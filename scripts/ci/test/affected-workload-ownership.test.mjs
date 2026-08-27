@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 154,
+  PROOF_UNIT: 156,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
-  FROZEN_INPUT: 121,
-  PACKAGE_OR_APPLICATION: 414,
-  SHARED_PROOF_INFRASTRUCTURE: 191,
-  PROJECT_DOCUMENTATION: 113,
+  FROZEN_INPUT: 122,
+  PACKAGE_OR_APPLICATION: 416,
+  SHARED_PROOF_INFRASTRUCTURE: 193,
+  PROJECT_DOCUMENTATION: 114,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1080 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1088 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1080 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1080);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1088);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 154);
+  assert.equal(proofEntries.length, 156);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -127,6 +127,15 @@ test("permits strict selection only for exact verifier and root-test proof input
     [
       "scripts/verify-editor-core-event-action-edits.mjs",
       "tests/editor-core-event-action-edits.test.mjs",
+    ],
+  );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "editor-core-authoring-round-trip")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-editor-core-authoring-round-trip.mjs",
+      "tests/editor-core-authoring-round-trip.test.mjs",
     ],
   );
   for (const entry of proofEntries) {
@@ -226,6 +235,14 @@ test("the reviewed M08 successor preserves the historical I07-04 ownership proje
     "scripts/lib/editor-core-event-action-edits-proof.mjs",
     "scripts/verify-editor-core-event-action-edits.mjs",
     "tests/editor-core-event-action-edits.test.mjs",
+    "docs/proof/EDITOR-CORE-AUTHORING-ROUND-TRIP.md",
+    "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json",
+    "packages/editor-core/test/authoring-round-trip.test.ts",
+    "packages/editor-core/test/authoring-round-trip.types.ts",
+    "scripts/generate-editor-core-authoring-round-trip-proof.mjs",
+    "scripts/lib/editor-core-authoring-round-trip-proof.mjs",
+    "scripts/verify-editor-core-authoring-round-trip.mjs",
+    "tests/editor-core-authoring-round-trip.test.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);

@@ -122,17 +122,39 @@ diagnostic-only failure, stable identity, structural re-admission, and Proxy-ref
 retain the earlier command boundary. The event/action profile additionally admits at most 25,000
 action occurrences per selected owner and action nesting depth 64 with root actions at zero.
 
-Insertion, structural edits, content edits, state/binding edits, and event/action edits remain structurally
-authoritative rather than Catalog-semantic: structurally valid unresolved capabilities, slots,
+M08-T07 adds no new transition or runtime export. It proves an in-memory parsed-value round trip
+over the existing factory and all 32 immutable commands. Root `authoring` remains detached,
+recursively immutable, producer-owned data through every successful transition. Two otherwise
+identical Sources that differ only in root authoring retain those distinct complete values while
+producing identical authoring-excluded projections and identical protocol Source digests. A root
+extension change, by contrast, changes the Source digest, so the exclusion remains exactly
+root-authoring-only.
+
+Unknown extension values are preserved at all 16 Source-reachable locations: the Source root, all
+seven closed action variants, variants, behaviors, repeats, nodes, state declarations, resource
+instances, surfaces, and Source catalog requirements. Nested arrays, objects, apparent core fields,
+recommended reverse-domain keys, and legal non-namespaced keys remain inert data. The editor does
+not interpret, resolve, normalize, or reject them solely because of their names. This proves exact
+parsed JSON value preservation, not lexical whitespace or object-member byte-order preservation.
+Authoring- or extension-shaped fake IDs and actions do not enter allocator, identity, or action
+scans, and root authoring is charged to the full 8 MiB Source limit. Extension lifecycle follows
+the owning transition: insert-supplied markers enter, move/reorder carry them, delete removes only
+the deleted target, and whole-value replacement replaces that target's old extension while
+unrelated markers survive. Preservation does not apply to an owner deliberately deleted or
+replaced by the requested command. `PF-084` records this boundary. Storage I/O, save/open
+durability, and the persistence adapter remain M08-T08.
+
+Insertion, structural edits, content edits, state/binding edits, and event/action edits remain
+structurally authoritative rather than Catalog-semantic: structurally valid unresolved capabilities, slots,
 props, style parts, visual states, tokens, references, repeats, and resource inputs may remain in
 the authoring graph for M08-T09 to diagnose. The common profile keeps canonical documents at 8
 MiB, selected surfaces at 25,000 identity occurrences, component depth at 64 with root at zero,
-and capability IDs at 4,096 code units where a command carries one. `N-014` remains `TESTED` by
-exact ordered edits and stable unaffected order. `S-002` remains `PLANNED` until M08-T10 closes
-terminal stable-identity integration. Authoring isolation and complete unknown-extension
-round-trip preservation remain M08-T07, persistence remains M08-T08, semantic resolution and
-continuous diagnostics remain M08-T09, and the terminal React/DOM boundary and G08 remain
-M08-T10. Selection, viewport, undo/redo, and action execution remain outside M08-T06.
+and capability IDs at 4,096 code units where a command carries one. `N-012`, `N-014`, `N-018`,
+and `S-003` are `TESTED`; reverse-domain naming remains guidance rather than a new hard validator
+rule. `S-002` remains `PLANNED` until M08-T10 closes terminal stable-identity integration.
+Persistence remains M08-T08, semantic resolution and continuous diagnostics remain M08-T09, and
+the terminal React/DOM boundary and G08 remain M08-T10. Selection, viewport, undo/redo, and action
+execution remain outside M08-T07.
 
 The cumulative M08 proof closes each boundary against the emitted public package as well as the
 source. The package depends only on `protocol` and `validator` and has zero platform imports or

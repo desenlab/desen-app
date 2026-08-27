@@ -1028,7 +1028,7 @@ hosted M07-T10 claim.
 | M08-T04 | DONE        | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
 | M08-T05 | DONE        | M08-T02         | State declaration and binding editing commands                       |
 | M08-T06 | DONE        | M08-T05         | Event and closed-action editing commands                             |
-| M08-T07 | NOT_STARTED | M08-T01–M08-T06 | Authoring isolation and unknown-extension round-trip preservation    |
+| M08-T07 | DONE        | M08-T01–M08-T06 | Authoring isolation and unknown-extension round-trip preservation    |
 | M08-T08 | NOT_STARTED | M08-T01         | Persistence port and local source adapter                            |
 | M08-T09 | NOT_STARTED | M08-T03–M08-T07 | Continuous validation and invalid-node mapping                       |
 | M08-T10 | NOT_STARTED | M08-T01–M08-T09 | React/DOM boundary, stable identity, and deterministic command tests |
@@ -1226,7 +1226,7 @@ emitted declarations. Exact evidence is pinned in
 The proof's sole direct official prerequisite is the exact frozen M08-T05 artifact. It verifies 81
 exact tracked-file receipts and executes behavior only after copying authenticated bytes into an
 isolated 29-file ESM graph: eight editor files and 21 dependency files, connected by 17 exact
-static edges. The current M08-T06 CI successor contains 163 workloads and 77 proof pairs: 66
+static edges. The historical M08-T06 CI successor contained 163 workloads and 77 proof pairs: 66
 ordinary pairs and 11 barriers. Its retained quality plan is
 `sha256:bc3a2cdc47a430b8c08fc80714fc043a877ced3a0cc62b13ce14743e0d66401d`; the neutral inventory,
 impact graph, workload set, and ordered projection are respectively
@@ -1240,13 +1240,13 @@ plans are `sha256:7e6afbee5323e174f7507827a69785d8189cb27c1c99fb64b3def258111b3f
 Affected ownership covers 1,080 tracked paths at
 `sha256:6ea7a544be7ed7817c59b1d723f3a7f4d584e0c8a37def99ed70c375276cd9b8`, including 154
 proof-owned paths, with complete projection
-`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`. Current selector and
-required-runner authorities are
+`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`. The then-current selector
+and required-runner authorities were
 `sha256:19d0f2c281bccf26e941c9440e18a7015d281224eed8bdf71c92ee0b5a497975` and
 `sha256:6aef41c5155e041d3fd3f9f0343b1a8aefc66d530378b6e6f402f503cec4fe6d`; the promotion artifact
 is `sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`. Append-only checkpoint
 sequence 34 at `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` authenticates 31 frozen
-artifacts and 62 current readers while preserving sequence 33 and every earlier byte. It reseals
+artifacts and 62 then-current readers while preserving sequence 33 and every earlier byte. It reseals
 reader indexes `[50, 51, 52, 53, 54, 56, 58]`, appends new readers at `[60, 61]`, and its
 dedicated suite passes 57/57. Targeted CI infrastructure passes 235/235, required-affected passes
 27/27, and promotion contracts pass 19/19. These are local code-owned receipts and make no hosted
@@ -1263,6 +1263,39 @@ proof, M08-T08 retains persistence, M08-T09 retains action/event semantics and c
 diagnostic mapping, and M08-T10 retains the terminal React/DOM boundary and G08. No `P-*`, `N-*`,
 `S-*`, or proof-gate status changes. Overall implementation progress is 91/145 (63%), M08 is 6/10,
 proof gates remain 8/13, and M08-T07 is next.
+
+M08-T07 is `DONE`. This proof-only task adds no runtime command or public export. The existing
+factory and all 32 immutable commands preserve root `authoring` as detached recursively immutable
+producer-owned parsed data. Otherwise identical Sources that differ only in root authoring retain
+equal authoring-excluded projections and equal protocol Source digests, while a root extension
+change still changes the digest. Unknown parsed extension values remain exact inert data at all 16
+Source-reachable locations, including both recommended reverse-domain keys and legal
+non-namespaced keys. Apparent core fields receive no core semantics, and the naming recommendation
+does not become a hard validator rule. Fake authoring/extension IDs and actions do not enter
+allocator, identity, or action scans; root authoring is charged to the full 8 MiB Source limit.
+Insert-supplied markers enter, move/reorder carry them, delete removes only the target, and
+whole-value replacement replaces that target's old extension while unrelated markers survive.
+The proof does not claim preservation of an owner deliberately deleted or replaced.
+
+The focused authoring-round-trip suite passes 33/33, with six focused compiler-negative
+assertions. The cumulative built public-package suite passes 46/46, with 75 public consumer
+compiler-negative assertions, and the independent root proof passes 10/10. The exact 62,304-byte
+artifact is `docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json` at
+`sha256:33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db`; its verifier tracks 95
+receipts and an isolated 29-file/17-edge graph. The current CI successor contains 165 workloads,
+78 proof pairs, 549 prerequisite segments, 3,435 ordered leaf invocations, and 260 distinct leaves.
+Sequence 35 at `a2e3ef962ed37e0570cdddef64ae8d0eef2fd3f298cc2580f7ee65d8200f6fa3`
+authenticates 32 frozen artifacts and 64 current readers, with sequence 34 and every earlier byte
+unchanged; its checkpoint suite passes 58/58. The full current CI infrastructure suite passes
+265/265, with separate required-affected, promotion, and retained legacy-gate receipts of 27/27,
+19/19, and 25/25. These are local code-owned receipts and make no hosted M08-T07 claim. This proves
+parsed JSON value preservation rather than lexical whitespace or
+object-member byte-order preservation. `N-012`,
+`N-018`, and `S-003` advance to `TESTED`; `N-014` remains `TESTED`, `S-002` remains `PLANNED`,
+and no `P-*` or proof-gate status changes. M08-T08 retains storage I/O, save/open durability, and
+the persistence adapter; M08-T09 retains continuous semantic diagnostics and invalid-node mapping;
+M08-T10 retains the terminal React/DOM boundary and G08. Overall implementation progress is
+92/145 (63%), M08 is 7/10, proof gates remain 8/13, and M08-T08 is next.
 
 ## M09 — Desen App Web MVP
 

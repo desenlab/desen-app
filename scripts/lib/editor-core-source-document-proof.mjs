@@ -80,6 +80,8 @@ const EXECUTABLE_DISTRIBUTION_PATHS = Object.freeze([
 ]);
 const PACKAGE_TEST_PATH = "packages/editor-core/test/source-document.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/source-document.types.ts";
+const AUTHORING_ROUND_TRIP_TEST_PATH = "packages/editor-core/test/authoring-round-trip.test.ts";
+const AUTHORING_ROUND_TRIP_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const GENERATOR_PATH = "scripts/generate-editor-core-source-document-proof.mjs";
@@ -195,6 +197,8 @@ const CURRENT_T01_PUBLIC_TEST_NAMES = Object.freeze([
   "the emitted factory rejects an invalid embedded schema at its exact pointer",
   "the emitted factory rejects executable non-JSON data without a partial document",
   "the emitted factory rejects getter and toJSON hooks without invoking caller code",
+  "the emitted factory isolates authoring and round-trips all Source extension locations",
+  "all 32 emitted mutation commands isolate authoring and preserve extension parsed values",
   "[proof-core] two fresh final builds are byte-identical and preserve honest scope",
   "[proof-core] rejects a wrapper-returning or mutable public runtime",
   "[proof-core] rejects caller retention and partial failure authority",
@@ -213,9 +217,13 @@ const CURRENT_T01_PUBLIC_TYPE_CLAIMS = Object.freeze([
 const EXPECTED_TEST_AUTHORITY_SHA256 = Object.freeze({
   [PACKAGE_TEST_PATH]: "3e032d38875f234a5effa3e8379f67b64280818eafe95b05e42b2551aca0f36d",
   [PACKAGE_TYPES_PATH]: "69a3e450d55a86bbb26a7b59a2cea84e5f85dfacb51aff3d32097fd81fddbf3e",
-  [PUBLIC_TEST_PATH]: "cda00f2081c48cf33916ea6f7716db60c1113dec88a991163295a9395b430daf",
-  [PUBLIC_TYPES_PATH]: "843ec41ab9d5ed8171ae107993ac3b8e8a8ca3fab81c91869aabc57aabb4708b",
-  [ROOT_TEST_PATH]: "e791be0263f0bb4c0cec9016fe68a0dee0cda43e9f7b8260f2fc098948e6d7f7",
+  [AUTHORING_ROUND_TRIP_TEST_PATH]:
+    "7240bb77e558485e5b2a8c0645601fe7276c350e307d9dad11a00a2ac14dfaa2",
+  [AUTHORING_ROUND_TRIP_TYPES_PATH]:
+    "24c41948e51d59c31a342d391a84bd229d39123c8764c3385b2402e1535d0739",
+  [PUBLIC_TEST_PATH]: "070692e36295731021984b453e1ed1fd1dc2ca566eb39614ee04d30a176a56f4",
+  [PUBLIC_TYPES_PATH]: "d443de9f6d1bf9a371c126be33d1cb9e08dc9719e10cedd069f44e4f9cb589a7",
+  [ROOT_TEST_PATH]: "8fefc48d88c72e09c4431fa5cbffabddce5b834745bb2de6420e4950be933712",
 });
 
 export const DEFAULT_EDITOR_CORE_SOURCE_DOCUMENT_ARTIFACT_PATH = path.join(
@@ -400,6 +408,7 @@ const EXPECTED_PACKAGE_SCRIPTS = Object.freeze({
   "test:public-package":
     "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
   "test:source-document": "vitest run test/source-document.test.ts",
+  "test:authoring-round-trip": "vitest run test/authoring-round-trip.test.ts",
   "test:coverage": "vitest run --coverage",
 });
 const PACKAGE_LIFECYCLE_SCRIPT_NAMES = Object.freeze([
@@ -498,6 +507,8 @@ const EXPECTED_TRACKED_PATHS = Object.freeze(
     SOURCE_PATH,
     PACKAGE_TEST_PATH,
     PACKAGE_TYPES_PATH,
+    AUTHORING_ROUND_TRIP_TEST_PATH,
+    AUTHORING_ROUND_TRIP_TYPES_PATH,
     PUBLIC_TEST_PATH,
     PUBLIC_TYPES_PATH,
     BUILD_TSCONFIG_PATH,
@@ -2419,6 +2430,15 @@ function verifySourceAndDistributionContract(files, packageManifest) {
         EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS.length +
         EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS.length,
     }),
+    proofOnlySuccessor: Object.freeze({
+      task: "M08-T07",
+      runtimeExports: Object.freeze([]),
+      typeExports: Object.freeze([]),
+      focusedTestPath: AUTHORING_ROUND_TRIP_TEST_PATH,
+      focusedTypesPath: AUTHORING_ROUND_TRIP_TYPES_PATH,
+      publicRuntimeCasesAdded: 2,
+      publicCompilerNegativeAssertionsAdded: 6,
+    }),
     publicDeclarations: EXPECTED_SOURCE_EXPORTS.length,
     tsdocDeclarations: EXPECTED_SOURCE_EXPORTS.length,
     runtimeImports: Object.freeze(["@desen/validator"]),
@@ -2508,7 +2528,7 @@ function callbackFingerprint(callback, sourceFile) {
 
 function verifyTestInventory(files) {
   if (
-    [PACKAGE_TEST_PATH, PACKAGE_TYPES_PATH].some(
+    Reflect.ownKeys(EXPECTED_TEST_AUTHORITY_SHA256).some(
       (relativePath) =>
         sha256(Buffer.from(files[relativePath], "utf8")) !==
         EXPECTED_TEST_AUTHORITY_SHA256[relativePath],
@@ -2714,8 +2734,8 @@ function verifyTestInventory(files) {
   if (
     inventory.packageRuntimeCases !== 7 ||
     inventory.sourceCompilerNegativeCases !== 5 ||
-    inventory.publicRuntimeContractCases < 10 ||
-    inventory.publicCompilerNegativeCases < 5 ||
+    inventory.publicRuntimeContractCases !== 39 ||
+    inventory.publicCompilerNegativeCases !== 75 ||
     inventory.publicProofCoreCases !== 7 ||
     inventory.rootProofCases !== EDITOR_CORE_SOURCE_DOCUMENT_ROOT_TEST_NAMES.length ||
     !exactJson(inventory.rootTestNames, EDITOR_CORE_SOURCE_DOCUMENT_ROOT_TEST_NAMES)
@@ -2996,6 +3016,8 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     DIST_EVENT_ACTION_EDITS_DECLARATION_PATH,
     PACKAGE_TEST_PATH,
     PACKAGE_TYPES_PATH,
+    AUTHORING_ROUND_TRIP_TEST_PATH,
+    AUTHORING_ROUND_TRIP_TYPES_PATH,
     PUBLIC_TEST_PATH,
     PUBLIC_TYPES_PATH,
     ROOT_TEST_PATH,
@@ -3020,6 +3042,8 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     [
       PACKAGE_TEST_PATH,
       PACKAGE_TYPES_PATH,
+      AUTHORING_ROUND_TRIP_TEST_PATH,
+      AUTHORING_ROUND_TRIP_TYPES_PATH,
       PUBLIC_TEST_PATH,
       PUBLIC_TYPES_PATH,
       ROOT_TEST_PATH,

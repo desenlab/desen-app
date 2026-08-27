@@ -20,6 +20,8 @@ const INSERT_SOURCE = "packages/editor-core/src/stable-id-insert.ts";
 const STRUCTURAL_EDITS_SOURCE = "packages/editor-core/src/structural-edits.ts";
 const CONTENT_EDITS_SOURCE = "packages/editor-core/src/content-edits.ts";
 const EVENT_ACTION_EDITS_SOURCE = "packages/editor-core/src/event-action-edits.ts";
+const AUTHORING_ROUND_TRIP_TEST = "packages/editor-core/test/authoring-round-trip.test.ts";
+const AUTHORING_ROUND_TRIP_TYPES = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PROTOCOL_RUNTIME = "packages/protocol/dist/index.js";
 const CONTENT_RUNTIME_EXPORTS = Object.freeze([
   "clearDesenEditorNodeCondition",
@@ -260,12 +262,21 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
     runtimeExports: EVENT_ACTION_RUNTIME_EXPORTS,
     typeExports: EVENT_ACTION_TYPE_EXPORTS,
   });
+  assert.deepEqual(built.currentCompatibility.boundary.proofOnlySuccessor, {
+    task: "M08-T07",
+    runtimeExports: [],
+    typeExports: [],
+    focusedTestPath: AUTHORING_ROUND_TRIP_TEST,
+    focusedTypesPath: AUTHORING_ROUND_TRIP_TYPES,
+    publicRuntimeCasesAdded: 2,
+    publicCompilerNegativeAssertionsAdded: 6,
+  });
   assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 4);
   assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 23);
   assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 2);
   assert.equal(built.currentCompatibility.executionAuthority.dependencyFiles, 21);
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 44);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 69);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 46);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 75);
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
     bytes: 19_561,
@@ -334,6 +345,8 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
   const source = await readFile(path.join(ROOT, INSERT_SOURCE));
   const structuralEditsSource = await readFile(path.join(ROOT, STRUCTURAL_EDITS_SOURCE));
   const contentEditsSource = await readFile(path.join(ROOT, CONTENT_EDITS_SOURCE));
+  const authoringRoundTripTest = await readFile(path.join(ROOT, AUTHORING_ROUND_TRIP_TEST));
+  const authoringRoundTripTypes = await readFile(path.join(ROOT, AUTHORING_ROUND_TRIP_TYPES));
   const dependency = await readFile(path.join(ROOT, PROTOCOL_RUNTIME));
   await assert.rejects(
     buildEditorCoreStableIdInsertEvidence({
@@ -350,6 +363,18 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
   await assert.rejects(
     buildEditorCoreStableIdInsertEvidence({
       fileOverrides: { [CONTENT_EDITS_SOURCE]: changedByte(contentEditsSource) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStableIdInsertEvidence({
+      fileOverrides: { [AUTHORING_ROUND_TRIP_TEST]: changedByte(authoringRoundTripTest) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStableIdInsertEvidence({
+      fileOverrides: { [AUTHORING_ROUND_TRIP_TYPES]: changedByte(authoringRoundTripTypes) },
     }),
     expectedError("BOUNDARY_DRIFT"),
   );

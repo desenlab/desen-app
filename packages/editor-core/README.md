@@ -21,9 +21,10 @@ if (result.ok) {
 ```
 
 Creation deliberately does not require Catalog-backed semantic validity. Continuous validation
-and invalid-node mapping belong to M08-T09, while broader mutation commands, authoring isolation,
-and persistence belong to their later tracked M08 tasks. Structural rejection returns the frozen
-protocol diagnostics and no partial document.
+and invalid-node mapping belong to M08-T09, while persistence belongs to M08-T08. M08-T07 now
+proves authoring isolation across this factory and the complete existing mutation surface without
+adding another runtime command. Structural rejection returns the frozen protocol diagnostics and
+no partial document.
 
 ## Stable-ID insertion
 
@@ -155,6 +156,32 @@ mechanical cap in addition to the shared 8 MiB/25,000/depth-64 Source profile; r
 budgets are not treated as authoring-list limits. `PF-083` records the exact lifecycle, pointer,
 ordering, replacement, limit, and diagnostic decisions.
 
+## Authoring isolation and extension round trips
+
+M08-T07 is a proof-only profile over the existing factory and all 32 immutable mutation commands;
+it adds no runtime API or export. Root `authoring` remains detached, recursively immutable,
+producer-owned parsed data through every successful transition. Two otherwise identical Sources
+that differ only in root `authoring` produce identical authoring-excluded transition projections
+and identical protocol Source digests. Root authoring values that resemble nodes, actions, or
+special JavaScript property names remain inert and are not interpreted as core Source structure.
+
+Unknown `extensions` parsed values are preserved exactly at all 16 Source-reachable extension
+locations: the Source root, all seven closed action variants, variants, behaviors, repeats, nodes,
+state declarations, resource instances, surfaces, and Source catalog requirements. Their nested
+arrays, duplicate ordered values, Unicode, null/empty values, dangerous own-data keys, apparent
+core IDs/actions, and order remain data; editor-core assigns them no core semantics. Extension keys
+**SHOULD** use a reverse-domain name such as
+`com.example.editor.selectionColor`. This is guidance rather than a hard naming error: a legal
+unknown non-namespaced key is also retained when the Source passes structural admission.
+
+The proof serializes every factory and command result with `JSON.stringify`, parses it again, and
+re-admits it through `createDesenEditorDocument`. The reopened Source is canonical-equal, detached,
+recursively frozen, and retains exact authoring and extension parsed values. This remains an
+in-memory parsed-value round trip; it does not claim preservation of input JSON whitespace or
+object-member byte order. M08-T08 owns storage I/O, save/open behavior, and durability; M08-T09 owns
+continuous semantic diagnostics; M08-T10 owns terminal React/DOM integration and its independent
+determinism evidence.
+
 ## Explicit non-responsibilities
 
 No React, DOM, canvas UI, production activation, Catalog-semantic validation, action execution,
@@ -164,9 +191,10 @@ persistence, authoring selection/viewport policy, or hidden document model.
 
 Private. M08-T01's direct Source document model, M08-T02 stable-ID allocation/insertion, M08-T03
 delete/move/ordered-reorder commands, M08-T04 prop/style/condition/variant commands, and M08-T05
-state-declaration/repeat/resource-input commands, and M08-T06 event/closed-action commands are
-present. The remaining authoring, persistence, validation, and terminal integration work stays
-assigned to its tracked M08 tasks. `N-014` is `TESTED`;
+state-declaration/repeat/resource-input commands, M08-T06 event/closed-action commands, and M08-T07
+authoring-isolation/extension-round-trip proof are present. The remaining persistence, validation,
+and terminal integration work stays assigned to M08-T08 through M08-T10. `N-012`, `N-014`,
+`N-018`, and `S-003` are `TESTED`;
 `S-002` remains `PLANNED` through terminal M08-T10 integration.
 
 ## Protocol and target support
@@ -180,7 +208,7 @@ Run the direct model suite with
 `pnpm --filter @desen/editor-core test:source-document` and the insert suite with
 `pnpm --filter @desen/editor-core test:stable-id-insert`. The separate
 `pnpm --filter @desen/editor-core test:public-package` check builds the package, resolves the
-public root through its export map, runs the exact current 38 runtime/root cases, and compiles the
+public root through its export map, runs the exact current 46 runtime/root cases, and compiles 75
 reviewed `@ts-expect-error` assertions against the emitted declarations. The proof cores audit the
 exact source, distribution, manifest, TSDoc, test inventory, and platform boundary. After
 authenticating the exact completed
@@ -247,3 +275,12 @@ lists, exact pointer/index semantics, whole-value replacement, immutable atomic 
 command shapes, and finite limits. The final case counts, receipt inventory, artifact size/hash,
 and isolated runtime closure are pinned in `docs/proof/EDITOR-CORE-EVENT-ACTION-EDITS.md` and its
 referenced frozen artifact.
+
+For M08-T07, run `pnpm --filter @desen/editor-core test:authoring-round-trip` and
+`pnpm --filter @desen/editor-core test:public-package`. The focused suite has 33 runtime cases—one
+factory/root-digest case and one case for each of the 32 existing commands—plus six source
+compiler-negative assertions. The cumulative emitted-package suite has 46 runtime/root cases and
+75 compiler-negative assertions. It proves root-authoring isolation and exact parsed-value
+preservation for all 16 Source-reachable extension locations, including both recommended
+reverse-domain and legal non-namespaced unknown keys, without adding runtime authority or claiming
+storage, semantic, or terminal behavior.

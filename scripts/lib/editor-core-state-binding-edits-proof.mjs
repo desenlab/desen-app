@@ -29,6 +29,8 @@ const STATE_BINDING_EDITS_SOURCE_PATH = "packages/editor-core/src/state-binding-
 const EVENT_ACTION_EDITS_SOURCE_PATH = "packages/editor-core/src/event-action-edits.ts";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/state-binding-edits.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/state-binding-edits.types.ts";
+const AUTHORING_ROUND_TRIP_TEST_PATH = "packages/editor-core/test/authoring-round-trip.test.ts";
+const AUTHORING_ROUND_TRIP_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST_PATH = "tests/editor-core-state-binding-edits.test.mjs";
@@ -132,6 +134,8 @@ const TRACKED_PATHS = Object.freeze([
   "packages/editor-core/test/content-edits.types.ts",
   PACKAGE_TEST_PATH,
   PACKAGE_TYPES_PATH,
+  AUTHORING_ROUND_TRIP_TEST_PATH,
+  AUTHORING_ROUND_TRIP_TYPES_PATH,
   PUBLIC_TEST_PATH,
   PUBLIC_TYPES_PATH,
   ...DEPENDENCY_RUNTIME_PATHS,
@@ -159,7 +163,10 @@ const RETAINED_T05_RECEIPT_PATHS = Object.freeze(
         "packages/editor-core/dist/event-action-edits.js.map",
         PUBLIC_TEST_PATH,
         PUBLIC_TYPES_PATH,
+        AUTHORING_ROUND_TRIP_TEST_PATH,
+        AUTHORING_ROUND_TRIP_TYPES_PATH,
         PROOF_LIBRARY_PATH,
+        ROOT_TEST_PATH,
       ].includes(relativePath),
   ),
 );
@@ -420,6 +427,8 @@ const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the emitted event and action commands preserve exact failure classes without partial authority",
   "the emitted event and action commands enforce exact own data and contain Proxy traps",
   "the emitted event and action commands are deterministic, immutable, and semantically unresolved",
+  "the emitted factory isolates authoring and round-trips all Source extension locations",
+  "all 32 emitted mutation commands isolate authoring and preserve extension parsed values",
   "[proof-core] two fresh final builds are byte-identical and preserve honest scope",
   "[proof-core] rejects a wrapper-returning or mutable public runtime",
   "[proof-core] rejects caller retention and partial failure authority",
@@ -891,7 +900,10 @@ function verifyBoundary(files) {
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
     manifest.scripts?.["test:state-binding-edits"] !==
       "vitest run test/state-binding-edits.test.ts" ||
-    manifest.scripts?.["test:event-action-edits"] !== "vitest run test/event-action-edits.test.ts"
+    manifest.scripts?.["test:event-action-edits"] !==
+      "vitest run test/event-action-edits.test.ts" ||
+    manifest.scripts?.["test:authoring-round-trip"] !==
+      "vitest run test/authoring-round-trip.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -1085,8 +1097,8 @@ function verifyBoundary(files) {
   const publicTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH),
   );
-  if (publicTypeAssertions !== 69) {
-    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain sixty-nine.");
+  if (publicTypeAssertions !== 75) {
+    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain seventy-five.");
   }
   const rootTests = testNames(decodeUtf8(files.get(ROOT_TEST_PATH), ROOT_TEST_PATH));
   exactArray(
@@ -1110,6 +1122,15 @@ function verifyBoundary(files) {
       declarationPath: distEventActionDeclarationPath,
       runtimeExports: [...EVENT_ACTION_RUNTIME_EXPORTS],
       typeExports: [...EVENT_ACTION_TYPE_EXPORTS],
+    },
+    proofOnlySuccessor: {
+      task: "M08-T07",
+      focusedTestPath: AUTHORING_ROUND_TRIP_TEST_PATH,
+      focusedTypesPath: AUTHORING_ROUND_TRIP_TYPES_PATH,
+      runtimeExportsAdded: 0,
+      typeExportsAdded: 0,
+      publicRuntimeCasesAdded: 2,
+      publicCompilerNegativeAssertionsAdded: 6,
     },
     stateBindingPublicDeclarations: EXPECTED_STATE_BINDING_EXPORTS.length,
     stateBindingTsdocDeclarations: sourceExports.tsdocDeclarations,
@@ -2054,6 +2075,7 @@ export async function buildEditorCoreStateBindingEditsEvidence(rawOptions = unde
       additiveRuntimeExports: boundary.additiveRuntimeExports,
       additiveTypeExports: boundary.additiveTypeExports,
       additiveSuccessor: boundary.additiveSuccessor,
+      proofOnlySuccessor: boundary.proofOnlySuccessor,
       stateBindingPublicDeclarations: boundary.stateBindingPublicDeclarations,
       stateBindingTsdocDeclarations: boundary.stateBindingTsdocDeclarations,
     },

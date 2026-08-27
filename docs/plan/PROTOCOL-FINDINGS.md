@@ -3469,3 +3469,49 @@ This file records implementation discoveries without changing the frozen DESEN 0
   invalid-node mapping, and M08-T10 must independently prove deterministic cross-command behavior
   and the React/DOM boundary. A later protocol revision should standardize event/action edit logs
   only if interoperable editor command histories become normative.
+
+## PF-084 — Authoring isolation and extension round trips are parsed-value editor invariants
+
+- Status: OPEN
+- Blocks proof: No; M08-T07 proves the frozen protocol boundary across the existing editor factory
+  and mutation surface without adding runtime API, changing Source exports, or claiming
+  persistence, semantic validation, or terminal integration.
+- Protocol location: SPEC Sections 10.2, 11.2, and 12.4; normative rows `N-012`, `N-018`, and
+  `S-003`; related findings `PF-065`, `PF-066`, and `PF-078`–`PF-083`
+- Observation: DESEN 0.1.0 requires an implementation to preserve an unknown extension when it
+  round-trips a Source and forbids assigning that extension core semantics. It recommends
+  reverse-domain extension keys but does not make that naming convention a structural validity
+  requirement. Root `authoring` is producer-owned non-production data omitted from the Source
+  digest. The protocol does not prescribe how an in-memory editor proves these obligations across
+  its commands, whether a persistence adapter preserves them through storage, or whether lexical
+  JSON whitespace and object-member order survive parse and serialization boundaries.
+- Implementation decision: M08-T07 is proof-only and adds no runtime command or public export. A
+  comprehensive fixture places unknown extension payloads at all 16 Source-reachable locations:
+  the Source root, each of the seven closed action variants, variants, behaviors, repeats, nodes,
+  state declarations, resource instances, surfaces, and Source catalog requirements. Every payload
+  contains both a recommended reverse-domain marker and a legal non-namespaced marker, nested arrays
+  and objects, duplicate ordered values, Unicode, null and empty values, own `__proto__`,
+  `constructor`, and `prototype` keys, and apparent core fields that remain inert. Those apparent
+  fields deliberately collide with the real insert ID base, while the two authoring variants carry
+  different fake node/action inventories. The factory and all 32 existing immutable mutation
+  commands preserve those parsed values exactly without interpreting, resolving, normalizing, or
+  rejecting the non-namespaced key solely for its name.
+
+  Paired Sources that differ only in root `authoring` retain their distinct complete authoring
+  values while producing identical authoring-excluded transition projections and identical Source
+  digests. A root extension-value change does change the Source digest, confirming that the digest
+  exclusion is root-authoring-only. Factory and command outputs remain detached recursively frozen
+  snapshots, command inputs remain unchanged, and emitted-package declarations keep root authoring
+  and extensions readonly while the exact existing command types grant no generic authority to
+  replace either root field. Every factory and command result is encoded with `JSON.stringify`,
+  parsed again, and re-admitted through the same factory; the reopened Source is canonical-equal,
+  detached, recursively frozen, and retains the exact authoring and extension values. This is
+  parsed-JSON-value preservation; it makes no lexical-byte, whitespace, object-member-order, storage
+  I/O, or durability round-trip claim.
+
+- Future action: M08-T08 must compose these invariants with its persistence port and local adapter
+  and independently prove save/open storage I/O and durability. M08-T09 owns Catalog-backed
+  continuous semantic diagnostics and invalid-node mapping; unknown extensions still gain no core
+  semantics here. M08-T10 owns terminal React/DOM integration, cross-command terminal determinism,
+  and the G08 boundary. Any future hard requirement for reverse-domain extension names requires a
+  protocol revision rather than an editor-local rejection rule.

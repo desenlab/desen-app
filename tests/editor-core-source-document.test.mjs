@@ -22,6 +22,8 @@ const ARTIFACT = "docs/proof/artifacts/editor-core-0.1.0-source-document.json";
 const PREREQUISITE = "docs/proof/baselines/i07-04-affected-selector-promotion.json";
 const DEPENDENCY_AUTHORITY = "docs/proof/artifacts/protocol-0.1.0-execution-contracts.json";
 const PACKAGE_TEST = "packages/editor-core/test/source-document.test.ts";
+const AUTHORING_ROUND_TRIP_TEST = "packages/editor-core/test/authoring-round-trip.test.ts";
+const AUTHORING_ROUND_TRIP_TYPES = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PUBLIC_TEST = "packages/editor-core/test/public-package.mjs";
 const ROOT_TEST = "tests/editor-core-source-document.test.mjs";
 const BASELINE_RUNTIME_PATHS = [
@@ -386,9 +388,19 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     publicDeclarations: 20,
     tsdocDeclarations: 20,
   });
+  assert.deepEqual(built.currentCompatibility.boundary.proofOnlySuccessor, {
+    task: "M08-T07",
+    runtimeExports: [],
+    typeExports: [],
+    focusedTestPath: AUTHORING_ROUND_TRIP_TEST,
+    focusedTypesPath: AUTHORING_ROUND_TRIP_TYPES,
+    publicRuntimeCasesAdded: 2,
+    publicCompilerNegativeAssertionsAdded: 6,
+  });
   assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 4);
-  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 37);
-  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 69);
+  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 39);
+  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 75);
+  assert.equal(built.currentCompatibility.evidence.trackedFiles.length, 49);
   for (const receipt of SUCCESSOR_RUNTIME_RECEIPTS) {
     const bytes = await workspaceBytes(receipt.path);
     assert.equal(bytes.byteLength, receipt.bytes);
@@ -726,9 +738,19 @@ test("[boundary] rejects source, TSDoc, import, distribution, and manifest drift
 });
 
 test("[inventory] rejects package, public, and root test-authority drift", async () => {
-  const [packageTest, packageTypes, publicTest, publicTypes, rootTest] = await Promise.all([
+  const [
+    packageTest,
+    packageTypes,
+    authoringRoundTripTest,
+    authoringRoundTripTypes,
+    publicTest,
+    publicTypes,
+    rootTest,
+  ] = await Promise.all([
     workspaceBytes(PACKAGE_TEST),
     workspaceBytes("packages/editor-core/test/source-document.types.ts"),
+    workspaceBytes(AUTHORING_ROUND_TRIP_TEST),
+    workspaceBytes(AUTHORING_ROUND_TRIP_TYPES),
     workspaceBytes(PUBLIC_TEST),
     workspaceBytes("packages/editor-core/test/public-package.types.mts"),
     workspaceBytes(ROOT_TEST),
@@ -787,6 +809,8 @@ test("[inventory] rejects package, public, and root test-authority drift", async
       ),
     ],
     [PACKAGE_TEST, packageNoop],
+    [AUTHORING_ROUND_TRIP_TEST, changedByte(authoringRoundTripTest)],
+    [AUTHORING_ROUND_TRIP_TYPES, changedByte(authoringRoundTripTypes)],
     [PUBLIC_TEST, publicTestText.replace('test("[proof-core] two fresh', 'test("two fresh')],
     [
       PUBLIC_TEST,

@@ -30,6 +30,8 @@ const EVENT_ACTION_EDITS_SOURCE_PATH = "packages/editor-core/src/event-action-ed
 const PACKAGE_PATH = "packages/editor-core/package.json";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/stable-id-insert.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/stable-id-insert.types.ts";
+const AUTHORING_ROUND_TRIP_TEST_PATH = "packages/editor-core/test/authoring-round-trip.test.ts";
+const AUTHORING_ROUND_TRIP_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST_PATH = "tests/editor-core-stable-id-insert.test.mjs";
@@ -354,6 +356,16 @@ const RETAINED_T02_PUBLIC_TYPE_CLAIMS = Object.freeze([
   "emitted command fields remain readonly",
   "callers cannot bypass emitted allocator ownership",
 ]);
+const EXPECTED_T07_PUBLIC_TEST_NAMES = Object.freeze([
+  "the emitted factory isolates authoring and round-trips all Source extension locations",
+  "all 32 emitted mutation commands isolate authoring and preserve extension parsed values",
+]);
+const EXPECTED_T07_TEST_AUTHORITY_SHA256 = Object.freeze({
+  [AUTHORING_ROUND_TRIP_TEST_PATH]:
+    "7240bb77e558485e5b2a8c0645601fe7276c350e307d9dad11a00a2ac14dfaa2",
+  [AUTHORING_ROUND_TRIP_TYPES_PATH]:
+    "24c41948e51d59c31a342d391a84bd229d39123c8764c3385b2402e1535d0739",
+});
 const DIST_PATHS = Object.freeze([
   "packages/editor-core/dist/index.d.ts",
   "packages/editor-core/dist/index.d.ts.map",
@@ -402,6 +414,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   ...STATE_BINDING_EDITS_DIST_PATHS,
   EVENT_ACTION_EDITS_SOURCE_PATH,
   ...EVENT_ACTION_EDITS_DIST_PATHS,
+  AUTHORING_ROUND_TRIP_TEST_PATH,
+  AUTHORING_ROUND_TRIP_TYPES_PATH,
 ]);
 const TRACKED_PATH_SET = new Set(CURRENT_COMPATIBILITY_PATHS);
 const RETAINED_T02_RECEIPT_PATHS = Object.freeze(
@@ -755,7 +769,10 @@ function verifyBoundary(files) {
     manifest.scripts?.["test:content-edits"] !== "vitest run test/content-edits.test.ts" ||
     manifest.scripts?.["test:state-binding-edits"] !==
       "vitest run test/state-binding-edits.test.ts" ||
-    manifest.scripts?.["test:event-action-edits"] !== "vitest run test/event-action-edits.test.ts"
+    manifest.scripts?.["test:event-action-edits"] !==
+      "vitest run test/event-action-edits.test.ts" ||
+    manifest.scripts?.["test:authoring-round-trip"] !==
+      "vitest run test/authoring-round-trip.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -1109,7 +1126,11 @@ function verifyBoundary(files) {
     "Root proof inventory",
   );
   const publicTestNames = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
-  if (RETAINED_T02_PUBLIC_TEST_NAMES.some((name) => !publicTestNames.includes(name))) {
+  if (
+    publicTestNames.length !== 46 ||
+    RETAINED_T02_PUBLIC_TEST_NAMES.some((name) => !publicTestNames.includes(name)) ||
+    EXPECTED_T07_PUBLIC_TEST_NAMES.some((name) => !publicTestNames.includes(name))
+  ) {
     fail("TEST_INVENTORY_DRIFT", "The public package lost a retained M08-T02 runnable case.");
   }
   const publicTypes = decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH);
@@ -1119,6 +1140,17 @@ function verifyBoundary(files) {
     )
   ) {
     fail("TEST_INVENTORY_DRIFT", "The public package lost a retained M08-T02 type claim.");
+  }
+  if (countTypeAssertions(publicTypes) !== 75) {
+    fail(
+      "TEST_INVENTORY_DRIFT",
+      "The public compiler-negative inventory must remain seventy-five.",
+    );
+  }
+  for (const [relativePath, expectedSha256] of Object.entries(EXPECTED_T07_TEST_AUTHORITY_SHA256)) {
+    if (sha256(files.get(relativePath)) !== expectedSha256) {
+      fail("TEST_INVENTORY_DRIFT", `The M08-T07 focused authority drifted: ${relativePath}.`);
+    }
   }
 
   return deepFreeze({
@@ -1179,6 +1211,15 @@ function verifyBoundary(files) {
       declarationPath: "packages/editor-core/dist/event-action-edits.d.ts",
       runtimeExports: [...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS],
       typeExports: [...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS],
+    },
+    proofOnlySuccessor: {
+      task: "M08-T07",
+      runtimeExports: [],
+      typeExports: [],
+      focusedTestPath: AUTHORING_ROUND_TRIP_TEST_PATH,
+      focusedTypesPath: AUTHORING_ROUND_TRIP_TYPES_PATH,
+      publicRuntimeCasesAdded: 2,
+      publicCompilerNegativeAssertionsAdded: 6,
     },
     publicDeclarations: EXPECTED_INSERT_EXPORTS.length,
     tsdocDeclarations: exports.tsdocDeclarations,

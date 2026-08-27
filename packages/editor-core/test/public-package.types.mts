@@ -806,3 +806,34 @@ void incompletePublicActionPointer;
 
 void eventActionDiagnostic;
 void invalidEventActionDiagnosticCode;
+
+// @ts-expect-error emitted root authoring data remains recursively immutable
+document.authoring = { selection: null };
+
+if (document.authoring !== undefined) {
+  // @ts-expect-error emitted authoring entries cannot be changed outside an immutable transition
+  document.authoring.selection = { surfaceId: "other" };
+}
+
+// @ts-expect-error emitted root extension data remains recursively immutable
+document.extensions = { "com.example.changed": true };
+
+if (document.extensions !== undefined) {
+  // @ts-expect-error emitted unknown extension entries remain recursively immutable
+  document.extensions["com.example.changed"] = true;
+}
+
+const publicAuthoringAuthority: DesenEditorNodeInsertCommand = {
+  ...command,
+  // @ts-expect-error existing emitted commands cannot smuggle root authoring authority
+  authoring: { selection: null },
+};
+
+const publicExtensionAuthority: DesenEditorNodeInsertCommand = {
+  ...command,
+  // @ts-expect-error existing emitted commands cannot smuggle generic extension authority
+  extensions: { "com.example.changed": true },
+};
+
+void publicAuthoringAuthority;
+void publicExtensionAuthority;

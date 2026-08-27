@@ -32,6 +32,8 @@ const CONTENT_EDITS_TEST_PATH = "packages/editor-core/test/content-edits.test.ts
 const CONTENT_EDITS_TYPES_PATH = "packages/editor-core/test/content-edits.types.ts";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/structural-edits.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/structural-edits.types.ts";
+const AUTHORING_ROUND_TRIP_TEST_PATH = "packages/editor-core/test/authoring-round-trip.test.ts";
+const AUTHORING_ROUND_TRIP_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST_PATH = "tests/editor-core-structural-edits.test.mjs";
@@ -131,6 +133,8 @@ const TRACKED_PATHS = Object.freeze([
   PACKAGE_TYPES_PATH,
   CONTENT_EDITS_TEST_PATH,
   CONTENT_EDITS_TYPES_PATH,
+  AUTHORING_ROUND_TRIP_TEST_PATH,
+  AUTHORING_ROUND_TRIP_TYPES_PATH,
   PUBLIC_TEST_PATH,
   PUBLIC_TYPES_PATH,
   ...DEPENDENCY_RUNTIME_PATHS,
@@ -436,6 +440,8 @@ const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the emitted event and action commands preserve exact failure classes without partial authority",
   "the emitted event and action commands enforce exact own data and contain Proxy traps",
   "the emitted event and action commands are deterministic, immutable, and semantically unresolved",
+  "the emitted factory isolates authoring and round-trips all Source extension locations",
+  "all 32 emitted mutation commands isolate authoring and preserve extension parsed values",
   "[proof-core] two fresh final builds are byte-identical and preserve honest scope",
   "[proof-core] rejects a wrapper-returning or mutable public runtime",
   "[proof-core] rejects caller retention and partial failure authority",
@@ -444,6 +450,12 @@ const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "[proof-core] rejects focused-test inventory drift",
   "[proof-core] rejects accessor, inherited, symbol, and Proxy options without hooks",
 ]);
+const EXPECTED_T07_TEST_AUTHORITY_SHA256 = Object.freeze({
+  [AUTHORING_ROUND_TRIP_TEST_PATH]:
+    "7240bb77e558485e5b2a8c0645601fe7276c350e307d9dad11a00a2ac14dfaa2",
+  [AUTHORING_ROUND_TRIP_TYPES_PATH]:
+    "24c41948e51d59c31a342d391a84bd229d39123c8764c3385b2402e1535d0739",
+});
 
 const BUILD_OPTION_KEYS = Object.freeze([
   "beforeAuthorityRecheck",
@@ -889,7 +901,10 @@ function verifyBoundary(files) {
     manifest.scripts?.["test:content-edits"] !== "vitest run test/content-edits.test.ts" ||
     manifest.scripts?.["test:state-binding-edits"] !==
       "vitest run test/state-binding-edits.test.ts" ||
-    manifest.scripts?.["test:event-action-edits"] !== "vitest run test/event-action-edits.test.ts"
+    manifest.scripts?.["test:event-action-edits"] !==
+      "vitest run test/event-action-edits.test.ts" ||
+    manifest.scripts?.["test:authoring-round-trip"] !==
+      "vitest run test/authoring-round-trip.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -1140,8 +1155,13 @@ function verifyBoundary(files) {
   const publicTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH),
   );
-  if (publicTypeAssertions !== 69) {
-    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain sixty-nine.");
+  if (publicTypeAssertions !== 75) {
+    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain seventy-five.");
+  }
+  for (const [relativePath, expectedSha256] of Object.entries(EXPECTED_T07_TEST_AUTHORITY_SHA256)) {
+    if (sha256(files.get(relativePath)) !== expectedSha256) {
+      fail("TEST_INVENTORY_DRIFT", `The M08-T07 focused authority drifted: ${relativePath}.`);
+    }
   }
   const rootTests = testNames(decodeUtf8(files.get(ROOT_TEST_PATH), ROOT_TEST_PATH));
   exactArray(
@@ -1173,6 +1193,15 @@ function verifyBoundary(files) {
       declarationPath: distEventActionDeclarationPath,
       runtimeExports: [...EXPECTED_EVENT_ACTION_RUNTIME_EXPORTS],
       typeExports: [...EXPECTED_EVENT_ACTION_TYPE_EXPORTS],
+    },
+    proofOnlySuccessor: {
+      task: "M08-T07",
+      runtimeExports: [],
+      typeExports: [],
+      focusedTestPath: AUTHORING_ROUND_TRIP_TEST_PATH,
+      focusedTypesPath: AUTHORING_ROUND_TRIP_TYPES_PATH,
+      publicRuntimeCasesAdded: 2,
+      publicCompilerNegativeAssertionsAdded: 6,
     },
     structuralPublicDeclarations: EXPECTED_STRUCTURAL_EXPORTS.length,
     structuralTsdocDeclarations: sourceExports.tsdocDeclarations,
@@ -1970,6 +1999,7 @@ export async function buildEditorCoreStructuralEditsEvidence(rawOptions = undefi
     },
     behavior,
     executionAuthority,
+    boundary,
     packageBoundary: {
       currentEmittedFiles: boundary.emittedFiles,
       staticEsmEdges: boundary.staticEsmEdges,

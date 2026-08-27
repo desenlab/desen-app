@@ -7,6 +7,7 @@ import { URL } from "node:url";
 import validSource from "../../protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json" with { type: "json" };
 import packageManifest from "../package.json" with { type: "json" };
 import * as editorCore from "@desen/editor-core";
+import { calculateDesenSourceDigest, canonicalizeJsonBytes } from "@desen/protocol";
 import {
   buildEditorCoreSourceDocumentEvidence,
   EditorCoreSourceDocumentProofError,
@@ -349,6 +350,7 @@ test("the package manifest keeps one exact root export and the declared runtime 
       test: "vitest run",
       "test:public-package":
         "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
+      "test:authoring-round-trip": "vitest run test/authoring-round-trip.test.ts",
       "test:content-edits": "vitest run test/content-edits.test.ts",
       "test:event-action-edits": "vitest run test/event-action-edits.test.ts",
       "test:state-binding-edits": "vitest run test/state-binding-edits.test.ts",
@@ -2213,6 +2215,719 @@ test("the emitted event and action commands are deterministic, immutable, and se
   );
   assert.deepEqual(creation.document, input);
   assertPlainOwnDataFrozen(first);
+});
+
+const AUTHORING_ROUND_TRIP_NAMESPACED_KEY = "com.example.editor-roundtrip";
+const AUTHORING_ROUND_TRIP_LEGACY_KEY = "legacy-marker";
+const AUTHORING_ROUND_TRIP_EXTENSION_KINDS = Object.freeze([
+  "document",
+  "action.state.set",
+  "action.state.toggle",
+  "action.navigate",
+  "action.operation.invoke",
+  "action.resource.refresh",
+  "action.component.command",
+  "action.event.emit",
+  "variant",
+  "behavior",
+  "repeat",
+  "node",
+  "state",
+  "resource-instance",
+  "surface",
+  "source-catalog-requirement",
+]);
+
+function authoringRoundTripExtension(kind) {
+  const extensions = JSON.parse(
+    `{
+      "${AUTHORING_ROUND_TRIP_NAMESPACED_KEY}": {
+        "kind": "",
+        "ordered": ["first", {"middle": true}, "first", null, [], {}],
+        "apparentCore": {
+          "id": "sign-in.inserted",
+          "use": "com.example.invalid/ExtensionMustRemainInert",
+          "$ref": "state.extensionMustRemainInert"
+        },
+        "__proto__": {"retainedAsOwnData": true},
+        "constructor": {"retainedAsOwnData": true},
+        "prototype": {"retainedAsOwnData": true},
+        "unicode": ["İstanbul", "e\\u0301", "雪", "\\ud83d\\ude00"],
+        "nullValue": null,
+        "emptyObject": {},
+        "emptyArray": []
+      },
+      "${AUTHORING_ROUND_TRIP_LEGACY_KEY}": {
+        "kind": "",
+        "retainedAlthoughNotReverseDomainNamed": true
+      },
+      "__proto__": {"retainedAsOwnExtensionKey": true},
+      "constructor": {"retainedAsOwnExtensionKey": true},
+      "prototype": {"retainedAsOwnExtensionKey": true}
+    }`,
+  );
+  extensions[AUTHORING_ROUND_TRIP_NAMESPACED_KEY].kind = kind;
+  extensions[AUTHORING_ROUND_TRIP_LEGACY_KEY].kind = kind;
+  return extensions;
+}
+
+function authoringRoundTripAuthoring(label) {
+  const apparentCore =
+    label === "alpha"
+      ? {
+          id: "sign-in.inserted",
+          use: "com.example.invalid/AuthoringMustRemainInert",
+          slots: {
+            default: [{ id: "sign-in.title", use: "com.example.invalid/AuthoringShadow" }],
+          },
+          on: {
+            press: [
+              { type: "event.emit", name: "authoring.alpha" },
+              { type: "state.toggle", path: "authoring.alpha" },
+            ],
+          },
+        }
+      : {
+          id: "sign-in.inserted",
+          use: "com.example.invalid/AuthoringMustRemainInert",
+          behaviors: [{ id: "sign-in.behavior", use: "com.example.invalid/AuthoringShadow" }],
+          slots: {
+            default: [{ id: "sign-in.delete-me", use: "com.example.invalid/AuthoringShadow" }],
+          },
+          on: {
+            press: [{ type: "navigate", surface: "authoring-omega" }],
+          },
+        };
+  return JSON.parse(
+    `{"canvas":{"sign-in":{"x":17,"y":23}},"selection":{"surfaceId":"sign-in","nodeId":"sign-in.title"},"viewport":{"label":${JSON.stringify(label)},"zoom":1.25},"__proto__":{"retained":true},"apparentCore":${JSON.stringify(apparentCore)}}`,
+  );
+}
+
+function authoringRoundTripActions() {
+  return [
+    {
+      type: "state.set",
+      path: "future.value",
+      value: { $ref: "state.future", fallback: null },
+      extensions: authoringRoundTripExtension("action.state.set"),
+    },
+    {
+      type: "state.toggle",
+      path: "future.enabled",
+      extensions: authoringRoundTripExtension("action.state.toggle"),
+    },
+    {
+      type: "navigate",
+      surface: "future-surface",
+      params: { tab: { $ref: "state.future" } },
+      extensions: authoringRoundTripExtension("action.navigate"),
+    },
+    {
+      type: "operation.invoke",
+      operation: "com.example.future/Save",
+      as: "futureSave",
+      input: { value: { $ref: "state.future" } },
+      concurrency: "queue",
+      onSuccess: [{ type: "event.emit", name: "future.saved" }],
+      onFailure: [{ type: "resource.refresh", resource: "futureResource" }],
+      extensions: authoringRoundTripExtension("action.operation.invoke"),
+    },
+    {
+      type: "resource.refresh",
+      resource: "futureResource",
+      extensions: authoringRoundTripExtension("action.resource.refresh"),
+    },
+    {
+      type: "component.command",
+      target: "future.component",
+      command: "futureCommand",
+      input: { value: { $ref: "state.future" } },
+      extensions: authoringRoundTripExtension("action.component.command"),
+    },
+    {
+      type: "event.emit",
+      name: "future.event",
+      payload: { value: { $ref: "state.future" } },
+      extensions: authoringRoundTripExtension("action.event.emit"),
+    },
+  ];
+}
+
+function authoringRoundTripFixture(label) {
+  const input = cloneFixture();
+  const surface = input.surfaces["sign-in"];
+  const root = surface.root;
+  const children = root.slots.default;
+  const title = children[0];
+
+  input.authoring = authoringRoundTripAuthoring(label);
+  input.extensions = authoringRoundTripExtension("document");
+  input.catalogs[0].extensions = authoringRoundTripExtension("source-catalog-requirement");
+  surface.extensions = authoringRoundTripExtension("surface");
+  surface.state.email.extensions = authoringRoundTripExtension("state");
+  surface.state.deleteMe = { schema: { type: "boolean" }, initial: false };
+  surface.resources.proof = {
+    use: "com.example.data/Proof",
+    input: {
+      existing: { $ref: "state.email" },
+      removeMe: { $ref: "state.password" },
+    },
+    policy: "manual",
+    extensions: authoringRoundTripExtension("resource-instance"),
+  };
+
+  root.extensions = authoringRoundTripExtension("node");
+  root.behaviors = [
+    {
+      id: "sign-in.behavior",
+      use: "com.example.interactions/Preview",
+      props: { removeMe: true },
+      style: { base: { root: { removeMe: true } } },
+      slots: { holding: [] },
+      extensions: authoringRoundTripExtension("behavior"),
+    },
+  ];
+  root.on = { preservation: authoringRoundTripActions() };
+
+  title.props = { ...title.props, removeMe: true };
+  title.style = { base: { root: { removeMe: true } } };
+  title.when = { op: "truthy", args: [true] };
+  title.repeat = {
+    items: { $ref: "resource.proof.value", fallback: [] },
+    as: "row",
+    key: { $ref: "item.row.id" },
+    limit: 10,
+    extensions: authoringRoundTripExtension("repeat"),
+  };
+  title.variants = [
+    {
+      when: { op: "truthy", args: [true] },
+      props: { removeMe: true },
+      style: { base: { root: { removeMe: true } } },
+      extensions: authoringRoundTripExtension("variant"),
+    },
+    { when: { op: "truthy", args: [false] }, props: { removable: true } },
+  ];
+  title.on = {
+    edit: [
+      { type: "state.toggle", path: "future.edit" },
+      { type: "navigate", surface: "future-edit" },
+    ],
+    deleteMe: [{ type: "event.emit", name: "future.delete" }],
+  };
+  children.push(
+    { id: "sign-in.delete-me", use: "com.example.ui/Text" },
+    { id: "sign-in.move-me", use: "com.example.ui/Text" },
+    { id: "sign-in.reorder-me", use: "com.example.ui/Text" },
+  );
+  return input;
+}
+
+function createAuthoringRoundTripDocument(label) {
+  const result = editorCore.createDesenEditorDocument(authoringRoundTripFixture(label));
+  assert.equal(result.ok, true);
+  if (!result.ok) throw new TypeError("Expected the authoring round-trip fixture to be admitted.");
+  return result.document;
+}
+
+function authoringRoundTripExtensions(root) {
+  const found = new Map();
+  const pending = [root];
+  const visited = new Set();
+  while (pending.length > 0) {
+    const value = pending.pop();
+    if (typeof value !== "object" || value === null || visited.has(value)) continue;
+    visited.add(value);
+    if (!Array.isArray(value) && Object.hasOwn(value, "extensions")) {
+      const extensions = value.extensions;
+      const marker = extensions?.[AUTHORING_ROUND_TRIP_NAMESPACED_KEY];
+      if (typeof marker?.kind === "string") {
+        assert.equal(found.has(marker.kind), false);
+        found.set(marker.kind, JSON.parse(JSON.stringify(extensions)));
+      }
+    }
+    pending.push(...Object.values(value));
+  }
+  return [...found.entries()].sort(([left], [right]) => left.localeCompare(right));
+}
+
+function authoringRoundTripWithoutAuthoring(document) {
+  const projection = JSON.parse(JSON.stringify(document));
+  delete projection.authoring;
+  return projection;
+}
+
+function reopenAuthoringRoundTripDocument(document) {
+  const expectedBytes = canonicalizeJsonBytes(document);
+  const expectedAuthoring = JSON.parse(JSON.stringify(document.authoring));
+  const expectedExtensions = authoringRoundTripExtensions(document);
+  const parsed = JSON.parse(JSON.stringify(document));
+  const result = editorCore.createDesenEditorDocument(parsed);
+
+  assert.equal(result.ok, true);
+  if (!result.ok) throw new TypeError("Expected the JSON-parsed Source to be re-admitted.");
+  const reopened = result.document;
+  assert.notStrictEqual(reopened, document);
+  assert.notStrictEqual(reopened, parsed);
+  assert.notStrictEqual(reopened.authoring, parsed.authoring);
+  assert.notStrictEqual(reopened.extensions, parsed.extensions);
+  assert.deepEqual(reopened.authoring, expectedAuthoring);
+  assert.deepEqual(authoringRoundTripExtensions(reopened), expectedExtensions);
+  assert.deepEqual(canonicalizeJsonBytes(reopened), expectedBytes);
+  assertPlainOwnDataFrozen(reopened);
+
+  parsed.authoring.roundTripCallerMutation = true;
+  parsed.extensions[AUTHORING_ROUND_TRIP_NAMESPACED_KEY].roundTripCallerMutation = true;
+  assert.deepEqual(reopened.authoring, expectedAuthoring);
+  assert.deepEqual(authoringRoundTripExtensions(reopened), expectedExtensions);
+  assert.deepEqual(canonicalizeJsonBytes(reopened), expectedBytes);
+  return reopened;
+}
+
+const AUTHORING_ROUND_TRIP_MUTATIONS = Object.freeze([
+  [
+    "insertDesenEditorNode",
+    (document) =>
+      editorCore.insertDesenEditorNode(document, {
+        surfaceId: "sign-in",
+        parentId: "sign-in.layout",
+        slot: "default",
+        index: 0,
+        idBase: "sign-in.inserted",
+        use: "com.example.future/Unknown",
+      }),
+  ],
+  [
+    "deleteDesenEditorNode",
+    (document) =>
+      editorCore.deleteDesenEditorNode(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.delete-me",
+      }),
+  ],
+  [
+    "moveDesenEditorNode",
+    (document) =>
+      editorCore.moveDesenEditorNode(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.move-me",
+        parentId: "sign-in.behavior",
+        slot: "holding",
+        index: 0,
+      }),
+  ],
+  [
+    "reorderDesenEditorNode",
+    (document) =>
+      editorCore.reorderDesenEditorNode(document, {
+        surfaceId: "sign-in",
+        parentId: "sign-in.layout",
+        slot: "default",
+        nodeId: "sign-in.reorder-me",
+        index: 0,
+      }),
+  ],
+  [
+    "setDesenEditorOwnerProp",
+    (document) =>
+      editorCore.setDesenEditorOwnerProp(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        name: "futureProp",
+        value: { $ref: "state.future" },
+      }),
+  ],
+  [
+    "deleteDesenEditorOwnerProp",
+    (document) =>
+      editorCore.deleteDesenEditorOwnerProp(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        name: "removeMe",
+      }),
+  ],
+  [
+    "setDesenEditorOwnerStyleProperty",
+    (document) =>
+      editorCore.setDesenEditorOwnerStyleProperty(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        state: "future",
+        part: "root",
+        property: "color",
+        value: { $token: "color.future" },
+      }),
+  ],
+  [
+    "deleteDesenEditorOwnerStyleProperty",
+    (document) =>
+      editorCore.deleteDesenEditorOwnerStyleProperty(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        state: "base",
+        part: "root",
+        property: "removeMe",
+      }),
+  ],
+  [
+    "setDesenEditorNodeCondition",
+    (document) =>
+      editorCore.setDesenEditorNodeCondition(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        when: { op: "truthy", args: [false] },
+      }),
+  ],
+  [
+    "clearDesenEditorNodeCondition",
+    (document) =>
+      editorCore.clearDesenEditorNodeCondition(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+      }),
+  ],
+  [
+    "insertDesenEditorVariant",
+    (document) =>
+      editorCore.insertDesenEditorVariant(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        index: 1,
+        variant: { when: { op: "truthy", args: [true] }, props: { inserted: true } },
+      }),
+  ],
+  [
+    "deleteDesenEditorVariant",
+    (document) =>
+      editorCore.deleteDesenEditorVariant(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        index: 1,
+      }),
+  ],
+  [
+    "reorderDesenEditorVariant",
+    (document) =>
+      editorCore.reorderDesenEditorVariant(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        variantIndex: 1,
+        index: 0,
+      }),
+  ],
+  [
+    "setDesenEditorVariantCondition",
+    (document) =>
+      editorCore.setDesenEditorVariantCondition(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        index: 0,
+        when: { op: "truthy", args: [false] },
+      }),
+  ],
+  [
+    "setDesenEditorVariantProp",
+    (document) =>
+      editorCore.setDesenEditorVariantProp(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        index: 0,
+        name: "future",
+        value: true,
+      }),
+  ],
+  [
+    "deleteDesenEditorVariantProp",
+    (document) =>
+      editorCore.deleteDesenEditorVariantProp(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        index: 0,
+        name: "removeMe",
+      }),
+  ],
+  [
+    "setDesenEditorVariantStyleProperty",
+    (document) =>
+      editorCore.setDesenEditorVariantStyleProperty(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        index: 0,
+        state: "future",
+        part: "root",
+        property: "color",
+        value: "purple",
+      }),
+  ],
+  [
+    "deleteDesenEditorVariantStyleProperty",
+    (document) =>
+      editorCore.deleteDesenEditorVariantStyleProperty(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        index: 0,
+        state: "base",
+        part: "root",
+        property: "removeMe",
+      }),
+  ],
+  [
+    "insertDesenEditorStateDeclaration",
+    (document) =>
+      editorCore.insertDesenEditorStateDeclaration(document, {
+        surfaceId: "sign-in",
+        name: "inserted",
+        declaration: { schema: { type: "string" }, initial: "" },
+      }),
+  ],
+  [
+    "deleteDesenEditorStateDeclaration",
+    (document) =>
+      editorCore.deleteDesenEditorStateDeclaration(document, {
+        surfaceId: "sign-in",
+        name: "deleteMe",
+      }),
+  ],
+  [
+    "setDesenEditorStateSchema",
+    (document) =>
+      editorCore.setDesenEditorStateSchema(document, {
+        surfaceId: "sign-in",
+        name: "email",
+        schema: { type: "number", minimum: 0 },
+      }),
+  ],
+  [
+    "setDesenEditorStateInitial",
+    (document) =>
+      editorCore.setDesenEditorStateInitial(document, {
+        surfaceId: "sign-in",
+        name: "email",
+        initial: { inert: true },
+      }),
+  ],
+  [
+    "setDesenEditorNodeRepeatItems",
+    (document) =>
+      editorCore.setDesenEditorNodeRepeatItems(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        items: { $ref: "state.futureRows" },
+      }),
+  ],
+  [
+    "setDesenEditorNodeRepeatKey",
+    (document) =>
+      editorCore.setDesenEditorNodeRepeatKey(document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        key: { $ref: "item.row.futureId" },
+      }),
+  ],
+  [
+    "setDesenEditorResourceInput",
+    (document) =>
+      editorCore.setDesenEditorResourceInput(document, {
+        surfaceId: "sign-in",
+        resourceId: "proof",
+        name: "inserted",
+        value: { $ref: "state.future" },
+      }),
+  ],
+  [
+    "deleteDesenEditorResourceInput",
+    (document) =>
+      editorCore.deleteDesenEditorResourceInput(document, {
+        surfaceId: "sign-in",
+        resourceId: "proof",
+        name: "removeMe",
+      }),
+  ],
+  [
+    "insertDesenEditorEventHandler",
+    (document) =>
+      editorCore.insertDesenEditorEventHandler(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        event: "inserted",
+        actions: [{ type: "event.emit", name: "future.inserted" }],
+      }),
+  ],
+  [
+    "deleteDesenEditorEventHandler",
+    (document) =>
+      editorCore.deleteDesenEditorEventHandler(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        event: "deleteMe",
+      }),
+  ],
+  [
+    "insertDesenEditorAction",
+    (document) =>
+      editorCore.insertDesenEditorAction(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        actionListPointer: "/on/edit",
+        index: 1,
+        action: { type: "resource.refresh", resource: "futureResource" },
+      }),
+  ],
+  [
+    "replaceDesenEditorAction",
+    (document) =>
+      editorCore.replaceDesenEditorAction(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        actionPointer: "/on/edit/0",
+        action: { type: "event.emit", name: "future.replaced" },
+      }),
+  ],
+  [
+    "deleteDesenEditorAction",
+    (document) =>
+      editorCore.deleteDesenEditorAction(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        actionPointer: "/on/edit/0",
+      }),
+  ],
+  [
+    "reorderDesenEditorAction",
+    (document) =>
+      editorCore.reorderDesenEditorAction(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        actionPointer: "/on/edit/0",
+        index: 1,
+      }),
+  ],
+]);
+
+test("the emitted factory isolates authoring and round-trips all Source extension locations", () => {
+  const input = authoringRoundTripFixture("alpha");
+  const expectedAuthoring = JSON.parse(JSON.stringify(input.authoring));
+  const expectedExtensions = authoringRoundTripExtensions(input);
+  const creation = editorCore.createDesenEditorDocument(input);
+  const alternate = createAuthoringRoundTripDocument("omega");
+  const extensionChangedInput = authoringRoundTripFixture("alpha");
+  extensionChangedInput.extensions[AUTHORING_ROUND_TRIP_NAMESPACED_KEY].changed = true;
+  const extensionChangedCreation = editorCore.createDesenEditorDocument(extensionChangedInput);
+
+  assert.equal(creation.ok, true);
+  assert.equal(extensionChangedCreation.ok, true);
+  if (!creation.ok || !extensionChangedCreation.ok) {
+    throw new TypeError("Expected the public authoring round-trip fixtures to be admitted.");
+  }
+  const reopened = reopenAuthoringRoundTripDocument(creation.document);
+  const reopenedAlternate = reopenAuthoringRoundTripDocument(alternate);
+  const reopenedExtensionChanged = reopenAuthoringRoundTripDocument(
+    extensionChangedCreation.document,
+  );
+  assert.deepEqual(
+    expectedExtensions.map(([kind]) => kind),
+    [...AUTHORING_ROUND_TRIP_EXTENSION_KINDS].sort(),
+  );
+  for (const [, extensions] of expectedExtensions) {
+    assert.equal(Object.hasOwn(extensions, AUTHORING_ROUND_TRIP_NAMESPACED_KEY), true);
+    assert.equal(Object.hasOwn(extensions, AUTHORING_ROUND_TRIP_LEGACY_KEY), true);
+    assert.equal(Object.hasOwn(extensions, "__proto__"), true);
+    assert.equal(Object.hasOwn(extensions, "constructor"), true);
+    assert.equal(Object.hasOwn(extensions, "prototype"), true);
+    const namespaced = extensions[AUTHORING_ROUND_TRIP_NAMESPACED_KEY];
+    assert.equal(Object.hasOwn(namespaced, "__proto__"), true);
+    assert.equal(Object.hasOwn(namespaced, "constructor"), true);
+    assert.equal(Object.hasOwn(namespaced, "prototype"), true);
+    assert.equal(namespaced.apparentCore.id, "sign-in.inserted");
+    assert.deepEqual(namespaced.ordered, ["first", { middle: true }, "first", null, [], {}]);
+    assert.deepEqual(namespaced.unicode, ["İstanbul", "é", "雪", "😀"]);
+    assert.equal(namespaced.nullValue, null);
+    assert.deepEqual(namespaced.emptyObject, {});
+    assert.deepEqual(namespaced.emptyArray, []);
+  }
+  assert.equal(creation.document.authoring.apparentCore.id, "sign-in.inserted");
+  assert.equal(alternate.authoring.apparentCore.id, "sign-in.inserted");
+  assert.notDeepEqual(
+    creation.document.authoring.apparentCore.slots,
+    alternate.authoring.apparentCore.slots,
+  );
+  assert.notDeepEqual(
+    creation.document.authoring.apparentCore.on,
+    alternate.authoring.apparentCore.on,
+  );
+  assert.deepEqual(creation.document.authoring, expectedAuthoring);
+  assert.deepEqual(authoringRoundTripExtensions(creation.document), expectedExtensions);
+  assert.deepEqual(
+    canonicalizeJsonBytes(authoringRoundTripWithoutAuthoring(creation.document)),
+    canonicalizeJsonBytes(authoringRoundTripWithoutAuthoring(alternate)),
+  );
+  assert.equal(
+    calculateDesenSourceDigest(creation.document),
+    calculateDesenSourceDigest(alternate),
+  );
+  assert.notEqual(
+    calculateDesenSourceDigest(extensionChangedCreation.document),
+    calculateDesenSourceDigest(creation.document),
+  );
+  assert.equal(calculateDesenSourceDigest(reopened), calculateDesenSourceDigest(reopenedAlternate));
+  assert.notEqual(
+    calculateDesenSourceDigest(reopenedExtensionChanged),
+    calculateDesenSourceDigest(reopened),
+  );
+
+  input.authoring.viewport.label = "caller-mutated";
+  input.extensions[AUTHORING_ROUND_TRIP_NAMESPACED_KEY].changed = "caller-mutated";
+  assert.deepEqual(creation.document.authoring, expectedAuthoring);
+  assert.deepEqual(authoringRoundTripExtensions(creation.document), expectedExtensions);
+  assertPlainOwnDataFrozen(creation.document);
+});
+
+test("all 32 emitted mutation commands isolate authoring and preserve extension parsed values", () => {
+  assert.equal(AUTHORING_ROUND_TRIP_MUTATIONS.length, 32);
+  for (const [name, run] of AUTHORING_ROUND_TRIP_MUTATIONS) {
+    const leftDocument = createAuthoringRoundTripDocument("alpha");
+    const rightDocument = createAuthoringRoundTripDocument("omega");
+    const expectedLeftAuthoring = JSON.parse(JSON.stringify(leftDocument.authoring));
+    const expectedRightAuthoring = JSON.parse(JSON.stringify(rightDocument.authoring));
+    const expectedExtensions = authoringRoundTripExtensions(leftDocument);
+    const leftBefore = canonicalizeJsonBytes(leftDocument);
+    const rightBefore = canonicalizeJsonBytes(rightDocument);
+
+    const leftResult = run(leftDocument);
+    const rightResult = run(rightDocument);
+    assert.equal(leftResult.ok, true, name);
+    assert.equal(rightResult.ok, true, name);
+    if (!leftResult.ok || !rightResult.ok) {
+      throw new TypeError(name + " must preserve the admitted authoring round-trip fixture.");
+    }
+    const left = leftResult.document;
+    const right = rightResult.document;
+    const reopenedLeft = reopenAuthoringRoundTripDocument(left);
+    const reopenedRight = reopenAuthoringRoundTripDocument(right);
+    if (name === "insertDesenEditorNode") {
+      assert.equal(left.surfaces["sign-in"].root.slots.default[0].id, "sign-in.inserted");
+      assert.equal(right.surfaces["sign-in"].root.slots.default[0].id, "sign-in.inserted");
+    }
+    assert.deepEqual(left.authoring, expectedLeftAuthoring, name);
+    assert.deepEqual(right.authoring, expectedRightAuthoring, name);
+    assert.deepEqual(authoringRoundTripExtensions(left), expectedExtensions, name);
+    assert.deepEqual(authoringRoundTripExtensions(right), expectedExtensions, name);
+    assert.deepEqual(
+      canonicalizeJsonBytes(authoringRoundTripWithoutAuthoring(left)),
+      canonicalizeJsonBytes(authoringRoundTripWithoutAuthoring(right)),
+      name,
+    );
+    assert.equal(calculateDesenSourceDigest(left), calculateDesenSourceDigest(right), name);
+    assert.equal(
+      calculateDesenSourceDigest(reopenedLeft),
+      calculateDesenSourceDigest(reopenedRight),
+      name,
+    );
+    assert.deepEqual(canonicalizeJsonBytes(leftDocument), leftBefore, name);
+    assert.deepEqual(canonicalizeJsonBytes(rightDocument), rightBefore, name);
+    assertPlainOwnDataFrozen(left);
+    assertPlainOwnDataFrozen(right);
+  }
 });
 
 test("[proof-core] two fresh final builds are byte-identical and preserve honest scope", async () => {

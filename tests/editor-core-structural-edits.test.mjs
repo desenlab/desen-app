@@ -27,6 +27,8 @@ import {
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const STRUCTURAL_SOURCE = "packages/editor-core/src/structural-edits.ts";
+const AUTHORING_ROUND_TRIP_TEST = "packages/editor-core/test/authoring-round-trip.test.ts";
+const AUTHORING_ROUND_TRIP_TYPES = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PROTOCOL_RUNTIME = "packages/protocol/dist/index.js";
 const temporaryDirectories = [];
 let built;
@@ -126,6 +128,18 @@ test("[authority] authenticates the exact frozen M08-T02 artifact and isolated r
   ]) {
     assert.deepEqual(trackedReceipts.get(receipt.path), receipt);
   }
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessor.task, "M08-T06");
+  assert.deepEqual(built.currentCompatibility.boundary.proofOnlySuccessor, {
+    task: "M08-T07",
+    runtimeExports: [],
+    typeExports: [],
+    focusedTestPath: AUTHORING_ROUND_TRIP_TEST,
+    focusedTypesPath: AUTHORING_ROUND_TRIP_TYPES,
+    publicRuntimeCasesAdded: 2,
+    publicCompilerNegativeAssertionsAdded: 6,
+  });
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 46);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 75);
 });
 
 test("[determinism] two fresh M08-T03 builds are byte-identical", async () => {
@@ -204,10 +218,24 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
   assert.equal(runtimeExecuted, false);
 
   const source = await readFile(path.join(ROOT, STRUCTURAL_SOURCE));
+  const authoringRoundTripTest = await readFile(path.join(ROOT, AUTHORING_ROUND_TRIP_TEST));
+  const authoringRoundTripTypes = await readFile(path.join(ROOT, AUTHORING_ROUND_TRIP_TYPES));
   const dependency = await readFile(path.join(ROOT, PROTOCOL_RUNTIME));
   await assert.rejects(
     buildEditorCoreStructuralEditsEvidence({
       fileOverrides: { [STRUCTURAL_SOURCE]: changedByte(source) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStructuralEditsEvidence({
+      fileOverrides: { [AUTHORING_ROUND_TRIP_TEST]: changedByte(authoringRoundTripTest) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStructuralEditsEvidence({
+      fileOverrides: { [AUTHORING_ROUND_TRIP_TYPES]: changedByte(authoringRoundTripTypes) },
     }),
     expectedError("BOUNDARY_DRIFT"),
   );
@@ -443,6 +471,7 @@ test("[options] rejects unknown, accessor, inherited, symbol, proxy, and shared 
 
 test("[immutability] freezes evidence and states the exact nonclaim boundary", () => {
   assertDeepFrozen(built.artifact);
+  assertDeepFrozen(built.currentCompatibility);
   assert.deepEqual(built.artifact.nonclaims, [
     "CATALOG_SLOT_ACCEPTANCE_AND_CARDINALITY",
     "CROSS_SURFACE_STRUCTURAL_MOVE",

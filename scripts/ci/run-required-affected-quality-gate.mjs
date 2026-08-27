@@ -380,7 +380,8 @@ function selectedRegions(selection, nodeById) {
       proofId === "editor-core-structural-edits" ||
       proofId === "editor-core-content-edits" ||
       proofId === "editor-core-state-binding-edits" ||
-      proofId === "editor-core-event-action-edits"
+      proofId === "editor-core-event-action-edits" ||
+      proofId === "editor-core-authoring-round-trip"
         ? "editor-core-public-package-contract"
         : "package-tests";
     if (
@@ -413,7 +414,7 @@ function selectedRegions(selection, nodeById) {
   const dependencyBoundary = suffix[0];
   const boundaryFixtures = suffix[1];
   if (
-    exhaustiveRootIds.length !== 77 ||
+    exhaustiveRootIds.length !== 78 ||
     dependencyBoundary.dependencies.length !== exhaustiveRootIds.length ||
     dependencyBoundary.dependencies.some(
       (dependency, index) => dependency !== exhaustiveRootIds[index],
