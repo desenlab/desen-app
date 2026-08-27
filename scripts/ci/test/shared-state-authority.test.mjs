@@ -108,20 +108,20 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 168 steps across the seven reviewed execution classes", () => {
+test("owns exactly 170 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 168);
-  assert.equal(new Set(ALL_STEP_IDS).size, 168);
+  assert.equal(ALL_STEP_IDS.length, 170);
+  assert.equal(new Set(ALL_STEP_IDS).size, 170);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 3,
     PACKAGE_TEST_EXCLUSIVE: 1,
     PROOF_READ_ONLY: 69,
-    PROOF_OS_TEMP_ISOLATED: 78,
+    PROOF_OS_TEMP_ISOLATED: 80,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
@@ -156,10 +156,10 @@ test("owns exactly 168 steps across the seven reviewed execution classes", () =>
 });
 
 test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 79);
-  assert.equal(new Set(PROOF_IDS).size, 79);
+  assert.equal(PROOF_IDS.length, 80);
+  assert.equal(new Set(PROOF_IDS).size, 80);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
-  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 68);
+  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 69);
   assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 11);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
@@ -174,7 +174,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "runtime-core-state-navigation-actions",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 68);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 69);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -516,6 +516,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "editor-core-event-action-edits",
     "editor-core-authoring-round-trip",
     "editor-core-persistence",
+    "editor-core-continuous-validation",
   ]);
   assert.deepEqual(classifyWorkloadStateMetadata("verify-editor-core-source-document"), {
     schemaVersion: 2,
@@ -530,6 +531,38 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     nativeAddonPolicy: "NONE",
     filesystemCompatibilityPolicy: "NONE",
     barrier: false,
+  });
+  assert.deepEqual(classifyProofPairState("editor-core-continuous-validation"), {
+    proofId: "editor-core-continuous-validation",
+    barrier: false,
+    verifier: {
+      schemaVersion: 2,
+      stepId: "verify-editor-core-continuous-validation",
+      executionClass: "PROOF_OS_TEMP_ISOLATED",
+      workspaceReads: ["."],
+      workspaceWrites: [],
+      tempPolicy: "RUNNER_SCOPED_OS",
+      tempKey: "verify-editor-core-continuous-validation",
+      ports: [],
+      childProcessPolicy: "NONE",
+      nativeAddonPolicy: "NONE",
+      filesystemCompatibilityPolicy: "NONE",
+      barrier: false,
+    },
+    rootTest: {
+      schemaVersion: 2,
+      stepId: "test-editor-core-continuous-validation",
+      executionClass: "PROOF_OS_TEMP_ISOLATED",
+      workspaceReads: ["."],
+      workspaceWrites: [],
+      tempPolicy: "RUNNER_SCOPED_OS",
+      tempKey: "test-editor-core-continuous-validation",
+      ports: [],
+      childProcessPolicy: "NODE_TEST_HARNESS",
+      nativeAddonPolicy: "NONE",
+      filesystemCompatibilityPolicy: "NONE",
+      barrier: false,
+    },
   });
   assert.deepEqual(NATIVE_ADDON_PROOF_IDS, [
     "reference-host-web-source-audit",
@@ -644,7 +677,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    79,
+    80,
   );
 });
 
@@ -1371,7 +1404,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 150,
+    NONE: 152,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,

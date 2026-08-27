@@ -3571,3 +3571,43 @@ This file records implementation discoveries without changing the frozen DESEN 0
   persistence port for save/open UI; it must not depend on the local transport adapter's internal
   response shapes or acquire storage-path authority. Any interoperable remote-storage or merge
   protocol requires a later explicit profile.
+
+## PF-086 — Continuous editor diagnostics require explicit subjects and snapshot identities
+
+- Status: OPEN
+- Blocks proof: No; M08-T09 layers the existing cumulative execution-contract Validator over one
+  immutable editor Source and one captured Catalog set without changing frozen protocol bytes or
+  granting runtime, persistence, or platform authority.
+- Protocol location: SPEC Sections 10.2, 11.2, 12.4, 15.1, and 23.5; normative rows `N-012`,
+  `N-014`, `N-018`, `S-002`, and `S-003`; related findings `PF-078`–`PF-085`
+- Observation: DESEN 0.1.0 defines deterministic diagnostics and surface-local node and behavior
+  identities, but it does not prescribe an editor subscription model, invalid-node index, Catalog
+  snapshot identity, or whether a diagnostic pointer may be interpreted as subject identity.
+  Pointer-derived mapping would be incorrect for diagnostics whose pointer names an action input
+  or rejected child while the Validator's explicit subject names the target node or slot owner.
+- Implementation decision: `createDesenEditorContinuousValidator` captures and validates one
+  detached immutable Catalog array. Catalog rejection returns no partial validator. A successful
+  validator synchronously re-admits each direct editor Source once, then uses that one immutable
+  snapshot for cumulative execution-contract validation, the complete RFC 8785 document
+  fingerprint, and invalid-subject occurrence mapping. The Catalog fingerprint preserves array
+  order; the document fingerprint includes root `authoring`.
+
+  Mapping authority is exactly `context.surfaceId` plus `context.subject.kind` and
+  `context.subject.id`. Diagnostic pointers, codes, messages, and capability identifiers never
+  infer identity. Every matching node or behavior occurrence is returned in deterministic order;
+  node and behavior identities remain distinct even when their text matches. Diagnostics lacking
+  an explicit subject or naming no current occurrence remain controlled unmapped indexes. The
+  original diagnostic order and complete dynamic-obligation list are preserved, and obligations
+  do not make an otherwise valid Source invalid. Structural or hostile-cast admission failure
+  produces a controlled report with a null document fingerprint and no partial mapping authority.
+
+  The API is pure and synchronous per immutable edit result. It creates no timer, subscription,
+  worker, adapter callback, storage generation, network request, React state, or DOM authority.
+  Necessary reflection over arbitrary JavaScript `Proxy` values may execute traps; this is not a
+  hostile-JavaScript or no-code-execution membrane.
+
+- Future action: M08-T10 must independently prove terminal React/DOM integration, cross-command
+  determinism, and stable identity at the G08 boundary. M09 may schedule validation after edits and
+  render the explicit mappings, but it must not replace subject authority with pointer heuristics
+  or execute dynamic obligations as part of editor validation. Any interoperable diagnostic-index
+  or editor-subscription protocol requires a later explicit profile.

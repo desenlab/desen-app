@@ -577,6 +577,35 @@ M08-T09 sürekli semantik diagnostic/invalid-node mapping'ini; M08-T10 ise termi
 cross-command determinizm ve G08'i taşır. Genel ilerleme 93/145 (%64), M08 ilerlemesi 8/10, kanıt
 kapıları 8/13'tür; sıradaki iş M08-T09'dur.
 
+M08-T09 da tamamlandı. `createDesenEditorContinuousValidator`, bir Catalog set'ini ayrık ve donmuş
+snapshot olarak yakalar; Catalog admission başarısızsa kısmi validator vermez. Her senkron doğrulama
+çağrısı doğrudan editor Source'unu yalnız bir kez yeniden admit eder ve aynı immutable snapshot'tan
+kümülatif execution-contract diagnostic'lerini, bütün dinamik obligation'ları, kök `authoring` dahil
+document fingerprint'ini ve Catalog array sırasına duyarlı Catalog-set fingerprint'ini üretir.
+
+Invalid-node eşlemesi yalnız Validator'ın açık `context.surfaceId` ve `context.subject` alanlarını
+otorite kabul eder. Pointer, diagnostic code/message veya capability kimliği üzerinden tahmin
+yapılmaz. Aynı node ya da behavior kimliğinin bütün occurrence'ları kararlı sırada korunur; node ve
+behavior türleri metinleri aynı olsa da birleşmez; açık ve mevcut subject'i olmayan diagnostic'ler
+kontrollü unmapped index olarak kalır. Obligation bulunması tek başına Source'u invalid yapmaz. API
+timer, worker, subscription, React, DOM, persistence generation, storage, network veya obligation
+execution yetkisi almaz.
+
+Odak suite 12/12 ve dokuz compiler-negatif; kümülatif editor-core 140/140; public package 50/50 ve
+102 compiler-negatif; bağımsız kök kanıtı 8/8 geçer. Exact kanıt
+[`EDITOR-CORE-CONTINUOUS-VALIDATION.md`](../proof/EDITOR-CORE-CONTINUOUS-VALIDATION.md) ve
+40,099 baytlık
+[`editor-core-0.1.0-continuous-validation.json`](../proof/artifacts/editor-core-0.1.0-continuous-validation.json)
+dosyalarındadır; artifact
+`sha256:7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a` ile pinlenir. Resmi
+donmuş önkoşullar M08-T03–M08-T07'dir; M08-T08 persistence mevcut paket
+uyumluluğu olarak doğrulanır fakat resmi önkoşul değildir. CI ardılı 170 iş yükü ve 80 kanıt çifti;
+sequence 37 ise önceki artifact baytlarını koruyarak 34 artifact ve 68 reader taşır.
+
+`N-012`, `N-014`, `N-018` ve `S-003` `TESTED` kalır; `S-002` terminal entegrasyon için `PLANNED`,
+`P-18` `PARTIAL` ve kanıt kapıları 8/13 kalır. Genel ilerleme 94/145 (%65), M08 ilerlemesi 9/10'dur;
+sıradaki iş M08-T10 terminal React/DOM sınırı, cross-command determinizm ve G08 kapanışıdır.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

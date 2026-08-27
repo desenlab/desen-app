@@ -18,6 +18,7 @@ import {
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const TRACKED_PERSISTENCE_SOURCE = "packages/editor-core/src/persistence.ts";
+const TRACKED_CONTINUOUS_VALIDATION_SOURCE = "packages/editor-core/src/continuous-validation.ts";
 const temporaryDirectories = [];
 let built;
 
@@ -71,6 +72,11 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
   assert.equal(built.artifact.profile, "desen.editor-core.persistence-proof.v1");
   assert.equal(built.artifact.task, "M08-T08");
   assert.equal(built.artifact.result, "PASS");
+  assert.equal(built.artifactBytes.byteLength, 49_785);
+  assert.equal(
+    built.artifactSha256,
+    "51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe",
+  );
   assert.deepEqual(
     built.artifact.prerequisites,
     EDITOR_CORE_PERSISTENCE_PREREQUISITE_PINS.map((pin) => ({
@@ -92,11 +98,78 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
       command,
     })),
   );
+  assert.deepEqual(
+    built.currentCompatibility.packageScripts.retained,
+    Object.entries(EDITOR_CORE_PERSISTENCE_PACKAGE_SCRIPTS).map(([name, command]) => ({
+      name,
+      command,
+    })),
+  );
+  assert.deepEqual(
+    built.currentCompatibility.packageScripts.compatibilityOnlySuccessor.map(({ name }) => name),
+    [
+      "generate:editor-core-continuous-validation",
+      "verify:editor-core-continuous-validation",
+      "test:editor-core-continuous-validation",
+    ],
+  );
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
+  assert.deepEqual(built.currentCompatibility.publicApi.compatibilityOnlySuccessor, {
+    task: "M08-T09",
+    authority: "COMPATIBILITY_ONLY_NOT_M08_T08_CLAIM_AUTHORITY",
+    relationship: "ADDITIVE_SIBLING_SUCCESSOR",
+    sourcePath: TRACKED_CONTINUOUS_VALIDATION_SOURCE,
+    runtimePath: "packages/editor-core/dist/continuous-validation.js",
+    declarationPath: "packages/editor-core/dist/continuous-validation.d.ts",
+    focusedTestPath: "packages/editor-core/test/continuous-validation.test.ts",
+    focusedTypesPath: "packages/editor-core/test/continuous-validation.types.ts",
+    runtimeExports: ["createDesenEditorContinuousValidator"],
+    typeExports: [
+      "DesenEditorContinuousValidationReport",
+      "DesenEditorContinuousValidator",
+      "DesenEditorContinuousValidatorCreationFailure",
+      "DesenEditorContinuousValidatorCreationResult",
+      "DesenEditorContinuousValidatorCreationSuccess",
+      "DesenEditorInvalidSubjectMapping",
+    ],
+    publicDeclarations: 7,
+    tsdocDeclarations: 7,
+    publicRuntimeCasesAdded: 1,
+    publicCompilerNegativeAssertionsAdded: 6,
+  });
+  assert.equal(built.currentCompatibility.packageBoundary.currentEmittedFiles, 36);
+  assert.equal(built.currentCompatibility.packageBoundary.staticEsmEdges, 24);
+  assert.equal(built.currentCompatibility.packageBoundary.editorWebOwnsTransportAdapter, true);
+  assert.equal(built.currentCompatibility.tests.editorCorePublicRuntimeCases, 50);
+  assert.equal(built.currentCompatibility.tests.editorCorePublicCompilerNegativeAssertions, 102);
+  assert.equal(built.currentCompatibility.tests.editorCoreContinuousValidationRuntimeCases, 12);
+  assert.equal(
+    built.currentCompatibility.tests.editorCoreContinuousValidationCompilerNegativeAssertions,
+    9,
+  );
+  assert.deepEqual(built.currentCompatibility.frozenAuthority, {
+    path: "docs/proof/artifacts/editor-core-0.1.0-persistence.json",
+    bytes: 49_785,
+    sha256: "51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe",
+    proofDocument: {
+      path: "docs/proof/EDITOR-CORE-PERSISTENCE.md",
+      bytes: 4_631,
+      sha256: "4076d45392de8662cfb52672550b6906341cf2c44be165017655c2ac3607ad26",
+    },
+    retainedTaskTimeReceipts: 32,
+    formalPrerequisiteTasks: ["M07-T05", "M08-T07"],
+  });
   const tracked = new Set(
-    built.artifact.trackedFiles.map(({ path: relativePath }) => relativePath),
+    built.currentCompatibility.trackedFiles.map(({ path: relativePath }) => relativePath),
   );
   for (const relativePath of [
     TRACKED_PERSISTENCE_SOURCE,
+    TRACKED_CONTINUOUS_VALIDATION_SOURCE,
+    "packages/editor-core/dist/continuous-validation.js",
+    "packages/editor-core/dist/continuous-validation.d.ts",
+    "packages/editor-core/test/continuous-validation.test.ts",
+    "packages/editor-core/test/continuous-validation.types.ts",
     "packages/editor-web/src/local-source-persistence.ts",
     "scripts/lib/editor-core-persistence-proof.mjs",
     "scripts/generate-editor-core-persistence-proof.mjs",
@@ -125,6 +198,10 @@ test("[lifecycle] proves create, open, unchanged, and update through the real lo
   assert.equal(built.artifact.integration.transport.implicitGlobalFetch, false);
   assert.equal(built.artifact.integration.transport.redirectMode, true);
   assert.ok(built.artifact.integration.transport.putRequests >= 6);
+  assert.deepEqual(
+    built.currentCompatibility.integration.lifecycle,
+    built.artifact.integration.lifecycle,
+  );
 });
 
 test("[durability] proves two-port CAS, close-reopen durability, and independent Source keys", () => {
@@ -193,6 +270,7 @@ test("[determinism] two fresh M08-T08 evidence builds are byte-identical", async
   const second = await buildEditorCorePersistenceEvidence();
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
   assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.deepEqual(first.currentCompatibility, second.currentCompatibility);
 });
 
 test("[mutation] rejects prerequisite, tracked-file, and runtime substitution", async () => {
@@ -211,6 +289,17 @@ test("[mutation] rejects prerequisite, tracked-file, and runtime substitution", 
   await assert.rejects(
     buildEditorCorePersistenceEvidence({
       fileOverrides: { [TRACKED_PERSISTENCE_SOURCE]: changedByte(tracked) },
+    }),
+    expectedError("TRACKED_FILE_DRIFT"),
+  );
+  const continuousValidation = await readFile(
+    path.join(ROOT, TRACKED_CONTINUOUS_VALIDATION_SOURCE),
+  );
+  await assert.rejects(
+    buildEditorCorePersistenceEvidence({
+      fileOverrides: {
+        [TRACKED_CONTINUOUS_VALIDATION_SOURCE]: changedByte(continuousValidation),
+      },
     }),
     expectedError("TRACKED_FILE_DRIFT"),
   );
@@ -312,7 +401,14 @@ test("[options] rejects linked authority and active, inherited, proxy, or shared
     expectedError("FILESYSTEM_UNSAFE"),
   );
   assertDeepFrozen(built.artifact);
+  assertDeepFrozen(built.currentCompatibility);
   assert.equal(built.artifact.nonclaims.length, 8);
+  assert.equal(
+    built.currentCompatibility.nonclaims.includes(
+      "M08-T09 continuous-validation bytes are compatibility-only successor authority and are not part of the frozen M08-T08 claim.",
+    ),
+    true,
+  );
   assert.deepEqual(
     EDITOR_CORE_PERSISTENCE_ROOT_TEST_NAMES,
     EDITOR_CORE_PERSISTENCE_ROOT_TEST_NAMES.slice(),

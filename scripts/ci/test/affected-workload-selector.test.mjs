@@ -221,6 +221,32 @@ test("an exact proof-unit modification yields a strict shadow subset", async () 
   assert.equal(Object.isFrozen(plan.nodeIds), true);
 });
 
+test("continuous validation selects the exact T03-T07-connected successor closure", async () => {
+  const plan = createShadowAffectedSelection(
+    await affectedBoundary(currentPaths(), [
+      "scripts/verify-editor-core-continuous-validation.mjs",
+    ]),
+  );
+  assert.equal(plan.effectiveScope, "AFFECTED");
+  assert.deepEqual(plan.ownerProofUnitIds, ["editor-core-continuous-validation"]);
+  assert.deepEqual(plan.affectedProofUnitIds, [
+    "protocol-structural-validation",
+    "editor-core-source-document",
+    "editor-core-stable-id-insert",
+    "editor-core-structural-edits",
+    "editor-core-content-edits",
+    "editor-core-state-binding-edits",
+    "editor-core-event-action-edits",
+    "editor-core-authoring-round-trip",
+    "editor-core-persistence",
+    "editor-core-continuous-validation",
+  ]);
+  assert.equal(plan.workloadCount, 30);
+  assert.equal(plan.nodeIds.includes("editor-web-public-package-contract"), true);
+  assert.equal(plan.nodeIds.includes("verify-editor-core-continuous-validation"), true);
+  assert.equal(plan.nodeIds.includes("test-editor-core-continuous-validation"), true);
+});
+
 test("multiple proof owners form one canonical union independent of diff order", async () => {
   const paths = currentPaths();
   const first = createShadowAffectedSelection(
@@ -252,7 +278,7 @@ test("policy, package, documentation, and shared inputs always expand to exhaust
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, "POLICY_DRIFT");
     assert.equal(plan.strictSubset, false);
-    assert.equal(plan.workloadCount, 168);
+    assert.equal(plan.workloadCount, 170);
   }
 });
 
@@ -285,7 +311,7 @@ test("all boundary uncertainty classes expand to exhaustive without partial path
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, category);
     assert.deepEqual(plan.changedPaths, []);
-    assert.equal(plan.workloadCount, 168);
+    assert.equal(plan.workloadCount, 170);
   }
 });
 

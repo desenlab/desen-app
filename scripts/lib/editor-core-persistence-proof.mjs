@@ -8,10 +8,7 @@ import { types as utilTypes } from "node:util";
 import { fileURLToPath } from "node:url";
 
 import { openLocalControlPlane } from "../../apps/control-plane-api/dist/index.js";
-import {
-  createDesenEditorDocument,
-  createDesenEditorPersistencePort,
-} from "../../packages/editor-core/dist/index.js";
+import * as editorCoreRuntime from "../../packages/editor-core/dist/index.js";
 import {
   createLocalDesenEditorPersistencePort,
   LocalDesenEditorPersistenceConfigurationError,
@@ -20,6 +17,8 @@ import { canonicalizeJsonBytes } from "../../packages/protocol/dist/index.js";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
+const { createDesenEditorDocument, createDesenEditorPersistencePort } = editorCoreRuntime;
+
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const MAX_AUTHORITY_BYTES = 32 * 1_024 * 1_024;
@@ -27,8 +26,24 @@ const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 const ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-persistence.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/EDITOR-CORE-PERSISTENCE.md";
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 49_785,
+  sha256: "51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe",
+});
+const FROZEN_PROOF_DOCUMENT_PIN = Object.freeze({
+  bytes: 4_631,
+  sha256: "4076d45392de8662cfb52672550b6906341cf2c44be165017655c2ac3607ad26",
+});
 const FIXTURE_PATH =
   "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json";
+const EDITOR_CORE_INDEX_SOURCE = "packages/editor-core/src/index.ts";
+const EDITOR_CORE_INDEX_RUNTIME = "packages/editor-core/dist/index.js";
+const EDITOR_CORE_INDEX_DECLARATION = "packages/editor-core/dist/index.d.ts";
+const CONTINUOUS_VALIDATION_SOURCE = "packages/editor-core/src/continuous-validation.ts";
+const CONTINUOUS_VALIDATION_RUNTIME = "packages/editor-core/dist/continuous-validation.js";
+const CONTINUOUS_VALIDATION_DECLARATION = "packages/editor-core/dist/continuous-validation.d.ts";
+const CONTINUOUS_VALIDATION_TEST = "packages/editor-core/test/continuous-validation.test.ts";
+const CONTINUOUS_VALIDATION_TYPES = "packages/editor-core/test/continuous-validation.types.ts";
 const SQLITE_FILE_NAME = "control-plane.sqlite3";
 const ORIGIN = "http://127.0.0.1:43127";
 const API_TOKEN = "m08-t08-persistence-proof-token-0000000001";
@@ -44,6 +59,64 @@ const PACKAGE_SCRIPTS = Object.freeze({
   "verify:editor-core-persistence": `${PACKAGE_SCRIPT_PREFIX} && node scripts/verify-editor-core-persistence.mjs`,
   "test:editor-core-persistence": `${PACKAGE_SCRIPT_PREFIX} && node --test tests/editor-core-persistence.test.mjs`,
 });
+const CONTINUOUS_VALIDATION_PACKAGE_SCRIPT_PREFIX =
+  "pnpm verify:editor-core-authoring-round-trip && pnpm --filter @desen/editor-core... build && pnpm --filter @desen/editor-core typecheck && pnpm --filter @desen/editor-core test:continuous-validation && pnpm --filter @desen/editor-core test:public-package";
+const CONTINUOUS_VALIDATION_PACKAGE_SCRIPTS = Object.freeze({
+  "generate:editor-core-continuous-validation": `${CONTINUOUS_VALIDATION_PACKAGE_SCRIPT_PREFIX} && node scripts/generate-editor-core-continuous-validation-proof.mjs`,
+  "verify:editor-core-continuous-validation": `${CONTINUOUS_VALIDATION_PACKAGE_SCRIPT_PREFIX} && node scripts/verify-editor-core-continuous-validation.mjs`,
+  "test:editor-core-continuous-validation": `${CONTINUOUS_VALIDATION_PACKAGE_SCRIPT_PREFIX} && node --test tests/editor-core-continuous-validation.test.mjs`,
+});
+
+const PERSISTENCE_RUNTIME_EXPORTS = Object.freeze(["createDesenEditorPersistencePort"]);
+const PERSISTENCE_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorPersistenceAdapter",
+    "DesenEditorPersistenceAdapterFailureReason",
+    "DesenEditorPersistenceAdapterReadResult",
+    "DesenEditorPersistenceAdapterSourceRecord",
+    "DesenEditorPersistenceAdapterWriteRequest",
+    "DesenEditorPersistenceAdapterWriteResult",
+    "DesenEditorPersistenceDiagnostic",
+    "DesenEditorPersistenceDiagnosticCode",
+    "DesenEditorPersistencePort",
+    "DesenEditorSourceOpenResult",
+    "DesenEditorSourceOpenSuccess",
+    "DesenEditorSourceSaveRequest",
+    "DesenEditorSourceSaveResult",
+  ].sort(compareText),
+);
+const CONTINUOUS_VALIDATION_RUNTIME_EXPORTS = Object.freeze([
+  "createDesenEditorContinuousValidator",
+]);
+const CONTINUOUS_VALIDATION_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorContinuousValidationReport",
+    "DesenEditorContinuousValidator",
+    "DesenEditorContinuousValidatorCreationFailure",
+    "DesenEditorContinuousValidatorCreationResult",
+    "DesenEditorContinuousValidatorCreationSuccess",
+    "DesenEditorInvalidSubjectMapping",
+  ].sort(compareText),
+);
+const EDITOR_CORE_MODULE_NAMES = Object.freeze([
+  "index",
+  "source-document",
+  "stable-id-insert",
+  "structural-edits",
+  "content-edits",
+  "state-binding-edits",
+  "event-action-edits",
+  "persistence",
+  "continuous-validation",
+]);
+const EDITOR_CORE_EMITTED_PATHS = Object.freeze(
+  EDITOR_CORE_MODULE_NAMES.flatMap((name) => [
+    `packages/editor-core/dist/${name}.d.ts`,
+    `packages/editor-core/dist/${name}.d.ts.map`,
+    `packages/editor-core/dist/${name}.js`,
+    `packages/editor-core/dist/${name}.js.map`,
+  ]).sort(compareText),
+);
 
 const PREREQUISITE_PINS = Object.freeze([
   Object.freeze({
@@ -77,8 +150,12 @@ const TRACKED_SOURCE_PATHS = Object.freeze([
   "apps/control-plane-api/src/local-control-plane-sqlite-internal.ts",
   "apps/control-plane-api/test/local-control-plane.test.ts",
   "packages/editor-core/package.json",
-  "packages/editor-core/src/index.ts",
+  "packages/editor-core/README.md",
+  EDITOR_CORE_INDEX_SOURCE,
+  CONTINUOUS_VALIDATION_SOURCE,
   "packages/editor-core/src/persistence.ts",
+  CONTINUOUS_VALIDATION_TEST,
+  CONTINUOUS_VALIDATION_TYPES,
   "packages/editor-core/test/persistence.test.ts",
   "packages/editor-core/test/persistence.types.ts",
   "packages/editor-core/test/public-package.mjs",
@@ -112,6 +189,43 @@ const DISTRIBUTION_ROOTS = Object.freeze([
   "packages/runtime-core/dist",
   "packages/validator/dist",
 ]);
+
+const RETAINED_T08_RECEIPT_PATHS = Object.freeze(
+  [
+    FIXTURE_PATH,
+    "apps/control-plane-api/package.json",
+    "apps/control-plane-api/src/index.ts",
+    "apps/control-plane-api/src/local-control-plane.ts",
+    "apps/control-plane-api/src/local-control-plane-contract.ts",
+    "apps/control-plane-api/src/local-control-plane-internal.ts",
+    "apps/control-plane-api/src/local-control-plane-repository-internal.ts",
+    "apps/control-plane-api/src/local-control-plane-sqlite-internal.ts",
+    "apps/control-plane-api/test/local-control-plane.test.ts",
+    "apps/control-plane-api/dist/index.js",
+    "apps/control-plane-api/dist/local-control-plane.js",
+    "packages/editor-core/src/persistence.ts",
+    "packages/editor-core/test/persistence.test.ts",
+    "packages/editor-core/test/persistence.types.ts",
+    "packages/editor-core/dist/persistence.js",
+    "packages/editor-core/dist/persistence.d.ts",
+    "packages/editor-web/package.json",
+    "packages/editor-web/src/index.ts",
+    "packages/editor-web/src/local-source-json.ts",
+    "packages/editor-web/src/local-source-persistence.ts",
+    "packages/editor-web/test/local-source-persistence.test.ts",
+    "packages/editor-web/test/public-package.mjs",
+    "packages/editor-web/test/public-package.types.mts",
+    "packages/editor-web/tsconfig.build.json",
+    "packages/editor-web/tsconfig.json",
+    "packages/editor-web/tsconfig.public-package.json",
+    "packages/editor-web/dist/index.js",
+    "packages/editor-web/dist/index.d.ts",
+    "packages/editor-web/dist/local-source-json.js",
+    "packages/editor-web/dist/local-source-json.d.ts",
+    "packages/editor-web/dist/local-source-persistence.js",
+    "packages/editor-web/dist/local-source-persistence.d.ts",
+  ].sort(compareText),
+);
 
 const BUILD_OPTION_KEYS = Object.freeze([
   "fileOverrides",
@@ -338,11 +452,43 @@ async function distributionPaths(relativeRoot) {
   return output;
 }
 
+async function editorCoreEmittedPaths() {
+  const relativeRoot = "packages/editor-core/dist";
+  const entries = await readdir(path.join(WORKSPACE_ROOT, relativeRoot), {
+    withFileTypes: true,
+  });
+  if (entries.some((entry) => entry.isSymbolicLink())) {
+    fail("FILESYSTEM_UNSAFE", "The emitted editor-core package contains a symbolic link.");
+  }
+  const paths = entries
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        (entry.name.endsWith(".js") ||
+          entry.name.endsWith(".js.map") ||
+          entry.name.endsWith(".d.ts") ||
+          entry.name.endsWith(".d.ts.map")),
+    )
+    .map((entry) => path.posix.join(relativeRoot, entry.name))
+    .sort(compareText);
+  if (JSON.stringify(paths) !== JSON.stringify(EDITOR_CORE_EMITTED_PATHS)) {
+    fail("EMITTED_PACKAGE_DRIFT", "The current editor-core package must emit exactly 36 files.", {
+      actual: paths,
+    });
+  }
+  return paths;
+}
+
 async function currentTrackedPaths() {
-  const distribution = (
-    await Promise.all(DISTRIBUTION_ROOTS.map((relativeRoot) => distributionPaths(relativeRoot)))
-  ).flat();
-  return Object.freeze([...new Set([...TRACKED_SOURCE_PATHS, ...distribution])].sort(compareText));
+  const [distribution, editorEmitted] = await Promise.all([
+    Promise.all(DISTRIBUTION_ROOTS.map((relativeRoot) => distributionPaths(relativeRoot))).then(
+      (paths) => paths.flat(),
+    ),
+    editorCoreEmittedPaths(),
+  ]);
+  return Object.freeze(
+    [...new Set([...TRACKED_SOURCE_PATHS, ...distribution, ...editorEmitted])].sort(compareText),
+  );
 }
 
 function parseJson(bytes, label) {
@@ -350,6 +496,269 @@ function parseJson(bytes, label) {
     return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
   } catch {
     fail("JSON_INVALID", `${label} is not valid UTF-8 JSON.`);
+  }
+}
+
+function exactNames(actual, expected, code, label) {
+  const sortedActual = [...actual].sort(compareText);
+  const sortedExpected = [...expected].sort(compareText);
+  if (JSON.stringify(sortedActual) !== JSON.stringify(sortedExpected)) {
+    fail(code, `${label} drifted.`, { actual: sortedActual, expected: sortedExpected });
+  }
+  return Object.freeze(sortedActual);
+}
+
+function reexportedNames(bytes, label) {
+  const source = bytes.toString("utf8");
+  const runtime = [];
+  const types = [];
+  for (const match of source.matchAll(
+    /\bexport\s+(type\s+)?\{([\s\S]*?)\}\s+from\s+["'][^"']+["'];?/gu,
+  )) {
+    const target = match[1] === undefined ? runtime : types;
+    for (const entry of match[2].split(",")) {
+      const normalized = entry.trim().replace(/^type\s+/u, "");
+      if (normalized === "") continue;
+      target.push(normalized.split(/\s+as\s+/u).at(-1));
+    }
+  }
+  if (runtime.length + types.length === 0) {
+    fail("PUBLIC_SURFACE_DRIFT", `${label} lost its explicit re-export surface.`);
+  }
+  return Object.freeze({
+    runtime: Object.freeze(runtime.sort(compareText)),
+    types: Object.freeze(types.sort(compareText)),
+  });
+}
+
+function directModuleExports(bytes, label) {
+  const source = bytes.toString("utf8");
+  const runtime = [];
+  const types = [];
+  for (const match of source.matchAll(
+    /^\s*export\s+(?:declare\s+)?(interface|type|function|class|const)\s+([A-Za-z_$][\w$]*)/gmu,
+  )) {
+    (match[1] === "interface" || match[1] === "type" ? types : runtime).push(match[2]);
+  }
+  if (runtime.length + types.length === 0) {
+    fail("EMITTED_PACKAGE_DRIFT", `${label} lost its direct export surface.`);
+  }
+  return Object.freeze({
+    runtime: Object.freeze(runtime.sort(compareText)),
+    types: Object.freeze(types.sort(compareText)),
+  });
+}
+
+function staticEditorCoreEdges(files) {
+  let edges = 0;
+  for (const name of EDITOR_CORE_MODULE_NAMES) {
+    const relativePath = `packages/editor-core/dist/${name}.js`;
+    const source = files.get(relativePath).toString("utf8");
+    edges += [...source.matchAll(/^(?:import|export)\s+.*\sfrom\s+["'][^"']+["'];?/gmu)].length;
+  }
+  if (edges !== 24) {
+    fail("EMITTED_PACKAGE_DRIFT", "The current editor-core graph must retain 24 static edges.", {
+      actual: edges,
+    });
+  }
+  return edges;
+}
+
+function verifyEditorCoreCompatibility(files, t07Artifact) {
+  const expectedRuntime = exactNames(
+    [
+      ...t07Artifact.publicApi.runtimeExports,
+      ...PERSISTENCE_RUNTIME_EXPORTS,
+      ...CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+    ],
+    [
+      ...t07Artifact.publicApi.runtimeExports,
+      ...PERSISTENCE_RUNTIME_EXPORTS,
+      ...CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+    ],
+    "PUBLIC_SURFACE_DRIFT",
+    "Expected current runtime export inventory",
+  );
+  const expectedTypes = exactNames(
+    [
+      ...t07Artifact.publicApi.typeExports,
+      ...PERSISTENCE_TYPE_EXPORTS,
+      ...CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+    ],
+    [
+      ...t07Artifact.publicApi.typeExports,
+      ...PERSISTENCE_TYPE_EXPORTS,
+      ...CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+    ],
+    "PUBLIC_SURFACE_DRIFT",
+    "Expected current type export inventory",
+  );
+  if (expectedRuntime.length !== 35 || expectedTypes.length !== 88) {
+    fail("PUBLIC_SURFACE_DRIFT", "The retained T07 plus T08 and T09 inventories drifted.");
+  }
+  const sourceIndex = reexportedNames(
+    files.get(EDITOR_CORE_INDEX_SOURCE),
+    EDITOR_CORE_INDEX_SOURCE,
+  );
+  const emittedIndex = reexportedNames(
+    files.get(EDITOR_CORE_INDEX_RUNTIME),
+    EDITOR_CORE_INDEX_RUNTIME,
+  );
+  const emittedDeclaration = reexportedNames(
+    files.get(EDITOR_CORE_INDEX_DECLARATION),
+    EDITOR_CORE_INDEX_DECLARATION,
+  );
+  exactNames(
+    sourceIndex.runtime,
+    expectedRuntime,
+    "PUBLIC_SURFACE_DRIFT",
+    "Source runtime exports",
+  );
+  exactNames(sourceIndex.types, expectedTypes, "PUBLIC_SURFACE_DRIFT", "Source type exports");
+  exactNames(
+    emittedIndex.runtime,
+    expectedRuntime,
+    "EMITTED_PACKAGE_DRIFT",
+    "Emitted runtime exports",
+  );
+  exactNames(
+    emittedDeclaration.runtime,
+    expectedRuntime,
+    "EMITTED_PACKAGE_DRIFT",
+    "Emitted declaration runtime exports",
+  );
+  exactNames(
+    emittedDeclaration.types,
+    expectedTypes,
+    "EMITTED_PACKAGE_DRIFT",
+    "Emitted declaration type exports",
+  );
+  exactNames(
+    Object.keys(editorCoreRuntime),
+    expectedRuntime,
+    "PUBLIC_SURFACE_DRIFT",
+    "Loaded public runtime exports",
+  );
+  for (const [relativePath, expected] of [
+    [
+      CONTINUOUS_VALIDATION_SOURCE,
+      { runtime: CONTINUOUS_VALIDATION_RUNTIME_EXPORTS, types: CONTINUOUS_VALIDATION_TYPE_EXPORTS },
+    ],
+    [CONTINUOUS_VALIDATION_RUNTIME, { runtime: CONTINUOUS_VALIDATION_RUNTIME_EXPORTS, types: [] }],
+    [
+      CONTINUOUS_VALIDATION_DECLARATION,
+      { runtime: CONTINUOUS_VALIDATION_RUNTIME_EXPORTS, types: CONTINUOUS_VALIDATION_TYPE_EXPORTS },
+    ],
+  ]) {
+    const direct = directModuleExports(files.get(relativePath), relativePath);
+    exactNames(
+      direct.runtime,
+      expected.runtime,
+      "EMITTED_PACKAGE_DRIFT",
+      `${relativePath} runtime exports`,
+    );
+    exactNames(
+      direct.types,
+      expected.types,
+      "EMITTED_PACKAGE_DRIFT",
+      `${relativePath} type exports`,
+    );
+  }
+  return deepFreeze({
+    currentPackageRuntimeExports: expectedRuntime,
+    currentPackageTypeExports: expectedTypes,
+    additiveSuccessor: {
+      task: "M08-T09",
+      authority: "COMPATIBILITY_ONLY_NOT_M08_T08_CLAIM_AUTHORITY",
+      relationship: "ADDITIVE_SIBLING_SUCCESSOR",
+      sourcePath: CONTINUOUS_VALIDATION_SOURCE,
+      runtimePath: CONTINUOUS_VALIDATION_RUNTIME,
+      declarationPath: CONTINUOUS_VALIDATION_DECLARATION,
+      focusedTestPath: CONTINUOUS_VALIDATION_TEST,
+      focusedTypesPath: CONTINUOUS_VALIDATION_TYPES,
+      runtimeExports: CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+      typeExports: CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+      publicDeclarations: 7,
+      tsdocDeclarations: 7,
+      publicRuntimeCasesAdded: 1,
+      publicCompilerNegativeAssertionsAdded: 6,
+    },
+    currentEmittedFiles: EDITOR_CORE_EMITTED_PATHS.length,
+    staticEsmEdges: staticEditorCoreEdges(files),
+  });
+}
+
+async function authenticateFrozenArtifact() {
+  const artifactBytes = await readNoFollow(
+    DEFAULT_EDITOR_CORE_PERSISTENCE_ARTIFACT_PATH,
+    "frozen M08-T08 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T08 artifact bytes differ from their reviewed pin.");
+  }
+  const proofDocumentBytes = await readNoFollow(
+    path.join(WORKSPACE_ROOT, PROOF_DOCUMENT_PATH),
+    "frozen M08-T08 proof document",
+  );
+  if (
+    proofDocumentBytes.byteLength !== FROZEN_PROOF_DOCUMENT_PIN.bytes ||
+    sha256(proofDocumentBytes) !== FROZEN_PROOF_DOCUMENT_PIN.sha256
+  ) {
+    fail(
+      "PROOF_DOCUMENT_DRIFT",
+      "The frozen M08-T08 proof document drifted from its reviewed pin.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, "frozen M08-T08 proof artifact");
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.proofId !== "editor-core-persistence" ||
+    artifact.profile !== "desen.editor-core.persistence-proof.v1" ||
+    artifact.task !== "M08-T08" ||
+    artifact.result !== "PASS" ||
+    artifact.prerequisites?.length !== PREREQUISITE_PINS.length ||
+    artifact.executionAuthority?.emittedDistributionReceipts !== 180 ||
+    artifact.executionAuthority?.trackedFiles !== 218 ||
+    artifact.trackedFiles?.length !== 218 ||
+    artifact.tests?.editorCorePublicRuntimeCases !== 49 ||
+    artifact.tests?.editorCorePublicCompilerNegativeAssertions !== 96 ||
+    artifact.nonclaims?.length !== 8
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T08 artifact identity or claim projection drifted.");
+  }
+  const prerequisiteProjection = artifact.prerequisites.map(
+    ({ task, proofId, profile, path: prerequisitePath, bytes, sha256: digest }) => ({
+      task,
+      proofId,
+      profile,
+      path: prerequisitePath,
+      bytes,
+      sha256: digest,
+    }),
+  );
+  if (JSON.stringify(prerequisiteProjection) !== JSON.stringify(PREREQUISITE_PINS)) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T08 formal prerequisite list drifted.");
+  }
+  return Object.freeze({
+    artifact: deepFreeze(artifact),
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedT08Receipts(frozenArtifact, files) {
+  const receiptByPath = new Map(
+    frozenArtifact.trackedFiles.map((receipt) => [receipt.path, receipt]),
+  );
+  for (const relativePath of RETAINED_T08_RECEIPT_PATHS) {
+    const receipt = receiptByPath.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (receipt?.bytes !== bytes?.byteLength || receipt?.sha256 !== sha256(bytes)) {
+      fail("RETAINED_T08_AUTHORITY_DRIFT", `Retained M08-T08 authority drifted: ${relativePath}.`);
+    }
   }
 }
 
@@ -949,6 +1358,12 @@ function verifyTestAuthority(files) {
     editorCoreFocusedCompilerNegativeAssertions: countTypeAssertions(
       files.get("packages/editor-core/test/persistence.types.ts").toString("utf8"),
     ),
+    editorCoreContinuousValidationRuntimeCases: testNames(
+      files.get(CONTINUOUS_VALIDATION_TEST).toString("utf8"),
+    ).length,
+    editorCoreContinuousValidationCompilerNegativeAssertions: countTypeAssertions(
+      files.get(CONTINUOUS_VALIDATION_TYPES).toString("utf8"),
+    ),
     editorCorePublicRuntimeCases: testNames(
       files.get("packages/editor-core/test/public-package.mjs").toString("utf8"),
     ).length,
@@ -970,8 +1385,10 @@ function verifyTestAuthority(files) {
   if (
     tests.editorCoreFocusedRuntimeCases !== 10 ||
     tests.editorCoreFocusedCompilerNegativeAssertions !== 21 ||
-    tests.editorCorePublicRuntimeCases !== 49 ||
-    tests.editorCorePublicCompilerNegativeAssertions !== 96 ||
+    tests.editorCoreContinuousValidationRuntimeCases !== 12 ||
+    tests.editorCoreContinuousValidationCompilerNegativeAssertions !== 9 ||
+    tests.editorCorePublicRuntimeCases !== 50 ||
+    tests.editorCorePublicCompilerNegativeAssertions !== 102 ||
     tests.editorWebFocusedRuntimeCases !== 12 ||
     tests.editorWebPublicRuntimeCases !== 3 ||
     tests.editorWebPublicCompilerNegativeAssertions !== 6 ||
@@ -986,6 +1403,10 @@ function verifyTestAuthority(files) {
 
 function verifyPackageScriptAuthority(files) {
   const packageManifest = parseJson(files.get("package.json"), "package.json");
+  const editorCoreManifest = parseJson(
+    files.get("packages/editor-core/package.json"),
+    "packages/editor-core/package.json",
+  );
   if (
     packageManifest === null ||
     typeof packageManifest !== "object" ||
@@ -996,31 +1417,41 @@ function verifyPackageScriptAuthority(files) {
   ) {
     fail("PACKAGE_SCRIPT_DRIFT", "The root package script authority is malformed.");
   }
-  const receipts = Object.entries(PACKAGE_SCRIPTS).map(([name, command]) => {
+  const retained = Object.entries(PACKAGE_SCRIPTS).map(([name, command]) => {
     if (packageManifest.scripts[name] !== command) {
       fail("PACKAGE_SCRIPT_DRIFT", `The exact root package script drifted: ${name}.`);
     }
     return Object.freeze({ name, command });
   });
-  return Object.freeze(receipts);
-}
-
-function deterministicArtifactBytes(artifact) {
-  const persistenceMethods = '[\n        "openSource",\n        "saveSource"\n      ]';
-  const raceStatuses = '[\n        "conflict",\n        "updated"\n      ]';
-  const serialized = JSON.stringify(artifact, null, 2);
-  if (!serialized.includes(persistenceMethods) || !serialized.includes(raceStatuses)) {
-    fail("ARTIFACT_FORMAT_DRIFT", "The M08-T08 compact array formatting authority drifted.");
+  const compatibilityOnlySuccessor = Object.entries(CONTINUOUS_VALIDATION_PACKAGE_SCRIPTS).map(
+    ([name, command]) => {
+      if (packageManifest.scripts[name] !== command) {
+        fail("PACKAGE_SCRIPT_DRIFT", `The M08-T09 compatibility script drifted: ${name}.`);
+      }
+      return Object.freeze({ name, command });
+    },
+  );
+  if (
+    editorCoreManifest?.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts" ||
+    editorCoreManifest?.scripts?.["test:continuous-validation"] !==
+      "vitest run test/continuous-validation.test.ts"
+  ) {
+    fail("PACKAGE_SCRIPT_DRIFT", "The editor-core T08/T09 focused script surface drifted.");
   }
-  const formatted = serialized
-    .replace(persistenceMethods, '["openSource", "saveSource"]')
-    .replace(raceStatuses, '["conflict", "updated"]');
-  return Buffer.from(`${formatted}\n`, "utf8");
+  return deepFreeze({
+    retained,
+    compatibilityOnlySuccessor,
+    editorCore: {
+      persistence: editorCoreManifest.scripts["test:persistence"],
+      continuousValidation: editorCoreManifest.scripts["test:continuous-validation"],
+    },
+  });
 }
 
 /** Builds deterministic M08-T08 evidence through the real local SQLite integration. */
 export async function buildEditorCorePersistenceEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
+  const frozen = await authenticateFrozenArtifact();
   const prerequisites = await authenticatePrerequisites(options);
   const paths = await currentTrackedPaths();
   const files = new Map();
@@ -1033,11 +1464,17 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
   const integration = await runIntegration(validSource);
   const tests = verifyTestAuthority(files);
   const packageScripts = verifyPackageScriptAuthority(files);
+  const t07Artifact = parseJson(
+    files.get(PREREQUISITE_PINS[1].path),
+    "frozen M08-T07 prerequisite",
+  );
+  const editorCoreCompatibility = verifyEditorCoreCompatibility(files, t07Artifact);
+  assertRetainedT08Receipts(frozen.artifact, files);
   const trackedFiles = paths.map((relativePath) => {
     const bytes = files.get(relativePath);
     return Object.freeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) });
   });
-  const artifact = deepFreeze({
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "editor-core-persistence",
     profile: "desen.editor-core.persistence-proof.v1",
@@ -1073,6 +1510,17 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
     },
     tests,
     packageScripts,
+    publicApi: {
+      currentPackageRuntimeExports: editorCoreCompatibility.currentPackageRuntimeExports,
+      currentPackageTypeExports: editorCoreCompatibility.currentPackageTypeExports,
+      compatibilityOnlySuccessor: editorCoreCompatibility.additiveSuccessor,
+    },
+    packageBoundary: {
+      currentEmittedFiles: editorCoreCompatibility.currentEmittedFiles,
+      staticEsmEdges: editorCoreCompatibility.staticEsmEdges,
+      persistencePortRemainsPlatformNeutral: true,
+      editorWebOwnsTransportAdapter: true,
+    },
     trackedFiles,
     nonclaims: [
       "Input JSON whitespace, object-member order, and original lexical bytes are not preserved; canonical parsed Source values are.",
@@ -1080,7 +1528,7 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
       "Node.js, its ESM loader, Fastify, installed external dependency bytes, the native SQLite addon, operating system, and process environment remain trusted authorities.",
       "The Web adapter owns no filesystem path, SQLite handle, implicit global fetch, automatic retry, merge, list, or delete authority.",
       "An indeterminate PUT is resolved only by reopening; it is never converted into a definite failure or automatic retry.",
-      "Continuous Catalog semantic diagnostics and invalid-node mapping remain assigned to M08-T09.",
+      "M08-T09 continuous-validation bytes are compatibility-only successor authority and are not part of the frozen M08-T08 claim.",
       "React/DOM integration, terminal command determinism, and G08 remain assigned to M08-T10.",
       "Undo/redo, selection policy, viewport policy, multi-user synchronization, and remote persistence remain outside M08-T08.",
     ],
@@ -1089,12 +1537,24 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
       "pnpm verify:editor-core-persistence",
       "pnpm test:editor-core-persistence",
     ],
+    frozenAuthority: {
+      path: ARTIFACT_PATH,
+      bytes: FROZEN_ARTIFACT_PIN.bytes,
+      sha256: FROZEN_ARTIFACT_PIN.sha256,
+      proofDocument: {
+        path: PROOF_DOCUMENT_PATH,
+        bytes: FROZEN_PROOF_DOCUMENT_PIN.bytes,
+        sha256: FROZEN_PROOF_DOCUMENT_PIN.sha256,
+      },
+      retainedTaskTimeReceipts: RETAINED_T08_RECEIPT_PATHS.length,
+      formalPrerequisiteTasks: PREREQUISITE_PINS.map(({ task }) => task),
+    },
   });
-  const artifactBytes = deterministicArtifactBytes(artifact);
   return Object.freeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
     task: "M08-T08",
   });
 }
@@ -1185,6 +1645,12 @@ export async function verifyEditorCorePersistenceEvidence(rawOptions = undefined
     trackedFiles: built.artifact.trackedFiles.length,
     distributionFiles: built.artifact.executionAuthority.emittedDistributionReceipts,
     rootProofCases: built.artifact.tests.rootProofCases,
+    currentTrackedFiles: built.currentCompatibility.trackedFiles.length,
+    currentEditorCoreRuntimeExports:
+      built.currentCompatibility.publicApi.currentPackageRuntimeExports.length,
+    currentEditorCoreTypeExports:
+      built.currentCompatibility.publicApi.currentPackageTypeExports.length,
+    currentEditorCoreEmittedFiles: built.currentCompatibility.packageBoundary.currentEmittedFiles,
   });
 }
 

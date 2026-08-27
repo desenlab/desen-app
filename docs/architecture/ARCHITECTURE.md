@@ -60,8 +60,10 @@ The result adds no wrapper root, normalized production projection, hidden AST, n
 executable authority, React value, DOM value, storage handle, or publication state.
 
 Structural admission is intentionally not continuous editor validation. A Source can enter this
-model while its Catalog-backed references are unresolved; M08-T09 owns semantic diagnostics and
-invalid-node mapping as the designer changes the document. M08-T02 adds one platform-neutral
+model while its Catalog-backed references are unresolved. M08-T09 adds a pure synchronous
+Catalog-bound validator that re-admits one immutable Source snapshot per pass, preserves complete
+diagnostics and dynamic obligations, and maps invalid subjects only from explicit Validator
+surface/subject context. M08-T02 adds one platform-neutral
 atomic insert transition over that direct graph. It addresses a node- or behavior-owned slot by
 surface-local stable identity, allocates the exact requested base or the lowest free numeric
 suffix in the shared node/behavior namespace, preserves every previous identity and semantic array
@@ -176,16 +178,19 @@ locations. A PUT dispatched to durable storage with its response hidden returns 
 reopen resolves the committed winner. `PF-085` records the port, adapter, and uncertainty profile.
 
 Insertion, structural edits, content edits, state/binding edits, and event/action edits remain
-structurally authoritative rather than Catalog-semantic: structurally valid unresolved capabilities, slots,
-props, style parts, visual states, tokens, references, repeats, and resource inputs may remain in
-the authoring graph for M08-T09 to diagnose. The common profile keeps canonical documents at 8
+structurally authoritative rather than Catalog-semantic: structurally valid unresolved capabilities,
+slots, props, style parts, visual states, tokens, references, repeats, and resource inputs may remain
+in the authoring graph. M08-T09 diagnoses them against one captured Catalog set without changing
+the document or persistence generation. The common profile keeps canonical documents at 8
 MiB, selected surfaces at 25,000 identity occurrences, component depth at 64 with root at zero,
 and capability IDs at 4,096 code units where a command carries one. `N-012`, `N-014`, `N-018`,
 and `S-003` are `TESTED`; reverse-domain naming remains guidance rather than a new hard validator
-rule. `S-002` remains `PLANNED` until M08-T10 closes terminal stable-identity integration. Semantic
-resolution and continuous diagnostics remain M08-T09, and the terminal React/DOM boundary and G08
-remain M08-T10. Selection, viewport, undo/redo, action execution, multi-user synchronization, and
-remote persistence remain outside M08-T08.
+rule. `S-002` remains `PLANNED` until M08-T10 closes terminal stable-identity integration. M08-T09
+keeps Catalog and complete-Source fingerprints separate, includes root `authoring` in the document
+identity, leaves subjectless diagnostics explicitly unmapped, and does not execute dynamic
+obligations. The terminal React/DOM boundary and G08 remain M08-T10. Selection, viewport,
+undo/redo, action execution, multi-user synchronization, and remote persistence remain outside the
+completed M08-T08/M08-T09 boundaries.
 
 The cumulative M08 proof closes each boundary against the emitted public package as well as the
 source. Editor-core depends only on `protocol` and `validator` and has zero platform imports or

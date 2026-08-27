@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████░░░░░░░░░` **93 / 145 tasks complete (64%)**
+**Overall:** `████████████████░░░░░░░░░` **94 / 145 tasks complete (65%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -22,9 +22,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M08:** `████████░░` **8 / 10 tasks complete (80%)**
+**M08:** `█████████░` **9 / 10 tasks complete (90%)**
 
-**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T09`
+**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T10`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -560,8 +560,29 @@ historical T01–T07 artifact hashes unchanged. These are local code-owned recei
 M08-T08 evidence. `N-012`, `N-018`, and `S-003` remain `TESTED`; P-18 remains `PARTIAL`, and no
 proof-gate or other normative status changes.
 
-I07-04 and G07 remain `DONE`; proof gates remain 8/13, implementation progress is 93/145 (64%),
-M08 is 8/10, and M08-T09 is next.
+M08-T09 adds `createDesenEditorContinuousValidator` to `@desen/editor-core`. The pure synchronous
+factory snapshots one Catalog set; each validation pass admits one immutable Source snapshot and
+returns complete cumulative diagnostics, dynamic obligations, an authoring-sensitive document
+fingerprint, and an order-sensitive Catalog fingerprint. Invalid-node mapping trusts only explicit
+Validator surface and subject context. It retains every matching node or behavior occurrence,
+keeps cross-kind identities separate, and leaves subjectless or non-occurring diagnostics
+controlled and unmapped instead of guessing from pointers.
+
+The focused suite passes 12/12 with nine compiler-negative assertions; the cumulative editor-core
+suite passes 140/140; the public package passes 50/50 with 102 compiler-negative assertions; and
+the independent root proof passes 8/8. Exact evidence is recorded in
+[`EDITOR-CORE-CONTINUOUS-VALIDATION.md`](docs/proof/EDITOR-CORE-CONTINUOUS-VALIDATION.md) and
+the exact 40,099-byte
+[`editor-core-0.1.0-continuous-validation.json`](docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json)
+at `sha256:7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a`.
+The proof authenticates frozen M08-T03–M08-T07; persistence remains a current-package compatibility
+sibling, not a formal prerequisite. The current CI successor contains 170 workloads and 80 proof
+pairs, and sequence 37 authenticates 34 frozen artifacts plus 68 readers without changing any
+historical artifact. The API adds no React, DOM, timer, worker, persistence, storage, network, or
+obligation-execution authority.
+
+I07-04 and G07 remain `DONE`; proof gates remain 8/13, implementation progress is 94/145 (65%),
+M08 is 9/10, and M08-T10 is next.
 Legacy retirement remains owned by I07-05.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN

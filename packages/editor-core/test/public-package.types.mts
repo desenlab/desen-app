@@ -1,5 +1,6 @@
 import {
   clearDesenEditorNodeCondition,
+  createDesenEditorContinuousValidator,
   createDesenEditorDocument,
   createDesenEditorPersistencePort,
   deleteDesenEditorAction,
@@ -52,6 +53,11 @@ import type {
   DesenEditorContentPredicate,
   DesenEditorContentValue,
   DesenEditorContentVariant,
+  DesenEditorContinuousValidationReport,
+  DesenEditorContinuousValidator,
+  DesenEditorContinuousValidatorCreationFailure,
+  DesenEditorContinuousValidatorCreationResult,
+  DesenEditorContinuousValidatorCreationSuccess,
   DesenEditorDocument,
   DesenEditorDocumentCreationFailure,
   DesenEditorDocumentCreationResult,
@@ -84,6 +90,7 @@ import type {
   DesenEditorPersistenceAdapterWriteResult,
   DesenEditorPersistenceDiagnosticCode,
   DesenEditorPersistencePort,
+  DesenEditorInvalidSubjectMapping,
   DesenEditorResourceInputDeleteCommand,
   DesenEditorResourceInputSetCommand,
   DesenEditorStateBindingEditDiagnostic,
@@ -152,6 +159,53 @@ if (result.ok) {
 }
 
 declare const document: DesenEditorDocument;
+declare const publicInvalidSubjectMapping: DesenEditorInvalidSubjectMapping;
+
+const continuousCreation: DesenEditorContinuousValidatorCreationResult =
+  createDesenEditorContinuousValidator(input);
+if (continuousCreation.ok) {
+  const success: DesenEditorContinuousValidatorCreationSuccess = continuousCreation;
+  const validator: DesenEditorContinuousValidator = success.validator;
+  const report: DesenEditorContinuousValidationReport = validator.validate(document);
+  const documentFingerprint: string | null = report.documentFingerprint;
+  const catalogSetFingerprint: string = report.catalogSetFingerprint;
+  const firstInvalidSubject: DesenEditorInvalidSubjectMapping | undefined =
+    report.invalidSubjects[0];
+  const firstUnmappedDiagnostic: number | undefined = report.unmappedDiagnosticIndexes[0];
+
+  // @ts-expect-error emitted continuous validators keep their Catalog identity immutable
+  validator.catalogSetFingerprint = "sha256:changed";
+
+  // @ts-expect-error emitted continuous validation is synchronous
+  const asynchronousReport: Promise<DesenEditorContinuousValidationReport> =
+    validator.validate(document);
+
+  // @ts-expect-error reports expose no Source snapshot
+  const leakedDocument = report.document;
+
+  // @ts-expect-error invalid-subject groups are recursively immutable
+  publicInvalidSubjectMapping.diagnosticIndexes.push(0);
+
+  // @ts-expect-error the public validator accepts an admitted direct editor Source
+  validator.validate({});
+
+  void documentFingerprint;
+  void catalogSetFingerprint;
+  void firstInvalidSubject;
+  void firstUnmappedDiagnostic;
+  void asynchronousReport;
+  void leakedDocument;
+} else {
+  const failure: DesenEditorContinuousValidatorCreationFailure = continuousCreation;
+  const diagnosticCode: string = failure.diagnostics[0]?.code ?? "none";
+
+  // @ts-expect-error a rejected Catalog set exposes no partial validator
+  const partialValidator = failure.validator;
+
+  void diagnosticCode;
+  void partialValidator;
+}
+
 const command: DesenEditorNodeInsertCommand = {
   surfaceId: "main",
   parentId: "main.root",

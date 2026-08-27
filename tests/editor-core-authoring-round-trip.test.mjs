@@ -35,6 +35,11 @@ const PERSISTENCE_RUNTIME = "packages/editor-core/dist/persistence.js";
 const PERSISTENCE_DECLARATION = "packages/editor-core/dist/persistence.d.ts";
 const PERSISTENCE_TEST = "packages/editor-core/test/persistence.test.ts";
 const PERSISTENCE_TYPES = "packages/editor-core/test/persistence.types.ts";
+const CONTINUOUS_VALIDATION_SOURCE = "packages/editor-core/src/continuous-validation.ts";
+const CONTINUOUS_VALIDATION_RUNTIME = "packages/editor-core/dist/continuous-validation.js";
+const CONTINUOUS_VALIDATION_DECLARATION = "packages/editor-core/dist/continuous-validation.d.ts";
+const CONTINUOUS_VALIDATION_TEST = "packages/editor-core/test/continuous-validation.test.ts";
+const CONTINUOUS_VALIDATION_TYPES = "packages/editor-core/test/continuous-validation.types.ts";
 const PERSISTENCE_SUCCESSOR_PATHS = Object.freeze([
   PERSISTENCE_SOURCE,
   PERSISTENCE_RUNTIME,
@@ -43,6 +48,15 @@ const PERSISTENCE_SUCCESSOR_PATHS = Object.freeze([
   `${PERSISTENCE_DECLARATION}.map`,
   PERSISTENCE_TEST,
   PERSISTENCE_TYPES,
+]);
+const CONTINUOUS_VALIDATION_SUCCESSOR_PATHS = Object.freeze([
+  CONTINUOUS_VALIDATION_SOURCE,
+  CONTINUOUS_VALIDATION_RUNTIME,
+  `${CONTINUOUS_VALIDATION_RUNTIME}.map`,
+  CONTINUOUS_VALIDATION_DECLARATION,
+  `${CONTINUOUS_VALIDATION_DECLARATION}.map`,
+  CONTINUOUS_VALIDATION_TEST,
+  CONTINUOUS_VALIDATION_TYPES,
 ]);
 const temporaryDirectories = [];
 let built;
@@ -97,6 +111,11 @@ test("[authority] authenticates exact M08-T01 through T06 artifacts, frozen prot
   assert.equal(built.artifact.profile, "desen.editor-core.authoring-round-trip-proof.v1");
   assert.equal(built.artifact.task, "M08-T07");
   assert.equal(built.artifact.result, "PASS");
+  assert.equal(built.artifactBytes.byteLength, 62_304);
+  assert.equal(
+    built.artifactSha256,
+    "33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db",
+  );
   assert.deepEqual(
     built.artifact.prerequisites,
     EDITOR_CORE_AUTHORING_ROUND_TRIP_PREREQUISITE_PINS.map((pin) => ({
@@ -176,40 +195,69 @@ test("[authority] authenticates exact M08-T01 through T06 artifacts, frozen prot
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
-  assert.deepEqual(built.currentCompatibility.publicApi.additiveSuccessor, {
-    task: "M08-T08",
-    sourcePath: PERSISTENCE_SOURCE,
-    runtimePath: PERSISTENCE_RUNTIME,
-    declarationPath: PERSISTENCE_DECLARATION,
-    focusedTestPath: PERSISTENCE_TEST,
-    focusedTypesPath: PERSISTENCE_TYPES,
-    runtimeExports: ["createDesenEditorPersistencePort"],
-    typeExports: [
-      "DesenEditorPersistenceAdapter",
-      "DesenEditorPersistenceAdapterFailureReason",
-      "DesenEditorPersistenceAdapterReadResult",
-      "DesenEditorPersistenceAdapterSourceRecord",
-      "DesenEditorPersistenceAdapterWriteRequest",
-      "DesenEditorPersistenceAdapterWriteResult",
-      "DesenEditorPersistenceDiagnostic",
-      "DesenEditorPersistenceDiagnosticCode",
-      "DesenEditorPersistencePort",
-      "DesenEditorSourceOpenResult",
-      "DesenEditorSourceOpenSuccess",
-      "DesenEditorSourceSaveRequest",
-      "DesenEditorSourceSaveResult",
-    ],
-    publicRuntimeCasesAdded: 3,
-    publicCompilerNegativeAssertionsAdded: 21,
-  });
-  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 34);
-  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 82);
-  assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 30);
-  assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 9);
-  assert.equal(built.currentCompatibility.packageBoundary.currentEmittedFiles, 32);
-  assert.equal(built.currentCompatibility.packageBoundary.staticEsmEdges, 20);
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 49);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 96);
+  assert.deepEqual(built.currentCompatibility.publicApi.additiveSuccessors, [
+    {
+      task: "M08-T08",
+      sourcePath: PERSISTENCE_SOURCE,
+      runtimePath: PERSISTENCE_RUNTIME,
+      declarationPath: PERSISTENCE_DECLARATION,
+      focusedTestPath: PERSISTENCE_TEST,
+      focusedTypesPath: PERSISTENCE_TYPES,
+      runtimeExports: ["createDesenEditorPersistencePort"],
+      typeExports: [
+        "DesenEditorPersistenceAdapter",
+        "DesenEditorPersistenceAdapterFailureReason",
+        "DesenEditorPersistenceAdapterReadResult",
+        "DesenEditorPersistenceAdapterSourceRecord",
+        "DesenEditorPersistenceAdapterWriteRequest",
+        "DesenEditorPersistenceAdapterWriteResult",
+        "DesenEditorPersistenceDiagnostic",
+        "DesenEditorPersistenceDiagnosticCode",
+        "DesenEditorPersistencePort",
+        "DesenEditorSourceOpenResult",
+        "DesenEditorSourceOpenSuccess",
+        "DesenEditorSourceSaveRequest",
+        "DesenEditorSourceSaveResult",
+      ],
+      publicRuntimeCasesAdded: 3,
+      publicCompilerNegativeAssertionsAdded: 21,
+    },
+    {
+      task: "M08-T09",
+      sourcePath: CONTINUOUS_VALIDATION_SOURCE,
+      runtimePath: CONTINUOUS_VALIDATION_RUNTIME,
+      declarationPath: CONTINUOUS_VALIDATION_DECLARATION,
+      focusedTestPath: CONTINUOUS_VALIDATION_TEST,
+      focusedTypesPath: CONTINUOUS_VALIDATION_TYPES,
+      runtimeExports: ["createDesenEditorContinuousValidator"],
+      typeExports: [
+        "DesenEditorContinuousValidationReport",
+        "DesenEditorContinuousValidator",
+        "DesenEditorContinuousValidatorCreationFailure",
+        "DesenEditorContinuousValidatorCreationResult",
+        "DesenEditorContinuousValidatorCreationSuccess",
+        "DesenEditorInvalidSubjectMapping",
+      ],
+      publicRuntimeCasesAdded: 1,
+      publicCompilerNegativeAssertionsAdded: 6,
+      publicDeclarations: 7,
+      tsdocDeclarations: 7,
+    },
+  ]);
+  assert.deepEqual(built.currentCompatibility.publicApi.additiveRuntimeExports, [
+    "createDesenEditorContinuousValidator",
+    "createDesenEditorPersistencePort",
+  ]);
+  assert.equal(built.currentCompatibility.publicApi.additiveTypeExports.length, 19);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
+  assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 31);
+  assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 10);
+  assert.equal(built.currentCompatibility.packageBoundary.currentEmittedFiles, 36);
+  assert.equal(built.currentCompatibility.packageBoundary.staticEsmEdges, 24);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
+  assert.equal(built.currentCompatibility.trackedBoundary.files, 109);
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json",
     bytes: 62_304,
@@ -220,6 +268,9 @@ test("[authority] authenticates exact M08-T01 through T06 artifacts, frozen prot
     built.currentCompatibility.trackedBoundary.receipts.map(({ path: receiptPath }) => receiptPath),
   );
   for (const relativePath of PERSISTENCE_SUCCESSOR_PATHS) {
+    assert.equal(currentReceipts.has(relativePath), true);
+  }
+  for (const relativePath of CONTINUOUS_VALIDATION_SUCCESSOR_PATHS) {
     assert.equal(currentReceipts.has(relativePath), true);
   }
 });
@@ -298,7 +349,7 @@ test("[behavior] proves all 32 commands preserve authoring and all 16 unknown-ex
 test("[mutation] rejects runtime substitution and tracked boundary mutation", async () => {
   let runtimeExecuted = false;
   const runtime = Object.fromEntries(
-    built.artifact.publicApi.runtimeExports.map((name) => [
+    built.currentCompatibility.publicApi.currentPackageRuntimeExports.map((name) => [
       name,
       (...arguments_) => {
         runtimeExecuted = true;
@@ -330,7 +381,10 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
       expectedError("BOUNDARY_DRIFT"),
     );
   }
-  for (const relativePath of PERSISTENCE_SUCCESSOR_PATHS) {
+  for (const relativePath of [
+    ...PERSISTENCE_SUCCESSOR_PATHS,
+    ...CONTINUOUS_VALIDATION_SUCCESSOR_PATHS,
+  ]) {
     const bytes = await readFile(path.join(ROOT, relativePath));
     await assert.rejects(
       buildEditorCoreAuthoringRoundTripEvidence({
@@ -550,6 +604,12 @@ test("[immutability] freezes evidence and states the exact nonclaim boundary", (
   assert.equal(
     built.currentCompatibility.nonclaims.includes(
       "M08_T08_PERSISTENCE_SUCCESSOR_BYTES_ARE_COMPATIBILITY_ONLY_NOT_T07_CLAIM_AUTHORITY",
+    ),
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.nonclaims.includes(
+      "M08_T09_CONTINUOUS_VALIDATION_SUCCESSOR_BYTES_ARE_COMPATIBILITY_ONLY_NOT_T07_CLAIM_AUTHORITY",
     ),
     true,
   );

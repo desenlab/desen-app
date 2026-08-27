@@ -135,6 +135,17 @@ const PERSISTENCE_TYPE_EXPORTS = Object.freeze([
   "DesenEditorSourceSaveRequest",
   "DesenEditorSourceSaveResult",
 ]);
+const CONTINUOUS_VALIDATION_RUNTIME_EXPORTS = Object.freeze([
+  "createDesenEditorContinuousValidator",
+]);
+const CONTINUOUS_VALIDATION_TYPE_EXPORTS = Object.freeze([
+  "DesenEditorContinuousValidationReport",
+  "DesenEditorContinuousValidator",
+  "DesenEditorContinuousValidatorCreationFailure",
+  "DesenEditorContinuousValidatorCreationResult",
+  "DesenEditorContinuousValidatorCreationSuccess",
+  "DesenEditorInvalidSubjectMapping",
+]);
 const temporaryDirectories = [];
 let built;
 
@@ -263,17 +274,19 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
       ...STATE_BINDING_RUNTIME_EXPORTS,
       ...EVENT_ACTION_RUNTIME_EXPORTS,
       ...PERSISTENCE_RUNTIME_EXPORTS,
+      ...CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
       "deleteDesenEditorNode",
       "moveDesenEditorNode",
       "reorderDesenEditorNode",
     ].sort(),
   );
-  assert.equal(built.currentCompatibility.boundary.additiveTypeExports.length, 72);
+  assert.equal(built.currentCompatibility.boundary.additiveTypeExports.length, 78);
   for (const name of [
     ...CONTENT_TYPE_EXPORTS,
     ...STATE_BINDING_TYPE_EXPORTS,
     ...EVENT_ACTION_TYPE_EXPORTS,
     ...PERSISTENCE_TYPE_EXPORTS,
+    ...CONTINUOUS_VALIDATION_TYPE_EXPORTS,
   ]) {
     assert.equal(built.currentCompatibility.boundary.additiveTypeExports.includes(name), true);
   }
@@ -298,14 +311,14 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
-  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 5);
-  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 34);
-  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 82);
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 6);
+  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 35);
+  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 88);
   assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 23);
   assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 2);
   assert.equal(built.currentCompatibility.executionAuthority.dependencyFiles, 21);
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 49);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 96);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 50);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
     bytes: 19_561,

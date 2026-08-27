@@ -321,6 +321,7 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
   ]);
   assert.deepEqual(built.currentCompatibility.boundary.additiveRuntimeExports, [
     "clearDesenEditorNodeCondition",
+    "createDesenEditorContinuousValidator",
     "createDesenEditorPersistencePort",
     "deleteDesenEditorAction",
     "deleteDesenEditorEventHandler",
@@ -357,6 +358,12 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
   assert.equal(
     built.currentCompatibility.boundary.currentPackageTypeExports.includes(
       "DesenEditorNodeInsertResult",
+    ),
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.boundary.currentPackageTypeExports.includes(
+      "DesenEditorContinuousValidationReport",
     ),
     true,
   );
@@ -397,14 +404,35 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
-  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 5);
-  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 34);
-  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 82);
+  assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessors.at(-1), {
+    task: "M08-T09",
+    sourcePath: "packages/editor-core/src/continuous-validation.ts",
+    runtimePath: "packages/editor-core/dist/continuous-validation.js",
+    declarationPath: "packages/editor-core/dist/continuous-validation.d.ts",
+    runtimeExports: ["createDesenEditorContinuousValidator"],
+    typeExports: [
+      "DesenEditorContinuousValidationReport",
+      "DesenEditorContinuousValidator",
+      "DesenEditorContinuousValidatorCreationFailure",
+      "DesenEditorContinuousValidatorCreationResult",
+      "DesenEditorContinuousValidatorCreationSuccess",
+      "DesenEditorInvalidSubjectMapping",
+    ],
+    publicDeclarations: 7,
+    tsdocDeclarations: 7,
+  });
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 6);
+  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 35);
+  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 88);
   assert.equal(built.currentCompatibility.evidence.tests.persistenceRuntimeCases, 10);
   assert.equal(built.currentCompatibility.evidence.tests.persistenceCompilerNegativeCases, 21);
-  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 42);
-  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 96);
-  assert.equal(built.currentCompatibility.evidence.trackedFiles.length, 56);
+  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 43);
+  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 102);
+  assert.equal(built.currentCompatibility.evidence.trackedFiles.length, 61);
+  assert.equal(
+    built.currentCompatibility.boundary.packageScripts.includes("test:continuous-validation"),
+    true,
+  );
   for (const receipt of SUCCESSOR_RUNTIME_RECEIPTS) {
     const bytes = await workspaceBytes(receipt.path);
     assert.equal(bytes.byteLength, receipt.bytes);
@@ -626,7 +654,7 @@ test("[boundary] rejects source, TSDoc, import, distribution, and manifest drift
         .toString("utf8")
         .replace(
           "const validation = validateDesenSource(input);",
-          "const validation = (document, validateDesenSource)(input);",
+          "const validation = (document.body, validateDesenSource)(input);",
         ),
       "EDITOR_SOURCE_DOCUMENT_PLATFORM_BOUNDARY_DRIFT",
     ],

@@ -212,19 +212,44 @@ The local Web adapter composes outside editor-core against the existing authenti
 route. M08-T09 still owns Catalog-semantic validation and continuous invalid-node mapping; M08-T10
 owns terminal React/DOM integration; M09-T12 owns save/open UI.
 
+## Continuous validation and invalid-subject mapping
+
+`createDesenEditorContinuousValidator(catalogs)` independently snapshots and prepares the complete
+Catalog array through `validateDesenExecutionCatalogSet`. A successful frozen validator exposes one
+pure synchronous `validate(document)` operation. Every pass first snapshots the admitted direct
+Source once, then runs `validateDesenSourceExecutionContracts`, full-document RFC 8785/SHA-256
+fingerprinting, and invalid-subject occurrence mapping over that same immutable value. The Catalog
+fingerprint is also RFC 8785/SHA-256 and preserves Catalog array order.
+
+The report retains complete deterministic diagnostics and dynamic obligations. Obligations are a
+later resolved-value handoff and do not make an otherwise valid Source invalid. A diagnostic is
+mapped only when its own `context.surfaceId` and `context.subject` identify one or more current
+occurrences. Pointer text is never reinterpreted as identity: command-input diagnostics therefore
+map to the explicit target node even when their pointer is under a different action owner, while
+slot-child diagnostics map to the explicit slot owner. Duplicate exact identities retain every
+node or behavior object-root pointer, and node/behavior kinds are never merged. Diagnostics without
+an explicit occurring subject remain represented by `unmappedDiagnosticIndexes`.
+
+Typed editor documents always receive a complete Source fingerprint including root `authoring`.
+If a runtime cast supplies non-canonical or structurally invalid hostile input, validation returns a
+controlled frozen stale-input report with structural diagnostics, empty obligations/mappings, all
+diagnostic indexes unmapped, and `documentFingerprint: null`. No Source value, Catalog snapshot,
+persistence handle, executable adapter, or UI authority crosses the report boundary.
+
 ## Explicit non-responsibilities
 
-No React, DOM, canvas UI, production activation, Catalog-semantic validation, action execution,
-concrete storage/transport implementation, authentication, automatic retries or merges, Source
-listing/deletion, authoring selection/viewport policy, or hidden document model.
+No React, DOM, canvas UI, production activation, action execution, concrete storage/transport
+implementation, authentication, automatic retries or merges, Source listing/deletion, authoring
+selection/viewport policy, or hidden document model. Continuous validation is static Catalog-backed
+analysis; it does not resolve dynamic obligations or execute adapters.
 
 ## Status
 
 Private. M08-T01's direct Source document model, M08-T02 stable-ID allocation/insertion, M08-T03
 delete/move/ordered-reorder commands, M08-T04 prop/style/condition/variant commands, and M08-T05
 state-declaration/repeat/resource-input commands, M08-T06 event/closed-action commands, and M08-T07
-authoring-isolation/extension-round-trip proof, and M08-T08 platform-neutral persistence port are
-present. Continuous validation and terminal integration remain M08-T09 and M08-T10. `N-012`, `N-014`,
+authoring-isolation/extension-round-trip proof, M08-T08 platform-neutral persistence port, and M08-T09
+continuous validation are present. Terminal integration remains assigned to M08-T10. `N-012`, `N-014`,
 `N-018`, and `S-003` are `TESTED`;
 `S-002` remains `PLANNED` through terminal M08-T10 integration.
 
@@ -239,7 +264,7 @@ Run the direct model suite with
 `pnpm --filter @desen/editor-core test:source-document` and the insert suite with
 `pnpm --filter @desen/editor-core test:stable-id-insert`. The separate
 `pnpm --filter @desen/editor-core test:public-package` check builds the package, resolves the
-public root through its export map, runs the exact current 49 runtime/root cases, and compiles 96
+public root through its export map, runs the exact current 50 runtime/root cases, and compiles 102
 reviewed `@ts-expect-error` assertions against the emitted declarations. The proof cores audit the
 exact source, distribution, manifest, TSDoc, test inventory, and platform boundary. After
 authenticating the exact completed
@@ -326,3 +351,9 @@ request rejection, the exact/one-over 8 MiB boundary, and a stale concurrent-wri
 cumulative emitted-package suite has 49 runtime/root cases and 96 compiler-negative assertions.
 Concrete local transport/storage evidence and the task-level proof remain separate from this
 platform-neutral package contract.
+
+For M08-T09, run `pnpm --filter @desen/editor-core test:continuous-validation` and
+`pnpm --filter @desen/editor-core test:public-package`. The focused suite covers immutable Catalog
+capture, order-sensitive fingerprints, complete obligations, root-authoring fingerprints, exact
+node/behavior occurrence groups, duplicate occurrences, explicit command-target and slot-owner
+mapping, controlled unmapped diagnostics, deterministic replay, and hostile-cast containment.

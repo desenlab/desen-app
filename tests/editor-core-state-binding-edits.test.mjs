@@ -45,6 +45,20 @@ const PERSISTENCE_SUCCESSOR_PATHS = Object.freeze([
   PERSISTENCE_TEST,
   PERSISTENCE_TYPES,
 ]);
+const CONTINUOUS_VALIDATION_SOURCE = "packages/editor-core/src/continuous-validation.ts";
+const CONTINUOUS_VALIDATION_RUNTIME = "packages/editor-core/dist/continuous-validation.js";
+const CONTINUOUS_VALIDATION_DECLARATION = "packages/editor-core/dist/continuous-validation.d.ts";
+const CONTINUOUS_VALIDATION_TEST = "packages/editor-core/test/continuous-validation.test.ts";
+const CONTINUOUS_VALIDATION_TYPES = "packages/editor-core/test/continuous-validation.types.ts";
+const CONTINUOUS_VALIDATION_SUCCESSOR_PATHS = Object.freeze([
+  CONTINUOUS_VALIDATION_SOURCE,
+  CONTINUOUS_VALIDATION_RUNTIME,
+  `${CONTINUOUS_VALIDATION_RUNTIME}.map`,
+  CONTINUOUS_VALIDATION_DECLARATION,
+  `${CONTINUOUS_VALIDATION_DECLARATION}.map`,
+  CONTINUOUS_VALIDATION_TEST,
+  CONTINUOUS_VALIDATION_TYPES,
+]);
 const RETAINED_CONTENT_RUNTIME_EXPORTS = Object.freeze(
   [
     "clearDesenEditorNodeCondition",
@@ -282,10 +296,31 @@ test("[authority] authenticates exact M08-T02 prerequisite, M08-T04 graph compat
     publicRuntimeCasesAdded: 3,
     publicCompilerNegativeAssertionsAdded: 21,
   });
-  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 34);
-  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 82);
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 49);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 96);
+  assert.deepEqual(built.currentCompatibility.publicApi.continuousValidationSuccessor, {
+    task: "M08-T09",
+    sourcePath: CONTINUOUS_VALIDATION_SOURCE,
+    runtimePath: CONTINUOUS_VALIDATION_RUNTIME,
+    declarationPath: CONTINUOUS_VALIDATION_DECLARATION,
+    focusedTestPath: CONTINUOUS_VALIDATION_TEST,
+    focusedTypesPath: CONTINUOUS_VALIDATION_TYPES,
+    runtimeExports: ["createDesenEditorContinuousValidator"],
+    typeExports: [
+      "DesenEditorContinuousValidationReport",
+      "DesenEditorContinuousValidator",
+      "DesenEditorContinuousValidatorCreationFailure",
+      "DesenEditorContinuousValidatorCreationResult",
+      "DesenEditorContinuousValidatorCreationSuccess",
+      "DesenEditorInvalidSubjectMapping",
+    ],
+    focusedBehaviorCasesAdded: 12,
+    focusedCompilerNegativeAssertionsAdded: 9,
+    publicRuntimeCasesAdded: 1,
+    publicCompilerNegativeAssertionsAdded: 6,
+  });
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
   assert.equal(built.currentCompatibility.frozenAuthority.retainedTaskTimeReceipts, 64);
   const currentReceipts = new Set(
     built.currentCompatibility.trackedBoundary.receipts.map(({ path: receiptPath }) => receiptPath),
@@ -293,6 +328,9 @@ test("[authority] authenticates exact M08-T02 prerequisite, M08-T04 graph compat
   assert.equal(currentReceipts.has(AUTHORING_ROUND_TRIP_TEST), true);
   assert.equal(currentReceipts.has(AUTHORING_ROUND_TRIP_TYPES), true);
   for (const relativePath of PERSISTENCE_SUCCESSOR_PATHS) {
+    assert.equal(currentReceipts.has(relativePath), true);
+  }
+  for (const relativePath of CONTINUOUS_VALIDATION_SUCCESSOR_PATHS) {
     assert.equal(currentReceipts.has(relativePath), true);
   }
 });
