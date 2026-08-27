@@ -724,8 +724,8 @@
       },
       {
         "path": "tests/desen-app-catalog-panel-layer-tree.test.mjs",
-        "bytes": 15266,
-        "sha256": "b74cc908587851d4475b2b343953f8cd33975052a82abac117d928f3cb11e6d0"
+        "bytes": 15618,
+        "sha256": "f9fbfad0fd05043080c2cf73c272f0dda41f5744a092f0a4a507531dcb79594e"
       }
     ]
   },

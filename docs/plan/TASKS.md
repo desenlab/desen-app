@@ -1460,7 +1460,7 @@ The app first calls `validateDesenInteractionCatalogSet`, then validates the off
 Source rejection, and bounded-projection failures return no partial model. A surface without an
 exact Source tree reports the absence and never substitutes the sign-in tree. The exact 25,375-byte
 artifact is `docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json` at
-`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`; the focused app
+`sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`; the focused app
 authoring suite passes 18/18 and the independent root proof passes 8/8.
 
 The live local M09-T02 CI authority contains 176 workloads and 83 proof pairs, split into 72
@@ -1468,10 +1468,13 @@ ordinary pairs and 11 barriers. Its formal impact entry has the exact M09-T01 sh
 reference capability as parents and selects 66 affected workloads; the local task wrapper verifies
 those prerequisite artifacts directly instead of recursively replaying their predecessor chains.
 Append-only checkpoint sequence 41 passes 64/64 and closes at
-`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`, authenticating 37
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`, authenticating 37
 frozen artifacts and 74 readers while preserving exact sequence 40 at
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor.
 These are local task and CI-infrastructure receipts; they make no required-gate or hosted-CI claim.
+The first hosted PR run exposed a workspace-target symlink denied by Node's permission model. The
+resealed fixture now uses only absolute runner-temporary targets, and its exact isolation suite
+passes 8/8 without widening permissions; no hosted pass is claimed yet.
 
 This slice adds no real adapter canvas, selection, inspector, insertion, drag/drop, Source mutation,
 persistence, Design/Run execution, diagnostics, publication, or activation. It changes no frozen

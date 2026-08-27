@@ -150,8 +150,8 @@ is `sha256:838aff55123559e2a5db0cbd938f625bcdaa41c5b7eaa5f688592212833622a4`, th
 authority contains 166 proof-owned paths. Its 1,148-path set is
 `sha256:25c23bb06ab9ef11157fa5c058d9fb87866c1adbe08a424855bdc532e51cff8d`, its ownership projection
 is `sha256:f806120b86e4cd07fbf4385c86eccb91c686001be3bf8fe2abb8b704fff380a1`, its selector is
-`sha256:934de528e3a10cd0e5cebcb14c65450a9a9bcb67d19e4dff3902e0b299b4d055`, and its runner is
-`sha256:b497bc718643364a8ec4633a3a6bc08d4840bc9e97528579dc5d0b9a674c708c`. Its ownership-category
+`sha256:3e26c1d403404b08830185a3d55d991766188a631b5e00643c23c962439dcaa2`, and its runner is
+`sha256:0665acc181249d9d522b79fb1b3a611d88a1be390ace94a1b04e9fd02cf9ad52`. Its ownership-category
 counts are `166 / 45 / 31 / 127 / 446 / 203 / 119 / 11`. The 16 reviewed workspace test scripts are pinned by
 `sha256:4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab`. Contract and
 hostile-input tests cover exact
@@ -478,7 +478,7 @@ index 35 and proof/root readers at `[70, 71]`, advances current README-bound sou
 and 72 current readers. Its dedicated checkpoint suite passes 63/63; this local reader authority
 makes no required-gate or hosted M09-T01 claim.
 M09-T02 appends sequence 41 at
-`9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`. It preserves sequences
+`b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`. It preserves sequences
 1–40 and all 36 predecessor artifact receipts byte-exact, appends the T02 artifact at index 36 and
 proof/root readers at `[72, 73]`, and advances only the live T01 readers at `[70, 71]`. The chain
 contains 37 frozen artifacts and 74 current readers. Its dedicated checkpoint suite passes 64/64;
@@ -527,10 +527,14 @@ locally; the focused application suite passes 43/43 and the independent root mut
 8/8.
 The exact 25,375-byte M09-T02 artifact is
 `docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json` at
-`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`; the report is
+`sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`; the report is
 `docs/proof/DESEN-APP-CATALOG-PANEL-LAYER-TREE.md`. Its focused authoring suite passes 18/18 and its
 independent root proof passes 8/8. These are local task receipts, not a required-gate or hosted CI
 claim.
+The first hosted PR run exposed an isolation-fixture workspace-target symlink denied by Node's
+permission model. The resealed fixture uses only absolute runner-temporary targets, and the exact
+isolation suite passes 8/8 without permission widening. This is a corrective local receipt, not a
+hosted pass.
 The historical T07-integrated full CI infrastructure suite
 passed 265/265; its dedicated checkpoint, required-affected, promotion, and retained legacy-gate
 suites passed 58/58, 27/27, 19/19, and 25/25 respectively. The M08-T10-integrated CI infrastructure suite

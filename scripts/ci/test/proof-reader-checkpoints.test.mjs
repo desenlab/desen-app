@@ -526,7 +526,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[40],
-    "9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e",
+    "b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -797,7 +797,7 @@ test("sequence forty-one preserves frozen receipts, reseals M09-T01, and appends
     task: "M09-T02",
     path: "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json",
     bytes: 25375,
-    sha256: "cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73",
+    sha256: "85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61",
   });
   assert.deepEqual(
     sequenceFortyOne.readers.slice(0, sequenceForty.readers.length).map(identity),
@@ -836,13 +836,13 @@ test("sequence forty-one preserves frozen receipts, reseals M09-T01, and appends
       task: "M09-T02",
       role: "root-test",
       path: "tests/desen-app-catalog-panel-layer-tree.test.mjs",
-      bytes: 15266,
-      sha256: "b74cc908587851d4475b2b343953f8cd33975052a82abac117d928f3cb11e6d0",
+      bytes: 15618,
+      sha256: "f9fbfad0fd05043080c2cf73c272f0dda41f5744a092f0a4a507531dcb79594e",
     },
   ]);
   assert.equal(
     calculateProofReaderCheckpointSha256(sequenceFortyOne),
-    "9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e",
+    "b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68",
   );
 });
 

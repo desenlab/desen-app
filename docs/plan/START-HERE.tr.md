@@ -680,15 +680,18 @@ doğrular. Catalog reddi, Source reddi veya bounded projection limiti hiçbir k�
 yerine koymaz. Exact kanıt 25.375 baytlık
 [`desen-app-0.1.0-catalog-panel-layer-tree.json`](../proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json)
 artifact'ıdır ve
-`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73` ile pinlenir. Odak app
+`sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61` ile pinlenir. Odak app
 authoring suite'i 18/18, bağımsız kök kanıt 8/8 geçer.
 
 Canlı yerel M09-T02 CI otoritesi 176 workload ve 83 proof pair içerir; bunlar 72 ordinary pair ile
 11 barrier'a ayrılır. Sequence 41, 64/64 geçer ve 37 donmuş artifact ile 74 reader'ı
-`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e` başında doğrularken exact
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68` başında doğrularken exact
 sequence 40 başını
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` ve bütün öncülleri korur.
-Bu yerel task ve CI-infrastructure makbuzları required gate veya hosted-CI başarısı iddia etmez.
+İlk hosted PR koşusu, Node permission modelinin workspace'i hedefleyen isolation-fixture symlink'ini
+reddettiğini gösterdi. Yeniden mühürlenen fixture yalnızca runner geçici alanındaki absolute
+target'ları kullanır; exact isolation suite'i izin genişletmeden 8/8 geçer. Bu yerel task ve
+CI-infrastructure makbuzları henüz required gate veya hosted-CI başarısı iddia etmez.
 
 Bu dilim gerçek adapter canvas'ı, selection, inspector, insert/drag-drop, Source mutation,
 persistence, Design/Run, diagnostics, publish veya activation eklemez. `P-*`, `N-*`, `S-*`, `G*`

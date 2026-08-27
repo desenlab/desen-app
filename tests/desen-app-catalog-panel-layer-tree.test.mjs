@@ -357,15 +357,19 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[6], async () => {
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[7], async () => {
   const directory = await temporaryDirectory("desen-m09-t02-links-");
+  const shellTarget = path.join(directory, "shell-target.json");
   const shellLink = path.join(directory, "shell.json");
-  await symlink(path.join(ROOT, SHELL_ARTIFACT), shellLink);
+  await writeFile(shellTarget, shellArtifactBytes);
+  await symlink(shellTarget, shellLink);
   await assert.rejects(
     buildDesenAppCatalogPanelLayerTreeEvidence({ shellArtifactPath: shellLink }),
     expectedError("AUTHORITY_UNSAFE"),
   );
 
+  const referenceTarget = path.join(directory, "reference-target.json");
   const referenceLink = path.join(directory, "reference.json");
-  await symlink(path.join(ROOT, REFERENCE_ARTIFACT), referenceLink);
+  await writeFile(referenceTarget, referenceArtifactBytes);
+  await symlink(referenceTarget, referenceLink);
   await assert.rejects(
     buildDesenAppCatalogPanelLayerTreeEvidence({ referenceArtifactPath: referenceLink }),
     expectedError("AUTHORITY_UNSAFE"),
@@ -396,8 +400,10 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[7], async () => {
   );
 
   const linkedWorkspace = path.join(directory, "workspace");
+  const linkedAppsTarget = path.join(directory, "apps-target");
   await mkdir(linkedWorkspace);
-  await symlink(path.join(ROOT, "apps"), path.join(linkedWorkspace, "apps"));
+  await mkdir(path.join(linkedAppsTarget, "desen-app"), { recursive: true });
+  await symlink(linkedAppsTarget, path.join(linkedWorkspace, "apps"), "dir");
   await assert.rejects(
     buildDesenAppCatalogPanelLayerTreeEvidence({
       workspaceRoot: linkedWorkspace,

@@ -924,15 +924,17 @@ component and behavior identity, named slots, conditional markers, and child ord
 Catalog set is validated before the official Source is validated against it; either rejection or a
 bounded-projection failure returns no model. A surface without an exact Source tree reports the
 absence and never substitutes the sign-in hierarchy. The exact 25,375-byte artifact is
-`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`; the focused app
+`sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`; the focused app
 authoring suite passes 18/18 and the independent root proof passes 8/8. No canvas, selection,
 inspector, mutation, persistence, Design/Run, diagnostics, publication, or activation claim is
 added. The live local M09-T02 CI authority contains 176 workloads and 83 proof pairs, split into 72
 ordinary pairs and 11 barriers. Checkpoint sequence 41 passes 64/64 at
-`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`, authenticating 37
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`, authenticating 37
 frozen artifacts and 74 readers while preserving exact sequence 40 at
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor.
-These local receipts make no required-gate or hosted-CI claim.
+The first hosted PR run exposed a workspace-target symlink denied by Node's permission model. The
+resealed fixture uses only absolute runner-temporary targets, and its exact isolation suite passes
+8/8 without permission widening. These local receipts make no required-gate or hosted-CI claim.
 
 ## Current milestone
 
@@ -3432,7 +3434,7 @@ M09-T02 evidence:
 
 - `docs/proof/DESEN-APP-CATALOG-PANEL-LAYER-TREE.md`
 - `docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json`, exactly 25,375 bytes at
-  `sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`
+  `sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`
 - prerequisite authority: the exact completed M09-T01 shell/navigation task artifact is
   authenticated before any M09-T02 claim
 - Catalog boundary: the app imports only the inert
@@ -3454,12 +3456,15 @@ M09-T02 evidence:
 - CI authority: the live local M09-T02 successor contains 176 workloads and 83 proof pairs, split
   into 72 ordinary pairs and 11 barriers; sequence 41 passes 64/64 and authenticates 37 frozen
   artifacts plus 74 readers at
-  `sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`, preserving exact
+  `sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`, preserving exact
   sequence 40 at
   `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor
 - affected authority: the exact M09-T01 shell and M03-T10 reference capability are the two formal
   impact parents, producing a 66-workload affected closure; the local task wrapper verifies both
   prerequisite artifacts directly instead of recursively replaying predecessor chains
+- hosted correction: the first PR run exposed a workspace-target symlink denied by Node's
+  permission model; the resealed fixture uses only absolute runner-temporary targets and its exact
+  isolation suite passes 8/8 without permission widening, but no hosted pass is claimed yet
 - evidence boundary: these are local task and CI-infrastructure receipts; no required-gate or
   hosted-CI result is inferred before its own execution
 - scope nonclaims: no real adapter canvas, selection, inspector, insertion, move, delete, drag/drop,

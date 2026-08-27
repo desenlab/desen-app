@@ -746,7 +746,7 @@ editor-core, editor-web, catalog-sdk, runtime-react, adapter registries, publish
 code. Its five local SVG imports remain repository-owned inert assets rather than an icon package
 or executable capability. The exact 25,375-byte read-panel artifact is
 `docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json` at
-`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`;
+`sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`;
 the focused authoring suite passes 18/18 and the independent root proof passes 8/8.
 
 The live local CI authority registers 176 workloads and 83 proof pairs, split into 72 ordinary
@@ -754,7 +754,7 @@ pairs and 11 barriers. M09-T02's formal impact parents are the exact M09-T01 she
 reference capability, yielding a 66-workload affected closure; its local wrapper verifies those
 two prerequisite artifacts directly rather than recursively replaying predecessor chains.
 Checkpoint sequence 41 passes 64/64 at
-`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`, authenticating 37
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`, authenticating 37
 frozen artifacts and 74 readers while preserving exact sequence 40 at
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor.
 These are local task and CI-infrastructure receipts and make no required-gate or hosted-CI claim.

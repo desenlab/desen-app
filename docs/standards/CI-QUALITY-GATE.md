@@ -93,8 +93,8 @@ non-authoritative shadow form is pinned separately as
 `sha256:aa7f46afdb5e67cd315597cadcf0f16b18e070621c198ff89dfa7f06646b18c3`.
 The historical M08-T10 selector and required-runner authorities remain authenticated by the frozen
 I07-04 promotion artifact. The reviewed M09-T02 selector is
-`sha256:934de528e3a10cd0e5cebcb14c65450a9a9bcb67d19e4dff3902e0b299b4d055`, and its required-runner
-authority is `sha256:b497bc718643364a8ec4633a3a6bc08d4840bc9e97528579dc5d0b9a674c708c`.
+`sha256:3e26c1d403404b08830185a3d55d991766188a631b5e00643c23c962439dcaa2`, and its required-runner
+authority is `sha256:0665acc181249d9d522b79fb1b3a611d88a1be390ace94a1b04e9fd02cf9ad52`.
 
 The reviewed workspace package-test inventory contains 16 test scripts and is pinned as
 `sha256:4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab`. One
@@ -860,12 +860,16 @@ appends the M09 artifact at index 35 and readers at `[70, 71]`, advances only li
 indexes `[66, 67, 68]`, and reauthenticates unchanged reader `[69]`.
 The exact 25,375-byte M09-T02 task artifact is
 `docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json` at
-`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`, with task report
+`sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`, with task report
 `docs/proof/DESEN-APP-CATALOG-PANEL-LAYER-TREE.md`. Append-only checkpoint sequence 41 closes at
-`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e` with 37 frozen
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68` with 37 frozen
 artifacts and 74 readers. It preserves sequences 1–40 and all 36 predecessor artifact receipts,
 appends the T02 artifact at index 36 and readers at `[72, 73]`, and advances only the live T01
 readers at `[70, 71]`.
+The first hosted PR run exposed an isolation-fixture workspace-target symlink denied by Node's
+permission model. The resealed fixture uses only absolute runner-temporary targets, and the exact
+isolation suite passes 8/8 without permission widening. This correction remains local and does not
+claim a hosted pass.
 The historical T07-integrated full CI infrastructure suite
 passed 265/265; its dedicated checkpoint, required-affected, promotion, and retained legacy-gate
 suites passed 58/58, 27/27, 19/19, and 25/25 respectively. The M08-T10-integrated CI infrastructure suite

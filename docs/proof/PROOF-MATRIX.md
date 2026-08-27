@@ -2374,7 +2374,7 @@ registries, dynamic imports, platform I/O, and mutation handlers remain outside 
 
 The exact 25,375-byte task artifact is
 `docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json` at
-`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`. The focused App
+`sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`. The focused App
 authoring suite passes 18/18 and the independent root proof passes 8/8. These local receipts make no
 required-gate or hosted-CI claim.
 
@@ -2383,10 +2383,14 @@ ordinary pairs and 11 barriers. Its formal impact parents are the exact M09-T01 
 reference capability, producing a 66-workload affected closure; the local wrapper calls both
 artifact verifiers directly so it does not recursively replay predecessor chains. Append-only
 checkpoint sequence 41 passes 64/64 and closes at
-`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`, authenticating 37
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`, authenticating 37
 frozen artifacts and 74 readers while preserving exact sequence 40 at
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor.
 These are local CI-infrastructure receipts, not a required-gate or hosted-CI result.
+
+The first hosted PR run exposed a workspace-target symlink denied by Node's permission model. The
+resealed fixture now uses only absolute runner-temporary targets, and its exact isolation suite
+passes 8/8 without widening permissions. This correction does not claim a hosted pass yet.
 
 M09-T02 adds no real adapter canvas, selection, inspector, insertion, move, delete, drag/drop,
 Source mutation, persistence, Design/Run execution, diagnostics, publication, or activation.

@@ -54,7 +54,12 @@ Artifact:
 `docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json`
 
 Final artifact: 25,375 bytes at
-`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`.
+`sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`.
+
+The first hosted PR run exposed a permission-model incompatibility in the isolation fixture: Node
+denied a symlink whose target resolved into the workspace. The resealed fixture uses only absolute
+targets under the runner temporary directory. Its exact isolation suite passes 8/8 without any
+permission widening; this corrective receipt does not claim a hosted pass yet.
 
 The focused App authoring suite passes 18/18 and the independent root proof passes 8/8. The live
 local CI authority contains 176 workloads and 83 proof pairs, split into 72 ordinary pairs and 11
@@ -63,7 +68,7 @@ parents, producing a 66-workload affected closure. The local task wrapper invoke
 artifact verifiers directly and does not recursively replay their predecessor chains.
 
 Append-only checkpoint sequence 41 passes 64/64 and closes at
-`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`, authenticating 37
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`, authenticating 37
 frozen artifacts and 74 readers while preserving exact sequence 40 at
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor.
 These are local task and CI-infrastructure receipts; they make no required-gate or hosted-CI claim.

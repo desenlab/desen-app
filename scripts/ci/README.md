@@ -340,8 +340,8 @@ The complete current reviewed digest set is:
 - shadow plan:
   `aa7f46afdb5e67cd315597cadcf0f16b18e070621c198ff89dfa7f06646b18c3`;
 - current selector and required-runner authorities:
-  `934de528e3a10cd0e5cebcb14c65450a9a9bcb67d19e4dff3902e0b299b4d055` and
-  `b497bc718643364a8ec4633a3a6bc08d4840bc9e97528579dc5d0b9a674c708c`; and
+  `3e26c1d403404b08830185a3d55d991766188a631b5e00643c23c962439dcaa2` and
+  `0665acc181249d9d522b79fb1b3a611d88a1be390ace94a1b04e9fd02cf9ad52`; and
 - promotion artifact:
   `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`.
 
@@ -691,12 +691,16 @@ byte-exact unchanged T10 root receipt at `[69]`. The chain now authenticates 36 
 and 72 current readers. The dedicated checkpoint suite passes 63/63; this local reader authority
 makes no required-gate or hosted M09-T01 claim.
 M09-T02 appends sequence 41 at
-`9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`. It preserves sequences
+`b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`. It preserves sequences
 1–40 and all 36 predecessor artifact receipts byte-exact, appends the 25,375-byte M09-T02 artifact
 at index 36 and its proof/root readers at `[72, 73]`, and advances only the live M09-T01 readers at
 `[70, 71]`. The chain now authenticates 37 frozen artifacts and 74 current readers. The dedicated
 checkpoint suite passes 64/64; this local reader authority makes no required-gate or hosted M09-T02
 claim.
+The first hosted PR run exposed an isolation-fixture workspace-target symlink denied by Node's
+permission model. The resealed fixture uses only absolute runner-temporary targets, and the exact
+isolation suite passes 8/8 without permission widening. This correction does not claim a hosted
+pass yet.
 [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 passed fresh `REQUIRED + EXHAUSTIVE` in
 [run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
@@ -744,7 +748,7 @@ the independent root mutation suite passes 8/8. These local task receipts and se
 required-gate or hosted M09-T01 claim.
 The exact 25,375-byte M09-T02 artifact is
 `docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json` at
-`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`, with reviewed report
+`sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`, with reviewed report
 `docs/proof/DESEN-APP-CATALOG-PANEL-LAYER-TREE.md`. The focused authoring suite passes 18/18 and the
 independent root proof passes 8/8. These local task receipts and sequence 41 make no required-gate
 or hosted M09-T02 claim.

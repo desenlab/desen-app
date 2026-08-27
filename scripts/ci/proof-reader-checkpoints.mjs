@@ -78,7 +78,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "64f7d6519589a5a8cb564af1215c2a12c44297f8ea855910613ea3b361cee6d0",
   "6a186ee56e9a3c8ffd176b712d54a56e7ca3e73990f46d0fe387c9f52bddf6f7",
   "e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e",
-  "9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e",
+  "b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
@@ -487,7 +487,7 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     {
       path: "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json",
       bytes: 25_375,
-      sha256: "cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73",
+      sha256: "85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61",
     },
     "scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs",
     "tests/desen-app-catalog-panel-layer-tree.test.mjs",
