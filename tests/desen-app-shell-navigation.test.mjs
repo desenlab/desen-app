@@ -19,6 +19,7 @@ const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const PREREQUISITE = "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json";
 const NAVIGATION = "apps/desen-app/src/project-navigation.ts";
 const APPLICATION = "apps/desen-app/src/application.tsx";
+const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
 const LOGO = "apps/desen-app/src/assets/desen-logo.svg";
 const INDEX = "apps/desen-app/index.html";
 const PACKAGE = "apps/desen-app/package.json";
@@ -78,7 +79,7 @@ test("[authority] binds M09-T01 to the exact completed G08 artifact", () => {
     DESEN_APP_SHELL_NAVIGATION_ROOT_TEST_NAMES,
   );
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T02");
+  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T03");
 });
 
 test("[shell] records the closed route, fixture, guidance, and accessibility profile", () => {
@@ -145,13 +146,32 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     true,
   );
   assert.equal(
+    built.currentCompatibility.additiveSuccessor.exactPublicRuntimeAdapterCanvasAllowed,
+    true,
+  );
+  assert.equal(
     built.currentCompatibility.additiveSuccessor
       .historicalNoCatalogPanelNonclaimAppliedToCurrentApp,
     false,
   );
   assert.deepEqual(built.currentCompatibility.additiveSuccessor.knownSourceEdges, [
     "apps/desen-app/src/authoring-data.ts",
+    "apps/desen-app/src/adapter-canvas.tsx",
   ]);
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor
+      .historicalNoRealAdapterCanvasNonclaimAppliedToCurrentApp,
+    false,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor
+      .selectionMutationPersistenceAndPublishStillDisallowed,
+    true,
+  );
+  assert.equal(built.currentCompatibility.boundary.imports.exactReferenceAdapterRegistry, true);
+  assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
+  assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
+  assert.equal(built.currentCompatibility.boundary.imports.mutationOrPublicationCalls, 0);
   assert.equal(built.currentCompatibility.retainedClaim.catalogDrivenPanelImplemented, undefined);
   assert.equal(built.currentCompatibility.retainedClaim.realAdapterCanvasImplemented, undefined);
 });
@@ -338,6 +358,72 @@ test("[mutation] rejects prerequisite, route, package, and scope-boundary drift"
       ]),
     }),
     expectedError("SCOPE_BOUNDARY_DRIFT"),
+  );
+
+  const adapterCanvas = await readFile(path.join(ROOT, ADAPTER_CANVAS), "utf8");
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [
+          ADAPTER_CANVAS,
+          Buffer.from(
+            adapterCanvas.replace(
+              "@desen/reference-catalog-web/react-adapters",
+              "@desen/reference-catalog-web/private/react-adapters",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [ADAPTER_CANVAS, Buffer.from(`${adapterCanvas}\nvoid import("@desen/runtime-react");\n`)],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [ADAPTER_CANVAS, Buffer.from(`${adapterCanvas}\nconst handwritten = <Stack />;\n`)],
+      ]),
+    }),
+    expectedError("SCOPE_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [ADAPTER_CANVAS, Buffer.from(`${adapterCanvas}\ndocument.querySelector("main");\n`)],
+      ]),
+    }),
+    expectedError("SCOPE_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [ADAPTER_CANVAS, Buffer.from(`${adapterCanvas}\ninsertDesenEditor();\n`)],
+      ]),
+    }),
+    expectedError("SCOPE_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [
+          ADAPTER_CANVAS,
+          Buffer.from(
+            adapterCanvas.replace(
+              "createRuntimeReactAdapterRegistry(\n  REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT,\n)",
+              "createRuntimeReactAdapterRegistry({})",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
   );
 
   const logo = await readFile(path.join(ROOT, LOGO), "utf8");

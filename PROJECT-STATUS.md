@@ -936,20 +936,46 @@ The first hosted PR run exposed a workspace-target symlink denied by Node's perm
 resealed fixture uses only absolute runner-temporary targets, and its exact isolation suite passes
 8/8 without permission widening. These local receipts make no required-gate or hosted-CI claim.
 
+M09-T03 now replaces the inert sign-in placeholder with one exact managed Web–React canvas. Desen
+App mounts the controlled official-derived Bundle through the public Runtime Core session APIs,
+preflights the exact public static reference-adapter registry, and renders the committed live
+surface through the public Runtime React hook and boundary. The route must match the exact
+`account-app` / `sign-in` tuple, `com.example.account-app` document, and
+`sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb` revision. Managed
+controls remain disabled behind inert all-deny host ports. Unsupported tuples neither mount nor
+substitute sign-in; route replacement, Strict Mode replay, and final unmount dispose the exact
+session.
+
+The exact 73,111-byte artifact is
+`sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151`; the focused canvas
+suite passes 20/20, the complete App suite passes 56/56, the independent root proof passes 11/11,
+and App typecheck, lint, and production build pass locally. Two deterministic Vite `write:false`
+builds each observe 102 modules, 290 static imports, no dynamic or unresolved imports, and 101
+backing files. The managed slice shares exactly 19 transformed runtime/component module identities
+with the frozen reference-host audit and reaches all five real components. The live local CI
+authority contains 178 workloads and 84 proof pairs, split into 73 ordinary pairs and 11 barriers;
+the exact M09-T01 shell and M05-T09 reference-host source audit are its formal parents, producing a
+51-proof-unit/112-workload affected closure. Checkpoint sequence 42 passes 65/65 at
+`sha256:e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3`, authenticating 38
+frozen artifacts and 76 readers while preserving exact sequence 41. These are local receipts and
+make no required-gate or hosted-CI claim. M09-T03 is `DONE`; P-06 is `PROVEN`, proof gates are
+10/13, implementation progress is 98/145 (68%), M09 is 3/14, and M09-T04 is next. `S-001`
+remains `PLANNED`, PF-059 remains `OPEN`, and P-07 remains `PARTIAL` for their later owners.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `97 / 145 tasks complete (67%)`
+- Overall implementation progress: `98 / 145 tasks complete (68%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
-- M09 progress: `2 / 14 tasks complete (14%)`
-- Proof-gate progress: `9 / 13 complete`
+- M09 progress: `3 / 14 tasks complete (21%)`
+- Proof-gate progress: `10 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
@@ -1031,16 +1057,18 @@ resealed fixture uses only absolute runner-temporary targets, and its exact isol
   `M08-T09 — Continuous validation and invalid-node mapping`,
   `M08-T10 — React/DOM boundary, stable identity, and deterministic command tests`,
   `M09-T01 — Desen App shell and project navigation`,
-  `M09-T02 — Catalog-driven component panel and layer tree`
+  `M09-T02 — Catalog-driven component panel and layer tree`,
+  `M09-T03 — Exact reference-adapter canvas`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M09-T03 — Canvas uses the exact React adapters used by the reference host`
-- Status: M08 is 10/10, M09 is 2/14, M07 is 11/11, I07-04, G07, G08, M09-T01, and M09-T02 are
-  `DONE`, proof gates are 9/13, and implementation progress is 97/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M09-T04 — Selection overlays remain outside capability subtrees; no private-DOM authoring`
+- Status: M08 is 10/10, M09 is 3/14, M07 is 11/11, I07-04, G07, G08, M09-T01, M09-T02, and
+  M09-T03 are `DONE`, P-06 is `PROVEN`, proof gates are 10/13, and implementation progress is
+  98/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
   its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
@@ -1059,7 +1087,10 @@ resealed fixture uses only absolute runner-temporary targets, and its exact isol
   mutation cases, historical 174-workload/82-pair successor registration, and sequence-40 reader
   checkpoint. M09-T02 is `DONE` with its exact Catalog/Source read-model artifact, 18/18 focused
   authoring cases, 8/8 independent root proof, live local 176-workload/83-pair CI authority, and
-  sequence-41 reader checkpoint.
+  sequence-41 reader checkpoint. M09-T03 is `DONE` with its exact real-adapter canvas artifact,
+  20/20 focused canvas cases, 56/56 complete App cases, 11/11 independent root proof, exact
+  reference-host graph identity, live local 178-workload/84-pair CI authority, and sequence-42
+  reader checkpoint.
 
 ## Completed preparation
 
@@ -3472,6 +3503,50 @@ M09-T02 evidence:
   implemented
 - coverage decision: M09-T02 is `DONE`; no `P-*`, `N-*`, `S-*`, `G*`, or proof-gate status changes;
   overall progress is 97/145 (67%), M09 is 2/14, proof gates remain 9/13, and M09-T03 is next
+
+M09-T03 evidence:
+
+- `docs/proof/DESEN-APP-REAL-ADAPTER-CANVAS.md`
+- `docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json`, exactly 73,111 bytes at
+  `sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151`
+- prerequisite authority: the exact completed M09-T01 shell artifact and frozen M05-T09
+  reference-host source-audit artifact are authenticated before any M09-T03 claim
+- runtime boundary: the App mounts the controlled official-derived Bundle through the public
+  Runtime Core session APIs, preflights the exact public static reference-adapter registry, and
+  renders the committed live surface through the public Runtime React hook and boundary
+- identity boundary: only exact `account-app` / `sign-in` routing, the
+  `com.example.account-app` document, and revision
+  `sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb` are accepted; an
+  unsupported tuple mounts no runtime and never substitutes sign-in
+- authoring boundary: managed controls render inside a disabled design-preview fieldset behind
+  inert all-deny host ports; route replacement, Strict Mode replay, and final unmount dispose the
+  exact session without carrying stale state across surfaces
+- source and graph audit: the TypeScript parser/checker rejects local registries, private paths,
+  handwritten managed trees, aliases/helpers, dynamic imports, private-DOM inspection, and
+  unsupported-route substitution; two deterministic Vite `build({ write: false })` observations
+  each contain 102 modules, 290 static imports, no dynamic or unresolved imports, and 101 backing
+  files
+- parity authority: the controlled managed slice shares exactly 19 transformed
+  runtime/component module identities with the frozen reference-host source audit and reaches all
+  five real components through the same public registry and Runtime React path
+- local proof: the focused canvas suite passes 20/20, the complete App suite passes 56/56, the
+  independent root proof passes 11/11, and App typecheck, lint, and production build pass
+- CI authority: the live local M09-T03 successor contains 178 workloads and 84 proof pairs, split
+  into 73 ordinary pairs and 11 barriers; its exact M09-T01 shell and M05-T09 reference-host source
+  audit parents produce an affected closure of 51 proof units and 112 workloads
+- checkpoint authority: sequence 42 passes 65/65 and authenticates 38 frozen artifacts plus 76
+  readers at `sha256:e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3`, preserving exact
+  sequence 41 at
+  `sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68` and every predecessor
+- evidence boundary: these are local task and CI-infrastructure receipts; no required-gate or
+  hosted-CI result is inferred before its own execution
+- scope nonclaims: no selection overlay, private-DOM authoring, inspector editing, insertion,
+  structural mutation, drag/drop, state/action editing, Design/Run mode, visible fidelity
+  disclosure, persistence, diagnostics, publication, or activation is implemented
+- coverage decision: M09-T03 is `DONE`; P-06 advances to `PROVEN`, proof gates advance to 10/13,
+  overall progress advances to 98/145 (68%), and M09 advances to 3/14. `S-001` remains `PLANNED`
+  for M09-T11, PF-059 remains `OPEN`, P-07 remains `PARTIAL` pending M10-T05 browser E2E, and
+  M09-T04 is next
 
 ## Status vocabulary
 

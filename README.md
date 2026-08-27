@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████████░░░░░░░░` **97 / 145 tasks complete (67%)**
+**Overall:** `█████████████████░░░░░░░░` **98 / 145 tasks complete (68%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `██░░░░░░░░░░░░` **2 / 14 tasks complete (14%)**
+**M09:** `███░░░░░░░░░░░` **3 / 14 tasks complete (21%)**
 
-**Proof gates:** **9 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T03`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T04`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -652,6 +652,41 @@ M09-T02 adds no real adapter canvas, selection, inspector, insertion, drag/drop,
 persistence, Design/Run execution, diagnostics, publication, or activation. It is `DONE` without a
 `P-*`, `N-*`, `S-*`, `G*`, or proof-gate status change; implementation progress is 97/145 (67%),
 M09 is 2/14, proof gates remain 9/13, and M09-T03 is next.
+
+M09-T03 replaces the inert sign-in placeholder with one exact managed Web–React canvas. Desen App
+mounts the controlled official-derived Bundle through the public Runtime Core session APIs,
+preflights the exact public static reference-adapter registry, and renders the live surface through
+the public Runtime React hook and boundary. The exact `account-app` / `sign-in` tuple,
+`com.example.account-app` document, and
+`sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb` revision are required.
+The design preview keeps its managed controls disabled behind inert
+all-deny host ports; unsupported tuples neither mount nor substitute sign-in, and route replacement,
+Strict Mode replay, and final unmount dispose the exact session.
+
+The focused canvas suite passes 20/20, the complete App suite passes 56/56, the independent root
+proof passes 11/11, and App typecheck, lint, and production build pass locally. Exact evidence is
+the 73,111-byte
+[`desen-app-0.1.0-real-adapter-canvas.json`](docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json)
+at `sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151`.
+Two deterministic Vite `write:false` builds observe the same 102-module graph with 290 static
+imports, no dynamic or unresolved imports, and 101 backing files. The managed slice shares exactly
+19 transformed runtime/component module identities with the frozen reference-host audit and
+reaches all five real components.
+
+The live local M09-T03 CI authority contains 178 workloads and 84 proof pairs, split into 73
+ordinary pairs and 11 barriers. Its exact formal parents are the M09-T01 shell and M05-T09
+reference-host source audit, producing an affected closure of 51 proof units and 112 workloads.
+Checkpoint sequence 42 passes 65/65 at
+`sha256:e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3`, authenticating 38
+frozen artifacts and 76 readers while preserving exact sequence 41 at
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`. These are local task
+and CI-infrastructure receipts; no required-gate or hosted-CI pass is claimed.
+
+M09-T03 is `DONE`; P-06 is `PROVEN`, implementation progress is 98/145 (68%), M09 is 3/14, and
+proof gates are 10/13. `S-001` remains `PLANNED` for the visible approximate-fidelity disclosure in
+M09-T11; PF-059 remains `OPEN` and P-07 remains `PARTIAL` pending M10-T05 browser E2E. Selection,
+private-DOM overlays, inspector editing, mutation, Design/Run mode, persistence, diagnostics,
+publication, and activation remain later tasks. M09-T04 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

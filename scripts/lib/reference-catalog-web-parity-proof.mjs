@@ -325,6 +325,11 @@ const NORMATIVE_STATUS_RANK = Object.freeze({
   PLANNED: 0,
   TESTED: 1,
 });
+const PROOF_MATRIX_STATUS_RANK = Object.freeze({
+  PARTIAL: 0,
+  PROVEN: 1,
+});
+const HISTORICAL_P06_STATUS = "PARTIAL";
 const MONOTONIC_NORMATIVE_STATUS_IDS = new Set(["N-033", "N-034"]);
 const HISTORICAL_SELF_RECORD = Object.freeze({
   path: "scripts/lib/reference-catalog-web-parity-proof.mjs",
@@ -1480,6 +1485,7 @@ function inspectClaimDocuments(proofDocument, normativeCoverage, proofMatrix) {
         .map((cell) => cell.trim()),
     );
   const [proofMatrixRow] = proofMatrixRows;
+  const currentP06Status = proofMatrixRow?.[3] ?? "";
   assertCondition(
     proofMatrixRows.length === 1 &&
       proofMatrixRow?.[0] === "P-06" &&
@@ -1487,15 +1493,19 @@ function inspectClaimDocuments(proofDocument, normativeCoverage, proofMatrix) {
         .split(",")
         .map((owner) => owner.trim())
         .includes("M03-T09") &&
-      proofMatrixRow[3] === "PARTIAL",
+      Object.hasOwn(PROOF_MATRIX_STATUS_RANK, currentP06Status) &&
+      PROOF_MATRIX_STATUS_RANK[currentP06Status] >= PROOF_MATRIX_STATUS_RANK[HISTORICAL_P06_STATUS],
     "REFERENCE_PARITY_CLAIM_DRIFT",
-    "P-06 must remain PARTIAL and owned by M03-T09 in the proof matrix.",
+    "P-06 must retain at least its historical PARTIAL status and M03-T09 ownership in the proof matrix.",
   );
 
   return Object.freeze({
     proofScopeBoundaries: requiredProofClaims.length,
     normativeStatuses: normativeCompatibility.historicalProjection,
-    proofMatrixStatuses: Object.freeze([{ id: "P-06", owner: "M03-T09", status: "PARTIAL" }]),
+    // Keep immutable M03-T09 evidence projected at task time even after a successor proves P-06.
+    proofMatrixStatuses: Object.freeze([
+      { id: "P-06", owner: "M03-T09", status: HISTORICAL_P06_STATUS },
+    ]),
   });
 }
 

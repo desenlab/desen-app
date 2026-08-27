@@ -91,6 +91,17 @@ function parityApiFrom(metadata) {
   return Object.freeze({ REFERENCE_WEB_IMPLEMENTATION_METADATA: deepFreeze(metadata) });
 }
 
+function withProofMatrixStatus(markdown, id, status) {
+  return markdown
+    .split("\n")
+    .map((line) =>
+      line.startsWith(`| ${id} `)
+        ? line.replace(/\| (?:NOT_PROVEN|PARTIAL|PROVEN|UNKNOWN)\s+\|/u, `| ${status.padEnd(15)}|`)
+        : line,
+    )
+    .join("\n");
+}
+
 async function temporaryDirectory() {
   return mkdtemp(path.join(os.tmpdir(), "desen-m03-t09-proof-"));
 }
@@ -678,19 +689,35 @@ test("rejects package-test type-negative trace and command-wiring drift", async 
     expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
   );
 
-  const proofMatrixPath = await mutatedCopy(
-    path.join(WORKSPACE_ROOT, "docs/proof/PROOF-MATRIX.md"),
-    directory,
-    "proof-matrix.md",
-    (source) =>
-      source
-        .split("\n")
-        .map((line) => (line.startsWith("| P-06 ") ? line.replace("| PARTIAL", "| PROVEN") : line))
-        .join("\n"),
-  );
-  await assert.rejects(injected({ proofMatrixPath }), (error) =>
-    expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
-  );
+  const proofMatrixSourcePath = path.join(WORKSPACE_ROOT, "docs/proof/PROOF-MATRIX.md");
+  const [partialProofMatrixPath, provenProofMatrixPath] = await Promise.all([
+    mutatedCopy(proofMatrixSourcePath, directory, "proof-matrix-partial.md", (source) =>
+      withProofMatrixStatus(source, "P-06", "PARTIAL"),
+    ),
+    mutatedCopy(proofMatrixSourcePath, directory, "proof-matrix-proven.md", (source) =>
+      withProofMatrixStatus(source, "P-06", "PROVEN"),
+    ),
+  ]);
+  const [partialCompatibility, provenCompatibility] = await Promise.all([
+    injected({ proofMatrixPath: partialProofMatrixPath }),
+    injected({ proofMatrixPath: provenProofMatrixPath }),
+  ]);
+  assert.deepEqual(partialCompatibility.artifactBytes, provenCompatibility.artifactBytes);
+  assert.deepEqual(partialCompatibility.artifact.evidence.claimDocuments.proofMatrixStatuses, [
+    { id: "P-06", owner: "M03-T09", status: "PARTIAL" },
+  ]);
+
+  for (const hostileStatus of ["NOT_PROVEN", "UNKNOWN", "toString"]) {
+    const hostileProofMatrixPath = await mutatedCopy(
+      proofMatrixSourcePath,
+      directory,
+      `proof-matrix-${hostileStatus.toLowerCase()}.md`,
+      (source) => withProofMatrixStatus(source, "P-06", hostileStatus),
+    );
+    await assert.rejects(injected({ proofMatrixPath: hostileProofMatrixPath }), (error) =>
+      expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
+    );
+  }
 
   const rootPackagePath = await mutatedCopy(
     path.join(WORKSPACE_ROOT, "package.json"),

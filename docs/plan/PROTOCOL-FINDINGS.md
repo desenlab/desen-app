@@ -2201,7 +2201,8 @@ This file records implementation discoveries without changing the frozen DESEN 0
 
 - Status: OPEN
 - Blocks proof: No; M05-T09 resolves the mismatch for the current independent Web–React host and
-  closes G05 without changing protocol semantics.
+  closes G05, while M09-T03 applies the exact controlled comparison to Desen App without changing
+  protocol semantics.
 - Protocol location: SPEC Sections 9.1 and 24.5 and Appendix A; proof claims `P-06`, `P-07`, and
   `P-10`; ADR 0010
 - Observation: TypeScript commonly resolves a workspace package import to its declaration entry,
@@ -2229,11 +2230,21 @@ This file records implementation discoveries without changing the frozen DESEN 0
   official-derived Bundle, current Catalog, and host CSS; the authoring Source is not a production
   dependency.
 
-- Future action: M09-T03 and M10-T05 must apply corresponding registry-identity, source/import, and
-  browser E2E evidence to Desen App before P-06 or P-07 can become `PROVEN`. Any legitimate future
-  reference-host infrastructure change must update the semantic allowlist and mutation suite.
-  Native hosts require target-specific executable registries and graph audits rather than
-  inheriting this Web–React proof.
+  M09-T03 applies the corresponding semantic TypeScript parser/checker audit to Desen App and
+  performs two independent Vite 8 `build({ write: false })` observations. Both App observations
+  close at the same 102-module graph with 290 static imports, no dynamic or unresolved imports,
+  and 101 backing modules. The controlled managed slice has exact code identity with the 19
+  transformed registry, runtime, and component modules authenticated by the frozen M05-T09 host
+  source audit, reaches all five real components through the same public registry and Runtime
+  React path, and rejects local-registry, private-path, handwritten-tree, dynamic-import,
+  private-DOM, and unsupported-route substitution mutations. Evidence:
+  `docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json`
+  `sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151`.
+
+- Future action: M10-T05 must add the corresponding Desen App browser-E2E evidence before P-07 can
+  become `PROVEN`. Any legitimate future reference-host or App infrastructure change must update
+  the semantic allowlist and mutation suite. Native hosts still require target-specific executable
+  registries and graph audits rather than inheriting this Web–React proof.
 
 ## PF-060 — Raw Source parsing needs an explicit interoperable JSON and finite-ingress profile
 

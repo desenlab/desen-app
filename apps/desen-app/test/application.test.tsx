@@ -131,7 +131,7 @@ describe("Desen App application shell", () => {
     expect(document.title).toBe("Not found · DESEN");
   });
 
-  it("renders the exact selected surface and read-only layer hierarchy without claiming later editor behavior", () => {
+  it("renders the exact selected surface, layer hierarchy, and read-only managed adapter canvas", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
 
     const breadcrumb = screen.getByRole("navigation", { name: "Breadcrumb" });
@@ -170,9 +170,23 @@ describe("Desen App application shell", () => {
     expect(within(hierarchy).queryByRole("treeitem")).toBeNull();
     expect(hierarchy.querySelector("[aria-selected]")).toBeNull();
     expect(screen.queryByRole("navigation", { name: "Sign-in layer hierarchy" })).toBeNull();
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    expect(canvas).toBeInstanceOf(HTMLFieldSetElement);
+    expect((canvas as HTMLFieldSetElement).disabled).toBe(true);
+    const email = within(canvas).getByLabelText("Email") as HTMLInputElement;
+    const password = within(canvas).getByLabelText("Password") as HTMLInputElement;
+    const submit = within(canvas).getByRole("button", { name: "Sign in" });
+    expect(email.type).toBe("text");
+    expect(password.type).toBe("password");
+    expect(email.matches(":disabled")).toBe(true);
+    expect(password.matches(":disabled")).toBe(true);
+    expect(submit.matches(":disabled")).toBe(true);
+    expect(within(canvas).queryByRole("alert")).toBeNull();
+    expect(screen.getByText("Design preview · controls are disabled.")).toBeTruthy();
     expect(
       screen.getByText(
-        "Exact Catalog metadata and sign-in Source structure are read only. No selection, mutation, adapter render, save or publication is available yet.",
+        "Exact Catalog metadata and sign-in Source structure are read only. The exact managed adapter canvas is rendered with controls disabled. No selection, mutation, save or publication is available yet.",
       ),
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: /publish/i })).toBeNull();
@@ -234,7 +248,7 @@ describe("Desen App application shell", () => {
     expect(screen.queryByRole("button", { name: /insert|add|drag/i })).toBeNull();
   });
 
-  it("does not substitute the sign-in Source tree for another preview surface", () => {
+  it("does not substitute the sign-in Source tree or adapter canvas for another preview surface", () => {
     renderApplication("/projects/account-app/surfaces/recovery");
 
     expect(screen.getByText("No Source tree for Recovery")).toBeTruthy();
@@ -245,9 +259,37 @@ describe("Desen App application shell", () => {
     ).toBeTruthy();
     expect(screen.queryByRole("region", { name: "Sign-in layer hierarchy" })).toBeNull();
     expect(screen.queryByText("sign-in.layout")).toBeNull();
+    expect(screen.queryByRole("group", { name: "Sign-in adapter canvas" })).toBeNull();
+    expect(screen.queryByRole("heading", { level: 2, name: "Sign in" })).toBeNull();
+    expect(screen.queryByLabelText("Email")).toBeNull();
+    expect(screen.queryByLabelText("Password")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();
 
-    fireEvent.click(screen.getByRole("tab", { name: "Components" }));
-    expect(screen.getByRole("status").textContent).toBe("5 of 5 components");
+    const componentsTab = screen.getByRole("tab", { name: "Components" });
+    fireEvent.click(componentsTab);
+    const componentsPanel = document.getElementById(
+      componentsTab.getAttribute("aria-controls") ?? "",
+    );
+    expect(within(componentsPanel as HTMLElement).getByRole("status").textContent).toBe(
+      "5 of 5 components",
+    );
+  });
+
+  it("removes the managed sign-in tree synchronously when routing to an unsupported surface", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("link", { name: "Account app" }));
+    const surfaces = screen.getByRole("navigation", { name: "Account app surfaces" });
+    fireEvent.click(within(surfaces).getByRole("link", { name: /Recovery/ }));
+
+    expect(window.location.pathname).toBe("/projects/account-app/surfaces/recovery");
+    expect(screen.queryByRole("heading", { level: 2, name: "Sign in" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Sign-in adapter canvas" })).toBeNull();
+    await waitFor(() => {
+      expect(screen.queryByLabelText("Email")).toBeNull();
+      expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();
+    });
   });
 
   it("guides a catalog-less project without inventing a surface or enabled action", () => {

@@ -1408,7 +1408,7 @@ is next.
 | ------- | ----------- | ------------------------ | ------------------------------------------------------------------------------- |
 | M09-T01 | DONE        | G08                      | Desen App shell and project navigation                                          |
 | M09-T02 | DONE        | M09-T01                  | Catalog-driven component panel and layer tree                                   |
-| M09-T03 | NOT_STARTED | M09-T01, G05             | Canvas uses the exact React adapters used by the reference host                 |
+| M09-T03 | DONE        | M09-T01, G05             | Canvas uses the exact React adapters used by the reference host                 |
 | M09-T04 | NOT_STARTED | M09-T03                  | Selection overlays remain outside capability subtrees; no private-DOM authoring |
 | M09-T05 | NOT_STARTED | M09-T02–M09-T03          | Schema-driven primitive/enum inspector controls                                 |
 | M09-T06 | NOT_STARTED | M09-T05                  | Nested-object controls and honest structured-JSON fallback                      |
@@ -1481,6 +1481,42 @@ persistence, Design/Run execution, diagnostics, publication, or activation. It c
 DESEN 0.1.0 byte and advances no `P-*`, `N-*`, `S-*`, `G*`, or proof-gate status. M09-T02 is
 `DONE`; overall implementation progress is 97/145 (67%), M09 is 2/14, proof gates remain 9/13, and
 M09-T03 is next.
+
+M09-T03 replaces the inert sign-in placeholder with an exact managed Web–React canvas. The App
+mounts the controlled official-derived Bundle through the public Runtime Core session boundary,
+preflights the public static `@desen/reference-catalog-web/react-adapters` registry, and renders
+the committed live surface through the public Runtime React hook and boundary. The route must
+match the exact `account-app` / `sign-in` tuple, `com.example.account-app` document, and
+`sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb` revision. All
+managed controls remain disabled behind inert all-deny host ports. Unsupported tuples do not mount
+or substitute sign-in, and route replacement, Strict Mode replay, and final unmount dispose the
+exact session.
+
+The exact 73,111-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json` at
+`sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151`. The focused canvas
+suite passes 20/20, the complete App suite passes 56/56, the independent root proof passes 11/11,
+and App typecheck, lint, and production build pass locally. Two deterministic Vite
+`build({ write: false })` observations each contain 102 modules, 290 static imports, no dynamic or
+unresolved imports, and 101 backing files. The controlled managed slice shares exactly 19
+transformed runtime/component module identities with the frozen host source audit and reaches all
+five real components.
+
+The live local M09-T03 CI authority contains 178 workloads and 84 proof pairs, split into 73
+ordinary pairs and 11 barriers. Its formal impact parents are exactly the M09-T01 shell and M05-T09
+reference-host source audit, producing a closure of 51 proof units and 112 workloads. Append-only
+checkpoint sequence 42 passes 65/65 and closes at
+`sha256:e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3`, authenticating 38
+frozen artifacts and 76 readers while preserving exact sequence 41 at
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68` and every predecessor.
+These are local task and CI-infrastructure receipts; they make no required-gate or hosted-CI claim.
+
+M09-T03 is `DONE`, advancing P-06 to `PROVEN`, implementation progress to 98/145 (68%), M09 to
+3/14, and proof gates to 10/13. `S-001` remains `PLANNED` because M09-T11 owns the visible
+approximate-fidelity disclosure. PF-059 remains `OPEN` and P-07 remains `PARTIAL` pending the
+M10-T05 browser-E2E proof. Selection/private-DOM overlays, inspector editing, insertion, structural
+mutation, drag/drop, state/action editing, Design/Run mode, fidelity disclosure, persistence,
+diagnostics, publication, and activation remain M09-T04 and later tasks. M09-T04 is next.
 
 ## M10 — First end-to-end proof
 

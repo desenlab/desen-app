@@ -52,7 +52,18 @@ const SOURCE_PATHS = Object.freeze(
 const SVG_ASSET_PATHS = Object.freeze(
   APP_PATHS.filter((relativePath) => /\/src\/assets\/.+\.svg$/u.test(relativePath)),
 );
-const ADDITIVE_SUCCESSOR_SOURCE_PATHS = Object.freeze(["apps/desen-app/src/authoring-data.ts"]);
+const AUTHORING_SOURCE_PATH = "apps/desen-app/src/authoring-data.ts";
+const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
+const OFFICIAL_SOURCE_PATH = "examples/sign-in/official-derived.source.desen.json";
+const OFFICIAL_BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
+const ADDITIVE_SUCCESSOR_SOURCE_PATHS = Object.freeze([
+  AUTHORING_SOURCE_PATH,
+  ADAPTER_CANVAS_SOURCE_PATH,
+]);
+const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
+  ...SOURCE_PATHS.filter((entry) => /\.(?:ts|tsx)$/u.test(entry)),
+  ...ADDITIVE_SUCCESSOR_SOURCE_PATHS,
+]);
 const TEST_PATHS = Object.freeze(
   APP_PATHS.filter((relativePath) => /\/test\//u.test(relativePath)),
 );
@@ -62,10 +73,14 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   "apps/desen-app/README.md",
   "apps/desen-app/src/application.tsx",
   "apps/desen-app/src/application.module.css",
+  ADAPTER_CANVAS_SOURCE_PATH,
   "apps/desen-app/test/application.test.tsx",
   "apps/desen-app/test/main-lifecycle.test.tsx",
   "scripts/lib/desen-app-shell-navigation-proof.mjs",
   "tests/desen-app-shell-navigation.test.mjs",
+]);
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...new Set([...TRACKED_PATHS, ...ADDITIVE_SUCCESSOR_SOURCE_PATHS]),
 ]);
 const SELF_RESEALED_PATHS = Object.freeze([
   "scripts/lib/desen-app-shell-navigation-proof.mjs",
@@ -187,12 +202,16 @@ function captureBytes(value, label) {
 
 function captureOverrides(value) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+  if (
+    !(value instanceof Map) ||
+    utilTypes.isProxy(value) ||
+    value.size > CURRENT_COMPATIBILITY_PATHS.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
   for (const [relativePath, bytes] of value) {
-    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+    if (!CURRENT_COMPATIBILITY_PATHS.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
@@ -481,7 +500,7 @@ function verifyShellSemantics(files) {
   for (const required of ["@media", "var(--desen-app-", ".visuallyHidden"]) {
     requireText(moduleStyles, required, "application.module.css");
   }
-  for (const required of ["M09-T02", "History API", "does not render a managed adapter canvas"]) {
+  for (const required of ["M09-T03", "History API"]) {
     requireText(readme, required, "apps/desen-app/README.md");
   }
 
@@ -593,14 +612,16 @@ function resolveTrackedSourceImport(importerPath, specifier) {
   const candidates =
     extension === ".js"
       ? [`${resolved.slice(0, -3)}.ts`, `${resolved.slice(0, -3)}.tsx`]
-      : [".ts", ".tsx", ".css", ".svg"].includes(extension)
+      : [".ts", ".tsx", ".css", ".svg", ".json"].includes(extension)
         ? [resolved]
         : [];
   const trackedTargets = candidates.filter(
     (candidate) =>
       SOURCE_PATHS.includes(candidate) ||
       SVG_ASSET_PATHS.includes(candidate) ||
-      ADDITIVE_SUCCESSOR_SOURCE_PATHS.includes(candidate),
+      ADDITIVE_SUCCESSOR_SOURCE_PATHS.includes(candidate) ||
+      candidate === OFFICIAL_SOURCE_PATH ||
+      candidate === OFFICIAL_BUNDLE_PATH,
   );
   if (trackedTargets.length !== 1) {
     fail(
@@ -614,7 +635,26 @@ function resolveTrackedSourceImport(importerPath, specifier) {
 
 function inspectImports(files) {
   const imports = [];
-  for (const relativePath of SOURCE_PATHS.filter((entry) => /\.(?:ts|tsx)$/u.test(entry))) {
+  const exactSuccessorPackageImports = new Map([
+    [
+      AUTHORING_SOURCE_PATH,
+      new Set(["@desen/reference-catalog-web/catalog.json", "@desen/validator"]),
+    ],
+    [
+      ADAPTER_CANVAS_SOURCE_PATH,
+      new Set([
+        "@desen/reference-catalog-web/catalog.json",
+        "@desen/reference-catalog-web/react-adapters",
+        "@desen/reference-catalog-web/tokens",
+        "@desen/runtime-core",
+        "@desen/runtime-react",
+      ]),
+    ],
+  ]);
+  const seenSuccessorPackageImports = new Map(
+    [...exactSuccessorPackageImports].map(([relativePath]) => [relativePath, new Set()]),
+  );
+  for (const relativePath of CURRENT_TYPESCRIPT_SOURCE_PATHS) {
     const source = decodeUtf8(files.get(relativePath), relativePath);
     const sourceFile = ts.createSourceFile(
       relativePath,
@@ -642,10 +682,18 @@ function inspectImports(files) {
         });
         return;
       }
-      if (specifier !== "react" && specifier !== "react-dom/client") {
+      const admittedSuccessorImports = exactSuccessorPackageImports.get(relativePath);
+      if (
+        specifier !== "react" &&
+        specifier !== "react-dom/client" &&
+        !admittedSuccessorImports?.has(specifier)
+      ) {
         fail("IMPORT_BOUNDARY_DRIFT", `${relativePath} imports an unreviewed package.`, {
           specifier,
         });
+      }
+      if (admittedSuccessorImports?.has(specifier)) {
+        seenSuccessorPackageImports.get(relativePath).add(specifier);
       }
       imports.push({ kind, path: relativePath, specifier, resolvedPath: null });
     };
@@ -666,6 +714,72 @@ function inspectImports(files) {
       ts.forEachChild(node, visit);
     };
     visit(sourceFile);
+  }
+  for (const [relativePath, expected] of exactSuccessorPackageImports) {
+    const seen = seenSuccessorPackageImports.get(relativePath);
+    if (seen.size !== expected.size || [...expected].some((specifier) => !seen.has(specifier))) {
+      fail(
+        "IMPORT_BOUNDARY_DRIFT",
+        `${relativePath} lost its exact reviewed successor package-import surface.`,
+      );
+    }
+  }
+  const authoringImports = imports.filter(
+    ({ path: importer }) => importer === AUTHORING_SOURCE_PATH,
+  );
+  if (
+    authoringImports.filter(({ resolvedPath }) => resolvedPath === OFFICIAL_SOURCE_PATH).length !==
+    1
+  ) {
+    fail("IMPORT_BOUNDARY_DRIFT", "M09-T02 must retain the one exact official Source import.");
+  }
+  const adapterImports = imports.filter(
+    ({ path: importer }) => importer === ADAPTER_CANVAS_SOURCE_PATH,
+  );
+  if (
+    adapterImports.filter(({ resolvedPath }) => resolvedPath === OFFICIAL_BUNDLE_PATH).length !== 1
+  ) {
+    fail("IMPORT_BOUNDARY_DRIFT", "M09-T03 must retain the one exact official Bundle import.");
+  }
+  const adapterCanvas = decodeUtf8(
+    files.get(ADAPTER_CANVAS_SOURCE_PATH),
+    ADAPTER_CANVAS_SOURCE_PATH,
+  );
+  for (const required of [
+    "REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT",
+    "REFERENCE_WEB_TOKEN_CSS_PROPERTIES",
+    "createRuntimeHostPorts",
+    "mountRuntimeHeadlessSession",
+    "disposeRuntimeHeadlessSession",
+    "createRuntimeReactAdapterRegistry",
+    "renderRuntimeReactSurface",
+    "useRuntimeReactSurface",
+    "RuntimeReactSurfaceBoundary",
+    "createRuntimeReactAdapterRegistry(\n  REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT,\n)",
+  ]) {
+    if (!adapterCanvas.includes(required)) {
+      fail("IMPORT_BOUNDARY_DRIFT", "M09-T03 lost its exact public adapter/runtime edge.", {
+        required,
+      });
+    }
+  }
+  if (
+    /<(?:Stack|Text|TextField|Button|Alert|canvas|Inspector|RuntimeCanvas)\b/u.test(
+      adapterCanvas,
+    ) ||
+    /(?:dangerouslySetInnerHTML|\bcreateElement\s*\(|\beval\s*\(|\bnew\s+Function\s*\()/u.test(
+      adapterCanvas,
+    ) ||
+    /\b(?:document|globalThis|navigator|self|window)\b/u.test(adapterCanvas) ||
+    /\b(?:insertDesenEditor|moveDesenEditor|deleteDesenEditor|saveDesen|publish(?:Revision|Source)?|activateRevision)\s*\(/u.test(
+      adapterCanvas,
+    ) ||
+    /\b(?:draggable|onDrag(?:End|Enter|Leave|Over|Start)?|onDrop)\s*=/u.test(adapterCanvas)
+  ) {
+    fail(
+      "SCOPE_BOUNDARY_DRIFT",
+      "M09-T03 gained a handwritten tree, private DOM, mutation, or publication bypass.",
+    );
   }
   const indexHtml = decodeUtf8(files.get("apps/desen-app/index.html"), "index.html");
   const expectedModuleEntry = '<script type="module" src="/src/main.tsx"></script>';
@@ -688,7 +802,17 @@ function inspectImports(files) {
     method: "TYPESCRIPT_AST_MODULE_SPECIFIER_INVENTORY_WITH_TRACKED_RELATIVE_RESOLUTION",
     imports,
     htmlModuleEntry: "/src/main.tsx",
-    desenPackageImports: 0,
+    desenPackageImports: imports.filter(({ specifier }) => specifier.startsWith("@desen/")).length,
+    exactSuccessorPackageImports: Object.fromEntries(
+      [...exactSuccessorPackageImports].map(([relativePath, specifiers]) => [
+        relativePath,
+        [...specifiers],
+      ]),
+    ),
+    exactReferenceAdapterRegistry: true,
+    handwrittenManagedTreeElements: 0,
+    privateDomAccesses: 0,
+    mutationOrPublicationCalls: 0,
     arbitraryExecutableImports: 0,
     arbitraryExecutableHtmlEntries: 0,
   });
@@ -696,7 +820,7 @@ function inspectImports(files) {
 
 async function readTrackedFiles(options) {
   const files = new Map();
-  for (const relativePath of TRACKED_PATHS) {
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
     const override = options.fileOverrides.get(relativePath);
     const live = await readRegularAuthority(
       path.join(options.workspaceRoot, relativePath),
@@ -836,10 +960,13 @@ export async function buildDesenAppShellNavigationEvidence(rawOptions = undefine
     },
     tests,
     additiveSuccessor: {
-      task: "M09-T02",
+      task: "M09-T03",
       catalogDrivenAuthoringReadModelAllowed: true,
+      exactPublicRuntimeAdapterCanvasAllowed: true,
       knownSourceEdges: [...ADDITIVE_SUCCESSOR_SOURCE_PATHS],
       historicalNoCatalogPanelNonclaimAppliedToCurrentApp: false,
+      historicalNoRealAdapterCanvasNonclaimAppliedToCurrentApp: false,
+      selectionMutationPersistenceAndPublishStillDisallowed: true,
     },
   });
   return deepFreeze({

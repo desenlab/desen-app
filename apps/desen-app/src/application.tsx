@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 
 import { REFERENCE_AUTHORING_MODEL } from "./authoring-data.js";
+import { DesenAdapterCanvas } from "./adapter-canvas.js";
 import {
   createDesenAppProjectPath,
   navigateDesenApp,
@@ -659,20 +660,19 @@ function ProjectShell({
         </div>
 
         <div className={styles.surfaceFrameBody}>
-          <div className={styles.framePlaceholder} aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-          <p>Authoring structure ready</p>
-          <span>The adapter canvas arrives in the next M09 slice.</span>
+          <DesenAdapterCanvas
+            key={`${project.id}:${selectedSurface.id}`}
+            projectId={project.id}
+            surfaceId={selectedSurface.id}
+          />
         </div>
 
         <div className={styles.boundaryNote}>
           <strong>Preview data</strong>
           <span>
-            Exact Catalog metadata and sign-in Source structure are read only. No selection,
-            mutation, adapter render, save or publication is available yet.
+            Exact Catalog metadata and sign-in Source structure are read only. The exact managed
+            adapter canvas is rendered with controls disabled. No selection, mutation, save or
+            publication is available yet.
           </span>
         </div>
       </div>
@@ -745,7 +745,7 @@ function RouteView({ route }: Readonly<{ readonly route: DesenAppRoute }>) {
   return <ProjectShell project={project} selectedSurface={surface} />;
 }
 
-/** M09 Desen App shell with exact routes and a read-only catalog-derived authoring structure. */
+/** M09 Desen App shell with exact routes, authoring structure, and a read-only adapter canvas. */
 export function DesenAppApplication() {
   const routeLocation = useSyncExternalStore(
     subscribeDesenAppNavigation,
