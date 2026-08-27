@@ -14,8 +14,8 @@ function clone(value) {
 
 test("the reviewed impact graph owns every proof unit exactly once", () => {
   const graph = createAffectedImpactGraph();
-  assert.equal(graph.proofUnitCount, 80);
-  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 80);
+  assert.equal(graph.proofUnitCount, 81);
+  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 81);
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "control-plane-runtime-transition-races")?.prerequisites,
     ["control-plane-runtime-fault-injection"],
@@ -66,6 +66,22 @@ test("the reviewed impact graph owns every proof unit exactly once", () => {
       "editor-core-authoring-round-trip",
     ],
   );
+  assert.deepEqual(
+    graph.entries.find(({ id }) => id === "editor-core-terminal-integration")?.prerequisites,
+    [
+      "runtime-core-headless-sign-in",
+      "runtime-core-audit-hardening",
+      "editor-core-source-document",
+      "editor-core-stable-id-insert",
+      "editor-core-structural-edits",
+      "editor-core-content-edits",
+      "editor-core-state-binding-edits",
+      "editor-core-event-action-edits",
+      "editor-core-authoring-round-trip",
+      "editor-core-persistence",
+      "editor-core-continuous-validation",
+    ],
+  );
   assert.equal(validateAffectedImpactGraph(graph), graph);
   assert.equal(Object.isFrozen(graph), true);
   assert.equal(Object.isFrozen(graph.entries), true);
@@ -102,6 +118,8 @@ test("the editor stable-ID insert closes over its Source predecessor and structu
   const closure = createAffectedImpactClosure(["editor-core-stable-id-insert"]);
   assert.deepEqual(closure.proofUnitIds, [
     "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
     "editor-core-source-document",
     "editor-core-stable-id-insert",
     "editor-core-structural-edits",
@@ -111,14 +129,17 @@ test("the editor stable-ID insert closes over its Source predecessor and structu
     "editor-core-authoring-round-trip",
     "editor-core-persistence",
     "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
   ]);
-  assert.equal(closure.workloadCount, 30);
+  assert.equal(closure.workloadCount, 36);
 });
 
 test("the editor structural edits close over stable insertion and Source admission", () => {
   const closure = createAffectedImpactClosure(["editor-core-structural-edits"]);
   assert.deepEqual(closure.proofUnitIds, [
     "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
     "editor-core-source-document",
     "editor-core-stable-id-insert",
     "editor-core-structural-edits",
@@ -128,14 +149,17 @@ test("the editor structural edits close over stable insertion and Source admissi
     "editor-core-authoring-round-trip",
     "editor-core-persistence",
     "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
   ]);
-  assert.equal(closure.workloadCount, 30);
+  assert.equal(closure.workloadCount, 36);
 });
 
 test("editor content edits close over both immutable T02 and T03 prerequisites", () => {
   const closure = createAffectedImpactClosure(["editor-core-content-edits"]);
   assert.deepEqual(closure.proofUnitIds, [
     "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
     "editor-core-source-document",
     "editor-core-stable-id-insert",
     "editor-core-structural-edits",
@@ -145,14 +169,17 @@ test("editor content edits close over both immutable T02 and T03 prerequisites",
     "editor-core-authoring-round-trip",
     "editor-core-persistence",
     "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
   ]);
-  assert.equal(closure.workloadCount, 30);
+  assert.equal(closure.workloadCount, 36);
 });
 
 test("editor state/binding edits close over the formal T02 and current T04 graph", () => {
   const closure = createAffectedImpactClosure(["editor-core-state-binding-edits"]);
   assert.deepEqual(closure.proofUnitIds, [
     "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
     "editor-core-source-document",
     "editor-core-stable-id-insert",
     "editor-core-structural-edits",
@@ -162,14 +189,17 @@ test("editor state/binding edits close over the formal T02 and current T04 graph
     "editor-core-authoring-round-trip",
     "editor-core-persistence",
     "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
   ]);
-  assert.equal(closure.workloadCount, 30);
+  assert.equal(closure.workloadCount, 36);
 });
 
 test("editor event/action edits close over the formal state/binding predecessor", () => {
   const closure = createAffectedImpactClosure(["editor-core-event-action-edits"]);
   assert.deepEqual(closure.proofUnitIds, [
     "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
     "editor-core-source-document",
     "editor-core-stable-id-insert",
     "editor-core-structural-edits",
@@ -179,14 +209,17 @@ test("editor event/action edits close over the formal state/binding predecessor"
     "editor-core-authoring-round-trip",
     "editor-core-persistence",
     "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
   ]);
-  assert.equal(closure.workloadCount, 30);
+  assert.equal(closure.workloadCount, 36);
 });
 
 test("editor authoring round-trip closes over the formal event/action predecessor", () => {
   const closure = createAffectedImpactClosure(["editor-core-authoring-round-trip"]);
   assert.deepEqual(closure.proofUnitIds, [
     "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
     "editor-core-source-document",
     "editor-core-stable-id-insert",
     "editor-core-structural-edits",
@@ -196,14 +229,17 @@ test("editor authoring round-trip closes over the formal event/action predecesso
     "editor-core-authoring-round-trip",
     "editor-core-persistence",
     "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
   ]);
-  assert.equal(closure.workloadCount, 30);
+  assert.equal(closure.workloadCount, 36);
 });
 
 test("editor persistence closes over the complete neutral authoring predecessor", () => {
   const closure = createAffectedImpactClosure(["editor-core-persistence"]);
   assert.deepEqual(closure.proofUnitIds, [
     "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
     "editor-core-source-document",
     "editor-core-stable-id-insert",
     "editor-core-structural-edits",
@@ -213,8 +249,9 @@ test("editor persistence closes over the complete neutral authoring predecessor"
     "editor-core-authoring-round-trip",
     "editor-core-persistence",
     "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
   ]);
-  assert.equal(closure.workloadCount, 30);
+  assert.equal(closure.workloadCount, 36);
   assert.equal(closure.nodeIds.includes("editor-web-public-package-contract"), true);
 });
 
@@ -222,6 +259,8 @@ test("continuous validation closes over T03-T07 without making persistence a for
   const closure = createAffectedImpactClosure(["editor-core-continuous-validation"]);
   assert.deepEqual(closure.proofUnitIds, [
     "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
     "editor-core-source-document",
     "editor-core-stable-id-insert",
     "editor-core-structural-edits",
@@ -231,8 +270,9 @@ test("continuous validation closes over T03-T07 without making persistence a for
     "editor-core-authoring-round-trip",
     "editor-core-persistence",
     "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
   ]);
-  assert.equal(closure.workloadCount, 30);
+  assert.equal(closure.workloadCount, 36);
   assert.equal(
     createAffectedImpactGraph()
       .entries.find(({ id }) => id === "editor-core-continuous-validation")
@@ -241,7 +281,32 @@ test("continuous validation closes over T03-T07 without making persistence a for
   );
   assert.equal(
     closure.impactSha256,
-    "abeeeeaa82cd79497230e69a5b31f82904fbd5c5da530faab57b02da13eb2ab4",
+    "a117c9c6e1a79cc4c696c3aebe06f634d3a5b255bd991c1634e96cc5502b1211",
+  );
+});
+
+test("terminal integration closes over all M08 predecessors and the frozen P-18 runtime proofs", () => {
+  const closure = createAffectedImpactClosure(["editor-core-terminal-integration"]);
+  assert.deepEqual(closure.proofUnitIds, [
+    "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
+    "editor-core-source-document",
+    "editor-core-stable-id-insert",
+    "editor-core-structural-edits",
+    "editor-core-content-edits",
+    "editor-core-state-binding-edits",
+    "editor-core-event-action-edits",
+    "editor-core-authoring-round-trip",
+    "editor-core-persistence",
+    "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
+  ]);
+  assert.equal(closure.workloadCount, 36);
+  assert.equal(closure.nodeIds.includes("editor-web-public-package-contract"), true);
+  assert.equal(
+    closure.impactSha256,
+    "d4b5c5ec94499023eeaf8c021ba69b40af0e77fe9deb9531d4f9d5896cbed66e",
   );
 });
 

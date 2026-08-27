@@ -231,6 +231,8 @@ test("continuous validation selects the exact T03-T07-connected successor closur
   assert.deepEqual(plan.ownerProofUnitIds, ["editor-core-continuous-validation"]);
   assert.deepEqual(plan.affectedProofUnitIds, [
     "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
     "editor-core-source-document",
     "editor-core-stable-id-insert",
     "editor-core-structural-edits",
@@ -240,11 +242,40 @@ test("continuous validation selects the exact T03-T07-connected successor closur
     "editor-core-authoring-round-trip",
     "editor-core-persistence",
     "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
   ]);
-  assert.equal(plan.workloadCount, 30);
+  assert.equal(plan.workloadCount, 36);
   assert.equal(plan.nodeIds.includes("editor-web-public-package-contract"), true);
   assert.equal(plan.nodeIds.includes("verify-editor-core-continuous-validation"), true);
   assert.equal(plan.nodeIds.includes("test-editor-core-continuous-validation"), true);
+  assert.equal(plan.nodeIds.includes("verify-editor-core-terminal-integration"), true);
+});
+
+test("terminal integration selects every formal editor parent and frozen P-18 runtime proof", async () => {
+  const plan = createShadowAffectedSelection(
+    await affectedBoundary(currentPaths(), [
+      "scripts/verify-editor-core-terminal-integration.mjs",
+    ]),
+  );
+  assert.equal(plan.effectiveScope, "AFFECTED");
+  assert.deepEqual(plan.ownerProofUnitIds, ["editor-core-terminal-integration"]);
+  assert.deepEqual(plan.affectedProofUnitIds, [
+    "protocol-structural-validation",
+    "runtime-core-headless-sign-in",
+    "runtime-core-audit-hardening",
+    "editor-core-source-document",
+    "editor-core-stable-id-insert",
+    "editor-core-structural-edits",
+    "editor-core-content-edits",
+    "editor-core-state-binding-edits",
+    "editor-core-event-action-edits",
+    "editor-core-authoring-round-trip",
+    "editor-core-persistence",
+    "editor-core-continuous-validation",
+    "editor-core-terminal-integration",
+  ]);
+  assert.equal(plan.workloadCount, 36);
+  assert.equal(plan.nodeIds.includes("editor-web-public-package-contract"), true);
 });
 
 test("multiple proof owners form one canonical union independent of diff order", async () => {
@@ -278,7 +309,7 @@ test("policy, package, documentation, and shared inputs always expand to exhaust
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, "POLICY_DRIFT");
     assert.equal(plan.strictSubset, false);
-    assert.equal(plan.workloadCount, 170);
+    assert.equal(plan.workloadCount, 172);
   }
 });
 
@@ -311,7 +342,7 @@ test("all boundary uncertainty classes expand to exhaustive without partial path
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, category);
     assert.deepEqual(plan.changedPaths, []);
-    assert.equal(plan.workloadCount, 170);
+    assert.equal(plan.workloadCount, 172);
   }
 });
 
