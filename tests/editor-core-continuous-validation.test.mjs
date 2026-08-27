@@ -76,6 +76,7 @@ test("[authority] authenticates exact M08-T03 through T07 artifacts and an isola
     "M08-T07",
   ]);
   assert.equal(built.artifact.claim.m08T08FormalPrerequisite, false);
+  assert.equal(built.artifact.claim.m08T08CurrentGraphCompatibility, true);
   assert.equal(
     built.artifact.prerequisites.some(({ task }) => task === "M08-T08"),
     false,
@@ -84,17 +85,31 @@ test("[authority] authenticates exact M08-T03 through T07 artifacts and an isola
     built.artifact.executionAuthority.mode,
     "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH",
   );
-  assert.equal(built.artifact.executionAuthority.runtimeFiles, 30);
-  assert.equal(built.artifact.executionAuthority.editorFiles, 9);
+  assert.equal(built.artifact.executionAuthority.runtimeFiles, 31);
+  assert.equal(built.artifact.executionAuthority.editorFiles, 10);
   assert.equal(built.artifact.executionAuthority.retainedPredecessorEditorFiles, 6);
+  assert.equal(built.artifact.executionAuthority.currentNonformalPersistenceEditorFiles, 1);
   assert.equal(built.artifact.executionAuthority.dependencyFiles, 21);
+  assert.equal(built.artifact.publicApi.runtimeExports.length, 35);
+  assert.equal(built.artifact.publicApi.typeExports.length, 88);
   assert.equal(built.artifact.publicApi.taskRuntimeExportsAdded, 1);
   assert.equal(built.artifact.publicApi.taskTypeExportsAdded, 6);
+  assert.equal(built.artifact.publicApi.currentNonformalPersistenceRuntimeExports, 1);
+  assert.equal(built.artifact.publicApi.currentNonformalPersistenceTypeExports, 13);
   assert.equal(built.artifact.packageBoundary.platformNeutral, true);
-  assert.equal(built.artifact.packageBoundary.staticEsmEdges, 21);
+  assert.equal(built.artifact.packageBoundary.currentEmittedFiles, 36);
+  assert.equal(built.artifact.packageBoundary.staticEsmEdges, 24);
+  assert.equal(built.artifact.packageBoundary.currentNonformalPersistenceModuleAudited, true);
   assert.equal(built.artifact.packageBoundary.nodeImports, 0);
   assert.equal(built.artifact.packageBoundary.reactImports, 0);
   assert.equal(built.artifact.packageBoundary.domImports, 0);
+  assert.equal(built.artifact.testAuthority.focusedBehaviorCases, 12);
+  assert.equal(built.artifact.testAuthority.focusedCompilerNegativeAssertions, 9);
+  assert.equal(built.artifact.testAuthority.persistenceBehaviorCases, 10);
+  assert.equal(built.artifact.testAuthority.persistenceCompilerNegativeAssertions, 21);
+  assert.equal(built.artifact.testAuthority.publicRuntimeAndRootCases, 50);
+  assert.equal(built.artifact.testAuthority.publicCompilerNegativeAssertions, 102);
+  assert.equal(built.artifact.trackedBoundary.files, 99);
 });
 
 test("[determinism] two fresh M08-T09 builds are byte-identical", async () => {

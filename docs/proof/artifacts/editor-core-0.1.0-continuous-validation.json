@@ -71,13 +71,15 @@
     "taskStatus": "DONE",
     "prerequisiteTasks": ["M08-T03", "M08-T04", "M08-T05", "M08-T06", "M08-T07"],
     "prerequisiteStatuses": ["DONE", "DONE", "DONE", "DONE", "DONE"],
-    "m08T08FormalPrerequisite": false
+    "m08T08FormalPrerequisite": false,
+    "m08T08CurrentGraphCompatibility": true
   },
   "publicApi": {
     "runtimeExports": [
       "clearDesenEditorNodeCondition",
       "createDesenEditorContinuousValidator",
       "createDesenEditorDocument",
+      "createDesenEditorPersistencePort",
       "deleteDesenEditorAction",
       "deleteDesenEditorEventHandler",
       "deleteDesenEditorNode",
@@ -161,8 +163,21 @@
       "DesenEditorOwnerPropSetCommand",
       "DesenEditorOwnerStylePropertyDeleteCommand",
       "DesenEditorOwnerStylePropertySetCommand",
+      "DesenEditorPersistenceAdapter",
+      "DesenEditorPersistenceAdapterFailureReason",
+      "DesenEditorPersistenceAdapterReadResult",
+      "DesenEditorPersistenceAdapterSourceRecord",
+      "DesenEditorPersistenceAdapterWriteRequest",
+      "DesenEditorPersistenceAdapterWriteResult",
+      "DesenEditorPersistenceDiagnostic",
+      "DesenEditorPersistenceDiagnosticCode",
+      "DesenEditorPersistencePort",
       "DesenEditorResourceInputDeleteCommand",
       "DesenEditorResourceInputSetCommand",
+      "DesenEditorSourceOpenResult",
+      "DesenEditorSourceOpenSuccess",
+      "DesenEditorSourceSaveRequest",
+      "DesenEditorSourceSaveResult",
       "DesenEditorStateBindingEditDiagnostic",
       "DesenEditorStateBindingEditDiagnosticCode",
       "DesenEditorStateBindingEditFailure",
@@ -189,6 +204,8 @@
     ],
     "taskRuntimeExportsAdded": 1,
     "taskTypeExportsAdded": 6,
+    "currentNonformalPersistenceRuntimeExports": 1,
+    "currentNonformalPersistenceTypeExports": 13,
     "continuousValidationDeclarations": 7,
     "continuousValidationTsdocDeclarations": 7,
     "resultFields": [
@@ -290,9 +307,10 @@
     "exactReceiptedBytes": true,
     "importAfterReceipt": true,
     "workspaceModuleCacheUsed": false,
-    "runtimeFiles": 30,
-    "editorFiles": 9,
+    "runtimeFiles": 31,
+    "editorFiles": 10,
     "retainedPredecessorEditorFiles": 6,
+    "currentNonformalPersistenceEditorFiles": 1,
     "dependencyFiles": 21,
     "dependencyModules": 19,
     "dependencyManifests": 2,
@@ -341,8 +359,13 @@
       },
       {
         "path": "packages/editor-core/dist/index.js",
-        "bytes": 1441,
-        "sha256": "bae903f93d4b516e3cd90f113b26e69bc6b7a522c4575e6061a60826ec89f517"
+        "bytes": 1510,
+        "sha256": "5b946f9cd8da3c142a4f3b010f39d9bac57a39d8af083578898c93f51d41bbb9"
+      },
+      {
+        "path": "packages/editor-core/dist/persistence.js",
+        "bytes": 14726,
+        "sha256": "97005521aaa3a9118ad868e846d7a3d5545380c3e78245fb9e9cc267d9c3a672"
       },
       {
         "path": "packages/editor-core/dist/source-document.js",
@@ -366,8 +389,8 @@
       },
       {
         "path": "packages/editor-core/package.json",
-        "bytes": 1521,
-        "sha256": "7fa379f49b4ce7fd6d96a7294740e29ea7fd6f8b7553e568de009317bdf15b65"
+        "bytes": 1584,
+        "sha256": "c6e07c1cfe7710c2c73220d4d09657c4c83d471baa56afb9d641a40e4af1684e"
       }
     ],
     "dependencyReceipts": [
@@ -480,8 +503,8 @@
     "trustedAuthorities": ["NODE_RUNTIME", "ESM_LOADER", "PROCESS_ENVIRONMENT"]
   },
   "packageBoundary": {
-    "currentEmittedFiles": 32,
-    "staticEsmEdges": 21,
+    "currentEmittedFiles": 36,
+    "staticEsmEdges": 24,
     "unknownStaticEsmEdges": 0,
     "platformNeutral": true,
     "manifestExportRoots": ["."],
@@ -489,22 +512,25 @@
     "reactImports": 0,
     "domImports": 0,
     "nodeImports": 0,
-    "networkOrStorageAuthority": false
+    "networkOrStorageAuthority": false,
+    "currentNonformalPersistenceModuleAudited": true
   },
   "testAuthority": {
     "focusedBehaviorCases": 12,
     "focusedCompilerNegativeAssertions": 9,
-    "publicRuntimeAndRootCases": 47,
-    "publicCompilerNegativeAssertions": 81,
+    "persistenceBehaviorCases": 10,
+    "persistenceCompilerNegativeAssertions": 21,
+    "publicRuntimeAndRootCases": 50,
+    "publicCompilerNegativeAssertions": 102,
     "rootProofCases": 8
   },
   "trackedBoundary": {
-    "files": 92,
+    "files": 99,
     "receipts": [
       {
         "path": "packages/editor-core/README.md",
-        "bytes": 21453,
-        "sha256": "d4ad2f47c669f3039731bbdae304a50d6af0c716c5646c6b1d942cc010da90dc"
+        "bytes": 24695,
+        "sha256": "7946dc61eeed279013fc339f03958afe4d39054ee0ad2f15edf5e744787f2a69"
       },
       {
         "path": "packages/editor-core/dist/content-edits.d.ts",
@@ -568,23 +594,43 @@
       },
       {
         "path": "packages/editor-core/dist/index.d.ts",
-        "bytes": 4373,
-        "sha256": "345345361680ec7c8e547cd0caa1cdc4005366cda6e2149723e8b89827a0235f"
+        "bytes": 4945,
+        "sha256": "3861fd72fc424fdf1675d614ec16470df199bd5301bc5221ed9de0313febbbf8"
       },
       {
         "path": "packages/editor-core/dist/index.d.ts.map",
-        "bytes": 1991,
-        "sha256": "9283ae9a4a42614036bfe83ce57fa2daa428a55ff00ffb1fb110a8f8212ca04f"
+        "bytes": 2238,
+        "sha256": "74f407e818f940558b20eae3fcfcfb37d6329350b89ee7dd095bd66a61b1778c"
       },
       {
         "path": "packages/editor-core/dist/index.js",
-        "bytes": 1441,
-        "sha256": "bae903f93d4b516e3cd90f113b26e69bc6b7a522c4575e6061a60826ec89f517"
+        "bytes": 1510,
+        "sha256": "5b946f9cd8da3c142a4f3b010f39d9bac57a39d8af083578898c93f51d41bbb9"
       },
       {
         "path": "packages/editor-core/dist/index.js.map",
-        "bytes": 783,
-        "sha256": "9e7ec1ebddfb7eb78b545f83ddf476963f2e037e430376d8d6044857c12e0660"
+        "bytes": 828,
+        "sha256": "206bc3ceebc6648a2ca277fee7a63c45444e40c56b11367b5900a04c387ee0df"
+      },
+      {
+        "path": "packages/editor-core/dist/persistence.d.ts",
+        "bytes": 9952,
+        "sha256": "7456015b5986feb042b26010ddf77ebf9f4a36973e29c2c06c55125089bca58f"
+      },
+      {
+        "path": "packages/editor-core/dist/persistence.d.ts.map",
+        "bytes": 4107,
+        "sha256": "a1464155dce24f26dedced82a570eb3307bba3c94d956750390b197ba4e3ed49"
+      },
+      {
+        "path": "packages/editor-core/dist/persistence.js",
+        "bytes": 14726,
+        "sha256": "97005521aaa3a9118ad868e846d7a3d5545380c3e78245fb9e9cc267d9c3a672"
+      },
+      {
+        "path": "packages/editor-core/dist/persistence.js.map",
+        "bytes": 11767,
+        "sha256": "8f3e4e5dc850a9f938062e4b0dd605fdd70af3ed598bd6fb348d4cd3ba721b3f"
       },
       {
         "path": "packages/editor-core/dist/source-document.d.ts",
@@ -668,8 +714,8 @@
       },
       {
         "path": "packages/editor-core/package.json",
-        "bytes": 1521,
-        "sha256": "7fa379f49b4ce7fd6d96a7294740e29ea7fd6f8b7553e568de009317bdf15b65"
+        "bytes": 1584,
+        "sha256": "c6e07c1cfe7710c2c73220d4d09657c4c83d471baa56afb9d641a40e4af1684e"
       },
       {
         "path": "packages/editor-core/src/content-edits.ts",
@@ -688,8 +734,13 @@
       },
       {
         "path": "packages/editor-core/src/index.ts",
-        "bytes": 4558,
-        "sha256": "624c4d619156dad9104b16c525cc9260e7e381cbeef5af948b48980de8017976"
+        "bytes": 5157,
+        "sha256": "962063152cc483b0899fd096fb4365e488e95b0c701cd5d5e695ffce07014e07"
+      },
+      {
+        "path": "packages/editor-core/src/persistence.ts",
+        "bytes": 25441,
+        "sha256": "075655fa60dcf9bcc9dcdf73684e77d605f23e164ddd13a1aee086d132cb7a25"
       },
       {
         "path": "packages/editor-core/src/source-document.ts",
@@ -752,14 +803,24 @@
         "sha256": "20d9e351166a18e24112864ad33291dd5f981d5e4e23f8dbb72de6a6c32f98c5"
       },
       {
+        "path": "packages/editor-core/test/persistence.test.ts",
+        "bytes": 22293,
+        "sha256": "17d86804a38c243cbd75a97649b3e9f6716ea57206453851bd98216937b5bc54"
+      },
+      {
+        "path": "packages/editor-core/test/persistence.types.ts",
+        "bytes": 5271,
+        "sha256": "da5114ec835c91e02df73ef58fd3f2a3f8a85508eb0e939d1c1c845bcfbd87f2"
+      },
+      {
         "path": "packages/editor-core/test/public-package.mjs",
-        "bytes": 125809,
-        "sha256": "9e12b1448b0b48ae23e31c7d2bd189876a26c5678df8cc6ab5c9cd2420430e08"
+        "bytes": 135117,
+        "sha256": "1eb2d878c95ea3655e89afc97e7f72d4f8b134cbf8c7022a268597efe4ed7cf4"
       },
       {
         "path": "packages/editor-core/test/public-package.types.mts",
-        "bytes": 30653,
-        "sha256": "97b53821659b94f3ad4f8e4cce61dd19b882b51726e0d91a99a9cdcb3207f572"
+        "bytes": 35811,
+        "sha256": "04a7b314398424563b765f1de60105c775aa13485c4b8913250edd21bd0f632a"
       },
       {
         "path": "packages/editor-core/test/source-document.test.ts",
@@ -943,8 +1004,8 @@
       },
       {
         "path": "scripts/lib/editor-core-continuous-validation-proof.mjs",
-        "bytes": 58423,
-        "sha256": "977902cdd3f509b00ad55d64be78fc08842c6158dfbea6e3d946f1676cfe13b3"
+        "bytes": 62890,
+        "sha256": "f3b27812aae9b3e4a3d74ccb9cda7aac7749c560257f33003eb66d5041dd1b5f"
       },
       {
         "path": "scripts/verify-editor-core-continuous-validation.mjs",
@@ -953,8 +1014,8 @@
       },
       {
         "path": "tests/editor-core-continuous-validation.test.mjs",
-        "bytes": 9663,
-        "sha256": "6ef80f9a50b68eafec76ee4fbde5f6898e4632af1ed7cb88a24bc86597b6e94e"
+        "bytes": 10840,
+        "sha256": "f1b415d0dc41f755649f1ddd345ba1454e8695b9971e0afbc4032fc7d348d2b5"
       },
       {
         "path": "tsconfig.base.json",

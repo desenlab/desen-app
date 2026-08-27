@@ -2222,3 +2222,50 @@ proof-gate status changes. Semantic diagnostics and invalid-node mapping remain 
 terminal React/DOM boundary, cross-command determinism, and G08 remain M08-T10. Undo/redo,
 selection, viewport policy, multi-user synchronization, remote persistence, and G08 remain
 unclaimed. M08-T09 is next.
+
+## M08-T09 — Continuous validation and invalid-subject mapping
+
+M08-T09 adds one pure synchronous `createDesenEditorContinuousValidator` factory to
+`@desen/editor-core`. The factory captures a detached immutable Catalog array and exposes no
+partial validator on admission failure. Each validation call re-admits the direct editor Source
+exactly once and uses that one immutable snapshot for cumulative execution-contract diagnostics,
+the complete dynamic-obligation handoff, an RFC 8785 document fingerprint including root
+`authoring`, and invalid-subject occurrence mapping. A separate Catalog-set fingerprint preserves
+Catalog array order.
+
+Mapping authority is restricted to the Validator's explicit `context.surfaceId` and
+`context.subject`. Pointer text, diagnostic code or message, and capability IDs never infer
+identity. Every current occurrence of the exact surface-local node or behavior subject is returned
+in deterministic order. Duplicate occurrences remain visible, and node/behavior identities do not
+merge when their text matches. Diagnostics with no explicit subject or no matching current
+occurrence remain controlled unmapped indexes. Original diagnostic order and the complete
+obligation array are unchanged; obligations alone do not make a Source invalid.
+
+The focused runtime suite passes 12/12 with nine compiler-negative assertions. The cumulative
+editor-core suite passes 140/140, the built public-package contract passes 50/50 with 102 public
+consumer compiler-negative assertions, and the independent root proof passes 8/8. The current
+package exposes 35 runtime and 88 type exports across 36 emitted files and 24 reviewed static ESM
+edges. It adds no React, DOM, Node-platform, timer, worker, persistence generation, storage,
+network, dynamic-import, evaluation, or obligation-execution authority.
+
+Exact reviewed evidence lives in
+[`EDITOR-CORE-CONTINUOUS-VALIDATION.md`](EDITOR-CORE-CONTINUOUS-VALIDATION.md) and
+the exact 40,099-byte
+[`editor-core-0.1.0-continuous-validation.json`](artifacts/editor-core-0.1.0-continuous-validation.json)
+at `sha256:7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a`.
+The proof directly authenticates the exact frozen M08-T03, M08-T04, M08-T05, M08-T06, and M08-T07
+artifacts. M08-T08 remains a current-package compatibility sibling rather than a formal
+prerequisite. Every frozen M08-T01–M08-T08 artifact byte remains unchanged.
+
+The current CI successor contains 170 workloads and 80 proof pairs: 69 ordinary pairs and 11
+barriers. Its retained legacy projection contains 581 prerequisite segments, 3,737 ordered leaf
+invocations, and 270 distinct leaves. A T09-owned change selects the connected ten-pair editor
+proof closure, including the persistence sibling and editor-web public contract, without making
+M08-T08 a direct formal parent. Append-only checkpoint sequence 37 authenticates 34 frozen
+artifacts and 68 current readers while preserving sequence 36 and every earlier artifact byte.
+
+M08-T09 is `DONE`, advancing implementation progress to 94/145 (65%) and M08 to 9/10. `N-012`,
+`N-014`, `N-018`, and `S-003` remain `TESTED`; `S-002` remains `PLANNED`, P-18 remains `PARTIAL`,
+and proof gates remain 8/13. Terminal React/DOM integration, cross-command determinism, and G08
+remain M08-T10. Undo/redo, selection and viewport policy, Catalog loading, dynamic-obligation
+execution, multi-user synchronization, and G08 remain unclaimed. M08-T10 is next.

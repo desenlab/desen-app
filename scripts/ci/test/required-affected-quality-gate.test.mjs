@@ -336,8 +336,8 @@ test("runs the persistence closure behind both public-package contracts", async 
   );
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
-  assert.equal(selection.proofUnitCount, 9);
-  assert.equal(selection.workloadCount, 28);
+  assert.equal(selection.proofUnitCount, 10);
+  assert.equal(selection.workloadCount, 30);
   assert.deepEqual(selection.nodeIds.slice(0, 8), [
     "orchestrator-contracts",
     "format",
@@ -349,8 +349,24 @@ test("runs the persistence closure behind both public-package contracts", async 
     "editor-web-public-package-contract",
   ]);
   assert.equal(selection.nodeIds.includes("verify-editor-core-persistence"), true);
+  assert.equal(selection.nodeIds.includes("verify-editor-core-continuous-validation"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 28);
+  assert.equal(receipt.observedClosedCount, 30);
+});
+
+test("runs continuous validation after the editor-core contract with the connected T03-T07 closure", async () => {
+  const selection = createRequiredAffectedSelection(
+    await boundary("scripts/verify-editor-core-continuous-validation.mjs"),
+  );
+  const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
+
+  assert.equal(selection.proofUnitCount, 10);
+  assert.equal(selection.workloadCount, 30);
+  assert.equal(selection.nodeIds.includes("editor-web-public-package-contract"), true);
+  assert.equal(selection.nodeIds.includes("verify-editor-core-continuous-validation"), true);
+  assert.equal(selection.nodeIds.includes("test-editor-core-continuous-validation"), true);
+  assert.equal(receipt.status, "PASS");
+  assert.equal(receipt.observedClosedCount, 30);
 });
 
 test("exhaustive fallback executes no duplicate required workload", async () => {
@@ -608,8 +624,8 @@ test("required exhaustive invariants remain exact after required execution is im
   const required = createRequiredExhaustivePlan();
   assert.equal(required.authority, "REQUIRED");
   assert.equal(required.scope, "EXHAUSTIVE");
-  assert.equal(required.stepCount, 168);
-  assert.equal(required.proofPairCount, 79);
+  assert.equal(required.stepCount, 170);
+  assert.equal(required.proofPairCount, 80);
 });
 
 test("only pull requests may attempt affected execution and every ineligible plan falls back", () => {

@@ -975,16 +975,17 @@ artifact is pinned at
   `M08-T05 — State declaration and binding editing commands`,
   `M08-T06 — Event and closed-action editing commands`,
   `M08-T07 — Authoring isolation and unknown-extension round-trip preservation`,
-  `M08-T08 — Persistence port and local source adapter`
+  `M08-T08 — Persistence port and local source adapter`,
+  `M08-T09 — Continuous validation and invalid-node mapping`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T09 — Continuous validation and invalid-node mapping`
-- Status: M08 is 8/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
-  and implementation progress is 93/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M08-T10 — React/DOM boundary, stable identity, and deterministic command tests`
+- Status: M08 is 9/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
+  and implementation progress is 94/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
   its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
@@ -993,7 +994,10 @@ artifact is pinned at
   also `DONE` with its tracked authoring-round-trip artifact, independent root proof, exact
   165-workload/78-pair CI registration, and sequence-35 reader checkpoint. M08-T08 is `DONE` with
   its tracked persistence artifact, real local SQLite integration, exact 168-workload/79-pair CI
-  registration, and sequence-36 reader checkpoint. Exact evidence and nonclaims are recorded below.
+  registration, and sequence-36 reader checkpoint. M08-T09 is `DONE` with explicit-subject
+  diagnostic mapping, deterministic Source/Catalog fingerprints, an independent root proof, exact
+  170-workload/80-pair CI registration, and sequence-37 reader checkpoint. Exact evidence and
+  nonclaims are recorded below.
 
 ## Completed preparation
 
@@ -3248,6 +3252,42 @@ M08-T08 evidence:
 - coverage decision: M08-T08 is `DONE`; `N-012`, `N-018`, and `S-003` remain `TESTED`; no `P-*`,
   other `N-*`/`S-*`, or proof-gate status changes; overall progress is 93/145 (64%); M08 is 8/10;
   proof gates remain 8/13; M08-T09 owns continuous validation and invalid-node mapping next
+
+M08-T09 evidence:
+
+- `docs/proof/EDITOR-CORE-CONTINUOUS-VALIDATION.md`
+- `docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json`, exactly 40,099 bytes at
+  `sha256:7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a`
+- Catalog authority: `createDesenEditorContinuousValidator` captures one detached immutable Catalog
+  set; invalid Catalogs expose no partial validator and successful validators carry an
+  array-order-sensitive Catalog-set fingerprint
+- Source authority: each synchronous validation pass re-admits the direct editor Source once and
+  uses that single immutable snapshot for cumulative execution diagnostics, complete dynamic
+  obligations, mapping, and an RFC 8785 fingerprint that includes root `authoring`
+- mapping authority: only explicit Validator `surfaceId` plus subject kind/ID selects an invalid
+  node or behavior; pointers, messages, diagnostic codes, and capability IDs never infer identity
+- occurrence boundary: duplicate occurrences are all retained in deterministic order, node and
+  behavior identities remain separate, and subjectless or non-occurring diagnostics remain
+  controlled unmapped indexes
+- semantic boundary: dynamic obligations are returned complete and do not make an otherwise valid
+  Source invalid; validation executes no obligation, adapter, operation, resource, command, or event
+- package proof: continuous validation passes 12/12 with nine compiler-negative assertions; the
+  cumulative editor-core suite passes 140/140; public-package cases pass 50/50 with 102
+  compiler-negative assertions; the independent root proof passes 8/8
+- prerequisite authority: exact frozen M08-T03–M08-T07 artifacts are authenticated; M08-T08 is a
+  current-package compatibility sibling and is deliberately not a formal prerequisite
+- platform boundary: the emitted editor graph remains framework-neutral and adds no React, DOM,
+  timer, worker, persistence generation, storage, filesystem, network, or dynamic-obligation
+  execution authority
+- current CI authority: 170 workloads / 80 proof pairs, including 69 ordinary pairs and 11 barriers
+- checkpoint authority: append-only sequence 37 authenticates 34 frozen artifacts and 68 current
+  readers while preserving every sequence-36 and earlier artifact byte
+- scope nonclaims: undo/redo, selection/viewport policy, multi-user synchronization, Catalog
+  loading, pointer-derived subject inference, obligation execution, terminal React/DOM integration,
+  and G08 remain outside M08-T09
+- coverage decision: M08-T09 is `DONE`; `N-012`, `N-014`, `N-018`, and `S-003` remain `TESTED`;
+  `S-002` remains `PLANNED`, `P-18` remains `PARTIAL`, proof gates remain 8/13, overall progress is
+  94/145 (65%), M08 is 9/10, and M08-T10 is next
 
 ## Status vocabulary
 

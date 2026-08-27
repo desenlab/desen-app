@@ -1030,7 +1030,7 @@ hosted M07-T10 claim.
 | M08-T06 | DONE        | M08-T05                   | Event and closed-action editing commands                             |
 | M08-T07 | DONE        | M08-T01–M08-T06           | Authoring isolation and unknown-extension round-trip preservation    |
 | M08-T08 | DONE        | M07-T05, M08-T01, M08-T07 | Persistence port and local source adapter                            |
-| M08-T09 | NOT_STARTED | M08-T03–M08-T07           | Continuous validation and invalid-node mapping                       |
+| M08-T09 | DONE        | M08-T03–M08-T07           | Continuous validation and invalid-node mapping                       |
 | M08-T10 | NOT_STARTED | M08-T01–M08-T09           | React/DOM boundary, stable identity, and deterministic command tests |
 | G08     | NOT_STARTED | M08-T01–M08-T10           | UI-independent editor core produces valid sources                    |
 
@@ -1333,6 +1333,36 @@ unchanged. These are local code-owned results and make no hosted M08-T08 claim.
 status remain unchanged, and proof gates remain 8/13. Catalog semantic diagnostics and invalid-node
 mapping remain M08-T09. Terminal React/DOM integration, cross-command determinism, and G08 remain
 M08-T10. Overall implementation progress is 93/145 (64%), M08 is 8/10, and M08-T09 is next.
+
+M08-T09 is `DONE`. `@desen/editor-core` now exposes a pure synchronous Catalog-bound continuous
+validator. The factory captures one detached immutable Catalog set and returns no partial validator
+when Catalog admission fails. Each validation call re-admits the direct editor Source once and uses
+that single immutable snapshot for cumulative execution-contract diagnostics, complete dynamic
+obligations, an RFC 8785 document fingerprint that includes root `authoring`, and deterministic
+invalid-subject mapping. The Catalog-set fingerprint is array-order-sensitive.
+
+Invalid mapping uses only the Validator's explicit `context.surfaceId` and `context.subject`.
+Pointers, codes, messages, and capability identifiers never infer identity. Every matching node or
+behavior occurrence is retained in stable order, cross-kind text matches remain separate, and a
+diagnostic without an explicit current subject remains a controlled unmapped index. Obligations do
+not make an otherwise valid Source invalid. The boundary is platform-neutral and adds no React,
+DOM, timer, worker, adapter, persistence generation, filesystem, network, or execution authority.
+
+The focused continuous-validation suite passes 12/12 with nine compiler-negative assertions. The
+cumulative editor-core suite passes 140/140; the built public-package contract passes 50/50 with
+102 compiler-negative assertions; and the independent root proof passes 8/8. Exact evidence is
+recorded in `docs/proof/EDITOR-CORE-CONTINUOUS-VALIDATION.md` and the exact 40,099-byte
+`docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json` at
+`sha256:7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a`. The proof directly
+authenticates the frozen M08-T03 through M08-T07 artifacts; M08-T08 remains a tested current-package
+compatibility sibling rather than a formal prerequisite. The current CI successor contains 170
+workloads and 80 proof pairs: 69 ordinary pairs and 11 barriers. Append-only checkpoint sequence 37
+authenticates 34 frozen artifacts and 68 current readers while preserving every sequence-36 and
+earlier artifact byte.
+
+`N-012`, `N-014`, `N-018`, and `S-003` remain `TESTED`; `S-002` remains `PLANNED` for terminal
+integration, `P-18` remains `PARTIAL`, and no proof-gate or other normative status changes. Overall
+implementation progress is 94/145 (65%), M08 is 9/10, proof gates remain 8/13, and M08-T10 is next.
 
 ## M09 — Desen App Web MVP
 

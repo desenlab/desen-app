@@ -25,7 +25,10 @@ const CATALOG_FIXTURE_PATH =
   "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json";
 const PACKAGE_PATH = "packages/editor-core/package.json";
 const INDEX_SOURCE_PATH = "packages/editor-core/src/index.ts";
+const PERSISTENCE_SOURCE_PATH = "packages/editor-core/src/persistence.ts";
 const CONTINUOUS_SOURCE_PATH = "packages/editor-core/src/continuous-validation.ts";
+const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
+const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/continuous-validation.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/continuous-validation.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
@@ -73,6 +76,7 @@ const EDITOR_MODULE_NAMES = Object.freeze([
   "content-edits",
   "state-binding-edits",
   "event-action-edits",
+  "persistence",
   "continuous-validation",
 ]);
 const DIST_PATHS = Object.freeze(
@@ -116,6 +120,7 @@ const EDITOR_TEST_PATHS = Object.freeze(
     "state-binding-edits",
     "event-action-edits",
     "authoring-round-trip",
+    "persistence",
     "continuous-validation",
   ].flatMap((name) => [
     `packages/editor-core/test/${name}.test.ts`,
@@ -158,6 +163,27 @@ const NEW_TYPE_EXPORTS = Object.freeze(
 );
 const EXPECTED_CONTINUOUS_SOURCE_EXPORTS = Object.freeze(
   [...NEW_RUNTIME_EXPORTS, ...NEW_TYPE_EXPORTS].sort(compareText),
+);
+const PERSISTENCE_RUNTIME_EXPORTS = Object.freeze(["createDesenEditorPersistencePort"]);
+const PERSISTENCE_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorPersistenceAdapter",
+    "DesenEditorPersistenceAdapterFailureReason",
+    "DesenEditorPersistenceAdapterReadResult",
+    "DesenEditorPersistenceAdapterSourceRecord",
+    "DesenEditorPersistenceAdapterWriteRequest",
+    "DesenEditorPersistenceAdapterWriteResult",
+    "DesenEditorPersistenceDiagnostic",
+    "DesenEditorPersistenceDiagnosticCode",
+    "DesenEditorPersistencePort",
+    "DesenEditorSourceOpenResult",
+    "DesenEditorSourceOpenSuccess",
+    "DesenEditorSourceSaveRequest",
+    "DesenEditorSourceSaveResult",
+  ].sort(compareText),
+);
+const EXPECTED_PERSISTENCE_SOURCE_EXPORTS = Object.freeze(
+  [...PERSISTENCE_RUNTIME_EXPORTS, ...PERSISTENCE_TYPE_EXPORTS].sort(compareText),
 );
 
 export const EDITOR_CORE_CONTINUOUS_VALIDATION_PREREQUISITE_PINS = Object.freeze([
@@ -606,6 +632,7 @@ function verifyBoundary(files, t07Artifact) {
       JSON.stringify({ ".": { types: "./dist/index.d.ts", import: "./dist/index.js" } }) ||
     JSON.stringify(manifest.dependencies) !==
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
+    manifest.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts" ||
     manifest.scripts?.["test:continuous-validation"] !==
       "vitest run test/continuous-validation.test.ts"
   ) {
@@ -614,8 +641,37 @@ function verifyBoundary(files, t07Artifact) {
 
   const predecessorRuntime = [...t07Artifact.publicApi.runtimeExports].sort(compareText);
   const predecessorTypes = [...t07Artifact.publicApi.typeExports].sort(compareText);
-  const expectedRuntime = [...predecessorRuntime, ...NEW_RUNTIME_EXPORTS].sort(compareText);
-  const expectedTypes = [...predecessorTypes, ...NEW_TYPE_EXPORTS].sort(compareText);
+  const expectedRuntime = [
+    ...predecessorRuntime,
+    ...PERSISTENCE_RUNTIME_EXPORTS,
+    ...NEW_RUNTIME_EXPORTS,
+  ].sort(compareText);
+  const expectedTypes = [
+    ...predecessorTypes,
+    ...PERSISTENCE_TYPE_EXPORTS,
+    ...NEW_TYPE_EXPORTS,
+  ].sort(compareText);
+  if (expectedRuntime.length !== 35 || expectedTypes.length !== 88) {
+    fail(
+      "PUBLIC_API_DRIFT",
+      "The current T08 plus T09 package must expose exactly thirty-five runtime and eighty-eight type exports.",
+    );
+  }
+
+  const persistenceSourceText = decodeUtf8(
+    files.get(PERSISTENCE_SOURCE_PATH),
+    PERSISTENCE_SOURCE_PATH,
+  );
+  const persistenceSourceExports = exportedNames(persistenceSourceText, PERSISTENCE_SOURCE_PATH);
+  exactArray(
+    persistenceSourceExports.names,
+    EXPECTED_PERSISTENCE_SOURCE_EXPORTS,
+    "SOURCE_DRIFT",
+    "Persistence source exports",
+  );
+  if (persistenceSourceExports.tsdocDeclarations !== EXPECTED_PERSISTENCE_SOURCE_EXPORTS.length) {
+    fail("TSDOC_DRIFT", "Every public persistence declaration must retain TSDoc.");
+  }
 
   const continuousSourceText = decodeUtf8(
     files.get(CONTINUOUS_SOURCE_PATH),
@@ -656,6 +712,8 @@ function verifyBoundary(files, t07Artifact) {
   const distIndexPath = "packages/editor-core/dist/index.js";
   const distIndexDeclarationPath = "packages/editor-core/dist/index.d.ts";
   const distContinuousDeclarationPath = "packages/editor-core/dist/continuous-validation.d.ts";
+  const distPersistencePath = "packages/editor-core/dist/persistence.js";
+  const distPersistenceDeclarationPath = "packages/editor-core/dist/persistence.d.ts";
   const emittedIndex = reexportedNames(
     decodeUtf8(files.get(distIndexPath), distIndexPath),
     distIndexPath,
@@ -677,6 +735,29 @@ function verifyBoundary(files, t07Artifact) {
     "EMITTED_DRIFT",
     "Emitted declaration type exports",
   );
+  const emittedPersistenceRuntime = exportedNames(
+    decodeUtf8(files.get(distPersistencePath), distPersistencePath),
+    distPersistencePath,
+  );
+  exactArray(
+    emittedPersistenceRuntime.names,
+    PERSISTENCE_RUNTIME_EXPORTS,
+    "EMITTED_DRIFT",
+    "Emitted persistence runtime exports",
+  );
+  const emittedPersistence = exportedNames(
+    decodeUtf8(files.get(distPersistenceDeclarationPath), distPersistenceDeclarationPath),
+    distPersistenceDeclarationPath,
+  );
+  exactArray(
+    emittedPersistence.names,
+    EXPECTED_PERSISTENCE_SOURCE_EXPORTS,
+    "EMITTED_DRIFT",
+    "Emitted persistence declarations",
+  );
+  if (emittedPersistence.tsdocDeclarations !== EXPECTED_PERSISTENCE_SOURCE_EXPORTS.length) {
+    fail("TSDOC_DRIFT", "Emitted persistence declarations lost TSDoc.");
+  }
   const emittedContinuous = exportedNames(
     decodeUtf8(files.get(distContinuousDeclarationPath), distContinuousDeclarationPath),
     distContinuousDeclarationPath,
@@ -710,8 +791,8 @@ function verifyBoundary(files, t07Artifact) {
       }
     }
   }
-  if (emittedStaticEdges.length !== 21) {
-    fail("EMITTED_DRIFT", "The emitted editor graph must retain exactly twenty-one static edges.");
+  if (emittedStaticEdges.length !== 24) {
+    fail("EMITTED_DRIFT", "The emitted editor graph must retain exactly twenty-four static edges.");
   }
   const emittedGraph = EDITOR_MODULE_NAMES.map((name) =>
     decodeUtf8(
@@ -746,24 +827,39 @@ function verifyBoundary(files, t07Artifact) {
       fail("TEST_INVENTORY_DRIFT", `Focused tests lost the ${fragment} boundary.`);
     }
   }
+  if (focusedTests.length !== 12) {
+    fail("TEST_INVENTORY_DRIFT", "Continuous validation must retain exactly twelve focused cases.");
+  }
   const focusedTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PACKAGE_TYPES_PATH), PACKAGE_TYPES_PATH),
   );
-  if (focusedTypeAssertions < 4) {
+  if (focusedTypeAssertions !== 9) {
     fail(
       "TEST_INVENTORY_DRIFT",
-      "Focused compiler-negative coverage must retain at least four cases.",
+      "Continuous validation must retain exactly nine focused compiler-negative cases.",
+    );
+  }
+  const persistenceTests = testNames(
+    decodeUtf8(files.get(PERSISTENCE_TEST_PATH), PERSISTENCE_TEST_PATH),
+  );
+  const persistenceTypeAssertions = countTypeAssertions(
+    decodeUtf8(files.get(PERSISTENCE_TYPES_PATH), PERSISTENCE_TYPES_PATH),
+  );
+  if (persistenceTests.length !== 10 || persistenceTypeAssertions !== 21) {
+    fail(
+      "TEST_INVENTORY_DRIFT",
+      "The non-formal T08 current boundary must retain ten persistence cases and twenty-one compiler-negative assertions.",
     );
   }
   const publicTests = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
   const publicTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH),
   );
-  if (
-    publicTests.length <= t07Artifact.testAuthority.publicRuntimeAndRootCases ||
-    publicTypeAssertions <= t07Artifact.testAuthority.publicCompilerNegativeAssertions
-  ) {
-    fail("TEST_INVENTORY_DRIFT", "The emitted public package lacks T09 runtime or type coverage.");
+  if (publicTests.length !== 50 || publicTypeAssertions !== 102) {
+    fail(
+      "TEST_INVENTORY_DRIFT",
+      "The current T08 plus T09 public package must retain fifty runtime/root cases and one hundred two compiler-negative assertions.",
+    );
   }
   const rootTests = testNames(decodeUtf8(files.get(ROOT_TEST_PATH), ROOT_TEST_PATH));
   exactArray(
@@ -778,6 +874,8 @@ function verifyBoundary(files, t07Artifact) {
     typeExports: expectedTypes,
     taskRuntimeExportsAdded: NEW_RUNTIME_EXPORTS.length,
     taskTypeExportsAdded: NEW_TYPE_EXPORTS.length,
+    currentNonformalPersistenceRuntimeExports: PERSISTENCE_RUNTIME_EXPORTS.length,
+    currentNonformalPersistenceTypeExports: PERSISTENCE_TYPE_EXPORTS.length,
     continuousValidationDeclarations: EXPECTED_CONTINUOUS_SOURCE_EXPORTS.length,
     continuousValidationTsdocDeclarations: continuousSourceExports.tsdocDeclarations,
     emittedFiles: DIST_PATHS.length,
@@ -786,6 +884,8 @@ function verifyBoundary(files, t07Artifact) {
     platformNeutral: true,
     focusedBehaviorCases: focusedTests.length,
     focusedCompilerNegativeAssertions: focusedTypeAssertions,
+    persistenceBehaviorCases: persistenceTests.length,
+    persistenceCompilerNegativeAssertions: persistenceTypeAssertions,
     publicRuntimeAndRootCases: publicTests.length,
     publicCompilerNegativeAssertions: publicTypeAssertions,
     rootProofCases: rootTests.length,
@@ -840,6 +940,7 @@ function authenticateRuntimeClosure(t07Artifact, prerequisiteEvidence, files) {
     runtimeFiles: ISOLATED_RUNTIME_PATHS.length,
     editorFiles: editorReceipts.length,
     retainedPredecessorEditorFiles: RETAINED_T07_EDITOR_RUNTIME_PATHS.length,
+    currentNonformalPersistenceEditorFiles: 1,
     dependencyFiles: dependencyReceipts.length,
     dependencyModules: PROTOCOL_RUNTIME_PATHS.length + VALIDATOR_RUNTIME_PATHS.length,
     dependencyManifests: 2,
@@ -1311,12 +1412,15 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
       ),
       prerequisiteStatuses: EDITOR_CORE_CONTINUOUS_VALIDATION_PREREQUISITE_PINS.map(() => "DONE"),
       m08T08FormalPrerequisite: false,
+      m08T08CurrentGraphCompatibility: true,
     },
     publicApi: {
       runtimeExports: boundary.runtimeExports,
       typeExports: boundary.typeExports,
       taskRuntimeExportsAdded: boundary.taskRuntimeExportsAdded,
       taskTypeExportsAdded: boundary.taskTypeExportsAdded,
+      currentNonformalPersistenceRuntimeExports: boundary.currentNonformalPersistenceRuntimeExports,
+      currentNonformalPersistenceTypeExports: boundary.currentNonformalPersistenceTypeExports,
       continuousValidationDeclarations: boundary.continuousValidationDeclarations,
       continuousValidationTsdocDeclarations: boundary.continuousValidationTsdocDeclarations,
       resultFields: [
@@ -1343,10 +1447,13 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
       domImports: 0,
       nodeImports: 0,
       networkOrStorageAuthority: false,
+      currentNonformalPersistenceModuleAudited: true,
     },
     testAuthority: {
       focusedBehaviorCases: boundary.focusedBehaviorCases,
       focusedCompilerNegativeAssertions: boundary.focusedCompilerNegativeAssertions,
+      persistenceBehaviorCases: boundary.persistenceBehaviorCases,
+      persistenceCompilerNegativeAssertions: boundary.persistenceCompilerNegativeAssertions,
       publicRuntimeAndRootCases: boundary.publicRuntimeAndRootCases,
       publicCompilerNegativeAssertions: boundary.publicCompilerNegativeAssertions,
       rootProofCases: boundary.rootProofCases,

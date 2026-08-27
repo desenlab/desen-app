@@ -96,11 +96,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "540feb633d01ea7f8cd72564214451f2dfe1fea0da624c1f0048e9c5595b0f09";
+  "277659c035da3710bb7992ba71cb2f048e30c2ddd2574504220ab2d5f4391b77";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "d826a73e920492e38d1605836656159419296e1d12566a4bcd2d60359665ed49";
+  "a51217819980b7c2c8d20b4e0897df3534115476c020efa795c3189645f760fc";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "a4e5befa962b78d85dfb67c95d975d376bd3dc81a93caa468c34966517d1292d";
+  "7f82f21c27f7d95c8fff7b326fd99647eb8fd57027f9f028176d142de1d62a6f";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "86f2dbb30344f9fcafbc656627b9a5bd70a4854405066d6e1c9b33594869e47b";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -498,6 +498,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "scripts/verify-editor-core-persistence.mjs",
     "tests/editor-core-persistence.test.mjs",
   ],
+  [
+    "editor-core-continuous-validation",
+    "scripts/verify-editor-core-continuous-validation.mjs",
+    "tests/editor-core-continuous-validation.test.mjs",
+  ],
 ]);
 
 const NO_SHARED_MUTATION = SAFE_OBJECT_FREEZE({
@@ -882,6 +887,7 @@ function classifyPrerequisite({
       "editor-core-event-action-edits",
       "editor-core-authoring-round-trip",
       "editor-core-persistence",
+      "editor-core-continuous-validation",
     ].includes(currentProofId);
     const reviewedPackage =
       packageName === "@desen/editor-core" ||
@@ -1173,7 +1179,8 @@ function buildCanonicalInventory() {
         id === "editor-core-content-edits" ||
         id === "editor-core-state-binding-edits" ||
         id === "editor-core-event-action-edits" ||
-        id === "editor-core-authoring-round-trip"
+        id === "editor-core-authoring-round-trip" ||
+        id === "editor-core-continuous-validation"
           ? "editor-core-public-package-contract"
           : id === "editor-core-persistence"
             ? "editor-web-public-package-contract"
@@ -1443,7 +1450,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "37d1c0cd99fbe5d2b411f9e98c22b1afb58cfca175d9c93fa9b1c6c6861b9418";
+  "10a9c77ac1481792420bc35c21e42efe85b4f44750aba4ef86bd835fa0725ad2";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

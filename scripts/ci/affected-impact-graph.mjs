@@ -107,12 +107,22 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
     ["editor-core-event-action-edits", ["editor-core-state-binding-edits"]],
     ["editor-core-authoring-round-trip", ["editor-core-event-action-edits"]],
     ["editor-core-persistence", ["editor-core-authoring-round-trip"]],
+    [
+      "editor-core-continuous-validation",
+      [
+        "editor-core-structural-edits",
+        "editor-core-content-edits",
+        "editor-core-state-binding-edits",
+        "editor-core-event-action-edits",
+        "editor-core-authoring-round-trip",
+      ],
+    ],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "26a3bfd66ae206bd3779c5147cc0b42ae5ba2578e22a6d8a4dcc1a434b9be47f";
+  "add38e32769ee7c197cb5a6e2d6a1a028382ca5d8fb6e8f9318ebfecfbfa9c9d";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

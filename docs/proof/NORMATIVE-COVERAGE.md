@@ -121,5 +121,29 @@ hard rejection rule. Exact evidence is the 49,785-byte
 `sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. No other mandatory or
 recommended-clause status changes.
 
+## M08-T09 evidence extension
+
+M08-T09 extends the existing `N-012`, `N-014`, and `N-018` evidence without changing their
+`TESTED` status. One immutable direct Source is validated against one captured immutable Catalog
+set; complete cumulative diagnostics and dynamic obligations are retained. Invalid-subject mapping
+uses only the Validator's explicit surface and node/behavior subject context, never pointer text or
+diagnostic prose. Every matching duplicate occurrence remains visible, cross-kind identities stay
+separate, and subjectless diagnostics remain controlled unmapped indexes.
+
+The complete document fingerprint includes root `authoring`, while a separate Catalog-set
+fingerprint preserves Catalog array order. Neither identity grants production authority, mutates a
+persistence generation, or changes the frozen M08-T07 authoring-exclusion/Source-digest result.
+Structurally valid unresolved semantics remain authorable and are diagnosed rather than executed.
+The proof authenticates exact frozen M08-T03–M08-T07 artifacts; M08-T08 is a current-package
+compatibility sibling rather than a formal prerequisite.
+
+`S-002` remains `PLANNED`: M08-T09 preserves and maps stable identities but does not close the
+terminal React/DOM and cross-command integration owned by M08-T10. `S-003` remains `TESTED`; unknown
+extensions receive no semantic interpretation from continuous validation. Exact evidence is
+`docs/proof/EDITOR-CORE-CONTINUOUS-VALIDATION.md` and
+the exact 40,099-byte `docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json` at
+`sha256:7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a`. No mandatory or
+recommended clause changes status in M08-T09.
+
 M12-T01 must retain failed, blocked, and justified deviations rather than weakening or deleting a
 clause. Recommended clauses may be deviated from only with an explicit rationale.

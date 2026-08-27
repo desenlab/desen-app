@@ -137,6 +137,7 @@ export const PROOF_IDS = Object.freeze([
   "editor-core-event-action-edits",
   "editor-core-authoring-round-trip",
   "editor-core-persistence",
+  "editor-core-continuous-validation",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -182,6 +183,7 @@ export const OS_TEMP_ONLY_VERIFIER_PROOF_IDS = Object.freeze([
   "editor-core-event-action-edits",
   "editor-core-authoring-round-trip",
   "editor-core-persistence",
+  "editor-core-continuous-validation",
 ]);
 
 /** Sole verifier step eligible to delegate an authenticated loopback port-zero child runtime. */
@@ -539,8 +541,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 168) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 168 steps.", {
+if (METADATA_BY_STEP_ID.size !== 170) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 170 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

@@ -270,13 +270,13 @@ test("authenticates the exact 20/20 hosted promotion campaign", async () => {
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "4a267ae207bf3ecd22b1a4bd7b46041fb773e7af0c6901b35aa40929ba0fe099",
-    ownershipSha256: "63d52bb33742fb5e482e923ab6df080dd4e87c8bc01a771c4f625c1722d5bb1e",
-    impactGraphSha256: "26a3bfd66ae206bd3779c5147cc0b42ae5ba2578e22a6d8a4dcc1a434b9be47f",
+    selectorSha256: "7c0dcaf471c1f38ed313593eeed63c3a12a015c078b322363eab61ed1cb0fcee",
+    ownershipSha256: "25d10800f2a531114017012de6c0306ba614f7a0cd273d8d3a997e525a728f34",
+    impactGraphSha256: "add38e32769ee7c197cb5a6e2d6a1a028382ca5d8fb6e8f9318ebfecfbfa9c9d",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
-    inventorySha256: "37d1c0cd99fbe5d2b411f9e98c22b1afb58cfca175d9c93fa9b1c6c6861b9418",
+    inventorySha256: "10a9c77ac1481792420bc35c21e42efe85b4f44750aba4ef86bd835fa0725ad2",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "cbb8346b690817730b301e458d435d940c7ea8543f18402e85e1ecafdd48d9ec",
+    runnerAuthoritySha256: "86022df6bf245ba7600ebf71b03537224d591278dd4fc4b421be0812f7a87ed8",
   });
 });
 
@@ -284,17 +284,17 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "4f351f2f535b1fc335876160256a42b1d53c7c7f43db08e0b86bf50c389d1e82",
-    checkpoints: 36,
-    frozenArtifacts: 33,
-    currentReaders: 66,
+    headSha256: "07e5de3676a30aa58c2108a2cb91ddabb7130d6490094072cda774b207f1b26f",
+    checkpoints: 37,
+    frozenArtifacts: 34,
+    currentReaders: 68,
   };
   assert.equal(validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt), liveReceipt);
   for (const [field, replacement] of [
     ["headSha256", "ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b"],
-    ["checkpoints", 35],
-    ["frozenArtifacts", 32],
-    ["currentReaders", 64],
+    ["checkpoints", 36],
+    ["frozenArtifacts", 33],
+    ["currentReaders", 66],
     ["status", "FAIL"],
   ]) {
     assert.throws(

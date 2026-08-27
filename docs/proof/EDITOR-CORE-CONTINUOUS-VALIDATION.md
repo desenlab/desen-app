@@ -6,7 +6,7 @@ Status: `DONE`
 
 Profile: `desen.editor-core.continuous-validation-proof.v1`
 
-Artifact: `docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json` (37,646 bytes)
+Artifact: `docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json` (40,099 bytes)
 
 ## Frozen prerequisite authority
 
@@ -18,9 +18,11 @@ The proof directly authenticates the five formal M08-T09 prerequisites by exact 
 - `M08-T06` `sha256:05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7`
 - `M08-T07` `sha256:33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db`
 
-`M08-T08` is deliberately not a formal prerequisite. Continuous validation is a pure in-memory
-editor concern and receives no persistence, filesystem, network, retry, or durability authority.
-No live reader or checkpoint head substitutes for any frozen prerequisite artifact.
+`M08-T08` is deliberately not a formal prerequisite. Its already-main persistence source,
+distribution, focused tests, types, exports, and package script are audited only as part of the
+current additive package graph. Continuous-validation behavior does not invoke the persistence
+port or receive filesystem, network, retry, storage, or durability authority. No live reader or
+checkpoint head substitutes for any frozen prerequisite artifact.
 
 ## Catalog-bound continuous validation
 
@@ -68,27 +70,32 @@ tracked authority receipts, and the isolated runtime closure.
 ## Runtime and platform audit
 
 Behavior executes only after copying the exact receipted package graph into a fresh OS temporary
-directory and importing it there. The closure contains nine editor files and twenty-one protocol
+directory and importing it there. The closure contains ten editor files and twenty-one protocol
 and Validator dependency files. Six retained editor runtime modules and every dependency byte are
-checked against the frozen M08-T07 authority before import. Node, the ESM loader, and the process
+checked against the frozen M08-T07 authority before import; the current persistence module is
+audited without making T08 formal prerequisite authority. Node, the ESM loader, and the process
 environment remain trusted.
 
-The emitted editor graph has twenty-one reviewed static ESM edges. Production dependencies remain
+The emitted editor graph has thirty-six emitted files and twenty-four reviewed static ESM edges.
+The current root exposes thirty-five runtime exports and eighty-eight types: T08 contributes its
+persistence factory and thirteen types, while T09 contributes exactly one validator factory and
+six types. Production dependencies remain
 only `@desen/protocol` and `@desen/validator`; the graph has no React, DOM, Node-platform, storage,
-network, dynamic-import, or evaluation authority. Every new public declaration retains TSDoc and
-the emitted package exposes exactly one new runtime factory and six new public types.
+network, dynamic-import, or evaluation authority. Every new public declaration retains TSDoc.
 
 ## Nonclaims
 
 This task does not prove pointer-derived identity, execute obligations, resolve dynamic values,
-load Catalog packages, run adapters, add persistence authority, provide undo/redo or viewport
-policy, or close the terminal React/DOM and G08 boundary. It is not a hostile-JavaScript sandbox.
+load Catalog packages, invoke persistence adapters, add storage or durability authority, provide
+undo/redo or viewport policy, or close the terminal React/DOM and G08 boundary. It is not a
+hostile-JavaScript sandbox.
 `M08-T10` retains terminal integration and G08.
 
 ## Reproduction
 
 ```text
 pnpm --filter @desen/editor-core build
+pnpm --filter @desen/editor-core test:persistence
 pnpm --filter @desen/editor-core test:continuous-validation
 pnpm --filter @desen/editor-core test:public-package
 node scripts/generate-editor-core-continuous-validation-proof.mjs
@@ -96,4 +103,4 @@ node scripts/verify-editor-core-continuous-validation.mjs
 node --test tests/editor-core-continuous-validation.test.mjs
 ```
 
-Final artifact: `sha256:e313fd7e549be53e58945524ff11b82c10246325d1cbcb469fd83d1b843c3785`
+Final artifact: `sha256:7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a`
