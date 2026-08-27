@@ -641,6 +641,28 @@ navigation'dır. React renderer/DOM davranışı, selection/viewport/undo politi
 senkronizasyon, somut durable storage/network adapter'ı, dynamic obligation execution,
 hostile-JavaScript sandbox'ı ve streaming/preallocation memory-DoS sınırı bu kanıtın dışındadır.
 
+M09-T01 artık `DONE`'dır. İlk React/Vite Desen App kabuğu; yönlendirici proje ana sayfasını, kapalı
+`/projects`, `/projects/:projectId` ve `/projects/:projectId/surfaces/:surfaceId` rota profilini,
+aynı origin History API geçişlerini, sabit ve inert fixture aramasını, açık not-found geri dönüşünü,
+responsive yerleşimi ve klavye/erişilebilirlik davranışını sağlar. Paylaşılan Figma wireframe'i
+yalnızca bilgi hiyerarşisi ve kullanıcı yönlendirmesi girdisidir; çalıştırılabilir kaynak veya kanıt
+otoritesi değildir.
+
+Uygulama build, typecheck ve lint kontrolleri yerelde geçer; odak uygulama suite'i 43/43, bağımsız
+mutasyon suite'i 8/8 geçer. Exact kanıt 9.795 baytlık
+[`desen-app-0.1.0-shell-navigation.json`](../proof/artifacts/desen-app-0.1.0-shell-navigation.json)
+artifact'ıdır ve
+`sha256:3a7ff5d58815eb4a731ce10271a39bc8567d846e57c1aaf6303beee624465fdb` ile pinlenir. Sequence 40
+63/63 geçer ve 36 donmuş artifact ile 72 reader'ı
+`sha256:eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0` başında doğrular.
+Current CI successor 174 workload ve 82 proof pair içerir. Bunlar yerel makbuzlardır; required gate
+veya hosted-CI başarısı çıkarımı yapılmaz.
+
+Bu dilim Catalog tabanlı panel/layer tree, gerçek adapter canvas'ı, Source düzenleme, diagnostics,
+persistence, Design/Run, publish veya activation davranışı eklemez. Genel ilerleme 96/145 (%66),
+M09 ilerlemesi 1/14, kanıt kapıları 9/13'tür; sıradaki iş M09-T02 Catalog tabanlı component panel ve
+layer tree'dir.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

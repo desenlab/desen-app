@@ -3658,3 +3658,30 @@ This file records implementation discoveries without changing the frozen DESEN 0
   be established by its own M09 evidence. Node.js, the ESM loader, process environment, Proxy
   traps, concrete durable adapters, and streaming/preallocation memory-DoS guarantees remain
   outside this proof.
+
+## PF-088 — Product-shell navigation is an application profile, not DESEN document semantics
+
+- Status: OPEN
+- Blocks proof: No; M09-T01 can expose one conservative finite application route profile without
+  changing the frozen protocol or granting the shell editor authority.
+- Protocol location: Outside DESEN 0.1.0 document semantics; related application/editor boundaries
+  and `PF-078`–`PF-087`
+- Observation: DESEN 0.1.0 defines Source surfaces and stable identities but does not define a
+  product's project list, browser URL grammar, navigation library, search behavior, workspace
+  chrome, responsive breakpoints, or focus-management policy. A surface identity therefore does
+  not authorize route aliases, project discovery, default project selection, or silent fallback.
+  A design file can inform product hierarchy and language but cannot become protocol or proof
+  authority.
+- Implementation decision: M09-T01 admits only `/projects`, `/projects/:projectId`, and
+  `/projects/:projectId/surfaces/:surfaceId`, with bounded lowercase kebab-case segments. The bare
+  root is replaced with `/projects`. App-owned transitions stay on the current origin, contain no
+  credentials, query, or fragment, and publish one private event after History API mutation;
+  `popstate` owns browser traversal. Unknown routes, projects, and surfaces render explicit
+  not-found guidance rather than guessing an alias. Search observes only two fixed inert fixtures.
+  Project creation and Catalog connection remain explained disabled actions. The Figma wireframe
+  supplies UX input only and is neither bundled runtime data nor evidence authority.
+- Future action: Later M09 tasks may replace fixture summaries with authenticated application
+  state and connect editor, Catalog, canvas, diagnostics, persistence, Run, and publish behavior
+  through their public boundaries. They must retain explicit route/failure ownership or document
+  and test any widening; no later slice may retroactively present M09-T01 fixtures as durable
+  project or protocol authority.

@@ -96,13 +96,13 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "5604fc3f76736614f8b7741c1a6e1d103dfa18f626a6c140f33e9d02c1b47f96";
+  "99cd8deb90ca33e409f7c94099c20a561310353b7c9242115fd001aff0c524e5";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "d7745b8bd83e1d041ca2df40fe65d274130a2670d9245b2e9cf2195b41adccc4";
+  "f5ec4def7813e640bf0162cabb6614fc1f138fa4127b588285caf2a0dbdd6479";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "f4807acfc06f4d2cdd92f44d677aa1c9fbf47a800bc84cadaf3caa69b87e970f";
+  "b1ed3947955c9309a854296504a8141f805c3a7a63a392a89e427bc992f52e60";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
-  "86f2dbb30344f9fcafbc656627b9a5bd70a4854405066d6e1c9b33594869e47b";
+  "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = SAFE_OBJECT_FREEZE(["apps/*", "packages/*"]);
@@ -507,6 +507,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "editor-core-terminal-integration",
     "scripts/verify-editor-core-terminal-integration.mjs",
     "tests/editor-core-terminal-integration.test.mjs",
+  ],
+  [
+    "desen-app-shell-navigation",
+    "scripts/verify-desen-app-shell-navigation.mjs",
+    "tests/desen-app-shell-navigation.test.mjs",
   ],
 ]);
 
@@ -1457,7 +1462,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "e11af281ae5911bf8fb5226fd506daa074b81a1a33d3ee8478e4cbe7d4ab0d8c";
+  "d4f4493585c1a62a25e01917946bb3d562c3da43ac4ca77a571a00cfebe49859";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

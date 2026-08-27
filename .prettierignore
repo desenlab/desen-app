@@ -11,3 +11,5 @@ tests/fixtures/standards/a2ui/0.9.1/common_types.json
 tests/fixtures/standards/a2ui/0.9.1/server_to_client.json
 # Canonical hosted-campaign evidence is byte- and SHA-pinned by its verifier.
 docs/proof/baselines/i07-04-affected-selector-promotion.json
+# Deterministic task evidence is byte- and SHA-pinned by its generator/verifier.
+docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json

@@ -707,9 +707,32 @@ Evidence:
 
 ### Desen App
 
-The visual authoring product. It edits a DESEN Source directly, renders production adapters in the
-canvas, provides schema-driven controls, switches between Design and Run modes, and sends valid
-sources to the publisher.
+The visual authoring product. M09-T01 establishes only its application-owned shell and project
+navigation, not the editor composition promised by later M09 tasks.
+
+The first slice owns three exact route forms: `/projects`, `/projects/:projectId`, and
+`/projects/:projectId/surfaces/:surfaceId`. The bare root is replaced with `/projects`; app-owned
+navigation stays on the current origin and uses the browser History API plus one private
+application event. Browser traversal is observed through `popstate`. Segments are finite lowercase
+kebab-case values, and unknown routes, projects, or surfaces fail closed into an explicit recovery
+view. App-owned navigation destinations with credentials, a query, or a fragment are rejected.
+This is an internal Web application profile, not DESEN protocol routing semantics.
+
+Project and surface data are two fixed recursively frozen fixtures. Search filters only those inert
+summaries; it does not discover, load, create, persist, or alias a project. The shell keeps future
+actions visibly disabled and explained. Native landmarks and controls, a skip link, current-item
+semantics, visible keyboard focus, route-heading focus, reduced-motion handling, and responsive CSS
+make the bounded navigation usable without inventing editor behavior.
+
+M09-T01 imports React and React DOM only. It does not import editor-core, editor-web, runtime-react,
+the reference Catalog, publisher, or control-plane code. It therefore has no Source mutation,
+Catalog connection, real-adapter canvas, selection/inspector, persistence, diagnostics, Design/Run,
+publication, or activation authority. Later M09 tasks must connect those capabilities through their
+public package boundaries and establish their own evidence.
+
+The M09 Figma wireframe is UX input for hierarchy and guidance, not architecture, proof, runtime,
+or protocol authority. Repository-owned TypeScript, React structure, CSS Modules, and automated
+user-observable tests remain authoritative for the implementation.
 
 ### Reference Host Web
 

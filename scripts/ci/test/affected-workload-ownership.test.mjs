@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 162,
+  PROOF_UNIT: 164,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
-  FROZEN_INPUT: 125,
-  PACKAGE_OR_APPLICATION: 429,
-  SHARED_PROOF_INFRASTRUCTURE: 199,
-  PROJECT_DOCUMENTATION: 117,
+  FROZEN_INPUT: 126,
+  PACKAGE_OR_APPLICATION: 439,
+  SHARED_PROOF_INFRASTRUCTURE: 201,
+  PROJECT_DOCUMENTATION: 118,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1119 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1135 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1119 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1119);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1135);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 162);
+  assert.equal(proofEntries.length, 164);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -162,6 +162,12 @@ test("permits strict selection only for exact verifier and root-test proof input
       "tests/editor-core-terminal-integration.test.mjs",
     ],
   );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "desen-app-shell-navigation")
+      .map(({ path: trackedPath }) => trackedPath),
+    ["scripts/verify-desen-app-shell-navigation.mjs", "tests/desen-app-shell-navigation.test.mjs"],
+  );
   for (const entry of proofEntries) {
     assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.SELECT_PROOF_UNIT);
     const verifier = nodeById.get(entry.verifierNodeId);
@@ -190,7 +196,7 @@ test("permits strict selection only for exact verifier and root-test proof input
   }
 });
 
-test("the reviewed M08 successor preserves the historical I07-04 ownership projection", async () => {
+test("the reviewed M09 successor preserves the historical I07-04 ownership projection", async () => {
   const currentPaths = await currentTrackedPaths();
   const current = createAffectedWorkloadOwnership(currentPaths);
   const promotedPaths = [
@@ -298,6 +304,22 @@ test("the reviewed M08 successor preserves the historical I07-04 ownership proje
     "scripts/lib/editor-core-terminal-integration-proof.mjs",
     "scripts/verify-editor-core-terminal-integration.mjs",
     "tests/editor-core-terminal-integration.test.mjs",
+    "apps/desen-app/index.html",
+    "apps/desen-app/src/application.module.css",
+    "apps/desen-app/src/application.tsx",
+    "apps/desen-app/src/main.tsx",
+    "apps/desen-app/src/project-data.ts",
+    "apps/desen-app/src/project-navigation.ts",
+    "apps/desen-app/src/styles.css",
+    "apps/desen-app/test/application.test.tsx",
+    "apps/desen-app/test/main-lifecycle.test.tsx",
+    "apps/desen-app/test/project-navigation.test.ts",
+    "docs/proof/DESEN-APP-SHELL-NAVIGATION.md",
+    "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json",
+    "scripts/generate-desen-app-shell-navigation-proof.mjs",
+    "scripts/lib/desen-app-shell-navigation-proof.mjs",
+    "scripts/verify-desen-app-shell-navigation.mjs",
+    "tests/desen-app-shell-navigation.test.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);
@@ -309,7 +331,7 @@ test("the reviewed M08 successor preserves the historical I07-04 ownership proje
   for (const successorPath of successorPaths) {
     assert.ok(
       current.entries.some(({ path: candidate }) => candidate === successorPath),
-      `${successorPath} must be tracked by the reviewed M08 successor`,
+      `${successorPath} must be tracked by the reviewed M09 successor`,
     );
   }
 

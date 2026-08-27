@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-shell-navigation",
+  "profile": "desen.app.shell-navigation-proof.v1",
+  "task": "M09-T01",
+  "result": "PASS",
+  "prerequisite": {
+    "task": "M08-T10",
+    "gate": "G08",
+    "path": "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json",
+    "bytes": 325549,
+    "sha256": "5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b",
+    "proofId": "editor-core-terminal-integration",
+    "profile": "desen.editor-core.terminal-integration-proof.v1",
+    "result": "PASS"
+  },
+  "claim": {
+    "taskStatus": "DONE",
+    "prerequisiteGate": "G08",
+    "prerequisiteStatus": "DONE",
+    "shellImplemented": true,
+    "projectNavigationImplemented": true,
+    "directUrlNavigationImplemented": true,
+    "unknownRoutesFailClosed": true,
+    "catalogDrivenPanelImplemented": false,
+    "realAdapterCanvasImplemented": false,
+    "selectionOrInspectorImplemented": false,
+    "persistenceUiImplemented": false,
+    "runOrPublishImplemented": false,
+    "userProjectCreationImplemented": false
+  },
+  "application": {
+    "package": {
+      "name": "@desen/app-web",
+      "private": true,
+      "framework": "react@19.2.8",
+      "buildTool": "vite@8.1.5",
+      "proofParser": "typescript@6.0.3",
+      "routerDependency": false,
+      "uiKitDependency": false,
+      "iconDependency": false
+    },
+    "shell": {
+      "routes": [
+        "/projects",
+        "/projects/:projectId",
+        "/projects/:projectId/surfaces/:surfaceId"
+      ],
+      "navigationAuthority": "SAME_ORIGIN_HISTORY_API_WITH_POPSTATE_AND_APP_EVENT",
+      "unknownRoutePolicy": "EXPLICIT_NOT_FOUND",
+      "fixtureProjects": [
+        "account-app",
+        "checkout-pilot"
+      ],
+      "search": "INERT_FIXED_FIXTURE_FILTER",
+      "responsiveCss": true,
+      "reducedMotionHonored": true,
+      "keyboardFocusVisible": true,
+      "routeHeadingFocus": true,
+      "landmarksAndCurrentPageSemantics": true,
+      "disabledFutureActionsExplained": true,
+      "appTokenPrefix": "--desen-app-"
+    }
+  },
+  "boundary": {
+    "imports": {
+      "method": "TYPESCRIPT_AST_MODULE_SPECIFIER_INVENTORY_WITH_TRACKED_RELATIVE_RESOLUTION",
+      "imports": [
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "react",
+          "resolvedPath": null
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./project-navigation.js",
+          "resolvedPath": "apps/desen-app/src/project-navigation.ts"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./project-data.js",
+          "resolvedPath": "apps/desen-app/src/project-data.ts"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./application.module.css",
+          "resolvedPath": "apps/desen-app/src/application.module.css"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "react",
+          "resolvedPath": null
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./project-navigation.js",
+          "resolvedPath": "apps/desen-app/src/project-navigation.ts"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./project-data.js",
+          "resolvedPath": "apps/desen-app/src/project-data.ts"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/main.tsx",
+          "specifier": "react",
+          "resolvedPath": null
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/main.tsx",
+          "specifier": "react-dom/client",
+          "resolvedPath": null
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/main.tsx",
+          "specifier": "./application.js",
+          "resolvedPath": "apps/desen-app/src/application.tsx"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/main.tsx",
+          "specifier": "./project-navigation.js",
+          "resolvedPath": "apps/desen-app/src/project-navigation.ts"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/main.tsx",
+          "specifier": "./styles.css",
+          "resolvedPath": "apps/desen-app/src/styles.css"
+        }
+      ],
+      "htmlModuleEntry": "/src/main.tsx",
+      "desenPackageImports": 0,
+      "arbitraryExecutableImports": 0,
+      "arbitraryExecutableHtmlEntries": 0
+    },
+    "trackedFiles": 19,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 779,
+        "sha256": "503356877400ec74a11e959aae8fcfa51f1fc99aa6ee444c8b083504cb9629dc"
+      },
+      {
+        "path": "apps/desen-app/tsconfig.json",
+        "bytes": 185,
+        "sha256": "99eaed090e363413adb250a8c295388847287d412f6dceedc613d13037a62066"
+      },
+      {
+        "path": "apps/desen-app/index.html",
+        "bytes": 413,
+        "sha256": "a49da81588b7e7d49ec458421cbf77404af8b3417bfbc60c25bb5063aa0de9f0"
+      },
+      {
+        "path": "apps/desen-app/README.md",
+        "bytes": 2893,
+        "sha256": "40be943cf2084568f273781446ff568f7da546e9195bce63cef45116edb7beef"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 20835,
+        "sha256": "39b5a00d1e1526de368d3ffe2a3ebd9c0c281b814e897b5b6d599f8f45351797"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 19235,
+        "sha256": "d215aa56b046a38cacb6bfbbed2e0528d3a0e0107f682b619bf306fe970f29a5"
+      },
+      {
+        "path": "apps/desen-app/src/main.tsx",
+        "bytes": 807,
+        "sha256": "78cb1a864a7fe554720e64e159d4596d31d654b59066e10e49c55d253915b277"
+      },
+      {
+        "path": "apps/desen-app/src/project-data.ts",
+        "bytes": 2667,
+        "sha256": "e17f1f72d156312b7bee80c5057abd56c0383294df274841ef7a350fb90b8c18"
+      },
+      {
+        "path": "apps/desen-app/src/project-navigation.ts",
+        "bytes": 5889,
+        "sha256": "bd3b6f836b1705ad8f0e0da66dad4817c29666f5a92f5fda22bb78dfa39a364a"
+      },
+      {
+        "path": "apps/desen-app/src/styles.css",
+        "bytes": 1605,
+        "sha256": "23baa927bde1533c2c09af79b7b855ef1e5830c7f894e702d8000e82864e9449"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 8873,
+        "sha256": "10b1e54541e437b9e669afec5d5dfad7cdc69c1b949f3683f76cb90f63a0d380"
+      },
+      {
+        "path": "apps/desen-app/test/main-lifecycle.test.tsx",
+        "bytes": 2744,
+        "sha256": "8bfe83684f5c69892adcd0193dc23bea5317a9f4dd4144b3b1a4615755bbdc8c"
+      },
+      {
+        "path": "apps/desen-app/test/project-navigation.test.ts",
+        "bytes": 7176,
+        "sha256": "b81a08bfb5cbb527098824ab0621fc963607e56a2de6e55f061cc61e68b2c11f"
+      },
+      {
+        "path": "package.json",
+        "bytes": 82072,
+        "sha256": "12cf087e1459cfcdce0b610be2696f2489be48985ade01da83dc39f9f2a59d36"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-shell-navigation-proof.mjs",
+        "bytes": 29329,
+        "sha256": "670217b11b327d7e98fe0ade8105fd954e1d66086f592af1b18df756458f8863"
+      },
+      {
+        "path": "scripts/generate-desen-app-shell-navigation-proof.mjs",
+        "bytes": 791,
+        "sha256": "d0d3d37213f112a92b0dec6b62fe911d7db082f16eb61fbeea56442853e95031"
+      },
+      {
+        "path": "scripts/verify-desen-app-shell-navigation.mjs",
+        "bytes": 651,
+        "sha256": "b7b5ffcc110a210841e243d358cb3f2b34c198dd84ea483c23458c8cec274e19"
+      },
+      {
+        "path": "tests/desen-app-shell-navigation.test.mjs",
+        "bytes": 14659,
+        "sha256": "e740838c73a3d1f7f7c5d92ad45ac2be2147cdaba51389f2da35b09e1626e52c"
+      }
+    ]
+  },
+  "evidence": {
+    "tests": {
+      "files": 3,
+      "registrations": {
+        "application.test.tsx": 6,
+        "main-lifecycle.test.tsx": 3,
+        "project-navigation.test.ts": 8
+      },
+      "runtimeCases": {
+        "project-navigation.test.ts": 30,
+        "application.test.tsx": 10,
+        "main-lifecycle.test.tsx": 3
+      },
+      "totalRuntimeCases": 43,
+      "positiveAndNegativeCoverage": true,
+      "executionAuthority": "ROOT_SCRIPT_REQUIRES_SUCCESSFUL_FOCUSED_VITEST_RUN"
+    },
+    "rootTestNames": [
+      "[authority] binds M09-T01 to the exact completed G08 artifact",
+      "[shell] records the closed route, fixture, guidance, and accessibility profile",
+      "[boundary] keeps the first app slice free of editor, renderer, persistence, and publish authority",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[mutation] rejects prerequisite, route, package, and scope-boundary drift",
+      "[verification] rejects artifact and visible proof-pin drift",
+      "[writer] atomically writes exact evidence and preserves a destination on tampering",
+      "[filesystem] rejects linked prerequisite, artifact, and proof authorities"
+    ]
+  },
+  "nonclaims": [
+    "No catalog-driven component panel or layer tree.",
+    "No runtime-react canvas, adapter execution, selection overlay, or inspector.",
+    "No editor-core mutation, undo, save/open, Design/Run, fixture execution, publish, or activation.",
+    "No user-created project persistence; New project remains disabled and explained."
+  ]
+}

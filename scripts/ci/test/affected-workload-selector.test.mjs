@@ -243,8 +243,9 @@ test("continuous validation selects the exact T03-T07-connected successor closur
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(plan.workloadCount, 36);
+  assert.equal(plan.workloadCount, 38);
   assert.equal(plan.nodeIds.includes("editor-web-public-package-contract"), true);
   assert.equal(plan.nodeIds.includes("verify-editor-core-continuous-validation"), true);
   assert.equal(plan.nodeIds.includes("test-editor-core-continuous-validation"), true);
@@ -271,8 +272,9 @@ test("terminal integration selects every formal editor parent and frozen P-18 ru
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(plan.workloadCount, 36);
+  assert.equal(plan.workloadCount, 38);
   assert.equal(plan.nodeIds.includes("editor-web-public-package-contract"), true);
 });
 
@@ -307,7 +309,7 @@ test("policy, package, documentation, and shared inputs always expand to exhaust
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, "POLICY_DRIFT");
     assert.equal(plan.strictSubset, false);
-    assert.equal(plan.workloadCount, 172);
+    assert.equal(plan.workloadCount, 174);
   }
 });
 
@@ -340,13 +342,13 @@ test("all boundary uncertainty classes expand to exhaustive without partial path
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, category);
     assert.deepEqual(plan.changedPaths, []);
-    assert.equal(plan.workloadCount, 172);
+    assert.equal(plan.workloadCount, 174);
   }
 });
 
 test("fabricated, cloned, proxied, mutated, and self-digested receipts fail safe", async () => {
   const paths = currentPaths();
-  const base = await affectedBoundary(paths, ["scripts/verify-protocol-types.mjs"]);
+  const base = await affectedBoundary(paths, ["scripts/verify-protocol-canonicalization.mjs"]);
   const clone = structuredClone(base);
   const forged = structuredClone(base);
   forged.changes[0].beforeObjectId = "2".repeat(40);

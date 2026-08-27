@@ -2318,3 +2318,28 @@ does not add or exercise a React renderer, component or DOM behavior, selection/
 policy, multi-user synchronization, concrete durable storage or network authority, dynamic
 obligation execution, a hostile-JavaScript sandbox, or streaming/preallocation memory-DoS bounds.
 M09-T01 is next.
+
+## M09-T01 — Desen App shell and project navigation (local evidence)
+
+The implementation introduces the first React/Vite Desen App surface behind the exact
+completed G08 prerequisite. It owns a guided projects home, the three bounded route forms
+`/projects`, `/projects/:projectId`, and `/projects/:projectId/surfaces/:surfaceId`, same-origin
+History API navigation, browser traversal, exact fixture project/surface resolution, fixture-only
+search, explicit not-found recovery, responsive styling, and keyboard/accessibility behavior.
+
+The Figma wireframe is design input only. It is not proof authority, an executable dependency, or a
+semantic oracle. The task does not connect a Catalog, render a real adapter canvas, expose a
+component panel, layer tree, selection, or inspector, mutate or persist a Source, calculate
+diagnostics, create user projects, run a surface, publish a revision, or activate a channel.
+
+The exact 9,795-byte task artifact is
+`docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json` at
+`sha256:3a7ff5d58815eb4a731ce10271a39bc8567d846e57c1aaf6303beee624465fdb`. The application
+build, typecheck, and lint pass locally; the focused application suite passes 43/43 and the
+independent root suite passes 8/8. Append-only reader checkpoint sequence 40 passes 63/63 and
+closes at `sha256:eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0`
+with 36 frozen artifacts and 72 readers while preserving every predecessor artifact receipt.
+
+These local receipts make no required-gate or hosted CI claim. M09-T01 is `DONE` in the dedicated
+status documents, advancing implementation progress to 96/145 (66%) and M09 to 1/14 while leaving
+proof gates at 9/13; M09-T02 is next. No `P-*`, `N-*`, `S-*`, or `G*` status changes here.
