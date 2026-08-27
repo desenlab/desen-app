@@ -113,6 +113,14 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
       "test:editor-core-continuous-validation",
     ],
   );
+  assert.deepEqual(
+    built.currentCompatibility.packageScripts.terminalProofSuccessor.map(({ name }) => name),
+    [
+      "generate:editor-core-terminal-integration",
+      "verify:editor-core-terminal-integration",
+      "test:editor-core-terminal-integration",
+    ],
+  );
   assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
   assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
   assert.deepEqual(built.currentCompatibility.publicApi.compatibilityOnlySuccessor, {
@@ -138,11 +146,22 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
     publicRuntimeCasesAdded: 1,
     publicCompilerNegativeAssertionsAdded: 6,
   });
+  assert.deepEqual(built.currentCompatibility.publicApi.terminalProofSuccessor, {
+    task: "M08-T10",
+    authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+    focusedTestPath: "packages/editor-core/test/terminal-integration.test.ts",
+    runtimeExportsAdded: 0,
+    typeExportsAdded: 0,
+    focusedRuntimeCases: 4,
+    publicRuntimeCasesAdded: 0,
+    publicCompilerNegativeAssertionsAdded: 0,
+  });
   assert.equal(built.currentCompatibility.packageBoundary.currentEmittedFiles, 36);
   assert.equal(built.currentCompatibility.packageBoundary.staticEsmEdges, 24);
   assert.equal(built.currentCompatibility.packageBoundary.editorWebOwnsTransportAdapter, true);
   assert.equal(built.currentCompatibility.tests.editorCorePublicRuntimeCases, 50);
   assert.equal(built.currentCompatibility.tests.editorCorePublicCompilerNegativeAssertions, 102);
+  assert.equal(built.currentCompatibility.tests.editorCoreTerminalIntegrationRuntimeCases, 4);
   assert.equal(built.currentCompatibility.tests.editorCoreContinuousValidationRuntimeCases, 12);
   assert.equal(
     built.currentCompatibility.tests.editorCoreContinuousValidationCompilerNegativeAssertions,
@@ -170,6 +189,7 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
     "packages/editor-core/dist/continuous-validation.d.ts",
     "packages/editor-core/test/continuous-validation.test.ts",
     "packages/editor-core/test/continuous-validation.types.ts",
+    "packages/editor-core/test/terminal-integration.test.ts",
     "packages/editor-web/src/local-source-persistence.ts",
     "scripts/lib/editor-core-persistence-proof.mjs",
     "scripts/generate-editor-core-persistence-proof.mjs",
@@ -406,6 +426,12 @@ test("[options] rejects linked authority and active, inherited, proxy, or shared
   assert.equal(
     built.currentCompatibility.nonclaims.includes(
       "M08-T09 continuous-validation bytes are compatibility-only successor authority and are not part of the frozen M08-T08 claim.",
+    ),
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.nonclaims.includes(
+      "M08-T10 terminal-integration bytes are compatibility-only successor authority and are not part of the frozen M08-T08 claim.",
     ),
     true,
   );

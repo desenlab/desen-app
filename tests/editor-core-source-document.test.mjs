@@ -27,6 +27,7 @@ const AUTHORING_ROUND_TRIP_TYPES = "packages/editor-core/test/authoring-round-tr
 const PERSISTENCE_SOURCE = "packages/editor-core/src/persistence.ts";
 const PERSISTENCE_TEST = "packages/editor-core/test/persistence.test.ts";
 const PERSISTENCE_TYPES = "packages/editor-core/test/persistence.types.ts";
+const TERMINAL_INTEGRATION_TEST = "packages/editor-core/test/terminal-integration.test.ts";
 const PUBLIC_TEST = "packages/editor-core/test/public-package.mjs";
 const ROOT_TEST = "tests/editor-core-source-document.test.mjs";
 const BASELINE_RUNTIME_PATHS = [
@@ -404,6 +405,16 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
+  assert.deepEqual(built.currentCompatibility.boundary.terminalProofSuccessor, {
+    task: "M08-T10",
+    authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+    focusedTestPath: TERMINAL_INTEGRATION_TEST,
+    runtimeExportsAdded: 0,
+    typeExportsAdded: 0,
+    focusedRuntimeCases: 4,
+    publicRuntimeCasesAdded: 0,
+    publicCompilerNegativeAssertionsAdded: 0,
+  });
   assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessors.at(-1), {
     task: "M08-T09",
     sourcePath: "packages/editor-core/src/continuous-validation.ts",
@@ -428,9 +439,14 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
   assert.equal(built.currentCompatibility.evidence.tests.persistenceCompilerNegativeCases, 21);
   assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 43);
   assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 102);
-  assert.equal(built.currentCompatibility.evidence.trackedFiles.length, 61);
+  assert.equal(built.currentCompatibility.evidence.tests.terminalIntegrationRuntimeCases, 4);
+  assert.equal(built.currentCompatibility.evidence.trackedFiles.length, 62);
   assert.equal(
     built.currentCompatibility.boundary.packageScripts.includes("test:continuous-validation"),
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.boundary.packageScripts.includes("test:terminal-integration"),
     true,
   );
   for (const receipt of SUCCESSOR_RUNTIME_RECEIPTS) {

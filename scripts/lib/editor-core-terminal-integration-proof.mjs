@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
 import { constants as fileConstants } from "node:fs";
-import { lstat, mkdir, mkdtemp, open, realpath, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, open, readdir, realpath, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { types as utilTypes } from "node:util";
@@ -97,6 +97,10 @@ const ISOLATED_RUNTIME_PATHS = Object.freeze([
   ...EDITOR_RUNTIME_PATHS,
   ...DEPENDENCY_RUNTIME_PATHS,
 ]);
+const EDITOR_SOURCE_DIRECTORY = "packages/editor-core/src";
+const EDITOR_DIST_DIRECTORY = "packages/editor-core/dist";
+const EXPECTED_EDITOR_SOURCE_INVENTORY = Object.freeze([...EDITOR_SOURCE_PATHS].sort(compareText));
+const EXPECTED_EDITOR_DIST_INVENTORY = Object.freeze([...DIST_PATHS].sort(compareText));
 
 const HISTORICAL_PACKAGE_TEST_PATHS = Object.freeze(
   [
@@ -450,18 +454,142 @@ function captureByteMap(raw, allowedPaths, label) {
   return captured;
 }
 
-const BUILD_OPTION_KEYS = Object.freeze(["fileOverrides", "prerequisiteBytes", "runtime"]);
+const BUILD_OPTION_KEYS = Object.freeze([
+  "fileOverrides",
+  "inventoryExtraPaths",
+  "prerequisiteBytes",
+  "runtime",
+]);
+
+function captureInventoryExtraPaths(raw) {
+  if (raw === undefined) return Object.freeze([]);
+  if (
+    !Array.isArray(raw) ||
+    utilTypes.isProxy(raw) ||
+    Object.getPrototypeOf(raw) !== Array.prototype
+  ) {
+    fail("OPTIONS_INVALID", "buildOptions.inventoryExtraPaths must be one plain non-Proxy array.");
+  }
+  const keys = Reflect.ownKeys(raw);
+  const expectedKeys = [
+    ...Array.from({ length: raw.length }, (_, index) => String(index)),
+    "length",
+  ];
+  if (JSON.stringify(keys) !== JSON.stringify(expectedKeys)) {
+    fail(
+      "OPTIONS_INVALID",
+      "buildOptions.inventoryExtraPaths must be one dense undecorated array.",
+    );
+  }
+  const captured = [];
+  for (let index = 0; index < raw.length; index += 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(raw, String(index));
+    if (
+      descriptor === undefined ||
+      !("value" in descriptor) ||
+      descriptor.enumerable !== true ||
+      descriptor.writable !== true ||
+      descriptor.configurable !== true ||
+      typeof descriptor.value !== "string" ||
+      !/^packages\/editor-core\/(?:src|dist)\/[^/]+$/u.test(descriptor.value)
+    ) {
+      fail(
+        "OPTIONS_INVALID",
+        `buildOptions.inventoryExtraPaths[${index}] must be one direct editor-core inventory path.`,
+      );
+    }
+    captured.push(descriptor.value);
+  }
+  return Object.freeze(captured);
+}
 
 function captureBuildOptions(raw) {
   const source = captureExactObject(raw, BUILD_OPTION_KEYS, "buildOptions");
   return Object.freeze({
     fileOverrides: captureByteMap(source.fileOverrides, TRACKED_PATHS, "fileOverrides"),
+    inventoryExtraPaths: captureInventoryExtraPaths(source.inventoryExtraPaths),
     prerequisiteBytes: captureByteMap(
       source.prerequisiteBytes,
       EDITOR_CORE_TERMINAL_INTEGRATION_PREREQUISITE_PINS.map(({ path: pinPath }) => pinPath),
       "prerequisiteBytes",
     ),
     runtime: source.runtime,
+  });
+}
+
+async function enumerateRegularInventory(relativeDirectory, label) {
+  const absoluteDirectory = path.join(WORKSPACE_ROOT, relativeDirectory);
+  try {
+    const [canonicalDirectory, directoryEntry] = await Promise.all([
+      realpath(absoluteDirectory),
+      lstat(absoluteDirectory),
+    ]);
+    if (
+      canonicalDirectory !== absoluteDirectory ||
+      !directoryEntry.isDirectory() ||
+      directoryEntry.isSymbolicLink()
+    ) {
+      fail("FILESYSTEM_UNSAFE", `${label} must be one canonical non-symlink directory.`);
+    }
+    const firstNames = (await readdir(absoluteDirectory)).sort(compareText);
+    const inventory = [];
+    for (const name of firstNames) {
+      if (name === "." || name === ".." || name.includes("/") || name.includes("\\")) {
+        fail("FILESYSTEM_UNSAFE", `${label} contains an unsafe directory entry.`);
+      }
+      const entry = await lstat(path.join(absoluteDirectory, name));
+      if (!entry.isFile() || entry.isSymbolicLink() || entry.nlink !== 1) {
+        fail("FILESYSTEM_UNSAFE", `${label}/${name} must be one unlinked regular file.`);
+      }
+      inventory.push(`${relativeDirectory}/${name}`);
+    }
+    const secondNames = (await readdir(absoluteDirectory)).sort(compareText);
+    if (JSON.stringify(firstNames) !== JSON.stringify(secondNames)) {
+      fail("FILESYSTEM_UNSAFE", `${label} changed while its inventory was inspected.`);
+    }
+    return Object.freeze(inventory.sort(compareText));
+  } catch (error) {
+    if (error instanceof EditorCoreTerminalIntegrationProofError) throw error;
+    fail("FILESYSTEM_UNSAFE", `${label} cannot be inventoried safely.`, String(error));
+  }
+}
+
+async function verifyWorkspaceFileInventory(inventoryExtraPaths = Object.freeze([])) {
+  const [sourceInventory, distInventory] = await Promise.all([
+    enumerateRegularInventory(EDITOR_SOURCE_DIRECTORY, "editor-core source inventory"),
+    enumerateRegularInventory(EDITOR_DIST_DIRECTORY, "editor-core distribution inventory"),
+  ]);
+  const simulatedSourceExtras = inventoryExtraPaths.filter((entry) =>
+    entry.startsWith(`${EDITOR_SOURCE_DIRECTORY}/`),
+  );
+  const simulatedDistExtras = inventoryExtraPaths.filter((entry) =>
+    entry.startsWith(`${EDITOR_DIST_DIRECTORY}/`),
+  );
+  const checkedSourceInventory = [...sourceInventory, ...simulatedSourceExtras].sort(compareText);
+  const checkedDistInventory = [...distInventory, ...simulatedDistExtras].sort(compareText);
+  exactArray(
+    checkedSourceInventory,
+    EXPECTED_EDITOR_SOURCE_INVENTORY,
+    "INVENTORY_DRIFT",
+    "Editor source file inventory",
+  );
+  exactArray(
+    checkedDistInventory,
+    EXPECTED_EDITOR_DIST_INVENTORY,
+    "INVENTORY_DRIFT",
+    "Editor distribution file inventory",
+  );
+  if (inventoryExtraPaths.length !== 0) {
+    fail("INVENTORY_OVERRIDE_REJECTED", "Caller inventory substitutions cannot issue PASS.");
+  }
+  return deepFreeze({
+    method: "NO_FOLLOW_EXACT_REGULAR_FILE_INVENTORY",
+    sourceDirectory: EDITOR_SOURCE_DIRECTORY,
+    sourceFiles: sourceInventory.length,
+    sourcePaths: sourceInventory,
+    distDirectory: EDITOR_DIST_DIRECTORY,
+    distFiles: distInventory.length,
+    distPaths: distInventory,
   });
 }
 
@@ -789,6 +917,50 @@ function auditAstFile(sourceText, fileName, layer) {
   });
 }
 
+function resolveAuditedRelativeTarget(fileName, layer, specifier) {
+  if (!specifier.startsWith("./") || !specifier.endsWith(".js")) {
+    fail("PLATFORM_DRIFT", `${fileName} contains an unclosed relative edge: ${specifier}`);
+  }
+  const emittedTarget = path.posix.normalize(
+    path.posix.join(path.posix.dirname(fileName), specifier),
+  );
+  if (layer === "SOURCE") return `${emittedTarget.slice(0, -3)}.ts`;
+  if (layer === "EMITTED_DTS") return `${emittedTarget.slice(0, -3)}.d.ts`;
+  return emittedTarget;
+}
+
+function verifyRelativeEdgeClosure(audits) {
+  const expectedPathsByLayer = Object.freeze({
+    SOURCE: new Set(EDITOR_SOURCE_PATHS),
+    EMITTED_JS: new Set(EDITOR_RUNTIME_PATHS),
+    EMITTED_DTS: new Set(EDITOR_DECLARATION_PATHS),
+  });
+  const receipts = [];
+  for (const audit of audits) {
+    const expectedPaths = expectedPathsByLayer[audit.layer];
+    if (!(expectedPaths instanceof Set)) {
+      fail("PLATFORM_DRIFT", `Unknown AST audit layer: ${audit.layer}`);
+    }
+    for (const specifier of audit.staticSpecifiers) {
+      if (!specifier.startsWith(".")) continue;
+      const target = resolveAuditedRelativeTarget(audit.file, audit.layer, specifier);
+      if (!expectedPaths.has(target)) {
+        fail(
+          "PLATFORM_DRIFT",
+          `${audit.file} resolves outside the exact audited ${audit.layer} closure: ${specifier}`,
+          { target },
+        );
+      }
+      receipts.push(Object.freeze({ from: audit.file, specifier, target, layer: audit.layer }));
+    }
+  }
+  return deepFreeze({
+    closed: true,
+    relativeEdges: receipts.length,
+    receipts,
+  });
+}
+
 function reexportedNames(sourceText, fileName) {
   const sourceFile = parseSourceFile(sourceText, fileName);
   const runtime = [];
@@ -811,7 +983,7 @@ function reexportedNames(sourceText, fileName) {
   });
 }
 
-function verifyBoundary(files, t09Artifact) {
+function verifyBoundary(files, t09Artifact, fileInventory) {
   if (
     files.get(PACKAGE_PATH).byteLength !== 1_665 ||
     sha256(files.get(PACKAGE_PATH)) !==
@@ -921,6 +1093,7 @@ function verifyBoundary(files, t09Artifact) {
       auditAstFile(decodeUtf8(files.get(relativePath), relativePath), relativePath, "EMITTED_DTS"),
     );
   }
+  const relativeEdgeClosure = verifyRelativeEdgeClosure(audits);
   const byLayer = Object.fromEntries(
     ["SOURCE", "EMITTED_JS", "EMITTED_DTS"].map((layer) => {
       const selected = audits.filter((audit) => audit.layer === layer);
@@ -972,8 +1145,15 @@ function verifyBoundary(files, t09Artifact) {
     typeExports: expectedTypes,
     taskRuntimeExportsAdded: 0,
     taskTypeExportsAdded: 0,
-    emittedFiles: DIST_PATHS.length,
-    astAudit: { method: "TYPESCRIPT_AST", byLayer, files: audits.length, receipts: audits },
+    emittedFiles: fileInventory.distFiles,
+    fileInventory,
+    astAudit: {
+      method: "TYPESCRIPT_AST",
+      byLayer,
+      files: audits.length,
+      relativeEdgeClosure,
+      receipts: audits,
+    },
     focusedBehaviorCases: focusedTests.length,
     publicRuntimeAndRootCases: publicTests.length,
     publicCompilerNegativeAssertions: publicTypeAssertions,
@@ -1758,7 +1938,7 @@ async function runTerminalTranscript(runtime, protocol, validSource, validCatalo
   if (
     terminalReport.valid !== true ||
     terminalReport.diagnostics.length !== 0 ||
-    terminalReport.obligations.length === 0 ||
+    terminalReport.obligations.length !== 7 ||
     terminalReport.invalidSubjects.length !== 0 ||
     terminalReport.unmappedDiagnosticIndexes.length !== 0
   ) {
@@ -1803,6 +1983,8 @@ async function runTerminalTranscript(runtime, protocol, validSource, validCatalo
         unmappedDiagnosticCount: terminalReport.unmappedDiagnosticIndexes.length,
         documentFingerprint: terminalReport.documentFingerprint,
         catalogSetFingerprint: terminalReport.catalogSetFingerprint,
+        report: terminalReport,
+        reportCanonical: canonicalReceipt(terminalReport, canonicalizeJsonBytes),
       },
       persistence,
       authoringFingerprints,
@@ -1846,13 +2028,14 @@ export async function buildEditorCoreTerminalIntegrationEvidence(rawOptions = un
   if (options.runtime !== undefined) {
     fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
   }
+  const fileInventory = await verifyWorkspaceFileInventory(options.inventoryExtraPaths);
   const prerequisites = await authenticatePrerequisites(options);
   const files = new Map();
   for (const relativePath of TRACKED_PATHS) {
     files.set(relativePath, await trackedBytes(relativePath, options));
   }
   const t09Artifact = prerequisites.artifacts["M08-T09"];
-  const boundary = verifyBoundary(files, t09Artifact);
+  const boundary = verifyBoundary(files, t09Artifact, fileInventory);
   const executionAuthority = authenticateRuntimeClosure(t09Artifact, files);
   const validSource = parseJson(files.get(SOURCE_FIXTURE_PATH), SOURCE_FIXTURE_PATH);
   const validCatalog = parseJson(files.get(CATALOG_FIXTURE_PATH), CATALOG_FIXTURE_PATH);
@@ -1871,12 +2054,20 @@ export async function buildEditorCoreTerminalIntegrationEvidence(rawOptions = un
       firstGraph.protocol.canonicalizeJsonBytes(first.finalDocument),
       secondGraph.protocol.canonicalizeJsonBytes(second.finalDocument),
     ) ||
+    !bytesEqual(
+      firstGraph.protocol.canonicalizeJsonBytes(first.trace.final.validation.report),
+      secondGraph.protocol.canonicalizeJsonBytes(second.trace.final.validation.report),
+    ) ||
     JSON.stringify(first.traceRoundTrip) !== JSON.stringify(second.traceRoundTrip)
   ) {
     fail("DETERMINISM_DRIFT", "The two independent emitted graphs did not converge exactly.");
   }
   if (options.fileOverrides.size !== 0) {
     fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue terminal integration evidence.");
+  }
+  const finalFileInventory = await verifyWorkspaceFileInventory();
+  if (JSON.stringify(finalFileInventory) !== JSON.stringify(fileInventory)) {
+    fail("INVENTORY_DRIFT", "The editor-core file inventory changed during terminal execution.");
   }
 
   const receipts = [...files.entries()]
@@ -1923,11 +2114,13 @@ export async function buildEditorCoreTerminalIntegrationEvidence(rawOptions = un
       traceValuesEqual: true,
       finalCanonicalBytesEqual: true,
       finalDocumentsDetached: true,
+      fullValidationReportsEqual: true,
       graphOneRoundTrip: first.traceRoundTrip,
       graphTwoRoundTrip: second.traceRoundTrip,
     },
     packageBoundary: {
       currentEmittedFiles: boundary.emittedFiles,
+      fileInventory: boundary.fileInventory,
       productionDependencies: ["@desen/protocol", "@desen/validator"],
       manifestExportRoots: ["."],
       platformNeutral: true,

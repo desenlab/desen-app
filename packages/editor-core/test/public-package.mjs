@@ -384,6 +384,7 @@ test("the package manifest keeps one exact root export and the declared runtime 
       "test:source-document": "vitest run test/source-document.test.ts",
       "test:stable-id-insert": "vitest run test/stable-id-insert.test.ts",
       "test:structural-edits": "vitest run test/structural-edits.test.ts",
+      "test:terminal-integration": "vitest run test/terminal-integration.test.ts",
       "test:coverage": "vitest run --coverage",
     },
     dependencies: {

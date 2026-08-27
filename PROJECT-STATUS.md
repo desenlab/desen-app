@@ -885,19 +885,38 @@ artifact is pinned at
 `sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. `N-012`, `N-018`, and
 `S-003` remain `TESTED`; no proof or normative status changes.
 
+M08-T09 completes synchronous Catalog-bound continuous validation over one immutable Source
+snapshot. It preserves cumulative diagnostics and obligations, fingerprints document and Catalog
+snapshots independently, and maps invalid occurrences only through explicit Validator subjects.
+The exact 40,099-byte artifact is pinned at
+`sha256:7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a`.
+
+M08-T10 now closes M08 and G08 without adding a production helper or public export. Two
+independent exact-byte ESM graphs run the same 32-step command transcript and produce byte-identical
+terminal Sources, identity ledgers, validation reports, persistence receipts, and callback-free
+JSON/RFC 8785 traces. Insertion adds only `sign-in.terminal`, deletion removes only the prepared
+`sign-in.terminal-delete` subtree, every other transition preserves the identity multiset, and a
+controlled interleaved failure exposes no partial document. The terminal Source passes M08-T09
+validation with zero diagnostics and seven retained obligations and survives M08-T08 generation-one
+save/open with exact canonical bytes. TypeScript AST inspection covers all nine source, nine emitted
+JavaScript, and nine emitted declaration files and finds no React, DOM/browser, Node-platform, CSS,
+dynamic-import, evaluation, or function-constructor authority. The 325,549-byte artifact is pinned
+at `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`. This advances
+`S-002` to `TESTED`, P-18 to `PROVEN`, G08 to `DONE`, proof gates to 9/13, and M08 to 10/10.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
-  `G06`, `G07`
+  `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
-- Current milestone: `M08 — UI-independent editor core`
-- Overall implementation progress: `93 / 145 tasks complete (64%)`
+- Current milestone: `M09 — Desen App Web MVP`
+- Overall implementation progress: `95 / 145 tasks complete (66%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
-- M08 progress: `8 / 10 tasks complete (80%)`
-- Proof-gate progress: `8 / 13 complete`
+- M08 progress: `10 / 10 tasks complete (100%)`
+- Proof-gate progress: `9 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
@@ -976,16 +995,17 @@ artifact is pinned at
   `M08-T06 — Event and closed-action editing commands`,
   `M08-T07 — Authoring isolation and unknown-extension round-trip preservation`,
   `M08-T08 — Persistence port and local source adapter`,
-  `M08-T09 — Continuous validation and invalid-node mapping`
+  `M08-T09 — Continuous validation and invalid-node mapping`,
+  `M08-T10 — React/DOM boundary, stable identity, and deterministic command tests`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T10 — React/DOM boundary, stable identity, and deterministic command tests`
-- Status: M08 is 9/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
-  and implementation progress is 94/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M09-T01 — Desen App shell and project navigation`
+- Status: M08 is 10/10, M07 is 11/11, I07-04, G07, and G08 are `DONE`, proof gates are 9/13,
+  and implementation progress is 95/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
   its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
@@ -997,7 +1017,9 @@ artifact is pinned at
   registration, and sequence-36 reader checkpoint. M08-T09 is `DONE` with explicit-subject
   diagnostic mapping, deterministic Source/Catalog fingerprints, an independent root proof, exact
   170-workload/80-pair CI registration, and sequence-37 reader checkpoint. Exact evidence and
-  nonclaims are recorded below.
+  nonclaims are recorded below. M08-T10 is `DONE` with the deterministic 32-step terminal
+  transcript, stable-identity ledger, M08-T09 validation and M08-T08 save/open round trip,
+  independent emitted-graph AST platform audit, and exact terminal-integration artifact.
 
 ## Completed preparation
 
@@ -3288,6 +3310,47 @@ M08-T09 evidence:
 - coverage decision: M08-T09 is `DONE`; `N-012`, `N-014`, `N-018`, and `S-003` remain `TESTED`;
   `S-002` remains `PLANNED`, `P-18` remains `PARTIAL`, proof gates remain 8/13, overall progress is
   94/145 (65%), M08 is 9/10, and M08-T10 is next
+
+M08-T10 / G08 evidence:
+
+- `docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md`
+- `docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json`, exactly 325,549 bytes at
+  `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`
+- prerequisite authority: every exact frozen M08-T01–M08-T09 artifact plus the M01-T05, M04-T16,
+  and M04-T17 P-18 authorities is authenticated before terminal execution
+- execution independence: exact emitted editor-core, protocol, and validator bytes are copied into
+  two independent temporary ESM graphs; neither resolves editor-core through the workspace module
+  cache
+- transcript authority: both graphs run the same ordered 32 steps—one insert, three structural,
+  fourteen content, eight state/binding, and six event/action commands—and produce byte-identical
+  terminal results
+- immutability and resume: every successful transition returns a fresh recursively frozen direct
+  Source and leaves its predecessor unchanged; one missing-target structural failure exposes no
+  partial document, preserves the exact resume snapshot, and is followed by a valid transition
+- stable identity: insertion adds only `node:sign-in.terminal`, deletion removes only the prepared
+  `node:sign-in.terminal-delete` subtree, and the other thirty transitions preserve the complete
+  node/behavior identity multiset
+- semantic terminal: the M08-T09 validator returns `valid: true`, zero diagnostics, seven dynamic
+  obligations, zero invalid subjects, and zero unmapped diagnostics for the terminal Source
+- persistence terminal: an injected in-memory compare-and-set adapter drives the M08-T08 port
+  through generation-one save and detached open with exact canonical Source bytes
+- authoring separation: Sources differing only in root `authoring` keep the same protocol Source
+  digest and receive distinct complete-document fingerprints
+- JSON authority: terminal documents, ledgers, validation reports, persistence receipts, and
+  callback-free traces are byte-identical across graphs and retain exact values and commitments
+  through JSON parse/stringify and RFC 8785 canonicalization
+- AST platform boundary: all nine editor-core TypeScript source files, all nine emitted JavaScript
+  files, and all nine emitted declaration files are parsed; the graph admits only relative,
+  `@desen/protocol`, and `@desen/validator` edges and no React, ReactDOM, DOM/browser, Node-platform,
+  CSS, dynamic-import, `eval`, or function-constructor authority
+- package proof: terminal integration passes 4/4; the full editor-core package passes 144/144;
+  public-package cases remain 50/50 with 102 compiler-negative assertions; the independent root
+  proof passes 10/10 and the exact artifact verifier passes
+- scope nonclaims: no React renderer, component or DOM behavior, selection/viewport/undo policy,
+  multi-user synchronization, concrete durable storage or network adapter, dynamic-obligation
+  execution, hostile-JavaScript sandbox, or streaming/preallocation memory-DoS guarantee is added
+- coverage decision: M08-T10 and G08 are `DONE`; `S-002` is `TESTED`, P-18 is `PROVEN`, proof gates
+  are 9/13, overall progress is 95/145 (66%), M08 is 10/10, and M09-T01 is next
 
 ## Status vocabulary
 

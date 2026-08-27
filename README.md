@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████░░░░░░░░░` **94 / 145 tasks complete (65%)**
+**Overall:** `████████████████░░░░░░░░░` **95 / 145 tasks complete (66%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -22,9 +22,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M08:** `█████████░` **9 / 10 tasks complete (90%)**
+**M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T10`
+**Proof gates:** **9 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T01`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -581,9 +581,30 @@ pairs, and sequence 37 authenticates 34 frozen artifacts plus 68 readers without
 historical artifact. The API adds no React, DOM, timer, worker, persistence, storage, network, or
 obligation-execution authority.
 
-I07-04 and G07 remain `DONE`; proof gates remain 8/13, implementation progress is 94/145 (65%),
-M08 is 9/10, and M08-T10 is next.
-Legacy retirement remains owned by I07-05.
+M08-T10 closes the framework-neutral editor-core milestone and G08 without adding a production
+helper or public export. Two independently copied emitted ESM graphs run the same ordered 32-step
+command transcript. Insertion adds only `sign-in.terminal`, deletion removes only the prepared
+`sign-in.terminal-delete` subtree, every other successful transition preserves the complete
+node/behavior identity multiset, and an interleaved controlled failure exposes no partial document
+before the transcript resumes. The terminal Source passes the M08-T09 validator with zero
+diagnostics and seven retained dynamic obligations, then survives an injected M08-T08
+generation-one save/open round trip with exact canonical bytes.
+
+The focused terminal suite passes 4/4; the full editor-core package passes 144/144; the public
+package remains 50/50 with 102 compiler-negative assertions; and the independent root proof passes
+10/10 with its exact verifier. TypeScript AST inspection covers all nine editor-core source files,
+all nine emitted JavaScript files, and all nine emitted declaration files. It finds no React,
+ReactDOM, DOM/browser, Node-platform, CSS, dynamic-import, `eval`, or function-constructor
+authority. The complete callback-free trace survives exact JSON and RFC 8785 round trip. Exact
+evidence is recorded in
+[`EDITOR-CORE-TERMINAL-INTEGRATION.md`](docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md) and the
+325,549-byte
+[`editor-core-0.1.0-terminal-integration.json`](docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json)
+at `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`.
+
+M08-T10 and G08 are `DONE`; `S-002` is `TESTED`, P-18 is `PROVEN`, proof gates are 9/13,
+implementation progress is 95/145 (66%), M08 is 10/10, and M09-T01 is next. Legacy retirement
+remains owned by I07-05.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

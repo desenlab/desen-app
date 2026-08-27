@@ -110,6 +110,7 @@ test("[graphs] runs two independent receipted emitted graphs with identical deta
   assert.equal(built.artifact.independentGraphs.traceValuesEqual, true);
   assert.equal(built.artifact.independentGraphs.finalCanonicalBytesEqual, true);
   assert.equal(built.artifact.independentGraphs.finalDocumentsDetached, true);
+  assert.equal(built.artifact.independentGraphs.fullValidationReportsEqual, true);
   assert.deepEqual(
     built.artifact.independentGraphs.graphOneTrace,
     built.artifact.independentGraphs.graphTwoTrace,
@@ -165,9 +166,19 @@ test("[terminal] validates, persists, reopens, and distinguishes authoring finge
   const terminal = built.artifact.independentGraphs.graphOneTrace.final;
   assert.equal(terminal.validation.valid, true);
   assert.equal(terminal.validation.diagnosticCount, 0);
-  assert.equal(terminal.validation.obligationCount > 0, true);
+  assert.equal(terminal.validation.obligationCount, 7);
   assert.equal(terminal.validation.invalidSubjectCount, 0);
   assert.equal(terminal.validation.unmappedDiagnosticCount, 0);
+  assert.equal(terminal.validation.report.valid, true);
+  assert.equal(terminal.validation.report.obligations.length, 7);
+  assert.deepEqual(
+    terminal.validation.report,
+    built.artifact.independentGraphs.graphTwoTrace.final.validation.report,
+  );
+  assert.deepEqual(
+    terminal.validation.reportCanonical,
+    built.artifact.independentGraphs.graphTwoTrace.final.validation.reportCanonical,
+  );
   assert.equal(terminal.persistence.saveStatus, "created");
   assert.equal(terminal.persistence.openStatus, "opened");
   assert.equal(terminal.persistence.generation, 1);
@@ -191,6 +202,14 @@ test("[platform] AST-audits source, JavaScript, and declarations for the React D
   assert.equal(boundary.astAudit.byLayer.EMITTED_JS.files, 9);
   assert.equal(boundary.astAudit.byLayer.EMITTED_DTS.files, 9);
   assert.equal(boundary.astAudit.byLayer.EMITTED_JS.staticEdges, 24);
+  assert.equal(boundary.fileInventory.method, "NO_FOLLOW_EXACT_REGULAR_FILE_INVENTORY");
+  assert.equal(boundary.fileInventory.sourceFiles, 9);
+  assert.equal(boundary.fileInventory.distFiles, 36);
+  assert.equal(boundary.fileInventory.sourcePaths.length, 9);
+  assert.equal(boundary.fileInventory.distPaths.length, 36);
+  assert.equal(boundary.astAudit.relativeEdgeClosure.closed, true);
+  assert.equal(boundary.astAudit.relativeEdgeClosure.relativeEdges, 68);
+  assert.equal(boundary.astAudit.relativeEdgeClosure.receipts.length, 68);
   for (const layer of Object.values(boundary.astAudit.byLayer)) {
     assert.equal(layer.forbiddenImports, 0);
     assert.equal(layer.unknownImports, 0);
@@ -221,6 +240,12 @@ test("[mutation] rejects runtime, tracked boundary, and prerequisite substitutio
   await assert.rejects(
     buildEditorCoreTerminalIntegrationEvidence({ runtime: {} }),
     expectedError("RUNTIME_OVERRIDE_REJECTED"),
+  );
+  await assert.rejects(
+    buildEditorCoreTerminalIntegrationEvidence({
+      inventoryExtraPaths: ["packages/editor-core/src/platform-authority.ts"],
+    }),
+    expectedError("INVENTORY_DRIFT"),
   );
   const proofLibraryBytes = await readFile(path.join(ROOT, PROOF_LIBRARY));
   await assert.rejects(

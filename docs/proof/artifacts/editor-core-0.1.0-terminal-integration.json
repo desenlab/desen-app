@@ -3755,7 +3755,91 @@
           "invalidSubjectCount": 0,
           "unmappedDiagnosticCount": 0,
           "documentFingerprint": "sha256:661c6ba8e4802dc5fab2cadfb1059afb54f98261a2ccc1350a9ab3e1206c27aa",
-          "catalogSetFingerprint": "sha256:09a61b8b0c03bcf2e68cbecdc183b9038135a1fef0daeabe84214c212e681a4d"
+          "catalogSetFingerprint": "sha256:09a61b8b0c03bcf2e68cbecdc183b9038135a1fef0daeabe84214c212e681a4d",
+          "report": {
+            "valid": true,
+            "documentFingerprint": "sha256:661c6ba8e4802dc5fab2cadfb1059afb54f98261a2ccc1350a9ab3e1206c27aa",
+            "catalogSetFingerprint": "sha256:09a61b8b0c03bcf2e68cbecdc183b9038135a1fef0daeabe84214c212e681a4d",
+            "diagnostics": [],
+            "obligations": [
+              {
+                "kind": "state-write",
+                "pointer": "/surfaces/sign-in/root/slots/default/3/on/change/0/value",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.email" },
+                  "capabilityId": "com.example.ui/TextField"
+                }
+              },
+              {
+                "kind": "component-prop",
+                "pointer": "/surfaces/sign-in/root/slots/default/3/props/value",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.email" },
+                  "capabilityId": "com.example.ui/TextField"
+                }
+              },
+              {
+                "kind": "state-write",
+                "pointer": "/surfaces/sign-in/root/slots/default/4/on/change/0/value",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.password" },
+                  "capabilityId": "com.example.ui/TextField"
+                }
+              },
+              {
+                "kind": "component-prop",
+                "pointer": "/surfaces/sign-in/root/slots/default/4/props/value",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.password" },
+                  "capabilityId": "com.example.ui/TextField"
+                }
+              },
+              {
+                "kind": "operation-input",
+                "pointer": "/surfaces/sign-in/root/slots/default/6/on/press/1/input/email",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.submit" },
+                  "capabilityId": "com.example.auth/signIn"
+                }
+              },
+              {
+                "kind": "operation-input",
+                "pointer": "/surfaces/sign-in/root/slots/default/6/on/press/1/input/password",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.submit" },
+                  "capabilityId": "com.example.auth/signIn"
+                }
+              },
+              {
+                "kind": "component-prop",
+                "pointer": "/surfaces/sign-in/root/slots/default/6/props/loading",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.submit" },
+                  "capabilityId": "com.example.ui/Button"
+                }
+              }
+            ],
+            "invalidSubjects": [],
+            "unmappedDiagnosticIndexes": []
+          },
+          "reportCanonical": {
+            "bytes": 2089,
+            "sha256": "aee0a91ee22450db514eafb0c686d1372ce4f94a365c005d39ed789090c94c68"
+          }
         },
         "persistence": {
           "sourceKey": "terminal-source",
@@ -7083,7 +7167,91 @@
           "invalidSubjectCount": 0,
           "unmappedDiagnosticCount": 0,
           "documentFingerprint": "sha256:661c6ba8e4802dc5fab2cadfb1059afb54f98261a2ccc1350a9ab3e1206c27aa",
-          "catalogSetFingerprint": "sha256:09a61b8b0c03bcf2e68cbecdc183b9038135a1fef0daeabe84214c212e681a4d"
+          "catalogSetFingerprint": "sha256:09a61b8b0c03bcf2e68cbecdc183b9038135a1fef0daeabe84214c212e681a4d",
+          "report": {
+            "valid": true,
+            "documentFingerprint": "sha256:661c6ba8e4802dc5fab2cadfb1059afb54f98261a2ccc1350a9ab3e1206c27aa",
+            "catalogSetFingerprint": "sha256:09a61b8b0c03bcf2e68cbecdc183b9038135a1fef0daeabe84214c212e681a4d",
+            "diagnostics": [],
+            "obligations": [
+              {
+                "kind": "state-write",
+                "pointer": "/surfaces/sign-in/root/slots/default/3/on/change/0/value",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.email" },
+                  "capabilityId": "com.example.ui/TextField"
+                }
+              },
+              {
+                "kind": "component-prop",
+                "pointer": "/surfaces/sign-in/root/slots/default/3/props/value",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.email" },
+                  "capabilityId": "com.example.ui/TextField"
+                }
+              },
+              {
+                "kind": "state-write",
+                "pointer": "/surfaces/sign-in/root/slots/default/4/on/change/0/value",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.password" },
+                  "capabilityId": "com.example.ui/TextField"
+                }
+              },
+              {
+                "kind": "component-prop",
+                "pointer": "/surfaces/sign-in/root/slots/default/4/props/value",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.password" },
+                  "capabilityId": "com.example.ui/TextField"
+                }
+              },
+              {
+                "kind": "operation-input",
+                "pointer": "/surfaces/sign-in/root/slots/default/6/on/press/1/input/email",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.submit" },
+                  "capabilityId": "com.example.auth/signIn"
+                }
+              },
+              {
+                "kind": "operation-input",
+                "pointer": "/surfaces/sign-in/root/slots/default/6/on/press/1/input/password",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.submit" },
+                  "capabilityId": "com.example.auth/signIn"
+                }
+              },
+              {
+                "kind": "component-prop",
+                "pointer": "/surfaces/sign-in/root/slots/default/6/props/loading",
+                "context": {
+                  "documentId": "com.example.account-app",
+                  "surfaceId": "sign-in",
+                  "subject": { "kind": "node", "id": "sign-in.submit" },
+                  "capabilityId": "com.example.ui/Button"
+                }
+              }
+            ],
+            "invalidSubjects": [],
+            "unmappedDiagnosticIndexes": []
+          },
+          "reportCanonical": {
+            "bytes": 2089,
+            "sha256": "aee0a91ee22450db514eafb0c686d1372ce4f94a365c005d39ed789090c94c68"
+          }
         },
         "persistence": {
           "sourceKey": "terminal-source",
@@ -7109,29 +7277,86 @@
     "traceValuesEqual": true,
     "finalCanonicalBytesEqual": true,
     "finalDocumentsDetached": true,
+    "fullValidationReportsEqual": true,
     "graphOneRoundTrip": {
       "jsonSerializable": true,
       "callbacksOrExecutableValues": false,
-      "jsonBytes": 71576,
+      "jsonBytes": 73784,
       "parsedValueExact": true,
-      "rfc8785CanonicalBytes": 71576,
-      "rfc8785CanonicalSha256": "77253ececb3f4db139a2a4e0d6f9bd53be2010d6fe668a98b7be4b84affa1988",
-      "roundTripCanonicalSha256": "77253ececb3f4db139a2a4e0d6f9bd53be2010d6fe668a98b7be4b84affa1988",
+      "rfc8785CanonicalBytes": 73784,
+      "rfc8785CanonicalSha256": "e7b684ddcf002f0bf803c3b8f54ba66b95fa8dda990ac2b2f4fcca2172e8bc03",
+      "roundTripCanonicalSha256": "e7b684ddcf002f0bf803c3b8f54ba66b95fa8dda990ac2b2f4fcca2172e8bc03",
       "canonicalBytesEqual": true
     },
     "graphTwoRoundTrip": {
       "jsonSerializable": true,
       "callbacksOrExecutableValues": false,
-      "jsonBytes": 71576,
+      "jsonBytes": 73784,
       "parsedValueExact": true,
-      "rfc8785CanonicalBytes": 71576,
-      "rfc8785CanonicalSha256": "77253ececb3f4db139a2a4e0d6f9bd53be2010d6fe668a98b7be4b84affa1988",
-      "roundTripCanonicalSha256": "77253ececb3f4db139a2a4e0d6f9bd53be2010d6fe668a98b7be4b84affa1988",
+      "rfc8785CanonicalBytes": 73784,
+      "rfc8785CanonicalSha256": "e7b684ddcf002f0bf803c3b8f54ba66b95fa8dda990ac2b2f4fcca2172e8bc03",
+      "roundTripCanonicalSha256": "e7b684ddcf002f0bf803c3b8f54ba66b95fa8dda990ac2b2f4fcca2172e8bc03",
       "canonicalBytesEqual": true
     }
   },
   "packageBoundary": {
     "currentEmittedFiles": 36,
+    "fileInventory": {
+      "method": "NO_FOLLOW_EXACT_REGULAR_FILE_INVENTORY",
+      "sourceDirectory": "packages/editor-core/src",
+      "sourceFiles": 9,
+      "sourcePaths": [
+        "packages/editor-core/src/content-edits.ts",
+        "packages/editor-core/src/continuous-validation.ts",
+        "packages/editor-core/src/event-action-edits.ts",
+        "packages/editor-core/src/index.ts",
+        "packages/editor-core/src/persistence.ts",
+        "packages/editor-core/src/source-document.ts",
+        "packages/editor-core/src/stable-id-insert.ts",
+        "packages/editor-core/src/state-binding-edits.ts",
+        "packages/editor-core/src/structural-edits.ts"
+      ],
+      "distDirectory": "packages/editor-core/dist",
+      "distFiles": 36,
+      "distPaths": [
+        "packages/editor-core/dist/content-edits.d.ts",
+        "packages/editor-core/dist/content-edits.d.ts.map",
+        "packages/editor-core/dist/content-edits.js",
+        "packages/editor-core/dist/content-edits.js.map",
+        "packages/editor-core/dist/continuous-validation.d.ts",
+        "packages/editor-core/dist/continuous-validation.d.ts.map",
+        "packages/editor-core/dist/continuous-validation.js",
+        "packages/editor-core/dist/continuous-validation.js.map",
+        "packages/editor-core/dist/event-action-edits.d.ts",
+        "packages/editor-core/dist/event-action-edits.d.ts.map",
+        "packages/editor-core/dist/event-action-edits.js",
+        "packages/editor-core/dist/event-action-edits.js.map",
+        "packages/editor-core/dist/index.d.ts",
+        "packages/editor-core/dist/index.d.ts.map",
+        "packages/editor-core/dist/index.js",
+        "packages/editor-core/dist/index.js.map",
+        "packages/editor-core/dist/persistence.d.ts",
+        "packages/editor-core/dist/persistence.d.ts.map",
+        "packages/editor-core/dist/persistence.js",
+        "packages/editor-core/dist/persistence.js.map",
+        "packages/editor-core/dist/source-document.d.ts",
+        "packages/editor-core/dist/source-document.d.ts.map",
+        "packages/editor-core/dist/source-document.js",
+        "packages/editor-core/dist/source-document.js.map",
+        "packages/editor-core/dist/stable-id-insert.d.ts",
+        "packages/editor-core/dist/stable-id-insert.d.ts.map",
+        "packages/editor-core/dist/stable-id-insert.js",
+        "packages/editor-core/dist/stable-id-insert.js.map",
+        "packages/editor-core/dist/state-binding-edits.d.ts",
+        "packages/editor-core/dist/state-binding-edits.d.ts.map",
+        "packages/editor-core/dist/state-binding-edits.js",
+        "packages/editor-core/dist/state-binding-edits.js.map",
+        "packages/editor-core/dist/structural-edits.d.ts",
+        "packages/editor-core/dist/structural-edits.d.ts.map",
+        "packages/editor-core/dist/structural-edits.js",
+        "packages/editor-core/dist/structural-edits.js.map"
+      ]
+    },
     "productionDependencies": ["@desen/protocol", "@desen/validator"],
     "manifestExportRoots": ["."],
     "platformNeutral": true,
@@ -7170,6 +7395,420 @@
         }
       },
       "files": 27,
+      "relativeEdgeClosure": {
+        "closed": true,
+        "relativeEdges": 68,
+        "receipts": [
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./stable-id-insert.js",
+            "target": "packages/editor-core/src/stable-id-insert.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./structural-edits.js",
+            "target": "packages/editor-core/src/structural-edits.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./content-edits.js",
+            "target": "packages/editor-core/src/content-edits.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./state-binding-edits.js",
+            "target": "packages/editor-core/src/state-binding-edits.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./event-action-edits.js",
+            "target": "packages/editor-core/src/event-action-edits.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./persistence.js",
+            "target": "packages/editor-core/src/persistence.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./continuous-validation.js",
+            "target": "packages/editor-core/src/continuous-validation.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./stable-id-insert.js",
+            "target": "packages/editor-core/src/stable-id-insert.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./structural-edits.js",
+            "target": "packages/editor-core/src/structural-edits.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./content-edits.js",
+            "target": "packages/editor-core/src/content-edits.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./state-binding-edits.js",
+            "target": "packages/editor-core/src/state-binding-edits.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./event-action-edits.js",
+            "target": "packages/editor-core/src/event-action-edits.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./persistence.js",
+            "target": "packages/editor-core/src/persistence.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/index.ts",
+            "specifier": "./continuous-validation.js",
+            "target": "packages/editor-core/src/continuous-validation.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/stable-id-insert.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/stable-id-insert.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/structural-edits.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/structural-edits.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/content-edits.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/content-edits.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/state-binding-edits.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/state-binding-edits.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/event-action-edits.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/event-action-edits.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/persistence.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/persistence.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/continuous-validation.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/src/continuous-validation.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/src/source-document.ts",
+            "layer": "SOURCE"
+          },
+          {
+            "from": "packages/editor-core/dist/index.js",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.js",
+            "specifier": "./stable-id-insert.js",
+            "target": "packages/editor-core/dist/stable-id-insert.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.js",
+            "specifier": "./structural-edits.js",
+            "target": "packages/editor-core/dist/structural-edits.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.js",
+            "specifier": "./content-edits.js",
+            "target": "packages/editor-core/dist/content-edits.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.js",
+            "specifier": "./state-binding-edits.js",
+            "target": "packages/editor-core/dist/state-binding-edits.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.js",
+            "specifier": "./event-action-edits.js",
+            "target": "packages/editor-core/dist/event-action-edits.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.js",
+            "specifier": "./persistence.js",
+            "target": "packages/editor-core/dist/persistence.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.js",
+            "specifier": "./continuous-validation.js",
+            "target": "packages/editor-core/dist/continuous-validation.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/stable-id-insert.js",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/structural-edits.js",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/content-edits.js",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/state-binding-edits.js",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/event-action-edits.js",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/persistence.js",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/continuous-validation.js",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.js",
+            "layer": "EMITTED_JS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./stable-id-insert.js",
+            "target": "packages/editor-core/dist/stable-id-insert.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./structural-edits.js",
+            "target": "packages/editor-core/dist/structural-edits.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./content-edits.js",
+            "target": "packages/editor-core/dist/content-edits.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./state-binding-edits.js",
+            "target": "packages/editor-core/dist/state-binding-edits.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./event-action-edits.js",
+            "target": "packages/editor-core/dist/event-action-edits.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./persistence.js",
+            "target": "packages/editor-core/dist/persistence.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./continuous-validation.js",
+            "target": "packages/editor-core/dist/continuous-validation.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./stable-id-insert.js",
+            "target": "packages/editor-core/dist/stable-id-insert.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./structural-edits.js",
+            "target": "packages/editor-core/dist/structural-edits.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./content-edits.js",
+            "target": "packages/editor-core/dist/content-edits.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./state-binding-edits.js",
+            "target": "packages/editor-core/dist/state-binding-edits.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./event-action-edits.js",
+            "target": "packages/editor-core/dist/event-action-edits.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./persistence.js",
+            "target": "packages/editor-core/dist/persistence.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/index.d.ts",
+            "specifier": "./continuous-validation.js",
+            "target": "packages/editor-core/dist/continuous-validation.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/stable-id-insert.d.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/structural-edits.d.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/content-edits.d.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/state-binding-edits.d.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/event-action-edits.d.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/persistence.d.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.d.ts",
+            "layer": "EMITTED_DTS"
+          },
+          {
+            "from": "packages/editor-core/dist/continuous-validation.d.ts",
+            "specifier": "./source-document.js",
+            "target": "packages/editor-core/dist/source-document.d.ts",
+            "layer": "EMITTED_DTS"
+          }
+        ]
+      },
       "receipts": [
         {
           "file": "packages/editor-core/src/index.ts",
@@ -7892,8 +8531,8 @@
       },
       {
         "path": "packages/editor-core/test/public-package.mjs",
-        "bytes": 135117,
-        "sha256": "1eb2d878c95ea3655e89afc97e7f72d4f8b134cbf8c7022a268597efe4ed7cf4"
+        "bytes": 135200,
+        "sha256": "ec488542950775d642116d082eb80f4b883cc87050ca0876a1a65c8e4c91dfd1"
       },
       {
         "path": "packages/editor-core/test/public-package.types.mts",
@@ -8087,8 +8726,8 @@
       },
       {
         "path": "scripts/lib/editor-core-terminal-integration-proof.mjs",
-        "bytes": 76502,
-        "sha256": "cf779739e1f3af5b9b726c6928ee92a59d76e298140283e13c3502df17e432a5"
+        "bytes": 84005,
+        "sha256": "46354aae84ddf65314ad3cd8cfbefc33245e4de495ecda577ca296185f749ca2"
       },
       {
         "path": "scripts/verify-editor-core-terminal-integration.mjs",
@@ -8097,8 +8736,8 @@
       },
       {
         "path": "tests/editor-core-terminal-integration.test.mjs",
-        "bytes": 11866,
-        "sha256": "af4ae28792c0c50084404769e08c781f2a070fbffae2de87f54fa108b61a2853"
+        "bytes": 13088,
+        "sha256": "f1cd04fbccbba01469bfbacad3154c2ba99e130745dbbd1bcf0397230982dff9"
       },
       {
         "path": "tsconfig.base.json",

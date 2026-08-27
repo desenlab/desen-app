@@ -718,12 +718,12 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
   currentReaderCount: 50,
   liveVerification: "PASS",
 });
-const M08_T09_PROOF_READER_CHECKPOINT = Object.freeze({
+const M08_T10_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 37,
-  headSha256: "e43b48e2d4873b9212d4d0b1bf3e6fb03f56fcc350f8bc9ad65409891995c310",
-  frozenArtifactCount: 34,
-  currentReaderCount: 68,
+  sequence: 38,
+  headSha256: "64f7d6519589a5a8cb564af1215c2a12c44297f8ea855910613ea3b361cee6d0",
+  frozenArtifactCount: 35,
+  currentReaderCount: 70,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -2231,11 +2231,11 @@ export function validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt) {
           liveVerification: liveReceipt.status,
         }
       : null;
-  if (!isDeepStrictEqual(projection, M08_T09_PROOF_READER_CHECKPOINT)) {
+  if (!isDeepStrictEqual(projection, M08_T10_PROOF_READER_CHECKPOINT)) {
     fail(
       "AFFECTED_PROMOTION_CUTOVER_DRIFT",
       "Promotion evidence does not match the live proof-reader checkpoint authority.",
-      { expected: M08_T09_PROOF_READER_CHECKPOINT, actual: projection },
+      { expected: M08_T10_PROOF_READER_CHECKPOINT, actual: projection },
     );
   }
   return liveReceipt;

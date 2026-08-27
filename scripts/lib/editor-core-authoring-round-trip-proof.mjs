@@ -86,6 +86,7 @@ const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
 const CONTINUOUS_VALIDATION_SOURCE_PATH = "packages/editor-core/src/continuous-validation.ts";
 const CONTINUOUS_VALIDATION_TEST_PATH = "packages/editor-core/test/continuous-validation.test.ts";
 const CONTINUOUS_VALIDATION_TYPES_PATH = "packages/editor-core/test/continuous-validation.types.ts";
+const TERMINAL_INTEGRATION_TEST_PATH = "packages/editor-core/test/terminal-integration.test.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST_PATH = "tests/editor-core-authoring-round-trip.test.mjs";
@@ -203,6 +204,7 @@ const TRACKED_PATHS = Object.freeze([
   PERSISTENCE_TYPES_PATH,
   CONTINUOUS_VALIDATION_TEST_PATH,
   CONTINUOUS_VALIDATION_TYPES_PATH,
+  TERMINAL_INTEGRATION_TEST_PATH,
   PUBLIC_TEST_PATH,
   PUBLIC_TYPES_PATH,
   ...DEPENDENCY_RUNTIME_PATHS,
@@ -238,6 +240,7 @@ const RETAINED_T07_RECEIPT_PATHS = Object.freeze(
         "packages/editor-core/dist/continuous-validation.js.map",
         CONTINUOUS_VALIDATION_TEST_PATH,
         CONTINUOUS_VALIDATION_TYPES_PATH,
+        TERMINAL_INTEGRATION_TEST_PATH,
         PUBLIC_TEST_PATH,
         PUBLIC_TYPES_PATH,
         PROOF_LIBRARY_PATH,
@@ -470,6 +473,12 @@ const EXPECTED_PERSISTENCE_TEST_NAMES = Object.freeze([
   "rejects malformed save/open requests and invalid documents before adapter invocation",
   "accepts an exact 8 MiB Source and rejects a one-byte crossing on both open and save",
   "preserves atomic compare-and-set behavior when two opened generations race",
+]);
+const EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES = Object.freeze([
+  "composes all 32 command APIs with immutable snapshots and an exact stable-identity ledger",
+  "replays two independent command runs byte-for-byte without sharing result identity",
+  "ends T09-valid with retained obligations and distinguishes authoring fingerprints from digests",
+  "round-trips the terminal document through an injected T08 persistence adapter",
 ]);
 const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the package manifest keeps one exact root export and the declared runtime dependencies",
@@ -1042,7 +1051,9 @@ function verifyBoundary(files) {
       "vitest run test/authoring-round-trip.test.ts" ||
     manifest.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts" ||
     manifest.scripts?.["test:continuous-validation"] !==
-      "vitest run test/continuous-validation.test.ts"
+      "vitest run test/continuous-validation.test.ts" ||
+    manifest.scripts?.["test:terminal-integration"] !==
+      "vitest run test/terminal-integration.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -1326,6 +1337,15 @@ function verifyBoundary(files) {
   if (persistenceTypeAssertions !== 21) {
     fail("TEST_INVENTORY_DRIFT", "Persistence compiler-negative inventory must remain twenty-one.");
   }
+  const terminalIntegrationTests = testNames(
+    decodeUtf8(files.get(TERMINAL_INTEGRATION_TEST_PATH), TERMINAL_INTEGRATION_TEST_PATH),
+  );
+  exactArray(
+    terminalIntegrationTests,
+    EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES,
+    "TEST_INVENTORY_DRIFT",
+    "Terminal-integration behavior inventory",
+  );
   const publicTests = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
   exactArray(
     publicTests,
@@ -1411,6 +1431,16 @@ function verifyBoundary(files) {
       typeExportsAdded: 0,
       publicRuntimeCasesAdded: 2,
       publicCompilerNegativeAssertionsAdded: 6,
+    },
+    terminalProofSuccessor: {
+      task: "M08-T10",
+      authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+      focusedTestPath: TERMINAL_INTEGRATION_TEST_PATH,
+      runtimeExportsAdded: 0,
+      typeExportsAdded: 0,
+      focusedRuntimeCases: EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES.length,
+      publicRuntimeCasesAdded: 0,
+      publicCompilerNegativeAssertionsAdded: 0,
     },
     retainedEventActionPublicDeclarations: EXPECTED_EVENT_ACTION_EXPORTS.length,
     retainedEventActionTsdocDeclarations: sourceExports.tsdocDeclarations,
@@ -3340,6 +3370,7 @@ export async function buildEditorCoreAuthoringRoundTripEvidence(rawOptions = und
       taskTypeExportsAdded: predecessorExportInvariance.taskTypeExportsAdded,
       predecessorExportInvariance,
       proofOnlySuccessor: boundary.proofOnlySuccessor,
+      terminalProofSuccessor: boundary.terminalProofSuccessor,
       retainedEventActionPublicDeclarations: boundary.retainedEventActionPublicDeclarations,
       retainedEventActionTsdocDeclarations: boundary.retainedEventActionTsdocDeclarations,
     },
@@ -3360,6 +3391,7 @@ export async function buildEditorCoreAuthoringRoundTripEvidence(rawOptions = und
       publicRuntimeAndRootCases: boundary.publicRuntimeAndRootCases,
       publicCompilerNegativeAssertions: boundary.publicCompilerNegativeAssertions,
       rootProofCases: boundary.rootProofCases,
+      terminalIntegrationRuntimeCases: EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES.length,
     },
     trackedBoundary: { files: currentReceipts.length, receipts: currentReceipts },
     frozenAuthority: {
@@ -3377,7 +3409,8 @@ export async function buildEditorCoreAuthoringRoundTripEvidence(rawOptions = und
       "DELIBERATELY_DELETED_OR_WHOLE_REPLACED_OWNER_EXTENSION_SURVIVAL",
       "ACTION_EXECUTION_AND_RUNTIME_TURNS",
       "UNDO_REDO_SELECTION_AND_VIEWPORT_POLICY",
-      "M08_T10_TERMINAL_REACT_DOM_AND_G08_BOUNDARY",
+      "M08_T10_TERMINAL_BYTES_ARE_COMPATIBILITY_ONLY_NOT_T07_CLAIM_AUTHORITY",
+      "REACT_RENDERER_COMPONENT_OR_DOM_BEHAVIOR",
       "HOSTILE_JAVASCRIPT_SANDBOX",
       "NO_PROXY_TRAP_EXECUTION_MEMBRANE",
       "NODE_RUNTIME_ESM_LOADER_AND_PROCESS_ENVIRONMENT_ARE_TRUSTED_AUTHORITIES",
@@ -3388,6 +3421,7 @@ export async function buildEditorCoreAuthoringRoundTripEvidence(rawOptions = und
       "pnpm --filter @desen/editor-core build",
       "pnpm --filter @desen/editor-core test:authoring-round-trip",
       "pnpm --filter @desen/editor-core test:public-package",
+      "pnpm --filter @desen/editor-core test:terminal-integration",
       "node scripts/generate-editor-core-authoring-round-trip-proof.mjs",
       "node scripts/verify-editor-core-authoring-round-trip.mjs",
       "node --test tests/editor-core-authoring-round-trip.test.mjs",
