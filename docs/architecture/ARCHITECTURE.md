@@ -707,8 +707,9 @@ Evidence:
 
 ### Desen App
 
-The visual authoring product. M09-T01 establishes only its application-owned shell and project
-navigation, not the editor composition promised by later M09 tasks.
+The visual authoring product. M09-T01 establishes its application-owned shell and project
+navigation. M09-T02 composes the first Catalog-driven, read-only authoring projection into that
+shell, not the interactive editor composition promised by later M09 tasks.
 
 The first slice owns three exact route forms: `/projects`, `/projects/:projectId`, and
 `/projects/:projectId/surfaces/:surfaceId`. The bare root is replaced with `/projects`; app-owned
@@ -724,14 +725,44 @@ actions visibly disabled and explained. Native landmarks and controls, a skip li
 semantics, visible keyboard focus, route-heading focus, reduced-motion handling, and responsive CSS
 make the bounded navigation usable without inventing editor behavior.
 
+M09-T02 admits the exact `@desen/reference-catalog-web/catalog.json` export and the official-derived
+sign-in Source only through a closed read boundary. It calls
+`validateDesenInteractionCatalogSet` first, then calls
+`validateDesenSourceInteractionContracts` with the accepted cumulative Catalog set. The app
+projects only the validator-returned values into a recursively frozen authoring model. Catalog
+rejection, unresolved Source capabilities, or the task-owned depth/occurrence limits produce a
+closed failure result with no partial model.
+
+The Components tab groups the exact Catalog component contracts by their authoring category and
+filters that inert projection locally. The Layers tab preserves exact Source surface, component,
+behavior, named-slot, conditional, and child-array order. A surface without an exact Source tree
+shows that absence explicitly and never aliases or substitutes the sign-in tree. The hierarchy is
+a read-only nested, labelled list, not an interactive ARIA tree or editor selection model.
+
 The full-viewport project gallery, project-level surface galleries, and centered inert surface
-frame are navigation composition only. M09-T01's only external runtime package imports are React
-and React DOM; its five local SVG imports are repository-owned inert assets rather than an icon
-package or executable capability. It does not import editor-core, editor-web, runtime-react, the
-reference Catalog, publisher, or control-plane code. It therefore has no Source mutation, Catalog
-connection, real-adapter canvas, selection/inspector, persistence, diagnostics, Design/Run,
-publication, or activation authority. Later M09 tasks must connect those capabilities through their
-public package boundaries and establish their own evidence.
+frame remain navigation composition. Through M09-T02, the app's DESEN package edges are limited to
+the inert reference-Catalog JSON and the two named Validator entry points; it does not import
+editor-core, editor-web, catalog-sdk, runtime-react, adapter registries, publisher, or control-plane
+code. Its five local SVG imports remain repository-owned inert assets rather than an icon package
+or executable capability. The exact 25,375-byte read-panel artifact is
+`docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json` at
+`sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`;
+the focused authoring suite passes 18/18 and the independent root proof passes 8/8.
+
+The live local CI authority registers 176 workloads and 83 proof pairs, split into 72 ordinary
+pairs and 11 barriers. M09-T02's formal impact parents are the exact M09-T01 shell and M03-T10
+reference capability, yielding a 66-workload affected closure; its local wrapper verifies those
+two prerequisite artifacts directly rather than recursively replaying predecessor chains.
+Checkpoint sequence 41 passes 64/64 at
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`, authenticating 37
+frozen artifacts and 74 readers while preserving exact sequence 40 at
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor.
+These are local task and CI-infrastructure receipts and make no required-gate or hosted-CI claim.
+
+M09-T02 has no real-adapter canvas, selection/inspector, insertion, move, delete, drag/drop, Source
+mutation, persistence, diagnostics, Design/Run, publication, or activation authority. Later M09
+tasks must connect those capabilities through their public package boundaries and establish their
+own evidence.
 
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,

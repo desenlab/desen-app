@@ -1,0 +1,773 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-catalog-panel-layer-tree",
+  "profile": "desen.app.catalog-panel-layer-tree-proof.v1",
+  "task": "M09-T02",
+  "result": "PASS",
+  "prerequisites": [
+    {
+      "task": "M09-T01",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json",
+      "bytes": 12118,
+      "sha256": "c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220",
+      "proofId": "desen-app-shell-navigation",
+      "profile": "desen.app.shell-navigation-proof.v1",
+      "result": "PASS"
+    },
+    {
+      "task": "M03-T10",
+      "path": "docs/proof/artifacts/reference-catalog-web-capability-artifact.json",
+      "bytes": 87159,
+      "sha256": "4ddeee8d33ff718e1907a6402b7c2d10ef0769c872832a4cb056231441ae65e0",
+      "result": "PASS",
+      "id": "run.desen.reference.sign-in",
+      "version": "0.1.0",
+      "target": "web-react"
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "shellCompatibilityRetained": true,
+    "exactCatalogResolved": true,
+    "catalogDrivenComponentPanelImplemented": true,
+    "catalogDerivedLayerTreeImplemented": true,
+    "cumulativeCatalogAndSourceValidationRequired": true,
+    "validationFailureReturnsPartialModel": false,
+    "componentFilterMutatesSource": false,
+    "unknownSurfaceSubstitutesSource": false,
+    "realAdapterCanvasImplemented": false,
+    "selectionOrInspectorImplemented": false,
+    "sourceMutationOrHistoryImplemented": false,
+    "persistenceUiImplemented": false,
+    "runOrPublishImplemented": false
+  },
+  "authority": {
+    "catalog": {
+      "receipt": {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      "identity": {
+        "kind": "desen.catalog",
+        "desen": "0.1.0",
+        "id": "run.desen.reference.sign-in",
+        "version": "0.1.0",
+        "target": "web-react",
+        "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0"
+      },
+      "components": [
+        {
+          "id": "com.example.ui/Alert",
+          "displayName": "Alert",
+          "authoringCategory": "Feedback",
+          "semanticCategory": "feedback",
+          "description": "Feedback message.",
+          "defaultProps": {
+            "text": "Message",
+            "tone": "info"
+          },
+          "slots": []
+        },
+        {
+          "id": "com.example.ui/Button",
+          "displayName": "Button",
+          "authoringCategory": "Actions",
+          "semanticCategory": "action",
+          "description": "Action button.",
+          "defaultProps": {
+            "label": "Button",
+            "loading": false,
+            "variant": "primary"
+          },
+          "slots": []
+        },
+        {
+          "id": "com.example.ui/Stack",
+          "displayName": "Stack",
+          "authoringCategory": "Layout",
+          "semanticCategory": "layout",
+          "description": "Linear layout container.",
+          "defaultProps": {
+            "direction": "vertical",
+            "gap": "md"
+          },
+          "slots": [
+            {
+              "name": "default",
+              "required": false,
+              "minItems": 0,
+              "maxItems": null,
+              "acceptsCategories": [
+                "layout",
+                "content",
+                "input",
+                "action",
+                "feedback",
+                "complex"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "com.example.ui/Text",
+          "displayName": "Text",
+          "authoringCategory": "Content",
+          "semanticCategory": "content",
+          "description": "Text content.",
+          "defaultProps": {
+            "role": "body",
+            "text": "Text"
+          },
+          "slots": []
+        },
+        {
+          "id": "com.example.ui/TextField",
+          "displayName": "Text field",
+          "authoringCategory": "Inputs",
+          "semanticCategory": "input",
+          "description": "Text input.",
+          "defaultProps": {
+            "label": "Label",
+            "value": ""
+          },
+          "slots": []
+        }
+      ],
+      "componentCount": 5,
+      "operationIds": [
+        "com.example.auth/signIn"
+      ],
+      "behaviorCount": 0,
+      "resourceCount": 0
+    },
+    "source": {
+      "receipt": {
+        "path": "examples/sign-in/official-derived.source.desen.json",
+        "bytes": 4724,
+        "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+      },
+      "identity": {
+        "kind": "desen.source",
+        "desen": "0.1.0",
+        "id": "com.example.account-app",
+        "entry": "sign-in",
+        "catalogs": [
+          {
+            "id": "run.desen.reference.sign-in",
+            "version": "0.1.0",
+            "target": "web-react"
+          }
+        ]
+      },
+      "surfaces": [
+        {
+          "id": "home",
+          "root": {
+            "id": "home.layout",
+            "use": "com.example.ui/Stack",
+            "conditional": false,
+            "behaviors": [],
+            "slots": [
+              {
+                "name": "default",
+                "children": [
+                  {
+                    "id": "home.title",
+                    "use": "com.example.ui/Text",
+                    "conditional": false,
+                    "behaviors": [],
+                    "slots": []
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "sign-in",
+          "root": {
+            "id": "sign-in.layout",
+            "use": "com.example.ui/Stack",
+            "conditional": false,
+            "behaviors": [],
+            "slots": [
+              {
+                "name": "default",
+                "children": [
+                  {
+                    "id": "sign-in.title",
+                    "use": "com.example.ui/Text",
+                    "conditional": false,
+                    "behaviors": [],
+                    "slots": []
+                  },
+                  {
+                    "id": "sign-in.email",
+                    "use": "com.example.ui/TextField",
+                    "conditional": false,
+                    "behaviors": [],
+                    "slots": []
+                  },
+                  {
+                    "id": "sign-in.password",
+                    "use": "com.example.ui/TextField",
+                    "conditional": false,
+                    "behaviors": [],
+                    "slots": []
+                  },
+                  {
+                    "id": "sign-in.error",
+                    "use": "com.example.ui/Alert",
+                    "conditional": true,
+                    "behaviors": [],
+                    "slots": []
+                  },
+                  {
+                    "id": "sign-in.submit",
+                    "use": "com.example.ui/Button",
+                    "conditional": false,
+                    "behaviors": [],
+                    "slots": []
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "surfaceCount": 2,
+      "componentNodeCount": 8,
+      "conditionalNodeIds": [
+        "sign-in.error"
+      ]
+    }
+  },
+  "application": {
+    "package": {
+      "name": "@desen/app-web",
+      "private": true,
+      "dependencies": {
+        "@desen/reference-catalog-web": "workspace:*",
+        "@desen/validator": "workspace:*",
+        "react": "19.2.8",
+        "react-dom": "19.2.8"
+      },
+      "devDependencies": {
+        "@testing-library/dom": "10.4.1",
+        "@testing-library/react": "16.3.2",
+        "@types/react": "19.2.17",
+        "@types/react-dom": "19.2.3",
+        "jsdom": "29.1.1",
+        "vite": "8.1.5",
+        "vitest": "4.1.10"
+      },
+      "focusedTestScript": "vitest run test/authoring-data.test.ts test/application.test.tsx",
+      "editorCoreDependency": false,
+      "catalogSdkDependency": false,
+      "runtimeReactDependency": false,
+      "adapterDependency": false
+    },
+    "projection": {
+      "validatorApis": [
+        "validateDesenInteractionCatalogSet",
+        "validateDesenSourceInteractionContracts"
+      ],
+      "validationOrder": "CATALOG_SET_THEN_SOURCE_INTERACTION_CONTRACTS",
+      "failurePolicy": "NO_PARTIAL_AUTHORING_MODEL",
+      "failureReasons": [
+        "catalog-invalid",
+        "source-invalid",
+        "projection-limit"
+      ],
+      "maxSourceTreeDepth": 64,
+      "maxIdentityOccurrencesPerSurface": 25000,
+      "recursivelyFrozenReadModel": true
+    },
+    "ui": {
+      "tabs": [
+        "Layers",
+        "Components"
+      ],
+      "tabKeyboardKeys": [
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End"
+      ],
+      "componentFilter": "LOCAL_READ_MODEL_ONLY",
+      "layerHierarchySemantics": "READ_ONLY_LABELLED_LIST_NOT_INTERACTIVE_ARIA_TREE",
+      "unknownSurfacePolicy": "EXPLICIT_NO_SOURCE_TREE_WITHOUT_SUBSTITUTION",
+      "insertionControls": 0,
+      "selectionControls": 0
+    }
+  },
+  "boundary": {
+    "imports": {
+      "method": "TYPESCRIPT_AST_EXACT_IMPORT_AND_EXECUTION_BOUNDARY",
+      "imports": [
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "react",
+          "resolvedPath": null,
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "useEffect",
+              "useId",
+              "useRef",
+              "useState",
+              "useSyncExternalStore"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./authoring-data.js",
+          "resolvedPath": "apps/desen-app/src/authoring-data.ts",
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "REFERENCE_AUTHORING_MODEL"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./project-navigation.js",
+          "resolvedPath": "apps/desen-app/src/project-navigation.ts",
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "createDesenAppProjectPath",
+              "navigateDesenApp",
+              "readDesenAppLocation",
+              "readDesenAppRoute",
+              "readDesenAppServerLocation",
+              "subscribeDesenAppNavigation"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./project-data.js",
+          "resolvedPath": "apps/desen-app/src/project-data.ts",
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "DESEN_APP_PROJECTS",
+              "findDesenAppProject",
+              "findDesenAppSurface"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./assets/breadcrumb-separator.svg",
+          "resolvedPath": "apps/desen-app/src/assets/breadcrumb-separator.svg",
+          "bindings": {
+            "defaultImport": "breadcrumbSeparatorUrl",
+            "namedImports": [],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./assets/desen-logo.svg",
+          "resolvedPath": "apps/desen-app/src/assets/desen-logo.svg",
+          "bindings": {
+            "defaultImport": "desenLogoUrl",
+            "namedImports": [],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./assets/plus.svg",
+          "resolvedPath": "apps/desen-app/src/assets/plus.svg",
+          "bindings": {
+            "defaultImport": "plusUrl",
+            "namedImports": [],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./assets/settings.svg",
+          "resolvedPath": "apps/desen-app/src/assets/settings.svg",
+          "bindings": {
+            "defaultImport": "settingsUrl",
+            "namedImports": [],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./assets/theme.svg",
+          "resolvedPath": "apps/desen-app/src/assets/theme.svg",
+          "bindings": {
+            "defaultImport": "themeUrl",
+            "namedImports": [],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./application.module.css",
+          "resolvedPath": "apps/desen-app/src/application.module.css",
+          "bindings": {
+            "defaultImport": "styles",
+            "namedImports": [],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "react",
+          "resolvedPath": null,
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "KeyboardEvent",
+              "MouseEvent",
+              "ReactNode"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./authoring-data.js",
+          "resolvedPath": "apps/desen-app/src/authoring-data.ts",
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "AuthoringBehaviorLayer",
+              "AuthoringLayerNode",
+              "CatalogComponentSummary"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./project-navigation.js",
+          "resolvedPath": "apps/desen-app/src/project-navigation.ts",
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "DesenAppRoute"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./project-data.js",
+          "resolvedPath": "apps/desen-app/src/project-data.ts",
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "DesenAppProjectSummary",
+              "DesenAppSurfaceSummary"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/authoring-data.ts",
+          "specifier": "@desen/reference-catalog-web/catalog.json",
+          "resolvedPath": null,
+          "bindings": {
+            "defaultImport": "referenceCatalog",
+            "namedImports": [],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/authoring-data.ts",
+          "specifier": "@desen/validator",
+          "resolvedPath": null,
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "validateDesenInteractionCatalogSet",
+              "validateDesenSourceInteractionContracts"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/authoring-data.ts",
+          "specifier": "../../../examples/sign-in/official-derived.source.desen.json",
+          "resolvedPath": "examples/sign-in/official-derived.source.desen.json",
+          "bindings": {
+            "defaultImport": "officialSignInSource",
+            "namedImports": [],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/main.tsx",
+          "specifier": "react",
+          "resolvedPath": null,
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "StrictMode"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/main.tsx",
+          "specifier": "react-dom/client",
+          "resolvedPath": null,
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "createRoot"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/main.tsx",
+          "specifier": "./application.js",
+          "resolvedPath": "apps/desen-app/src/application.tsx",
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "DesenAppApplication"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/main.tsx",
+          "specifier": "./project-navigation.js",
+          "resolvedPath": "apps/desen-app/src/project-navigation.ts",
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [
+              "normalizeInitialDesenAppLocation"
+            ],
+            "namespaceImport": null
+          }
+        },
+        {
+          "path": "apps/desen-app/src/main.tsx",
+          "specifier": "./styles.css",
+          "resolvedPath": "apps/desen-app/src/styles.css",
+          "bindings": {
+            "defaultImport": null,
+            "namedImports": [],
+            "namespaceImport": null
+          }
+        }
+      ],
+      "exactDesenPackageImports": [
+        "@desen/reference-catalog-web/catalog.json",
+        "@desen/validator#validateDesenInteractionCatalogSet",
+        "@desen/validator#validateDesenSourceInteractionContracts"
+      ],
+      "arbitraryExecutableImports": 0,
+      "editorCoreImports": 0,
+      "catalogSdkImports": 0,
+      "runtimeReactImports": 0,
+      "adapterImports": 0,
+      "platformIoCalls": 0,
+      "dragDropMutationHandlers": 0,
+      "canvasElements": 0,
+      "inspectorElements": 0
+    },
+    "trackedFiles": 28,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 959,
+        "sha256": "dbd050179b262bdb14a950cde5a5026f42ef67ca81057459b01bf709afcd4a40"
+      },
+      {
+        "path": "apps/desen-app/tsconfig.json",
+        "bytes": 185,
+        "sha256": "99eaed090e363413adb250a8c295388847287d412f6dceedc613d13037a62066"
+      },
+      {
+        "path": "apps/desen-app/index.html",
+        "bytes": 413,
+        "sha256": "a49da81588b7e7d49ec458421cbf77404af8b3417bfbc60c25bb5063aa0de9f0"
+      },
+      {
+        "path": "apps/desen-app/README.md",
+        "bytes": 4418,
+        "sha256": "92d3b4bbc6764954af3447d4e3f315a22b0b15c46dfb809e79374f2452be80d1"
+      },
+      {
+        "path": "apps/desen-app/src/assets/breadcrumb-separator.svg",
+        "bytes": 419,
+        "sha256": "095027d1707a74b5b904a5f4d1aea3db113a4f96efd380477b67731a4132cd11"
+      },
+      {
+        "path": "apps/desen-app/src/assets/desen-logo.svg",
+        "bytes": 564,
+        "sha256": "f96d5554a5b1a3c0755214a488cced06a5d47e37ba243fe425e8b617b186c27a"
+      },
+      {
+        "path": "apps/desen-app/src/assets/plus.svg",
+        "bytes": 427,
+        "sha256": "114cc5ac1e52d62b5a754d4e99099a51b98eb6227330e4e3e49bab6e3c0df1ff"
+      },
+      {
+        "path": "apps/desen-app/src/assets/settings.svg",
+        "bytes": 1080,
+        "sha256": "93d8579fb0902913ccbb5e2329643220a1694444489f034f2bbd118a5a5898f6"
+      },
+      {
+        "path": "apps/desen-app/src/assets/theme.svg",
+        "bytes": 973,
+        "sha256": "e4fb6c23bbd2fe4040867f391234ea8653473038f12d1d6d66059b7dbc9feb49"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 27703,
+        "sha256": "32a8f799113d285de0b773f711b7b77530da10abd7aeffffd6ac4062771f312c"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 28067,
+        "sha256": "06e113928125b20ee9f84bbdae2dd431f0c22008c13d4962712461b45993f086"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 13768,
+        "sha256": "c295a07b732e2f911b74cdebafca8112c060a7af5b017fb922c0f2ecb9e9ab01"
+      },
+      {
+        "path": "apps/desen-app/src/main.tsx",
+        "bytes": 807,
+        "sha256": "78cb1a864a7fe554720e64e159d4596d31d654b59066e10e49c55d253915b277"
+      },
+      {
+        "path": "apps/desen-app/src/project-data.ts",
+        "bytes": 2667,
+        "sha256": "e17f1f72d156312b7bee80c5057abd56c0383294df274841ef7a350fb90b8c18"
+      },
+      {
+        "path": "apps/desen-app/src/project-navigation.ts",
+        "bytes": 5889,
+        "sha256": "bd3b6f836b1705ad8f0e0da66dad4817c29666f5a92f5fda22bb78dfa39a364a"
+      },
+      {
+        "path": "apps/desen-app/src/styles.css",
+        "bytes": 1704,
+        "sha256": "e2ec462676f0852844c6f6fe7d6e24b180615be19fddcf4ce83d504d3c06bcd9"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 14485,
+        "sha256": "7b15cda4357d22b1f51428502d712577a30cb84d7720376ced0e0a9026d8252a"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-data.test.ts",
+        "bytes": 6378,
+        "sha256": "a51138e9d2748eed809b792e8daecd65581bd55825252925016b3b37c1f15e60"
+      },
+      {
+        "path": "apps/desen-app/test/main-lifecycle.test.tsx",
+        "bytes": 2766,
+        "sha256": "99bac70175b72c4a80e97a136be8cde7ddf4cff0ca3cd756ffbc03eaf64b9c96"
+      },
+      {
+        "path": "apps/desen-app/test/project-navigation.test.ts",
+        "bytes": 7176,
+        "sha256": "b81a08bfb5cbb527098824ab0621fc963607e56a2de6e55f061cc61e68b2c11f"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129383,
+        "sha256": "9fd4c373268d2c81c4bf32e363ec3dcfee3006369dc4f467f1ff2e1d091d232d"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      {
+        "path": "examples/sign-in/official-derived.source.desen.json",
+        "bytes": 4724,
+        "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs",
+        "bytes": 50635,
+        "sha256": "fb4bab225f2d05bea7282d19daf99d4389e64fcf23a7c6091e87057ca2be63bb"
+      },
+      {
+        "path": "scripts/generate-desen-app-catalog-panel-layer-tree-proof.mjs",
+        "bytes": 821,
+        "sha256": "1df3d724b9b77073a28f289c7941f317c1fc0867e8077245d4bf3fb38c9d6924"
+      },
+      {
+        "path": "scripts/verify-desen-app-catalog-panel-layer-tree.mjs",
+        "bytes": 683,
+        "sha256": "b80c215099ff3aab6f893896953a8b4007a78b8b341a4b537bd4be9ddb45bf5e"
+      },
+      {
+        "path": "tests/desen-app-catalog-panel-layer-tree.test.mjs",
+        "bytes": 15618,
+        "sha256": "f9fbfad0fd05043080c2cf73c272f0dda41f5744a092f0a4a507531dcb79594e"
+      }
+    ]
+  },
+  "evidence": {
+    "tests": {
+      "command": "pnpm --filter @desen/app-web test:authoring && node --test tests/desen-app-catalog-panel-layer-tree.test.mjs",
+      "registrations": {
+        "authoring-data.test.ts": 6,
+        "application.test.tsx": 9
+      },
+      "positiveAndNegativeCoverage": true,
+      "failClosedCatalogSourceAndLimitCoverage": true,
+      "noSubstitutionCoverage": true,
+      "laterSliceAbsenceCoverage": true,
+      "targetedReceipts": [
+        {
+          "path": "apps/desen-app/test/authoring-data.test.ts",
+          "bytes": 6378,
+          "sha256": "a51138e9d2748eed809b792e8daecd65581bd55825252925016b3b37c1f15e60"
+        },
+        {
+          "path": "apps/desen-app/test/application.test.tsx",
+          "bytes": 14485,
+          "sha256": "7b15cda4357d22b1f51428502d712577a30cb84d7720376ced0e0a9026d8252a"
+        }
+      ]
+    },
+    "rootTestNames": [
+      "[authority] authenticates the exact M09-T01 shell and M03-T10 capability artifacts",
+      "[catalog-source] records five exact Catalog components and both exact Source trees",
+      "[validation-ui] records fail-closed validation, filtering, tabs, and read-only hierarchy evidence",
+      "[boundary] admits only inert Catalog JSON and validator APIs across Desen package imports",
+      "[determinism] builds byte-identical detached M09-T02 evidence twice",
+      "[mutation] rejects prerequisite, Catalog, Source, dependency, import, and test drift",
+      "[verification-writer] rejects visible-pin drift and atomically preserves destinations on tampering",
+      "[filesystem] rejects linked prerequisite, artifact, proof, and tracked-file authorities"
+    ]
+  },
+  "nonclaims": [
+    "No runtime-react or reference adapter execution and no real canvas.",
+    "No editor-core selection, inspector, insertion, move, delete, undo, or redo authority.",
+    "No drag-and-drop, Source mutation, persistence, save/open, or revision authority.",
+    "No Design/Run execution, fixtures, host operations, diagnostics panel, publish, or activation."
+  ]
+}

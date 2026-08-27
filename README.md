@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████████░░░░░░░░` **96 / 145 tasks complete (66%)**
+**Overall:** `█████████████████░░░░░░░░` **97 / 145 tasks complete (67%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `█░░░░░░░░░░░░░` **1 / 14 tasks complete (7%)**
+**M09:** `██░░░░░░░░░░░░` **2 / 14 tasks complete (14%)**
 
-**Proof gates:** **9 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T02`
+**Proof gates:** **9 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T03`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -619,11 +619,39 @@ evidence is the 12,118-byte
 [`desen-app-0.1.0-shell-navigation.json`](docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json)
 at `sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`; sequence 40 closes at
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` with 36 frozen
-artifacts and 72 readers. These are local receipts, not a required-gate or hosted-CI result. This
-slice does not claim a Catalog panel, layer tree, real adapter canvas, Source editing, persistence,
-Design/Run execution, publication, or activation.
+artifacts and 72 readers. Its historical M09-T01 CI successor contained 174 workloads and 82 proof
+pairs, split into 71 ordinary pairs and 11 barriers. These are local receipts, not a required-gate
+or hosted-CI result. This slice does not claim a Catalog panel, layer tree, real adapter canvas,
+Source editing, persistence, Design/Run execution, publication, or activation.
 
 M09-T01 is `DONE`; implementation progress is 96/145 (66%), M09 is 1/14, and M09-T02 is next.
+
+M09-T02 adds the first Catalog-driven authoring surface without widening that shell into an editor.
+The read-only Components tab projects the exact five-component library and authoring metadata from
+`@desen/reference-catalog-web/catalog.json`; the Layers tab projects the exact validated `home` and
+`sign-in` Source trees, including named slots, child order, attached behaviors, and conditional
+markers. The app validates the cumulative Catalog set first and the official Source against that
+accepted set second. Any Catalog rejection, Source rejection, or bounded-projection failure returns
+no authoring model, and a surface without an exact Source tree reports the absence instead of
+substituting the sign-in hierarchy.
+
+The focused authoring suite passes 18/18 and the independent root proof passes 8/8. Exact evidence
+is the 25,375-byte
+[`desen-app-0.1.0-catalog-panel-layer-tree.json`](docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json)
+at `sha256:85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61`.
+The live local M09-T02 CI authority contains 176 workloads and 83 proof pairs, split into 72
+ordinary pairs and 11 barriers. Checkpoint sequence 41 passes 64/64 at
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68`, authenticating 37
+frozen artifacts and 74 readers while preserving exact sequence 40 at
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor.
+These are local task and CI-infrastructure receipts; they make no required-gate or hosted-CI claim.
+The first hosted PR run exposed that Node's permission model denied the isolation fixture's
+workspace-target symlink. The resealed fixture now uses only absolute runner-temporary targets and
+its exact isolation suite passes 8/8 without widening permissions; a hosted pass is not yet claimed.
+M09-T02 adds no real adapter canvas, selection, inspector, insertion, drag/drop, Source mutation,
+persistence, Design/Run execution, diagnostics, publication, or activation. It is `DONE` without a
+`P-*`, `N-*`, `S-*`, `G*`, or proof-gate status change; implementation progress is 97/145 (67%),
+M09 is 2/14, proof gates remain 9/13, and M09-T03 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

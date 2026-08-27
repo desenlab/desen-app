@@ -68,6 +68,12 @@ const FOCUSED_PACKAGE_PREREQUISITES = SAFE_OBJECT_FREEZE({
     task: "test:failure-boundary",
   }),
 });
+const DIRECT_PROOF_VERIFIER_PREREQUISITES = SAFE_OBJECT_FREEZE({
+  "desen-app-catalog-panel-layer-tree": SAFE_OBJECT_FREEZE([
+    "node scripts/verify-desen-app-shell-navigation.mjs",
+    "node scripts/verify-reference-catalog-web-capability-artifact.mjs",
+  ]),
+});
 const EXPECTED_CHECK_SUFFIX = SAFE_OBJECT_FREEZE([
   "pnpm lint",
   "pnpm typecheck",
@@ -96,11 +102,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "99cd8deb90ca33e409f7c94099c20a561310353b7c9242115fd001aff0c524e5";
+  "3edb7d750b1c9bee5b081e46e887c9e9e90ec1bf989aff5745fd0e4dbab492f1";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "f5ec4def7813e640bf0162cabb6614fc1f138fa4127b588285caf2a0dbdd6479";
+  "a8db91b1306dcffdb52eedcb47dcf7d8fa1f60457d0b36ee5af44a0dfa743dec";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "b1ed3947955c9309a854296504a8141f805c3a7a63a392a89e427bc992f52e60";
+  "cf36b706947b4fcb4fa60759dc118c3b07faabea84a36ee1c69e10996441294e";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -513,6 +519,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "scripts/verify-desen-app-shell-navigation.mjs",
     "tests/desen-app-shell-navigation.test.mjs",
   ],
+  [
+    "desen-app-catalog-panel-layer-tree",
+    "scripts/verify-desen-app-catalog-panel-layer-tree.mjs",
+    "tests/desen-app-catalog-panel-layer-tree.test.mjs",
+  ],
 ]);
 
 const NO_SHARED_MUTATION = SAFE_OBJECT_FREEZE({
@@ -791,6 +802,16 @@ function classifyPrerequisite({
       });
     }
     return "proof-verifier";
+  }
+
+  const reviewedDirectProofVerifiers = SAFE_OBJECT_HAS_OWN(
+    DIRECT_PROOF_VERIFIER_PREREQUISITES,
+    currentProofId,
+  )
+    ? DIRECT_PROOF_VERIFIER_PREREQUISITES[currentProofId]
+    : undefined;
+  if (reviewedDirectProofVerifiers?.includes(command)) {
+    return "direct-proof-verifier";
   }
 
   const parts = command.split(" ");
@@ -1462,7 +1483,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "d4f4493585c1a62a25e01917946bb3d562c3da43ac4ca77a571a00cfebe49859";
+  "05df088b3aab34277c60d7cff8f8814b1b8d82e2b4d92170a0c7bf1e34a9365a";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

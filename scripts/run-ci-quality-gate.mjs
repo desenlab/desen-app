@@ -414,6 +414,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-desen-app-shell-navigation.mjs",
       "tests/desen-app-shell-navigation.test.mjs",
     ],
+    [
+      "desen-app-catalog-panel-layer-tree",
+      "scripts/verify-desen-app-catalog-panel-layer-tree.mjs",
+      "tests/desen-app-catalog-panel-layer-tree.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -426,6 +431,13 @@ const DIRECT_FOCUSED_TEST_PREREQUISITES = Object.freeze({
     packageName: "@desen/runtime-react",
     task: "test:failure-boundary",
   }),
+});
+
+const DIRECT_PROOF_VERIFIER_PREREQUISITES = Object.freeze({
+  "desen-app-catalog-panel-layer-tree": Object.freeze([
+    "node scripts/verify-desen-app-shell-navigation.mjs",
+    "node scripts/verify-reference-catalog-web-capability-artifact.mjs",
+  ]),
 });
 
 const EXPECTED_CHECK_SUFFIX = Object.freeze([
@@ -455,14 +467,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "99cd8deb90ca33e409f7c94099c20a561310353b7c9242115fd001aff0c524e5";
+  "3edb7d750b1c9bee5b081e46e887c9e9e90ec1bf989aff5745fd0e4dbab492f1";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "f5ec4def7813e640bf0162cabb6614fc1f138fa4127b588285caf2a0dbdd6479";
+  "a8db91b1306dcffdb52eedcb47dcf7d8fa1f60457d0b36ee5af44a0dfa743dec";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "b1ed3947955c9309a854296504a8141f805c3a7a63a392a89e427bc992f52e60";
+  "cf36b706947b4fcb4fa60759dc118c3b07faabea84a36ee1c69e10996441294e";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "daee065ac1caf04715b728191cbae6cc8b64783f4633b8c583797883712df3da";
+const QUALITY_GATE_PLAN_SHA256 = "5ef9b46e949c9be14698a57fb5c8a520b04129269b7ca031c720ddaedb464d42";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -652,6 +664,16 @@ function classifyLegacyPrerequisite({
       );
     }
     return "proof-verifier";
+  }
+
+  const reviewedDirectProofVerifiers = Object.hasOwn(
+    DIRECT_PROOF_VERIFIER_PREREQUISITES,
+    currentProofId,
+  )
+    ? DIRECT_PROOF_VERIFIER_PREREQUISITES[currentProofId]
+    : undefined;
+  if (reviewedDirectProofVerifiers?.includes(command)) {
+    return "direct-proof-verifier";
   }
 
   const parts = command.split(" ");

@@ -62,7 +62,9 @@ it(
       window.dispatchEvent(pageHideEvent(true));
     });
     expect(screen.getByRole("heading", { level: 2, name: "Sign-in" })).toBeTruthy();
-    expect(document.getElementById("desen-app-root")?.textContent).toContain("Navigation ready");
+    expect(document.getElementById("desen-app-root")?.textContent).toContain(
+      "Authoring structure ready",
+    );
 
     act(() => {
       window.dispatchEvent(pageHideEvent(false));

@@ -6,8 +6,8 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T01 implements the first application-owned shell and project-navigation slice. The current
-product surface contains:
+M09-T02 extends the application-owned shell with a Catalog-driven, read-only authoring structure.
+The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
 - a project-level surface gallery and a centered, inert surface frame that preserve the route
@@ -17,6 +17,14 @@ product surface contains:
 - same-origin History API transitions, browser back/forward observation, and canonical replacement
   of the bare `/` entry with `/projects`;
 - fixture-only project search with an explicit empty result and recovery action;
+- a compact authoring panel whose Layers view preserves the official sign-in Source node, named
+  slot, child order, conditional marker, and attached-behavior structure;
+- a Components view derived from the exact `@desen/reference-catalog-web/catalog.json` component
+  inventory, display names, categories, descriptions, identity, version, and target;
+- local component filtering that changes only the visible list and never mutates Catalog or Source
+  data;
+- an explicit no-substitution state for Recovery and Profile, which have no exact Source tree in
+  the official fixture;
 - explicit not-found states for unknown routes, projects, and surfaces; and
 - semantic landmarks, a skip link, visible keyboard focus, route-heading focus, reduced-motion
   support, and responsive layouts.
@@ -36,18 +44,23 @@ behavior.
 
 ## Deliberate boundary
 
-This slice does not connect a Catalog, render a managed adapter canvas, expose a component panel or
-layer tree, select or inspect nodes, mutate an editor-core Source, persist project data, create user
-projects, execute Design/Run behavior, calculate diagnostics, publish a revision, or activate a
-channel. Disabled future actions explain their unavailable state and do not simulate later M09
-tasks.
+The authoring read model first prepares the exact Catalog with
+`validateDesenInteractionCatalogSet`, then validates the official-derived Source against that exact
+prepared set with `validateDesenSourceInteractionContracts`. It projects UI data only from the two
+detached, recursively immutable success values. Validation or bounded-projection failure exposes no
+partial panel or tree. Component and behavior identity occurrences are bounded to 25,000 per
+surface and Source depth to 64; own empty slots remain distinct from absent optional slots.
 
-In particular, the M09-T02 Catalog-driven panel and layer tree are not implemented. The project
-tiles, surface tiles, central frame placeholder, and fixture links are navigation guidance only.
+This slice does not render a managed adapter canvas, select or inspect nodes, expose prop/schema or
+slot-cardinality controls, drag, insert, reorder or otherwise mutate Source, persist project data,
+create user projects, execute Design/Run behavior, calculate user-facing diagnostics, publish a
+revision, or activate a channel. The central frame remains an explicit placeholder for M09-T03;
+selection belongs to M09-T04, inspector controls to M09-T05, and insertion/cardinality UI to
+M09-T07.
 
-Later slices may consume `editor-web`, `runtime-react`, and capability catalogs through their public
-package APIs. M09-T01 itself depends only on React and React DOM at runtime and keeps its project
-inventory as inert local fixtures.
+M09-T02 imports only the inert Catalog JSON subpath and the two required public validator APIs. It
+does not import `editor-core`, `catalog-sdk`, `runtime-react`, React adapters, or concrete Catalog
+components, so the panel carries no premature mutation, inspector, or canvas authority.
 
 ## Local commands
 
@@ -55,6 +68,7 @@ inventory as inert local fixtures.
 pnpm --filter @desen/app-web dev
 pnpm --filter @desen/app-web lint
 pnpm --filter @desen/app-web typecheck
+pnpm --filter @desen/app-web test:authoring
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```
