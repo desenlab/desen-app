@@ -721,7 +721,7 @@ Canlı yerel M09-T03 CI otoritesi 178 workload ve 84 proof pair içerir; bunlar 
 11 barrier'a ayrılır. Formal impact parent'ları exact M09-T01 shell ve M05-T09 reference-host
 source audit'idir; affected closure 51 proof unit ve 112 workload'dur. Sequence 42, 65/65 geçer;
 38 donmuş artifact ile 76 reader'ı
-`sha256:e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3` başında doğrular ve
+`sha256:40d7c380cec3a7efd04316959a41abda3c8f71c1604f7f2fb892f18ae4cd2fa5` başında doğrular ve
 exact sequence 41 başı
 `sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68` ile bütün öncülleri
 korur. Bunlar yerel task ve CI-infrastructure makbuzlarıdır; required gate veya hosted-CI başarısı

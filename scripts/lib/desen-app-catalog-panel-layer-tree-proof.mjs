@@ -1483,10 +1483,6 @@ function receipts(files) {
   });
 }
 
-function canonicalArtifactBytes(artifact) {
-  return Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`, "utf8");
-}
-
 async function authenticateFrozenArtifact(workspaceRoot) {
   const artifactBytes = await readRegularAuthority(
     path.join(workspaceRoot, ARTIFACT_PATH),

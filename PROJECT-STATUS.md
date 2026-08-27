@@ -956,7 +956,7 @@ with the frozen reference-host audit and reaches all five real components. The l
 authority contains 178 workloads and 84 proof pairs, split into 73 ordinary pairs and 11 barriers;
 the exact M09-T01 shell and M05-T09 reference-host source audit are its formal parents, producing a
 51-proof-unit/112-workload affected closure. Checkpoint sequence 42 passes 65/65 at
-`sha256:e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3`, authenticating 38
+`sha256:40d7c380cec3a7efd04316959a41abda3c8f71c1604f7f2fb892f18ae4cd2fa5`, authenticating 38
 frozen artifacts and 76 readers while preserving exact sequence 41. These are local receipts and
 make no required-gate or hosted-CI claim. M09-T03 is `DONE`; P-06 is `PROVEN`, proof gates are
 10/13, implementation progress is 98/145 (68%), M09 is 3/14, and M09-T04 is next. `S-001`
@@ -3535,7 +3535,7 @@ M09-T03 evidence:
   into 73 ordinary pairs and 11 barriers; its exact M09-T01 shell and M05-T09 reference-host source
   audit parents produce an affected closure of 51 proof units and 112 workloads
 - checkpoint authority: sequence 42 passes 65/65 and authenticates 38 frozen artifacts plus 76
-  readers at `sha256:e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3`, preserving exact
+  readers at `sha256:40d7c380cec3a7efd04316959a41abda3c8f71c1604f7f2fb892f18ae4cd2fa5`, preserving exact
   sequence 41 at
   `sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68` and every predecessor
 - evidence boundary: these are local task and CI-infrastructure receipts; no required-gate or

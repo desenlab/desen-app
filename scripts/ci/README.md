@@ -341,8 +341,8 @@ The complete current reviewed digest set is:
 - shadow plan:
   `1d6faf4a1ab8299e9e400b1588859e9c33c9d1f7e2aea959a44dd50144dce347`;
 - current selector and required-runner authorities:
-  `2ec9e8cb5125eba6f3a5f0a72fc64156f4a1a794dbcac910a9ac3994a9389c79` and
-  `9f9ef0a99a6b9a065641ae89e7a8dca8ecf24427df46948ce0a276f40988bf19`; and
+  `0a4268f0c25cf04de9ecf60f0990c5e2310c30410a8841f96ae4592f9cbad2b6` and
+  `299512c107ccef514c76843525cab4ab46f1755c4e6ea5ad193cec8f7d9c866d`; and
 - promotion artifact:
   `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`.
 
@@ -710,7 +710,7 @@ at index 36 and its proof/root readers at `[72, 73]`, and advances only the live
 checkpoint suite passes 64/64; this local reader authority makes no required-gate or hosted M09-T02
 claim.
 M09-T03 appends sequence 42 at
-`e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3`. It preserves sequences
+`40d7c380cec3a7efd04316959a41abda3c8f71c1604f7f2fb892f18ae4cd2fa5`. It preserves sequences
 1–41 and all 37 predecessor artifact receipts byte-exact, appends the 73,111-byte M09-T03 artifact
 at index 37 and its proof/root readers at `[74, 75]`. The chain now authenticates 38 frozen
 artifacts and 76 current readers. The dedicated checkpoint suite passes 65/65; this local reader
@@ -785,4 +785,5 @@ passes 302/302; the terminal-integration root proof and checkpoint suites pass 1
 Those T10-integrated local receipts make no hosted M08-T10 claim. The M09-T01 commit-tree CI suites
 pass 136/136 and their shared-state/root-gate units pass 52/52; required-gate and hosted results
 remain unclaimed until observed. The current M09-T03 focused CI infrastructure suite passes
-196/196; it is a local authority receipt and does not claim a required gate or hosted result.
+196/196, and the complete structural CI glob passes 314/314; these are local authority receipts and
+do not claim a required gate or hosted result.

@@ -537,7 +537,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[41],
-    "e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3",
+    "40d7c380cec3a7efd04316959a41abda3c8f71c1604f7f2fb892f18ae4cd2fa5",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -933,8 +933,8 @@ test("sequence forty-two preserves sequences one through forty-one, reseals exac
         task: "M09-T02",
         role: "proof-library",
         path: "scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs",
-        bytes: 62883,
-        sha256: "4f62ba9748a9ed11f873b153301f5cb10d383997ac7f8e81eb644a9b8c07f731",
+        bytes: 62764,
+        sha256: "ad5b6b079d0c3ca82c3b685d6d55164600471f49389d2f77e469129215175049",
       },
       {
         task: "M09-T02",
@@ -961,7 +961,7 @@ test("sequence forty-two preserves sequences one through forty-one, reseals exac
   );
   assert.equal(
     calculateProofReaderCheckpointSha256(sequenceFortyTwo),
-    "e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3",
+    "40d7c380cec3a7efd04316959a41abda3c8f71c1604f7f2fb892f18ae4cd2fa5",
   );
 });
 

@@ -171,8 +171,8 @@ authority contains 168 proof-owned paths. Its 1,156-path set is
 `sha256:34be405a152c65ff1e6a7a60a7a582922c15798c26554f37a5bd5f635edc3013`, and its ownership
 projection is `sha256:20a323638ad015d4977ef8be127b01288cfc9e67e5ea48fe6076179e421ef87a`.
 Its selector and runner authorities are
-`sha256:2ec9e8cb5125eba6f3a5f0a72fc64156f4a1a794dbcac910a9ac3994a9389c79` and
-`sha256:9f9ef0a99a6b9a065641ae89e7a8dca8ecf24427df46948ce0a276f40988bf19`. Its ownership-category
+`sha256:0a4268f0c25cf04de9ecf60f0990c5e2310c30410a8841f96ae4592f9cbad2b6` and
+`sha256:299512c107ccef514c76843525cab4ab46f1755c4e6ea5ad193cec8f7d9c866d`. Its ownership-category
 counts are `168 / 45 / 31 / 128 / 448 / 205 / 120 / 11`. The 16 reviewed workspace test scripts
 are pinned by
 `sha256:4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab`. Contract and
@@ -520,7 +520,7 @@ proof/root readers at `[72, 73]`, and advances only the live T01 readers at `[70
 contains 37 frozen artifacts and 74 current readers. Its dedicated checkpoint suite passes 64/64;
 this local reader authority makes no required-gate or hosted M09-T02 claim.
 M09-T03 appends sequence 42 at
-`e9e180dd202d5ccbbb79ebaa285379e0f8f3611c44416fab2a2a5f3d141851e3`. It preserves sequences
+`40d7c380cec3a7efd04316959a41abda3c8f71c1604f7f2fb892f18ae4cd2fa5`. It preserves sequences
 1–41 and all 37 predecessor artifact receipts byte-exact, appends the T03 artifact at index 37 and
 proof/root readers at `[74, 75]`. The chain contains 38 frozen artifacts and 76 current readers. Its
 dedicated checkpoint suite passes 65/65; this local reader authority makes no required-gate or
@@ -592,7 +592,8 @@ passes 302/302; the terminal-integration root proof and checkpoint suites pass 1
 Those T10-integrated local receipts make no hosted M08-T10 claim. The M09-T01 commit-tree CI suites
 pass 136/136 and their shared-state/root-gate units pass 52/52; required-gate and hosted results
 remain unclaimed until observed. The current M09-T03 focused CI infrastructure suite passes
-196/196; required-gate and hosted results remain unclaimed until observed.
+196/196 and the complete structural CI glob passes 314/314; required-gate and hosted results remain
+unclaimed until observed.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one or more live readers through the reviewed checkpoint append procedure only when every previously pinned
