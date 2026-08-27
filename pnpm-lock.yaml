@@ -90,6 +90,12 @@ importers:
       '@desen/reference-catalog-web':
         specifier: workspace:*
         version: link:../../packages/reference-catalog-web
+      '@desen/runtime-core':
+        specifier: workspace:*
+        version: link:../../packages/runtime-core
+      '@desen/runtime-react':
+        specifier: workspace:*
+        version: link:../../packages/runtime-react
       '@desen/validator':
         specifier: workspace:*
         version: link:../../packages/validator

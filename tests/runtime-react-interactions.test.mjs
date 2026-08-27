@@ -51,7 +51,21 @@ function replaceExactOnce(text, search, replacement) {
   return text.replace(search, replacement);
 }
 
+function withLedgerStatus(row, status) {
+  return row.replace(/\| (?:NOT_PROVEN|PARTIAL|PROVEN|UNKNOWN)\s+\|/u, `| ${status.padEnd(15)}|`);
+}
+
+function readLedgerStatus(markdown, id) {
+  const row = markdown.split("\n").filter((line) => line.startsWith(`| ${id} |`));
+  assert.equal(row.length, 1);
+  return row[0]
+    .slice(1, -1)
+    .split("|")
+    .map((cell) => cell.trim())[3];
+}
+
 test("accepts immutable task-time M05-T04 interaction evidence and root mutation coverage", async () => {
+  const texts = await proofTexts();
   const result = await verifyRuntimeReactInteractionsEvidence();
   assert.deepEqual(result, {
     result: "PASS",
@@ -68,7 +82,7 @@ test("accepts immutable task-time M05-T04 interaction evidence and root mutation
     rootMutationTests: 18,
     trackedFiles: 114,
     compatibilityPaths: 28,
-    p06CurrentStatus: "PARTIAL",
+    p06CurrentStatus: readLedgerStatus(texts.proofMatrixText, "P-06"),
     normativeStatus: "N-034:TESTED",
     exactDocumentationReferences: 5,
   });
@@ -308,6 +322,29 @@ test("rejects moved, duplicated, pending, or mismatched M05-T04 Proof Matrix pin
 
 test("rejects P-05 or P-06 task-time authority drift", async () => {
   const texts = await proofTexts();
+  const partialProofMatrixText = replaceRow(texts.proofMatrixText, "P-06", (row) =>
+    withLedgerStatus(row, "PARTIAL"),
+  );
+  const provenProofMatrixText = replaceRow(texts.proofMatrixText, "P-06", (row) =>
+    withLedgerStatus(row, "PROVEN"),
+  );
+  const [partialCompatibility, provenCompatibility] = await Promise.all([
+    verifyRuntimeReactInteractionsEvidence({
+      proofDocumentText: texts.proofDocumentText,
+      proofMatrixText: partialProofMatrixText,
+      normativeCoverageText: texts.normativeCoverageText,
+    }),
+    verifyRuntimeReactInteractionsEvidence({
+      proofDocumentText: texts.proofDocumentText,
+      proofMatrixText: provenProofMatrixText,
+      normativeCoverageText: texts.normativeCoverageText,
+    }),
+  ]);
+  assert.equal(partialCompatibility.p06CurrentStatus, "PARTIAL");
+  assert.equal(provenCompatibility.p06CurrentStatus, "PROVEN");
+  assert.equal(partialCompatibility.artifactSha256, HISTORICAL_SHA256);
+  assert.equal(provenCompatibility.artifactSha256, HISTORICAL_SHA256);
+
   const variants = [
     replaceRow(texts.proofMatrixText, "P-05", (row) =>
       row.replace(`\`${ARTIFACT_FILE_NAME}\``, `\`evil/${ARTIFACT_FILE_NAME}\``),
@@ -326,9 +363,9 @@ test("rejects P-05 or P-06 task-time authority drift", async () => {
       row.replace(HISTORICAL_SHA256, "f".repeat(64)),
     ),
     replaceRow(texts.proofMatrixText, "P-06", (row) => row.replace("M05-T04", "M05-T99")),
-    replaceRow(texts.proofMatrixText, "P-06", (row) =>
-      replaceExactOnce(row, "| PARTIAL        |", "| PROVEN         |"),
-    ),
+    replaceRow(texts.proofMatrixText, "P-06", (row) => withLedgerStatus(row, "NOT_PROVEN")),
+    replaceRow(texts.proofMatrixText, "P-06", (row) => withLedgerStatus(row, "UNKNOWN")),
+    replaceRow(texts.proofMatrixText, "P-06", (row) => withLedgerStatus(row, "toString")),
   ];
   for (const proofMatrixText of variants) {
     await assert.rejects(

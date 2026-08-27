@@ -138,12 +138,16 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
       "desen-app-catalog-panel-layer-tree",
       ["desen-app-shell-navigation", "reference-catalog-web-capability-artifact"],
     ],
+    [
+      "desen-app-real-adapter-canvas",
+      ["desen-app-shell-navigation", "reference-host-web-source-audit"],
+    ],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "132ee4ef584a3526da0db1d72a39584f5201b1df402e59cec03a2d09d0661a19";
+  "2a00d10d248229bbdf0b72f67ee1c4b600fcfa9062b7f45ae1ee41b841937562";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

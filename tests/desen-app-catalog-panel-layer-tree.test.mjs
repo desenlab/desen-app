@@ -24,6 +24,7 @@ const SOURCE = "examples/sign-in/official-derived.source.desen.json";
 const PACKAGE = "apps/desen-app/package.json";
 const AUTHORING = "apps/desen-app/src/authoring-data.ts";
 const APPLICATION = "apps/desen-app/src/application.tsx";
+const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
 const AUTHORING_TEST = "apps/desen-app/test/authoring-data.test.ts";
 const temporaryDirectories = [];
 let built;
@@ -67,6 +68,11 @@ after(async () => {
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[0], () => {
+  assert.equal(built.artifactBytes.byteLength, 25_375);
+  assert.equal(
+    built.artifactSha256,
+    "85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61",
+  );
   assert.equal(built.artifact.schemaVersion, 1);
   assert.equal(built.artifact.proofId, "desen-app-catalog-panel-layer-tree");
   assert.equal(built.artifact.profile, "desen.app.catalog-panel-layer-tree-proof.v1");
@@ -78,6 +84,8 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[0], () => {
   ]);
   assert.equal(built.artifact.claim.taskStatus, "DONE");
   assert.equal(built.artifact.claim.shellCompatibilityRetained, true);
+  assert.equal(built.currentCompatibility.result, "PASS");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T03");
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[1], () => {
@@ -195,6 +203,29 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.artifact.claim.selectionOrInspectorImplemented, false);
   assert.equal(built.artifact.claim.sourceMutationOrHistoryImplemented, false);
   assert.equal(built.artifact.nonclaims.length, 4);
+  assert.equal(built.currentCompatibility.retainedClaim.componentFilterMutatesSource, false);
+  assert.equal(built.currentCompatibility.retainedClaim.unknownSurfaceSubstitutesSource, false);
+  assert.equal(built.currentCompatibility.successor.realAdapterCanvasOwnedBySuccessor, true);
+  assert.equal(
+    built.currentCompatibility.successor.historicalNoCanvasNonclaimAppliedToCurrentApp,
+    false,
+  );
+  assert.equal(built.currentCompatibility.successor.exactPublicRuntimeAdapterPathAllowed, true);
+  assert.equal(built.currentCompatibility.successor.selectionOrInspectorImplemented, false);
+  assert.equal(built.currentCompatibility.successor.sourceMutationOrHistoryImplemented, false);
+  assert.equal(built.currentCompatibility.successor.persistenceUiImplemented, false);
+  assert.equal(built.currentCompatibility.successor.runOrPublishImplemented, false);
+  assert.equal(built.currentCompatibility.boundary.imports.runtimeCoreImports, 2);
+  assert.equal(built.currentCompatibility.boundary.imports.runtimeReactImports, 2);
+  assert.equal(built.currentCompatibility.boundary.imports.adapterImports, 1);
+  assert.equal(
+    built.currentCompatibility.boundary.imports.exactReferenceAdapterRegistryConstructions,
+    1,
+  );
+  assert.equal(built.currentCompatibility.boundary.imports.officialBundleImports, 1);
+  assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
+  assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
+  assert.equal(built.currentCompatibility.boundary.imports.sourceMutationCalls, 0);
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[4], async () => {
@@ -204,6 +235,8 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[4], async () => {
   assert.notEqual(second.artifact, built.artifact);
   assert.equal(Object.isFrozen(second.artifact), true);
   assert.equal(Object.isFrozen(second.artifact.boundary.trackedReceipts), true);
+  assert.deepEqual(second.currentCompatibility, built.currentCompatibility);
+  assert.equal(Object.isFrozen(second.currentCompatibility), true);
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[5], async () => {
@@ -305,6 +338,72 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[5], async () => {
       ]),
     }),
     expectedError("TEST_AUTHORITY_DRIFT"),
+  );
+
+  const adapterCanvas = await readFile(path.join(ROOT, ADAPTER_CANVAS), "utf8");
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [
+          ADAPTER_CANVAS,
+          Buffer.from(
+            adapterCanvas.replace(
+              "@desen/reference-catalog-web/react-adapters",
+              "@desen/reference-catalog-web/private/react-adapters",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [ADAPTER_CANVAS, Buffer.from(`${adapterCanvas}\nvoid import("@desen/runtime-react");\n`)],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [ADAPTER_CANVAS, Buffer.from(`${adapterCanvas}\nconst handwritten = <Stack />;\n`)],
+      ]),
+    }),
+    expectedError("SCOPE_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [ADAPTER_CANVAS, Buffer.from(`${adapterCanvas}\ndocument.querySelector("main");\n`)],
+      ]),
+    }),
+    expectedError("SCOPE_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [ADAPTER_CANVAS, Buffer.from(`${adapterCanvas}\ninsertDesenEditor();\n`)],
+      ]),
+    }),
+    expectedError("SCOPE_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [
+          ADAPTER_CANVAS,
+          Buffer.from(
+            adapterCanvas.replace(
+              "createRuntimeReactAdapterRegistry(\n  REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT,\n)",
+              "createRuntimeReactAdapterRegistry({})",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("SCOPE_BOUNDARY_DRIFT"),
   );
 });
 

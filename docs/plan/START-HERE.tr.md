@@ -698,6 +698,41 @@ persistence, Design/Run, diagnostics, publish veya activation eklemez. `P-*`, `N
 ve kanıt-kapısı durumları değişmez. Genel ilerleme 97/145 (%67), M09 ilerlemesi 2/14, kanıt
 kapıları 9/13'tür; sıradaki iş M09-T03 exact React adapter canvas'ıdır.
 
+M09-T03 artık `DONE`'dır. Desen App, kontrollü official-derived Bundle'ı public Runtime Core
+session API'leriyle mount eder, exact public static reference-adapter registry'sini preflight eder
+ve commit edilmiş canlı surface'i public Runtime React hook/boundary üzerinden render eder. Yalnızca
+exact `account-app` / `sign-in` tuple'ı, `com.example.account-app` document'ı ve
+`sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb` revision'ı kabul
+edilir. Design preview içindeki managed kontroller inert all-deny host port'ları arkasında disabled kalır.
+Desteklenmeyen tuple sign-in yerine koymaz ve runtime session mount etmez; rota değişimi, React
+Strict Mode replay'i ve final unmount exact session'ı dispose eder.
+
+Odak canvas suite'i 20/20, tam App suite'i 56/56 ve bağımsız kök kanıt 11/11 geçer; App
+typecheck, lint ve production build de yerelde geçer. Exact kanıt 73.111 baytlık
+[`desen-app-0.1.0-real-adapter-canvas.json`](../proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json)
+artifact'ıdır ve
+`sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151` ile pinlenir. İki
+deterministik Vite `build({ write: false })` gözlemi de 102 modül, 290 static import, sıfır dynamic
+ve unresolved import ile 101 backing file üretir. Kontrollü managed dilim, donmuş reference-host
+source audit'indeki exact 19 transformed runtime/component modül kimliğini paylaşır ve beş gerçek
+component'ın tamamına ulaşır.
+
+Canlı yerel M09-T03 CI otoritesi 178 workload ve 84 proof pair içerir; bunlar 73 ordinary pair ile
+11 barrier'a ayrılır. Formal impact parent'ları exact M09-T01 shell ve M05-T09 reference-host
+source audit'idir; affected closure 51 proof unit ve 112 workload'dur. Sequence 42, 65/65 geçer;
+38 donmuş artifact ile 76 reader'ı
+`sha256:40d7c380cec3a7efd04316959a41abda3c8f71c1604f7f2fb892f18ae4cd2fa5` başında doğrular ve
+exact sequence 41 başı
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68` ile bütün öncülleri
+korur. Bunlar yerel task ve CI-infrastructure makbuzlarıdır; required gate veya hosted-CI başarısı
+iddia edilmez.
+
+Bu kapanışla P-06 `PROVEN`, genel ilerleme 98/145 (%68), M09 ilerlemesi 3/14 ve kanıt kapıları
+10/13 olur. `S-001`, M09-T11'deki görünür approximate-fidelity disclosure için `PLANNED` kalır;
+PF-059 `OPEN`, P-07 ise M10-T05 browser E2E beklerken `PARTIAL` kalır. Selection/private-DOM
+overlay, inspector editing, mutation, Design/Run, persistence, diagnostics, publish ve activation
+bu dilimin dışındadır; sıradaki iş M09-T04'tür.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

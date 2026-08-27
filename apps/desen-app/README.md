@@ -6,7 +6,7 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T02 extends the application-owned shell with a Catalog-driven, read-only authoring structure.
+M09-T03 extends the application-owned shell with an exact, read-only React adapter canvas.
 The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
@@ -25,6 +25,12 @@ The current product surface contains:
   data;
 - an explicit no-substitution state for Recovery and Profile, which have no exact Source tree in
   the official fixture;
+- a sign-in canvas mounted from the official-derived Bundle through the same public
+  `REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT` used by the reference host;
+- exact runtime document, revision, surface, Catalog-set, registry, and snapshot authority checks
+  before the managed tree becomes visible;
+- a native disabled fieldset that keeps the real heading and labels accessible while preventing
+  this Design preview from dispatching input or action events;
 - explicit not-found states for unknown routes, projects, and surfaces; and
 - semantic landmarks, a skip link, visible keyboard focus, route-heading focus, reduced-motion
   support, and responsive layouts.
@@ -51,16 +57,23 @@ detached, recursively immutable success values. Validation or bounded-projection
 partial panel or tree. Component and behavior identity occurrences are bounded to 25,000 per
 surface and Source depth to 64; own empty slots remain distinct from absent optional slots.
 
-This slice does not render a managed adapter canvas, select or inspect nodes, expose prop/schema or
-slot-cardinality controls, drag, insert, reorder or otherwise mutate Source, persist project data,
-create user projects, execute Design/Run behavior, calculate user-facing diagnostics, publish a
-revision, or activate a channel. The central frame remains an explicit placeholder for M09-T03;
-selection belongs to M09-T04, inspector controls to M09-T05, and insertion/cardinality UI to
-M09-T07.
+The canvas mounts only for the exact `account-app:sign-in` route tuple. It creates a public
+`runtime-core` headless session with explicit inert/denying host ports, preflights that session
+through `runtime-react`, and renders it through `useRuntimeReactSurface` plus
+`RuntimeReactSurfaceBoundary`. Recovery, Profile, and every other tuple report that no exact
+adapter preview is available; they never borrow the sign-in Bundle or retain its managed tree.
+StrictMode replay, route replacement, and unmount dispose the exact session they created.
 
-M09-T02 imports only the inert Catalog JSON subpath and the two required public validator APIs. It
-does not import `editor-core`, `catalog-sdk`, `runtime-react`, React adapters, or concrete Catalog
-components, so the panel carries no premature mutation, inspector, or canvas authority.
+This slice does not select or inspect nodes, expose prop/schema or slot-cardinality controls, drag,
+insert, reorder or otherwise mutate Source, persist project data, create user projects, execute
+interactive Design/Run behavior, calculate user-facing diagnostics, publish a revision, or activate
+a channel. Selection belongs to M09-T04, inspector controls to M09-T05, insertion/cardinality UI to
+M09-T07, and interactive Design/Run behavior to M09-T10.
+
+The App imports only public package entry points for runtime composition and the exact static
+reference adapter registry. It does not import concrete Catalog components, private package files,
+`editor-core`, `catalog-sdk`, Publisher, or control-plane code. Bundle data never selects a
+module, component, fallback tree, or executable host binding.
 
 ## Local commands
 
@@ -69,6 +82,7 @@ pnpm --filter @desen/app-web dev
 pnpm --filter @desen/app-web lint
 pnpm --filter @desen/app-web typecheck
 pnpm --filter @desen/app-web test:authoring
+pnpm --filter @desen/app-web test:canvas
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

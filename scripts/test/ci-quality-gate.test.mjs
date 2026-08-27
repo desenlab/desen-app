@@ -95,17 +95,17 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 83,
-    verifierCount: 83,
-    rootTestCount: 83,
+    proofCount: 84,
+    verifierCount: 84,
+    rootTestCount: 84,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
-    legacyPrerequisiteCount: 611,
-    legacyPrerequisiteSha256: "3edb7d750b1c9bee5b081e46e887c9e9e90ec1bf989aff5745fd0e4dbab492f1",
-    legacyLeafInvocationCount: 4381,
-    legacyLeafInvocationSha256: "a8db91b1306dcffdb52eedcb47dcf7d8fa1f60457d0b36ee5af44a0dfa743dec",
-    distinctLeafWorkloadCount: 281,
-    distinctLeafWorkloadSha256: "cf36b706947b4fcb4fa60759dc118c3b07faabea84a36ee1c69e10996441294e",
+    legacyPrerequisiteCount: 621,
+    legacyPrerequisiteSha256: "8e1f08ea689d33520b7dd905bc124a3dcb842abf5e40873da254013d9fb2ccbd",
+    legacyLeafInvocationCount: 4393,
+    legacyLeafInvocationSha256: "bcb1a99cd6832975955719a794c8c44a154d97f3e784ce9a5775502bfba210e2",
+    distinctLeafWorkloadCount: 284,
+    distinctLeafWorkloadSha256: "b5a85ab89e327e828b8ebb5aa2c85b008596eae5e4bfa284d255548de76a53af",
     testConfigurationFileCount: 0,
     workspaceTestScriptCount: 16,
     workspaceTestScriptSha256: "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab",
@@ -345,6 +345,19 @@ test("direct proof-verifier prerequisites require their exact reviewed proof and
     (error) =>
       error instanceof QualityGateError && /unclassified legacy prerequisite/u.test(error.message),
   );
+
+  const adapterInventory = await currentInventory();
+  adapterInventory.packageJson = clone(adapterInventory.packageJson);
+  adapterInventory.packageJson.scripts["verify:desen-app-real-adapter-canvas"] =
+    adapterInventory.packageJson.scripts["verify:desen-app-real-adapter-canvas"].replace(
+      "node scripts/verify-reference-host-web-source-audit.mjs",
+      "node scripts/verify-reference-catalog-web-capability-artifact.mjs",
+    );
+  assert.throws(
+    () => validateProofInventory(adapterInventory),
+    (error) =>
+      error instanceof QualityGateError && /unclassified legacy prerequisite/u.test(error.message),
+  );
 });
 
 test("inventory validation rejects hidden test configuration and manifest overrides", async () => {
@@ -405,8 +418,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 176);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 83);
+  assert.equal(steps.length, 178);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 84);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -469,6 +482,24 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
       args: ["--test", "--test-concurrency=1", "tests/desen-app-catalog-panel-layer-tree.test.mjs"],
     },
   );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "verify-desen-app-real-adapter-canvas"),
+    {
+      id: "verify-desen-app-real-adapter-canvas",
+      label: "Proof verifier: desen-app-real-adapter-canvas",
+      command: "node",
+      args: ["scripts/verify-desen-app-real-adapter-canvas.mjs"],
+    },
+  );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "test-desen-app-real-adapter-canvas"),
+    {
+      id: "test-desen-app-real-adapter-canvas",
+      label: "Root proof and mutation test: desen-app-real-adapter-canvas",
+      command: "node",
+      args: ["--test", "--test-concurrency=1", "tests/desen-app-real-adapter-canvas.test.mjs"],
+    },
+  );
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -489,8 +520,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 176,
-    planSha256: "5ef9b46e949c9be14698a57fb5c8a520b04129269b7ca031c720ddaedb464d42",
+    stepCount: 178,
+    planSha256: "264117dbe5e03165997673e2065b459d9e383c66d145431c95feee70e90e372d",
   });
 
   const missingTypecheck = clone(steps);

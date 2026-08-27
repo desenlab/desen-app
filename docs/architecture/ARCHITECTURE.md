@@ -709,7 +709,8 @@ Evidence:
 
 The visual authoring product. M09-T01 establishes its application-owned shell and project
 navigation. M09-T02 composes the first Catalog-driven, read-only authoring projection into that
-shell, not the interactive editor composition promised by later M09 tasks.
+shell. M09-T03 adds one exact managed reference-adapter canvas without yet admitting the selection,
+inspector, or mutation authority promised by later M09 tasks.
 
 The first slice owns three exact route forms: `/projects`, `/projects/:projectId`, and
 `/projects/:projectId/surfaces/:surfaceId`. The bare root is replaced with `/projects`; app-owned
@@ -763,6 +764,50 @@ M09-T02 has no real-adapter canvas, selection/inspector, insertion, move, delete
 mutation, persistence, diagnostics, Design/Run, publication, or activation authority. Later M09
 tasks must connect those capabilities through their public package boundaries and establish their
 own evidence.
+
+M09-T03 is a separate runtime composition boundary. For only the exact `account-app` / `sign-in`
+route tuple, the App mounts the controlled official-derived Bundle with public Runtime Core
+session APIs, verifies the exact `com.example.account-app` document, `sign-in` surface, and
+`sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb` revision, preflights
+the public static `@desen/reference-catalog-web/react-adapters` registry, and issues a frozen
+live-surface input to the public Runtime React hook and boundary. The component registry, token CSS
+properties, runtime session, and renderer are imported through public package exports; no local
+registry, private package path, handwritten managed tree, or alternate rendering path is admitted.
+
+The authoring canvas supplies inert all-deny host ports and encloses the managed tree in a disabled
+fieldset, so the exact five real reference components render as a design preview without operation,
+navigation, resource, state, or other interaction authority. Unsupported project/surface tuples
+mount no runtime and never substitute sign-in. A route-owned key and effect cleanup dispose the
+exact session during surface replacement, React Strict Mode replay, and final unmount, preventing
+stale runtime state from crossing route identities. Selection overlays, inspector state, and any
+future authoring chrome must remain outside the capability subtree and cannot inspect private DOM;
+M09-T04 owns that next boundary.
+
+The independent audit combines TypeScript parser/checker symbol resolution with two deterministic
+Vite `build({ write: false })` observations. Each observed App graph has 102 modules, 290 static
+imports, no dynamic or unresolved imports, and 101 backing files. The controlled managed slice
+shares exactly 19 transformed runtime/component module identities with the frozen M05-T09
+reference-host source audit and reaches all five real components through the same public registry
+and Runtime React path. The exact 73,111-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json` at
+`sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151`; the focused canvas
+suite passes 20/20, the complete App suite passes 56/56, the independent root proof passes 11/11,
+and App typecheck, lint, and production build pass locally.
+
+The live local CI authority registers 178 workloads and 84 proof pairs, split into 73 ordinary
+pairs and 11 barriers. M09-T03's formal impact parents are exactly the M09-T01 shell and M05-T09
+reference-host source audit, yielding an affected closure of 51 proof units and 112 workloads.
+Checkpoint sequence 42 passes 65/65 at
+`sha256:40d7c380cec3a7efd04316959a41abda3c8f71c1604f7f2fb892f18ae4cd2fa5`, authenticating 38
+frozen artifacts and 76 readers while preserving exact sequence 41 at
+`sha256:b36679b7ea3ffd0e019d3051b30312dd96b050e10ae7d5d44cf39eb9d30eeb68` and every predecessor.
+These are local task and CI-infrastructure receipts; they make no required-gate or hosted-CI claim.
+
+This closes the controlled Web–React registry-identity claim and advances P-06 to `PROVEN`, but
+`S-001` remains `PLANNED` until M09-T11 adds visible approximate-fidelity disclosure. PF-059 stays
+`OPEN` and P-07 stays `PARTIAL` pending M10-T05 browser E2E. M09-T03 grants no selection,
+private-DOM overlay, inspector editing, insertion, structural mutation, drag/drop, state/action
+editing, Design/Run mode, persistence, diagnostics, publication, or activation authority.
 
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,

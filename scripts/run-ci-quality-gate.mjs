@@ -419,6 +419,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-desen-app-catalog-panel-layer-tree.mjs",
       "tests/desen-app-catalog-panel-layer-tree.test.mjs",
     ],
+    [
+      "desen-app-real-adapter-canvas",
+      "scripts/verify-desen-app-real-adapter-canvas.mjs",
+      "tests/desen-app-real-adapter-canvas.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -437,6 +442,10 @@ const DIRECT_PROOF_VERIFIER_PREREQUISITES = Object.freeze({
   "desen-app-catalog-panel-layer-tree": Object.freeze([
     "node scripts/verify-desen-app-shell-navigation.mjs",
     "node scripts/verify-reference-catalog-web-capability-artifact.mjs",
+  ]),
+  "desen-app-real-adapter-canvas": Object.freeze([
+    "node scripts/verify-desen-app-shell-navigation.mjs",
+    "node scripts/verify-reference-host-web-source-audit.mjs",
   ]),
 });
 
@@ -467,14 +476,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "3edb7d750b1c9bee5b081e46e887c9e9e90ec1bf989aff5745fd0e4dbab492f1";
+  "8e1f08ea689d33520b7dd905bc124a3dcb842abf5e40873da254013d9fb2ccbd";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "a8db91b1306dcffdb52eedcb47dcf7d8fa1f60457d0b36ee5af44a0dfa743dec";
+  "bcb1a99cd6832975955719a794c8c44a154d97f3e784ce9a5775502bfba210e2";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "cf36b706947b4fcb4fa60759dc118c3b07faabea84a36ee1c69e10996441294e";
+  "b5a85ab89e327e828b8ebb5aa2c85b008596eae5e4bfa284d255548de76a53af";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "5ef9b46e949c9be14698a57fb5c8a520b04129269b7ca031c720ddaedb464d42";
+const QUALITY_GATE_PLAN_SHA256 = "264117dbe5e03165997673e2065b459d9e383c66d145431c95feee70e90e372d";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:

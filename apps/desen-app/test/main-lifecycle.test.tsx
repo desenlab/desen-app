@@ -57,13 +57,14 @@ it(
       await Promise.resolve();
     });
     expect(await screen.findByRole("heading", { level: 2, name: "Sign-in" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
 
     act(() => {
       window.dispatchEvent(pageHideEvent(true));
     });
     expect(screen.getByRole("heading", { level: 2, name: "Sign-in" })).toBeTruthy();
     expect(document.getElementById("desen-app-root")?.textContent).toContain(
-      "Authoring structure ready",
+      "Design preview · controls are disabled.",
     );
 
     act(() => {

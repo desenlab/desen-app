@@ -17,7 +17,8 @@ const NORMATIVE_COVERAGE_PATH = "docs/proof/NORMATIVE-COVERAGE.md";
 const HISTORICAL_ARTIFACT_SHA256 =
   "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0";
 const HISTORICAL_ARTIFACT_BYTES = 52_430;
-const P06_CURRENT_STATUS = "PARTIAL";
+const P06_HISTORICAL_STATUS = "PARTIAL";
+const PROOF_STATUS_RANK = Object.freeze({ NOT_PROVEN: 0, PARTIAL: 1, PROVEN: 2 });
 const COMPATIBILITY_MODE = "immutable-task-time-artifact";
 const MAX_PROOF_DOCUMENT_BYTES = 500_000;
 const MAX_PROOF_MATRIX_BYTES = 2_000_000;
@@ -882,13 +883,12 @@ function verifyProofMatrix(markdown) {
 
   const historicalPin = `\`${ARTIFACT_FILE_NAME}\` \`sha256:${HISTORICAL_ARTIFACT_SHA256}\``;
   const p05 = exactRow(markdown, "P-05");
-  const statusRank = Object.freeze({ NOT_PROVEN: 0, PARTIAL: 1, PROVEN: 2 });
-  const currentRank = statusRank[p05.cells[3]];
+  const currentRank = PROOF_STATUS_RANK[p05.cells[3]];
   if (
     p05.cells[0] !== "P-05" ||
     !p05.cells[2].includes("M05-T04") ||
-    currentRank === undefined ||
-    currentRank < statusRank.PARTIAL ||
+    !Object.hasOwn(PROOF_STATUS_RANK, p05.cells[3]) ||
+    currentRank < PROOF_STATUS_RANK.PARTIAL ||
     p05.line.split(historicalPin).length !== 2 ||
     p05.line.includes(PENDING_ARTIFACT_SHA256)
   ) {
@@ -896,9 +896,12 @@ function verifyProofMatrix(markdown) {
   }
 
   const p06 = exactRow(markdown, "P-06");
+  const p06CurrentStatus = p06.cells[3];
+  const p06CurrentRank = PROOF_STATUS_RANK[p06CurrentStatus];
   if (
     p06.cells[0] !== "P-06" ||
-    p06.cells[3] !== P06_CURRENT_STATUS ||
+    !Object.hasOwn(PROOF_STATUS_RANK, p06CurrentStatus) ||
+    p06CurrentRank < PROOF_STATUS_RANK[P06_HISTORICAL_STATUS] ||
     !p06.cells[2].includes("M05-T04") ||
     p06.line.split(historicalPin).length !== 2 ||
     p06.line.includes(PENDING_ARTIFACT_SHA256)
@@ -908,6 +911,7 @@ function verifyProofMatrix(markdown) {
       "The exact P-06 M05-T04 artifact pin or historical status drifted.",
     );
   }
+  return p06CurrentStatus;
 }
 
 function verifyNormativeCoverage(markdown) {
@@ -939,7 +943,7 @@ function countOccurrences(text, token) {
 
 function verifyDocumentation(proofText, matrixText, normativeText) {
   verifyProofDocument(proofText);
-  verifyProofMatrix(matrixText);
+  const p06CurrentStatus = verifyProofMatrix(matrixText);
   verifyNormativeCoverage(normativeText);
 
   const documents = [proofText, matrixText, normativeText];
@@ -962,9 +966,10 @@ function verifyDocumentation(proofText, matrixText, normativeText) {
       },
     );
   }
+  return p06CurrentStatus;
 }
 
-function summarizeEvidence(built) {
+function summarizeEvidence(built, p06CurrentStatus = P06_HISTORICAL_STATUS) {
   return Object.freeze({
     result: built.artifact.result,
     artifactSha256: built.artifactSha256,
@@ -980,7 +985,7 @@ function summarizeEvidence(built) {
     rootMutationTests: EXPECTED_TESTS.rootMutationTests,
     trackedFiles: 114,
     compatibilityPaths: EXPECTED_COMPATIBILITY_PATHS.length,
-    p06CurrentStatus: P06_CURRENT_STATUS,
+    p06CurrentStatus,
     normativeStatus: "N-034:TESTED",
     exactDocumentationReferences: 5,
   });
@@ -1105,8 +1110,8 @@ export async function verifyRuntimeReactInteractionsEvidence(rawOptions = undefi
         MAX_NORMATIVE_COVERAGE_BYTES,
       ).then((bytes) => bytes.toString("utf8")),
   ]);
-  verifyDocumentation(proofText, matrixText, normativeText);
-  return summarizeEvidence(built);
+  const p06CurrentStatus = verifyDocumentation(proofText, matrixText, normativeText);
+  return summarizeEvidence(built, p06CurrentStatus);
 }
 
 /** Atomically copies only exact already-authenticated immutable M05-T04 task-time bytes. */
