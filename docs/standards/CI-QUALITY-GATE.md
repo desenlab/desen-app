@@ -87,8 +87,8 @@ the current M08-T09 live authority. The authority-specific required plan is pinn
 non-authoritative shadow form is pinned separately as
 `sha256:d208a4afcbc2c6363e3f20959beefa0aade93751fc8b49676260af74b3701120`.
 The current selector comparison authority is
-`sha256:7c0dcaf471c1f38ed313593eeed63c3a12a015c078b322363eab61ed1cb0fcee`, the required-runner
-authority is `sha256:86022df6bf245ba7600ebf71b03537224d591278dd4fc4b421be0812f7a87ed8`, and the authenticated
+`sha256:0360b3fb0d609d79f7e6117e8d7e7cafd14fabdeab38932d077fb7f2274c1d1d`, the required-runner
+authority is `sha256:eeb690e8f4917a69b6912ab40199dabb3b86957445e5ea0e5b71d8ed611f2f0e`, and the authenticated
 promotion artifact is
 `sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`.
 
@@ -772,7 +772,7 @@ the twelve changed live historical readers at indexes `[50, 51, 52, 53, 54, 55, 
 artifacts and 66 then-current readers while preserving sequence 35 and every earlier byte. It reseals
 reader indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63]`, appends the T08
 proof/root readers at `[64, 65]`, and remains immutable history. Current M08-T09 sequence 37 at
-`07e5de3676a30aa58c2108a2cb91ddabb7130d6490094072cda774b207f1b26f` authenticates 34 frozen
+`e43b48e2d4873b9212d4d0b1bf3e6fb03f56fcc350f8bc9ad65409891995c310` authenticates 34 frozen
 artifacts and 68 current readers while preserving sequence 36 and every earlier byte. It reseals
 the sixteen changed editor readers at indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
 62, 63, 64, 65]`, appends the T09 proof/root readers at `[66, 67]`, and the dedicated checkpoint

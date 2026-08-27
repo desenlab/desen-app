@@ -169,12 +169,12 @@ test("[authority] authenticates the exact frozen M08-T02 artifact and isolated r
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
-  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 34);
-  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 82);
-  assert.equal(built.currentCompatibility.boundary.emittedFiles, 32);
-  assert.equal(built.currentCompatibility.boundary.staticEsmEdges, 20);
-  assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 30);
-  assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 9);
+  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 35);
+  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 88);
+  assert.equal(built.currentCompatibility.boundary.emittedFiles, 36);
+  assert.equal(built.currentCompatibility.boundary.staticEsmEdges, 24);
+  assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 31);
+  assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 10);
   assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
   assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
 });

@@ -246,8 +246,8 @@ test("[authority] authenticates exact frozen M08-T02/T03 artifacts and the isola
     publicRuntimeCasesAdded: 3,
     publicCompilerNegativeAssertionsAdded: 21,
   });
-  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 34);
-  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 82);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
   assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
   assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
   assert.equal(built.currentCompatibility.frozenAuthority.retainedTaskTimeReceipts, 57);

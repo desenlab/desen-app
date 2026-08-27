@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "07e5de3676a30aa58c2108a2cb91ddabb7130d6490094072cda774b207f1b26f",
+  "headSha256": "e43b48e2d4873b9212d4d0b1bf3e6fb03f56fcc350f8bc9ad65409891995c310",
   "checkpoints": [
     {
       "sequence": 1,
@@ -14404,14 +14404,14 @@
           "role": "proof-library",
           "path": "scripts/lib/editor-core-structural-edits-proof.mjs",
           "bytes": 95389,
-          "sha256": "8d08725745f663ee59bdd38bafdf98d251d05255a0fd3ab495dc11d14dc7788a"
+          "sha256": "dfe82adbe8492c13de0165e5170e1a3a662d114528e4d875342c48a811247bc8"
         },
         {
           "task": "M08-T03",
           "role": "root-test",
           "path": "tests/editor-core-structural-edits.test.mjs",
-          "bytes": 21988,
-          "sha256": "49b5b07768c47de0127b379478a175a21fa6e59e94400ae6305c1b130faa4949"
+          "bytes": 21989,
+          "sha256": "3adcd2326e9122130d782a5890ee31810fa17376146f283ecf08a94d90b1ae13"
         },
         {
           "task": "M08-T04",
@@ -14425,7 +14425,7 @@
           "role": "root-test",
           "path": "tests/editor-core-content-edits.test.mjs",
           "bytes": 25820,
-          "sha256": "f8c27c96236438d4e31eab61c5fa96bfc63415fd75e599987234e32b4838937b"
+          "sha256": "d4ab57f76fee5f0017c8e7f0de3243ffff06c5e5d717f7127653db72db3b84d3"
         },
         {
           "task": "M08-T05",

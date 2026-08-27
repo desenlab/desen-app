@@ -482,7 +482,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[36],
-    "07e5de3676a30aa58c2108a2cb91ddabb7130d6490094072cda774b207f1b26f",
+    "e43b48e2d4873b9212d4d0b1bf3e6fb03f56fcc350f8bc9ad65409891995c310",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -3255,7 +3255,7 @@ test("sequence thirty-seven reseals all changed editor readers and appends exact
   assert.deepEqual(liveReceipts, authorities);
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "07e5de3676a30aa58c2108a2cb91ddabb7130d6490094072cda774b207f1b26f",
+    "e43b48e2d4873b9212d4d0b1bf3e6fb03f56fcc350f8bc9ad65409891995c310",
   );
 
   const readerMutation = cloneBaseline();

@@ -121,8 +121,8 @@ Affected ownership covers 1,112 tracked paths at
 proof-owned paths; the complete ownership projection is
 `sha256:25d10800f2a531114017012de6c0306ba614f7a0cd273d8d3a997e525a728f34`. Current selector and
 required-runner authorities are
-`sha256:7c0dcaf471c1f38ed313593eeed63c3a12a015c078b322363eab61ed1cb0fcee` and
-`sha256:86022df6bf245ba7600ebf71b03537224d591278dd4fc4b421be0812f7a87ed8`; the authenticated
+`sha256:0360b3fb0d609d79f7e6117e8d7e7cafd14fabdeab38932d077fb7f2274c1d1d` and
+`sha256:eeb690e8f4917a69b6912ab40199dabb3b86957445e5ea0e5b71d8ed611f2f0e`; the authenticated
 promotion artifact is
 `sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`. No hosted M08-T09
 result is claimed. The 15 reviewed workspace test scripts remain pinned by
@@ -402,7 +402,7 @@ appends the T07 proof/root readers at `[62, 63]`. Historical M08-T08 sequence 36
 artifacts and 66 then-current readers while preserving sequence 35 and every earlier byte. It reseals
 the fourteen live editor-reader indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62,
 63]` and appends the T08 proof/root readers at `[64, 65]`. Current M08-T09 sequence 37 at
-`07e5de3676a30aa58c2108a2cb91ddabb7130d6490094072cda774b207f1b26f` authenticates 34 frozen
+`e43b48e2d4873b9212d4d0b1bf3e6fb03f56fcc350f8bc9ad65409891995c310` authenticates 34 frozen
 artifacts and 68 current readers while preserving sequence 36 and every earlier byte. It reseals
 the sixteen changed editor readers at indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
 62, 63, 64, 65]`, appends the T09 proof/root readers at `[66, 67]`, and the dedicated checkpoint
