@@ -657,13 +657,43 @@ artifact'ıdır ve
 `sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220` ile pinlenir. Sequence 40
 63/63 geçer ve 36 donmuş artifact ile 72 reader'ı
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` başında doğrular.
-Current CI successor 174 workload ve 82 proof pair içerir. Bunlar yerel makbuzlardır; required gate
-veya hosted-CI başarısı çıkarımı yapılmaz.
+M09-T01'in tarihsel CI successor'ı 174 workload ve 82 proof pair içerir; dağılım 71 ordinary pair
+ve 11 barrier'dır. Bunlar yerel makbuzlardır; required gate veya hosted-CI başarısı çıkarımı
+yapılmaz.
 
 Bu dilim Catalog tabanlı panel/layer tree, gerçek adapter canvas'ı, Source düzenleme, diagnostics,
 persistence, Design/Run, publish veya activation davranışı eklemez. Genel ilerleme 96/145 (%66),
 M09 ilerlemesi 1/14, kanıt kapıları 9/13'tür; sıradaki iş M09-T02 Catalog tabanlı component panel ve
 layer tree'dir.
+
+M09-T02 artık `DONE`'dır. Read-only Components sekmesi, exact
+`@desen/reference-catalog-web/catalog.json` içindeki beş component'ı Catalog-owned adları ve
+authoring kategorileriyle gösterir. Layers sekmesi doğrulanmış official Source içindeki exact
+`home` ve `sign-in` ağaçlarını; component/behavior kimliklerini, named slot'ları, koşul işaretlerini
+ve child-array sırasını koruyarak yansıtır. Yerel component filtresi inert'tir; ekleme veya mutation
+yapmaz. Katman görünümü de interactive tree ya da selection semantiği iddia etmez.
+
+Uygulama önce `validateDesenInteractionCatalogSet` ile kümülatif Catalog setini doğrular, sonra
+kabul edilen set karşısında `validateDesenSourceInteractionContracts` ile official Source'u
+doğrular. Catalog reddi, Source reddi veya bounded projection limiti hiçbir kısmi authoring model
+üretmez. Exact Source ağacı bulunmayan surface bu yokluğu açıkça gösterir ve `sign-in` ağacını
+yerine koymaz. Exact kanıt 25.375 baytlık
+[`desen-app-0.1.0-catalog-panel-layer-tree.json`](../proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json)
+artifact'ıdır ve
+`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73` ile pinlenir. Odak app
+authoring suite'i 18/18, bağımsız kök kanıt 8/8 geçer.
+
+Canlı yerel M09-T02 CI otoritesi 176 workload ve 83 proof pair içerir; bunlar 72 ordinary pair ile
+11 barrier'a ayrılır. Sequence 41, 64/64 geçer ve 37 donmuş artifact ile 74 reader'ı
+`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e` başında doğrularken exact
+sequence 40 başını
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` ve bütün öncülleri korur.
+Bu yerel task ve CI-infrastructure makbuzları required gate veya hosted-CI başarısı iddia etmez.
+
+Bu dilim gerçek adapter canvas'ı, selection, inspector, insert/drag-drop, Source mutation,
+persistence, Design/Run, diagnostics, publish veya activation eklemez. `P-*`, `N-*`, `S-*`, `G*`
+ve kanıt-kapısı durumları değişmez. Genel ilerleme 97/145 (%67), M09 ilerlemesi 2/14, kanıt
+kapıları 9/13'tür; sıradaki iş M09-T03 exact React adapter canvas'ıdır.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

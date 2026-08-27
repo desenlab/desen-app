@@ -914,7 +914,25 @@ source is executable input or proof authority. The exact 12,118-byte artifact is
 `sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`; the app suite passes
 43/43, the independent mutation suite passes 8/8, and checkpoint sequence 40 passes 63/63 at
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`. These are local
-receipts and do not claim a required-gate or hosted-CI pass.
+receipts and do not claim a required-gate or hosted-CI pass. The historical M09-T01 successor
+contained 174 workloads and 82 proof pairs, split into 71 ordinary pairs and 11 barriers.
+
+M09-T02 now adds the first Catalog-driven authoring surface while keeping the shell read-only. The
+Components tab projects the exact five-component reference Catalog library and its authoring
+metadata. The Layers tab projects the exact validated `home` and `sign-in` Source trees, preserving
+component and behavior identity, named slots, conditional markers, and child order. The cumulative
+Catalog set is validated before the official Source is validated against it; either rejection or a
+bounded-projection failure returns no model. A surface without an exact Source tree reports the
+absence and never substitutes the sign-in hierarchy. The exact 25,375-byte artifact is
+`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`; the focused app
+authoring suite passes 18/18 and the independent root proof passes 8/8. No canvas, selection,
+inspector, mutation, persistence, Design/Run, diagnostics, publication, or activation claim is
+added. The live local M09-T02 CI authority contains 176 workloads and 83 proof pairs, split into 72
+ordinary pairs and 11 barriers. Checkpoint sequence 41 passes 64/64 at
+`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`, authenticating 37
+frozen artifacts and 74 readers while preserving exact sequence 40 at
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor.
+These local receipts make no required-gate or hosted-CI claim.
 
 ## Current milestone
 
@@ -922,13 +940,13 @@ receipts and do not claim a required-gate or hosted-CI pass.
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `96 / 145 tasks complete (66%)`
+- Overall implementation progress: `97 / 145 tasks complete (67%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
-- M09 progress: `1 / 14 tasks complete (7%)`
+- M09 progress: `2 / 14 tasks complete (14%)`
 - Proof-gate progress: `9 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1010,16 +1028,17 @@ receipts and do not claim a required-gate or hosted-CI pass.
   `M08-T08 — Persistence port and local source adapter`,
   `M08-T09 — Continuous validation and invalid-node mapping`,
   `M08-T10 — React/DOM boundary, stable identity, and deterministic command tests`,
-  `M09-T01 — Desen App shell and project navigation`
+  `M09-T01 — Desen App shell and project navigation`,
+  `M09-T02 — Catalog-driven component panel and layer tree`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M09-T02 — Catalog-driven component panel and layer tree`
-- Status: M08 is 10/10, M09 is 1/14, M07 is 11/11, I07-04, G07, G08, and M09-T01 are `DONE`,
-  proof gates are 9/13, and implementation progress is 96/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M09-T03 — Canvas uses the exact React adapters used by the reference host`
+- Status: M08 is 10/10, M09 is 2/14, M07 is 11/11, I07-04, G07, G08, M09-T01, and M09-T02 are
+  `DONE`, proof gates are 9/13, and implementation progress is 97/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
   its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
@@ -1035,7 +1054,10 @@ receipts and do not claim a required-gate or hosted-CI pass.
   transcript, stable-identity ledger, M08-T09 validation and M08-T08 save/open round trip,
   independent emitted-graph AST platform audit, and exact terminal-integration artifact. M09-T01
   is `DONE` with its exact shell/navigation artifact, 43/43 focused cases, 8/8 independent
-  mutation cases, 174-workload/82-pair CI registration, and sequence-40 reader checkpoint.
+  mutation cases, historical 174-workload/82-pair successor registration, and sequence-40 reader
+  checkpoint. M09-T02 is `DONE` with its exact Catalog/Source read-model artifact, 18/18 focused
+  authoring cases, 8/8 independent root proof, live local 176-workload/83-pair CI authority, and
+  sequence-41 reader checkpoint.
 
 ## Completed preparation
 
@@ -3394,9 +3416,9 @@ M09-T01 evidence:
   entries; the five repository-owned SVGs add no icon-package dependency
 - local proof: build, typecheck, and lint pass; the focused app suite passes 43/43 and the
   independent deterministic mutation suite passes 8/8 across 24 tracked task files
-- CI authority: the current successor contains 174 workloads and 82 proof pairs, split into 71
-  ordinary pairs and 11 barriers; sequence 40 passes 63/63 and authenticates 36 frozen artifacts
-  plus 72 readers at
+- historical CI authority: the M09-T01 successor contains 174 workloads and 82 proof pairs, split
+  into 71 ordinary pairs and 11 barriers; sequence 40 passes 63/63 and authenticates 36 frozen
+  artifacts plus 72 readers at
   `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`
 - evidence boundary: these are local task and CI-infrastructure receipts; no required-gate or
   hosted-CI result is inferred before its own execution
@@ -3405,6 +3427,46 @@ M09-T01 evidence:
   publication, channel activation, multi-user collaboration, or browser E2E is implemented
 - coverage decision: M09-T01 is `DONE`; no `P-*`, `N-*`, `S-*`, `G*`, or proof-gate status changes;
   overall progress is 96/145 (66%), M09 is 1/14, proof gates remain 9/13, and M09-T02 is next
+
+M09-T02 evidence:
+
+- `docs/proof/DESEN-APP-CATALOG-PANEL-LAYER-TREE.md`
+- `docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json`, exactly 25,375 bytes at
+  `sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`
+- prerequisite authority: the exact completed M09-T01 shell/navigation task artifact is
+  authenticated before any M09-T02 claim
+- Catalog boundary: the app imports only the inert
+  `@desen/reference-catalog-web/catalog.json` export and the two named cumulative-validation APIs
+  from `@desen/validator`; Editor Core, Catalog SDK, Runtime React, adapters, Publisher, and control
+  plane remain outside the task graph
+- validation order: `validateDesenInteractionCatalogSet` first accepts the cumulative Catalog set;
+  `validateDesenSourceInteractionContracts` then accepts the official Source against that exact
+  set, and the app projects only Validator-returned values
+- Components boundary: the read-only tab contains exactly the five reference-Catalog component
+  contracts, groups their Catalog-owned authoring metadata, and filters only the inert local list
+- Layers boundary: the exact validated `home` and `sign-in` trees preserve component and attached
+  behavior identities, Source-owned named slots, conditional markers, and child-array order; a
+  surface without an exact Source tree reports the absence and never substitutes sign-in
+- fail-closed boundary: invalid Catalog data, invalid or unresolved Source data, and task-owned
+  bounded-projection limit failures return no partial authoring model
+- local proof: the focused app authoring suite passes 18/18; the independent root proof and exact
+  artifact verifier pass 8/8
+- CI authority: the live local M09-T02 successor contains 176 workloads and 83 proof pairs, split
+  into 72 ordinary pairs and 11 barriers; sequence 41 passes 64/64 and authenticates 37 frozen
+  artifacts plus 74 readers at
+  `sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`, preserving exact
+  sequence 40 at
+  `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor
+- affected authority: the exact M09-T01 shell and M03-T10 reference capability are the two formal
+  impact parents, producing a 66-workload affected closure; the local task wrapper verifies both
+  prerequisite artifacts directly instead of recursively replaying predecessor chains
+- evidence boundary: these are local task and CI-infrastructure receipts; no required-gate or
+  hosted-CI result is inferred before its own execution
+- scope nonclaims: no real adapter canvas, selection, inspector, insertion, move, delete, drag/drop,
+  Source mutation, persistence, Design/Run execution, diagnostics, publication, or activation is
+  implemented
+- coverage decision: M09-T02 is `DONE`; no `P-*`, `N-*`, `S-*`, `G*`, or proof-gate status changes;
+  overall progress is 97/145 (67%), M09 is 2/14, proof gates remain 9/13, and M09-T03 is next
 
 ## Status vocabulary
 

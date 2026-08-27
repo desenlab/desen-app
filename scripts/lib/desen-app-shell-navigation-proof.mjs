@@ -52,9 +52,32 @@ const SOURCE_PATHS = Object.freeze(
 const SVG_ASSET_PATHS = Object.freeze(
   APP_PATHS.filter((relativePath) => /\/src\/assets\/.+\.svg$/u.test(relativePath)),
 );
+const ADDITIVE_SUCCESSOR_SOURCE_PATHS = Object.freeze(["apps/desen-app/src/authoring-data.ts"]);
 const TEST_PATHS = Object.freeze(
   APP_PATHS.filter((relativePath) => /\/test\//u.test(relativePath)),
 );
+const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  "package.json",
+  "apps/desen-app/package.json",
+  "apps/desen-app/README.md",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/main-lifecycle.test.tsx",
+  "scripts/lib/desen-app-shell-navigation-proof.mjs",
+  "tests/desen-app-shell-navigation.test.mjs",
+]);
+const SELF_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-shell-navigation-proof.mjs",
+  "tests/desen-app-shell-navigation.test.mjs",
+]);
+const RETAINED_HISTORICAL_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
+);
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 12_118,
+  sha256: "c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220",
+});
 
 /** Exact immutable G08 prerequisite for the first Desen App task. */
 export const DESEN_APP_SHELL_NAVIGATION_PREREQUISITE_PIN = Object.freeze({
@@ -305,10 +328,6 @@ function verifyPrerequisite(bytes) {
 function verifyPackage(bytes, rootPackageBytes) {
   const manifest = parseJson(bytes, "apps/desen-app/package.json");
   const rootManifest = parseJson(rootPackageBytes, "package.json");
-  const expectedDependencies = {
-    react: "19.2.8",
-    "react-dom": "19.2.8",
-  };
   const expectedDevDependencies = {
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.2",
@@ -325,6 +344,18 @@ function verifyPackage(bytes, rootPackageBytes) {
     "test:shell":
       "vitest run test/project-navigation.test.ts test/application.test.tsx test/main-lifecycle.test.tsx",
   };
+  const expectedRootScripts = {
+    "generate:desen-app-shell-navigation":
+      "pnpm verify:editor-core-terminal-integration && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:shell && node scripts/generate-desen-app-shell-navigation-proof.mjs",
+    "verify:desen-app-shell-navigation":
+      "pnpm verify:editor-core-terminal-integration && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:shell && node scripts/verify-desen-app-shell-navigation.mjs",
+    "test:desen-app-shell-navigation":
+      "pnpm verify:editor-core-terminal-integration && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:shell && node --test tests/desen-app-shell-navigation.test.mjs",
+  };
+  const dependencyEntries = Object.entries(manifest?.dependencies ?? {});
+  const additiveDependencies = dependencyEntries.filter(
+    ([name]) => name !== "react" && name !== "react-dom",
+  );
   if (
     manifest?.name !== "@desen/app-web" ||
     manifest?.private !== true ||
@@ -333,8 +364,19 @@ function verifyPackage(bytes, rootPackageBytes) {
       Object.fromEntries(Object.keys(expectedScripts).map((key) => [key, manifest.scripts?.[key]])),
       expectedScripts,
     ) ||
-    !isDeepStrictEqual(manifest?.dependencies, expectedDependencies) ||
+    manifest?.dependencies?.react !== "19.2.8" ||
+    manifest?.dependencies?.["react-dom"] !== "19.2.8" ||
+    additiveDependencies.some(
+      ([name, version]) => !name.startsWith("@desen/") || version !== "workspace:*",
+    ) ||
+    dependencyEntries.some(([name]) => /(?:router|icon|(?:^|[-/])ui(?:$|[-/]))/iu.test(name)) ||
     !isDeepStrictEqual(manifest?.devDependencies, expectedDevDependencies) ||
+    !isDeepStrictEqual(
+      Object.fromEntries(
+        Object.keys(expectedRootScripts).map((key) => [key, rootManifest.scripts?.[key]]),
+      ),
+      expectedRootScripts,
+    ) ||
     rootManifest?.devDependencies?.typescript !== "6.0.3" ||
     ts.version !== "6.0.3"
   ) {
@@ -346,6 +388,9 @@ function verifyPackage(bytes, rootPackageBytes) {
     framework: `react@${manifest.dependencies.react}`,
     buildTool: `vite@${manifest.devDependencies?.vite}`,
     proofParser: `typescript@${ts.version}`,
+    additiveWorkspaceDependencies: additiveDependencies
+      .map(([name]) => name)
+      .sort((left, right) => left.localeCompare(right)),
     routerDependency: false,
     uiKitDependency: false,
     iconDependency: false,
@@ -436,7 +481,7 @@ function verifyShellSemantics(files) {
   for (const required of ["@media", "var(--desen-app-", ".visuallyHidden"]) {
     requireText(moduleStyles, required, "application.module.css");
   }
-  for (const required of ["M09-T01", "M09-T02", "History API", "not implemented"]) {
+  for (const required of ["M09-T02", "History API", "does not render a managed adapter canvas"]) {
     requireText(readme, required, "apps/desen-app/README.md");
   }
 
@@ -498,31 +543,33 @@ function verifyTests(files) {
     files.get("apps/desen-app/test/application.test.tsx"),
     "application.test.tsx",
   );
+  const mainLifecycle = decodeUtf8(
+    files.get("apps/desen-app/test/main-lifecycle.test.tsx"),
+    "main-lifecycle.test.tsx",
+  );
   for (const required of ["not-found", "cross-origin", "popstate", "pushState"]) {
     requireText(navigation, required, "project-navigation.test.ts");
   }
   for (const required of ["Search projects", "New project", "aria-current", "not found"]) {
     requireText(application, required, "application.test.tsx");
   }
-  const runtimeCases = {
-    "project-navigation.test.ts": 30,
-    "application.test.tsx": 10,
-    "main-lifecycle.test.tsx": 3,
-  };
+  for (const required of ["normalizes the root", "BFCache", "root container is absent"]) {
+    requireText(mainLifecycle, required, "main-lifecycle.test.tsx");
+  }
   if (
     registrations["project-navigation.test.ts"] !== 8 ||
     exactTextCount(navigation, "it.each(") !== 2 ||
-    registrations["application.test.tsx"] !== 6 ||
-    exactTextCount(application, "it.each(") !== 1 ||
-    registrations["main-lifecycle.test.tsx"] !== 3
+    registrations["application.test.tsx"] < 6 ||
+    exactTextCount(application, "it.each(") < 1 ||
+    registrations["main-lifecycle.test.tsx"] < 3
   ) {
-    fail("TEST_AUTHORITY_DRIFT", "The exact 43-case focused Vitest matrix drifted.");
+    fail("TEST_AUTHORITY_DRIFT", "The retained T01 focused Vitest coverage drifted.");
   }
   return deepFreeze({
     files: TEST_PATHS.length,
     registrations,
-    runtimeCases,
-    totalRuntimeCases: Object.values(runtimeCases).reduce((total, count) => total + count, 0),
+    historicalRuntimeCases: 43,
+    successorRegistrationsAllowed: true,
     positiveAndNegativeCoverage: true,
     executionAuthority: "ROOT_SCRIPT_REQUIRES_SUCCESSFUL_FOCUSED_VITEST_RUN",
   });
@@ -550,7 +597,10 @@ function resolveTrackedSourceImport(importerPath, specifier) {
         ? [resolved]
         : [];
   const trackedTargets = candidates.filter(
-    (candidate) => SOURCE_PATHS.includes(candidate) || SVG_ASSET_PATHS.includes(candidate),
+    (candidate) =>
+      SOURCE_PATHS.includes(candidate) ||
+      SVG_ASSET_PATHS.includes(candidate) ||
+      ADDITIVE_SUCCESSOR_SOURCE_PATHS.includes(candidate),
   );
   if (trackedTargets.length !== 1) {
     fail(
@@ -648,30 +698,103 @@ async function readTrackedFiles(options) {
   const files = new Map();
   for (const relativePath of TRACKED_PATHS) {
     const override = options.fileOverrides.get(relativePath);
-    files.set(
+    const live = await readRegularAuthority(
+      path.join(options.workspaceRoot, relativePath),
       relativePath,
-      override ??
-        (await readRegularAuthority(path.join(options.workspaceRoot, relativePath), relativePath)),
     );
+    if (
+      override !== undefined &&
+      SELF_RESEALED_PATHS.includes(relativePath) &&
+      !isDeepStrictEqual(override, live)
+    ) {
+      fail("BOUNDARY_DRIFT", `${relativePath} cannot be substituted by a caller.`);
+    }
+    files.set(relativePath, override ?? live);
   }
   return files;
 }
 
-function receipts(files) {
-  return TRACKED_PATHS.map((relativePath) => {
-    const bytes = files.get(relativePath);
-    return deepFreeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) });
+async function authenticateFrozenArtifact(workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    "frozen M09-T01 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T01 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(artifactBytes, "frozen M09-T01 proof artifact");
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-shell-navigation" ||
+    artifact?.profile !== "desen.app.shell-navigation-proof.v1" ||
+    artifact?.task !== "M09-T01" ||
+    artifact?.result !== "PASS" ||
+    artifact?.claim?.taskStatus !== "DONE" ||
+    artifact?.claim?.prerequisiteGate !== "G08" ||
+    artifact?.claim?.prerequisiteStatus !== "DONE" ||
+    artifact?.claim?.shellImplemented !== true ||
+    artifact?.claim?.projectNavigationImplemented !== true ||
+    artifact?.claim?.directUrlNavigationImplemented !== true ||
+    artifact?.claim?.unknownRoutesFailClosed !== true ||
+    artifact?.boundary?.trackedFiles !== TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== TRACKED_PATHS.length ||
+    !isDeepStrictEqual(
+      trackedReceipts.map((candidate) => candidate?.path),
+      TRACKED_PATHS,
+    ) ||
+    trackedReceipts.some(
+      (candidate) =>
+        candidate === null ||
+        typeof candidate !== "object" ||
+        !Number.isSafeInteger(candidate.bytes) ||
+        candidate.bytes < 0 ||
+        typeof candidate.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(candidate.sha256),
+    ) ||
+    !isDeepStrictEqual(
+      artifact?.evidence?.rootTestNames,
+      DESEN_APP_SHELL_NAVIGATION_ROOT_TEST_NAMES,
+    ) ||
+    artifact?.evidence?.tests?.totalRuntimeCases !== 43 ||
+    artifact?.nonclaims?.[0] !== "No catalog-driven component panel or layer tree."
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T01 artifact identity or retained claim drifted.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
   });
 }
 
-function canonicalArtifactBytes(artifact) {
-  return Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`, "utf8");
+function assertRetainedHistoricalReceipts(frozenArtifact, files) {
+  const taskTimeReceipts = new Map(
+    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    const authority = taskTimeReceipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M09-T01 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
 }
 
-/** Builds deterministic, detached M09-T01 shell/navigation evidence. */
+/** Authenticates frozen M09-T01 evidence and checks the live additive successor. */
 export async function buildDesenAppShellNavigationEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
-  const [files, prerequisiteBytes] = await Promise.all([
+  const [frozen, files, prerequisiteBytes] = await Promise.all([
+    authenticateFrozenArtifact(options.workspaceRoot),
     readTrackedFiles(options),
     options.prerequisiteBytes ?? readRegularAuthority(options.prerequisitePath, PREREQUISITE_PATH),
   ]);
@@ -683,28 +806,24 @@ export async function buildDesenAppShellNavigationEvidence(rawOptions = undefine
   const shell = verifyShellSemantics(files);
   const tests = verifyTests(files);
   const importBoundary = inspectImports(files);
-  const trackedReceipts = receipts(files);
-  const artifact = deepFreeze({
+  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  if (options.fileOverrides.size !== 0) {
+    fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue current compatibility evidence.");
+  }
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-shell-navigation",
     profile: "desen.app.shell-navigation-proof.v1",
     task: "M09-T01",
     result: "PASS",
     prerequisite,
-    claim: {
-      taskStatus: "DONE",
-      prerequisiteGate: "G08",
-      prerequisiteStatus: "DONE",
-      shellImplemented: true,
-      projectNavigationImplemented: true,
-      directUrlNavigationImplemented: true,
-      unknownRoutesFailClosed: true,
-      catalogDrivenPanelImplemented: false,
-      realAdapterCanvasImplemented: false,
-      selectionOrInspectorImplemented: false,
-      persistenceUiImplemented: false,
-      runOrPublishImplemented: false,
-      userProjectCreationImplemented: false,
+    retainedClaim: {
+      taskStatus: frozen.artifact.claim.taskStatus,
+      shellImplemented: frozen.artifact.claim.shellImplemented,
+      projectNavigationImplemented: frozen.artifact.claim.projectNavigationImplemented,
+      directUrlNavigationImplemented: frozen.artifact.claim.directUrlNavigationImplemented,
+      unknownRoutesFailClosed: frozen.artifact.claim.unknownRoutesFailClosed,
+      userProjectCreationImplemented: frozen.artifact.claim.userProjectCreationImplemented,
     },
     application: {
       package: packageContract,
@@ -712,22 +831,23 @@ export async function buildDesenAppShellNavigationEvidence(rawOptions = undefine
     },
     boundary: {
       imports: importBoundary,
-      trackedFiles: trackedReceipts.length,
-      trackedReceipts,
+      retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
+      successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
     },
-    evidence: {
-      tests,
-      rootTestNames: DESEN_APP_SHELL_NAVIGATION_ROOT_TEST_NAMES,
+    tests,
+    additiveSuccessor: {
+      task: "M09-T02",
+      catalogDrivenAuthoringReadModelAllowed: true,
+      knownSourceEdges: [...ADDITIVE_SUCCESSOR_SOURCE_PATHS],
+      historicalNoCatalogPanelNonclaimAppliedToCurrentApp: false,
     },
-    nonclaims: [
-      "No catalog-driven component panel or layer tree.",
-      "No runtime-react canvas, adapter execution, selection overlay, or inspector.",
-      "No editor-core mutation, undo, save/open, Design/Run, fixture execution, publish, or activation.",
-      "No user-created project persistence; New project remains disabled and explained.",
-    ],
   });
-  const artifactBytes = canonicalArtifactBytes(artifact);
-  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  return deepFreeze({
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+  });
 }
 
 function verifyProofDocument(proofDocument, artifactSha256) {

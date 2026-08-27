@@ -2342,8 +2342,53 @@ files, including five repository-owned SVG assets, and 43 runtime cases. The app
 typecheck, and lint pass locally; the focused application suite passes 43/43 and the independent
 root suite passes 8/8. Append-only reader checkpoint sequence 40 passes 63/63 and closes at
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` with 36 frozen
-artifacts and 72 readers while preserving every predecessor artifact receipt.
+artifacts and 72 readers while preserving every predecessor artifact receipt. The historical
+M09-T01 CI successor contained 174 workloads and 82 proof pairs, split into 71 ordinary pairs and
+11 barriers.
 
 These local receipts make no required-gate or hosted CI claim. M09-T01 is `DONE` in the dedicated
 status documents, advancing implementation progress to 96/145 (66%) and M09 to 1/14 while leaving
 proof gates at 9/13; M09-T02 is next. No `P-*`, `N-*`, `S-*`, or `G*` status changes here.
+
+## M09-T02 — Catalog-driven component panel and layer tree (local evidence)
+
+M09-T02 extends the authenticated shell with a read-only authoring projection. The Components tab
+contains exactly the five contracts exported by `@desen/reference-catalog-web/catalog.json`, using
+Catalog-owned display names, descriptions, semantic categories, and authoring categories rather
+than a parallel App registry. Its local filter changes only the visible inert list and provides no
+insertion or mutation authority.
+
+The Layers tab projects the exact validated `home` and `sign-in` Source trees. It preserves
+component and attached-behavior identities, Source-owned named slots, conditional markers, and
+child-array order. A surface without an exact Source fixture shows an explicit absence state and
+never substitutes or aliases the sign-in tree. The nested, labelled list hierarchy deliberately
+does not claim interactive ARIA-tree, selection, canvas, or inspector semantics.
+
+The read model is issued only after `validateDesenInteractionCatalogSet` accepts the cumulative
+Catalog set and `validateDesenSourceInteractionContracts` accepts the official Source against that
+exact set, in that order. The projection consumes only the Validator-returned values. Invalid
+Catalog data, unresolved or otherwise invalid Source data, and the bounded depth/occurrence limits
+all fail closed without returning a partial model. The App graph admits only the inert reference
+Catalog JSON and the two named Validator APIs; Editor Core, Catalog SDK, Runtime React, adapter
+registries, dynamic imports, platform I/O, and mutation handlers remain outside the slice.
+
+The exact 25,375-byte task artifact is
+`docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json` at
+`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`. The focused App
+authoring suite passes 18/18 and the independent root proof passes 8/8. These local receipts make no
+required-gate or hosted-CI claim.
+
+The live local M09-T02 CI authority contains 176 workloads and 83 proof pairs, split into 72
+ordinary pairs and 11 barriers. Its formal impact parents are the exact M09-T01 shell and M03-T10
+reference capability, producing a 66-workload affected closure; the local wrapper calls both
+artifact verifiers directly so it does not recursively replay predecessor chains. Append-only
+checkpoint sequence 41 passes 64/64 and closes at
+`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`, authenticating 37
+frozen artifacts and 74 readers while preserving exact sequence 40 at
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor.
+These are local CI-infrastructure receipts, not a required-gate or hosted-CI result.
+
+M09-T02 adds no real adapter canvas, selection, inspector, insertion, move, delete, drag/drop,
+Source mutation, persistence, Design/Run execution, diagnostics, publication, or activation.
+M09-T02 is `DONE`, advancing implementation progress to 97/145 (67%) and M09 to 2/14 while leaving
+proof gates at 9/13; M09-T03 is next. No `P-*`, `N-*`, `S-*`, or `G*` status changes here.

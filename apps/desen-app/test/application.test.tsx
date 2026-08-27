@@ -131,7 +131,7 @@ describe("Desen App application shell", () => {
     expect(document.title).toBe("Not found · DESEN");
   });
 
-  it("renders the exact selected surface without claiming editor or publishing behavior", () => {
+  it("renders the exact selected surface and read-only layer hierarchy without claiming later editor behavior", () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
 
     const breadcrumb = screen.getByRole("navigation", { name: "Breadcrumb" });
@@ -141,15 +141,113 @@ describe("Desen App application shell", () => {
     expect(within(breadcrumb).getByText("Sign-in").getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("heading", { level: 2, name: "Sign-in" })).toBeTruthy();
     expect(screen.getAllByText("account.sign-in")).toHaveLength(1);
+    expect(screen.getByRole("complementary", { name: "Authoring panel" })).toBeTruthy();
+    const layersTab = screen.getByRole("tab", { name: "Layers" });
+    const componentsTab = screen.getByRole("tab", { name: "Components" });
+    expect(layersTab.getAttribute("aria-selected")).toBe("true");
+    expect(componentsTab.getAttribute("aria-selected")).toBe("false");
+    const layersPanel = document.getElementById(layersTab.getAttribute("aria-controls") ?? "");
+    const componentsPanel = document.getElementById(
+      componentsTab.getAttribute("aria-controls") ?? "",
+    );
+    expect(layersPanel?.getAttribute("role")).toBe("tabpanel");
+    expect(layersPanel?.hidden).toBe(false);
+    expect(componentsPanel?.getAttribute("role")).toBe("tabpanel");
+    expect(componentsPanel?.hidden).toBe(true);
+    expect(layersPanel?.getAttribute("aria-labelledby")).toBe(layersTab.id);
+    expect(componentsPanel?.getAttribute("aria-labelledby")).toBe(componentsTab.id);
+
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    expect(within(hierarchy).getByText("sign-in.layout")).toBeTruthy();
+    expect(within(hierarchy).getByText("sign-in.title")).toBeTruthy();
+    expect(within(hierarchy).getByText("sign-in.email")).toBeTruthy();
+    expect(within(hierarchy).getByText("sign-in.password")).toBeTruthy();
+    expect(within(hierarchy).getByText("sign-in.error")).toBeTruthy();
+    expect(within(hierarchy).getByText("sign-in.submit")).toBeTruthy();
+    expect(within(hierarchy).getByText("default slot")).toBeTruthy();
+    expect(within(hierarchy).getByText("when")).toBeTruthy();
+    expect(within(hierarchy).queryByRole("tree")).toBeNull();
+    expect(within(hierarchy).queryByRole("treeitem")).toBeNull();
+    expect(hierarchy.querySelector("[aria-selected]")).toBeNull();
+    expect(screen.queryByRole("navigation", { name: "Sign-in layer hierarchy" })).toBeNull();
     expect(
       screen.getByText(
-        "This shell does not mutate Source data, render a canvas or publish a revision yet.",
+        "Exact Catalog metadata and sign-in Source structure are read only. No selection, mutation, adapter render, save or publication is available yet.",
       ),
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: /publish/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /^run$/i })).toBeNull();
     expect(screen.queryByRole("tab", { name: /design|run/i })).toBeNull();
     expect(document.querySelector("canvas")).toBeNull();
+  });
+
+  it("switches to the exact Catalog component library and filters only the local view", () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+
+    const layersTab = screen.getByRole("tab", { name: "Layers" });
+    const componentsTab = screen.getByRole("tab", { name: "Components" });
+    fireEvent.keyDown(layersTab, { key: "ArrowRight" });
+    expect(componentsTab.getAttribute("aria-selected")).toBe("true");
+    expect(document.activeElement).toBe(componentsTab);
+
+    const componentsPanel = document.getElementById(
+      componentsTab.getAttribute("aria-controls") ?? "",
+    );
+    expect(componentsPanel).toBeTruthy();
+    const componentView = within(componentsPanel as HTMLElement);
+    expect(componentView.getByText("run.desen.reference.sign-in")).toBeTruthy();
+    expect(componentView.getByText("v0.1.0")).toBeTruthy();
+    expect(componentView.getByRole("status").textContent).toBe("5 of 5 components");
+    expect(componentView.getByText("Alert")).toBeTruthy();
+    expect(componentView.getByText("Button")).toBeTruthy();
+    expect(componentView.getByText("Stack")).toBeTruthy();
+    expect(componentView.getByText("Text", { selector: "strong" })).toBeTruthy();
+    expect(componentView.getByText("Text field")).toBeTruthy();
+
+    const search = componentView.getByRole("searchbox", { name: "Search catalog components" });
+    fireEvent.change(search, { target: { value: "feedback" } });
+    expect(componentView.getByRole("status").textContent).toBe("1 of 5 components");
+    expect(componentView.getByText("Alert")).toBeTruthy();
+    expect(componentView.queryByText("Text field")).toBeNull();
+    expect(window.location.pathname).toBe("/projects/account-app/surfaces/sign-in");
+
+    fireEvent.click(layersTab);
+    expect(document.getElementById(layersTab.getAttribute("aria-controls") ?? "")?.hidden).toBe(
+      false,
+    );
+    expect(document.getElementById(componentsTab.getAttribute("aria-controls") ?? "")?.hidden).toBe(
+      true,
+    );
+    fireEvent.click(componentsTab);
+    expect(
+      (
+        componentView.getByRole("searchbox", {
+          name: "Search catalog components",
+        }) as HTMLInputElement
+      ).value,
+    ).toBe("feedback");
+
+    fireEvent.change(search, { target: { value: "missing capability" } });
+    expect(componentView.getByText("No catalog matches")).toBeTruthy();
+    fireEvent.click(componentView.getByRole("button", { name: "Clear search" }));
+    expect(componentView.getByRole("status").textContent).toBe("5 of 5 components");
+    expect(screen.queryByRole("button", { name: /insert|add|drag/i })).toBeNull();
+  });
+
+  it("does not substitute the sign-in Source tree for another preview surface", () => {
+    renderApplication("/projects/account-app/surfaces/recovery");
+
+    expect(screen.getByText("No Source tree for Recovery")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "This preview surface has no exact Source fixture. DESEN will not substitute the sign-in tree.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "Sign-in layer hierarchy" })).toBeNull();
+    expect(screen.queryByText("sign-in.layout")).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Components" }));
+    expect(screen.getByRole("status").textContent).toBe("5 of 5 components");
   });
 
   it("guides a catalog-less project without inventing a surface or enabled action", () => {

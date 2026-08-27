@@ -13,3 +13,4 @@ tests/fixtures/standards/a2ui/0.9.1/server_to_client.json
 docs/proof/baselines/i07-04-affected-selector-promotion.json
 # Deterministic task evidence is byte- and SHA-pinned by its generator/verifier.
 docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json
+docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json

@@ -1407,7 +1407,7 @@ is next.
 | ID      | Status      | Depends on               | Deliverable / evidence                                                          |
 | ------- | ----------- | ------------------------ | ------------------------------------------------------------------------------- |
 | M09-T01 | DONE        | G08                      | Desen App shell and project navigation                                          |
-| M09-T02 | NOT_STARTED | M09-T01                  | Catalog-driven component panel and layer tree                                   |
+| M09-T02 | DONE        | M09-T01                  | Catalog-driven component panel and layer tree                                   |
 | M09-T03 | NOT_STARTED | M09-T01, G05             | Canvas uses the exact React adapters used by the reference host                 |
 | M09-T04 | NOT_STARTED | M09-T03                  | Selection overlays remain outside capability subtrees; no private-DOM authoring |
 | M09-T05 | NOT_STARTED | M09-T02–M09-T03          | Schema-driven primitive/enum inspector controls                                 |
@@ -1438,15 +1438,46 @@ The application build, typecheck, and lint pass locally; the focused application
 files, including five repository-owned SVG assets, and 43 runtime cases. Append-only checkpoint
 sequence 40 passes 63/63 and closes at
 `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`, authenticating 36
-frozen artifacts and 72 readers. The current CI successor contains 174 workloads and 82 proof
-pairs, split into 71 ordinary pairs and 11 barriers. These local receipts make no required-gate or
-hosted-CI claim.
+frozen artifacts and 72 readers. The historical M09-T01 CI successor contained 174 workloads and
+82 proof pairs, split into 71 ordinary pairs and 11 barriers. These local receipts make no
+required-gate or hosted-CI claim.
 
 This slice does not implement a Catalog-driven component panel, layer tree, real adapter canvas,
 selection or inspector state, Source mutation, diagnostics, persistence UI, user-created project
 persistence, Design/Run execution, publication, or channel activation. It changes no frozen DESEN
 0.1.0 byte and advances no `P-*`, `N-*`, `S-*`, or proof-gate status. M09-T01 is `DONE`; overall
 implementation progress is 96/145 (66%), M09 is 1/14, proof gates remain 9/13, and M09-T02 is next.
+
+M09-T02 adds a read-only Components/Layers panel to the authenticated shell. The Components view
+projects the exact five-component `@desen/reference-catalog-web/catalog.json` library with
+Catalog-owned labels and authoring categories. The Layers view preserves the exact validated
+`home` and `sign-in` Source trees, component and behavior identities, named slots, conditional
+markers, and child-array order. Local component filtering does not insert or mutate anything, and
+the nested layer navigation does not claim interactive tree or selection semantics.
+
+The app first calls `validateDesenInteractionCatalogSet`, then validates the official Source with
+`validateDesenSourceInteractionContracts` against that accepted cumulative set. Catalog rejection,
+Source rejection, and bounded-projection failures return no partial model. A surface without an
+exact Source tree reports the absence and never substitutes the sign-in tree. The exact 25,375-byte
+artifact is `docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json` at
+`sha256:cdcb1cf0caf55ebac13f9affb122da52c6c8ba58a1bda7eb030ac1641bcbed73`; the focused app
+authoring suite passes 18/18 and the independent root proof passes 8/8.
+
+The live local M09-T02 CI authority contains 176 workloads and 83 proof pairs, split into 72
+ordinary pairs and 11 barriers. Its formal impact entry has the exact M09-T01 shell and M03-T10
+reference capability as parents and selects 66 affected workloads; the local task wrapper verifies
+those prerequisite artifacts directly instead of recursively replaying their predecessor chains.
+Append-only checkpoint sequence 41 passes 64/64 and closes at
+`sha256:9b591c7a4c1e1e723cc587e5f8958f356a3a1e0e6f6d7088447d7d9aec08796e`, authenticating 37
+frozen artifacts and 74 readers while preserving exact sequence 40 at
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` and every predecessor.
+These are local task and CI-infrastructure receipts; they make no required-gate or hosted-CI claim.
+
+This slice adds no real adapter canvas, selection, inspector, insertion, drag/drop, Source mutation,
+persistence, Design/Run execution, diagnostics, publication, or activation. It changes no frozen
+DESEN 0.1.0 byte and advances no `P-*`, `N-*`, `S-*`, `G*`, or proof-gate status. M09-T02 is
+`DONE`; overall implementation progress is 97/145 (67%), M09 is 2/14, proof gates remain 9/13, and
+M09-T03 is next.
 
 ## M10 — First end-to-end proof
 

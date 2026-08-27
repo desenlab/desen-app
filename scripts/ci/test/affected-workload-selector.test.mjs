@@ -50,6 +50,36 @@ const EXPECTED_COMPARISON_AUTHORITY_PATHS = Object.freeze([
   "scripts/ci/run-required-affected-quality-gate.mjs",
   "scripts/ci/shared-state-authority.mjs",
 ]);
+const DESEN_APP_CONNECTED_PROOF_UNITS = Object.freeze([
+  "protocol-structural-validation",
+  "catalog-manifest-registration",
+  "web-react-package-digest",
+  "reference-catalog-web-components",
+  "reference-catalog-web-form-feedback",
+  "reference-tokens-and-synthetic-fixtures",
+  "reference-sign-in-fixtures-and-host-binding",
+  "reference-catalog-web-parity",
+  "reference-catalog-web-capability-artifact",
+  "runtime-core-host-ports",
+  "runtime-core-value-resolution",
+  "runtime-core-token-format-resolution",
+  "runtime-core-predicate-evaluation",
+  "runtime-core-variant-style-evaluation",
+  "runtime-core-headless-sign-in",
+  "runtime-core-audit-hardening",
+  "editor-core-source-document",
+  "editor-core-stable-id-insert",
+  "editor-core-structural-edits",
+  "editor-core-content-edits",
+  "editor-core-state-binding-edits",
+  "editor-core-event-action-edits",
+  "editor-core-authoring-round-trip",
+  "editor-core-persistence",
+  "editor-core-continuous-validation",
+  "editor-core-terminal-integration",
+  "desen-app-shell-navigation",
+  "desen-app-catalog-panel-layer-tree",
+]);
 
 function sha256(value) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -229,23 +259,8 @@ test("continuous validation selects the exact T03-T07-connected successor closur
   );
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["editor-core-continuous-validation"]);
-  assert.deepEqual(plan.affectedProofUnitIds, [
-    "protocol-structural-validation",
-    "runtime-core-headless-sign-in",
-    "runtime-core-audit-hardening",
-    "editor-core-source-document",
-    "editor-core-stable-id-insert",
-    "editor-core-structural-edits",
-    "editor-core-content-edits",
-    "editor-core-state-binding-edits",
-    "editor-core-event-action-edits",
-    "editor-core-authoring-round-trip",
-    "editor-core-persistence",
-    "editor-core-continuous-validation",
-    "editor-core-terminal-integration",
-    "desen-app-shell-navigation",
-  ]);
-  assert.equal(plan.workloadCount, 38);
+  assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
+  assert.equal(plan.workloadCount, 66);
   assert.equal(plan.nodeIds.includes("editor-web-public-package-contract"), true);
   assert.equal(plan.nodeIds.includes("verify-editor-core-continuous-validation"), true);
   assert.equal(plan.nodeIds.includes("test-editor-core-continuous-validation"), true);
@@ -258,24 +273,23 @@ test("terminal integration selects every formal editor parent and frozen P-18 ru
   );
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["editor-core-terminal-integration"]);
-  assert.deepEqual(plan.affectedProofUnitIds, [
-    "protocol-structural-validation",
-    "runtime-core-headless-sign-in",
-    "runtime-core-audit-hardening",
-    "editor-core-source-document",
-    "editor-core-stable-id-insert",
-    "editor-core-structural-edits",
-    "editor-core-content-edits",
-    "editor-core-state-binding-edits",
-    "editor-core-event-action-edits",
-    "editor-core-authoring-round-trip",
-    "editor-core-persistence",
-    "editor-core-continuous-validation",
-    "editor-core-terminal-integration",
-    "desen-app-shell-navigation",
-  ]);
-  assert.equal(plan.workloadCount, 38);
+  assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
+  assert.equal(plan.workloadCount, 66);
   assert.equal(plan.nodeIds.includes("editor-web-public-package-contract"), true);
+});
+
+test("catalog panel selects the exact shell and Catalog-connected successor closure", async () => {
+  const plan = createShadowAffectedSelection(
+    await affectedBoundary(currentPaths(), [
+      "scripts/verify-desen-app-catalog-panel-layer-tree.mjs",
+    ]),
+  );
+  assert.equal(plan.effectiveScope, "AFFECTED");
+  assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-catalog-panel-layer-tree"]);
+  assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
+  assert.equal(plan.workloadCount, 66);
+  assert.equal(plan.nodeIds.includes("verify-desen-app-catalog-panel-layer-tree"), true);
+  assert.equal(plan.nodeIds.includes("test-desen-app-catalog-panel-layer-tree"), true);
 });
 
 test("multiple proof owners form one canonical union independent of diff order", async () => {
@@ -309,7 +323,7 @@ test("policy, package, documentation, and shared inputs always expand to exhaust
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, "POLICY_DRIFT");
     assert.equal(plan.strictSubset, false);
-    assert.equal(plan.workloadCount, 174);
+    assert.equal(plan.workloadCount, 176);
   }
 });
 
@@ -342,7 +356,7 @@ test("all boundary uncertainty classes expand to exhaustive without partial path
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, category);
     assert.deepEqual(plan.changedPaths, []);
-    assert.equal(plan.workloadCount, 174);
+    assert.equal(plan.workloadCount, 176);
   }
 });
 

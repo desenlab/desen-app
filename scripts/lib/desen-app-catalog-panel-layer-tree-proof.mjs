@@ -1,0 +1,1419 @@
+import { createHash } from "node:crypto";
+import { constants as fileConstants } from "node:fs";
+import { lstat, open, realpath } from "node:fs/promises";
+import path from "node:path";
+import { isDeepStrictEqual, types as utilTypes } from "node:util";
+import { fileURLToPath } from "node:url";
+
+import ts from "typescript";
+
+import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+
+const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
+const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
+const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json";
+const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-CATALOG-PANEL-LAYER-TREE.md";
+const SHELL_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
+const REFERENCE_ARTIFACT_PATH =
+  "docs/proof/artifacts/reference-catalog-web-capability-artifact.json";
+const CATALOG_PATH = "packages/reference-catalog-web/catalog.json";
+const SOURCE_PATH = "examples/sign-in/official-derived.source.desen.json";
+const APP_PACKAGE_PATH = "apps/desen-app/package.json";
+const AUTHORING_SOURCE_PATH = "apps/desen-app/src/authoring-data.ts";
+const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
+const AUTHORING_TEST_PATH = "apps/desen-app/test/authoring-data.test.ts";
+const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
+const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
+const READ_FLAGS =
+  fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
+
+const APP_PATHS = Object.freeze([
+  "apps/desen-app/package.json",
+  "apps/desen-app/tsconfig.json",
+  "apps/desen-app/index.html",
+  "apps/desen-app/README.md",
+  "apps/desen-app/src/assets/breadcrumb-separator.svg",
+  "apps/desen-app/src/assets/desen-logo.svg",
+  "apps/desen-app/src/assets/plus.svg",
+  "apps/desen-app/src/assets/settings.svg",
+  "apps/desen-app/src/assets/theme.svg",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/authoring-data.ts",
+  "apps/desen-app/src/main.tsx",
+  "apps/desen-app/src/project-data.ts",
+  "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/styles.css",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-data.test.ts",
+  "apps/desen-app/test/main-lifecycle.test.tsx",
+  "apps/desen-app/test/project-navigation.test.ts",
+]);
+const APP_SOURCE_PATHS = Object.freeze(
+  APP_PATHS.filter((relativePath) => /\/src\/.+\.(?:ts|tsx|css|svg)$/u.test(relativePath)),
+);
+const TYPESCRIPT_SOURCE_PATHS = Object.freeze(
+  APP_SOURCE_PATHS.filter((relativePath) => /\.(?:ts|tsx)$/u.test(relativePath)),
+);
+const SVG_PATHS = Object.freeze(
+  APP_SOURCE_PATHS.filter((relativePath) => relativePath.endsWith(".svg")),
+);
+const PROOF_PATHS = Object.freeze([
+  "scripts/lib/atomic-proof-artifact.mjs",
+  "scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs",
+  "scripts/generate-desen-app-catalog-panel-layer-tree-proof.mjs",
+  "scripts/verify-desen-app-catalog-panel-layer-tree.mjs",
+  "tests/desen-app-catalog-panel-layer-tree.test.mjs",
+]);
+const TRACKED_PATHS = Object.freeze([
+  ...APP_PATHS,
+  "pnpm-lock.yaml",
+  CATALOG_PATH,
+  SOURCE_PATH,
+  ...PROOF_PATHS,
+]);
+const EXPECTED_VALIDATOR_IMPORTS = Object.freeze([
+  "validateDesenInteractionCatalogSet",
+  "validateDesenSourceInteractionContracts",
+]);
+const EXPECTED_COMPONENTS = Object.freeze([
+  Object.freeze({
+    id: "com.example.ui/Alert",
+    displayName: "Alert",
+    authoringCategory: "Feedback",
+    semanticCategory: "feedback",
+    description: "Feedback message.",
+    defaultProps: Object.freeze({ text: "Message", tone: "info" }),
+    slots: Object.freeze([]),
+  }),
+  Object.freeze({
+    id: "com.example.ui/Button",
+    displayName: "Button",
+    authoringCategory: "Actions",
+    semanticCategory: "action",
+    description: "Action button.",
+    defaultProps: Object.freeze({ label: "Button", loading: false, variant: "primary" }),
+    slots: Object.freeze([]),
+  }),
+  Object.freeze({
+    id: "com.example.ui/Stack",
+    displayName: "Stack",
+    authoringCategory: "Layout",
+    semanticCategory: "layout",
+    description: "Linear layout container.",
+    defaultProps: Object.freeze({ direction: "vertical", gap: "md" }),
+    slots: Object.freeze([
+      Object.freeze({
+        name: "default",
+        required: false,
+        minItems: 0,
+        maxItems: null,
+        acceptsCategories: Object.freeze([
+          "layout",
+          "content",
+          "input",
+          "action",
+          "feedback",
+          "complex",
+        ]),
+      }),
+    ]),
+  }),
+  Object.freeze({
+    id: "com.example.ui/Text",
+    displayName: "Text",
+    authoringCategory: "Content",
+    semanticCategory: "content",
+    description: "Text content.",
+    defaultProps: Object.freeze({ role: "body", text: "Text" }),
+    slots: Object.freeze([]),
+  }),
+  Object.freeze({
+    id: "com.example.ui/TextField",
+    displayName: "Text field",
+    authoringCategory: "Inputs",
+    semanticCategory: "input",
+    description: "Text input.",
+    defaultProps: Object.freeze({ label: "Label", value: "" }),
+    slots: Object.freeze([]),
+  }),
+]);
+const EXPECTED_SURFACE_TREES = Object.freeze([
+  Object.freeze({
+    id: "home",
+    root: Object.freeze({
+      id: "home.layout",
+      use: "com.example.ui/Stack",
+      conditional: false,
+      behaviors: Object.freeze([]),
+      slots: Object.freeze([
+        Object.freeze({
+          name: "default",
+          children: Object.freeze([
+            Object.freeze({
+              id: "home.title",
+              use: "com.example.ui/Text",
+              conditional: false,
+              behaviors: Object.freeze([]),
+              slots: Object.freeze([]),
+            }),
+          ]),
+        }),
+      ]),
+    }),
+  }),
+  Object.freeze({
+    id: "sign-in",
+    root: Object.freeze({
+      id: "sign-in.layout",
+      use: "com.example.ui/Stack",
+      conditional: false,
+      behaviors: Object.freeze([]),
+      slots: Object.freeze([
+        Object.freeze({
+          name: "default",
+          children: Object.freeze([
+            Object.freeze({
+              id: "sign-in.title",
+              use: "com.example.ui/Text",
+              conditional: false,
+              behaviors: Object.freeze([]),
+              slots: Object.freeze([]),
+            }),
+            Object.freeze({
+              id: "sign-in.email",
+              use: "com.example.ui/TextField",
+              conditional: false,
+              behaviors: Object.freeze([]),
+              slots: Object.freeze([]),
+            }),
+            Object.freeze({
+              id: "sign-in.password",
+              use: "com.example.ui/TextField",
+              conditional: false,
+              behaviors: Object.freeze([]),
+              slots: Object.freeze([]),
+            }),
+            Object.freeze({
+              id: "sign-in.error",
+              use: "com.example.ui/Alert",
+              conditional: true,
+              behaviors: Object.freeze([]),
+              slots: Object.freeze([]),
+            }),
+            Object.freeze({
+              id: "sign-in.submit",
+              use: "com.example.ui/Button",
+              conditional: false,
+              behaviors: Object.freeze([]),
+              slots: Object.freeze([]),
+            }),
+          ]),
+        }),
+      ]),
+    }),
+  }),
+]);
+
+/** Exact immutable M09-T01 shell authority required by the M09-T02 proof. */
+export const DESEN_APP_CATALOG_PANEL_SHELL_PIN = Object.freeze({
+  task: "M09-T01",
+  path: SHELL_ARTIFACT_PATH,
+  bytes: 12_118,
+  sha256: "c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220",
+  proofId: "desen-app-shell-navigation",
+  profile: "desen.app.shell-navigation-proof.v1",
+  result: "PASS",
+});
+
+/** Exact immutable M03-T10 reference capability authority required by M09-T02. */
+export const DESEN_APP_CATALOG_PANEL_REFERENCE_CAPABILITY_PIN = Object.freeze({
+  task: "M03-T10",
+  path: REFERENCE_ARTIFACT_PATH,
+  bytes: 87_159,
+  sha256: "4ddeee8d33ff718e1907a6402b7c2d10ef0769c872832a4cb056231441ae65e0",
+  result: "PASS",
+  id: "run.desen.reference.sign-in",
+  version: "0.1.0",
+  target: "web-react",
+});
+
+/** Exact root-test names owned by the deterministic M09-T02 proof reader. */
+export const DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES = Object.freeze([
+  "[authority] authenticates the exact M09-T01 shell and M03-T10 capability artifacts",
+  "[catalog-source] records five exact Catalog components and both exact Source trees",
+  "[validation-ui] records fail-closed validation, filtering, tabs, and read-only hierarchy evidence",
+  "[boundary] admits only inert Catalog JSON and validator APIs across Desen package imports",
+  "[determinism] builds byte-identical detached M09-T02 evidence twice",
+  "[mutation] rejects prerequisite, Catalog, Source, dependency, import, and test drift",
+  "[verification-writer] rejects visible-pin drift and atomically preserves destinations on tampering",
+  "[filesystem] rejects linked prerequisite, artifact, proof, and tracked-file authorities",
+]);
+
+/** Default destination for deterministic M09-T02 evidence. */
+export const DEFAULT_DESEN_APP_CATALOG_PANEL_LAYER_TREE_ARTIFACT_PATH = path.join(
+  WORKSPACE_ROOT,
+  ARTIFACT_PATH,
+);
+
+/** Stable fail-closed error raised by the M09-T02 evidence reader. */
+export class DesenAppCatalogPanelLayerTreeProofError extends Error {
+  constructor(code, message, details = {}) {
+    super(message);
+    this.name = "DesenAppCatalogPanelLayerTreeProofError";
+    this.code = code;
+    this.details = Object.freeze({ ...details });
+  }
+}
+
+function fail(code, message, details = {}) {
+  throw new DesenAppCatalogPanelLayerTreeProofError(code, message, details);
+}
+
+function sha256(bytes) {
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
+function compareText(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function deepFreeze(value) {
+  if (ArrayBuffer.isView(value)) return value;
+  if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
+    for (const child of Object.values(value)) deepFreeze(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+function exactOwnDataOptions(value, allowedKeys, label) {
+  if (value === undefined) return Object.freeze(Object.create(null));
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    utilTypes.isProxy(value) ||
+    (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
+  ) {
+    fail("OPTIONS_INVALID", `${label} must be one inert own-data object.`);
+  }
+  const keys = Reflect.ownKeys(value);
+  if (keys.some((key) => typeof key !== "string" || !allowedKeys.includes(key))) {
+    fail("OPTIONS_INVALID", `${label} contains an unknown or symbol field.`);
+  }
+  const captured = Object.create(null);
+  for (const key of keys) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || !descriptor.enumerable || !("value" in descriptor)) {
+      fail("OPTIONS_INVALID", `${label}.${String(key)} must be enumerable own data.`);
+    }
+    captured[key] = descriptor.value;
+  }
+  return Object.freeze(captured);
+}
+
+function capturePath(value, label, fallback) {
+  const selected = value === undefined ? fallback : value;
+  if (typeof selected !== "string" || selected.length === 0 || selected.includes("\0")) {
+    fail("OPTIONS_INVALID", `${label} must be one non-empty path.`);
+  }
+  return path.resolve(selected);
+}
+
+function captureBytes(value, label) {
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    utilTypes.isProxy(value) ||
+    !utilTypes.isUint8Array(value) ||
+    utilTypes.isSharedArrayBuffer(value.buffer) ||
+    (Object.getPrototypeOf(value) !== Uint8Array.prototype &&
+      Object.getPrototypeOf(value) !== Buffer.prototype)
+  ) {
+    fail("OPTIONS_INVALID", `${label} must be exact non-shared Buffer or Uint8Array bytes.`);
+  }
+  return Buffer.from(value);
+}
+
+function captureOverrides(value) {
+  if (value === undefined) return Object.freeze(new Map());
+  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+    fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
+  }
+  const captured = new Map();
+  for (const [relativePath, bytes] of value) {
+    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+      fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
+        path: relativePath,
+      });
+    }
+    captured.set(relativePath, captureBytes(bytes, `fileOverrides[${relativePath}]`));
+  }
+  return Object.freeze(captured);
+}
+
+function captureBuildOptions(rawOptions) {
+  const options = exactOwnDataOptions(
+    rawOptions,
+    [
+      "fileOverrides",
+      "referenceArtifactBytes",
+      "referenceArtifactPath",
+      "shellArtifactBytes",
+      "shellArtifactPath",
+      "workspaceRoot",
+    ],
+    "build options",
+  );
+  const workspaceRoot = capturePath(options.workspaceRoot, "workspaceRoot", WORKSPACE_ROOT);
+  return Object.freeze({
+    workspaceRoot,
+    fileOverrides: captureOverrides(options.fileOverrides),
+    referenceArtifactBytes:
+      options.referenceArtifactBytes === undefined
+        ? undefined
+        : captureBytes(options.referenceArtifactBytes, "referenceArtifactBytes"),
+    referenceArtifactPath: capturePath(
+      options.referenceArtifactPath,
+      "referenceArtifactPath",
+      path.join(workspaceRoot, REFERENCE_ARTIFACT_PATH),
+    ),
+    shellArtifactBytes:
+      options.shellArtifactBytes === undefined
+        ? undefined
+        : captureBytes(options.shellArtifactBytes, "shellArtifactBytes"),
+    shellArtifactPath: capturePath(
+      options.shellArtifactPath,
+      "shellArtifactPath",
+      path.join(workspaceRoot, SHELL_ARTIFACT_PATH),
+    ),
+  });
+}
+
+async function readRegularAuthority(absolutePath, label) {
+  const resolved = path.resolve(absolutePath);
+  let canonicalParent;
+  try {
+    canonicalParent = await realpath(path.dirname(resolved));
+  } catch (error) {
+    fail("AUTHORITY_UNSAFE", `${label} parent is unavailable.`, { cause: String(error) });
+  }
+  const canonical = path.join(canonicalParent, path.basename(resolved));
+  if (canonical !== resolved) {
+    fail("AUTHORITY_UNSAFE", `${label} must not traverse a linked parent.`);
+  }
+  let before;
+  let handle;
+  try {
+    before = await lstat(canonical);
+    if (
+      !before.isFile() ||
+      before.isSymbolicLink() ||
+      before.nlink !== 1 ||
+      before.size > MAX_AUTHORITY_BYTES
+    ) {
+      fail("AUTHORITY_UNSAFE", `${label} must be one bounded regular non-linked file.`);
+    }
+    handle = await open(canonical, READ_FLAGS);
+    const opened = await handle.stat();
+    if (
+      !opened.isFile() ||
+      opened.dev !== before.dev ||
+      opened.ino !== before.ino ||
+      opened.size !== before.size
+    ) {
+      fail("AUTHORITY_UNSAFE", `${label} changed identity while opening.`);
+    }
+    const bytes = await handle.readFile();
+    if (bytes.byteLength !== before.size || bytes.byteLength > MAX_AUTHORITY_BYTES) {
+      fail("AUTHORITY_UNSAFE", `${label} changed size while reading.`);
+    }
+    return bytes;
+  } catch (error) {
+    if (error instanceof DesenAppCatalogPanelLayerTreeProofError) throw error;
+    fail("AUTHORITY_UNSAFE", `${label} could not be read safely.`, { cause: String(error) });
+  } finally {
+    await handle?.close();
+  }
+}
+
+function decodeUtf8(bytes, label) {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    fail("UTF8_INVALID", `${label} is not valid UTF-8.`);
+  }
+}
+
+function parseJson(bytes, label) {
+  try {
+    return JSON.parse(decodeUtf8(bytes, label));
+  } catch (error) {
+    if (error instanceof DesenAppCatalogPanelLayerTreeProofError) throw error;
+    fail("JSON_INVALID", `${label} is not valid JSON.`);
+  }
+}
+
+function exactTextCount(source, expected) {
+  return source.split(expected).length - 1;
+}
+
+function requireText(source, expected, label, code = "IMPLEMENTATION_DRIFT") {
+  if (exactTextCount(source, expected) < 1) {
+    fail(code, `${label} lost required M09-T02 semantics.`, { expected });
+  }
+}
+
+function authenticateShellArtifact(bytes) {
+  const pin = DESEN_APP_CATALOG_PANEL_SHELL_PIN;
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("SHELL_PREREQUISITE_DRIFT", "The exact frozen M09-T01 shell artifact changed.");
+  }
+  const artifact = parseJson(bytes, SHELL_ARTIFACT_PATH);
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== pin.proofId ||
+    artifact?.profile !== pin.profile ||
+    artifact?.task !== pin.task ||
+    artifact?.result !== pin.result ||
+    artifact?.claim?.taskStatus !== "DONE" ||
+    artifact?.claim?.shellImplemented !== true ||
+    artifact?.claim?.projectNavigationImplemented !== true ||
+    artifact?.claim?.unknownRoutesFailClosed !== true ||
+    artifact?.claim?.catalogDrivenPanelImplemented !== false
+  ) {
+    fail("SHELL_PREREQUISITE_DRIFT", "The M09-T01 artifact lost exact shell semantics.");
+  }
+  return deepFreeze({ ...pin });
+}
+
+function authenticateReferenceArtifact(bytes) {
+  const pin = DESEN_APP_CATALOG_PANEL_REFERENCE_CAPABILITY_PIN;
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("REFERENCE_PREREQUISITE_DRIFT", "The exact frozen M03-T10 capability artifact changed.");
+  }
+  const artifact = parseJson(bytes, REFERENCE_ARTIFACT_PATH);
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.task !== pin.task ||
+    artifact?.result !== pin.result ||
+    artifact?.identity?.id !== pin.id ||
+    artifact?.identity?.version !== pin.version ||
+    artifact?.identity?.target !== pin.target ||
+    artifact?.identity?.protocol !== "0.1.0" ||
+    artifact?.catalog?.components?.length !== 5 ||
+    artifact?.inventory?.files !== 76 ||
+    artifact?.inventory?.totalBytes !== 224_069
+  ) {
+    fail(
+      "REFERENCE_PREREQUISITE_DRIFT",
+      "The M03-T10 artifact lost its exact historical capability identity or inventory.",
+    );
+  }
+  return deepFreeze({ ...pin });
+}
+
+function plainObject(value, label, code) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    fail(code, `${label} must remain an inert object.`);
+  }
+  return value;
+}
+
+function sortedKeys(value) {
+  return Object.keys(value).sort(compareText);
+}
+
+function projectCatalogComponent(id, value) {
+  const contract = plainObject(value, `Catalog component ${id}`, "CATALOG_SEMANTIC_DRIFT");
+  const authoring = plainObject(
+    contract.authoring,
+    `Catalog component ${id}.authoring`,
+    "CATALOG_SEMANTIC_DRIFT",
+  );
+  const slots =
+    contract.slots === undefined
+      ? []
+      : sortedKeys(
+          plainObject(contract.slots, `Catalog component ${id}.slots`, "CATALOG_SEMANTIC_DRIFT"),
+        ).map((name) => {
+          const slot = plainObject(
+            contract.slots[name],
+            `Catalog component ${id}.slots.${name}`,
+            "CATALOG_SEMANTIC_DRIFT",
+          );
+          return {
+            name,
+            required: slot.required,
+            minItems: slot.minItems,
+            maxItems: slot.maxItems ?? null,
+            acceptsCategories: Array.isArray(slot.acceptsCategories)
+              ? [...slot.acceptsCategories]
+              : [],
+          };
+        });
+  return {
+    id,
+    displayName: authoring.displayName,
+    authoringCategory: authoring.category,
+    semanticCategory: contract.category,
+    description: contract.description,
+    defaultProps: authoring.defaultProps,
+    slots,
+  };
+}
+
+function verifyCatalog(bytes) {
+  const catalog = plainObject(
+    parseJson(bytes, CATALOG_PATH),
+    CATALOG_PATH,
+    "CATALOG_SEMANTIC_DRIFT",
+  );
+  if (
+    catalog.kind !== "desen.catalog" ||
+    catalog.desen !== "0.1.0" ||
+    catalog.id !== "run.desen.reference.sign-in" ||
+    catalog.version !== "0.1.0" ||
+    catalog.target !== "web-react" ||
+    typeof catalog.packageDigest !== "string" ||
+    !/^sha256:[a-f0-9]{64}$/u.test(catalog.packageDigest) ||
+    sortedKeys(plainObject(catalog.behaviors, "Catalog behaviors", "CATALOG_SEMANTIC_DRIFT"))
+      .length !== 0 ||
+    sortedKeys(plainObject(catalog.resources, "Catalog resources", "CATALOG_SEMANTIC_DRIFT"))
+      .length !== 0 ||
+    sortedKeys(
+      plainObject(catalog.operations, "Catalog operations", "CATALOG_SEMANTIC_DRIFT"),
+    ).join("\0") !== "com.example.auth/signIn"
+  ) {
+    fail(
+      "CATALOG_SEMANTIC_DRIFT",
+      "The exact reference Catalog identity or capability shape drifted.",
+    );
+  }
+  const componentsObject = plainObject(
+    catalog.components,
+    "Catalog components",
+    "CATALOG_SEMANTIC_DRIFT",
+  );
+  const components = sortedKeys(componentsObject).map((id) =>
+    projectCatalogComponent(id, componentsObject[id]),
+  );
+  if (!isDeepStrictEqual(components, EXPECTED_COMPONENTS)) {
+    fail(
+      "CATALOG_SEMANTIC_DRIFT",
+      "The exact five Catalog component authoring contracts drifted.",
+      { components },
+    );
+  }
+  return deepFreeze({
+    receipt: { path: CATALOG_PATH, bytes: bytes.byteLength, sha256: sha256(bytes) },
+    identity: {
+      kind: catalog.kind,
+      desen: catalog.desen,
+      id: catalog.id,
+      version: catalog.version,
+      target: catalog.target,
+      packageDigest: catalog.packageDigest,
+    },
+    components,
+    componentCount: components.length,
+    operationIds: sortedKeys(catalog.operations),
+    behaviorCount: 0,
+    resourceCount: 0,
+  });
+}
+
+function projectSourceNode(value, label) {
+  const node = plainObject(value, label, "SOURCE_SEMANTIC_DRIFT");
+  if (typeof node.id !== "string" || typeof node.use !== "string") {
+    fail("SOURCE_SEMANTIC_DRIFT", `${label} lost an exact id/use pair.`);
+  }
+  const behaviorValues =
+    node.behaviors === undefined
+      ? []
+      : Array.isArray(node.behaviors)
+        ? node.behaviors
+        : fail("SOURCE_SEMANTIC_DRIFT", `${label}.behaviors must remain an array.`);
+  const slotsObject =
+    node.slots === undefined
+      ? {}
+      : plainObject(node.slots, `${label}.slots`, "SOURCE_SEMANTIC_DRIFT");
+  return {
+    id: node.id,
+    use: node.use,
+    conditional: Object.hasOwn(node, "when"),
+    behaviors: behaviorValues.map((behavior, index) =>
+      projectSourceNode(behavior, `${label}.behaviors[${index}]`),
+    ),
+    slots: sortedKeys(slotsObject).map((name) => {
+      const children = slotsObject[name];
+      if (!Array.isArray(children)) {
+        fail("SOURCE_SEMANTIC_DRIFT", `${label}.slots.${name} must remain an array.`);
+      }
+      return {
+        name,
+        children: children.map((child, index) =>
+          projectSourceNode(child, `${label}.slots.${name}[${index}]`),
+        ),
+      };
+    }),
+  };
+}
+
+function verifySource(bytes) {
+  const source = plainObject(parseJson(bytes, SOURCE_PATH), SOURCE_PATH, "SOURCE_SEMANTIC_DRIFT");
+  const catalogs = source.catalogs;
+  const surfacesObject = plainObject(source.surfaces, "Source surfaces", "SOURCE_SEMANTIC_DRIFT");
+  if (
+    source.kind !== "desen.source" ||
+    source.desen !== "0.1.0" ||
+    source.id !== "com.example.account-app" ||
+    source.entry !== "sign-in" ||
+    !isDeepStrictEqual(catalogs, [
+      { id: "run.desen.reference.sign-in", version: "0.1.0", target: "web-react" },
+    ]) ||
+    sortedKeys(surfacesObject).join("\0") !== "home\0sign-in"
+  ) {
+    fail(
+      "SOURCE_SEMANTIC_DRIFT",
+      "The official Source identity, requirement, or surfaces drifted.",
+    );
+  }
+  const surfaces = sortedKeys(surfacesObject).map((id) => {
+    const surface = plainObject(
+      surfacesObject[id],
+      `Source surface ${id}`,
+      "SOURCE_SEMANTIC_DRIFT",
+    );
+    if (surface.id !== id) {
+      fail("SOURCE_SEMANTIC_DRIFT", `Source surface ${id} lost its exact identity.`);
+    }
+    return { id, root: projectSourceNode(surface.root, `Source surface ${id}.root`) };
+  });
+  if (!isDeepStrictEqual(surfaces, EXPECTED_SURFACE_TREES)) {
+    fail("SOURCE_SEMANTIC_DRIFT", "The exact sign-in or home component/slot tree drifted.", {
+      surfaces,
+    });
+  }
+  return deepFreeze({
+    receipt: { path: SOURCE_PATH, bytes: bytes.byteLength, sha256: sha256(bytes) },
+    identity: {
+      kind: source.kind,
+      desen: source.desen,
+      id: source.id,
+      entry: source.entry,
+      catalogs,
+    },
+    surfaces,
+    surfaceCount: surfaces.length,
+    componentNodeCount: 8,
+    conditionalNodeIds: ["sign-in.error"],
+  });
+}
+
+function verifyPackage(bytes) {
+  const manifest = parseJson(bytes, APP_PACKAGE_PATH);
+  const expectedDependencies = {
+    "@desen/reference-catalog-web": "workspace:*",
+    "@desen/validator": "workspace:*",
+    react: "19.2.8",
+    "react-dom": "19.2.8",
+  };
+  const expectedDevDependencies = {
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.2",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    jsdom: "29.1.1",
+    vite: "8.1.5",
+    vitest: "4.1.10",
+  };
+  if (
+    manifest?.name !== "@desen/app-web" ||
+    manifest?.private !== true ||
+    manifest?.type !== "module" ||
+    !isDeepStrictEqual(manifest.dependencies, expectedDependencies) ||
+    !isDeepStrictEqual(manifest.devDependencies, expectedDevDependencies) ||
+    manifest.scripts?.build !== "vite build" ||
+    manifest.scripts?.typecheck !== "tsc -p tsconfig.json --noEmit" ||
+    manifest.scripts?.test !== "vitest run" ||
+    manifest.scripts?.["test:authoring"] !==
+      "vitest run test/authoring-data.test.ts test/application.test.tsx" ||
+    manifest.scripts?.["test:shell"] !==
+      "vitest run test/project-navigation.test.ts test/application.test.tsx test/main-lifecycle.test.tsx"
+  ) {
+    fail("PACKAGE_DRIFT", "The M09-T02 app dependency or focused-script contract drifted.");
+  }
+  return deepFreeze({
+    name: manifest.name,
+    private: true,
+    dependencies: expectedDependencies,
+    devDependencies: expectedDevDependencies,
+    focusedTestScript: manifest.scripts["test:authoring"],
+    editorCoreDependency: false,
+    catalogSdkDependency: false,
+    runtimeReactDependency: false,
+    adapterDependency: false,
+  });
+}
+
+function resolveRelativeImport(importerPath, specifier) {
+  if (
+    specifier.includes("\\") ||
+    specifier.includes("?") ||
+    specifier.includes("#") ||
+    !/^(?:\.\.?\/)[a-zA-Z0-9._/-]+$/u.test(specifier)
+  ) {
+    fail("IMPORT_BOUNDARY_DRIFT", `${importerPath} has an invalid relative import.`, { specifier });
+  }
+  const resolved = path.posix.normalize(
+    path.posix.join(path.posix.dirname(importerPath), specifier),
+  );
+  const extension = path.posix.extname(resolved);
+  const candidates =
+    extension === ".js"
+      ? [`${resolved.slice(0, -3)}.ts`, `${resolved.slice(0, -3)}.tsx`]
+      : [".ts", ".tsx", ".css", ".svg", ".json"].includes(extension)
+        ? [resolved]
+        : [];
+  const admitted = candidates.filter(
+    (candidate) => APP_SOURCE_PATHS.includes(candidate) || candidate === SOURCE_PATH,
+  );
+  if (admitted.length !== 1) {
+    fail(
+      "IMPORT_BOUNDARY_DRIFT",
+      `${importerPath} imports outside the exact tracked application/Source authority.`,
+      { specifier, candidates },
+    );
+  }
+  return admitted[0];
+}
+
+function importBindingShape(declaration) {
+  const clause = declaration.importClause;
+  if (clause === undefined) return { defaultImport: null, namedImports: [], namespaceImport: null };
+  const shape = {
+    defaultImport: clause.name?.text ?? null,
+    namedImports: [],
+    namespaceImport: null,
+  };
+  if (clause.namedBindings !== undefined) {
+    if (ts.isNamespaceImport(clause.namedBindings)) {
+      shape.namespaceImport = clause.namedBindings.name.text;
+    } else {
+      shape.namedImports = clause.namedBindings.elements
+        .map((element) => element.propertyName?.text ?? element.name.text)
+        .sort(compareText);
+    }
+  }
+  return shape;
+}
+
+function unwrapPlatformExpression(node) {
+  let current = node;
+  while (
+    ts.isParenthesizedExpression(current) ||
+    ts.isAsExpression(current) ||
+    ts.isTypeAssertionExpression(current) ||
+    ts.isNonNullExpression(current) ||
+    ts.isSatisfiesExpression(current)
+  ) {
+    current = current.expression;
+  }
+  return current;
+}
+
+function platformGlobalRoot(node, roots) {
+  const current = unwrapPlatformExpression(node);
+  if (ts.isIdentifier(current)) return roots.has(current.text) ? current.text : null;
+  if (ts.isPropertyAccessExpression(current) || ts.isElementAccessExpression(current)) {
+    return platformGlobalRoot(current.expression, roots);
+  }
+  return null;
+}
+
+function staticPlatformMemberName(node) {
+  if (ts.isPropertyAccessExpression(node)) return node.name.text;
+  const argument = node.argumentExpression && unwrapPlatformExpression(node.argumentExpression);
+  return argument !== undefined &&
+    (ts.isStringLiteralLike(argument) || ts.isNoSubstitutionTemplateLiteral(argument))
+    ? argument.text
+    : null;
+}
+
+function isIdentifierValueReference(node) {
+  if (ts.isDeclarationName(node)) return false;
+  const parent = node.parent;
+  return !(
+    (ts.isPropertyAccessExpression(parent) && parent.name === node) ||
+    (ts.isPropertyAssignment(parent) && parent.name === node) ||
+    (ts.isLabeledStatement(parent) && parent.label === node) ||
+    ((ts.isBreakStatement(parent) || ts.isContinueStatement(parent)) && parent.label === node)
+  );
+}
+
+function isPlatformMemberReceiver(node) {
+  let current = node;
+  while (true) {
+    const parent = current.parent;
+    if (
+      (ts.isParenthesizedExpression(parent) ||
+        ts.isAsExpression(parent) ||
+        ts.isTypeAssertionExpression(parent) ||
+        ts.isNonNullExpression(parent) ||
+        ts.isSatisfiesExpression(parent)) &&
+      parent.expression === current
+    ) {
+      current = parent;
+      continue;
+    }
+    return (
+      (ts.isPropertyAccessExpression(parent) || ts.isElementAccessExpression(parent)) &&
+      parent.expression === current
+    );
+  }
+}
+
+function inspectImportsAndExecutionBoundary(files) {
+  const inventory = [];
+  let referenceCatalogImports = 0;
+  let validatorImports = 0;
+  const platformGlobalRoots = new Set(["document", "globalThis", "navigator", "self", "window"]);
+  const forbiddenGlobalIdentifiers = new Set([
+    "EventSource",
+    "WebSocket",
+    "XMLHttpRequest",
+    "fetch",
+    "indexedDB",
+    "localStorage",
+    "sessionStorage",
+  ]);
+  const forbiddenPlatformMembers = new Set([
+    "EventSource",
+    "WebSocket",
+    "XMLHttpRequest",
+    "cookie",
+    "fetch",
+    "indexedDB",
+    "localStorage",
+    "sendBeacon",
+    "sessionStorage",
+  ]);
+  const forbiddenCallPattern =
+    /^(?:activateRevision|createDesenEditor|createRuntimeReact|insertDesenEditor|moveDesenEditor|deleteDesenEditor|publish(?:Revision|Source)?|saveDesen|useRuntimeReact)/u;
+
+  for (const relativePath of TYPESCRIPT_SOURCE_PATHS) {
+    const source = decodeUtf8(files.get(relativePath), relativePath);
+    const sourceFile = ts.createSourceFile(
+      relativePath,
+      source,
+      ts.ScriptTarget.Latest,
+      true,
+      relativePath.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+    );
+    if (sourceFile.parseDiagnostics.length > 0) {
+      fail("IMPORT_BOUNDARY_DRIFT", `${relativePath} has TypeScript parse diagnostics.`, {
+        diagnosticCodes: sourceFile.parseDiagnostics.map(({ code }) => code),
+      });
+    }
+    const visit = (node) => {
+      if (ts.isImportDeclaration(node)) {
+        if (!ts.isStringLiteralLike(node.moduleSpecifier)) {
+          fail("IMPORT_BOUNDARY_DRIFT", `${relativePath} has a non-literal import.`);
+        }
+        const specifier = node.moduleSpecifier.text;
+        const shape = importBindingShape(node);
+        let resolvedPath = null;
+        if (specifier.startsWith(".")) {
+          resolvedPath = resolveRelativeImport(relativePath, specifier);
+        } else if (specifier === "react" || specifier === "react-dom/client") {
+          // React is the already admitted M09-T01 application framework.
+        } else if (specifier === "@desen/reference-catalog-web/catalog.json") {
+          referenceCatalogImports += 1;
+          if (
+            relativePath !== AUTHORING_SOURCE_PATH ||
+            shape.defaultImport !== "referenceCatalog" ||
+            shape.namespaceImport !== null ||
+            shape.namedImports.length !== 0
+          ) {
+            fail(
+              "IMPORT_BOUNDARY_DRIFT",
+              "The Catalog must enter only as one exact inert JSON import.",
+            );
+          }
+        } else if (specifier === "@desen/validator") {
+          validatorImports += 1;
+          if (
+            relativePath !== AUTHORING_SOURCE_PATH ||
+            shape.defaultImport !== null ||
+            shape.namespaceImport !== null ||
+            !isDeepStrictEqual(
+              shape.namedImports,
+              [...EXPECTED_VALIDATOR_IMPORTS].sort(compareText),
+            )
+          ) {
+            fail(
+              "IMPORT_BOUNDARY_DRIFT",
+              "The validator import must expose only the two reviewed cumulative-validation APIs.",
+            );
+          }
+        } else {
+          fail("IMPORT_BOUNDARY_DRIFT", `${relativePath} imports an unreviewed package.`, {
+            specifier,
+          });
+        }
+        inventory.push({ path: relativePath, specifier, resolvedPath, bindings: shape });
+      } else if (ts.isExportDeclaration(node) && node.moduleSpecifier !== undefined) {
+        fail("IMPORT_BOUNDARY_DRIFT", `${relativePath} must not re-export another module.`);
+      } else if (ts.isImportEqualsDeclaration(node) || ts.isImportTypeNode(node)) {
+        fail("IMPORT_BOUNDARY_DRIFT", `${relativePath} contains an indirect import declaration.`);
+      } else if (
+        ts.isCallExpression(node) &&
+        (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
+          (ts.isIdentifier(node.expression) && node.expression.text === "require"))
+      ) {
+        fail("IMPORT_BOUNDARY_DRIFT", `${relativePath} contains an executable dynamic import.`);
+      }
+
+      if (
+        ts.isIdentifier(node) &&
+        isIdentifierValueReference(node) &&
+        forbiddenGlobalIdentifiers.has(node.text)
+      ) {
+        fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained platform I/O authority.`, {
+          identifier: node.text,
+        });
+      }
+      if (
+        ts.isIdentifier(node) &&
+        isIdentifierValueReference(node) &&
+        platformGlobalRoots.has(node.text) &&
+        !isPlatformMemberReceiver(node)
+      ) {
+        fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained broad platform-global authority.`, {
+          identifier: node.text,
+        });
+      }
+      if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
+        const root = platformGlobalRoot(node.expression, platformGlobalRoots);
+        if (root !== null) {
+          const member = staticPlatformMemberName(node);
+          if (member === null || forbiddenPlatformMembers.has(member)) {
+            fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained platform I/O authority.`, {
+              root,
+              member: member ?? "DYNAMIC_COMPUTED_MEMBER",
+            });
+          }
+        }
+      }
+      if (
+        ts.isCallExpression(node) &&
+        ts.isIdentifier(node.expression) &&
+        forbiddenCallPattern.test(node.expression.text)
+      ) {
+        fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained later-slice execution authority.`, {
+          call: node.expression.text,
+        });
+      }
+      if (ts.isJsxOpeningLikeElement(node)) {
+        const tagName = node.tagName.getText(sourceFile);
+        if (/^(?:canvas|Inspector|RuntimeCanvas)$/u.test(tagName)) {
+          fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained a canvas or inspector element.`);
+        }
+        for (const property of node.attributes.properties) {
+          if (
+            ts.isJsxAttribute(property) &&
+            /^(?:draggable|onDrag(?:End|Enter|Leave|Over|Start)?|onDrop)$/u.test(
+              property.name.getText(sourceFile),
+            )
+          ) {
+            fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained drag/drop mutation behavior.`);
+          }
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(sourceFile);
+  }
+  if (referenceCatalogImports !== 1 || validatorImports !== 1) {
+    fail(
+      "IMPORT_BOUNDARY_DRIFT",
+      "The source graph must contain one exact Catalog JSON import and one exact validator import.",
+    );
+  }
+
+  const authoringImports = inventory.filter(
+    ({ path: importerPath }) => importerPath === AUTHORING_SOURCE_PATH,
+  );
+  const sourceFixtureImports = authoringImports.filter(
+    ({ resolvedPath }) => resolvedPath === SOURCE_PATH,
+  );
+  if (sourceFixtureImports.length !== 1) {
+    fail("IMPORT_BOUNDARY_DRIFT", "The authoring model must import the one exact official Source.");
+  }
+
+  const indexHtml = decodeUtf8(files.get("apps/desen-app/index.html"), "apps/desen-app/index.html");
+  if (
+    exactTextCount(indexHtml, '<script type="module" src="/src/main.tsx"></script>') !== 1 ||
+    [...indexHtml.matchAll(/<script\b/giu)].length !== 1 ||
+    /\s(?:on[a-z][a-z0-9_-]*|srcdoc)\s*=/iu.test(indexHtml) ||
+    /\bjavascript\s*:/iu.test(indexHtml) ||
+    /<(?:iframe|object|embed)\b/iu.test(indexHtml)
+  ) {
+    fail("IMPORT_BOUNDARY_DRIFT", "index.html gained unreviewed executable authority.");
+  }
+  for (const relativePath of SVG_PATHS) {
+    const svg = decodeUtf8(files.get(relativePath), relativePath);
+    if (
+      !svg.includes("<svg") ||
+      /<(?:script|foreignObject)\b|\s(?:on[a-z][a-z0-9_-]*|href|xlink:href)\s*=|\bjavascript\s*:/iu.test(
+        svg,
+      )
+    ) {
+      fail("IMPORT_BOUNDARY_DRIFT", `${relativePath} is no longer one inert local SVG.`);
+    }
+  }
+  for (const relativePath of [
+    "apps/desen-app/src/application.module.css",
+    "apps/desen-app/src/styles.css",
+  ]) {
+    const css = decodeUtf8(files.get(relativePath), relativePath);
+    if (/@import\b|url\(\s*["']?(?:https?:|data:|javascript:)/iu.test(css)) {
+      fail("IMPORT_BOUNDARY_DRIFT", `${relativePath} gained external or executable CSS authority.`);
+    }
+  }
+
+  return deepFreeze({
+    method: "TYPESCRIPT_AST_EXACT_IMPORT_AND_EXECUTION_BOUNDARY",
+    imports: inventory,
+    exactDesenPackageImports: [
+      "@desen/reference-catalog-web/catalog.json",
+      "@desen/validator#validateDesenInteractionCatalogSet",
+      "@desen/validator#validateDesenSourceInteractionContracts",
+    ],
+    arbitraryExecutableImports: 0,
+    editorCoreImports: 0,
+    catalogSdkImports: 0,
+    runtimeReactImports: 0,
+    adapterImports: 0,
+    platformIoCalls: 0,
+    dragDropMutationHandlers: 0,
+    canvasElements: 0,
+    inspectorElements: 0,
+  });
+}
+
+function countRegistrations(source) {
+  return [...source.matchAll(/\b(?:it|test)\s*(?:\.each\s*\([^)]*\)\s*)?\(\s*["'`]/gsu)].length;
+}
+
+function verifyImplementationAndTests(files) {
+  const authoring = decodeUtf8(files.get(AUTHORING_SOURCE_PATH), AUTHORING_SOURCE_PATH);
+  const application = decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH);
+  const authoringTest = decodeUtf8(files.get(AUTHORING_TEST_PATH), AUTHORING_TEST_PATH);
+  const applicationTest = decodeUtf8(files.get(APPLICATION_TEST_PATH), APPLICATION_TEST_PATH);
+
+  for (const required of [
+    "prepareCatalogAuthoringModel",
+    "validateDesenInteractionCatalogSet([catalogValue])",
+    "validateDesenSourceInteractionContracts(sourceValue, catalogSet.value)",
+    'reason: "catalog-invalid"',
+    'reason: "source-invalid"',
+    'reason: "projection-limit"',
+    "maxIdentityOccurrencesPerSurface: 25_000",
+    "maxSourceTreeDepth: 64",
+    "Object.freeze",
+    "REFERENCE_AUTHORING_MODEL",
+  ]) {
+    requireText(authoring, required, AUTHORING_SOURCE_PATH, "VALIDATION_CONTRACT_DRIFT");
+  }
+  for (const required of [
+    'type AuthoringTab = "layers" | "components"',
+    'aria-label="Authoring panel"',
+    'role="tablist"',
+    'role="tab"',
+    'role="tabpanel"',
+    'event.key === "ArrowRight"',
+    'event.key === "End"',
+    "Search catalog components",
+    "No catalog matches",
+    "DESEN node / slot tree",
+    "aria-label={`${selectedSurface.name} layer hierarchy`}",
+    "will not substitute the sign-in",
+    "Structure only · selection and insertion arrive in later M09 slices.",
+    "Exact Catalog metadata and sign-in Source structure are read only.",
+  ]) {
+    requireText(application, required, APPLICATION_SOURCE_PATH);
+  }
+  if (/role\s*=\s*["']tree(?:item)?["']/u.test(application)) {
+    fail(
+      "ACCESSIBILITY_DRIFT",
+      "The read-only hierarchy must not claim interactive ARIA tree behavior.",
+    );
+  }
+  for (const required of [
+    "projects the exact Catalog library and official Source surface trees",
+    'reason: "catalog-invalid"',
+    'reason: "source-invalid"',
+    'reason: "projection-limit"',
+    "com.example.ui/Unknown",
+    "Object.isFrozen(model)",
+    "preserves absent slots",
+    "reverse()",
+  ]) {
+    requireText(authoringTest, required, AUTHORING_TEST_PATH, "TEST_AUTHORITY_DRIFT");
+  }
+  for (const required of [
+    "read-only layer hierarchy",
+    "5 of 5 components",
+    "Search catalog components",
+    "ArrowRight",
+    "No Source tree for Recovery",
+    "will not substitute the sign-in tree",
+    'queryByRole("tree")',
+    'querySelector("canvas")',
+    "insert|add|drag",
+    "publish|save|run",
+  ]) {
+    requireText(applicationTest, required, APPLICATION_TEST_PATH, "TEST_AUTHORITY_DRIFT");
+  }
+
+  const registrations = {
+    "authoring-data.test.ts": countRegistrations(authoringTest),
+    "application.test.tsx": countRegistrations(applicationTest),
+  };
+  if (registrations["authoring-data.test.ts"] < 5 || registrations["application.test.tsx"] < 9) {
+    fail("TEST_AUTHORITY_DRIFT", "The focused M09-T02 positive/negative test inventory shrank.", {
+      registrations,
+    });
+  }
+  const receiptByPath = new Map(receipts(files).map((receipt) => [receipt.path, receipt]));
+  return deepFreeze({
+    projection: {
+      validatorApis: EXPECTED_VALIDATOR_IMPORTS,
+      validationOrder: "CATALOG_SET_THEN_SOURCE_INTERACTION_CONTRACTS",
+      failurePolicy: "NO_PARTIAL_AUTHORING_MODEL",
+      failureReasons: ["catalog-invalid", "source-invalid", "projection-limit"],
+      maxSourceTreeDepth: 64,
+      maxIdentityOccurrencesPerSurface: 25_000,
+      recursivelyFrozenReadModel: true,
+    },
+    ui: {
+      tabs: ["Layers", "Components"],
+      tabKeyboardKeys: ["ArrowLeft", "ArrowRight", "Home", "End"],
+      componentFilter: "LOCAL_READ_MODEL_ONLY",
+      layerHierarchySemantics: "READ_ONLY_LABELLED_LIST_NOT_INTERACTIVE_ARIA_TREE",
+      unknownSurfacePolicy: "EXPLICIT_NO_SOURCE_TREE_WITHOUT_SUBSTITUTION",
+      insertionControls: 0,
+      selectionControls: 0,
+    },
+    tests: {
+      command:
+        "pnpm --filter @desen/app-web test:authoring && node --test tests/desen-app-catalog-panel-layer-tree.test.mjs",
+      registrations,
+      positiveAndNegativeCoverage: true,
+      failClosedCatalogSourceAndLimitCoverage: true,
+      noSubstitutionCoverage: true,
+      laterSliceAbsenceCoverage: true,
+      targetedReceipts: [
+        receiptByPath.get(AUTHORING_TEST_PATH),
+        receiptByPath.get(APPLICATION_TEST_PATH),
+      ],
+    },
+  });
+}
+
+async function readTrackedFiles(options) {
+  const files = new Map();
+  for (const relativePath of TRACKED_PATHS) {
+    const override = options.fileOverrides.get(relativePath);
+    files.set(
+      relativePath,
+      override ??
+        (await readRegularAuthority(path.join(options.workspaceRoot, relativePath), relativePath)),
+    );
+  }
+  return files;
+}
+
+function receipts(files) {
+  return TRACKED_PATHS.map((relativePath) => {
+    const bytes = files.get(relativePath);
+    return deepFreeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) });
+  });
+}
+
+function canonicalArtifactBytes(artifact) {
+  return Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`, "utf8");
+}
+
+/** Builds deterministic, detached M09-T02 Catalog panel/layer-tree evidence. */
+export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = undefined) {
+  const options = captureBuildOptions(rawOptions);
+  const [files, shellArtifactBytes, referenceArtifactBytes] = await Promise.all([
+    readTrackedFiles(options),
+    options.shellArtifactBytes ??
+      readRegularAuthority(options.shellArtifactPath, SHELL_ARTIFACT_PATH),
+    options.referenceArtifactBytes ??
+      readRegularAuthority(options.referenceArtifactPath, REFERENCE_ARTIFACT_PATH),
+  ]);
+  const prerequisites = [
+    authenticateShellArtifact(shellArtifactBytes),
+    authenticateReferenceArtifact(referenceArtifactBytes),
+  ];
+  const catalog = verifyCatalog(files.get(CATALOG_PATH));
+  const source = verifySource(files.get(SOURCE_PATH));
+  const packageContract = verifyPackage(files.get(APP_PACKAGE_PATH));
+  const imports = inspectImportsAndExecutionBoundary(files);
+  const implementation = verifyImplementationAndTests(files);
+  const trackedReceipts = receipts(files);
+  const artifact = deepFreeze({
+    schemaVersion: 1,
+    proofId: "desen-app-catalog-panel-layer-tree",
+    profile: "desen.app.catalog-panel-layer-tree-proof.v1",
+    task: "M09-T02",
+    result: "PASS",
+    prerequisites,
+    claim: {
+      taskStatus: "DONE",
+      shellCompatibilityRetained: true,
+      exactCatalogResolved: true,
+      catalogDrivenComponentPanelImplemented: true,
+      catalogDerivedLayerTreeImplemented: true,
+      cumulativeCatalogAndSourceValidationRequired: true,
+      validationFailureReturnsPartialModel: false,
+      componentFilterMutatesSource: false,
+      unknownSurfaceSubstitutesSource: false,
+      realAdapterCanvasImplemented: false,
+      selectionOrInspectorImplemented: false,
+      sourceMutationOrHistoryImplemented: false,
+      persistenceUiImplemented: false,
+      runOrPublishImplemented: false,
+    },
+    authority: { catalog, source },
+    application: {
+      package: packageContract,
+      projection: implementation.projection,
+      ui: implementation.ui,
+    },
+    boundary: {
+      imports,
+      trackedFiles: trackedReceipts.length,
+      trackedReceipts,
+    },
+    evidence: {
+      tests: implementation.tests,
+      rootTestNames: DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES,
+    },
+    nonclaims: [
+      "No runtime-react or reference adapter execution and no real canvas.",
+      "No editor-core selection, inspector, insertion, move, delete, undo, or redo authority.",
+      "No drag-and-drop, Source mutation, persistence, save/open, or revision authority.",
+      "No Design/Run execution, fixtures, host operations, diagnostics panel, publish, or activation.",
+    ],
+  });
+  const artifactBytes = canonicalArtifactBytes(artifact);
+  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+}
+
+function verifyProofDocument(proofDocument, artifactSha256) {
+  const text = decodeUtf8(proofDocument, PROOF_DOCUMENT_PATH);
+  if (
+    exactTextCount(text, ARTIFACT_PATH) < 1 ||
+    exactTextCount(text, `sha256:${artifactSha256}`) !== 1 ||
+    exactTextCount(text, "[PENDING_FINAL_ARTIFACT_SHA256]") !== 0 ||
+    exactTextCount(text, "M09-T02") < 1 ||
+    !/(?:Status:\s*`?DONE`?|M09-T02\s*\|\s*DONE)/u.test(text)
+  ) {
+    fail("PROOF_PIN_DRIFT", "The visible M09-T02 proof path, digest, or DONE association drifted.");
+  }
+}
+
+/** Verifies committed M09-T02 artifact bytes and their visible proof-document association. */
+export async function verifyDesenAppCatalogPanelLayerTreeEvidence(rawOptions = undefined) {
+  const options = exactOwnDataOptions(
+    rawOptions,
+    ["artifactBytes", "artifactPath", "buildOptions", "proofDocument", "proofDocumentPath"],
+    "verify options",
+  );
+  const built = await buildDesenAppCatalogPanelLayerTreeEvidence(options.buildOptions);
+  const artifactBytes =
+    options.artifactBytes === undefined
+      ? await readRegularAuthority(
+          capturePath(
+            options.artifactPath,
+            "artifactPath",
+            DEFAULT_DESEN_APP_CATALOG_PANEL_LAYER_TREE_ARTIFACT_PATH,
+          ),
+          ARTIFACT_PATH,
+        )
+      : captureBytes(options.artifactBytes, "artifactBytes");
+  if (!isDeepStrictEqual(artifactBytes, built.artifactBytes)) {
+    fail("ARTIFACT_DRIFT", "Committed M09-T02 artifact bytes differ from fresh evidence.");
+  }
+  const proofDocument =
+    options.proofDocument === undefined
+      ? await readRegularAuthority(
+          capturePath(
+            options.proofDocumentPath,
+            "proofDocumentPath",
+            path.join(WORKSPACE_ROOT, PROOF_DOCUMENT_PATH),
+          ),
+          PROOF_DOCUMENT_PATH,
+        )
+      : captureBytes(options.proofDocument, "proofDocument");
+  verifyProofDocument(proofDocument, built.artifactSha256);
+  return deepFreeze({
+    task: built.artifact.task,
+    result: built.artifact.result,
+    artifactBytes: built.artifactBytes.byteLength,
+    artifactSha256: built.artifactSha256,
+    prerequisites: built.artifact.prerequisites.length,
+    catalogComponents: built.artifact.authority.catalog.componentCount,
+    sourceSurfaces: built.artifact.authority.source.surfaceCount,
+    sourceNodes: built.artifact.authority.source.componentNodeCount,
+    trackedFiles: built.artifact.boundary.trackedFiles,
+  });
+}
+
+/** Atomically writes exact deterministic M09-T02 evidence. */
+export async function writeDesenAppCatalogPanelLayerTreeEvidence(rawOptions = undefined) {
+  const options = exactOwnDataOptions(
+    rawOptions,
+    ["artifactPath", "beforeAtomicRename", "buildOptions"],
+    "write options",
+  );
+  if (
+    options.beforeAtomicRename !== undefined &&
+    (typeof options.beforeAtomicRename !== "function" ||
+      utilTypes.isProxy(options.beforeAtomicRename))
+  ) {
+    fail("OPTIONS_INVALID", "beforeAtomicRename must be one non-Proxy function.");
+  }
+  const artifactPath = capturePath(
+    options.artifactPath,
+    "artifactPath",
+    DEFAULT_DESEN_APP_CATALOG_PANEL_LAYER_TREE_ARTIFACT_PATH,
+  );
+  const built = await buildDesenAppCatalogPanelLayerTreeEvidence(options.buildOptions);
+  try {
+    await writeAtomicProofArtifact({
+      artifactPath,
+      artifactBytes: built.artifactBytes,
+      beforeAtomicRename: options.beforeAtomicRename,
+    });
+  } catch (error) {
+    fail("ARTIFACT_WRITE_UNSAFE", "Atomic M09-T02 artifact write failed safely.", {
+      cause: String(error),
+    });
+  }
+  return deepFreeze({
+    task: built.artifact.task,
+    result: built.artifact.result,
+    artifactPath,
+    artifactBytes: built.artifactBytes.byteLength,
+    artifactSha256: built.artifactSha256,
+    trackedFiles: built.artifact.boundary.trackedFiles,
+  });
+}

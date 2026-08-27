@@ -11,9 +11,12 @@
     "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "test:authoring": "vitest run test/authoring-data.test.ts test/application.test.tsx",
     "test:shell": "vitest run test/project-navigation.test.ts test/application.test.tsx test/main-lifecycle.test.tsx"
   },
   "dependencies": {
+    "@desen/reference-catalog-web": "workspace:*",
+    "@desen/validator": "workspace:*",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },

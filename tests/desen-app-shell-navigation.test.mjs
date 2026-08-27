@@ -59,6 +59,11 @@ after(async () => {
 });
 
 test("[authority] binds M09-T01 to the exact completed G08 artifact", () => {
+  assert.equal(built.artifactBytes.byteLength, 12_118);
+  assert.equal(
+    built.artifactSha256,
+    "c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220",
+  );
   assert.equal(built.artifact.schemaVersion, 1);
   assert.equal(built.artifact.proofId, "desen-app-shell-navigation");
   assert.equal(built.artifact.profile, "desen.app.shell-navigation-proof.v1");
@@ -72,6 +77,8 @@ test("[authority] binds M09-T01 to the exact completed G08 artifact", () => {
     built.artifact.evidence.rootTestNames,
     DESEN_APP_SHELL_NAVIGATION_ROOT_TEST_NAMES,
   );
+  assert.equal(built.currentCompatibility.result, "PASS");
+  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T02");
 });
 
 test("[shell] records the closed route, fixture, guidance, and accessibility profile", () => {
@@ -133,6 +140,20 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
   assert.equal(built.artifact.boundary.imports.arbitraryExecutableHtmlEntries, 0);
   assert.equal(built.artifact.boundary.trackedFiles, 24);
   assert.equal(built.artifact.nonclaims.length, 4);
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.catalogDrivenAuthoringReadModelAllowed,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor
+      .historicalNoCatalogPanelNonclaimAppliedToCurrentApp,
+    false,
+  );
+  assert.deepEqual(built.currentCompatibility.additiveSuccessor.knownSourceEdges, [
+    "apps/desen-app/src/authoring-data.ts",
+  ]);
+  assert.equal(built.currentCompatibility.retainedClaim.catalogDrivenPanelImplemented, undefined);
+  assert.equal(built.currentCompatibility.retainedClaim.realAdapterCanvasImplemented, undefined);
 });
 
 test("[determinism] builds byte-identical detached evidence twice", async () => {
@@ -142,6 +163,8 @@ test("[determinism] builds byte-identical detached evidence twice", async () => 
   assert.notEqual(second.artifact, built.artifact);
   assert.equal(Object.isFrozen(second.artifact), true);
   assert.equal(Object.isFrozen(second.artifact.boundary.trackedReceipts), true);
+  assert.deepEqual(second.currentCompatibility, built.currentCompatibility);
+  assert.equal(Object.isFrozen(second.currentCompatibility), true);
 });
 
 test("[mutation] rejects prerequisite, route, package, and scope-boundary drift", async () => {
