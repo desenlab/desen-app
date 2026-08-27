@@ -16,6 +16,8 @@ import {
 } from "@desen/runtime-react";
 
 import officialDerivedSignInBundle from "../../../examples/sign-in/official-derived.bundle.desen.json";
+import { REFERENCE_AUTHORING_MODEL } from "./authoring-data.js";
+import { projectAuthoringSelection } from "./authoring-selection.js";
 import styles from "./application.module.css";
 
 import type { RuntimeHostPorts, RuntimeJsonObject } from "@desen/runtime-core";
@@ -23,6 +25,10 @@ import type {
   RuntimeReactLiveSurfaceInput,
   RuntimeReactSurfaceFailureRenderer,
 } from "@desen/runtime-react";
+import type {
+  AuthoringComponentSelection,
+  AuthoringSelectionProjection,
+} from "./authoring-selection.js";
 
 const SUPPORTED_PROJECT_ID = "account-app";
 const SUPPORTED_SURFACE_ID = "sign-in";
@@ -90,12 +96,81 @@ const renderManagedFailure: RuntimeReactSurfaceFailureRenderer = () => (
   </div>
 );
 
+function SelectionOverlay({
+  projection,
+}: Readonly<{ readonly projection: AuthoringSelectionProjection }>) {
+  if (projection.status !== "materialized" && projection.status !== "not-materialized") {
+    return null;
+  }
+
+  const materialized = projection.status === "materialized";
+  const instanceCount = materialized ? projection.runtimeNodeIds.length : 0;
+  return (
+    <div
+      aria-label="Selected layer preview"
+      className={styles.selectionOverlay}
+      data-materialized={materialized ? "true" : "false"}
+      data-selection-overlay="source-identity"
+      role="status"
+    >
+      <span className={styles.selectionOverlayLabel}>Selected</span>
+      <span className={styles.selectionOverlayIdentity}>
+        <strong>{projection.selection.displayName}</strong>
+        <code>{projection.selection.sourceNodeId}</code>
+      </span>
+      <span className={styles.selectionOverlayStatus}>
+        {materialized
+          ? instanceCount === 1
+            ? "Visible in preview"
+            : `${instanceCount} instances in preview`
+          : "Hidden by condition"}
+      </span>
+    </div>
+  );
+}
+
 function ManagedAdapterSurface({
   input,
-}: Readonly<{ readonly input: RuntimeReactLiveSurfaceInput }>) {
+  projectId,
+  selection,
+  surfaceId,
+}: Readonly<{
+  readonly input: RuntimeReactLiveSurfaceInput;
+  readonly projectId: string;
+  readonly selection: AuthoringComponentSelection | null;
+  readonly surfaceId: string;
+}>) {
   const result = useRuntimeReactSurface(input);
+  const renderedIdentity =
+    result.status === "rendered"
+      ? Object.freeze({
+          surfaceId: result.surface.surfaceId,
+          diagnosticIndex: result.surface.diagnosticIndex,
+        })
+      : undefined;
+  const projection = projectAuthoringSelection(
+    selection,
+    Object.freeze({ projectId, surfaceId }),
+    REFERENCE_AUTHORING_MODEL,
+    renderedIdentity,
+  );
 
-  return <RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />;
+  return (
+    <>
+      <fieldset
+        className={styles.adapterCanvasManaged}
+        data-managed-capability-frame="true"
+        disabled
+        style={REFERENCE_WEB_TOKEN_CSS_PROPERTIES}
+      >
+        <legend className={styles.adapterCanvasLegend}>Sign-in adapter canvas</legend>
+        <div className={styles.adapterCanvasSurface} data-managed-capability-subtree="true">
+          <RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />
+        </div>
+      </fieldset>
+      <SelectionOverlay projection={projection} />
+    </>
+  );
 }
 
 function CanvasUnavailable() {
@@ -117,6 +192,7 @@ function CanvasLoading() {
 /** Exact read-only React-adapter canvas for the controlled account sign-in fixture. */
 export interface DesenAdapterCanvasProps {
   readonly projectId: string;
+  readonly selection?: AuthoringComponentSelection | null;
   readonly surfaceId: string;
 }
 
@@ -126,7 +202,11 @@ export interface DesenAdapterCanvasProps {
  * @remarks The App supplies no managed component tree and accepts only the exact controlled route.
  * Other project/surface tuples fail closed without mounting or substituting the sign-in surface.
  */
-export function DesenAdapterCanvas({ projectId, surfaceId }: DesenAdapterCanvasProps) {
+export function DesenAdapterCanvas({
+  projectId,
+  selection = null,
+  surfaceId,
+}: DesenAdapterCanvasProps) {
   const routeIdentity = useMemo(
     () => Object.freeze({ projectId, surfaceId }),
     [projectId, surfaceId],
@@ -196,12 +276,16 @@ export function DesenAdapterCanvas({ projectId, surfaceId }: DesenAdapterCanvasP
   if (state.status === "failed") return <CanvasUnavailable />;
 
   return (
-    <fieldset className={styles.adapterCanvas} disabled style={REFERENCE_WEB_TOKEN_CSS_PROPERTIES}>
-      <legend className={styles.adapterCanvasLegend}>Sign-in adapter canvas</legend>
+    <div className={styles.adapterCanvas}>
       <p className={styles.adapterCanvasNote}>Design preview · controls are disabled.</p>
-      <div className={styles.adapterCanvasSurface}>
-        <ManagedAdapterSurface input={state.input} />
+      <div className={styles.adapterCanvasViewport}>
+        <ManagedAdapterSurface
+          input={state.input}
+          projectId={projectId}
+          selection={selection}
+          surfaceId={surfaceId}
+        />
       </div>
-    </fieldset>
+    </div>
   );
 }

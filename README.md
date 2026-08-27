@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████████░░░░░░░░` **98 / 145 tasks complete (68%)**
+**Overall:** `█████████████████░░░░░░░░` **99 / 145 tasks complete (68%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `███░░░░░░░░░░░` **3 / 14 tasks complete (21%)**
+**M09:** `████░░░░░░░░░░` **4 / 14 tasks complete (29%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T04`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T05`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -687,6 +687,41 @@ proof gates are 10/13. `S-001` remains `PLANNED` for the visible approximate-fid
 M09-T11; PF-059 remains `OPEN` and P-07 remains `PARTIAL` pending M10-T05 browser E2E. Selection,
 private-DOM overlays, inspector editing, mutation, Design/Run mode, persistence, diagnostics,
 publication, and activation remain later tasks. M09-T04 is next.
+
+M09-T04 adds a route-local Source-identity selection model and keeps its authoring chrome outside
+the exact managed capability subtree. Selection is minted only from the validated authoring model
+and projected through the public callback-free Runtime React diagnostic index. Repeated component
+instances remain distinct, attached behavior identities are excluded, conditional absence is
+reported honestly, and unknown, stale, cross-route, or forged identities produce no overlay.
+
+The managed runtime remains inside its disabled fieldset; Desen App renders one compact
+pointer-inert identity/status card as a DOM sibling with no managed child, DOM/native handle,
+private React value, callback, hit-test, or geometry authority. Native layer buttons provide
+Select/Deselect names, pressed state, conditional context, wrapped keyboard navigation, and live
+feedback, while route replacement resets selection synchronously. Desktop and mobile interaction
+checks confirmed the product behavior manually without constituting browser E2E.
+
+The focused App selection suite passes 27/27, the independent root proof passes 10/10, and App
+typecheck, lint, and production build pass locally. Exact evidence is the 11,997-byte
+[`desen-app-0.1.0-selection-overlay.json`](docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json)
+at `sha256:9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1`, directly authenticated
+against the 73,111-byte M09-T03 parent at
+`sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151`. The live local CI
+authority contains 180 workloads and 85 proof pairs—74 ordinary and 11 barriers—with a
+52-proof-unit/114-workload selection-overlay closure and complete ownership over 1,164 tracked
+paths, including 170 proof-owned paths. Sequence 43 passes 66/66 at
+`sha256:0bbb101332d7af5dcf7260b6df6961837003571f67a6e3a69232e65e19cded58`, preserving sequence 42
+and all 38 predecessor artifacts while appending the T04 artifact at index 38, resealing readers
+`[70, 71, 72, 73, 74, 75]`, and appending T04 readers `[76, 77]`. The chain now contains 39
+artifacts and 78 readers, and the complete structural CI suite passes 317/317 locally. No
+required-gate or hosted-CI pass is claimed.
+
+M09-T04 is `DONE`; `N-042` is `TESTED` for the exact controlled Web–React profile, P-06 remains
+`PROVEN`, and P-07/P-16 remain `PARTIAL`. Implementation progress is 99/145 (68%), M09 is 4/14,
+and proof gates remain 10/13. Component geometry, hit testing, canvas picking, inspector or Source
+mutation, insertion/cardinality/drag-drop, state/action authoring, Design/Run, diagnostics
+navigation/placeholders, persistence, browser E2E, publication, and activation remain later work.
+M09-T05 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

@@ -3,6 +3,10 @@ import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react"
 import { REFERENCE_AUTHORING_MODEL } from "./authoring-data.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
 import {
+  createAuthoringComponentSelection,
+  isSameAuthoringComponentSelection,
+} from "./authoring-selection.js";
+import {
   createDesenAppProjectPath,
   navigateDesenApp,
   readDesenAppLocation,
@@ -24,6 +28,7 @@ import type {
   AuthoringLayerNode,
   CatalogComponentSummary,
 } from "./authoring-data.js";
+import type { AuthoringComponentSelection } from "./authoring-selection.js";
 import type { DesenAppRoute } from "./project-navigation.js";
 import type { DesenAppProjectSummary, DesenAppSurfaceSummary } from "./project-data.js";
 
@@ -290,21 +295,44 @@ function ProjectsHome() {
 
 type AuthoringTab = "layers" | "components";
 
-function LayerNode({ node }: Readonly<{ readonly node: AuthoringLayerNode }>) {
+interface LayerSelectionProps {
+  readonly onToggleSelection: (node: AuthoringLayerNode) => void;
+  readonly selectedSourceNodeId: string | null;
+}
+
+function LayerNode({
+  node,
+  onToggleSelection,
+  selectedSourceNodeId,
+}: Readonly<LayerSelectionProps & { readonly node: AuthoringLayerNode }>) {
+  const selected = selectedSourceNodeId === node.id;
+
   return (
     <li className={styles.layerNode}>
-      <div className={styles.layerRow} data-category={node.capabilityId.split("/").at(-1)}>
+      <button
+        aria-label={`${selected ? "Deselect" : "Select"} ${node.displayName} layer · ${node.id}${node.conditional ? " · Conditional" : ""}`}
+        aria-pressed={selected}
+        className={styles.layerRow}
+        data-category={node.capabilityId.split("/").at(-1)}
+        onClick={() => onToggleSelection(node)}
+        type="button"
+      >
         <span aria-hidden="true" className={styles.layerGlyph} />
         <span className={styles.layerIdentity}>
           <strong>{node.displayName}</strong>
           <small>{node.id}</small>
         </span>
-        {node.conditional ? <span className={styles.conditionalBadge}>when</span> : null}
-      </div>
+        {node.conditional ? <span className={styles.conditionalBadge}>Conditional</span> : null}
+      </button>
       {node.behaviors.length > 0 ? (
         <ul aria-label={`${node.id} behaviors`} className={styles.behaviorList}>
           {node.behaviors.map((behavior) => (
-            <BehaviorNode behavior={behavior} key={behavior.id} />
+            <BehaviorNode
+              behavior={behavior}
+              key={behavior.id}
+              onToggleSelection={onToggleSelection}
+              selectedSourceNodeId={selectedSourceNodeId}
+            />
           ))}
         </ul>
       ) : null}
@@ -316,7 +344,12 @@ function LayerNode({ node }: Readonly<{ readonly node: AuthoringLayerNode }>) {
           </div>
           <ul>
             {slot.children.map((child) => (
-              <LayerNode key={child.id} node={child} />
+              <LayerNode
+                key={child.id}
+                node={child}
+                onToggleSelection={onToggleSelection}
+                selectedSourceNodeId={selectedSourceNodeId}
+              />
             ))}
           </ul>
         </div>
@@ -325,7 +358,11 @@ function LayerNode({ node }: Readonly<{ readonly node: AuthoringLayerNode }>) {
   );
 }
 
-function BehaviorNode({ behavior }: Readonly<{ readonly behavior: AuthoringBehaviorLayer }>) {
+function BehaviorNode({
+  behavior,
+  onToggleSelection,
+  selectedSourceNodeId,
+}: Readonly<LayerSelectionProps & { readonly behavior: AuthoringBehaviorLayer }>) {
   return (
     <li className={styles.behaviorNode}>
       <div className={styles.layerRow} data-category="Behavior">
@@ -335,7 +372,7 @@ function BehaviorNode({ behavior }: Readonly<{ readonly behavior: AuthoringBehav
           <small>{behavior.id}</small>
         </span>
         <span className={styles.behaviorBadge}>behavior</span>
-        {behavior.conditional ? <span className={styles.conditionalBadge}>when</span> : null}
+        {behavior.conditional ? <span className={styles.conditionalBadge}>Conditional</span> : null}
       </div>
       {behavior.slots.map((slot) => (
         <div className={styles.layerSlot} key={slot.name}>
@@ -345,7 +382,12 @@ function BehaviorNode({ behavior }: Readonly<{ readonly behavior: AuthoringBehav
           </div>
           <ul>
             {slot.children.map((child) => (
-              <LayerNode key={child.id} node={child} />
+              <LayerNode
+                key={child.id}
+                node={child}
+                onToggleSelection={onToggleSelection}
+                selectedSourceNodeId={selectedSourceNodeId}
+              />
             ))}
           </ul>
         </div>
@@ -355,8 +397,10 @@ function BehaviorNode({ behavior }: Readonly<{ readonly behavior: AuthoringBehav
 }
 
 function LayerTree({
+  onToggleSelection,
+  selectedSourceNodeId,
   selectedSurface,
-}: Readonly<{ readonly selectedSurface: DesenAppSurfaceSummary }>) {
+}: Readonly<LayerSelectionProps & { readonly selectedSurface: DesenAppSurfaceSummary }>) {
   const model = REFERENCE_AUTHORING_MODEL;
   const surfaceTree = model.surfaces.find((surface) => surface.id === selectedSurface.id);
   if (surfaceTree === undefined) {
@@ -390,7 +434,11 @@ function LayerTree({
       </div>
       <section aria-label={`${selectedSurface.name} layer hierarchy`}>
         <ul className={styles.layerTree}>
-          <LayerNode node={surfaceTree.root} />
+          <LayerNode
+            node={surfaceTree.root}
+            onToggleSelection={onToggleSelection}
+            selectedSourceNodeId={selectedSourceNodeId}
+          />
         </ul>
       </section>
     </div>
@@ -491,8 +539,16 @@ function ComponentLibrary() {
 }
 
 function AuthoringPanel({
+  onToggleSelection,
+  selection,
+  selectedSourceNodeId,
   selectedSurface,
-}: Readonly<{ readonly selectedSurface: DesenAppSurfaceSummary }>) {
+}: Readonly<
+  LayerSelectionProps & {
+    readonly selection: AuthoringComponentSelection | null;
+    readonly selectedSurface: DesenAppSurfaceSummary;
+  }
+>) {
   const [activeTab, setActiveTab] = useState<AuthoringTab>("layers");
   const panelId = useId();
   const layersTab = useRef<HTMLButtonElement>(null);
@@ -501,7 +557,18 @@ function AuthoringPanel({
   function selectAdjacentTab(event: KeyboardEvent<HTMLButtonElement>): void {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const nextTab = event.key === "ArrowRight" || event.key === "End" ? "components" : "layers";
+    const nextTab =
+      event.key === "Home"
+        ? "layers"
+        : event.key === "End"
+          ? "components"
+          : event.key === "ArrowRight"
+            ? activeTab === "layers"
+              ? "components"
+              : "layers"
+            : activeTab === "components"
+              ? "layers"
+              : "components";
     setActiveTab(nextTab);
     (nextTab === "layers" ? layersTab : componentsTab).current?.focus();
   }
@@ -555,7 +622,11 @@ function AuthoringPanel({
         role="tabpanel"
         tabIndex={activeTab === "layers" ? 0 : -1}
       >
-        <LayerTree selectedSurface={selectedSurface} />
+        <LayerTree
+          onToggleSelection={onToggleSelection}
+          selectedSourceNodeId={selectedSourceNodeId}
+          selectedSurface={selectedSurface}
+        />
       </div>
       <div
         aria-labelledby={`${panelId}-components-tab`}
@@ -567,10 +638,84 @@ function AuthoringPanel({
       >
         <ComponentLibrary />
       </div>
-      <p className={styles.authoringBoundary}>
-        Structure only · selection and insertion arrive in later M09 slices.
+      <p aria-live="polite" className={styles.authoringBoundary}>
+        {selection === null
+          ? "Choose a Source layer to inspect its preview state."
+          : `Selected · ${selection.displayName}${selection.conditional ? " · Conditional" : ""}`}
       </p>
     </aside>
+  );
+}
+
+function SurfaceEditor({
+  project,
+  selectedSurface,
+}: Readonly<{
+  readonly project: DesenAppProjectSummary;
+  readonly selectedSurface: DesenAppSurfaceSummary;
+}>) {
+  const [selection, setSelection] = useState<AuthoringComponentSelection | null>(null);
+
+  function toggleSelection(node: AuthoringLayerNode): void {
+    const candidate = createAuthoringComponentSelection({
+      projectId: project.id,
+      surfaceId: selectedSurface.id,
+      sourceNodeId: node.id,
+      capabilityId: node.capabilityId,
+      displayName: node.displayName,
+      conditional: node.conditional,
+    });
+    setSelection((current) =>
+      isSameAuthoringComponentSelection(current, candidate) ? null : candidate,
+    );
+  }
+
+  return (
+    <section className={styles.surfaceEditor} aria-labelledby="workspace-title">
+      <h1 className={styles.visuallyHidden} data-route-heading id="project-title" tabIndex={-1}>
+        {project.name}
+      </h1>
+
+      <AuthoringPanel
+        onToggleSelection={toggleSelection}
+        selection={selection}
+        selectedSourceNodeId={selection?.sourceNodeId ?? null}
+        selectedSurface={selectedSurface}
+      />
+
+      <div className={styles.surfaceFrame}>
+        <div className={styles.surfaceFrameHeader}>
+          <div>
+            <h2 id="workspace-title">{selectedSurface.name}</h2>
+            <span>{selectedSurface.capabilityId}</span>
+          </div>
+          <SurfaceState state={selectedSurface.state} />
+        </div>
+
+        <div className={styles.surfaceFrameBody}>
+          <DesenAdapterCanvas
+            projectId={project.id}
+            selection={selection}
+            surfaceId={selectedSurface.id}
+          />
+        </div>
+
+        <div className={styles.boundaryNote}>
+          <strong>Preview data</strong>
+          <span>
+            Exact Catalog metadata and sign-in Source structure are read only. Selection stays in
+            the editor and never enters the managed component tree. Editing, save, and publication
+            remain unavailable.
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.editorStatus}>
+        <span>{project.navigationStatus}</span>
+        <span aria-hidden="true">·</span>
+        <span>{selectedSurface.detail}</span>
+      </div>
+    </section>
   );
 }
 
@@ -643,46 +788,11 @@ function ProjectShell({
   }
 
   return (
-    <section className={styles.surfaceEditor} aria-labelledby="workspace-title">
-      <h1 className={styles.visuallyHidden} data-route-heading id="project-title" tabIndex={-1}>
-        {project.name}
-      </h1>
-
-      <AuthoringPanel selectedSurface={selectedSurface} />
-
-      <div className={styles.surfaceFrame}>
-        <div className={styles.surfaceFrameHeader}>
-          <div>
-            <h2 id="workspace-title">{selectedSurface.name}</h2>
-            <span>{selectedSurface.capabilityId}</span>
-          </div>
-          <SurfaceState state={selectedSurface.state} />
-        </div>
-
-        <div className={styles.surfaceFrameBody}>
-          <DesenAdapterCanvas
-            key={`${project.id}:${selectedSurface.id}`}
-            projectId={project.id}
-            surfaceId={selectedSurface.id}
-          />
-        </div>
-
-        <div className={styles.boundaryNote}>
-          <strong>Preview data</strong>
-          <span>
-            Exact Catalog metadata and sign-in Source structure are read only. The exact managed
-            adapter canvas is rendered with controls disabled. No selection, mutation, save or
-            publication is available yet.
-          </span>
-        </div>
-      </div>
-
-      <div className={styles.editorStatus}>
-        <span>{project.navigationStatus}</span>
-        <span aria-hidden="true">·</span>
-        <span>{selectedSurface.detail}</span>
-      </div>
-    </section>
+    <SurfaceEditor
+      key={`${project.id}:${selectedSurface.id}`}
+      project={project}
+      selectedSurface={selectedSurface}
+    />
   );
 }
 

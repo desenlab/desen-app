@@ -6,7 +6,8 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T03 extends the application-owned shell with an exact, read-only React adapter canvas.
+M09-T04 extends the application-owned shell with Source-identity selection and App-owned overlay
+chrome outside the exact, read-only React adapter canvas.
 The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
@@ -31,6 +32,12 @@ The current product surface contains:
   before the managed tree becomes visible;
 - a native disabled fieldset that keeps the real heading and labels accessible while preventing
   this Design preview from dispatching input or action events;
+- route-local Source-node selection admitted only from the validated authoring model and projected
+  through the public callback-free Runtime React diagnostic index;
+- native layer buttons with pressed state, Select/Deselect names, conditional context, wrapped
+  keyboard navigation, and immediate live selection status;
+- a compact pointer-inert selection card that is a DOM sibling outside the disabled managed
+  capability fieldset and exposes no component geometry or private capability structure;
 - explicit not-found states for unknown routes, projects, and surfaces; and
 - semantic landmarks, a skip link, visible keyboard focus, route-heading focus, reduced-motion
   support, and responsive layouts.
@@ -64,16 +71,34 @@ through `runtime-react`, and renders it through `useRuntimeReactSurface` plus
 adapter preview is available; they never borrow the sign-in Bundle or retain its managed tree.
 StrictMode replay, route replacement, and unmount dispose the exact session they created.
 
-This slice does not select or inspect nodes, expose prop/schema or slot-cardinality controls, drag,
-insert, reorder or otherwise mutate Source, persist project data, create user projects, execute
-interactive Design/Run behavior, calculate user-facing diagnostics, publish a revision, or activate
-a channel. Selection belongs to M09-T04, inspector controls to M09-T05, insertion/cardinality UI to
-M09-T07, and interactive Design/Run behavior to M09-T10.
+Selection stores only exact project, surface, Source-node, capability, display, and conditional
+primitives. The current route and validated authoring model must admit that identity before the App
+consults the public diagnostic index. Repeated component instances remain distinct, attached
+behavior runtime identities are excluded, and only a selected conditional Source node may report
+an honest non-materialized state. Unknown, stale, cross-route, and forged same-route selections
+fail closed. Route replacement resets the route-owned selection synchronously.
+
+This slice does not expose component rectangles, hit testing, canvas picking, private DOM/native
+structure, prop/schema or slot-cardinality controls, drag, insert, reorder or otherwise mutate
+Source, persist project data, create user projects, execute interactive Design/Run behavior,
+navigate diagnostics, publish a revision, or activate a channel. Inspector controls belong to
+M09-T05, insertion/cardinality UI to M09-T07, and interactive Design/Run behavior to M09-T10.
 
 The App imports only public package entry points for runtime composition and the exact static
 reference adapter registry. It does not import concrete Catalog components, private package files,
 `editor-core`, `catalog-sdk`, Publisher, or control-plane code. Bundle data never selects a
 module, component, fallback tree, or executable host binding.
+
+The focused selection suite passes 27/27, the independent root proof passes 10/10, and App
+typecheck, lint, and production build pass locally. The exact 11,997-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json` at
+`sha256:9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1`. The live local CI
+authority contains 180 workloads and 85 proof pairs—74 ordinary and 11 barriers—with a
+52-proof-unit/114-workload connected closure and ownership over 1,164 tracked paths, including 170
+proof-owned paths. Sequence 43 passes 66/66 at
+`sha256:0bbb101332d7af5dcf7260b6df6961837003571f67a6e3a69232e65e19cded58`, preserving sequence 42
+and every predecessor while producing 39 artifacts and 78 readers; structural CI passes 317/317
+locally. No required-gate or hosted-CI pass is claimed.
 
 ## Local commands
 
@@ -83,6 +108,7 @@ pnpm --filter @desen/app-web lint
 pnpm --filter @desen/app-web typecheck
 pnpm --filter @desen/app-web test:authoring
 pnpm --filter @desen/app-web test:canvas
+pnpm --filter @desen/app-web test:selection
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

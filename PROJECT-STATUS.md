@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-27
+Last updated: 2026-08-28
 
 ## Plain-language status
 
@@ -962,19 +962,52 @@ make no required-gate or hosted-CI claim. M09-T03 is `DONE`; P-06 is `PROVEN`, p
 10/13, implementation progress is 98/145 (68%), M09 is 3/14, and M09-T04 is next. `S-001`
 remains `PLANNED`, PF-059 remains `OPEN`, and P-07 remains `PARTIAL` for their later owners.
 
+M09-T04 now adds route-local Source-identity selection without granting the App access to private
+capability structure. Exact primitive selection data is minted only from the validated authoring
+model and projected only through the public callback-free Runtime React diagnostic index. Repeated
+component instances remain distinct, attached behavior identities are filtered, conditional
+absence is explicit, and unknown, stale, cross-route, or forged identities produce no overlay.
+The compact pointer-inert selection card is an App-owned DOM sibling outside the disabled managed
+fieldset and marked capability subtree; it receives no managed child, DOM/native handle,
+React-private value, registry, session, callback, hit-test, or geometry authority. Native layer
+buttons expose accessible Select/Deselect names, pressed state, conditional context, wrapped
+keyboard navigation, and live feedback; route replacement resets selection synchronously.
+
+The focused App selection suite passes 27/27, the independent root proof passes 10/10, and App
+typecheck, lint, and production build pass locally. Desktop and mobile interaction checks confirm
+the product behavior manually without constituting browser E2E. The exact 11,997-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json` at
+`sha256:9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1`, with the exact
+73,111-byte M09-T03 artifact at
+`sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151` as its sole direct
+parent. The local CI authority contains 180 workloads and 85 proof pairs—74 ordinary and 11
+barriers—over 1,164 tracked paths and 170 proof-owned paths. The selection-overlay connected
+closure contains 52 proof units and 114 workloads. Sequence 43 passes 66/66 at
+`sha256:0bbb101332d7af5dcf7260b6df6961837003571f67a6e3a69232e65e19cded58`, preserves sequence 42
+and all 38 predecessor artifacts, appends the T04 artifact at index 38, reseals predecessor
+compatibility readers `[70, 71, 72, 73, 74, 75]`, and appends T04 proof/root readers `[76, 77]`.
+The current checkpoint contains 39 artifacts and 78 readers; the structural CI suite passes
+317/317. These are local code-owned receipts, not a required-gate or hosted-CI pass. M09-T04 is
+`DONE`;
+`N-042` is `TESTED` for this exact controlled Web–React profile, P-06 remains `PROVEN`, P-07 and
+P-16 remain `PARTIAL`, proof gates remain 10/13, implementation progress is 99/145 (68%), M09 is
+4/14, and M09-T05 is next. Component geometry, hit testing, canvas picking, inspector/mutation,
+insertion/cardinality/drag-drop, state/action authoring, Design/Run, diagnostics navigation or
+placeholders, persistence, browser E2E, publication, and activation remain outside this slice.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `98 / 145 tasks complete (68%)`
+- Overall implementation progress: `99 / 145 tasks complete (68%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
-- M09 progress: `3 / 14 tasks complete (21%)`
+- M09 progress: `4 / 14 tasks complete (29%)`
 - Proof-gate progress: `10 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1058,17 +1091,18 @@ remains `PLANNED`, PF-059 remains `OPEN`, and P-07 remains `PARTIAL` for their l
   `M08-T10 — React/DOM boundary, stable identity, and deterministic command tests`,
   `M09-T01 — Desen App shell and project navigation`,
   `M09-T02 — Catalog-driven component panel and layer tree`,
-  `M09-T03 — Exact reference-adapter canvas`
+  `M09-T03 — Exact reference-adapter canvas`,
+  `M09-T04 — Source-identity selection outside managed capability subtrees`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M09-T04 — Selection overlays remain outside capability subtrees; no private-DOM authoring`
-- Status: M08 is 10/10, M09 is 3/14, M07 is 11/11, I07-04, G07, G08, M09-T01, M09-T02, and
-  M09-T03 are `DONE`, P-06 is `PROVEN`, proof gates are 10/13, and implementation progress is
-  98/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M09-T05 — Schema-driven primitive/enum inspector controls`
+- Status: M08 is 10/10, M09 is 4/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T04 are
+  `DONE`; `N-042` is `TESTED`, P-06 is `PROVEN`, P-07 and P-16 are `PARTIAL`, proof gates are
+  10/13, and implementation progress is 99/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
   its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
@@ -1090,7 +1124,11 @@ remains `PLANNED`, PF-059 remains `OPEN`, and P-07 remains `PARTIAL` for their l
   sequence-41 reader checkpoint. M09-T03 is `DONE` with its exact real-adapter canvas artifact,
   20/20 focused canvas cases, 56/56 complete App cases, 11/11 independent root proof, exact
   reference-host graph identity, live local 178-workload/84-pair CI authority, and sequence-42
-  reader checkpoint.
+  reader checkpoint. M09-T04 is `DONE` with its exact Source-identity selection artifact, 27/27
+  focused App cases, 10/10 independent root proof, private-structure/geometry mutation rejection,
+  desktop/mobile manual interaction verification, live local 180-workload/85-pair CI authority,
+  52-proof-unit/114-workload connected closure, 1,164-path/170-proof-owned ownership authority,
+  and sequence-43 reader checkpoint. No required-gate or hosted result is claimed.
 
 ## Completed preparation
 
@@ -3547,6 +3585,52 @@ M09-T03 evidence:
   overall progress advances to 98/145 (68%), and M09 advances to 3/14. `S-001` remains `PLANNED`
   for M09-T11, PF-059 remains `OPEN`, P-07 remains `PARTIAL` pending M10-T05 browser E2E, and
   M09-T04 is next
+
+M09-T04 evidence:
+
+- `docs/proof/DESEN-APP-SELECTION-OVERLAY.md`
+- `docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json`, exactly 11,997 bytes at
+  `sha256:9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1`
+- prerequisite authority: the exact completed 73,111-byte M09-T03 real-adapter canvas artifact is
+  authenticated at
+  `sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151` before any M09-T04
+  claim
+- selection boundary: route-local immutable selection contains only exact primitive project,
+  surface, Source-node, capability, display, and conditional data minted from the validated
+  authoring model; unknown, stale, cross-route, and forged same-route identities fail closed
+- runtime projection: only the public callback-free Runtime React diagnostic index is observed;
+  repeated component instances remain distinct, attached behavior identities are excluded, and
+  missing materialization is represented only for an explicitly conditional Source component
+- ownership boundary: the Runtime React boundary remains inside the disabled managed fieldset;
+  the compact pointer-inert selection card is a DOM sibling outside both that fieldset and the
+  marked capability subtree and receives no managed child or private implementation authority
+- private-structure boundary: source/CSS proof rejects private DOM lookup, React-tree access,
+  geometry measurement, overlay nesting, managed-tree substitution, and perimeter-box mutations;
+  no hit testing or canvas picking is introduced
+- accessibility boundary: native layer buttons expose dynamic Select/Deselect names,
+  `aria-pressed`, conditional context, wrapped keyboard navigation, and live selection status;
+  route replacement resets selection synchronously
+- local proof: the focused App selection suite passes 27/27, the independent root proof passes
+  10/10, and App typecheck, lint, and production build pass; manual desktop/mobile interaction
+  verification is recorded without claiming browser E2E
+- CI authority: the live local successor contains 180 workloads and 85 proof pairs, split into 74
+  ordinary pairs and 11 barriers; the selection-overlay connected closure contains 52 proof units
+  and 114 workloads, while complete ownership covers 1,164 tracked paths and 170 proof-owned paths
+- checkpoint authority: sequence 43 passes 66/66 at
+  `sha256:0bbb101332d7af5dcf7260b6df6961837003571f67a6e3a69232e65e19cded58`, preserves sequence 42
+  and all 38 predecessor artifacts, appends the T04 artifact at index 38, reseals predecessor
+  compatibility readers `[70, 71, 72, 73, 74, 75]`, and appends T04 proof/root readers `[76, 77]`;
+  the current chain contains 39 artifacts and 78 readers
+- structural CI authority: the complete structural CI test glob passes 317/317 locally
+- evidence boundary: these task, CI, ownership, and checkpoint receipts are local; no
+  required-gate or hosted-CI result is inferred in this update
+- scope nonclaims: no component geometry, hit testing, canvas picking, inspector, Source mutation,
+  insertion, cardinality, drag/drop, state/action authoring, Design/Run mode, diagnostics
+  navigation/placeholders, persistence, browser E2E, publication, activation, arbitrary-future-
+  Catalog, or native-target behavior is implemented or proven
+- coverage decision: M09-T04 is `DONE`; `N-042` advances to `TESTED` for the exact controlled
+  Web–React profile; P-06 remains `PROVEN`; P-07 and P-16 remain `PARTIAL`; proof gates remain
+  10/13; overall progress advances to 99/145 (68%); M09 advances to 4/14; M09-T05 is next
 
 ## Status vocabulary
 

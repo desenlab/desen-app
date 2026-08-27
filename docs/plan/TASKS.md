@@ -1409,7 +1409,7 @@ is next.
 | M09-T01 | DONE        | G08                      | Desen App shell and project navigation                                          |
 | M09-T02 | DONE        | M09-T01                  | Catalog-driven component panel and layer tree                                   |
 | M09-T03 | DONE        | M09-T01, G05             | Canvas uses the exact React adapters used by the reference host                 |
-| M09-T04 | NOT_STARTED | M09-T03                  | Selection overlays remain outside capability subtrees; no private-DOM authoring |
+| M09-T04 | DONE        | M09-T03                  | Selection overlays remain outside capability subtrees; no private-DOM authoring |
 | M09-T05 | NOT_STARTED | M09-T02–M09-T03          | Schema-driven primitive/enum inspector controls                                 |
 | M09-T06 | NOT_STARTED | M09-T05                  | Nested-object controls and honest structured-JSON fallback                      |
 | M09-T07 | NOT_STARTED | M09-T02–M09-T06          | Named-slot drop, move, reorder, cardinality, and acceptance UI                  |
@@ -1517,6 +1517,45 @@ approximate-fidelity disclosure. PF-059 remains `OPEN` and P-07 remains `PARTIAL
 M10-T05 browser-E2E proof. Selection/private-DOM overlays, inspector editing, insertion, structural
 mutation, drag/drop, state/action editing, Design/Run mode, fidelity disclosure, persistence,
 diagnostics, publication, and activation remain M09-T04 and later tasks. M09-T04 is next.
+
+M09-T04 adds route-local Source-identity selection without placing authoring state or chrome inside
+the managed capability subtree. Selection contains only exact primitive project, surface,
+Source-node, capability, display, and conditional data minted from the validated authoring model.
+Its runtime projection reads only the public callback-free diagnostic index, preserves repeated
+component instances, filters attached behavior identities, represents an absent runtime instance
+only for an explicitly conditional Source component, and rejects unknown, stale, cross-route, or
+forged identities without an overlay.
+
+The Runtime React boundary remains inside the disabled managed fieldset. Desen App renders one
+compact pointer-inert identity/status card as its DOM sibling, outside the marked capability
+subtree, with no managed child, DOM/native handle, private React value, registry, session, callback,
+hit-test, or geometry authority. Native layer buttons expose dynamic Select/Deselect names,
+`aria-pressed`, conditional context, wrapped keyboard navigation, and immediate live feedback;
+route replacement resets selection synchronously. Desktop and mobile interaction checks are
+manual product verification rather than browser-E2E evidence.
+
+The exact 11,997-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json` at
+`sha256:9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1`, authenticated against
+the exact 73,111-byte M09-T03 parent at
+`sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151`. The focused App
+selection suite passes 27/27, the independent root proof passes 10/10, and App typecheck, lint, and
+production build pass locally. The live local CI authority contains 180 workloads and 85 proof
+pairs, split into 74 ordinary pairs and 11 barriers. The selection-overlay connected closure
+contains 52 proof units and 114 workloads; complete ownership covers 1,164 tracked paths and 170
+proof-owned paths. Sequence 43 passes 66/66 at
+`sha256:0bbb101332d7af5dcf7260b6df6961837003571f67a6e3a69232e65e19cded58`, preserves sequence 42
+and all 38 predecessor artifacts, appends T04 artifact index 38, reseals predecessor compatibility
+readers `[70, 71, 72, 73, 74, 75]`, and appends T04 proof/root readers `[76, 77]`. The current
+chain contains 39 artifacts and 78 readers, and the structural CI suite passes 317/317 locally.
+No required-gate or hosted-CI pass is claimed.
+
+M09-T04 is `DONE`, advancing implementation progress to 99/145 (68%) and M09 to 4/14 while proof
+gates remain 10/13. `N-042` advances to `TESTED` for this exact controlled Web–React profile;
+P-06 remains `PROVEN`, and P-07/P-16 remain `PARTIAL`. No component geometry, hit testing, canvas
+picking, inspector, Source mutation, insertion/cardinality/drag-drop, state/action authoring,
+Design/Run mode, diagnostics navigation or placeholders, persistence, browser E2E, publication, or
+activation is claimed. M09-T05 is next.
 
 ## M10 — First end-to-end proof
 

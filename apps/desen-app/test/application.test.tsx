@@ -165,10 +165,16 @@ describe("Desen App application shell", () => {
     expect(within(hierarchy).getByText("sign-in.error")).toBeTruthy();
     expect(within(hierarchy).getByText("sign-in.submit")).toBeTruthy();
     expect(within(hierarchy).getByText("default slot")).toBeTruthy();
-    expect(within(hierarchy).getByText("when")).toBeTruthy();
+    expect(within(hierarchy).getByText("Conditional")).toBeTruthy();
     expect(within(hierarchy).queryByRole("tree")).toBeNull();
     expect(within(hierarchy).queryByRole("treeitem")).toBeNull();
     expect(hierarchy.querySelector("[aria-selected]")).toBeNull();
+    expect(within(hierarchy).getAllByRole("button")).toHaveLength(6);
+    expect(
+      within(hierarchy)
+        .getAllByRole("button")
+        .every((button) => button.getAttribute("aria-pressed") === "false"),
+    ).toBe(true);
     expect(screen.queryByRole("navigation", { name: "Sign-in layer hierarchy" })).toBeNull();
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
     const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
@@ -186,13 +192,58 @@ describe("Desen App application shell", () => {
     expect(screen.getByText("Design preview · controls are disabled.")).toBeTruthy();
     expect(
       screen.getByText(
-        "Exact Catalog metadata and sign-in Source structure are read only. The exact managed adapter canvas is rendered with controls disabled. No selection, mutation, save or publication is available yet.",
+        "Exact Catalog metadata and sign-in Source structure are read only. Selection stays in the editor and never enters the managed component tree. Editing, save, and publication remain unavailable.",
       ),
     ).toBeTruthy();
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     expect(screen.queryByRole("button", { name: /publish/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /^run$/i })).toBeNull();
     expect(screen.queryByRole("tab", { name: /design|run/i })).toBeNull();
     expect(document.querySelector("canvas")).toBeNull();
+  });
+
+  it("selects Source layers accessibly and keeps the identity overlay outside managed adapters", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
+
+    const emailLayer = screen.getByRole("button", {
+      name: "Select Text field layer · sign-in.email",
+    });
+    expect(emailLayer.tagName).toBe("BUTTON");
+    expect(emailLayer.getAttribute("type")).toBe("button");
+    emailLayer.focus();
+    expect(document.activeElement).toBe(emailLayer);
+    fireEvent.click(emailLayer);
+
+    expect(emailLayer.getAttribute("aria-pressed")).toBe("true");
+    expect(emailLayer.getAttribute("aria-label")).toBe("Deselect Text field layer · sign-in.email");
+    expect(screen.getByText("Selected · Text field")).toBeTruthy();
+    const overlay = await screen.findByRole("status", { name: "Selected layer preview" });
+    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const managedSubtree = document.querySelector("[data-managed-capability-subtree='true']");
+    expect(overlay.textContent).toContain("Text field");
+    expect(overlay.textContent).toContain("sign-in.email");
+    expect(overlay.textContent).toContain("Visible in preview");
+    expect(canvas.parentElement).toBe(overlay.parentElement);
+    expect(managedSubtree?.contains(overlay)).toBe(false);
+
+    fireEvent.click(within(canvas).getByRole("button", { name: "Sign in" }));
+    expect(emailLayer.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("status", { name: "Selected layer preview" })).toBe(overlay);
+
+    fireEvent.click(emailLayer);
+    expect(emailLayer.getAttribute("aria-pressed")).toBe("false");
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
+
+    const conditionalLayer = screen.getByRole("button", {
+      name: "Select Alert layer · sign-in.error · Conditional",
+    });
+    fireEvent.click(conditionalLayer);
+    const conditionalOverlay = screen.getByRole("status", { name: "Selected layer preview" });
+    expect(conditionalLayer.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("Selected · Alert · Conditional")).toBeTruthy();
+    expect(conditionalOverlay.getAttribute("data-materialized")).toBe("false");
+    expect(conditionalOverlay.textContent).toContain("Hidden by condition");
   });
 
   it("switches to the exact Catalog component library and filters only the local view", () => {
@@ -203,6 +254,16 @@ describe("Desen App application shell", () => {
     fireEvent.keyDown(layersTab, { key: "ArrowRight" });
     expect(componentsTab.getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(componentsTab);
+    fireEvent.keyDown(componentsTab, { key: "ArrowRight" });
+    expect(layersTab.getAttribute("aria-selected")).toBe("true");
+    expect(document.activeElement).toBe(layersTab);
+    fireEvent.keyDown(layersTab, { key: "ArrowLeft" });
+    expect(componentsTab.getAttribute("aria-selected")).toBe("true");
+    expect(document.activeElement).toBe(componentsTab);
+    fireEvent.keyDown(componentsTab, { key: "Home" });
+    expect(layersTab.getAttribute("aria-selected")).toBe("true");
+    fireEvent.keyDown(layersTab, { key: "End" });
+    expect(componentsTab.getAttribute("aria-selected")).toBe("true");
 
     const componentsPanel = document.getElementById(
       componentsTab.getAttribute("aria-controls") ?? "",
@@ -279,13 +340,20 @@ describe("Desen App application shell", () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
 
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+    expect(await screen.findByRole("status", { name: "Selected layer preview" })).toBeTruthy();
+
     fireEvent.click(screen.getByRole("link", { name: "Account app" }));
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     const surfaces = screen.getByRole("navigation", { name: "Account app surfaces" });
     fireEvent.click(within(surfaces).getByRole("link", { name: /Recovery/ }));
 
     expect(window.location.pathname).toBe("/projects/account-app/surfaces/recovery");
     expect(screen.queryByRole("heading", { level: 2, name: "Sign in" })).toBeNull();
     expect(screen.queryByRole("group", { name: "Sign-in adapter canvas" })).toBeNull();
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     await waitFor(() => {
       expect(screen.queryByLabelText("Email")).toBeNull();
       expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();
