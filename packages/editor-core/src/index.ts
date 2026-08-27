@@ -46,6 +46,7 @@ export {
   replaceDesenEditorAction,
 } from "./event-action-edits.js";
 export { createDesenEditorPersistencePort } from "./persistence.js";
+export { createDesenEditorContinuousValidator } from "./continuous-validation.js";
 
 export type {
   DesenEditorDocument,
@@ -149,3 +150,12 @@ export type {
   DesenEditorSourceSaveRequest,
   DesenEditorSourceSaveResult,
 } from "./persistence.js";
+
+export type {
+  DesenEditorContinuousValidationReport,
+  DesenEditorContinuousValidator,
+  DesenEditorContinuousValidatorCreationFailure,
+  DesenEditorContinuousValidatorCreationResult,
+  DesenEditorContinuousValidatorCreationSuccess,
+  DesenEditorInvalidSubjectMapping,
+} from "./continuous-validation.js";

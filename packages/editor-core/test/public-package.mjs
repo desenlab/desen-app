@@ -5,6 +5,7 @@ import test from "node:test";
 import { URL } from "node:url";
 
 import validSource from "../../protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json" with { type: "json" };
+import validCatalog from "../../protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json" with { type: "json" };
 import packageManifest from "../package.json" with { type: "json" };
 import * as editorCore from "@desen/editor-core";
 import { calculateDesenSourceDigest, canonicalizeJsonBytes } from "@desen/protocol";
@@ -377,6 +378,7 @@ test("the package manifest keeps one exact root export and the declared runtime 
       "test:authoring-round-trip": "vitest run test/authoring-round-trip.test.ts",
       "test:persistence": "vitest run test/persistence.test.ts",
       "test:content-edits": "vitest run test/content-edits.test.ts",
+      "test:continuous-validation": "vitest run test/continuous-validation.test.ts",
       "test:event-action-edits": "vitest run test/event-action-edits.test.ts",
       "test:state-binding-edits": "vitest run test/state-binding-edits.test.ts",
       "test:source-document": "vitest run test/source-document.test.ts",
@@ -403,6 +405,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
       "state-binding-edits.js",
       "event-action-edits.js",
       "persistence.js",
+      "continuous-validation.js",
     ].map(async (file) => ({
       file,
       source: await readFile(new URL(`../dist/${file}`, import.meta.url), "utf8"),
@@ -425,6 +428,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
           "./state-binding-edits.js",
           "./event-action-edits.js",
           "./persistence.js",
+          "./continuous-validation.js",
         ],
       },
       { file: "source-document.js", specifiers: ["@desen/validator"] },
@@ -451,6 +455,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
       {
         file: "persistence.js",
         specifiers: ["@desen/protocol", "./source-document.js"],
+      },
+      {
+        file: "continuous-validation.js",
+        specifiers: ["@desen/protocol", "@desen/validator", "./source-document.js"],
       },
     ],
   );
@@ -482,6 +490,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
     emittedModules[0].source,
     /export\s*\{\s*createDesenEditorPersistencePort\s*\}\s*from\s*["']\.\/persistence\.js["']/,
   );
+  assert.match(
+    emittedModules[0].source,
+    /export\s*\{\s*createDesenEditorContinuousValidator\s*\}\s*from\s*["']\.\/continuous-validation\.js["']/,
+  );
 
   const emittedGraph = emittedModules.map(({ source }) => source).join("\n");
   for (const forbidden of [
@@ -502,6 +514,7 @@ test("the built public package resolves through its export map and exposes the r
   );
   assert.deepEqual(Object.keys(editorCore), [
     "clearDesenEditorNodeCondition",
+    "createDesenEditorContinuousValidator",
     "createDesenEditorDocument",
     "createDesenEditorPersistencePort",
     "deleteDesenEditorAction",
@@ -656,6 +669,51 @@ test("the emitted factory rejects getter and toJSON hooks without invoking calle
 
   assert.equal(getterInvocations, 0);
   assert.equal(toJsonInvocations, 0);
+});
+
+test("the emitted continuous validator snapshots Catalogs and maps explicit invalid subjects", () => {
+  const callerCatalog = JSON.parse(JSON.stringify(validCatalog));
+  const creation = editorCore.createDesenEditorContinuousValidator([callerCatalog]);
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the public continuous validator factory.");
+  assert.deepEqual(Reflect.ownKeys(creation), ["ok", "validator", "diagnostics"]);
+  assert.deepEqual(creation.diagnostics, []);
+  assert.match(creation.validator.catalogSetFingerprint, /^sha256:[0-9a-f]{64}$/u);
+
+  callerCatalog.components = {};
+  const validCreation = editorCore.createDesenEditorDocument(cloneFixture());
+  assert.equal(validCreation.ok, true);
+  if (!validCreation.ok) throw new TypeError("Expected the public Source factory.");
+  const validReport = creation.validator.validate(validCreation.document);
+  assert.equal(validReport.valid, true);
+  assert.ok(validReport.obligations.length > 0);
+  assert.deepEqual(validReport.diagnostics, []);
+  assert.deepEqual(validReport.invalidSubjects, []);
+  assert.deepEqual(validReport.unmappedDiagnosticIndexes, []);
+  assert.equal(validReport.catalogSetFingerprint, creation.validator.catalogSetFingerprint);
+  assert.match(validReport.documentFingerprint, /^sha256:[0-9a-f]{64}$/u);
+  assert.equal(Object.hasOwn(validReport, "document"), false);
+  assert.equal(Object.hasOwn(validReport, "value"), false);
+
+  const invalidInput = cloneFixture();
+  invalidInput.surfaces["sign-in"].root.use = "com.example.unresolved/Unknown";
+  const invalidCreation = editorCore.createDesenEditorDocument(invalidInput);
+  assert.equal(invalidCreation.ok, true);
+  if (!invalidCreation.ok) throw new TypeError("Expected unresolved structural admission.");
+  const invalidReport = creation.validator.validate(invalidCreation.document);
+  assert.equal(invalidReport.valid, false);
+  assert.deepEqual(invalidReport.invalidSubjects, [
+    {
+      surfaceId: "sign-in",
+      subject: { kind: "node", id: "sign-in.layout" },
+      diagnosticIndexes: [0],
+      occurrencePointers: ["/surfaces/sign-in/root"],
+    },
+  ]);
+  assert.deepEqual(invalidReport.unmappedDiagnosticIndexes, []);
+  assertPlainOwnDataFrozen(creation);
+  assertPlainOwnDataFrozen(validReport);
+  assertPlainOwnDataFrozen(invalidReport);
 });
 
 test("the emitted insert command allocates a stable id and returns one new direct Source", () => {

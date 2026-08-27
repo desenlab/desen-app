@@ -1,0 +1,986 @@
+{
+  "schemaVersion": 1,
+  "proofId": "editor-core-continuous-validation",
+  "profile": "desen.editor-core.continuous-validation-proof.v1",
+  "task": "M08-T09",
+  "result": "PASS",
+  "prerequisites": [
+    {
+      "task": "M08-T03",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json",
+      "bytes": 22402,
+      "sha256": "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    },
+    {
+      "task": "M08-T04",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-content-edits.json",
+      "bytes": 26988,
+      "sha256": "1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    },
+    {
+      "task": "M08-T05",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json",
+      "bytes": 30014,
+      "sha256": "b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    },
+    {
+      "task": "M08-T06",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
+      "bytes": 31310,
+      "sha256": "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    },
+    {
+      "task": "M08-T07",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json",
+      "bytes": 62304,
+      "sha256": "33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    }
+  ],
+  "claim": {
+    "protocol": "0.1.0",
+    "platform": "platform-neutral",
+    "catalogBoundContinuousValidation": true,
+    "cumulativeExecutionContractDiagnostics": true,
+    "explicitSubjectInvalidNodeMapping": true,
+    "duplicateOccurrenceMapping": true,
+    "controlledUnmappedDiagnostics": true,
+    "dynamicObligationsPreserved": true,
+    "completeAuthoringSensitiveDocumentFingerprint": true,
+    "orderSensitiveCatalogSetFingerprint": true,
+    "deterministicFrozenReports": true,
+    "taskStatus": "DONE",
+    "prerequisiteTasks": ["M08-T03", "M08-T04", "M08-T05", "M08-T06", "M08-T07"],
+    "prerequisiteStatuses": ["DONE", "DONE", "DONE", "DONE", "DONE"],
+    "m08T08FormalPrerequisite": false
+  },
+  "publicApi": {
+    "runtimeExports": [
+      "clearDesenEditorNodeCondition",
+      "createDesenEditorContinuousValidator",
+      "createDesenEditorDocument",
+      "deleteDesenEditorAction",
+      "deleteDesenEditorEventHandler",
+      "deleteDesenEditorNode",
+      "deleteDesenEditorOwnerProp",
+      "deleteDesenEditorOwnerStyleProperty",
+      "deleteDesenEditorResourceInput",
+      "deleteDesenEditorStateDeclaration",
+      "deleteDesenEditorVariant",
+      "deleteDesenEditorVariantProp",
+      "deleteDesenEditorVariantStyleProperty",
+      "insertDesenEditorAction",
+      "insertDesenEditorEventHandler",
+      "insertDesenEditorNode",
+      "insertDesenEditorStateDeclaration",
+      "insertDesenEditorVariant",
+      "moveDesenEditorNode",
+      "reorderDesenEditorAction",
+      "reorderDesenEditorNode",
+      "reorderDesenEditorVariant",
+      "replaceDesenEditorAction",
+      "setDesenEditorNodeCondition",
+      "setDesenEditorNodeRepeatItems",
+      "setDesenEditorNodeRepeatKey",
+      "setDesenEditorOwnerProp",
+      "setDesenEditorOwnerStyleProperty",
+      "setDesenEditorResourceInput",
+      "setDesenEditorStateInitial",
+      "setDesenEditorStateSchema",
+      "setDesenEditorVariantCondition",
+      "setDesenEditorVariantProp",
+      "setDesenEditorVariantStyleProperty"
+    ],
+    "typeExports": [
+      "DesenEditorAction",
+      "DesenEditorActionDeleteCommand",
+      "DesenEditorActionInsertCommand",
+      "DesenEditorActionListPointer",
+      "DesenEditorActionPointer",
+      "DesenEditorActionReorderCommand",
+      "DesenEditorActionReplaceCommand",
+      "DesenEditorBindingValue",
+      "DesenEditorContentEditDiagnostic",
+      "DesenEditorContentEditDiagnosticCode",
+      "DesenEditorContentEditFailure",
+      "DesenEditorContentEditResult",
+      "DesenEditorContentEditSuccess",
+      "DesenEditorContentPredicate",
+      "DesenEditorContentValue",
+      "DesenEditorContentVariant",
+      "DesenEditorContinuousValidationReport",
+      "DesenEditorContinuousValidator",
+      "DesenEditorContinuousValidatorCreationFailure",
+      "DesenEditorContinuousValidatorCreationResult",
+      "DesenEditorContinuousValidatorCreationSuccess",
+      "DesenEditorDocument",
+      "DesenEditorDocumentCreationFailure",
+      "DesenEditorDocumentCreationResult",
+      "DesenEditorDocumentCreationSuccess",
+      "DesenEditorEventActionEditDiagnostic",
+      "DesenEditorEventActionEditDiagnosticCode",
+      "DesenEditorEventActionEditFailure",
+      "DesenEditorEventActionEditResult",
+      "DesenEditorEventActionEditSuccess",
+      "DesenEditorEventHandlerDeleteCommand",
+      "DesenEditorEventHandlerInsertCommand",
+      "DesenEditorInsertDiagnostic",
+      "DesenEditorInsertDiagnosticCode",
+      "DesenEditorInvalidSubjectMapping",
+      "DesenEditorNodeConditionClearCommand",
+      "DesenEditorNodeConditionSetCommand",
+      "DesenEditorNodeDeleteCommand",
+      "DesenEditorNodeInsertCommand",
+      "DesenEditorNodeInsertFailure",
+      "DesenEditorNodeInsertResult",
+      "DesenEditorNodeInsertSuccess",
+      "DesenEditorNodeMoveCommand",
+      "DesenEditorNodeReorderCommand",
+      "DesenEditorNodeRepeatItemsSetCommand",
+      "DesenEditorNodeRepeatKeySetCommand",
+      "DesenEditorOwnerPropDeleteCommand",
+      "DesenEditorOwnerPropSetCommand",
+      "DesenEditorOwnerStylePropertyDeleteCommand",
+      "DesenEditorOwnerStylePropertySetCommand",
+      "DesenEditorResourceInputDeleteCommand",
+      "DesenEditorResourceInputSetCommand",
+      "DesenEditorStateBindingEditDiagnostic",
+      "DesenEditorStateBindingEditDiagnosticCode",
+      "DesenEditorStateBindingEditFailure",
+      "DesenEditorStateBindingEditResult",
+      "DesenEditorStateBindingEditSuccess",
+      "DesenEditorStateDeclaration",
+      "DesenEditorStateDeclarationDeleteCommand",
+      "DesenEditorStateDeclarationInsertCommand",
+      "DesenEditorStateInitialSetCommand",
+      "DesenEditorStateSchemaSetCommand",
+      "DesenEditorStructuralEditDiagnostic",
+      "DesenEditorStructuralEditDiagnosticCode",
+      "DesenEditorStructuralEditFailure",
+      "DesenEditorStructuralEditResult",
+      "DesenEditorStructuralEditSuccess",
+      "DesenEditorVariantConditionSetCommand",
+      "DesenEditorVariantDeleteCommand",
+      "DesenEditorVariantInsertCommand",
+      "DesenEditorVariantPropDeleteCommand",
+      "DesenEditorVariantPropSetCommand",
+      "DesenEditorVariantReorderCommand",
+      "DesenEditorVariantStylePropertyDeleteCommand",
+      "DesenEditorVariantStylePropertySetCommand"
+    ],
+    "taskRuntimeExportsAdded": 1,
+    "taskTypeExportsAdded": 6,
+    "continuousValidationDeclarations": 7,
+    "continuousValidationTsdocDeclarations": 7,
+    "resultFields": [
+      "valid",
+      "documentFingerprint",
+      "catalogSetFingerprint",
+      "diagnostics",
+      "obligations",
+      "invalidSubjects",
+      "unmappedDiagnosticIndexes"
+    ],
+    "mappingFields": ["surfaceId", "subject", "diagnosticIndexes", "occurrencePointers"]
+  },
+  "behavior": {
+    "determinism": {
+      "repeatedReportByteEquivalent": true,
+      "freshReportIdentity": true,
+      "baselineReport": {
+        "bytes": 2089,
+        "sha256": "1e18104e2f78687b9242042bd133d9ee5eb8b54dc84c211fdd9035da012c1ff4"
+      },
+      "secondBaselineReport": {
+        "bytes": 2089,
+        "sha256": "1e18104e2f78687b9242042bd133d9ee5eb8b54dc84c211fdd9035da012c1ff4"
+      }
+    },
+    "catalogCapture": {
+      "malformedCatalogControlled": true,
+      "noPartialValidatorOnFailure": true,
+      "callerMutationDetached": true,
+      "validatorAndReportsRecursivelyFrozen": true
+    },
+    "baseline": {
+      "valid": true,
+      "diagnosticCount": 0,
+      "obligationCount": 7,
+      "obligationKinds": ["component-prop", "operation-input", "state-write"],
+      "documentFingerprint": "sha256:1ecc6666503a5c9e5825f9db2455356bbbe22f48978a0016d00f4531b7bc4963",
+      "catalogSetFingerprint": "sha256:09a61b8b0c03bcf2e68cbecdc183b9038135a1fef0daeabe84214c212e681a4d",
+      "obligationsDoNotCauseInvalidity": true
+    },
+    "criticalSubjectMapping": {
+      "diagnosticCodes": ["UNKNOWN_CAPABILITY"],
+      "invalidSubjects": [
+        {
+          "surfaceId": "sign-in",
+          "subject": { "kind": "node", "id": "sign-in.layout" },
+          "diagnosticIndexes": [0],
+          "occurrencePointers": ["/surfaces/sign-in/root"]
+        }
+      ],
+      "unmappedDiagnosticIndexes": [],
+      "explicitContextOnly": true,
+      "pointerInference": false
+    },
+    "duplicateOccurrences": {
+      "diagnosticCodes": ["DUPLICATE_NODE_ID"],
+      "mapping": {
+        "surfaceId": "sign-in",
+        "subject": { "kind": "node", "id": "sign-in.email" },
+        "diagnosticIndexes": [0],
+        "occurrencePointers": [
+          "/surfaces/sign-in/root/slots/default/0",
+          "/surfaces/sign-in/root/slots/default/1"
+        ]
+      },
+      "everyExactOccurrenceReturned": true,
+      "occurrenceOrderDeterministic": true
+    },
+    "multiDiagnosticSubject": {
+      "diagnosticCodes": ["PROP_TYPE_MISMATCH", "PROP_TYPE_MISMATCH"],
+      "mapping": {
+        "surfaceId": "sign-in",
+        "subject": { "kind": "node", "id": "sign-in.layout" },
+        "diagnosticIndexes": [0, 1],
+        "occurrencePointers": ["/surfaces/sign-in/root"]
+      },
+      "validatorDiagnosticOrderPreserved": true
+    },
+    "controlledUnmapped": {
+      "diagnosticCodes": ["run.desen.validator/CATALOG_REQUIREMENT_MISMATCH"],
+      "invalidSubjects": [],
+      "unmappedDiagnosticIndexes": [0],
+      "noPointerGuessing": true
+    },
+    "fingerprints": {
+      "algorithm": "RFC8785_SHA256",
+      "authoringSensitiveDocumentFingerprint": true,
+      "firstAuthoringDocumentFingerprint": "sha256:d165f9dbe91175dde40e937a5664d53448bfdf89cef0741cab0b7f4cbc634136",
+      "secondAuthoringDocumentFingerprint": "sha256:7ac858adb9bac929dc8525276faadf0295ec506c5f79692d74b759b5f8584350",
+      "orderSensitiveCatalogSetFingerprint": true,
+      "firstCatalogOrderFingerprint": "sha256:0fe8f15e3b0f20d878e0d0c21e57faac71113bb657cc5fb6b7367591ee6adb44",
+      "secondCatalogOrderFingerprint": "sha256:9a29a5dd3d47eb4fd8daf7d946c945448262378d0e46722da0996081daf15475",
+      "identicalDocumentAcrossCatalogOrders": true
+    }
+  },
+  "executionAuthority": {
+    "mode": "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH",
+    "exactReceiptedBytes": true,
+    "importAfterReceipt": true,
+    "workspaceModuleCacheUsed": false,
+    "runtimeFiles": 30,
+    "editorFiles": 9,
+    "retainedPredecessorEditorFiles": 6,
+    "dependencyFiles": 21,
+    "dependencyModules": 19,
+    "dependencyManifests": 2,
+    "prerequisites": [
+      {
+        "task": "M08-T03",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json",
+        "sha256": "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b"
+      },
+      {
+        "task": "M08-T04",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-content-edits.json",
+        "sha256": "1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066"
+      },
+      {
+        "task": "M08-T05",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json",
+        "sha256": "b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8"
+      },
+      {
+        "task": "M08-T06",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
+        "sha256": "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7"
+      },
+      {
+        "task": "M08-T07",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json",
+        "sha256": "33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db"
+      }
+    ],
+    "editorReceipts": [
+      {
+        "path": "packages/editor-core/dist/content-edits.js",
+        "bytes": 38371,
+        "sha256": "bdedf7a4dbe540b54067651bb3af9e269acdb2909d6354fa48c0ca8a6cb1cb69"
+      },
+      {
+        "path": "packages/editor-core/dist/continuous-validation.js",
+        "bytes": 7576,
+        "sha256": "7646b7e760c7985af0b815e1d2086c23a4632cb4e8868d1f44109c8054fd0bca"
+      },
+      {
+        "path": "packages/editor-core/dist/event-action-edits.js",
+        "bytes": 33618,
+        "sha256": "51fbea68365ea1cf8b0cc76a6c743c06113e8599154e299b854c005cf0c0c040"
+      },
+      {
+        "path": "packages/editor-core/dist/index.js",
+        "bytes": 1441,
+        "sha256": "bae903f93d4b516e3cd90f113b26e69bc6b7a522c4575e6061a60826ec89f517"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.js",
+        "bytes": 842,
+        "sha256": "6b38f237b884a9f33ca12622ee038adf93f93a30dff005903103ceb0e1101381"
+      },
+      {
+        "path": "packages/editor-core/dist/stable-id-insert.js",
+        "bytes": 16696,
+        "sha256": "82b7f43bb4446daac16ad80a8aea896d75abe1094dbc58aa321797ae421bf339"
+      },
+      {
+        "path": "packages/editor-core/dist/state-binding-edits.js",
+        "bytes": 26979,
+        "sha256": "ec163b8d03efe765c05e5931b63d83eadc979db6dd15a598c79663f15fe8d754"
+      },
+      {
+        "path": "packages/editor-core/dist/structural-edits.js",
+        "bytes": 27005,
+        "sha256": "d8aaffc638922b7daa66656b06def5a263dc569e3fc75d260d4212d57d14de1b"
+      },
+      {
+        "path": "packages/editor-core/package.json",
+        "bytes": 1521,
+        "sha256": "7fa379f49b4ce7fd6d96a7294740e29ea7fd6f8b7553e568de009317bdf15b65"
+      }
+    ],
+    "dependencyReceipts": [
+      {
+        "path": "packages/protocol/dist/canonicalization.js",
+        "bytes": 17634,
+        "sha256": "64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+      },
+      {
+        "path": "packages/protocol/dist/diagnostics.js",
+        "bytes": 8905,
+        "sha256": "0a457213b75b7fdd896fa7bd4b37faea7ff9ddc7b97dd24b3bdb99eeca82bdbf"
+      },
+      {
+        "path": "packages/protocol/dist/index.js",
+        "bytes": 679,
+        "sha256": "a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+      },
+      {
+        "path": "packages/protocol/dist/json-pointer.js",
+        "bytes": 6499,
+        "sha256": "7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
+      },
+      {
+        "path": "packages/protocol/package.json",
+        "bytes": 923,
+        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
+      },
+      {
+        "path": "packages/validator/dist/binding-contract-validation.js",
+        "bytes": 46895,
+        "sha256": "82d2d9ae24ca0283c95c914025e4f708bad7f114879460b5931a25459dc2ad19"
+      },
+      {
+        "path": "packages/validator/dist/component-contract-validation.js",
+        "bytes": 24587,
+        "sha256": "f9fc4e959275308b74b17f935caebde3eb4829052b0fc18bd6486973f96fa617"
+      },
+      {
+        "path": "packages/validator/dist/embedded-schema-validation.js",
+        "bytes": 8707,
+        "sha256": "240e76983e4700658b556a0142c42c0ce9625f4f35be70ddbaecfab9cf2438f1"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.js",
+        "bytes": 76906,
+        "sha256": "2d84bfa71a348bffe94c8c91711b7a5ea683bd89d8e5a0398e00bda3d63fda4f"
+      },
+      {
+        "path": "packages/validator/dist/generated/0.1.0/structural-validators.js",
+        "bytes": 1001830,
+        "sha256": "322fb4bcaf4359bdb819b1a9ddd2baba21b628cd6c1bb39203932221a3d8bab7"
+      },
+      {
+        "path": "packages/validator/dist/index.js",
+        "bytes": 1965,
+        "sha256": "5009c889ea5eeab437f902057cdee9f84ba39c437239f1f5d222ad2ba5e05ec8"
+      },
+      {
+        "path": "packages/validator/dist/interaction-contract-validation.js",
+        "bytes": 49673,
+        "sha256": "431b473b6aa82a5af848faf74cf5459aa4375e2678f936e51c733212c42af331"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.js",
+        "bytes": 86247,
+        "sha256": "169312f4eb2c304104c4321b57d0b9f07bfe88285753fd1c3f8d569e544901ca"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.js",
+        "bytes": 6799,
+        "sha256": "f2fa2b0d7a1bb5a06d57e577ec0b1922d5b924cefca5c65314a55108f123c09b"
+      },
+      {
+        "path": "packages/validator/dist/semantic-validation.js",
+        "bytes": 27165,
+        "sha256": "1d89f973a8a768771aabf203e55bc9816e1b06365553604c5808318abc483368"
+      },
+      {
+        "path": "packages/validator/dist/standalone-runtime.js",
+        "bytes": 2004,
+        "sha256": "0a3f1eca4cdffbe2ddfef0e7465f2609070e11763a6b809f643c04300b6ed81b"
+      },
+      {
+        "path": "packages/validator/dist/structural-diagnostics.js",
+        "bytes": 2879,
+        "sha256": "118eaf52b80305eecdafabfcfa3d437e4864d54cd0cf8c98f8422b2ff3dd1a0b"
+      },
+      {
+        "path": "packages/validator/dist/structural-validation.js",
+        "bytes": 6241,
+        "sha256": "316c1ea98f96ada1cad6a5cb398538fac5c10e94a03e0efa318f07c8d0459c28"
+      },
+      {
+        "path": "packages/validator/dist/uri-reference.js",
+        "bytes": 10282,
+        "sha256": "342c8e315f8b69ce965c46403c578ef1f2ddeeba8bf76d1df67348a833ae3525"
+      },
+      {
+        "path": "packages/validator/dist/validation-internals.js",
+        "bytes": 1381,
+        "sha256": "d0639abec859e8ab371a0ec3a8fc14a2942184a1f61ccb66111faf1070897114"
+      },
+      {
+        "path": "packages/validator/package.json",
+        "bytes": 2666,
+        "sha256": "05f8672a36552e2b1782fd50b658b981323916662c0b9a661ebea0963cc84276"
+      }
+    ],
+    "trustedAuthorities": ["NODE_RUNTIME", "ESM_LOADER", "PROCESS_ENVIRONMENT"]
+  },
+  "packageBoundary": {
+    "currentEmittedFiles": 32,
+    "staticEsmEdges": 21,
+    "unknownStaticEsmEdges": 0,
+    "platformNeutral": true,
+    "manifestExportRoots": ["."],
+    "productionDependencies": ["@desen/protocol", "@desen/validator"],
+    "reactImports": 0,
+    "domImports": 0,
+    "nodeImports": 0,
+    "networkOrStorageAuthority": false
+  },
+  "testAuthority": {
+    "focusedBehaviorCases": 12,
+    "focusedCompilerNegativeAssertions": 9,
+    "publicRuntimeAndRootCases": 47,
+    "publicCompilerNegativeAssertions": 81,
+    "rootProofCases": 8
+  },
+  "trackedBoundary": {
+    "files": 92,
+    "receipts": [
+      {
+        "path": "packages/editor-core/README.md",
+        "bytes": 21453,
+        "sha256": "d4ad2f47c669f3039731bbdae304a50d6af0c716c5646c6b1d942cc010da90dc"
+      },
+      {
+        "path": "packages/editor-core/dist/content-edits.d.ts",
+        "bytes": 16841,
+        "sha256": "029ce63431bb89f184c6334033b4994d80fadce6150a47d38f6f28868c5dcfc1"
+      },
+      {
+        "path": "packages/editor-core/dist/content-edits.d.ts.map",
+        "bytes": 6228,
+        "sha256": "fd3dab9e333afe2e5006643ecb74226a6c19250b21881b7ded700f47efa9bcbb"
+      },
+      {
+        "path": "packages/editor-core/dist/content-edits.js",
+        "bytes": 38371,
+        "sha256": "bdedf7a4dbe540b54067651bb3af9e269acdb2909d6354fa48c0ca8a6cb1cb69"
+      },
+      {
+        "path": "packages/editor-core/dist/content-edits.js.map",
+        "bytes": 31654,
+        "sha256": "aa89e073a91ec547a5f76cf45be2ca9af212e6613e1dfc23283f0879666f73a1"
+      },
+      {
+        "path": "packages/editor-core/dist/continuous-validation.d.ts",
+        "bytes": 3994,
+        "sha256": "712327654567dcbbea30d96ef4b9c025523d095cb883e471e3f7c8abd6f46f40"
+      },
+      {
+        "path": "packages/editor-core/dist/continuous-validation.d.ts.map",
+        "bytes": 1625,
+        "sha256": "682b9fe9c81599b9d2f5e255d0fe60997c519f253bf2cedfc079fc636642f0cc"
+      },
+      {
+        "path": "packages/editor-core/dist/continuous-validation.js",
+        "bytes": 7576,
+        "sha256": "7646b7e760c7985af0b815e1d2086c23a4632cb4e8868d1f44109c8054fd0bca"
+      },
+      {
+        "path": "packages/editor-core/dist/continuous-validation.js.map",
+        "bytes": 6762,
+        "sha256": "960370dca9e985dbffafe036b976b65893b575d08bb6f38c3524c7d74a92afe7"
+      },
+      {
+        "path": "packages/editor-core/dist/event-action-edits.d.ts",
+        "bytes": 9564,
+        "sha256": "e45abcc3f63d7e1ae4a69959ffddd715f660c58cdc439c7e864cffb2cc950fad"
+      },
+      {
+        "path": "packages/editor-core/dist/event-action-edits.d.ts.map",
+        "bytes": 3402,
+        "sha256": "73cbc6cc2414c23d6aebeac31b44bd7753fea7f498583c647571db0eb66b3ba9"
+      },
+      {
+        "path": "packages/editor-core/dist/event-action-edits.js",
+        "bytes": 33618,
+        "sha256": "51fbea68365ea1cf8b0cc76a6c743c06113e8599154e299b854c005cf0c0c040"
+      },
+      {
+        "path": "packages/editor-core/dist/event-action-edits.js.map",
+        "bytes": 29465,
+        "sha256": "b726dee0c93ab6c7b1ea3640163dd3390e1b02b94260d3f09e47e86cc9cebe7a"
+      },
+      {
+        "path": "packages/editor-core/dist/index.d.ts",
+        "bytes": 4373,
+        "sha256": "345345361680ec7c8e547cd0caa1cdc4005366cda6e2149723e8b89827a0235f"
+      },
+      {
+        "path": "packages/editor-core/dist/index.d.ts.map",
+        "bytes": 1991,
+        "sha256": "9283ae9a4a42614036bfe83ce57fa2daa428a55ff00ffb1fb110a8f8212ca04f"
+      },
+      {
+        "path": "packages/editor-core/dist/index.js",
+        "bytes": 1441,
+        "sha256": "bae903f93d4b516e3cd90f113b26e69bc6b7a522c4575e6061a60826ec89f517"
+      },
+      {
+        "path": "packages/editor-core/dist/index.js.map",
+        "bytes": 783,
+        "sha256": "9e7ec1ebddfb7eb78b545f83ddf476963f2e037e430376d8d6044857c12e0660"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.d.ts",
+        "bytes": 2091,
+        "sha256": "e9244f005b7ec432a7f6b556ec8af4b81e7ce59b0525bf1cab747cba50ad752a"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.d.ts.map",
+        "bytes": 783,
+        "sha256": "521d1f5c2334de4ef00d02de2ee8750380bba3b5b4ccc284131b09ec155000e6"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.js",
+        "bytes": 842,
+        "sha256": "6b38f237b884a9f33ca12622ee038adf93f93a30dff005903103ceb0e1101381"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.js.map",
+        "bytes": 599,
+        "sha256": "0031f544c158ef14f9dd78ce55df5ae73e2632c5c19ec2c145c53a823239d680"
+      },
+      {
+        "path": "packages/editor-core/dist/stable-id-insert.d.ts",
+        "bytes": 4668,
+        "sha256": "d0cc3ab760cf67d38e05fd82e1ac216042aebd7be8a863551bf09605e3c0e075"
+      },
+      {
+        "path": "packages/editor-core/dist/stable-id-insert.d.ts.map",
+        "bytes": 1442,
+        "sha256": "34cabcd523d1879fc243077332c5bc1880a6381f285385cbc2dbe3c2f4463b92"
+      },
+      {
+        "path": "packages/editor-core/dist/stable-id-insert.js",
+        "bytes": 16696,
+        "sha256": "82b7f43bb4446daac16ad80a8aea896d75abe1094dbc58aa321797ae421bf339"
+      },
+      {
+        "path": "packages/editor-core/dist/stable-id-insert.js.map",
+        "bytes": 14152,
+        "sha256": "1575732d590251285ce13169385d73bb80b33367a0c1d58d1a57139a243d97a6"
+      },
+      {
+        "path": "packages/editor-core/dist/state-binding-edits.d.ts",
+        "bytes": 9965,
+        "sha256": "a6aff65e40d7e7dbcd0b477d7c723db1540799477eb63d7c916baf461dddfb41"
+      },
+      {
+        "path": "packages/editor-core/dist/state-binding-edits.d.ts.map",
+        "bytes": 3639,
+        "sha256": "b8484b01bcedfab2e8a8be260bcdd764d8c013e3628fdbc200b6fbaca692f309"
+      },
+      {
+        "path": "packages/editor-core/dist/state-binding-edits.js",
+        "bytes": 26979,
+        "sha256": "ec163b8d03efe765c05e5931b63d83eadc979db6dd15a598c79663f15fe8d754"
+      },
+      {
+        "path": "packages/editor-core/dist/state-binding-edits.js.map",
+        "bytes": 22818,
+        "sha256": "5b72c070a6b940963a7b9a629c3a17d535c624d45bae703b31cbafedfc5c6df6"
+      },
+      {
+        "path": "packages/editor-core/dist/structural-edits.d.ts",
+        "bytes": 6315,
+        "sha256": "0be9f7fa1f1ab941cb8621b41dc52f9660d9c8c92be0590dfa60f5c66ab28475"
+      },
+      {
+        "path": "packages/editor-core/dist/structural-edits.d.ts.map",
+        "bytes": 1994,
+        "sha256": "7b3580660e285ba2daf61f805fcc854121fd94820083d11240bc9c408064aadc"
+      },
+      {
+        "path": "packages/editor-core/dist/structural-edits.js",
+        "bytes": 27005,
+        "sha256": "d8aaffc638922b7daa66656b06def5a263dc569e3fc75d260d4212d57d14de1b"
+      },
+      {
+        "path": "packages/editor-core/dist/structural-edits.js.map",
+        "bytes": 21939,
+        "sha256": "c90ee9eda5b332d0f05e4636771cb87a29c8c301e1cd3a43a230ba0830b2ca5b"
+      },
+      {
+        "path": "packages/editor-core/package.json",
+        "bytes": 1521,
+        "sha256": "7fa379f49b4ce7fd6d96a7294740e29ea7fd6f8b7553e568de009317bdf15b65"
+      },
+      {
+        "path": "packages/editor-core/src/content-edits.ts",
+        "bytes": 56853,
+        "sha256": "c23952e050497fd44ed1ed1b530fd55bddca33ab612e67e23033334be20b6111"
+      },
+      {
+        "path": "packages/editor-core/src/continuous-validation.ts",
+        "bytes": 11841,
+        "sha256": "a90d8db8a1e43dac6c0d197cdd194e9694d21a2d12abd77ad89e24f8501d61b9"
+      },
+      {
+        "path": "packages/editor-core/src/event-action-edits.ts",
+        "bytes": 47560,
+        "sha256": "0d62f8027b4b4045a4107517034912fbfe60a712743ac5c946561ad5bfe76b77"
+      },
+      {
+        "path": "packages/editor-core/src/index.ts",
+        "bytes": 4558,
+        "sha256": "624c4d619156dad9104b16c525cc9260e7e381cbeef5af948b48980de8017976"
+      },
+      {
+        "path": "packages/editor-core/src/source-document.ts",
+        "bytes": 2418,
+        "sha256": "9228d41e1d8db82c52e9883e01516d79e9cefb7e348a0c1354a2e78f44d46686"
+      },
+      {
+        "path": "packages/editor-core/src/stable-id-insert.ts",
+        "bytes": 22701,
+        "sha256": "5086704795cc8384bff496a6a35c3d39303a4f51f8abac151f7078d95a113bee"
+      },
+      {
+        "path": "packages/editor-core/src/state-binding-edits.ts",
+        "bytes": 38296,
+        "sha256": "28baf25a79fbb5c2b0bef6466acca982f966e28d05ab88998d493798ae93b56c"
+      },
+      {
+        "path": "packages/editor-core/src/structural-edits.ts",
+        "bytes": 35599,
+        "sha256": "be33af4cc193bbc4d0adf9043ec3baec9788e8a94ad4195a3ff2eddb6059f285"
+      },
+      {
+        "path": "packages/editor-core/test/authoring-round-trip.test.ts",
+        "bytes": 26494,
+        "sha256": "7240bb77e558485e5b2a8c0645601fe7276c350e307d9dad11a00a2ac14dfaa2"
+      },
+      {
+        "path": "packages/editor-core/test/authoring-round-trip.types.ts",
+        "bytes": 1800,
+        "sha256": "24c41948e51d59c31a342d391a84bd229d39123c8764c3385b2402e1535d0739"
+      },
+      {
+        "path": "packages/editor-core/test/content-edits.test.ts",
+        "bytes": 25435,
+        "sha256": "83db0beb0f74fb3e4a59ec7f94aa1a32487553f4f0aeaf9c5c0c9a512eaf8e91"
+      },
+      {
+        "path": "packages/editor-core/test/content-edits.types.ts",
+        "bytes": 5685,
+        "sha256": "6c29c1e0cbb2c5c1767fd333ec120f22701e110c8c668e2595dca78807d36edd"
+      },
+      {
+        "path": "packages/editor-core/test/continuous-validation.test.ts",
+        "bytes": 15082,
+        "sha256": "2463ee2777f2a73438c4e3d2049a5b00fb80315d35abd3752f195f56a482c300"
+      },
+      {
+        "path": "packages/editor-core/test/continuous-validation.types.ts",
+        "bytes": 3179,
+        "sha256": "4491f8f22d08342e0d5d62a3935796d4d37c4a75ee41832f47b8f374f44092c4"
+      },
+      {
+        "path": "packages/editor-core/test/event-action-edits.test.ts",
+        "bytes": 32905,
+        "sha256": "ac89aa9e6f97f3867f041d0853a46f1f76ef2ad3ea81cb7d29e8d1e3e50fadc3"
+      },
+      {
+        "path": "packages/editor-core/test/event-action-edits.types.ts",
+        "bytes": 8001,
+        "sha256": "20d9e351166a18e24112864ad33291dd5f981d5e4e23f8dbb72de6a6c32f98c5"
+      },
+      {
+        "path": "packages/editor-core/test/public-package.mjs",
+        "bytes": 125809,
+        "sha256": "9e12b1448b0b48ae23e31c7d2bd189876a26c5678df8cc6ab5c9cd2420430e08"
+      },
+      {
+        "path": "packages/editor-core/test/public-package.types.mts",
+        "bytes": 30653,
+        "sha256": "97b53821659b94f3ad4f8e4cce61dd19b882b51726e0d91a99a9cdcb3207f572"
+      },
+      {
+        "path": "packages/editor-core/test/source-document.test.ts",
+        "bytes": 7295,
+        "sha256": "3e032d38875f234a5effa3e8379f67b64280818eafe95b05e42b2551aca0f36d"
+      },
+      {
+        "path": "packages/editor-core/test/source-document.types.ts",
+        "bytes": 1186,
+        "sha256": "69a3e450d55a86bbb26a7b59a2cea84e5f85dfacb51aff3d32097fd81fddbf3e"
+      },
+      {
+        "path": "packages/editor-core/test/stable-id-insert.test.ts",
+        "bytes": 19139,
+        "sha256": "05cfe102310521716b669db964597051d895683075ddf77d41a633ac071e8716"
+      },
+      {
+        "path": "packages/editor-core/test/stable-id-insert.types.ts",
+        "bytes": 2356,
+        "sha256": "060a2c1dfd176cb22ca8f10c96c8d79f7e4e8fdf127b7844dca6eb6e8e68f601"
+      },
+      {
+        "path": "packages/editor-core/test/state-binding-edits.test.ts",
+        "bytes": 23546,
+        "sha256": "5e6a6ce99798c3a63cc1ec13a7cdecf6322ab42192c46f5d0f016c0510eafd9c"
+      },
+      {
+        "path": "packages/editor-core/test/state-binding-edits.types.ts",
+        "bytes": 6176,
+        "sha256": "47f9351e3fee1a62d3a3bc6855b69c79334b216947f5b0098bd7599bd7553cd1"
+      },
+      {
+        "path": "packages/editor-core/test/structural-edits.test.ts",
+        "bytes": 22675,
+        "sha256": "eb697b03ea26fb336c61d051de7a9f52e21b09bd6666e53250c17c2faff68c96"
+      },
+      {
+        "path": "packages/editor-core/test/structural-edits.types.ts",
+        "bytes": 3203,
+        "sha256": "409f23aa8e9b5fab8989d7c50791a7f4056061a923da2991ed60af1290e50eb7"
+      },
+      {
+        "path": "packages/editor-core/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/editor-core/tsconfig.json",
+        "bytes": 167,
+        "sha256": "fc1dd95e42092833c4dfc3a59be1fdc0d7f284083260e31c1ec0988925fb392b"
+      },
+      {
+        "path": "packages/editor-core/tsconfig.public-package.json",
+        "bytes": 147,
+        "sha256": "01366a6ddba0a147aabc93fbaff75481dfaf644f628cde2cd584e0f44b7d493c"
+      },
+      {
+        "path": "packages/protocol/dist/canonicalization.js",
+        "bytes": 17634,
+        "sha256": "64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+      },
+      {
+        "path": "packages/protocol/dist/diagnostics.js",
+        "bytes": 8905,
+        "sha256": "0a457213b75b7fdd896fa7bd4b37faea7ff9ddc7b97dd24b3bdb99eeca82bdbf"
+      },
+      {
+        "path": "packages/protocol/dist/index.js",
+        "bytes": 679,
+        "sha256": "a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+      },
+      {
+        "path": "packages/protocol/dist/json-pointer.js",
+        "bytes": 6499,
+        "sha256": "7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
+      },
+      {
+        "path": "packages/protocol/package.json",
+        "bytes": 923,
+        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+        "bytes": 4719,
+        "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+        "bytes": 22084,
+        "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+      },
+      {
+        "path": "packages/validator/dist/binding-contract-validation.js",
+        "bytes": 46895,
+        "sha256": "82d2d9ae24ca0283c95c914025e4f708bad7f114879460b5931a25459dc2ad19"
+      },
+      {
+        "path": "packages/validator/dist/component-contract-validation.js",
+        "bytes": 24587,
+        "sha256": "f9fc4e959275308b74b17f935caebde3eb4829052b0fc18bd6486973f96fa617"
+      },
+      {
+        "path": "packages/validator/dist/embedded-schema-validation.js",
+        "bytes": 8707,
+        "sha256": "240e76983e4700658b556a0142c42c0ce9625f4f35be70ddbaecfab9cf2438f1"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.js",
+        "bytes": 76906,
+        "sha256": "2d84bfa71a348bffe94c8c91711b7a5ea683bd89d8e5a0398e00bda3d63fda4f"
+      },
+      {
+        "path": "packages/validator/dist/generated/0.1.0/structural-validators.js",
+        "bytes": 1001830,
+        "sha256": "322fb4bcaf4359bdb819b1a9ddd2baba21b628cd6c1bb39203932221a3d8bab7"
+      },
+      {
+        "path": "packages/validator/dist/index.js",
+        "bytes": 1965,
+        "sha256": "5009c889ea5eeab437f902057cdee9f84ba39c437239f1f5d222ad2ba5e05ec8"
+      },
+      {
+        "path": "packages/validator/dist/interaction-contract-validation.js",
+        "bytes": 49673,
+        "sha256": "431b473b6aa82a5af848faf74cf5459aa4375e2678f936e51c733212c42af331"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.js",
+        "bytes": 86247,
+        "sha256": "169312f4eb2c304104c4321b57d0b9f07bfe88285753fd1c3f8d569e544901ca"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.js",
+        "bytes": 6799,
+        "sha256": "f2fa2b0d7a1bb5a06d57e577ec0b1922d5b924cefca5c65314a55108f123c09b"
+      },
+      {
+        "path": "packages/validator/dist/semantic-validation.js",
+        "bytes": 27165,
+        "sha256": "1d89f973a8a768771aabf203e55bc9816e1b06365553604c5808318abc483368"
+      },
+      {
+        "path": "packages/validator/dist/standalone-runtime.js",
+        "bytes": 2004,
+        "sha256": "0a3f1eca4cdffbe2ddfef0e7465f2609070e11763a6b809f643c04300b6ed81b"
+      },
+      {
+        "path": "packages/validator/dist/structural-diagnostics.js",
+        "bytes": 2879,
+        "sha256": "118eaf52b80305eecdafabfcfa3d437e4864d54cd0cf8c98f8422b2ff3dd1a0b"
+      },
+      {
+        "path": "packages/validator/dist/structural-validation.js",
+        "bytes": 6241,
+        "sha256": "316c1ea98f96ada1cad6a5cb398538fac5c10e94a03e0efa318f07c8d0459c28"
+      },
+      {
+        "path": "packages/validator/dist/uri-reference.js",
+        "bytes": 10282,
+        "sha256": "342c8e315f8b69ce965c46403c578ef1f2ddeeba8bf76d1df67348a833ae3525"
+      },
+      {
+        "path": "packages/validator/dist/validation-internals.js",
+        "bytes": 1381,
+        "sha256": "d0639abec859e8ab371a0ec3a8fc14a2942184a1f61ccb66111faf1070897114"
+      },
+      {
+        "path": "packages/validator/package.json",
+        "bytes": 2666,
+        "sha256": "05f8672a36552e2b1782fd50b658b981323916662c0b9a661ebea0963cc84276"
+      },
+      {
+        "path": "scripts/generate-editor-core-continuous-validation-proof.mjs",
+        "bytes": 921,
+        "sha256": "d64682f9a7aab30d6df0ad32d28f73ce4658bedc7819758b657306748b1b3afb"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/editor-core-continuous-validation-proof.mjs",
+        "bytes": 58423,
+        "sha256": "977902cdd3f509b00ad55d64be78fc08842c6158dfbea6e3d946f1676cfe13b3"
+      },
+      {
+        "path": "scripts/verify-editor-core-continuous-validation.mjs",
+        "bytes": 686,
+        "sha256": "cc25546840ff1dcffe7e8a08f62a91d2774a2562c7e0e6e1e16070809c7ccf4e"
+      },
+      {
+        "path": "tests/editor-core-continuous-validation.test.mjs",
+        "bytes": 9663,
+        "sha256": "6ef80f9a50b68eafec76ee4fbde5f6898e4632af1ed7cb88a24bc86597b6e94e"
+      },
+      {
+        "path": "tsconfig.base.json",
+        "bytes": 852,
+        "sha256": "cc75fba8d1b9aaa022463527b1c4621d1754bf710814164148a36deaf08fce21"
+      }
+    ]
+  },
+  "nonclaims": [
+    "POINTER_TEXT_AS_SUBJECT_IDENTITY_AUTHORITY",
+    "DIAGNOSTIC_MAPPING_WITHOUT_EXPLICIT_SURFACE_AND_SUBJECT_CONTEXT",
+    "DYNAMIC_OBLIGATION_EXECUTION_OR_VALUE_RESOLUTION",
+    "CATALOG_FETCH_PACKAGE_LOADING_OR_ADAPTER_EXECUTION",
+    "PERSISTENCE_STORAGE_OR_DURABILITY_AUTHORITY",
+    "UNDO_REDO_SELECTION_OR_VIEWPORT_POLICY",
+    "M08_T10_REACT_DOM_TERMINAL_INTEGRATION_AND_G08",
+    "HOSTILE_JAVASCRIPT_SANDBOX",
+    "NODE_RUNTIME_ESM_LOADER_AND_PROCESS_ENVIRONMENT_ARE_TRUSTED_AUTHORITIES",
+    "P18_OR_G08_ADVANCEMENT"
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/editor-core build",
+    "pnpm --filter @desen/editor-core test:continuous-validation",
+    "pnpm --filter @desen/editor-core test:public-package",
+    "node scripts/generate-editor-core-continuous-validation-proof.mjs",
+    "node scripts/verify-editor-core-continuous-validation.mjs",
+    "node --test tests/editor-core-continuous-validation.test.mjs"
+  ]
+}

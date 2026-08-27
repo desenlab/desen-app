@@ -175,8 +175,8 @@ test("[authority] authenticates the exact frozen M08-T02 artifact and isolated r
   assert.equal(built.currentCompatibility.boundary.staticEsmEdges, 20);
   assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 30);
   assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 9);
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 49);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 96);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
 });
 
 test("[determinism] two fresh M08-T03 builds are byte-identical", async () => {

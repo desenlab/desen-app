@@ -22,6 +22,10 @@ const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 const DIRECTORY_READ_FLAGS = READ_FLAGS | (fileConstants.O_DIRECTORY ?? 0);
 const ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json";
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 62_304,
+  sha256: "33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db",
+});
 const PROOF_DOCUMENT_PATH = "docs/proof/EDITOR-CORE-AUTHORING-ROUND-TRIP.md";
 const T01_ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-source-document.json";
 const T02_ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json";
@@ -79,6 +83,9 @@ const PACKAGE_TEST_PATH = "packages/editor-core/test/authoring-round-trip.test.t
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
 const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
+const CONTINUOUS_VALIDATION_SOURCE_PATH = "packages/editor-core/src/continuous-validation.ts";
+const CONTINUOUS_VALIDATION_TEST_PATH = "packages/editor-core/test/continuous-validation.test.ts";
+const CONTINUOUS_VALIDATION_TYPES_PATH = "packages/editor-core/test/continuous-validation.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST_PATH = "tests/editor-core-authoring-round-trip.test.mjs";
@@ -88,10 +95,6 @@ const VERIFIER_PATH = "scripts/verify-editor-core-authoring-round-trip.mjs";
 const ATOMIC_WRITER_PATH = "scripts/lib/atomic-proof-artifact.mjs";
 const DOCUMENT_LIMIT = 8_388_608;
 const ACTION_OCCURRENCE_LIMIT = 25_000;
-const FROZEN_ARTIFACT_PIN = Object.freeze({
-  bytes: 62_304,
-  sha256: "33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db",
-});
 
 const PROTOCOL_RUNTIME_PATHS = Object.freeze([
   "packages/protocol/dist/canonicalization.js",
@@ -132,6 +135,7 @@ const CURRENT_EDITOR_RUNTIME_PATHS = Object.freeze([
   "packages/editor-core/dist/state-binding-edits.js",
   "packages/editor-core/dist/event-action-edits.js",
   "packages/editor-core/dist/persistence.js",
+  "packages/editor-core/dist/continuous-validation.js",
 ]);
 const ISOLATED_RUNTIME_PATHS = Object.freeze([
   ...CURRENT_EDITOR_RUNTIME_PATHS,
@@ -147,6 +151,7 @@ const DIST_PATHS = Object.freeze(
     "state-binding-edits",
     "event-action-edits",
     "persistence",
+    "continuous-validation",
   ].flatMap((name) => [
     `packages/editor-core/dist/${name}.d.ts`,
     `packages/editor-core/dist/${name}.d.ts.map`,
@@ -177,6 +182,7 @@ const TRACKED_PATHS = Object.freeze([
   "packages/editor-core/src/state-binding-edits.ts",
   EVENT_ACTION_EDITS_SOURCE_PATH,
   PERSISTENCE_SOURCE_PATH,
+  CONTINUOUS_VALIDATION_SOURCE_PATH,
   INDEX_SOURCE_PATH,
   ...DIST_PATHS,
   "packages/editor-core/test/source-document.test.ts",
@@ -195,6 +201,8 @@ const TRACKED_PATHS = Object.freeze([
   PACKAGE_TYPES_PATH,
   PERSISTENCE_TEST_PATH,
   PERSISTENCE_TYPES_PATH,
+  CONTINUOUS_VALIDATION_TEST_PATH,
+  CONTINUOUS_VALIDATION_TYPES_PATH,
   PUBLIC_TEST_PATH,
   PUBLIC_TYPES_PATH,
   ...DEPENDENCY_RUNTIME_PATHS,
@@ -223,6 +231,13 @@ const RETAINED_T07_RECEIPT_PATHS = Object.freeze(
         "packages/editor-core/dist/persistence.js.map",
         PERSISTENCE_TEST_PATH,
         PERSISTENCE_TYPES_PATH,
+        CONTINUOUS_VALIDATION_SOURCE_PATH,
+        "packages/editor-core/dist/continuous-validation.d.ts",
+        "packages/editor-core/dist/continuous-validation.d.ts.map",
+        "packages/editor-core/dist/continuous-validation.js",
+        "packages/editor-core/dist/continuous-validation.js.map",
+        CONTINUOUS_VALIDATION_TEST_PATH,
+        CONTINUOUS_VALIDATION_TYPES_PATH,
         PUBLIC_TEST_PATH,
         PUBLIC_TYPES_PATH,
         PROOF_LIBRARY_PATH,
@@ -365,6 +380,19 @@ const EXPECTED_TYPE_EXPORTS = Object.freeze(
     "DesenEditorEventHandlerInsertCommand",
   ].sort(compareText),
 );
+const EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS = Object.freeze([
+  "createDesenEditorContinuousValidator",
+]);
+const EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorContinuousValidationReport",
+    "DesenEditorContinuousValidator",
+    "DesenEditorContinuousValidatorCreationFailure",
+    "DesenEditorContinuousValidatorCreationResult",
+    "DesenEditorContinuousValidatorCreationSuccess",
+    "DesenEditorInvalidSubjectMapping",
+  ].sort(compareText),
+);
 const EXPECTED_EVENT_ACTION_EXPORTS = Object.freeze(
   [
     ...EVENT_ACTION_RUNTIME_EXPORTS,
@@ -406,10 +434,18 @@ const EXPECTED_PERSISTENCE_EXPORTS = Object.freeze(
   [...PERSISTENCE_RUNTIME_EXPORTS, ...PERSISTENCE_TYPE_EXPORTS].sort(compareText),
 );
 const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
-  [...EXPECTED_RUNTIME_EXPORTS, ...PERSISTENCE_RUNTIME_EXPORTS].sort(compareText),
+  [
+    ...EXPECTED_RUNTIME_EXPORTS,
+    ...PERSISTENCE_RUNTIME_EXPORTS,
+    ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+  ].sort(compareText),
 );
 const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
-  [...EXPECTED_TYPE_EXPORTS, ...PERSISTENCE_TYPE_EXPORTS].sort(compareText),
+  [
+    ...EXPECTED_TYPE_EXPORTS,
+    ...PERSISTENCE_TYPE_EXPORTS,
+    ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+  ].sort(compareText),
 );
 const EXPECTED_DIAGNOSTIC_CODES = Object.freeze([
   "run.desen.editor/EVENT_ACTION_EDIT_COMMAND_INVALID",
@@ -446,6 +482,7 @@ const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the emitted factory rejects an invalid embedded schema at its exact pointer",
   "the emitted factory rejects executable non-JSON data without a partial document",
   "the emitted factory rejects getter and toJSON hooks without invoking caller code",
+  "the emitted continuous validator snapshots Catalogs and maps explicit invalid subjects",
   "the emitted insert command allocates a stable id and returns one new direct Source",
   "the emitted insert command is deterministic and keeps identity allocation surface-local",
   "the emitted insert command creates Object.prototype-named slots as own data",
@@ -701,7 +738,7 @@ function captureFileOverrides(raw) {
 
 function captureRuntime(raw) {
   if (raw === undefined) return undefined;
-  const keys = [...EXPECTED_RUNTIME_EXPORTS];
+  const keys = [...EXPECTED_CURRENT_RUNTIME_EXPORTS];
   const source = captureExactObject(raw, keys, "buildOptions.runtime");
   for (const key of keys) {
     if (typeof source[key] !== "function" || utilTypes.isProxy(source[key])) {
@@ -1003,7 +1040,9 @@ function verifyBoundary(files) {
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
     manifest.scripts?.["test:authoring-round-trip"] !==
       "vitest run test/authoring-round-trip.test.ts" ||
-    manifest.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts"
+    manifest.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts" ||
+    manifest.scripts?.["test:continuous-validation"] !==
+      "vitest run test/continuous-validation.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -1058,6 +1097,31 @@ function verifyBoundary(files) {
     fail("TSDOC_DRIFT", "Every public persistence declaration must retain TSDoc.");
   }
 
+  const continuousValidationSource = decodeUtf8(
+    files.get(CONTINUOUS_VALIDATION_SOURCE_PATH),
+    CONTINUOUS_VALIDATION_SOURCE_PATH,
+  );
+  const continuousValidationExports = exportedNames(
+    continuousValidationSource,
+    CONTINUOUS_VALIDATION_SOURCE_PATH,
+  );
+  exactArray(
+    continuousValidationExports.names,
+    [
+      ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+      ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+    ].sort(compareText),
+    "SOURCE_DRIFT",
+    "Continuous-validation source exports",
+  );
+  if (
+    continuousValidationExports.tsdocDeclarations !==
+    EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS.length +
+      EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS.length
+  ) {
+    fail("TSDOC_DRIFT", "Every public continuous-validation declaration must retain TSDoc.");
+  }
+
   const sourceIndex = reexportedNames(
     decodeUtf8(files.get(INDEX_SOURCE_PATH), INDEX_SOURCE_PATH),
     INDEX_SOURCE_PATH,
@@ -1074,6 +1138,8 @@ function verifyBoundary(files) {
     [
       "./content-edits.js",
       "./content-edits.js",
+      "./continuous-validation.js",
+      "./continuous-validation.js",
       "./event-action-edits.js",
       "./event-action-edits.js",
       "./persistence.js",
@@ -1097,6 +1163,9 @@ function verifyBoundary(files) {
   const distEventActionDeclarationPath = "packages/editor-core/dist/event-action-edits.d.ts";
   const distPersistencePath = "packages/editor-core/dist/persistence.js";
   const distPersistenceDeclarationPath = "packages/editor-core/dist/persistence.d.ts";
+  const distContinuousValidationPath = "packages/editor-core/dist/continuous-validation.js";
+  const distContinuousValidationDeclarationPath =
+    "packages/editor-core/dist/continuous-validation.d.ts";
   const distIndex = decodeUtf8(files.get(distIndexPath), distIndexPath);
   const emittedIndex = reexportedNames(distIndex, distIndexPath);
   const emittedIndexDeclaration = reexportedNames(
@@ -1148,6 +1217,30 @@ function verifyBoundary(files) {
     fail("TSDOC_DRIFT", "Emitted persistence declarations lost TSDoc.");
   }
 
+  const emittedContinuousValidation = exportedNames(
+    decodeUtf8(
+      files.get(distContinuousValidationDeclarationPath),
+      distContinuousValidationDeclarationPath,
+    ),
+    distContinuousValidationDeclarationPath,
+  );
+  exactArray(
+    emittedContinuousValidation.names,
+    [
+      ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+      ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+    ].sort(compareText),
+    "EMITTED_DRIFT",
+    "Emitted continuous-validation declarations",
+  );
+  if (
+    emittedContinuousValidation.tsdocDeclarations !==
+    EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS.length +
+      EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS.length
+  ) {
+    fail("TSDOC_DRIFT", "Emitted continuous-validation declarations lost TSDoc.");
+  }
+
   const emittedModules = [
     [
       distIndexPath,
@@ -1159,6 +1252,7 @@ function verifyBoundary(files) {
         "./state-binding-edits.js",
         "./event-action-edits.js",
         "./persistence.js",
+        "./continuous-validation.js",
       ],
     ],
     ["packages/editor-core/dist/source-document.js", ["@desen/validator"]],
@@ -1171,6 +1265,7 @@ function verifyBoundary(files) {
     ],
     [distEventActionPath, ["@desen/protocol", "./source-document.js"]],
     [distPersistencePath, ["@desen/protocol", "./source-document.js"]],
+    [distContinuousValidationPath, ["@desen/protocol", "@desen/validator", "./source-document.js"]],
   ];
   for (const [relativePath, expected] of emittedModules) {
     exactArray(
@@ -1241,8 +1336,8 @@ function verifyBoundary(files) {
   const publicTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH),
   );
-  if (publicTypeAssertions !== 96) {
-    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain ninety-six.");
+  if (publicTypeAssertions !== 102) {
+    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain one hundred two.");
   }
   const rootTests = testNames(decodeUtf8(files.get(ROOT_TEST_PATH), ROOT_TEST_PATH));
   exactArray(
@@ -1255,22 +1350,59 @@ function verifyBoundary(files) {
   return deepFreeze({
     runtimeExports: [...EXPECTED_RUNTIME_EXPORTS],
     typeExports: [...EXPECTED_TYPE_EXPORTS],
-    currentPackageRuntimeExports: [...EXPECTED_CURRENT_RUNTIME_EXPORTS],
-    currentPackageTypeExports: [...EXPECTED_CURRENT_TYPE_EXPORTS],
-    additiveRuntimeExports: [...PERSISTENCE_RUNTIME_EXPORTS],
-    additiveTypeExports: [...PERSISTENCE_TYPE_EXPORTS],
-    additiveSuccessor: {
-      task: "M08-T08",
-      sourcePath: PERSISTENCE_SOURCE_PATH,
-      runtimePath: distPersistencePath,
-      declarationPath: distPersistenceDeclarationPath,
-      focusedTestPath: PERSISTENCE_TEST_PATH,
-      focusedTypesPath: PERSISTENCE_TYPES_PATH,
-      runtimeExports: [...PERSISTENCE_RUNTIME_EXPORTS],
-      typeExports: [...PERSISTENCE_TYPE_EXPORTS],
-      publicRuntimeCasesAdded: 3,
-      publicCompilerNegativeAssertionsAdded: 21,
-    },
+    sourceRuntimeExports: sourceIndex.runtime.filter((name) =>
+      EXPECTED_RUNTIME_EXPORTS.includes(name),
+    ),
+    sourceTypeExports: sourceIndex.types.filter((name) => EXPECTED_TYPE_EXPORTS.includes(name)),
+    emittedRuntimeExports: emittedIndex.runtime.filter((name) =>
+      EXPECTED_RUNTIME_EXPORTS.includes(name),
+    ),
+    emittedDeclarationRuntimeExports: emittedIndexDeclaration.runtime.filter((name) =>
+      EXPECTED_RUNTIME_EXPORTS.includes(name),
+    ),
+    emittedDeclarationTypeExports: emittedIndexDeclaration.types.filter((name) =>
+      EXPECTED_TYPE_EXPORTS.includes(name),
+    ),
+    currentPackageRuntimeExports: [...sourceIndex.runtime],
+    currentPackageTypeExports: [...sourceIndex.types],
+    additiveRuntimeExports: [
+      ...PERSISTENCE_RUNTIME_EXPORTS,
+      ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+    ].sort(compareText),
+    additiveTypeExports: [
+      ...PERSISTENCE_TYPE_EXPORTS,
+      ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+    ].sort(compareText),
+    additiveSuccessors: [
+      {
+        task: "M08-T08",
+        sourcePath: PERSISTENCE_SOURCE_PATH,
+        runtimePath: distPersistencePath,
+        declarationPath: distPersistenceDeclarationPath,
+        focusedTestPath: PERSISTENCE_TEST_PATH,
+        focusedTypesPath: PERSISTENCE_TYPES_PATH,
+        runtimeExports: [...PERSISTENCE_RUNTIME_EXPORTS],
+        typeExports: [...PERSISTENCE_TYPE_EXPORTS],
+        publicRuntimeCasesAdded: 3,
+        publicCompilerNegativeAssertionsAdded: 21,
+      },
+      {
+        task: "M08-T09",
+        sourcePath: CONTINUOUS_VALIDATION_SOURCE_PATH,
+        runtimePath: distContinuousValidationPath,
+        declarationPath: distContinuousValidationDeclarationPath,
+        focusedTestPath: CONTINUOUS_VALIDATION_TEST_PATH,
+        focusedTypesPath: CONTINUOUS_VALIDATION_TYPES_PATH,
+        runtimeExports: [...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS],
+        typeExports: [...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS],
+        publicRuntimeCasesAdded: 1,
+        publicCompilerNegativeAssertionsAdded: 6,
+        publicDeclarations:
+          EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS.length +
+          EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS.length,
+        tsdocDeclarations: continuousValidationExports.tsdocDeclarations,
+      },
+    ],
     proofOnlySuccessor: {
       task: "M08-T07",
       focusedTestPath: PACKAGE_TEST_PATH,
@@ -1280,15 +1412,10 @@ function verifyBoundary(files) {
       publicRuntimeCasesAdded: 2,
       publicCompilerNegativeAssertionsAdded: 6,
     },
-    sourceRuntimeExports: [...sourceIndex.runtime],
-    sourceTypeExports: [...sourceIndex.types],
-    emittedRuntimeExports: [...emittedIndex.runtime],
-    emittedDeclarationRuntimeExports: [...emittedIndexDeclaration.runtime],
-    emittedDeclarationTypeExports: [...emittedIndexDeclaration.types],
     retainedEventActionPublicDeclarations: EXPECTED_EVENT_ACTION_EXPORTS.length,
     retainedEventActionTsdocDeclarations: sourceExports.tsdocDeclarations,
     emittedFiles: DIST_PATHS.length,
-    staticEsmEdges: 20,
+    staticEsmEdges: 24,
     unknownStaticEsmEdges: 0,
     platformNeutral: true,
     focusedBehaviorCases: EXPECTED_PACKAGE_TEST_NAMES.length + focusedMutationCases.length,
@@ -1469,8 +1596,10 @@ function authenticateRuntimeClosure(prerequisiteArtifact, prerequisiteEvidence, 
     }
     return receipt(relativePath, bytes);
   }).sort((left, right) => compareText(left.path, right.path));
-  for (const relativePath of RETAINED_T06_RUNTIME_RECEIPT_PATHS.filter((candidate) =>
-    candidate.startsWith("packages/editor-core/dist/"),
+  for (const relativePath of RETAINED_T06_RUNTIME_RECEIPT_PATHS.filter(
+    (candidate) =>
+      candidate.startsWith("packages/editor-core/dist/") &&
+      candidate !== "packages/editor-core/dist/index.js",
   )) {
     const authority = prerequisiteReceipt(prerequisiteArtifact, relativePath, "editorReceipts");
     const bytes = files.get(relativePath);
@@ -3046,10 +3175,8 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes, calculateDe
 
 async function authenticateFrozenArtifact() {
   const bytes = await readNoFollow(ARTIFACT_PATH, "frozen M08-T07 proof artifact");
-  if (
-    bytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
-    sha256(bytes) !== FROZEN_ARTIFACT_PIN.sha256
-  ) {
+  const digest = sha256(bytes);
+  if (bytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes || digest !== FROZEN_ARTIFACT_PIN.sha256) {
     fail("ARTIFACT_DRIFT", "The frozen M08-T07 artifact bytes differ from their exact receipt.");
   }
   const artifact = parseJson(bytes, "frozen M08-T07 proof artifact");
@@ -3064,6 +3191,8 @@ async function authenticateFrozenArtifact() {
     artifact.claim?.proofOnlyNoRuntimeOrTypeExportAdded !== true ||
     artifact.claim?.rootAuthoringIsolation !== true ||
     artifact.claim?.parsedUnknownExtensionPreservation !== true ||
+    artifact.publicApi?.runtimeExports?.length !== 33 ||
+    artifact.publicApi?.typeExports?.length !== 69 ||
     artifact.trackedBoundary?.files !== 95 ||
     !Array.isArray(receipts) ||
     receipts.length !== 95 ||
@@ -3084,7 +3213,7 @@ async function authenticateFrozenArtifact() {
   return Object.freeze({
     artifact: deepFreeze(artifact),
     artifactBytes: Buffer.from(bytes),
-    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+    artifactSha256: digest,
   });
 }
 
@@ -3202,14 +3331,14 @@ export async function buildEditorCoreAuthoringRoundTripEvidence(rawOptions = und
     publicApi: {
       runtimeExports: boundary.runtimeExports,
       typeExports: boundary.typeExports,
-      taskRuntimeExportsAdded: predecessorExportInvariance.taskRuntimeExportsAdded,
-      taskTypeExportsAdded: predecessorExportInvariance.taskTypeExportsAdded,
-      predecessorExportInvariance,
       currentPackageRuntimeExports: boundary.currentPackageRuntimeExports,
       currentPackageTypeExports: boundary.currentPackageTypeExports,
       additiveRuntimeExports: boundary.additiveRuntimeExports,
       additiveTypeExports: boundary.additiveTypeExports,
-      additiveSuccessor: boundary.additiveSuccessor,
+      additiveSuccessors: boundary.additiveSuccessors,
+      taskRuntimeExportsAdded: predecessorExportInvariance.taskRuntimeExportsAdded,
+      taskTypeExportsAdded: predecessorExportInvariance.taskTypeExportsAdded,
+      predecessorExportInvariance,
       proofOnlySuccessor: boundary.proofOnlySuccessor,
       retainedEventActionPublicDeclarations: boundary.retainedEventActionPublicDeclarations,
       retainedEventActionTsdocDeclarations: boundary.retainedEventActionTsdocDeclarations,
@@ -3243,9 +3372,9 @@ export async function buildEditorCoreAuthoringRoundTripEvidence(rawOptions = und
     nonclaims: [
       "LEXICAL_JSON_BYTES_WHITESPACE_OR_OBJECT_MEMBER_ORDER_PRESERVATION",
       "M08_T08_PERSISTENCE_SUCCESSOR_BYTES_ARE_COMPATIBILITY_ONLY_NOT_T07_CLAIM_AUTHORITY",
+      "M08_T09_CONTINUOUS_VALIDATION_SUCCESSOR_BYTES_ARE_COMPATIBILITY_ONLY_NOT_T07_CLAIM_AUTHORITY",
       "UNKNOWN_EXTENSION_DEFINED_CORE_SEMANTICS",
       "DELIBERATELY_DELETED_OR_WHOLE_REPLACED_OWNER_EXTENSION_SURVIVAL",
-      "CONTINUOUS_CATALOG_SEMANTICS_AND_INVALID_NODE_MAPPING_M08_T09",
       "ACTION_EXECUTION_AND_RUNTIME_TURNS",
       "UNDO_REDO_SELECTION_AND_VIEWPORT_POLICY",
       "M08_T10_TERMINAL_REACT_DOM_AND_G08_BOUNDARY",

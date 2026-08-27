@@ -28,6 +28,7 @@ const CONTENT_EDITS_SOURCE_PATH = "packages/editor-core/src/content-edits.ts";
 const STATE_BINDING_EDITS_SOURCE_PATH = "packages/editor-core/src/state-binding-edits.ts";
 const EVENT_ACTION_EDITS_SOURCE_PATH = "packages/editor-core/src/event-action-edits.ts";
 const PERSISTENCE_SOURCE_PATH = "packages/editor-core/src/persistence.ts";
+const CONTINUOUS_VALIDATION_SOURCE_PATH = "packages/editor-core/src/continuous-validation.ts";
 const DIST_SOURCE_PATH = "packages/editor-core/dist/source-document.js";
 const DIST_INDEX_PATH = "packages/editor-core/dist/index.js";
 const DIST_STRUCTURAL_EDITS_PATH = "packages/editor-core/dist/structural-edits.js";
@@ -35,6 +36,7 @@ const DIST_CONTENT_EDITS_PATH = "packages/editor-core/dist/content-edits.js";
 const DIST_STATE_BINDING_EDITS_PATH = "packages/editor-core/dist/state-binding-edits.js";
 const DIST_EVENT_ACTION_EDITS_PATH = "packages/editor-core/dist/event-action-edits.js";
 const DIST_PERSISTENCE_PATH = "packages/editor-core/dist/persistence.js";
+const DIST_CONTINUOUS_VALIDATION_PATH = "packages/editor-core/dist/continuous-validation.js";
 const DIST_SOURCE_DECLARATION_PATH = "packages/editor-core/dist/source-document.d.ts";
 const DIST_INDEX_DECLARATION_PATH = "packages/editor-core/dist/index.d.ts";
 const DIST_STRUCTURAL_EDITS_DECLARATION_PATH = "packages/editor-core/dist/structural-edits.d.ts";
@@ -44,6 +46,8 @@ const DIST_STATE_BINDING_EDITS_DECLARATION_PATH =
 const DIST_EVENT_ACTION_EDITS_DECLARATION_PATH =
   "packages/editor-core/dist/event-action-edits.d.ts";
 const DIST_PERSISTENCE_DECLARATION_PATH = "packages/editor-core/dist/persistence.d.ts";
+const DIST_CONTINUOUS_VALIDATION_DECLARATION_PATH =
+  "packages/editor-core/dist/continuous-validation.d.ts";
 const DIST_PERSISTENCE_DECLARATION_MAP_PATH = "packages/editor-core/dist/persistence.d.ts.map";
 const DIST_PERSISTENCE_SOURCE_MAP_PATH = "packages/editor-core/dist/persistence.js.map";
 const VALIDATOR_PACKAGE_PATH = "packages/validator/package.json";
@@ -89,6 +93,8 @@ const AUTHORING_ROUND_TRIP_TEST_PATH = "packages/editor-core/test/authoring-roun
 const AUTHORING_ROUND_TRIP_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
 const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
+const CONTINUOUS_VALIDATION_TEST_PATH = "packages/editor-core/test/continuous-validation.test.ts";
+const CONTINUOUS_VALIDATION_TYPES_PATH = "packages/editor-core/test/continuous-validation.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const GENERATOR_PATH = "scripts/generate-editor-core-source-document-proof.mjs";
@@ -245,9 +251,9 @@ const EXPECTED_TEST_AUTHORITY_SHA256 = Object.freeze({
     "24c41948e51d59c31a342d391a84bd229d39123c8764c3385b2402e1535d0739",
   [PERSISTENCE_TEST_PATH]: "17d86804a38c243cbd75a97649b3e9f6716ea57206453851bd98216937b5bc54",
   [PERSISTENCE_TYPES_PATH]: "da5114ec835c91e02df73ef58fd3f2a3f8a85508eb0e939d1c1c845bcfbd87f2",
-  [PUBLIC_TEST_PATH]: "29261287880d047a9d1c43f66fa5f9b59b45bbc6129106a432291715333bad1d",
-  [PUBLIC_TYPES_PATH]: "15a4be175dfbe3ccd40ce69e5911072276bdaba9349d77c2501d96199555bbc1",
-  [ROOT_TEST_PATH]: "b32803af2fefa03b5da81260db6997133b972fc601700f81a4374083986ea58f",
+  [PUBLIC_TEST_PATH]: "1eb2d878c95ea3655e89afc97e7f72d4f8b134cbf8c7022a268597efe4ed7cf4",
+  [PUBLIC_TYPES_PATH]: "04a7b314398424563b765f1de60105c775aa13485c4b8913250edd21bd0f632a",
+  [ROOT_TEST_PATH]: "27dd4452d6432fad8b9207e74547938760e807eb16e20374b6af9fa6a0d9b1f8",
 });
 
 export const DEFAULT_EDITOR_CORE_SOURCE_DOCUMENT_ARTIFACT_PATH = path.join(
@@ -405,6 +411,19 @@ const EXPECTED_PERSISTENCE_TYPE_EXPORTS = Object.freeze(
     "DesenEditorSourceSaveResult",
   ].sort(),
 );
+const EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS = Object.freeze([
+  "createDesenEditorContinuousValidator",
+]);
+const EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorContinuousValidationReport",
+    "DesenEditorContinuousValidator",
+    "DesenEditorContinuousValidatorCreationFailure",
+    "DesenEditorContinuousValidatorCreationResult",
+    "DesenEditorContinuousValidatorCreationSuccess",
+    "DesenEditorInvalidSubjectMapping",
+  ].sort(),
+);
 const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
   [
     "createDesenEditorDocument",
@@ -416,6 +435,7 @@ const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
     ...EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS,
     ...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS,
     ...EXPECTED_PERSISTENCE_RUNTIME_EXPORTS,
+    ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
   ].sort(),
 );
 const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
@@ -442,6 +462,7 @@ const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
     ...EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS,
     ...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS,
     ...EXPECTED_PERSISTENCE_TYPE_EXPORTS,
+    ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
   ].sort(),
 );
 const EXPECTED_PACKAGE_SCRIPTS = Object.freeze({
@@ -454,6 +475,7 @@ const EXPECTED_PACKAGE_SCRIPTS = Object.freeze({
   "test:source-document": "vitest run test/source-document.test.ts",
   "test:authoring-round-trip": "vitest run test/authoring-round-trip.test.ts",
   "test:persistence": "vitest run test/persistence.test.ts",
+  "test:continuous-validation": "vitest run test/continuous-validation.test.ts",
   "test:coverage": "vitest run --coverage",
 });
 const PACKAGE_LIFECYCLE_SCRIPT_NAMES = Object.freeze([
@@ -556,6 +578,9 @@ const EXPECTED_TRACKED_PATHS = Object.freeze(
     AUTHORING_ROUND_TRIP_TYPES_PATH,
     PERSISTENCE_TEST_PATH,
     PERSISTENCE_TYPES_PATH,
+    CONTINUOUS_VALIDATION_SOURCE_PATH,
+    CONTINUOUS_VALIDATION_TEST_PATH,
+    CONTINUOUS_VALIDATION_TYPES_PATH,
     PUBLIC_TEST_PATH,
     PUBLIC_TYPES_PATH,
     BUILD_TSCONFIG_PATH,
@@ -575,6 +600,8 @@ const EXPECTED_TRACKED_PATHS = Object.freeze(
     DIST_PERSISTENCE_DECLARATION_PATH,
     DIST_PERSISTENCE_DECLARATION_MAP_PATH,
     DIST_PERSISTENCE_SOURCE_MAP_PATH,
+    DIST_CONTINUOUS_VALIDATION_PATH,
+    DIST_CONTINUOUS_VALIDATION_DECLARATION_PATH,
     GENERATOR_PATH,
     VERIFIER_PATH,
     PROOF_LIBRARY_PATH,
@@ -601,7 +628,6 @@ const FORBIDDEN_IDENTIFIER_NAMES = Object.freeze([
   "Response",
   "WebSocket",
   "Worker",
-  "document",
   "eval",
   "exports",
   "fetch",
@@ -2049,6 +2075,18 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     files[DIST_PERSISTENCE_PATH],
     DIST_PERSISTENCE_PATH,
   );
+  const continuousValidationSource = declarationInventory(
+    files[CONTINUOUS_VALIDATION_SOURCE_PATH],
+    CONTINUOUS_VALIDATION_SOURCE_PATH,
+  );
+  const continuousValidationDeclaration = declarationInventory(
+    files[DIST_CONTINUOUS_VALIDATION_DECLARATION_PATH],
+    DIST_CONTINUOUS_VALIDATION_DECLARATION_PATH,
+  );
+  const continuousValidationRuntime = declarationInventory(
+    files[DIST_CONTINUOUS_VALIDATION_PATH],
+    DIST_CONTINUOUS_VALIDATION_PATH,
+  );
   const sourcePrivateStatements = source.sourceFile.statements.filter(
     (statement) =>
       !ts.isImportDeclaration(statement) &&
@@ -2163,6 +2201,40 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     );
   }
   if (
+    !exactJson(
+      continuousValidationSource.runtime,
+      EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+    ) ||
+    !exactJson(continuousValidationSource.types, EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS) ||
+    continuousValidationSource.missingTsdoc.length !== 0 ||
+    !exactJson(
+      continuousValidationDeclaration.runtime,
+      EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+    ) ||
+    !exactJson(
+      continuousValidationDeclaration.types,
+      EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+    ) ||
+    continuousValidationDeclaration.missingTsdoc.length !== 0 ||
+    !exactJson(
+      continuousValidationRuntime.runtime,
+      EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+    ) ||
+    continuousValidationRuntime.types.length !== 0
+  ) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_PUBLIC_API_DRIFT",
+      "The additive M08-T09 continuous-validation module lost its reviewed declarations or TSDoc.",
+      {
+        sourceRuntime: continuousValidationSource.runtime,
+        sourceTypes: continuousValidationSource.types,
+        declarationRuntime: continuousValidationDeclaration.runtime,
+        declarationTypes: continuousValidationDeclaration.types,
+        emittedRuntime: continuousValidationRuntime.runtime,
+      },
+    );
+  }
+  if (
     !exactJson(structuralEditsSource.runtime, EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS) ||
     !exactJson(structuralEditsSource.types, EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS) ||
     structuralEditsSource.missingTsdoc.length !== 0 ||
@@ -2214,6 +2286,8 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     !exactJson(sourceIndex.modules, [
       "./content-edits.js",
       "./content-edits.js",
+      "./continuous-validation.js",
+      "./continuous-validation.js",
       "./event-action-edits.js",
       "./event-action-edits.js",
       "./persistence.js",
@@ -2231,6 +2305,7 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     distIndex.types.length !== 0 ||
     !exactJson(distIndex.modules, [
       "./content-edits.js",
+      "./continuous-validation.js",
       "./event-action-edits.js",
       "./persistence.js",
       "./source-document.js",
@@ -2243,6 +2318,8 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     !exactJson(declarationIndex.modules, [
       "./content-edits.js",
       "./content-edits.js",
+      "./continuous-validation.js",
+      "./continuous-validation.js",
       "./event-action-edits.js",
       "./event-action-edits.js",
       "./persistence.js",
@@ -2368,6 +2445,9 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     persistenceSource.sourceFile,
     persistenceDeclaration.sourceFile,
     persistenceRuntime.sourceFile,
+    continuousValidationSource.sourceFile,
+    continuousValidationDeclaration.sourceFile,
+    continuousValidationRuntime.sourceFile,
     sourceIndex.sourceFile,
     distIndex.sourceFile,
     declaration.sourceFile,
@@ -2375,6 +2455,22 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     emittedSource,
   ]) {
     function visit(node) {
+      if (
+        ts.isIdentifier(node) &&
+        node.text === "document" &&
+        ts.isPropertyAccessExpression(node.parent) &&
+        node.parent.expression === node &&
+        [
+          "addEventListener",
+          "body",
+          "createElement",
+          "getElementById",
+          "head",
+          "querySelector",
+        ].includes(node.parent.name.text)
+      ) {
+        forbidden.add(`document.${node.parent.name.text}`);
+      }
       if (
         ts.isIdentifier(node) &&
         FORBIDDEN_IDENTIFIER_NAMES.includes(node.text) &&
@@ -2524,6 +2620,20 @@ function verifySourceAndDistributionContract(files, packageManifest) {
           EXPECTED_PERSISTENCE_RUNTIME_EXPORTS.length + EXPECTED_PERSISTENCE_TYPE_EXPORTS.length,
         publicRuntimeCasesAdded: 3,
         publicCompilerNegativeAssertionsAdded: 21,
+      }),
+      Object.freeze({
+        task: "M08-T09",
+        sourcePath: CONTINUOUS_VALIDATION_SOURCE_PATH,
+        runtimePath: DIST_CONTINUOUS_VALIDATION_PATH,
+        declarationPath: DIST_CONTINUOUS_VALIDATION_DECLARATION_PATH,
+        runtimeExports: EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+        typeExports: EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+        publicDeclarations:
+          EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS.length +
+          EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS.length,
+        tsdocDeclarations:
+          EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS.length +
+          EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS.length,
       }),
     ]),
     additiveSuccessor: Object.freeze({
@@ -2887,8 +2997,8 @@ function verifyTestInventory(files) {
     inventory.sourceCompilerNegativeCases !== 5 ||
     inventory.persistenceRuntimeCases !== EXPECTED_PERSISTENCE_TEST_NAMES.length ||
     inventory.persistenceCompilerNegativeCases !== 21 ||
-    inventory.publicRuntimeContractCases !== 42 ||
-    inventory.publicCompilerNegativeCases !== 96 ||
+    inventory.publicRuntimeContractCases !== 43 ||
+    inventory.publicCompilerNegativeCases !== 102 ||
     inventory.publicProofCoreCases !== 7 ||
     inventory.rootProofCases !== EDITOR_CORE_SOURCE_DOCUMENT_ROOT_TEST_NAMES.length ||
     !exactJson(inventory.rootTestNames, EDITOR_CORE_SOURCE_DOCUMENT_ROOT_TEST_NAMES)
@@ -3156,6 +3266,7 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     STATE_BINDING_EDITS_SOURCE_PATH,
     EVENT_ACTION_EDITS_SOURCE_PATH,
     PERSISTENCE_SOURCE_PATH,
+    CONTINUOUS_VALIDATION_SOURCE_PATH,
     DIST_SOURCE_PATH,
     DIST_INDEX_PATH,
     DIST_STRUCTURAL_EDITS_PATH,
@@ -3163,6 +3274,7 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     DIST_STATE_BINDING_EDITS_PATH,
     DIST_EVENT_ACTION_EDITS_PATH,
     DIST_PERSISTENCE_PATH,
+    DIST_CONTINUOUS_VALIDATION_PATH,
     DIST_SOURCE_DECLARATION_PATH,
     DIST_INDEX_DECLARATION_PATH,
     DIST_STRUCTURAL_EDITS_DECLARATION_PATH,
@@ -3170,6 +3282,7 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     DIST_STATE_BINDING_EDITS_DECLARATION_PATH,
     DIST_EVENT_ACTION_EDITS_DECLARATION_PATH,
     DIST_PERSISTENCE_DECLARATION_PATH,
+    DIST_CONTINUOUS_VALIDATION_DECLARATION_PATH,
     DIST_PERSISTENCE_DECLARATION_MAP_PATH,
     DIST_PERSISTENCE_SOURCE_MAP_PATH,
     PACKAGE_TEST_PATH,
@@ -3178,6 +3291,8 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     AUTHORING_ROUND_TRIP_TYPES_PATH,
     PERSISTENCE_TEST_PATH,
     PERSISTENCE_TYPES_PATH,
+    CONTINUOUS_VALIDATION_TEST_PATH,
+    CONTINUOUS_VALIDATION_TYPES_PATH,
     PUBLIC_TEST_PATH,
     PUBLIC_TYPES_PATH,
     ROOT_TEST_PATH,

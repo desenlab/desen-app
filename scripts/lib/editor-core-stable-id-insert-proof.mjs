@@ -28,6 +28,7 @@ const CONTENT_EDITS_SOURCE_PATH = "packages/editor-core/src/content-edits.ts";
 const STATE_BINDING_EDITS_SOURCE_PATH = "packages/editor-core/src/state-binding-edits.ts";
 const EVENT_ACTION_EDITS_SOURCE_PATH = "packages/editor-core/src/event-action-edits.ts";
 const PERSISTENCE_SOURCE_PATH = "packages/editor-core/src/persistence.ts";
+const CONTINUOUS_VALIDATION_SOURCE_PATH = "packages/editor-core/src/continuous-validation.ts";
 const PACKAGE_PATH = "packages/editor-core/package.json";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/stable-id-insert.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/stable-id-insert.types.ts";
@@ -35,6 +36,8 @@ const AUTHORING_ROUND_TRIP_TEST_PATH = "packages/editor-core/test/authoring-roun
 const AUTHORING_ROUND_TRIP_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
 const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
+const CONTINUOUS_VALIDATION_TEST_PATH = "packages/editor-core/test/continuous-validation.test.ts";
+const CONTINUOUS_VALIDATION_TYPES_PATH = "packages/editor-core/test/continuous-validation.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST_PATH = "tests/editor-core-stable-id-insert.test.mjs";
@@ -72,6 +75,10 @@ const PERSISTENCE_DIST_PATHS = Object.freeze([
   "packages/editor-core/dist/persistence.d.ts.map",
   "packages/editor-core/dist/persistence.js",
   "packages/editor-core/dist/persistence.js.map",
+]);
+const CONTINUOUS_VALIDATION_DIST_PATHS = Object.freeze([
+  "packages/editor-core/dist/continuous-validation.d.ts",
+  "packages/editor-core/dist/continuous-validation.js",
 ]);
 const PROTOCOL_RUNTIME_PATHS = Object.freeze([
   "packages/protocol/dist/canonicalization.js",
@@ -300,6 +307,19 @@ const EXPECTED_PERSISTENCE_TYPE_EXPORTS = Object.freeze(
     "DesenEditorSourceSaveResult",
   ].sort(compareText),
 );
+const EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS = Object.freeze([
+  "createDesenEditorContinuousValidator",
+]);
+const EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorContinuousValidationReport",
+    "DesenEditorContinuousValidator",
+    "DesenEditorContinuousValidatorCreationFailure",
+    "DesenEditorContinuousValidatorCreationResult",
+    "DesenEditorContinuousValidatorCreationSuccess",
+    "DesenEditorInvalidSubjectMapping",
+  ].sort(compareText),
+);
 const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
   [
     "createDesenEditorDocument",
@@ -311,6 +331,7 @@ const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
     ...EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS,
     ...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS,
     ...EXPECTED_PERSISTENCE_RUNTIME_EXPORTS,
+    ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
   ].sort(compareText),
 );
 const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
@@ -321,6 +342,7 @@ const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
     ...EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS,
     ...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS,
     ...EXPECTED_PERSISTENCE_TYPE_EXPORTS,
+    ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
   ].sort(compareText),
 );
 const EXPECTED_DIAGNOSTIC_CODES = Object.freeze([
@@ -424,9 +446,9 @@ const EXPECTED_T08_AUTHORITY_SHA256 = Object.freeze({
     "8f3e4e5dc850a9f938062e4b0dd605fdd70af3ed598bd6fb348d4cd3ba721b3f",
   [PERSISTENCE_TEST_PATH]: "17d86804a38c243cbd75a97649b3e9f6716ea57206453851bd98216937b5bc54",
   [PERSISTENCE_TYPES_PATH]: "da5114ec835c91e02df73ef58fd3f2a3f8a85508eb0e939d1c1c845bcfbd87f2",
-  [PUBLIC_TEST_PATH]: "29261287880d047a9d1c43f66fa5f9b59b45bbc6129106a432291715333bad1d",
-  [PUBLIC_TYPES_PATH]: "15a4be175dfbe3ccd40ce69e5911072276bdaba9349d77c2501d96199555bbc1",
-  [ROOT_TEST_PATH]: "beed4c1d5e790d31e74dfcda0438191b496d679f88972be417d8be2e40c065b2",
+  [PUBLIC_TEST_PATH]: "1eb2d878c95ea3655e89afc97e7f72d4f8b134cbf8c7022a268597efe4ed7cf4",
+  [PUBLIC_TYPES_PATH]: "04a7b314398424563b765f1de60105c775aa13485c4b8913250edd21bd0f632a",
+  [ROOT_TEST_PATH]: "eb1dbd03246682ab3ce9af8ce276ddc0418a10663fa76e6c2ecdd9edf03e769c",
 });
 const DIST_PATHS = Object.freeze([
   "packages/editor-core/dist/index.d.ts",
@@ -478,10 +500,14 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   ...EVENT_ACTION_EDITS_DIST_PATHS,
   PERSISTENCE_SOURCE_PATH,
   ...PERSISTENCE_DIST_PATHS,
+  CONTINUOUS_VALIDATION_SOURCE_PATH,
+  ...CONTINUOUS_VALIDATION_DIST_PATHS,
   AUTHORING_ROUND_TRIP_TEST_PATH,
   AUTHORING_ROUND_TRIP_TYPES_PATH,
   PERSISTENCE_TEST_PATH,
   PERSISTENCE_TYPES_PATH,
+  CONTINUOUS_VALIDATION_TEST_PATH,
+  CONTINUOUS_VALIDATION_TYPES_PATH,
 ]);
 const TRACKED_PATH_SET = new Set(CURRENT_COMPATIBILITY_PATHS);
 const RETAINED_T02_RECEIPT_PATHS = Object.freeze(
@@ -849,7 +875,9 @@ function verifyBoundary(files) {
       "vitest run test/event-action-edits.test.ts" ||
     manifest.scripts?.["test:authoring-round-trip"] !==
       "vitest run test/authoring-round-trip.test.ts" ||
-    manifest.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts"
+    manifest.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts" ||
+    manifest.scripts?.["test:continuous-validation"] !==
+      "vitest run test/continuous-validation.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -973,6 +1001,28 @@ function verifyBoundary(files) {
     fail("TSDOC_DRIFT", "Every public persistence declaration must retain TSDoc.");
   }
 
+  const continuousValidationSource = decodeUtf8(
+    files.get(CONTINUOUS_VALIDATION_SOURCE_PATH),
+    CONTINUOUS_VALIDATION_SOURCE_PATH,
+  );
+  const continuousValidationSourceExports = exportedNames(continuousValidationSource);
+  exactArray(
+    continuousValidationSourceExports.names,
+    [
+      ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+      ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+    ].sort(compareText),
+    "SOURCE_DRIFT",
+    "Continuous-validation exports",
+  );
+  if (
+    continuousValidationSourceExports.tsdocDeclarations !==
+    EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS.length +
+      EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS.length
+  ) {
+    fail("TSDOC_DRIFT", "Every public continuous-validation declaration must retain TSDoc.");
+  }
+
   const indexSource = decodeUtf8(files.get(INDEX_SOURCE_PATH), INDEX_SOURCE_PATH);
   const sourceIndexExports = reexportedNames(indexSource, INDEX_SOURCE_PATH);
   exactArray(
@@ -992,6 +1042,8 @@ function verifyBoundary(files) {
     [
       "./content-edits.js",
       "./content-edits.js",
+      "./continuous-validation.js",
+      "./continuous-validation.js",
       "./event-action-edits.js",
       "./event-action-edits.js",
       "./persistence.js",
@@ -1061,6 +1113,14 @@ function verifyBoundary(files) {
     files.get("packages/editor-core/dist/persistence.d.ts"),
     "packages/editor-core/dist/persistence.d.ts",
   );
+  const distContinuousValidation = decodeUtf8(
+    files.get("packages/editor-core/dist/continuous-validation.js"),
+    "packages/editor-core/dist/continuous-validation.js",
+  );
+  const distContinuousValidationDeclaration = decodeUtf8(
+    files.get("packages/editor-core/dist/continuous-validation.d.ts"),
+    "packages/editor-core/dist/continuous-validation.d.ts",
+  );
   const distIndexExports = reexportedNames(distIndex, "packages/editor-core/dist/index.js");
   const distIndexDeclarationExports = reexportedNames(
     decodeUtf8(
@@ -1097,6 +1157,7 @@ function verifyBoundary(files) {
       "./state-binding-edits.js",
       "./event-action-edits.js",
       "./persistence.js",
+      "./continuous-validation.js",
     ],
     "EMITTED_DRIFT",
     "Emitted index edges",
@@ -1222,7 +1283,30 @@ function verifyBoundary(files) {
   ) {
     fail("TSDOC_DRIFT", "Emitted persistence declarations lost TSDoc.");
   }
-  const emittedGraph = `${distIndex}\n${distSource}\n${distInsert}\n${distStructuralEdits}\n${distContentEdits}\n${distStateBindingEdits}\n${distEventActionEdits}\n${distPersistence}`;
+  exactArray(
+    staticModuleSpecifiers(distContinuousValidation),
+    ["@desen/protocol", "@desen/validator", "./source-document.js"],
+    "EMITTED_DRIFT",
+    "Emitted continuous-validation edges",
+  );
+  const continuousValidationDeclarationExports = exportedNames(distContinuousValidationDeclaration);
+  exactArray(
+    continuousValidationDeclarationExports.names,
+    [
+      ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+      ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+    ].sort(compareText),
+    "EMITTED_DRIFT",
+    "Emitted continuous-validation declarations",
+  );
+  if (
+    continuousValidationDeclarationExports.tsdocDeclarations !==
+    EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS.length +
+      EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS.length
+  ) {
+    fail("TSDOC_DRIFT", "Emitted continuous-validation declarations lost TSDoc.");
+  }
+  const emittedGraph = `${distIndex}\n${distSource}\n${distInsert}\n${distStructuralEdits}\n${distContentEdits}\n${distStateBindingEdits}\n${distEventActionEdits}\n${distPersistence}\n${distContinuousValidation}`;
   for (const forbidden of [
     /\bimport\s*\(/u,
     /\beval\s*\(/u,
@@ -1268,7 +1352,7 @@ function verifyBoundary(files) {
   }
   const publicTestNames = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
   if (
-    publicTestNames.length !== 49 ||
+    publicTestNames.length !== 50 ||
     RETAINED_T02_PUBLIC_TEST_NAMES.some((name) => !publicTestNames.includes(name)) ||
     EXPECTED_T07_PUBLIC_TEST_NAMES.some((name) => !publicTestNames.includes(name)) ||
     EXPECTED_T08_PUBLIC_TEST_NAMES.some((name) => !publicTestNames.includes(name))
@@ -1283,8 +1367,11 @@ function verifyBoundary(files) {
   ) {
     fail("TEST_INVENTORY_DRIFT", "The public package lost a retained M08-T02 type claim.");
   }
-  if (countTypeAssertions(publicTypes) !== 96) {
-    fail("TEST_INVENTORY_DRIFT", "The public compiler-negative inventory must remain ninety-six.");
+  if (countTypeAssertions(publicTypes) !== 102) {
+    fail(
+      "TEST_INVENTORY_DRIFT",
+      "The public compiler-negative inventory must remain one hundred two.",
+    );
   }
   for (const [relativePath, expectedSha256] of Object.entries(EXPECTED_T07_TEST_AUTHORITY_SHA256)) {
     if (sha256(files.get(relativePath)) !== expectedSha256) {
@@ -1303,6 +1390,7 @@ function verifyBoundary(files) {
       ...EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS,
       ...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS,
       ...EXPECTED_PERSISTENCE_TYPE_EXPORTS,
+      ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
     ].sort(compareText),
     additiveRuntimeExports: [
       ...EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS,
@@ -1310,6 +1398,7 @@ function verifyBoundary(files) {
       ...EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS,
       ...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS,
       ...EXPECTED_PERSISTENCE_RUNTIME_EXPORTS,
+      ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
     ].sort(compareText),
     additiveSuccessors: [
       {
@@ -1356,6 +1445,14 @@ function verifyBoundary(files) {
         publicRuntimeCasesAdded: 3,
         publicCompilerNegativeAssertionsAdded: 21,
       },
+      {
+        task: "M08-T09",
+        sourcePath: CONTINUOUS_VALIDATION_SOURCE_PATH,
+        runtimePath: "packages/editor-core/dist/continuous-validation.js",
+        declarationPath: "packages/editor-core/dist/continuous-validation.d.ts",
+        runtimeExports: [...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS],
+        typeExports: [...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS],
+      },
     ],
     additiveSuccessor: {
       task: "M08-T08",
@@ -1380,7 +1477,7 @@ function verifyBoundary(files) {
     },
     publicDeclarations: EXPECTED_INSERT_EXPORTS.length,
     tsdocDeclarations: exports.tsdocDeclarations,
-    staticEsmEdges: 20,
+    staticEsmEdges: 24,
     unknownStaticEsmEdges: 0,
     platformNeutral: true,
     focusedBehaviorCases: EXPECTED_PACKAGE_TEST_NAMES.length,
@@ -2021,7 +2118,8 @@ export async function buildEditorCoreStableIdInsertEvidence(rawOptions = undefin
         CONTENT_EDITS_DIST_PATHS.length +
         STATE_BINDING_EDITS_DIST_PATHS.length +
         EVENT_ACTION_EDITS_DIST_PATHS.length +
-        PERSISTENCE_DIST_PATHS.length,
+        PERSISTENCE_DIST_PATHS.length +
+        CONTINUOUS_VALIDATION_DIST_PATHS.length,
       staticEsmEdges: boundary.staticEsmEdges,
       unknownStaticEsmEdges: boundary.unknownStaticEsmEdges,
       platformNeutral: boundary.platformNeutral,
