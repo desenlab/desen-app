@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806",
+  "headSha256": "f7aa741f2a8a829950d7fd01dbaa0d413c7e49200a26985c7d772d269a988c58",
   "checkpoints": [
     {
       "sequence": 1,
@@ -16617,15 +16617,15 @@
           "task": "M08-T10",
           "role": "proof-library",
           "path": "scripts/lib/editor-core-terminal-integration-proof.mjs",
-          "bytes": 90803,
-          "sha256": "4441327d8cfc63b504a2bd1fa343288df3b3198e96043eb3408e34649f3a7f36"
+          "bytes": 90824,
+          "sha256": "f451ee7337caf6c9974e78d5c9947f052c9eb39a0c853d3015e25bad39c675e4"
         },
         {
           "task": "M08-T10",
           "role": "root-test",
           "path": "tests/editor-core-terminal-integration.test.mjs",
-          "bytes": 14830,
-          "sha256": "9cc2fb35ddb5d4b15371f8edcba07837e02a605169a609ef5eeb5da7e3ef0431"
+          "bytes": 14852,
+          "sha256": "bf65bd2c607d43e6ae1466accf85fba7e54b518e70eb190cc476496ede1f8a44"
         },
         {
           "task": "M09-T01",

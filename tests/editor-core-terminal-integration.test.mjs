@@ -99,8 +99,9 @@ test("[authority] authenticates M08-T01 through T09 and the exact P-18 platform 
     path: "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json",
     bytes: 325_549,
     sha256: "5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b",
-    retainedTaskTimeReceipts: 98,
+    retainedTaskTimeReceipts: 97,
     currentCompatibilityOnlyPaths: [
+      "package.json",
       PACKAGE_README,
       PROOF_LIBRARY,
       "tests/editor-core-terminal-integration.test.mjs",
