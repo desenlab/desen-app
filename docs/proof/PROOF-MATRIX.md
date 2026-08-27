@@ -2428,3 +2428,45 @@ target-policy work; P-07 remains `PARTIAL`. M09-T03 does not add selection, a pr
 inspector editing, insertion, structural mutation, drag/drop, state/action editing, Design/Run mode,
 fidelity disclosure, persistence, diagnostics, publication, or activation; those remain M09-T04
 and later tasks.
+
+## M09-T04 — Source-identity selection outside managed capability subtrees (local evidence)
+
+M09-T04 adds one route-local immutable selection primitive minted only from the validated
+authoring model. Its exact project, surface, Source-node, capability, display, and conditional
+fields contain no callback, managed child, DOM/native handle, registry, session, or executable
+authority. Runtime projection reads only the public callback-free diagnostic index, preserves all
+matching repeated component instances, excludes attached behavior identities, permits a missing
+runtime instance only for an explicitly conditional Source component, and rejects unknown, stale,
+cross-route, and forged same-route identities closed.
+
+The existing Runtime React boundary remains inside the disabled managed fieldset. Selection chrome
+is one compact pointer-inert identity/status card rendered by Desen App as a DOM sibling outside the
+fieldset and marked capability subtree. TypeScript and CSS audits reject private DOM lookup,
+React-tree access, geometry measurement, overlay nesting, managed-tree substitution, and perimeter
+box mutations. Native layer buttons expose dynamic Select/Deselect names, `aria-pressed`,
+conditional context, wrapped keyboard navigation, and live panel status; route replacement resets
+selection synchronously. Manual desktop/mobile interaction checks are useful product verification
+but do not constitute browser E2E.
+
+The exact 11,997-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json` at
+`sha256:9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1`, with the exact
+73,111-byte M09-T03 real-adapter canvas artifact at
+`sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151` as its sole direct
+parent. The focused App selection suite passes 27/27, the independent root proof passes 10/10, and
+App typecheck, lint, and production build pass locally. The live local CI authority contains 180
+workloads and 85 proof pairs, split into 74 ordinary pairs and 11 barriers. Its selection-overlay
+connected closure contains 52 proof units and 114 workloads; complete ownership covers 1,164
+tracked paths and 170 proof-owned paths. Sequence 43 passes 66/66 at
+`sha256:0bbb101332d7af5dcf7260b6df6961837003571f67a6e3a69232e65e19cded58`, preserves sequence 42
+and all 38 predecessor artifacts, appends T04 artifact index 38, reseals predecessor compatibility
+readers `[70, 71, 72, 73, 74, 75]`, and appends T04 proof/root readers `[76, 77]`. The chain now
+contains 39 artifacts and 78 readers; the structural CI suite passes 317/317 locally. This section
+makes no required-gate or hosted-CI claim.
+
+M09-T04 is `DONE`, advancing implementation progress to 99/145 (68%) and M09 to 4/14 while proof
+gates remain 10/13. `N-042` advances to `TESTED` for this exact controlled Web–React profile;
+P-06 remains `PROVEN`, and P-07/P-16 remain `PARTIAL`. No component geometry, hit testing, canvas
+picking, inspector, Source mutation, insertion/cardinality/drag-drop, state/action authoring,
+Design/Run mode, diagnostics navigation/placeholders, persistence, browser E2E, publication, or
+activation is claimed. M09-T05 is next.

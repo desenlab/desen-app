@@ -23,9 +23,10 @@ const CATALOG = "packages/reference-catalog-web/catalog.json";
 const SOURCE = "examples/sign-in/official-derived.source.desen.json";
 const PACKAGE = "apps/desen-app/package.json";
 const AUTHORING = "apps/desen-app/src/authoring-data.ts";
-const APPLICATION = "apps/desen-app/src/application.tsx";
+const AUTHORING_SELECTION = "apps/desen-app/src/authoring-selection.ts";
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
 const AUTHORING_TEST = "apps/desen-app/test/authoring-data.test.ts";
+const AUTHORING_SELECTION_TEST = "apps/desen-app/test/authoring-selection.test.ts";
 const temporaryDirectories = [];
 let built;
 let shellArtifactBytes;
@@ -85,7 +86,7 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.taskStatus, "DONE");
   assert.equal(built.artifact.claim.shellCompatibilityRetained, true);
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.successor.task, "M09-T03");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T04");
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[1], () => {
@@ -211,18 +212,30 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
     false,
   );
   assert.equal(built.currentCompatibility.successor.exactPublicRuntimeAdapterPathAllowed, true);
-  assert.equal(built.currentCompatibility.successor.selectionOrInspectorImplemented, false);
+  assert.equal(
+    built.currentCompatibility.successor.sourceIdentitySelectionOverlayImplemented,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.historicalNoSelectionNonclaimAppliedToCurrentApp,
+    false,
+  );
+  assert.equal(built.currentCompatibility.successor.inspectorImplemented, false);
   assert.equal(built.currentCompatibility.successor.sourceMutationOrHistoryImplemented, false);
   assert.equal(built.currentCompatibility.successor.persistenceUiImplemented, false);
   assert.equal(built.currentCompatibility.successor.runOrPublishImplemented, false);
   assert.equal(built.currentCompatibility.boundary.imports.runtimeCoreImports, 2);
   assert.equal(built.currentCompatibility.boundary.imports.runtimeReactImports, 2);
+  assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.adapterImports, 1);
   assert.equal(
     built.currentCompatibility.boundary.imports.exactReferenceAdapterRegistryConstructions,
     1,
   );
   assert.equal(built.currentCompatibility.boundary.imports.officialBundleImports, 1);
+  assert.equal(built.currentCompatibility.boundary.imports.applicationSelectionImports, 2);
+  assert.equal(built.currentCompatibility.boundary.imports.adapterSelectionImports, 2);
+  assert.equal(built.currentCompatibility.boundary.imports.selectionAuthoringImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
   assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
   assert.equal(built.currentCompatibility.boundary.imports.sourceMutationCalls, 0);
@@ -312,29 +325,58 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[5], async () => {
     expectedError("SCOPE_BOUNDARY_DRIFT"),
   );
 
-  const application = await readFile(path.join(ROOT, APPLICATION), "utf8");
-  await assert.rejects(
-    buildDesenAppCatalogPanelLayerTreeEvidence({
-      fileOverrides: new Map([
-        [
-          APPLICATION,
-          Buffer.from(
-            application.replace(
-              "aria-label={`${selectedSurface.name} layer hierarchy`}",
-              'aria-label={`${selectedSurface.name} layer hierarchy`} role="tree"',
-            ),
-          ),
-        ],
-      ]),
-    }),
-    expectedError("ACCESSIBILITY_DRIFT"),
-  );
-
   const authoringTest = await readFile(path.join(ROOT, AUTHORING_TEST), "utf8");
   await assert.rejects(
     buildDesenAppCatalogPanelLayerTreeEvidence({
       fileOverrides: new Map([
         [AUTHORING_TEST, Buffer.from(authoringTest.replaceAll('reason: "projection-limit",', ""))],
+      ]),
+    }),
+    expectedError("TEST_AUTHORITY_DRIFT"),
+  );
+
+  const authoringSelection = await readFile(path.join(ROOT, AUTHORING_SELECTION), "utf8");
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [
+          AUTHORING_SELECTION,
+          Buffer.from(
+            authoringSelection.replace(
+              "import type { RuntimeReactDiagnosticIndex }",
+              "import { RuntimeReactDiagnosticIndex }",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [
+          AUTHORING_SELECTION,
+          Buffer.from(`${authoringSelection}\ndocument.querySelector("[data-node]");\n`),
+        ],
+      ]),
+    }),
+    expectedError("SCOPE_BOUNDARY_DRIFT"),
+  );
+
+  const authoringSelectionTest = await readFile(path.join(ROOT, AUTHORING_SELECTION_TEST), "utf8");
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [
+          AUTHORING_SELECTION_TEST,
+          Buffer.from(
+            authoringSelectionTest.replace(
+              "rejects a forged same-route Source identity instead of treating it as conditional",
+              "accepts a forged same-route Source identity",
+            ),
+          ),
+        ],
       ]),
     }),
     expectedError("TEST_AUTHORITY_DRIFT"),

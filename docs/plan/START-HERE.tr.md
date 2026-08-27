@@ -733,6 +733,44 @@ PF-059 `OPEN`, P-07 ise M10-T05 browser E2E beklerken `PARTIAL` kalır. Selectio
 overlay, inspector editing, mutation, Design/Run, persistence, diagnostics, publish ve activation
 bu dilimin dışındadır; sıradaki iş M09-T04'tür.
 
+M09-T04 artık `DONE`'dır. Route-local seçim, yalnız doğrulanmış authoring model içindeki exact
+project, surface, Source-node, capability, display ve conditional primitive'lerinden üretilir.
+Runtime eşlemesi yalnız public, callback-free Runtime React diagnostic index'ini okur; tekrar eden
+component instance'larını ayrı tutar, attached behavior kimliklerini eler, materialize olmayan
+seçimi yalnız Source'ta açıkça conditional olan component için dürüstçe gösterir ve unknown, stale,
+cross-route veya forged kimlikleri overlay vermeden reddeder.
+
+Managed Runtime React ağacı disabled fieldset içinde kalır. Desen App'in kompakt, pointer-inert
+identity/status kartı bu fieldset'in ve işaretli capability subtree'nin DOM kardeşidir; managed
+child, DOM/native handle, private React değeri, registry, session, callback, hit-test veya geometry
+yetkisi almaz. Native layer button'ları Select/Deselect erişilebilir adlarını, `aria-pressed`
+durumunu, conditional bağlamı, sarmalanan klavye geçişini ve canlı panel geri bildirimini taşır.
+Route değişimi seçimi senkron sıfırlar. Desktop ve mobil etkileşimleri manuel doğrulanmıştır; bu
+browser E2E iddiası değildir.
+
+Odak App selection suite'i 27/27, bağımsız kök kanıt 10/10 geçer; App typecheck, lint ve production
+build de yerelde geçer. Exact kanıt 11.997 baytlık
+[`desen-app-0.1.0-selection-overlay.json`](../proof/artifacts/desen-app-0.1.0-selection-overlay.json)
+artifact'ıdır ve
+`sha256:9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1` ile pinlenir. Tek doğrudan
+parent, 73.111 baytlık M09-T03 artifact'ıdır:
+`sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151`. Canlı yerel CI otoritesi
+180 workload ve 85 proof pair taşır; bunlar 74 ordinary pair ve 11 barrier'dır. Selection-overlay
+connected closure 52 proof unit/114 workload, ownership ise 1.164 tracked path/170 proof-owned path
+içerir. Sequence 43, 66/66 geçer ve
+`sha256:0bbb101332d7af5dcf7260b6df6961837003571f67a6e3a69232e65e19cded58` başında sequence 42 ile
+38 predecessor artifact'ın tamamını korur; T04 artifact'ını index 38'e ekler, predecessor
+compatibility reader'ları `[70, 71, 72, 73, 74, 75]` index'lerinde yeniden mühürler ve T04
+proof/root reader'larını `[76, 77]` index'lerine ekler. Güncel zincir 39 artifact/78 reader taşır;
+structural CI suite 317/317 geçer. Bunlar yerel makbuzlardır; required gate veya hosted CI pass'i
+iddia edilmez.
+
+Bu kapanışla `N-042` exact kontrollü Web–React profili için `TESTED` olur. P-06 `PROVEN`, P-07 ve
+P-16 `PARTIAL`, kanıt kapıları 10/13 kalır. Genel ilerleme 99/145 (%68), M09 ilerlemesi 4/14'tür.
+Component geometry/hit testing/canvas picking, inspector veya Source mutation,
+insert/cardinality/drag-drop, state/action authoring, Design/Run, diagnostics navigation/placeholder,
+persistence, browser E2E, publish ve activation kanıtlanmaz; sıradaki iş M09-T05'tir.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

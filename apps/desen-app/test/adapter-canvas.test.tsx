@@ -32,6 +32,23 @@ vi.mock("@desen/runtime-core", async (importOriginal) => {
 });
 
 import { DesenAdapterCanvas } from "../src/adapter-canvas.js";
+import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
+
+function componentSelection(
+  sourceNodeId: string,
+  capabilityId: string,
+  displayName: string,
+  conditional = false,
+) {
+  return createAuthoringComponentSelection({
+    projectId: "account-app",
+    surfaceId: "sign-in",
+    sourceNodeId,
+    capabilityId,
+    displayName,
+    conditional,
+  });
+}
 
 describe("Desen App exact React adapter canvas", () => {
   beforeEach(() => {
@@ -62,7 +79,7 @@ describe("Desen App exact React adapter canvas", () => {
     expect(password.matches(":disabled")).toBe(true);
     expect(submit.matches(":disabled")).toBe(true);
     expect(within(canvas).queryByRole("alert")).toBeNull();
-    expect(within(canvas).getByText("Design preview · controls are disabled.")).toBeTruthy();
+    expect(screen.getByText("Design preview · controls are disabled.")).toBeTruthy();
     expect(document.querySelector("canvas")).toBeNull();
     expect(lifecycle.mounted).toHaveLength(1);
   });
@@ -114,5 +131,75 @@ describe("Desen App exact React adapter canvas", () => {
 
     view.unmount();
     expect(lifecycle.disposed).toEqual([lifecycle.mounted[0], lifecycle.mounted[1]]);
+  });
+
+  it("renders Source-identity selection chrome as a sibling outside the managed subtree", async () => {
+    render(
+      <DesenAdapterCanvas
+        projectId="account-app"
+        selection={componentSelection("sign-in.email", "com.example.ui/TextField", "Text field")}
+        surfaceId="sign-in"
+      />,
+    );
+
+    const canvas = await screen.findByRole("group", { name: "Sign-in adapter canvas" });
+    const overlay = await screen.findByRole("status", { name: "Selected layer preview" });
+    const managedSubtree = document.querySelector("[data-managed-capability-subtree='true']");
+
+    expect(overlay.textContent).toContain("Text field");
+    expect(overlay.textContent).toContain("sign-in.email");
+    expect(overlay.textContent).toContain("Visible in preview");
+    expect(canvas.parentElement).toBe(overlay.parentElement);
+    expect(canvas.contains(overlay)).toBe(false);
+    expect(overlay.contains(canvas)).toBe(false);
+    expect(managedSubtree).toBeTruthy();
+    expect(managedSubtree?.contains(overlay)).toBe(false);
+    expect((canvas as HTMLFieldSetElement).disabled).toBe(true);
+  });
+
+  it("keeps a selected conditional Source node honest when it is not materialized", async () => {
+    render(
+      <DesenAdapterCanvas
+        projectId="account-app"
+        selection={componentSelection("sign-in.error", "com.example.ui/Alert", "Alert", true)}
+        surfaceId="sign-in"
+      />,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
+    const overlay = screen.getByRole("status", { name: "Selected layer preview" });
+    expect(overlay.getAttribute("data-materialized")).toBe("false");
+    expect(overlay.textContent).toContain("Hidden by condition");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("rejects stale and cross-route selection identities without exposing overlay chrome", async () => {
+    const stale = createAuthoringComponentSelection({
+      projectId: "other-project",
+      surfaceId: "sign-in",
+      sourceNodeId: "sign-in.email",
+      capabilityId: "com.example.ui/TextField",
+      displayName: "Text field",
+      conditional: false,
+    });
+    const view = render(
+      <DesenAdapterCanvas projectId="account-app" selection={stale} surfaceId="sign-in" />,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
+
+    const forged = createAuthoringComponentSelection({
+      projectId: "account-app",
+      surfaceId: "sign-in",
+      sourceNodeId: "sign-in.forged",
+      capabilityId: "com.example.ui/Alert",
+      displayName: "Forged",
+      conditional: true,
+    });
+    view.rerender(
+      <DesenAdapterCanvas projectId="account-app" selection={forged} surfaceId="sign-in" />,
+    );
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
   });
 });

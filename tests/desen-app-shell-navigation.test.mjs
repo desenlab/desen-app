@@ -20,6 +20,7 @@ const PREREQUISITE = "docs/proof/artifacts/editor-core-0.1.0-terminal-integratio
 const NAVIGATION = "apps/desen-app/src/project-navigation.ts";
 const APPLICATION = "apps/desen-app/src/application.tsx";
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
+const AUTHORING_SELECTION = "apps/desen-app/src/authoring-selection.ts";
 const LOGO = "apps/desen-app/src/assets/desen-logo.svg";
 const INDEX = "apps/desen-app/index.html";
 const PACKAGE = "apps/desen-app/package.json";
@@ -79,7 +80,7 @@ test("[authority] binds M09-T01 to the exact completed G08 artifact", () => {
     DESEN_APP_SHELL_NAVIGATION_ROOT_TEST_NAMES,
   );
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T03");
+  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T04");
 });
 
 test("[shell] records the closed route, fixture, guidance, and accessibility profile", () => {
@@ -150,6 +151,10 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     true,
   );
   assert.equal(
+    built.currentCompatibility.additiveSuccessor.stableSourceSelectionOverlayAllowed,
+    true,
+  );
+  assert.equal(
     built.currentCompatibility.additiveSuccessor
       .historicalNoCatalogPanelNonclaimAppliedToCurrentApp,
     false,
@@ -157,6 +162,7 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
   assert.deepEqual(built.currentCompatibility.additiveSuccessor.knownSourceEdges, [
     "apps/desen-app/src/authoring-data.ts",
     "apps/desen-app/src/adapter-canvas.tsx",
+    "apps/desen-app/src/authoring-selection.ts",
   ]);
   assert.equal(
     built.currentCompatibility.additiveSuccessor
@@ -165,10 +171,15 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
   );
   assert.equal(
     built.currentCompatibility.additiveSuccessor
-      .selectionMutationPersistenceAndPublishStillDisallowed,
+      .historicalNoSelectionOrInspectorNonclaimAppliedToCurrentApp,
+    false,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.sourceMutationPersistenceAndPublishStillDisallowed,
     true,
   );
   assert.equal(built.currentCompatibility.boundary.imports.exactReferenceAdapterRegistry, true);
+  assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
   assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
   assert.equal(built.currentCompatibility.boundary.imports.mutationOrPublicationCalls, 0);
@@ -373,6 +384,27 @@ test("[mutation] rejects prerequisite, route, package, and scope-boundary drift"
             ),
           ),
         ],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
+  );
+
+  const authoringSelection = await readFile(path.join(ROOT, AUTHORING_SELECTION), "utf8");
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [
+          AUTHORING_SELECTION,
+          Buffer.from(`${authoringSelection}\ndocument.querySelector("input");\n`),
+        ],
+      ]),
+    }),
+    expectedError("SCOPE_BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [AUTHORING_SELECTION, Buffer.from(authoringSelection.replace("import type {", "import {"))],
       ]),
     }),
     expectedError("IMPORT_BOUNDARY_DRIFT"),

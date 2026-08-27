@@ -20,10 +20,12 @@ const CATALOG_PATH = "packages/reference-catalog-web/catalog.json";
 const SOURCE_PATH = "examples/sign-in/official-derived.source.desen.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const AUTHORING_SOURCE_PATH = "apps/desen-app/src/authoring-data.ts";
+const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const OFFICIAL_BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
 const AUTHORING_TEST_PATH = "apps/desen-app/test/authoring-data.test.ts";
+const AUTHORING_SELECTION_TEST_PATH = "apps/desen-app/test/authoring-selection.test.ts";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
@@ -80,18 +82,26 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   "apps/desen-app/src/application.tsx",
   "apps/desen-app/src/application.module.css",
   ADAPTER_CANVAS_SOURCE_PATH,
+  AUTHORING_SELECTION_SOURCE_PATH,
   "apps/desen-app/test/application.test.tsx",
+  AUTHORING_SELECTION_TEST_PATH,
   "apps/desen-app/test/main-lifecycle.test.tsx",
   "pnpm-lock.yaml",
   "scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs",
   "tests/desen-app-catalog-panel-layer-tree.test.mjs",
 ]);
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
-  ...new Set([...TRACKED_PATHS, ADAPTER_CANVAS_SOURCE_PATH]),
+  ...new Set([
+    ...TRACKED_PATHS,
+    ADAPTER_CANVAS_SOURCE_PATH,
+    AUTHORING_SELECTION_SOURCE_PATH,
+    AUTHORING_SELECTION_TEST_PATH,
+  ]),
 ]);
 const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
   ...TYPESCRIPT_SOURCE_PATHS,
   ADAPTER_CANVAS_SOURCE_PATH,
+  AUTHORING_SELECTION_SOURCE_PATH,
 ]);
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
   TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
@@ -780,6 +790,8 @@ function verifyPackage(bytes) {
       "vitest run test/authoring-data.test.ts test/application.test.tsx" ||
     manifest.scripts?.["test:canvas"] !==
       "vitest run test/adapter-canvas.test.tsx test/application.test.tsx test/main-lifecycle.test.tsx" ||
+    manifest.scripts?.["test:selection"] !==
+      "vitest run test/authoring-selection.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
     manifest.scripts?.["test:shell"] !==
       "vitest run test/project-navigation.test.ts test/application.test.tsx test/main-lifecycle.test.tsx"
   ) {
@@ -792,6 +804,7 @@ function verifyPackage(bytes) {
     devDependencies: expectedDevDependencies,
     focusedTestScript: manifest.scripts["test:authoring"],
     successorTestScript: manifest.scripts["test:canvas"],
+    selectionSuccessorTestScript: manifest.scripts["test:selection"],
     editorCoreDependency: false,
     catalogSdkDependency: false,
     runtimeCoreDependency: true,
@@ -823,6 +836,7 @@ function resolveRelativeImport(importerPath, specifier) {
     (candidate) =>
       APP_SOURCE_PATHS.includes(candidate) ||
       candidate === ADAPTER_CANVAS_SOURCE_PATH ||
+      candidate === AUTHORING_SELECTION_SOURCE_PATH ||
       candidate === SOURCE_PATH ||
       candidate === OFFICIAL_BUNDLE_PATH,
   );
@@ -838,11 +852,14 @@ function resolveRelativeImport(importerPath, specifier) {
 
 function importBindingShape(declaration) {
   const clause = declaration.importClause;
-  if (clause === undefined) return { defaultImport: null, namedImports: [], namespaceImport: null };
+  if (clause === undefined) {
+    return { defaultImport: null, namedImports: [], namespaceImport: null, typeOnly: false };
+  }
   const shape = {
     defaultImport: clause.name?.text ?? null,
     namedImports: [],
     namespaceImport: null,
+    typeOnly: clause.isTypeOnly,
   };
   if (clause.namedBindings !== undefined) {
     if (ts.isNamespaceImport(clause.namedBindings)) {
@@ -926,6 +943,7 @@ function inspectImportsAndExecutionBoundary(files) {
   let referenceCatalogImports = 0;
   let validatorImports = 0;
   let exactRegistryConstructionCalls = 0;
+  let publicDiagnosticIndexTypeOnlyImports = 0;
   const successorImportDeclarations = new Map();
   const successorImportedNames = new Map();
   const platformGlobalRoots = new Set(["document", "globalThis", "navigator", "self", "window"]);
@@ -966,6 +984,25 @@ function inspectImportsAndExecutionBoundary(files) {
     "renderRuntimeReactSurface",
     "useRuntimeReactSurface",
   ]);
+  const forbiddenSelectionIdentifiers = new Set([
+    "Element",
+    "HTMLElement",
+    "MutationObserver",
+    "Node",
+    "React",
+    "ResizeObserver",
+  ]);
+  const forbiddenSelectionMembers = new Set([
+    "Children",
+    "cloneElement",
+    "closest",
+    "createElement",
+    "getBoundingClientRect",
+    "matches",
+    "props",
+    "querySelector",
+    "querySelectorAll",
+  ]);
 
   for (const relativePath of CURRENT_TYPESCRIPT_SOURCE_PATHS) {
     const source = decodeUtf8(files.get(relativePath), relativePath);
@@ -992,6 +1029,12 @@ function inspectImportsAndExecutionBoundary(files) {
         if (specifier.startsWith(".")) {
           resolvedPath = resolveRelativeImport(relativePath, specifier);
         } else if (specifier === "react" || specifier === "react-dom/client") {
+          if (relativePath === AUTHORING_SELECTION_SOURCE_PATH) {
+            fail(
+              "IMPORT_BOUNDARY_DRIFT",
+              "M09-T04 selection projection must remain independent of React tree authority.",
+            );
+          }
           // React is the already admitted M09-T01 application framework.
         } else if (specifier === "@desen/reference-catalog-web/catalog.json") {
           referenceCatalogImports += 1;
@@ -1006,6 +1049,22 @@ function inspectImportsAndExecutionBoundary(files) {
               "The Catalog must enter only as one exact inert JSON import.",
             );
           }
+        } else if (
+          relativePath === AUTHORING_SELECTION_SOURCE_PATH &&
+          specifier === "@desen/runtime-react"
+        ) {
+          if (
+            shape.defaultImport !== null ||
+            shape.namespaceImport !== null ||
+            shape.typeOnly !== true ||
+            !isDeepStrictEqual(shape.namedImports, ["RuntimeReactDiagnosticIndex"])
+          ) {
+            fail(
+              "IMPORT_BOUNDARY_DRIFT",
+              "M09-T04 selection may import only the public diagnostic index as a type.",
+            );
+          }
+          publicDiagnosticIndexTypeOnlyImports += 1;
         } else if (
           relativePath === ADAPTER_CANVAS_SOURCE_PATH &&
           exactAdapterPackages.has(specifier)
@@ -1070,10 +1129,30 @@ function inspectImportsAndExecutionBoundary(files) {
         ts.isIdentifier(node) &&
         isIdentifierValueReference(node) &&
         platformGlobalRoots.has(node.text) &&
-        (relativePath === ADAPTER_CANVAS_SOURCE_PATH || !isPlatformMemberReceiver(node))
+        (relativePath === ADAPTER_CANVAS_SOURCE_PATH ||
+          relativePath === AUTHORING_SELECTION_SOURCE_PATH ||
+          !isPlatformMemberReceiver(node))
       ) {
         fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained broad platform-global authority.`, {
           identifier: node.text,
+        });
+      }
+      if (
+        relativePath === AUTHORING_SELECTION_SOURCE_PATH &&
+        ts.isIdentifier(node) &&
+        forbiddenSelectionIdentifiers.has(node.text)
+      ) {
+        fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained private DOM or React authority.`, {
+          identifier: node.text,
+        });
+      }
+      if (
+        relativePath === AUTHORING_SELECTION_SOURCE_PATH &&
+        ts.isPropertyAccessExpression(node) &&
+        forbiddenSelectionMembers.has(node.name.text)
+      ) {
+        fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained private DOM or React inspection.`, {
+          member: node.name.text,
         });
       }
       if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
@@ -1154,10 +1233,14 @@ function inspectImportsAndExecutionBoundary(files) {
     };
     visit(sourceFile);
   }
-  if (referenceCatalogImports !== 2 || validatorImports !== 1) {
+  if (
+    referenceCatalogImports !== 2 ||
+    validatorImports !== 1 ||
+    publicDiagnosticIndexTypeOnlyImports !== 1
+  ) {
     fail(
       "IMPORT_BOUNDARY_DRIFT",
-      "The source graph must retain T02's exact Catalog/validator edge and T03's exact Catalog edge.",
+      "The source graph must retain T02/T03 edges plus one type-only public diagnostic-index edge.",
     );
   }
 
@@ -1237,10 +1320,29 @@ function inspectImportsAndExecutionBoundary(files) {
     ({ path: importerPath, resolvedPath }) =>
       importerPath === ADAPTER_CANVAS_SOURCE_PATH && resolvedPath === OFFICIAL_BUNDLE_PATH,
   );
-  if (applicationAdapterEdges.length !== 1 || adapterBundleEdges.length !== 1) {
+  const applicationSelectionEdges = inventory.filter(
+    ({ path: importerPath, resolvedPath }) =>
+      importerPath === APPLICATION_SOURCE_PATH && resolvedPath === AUTHORING_SELECTION_SOURCE_PATH,
+  );
+  const adapterSelectionEdges = inventory.filter(
+    ({ path: importerPath, resolvedPath }) =>
+      importerPath === ADAPTER_CANVAS_SOURCE_PATH &&
+      resolvedPath === AUTHORING_SELECTION_SOURCE_PATH,
+  );
+  const selectionAuthoringEdges = inventory.filter(
+    ({ path: importerPath, resolvedPath }) =>
+      importerPath === AUTHORING_SELECTION_SOURCE_PATH && resolvedPath === AUTHORING_SOURCE_PATH,
+  );
+  if (
+    applicationAdapterEdges.length !== 1 ||
+    adapterBundleEdges.length !== 1 ||
+    applicationSelectionEdges.length !== 2 ||
+    adapterSelectionEdges.length !== 2 ||
+    selectionAuthoringEdges.length !== 1
+  ) {
     fail(
       "IMPORT_BOUNDARY_DRIFT",
-      "M09-T03 must retain one App-to-canvas edge and one canvas-to-official-Bundle edge.",
+      "M09-T04 must retain exact App/canvas and additive selection identity edges.",
     );
   }
 
@@ -1286,15 +1388,20 @@ function inspectImportsAndExecutionBoundary(files) {
       "@desen/reference-catalog-web/tokens#REFERENCE_WEB_TOKEN_CSS_PROPERTIES",
       "@desen/runtime-core#public-headless-session-apis",
       "@desen/runtime-react#public-managed-surface-apis",
+      "@desen/runtime-react#RuntimeReactDiagnosticIndex(type-only)",
     ],
     arbitraryExecutableImports: 0,
     editorCoreImports: 0,
     catalogSdkImports: 0,
     runtimeCoreImports: 2,
     runtimeReactImports: 2,
+    publicDiagnosticIndexTypeOnlyImports,
     adapterImports: 1,
     exactReferenceAdapterRegistryConstructions: 1,
     officialBundleImports: 1,
+    applicationSelectionImports: 2,
+    adapterSelectionImports: 2,
+    selectionAuthoringImports: 1,
     handwrittenManagedTreeElements: 0,
     privateDomAccesses: 0,
     sourceMutationCalls: 0,
@@ -1316,7 +1423,15 @@ function verifyImplementationAndTests(files) {
     files.get(ADAPTER_CANVAS_SOURCE_PATH),
     ADAPTER_CANVAS_SOURCE_PATH,
   );
+  const authoringSelection = decodeUtf8(
+    files.get(AUTHORING_SELECTION_SOURCE_PATH),
+    AUTHORING_SELECTION_SOURCE_PATH,
+  );
   const authoringTest = decodeUtf8(files.get(AUTHORING_TEST_PATH), AUTHORING_TEST_PATH);
+  const authoringSelectionTest = decodeUtf8(
+    files.get(AUTHORING_SELECTION_TEST_PATH),
+    AUTHORING_SELECTION_TEST_PATH,
+  );
   const applicationTest = decodeUtf8(files.get(APPLICATION_TEST_PATH), APPLICATION_TEST_PATH);
 
   for (const required of [
@@ -1346,7 +1461,11 @@ function verifyImplementationAndTests(files) {
     "DESEN node / slot tree",
     "aria-label={`${selectedSurface.name} layer hierarchy`}",
     "will not substitute the sign-in",
-    "Structure only · selection and insertion arrive in later M09 slices.",
+    "createAuthoringComponentSelection",
+    "isSameAuthoringComponentSelection",
+    "selectedSourceNodeId",
+    "onToggleSelection",
+    "selection={selection}",
     "Exact Catalog metadata and sign-in Source structure are read only.",
   ]) {
     requireText(application, required, APPLICATION_SOURCE_PATH);
@@ -1363,16 +1482,34 @@ function verifyImplementationAndTests(files) {
     "useRuntimeReactSurface",
     "RuntimeReactSurfaceBoundary",
     "<fieldset",
-    "disabled style={REFERENCE_WEB_TOKEN_CSS_PROPERTIES}",
+    "disabled",
+    "style={REFERENCE_WEB_TOKEN_CSS_PROPERTIES}",
     "Sign-in adapter canvas",
     "Design preview · controls are disabled.",
+    "projectAuthoringSelection",
+    'data-managed-capability-subtree="true"',
+    'data-selection-overlay="source-identity"',
   ]) {
     requireText(adapterCanvas, required, ADAPTER_CANVAS_SOURCE_PATH, "SUCCESSOR_CANVAS_DRIFT");
   }
-  if (/role\s*=\s*["']tree(?:item)?["']/u.test(application)) {
-    fail(
-      "ACCESSIBILITY_DRIFT",
-      "The read-only hierarchy must not claim interactive ARIA tree behavior.",
+  for (const required of [
+    "RuntimeReactDiagnosticIndex",
+    "AuthoringComponentSelection",
+    "AuthoringRenderedIdentitySnapshot",
+    "AuthoringSelectionProjection",
+    "createAuthoringComponentSelection",
+    "isSameAuthoringComponentSelection",
+    "projectAuthoringSelection",
+    "runtimeNodeIdsBySourceNodeId",
+    'status: "not-materialized"',
+    'status: "materialized"',
+    "Object.freeze",
+  ]) {
+    requireText(
+      authoringSelection,
+      required,
+      AUTHORING_SELECTION_SOURCE_PATH,
+      "SUCCESSOR_SELECTION_DRIFT",
     );
   }
   for (const required of [
@@ -1403,12 +1540,32 @@ function verifyImplementationAndTests(files) {
   ]) {
     requireText(applicationTest, required, APPLICATION_TEST_PATH, "TEST_AUTHORITY_DRIFT");
   }
+  for (const required of [
+    "creates only a frozen inert route and Source identity",
+    "keeps idle and pre-render states explicit without inventing a runtime target",
+    "projects repeated component instances while excluding attached behavior identities",
+    "reports a conditional Source component honestly when no runtime instance exists",
+    "rejects cross-route, cross-surface, and stale-capability identities closed",
+    "rejects a forged same-route Source identity instead of treating it as conditional",
+  ]) {
+    requireText(
+      authoringSelectionTest,
+      required,
+      AUTHORING_SELECTION_TEST_PATH,
+      "TEST_AUTHORITY_DRIFT",
+    );
+  }
 
   const registrations = {
     "authoring-data.test.ts": countRegistrations(authoringTest),
+    "authoring-selection.test.ts": countRegistrations(authoringSelectionTest),
     "application.test.tsx": countRegistrations(applicationTest),
   };
-  if (registrations["authoring-data.test.ts"] < 5 || registrations["application.test.tsx"] < 9) {
+  if (
+    registrations["authoring-data.test.ts"] < 5 ||
+    registrations["authoring-selection.test.ts"] < 6 ||
+    registrations["application.test.tsx"] < 10
+  ) {
     fail("TEST_AUTHORITY_DRIFT", "The focused M09-T02 positive/negative test inventory shrank.", {
       registrations,
     });
@@ -1428,10 +1585,10 @@ function verifyImplementationAndTests(files) {
       tabs: ["Layers", "Components"],
       tabKeyboardKeys: ["ArrowLeft", "ArrowRight", "Home", "End"],
       componentFilter: "LOCAL_READ_MODEL_ONLY",
-      layerHierarchySemantics: "READ_ONLY_LABELLED_LIST_NOT_INTERACTIVE_ARIA_TREE",
+      layerHierarchySemantics: "READ_ONLY_SOURCE_IDENTITY_SELECTION",
       unknownSurfacePolicy: "EXPLICIT_NO_SOURCE_TREE_WITHOUT_SUBSTITUTION",
       insertionControls: 0,
-      selectionControls: 0,
+      selectionControls: "SOURCE_COMPONENT_TOGGLE_ONLY",
       successorCanvas: {
         task: "M09-T03",
         exactPublicReferenceRegistry: true,
@@ -1439,17 +1596,29 @@ function verifyImplementationAndTests(files) {
         controlsDisabled: true,
         unknownSurfaceSubstitution: false,
       },
+      successorSelectionOverlay: {
+        task: "M09-T04",
+        exactSourceIdentityOnly: true,
+        publicDiagnosticIndexOnly: true,
+        outsideManagedCapabilitySubtree: true,
+        privateDomOrReactInspection: false,
+      },
     },
     tests: {
       command:
-        "pnpm --filter @desen/app-web test:authoring && node --test tests/desen-app-catalog-panel-layer-tree.test.mjs",
+        "pnpm --filter @desen/app-web test:selection && node --test tests/desen-app-catalog-panel-layer-tree.test.mjs",
       registrations,
       positiveAndNegativeCoverage: true,
       failClosedCatalogSourceAndLimitCoverage: true,
       noSubstitutionCoverage: true,
-      laterSliceAbsenceCoverage: true,
+      mutationAndPersistenceAbsenceCoverage: true,
       targetedReceipts: [
         receiptByPath.get(AUTHORING_TEST_PATH),
+        {
+          path: AUTHORING_SELECTION_TEST_PATH,
+          bytes: files.get(AUTHORING_SELECTION_TEST_PATH).byteLength,
+          sha256: sha256(files.get(AUTHORING_SELECTION_TEST_PATH)),
+        },
         receiptByPath.get(APPLICATION_TEST_PATH),
       ],
     },
@@ -1559,7 +1728,7 @@ function assertRetainedHistoricalReceipts(frozenArtifact, files) {
   }
 }
 
-/** Authenticates frozen M09-T02 evidence and checks its live M09-T03 successor. */
+/** Authenticates frozen M09-T02 evidence and checks its live M09-T04 successor. */
 export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const [frozen, files, shellArtifactBytes, referenceArtifactBytes] = await Promise.all([
@@ -1614,11 +1783,13 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
       successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
     },
     successor: {
-      task: "M09-T03",
+      task: "M09-T04",
       realAdapterCanvasOwnedBySuccessor: true,
       historicalNoCanvasNonclaimAppliedToCurrentApp: false,
       exactPublicRuntimeAdapterPathAllowed: true,
-      selectionOrInspectorImplemented: false,
+      sourceIdentitySelectionOverlayImplemented: true,
+      historicalNoSelectionNonclaimAppliedToCurrentApp: false,
+      inspectorImplemented: false,
       sourceMutationOrHistoryImplemented: false,
       persistenceUiImplemented: false,
       runOrPublishImplemented: false,

@@ -809,6 +809,25 @@ This closes the controlled Web–React registry-identity claim and advances P-06
 private-DOM overlay, inspector editing, insertion, structural mutation, drag/drop, state/action
 editing, Design/Run mode, persistence, diagnostics, publication, or activation authority.
 
+M09-T04 adds selection without crossing that managed boundary. A route-keyed application owner
+captures only exact primitive project, surface, Source-node, capability, display, and conditional
+data minted from the validated authoring model. Projection to current runtime instances reads only
+the public callback-free Runtime React diagnostic index: repeated component instances are retained,
+attached behavior identities are filtered, and a missing runtime instance is represented only for
+an explicitly conditional Source component. Unknown, stale, cross-route, and forged identities
+produce no overlay authority.
+
+The disabled managed fieldset still contains the Runtime React boundary. Desen App renders its
+pointer-inert selection card as a sibling outside that fieldset and the marked capability subtree;
+the card receives no managed child, DOM/native handle, React-private value, registry, session,
+callback, hit-test, or geometry input. Native layer buttons own selection and pressed semantics,
+while route replacement resets the local selection synchronously. This establishes `N-042` as
+`TESTED` for the exact controlled Web–React profile without claiming an inspector, mutation,
+Design/Run behavior, diagnostics navigation, persistence, publication, activation, future Catalog
+generality, or native-target parity. Exact evidence is the 11,997-byte
+`docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json` at
+`sha256:9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1`.
+
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,
 proof, runtime, or protocol authority. Repository-owned TypeScript, React structure, CSS Modules,

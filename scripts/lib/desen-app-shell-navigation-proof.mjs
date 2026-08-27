@@ -54,11 +54,13 @@ const SVG_ASSET_PATHS = Object.freeze(
 );
 const AUTHORING_SOURCE_PATH = "apps/desen-app/src/authoring-data.ts";
 const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
+const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
 const OFFICIAL_SOURCE_PATH = "examples/sign-in/official-derived.source.desen.json";
 const OFFICIAL_BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
 const ADDITIVE_SUCCESSOR_SOURCE_PATHS = Object.freeze([
   AUTHORING_SOURCE_PATH,
   ADAPTER_CANVAS_SOURCE_PATH,
+  AUTHORING_SELECTION_SOURCE_PATH,
 ]);
 const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
   ...SOURCE_PATHS.filter((entry) => /\.(?:ts|tsx)$/u.test(entry)),
@@ -500,7 +502,7 @@ function verifyShellSemantics(files) {
   for (const required of ["@media", "var(--desen-app-", ".visuallyHidden"]) {
     requireText(moduleStyles, required, "application.module.css");
   }
-  for (const required of ["M09-T03", "History API"]) {
+  for (const required of ["M09-T04", "History API"]) {
     requireText(readme, required, "apps/desen-app/README.md");
   }
 
@@ -650,10 +652,12 @@ function inspectImports(files) {
         "@desen/runtime-react",
       ]),
     ],
+    [AUTHORING_SELECTION_SOURCE_PATH, new Set(["@desen/runtime-react"])],
   ]);
   const seenSuccessorPackageImports = new Map(
     [...exactSuccessorPackageImports].map(([relativePath]) => [relativePath, new Set()]),
   );
+  let publicDiagnosticIndexTypeOnlyImports = 0;
   for (const relativePath of CURRENT_TYPESCRIPT_SOURCE_PATHS) {
     const source = decodeUtf8(files.get(relativePath), relativePath);
     const sourceFile = ts.createSourceFile(
@@ -700,6 +704,29 @@ function inspectImports(files) {
     const visit = (node) => {
       if (ts.isImportDeclaration(node)) {
         recordSpecifier(node.moduleSpecifier, "import");
+        if (
+          relativePath === AUTHORING_SELECTION_SOURCE_PATH &&
+          ts.isStringLiteralLike(node.moduleSpecifier) &&
+          node.moduleSpecifier.text === "@desen/runtime-react"
+        ) {
+          const clause = node.importClause;
+          const bindings = clause?.namedBindings;
+          if (
+            clause?.isTypeOnly !== true ||
+            clause.name !== undefined ||
+            bindings === undefined ||
+            !ts.isNamedImports(bindings) ||
+            bindings.elements.length !== 1 ||
+            bindings.elements[0].propertyName !== undefined ||
+            bindings.elements[0].name.text !== "RuntimeReactDiagnosticIndex"
+          ) {
+            fail(
+              "IMPORT_BOUNDARY_DRIFT",
+              "M09-T04 selection may import only the public diagnostic-index type.",
+            );
+          }
+          publicDiagnosticIndexTypeOnlyImports += 1;
+        }
       } else if (ts.isExportDeclaration(node) && node.moduleSpecifier !== undefined) {
         recordSpecifier(node.moduleSpecifier, "re-export");
       } else if (ts.isImportEqualsDeclaration(node) || ts.isImportTypeNode(node)) {
@@ -723,6 +750,12 @@ function inspectImports(files) {
         `${relativePath} lost its exact reviewed successor package-import surface.`,
       );
     }
+  }
+  if (publicDiagnosticIndexTypeOnlyImports !== 1) {
+    fail(
+      "IMPORT_BOUNDARY_DRIFT",
+      "M09-T04 must retain one type-only RuntimeReactDiagnosticIndex import.",
+    );
   }
   const authoringImports = imports.filter(
     ({ path: importer }) => importer === AUTHORING_SOURCE_PATH,
@@ -781,6 +814,25 @@ function inspectImports(files) {
       "M09-T03 gained a handwritten tree, private DOM, mutation, or publication bypass.",
     );
   }
+  const authoringSelection = decodeUtf8(
+    files.get(AUTHORING_SELECTION_SOURCE_PATH),
+    AUTHORING_SELECTION_SOURCE_PATH,
+  );
+  if (
+    /\b(?:document|globalThis|navigator|self|window)\b/u.test(authoringSelection) ||
+    /\b(?:getBoundingClientRect|querySelector(?:All)?|closest|matches|elementFromPoint|elementsFromPoint|MutationObserver|ResizeObserver)\b/u.test(
+      authoringSelection,
+    ) ||
+    /\b(?:cloneElement|createElement)\s*\(|React\.Children\b|\.props\b/u.test(authoringSelection) ||
+    /\b(?:insertDesenEditor|moveDesenEditor|deleteDesenEditor|saveDesen|publish(?:Revision|Source)?|activateRevision)\s*\(/u.test(
+      authoringSelection,
+    )
+  ) {
+    fail(
+      "SCOPE_BOUNDARY_DRIFT",
+      "M09-T04 selection gained private DOM, React-tree, mutation, or publication authority.",
+    );
+  }
   const indexHtml = decodeUtf8(files.get("apps/desen-app/index.html"), "index.html");
   const expectedModuleEntry = '<script type="module" src="/src/main.tsx"></script>';
   const scriptOpenings = [...indexHtml.matchAll(/<script\b/giu)].length;
@@ -810,6 +862,7 @@ function inspectImports(files) {
       ]),
     ),
     exactReferenceAdapterRegistry: true,
+    publicDiagnosticIndexTypeOnlyImports,
     handwrittenManagedTreeElements: 0,
     privateDomAccesses: 0,
     mutationOrPublicationCalls: 0,
@@ -960,13 +1013,15 @@ export async function buildDesenAppShellNavigationEvidence(rawOptions = undefine
     },
     tests,
     additiveSuccessor: {
-      task: "M09-T03",
+      task: "M09-T04",
       catalogDrivenAuthoringReadModelAllowed: true,
       exactPublicRuntimeAdapterCanvasAllowed: true,
+      stableSourceSelectionOverlayAllowed: true,
       knownSourceEdges: [...ADDITIVE_SUCCESSOR_SOURCE_PATHS],
       historicalNoCatalogPanelNonclaimAppliedToCurrentApp: false,
       historicalNoRealAdapterCanvasNonclaimAppliedToCurrentApp: false,
-      selectionMutationPersistenceAndPublishStillDisallowed: true,
+      historicalNoSelectionOrInspectorNonclaimAppliedToCurrentApp: false,
+      sourceMutationPersistenceAndPublishStillDisallowed: true,
     },
   });
   return deepFreeze({

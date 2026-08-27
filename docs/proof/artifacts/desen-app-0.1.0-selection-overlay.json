@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-selection-overlay",
+  "profile": "desen.app.selection-overlay-proof.v1",
+  "task": "M09-T04",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M09-T03",
+      "proofId": "desen-app-real-adapter-canvas",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json",
+      "bytes": 73111,
+      "sha256": "8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151",
+      "profile": "desen.app.real-adapter-canvas-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "stableSourceIdentitySelection": true,
+    "validatedAuthoringModelMembershipRequired": true,
+    "publicDiagnosticIndexOnly": true,
+    "repeatedRuntimeInstancesPreserved": true,
+    "behaviorRuntimeIdentitiesExcludedFromComponentSelection": true,
+    "conditionalAbsenceRepresentedHonestly": true,
+    "unknownAndStaleIdentityRejected": true,
+    "selectionChromeOutsideManagedCapabilitySubtree": true,
+    "privateDomAndReactAuthoringRejected": true,
+    "componentGeometryClaimed": false,
+    "managedAdapterPathRetained": true,
+    "routeResetSynchronous": true,
+    "n042Status": "TESTED",
+    "p06Status": "PROVEN",
+    "p07Status": "PARTIAL",
+    "p16Status": "PARTIAL"
+  },
+  "authority": {
+    "source": {
+      "selection": {
+        "exactPrimitiveFields": [
+          "kind",
+          "projectId",
+          "surfaceId",
+          "sourceNodeId",
+          "capabilityId",
+          "displayName",
+          "conditional"
+        ],
+        "exactRuntimeSnapshotFields": [
+          "surfaceId",
+          "diagnosticIndex"
+        ],
+        "authoringModelMembershipRequired": true,
+        "conditionalAbsenceOnly": true,
+        "repeatedRuntimeIdentitiesPreserved": true,
+        "attachedBehaviorIdentitiesFiltered": true,
+        "diagnosticReads": [
+          "byRuntimeNodeId",
+          "runtimeNodeIdsBySourceNodeId"
+        ],
+        "constructorDropsUnknownFields": true,
+        "privateInspection": {
+          "privateDomOrGeometryCalls": 0,
+          "privateReactReferences": 0,
+          "allowedAppNavigationDomCalls": 0
+        }
+      },
+      "adapter": {
+        "publicRuntimeOnly": true,
+        "exactSharedRegistryRetained": true,
+        "detachedSnapshotFields": [
+          "surfaceId",
+          "diagnosticIndex"
+        ],
+        "managedFieldsetContainsRuntimeBoundary": true,
+        "overlayOutsideManagedFieldset": true,
+        "overlayReceivesNoManagedChildOrDomHandle": true,
+        "dataAttributes": [
+          "data-managed-capability-frame",
+          "data-managed-capability-subtree",
+          "data-materialized",
+          "data-selection-overlay"
+        ],
+        "privateInspection": {
+          "privateDomOrGeometryCalls": 0,
+          "privateReactReferences": 0,
+          "allowedAppNavigationDomCalls": 0
+        }
+      },
+      "application": {
+        "nativeLayerButton": true,
+        "buttonAttributes": [
+          "aria-label",
+          "aria-pressed",
+          "className",
+          "data-category",
+          "onClick",
+          "type"
+        ],
+        "singleRouteLocalSelectionState": true,
+        "routeKeyReset": true,
+        "validatedAuthoringNodeMinting": true,
+        "privateInspection": {
+          "privateDomOrGeometryCalls": 0,
+          "privateReactReferences": 0,
+          "allowedAppNavigationDomCalls": 2
+        }
+      },
+      "css": {
+        "compactIdentityCard": true,
+        "componentGeometryClaimed": false,
+        "pointerEvents": "none",
+        "managedDescendantSelectors": 0,
+        "responsiveEditorStatusDocked": true
+      }
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/authoring-selection.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+      "rootCommands": {
+        "generate:desen-app-selection-overlay": "node scripts/verify-desen-app-real-adapter-canvas.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:selection && node scripts/generate-desen-app-selection-overlay-proof.mjs",
+        "verify:desen-app-selection-overlay": "node scripts/verify-desen-app-real-adapter-canvas.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:selection && node scripts/verify-desen-app-selection-overlay.mjs",
+        "test:desen-app-selection-overlay": "node scripts/verify-desen-app-real-adapter-canvas.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:selection && node --test tests/desen-app-selection-overlay.test.mjs"
+      },
+      "directParentVerifier": "node scripts/verify-desen-app-real-adapter-canvas.mjs"
+    },
+    "selection": {
+      "owner": "route-keyed SurfaceEditor",
+      "identity": "project/surface/Source/capability/display/conditional primitives",
+      "runtimeLookup": "RuntimeReactDiagnosticIndex callback-free identity",
+      "persistence": false
+    },
+    "overlay": {
+      "owner": "Desen App authoring chrome",
+      "relationship": "DOM sibling outside disabled managed fieldset",
+      "shape": "compact identity/status card",
+      "pointerEvents": "none",
+      "componentGeometry": false
+    },
+    "accessibility": {
+      "nativeLayerButtons": true,
+      "pressedState": true,
+      "dynamicSelectDeselectName": true,
+      "conditionalName": true,
+      "panelLiveStatus": true,
+      "tabKeyboardWrap": true
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/app-web test:selection && node --test tests/desen-app-selection-overlay.test.mjs",
+    "selectionTestNames": [
+      "creates only a frozen inert route and Source identity",
+      "keeps idle and pre-render states explicit without inventing a runtime target",
+      "projects repeated component instances while excluding attached behavior identities",
+      "reports a conditional Source component honestly when no runtime instance exists",
+      "rejects cross-route, cross-surface, and stale-capability identities closed",
+      "rejects a forged same-route Source identity instead of treating it as conditional"
+    ],
+    "adapterTestNames": [
+      "renders Source-identity selection chrome as a sibling outside the managed subtree",
+      "keeps a selected conditional Source node honest when it is not materialized",
+      "rejects stale and cross-route selection identities without exposing overlay chrome"
+    ],
+    "applicationTestNames": [
+      "selects Source layers accessibly and keeps the identity overlay outside managed adapters",
+      "removes the managed sign-in tree synchronously when routing to an unsupported surface"
+    ],
+    "rootTestNames": [
+      "[authority] authenticates the exact frozen M09-T03 adapter-canvas parent",
+      "[selection] captures only exact primitive Source identity admitted by the authoring model",
+      "[projection] preserves repeats, filters behavior identities, and rejects stale targets",
+      "[ownership] proves selection chrome is a sibling outside the managed capability subtree",
+      "[boundary] rejects private DOM, React-tree, geometry, registry, session, and callback authority",
+      "[experience] records accessible single selection, conditional feedback, and route reset",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[mutation] rejects private lookup, geometry, overlay nesting, and perimeter-box substitutions",
+      "[verification] rejects parent, committed artifact, and visible proof-pin drift",
+      "[filesystem] writes atomically and rejects non-regular proof authorities"
+    ],
+    "hostileMutationClasses": [
+      "UNKNOWN_OR_STALE_SOURCE_IDENTITY",
+      "CALLBACK_OR_EXTRA_SELECTION_FIELD",
+      "PRIVATE_DOM_LOOKUP",
+      "PRIVATE_REACT_TREE_ACCESS",
+      "GEOMETRY_MEASUREMENT",
+      "OVERLAY_NESTING",
+      "PERIMETER_BOUNDING_BOX",
+      "REGISTRY_OR_MANAGED_TREE_SUBSTITUTION"
+    ]
+  },
+  "boundary": {
+    "trackedFiles": 15,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 1285,
+        "sha256": "3fda6f201449b9a1efa01075c38c992c6672b4b4655d14fad2acf2caf087fb1e"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 9444,
+        "sha256": "e9f46d9965741066bf43329af2fcba8f7296740862eea3513fc792693d8cbd06"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 31468,
+        "sha256": "995a9cb596628114a4488d7bbc9aac204433b3ac391b638acfd0bcce8667b1bc"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 30885,
+        "sha256": "df13d30eb9ec58477c0c24ee0202ed66cc24aaf10e43e6031f62ba7690efa014"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-selection.ts",
+        "bytes": 6147,
+        "sha256": "e97eed87734fff6fdc3a40dbc81754a88318238090e4c1dfcc53062e8ff7fc7c"
+      },
+      {
+        "path": "apps/desen-app/test/adapter-canvas.test.tsx",
+        "bytes": 8168,
+        "sha256": "86eb444fb0d0a7e6b078dfe1ba379007a81e9e6dc2a13ea2df635e5afeb7986c"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 20698,
+        "sha256": "7ef524df0e6a4be0d18a2a423bc238654b14ded84c0479a1dc45c8fc7864c823"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-selection.test.ts",
+        "bytes": 6779,
+        "sha256": "2cb243e2df249aed20cf3004cb084a2c50af8eeda1b8f32dc59b69b7e72ae875"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json",
+        "bytes": 73111,
+        "sha256": "8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151"
+      },
+      {
+        "path": "package.json",
+        "bytes": 85315,
+        "sha256": "1fc975768a3ddb251a206ae28c1dde5cf540f8a815e964c6109943f4a92d925c"
+      },
+      {
+        "path": "scripts/generate-desen-app-selection-overlay-proof.mjs",
+        "bytes": 787,
+        "sha256": "a1d4c3649b0a3110afa78fdf0bd212be301b7e284705e2f36c84ee76ceab9718"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-selection-overlay-proof.mjs",
+        "bytes": 42521,
+        "sha256": "cfa1c0b4d04b7d15ca746fd7b46b1d947a08b48dee5b7637ca4e99fcd3ab1d37"
+      },
+      {
+        "path": "scripts/verify-desen-app-selection-overlay.mjs",
+        "bytes": 656,
+        "sha256": "bfb20ee0265c22dad46b9298c474d793d0113cef89ffe6a0e5876dbf3fd12ccc"
+      },
+      {
+        "path": "tests/desen-app-selection-overlay.test.mjs",
+        "bytes": 10506,
+        "sha256": "ce59437c2dcfbfb58bf3b6c641ed08021d77bde024371784eeb17cd57af6e9b2"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-selection-overlay-proof.mjs",
+      "scripts/generate-desen-app-selection-overlay-proof.mjs",
+      "scripts/verify-desen-app-selection-overlay.mjs",
+      "tests/desen-app-selection-overlay.test.mjs"
+    ],
+    "parentArtifacts": 1,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "No per-component rectangle, hit testing, canvas picking, geometry, or private DOM/native structure is exposed.",
+    "No inspector, Source mutation, insertion, move, reorder, cardinality, drag/drop, binding, event, or action authoring.",
+    "No Design/Run switch, diagnostics navigation, invalid placeholders, persistence, publication, or activation.",
+    "P-07 and P-16 remain PARTIAL; browser E2E and end-to-end diagnostic selection remain later tasks.",
+    "N-042 is TESTED only for this exact controlled Web-React profile, not arbitrary future or native adapters."
+  ]
+}

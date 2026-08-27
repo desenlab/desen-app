@@ -24,9 +24,11 @@ const HOST_SOURCE_AUDIT_ARTIFACT =
   "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json";
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION = "apps/desen-app/src/application.tsx";
+const AUTHORING_SELECTION = "apps/desen-app/src/authoring-selection.ts";
 const temporaryDirectories = [];
 let adapterCanvasSource;
 let applicationSource;
+let authoringSelectionSource;
 let built;
 let hostSourceAuditArtifact;
 let hostSourceAuditArtifactBytes;
@@ -48,7 +50,7 @@ function replaceOnce(source, search, replacement) {
 }
 
 function cloneGraph() {
-  return JSON.parse(JSON.stringify(built.artifact.authority.runtimeResolution.modules));
+  return JSON.parse(JSON.stringify(built.currentCompatibility.authority.runtimeResolution.modules));
 }
 
 function graphModule(graph, id) {
@@ -73,12 +75,14 @@ before(async () => {
   [
     adapterCanvasSource,
     applicationSource,
+    authoringSelectionSource,
     built,
     hostSourceAuditArtifactBytes,
     shellArtifactBytes,
   ] = await Promise.all([
     readFile(path.join(ROOT, ADAPTER_CANVAS), "utf8"),
     readFile(path.join(ROOT, APPLICATION), "utf8"),
+    readFile(path.join(ROOT, AUTHORING_SELECTION), "utf8"),
     buildDesenAppRealAdapterCanvasEvidence(),
     readFile(path.join(ROOT, HOST_SOURCE_AUDIT_ARTIFACT)),
     readFile(path.join(ROOT, SHELL_ARTIFACT)),
@@ -98,6 +102,11 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.profile, "desen.app.real-adapter-canvas-proof.v1");
   assert.equal(built.artifact.task, "M09-T03");
   assert.equal(built.artifact.result, "PASS");
+  assert.equal(built.artifactBytes.byteLength, 73_111);
+  assert.equal(
+    built.artifactSha256,
+    "8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151",
+  );
   assert.deepEqual(built.artifact.prerequisites, [
     DESEN_APP_REAL_ADAPTER_CANVAS_SHELL_PIN,
     DESEN_APP_REAL_ADAPTER_CANVAS_HOST_SOURCE_AUDIT_PIN,
@@ -108,6 +117,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.s001Status, "PLANNED");
   assert.equal(built.artifact.claim.pf059Status, "OPEN");
   assert.equal(built.artifact.claim.p07Status, "PARTIAL");
+  assert.equal(built.currentCompatibility.result, "PASS");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T04");
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[1], () => {
@@ -171,12 +182,21 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
     true,
   );
 
+  const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
+  assert.equal(currentRuntime.moduleCount, 103);
+  assert.equal(currentRuntime.staticEdges, 293);
+  assert.equal(currentRuntime.dynamicEdges, 0);
+  assert.equal(currentRuntime.sharedRuntimeModuleCount, 19);
+  assert.equal(currentRuntime.realComponentModuleCount, 5);
+
   const second = await buildDesenAppRealAdapterCanvasEvidence();
   assert.deepEqual(second.artifactBytes, built.artifactBytes);
   assert.equal(second.artifactSha256, built.artifactSha256);
   assert.notEqual(second.artifact, built.artifact);
   assert.equal(Object.isFrozen(second.artifact), true);
   assert.equal(Object.isFrozen(second.artifact.authority.runtimeResolution.modules), true);
+  assert.deepEqual(second.currentCompatibility, built.currentCompatibility);
+  assert.equal(Object.isFrozen(second.currentCompatibility), true);
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
@@ -192,6 +212,17 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.artifact.application.lifecycle.mismatchDisposesBeforeFailure, true);
   assert.equal(built.artifact.application.lifecycle.preflightFailureDisposesBeforeFailure, true);
   assert.equal(built.artifact.application.lifecycle.effectCleanupDisposes, true);
+  assert.equal(built.currentCompatibility.application.ui.selectionOverlay, true);
+  assert.equal(
+    built.currentCompatibility.application.ui.selectionOverlayOutsideManagedCapabilitySubtree,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.historicalNoSelectionOverlayNonclaimAppliedToCurrentApp,
+    false,
+  );
+  assert.equal(built.currentCompatibility.successor.publicDiagnosticIndexOnly, true);
+  assert.equal(built.currentCompatibility.successor.sourceMutationOrHistoryImplemented, false);
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[4], () => {
@@ -207,8 +238,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[4], () => {
 
   const handwrittenTree = replaceOnce(
     adapterCanvasSource,
-    "return <RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />;",
-    'return <button type="button">Handwritten managed action</button>;',
+    "<RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />",
+    '<button type="button">Handwritten managed action</button>',
   );
   assert.throws(
     () => verifyDesenAppRealAdapterCanvasSourcePolicy(handwrittenTree, applicationSource),
@@ -334,6 +365,47 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[7], () => {
     expectedError("SOURCE_POLICY_VIOLATION"),
   );
 
+  const valueDiagnosticImport = replaceOnce(
+    authoringSelectionSource,
+    "import type { RuntimeReactDiagnosticIndex }",
+    "import { RuntimeReactDiagnosticIndex }",
+  );
+  assert.throws(
+    () =>
+      verifyDesenAppRealAdapterCanvasSourcePolicy(
+        adapterCanvasSource,
+        applicationSource,
+        valueDiagnosticImport,
+      ),
+    expectedError("SOURCE_POLICY_VIOLATION"),
+  );
+
+  const selectionDomInspection = `${authoringSelectionSource}\ndocument.querySelector("[data-node]");\n`;
+  assert.throws(
+    () =>
+      verifyDesenAppRealAdapterCanvasSourcePolicy(
+        adapterCanvasSource,
+        applicationSource,
+        selectionDomInspection,
+      ),
+    expectedError("SOURCE_POLICY_VIOLATION"),
+  );
+
+  const overlayInsideManagedSubtree = replaceOnce(
+    adapterCanvasSource,
+    "        </div>\n      </fieldset>\n      <SelectionOverlay projection={projection} />",
+    "          <SelectionOverlay projection={projection} />\n        </div>\n      </fieldset>",
+  );
+  assert.throws(
+    () =>
+      verifyDesenAppRealAdapterCanvasSourcePolicy(
+        overlayInsideManagedSubtree,
+        applicationSource,
+        authoringSelectionSource,
+      ),
+    expectedError("SOURCE_POLICY_VIOLATION"),
+  );
+
   const unsupportedSubstitution = replaceOnce(
     adapterCanvasSource,
     "if (!supported) return <CanvasUnavailable />;",
@@ -362,8 +434,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[7], () => {
     ),
     replaceOnce(
       adapterCanvasSource,
-      "  return (\n    <fieldset className={styles.adapterCanvas} disabled style={REFERENCE_WEB_TOKEN_CSS_PROPERTIES}>",
-      "  return\n  (\n    <fieldset className={styles.adapterCanvas} disabled style={REFERENCE_WEB_TOKEN_CSS_PROPERTIES}>",
+      "  return (\n    <>\n      <fieldset",
+      "  return\n  (\n    <>\n      <fieldset",
     ),
     replaceOnce(
       adapterCanvasSource,
@@ -518,6 +590,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
+  assert.equal(verified.currentGraphModules, 103);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 

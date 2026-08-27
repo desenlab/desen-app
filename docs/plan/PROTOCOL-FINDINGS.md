@@ -1859,9 +1859,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
   composes receiving failures and adapter exceptions into the production safe-boundary policy;
   `PF-055` records its conservative attribution and recovery rules.
   M06-T05 still owns publisher-side recording of dynamic validation obligations, so `N-027`
-  remains `PLANNED`. M09-T04 still owns editor overlay/private-structure isolation, so `N-042`
-  remains `PLANNED`. A later protocol revision may standardize a target-neutral receiving-scope
-  envelope and aggregate-budget terminology if independent runtimes need byte-level parity.
+  remains `PLANNED`. M09-T04 now closes `N-042` as `TESTED` for the exact controlled Web–React
+  editor profile: selection is minted from validated Source identity, projected through the public
+  callback-free diagnostic index, and rendered as App-owned chrome outside the managed capability
+  subtree without DOM/native handles, React-private data, or geometry authority. Arbitrary future
+  Catalogs, native adapters, inspector behavior, and browser E2E remain outside that result. A
+  later protocol revision may standardize a target-neutral receiving-scope envelope and
+  aggregate-budget terminology if independent runtimes need byte-level parity.
 
 ## PF-052 — Semantic React style delivery preserves capability-owned state activation
 

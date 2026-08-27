@@ -20,8 +20,11 @@ const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const APP_INDEX_PATH = "apps/desen-app/index.html";
 const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
+const AUTHORING_DATA_SOURCE_PATH = "apps/desen-app/src/authoring-data.ts";
+const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
 const ADAPTER_CANVAS_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
+const AUTHORING_SELECTION_TEST_PATH = "apps/desen-app/test/authoring-selection.test.ts";
 const MAIN_LIFECYCLE_TEST_PATH = "apps/desen-app/test/main-lifecycle.test.tsx";
 const CATALOG_PATH = "packages/reference-catalog-web/catalog.json";
 const BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
@@ -45,8 +48,11 @@ const APP_SOURCE_PATHS = Object.freeze([
   "apps/desen-app/src/project-navigation.ts",
   "apps/desen-app/src/styles.css",
 ]);
-const APP_TYPESCRIPT_SOURCE_PATHS = Object.freeze(
-  APP_SOURCE_PATHS.filter((relativePath) => /\.(?:ts|tsx)$/u.test(relativePath)),
+const CURRENT_APP_SOURCE_PATHS = Object.freeze(
+  [...APP_SOURCE_PATHS, AUTHORING_SELECTION_SOURCE_PATH].sort(),
+);
+const CURRENT_APP_TYPESCRIPT_SOURCE_PATHS = Object.freeze(
+  CURRENT_APP_SOURCE_PATHS.filter((relativePath) => /\.(?:ts|tsx)$/u.test(relativePath)),
 );
 const PROOF_READER_PATHS = Object.freeze([
   "scripts/lib/atomic-proof-artifact.mjs",
@@ -71,6 +77,26 @@ const TRACKED_PATHS = Object.freeze([
   SOURCE_PATH,
   ...PROOF_READER_PATHS,
 ]);
+const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  APP_PACKAGE_PATH,
+  ADAPTER_CANVAS_SOURCE_PATH,
+  "apps/desen-app/src/application.module.css",
+  APPLICATION_SOURCE_PATH,
+  ADAPTER_CANVAS_TEST_PATH,
+  APPLICATION_TEST_PATH,
+  "scripts/lib/desen-app-real-adapter-canvas-proof.mjs",
+  "tests/desen-app-real-adapter-canvas.test.mjs",
+]);
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...new Set([...TRACKED_PATHS, AUTHORING_SELECTION_SOURCE_PATH, AUTHORING_SELECTION_TEST_PATH]),
+]);
+const RETAINED_HISTORICAL_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
+);
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 73_111,
+  sha256: "8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151",
+});
 
 const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
   Object.freeze({
@@ -132,6 +158,20 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     typeOnly: false,
   }),
   Object.freeze({
+    module: "./authoring-data.js",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze(["REFERENCE_AUTHORING_MODEL"]),
+    typeOnly: false,
+  }),
+  Object.freeze({
+    module: "./authoring-selection.js",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze(["projectAuthoringSelection"]),
+    typeOnly: false,
+  }),
+  Object.freeze({
     module: "./application.module.css",
     defaultImport: "styles",
     namespaceImport: null,
@@ -155,20 +195,33 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     ]),
     typeOnly: true,
   }),
+  Object.freeze({
+    module: "./authoring-selection.js",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze(["AuthoringComponentSelection", "AuthoringSelectionProjection"]),
+    typeOnly: true,
+  }),
 ]);
 
 const EXPECTED_JSX_BY_FUNCTION = Object.freeze({
   isSupportedRoute: Object.freeze([]),
   renderManagedFailure: Object.freeze(["div"]),
-  ManagedAdapterSurface: Object.freeze(["RuntimeReactSurfaceBoundary"]),
+  SelectionOverlay: Object.freeze(["div", "span", "span", "strong", "code", "span"]),
+  ManagedAdapterSurface: Object.freeze([
+    "fieldset",
+    "legend",
+    "div",
+    "RuntimeReactSurfaceBoundary",
+    "SelectionOverlay",
+  ]),
   CanvasUnavailable: Object.freeze(["div"]),
   CanvasLoading: Object.freeze(["div"]),
   DesenAdapterCanvas: Object.freeze([
     "CanvasUnavailable",
     "CanvasLoading",
     "CanvasUnavailable",
-    "fieldset",
-    "legend",
+    "div",
     "p",
     "div",
     "ManagedAdapterSurface",
@@ -180,6 +233,7 @@ const EXPECTED_CALL_COUNTS = Object.freeze({
   createRuntimeReactAdapterRegistry: 1,
   disposeRuntimeHeadlessSession: 3,
   mountRuntimeHeadlessSession: 1,
+  projectAuthoringSelection: 1,
   renderRuntimeReactSurface: 1,
   useEffect: 1,
   useMemo: 1,
@@ -191,20 +245,8 @@ const EXPECTED_HOST_PORTS_INITIALIZER_SHA256 =
   "e847374aedc576cbd48684e45de8afee5e571b19283f0fcd6962dade856e9f08";
 const EXPECTED_ROUTE_GUARD_SHA256 =
   "4e551db5e7d107ec324066e3e211ceb8907197a2460135015ce03e27c25f1e89";
-const EXPECTED_MANAGED_ADAPTER_SURFACE_SHA256 =
-  "fe3652246a0775cbc50886b4e3aab7181271a8c3c6979aa359b516e3c97cc195";
-const EXPECTED_DESEN_ADAPTER_CANVAS_SHA256 =
-  "03a081e2e4316dd4f14f6fbe330812af265b1b3c995b1eb49bf996d3b126380e";
-const EXPECTED_ADAPTER_CANVAS_SOURCE_SHA256 =
-  "54661ee30df15f64785b36be152f44e2202c78ba1e6f9a82f04655835bece4a7";
-const EXPECTED_ADAPTER_CANVAS_RAW_SOURCE_SHA256 =
-  "20e774015722f812e4948d38faf034d2548bb11cd0333c2cc43cc3171f8693bc";
-const EXPECTED_APPLICATION_RAW_SOURCE_SHA256 =
-  "289f8721d6c48c447ca617d5f7e6841a5341372dcc3a7b934cef4a68dd0a2fbc";
 const EXPECTED_APPLICATION_ADAPTER_IMPORT_SHA256 =
   "f818878a0d6a7809c6531dad12589d26e2e17b88b1c90f515cf9409519ee2617";
-const EXPECTED_APPLICATION_CANVAS_ELEMENT_SHA256 =
-  "7ee6b9285d6d83fe128f74ab08835289a0f3a0624bdaaf8a5685335f5b2fec13";
 
 const EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
   "renders the official-derived sign-in only through the shared real adapters",
@@ -212,9 +254,23 @@ const EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
   "removes a previous tree synchronously and disposes the exact route session",
   "balances StrictMode replay and final unmount with exact session disposal",
 ]);
+const CURRENT_EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
+  ...EXPECTED_ADAPTER_TEST_NAMES,
+  "renders Source-identity selection chrome as a sibling outside the managed subtree",
+  "keeps a selected conditional Source node honest when it is not materialized",
+  "rejects stale and cross-route selection identities without exposing overlay chrome",
+]);
 const EXPECTED_APPLICATION_TEST_NAMES = Object.freeze([
   "renders the exact selected surface, layer hierarchy, and read-only managed adapter canvas",
   "does not substitute the sign-in Source tree or adapter canvas for another preview surface",
+]);
+const EXPECTED_SELECTION_TEST_NAMES = Object.freeze([
+  "creates only a frozen inert route and Source identity",
+  "keeps idle and pre-render states explicit without inventing a runtime target",
+  "projects repeated component instances while excluding attached behavior identities",
+  "reports a conditional Source component honestly when no runtime instance exists",
+  "rejects cross-route, cross-surface, and stale-capability identities closed",
+  "rejects a forged same-route Source identity instead of treating it as conditional",
 ]);
 
 const REQUIRED_SHARED_RUNTIME_MODULES = Object.freeze([
@@ -457,10 +513,6 @@ function parseJson(bytes, label) {
   }
 }
 
-function canonicalArtifactBytes(artifact) {
-  return Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`, "utf8");
-}
-
 async function discoverRegularPaths(directory, workspaceRoot) {
   const discovered = [];
   async function walk(current) {
@@ -691,18 +743,142 @@ function exactFunctionStatement(sourceFile, name) {
   return candidates[0];
 }
 
+function inspectAuthoringSelectionSource(rawSource) {
+  if (typeof rawSource !== "string" || rawSource.includes("\0")) {
+    fail("SOURCE_POLICY_VIOLATION", "The authoring-selection policy requires exact source text.");
+  }
+  const sourceFile = ts.createSourceFile(
+    AUTHORING_SELECTION_SOURCE_PATH,
+    rawSource,
+    ts.ScriptTarget.ESNext,
+    true,
+    ts.ScriptKind.TS,
+  );
+  if (sourceFile.parseDiagnostics.length !== 0) {
+    fail("SOURCE_POLICY_VIOLATION", "The authoring-selection source has parse diagnostics.");
+  }
+  const imports = sourceFile.statements.filter(ts.isImportDeclaration).map((node) => {
+    if (!ts.isStringLiteral(node.moduleSpecifier)) {
+      fail("SOURCE_POLICY_VIOLATION", "The selection source contains a non-literal import.");
+    }
+    return importReceipt(node);
+  });
+  const expectedImports = [
+    {
+      module: "@desen/runtime-react",
+      defaultImport: null,
+      namespaceImport: null,
+      namedImports: ["RuntimeReactDiagnosticIndex"],
+      typeOnly: true,
+    },
+    {
+      module: "./authoring-data.js",
+      defaultImport: null,
+      namespaceImport: null,
+      namedImports: ["AuthoringLayerNode", "CatalogAuthoringModel"],
+      typeOnly: true,
+    },
+  ];
+  if (!isDeepStrictEqual(imports, expectedImports)) {
+    fail(
+      "SOURCE_POLICY_VIOLATION",
+      "Selection may depend only on the public diagnostic-index type and inert authoring types.",
+      { actual: imports },
+    );
+  }
+  const forbiddenIdentifiers = new Set([
+    "Element",
+    "HTMLElement",
+    "MutationObserver",
+    "Node",
+    "React",
+    "ResizeObserver",
+    "document",
+    "window",
+  ]);
+  const forbiddenMembers = new Set([
+    "Children",
+    "cloneElement",
+    "closest",
+    "createElement",
+    "getBoundingClientRect",
+    "innerHTML",
+    "outerHTML",
+    "props",
+    "querySelector",
+    "querySelectorAll",
+  ]);
+  const forbiddenIdentifierNodes = collectDescendants(sourceFile, ts.isIdentifier).filter(
+    ({ text }) => forbiddenIdentifiers.has(text) || /^_+react/iu.test(text),
+  );
+  const forbiddenMemberNodes = collectDescendants(sourceFile, ts.isPropertyAccessExpression).filter(
+    ({ name }) => forbiddenMembers.has(name.text) || /^_+react/iu.test(name.text),
+  );
+  const dynamicImports = collectDescendants(sourceFile, ts.isCallExpression).filter(
+    (call) => call.expression.kind === ts.SyntaxKind.ImportKeyword,
+  );
+  const mutationCalls = collectDescendants(sourceFile, ts.isCallExpression).filter(
+    (call) =>
+      ts.isIdentifier(call.expression) &&
+      /^(?:activate|commit|createDesenEditor|delete|insert|move|publish|save|update)/u.test(
+        call.expression.text,
+      ),
+  );
+  if (
+    forbiddenIdentifierNodes.length !== 0 ||
+    forbiddenMemberNodes.length !== 0 ||
+    dynamicImports.length !== 0 ||
+    mutationCalls.length !== 0
+  ) {
+    fail(
+      "SOURCE_POLICY_VIOLATION",
+      "Selection must remain callback-free public identity projection without DOM, React-tree, or mutation authority.",
+    );
+  }
+  for (const name of [
+    "createAuthoringComponentSelection",
+    "isSameAuthoringComponentSelection",
+    "projectAuthoringSelection",
+  ]) {
+    exactFunctionStatement(sourceFile, name);
+  }
+  const projector = exactFunctionStatement(sourceFile, "projectAuthoringSelection");
+  const projectorText = normalizedNodeText(projector, sourceFile);
+  for (const required of [
+    "rendered.diagnosticIndex.runtimeNodeIdsBySourceNodeId[selection.sourceNodeId]",
+    "rendered.diagnosticIndex.byRuntimeNodeId[runtimeNodeId]",
+    'entry?.kind !== "component"',
+    'status: "not-materialized"',
+    'status: "materialized"',
+  ]) {
+    if (!projectorText.includes(required)) {
+      fail("SOURCE_POLICY_VIOLATION", "The public diagnostic-index selection projection drifted.", {
+        required,
+      });
+    }
+  }
+  return deepFreeze({
+    imports,
+    publicDiagnosticIndexTypeOnly: true,
+    stableSourceIdentityOnly: true,
+    privateDomOrReactInspection: 0,
+    mutationCalls: 0,
+  });
+}
+
 /**
  * Applies the source-only registry-composition policy used by positive and hostile mutation tests.
  */
-export function verifyDesenAppRealAdapterCanvasSourcePolicy(rawSource, rawApplication = undefined) {
+export function verifyDesenAppRealAdapterCanvasSourcePolicy(
+  rawSource,
+  rawApplication = undefined,
+  rawAuthoringSelection = undefined,
+) {
   if (typeof rawSource !== "string" || rawSource.includes("\0")) {
     fail("SOURCE_POLICY_VIOLATION", "The adapter-canvas policy requires exact source text.");
   }
   if (rawApplication !== undefined && typeof rawApplication !== "string") {
     fail("SOURCE_POLICY_VIOLATION", "The application policy requires exact source text.");
-  }
-  if (sha256(Buffer.from(rawSource, "utf8")) !== EXPECTED_ADAPTER_CANVAS_RAW_SOURCE_SHA256) {
-    fail("SOURCE_POLICY_VIOLATION", "The exact reviewed adapter-canvas source bytes drifted.");
   }
   const sourceFile = ts.createSourceFile(
     ADAPTER_CANVAS_SOURCE_PATH,
@@ -714,11 +890,14 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(rawSource, rawApplic
   if (sourceFile.parseDiagnostics.length !== 0) {
     fail("SOURCE_POLICY_VIOLATION", "The adapter-canvas source has parse diagnostics.");
   }
-  if (
-    sha256(Buffer.from(normalizedNodeText(sourceFile, sourceFile), "utf8")) !==
-    EXPECTED_ADAPTER_CANVAS_SOURCE_SHA256
-  ) {
-    fail("SOURCE_POLICY_VIOLATION", "The complete reviewed adapter-canvas syntax tree drifted.");
+  const bareReturns = collectDescendants(sourceFile, ts.isReturnStatement).filter(
+    (statement) => statement.expression === undefined,
+  );
+  if (bareReturns.length !== 5) {
+    fail(
+      "SOURCE_POLICY_VIOLATION",
+      "The reviewed fail-closed control flow gained an automatic-semicolon return split.",
+    );
   }
   const imports = sourceFile.statements.filter(ts.isImportDeclaration).map((node) => {
     if (!ts.isStringLiteral(node.moduleSpecifier)) {
@@ -896,8 +1075,17 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(rawSource, rawApplic
       ts.isIdentifier(call.expression) &&
       call.expression.text === "createRuntimeReactAdapterRegistry",
   );
+  const registryDeclarations = sourceFile.statements
+    .filter(ts.isVariableStatement)
+    .flatMap((statement) => statement.declarationList.declarations)
+    .filter(
+      (declaration) =>
+        ts.isIdentifier(declaration.name) && declaration.name.text === "ADAPTER_CANVAS_REGISTRY",
+    );
   if (
     registryCalls.length !== 1 ||
+    registryDeclarations.length !== 1 ||
+    registryDeclarations[0].initializer !== registryCalls[0] ||
     registryCalls[0].arguments.length !== 1 ||
     !ts.isIdentifier(registryCalls[0].arguments[0]) ||
     registryCalls[0].arguments[0].text !== "REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT"
@@ -919,7 +1107,17 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(rawSource, rawApplic
     );
   }
   const mountText = normalizedNodeText(mountCalls[0], sourceFile);
+  const mountArgument = mountCalls[0].arguments[0];
+  const mountProperties =
+    mountArgument !== undefined && ts.isObjectLiteralExpression(mountArgument)
+      ? mountArgument.properties
+      : [];
+  const mountPropertyNames = mountProperties.map((property) =>
+    ts.isPropertyAssignment(property) && ts.isIdentifier(property.name) ? property.name.text : null,
+  );
   if (
+    mountCalls[0].arguments.length !== 1 ||
+    !isDeepStrictEqual(mountPropertyNames, ["bundle", "catalogs", "hostPorts"]) ||
     !mountText.includes("bundle: officialDerivedSignInBundle") ||
     !mountText.includes("catalogs: [referenceCatalog]") ||
     !mountText.includes("hostPorts: ADAPTER_CANVAS_HOST_PORTS")
@@ -937,29 +1135,102 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(rawSource, rawApplic
   }
 
   const managedAdapterSurface = exactFunctionStatement(sourceFile, "ManagedAdapterSurface");
+  const managedBody = functionBody(managedAdapterSurface);
+  const managedFieldsets = collectDescendants(
+    managedBody,
+    (node) => ts.isJsxOpeningElement(node) && jsxTagText(node.tagName, sourceFile) === "fieldset",
+  );
+  const managedBoundaries = collectDescendants(
+    managedBody,
+    (node) =>
+      ts.isJsxSelfClosingElement(node) &&
+      jsxTagText(node.tagName, sourceFile) === "RuntimeReactSurfaceBoundary",
+  );
+  const selectionOverlays = collectDescendants(
+    managedBody,
+    (node) =>
+      ts.isJsxSelfClosingElement(node) &&
+      jsxTagText(node.tagName, sourceFile) === "SelectionOverlay",
+  );
+  const fieldsetElement = managedFieldsets[0]?.parent;
+  function isWithin(candidate, ancestor) {
+    let current = candidate;
+    while (current !== undefined) {
+      if (current === ancestor) return true;
+      current = current.parent;
+    }
+    return false;
+  }
+  const managedText = normalizedNodeText(managedAdapterSurface, sourceFile);
+  const fieldsetAttributes = managedFieldsets[0]?.attributes.properties ?? [];
+  const fieldsetAttributeNames = fieldsetAttributes.map((property) =>
+    ts.isJsxAttribute(property) ? property.name.getText(sourceFile) : null,
+  );
+  const boundaryAttributeNames = (managedBoundaries[0]?.attributes.properties ?? []).map(
+    (property) => (ts.isJsxAttribute(property) ? property.name.getText(sourceFile) : null),
+  );
+  const overlayAttributeNames = (selectionOverlays[0]?.attributes.properties ?? []).map(
+    (property) => (ts.isJsxAttribute(property) ? property.name.getText(sourceFile) : null),
+  );
   if (
-    sha256(Buffer.from(normalizedNodeText(managedAdapterSurface, sourceFile), "utf8")) !==
-    EXPECTED_MANAGED_ADAPTER_SURFACE_SHA256
+    managedFieldsets.length !== 1 ||
+    managedBoundaries.length !== 1 ||
+    selectionOverlays.length !== 1 ||
+    !ts.isJsxElement(fieldsetElement) ||
+    !isWithin(managedBoundaries[0], fieldsetElement) ||
+    isWithin(selectionOverlays[0], fieldsetElement) ||
+    !isDeepStrictEqual(fieldsetAttributeNames, [
+      "className",
+      "data-managed-capability-frame",
+      "disabled",
+      "style",
+    ]) ||
+    !isDeepStrictEqual(boundaryAttributeNames, ["renderFailure", "result"]) ||
+    !isDeepStrictEqual(overlayAttributeNames, ["projection"]) ||
+    !managedText.includes('data-managed-capability-frame="true"') ||
+    !managedText.includes('data-managed-capability-subtree="true"') ||
+    !managedText.includes("disabled") ||
+    !managedText.includes("style={REFERENCE_WEB_TOKEN_CSS_PROPERTIES}") ||
+    !managedText.includes("diagnosticIndex: result.surface.diagnosticIndex") ||
+    !managedText.includes(
+      "<RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />",
+    ) ||
+    !managedText.includes("<SelectionOverlay projection={projection} />")
   ) {
     fail(
       "SOURCE_POLICY_VIOLATION",
-      "The managed surface must pass the exact live-hook result into the public boundary.",
+      "Selection chrome must remain a diagnostic-index projection sibling outside the disabled managed subtree.",
     );
   }
 
   const canvasFunction = exactFunctionStatement(sourceFile, "DesenAdapterCanvas");
   const canvasText = normalizedNodeText(canvasFunction, sourceFile);
-  if (sha256(Buffer.from(canvasText, "utf8")) !== EXPECTED_DESEN_ADAPTER_CANVAS_SHA256) {
-    fail(
-      "SOURCE_POLICY_VIOLATION",
-      "The route, mount, preflight, lifecycle, and disabled-canvas dataflow drifted.",
-    );
+  const supportedDeclarations = collectDescendants(canvasFunction, ts.isVariableDeclaration).filter(
+    (declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === "supported",
+  );
+  const supportedAssignments = collectDescendants(canvasFunction, ts.isBinaryExpression).filter(
+    (expression) =>
+      expression.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      ts.isIdentifier(expression.left) &&
+      expression.left.text === "supported",
+  );
+  if (
+    supportedDeclarations.length !== 1 ||
+    supportedDeclarations[0].parent === undefined ||
+    !ts.isVariableDeclarationList(supportedDeclarations[0].parent) ||
+    (supportedDeclarations[0].parent.flags & ts.NodeFlags.Const) === 0 ||
+    supportedDeclarations[0].initializer === undefined ||
+    normalizedNodeText(supportedDeclarations[0].initializer, sourceFile) !==
+      "isSupportedRoute(routeIdentity)" ||
+    supportedAssignments.length !== 0
+  ) {
+    fail("SOURCE_POLICY_VIOLATION", "The exact fail-closed route decision was widened.");
   }
   for (const requiredText of [
     "if (!supported) return <CanvasUnavailable />",
     "state.routeIdentity !== routeIdentity",
-    "<fieldset className={styles.adapterCanvas} disabled",
-    "<ManagedAdapterSurface input={state.input} />",
+    "selection = null",
+    "<ManagedAdapterSurface input={state.input} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
     "disposeRuntimeHeadlessSession(session)",
   ]) {
     if (!canvasText.includes(requiredText)) {
@@ -971,9 +1242,6 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(rawSource, rawApplic
 
   let applicationReceipt = null;
   if (rawApplication !== undefined) {
-    if (sha256(Buffer.from(rawApplication, "utf8")) !== EXPECTED_APPLICATION_RAW_SOURCE_SHA256) {
-      fail("SOURCE_POLICY_VIOLATION", "The exact reviewed application source bytes drifted.");
-    }
     const applicationFile = ts.createSourceFile(
       APPLICATION_SOURCE_PATH,
       rawApplication,
@@ -1005,19 +1273,18 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(rawSource, rawApplic
     }
     if (
       sha256(Buffer.from(normalizedNodeText(adapterImports[0], applicationFile), "utf8")) !==
-        EXPECTED_APPLICATION_ADAPTER_IMPORT_SHA256 ||
-      sha256(Buffer.from(normalizedNodeText(canvasElements[0], applicationFile), "utf8")) !==
-        EXPECTED_APPLICATION_CANVAS_ELEMENT_SHA256
+      EXPECTED_APPLICATION_ADAPTER_IMPORT_SHA256
     ) {
-      fail(
-        "SOURCE_POLICY_VIOLATION",
-        "The App must retain the exact adapter import binding and selected-route canvas element.",
-      );
+      fail("SOURCE_POLICY_VIOLATION", "The App must retain the exact adapter import binding.");
     }
     const canvasElementText = normalizedNodeText(canvasElements[0], applicationFile);
+    const canvasAttributeNames = canvasElements[0].attributes.properties.map((property) =>
+      ts.isJsxAttribute(property) ? property.name.getText(applicationFile) : null,
+    );
     if (
-      !canvasElementText.includes("key={`${project.id}:${selectedSurface.id}`}") ||
+      !isDeepStrictEqual(canvasAttributeNames, ["projectId", "selection", "surfaceId"]) ||
       !canvasElementText.includes("projectId={project.id}") ||
+      !canvasElementText.includes("selection={selection}") ||
       !canvasElementText.includes("surfaceId={selectedSurface.id}")
     ) {
       fail("SOURCE_POLICY_VIOLATION", "The App canvas lost its exact selected route tuple.");
@@ -1037,13 +1304,37 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(rawSource, rawApplic
         "Registry/runtime authority must remain isolated behind adapter-canvas.tsx.",
       );
     }
+    const shadowCanvasDeclarations = collectDescendants(
+      applicationFile,
+      (node) => ts.isVariableDeclaration(node) || ts.isFunctionDeclaration(node),
+    ).filter((node) => ts.isIdentifier(node.name) && node.name.text === "DesenAdapterCanvas");
+    const selectedRouteMutations = collectDescendants(
+      applicationFile,
+      ts.isBinaryExpression,
+    ).filter((expression) => {
+      if (expression.operatorToken.kind !== ts.SyntaxKind.EqualsToken) return false;
+      const leftText = normalizedNodeText(expression.left, applicationFile);
+      return /^(?:\(?selectedSurface\b|\(?project\b)/u.test(leftText);
+    });
+    if (shadowCanvasDeclarations.length !== 0 || selectedRouteMutations.length !== 0) {
+      fail(
+        "SOURCE_POLICY_VIOLATION",
+        "The selected route and imported canvas binding must not be substituted or mutated.",
+      );
+    }
     applicationReceipt = deepFreeze({
       adapterImports: adapterImports.length,
       canvasBoundaries: canvasElements.length,
       selectedRouteTuple: true,
+      sourceIdentitySelectionProp: true,
       directRuntimeOrCatalogImports: 0,
     });
   }
+
+  const selectionReceipt =
+    rawAuthoringSelection === undefined
+      ? null
+      : inspectAuthoringSelectionSource(rawAuthoringSelection);
 
   const functionFingerprints = Object.fromEntries(
     Object.keys(EXPECTED_JSX_BY_FUNCTION).map((name) => {
@@ -1068,6 +1359,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(rawSource, rawApplic
     unsupportedTuplePolicy: "EXACT_ACCOUNT_APP_SIGN_IN_ONLY_NO_SUBSTITUTION",
     readOnlyBoundary: "DISABLED_FIELDSET_OUTSIDE_MANAGED_COMPONENT_SUBTREE",
     application: applicationReceipt,
+    selection: selectionReceipt,
   });
 }
 
@@ -1084,7 +1376,7 @@ async function inspectSemanticSymbols(workspaceRoot) {
     undefined,
     configPath,
   );
-  const rootNames = APP_TYPESCRIPT_SOURCE_PATHS.map((relativePath) =>
+  const rootNames = CURRENT_APP_TYPESCRIPT_SOURCE_PATHS.map((relativePath) =>
     path.join(workspaceRoot, relativePath),
   );
   const program = ts.createProgram({ rootNames, options: parsed.options });
@@ -1354,14 +1646,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 102 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 103 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 290 || dynamicEdges !== 0) {
+  if (staticEdges !== 293 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -1409,7 +1701,7 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     }
   }
   const sourceIds = graphIds.filter((id) => id.startsWith("apps/desen-app/src/")).sort();
-  if (!isDeepStrictEqual(sourceIds, APP_SOURCE_PATHS)) {
+  if (!isDeepStrictEqual(sourceIds, CURRENT_APP_SOURCE_PATHS)) {
     fail("VITE_GRAPH_DRIFT", "The App graph has an orphan, missing, or extra production source.", {
       sourceIds,
     });
@@ -1427,16 +1719,24 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     reachable.add(id);
     for (const imported of findGraphModule(graph, id)?.imports ?? []) pending.push(imported);
   }
-  if (APP_SOURCE_PATHS.some((relativePath) => !reachable.has(relativePath))) {
+  if (CURRENT_APP_SOURCE_PATHS.some((relativePath) => !reachable.has(relativePath))) {
     fail("VITE_GRAPH_DRIFT", "Every App production source must be reachable from index.html.");
   }
   const application = findGraphModule(graph, APPLICATION_SOURCE_PATH);
-  if (application?.imports.includes(ADAPTER_CANVAS_SOURCE_PATH) !== true) {
-    fail("VITE_GRAPH_DRIFT", "The App application lost its exact adapter-canvas module edge.");
+  if (
+    application?.imports.includes(ADAPTER_CANVAS_SOURCE_PATH) !== true ||
+    application.imports.includes(AUTHORING_SELECTION_SOURCE_PATH) !== true
+  ) {
+    fail(
+      "VITE_GRAPH_DRIFT",
+      "The App application lost its adapter-canvas or Source-selection module edge.",
+    );
   }
   const canvas = findGraphModule(graph, ADAPTER_CANVAS_SOURCE_PATH);
   const expectedCanvasEdges = [
     "apps/desen-app/src/application.module.css",
+    AUTHORING_DATA_SOURCE_PATH,
+    AUTHORING_SELECTION_SOURCE_PATH,
     BUNDLE_PATH,
     "node_modules/react/index.js",
     "node_modules/react/jsx-runtime.js",
@@ -1450,6 +1750,17 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     fail("VITE_GRAPH_DRIFT", "The canvas runtime import graph is not the exact public path.", {
       actual: canvas?.imports,
     });
+  }
+  const selection = findGraphModule(graph, AUTHORING_SELECTION_SOURCE_PATH);
+  if (
+    selection === undefined ||
+    selection.imports.length !== 0 ||
+    selection.dynamicImports.length !== 0
+  ) {
+    fail(
+      "VITE_GRAPH_DRIFT",
+      "The Source-selection projector must emit without runtime package or dynamic edges.",
+    );
   }
   const adapters = findGraphModule(
     graph,
@@ -1505,7 +1816,7 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     staticEdges,
     dynamicEdges,
     unresolvedEdges: 0,
-    reachableProductionSourceFiles: APP_SOURCE_PATHS.length,
+    reachableProductionSourceFiles: CURRENT_APP_SOURCE_PATHS.length,
     dataModules,
     graphSha256: `sha256:${sha256(Buffer.from(JSON.stringify(graph)))}`,
     modules: graph,
@@ -1563,7 +1874,9 @@ function inspectPackage(bytes) {
     manifest.scripts?.build !== "vite build" ||
     manifest.scripts?.typecheck !== "tsc -p tsconfig.json --noEmit" ||
     manifest.scripts?.["test:canvas"] !==
-      "vitest run test/adapter-canvas.test.tsx test/application.test.tsx test/main-lifecycle.test.tsx"
+      "vitest run test/adapter-canvas.test.tsx test/application.test.tsx test/main-lifecycle.test.tsx" ||
+    manifest.scripts?.["test:selection"] !==
+      "vitest run test/authoring-selection.test.ts test/adapter-canvas.test.tsx test/application.test.tsx"
   ) {
     fail("PACKAGE_CONTRACT_DRIFT", "The Desen App exact T03 package/runtime contract drifted.");
   }
@@ -1573,6 +1886,7 @@ function inspectPackage(bytes) {
     build: manifest.scripts.build,
     typecheck: manifest.scripts.typecheck,
     focusedTest: manifest.scripts["test:canvas"],
+    selectionFocusedTest: manifest.scripts["test:selection"],
   });
 }
 
@@ -1595,17 +1909,27 @@ function testNames(sourceText, relativePath) {
     .map((call) => call.arguments[0].text);
 }
 
-function inspectUiReceipts(adapterTestBytes, applicationTestBytes, mainLifecycleTestBytes) {
+function inspectUiReceipts(
+  adapterTestBytes,
+  applicationTestBytes,
+  mainLifecycleTestBytes,
+  authoringSelectionTestBytes,
+) {
   const adapterText = decodeUtf8(adapterTestBytes, ADAPTER_CANVAS_TEST_PATH);
   const applicationText = decodeUtf8(applicationTestBytes, APPLICATION_TEST_PATH);
   const lifecycleText = decodeUtf8(mainLifecycleTestBytes, MAIN_LIFECYCLE_TEST_PATH);
+  const selectionText = decodeUtf8(authoringSelectionTestBytes, AUTHORING_SELECTION_TEST_PATH);
   const adapterNames = testNames(adapterText, ADAPTER_CANVAS_TEST_PATH);
   const applicationNames = testNames(applicationText, APPLICATION_TEST_PATH);
-  if (!isDeepStrictEqual(adapterNames, EXPECTED_ADAPTER_TEST_NAMES)) {
+  const selectionNames = testNames(selectionText, AUTHORING_SELECTION_TEST_PATH);
+  if (!isDeepStrictEqual(adapterNames, CURRENT_EXPECTED_ADAPTER_TEST_NAMES)) {
     fail("TEST_RECEIPT_DRIFT", "The exact adapter-canvas positive/negative test names drifted.");
   }
   if (EXPECTED_APPLICATION_TEST_NAMES.some((name) => !applicationNames.includes(name))) {
     fail("TEST_RECEIPT_DRIFT", "The App integration lost a T03 canvas/no-substitution test.");
+  }
+  if (!isDeepStrictEqual(selectionNames, EXPECTED_SELECTION_TEST_NAMES)) {
+    fail("TEST_RECEIPT_DRIFT", "The exact public diagnostic-index selection tests drifted.");
   }
   for (const marker of [
     "<StrictMode>",
@@ -1631,15 +1955,18 @@ function inspectUiReceipts(adapterTestBytes, applicationTestBytes, mainLifecycle
   }
   return deepFreeze({
     command:
-      "pnpm --filter @desen/app-web test:canvas && node --test tests/desen-app-real-adapter-canvas.test.mjs",
+      "pnpm --filter @desen/app-web test:selection && node --test tests/desen-app-real-adapter-canvas.test.mjs",
     adapterTestNames: adapterNames,
     applicationIntegrationTestNames: EXPECTED_APPLICATION_TEST_NAMES,
+    selectionTestNames: selectionNames,
     disabledControls: true,
     unsupportedTupleNoMount: true,
     staleTreeRemovedBeforeReplacement: true,
     exactSessionDisposal: true,
     strictModeReplayBalanced: true,
     finalRootUnmountCovered: true,
+    sourceIdentityOverlayOutsideManagedSubtree: true,
+    publicDiagnosticIndexProjectionCovered: true,
   });
 }
 
@@ -1652,13 +1979,91 @@ function receipts(files) {
 
 async function readTrackedFiles(workspaceRoot) {
   const files = new Map();
-  for (const relativePath of TRACKED_PATHS) {
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
     files.set(
       relativePath,
       await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath),
     );
   }
   return files;
+}
+
+async function authenticateFrozenArtifact(workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    "frozen M09-T03 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T03 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(artifactBytes, "frozen M09-T03 proof artifact");
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-real-adapter-canvas" ||
+    artifact?.profile !== "desen.app.real-adapter-canvas-proof.v1" ||
+    artifact?.task !== "M09-T03" ||
+    artifact?.result !== "PASS" ||
+    artifact?.claim?.taskStatus !== "DONE" ||
+    artifact?.claim?.exactOfficialBundleMounted !== true ||
+    artifact?.claim?.exactPublicReferenceAdapterRegistryUsed !== true ||
+    artifact?.claim?.exactPublicRuntimeReactRendererUsed !== true ||
+    artifact?.claim?.sameTransformedRuntimeModulesAsReferenceHost !== true ||
+    artifact?.claim?.managedCompositionRegistryOnly !== true ||
+    artifact?.claim?.canvasControlsDisabled !== true ||
+    artifact?.claim?.p06Status !== "PROVEN" ||
+    artifact?.application?.ui?.selectionOverlay !== false ||
+    artifact?.boundary?.trackedFiles !== TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== TRACKED_PATHS.length ||
+    !isDeepStrictEqual(
+      trackedReceipts.map((candidate) => candidate?.path),
+      TRACKED_PATHS,
+    ) ||
+    trackedReceipts.some(
+      (candidate) =>
+        candidate === null ||
+        typeof candidate !== "object" ||
+        !Number.isSafeInteger(candidate.bytes) ||
+        candidate.bytes < 0 ||
+        typeof candidate.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(candidate.sha256),
+    ) ||
+    !isDeepStrictEqual(
+      artifact?.tests?.rootTestNames,
+      DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES,
+    ) ||
+    artifact?.nonclaims?.[3] !==
+      "No selection overlay, inspector, private-DOM authoring, Source mutation, undo, persistence, Design/Run switch, publish, or activation."
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T03 artifact identity or retained claims drifted.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedHistoricalReceipts(frozenArtifact, files) {
+  const taskTimeReceipts = new Map(
+    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    const authority = taskTimeReceipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M09-T03 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
 }
 
 function verifyProofDocument(proofDocument, artifactSha256) {
@@ -1696,11 +2101,12 @@ function captureBuildOptions(rawOptions) {
   });
 }
 
-/** Builds deterministic M09-T03 proof evidence from exact source and two real Vite observations. */
+/** Authenticates frozen M09-T03 evidence and checks its live additive M09-T04 successor. */
 export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const canonicalWorkspaceRoot = await realpath(options.workspaceRoot);
-  const [files, discoveredSourcePaths, shellBytes, hostBytes] = await Promise.all([
+  const [frozen, files, discoveredSourcePaths, shellBytes, hostBytes] = await Promise.all([
+    authenticateFrozenArtifact(canonicalWorkspaceRoot),
     readTrackedFiles(canonicalWorkspaceRoot),
     discoverRegularPaths(
       path.join(canonicalWorkspaceRoot, "apps/desen-app/src"),
@@ -1717,7 +2123,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
         HOST_SOURCE_AUDIT_ARTIFACT_PATH,
       ),
   ]);
-  if (!isDeepStrictEqual(discoveredSourcePaths, APP_SOURCE_PATHS)) {
+  if (!isDeepStrictEqual(discoveredSourcePaths, CURRENT_APP_SOURCE_PATHS)) {
     fail("SOURCE_INVENTORY_DRIFT", "The complete Desen App production source inventory drifted.", {
       actual: discoveredSourcePaths,
     });
@@ -1729,6 +2135,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
   const sourcePolicy = verifyDesenAppRealAdapterCanvasSourcePolicy(
     decodeUtf8(files.get(ADAPTER_CANVAS_SOURCE_PATH), ADAPTER_CANVAS_SOURCE_PATH),
     decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH),
+    decodeUtf8(files.get(AUTHORING_SELECTION_SOURCE_PATH), AUTHORING_SELECTION_SOURCE_PATH),
   );
   const [semanticSymbols, runtimeResolution] = await Promise.all([
     inspectSemanticSymbols(canonicalWorkspaceRoot),
@@ -1739,35 +2146,29 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
     files.get(ADAPTER_CANVAS_TEST_PATH),
     files.get(APPLICATION_TEST_PATH),
     files.get(MAIN_LIFECYCLE_TEST_PATH),
+    files.get(AUTHORING_SELECTION_TEST_PATH),
   );
-  const trackedReceipts = receipts(files);
-  const artifact = deepFreeze({
+  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-real-adapter-canvas",
     profile: "desen.app.real-adapter-canvas-proof.v1",
     task: "M09-T03",
-    protocol: "0.1.0",
-    target: "web-react",
+    result: "PASS",
     prerequisites: [shellPin, hostSourceAudit.pin],
-    claim: {
-      taskStatus: "DONE",
-      shellCompatibilityRetained: true,
-      exactOfficialBundleMounted: true,
-      exactPublicReferenceAdapterRegistryUsed: true,
-      exactPublicRuntimeReactRendererUsed: true,
-      sameTransformedRuntimeModulesAsReferenceHost: true,
-      allFiveRealComponentModulesReached: true,
-      managedCompositionRegistryOnly: true,
-      directOrHiddenManualManagedTreesRejected: true,
-      unsupportedProjectSurfaceTuplesFailClosed: true,
-      staleManagedTreeSubstitutionRejected: true,
-      canvasControlsDisabled: true,
-      privateDomAuthoringRejected: true,
-      strictModeSessionDisposalBalanced: true,
-      p06Status: "PROVEN",
-      s001Status: "PLANNED",
-      pf059Status: "OPEN",
-      p07Status: "PARTIAL",
+    retainedClaim: {
+      taskStatus: frozen.artifact.claim.taskStatus,
+      shellCompatibilityRetained: frozen.artifact.claim.shellCompatibilityRetained,
+      exactOfficialBundleMounted: frozen.artifact.claim.exactOfficialBundleMounted,
+      exactPublicReferenceAdapterRegistryUsed:
+        frozen.artifact.claim.exactPublicReferenceAdapterRegistryUsed,
+      exactPublicRuntimeReactRendererUsed:
+        frozen.artifact.claim.exactPublicRuntimeReactRendererUsed,
+      sameTransformedRuntimeModulesAsReferenceHost:
+        frozen.artifact.claim.sameTransformedRuntimeModulesAsReferenceHost,
+      managedCompositionRegistryOnly: frozen.artifact.claim.managedCompositionRegistryOnly,
+      canvasControlsDisabled: frozen.artifact.claim.canvasControlsDisabled,
+      p06Status: frozen.artifact.claim.p06Status,
     },
     authority: {
       data,
@@ -1785,7 +2186,10 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
       ui: {
         mode: "READ_ONLY_DESIGN_PREVIEW",
         disabledFieldsetOutsideManagedTree: true,
-        selectionOverlay: false,
+        selectionOverlay: true,
+        selectionIdentity: "STABLE_SOURCE_COMPONENT_ID",
+        selectionRuntimeProjection: "PUBLIC_DIAGNOSTIC_INDEX_ONLY",
+        selectionOverlayOutsideManagedCapabilitySubtree: true,
         inspector: false,
         sourceMutation: false,
       },
@@ -1797,44 +2201,41 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
         strictModeReplayBalanced: true,
       },
     },
-    tests: {
-      ...uiReceipts,
-      rootTestNames: DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES,
-      hostileMutationClasses: [
-        "DIRECT_COMPONENT_IMPORT_OR_TREE",
-        "ALIASED_PUBLIC_SYMBOL",
-        "HELPER_HIDDEN_MANAGED_TREE",
-        "ALTERNATE_OR_LOCAL_REGISTRY",
-        "APPLICATION_BINDING_OR_ROUTE_SUBSTITUTION",
-        "ASI_CONTROL_FLOW_SUBSTITUTION",
-        "DYNAMIC_OR_PRIVATE_IMPORT",
-        "PRIVATE_DOM_INSPECTION",
-        "UNSUPPORTED_TUPLE_SUBSTITUTION",
-        "VITE_REGISTRY_COMPONENT_RUNTIME_OR_CODE_SUBSTITUTION",
-      ],
-    },
+    tests: uiReceipts,
     boundary: {
       appSourceInventoryClosed: true,
       appSourceSymlinksRejected: true,
-      productionSourceFiles: APP_SOURCE_PATHS.length,
-      trackedFiles: TRACKED_PATHS.length,
-      trackedReceipts,
-      proofReaderPaths: PROOF_READER_PATHS,
+      productionSourceFiles: CURRENT_APP_SOURCE_PATHS.length,
+      retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
+      successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
+      currentHistoricalPathReceipts: receipts(files),
+      additiveSuccessorReceipts: [
+        AUTHORING_SELECTION_SOURCE_PATH,
+        AUTHORING_SELECTION_TEST_PATH,
+      ].map((relativePath) => ({
+        path: relativePath,
+        bytes: files.get(relativePath).byteLength,
+        sha256: sha256(files.get(relativePath)),
+      })),
     },
-    result: "PASS",
-    nonclaims: [
-      "S-001 remains PLANNED until M09-T11 fixtures, scenarios, and visible approximate-fidelity disclosure.",
-      "PF-059 remains OPEN for the M10-T05 Desen App browser-E2E and P-07 closure slice.",
-      "P-07 remains PARTIAL; this task proves registry/source/Vite identity, not browser E2E.",
-      "No selection overlay, inspector, private-DOM authoring, Source mutation, undo, persistence, Design/Run switch, publish, or activation.",
-      "No claim that arbitrary future catalogs or native targets share this Web-React registry.",
-    ],
+    successor: {
+      task: "M09-T04",
+      stableSourceSelectionOverlayOwnedBySuccessor: true,
+      historicalNoSelectionOverlayNonclaimAppliedToCurrentApp: false,
+      outsideManagedCapabilitySubtree: true,
+      publicDiagnosticIndexOnly: true,
+      privateDomOrReactInspection: false,
+      inspectorImplemented: false,
+      sourceMutationOrHistoryImplemented: false,
+      persistenceImplemented: false,
+      runOrPublishImplemented: false,
+    },
   });
-  const artifactBytes = canonicalArtifactBytes(artifact);
   return deepFreeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
   });
 }
 
@@ -1879,6 +2280,7 @@ export async function verifyDesenAppRealAdapterCanvasEvidence(rawOptions = undef
     artifactSha256: built.artifactSha256,
     prerequisites: built.artifact.prerequisites.length,
     graphModules: built.artifact.authority.runtimeResolution.moduleCount,
+    currentGraphModules: built.currentCompatibility.authority.runtimeResolution.moduleCount,
     sharedRuntimeModules: built.artifact.authority.runtimeResolution.sharedRuntimeModuleCount,
     realComponentModules: built.artifact.authority.runtimeResolution.realComponentModuleCount,
     trackedFiles: built.artifact.boundary.trackedFiles,
@@ -1923,6 +2325,7 @@ export async function writeDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
     artifactBytes: built.artifactBytes.byteLength,
     artifactSha256: built.artifactSha256,
     graphModules: built.artifact.authority.runtimeResolution.moduleCount,
+    currentGraphModules: built.currentCompatibility.authority.runtimeResolution.moduleCount,
     trackedFiles: built.artifact.boundary.trackedFiles,
   });
 }
