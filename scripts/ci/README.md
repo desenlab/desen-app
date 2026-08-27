@@ -295,7 +295,7 @@ eligible hosted comparisons with zero false negatives; promotion and hosted cuto
 The I07-04 baseline remains byte-identical and historical. Its verifier authenticates that frozen
 promotion receipt first, then separately admits only the exact M08-T10 current-authority successor,
 whose comparison digest is
-`sha256:cceaf578e2757ca10ff471e59ffd19b9f9fadadcc952c53a308da5c2ae9c3c2d`.
+`sha256:8dc47b6160cbe8e27fc66b2462f27582385a196f2cb839c7184a86562040aafb`.
 The historical M08-T05 comparison digest remains
 `sha256:41b08d79888fbf3f79f7358ddd02af3bf17d677e9b37c94d58b06d267ad4ced2`.
 
@@ -328,9 +328,9 @@ The complete current reviewed digest set is:
 - shadow plan:
   `307a58cab69e684e8f69ce9d0d0dfb5ae4651c0a6375f8f6d0b953353294f761`;
 - current selector authority:
-  `cceaf578e2757ca10ff471e59ffd19b9f9fadadcc952c53a308da5c2ae9c3c2d`;
+  `8dc47b6160cbe8e27fc66b2462f27582385a196f2cb839c7184a86562040aafb`;
 - required-runner authority:
-  `5d99b53ee77fb052756270d77d8bd23b90109a66920d9a5da8405ed2c61bba84`; and
+  `14ac4cf625e2dcbe1a209a178027015de78ad07d2db5022dce381f0ffdc93514`; and
 - promotion artifact:
   `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`.
 
@@ -643,12 +643,19 @@ resealed editor readers occupy indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
 `e43b48e2d4873b9212d4d0b1bf3e6fb03f56fcc350f8bc9ad65409891995c310`, authenticating 34 frozen
 artifacts and 68 then-current readers while preserving sequence 36 and every earlier byte. The sixteen
 resealed editor readers occupy indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62,
-63, 64, 65]`, and the T09 proof/root readers occupy `[66, 67]`. Current M08-T10 authority is
+63, 64, 65]`, and the T09 proof/root readers occupy `[66, 67]`. Historical M08-T10 authority is
 sequence 38 at `64f7d6519589a5a8cb564af1215c2a12c44297f8ea855910613ea3b361cee6d0`, authenticating 35 frozen
-artifacts and 70 current readers while preserving sequence 37 and every predecessor artifact byte.
-The eighteen resealed live editor readers occupy indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58,
-59, 60, 61, 62, 63, 64, 65, 66, 67]`, the T10 proof/root readers occupy `[68, 69]`, and the
-dedicated checkpoint suite passes 61/61.
+artifacts and 70 then-current readers while preserving sequence 37 and every predecessor artifact
+byte. The eighteen resealed live editor readers occupy indexes `[50, 51, 52, 53, 54, 55, 56, 57,
+58, 59, 60, 61, 62, 63, 64, 65, 66, 67]`, and the T10 proof/root readers occupy `[68, 69]`.
+Current corrective reader authority is sequence 39 at
+`6a186ee56e9a3c8ffd176b712d54a56e7ca3e73990f46d0fe387c9f52bddf6f7`. It preserves sequence 38,
+all 35 frozen artifact receipts, and all 70 reader identities while advancing only indexes `[66, 67,
+68, 69]`: T09 proof 71,087 bytes / `sha256:df665c264cea2c33a937c0fc74b6250ede8acae2032b75f2f24c1f8dc69affdb`,
+T09 root 15,066 bytes / `sha256:574467231c3dbf4fd60b350da7f39c008d39072d935f461c50e059c609cc4d2a`,
+T10 proof 90,708 bytes / `sha256:53942712a9a1c40a1076b46912d13feb247eda59405790f4f211c495c44e895c`,
+and T10 root 14,830 bytes / `sha256:9cc2fb35ddb5d4b15371f8edcba07837e02a605169a609ef5eeb5da7e3ef0431`.
+The dedicated checkpoint suite passes 62/62.
 [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 passed fresh `REQUIRED + EXHAUSTIVE` in
 [run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
@@ -684,11 +691,11 @@ root reader at `sha256:f1b415d0dc41f755649f1ddd345ba1454e8695b9971e0afbc4032fc7d
 The exact 325,549-byte M08-T10 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json` at
 `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`, with reviewed report
-`docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md`. Its 84,005-byte proof reader is pinned at
+`docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md`. Historical sequence 38 pins its initial 84,005-byte proof reader at
 `sha256:46354aae84ddf65314ad3cd8cfbefc33245e4de495ecda577ca296185f749ca2` and its 13,088-byte
 root reader at `sha256:f1cd04fbccbba01469bfbacad3154c2ba99e130745dbbd1bcf0397230982dff9`.
 The historical T07-integrated CI infrastructure suite
 passed 265/265; its dedicated checkpoint, required-affected, promotion, and retained legacy-gate
 suites passed 58/58, 27/27, 19/19, and 25/25 respectively. The current CI infrastructure suite
-passes 301/301; the terminal-integration root proof and checkpoint suites pass 10/10 and 61/61.
+passes 302/302; the terminal-integration root proof and checkpoint suites pass 10/10 and 62/62.
 These T10-integrated local receipts make no hosted M08-T10 claim.

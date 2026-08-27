@@ -123,8 +123,8 @@ Affected ownership covers 1,119 tracked paths at
 proof-owned paths; the complete ownership projection is
 `sha256:b6e842d5cbaa89af877e4c4e75ee7551160d617385395961d8efe6d49a67a341`. Current selector and
 required-runner authorities are
-`sha256:cceaf578e2757ca10ff471e59ffd19b9f9fadadcc952c53a308da5c2ae9c3c2d` and
-`sha256:5d99b53ee77fb052756270d77d8bd23b90109a66920d9a5da8405ed2c61bba84`; the authenticated
+`sha256:8dc47b6160cbe8e27fc66b2462f27582385a196f2cb839c7184a86562040aafb` and
+`sha256:14ac4cf625e2dcbe1a209a178027015de78ad07d2db5022dce381f0ffdc93514`; the authenticated
 promotion artifact is
 `sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`. No hosted M08-T10
 result is claimed. The 15 reviewed workspace test scripts remain pinned by
@@ -416,12 +416,19 @@ the fourteen live editor-reader indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59
 `e43b48e2d4873b9212d4d0b1bf3e6fb03f56fcc350f8bc9ad65409891995c310` authenticates 34 frozen
 artifacts and 68 then-current readers while preserving sequence 36 and every earlier byte. It reseals
 the sixteen changed editor readers at indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
-62, 63, 64, 65]` and appends the T09 proof/root readers at `[66, 67]`. Current M08-T10 sequence 38
-at `64f7d6519589a5a8cb564af1215c2a12c44297f8ea855910613ea3b361cee6d0` authenticates 35 frozen
-artifacts and 70 current readers while preserving sequence 37 and every predecessor artifact byte.
-It reseals the eighteen changed live editor readers at indexes `[50, 51, 52, 53, 54, 55, 56, 57,
-58, 59, 60, 61, 62, 63, 64, 65, 66, 67]`, appends the T10 proof/root readers at `[68, 69]`, and
-the dedicated checkpoint suite passes 61/61.
+62, 63, 64, 65]` and appends the T09 proof/root readers at `[66, 67]`. Historical M08-T10 sequence
+38 at `64f7d6519589a5a8cb564af1215c2a12c44297f8ea855910613ea3b361cee6d0` authenticates 35 frozen
+artifacts and 70 then-current readers while preserving sequence 37 and every predecessor artifact
+byte. It reseals the eighteen changed live editor readers at indexes `[50, 51, 52, 53, 54, 55, 56,
+57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67]` and appends the T10 proof/root readers at `[68, 69]`.
+Current corrective reader authority is sequence 39 at
+`6a186ee56e9a3c8ffd176b712d54a56e7ca3e73990f46d0fe387c9f52bddf6f7`. It preserves sequence 38,
+all 35 frozen artifact receipts, and all 70 reader identities while advancing only indexes `[66, 67,
+68, 69]`: T09 proof 71,087 bytes / `sha256:df665c264cea2c33a937c0fc74b6250ede8acae2032b75f2f24c1f8dc69affdb`,
+T09 root 15,066 bytes / `sha256:574467231c3dbf4fd60b350da7f39c008d39072d935f461c50e059c609cc4d2a`,
+T10 proof 90,708 bytes / `sha256:53942712a9a1c40a1076b46912d13feb247eda59405790f4f211c495c44e895c`,
+and T10 root 14,830 bytes / `sha256:9cc2fb35ddb5d4b15371f8edcba07837e02a605169a609ef5eeb5da7e3ef0431`.
+The dedicated checkpoint suite passes 62/62.
 These are joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact one-file
 [canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
@@ -454,17 +461,17 @@ root reader at `sha256:f1b415d0dc41f755649f1ddd345ba1454e8695b9971e0afbc4032fc7d
 The exact 325,549-byte M08-T10 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json` at
 `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`; the report is
-`docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md`. Its 84,005-byte proof reader is pinned at
+`docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md`. Historical sequence 38 pins its initial 84,005-byte proof reader at
 `sha256:46354aae84ddf65314ad3cd8cfbefc33245e4de495ecda577ca296185f749ca2` and its 13,088-byte
 root reader at `sha256:f1cd04fbccbba01469bfbacad3154c2ba99e130745dbbd1bcf0397230982dff9`.
 The historical T07-integrated full CI infrastructure suite
 passed 265/265; its dedicated checkpoint, required-affected, promotion, and retained legacy-gate
 suites passed 58/58, 27/27, 19/19, and 25/25 respectively. The current CI infrastructure suite
-passes 301/301; the terminal-integration root proof and checkpoint suites pass 10/10 and 61/61.
+passes 302/302; the terminal-integration root proof and checkpoint suites pass 10/10 and 62/62.
 These T10-integrated local receipts make no hosted M08-T10 claim.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
-one live reader through the reviewed checkpoint append procedure only when every previously pinned
+one or more live readers through the reviewed checkpoint append procedure only when every previously pinned
 checkpoint digest, frozen artifact, claim/nonclaim scope, and historical projection remains
 unchanged and the full existing plus new regression suite passes. The checkpoint is inert data and
 cannot select executable commands. M07-T02 follows that procedure in checkpoint sequence 3: the
