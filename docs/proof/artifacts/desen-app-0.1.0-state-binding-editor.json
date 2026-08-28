@@ -1,0 +1,587 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-state-binding-editor",
+  "profile": "desen.app.state-binding-editor-proof.v1",
+  "task": "M09-T08",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M09-T05",
+      "proofId": "desen-app-schema-inspector",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json",
+      "bytes": 22998,
+      "sha256": "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b",
+      "profile": "desen.app.schema-inspector-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M08-T05",
+      "proofId": "editor-core-state-binding-edits",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json",
+      "bytes": 30014,
+      "sha256": "b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8",
+      "profile": "desen.editor-core.state-binding-edits-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T07",
+      "proofId": "desen-app-named-slot-authoring",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json",
+      "bytes": 24830,
+      "sha256": "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+      "profile": "desen.app.named-slot-authoring-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "surfaceLocalPrimitiveStateList": true,
+    "primitiveStateAddUpdateDelete": true,
+    "primitiveStateTypes": [
+      "boolean",
+      "integer",
+      "number",
+      "string"
+    ],
+    "boundedConservativeUsageCount": true,
+    "usageScanMaxDepth": 512,
+    "usageScanMaxVisitedValues": 100000,
+    "usedStateDeleteRejected": true,
+    "directCompatibleLocalStatePropBinding": true,
+    "exactDirectBindingChange": true,
+    "exactDirectBindingDetachToInitial": true,
+    "runtimeAndAdvancedBindingReadOnly": true,
+    "advancedStateSchemaReadOnly": true,
+    "exactOwnDataStateAndBindingCapture": true,
+    "publicEditorCoreStateAndPropMutation": true,
+    "continuousCompleteSourceRevalidation": true,
+    "failedEditPreservesCurrentDocument": true,
+    "publisherSessionPreview": true,
+    "sourceAndPreviewCommitAtomically": true,
+    "stateAndBindingChromeOutsideManagedCapabilitySubtree": true,
+    "retainedNamedSlotAuthoringUxCompatibility": true,
+    "persistenceClaimed": false,
+    "eventActionEditingClaimed": false,
+    "designRunClaimed": false,
+    "activationClaimed": false,
+    "browserE2eClaimed": false,
+    "p08Status": "NOT_PROVEN"
+  },
+  "authority": {
+    "protocolProfiles": {
+      "localStateReference": "exact { \"$ref\": \"state.<name>\" } only",
+      "stateScope": "selected Source surface only",
+      "primitiveStateTypes": [
+        "boolean",
+        "integer",
+        "number",
+        "string"
+      ],
+      "usageCount": "bounded conservative reads plus explicit state.set/state.toggle writes"
+    },
+    "source": {
+      "authoringData": {
+        "publicCatalogAndSourceValidation": true,
+        "validatedDocumentSnapshotRetained": true,
+        "validatedCatalogSetRetained": true
+      },
+      "state": {
+        "primitivePresets": [
+          "boolean",
+          "integer",
+          "number",
+          "string"
+        ],
+        "surfaceLocalProjection": true,
+        "deterministicDeclarationOrder": true,
+        "exactOwnDataRouteAndEditCapture": true,
+        "conservativeIdentifierProfile": "^[A-Za-z][A-Za-z0-9_-]{0,127}$",
+        "usageReferenceReads": true,
+        "usageStateSetAndToggleWrites": true,
+        "inertStateInitialExcludedFromUsage": true,
+        "usageScanMaxDepth": 512,
+        "usageScanMaxVisitedValues": 100000,
+        "legalAdvancedSchemasVisibleReadOnly": true,
+        "publicEditorCoreStateCommandsOnly": true,
+        "primitiveSchemaAndInitialStagedPrivately": true,
+        "unusedOnlyDeletion": true,
+        "completeSourceRevalidation": true,
+        "noPartialDocumentOnFailure": true
+      },
+      "inspector": {
+        "directPrimitiveLocalStateOptionsOnly": true,
+        "exactSingleRefBindingShapeOnly": true,
+        "catalogControlCompatibilityRequired": true,
+        "routeSelectionAndEditReadmissionRequired": true,
+        "exactOwnDataBindingEditCapture": true,
+        "runtimeAndAdvancedBindingsReadOnly": true,
+        "bindConstructsExactStateReference": true,
+        "detachRestoresValidatedPrimitiveInitial": true,
+        "completeSourceRevalidation": true,
+        "noPartialDocumentOnFailure": true
+      },
+      "structuredJson": {
+        "inertReservedMembersNotInterpreted": true,
+        "publisherJsonLimitsRetained": true,
+        "duplicateAndUnicodeChecksRetained": true,
+        "detachedFrozenSuccess": true,
+        "advancedStateUiClaimed": false
+      },
+      "statePanel": {
+        "owner": "Desen App",
+        "primitiveListAddUpdateDeleteControls": true,
+        "deterministicOrder": true,
+        "boundedUsageVisible": true,
+        "usedDeleteDisabled": true,
+        "advancedSchemaReadOnly": true,
+        "noPersistenceOrPublicationClaim": true
+      },
+      "inspectorPanel": {
+        "owner": "Desen App",
+        "compatibleDirectLocalStateSelector": true,
+        "detachControl": true,
+        "runtimeAndAdvancedBindingsReadOnly": true,
+        "managedAdapterImports": 0
+      },
+      "preview": {
+        "publicPublisherOnly": true,
+        "sourceReadmittedBeforePublication": true,
+        "exactBundleRevisionReturned": true,
+        "noPartialBundleOnFailure": true
+      },
+      "adapter": {
+        "revisionReplacement": true,
+        "previousSessionDisposed": true,
+        "managedSubtreeExplicit": true,
+        "selectionOverlayRemainsSibling": true
+      },
+      "application": {
+        "statePanelComposedByApp": true,
+        "bindingInspectorComposedByApp": true,
+        "localStateRouteProjection": true,
+        "sourceAndPreviewCommitAtomically": true,
+        "stateSourceAndPreviewCommitAtomically": true,
+        "bindingSourceAndPreviewCommitAtomically": true,
+        "publisherFailurePreservesPriorSession": true,
+        "stateAndInspectorChromeOutsideManagedCapabilitySubtree": true,
+        "retainedNamedSlotRowHalfDropTargets": true,
+        "retainedStickyComponentDropTarget": true,
+        "retainedInsertSelectionForDeleteDiscoverability": true,
+        "saveAuthority": false,
+        "publicationAuthority": false,
+        "activationAuthority": false
+      },
+      "css": {
+        "appOwnedStateAndBindingSelectors": true,
+        "managedDescendantStateOrBindingSelectors": 0,
+        "retainedNonOverlappingStableSlotBoundaries": true,
+        "retainedRowDropPositionPresentation": true,
+        "retainedStickyComponentTargetPresentation": true
+      }
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/structured-json.test.ts test/authoring-state.test.ts test/authoring-inspector.test.ts test/state-panel.test.tsx test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+      "rootCommands": {
+        "generate:desen-app-state-binding-editor": "node scripts/verify-desen-app-schema-inspector.mjs && node scripts/verify-editor-core-state-binding-edits.mjs && node scripts/verify-desen-app-named-slot-authoring.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:state-bindings && node scripts/generate-desen-app-state-binding-editor-proof.mjs",
+        "verify:desen-app-state-binding-editor": "node scripts/verify-desen-app-schema-inspector.mjs && node scripts/verify-editor-core-state-binding-edits.mjs && node scripts/verify-desen-app-named-slot-authoring.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:state-bindings && node scripts/verify-desen-app-state-binding-editor.mjs",
+        "test:desen-app-state-binding-editor": "node scripts/verify-desen-app-schema-inspector.mjs && node scripts/verify-editor-core-state-binding-edits.mjs && node scripts/verify-desen-app-named-slot-authoring.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:state-bindings && node --test tests/desen-app-state-binding-editor.test.mjs"
+      },
+      "parentsAuthenticatedInsideReader": true,
+      "publicDependencies": [
+        "@desen/catalog-sdk",
+        "@desen/editor-core",
+        "@desen/protocol",
+        "@desen/publisher",
+        "@desen/validator"
+      ]
+    },
+    "mutationFlow": [
+      "validator-admitted Catalog and Source projection",
+      "exact surface route and state or Inspector edit capture",
+      "bounded surface-local state and usage projection",
+      "Catalog-derived primitive property and compatible local-state reauthorization",
+      "public Editor Core state-declaration or owner-prop commands",
+      "continuous complete-Source validation",
+      "Publisher session-local Bundle",
+      "atomic Source and exact adapter session replacement"
+    ],
+    "ownership": {
+      "statePanel": "Desen App sibling chrome",
+      "bindingSelector": "Desen App Inspector chrome",
+      "advancedBindings": "visible read-only Source data",
+      "managedCapabilitySubtree": "Runtime React adapters only"
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/app-web test:state-bindings && node --test tests/desen-app-state-binding-editor.test.mjs",
+    "appTestNames": {
+      "apps/desen-app/test/structured-json.test.ts": [
+        "returns a detached recursively frozen JSON value without prototype-name interpretation",
+        "rejects malformed JSON and non-finite JSON numbers without exposing partial data",
+        "rejects duplicate decoded member names at every object level",
+        "rejects raw and escaped unpaired Unicode while accepting scalar pairs",
+        "keeps every decoded protocol-reserved object member behind M09-T08",
+        "enforces Publisher depth, value-count, and number-token boundaries exactly",
+        "enforces Publisher decoded-string and raw UTF-8 byte boundaries exactly",
+        "formats objects canonically and arrays semantically before exact round trip",
+        "keeps a deeply indented admitted value editable through compact fallback",
+        "admits reserved-looking members as detached recursively frozen inert data",
+        "keeps duplicate, malformed, non-finite, and non-scalar input fail-closed",
+        "enforces every Publisher Source JSON limit at its exact boundary"
+      ],
+      "apps/desen-app/test/authoring-state.test.ts": [
+        "projects exact ordered primitive declarations and bounded official usage counts",
+        "counts reads and nested writes conservatively but excludes inert state initial data",
+        "authenticates exact route data and fails closed without invoking accessors",
+        "inserts every primitive preset with its exact default on the selected surface",
+        "stages schema and initial changes privately and validates only the complete endpoint",
+        "deletes only unused declarations without cascading and retains the required state map",
+        "keeps legal non-addressable and richer-schema declarations visible but outside edits",
+        "rejects duplicate and stale targets with stable reasons and no partial document",
+        "captures edits as exact own data and enforces conservative identifiers and preset initials",
+        "accepts null-prototype exact command data without prototype-sensitive lookup",
+        "maps Catalog, Source, and route rejection without exposing a candidate",
+        "bounds data-only projection depth and rejects accessors without reading them"
+      ],
+      "apps/desen-app/test/authoring-inspector.test.ts": [
+        "projects only directly addressable primitive local state for compatible bindings",
+        "changes and detaches an exact compatible local-state binding atomically",
+        "rejects incompatible, forged, and runtime binding transitions without mutation",
+        "derives the exact canonical primitive and enum matrix for every reference component",
+        "distinguishes literal, absent, and dynamic Source values without coercion",
+        "sets string, enum, boolean, and number props through fresh immutable Source snapshots",
+        "deletes only an existing optional prop and rejects absent or required deletion atomically",
+        "rejects invalid enum and numeric values without mutating the current Source",
+        "keeps dynamic props outside T05 mutation authority and preserves their exact objects",
+        "captures exact own-data edit fields before authorization and rejects accessor drift",
+        "rejects selection accessors unread and captures a data-descriptor Proxy exactly once",
+        "mutates the validator-admitted Source snapshot when a hostile document Proxy drifts",
+        "rejects stale routes and forged selection identity before exposing or applying controls",
+        "preserves integer and mixed primitive enum values with exact JSON types",
+        "derives nested closed-object groups and edits RFC 6901-escaped child pointers",
+        "disambiguates repeated schema titles and names an empty property accessibly",
+        "creates an absent optional group with one atomic whole-group set",
+        "edits a structured-JSON property while rejecting dynamic marker injection",
+        "replaces all props through an honest root structured-JSON fallback",
+        "replaces disjoint near-limit root props without exceeding the private transition budget",
+        "shrinks an existing near-limit root prop before adding lexically earlier growth",
+        "counts only changed root props against the synchronous transition budget",
+        "rejects a wide root replacement before public per-prop commands can block the UI",
+        "locks only the dynamic child while preserving edits to its literal group sibling",
+        "locks whole-group replacement and deletion around an optional dynamic child",
+        "treats __proto__ and constructor as exact JSON property names without pollution",
+        "keeps dynamic object values bound instead of presenting the structured fallback"
+      ],
+      "apps/desen-app/test/state-panel.test.tsx": [
+        "presents surface-local state in deterministic order without persistence claims",
+        "submits friendly string, boolean, number, and integer initial controls with one Apply",
+        "resets the initial control safely when changing primitive type before Apply",
+        "rejects invalid numeric drafts locally and announces backend update failures",
+        "adds only directly addressable names and reports duplicate state failures",
+        "disables deletion for used state and deletes an unused state through the exact edit",
+        "refreshes an unsaved primitive draft when the projected declaration changes",
+        "fails closed for rejected projection and keeps the empty ready path actionable"
+      ],
+      "apps/desen-app/test/inspector-panel.test.tsx": [
+        "changes or detaches a compatible direct local-state value source",
+        "keeps operation bindings visible and read-only",
+        "exposes recursive groups and leaf controls through qualified accessible names",
+        "canonicalizes a successful decimal draft and keeps validation errors inline",
+        "shows an honest fallback reason and commits structured JSON only through explicit Apply",
+        "rejects %s structured JSON before invoking the edit boundary",
+        "hides optional group Unset when the current subtree contains a dynamic value",
+        "stages an absent group as complete JSON and dispatches its exact group pointer",
+        "offers Unset for an optional structured property but never for the root pointer"
+      ],
+      "apps/desen-app/test/authoring-preview.test.ts": [
+        "admits the official-derived Source as the frozen direct reference editor document",
+        "reproduces the exact session-local baseline Bundle and official revision",
+        "publishes a valid primitive prop edit as a fresh exact Bundle revision",
+        "rejects a runtime-cast non-Source without throwing or exposing a partial Bundle",
+        "rejects a structurally valid but Catalog-invalid prop edit without a partial Bundle"
+      ],
+      "apps/desen-app/test/adapter-canvas.test.tsx": [
+        "renders the official-derived sign-in only through the shared real adapters",
+        "fails closed for every unsupported project or surface without mounting sign-in",
+        "removes a previous tree synchronously and disposes the exact route session",
+        "replaces the exact session when a current authoring draft Bundle is rerendered",
+        "balances StrictMode replay and final unmount with exact session disposal",
+        "renders Source-identity selection chrome as a sibling outside the managed subtree",
+        "keeps a selected conditional Source node honest when it is not materialized",
+        "rejects stale and cross-route selection identities without exposing overlay chrome"
+      ],
+      "apps/desen-app/test/application.test.tsx": [
+        "renders an app-native projects gallery with explicit landmarks and current navigation",
+        "filters only the fixed project inventory and provides a clear recovery action",
+        "uses same-document navigation and focuses the new route heading",
+        "reacts to browser traversal and keeps route focus inside the content landmark",
+        "renders the editable Source hierarchy and keeps the exact managed adapter canvas read only",
+        "selects Source layers accessibly and keeps the identity overlay outside managed adapters",
+        "chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
+        "disables deletion for the surface root and a slot-minimum preflight without changing preview",
+        "preserves the selected layer, preview, and focus when deletion is rejected",
+        "uses only the App-owned drag intent and ignores forged native transfer authority",
+        "reorders a selected Source node through the keyboard placement control",
+        "snaps a native layer drag to the before or after half of a visible layer row",
+        "moves nodes across nested slots with keyboard and App-owned native drag intent",
+        "edits schema-derived string and enum props and refreshes the exact adapter preview",
+        "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
+        "updates surface-local state and changes a compatible binding in the live preview",
+        "keeps bound props explicit while boolean and numeric edits fail or apply atomically",
+        "resets local drafts across Source identities and qualifies repeated edit actions",
+        "switches to the exact Catalog component library and filters only the local view",
+        "does not substitute the sign-in Source tree or adapter canvas for another preview surface",
+        "removes the managed sign-in tree synchronously when routing to an unsupported surface",
+        "guides a catalog-less project without inventing a surface or enabled action",
+        "fails closed for $pathname"
+      ]
+    },
+    "rootTestNames": [
+      "[authority] authenticates exact frozen App, Editor Core, and graph parents",
+      "[state] proves primitive local-state projection, usage, and exact edits",
+      "[binding] proves exact compatible direct binding change and detach",
+      "[safety] proves bounded capture, read-only advanced forms, and complete validation",
+      "[ownership] keeps state, binding, and session preview chrome App-owned",
+      "[tests] pins focused App behavior and exact package commands",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[policy] rejects weakened state, binding, preview, and ownership sources",
+      "[verification] rejects parents, artifact, report, and filesystem authority drift"
+    ],
+    "localCommandReceipts": {
+      "pureState": {
+        "command": "pnpm --filter @desen/app-web exec vitest run test/authoring-state.test.ts",
+        "result": "PASS",
+        "testFiles": 1,
+        "tests": 12
+      },
+      "focusedStateBindings": {
+        "command": "pnpm --filter @desen/app-web test:state-bindings",
+        "result": "PASS",
+        "testFiles": 8,
+        "tests": 109
+      },
+      "fullApp": {
+        "command": "pnpm --filter @desen/app-web test",
+        "result": "PASS",
+        "testFiles": 13,
+        "tests": 181
+      },
+      "rootProof": {
+        "command": "node --test tests/desen-app-state-binding-editor.test.mjs",
+        "result": "PASS",
+        "testFiles": 1,
+        "tests": 9
+      }
+    },
+    "semanticCoverage": [
+      "SURFACE_LOCAL_PRIMITIVE_STATE_PROJECTION",
+      "ORDERED_LIST_ADD_UPDATE_DELETE",
+      "BOUNDED_CONSERVATIVE_USAGE_COUNT",
+      "STATE_INITIAL_EXCLUDED_AS_INERT_DATA",
+      "USED_STATE_DELETE_REJECTED",
+      "PRIVATE_SCHEMA_INITIAL_STAGING",
+      "EXACT_OWN_DATA_ROUTE_STATE_AND_BINDING_CAPTURE",
+      "DIRECT_SINGLE_REF_LOCAL_STATE_BINDING",
+      "CATALOG_CONTROL_COMPATIBILITY",
+      "DIRECT_BINDING_CHANGE_AND_DETACH",
+      "RUNTIME_AND_ADVANCED_BINDINGS_READ_ONLY",
+      "CONTINUOUS_SOURCE_REVALIDATION",
+      "ATOMIC_PUBLISHER_PREVIEW",
+      "APP_OWNED_STATE_AND_BINDING_CHROME"
+    ]
+  },
+  "boundary": {
+    "trackedFiles": 32,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 2308,
+        "sha256": "6d18724a6922be2998ba22e7e3f4071e99bfdf472de1365842bb8aeaa54f4f37"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 10920,
+        "sha256": "a678302fd2931172d32f6509dc37018a294bc938ccca73df646a715516a6db38"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 55026,
+        "sha256": "ed91c67f1dab1643642e286da184c8abf96361031eefd32f76aff8a7ea8f5063"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 65378,
+        "sha256": "c1daf62dba03a5646bb3d9d21eb3d28a32385b8fe296d61b38007e9f59d29bce"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 18521,
+        "sha256": "ae18d9ea0fe37ee553e758a73a9ca2e54e97c7fbcf048c21cd3bd131aadc1b25"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-inspector.ts",
+        "bytes": 38614,
+        "sha256": "76c1bebae33c41b175558bd8c4e1d392a28f86e97e0895863b13df1320d421b2"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-preview.ts",
+        "bytes": 3704,
+        "sha256": "75fa2d605f8c5ceebc2668c1f4c739155c7791b895132dc9a5fac183384e3d34"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-state.ts",
+        "bytes": 23320,
+        "sha256": "60d07b2229ff3e264cca66699d7711778802379a7d48bc1c16420f7bc43b7cb5"
+      },
+      {
+        "path": "apps/desen-app/src/inspector-panel.tsx",
+        "bytes": 27598,
+        "sha256": "45700d67ff6da373b4e3da9599b675ec793b0007b511775af24a4be5e69a858f"
+      },
+      {
+        "path": "apps/desen-app/src/state-panel.tsx",
+        "bytes": 14180,
+        "sha256": "1b6f475877a53f2c0f35a2fe9cc8e8e8708ba344318fba1178bc09b8e782dc3a"
+      },
+      {
+        "path": "apps/desen-app/src/structured-json.ts",
+        "bytes": 13908,
+        "sha256": "74c56059e2cdca1ae018424f27e1c28c54785bbbc89c75d25dfa1858b76c4759"
+      },
+      {
+        "path": "apps/desen-app/test/adapter-canvas.test.tsx",
+        "bytes": 11338,
+        "sha256": "6f09674b0f0dd22bdc61e158c8567df4fdbdbe3ca3d96710b54f5e9138ce8de0"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 56448,
+        "sha256": "dbd802b086a2595c61db87e3ec9512d1a2b5f425852d584f5181b216f4607705"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-inspector.test.ts",
+        "bytes": 53219,
+        "sha256": "3037926ac89677c412a25e455407becfe67475aa9cb3ec6b5f511cfe50f212fc"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-preview.test.ts",
+        "bytes": 4001,
+        "sha256": "1e514ec48f41d6e565197595d1bd4cbbbacf42b50d960cb7f28b4ad27b4510dc"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-state.test.ts",
+        "bytes": 19315,
+        "sha256": "d0e58e07a4af4d0af76175c8609f6454f87fac442042e121b71de6d94980eb3b"
+      },
+      {
+        "path": "apps/desen-app/test/inspector-panel.test.tsx",
+        "bytes": 21884,
+        "sha256": "0c891415e34a29bf74baa4e211f82a46243c5dd8091b702d2ad558b24e1590f6"
+      },
+      {
+        "path": "apps/desen-app/test/state-panel.test.tsx",
+        "bytes": 12166,
+        "sha256": "93ded9dfc6742b78ab98901f449a530b4d5a3db8168b3c738cb6fc45186561e8"
+      },
+      {
+        "path": "apps/desen-app/test/structured-json.test.ts",
+        "bytes": 10359,
+        "sha256": "254f2f2e6c0a5f1fce72e7881c1b94d7d501fb8be08be693c66e1256e28ba827"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json",
+        "bytes": 24830,
+        "sha256": "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json",
+        "bytes": 22998,
+        "sha256": "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b"
+      },
+      {
+        "path": "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json",
+        "bytes": 30014,
+        "sha256": "b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8"
+      },
+      {
+        "path": "examples/sign-in/official-derived.bundle.desen.json",
+        "bytes": 4899,
+        "sha256": "334450fa1864bf280a30342090a46ba1d2f2dc96552b9430afdde5fcada902b0"
+      },
+      {
+        "path": "examples/sign-in/official-derived.source.desen.json",
+        "bytes": 4724,
+        "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+      },
+      {
+        "path": "package.json",
+        "bytes": 89860,
+        "sha256": "a8e9ad3ef63447c816d95e7fd247d68875b8cdae08750a5181721d2fae93a2a0"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129394,
+        "sha256": "463a35abf13fd9ba6acb897aca52a11e7a90c8fcfedbce085e82f89c23418d89"
+      },
+      {
+        "path": "scripts/generate-desen-app-state-binding-editor-proof.mjs",
+        "bytes": 805,
+        "sha256": "42ced185a5dc26ef978eec01d0014a2d9921e52ebed47031f40816e050ff461b"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-state-binding-editor-proof.mjs",
+        "bytes": 48807,
+        "sha256": "e9e822c0532cb7b63837e7c0e3bd8fdb3a6c948844f59fd3eb91c6ea16ff4903"
+      },
+      {
+        "path": "scripts/verify-desen-app-state-binding-editor.mjs",
+        "bytes": 810,
+        "sha256": "b6d6d3cb019885ccdedaee51be1ad0a9a1bf25a749eead40689124febaa7cdd5"
+      },
+      {
+        "path": "tests/desen-app-state-binding-editor.test.mjs",
+        "bytes": 16147,
+        "sha256": "10c77e961eae66429b775a3ef4abab40841f0cbae31e4eade6a8fc13116d5f37"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-state-binding-editor-proof.mjs",
+      "scripts/generate-desen-app-state-binding-editor-proof.mjs",
+      "scripts/verify-desen-app-state-binding-editor.mjs",
+      "tests/desen-app-state-binding-editor.test.mjs"
+    ],
+    "parentArtifacts": 3,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "Repeat and resource-binding UI are not implemented or claimed by M09-T08.",
+    "M09-T09 is NOT_PROVEN: event and closed-action editing are not implemented.",
+    "M09-T10 is NOT_PROVEN: no Design/Run mode is claimed.",
+    "M09-T12 is NOT_PROVEN: no save/open or durable persistence UI is claimed.",
+    "M09-T14 is NOT_PROVEN: session preview is not control-plane publication or activation.",
+    "G09 and browser E2E remain NOT_PROVEN.",
+    "P-08 remains NOT_PROVEN until the remaining visual authoring and browser-E2E owners pass.",
+    "Runtime namespaces, fallbacks, tokens, formats, nested dynamic values, and advanced local-state schemas remain read-only.",
+    "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence."
+  ]
+}

@@ -192,8 +192,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   );
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
-  assert.equal(currentRuntime.moduleCount, 129);
-  assert.equal(currentRuntime.staticEdges, 380);
+  assert.equal(currentRuntime.moduleCount, 131);
+  assert.equal(currentRuntime.staticEdges, 388);
   assert.equal(currentRuntime.dynamicEdges, 0);
   assert.equal(currentRuntime.sharedRuntimeModuleCount, 19);
   assert.equal(currentRuntime.realComponentModuleCount, 5);
@@ -287,7 +287,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
   );
   assert.equal(built.currentCompatibility.successor.atomicDeletionPreviewAndFocusImplemented, true);
   assert.equal(built.currentCompatibility.successor.exactArtifactSourceAndTestReceipts, true);
-  assert.equal(built.currentCompatibility.successor.artifactSourceAndTestReceiptCount, 11);
+  assert.equal(built.currentCompatibility.successor.artifactSourceAndTestReceiptCount, 8);
   assert.equal(
     built.currentCompatibility.application.package.namedSlotFocusedTest,
     "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
@@ -662,7 +662,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
-  assert.equal(verified.currentGraphModules, 129);
+  assert.equal(verified.currentGraphModules, 131);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 

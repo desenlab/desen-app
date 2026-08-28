@@ -19,6 +19,8 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const PARENT_PATH = "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json";
 const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
+const STATE_BINDING_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json";
 const SOURCE_PATHS = Object.freeze({
   authoringDataSource: "apps/desen-app/src/authoring-data.ts",
   inspectorSource: "apps/desen-app/src/authoring-inspector.ts",
@@ -109,8 +111,17 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.taskStatus, "DONE");
   assert.equal(built.artifact.claim.p08Status, "NOT_PROVEN");
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.successor.task, "M09-T07");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T08");
   assert.deepEqual(built.currentCompatibility.successor.artifact, {
+    task: "M09-T08",
+    proofId: "desen-app-state-binding-editor",
+    profile: "desen.app.state-binding-editor-proof.v1",
+    result: "PASS",
+    path: STATE_BINDING_ARTIFACT_PATH,
+    bytes: 28_766,
+    sha256: "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
+  });
+  assert.deepEqual(built.currentCompatibility.successor.predecessorArtifact, {
     task: "M09-T07",
     proofId: "desen-app-named-slot-authoring",
     profile: "desen.app.named-slot-authoring-proof.v1",
@@ -161,6 +172,28 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[0], () => {
     built.currentCompatibility.successor.slotChromeOutsideManagedCapabilitySubtree,
     true,
   );
+  assert.equal(built.currentCompatibility.successor.surfaceLocalPrimitiveStateEditing, true);
+  assert.equal(built.currentCompatibility.successor.boundedUsageCounts, true);
+  assert.equal(built.currentCompatibility.successor.usedStateDeleteRejected, true);
+  assert.equal(
+    built.currentCompatibility.successor.exactCompatibleDirectLocalStateBindingChangeAndDetach,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.runtimeAndAdvancedBindingsReadOnly, true);
+  assert.equal(built.currentCompatibility.successor.atomicPublisherBackedPreview, true);
+  assert.equal(
+    built.currentCompatibility.successor.retainedNamedSlotAuthoringUxCompatibility,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.nonOverlappingStableSlotBoundaries, true);
+  assert.equal(built.currentCompatibility.successor.rowHalfDropTargets, true);
+  assert.equal(built.currentCompatibility.successor.stickyComponentDropTarget, true);
+  assert.equal(built.currentCompatibility.successor.successfulInsertionSelectsNewLayer, true);
+  assert.equal(built.currentCompatibility.successor.persistenceImplemented, false);
+  assert.equal(built.currentCompatibility.successor.eventActionEditingImplemented, false);
+  assert.equal(built.currentCompatibility.successor.designRunImplemented, false);
+  assert.equal(built.currentCompatibility.successor.activationImplemented, false);
+  assert.equal(built.currentCompatibility.successor.browserE2eImplemented, false);
   assert.equal(
     built.currentCompatibility.successor.package.namedSlotTestCommand,
     "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
@@ -170,6 +203,16 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[0], () => {
       "test:desen-app-named-slot-authoring"
     ],
     "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node --test tests/desen-app-named-slot-authoring.test.mjs",
+  );
+  assert.equal(
+    built.currentCompatibility.successor.package.stateBindingTestCommand,
+    "vitest run test/structured-json.test.ts test/authoring-state.test.ts test/authoring-inspector.test.ts test/state-panel.test.tsx test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+  );
+  assert.equal(
+    built.currentCompatibility.successor.package.stateBindingRootCommands[
+      "test:desen-app-state-binding-editor"
+    ],
+    "node scripts/verify-desen-app-schema-inspector.mjs && node scripts/verify-editor-core-state-binding-edits.mjs && node scripts/verify-desen-app-named-slot-authoring.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:state-bindings && node --test tests/desen-app-state-binding-editor.test.mjs",
   );
 });
 
@@ -665,6 +708,15 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[9], async () => {
   await assert.rejects(
     buildDesenAppStructuredInspectorEvidence({
       fileOverrides: new Map([[NAMED_SLOT_ARTIFACT_PATH, changedByte(namedSlotArtifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  const stateBindingArtifactBytes = await readFile(path.join(ROOT, STATE_BINDING_ARTIFACT_PATH));
+  await assert.rejects(
+    buildDesenAppStructuredInspectorEvidence({
+      fileOverrides: new Map([
+        [STATE_BINDING_ARTIFACT_PATH, changedByte(stateBindingArtifactBytes)],
+      ]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );

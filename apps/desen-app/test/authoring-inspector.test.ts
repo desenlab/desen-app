@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
 import {
+  applyAuthoringInspectorBindingEdit,
   applyAuthoringInspectorEdit,
   prepareAuthoringInspectorModel,
 } from "../src/authoring-inspector.js";
@@ -210,6 +211,103 @@ function controlSignature(model: CatalogAuthoringModel, componentId: string) {
 }
 
 describe("Desen App schema-driven authoring inspector", () => {
+  it("projects only directly addressable primitive local state for compatible bindings", () => {
+    const inspector = requireInspector(
+      REFERENCE_AUTHORING_MODEL,
+      selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.email"),
+    );
+
+    expect(inspector.localStates).toEqual([
+      {
+        enumValues: undefined,
+        initial: "",
+        name: "email",
+        reference: "state.email",
+        type: "string",
+      },
+      {
+        enumValues: undefined,
+        initial: "",
+        name: "password",
+        reference: "state.password",
+        type: "string",
+      },
+    ]);
+    expect(Object.isFrozen(inspector.localStates)).toBe(true);
+    expect(inspector.localStates.every(Object.isFrozen)).toBe(true);
+  });
+
+  it("changes and detaches an exact compatible local-state binding atomically", () => {
+    const original = requireReferenceDocument();
+    const selection = selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.email");
+
+    const rebound = requireEditSuccess(
+      applyAuthoringInspectorBindingEdit(original, referenceCatalog, REFERENCE_ROUTE, selection, {
+        kind: "bind",
+        stateName: "password",
+        valuePointer: "/value",
+      }),
+    );
+    expect(findEditorNode(rebound, "sign-in.email").props?.value).toEqual({
+      $ref: "state.password",
+    });
+    expect(findEditorNode(original, "sign-in.email").props?.value).toEqual({
+      $ref: "state.email",
+    });
+
+    const reboundModel = requirePreparedModel(referenceCatalog, rebound);
+    const detached = requireEditSuccess(
+      applyAuthoringInspectorBindingEdit(
+        rebound,
+        referenceCatalog,
+        REFERENCE_ROUTE,
+        selectionFor(reboundModel, "sign-in.email"),
+        { kind: "use-initial", valuePointer: "/value" },
+      ),
+    );
+    expect(findEditorNode(detached, "sign-in.email").props?.value).toBe("");
+    expect(findEditorNode(rebound, "sign-in.email").props?.value).toEqual({
+      $ref: "state.password",
+    });
+  });
+
+  it("rejects incompatible, forged, and runtime binding transitions without mutation", () => {
+    const original = requireReferenceDocument();
+    const emailSelection = selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.email");
+    const submitSelection = selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.submit");
+
+    expect(
+      applyAuthoringInspectorBindingEdit(
+        original,
+        referenceCatalog,
+        REFERENCE_ROUTE,
+        emailSelection,
+        { kind: "bind", stateName: "email", valuePointer: "/disabled" },
+      ),
+    ).toEqual({ ok: false, reason: "binding-incompatible" });
+    expect(
+      applyAuthoringInspectorBindingEdit(
+        original,
+        referenceCatalog,
+        REFERENCE_ROUTE,
+        submitSelection,
+        { kind: "bind", stateName: "email", valuePointer: "/loading" },
+      ),
+    ).toEqual({ ok: false, reason: "control-unavailable" });
+    expect(
+      applyAuthoringInspectorBindingEdit(
+        original,
+        referenceCatalog,
+        REFERENCE_ROUTE,
+        emailSelection,
+        { kind: "bind", stateName: "email.profile", valuePointer: "/value" },
+      ),
+    ).toEqual({ ok: false, reason: "edit-rejected" });
+    expect(findEditorNode(original, "sign-in.email").props?.value).toEqual({
+      $ref: "state.email",
+    });
+  });
+
   it("derives the exact canonical primitive and enum matrix for every reference component", () => {
     expect(controlSignature(REFERENCE_AUTHORING_MODEL, "com.example.ui/Alert")).toEqual([
       ["text", "string", true, null],
@@ -271,7 +369,11 @@ describe("Desen App schema-driven authoring inspector", () => {
       label: { kind: "literal", value: "Email" },
       placeholder: { kind: "absent" },
       secure: { kind: "absent" },
-      value: { kind: "dynamic", reference: "state.email" },
+      value: {
+        kind: "dynamic",
+        reference: "state.email",
+        value: { $ref: "state.email" },
+      },
     });
 
     const password = requireInspector(
@@ -290,6 +392,7 @@ describe("Desen App schema-driven authoring inspector", () => {
     expect(submit.fields.find(({ control }) => control.property === "loading")?.value).toEqual({
       kind: "dynamic",
       reference: "operation.signIn.pending",
+      value: { $ref: "operation.signIn.pending", fallback: false },
     });
     expect(Object.isFrozen(email.fields)).toBe(true);
     expect(email.fields.every(Object.isFrozen)).toBe(true);
@@ -1167,7 +1270,10 @@ describe("Desen App schema-driven authoring inspector", () => {
     expect(group?.control.kind).toBe("group");
     expect(group?.children.map(({ control, value }) => [control.valuePointer, value])).toEqual([
       ["/config/label", { kind: "literal", value: "Before" }],
-      ["/config/secret", { kind: "dynamic", reference: "state.secret" }],
+      [
+        "/config/secret",
+        { kind: "dynamic", reference: "state.secret", value: { $ref: "state.secret" } },
+      ],
     ]);
 
     const changed = requireEditSuccess(
@@ -1337,6 +1443,10 @@ describe("Desen App schema-driven authoring inspector", () => {
       ({ control }) => control.property === "config",
     );
     expect(field?.control.kind).toBe("group");
-    expect(field?.value).toEqual({ kind: "dynamic", reference: "state.email" });
+    expect(field?.value).toEqual({
+      kind: "dynamic",
+      reference: "state.email",
+      value: { $ref: "state.email" },
+    });
   });
 });

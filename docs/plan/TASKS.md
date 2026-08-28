@@ -1439,7 +1439,7 @@ is next.
 | M09-T05 | DONE        | M09-T02–M09-T04          | Schema-driven primitive/enum inspector controls                                 |
 | M09-T06 | DONE        | M09-T05                  | Nested-object controls and honest structured-JSON fallback                      |
 | M09-T07 | DONE        | M09-T02–M09-T06          | Named-slot drop, move, reorder, cardinality, and acceptance UI                  |
-| M09-T08 | NOT_STARTED | M09-T05                  | Local state and binding editor UI                                               |
+| M09-T08 | DONE        | M09-T05                  | Local state and binding editor UI                                               |
 | M09-T09 | NOT_STARTED | M09-T08                  | Sign-in event and closed-action editor UI                                       |
 | M09-T10 | NOT_STARTED | M09-T03, M09-T08–M09-T09 | Design/Run modes on the same source tree                                        |
 | M09-T11 | NOT_STARTED | M09-T10                  | Fixtures, scenarios, and visible approximate-fidelity disclosure                |
@@ -1674,12 +1674,12 @@ publication, and activation owners remain outstanding. M09-T07 is next.
 
 M09-T07 turns the Catalog-declared named slots already projected by the App into one bounded
 authoring surface. Layers expose every valid insertion boundary for click/keyboard placement and
-App-owned drag intent. While an admissible drag is active, those boundaries expand across the
-space between neighboring rows, keep hover state stable across nested child events, and show the
-exact target line. Components no longer imply that they can be dropped without a destination: a
-visible target card names the selected owner, slot, cardinality, and next position, while the
-targetless state disables component drag/insert and routes the user back to Layers. Browser
-`DataTransfer` contains only an inert hint and is never mutation authority.
+App-owned drag intent. The compatibility patch makes neighboring boundary targets non-overlapping
+and lets each row's top and bottom halves resolve to the adjacent deterministic boundary, so a
+narrow inter-row gap is not the only target. Components retains a sticky target card naming the
+selected owner, slot, cardinality, and next position. Successful insertion auto-selects the new
+component and exposes the existing safe Delete action. Browser `DataTransfer` contains only an
+inert hint and is never mutation authority.
 
 Every insert, cross-slot move, same-slot reorder, and selected-subtree delete is re-authorized
 against the exact current route, Source, Catalog capability identity, slot acceptance rule, and
@@ -1712,7 +1712,42 @@ dragStart/dragEnter/dragOver/drop chain is covered by the focused App tests.
 M09-T07 is `DONE`, advancing implementation progress to 102/145 (70%) and M09 to 7/14 (50%) while
 proof gates remain 10/13. P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, and dynamic
 state/binding editing, event/action authoring, Design/Run, durable save/open, real-browser E2E,
-publication, and activation remain later owners. M09-T08 is next.
+publication, and activation remain later owners. M09-T08 was the next owner.
+
+M09-T08 adds one bounded surface-local primitive-state and direct-binding authoring profile. The
+State panel deterministically lists directly addressable declarations and supports add,
+initial-value update, and unused delete for string, boolean, number, and integer state. A bounded
+conservative usage scan displays reference counts and prevents deletion of referenced declarations;
+the exact current Source is rechecked when the edit is applied. Unsupported and non-preset schema
+shapes remain visible but read-only rather than being guessed into editable controls.
+
+The Inspector can attach a compatible property to one exact direct `state.<name>` reference,
+change that reference, or detach it back to the declaration's validated primitive initial value.
+Compatibility comes from the authenticated Catalog `propsSchema`, not opaque authoring hints.
+Operation, context, event, item, environment, and resource references plus fallback, token, format,
+nested, or otherwise advanced dynamic values remain read-only. State schema and initial documents
+use inert JSON capture, so marker-shaped `$` members remain state data rather than being interpreted
+as `ValueSpec` authority.
+
+Accepted edits use public Editor Core state/binding commands, complete continuous validation, and
+Publisher preflight before one atomic session-local `{document, preview}` replacement. Rejected,
+stale, incompatible, in-use, malformed, or over-budget requests expose no partial Source or
+preview. The focused `test:state-bindings` suite passes 109/109. The final structural receipt is
+`278/278`; exact evidence is the
+`28,766`-byte
+`docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json` at
+`sha256:b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a`.
+
+The live local CI inventory contains 188 workloads and 89 proof pairs—78 ordinary pairs and 11
+barriers. M09-T08's connected closure contains 56 proof units and 122 workloads; complete ownership
+covers 1,202 tracked paths, including 178 proof-owned paths. Append-only checkpoint sequence 47
+contains 43 artifacts and 86 readers at `sha256:c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7`. These are local receipts;
+no required-gate, hosted-CI, native-drag, or real-browser E2E pass is claimed.
+
+M09-T08 is `DONE`, advancing implementation progress to 103/145 (71%) and M09 to 8/14 (57%) while
+proof gates remain 10/13. P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, and event/action
+authoring, Design/Run, durable save/open, real-browser E2E, publication, and activation remain later
+owners. M09-T09 is next.
 
 ## M10 — First end-to-end proof
 

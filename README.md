@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████████░░░░░░░░` **102 / 145 tasks complete (70%)**
+**Overall:** `██████████████████░░░░░░░` **103 / 145 tasks complete (71%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `███████░░░░░░░` **7 / 14 tasks complete (50%)**
+**M09:** `████████░░░░░░` **8 / 14 tasks complete (57%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T08`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T09`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -798,11 +798,11 @@ remain 10/13. P-08 remains `NOT_PROVEN`; slot/cardinality UI, state/binding and 
 authoring, Design/Run, persistence, browser E2E, control-plane publication, and activation remain
 later work. PF-025 remains `OPEN`, dynamic `$` values stay locked for M09-T08, and M09-T07 is next.
 
-M09-T07 adds App-owned named-slot insertion, move, reorder, and deletion. During an admissible
-Layers drag, insertion boundaries expand across the inter-row gaps and retain hover through nested
-events. Components now exposes one explicit owner/slot/cardinality/position target; without a
-selected slot, drag and insert are disabled and a native action returns focus to Layers. Click and
-keyboard placement remain available, and browser transfer data is only an inert hint.
+M09-T07 adds App-owned named-slot insertion, move, reorder, and deletion. Its compatibility patch
+uses non-overlapping insertion boundaries plus whole-row top/bottom targets so narrow gaps are not
+the only drop surface. Components retains one sticky owner/slot/cardinality/position target, and a
+successful insert auto-selects the new component so the existing safe Delete action is visible.
+Click and keyboard placement remain available, and browser transfer data is only an inert hint.
 
 Every operation re-authorizes the exact current route, Source node, Catalog capability, slot
 contract, acceptance, minimum/maximum, and placement. Accepted candidates use public Editor Core
@@ -825,7 +825,33 @@ delete affordance, root-delete explanation, and clean console. Native drag autom
 real-browser E2E remain unclaimed. M09-T07 is `DONE`; implementation progress is 102/145 (70%),
 M09 is 7/14 (50%), and proof gates remain 10/13. P-08 remains `NOT_PROVEN`; state/binding and
 event/action authoring, Design/Run, durable save/open, browser E2E, publication, and activation
-remain. PF-025 remains `OPEN`, and M09-T08 is next.
+remain. PF-025 remains `OPEN`; this closure handed off to M09-T08.
+
+M09-T08 adds a surface-local state and binding editor for directly addressable primitive state.
+The State panel lists declarations deterministically and supports bounded add, initial-value update,
+usage-aware delete, and explicit read-only treatment for unsupported declaration shapes. Usage is a
+conservative bounded scan: referenced state cannot be deleted, and every edit is revalidated against
+the current Source rather than trusting a stale UI projection.
+
+The Inspector can attach a compatible property to one exact direct local-state reference, change
+that reference, or detach it back to the declaration's validated initial value. Runtime namespaces,
+fallbacks, tokens, formats, nested references, and other advanced dynamic bindings stay read-only.
+Accepted changes use public Editor Core commands, complete continuous validation, and Publisher
+preflight before one atomic session-local `{document, preview}` replacement.
+
+The focused state/binding suite passes 109/109. Final structural receipt is
+`278/278`; exact evidence is the
+`28,766`-byte
+[`desen-app-0.1.0-state-binding-editor.json`](docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json)
+at `sha256:b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a`. The local CI authority contains 188 workloads and 89 proof
+pairs—78 ordinary pairs and 11 barriers—with a 56-proof-unit/122-workload closure and 1,202
+tracked/178 proof-owned paths. Append-only sequence 47 authenticates 43 artifacts and 86 readers at
+`sha256:c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7`.
+
+M09-T08 is `DONE`; implementation progress is 103/145 (71%), M09 is 8/14 (57%), and proof gates
+remain 10/13. P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, and event/action authoring,
+Design/Run, durable save/open, real-browser E2E, publication, and activation remain. The T07 native
+real-browser drag E2E receipt also remains open. M09-T09 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

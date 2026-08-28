@@ -862,12 +862,12 @@ P-08 `NOT_PROVEN`, PF-025 `OPEN` ve kanıt kapıları 10/13 kalır. Genel ilerle
 M09 ilerlemesi 6/14'tür (%43). Dynamic `$` edit M09-T08'de; slot/cardinality UI ise sıradaki
 M09-T07'dedir.
 
-M09-T07 artık `DONE`'dır. Layers görünümündeki geçerli named-slot ekleme sınırları, kabul edilen bir
-sürükleme sırasında komşu satırlar arasındaki boşluğu kapsayacak biçimde genişler; iç içe child
-event'lerinde hover kararlılığını ve click/klavye `Place` alternatifini korur. Components görünümü
-seçili owner/slot, cardinality ve sonraki konumu açıkça gösteren tek bırakma hedefi sunar. Hedef
-yokken sürükleme ve ekleme devre dışıdır; native buton odağı Layers'a götürür. Browser
-`DataTransfer` yalnız inert bir ipucudur, mutation otoritesi değildir.
+M09-T07 artık `DONE`'dır. Uyumluluk düzeltmesi, Layers'taki komşu named-slot sınırlarını çakışmasız
+hale getirir ve her satırın üst/alt yarısını bitişik deterministik sınıra bağlar; böylece dar satır
+aralığı tek bırakma yüzeyi olmaz. Components görünümündeki seçili owner/slot, cardinality ve sonraki
+konumu gösteren hedef kalıcıdır. Başarılı ekleme yeni bileşeni otomatik seçerek mevcut güvenli Delete
+eylemini görünür kılar. Click/klavye `Place` alternatifi korunur; browser `DataTransfer` yalnız inert
+bir ipucudur, mutation otoritesi değildir.
 
 Insert, farklı slota move, aynı slotta reorder ve seçili subtree delete işlemleri; güncel rota,
 Source yerleşimi, Catalog capability kimliği, kabul kuralı ve effective minimum/maximum üzerinden
@@ -891,7 +891,39 @@ In-app browser incelemesi hedefsiz yönlendirmeyi, seçili-slot hedefini, click/
 delete kontrolünü, root-delete açıklamasını ve temiz console'u doğrulamıştır. Native drag
 otomasyonu gözlemlenmediği için gerçek-browser E2E iddiası açıkça yapılmaz. P-08 `NOT_PROVEN`,
 PF-025 `OPEN` ve kanıt kapıları 10/13 kalır. Genel ilerleme 102/145 (%70), M09 ilerlemesi 7/14'tür
-(%50); sıradaki iş M09-T08 local state ve binding editor UI'dır.
+(%50); bu kapanış M09-T08'e devredilmiştir.
+
+M09-T08 artık `DONE`'dır. State paneli doğrudan adreslenebilen surface-local primitive state
+bildirimlerini deterministik biçimde listeler; string, boolean, number ve integer state için ekleme,
+initial değer güncelleme ve kullanılmayan state'i silme sağlar. Sınırlı ve muhafazakâr kullanım
+taraması referans sayısını gösterir, kullanılan state'in silinmesini engeller ve uygulama anında
+güncel Source'u yeniden denetler. Desteklenmeyen veya preset dışı şema şekilleri tahmin edilmez;
+görünür ama salt okunur kalır.
+
+Inspector, uyumlu bir prop'u yalnız exact direct `state.<name>` referansına bağlayabilir, bu bağı
+değiştirebilir veya declaration'ın doğrulanmış primitive initial değerine geri ayırabilir. Uyum
+authenticated Catalog `propsSchema` üzerinden belirlenir. Operation/context/event/item/env/resource
+referansları; fallback, token, format, nested ve diğer advanced dynamic binding şekilleri salt
+okunur kalır. State schema ve initial alanları inert JSON'dur; `$` biçimli üyeler `ValueSpec`
+otoritesi gibi yorumlanmaz.
+
+Kabul edilen değişiklikler public Editor Core komutlarını, complete continuous validation'ı ve
+Publisher preflight'ı geçmeden session-local `{document, preview}` değerini atomik olarak
+değiştirmez. Odak `test:state-bindings` suite'i 109/109 geçer. Son structural receipt
+`278/278`; exact kanıt
+`28.766` baytlık
+[`desen-app-0.1.0-state-binding-editor.json`](../proof/artifacts/desen-app-0.1.0-state-binding-editor.json)
+artifact'ıdır ve `sha256:b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a` ile pinlenir.
+
+Yerel CI otoritesi 188 workload ve 89 proof pair içerir: 78 ordinary pair ile 11 barrier. Connected
+closure 56 proof unit/122 workload, ownership 1.202 tracked/178 proof-owned path'tir. Append-only
+sequence 47, 43 artifact ve 86 reader'ı `sha256:c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7` başında doğrular. Bunlar
+required-gate, hosted-CI veya real-browser E2E iddiası değildir; T07 native drag E2E kanıtı da açık
+kalır.
+
+P-08 `NOT_PROVEN`, PF-025 `OPEN` ve kanıt kapıları 10/13 kalır. Genel ilerleme 103/145 (%71), M09
+ilerlemesi 8/14'tür (%57). Event/action authoring, Design/Run, durable save/open, gerçek-browser E2E,
+publication ve activation sonraki sahiplerde kalır; sıradaki iş M09-T09'dur.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

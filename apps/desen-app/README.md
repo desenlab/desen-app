@@ -6,9 +6,9 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T07 adds Catalog-declared named-slot insertion, move, reorder, and deletion controls while
-keeping drag intent, placement targets, selection, and every other authoring control in the
-application-owned shell outside the exact React adapter canvas.
+M09-T08 adds a surface-local state editor and direct, type-compatible local-state property
+bindings while keeping state forms, binding controls, selection, and every other authoring control
+in the application-owned shell outside the exact React adapter canvas.
 The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
@@ -25,14 +25,19 @@ The current product surface contains:
   inventory, display names, categories, descriptions, identity, version, and target;
 - local component filtering that changes only the visible list and never mutates Catalog or Source
   data;
-- widened, overlapping slot boundaries with stable nested-hover feedback so the Layers view
-  exposes each valid insertion or placement boundary as an easier drop target;
-- one explicit Components drop target for the selected compatible slot, or a disabled guide that
-  returns the user to Layers when no slot is selected;
+- stable, non-overlapping slot boundaries plus the upper and lower half of each visible layer row
+  as before/after targets, without moving the tree while a drag is active;
+- one sticky Components drop target for the selected compatible slot, with visible drag grips and
+  click guidance, or a disabled guide that returns the user to Layers when no slot is selected;
 - App-owned inert drag intent plus native keyboard and click placement controls for component
   insertion, cross-slot move, and same-slot reorder;
-- a selection-bound deletion control that explains root and effective-minimum restrictions, clears
-  a successfully deleted selection, and returns focus to Layers;
+- a selection-bound deletion control that explains root and effective-minimum restrictions,
+  automatically targets a newly inserted component, clears a successfully deleted selection, and
+  returns focus to Layers;
+- a third State view that projects the exact current surface-local declarations, bounded usage
+  counts, and controlled String, Boolean, Number, and Integer initial values;
+- stable add, atomic type-and-initial update, and unused-state deletion controls that preserve used
+  declarations without cascading into references or actions;
 - an explicit no-substitution state for Recovery and Profile, which have no exact Source tree in
   the official fixture;
 - a sign-in canvas mounted from the official-derived Bundle through the same public
@@ -57,6 +62,10 @@ The current product surface contains:
   Reset, and eligible Unset actions;
 - Publisher-profile strict JSON capture, deterministic formatting, dynamic `$` locks, bounded
   changed-only root transitions, and focus handoff when an edit changes control kind;
+- Inspector value-source controls that construct only exact direct `state.<name>` references for
+  primitive declarations whose type is provably compatible with the selected Catalog control;
+- explicit change-binding and use-state-initial transitions, while operation bindings, fallbacks,
+  tokens, formats, nested paths, and other advanced dynamic values remain visible and read-only;
 - public Editor Core set/delete commands followed by continuous Catalog validation, with no
   partial Source returned for stale identity, invalid value, or failed validation;
 - Publisher preflight for every accepted edit and one atomic session-local `{document, preview}`
@@ -136,19 +145,38 @@ closed. Each complete candidate must pass continuous validation and Publisher pr
 atomic session-local `{document, preview}` commit. A failed mutation or publication preserves the
 prior Source, preview, selection, and focus.
 
-The browser drag payload is an inert hint and is never read as authority. Expanded drop boundaries
-and depth-counted hover state improve pointer targeting, while exact placement semantics still come
-from the App-owned drag intent and current validated model. Components whose insertion would
-require inventing a private required child subtree remain unavailable.
+The browser drag payload is an inert hint and is never read as authority. Stable slot boundaries
+and the upper or lower half of each visible row expose the nearest before/after placement without
+overlap or drag-time layout movement, while exact placement semantics still come from the App-owned
+drag intent and current validated model. The Components target remains visible while its list
+scrolls, and successful insertion immediately selects the new node so its deletion control is
+available. Components whose insertion would require inventing a private required child subtree
+remain unavailable.
+
+Local-state projection re-admits the exact current Source and Catalog, authenticates the current
+surface route, and scans at most 100,000 inert values to count direct state references plus
+`state.set` and `state.toggle` targets. Declaration edits accept only directly addressable names
+matching `^[A-Za-z][A-Za-z0-9_-]{0,127}$`. Existing richer or non-addressable protocol-valid
+declarations stay visible but cannot be rewritten by the primitive controls. Type changes stage
+the schema and initial commands on a private candidate, then continuously validate only the
+complete endpoint so no incompatible intermediate Source becomes observable.
+
+Property binding is a separate boundary from the structured-JSON prop editor. It reauthorizes the
+route, selection, node, control, current value, and local declaration before constructing one exact
+`{ $ref: "state.<name>" }` ValueSpec through the public owner-prop command. Primitive compatibility
+is conservative: String and Boolean must match exactly, Integer may feed Number, Number never
+feeds Integer, and enum binding requires a proven subset. Detaching a direct binding restores the
+declaration's validated primitive initial value. Runtime namespaces and advanced ValueSpecs remain
+read-only rather than being silently simplified.
 
 This slice does not expose component rectangles, hit testing, canvas picking, private DOM/native
-structure, or managed-tree inspection. It does not edit local state, bindings, events, or actions;
-persist project data; create user projects; execute interactive Design/Run behavior; navigate
-diagnostics; publish to the control plane; or activate a channel. Dynamic state and binding editing
-belongs to M09-T08, event/action authoring to M09-T09, interactive Design/Run behavior to M09-T10,
-durable save/open to M09-T12, and publication or activation to M09-T14. Catalog control hints
-remain opaque under PF-025 and cannot widen schema authority. P-08 remains `NOT_PROVEN`, and no
-real-browser E2E or native-drag automation result is claimed.
+structure, or managed-tree inspection. It does not edit repeat/resource bindings, events, or
+actions; persist project data; create user projects; execute interactive Design/Run behavior;
+navigate diagnostics; publish to the control plane; or activate a channel. Event/action authoring
+belongs to M09-T09, interactive Design/Run behavior to M09-T10, durable save/open to M09-T12, and
+publication or activation to M09-T14. Catalog control hints remain opaque under PF-025 and cannot
+widen schema authority. P-08 remains `NOT_PROVEN`, and no real-browser E2E or native-drag
+automation result is claimed.
 
 The App imports only public package entry points for Catalog derivation, Editor Core mutation and
 validation, Publisher preflight, runtime composition, and the exact static reference adapter
@@ -156,12 +184,11 @@ registry. It does not import concrete Catalog components, private package files,
 or control-plane code. Bundle data never selects a module, component, fallback tree, or executable
 host binding.
 
-The focused named-slot suite passes 70/70, the complete App suite passes 151/151, the independent
-root proof passes 9/9, and the task verifier passes locally. The exact 24,830-byte artifact is
-`docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json` at
-`sha256:daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f`. These measured
-receipts make no required-gate, global-CI-count, hosted-CI, real-browser E2E, or native-drag
-automation claim.
+The focused state-binding suite passes 109/109 and the complete App suite passes 181/181. Local
+in-app-browser inspection covers state-initial refresh, direct String and Boolean binding changes,
+read-only operation binding preservation, keyboard-accessible tabs, and a clean console. These
+measured receipts make no required-gate, global-CI-count, hosted-CI, real-browser E2E, or
+native-drag automation claim.
 
 ## Local commands
 
@@ -175,6 +202,7 @@ pnpm --filter @desen/app-web test:selection
 pnpm --filter @desen/app-web test:inspector
 pnpm --filter @desen/app-web test:structured-inspector
 pnpm --filter @desen/app-web test:named-slots
+pnpm --filter @desen/app-web test:state-bindings
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

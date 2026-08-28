@@ -1,0 +1,1285 @@
+import { createHash } from "node:crypto";
+import { constants as fileConstants } from "node:fs";
+import { lstat, open, realpath } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { isDeepStrictEqual, types as utilTypes } from "node:util";
+
+import ts from "typescript";
+
+import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+
+const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
+const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
+const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json";
+const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-STATE-BINDING-EDITOR.md";
+const SCHEMA_INSPECTOR_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json";
+const EDITOR_STATE_ARTIFACT_PATH =
+  "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json";
+const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
+const ROOT_PACKAGE_PATH = "package.json";
+const APP_PACKAGE_PATH = "apps/desen-app/package.json";
+const LOCKFILE_PATH = "pnpm-lock.yaml";
+const CATALOG_PATH = "packages/reference-catalog-web/catalog.json";
+const SOURCE_FIXTURE_PATH = "examples/sign-in/official-derived.source.desen.json";
+const BUNDLE_FIXTURE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
+const AUTHORING_DATA_PATH = "apps/desen-app/src/authoring-data.ts";
+const STATE_SOURCE_PATH = "apps/desen-app/src/authoring-state.ts";
+const INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
+const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
+const STATE_PANEL_SOURCE_PATH = "apps/desen-app/src/state-panel.tsx";
+const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
+const PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
+const ADAPTER_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
+const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
+const APPLICATION_CSS_PATH = "apps/desen-app/src/application.module.css";
+const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
+const STATE_TEST_PATH = "apps/desen-app/test/authoring-state.test.ts";
+const INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.test.ts";
+const STATE_PANEL_TEST_PATH = "apps/desen-app/test/state-panel.test.tsx";
+const INSPECTOR_PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
+const PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
+const ADAPTER_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
+const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
+const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
+const READ_FLAGS =
+  fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
+
+const PROOF_READER_PATHS = Object.freeze([
+  "scripts/lib/atomic-proof-artifact.mjs",
+  "scripts/lib/desen-app-state-binding-editor-proof.mjs",
+  "scripts/generate-desen-app-state-binding-editor-proof.mjs",
+  "scripts/verify-desen-app-state-binding-editor.mjs",
+  "tests/desen-app-state-binding-editor.test.mjs",
+]);
+
+const SOURCE_PATHS = Object.freeze([
+  AUTHORING_DATA_PATH,
+  STATE_SOURCE_PATH,
+  INSPECTOR_SOURCE_PATH,
+  STRUCTURED_JSON_SOURCE_PATH,
+  STATE_PANEL_SOURCE_PATH,
+  INSPECTOR_PANEL_SOURCE_PATH,
+  PREVIEW_SOURCE_PATH,
+  ADAPTER_SOURCE_PATH,
+  APPLICATION_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+]);
+
+const APP_TEST_PATHS = Object.freeze([
+  STRUCTURED_JSON_TEST_PATH,
+  STATE_TEST_PATH,
+  INSPECTOR_TEST_PATH,
+  STATE_PANEL_TEST_PATH,
+  INSPECTOR_PANEL_TEST_PATH,
+  PREVIEW_TEST_PATH,
+  ADAPTER_TEST_PATH,
+  APPLICATION_TEST_PATH,
+]);
+
+const TRACKED_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  LOCKFILE_PATH,
+  CATALOG_PATH,
+  SOURCE_FIXTURE_PATH,
+  BUNDLE_FIXTURE_PATH,
+  ...SOURCE_PATHS,
+  ...APP_TEST_PATHS,
+  SCHEMA_INSPECTOR_ARTIFACT_PATH,
+  EDITOR_STATE_ARTIFACT_PATH,
+  NAMED_SLOT_ARTIFACT_PATH,
+  ...PROOF_READER_PATHS,
+]);
+
+const EXPECTED_STRUCTURED_JSON_TEST_NAMES = Object.freeze([
+  "admits reserved-looking members as detached recursively frozen inert data",
+  "keeps duplicate, malformed, non-finite, and non-scalar input fail-closed",
+  "enforces every Publisher Source JSON limit at its exact boundary",
+]);
+
+const EXPECTED_STATE_TEST_NAMES = Object.freeze([
+  "projects exact ordered primitive declarations and bounded official usage counts",
+  "counts reads and nested writes conservatively but excludes inert state initial data",
+  "authenticates exact route data and fails closed without invoking accessors",
+  "inserts every primitive preset with its exact default on the selected surface",
+  "stages schema and initial changes privately and validates only the complete endpoint",
+  "deletes only unused declarations without cascading and retains the required state map",
+  "keeps legal non-addressable and richer-schema declarations visible but outside edits",
+  "rejects duplicate and stale targets with stable reasons and no partial document",
+  "captures edits as exact own data and enforces conservative identifiers and preset initials",
+  "accepts null-prototype exact command data without prototype-sensitive lookup",
+  "maps Catalog, Source, and route rejection without exposing a candidate",
+  "bounds data-only projection depth and rejects accessors without reading them",
+]);
+
+const EXPECTED_INSPECTOR_TEST_NAMES = Object.freeze([
+  "projects only directly addressable primitive local state for compatible bindings",
+  "changes and detaches an exact compatible local-state binding atomically",
+  "rejects incompatible, forged, and runtime binding transitions without mutation",
+]);
+
+const EXPECTED_STATE_PANEL_TEST_NAMES = Object.freeze([
+  "presents surface-local state in deterministic order without persistence claims",
+  "submits friendly string, boolean, number, and integer initial controls with one Apply",
+  "resets the initial control safely when changing primitive type before Apply",
+  "rejects invalid numeric drafts locally and announces backend update failures",
+  "adds only directly addressable names and reports duplicate state failures",
+  "disables deletion for used state and deletes an unused state through the exact edit",
+  "refreshes an unsaved primitive draft when the projected declaration changes",
+  "fails closed for rejected projection and keeps the empty ready path actionable",
+]);
+
+const EXPECTED_INSPECTOR_PANEL_TEST_NAMES = Object.freeze([
+  "changes or detaches a compatible direct local-state value source",
+  "keeps operation bindings visible and read-only",
+]);
+
+const EXPECTED_PREVIEW_TEST_NAMES = Object.freeze([
+  "publishes a valid primitive prop edit as a fresh exact Bundle revision",
+  "rejects a structurally valid but Catalog-invalid prop edit without a partial Bundle",
+]);
+
+const EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
+  "replaces the exact session when a current authoring draft Bundle is rerendered",
+  "renders Source-identity selection chrome as a sibling outside the managed subtree",
+]);
+
+const EXPECTED_APPLICATION_TEST_NAMES = Object.freeze([
+  "snaps a native layer drag to the before or after half of a visible layer row",
+  "updates surface-local state and changes a compatible binding in the live preview",
+  "keeps bound props explicit while boolean and numeric edits fail or apply atomically",
+  "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
+]);
+
+/** Exact immutable proof receipts that bound M09-T08 App authority. */
+export const DESEN_APP_STATE_BINDING_EDITOR_PARENT_PINS = Object.freeze([
+  Object.freeze({
+    task: "M09-T05",
+    proofId: "desen-app-schema-inspector",
+    path: SCHEMA_INSPECTOR_ARTIFACT_PATH,
+    bytes: 22_998,
+    sha256: "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b",
+    profile: "desen.app.schema-inspector-proof.v1",
+    result: "PASS",
+    immutable: true,
+  }),
+  Object.freeze({
+    task: "M08-T05",
+    proofId: "editor-core-state-binding-edits",
+    path: EDITOR_STATE_ARTIFACT_PATH,
+    bytes: 30_014,
+    sha256: "b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8",
+    profile: "desen.editor-core.state-binding-edits-proof.v1",
+    result: "PASS",
+    immutable: true,
+  }),
+  Object.freeze({
+    task: "M09-T07",
+    proofId: "desen-app-named-slot-authoring",
+    path: NAMED_SLOT_ARTIFACT_PATH,
+    bytes: 24_830,
+    sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+    profile: "desen.app.named-slot-authoring-proof.v1",
+    result: "PASS",
+    immutable: true,
+  }),
+]);
+
+/** Reviewed independent root-test names retained by the M09-T08 artifact. */
+export const DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES = Object.freeze([
+  "[authority] authenticates exact frozen App, Editor Core, and graph parents",
+  "[state] proves primitive local-state projection, usage, and exact edits",
+  "[binding] proves exact compatible direct binding change and detach",
+  "[safety] proves bounded capture, read-only advanced forms, and complete validation",
+  "[ownership] keeps state, binding, and session preview chrome App-owned",
+  "[tests] pins focused App behavior and exact package commands",
+  "[determinism] builds byte-identical detached evidence twice",
+  "[policy] rejects weakened state, binding, preview, and ownership sources",
+  "[verification] rejects parents, artifact, report, and filesystem authority drift",
+]);
+
+/** Default destination for deterministic M09-T08 evidence. */
+export const DEFAULT_DESEN_APP_STATE_BINDING_EDITOR_ARTIFACT_PATH = path.join(
+  WORKSPACE_ROOT,
+  ARTIFACT_PATH,
+);
+
+/** Stable fail-closed error raised by the M09-T08 evidence reader. */
+export class DesenAppStateBindingEditorProofError extends Error {
+  constructor(code, message, details = {}) {
+    super(message);
+    this.name = "DesenAppStateBindingEditorProofError";
+    this.code = code;
+    this.details = Object.freeze({ ...details });
+  }
+}
+
+function fail(code, message, details = {}) {
+  throw new DesenAppStateBindingEditorProofError(code, message, details);
+}
+
+function sha256(bytes) {
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
+function deepFreeze(value) {
+  if (ArrayBuffer.isView(value)) return value;
+  if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
+    for (const child of Object.values(value)) deepFreeze(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+function canonicalArtifactBytes(artifact) {
+  return Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`);
+}
+
+function exactOwnDataOptions(value, allowedKeys, label) {
+  if (value === undefined) return Object.freeze(Object.create(null));
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    utilTypes.isProxy(value) ||
+    (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
+  ) {
+    fail("OPTIONS_INVALID", `${label} must be one inert own-data object.`);
+  }
+  const keys = Reflect.ownKeys(value);
+  if (keys.some((key) => typeof key !== "string" || !allowedKeys.includes(key))) {
+    fail("OPTIONS_INVALID", `${label} contains an unknown or symbol field.`);
+  }
+  const captured = Object.create(null);
+  for (const key of keys) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
+      fail("OPTIONS_INVALID", `${label}.${String(key)} must be enumerable own data.`);
+    }
+    captured[key] = descriptor.value;
+  }
+  return Object.freeze(captured);
+}
+
+function capturePath(value, label, fallback) {
+  const selected = value === undefined ? fallback : value;
+  if (typeof selected !== "string" || selected.length === 0 || selected.includes("\0")) {
+    fail("OPTIONS_INVALID", `${label} must be one non-empty path.`);
+  }
+  return path.resolve(selected);
+}
+
+function captureBytes(value, label) {
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    utilTypes.isProxy(value) ||
+    !utilTypes.isUint8Array(value) ||
+    utilTypes.isSharedArrayBuffer(value.buffer)
+  ) {
+    fail("OPTIONS_INVALID", `${label} must be exact non-shared bytes.`);
+  }
+  return Buffer.from(value);
+}
+
+function captureOverrides(value) {
+  if (value === undefined) return Object.freeze(new Map());
+  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+    fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
+  }
+  const captured = new Map();
+  for (const [relativePath, bytes] of value) {
+    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+      fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
+        path: relativePath,
+      });
+    }
+    captured.set(relativePath, captureBytes(bytes, `fileOverrides[${relativePath}]`));
+  }
+  return Object.freeze(captured);
+}
+
+function captureBuildOptions(value) {
+  const options = exactOwnDataOptions(value, ["fileOverrides", "workspaceRoot"], "build options");
+  return Object.freeze({
+    workspaceRoot: capturePath(options.workspaceRoot, "workspaceRoot", WORKSPACE_ROOT),
+    fileOverrides: captureOverrides(options.fileOverrides),
+  });
+}
+
+async function readRegularAuthority(absolutePath, label) {
+  let entry;
+  try {
+    entry = await lstat(absolutePath);
+  } catch (error) {
+    fail("AUTHORITY_UNREADABLE", `${label} could not be inspected.`, { cause: String(error) });
+  }
+  if (!entry.isFile() || entry.size > MAX_AUTHORITY_BYTES) {
+    fail("AUTHORITY_UNSAFE", `${label} must be one bounded regular file.`);
+  }
+  let canonical;
+  try {
+    canonical = await realpath(absolutePath);
+  } catch (error) {
+    fail("AUTHORITY_UNREADABLE", `${label} could not be resolved.`, { cause: String(error) });
+  }
+  if (canonical !== absolutePath) {
+    fail("AUTHORITY_UNSAFE", `${label} must not resolve through a linked path.`);
+  }
+
+  let handle;
+  try {
+    handle = await open(absolutePath, READ_FLAGS);
+    const opened = await handle.stat();
+    if (!opened.isFile() || opened.dev !== entry.dev || opened.ino !== entry.ino) {
+      fail("AUTHORITY_UNSAFE", `${label} changed identity while opening.`);
+    }
+    const bytes = await handle.readFile();
+    if (bytes.byteLength > MAX_AUTHORITY_BYTES) {
+      fail("AUTHORITY_UNSAFE", `${label} exceeded its byte ceiling.`);
+    }
+    return bytes;
+  } catch (error) {
+    if (error instanceof DesenAppStateBindingEditorProofError) throw error;
+    fail("AUTHORITY_UNREADABLE", `${label} could not be read safely.`, {
+      cause: String(error),
+    });
+  } finally {
+    await handle?.close();
+  }
+}
+
+async function readTrackedFiles(workspaceRoot, overrides) {
+  const output = new Map();
+  for (const relativePath of TRACKED_PATHS) {
+    output.set(
+      relativePath,
+      overrides.get(relativePath) ??
+        (await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath)),
+    );
+  }
+  return output;
+}
+
+function decodeUtf8(bytes, label) {
+  const value = Buffer.from(bytes).toString("utf8");
+  if (value.includes("\0") || !Buffer.from(value, "utf8").equals(Buffer.from(bytes))) {
+    fail("SOURCE_POLICY_VIOLATION", `${label} must be exact UTF-8 text.`);
+  }
+  return value;
+}
+
+function parseJson(bytes, label) {
+  try {
+    return JSON.parse(decodeUtf8(bytes, label));
+  } catch (error) {
+    fail("SOURCE_POLICY_VIOLATION", `${label} must be exact JSON.`, { cause: String(error) });
+  }
+}
+
+function assertIncludes(source, markers, label) {
+  const missing = markers.filter((marker) => !source.includes(marker));
+  if (missing.length !== 0) {
+    fail("SOURCE_POLICY_VIOLATION", `${label} lost required state-binding policy.`, { missing });
+  }
+}
+
+function assertExcludes(source, markers, label) {
+  const present = markers.filter((marker) => source.includes(marker));
+  if (present.length !== 0) {
+    fail("SOURCE_POLICY_VIOLATION", `${label} acquired forbidden authority.`, { present });
+  }
+}
+
+function sourceSection(source, startMarker, endMarker, label) {
+  const start = source.indexOf(startMarker);
+  const end = endMarker === undefined ? source.length : source.indexOf(endMarker, start + 1);
+  if (start < 0 || end < 0 || end <= start) {
+    fail("SOURCE_POLICY_VIOLATION", `${label} could not be isolated.`);
+  }
+  return source.slice(start, end);
+}
+
+function inspectAuthoringData(source) {
+  assertIncludes(
+    source,
+    [
+      "validateDesenInteractionCatalogSet",
+      "validateDesenSourceInteractionContracts",
+      "validationDocument: sourceResult.value",
+      "validationCatalogs:",
+    ],
+    "authoring-data.ts",
+  );
+  assertExcludes(
+    source,
+    ["react", "react-dom", "document.querySelector", "getBoundingClientRect"],
+    "authoring-data.ts",
+  );
+  return deepFreeze({
+    publicCatalogAndSourceValidation: true,
+    validatedDocumentSnapshotRetained: true,
+    validatedCatalogSetRetained: true,
+  });
+}
+
+function inspectStateSource(source) {
+  assertIncludes(
+    source,
+    [
+      "createDesenEditorContinuousValidator",
+      "deleteDesenEditorStateDeclaration",
+      "insertDesenEditorStateDeclaration",
+      "setDesenEditorStateInitial",
+      "setDesenEditorStateSchema",
+      "const AUTHORING_STATE_IDENTIFIER_PATTERN = /^[A-Za-z][A-Za-z0-9_-]{0,127}$/u",
+      "maxDepth: 512",
+      "maxVisitedValues: 100_000",
+      "function exactOwnData(",
+      "Reflect.ownKeys(input)",
+      "Object.getOwnPropertyDescriptor(input, key)",
+      "function usageCounts(",
+      "scanReferences(roots, usages, visited)",
+      "countActionWrites(root, usages, visited)",
+      'type === "state.set" || type === "state.toggle"',
+      "function presetType(schema: JsonObject): AuthoringStateValueType | null",
+      "export function prepareAuthoringStateModel(",
+      "export function applyAuthoringStateEdit(",
+      "prepareCatalogAuthoringModel(catalogValue, document)",
+      "insertDesenEditorStateDeclaration(candidate",
+      "setDesenEditorStateSchema(candidate",
+      "setDesenEditorStateInitial(schemaChanged.document",
+      "existing.usageCount !== 0",
+      "deleteDesenEditorStateDeclaration(candidate",
+      "validator.validator.validate(candidate).valid",
+    ],
+    "authoring-state.ts",
+  );
+  assertExcludes(
+    source,
+    ["react", "react-dom", "document.querySelector", "@desen/editor-core/src"],
+    "authoring-state.ts",
+  );
+  const mutation = sourceSection(
+    source,
+    "export function applyAuthoringStateEdit(",
+    undefined,
+    "state mutation",
+  );
+  assertIncludes(
+    mutation,
+    [
+      "const capturedRoute = captureRoute(route)",
+      "const capturedEdit = captureEdit(edit)",
+      "prepared.model.validationDocument",
+      "createDesenEditorContinuousValidator(prepared.model.validationCatalogs)",
+      "return Object.freeze({ ok: true, document: candidate })",
+    ],
+    "state mutation",
+  );
+  return deepFreeze({
+    primitivePresets: ["boolean", "integer", "number", "string"],
+    surfaceLocalProjection: true,
+    deterministicDeclarationOrder: true,
+    exactOwnDataRouteAndEditCapture: true,
+    conservativeIdentifierProfile: "^[A-Za-z][A-Za-z0-9_-]{0,127}$",
+    usageReferenceReads: true,
+    usageStateSetAndToggleWrites: true,
+    inertStateInitialExcludedFromUsage: true,
+    usageScanMaxDepth: 512,
+    usageScanMaxVisitedValues: 100_000,
+    legalAdvancedSchemasVisibleReadOnly: true,
+    publicEditorCoreStateCommandsOnly: true,
+    primitiveSchemaAndInitialStagedPrivately: true,
+    unusedOnlyDeletion: true,
+    completeSourceRevalidation: true,
+    noPartialDocumentOnFailure: true,
+  });
+}
+
+function inspectInspectorSource(source) {
+  assertIncludes(
+    source,
+    [
+      "export interface AuthoringInspectorStateOption",
+      "readonly localStates: readonly AuthoringInspectorStateOption[]",
+      "export type AuthoringInspectorBindingEdit =",
+      'Readonly<{ readonly kind: "bind"; readonly stateName: string; readonly valuePointer: string }>',
+      'Readonly<{ readonly kind: "use-initial"; readonly valuePointer: string }>',
+      "function captureInspectorBindingEdit(",
+      "function projectInspectorStateOptions(",
+      "export function isAuthoringInspectorStateCompatible(",
+      "function directLocalStateName(value: JsonValue)",
+      'if (keys.length !== 1 || keys[0] !== "$ref") return undefined',
+      "export function applyAuthoringInspectorBindingEdit(",
+      "const capturedEdit = captureInspectorBindingEdit(edit)",
+      'field.value.kind === "dynamic" ? directLocalStateName(field.value.value) : undefined',
+      'field.value.kind === "dynamic" && currentStateName === undefined',
+      "!isAuthoringInspectorStateCompatible(field, state)",
+      "Object.freeze({ $ref: state.reference })",
+      "createDesenEditorContinuousValidator(prepared.model.validationCatalogs)",
+      "validator.validator.validate(changed)",
+    ],
+    "authoring-inspector.ts",
+  );
+  assertExcludes(
+    source,
+    ["react", "react-dom", "@desen/editor-core/src", "eval(", "new Function"],
+    "authoring-inspector.ts",
+  );
+  return deepFreeze({
+    directPrimitiveLocalStateOptionsOnly: true,
+    exactSingleRefBindingShapeOnly: true,
+    catalogControlCompatibilityRequired: true,
+    routeSelectionAndEditReadmissionRequired: true,
+    exactOwnDataBindingEditCapture: true,
+    runtimeAndAdvancedBindingsReadOnly: true,
+    bindConstructsExactStateReference: true,
+    detachRestoresValidatedPrimitiveInitial: true,
+    completeSourceRevalidation: true,
+    noPartialDocumentOnFailure: true,
+  });
+}
+
+function inspectStructuredJsonSource(source) {
+  assertIncludes(
+    source,
+    [
+      'import { PUBLISH_SOURCE_JSON_LIMITS } from "@desen/publisher"',
+      "function scanInertJson(text: string)",
+      "export function parseInertJsonText(input: unknown)",
+      "const issue = scanInertJson(input)",
+      "value: deepFreezeJson(parsed as JsonValue)",
+    ],
+    "structured-json.ts",
+  );
+  return deepFreeze({
+    inertReservedMembersNotInterpreted: true,
+    publisherJsonLimitsRetained: true,
+    duplicateAndUnicodeChecksRetained: true,
+    detachedFrozenSuccess: true,
+    advancedStateUiClaimed: false,
+  });
+}
+
+function inspectPreviewSource(source) {
+  assertIncludes(
+    source,
+    [
+      'import { createDesenEditorDocument } from "@desen/editor-core"',
+      'import { publishDesenSource } from "@desen/publisher"',
+      "createDesenEditorDocument(document)",
+      "publishDesenSource(rawSource, REFERENCE_CATALOG_PACKAGES)",
+      "bundle: published.bundle",
+      "revision: published.bundle.revision",
+    ],
+    "authoring-preview.ts",
+  );
+  return deepFreeze({
+    publicPublisherOnly: true,
+    sourceReadmittedBeforePublication: true,
+    exactBundleRevisionReturned: true,
+    noPartialBundleOnFailure: true,
+  });
+}
+
+function inspectAdapterSource(source) {
+  assertIncludes(
+    source,
+    [
+      "mounted.snapshot.revision !== previewRevision",
+      "disposeRuntimeHeadlessSession(session)",
+      'data-managed-capability-subtree="true"',
+      "selectionOverlay",
+    ],
+    "adapter-canvas.tsx",
+  );
+  return deepFreeze({
+    revisionReplacement: true,
+    previousSessionDisposed: true,
+    managedSubtreeExplicit: true,
+    selectionOverlayRemainsSibling: true,
+  });
+}
+
+function inspectApplicationSource(source) {
+  assertIncludes(
+    source,
+    [
+      "applyAuthoringInspectorBindingEdit",
+      "applyAuthoringStateEdit",
+      "prepareAuthoringStateModel",
+      'type AuthoringTab = "layers" | "components" | "state"',
+      "<StatePanel model={stateModel} onEdit={onStateEdit} surfaceName={selectedSurface.name} />",
+      "function editSelectedBinding(edit: AuthoringInspectorBindingEdit)",
+      "function editLocalState(edit: AuthoringStateEdit)",
+      "prepareAuthoringPreviewBundle(result.document)",
+      "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
+      '<aside aria-label="Authoring panel"',
+      "<DesenAdapterCanvas",
+      "<InspectorPanel",
+      "onBindingEdit={editSelectedBinding}",
+      "Save, control-plane publication, and activation remain unavailable.",
+      "function acceptsDragIntent(",
+      "function projectedRowDrop(event: DragEvent<HTMLButtonElement>)",
+      "const bounds = event.currentTarget.getBoundingClientRect()",
+      'const position = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after"',
+      "data-row-drop-position={rowDropPosition ?? undefined}",
+      'data-drag-active={dragIntent?.kind === "component"}',
+      'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
+      "sourceNodeId: result.nodeId",
+    ],
+    "application.tsx",
+  );
+  assertExcludes(
+    source,
+    ["dataTransfer.getData", "document.elementFromPoint", "elementsFromPoint"],
+    "application.tsx",
+  );
+  return deepFreeze({
+    statePanelComposedByApp: true,
+    bindingInspectorComposedByApp: true,
+    localStateRouteProjection: true,
+    sourceAndPreviewCommitAtomically: true,
+    stateSourceAndPreviewCommitAtomically: true,
+    bindingSourceAndPreviewCommitAtomically: true,
+    publisherFailurePreservesPriorSession: true,
+    stateAndInspectorChromeOutsideManagedCapabilitySubtree: true,
+    retainedNamedSlotRowHalfDropTargets: true,
+    retainedStickyComponentDropTarget: true,
+    retainedInsertSelectionForDeleteDiscoverability: true,
+    saveAuthority: false,
+    publicationAuthority: false,
+    activationAuthority: false,
+  });
+}
+
+function inspectStatePanelSource(source) {
+  assertIncludes(
+    source,
+    [
+      "export function StatePanel(",
+      'model.status === "ready"',
+      "Object.freeze([...model.declarations].sort(compareStateNames))",
+      "Read-only custom schema",
+      "Used states cannot be deleted.",
+      'onEdit({ kind: "delete", name: declaration.name })',
+      'kind: "update"',
+      'kind: "insert"',
+      "publication are not available here.",
+      "State edits stay in this session until save is implemented.",
+    ],
+    "state-panel.tsx",
+  );
+  return deepFreeze({
+    owner: "Desen App",
+    primitiveListAddUpdateDeleteControls: true,
+    deterministicOrder: true,
+    boundedUsageVisible: true,
+    usedDeleteDisabled: true,
+    advancedSchemaReadOnly: true,
+    noPersistenceOrPublicationClaim: true,
+  });
+}
+
+function inspectInspectorPanelSource(source) {
+  assertIncludes(
+    source,
+    [
+      "function ValueSourceControl(",
+      "isAuthoringInspectorStateCompatible(field, state)",
+      'stateName === "__local__"',
+      'kind: "use-initial"',
+      'kind: "bind"',
+      "function DynamicField(",
+      "This runtime or advanced binding is preserved as read-only.",
+      "Choose another compatible state or restore this state's initial value.",
+      'data-authoring-inspector="true"',
+    ],
+    "inspector-panel.tsx",
+  );
+  return deepFreeze({
+    owner: "Desen App",
+    compatibleDirectLocalStateSelector: true,
+    detachControl: true,
+    runtimeAndAdvancedBindingsReadOnly: true,
+    managedAdapterImports: 0,
+  });
+}
+
+function inspectCssSource(source) {
+  assertIncludes(
+    source,
+    [
+      ".valueSourceControl",
+      ".statePanel",
+      ".stateList",
+      ".stateCard",
+      ".stateDeleteButton",
+      ".stateReadonly",
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.875rem;",
+      '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;\n  min-height: 0.875rem;',
+      "margin-block: 0",
+      ".layerNode[data-row-drop-position] {\n  z-index: 4;",
+      ".layerNode[data-row-drop-position] > .layerRow",
+      '.layerNode[data-row-drop-position="before"]::before',
+      '.layerNode[data-row-drop-position="after"]::before',
+      ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
+      '.componentSlotTarget[data-drag-active="true"]',
+    ],
+    "application.module.css",
+  );
+  const managedSelectors = source
+    .split("\n")
+    .filter(
+      (line) =>
+        line.includes("data-managed-capability-subtree") &&
+        (line.includes("state") || line.includes("valueSource")),
+    );
+  if (managedSelectors.length !== 0) {
+    fail("SOURCE_POLICY_VIOLATION", "State or binding CSS entered the managed subtree.", {
+      managedSelectors,
+    });
+  }
+  assertExcludes(
+    source,
+    ["margin-block: -1.125rem", "transition: min-height"],
+    "application.module.css",
+  );
+  return deepFreeze({
+    appOwnedStateAndBindingSelectors: true,
+    managedDescendantStateOrBindingSelectors: 0,
+    retainedNonOverlappingStableSlotBoundaries: true,
+    retainedRowDropPositionPresentation: true,
+    retainedStickyComponentTargetPresentation: true,
+  });
+}
+
+/** Applies the exact M09-T08 production source and ownership policy. */
+export function verifyDesenAppStateBindingEditorSourcePolicy(rawInput) {
+  const keys = [
+    "adapterSource",
+    "applicationSource",
+    "applicationCss",
+    "authoringDataSource",
+    "inspectorPanelSource",
+    "inspectorSource",
+    "previewSource",
+    "statePanelSource",
+    "stateSource",
+    "structuredJsonSource",
+  ];
+  const input = exactOwnDataOptions(rawInput, keys, "source policy input");
+  for (const key of keys) {
+    if (typeof input[key] !== "string" || input[key].includes("\0")) {
+      fail("SOURCE_POLICY_VIOLATION", `${key} must be exact source text.`);
+    }
+  }
+  return deepFreeze({
+    authoringData: inspectAuthoringData(input.authoringDataSource),
+    state: inspectStateSource(input.stateSource),
+    inspector: inspectInspectorSource(input.inspectorSource),
+    structuredJson: inspectStructuredJsonSource(input.structuredJsonSource),
+    statePanel: inspectStatePanelSource(input.statePanelSource),
+    inspectorPanel: inspectInspectorPanelSource(input.inspectorPanelSource),
+    preview: inspectPreviewSource(input.previewSource),
+    adapter: inspectAdapterSource(input.adapterSource),
+    application: inspectApplicationSource(input.applicationSource),
+    css: inspectCssSource(input.applicationCss),
+  });
+}
+
+function parseTypeScript(rawSource, relativePath) {
+  const kind = relativePath.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const sourceFile = ts.createSourceFile(
+    relativePath,
+    rawSource,
+    ts.ScriptTarget.Latest,
+    true,
+    kind,
+  );
+  if (sourceFile.parseDiagnostics.length !== 0) {
+    fail("TEST_POLICY_VIOLATION", `${relativePath} must parse as TypeScript.`);
+  }
+  return sourceFile;
+}
+
+function collectDescendants(node, predicate) {
+  const values = [];
+  const visit = (current) => {
+    if (predicate(current)) values.push(current);
+    current.forEachChild(visit);
+  };
+  visit(node);
+  return values;
+}
+
+function collectTestNames(rawSource, relativePath) {
+  const sourceFile = parseTypeScript(rawSource, relativePath);
+  return collectDescendants(sourceFile, ts.isCallExpression)
+    .filter((call) => {
+      const direct =
+        ts.isIdentifier(call.expression) && ["it", "test"].includes(call.expression.text);
+      const parameterized =
+        ts.isCallExpression(call.expression) &&
+        ts.isPropertyAccessExpression(call.expression.expression) &&
+        ts.isIdentifier(call.expression.expression.expression) &&
+        ["it", "test"].includes(call.expression.expression.expression.text) &&
+        call.expression.expression.name.text === "each";
+      return (
+        (direct || parameterized) &&
+        call.arguments.length > 0 &&
+        ts.isStringLiteral(call.arguments[0])
+      );
+    })
+    .map((call) => call.arguments[0].text);
+}
+
+function requireTestNames(actual, expected, relativePath) {
+  const missing = expected.filter((name) => !actual.includes(name));
+  if (missing.length !== 0) {
+    fail("TEST_POLICY_VIOLATION", `${relativePath} lost required tests.`, { missing });
+  }
+}
+
+function inspectTests(files) {
+  const sources = new Map(
+    APP_TEST_PATHS.map((relativePath) => [
+      relativePath,
+      decodeUtf8(files.get(relativePath), relativePath),
+    ]),
+  );
+  const names = Object.fromEntries(
+    [...sources].map(([relativePath, source]) => [
+      relativePath,
+      collectTestNames(source, relativePath),
+    ]),
+  );
+  requireTestNames(
+    names[STRUCTURED_JSON_TEST_PATH],
+    EXPECTED_STRUCTURED_JSON_TEST_NAMES,
+    STRUCTURED_JSON_TEST_PATH,
+  );
+  requireTestNames(names[STATE_TEST_PATH], EXPECTED_STATE_TEST_NAMES, STATE_TEST_PATH);
+  requireTestNames(names[INSPECTOR_TEST_PATH], EXPECTED_INSPECTOR_TEST_NAMES, INSPECTOR_TEST_PATH);
+  requireTestNames(
+    names[STATE_PANEL_TEST_PATH],
+    EXPECTED_STATE_PANEL_TEST_NAMES,
+    STATE_PANEL_TEST_PATH,
+  );
+  requireTestNames(
+    names[INSPECTOR_PANEL_TEST_PATH],
+    EXPECTED_INSPECTOR_PANEL_TEST_NAMES,
+    INSPECTOR_PANEL_TEST_PATH,
+  );
+  requireTestNames(names[PREVIEW_TEST_PATH], EXPECTED_PREVIEW_TEST_NAMES, PREVIEW_TEST_PATH);
+  requireTestNames(names[ADAPTER_TEST_PATH], EXPECTED_ADAPTER_TEST_NAMES, ADAPTER_TEST_PATH);
+  requireTestNames(
+    names[APPLICATION_TEST_PATH],
+    EXPECTED_APPLICATION_TEST_NAMES,
+    APPLICATION_TEST_PATH,
+  );
+  assertIncludes(
+    sources.get(STATE_TEST_PATH),
+    [
+      "Array.from({ length: 100_001 }",
+      "for (let depth = 0; depth < 513; depth += 1)",
+      "expect(accessorCalls).toBe(0)",
+      'type: "state.set"',
+      'type: "state.toggle"',
+      'name: "constrained"',
+      'name: "legacy.value"',
+      'reason: "state-in-use"',
+    ],
+    "authoring-state tests",
+  );
+  assertIncludes(
+    sources.get(APPLICATION_TEST_PATH),
+    [
+      "Updated email local state.",
+      "Bound Value to state.password.",
+      "Used by 2",
+      "Used by 4",
+      "Delete password local state",
+      "Value value source",
+    ],
+    "application tests",
+  );
+  return deepFreeze({
+    command:
+      "pnpm --filter @desen/app-web test:state-bindings && node --test tests/desen-app-state-binding-editor.test.mjs",
+    appTestNames: names,
+    rootTestNames: DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES,
+    localCommandReceipts: {
+      pureState: {
+        command: "pnpm --filter @desen/app-web exec vitest run test/authoring-state.test.ts",
+        result: "PASS",
+        testFiles: 1,
+        tests: 12,
+      },
+      focusedStateBindings: {
+        command: "pnpm --filter @desen/app-web test:state-bindings",
+        result: "PASS",
+        testFiles: 8,
+        tests: 109,
+      },
+      fullApp: {
+        command: "pnpm --filter @desen/app-web test",
+        result: "PASS",
+        testFiles: 13,
+        tests: 181,
+      },
+      rootProof: {
+        command: "node --test tests/desen-app-state-binding-editor.test.mjs",
+        result: "PASS",
+        testFiles: 1,
+        tests: 9,
+      },
+    },
+    semanticCoverage: [
+      "SURFACE_LOCAL_PRIMITIVE_STATE_PROJECTION",
+      "ORDERED_LIST_ADD_UPDATE_DELETE",
+      "BOUNDED_CONSERVATIVE_USAGE_COUNT",
+      "STATE_INITIAL_EXCLUDED_AS_INERT_DATA",
+      "USED_STATE_DELETE_REJECTED",
+      "PRIVATE_SCHEMA_INITIAL_STAGING",
+      "EXACT_OWN_DATA_ROUTE_STATE_AND_BINDING_CAPTURE",
+      "DIRECT_SINGLE_REF_LOCAL_STATE_BINDING",
+      "CATALOG_CONTROL_COMPATIBILITY",
+      "DIRECT_BINDING_CHANGE_AND_DETACH",
+      "RUNTIME_AND_ADVANCED_BINDINGS_READ_ONLY",
+      "CONTINUOUS_SOURCE_REVALIDATION",
+      "ATOMIC_PUBLISHER_PREVIEW",
+      "APP_OWNED_STATE_AND_BINDING_CHROME",
+    ],
+  });
+}
+
+function inspectPackages(files) {
+  const root = parseJson(files.get(ROOT_PACKAGE_PATH), ROOT_PACKAGE_PATH);
+  const app = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
+  const appCommand =
+    "vitest run test/structured-json.test.ts test/authoring-state.test.ts test/authoring-inspector.test.ts test/state-panel.test.tsx test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx";
+  if (app.scripts?.["test:state-bindings"] !== appCommand) {
+    fail("PACKAGE_POLICY_VIOLATION", "The exact App state-binding test command drifted.");
+  }
+  const prefix =
+    "node scripts/verify-desen-app-schema-inspector.mjs && node scripts/verify-editor-core-state-binding-edits.mjs && node scripts/verify-desen-app-named-slot-authoring.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:state-bindings && ";
+  const expectedRootCommands = {
+    "generate:desen-app-state-binding-editor": `${prefix}node scripts/generate-desen-app-state-binding-editor-proof.mjs`,
+    "verify:desen-app-state-binding-editor": `${prefix}node scripts/verify-desen-app-state-binding-editor.mjs`,
+    "test:desen-app-state-binding-editor": `${prefix}node --test tests/desen-app-state-binding-editor.test.mjs`,
+  };
+  for (const [name, command] of Object.entries(expectedRootCommands)) {
+    if (root.scripts?.[name] !== command) {
+      fail("PACKAGE_POLICY_VIOLATION", `The exact ${name} command drifted.`);
+    }
+  }
+  const publicDependencies = [
+    "@desen/catalog-sdk",
+    "@desen/editor-core",
+    "@desen/protocol",
+    "@desen/publisher",
+    "@desen/validator",
+  ];
+  for (const dependency of publicDependencies) {
+    if (app.dependencies?.[dependency] !== "workspace:*") {
+      fail("PACKAGE_POLICY_VIOLATION", `The App lost its public ${dependency} dependency.`);
+    }
+  }
+  return deepFreeze({
+    appName: app.name,
+    appTestCommand: appCommand,
+    rootCommands: expectedRootCommands,
+    parentsAuthenticatedInsideReader: true,
+    publicDependencies,
+  });
+}
+
+function authenticateParent(bytes, pin) {
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("PARENT_DRIFT", `The exact frozen ${pin.task} parent artifact changed.`);
+  }
+  const artifact = parseJson(bytes, `frozen ${pin.task} parent artifact`);
+  if (
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result
+  ) {
+    fail("PARENT_DRIFT", `The frozen ${pin.task} identity drifted.`);
+  }
+  if (
+    pin.proofId === "desen-app-schema-inspector" &&
+    (artifact.claim?.schemaDerivedPrimitiveAndEnumControls !== true ||
+      artifact.claim?.publicEditorCoreAtomicMutation !== true ||
+      artifact.claim?.sourceAndPreviewCommitAtomically !== true ||
+      artifact.claim?.inspectorOutsideManagedCapabilitySubtree !== true)
+  ) {
+    fail("PARENT_DRIFT", "The frozen M09-T05 Inspector authority claims drifted.");
+  }
+  if (
+    pin.proofId === "editor-core-state-binding-edits" &&
+    (artifact.claim?.immutableStateBindingEditCommands !== true ||
+      artifact.claim?.stableIdentityPreserved !== true ||
+      artifact.claim?.taskStatus !== "DONE")
+  ) {
+    fail("PARENT_DRIFT", "The frozen M08-T05 state-binding authority claims drifted.");
+  }
+  if (
+    pin.proofId === "desen-app-named-slot-authoring" &&
+    (artifact.claim?.publicStableIdInsert !== true ||
+      artifact.claim?.continuousCompleteSourceRevalidation !== true ||
+      artifact.claim?.sourceAndPreviewCommitAtomically !== true ||
+      artifact.claim?.slotChromeOutsideManagedCapabilitySubtree !== true)
+  ) {
+    fail("PARENT_DRIFT", "The frozen M09-T07 graph authority claims drifted.");
+  }
+  return pin;
+}
+
+function receipts(files) {
+  return [...files.entries()]
+    .sort(([left], [right]) => left.localeCompare(right, "en-US"))
+    .map(([relativePath, bytes]) =>
+      Object.freeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) }),
+    );
+}
+
+/** Builds detached deterministic M09-T08 state-binding editor evidence. */
+export async function buildDesenAppStateBindingEditorEvidence(rawOptions = undefined) {
+  const options = captureBuildOptions(rawOptions);
+  const workspaceRoot = await realpath(options.workspaceRoot);
+  const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const parents = DESEN_APP_STATE_BINDING_EDITOR_PARENT_PINS.map((pin) =>
+    authenticateParent(files.get(pin.path), pin),
+  );
+  const source = verifyDesenAppStateBindingEditorSourcePolicy({
+    authoringDataSource: decodeUtf8(files.get(AUTHORING_DATA_PATH), AUTHORING_DATA_PATH),
+    stateSource: decodeUtf8(files.get(STATE_SOURCE_PATH), STATE_SOURCE_PATH),
+    inspectorSource: decodeUtf8(files.get(INSPECTOR_SOURCE_PATH), INSPECTOR_SOURCE_PATH),
+    structuredJsonSource: decodeUtf8(
+      files.get(STRUCTURED_JSON_SOURCE_PATH),
+      STRUCTURED_JSON_SOURCE_PATH,
+    ),
+    statePanelSource: decodeUtf8(files.get(STATE_PANEL_SOURCE_PATH), STATE_PANEL_SOURCE_PATH),
+    inspectorPanelSource: decodeUtf8(
+      files.get(INSPECTOR_PANEL_SOURCE_PATH),
+      INSPECTOR_PANEL_SOURCE_PATH,
+    ),
+    previewSource: decodeUtf8(files.get(PREVIEW_SOURCE_PATH), PREVIEW_SOURCE_PATH),
+    adapterSource: decodeUtf8(files.get(ADAPTER_SOURCE_PATH), ADAPTER_SOURCE_PATH),
+    applicationSource: decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH),
+    applicationCss: decodeUtf8(files.get(APPLICATION_CSS_PATH), APPLICATION_CSS_PATH),
+  });
+  const tests = inspectTests(files);
+  const packageContract = inspectPackages(files);
+  const trackedReceipts = receipts(files);
+  const artifact = deepFreeze({
+    schemaVersion: 1,
+    proofId: "desen-app-state-binding-editor",
+    profile: "desen.app.state-binding-editor-proof.v1",
+    task: "M09-T08",
+    protocol: "0.1.0",
+    target: "web-react",
+    prerequisites: parents,
+    claim: {
+      taskStatus: "DONE",
+      surfaceLocalPrimitiveStateList: true,
+      primitiveStateAddUpdateDelete: true,
+      primitiveStateTypes: ["boolean", "integer", "number", "string"],
+      boundedConservativeUsageCount: true,
+      usageScanMaxDepth: 512,
+      usageScanMaxVisitedValues: 100_000,
+      usedStateDeleteRejected: true,
+      directCompatibleLocalStatePropBinding: true,
+      exactDirectBindingChange: true,
+      exactDirectBindingDetachToInitial: true,
+      runtimeAndAdvancedBindingReadOnly: true,
+      advancedStateSchemaReadOnly: true,
+      exactOwnDataStateAndBindingCapture: true,
+      publicEditorCoreStateAndPropMutation: true,
+      continuousCompleteSourceRevalidation: true,
+      failedEditPreservesCurrentDocument: true,
+      publisherSessionPreview: true,
+      sourceAndPreviewCommitAtomically: true,
+      stateAndBindingChromeOutsideManagedCapabilitySubtree: true,
+      retainedNamedSlotAuthoringUxCompatibility: true,
+      persistenceClaimed: false,
+      eventActionEditingClaimed: false,
+      designRunClaimed: false,
+      activationClaimed: false,
+      browserE2eClaimed: false,
+      p08Status: "NOT_PROVEN",
+    },
+    authority: {
+      protocolProfiles: {
+        localStateReference: 'exact { "$ref": "state.<name>" } only',
+        stateScope: "selected Source surface only",
+        primitiveStateTypes: ["boolean", "integer", "number", "string"],
+        usageCount: "bounded conservative reads plus explicit state.set/state.toggle writes",
+      },
+      source,
+    },
+    application: {
+      package: packageContract,
+      mutationFlow: [
+        "validator-admitted Catalog and Source projection",
+        "exact surface route and state or Inspector edit capture",
+        "bounded surface-local state and usage projection",
+        "Catalog-derived primitive property and compatible local-state reauthorization",
+        "public Editor Core state-declaration or owner-prop commands",
+        "continuous complete-Source validation",
+        "Publisher session-local Bundle",
+        "atomic Source and exact adapter session replacement",
+      ],
+      ownership: {
+        statePanel: "Desen App sibling chrome",
+        bindingSelector: "Desen App Inspector chrome",
+        advancedBindings: "visible read-only Source data",
+        managedCapabilitySubtree: "Runtime React adapters only",
+      },
+    },
+    tests,
+    boundary: {
+      trackedFiles: TRACKED_PATHS.length,
+      trackedReceipts,
+      proofReaderPaths: PROOF_READER_PATHS,
+      parentArtifacts: 3,
+      immutableInputs: true,
+      sourceSymlinksRejected: true,
+    },
+    result: "PASS",
+    nonclaims: [
+      "Repeat and resource-binding UI are not implemented or claimed by M09-T08.",
+      "M09-T09 is NOT_PROVEN: event and closed-action editing are not implemented.",
+      "M09-T10 is NOT_PROVEN: no Design/Run mode is claimed.",
+      "M09-T12 is NOT_PROVEN: no save/open or durable persistence UI is claimed.",
+      "M09-T14 is NOT_PROVEN: session preview is not control-plane publication or activation.",
+      "G09 and browser E2E remain NOT_PROVEN.",
+      "P-08 remains NOT_PROVEN until the remaining visual authoring and browser-E2E owners pass.",
+      "Runtime namespaces, fallbacks, tokens, formats, nested dynamic values, and advanced local-state schemas remain read-only.",
+      "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence.",
+    ],
+  });
+  const artifactBytes = canonicalArtifactBytes(artifact);
+  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+}
+
+function verifyProofDocument(bytes, artifactSha256) {
+  const text = decodeUtf8(bytes, PROOF_DOCUMENT_PATH);
+  for (const required of [
+    "Task: M09-T08",
+    "Status: DONE",
+    "P-08: NOT_PROVEN",
+    "M09-T09: NOT_PROVEN",
+    "M09-T10: NOT_PROVEN",
+    "M09-T12: NOT_PROVEN",
+    "M09-T14: NOT_PROVEN",
+    `Final artifact: \`sha256:${artifactSha256}\``,
+  ]) {
+    if (!text.includes(required)) {
+      fail("PROOF_DOCUMENT_DRIFT", `Proof document is missing ${required}.`);
+    }
+  }
+}
+
+function localTestCounts(artifact) {
+  const receipts = artifact.tests.localCommandReceipts;
+  return deepFreeze({
+    pureState: receipts.pureState.tests,
+    focusedStateBindings: receipts.focusedStateBindings.tests,
+    fullApp: receipts.fullApp.tests,
+    rootProof: receipts.rootProof.tests,
+  });
+}
+
+/** Verifies committed M09-T08 bytes and the visible report digest. */
+export async function verifyDesenAppStateBindingEditorEvidence(rawOptions = undefined) {
+  const options = exactOwnDataOptions(
+    rawOptions,
+    ["artifactBytes", "artifactPath", "buildOptions", "proofDocument", "proofDocumentPath"],
+    "verify options",
+  );
+  const built = await buildDesenAppStateBindingEditorEvidence(options.buildOptions);
+  const artifactBytes =
+    options.artifactBytes === undefined
+      ? await readRegularAuthority(
+          capturePath(
+            options.artifactPath,
+            "artifactPath",
+            DEFAULT_DESEN_APP_STATE_BINDING_EDITOR_ARTIFACT_PATH,
+          ),
+          ARTIFACT_PATH,
+        )
+      : captureBytes(options.artifactBytes, "artifactBytes");
+  if (!isDeepStrictEqual(artifactBytes, built.artifactBytes)) {
+    fail("ARTIFACT_DRIFT", "Committed M09-T08 artifact bytes differ from fresh evidence.");
+  }
+  const proofDocument =
+    options.proofDocument === undefined
+      ? await readRegularAuthority(
+          capturePath(
+            options.proofDocumentPath,
+            "proofDocumentPath",
+            path.join(WORKSPACE_ROOT, PROOF_DOCUMENT_PATH),
+          ),
+          PROOF_DOCUMENT_PATH,
+        )
+      : captureBytes(options.proofDocument, "proofDocument");
+  verifyProofDocument(proofDocument, built.artifactSha256);
+  return deepFreeze({
+    task: built.artifact.task,
+    result: built.artifact.result,
+    artifactBytes: built.artifactBytes.byteLength,
+    artifactSha256: built.artifactSha256,
+    prerequisites: built.artifact.prerequisites.length,
+    trackedFiles: built.artifact.boundary.trackedFiles,
+    rootTests: built.artifact.tests.rootTestNames.length,
+    localTestCounts: localTestCounts(built.artifact),
+    p08Status: built.artifact.claim.p08Status,
+  });
+}
+
+/** Atomically writes exact deterministic M09-T08 proof bytes. */
+export async function writeDesenAppStateBindingEditorEvidence(rawOptions = undefined) {
+  const options = exactOwnDataOptions(
+    rawOptions,
+    ["artifactPath", "beforeAtomicRename", "buildOptions"],
+    "write options",
+  );
+  if (
+    options.beforeAtomicRename !== undefined &&
+    (typeof options.beforeAtomicRename !== "function" ||
+      utilTypes.isProxy(options.beforeAtomicRename))
+  ) {
+    fail("OPTIONS_INVALID", "beforeAtomicRename must be one non-Proxy function.");
+  }
+  const artifactPath = capturePath(
+    options.artifactPath,
+    "artifactPath",
+    DEFAULT_DESEN_APP_STATE_BINDING_EDITOR_ARTIFACT_PATH,
+  );
+  const built = await buildDesenAppStateBindingEditorEvidence(options.buildOptions);
+  try {
+    await writeAtomicProofArtifact({
+      artifactPath,
+      artifactBytes: built.artifactBytes,
+      beforeAtomicRename: options.beforeAtomicRename,
+    });
+  } catch (error) {
+    fail("ARTIFACT_WRITE_UNSAFE", "Atomic M09-T08 artifact write failed safely.", {
+      cause: String(error),
+    });
+  }
+  return deepFreeze({
+    task: built.artifact.task,
+    result: built.artifact.result,
+    artifactPath,
+    artifactBytes: built.artifactBytes.byteLength,
+    artifactSha256: built.artifactSha256,
+    trackedFiles: built.artifact.boundary.trackedFiles,
+    localTestCounts: localTestCounts(built.artifact),
+  });
+}

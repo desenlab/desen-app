@@ -5,9 +5,11 @@ import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 import { prepareCatalogAuthoringModel } from "./authoring-data.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
 import {
+  applyAuthoringInspectorBindingEdit,
   applyAuthoringInspectorEdit,
   prepareAuthoringInspectorModel,
 } from "./authoring-inspector.js";
+import { applyAuthoringStateEdit, prepareAuthoringStateModel } from "./authoring-state.js";
 import {
   applyAuthoringNodeDelete,
   applyAuthoringSlotEdit,
@@ -23,6 +25,7 @@ import {
   isSameAuthoringComponentSelection,
 } from "./authoring-selection.js";
 import { InspectorPanel } from "./inspector-panel.js";
+import { StatePanel } from "./state-panel.js";
 import { prepareAuthoringPreviewBundle, REFERENCE_EDITOR_DOCUMENT } from "./authoring-preview.js";
 import {
   createDesenAppProjectPath,
@@ -49,9 +52,15 @@ import type {
   CatalogComponentSummary,
 } from "./authoring-data.js";
 import type {
+  AuthoringInspectorBindingEdit,
   AuthoringInspectorEdit,
   AuthoringInspectorEditResult,
 } from "./authoring-inspector.js";
+import type {
+  AuthoringStateEdit,
+  AuthoringStateEditResult,
+  AuthoringStateModelResult,
+} from "./authoring-state.js";
 import type { AuthoringComponentSelection } from "./authoring-selection.js";
 import type {
   AuthoringSlotEdit,
@@ -325,7 +334,7 @@ function ProjectsHome() {
   );
 }
 
-type AuthoringTab = "layers" | "components";
+type AuthoringTab = "layers" | "components" | "state";
 
 type AuthoringDragIntent =
   | Readonly<{ readonly kind: "component"; readonly componentId: string }>
@@ -398,6 +407,31 @@ function prepareNativeDrag(event: DragEvent<HTMLElement>, effect: "copy" | "move
   event.dataTransfer.setData("text/plain", "DESEN App authoring item");
 }
 
+function acceptsDragIntent(
+  route: AuthoringSlotRoute,
+  authoringModel: CatalogAuthoringModel,
+  target: AuthoringSlotSelection,
+  index: number,
+  dragIntent: AuthoringDragIntent,
+): boolean {
+  if (dragIntent.kind === "node") {
+    const compatibility = evaluateAuthoringSlotPlacement(
+      route,
+      authoringModel,
+      target,
+      dragIntent.nodeId,
+      index,
+    );
+    return compatibility.accepted && compatibility.changesSource;
+  }
+
+  const component = authoringModel.components.find(({ id }) => id === dragIntent.componentId);
+  return (
+    component !== undefined &&
+    evaluateAuthoringSlotInsertion(route, authoringModel, target, component.id, index).accepted
+  );
+}
+
 function SlotBoundary({
   index,
   owner,
@@ -433,29 +467,7 @@ function SlotBoundary({
   const selectedMovable =
     selectedPlacement?.accepted === true && selectedPlacement.changesSource === true;
   const dragAccepted =
-    dragIntent?.kind === "node"
-      ? (() => {
-          const compatibility = evaluateAuthoringSlotPlacement(
-            route,
-            authoringModel,
-            target,
-            dragIntent.nodeId,
-            index,
-          );
-          return compatibility.accepted && compatibility.changesSource;
-        })()
-      : dragIntent?.kind === "component"
-        ? (() => {
-            const component = authoringModel.components.find(
-              ({ id }) => id === dragIntent.componentId,
-            );
-            return (
-              component !== undefined &&
-              evaluateAuthoringSlotInsertion(route, authoringModel, target, component.id, index)
-                .accepted
-            );
-          })()
-        : false;
+    dragIntent !== null && acceptsDragIntent(route, authoringModel, target, index, dragIntent);
   const dropReady = dragIntent !== null && dragAccepted;
   const [dragHovered, setDragHovered] = useState(false);
   const dragEnterDepth = useRef(0);
@@ -570,7 +582,17 @@ function LayerSlot({
         <SlotBoundary index={0} owner={owner} slot={slot} {...interaction} />
         {slot.children.map((child, index) => (
           <Fragment key={child.id}>
-            <LayerNode node={child} movable {...interaction} />
+            <LayerNode
+              dropPlacement={Object.freeze({
+                owner,
+                slot,
+                beforeIndex: index,
+                afterIndex: index + 1,
+              })}
+              node={child}
+              movable
+              {...interaction}
+            />
             <SlotBoundary index={index + 1} owner={owner} slot={slot} {...interaction} />
           </Fragment>
         ))}
@@ -583,6 +605,7 @@ function LayerNode({
   activeSlot,
   authoringModel,
   dragIntent,
+  dropPlacement,
   movable = false,
   node,
   onApplyIntent,
@@ -595,11 +618,18 @@ function LayerNode({
   selectedSourceNodeId,
 }: Readonly<
   LayerSelectionProps & {
+    readonly dropPlacement?: Readonly<{
+      readonly afterIndex: number;
+      readonly beforeIndex: number;
+      readonly owner: AuthoringBehaviorLayer | AuthoringLayerNode;
+      readonly slot: AuthoringSlotState;
+    }>;
     readonly movable?: boolean;
     readonly node: AuthoringLayerNode;
   }
 >) {
   const selected = selectedSourceNodeId === node.id;
+  const [rowDropPosition, setRowDropPosition] = useState<"after" | "before" | null>(null);
   const interaction = {
     activeSlot,
     authoringModel,
@@ -614,8 +644,27 @@ function LayerNode({
     selectedSourceNodeId,
   } satisfies LayerSelectionProps;
 
+  useEffect(() => {
+    setRowDropPosition(null);
+  }, [dragIntent]);
+
+  function projectedRowDrop(event: DragEvent<HTMLButtonElement>): Readonly<{
+    readonly index: number;
+    readonly position: "after" | "before";
+    readonly target: AuthoringSlotSelection;
+  }> | null {
+    if (dragIntent === null || dropPlacement === undefined) return null;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const position = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after";
+    const index = position === "before" ? dropPlacement.beforeIndex : dropPlacement.afterIndex;
+    const target = slotTarget(route, dropPlacement.owner, dropPlacement.slot);
+    return acceptsDragIntent(route, authoringModel, target, index, dragIntent)
+      ? Object.freeze({ index, position, target })
+      : null;
+  }
+
   return (
-    <li className={styles.layerNode}>
+    <li className={styles.layerNode} data-row-drop-position={rowDropPosition ?? undefined}>
       <button
         aria-label={`${selected ? "Deselect" : "Select"} ${node.displayName} layer · ${node.id}${node.conditional ? " · Conditional" : ""}`}
         aria-pressed={selected}
@@ -623,11 +672,38 @@ function LayerNode({
         data-category={node.capabilityId.split("/").at(-1)}
         data-dragging={dragIntent?.kind === "node" && dragIntent.nodeId === node.id}
         draggable={movable}
-        onDragEnd={onClearDrag}
+        onDragEnd={() => {
+          setRowDropPosition(null);
+          onClearDrag();
+        }}
+        onDragLeave={(event) => {
+          const relatedTarget = event.relatedTarget;
+          if (relatedTarget instanceof Node && event.currentTarget.contains(relatedTarget)) return;
+          setRowDropPosition(null);
+        }}
+        onDragOver={(event) => {
+          const projected = projectedRowDrop(event);
+          if (projected === null) {
+            setRowDropPosition(null);
+            return;
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          event.dataTransfer.dropEffect = dragIntent?.kind === "component" ? "copy" : "move";
+          setRowDropPosition(projected.position);
+        }}
         onDragStart={(event) => {
           if (!movable) return;
           onStartDrag(Object.freeze({ kind: "node", nodeId: node.id }));
           prepareNativeDrag(event, "move");
+        }}
+        onDrop={(event) => {
+          const projected = projectedRowDrop(event);
+          if (projected === null || dragIntent === null) return;
+          event.preventDefault();
+          event.stopPropagation();
+          setRowDropPosition(null);
+          onApplyIntent(projected.target, projected.index, dragIntent);
         }}
         onClick={() => onToggleSelection(node)}
         type="button"
@@ -866,6 +942,7 @@ function ComponentLibrary({
       <div
         aria-label={targetName}
         className={styles.componentSlotTarget}
+        data-drag-active={dragIntent?.kind === "component"}
         data-drop-hovered={componentDropReady && targetDragHovered}
         data-drop-ready={componentDropReady}
         data-guide={readySlot === null}
@@ -913,20 +990,24 @@ function ComponentLibrary({
           </>
         ) : (
           <>
+            <span aria-hidden="true" className={styles.componentDropGlyph} />
             <span className={styles.componentTargetCopy}>
               <strong>
                 {draggedComponent === undefined
-                  ? readySlot.owner.displayName
+                  ? `Add to ${readySlot.owner.displayName}`
                   : `Drop ${draggedComponent.displayName} here`}
               </strong>
               <small>
                 {readySlot.owner.id} · {readySlot.slot.name} slot
                 {draggedComponent === undefined
-                  ? ""
+                  ? " · Drop here or click a component below"
                   : ` · position ${readySlot.slot.children.length + 1}`}
               </small>
             </span>
-            <span className={styles.slotContractBadge}>{slotCardinalityLabel(readySlot.slot)}</span>
+            <span className={styles.slotContractBadge}>
+              {readySlot.slot.children.length}{" "}
+              {readySlot.slot.children.length === 1 ? "item" : "items"}
+            </span>
           </>
         )}
       </div>
@@ -1003,7 +1084,16 @@ function ComponentLibrary({
                               <small>{component.description}</small>
                             )}
                           </span>
-                          <span className={styles.componentMeta}>{action}</span>
+                          <span className={styles.componentItemAction}>
+                            {enabled ? (
+                              <span
+                                aria-hidden="true"
+                                className={styles.componentDragHandle}
+                                title="Drag to the placement target"
+                              />
+                            ) : null}
+                            <span className={styles.componentMeta}>{action}</span>
+                          </span>
                         </button>
                       );
                     })()}
@@ -1030,11 +1120,13 @@ function AuthoringPanel({
   model,
   onDeleteSelection,
   onSlotEdit,
+  onStateEdit,
   onToggleSelection,
   route,
   selection,
   selectedSourceNodeId,
   selectedSurface,
+  stateModel,
 }: Readonly<{
   readonly model: CatalogAuthoringModel;
   readonly onDeleteSelection: () => AuthoringSlotEditResult;
@@ -1042,11 +1134,13 @@ function AuthoringPanel({
     target: AuthoringSlotSelection,
     edit: AuthoringSlotEdit,
   ) => AuthoringSlotEditResult;
+  readonly onStateEdit: (edit: AuthoringStateEdit) => AuthoringStateEditResult;
   readonly onToggleSelection: (node: AuthoringLayerNode) => void;
   readonly route: AuthoringSlotRoute;
   readonly selection: AuthoringComponentSelection | null;
   readonly selectedSourceNodeId: string | null;
   readonly selectedSurface: DesenAppSurfaceSummary;
+  readonly stateModel: AuthoringStateModelResult;
 }>) {
   const [activeTab, setActiveTab] = useState<AuthoringTab>("layers");
   const [activeSlot, setActiveSlot] = useState<AuthoringSlotSelection | null>(null);
@@ -1055,6 +1149,7 @@ function AuthoringPanel({
   const panelId = useId();
   const layersTab = useRef<HTMLButtonElement>(null);
   const componentsTab = useRef<HTMLButtonElement>(null);
+  const stateTab = useRef<HTMLButtonElement>(null);
   const slotProjection =
     activeSlot === null ? null : projectAuthoringSlotSelection(activeSlot, route, model);
   const surfaceRootNodeId =
@@ -1132,20 +1227,23 @@ function AuthoringPanel({
   function selectAdjacentTab(event: KeyboardEvent<HTMLButtonElement>): void {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
+    const tabs: readonly AuthoringTab[] = ["layers", "components", "state"];
+    const currentIndex = tabs.indexOf(activeTab);
     const nextTab =
       event.key === "Home"
         ? "layers"
         : event.key === "End"
-          ? "components"
-          : event.key === "ArrowRight"
-            ? activeTab === "layers"
-              ? "components"
-              : "layers"
-            : activeTab === "components"
-              ? "layers"
-              : "components";
+          ? "state"
+          : (tabs[
+              (currentIndex + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length
+            ] ?? "layers");
     setActiveTab(nextTab);
-    (nextTab === "layers" ? layersTab : componentsTab).current?.focus();
+    (nextTab === "layers"
+      ? layersTab
+      : nextTab === "components"
+        ? componentsTab
+        : stateTab
+    ).current?.focus();
   }
 
   function requestSlotChoice(): void {
@@ -1216,6 +1314,19 @@ function AuthoringPanel({
         >
           Components
         </button>
+        <button
+          aria-controls={`${panelId}-state-panel`}
+          aria-selected={activeTab === "state"}
+          id={`${panelId}-state-tab`}
+          onClick={() => setActiveTab("state")}
+          onKeyDown={selectAdjacentTab}
+          ref={stateTab}
+          role="tab"
+          tabIndex={activeTab === "state" ? 0 : -1}
+          type="button"
+        >
+          State
+        </button>
       </div>
       <div
         aria-labelledby={`${panelId}-layers-tab`}
@@ -1263,7 +1374,17 @@ function AuthoringPanel({
           slotProjection={slotProjection}
         />
       </div>
-      {selection === null ? null : (
+      <div
+        aria-labelledby={`${panelId}-state-tab`}
+        className={styles.authoringTabPanel}
+        hidden={activeTab !== "state"}
+        id={`${panelId}-state-panel`}
+        role="tabpanel"
+        tabIndex={activeTab === "state" ? 0 : -1}
+      >
+        <StatePanel model={stateModel} onEdit={onStateEdit} surfaceName={selectedSurface.name} />
+      </div>
+      {selection === null || activeTab === "state" ? null : (
         <div className={styles.authoringSelectionActions}>
           <button
             aria-describedby={`${panelId}-delete-layer-description`}
@@ -1280,9 +1401,11 @@ function AuthoringPanel({
       )}
       <p aria-atomic="true" aria-live="polite" className={styles.authoringBoundary} role="status">
         {notice ||
-          (selection === null
-            ? "Choose a Source layer to inspect, move, or edit its properties."
-            : `Selected · ${selection.displayName}${selection.conditional ? " · Conditional" : ""}`)}
+          (activeTab === "state"
+            ? `Local state · ${selectedSurface.name}`
+            : selection === null
+              ? "Choose a Source layer to inspect, move, or edit its properties."
+              : `Selected · ${selection.displayName}${selection.conditional ? " · Conditional" : ""}`)}
       </p>
     </aside>
   );
@@ -1318,6 +1441,13 @@ function SurfaceEditor({
         : Object.freeze({ status: "rejected" as const }),
     [preparedModel, route, selection],
   );
+  const stateModel = useMemo<AuthoringStateModelResult>(
+    () =>
+      preparedModel.ok
+        ? prepareAuthoringStateModel(preparedModel.model, route)
+        : Object.freeze({ status: "rejected", reason: "route-invalid" }),
+    [preparedModel, route],
+  );
 
   function toggleSelection(node: AuthoringLayerNode): void {
     const candidate = createAuthoringComponentSelection({
@@ -1345,6 +1475,35 @@ function SurfaceEditor({
     return result;
   }
 
+  function editSelectedBinding(edit: AuthoringInspectorBindingEdit): AuthoringInspectorEditResult {
+    if (selection === null) return Object.freeze({ ok: false, reason: "selection-invalid" });
+    const result = applyAuthoringInspectorBindingEdit(
+      document,
+      referenceCatalog,
+      route,
+      selection,
+      edit,
+    );
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    if (!nextPreview.ok) {
+      return Object.freeze({ ok: false, reason: "preview-unavailable" });
+    }
+    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    return result;
+  }
+
+  function editLocalState(edit: AuthoringStateEdit): AuthoringStateEditResult {
+    const result = applyAuthoringStateEdit(document, referenceCatalog, route, edit);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    if (!nextPreview.ok) {
+      return Object.freeze({ ok: false, reason: "preview-unavailable" });
+    }
+    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    return result;
+  }
+
   function editNamedSlot(
     target: AuthoringSlotSelection,
     edit: AuthoringSlotEdit,
@@ -1356,6 +1515,21 @@ function SurfaceEditor({
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
     setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok) {
+      const component = preparedModel.model.components.find(({ id }) => id === edit.componentId);
+      if (component !== undefined) {
+        setSelection(
+          createAuthoringComponentSelection({
+            projectId: project.id,
+            surfaceId: selectedSurface.id,
+            sourceNodeId: result.nodeId,
+            capabilityId: component.id,
+            displayName: component.displayName,
+            conditional: false,
+          }),
+        );
+      }
+    }
     return result;
   }
 
@@ -1398,11 +1572,13 @@ function SurfaceEditor({
         model={model}
         onDeleteSelection={deleteSelectedLayer}
         onSlotEdit={editNamedSlot}
+        onStateEdit={editLocalState}
         onToggleSelection={toggleSelection}
         route={route}
         selection={selection}
         selectedSourceNodeId={selection?.sourceNodeId ?? null}
         selectedSurface={selectedSurface}
+        stateModel={stateModel}
       />
 
       <div className={styles.surfaceFrame}>
@@ -1434,7 +1610,11 @@ function SurfaceEditor({
         </div>
       </div>
 
-      <InspectorPanel inspector={inspector} onEdit={editSelectedProperty} />
+      <InspectorPanel
+        inspector={inspector}
+        onBindingEdit={editSelectedBinding}
+        onEdit={editSelectedProperty}
+      />
 
       <div className={styles.editorStatus}>
         <span>{project.navigationStatus}</span>

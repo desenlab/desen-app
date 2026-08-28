@@ -13,6 +13,8 @@ const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-NAMED-SLOT-AUTHORING.md";
+const STATE_BINDING_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json";
 const PARENT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
@@ -73,6 +75,44 @@ const TRACKED_PATHS = Object.freeze([
   ...PROOF_READER_PATHS,
 ]);
 
+const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  APPLICATION_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+  APPLICATION_TEST_PATH,
+  "scripts/lib/desen-app-named-slot-authoring-proof.mjs",
+  "tests/desen-app-named-slot-authoring.test.mjs",
+]);
+
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...new Set([...TRACKED_PATHS, STATE_BINDING_ARTIFACT_PATH]),
+]);
+
+const RETAINED_HISTORICAL_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
+);
+
+const SELF_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-named-slot-authoring-proof.mjs",
+  "tests/desen-app-named-slot-authoring.test.mjs",
+]);
+
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 24_830,
+  sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+});
+
+const STATE_BINDING_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T08",
+  proofId: "desen-app-state-binding-editor",
+  profile: "desen.app.state-binding-editor-proof.v1",
+  result: "PASS",
+  path: STATE_BINDING_ARTIFACT_PATH,
+  bytes: 28_766,
+  sha256: "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
+});
+
 const EXPECTED_AUTHORING_DATA_TEST_NAMES = Object.freeze([
   "projects the exact Catalog library and official Source surface trees",
   "preserves absent slots, own empty slots, and Source child-array order",
@@ -119,6 +159,7 @@ const EXPECTED_APPLICATION_TEST_NAMES = Object.freeze([
   "disables deletion for the surface root and a slot-minimum preflight without changing preview",
   "preserves the selected layer, preview, and focus when deletion is rejected",
   "uses only the App-owned drag intent and ignores forged native transfer authority",
+  "snaps a native layer drag to the before or after half of a visible layer row",
   "reorders a selected Source node through the keyboard placement control",
   "moves nodes across nested slots with keyboard and App-owned native drag intent",
   "switches to the exact Catalog component library and filters only the local view",
@@ -235,12 +276,16 @@ function captureBytes(value, label) {
 
 function captureOverrides(value) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+  if (
+    !(value instanceof Map) ||
+    utilTypes.isProxy(value) ||
+    value.size > CURRENT_COMPATIBILITY_PATHS.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
   for (const [relativePath, bytes] of value) {
-    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+    if (!CURRENT_COMPATIBILITY_PATHS.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
@@ -310,12 +355,17 @@ async function readRegularAuthority(absolutePath, label) {
 
 async function readTrackedFiles(workspaceRoot, overrides) {
   const output = new Map();
-  for (const relativePath of TRACKED_PATHS) {
-    output.set(
-      relativePath,
-      overrides.get(relativePath) ??
-        (await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath)),
-    );
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
+    const live = await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath);
+    const override = overrides.get(relativePath);
+    if (
+      override !== undefined &&
+      SELF_RESEALED_PATHS.includes(relativePath) &&
+      !isDeepStrictEqual(override, live)
+    ) {
+      fail("BOUNDARY_DRIFT", `${relativePath} cannot be substituted by a caller.`);
+    }
+    output.set(relativePath, override ?? live);
   }
   return output;
 }
@@ -655,12 +705,18 @@ function inspectApplicationSource(source) {
       'event.dataTransfer.setData("text/plain", "DESEN App authoring item")',
       "const [dragIntent, setDragIntent] = useState<AuthoringDragIntent | null>(null)",
       "const dropReady = dragIntent !== null && dragAccepted",
+      "function acceptsDragIntent(",
       "const [dragHovered, setDragHovered] = useState(false)",
       "const dragEnterDepth = useRef(0)",
       "data-drop-hovered={dropReady && dragHovered}",
       "data-drop-ready={dropReady}",
       "dragEnterDepth.current += 1",
       "dragEnterDepth.current = Math.max(0, dragEnterDepth.current - 1)",
+      "function projectedRowDrop(event: DragEvent<HTMLButtonElement>)",
+      "const bounds = event.currentTarget.getBoundingClientRect()",
+      'const position = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after"',
+      "data-row-drop-position={rowDropPosition ?? undefined}",
+      "event.stopPropagation()",
       "projectAuthoringSlotSelection(activeSlot, route, model)",
       "evaluateAuthoringSlotInsertion(\n                              route,",
       "evaluateAuthoringSlotPlacement(route, authoringModel, target",
@@ -696,6 +752,8 @@ function inspectApplicationSource(source) {
       "applyAuthoringNodeDelete(document, referenceCatalog, route, selection)",
       "prepareAuthoringPreviewBundle(result.document)",
       "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
+      'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
+      "sourceNodeId: result.nodeId",
       "setSelection(null)",
       "Deletes this layer and its nested Source subtree.",
       "aria-label={`Delete ${selection.displayName} layer · ${selection.sourceNodeId}`}",
@@ -710,12 +768,7 @@ function inspectApplicationSource(source) {
   );
   assertExcludes(
     source,
-    [
-      "dataTransfer.getData",
-      "document.elementFromPoint",
-      "getBoundingClientRect",
-      "elementsFromPoint",
-    ],
+    ["dataTransfer.getData", "document.elementFromPoint", "elementsFromPoint"],
     "application.tsx",
   );
   return deepFreeze({
@@ -724,10 +777,14 @@ function inspectApplicationSource(source) {
     declaredAbsentSlotsVisible: true,
     linearDeclaredPresentJoin: true,
     orderedBoundaryControls: true,
-    expandedOverlappingDropReadyBoundaries: true,
+    expandedNonOverlappingDropReadyBoundaries: true,
+    rowHalfDropTargets: true,
+    rowGeometryUsedOnlyForBoundedDropProjection: true,
     stableNestedDragHoverTracking: true,
     componentCompatibilityVisible: true,
     explicitComponentDropTarget: true,
+    stickyComponentDropTarget: true,
+    componentDragGuidance: true,
     slotlessDisabledPlacementGuide: true,
     browserDataTransferReads: 0,
     invalidPlacementControlsDisabled: true,
@@ -744,6 +801,7 @@ function inspectApplicationSource(source) {
     sourceAndPreviewCommitAtomically: true,
     deletionSourceAndPreviewCommitAtomically: true,
     successfulDeletionClearsSelection: true,
+    successfulInsertionSelectsNewLayer: true,
     deletionFocusReturnsToLayersTab: true,
     failedDeletionPreservesSelectionAndFocus: true,
     publisherFailurePreservesPriorSession: true,
@@ -757,12 +815,19 @@ function inspectCssSource(source) {
     [
       ".slotBoundary",
       '.slotBoundary[data-drop-ready="true"]',
-      "min-height: 2.875rem",
-      "margin-block: -1.125rem",
+      "min-height: 0.875rem",
+      "margin-block: 0",
       '.slotBoundary[data-drop-ready="true"]::before',
       '.slotBoundary[data-drop-hovered="true"]',
       '.slotBoundary[data-drop-ready="true"] .slotBoundaryLine',
+      ".layerNode[data-row-drop-position] {\n  z-index: 4;",
+      ".layerNode[data-row-drop-position] > .layerRow",
+      '.layerNode[data-row-drop-position="before"]::before',
+      '.layerNode[data-row-drop-position="after"]::before',
       ".componentSlotTarget",
+      "position: sticky",
+      "top: 0.25rem",
+      '.componentSlotTarget[data-drag-active="true"]',
       '.componentSlotTarget[data-ready="true"]',
       '.componentSlotTarget[data-guide="true"]',
       '.componentSlotTarget[data-drop-ready="true"]',
@@ -782,11 +847,18 @@ function inspectCssSource(source) {
       managedSlotSelectors,
     });
   }
+  assertExcludes(
+    source,
+    ["margin-block: -1.125rem", "transition: min-height"],
+    "application.module.css",
+  );
   return deepFreeze({
     namedSlotSelectors: true,
     selectedTargetPresentation: true,
-    expandedOverlappingDropBoundaries: true,
+    expandedNonOverlappingDropBoundaries: true,
+    rowDropPositionPresentation: true,
     stableHoveredDropPresentation: true,
+    stickyComponentTargetPresentation: true,
     slotlessTargetGuidePresentation: true,
     managedDescendantSlotSelectors: 0,
   });
@@ -1087,8 +1159,133 @@ function receipts(files) {
     );
 }
 
+async function authenticateFrozenArtifact(workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    "frozen M09-T07 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T07 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(artifactBytes, "frozen M09-T07 proof artifact");
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-named-slot-authoring" ||
+    artifact?.profile !== "desen.app.named-slot-authoring-proof.v1" ||
+    artifact?.task !== "M09-T07" ||
+    artifact?.result !== "PASS" ||
+    artifact?.claim?.taskStatus !== "DONE" ||
+    artifact?.claim?.completeCatalogDeclaredSlotProjection !== true ||
+    artifact?.claim?.publicStableIdInsert !== true ||
+    artifact?.claim?.publicCrossSlotMove !== true ||
+    artifact?.claim?.publicSameSlotReorder !== true ||
+    artifact?.claim?.publicNestedSubtreeDelete !== true ||
+    artifact?.claim?.continuousCompleteSourceRevalidation !== true ||
+    artifact?.claim?.sourceAndPreviewCommitAtomically !== true ||
+    artifact?.claim?.slotChromeOutsideManagedCapabilitySubtree !== true ||
+    artifact?.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact?.boundary?.trackedFiles !== TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== TRACKED_PATHS.length ||
+    !isDeepStrictEqual(
+      trackedReceipts.map((candidate) => candidate?.path),
+      [...TRACKED_PATHS].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    trackedReceipts.some(
+      (candidate) =>
+        candidate === null ||
+        typeof candidate !== "object" ||
+        !Number.isSafeInteger(candidate.bytes) ||
+        candidate.bytes < 0 ||
+        typeof candidate.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(candidate.sha256),
+    ) ||
+    !isDeepStrictEqual(
+      artifact?.tests?.rootTestNames,
+      DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES,
+    )
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T07 artifact identity or retained claims drifted.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedHistoricalReceipts(frozenArtifact, files) {
+  const taskTimeReceipts = new Map(
+    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    const authority = taskTimeReceipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M09-T07 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
+}
+
+function authenticateStateBindingSuccessor(files) {
+  const artifactBytes = files.get(STATE_BINDING_ARTIFACT_PATH);
+  if (
+    artifactBytes.byteLength !== STATE_BINDING_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== STATE_BINDING_ARTIFACT_PIN.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T08 artifact bytes drifted.");
+  }
+  const artifact = parseJson(artifactBytes, STATE_BINDING_ARTIFACT_PATH);
+  if (
+    artifact.task !== STATE_BINDING_ARTIFACT_PIN.task ||
+    artifact.proofId !== STATE_BINDING_ARTIFACT_PIN.proofId ||
+    artifact.profile !== STATE_BINDING_ARTIFACT_PIN.profile ||
+    artifact.result !== STATE_BINDING_ARTIFACT_PIN.result ||
+    artifact.claim?.surfaceLocalPrimitiveStateList !== true ||
+    artifact.claim?.primitiveStateAddUpdateDelete !== true ||
+    artifact.claim?.boundedConservativeUsageCount !== true ||
+    artifact.claim?.directCompatibleLocalStatePropBinding !== true ||
+    artifact.claim?.exactDirectBindingChange !== true ||
+    artifact.claim?.exactDirectBindingDetachToInitial !== true ||
+    artifact.claim?.runtimeAndAdvancedBindingReadOnly !== true ||
+    artifact.claim?.sourceAndPreviewCommitAtomically !== true ||
+    artifact.claim?.retainedNamedSlotAuthoringUxCompatibility !== true ||
+    artifact.claim?.eventActionEditingClaimed !== false ||
+    artifact.claim?.designRunClaimed !== false ||
+    artifact.claim?.persistenceClaimed !== false ||
+    artifact.claim?.activationClaimed !== false ||
+    artifact.claim?.browserE2eClaimed !== false
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T08 artifact identity or claims drifted.");
+  }
+  return deepFreeze({
+    task: STATE_BINDING_ARTIFACT_PIN.task,
+    artifact: STATE_BINDING_ARTIFACT_PIN,
+    surfaceLocalPrimitiveStateEditing: true,
+    boundedUsageCounts: true,
+    exactCompatibleDirectLocalStateBindingChangeAndDetach: true,
+    runtimeAndAdvancedBindingsReadOnly: true,
+    atomicPublisherBackedPreview: true,
+    retainedNamedSlotAuthoringUxCompatibility: true,
+    eventActionEditingImplemented: false,
+    designRunImplemented: false,
+    persistenceImplemented: false,
+    activationImplemented: false,
+    browserE2eImplemented: false,
+  });
+}
+
 /** Builds detached deterministic M09-T07 named-slot authoring evidence. */
-export async function buildDesenAppNamedSlotAuthoringEvidence(rawOptions = undefined) {
+async function _buildFreshDesenAppNamedSlotAuthoringEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
   const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
@@ -1226,6 +1423,79 @@ export async function buildDesenAppNamedSlotAuthoringEvidence(rawOptions = undef
   });
   const artifactBytes = canonicalArtifactBytes(artifact);
   return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+}
+
+/** Authenticates frozen M09-T07 evidence and checks its live additive M09-T08 successor. */
+export async function buildDesenAppNamedSlotAuthoringEvidence(rawOptions = undefined) {
+  const options = captureBuildOptions(rawOptions);
+  const workspaceRoot = await realpath(options.workspaceRoot);
+  const [frozen, files] = await Promise.all([
+    authenticateFrozenArtifact(workspaceRoot),
+    readTrackedFiles(workspaceRoot, options.fileOverrides),
+  ]);
+  const parent = authenticateParent(options.parentArtifactBytes ?? files.get(PARENT_ARTIFACT_PATH));
+  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  const source = verifyDesenAppNamedSlotAuthoringSourcePolicy({
+    authoringDataSource: decodeUtf8(files.get(AUTHORING_DATA_PATH), AUTHORING_DATA_PATH),
+    slotSource: decodeUtf8(files.get(SLOT_SOURCE_PATH), SLOT_SOURCE_PATH),
+    previewSource: decodeUtf8(files.get(PREVIEW_SOURCE_PATH), PREVIEW_SOURCE_PATH),
+    adapterSource: decodeUtf8(files.get(ADAPTER_SOURCE_PATH), ADAPTER_SOURCE_PATH),
+    applicationSource: decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH),
+    applicationCss: decodeUtf8(files.get(APPLICATION_CSS_PATH), APPLICATION_CSS_PATH),
+  });
+  const tests = inspectTests(files);
+  const packageContract = inspectPackages(files);
+  const successor = authenticateStateBindingSuccessor(files);
+  const currentCompatibility = deepFreeze({
+    schemaVersion: 1,
+    proofId: "desen-app-named-slot-authoring",
+    profile: "desen.app.named-slot-authoring-proof.v1",
+    task: "M09-T07",
+    result: "PASS",
+    prerequisites: [parent],
+    retainedClaim: {
+      taskStatus: frozen.artifact.claim.taskStatus,
+      completeCatalogDeclaredSlotProjection:
+        frozen.artifact.claim.completeCatalogDeclaredSlotProjection,
+      publicStableIdInsert: frozen.artifact.claim.publicStableIdInsert,
+      publicCrossSlotMove: frozen.artifact.claim.publicCrossSlotMove,
+      publicSameSlotReorder: frozen.artifact.claim.publicSameSlotReorder,
+      publicNestedSubtreeDelete: frozen.artifact.claim.publicNestedSubtreeDelete,
+      continuousCompleteSourceRevalidation:
+        frozen.artifact.claim.continuousCompleteSourceRevalidation,
+      sourceAndPreviewCommitAtomically: frozen.artifact.claim.sourceAndPreviewCommitAtomically,
+      slotChromeOutsideManagedCapabilitySubtree:
+        frozen.artifact.claim.slotChromeOutsideManagedCapabilitySubtree,
+    },
+    source,
+    successor,
+    package: packageContract,
+    testPolicy: {
+      applicationTestNames: tests.appTestNames[APPLICATION_TEST_PATH],
+      rootTestNames: tests.rootTestNames,
+    },
+    boundary: {
+      retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
+      successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
+      currentPathReceipts: receipts(files),
+      additiveSuccessorReceipts: [
+        APPLICATION_SOURCE_PATH,
+        APPLICATION_CSS_PATH,
+        APPLICATION_TEST_PATH,
+        STATE_BINDING_ARTIFACT_PATH,
+      ].map((relativePath) => ({
+        path: relativePath,
+        bytes: files.get(relativePath).byteLength,
+        sha256: sha256(files.get(relativePath)),
+      })),
+    },
+  });
+  return deepFreeze({
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+  });
 }
 
 function verifyProofDocument(bytes, artifactSha256) {

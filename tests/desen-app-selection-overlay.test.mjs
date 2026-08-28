@@ -131,7 +131,7 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.currentCompatibility.successor.artifact.bytes, 24_830);
   assert.equal(
     built.currentCompatibility.successor.artifact.exactLiveSourceAndTestReceipts.length,
-    11,
+    8,
   );
   assert.deepEqual(
     built.currentCompatibility.successor.artifact.exactLiveSourceAndTestReceipts.map(
@@ -139,13 +139,10 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[0], () => {
     ),
     [
       "apps/desen-app/src/adapter-canvas.tsx",
-      "apps/desen-app/src/application.module.css",
-      "apps/desen-app/src/application.tsx",
       "apps/desen-app/src/authoring-data.ts",
       "apps/desen-app/src/authoring-preview.ts",
       "apps/desen-app/src/authoring-slots.ts",
       "apps/desen-app/test/adapter-canvas.test.tsx",
-      "apps/desen-app/test/application.test.tsx",
       "apps/desen-app/test/authoring-data.test.ts",
       "apps/desen-app/test/authoring-preview.test.ts",
       "apps/desen-app/test/authoring-slots.test.ts",
@@ -356,8 +353,8 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
           Buffer.from(
             replaceOnce(
               inspectorSource,
-              'field.value.kind === "dynamic"',
-              'field.value.kind === "unavailable"',
+              'if (field.value.kind === "dynamic") {',
+              'if (field.value.kind === "unavailable") {',
             ),
           ),
         ],
@@ -395,7 +392,13 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       'event.dataTransfer.setData("text/plain", "DESEN App authoring item");',
       'event.dataTransfer.getData("text/plain");\n  event.dataTransfer.setData("text/plain", "DESEN App authoring item");',
     ],
-    [APPLICATION_CSS, cssSource, "margin-block: -1.125rem;", "margin-block: 0;"],
+    [APPLICATION_CSS, cssSource, "margin-block: 0;", "margin-block: -1.125rem;"],
+    [
+      APPLICATION_CSS,
+      cssSource,
+      ".layerNode[data-row-drop-position] {",
+      ".layerNode[data-row-drop-disabled] {",
+    ],
     [
       AUTHORING_SLOT_TEST,
       slotTestSource,

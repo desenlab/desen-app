@@ -235,6 +235,25 @@ function scanStructuredJson(text: string): ScanIssue | undefined {
   return state.dynamicValue ? "dynamic-value" : undefined;
 }
 
+function scanInertJson(text: string): ScanIssue | undefined {
+  const byteIssue = measureUtf8Bytes(text);
+  if (byteIssue !== undefined) return byteIssue;
+
+  const state: ScanState = {
+    text,
+    decodedStringCodeUnits: 0,
+    dynamicValue: false,
+    index: 0,
+    valueOccurrences: 0,
+  };
+  skipWhitespace(state);
+  const issue = scanValue(state, 0);
+  if (issue !== undefined) return issue;
+  skipWhitespace(state);
+  if (state.index !== text.length) return "invalid-json";
+  return undefined;
+}
+
 function deepFreezeJson(value: JsonValue): JsonValue {
   if (typeof value !== "object" || value === null) return value;
   if (Array.isArray(value)) {
@@ -261,6 +280,29 @@ function failure(reason: StructuredJsonParseFailureReason): StructuredJsonParseF
 export function parseStructuredJsonText(input: unknown): StructuredJsonParseResult {
   if (typeof input !== "string") return failure("invalid-json");
   const issue = scanStructuredJson(input);
+  if (issue !== undefined) return failure(issue);
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(input) as unknown;
+  } catch {
+    return failure("invalid-json");
+  }
+  return Object.freeze({ ok: true, value: deepFreezeJson(parsed as JsonValue) });
+}
+
+/**
+ * Parses one user-authored inert JSON string under the Publisher Source JSON limit profile.
+ *
+ * @remarks This parser is intended for Source fields such as local-state schemas and initial
+ * values, where `$`-prefixed object members are inert data rather than DESEN dynamic-value syntax.
+ * It still rejects malformed JSON, decoded duplicate object members, non-scalar Unicode, and
+ * finite-profile exhaustion. No marker is interpreted or evaluated. Success returns a detached,
+ * recursively frozen JSON value; failure returns no partial value.
+ */
+export function parseInertJsonText(input: unknown): StructuredJsonParseResult {
+  if (typeof input !== "string") return failure("invalid-json");
+  const issue = scanInertJson(input);
   if (issue !== undefined) return failure(issue);
 
   let parsed: unknown;
