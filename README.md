@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████████░░░░░░░░` **99 / 145 tasks complete (68%)**
+**Overall:** `█████████████████░░░░░░░░` **100 / 145 tasks complete (69%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `████░░░░░░░░░░` **4 / 14 tasks complete (29%)**
+**M09:** `█████░░░░░░░░░` **5 / 14 tasks complete (36%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T05`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T06`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -722,6 +722,44 @@ and proof gates remain 10/13. Component geometry, hit testing, canvas picking, i
 mutation, insertion/cardinality/drag-drop, state/action authoring, Design/Run, diagnostics
 navigation/placeholders, persistence, browser E2E, publication, and activation remain later work.
 M09-T05 is next.
+
+M09-T05 adds one App-owned Inspector for the exact selected Source component. Its controls derive
+from the validator-admitted Catalog `propsSchema` through the public Catalog SDK: string, boolean,
+number, integer, and primitive-enum values receive native controls, while dynamic `$ref` values and
+group/structured descriptors remain visible but locked for M09-T08 and M09-T06 respectively.
+
+Edit commands are reduced to exact own enumerable data before authorization. Proxy-backed commands
+are consumed through captured own data without invoking property getters; accessor, extra-field,
+and symbol-bearing shapes fail closed. The App re-derives route, selection, node, capability,
+control, requiredness, current value kind, and primitive type from the current immutable Source and
+Catalog. Public Editor Core set/delete commands may produce a candidate only after those checks,
+and the complete candidate must pass the public continuous validator.
+
+An Editor Core success is still provisional until the public Publisher accepts the complete Source
+against the exact reference Catalog package candidate. The App then replaces `{document, preview}`
+as one session update. Publisher rejection keeps both the prior Source and prior working preview;
+an accepted Bundle revision replaces the Runtime session and disposes its predecessor. The
+Inspector remains an App-owned `aside` outside the disabled managed fieldset and capability
+subtree, with no private DOM/native, geometry, hit-test, canvas-picking, registry, session, or
+runtime-callback authority.
+
+The focused Inspector suite passes 41/41, the complete App suite passes 86/86, the independent root
+proof passes 10/10, and App typecheck, lint, and production build pass locally. Exact evidence is
+the 22,998-byte
+[`desen-app-0.1.0-schema-inspector.json`](docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json)
+at `sha256:473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b`, authenticated against
+the exact M09-T02 Catalog-panel, M09-T04 selection-overlay, and M06-T10 Publisher official-golden
+parents. The live local CI inventory registers 182 workloads and 86 proof pairs—75 ordinary and
+11 barriers—with a 53-proof-unit/116-workload connected closure and ownership over 1,175 tracked
+paths, including 172 proof-owned paths. Sequence 44 passes 67/67 at
+`sha256:f0c5f3bfbc30ccf230c5256b3a5672c29ffa0e884129ae210571895bd063812c`, preserving the first
+43 checkpoints while extending the chain to 40 artifacts and 80 readers. The complete structural
+CI suite passes 320/320 locally. No required-gate or hosted-CI pass is claimed.
+
+M09-T05 is `DONE`; implementation progress is 100/145 (69%), M09 is 5/14 (36%), and proof gates
+remain 10/13. P-08 remains `NOT_PROVEN`: nested-object/structured-JSON editing, state/binding and
+event/action authoring, Design/Run, persistence, browser E2E, control-plane publication, and
+activation remain later work. M09-T06 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

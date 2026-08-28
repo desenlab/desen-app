@@ -192,9 +192,11 @@ describe("Desen App application shell", () => {
     expect(screen.getByText("Design preview · controls are disabled.")).toBeTruthy();
     expect(
       screen.getByText(
-        "Exact Catalog metadata and sign-in Source structure are read only. Selection stays in the editor and never enters the managed component tree. Editing, save, and publication remain unavailable.",
+        "Catalog-backed property edits stay in this session and refresh the exact adapter preview. Selection and Inspector chrome never enter the managed component tree. Save, control-plane publication, and activation remain unavailable.",
       ),
     ).toBeTruthy();
+    expect(screen.getByRole("complementary", { name: "Inspector" })).toBeTruthy();
+    expect(screen.getByText("Select a layer", { selector: "strong" })).toBeTruthy();
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     expect(screen.queryByRole("button", { name: /publish/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /^run$/i })).toBeNull();
@@ -244,6 +246,144 @@ describe("Desen App application shell", () => {
     expect(screen.getByText("Selected · Alert · Conditional")).toBeTruthy();
     expect(conditionalOverlay.getAttribute("data-materialized")).toBe("false");
     expect(conditionalOverlay.textContent).toContain("Hidden by condition");
+  });
+
+  it("edits schema-derived string and enum props and refreshes the exact adapter preview", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Select Text layer · sign-in.title" }));
+    const inspector = screen.getByRole("complementary", { name: "Inspector" });
+    expect(within(inspector).getByText("sign-in.title")).toBeTruthy();
+    expect(within(inspector).getByText("com.example.ui/Text")).toBeTruthy();
+    expect(within(inspector).getByText("2 controls")).toBeTruthy();
+
+    const text = within(inspector).getByRole("textbox", { name: "Text" }) as HTMLInputElement;
+    expect(text.value).toBe("Sign in");
+    fireEvent.change(text, { target: { value: "Welcome back" } });
+    fireEvent.blur(text);
+    expect(await screen.findByRole("heading", { level: 2, name: "Welcome back" })).toBeTruthy();
+    expect(within(inspector).getByRole("status").textContent).toBe("Updated Text.");
+
+    const role = within(inspector).getByRole("combobox", { name: "Role" });
+    expect((role as HTMLSelectElement).value).toBe("option:1");
+    fireEvent.change(role, { target: { value: "option:2" } });
+    await waitFor(() => {
+      expect(screen.queryByRole("heading", { level: 2, name: "Welcome back" })).toBeNull();
+      expect(screen.getByText("Welcome back", { selector: "small" })).toBeTruthy();
+    });
+    expect(within(inspector).getByRole("status").textContent).toBe("Updated Role.");
+    expect(screen.getByText("Session draft")).toBeTruthy();
+  });
+
+  it("preserves the prior Source and preview when Publisher rejects an oversized valid prop", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Select Text layer · sign-in.title" }));
+    const inspector = screen.getByRole("complementary", { name: "Inspector" });
+    const text = within(inspector).getByRole("textbox", { name: "Text" }) as HTMLInputElement;
+    fireEvent.change(text, { target: { value: "x".repeat(2_200_000) } });
+    fireEvent.blur(text);
+
+    expect(
+      within(inspector).getAllByText("This value is too large for the exact adapter preview."),
+    ).toHaveLength(2);
+    expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+    expect(screen.queryByText("Preview unavailable")).toBeNull();
+    expect(screen.getByText("Session draft")).toBeTruthy();
+
+    fireEvent.keyDown(text, { key: "Escape" });
+    expect(text.value).toBe("Sign in");
+  });
+
+  it("keeps bound props locked while boolean and numeric edits fail or apply atomically", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+    let inspector = screen.getByRole("complementary", { name: "Inspector" });
+    expect(within(inspector).getByLabelText("Value bound value").textContent).toContain(
+      "state.email",
+    );
+    expect(within(inspector).queryByRole("textbox", { name: "Value" })).toBeNull();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.password" }),
+    );
+    inspector = screen.getByRole("complementary", { name: "Inspector" });
+    const secure = within(inspector).getByRole("switch", { name: "Secure" }) as HTMLInputElement;
+    expect(secure.checked).toBe(true);
+    fireEvent.click(secure);
+    await waitFor(() => {
+      expect((screen.getByLabelText("Password") as HTMLInputElement).type).toBe("text");
+    });
+    expect(within(inspector).getByRole("status").textContent).toBe("Updated Secure.");
+    fireEvent.click(within(inspector).getByRole("button", { name: "Unset Secure" }));
+    expect(within(inspector).getByRole("button", { name: "Set Secure" })).toBeTruthy();
+    fireEvent.click(within(inspector).getByRole("button", { name: "Set Secure" }));
+    await waitFor(() => {
+      expect(within(inspector).getByRole("switch", { name: "Secure" })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Select Stack layer · sign-in.layout" }));
+    inspector = screen.getByRole("complementary", { name: "Inspector" });
+    const maxWidth = within(inspector).getByRole("spinbutton", {
+      name: "Max Width",
+    }) as HTMLInputElement;
+    expect(maxWidth.value).toBe("420");
+    fireEvent.change(maxWidth, { target: { value: "" } });
+    fireEvent.blur(maxWidth);
+    expect(maxWidth.getAttribute("aria-invalid")).toBe("true");
+    expect(within(inspector).getByRole("alert").textContent).toBe("Enter a finite number.");
+    expect(within(inspector).getByRole("status").textContent).toBe("Enter a finite number.");
+
+    fireEvent.change(maxWidth, { target: { value: "0" } });
+    fireEvent.blur(maxWidth);
+    expect(maxWidth.getAttribute("aria-invalid")).toBe("true");
+    expect(
+      within(inspector).getAllByText("This value does not satisfy the Catalog schema."),
+    ).toHaveLength(2);
+
+    fireEvent.change(maxWidth, { target: { value: "512" } });
+    fireEvent.blur(maxWidth);
+    await waitFor(() => {
+      expect(maxWidth.getAttribute("aria-invalid")).toBe("false");
+      expect(maxWidth.value).toBe("512");
+    });
+    expect(within(inspector).getByRole("status").textContent).toBe("Updated Max Width.");
+  });
+
+  it("resets local drafts across Source identities and qualifies repeated edit actions", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+    let inspector = screen.getByRole("complementary", { name: "Inspector" });
+    const emailPlaceholder = within(inspector).getByRole("textbox", {
+      name: "Placeholder",
+    }) as HTMLInputElement;
+    expect(emailPlaceholder.value).toBe("");
+    fireEvent.change(emailPlaceholder, { target: { value: "Uncommitted email draft" } });
+    expect(emailPlaceholder.value).toBe("Uncommitted email draft");
+    expect(within(inspector).getByRole("button", { name: "Apply Placeholder" })).toBeTruthy();
+    expect(within(inspector).getByRole("button", { name: "Set Disabled" })).toBeTruthy();
+    expect(within(inspector).getByRole("button", { name: "Set Invalid" })).toBeTruthy();
+    expect(within(inspector).getByRole("button", { name: "Set Secure" })).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.password" }),
+    );
+    inspector = screen.getByRole("complementary", { name: "Inspector" });
+    expect(
+      (within(inspector).getByRole("textbox", { name: "Placeholder" }) as HTMLInputElement).value,
+    ).toBe("");
+    expect(within(inspector).getByRole("button", { name: "Apply Label" })).toBeTruthy();
+    expect(within(inspector).getByRole("button", { name: "Apply Placeholder" })).toBeTruthy();
   });
 
   it("switches to the exact Catalog component library and filters only the local view", () => {

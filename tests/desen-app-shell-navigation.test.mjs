@@ -80,7 +80,7 @@ test("[authority] binds M09-T01 to the exact completed G08 artifact", () => {
     DESEN_APP_SHELL_NAVIGATION_ROOT_TEST_NAMES,
   );
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T04");
+  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T05");
 });
 
 test("[shell] records the closed route, fixture, guidance, and accessibility profile", () => {
@@ -163,6 +163,9 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     "apps/desen-app/src/authoring-data.ts",
     "apps/desen-app/src/adapter-canvas.tsx",
     "apps/desen-app/src/authoring-selection.ts",
+    "apps/desen-app/src/authoring-inspector.ts",
+    "apps/desen-app/src/authoring-preview.ts",
+    "apps/desen-app/src/inspector-panel.tsx",
   ]);
   assert.equal(
     built.currentCompatibility.additiveSuccessor
@@ -175,14 +178,32 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     false,
   );
   assert.equal(
-    built.currentCompatibility.additiveSuccessor.sourceMutationPersistenceAndPublishStillDisallowed,
+    built.currentCompatibility.additiveSuccessor
+      .historicalNoSourceMutationNonclaimAppliedToCurrentApp,
+    false,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.persistenceAndControlPlanePublishStillDisallowed,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.schemaDerivedPrimitiveAndEnumInspectorAllowed,
+    true,
+  );
+  assert.equal(built.currentCompatibility.additiveSuccessor.publicEditorCoreMutationAllowed, true);
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.publisherBackedSessionPreviewAllowed,
     true,
   );
   assert.equal(built.currentCompatibility.boundary.imports.exactReferenceAdapterRegistry, true);
   assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
   assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
-  assert.equal(built.currentCompatibility.boundary.imports.mutationOrPublicationCalls, 0);
+  assert.equal(built.currentCompatibility.boundary.imports.unreviewedMutationOrPublicationCalls, 0);
+  assert.equal(
+    built.currentCompatibility.boundary.imports.publicEditorCoreAndPublisherSuccessorEdges,
+    true,
+  );
   assert.equal(built.currentCompatibility.retainedClaim.catalogDrivenPanelImplemented, undefined);
   assert.equal(built.currentCompatibility.retainedClaim.realAdapterCanvasImplemented, undefined);
 });

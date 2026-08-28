@@ -80,13 +80,17 @@ describe("Desen App catalog authoring read model", () => {
 
     const model = requirePrepared(prepareCatalogAuthoringModel(catalog, officialSignInSource));
     const text = model.components.find((component) => component.id === "com.example.ui/Text");
-    expect(text).toEqual({
+    expect(text).toMatchObject({
       authoringCategory: "content",
       description: "Text content.",
       displayName: "com.example.ui/Text",
       id: "com.example.ui/Text",
       semanticCategory: "content",
     });
+    expect(text?.inspector.controls.map(({ kind, property }) => [property, kind])).toEqual([
+      ["role", "enum"],
+      ["text", "string"],
+    ]);
     expect(
       model.surfaces.find((surface) => surface.id === "sign-in")?.root.slots[0]?.children[0]
         ?.displayName,

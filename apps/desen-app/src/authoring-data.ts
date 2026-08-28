@@ -1,10 +1,13 @@
 import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
+import { deriveComponentInspectorControls, registerComponent } from "@desen/catalog-sdk";
 import {
   validateDesenInteractionCatalogSet,
   validateDesenSourceInteractionContracts,
 } from "@desen/validator";
 
 import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
+
+import type { ComponentInspectorControlPlan, ComponentManifest } from "@desen/catalog-sdk";
 
 type JsonObject = Readonly<Record<string, unknown>>;
 
@@ -19,6 +22,8 @@ export interface CatalogComponentSummary {
   readonly authoringCategory: string;
   readonly semanticCategory: string | undefined;
   readonly description: string | undefined;
+  /** Schema-authoritative control plan derived from this exact validated component manifest. */
+  readonly inspector: ComponentInspectorControlPlan;
 }
 
 /** One named Source slot with child order preserved exactly. */
@@ -44,6 +49,8 @@ export interface AuthoringLayerNode {
   readonly capabilityId: string;
   readonly displayName: string;
   readonly conditional: boolean;
+  /** Exact immutable base props currently present on this Source node. */
+  readonly props: JsonObject;
   readonly behaviors: readonly AuthoringBehaviorLayer[];
   readonly slots: readonly AuthoringLayerSlot[];
 }
@@ -137,12 +144,19 @@ function projectComponent(componentId: string, contractValue: unknown): CatalogC
   const contract = readObject(contractValue, path);
   const authoring = optionalObject(contract.authoring);
   const semanticCategory = optionalString(contract.category);
+  const inspector = deriveComponentInspectorControls(
+    registerComponent({
+      id: componentId,
+      manifest: contract as ComponentManifest,
+    }),
+  );
   return Object.freeze({
     id: componentId,
     displayName: optionalString(authoring?.displayName) ?? componentId,
     authoringCategory: optionalString(authoring?.category) ?? semanticCategory ?? "Other",
     semanticCategory,
     description: optionalString(contract.description),
+    inspector,
   });
 }
 
@@ -315,6 +329,9 @@ function projectLayerNode(
     capabilityId,
     displayName: metadata.displayName,
     conditional: Object.hasOwn(node, "when"),
+    props: Object.hasOwn(node, "props")
+      ? readObject(node.props, `${path}.props`)
+      : Object.freeze({}),
     behaviors: Object.freeze(behaviors),
     slots: projectSlots(node, path, componentsById, behaviorsById, depth),
   });

@@ -6,8 +6,9 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T04 extends the application-owned shell with Source-identity selection and App-owned overlay
-chrome outside the exact, read-only React adapter canvas.
+M09-T05 turns the selected Source component into a schema-derived primitive/enum Inspector while
+keeping every authoring control in the application-owned shell outside the exact React adapter
+canvas.
 The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
@@ -38,6 +39,14 @@ The current product surface contains:
   keyboard navigation, and immediate live selection status;
 - a compact pointer-inert selection card that is a DOM sibling outside the disabled managed
   capability fieldset and exposes no component geometry or private capability structure;
+- one App-owned Inspector whose labels, descriptions, requiredness, primitive types, enum options,
+  and current value states come from the exact validated Catalog schema and selected Source node;
+- native string, boolean, number, integer, and exact primitive-enum controls, with dynamic `$ref`
+  values and group/structured descriptors visible but deliberately locked;
+- public Editor Core set/delete commands followed by continuous Catalog validation, with no
+  partial Source returned for stale identity, invalid value, or failed validation;
+- Publisher preflight for every accepted edit and one atomic session-local `{document, preview}`
+  replacement, so a failed publication keeps both the prior Source and prior working preview;
 - explicit not-found states for unknown routes, projects, and surfaces; and
 - semantic landmarks, a skip link, visible keyboard focus, route-heading focus, reduced-motion
   support, and responsive layouts.
@@ -78,27 +87,38 @@ behavior runtime identities are excluded, and only a selected conditional Source
 an honest non-materialized state. Unknown, stale, cross-route, and forged same-route selections
 fail closed. Route replacement resets the route-owned selection synchronously.
 
+Inspector derivation uses the public Catalog SDK over the exact validator-admitted component
+manifest. An edit command is reduced to an exact own enumerable data snapshot before authority is
+checked; proxy-backed inputs are read through captured own data without invoking property getters,
+while accessor, extra-field, and symbol-bearing commands are rejected. Route, selection, node,
+capability, control, requiredness, current value kind, and primitive type are re-derived from the
+current immutable Source and Catalog before the public Editor Core command runs. The resulting
+Source must pass the public continuous validator and a public Publisher preflight before the App
+replaces the current document and preview together. An accepted revision replaces the Runtime
+session and disposes its predecessor.
+
 This slice does not expose component rectangles, hit testing, canvas picking, private DOM/native
-structure, prop/schema or slot-cardinality controls, drag, insert, reorder or otherwise mutate
-Source, persist project data, create user projects, execute interactive Design/Run behavior,
-navigate diagnostics, publish a revision, or activate a channel. Inspector controls belong to
-M09-T05, insertion/cardinality UI to M09-T07, and interactive Design/Run behavior to M09-T10.
+structure, nested-object or structured-JSON mutation controls, slot-cardinality controls, drag,
+insert, move, or reorder. It does not edit local state, bindings, events, or actions; persist project
+data; create user projects; execute interactive Design/Run behavior; navigate diagnostics; publish
+to the control plane; or activate a channel. Nested-object editing belongs to M09-T06, dynamic
+binding editing to M09-T08, insertion/cardinality UI to M09-T07, and interactive Design/Run
+behavior to M09-T10.
 
-The App imports only public package entry points for runtime composition and the exact static
-reference adapter registry. It does not import concrete Catalog components, private package files,
-`editor-core`, `catalog-sdk`, Publisher, or control-plane code. Bundle data never selects a
-module, component, fallback tree, or executable host binding.
+The App imports only public package entry points for Catalog derivation, Editor Core mutation and
+validation, Publisher preflight, runtime composition, and the exact static reference adapter
+registry. It does not import concrete Catalog components, private package files, editor internals,
+or control-plane code. Bundle data never selects a module, component, fallback tree, or executable
+host binding.
 
-The focused selection suite passes 27/27, the independent root proof passes 10/10, and App
-typecheck, lint, and production build pass locally. The exact 11,997-byte artifact is
-`docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json` at
-`sha256:9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1`. The live local CI
-authority contains 180 workloads and 85 proof pairs—74 ordinary and 11 barriers—with a
-52-proof-unit/114-workload connected closure and ownership over 1,164 tracked paths, including 170
-proof-owned paths. Sequence 43 passes 66/66 at
-`sha256:0bbb101332d7af5dcf7260b6df6961837003571f67a6e3a69232e65e19cded58`, preserving sequence 42
-and every predecessor while producing 39 artifacts and 78 readers; structural CI passes 317/317
-locally. No required-gate or hosted-CI pass is claimed.
+The focused Inspector suite passes 41/41, the complete App suite passes 86/86, the independent root
+proof passes 10/10, and App typecheck, lint, and production build pass locally. The exact
+22,998-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json` at
+`sha256:473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b`. The live local CI
+authority registers 182 workloads and 86 proof pairs—75 ordinary and 11 barriers—with a
+53-proof-unit/116-workload connected closure and ownership over 1,175 tracked paths, including 172
+proof-owned paths. No required-gate or hosted-CI pass is claimed.
 
 ## Local commands
 
@@ -109,6 +129,7 @@ pnpm --filter @desen/app-web typecheck
 pnpm --filter @desen/app-web test:authoring
 pnpm --filter @desen/app-web test:canvas
 pnpm --filter @desen/app-web test:selection
+pnpm --filter @desen/app-web test:inspector
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

@@ -1,11 +1,19 @@
-import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
-import { REFERENCE_AUTHORING_MODEL } from "./authoring-data.js";
+import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
+
+import { prepareCatalogAuthoringModel } from "./authoring-data.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
+import {
+  applyAuthoringInspectorEdit,
+  prepareAuthoringInspectorModel,
+} from "./authoring-inspector.js";
 import {
   createAuthoringComponentSelection,
   isSameAuthoringComponentSelection,
 } from "./authoring-selection.js";
+import { InspectorPanel } from "./inspector-panel.js";
+import { prepareAuthoringPreviewBundle, REFERENCE_EDITOR_DOCUMENT } from "./authoring-preview.js";
 import {
   createDesenAppProjectPath,
   navigateDesenApp,
@@ -26,8 +34,13 @@ import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
 import type {
   AuthoringBehaviorLayer,
   AuthoringLayerNode,
+  CatalogAuthoringModel,
   CatalogComponentSummary,
 } from "./authoring-data.js";
+import type {
+  AuthoringInspectorEdit,
+  AuthoringInspectorEditResult,
+} from "./authoring-inspector.js";
 import type { AuthoringComponentSelection } from "./authoring-selection.js";
 import type { DesenAppRoute } from "./project-navigation.js";
 import type { DesenAppProjectSummary, DesenAppSurfaceSummary } from "./project-data.js";
@@ -397,11 +410,16 @@ function BehaviorNode({
 }
 
 function LayerTree({
+  model,
   onToggleSelection,
   selectedSourceNodeId,
   selectedSurface,
-}: Readonly<LayerSelectionProps & { readonly selectedSurface: DesenAppSurfaceSummary }>) {
-  const model = REFERENCE_AUTHORING_MODEL;
+}: Readonly<
+  LayerSelectionProps & {
+    readonly model: CatalogAuthoringModel;
+    readonly selectedSurface: DesenAppSurfaceSummary;
+  }
+>) {
   const surfaceTree = model.surfaces.find((surface) => surface.id === selectedSurface.id);
   if (surfaceTree === undefined) {
     return (
@@ -459,8 +477,7 @@ function groupComponents(
     .map(([category, items]) => [category, Object.freeze(items)] as const);
 }
 
-function ComponentLibrary() {
-  const model = REFERENCE_AUTHORING_MODEL;
+function ComponentLibrary({ model }: Readonly<{ readonly model: CatalogAuthoringModel }>) {
   const [query, setQuery] = useState("");
   const normalizedQuery = query.trim().toLocaleLowerCase("en-US");
   const components = model.components.filter((component) => {
@@ -539,12 +556,14 @@ function ComponentLibrary() {
 }
 
 function AuthoringPanel({
+  model,
   onToggleSelection,
   selection,
   selectedSourceNodeId,
   selectedSurface,
 }: Readonly<
   LayerSelectionProps & {
+    readonly model: CatalogAuthoringModel;
     readonly selection: AuthoringComponentSelection | null;
     readonly selectedSurface: DesenAppSurfaceSummary;
   }
@@ -623,6 +642,7 @@ function AuthoringPanel({
         tabIndex={activeTab === "layers" ? 0 : -1}
       >
         <LayerTree
+          model={model}
           onToggleSelection={onToggleSelection}
           selectedSourceNodeId={selectedSourceNodeId}
           selectedSurface={selectedSurface}
@@ -636,11 +656,11 @@ function AuthoringPanel({
         role="tabpanel"
         tabIndex={activeTab === "components" ? 0 : -1}
       >
-        <ComponentLibrary />
+        <ComponentLibrary model={model} />
       </div>
       <p aria-live="polite" className={styles.authoringBoundary}>
         {selection === null
-          ? "Choose a Source layer to inspect its preview state."
+          ? "Choose a Source layer to inspect and edit its properties."
           : `Selected · ${selection.displayName}${selection.conditional ? " · Conditional" : ""}`}
       </p>
     </aside>
@@ -655,6 +675,28 @@ function SurfaceEditor({
   readonly selectedSurface: DesenAppSurfaceSummary;
 }>) {
   const [selection, setSelection] = useState<AuthoringComponentSelection | null>(null);
+  const [authoringSession, setAuthoringSession] = useState(() =>
+    Object.freeze({
+      document: REFERENCE_EDITOR_DOCUMENT,
+      preview: prepareAuthoringPreviewBundle(REFERENCE_EDITOR_DOCUMENT),
+    }),
+  );
+  const { document, preview } = authoringSession;
+  const route = useMemo(
+    () => Object.freeze({ projectId: project.id, surfaceId: selectedSurface.id }),
+    [project.id, selectedSurface.id],
+  );
+  const preparedModel = useMemo(
+    () => prepareCatalogAuthoringModel(referenceCatalog, document),
+    [document],
+  );
+  const inspector = useMemo(
+    () =>
+      preparedModel.ok
+        ? prepareAuthoringInspectorModel(preparedModel.model, route, selection)
+        : Object.freeze({ status: "rejected" as const }),
+    [preparedModel, route, selection],
+  );
 
   function toggleSelection(node: AuthoringLayerNode): void {
     const candidate = createAuthoringComponentSelection({
@@ -670,6 +712,34 @@ function SurfaceEditor({
     );
   }
 
+  function editSelectedProperty(edit: AuthoringInspectorEdit): AuthoringInspectorEditResult {
+    if (selection === null) return Object.freeze({ ok: false, reason: "selection-invalid" });
+    const result = applyAuthoringInspectorEdit(document, referenceCatalog, route, selection, edit);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    if (!nextPreview.ok) {
+      return Object.freeze({ ok: false, reason: "preview-unavailable" });
+    }
+    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    return result;
+  }
+
+  if (!preparedModel.ok) {
+    return (
+      <section className={styles.surfaceEditor} aria-labelledby="workspace-title">
+        <h1 className={styles.visuallyHidden} data-route-heading id="project-title" tabIndex={-1}>
+          {project.name}
+        </h1>
+        <div className={styles.panelEmptyState} role="alert">
+          <strong id="workspace-title">The session draft is unavailable.</strong>
+          <p>DESEN preserved the previous Source and stopped authoring safely.</p>
+        </div>
+      </section>
+    );
+  }
+
+  const model = preparedModel.model;
+
   return (
     <section className={styles.surfaceEditor} aria-labelledby="workspace-title">
       <h1 className={styles.visuallyHidden} data-route-heading id="project-title" tabIndex={-1}>
@@ -677,6 +747,7 @@ function SurfaceEditor({
       </h1>
 
       <AuthoringPanel
+        model={model}
         onToggleSelection={toggleSelection}
         selection={selection}
         selectedSourceNodeId={selection?.sourceNodeId ?? null}
@@ -694,6 +765,8 @@ function SurfaceEditor({
 
         <div className={styles.surfaceFrameBody}>
           <DesenAdapterCanvas
+            authoringModel={model}
+            bundle={preview.ok ? preview.bundle : null}
             projectId={project.id}
             selection={selection}
             surfaceId={selectedSurface.id}
@@ -703,17 +776,19 @@ function SurfaceEditor({
         <div className={styles.boundaryNote}>
           <strong>Preview data</strong>
           <span>
-            Exact Catalog metadata and sign-in Source structure are read only. Selection stays in
-            the editor and never enters the managed component tree. Editing, save, and publication
-            remain unavailable.
+            Catalog-backed property edits stay in this session and refresh the exact adapter
+            preview. Selection and Inspector chrome never enter the managed component tree. Save,
+            control-plane publication, and activation remain unavailable.
           </span>
         </div>
       </div>
 
+      <InspectorPanel inspector={inspector} onEdit={editSelectedProperty} />
+
       <div className={styles.editorStatus}>
         <span>{project.navigationStatus}</span>
         <span aria-hidden="true">·</span>
-        <span>{selectedSurface.detail}</span>
+        <span>{preview.ok ? "Session draft" : "Preview unavailable"}</span>
       </div>
     </section>
   );
@@ -855,7 +930,7 @@ function RouteView({ route }: Readonly<{ readonly route: DesenAppRoute }>) {
   return <ProjectShell project={project} selectedSurface={surface} />;
 }
 
-/** M09 Desen App shell with exact routes, authoring structure, and a read-only adapter canvas. */
+/** M09 Desen App shell with exact routes, schema-driven Source editing, and adapter preview. */
 export function DesenAppApplication() {
   const routeLocation = useSyncExternalStore(
     subscribeDesenAppNavigation,

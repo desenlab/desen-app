@@ -80,6 +80,11 @@ const DIRECT_PROOF_VERIFIER_PREREQUISITES = SAFE_OBJECT_FREEZE({
   "desen-app-selection-overlay": SAFE_OBJECT_FREEZE([
     "node scripts/verify-desen-app-real-adapter-canvas.mjs",
   ]),
+  "desen-app-schema-inspector": SAFE_OBJECT_FREEZE([
+    "node scripts/verify-desen-app-catalog-panel-layer-tree.mjs",
+    "node scripts/verify-desen-app-selection-overlay.mjs",
+    "node scripts/verify-publisher-official-golden.mjs",
+  ]),
 });
 const EXPECTED_CHECK_SUFFIX = SAFE_OBJECT_FREEZE([
   "pnpm lint",
@@ -109,11 +114,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "f0e4f63cbc05222ba64d407206d3c492586b3870f368c28f611af03d1f67e374";
+  "6246c4865e28a737e5990a7204dedaad6cae3e6c989a70a6cd496c84c29d0764";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "6460c20463ae01924f574a9c01e1515a1446b853bc9cc91205283ce90b715d42";
+  "de50c6186438de2dbd56083de01bc7f39f6492c1d02806a8fc239e6a4edc341d";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "b9047beffe348a9bd93d8d089b93b054298a17602e491be8b0c1f837d2930a1b";
+  "0dfd1eb4210839d739572a943f421026ca40aecc4f285832148f66d242f9970c";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -540,6 +545,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "desen-app-selection-overlay",
     "scripts/verify-desen-app-selection-overlay.mjs",
     "tests/desen-app-selection-overlay.test.mjs",
+  ],
+  [
+    "desen-app-schema-inspector",
+    "scripts/verify-desen-app-schema-inspector.mjs",
+    "tests/desen-app-schema-inspector.test.mjs",
   ],
 ]);
 
@@ -1500,7 +1510,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "190ed57daddb635c67ebccbb3ff1598398ddc0c909d8c4d6bfce8feae08351cb";
+  "d1c1e447dd567ab08e3238eb13fcd45823f2c8e832e6c81ddf201187413f0f71";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

@@ -54,6 +54,7 @@ const allowedApplicationDependencies = {
   "desen-app": [
     "protocol",
     "validator",
+    "publisher",
     "catalog-sdk",
     "runtime-core",
     "runtime-react",

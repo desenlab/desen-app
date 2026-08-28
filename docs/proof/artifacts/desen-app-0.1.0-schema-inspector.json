@@ -1,0 +1,627 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-schema-inspector",
+  "profile": "desen.app.schema-inspector-proof.v1",
+  "task": "M09-T05",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M09-T02",
+      "proofId": "desen-app-catalog-panel-layer-tree",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json",
+      "bytes": 25375,
+      "sha256": "85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61",
+      "profile": "desen.app.catalog-panel-layer-tree-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T04",
+      "proofId": "desen-app-selection-overlay",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json",
+      "bytes": 11997,
+      "sha256": "9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1",
+      "profile": "desen.app.selection-overlay-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M06-T10",
+      "proofId": "publisher-official-golden",
+      "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+      "bytes": 13179,
+      "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2",
+      "profile": "desen.publisher.official-golden-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "schemaDerivedPrimitiveAndEnumControls": true,
+    "controlKinds": [
+      "boolean",
+      "enum",
+      "integer",
+      "number",
+      "string"
+    ],
+    "publicEditorCoreAtomicMutation": true,
+    "exactOwnDataEditCommandCapture": true,
+    "hostileAccessorsSymbolsAndExtraFieldsRejected": true,
+    "continuousSchemaRevalidation": true,
+    "failedEditPreservesCurrentDocument": true,
+    "dynamicValuesLocked": true,
+    "structuredValuesLocked": true,
+    "staleRouteAndSelectionRejected": true,
+    "publisherSessionPreview": true,
+    "exactPreviewRevisionReplacement": true,
+    "sourceAndPreviewCommitAtomically": true,
+    "publisherFailurePreservesPriorSession": true,
+    "inspectorOutsideManagedCapabilitySubtree": true,
+    "selectionOverlayBoundaryRetained": true,
+    "persistenceClaimed": false,
+    "activationClaimed": false,
+    "browserE2eClaimed": false,
+    "p08Status": "NOT_PROVEN"
+  },
+  "authority": {
+    "schema": {
+      "catalog": {
+        "id": "run.desen.reference.sign-in",
+        "version": "0.1.0",
+        "target": "web-react"
+      },
+      "referenceControls": [
+        {
+          "componentId": "com.example.ui/Alert",
+          "controls": [
+            {
+              "property": "text",
+              "kind": "string",
+              "required": true
+            },
+            {
+              "property": "tone",
+              "kind": "enum",
+              "required": true,
+              "options": [
+                "info",
+                "success",
+                "warning",
+                "critical"
+              ]
+            }
+          ]
+        },
+        {
+          "componentId": "com.example.ui/Button",
+          "controls": [
+            {
+              "property": "disabled",
+              "kind": "boolean",
+              "required": false
+            },
+            {
+              "property": "label",
+              "kind": "string",
+              "required": true
+            },
+            {
+              "property": "loading",
+              "kind": "boolean",
+              "required": false
+            },
+            {
+              "property": "variant",
+              "kind": "enum",
+              "required": false,
+              "options": [
+                "primary",
+                "secondary",
+                "danger"
+              ]
+            }
+          ]
+        },
+        {
+          "componentId": "com.example.ui/Stack",
+          "controls": [
+            {
+              "property": "align",
+              "kind": "enum",
+              "required": false,
+              "options": [
+                "start",
+                "center",
+                "end",
+                "stretch"
+              ]
+            },
+            {
+              "property": "direction",
+              "kind": "enum",
+              "required": false,
+              "options": [
+                "vertical",
+                "horizontal"
+              ]
+            },
+            {
+              "property": "gap",
+              "kind": "enum",
+              "required": false,
+              "options": [
+                "none",
+                "xs",
+                "sm",
+                "md",
+                "lg",
+                "xl"
+              ]
+            },
+            {
+              "property": "maxWidth",
+              "kind": "number",
+              "required": false
+            }
+          ]
+        },
+        {
+          "componentId": "com.example.ui/Text",
+          "controls": [
+            {
+              "property": "role",
+              "kind": "enum",
+              "required": false,
+              "options": [
+                "body",
+                "heading",
+                "caption"
+              ]
+            },
+            {
+              "property": "text",
+              "kind": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "componentId": "com.example.ui/TextField",
+          "controls": [
+            {
+              "property": "disabled",
+              "kind": "boolean",
+              "required": false
+            },
+            {
+              "property": "invalid",
+              "kind": "boolean",
+              "required": false
+            },
+            {
+              "property": "label",
+              "kind": "string",
+              "required": true
+            },
+            {
+              "property": "placeholder",
+              "kind": "string",
+              "required": false
+            },
+            {
+              "property": "secure",
+              "kind": "boolean",
+              "required": false
+            },
+            {
+              "property": "value",
+              "kind": "string",
+              "required": true
+            }
+          ]
+        }
+      ],
+      "referenceKinds": [
+        "boolean",
+        "enum",
+        "number",
+        "string"
+      ],
+      "syntheticCoveredKinds": [
+        "integer",
+        "mixed-primitive-enum"
+      ],
+      "schemaAuthority": "component.propsSchema"
+    },
+    "source": {
+      "authoringData": {
+        "imports": {
+          "packageImports": [
+            "@desen/reference-catalog-web/catalog.json",
+            "@desen/catalog-sdk",
+            "@desen/validator",
+            "@desen/catalog-sdk"
+          ],
+          "privatePackageImports": 0
+        },
+        "publicCatalogSdkDerivation": true,
+        "exactValidatedCatalogAndSourceProjection": true,
+        "inspectorPlanFrozenWithComponentSummary": true
+      },
+      "inspector": {
+        "imports": {
+          "packageImports": [
+            "@desen/editor-core",
+            "@desen/catalog-sdk",
+            "@desen/editor-core"
+          ],
+          "privatePackageImports": 0
+        },
+        "editorCoreCalls": [
+          "deleteDesenEditorOwnerProp",
+          "setDesenEditorOwnerProp",
+          "createDesenEditorContinuousValidator"
+        ],
+        "editableKinds": [
+          "boolean",
+          "enum",
+          "integer",
+          "number",
+          "string"
+        ],
+        "exactJsonPrimitiveEnumIdentity": true,
+        "editCommandCapturedAsExactOwnEnumerableData": true,
+        "editAccessorsSymbolsAndUnknownFieldsRejected": true,
+        "proxyGetTrapNotRequired": true,
+        "dynamicAndStructuredLockPrecedesMutation": true,
+        "mutationUsesPublicEditorCoreOnly": true,
+        "completeDocumentRevalidatedAfterEveryMutation": true,
+        "noPartialDocumentOnFailure": true,
+        "routeAndSelectionReadmissionRequired": true
+      },
+      "preview": {
+        "imports": {
+          "packageImports": [
+            "@desen/editor-core",
+            "@desen/publisher",
+            "@desen/reference-catalog-web/catalog.json",
+            "@desen/editor-core",
+            "@desen/publisher"
+          ],
+          "privatePackageImports": 0
+        },
+        "sourceReadmittedBeforePublication": true,
+        "exactReferenceCatalogPackageCandidate": true,
+        "publicPublisherOnly": true,
+        "immutableBundleAndRevisionReturned": true,
+        "persistenceAuthority": false,
+        "activationAuthority": false
+      },
+      "selection": {
+        "imports": {
+          "packageImports": [
+            "@desen/runtime-react"
+          ],
+          "privatePackageImports": 0
+        },
+        "validatedModelMembershipRequired": true,
+        "routeIdentityRequired": true,
+        "runtimeAuthority": "callback-free diagnostic identity only"
+      },
+      "panel": {
+        "imports": {
+          "packageImports": [
+            "@desen/catalog-sdk"
+          ],
+          "privatePackageImports": 0
+        },
+        "owner": "Desen App",
+        "semanticContainer": "aside",
+        "primitiveControls": {
+          "enum": "select",
+          "boolean": "checkbox switch",
+          "string": "text input",
+          "number": "number input",
+          "integer": "number input step=1"
+        },
+        "dynamicInteractiveControls": 0,
+        "structuredInteractiveControls": 0,
+        "managedAdapterImports": 0
+      },
+      "adapter": {
+        "imports": {
+          "packageImports": [
+            "@desen/reference-catalog-web/catalog.json",
+            "@desen/reference-catalog-web/react-adapters",
+            "@desen/reference-catalog-web/tokens",
+            "@desen/runtime-core",
+            "@desen/runtime-react",
+            "@desen/runtime-core",
+            "@desen/runtime-react"
+          ],
+          "privatePackageImports": 0
+        },
+        "publisherBundleAcceptedAsOpaqueInput": true,
+        "revisionReplacementDisposesPreviousSession": true,
+        "selectionOverlayRemainsAppOwnedSibling": true,
+        "inspectorImports": 0
+      },
+      "application": {
+        "imports": {
+          "packageImports": [
+            "@desen/reference-catalog-web/catalog.json"
+          ],
+          "privatePackageImports": 0
+        },
+        "calls": [
+          "prepareAuthoringPreviewBundle",
+          "prepareAuthoringInspectorModel"
+        ],
+        "documentOwner": "route-keyed SurfaceEditor session state",
+        "modelAndPreviewRecomputedFromSameDocument": true,
+        "sourceAndPreviewCommitAtomically": true,
+        "publisherRejectionPreservesPriorSession": true,
+        "inspectorAndCanvasComposedByApp": true,
+        "inspectorInsideManagedSubtree": false,
+        "saveAuthority": false
+      },
+      "css": {
+        "appOwnedInspectorSelectors": true,
+        "managedDescendantSelectors": 0,
+        "responsiveThreePanelWorkspace": true
+      }
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+      "rootCommands": {
+        "generate:desen-app-schema-inspector": "node scripts/verify-desen-app-catalog-panel-layer-tree.mjs && node scripts/verify-desen-app-selection-overlay.mjs && node scripts/verify-publisher-official-golden.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:inspector && node scripts/generate-desen-app-schema-inspector-proof.mjs",
+        "verify:desen-app-schema-inspector": "node scripts/verify-desen-app-catalog-panel-layer-tree.mjs && node scripts/verify-desen-app-selection-overlay.mjs && node scripts/verify-publisher-official-golden.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:inspector && node scripts/verify-desen-app-schema-inspector.mjs",
+        "test:desen-app-schema-inspector": "node scripts/verify-desen-app-catalog-panel-layer-tree.mjs && node scripts/verify-desen-app-selection-overlay.mjs && node scripts/verify-publisher-official-golden.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:inspector && node --test tests/desen-app-schema-inspector.test.mjs"
+      },
+      "directParentVerifiers": [
+        "node scripts/verify-desen-app-catalog-panel-layer-tree.mjs",
+        "node scripts/verify-desen-app-selection-overlay.mjs",
+        "node scripts/verify-publisher-official-golden.mjs"
+      ]
+    },
+    "mutationFlow": [
+      "validated Catalog/Source projection",
+      "route-valid Source selection",
+      "schema-derived control admission",
+      "public Editor Core atomic command",
+      "continuous complete-Source validation",
+      "Publisher session-local Bundle",
+      "exact adapter session replacement"
+    ],
+    "ownership": {
+      "inspector": "Desen App sibling chrome",
+      "selectionOverlay": "Desen App sibling chrome retained from M09-T04",
+      "managedCapabilitySubtree": "Runtime React adapters only"
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/app-web test:inspector && node --test tests/desen-app-schema-inspector.test.mjs",
+    "retained": {
+      "apps/desen-app/test/authoring-inspector.test.ts": [
+        "derives the exact canonical primitive and enum matrix for every reference component",
+        "distinguishes literal, absent, and dynamic Source values without coercion",
+        "sets string, enum, boolean, and number props through fresh immutable Source snapshots",
+        "deletes only an existing optional prop and rejects absent or required deletion atomically",
+        "rejects invalid enum and numeric values without mutating the current Source",
+        "keeps dynamic props outside T05 mutation authority and preserves their exact objects",
+        "captures exact own-data edit fields before authorization and rejects accessor drift",
+        "rejects stale routes and forged selection identity before exposing or applying controls",
+        "preserves integer and mixed primitive enum values with exact JSON types",
+        "keeps dynamic object values bound instead of presenting the structured fallback"
+      ],
+      "apps/desen-app/test/authoring-preview.test.ts": [
+        "admits the official-derived Source as the frozen direct reference editor document",
+        "reproduces the exact session-local baseline Bundle and official revision",
+        "publishes a valid primitive prop edit as a fresh exact Bundle revision",
+        "rejects a runtime-cast non-Source without throwing or exposing a partial Bundle",
+        "rejects a structurally valid but Catalog-invalid prop edit without a partial Bundle"
+      ],
+      "apps/desen-app/test/adapter-canvas.test.tsx": [
+        "replaces the exact session when a current authoring draft Bundle is rerendered"
+      ],
+      "apps/desen-app/test/application.test.tsx": [
+        "edits schema-derived string and enum props and refreshes the exact adapter preview",
+        "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
+        "keeps bound props locked while boolean and numeric edits fail or apply atomically",
+        "resets local drafts across Source identities and qualifies repeated edit actions"
+      ]
+    },
+    "rootTestNames": [
+      "[authority] authenticates exact frozen Catalog, selection-overlay, and Publisher parents",
+      "[schema] derives the exact primitive and enum control surface from Catalog schemas",
+      "[mutation] proves public Editor Core atomic edits and continuous schema revalidation",
+      "[safety] locks dynamic and structured values and rejects stale routes and selections",
+      "[preview] proves Publisher-backed immutable session preview replacement",
+      "[ownership] keeps Inspector and selection overlay outside managed capability subtrees",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[policy] rejects weakened schema, mutation, validation, preview, and ownership sources",
+      "[verification] rejects parent, committed artifact, and visible proof-pin drift",
+      "[filesystem] writes atomically and rejects non-regular proof authorities"
+    ],
+    "hostileMutationClasses": [
+      "MANUAL_CONTROL_PLAN",
+      "PRIVATE_EDITOR_IMPORT",
+      "DIRECT_SOURCE_MUTATION",
+      "VALIDATION_BYPASS",
+      "DYNAMIC_VALUE_OVERWRITE",
+      "STRUCTURED_VALUE_OVERWRITE",
+      "STALE_ROUTE_OR_SELECTION",
+      "PUBLISHER_BYPASS",
+      "PARTIAL_PREVIEW_BUNDLE",
+      "INSPECTOR_IN_MANAGED_SUBTREE",
+      "SESSION_WITHOUT_DISPOSAL"
+    ]
+  },
+  "boundary": {
+    "trackedFiles": 27,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 1561,
+        "sha256": "f7baaaf1f6c8eed726561ef2dd8165bad125bbfc9d50f63e2bac274cf06a6ddb"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 10920,
+        "sha256": "a678302fd2931172d32f6509dc37018a294bc938ccca73df646a715516a6db38"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 39077,
+        "sha256": "8a3c2f832cd532d263b29ff1da39fc0a89a54cc51a4333dc47b6de02473e67ac"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 33727,
+        "sha256": "e030bbad64e1909a2f3237de3d820f13af730439c0f94e289553782b990dcab0"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 14497,
+        "sha256": "e55163afbc6b39ab42318a6d48b3ca76de93cd006df0a585397990ed62fc3bad"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-inspector.ts",
+        "bytes": 13984,
+        "sha256": "e461c9935574c9c89e0bd5462da21c2f4b16dd4f2c4a4db35fd504be99e0f3e7"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-preview.ts",
+        "bytes": 3704,
+        "sha256": "75fa2d605f8c5ceebc2668c1f4c739155c7791b895132dc9a5fac183384e3d34"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-selection.ts",
+        "bytes": 6147,
+        "sha256": "e97eed87734fff6fdc3a40dbc81754a88318238090e4c1dfcc53062e8ff7fc7c"
+      },
+      {
+        "path": "apps/desen-app/src/inspector-panel.tsx",
+        "bytes": 14500,
+        "sha256": "c1ea515440052e41273c78b3f1d5289aec9f50987cd0ee8169116aa0a7cf5c2c"
+      },
+      {
+        "path": "apps/desen-app/src/styles.css",
+        "bytes": 1734,
+        "sha256": "4cffb8e77e10402919b942834020f19b330fe34cd06654ed7ff5b2b9c68d9e35"
+      },
+      {
+        "path": "apps/desen-app/test/adapter-canvas.test.tsx",
+        "bytes": 11338,
+        "sha256": "6f09674b0f0dd22bdc61e158c8567df4fdbdbe3ca3d96710b54f5e9138ce8de0"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 28158,
+        "sha256": "ba33f7017f717f3bc79cde9592dcbcfb83f60485223d1d4d0d351430c2583f19"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-inspector.test.ts",
+        "bytes": 23684,
+        "sha256": "4eb2f7d50b83a63dbe8c9f9984a8b1dc115b44069c27524105e3e21f50dcce66"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-preview.test.ts",
+        "bytes": 4001,
+        "sha256": "1e514ec48f41d6e565197595d1bd4cbbbacf42b50d960cb7f28b4ad27b4510dc"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json",
+        "bytes": 25375,
+        "sha256": "85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json",
+        "bytes": 11997,
+        "sha256": "9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1"
+      },
+      {
+        "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+        "bytes": 13179,
+        "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+      },
+      {
+        "path": "examples/sign-in/official-derived.bundle.desen.json",
+        "bytes": 4899,
+        "sha256": "334450fa1864bf280a30342090a46ba1d2f2dc96552b9430afdde5fcada902b0"
+      },
+      {
+        "path": "examples/sign-in/official-derived.source.desen.json",
+        "bytes": 4724,
+        "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+      },
+      {
+        "path": "package.json",
+        "bytes": 86584,
+        "sha256": "23adae58a839740a9f52e538812d37b55d2f50de9d0cd1025f0619c3317f8078"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129292,
+        "sha256": "cf6429426dfbc9f3bf4641ab7400d99beb541bd222771b3d7a24cf9005fa840c"
+      },
+      {
+        "path": "scripts/generate-desen-app-schema-inspector-proof.mjs",
+        "bytes": 781,
+        "sha256": "52b68f24502c0adef0405f2a23c524dd06fb3003f2f18b25a743561b765648db"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-schema-inspector-proof.mjs",
+        "bytes": 51508,
+        "sha256": "e675dac3face232a48dd2fc0cbe64a47c2453bd51e3ca7269a9ec3379f3d421b"
+      },
+      {
+        "path": "scripts/verify-desen-app-schema-inspector.mjs",
+        "bytes": 651,
+        "sha256": "d301a00dc848c67f6fc0a15c1ff234b49a6325ec1dc8237da817e7811eec946c"
+      },
+      {
+        "path": "tests/desen-app-schema-inspector.test.mjs",
+        "bytes": 13578,
+        "sha256": "193ce0247f3c9f14fe612643a351e4ef4fff906d059d981cec62c83828b95ca2"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-schema-inspector-proof.mjs",
+      "scripts/generate-desen-app-schema-inspector-proof.mjs",
+      "scripts/verify-desen-app-schema-inspector.mjs",
+      "tests/desen-app-schema-inspector.test.mjs"
+    ],
+    "parentArtifacts": 3,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M09-T06 is NOT_PROVEN: no nested-object editor or structured-JSON mutation UI is claimed.",
+    "M09-T08 is NOT_PROVEN: dynamic state and binding values remain locked.",
+    "M09-T10 is NOT_PROVEN: no Design/Run mode is claimed.",
+    "M09-T12 is NOT_PROVEN: no save/open or durable persistence UI is claimed.",
+    "M09-T14 is NOT_PROVEN: session preview is not control-plane publication or activation.",
+    "P-08 remains NOT_PROVEN until the complete visual authoring scope and browser E2E owner pass.",
+    "No private DOM, component geometry, hit testing, canvas picking, or managed-tree inspection is claimed.",
+    "No required-gate or hosted-CI pass is inferred from local evidence."
+  ]
+}

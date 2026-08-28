@@ -20,7 +20,14 @@ const SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
 const ADAPTER_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const APPLICATION_CSS_PATH = "apps/desen-app/src/application.module.css";
+const AUTHORING_DATA_PATH = "apps/desen-app/src/authoring-data.ts";
+const INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
+const PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
+const PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
+const GLOBAL_CSS_PATH = "apps/desen-app/src/styles.css";
 const SELECTION_TEST_PATH = "apps/desen-app/test/authoring-selection.test.ts";
+const INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.test.ts";
+const PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
 const ADAPTER_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
@@ -49,11 +56,51 @@ const TRACKED_PATHS = Object.freeze([
   ...PROOF_READER_PATHS,
 ]);
 
+const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  ADAPTER_SOURCE_PATH,
+  APPLICATION_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+  ADAPTER_TEST_PATH,
+  APPLICATION_TEST_PATH,
+  "scripts/lib/desen-app-selection-overlay-proof.mjs",
+  "tests/desen-app-selection-overlay.test.mjs",
+]);
+
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...new Set([
+    ...TRACKED_PATHS,
+    AUTHORING_DATA_PATH,
+    INSPECTOR_SOURCE_PATH,
+    PREVIEW_SOURCE_PATH,
+    PANEL_SOURCE_PATH,
+    GLOBAL_CSS_PATH,
+    INSPECTOR_TEST_PATH,
+    PREVIEW_TEST_PATH,
+    "pnpm-lock.yaml",
+  ]),
+]);
+
+const RETAINED_HISTORICAL_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
+);
+
+const SELF_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-selection-overlay-proof.mjs",
+  "tests/desen-app-selection-overlay.test.mjs",
+]);
+
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 11_997,
+  sha256: "9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1",
+});
+
 const EXPECTED_SOURCE_SHA256 = Object.freeze({
   [SELECTION_SOURCE_PATH]: "e97eed87734fff6fdc3a40dbc81754a88318238090e4c1dfcc53062e8ff7fc7c",
-  [ADAPTER_SOURCE_PATH]: "e9f46d9965741066bf43329af2fcba8f7296740862eea3513fc792693d8cbd06",
-  [APPLICATION_SOURCE_PATH]: "df13d30eb9ec58477c0c24ee0202ed66cc24aaf10e43e6031f62ba7690efa014",
-  [APPLICATION_CSS_PATH]: "995a9cb596628114a4488d7bbc9aac204433b3ac391b638acfd0bcce8667b1bc",
+  [ADAPTER_SOURCE_PATH]: "a678302fd2931172d32f6509dc37018a294bc938ccca73df646a715516a6db38",
+  [APPLICATION_SOURCE_PATH]: "e030bbad64e1909a2f3237de3d820f13af730439c0f94e289553782b990dcab0",
+  [APPLICATION_CSS_PATH]: "8a3c2f832cd532d263b29ff1da39fc0a89a54cc51a4333dc47b6de02473e67ac",
 });
 
 const PRIVATE_DOM_PROPERTIES = Object.freeze([
@@ -168,10 +215,6 @@ function deepFreeze(value) {
   return value;
 }
 
-function canonicalArtifactBytes(artifact) {
-  return Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`);
-}
-
 function exactOwnDataOptions(value, allowedKeys, label) {
   if (value === undefined) return Object.freeze(Object.create(null));
   if (
@@ -221,12 +264,16 @@ function captureBytes(value, label) {
 
 function captureOverrides(value) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+  if (
+    !(value instanceof Map) ||
+    utilTypes.isProxy(value) ||
+    value.size > CURRENT_COMPATIBILITY_PATHS.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
   for (const [relativePath, bytes] of value) {
-    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+    if (!CURRENT_COMPATIBILITY_PATHS.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
@@ -294,13 +341,17 @@ async function readRegularAuthority(absolutePath, label) {
 
 async function readTrackedFiles(workspaceRoot, overrides) {
   const output = new Map();
-  for (const relativePath of TRACKED_PATHS) {
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
     const overridden = overrides.get(relativePath);
-    output.set(
-      relativePath,
-      overridden ??
-        (await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath)),
-    );
+    const live = await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath);
+    if (
+      overridden !== undefined &&
+      SELF_RESEALED_PATHS.includes(relativePath) &&
+      !isDeepStrictEqual(overridden, live)
+    ) {
+      fail("BOUNDARY_DRIFT", `${relativePath} cannot be substituted by a caller.`);
+    }
+    output.set(relativePath, overridden ?? live);
   }
   return output;
 }
@@ -702,8 +753,11 @@ function inspectApplicationSource(rawSource) {
   const stateCalls = collectDescendants(surfaceBody, ts.isCallExpression).filter(
     (call) => ts.isIdentifier(call.expression) && call.expression.text === "useState",
   );
-  if (stateCalls.length !== 1) {
-    fail("SOURCE_POLICY_VIOLATION", "SurfaceEditor must own one route-local selection state.");
+  if (stateCalls.length !== 2) {
+    fail(
+      "SOURCE_POLICY_VIOLATION",
+      "SurfaceEditor must own route-local selection and authoring-session state.",
+    );
   }
   const projectShell = exactFunction(sourceFile, "ProjectShell");
   const projectBody = functionBody(projectShell);
@@ -727,7 +781,7 @@ function inspectApplicationSource(rawSource) {
   return deepFreeze({
     nativeLayerButton: true,
     buttonAttributes: buttonAttributes.sort(),
-    singleRouteLocalSelectionState: true,
+    routeLocalSelectionAndAuthoringSessionState: true,
     routeKeyReset: true,
     validatedAuthoringNodeMinting: true,
     privateInspection,
@@ -861,6 +915,16 @@ function inspectPackages(files) {
   if (app.scripts?.["test:selection"] !== appCommand) {
     fail("PACKAGE_POLICY_VIOLATION", "The exact App selection test command drifted.");
   }
+  const inspectorCommand =
+    "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx";
+  if (
+    app.scripts?.["test:inspector"] !== inspectorCommand ||
+    ["@desen/catalog-sdk", "@desen/editor-core", "@desen/publisher"].some(
+      (dependency) => app.dependencies?.[dependency] !== "workspace:*",
+    )
+  ) {
+    fail("PACKAGE_POLICY_VIOLATION", "The exact T05 App dependency or test contract drifted.");
+  }
   const expectedRootCommands = {
     "generate:desen-app-selection-overlay":
       "node scripts/verify-desen-app-real-adapter-canvas.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:selection && node scripts/generate-desen-app-selection-overlay-proof.mjs",
@@ -877,6 +941,7 @@ function inspectPackages(files) {
   return deepFreeze({
     appName: app.name,
     appTestCommand: appCommand,
+    inspectorTestCommand: inspectorCommand,
     rootCommands: expectedRootCommands,
     directParentVerifier: "node scripts/verify-desen-app-real-adapter-canvas.mjs",
   });
@@ -903,6 +968,141 @@ function authenticateParent(bytes) {
   return DESEN_APP_SELECTION_OVERLAY_PARENT_PIN;
 }
 
+async function authenticateFrozenArtifact(workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    "frozen M09-T04 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T04 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(artifactBytes, "frozen M09-T04 proof artifact");
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-selection-overlay" ||
+    artifact?.profile !== "desen.app.selection-overlay-proof.v1" ||
+    artifact?.task !== "M09-T04" ||
+    artifact?.result !== "PASS" ||
+    artifact?.claim?.taskStatus !== "DONE" ||
+    artifact?.claim?.stableSourceIdentitySelection !== true ||
+    artifact?.claim?.selectionChromeOutsideManagedCapabilitySubtree !== true ||
+    artifact?.claim?.privateDomAndReactAuthoringRejected !== true ||
+    artifact?.claim?.n042Status !== "TESTED" ||
+    artifact?.boundary?.trackedFiles !== TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== TRACKED_PATHS.length ||
+    !isDeepStrictEqual(
+      trackedReceipts.map((candidate) => candidate?.path).sort(),
+      [...TRACKED_PATHS].sort(),
+    ) ||
+    trackedReceipts.some(
+      (candidate) =>
+        candidate === null ||
+        typeof candidate !== "object" ||
+        !Number.isSafeInteger(candidate.bytes) ||
+        candidate.bytes < 0 ||
+        typeof candidate.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(candidate.sha256),
+    ) ||
+    !isDeepStrictEqual(artifact?.tests?.rootTestNames, DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES)
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T04 artifact identity or retained claims drifted.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedHistoricalReceipts(frozenArtifact, files) {
+  const taskTimeReceipts = new Map(
+    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    const authority = taskTimeReceipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M09-T04 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
+}
+
+function inspectSchemaInspectorSuccessor(files) {
+  const authoring = decodeUtf8(files.get(AUTHORING_DATA_PATH), AUTHORING_DATA_PATH);
+  const inspector = decodeUtf8(files.get(INSPECTOR_SOURCE_PATH), INSPECTOR_SOURCE_PATH);
+  const preview = decodeUtf8(files.get(PREVIEW_SOURCE_PATH), PREVIEW_SOURCE_PATH);
+  const panel = decodeUtf8(files.get(PANEL_SOURCE_PATH), PANEL_SOURCE_PATH);
+  const adapter = decodeUtf8(files.get(ADAPTER_SOURCE_PATH), ADAPTER_SOURCE_PATH);
+  const application = decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH);
+  const inspectorTests = decodeUtf8(files.get(INSPECTOR_TEST_PATH), INSPECTOR_TEST_PATH);
+  const previewTests = decodeUtf8(files.get(PREVIEW_TEST_PATH), PREVIEW_TEST_PATH);
+
+  for (const [source, relativePath, markers] of [
+    [
+      authoring,
+      AUTHORING_DATA_PATH,
+      ["deriveComponentInspectorControls", "ComponentInspectorControlPlan"],
+    ],
+    [
+      inspector,
+      INSPECTOR_SOURCE_PATH,
+      [
+        "createDesenEditorContinuousValidator",
+        "deleteDesenEditorOwnerProp",
+        "setDesenEditorOwnerProp",
+        "captureInspectorEdit",
+        'field.value.kind === "dynamic"',
+        'field.value.kind === "structured"',
+        'reason: "control-unavailable"',
+      ],
+    ],
+    [preview, PREVIEW_SOURCE_PATH, ["createDesenEditorDocument", "publishDesenSource"]],
+    [panel, PANEL_SOURCE_PATH, ['aria-label="Inspector"', "AuthoringInspectorEdit"]],
+  ]) {
+    for (const marker of markers) {
+      if (!source.includes(marker)) {
+        fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} lost the T05 marker ${marker}.`);
+      }
+    }
+  }
+  if (
+    adapter.includes("InspectorPanel") ||
+    !adapter.includes("bundle = officialDerivedSignInBundle") ||
+    !adapter.includes("state.previewRevision !== previewRevision") ||
+    !application.includes("prepareAuthoringInspectorModel") ||
+    !application.includes("applyAuthoringInspectorEdit") ||
+    !application.includes("prepareAuthoringPreviewBundle") ||
+    !application.includes(
+      "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
+    ) ||
+    application.indexOf("<InspectorPanel") <= application.indexOf("<DesenAdapterCanvas") ||
+    !inspectorTests.includes("keeps dynamic props outside T05 mutation authority") ||
+    !previewTests.includes("publishes a valid primitive prop edit as a fresh exact Bundle revision")
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The live M09-T05 inspector or preview boundary drifted.");
+  }
+  return deepFreeze({
+    task: "M09-T05",
+    schemaDerivedPrimitiveAndEnumControls: true,
+    publicEditorCoreAtomicMutation: true,
+    dynamicAndStructuredValuesLocked: true,
+    publisherBackedSessionPreview: true,
+    sourceAndPreviewCommitAtomically: true,
+    inspectorOutsideManagedCapabilitySubtree: true,
+    selectionOverlayBoundaryRetained: true,
+  });
+}
+
 function receipts(files) {
   return [...files.entries()]
     .sort(([left], [right]) => left.localeCompare(right, "en-US"))
@@ -911,11 +1111,14 @@ function receipts(files) {
     );
 }
 
-/** Builds detached deterministic M09-T04 selection-overlay evidence. */
+/** Authenticates frozen M09-T04 evidence and checks its live additive M09-T05 successor. */
 export async function buildDesenAppSelectionOverlayEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
-  const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const [frozen, files] = await Promise.all([
+    authenticateFrozenArtifact(workspaceRoot),
+    readTrackedFiles(workspaceRoot, options.fileOverrides),
+  ]);
   const parentBytes = options.parentArtifactBytes ?? files.get(PARENT_ARTIFACT_PATH);
   const parent = authenticateParent(parentBytes);
   const source = verifyDesenAppSelectionOverlaySourcePolicy({
@@ -926,33 +1129,35 @@ export async function buildDesenAppSelectionOverlayEvidence(rawOptions = undefin
   });
   const tests = inspectTests(files);
   const packageContract = inspectPackages(files);
-  const trackedReceipts = receipts(files);
-  const artifact = deepFreeze({
+  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-selection-overlay",
     profile: "desen.app.selection-overlay-proof.v1",
     task: "M09-T04",
-    protocol: "0.1.0",
-    target: "web-react",
+    result: "PASS",
     prerequisites: [parent],
-    claim: {
-      taskStatus: "DONE",
-      stableSourceIdentitySelection: true,
-      validatedAuthoringModelMembershipRequired: true,
-      publicDiagnosticIndexOnly: true,
-      repeatedRuntimeInstancesPreserved: true,
-      behaviorRuntimeIdentitiesExcludedFromComponentSelection: true,
-      conditionalAbsenceRepresentedHonestly: true,
-      unknownAndStaleIdentityRejected: true,
-      selectionChromeOutsideManagedCapabilitySubtree: true,
-      privateDomAndReactAuthoringRejected: true,
-      componentGeometryClaimed: false,
-      managedAdapterPathRetained: true,
-      routeResetSynchronous: true,
-      n042Status: "TESTED",
-      p06Status: "PROVEN",
-      p07Status: "PARTIAL",
-      p16Status: "PARTIAL",
+    retainedClaim: {
+      taskStatus: frozen.artifact.claim.taskStatus,
+      stableSourceIdentitySelection: frozen.artifact.claim.stableSourceIdentitySelection,
+      validatedAuthoringModelMembershipRequired:
+        frozen.artifact.claim.validatedAuthoringModelMembershipRequired,
+      publicDiagnosticIndexOnly: frozen.artifact.claim.publicDiagnosticIndexOnly,
+      repeatedRuntimeInstancesPreserved: frozen.artifact.claim.repeatedRuntimeInstancesPreserved,
+      behaviorRuntimeIdentitiesExcludedFromComponentSelection:
+        frozen.artifact.claim.behaviorRuntimeIdentitiesExcludedFromComponentSelection,
+      conditionalAbsenceRepresentedHonestly:
+        frozen.artifact.claim.conditionalAbsenceRepresentedHonestly,
+      unknownAndStaleIdentityRejected: frozen.artifact.claim.unknownAndStaleIdentityRejected,
+      selectionChromeOutsideManagedCapabilitySubtree:
+        frozen.artifact.claim.selectionChromeOutsideManagedCapabilitySubtree,
+      privateDomAndReactAuthoringRejected:
+        frozen.artifact.claim.privateDomAndReactAuthoringRejected,
+      componentGeometryClaimed: frozen.artifact.claim.componentGeometryClaimed,
+      managedAdapterPathRetained: frozen.artifact.claim.managedAdapterPathRetained,
+      routeResetSynchronous: frozen.artifact.claim.routeResetSynchronous,
+      n042Status: frozen.artifact.claim.n042Status,
+      p06Status: frozen.artifact.claim.p06Status,
     },
     authority: { source },
     application: {
@@ -981,24 +1186,31 @@ export async function buildDesenAppSelectionOverlayEvidence(rawOptions = undefin
     },
     tests,
     boundary: {
-      trackedFiles: TRACKED_PATHS.length,
-      trackedReceipts,
-      proofReaderPaths: PROOF_READER_PATHS,
-      parentArtifacts: 1,
-      immutableInputs: true,
-      sourceSymlinksRejected: true,
+      retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
+      successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
+      currentPathReceipts: receipts(files),
+      additiveSuccessorReceipts: [
+        AUTHORING_DATA_PATH,
+        INSPECTOR_SOURCE_PATH,
+        PREVIEW_SOURCE_PATH,
+        PANEL_SOURCE_PATH,
+        GLOBAL_CSS_PATH,
+        INSPECTOR_TEST_PATH,
+        PREVIEW_TEST_PATH,
+      ].map((relativePath) => ({
+        path: relativePath,
+        bytes: files.get(relativePath).byteLength,
+        sha256: sha256(files.get(relativePath)),
+      })),
     },
-    result: "PASS",
-    nonclaims: [
-      "No per-component rectangle, hit testing, canvas picking, geometry, or private DOM/native structure is exposed.",
-      "No inspector, Source mutation, insertion, move, reorder, cardinality, drag/drop, binding, event, or action authoring.",
-      "No Design/Run switch, diagnostics navigation, invalid placeholders, persistence, publication, or activation.",
-      "P-07 and P-16 remain PARTIAL; browser E2E and end-to-end diagnostic selection remain later tasks.",
-      "N-042 is TESTED only for this exact controlled Web-React profile, not arbitrary future or native adapters.",
-    ],
+    successor: inspectSchemaInspectorSuccessor(files),
   });
-  const artifactBytes = canonicalArtifactBytes(artifact);
-  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  return deepFreeze({
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+  });
 }
 
 function verifyProofDocument(bytes, artifactSha256) {

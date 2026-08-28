@@ -3,6 +3,9 @@ import { StrictMode } from "react";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { setDesenEditorOwnerProp } from "@desen/editor-core";
+import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
+
 import type * as RuntimeCore from "@desen/runtime-core";
 
 const lifecycle = vi.hoisted(() => ({
@@ -32,6 +35,11 @@ vi.mock("@desen/runtime-core", async (importOriginal) => {
 });
 
 import { DesenAdapterCanvas } from "../src/adapter-canvas.js";
+import { prepareCatalogAuthoringModel } from "../src/authoring-data.js";
+import {
+  prepareAuthoringPreviewBundle,
+  REFERENCE_EDITOR_DOCUMENT,
+} from "../src/authoring-preview.js";
 import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
 
 function componentSelection(
@@ -114,6 +122,73 @@ describe("Desen App exact React adapter canvas", () => {
     await waitFor(() => {
       expect(lifecycle.disposed).toEqual([firstSession]);
     });
+  });
+
+  it("replaces the exact session when a current authoring draft Bundle is rerendered", async () => {
+    const baselinePreview = prepareAuthoringPreviewBundle(REFERENCE_EDITOR_DOCUMENT);
+    expect(baselinePreview.ok).toBe(true);
+    if (!baselinePreview.ok) throw new Error("Expected the reference preview Bundle.");
+
+    const selection = componentSelection("sign-in.title", "com.example.ui/Text", "Text");
+    const view = render(
+      <DesenAdapterCanvas
+        bundle={baselinePreview.bundle}
+        projectId="account-app"
+        selection={selection}
+        surfaceId="sign-in"
+      />,
+    );
+
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+    const firstSession = lifecycle.mounted[0];
+    expect(firstSession).toBeDefined();
+
+    const edited = setDesenEditorOwnerProp(REFERENCE_EDITOR_DOCUMENT, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.title",
+      name: "text",
+      value: "Welcome back",
+    });
+    expect(edited.ok).toBe(true);
+    if (!edited.ok) throw new Error("Expected a valid title prop mutation.");
+
+    const currentAuthoring = prepareCatalogAuthoringModel(referenceCatalog, edited.document);
+    expect(currentAuthoring.ok).toBe(true);
+    if (!currentAuthoring.ok) throw new Error("Expected the current authoring model.");
+
+    const currentPreview = prepareAuthoringPreviewBundle(edited.document);
+    expect(currentPreview.ok).toBe(true);
+    if (!currentPreview.ok) throw new Error("Expected the current preview Bundle.");
+
+    view.rerender(
+      <DesenAdapterCanvas
+        authoringModel={currentAuthoring.model}
+        bundle={currentPreview.bundle}
+        projectId="account-app"
+        selection={selection}
+        surfaceId="sign-in"
+      />,
+    );
+
+    expect(screen.queryByRole("heading", { name: "Sign in" })).toBeNull();
+    const canvas = await screen.findByRole("group", { name: "Sign-in adapter canvas" });
+    expect(within(canvas).getByRole("heading", { level: 2, name: "Welcome back" })).toBeTruthy();
+    await waitFor(() => {
+      expect(lifecycle.mounted).toHaveLength(2);
+      expect(lifecycle.disposed).toEqual([firstSession]);
+    });
+
+    const overlay = screen.getByRole("status", { name: "Selected layer preview" });
+    const managedSubtree = canvas.querySelector("[data-managed-capability-subtree='true']");
+    expect(overlay.textContent).toContain("Text");
+    expect(overlay.textContent).toContain("sign-in.title");
+    expect(overlay.textContent).toContain("Visible in preview");
+    expect(canvas.parentElement).toBe(overlay.parentElement);
+    expect(canvas.contains(overlay)).toBe(false);
+    expect(overlay.contains(canvas)).toBe(false);
+    expect(managedSubtree).toBeTruthy();
+    expect(managedSubtree?.contains(overlay)).toBe(false);
+    expect((canvas as HTMLFieldSetElement).disabled).toBe(true);
   });
 
   it("balances StrictMode replay and final unmount with exact session disposal", async () => {
