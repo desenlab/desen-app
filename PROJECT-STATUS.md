@@ -1161,17 +1161,23 @@ dynamic `$` editing remains M09-T08, and M09-T07 is next.
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Active operational task: CI-02 is `IN_PROGRESS` with local evidence only. The exact bounded
-  baseline passes; focused CI-02 contract tests pass 2/2; the complete legacy CI contract file
-  passes 28/28. The 45-checkpoint/41-artifact/82-reader authority, infrastructure-debt verifier,
-  and I07-04 promotion verifier remain passing. One earlier attempt observed this host intermittently deny
-  the unchanged process-group probe `process.kill(-pid, 0)` with `EPERM`; it passed on the final
-  rerun. Local evidence is provisional and non-completing. CI-02 remains `IN_PROGRESS` until the
-  hosted `Quality gate` passes on the exact current pull-request head. This local CI-02 candidate
-  claims no hosted result, adds no local affected selector, changes no hosted dispatcher/workflow,
-  and leaves I07-05 plus the manual legacy rollback path unchanged.
+- Conditional operational completion: CI-02's `DONE` entry in this unmerged change is a closure
+  candidate; it is not yet canonical. The exact bounded baseline passes; focused CI-02 contract
+  tests pass 2/2; the complete legacy CI contract file passes 28/28. The
+  45-checkpoint/41-artifact/82-reader authority, infrastructure-debt verifier, and I07-04 promotion
+  verifier remain passing. One earlier attempt observed this host intermittently deny the unchanged
+  process-group probe `process.kill(-pid, 0)` with `EPERM`; it passed on the final rerun. The
+  implementation candidate at `921fd54c406f22fb6da25b0fdd29598ac8950750` passed PR #56's hosted
+  `Quality gate` in
+  [run 33196876164 / job 98936152886](https://github.com/desenlab/desen-app/actions/runs/33196876164/job/98936152886)
+  in `14m53s`. That receipt proves only that prior exact head and does not authorize this new head.
+  Canonical CI-02 remains `IN_PROGRESS` until the hosted `Quality gate` attached to this exact
+  current head passes. If it passes, this same unchanged commit becomes the authoritative `DONE`
+  revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
+  selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
+  path unchanged.
 - Next implementation task: `M09-T07 — Named-slot drop, move, reorder, cardinality, and acceptance UI`
-- Status: CI-02 is `IN_PROGRESS` with its hosted exact-head gate pending. M08 is 10/10, M09 is
+- Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
   6/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T06 are `DONE`; `N-042` is `TESTED`, P-06
   is `PROVEN`, P-07 and P-16 are `PARTIAL`, proof gates are 10/13, P-08 remains `NOT_PROVEN`,
   PF-025 remains `OPEN`, and implementation progress is 101/145.

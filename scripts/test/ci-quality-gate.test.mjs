@@ -32,6 +32,36 @@ const CI_02_LOCAL_BASELINE = Object.freeze([
   "pnpm boundaries",
   "node scripts/ci/verify-proof-reader-checkpoints.mjs",
 ]);
+const CI_02_FIRST_HOSTED_RECEIPT = Object.freeze({
+  headSha: "921fd54c406f22fb6da25b0fdd29598ac8950750",
+  runId: "33196876164",
+  jobId: "98936152886",
+  duration: "14m53s",
+  jobUrl: "https://github.com/desenlab/desen-app/actions/runs/33196876164/job/98936152886",
+});
+const CI_02_FIRST_HOSTED_LINK = `[run ${CI_02_FIRST_HOSTED_RECEIPT.runId} / job ${CI_02_FIRST_HOSTED_RECEIPT.jobId}](${CI_02_FIRST_HOSTED_RECEIPT.jobUrl})`;
+const CI_02_FIRST_HOSTED_RECEIPT_MARKERS = Object.freeze({
+  "docs/plan/TASKS.md": `The implementation candidate at \`${CI_02_FIRST_HOSTED_RECEIPT.headSha}\` passed PR #56's hosted \`Quality gate\` in ${CI_02_FIRST_HOSTED_LINK} in \`${CI_02_FIRST_HOSTED_RECEIPT.duration}\`.`,
+  "PROJECT-STATUS.md": `The implementation candidate at \`${CI_02_FIRST_HOSTED_RECEIPT.headSha}\` passed PR #56's hosted \`Quality gate\` in ${CI_02_FIRST_HOSTED_LINK} in \`${CI_02_FIRST_HOSTED_RECEIPT.duration}\`.`,
+  "docs/plan/START-HERE.tr.md": `\`${CI_02_FIRST_HOSTED_RECEIPT.headSha}\` başındaki uygulama adayı, PR #56'nın hosted \`Quality gate\` koşusunu ${CI_02_FIRST_HOSTED_LINK} içinde 14 dakika 53 saniyede geçti.`,
+});
+const CI_02_CONDITIONAL_CLOSURE_MARKERS = Object.freeze({
+  "docs/plan/TASKS.md": Object.freeze([
+    "The `DONE` row in this unmerged pull request is a conditional closure candidate",
+    "Canonical CI-02 remains `IN_PROGRESS` until the hosted `Quality gate` attached to this exact current head passes.",
+  ]),
+  "PROJECT-STATUS.md": Object.freeze([
+    "Conditional operational completion: CI-02's `DONE` entry in this unmerged change is a closure candidate; it is not yet canonical.",
+    "Canonical CI-02 remains `IN_PROGRESS` until the hosted `Quality gate` attached to this exact current head passes.",
+  ]),
+  "README.md": Object.freeze([
+    "**CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending",
+  ]),
+  "docs/plan/START-HERE.tr.md": Object.freeze([
+    "CI-02'nin bu merge edilmemiş değişiklikteki `DONE` kaydı koşullu bir kapanış adayıdır.",
+    "Tam güncel PR head'indeki hosted `Quality gate` geçene kadar kanonik CI-02 durumu `IN_PROGRESS` kalır",
+  ]),
+});
 const CI_02_BASELINE_SECTIONS = Object.freeze({
   "AGENTS.md": "## Per-task quality contract (CI-02)",
   "CONTRIBUTING.md": "## Validation",
@@ -77,24 +107,26 @@ const CI_02_DOCUMENT_MARKERS = Object.freeze({
   "docs/plan/START-HERE.tr.md": Object.freeze([
     "CI-02'nin sınırlı yerel temel kontrolleri",
     "Mühür/checkpoint yalnızca kimlik ve etki otoritesidir; başarıyı",
-    "CI-02 `IN_PROGRESS` durumundadır",
-    "beklenmektedir. CI-02 yerel bir affected-selector eklemedi",
+    "CI-02'nin bu merge edilmemiş",
+    "Bu makbuz yalnızca önceki head'i kanıtlar ve yeni head'e otorite",
   ]),
   "docs/plan/TASKS.md": Object.freeze([
-    "| CI-02  | IN_PROGRESS",
+    "| CI-02  | DONE",
     "I07-04, explicit user authorization",
     "`CI-02` is a separate explicitly authorized operational task",
-    "This local evidence is provisional and non-completing",
-    "does not claim a hosted result for this local implementation",
+    "The `DONE` row in this unmerged pull",
+    "Canonical CI-02 remains `IN_PROGRESS` until the hosted `Quality gate` attached to this exact",
     "I07-05 plus the legacy rollback path unchanged",
   ]),
   "PROJECT-STATUS.md": Object.freeze([
-    "Active operational task: CI-02 is `IN_PROGRESS` with local evidence only.",
-    "Local evidence is provisional and non-completing.",
-    "This local CI-02 candidate",
+    "Conditional operational completion: CI-02's `DONE` entry in this unmerged change",
+    "That receipt proves only that prior exact head and does not authorize this new head.",
+    "Canonical CI-02 remains `IN_PROGRESS` until the hosted `Quality gate` attached to this exact",
     "changes no hosted dispatcher/workflow",
   ]),
-  "README.md": Object.freeze(["**CI-02:** `IN_PROGRESS` (hosted exact-head gate pending)"]),
+  "README.md": Object.freeze([
+    "**CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending",
+  ]),
   "scripts/ci/README.md": Object.freeze([
     "CI-02 adds only a per-task completion policy.",
     "Checkpoints and seals authenticate identity and impact, never",
@@ -115,6 +147,16 @@ async function currentCi02ContractDocuments() {
 
 function ci02ContractFailure(message) {
   throw new Error(`CI-02 ${message}`);
+}
+
+function normalizeWhitespace(value) {
+  return value.replace(/\s+/gu, " ").trim();
+}
+
+function assertNormalizedMarkerExactlyOnce(relativePath, source, marker, failureKind) {
+  if (normalizeWhitespace(source).split(marker).length - 1 !== 1) {
+    ci02ContractFailure(`${failureKind} drifted in ${relativePath}.`);
+  }
 }
 
 function validateCi02BaselineBlocks(documents) {
@@ -139,45 +181,56 @@ function validateCi02BaselineBlocks(documents) {
   return Object.keys(CI_02_BASELINE_SECTIONS).length;
 }
 
-function assertCi02PendingStatuses(relativePath, statuses, expectedCount) {
-  if (statuses.length !== expectedCount || statuses.some((status) => status !== "IN_PROGRESS")) {
-    ci02ContractFailure(`hosted-pending status drifted in ${relativePath}.`);
+function validateCi02FirstHostedReceipt(documents) {
+  for (const [relativePath, marker] of Object.entries(CI_02_FIRST_HOSTED_RECEIPT_MARKERS)) {
+    assertNormalizedMarkerExactlyOnce(
+      relativePath,
+      documents[relativePath],
+      marker,
+      "hosted receipt",
+    );
   }
+  return Object.keys(CI_02_FIRST_HOSTED_RECEIPT_MARKERS).length;
 }
 
-function validateCi02HostedPendingStatuses(documents) {
+function validateCi02ConditionalClosureStatuses(documents) {
   const taskStatuses = [
     ...documents["docs/plan/TASKS.md"].matchAll(/^\| CI-02\s+\|\s+([A-Z_]+)\s+\|/gmu),
   ].map((match) => match[1]);
-  assertCi02PendingStatuses("docs/plan/TASKS.md", taskStatuses, 1);
+  if (taskStatuses.length !== 1 || taskStatuses[0] !== "DONE") {
+    ci02ContractFailure("conditional-closure status drifted in docs/plan/TASKS.md.");
+  }
 
-  const projectStatuses = [
-    ...documents["PROJECT-STATUS.md"].matchAll(/\bCI-02\s+(?:is|remains)\s+`([A-Z_]+)`/gu),
-  ].map((match) => match[1]);
-  assertCi02PendingStatuses("PROJECT-STATUS.md", projectStatuses, 3);
+  for (const [relativePath, markers] of Object.entries(CI_02_CONDITIONAL_CLOSURE_MARKERS)) {
+    for (const marker of markers) {
+      assertNormalizedMarkerExactlyOnce(
+        relativePath,
+        documents[relativePath],
+        marker,
+        "conditional-closure status",
+      );
+    }
+  }
 
-  const readmeStatuses = [...documents["README.md"].matchAll(/\*\*CI-02:\*\*\s+`([A-Z_]+)`/gu)].map(
-    (match) => match[1],
-  );
-  assertCi02PendingStatuses("README.md", readmeStatuses, 1);
-
-  const startHereStatuses = [
-    ...documents["docs/plan/START-HERE.tr.md"].matchAll(/CI-02\s+`([A-Z_]+)`\s+durumundadır/gu),
-  ].map((match) => match[1]);
-  assertCi02PendingStatuses("docs/plan/START-HERE.tr.md", startHereStatuses, 1);
-
-  for (const relativePath of [
-    "docs/plan/TASKS.md",
-    "PROJECT-STATUS.md",
-    "README.md",
-    "docs/plan/START-HERE.tr.md",
-  ]) {
-    const source = documents[relativePath];
+  const statusDocuments = Object.keys(CI_02_CONDITIONAL_CLOSURE_MARKERS);
+  const unconditionalDonePatterns = [
+    /^CI-02 is `DONE`\.\s*$/imu,
+    /^\*\*CI-02:\*\*\s+`DONE`\s*$/imu,
+    /^CI-02 `DONE` durumundadır\.\s*$/imu,
+  ];
+  for (const relativePath of statusDocuments) {
+    if (unconditionalDonePatterns.some((pattern) => pattern.test(documents[relativePath]))) {
+      ci02ContractFailure(`conditional-closure status drifted in ${relativePath}.`);
+    }
     if (
-      /CI-02\s+(?:(?:is|was)\s+)?`?(?:DONE|complete|completed)`?\b/iu.test(source) ||
-      /CI-02\s+(?:tamamlandı|tamamlanmıştır)\b/iu.test(source)
+      /^The prior receipt (?:authorizes|validates) (?:this|the) (?:new|current) head\.\s*$/imu.test(
+        documents[relativePath],
+      ) ||
+      /^Önceki makbuz (?:bu|yeni|güncel) head'e otorite verir\.\s*$/imu.test(
+        documents[relativePath],
+      )
     ) {
-      ci02ContractFailure(`hosted-pending status drifted in ${relativePath}.`);
+      ci02ContractFailure(`prior-receipt authority drifted in ${relativePath}.`);
     }
   }
   return 4;
@@ -197,13 +250,15 @@ function validateCi02ContractDocuments(documents) {
     }
   }
   const baselineBlockCount = validateCi02BaselineBlocks(documents);
-  const hostedPendingStatusDocumentCount = validateCi02HostedPendingStatuses(documents);
+  const hostedReceiptDocumentCount = validateCi02FirstHostedReceipt(documents);
+  const conditionalClosureStatusDocumentCount = validateCi02ConditionalClosureStatuses(documents);
   return Object.freeze({
     documentCount: Object.keys(CI_02_DOCUMENT_MARKERS).length,
     markerCount,
     localBaselineCommandCount: CI_02_LOCAL_BASELINE.length,
     baselineBlockCount,
-    hostedPendingStatusDocumentCount,
+    hostedReceiptDocumentCount,
+    conditionalClosureStatusDocumentCount,
   });
 }
 
@@ -296,20 +351,25 @@ test("the current repository exactly matches the reviewed live proof inventory",
   });
 });
 
-test("CI-02 pins the bounded local baseline and exact-head hosted completion contract", async () => {
+test("CI-02 pins the bounded baseline, first hosted receipt, and conditional closure", async () => {
   assert.deepEqual(validateCi02ContractDocuments(await currentCi02ContractDocuments()), {
     documentCount: 9,
     markerCount: 46,
     localBaselineCommandCount: 6,
     baselineBlockCount: 3,
-    hostedPendingStatusDocumentCount: 4,
+    hostedReceiptDocumentCount: 3,
+    conditionalClosureStatusDocumentCount: 4,
   });
 });
 
 test("CI-02 rejects baseline, evidence, completion, freshness, or rollback wording drift", async () => {
   const documents = await currentCi02ContractDocuments();
   const mutations = [
-    ["README.md", "**CI-02:** `IN_PROGRESS`", "**CI-02:** `DONE`"],
+    [
+      "README.md",
+      "**CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`",
+      "**CI-02:** `DONE`",
+    ],
     ["AGENTS.md", "pnpm boundaries", "pnpm test"],
     [
       "docs/standards/CI-QUALITY-GATE.md",
@@ -347,6 +407,23 @@ test("CI-02 rejects baseline, evidence, completion, freshness, or rollback wordi
     assert.throws(() => validateCi02ContractDocuments(drifted), /CI-02 contract marker drifted/u);
   }
 
+  for (const [marker, replacement] of [
+    [CI_02_FIRST_HOSTED_RECEIPT.headSha, "0000000000000000000000000000000000000000"],
+    [CI_02_FIRST_HOSTED_RECEIPT.runId, "33196876165"],
+    [CI_02_FIRST_HOSTED_RECEIPT.jobId, "98936152887"],
+    [CI_02_FIRST_HOSTED_RECEIPT.duration, "14m52s"],
+  ]) {
+    assert.ok(documents["docs/plan/TASKS.md"].includes(marker));
+    const driftedReceipt = {
+      ...documents,
+      "docs/plan/TASKS.md": documents["docs/plan/TASKS.md"].replace(marker, replacement),
+    };
+    assert.throws(
+      () => validateCi02ContractDocuments(driftedReceipt),
+      /CI-02 hosted receipt drifted/u,
+    );
+  }
+
   const baselineTerminator = `${CI_02_LOCAL_BASELINE.at(-1)}\n\`\`\``;
   assert.equal(documents["AGENTS.md"].split(baselineTerminator).length - 1, 1);
   const extraCommand = {
@@ -367,15 +444,24 @@ test("CI-02 rejects baseline, evidence, completion, freshness, or rollback wordi
     ["README.md", "\n**CI-02:** `DONE`\n"],
     ["docs/plan/START-HERE.tr.md", "\nCI-02 `DONE` durumundadır.\n"],
   ]) {
-    const contradictoryDone = {
+    const unconditionalDone = {
       ...documents,
       [relativePath]: `${documents[relativePath]}${contradiction}`,
     };
     assert.throws(
-      () => validateCi02ContractDocuments(contradictoryDone),
-      /CI-02 hosted-pending status drifted/u,
+      () => validateCi02ContractDocuments(unconditionalDone),
+      /CI-02 conditional-closure status drifted/u,
     );
   }
+
+  const reusedPriorReceipt = {
+    ...documents,
+    "docs/plan/TASKS.md": `${documents["docs/plan/TASKS.md"]}\nThe prior receipt authorizes this new head.\n`,
+  };
+  assert.throws(
+    () => validateCi02ContractDocuments(reusedPriorReceipt),
+    /CI-02 prior-receipt authority drifted/u,
+  );
 });
 
 test("inventory validation rejects a missing verifier file", async () => {

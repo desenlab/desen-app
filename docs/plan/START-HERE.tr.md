@@ -37,11 +37,17 @@ yerel manuel denetim veya açık istek için yerel kapsamlı uyumluluk komutu ol
 Mühür/checkpoint yalnızca kimlik ve etki otoritesidir; başarıyı önbelleklemez ve seçilen hosted
 işler taze çalışır.
 
-`I07-01` ve `I07-02` tamamlandı. Açık kullanıcı yetkisiyle eklenen CI-02 `IN_PROGRESS` durumundadır;
-yerel kanıtları geçici ve tamamlayıcı değildir, tam güncel PR head'indeki hosted `Quality gate`
-beklenmektedir. CI-02 yerel bir affected-selector eklemedi, hosted dispatcher/workflow'u
-değiştirmedi ve I07-05'in legacy rollback sorumluluğunu aynen korudu. I07-02 geçiş anındaki 130 iş ve
-61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T09 checkpoint'i 146 iş ve 69 kanıt
+`I07-01` ve `I07-02` tamamlandı. Açık kullanıcı yetkisiyle eklenen CI-02'nin bu merge edilmemiş
+değişiklikteki `DONE` kaydı koşullu bir kapanış adayıdır.
+`921fd54c406f22fb6da25b0fdd29598ac8950750` başındaki uygulama adayı, PR #56'nın hosted
+`Quality gate` koşusunu
+[run 33196876164 / job 98936152886](https://github.com/desenlab/desen-app/actions/runs/33196876164/job/98936152886)
+içinde 14 dakika 53 saniyede geçti. Bu makbuz yalnızca önceki head'i kanıtlar ve yeni head'e otorite
+vermez. Tam güncel PR head'indeki hosted `Quality gate` geçene kadar kanonik CI-02 durumu
+`IN_PROGRESS` kalır; geçerse aynı değişmemiş commit yetkili `DONE` revizyonu olur. O zamana kadar
+merge ve tamamlandı raporu blokludur. CI-02 yerel bir affected-selector eklemedi, hosted
+dispatcher/workflow'u değiştirmedi ve I07-05'in legacy rollback sorumluluğunu aynen korudu. I07-02
+geçiş anındaki 130 iş ve 61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T09 checkpoint'i 146 iş ve 69 kanıt
 çiftiydi. M07-T10 eklendikten sonra çalışma alanındaki güncel zorunlu plan 148 işin ve 70 kanıt
 çiftinin tamamını yeni sistemle çalıştırır: 59 normal çift ve 11 özel bariyer. Eski planın aynı
 kapsamdaki açılımı 463 önkoşul parçası, 2.929 sıralı yaprak çağrısı ve 230 farklı yaprak iştir.
