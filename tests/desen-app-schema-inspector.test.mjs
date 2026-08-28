@@ -11,7 +11,6 @@ import {
   DesenAppSchemaInspectorProofError,
   buildDesenAppSchemaInspectorEvidence,
   verifyDesenAppSchemaInspectorEvidence,
-  verifyDesenAppSchemaInspectorSourcePolicy,
   writeDesenAppSchemaInspectorEvidence,
 } from "../scripts/lib/desen-app-schema-inspector-proof.mjs";
 
@@ -45,11 +44,6 @@ function changedByte(bytes) {
   const changed = Buffer.from(bytes);
   changed[Math.floor(changed.byteLength / 2)] ^= 1;
   return changed;
-}
-
-function replaceOnce(source, search, replacement) {
-  assert.equal(source.includes(search), true, `Mutation anchor not found: ${search}`);
-  return source.replace(search, replacement);
 }
 
 function exactProofDocument(artifactSha256) {
@@ -116,12 +110,18 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.boundary.parentArtifacts, 3);
   assert.equal(built.artifact.claim.taskStatus, "DONE");
   assert.equal(built.artifact.claim.p08Status, "NOT_PROVEN");
+  assert.equal(built.artifactBytes.byteLength, 22_998);
+  assert.equal(
+    built.artifactSha256,
+    "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b",
+  );
+  assert.equal(built.currentCompatibility.result, "PASS");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T06");
 });
 
 test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[1], () => {
-  const policy = verifyDesenAppSchemaInspectorSourcePolicy(sourcePolicyInput);
-  assert.equal(policy.authoringData.publicCatalogSdkDerivation, true);
-  assert.equal(policy.authoringData.inspectorPlanFrozenWithComponentSummary, true);
+  assert.equal(built.currentCompatibility.successor.schemaDerivedChildControls, true);
+  assert.equal(built.currentCompatibility.successor.nestedObjectInspector, true);
   assert.deepEqual(built.artifact.claim.controlKinds, [
     "boolean",
     "enum",
@@ -169,6 +169,8 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.artifact.claim.dynamicValuesLocked, true);
   assert.equal(built.artifact.claim.structuredValuesLocked, true);
   assert.equal(built.artifact.claim.staleRouteAndSelectionRejected, true);
+  assert.equal(built.currentCompatibility.successor.structuredJsonFallback, true);
+  assert.equal(built.currentCompatibility.successor.protocolDynamicValuesLocked, true);
 });
 
 test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[4], () => {
@@ -206,81 +208,22 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[6], async () => {
   assert.notEqual(second.artifact, built.artifact);
   assert.equal(Object.isFrozen(second.artifact), true);
   assert.equal(Object.isFrozen(second.artifact.boundary.trackedReceipts), true);
+  assert.deepEqual(second.currentCompatibility, built.currentCompatibility);
+  assert.equal(Object.isFrozen(second.currentCompatibility), true);
 });
 
-test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[7], () => {
-  assert.equal(
-    verifyDesenAppSchemaInspectorSourcePolicy(sourcePolicyInput).inspector
-      .completeDocumentRevalidatedAfterEveryMutation,
-    true,
-  );
-
-  const mutations = [
-    {
-      ...sourcePolicyInput,
-      authoringDataSource: replaceOnce(
-        sourcePolicyInput.authoringDataSource,
-        "deriveComponentInspectorControls(",
-        "deriveManualInspectorControls(",
-      ),
-    },
-    {
-      ...sourcePolicyInput,
-      inspectorSource: replaceOnce(
-        sourcePolicyInput.inspectorSource,
-        "createDesenEditorContinuousValidator([catalogValue])",
-        "createUncheckedValidator([catalogValue])",
-      ),
-    },
-    {
-      ...sourcePolicyInput,
-      inspectorSource: replaceOnce(
-        sourcePolicyInput.inspectorSource,
-        'field.value.kind === "dynamic" || field.value.kind === "structured"',
-        'field.value.kind === "never"',
-      ),
-    },
-    {
-      ...sourcePolicyInput,
-      previewSource: replaceOnce(
-        sourcePolicyInput.previewSource,
-        "publishDesenSource(rawSource, REFERENCE_CATALOG_PACKAGES)",
-        "publishUncheckedSource(rawSource, REFERENCE_CATALOG_PACKAGES)",
-      ),
-    },
-    {
-      ...sourcePolicyInput,
-      panelSource: `${sourcePolicyInput.panelSource}\nvoid document.querySelector('input');\n`,
-    },
-    {
-      ...sourcePolicyInput,
-      adapterSource: replaceOnce(
-        sourcePolicyInput.adapterSource,
-        "<SelectionOverlay projection={projection} />",
-        "<div data-managed-selection-overlay />",
-      ),
-    },
-    {
-      ...sourcePolicyInput,
-      applicationSource: replaceOnce(
-        sourcePolicyInput.applicationSource,
-        "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
-        "setAuthoringSession(Object.freeze({ document: result.document, preview }))",
-      ),
-    },
-    {
-      ...sourcePolicyInput,
-      applicationCss: replaceOnce(
-        sourcePolicyInput.applicationCss,
-        ".inspectorPanel",
-        "[data-managed-capability-subtree] .inspectorPanel",
-      ),
-    },
-  ];
-  for (const mutation of mutations) {
-    assert.throws(
-      () => verifyDesenAppSchemaInspectorSourcePolicy(mutation),
-      expectedError("SOURCE_POLICY_VIOLATION"),
+test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[7], async () => {
+  assert.equal(built.currentCompatibility.successor.publicEditorCoreMutationRetained, true);
+  for (const [key, relativePath] of Object.entries(SOURCE_PATHS).filter(([key]) =>
+    ["authoringDataSource", "inspectorSource", "panelSource", "applicationCss"].includes(key),
+  )) {
+    await assert.rejects(
+      buildDesenAppSchemaInspectorEvidence({
+        fileOverrides: new Map([
+          [relativePath, Buffer.from(`${sourcePolicyInput[key]}\n/* successor drift */\n`)],
+        ]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
     );
   }
 });

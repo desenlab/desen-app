@@ -8,6 +8,7 @@ import {
 import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
 
 import type { ComponentInspectorControlPlan, ComponentManifest } from "@desen/catalog-sdk";
+import type { DesenEditorDocument } from "@desen/editor-core";
 
 type JsonObject = Readonly<Record<string, unknown>>;
 
@@ -70,6 +71,10 @@ export interface CatalogAuthoringModel {
   };
   readonly components: readonly CatalogComponentSummary[];
   readonly surfaces: readonly AuthoringSurfaceTree[];
+  /** Exact validator-admitted Catalog set reused by later App validation boundaries. */
+  readonly validationCatalogs: readonly unknown[];
+  /** Exact validator-admitted Source snapshot reused by later App mutation boundaries. */
+  readonly validationDocument: DesenEditorDocument;
 }
 
 /** Fail-closed outcome of preparing the M09-T02 authoring read model. */
@@ -413,6 +418,8 @@ export function prepareCatalogAuthoringModel(
         }),
         components,
         surfaces: Object.freeze(surfaces),
+        validationCatalogs: catalogSet.value,
+        validationDocument: sourceResult.value,
       }),
     });
   } catch (error) {

@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████████░░░░░░░░` **100 / 145 tasks complete (69%)**
+**Overall:** `█████████████████░░░░░░░░` **101 / 145 tasks complete (70%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `█████░░░░░░░░░` **5 / 14 tasks complete (36%)**
+**M09:** `██████░░░░░░░░` **6 / 14 tasks complete (43%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T06`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T07`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -760,6 +760,43 @@ M09-T05 is `DONE`; implementation progress is 100/145 (69%), M09 is 5/14 (36%), 
 remain 10/13. P-08 remains `NOT_PROVEN`: nested-object/structured-JSON editing, state/binding and
 event/action authoring, Design/Run, persistence, browser E2E, control-plane publication, and
 activation remain later work. M09-T06 is next.
+
+M09-T06 completes recursive closed-object Inspector controls and an honest structured-JSON
+fallback. Present closed groups expose canonical child order, qualified accessible names, and exact
+RFC 6901 value and schema pointers, including escaped `/` and `~` names. An absent optional group is
+staged as one complete JSON object and committed atomically. Arrays, open objects, unions,
+references, combinators, conditionals, pattern properties, unsupported schemas, and
+derivation-limit results remain editable through an explicit textarea with a visible reason and
+Apply, Reset, and eligible Unset actions.
+
+Structured input is scanned under the Publisher Source JSON profile before parsing. Malformed or
+non-finite JSON, decoded duplicate members, unpaired Unicode, limit violations, and every decoded
+object key beginning with `$` fail closed. Successful values are detached and recursively frozen.
+Object formatting is deterministic while array order remains significant; when pretty indentation
+would exceed the admitted profile, formatting stops early and uses compact canonical JSON.
+
+Route, selection, edit command, validator-admitted Source, and Catalog authority are captured
+exactly before mutation. Nested edits rebuild only the complete top-level owner prop through public
+Editor Core commands. Root fallback counts only changed props, permits at most 256 transitions and
+32 MiB of aggregate snapshot work, and deletes obsolete props and applies shrinking replacements
+before growth so a valid near-limit endpoint does not fail on a larger private transition. Every
+candidate still passes continuous validation and Publisher preflight before `{document, preview}`
+changes.
+
+The focused structured-Inspector suite passes 73/73, the complete App suite passes 118/118, the
+independent root proof passes 10/10, and the complete structural CI glob passes 323/323. Exact
+evidence is the 26,133-byte
+[`desen-app-0.1.0-structured-inspector.json`](docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json)
+at `sha256:6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec`.
+The local CI authority contains 184 workloads and 87 proof pairs—76 ordinary and 11 barriers—with
+a 54-proof-unit/118-workload closure and ownership over 1,184 tracked paths, including 174
+proof-owned paths. Sequence 45 contains 41 artifacts and 82 readers. These are local receipts; no
+required-gate or hosted-CI pass is claimed.
+
+M09-T06 is `DONE`; implementation progress is 101/145 (70%), M09 is 6/14 (43%), and proof gates
+remain 10/13. P-08 remains `NOT_PROVEN`; slot/cardinality UI, state/binding and event/action
+authoring, Design/Run, persistence, browser E2E, control-plane publication, and activation remain
+later work. PF-025 remains `OPEN`, dynamic `$` values stay locked for M09-T08, and M09-T07 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

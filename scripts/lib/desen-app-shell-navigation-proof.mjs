@@ -58,6 +58,7 @@ const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.
 const AUTHORING_INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
 const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
+const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const OFFICIAL_SOURCE_PATH = "examples/sign-in/official-derived.source.desen.json";
 const OFFICIAL_BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
@@ -68,6 +69,7 @@ const ADDITIVE_SUCCESSOR_SOURCE_PATHS = Object.freeze([
   AUTHORING_INSPECTOR_SOURCE_PATH,
   AUTHORING_PREVIEW_SOURCE_PATH,
   INSPECTOR_PANEL_SOURCE_PATH,
+  STRUCTURED_JSON_SOURCE_PATH,
 ]);
 const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
   ...SOURCE_PATHS.filter((entry) => /\.(?:ts|tsx)$/u.test(entry)),
@@ -510,7 +512,7 @@ function verifyShellSemantics(files) {
   for (const required of ["@media", "var(--desen-app-", ".visuallyHidden"]) {
     requireText(moduleStyles, required, "application.module.css");
   }
-  for (const required of ["M09-T05", "History API"]) {
+  for (const required of ["M09-T06", "History API"]) {
     requireText(readme, required, "apps/desen-app/README.md");
   }
 
@@ -649,6 +651,7 @@ function inspectImports(files) {
       AUTHORING_SOURCE_PATH,
       new Set([
         "@desen/catalog-sdk",
+        "@desen/editor-core",
         "@desen/reference-catalog-web/catalog.json",
         "@desen/validator",
       ]),
@@ -664,7 +667,10 @@ function inspectImports(files) {
       ]),
     ],
     [AUTHORING_SELECTION_SOURCE_PATH, new Set(["@desen/runtime-react"])],
-    [AUTHORING_INSPECTOR_SOURCE_PATH, new Set(["@desen/catalog-sdk", "@desen/editor-core"])],
+    [
+      AUTHORING_INSPECTOR_SOURCE_PATH,
+      new Set(["@desen/catalog-sdk", "@desen/editor-core", "@desen/protocol"]),
+    ],
     [
       AUTHORING_PREVIEW_SOURCE_PATH,
       new Set([
@@ -674,6 +680,10 @@ function inspectImports(files) {
       ]),
     ],
     [INSPECTOR_PANEL_SOURCE_PATH, new Set(["@desen/catalog-sdk"])],
+    [
+      STRUCTURED_JSON_SOURCE_PATH,
+      new Set(["@desen/catalog-sdk", "@desen/protocol", "@desen/publisher"]),
+    ],
     [APPLICATION_SOURCE_PATH, new Set(["@desen/reference-catalog-web/catalog.json"])],
   ]);
   const seenSuccessorPackageImports = new Map(
@@ -1036,13 +1046,16 @@ export async function buildDesenAppShellNavigationEvidence(rawOptions = undefine
     },
     tests,
     additiveSuccessor: {
-      task: "M09-T05",
+      task: "M09-T06",
       catalogDrivenAuthoringReadModelAllowed: true,
       exactPublicRuntimeAdapterCanvasAllowed: true,
       stableSourceSelectionOverlayAllowed: true,
       schemaDerivedPrimitiveAndEnumInspectorAllowed: true,
       publicEditorCoreMutationAllowed: true,
       publisherBackedSessionPreviewAllowed: true,
+      nestedObjectInspectorAllowed: true,
+      honestStructuredJsonFallbackAllowed: true,
+      dynamicValuesRemainLocked: true,
       knownSourceEdges: [...ADDITIVE_SUCCESSOR_SOURCE_PATHS],
       historicalNoCatalogPanelNonclaimAppliedToCurrentApp: false,
       historicalNoRealAdapterCanvasNonclaimAppliedToCurrentApp: false,

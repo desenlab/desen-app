@@ -29,12 +29,15 @@ const INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
 const PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
 const PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
+const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
 const ADAPTER_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const APPLICATION_CSS_PATH = "apps/desen-app/src/application.module.css";
 const GLOBAL_CSS_PATH = "apps/desen-app/src/styles.css";
 const INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.test.ts";
 const PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
+const PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
+const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
 const ADAPTER_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
@@ -78,6 +81,43 @@ const TRACKED_PATHS = Object.freeze([
   PUBLISHER_PARENT_ARTIFACT_PATH,
   ...PROOF_READER_PATHS,
 ]);
+
+const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  LOCKFILE_PATH,
+  AUTHORING_DATA_PATH,
+  INSPECTOR_SOURCE_PATH,
+  PANEL_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+  INSPECTOR_TEST_PATH,
+  APPLICATION_TEST_PATH,
+  "scripts/lib/desen-app-schema-inspector-proof.mjs",
+  "tests/desen-app-schema-inspector.test.mjs",
+]);
+
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...new Set([
+    ...TRACKED_PATHS,
+    STRUCTURED_JSON_SOURCE_PATH,
+    PANEL_TEST_PATH,
+    STRUCTURED_JSON_TEST_PATH,
+  ]),
+]);
+
+const RETAINED_HISTORICAL_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
+);
+
+const SELF_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-schema-inspector-proof.mjs",
+  "tests/desen-app-schema-inspector.test.mjs",
+]);
+
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 22_998,
+  sha256: "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b",
+});
 
 const EXPECTED_SOURCE_SHA256 = Object.freeze({
   [AUTHORING_DATA_PATH]: "e55163afbc6b39ab42318a6d48b3ca76de93cd006df0a585397990ed62fc3bad",
@@ -280,7 +320,7 @@ function deepFreeze(value) {
   return value;
 }
 
-function canonicalArtifactBytes(artifact) {
+function _canonicalArtifactBytes(artifact) {
   return Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`);
 }
 
@@ -333,12 +373,16 @@ function captureBytes(value, label) {
 
 function captureOverrides(value) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+  if (
+    !(value instanceof Map) ||
+    utilTypes.isProxy(value) ||
+    value.size > CURRENT_COMPATIBILITY_PATHS.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
   for (const [relativePath, bytes] of value) {
-    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+    if (!CURRENT_COMPATIBILITY_PATHS.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
@@ -408,12 +452,17 @@ async function readRegularAuthority(absolutePath, label) {
 
 async function readTrackedFiles(workspaceRoot, overrides) {
   const output = new Map();
-  for (const relativePath of TRACKED_PATHS) {
-    output.set(
-      relativePath,
-      overrides.get(relativePath) ??
-        (await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath)),
-    );
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
+    const live = await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath);
+    const override = overrides.get(relativePath);
+    if (
+      override !== undefined &&
+      SELF_RESEALED_PATHS.includes(relativePath) &&
+      !isDeepStrictEqual(override, live)
+    ) {
+      fail("BOUNDARY_DRIFT", `${relativePath} cannot be substituted by a caller.`);
+    }
+    output.set(relativePath, override ?? live);
   }
   return output;
 }
@@ -952,7 +1001,7 @@ function controlKind(schema, label) {
   fail("CATALOG_POLICY_VIOLATION", `${label} is not a T05 primitive or enum schema.`);
 }
 
-function inspectCatalog(catalogBytes) {
+function _inspectCatalog(catalogBytes) {
   const catalog = schemaObject(parseJson(catalogBytes, CATALOG_PATH), "catalog");
   const components = schemaObject(catalog.components, "catalog.components");
   const matrix = Object.keys(components)
@@ -1004,7 +1053,7 @@ function collectTestNames(rawSource, relativePath) {
     .map((call) => call.arguments[0].text);
 }
 
-function inspectTests(files) {
+function _inspectTests(files) {
   const expectedByPath = new Map([
     [INSPECTOR_TEST_PATH, EXPECTED_INSPECTOR_TEST_NAMES],
     [PREVIEW_TEST_PATH, EXPECTED_PREVIEW_TEST_NAMES],
@@ -1044,7 +1093,7 @@ function inspectTests(files) {
   });
 }
 
-function inspectPackages(files) {
+function _inspectPackages(files) {
   const root = parseJson(files.get(ROOT_PACKAGE_PATH), ROOT_PACKAGE_PATH);
   const app = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
   const appCommand =
@@ -1124,11 +1173,191 @@ function receipts(files) {
     );
 }
 
-/** Builds detached deterministic M09-T05 schema-inspector evidence. */
+const CURRENT_SUCCESSOR_SHA256 = Object.freeze({
+  [ROOT_PACKAGE_PATH]: "2e5158e6d3d58cdcb4320ffc4b343ec0b30533b84c23c81a080a650280d3334b",
+  [APP_PACKAGE_PATH]: "145a5d118a0327fc10e192fcee23f5e66858dc508a18485b723cac68e852665b",
+  [LOCKFILE_PATH]: "463a35abf13fd9ba6acb897aca52a11e7a90c8fcfedbce085e82f89c23418d89",
+  [AUTHORING_DATA_PATH]: "cc185e4094a97a0e36c304f8e6bc7bf2630a481ceb4143d645cbe1f600d1dbd6",
+  [INSPECTOR_SOURCE_PATH]: "8a79b662f5b7bf15147d242b38916162d2f6f75e175d056ba9434177c09ce8e6",
+  [PANEL_SOURCE_PATH]: "a9362b4531a00bbe24cf07e9d75e6c58fe27051d77fec48e7f6a1f269bffeca0",
+  [STRUCTURED_JSON_SOURCE_PATH]: "9c28b34b37bd02d213750f17c868807d4dd50c9fffb35ce6c3e3e6483a513c36",
+  [APPLICATION_CSS_PATH]: "f8edeac5a918dcd8ba7b2b636a32473ccc7c1082bfa5d743763a85d25225d637",
+  [INSPECTOR_TEST_PATH]: "77f777f2790962df2e0b984cf06af57200d958a5faf4dee7c9d6845c32b27406",
+  [PANEL_TEST_PATH]: "73280b88d69fa0906f7f6728cb5abc9b732752b7d2ece3a096e13fe59725a7e2",
+  [STRUCTURED_JSON_TEST_PATH]: "e09774464eb09f99074619ea9d33f78a111e4799127b3ff32ed9841645b3efed",
+  [APPLICATION_TEST_PATH]: "292cb62cfe43b17c39b1548409a77e128ab030fc005bba9a99b98c95ce4f443c",
+});
+
+async function authenticateFrozenArtifact(workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    "frozen M09-T05 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T05 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(artifactBytes, "frozen M09-T05 proof artifact");
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-schema-inspector" ||
+    artifact?.profile !== "desen.app.schema-inspector-proof.v1" ||
+    artifact?.task !== "M09-T05" ||
+    artifact?.result !== "PASS" ||
+    artifact?.claim?.taskStatus !== "DONE" ||
+    artifact?.claim?.schemaDerivedPrimitiveAndEnumControls !== true ||
+    artifact?.claim?.publicEditorCoreAtomicMutation !== true ||
+    artifact?.claim?.structuredValuesLocked !== true ||
+    artifact?.claim?.dynamicValuesLocked !== true ||
+    artifact?.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact?.boundary?.trackedFiles !== TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== TRACKED_PATHS.length ||
+    !isDeepStrictEqual(
+      trackedReceipts.map((candidate) => candidate?.path),
+      [...TRACKED_PATHS].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    trackedReceipts.some(
+      (candidate) =>
+        candidate === null ||
+        typeof candidate !== "object" ||
+        !Number.isSafeInteger(candidate.bytes) ||
+        candidate.bytes < 0 ||
+        typeof candidate.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(candidate.sha256),
+    ) ||
+    !isDeepStrictEqual(artifact?.tests?.rootTestNames, DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES)
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T05 artifact identity or retained claims drifted.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedHistoricalReceipts(frozenArtifact, files) {
+  const taskTimeReceipts = new Map(
+    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    const authority = taskTimeReceipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M09-T05 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
+}
+
+function inspectStructuredInspectorSuccessor(files) {
+  for (const [relativePath, expectedSha256] of Object.entries(CURRENT_SUCCESSOR_SHA256)) {
+    const bytes = files.get(relativePath);
+    if (bytes === undefined || sha256(bytes) !== expectedSha256) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} exact reviewed T06 bytes drifted.`);
+    }
+  }
+  const app = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
+  const root = parseJson(files.get(ROOT_PACKAGE_PATH), ROOT_PACKAGE_PATH);
+  const structuredCommand =
+    "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx";
+  const rootPrefix =
+    "node scripts/verify-desen-app-schema-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:structured-inspector && ";
+  const rootCommands = {
+    "generate:desen-app-structured-inspector": `${rootPrefix}node scripts/generate-desen-app-structured-inspector-proof.mjs`,
+    "verify:desen-app-structured-inspector": `${rootPrefix}node scripts/verify-desen-app-structured-inspector.mjs`,
+    "test:desen-app-structured-inspector": `${rootPrefix}node --test tests/desen-app-structured-inspector.test.mjs`,
+  };
+  if (
+    app.scripts?.["test:structured-inspector"] !== structuredCommand ||
+    app.dependencies?.["@desen/protocol"] !== "workspace:*" ||
+    Object.entries(rootCommands).some(([name, command]) => root.scripts?.[name] !== command)
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T06 package or proof command drifted.");
+  }
+  const sourceMarkers = new Map([
+    [AUTHORING_DATA_PATH, ["deriveComponentInspectorControls", "ComponentInspectorControlPlan"]],
+    [
+      INSPECTOR_SOURCE_PATH,
+      [
+        "canonicalizeJsonBytes",
+        "parseJsonPointer",
+        'control.kind === "structured-json"',
+        "nestedDynamicValue",
+        "setDesenEditorOwnerProp",
+      ],
+    ],
+    [
+      PANEL_SOURCE_PATH,
+      ["StructuredJsonField", "parseStructuredJsonText", "formatStructuredJson", "Apply"],
+    ],
+    [
+      STRUCTURED_JSON_SOURCE_PATH,
+      ["PUBLISH_SOURCE_JSON_LIMITS", "canonicalizeJson", "parseStructuredJsonText"],
+    ],
+    [
+      INSPECTOR_TEST_PATH,
+      [
+        "edits a structured-JSON property while rejecting dynamic marker injection",
+        "locks only the dynamic child while preserving edits to its literal group sibling",
+      ],
+    ],
+    [
+      PANEL_TEST_PATH,
+      [
+        "nested and structured Inspector panel",
+        "commits structured JSON only through explicit Apply",
+      ],
+    ],
+    [
+      STRUCTURED_JSON_TEST_PATH,
+      ["rejects duplicate decoded member names at every object level", "dynamic-value"],
+    ],
+  ]);
+  for (const [relativePath, markers] of sourceMarkers) {
+    const source = decodeUtf8(files.get(relativePath), relativePath);
+    for (const marker of markers) {
+      if (!source.includes(marker)) {
+        fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} lost the T06 marker ${marker}.`);
+      }
+    }
+  }
+  return deepFreeze({
+    task: "M09-T06",
+    nestedObjectInspector: true,
+    schemaDerivedChildControls: true,
+    structuredJsonFallback: true,
+    strictDuplicateMemberRejection: true,
+    protocolDynamicValuesLocked: true,
+    explicitApplyOnly: true,
+    publicEditorCoreMutationRetained: true,
+    publisherBackedSessionPreviewRetained: true,
+    inspectorOutsideManagedCapabilitySubtree: true,
+    package: {
+      appName: app.name,
+      protocolDependency: app.dependencies["@desen/protocol"],
+      structuredInspectorTestCommand: structuredCommand,
+      rootCommands,
+    },
+  });
+}
+
+/** Authenticates frozen M09-T05 evidence and checks its live additive M09-T06 successor. */
 export async function buildDesenAppSchemaInspectorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
-  const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const [frozen, files] = await Promise.all([
+    authenticateFrozenArtifact(workspaceRoot),
+    readTrackedFiles(workspaceRoot, options.fileOverrides),
+  ]);
   const parents = DESEN_APP_SCHEMA_INSPECTOR_PARENT_PINS.map((pin) =>
     authenticateParent(
       pin.path === SELECTION_PARENT_ARTIFACT_PATH && options.parentArtifactBytes !== undefined
@@ -1137,93 +1366,51 @@ export async function buildDesenAppSchemaInspectorEvidence(rawOptions = undefine
       pin,
     ),
   );
-  const source = verifyDesenAppSchemaInspectorSourcePolicy({
-    authoringDataSource: decodeUtf8(files.get(AUTHORING_DATA_PATH), AUTHORING_DATA_PATH),
-    inspectorSource: decodeUtf8(files.get(INSPECTOR_SOURCE_PATH), INSPECTOR_SOURCE_PATH),
-    previewSource: decodeUtf8(files.get(PREVIEW_SOURCE_PATH), PREVIEW_SOURCE_PATH),
-    selectionSource: decodeUtf8(files.get(SELECTION_SOURCE_PATH), SELECTION_SOURCE_PATH),
-    panelSource: decodeUtf8(files.get(PANEL_SOURCE_PATH), PANEL_SOURCE_PATH),
-    adapterSource: decodeUtf8(files.get(ADAPTER_SOURCE_PATH), ADAPTER_SOURCE_PATH),
-    applicationSource: decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH),
-    applicationCss: decodeUtf8(files.get(APPLICATION_CSS_PATH), APPLICATION_CSS_PATH),
-    globalCss: decodeUtf8(files.get(GLOBAL_CSS_PATH), GLOBAL_CSS_PATH),
-  });
-  const schema = inspectCatalog(files.get(CATALOG_PATH));
-  const tests = inspectTests(files);
-  const packageContract = inspectPackages(files);
-  const trackedReceipts = receipts(files);
-  const artifact = deepFreeze({
+  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  const successor = inspectStructuredInspectorSuccessor(files);
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-schema-inspector",
     profile: "desen.app.schema-inspector-proof.v1",
     task: "M09-T05",
-    protocol: "0.1.0",
-    target: "web-react",
-    prerequisites: parents,
-    claim: {
-      taskStatus: "DONE",
-      schemaDerivedPrimitiveAndEnumControls: true,
-      controlKinds: ["boolean", "enum", "integer", "number", "string"],
-      publicEditorCoreAtomicMutation: true,
-      exactOwnDataEditCommandCapture: true,
-      hostileAccessorsSymbolsAndExtraFieldsRejected: true,
-      continuousSchemaRevalidation: true,
-      failedEditPreservesCurrentDocument: true,
-      dynamicValuesLocked: true,
-      structuredValuesLocked: true,
-      staleRouteAndSelectionRejected: true,
-      publisherSessionPreview: true,
-      exactPreviewRevisionReplacement: true,
-      sourceAndPreviewCommitAtomically: true,
-      publisherFailurePreservesPriorSession: true,
-      inspectorOutsideManagedCapabilitySubtree: true,
-      selectionOverlayBoundaryRetained: true,
-      persistenceClaimed: false,
-      activationClaimed: false,
-      browserE2eClaimed: false,
-      p08Status: "NOT_PROVEN",
-    },
-    authority: { schema, source },
-    application: {
-      package: packageContract,
-      mutationFlow: [
-        "validated Catalog/Source projection",
-        "route-valid Source selection",
-        "schema-derived control admission",
-        "public Editor Core atomic command",
-        "continuous complete-Source validation",
-        "Publisher session-local Bundle",
-        "exact adapter session replacement",
-      ],
-      ownership: {
-        inspector: "Desen App sibling chrome",
-        selectionOverlay: "Desen App sibling chrome retained from M09-T04",
-        managedCapabilitySubtree: "Runtime React adapters only",
-      },
-    },
-    tests,
-    boundary: {
-      trackedFiles: TRACKED_PATHS.length,
-      trackedReceipts,
-      proofReaderPaths: PROOF_READER_PATHS,
-      parentArtifacts: 3,
-      immutableInputs: true,
-      sourceSymlinksRejected: true,
-    },
     result: "PASS",
-    nonclaims: [
-      "M09-T06 is NOT_PROVEN: no nested-object editor or structured-JSON mutation UI is claimed.",
-      "M09-T08 is NOT_PROVEN: dynamic state and binding values remain locked.",
-      "M09-T10 is NOT_PROVEN: no Design/Run mode is claimed.",
-      "M09-T12 is NOT_PROVEN: no save/open or durable persistence UI is claimed.",
-      "M09-T14 is NOT_PROVEN: session preview is not control-plane publication or activation.",
-      "P-08 remains NOT_PROVEN until the complete visual authoring scope and browser E2E owner pass.",
-      "No private DOM, component geometry, hit testing, canvas picking, or managed-tree inspection is claimed.",
-      "No required-gate or hosted-CI pass is inferred from local evidence.",
-    ],
+    prerequisites: parents,
+    retainedClaim: {
+      taskStatus: frozen.artifact.claim.taskStatus,
+      schemaDerivedPrimitiveAndEnumControls:
+        frozen.artifact.claim.schemaDerivedPrimitiveAndEnumControls,
+      publicEditorCoreAtomicMutation: frozen.artifact.claim.publicEditorCoreAtomicMutation,
+      continuousSchemaRevalidation: frozen.artifact.claim.continuousSchemaRevalidation,
+      failedEditPreservesCurrentDocument: frozen.artifact.claim.failedEditPreservesCurrentDocument,
+      dynamicValuesLocked: frozen.artifact.claim.dynamicValuesLocked,
+      staleRouteAndSelectionRejected: frozen.artifact.claim.staleRouteAndSelectionRejected,
+      publisherSessionPreview: frozen.artifact.claim.publisherSessionPreview,
+      inspectorOutsideManagedCapabilitySubtree:
+        frozen.artifact.claim.inspectorOutsideManagedCapabilitySubtree,
+      selectionOverlayBoundaryRetained: frozen.artifact.claim.selectionOverlayBoundaryRetained,
+    },
+    successor,
+    boundary: {
+      retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
+      successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
+      currentPathReceipts: receipts(files),
+      additiveSuccessorReceipts: [
+        STRUCTURED_JSON_SOURCE_PATH,
+        PANEL_TEST_PATH,
+        STRUCTURED_JSON_TEST_PATH,
+      ].map((relativePath) => ({
+        path: relativePath,
+        bytes: files.get(relativePath).byteLength,
+        sha256: sha256(files.get(relativePath)),
+      })),
+    },
   });
-  const artifactBytes = canonicalArtifactBytes(artifact);
-  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  return deepFreeze({
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+  });
 }
 
 function verifyProofDocument(bytes, artifactSha256) {

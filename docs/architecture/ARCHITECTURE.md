@@ -711,7 +711,9 @@ The visual authoring product. M09-T01 establishes its application-owned shell an
 navigation. M09-T02 composes the first Catalog-driven, read-only authoring projection into that
 shell. M09-T03 adds one exact managed reference-adapter canvas, M09-T04 adds Source-identity
 selection outside that managed subtree, and M09-T05 adds schema-derived primitive/enum Inspector
-controls through public Editor Core and Publisher boundaries.
+controls through public Editor Core and Publisher boundaries. M09-T06 consumes the recursive
+control plan with closed-object controls and an explicit structured-JSON fallback without crossing
+the App-owned Inspector boundary.
 
 The first slice owns three exact route forms: `/projects`, `/projects/:projectId`, and
 `/projects/:projectId/surfaces/:surfaceId`. The bare root is replaced with `/projects`; app-owned
@@ -861,6 +863,52 @@ Design/Run mode, save/open UI, diagnostics navigation, control-plane publication
 P-08 therefore remains `NOT_PROVEN`. Exact local evidence is the 22,998-byte
 `docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json` at
 `sha256:473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b`.
+
+M09-T06 consumes the complete recursive Catalog SDK control plan. Present closed-object groups
+retain canonical child order, qualified accessible names, and exact RFC 6901 value and schema
+pointers, including escaped property names. A nested edit re-admits the current route, selection,
+Source node, capability, descriptor, pointer, requiredness, and value state, then rebuilds only the
+complete top-level owner prop through public Editor Core commands. An absent optional group is
+staged as one complete JSON object and set atomically.
+
+Arrays, open objects, unions, references, combinators, conditionals, pattern properties,
+unsupported shapes, and derivation-limit results remain visible and editable through an explicit
+structured-JSON fallback with a named reason. Catalog control hints stay opaque presentation
+metadata and cannot replace `propsSchema` as authority. Structured input is scanned under the
+Publisher Source JSON profile before parsing. Malformed or non-finite JSON, decoded duplicate
+members, unpaired Unicode, finite-profile overflow, and every decoded `$`-prefixed object key fail
+closed without a partial value. Accepted values are detached and recursively frozen. Formatting
+sorts object keys while preserving array order; when indentation would exceed the admitted profile,
+pretty accumulation stops early and compact canonical JSON keeps the admitted value editable.
+
+Route, selection, and edit commands are captured as exact own enumerable data. Mutation starts
+from the exact validator-admitted Source and Catalog snapshots, preventing caller drift between
+validation and use. A root fallback diffs the complete props object, counts only changed props,
+rejects more than 256 public transitions or 32 MiB of aggregate snapshot work, and performs
+deletions and shrinking replacements before growth so a valid near-limit endpoint is not rejected
+because of a larger private intermediate. Complete continuous validation and Publisher preflight
+still precede the atomic session-local `{document, preview}` replacement.
+
+The Inspector remains an App-owned `aside` outside the disabled Runtime React fieldset and managed
+capability subtree. Recursive groups use named fieldsets, repeated schema titles and empty property
+names remain accessibly distinguishable, draft failures stay inline, and stable pointer-keyed
+controls hand focus to a replacement group, textarea, or primitive control when the value kind
+changes. No private DOM/native structure, geometry, hit-test, canvas-picking, adapter, registry, or
+runtime authority is introduced.
+
+Exact local evidence is the 26,133-byte
+`docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json` at
+`sha256:6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec`. The focused suite
+passes 73/73, the complete App suite passes 118/118, the independent root proof passes 10/10, and
+the complete structural CI glob passes 323/323.
+The local CI authority contains 184 workloads and 87 proof pairs with a
+54-proof-unit/118-workload closure and ownership over 1,184 tracked paths, including 174
+proof-owned paths. Sequence 45 contains 41 artifacts and 82 readers. These receipts make no
+required-gate or hosted-CI claim.
+
+This does not resolve PF-025 or complete P-08. Dynamic `$` values remain locked for M09-T08, and
+slot/cardinality UI, state/actions, Design/Run, persistence, browser E2E, publication, activation,
+arbitrary-future-Catalog, and native-target claims remain outside M09-T06.
 
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,

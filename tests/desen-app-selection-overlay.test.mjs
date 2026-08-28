@@ -100,7 +100,7 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[0], () => {
   );
   assert.equal(built.currentCompatibility.task, "M09-T04");
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.successor.task, "M09-T05");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T06");
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[1], () => {
@@ -185,9 +185,14 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
     built.currentCompatibility.application.package.inspectorTestCommand,
     "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
   );
+  assert.equal(
+    built.currentCompatibility.application.package.structuredInspectorTestCommand,
+    "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+  );
   assert.equal(built.currentCompatibility.successor.schemaDerivedPrimitiveAndEnumControls, true);
   assert.equal(built.currentCompatibility.successor.publicEditorCoreAtomicMutation, true);
-  assert.equal(built.currentCompatibility.successor.dynamicAndStructuredValuesLocked, true);
+  assert.equal(built.currentCompatibility.successor.nestedObjectAndStructuredJsonEditing, true);
+  assert.equal(built.currentCompatibility.successor.dynamicValuesLocked, true);
   assert.equal(built.currentCompatibility.successor.publisherBackedSessionPreview, true);
   assert.equal(built.currentCompatibility.successor.sourceAndPreviewCommitAtomically, true);
   assert.equal(built.currentCompatibility.successor.inspectorOutsideManagedCapabilitySubtree, true);

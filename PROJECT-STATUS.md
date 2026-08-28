@@ -1024,19 +1024,50 @@ rather than a required-gate or hosted-CI pass. M09-T05 is `DONE`; P-08
 remains `NOT_PROVEN`, proof gates remain 10/13, implementation progress is 100/145 (69%), M09 is
 5/14 (36%), and M09-T06 is next.
 
+M09-T06 now consumes the complete recursive Catalog SDK control plan. Present closed-object groups
+retain canonical child order, qualified accessible names, and exact RFC 6901 value and schema
+pointers, including escaped property names. Nested edits rebuild only the complete top-level owner
+prop. An absent optional group is staged as one complete JSON object and set atomically. Arrays,
+open objects, unions, references, combinators, conditionals, pattern properties, unsupported
+schemas, and derivation-limit results remain editable through an explicit structured-JSON
+fallback with a visible reason and Apply, Reset, and eligible Unset actions.
+
+Structured input is scanned under the Publisher Source JSON profile before parsing. Malformed or
+non-finite JSON, decoded duplicate members, unpaired Unicode, limit violations, and decoded object
+keys beginning with `$` fail closed. Successful values are detached and recursively frozen.
+Formatting preserves array order and canonical object order; when pretty indentation would exceed
+the admitted profile, accumulation stops early and compact canonical JSON keeps the value editable.
+Route, selection, edit, validator-admitted Source, and Catalog authority are captured exactly before
+mutation. The root fallback counts only changed props, permits at most 256 public transitions and
+32 MiB of aggregate snapshot work, and applies deletions and shrinking replacements before growth.
+Every candidate still passes continuous validation and Publisher preflight before the atomic
+session-local `{document, preview}` state changes.
+
+The focused structured-Inspector suite passes 73/73, the complete App suite passes 118/118, the
+independent root proof passes 10/10, and the complete structural CI glob passes 323/323. Exact
+evidence is the 26,133-byte
+`docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json` artifact at
+`sha256:6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec`. The live local CI
+authority contains 184 workloads and 87 proof pairs—76 ordinary and 11 barriers—with a
+54-proof-unit/118-workload connected closure and complete 1,184-path/174-proof-owned ownership.
+Sequence 45 contains 41 artifacts and 82 readers. These are local receipts rather than a
+required-gate or hosted-CI pass. M09-T06 is `DONE`; P-08 remains `NOT_PROVEN`, PF-025 remains
+`OPEN`, proof gates remain 10/13, implementation progress is 101/145 (70%), M09 is 6/14 (43%),
+dynamic `$` editing remains M09-T08, and M09-T07 is next.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `100 / 145 tasks complete (69%)`
+- Overall implementation progress: `101 / 145 tasks complete (70%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
-- M09 progress: `5 / 14 tasks complete (36%)`
+- M09 progress: `6 / 14 tasks complete (43%)`
 - Proof-gate progress: `10 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1122,17 +1153,19 @@ remains `NOT_PROVEN`, proof gates remain 10/13, implementation progress is 100/1
   `M09-T02 — Catalog-driven component panel and layer tree`,
   `M09-T03 — Exact reference-adapter canvas`,
   `M09-T04 — Source-identity selection outside managed capability subtrees`,
-  `M09-T05 — Schema-driven primitive/enum inspector controls`
+  `M09-T05 — Schema-driven primitive/enum inspector controls`,
+  `M09-T06 — Nested-object controls and honest structured-JSON fallback`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M09-T06 — Nested-object controls and honest structured-JSON fallback`
-- Status: M08 is 10/10, M09 is 5/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T05 are
+- Next implementation task: `M09-T07 — Named-slot drop, move, reorder, cardinality, and acceptance UI`
+- Status: M08 is 10/10, M09 is 6/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T06 are
   `DONE`; `N-042` is `TESTED`, P-06 is `PROVEN`, P-07 and P-16 are `PARTIAL`, proof gates are
-  10/13, P-08 remains `NOT_PROVEN`, and implementation progress is 100/145. All 17 G07-due
+  10/13, P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, and implementation progress is 101/145.
+  All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
@@ -1165,7 +1198,13 @@ remains `NOT_PROVEN`, proof gates remain 10/13, implementation progress is 100/1
   preflight transaction, live local 182-workload/86-pair CI inventory,
   53-proof-unit/116-workload connected closure, and 1,175-path/172-proof-owned ownership authority.
   Sequence 44 passes 67/67 with 40 artifacts and 80 readers, and the complete structural CI suite
-  passes 320/320 locally. No required-gate or hosted result is claimed.
+  passes 320/320 locally. M09-T06 is `DONE` with its exact structured-Inspector artifact, 73/73
+  focused cases, 118/118 complete App cases, 10/10 independent root proof, recursive RFC 6901
+  controls, strict Publisher-profile JSON capture, bounded changed-only root transitions, and
+  atomic Publisher-backed preview. Its live local CI authority contains 184 workloads/87 proof
+  pairs, a 54-proof-unit/118-workload connected closure, 1,184-path/174-proof-owned ownership, and
+  a sequence-45 checkpoint with 41 artifacts and 82 readers. No required-gate or hosted result is
+  claimed.
 
 ## Completed preparation
 
@@ -3713,6 +3752,52 @@ M09-T05 evidence:
   native-target, or pixel-fidelity guarantee is implemented or proven
 - coverage decision: M09-T05 is `DONE`; P-08 remains `NOT_PROVEN`; proof gates remain 10/13;
   overall progress advances to 100/145 (69%); M09 advances to 5/14 (36%); M09-T06 is next
+
+M09-T06 evidence:
+
+- `docs/proof/DESEN-APP-STRUCTURED-INSPECTOR.md`
+- `docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json`, exactly 26,133 bytes at
+  `sha256:6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec`
+- prerequisite authority: the exact frozen 22,998-byte M09-T05 schema-Inspector artifact is
+  authenticated before any M09-T06 claim
+- recursive control boundary: present closed-object groups retain canonical child order,
+  qualified accessible names, and exact RFC 6901 value/schema pointers; nested edits rebuild only
+  the complete top-level owner prop, and an absent optional group is staged and set as one complete
+  JSON object
+- fallback boundary: arrays, open objects, unions, references, combinators, conditionals, pattern
+  properties, unsupported schemas, and derivation-limit results remain editable through an
+  explicit structured-JSON textarea with a visible reason and Apply, Reset, and eligible Unset
+  actions; Catalog control hints stay opaque under PF-025
+- structured-data boundary: input is scanned under the Publisher Source JSON profile before
+  parsing; malformed or non-finite JSON, decoded duplicate members, unpaired Unicode, finite-limit
+  overflow, and every decoded `$`-prefixed object key fail closed, while accepted values are
+  detached, recursively frozen, and deterministically formatted without reordering arrays
+- authority and mutation boundary: exact own-data route, selection, and edit snapshots plus the
+  validator-admitted Source and Catalog snapshots close hostile caller drift; root replacement
+  counts only changed props, rejects more than 256 public transitions or 32 MiB of aggregate
+  snapshot work, and performs deletions and shrinking replacements before growth
+- preview and UI boundary: complete continuous validation and Publisher preflight precede the
+  atomic session-local `{document, preview}` replacement; recursive fieldsets, inline draft errors,
+  bounded compact formatting, and pointer-keyed focus handoff remain App-owned outside the managed
+  capability subtree
+- local proof: the focused structured-Inspector suite passes 73/73; the complete App suite passes
+  118/118; the independent root proof passes 10/10; the complete structural CI glob passes 323/323;
+  App typecheck, lint, and production build pass locally; the artifact records 28 exact tracked-file
+  receipts
+- CI authority: the live local inventory registers 184 workloads and 87 proof pairs, split into 76
+  ordinary pairs and 11 barriers; its formal parent produces a 54-proof-unit, 118-workload
+  connected closure; complete ownership covers 1,184 tracked paths and 174 proof-owned paths
+- checkpoint authority: sequence 45 preserves the first 44 checkpoints and every predecessor
+  artifact, appends the T06 artifact at index 40 and T06 proof/root readers at `[80, 81]`, and
+  contains 41 artifacts and 82 readers
+- evidence boundary: these task, CI, ownership, and checkpoint receipts are local; no
+  required-gate or hosted-CI result is inferred in this update
+- scope nonclaims: no dynamic-value, slot/cardinality, state/binding, event/action, Design/Run,
+  save/open, diagnostics-navigation, browser-E2E, control-plane publication, activation,
+  arbitrary-future-Catalog, native-target, or pixel-fidelity guarantee is implemented or proven
+- coverage decision: M09-T06 is `DONE`; P-08 remains `NOT_PROVEN`; PF-025 remains `OPEN`; proof
+  gates remain 10/13; overall progress advances to 101/145 (70%); M09 advances to 6/14 (43%);
+  dynamic `$` editing remains M09-T08, and M09-T07 is next
 
 ## Status vocabulary
 

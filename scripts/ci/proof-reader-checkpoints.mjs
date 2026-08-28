@@ -82,10 +82,11 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "40d7c380cec3a7efd04316959a41abda3c8f71c1604f7f2fb892f18ae4cd2fa5",
   "0bbb101332d7af5dcf7260b6df6961837003571f67a6e3a69232e65e19cded58",
   "f0c5f3bfbc30ccf230c5256b3a5672c29ffa0e884129ae210571895bd063812c",
+  "340460237dd173995d4d0fa158f0e4c6c54b76d55958757d742a981466fd213f",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
-  25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40,
+  25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
@@ -524,6 +525,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/desen-app-schema-inspector-proof.mjs",
     "tests/desen-app-schema-inspector.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M09-T06",
+    {
+      path: "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json",
+      bytes: 26_133,
+      sha256: "6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec",
+    },
+    "scripts/lib/desen-app-structured-inspector-proof.mjs",
+    "tests/desen-app-structured-inspector.test.mjs",
   ),
 ]);
 

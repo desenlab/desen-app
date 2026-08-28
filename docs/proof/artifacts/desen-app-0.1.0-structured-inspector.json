@@ -1,0 +1,588 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-structured-inspector",
+  "profile": "desen.app.structured-inspector-proof.v1",
+  "task": "M09-T06",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M09-T05",
+      "proofId": "desen-app-schema-inspector",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json",
+      "bytes": 22998,
+      "sha256": "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b",
+      "profile": "desen.app.schema-inspector-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "recursiveClosedObjectControls": true,
+    "canonicalRfc6901Pointers": true,
+    "completeFallbackReasonMatrix": true,
+    "structuredJsonFallbackVisibleAndEditable": true,
+    "strictBoundedStructuredJsonCapture": true,
+    "duplicateMembersAndInvalidUnicodeRejected": true,
+    "publisherJsonLimitsEnforced": true,
+    "admittedStructuredJsonRemainsEditableAtPrettyLimit": true,
+    "boundedPrettyFormattingConstruction": true,
+    "publicEditorCoreNestedMutation": true,
+    "exactOwnDataEditCommandCapture": true,
+    "exactOwnDataRouteAndSelectionCapture": true,
+    "validatedSourceSnapshotMutation": true,
+    "completeTopLevelOwnerRebuild": true,
+    "rootPropsTransitionDeterministic": true,
+    "rootPropsDeleteBeforeSet": true,
+    "rootPropsShrinkBeforeGrowth": true,
+    "unchangedRootPropsSkipped": true,
+    "boundedSynchronousRootTransitions": true,
+    "semanticRootNoOpSucceedsWithValidatedDocument": true,
+    "continuousSchemaRevalidation": true,
+    "failedEditPreservesCurrentDocument": true,
+    "dynamicValuesLocked": true,
+    "dynamicAncestorGroupsLocked": true,
+    "controlHintsRemainOpaque": true,
+    "staleRouteSelectionAndPointerRejected": true,
+    "accessibleDuplicateAndEmptyPropertyNames": true,
+    "semanticNestedGroupFieldsets": true,
+    "memoizedStructuredFormatting": true,
+    "canonicalNumericDraftWithInlineErrors": true,
+    "describedHelpRetainedWithInlineErrors": true,
+    "valueKindReplacementFocusHandoff": true,
+    "stableInspectorFieldIdentity": true,
+    "publisherSessionPreview": true,
+    "exactPreviewRevisionReplacement": true,
+    "sourceAndPreviewCommitAtomically": true,
+    "publisherFailurePreservesPriorSession": true,
+    "inspectorOutsideManagedCapabilitySubtree": true,
+    "selectionOverlayBoundaryRetained": true,
+    "persistenceClaimed": false,
+    "activationClaimed": false,
+    "browserE2eClaimed": false,
+    "p08Status": "NOT_PROVEN"
+  },
+  "authority": {
+    "fallback": {
+      "reasons": [
+        "array",
+        "open-object",
+        "multi-type",
+        "reference",
+        "combinator",
+        "conditional",
+        "pattern",
+        "unsupported-schema",
+        "derivation-limit"
+      ],
+      "schemaAuthority": "component.propsSchema",
+      "hintsAuthority": "opaque top-level sidecar only",
+      "referenceCatalogHasNestedFallbackFixture": false,
+      "syntheticAppTestsRequired": true
+    },
+    "source": {
+      "authoringData": {
+        "imports": {
+          "packageImports": [
+            "@desen/reference-catalog-web/catalog.json",
+            "@desen/catalog-sdk",
+            "@desen/validator",
+            "@desen/catalog-sdk",
+            "@desen/editor-core"
+          ],
+          "privatePackageImports": 0
+        },
+        "publicCatalogSdkDerivation": true,
+        "exactValidatedCatalogAndSourceProjection": true,
+        "recursiveControlPlanRetained": true,
+        "validationCatalogSetRetained": true,
+        "validationDocumentSnapshotRetained": true
+      },
+      "inspector": {
+        "imports": {
+          "packageImports": [
+            "@desen/editor-core",
+            "@desen/protocol",
+            "@desen/catalog-sdk",
+            "@desen/editor-core"
+          ],
+          "privatePackageImports": 0
+        },
+        "editorCoreCalls": [
+          "setDesenEditorOwnerProp",
+          "deleteDesenEditorOwnerProp",
+          "createDesenEditorContinuousValidator",
+          "canonicalizeJson",
+          "canonicalizeJsonBytes",
+          "parseJsonPointer"
+        ],
+        "schemaDescriptorAuthority": true,
+        "recursiveGroupProjection": true,
+        "canonicalValuePointerReadmission": true,
+        "nestedTopOwnerRebuild": true,
+        "deterministicWholePropsTransition": true,
+        "exactOwnDataEditCapture": true,
+        "detachedJsonCapture": true,
+        "dynamicLockBeforeMutation": true,
+        "dynamicAncestorLockBeforeMutation": true,
+        "exactOwnDataRouteAndSelectionCapture": true,
+        "routeSelectionAndControlReadmission": true,
+        "validatedSourceSnapshotMutation": true,
+        "rootDeleteBeforeSetTransition": true,
+        "rootReducingSetsBeforeGrowth": true,
+        "unchangedRootPropsSkipped": true,
+        "rootTransitionCountLimit": 256,
+        "rootTransitionWorkByteLimit": 33554432,
+        "rootTransitionBudgetBeforeEditorCoreLoop": true,
+        "semanticRootNoOpReturnsValidatedDocument": true,
+        "accessibleQualifiedNameDisambiguation": true,
+        "publicEditorCoreOnly": true,
+        "completeSourceRevalidation": true,
+        "noPartialDocumentOnFailure": true
+      },
+      "structuredJson": {
+        "imports": {
+          "packageImports": [
+            "@desen/publisher",
+            "@desen/protocol",
+            "@desen/catalog-sdk"
+          ],
+          "privatePackageImports": 0
+        },
+        "parserProfile": "strict-bounded-json",
+        "malformedAndNonFiniteRejected": true,
+        "duplicateDecodedMembersRejected": true,
+        "invalidUnicodeRejected": true,
+        "publisherLimitsEnforced": [
+          "maxSourceUtf8Bytes",
+          "maxDecodedStringCodeUnits",
+          "maxNumberTokenCodeUnits",
+          "maxJsonDepth",
+          "maxJsonValueOccurrences"
+        ],
+        "dynamicMemberNamesRejected": true,
+        "detachedRecursivelyFrozenResult": true,
+        "deterministicPrettyFormatting": true,
+        "canonicalCompactFallbackForPrettyLimit": true,
+        "boundedPrettyFormattingConstruction": true
+      },
+      "preview": {
+        "imports": {
+          "packageImports": [
+            "@desen/editor-core",
+            "@desen/publisher",
+            "@desen/reference-catalog-web/catalog.json",
+            "@desen/editor-core",
+            "@desen/publisher"
+          ],
+          "privatePackageImports": 0
+        },
+        "sourceReadmittedBeforePublication": true,
+        "publicPublisherOnly": true,
+        "immutableBundleAndRevisionReturned": true,
+        "persistenceAuthority": false,
+        "activationAuthority": false
+      },
+      "selection": {
+        "imports": {
+          "packageImports": [
+            "@desen/runtime-react"
+          ],
+          "privatePackageImports": 0
+        },
+        "validatedModelMembershipRequired": true,
+        "routeIdentityRequired": true,
+        "runtimeAuthority": "callback-free diagnostic identity only"
+      },
+      "panel": {
+        "imports": {
+          "packageImports": [
+            "@desen/catalog-sdk"
+          ],
+          "privatePackageImports": 0
+        },
+        "owner": "Desen App",
+        "semanticContainer": "aside",
+        "recursiveGroupPresentation": true,
+        "structuredJsonTextarea": true,
+        "fallbackReasons": [
+          "array",
+          "open-object",
+          "multi-type",
+          "reference",
+          "combinator",
+          "conditional",
+          "pattern",
+          "unsupported-schema",
+          "derivation-limit"
+        ],
+        "parseBeforeEditDispatch": true,
+        "accessibleErrorAndStatusFeedback": true,
+        "semanticNestedGroupFieldsets": true,
+        "memoizedStructuredFormatting": true,
+        "canonicalNumericDraftAfterCommit": true,
+        "singleInlineValidationAlertPerDraft": true,
+        "helpDescriptionRetainedWithInlineError": true,
+        "dynamicAncestorUnsetHidden": true,
+        "stableInspectorFieldIdentity": true,
+        "valueKindFocusHandoff": true,
+        "semanticReplacementFocusTargets": true,
+        "dynamicInteractiveControls": 0,
+        "managedAdapterImports": 0
+      },
+      "adapter": {
+        "imports": {
+          "packageImports": [
+            "@desen/reference-catalog-web/catalog.json",
+            "@desen/reference-catalog-web/react-adapters",
+            "@desen/reference-catalog-web/tokens",
+            "@desen/runtime-core",
+            "@desen/runtime-react",
+            "@desen/runtime-core",
+            "@desen/runtime-react"
+          ],
+          "privatePackageImports": 0
+        },
+        "publisherBundleAcceptedAsOpaqueInput": true,
+        "revisionReplacementDisposesPreviousSession": true,
+        "selectionOverlayRemainsAppOwnedSibling": true,
+        "inspectorImports": 0
+      },
+      "application": {
+        "imports": {
+          "packageImports": [
+            "@desen/reference-catalog-web/catalog.json"
+          ],
+          "privatePackageImports": 0
+        },
+        "documentOwner": "route-keyed SurfaceEditor session state",
+        "modelAndPreviewDerivedFromSameDocument": true,
+        "sourceAndPreviewCommitAtomically": true,
+        "publisherFailurePreservesPriorSession": true,
+        "inspectorAndCanvasComposedByApp": true,
+        "inspectorInsideManagedSubtree": false,
+        "saveAuthority": false
+      },
+      "css": {
+        "appOwnedInspectorSelectors": true,
+        "structuredEditorSelectors": true,
+        "managedDescendantSelectors": 0,
+        "responsiveThreePanelWorkspace": true
+      }
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+      "rootCommands": {
+        "generate:desen-app-structured-inspector": "node scripts/verify-desen-app-schema-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:structured-inspector && node scripts/generate-desen-app-structured-inspector-proof.mjs",
+        "verify:desen-app-structured-inspector": "node scripts/verify-desen-app-schema-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:structured-inspector && node scripts/verify-desen-app-structured-inspector.mjs",
+        "test:desen-app-structured-inspector": "node scripts/verify-desen-app-schema-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:structured-inspector && node --test tests/desen-app-structured-inspector.test.mjs"
+      },
+      "directParentVerifiers": [
+        "node scripts/verify-desen-app-schema-inspector.mjs"
+      ],
+      "publicProtocolDependency": true
+    },
+    "mutationFlow": [
+      "validated Catalog/Source projection",
+      "route-valid Source selection",
+      "recursive schema control and pointer readmission",
+      "strict structured JSON capture when required",
+      "public Editor Core top-level owner transition",
+      "continuous complete-Source validation",
+      "Publisher session-local Bundle",
+      "atomic Source and exact adapter session replacement"
+    ],
+    "ownership": {
+      "inspector": "Desen App sibling chrome",
+      "selectionOverlay": "Desen App sibling chrome retained from M09-T04",
+      "managedCapabilitySubtree": "Runtime React adapters only"
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/app-web test:structured-inspector && node --test tests/desen-app-structured-inspector.test.mjs",
+    "appTestNames": {
+      "apps/desen-app/test/structured-json.test.ts": [
+        "returns a detached recursively frozen JSON value without prototype-name interpretation",
+        "rejects malformed JSON and non-finite JSON numbers without exposing partial data",
+        "rejects duplicate decoded member names at every object level",
+        "rejects raw and escaped unpaired Unicode while accepting scalar pairs",
+        "keeps every decoded protocol-reserved object member behind M09-T08",
+        "enforces Publisher depth, value-count, and number-token boundaries exactly",
+        "enforces Publisher decoded-string and raw UTF-8 byte boundaries exactly",
+        "formats objects canonically and arrays semantically before exact round trip",
+        "keeps a deeply indented admitted value editable through compact fallback"
+      ],
+      "apps/desen-app/test/authoring-inspector.test.ts": [
+        "derives the exact canonical primitive and enum matrix for every reference component",
+        "distinguishes literal, absent, and dynamic Source values without coercion",
+        "sets string, enum, boolean, and number props through fresh immutable Source snapshots",
+        "deletes only an existing optional prop and rejects absent or required deletion atomically",
+        "rejects invalid enum and numeric values without mutating the current Source",
+        "keeps dynamic props outside T05 mutation authority and preserves their exact objects",
+        "captures exact own-data edit fields before authorization and rejects accessor drift",
+        "rejects selection accessors unread and captures a data-descriptor Proxy exactly once",
+        "mutates the validator-admitted Source snapshot when a hostile document Proxy drifts",
+        "rejects stale routes and forged selection identity before exposing or applying controls",
+        "preserves integer and mixed primitive enum values with exact JSON types",
+        "derives nested closed-object groups and edits RFC 6901-escaped child pointers",
+        "disambiguates repeated schema titles and names an empty property accessibly",
+        "creates an absent optional group with one atomic whole-group set",
+        "edits a structured-JSON property while rejecting dynamic marker injection",
+        "replaces all props through an honest root structured-JSON fallback",
+        "replaces disjoint near-limit root props without exceeding the private transition budget",
+        "shrinks an existing near-limit root prop before adding lexically earlier growth",
+        "counts only changed root props against the synchronous transition budget",
+        "rejects a wide root replacement before public per-prop commands can block the UI",
+        "locks only the dynamic child while preserving edits to its literal group sibling",
+        "locks whole-group replacement and deletion around an optional dynamic child",
+        "treats __proto__ and constructor as exact JSON property names without pollution",
+        "keeps dynamic object values bound instead of presenting the structured fallback"
+      ],
+      "apps/desen-app/test/inspector-panel.test.tsx": [
+        "exposes recursive groups and leaf controls through qualified accessible names",
+        "canonicalizes a successful decimal draft and keeps validation errors inline",
+        "shows an honest fallback reason and commits structured JSON only through explicit Apply",
+        "rejects %s structured JSON before invoking the edit boundary",
+        "hides optional group Unset when the current subtree contains a dynamic value",
+        "stages an absent group as complete JSON and dispatches its exact group pointer",
+        "offers Unset for an optional structured property but never for the root pointer"
+      ],
+      "apps/desen-app/test/authoring-preview.test.ts": [
+        "admits the official-derived Source as the frozen direct reference editor document",
+        "reproduces the exact session-local baseline Bundle and official revision",
+        "publishes a valid primitive prop edit as a fresh exact Bundle revision",
+        "rejects a runtime-cast non-Source without throwing or exposing a partial Bundle",
+        "rejects a structurally valid but Catalog-invalid prop edit without a partial Bundle"
+      ],
+      "apps/desen-app/test/adapter-canvas.test.tsx": [
+        "renders the official-derived sign-in only through the shared real adapters",
+        "fails closed for every unsupported project or surface without mounting sign-in",
+        "removes a previous tree synchronously and disposes the exact route session",
+        "replaces the exact session when a current authoring draft Bundle is rerendered",
+        "balances StrictMode replay and final unmount with exact session disposal",
+        "renders Source-identity selection chrome as a sibling outside the managed subtree",
+        "keeps a selected conditional Source node honest when it is not materialized",
+        "rejects stale and cross-route selection identities without exposing overlay chrome"
+      ],
+      "apps/desen-app/test/application.test.tsx": [
+        "renders an app-native projects gallery with explicit landmarks and current navigation",
+        "filters only the fixed project inventory and provides a clear recovery action",
+        "uses same-document navigation and focuses the new route heading",
+        "reacts to browser traversal and keeps route focus inside the content landmark",
+        "renders the exact selected surface, layer hierarchy, and read-only managed adapter canvas",
+        "selects Source layers accessibly and keeps the identity overlay outside managed adapters",
+        "edits schema-derived string and enum props and refreshes the exact adapter preview",
+        "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
+        "keeps bound props locked while boolean and numeric edits fail or apply atomically",
+        "resets local drafts across Source identities and qualifies repeated edit actions",
+        "switches to the exact Catalog component library and filters only the local view",
+        "does not substitute the sign-in Source tree or adapter canvas for another preview surface",
+        "removes the managed sign-in tree synchronously when routing to an unsupported surface",
+        "guides a catalog-less project without inventing a surface or enabled action",
+        "fails closed for $pathname"
+      ]
+    },
+    "rootTestNames": [
+      "[authority] authenticates the exact frozen M09-T05 schema-inspector parent",
+      "[schema] proves recursive groups, canonical pointers, and the complete fallback matrix",
+      "[structured-json] proves strict bounded parsing and deterministic formatting",
+      "[mutation] proves nested public Editor Core edits and complete Source revalidation",
+      "[safety] locks dynamic values and rejects stale or forged pointer authority",
+      "[preview] proves atomic Source and Publisher-backed session replacement",
+      "[ownership] keeps structured Inspector chrome outside managed capability subtrees",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[policy] rejects weakened group, fallback, JSON, mutation, and ownership sources",
+      "[verification] rejects parent, artifact, report, and filesystem authority drift"
+    ],
+    "semanticCoverage": [
+      "RECURSIVE_GROUPS",
+      "RFC6901_POINTERS",
+      "COMPLETE_FALLBACK_MATRIX",
+      "STRICT_JSON_CAPTURE",
+      "EXACT_ROUTE_SELECTION_CAPTURE",
+      "VALIDATED_SOURCE_SNAPSHOT_MUTATION",
+      "ROOT_DELETE_BEFORE_SET",
+      "ROOT_TRANSITION_DIFF_AND_WORK_BUDGET",
+      "SEMANTIC_ROOT_NOOP_NORMALIZATION",
+      "DYNAMIC_VALUE_LOCK",
+      "DYNAMIC_ANCESTOR_LOCK",
+      "CONTINUOUS_REVALIDATION",
+      "ACCESSIBLE_QUALIFIED_NAMES",
+      "SEMANTIC_GROUP_FIELDSETS",
+      "INLINE_DRAFT_VALIDATION",
+      "BOUNDED_PRETTY_FORMATTING",
+      "VALUE_KIND_FOCUS_HANDOFF",
+      "ATOMIC_PUBLISHER_PREVIEW",
+      "APP_OWNED_INSPECTOR"
+    ]
+  },
+  "boundary": {
+    "trackedFiles": 28,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 1824,
+        "sha256": "145a5d118a0327fc10e192fcee23f5e66858dc508a18485b723cac68e852665b"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 10920,
+        "sha256": "a678302fd2931172d32f6509dc37018a294bc938ccca73df646a715516a6db38"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 40459,
+        "sha256": "f8edeac5a918dcd8ba7b2b636a32473ccc7c1082bfa5d743763a85d25225d637"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 33727,
+        "sha256": "e030bbad64e1909a2f3237de3d820f13af730439c0f94e289553782b990dcab0"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 14937,
+        "sha256": "cc185e4094a97a0e36c304f8e6bc7bf2630a481ceb4143d645cbe1f600d1dbd6"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-inspector.ts",
+        "bytes": 28298,
+        "sha256": "8a79b662f5b7bf15147d242b38916162d2f6f75e175d056ba9434177c09ce8e6"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-preview.ts",
+        "bytes": 3704,
+        "sha256": "75fa2d605f8c5ceebc2668c1f4c739155c7791b895132dc9a5fac183384e3d34"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-selection.ts",
+        "bytes": 6147,
+        "sha256": "e97eed87734fff6fdc3a40dbc81754a88318238090e4c1dfcc53062e8ff7fc7c"
+      },
+      {
+        "path": "apps/desen-app/src/inspector-panel.tsx",
+        "bytes": 23023,
+        "sha256": "a9362b4531a00bbe24cf07e9d75e6c58fe27051d77fec48e7f6a1f269bffeca0"
+      },
+      {
+        "path": "apps/desen-app/src/structured-json.ts",
+        "bytes": 12402,
+        "sha256": "9c28b34b37bd02d213750f17c868807d4dd50c9fffb35ce6c3e3e6483a513c36"
+      },
+      {
+        "path": "apps/desen-app/src/styles.css",
+        "bytes": 1734,
+        "sha256": "4cffb8e77e10402919b942834020f19b330fe34cd06654ed7ff5b2b9c68d9e35"
+      },
+      {
+        "path": "apps/desen-app/test/adapter-canvas.test.tsx",
+        "bytes": 11338,
+        "sha256": "6f09674b0f0dd22bdc61e158c8567df4fdbdbe3ca3d96710b54f5e9138ce8de0"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 28340,
+        "sha256": "292cb62cfe43b17c39b1548409a77e128ab030fc005bba9a99b98c95ce4f443c"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-inspector.test.ts",
+        "bytes": 49657,
+        "sha256": "77f777f2790962df2e0b984cf06af57200d958a5faf4dee7c9d6845c32b27406"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-preview.test.ts",
+        "bytes": 4001,
+        "sha256": "1e514ec48f41d6e565197595d1bd4cbbbacf42b50d960cb7f28b4ad27b4510dc"
+      },
+      {
+        "path": "apps/desen-app/test/inspector-panel.test.tsx",
+        "bytes": 18394,
+        "sha256": "73280b88d69fa0906f7f6728cb5abc9b732752b7d2ece3a096e13fe59725a7e2"
+      },
+      {
+        "path": "apps/desen-app/test/structured-json.test.ts",
+        "bytes": 6523,
+        "sha256": "e09774464eb09f99074619ea9d33f78a111e4799127b3ff32ed9841645b3efed"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json",
+        "bytes": 22998,
+        "sha256": "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b"
+      },
+      {
+        "path": "examples/sign-in/official-derived.bundle.desen.json",
+        "bytes": 4899,
+        "sha256": "334450fa1864bf280a30342090a46ba1d2f2dc96552b9430afdde5fcada902b0"
+      },
+      {
+        "path": "examples/sign-in/official-derived.source.desen.json",
+        "bytes": 4724,
+        "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+      },
+      {
+        "path": "package.json",
+        "bytes": 87570,
+        "sha256": "2e5158e6d3d58cdcb4320ffc4b343ec0b30533b84c23c81a080a650280d3334b"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129394,
+        "sha256": "463a35abf13fd9ba6acb897aca52a11e7a90c8fcfedbce085e82f89c23418d89"
+      },
+      {
+        "path": "scripts/generate-desen-app-structured-inspector-proof.mjs",
+        "bytes": 805,
+        "sha256": "c56cf9ce92c640b316333d902eefa7132ab5d8ba847460e8da0fd392e7d48d39"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-structured-inspector-proof.mjs",
+        "bytes": 59817,
+        "sha256": "9075433fd20436f6ae79075470722fe8e23ee65fe82f2347ac151ef25667d729"
+      },
+      {
+        "path": "scripts/verify-desen-app-structured-inspector.mjs",
+        "bytes": 671,
+        "sha256": "e8861944b18082e6dc6f12da74a87d06b0ebecd0138c5b8b0ff0a4a83951fe37"
+      },
+      {
+        "path": "tests/desen-app-structured-inspector.test.mjs",
+        "bytes": 23934,
+        "sha256": "835162247f14fe5183a31ec9c806cd23f0c3dfeb43515afe622b539637c9970e"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-structured-inspector-proof.mjs",
+      "scripts/generate-desen-app-structured-inspector-proof.mjs",
+      "scripts/verify-desen-app-structured-inspector.mjs",
+      "tests/desen-app-structured-inspector.test.mjs"
+    ],
+    "parentArtifacts": 1,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M09-T08 is NOT_PROVEN: dynamic state and binding values remain locked.",
+    "M09-T10 is NOT_PROVEN: no Design/Run mode is claimed.",
+    "M09-T12 is NOT_PROVEN: no save/open or durable persistence UI is claimed.",
+    "M09-T14 is NOT_PROVEN: session preview is not control-plane publication or activation.",
+    "P-08 remains NOT_PROVEN until the complete visual authoring scope and browser E2E owner pass.",
+    "No private DOM, component geometry, hit testing, canvas picking, or managed-tree inspection is claimed.",
+    "No required-gate or hosted-CI pass is inferred from local evidence."
+  ]
+}

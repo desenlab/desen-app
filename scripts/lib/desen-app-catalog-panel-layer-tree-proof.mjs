@@ -24,6 +24,7 @@ const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.
 const AUTHORING_INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
 const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
+const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const OFFICIAL_BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
@@ -31,6 +32,8 @@ const AUTHORING_TEST_PATH = "apps/desen-app/test/authoring-data.test.ts";
 const AUTHORING_SELECTION_TEST_PATH = "apps/desen-app/test/authoring-selection.test.ts";
 const AUTHORING_INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.test.ts";
 const AUTHORING_PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
+const INSPECTOR_PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
+const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
@@ -107,8 +110,11 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_INSPECTOR_SOURCE_PATH,
     AUTHORING_PREVIEW_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
+    STRUCTURED_JSON_SOURCE_PATH,
     AUTHORING_INSPECTOR_TEST_PATH,
     AUTHORING_PREVIEW_TEST_PATH,
+    INSPECTOR_PANEL_TEST_PATH,
+    STRUCTURED_JSON_TEST_PATH,
   ]),
 ]);
 const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
@@ -118,6 +124,7 @@ const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
   AUTHORING_INSPECTOR_SOURCE_PATH,
   AUTHORING_PREVIEW_SOURCE_PATH,
   INSPECTOR_PANEL_SOURCE_PATH,
+  STRUCTURED_JSON_SOURCE_PATH,
 ]);
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
   TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
@@ -780,6 +787,7 @@ function verifyPackage(bytes) {
     "@desen/catalog-sdk": "workspace:*",
     "@desen/editor-core": "workspace:*",
     "@desen/publisher": "workspace:*",
+    "@desen/protocol": "workspace:*",
     "@desen/reference-catalog-web": "workspace:*",
     "@desen/runtime-core": "workspace:*",
     "@desen/runtime-react": "workspace:*",
@@ -813,6 +821,8 @@ function verifyPackage(bytes) {
       "vitest run test/authoring-selection.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
     manifest.scripts?.["test:inspector"] !==
       "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
+    manifest.scripts?.["test:structured-inspector"] !==
+      "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
     manifest.scripts?.["test:shell"] !==
       "vitest run test/project-navigation.test.ts test/application.test.tsx test/main-lifecycle.test.tsx"
   ) {
@@ -827,9 +837,11 @@ function verifyPackage(bytes) {
     successorTestScript: manifest.scripts["test:canvas"],
     selectionSuccessorTestScript: manifest.scripts["test:selection"],
     inspectorSuccessorTestScript: manifest.scripts["test:inspector"],
+    structuredInspectorSuccessorTestScript: manifest.scripts["test:structured-inspector"],
     editorCoreDependency: true,
     catalogSdkDependency: true,
     publisherDependency: true,
+    protocolDependency: true,
     runtimeCoreDependency: true,
     runtimeReactDependency: true,
     exactReferenceAdapterSubpath: "@desen/reference-catalog-web/react-adapters",
@@ -863,6 +875,7 @@ function resolveRelativeImport(importerPath, specifier) {
       candidate === AUTHORING_INSPECTOR_SOURCE_PATH ||
       candidate === AUTHORING_PREVIEW_SOURCE_PATH ||
       candidate === INSPECTOR_PANEL_SOURCE_PATH ||
+      candidate === STRUCTURED_JSON_SOURCE_PATH ||
       candidate === SOURCE_PATH ||
       candidate === OFFICIAL_BUNDLE_PATH,
   );
@@ -971,6 +984,7 @@ function inspectImportsAndExecutionBoundary(files) {
   let catalogSdkImports = 0;
   let editorCoreImports = 0;
   let publisherImports = 0;
+  let protocolImports = 0;
   let exactRegistryConstructionCalls = 0;
   let publicDiagnosticIndexTypeOnlyImports = 0;
   const successorImportDeclarations = new Map();
@@ -1100,6 +1114,7 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_SOURCE_PATH,
               AUTHORING_INSPECTOR_SOURCE_PATH,
               INSPECTOR_PANEL_SOURCE_PATH,
+              STRUCTURED_JSON_SOURCE_PATH,
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null
@@ -1109,9 +1124,11 @@ function inspectImportsAndExecutionBoundary(files) {
           catalogSdkImports += 1;
         } else if (specifier === "@desen/editor-core") {
           if (
-            ![AUTHORING_INSPECTOR_SOURCE_PATH, AUTHORING_PREVIEW_SOURCE_PATH].includes(
-              relativePath,
-            ) ||
+            ![
+              AUTHORING_SOURCE_PATH,
+              AUTHORING_INSPECTOR_SOURCE_PATH,
+              AUTHORING_PREVIEW_SOURCE_PATH,
+            ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null
           ) {
@@ -1120,13 +1137,25 @@ function inspectImportsAndExecutionBoundary(files) {
           editorCoreImports += 1;
         } else if (specifier === "@desen/publisher") {
           if (
-            relativePath !== AUTHORING_PREVIEW_SOURCE_PATH ||
+            ![AUTHORING_PREVIEW_SOURCE_PATH, STRUCTURED_JSON_SOURCE_PATH].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null
           ) {
             fail("IMPORT_BOUNDARY_DRIFT", "Publisher entered outside the T05 preview path.");
           }
           publisherImports += 1;
+        } else if (specifier === "@desen/protocol") {
+          if (
+            ![AUTHORING_INSPECTOR_SOURCE_PATH, STRUCTURED_JSON_SOURCE_PATH].includes(
+              relativePath,
+            ) ||
+            shape.defaultImport !== null ||
+            shape.namespaceImport !== null ||
+            shape.typeOnly
+          ) {
+            fail("IMPORT_BOUNDARY_DRIFT", "Protocol entered outside the T06 inspector path.");
+          }
+          protocolImports += 1;
         } else if (
           relativePath === AUTHORING_SELECTION_SOURCE_PATH &&
           specifier === "@desen/runtime-react"
@@ -1321,9 +1350,10 @@ function inspectImportsAndExecutionBoundary(files) {
     referenceCatalogImports !== 4 ||
     validatorImports !== 1 ||
     publicDiagnosticIndexTypeOnlyImports !== 1 ||
-    catalogSdkImports !== 4 ||
-    editorCoreImports !== 4 ||
-    publisherImports !== 2
+    catalogSdkImports !== 5 ||
+    editorCoreImports !== 5 ||
+    publisherImports !== 3 ||
+    protocolImports !== 2
   ) {
     fail(
       "IMPORT_BOUNDARY_DRIFT",
@@ -1479,11 +1509,13 @@ function inspectImportsAndExecutionBoundary(files) {
       "@desen/catalog-sdk#schema-derived-inspector-controls",
       "@desen/editor-core#public-authoring-mutation",
       "@desen/publisher#session-preview-publication",
+      "@desen/protocol#canonical-structured-json",
     ],
     arbitraryExecutableImports: 0,
     editorCoreImports,
     catalogSdkImports,
     publisherImports,
+    protocolImports,
     runtimeCoreImports: 2,
     runtimeReactImports: 2,
     publicDiagnosticIndexTypeOnlyImports,
@@ -1825,7 +1857,7 @@ function assertRetainedHistoricalReceipts(frozenArtifact, files) {
   }
 }
 
-/** Authenticates frozen M09-T02 evidence and checks its live M09-T05 successor. */
+/** Authenticates frozen M09-T02 evidence and checks its live additive M09-T06 successor. */
 export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const [frozen, files, shellArtifactBytes, referenceArtifactBytes] = await Promise.all([
@@ -1880,7 +1912,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
       successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
     },
     successor: {
-      task: "M09-T05",
+      task: "M09-T06",
       realAdapterCanvasOwnedBySuccessor: true,
       historicalNoCanvasNonclaimAppliedToCurrentApp: false,
       exactPublicRuntimeAdapterPathAllowed: true,
@@ -1890,7 +1922,8 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
       publicEditorCorePropMutationImplemented: true,
       publisherBackedSessionPreviewImplemented: true,
       historicalNoInspectorOrSourceMutationNonclaimAppliedToCurrentApp: false,
-      structuredAndDynamicEditingImplemented: false,
+      nestedObjectAndStructuredJsonEditingImplemented: true,
+      dynamicEditingImplemented: false,
       persistenceUiImplemented: false,
       runOrPublishImplemented: false,
     },

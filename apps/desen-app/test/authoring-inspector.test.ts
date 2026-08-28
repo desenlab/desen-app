@@ -1,5 +1,7 @@
 import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
+import { createCatalogManifest, registerComponent } from "@desen/catalog-sdk";
 import { createDesenEditorDocument } from "@desen/editor-core";
+import { canonicalizeJsonBytes } from "@desen/protocol";
 import { describe, expect, it } from "vitest";
 
 import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
@@ -24,6 +26,13 @@ const REFERENCE_ROUTE = Object.freeze({
   projectId: "account-app",
   surfaceId: "sign-in",
 }) satisfies AuthoringInspectorRoute;
+
+const SYNTHETIC_ROUTE = Object.freeze({
+  projectId: "inspector-fixture",
+  surfaceId: "fixture",
+}) satisfies AuthoringInspectorRoute;
+const SYNTHETIC_CATALOG_ID = "run.desen.test.inspector";
+const SYNTHETIC_COMPONENT_ID = "com.example.ui/InspectorFixture";
 
 type EditorNode = DesenEditorDocument["surfaces"][string]["root"];
 type MutableJsonObject = Record<string, unknown>;
@@ -77,6 +86,60 @@ function requireEditSuccess(result: AuthoringInspectorEditResult): DesenEditorDo
   expect(result.ok).toBe(true);
   if (!result.ok) throw new Error(`Expected an inspector edit, received ${result.reason}.`);
   return result.document;
+}
+
+function createSyntheticInspectorFixture(
+  propsSchema: unknown,
+  props: unknown,
+  state: unknown = {},
+) {
+  const component = registerComponent({
+    id: SYNTHETIC_COMPONENT_ID,
+    manifest: {
+      authoring: {
+        category: "Tests",
+        displayName: "Inspector Fixture",
+      },
+      category: "complex",
+      propsSchema: propsSchema as never,
+    },
+  });
+  const catalog = createCatalogManifest({
+    components: [component],
+    id: SYNTHETIC_CATALOG_ID,
+    packageDigest: `sha256:${"0".repeat(64)}`,
+    target: "web-react",
+    version: "1.0.0",
+  });
+  const source = {
+    catalogs: [
+      {
+        id: SYNTHETIC_CATALOG_ID,
+        target: "web-react",
+        version: "1.0.0",
+      },
+    ],
+    desen: "0.1.0",
+    entry: "fixture",
+    id: "com.example.inspector-fixture",
+    kind: "desen.source",
+    surfaces: {
+      fixture: {
+        id: "fixture",
+        resources: {},
+        root: {
+          id: "fixture.root",
+          props,
+          use: SYNTHETIC_COMPONENT_ID,
+        },
+        state,
+      },
+    },
+  };
+  const document = requireEditorDocument(source);
+  const model = requirePreparedModel(catalog, document);
+  const selection = selectionFor(model, "fixture.root", SYNTHETIC_ROUTE);
+  return { catalog, document, model, selection };
 }
 
 function findLayerNode(model: CatalogAuthoringModel, surfaceId: string, nodeId: string) {
@@ -245,7 +308,7 @@ describe("Desen App schema-driven authoring inspector", () => {
         referenceCatalog,
         REFERENCE_ROUTE,
         selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.title"),
-        { kind: "set", property: "text", value: "Welcome back" },
+        { kind: "set", valuePointer: "/text", value: "Welcome back" },
       ),
     );
     const roleChanged = requireEditSuccess(
@@ -254,7 +317,7 @@ describe("Desen App schema-driven authoring inspector", () => {
         referenceCatalog,
         REFERENCE_ROUTE,
         selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.title"),
-        { kind: "set", property: "role", value: "caption" },
+        { kind: "set", valuePointer: "/role", value: "caption" },
       ),
     );
     const booleanChanged = requireEditSuccess(
@@ -263,7 +326,7 @@ describe("Desen App schema-driven authoring inspector", () => {
         referenceCatalog,
         REFERENCE_ROUTE,
         selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.password"),
-        { kind: "set", property: "secure", value: false },
+        { kind: "set", valuePointer: "/secure", value: false },
       ),
     );
     const numberChanged = requireEditSuccess(
@@ -272,7 +335,7 @@ describe("Desen App schema-driven authoring inspector", () => {
         referenceCatalog,
         REFERENCE_ROUTE,
         selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.layout"),
-        { kind: "set", property: "maxWidth", value: 512 },
+        { kind: "set", valuePointer: "/maxWidth", value: 512 },
       ),
     );
 
@@ -304,7 +367,7 @@ describe("Desen App schema-driven authoring inspector", () => {
     const deleted = requireEditSuccess(
       applyAuthoringInspectorEdit(original, referenceCatalog, REFERENCE_ROUTE, passwordSelection, {
         kind: "delete",
-        property: "secure",
+        valuePointer: "/secure",
       }),
     );
     expect(Object.hasOwn(findEditorNode(deleted, "sign-in.password").props ?? {}, "secure")).toBe(
@@ -320,7 +383,7 @@ describe("Desen App schema-driven authoring inspector", () => {
       referenceCatalog,
       REFERENCE_ROUTE,
       selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.email"),
-      { kind: "delete", property: "secure" },
+      { kind: "delete", valuePointer: "/secure" },
     );
     expect(absent).toEqual({ ok: false, reason: "control-unavailable" });
 
@@ -329,7 +392,7 @@ describe("Desen App schema-driven authoring inspector", () => {
       referenceCatalog,
       REFERENCE_ROUTE,
       selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.title"),
-      { kind: "delete", property: "text" },
+      { kind: "delete", valuePointer: "/text" },
     );
     expect(required).toEqual({ ok: false, reason: "required-property" });
     expect(original).toEqual(originalSnapshot);
@@ -344,28 +407,28 @@ describe("Desen App schema-driven authoring inspector", () => {
     expect(
       applyAuthoringInspectorEdit(original, referenceCatalog, REFERENCE_ROUTE, titleSelection, {
         kind: "set",
-        property: "role",
+        valuePointer: "/role",
         value: "display",
       }),
     ).toEqual({ ok: false, reason: "value-invalid" });
     expect(
       applyAuthoringInspectorEdit(original, referenceCatalog, REFERENCE_ROUTE, layoutSelection, {
         kind: "set",
-        property: "maxWidth",
+        valuePointer: "/maxWidth",
         value: Number.NaN,
       }),
-    ).toEqual({ ok: false, reason: "value-invalid" });
+    ).toEqual({ ok: false, reason: "edit-rejected" });
     expect(
       applyAuthoringInspectorEdit(original, referenceCatalog, REFERENCE_ROUTE, layoutSelection, {
         kind: "set",
-        property: "maxWidth",
+        valuePointer: "/maxWidth",
         value: Number.POSITIVE_INFINITY,
       }),
-    ).toEqual({ ok: false, reason: "value-invalid" });
+    ).toEqual({ ok: false, reason: "edit-rejected" });
     expect(
       applyAuthoringInspectorEdit(original, referenceCatalog, REFERENCE_ROUTE, layoutSelection, {
         kind: "set",
-        property: "maxWidth",
+        valuePointer: "/maxWidth",
         value: 0,
       }),
     ).toEqual({ ok: false, reason: "source-invalid" });
@@ -383,7 +446,7 @@ describe("Desen App schema-driven authoring inspector", () => {
         referenceCatalog,
         REFERENCE_ROUTE,
         selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.email"),
-        { kind: "set", property: "value", value: "replacement" },
+        { kind: "set", valuePointer: "/value", value: "replacement" },
       ),
     ).toEqual({ ok: false, reason: "control-unavailable" });
     expect(
@@ -392,7 +455,7 @@ describe("Desen App schema-driven authoring inspector", () => {
         referenceCatalog,
         REFERENCE_ROUTE,
         selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.submit"),
-        { kind: "set", property: "loading", value: false },
+        { kind: "set", valuePointer: "/loading", value: false },
       ),
     ).toEqual({ ok: false, reason: "control-unavailable" });
 
@@ -404,14 +467,14 @@ describe("Desen App schema-driven authoring inspector", () => {
     const original = requireReferenceDocument();
     const originalSnapshot = copyJson(original);
     const selection = selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.email");
-    let propertyReads = 0;
+    let pointerReads = 0;
     const accessorEdit = Object.defineProperties(
       {},
       {
         kind: { enumerable: true, get: () => "set" },
-        property: {
+        valuePointer: {
           enumerable: true,
-          get: () => (++propertyReads < 4 ? "label" : "value"),
+          get: () => (++pointerReads < 4 ? "/label" : "/value"),
         },
         value: { enumerable: true, get: () => "replacement" },
       },
@@ -426,12 +489,12 @@ describe("Desen App schema-driven authoring inspector", () => {
         accessorEdit,
       ),
     ).toEqual({ ok: false, reason: "edit-rejected" });
-    expect(propertyReads).toBe(0);
+    expect(pointerReads).toBe(0);
     expect(original).toEqual(originalSnapshot);
 
     const extraField = {
       kind: "set",
-      property: "label",
+      valuePointer: "/label",
       value: "replacement",
       unexpected: true,
     } as unknown as AuthoringInspectorEdit;
@@ -447,12 +510,12 @@ describe("Desen App schema-driven authoring inspector", () => {
 
     let proxyReads = 0;
     const snapshottedProxy = new Proxy<AuthoringInspectorEdit>(
-      { kind: "set", property: "label", value: "Captured label" },
+      { kind: "set", valuePointer: "/label", value: "Captured label" },
       {
         get(target, property, receiver) {
-          if (property === "property") {
+          if (property === "valuePointer") {
             proxyReads += 1;
-            return proxyReads < 4 ? "label" : "value";
+            return proxyReads < 4 ? "/label" : "/value";
           }
           return Reflect.get(target, property, receiver) as unknown;
         },
@@ -470,6 +533,130 @@ describe("Desen App schema-driven authoring inspector", () => {
     expect(proxyReads).toBe(0);
     expect(findEditorNode(changed, "sign-in.email").props).toMatchObject({
       label: "Captured label",
+      value: { $ref: "state.email" },
+    });
+  });
+
+  it("rejects selection accessors unread and captures a data-descriptor Proxy exactly once", () => {
+    const original = requireReferenceDocument();
+    const originalSnapshot = copyJson(original);
+    const exact = selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.email");
+    let accessorReads = 0;
+    const accessorSelection = Object.defineProperties(
+      {},
+      {
+        capabilityId: { enumerable: true, value: exact.capabilityId },
+        conditional: { enumerable: true, value: exact.conditional },
+        displayName: { enumerable: true, value: exact.displayName },
+        kind: { enumerable: true, value: exact.kind },
+        projectId: { enumerable: true, value: exact.projectId },
+        sourceNodeId: {
+          enumerable: true,
+          get: () => {
+            accessorReads += 1;
+            return "sign-in.email";
+          },
+        },
+        surfaceId: { enumerable: true, value: exact.surfaceId },
+      },
+    ) as AuthoringComponentSelection;
+
+    expect(
+      applyAuthoringInspectorEdit(original, referenceCatalog, REFERENCE_ROUTE, accessorSelection, {
+        kind: "set",
+        value: "Unread accessor",
+        valuePointer: "/label",
+      }),
+    ).toEqual({ ok: false, reason: "selection-invalid" });
+    expect(accessorReads).toBe(0);
+    expect(original).toEqual(originalSnapshot);
+
+    let descriptorReads = 0;
+    let directReads = 0;
+    const selectionProxy = new Proxy<AuthoringComponentSelection>(
+      { ...exact },
+      {
+        get(target, property, receiver) {
+          if (property === "sourceNodeId") {
+            directReads += 1;
+            return "sign-in.submit";
+          }
+          return Reflect.get(target, property, receiver) as unknown;
+        },
+        getOwnPropertyDescriptor(target, property) {
+          if (property === "sourceNodeId") {
+            descriptorReads += 1;
+            return {
+              configurable: true,
+              enumerable: true,
+              value: descriptorReads === 1 ? "sign-in.email" : "sign-in.submit",
+              writable: true,
+            };
+          }
+          return Reflect.getOwnPropertyDescriptor(target, property);
+        },
+      },
+    );
+    const changed = requireEditSuccess(
+      applyAuthoringInspectorEdit(original, referenceCatalog, REFERENCE_ROUTE, selectionProxy, {
+        kind: "set",
+        value: "Captured selection",
+        valuePointer: "/label",
+      }),
+    );
+
+    expect(descriptorReads).toBe(1);
+    expect(directReads).toBe(0);
+    expect(findEditorNode(changed, "sign-in.email").props).toMatchObject({
+      label: "Captured selection",
+      value: { $ref: "state.email" },
+    });
+    expect(findEditorNode(changed, "sign-in.submit").props?.label).toBe("Sign in");
+  });
+
+  it("mutates the validator-admitted Source snapshot when a hostile document Proxy drifts", () => {
+    const admitted = requireReferenceDocument();
+    const firstSnapshot = copyJson(admitted);
+    const driftedSnapshot = copyJson(admitted);
+    const driftedSurfaces = requireRecord(
+      requireRecord(driftedSnapshot, "drifted source").surfaces,
+      "drifted surfaces",
+    );
+    const driftedSignIn = requireRecord(driftedSurfaces["sign-in"], "drifted sign-in");
+    const driftedRoot = requireRecord(driftedSignIn.root, "drifted root");
+    const driftedSlots = requireRecord(driftedRoot.slots, "drifted slots");
+    const driftedChildren = driftedSlots.default;
+    if (!Array.isArray(driftedChildren)) throw new TypeError("Expected drifted default children.");
+    const driftedTitle = requireRecord(driftedChildren[0], "drifted title");
+    requireRecord(driftedTitle.props, "drifted title props").text = "Hostile second snapshot";
+
+    let snapshotReads = 0;
+    let activeSnapshot = firstSnapshot as unknown as object;
+    const hostileDocument = new Proxy(firstSnapshot as unknown as DesenEditorDocument, {
+      getOwnPropertyDescriptor(_target, property) {
+        return Object.getOwnPropertyDescriptor(activeSnapshot, property);
+      },
+      ownKeys() {
+        snapshotReads += 1;
+        activeSnapshot = (snapshotReads === 1
+          ? firstSnapshot
+          : driftedSnapshot) as unknown as object;
+        return Reflect.ownKeys(activeSnapshot);
+      },
+    });
+    const selection = selectionFor(REFERENCE_AUTHORING_MODEL, "sign-in.email");
+    const changed = requireEditSuccess(
+      applyAuthoringInspectorEdit(hostileDocument, referenceCatalog, REFERENCE_ROUTE, selection, {
+        kind: "set",
+        value: "Snapshot label",
+        valuePointer: "/label",
+      }),
+    );
+
+    expect(snapshotReads).toBe(1);
+    expect(findEditorNode(changed, "sign-in.title").props?.text).toBe("Sign in");
+    expect(findEditorNode(changed, "sign-in.email").props).toMatchObject({
+      label: "Snapshot label",
       value: { $ref: "state.email" },
     });
   });
@@ -497,14 +684,14 @@ describe("Desen App schema-driven authoring inspector", () => {
     expect(
       applyAuthoringInspectorEdit(original, referenceCatalog, staleRoute, exact, {
         kind: "set",
-        property: "label",
+        valuePointer: "/label",
         value: "Forged route",
       }),
     ).toEqual({ ok: false, reason: "selection-invalid" });
     expect(
       applyAuthoringInspectorEdit(original, referenceCatalog, REFERENCE_ROUTE, forged, {
         kind: "set",
-        property: "label",
+        valuePointer: "/label",
         value: "Forged identity",
       }),
     ).toEqual({ ok: false, reason: "selection-invalid" });
@@ -549,7 +736,7 @@ describe("Desen App schema-driven authoring inspector", () => {
     const integerChanged = requireEditSuccess(
       applyAuthoringInspectorEdit(document, catalog, REFERENCE_ROUTE, selection, {
         kind: "set",
-        property: "columns",
+        valuePointer: "/columns",
         value: 4,
       }),
     );
@@ -557,7 +744,7 @@ describe("Desen App schema-driven authoring inspector", () => {
     expect(
       applyAuthoringInspectorEdit(integerChanged, catalog, REFERENCE_ROUTE, selection, {
         kind: "set",
-        property: "columns",
+        valuePointer: "/columns",
         value: 4.5,
       }),
     ).toEqual({ ok: false, reason: "value-invalid" });
@@ -565,7 +752,7 @@ describe("Desen App schema-driven authoring inspector", () => {
     const enumChanged = requireEditSuccess(
       applyAuthoringInspectorEdit(integerChanged, catalog, REFERENCE_ROUTE, selection, {
         kind: "set",
-        property: "mode",
+        valuePointer: "/mode",
         value: 2,
       }),
     );
@@ -573,10 +760,555 @@ describe("Desen App schema-driven authoring inspector", () => {
     expect(
       applyAuthoringInspectorEdit(enumChanged, catalog, REFERENCE_ROUTE, selection, {
         kind: "set",
-        property: "mode",
+        valuePointer: "/mode",
         value: "2",
       }),
     ).toEqual({ ok: false, reason: "value-invalid" });
+  });
+
+  it("derives nested closed-object groups and edits RFC 6901-escaped child pointers", () => {
+    const propsSchema = JSON.parse(`{
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile/a~b"],
+      "properties": {
+        "profile/a~b": {
+          "title": "Profile",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["display/name~raw"],
+          "properties": {
+            "display/name~raw": { "title": "Display name", "type": "string" },
+            "age": { "type": "integer" },
+            "note": { "type": "string" }
+          }
+        }
+      }
+    }`) as unknown;
+    const props = JSON.parse(`{
+      "profile/a~b": {
+        "display/name~raw": "Ada",
+        "age": 30,
+        "note": "Original"
+      }
+    }`) as unknown;
+    const { catalog, document, model, selection } = createSyntheticInspectorFixture(
+      propsSchema,
+      props,
+    );
+    const originalSnapshot = copyJson(document);
+    const inspector = requireInspector(model, selection, SYNTHETIC_ROUTE);
+    const group = inspector.fields.find(({ control }) => control.valuePointer === "/profile~1a~0b");
+
+    expect(inspector.controlCount).toBe(4);
+    expect(group?.control).toMatchObject({
+      kind: "group",
+      property: "profile/a~b",
+      required: true,
+      valuePointer: "/profile~1a~0b",
+    });
+    expect(
+      group?.children.map(({ control, qualifiedLabel, value }) => [
+        control.property,
+        control.valuePointer,
+        qualifiedLabel,
+        value,
+      ]),
+    ).toEqual([
+      ["age", "/profile~1a~0b/age", "Profile · Age", { kind: "literal", value: 30 }],
+      [
+        "display/name~raw",
+        "/profile~1a~0b/display~1name~0raw",
+        "Profile · Display name",
+        { kind: "literal", value: "Ada" },
+      ],
+      ["note", "/profile~1a~0b/note", "Profile · Note", { kind: "literal", value: "Original" }],
+    ]);
+
+    const renamed = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: "Grace",
+        valuePointer: "/profile~1a~0b/display~1name~0raw",
+      }),
+    );
+    const noteDeleted = requireEditSuccess(
+      applyAuthoringInspectorEdit(renamed, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "delete",
+        valuePointer: "/profile~1a~0b/note",
+      }),
+    );
+    expect(findEditorNode(noteDeleted, "fixture.root", "fixture").props).toEqual({
+      "profile/a~b": {
+        age: 30,
+        "display/name~raw": "Grace",
+      },
+    });
+    expect(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: "Not authorized",
+        valuePointer: "/profile~1a~0b/display/name~0raw",
+      }),
+    ).toEqual({ ok: false, reason: "control-unavailable" });
+    expect(document).toEqual(originalSnapshot);
+    expect(Object.isFrozen(noteDeleted)).toBe(true);
+  });
+
+  it("disambiguates repeated schema titles and names an empty property accessibly", () => {
+    const { model, selection } = createSyntheticInspectorFixture(
+      {
+        additionalProperties: false,
+        properties: {
+          "": { type: "string" },
+          first: { title: "Value", type: "string" },
+          second: { title: "Value", type: "string" },
+          third: { title: " \t ", type: "string" },
+        },
+        required: ["", "first", "second", "third"],
+        type: "object",
+      },
+      { "": "empty", first: "one", second: "two", third: "three" },
+    );
+    const inspector = requireInspector(model, selection, SYNTHETIC_ROUTE);
+
+    expect(
+      inspector.fields.map(({ control, label, qualifiedLabel }) => [
+        control.valuePointer,
+        label,
+        qualifiedLabel,
+      ]),
+    ).toEqual([
+      ["/", "Unnamed property", "Unnamed property"],
+      ["/first", "Value", "Value (/first)"],
+      ["/second", "Value", "Value (/second)"],
+      ["/third", "Third", "Third"],
+    ]);
+  });
+
+  it("creates an absent optional group with one atomic whole-group set", () => {
+    const { catalog, document, model, selection } = createSyntheticInspectorFixture(
+      {
+        additionalProperties: false,
+        properties: {
+          settings: {
+            additionalProperties: false,
+            properties: {
+              enabled: { type: "boolean" },
+              label: { type: "string" },
+            },
+            required: ["label"],
+            type: "object",
+          },
+        },
+        type: "object",
+      },
+      {},
+    );
+    const originalSnapshot = copyJson(document);
+    const settings = requireInspector(model, selection, SYNTHETIC_ROUTE).fields.find(
+      ({ control }) => control.valuePointer === "/settings",
+    );
+
+    expect(settings?.control).toMatchObject({
+      kind: "group",
+      required: false,
+      valuePointer: "/settings",
+    });
+    expect(settings?.value).toEqual({ kind: "absent" });
+    expect(settings?.children).toEqual([]);
+    expect(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: { enabled: true },
+        valuePointer: "/settings",
+      }),
+    ).toEqual({ ok: false, reason: "source-invalid" });
+    expect(document).toEqual(originalSnapshot);
+
+    const changed = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: { enabled: true, label: "Ready" },
+        valuePointer: "/settings",
+      }),
+    );
+    expect(findEditorNode(changed, "fixture.root", "fixture").props).toEqual({
+      settings: { enabled: true, label: "Ready" },
+    });
+    expect(document).toEqual(originalSnapshot);
+  });
+
+  it("edits a structured-JSON property while rejecting dynamic marker injection", () => {
+    const { catalog, document, model, selection } = createSyntheticInspectorFixture(
+      {
+        additionalProperties: false,
+        properties: {
+          payload: { items: { type: "string" }, type: "array" },
+          title: { type: "string" },
+        },
+        required: ["title"],
+        type: "object",
+      },
+      { payload: ["one"], title: "Fixture" },
+    );
+    const originalSnapshot = copyJson(document);
+    const payload = requireInspector(model, selection, SYNTHETIC_ROUTE).fields.find(
+      ({ control }) => control.valuePointer === "/payload",
+    );
+
+    expect(payload?.control).toMatchObject({
+      fallbackReason: "array",
+      kind: "structured-json",
+      valuePointer: "/payload",
+    });
+    expect(payload?.value).toEqual({ kind: "structured", value: ["one"] });
+
+    const changed = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: ["one", "two"],
+        valuePointer: "/payload",
+      }),
+    );
+    expect(findEditorNode(changed, "fixture.root", "fixture").props?.payload).toEqual([
+      "one",
+      "two",
+    ]);
+    expect(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: [{ $ref: "state.secret" }],
+        valuePointer: "/payload",
+      }),
+    ).toEqual({ ok: false, reason: "control-unavailable" });
+    expect(document).toEqual(originalSnapshot);
+  });
+
+  it("replaces all props through an honest root structured-JSON fallback", () => {
+    const { catalog, document, model, selection } = createSyntheticInspectorFixture(
+      {
+        properties: { label: { type: "string" } },
+        type: "object",
+      },
+      { keep: true, label: "Before" },
+    );
+    const originalSnapshot = copyJson(document);
+    const inspector = requireInspector(model, selection, SYNTHETIC_ROUTE);
+
+    expect(inspector.fields).toHaveLength(1);
+    expect(inspector.fields[0]?.control).toEqual({
+      fallbackReason: "open-object",
+      kind: "structured-json",
+      property: null,
+      required: true,
+      schemaPointer: "/propsSchema",
+      valuePointer: "",
+    });
+    expect(inspector.fields[0]?.value).toEqual({
+      kind: "structured",
+      value: { keep: true, label: "Before" },
+    });
+
+    const changed = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: { count: 2, label: "After" },
+        valuePointer: "",
+      }),
+    );
+    expect(findEditorNode(changed, "fixture.root", "fixture").props).toEqual({
+      count: 2,
+      label: "After",
+    });
+
+    const normalizedNoOp = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: { label: "Before", keep: true },
+        valuePointer: "",
+      }),
+    );
+    expect(findEditorNode(normalizedNoOp, "fixture.root", "fixture").props).toEqual({
+      keep: true,
+      label: "Before",
+    });
+    expect(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: ["not", "props"],
+        valuePointer: "",
+      }),
+    ).toEqual({ ok: false, reason: "edit-rejected" });
+    expect(document).toEqual(originalSnapshot);
+  });
+
+  it("replaces disjoint near-limit root props without exceeding the private transition budget", () => {
+    const editorByteLimit = 8_388_608;
+    const payloadLength = 4_300_000;
+    const oldPayload = "a".repeat(payloadLength);
+    const nextPayload = "b".repeat(payloadLength);
+    const { catalog, document, selection } = createSyntheticInspectorFixture(
+      { type: "object" },
+      { oldPayload },
+    );
+    const transientUnion = copyJson(document);
+    const transientSurfaces = requireRecord(
+      requireRecord(transientUnion, "transient source").surfaces,
+      "transient surfaces",
+    );
+    const transientSurface = requireRecord(transientSurfaces.fixture, "transient fixture");
+    const transientRoot = requireRecord(transientSurface.root, "transient root");
+    requireRecord(transientRoot.props, "transient props").nextPayload = nextPayload;
+
+    expect(canonicalizeJsonBytes(document).byteLength).toBeLessThan(editorByteLimit);
+    expect(canonicalizeJsonBytes(transientUnion).byteLength).toBeGreaterThan(editorByteLimit);
+
+    const changed = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: { nextPayload },
+        valuePointer: "",
+      }),
+    );
+    const changedProps = findEditorNode(changed, "fixture.root", "fixture").props ?? {};
+    expect(canonicalizeJsonBytes(changed).byteLength).toBeLessThan(editorByteLimit);
+    expect(Object.hasOwn(changedProps, "oldPayload")).toBe(false);
+    expect(changedProps.nextPayload).toBe(nextPayload);
+  }, 20_000);
+
+  it("shrinks an existing near-limit root prop before adding lexically earlier growth", () => {
+    const editorByteLimit = 8_388_608;
+    const payloadLength = 4_300_000;
+    const oldPayload = "a".repeat(payloadLength);
+    const nextPayload = "b".repeat(payloadLength);
+    const { catalog, document, selection } = createSyntheticInspectorFixture(
+      { type: "object" },
+      { z: oldPayload },
+    );
+
+    const changed = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: { a: nextPayload, z: "small" },
+        valuePointer: "",
+      }),
+    );
+    const changedProps = findEditorNode(changed, "fixture.root", "fixture").props ?? {};
+
+    expect(canonicalizeJsonBytes(changed).byteLength).toBeLessThan(editorByteLimit);
+    expect(changedProps.a).toBe(nextPayload);
+    expect(changedProps.z).toBe("small");
+  }, 20_000);
+
+  it("counts only changed root props against the synchronous transition budget", () => {
+    const stableProps = Object.fromEntries(
+      Array.from({ length: 300 }, (_, index) => [`stable-${index}`, index]),
+    );
+    const { catalog, document, selection } = createSyntheticInspectorFixture(
+      { type: "object" },
+      { ...stableProps, marker: "before" },
+    );
+
+    const changed = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: { ...stableProps, marker: "after" },
+        valuePointer: "",
+      }),
+    );
+
+    expect(findEditorNode(changed, "fixture.root", "fixture").props?.marker).toBe("after");
+  });
+
+  it("rejects a wide root replacement before public per-prop commands can block the UI", () => {
+    const { catalog, document, selection } = createSyntheticInspectorFixture(
+      { type: "object" },
+      {},
+    );
+    const originalSnapshot = copyJson(document);
+    const wideProps = Object.fromEntries(
+      Array.from({ length: 257 }, (_, index) => [`property-${index}`, index]),
+    );
+
+    expect(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: wideProps,
+        valuePointer: "",
+      }),
+    ).toEqual({ ok: false, reason: "edit-rejected" });
+    expect(document).toEqual(originalSnapshot);
+  });
+
+  it("locks only the dynamic child while preserving edits to its literal group sibling", () => {
+    const { catalog, document, model, selection } = createSyntheticInspectorFixture(
+      {
+        additionalProperties: false,
+        properties: {
+          config: {
+            additionalProperties: false,
+            properties: {
+              label: { type: "string" },
+              secret: { type: "string" },
+            },
+            required: ["label", "secret"],
+            type: "object",
+          },
+        },
+        required: ["config"],
+        type: "object",
+      },
+      { config: { label: "Before", secret: { $ref: "state.secret" } } },
+      { secret: { initial: "classified", schema: { type: "string" } } },
+    );
+    const group = requireInspector(model, selection, SYNTHETIC_ROUTE).fields[0];
+
+    expect(group?.control.kind).toBe("group");
+    expect(group?.children.map(({ control, value }) => [control.valuePointer, value])).toEqual([
+      ["/config/label", { kind: "literal", value: "Before" }],
+      ["/config/secret", { kind: "dynamic", reference: "state.secret" }],
+    ]);
+
+    const changed = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: "After",
+        valuePointer: "/config/label",
+      }),
+    );
+    expect(findEditorNode(changed, "fixture.root", "fixture").props?.config).toEqual({
+      label: "After",
+      secret: { $ref: "state.secret" },
+    });
+    expect(
+      applyAuthoringInspectorEdit(changed, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: "exposed",
+        valuePointer: "/config/secret",
+      }),
+    ).toEqual({ ok: false, reason: "control-unavailable" });
+    expect(findEditorNode(changed, "fixture.root", "fixture").props?.config).toEqual({
+      label: "After",
+      secret: { $ref: "state.secret" },
+    });
+  });
+
+  it("locks whole-group replacement and deletion around an optional dynamic child", () => {
+    const { catalog, document, model, selection } = createSyntheticInspectorFixture(
+      {
+        additionalProperties: false,
+        properties: {
+          config: {
+            additionalProperties: false,
+            properties: {
+              label: { type: "string" },
+              secret: { type: "string" },
+            },
+            required: ["label", "secret"],
+            type: "object",
+          },
+        },
+        type: "object",
+      },
+      { config: { label: "Before", secret: { $ref: "state.secret" } } },
+      { secret: { initial: "classified", schema: { type: "string" } } },
+    );
+    const group = requireInspector(model, selection, SYNTHETIC_ROUTE).fields[0];
+    expect(group?.control).toMatchObject({ kind: "group", required: false });
+    expect(group?.containsDynamicValue).toBe(true);
+
+    const literalChanged = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: "After",
+        valuePointer: "/config/label",
+      }),
+    );
+    expect(findEditorNode(literalChanged, "fixture.root", "fixture").props?.config).toEqual({
+      label: "After",
+      secret: { $ref: "state.secret" },
+    });
+    expect(
+      applyAuthoringInspectorEdit(literalChanged, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: { label: "Replacement", secret: "literal" },
+        valuePointer: "/config",
+      }),
+    ).toEqual({ ok: false, reason: "control-unavailable" });
+    expect(
+      applyAuthoringInspectorEdit(literalChanged, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "delete",
+        valuePointer: "/config",
+      }),
+    ).toEqual({ ok: false, reason: "control-unavailable" });
+    expect(findEditorNode(literalChanged, "fixture.root", "fixture").props?.config).toEqual({
+      label: "After",
+      secret: { $ref: "state.secret" },
+    });
+  });
+
+  it("treats __proto__ and constructor as exact JSON property names without pollution", () => {
+    const propsSchema = JSON.parse(`{
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["__proto__", "constructor"],
+      "properties": {
+        "__proto__": { "type": "boolean" },
+        "constructor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["prototype"],
+          "properties": {
+            "__proto__": { "type": "string" },
+            "prototype": { "type": "string" }
+          }
+        }
+      }
+    }`) as unknown;
+    const props = JSON.parse(`{
+      "__proto__": true,
+      "constructor": { "__proto__": "nested", "prototype": "safe" }
+    }`) as unknown;
+    const { catalog, document, model, selection } = createSyntheticInspectorFixture(
+      propsSchema,
+      props,
+    );
+    const inspector = requireInspector(model, selection, SYNTHETIC_ROUTE);
+
+    expect(inspector.fields.map(({ control }) => [control.property, control.valuePointer])).toEqual(
+      [
+        ["__proto__", "/__proto__"],
+        ["constructor", "/constructor"],
+      ],
+    );
+    expect(inspector.fields[1]?.children.map(({ control }) => control.valuePointer)).toEqual([
+      "/constructor/__proto__",
+      "/constructor/prototype",
+    ]);
+
+    const rootChanged = requireEditSuccess(
+      applyAuthoringInspectorEdit(document, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: false,
+        valuePointer: "/__proto__",
+      }),
+    );
+    const nestedChanged = requireEditSuccess(
+      applyAuthoringInspectorEdit(rootChanged, catalog, SYNTHETIC_ROUTE, selection, {
+        kind: "set",
+        value: "changed",
+        valuePointer: "/constructor/__proto__",
+      }),
+    );
+    const changedProps = findEditorNode(nestedChanged, "fixture.root", "fixture").props ?? {};
+    const constructorValue = requireRecord(changedProps["constructor"], "props.constructor");
+    expect(Object.hasOwn(changedProps, "__proto__")).toBe(true);
+    expect(changedProps["__proto__"]).toBe(false);
+    expect(Object.hasOwn(constructorValue, "__proto__")).toBe(true);
+    expect(constructorValue["__proto__"]).toBe("changed");
+    expect(constructorValue.prototype).toBe("safe");
+    expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
   });
 
   it("keeps dynamic object values bound instead of presenting the structured fallback", () => {

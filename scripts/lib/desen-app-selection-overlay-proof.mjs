@@ -24,10 +24,13 @@ const AUTHORING_DATA_PATH = "apps/desen-app/src/authoring-data.ts";
 const INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
 const PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
+const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
 const GLOBAL_CSS_PATH = "apps/desen-app/src/styles.css";
 const SELECTION_TEST_PATH = "apps/desen-app/test/authoring-selection.test.ts";
 const INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.test.ts";
 const PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
+const PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
+const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
 const ADAPTER_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
@@ -75,9 +78,12 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     INSPECTOR_SOURCE_PATH,
     PREVIEW_SOURCE_PATH,
     PANEL_SOURCE_PATH,
+    STRUCTURED_JSON_SOURCE_PATH,
     GLOBAL_CSS_PATH,
     INSPECTOR_TEST_PATH,
     PREVIEW_TEST_PATH,
+    PANEL_TEST_PATH,
+    STRUCTURED_JSON_TEST_PATH,
     "pnpm-lock.yaml",
   ]),
 ]);
@@ -100,7 +106,7 @@ const EXPECTED_SOURCE_SHA256 = Object.freeze({
   [SELECTION_SOURCE_PATH]: "e97eed87734fff6fdc3a40dbc81754a88318238090e4c1dfcc53062e8ff7fc7c",
   [ADAPTER_SOURCE_PATH]: "a678302fd2931172d32f6509dc37018a294bc938ccca73df646a715516a6db38",
   [APPLICATION_SOURCE_PATH]: "e030bbad64e1909a2f3237de3d820f13af730439c0f94e289553782b990dcab0",
-  [APPLICATION_CSS_PATH]: "8a3c2f832cd532d263b29ff1da39fc0a89a54cc51a4333dc47b6de02473e67ac",
+  [APPLICATION_CSS_PATH]: "f8edeac5a918dcd8ba7b2b636a32473ccc7c1082bfa5d743763a85d25225d637",
 });
 
 const PRIVATE_DOM_PROPERTIES = Object.freeze([
@@ -917,9 +923,12 @@ function inspectPackages(files) {
   }
   const inspectorCommand =
     "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx";
+  const structuredInspectorCommand =
+    "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx";
   if (
     app.scripts?.["test:inspector"] !== inspectorCommand ||
-    ["@desen/catalog-sdk", "@desen/editor-core", "@desen/publisher"].some(
+    app.scripts?.["test:structured-inspector"] !== structuredInspectorCommand ||
+    ["@desen/catalog-sdk", "@desen/editor-core", "@desen/protocol", "@desen/publisher"].some(
       (dependency) => app.dependencies?.[dependency] !== "workspace:*",
     )
   ) {
@@ -942,6 +951,7 @@ function inspectPackages(files) {
     appName: app.name,
     appTestCommand: appCommand,
     inspectorTestCommand: inspectorCommand,
+    structuredInspectorTestCommand: structuredInspectorCommand,
     rootCommands: expectedRootCommands,
     directParentVerifier: "node scripts/verify-desen-app-real-adapter-canvas.mjs",
   });
@@ -1042,10 +1052,19 @@ function inspectSchemaInspectorSuccessor(files) {
   const inspector = decodeUtf8(files.get(INSPECTOR_SOURCE_PATH), INSPECTOR_SOURCE_PATH);
   const preview = decodeUtf8(files.get(PREVIEW_SOURCE_PATH), PREVIEW_SOURCE_PATH);
   const panel = decodeUtf8(files.get(PANEL_SOURCE_PATH), PANEL_SOURCE_PATH);
+  const structuredJson = decodeUtf8(
+    files.get(STRUCTURED_JSON_SOURCE_PATH),
+    STRUCTURED_JSON_SOURCE_PATH,
+  );
   const adapter = decodeUtf8(files.get(ADAPTER_SOURCE_PATH), ADAPTER_SOURCE_PATH);
   const application = decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH);
   const inspectorTests = decodeUtf8(files.get(INSPECTOR_TEST_PATH), INSPECTOR_TEST_PATH);
   const previewTests = decodeUtf8(files.get(PREVIEW_TEST_PATH), PREVIEW_TEST_PATH);
+  const panelTests = decodeUtf8(files.get(PANEL_TEST_PATH), PANEL_TEST_PATH);
+  const structuredJsonTests = decodeUtf8(
+    files.get(STRUCTURED_JSON_TEST_PATH),
+    STRUCTURED_JSON_TEST_PATH,
+  );
 
   for (const [source, relativePath, markers] of [
     [
@@ -1062,12 +1081,17 @@ function inspectSchemaInspectorSuccessor(files) {
         "setDesenEditorOwnerProp",
         "captureInspectorEdit",
         'field.value.kind === "dynamic"',
-        'field.value.kind === "structured"',
+        'control.kind === "structured-json"',
         'reason: "control-unavailable"',
       ],
     ],
     [preview, PREVIEW_SOURCE_PATH, ["createDesenEditorDocument", "publishDesenSource"]],
     [panel, PANEL_SOURCE_PATH, ['aria-label="Inspector"', "AuthoringInspectorEdit"]],
+    [
+      structuredJson,
+      STRUCTURED_JSON_SOURCE_PATH,
+      ["PUBLISH_SOURCE_JSON_LIMITS", "canonicalizeJson", "parseStructuredJsonText"],
+    ],
   ]) {
     for (const marker of markers) {
       if (!source.includes(marker)) {
@@ -1087,15 +1111,22 @@ function inspectSchemaInspectorSuccessor(files) {
     ) ||
     application.indexOf("<InspectorPanel") <= application.indexOf("<DesenAdapterCanvas") ||
     !inspectorTests.includes("keeps dynamic props outside T05 mutation authority") ||
-    !previewTests.includes("publishes a valid primitive prop edit as a fresh exact Bundle revision")
+    !previewTests.includes(
+      "publishes a valid primitive prop edit as a fresh exact Bundle revision",
+    ) ||
+    !panel.includes("StructuredJsonField") ||
+    !panel.includes("parseStructuredJsonText") ||
+    !panelTests.includes("commits structured JSON only through explicit Apply") ||
+    !structuredJsonTests.includes("rejects duplicate decoded member names at every object level")
   ) {
-    fail("SUCCESSOR_POLICY_VIOLATION", "The live M09-T05 inspector or preview boundary drifted.");
+    fail("SUCCESSOR_POLICY_VIOLATION", "The live M09-T06 inspector or preview boundary drifted.");
   }
   return deepFreeze({
-    task: "M09-T05",
+    task: "M09-T06",
     schemaDerivedPrimitiveAndEnumControls: true,
     publicEditorCoreAtomicMutation: true,
-    dynamicAndStructuredValuesLocked: true,
+    nestedObjectAndStructuredJsonEditing: true,
+    dynamicValuesLocked: true,
     publisherBackedSessionPreview: true,
     sourceAndPreviewCommitAtomically: true,
     inspectorOutsideManagedCapabilitySubtree: true,
@@ -1111,7 +1142,7 @@ function receipts(files) {
     );
 }
 
-/** Authenticates frozen M09-T04 evidence and checks its live additive M09-T05 successor. */
+/** Authenticates frozen M09-T04 evidence and checks its live additive M09-T06 successor. */
 export async function buildDesenAppSelectionOverlayEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
@@ -1194,9 +1225,12 @@ export async function buildDesenAppSelectionOverlayEvidence(rawOptions = undefin
         INSPECTOR_SOURCE_PATH,
         PREVIEW_SOURCE_PATH,
         PANEL_SOURCE_PATH,
+        STRUCTURED_JSON_SOURCE_PATH,
         GLOBAL_CSS_PATH,
         INSPECTOR_TEST_PATH,
         PREVIEW_TEST_PATH,
+        PANEL_TEST_PATH,
+        STRUCTURED_JSON_TEST_PATH,
       ].map((relativePath) => ({
         path: relativePath,
         bytes: files.get(relativePath).byteLength,

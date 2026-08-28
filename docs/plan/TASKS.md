@@ -1411,7 +1411,7 @@ is next.
 | M09-T03 | DONE        | M09-T01, G05             | Canvas uses the exact React adapters used by the reference host                 |
 | M09-T04 | DONE        | M09-T03                  | Selection overlays remain outside capability subtrees; no private-DOM authoring |
 | M09-T05 | DONE        | M09-T02–M09-T04          | Schema-driven primitive/enum inspector controls                                 |
-| M09-T06 | NOT_STARTED | M09-T05                  | Nested-object controls and honest structured-JSON fallback                      |
+| M09-T06 | DONE        | M09-T05                  | Nested-object controls and honest structured-JSON fallback                      |
 | M09-T07 | NOT_STARTED | M09-T02–M09-T06          | Named-slot drop, move, reorder, cardinality, and acceptance UI                  |
 | M09-T08 | NOT_STARTED | M09-T05                  | Local state and binding editor UI                                               |
 | M09-T09 | NOT_STARTED | M09-T08                  | Sign-in event and closed-action editor UI                                       |
@@ -1602,6 +1602,49 @@ M09-T05 is `DONE`, advancing implementation progress to 100/145 (69%) and M09 to
 proof gates remain 10/13. P-08 remains `NOT_PROVEN`: nested-object/structured-JSON editing,
 state/binding and event/action authoring, Design/Run, persistence, browser E2E, control-plane
 publication, and activation remain later owners. M09-T06 is next.
+
+M09-T06 consumes the complete recursive Catalog SDK control plan. Present closed-object groups
+retain canonical child order, qualified accessible names, and exact RFC 6901 value and schema
+pointers, including escaped `/` and `~` property names. Nested edits rebuild only the complete
+top-level owner prop through public Editor Core commands. An absent optional group is staged as one
+complete JSON object and set atomically. Arrays, open objects, unions, references, combinators,
+conditionals, pattern properties, unsupported schemas, and derivation-limit results remain editable
+through an explicit structured-JSON textarea with a visible reason and Apply, Reset, and eligible
+Unset actions. Catalog control hints remain opaque presentation metadata under PF-025.
+
+Structured input is scanned under the Publisher Source JSON profile before `JSON.parse`. Malformed
+or non-finite JSON, decoded duplicate members, unpaired Unicode, finite-limit overflow, and every
+decoded object key beginning with `$` fail closed without a partial value. Successful values are
+detached and recursively frozen. Formatting sorts object keys while preserving array order; if
+pretty indentation would exceed the same admitted profile, accumulation stops early and falls back
+to compact canonical JSON.
+
+Route, selection, and edit inputs are captured as exact own enumerable data before authorization.
+Mutation starts from the exact validator-admitted Source and Catalog snapshots, closing hostile
+caller and time-of-check/time-of-use drift. Root replacement counts only changed props, rejects
+more than 256 public transitions or 32 MiB of aggregate snapshot work, and performs deletions and
+shrinking replacements before growth. Complete continuous validation and Publisher preflight still
+precede the atomic session-local `{document, preview}` replacement. Recursive fieldsets, inline
+errors, pointer-keyed focus handoff, and structured actions remain App-owned outside the managed
+capability subtree.
+
+The exact 26,133-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json` at
+`sha256:6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec`. It authenticates the
+exact frozen 22,998-byte M09-T05 schema-Inspector parent and records 28 tracked-file receipts. The
+focused structured-Inspector suite passes 73/73, the complete App suite passes 118/118, the
+independent root proof passes 10/10, the complete structural CI glob passes 323/323, and App
+typecheck, lint, and production build pass locally.
+The live local CI inventory registers 184 workloads and 87 proof pairs—76 ordinary and 11
+barriers—with a 54-proof-unit/118-workload connected closure and complete ownership over 1,184
+tracked paths, including 174 proof-owned paths. Sequence 45 preserves all predecessors and contains
+41 artifacts and 82 readers. These are local task and CI-infrastructure receipts; no required-gate
+or hosted-CI pass is claimed.
+
+M09-T06 is `DONE`, advancing implementation progress to 101/145 (70%) and M09 to 6/14 (43%) while
+proof gates remain 10/13. P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, dynamic-value editing
+remains M09-T08, and slot/cardinality, state/action, Design/Run, persistence, browser-E2E,
+publication, and activation owners remain outstanding. M09-T07 is next.
 
 ## M10 — First end-to-end proof
 

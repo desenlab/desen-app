@@ -812,6 +812,35 @@ P-08 `NOT_PROVEN` ve kanıt kapıları 10/13 kalır. Genel ilerleme 100/145 (%69
 Design/Run, persistence, browser E2E, control-plane publish ve activation daha sonraki sahiplerde
 kalır; sıradaki iş M09-T06'dır.
 
+M09-T06 artık `DONE`'dır. Inspector, kapalı nesne şemalarını canonical çocuk sırası ve exact
+RFC 6901 pointer'larıyla recursive alan gruplarına dönüştürür. Mevcut gruplar native alt
+kontrollerle düzenlenir; bulunmayan optional grup tek bir complete JSON object olarak atomik
+oluşturulur. Array, open object, union, reference, combinator, conditional, pattern-property,
+desteklenmeyen şekil ve derivation-limit sonuçları görünür bir gerekçe taşıyan structured-JSON
+fallback'inda kalır.
+
+Structured JSON, parse edilmeden önce Publisher Source JSON limitleriyle taranır. Malformed veya
+non-finite JSON, decoded duplicate member, unpaired Unicode, limit aşımı ve `$` ile başlayan her
+decoded object key kısmi değer vermeden reddedilir. Başarılı değer detached ve recursively frozen
+olur. Pretty format limit büyümesini erken durdurup gerektiğinde canonical compact JSON'a döner.
+
+Route, selection, edit, validator-admitted Source ve Catalog snapshot'ları yetkilendirmeden önce
+exact olarak yakalanır. Nested edit yalnız complete top-level owner prop'u public Editor Core
+üzerinden yeniden kurar. Root fallback yalnız değişen prop'ları sayar; 256 transition ve 32 MiB
+toplam snapshot-work sınırını uygular, delete ve shrink işlemlerini growth'tan önce yapar. Tam aday
+Source continuous validation ve Publisher preflight geçmeden document/preview değişmez.
+
+Odak suite 73/73, tam App suite 118/118, bağımsız kök kanıt 10/10 ve tam structural CI glob 323/323
+geçer. Exact artifact 26.133 bayttır ve
+`sha256:6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec` ile pinlenir. Yerel CI
+184 workload/87 proof pair, closure 54 proof unit/118 workload ve ownership 1.184
+tracked/174 proof-owned path'tir. Sequence 45, 41 artifact ve 82 reader içerir. Bunlar required-gate
+veya hosted-CI iddiası değildir.
+
+P-08 `NOT_PROVEN`, PF-025 `OPEN` ve kanıt kapıları 10/13 kalır. Genel ilerleme 101/145 (%70),
+M09 ilerlemesi 6/14'tür (%43). Dynamic `$` edit M09-T08'de; slot/cardinality UI ise sıradaki
+M09-T07'dedir.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip
