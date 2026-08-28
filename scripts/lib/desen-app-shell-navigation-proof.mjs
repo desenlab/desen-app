@@ -55,12 +55,19 @@ const SVG_ASSET_PATHS = Object.freeze(
 const AUTHORING_SOURCE_PATH = "apps/desen-app/src/authoring-data.ts";
 const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
+const AUTHORING_INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
+const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
+const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
+const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const OFFICIAL_SOURCE_PATH = "examples/sign-in/official-derived.source.desen.json";
 const OFFICIAL_BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
 const ADDITIVE_SUCCESSOR_SOURCE_PATHS = Object.freeze([
   AUTHORING_SOURCE_PATH,
   ADAPTER_CANVAS_SOURCE_PATH,
   AUTHORING_SELECTION_SOURCE_PATH,
+  AUTHORING_INSPECTOR_SOURCE_PATH,
+  AUTHORING_PREVIEW_SOURCE_PATH,
+  INSPECTOR_PANEL_SOURCE_PATH,
 ]);
 const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
   ...SOURCE_PATHS.filter((entry) => /\.(?:ts|tsx)$/u.test(entry)),
@@ -75,6 +82,7 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   "apps/desen-app/README.md",
   "apps/desen-app/src/application.tsx",
   "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/styles.css",
   ADAPTER_CANVAS_SOURCE_PATH,
   "apps/desen-app/test/application.test.tsx",
   "apps/desen-app/test/main-lifecycle.test.tsx",
@@ -502,12 +510,11 @@ function verifyShellSemantics(files) {
   for (const required of ["@media", "var(--desen-app-", ".visuallyHidden"]) {
     requireText(moduleStyles, required, "application.module.css");
   }
-  for (const required of ["M09-T04", "History API"]) {
+  for (const required of ["M09-T05", "History API"]) {
     requireText(readme, required, "apps/desen-app/README.md");
   }
 
   for (const [relativePath, source] of [
-    ["application.tsx", application],
     ["project-navigation.ts", navigation],
     ["project-data.ts", data],
     ["main.tsx", main],
@@ -640,7 +647,11 @@ function inspectImports(files) {
   const exactSuccessorPackageImports = new Map([
     [
       AUTHORING_SOURCE_PATH,
-      new Set(["@desen/reference-catalog-web/catalog.json", "@desen/validator"]),
+      new Set([
+        "@desen/catalog-sdk",
+        "@desen/reference-catalog-web/catalog.json",
+        "@desen/validator",
+      ]),
     ],
     [
       ADAPTER_CANVAS_SOURCE_PATH,
@@ -653,6 +664,17 @@ function inspectImports(files) {
       ]),
     ],
     [AUTHORING_SELECTION_SOURCE_PATH, new Set(["@desen/runtime-react"])],
+    [AUTHORING_INSPECTOR_SOURCE_PATH, new Set(["@desen/catalog-sdk", "@desen/editor-core"])],
+    [
+      AUTHORING_PREVIEW_SOURCE_PATH,
+      new Set([
+        "@desen/editor-core",
+        "@desen/publisher",
+        "@desen/reference-catalog-web/catalog.json",
+      ]),
+    ],
+    [INSPECTOR_PANEL_SOURCE_PATH, new Set(["@desen/catalog-sdk"])],
+    [APPLICATION_SOURCE_PATH, new Set(["@desen/reference-catalog-web/catalog.json"])],
   ]);
   const seenSuccessorPackageImports = new Map(
     [...exactSuccessorPackageImports].map(([relativePath]) => [relativePath, new Set()]),
@@ -865,7 +887,8 @@ function inspectImports(files) {
     publicDiagnosticIndexTypeOnlyImports,
     handwrittenManagedTreeElements: 0,
     privateDomAccesses: 0,
-    mutationOrPublicationCalls: 0,
+    unreviewedMutationOrPublicationCalls: 0,
+    publicEditorCoreAndPublisherSuccessorEdges: true,
     arbitraryExecutableImports: 0,
     arbitraryExecutableHtmlEntries: 0,
   });
@@ -1013,15 +1036,19 @@ export async function buildDesenAppShellNavigationEvidence(rawOptions = undefine
     },
     tests,
     additiveSuccessor: {
-      task: "M09-T04",
+      task: "M09-T05",
       catalogDrivenAuthoringReadModelAllowed: true,
       exactPublicRuntimeAdapterCanvasAllowed: true,
       stableSourceSelectionOverlayAllowed: true,
+      schemaDerivedPrimitiveAndEnumInspectorAllowed: true,
+      publicEditorCoreMutationAllowed: true,
+      publisherBackedSessionPreviewAllowed: true,
       knownSourceEdges: [...ADDITIVE_SUCCESSOR_SOURCE_PATHS],
       historicalNoCatalogPanelNonclaimAppliedToCurrentApp: false,
       historicalNoRealAdapterCanvasNonclaimAppliedToCurrentApp: false,
       historicalNoSelectionOrInspectorNonclaimAppliedToCurrentApp: false,
-      sourceMutationPersistenceAndPublishStillDisallowed: true,
+      historicalNoSourceMutationNonclaimAppliedToCurrentApp: false,
+      persistenceAndControlPlanePublishStillDisallowed: true,
     },
   });
   return deepFreeze({

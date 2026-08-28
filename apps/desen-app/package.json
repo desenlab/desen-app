@@ -13,10 +13,14 @@
     "test": "vitest run",
     "test:authoring": "vitest run test/authoring-data.test.ts test/application.test.tsx",
     "test:canvas": "vitest run test/adapter-canvas.test.tsx test/application.test.tsx test/main-lifecycle.test.tsx",
+    "test:inspector": "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
     "test:selection": "vitest run test/authoring-selection.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
     "test:shell": "vitest run test/project-navigation.test.ts test/application.test.tsx test/main-lifecycle.test.tsx"
   },
   "dependencies": {
+    "@desen/catalog-sdk": "workspace:*",
+    "@desen/editor-core": "workspace:*",
+    "@desen/publisher": "workspace:*",
     "@desen/reference-catalog-web": "workspace:*",
     "@desen/runtime-core": "workspace:*",
     "@desen/runtime-react": "workspace:*",

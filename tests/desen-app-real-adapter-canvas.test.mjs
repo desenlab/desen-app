@@ -118,7 +118,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.pf059Status, "OPEN");
   assert.equal(built.artifact.claim.p07Status, "PARTIAL");
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.successor.task, "M09-T04");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T05");
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[1], () => {
@@ -183,8 +183,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   );
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
-  assert.equal(currentRuntime.moduleCount, 103);
-  assert.equal(currentRuntime.staticEdges, 293);
+  assert.equal(currentRuntime.moduleCount, 127);
+  assert.equal(currentRuntime.staticEdges, 372);
   assert.equal(currentRuntime.dynamicEdges, 0);
   assert.equal(currentRuntime.sharedRuntimeModuleCount, 19);
   assert.equal(currentRuntime.realComponentModuleCount, 5);
@@ -222,7 +222,18 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
     false,
   );
   assert.equal(built.currentCompatibility.successor.publicDiagnosticIndexOnly, true);
-  assert.equal(built.currentCompatibility.successor.sourceMutationOrHistoryImplemented, false);
+  assert.equal(
+    built.currentCompatibility.successor.schemaDerivedPrimitiveAndEnumInspectorImplemented,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.publicEditorCorePropMutationImplemented, true);
+  assert.equal(built.currentCompatibility.successor.publisherBackedSessionPreviewImplemented, true);
+  assert.equal(
+    built.currentCompatibility.successor
+      .historicalNoInspectorOrSourceMutationNonclaimAppliedToCurrentApp,
+    false,
+  );
+  assert.equal(built.currentCompatibility.successor.dynamicAndStructuredEditingImplemented, false);
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[4], () => {
@@ -308,8 +319,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[6], () => {
     ),
     replaceOnce(
       applicationSource,
-      "  }\n\n  return (\n    <section className={styles.surfaceEditor}",
-      '  }\n\n  if (import.meta.env.PROD) (selectedSurface as { id: string }).id = "sign-in";\n\n  return (\n    <section className={styles.surfaceEditor}',
+      "  const model = preparedModel.model;\n\n  return (\n    <section className={styles.surfaceEditor}",
+      '  const model = preparedModel.model;\n  if (import.meta.env.PROD) (selectedSurface as { id: string }).id = "sign-in";\n\n  return (\n    <section className={styles.surfaceEditor}',
     ),
   ]) {
     assert.throws(
@@ -455,8 +466,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[7], () => {
       "let supported = isSupportedRoute(routeIdentity); supported = true;",
     ],
     [
-      "bundle: officialDerivedSignInBundle,",
-      "bundle: officialDerivedSignInBundle, ...({ bundle: {} as never }),",
+      "      bundle,\n      catalogs: [referenceCatalog],",
+      "      bundle: {} as never,\n      catalogs: [referenceCatalog],",
     ],
     [
       "catalogs: [referenceCatalog],",
@@ -510,10 +521,6 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[7], () => {
     ['"account-app"', '"checkout-pilot"'],
     ['"sign-in"', '"recovery"'],
     ['"com.example.account-app"', '"com.example.other-app"'],
-    [
-      '"sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb"',
-      `"sha256:${"0".repeat(64)}"`,
-    ],
     [
       '"../../../examples/sign-in/official-derived.bundle.desen.json"',
       '"../../../examples/sign-in/handwritten.bundle.desen.json"',
@@ -590,7 +597,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
-  assert.equal(verified.currentGraphModules, 103);
+  assert.equal(verified.currentGraphModules, 127);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 

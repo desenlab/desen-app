@@ -22,9 +22,14 @@ const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const AUTHORING_DATA_SOURCE_PATH = "apps/desen-app/src/authoring-data.ts";
 const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
+const AUTHORING_INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
+const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
+const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
 const ADAPTER_CANVAS_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const AUTHORING_SELECTION_TEST_PATH = "apps/desen-app/test/authoring-selection.test.ts";
+const AUTHORING_INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.test.ts";
+const AUTHORING_PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
 const MAIN_LIFECYCLE_TEST_PATH = "apps/desen-app/test/main-lifecycle.test.tsx";
 const CATALOG_PATH = "packages/reference-catalog-web/catalog.json";
 const BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
@@ -49,7 +54,13 @@ const APP_SOURCE_PATHS = Object.freeze([
   "apps/desen-app/src/styles.css",
 ]);
 const CURRENT_APP_SOURCE_PATHS = Object.freeze(
-  [...APP_SOURCE_PATHS, AUTHORING_SELECTION_SOURCE_PATH].sort(),
+  [
+    ...APP_SOURCE_PATHS,
+    AUTHORING_SELECTION_SOURCE_PATH,
+    AUTHORING_INSPECTOR_SOURCE_PATH,
+    AUTHORING_PREVIEW_SOURCE_PATH,
+    INSPECTOR_PANEL_SOURCE_PATH,
+  ].sort(),
 );
 const CURRENT_APP_TYPESCRIPT_SOURCE_PATHS = Object.freeze(
   CURRENT_APP_SOURCE_PATHS.filter((relativePath) => /\.(?:ts|tsx)$/u.test(relativePath)),
@@ -82,13 +93,26 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ADAPTER_CANVAS_SOURCE_PATH,
   "apps/desen-app/src/application.module.css",
   APPLICATION_SOURCE_PATH,
+  AUTHORING_DATA_SOURCE_PATH,
+  "apps/desen-app/src/styles.css",
   ADAPTER_CANVAS_TEST_PATH,
   APPLICATION_TEST_PATH,
+  "apps/desen-app/test/authoring-data.test.ts",
+  "pnpm-lock.yaml",
   "scripts/lib/desen-app-real-adapter-canvas-proof.mjs",
   "tests/desen-app-real-adapter-canvas.test.mjs",
 ]);
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
-  ...new Set([...TRACKED_PATHS, AUTHORING_SELECTION_SOURCE_PATH, AUTHORING_SELECTION_TEST_PATH]),
+  ...new Set([
+    ...TRACKED_PATHS,
+    AUTHORING_SELECTION_SOURCE_PATH,
+    AUTHORING_SELECTION_TEST_PATH,
+    AUTHORING_INSPECTOR_SOURCE_PATH,
+    AUTHORING_PREVIEW_SOURCE_PATH,
+    INSPECTOR_PANEL_SOURCE_PATH,
+    AUTHORING_INSPECTOR_TEST_PATH,
+    AUTHORING_PREVIEW_TEST_PATH,
+  ]),
 ]);
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
   TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
@@ -202,10 +226,18 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     namedImports: Object.freeze(["AuthoringComponentSelection", "AuthoringSelectionProjection"]),
     typeOnly: true,
   }),
+  Object.freeze({
+    module: "./authoring-data.js",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze(["CatalogAuthoringModel"]),
+    typeOnly: true,
+  }),
 ]);
 
 const EXPECTED_JSX_BY_FUNCTION = Object.freeze({
   isSupportedRoute: Object.freeze([]),
+  readPreviewRevision: Object.freeze([]),
   renderManagedFailure: Object.freeze(["div"]),
   SelectionOverlay: Object.freeze(["div", "span", "span", "strong", "code", "span"]),
   ManagedAdapterSurface: Object.freeze([
@@ -218,6 +250,7 @@ const EXPECTED_JSX_BY_FUNCTION = Object.freeze({
   CanvasUnavailable: Object.freeze(["div"]),
   CanvasLoading: Object.freeze(["div"]),
   DesenAdapterCanvas: Object.freeze([
+    "CanvasUnavailable",
     "CanvasUnavailable",
     "CanvasLoading",
     "CanvasUnavailable",
@@ -255,7 +288,9 @@ const EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
   "balances StrictMode replay and final unmount with exact session disposal",
 ]);
 const CURRENT_EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
-  ...EXPECTED_ADAPTER_TEST_NAMES,
+  ...EXPECTED_ADAPTER_TEST_NAMES.slice(0, 3),
+  "replaces the exact session when a current authoring draft Bundle is rerendered",
+  EXPECTED_ADAPTER_TEST_NAMES[3],
   "renders Source-identity selection chrome as a sibling outside the managed subtree",
   "keeps a selected conditional Source node honest when it is not materialized",
   "rejects stale and cross-route selection identities without exposing overlay chrome",
@@ -313,6 +348,8 @@ const EXPECTED_GRAPH_DATA_MODULES = Object.freeze([
 
 const ALLOWED_RUNTIME_PACKAGE_EDGES = Object.freeze({
   "catalog-sdk": Object.freeze(["catalog-sdk", "protocol"]),
+  "editor-core": Object.freeze(["editor-core", "protocol", "validator"]),
+  publisher: Object.freeze(["catalog-sdk", "protocol", "publisher", "validator"]),
   protocol: Object.freeze(["protocol"]),
   "reference-catalog-web": Object.freeze([
     "catalog-sdk",
@@ -915,10 +952,6 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     ["SUPPORTED_PROJECT_ID", "account-app"],
     ["SUPPORTED_SURFACE_ID", "sign-in"],
     ["EXPECTED_DOCUMENT_ID", "com.example.account-app"],
-    [
-      "EXPECTED_REVISION",
-      "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb",
-    ],
   ]);
   const observedStringConstants = new Map();
   const stringConstantDeclarationCounts = new Map(
@@ -1113,12 +1146,16 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       ? mountArgument.properties
       : [];
   const mountPropertyNames = mountProperties.map((property) =>
-    ts.isPropertyAssignment(property) && ts.isIdentifier(property.name) ? property.name.text : null,
+    (ts.isPropertyAssignment(property) || ts.isShorthandPropertyAssignment(property)) &&
+    ts.isIdentifier(property.name)
+      ? property.name.text
+      : null,
   );
   if (
     mountCalls[0].arguments.length !== 1 ||
     !isDeepStrictEqual(mountPropertyNames, ["bundle", "catalogs", "hostPorts"]) ||
-    !mountText.includes("bundle: officialDerivedSignInBundle") ||
+    !ts.isShorthandPropertyAssignment(mountProperties[0]) ||
+    !mountText.includes("bundle") ||
     !mountText.includes("catalogs: [referenceCatalog]") ||
     !mountText.includes("hostPorts: ADAPTER_CANVAS_HOST_PORTS")
   ) {
@@ -1230,7 +1267,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     "if (!supported) return <CanvasUnavailable />",
     "state.routeIdentity !== routeIdentity",
     "selection = null",
-    "<ManagedAdapterSurface input={state.input} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
+    "<ManagedAdapterSurface authoringModel={authoringModel} input={state.input} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
     "disposeRuntimeHeadlessSession(session)",
   ]) {
     if (!canvasText.includes(requiredText)) {
@@ -1282,7 +1319,15 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       ts.isJsxAttribute(property) ? property.name.getText(applicationFile) : null,
     );
     if (
-      !isDeepStrictEqual(canvasAttributeNames, ["projectId", "selection", "surfaceId"]) ||
+      !isDeepStrictEqual(canvasAttributeNames, [
+        "authoringModel",
+        "bundle",
+        "projectId",
+        "selection",
+        "surfaceId",
+      ]) ||
+      !canvasElementText.includes("authoringModel={model}") ||
+      !canvasElementText.includes("bundle={preview.ok ? preview.bundle : null}") ||
       !canvasElementText.includes("projectId={project.id}") ||
       !canvasElementText.includes("selection={selection}") ||
       !canvasElementText.includes("surfaceId={selectedSurface.id}")
@@ -1296,7 +1341,8 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       appImports.some(
         (specifier) =>
           specifier.startsWith("@desen/runtime-") ||
-          specifier.startsWith("@desen/reference-catalog-web"),
+          (specifier.startsWith("@desen/reference-catalog-web") &&
+            specifier !== "@desen/reference-catalog-web/catalog.json"),
       )
     ) {
       fail(
@@ -1327,7 +1373,8 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       canvasBoundaries: canvasElements.length,
       selectedRouteTuple: true,
       sourceIdentitySelectionProp: true,
-      directRuntimeOrCatalogImports: 0,
+      directRuntimeImports: 0,
+      inertCatalogImports: 1,
     });
   }
 
@@ -1352,7 +1399,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     controlledIdentity: Object.fromEntries(observedStringConstants),
     hostPortsPolicy: "EXACT_INERT_ALL_DENY",
     exactPublicRegistryInput: true,
-    exactOfficialBundleMount: true,
+    exactPublisherOrOfficialFallbackBundleMount: true,
     manualManagedTreeElements: 0,
     dynamicExecutableImports: 0,
     privateDomInspectionCalls: 0,
@@ -1646,14 +1693,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 103 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 127 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 293 || dynamicEdges !== 0) {
+  if (staticEdges !== 372 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -1861,6 +1908,9 @@ async function buildRuntimeGraphEvidence(workspaceRoot, hostArtifact) {
 function inspectPackage(bytes) {
   const manifest = parseJson(bytes, APP_PACKAGE_PATH);
   const requiredDependencies = {
+    "@desen/catalog-sdk": "workspace:*",
+    "@desen/editor-core": "workspace:*",
+    "@desen/publisher": "workspace:*",
     "@desen/reference-catalog-web": "workspace:*",
     "@desen/runtime-core": "workspace:*",
     "@desen/runtime-react": "workspace:*",
@@ -1876,7 +1926,9 @@ function inspectPackage(bytes) {
     manifest.scripts?.["test:canvas"] !==
       "vitest run test/adapter-canvas.test.tsx test/application.test.tsx test/main-lifecycle.test.tsx" ||
     manifest.scripts?.["test:selection"] !==
-      "vitest run test/authoring-selection.test.ts test/adapter-canvas.test.tsx test/application.test.tsx"
+      "vitest run test/authoring-selection.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
+    manifest.scripts?.["test:inspector"] !==
+      "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx"
   ) {
     fail("PACKAGE_CONTRACT_DRIFT", "The Desen App exact T03 package/runtime contract drifted.");
   }
@@ -1887,6 +1939,7 @@ function inspectPackage(bytes) {
     typecheck: manifest.scripts.typecheck,
     focusedTest: manifest.scripts["test:canvas"],
     selectionFocusedTest: manifest.scripts["test:selection"],
+    inspectorFocusedTest: manifest.scripts["test:inspector"],
   });
 }
 
@@ -1955,7 +2008,7 @@ function inspectUiReceipts(
   }
   return deepFreeze({
     command:
-      "pnpm --filter @desen/app-web test:selection && node --test tests/desen-app-real-adapter-canvas.test.mjs",
+      "pnpm --filter @desen/app-web test:inspector && node --test tests/desen-app-real-adapter-canvas.test.mjs",
     adapterTestNames: adapterNames,
     applicationIntegrationTestNames: EXPECTED_APPLICATION_TEST_NAMES,
     selectionTestNames: selectionNames,
@@ -1967,6 +2020,7 @@ function inspectUiReceipts(
     finalRootUnmountCovered: true,
     sourceIdentityOverlayOutsideManagedSubtree: true,
     publicDiagnosticIndexProjectionCovered: true,
+    publisherBundleSessionReplacementCovered: true,
   });
 }
 
@@ -2101,7 +2155,7 @@ function captureBuildOptions(rawOptions) {
   });
 }
 
-/** Authenticates frozen M09-T03 evidence and checks its live additive M09-T04 successor. */
+/** Authenticates frozen M09-T03 evidence and checks its live additive M09-T05 successor. */
 export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const canonicalWorkspaceRoot = await realpath(options.workspaceRoot);
@@ -2184,14 +2238,16 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
         unsupportedTuplePolicy: "NO_MOUNT_NO_SUBSTITUTION",
       },
       ui: {
-        mode: "READ_ONLY_DESIGN_PREVIEW",
+        mode: "DESIGN_SESSION_PREVIEW",
         disabledFieldsetOutsideManagedTree: true,
         selectionOverlay: true,
         selectionIdentity: "STABLE_SOURCE_COMPONENT_ID",
         selectionRuntimeProjection: "PUBLIC_DIAGNOSTIC_INDEX_ONLY",
         selectionOverlayOutsideManagedCapabilitySubtree: true,
-        inspector: false,
-        sourceMutation: false,
+        inspector: true,
+        schemaDerivedPrimitiveAndEnumControls: true,
+        sourcePropMutation: "PUBLIC_EDITOR_CORE_ONLY",
+        publisherBackedSessionPreview: true,
       },
       lifecycle: {
         headlessSessionPerSupportedMount: true,
@@ -2212,6 +2268,11 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
       additiveSuccessorReceipts: [
         AUTHORING_SELECTION_SOURCE_PATH,
         AUTHORING_SELECTION_TEST_PATH,
+        AUTHORING_INSPECTOR_SOURCE_PATH,
+        AUTHORING_PREVIEW_SOURCE_PATH,
+        INSPECTOR_PANEL_SOURCE_PATH,
+        AUTHORING_INSPECTOR_TEST_PATH,
+        AUTHORING_PREVIEW_TEST_PATH,
       ].map((relativePath) => ({
         path: relativePath,
         bytes: files.get(relativePath).byteLength,
@@ -2219,14 +2280,17 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
       })),
     },
     successor: {
-      task: "M09-T04",
+      task: "M09-T05",
       stableSourceSelectionOverlayOwnedBySuccessor: true,
       historicalNoSelectionOverlayNonclaimAppliedToCurrentApp: false,
       outsideManagedCapabilitySubtree: true,
       publicDiagnosticIndexOnly: true,
       privateDomOrReactInspection: false,
-      inspectorImplemented: false,
-      sourceMutationOrHistoryImplemented: false,
+      schemaDerivedPrimitiveAndEnumInspectorImplemented: true,
+      publicEditorCorePropMutationImplemented: true,
+      publisherBackedSessionPreviewImplemented: true,
+      historicalNoInspectorOrSourceMutationNonclaimAppliedToCurrentApp: false,
+      dynamicAndStructuredEditingImplemented: false,
       persistenceImplemented: false,
       runOrPublishImplemented: false,
     },

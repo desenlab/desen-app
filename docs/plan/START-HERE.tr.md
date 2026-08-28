@@ -771,6 +771,47 @@ Component geometry/hit testing/canvas picking, inspector veya Source mutation,
 insert/cardinality/drag-drop, state/action authoring, Design/Run, diagnostics navigation/placeholder,
 persistence, browser E2E, publish ve activation kanıtlanmaz; sıradaki iş M09-T05'tir.
 
+M09-T05 artık `DONE`'dır. Seçili exact Source component'ı için tek App-owned Inspector,
+validator tarafından kabul edilen Catalog `propsSchema`'sını public Catalog SDK ile kontrol
+planına dönüştürür. String, boolean, number, integer ve primitive-enum değerleri native
+kontroller alır. Dynamic `$ref` değerleri M09-T08'e, group/structured descriptor'lar M09-T06'ya
+kadar görünür ama kilitli kalır; etiket ve açıklamalar şema otoritesinin yerini almaz.
+
+Her edit komutu yetkilendirmeden önce exact own-enumerable data snapshot'ına indirgenir.
+Proxy-backed komutlar property getter çağırmadan yalnız yakalanmış own data üzerinden
+tüketilir; accessor, extra-field ve symbol içeren şekiller reddedilir. Route, selection, Source
+node, capability, control, requiredness, mevcut değer türü ve primitive tip güncel immutable
+Source ile Catalog'dan yeniden türetilir. Yalnız bundan sonra public Editor Core set/delete komutu
+aday üretebilir ve tam aday Source public continuous Catalog validator'dan geçmeden başarı
+dönmez.
+
+Editor Core başarısı da public Publisher tam aday Source'u exact reference Catalog package
+candidate karşısında kabul edene kadar geçicidir. App, `{document, preview}` durumunu yalnız bu
+preflight'tan sonra tek session update'i olarak değiştirir. Publisher reddi önceki Source ve
+çalışan preview'yu birlikte korur; kabul edilen Bundle revision'ı exact Runtime session'ı
+değiştirir ve öncülünü dispose eder. Inspector disabled managed fieldset ve capability
+subtree dışında bir App-owned `aside`'dır; private DOM/native, geometry, hit-test, canvas-picking,
+registry, session veya runtime callback yetkisi almaz.
+
+Odak Inspector suite'i 41/41, tam App suite'i 86/86 ve bağımsız kök kanıt 10/10 geçer; App
+typecheck, lint ve production build de yerelde geçer. Exact kanıt 22.998 baytlık
+[`desen-app-0.1.0-schema-inspector.json`](../proof/artifacts/desen-app-0.1.0-schema-inspector.json)
+artifact'ıdır ve
+`sha256:473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b` ile pinlenir. Doğrudan
+parent'lar exact M09-T02 Catalog paneli, M09-T04 selection overlay'i ve M06-T10 Publisher official
+golden artifact'ıdır. Canlı yerel CI envanteri 182 workload ve 86 proof pair kaydeder; bunlar 75
+ordinary pair ve 11 barrier'dır. Connected closure 53 proof unit/116 workload, ownership ise 1.175
+tracked path/172 proof-owned path'tir. Sequence 44,
+`sha256:f0c5f3bfbc30ccf230c5256b3a5672c29ffa0e884129ae210571895bd063812c` başında 67/67 geçer;
+ilk 43 checkpoint'i koruyarak zinciri 40 artifact ve 80 reader'a çıkarır. Tam structural CI suite'i
+yerelde 320/320 geçer. Bunlar yerel task/CI makbuzlarıdır; required gate veya hosted-CI başarısı
+iddia edilmez.
+
+P-08 `NOT_PROVEN` ve kanıt kapıları 10/13 kalır. Genel ilerleme 100/145 (%69), M09 ilerlemesi
+5/14'tür (%36). Nested-object/structured-JSON edit, state/binding ve event/action authoring,
+Design/Run, persistence, browser E2E, control-plane publish ve activation daha sonraki sahiplerde
+kalır; sıradaki iş M09-T06'dır.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

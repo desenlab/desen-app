@@ -709,8 +709,9 @@ Evidence:
 
 The visual authoring product. M09-T01 establishes its application-owned shell and project
 navigation. M09-T02 composes the first Catalog-driven, read-only authoring projection into that
-shell. M09-T03 adds one exact managed reference-adapter canvas without yet admitting the selection,
-inspector, or mutation authority promised by later M09 tasks.
+shell. M09-T03 adds one exact managed reference-adapter canvas, M09-T04 adds Source-identity
+selection outside that managed subtree, and M09-T05 adds schema-derived primitive/enum Inspector
+controls through public Editor Core and Publisher boundaries.
 
 The first slice owns three exact route forms: `/projects`, `/projects/:projectId`, and
 `/projects/:projectId/surfaces/:surfaceId`. The bare root is replaced with `/projects`; app-owned
@@ -827,6 +828,39 @@ Design/Run behavior, diagnostics navigation, persistence, publication, activatio
 generality, or native-target parity. Exact evidence is the 11,997-byte
 `docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json` at
 `sha256:9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1`.
+
+M09-T05 joins the exact selected Source identity to a control plan derived from the selected
+component's validator-admitted `propsSchema` through the public Catalog SDK. String, boolean,
+number, integer, and primitive-enum descriptors receive native controls. Dynamic `$ref` values are
+represented as bound and remain read-only until M09-T08. Group and structured descriptors remain
+visible but locked until M09-T06; presentation labels and descriptions never replace the schema as
+mutation authority.
+
+Every edit is reduced to an exact own enumerable data snapshot before authorization. Proxy-backed
+commands are therefore consumed only through captured own data without invoking property getters;
+accessor, extra-field, and symbol-bearing shapes are rejected. The App re-derives the route,
+selection, node, capability, control, requiredness, current value kind, and primitive type from the
+current immutable Source and Catalog. Only then may the public Editor Core set/delete prop command
+produce a candidate. That complete candidate must pass the public continuous Catalog validator;
+stale identities, invalid enums or numeric forms, deletion-policy failures, and schema-invalid
+values expose no partial document.
+
+A successful Editor Core result is still provisional. The application passes the complete
+candidate Source through the public Publisher against the exact reference Catalog package
+candidate. `SurfaceEditor` replaces one session-owned `{document, preview}` state only after that
+preflight succeeds. Publisher rejection leaves both the prior Source and the prior working preview
+unchanged; an accepted Bundle revision causes the adapter canvas to dispose its predecessor session
+and mount the exact new Bundle. This session-local preview is not persistence, control-plane
+publication, channel activation, deployment, or host authority.
+
+The Inspector is an App-owned `aside` rendered outside the disabled Runtime React fieldset and
+marked capability subtree. It receives no managed child, private DOM/native structure, component
+geometry, hit-test, canvas-picking, registry, or runtime callback authority. M09-T05 also adds no
+nested-object editor, structured-JSON mutation UI, state/binding editor, event/action editor,
+Design/Run mode, save/open UI, diagnostics navigation, control-plane publication, or activation.
+P-08 therefore remains `NOT_PROVEN`. Exact local evidence is the 22,998-byte
+`docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json` at
+`sha256:473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b`.
 
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,

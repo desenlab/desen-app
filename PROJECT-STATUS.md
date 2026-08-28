@@ -986,7 +986,7 @@ closure contains 52 proof units and 114 workloads. Sequence 43 passes 66/66 at
 `sha256:0bbb101332d7af5dcf7260b6df6961837003571f67a6e3a69232e65e19cded58`, preserves sequence 42
 and all 38 predecessor artifacts, appends the T04 artifact at index 38, reseals predecessor
 compatibility readers `[70, 71, 72, 73, 74, 75]`, and appends T04 proof/root readers `[76, 77]`.
-The current checkpoint contains 39 artifacts and 78 readers; the structural CI suite passes
+The sequence-43 checkpoint contains 39 artifacts and 78 readers; its structural CI suite passes
 317/317. These are local code-owned receipts, not a required-gate or hosted-CI pass. M09-T04 is
 `DONE`;
 `N-042` is `TESTED` for this exact controlled Web–React profile, P-06 remains `PROVEN`, P-07 and
@@ -995,19 +995,48 @@ P-16 remain `PARTIAL`, proof gates remain 10/13, implementation progress is 99/1
 insertion/cardinality/drag-drop, state/action authoring, Design/Run, diagnostics navigation or
 placeholders, persistence, browser E2E, publication, and activation remain outside this slice.
 
+M09-T05 now adds a schema-derived primitive/enum Inspector without moving authoring controls into
+the managed capability subtree. The exact selected Source component is joined to its
+validator-admitted Catalog `propsSchema` through the public Catalog SDK. Native string, boolean,
+number, integer, and primitive-enum controls are editable; dynamic `$ref` values and
+group/structured descriptors remain visible but locked for M09-T08 and M09-T06.
+
+Each command is captured as exact own enumerable data before authority checks. Proxy-backed input
+is consumed through captured own data without invoking property getters; accessor, extra-field,
+and symbol-bearing shapes fail closed. The current route, selection, node, capability, control,
+requiredness, value kind, and primitive type are re-derived before a public Editor Core set/delete
+command may run, and the complete candidate must pass continuous Catalog validation. A successful
+candidate is committed only after public Publisher preflight; one session-local `{document,
+preview}` update preserves both prior values on failure and replaces/disposes the Runtime session
+only after success.
+
+The focused Inspector suite passes 41/41, the complete App suite passes 86/86, the independent root
+proof passes 10/10, and App typecheck, lint, and production build pass locally. Exact evidence is
+the 22,998-byte
+`docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json` artifact at
+`sha256:473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b`. The live local CI
+inventory registers 182 workloads and 86 proof pairs—75 ordinary and 11 barriers—with a
+53-proof-unit/116-workload connected closure and complete 1,175-path/172-proof-owned ownership.
+Sequence 44 passes 67/67 at
+`sha256:f0c5f3bfbc30ccf230c5256b3a5672c29ffa0e884129ae210571895bd063812c`, with 40 artifacts and
+80 readers, and the complete structural CI suite passes 320/320 locally. These are local receipts
+rather than a required-gate or hosted-CI pass. M09-T05 is `DONE`; P-08
+remains `NOT_PROVEN`, proof gates remain 10/13, implementation progress is 100/145 (69%), M09 is
+5/14 (36%), and M09-T06 is next.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `99 / 145 tasks complete (68%)`
+- Overall implementation progress: `100 / 145 tasks complete (69%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
-- M09 progress: `4 / 14 tasks complete (29%)`
+- M09 progress: `5 / 14 tasks complete (36%)`
 - Proof-gate progress: `10 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1092,18 +1121,20 @@ placeholders, persistence, browser E2E, publication, and activation remain outsi
   `M09-T01 — Desen App shell and project navigation`,
   `M09-T02 — Catalog-driven component panel and layer tree`,
   `M09-T03 — Exact reference-adapter canvas`,
-  `M09-T04 — Source-identity selection outside managed capability subtrees`
+  `M09-T04 — Source-identity selection outside managed capability subtrees`,
+  `M09-T05 — Schema-driven primitive/enum inspector controls`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M09-T05 — Schema-driven primitive/enum inspector controls`
-- Status: M08 is 10/10, M09 is 4/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T04 are
+- Next implementation task: `M09-T06 — Nested-object controls and honest structured-JSON fallback`
+- Status: M08 is 10/10, M09 is 5/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T05 are
   `DONE`; `N-042` is `TESTED`, P-06 is `PROVEN`, P-07 and P-16 are `PARTIAL`, proof gates are
-  10/13, and implementation progress is 99/145. All 17 G07-due entries remain `CLOSED`;
-  `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
+  10/13, P-08 remains `NOT_PROVEN`, and implementation progress is 100/145. All 17 G07-due
+  entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
+  are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
   its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
   `DONE` with its tracked state/binding artifact, independent root proof, and CI registration.
@@ -1128,7 +1159,13 @@ placeholders, persistence, browser E2E, publication, and activation remain outsi
   focused App cases, 10/10 independent root proof, private-structure/geometry mutation rejection,
   desktop/mobile manual interaction verification, live local 180-workload/85-pair CI authority,
   52-proof-unit/114-workload connected closure, 1,164-path/170-proof-owned ownership authority,
-  and sequence-43 reader checkpoint. No required-gate or hosted result is claimed.
+  and sequence-43 reader checkpoint. M09-T05 is `DONE` with its exact schema-Inspector artifact,
+  41/41 focused cases, 86/86 complete App cases, 10/10 independent root proof, public Editor Core
+  validation and Publisher
+  preflight transaction, live local 182-workload/86-pair CI inventory,
+  53-proof-unit/116-workload connected closure, and 1,175-path/172-proof-owned ownership authority.
+  Sequence 44 passes 67/67 with 40 artifacts and 80 readers, and the complete structural CI suite
+  passes 320/320 locally. No required-gate or hosted result is claimed.
 
 ## Completed preparation
 
@@ -3631,6 +3668,51 @@ M09-T04 evidence:
 - coverage decision: M09-T04 is `DONE`; `N-042` advances to `TESTED` for the exact controlled
   Web–React profile; P-06 remains `PROVEN`; P-07 and P-16 remain `PARTIAL`; proof gates remain
   10/13; overall progress advances to 99/145 (68%); M09 advances to 4/14; M09-T05 is next
+
+M09-T05 evidence:
+
+- `docs/proof/DESEN-APP-SCHEMA-INSPECTOR.md`
+- `docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json`, exactly 22,998 bytes at
+  `sha256:473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b`
+- prerequisite authority: exact frozen M09-T02 Catalog-panel/layer-tree, M09-T04 selection-overlay,
+  and M06-T10 Publisher official-golden artifacts are authenticated before any M09-T05 claim
+- schema authority: each selected component control plan is derived through the public Catalog SDK
+  from its exact validator-admitted `propsSchema`; labels and descriptions remain presentation,
+  while the descriptor retains primitive type, enum, requiredness, and mutation authority
+- control boundary: native string, boolean, number, integer, and exact primitive-enum controls are
+  editable; dynamic `$ref` values are shown as bound and locked for M09-T08; group and structured
+  descriptors are visible but locked for M09-T06
+- command boundary: each input is captured as an exact own enumerable data snapshot before
+  authorization; proxy-backed commands are consumed through captured own data without invoking
+  property getters, while accessor, extra-field, and symbol-bearing commands are rejected
+- identity and validation boundary: route, selection, Source node, capability, control,
+  requiredness, current value kind, and primitive type are re-derived from the current immutable
+  document and Catalog; public Editor Core set/delete commands return no partial Source, and the
+  complete candidate must pass the public continuous Catalog validator
+- preview transaction: every Editor Core success remains provisional until the public Publisher
+  admits the complete candidate against the exact reference Catalog package candidate; only then
+  does the App replace one session-local `{document, preview}` state, while Publisher rejection
+  retains both the previous Source and working preview
+- runtime lifecycle: an accepted Bundle revision replaces the exact Runtime session and disposes
+  its predecessor; this session preview has no storage, control-plane publication, activation,
+  deployment, or host authority
+- UI ownership: the Inspector is one App-owned `aside` outside the disabled Runtime React fieldset
+  and marked capability subtree, with no private DOM/native structure, geometry, hit-test,
+  canvas-picking, registry, session, managed child, or runtime callback authority
+- local proof: the focused App Inspector suite passes 41/41; the complete App suite passes 86/86;
+  the independent root proof passes 10/10; App typecheck, lint, and production build pass locally
+- CI authority: the live local inventory registers 182 workloads and 86 proof pairs, split into 75
+  ordinary pairs and 11 barriers; its exact formal impact parents produce a 53-proof-unit,
+  116-workload connected closure; complete ownership covers 1,175 tracked paths and 172 proof-owned
+  paths
+- evidence boundary: these task and CI receipts are local; no required-gate or hosted-CI result is
+  inferred in this update
+- scope nonclaims: no nested-object/structured-JSON mutation UI, state/binding or event/action
+  authoring, insertion/cardinality/drag-drop, Design/Run, save/open durability, diagnostics
+  navigation, browser E2E, control-plane publication, activation, arbitrary-future-Catalog,
+  native-target, or pixel-fidelity guarantee is implemented or proven
+- coverage decision: M09-T05 is `DONE`; P-08 remains `NOT_PROVEN`; proof gates remain 10/13;
+  overall progress advances to 100/145 (69%); M09 advances to 5/14 (36%); M09-T06 is next
 
 ## Status vocabulary
 

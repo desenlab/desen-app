@@ -1410,7 +1410,7 @@ is next.
 | M09-T02 | DONE        | M09-T01                  | Catalog-driven component panel and layer tree                                   |
 | M09-T03 | DONE        | M09-T01, G05             | Canvas uses the exact React adapters used by the reference host                 |
 | M09-T04 | DONE        | M09-T03                  | Selection overlays remain outside capability subtrees; no private-DOM authoring |
-| M09-T05 | NOT_STARTED | M09-T02–M09-T03          | Schema-driven primitive/enum inspector controls                                 |
+| M09-T05 | DONE        | M09-T02–M09-T04          | Schema-driven primitive/enum inspector controls                                 |
 | M09-T06 | NOT_STARTED | M09-T05                  | Nested-object controls and honest structured-JSON fallback                      |
 | M09-T07 | NOT_STARTED | M09-T02–M09-T06          | Named-slot drop, move, reorder, cardinality, and acceptance UI                  |
 | M09-T08 | NOT_STARTED | M09-T05                  | Local state and binding editor UI                                               |
@@ -1556,6 +1556,52 @@ P-06 remains `PROVEN`, and P-07/P-16 remain `PARTIAL`. No component geometry, hi
 picking, inspector, Source mutation, insertion/cardinality/drag-drop, state/action authoring,
 Design/Run mode, diagnostics navigation or placeholders, persistence, browser E2E, publication, or
 activation is claimed. M09-T05 is next.
+
+M09-T05 adds one App-owned Inspector for the exact selected Source component. The control plan is
+derived through the public Catalog SDK from the exact validator-admitted component `propsSchema`;
+string, boolean, number, integer, and primitive-enum descriptors receive native controls. Dynamic
+`$ref` values remain visible but locked for M09-T08, while group and structured descriptors remain
+visible but locked for M09-T06. Labels and descriptions are presentation metadata only; the schema
+descriptor remains mutation authority.
+
+Each requested edit is first captured as an exact own enumerable data snapshot. Proxy-backed
+commands are consumed only through that captured own data without invoking property getters, while
+accessor, extra-field, and symbol-bearing commands are rejected. Route, selection, Source node,
+capability, control identity, requiredness, current value kind, and primitive type are re-derived
+from the current immutable document and Catalog. Accepted set/delete operations use public Editor
+Core commands, and the complete resulting Source must pass the public continuous Catalog validator
+before success can be returned. Stale or forged identities, invalid enum and numeric forms,
+required or absent deletion, dynamic/structured edits, and schema-invalid values fail closed with
+no partial Source.
+
+Every Editor Core success remains provisional until the public Publisher accepts the complete
+candidate Source against the exact reference Catalog package candidate. The App replaces one
+session-owned `{document, preview}` state only after that preflight succeeds. A Publisher rejection,
+including an oversized but schema-valid string, retains both the prior Source and working preview;
+an accepted Bundle revision replaces the exact Runtime session and disposes its predecessor. The
+Inspector is an App-owned `aside` outside the disabled managed fieldset and marked capability
+subtree, with no private DOM/native, geometry, hit-test, canvas-picking, registry, session, or
+runtime-callback authority.
+
+The exact 22,998-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json` at
+`sha256:473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b`. It authenticates exact
+M09-T02 Catalog-panel, M09-T04 selection-overlay, and M06-T10 Publisher official-golden parents.
+The focused App Inspector suite passes 41/41, the complete App suite passes 86/86, the independent
+root proof passes 10/10, and App typecheck, lint, and production build pass locally. The live local
+CI inventory registers 182
+workloads and 86 proof pairs—75 ordinary and 11 barriers—with a 53-proof-unit/116-workload
+connected closure and complete ownership over 1,175 tracked paths, including 172 proof-owned paths.
+Sequence 44 passes 67/67 at
+`sha256:f0c5f3bfbc30ccf230c5256b3a5672c29ffa0e884129ae210571895bd063812c`, preserving its first
+43 checkpoints while extending the chain to 40 artifacts and 80 readers. The complete structural
+CI suite passes 320/320 locally. These are local task and CI-infrastructure receipts; no
+required-gate or hosted-CI pass is claimed.
+
+M09-T05 is `DONE`, advancing implementation progress to 100/145 (69%) and M09 to 5/14 (36%) while
+proof gates remain 10/13. P-08 remains `NOT_PROVEN`: nested-object/structured-JSON editing,
+state/binding and event/action authoring, Design/Run, persistence, browser E2E, control-plane
+publication, and activation remain later owners. M09-T06 is next.
 
 ## M10 — First end-to-end proof
 

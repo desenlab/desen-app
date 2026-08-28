@@ -21,12 +21,14 @@ const SELECTION_SOURCE = "apps/desen-app/src/authoring-selection.ts";
 const ADAPTER_SOURCE = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION_SOURCE = "apps/desen-app/src/application.tsx";
 const APPLICATION_CSS = "apps/desen-app/src/application.module.css";
+const INSPECTOR_SOURCE = "apps/desen-app/src/authoring-inspector.ts";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let selectionSource;
 let adapterSource;
 let applicationSource;
 let cssSource;
+let inspectorSource;
 let built;
 
 function expectedError(code) {
@@ -57,14 +59,21 @@ async function temporaryDirectory(prefix) {
 }
 
 before(async () => {
-  [parentArtifactBytes, selectionSource, adapterSource, applicationSource, cssSource] =
-    await Promise.all([
-      readFile(path.join(ROOT, PARENT_ARTIFACT)),
-      readFile(path.join(ROOT, SELECTION_SOURCE), "utf8"),
-      readFile(path.join(ROOT, ADAPTER_SOURCE), "utf8"),
-      readFile(path.join(ROOT, APPLICATION_SOURCE), "utf8"),
-      readFile(path.join(ROOT, APPLICATION_CSS), "utf8"),
-    ]);
+  [
+    parentArtifactBytes,
+    selectionSource,
+    adapterSource,
+    applicationSource,
+    cssSource,
+    inspectorSource,
+  ] = await Promise.all([
+    readFile(path.join(ROOT, PARENT_ARTIFACT)),
+    readFile(path.join(ROOT, SELECTION_SOURCE), "utf8"),
+    readFile(path.join(ROOT, ADAPTER_SOURCE), "utf8"),
+    readFile(path.join(ROOT, APPLICATION_SOURCE), "utf8"),
+    readFile(path.join(ROOT, APPLICATION_CSS), "utf8"),
+    readFile(path.join(ROOT, INSPECTOR_SOURCE), "utf8"),
+  ]);
   built = await buildDesenAppSelectionOverlayEvidence();
 });
 
@@ -84,6 +93,14 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.taskStatus, "DONE");
   assert.equal(built.artifact.claim.n042Status, "TESTED");
   assert.equal(built.artifact.claim.p06Status, "PROVEN");
+  assert.equal(built.artifactBytes.byteLength, 11_997);
+  assert.equal(
+    built.artifactSha256,
+    "9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1",
+  );
+  assert.equal(built.currentCompatibility.task, "M09-T04");
+  assert.equal(built.currentCompatibility.result, "PASS");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T05");
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[1], () => {
@@ -117,12 +134,16 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[2], () => {
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[3], () => {
   const adapter = built.artifact.authority.source.adapter;
+  const currentAdapter = built.currentCompatibility.authority.source.adapter;
   assert.equal(adapter.exactSharedRegistryRetained, true);
   assert.equal(adapter.managedFieldsetContainsRuntimeBoundary, true);
   assert.equal(adapter.overlayOutsideManagedFieldset, true);
   assert.equal(adapter.overlayReceivesNoManagedChildOrDomHandle, true);
   assert.equal(built.artifact.application.overlay.relationship.includes("sibling"), true);
   assert.equal(built.artifact.application.overlay.componentGeometry, false);
+  assert.equal(currentAdapter.exactSharedRegistryRetained, true);
+  assert.equal(currentAdapter.overlayOutsideManagedFieldset, true);
+  assert.equal(currentAdapter.overlayReceivesNoManagedChildOrDomHandle, true);
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[4], () => {
@@ -137,6 +158,14 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[4], () => {
   assert.equal(built.artifact.claim.privateDomAndReactAuthoringRejected, true);
   assert.equal(built.artifact.claim.publicDiagnosticIndexOnly, true);
   assert.equal(built.artifact.claim.componentGeometryClaimed, false);
+  for (const authority of [
+    built.currentCompatibility.authority.source.selection,
+    built.currentCompatibility.authority.source.adapter,
+    built.currentCompatibility.authority.source.application,
+  ]) {
+    assert.equal(authority.privateInspection.privateDomOrGeometryCalls, 0);
+    assert.equal(authority.privateInspection.privateReactReferences, 0);
+  }
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
@@ -152,6 +181,17 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
   assert.equal(built.artifact.tests.selectionTestNames.length, 6);
   assert.equal(built.artifact.tests.adapterTestNames.length, 3);
   assert.equal(built.artifact.tests.applicationTestNames.length, 2);
+  assert.equal(
+    built.currentCompatibility.application.package.inspectorTestCommand,
+    "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+  );
+  assert.equal(built.currentCompatibility.successor.schemaDerivedPrimitiveAndEnumControls, true);
+  assert.equal(built.currentCompatibility.successor.publicEditorCoreAtomicMutation, true);
+  assert.equal(built.currentCompatibility.successor.dynamicAndStructuredValuesLocked, true);
+  assert.equal(built.currentCompatibility.successor.publisherBackedSessionPreview, true);
+  assert.equal(built.currentCompatibility.successor.sourceAndPreviewCommitAtomically, true);
+  assert.equal(built.currentCompatibility.successor.inspectorOutsideManagedCapabilitySubtree, true);
+  assert.equal(built.currentCompatibility.successor.selectionOverlayBoundaryRetained, true);
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[6], async () => {
@@ -161,9 +201,11 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[6], async () => {
   assert.notEqual(second.artifact, built.artifact);
   assert.equal(Object.isFrozen(second.artifact), true);
   assert.equal(Object.isFrozen(second.artifact.boundary.trackedReceipts), true);
+  assert.deepEqual(second.currentCompatibility, built.currentCompatibility);
+  assert.equal(Object.isFrozen(second.currentCompatibility), true);
 });
 
-test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], () => {
+test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
   const baseline = {
     selectionSource,
     adapterSource,
@@ -206,6 +248,24 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], () => {
       expectedError("SOURCE_POLICY_VIOLATION"),
     );
   }
+
+  await assert.rejects(
+    buildDesenAppSelectionOverlayEvidence({
+      fileOverrides: new Map([
+        [
+          INSPECTOR_SOURCE,
+          Buffer.from(
+            replaceOnce(
+              inspectorSource,
+              'field.value.kind === "dynamic"',
+              'field.value.kind === "unavailable"',
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[8], async () => {
