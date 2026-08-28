@@ -355,7 +355,7 @@ The current reviewed T05 digest set available at this local task-proof checkpoin
 - shadow plan:
   `31bc4046f7d3344c5e5d85d74d782b993df948cf676cdafef53ba6757ccc936e`;
 - current selector authority:
-  `b27da8b3c8b855336b5a678458ed55acd589d61772a411225b77d40e4a9d18b7`;
+  `afc59adf27f4cddf07684f6ac0ef16550c42cdef9002aeb87c9892f5235639ed`;
 - current required-runner authority:
   `9238940f7926a80d40d012208cec63de9fb917e54e604b6b579811f159c8e585`, independently reviewed
   rather than inferred from selector success; and

@@ -93,7 +93,7 @@ non-authoritative shadow form is pinned separately as
 `sha256:31bc4046f7d3344c5e5d85d74d782b993df948cf676cdafef53ba6757ccc936e`.
 The historical M08-T10 selector and required-runner authorities remain authenticated by the frozen
 I07-04 promotion artifact. The reviewed M09-T05 selector is
-`sha256:b27da8b3c8b855336b5a678458ed55acd589d61772a411225b77d40e4a9d18b7`; its required-runner
+`sha256:afc59adf27f4cddf07684f6ac0ef16550c42cdef9002aeb87c9892f5235639ed`; its required-runner
 authority is independently pinned as
 `sha256:9238940f7926a80d40d012208cec63de9fb917e54e604b6b579811f159c8e585` and is not inferred
 from selector success.

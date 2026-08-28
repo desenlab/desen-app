@@ -214,7 +214,7 @@ counts are `170 / 45 / 31 / 129 / 450 / 207 / 121 / 11`. The current M09-T05 aut
 `sha256:361ce76e9d9b7480e2bb9ea7c2b889848ab81c89db6b13d298923dde49e68146`, and its ownership
 projection is `sha256:d708c590da4a00e36c5f7a96e0e807bc60421aa4561482b6dd73a29bd43f90a2`.
 Its selector authority is
-`sha256:b27da8b3c8b855336b5a678458ed55acd589d61772a411225b77d40e4a9d18b7`; required-runner
+`sha256:afc59adf27f4cddf07684f6ac0ef16550c42cdef9002aeb87c9892f5235639ed`; required-runner
 authority is independently pinned as
 `sha256:9238940f7926a80d40d012208cec63de9fb917e54e604b6b579811f159c8e585` and is not inferred
 from selector success. Its

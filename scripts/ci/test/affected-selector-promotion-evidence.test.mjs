@@ -270,7 +270,7 @@ test("authenticates the exact 20/20 hosted promotion campaign", async () => {
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "b27da8b3c8b855336b5a678458ed55acd589d61772a411225b77d40e4a9d18b7",
+    selectorSha256: "afc59adf27f4cddf07684f6ac0ef16550c42cdef9002aeb87c9892f5235639ed",
     ownershipSha256: "d708c590da4a00e36c5f7a96e0e807bc60421aa4561482b6dd73a29bd43f90a2",
     impactGraphSha256: "bb20c549f9e61e88384f4d516c8f76225c3c99c7ba7e3d5f24344689b46e0e05",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
