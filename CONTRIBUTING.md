@@ -35,10 +35,23 @@ A task is complete only when:
 
 ## Validation
 
-Run the complete local quality gate before review:
+For an ordinary task, run the bounded local baseline before review:
 
 ```bash
-pnpm check
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm build
+pnpm boundaries
+node scripts/ci/verify-proof-reader-checkpoints.mjs
 ```
 
-End-to-end and proof milestones add their own task-specific commands.
+This baseline is non-authoritative early feedback. The task-specific verifier and focused positive
+and relevant negative tests are still mandatory. Merge or a completion report additionally
+requires a passing hosted `Quality gate` attached to the exact current pull-request head; a new
+commit invalidates the earlier result.
+
+Use the exhaustive local `pnpm check` compatibility command for G closure, an explicit local
+manual audit, or an explicit request. Hosted `main`, release, manual audit, and unsafe or untrusted
+boundaries remain fresh exhaustive runs. Current checkpoints and seals authenticate identity and
+impact; they never cache success or replace fresh selected workloads.

@@ -26,11 +26,35 @@
 - Add positive and relevant negative tests.
 - Add TSDoc to every public export.
 - Update the package README and any affected ADR, finding, or proof evidence.
-- Run `pnpm check` and task-specific verification.
+- Follow the CI-02 per-task quality contract below.
 - Update `docs/plan/TASKS.md` and `PROJECT-STATUS.md` only after evidence passes.
 - When a task becomes `DONE`, update the README task-progress block from `docs/plan/TASKS.md` in
   the same commit.
 - Do not include AI or tool co-author trailers in commits.
+
+## Per-task quality contract (CI-02)
+
+For an ordinary `T` task, run this exact bounded local baseline:
+
+```bash
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm build
+pnpm boundaries
+node scripts/ci/verify-proof-reader-checkpoints.mjs
+```
+
+This baseline is non-authoritative early feedback; it does not complete a task and it does not
+replace the task-specific verifier or focused positive and relevant negative tests. A task may be
+merged or reported complete only after the hosted `Quality gate` passes for the exact current
+pull-request head. Any new commit invalidates that result.
+
+The full `pnpm check` remains the local exhaustive compatibility and gate-closure command for G
+closure, an explicit local manual audit, or an explicit request. Hosted `main`, release, manual
+audit, and unsafe or untrusted boundaries remain fresh exhaustive runs. A checkpoint or seal is
+identity and impact authority, never cached success; every hosted selected workload still runs
+fresh.
 
 ## Public build-log handoff
 

@@ -13,6 +13,36 @@ unsafe boundary, plus `main`, release, and manual audit, runs fresh `REQUIRED + 
 `scripts/run-ci-quality-gate.mjs` is retained only behind the explicit manual `legacy-rollback`
 workflow mode.
 
+## CI-02 per-task completion contract
+
+CI-02 is an explicitly user-authorized operational task. For an ordinary `T` task, its bounded
+local baseline is exactly:
+
+```bash
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm build
+pnpm boundaries
+node scripts/ci/verify-proof-reader-checkpoints.mjs
+```
+
+The baseline is deliberately non-authoritative early feedback. It never replaces the exact
+task-specific verifier or focused positive and relevant negative tests, and it cannot authorize a
+merge or completion report. That authority requires an observed hosted `Quality gate` pass for the
+exact current pull-request head; any new commit invalidates the earlier result.
+
+`pnpm check` remains the local exhaustive compatibility and gate-closure command for G closure, an
+explicit local manual audit, or an explicit request. Hosted `main`, release, manual audit, and
+unsafe or untrusted boundaries remain fresh exhaustive runs. The hosted dispatcher still chooses
+fresh affected scope only for an authenticated eligible same-repository pull request and otherwise
+falls back to fresh exhaustive scope. A frozen artifact, current checkpoint, or seal is identity
+and impact authority, never cached success; every selected verifier, test, build, and boundary
+workload remains fresh.
+
+CI-02 does not add a local affected selector. The hosted dispatcher and workflow are unchanged.
+I07-05 and the legacy rollback path remain unchanged.
+
 ## Single-pass order
 
 The gate runs from a fresh workspace in this order:

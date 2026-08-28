@@ -19,13 +19,28 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 2. `docs/plan/TASKS.md` içindeki aktif görev kimliğini bul.
 3. Codex'e yalnızca o görevi ver. Örnek: “M02-T03 görevini tamamla ve kanıtını ekle.”
 4. Codex görevin testlerini ve belgelerini de tamamlamalı.
-5. Bütün kontroller geçmeden görev `DONE` yapılmamalı.
+5. CI-02'nin sınırlı yerel temel kontrolleri, göreve özel doğrulayıcı ve odaklı pozitif/ilgili
+   negatif testler geçmeden görev `DONE` yapılmamalı.
 6. Sonraki göreve ancak mevcut görev tamamlandıktan sonra geçilmeli.
 
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
-`I07-01` ve `I07-02` tamamlandı; aktif bir altyapı görevi yoktur. I07-02 geçiş anındaki 130 iş ve
+Sıradan bir `T` görevinin hızlı yerel geri bildirimi; `pnpm format:check`, `pnpm lint`,
+`pnpm typecheck`, `pnpm build`, `pnpm boundaries` ve
+`node scripts/ci/verify-proof-reader-checkpoints.mjs` komutlarından oluşur. Bu temel kontrol
+yetkili bir tamamlama kanıtı değildir; göreve özel doğrulayıcıyı ve testleri kaldırmaz. Merge veya
+tamamlandı raporu için GitHub'daki `Quality gate`, pull request'in tam güncel head commit'inde
+geçmelidir; yeni commit önceki sonucu geçersiz kılar. `pnpm check`, G kapanışı, açıkça istenen
+yerel manuel denetim veya açık istek için yerel kapsamlı uyumluluk komutu olarak kalır. Hosted
+`main`, release, manuel denetim ve güvenli olmayan/güvenilmeyen sınırlar taze kapsamlı çalışır.
+Mühür/checkpoint yalnızca kimlik ve etki otoritesidir; başarıyı önbelleklemez ve seçilen hosted
+işler taze çalışır.
+
+`I07-01` ve `I07-02` tamamlandı. Açık kullanıcı yetkisiyle eklenen CI-02 `IN_PROGRESS` durumundadır;
+yerel kanıtları geçici ve tamamlayıcı değildir, tam güncel PR head'indeki hosted `Quality gate`
+beklenmektedir. CI-02 yerel bir affected-selector eklemedi, hosted dispatcher/workflow'u
+değiştirmedi ve I07-05'in legacy rollback sorumluluğunu aynen korudu. I07-02 geçiş anındaki 130 iş ve
 61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T09 checkpoint'i 146 iş ve 69 kanıt
 çiftiydi. M07-T10 eklendikten sonra çalışma alanındaki güncel zorunlu plan 148 işin ve 70 kanıt
 çiftinin tamamını yeni sistemle çalıştırır: 59 normal çift ve 11 özel bariyer. Eski planın aynı

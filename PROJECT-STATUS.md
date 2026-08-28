@@ -1161,10 +1161,20 @@ dynamic `$` editing remains M09-T08, and M09-T07 is next.
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
+- Active operational task: CI-02 is `IN_PROGRESS` with local evidence only. The exact bounded
+  baseline passes; focused CI-02 contract tests pass 2/2; the complete legacy CI contract file
+  passes 28/28. The 45-checkpoint/41-artifact/82-reader authority, infrastructure-debt verifier,
+  and I07-04 promotion verifier remain passing. One earlier attempt observed this host intermittently deny
+  the unchanged process-group probe `process.kill(-pid, 0)` with `EPERM`; it passed on the final
+  rerun. Local evidence is provisional and non-completing. CI-02 remains `IN_PROGRESS` until the
+  hosted `Quality gate` passes on the exact current pull-request head. This local CI-02 candidate
+  claims no hosted result, adds no local affected selector, changes no hosted dispatcher/workflow,
+  and leaves I07-05 plus the manual legacy rollback path unchanged.
 - Next implementation task: `M09-T07 — Named-slot drop, move, reorder, cardinality, and acceptance UI`
-- Status: M08 is 10/10, M09 is 6/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T06 are
-  `DONE`; `N-042` is `TESTED`, P-06 is `PROVEN`, P-07 and P-16 are `PARTIAL`, proof gates are
-  10/13, P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, and implementation progress is 101/145.
+- Status: CI-02 is `IN_PROGRESS` with its hosted exact-head gate pending. M08 is 10/10, M09 is
+  6/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T06 are `DONE`; `N-042` is `TESTED`, P-06
+  is `PROVEN`, P-07 and P-16 are `PARTIAL`, proof gates are 10/13, P-08 remains `NOT_PROVEN`,
+  PF-025 remains `OPEN`, and implementation progress is 101/145.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
