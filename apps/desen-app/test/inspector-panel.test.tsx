@@ -17,8 +17,10 @@ import type { JsonPointer } from "@desen/protocol";
 import type {
   AuthoringInspectorEdit,
   AuthoringInspectorEditResult,
+  AuthoringInspectorBindingEdit,
   AuthoringInspectorField,
   AuthoringInspectorReadyModel,
+  AuthoringInspectorStateOption,
   AuthoringInspectorValueState,
 } from "../src/authoring-inspector.js";
 
@@ -44,6 +46,7 @@ function field(
 function readyModel(
   fields: readonly AuthoringInspectorField[],
   controlCount: number,
+  localStates: readonly AuthoringInspectorStateOption[] = Object.freeze([]),
 ): AuthoringInspectorReadyModel {
   const controls = Object.freeze(fields.map(({ control }) => control));
   const inspector = Object.freeze({
@@ -68,6 +71,7 @@ function readyModel(
     }),
     controlCount,
     fields: Object.freeze([...fields]),
+    localStates: Object.freeze([...localStates]),
     node: Object.freeze({
       behaviors: Object.freeze([]),
       capabilityId: "com.example.test/Inspector",
@@ -124,6 +128,11 @@ function successfulEdit(edit: AuthoringInspectorEdit): AuthoringInspectorEditRes
   return Object.freeze({ ok: true, document: REFERENCE_EDITOR_DOCUMENT });
 }
 
+function successfulBindingEdit(edit: AuthoringInspectorBindingEdit): AuthoringInspectorEditResult {
+  void edit;
+  return Object.freeze({ ok: true, document: REFERENCE_EDITOR_DOCUMENT });
+}
+
 describe("Desen App nested and structured Inspector panel", () => {
   beforeEach(() => {
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -132,6 +141,96 @@ describe("Desen App nested and structured Inspector panel", () => {
   afterEach(() => {
     cleanup();
     document.body.replaceChildren();
+  });
+
+  it("changes or detaches a compatible direct local-state value source", () => {
+    const valueControl = Object.freeze({
+      kind: "string",
+      property: "value",
+      required: true,
+      schemaPointer: createJsonPointer(["propsSchema", "properties", "value"]),
+      valuePointer: createJsonPointer(["value"]),
+    }) satisfies ComponentInspectorControl;
+    const valueField = field(
+      valueControl,
+      "Value",
+      "Value",
+      Object.freeze({
+        kind: "dynamic",
+        reference: "state.email",
+        value: Object.freeze({ $ref: "state.email" }),
+      }),
+    );
+    const states = Object.freeze([
+      Object.freeze({
+        enumValues: undefined,
+        initial: "",
+        name: "email",
+        reference: "state.email",
+        type: "string" as const,
+      }),
+      Object.freeze({
+        enumValues: undefined,
+        initial: "",
+        name: "password",
+        reference: "state.password",
+        type: "string" as const,
+      }),
+    ]);
+    const onBindingEdit = vi.fn(successfulBindingEdit);
+    render(
+      <InspectorPanel
+        inspector={readyModel([valueField], 1, states)}
+        onBindingEdit={onBindingEdit}
+        onEdit={vi.fn()}
+      />,
+    );
+
+    const source = screen.getByRole("combobox", { name: "Value value source" });
+    expect((source as HTMLSelectElement).value).toBe("email");
+    fireEvent.change(source, { target: { value: "password" } });
+    expect(onBindingEdit).toHaveBeenLastCalledWith({
+      kind: "bind",
+      stateName: "password",
+      valuePointer: "/value",
+    });
+    expect(screen.getByRole("status").textContent).toBe("Bound Value to state.password.");
+
+    fireEvent.change(source, { target: { value: "__local__" } });
+    expect(onBindingEdit).toHaveBeenLastCalledWith({
+      kind: "use-initial",
+      valuePointer: "/value",
+    });
+    expect(screen.getByRole("status").textContent).toBe(
+      "Restored Value to the bound state's initial value.",
+    );
+  });
+
+  it("keeps operation bindings visible and read-only", () => {
+    const loadingControl = Object.freeze({
+      kind: "boolean",
+      property: "loading",
+      required: false,
+      schemaPointer: createJsonPointer(["propsSchema", "properties", "loading"]),
+      valuePointer: createJsonPointer(["loading"]),
+    }) satisfies ComponentInspectorControl;
+    const loading = field(
+      loadingControl,
+      "Loading",
+      "Loading",
+      Object.freeze({
+        kind: "dynamic",
+        reference: "operation.signIn.pending",
+        value: Object.freeze({ $ref: "operation.signIn.pending", fallback: false }),
+      }),
+    );
+    render(<InspectorPanel inspector={readyModel([loading], 1)} onEdit={vi.fn()} />);
+
+    expect(screen.getByText("operation.signIn.pending")).toBeTruthy();
+    expect(
+      screen.getByText("This runtime or advanced binding is preserved as read-only."),
+    ).toBeTruthy();
+    expect(screen.queryByRole("combobox", { name: "Loading value source" })).toBeNull();
   });
 
   it("exposes recursive groups and leaf controls through qualified accessible names", () => {

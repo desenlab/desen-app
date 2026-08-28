@@ -60,6 +60,8 @@ const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
 const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
 const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
+const AUTHORING_STATE_SOURCE_PATH = "apps/desen-app/src/authoring-state.ts";
+const STATE_PANEL_SOURCE_PATH = "apps/desen-app/src/state-panel.tsx";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const OFFICIAL_SOURCE_PATH = "examples/sign-in/official-derived.source.desen.json";
@@ -73,6 +75,8 @@ const ADDITIVE_SUCCESSOR_SOURCE_PATHS = Object.freeze([
   INSPECTOR_PANEL_SOURCE_PATH,
   STRUCTURED_JSON_SOURCE_PATH,
   AUTHORING_SLOT_SOURCE_PATH,
+  AUTHORING_STATE_SOURCE_PATH,
+  STATE_PANEL_SOURCE_PATH,
 ]);
 const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
   ...SOURCE_PATHS.filter((entry) => /\.(?:ts|tsx)$/u.test(entry)),
@@ -711,6 +715,8 @@ function inspectImports(files) {
       AUTHORING_SLOT_SOURCE_PATH,
       new Set(["@desen/catalog-sdk", "@desen/editor-core", "@desen/protocol"]),
     ],
+    [AUTHORING_STATE_SOURCE_PATH, new Set(["@desen/catalog-sdk", "@desen/editor-core"])],
+    [STATE_PANEL_SOURCE_PATH, new Set(["@desen/catalog-sdk"])],
     [
       STRUCTURED_JSON_SOURCE_PATH,
       new Set(["@desen/catalog-sdk", "@desen/protocol", "@desen/publisher"]),

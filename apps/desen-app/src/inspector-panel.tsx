@@ -2,20 +2,25 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 
 import styles from "./application.module.css";
 import { formatStructuredJson, parseStructuredJsonText } from "./structured-json.js";
+import { isAuthoringInspectorStateCompatible } from "./authoring-inspector.js";
 
 import type { FormEvent, KeyboardEvent, RefCallback } from "react";
 import type { ComponentInspectorFallbackReason, JsonPrimitive } from "@desen/catalog-sdk";
 import type {
   AuthoringInspectorEdit,
   AuthoringInspectorEditResult,
+  AuthoringInspectorBindingEdit,
   AuthoringInspectorField,
   AuthoringInspectorModelResult,
+  AuthoringInspectorStateOption,
 } from "./authoring-inspector.js";
 import type { StructuredJsonParseFailureReason } from "./structured-json.js";
 
 interface InspectorPanelProps {
   readonly inspector: AuthoringInspectorModelResult;
   readonly onEdit: (edit: AuthoringInspectorEdit) => AuthoringInspectorEditResult;
+  readonly onBindingEdit?:
+    ((edit: AuthoringInspectorBindingEdit) => AuthoringInspectorEditResult) | undefined;
 }
 
 function primitiveText(value: JsonPrimitive): string {
@@ -27,6 +32,9 @@ function primitiveText(value: JsonPrimitive): string {
 function failureMessage(result: AuthoringInspectorEditResult): string {
   if (result.ok) return "";
   if (result.reason === "source-invalid") return "This value does not satisfy the Catalog schema.";
+  if (result.reason === "binding-incompatible") {
+    return "That local state cannot safely supply this property type.";
+  }
   if (result.reason === "value-invalid") return "Enter a value supported by this control.";
   if (result.reason === "required-property") return "Required properties cannot be unset.";
   if (result.reason === "preview-unavailable") {
@@ -51,12 +59,90 @@ function FieldHeader({ field }: Readonly<{ readonly field: AuthoringInspectorFie
   );
 }
 
+function directStateName(field: AuthoringInspectorField): string | undefined {
+  if (field.value.kind !== "dynamic") return undefined;
+  const value = field.value.value;
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
+  const keys = Object.keys(value);
+  if (keys.length !== 1 || keys[0] !== "$ref") return undefined;
+  const reference = (value as Readonly<Record<string, unknown>>).$ref;
+  return typeof reference === "string" && reference.startsWith("state.")
+    ? reference.slice("state.".length)
+    : undefined;
+}
+
+function ValueSourceControl({
+  field,
+  localStates,
+  onBindingEdit,
+  onNotice,
+}: Readonly<{
+  readonly field: AuthoringInspectorField;
+  readonly localStates: readonly AuthoringInspectorStateOption[];
+  readonly onBindingEdit: (edit: AuthoringInspectorBindingEdit) => AuthoringInspectorEditResult;
+  readonly onNotice: (message: string) => void;
+}>) {
+  const compatibleStates = localStates.filter((state) =>
+    isAuthoringInspectorStateCompatible(field, state),
+  );
+  const currentState = directStateName(field);
+  if (
+    compatibleStates.length === 0 ||
+    (field.value.kind === "dynamic" && !compatibleStates.some(({ name }) => name === currentState))
+  ) {
+    return null;
+  }
+
+  return (
+    <label className={styles.valueSourceControl}>
+      <span>Value source · {field.label}</span>
+      <select
+        aria-label={`${field.qualifiedLabel} value source`}
+        onChange={(event) => {
+          const stateName = event.currentTarget.value;
+          const result =
+            stateName === "__local__"
+              ? onBindingEdit({ kind: "use-initial", valuePointer: field.control.valuePointer })
+              : onBindingEdit({
+                  kind: "bind",
+                  stateName,
+                  valuePointer: field.control.valuePointer,
+                });
+          onNotice(
+            result.ok
+              ? stateName === "__local__"
+                ? `Restored ${field.qualifiedLabel} to the bound state's initial value.`
+                : `Bound ${field.qualifiedLabel} to state.${stateName}.`
+              : failureMessage(result),
+          );
+        }}
+        value={currentState ?? "__local__"}
+      >
+        <option value="__local__">
+          {currentState === undefined ? "Local value" : "Local value · use state initial"}
+        </option>
+        {compatibleStates.map((state) => (
+          <option key={state.name} value={state.name}>
+            State · {state.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function DynamicField({
   field,
   focusTargetRef,
+  localStates,
+  onBindingEdit,
+  onNotice,
 }: Readonly<{
   readonly field: AuthoringInspectorField;
   readonly focusTargetRef: RefCallback<HTMLElement>;
+  readonly localStates: readonly AuthoringInspectorStateOption[];
+  readonly onBindingEdit: (edit: AuthoringInspectorBindingEdit) => AuthoringInspectorEditResult;
+  readonly onNotice: (message: string) => void;
 }>) {
   if (field.value.kind !== "dynamic") return null;
   return (
@@ -71,7 +157,17 @@ function DynamicField({
         <span className={styles.boundBadge}>Bound</span>
         <code>{field.value.reference ?? "Dynamic value"}</code>
       </div>
-      <p className={styles.fieldHelp}>Binding editing becomes available with M09-T08.</p>
+      <ValueSourceControl
+        field={field}
+        localStates={localStates}
+        onBindingEdit={onBindingEdit}
+        onNotice={onNotice}
+      />
+      <p className={styles.fieldHelp}>
+        {directStateName(field) === undefined
+          ? "This runtime or advanced binding is preserved as read-only."
+          : "Choose another compatible state or restore this state's initial value."}
+      </p>
     </div>
   );
 }
@@ -82,7 +178,12 @@ interface FieldEditProps {
   readonly onNotice: (message: string) => void;
 }
 
-interface ControlledFieldEditProps extends FieldEditProps {
+interface InspectorFieldProps extends FieldEditProps {
+  readonly localStates: readonly AuthoringInspectorStateOption[];
+  readonly onBindingEdit: (edit: AuthoringInspectorBindingEdit) => AuthoringInspectorEditResult;
+}
+
+interface ControlledFieldEditProps extends InspectorFieldProps {
   readonly focusTargetRef: RefCallback<HTMLElement>;
 }
 
@@ -543,7 +644,7 @@ function StructuredJsonField({
 }
 
 function GroupField(props: Readonly<ControlledFieldEditProps>) {
-  const { field, focusTargetRef, onEdit, onNotice } = props;
+  const { field, focusTargetRef, localStates, onBindingEdit, onEdit, onNotice } = props;
   const helpId = useId();
   if (field.control.kind !== "group") return null;
   if (field.value.kind === "absent") return <StructuredJsonField {...props} />;
@@ -572,6 +673,8 @@ function GroupField(props: Readonly<ControlledFieldEditProps>) {
           <InspectorField
             field={child}
             key={child.control.valuePointer}
+            localStates={localStates}
+            onBindingEdit={onBindingEdit}
             onEdit={onEdit}
             onNotice={onNotice}
           />
@@ -581,8 +684,8 @@ function GroupField(props: Readonly<ControlledFieldEditProps>) {
   );
 }
 
-function InspectorField(props: Readonly<FieldEditProps>) {
-  const { field } = props;
+function InspectorField(props: Readonly<InspectorFieldProps>) {
+  const { field, localStates, onBindingEdit, onNotice } = props;
   const focusTarget = useRef<HTMLElement | null>(null);
   const previousValueKind = useRef(field.value.kind);
   const focusTargetRef = useCallback<RefCallback<HTMLElement>>((node) => {
@@ -596,27 +699,54 @@ function InspectorField(props: Readonly<FieldEditProps>) {
 
   const controlledProps = { ...props, focusTargetRef };
   if (field.value.kind === "dynamic") {
-    return <DynamicField field={field} focusTargetRef={focusTargetRef} />;
+    return (
+      <DynamicField
+        field={field}
+        focusTargetRef={focusTargetRef}
+        localStates={localStates}
+        onBindingEdit={onBindingEdit}
+        onNotice={onNotice}
+      />
+    );
   }
-  if (field.control.kind === "group") return <GroupField {...controlledProps} />;
-  if (field.control.kind === "structured-json") {
-    return <StructuredJsonField {...controlledProps} />;
-  }
-  if (field.control.kind === "enum") return <EnumField {...controlledProps} />;
-  if (field.control.kind === "boolean") return <BooleanField {...controlledProps} />;
-  if (
-    field.control.kind === "string" ||
-    field.control.kind === "number" ||
-    field.control.kind === "integer"
-  ) {
-    return <TextOrNumberField {...controlledProps} />;
-  }
-  return null;
+  const fieldControl =
+    field.control.kind === "group" ? (
+      <GroupField {...controlledProps} />
+    ) : field.control.kind === "structured-json" ? (
+      <StructuredJsonField {...controlledProps} />
+    ) : field.control.kind === "enum" ? (
+      <EnumField {...controlledProps} />
+    ) : field.control.kind === "boolean" ? (
+      <BooleanField {...controlledProps} />
+    ) : field.control.kind === "string" ||
+      field.control.kind === "number" ||
+      field.control.kind === "integer" ? (
+      <TextOrNumberField {...controlledProps} />
+    ) : null;
+  if (fieldControl === null) return null;
+  return (
+    <>
+      {fieldControl}
+      <ValueSourceControl
+        field={field}
+        localStates={localStates}
+        onBindingEdit={onBindingEdit}
+        onNotice={onNotice}
+      />
+    </>
+  );
 }
 
 /** App-owned property inspector rendered outside the managed capability subtree. */
-export function InspectorPanel({ inspector, onEdit }: Readonly<InspectorPanelProps>) {
+export function InspectorPanel({
+  inspector,
+  onBindingEdit,
+  onEdit,
+}: Readonly<InspectorPanelProps>) {
   const [notice, setNotice] = useState("");
+  const applyBindingEdit =
+    onBindingEdit ??
+    (() => Object.freeze({ ok: false as const, reason: "control-unavailable" as const }));
 
   useEffect(() => {
     setNotice("");
@@ -669,6 +799,8 @@ export function InspectorPanel({ inspector, onEdit }: Readonly<InspectorPanelPro
                 <InspectorField
                   field={field}
                   key={`${inspector.selection.sourceNodeId}:${field.control.valuePointer}`}
+                  localStates={inspector.localStates}
+                  onBindingEdit={applyBindingEdit}
                   onEdit={onEdit}
                   onNotice={setNotice}
                 />

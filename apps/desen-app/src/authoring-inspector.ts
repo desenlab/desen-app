@@ -29,8 +29,21 @@ export interface AuthoringInspectorRoute {
 export type AuthoringInspectorValueState =
   | Readonly<{ readonly kind: "absent" }>
   | Readonly<{ readonly kind: "literal"; readonly value: JsonPrimitive }>
-  | Readonly<{ readonly kind: "dynamic"; readonly reference: string | null }>
+  | Readonly<{
+      readonly kind: "dynamic";
+      readonly reference: string | null;
+      readonly value: JsonValue;
+    }>
   | Readonly<{ readonly kind: "structured"; readonly value: JsonValue }>;
+
+/** One directly addressable, primitive local-state declaration available to Inspector binding UI. */
+export interface AuthoringInspectorStateOption {
+  readonly enumValues: readonly JsonPrimitive[] | undefined;
+  readonly initial: JsonPrimitive;
+  readonly name: string;
+  readonly reference: string;
+  readonly type: "boolean" | "integer" | "number" | "string";
+}
 
 /** One inspector row joined from an authoritative schema descriptor and current Source value. */
 export interface AuthoringInspectorField {
@@ -49,6 +62,7 @@ export interface AuthoringInspectorReadyModel {
   readonly component: CatalogComponentSummary;
   readonly controlCount: number;
   readonly fields: readonly AuthoringInspectorField[];
+  readonly localStates: readonly AuthoringInspectorStateOption[];
   readonly node: AuthoringLayerNode;
   readonly selection: AuthoringComponentSelection;
   readonly status: "ready";
@@ -69,6 +83,11 @@ export type AuthoringInspectorEdit =
       readonly valuePointer: string;
     }>;
 
+/** Exact local-state binding transition requested through the App-owned Inspector. */
+export type AuthoringInspectorBindingEdit =
+  | Readonly<{ readonly kind: "bind"; readonly stateName: string; readonly valuePointer: string }>
+  | Readonly<{ readonly kind: "use-initial"; readonly valuePointer: string }>;
+
 /** Atomic Source mutation success returned by the App inspector boundary. */
 export interface AuthoringInspectorEditSuccess {
   readonly ok: true;
@@ -78,6 +97,7 @@ export interface AuthoringInspectorEditSuccess {
 /** Stable, UI-safe reason why an inspector edit produced no Source document. */
 export type AuthoringInspectorEditFailureReason =
   | "catalog-invalid"
+  | "binding-incompatible"
   | "control-unavailable"
   | "edit-rejected"
   | "preview-unavailable"
@@ -112,6 +132,12 @@ function isJsonPrimitive(value: unknown): value is JsonPrimitive {
 type CapturedAuthoringInspectorEdit =
   | Readonly<{ readonly kind: "delete"; readonly valuePointer: string }>
   | Readonly<{ readonly kind: "set"; readonly value: JsonValue; readonly valuePointer: string }>;
+
+type CapturedAuthoringInspectorBindingEdit =
+  | Readonly<{ readonly kind: "bind"; readonly stateName: string; readonly valuePointer: string }>
+  | Readonly<{ readonly kind: "use-initial"; readonly valuePointer: string }>;
+
+const BINDABLE_STATE_NAME = /^[A-Za-z][A-Za-z0-9_-]{0,127}$/u;
 
 function captureExactOwnData(
   input: unknown,
@@ -267,6 +293,57 @@ function captureInspectorEdit(
   }
 }
 
+function captureInspectorBindingEdit(
+  edit: AuthoringInspectorBindingEdit,
+): CapturedAuthoringInspectorBindingEdit | undefined {
+  try {
+    if (typeof edit !== "object" || edit === null || Array.isArray(edit)) return undefined;
+    const kindDescriptor = Object.getOwnPropertyDescriptor(edit, "kind");
+    const pointerDescriptor = Object.getOwnPropertyDescriptor(edit, "valuePointer");
+    if (
+      kindDescriptor?.enumerable !== true ||
+      !("value" in kindDescriptor) ||
+      pointerDescriptor?.enumerable !== true ||
+      !("value" in pointerDescriptor) ||
+      typeof pointerDescriptor.value !== "string" ||
+      pointerDescriptor.value.length === 0
+    ) {
+      return undefined;
+    }
+    parseJsonPointer(pointerDescriptor.value);
+    const ownKeys = Reflect.ownKeys(edit);
+    if (ownKeys.some((key) => typeof key !== "string")) return undefined;
+
+    if (kindDescriptor.value === "use-initial") {
+      if (ownKeys.length !== 2 || !ownKeys.includes("kind") || !ownKeys.includes("valuePointer")) {
+        return undefined;
+      }
+      return Object.freeze({ kind: "use-initial", valuePointer: pointerDescriptor.value });
+    }
+    if (kindDescriptor.value !== "bind") return undefined;
+    const stateDescriptor = Object.getOwnPropertyDescriptor(edit, "stateName");
+    if (
+      ownKeys.length !== 3 ||
+      !ownKeys.includes("kind") ||
+      !ownKeys.includes("stateName") ||
+      !ownKeys.includes("valuePointer") ||
+      stateDescriptor?.enumerable !== true ||
+      !("value" in stateDescriptor) ||
+      typeof stateDescriptor.value !== "string" ||
+      !BINDABLE_STATE_NAME.test(stateDescriptor.value)
+    ) {
+      return undefined;
+    }
+    return Object.freeze({
+      kind: "bind",
+      stateName: stateDescriptor.value,
+      valuePointer: pointerDescriptor.value,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
 function humanizeProperty(property: string): string {
   const spaced = property
     .replaceAll(/([a-z0-9])([A-Z])/gu, "$1 $2")
@@ -348,12 +425,12 @@ function sourceValueState(
   const value = (property === null ? container : container[property]) as JsonValue;
   const directDynamic = directDynamicValue(value);
   if (directDynamic.found) {
-    return Object.freeze({ kind: "dynamic", reference: directDynamic.reference });
+    return Object.freeze({ kind: "dynamic", reference: directDynamic.reference, value });
   }
   if (control.kind === "structured-json") {
     const nestedDynamic = nestedDynamicValue(value);
     if (nestedDynamic.found) {
-      return Object.freeze({ kind: "dynamic", reference: nestedDynamic.reference });
+      return Object.freeze({ kind: "dynamic", reference: nestedDynamic.reference, value });
     }
     return Object.freeze({ kind: "structured", value });
   }
@@ -361,7 +438,7 @@ function sourceValueState(
   if (control.kind === "group") {
     return Object.freeze({ kind: "structured", value });
   }
-  return Object.freeze({ kind: "dynamic", reference: null });
+  return Object.freeze({ kind: "dynamic", reference: null, value });
 }
 
 function isJsonObject(value: JsonValue): value is Readonly<Record<string, JsonValue>> {
@@ -498,6 +575,92 @@ function controlAcceptsValue(control: ComponentInspectorControl, value: JsonPrim
   if (control.kind === "number") return typeof value === "number" && Number.isFinite(value);
   if (control.kind === "integer") return typeof value === "number" && Number.isInteger(value);
   return false;
+}
+
+function primitiveMatchesStateType(
+  type: AuthoringInspectorStateOption["type"],
+  value: unknown,
+): value is JsonPrimitive {
+  if (type === "string") return typeof value === "string";
+  if (type === "boolean") return typeof value === "boolean";
+  if (type === "integer") return typeof value === "number" && Number.isInteger(value);
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function projectStateEnum(schema: JsonObject): readonly JsonPrimitive[] | undefined {
+  if (!Object.hasOwn(schema, "enum")) return undefined;
+  const values = schema.enum;
+  if (!Array.isArray(values) || values.length === 0 || !values.every(isJsonPrimitive)) {
+    return undefined;
+  }
+  return Object.freeze([...values]);
+}
+
+function projectInspectorStateOptions(
+  document: DesenEditorDocument,
+  surfaceId: string,
+): readonly AuthoringInspectorStateOption[] {
+  try {
+    const surface = document.surfaces[surfaceId];
+    if (surface === undefined) return Object.freeze([]);
+    const options: AuthoringInspectorStateOption[] = [];
+    for (const [name, declaration] of Object.entries(surface.state)) {
+      if (!BINDABLE_STATE_NAME.test(name)) continue;
+      const schema = declaration.schema as JsonObject;
+      const type = schema.type;
+      if (type !== "string" && type !== "boolean" && type !== "number" && type !== "integer") {
+        continue;
+      }
+      if (!primitiveMatchesStateType(type, declaration.initial)) continue;
+      options.push(
+        Object.freeze({
+          enumValues: projectStateEnum(schema),
+          initial: declaration.initial,
+          name,
+          reference: `state.${name}`,
+          type,
+        }),
+      );
+    }
+    options.sort((left, right) => (left.name < right.name ? -1 : left.name > right.name ? 1 : 0));
+    return Object.freeze(options);
+  } catch {
+    return Object.freeze([]);
+  }
+}
+
+/** Returns whether one authenticated local-state declaration is provably safe for a field. */
+export function isAuthoringInspectorStateCompatible(
+  field: AuthoringInspectorField,
+  state: AuthoringInspectorStateOption,
+): boolean {
+  try {
+    if (field.control.valuePointer.length === 0 || field.control.property === null) return false;
+    if (field.control.kind === "string") return state.type === "string";
+    if (field.control.kind === "boolean") return state.type === "boolean";
+    if (field.control.kind === "number") {
+      return state.type === "number" || state.type === "integer";
+    }
+    if (field.control.kind === "integer") return state.type === "integer";
+    const control = field.control;
+    if (control.kind !== "enum" || state.enumValues === undefined) return false;
+    return state.enumValues.every((value) => control.options.some((item) => item === value));
+  } catch {
+    return false;
+  }
+}
+
+function directLocalStateName(value: JsonValue): string | undefined {
+  if (!isJsonObject(value)) return undefined;
+  const keys = Reflect.ownKeys(value);
+  if (keys.length !== 1 || keys[0] !== "$ref") return undefined;
+  const descriptor = Object.getOwnPropertyDescriptor(value, "$ref");
+  if (descriptor?.enumerable !== true || !("value" in descriptor)) return undefined;
+  if (typeof descriptor.value !== "string" || !descriptor.value.startsWith("state.")) {
+    return undefined;
+  }
+  const name = descriptor.value.slice("state.".length);
+  return BINDABLE_STATE_NAME.test(name) ? name : undefined;
 }
 
 function findInspectorField(
@@ -670,9 +833,10 @@ function changeNestedProp(
 /**
  * Joins one route-valid Source selection with current props and canonical Catalog control order.
  *
- * @remarks Dynamic values remain explicit non-editable states for M09-T08. Closed object groups
- * expose their recursive control tree, while every unsupported schema subtree stays visible as an
- * honest structured-JSON fallback instead of being silently discarded.
+ * @remarks Dynamic values remain explicit states and retain their complete inert ValueSpec.
+ * Direct, compatible local-state references may be changed only through the separate binding
+ * boundary; every other dynamic form stays read-only. Closed object groups expose their recursive
+ * control tree, while unsupported schema subtrees remain honest structured-JSON fallbacks.
  */
 export function prepareAuthoringInspectorModel(
   model: CatalogAuthoringModel,
@@ -689,12 +853,14 @@ export function prepareAuthoringInspectorModel(
 
   const propsSchema = component.inspector.propsSchema as JsonObject;
   const fields = prepareInspectorFields(component.inspector.controls, node.props, propsSchema, []);
+  const localStates = projectInspectorStateOptions(model.validationDocument, selection.surfaceId);
 
   return Object.freeze({
     status: "ready",
     component,
     controlCount: countControls(component.inspector.controls),
     fields: Object.freeze(fields),
+    localStates,
     node,
     selection,
   });
@@ -793,5 +959,90 @@ export function applyAuthoringInspectorEdit(
   const report = validator.validator.validate(changed);
   if (!report.valid) return Object.freeze({ ok: false, reason: "source-invalid" });
 
+  return Object.freeze({ ok: true, document: changed });
+}
+
+/**
+ * Applies one direct local-state binding transition through Editor Core and continuous validation.
+ *
+ * @remarks This boundary is intentionally separate from literal Inspector editing. It constructs
+ * only exact `{ $ref: "state.<name>" }` values for route-local, primitive declarations whose type
+ * is provably compatible with the authenticated Catalog control. Existing bindings from runtime
+ * namespaces, bindings with fallbacks, tokens, formats, and nested dynamic values remain read-only.
+ * Detaching a direct state binding restores that declaration's validated primitive initial value.
+ * Every rejection preserves the input Source document.
+ */
+export function applyAuthoringInspectorBindingEdit(
+  document: DesenEditorDocument,
+  catalogValue: unknown,
+  route: AuthoringInspectorRoute,
+  selection: AuthoringComponentSelection,
+  edit: AuthoringInspectorBindingEdit,
+): AuthoringInspectorEditResult {
+  const capturedRoute = captureInspectorRoute(route);
+  const capturedSelection = captureInspectorSelection(selection);
+  const capturedEdit = captureInspectorBindingEdit(edit);
+  if (capturedRoute === undefined || capturedSelection === undefined) {
+    return Object.freeze({ ok: false, reason: "selection-invalid" });
+  }
+  if (capturedEdit === undefined) {
+    return Object.freeze({ ok: false, reason: "edit-rejected" });
+  }
+
+  const prepared = prepareCatalogAuthoringModel(catalogValue, document);
+  if (!prepared.ok) {
+    return Object.freeze({
+      ok: false,
+      reason: prepared.reason === "catalog-invalid" ? "catalog-invalid" : "source-invalid",
+    });
+  }
+  const inspector = prepareAuthoringInspectorModel(
+    prepared.model,
+    capturedRoute,
+    capturedSelection,
+  );
+  if (inspector.status !== "ready") {
+    return Object.freeze({ ok: false, reason: "selection-invalid" });
+  }
+  const field = findInspectorField(inspector.fields, capturedEdit.valuePointer);
+  if (
+    field === undefined ||
+    !isPrimitiveControl(field.control) ||
+    field.control.property === null ||
+    field.control.valuePointer.length === 0
+  ) {
+    return Object.freeze({ ok: false, reason: "control-unavailable" });
+  }
+
+  const currentStateName =
+    field.value.kind === "dynamic" ? directLocalStateName(field.value.value) : undefined;
+  if (field.value.kind === "dynamic" && currentStateName === undefined) {
+    return Object.freeze({ ok: false, reason: "control-unavailable" });
+  }
+
+  const stateName = capturedEdit.kind === "bind" ? capturedEdit.stateName : currentStateName;
+  if (stateName === undefined) {
+    return Object.freeze({ ok: false, reason: "control-unavailable" });
+  }
+  const state = inspector.localStates.find(({ name }) => name === stateName);
+  if (state === undefined || !isAuthoringInspectorStateCompatible(field, state)) {
+    return Object.freeze({ ok: false, reason: "binding-incompatible" });
+  }
+
+  const value: JsonValue =
+    capturedEdit.kind === "bind" ? Object.freeze({ $ref: state.reference }) : state.initial;
+  const changed = changeNestedProp(
+    prepared.model.validationDocument,
+    capturedSelection,
+    inspector.node.props,
+    parseJsonPointer(capturedEdit.valuePointer),
+    Object.freeze({ kind: "set", value, valuePointer: capturedEdit.valuePointer }),
+  );
+  if (changed === undefined) return Object.freeze({ ok: false, reason: "edit-rejected" });
+
+  const validator = createDesenEditorContinuousValidator(prepared.model.validationCatalogs);
+  if (!validator.ok) return Object.freeze({ ok: false, reason: "catalog-invalid" });
+  const report = validator.validator.validate(changed);
+  if (!report.valid) return Object.freeze({ ok: false, reason: "source-invalid" });
   return Object.freeze({ ok: true, document: changed });
 }

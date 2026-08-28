@@ -320,7 +320,8 @@ describe("Desen App application shell", () => {
     });
     expect(dropTarget.textContent).toContain("Stack");
     expect(dropTarget.textContent).toContain("sign-in.layout · default");
-    expect(dropTarget.textContent).toContain("5 items · minimum 0 · no maximum");
+    expect(dropTarget.textContent).toContain("5 items");
+    expect(dropTarget.textContent).toContain("Drop here or click a component below");
     expect(managedSubtree?.contains(dropTarget)).toBe(false);
 
     const addAlert = componentView.getByRole("button", {
@@ -336,22 +337,9 @@ describe("Desen App application shell", () => {
         .getByText("Inserted Alert in Stack default slot at position 6.")
         .getAttribute("role"),
     ).toBe("status");
-    expect(dropTarget.textContent).toContain("6 items · minimum 0 · no maximum");
+    expect(dropTarget.textContent).toContain("6 items");
     const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
     expect(within(canvas).getByRole("status").textContent).toBe("Message");
-
-    fireEvent.click(layersTab);
-    expect(screen.getByRole("button", { name: "Select Alert layer · node.alert" })).toBeTruthy();
-    const updatedSlot = screen.getByRole("button", {
-      name: stackSlotName(6),
-    });
-    expect(updatedSlot.textContent).toContain("6 items · minimum 0 · no maximum");
-    expect(managedSubtree?.contains(updatedSlot)).toBe(false);
-
-    const insertedAlert = screen.getByRole("button", {
-      name: "Select Alert layer · node.alert",
-    });
-    fireEvent.click(insertedAlert);
     const deleteAlert = within(authoring).getByRole("button", {
       name: "Delete Alert layer · node.alert",
     }) as HTMLButtonElement;
@@ -364,6 +352,7 @@ describe("Desen App application shell", () => {
       "Deleted Alert layer · node.alert.",
     );
     expect(document.activeElement).toBe(layersTab);
+    expect(layersTab.getAttribute("aria-selected")).toBe("true");
     expect(screen.queryByRole("button", { name: "Select Alert layer · node.alert" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Delete Alert layer · node.alert" })).toBeNull();
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
@@ -495,6 +484,7 @@ describe("Desen App application shell", () => {
     fireEvent.dragStart(alert, { dataTransfer });
     expect(dataTransfer.effectAllowed).toBe("copy");
     expect(writes).toEqual([["text/plain", "DESEN App authoring item"]]);
+    expect(target.getAttribute("data-drag-active")).toBe("true");
     expect(target.getAttribute("data-drop-ready")).toBe("true");
     const dropPrompt = within(target).getByText("Drop Alert here");
     fireEvent.dragEnter(target, { dataTransfer });
@@ -511,6 +501,11 @@ describe("Desen App application shell", () => {
         .getByText("Inserted Alert in Stack default slot at position 6.")
         .getAttribute("role"),
     ).toBe("status");
+    expect(
+      within(screen.getByRole("complementary", { name: "Authoring panel" })).getByRole("button", {
+        name: "Delete Alert layer · node.alert",
+      }),
+    ).toBeTruthy();
   });
 
   it("reorders a selected Source node through the keyboard placement control", async () => {
@@ -565,6 +560,117 @@ describe("Desen App application shell", () => {
         name: stackSlotName(5),
       }).textContent,
     ).toContain("5 items · minimum 0 · no maximum");
+  });
+
+  it("snaps a native layer drag to the before or after half of a visible layer row", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    const submitLayer = within(hierarchy).getByRole("button", {
+      name: "Select Button layer · sign-in.submit",
+    });
+    const dataTransfer = {
+      dropEffect: "none",
+      effectAllowed: "none",
+      getData: vi.fn(),
+      setData: vi.fn(),
+    };
+
+    fireEvent.dragStart(submitLayer, { dataTransfer });
+    const titleLayer = within(hierarchy).getByRole("button", {
+      name: "Select Text layer · sign-in.title",
+    });
+    Object.defineProperty(titleLayer, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        bottom: 140,
+        height: 40,
+        left: 0,
+        right: 240,
+        top: 100,
+        width: 240,
+        x: 0,
+        y: 100,
+        toJSON: () => ({}),
+      }),
+    });
+    const dragOver = new Event("dragover", { bubbles: true, cancelable: true });
+    Object.defineProperties(dragOver, {
+      clientY: { value: 105 },
+      dataTransfer: { value: dataTransfer },
+    });
+    fireEvent(titleLayer, dragOver);
+    expect(dataTransfer.dropEffect).toBe("move");
+    expect(titleLayer.closest("li")?.getAttribute("data-row-drop-position")).toBe("before");
+    expect(titleLayer.getAttribute("data-row-drop-position")).toBeNull();
+    const drop = new Event("drop", { bubbles: true, cancelable: true });
+    Object.defineProperties(drop, {
+      clientY: { value: 105 },
+      dataTransfer: { value: dataTransfer },
+    });
+    fireEvent(titleLayer, drop);
+
+    expect(
+      within(screen.getByRole("complementary", { name: "Authoring panel" })).getByRole("status")
+        .textContent,
+    ).toBe("Reordered sign-in.submit in Stack default slot.");
+    const reorderedLayers = within(hierarchy).getAllByRole("button", {
+      name: /^(?:Select|Deselect) .+ layer · /,
+    });
+    expect(reorderedLayers[0]?.getAttribute("aria-label")).toBe(
+      "Select Stack layer · sign-in.layout",
+    );
+    expect(reorderedLayers[1]?.getAttribute("aria-label")).toBe(
+      "Select Button layer · sign-in.submit",
+    );
+    expect(reorderedLayers[2]?.getAttribute("aria-label")).toBe(
+      "Select Text layer · sign-in.title",
+    );
+
+    const reorderedSubmit = within(hierarchy).getByRole("button", {
+      name: "Select Button layer · sign-in.submit",
+    });
+    fireEvent.dragStart(reorderedSubmit, { dataTransfer });
+    const reorderedTitle = within(hierarchy).getByRole("button", {
+      name: "Select Text layer · sign-in.title",
+    });
+    Object.defineProperty(reorderedTitle, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        bottom: 140,
+        height: 40,
+        left: 0,
+        right: 240,
+        top: 100,
+        width: 240,
+        x: 0,
+        y: 100,
+        toJSON: () => ({}),
+      }),
+    });
+    const lowerHalfDragOver = new Event("dragover", { bubbles: true, cancelable: true });
+    Object.defineProperties(lowerHalfDragOver, {
+      clientY: { value: 135 },
+      dataTransfer: { value: dataTransfer },
+    });
+    fireEvent(reorderedTitle, lowerHalfDragOver);
+    expect(reorderedTitle.closest("li")?.getAttribute("data-row-drop-position")).toBe("after");
+    const lowerHalfDrop = new Event("drop", { bubbles: true, cancelable: true });
+    Object.defineProperties(lowerHalfDrop, {
+      clientY: { value: 135 },
+      dataTransfer: { value: dataTransfer },
+    });
+    fireEvent(reorderedTitle, lowerHalfDrop);
+
+    const restoredLayers = within(hierarchy).getAllByRole("button", {
+      name: /^(?:Select|Deselect) .+ layer · /,
+    });
+    expect(restoredLayers[1]?.getAttribute("aria-label")).toBe("Select Text layer · sign-in.title");
+    expect(restoredLayers[2]?.getAttribute("aria-label")).toBe(
+      "Select Button layer · sign-in.submit",
+    );
+    expect(dataTransfer.getData).not.toHaveBeenCalled();
   });
 
   it("moves nodes across nested slots with keyboard and App-owned native drag intent", async () => {
@@ -771,7 +877,67 @@ describe("Desen App application shell", () => {
     expect(text.value).toBe("Sign in");
   });
 
-  it("keeps bound props locked while boolean and numeric edits fail or apply atomically", async () => {
+  it("updates surface-local state and changes a compatible binding in the live preview", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const emailInput = within(canvas).getByLabelText("Email") as HTMLInputElement;
+    expect(emailInput.value).toBe("");
+
+    fireEvent.click(screen.getByRole("tab", { name: "State" }));
+    const statePanel = screen.getByRole("region", { name: "Local state" });
+    expect(within(statePanel).getByRole("list", { name: "Sign-in local state" })).toBeTruthy();
+    expect(within(statePanel).getByLabelText("email usage count").textContent).toBe("Used by 3");
+    const emailInitial = within(statePanel).getByRole("textbox", {
+      name: "email initial value",
+    });
+    fireEvent.change(emailInitial, { target: { value: "person@example.com" } });
+    fireEvent.click(within(statePanel).getByRole("button", { name: "Apply email local state" }));
+    await waitFor(() =>
+      expect(
+        (
+          within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+            "Email",
+          ) as HTMLInputElement
+        ).value,
+      ).toBe("person@example.com"),
+    );
+    expect(within(statePanel).getByRole("status").textContent).toBe("Updated email local state.");
+
+    fireEvent.click(screen.getByRole("tab", { name: "Layers" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+    const inspector = screen.getByRole("complementary", { name: "Inspector" });
+    const valueSource = within(inspector).getByRole("combobox", {
+      name: "Value value source",
+    });
+    fireEvent.change(valueSource, { target: { value: "password" } });
+    await waitFor(() =>
+      expect(
+        (
+          within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+            "Email",
+          ) as HTMLInputElement
+        ).value,
+      ).toBe(""),
+    );
+    expect(within(inspector).getByRole("status").textContent).toBe(
+      "Bound Value to state.password.",
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "State" }));
+    expect(within(statePanel).getByLabelText("email usage count").textContent).toBe("Used by 2");
+    expect(within(statePanel).getByLabelText("password usage count").textContent).toBe("Used by 4");
+    expect(
+      (
+        within(statePanel).getByRole("button", {
+          name: "Delete password local state",
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+  });
+
+  it("keeps bound props explicit while boolean and numeric edits fail or apply atomically", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
 
@@ -782,6 +948,10 @@ describe("Desen App application shell", () => {
     expect(within(inspector).getByLabelText("Value bound value").textContent).toContain(
       "state.email",
     );
+    expect(
+      (within(inspector).getByRole("combobox", { name: "Value value source" }) as HTMLSelectElement)
+        .value,
+    ).toBe("email");
     expect(within(inspector).queryByRole("textbox", { name: "Value" })).toBeNull();
 
     fireEvent.click(
@@ -867,19 +1037,24 @@ describe("Desen App application shell", () => {
 
     const layersTab = screen.getByRole("tab", { name: "Layers" });
     const componentsTab = screen.getByRole("tab", { name: "Components" });
+    const stateTab = screen.getByRole("tab", { name: "State" });
     fireEvent.keyDown(layersTab, { key: "ArrowRight" });
     expect(componentsTab.getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(componentsTab);
     fireEvent.keyDown(componentsTab, { key: "ArrowRight" });
+    expect(stateTab.getAttribute("aria-selected")).toBe("true");
+    expect(document.activeElement).toBe(stateTab);
+    fireEvent.keyDown(stateTab, { key: "ArrowRight" });
     expect(layersTab.getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(layersTab);
     fireEvent.keyDown(layersTab, { key: "ArrowLeft" });
-    expect(componentsTab.getAttribute("aria-selected")).toBe("true");
-    expect(document.activeElement).toBe(componentsTab);
-    fireEvent.keyDown(componentsTab, { key: "Home" });
+    expect(stateTab.getAttribute("aria-selected")).toBe("true");
+    expect(document.activeElement).toBe(stateTab);
+    fireEvent.keyDown(stateTab, { key: "Home" });
     expect(layersTab.getAttribute("aria-selected")).toBe("true");
     fireEvent.keyDown(layersTab, { key: "End" });
-    expect(componentsTab.getAttribute("aria-selected")).toBe("true");
+    expect(stateTab.getAttribute("aria-selected")).toBe("true");
+    fireEvent.click(componentsTab);
 
     const componentsPanel = document.getElementById(
       componentsTab.getAttribute("aria-controls") ?? "",

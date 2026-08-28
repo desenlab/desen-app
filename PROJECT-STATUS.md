@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-28
+Last updated: 2026-08-29
 
 ## Plain-language status
 
@@ -1056,12 +1056,12 @@ required-gate or hosted-CI pass. M09-T06 is `DONE`; P-08 remains `NOT_PROVEN`, P
 dynamic `$` editing remains M09-T08, and M09-T07 is next.
 
 M09-T07 now exposes Catalog-declared named-slot insertion boundaries as an App-owned authoring
-surface. Valid layer-drop boundaries expand into the space between rows while dragging, retain
-stable hover state through nested child events, and preserve keyboard/click placement. Components
-show one explicit selected-slot target with owner, slot, cardinality, and position; without a
-target, drag/insert is disabled and a native control returns the user to Layers. Browser
-`DataTransfer` is an inert hint only; current App drag intent plus current Source/Catalog admission
-is the sole edit authority.
+surface. Its compatibility patch makes neighboring boundaries non-overlapping and maps each whole
+row's top and bottom halves to adjacent deterministic targets while preserving keyboard/click
+placement. Components retains one sticky selected-slot target with owner, slot, cardinality, and
+position. Successful insertion auto-selects the new component and exposes the existing safe Delete
+action. Browser `DataTransfer` is an inert hint only; current App drag intent plus current
+Source/Catalog admission is the sole edit authority.
 
 Insert, move, reorder, and delete requests re-derive exact route, owner, slot, capability,
 acceptance, minimum/maximum, placement, and selection identity from the current validator-admitted
@@ -1082,7 +1082,25 @@ and 1,192-path/176-proof-owned ownership. Sequence 46 passes 69/69 at
 delete affordance, root-delete explanation, and clean console; native drag automation and
 real-browser E2E remain unclaimed. M09-T07 is `DONE`; P-08 remains `NOT_PROVEN`, PF-025 remains
 `OPEN`, proof gates remain 10/13, implementation progress is 102/145 (70%), M09 is 7/14 (50%), and
-M09-T08 is next.
+M09-T08 was the next owner.
+
+M09-T08 now exposes deterministic surface-local primitive state list/add/update/delete with bounded
+conservative usage protection. The Inspector attaches or changes only one exact direct
+Catalog-compatible local-state binding and detaches it back to the declaration's validated initial
+value. Runtime namespaces and advanced dynamic bindings remain read-only. Every accepted change
+uses public Editor Core commands, complete continuous validation, and Publisher preflight before
+one atomic session-local `{document, preview}` replacement.
+
+The focused state/binding suite passes 109/109; final structural evidence is
+`278/278`. Exact evidence is the
+`28,766`-byte
+`docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json` at
+`sha256:b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a`. The live local CI authority contains 188 workloads/89 proof pairs, a
+56-proof-unit/122-workload closure, and 1,202-path/178-proof-owned ownership. Sequence 47 contains
+43 artifacts and 86 readers at `sha256:c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7`. These are local receipts; no
+required-gate, hosted-CI, native-drag, or real-browser E2E pass is claimed. M09-T08 is `DONE`; P-08
+remains `NOT_PROVEN`, PF-025 remains `OPEN`, proof gates remain 10/13, implementation progress is
+103/145 (71%), M09 is 8/14 (57%), and M09-T09 is next.
 
 ## Current milestone
 
@@ -1206,11 +1224,11 @@ M09-T08 is next.
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Next implementation task: `M09-T08 — Local state and binding editor UI`
+- Next implementation task: `M09-T09 — Sign-in event and closed-action editor UI`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  7/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T07 are `DONE`; `N-042` is `TESTED`, P-06
+  8/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T08 are `DONE`; `N-042` is `TESTED`, P-06
   is `PROVEN`, P-07 and P-16 are `PARTIAL`, proof gates are 10/13, P-08 remains `NOT_PROVEN`,
-  PF-025 remains `OPEN`, and implementation progress is 102/145.
+  PF-025 remains `OPEN`, and implementation progress is 103/145.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -1251,12 +1269,24 @@ M09-T08 is next.
   pairs, a 54-proof-unit/118-workload connected closure, 1,184-path/174-proof-owned ownership, and
   a sequence-45 checkpoint with 41 artifacts and 82 readers. No required-gate or hosted result is
   claimed. M09-T07 is `DONE` with its exact named-slot artifact, 70/70 focused cases, 151/151
-  complete App cases, 9/9 independent root proof, expanded and stable App-owned drop boundaries,
-  explicit Components targeting, public insert/move/reorder/delete transitions, exact slot
+  complete App cases, 9/9 independent root proof, non-overlapping boundaries plus whole-row
+  top/bottom drop targets, a sticky Components target, public insert/move/reorder/delete transitions,
+  insert auto-selection that exposes the existing safe Delete action, exact slot
   admission, deletion-minimum enforcement, and atomic Publisher-backed preview/focus behavior. Its
   live local CI authority contains 186 workloads/88 proof pairs, a 55-proof-unit/120-workload
   connected closure, 1,192-path/176-proof-owned ownership, and sequence 46 with 42 artifacts and 84
-  readers. Native browser drag automation and real-browser E2E are not claimed.
+  readers. Native browser drag automation and real-browser E2E are not claimed. M09-T08 is `DONE`
+  with deterministic surface-local primitive state list/add/update/delete, bounded conservative
+  usage accounting, usage-protected deletion, compatible exact direct local-state binding
+  change/detach, and atomic Publisher-backed preview. Runtime namespaces and advanced dynamic
+  binding shapes remain read-only. The focused state/binding suite passes 109/109. Its exact
+  `28,766`-byte artifact is pinned at
+  `sha256:b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a`; the final structural
+  receipt is `278/278`. The live local CI authority contains 188
+  workloads/89 proof pairs—78 ordinary and 11 barriers—a 56-proof-unit/122-workload closure,
+  1,202-path/178-proof-owned ownership, and sequence 47 with 43 artifacts and 86 readers at
+  `sha256:c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7`. These are local receipts and make no required-gate, hosted-CI,
+  real-browser E2E, event/action, Design/Run, durable persistence, publication, or activation claim.
 
 ## Completed preparation
 
@@ -3862,10 +3892,11 @@ M09-T07 evidence:
 - slot authority: exact current route, owner identity, Catalog slot contract, Source presence,
   child order, accepted capability/category, minimum/maximum, component defaults, node placement,
   and cycle relationship are re-derived for every request
-- interaction boundary: valid Layers drop boundaries expand across the inter-row gap and retain
-  nested-event hover state; Components exposes one explicit owner/slot/cardinality/position target
-  or disables placement and directs focus to Layers; click and keyboard alternatives remain
-  available, and browser transfer data is never mutation authority
+- interaction boundary: valid Layers insertion boundaries do not overlap, while each row's top and
+  bottom halves provide a wider deterministic target; Components retains one sticky
+  owner/slot/cardinality/position target, and successful insertion auto-selects the new component so
+  the existing safe Delete action is exposed; click and keyboard alternatives remain available,
+  and browser transfer data is never mutation authority
 - mutation boundary: insert, cross-slot move, same-slot reorder, and exact selected-subtree delete
   use only public Editor Core commands; root deletion, stale identity, source-minimum violation,
   invalid index, rejected child, cycle, bounded-default failure, or complete-validation failure
@@ -3895,7 +3926,45 @@ M09-T07 evidence:
   arbitrary-future-Catalog, native-target, or pixel-fidelity guarantee is implemented or proven
 - coverage decision: M09-T07 is `DONE`; P-08 remains `NOT_PROVEN`; PF-025 remains `OPEN`; proof
   gates remain 10/13; overall progress advances to 102/145 (70%); M09 advances to 7/14 (50%);
-  M09-T08 is next
+  M09-T08 was the next owner
+
+M09-T08 evidence:
+
+- `docs/proof/DESEN-APP-STATE-BINDING-EDITOR.md`
+- `docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json`, exactly
+  `28,766` bytes at `sha256:b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a`
+- state authority: the State panel deterministically projects directly addressable surface-local
+  primitive declarations; it supports add, initial-value update, and unused delete, while
+  unsupported declaration shapes remain explicitly read-only
+- usage boundary: a bounded conservative scan reports declaration usage and disables referenced
+  state deletion in the UI; every delete is re-authorized against the exact current Source so a
+  stale projection cannot create a dangling reference
+- binding authority: the Inspector may attach, change, or detach only one exact direct
+  type-compatible `state.<name>` reference; detach restores the declaration's validated primitive
+  initial value, while runtime namespaces, fallback, token, format, nested, and other advanced
+  dynamic shapes remain read-only
+- mutation boundary: accepted operations use public Editor Core transitions, complete continuous
+  validation, and Publisher preflight before one atomic session-local `{document, preview}` commit;
+  rejection exposes no partial Source or preview
+- T07 UX compatibility patch: Layers uses non-overlapping boundaries plus whole-row top/bottom
+  targets, Components retains its selected-slot target, and successful insertion auto-selects the
+  new component to expose the existing safe Delete action; native real-browser drag E2E remains
+  open
+- local proof: the focused `test:state-bindings` suite passes 109/109; the final complete structural
+  receipt passes `278/278`
+- CI authority: the live local inventory registers 188 workloads and 89 proof pairs, split into 78
+  ordinary pairs and 11 barriers; the connected closure contains 56 proof units and 122 workloads;
+  complete ownership covers 1,202 tracked paths and 178 proof-owned paths
+- checkpoint authority: sequence 47 preserves every predecessor and extends the chain to 43
+  artifacts and 86 readers at `sha256:c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7`
+- evidence boundary: these task, CI, ownership, and checkpoint receipts are local; no required-gate,
+  hosted-CI, native-drag automation, or real-browser E2E result is inferred
+- scope nonclaims: runtime/advanced binding authoring, event/action authoring, Design/Run, durable
+  save/open, diagnostics navigation/placeholders, control-plane publication, activation,
+  arbitrary-future-Catalog, native-target, and pixel-fidelity guarantees remain unproven
+- coverage decision: M09-T08 is `DONE`; P-08 remains `NOT_PROVEN`; PF-025 remains `OPEN`; proof
+  gates remain 10/13; overall progress advances to 103/145 (71%); M09 advances to 8/14 (57%);
+  M09-T09 is next
 
 ## Status vocabulary
 

@@ -177,11 +177,11 @@ pinned at `sha256:6246c4865e28a737e5990a7204dedaad6cae3e6c989a70a6cd496c84c29d07
 `sha256:de50c6186438de2dbd56083de01bc7f39f6492c1d02806a8fc239e6a4edc341d`, and
 `sha256:0dfd1eb4210839d739572a943f421026ca40aecc4f285832148f66d242f9970c`.
 
-The historical M09-T06 successor contains 184 workloads and 87 proof pairs. The current M09-T07
-successor contains 186 workloads and 88 proof pairs, split into 77 ordinary pairs and 11 barriers.
-Its sole formal impact parent is `desen-app-structured-inspector`; the connected closure contains
-55 proof units and 120 workloads at
-`sha256:6a7cb544efd2906ccd09db03209c54888a25f366b080b5cf37b87c43edc2651c`.
+The historical M09-T06 and M09-T07 successors contain 184 workloads/87 proof pairs and 186
+workloads/88 proof pairs respectively. The current M09-T08 successor contains 188 workloads and 89
+proof pairs, split into 78 ordinary pairs and 11 barriers. Its three formal impact parents are
+`desen-app-schema-inspector`, `editor-core-state-binding-edits`, and
+`desen-app-named-slot-authoring`; the connected closure contains 56 proof units and 122 workloads.
 Exact plan, inventory, selector, runner, ownership, and checkpoint digests remain machine-verified
 CI authorities rather than values inferred from these counts.
 
@@ -228,9 +228,12 @@ authority is independently pinned as
 from selector success. Its ownership-category counts are
 `172 / 45 / 31 / 130 / 455 / 209 / 122 / 11`. The historical M09-T06 authority contains 174
 proof-owned paths across 1,184 tracked paths. Its ownership-category counts are
-`174 / 45 / 31 / 131 / 458 / 211 / 123 / 11`. The current M09-T07 authority contains 176
+`174 / 45 / 31 / 131 / 458 / 211 / 123 / 11`. The historical M09-T07 authority contains 176
 proof-owned paths across 1,192 tracked paths. Its ownership-category counts are
-`176 / 45 / 31 / 132 / 460 / 213 / 124 / 11`. The 16 reviewed workspace test scripts are pinned by
+`176 / 45 / 31 / 132 / 460 / 213 / 124 / 11`. The current M09-T08 authority contains 178
+proof-owned paths across 1,202 tracked paths; its complete category projection remains a
+machine-verified CI authority rather than a value inferred from those totals. The 16 reviewed
+workspace test scripts are pinned by
 `sha256:4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab`. Contract and
 hostile-input tests cover exact
 ordered ids, labels, commands, arguments,
@@ -416,6 +419,16 @@ Neither receives workspace-write, listener-port, native-addon, filesystem-compat
 verifier runtime-probe authority. The task wrapper authenticates the frozen T06 parent before App
 build, typecheck, the 70-case focused named-slot suite, artifact verification, and the independent
 9-case root proof. Required-gate and hosted outcomes remain separate authorities.
+
+The M09-T08 `desen-app-state-binding-editor` verifier/root pair is ordinary and non-barrier. Its
+exact formal impact parents are `desen-app-schema-inspector`, `editor-core-state-binding-edits`, and
+`desen-app-named-slot-authoring`; the connected closure contains 56 proof units and 122 workloads.
+The verifier is `PROOF_READ_ONLY`; the root is `PROOF_OS_TEMP_ISOLATED` and receives only
+`NODE_TEST_HARNESS`. Neither receives workspace-write, listener-port, native-addon,
+filesystem-compatibility, or verifier runtime-probe authority. The task wrapper authenticates all
+three frozen parents before App build, typecheck, the 109-case focused state/binding suite, artifact
+verification, and the independent root proof. Required-gate and hosted outcomes remain separate
+authorities.
 
 The M08-T05 focused package layer passes 14/14 runtime cases and 14 compiler-negative assertions.
 The cumulative package suite passes 69/69. The emitted public-package layer passes 38/38 runtime
@@ -643,6 +656,10 @@ M09-T07 appends sequence 46 at
 reseals App compatibility readers `[70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81]`, and appends
 the T07 proof/root readers at `[82, 83]`. The chain contains 42 frozen artifacts and 84 current
 readers. This local reader authority makes no required-gate or hosted M09-T07 claim.
+M09-T08 appends sequence 47 at `c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7`. It preserves sequences 1–46 and all 42
+predecessor artifact receipts byte-exact, appends the T08 artifact at index 42, and extends the chain
+to 43 frozen artifacts and 86 current readers. This local reader authority makes no required-gate
+or hosted M09-T08 claim.
 These are joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact one-file
 [canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
@@ -650,10 +667,10 @@ and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact o
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04, G07,
-M08-T10, G08, and M09-T01–T07 are `DONE`; proof gates are 10/13, implementation progress is
-102/145, M08 is 10/10, M09 is 7/14, `N-012`, `N-014`, `N-018`, `N-042`, `S-002`, and `S-003` are
+M08-T10, G08, and M09-T01–T08 are `DONE`; proof gates are 10/13, implementation progress is
+103/145, M08 is 10/10, M09 is 8/14, `N-012`, `N-014`, `N-018`, `N-042`, `S-002`, and `S-003` are
 `TESTED`, P-06 and P-18 are `PROVEN`, P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, and
-M09-T08 is next. The
+M09-T09 is next. The
 exact 30,014-byte M08-T05 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
 `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`; the report is
@@ -721,7 +738,19 @@ The exact 24,830-byte M09-T07 artifact is
 complete App suite passes 151/151, and its independent root proof passes 9/9. The artifact records
 23 exact tracked-file receipts. Dynamic state/binding and event/action authoring, Design/Run,
 durable save/open, browser E2E, publication, and activation remain unproven; P-08 remains
-`NOT_PROVEN`. These are local task receipts rather than a required-gate or hosted-CI claim.
+`NOT_PROVEN`. The compatibility patch covers non-overlapping boundaries, whole-row top/bottom
+targets, a sticky Components target, and insert auto-selection exposing the existing safe Delete;
+native real-browser drag E2E remains open. These are local task receipts rather than a required-gate
+or hosted-CI claim.
+The exact `28,766`-byte M09-T08 artifact is
+`docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json` at
+`sha256:b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a`; the report is
+`docs/proof/DESEN-APP-STATE-BINDING-EDITOR.md`. Its focused state/binding suite passes 109/109; the
+final complete structural receipt is `278/278`. It covers
+surface-local primitive state list/add/update/delete, bounded conservative usage protection, exact
+direct compatible local-state binding change/detach, and Publisher-atomic preview. Runtime and
+advanced dynamic bindings remain read-only; P-08 remains `NOT_PROVEN` and PF-025 remains `OPEN`.
+These are local task receipts rather than a required-gate or hosted-CI claim.
 The first hosted PR run exposed an isolation-fixture workspace-target symlink denied by Node's
 permission model. The resealed fixture uses only absolute runner-temporary targets, and the exact
 isolation suite passes 8/8 without permission widening. This is a corrective local receipt, not a
@@ -740,7 +769,10 @@ complete structural CI suites pass 73/73, 118/118, 10/10, and 323/323. The M09-T
 named-slot, complete App, independent root, and complete structural CI suites pass 70/70, 151/151,
 9/9, and 329/329. Sequence 46 closes at
 `sha256:f09ec643d1b2756174ca47fae99837a68f6656bec0c6933e566d5075713a0f5f` with 42 artifacts and
-84 readers. No required-gate or hosted-CI result is inferred from those local receipts.
+84 readers. The M09-T08 focused state/binding suite passes 109/109; its final complete structural
+receipt is `278/278`. Sequence 47 closes at
+`sha256:c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7` with 43 artifacts and 86 readers. No required-gate or hosted-CI
+result is inferred from those local receipts.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one or more live readers through the reviewed checkpoint append procedure only when every previously pinned

@@ -122,13 +122,10 @@ const NAMED_SLOT_ARTIFACT_PIN = Object.freeze({
 
 const NAMED_SLOT_LIVE_SOURCE_AND_TEST_PATHS = Object.freeze([
   ADAPTER_SOURCE_PATH,
-  APPLICATION_CSS_PATH,
-  APPLICATION_SOURCE_PATH,
   AUTHORING_DATA_PATH,
   PREVIEW_SOURCE_PATH,
   AUTHORING_SLOT_SOURCE_PATH,
   ADAPTER_TEST_PATH,
-  APPLICATION_TEST_PATH,
   AUTHORING_DATA_TEST_PATH,
   PREVIEW_TEST_PATH,
   AUTHORING_SLOT_TEST_PATH,
@@ -481,19 +478,31 @@ function assertNoPrivateInspection(sourceFile, relativePath, allowApplicationNav
     .map((access) => access.getText(sourceFile));
   const allowed = allowApplicationNavigation
     ? privateProperties.filter(
-        (text) => text === "document.getElementById" || text === "document.querySelector",
+        (text) =>
+          text === "document.getElementById" ||
+          text === "document.querySelector" ||
+          text === "event.currentTarget.getBoundingClientRect",
       )
     : [];
   const forbiddenProperties = allowApplicationNavigation
     ? privateProperties.filter(
-        (text) => text !== "document.getElementById" && text !== "document.querySelector",
+        (text) =>
+          text !== "document.getElementById" &&
+          text !== "document.querySelector" &&
+          text !== "event.currentTarget.getBoundingClientRect",
       )
     : privateProperties;
   const privateGlobals = collectDescendants(sourceFile, ts.isIdentifier)
     .filter(({ text }) => PRIVATE_DOM_GLOBALS.includes(text))
     .filter((identifier) => {
       if (!allowApplicationNavigation) return true;
-      return identifier.text !== "document" && identifier.text !== "HTMLElement";
+      if (identifier.text === "document" || identifier.text === "HTMLElement") return false;
+      return !(
+        identifier.text === "Node" &&
+        ts.isBinaryExpression(identifier.parent) &&
+        identifier.parent.operatorToken.kind === ts.SyntaxKind.InstanceOfKeyword &&
+        identifier.parent.left.getText(sourceFile) === "relatedTarget"
+      );
     });
   const reactPrivate = collectDescendants(sourceFile, ts.isIdentifier).filter(({ text }) =>
     ["Children", "cloneElement", "createPortal", "findDOMNode"].includes(text),
@@ -517,6 +526,9 @@ function assertNoPrivateInspection(sourceFile, relativePath, allowApplicationNav
     privateDomOrGeometryCalls: 0,
     privateReactReferences: 0,
     allowedAppNavigationDomCalls: allowed.length,
+    allowedRowDropGeometryCalls: allowed.filter(
+      (text) => text === "event.currentTarget.getBoundingClientRect",
+    ).length,
   });
 }
 
@@ -752,10 +764,13 @@ function inspectApplicationSource(rawSource) {
     fail("SOURCE_POLICY_VIOLATION", "Application selection ownership or editor boundary drifted.");
   }
   const privateInspection = assertNoPrivateInspection(sourceFile, APPLICATION_SOURCE_PATH, true);
-  if (privateInspection.allowedAppNavigationDomCalls !== 2) {
+  if (
+    privateInspection.allowedAppNavigationDomCalls !== 3 ||
+    privateInspection.allowedRowDropGeometryCalls !== 1
+  ) {
     fail(
       "SOURCE_POLICY_VIOLATION",
-      "Only the two historical app-owned navigation/focus DOM calls are allowed.",
+      "Only two historical navigation/focus calls plus one row-local drop projection are allowed.",
       privateInspection,
     );
   }
@@ -1249,7 +1264,7 @@ function inspectSchemaInspectorSuccessor(files) {
         "deleteDesenEditorOwnerProp",
         "setDesenEditorOwnerProp",
         "captureInspectorEdit",
-        'field.value.kind === "dynamic"',
+        'if (field.value.kind === "dynamic") {',
         'control.kind === "structured-json"',
         'reason: "control-unavailable"',
       ],
@@ -1292,6 +1307,9 @@ function inspectSchemaInspectorSuccessor(files) {
         "data-drop-hovered={dropReady && dragHovered}",
         "data-drop-hovered={componentDropReady && targetDragHovered}",
         "data-guide={readySlot === null}",
+        "data-row-drop-position={rowDropPosition ?? undefined}",
+        'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
+        "sourceNodeId: result.nodeId",
         "No drop target selected",
         "Choose slot in Layers",
         "`Drop ${draggedComponent.displayName} here`",
@@ -1307,8 +1325,11 @@ function inspectSchemaInspectorSuccessor(files) {
       APPLICATION_CSS_PATH,
       [
         '.slotBoundary[data-drop-ready="true"]',
-        "min-height: 2.875rem",
-        "margin-block: -1.125rem",
+        "min-height: 0.875rem",
+        "margin-block: 0",
+        ".layerNode[data-row-drop-position] {\n  z-index: 4;",
+        ".layerNode[data-row-drop-position] > .layerRow",
+        ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
         '.slotBoundary[data-drop-hovered="true"]',
         '.componentSlotTarget[data-guide="true"]',
         '.componentSlotTarget[data-drop-hovered="true"]',

@@ -91,6 +91,11 @@ const DIRECT_PROOF_VERIFIER_PREREQUISITES = SAFE_OBJECT_FREEZE({
   "desen-app-named-slot-authoring": SAFE_OBJECT_FREEZE([
     "node scripts/verify-desen-app-structured-inspector.mjs",
   ]),
+  "desen-app-state-binding-editor": SAFE_OBJECT_FREEZE([
+    "node scripts/verify-desen-app-schema-inspector.mjs",
+    "node scripts/verify-editor-core-state-binding-edits.mjs",
+    "node scripts/verify-desen-app-named-slot-authoring.mjs",
+  ]),
 });
 const EXPECTED_CHECK_SUFFIX = SAFE_OBJECT_FREEZE([
   "pnpm lint",
@@ -120,11 +125,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "0ca9fcc3176df5b6707e2b704d0e3aa4dd4288bc3b7f813461d90ef3397c5d80";
+  "27dc2ee009837434a8d16c5bddebca8d693f1133f8214aa870f94cf482467073";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "d4cea0955703f00540994ecdaac6d5cdca4f9f1bb3037c7ba038da67d9991e7a";
+  "f75015245b76738433e188edc5171f4fdc22d8a91cfd0bc266f485e42caa1ba5";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "ddc6aa4a631dd92edb762c52d06277eec262b89f5e062e9c199a3c15f423304f";
+  "7460545faa6ff0ab3eb46f1631abaaeab8645d7bdd3bfe42fd381256a7848de6";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -566,6 +571,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "desen-app-named-slot-authoring",
     "scripts/verify-desen-app-named-slot-authoring.mjs",
     "tests/desen-app-named-slot-authoring.test.mjs",
+  ],
+  [
+    "desen-app-state-binding-editor",
+    "scripts/verify-desen-app-state-binding-editor.mjs",
+    "tests/desen-app-state-binding-editor.test.mjs",
   ],
 ]);
 
@@ -1526,7 +1536,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "67e537ed19f3518561909a342fa79e06d0f9adc49436aaf6c9816be1c840cb6f";
+  "30692cd0f41c54e8c35b219d6aaebdb01c0ede62300ea0cd4ec4ac1d98c08775";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

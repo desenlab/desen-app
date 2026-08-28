@@ -14,6 +14,8 @@ const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-SCHEMA-INSPECTOR.md";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
+const STATE_BINDING_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json";
 const CATALOG_PARENT_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json";
 const SELECTION_PARENT_ARTIFACT_PATH =
@@ -111,6 +113,7 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_DATA_TEST_PATH,
     AUTHORING_SLOT_TEST_PATH,
     NAMED_SLOT_ARTIFACT_PATH,
+    STATE_BINDING_ARTIFACT_PATH,
   ]),
 ]);
 
@@ -136,6 +139,16 @@ const NAMED_SLOT_ARTIFACT_PIN = Object.freeze({
   path: NAMED_SLOT_ARTIFACT_PATH,
   bytes: 24_830,
   sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+});
+
+const STATE_BINDING_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T08",
+  proofId: "desen-app-state-binding-editor",
+  profile: "desen.app.state-binding-editor-proof.v1",
+  result: "PASS",
+  path: STATE_BINDING_ARTIFACT_PATH,
+  bytes: 28_766,
+  sha256: "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
 });
 
 const EXPECTED_SOURCE_SHA256 = Object.freeze({
@@ -1193,23 +1206,24 @@ function receipts(files) {
 }
 
 const CURRENT_SUCCESSOR_SHA256 = Object.freeze({
-  [ROOT_PACKAGE_PATH]: "08824da0ef0f0fc2085259b2f60c2376ff184eabd3708594b0b53d105790734f",
-  [APP_PACKAGE_PATH]: "6efc3da8192134bfe41d8b4855db67f4084fd2d6818e87b2fab660722c300c87",
+  [ROOT_PACKAGE_PATH]: "a8e9ad3ef63447c816d95e7fd247d68875b8cdae08750a5181721d2fae93a2a0",
+  [APP_PACKAGE_PATH]: "6d18724a6922be2998ba22e7e3f4071e99bfdf472de1365842bb8aeaa54f4f37",
   [LOCKFILE_PATH]: "463a35abf13fd9ba6acb897aca52a11e7a90c8fcfedbce085e82f89c23418d89",
   [AUTHORING_DATA_PATH]: "ae18d9ea0fe37ee553e758a73a9ca2e54e97c7fbcf048c21cd3bd131aadc1b25",
-  [INSPECTOR_SOURCE_PATH]: "8a79b662f5b7bf15147d242b38916162d2f6f75e175d056ba9434177c09ce8e6",
-  [PANEL_SOURCE_PATH]: "a9362b4531a00bbe24cf07e9d75e6c58fe27051d77fec48e7f6a1f269bffeca0",
-  [STRUCTURED_JSON_SOURCE_PATH]: "9c28b34b37bd02d213750f17c868807d4dd50c9fffb35ce6c3e3e6483a513c36",
+  [INSPECTOR_SOURCE_PATH]: "76c1bebae33c41b175558bd8c4e1d392a28f86e97e0895863b13df1320d421b2",
+  [PANEL_SOURCE_PATH]: "45700d67ff6da373b4e3da9599b675ec793b0007b511775af24a4be5e69a858f",
+  [STRUCTURED_JSON_SOURCE_PATH]: "74c56059e2cdca1ae018424f27e1c28c54785bbbc89c75d25dfa1858b76c4759",
   [AUTHORING_SLOT_SOURCE_PATH]: "7e41cc2c4e8f9da91a7737160619836a8f61dc9445f3b2c118fd0793a6dc405b",
-  [APPLICATION_SOURCE_PATH]: "de1c61540651709b4a82d587765d7f1ec3d444f7d125cff5dc0d4906a3e348f2",
-  [APPLICATION_CSS_PATH]: "c832498a4bc2f94e005da89de91f77d38759e6aa3c421a7ec133d02b5aa78e2e",
+  [APPLICATION_SOURCE_PATH]: "c1daf62dba03a5646bb3d9d21eb3d28a32385b8fe296d61b38007e9f59d29bce",
+  [APPLICATION_CSS_PATH]: "ed91c67f1dab1643642e286da184c8abf96361031eefd32f76aff8a7ea8f5063",
   [AUTHORING_DATA_TEST_PATH]: "ac69505e2391db6ad61ad18f82ac9b6f699b2aebb2b0367f2c497335f6a08bcd",
-  [INSPECTOR_TEST_PATH]: "77f777f2790962df2e0b984cf06af57200d958a5faf4dee7c9d6845c32b27406",
-  [PANEL_TEST_PATH]: "eb4cd46bc66ef04c6f644c8065ccee21b5d3512da33d13f5afcfe908896ed3bf",
-  [STRUCTURED_JSON_TEST_PATH]: "e09774464eb09f99074619ea9d33f78a111e4799127b3ff32ed9841645b3efed",
+  [INSPECTOR_TEST_PATH]: "3037926ac89677c412a25e455407becfe67475aa9cb3ec6b5f511cfe50f212fc",
+  [PANEL_TEST_PATH]: "0c891415e34a29bf74baa4e211f82a46243c5dd8091b702d2ad558b24e1590f6",
+  [STRUCTURED_JSON_TEST_PATH]: "254f2f2e6c0a5f1fce72e7881c1b94d7d501fb8be08be693c66e1256e28ba827",
   [AUTHORING_SLOT_TEST_PATH]: "93c6b850c235ab09308fb36b9f99d6a5715d28514374c5c709a3c1eacb729ab2",
-  [APPLICATION_TEST_PATH]: "a98974dea7dde6a8aab7c9864d425f7cc9b7af9f5ed3e7b457840497498bf799",
+  [APPLICATION_TEST_PATH]: "dbd802b086a2595c61db87e3ec9512d1a2b5f425852d584f5181b216f4607705",
   [NAMED_SLOT_ARTIFACT_PATH]: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+  [STATE_BINDING_ARTIFACT_PATH]: "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
 });
 
 async function authenticateFrozenArtifact(workspaceRoot) {
@@ -1282,11 +1296,93 @@ function assertRetainedHistoricalReceipts(frozenArtifact, files) {
   }
 }
 
-function inspectNamedSlotSuccessor(files) {
+function authenticateStateBindingSuccessorArtifact(files) {
+  const artifactBytes = files.get(STATE_BINDING_ARTIFACT_PATH);
+  if (
+    artifactBytes.byteLength !== STATE_BINDING_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== STATE_BINDING_ARTIFACT_PIN.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact frozen M09-T08 artifact bytes drifted.");
+  }
+  const artifact = parseJson(artifactBytes, STATE_BINDING_ARTIFACT_PATH);
+  const namedSlotParent = Array.isArray(artifact.prerequisites)
+    ? artifact.prerequisites.find(({ proofId }) => proofId === NAMED_SLOT_ARTIFACT_PIN.proofId)
+    : undefined;
+  const requiredNonclaims = [
+    "Repeat and resource-binding UI are not implemented or claimed by M09-T08.",
+    "M09-T09 is NOT_PROVEN: event and closed-action editing are not implemented.",
+    "M09-T10 is NOT_PROVEN: no Design/Run mode is claimed.",
+    "M09-T12 is NOT_PROVEN: no save/open or durable persistence UI is claimed.",
+    "M09-T14 is NOT_PROVEN: session preview is not control-plane publication or activation.",
+    "G09 and browser E2E remain NOT_PROVEN.",
+  ];
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== STATE_BINDING_ARTIFACT_PIN.task ||
+    artifact.proofId !== STATE_BINDING_ARTIFACT_PIN.proofId ||
+    artifact.profile !== STATE_BINDING_ARTIFACT_PIN.profile ||
+    artifact.result !== STATE_BINDING_ARTIFACT_PIN.result ||
+    namedSlotParent?.bytes !== NAMED_SLOT_ARTIFACT_PIN.bytes ||
+    namedSlotParent?.sha256 !== NAMED_SLOT_ARTIFACT_PIN.sha256 ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.surfaceLocalPrimitiveStateList !== true ||
+    artifact.claim?.primitiveStateAddUpdateDelete !== true ||
+    !isDeepStrictEqual(artifact.claim?.primitiveStateTypes, [
+      "boolean",
+      "integer",
+      "number",
+      "string",
+    ]) ||
+    artifact.claim?.boundedConservativeUsageCount !== true ||
+    artifact.claim?.usedStateDeleteRejected !== true ||
+    artifact.claim?.directCompatibleLocalStatePropBinding !== true ||
+    artifact.claim?.exactDirectBindingChange !== true ||
+    artifact.claim?.exactDirectBindingDetachToInitial !== true ||
+    artifact.claim?.runtimeAndAdvancedBindingReadOnly !== true ||
+    artifact.claim?.advancedStateSchemaReadOnly !== true ||
+    artifact.claim?.exactOwnDataStateAndBindingCapture !== true ||
+    artifact.claim?.publicEditorCoreStateAndPropMutation !== true ||
+    artifact.claim?.continuousCompleteSourceRevalidation !== true ||
+    artifact.claim?.failedEditPreservesCurrentDocument !== true ||
+    artifact.claim?.publisherSessionPreview !== true ||
+    artifact.claim?.sourceAndPreviewCommitAtomically !== true ||
+    artifact.claim?.stateAndBindingChromeOutsideManagedCapabilitySubtree !== true ||
+    artifact.claim?.retainedNamedSlotAuthoringUxCompatibility !== true ||
+    artifact.claim?.persistenceClaimed !== false ||
+    artifact.claim?.eventActionEditingClaimed !== false ||
+    artifact.claim?.designRunClaimed !== false ||
+    artifact.claim?.activationClaimed !== false ||
+    artifact.claim?.browserE2eClaimed !== false ||
+    artifact.claim?.p08Status !== "NOT_PROVEN" ||
+    !Array.isArray(artifact.nonclaims) ||
+    requiredNonclaims.some((nonclaim) => !artifact.nonclaims.includes(nonclaim))
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T08 identity or claims drifted.");
+  }
+  return deepFreeze({
+    task: STATE_BINDING_ARTIFACT_PIN.task,
+    artifact: STATE_BINDING_ARTIFACT_PIN,
+    predecessorArtifact: NAMED_SLOT_ARTIFACT_PIN,
+    surfaceLocalPrimitiveStateEditing: true,
+    boundedUsageCounts: true,
+    usedStateDeleteRejected: true,
+    exactCompatibleDirectLocalStateBindingChangeAndDetach: true,
+    runtimeAndAdvancedBindingsReadOnly: true,
+    atomicPublisherBackedPreview: true,
+    retainedNamedSlotAuthoringUxCompatibility: true,
+    eventActionEditingImplemented: false,
+    designRunImplemented: false,
+    persistenceImplemented: false,
+    activationImplemented: false,
+    browserE2eImplemented: false,
+  });
+}
+
+function inspectStateBindingSuccessor(files) {
   for (const [relativePath, expectedSha256] of Object.entries(CURRENT_SUCCESSOR_SHA256)) {
     const bytes = files.get(relativePath);
     if (bytes === undefined || sha256(bytes) !== expectedSha256) {
-      fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} exact reviewed T07 bytes drifted.`);
+      fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} exact reviewed T08 bytes drifted.`);
     }
   }
   const app = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
@@ -1309,16 +1405,32 @@ function inspectNamedSlotSuccessor(files) {
     "verify:desen-app-named-slot-authoring": `${namedSlotPrefix}node scripts/verify-desen-app-named-slot-authoring.mjs`,
     "test:desen-app-named-slot-authoring": `${namedSlotPrefix}node --test tests/desen-app-named-slot-authoring.test.mjs`,
   };
+  const stateBindingCommand =
+    "vitest run test/structured-json.test.ts test/authoring-state.test.ts test/authoring-inspector.test.ts test/state-panel.test.tsx test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx";
+  const stateBindingPrefix =
+    "node scripts/verify-desen-app-schema-inspector.mjs && node scripts/verify-editor-core-state-binding-edits.mjs && node scripts/verify-desen-app-named-slot-authoring.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:state-bindings && ";
+  const stateBindingRootCommands = {
+    "generate:desen-app-state-binding-editor": `${stateBindingPrefix}node scripts/generate-desen-app-state-binding-editor-proof.mjs`,
+    "verify:desen-app-state-binding-editor": `${stateBindingPrefix}node scripts/verify-desen-app-state-binding-editor.mjs`,
+    "test:desen-app-state-binding-editor": `${stateBindingPrefix}node --test tests/desen-app-state-binding-editor.test.mjs`,
+  };
   if (
     app.scripts?.["test:structured-inspector"] !== structuredCommand ||
     app.scripts?.["test:named-slots"] !== namedSlotCommand ||
+    app.scripts?.["test:state-bindings"] !== stateBindingCommand ||
     app.dependencies?.["@desen/protocol"] !== "workspace:*" ||
     Object.entries(rootCommands).some(([name, command]) => root.scripts?.[name] !== command) ||
     Object.entries(namedSlotRootCommands).some(
       ([name, command]) => root.scripts?.[name] !== command,
+    ) ||
+    Object.entries(stateBindingRootCommands).some(
+      ([name, command]) => root.scripts?.[name] !== command,
     )
   ) {
-    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T06/T07 package or proof command drifted.");
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M09-T06/T07/T08 package or proof command drifted.",
+    );
   }
   const sourceMarkers = new Map([
     [
@@ -1338,12 +1450,22 @@ function inspectNamedSlotSuccessor(files) {
         "parseJsonPointer",
         'control.kind === "structured-json"',
         "nestedDynamicValue",
+        "applyAuthoringInspectorBindingEdit",
+        "captureInspectorBindingEdit",
+        "isAuthoringInspectorStateCompatible",
         "setDesenEditorOwnerProp",
       ],
     ],
     [
       PANEL_SOURCE_PATH,
-      ["StructuredJsonField", "parseStructuredJsonText", "formatStructuredJson", "Apply"],
+      [
+        "StructuredJsonField",
+        "parseStructuredJsonText",
+        "formatStructuredJson",
+        "ValueSourceControl",
+        "This runtime or advanced binding is preserved as read-only.",
+        "Apply",
+      ],
     ],
     [
       STRUCTURED_JSON_SOURCE_PATH,
@@ -1390,14 +1512,52 @@ function inspectNamedSlotSuccessor(files) {
     [
       APPLICATION_SOURCE_PATH,
       [
+        "applyAuthoringInspectorBindingEdit",
+        "applyAuthoringStateEdit",
+        "prepareAuthoringStateModel",
+        "<StatePanel model={stateModel} onEdit={onStateEdit} surfaceName={selectedSurface.name} />",
         "createAuthoringSlotSelection",
         "evaluateAuthoringSlotInsertion",
         "evaluateAuthoringSlotPlacement",
         "evaluateAuthoringNodeDeletion",
         "applyAuthoringSlotEdit",
         "applyAuthoringNodeDelete",
+        "function acceptsDragIntent(",
+        "function projectedRowDrop(event: DragEvent<HTMLButtonElement>)",
+        "const bounds = event.currentTarget.getBoundingClientRect()",
+        'const position = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after"',
+        "data-row-drop-position={rowDropPosition ?? undefined}",
+        'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
+        "sourceNodeId: result.nodeId",
         "data-active-slot={active}",
         'event.dataTransfer.setData("text/plain", "DESEN App authoring item")',
+      ],
+    ],
+    [
+      APPLICATION_CSS_PATH,
+      [
+        ".valueSourceControl",
+        ".statePanel",
+        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.875rem;",
+        '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;\n  min-height: 0.875rem;',
+        "margin-block: 0",
+        ".layerNode[data-row-drop-position] {\n  z-index: 4;",
+        ".layerNode[data-row-drop-position] > .layerRow",
+        '.layerNode[data-row-drop-position="before"]::before',
+        '.layerNode[data-row-drop-position="after"]::before',
+        ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
+      ],
+    ],
+    [
+      APPLICATION_TEST_PATH,
+      [
+        "snaps a native layer drag to the before or after half of a visible layer row",
+        'closest("li")?.getAttribute("data-row-drop-position")',
+        'toBe("before")',
+        'toBe("after")',
+        "updates surface-local state and changes a compatible binding in the live preview",
+        "Bound Value to state.password.",
+        'name: "Delete Alert layer · node.alert"',
       ],
     ],
     [
@@ -1423,6 +1583,13 @@ function inspectNamedSlotSuccessor(files) {
         fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} lost the T06/T07 marker ${marker}.`);
       }
     }
+  }
+  const applicationCss = decodeUtf8(files.get(APPLICATION_CSS_PATH), APPLICATION_CSS_PATH);
+  if (
+    applicationCss.includes("margin-block: -1.125rem") ||
+    applicationCss.includes("transition: min-height")
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The live slot boundaries overlap or animate geometry.");
   }
   const namedSlotArtifactBytes = files.get(NAMED_SLOT_ARTIFACT_PATH);
   const namedSlotArtifact = parseJson(namedSlotArtifactBytes, NAMED_SLOT_ARTIFACT_PATH);
@@ -1464,9 +1631,9 @@ function inspectNamedSlotSuccessor(files) {
   ) {
     fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T07 artifact identity or claims drifted.");
   }
+  const stateBinding = authenticateStateBindingSuccessorArtifact(files);
   return deepFreeze({
-    task: "M09-T07",
-    artifact: NAMED_SLOT_ARTIFACT_PIN,
+    ...stateBinding,
     nestedObjectInspector: true,
     schemaDerivedChildControls: true,
     structuredJsonFallback: true,
@@ -1503,6 +1670,10 @@ function inspectNamedSlotSuccessor(files) {
     exactOwnDataRouteSelectionAndEditCapture: true,
     atomicPublisherBackedSlotEdits: true,
     slotChromeOutsideManagedCapabilitySubtree: true,
+    nonOverlappingStableSlotBoundaries: true,
+    rowHalfDropTargets: true,
+    stickyComponentDropTarget: true,
+    successfulInsertionSelectsNewLayer: true,
     package: {
       appName: app.name,
       protocolDependency: app.dependencies["@desen/protocol"],
@@ -1510,11 +1681,13 @@ function inspectNamedSlotSuccessor(files) {
       rootCommands,
       namedSlotTestCommand: namedSlotCommand,
       namedSlotRootCommands,
+      stateBindingTestCommand: stateBindingCommand,
+      stateBindingRootCommands,
     },
   });
 }
 
-/** Authenticates frozen M09-T05 evidence and checks its live additive M09-T07 successor. */
+/** Authenticates frozen M09-T05 evidence and checks its live additive M09-T08 successor. */
 export async function buildDesenAppSchemaInspectorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
@@ -1531,7 +1704,7 @@ export async function buildDesenAppSchemaInspectorEvidence(rawOptions = undefine
     ),
   );
   assertRetainedHistoricalReceipts(frozen.artifact, files);
-  const successor = inspectNamedSlotSuccessor(files);
+  const successor = inspectStateBindingSuccessor(files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-schema-inspector",
@@ -1564,6 +1737,7 @@ export async function buildDesenAppSchemaInspectorEvidence(rawOptions = undefine
         AUTHORING_DATA_TEST_PATH,
         AUTHORING_SLOT_TEST_PATH,
         NAMED_SLOT_ARTIFACT_PATH,
+        STATE_BINDING_ARTIFACT_PATH,
         PANEL_TEST_PATH,
         STRUCTURED_JSON_TEST_PATH,
       ].map((relativePath) => ({

@@ -27,7 +27,9 @@ const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.
 const AUTHORING_INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
 const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
+const AUTHORING_STATE_SOURCE_PATH = "apps/desen-app/src/authoring-state.ts";
 const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
+const STATE_PANEL_SOURCE_PATH = "apps/desen-app/src/state-panel.tsx";
 const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
 const ADAPTER_CANVAS_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
@@ -35,7 +37,9 @@ const AUTHORING_SELECTION_TEST_PATH = "apps/desen-app/test/authoring-selection.t
 const AUTHORING_INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.test.ts";
 const AUTHORING_PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
 const AUTHORING_SLOT_TEST_PATH = "apps/desen-app/test/authoring-slots.test.ts";
+const AUTHORING_STATE_TEST_PATH = "apps/desen-app/test/authoring-state.test.ts";
 const INSPECTOR_PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
+const STATE_PANEL_TEST_PATH = "apps/desen-app/test/state-panel.test.tsx";
 const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
 const MAIN_LIFECYCLE_TEST_PATH = "apps/desen-app/test/main-lifecycle.test.tsx";
 const CATALOG_PATH = "packages/reference-catalog-web/catalog.json";
@@ -67,7 +71,9 @@ const CURRENT_APP_SOURCE_PATHS = Object.freeze(
     AUTHORING_INSPECTOR_SOURCE_PATH,
     AUTHORING_PREVIEW_SOURCE_PATH,
     AUTHORING_SLOT_SOURCE_PATH,
+    AUTHORING_STATE_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
+    STATE_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
   ].sort(),
 );
@@ -121,12 +127,16 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_INSPECTOR_SOURCE_PATH,
     AUTHORING_PREVIEW_SOURCE_PATH,
     AUTHORING_SLOT_SOURCE_PATH,
+    AUTHORING_STATE_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
+    STATE_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
     AUTHORING_INSPECTOR_TEST_PATH,
     AUTHORING_PREVIEW_TEST_PATH,
     AUTHORING_SLOT_TEST_PATH,
+    AUTHORING_STATE_TEST_PATH,
     INSPECTOR_PANEL_TEST_PATH,
+    STATE_PANEL_TEST_PATH,
     STRUCTURED_JSON_TEST_PATH,
   ]),
 ]);
@@ -151,13 +161,10 @@ const NAMED_SLOT_SOURCE_AND_TEST_PATHS = Object.freeze([
   AUTHORING_SLOT_SOURCE_PATH,
   AUTHORING_PREVIEW_SOURCE_PATH,
   ADAPTER_CANVAS_SOURCE_PATH,
-  APPLICATION_SOURCE_PATH,
-  "apps/desen-app/src/application.module.css",
   "apps/desen-app/test/authoring-data.test.ts",
   AUTHORING_SLOT_TEST_PATH,
   AUTHORING_PREVIEW_TEST_PATH,
   ADAPTER_CANVAS_TEST_PATH,
-  APPLICATION_TEST_PATH,
 ]);
 
 const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
@@ -1792,14 +1799,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 129 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 131 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 380 || dynamicEdges !== 0) {
+  if (staticEdges !== 388 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -2121,6 +2128,12 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "No drop target selected",
     "evaluateAuthoringNodeDeletion(route, model, selection)",
     "applyAuthoringNodeDelete(document, referenceCatalog, route, selection)",
+    "function acceptsDragIntent(",
+    "function projectedRowDrop(event: DragEvent<HTMLButtonElement>)",
+    "const bounds = event.currentTarget.getBoundingClientRect()",
+    "data-row-drop-position={rowDropPosition ?? undefined}",
+    'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
+    "sourceNodeId: result.nodeId",
     "setSelection(null)",
     "layersTab.current?.focus()",
   ]) {
@@ -2133,8 +2146,14 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
   }
   for (const marker of [
     '.slotBoundary[data-drop-ready="true"]',
-    "margin-block: -1.125rem",
+    "min-height: 0.875rem",
+    "margin-block: 0",
     '.slotBoundary[data-drop-hovered="true"]',
+    ".layerNode[data-row-drop-position] {\n  z-index: 4;",
+    ".layerNode[data-row-drop-position] > .layerRow",
+    '.layerNode[data-row-drop-position="before"]::before',
+    '.layerNode[data-row-drop-position="after"]::before',
+    ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
     '.componentSlotTarget[data-guide="true"]',
     '.componentSlotTarget[data-drop-hovered="true"]',
   ]) {
@@ -2160,6 +2179,9 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "preserves the selected layer, preview, and focus when deletion is rejected",
     "expect(reads).toBe(0)",
     'getAttribute("data-drop-hovered")',
+    'closest("li")?.getAttribute("data-row-drop-position")',
+    'toBe("before")',
+    'toBe("after")',
     "No drop target selected",
   ]) {
     if (!applicationTests.includes(marker)) {

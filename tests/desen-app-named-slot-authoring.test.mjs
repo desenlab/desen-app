@@ -103,6 +103,16 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.boundary.parentArtifacts, 1);
   assert.equal(built.artifact.claim.taskStatus, "DONE");
   assert.equal(built.artifact.claim.p08Status, "NOT_PROVEN");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T08");
+  assert.deepEqual(built.currentCompatibility.successor.artifact, {
+    task: "M09-T08",
+    proofId: "desen-app-state-binding-editor",
+    profile: "desen.app.state-binding-editor-proof.v1",
+    result: "PASS",
+    path: "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json",
+    bytes: 28_766,
+    sha256: "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
+  });
 });
 
 test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[1], () => {
@@ -181,18 +191,23 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[3], () => {
 });
 
 test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[4], () => {
-  const application = built.artifact.authority.source.application;
-  const adapter = built.artifact.authority.source.adapter;
+  const application = built.currentCompatibility.source.application;
+  const adapter = built.currentCompatibility.source.adapter;
+  const css = built.currentCompatibility.source.css;
   assert.equal(application.appOwnedDragIntent, true);
   assert.equal(application.browserPayloadIsInertHint, true);
   assert.equal(application.declaredAbsentSlotsVisible, true);
   assert.equal(application.linearDeclaredPresentJoin, true);
   assert.equal(application.orderedBoundaryControls, true);
-  assert.equal(application.expandedOverlappingDropReadyBoundaries, true);
+  assert.equal(application.expandedNonOverlappingDropReadyBoundaries, true);
+  assert.equal(application.rowHalfDropTargets, true);
+  assert.equal(application.rowGeometryUsedOnlyForBoundedDropProjection, true);
   assert.equal(application.stableNestedDragHoverTracking, true);
   assert.equal(application.invalidPlacementControlsDisabled, true);
   assert.equal(application.sameSlotNoOpControlsDisabled, true);
   assert.equal(application.explicitComponentDropTarget, true);
+  assert.equal(application.stickyComponentDropTarget, true);
+  assert.equal(application.componentDragGuidance, true);
   assert.equal(application.slotlessDisabledPlacementGuide, true);
   assert.equal(application.browserDataTransferReads, 0);
   assert.equal(application.componentPaletteRenderLimit, 24);
@@ -206,15 +221,18 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[4], () => {
   assert.equal(application.sourceAndPreviewCommitAtomically, true);
   assert.equal(application.deletionSourceAndPreviewCommitAtomically, true);
   assert.equal(application.successfulDeletionClearsSelection, true);
+  assert.equal(application.successfulInsertionSelectsNewLayer, true);
   assert.equal(application.deletionFocusReturnsToLayersTab, true);
   assert.equal(application.failedDeletionPreservesSelectionAndFocus, true);
   assert.equal(application.slotChromeOutsideManagedCapabilitySubtree, true);
   assert.equal(adapter.managedSubtreeExplicit, true);
   assert.equal(adapter.selectionOverlayRemainsSibling, true);
-  assert.equal(built.artifact.authority.source.css.managedDescendantSlotSelectors, 0);
-  assert.equal(built.artifact.authority.source.css.expandedOverlappingDropBoundaries, true);
-  assert.equal(built.artifact.authority.source.css.stableHoveredDropPresentation, true);
-  assert.equal(built.artifact.authority.source.css.slotlessTargetGuidePresentation, true);
+  assert.equal(css.managedDescendantSlotSelectors, 0);
+  assert.equal(css.expandedNonOverlappingDropBoundaries, true);
+  assert.equal(css.rowDropPositionPresentation, true);
+  assert.equal(css.stableHoveredDropPresentation, true);
+  assert.equal(css.stickyComponentTargetPresentation, true);
+  assert.equal(css.slotlessTargetGuidePresentation, true);
   assert.equal(built.artifact.claim.appOwnedInertDragHints, true);
   assert.equal(built.artifact.claim.browserDataTransferReadsZero, true);
   assert.equal(built.artifact.claim.expandedDropReadyBoundaries, true);
@@ -297,6 +315,8 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[6], async () => {
   assert.notEqual(second.artifact, built.artifact);
   assert.equal(Object.isFrozen(second.artifact), true);
   assert.equal(Object.isFrozen(second.artifact.boundary.trackedReceipts), true);
+  assert.deepEqual(second.currentCompatibility, built.currentCompatibility);
+  assert.equal(Object.isFrozen(second.currentCompatibility), true);
 });
 
 test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[7], () => {
@@ -365,6 +385,22 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[7], () => {
       ...sourcePolicyInput,
       applicationSource: replaceOnce(
         sourcePolicyInput.applicationSource,
+        "function projectedRowDrop(event: DragEvent<HTMLButtonElement>)",
+        "function uncheckedRowDrop(event: DragEvent<HTMLButtonElement>)",
+      ),
+    },
+    {
+      ...sourcePolicyInput,
+      applicationSource: replaceOnce(
+        sourcePolicyInput.applicationSource,
+        "sourceNodeId: result.nodeId",
+        "sourceNodeId: selection?.sourceNodeId ?? result.nodeId",
+      ),
+    },
+    {
+      ...sourcePolicyInput,
+      applicationSource: replaceOnce(
+        sourcePolicyInput.applicationSource,
         "applyAuthoringNodeDelete(document, referenceCatalog, route, selection)",
         "applyAuthoringSlotEdit(document, referenceCatalog, route, selection as never, {} as never)",
       ),
@@ -397,8 +433,24 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[7], () => {
       ...sourcePolicyInput,
       applicationCss: replaceOnce(
         sourcePolicyInput.applicationCss,
-        "margin-block: -1.125rem",
         "margin-block: 0",
+        "margin-block: -1.125rem",
+      ),
+    },
+    {
+      ...sourcePolicyInput,
+      applicationCss: replaceOnce(
+        sourcePolicyInput.applicationCss,
+        ".layerNode[data-row-drop-position] {\n  z-index: 4;",
+        ".layerNode[data-row-drop-disabled] {\n  z-index: 4;",
+      ),
+    },
+    {
+      ...sourcePolicyInput,
+      applicationCss: replaceOnce(
+        sourcePolicyInput.applicationCss,
+        ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
+        ".componentSlotTarget {\n  position: relative;\n  top: 0;",
       ),
     },
   ];

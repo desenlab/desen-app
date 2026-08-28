@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 176,
+  PROOF_UNIT: 178,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
-  FROZEN_INPUT: 132,
-  PACKAGE_OR_APPLICATION: 460,
-  SHARED_PROOF_INFRASTRUCTURE: 213,
-  PROJECT_DOCUMENTATION: 124,
+  FROZEN_INPUT: 133,
+  PACKAGE_OR_APPLICATION: 464,
+  SHARED_PROOF_INFRASTRUCTURE: 215,
+  PROJECT_DOCUMENTATION: 125,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1192 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1202 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1192 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1192);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1202);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 176);
+  assert.equal(proofEntries.length, 178);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -428,6 +428,16 @@ test("the reviewed M09 successor preserves the historical I07-04 ownership proje
     "scripts/lib/desen-app-named-slot-authoring-proof.mjs",
     "scripts/verify-desen-app-named-slot-authoring.mjs",
     "tests/desen-app-named-slot-authoring.test.mjs",
+    "apps/desen-app/src/authoring-state.ts",
+    "apps/desen-app/src/state-panel.tsx",
+    "apps/desen-app/test/authoring-state.test.ts",
+    "apps/desen-app/test/state-panel.test.tsx",
+    "docs/proof/DESEN-APP-STATE-BINDING-EDITOR.md",
+    "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json",
+    "scripts/generate-desen-app-state-binding-editor-proof.mjs",
+    "scripts/lib/desen-app-state-binding-editor-proof.mjs",
+    "scripts/verify-desen-app-state-binding-editor.mjs",
+    "tests/desen-app-state-binding-editor.test.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);

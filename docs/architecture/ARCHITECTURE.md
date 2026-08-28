@@ -714,7 +714,9 @@ selection outside that managed subtree, and M09-T05 adds schema-derived primitiv
 controls through public Editor Core and Publisher boundaries. M09-T06 consumes the recursive
 control plan with closed-object controls and an explicit structured-JSON fallback without crossing
 the App-owned Inspector boundary. M09-T07 adds Catalog-declared named-slot insertion, move,
-reorder, and deletion through the same public mutation and publication boundaries.
+reorder, and deletion through the same public mutation and publication boundaries. M09-T08 adds a
+bounded surface-local primitive-state editor and exact direct local-state prop bindings without
+widening the literal Inspector parser or managed runtime subtree.
 
 The first slice owns three exact route forms: `/projects`, `/projects/:projectId`, and
 `/projects/:projectId/surfaces/:surfaceId`. The bare root is replaced with `/projects`; app-owned
@@ -929,11 +931,13 @@ admitted child from a behavior-owned slot retains that exact own slot key with `
 
 Drag remains an application boundary rather than protocol or runtime authority. The browser drag
 payload is inert and never read to authorize an edit; the App-owned drag intent and current model
-determine the subject and destination. Slot boundaries expand beyond their narrow visual line and
-overlap adjacent row halves, while depth-counted enter/leave state keeps hover feedback stable over
-nested descendants. Components renders one explicit compatible slot target, or disables component
-dragging and presents a guide back to Layers when no slot is selected. Native keyboard and click
-controls preserve the same insertion and placement paths.
+determine the subject and destination. Slot boundaries remain stable and non-overlapping, while
+the upper and lower halves of visible layer rows expose the nearest before/after placement without
+moving the tree during a drag. Components keeps one explicit compatible slot target sticky above
+its scrolling list, exposes drag grips and click guidance, or disables component dragging and
+presents a guide back to Layers when no slot is selected. Native keyboard and click controls
+preserve the same insertion and placement paths. Successful insertion selects the exact new node
+so the existing deletion boundary is immediately available.
 
 All named-slot chrome, deletion controls, drag intent, and focus state remain App-owned siblings
 outside the managed Runtime React capability subtree. No component geometry, hit testing, canvas
@@ -948,9 +952,41 @@ named-slot suite passes 70/70, the complete App suite passes 151/151, the indepe
 passes 9/9, and the task verifier passes. These receipts make no required-gate, global-CI-count, or
 hosted-CI claim.
 
-M09-T07 is `DONE`, but P-08 remains `NOT_PROVEN`. Dynamic state and bindings, events and actions,
-Design/Run, durable save/open, control-plane publication and activation, and real-browser E2E
-remain with M09-T08 through M09-T14 and M10-T01.
+M09-T07 itself adds no state/binding, event/action, Design/Run, persistence, publication,
+activation, or real-browser E2E authority. P-08 remains `NOT_PROVEN`; the bounded state/binding
+boundary follows in M09-T08, while the remaining capabilities stay with M09-T09–M09-T14 and
+M10-T01.
+
+M09-T08 keeps state declaration editing separate from ValueSpec binding. The State view derives
+the exact selected surface's declaration map only after the Source and Catalog pass the existing
+authoring admission boundary. A bounded data-only traversal counts direct `$ref` reads and
+`state.set` / `state.toggle` write targets without treating declaration initial values as
+executable bindings. Primitive creation is restricted to String, Boolean, Number, and Integer with
+directly addressable names. Existing richer or protocol-valid non-addressable declarations remain
+visible but cannot be rewritten by the primitive controls. Deletion never cascades and is refused
+for a declaration with a current use; complete continuous validation remains the final authority.
+
+A primitive type transition stages the public Editor Core schema and initial commands on one
+private candidate and validates only its complete endpoint. This avoids publishing an intermediate
+schema/initial mismatch while preserving the immutable input document on every failure. The App
+then runs the same Publisher preflight used by property and slot edits before replacing the
+session-local `{document, preview}` pair. A rejected command, validation result, or preview leaves
+both Source and working canvas unchanged.
+
+Direct property binding has its own exact edit boundary. It re-derives the route, selection, Source
+node, Catalog control, local declaration, and current dynamic form before constructing
+`{ $ref: "state.<name>" }` through the public owner-prop command. Compatibility is deliberately
+conservative and primitive: String and Boolean match exactly, Integer may feed Number, Number may
+not feed Integer, and enum state requires a proven subset of the control options. A direct local
+binding may be changed or detached to its validated state initial. Operation/event/resource/item/
+context/environment refs, fallback-bearing refs, tokens, formats, nested dynamic structures, and
+repeat/resource binding UI remain visible but read-only.
+
+State and binding chrome remains in App-owned panels outside the disabled Runtime React fieldset
+and managed capability subtree. M09-T08 does not add event/action editing, interactive Design/Run,
+durable save/open, diagnostics navigation, control-plane publication, channel activation, or a
+real-browser end-to-end claim. P-08 and PF-025 therefore remain open; M09-T09 owns the next
+event/action authoring boundary.
 
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,

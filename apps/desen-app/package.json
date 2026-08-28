@@ -17,7 +17,8 @@
     "test:selection": "vitest run test/authoring-selection.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
     "test:shell": "vitest run test/project-navigation.test.ts test/application.test.tsx test/main-lifecycle.test.tsx",
     "test:structured-inspector": "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
-    "test:named-slots": "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx"
+    "test:named-slots": "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+    "test:state-bindings": "vitest run test/structured-json.test.ts test/authoring-state.test.ts test/authoring-inspector.test.ts test/state-panel.test.tsx test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx"
   },
   "dependencies": {
     "@desen/catalog-sdk": "workspace:*",

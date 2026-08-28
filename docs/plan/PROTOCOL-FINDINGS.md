@@ -565,7 +565,11 @@ This file records implementation discoveries without changing the frozen DESEN 0
   detached opaque JSON, but hints cannot change property existence, required state, value type, or
   enum options. The reference profile maps primitive and closed-object schemas conservatively and
   emits an explicit `structured-json` fallback for every unsupported, open, ambiguous, or
-  over-budget subtree. Actual widgets and hint interpretation remain editor responsibilities.
+  over-budget subtree. M09-T08 applies the same boundary to local-state binding compatibility: the
+  Inspector derives eligible direct bindings only from the authenticated Catalog `propsSchema` and
+  the state declaration schema, while opaque authoring hints cannot widen type compatibility or
+  make an advanced dynamic value editable. Actual widgets and hint interpretation remain editor
+  responsibilities. PF-025 therefore remains `OPEN`.
 - Future action: Define a versioned control-hint vocabulary and deterministic precedence rules in
   a later protocol or profile revision, with `propsSchema` remaining the validity authority.
 
@@ -3286,6 +3290,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
   rejection, stable-ID preservation, and complete post-edit validation are re-derived for every
   request. Browser drag data is inert rather than command authority; accepted edits still pass the
   public Editor Core transition and Publisher preflight before one atomic preview replacement.
+  The subsequent App compatibility patch removes overlapping boundary hit areas, maps each whole
+  row's top and bottom halves to the adjacent deterministic boundary, retains the selected
+  Components target across the interaction, and auto-selects a newly inserted component so the
+  already-safe Delete action is immediately available. These are App-owned input and selection
+  mechanics only; they grant no additional command authority. Native real-browser drag E2E remains
+  open.
   This closes the product's conservative authoring profile without changing DESEN 0.1.0 bytes or
   making the editor-only position rules interoperable protocol commands.
 - Future action: The current Editor Core and Desen App profiles must retain the same exact-command,
@@ -3412,12 +3422,24 @@ This file records implementation discoveries without changing the frozen DESEN 0
   `profile.name`. Dotted declarations remain structurally legal, while these commands make no
   reachability claim and perform no longest-prefix or backtracking lookup.
 
-- Future action: M08-T06 owns event maps and every closed action, guard, payload, input, and nested
-  success/failure action edit. M08-T07 must prove authoring isolation and unknown-extension
-  preservation, M08-T09 must add continuous semantic validation and invalid-node mapping, and
-  M08-T10 must independently prove cross-command determinism and the React/DOM boundary. A later
-  protocol revision should align state-name and reference grammars and standardize these editor
-  transitions only if interoperable command logs become normative.
+  M09-T08 consumes this profile in Desen App without widening it. A deterministic surface-local
+  projection exposes only directly addressable primitive declarations for add, initial-value
+  update, and unused delete. Usage is a bounded conservative scan, and deletion rechecks the exact
+  current Source so an in-use or stale declaration fails without partial state. Unsupported and
+  non-preset declaration schemas remain visible but read-only.
+
+  The Inspector edits only exact direct, Catalog-compatible `state.<name>` bindings. It may attach
+  or change that reference, or detach it by restoring the declaration's validated primitive initial
+  value. Runtime namespaces, fallback, token, format, nested references, and other advanced dynamic
+  shapes remain read-only. State schema and initial capture stays inert data, including `$`-shaped
+  members; successful edits still require the public Editor Core transition, complete continuous
+  validation, and Publisher preflight before one atomic session-local `{document, preview}`
+  replacement.
+
+- Future action: M09-T09 owns the App's sign-in event and closed-action editor UI. Design/Run,
+  durable persistence, diagnostics navigation, browser E2E, publication, and activation remain
+  later owners. A later protocol revision should align state-name and reference grammars and
+  standardize these editor transitions only if interoperable command logs become normative.
 
 ## PF-083 — Event maps and recursively nested closed actions need exact editor lifecycle and addressing
 
