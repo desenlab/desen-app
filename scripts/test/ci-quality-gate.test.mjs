@@ -24,6 +24,243 @@ import {
 } from "../run-ci-quality-gate.mjs";
 
 const WORKSPACE_ROOT = resolve(import.meta.dirname, "../..");
+const CI_02_LOCAL_BASELINE = Object.freeze([
+  "pnpm format:check",
+  "pnpm lint",
+  "pnpm typecheck",
+  "pnpm build",
+  "pnpm boundaries",
+  "node scripts/ci/verify-proof-reader-checkpoints.mjs",
+]);
+const CI_02_FIRST_HOSTED_RECEIPT = Object.freeze({
+  headSha: "921fd54c406f22fb6da25b0fdd29598ac8950750",
+  runId: "33196876164",
+  jobId: "98936152886",
+  duration: "14m53s",
+  jobUrl: "https://github.com/desenlab/desen-app/actions/runs/33196876164/job/98936152886",
+});
+const CI_02_FIRST_HOSTED_LINK = `[run ${CI_02_FIRST_HOSTED_RECEIPT.runId} / job ${CI_02_FIRST_HOSTED_RECEIPT.jobId}](${CI_02_FIRST_HOSTED_RECEIPT.jobUrl})`;
+const CI_02_FIRST_HOSTED_RECEIPT_MARKERS = Object.freeze({
+  "docs/plan/TASKS.md": `The implementation candidate at \`${CI_02_FIRST_HOSTED_RECEIPT.headSha}\` passed PR #56's hosted \`Quality gate\` in ${CI_02_FIRST_HOSTED_LINK} in \`${CI_02_FIRST_HOSTED_RECEIPT.duration}\`.`,
+  "PROJECT-STATUS.md": `The implementation candidate at \`${CI_02_FIRST_HOSTED_RECEIPT.headSha}\` passed PR #56's hosted \`Quality gate\` in ${CI_02_FIRST_HOSTED_LINK} in \`${CI_02_FIRST_HOSTED_RECEIPT.duration}\`.`,
+  "docs/plan/START-HERE.tr.md": `\`${CI_02_FIRST_HOSTED_RECEIPT.headSha}\` başındaki uygulama adayı, PR #56'nın hosted \`Quality gate\` koşusunu ${CI_02_FIRST_HOSTED_LINK} içinde 14 dakika 53 saniyede geçti.`,
+});
+const CI_02_CONDITIONAL_CLOSURE_MARKERS = Object.freeze({
+  "docs/plan/TASKS.md": Object.freeze([
+    "The `DONE` row in this unmerged pull request is a conditional closure candidate",
+    "Canonical CI-02 remains `IN_PROGRESS` until the hosted `Quality gate` attached to this exact current head passes.",
+  ]),
+  "PROJECT-STATUS.md": Object.freeze([
+    "Conditional operational completion: CI-02's `DONE` entry in this unmerged change is a closure candidate; it is not yet canonical.",
+    "Canonical CI-02 remains `IN_PROGRESS` until the hosted `Quality gate` attached to this exact current head passes.",
+  ]),
+  "README.md": Object.freeze([
+    "**CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending",
+  ]),
+  "docs/plan/START-HERE.tr.md": Object.freeze([
+    "CI-02'nin bu merge edilmemiş değişiklikteki `DONE` kaydı koşullu bir kapanış adayıdır.",
+    "Tam güncel PR head'indeki hosted `Quality gate` geçene kadar kanonik CI-02 durumu `IN_PROGRESS` kalır",
+  ]),
+});
+const CI_02_BASELINE_SECTIONS = Object.freeze({
+  "AGENTS.md": "## Per-task quality contract (CI-02)",
+  "CONTRIBUTING.md": "## Validation",
+  "docs/standards/CI-QUALITY-GATE.md": "## CI-02 per-task completion contract",
+});
+const CI_02_DOCUMENT_MARKERS = Object.freeze({
+  "AGENTS.md": Object.freeze([
+    "## Per-task quality contract (CI-02)",
+    CI_02_LOCAL_BASELINE.join("\n"),
+    "This baseline is non-authoritative early feedback",
+    "task-specific verifier or focused positive and relevant negative tests",
+    "merged or reported complete only after the hosted `Quality gate` passes for the exact current",
+    "Any new commit invalidates that result.",
+    "The full `pnpm check` remains the local exhaustive compatibility and gate-closure command for G",
+    "identity and impact authority, never cached success",
+  ]),
+  "CONTRIBUTING.md": Object.freeze([
+    "For an ordinary task, run the bounded local baseline before review:",
+    CI_02_LOCAL_BASELINE.join("\n"),
+    "and relevant negative tests are still mandatory.",
+    "passing hosted `Quality gate` attached to the exact current pull-request head",
+    "Use the exhaustive local `pnpm check` compatibility command for G closure, an explicit local",
+    "they never cache success or replace fresh selected workloads",
+  ]),
+  "docs/standards/CI-QUALITY-GATE.md": Object.freeze([
+    "## CI-02 per-task completion contract",
+    "CI-02 is an explicitly user-authorized operational task.",
+    "The baseline is deliberately non-authoritative early feedback.",
+    "exact current pull-request head; any new commit invalidates the earlier result",
+    "`pnpm check` remains the local exhaustive compatibility and gate-closure command for G closure, an",
+    "and impact authority, never cached success",
+    "CI-02 does not add a local affected selector.",
+    "The hosted dispatcher and workflow are unchanged.",
+    "I07-05 and the legacy rollback path remain unchanged.",
+  ]),
+  "docs/adr/0011-modular-proof-infrastructure.md": Object.freeze([
+    "### CI-02 operational overlay — per-task quality contract",
+    "CI-02 separates quick developer feedback from completion authority.",
+    "Merge or a completion report requires the hosted `Quality gate` to pass on the exact current",
+    "never cached success; the selected hosted workloads always run fresh",
+    "I07-05 still owns legacy retirement",
+  ]),
+  "docs/plan/START-HERE.tr.md": Object.freeze([
+    "CI-02'nin sınırlı yerel temel kontrolleri",
+    "Mühür/checkpoint yalnızca kimlik ve etki otoritesidir; başarıyı",
+    "CI-02'nin bu merge edilmemiş",
+    "Bu makbuz yalnızca önceki head'i kanıtlar ve yeni head'e otorite",
+  ]),
+  "docs/plan/TASKS.md": Object.freeze([
+    "| CI-02  | DONE",
+    "I07-04, explicit user authorization",
+    "`CI-02` is a separate explicitly authorized operational task",
+    "The `DONE` row in this unmerged pull",
+    "Canonical CI-02 remains `IN_PROGRESS` until the hosted `Quality gate` attached to this exact",
+    "I07-05 plus the legacy rollback path unchanged",
+  ]),
+  "PROJECT-STATUS.md": Object.freeze([
+    "Conditional operational completion: CI-02's `DONE` entry in this unmerged change",
+    "That receipt proves only that prior exact head and does not authorize this new head.",
+    "Canonical CI-02 remains `IN_PROGRESS` until the hosted `Quality gate` attached to this exact",
+    "changes no hosted dispatcher/workflow",
+  ]),
+  "README.md": Object.freeze([
+    "**CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending",
+  ]),
+  "scripts/ci/README.md": Object.freeze([
+    "CI-02 adds only a per-task completion policy.",
+    "Checkpoints and seals authenticate identity and impact, never",
+    "and leaves I07-05 plus the manual legacy",
+  ]),
+});
+
+async function currentCi02ContractDocuments() {
+  return Object.fromEntries(
+    await Promise.all(
+      Object.keys(CI_02_DOCUMENT_MARKERS).map(async (relativePath) => [
+        relativePath,
+        await readFile(resolve(WORKSPACE_ROOT, relativePath), "utf8"),
+      ]),
+    ),
+  );
+}
+
+function ci02ContractFailure(message) {
+  throw new Error(`CI-02 ${message}`);
+}
+
+function normalizeWhitespace(value) {
+  return value.replace(/\s+/gu, " ").trim();
+}
+
+function assertNormalizedMarkerExactlyOnce(relativePath, source, marker, failureKind) {
+  if (normalizeWhitespace(source).split(marker).length - 1 !== 1) {
+    ci02ContractFailure(`${failureKind} drifted in ${relativePath}.`);
+  }
+}
+
+function validateCi02BaselineBlocks(documents) {
+  for (const [relativePath, heading] of Object.entries(CI_02_BASELINE_SECTIONS)) {
+    const source = documents[relativePath];
+    const headingStart = source.indexOf(`${heading}\n`);
+    if (headingStart === -1) {
+      ci02ContractFailure(`baseline section drifted in ${relativePath}.`);
+    }
+    const sectionStart = headingStart + heading.length + 1;
+    const nextHeading = source.indexOf("\n## ", sectionStart);
+    const section = source.slice(sectionStart, nextHeading === -1 ? source.length : nextHeading);
+    const bashBlocks = [...section.matchAll(/```bash\n([\s\S]*?)\n```/gu)];
+    if (bashBlocks.length !== 1) {
+      ci02ContractFailure(`baseline command block drifted in ${relativePath}.`);
+    }
+    const commands = bashBlocks[0][1].split("\n");
+    if (JSON.stringify(commands) !== JSON.stringify(CI_02_LOCAL_BASELINE)) {
+      ci02ContractFailure(`baseline command block drifted in ${relativePath}.`);
+    }
+  }
+  return Object.keys(CI_02_BASELINE_SECTIONS).length;
+}
+
+function validateCi02FirstHostedReceipt(documents) {
+  for (const [relativePath, marker] of Object.entries(CI_02_FIRST_HOSTED_RECEIPT_MARKERS)) {
+    assertNormalizedMarkerExactlyOnce(
+      relativePath,
+      documents[relativePath],
+      marker,
+      "hosted receipt",
+    );
+  }
+  return Object.keys(CI_02_FIRST_HOSTED_RECEIPT_MARKERS).length;
+}
+
+function validateCi02ConditionalClosureStatuses(documents) {
+  const taskStatuses = [
+    ...documents["docs/plan/TASKS.md"].matchAll(/^\| CI-02\s+\|\s+([A-Z_]+)\s+\|/gmu),
+  ].map((match) => match[1]);
+  if (taskStatuses.length !== 1 || taskStatuses[0] !== "DONE") {
+    ci02ContractFailure("conditional-closure status drifted in docs/plan/TASKS.md.");
+  }
+
+  for (const [relativePath, markers] of Object.entries(CI_02_CONDITIONAL_CLOSURE_MARKERS)) {
+    for (const marker of markers) {
+      assertNormalizedMarkerExactlyOnce(
+        relativePath,
+        documents[relativePath],
+        marker,
+        "conditional-closure status",
+      );
+    }
+  }
+
+  const statusDocuments = Object.keys(CI_02_CONDITIONAL_CLOSURE_MARKERS);
+  const unconditionalDonePatterns = [
+    /^CI-02 is `DONE`\.\s*$/imu,
+    /^\*\*CI-02:\*\*\s+`DONE`\s*$/imu,
+    /^CI-02 `DONE` durumundadır\.\s*$/imu,
+  ];
+  for (const relativePath of statusDocuments) {
+    if (unconditionalDonePatterns.some((pattern) => pattern.test(documents[relativePath]))) {
+      ci02ContractFailure(`conditional-closure status drifted in ${relativePath}.`);
+    }
+    if (
+      /^The prior receipt (?:authorizes|validates) (?:this|the) (?:new|current) head\.\s*$/imu.test(
+        documents[relativePath],
+      ) ||
+      /^Önceki makbuz (?:bu|yeni|güncel) head'e otorite verir\.\s*$/imu.test(
+        documents[relativePath],
+      )
+    ) {
+      ci02ContractFailure(`prior-receipt authority drifted in ${relativePath}.`);
+    }
+  }
+  return 4;
+}
+
+function validateCi02ContractDocuments(documents) {
+  assert.deepEqual(Object.keys(documents), Object.keys(CI_02_DOCUMENT_MARKERS));
+  let markerCount = 0;
+  for (const [relativePath, markers] of Object.entries(CI_02_DOCUMENT_MARKERS)) {
+    const source = documents[relativePath];
+    assert.equal(typeof source, "string", `CI-02 contract document missing: ${relativePath}`);
+    for (const marker of markers) {
+      markerCount += 1;
+      if (source.split(marker).length - 1 !== 1) {
+        throw new Error(`CI-02 contract marker drifted in ${relativePath}: ${marker}`);
+      }
+    }
+  }
+  const baselineBlockCount = validateCi02BaselineBlocks(documents);
+  const hostedReceiptDocumentCount = validateCi02FirstHostedReceipt(documents);
+  const conditionalClosureStatusDocumentCount = validateCi02ConditionalClosureStatuses(documents);
+  return Object.freeze({
+    documentCount: Object.keys(CI_02_DOCUMENT_MARKERS).length,
+    markerCount,
+    localBaselineCommandCount: CI_02_LOCAL_BASELINE.length,
+    baselineBlockCount,
+    hostedReceiptDocumentCount,
+    conditionalClosureStatusDocumentCount,
+  });
+}
 
 async function currentInventory() {
   const packageJson = JSON.parse(await readFile(resolve(WORKSPACE_ROOT, "package.json"), "utf8"));
@@ -112,6 +349,119 @@ test("the current repository exactly matches the reviewed live proof inventory",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
     workspacePackageGlobs: ["apps/*", "packages/*"],
   });
+});
+
+test("CI-02 pins the bounded baseline, first hosted receipt, and conditional closure", async () => {
+  assert.deepEqual(validateCi02ContractDocuments(await currentCi02ContractDocuments()), {
+    documentCount: 9,
+    markerCount: 46,
+    localBaselineCommandCount: 6,
+    baselineBlockCount: 3,
+    hostedReceiptDocumentCount: 3,
+    conditionalClosureStatusDocumentCount: 4,
+  });
+});
+
+test("CI-02 rejects baseline, evidence, completion, freshness, or rollback wording drift", async () => {
+  const documents = await currentCi02ContractDocuments();
+  const mutations = [
+    [
+      "README.md",
+      "**CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`",
+      "**CI-02:** `DONE`",
+    ],
+    ["AGENTS.md", "pnpm boundaries", "pnpm test"],
+    [
+      "docs/standards/CI-QUALITY-GATE.md",
+      "The baseline is deliberately non-authoritative early feedback.",
+      "The baseline completes the task.",
+    ],
+    [
+      "CONTRIBUTING.md",
+      "and relevant negative tests are still mandatory.",
+      "task-specific verification is optional",
+    ],
+    [
+      "docs/adr/0011-modular-proof-infrastructure.md",
+      "Merge or a completion report requires the hosted `Quality gate` to pass on the exact current",
+      "Merge may use any earlier hosted result",
+    ],
+    [
+      "AGENTS.md",
+      "identity and impact authority, never cached success",
+      "identity, impact, and cached success authority",
+    ],
+    [
+      "scripts/ci/README.md",
+      "and leaves I07-05 plus the manual legacy",
+      "retires I07-05 and the manual legacy rollback path",
+    ],
+  ];
+
+  for (const [relativePath, marker, replacement] of mutations) {
+    assert.equal(documents[relativePath].split(marker).length - 1, 1, `${relativePath}: ${marker}`);
+    const drifted = {
+      ...documents,
+      [relativePath]: documents[relativePath].replace(marker, replacement),
+    };
+    assert.throws(() => validateCi02ContractDocuments(drifted), /CI-02 contract marker drifted/u);
+  }
+
+  for (const [marker, replacement] of [
+    [CI_02_FIRST_HOSTED_RECEIPT.headSha, "0000000000000000000000000000000000000000"],
+    [CI_02_FIRST_HOSTED_RECEIPT.runId, "33196876165"],
+    [CI_02_FIRST_HOSTED_RECEIPT.jobId, "98936152887"],
+    [CI_02_FIRST_HOSTED_RECEIPT.duration, "14m52s"],
+  ]) {
+    assert.ok(documents["docs/plan/TASKS.md"].includes(marker));
+    const driftedReceipt = {
+      ...documents,
+      "docs/plan/TASKS.md": documents["docs/plan/TASKS.md"].replace(marker, replacement),
+    };
+    assert.throws(
+      () => validateCi02ContractDocuments(driftedReceipt),
+      /CI-02 hosted receipt drifted/u,
+    );
+  }
+
+  const baselineTerminator = `${CI_02_LOCAL_BASELINE.at(-1)}\n\`\`\``;
+  assert.equal(documents["AGENTS.md"].split(baselineTerminator).length - 1, 1);
+  const extraCommand = {
+    ...documents,
+    "AGENTS.md": documents["AGENTS.md"].replace(
+      baselineTerminator,
+      `${CI_02_LOCAL_BASELINE.at(-1)}\npnpm test\n\`\`\``,
+    ),
+  };
+  assert.throws(
+    () => validateCi02ContractDocuments(extraCommand),
+    /CI-02 baseline command block drifted/u,
+  );
+
+  for (const [relativePath, contradiction] of [
+    ["docs/plan/TASKS.md", "\n| CI-02 | DONE | I07-04 | contradictory | none |\n"],
+    ["PROJECT-STATUS.md", "\nCI-02 is `DONE`.\n"],
+    ["README.md", "\n**CI-02:** `DONE`\n"],
+    ["docs/plan/START-HERE.tr.md", "\nCI-02 `DONE` durumundadır.\n"],
+  ]) {
+    const unconditionalDone = {
+      ...documents,
+      [relativePath]: `${documents[relativePath]}${contradiction}`,
+    };
+    assert.throws(
+      () => validateCi02ContractDocuments(unconditionalDone),
+      /CI-02 conditional-closure status drifted/u,
+    );
+  }
+
+  const reusedPriorReceipt = {
+    ...documents,
+    "docs/plan/TASKS.md": `${documents["docs/plan/TASKS.md"]}\nThe prior receipt authorizes this new head.\n`,
+  };
+  assert.throws(
+    () => validateCi02ContractDocuments(reusedPriorReceipt),
+    /CI-02 prior-receipt authority drifted/u,
+  );
 });
 
 test("inventory validation rejects a missing verifier file", async () => {

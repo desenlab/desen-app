@@ -14,7 +14,9 @@
   observation, affected promotion, current-reader cleanup, or legacy retirement was claimed at
   that checkpoint. I07-04 is now complete: its independent campaign reached `20 / 20` with zero
   false negatives, required affected execution passed its hosted canary, and G07 is `DONE`.
-  Legacy retirement remains assigned to I07-05
+  CI-02 is an explicitly user-authorized operational overlay that defines bounded local task
+  feedback without changing hosted selection or execution authority. Legacy retirement remains
+  assigned to I07-05.
 
 ## Context
 
@@ -374,6 +376,25 @@ subset without cached success. The exact run, job, revision, and receipt identit
 `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546` authenticates 25 frozen
 artifacts and 50 current readers. Every one of the 17 G07-due debt entries is `CLOSED`;
 `DEBT-I07-007` remains `OPEN` for Phase 5. Phase 4, I07-04, and G07 are complete.
+
+### CI-02 operational overlay — per-task quality contract
+
+CI-02 separates quick developer feedback from completion authority. An ordinary `T` task runs the
+exact bounded local sequence documented in `AGENTS.md`: format check, lint, typecheck, build,
+dependency boundaries, and current proof-reader checkpoint verification. Its exact task-specific
+verifier and focused positive and relevant negative tests remain mandatory. This local sequence is
+non-authoritative and cannot replace a hosted result.
+
+Merge or a completion report requires the hosted `Quality gate` to pass on the exact current
+pull-request head; any later commit invalidates that result. `pnpm check` remains the local
+exhaustive compatibility and gate-closure command for G closure, an explicit local manual audit,
+or an explicit request. Hosted `main`, release, manual audit, and unsafe or untrusted boundaries
+remain fresh exhaustive runs. Frozen artifacts, checkpoints, and seals establish identity and
+impact, never cached success; the selected hosted workloads always run fresh.
+
+This overlay adds no local affected selector and changes no hosted dispatcher, workflow, workload,
+or rollback authority. I07-05 still owns legacy retirement, and the manual legacy rollback remains
+available until its existing gates close.
 
 ### Phase 5 — I07-05: legacy retirement
 

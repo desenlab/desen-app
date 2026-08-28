@@ -42,6 +42,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | ID     | Status      | Depends on                           | Deliverable                                                                                                                                       | Evidence                                                           |
 | ------ | ----------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | CI-01  | DONE        | M04-T02, explicit user authorization | Secure single-pass CI orchestration that preserves every proof while removing recursive repetition                                                | `docs/proof/baselines/ci-01-single-pass.json`                      |
+| CI-02  | DONE        | I07-04, explicit user authorization  | Bounded non-authoritative per-task local feedback plus exact PR-head hosted completion authority; exhaustive compatibility coverage retained      | `AGENTS.md`, `scripts/test/ci-quality-gate.test.mjs`, ADR 0011     |
 | I07-01 | DONE        | M07-T01, explicit user authorization | Current-reader checkpoint, machine-enforced cleanup register, and a non-authoritative `SHADOW + EXHAUSTIVE` modular candidate                     | `docs/proof/baselines/i07-01-modular-proof-shadow.json`            |
 | I07-02 | DONE        | I07-01                               | Exact legacy/modular equivalence, shared-state classification, and required-CI cutover to `REQUIRED + EXHAUSTIVE` execution                       | `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json` |
 | I07-03 | DONE        | I07-02                               | Fail-closed `SHADOW + AFFECTED` selector with complete tracked-path ownership, unknown-to-exhaustive fallback, and a frozen observation threshold | `docs/proof/baselines/i07-03-affected-selector-shadow.json`        |
@@ -52,6 +53,31 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 dependency graph, milestone totals, or proof-gate counts. It must keep the existing task-specific
 commands available, run every frozen-snapshot, proof-artifact, negative, mutation, and boundary
 check from fresh inputs, and must not trust path filters or cached proof success.
+
+`CI-02` is a separate explicitly authorized operational task and does not change the 145-task
+implementation total or any proof-gate count. It makes the exact six-command local baseline
+non-authoritative, keeps the exact task-specific verifier and focused positive/relevant negative
+tests mandatory, and requires the hosted `Quality gate` on the exact current pull-request head
+before merge or a completion report. The full `pnpm check` remains the local exhaustive
+compatibility and gate-closure command for G closure, an explicit local manual audit, or an
+explicit request. Hosted `main`, release, manual audit, and unsafe/untrusted boundaries remain
+fresh exhaustive runs. Checkpoints and seals remain identity/impact authority rather than cached
+success, and selected hosted workloads remain fresh. CI-02 adds no local affected selector, changes
+no hosted dispatcher/workflow, and leaves I07-05 plus the legacy rollback path unchanged.
+
+Local CI-02 evidence is the passing six-command bounded baseline, the 2/2 focused CI-02 contract
+tests, unchanged 45-checkpoint/41-artifact/82-reader authority, passing infrastructure-debt and
+I07-04 promotion verifiers, and clean formatting. The complete legacy CI contract file passes
+28/28 on its final local rerun. One earlier attempt observed this host intermittently deny the
+pre-existing process-group probe `process.kill(-pid, 0)` with `EPERM`; the test remained unchanged
+and enabled and passed on the final rerun. The implementation candidate at
+`921fd54c406f22fb6da25b0fdd29598ac8950750` passed PR #56's hosted `Quality gate` in
+[run 33196876164 / job 98936152886](https://github.com/desenlab/desen-app/actions/runs/33196876164/job/98936152886)
+in `14m53s`. That receipt proves only that prior exact head. The `DONE` row in this unmerged pull
+request is a conditional closure candidate, not evidence that the prior receipt authorizes this new
+head. Canonical CI-02 remains `IN_PROGRESS` until the hosted `Quality gate` attached to this exact
+current head passes. If it passes, this same unchanged commit becomes the authoritative `DONE`
+revision; until then merge and a completion report remain blocked.
 
 `I07-01` and `I07-02` preceded `M07-T02` in the working order without changing the 145-task
 implementation total or proof-gate counts. Both infrastructure tasks are complete. I07-02 froze

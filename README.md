@@ -26,7 +26,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09:** `██████░░░░░░░░` **6 / 14 tasks complete (43%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T07`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T07`
 
 [View the detailed task board](docs/plan/TASKS.md)
 

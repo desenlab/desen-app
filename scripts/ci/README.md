@@ -6,6 +6,15 @@ required dispatcher defined here. An authenticated eligible same-repository pull
 fresh affected scope; every unsafe boundary, plus `main`, release, and manual audit, remains fresh
 exhaustive. The CI-01 sequential runner remains available only through explicit manual rollback.
 
+CI-02 adds only a per-task completion policy. Its exact bounded local baseline is documented in
+`AGENTS.md` and is non-authoritative; the exact task-specific verifier and focused
+positive/relevant negative tests remain mandatory. Merge or a completion report additionally
+requires the hosted `Quality gate` to pass on the exact current pull-request head, and a later
+commit invalidates that result. Checkpoints and seals authenticate identity and impact, never
+cached success, so every selected hosted workload remains fresh. CI-02 adds no local affected
+selector, changes no hosted dispatcher or workflow, and leaves I07-05 plus the manual legacy
+rollback path unchanged.
+
 ## Trust layers
 
 1. Frozen task artifacts preserve the exact task-time claim and nonclaim boundary.
