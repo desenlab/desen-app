@@ -3,12 +3,13 @@ import {
   deleteDesenEditorOwnerProp,
   setDesenEditorOwnerProp,
 } from "@desen/editor-core";
+import { canonicalizeJson, canonicalizeJsonBytes, parseJsonPointer } from "@desen/protocol";
 
 import { prepareCatalogAuthoringModel } from "./authoring-data.js";
 import { projectAuthoringSelection } from "./authoring-selection.js";
 
-import type { ComponentInspectorControl, JsonPrimitive } from "@desen/catalog-sdk";
-import type { DesenEditorDocument } from "@desen/editor-core";
+import type { ComponentInspectorControl, JsonPrimitive, JsonValue } from "@desen/catalog-sdk";
+import type { DesenEditorContentValue, DesenEditorDocument } from "@desen/editor-core";
 import type {
   AuthoringLayerNode,
   CatalogAuthoringModel,
@@ -29,19 +30,24 @@ export type AuthoringInspectorValueState =
   | Readonly<{ readonly kind: "absent" }>
   | Readonly<{ readonly kind: "literal"; readonly value: JsonPrimitive }>
   | Readonly<{ readonly kind: "dynamic"; readonly reference: string | null }>
-  | Readonly<{ readonly kind: "structured" }>;
+  | Readonly<{ readonly kind: "structured"; readonly value: JsonValue }>;
 
 /** One inspector row joined from an authoritative schema descriptor and current Source value. */
 export interface AuthoringInspectorField {
+  readonly children: readonly AuthoringInspectorField[];
+  /** Whether this exact value subtree contains protocol-dynamic authority. */
+  readonly containsDynamicValue: boolean;
   readonly control: ComponentInspectorControl;
   readonly description: string | undefined;
   readonly label: string;
+  readonly qualifiedLabel: string;
   readonly value: AuthoringInspectorValueState;
 }
 
 /** Inspector model for one exact, route-valid Source component selection. */
 export interface AuthoringInspectorReadyModel {
   readonly component: CatalogComponentSummary;
+  readonly controlCount: number;
   readonly fields: readonly AuthoringInspectorField[];
   readonly node: AuthoringLayerNode;
   readonly selection: AuthoringComponentSelection;
@@ -54,13 +60,13 @@ export type AuthoringInspectorModelResult =
   | Readonly<{ readonly status: "rejected" }>
   | AuthoringInspectorReadyModel;
 
-/** Exact primitive prop mutation admitted by the M09-T05 inspector. */
+/** Exact schema-derived prop mutation requested through the App-owned Inspector. */
 export type AuthoringInspectorEdit =
-  | Readonly<{ readonly kind: "delete"; readonly property: string }>
+  | Readonly<{ readonly kind: "delete"; readonly valuePointer: string }>
   | Readonly<{
       readonly kind: "set";
-      readonly property: string;
-      readonly value: JsonPrimitive;
+      readonly value: JsonValue;
+      readonly valuePointer: string;
     }>;
 
 /** Atomic Source mutation success returned by the App inspector boundary. */
@@ -86,7 +92,7 @@ export interface AuthoringInspectorEditFailure {
   readonly reason: AuthoringInspectorEditFailureReason;
 }
 
-/** Complete result of one schema-authorized primitive or enum inspector edit. */
+/** Complete result of one schema-authorized Inspector edit. */
 export type AuthoringInspectorEditResult =
   AuthoringInspectorEditFailure | AuthoringInspectorEditSuccess;
 
@@ -104,8 +110,110 @@ function isJsonPrimitive(value: unknown): value is JsonPrimitive {
 }
 
 type CapturedAuthoringInspectorEdit =
-  | Readonly<{ readonly kind: "delete"; readonly property: string }>
-  | Readonly<{ readonly kind: "set"; readonly property: string; readonly value: unknown }>;
+  | Readonly<{ readonly kind: "delete"; readonly valuePointer: string }>
+  | Readonly<{ readonly kind: "set"; readonly value: JsonValue; readonly valuePointer: string }>;
+
+function captureExactOwnData(
+  input: unknown,
+  expectedKeys: readonly string[],
+): Readonly<Record<string, unknown>> | undefined {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) return undefined;
+  const ownKeys = Reflect.ownKeys(input);
+  if (
+    ownKeys.length !== expectedKeys.length ||
+    ownKeys.some((key) => typeof key !== "string" || !expectedKeys.includes(key))
+  ) {
+    return undefined;
+  }
+  const captured: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
+  for (const key of expectedKeys) {
+    const descriptor = Object.getOwnPropertyDescriptor(input, key);
+    if (descriptor?.enumerable !== true || !("value" in descriptor)) return undefined;
+    captured[key] = descriptor.value;
+  }
+  return Object.freeze(captured);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
+}
+
+function captureInspectorRoute(
+  route: AuthoringInspectorRoute,
+): AuthoringInspectorRoute | undefined {
+  try {
+    const fields = captureExactOwnData(route, ["projectId", "surfaceId"]);
+    if (
+      fields === undefined ||
+      !isNonEmptyString(fields.projectId) ||
+      !isNonEmptyString(fields.surfaceId)
+    ) {
+      return undefined;
+    }
+    return Object.freeze({ projectId: fields.projectId, surfaceId: fields.surfaceId });
+  } catch {
+    return undefined;
+  }
+}
+
+function captureInspectorSelection(
+  selection: AuthoringComponentSelection,
+): AuthoringComponentSelection | undefined {
+  try {
+    const fields = captureExactOwnData(selection, [
+      "kind",
+      "projectId",
+      "surfaceId",
+      "sourceNodeId",
+      "capabilityId",
+      "displayName",
+      "conditional",
+    ]);
+    if (
+      fields === undefined ||
+      fields.kind !== "component" ||
+      !isNonEmptyString(fields.projectId) ||
+      !isNonEmptyString(fields.surfaceId) ||
+      !isNonEmptyString(fields.sourceNodeId) ||
+      !isNonEmptyString(fields.capabilityId) ||
+      !isNonEmptyString(fields.displayName) ||
+      typeof fields.conditional !== "boolean"
+    ) {
+      return undefined;
+    }
+    return Object.freeze({
+      kind: "component",
+      projectId: fields.projectId,
+      surfaceId: fields.surfaceId,
+      sourceNodeId: fields.sourceNodeId,
+      capabilityId: fields.capabilityId,
+      displayName: fields.displayName,
+      conditional: fields.conditional,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+function deepFreezeJson(value: JsonValue): JsonValue {
+  if (typeof value !== "object" || value === null) return value;
+  if (Array.isArray(value)) {
+    for (const item of value) deepFreezeJson(item);
+  } else {
+    for (const key of Object.keys(value)) {
+      deepFreezeJson((value as Readonly<Record<string, JsonValue>>)[key] as JsonValue);
+    }
+  }
+  return Object.freeze(value);
+}
+
+function captureJsonValue(value: unknown): JsonValue | undefined {
+  try {
+    return deepFreezeJson(JSON.parse(canonicalizeJson(value)) as JsonValue);
+  } catch {
+    return undefined;
+  }
+}
 
 function captureInspectorEdit(
   edit: AuthoringInspectorEdit,
@@ -116,29 +224,29 @@ function captureInspectorEdit(
     if (ownKeys.some((key) => typeof key !== "string")) return undefined;
 
     const kindDescriptor = Object.getOwnPropertyDescriptor(edit, "kind");
-    const propertyDescriptor = Object.getOwnPropertyDescriptor(edit, "property");
+    const pointerDescriptor = Object.getOwnPropertyDescriptor(edit, "valuePointer");
     if (
       kindDescriptor?.enumerable !== true ||
       !("value" in kindDescriptor) ||
-      propertyDescriptor?.enumerable !== true ||
-      !("value" in propertyDescriptor) ||
-      typeof propertyDescriptor.value !== "string" ||
-      propertyDescriptor.value.length === 0
+      pointerDescriptor?.enumerable !== true ||
+      !("value" in pointerDescriptor) ||
+      typeof pointerDescriptor.value !== "string"
     ) {
       return undefined;
     }
+    parseJsonPointer(pointerDescriptor.value);
 
     if (kindDescriptor.value === "delete") {
-      if (ownKeys.length !== 2 || !ownKeys.includes("kind") || !ownKeys.includes("property")) {
+      if (ownKeys.length !== 2 || !ownKeys.includes("kind") || !ownKeys.includes("valuePointer")) {
         return undefined;
       }
-      return Object.freeze({ kind: "delete", property: propertyDescriptor.value });
+      return Object.freeze({ kind: "delete", valuePointer: pointerDescriptor.value });
     }
     if (kindDescriptor.value !== "set") return undefined;
     if (
       ownKeys.length !== 3 ||
       !ownKeys.includes("kind") ||
-      !ownKeys.includes("property") ||
+      !ownKeys.includes("valuePointer") ||
       !ownKeys.includes("value")
     ) {
       return undefined;
@@ -147,10 +255,12 @@ function captureInspectorEdit(
     if (valueDescriptor?.enumerable !== true || !("value" in valueDescriptor)) {
       return undefined;
     }
+    const value = captureJsonValue(valueDescriptor.value);
+    if (value === undefined) return undefined;
     return Object.freeze({
       kind: "set",
-      property: propertyDescriptor.value,
-      value: valueDescriptor.value,
+      value,
+      valuePointer: pointerDescriptor.value,
     });
   } catch {
     return undefined;
@@ -162,21 +272,19 @@ function humanizeProperty(property: string): string {
     .replaceAll(/([a-z0-9])([A-Z])/gu, "$1 $2")
     .replaceAll(/[._:-]+/gu, " ")
     .trim();
-  return spaced.length === 0 ? property : `${spaced[0]?.toUpperCase() ?? ""}${spaced.slice(1)}`;
+  return spaced.length === 0
+    ? "Unnamed property"
+    : `${spaced[0]?.toUpperCase() ?? ""}${spaced.slice(1)}`;
 }
 
-function readSchemaRecord(
-  component: CatalogComponentSummary,
-  property: string,
-): JsonObject | undefined {
-  const root = component.inspector.propsSchema as JsonObject;
-  const properties = root.properties;
+function readChildSchema(schema: JsonObject | undefined, property: string): JsonObject | undefined {
+  const properties = schema?.properties;
   if (typeof properties !== "object" || properties === null || Array.isArray(properties)) {
     return undefined;
   }
-  const schema = (properties as JsonObject)[property];
-  return typeof schema === "object" && schema !== null && !Array.isArray(schema)
-    ? (schema as JsonObject)
+  const childSchema = (properties as JsonObject)[property];
+  return typeof childSchema === "object" && childSchema !== null && !Array.isArray(childSchema)
+    ? (childSchema as JsonObject)
     : undefined;
 }
 
@@ -185,29 +293,156 @@ function optionalSchemaText(schema: JsonObject | undefined, key: "description" |
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
+function optionalSchemaTitle(schema: JsonObject | undefined): string | undefined {
+  const title = optionalSchemaText(schema, "title")?.trim();
+  return title === undefined || title.length === 0 ? undefined : title;
+}
+
+interface DynamicValueScan {
+  readonly found: boolean;
+  readonly reference: string | null;
+}
+
+const NO_DYNAMIC_VALUE = Object.freeze({ found: false, reference: null });
+
+function directDynamicValue(value: unknown): DynamicValueScan {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return NO_DYNAMIC_VALUE;
+  }
+  const record = value as JsonObject;
+  const dynamicKey = Object.keys(record).find((key) => key.startsWith("$"));
+  if (dynamicKey === undefined) return NO_DYNAMIC_VALUE;
+  return Object.freeze({
+    found: true,
+    reference: dynamicKey === "$ref" && typeof record.$ref === "string" ? record.$ref : null,
+  });
+}
+
+function nestedDynamicValue(value: JsonValue): DynamicValueScan {
+  const direct = directDynamicValue(value);
+  if (direct.found) return direct;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const nested = nestedDynamicValue(item);
+      if (nested.found) return nested;
+    }
+    return NO_DYNAMIC_VALUE;
+  }
+  if (isJsonObject(value)) {
+    for (const key of Object.keys(value)) {
+      const nested = nestedDynamicValue(value[key] as JsonValue);
+      if (nested.found) return nested;
+    }
+  }
+  return NO_DYNAMIC_VALUE;
+}
+
 function sourceValueState(
-  node: AuthoringLayerNode,
+  container: JsonObject,
   control: ComponentInspectorControl,
 ): AuthoringInspectorValueState {
   const property = control.property;
-  if (property === null || !Object.hasOwn(node.props, property)) {
+  if (property !== null && !Object.hasOwn(container, property)) {
     return Object.freeze({ kind: "absent" });
   }
-  const value = node.props[property];
-  if (isJsonPrimitive(value)) return Object.freeze({ kind: "literal", value });
-  const reference =
-    typeof value === "object" &&
-    value !== null &&
-    !Array.isArray(value) &&
-    Object.hasOwn(value, "$ref") &&
-    typeof (value as JsonObject).$ref === "string"
-      ? ((value as JsonObject).$ref as string)
-      : null;
-  if (reference !== null) return Object.freeze({ kind: "dynamic", reference });
-  if (control.kind === "group" || control.kind === "structured-json") {
-    return Object.freeze({ kind: "structured" });
+  const value = (property === null ? container : container[property]) as JsonValue;
+  const directDynamic = directDynamicValue(value);
+  if (directDynamic.found) {
+    return Object.freeze({ kind: "dynamic", reference: directDynamic.reference });
   }
-  return Object.freeze({ kind: "dynamic", reference });
+  if (control.kind === "structured-json") {
+    const nestedDynamic = nestedDynamicValue(value);
+    if (nestedDynamic.found) {
+      return Object.freeze({ kind: "dynamic", reference: nestedDynamic.reference });
+    }
+    return Object.freeze({ kind: "structured", value });
+  }
+  if (isJsonPrimitive(value)) return Object.freeze({ kind: "literal", value });
+  if (control.kind === "group") {
+    return Object.freeze({ kind: "structured", value });
+  }
+  return Object.freeze({ kind: "dynamic", reference: null });
+}
+
+function isJsonObject(value: JsonValue): value is Readonly<Record<string, JsonValue>> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function inspectorControlLabel(
+  control: ComponentInspectorControl,
+  parentSchema: JsonObject | undefined,
+): string {
+  const property = control.property;
+  const schema = property === null ? parentSchema : readChildSchema(parentSchema, property);
+  return (
+    optionalSchemaTitle(schema) ?? (property === null ? "Properties" : humanizeProperty(property))
+  );
+}
+
+function prepareInspectorFields(
+  controls: readonly ComponentInspectorControl[],
+  container: JsonObject,
+  parentSchema: JsonObject | undefined,
+  parentLabels: readonly string[],
+): readonly AuthoringInspectorField[] {
+  const labels = controls.map((control) => inspectorControlLabel(control, parentSchema));
+  const labelCounts = new Map<string, number>();
+  labels.forEach((label) => labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1));
+  return controls.map((control, index) => {
+    const label = labels[index] ?? "Unnamed property";
+    const qualifiedSegment =
+      (labelCounts.get(label) ?? 0) > 1 ? `${label} (${control.valuePointer || "/"})` : label;
+    return prepareInspectorField(
+      control,
+      container,
+      parentSchema,
+      parentLabels,
+      label,
+      qualifiedSegment,
+    );
+  });
+}
+
+function prepareInspectorField(
+  control: ComponentInspectorControl,
+  container: JsonObject,
+  parentSchema: JsonObject | undefined,
+  parentLabels: readonly string[],
+  label: string,
+  qualifiedSegment: string,
+): AuthoringInspectorField {
+  const property = control.property;
+  const schema = property === null ? parentSchema : readChildSchema(parentSchema, property);
+  const value = sourceValueState(container, control);
+  const containsDynamicValue =
+    value.kind === "dynamic" ||
+    (value.kind === "structured" && nestedDynamicValue(value.value).found);
+  const qualifiedLabel = [...parentLabels, qualifiedSegment].join(" · ");
+  let children: readonly AuthoringInspectorField[] = [];
+  if (control.kind === "group" && value.kind === "structured" && isJsonObject(value.value)) {
+    const groupValue = value.value;
+    children = prepareInspectorFields(control.children, groupValue, schema, [
+      ...parentLabels,
+      qualifiedSegment,
+    ]);
+  }
+  return Object.freeze({
+    children: Object.freeze(children),
+    containsDynamicValue,
+    control,
+    description: optionalSchemaText(schema, "description"),
+    label,
+    qualifiedLabel,
+    value,
+  });
+}
+
+function countControls(controls: readonly ComponentInspectorControl[]): number {
+  return controls.reduce(
+    (total, control) =>
+      total + 1 + (control.kind === "group" ? countControls(control.children) : 0),
+    0,
+  );
 }
 
 function scheduleChildren(pending: AuthoringLayerNode[], node: AuthoringLayerNode): void {
@@ -237,7 +472,7 @@ function findSelectedNode(
   return undefined;
 }
 
-function isEditableControl(
+function isPrimitiveControl(
   control: ComponentInspectorControl,
 ): control is
   | Extract<ComponentInspectorControl, { readonly kind: "enum" }>
@@ -265,11 +500,179 @@ function controlAcceptsValue(control: ComponentInspectorControl, value: JsonPrim
   return false;
 }
 
+function findInspectorField(
+  fields: readonly AuthoringInspectorField[],
+  valuePointer: string,
+): AuthoringInspectorField | undefined {
+  for (const field of fields) {
+    if (field.control.valuePointer === valuePointer) return field;
+    const nested = findInspectorField(field.children, valuePointer);
+    if (nested !== undefined) return nested;
+  }
+  return undefined;
+}
+
+type MutableJsonValue = JsonPrimitive | MutableJsonValue[] | { [key: string]: MutableJsonValue };
+
+const MAX_ROOT_PROP_TRANSITIONS = 256;
+const MAX_ROOT_TRANSITION_WORK_BYTES = 32 * 1024 * 1024;
+
+function mutableJsonClone(value: JsonValue): MutableJsonValue | undefined {
+  try {
+    return JSON.parse(canonicalizeJson(value)) as MutableJsonValue;
+  } catch {
+    return undefined;
+  }
+}
+
+function defineJsonProperty(
+  object: Record<string, MutableJsonValue>,
+  property: string,
+  value: MutableJsonValue,
+): void {
+  Object.defineProperty(object, property, {
+    configurable: true,
+    enumerable: true,
+    value,
+    writable: true,
+  });
+}
+
+function setOwnerProp(
+  document: DesenEditorDocument,
+  selection: AuthoringComponentSelection,
+  property: string,
+  value: JsonValue,
+): DesenEditorDocument | undefined {
+  const changed = setDesenEditorOwnerProp(document, {
+    surfaceId: selection.surfaceId,
+    ownerId: selection.sourceNodeId,
+    name: property,
+    value: value as DesenEditorContentValue,
+  });
+  return changed.ok ? changed.document : undefined;
+}
+
+function deleteOwnerProp(
+  document: DesenEditorDocument,
+  selection: AuthoringComponentSelection,
+  property: string,
+): DesenEditorDocument | undefined {
+  const changed = deleteDesenEditorOwnerProp(document, {
+    surfaceId: selection.surfaceId,
+    ownerId: selection.sourceNodeId,
+    name: property,
+  });
+  return changed.ok ? changed.document : undefined;
+}
+
+function replaceRootProps(
+  document: DesenEditorDocument,
+  selection: AuthoringComponentSelection,
+  currentProps: JsonObject,
+  nextValue: JsonValue,
+): DesenEditorDocument | undefined {
+  if (!isJsonObject(nextValue)) return undefined;
+  const deletions = Object.keys(currentProps)
+    .filter((property) => !Object.hasOwn(nextValue, property))
+    .sort();
+  const reducingSets: string[] = [];
+  const growingSets: string[] = [];
+  for (const property of Object.keys(nextValue)) {
+    if (!Object.hasOwn(currentProps, property)) {
+      growingSets.push(property);
+      continue;
+    }
+    const currentValue = currentProps[property];
+    const nextPropertyValue = nextValue[property];
+    if (canonicalizeJson(currentValue) === canonicalizeJson(nextPropertyValue)) continue;
+    const target =
+      canonicalizeJsonBytes(nextPropertyValue).byteLength <=
+      canonicalizeJsonBytes(currentValue).byteLength
+        ? reducingSets
+        : growingSets;
+    target.push(property);
+  }
+  const sets = [...reducingSets.sort(), ...growingSets.sort()];
+  const transitionCount = deletions.length + sets.length;
+  if (transitionCount === 0) return document;
+  if (transitionCount > MAX_ROOT_PROP_TRANSITIONS) return undefined;
+
+  // Editor Core intentionally snapshots and validates the complete document for every public prop
+  // command. Bound both command count and aggregate snapshot work before entering that synchronous
+  // loop so a small but very wide root object cannot monopolize the browser main thread.
+  const snapshotBytes =
+    canonicalizeJsonBytes(document).byteLength + canonicalizeJsonBytes(nextValue).byteLength;
+  if (snapshotBytes > Math.floor(MAX_ROOT_TRANSITION_WORK_BYTES / transitionCount)) {
+    return undefined;
+  }
+
+  let candidate = document;
+
+  // This candidate is never exposed. Removing obsolete values and shrinking replacements before
+  // any growth avoids a transient document that can exceed Editor Core's fixed byte profile even
+  // when both endpoints are admissible.
+  for (const property of deletions) {
+    const changed = deleteOwnerProp(candidate, selection, property);
+    if (changed === undefined) return undefined;
+    candidate = changed;
+  }
+  for (const property of sets) {
+    const changed = setOwnerProp(candidate, selection, property, nextValue[property] as JsonValue);
+    if (changed === undefined) return undefined;
+    candidate = changed;
+  }
+  return candidate;
+}
+
+function changeNestedProp(
+  document: DesenEditorDocument,
+  selection: AuthoringComponentSelection,
+  currentProps: JsonObject,
+  segments: readonly string[],
+  edit: CapturedAuthoringInspectorEdit,
+): DesenEditorDocument | undefined {
+  const topProperty = segments[0];
+  if (topProperty === undefined) {
+    return edit.kind === "set"
+      ? replaceRootProps(document, selection, currentProps, edit.value)
+      : undefined;
+  }
+  if (segments.length === 1) {
+    return edit.kind === "set"
+      ? setOwnerProp(document, selection, topProperty, edit.value)
+      : deleteOwnerProp(document, selection, topProperty);
+  }
+
+  const currentTop = currentProps[topProperty] as JsonValue | undefined;
+  if (currentTop === undefined) return undefined;
+  const mutableTop = mutableJsonClone(currentTop);
+  if (!isJsonObject(mutableTop as JsonValue)) return undefined;
+
+  let parent = mutableTop as Record<string, MutableJsonValue>;
+  for (let index = 1; index < segments.length - 1; index += 1) {
+    const segment = segments[index] as string;
+    if (!Object.hasOwn(parent, segment)) return undefined;
+    const child = parent[segment];
+    if (typeof child !== "object" || child === null || Array.isArray(child)) return undefined;
+    parent = child;
+  }
+  const property = segments.at(-1) as string;
+  if (edit.kind === "delete") {
+    if (!Object.hasOwn(parent, property)) return undefined;
+    Reflect.deleteProperty(parent, property);
+  } else {
+    defineJsonProperty(parent, property, mutableJsonClone(edit.value) as MutableJsonValue);
+  }
+  return setOwnerProp(document, selection, topProperty, mutableTop as JsonValue);
+}
+
 /**
  * Joins one route-valid Source selection with current props and canonical Catalog control order.
  *
- * @remarks Dynamic values remain explicit non-editable states for M09-T08, while group and
- * structured-JSON descriptors remain visible for M09-T06 instead of being silently discarded.
+ * @remarks Dynamic values remain explicit non-editable states for M09-T08. Closed object groups
+ * expose their recursive control tree, while every unsupported schema subtree stays visible as an
+ * honest structured-JSON fallback instead of being silently discarded.
  */
 export function prepareAuthoringInspectorModel(
   model: CatalogAuthoringModel,
@@ -284,22 +687,13 @@ export function prepareAuthoringInspectorModel(
   const component = model.components.find(({ id }) => id === selection.capabilityId);
   if (node === undefined || component === undefined) return Object.freeze({ status: "rejected" });
 
-  const fields = component.inspector.controls.map((control) => {
-    const property = control.property;
-    const schema = property === null ? undefined : readSchemaRecord(component, property);
-    return Object.freeze({
-      control,
-      description: optionalSchemaText(schema, "description"),
-      label:
-        optionalSchemaText(schema, "title") ??
-        (property === null ? "Properties" : humanizeProperty(property)),
-      value: sourceValueState(node, control),
-    });
-  });
+  const propsSchema = component.inspector.propsSchema as JsonObject;
+  const fields = prepareInspectorFields(component.inspector.controls, node.props, propsSchema, []);
 
   return Object.freeze({
     status: "ready",
     component,
+    controlCount: countControls(component.inspector.controls),
     fields: Object.freeze(fields),
     node,
     selection,
@@ -307,11 +701,13 @@ export function prepareAuthoringInspectorModel(
 }
 
 /**
- * Applies one exact primitive/enum edit through Editor Core and continuous Catalog validation.
+ * Applies one exact schema-derived edit through Editor Core and continuous Catalog validation.
  *
  * @remarks Selection and control identity are re-derived from the supplied immutable Source and
- * validated Catalog before mutation. Dynamic values cannot be overwritten through this T05 API;
- * required props cannot be deleted. Any command or semantic failure preserves the input document.
+ * validated Catalog before mutation. Nested changes rebuild only their complete top-level prop,
+ * while a root structured fallback stages a deterministic whole-props transition internally.
+ * Dynamic values cannot be overwritten through this T06 API; required values cannot be deleted.
+ * Any command or semantic failure preserves the input document.
  */
 export function applyAuthoringInspectorEdit(
   document: DesenEditorDocument,
@@ -320,7 +716,12 @@ export function applyAuthoringInspectorEdit(
   selection: AuthoringComponentSelection,
   edit: AuthoringInspectorEdit,
 ): AuthoringInspectorEditResult {
+  const capturedRoute = captureInspectorRoute(route);
+  const capturedSelection = captureInspectorSelection(selection);
   const capturedEdit = captureInspectorEdit(edit);
+  if (capturedRoute === undefined || capturedSelection === undefined) {
+    return Object.freeze({ ok: false, reason: "selection-invalid" });
+  }
   if (capturedEdit === undefined) {
     return Object.freeze({ ok: false, reason: "edit-rejected" });
   }
@@ -331,52 +732,66 @@ export function applyAuthoringInspectorEdit(
       reason: prepared.reason === "catalog-invalid" ? "catalog-invalid" : "source-invalid",
     });
   }
-  const inspector = prepareAuthoringInspectorModel(prepared.model, route, selection);
+  const inspector = prepareAuthoringInspectorModel(
+    prepared.model,
+    capturedRoute,
+    capturedSelection,
+  );
   if (inspector.status !== "ready") {
     return Object.freeze({ ok: false, reason: "selection-invalid" });
   }
 
-  const field = inspector.fields.find(({ control }) => control.property === capturedEdit.property);
-  if (field === undefined || field.control.property === null || !isEditableControl(field.control)) {
+  const field = findInspectorField(inspector.fields, capturedEdit.valuePointer);
+  if (field === undefined) {
     return Object.freeze({ ok: false, reason: "control-unavailable" });
   }
-  if (field.value.kind === "dynamic" || field.value.kind === "structured") {
+  if (field.value.kind === "dynamic") {
+    return Object.freeze({ ok: false, reason: "control-unavailable" });
+  }
+  if (field.control.kind === "group" && field.containsDynamicValue) {
     return Object.freeze({ ok: false, reason: "control-unavailable" });
   }
 
   if (capturedEdit.kind === "delete") {
+    if (capturedEdit.valuePointer === "") {
+      return Object.freeze({ ok: false, reason: "control-unavailable" });
+    }
     if (field.control.required) {
       return Object.freeze({ ok: false, reason: "required-property" });
     }
     if (field.value.kind === "absent") {
       return Object.freeze({ ok: false, reason: "control-unavailable" });
     }
-  } else if (
-    !isJsonPrimitive(capturedEdit.value) ||
-    !controlAcceptsValue(field.control, capturedEdit.value)
-  ) {
-    return Object.freeze({ ok: false, reason: "value-invalid" });
+  } else {
+    const dynamic = nestedDynamicValue(capturedEdit.value);
+    if (dynamic.found) {
+      return Object.freeze({ ok: false, reason: "control-unavailable" });
+    }
+    if (isPrimitiveControl(field.control)) {
+      if (
+        !isJsonPrimitive(capturedEdit.value) ||
+        !controlAcceptsValue(field.control, capturedEdit.value)
+      ) {
+        return Object.freeze({ ok: false, reason: "value-invalid" });
+      }
+    } else if (field.control.kind === "group" && !isJsonObject(capturedEdit.value)) {
+      return Object.freeze({ ok: false, reason: "value-invalid" });
+    }
   }
 
-  const changed =
-    capturedEdit.kind === "delete"
-      ? deleteDesenEditorOwnerProp(document, {
-          surfaceId: selection.surfaceId,
-          ownerId: selection.sourceNodeId,
-          name: capturedEdit.property,
-        })
-      : setDesenEditorOwnerProp(document, {
-          surfaceId: selection.surfaceId,
-          ownerId: selection.sourceNodeId,
-          name: capturedEdit.property,
-          value: capturedEdit.value as JsonPrimitive,
-        });
-  if (!changed.ok) return Object.freeze({ ok: false, reason: "edit-rejected" });
+  const changed = changeNestedProp(
+    prepared.model.validationDocument,
+    capturedSelection,
+    inspector.node.props,
+    parseJsonPointer(capturedEdit.valuePointer),
+    capturedEdit,
+  );
+  if (changed === undefined) return Object.freeze({ ok: false, reason: "edit-rejected" });
 
-  const validator = createDesenEditorContinuousValidator([catalogValue]);
+  const validator = createDesenEditorContinuousValidator(prepared.model.validationCatalogs);
   if (!validator.ok) return Object.freeze({ ok: false, reason: "catalog-invalid" });
-  const report = validator.validator.validate(changed.document);
+  const report = validator.validator.validate(changed);
   if (!report.valid) return Object.freeze({ ok: false, reason: "source-invalid" });
 
-  return Object.freeze({ ok: true, document: changed.document });
+  return Object.freeze({ ok: true, document: changed });
 }

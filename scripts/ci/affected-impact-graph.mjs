@@ -151,12 +151,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
         "publisher-official-golden",
       ],
     ],
+    ["desen-app-structured-inspector", ["desen-app-schema-inspector"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "bb20c549f9e61e88384f4d516c8f76225c3c99c7ba7e3d5f24344689b46e0e05";
+  "a02725aa4c74e553766b561b535e5be44f67fe74abe9c98188f265fd2fb33fb1";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

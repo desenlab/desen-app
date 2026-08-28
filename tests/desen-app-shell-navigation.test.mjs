@@ -80,7 +80,7 @@ test("[authority] binds M09-T01 to the exact completed G08 artifact", () => {
     DESEN_APP_SHELL_NAVIGATION_ROOT_TEST_NAMES,
   );
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T05");
+  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T06");
 });
 
 test("[shell] records the closed route, fixture, guidance, and accessibility profile", () => {
@@ -166,6 +166,7 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     "apps/desen-app/src/authoring-inspector.ts",
     "apps/desen-app/src/authoring-preview.ts",
     "apps/desen-app/src/inspector-panel.tsx",
+    "apps/desen-app/src/structured-json.ts",
   ]);
   assert.equal(
     built.currentCompatibility.additiveSuccessor
@@ -195,6 +196,12 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     built.currentCompatibility.additiveSuccessor.publisherBackedSessionPreviewAllowed,
     true,
   );
+  assert.equal(built.currentCompatibility.additiveSuccessor.nestedObjectInspectorAllowed, true);
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.honestStructuredJsonFallbackAllowed,
+    true,
+  );
+  assert.equal(built.currentCompatibility.additiveSuccessor.dynamicValuesRemainLocked, true);
   assert.equal(built.currentCompatibility.boundary.imports.exactReferenceAdapterRegistry, true);
   assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);

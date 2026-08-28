@@ -93,6 +93,9 @@ importers:
       '@desen/editor-core':
         specifier: workspace:*
         version: link:../../packages/editor-core
+      '@desen/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
       '@desen/publisher':
         specifier: workspace:*
         version: link:../../packages/publisher

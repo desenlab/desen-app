@@ -118,7 +118,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.pf059Status, "OPEN");
   assert.equal(built.artifact.claim.p07Status, "PARTIAL");
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.successor.task, "M09-T05");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T06");
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[1], () => {
@@ -183,8 +183,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   );
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
-  assert.equal(currentRuntime.moduleCount, 127);
-  assert.equal(currentRuntime.staticEdges, 372);
+  assert.equal(currentRuntime.moduleCount, 128);
+  assert.equal(currentRuntime.staticEdges, 376);
   assert.equal(currentRuntime.dynamicEdges, 0);
   assert.equal(currentRuntime.sharedRuntimeModuleCount, 19);
   assert.equal(currentRuntime.realComponentModuleCount, 5);
@@ -233,7 +233,11 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
       .historicalNoInspectorOrSourceMutationNonclaimAppliedToCurrentApp,
     false,
   );
-  assert.equal(built.currentCompatibility.successor.dynamicAndStructuredEditingImplemented, false);
+  assert.equal(
+    built.currentCompatibility.successor.nestedObjectAndStructuredJsonEditingImplemented,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.dynamicEditingImplemented, false);
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[4], () => {
@@ -597,7 +601,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
-  assert.equal(verified.currentGraphModules, 127);
+  assert.equal(verified.currentGraphModules, 128);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 

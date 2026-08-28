@@ -288,7 +288,10 @@ describe("Desen App application shell", () => {
 
     expect(
       within(inspector).getAllByText("This value is too large for the exact adapter preview."),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
+    expect(within(inspector).getByRole("status").textContent).toBe(
+      "Edits stay in this session until save is implemented.",
+    );
     expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
     expect(screen.queryByText("Preview unavailable")).toBeNull();
     expect(screen.getByText("Session draft")).toBeTruthy();
@@ -338,14 +341,16 @@ describe("Desen App application shell", () => {
     fireEvent.blur(maxWidth);
     expect(maxWidth.getAttribute("aria-invalid")).toBe("true");
     expect(within(inspector).getByRole("alert").textContent).toBe("Enter a finite number.");
-    expect(within(inspector).getByRole("status").textContent).toBe("Enter a finite number.");
+    expect(within(inspector).getByRole("status").textContent).toBe(
+      "Edits stay in this session until save is implemented.",
+    );
 
     fireEvent.change(maxWidth, { target: { value: "0" } });
     fireEvent.blur(maxWidth);
     expect(maxWidth.getAttribute("aria-invalid")).toBe("true");
     expect(
       within(inspector).getAllByText("This value does not satisfy the Catalog schema."),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
 
     fireEvent.change(maxWidth, { target: { value: "512" } });
     fireEvent.blur(maxWidth);

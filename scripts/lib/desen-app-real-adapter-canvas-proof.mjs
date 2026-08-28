@@ -25,11 +25,14 @@ const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.
 const AUTHORING_INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
 const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
+const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
 const ADAPTER_CANVAS_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const AUTHORING_SELECTION_TEST_PATH = "apps/desen-app/test/authoring-selection.test.ts";
 const AUTHORING_INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.test.ts";
 const AUTHORING_PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
+const INSPECTOR_PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
+const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
 const MAIN_LIFECYCLE_TEST_PATH = "apps/desen-app/test/main-lifecycle.test.tsx";
 const CATALOG_PATH = "packages/reference-catalog-web/catalog.json";
 const BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
@@ -60,6 +63,7 @@ const CURRENT_APP_SOURCE_PATHS = Object.freeze(
     AUTHORING_INSPECTOR_SOURCE_PATH,
     AUTHORING_PREVIEW_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
+    STRUCTURED_JSON_SOURCE_PATH,
   ].sort(),
 );
 const CURRENT_APP_TYPESCRIPT_SOURCE_PATHS = Object.freeze(
@@ -110,8 +114,11 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_INSPECTOR_SOURCE_PATH,
     AUTHORING_PREVIEW_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
+    STRUCTURED_JSON_SOURCE_PATH,
     AUTHORING_INSPECTOR_TEST_PATH,
     AUTHORING_PREVIEW_TEST_PATH,
+    INSPECTOR_PANEL_TEST_PATH,
+    STRUCTURED_JSON_TEST_PATH,
   ]),
 ]);
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
@@ -1693,14 +1700,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 127 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 128 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 372 || dynamicEdges !== 0) {
+  if (staticEdges !== 376 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -1911,6 +1918,7 @@ function inspectPackage(bytes) {
     "@desen/catalog-sdk": "workspace:*",
     "@desen/editor-core": "workspace:*",
     "@desen/publisher": "workspace:*",
+    "@desen/protocol": "workspace:*",
     "@desen/reference-catalog-web": "workspace:*",
     "@desen/runtime-core": "workspace:*",
     "@desen/runtime-react": "workspace:*",
@@ -1928,7 +1936,9 @@ function inspectPackage(bytes) {
     manifest.scripts?.["test:selection"] !==
       "vitest run test/authoring-selection.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
     manifest.scripts?.["test:inspector"] !==
-      "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx"
+      "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
+    manifest.scripts?.["test:structured-inspector"] !==
+      "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx"
   ) {
     fail("PACKAGE_CONTRACT_DRIFT", "The Desen App exact T03 package/runtime contract drifted.");
   }
@@ -1940,6 +1950,7 @@ function inspectPackage(bytes) {
     focusedTest: manifest.scripts["test:canvas"],
     selectionFocusedTest: manifest.scripts["test:selection"],
     inspectorFocusedTest: manifest.scripts["test:inspector"],
+    structuredInspectorFocusedTest: manifest.scripts["test:structured-inspector"],
   });
 }
 
@@ -2155,7 +2166,7 @@ function captureBuildOptions(rawOptions) {
   });
 }
 
-/** Authenticates frozen M09-T03 evidence and checks its live additive M09-T05 successor. */
+/** Authenticates frozen M09-T03 evidence and checks its live additive M09-T06 successor. */
 export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const canonicalWorkspaceRoot = await realpath(options.workspaceRoot);
@@ -2271,8 +2282,11 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
         AUTHORING_INSPECTOR_SOURCE_PATH,
         AUTHORING_PREVIEW_SOURCE_PATH,
         INSPECTOR_PANEL_SOURCE_PATH,
+        STRUCTURED_JSON_SOURCE_PATH,
         AUTHORING_INSPECTOR_TEST_PATH,
         AUTHORING_PREVIEW_TEST_PATH,
+        INSPECTOR_PANEL_TEST_PATH,
+        STRUCTURED_JSON_TEST_PATH,
       ].map((relativePath) => ({
         path: relativePath,
         bytes: files.get(relativePath).byteLength,
@@ -2280,7 +2294,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
       })),
     },
     successor: {
-      task: "M09-T05",
+      task: "M09-T06",
       stableSourceSelectionOverlayOwnedBySuccessor: true,
       historicalNoSelectionOverlayNonclaimAppliedToCurrentApp: false,
       outsideManagedCapabilitySubtree: true,
@@ -2290,7 +2304,8 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
       publicEditorCorePropMutationImplemented: true,
       publisherBackedSessionPreviewImplemented: true,
       historicalNoInspectorOrSourceMutationNonclaimAppliedToCurrentApp: false,
-      dynamicAndStructuredEditingImplemented: false,
+      nestedObjectAndStructuredJsonEditingImplemented: true,
+      dynamicEditingImplemented: false,
       persistenceImplemented: false,
       runOrPublishImplemented: false,
     },

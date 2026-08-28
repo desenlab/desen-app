@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 172,
+  PROOF_UNIT: 174,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
-  FROZEN_INPUT: 130,
-  PACKAGE_OR_APPLICATION: 455,
-  SHARED_PROOF_INFRASTRUCTURE: 209,
-  PROJECT_DOCUMENTATION: 122,
+  FROZEN_INPUT: 131,
+  PACKAGE_OR_APPLICATION: 458,
+  SHARED_PROOF_INFRASTRUCTURE: 211,
+  PROJECT_DOCUMENTATION: 123,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1175 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1184 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1175 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1175);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1184);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 172);
+  assert.equal(proofEntries.length, 174);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -200,6 +200,15 @@ test("permits strict selection only for exact verifier and root-test proof input
       .filter(({ proofUnitId }) => proofUnitId === "desen-app-schema-inspector")
       .map(({ path: trackedPath }) => trackedPath),
     ["scripts/verify-desen-app-schema-inspector.mjs", "tests/desen-app-schema-inspector.test.mjs"],
+  );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "desen-app-structured-inspector")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-desen-app-structured-inspector.mjs",
+      "tests/desen-app-structured-inspector.test.mjs",
+    ],
   );
   for (const entry of proofEntries) {
     assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.SELECT_PROOF_UNIT);
@@ -393,6 +402,15 @@ test("the reviewed M09 successor preserves the historical I07-04 ownership proje
     "scripts/lib/desen-app-schema-inspector-proof.mjs",
     "scripts/verify-desen-app-schema-inspector.mjs",
     "tests/desen-app-schema-inspector.test.mjs",
+    "apps/desen-app/src/structured-json.ts",
+    "apps/desen-app/test/inspector-panel.test.tsx",
+    "apps/desen-app/test/structured-json.test.ts",
+    "docs/proof/DESEN-APP-STRUCTURED-INSPECTOR.md",
+    "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json",
+    "scripts/generate-desen-app-structured-inspector-proof.mjs",
+    "scripts/lib/desen-app-structured-inspector-proof.mjs",
+    "scripts/verify-desen-app-structured-inspector.mjs",
+    "tests/desen-app-structured-inspector.test.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);
