@@ -59,10 +59,12 @@ function readyModel(
     component: Object.freeze({
       authoringCategory: "Test",
       description: undefined,
+      defaultProps: Object.freeze({}),
       displayName: "Test component",
       id: "com.example.test/Inspector",
       inspector,
       semanticCategory: undefined,
+      slotContracts: Object.freeze([]),
     }),
     controlCount,
     fields: Object.freeze([...fields]),
@@ -74,6 +76,7 @@ function readyModel(
       id: "test.node",
       kind: "component",
       props: Object.freeze({}),
+      slotContracts: Object.freeze([]),
       slots: Object.freeze([]),
     }),
     selection: Object.freeze({

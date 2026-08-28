@@ -713,7 +713,8 @@ shell. M09-T03 adds one exact managed reference-adapter canvas, M09-T04 adds Sou
 selection outside that managed subtree, and M09-T05 adds schema-derived primitive/enum Inspector
 controls through public Editor Core and Publisher boundaries. M09-T06 consumes the recursive
 control plan with closed-object controls and an explicit structured-JSON fallback without crossing
-the App-owned Inspector boundary.
+the App-owned Inspector boundary. M09-T07 adds Catalog-declared named-slot insertion, move,
+reorder, and deletion through the same public mutation and publication boundaries.
 
 The first slice owns three exact route forms: `/projects`, `/projects/:projectId`, and
 `/projects/:projectId/surfaces/:surfaceId`. The bare root is replaced with `/projects`; app-owned
@@ -909,6 +910,47 @@ required-gate or hosted-CI claim.
 This does not resolve PF-025 or complete P-08. Dynamic `$` values remain locked for M09-T08, and
 slot/cardinality UI, state/actions, Design/Run, persistence, browser E2E, publication, activation,
 arbitrary-future-Catalog, and native-target claims remain outside M09-T06.
+
+M09-T07 derives placement authority from the exact current validator-admitted Source and Catalog.
+Before mutation, the App reauthorizes the current route, component or behavior owner, named slot,
+selected subtree, capability identity, and requested boundary. Catalog acceptance plus effective
+minimum and maximum cardinality constrain insertion, cross-slot move, same-slot reorder, and nested
+subtree deletion. Declared-but-absent slots remain distinct from present empty slots; root
+deletion, deletion across an owning-slot minimum, incompatible children, full destinations, stale
+or cross-route identities, and invalid cycles fail closed.
+
+Accepted operations call only public Editor Core insert, move, reorder, delete, and prop commands.
+Catalog `defaultProps` are staged deterministically under explicit transition and aggregate
+snapshot-work ceilings. Every complete candidate is continuously validated and Publisher
+preflighted before `SurfaceEditor` replaces its session-local `{document, preview}` pair. Failed
+mutation or publication leaves the previous Source, preview, selection, and focus untouched. A
+successful deletion clears the now-stale selection and returns focus to Layers; deleting the last
+admitted child from a behavior-owned slot retains that exact own slot key with `[]`.
+
+Drag remains an application boundary rather than protocol or runtime authority. The browser drag
+payload is inert and never read to authorize an edit; the App-owned drag intent and current model
+determine the subject and destination. Slot boundaries expand beyond their narrow visual line and
+overlap adjacent row halves, while depth-counted enter/leave state keeps hover feedback stable over
+nested descendants. Components renders one explicit compatible slot target, or disables component
+dragging and presents a guide back to Layers when no slot is selected. Native keyboard and click
+controls preserve the same insertion and placement paths.
+
+All named-slot chrome, deletion controls, drag intent, and focus state remain App-owned siblings
+outside the managed Runtime React capability subtree. No component geometry, hit testing, canvas
+picking, private DOM/native structure, managed-tree inspection, real-browser E2E, or native-drag
+automation result is claimed. Components whose insertion requires materializing a private required
+child subtree fail closed.
+
+Exact local evidence is the 24,830-byte
+`docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json` at
+`sha256:daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f`. The focused
+named-slot suite passes 70/70, the complete App suite passes 151/151, the independent root proof
+passes 9/9, and the task verifier passes. These receipts make no required-gate, global-CI-count, or
+hosted-CI claim.
+
+M09-T07 is `DONE`, but P-08 remains `NOT_PROVEN`. Dynamic state and bindings, events and actions,
+Design/Run, durable save/open, control-plane publication and activation, and real-browser E2E
+remain with M09-T08 through M09-T14 and M10-T01.
 
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,

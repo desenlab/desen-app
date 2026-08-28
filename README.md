@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████████░░░░░░░░` **101 / 145 tasks complete (70%)**
+**Overall:** `█████████████████░░░░░░░░` **102 / 145 tasks complete (70%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `██████░░░░░░░░` **6 / 14 tasks complete (43%)**
+**M09:** `███████░░░░░░░` **7 / 14 tasks complete (50%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T07`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T08`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -797,6 +797,35 @@ M09-T06 is `DONE`; implementation progress is 101/145 (70%), M09 is 6/14 (43%), 
 remain 10/13. P-08 remains `NOT_PROVEN`; slot/cardinality UI, state/binding and event/action
 authoring, Design/Run, persistence, browser E2E, control-plane publication, and activation remain
 later work. PF-025 remains `OPEN`, dynamic `$` values stay locked for M09-T08, and M09-T07 is next.
+
+M09-T07 adds App-owned named-slot insertion, move, reorder, and deletion. During an admissible
+Layers drag, insertion boundaries expand across the inter-row gaps and retain hover through nested
+events. Components now exposes one explicit owner/slot/cardinality/position target; without a
+selected slot, drag and insert are disabled and a native action returns focus to Layers. Click and
+keyboard placement remain available, and browser transfer data is only an inert hint.
+
+Every operation re-authorizes the exact current route, Source node, Catalog capability, slot
+contract, acceptance, minimum/maximum, and placement. Accepted candidates use public Editor Core
+commands, pass complete continuous validation, and require Publisher preflight before an atomic
+`{document, preview}` replacement. Root or stale deletion and source-minimum violations fail
+without partial Source; a successful delete clears selection and returns focus to Layers, while a
+rejected delete preserves selection, preview, and focus.
+
+The focused named-slot suite passes 70/70, the complete App suite passes 151/151, the independent
+root proof passes 9/9, and the complete structural CI glob passes 329/329. Exact evidence is the 24,830-byte
+[`desen-app-0.1.0-named-slot-authoring.json`](docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json)
+at `sha256:daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f`. The local CI
+authority contains 186 workloads and 88 proof pairs—77 ordinary pairs and 11 barriers—with a
+55-proof-unit/120-workload closure and 1,192 tracked/176 proof-owned paths. Sequence 46 passes
+69/69 at `sha256:f09ec643d1b2756174ca47fae99837a68f6656bec0c6933e566d5075713a0f5f` with 42 artifacts and
+84 readers.
+
+In-app-browser inspection covered the target guide, selected target, click/keyboard insertion,
+delete affordance, root-delete explanation, and clean console. Native drag automation and
+real-browser E2E remain unclaimed. M09-T07 is `DONE`; implementation progress is 102/145 (70%),
+M09 is 7/14 (50%), and proof gates remain 10/13. P-08 remains `NOT_PROVEN`; state/binding and
+event/action authoring, Design/Run, durable save/open, browser E2E, publication, and activation
+remain. PF-025 remains `OPEN`, and M09-T08 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

@@ -16,6 +16,8 @@ const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-REAL-ADAPTER-CANVAS.md";
 const SHELL_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const HOST_SOURCE_AUDIT_ARTIFACT_PATH =
   "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json";
+const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
+const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const APP_INDEX_PATH = "apps/desen-app/index.html";
 const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
@@ -24,6 +26,7 @@ const AUTHORING_DATA_SOURCE_PATH = "apps/desen-app/src/authoring-data.ts";
 const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
 const AUTHORING_INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
 const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
+const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
 const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
 const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
 const ADAPTER_CANVAS_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
@@ -31,6 +34,7 @@ const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const AUTHORING_SELECTION_TEST_PATH = "apps/desen-app/test/authoring-selection.test.ts";
 const AUTHORING_INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.test.ts";
 const AUTHORING_PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
+const AUTHORING_SLOT_TEST_PATH = "apps/desen-app/test/authoring-slots.test.ts";
 const INSPECTOR_PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
 const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
 const MAIN_LIFECYCLE_TEST_PATH = "apps/desen-app/test/main-lifecycle.test.tsx";
@@ -62,6 +66,7 @@ const CURRENT_APP_SOURCE_PATHS = Object.freeze(
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_INSPECTOR_SOURCE_PATH,
     AUTHORING_PREVIEW_SOURCE_PATH,
+    AUTHORING_SLOT_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
   ].sort(),
@@ -109,14 +114,18 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   ...new Set([
     ...TRACKED_PATHS,
+    ROOT_PACKAGE_PATH,
+    NAMED_SLOT_ARTIFACT_PATH,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_SELECTION_TEST_PATH,
     AUTHORING_INSPECTOR_SOURCE_PATH,
     AUTHORING_PREVIEW_SOURCE_PATH,
+    AUTHORING_SLOT_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
     AUTHORING_INSPECTOR_TEST_PATH,
     AUTHORING_PREVIEW_TEST_PATH,
+    AUTHORING_SLOT_TEST_PATH,
     INSPECTOR_PANEL_TEST_PATH,
     STRUCTURED_JSON_TEST_PATH,
   ]),
@@ -128,6 +137,28 @@ const FROZEN_ARTIFACT_PIN = Object.freeze({
   bytes: 73_111,
   sha256: "8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151",
 });
+const NAMED_SLOT_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T07",
+  proofId: "desen-app-named-slot-authoring",
+  profile: "desen.app.named-slot-authoring-proof.v1",
+  result: "PASS",
+  path: NAMED_SLOT_ARTIFACT_PATH,
+  bytes: 24_830,
+  sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+});
+const NAMED_SLOT_SOURCE_AND_TEST_PATHS = Object.freeze([
+  AUTHORING_DATA_SOURCE_PATH,
+  AUTHORING_SLOT_SOURCE_PATH,
+  AUTHORING_PREVIEW_SOURCE_PATH,
+  ADAPTER_CANVAS_SOURCE_PATH,
+  APPLICATION_SOURCE_PATH,
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/test/authoring-data.test.ts",
+  AUTHORING_SLOT_TEST_PATH,
+  AUTHORING_PREVIEW_TEST_PATH,
+  ADAPTER_CANVAS_TEST_PATH,
+  APPLICATION_TEST_PATH,
+]);
 
 const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
   Object.freeze({
@@ -303,7 +334,7 @@ const CURRENT_EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
   "rejects stale and cross-route selection identities without exposing overlay chrome",
 ]);
 const EXPECTED_APPLICATION_TEST_NAMES = Object.freeze([
-  "renders the exact selected surface, layer hierarchy, and read-only managed adapter canvas",
+  "renders the editable Source hierarchy and keeps the exact managed adapter canvas read only",
   "does not substitute the sign-in Source tree or adapter canvas for another preview surface",
 ]);
 const EXPECTED_SELECTION_TEST_NAMES = Object.freeze([
@@ -643,6 +674,67 @@ function authenticateHostSourceAuditArtifact(bytes) {
     },
   );
   return Object.freeze({ pin, artifact });
+}
+
+function authenticateNamedSlotArtifact(bytes) {
+  const pin = NAMED_SLOT_ARTIFACT_PIN;
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("PREREQUISITE_DRIFT", "The exact M09-T07 named-slot artifact receipt drifted.");
+  }
+  const artifact = parseJson(bytes, NAMED_SLOT_ARTIFACT_PATH);
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.task !== pin.task ||
+    artifact?.proofId !== pin.proofId ||
+    artifact?.profile !== pin.profile ||
+    artifact?.result !== pin.result ||
+    artifact?.claim?.completeCatalogDeclaredSlotProjection !== true ||
+    artifact?.claim?.publicStableIdInsert !== true ||
+    artifact?.claim?.publicCrossSlotMove !== true ||
+    artifact?.claim?.publicSameSlotReorder !== true ||
+    artifact?.claim?.nodeDeletionPreflight !== true ||
+    artifact?.claim?.deletionPreflightRunsPublicMutationAndValidation !== true ||
+    artifact?.claim?.publicNestedSubtreeDelete !== true ||
+    artifact?.claim?.rootDeletionDisabled !== true ||
+    artifact?.claim?.sourceMinimumDeletionDisabled !== true ||
+    artifact?.claim?.behaviorOwnedDeletePreservesEmptySlot !== true ||
+    artifact?.claim?.exactOwnDataDeletionSelectionCapture !== true ||
+    artifact?.claim?.continuousCompleteSourceRevalidation !== true ||
+    artifact?.claim?.failedDeletionPreservesCurrentDocument !== true ||
+    artifact?.claim?.cyclePreflight !== true ||
+    artifact?.claim?.insertionAdmissionCachedPerModelAndExactTarget !== true ||
+    artifact?.claim?.placementAdmissionCachedPerModelAndExactTarget !== true ||
+    artifact?.claim?.cachedPlacementBaseMaterializesBoundaryFinalIndex !== true ||
+    artifact?.claim?.componentPaletteRenderLimit !== 24 ||
+    artifact?.claim?.activeTabOnlyAuthoringWork !== true ||
+    artifact?.claim?.browserDataTransferReadsZero !== true ||
+    artifact?.claim?.expandedDropReadyBoundaries !== true ||
+    artifact?.claim?.stableNestedDragHover !== true ||
+    artifact?.claim?.explicitComponentDropTargetGuide !== true ||
+    artifact?.claim?.sourceAndPreviewCommitAtomically !== true ||
+    artifact?.claim?.deletionSourceAndPreviewCommitAtomically !== true ||
+    artifact?.claim?.deletionFocusManaged !== true ||
+    artifact?.claim?.slotChromeOutsideManagedCapabilitySubtree !== true
+  ) {
+    fail("PREREQUISITE_DRIFT", "The M09-T07 named-slot identity or retained claims drifted.");
+  }
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (!Array.isArray(trackedReceipts)) {
+    fail("PREREQUISITE_DRIFT", "The M09-T07 tracked receipt boundary is absent.");
+  }
+  const receiptsByPath = new Map(trackedReceipts.map((receipt) => [receipt?.path, receipt]));
+  const sourceAndTestReceipts = NAMED_SLOT_SOURCE_AND_TEST_PATHS.map((relativePath) => {
+    const receipt = receiptsByPath.get(relativePath);
+    if (
+      receipt === undefined ||
+      typeof receipt.bytes !== "number" ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256)
+    ) {
+      fail("PREREQUISITE_DRIFT", `The M09-T07 receipt for ${relativePath} is absent or invalid.`);
+    }
+    return Object.freeze({ path: relativePath, bytes: receipt.bytes, sha256: receipt.sha256 });
+  });
+  return Object.freeze({ pin, sourceAndTestReceipts: Object.freeze(sourceAndTestReceipts) });
 }
 
 function inspectControlledData(catalogBytes, bundleBytes) {
@@ -1700,14 +1792,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 128 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 129 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 376 || dynamicEdges !== 0) {
+  if (staticEdges !== 380 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -1779,11 +1871,12 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   const application = findGraphModule(graph, APPLICATION_SOURCE_PATH);
   if (
     application?.imports.includes(ADAPTER_CANVAS_SOURCE_PATH) !== true ||
-    application.imports.includes(AUTHORING_SELECTION_SOURCE_PATH) !== true
+    application.imports.includes(AUTHORING_SELECTION_SOURCE_PATH) !== true ||
+    application.imports.includes(AUTHORING_SLOT_SOURCE_PATH) !== true
   ) {
     fail(
       "VITE_GRAPH_DRIFT",
-      "The App application lost its adapter-canvas or Source-selection module edge.",
+      "The App application lost its adapter-canvas, Source-selection, or named-slot module edge.",
     );
   }
   const canvas = findGraphModule(graph, ADAPTER_CANVAS_SOURCE_PATH);
@@ -1912,8 +2005,9 @@ async function buildRuntimeGraphEvidence(workspaceRoot, hostArtifact) {
   });
 }
 
-function inspectPackage(bytes) {
-  const manifest = parseJson(bytes, APP_PACKAGE_PATH);
+function inspectPackage(appBytes, rootBytes) {
+  const manifest = parseJson(appBytes, APP_PACKAGE_PATH);
+  const rootManifest = parseJson(rootBytes, ROOT_PACKAGE_PATH);
   const requiredDependencies = {
     "@desen/catalog-sdk": "workspace:*",
     "@desen/editor-core": "workspace:*",
@@ -1938,9 +2032,25 @@ function inspectPackage(bytes) {
     manifest.scripts?.["test:inspector"] !==
       "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
     manifest.scripts?.["test:structured-inspector"] !==
-      "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx"
+      "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
+    manifest.scripts?.["test:named-slots"] !==
+      "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx"
   ) {
     fail("PACKAGE_CONTRACT_DRIFT", "The Desen App exact T03 package/runtime contract drifted.");
+  }
+  const namedSlotPrefix =
+    "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && ";
+  const namedSlotRootCommands = {
+    "generate:desen-app-named-slot-authoring": `${namedSlotPrefix}node scripts/generate-desen-app-named-slot-authoring-proof.mjs`,
+    "verify:desen-app-named-slot-authoring": `${namedSlotPrefix}node scripts/verify-desen-app-named-slot-authoring.mjs`,
+    "test:desen-app-named-slot-authoring": `${namedSlotPrefix}node --test tests/desen-app-named-slot-authoring.test.mjs`,
+  };
+  if (
+    Object.entries(namedSlotRootCommands).some(
+      ([name, command]) => rootManifest.scripts?.[name] !== command,
+    )
+  ) {
+    fail("PACKAGE_CONTRACT_DRIFT", "The exact T07 root proof command chain drifted.");
   }
   return deepFreeze({
     name: manifest.name,
@@ -1951,6 +2061,133 @@ function inspectPackage(bytes) {
     selectionFocusedTest: manifest.scripts["test:selection"],
     inspectorFocusedTest: manifest.scripts["test:inspector"],
     structuredInspectorFocusedTest: manifest.scripts["test:structured-inspector"],
+    namedSlotFocusedTest: manifest.scripts["test:named-slots"],
+    namedSlotRootCommands,
+  });
+}
+
+function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
+  const slots = decodeUtf8(files.get(AUTHORING_SLOT_SOURCE_PATH), AUTHORING_SLOT_SOURCE_PATH);
+  const application = decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH);
+  const css = decodeUtf8(
+    files.get("apps/desen-app/src/application.module.css"),
+    "apps/desen-app/src/application.module.css",
+  );
+  const slotTests = decodeUtf8(files.get(AUTHORING_SLOT_TEST_PATH), AUTHORING_SLOT_TEST_PATH);
+  const applicationTests = decodeUtf8(files.get(APPLICATION_TEST_PATH), APPLICATION_TEST_PATH);
+  for (const receipt of sourceAndTestReceipts) {
+    const bytes = files.get(receipt.path);
+    if (
+      bytes === undefined ||
+      bytes.byteLength !== receipt.bytes ||
+      sha256(bytes) !== receipt.sha256
+    ) {
+      fail(
+        "SOURCE_POLICY_VIOLATION",
+        `The live M09-T07 source/test receipt drifted: ${receipt.path}.`,
+      );
+    }
+  }
+  for (const marker of [
+    "  deleteDesenEditorNode,",
+    "insertDesenEditorNode",
+    "moveDesenEditorNode",
+    "reorderDesenEditorNode",
+    "evaluateAuthoringSlotInsertion",
+    "evaluateAuthoringSlotPlacement",
+    "evaluateAuthoringNodeDeletion",
+    "applyAuthoringNodeDelete",
+    "function captureComponentSelection(",
+    "placement.slot.children.length - 1 < placement.slot.contract.minimum",
+    "const VALIDATOR_BY_MODEL = new WeakMap<",
+    "const INSERTION_ADMISSION_BY_MODEL = new WeakMap<",
+    "const PLACEMENT_ADMISSION_BY_MODEL = new WeakMap<",
+    "materializePlacementCompatibility(cached.base, index)",
+    "nodeContainsOwner(placement.node, capturedSelection)",
+  ]) {
+    if (!slots.includes(marker)) {
+      fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 named-slot source lost ${marker}.`);
+    }
+  }
+  for (const marker of [
+    "const COMPONENT_PALETTE_RENDER_LIMIT = 24",
+    "components.slice(0, COMPONENT_PALETTE_RENDER_LIMIT)",
+    "if (!active) return null",
+    '{activeTab === "layers" ? (',
+    'active={activeTab === "components"}',
+    "data-drop-hovered={dropReady && dragHovered}",
+    "dragEnterDepth.current += 1",
+    "data-guide={readySlot === null}",
+    "No drop target selected",
+    "evaluateAuthoringNodeDeletion(route, model, selection)",
+    "applyAuthoringNodeDelete(document, referenceCatalog, route, selection)",
+    "setSelection(null)",
+    "layersTab.current?.focus()",
+  ]) {
+    if (!application.includes(marker)) {
+      fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App source lost ${marker}.`);
+    }
+  }
+  if (application.includes("dataTransfer.getData")) {
+    fail("SOURCE_POLICY_VIOLATION", "The live M09-T07 App reads browser DataTransfer authority.");
+  }
+  for (const marker of [
+    '.slotBoundary[data-drop-ready="true"]',
+    "margin-block: -1.125rem",
+    '.slotBoundary[data-drop-hovered="true"]',
+    '.componentSlotTarget[data-guide="true"]',
+    '.componentSlotTarget[data-drop-hovered="true"]',
+  ]) {
+    if (!css.includes(marker)) {
+      fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App CSS lost ${marker}.`);
+    }
+  }
+  for (const marker of [
+    "disables inserts whose Catalog defaults fail schema or bounded transition admission",
+    "finishes a cross-owner move across 1,024 sibling nodes",
+    "Array.from({ length: 1_025 }",
+    "removes a newly inserted nested subtree",
+    "deletes from a behavior-owned slot and retains its own empty slot key",
+    "disables root deletion and deletion across the owning slot minimum",
+    "captures deletion selections as exact own data and rejects cross-route authority",
+  ]) {
+    if (!slotTests.includes(marker)) {
+      fail("TEST_RECEIPT_DRIFT", `The live M09-T07 slot tests lost ${marker}.`);
+    }
+  }
+  for (const marker of [
+    "disables deletion for the surface root and a slot-minimum preflight without changing preview",
+    "preserves the selected layer, preview, and focus when deletion is rejected",
+    "expect(reads).toBe(0)",
+    'getAttribute("data-drop-hovered")',
+    "No drop target selected",
+  ]) {
+    if (!applicationTests.includes(marker)) {
+      fail("TEST_RECEIPT_DRIFT", `The live M09-T07 App tests lost ${marker}.`);
+    }
+  }
+  return deepFreeze({
+    task: "M09-T07",
+    completeNamedSlotProjectionImplemented: true,
+    publicStableIdInsertMoveAndReorderImplemented: true,
+    publicValidatedNestedSubtreeDeletionImplemented: true,
+    exactDeletionSelectionCaptureImplemented: true,
+    rootAndMinimumDeletionPreflightImplemented: true,
+    behaviorOwnedDeletePreservesEmptySlotImplemented: true,
+    failedDeletionPreservesDocumentImplemented: true,
+    exactTargetAdmissionCachesImplemented: true,
+    placementCacheMaterializesBoundaryFinalIndex: true,
+    cyclePreflightedBeforePublicEditorCoreMove: true,
+    componentPaletteRenderLimit: 24,
+    activeTabOnlyAuthoringWork: true,
+    largeSameSlotBoundaryEvaluationCovered: true,
+    expandedDropReadyBoundariesImplemented: true,
+    stableNestedDragHoverImplemented: true,
+    browserDataTransferReads: 0,
+    explicitComponentDropTargetGuideImplemented: true,
+    atomicDeletionPreviewAndFocusImplemented: true,
+    exactArtifactSourceAndTestReceipts: true,
+    artifactSourceAndTestReceiptCount: sourceAndTestReceipts.length,
   });
 }
 
@@ -2166,7 +2403,7 @@ function captureBuildOptions(rawOptions) {
   });
 }
 
-/** Authenticates frozen M09-T03 evidence and checks its live additive M09-T06 successor. */
+/** Authenticates frozen M09-T03 evidence and checks its live additive M09-T07 successor. */
 export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const canonicalWorkspaceRoot = await realpath(options.workspaceRoot);
@@ -2195,6 +2432,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
   }
   const shellPin = authenticateShellArtifact(shellBytes);
   const hostSourceAudit = authenticateHostSourceAuditArtifact(hostBytes);
+  const namedSlotEvidence = authenticateNamedSlotArtifact(files.get(NAMED_SLOT_ARTIFACT_PATH));
   const hostArtifact = hostSourceAudit.artifact;
   const data = inspectControlledData(files.get(CATALOG_PATH), files.get(BUNDLE_PATH));
   const sourcePolicy = verifyDesenAppRealAdapterCanvasSourcePolicy(
@@ -2206,7 +2444,11 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
     inspectSemanticSymbols(canonicalWorkspaceRoot),
     buildRuntimeGraphEvidence(canonicalWorkspaceRoot, hostArtifact),
   ]);
-  const packageContract = inspectPackage(files.get(APP_PACKAGE_PATH));
+  const packageContract = inspectPackage(files.get(APP_PACKAGE_PATH), files.get(ROOT_PACKAGE_PATH));
+  const namedSlotSuccessor = inspectNamedSlotSuccessor(
+    files,
+    namedSlotEvidence.sourceAndTestReceipts,
+  );
   const uiReceipts = inspectUiReceipts(
     files.get(ADAPTER_CANVAS_TEST_PATH),
     files.get(APPLICATION_TEST_PATH),
@@ -2281,12 +2523,15 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
         AUTHORING_SELECTION_TEST_PATH,
         AUTHORING_INSPECTOR_SOURCE_PATH,
         AUTHORING_PREVIEW_SOURCE_PATH,
+        AUTHORING_SLOT_SOURCE_PATH,
         INSPECTOR_PANEL_SOURCE_PATH,
         STRUCTURED_JSON_SOURCE_PATH,
         AUTHORING_INSPECTOR_TEST_PATH,
         AUTHORING_PREVIEW_TEST_PATH,
+        AUTHORING_SLOT_TEST_PATH,
         INSPECTOR_PANEL_TEST_PATH,
         STRUCTURED_JSON_TEST_PATH,
+        NAMED_SLOT_ARTIFACT_PATH,
       ].map((relativePath) => ({
         path: relativePath,
         bytes: files.get(relativePath).byteLength,
@@ -2294,7 +2539,8 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
       })),
     },
     successor: {
-      task: "M09-T06",
+      ...namedSlotSuccessor,
+      artifact: namedSlotEvidence.pin,
       stableSourceSelectionOverlayOwnedBySuccessor: true,
       historicalNoSelectionOverlayNonclaimAppliedToCurrentApp: false,
       outsideManagedCapabilitySubtree: true,

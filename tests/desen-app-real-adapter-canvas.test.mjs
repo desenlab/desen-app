@@ -118,7 +118,16 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.pf059Status, "OPEN");
   assert.equal(built.artifact.claim.p07Status, "PARTIAL");
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.successor.task, "M09-T06");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T07");
+  assert.deepEqual(built.currentCompatibility.successor.artifact, {
+    task: "M09-T07",
+    proofId: "desen-app-named-slot-authoring",
+    profile: "desen.app.named-slot-authoring-proof.v1",
+    result: "PASS",
+    path: "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json",
+    bytes: 24_830,
+    sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+  });
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[1], () => {
@@ -183,8 +192,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   );
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
-  assert.equal(currentRuntime.moduleCount, 128);
-  assert.equal(currentRuntime.staticEdges, 376);
+  assert.equal(currentRuntime.moduleCount, 129);
+  assert.equal(currentRuntime.staticEdges, 380);
   assert.equal(currentRuntime.dynamicEdges, 0);
   assert.equal(currentRuntime.sharedRuntimeModuleCount, 19);
   assert.equal(currentRuntime.realComponentModuleCount, 5);
@@ -236,6 +245,58 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
   assert.equal(
     built.currentCompatibility.successor.nestedObjectAndStructuredJsonEditingImplemented,
     true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.publicStableIdInsertMoveAndReorderImplemented,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.publicValidatedNestedSubtreeDeletionImplemented,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.exactDeletionSelectionCaptureImplemented, true);
+  assert.equal(
+    built.currentCompatibility.successor.rootAndMinimumDeletionPreflightImplemented,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.behaviorOwnedDeletePreservesEmptySlotImplemented,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.failedDeletionPreservesDocumentImplemented,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.exactTargetAdmissionCachesImplemented, true);
+  assert.equal(
+    built.currentCompatibility.successor.placementCacheMaterializesBoundaryFinalIndex,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.cyclePreflightedBeforePublicEditorCoreMove,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
+  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
+  assert.equal(built.currentCompatibility.successor.expandedDropReadyBoundariesImplemented, true);
+  assert.equal(built.currentCompatibility.successor.stableNestedDragHoverImplemented, true);
+  assert.equal(built.currentCompatibility.successor.browserDataTransferReads, 0);
+  assert.equal(
+    built.currentCompatibility.successor.explicitComponentDropTargetGuideImplemented,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.atomicDeletionPreviewAndFocusImplemented, true);
+  assert.equal(built.currentCompatibility.successor.exactArtifactSourceAndTestReceipts, true);
+  assert.equal(built.currentCompatibility.successor.artifactSourceAndTestReceiptCount, 11);
+  assert.equal(
+    built.currentCompatibility.application.package.namedSlotFocusedTest,
+    "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+  );
+  assert.equal(
+    built.currentCompatibility.application.package.namedSlotRootCommands[
+      "verify:desen-app-named-slot-authoring"
+    ],
+    "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node scripts/verify-desen-app-named-slot-authoring.mjs",
   );
   assert.equal(built.currentCompatibility.successor.dynamicEditingImplemented, false);
 });
@@ -601,7 +662,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
-  assert.equal(verified.currentGraphModules, 128);
+  assert.equal(verified.currentGraphModules, 129);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 

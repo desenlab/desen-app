@@ -3279,13 +3279,19 @@ This file records implementation discoveries without changing the frozen DESEN 0
   `STRUCTURAL_EDIT_TARGET_NOT_FOUND`, `STRUCTURAL_EDIT_TARGET_AMBIGUOUS`,
   `STRUCTURAL_EDIT_POSITION_INVALID`, `STRUCTURAL_EDIT_ROOT_FORBIDDEN`,
   `STRUCTURAL_EDIT_CYCLE_FORBIDDEN`, or `STRUCTURAL_EDIT_LIMIT_EXCEEDED`; structural re-admission
-  retains frozen protocol diagnostics. Catalog slot declaration, acceptance, and cardinality remain
-  unresolved authoring semantics for M08-T09 and M09-T07.
-- Future action: M08-T04 through M08-T06 must retain the same exact-command, atomic direct-Source,
-  stable-identity discipline. M08-T07 must prove authoring isolation and unknown-extension
-  preservation, M08-T09 must add continuous semantic validation, and M08-T10 must independently
-  prove cross-command determinism and the React/DOM boundary. A later protocol revision should
-  standardize these command semantics only if interoperable editor command logs become normative.
+  retains frozen protocol diagnostics. M08-T09 subsequently added continuous Catalog/Source
+  validation. M09-T07 now consumes the resulting current-package semantics in Desen App: exact
+  Catalog-declared owner/slot identity, accepted capability/category checks, effective slot
+  minimum/maximum, destination-boundary indices, source-minimum protection for move/delete, cycle
+  rejection, stable-ID preservation, and complete post-edit validation are re-derived for every
+  request. Browser drag data is inert rather than command authority; accepted edits still pass the
+  public Editor Core transition and Publisher preflight before one atomic preview replacement.
+  This closes the product's conservative authoring profile without changing DESEN 0.1.0 bytes or
+  making the editor-only position rules interoperable protocol commands.
+- Future action: The current Editor Core and Desen App profiles must retain the same exact-command,
+  atomic direct-Source, stable-identity discipline as state/binding, event/action, persistence, and
+  browser-E2E work is added. A later protocol revision should standardize structural command and
+  position semantics only if interoperable editor command logs become normative.
 
 ## PF-081 — Content edits need exact paths and ordered variant mechanics
 

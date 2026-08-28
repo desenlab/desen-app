@@ -22,6 +22,11 @@ const ADAPTER_SOURCE = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION_SOURCE = "apps/desen-app/src/application.tsx";
 const APPLICATION_CSS = "apps/desen-app/src/application.module.css";
 const INSPECTOR_SOURCE = "apps/desen-app/src/authoring-inspector.ts";
+const AUTHORING_SLOT_SOURCE = "apps/desen-app/src/authoring-slots.ts";
+const AUTHORING_SLOT_TEST = "apps/desen-app/test/authoring-slots.test.ts";
+const NAMED_SLOT_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
+const NAMED_SLOT_ARTIFACT_PIN_SHA256 =
+  "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let selectionSource;
@@ -29,10 +34,22 @@ let adapterSource;
 let applicationSource;
 let cssSource;
 let inspectorSource;
+let slotSource;
+let slotTestSource;
+let namedSlotArtifactBytes;
 let built;
 
 function expectedError(code) {
   return (error) => error instanceof DesenAppSelectionOverlayProofError && error.code === code;
+}
+
+function expectedSourcePolicyError(error) {
+  return (
+    error instanceof DesenAppSelectionOverlayProofError &&
+    ["SOURCE_POLICY_VIOLATION", "CSS_POLICY_VIOLATION", "OVERLAY_OWNERSHIP_VIOLATION"].includes(
+      error.code,
+    )
+  );
 }
 
 function changedByte(bytes) {
@@ -66,6 +83,9 @@ before(async () => {
     applicationSource,
     cssSource,
     inspectorSource,
+    slotSource,
+    slotTestSource,
+    namedSlotArtifactBytes,
   ] = await Promise.all([
     readFile(path.join(ROOT, PARENT_ARTIFACT)),
     readFile(path.join(ROOT, SELECTION_SOURCE), "utf8"),
@@ -73,6 +93,9 @@ before(async () => {
     readFile(path.join(ROOT, APPLICATION_SOURCE), "utf8"),
     readFile(path.join(ROOT, APPLICATION_CSS), "utf8"),
     readFile(path.join(ROOT, INSPECTOR_SOURCE), "utf8"),
+    readFile(path.join(ROOT, AUTHORING_SLOT_SOURCE), "utf8"),
+    readFile(path.join(ROOT, AUTHORING_SLOT_TEST), "utf8"),
+    readFile(path.join(ROOT, NAMED_SLOT_ARTIFACT)),
   ]);
   built = await buildDesenAppSelectionOverlayEvidence();
 });
@@ -100,7 +123,34 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[0], () => {
   );
   assert.equal(built.currentCompatibility.task, "M09-T04");
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.successor.task, "M09-T06");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T07");
+  assert.equal(
+    built.currentCompatibility.successor.artifact.sha256,
+    NAMED_SLOT_ARTIFACT_PIN_SHA256,
+  );
+  assert.equal(built.currentCompatibility.successor.artifact.bytes, 24_830);
+  assert.equal(
+    built.currentCompatibility.successor.artifact.exactLiveSourceAndTestReceipts.length,
+    11,
+  );
+  assert.deepEqual(
+    built.currentCompatibility.successor.artifact.exactLiveSourceAndTestReceipts.map(
+      ({ path: relativePath }) => relativePath,
+    ),
+    [
+      "apps/desen-app/src/adapter-canvas.tsx",
+      "apps/desen-app/src/application.module.css",
+      "apps/desen-app/src/application.tsx",
+      "apps/desen-app/src/authoring-data.ts",
+      "apps/desen-app/src/authoring-preview.ts",
+      "apps/desen-app/src/authoring-slots.ts",
+      "apps/desen-app/test/adapter-canvas.test.tsx",
+      "apps/desen-app/test/application.test.tsx",
+      "apps/desen-app/test/authoring-data.test.ts",
+      "apps/desen-app/test/authoring-preview.test.ts",
+      "apps/desen-app/test/authoring-slots.test.ts",
+    ],
+  );
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[1], () => {
@@ -189,6 +239,10 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
     built.currentCompatibility.application.package.structuredInspectorTestCommand,
     "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
   );
+  assert.equal(
+    built.currentCompatibility.application.package.namedSlotTestCommand,
+    "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+  );
   assert.equal(built.currentCompatibility.successor.schemaDerivedPrimitiveAndEnumControls, true);
   assert.equal(built.currentCompatibility.successor.publicEditorCoreAtomicMutation, true);
   assert.equal(built.currentCompatibility.successor.nestedObjectAndStructuredJsonEditing, true);
@@ -197,6 +251,46 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
   assert.equal(built.currentCompatibility.successor.sourceAndPreviewCommitAtomically, true);
   assert.equal(built.currentCompatibility.successor.inspectorOutsideManagedCapabilitySubtree, true);
   assert.equal(built.currentCompatibility.successor.selectionOverlayBoundaryRetained, true);
+  assert.equal(built.currentCompatibility.successor.completeNamedSlotProjectionImplemented, true);
+  assert.equal(
+    built.currentCompatibility.successor.publicStableIdInsertMoveAndReorderImplemented,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.publicValidatedNodeDeleteImplemented, true);
+  assert.equal(built.currentCompatibility.successor.exactOwnDataDeletionSelectionImplemented, true);
+  assert.equal(built.currentCompatibility.successor.rootAndSourceMinimumDeletionDisabled, true);
+  assert.equal(built.currentCompatibility.successor.behaviorOwnedDeletePreservesEmptySlot, true);
+  assert.equal(built.currentCompatibility.successor.failedDeletionPreservesCurrentDocument, true);
+  assert.equal(built.currentCompatibility.successor.browserDataTransferReadsZero, true);
+  assert.equal(built.currentCompatibility.successor.expandedDropReadyBoundaries, true);
+  assert.equal(built.currentCompatibility.successor.stableNestedDragHover, true);
+  assert.equal(built.currentCompatibility.successor.explicitComponentDropTargetGuide, true);
+  assert.equal(built.currentCompatibility.successor.deletionSourceAndPreviewCommitAtomically, true);
+  assert.equal(built.currentCompatibility.successor.deletionFocusManaged, true);
+  assert.deepEqual(built.currentCompatibility.successor.artifact.authenticatedClaims, {
+    publicValidatedDelete: true,
+    exactDeleteSelection: true,
+    rootAndSourceMinimumDeletionDisabled: true,
+    behaviorOwnedDeletePreservesEmptySlot: true,
+    failedDeletionPreservesCurrentDocument: true,
+    browserDataTransferReadsZero: true,
+    expandedDropReadyBoundaries: true,
+    stableNestedDragHover: true,
+    explicitComponentDropTargetGuide: true,
+    deletionSourceAndPreviewCommitAtomically: true,
+    deletionFocusManaged: true,
+  });
+  assert.deepEqual(
+    Object.fromEntries(
+      Object.entries(built.currentCompatibility.successor.artifact.localCommandReceipts).map(
+        ([name, receipt]) => [name, receipt.tests],
+      ),
+    ),
+    { pureSlot: 27, focusedNamedSlots: 70, fullApp: 151, rootProof: 9 },
+  );
+  assert.equal(built.currentCompatibility.successor.exactTargetAdmissionCachesImplemented, true);
+  assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
+  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[6], async () => {
@@ -245,12 +339,12 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
     },
     {
       ...baseline,
-      applicationSource: `${applicationSource}\nvoid import("@desen/editor-core");\n`,
+      applicationSource: `import type { DesenEditorDocument } from "@desen/editor-core";\n${applicationSource}`,
     },
   ]) {
     assert.throws(
       () => verifyDesenAppSelectionOverlaySourcePolicy(mutation),
-      expectedError("SOURCE_POLICY_VIOLATION"),
+      expectedSourcePolicyError,
     );
   }
 
@@ -268,6 +362,59 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
           ),
         ],
       ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppSelectionOverlayEvidence({
+      fileOverrides: new Map([
+        [
+          AUTHORING_SLOT_SOURCE,
+          Buffer.from(
+            replaceOnce(
+              slotSource,
+              "const INSERTION_ADMISSION_BY_MODEL = new WeakMap<",
+              "const INSERTION_ADMISSION_BY_MODEL = new Map<",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  for (const [relativePath, source, search, replacement] of [
+    [
+      AUTHORING_SLOT_SOURCE,
+      slotSource,
+      "export function applyAuthoringNodeDelete(",
+      "export function applyAuthoringNodeRemoval(",
+    ],
+    [
+      APPLICATION_SOURCE,
+      applicationSource,
+      'event.dataTransfer.setData("text/plain", "DESEN App authoring item");',
+      'event.dataTransfer.getData("text/plain");\n  event.dataTransfer.setData("text/plain", "DESEN App authoring item");',
+    ],
+    [APPLICATION_CSS, cssSource, "margin-block: -1.125rem;", "margin-block: 0;"],
+    [
+      AUTHORING_SLOT_TEST,
+      slotTestSource,
+      "disables root deletion and deletion across the owning slot minimum",
+      "allows root deletion and ignores the owning slot minimum",
+    ],
+  ]) {
+    await assert.rejects(
+      buildDesenAppSelectionOverlayEvidence({
+        fileOverrides: new Map([
+          [relativePath, Buffer.from(replaceOnce(source, search, replacement))],
+        ]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+  await assert.rejects(
+    buildDesenAppSelectionOverlayEvidence({
+      fileOverrides: new Map([[NAMED_SLOT_ARTIFACT, changedByte(namedSlotArtifactBytes)]]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );

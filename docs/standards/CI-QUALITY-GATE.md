@@ -52,13 +52,13 @@ The gate runs from a fresh workspace in this order:
 3. verify generated structural-validator bytes;
 4. build and typecheck the workspace once through a cache-read-disabled Turbo graph;
 5. run every package's complete test suite once with controlled concurrency;
-6. run all 87 proof verifiers directly in the reviewed order, ending with the M09-T06 Desen App
-   structured-Inspector proof;
-7. run all 87 root proof and mutation files as separate fail-fast processes; and
+6. run all 88 proof verifiers directly in the reviewed order, ending with the M09-T07 Desen App
+   named-slot-authoring proof;
+7. run all 88 root proof and mutation files as separate fail-fast processes; and
 8. run the dependency graph and hostile boundary fixtures.
 
-The current legacy expansion contains 4,427 leaf process invocations but only 293 distinct
-workloads. The optimized gate covers all 293 distinct workloads. Repeated prerequisite checks
+The current legacy expansion contains 4,437 leaf process invocations but only 296 distinct
+workloads. The optimized gate covers all 296 distinct workloads. Repeated prerequisite checks
 inside proof builders remain intact because those checks are evidence, not orchestration overhead.
 The measurement recursively expands exact root-level `pnpm <script>` references beginning at
 `check`; commands with no further local root-script indirection are leaves, and the distinct
@@ -68,9 +68,9 @@ inventory is sorted before hashing.
 
 The gate refuses to run when any of these conditions changes without an explicit review:
 
-- the 87 task IDs, verifier files, root test files, or their order;
-- any of the 649 legacy prerequisite command segments;
-- the exact 184-step normalized execution plan;
+- the 88 task IDs, verifier files, root test files, or their order;
+- any of the 657 legacy prerequisite command segments;
+- the exact 186-step normalized execution plan;
 - a focused package test that is no longer included by its full package suite;
 - any drift in the reviewed `test` command of any workspace package, including packages without a
   focused prerequisite;
@@ -89,43 +89,43 @@ Proof generators and evidence writers are never CI inputs. Proof output and succ
 from cache. Timing data is observational and cannot influence pass or fail.
 
 The reviewed live prerequisite inventory is pinned as
-`sha256:c9f90ee01326cd470d7f3f55518076334070dc29bbeb6282fa635a685584ab00`.
-The ordered 4,427-entry legacy leaf-invocation inventory is pinned as
-`sha256:e2f99d148a89ac2eb2d61014141519f5e00d435cf25f2dab8a92af42ac0cd853`; its sorted
-293-entry distinct-workload inventory is pinned as
-`sha256:e1d58f02e373a4f7f99c923d63b54f9027ee5908d567667e41f1b1be3310c1b4`. The retained
+`sha256:0ca9fcc3176df5b6707e2b704d0e3aa4dd4288bc3b7f813461d90ef3397c5d80`.
+The ordered 4,437-entry legacy leaf-invocation inventory is pinned as
+`sha256:d4cea0955703f00540994ecdaac6d5cdca4f9f1bb3037c7ba038da67d9991e7a`; its sorted
+296-entry distinct-workload inventory is pinned as
+`sha256:ddc6aa4a631dd92edb762c52d06277eec262b89f5e062e9c199a3c15f423304f`. The retained
 plan/projection is pinned as
-`sha256:480dc1ac119e1d939823d969e8e5add34504a7130345528263c8a6e8d59e164f`.
+`sha256:fc2320e67fab4582f8eb4deead2e7048cd207577c965931440a83daeefb9de79`.
 The scheduler-neutral live successor inventory is independently pinned as
-`sha256:68494f504cae698e253966c8f5a4b4917c96c166bdada22a422c0cbe0fe5e38b`.
+`sha256:67e537ed19f3518561909a342fa79e06d0f9adc49436aaf6c9816be1c840cb6f`.
 Its exact live workload-id set is pinned as
-`sha256:f1e9119f3fd1529a0d5fef530401631470dd41d2eb2e2182130f672ff892b7c5`, and its ordered
+`sha256:2ec8ce76c133230f1f16464ec2c46fff616e0179d480aa601decf34adeb7f4aa`, and its ordered
 id/label/command/argument equivalence projection is pinned as
-`sha256:a0bfb6171496c98c91d98b29f901511561d130b300aec432e679681a10de35d4`.
+`sha256:43cfaf9c54b29a56d2111267cbc923ff5488d3ef2a1112e0cc0aca2990e9feba`.
 The selector-only semantic impact graph is pinned independently as
-`sha256:a02725aa4c74e553766b561b535e5be44f67fe74abe9c98188f265fd2fb33fb1`.
-M09-T06 adds one verifier/root pair, so proof ownership contains 174 exact reader paths. The live
-ownership authority covers 1,184 tracked paths. Its exact path set is
-`sha256:08fb84419e3e77382cb2a88f1077b3b8804a9ced2759c50b92bff4f0b3644d58`, and its complete
-ownership projection is `sha256:8c2470bb1c835ab1359366960908b2ffc8a8dfa384061c37f511aad6cc91d2ef`.
-The eight ownership-category counts are `174 / 45 / 31 / 131 / 458 / 211 / 123 / 11` for
+`sha256:905d22e40524d26eac056ca32236f0948910a7ac6049b0d35c644f19e629d668`.
+M09-T07 adds one verifier/root pair, so proof ownership contains 176 exact reader paths. The live
+ownership authority covers 1,192 tracked paths. Its exact path set is
+`sha256:b9e2f0069bb8d0eba4738749245cc309d08cefff5ffe6ca18bd3356fcaa5e3e5`, and its complete
+ownership projection is `sha256:3561ac8305b7b34cfef0975abe5899aa54e637a4747ac0fa76bd39a129ce9f03`.
+The eight ownership-category counts are `176 / 45 / 31 / 132 / 460 / 213 / 124 / 11` for
 `PROOF_UNIT`, `CI_POLICY`, `DEPENDENCY_POLICY`, `FROZEN_INPUT`, `PACKAGE_OR_APPLICATION`,
 `SHARED_PROOF_INFRASTRUCTURE`, `PROJECT_DOCUMENTATION`, and `REPOSITORY_POLICY`, respectively.
-The prior M08-T10 and M09-T01–M09-T05 ownership receipts remain historical rather than being
-presented as the M09-T06 successor.
+The prior M08-T10 and M09-T01–M09-T06 ownership receipts remain historical rather than being
+presented as the M09-T07 successor.
 The preceding M07-T03 retained/neutral workload-set equality receipt remains historically pinned as
 `sha256:49977fca154b0bf06639b8e3f0b667d04e060603cc14ec99660c8c434b7f5edb`, and its ordered
 projection is pinned as
 `sha256:0cf74075304304385594ae6c7def89c76f22a82be3059bc0841f408682f198f8`; it is historical, not
-the historical M08-T10 authority. The M09-T06 authority-specific required plan is pinned as
-`sha256:89c68ec52affb10717459bb2dea41cd1608af2b43212db7dc54bdaaab95f1433`; the
+the historical M08-T10 authority. The M09-T07 authority-specific required plan is pinned as
+`sha256:00c0fbb14b15bf898872ba09b61c9a3d8995f60f42cf1bf894a0acb096dc2490`; the
 non-authoritative shadow form is pinned separately as
-`sha256:82f62e41ac973b45b17cc94fd0ab811807be548610c9b588669ee6bd259e82f6`.
+`sha256:952fd6519a0746c0849716fad300badaa84f2bf5fe4914f97662546cd5a122dc`.
 The historical M08-T10 selector and required-runner authorities remain authenticated by the frozen
-I07-04 promotion artifact. The reviewed M09-T06 selector is
-`sha256:0fda33f0ea32214f0a20adb666d9abefd57fcdfcc4e5aa03401a6be7d3ecec2a`; its required-runner
+I07-04 promotion artifact. The reviewed M09-T07 selector is
+`sha256:5301aedd0f4e7fe44bb07f67d6dd0dfaeea08cbc7ecd431ddf619345805656d0`; its required-runner
 authority is independently pinned as
-`sha256:7ed5299efa270cc8e17c8411827a4370f4128ab955d6ea5da6a6f3fe4f752081` and is not inferred
+`sha256:7b660497db1d82411a1e6c223d9225c5608ceb1cf25daddc9cc84de49661b559` and is not inferred
 from selector success. The frozen promotion baseline's selection-equivalence receipt remains
 `sha256:97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698`, and its observation
 threshold remains
@@ -223,10 +223,12 @@ distinct leaves, and 180 normalized single-pass steps. Its reviewed inventory an
 historical authorities above; they make no hosted M09-T04 pass claim. The historical M09-T05 successor
 contains 86 proof pairs, 641 prerequisite segments, 4,417 ordered leaf invocations, 290 distinct
 leaves, and 182 normalized single-pass steps. Its reviewed receipts remain historical and make no
-hosted M09-T05 pass claim. The current M09-T06 successor contains 87 proof pairs, 649 prerequisite
-segments, 4,427 ordered leaf invocations, 293 distinct leaves, and 184 normalized single-pass
-steps. Its reviewed inventory and plan pins are the live authorities above; they make no hosted
-M09-T06 pass claim.
+hosted M09-T05 pass claim. The historical M09-T06 successor contains 87 proof pairs, 649
+prerequisite segments, 4,427 ordered leaf invocations, 293 distinct leaves, and 184 normalized
+single-pass steps. The current M09-T07 successor contains 88 proof pairs, 657 prerequisite segments,
+4,437 ordered leaf invocations, 296 distinct leaves, and 186 normalized single-pass steps. Its
+reviewed inventory and plan pins are the live authorities above; they make no hosted M09-T07 pass
+claim.
 
 `SIGINT` and `SIGTERM` become permanent cancellation state, are forwarded to the active process
 group, stop later steps, and preserve exit codes 130 and 143. This prevents a superseded workflow
@@ -516,24 +518,24 @@ The retained sequential runner is not an automatic peer: it runs only when a tru
 manually dispatches `legacy-rollback`. Event name and mode are part of the concurrency key, so a
 rollback exercise cannot cancel a pull-request or `main` authority run.
 
-All 184 workloads have one exact shared-state class:
+All 186 workloads have one exact shared-state class:
 
 | Execution class                  | Count | Scheduling rule                                      |
 | -------------------------------- | ----: | ---------------------------------------------------- |
 | `GLOBAL_EXCLUSIVE`               |     6 | Drained repository-wide barrier                      |
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     3 | Workspace and public-package output writers          |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Drained complete package-test barrier                |
-| `PROOF_READ_ONLY`                |    74 | No shared workspace writes                           |
-| `PROOF_OS_TEMP_ISOLATED`         |    89 | Writes only to a workload-owned OS temp root         |
+| `PROOF_READ_ONLY`                |    75 | No shared workspace writes                           |
+| `PROOF_OS_TEMP_ISOLATED`         |    90 | Writes only to a workload-owned OS temp root         |
 | `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases under a drained scheduler       |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | Direct source-audit workspace-temp root-test barrier |
 
-Seventy-six proof pairs may overlap pair-by-pair at concurrency two after their predecessors pass. A
+Seventy-seven proof pairs may overlap pair-by-pair at concurrency two after their predecessors pass. A
 pair's root test still follows its verifier. Ten real tracked-alias pairs and the
 `reference-host-web-source-audit` pair are the eleven exclusive barriers.
-The normalized topology contains eight serial prefix workloads, 76 ordinary proof pairs, eleven
-exclusive proof-pair barriers, and two serial suffix workloads: `8 + (76 * 2) + (11 * 2) + 2 =
-184`. The serial `editor-web-public-package-contract` prefix owns the editor-web `dist`
+The normalized topology contains eight serial prefix workloads, 77 ordinary proof pairs, eleven
+exclusive proof-pair barriers, and two serial suffix workloads: `8 + (77 * 2) + (11 * 2) + 2 =
+186`. The serial `editor-web-public-package-contract` prefix owns the editor-web `dist`
 writer after the editor-core public-package contract and before the M08-T08 verifier.
 
 The added `control-plane-reference-preflight` pair is ordinary and non-barrier. Its verifier is
@@ -698,7 +700,7 @@ directly authenticates the three prerequisite artifacts before App build, typech
 Inspector tests, artifact verification, and the root proof.
 
 The M09-T06 `desen-app-structured-inspector` pair is ordinary and non-barrier. Its sole exact
-formal impact parent is `desen-app-schema-inspector`; the current connected closure contains 54
+formal impact parent is `desen-app-schema-inspector`; its reviewed T06 connected closure contains 54
 proof units and 118 workloads at
 `sha256:5ccac855e50f6fe0b3b17f1d36b5dd72ac4657132bf9ee7280f5fe8cf297d5ec`. Its verifier is
 `PROOF_READ_ONLY`; its root mutation test is `PROOF_OS_TEMP_ISOLATED` and receives only
@@ -706,6 +708,16 @@ proof units and 118 workloads at
 filesystem-compatibility, or verifier runtime-probe authority. Its local wrapper directly
 authenticates the frozen M09-T05 artifact before the App build, typecheck, structured-Inspector
 suite, artifact verification, and root proof.
+
+The M09-T07 `desen-app-named-slot-authoring` pair is ordinary and non-barrier. Its sole exact
+formal impact parent is `desen-app-structured-inspector`; the current connected closure contains 55
+proof units and 120 workloads at
+`sha256:6a7cb544efd2906ccd09db03209c54888a25f366b080b5cf37b87c43edc2651c`. Its verifier is
+`PROOF_READ_ONLY`; its root mutation test is `PROOF_OS_TEMP_ISOLATED` and receives only
+`NODE_TEST_HARNESS`. Neither workload receives workspace-write, listener-port, native-addon,
+filesystem-compatibility, or verifier runtime-probe authority. Its local wrapper directly
+authenticates the frozen M09-T06 artifact before the App build, typecheck, focused named-slot suite,
+artifact verification, and root proof.
 
 Only these verifier proofs receive both runner-owned temp-write and child-runtime-probe authority:
 
@@ -747,7 +759,7 @@ workload record grants them. Inherited `NODE_OPTIONS` is rejected, and a mandato
 TCP and UDP listener binding. The runner authenticates temp identity again before cleanup.
 
 Eighteen root-test records also own an orthogonal schema-v2 Node-permission compatibility policy:
-162 workloads are `NONE`, two are `FIXTURE_COPY`, fifteen are `REVIEWED_SYMLINK`, and one is
+168 workloads are `NONE`, two are `FIXTURE_COPY`, fifteen are `REVIEWED_SYMLINK`, and one is
 `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy is limited to the exact code-owned workspace
 source, a no-follow destination inside the workload's own temp root, two reviewed recursive option
 shapes, bounded regular trees, and matching source/destination fingerprints. Symlink handling
@@ -992,7 +1004,17 @@ Append-only checkpoint sequence 45 links the exact sequence-44 head to
 `sha256:340460237dd173995d4d0fa158f0e4c6c54b76d55958757d742a981466fd213f`. It preserves sequences
 1–44 and all 40 predecessor artifact receipts, appends the T06 artifact at index 40, reseals App
 reader indexes `[70, 71, 72, 73, 74, 75, 76, 77, 78, 79]`, and appends the T06 readers at
-`[80, 81]`; the current chain authenticates 41 artifacts and 82 readers.
+`[80, 81]`; that chain authenticates 41 artifacts and 82 readers.
+The exact 24,830-byte M09-T07 task artifact is
+`docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json` at
+`sha256:daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f`, with task report
+`docs/proof/DESEN-APP-NAMED-SLOT-AUTHORING.md`. Its exact frozen M09-T06 parent is verified directly
+before the 70-case focused named-slot suite, 151-case complete App suite, and 9-case root proof.
+Append-only checkpoint sequence 46 links the exact sequence-45 head to
+`sha256:f09ec643d1b2756174ca47fae99837a68f6656bec0c6933e566d5075713a0f5f`. It preserves sequences
+1–45 and all 41 predecessor artifact receipts, appends the T07 artifact at index 41, reseals App
+reader indexes `[70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81]`, and appends the T07 readers at
+`[82, 83]`; the current chain authenticates 42 artifacts and 84 readers.
 The first hosted PR run exposed an isolation-fixture workspace-target symlink denied by Node's
 permission model. The resealed fixture uses only absolute runner-temporary targets, and the exact
 isolation suite passes 8/8 without permission widening. This correction remains local and does not
@@ -1022,6 +1044,11 @@ checkpoint suites pass 73/73, 118/118, 10/10, and 68/68 locally. The CI-policy s
 270/270, and the complete structural glob passes 323/323. Sequence 45 is pinned at
 `sha256:340460237dd173995d4d0fa158f0e4c6c54b76d55958757d742a981466fd213f` with 41 artifacts and
 82 readers. No M09-T06 required-gate or hosted result is claimed in this standard.
+The M09-T07 focused named-slot, complete App, independent root, and sequence-46 checkpoint suites
+pass 70/70, 151/151, 9/9, and 69/69 locally. The complete structural glob passes 329/329. Sequence
+46 is pinned at `sha256:f09ec643d1b2756174ca47fae99837a68f6656bec0c6933e566d5075713a0f5f`
+with 42 artifacts and 84 readers. No M09-T07 required-gate or hosted result is claimed in this
+standard.
 Global progress and next-task ownership remain in the project status documents.
 `DEBT-I07-007` keeps the sequential runner, rollback-only equivalence adapter, and other rollback
 references under I07-05 until their exact machine-checked removal conditions in

@@ -39,11 +39,26 @@ describe("Desen App catalog authoring read model", () => {
       "Text",
       "Text field",
     ]);
+    const stack = model.components.find((component) => component.id === "com.example.ui/Stack");
+    expect(stack?.defaultProps).toEqual({ direction: "vertical", gap: "md" });
+    expect(stack?.slotContracts).toEqual([
+      {
+        acceptedCapabilityIds: [],
+        acceptedCategories: ["layout", "content", "input", "action", "feedback", "complex"],
+        constrainsChildren: true,
+        description: undefined,
+        maximum: null,
+        minimum: 0,
+        name: "default",
+        required: false,
+      },
+    ]);
     expect(model.surfaces.map((surface) => surface.id)).toEqual(["home", "sign-in"]);
 
     const signIn = model.surfaces.find((surface) => surface.id === "sign-in");
     expect(signIn?.root.id).toBe("sign-in.layout");
     expect(signIn?.root.displayName).toBe("Stack");
+    expect(signIn?.root.slotContracts).toEqual(stack?.slotContracts);
     expect(signIn?.root.slots.map((slot) => slot.name)).toEqual(["default"]);
     expect(signIn?.root.slots[0]?.children.map((child) => child.id)).toEqual([
       "sign-in.title",
@@ -56,6 +71,8 @@ describe("Desen App catalog authoring read model", () => {
       signIn?.root.slots[0]?.children.find((child) => child.id === "sign-in.error")?.conditional,
     ).toBe(true);
     expect(Object.isFrozen(model)).toBe(true);
+    expect(Object.isFrozen(stack?.defaultProps)).toBe(true);
+    expect(Object.isFrozen(stack?.slotContracts)).toBe(true);
     expect(Object.isFrozen(signIn?.root.slots[0]?.children)).toBe(true);
   });
 

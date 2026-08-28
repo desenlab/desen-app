@@ -16,7 +16,7 @@ import {
 
 const WORKSPACE_ROOT = resolve(import.meta.dirname, "../../..");
 const COMPATIBILITY_PROJECTION_SHA256 =
-  "480dc1ac119e1d939823d969e8e5add34504a7130345528263c8a6e8d59e164f";
+  "fc2320e67fab4582f8eb4deead2e7048cd207577c965931440a83daeefb9de79";
 
 function cloneInventory() {
   return structuredClone(createExhaustiveWorkloadInventory());
@@ -84,19 +84,19 @@ async function currentRepositoryInputs() {
   };
 }
 
-test("the neutral inventory preserves the exact 184-workload successor projection", () => {
+test("the neutral inventory preserves the exact 186-workload successor projection", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const projection = inventory.nodes.map(({ id, command, args }) => ({ id, command, args }));
   const projectionSha256 = createHash("sha256").update(JSON.stringify(projection)).digest("hex");
 
   assert.equal(inventory.schemaVersion, 1);
   assert.equal(inventory.profile, "desen.ci.exhaustive-workload-inventory.v1");
-  assert.equal(inventory.workloadCount, 184);
-  assert.equal(inventory.proofUnitCount, 87);
+  assert.equal(inventory.workloadCount, 186);
+  assert.equal(inventory.proofUnitCount, 88);
   assert.equal(inventory.inventorySha256, EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256);
   assert.equal(
     EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    "68494f504cae698e253966c8f5a4b4917c96c166bdada22a422c0cbe0fe5e38b",
+    "67e537ed19f3518561909a342fa79e06d0f9adc49436aaf6c9816be1c840cb6f",
   );
   assert.equal(projectionSha256, COMPATIBILITY_PROJECTION_SHA256);
   assert.deepEqual(
@@ -113,11 +113,11 @@ test("the neutral inventory preserves the exact 184-workload successor projectio
     ],
   );
   assert.equal(
-    inventory.nodes.slice(8, 95).every(({ id }) => id.startsWith("verify-")),
+    inventory.nodes.slice(8, 96).every(({ id }) => id.startsWith("verify-")),
     true,
   );
   assert.equal(
-    inventory.nodes.slice(95, 182).every(({ id }) => id.startsWith("test-")),
+    inventory.nodes.slice(96, 184).every(({ id }) => id.startsWith("test-")),
     true,
   );
   assert.deepEqual(
@@ -125,9 +125,9 @@ test("the neutral inventory preserves the exact 184-workload successor projectio
     ["dependency-boundaries", "boundary-fixtures"],
   );
   assert.deepEqual(inventory.proofUnits.at(-1), {
-    id: "desen-app-structured-inspector",
-    verifierNodeId: "verify-desen-app-structured-inspector",
-    rootTestNodeId: "test-desen-app-structured-inspector",
+    id: "desen-app-named-slot-authoring",
+    verifierNodeId: "verify-desen-app-named-slot-authoring",
+    rootTestNodeId: "test-desen-app-named-slot-authoring",
   });
   assert.equal(validateExhaustiveWorkloadInventory(inventory), inventory);
 });
@@ -137,17 +137,17 @@ test("repository manifests and discovered proof files retain the reviewed parity
   const receipt = validateRepositoryWorkloadInputs(inputs);
 
   assert.deepEqual(receipt, {
-    proofCount: 87,
-    verifierCount: 87,
-    rootTestCount: 87,
+    proofCount: 88,
+    verifierCount: 88,
+    rootTestCount: 88,
     ciContractScriptCount: 5,
     ciContractScriptSha256: EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
-    legacyPrerequisiteCount: 649,
-    legacyPrerequisiteSha256: "c9f90ee01326cd470d7f3f55518076334070dc29bbeb6282fa635a685584ab00",
-    legacyLeafInvocationCount: 4427,
-    legacyLeafInvocationSha256: "e2f99d148a89ac2eb2d61014141519f5e00d435cf25f2dab8a92af42ac0cd853",
-    distinctLeafWorkloadCount: 293,
-    distinctLeafWorkloadSha256: "e1d58f02e373a4f7f99c923d63b54f9027ee5908d567667e41f1b1be3310c1b4",
+    legacyPrerequisiteCount: 657,
+    legacyPrerequisiteSha256: "0ca9fcc3176df5b6707e2b704d0e3aa4dd4288bc3b7f813461d90ef3397c5d80",
+    legacyLeafInvocationCount: 4437,
+    legacyLeafInvocationSha256: "d4cea0955703f00540994ecdaac6d5cdca4f9f1bb3037c7ba038da67d9991e7a",
+    distinctLeafWorkloadCount: 296,
+    distinctLeafWorkloadSha256: "ddc6aa4a631dd92edb762c52d06277eec262b89f5e062e9c199a3c15f423304f",
     testConfigurationFileCount: 0,
     workspaceTestScriptCount: 16,
     workspaceTestScriptSha256: "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab",
@@ -294,7 +294,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
       ports: "NONE",
     },
   });
-  assert.equal(boundaries.dependencies.length, 87);
+  assert.equal(boundaries.dependencies.length, 88);
 
   for (const unit of inventory.proofUnits) {
     const verifier = nodeById.get(unit.verifierNodeId);

@@ -1055,19 +1055,48 @@ required-gate or hosted-CI pass. M09-T06 is `DONE`; P-08 remains `NOT_PROVEN`, P
 `OPEN`, proof gates remain 10/13, implementation progress is 101/145 (70%), M09 is 6/14 (43%),
 dynamic `$` editing remains M09-T08, and M09-T07 is next.
 
+M09-T07 now exposes Catalog-declared named-slot insertion boundaries as an App-owned authoring
+surface. Valid layer-drop boundaries expand into the space between rows while dragging, retain
+stable hover state through nested child events, and preserve keyboard/click placement. Components
+show one explicit selected-slot target with owner, slot, cardinality, and position; without a
+target, drag/insert is disabled and a native control returns the user to Layers. Browser
+`DataTransfer` is an inert hint only; current App drag intent plus current Source/Catalog admission
+is the sole edit authority.
+
+Insert, move, reorder, and delete requests re-derive exact route, owner, slot, capability,
+acceptance, minimum/maximum, placement, and selection identity from the current validator-admitted
+model. Public Editor Core produces the candidate, complete validation admits it, and Publisher
+preflight must succeed before one atomic `{document, preview}` replacement. Root or stale deletion,
+source-minimum violations, invalid targets, cycles, rejected children, and preview failures expose
+no partial Source. Successful delete clears stale selection and returns focus to Layers; rejection
+preserves selection, preview, and focus.
+
+The focused named-slot suite passes 70/70, the complete App suite passes 151/151, the independent
+root proof passes 9/9, and the complete structural CI glob passes 329/329. Exact evidence is the 24,830-byte
+`docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json` artifact at
+`sha256:daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f`. The live local CI
+authority contains 186 workloads/88 proof pairs, a 55-proof-unit/120-workload connected closure,
+and 1,192-path/176-proof-owned ownership. Sequence 46 passes 69/69 at
+`sha256:f09ec643d1b2756174ca47fae99837a68f6656bec0c6933e566d5075713a0f5f` with 42 artifacts and
+84 readers. In-app-browser inspection covered the guide, selected target, click/keyboard insertion,
+delete affordance, root-delete explanation, and clean console; native drag automation and
+real-browser E2E remain unclaimed. M09-T07 is `DONE`; P-08 remains `NOT_PROVEN`, PF-025 remains
+`OPEN`, proof gates remain 10/13, implementation progress is 102/145 (70%), M09 is 7/14 (50%), and
+M09-T08 is next.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `101 / 145 tasks complete (70%)`
+- Overall implementation progress: `102 / 145 tasks complete (70%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
-- M09 progress: `6 / 14 tasks complete (43%)`
+- M09 progress: `7 / 14 tasks complete (50%)`
 - Proof-gate progress: `10 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1154,7 +1183,8 @@ dynamic `$` editing remains M09-T08, and M09-T07 is next.
   `M09-T03 — Exact reference-adapter canvas`,
   `M09-T04 — Source-identity selection outside managed capability subtrees`,
   `M09-T05 — Schema-driven primitive/enum inspector controls`,
-  `M09-T06 — Nested-object controls and honest structured-JSON fallback`
+  `M09-T06 — Nested-object controls and honest structured-JSON fallback`,
+  `M09-T07 — Named-slot drop, move, reorder, cardinality, acceptance, and deletion UI`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -1164,7 +1194,7 @@ dynamic `$` editing remains M09-T08, and M09-T07 is next.
 - Conditional operational completion: CI-02's `DONE` entry in this unmerged change is a closure
   candidate; it is not yet canonical. The exact bounded baseline passes; focused CI-02 contract
   tests pass 2/2; the complete legacy CI contract file passes 28/28. The
-  45-checkpoint/41-artifact/82-reader authority, infrastructure-debt verifier, and I07-04 promotion
+  46-checkpoint/42-artifact/84-reader authority, infrastructure-debt verifier, and I07-04 promotion
   verifier remain passing. One earlier attempt observed this host intermittently deny the unchanged
   process-group probe `process.kill(-pid, 0)` with `EPERM`; it passed on the final rerun. The
   implementation candidate at `921fd54c406f22fb6da25b0fdd29598ac8950750` passed PR #56's hosted
@@ -1176,11 +1206,11 @@ dynamic `$` editing remains M09-T08, and M09-T07 is next.
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Next implementation task: `M09-T07 — Named-slot drop, move, reorder, cardinality, and acceptance UI`
+- Next implementation task: `M09-T08 — Local state and binding editor UI`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  6/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T06 are `DONE`; `N-042` is `TESTED`, P-06
+  7/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T07 are `DONE`; `N-042` is `TESTED`, P-06
   is `PROVEN`, P-07 and P-16 are `PARTIAL`, proof gates are 10/13, P-08 remains `NOT_PROVEN`,
-  PF-025 remains `OPEN`, and implementation progress is 101/145.
+  PF-025 remains `OPEN`, and implementation progress is 102/145.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -1220,7 +1250,13 @@ dynamic `$` editing remains M09-T08, and M09-T07 is next.
   atomic Publisher-backed preview. Its live local CI authority contains 184 workloads/87 proof
   pairs, a 54-proof-unit/118-workload connected closure, 1,184-path/174-proof-owned ownership, and
   a sequence-45 checkpoint with 41 artifacts and 82 readers. No required-gate or hosted result is
-  claimed.
+  claimed. M09-T07 is `DONE` with its exact named-slot artifact, 70/70 focused cases, 151/151
+  complete App cases, 9/9 independent root proof, expanded and stable App-owned drop boundaries,
+  explicit Components targeting, public insert/move/reorder/delete transitions, exact slot
+  admission, deletion-minimum enforcement, and atomic Publisher-backed preview/focus behavior. Its
+  live local CI authority contains 186 workloads/88 proof pairs, a 55-proof-unit/120-workload
+  connected closure, 1,192-path/176-proof-owned ownership, and sequence 46 with 42 artifacts and 84
+  readers. Native browser drag automation and real-browser E2E are not claimed.
 
 ## Completed preparation
 
@@ -3814,6 +3850,52 @@ M09-T06 evidence:
 - coverage decision: M09-T06 is `DONE`; P-08 remains `NOT_PROVEN`; PF-025 remains `OPEN`; proof
   gates remain 10/13; overall progress advances to 101/145 (70%); M09 advances to 6/14 (43%);
   dynamic `$` editing remains M09-T08, and M09-T07 is next
+
+M09-T07 evidence:
+
+- `docs/proof/DESEN-APP-NAMED-SLOT-AUTHORING.md`
+- `docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json`, exactly 24,830 bytes at
+  `sha256:daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f`
+- prerequisite authority: the exact frozen M09-T06 structured-Inspector artifact is authenticated
+  before any M09-T07 claim; M09-T01–M09-T06 compatibility readers bind the new production and test
+  receipts without regenerating predecessor artifacts
+- slot authority: exact current route, owner identity, Catalog slot contract, Source presence,
+  child order, accepted capability/category, minimum/maximum, component defaults, node placement,
+  and cycle relationship are re-derived for every request
+- interaction boundary: valid Layers drop boundaries expand across the inter-row gap and retain
+  nested-event hover state; Components exposes one explicit owner/slot/cardinality/position target
+  or disables placement and directs focus to Layers; click and keyboard alternatives remain
+  available, and browser transfer data is never mutation authority
+- mutation boundary: insert, cross-slot move, same-slot reorder, and exact selected-subtree delete
+  use only public Editor Core commands; root deletion, stale identity, source-minimum violation,
+  invalid index, rejected child, cycle, bounded-default failure, or complete-validation failure
+  returns no partial Source or identity
+- preview and focus boundary: complete continuous validation and Publisher preflight precede one
+  atomic session-local `{document, preview}` replacement; successful delete clears selection and
+  returns focus to Layers, while a rejected deletion preserves selection, preview, and focus
+- local proof: the pure slot suite passes 27/27, the focused named-slot suite passes 70/70, the
+  complete App suite passes 151/151, the independent root proof passes 9/9, and the complete
+  structural CI glob passes 329/329; App typecheck, lint, and production build pass locally
+- browser inspection: the in-app browser confirms the targetless guide, selected-slot target,
+  click/keyboard insertion, enabled delete affordance, disabled root deletion with explanation,
+  and an error-free console; native drag-event automation was not observed and is not promoted to
+  browser-E2E evidence
+- CI authority: the live local inventory registers 186 workloads and 88 proof pairs, split into 77
+  ordinary pairs and 11 barriers; the formal parent produces a 55-proof-unit/120-workload connected
+  closure; complete ownership covers 1,192 tracked paths and 176 proof-owned paths
+- checkpoint authority: sequence 46 passes 69/69 at
+  `sha256:f09ec643d1b2756174ca47fae99837a68f6656bec0c6933e566d5075713a0f5f`, preserves sequences
+  1–45 and all 41 predecessor artifacts, appends T07 artifact index 41, reseals App compatibility
+  readers `[70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81]`, and appends T07 proof/root readers
+  `[82, 83]`; the current chain contains 42 artifacts and 84 readers
+- evidence boundary: these task, CI, ownership, browser-inspection, and checkpoint receipts are
+  local; no required-gate, hosted-CI, native-drag automation, or real-browser E2E result is inferred
+- scope nonclaims: no dynamic state/binding or event/action authoring, Design/Run mode, durable
+  save/open, diagnostics navigation/placeholders, control-plane publication, activation,
+  arbitrary-future-Catalog, native-target, or pixel-fidelity guarantee is implemented or proven
+- coverage decision: M09-T07 is `DONE`; P-08 remains `NOT_PROVEN`; PF-025 remains `OPEN`; proof
+  gates remain 10/13; overall progress advances to 102/145 (70%); M09 advances to 7/14 (50%);
+  M09-T08 is next
 
 ## Status vocabulary
 

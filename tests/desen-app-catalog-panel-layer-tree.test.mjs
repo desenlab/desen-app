@@ -86,7 +86,7 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.taskStatus, "DONE");
   assert.equal(built.artifact.claim.shellCompatibilityRetained, true);
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.successor.task, "M09-T06");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T07");
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[1], () => {
@@ -235,6 +235,73 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
     built.currentCompatibility.successor.nestedObjectAndStructuredJsonEditingImplemented,
     true,
   );
+  assert.deepEqual(built.currentCompatibility.successor.artifact, {
+    task: "M09-T07",
+    proofId: "desen-app-named-slot-authoring",
+    profile: "desen.app.named-slot-authoring-proof.v1",
+    result: "PASS",
+    path: "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json",
+    bytes: 24_830,
+    sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+  });
+  assert.equal(built.currentCompatibility.successor.completeNamedSlotProjectionImplemented, true);
+  assert.equal(
+    built.currentCompatibility.successor.catalogAdmissionAndCardinalityPreflightImplemented,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.publicStableIdInsertMoveAndReorderImplemented,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.publicValidatedNodeDeletionImplemented, true);
+  assert.equal(
+    built.currentCompatibility.successor.deletionPreflightRunsPublicMutationAndValidation,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.rootAndSourceMinimumDeletionDisabled, true);
+  assert.equal(built.currentCompatibility.successor.behaviorOwnedDeletePreservesEmptySlot, true);
+  assert.equal(built.currentCompatibility.successor.exactOwnDataDeletionSelectionCapture, true);
+  assert.equal(built.currentCompatibility.successor.continuousCompleteSourceRevalidation, true);
+  assert.equal(built.currentCompatibility.successor.failedDeletionPreservesCurrentDocument, true);
+  assert.equal(built.currentCompatibility.successor.deletionSourceAndPreviewCommitAtomically, true);
+  assert.equal(built.currentCompatibility.successor.deletionFocusManaged, true);
+  assert.equal(built.currentCompatibility.successor.browserDataTransferReadsZero, true);
+  assert.equal(built.currentCompatibility.successor.expandedDropReadyBoundaries, true);
+  assert.equal(built.currentCompatibility.successor.stableNestedDragHover, true);
+  assert.equal(built.currentCompatibility.successor.explicitComponentDropTargetGuide, true);
+  assert.equal(built.currentCompatibility.successor.keyboardPlacementControl, true);
+  assert.equal(
+    built.currentCompatibility.successor.insertionAdmissionCachedPerModelAndExactTarget,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.placementAdmissionCachedPerModelAndExactTarget,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.cachedPlacementBaseMaterializesBoundaryFinalIndex,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
+  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
+  assert.equal(
+    built.currentCompatibility.successor.exactSlotSelectionAndEditCaptureImplemented,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.atomicPublisherBackedSlotEditsImplemented,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.application.package.namedSlotSuccessorTestScript,
+    "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+  );
+  assert.equal(
+    built.currentCompatibility.application.package.namedSlotRootCommands[
+      "verify:desen-app-named-slot-authoring"
+    ],
+    "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node scripts/verify-desen-app-named-slot-authoring.mjs",
+  );
   assert.equal(built.currentCompatibility.successor.dynamicEditingImplemented, false);
   assert.equal(built.currentCompatibility.successor.persistenceUiImplemented, false);
   assert.equal(built.currentCompatibility.successor.runOrPublishImplemented, false);
@@ -252,11 +319,12 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.currentCompatibility.boundary.imports.selectionAuthoringImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
   assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
-  assert.equal(built.currentCompatibility.boundary.imports.catalogSdkImports, 5);
-  assert.equal(built.currentCompatibility.boundary.imports.editorCoreImports, 5);
+  assert.equal(built.currentCompatibility.boundary.imports.catalogSdkImports, 6);
+  assert.equal(built.currentCompatibility.boundary.imports.editorCoreImports, 7);
   assert.equal(built.currentCompatibility.boundary.imports.publisherImports, 3);
-  assert.equal(built.currentCompatibility.boundary.imports.protocolImports, 2);
-  assert.equal(built.currentCompatibility.boundary.imports.reviewedSourceMutationCalls, 3);
+  assert.equal(built.currentCompatibility.boundary.imports.protocolImports, 3);
+  assert.equal(built.currentCompatibility.boundary.imports.reviewedSourceMutationCalls, 13);
+  assert.equal(built.currentCompatibility.boundary.imports.reviewedNamedSlotDragDropHandlers, 14);
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[4], async () => {
