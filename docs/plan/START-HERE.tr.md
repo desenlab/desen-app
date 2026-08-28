@@ -862,6 +862,37 @@ P-08 `NOT_PROVEN`, PF-025 `OPEN` ve kanıt kapıları 10/13 kalır. Genel ilerle
 M09 ilerlemesi 6/14'tür (%43). Dynamic `$` edit M09-T08'de; slot/cardinality UI ise sıradaki
 M09-T07'dedir.
 
+M09-T07 artık `DONE`'dır. Layers görünümündeki geçerli named-slot ekleme sınırları, kabul edilen bir
+sürükleme sırasında komşu satırlar arasındaki boşluğu kapsayacak biçimde genişler; iç içe child
+event'lerinde hover kararlılığını ve click/klavye `Place` alternatifini korur. Components görünümü
+seçili owner/slot, cardinality ve sonraki konumu açıkça gösteren tek bırakma hedefi sunar. Hedef
+yokken sürükleme ve ekleme devre dışıdır; native buton odağı Layers'a götürür. Browser
+`DataTransfer` yalnız inert bir ipucudur, mutation otoritesi değildir.
+
+Insert, farklı slota move, aynı slotta reorder ve seçili subtree delete işlemleri; güncel rota,
+Source yerleşimi, Catalog capability kimliği, kabul kuralı ve effective minimum/maximum üzerinden
+her seferinde yeniden yetkilendirilir. Aday yalnız public Editor Core komutuyla üretilir; complete
+continuous validation ve Publisher preflight geçmeden `{document, preview}` atomik olarak değişmez.
+Root/stale delete, source-slot minimum ihlali, cycle, geçersiz sınır veya reddedilen child kısmi
+Source üretmez. Başarılı silme selection'ı temizleyip odağı Layers'a taşır; ret selection, preview
+ve odağı korur.
+
+Odak named-slot suite'i 70/70, tam App suite'i 151/151, bağımsız kök kanıt 9/9 ve tam structural CI
+glob'u 329/329 geçer. Exact kanıt
+24.830 baytlık
+[`desen-app-0.1.0-named-slot-authoring.json`](../proof/artifacts/desen-app-0.1.0-named-slot-authoring.json)
+artifact'ıdır ve
+`sha256:daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f` ile pinlenir. Yerel CI
+186 workload/88 proof pair, 55 proof unit/120 workload closure ve 1.192 tracked/176 proof-owned
+path içerir. Sequence 46, 69/69 geçer; 42 artifact ile 84 reader'ı
+`sha256:f09ec643d1b2756174ca47fae99837a68f6656bec0c6933e566d5075713a0f5f` başında doğrular.
+
+In-app browser incelemesi hedefsiz yönlendirmeyi, seçili-slot hedefini, click/klavye eklemeyi,
+delete kontrolünü, root-delete açıklamasını ve temiz console'u doğrulamıştır. Native drag
+otomasyonu gözlemlenmediği için gerçek-browser E2E iddiası açıkça yapılmaz. P-08 `NOT_PROVEN`,
+PF-025 `OPEN` ve kanıt kapıları 10/13 kalır. Genel ilerleme 102/145 (%70), M09 ilerlemesi 7/14'tür
+(%50); sıradaki iş M09-T08 local state ve binding editor UI'dır.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

@@ -6,9 +6,9 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T06 extends the selected Source component's schema-derived Inspector with recursive
-closed-object controls and an honest structured-JSON fallback while keeping every authoring
-control in the application-owned shell outside the exact React adapter canvas.
+M09-T07 adds Catalog-declared named-slot insertion, move, reorder, and deletion controls while
+keeping drag intent, placement targets, selection, and every other authoring control in the
+application-owned shell outside the exact React adapter canvas.
 The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
@@ -25,6 +25,14 @@ The current product surface contains:
   inventory, display names, categories, descriptions, identity, version, and target;
 - local component filtering that changes only the visible list and never mutates Catalog or Source
   data;
+- widened, overlapping slot boundaries with stable nested-hover feedback so the Layers view
+  exposes each valid insertion or placement boundary as an easier drop target;
+- one explicit Components drop target for the selected compatible slot, or a disabled guide that
+  returns the user to Layers when no slot is selected;
+- App-owned inert drag intent plus native keyboard and click placement controls for component
+  insertion, cross-slot move, and same-slot reorder;
+- a selection-bound deletion control that explains root and effective-minimum restrictions, clears
+  a successfully deleted selection, and returns focus to Layers;
 - an explicit no-substitution state for Recovery and Profile, which have no exact Source tree in
   the official fixture;
 - a sign-in canvas mounted from the official-derived Bundle through the same public
@@ -119,13 +127,28 @@ when indentation alone would exceed the same profile, formatting stops accumulat
 early and falls back to canonical compact JSON. Dynamic-containing groups stay locked as a whole,
 while literal siblings retain their own edit authority.
 
+Named-slot authoring reauthorizes the exact current route, Source identity, Catalog-declared slot,
+component capability, and edit before every operation. Slot acceptance and effective minimum and
+maximum cardinality are checked before public Editor Core insert, move, reorder, or delete
+commands run. Declared-but-absent slots stay distinct from present empty slots; root deletion,
+owning-slot minimum violations, stale identities, invalid cycles, and incompatible placements fail
+closed. Each complete candidate must pass continuous validation and Publisher preflight before one
+atomic session-local `{document, preview}` commit. A failed mutation or publication preserves the
+prior Source, preview, selection, and focus.
+
+The browser drag payload is an inert hint and is never read as authority. Expanded drop boundaries
+and depth-counted hover state improve pointer targeting, while exact placement semantics still come
+from the App-owned drag intent and current validated model. Components whose insertion would
+require inventing a private required child subtree remain unavailable.
+
 This slice does not expose component rectangles, hit testing, canvas picking, private DOM/native
-structure, slot-cardinality controls, drag, insert, move, or reorder. It does not edit local state,
-bindings, events, or actions; persist project data; create user projects; execute interactive
-Design/Run behavior; navigate diagnostics; publish to the control plane; or activate a channel.
-Dynamic binding editing belongs to M09-T08, insertion/cardinality UI to M09-T07, and interactive
-Design/Run behavior to M09-T10. Catalog control hints remain opaque under PF-025 and cannot widen
-schema authority.
+structure, or managed-tree inspection. It does not edit local state, bindings, events, or actions;
+persist project data; create user projects; execute interactive Design/Run behavior; navigate
+diagnostics; publish to the control plane; or activate a channel. Dynamic state and binding editing
+belongs to M09-T08, event/action authoring to M09-T09, interactive Design/Run behavior to M09-T10,
+durable save/open to M09-T12, and publication or activation to M09-T14. Catalog control hints
+remain opaque under PF-025 and cannot widen schema authority. P-08 remains `NOT_PROVEN`, and no
+real-browser E2E or native-drag automation result is claimed.
 
 The App imports only public package entry points for Catalog derivation, Editor Core mutation and
 validation, Publisher preflight, runtime composition, and the exact static reference adapter
@@ -133,16 +156,12 @@ registry. It does not import concrete Catalog components, private package files,
 or control-plane code. Bundle data never selects a module, component, fallback tree, or executable
 host binding.
 
-The focused structured-Inspector suite passes 73/73, the complete App suite passes 118/118, the
-independent root proof passes 10/10, the complete structural CI glob passes 323/323, and App
-typecheck, lint, and production build pass locally.
-The exact 26,133-byte artifact is
-`docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json` at
-`sha256:6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec`. The live local CI
-authority registers 184 workloads and 87 proof pairs—76 ordinary and 11 barriers—with a
-54-proof-unit/118-workload connected closure and ownership over 1,184 tracked paths, including 174
-proof-owned paths. Sequence 45 contains 41 artifacts and 82 readers. No required-gate or hosted-CI
-pass is claimed.
+The focused named-slot suite passes 70/70, the complete App suite passes 151/151, the independent
+root proof passes 9/9, and the task verifier passes locally. The exact 24,830-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json` at
+`sha256:daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f`. These measured
+receipts make no required-gate, global-CI-count, hosted-CI, real-browser E2E, or native-drag
+automation claim.
 
 ## Local commands
 
@@ -155,6 +174,7 @@ pnpm --filter @desen/app-web test:canvas
 pnpm --filter @desen/app-web test:selection
 pnpm --filter @desen/app-web test:inspector
 pnpm --filter @desen/app-web test:structured-inspector
+pnpm --filter @desen/app-web test:named-slots
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

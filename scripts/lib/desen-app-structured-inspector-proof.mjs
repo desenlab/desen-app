@@ -13,6 +13,7 @@ const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-STRUCTURED-INSPECTOR.md";
+const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const PARENT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
@@ -23,6 +24,7 @@ const BUNDLE_FIXTURE_PATH = "examples/sign-in/official-derived.bundle.desen.json
 const AUTHORING_DATA_PATH = "apps/desen-app/src/authoring-data.ts";
 const INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.ts";
 const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
+const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
 const PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
 const PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
@@ -36,6 +38,8 @@ const PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
 const PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
 const ADAPTER_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
+const AUTHORING_DATA_TEST_PATH = "apps/desen-app/test/authoring-data.test.ts";
+const AUTHORING_SLOT_TEST_PATH = "apps/desen-app/test/authoring-slots.test.ts";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
@@ -106,6 +110,52 @@ const TRACKED_PATHS = Object.freeze([
   PARENT_ARTIFACT_PATH,
   ...PROOF_READER_PATHS,
 ]);
+
+const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  AUTHORING_DATA_PATH,
+  APPLICATION_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+  PANEL_TEST_PATH,
+  APPLICATION_TEST_PATH,
+  "scripts/lib/desen-app-structured-inspector-proof.mjs",
+  "tests/desen-app-structured-inspector.test.mjs",
+]);
+
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...new Set([
+    ...TRACKED_PATHS,
+    AUTHORING_SLOT_SOURCE_PATH,
+    AUTHORING_DATA_TEST_PATH,
+    AUTHORING_SLOT_TEST_PATH,
+    NAMED_SLOT_ARTIFACT_PATH,
+  ]),
+]);
+
+const RETAINED_HISTORICAL_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
+);
+
+const SELF_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-structured-inspector-proof.mjs",
+  "tests/desen-app-structured-inspector.test.mjs",
+]);
+
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 26_133,
+  sha256: "6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec",
+});
+
+const NAMED_SLOT_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T07",
+  proofId: "desen-app-named-slot-authoring",
+  profile: "desen.app.named-slot-authoring-proof.v1",
+  result: "PASS",
+  path: NAMED_SLOT_ARTIFACT_PATH,
+  bytes: 24_830,
+  sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+});
 
 const EXPECTED_STRUCTURED_JSON_TEST_NAMES = Object.freeze([
   "returns a detached recursively frozen JSON value without prototype-name interpretation",
@@ -274,12 +324,16 @@ function captureBytes(value, label) {
 
 function captureOverrides(value) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+  if (
+    !(value instanceof Map) ||
+    utilTypes.isProxy(value) ||
+    value.size > CURRENT_COMPATIBILITY_PATHS.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
   for (const [relativePath, bytes] of value) {
-    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+    if (!CURRENT_COMPATIBILITY_PATHS.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
@@ -349,12 +403,17 @@ async function readRegularAuthority(absolutePath, label) {
 
 async function readTrackedFiles(workspaceRoot, overrides) {
   const output = new Map();
-  for (const relativePath of TRACKED_PATHS) {
-    output.set(
-      relativePath,
-      overrides.get(relativePath) ??
-        (await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath)),
-    );
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
+    const live = await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath);
+    const override = overrides.get(relativePath);
+    if (
+      override !== undefined &&
+      SELF_RESEALED_PATHS.includes(relativePath) &&
+      !isDeepStrictEqual(override, live)
+    ) {
+      fail("BOUNDARY_DRIFT", `${relativePath} cannot be substituted by a caller.`);
+    }
+    output.set(relativePath, override ?? live);
   }
   return output;
 }
@@ -1331,8 +1390,274 @@ function receipts(files) {
     );
 }
 
+const CURRENT_SUCCESSOR_SHA256 = Object.freeze({
+  [ROOT_PACKAGE_PATH]: "08824da0ef0f0fc2085259b2f60c2376ff184eabd3708594b0b53d105790734f",
+  [APP_PACKAGE_PATH]: "6efc3da8192134bfe41d8b4855db67f4084fd2d6818e87b2fab660722c300c87",
+  [AUTHORING_DATA_PATH]: "ae18d9ea0fe37ee553e758a73a9ca2e54e97c7fbcf048c21cd3bd131aadc1b25",
+  [AUTHORING_SLOT_SOURCE_PATH]: "7e41cc2c4e8f9da91a7737160619836a8f61dc9445f3b2c118fd0793a6dc405b",
+  [APPLICATION_SOURCE_PATH]: "de1c61540651709b4a82d587765d7f1ec3d444f7d125cff5dc0d4906a3e348f2",
+  [APPLICATION_CSS_PATH]: "c832498a4bc2f94e005da89de91f77d38759e6aa3c421a7ec133d02b5aa78e2e",
+  [AUTHORING_DATA_TEST_PATH]: "ac69505e2391db6ad61ad18f82ac9b6f699b2aebb2b0367f2c497335f6a08bcd",
+  [AUTHORING_SLOT_TEST_PATH]: "93c6b850c235ab09308fb36b9f99d6a5715d28514374c5c709a3c1eacb729ab2",
+  [PANEL_TEST_PATH]: "eb4cd46bc66ef04c6f644c8065ccee21b5d3512da33d13f5afcfe908896ed3bf",
+  [APPLICATION_TEST_PATH]: "a98974dea7dde6a8aab7c9864d425f7cc9b7af9f5ed3e7b457840497498bf799",
+  [NAMED_SLOT_ARTIFACT_PATH]: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+});
+
+async function authenticateFrozenArtifact(workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    "frozen M09-T06 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T06 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(artifactBytes, "frozen M09-T06 proof artifact");
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-structured-inspector" ||
+    artifact?.profile !== "desen.app.structured-inspector-proof.v1" ||
+    artifact?.task !== "M09-T06" ||
+    artifact?.result !== "PASS" ||
+    artifact?.claim?.taskStatus !== "DONE" ||
+    artifact?.claim?.recursiveClosedObjectControls !== true ||
+    artifact?.claim?.strictBoundedStructuredJsonCapture !== true ||
+    artifact?.claim?.publicEditorCoreNestedMutation !== true ||
+    artifact?.claim?.dynamicValuesLocked !== true ||
+    artifact?.claim?.sourceAndPreviewCommitAtomically !== true ||
+    artifact?.claim?.inspectorOutsideManagedCapabilitySubtree !== true ||
+    artifact?.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact?.boundary?.trackedFiles !== TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== TRACKED_PATHS.length ||
+    !isDeepStrictEqual(
+      trackedReceipts.map((candidate) => candidate?.path),
+      [...TRACKED_PATHS].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    trackedReceipts.some(
+      (candidate) =>
+        candidate === null ||
+        typeof candidate !== "object" ||
+        !Number.isSafeInteger(candidate.bytes) ||
+        candidate.bytes < 0 ||
+        typeof candidate.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(candidate.sha256),
+    ) ||
+    !isDeepStrictEqual(
+      artifact?.tests?.rootTestNames,
+      DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES,
+    )
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T06 artifact identity or retained claims drifted.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedHistoricalReceipts(frozenArtifact, files) {
+  const taskTimeReceipts = new Map(
+    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    const authority = taskTimeReceipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M09-T06 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
+}
+
+function inspectNamedSlotSuccessor(files) {
+  for (const [relativePath, expectedSha256] of Object.entries(CURRENT_SUCCESSOR_SHA256)) {
+    const bytes = files.get(relativePath);
+    if (bytes === undefined || sha256(bytes) !== expectedSha256) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} exact reviewed T07 bytes drifted.`);
+    }
+  }
+  const app = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
+  const root = parseJson(files.get(ROOT_PACKAGE_PATH), ROOT_PACKAGE_PATH);
+  const namedSlotTestCommand =
+    "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx";
+  const rootPrefix =
+    "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && ";
+  const rootCommands = {
+    "generate:desen-app-named-slot-authoring": `${rootPrefix}node scripts/generate-desen-app-named-slot-authoring-proof.mjs`,
+    "verify:desen-app-named-slot-authoring": `${rootPrefix}node scripts/verify-desen-app-named-slot-authoring.mjs`,
+    "test:desen-app-named-slot-authoring": `${rootPrefix}node --test tests/desen-app-named-slot-authoring.test.mjs`,
+  };
+  if (
+    app.scripts?.["test:named-slots"] !== namedSlotTestCommand ||
+    Object.entries(rootCommands).some(([name, command]) => root.scripts?.[name] !== command)
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T07 package or proof command drifted.");
+  }
+  const markers = new Map([
+    [
+      AUTHORING_DATA_PATH,
+      [
+        "export interface AuthoringSlotContract",
+        "projectSlotContracts",
+        "readonly defaultProps",
+        'Object.hasOwn(slot, "minItems")',
+      ],
+    ],
+    [
+      AUTHORING_SLOT_SOURCE_PATH,
+      [
+        "createAuthoringSlotSelection",
+        "projectAuthoringSlotSelection",
+        "evaluateAuthoringSlotInsertion",
+        "evaluateAuthoringSlotPlacement",
+        "evaluateAuthoringNodeDeletion",
+        "applyAuthoringSlotEdit",
+        "applyAuthoringNodeDelete",
+        "createDesenEditorContinuousValidator",
+        "deleteDesenEditorNode",
+        "insertDesenEditorNode",
+        "moveDesenEditorNode",
+        "reorderDesenEditorNode",
+        "setDesenEditorOwnerProp",
+        "maxDefaultPropTransitions: 256",
+        "maxAggregateSnapshotWorkBytes: 33_554_432",
+      ],
+    ],
+    [
+      APPLICATION_SOURCE_PATH,
+      [
+        "createAuthoringSlotSelection",
+        "evaluateAuthoringSlotInsertion",
+        "evaluateAuthoringSlotPlacement",
+        "evaluateAuthoringNodeDeletion",
+        "applyAuthoringSlotEdit",
+        "applyAuthoringNodeDelete",
+        "data-active-slot={active}",
+        'event.dataTransfer.setData("text/plain", "DESEN App authoring item")',
+      ],
+    ],
+    [
+      AUTHORING_SLOT_TEST_PATH,
+      [
+        "inserts reference components with exact defaults and deterministic collision IDs",
+        "projects a declared-but-absent slot with effective min/max semantics",
+        "moves across component and behavior owners without changing the node",
+        "rejects one insert or move into an absent optional minItems:2 slot",
+        "finishes a cross-owner move across 1,024 sibling nodes",
+        "never invokes accessors on hostile selection or edit objects",
+        "removes a newly inserted nested subtree and preserves the owning slot plus prior siblings",
+        "deletes from a behavior-owned slot and retains its own empty slot key",
+        "disables root deletion and deletion across the owning slot minimum",
+        "deletes the final node from a 1,024-sibling slot within the bounded profile",
+        "captures deletion selections as exact own data and rejects cross-route authority",
+      ],
+    ],
+  ]);
+  for (const [relativePath, requiredMarkers] of markers) {
+    const source = decodeUtf8(files.get(relativePath), relativePath);
+    for (const marker of requiredMarkers) {
+      if (!source.includes(marker)) {
+        fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} lost the T07 marker ${marker}.`);
+      }
+    }
+  }
+  const artifactBytes = files.get(NAMED_SLOT_ARTIFACT_PATH);
+  const artifact = parseJson(artifactBytes, NAMED_SLOT_ARTIFACT_PATH);
+  if (
+    artifactBytes.byteLength !== NAMED_SLOT_ARTIFACT_PIN.bytes ||
+    artifact.task !== NAMED_SLOT_ARTIFACT_PIN.task ||
+    artifact.proofId !== NAMED_SLOT_ARTIFACT_PIN.proofId ||
+    artifact.profile !== NAMED_SLOT_ARTIFACT_PIN.profile ||
+    artifact.result !== NAMED_SLOT_ARTIFACT_PIN.result ||
+    artifact.claim?.completeCatalogDeclaredSlotProjection !== true ||
+    artifact.claim?.absentAndEmptySlotsRemainDistinct !== true ||
+    artifact.claim?.sourceMinimumEnforced !== true ||
+    artifact.claim?.destinationMaximumEnforced !== true ||
+    artifact.claim?.absentDestinationMinimumEnforced !== true ||
+    artifact.claim?.publicStableIdInsert !== true ||
+    artifact.claim?.publicCrossSlotMove !== true ||
+    artifact.claim?.publicSameSlotReorder !== true ||
+    artifact.claim?.nodeDeletionPreflight !== true ||
+    artifact.claim?.deletionPreflightRunsPublicMutationAndValidation !== true ||
+    artifact.claim?.publicNestedSubtreeDelete !== true ||
+    artifact.claim?.rootDeletionDisabled !== true ||
+    artifact.claim?.sourceMinimumDeletionDisabled !== true ||
+    artifact.claim?.behaviorOwnedDeletePreservesEmptySlot !== true ||
+    artifact.claim?.exactOwnDataRouteSelectionAndEditCapture !== true ||
+    artifact.claim?.exactOwnDataDeletionSelectionCapture !== true ||
+    artifact.claim?.continuousCompleteSourceRevalidation !== true ||
+    artifact.claim?.failedDeletionPreservesCurrentDocument !== true ||
+    artifact.claim?.sourceAndPreviewCommitAtomically !== true ||
+    artifact.claim?.deletionSourceAndPreviewCommitAtomically !== true ||
+    artifact.claim?.deletionFocusManaged !== true ||
+    artifact.claim?.browserDataTransferReadsZero !== true ||
+    artifact.claim?.expandedDropReadyBoundaries !== true ||
+    artifact.claim?.stableNestedDragHover !== true ||
+    artifact.claim?.explicitComponentDropTargetGuide !== true ||
+    artifact.claim?.keyboardPlacementControl !== true ||
+    artifact.claim?.insertionAdmissionCachedPerModelAndExactTarget !== true ||
+    artifact.claim?.placementAdmissionCachedPerModelAndExactTarget !== true ||
+    artifact.claim?.cachedPlacementBaseMaterializesBoundaryFinalIndex !== true ||
+    artifact.claim?.componentPaletteRenderLimit !== 24 ||
+    artifact.claim?.activeTabOnlyAuthoringWork !== true ||
+    artifact.claim?.slotChromeOutsideManagedCapabilitySubtree !== true
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T07 artifact identity or claims drifted.");
+  }
+  return deepFreeze({
+    task: "M09-T07",
+    artifact: NAMED_SLOT_ARTIFACT_PIN,
+    completeCatalogDeclaredSlotProjection: true,
+    absentAndEmptySlotsRemainDistinct: true,
+    catalogAdmissionAndCardinalityPreflight: true,
+    publicStableIdInsertMoveAndReorder: true,
+    publicValidatedNodeDeletion: true,
+    deletionPreflightRunsPublicMutationAndValidation: true,
+    rootAndSourceMinimumDeletionDisabled: true,
+    behaviorOwnedDeletePreservesEmptySlot: true,
+    exactOwnDataDeletionSelectionCapture: true,
+    continuousCompleteSourceRevalidation: true,
+    failedDeletionPreservesCurrentDocument: true,
+    deletionSourceAndPreviewCommitAtomically: true,
+    deletionFocusManaged: true,
+    browserDataTransferReadsZero: true,
+    expandedDropReadyBoundaries: true,
+    stableNestedDragHover: true,
+    explicitComponentDropTargetGuide: true,
+    keyboardPlacementControl: true,
+    insertionAdmissionCachedPerModelAndExactTarget: true,
+    placementAdmissionCachedPerModelAndExactTarget: true,
+    cachedPlacementBaseMaterializesBoundaryFinalIndex: true,
+    componentPaletteRenderLimit: 24,
+    activeTabOnlyAuthoringWork: true,
+    nodeAndBehaviorOwnersSupported: true,
+    exactOwnDataRouteSelectionAndEditCapture: true,
+    atomicPublisherBackedSlotEdits: true,
+    slotChromeOutsideManagedCapabilitySubtree: true,
+    dynamicValuesRemainLocked: true,
+    persistenceImplemented: false,
+    activationImplemented: false,
+    browserE2eImplemented: false,
+    package: {
+      appName: app.name,
+      namedSlotTestCommand,
+      rootCommands,
+    },
+  });
+}
+
 /** Builds detached deterministic M09-T06 structured-inspector evidence. */
-export async function buildDesenAppStructuredInspectorEvidence(rawOptions = undefined) {
+async function _buildFreshDesenAppStructuredInspectorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
   const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
@@ -1459,6 +1784,65 @@ export async function buildDesenAppStructuredInspectorEvidence(rawOptions = unde
   });
   const artifactBytes = canonicalArtifactBytes(artifact);
   return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+}
+
+/** Authenticates frozen M09-T06 evidence and checks its live additive M09-T07 successor. */
+export async function buildDesenAppStructuredInspectorEvidence(rawOptions = undefined) {
+  const options = captureBuildOptions(rawOptions);
+  const workspaceRoot = await realpath(options.workspaceRoot);
+  const [frozen, files] = await Promise.all([
+    authenticateFrozenArtifact(workspaceRoot),
+    readTrackedFiles(workspaceRoot, options.fileOverrides),
+  ]);
+  const parent = authenticateParent(options.parentArtifactBytes ?? files.get(PARENT_ARTIFACT_PATH));
+  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  const successor = inspectNamedSlotSuccessor(files);
+  const currentCompatibility = deepFreeze({
+    schemaVersion: 1,
+    proofId: "desen-app-structured-inspector",
+    profile: "desen.app.structured-inspector-proof.v1",
+    task: "M09-T06",
+    result: "PASS",
+    prerequisites: [parent],
+    retainedClaim: {
+      taskStatus: frozen.artifact.claim.taskStatus,
+      recursiveClosedObjectControls: frozen.artifact.claim.recursiveClosedObjectControls,
+      strictBoundedStructuredJsonCapture: frozen.artifact.claim.strictBoundedStructuredJsonCapture,
+      publicEditorCoreNestedMutation: frozen.artifact.claim.publicEditorCoreNestedMutation,
+      exactOwnDataRouteAndSelectionCapture:
+        frozen.artifact.claim.exactOwnDataRouteAndSelectionCapture,
+      continuousSchemaRevalidation: frozen.artifact.claim.continuousSchemaRevalidation,
+      failedEditPreservesCurrentDocument: frozen.artifact.claim.failedEditPreservesCurrentDocument,
+      dynamicValuesLocked: frozen.artifact.claim.dynamicValuesLocked,
+      publisherSessionPreview: frozen.artifact.claim.publisherSessionPreview,
+      sourceAndPreviewCommitAtomically: frozen.artifact.claim.sourceAndPreviewCommitAtomically,
+      inspectorOutsideManagedCapabilitySubtree:
+        frozen.artifact.claim.inspectorOutsideManagedCapabilitySubtree,
+      selectionOverlayBoundaryRetained: frozen.artifact.claim.selectionOverlayBoundaryRetained,
+    },
+    successor,
+    boundary: {
+      retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
+      successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
+      currentPathReceipts: receipts(files),
+      additiveSuccessorReceipts: [
+        AUTHORING_SLOT_SOURCE_PATH,
+        AUTHORING_DATA_TEST_PATH,
+        AUTHORING_SLOT_TEST_PATH,
+        NAMED_SLOT_ARTIFACT_PATH,
+      ].map((relativePath) => ({
+        path: relativePath,
+        bytes: files.get(relativePath).byteLength,
+        sha256: sha256(files.get(relativePath)),
+      })),
+    },
+  });
+  return deepFreeze({
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+  });
 }
 
 function verifyProofDocument(bytes, artifactSha256) {

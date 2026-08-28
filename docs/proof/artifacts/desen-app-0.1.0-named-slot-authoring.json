@@ -1,0 +1,526 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-named-slot-authoring",
+  "profile": "desen.app.named-slot-authoring-proof.v1",
+  "task": "M09-T07",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M09-T06",
+      "proofId": "desen-app-structured-inspector",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json",
+      "bytes": 26133,
+      "sha256": "6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec",
+      "profile": "desen.app.structured-inspector-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "completeCatalogDeclaredSlotProjection": true,
+    "absentAndEmptySlotsRemainDistinct": true,
+    "pf010EffectiveMinimum": true,
+    "exactIdOrCategoryAcceptance": true,
+    "explicitEmptyAcceptanceRejectsAll": true,
+    "componentInsertionPreflight": true,
+    "nodeMoveAndReorderPreflight": true,
+    "nodeDeletionPreflight": true,
+    "invalidPlacementControlsDisabled": true,
+    "insertionPreflightRunsPublicMutationAndValidation": true,
+    "placementPreflightRunsPublicMutationAndValidation": true,
+    "deletionPreflightRunsPublicMutationAndValidation": true,
+    "cyclePreflight": true,
+    "sameSlotNoOpControlsDisabled": true,
+    "insertionAdmissionCachedPerModelAndExactTarget": true,
+    "placementAdmissionCachedPerModelAndExactTarget": true,
+    "cachedPlacementBaseMaterializesBoundaryFinalIndex": true,
+    "componentPaletteRenderLimit": 24,
+    "activeTabOnlyAuthoringWork": true,
+    "sourceMinimumEnforced": true,
+    "destinationMaximumEnforced": true,
+    "absentDestinationMinimumEnforced": true,
+    "publicStableIdInsert": true,
+    "publicCrossSlotMove": true,
+    "publicSameSlotReorder": true,
+    "publicNestedSubtreeDelete": true,
+    "pf080BoundaryConversion": true,
+    "nodeAndBehaviorOwnersSupported": true,
+    "stableIdentityPreserved": true,
+    "rootsAndCyclesFailClosed": true,
+    "rootDeletionDisabled": true,
+    "sourceMinimumDeletionDisabled": true,
+    "behaviorOwnedDeletePreservesEmptySlot": true,
+    "exactOwnDataRouteSelectionAndEditCapture": true,
+    "exactOwnDataDeletionSelectionCapture": true,
+    "validatedSourceSnapshotMutation": true,
+    "boundedDefaultPropStaging": true,
+    "continuousCompleteSourceRevalidation": true,
+    "failedEditPreservesCurrentDocument": true,
+    "failedDeletionPreservesCurrentDocument": true,
+    "appOwnedInertDragHints": true,
+    "browserDataTransferReadsZero": true,
+    "expandedDropReadyBoundaries": true,
+    "stableNestedDragHover": true,
+    "explicitComponentDropTargetGuide": true,
+    "keyboardPlacementControl": true,
+    "publisherSessionPreview": true,
+    "sourceAndPreviewCommitAtomically": true,
+    "deletionSourceAndPreviewCommitAtomically": true,
+    "deletionFocusManaged": true,
+    "slotChromeOutsideManagedCapabilitySubtree": true,
+    "persistenceClaimed": false,
+    "activationClaimed": false,
+    "browserE2eClaimed": false,
+    "p08Status": "NOT_PROVEN"
+  },
+  "authority": {
+    "protocolProfiles": {
+      "slotSemantics": "PF-010",
+      "editorPositionSemantics": "PF-080",
+      "insertIndex": "existing destination boundary",
+      "moveIndex": "destination boundary before move",
+      "reorderIndex": "final position after selected child removal"
+    },
+    "source": {
+      "authoringData": {
+        "publicCatalogAndSourceValidation": true,
+        "completeDeclaredSlotProjection": true,
+        "effectiveMinimumProfile": "minItems ?? (required ? 1 : 0)",
+        "explicitAcceptancePresenceRetained": true,
+        "authoringDefaultsRetained": true,
+        "sourcePresenceRetainedSeparately": true,
+        "validatedDocumentSnapshotRetained": true
+      },
+      "slots": {
+        "publicEditorCoreOnly": true,
+        "exactRouteSelectionAndEditCapture": true,
+        "editDescriptorsCapturedOnce": true,
+        "absentSlotProjection": true,
+        "linearSharedContractTraversal": true,
+        "exactIdOrCategoryAcceptance": true,
+        "unrestrictedOnlyWhenAcceptanceFieldsAbsent": true,
+        "componentInsertionPreflight": true,
+        "nodeMoveAndReorderPreflight": true,
+        "nodeDeletionPreflight": true,
+        "insertionPreflightRunsPublicMutationAndValidation": true,
+        "placementPreflightRunsPublicMutationAndValidation": true,
+        "deletionPreflightRunsPublicMutationAndValidation": true,
+        "cyclePreflight": true,
+        "sameSlotNoOpReported": true,
+        "destinationMaximumBeforeInsertOrMove": true,
+        "absentDestinationMinimumBeforeInsertOrMove": true,
+        "sourceMinimumBeforeCrossSlotMove": true,
+        "sourceMinimumBeforeDelete": true,
+        "sameSlotBoundaryConvertedAfterRemoval": true,
+        "rootPlacementRejected": true,
+        "rootDeletionRejected": true,
+        "cyclesPreflightedBeforePublicEditorCoreMove": true,
+        "deterministicStableIdInsert": true,
+        "publicNestedSubtreeDelete": true,
+        "exactComponentDeletionSelectionCapture": true,
+        "defaultPropTransitionLimit": 256,
+        "defaultPropWorkByteLimit": 33554432,
+        "defaultPropWidthCheckedBeforeSort": true,
+        "validatorPreparationCachedPerModel": true,
+        "insertionAdmissionCachedPerModelAndExactTarget": true,
+        "placementAdmissionCachedPerModelAndExactTarget": true,
+        "admissionCacheKeysExcludeBoundaryIndex": true,
+        "cachedPlacementBaseMaterializesBoundaryFinalIndex": true,
+        "cachedAdmissionsRejectOutOfRangeBoundary": true,
+        "minimalRequiredSlotInsertFailsClosed": true,
+        "validatedSourceSnapshotMutation": true,
+        "completeSourceRevalidation": true,
+        "deletionCompleteSourceRevalidation": true,
+        "noPartialDocumentOrIdentityOnFailure": true,
+        "noPartialDocumentOnDeleteFailure": true
+      },
+      "preview": {
+        "publicPublisherOnly": true,
+        "sourceReadmittedBeforePublication": true,
+        "exactBundleRevisionReturned": true,
+        "noPartialBundleOnFailure": true
+      },
+      "adapter": {
+        "revisionReplacement": true,
+        "previousSessionDisposed": true,
+        "managedSubtreeExplicit": true,
+        "selectionOverlayRemainsSibling": true
+      },
+      "application": {
+        "appOwnedDragIntent": true,
+        "browserPayloadIsInertHint": true,
+        "declaredAbsentSlotsVisible": true,
+        "linearDeclaredPresentJoin": true,
+        "orderedBoundaryControls": true,
+        "expandedOverlappingDropReadyBoundaries": true,
+        "stableNestedDragHoverTracking": true,
+        "componentCompatibilityVisible": true,
+        "explicitComponentDropTarget": true,
+        "slotlessDisabledPlacementGuide": true,
+        "browserDataTransferReads": 0,
+        "invalidPlacementControlsDisabled": true,
+        "sameSlotNoOpControlsDisabled": true,
+        "componentPaletteRenderLimit": 24,
+        "completeFilteredMatchCountRetained": true,
+        "inactiveLayerTreeNotRendered": true,
+        "inactiveComponentPaletteShortCircuited": true,
+        "activeTabOnlyAuthoringWork": true,
+        "staleSlotProjectionRejected": true,
+        "publicNodeDeletionPreflight": true,
+        "invalidDeletionControlsDisabled": true,
+        "deletionReasonAssociatedWithControl": true,
+        "sourceAndPreviewCommitAtomically": true,
+        "deletionSourceAndPreviewCommitAtomically": true,
+        "successfulDeletionClearsSelection": true,
+        "deletionFocusReturnsToLayersTab": true,
+        "failedDeletionPreservesSelectionAndFocus": true,
+        "publisherFailurePreservesPriorSession": true,
+        "slotChromeOutsideManagedCapabilitySubtree": true
+      },
+      "css": {
+        "namedSlotSelectors": true,
+        "selectedTargetPresentation": true,
+        "expandedOverlappingDropBoundaries": true,
+        "stableHoveredDropPresentation": true,
+        "slotlessTargetGuidePresentation": true,
+        "managedDescendantSlotSelectors": 0
+      }
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+      "rootCommands": {
+        "generate:desen-app-named-slot-authoring": "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node scripts/generate-desen-app-named-slot-authoring-proof.mjs",
+        "verify:desen-app-named-slot-authoring": "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node scripts/verify-desen-app-named-slot-authoring.mjs",
+        "test:desen-app-named-slot-authoring": "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node --test tests/desen-app-named-slot-authoring.test.mjs"
+      },
+      "parentAuthenticatedInsideReader": true,
+      "publicDependencies": [
+        "@desen/catalog-sdk",
+        "@desen/editor-core",
+        "@desen/protocol",
+        "@desen/publisher",
+        "@desen/validator"
+      ]
+    },
+    "mutationFlow": [
+      "validator-admitted Catalog and Source projection",
+      "exact route and named-slot selection reauthorization",
+      "App-owned inert drag or keyboard placement intent",
+      "Catalog acceptance and cardinality checks",
+      "public Editor Core insert, move, reorder, or nested-subtree delete",
+      "bounded Catalog default-prop staging for insert",
+      "continuous complete-Source validation",
+      "Publisher session-local Bundle",
+      "atomic Source and exact adapter session replacement",
+      "successful deletion clears stale selection and returns focus to Layers"
+    ],
+    "ownership": {
+      "slotChrome": "Desen App sibling chrome",
+      "browserDragPayload": "inert non-authoritative hint",
+      "dropTargets": "expanded App-owned boundary and explicit Components target chrome",
+      "deletionControl": "App-owned exact-selection preflight outside managed capability subtree",
+      "managedCapabilitySubtree": "Runtime React adapters only"
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/app-web test:named-slots && node --test tests/desen-app-named-slot-authoring.test.mjs",
+    "appTestNames": {
+      "apps/desen-app/test/authoring-data.test.ts": [
+        "projects the exact Catalog library and official Source surface trees",
+        "fails closed before projecting malformed Catalog or unresolved Source data",
+        "accepts optional authoring metadata and falls back only to exact inert contract fields",
+        "preserves absent slots, own empty slots, and Source child-array order",
+        "rejects a valid but over-depth Source atomically at the authoring projection boundary",
+        "rejects a valid but over-width Source before its pending authoring work can exceed the occurrence budget"
+      ],
+      "apps/desen-app/test/authoring-slots.test.ts": [
+        "projects the selected slot and captures an exact frozen selection",
+        "inserts reference components with exact defaults and deterministic collision IDs",
+        "removes a newly inserted nested subtree and preserves the owning slot plus prior siblings",
+        "$label",
+        "preflights and rejects a move into the moving node's descendant slot",
+        "projects a declared-but-absent slot with effective min/max semantics",
+        "implements ID/category OR, unrestricted, explicit-empty, and max acceptance",
+        "disables inserts whose Catalog defaults fail schema or bounded transition admission",
+        "moves across component and behavior owners without changing the node",
+        "deletes from a behavior-owned slot and retains its own empty slot key",
+        "rejects crossing a source minimum or destination maximum atomically",
+        "disables root deletion and deletion across the owning slot minimum",
+        "rejects one insert or move into an absent optional minItems:2 slot",
+        "fails closed when a minimal insert cannot materialize the component's own required slot",
+        "finishes a cross-owner move across 1,024 sibling nodes",
+        "deletes the final node from a 1,024-sibling slot within the bounded profile",
+        "rejects stale and forged selections without mutating Source",
+        "rejects cross-route and extra-field inputs",
+        "never invokes accessors on hostile selection or edit objects",
+        "captures deletion selections as exact own data and rejects cross-route authority",
+        "rejects deletion with a %s",
+        "captures every edit Proxy own descriptor exactly once"
+      ],
+      "apps/desen-app/test/authoring-preview.test.ts": [
+        "admits the official-derived Source as the frozen direct reference editor document",
+        "reproduces the exact session-local baseline Bundle and official revision",
+        "publishes a valid primitive prop edit as a fresh exact Bundle revision",
+        "rejects a runtime-cast non-Source without throwing or exposing a partial Bundle",
+        "rejects a structurally valid but Catalog-invalid prop edit without a partial Bundle"
+      ],
+      "apps/desen-app/test/adapter-canvas.test.tsx": [
+        "renders the official-derived sign-in only through the shared real adapters",
+        "fails closed for every unsupported project or surface without mounting sign-in",
+        "removes a previous tree synchronously and disposes the exact route session",
+        "replaces the exact session when a current authoring draft Bundle is rerendered",
+        "balances StrictMode replay and final unmount with exact session disposal",
+        "renders Source-identity selection chrome as a sibling outside the managed subtree",
+        "keeps a selected conditional Source node honest when it is not materialized",
+        "rejects stale and cross-route selection identities without exposing overlay chrome"
+      ],
+      "apps/desen-app/test/application.test.tsx": [
+        "renders an app-native projects gallery with explicit landmarks and current navigation",
+        "filters only the fixed project inventory and provides a clear recovery action",
+        "uses same-document navigation and focuses the new route heading",
+        "reacts to browser traversal and keeps route focus inside the content landmark",
+        "renders the editable Source hierarchy and keeps the exact managed adapter canvas read only",
+        "selects Source layers accessibly and keeps the identity overlay outside managed adapters",
+        "chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
+        "disables deletion for the surface root and a slot-minimum preflight without changing preview",
+        "preserves the selected layer, preview, and focus when deletion is rejected",
+        "uses only the App-owned drag intent and ignores forged native transfer authority",
+        "reorders a selected Source node through the keyboard placement control",
+        "moves nodes across nested slots with keyboard and App-owned native drag intent",
+        "edits schema-derived string and enum props and refreshes the exact adapter preview",
+        "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
+        "keeps bound props locked while boolean and numeric edits fail or apply atomically",
+        "resets local drafts across Source identities and qualifies repeated edit actions",
+        "switches to the exact Catalog component library and filters only the local view",
+        "does not substitute the sign-in Source tree or adapter canvas for another preview surface",
+        "removes the managed sign-in tree synchronously when routing to an unsupported surface",
+        "guides a catalog-less project without inventing a surface or enabled action",
+        "fails closed for $pathname"
+      ]
+    },
+    "rootTestNames": [
+      "[authority] authenticates the exact frozen M09-T06 structured-inspector parent",
+      "[catalog] proves PF-010 slot projection, presence, cardinality, and acceptance",
+      "[editing] proves public insert, move, reorder, delete, identity, and index semantics",
+      "[safety] proves exact capture, bounded defaults, deletion minima, and complete Source validation",
+      "[ownership] keeps expanded drag targets, deletion UI, and slot chrome App-owned",
+      "[tests] pins focused App behavior and exact package commands",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[policy] rejects weakened slot, mutation, bound, and ownership sources",
+      "[verification] rejects parent, artifact, report, and filesystem authority drift"
+    ],
+    "localCommandReceipts": {
+      "pureSlot": {
+        "command": "pnpm --filter @desen/app-web exec vitest run test/authoring-slots.test.ts",
+        "result": "PASS",
+        "testFiles": 1,
+        "tests": 27
+      },
+      "focusedNamedSlots": {
+        "command": "pnpm --filter @desen/app-web test:named-slots",
+        "result": "PASS",
+        "testFiles": 5,
+        "tests": 70
+      },
+      "fullApp": {
+        "command": "pnpm --filter @desen/app-web test",
+        "result": "PASS",
+        "testFiles": 11,
+        "tests": 151
+      },
+      "rootProof": {
+        "command": "node --test tests/desen-app-named-slot-authoring.test.mjs",
+        "result": "PASS",
+        "testFiles": 1,
+        "tests": 9
+      }
+    },
+    "semanticCoverage": [
+      "PF_010_EFFECTIVE_MINIMUM",
+      "ABSENT_VS_EMPTY_SLOT",
+      "EXACT_ID_OR_CATEGORY_ACCEPTANCE",
+      "EXPLICIT_EMPTY_ACCEPTANCE_REJECTS_ALL",
+      "SOURCE_MINIMUM",
+      "DESTINATION_MAXIMUM",
+      "ABSENT_DESTINATION_MINIMUM",
+      "PF_080_BOUNDARY_CONVERSION",
+      "PUBLIC_STABLE_ID_INSERT",
+      "PUBLIC_MOVE_AND_REORDER",
+      "PUBLIC_NESTED_SUBTREE_DELETE",
+      "BEHAVIOR_OWNED_DESTINATION",
+      "BEHAVIOR_OWNED_DELETE_AND_EMPTY_SLOT_KEY",
+      "EXACT_OWN_DATA_CAPTURE",
+      "EXACT_DELETION_SELECTION_CAPTURE",
+      "STALE_DELETION_IDENTITY_REJECTION",
+      "DEFAULT_PROP_STAGING_BOUNDS",
+      "INSERT_DRY_RUN_REVALIDATION",
+      "MOVE_REORDER_DRY_RUN_REVALIDATION",
+      "DELETE_DRY_RUN_REVALIDATION",
+      "ROOT_AND_SOURCE_MINIMUM_DELETE_PREFLIGHT",
+      "CYCLE_PREFLIGHT",
+      "SAME_SLOT_NO_OP_SUPPRESSION",
+      "MODEL_KEYED_EXACT_TARGET_ADMISSION_CACHE",
+      "BOUNDARY_FINAL_INDEX_MATERIALIZATION",
+      "ONE_THOUSAND_TWENTY_FIVE_CACHED_BOUNDARIES",
+      "ONE_THOUSAND_TWENTY_FOUR_SIBLING_DELETE",
+      "COMPONENT_PALETTE_RENDER_LIMIT_24",
+      "ACTIVE_TAB_ONLY_AUTHORING_WORK",
+      "EXPANDED_OVERLAPPING_DROP_BOUNDARIES",
+      "STABLE_NESTED_DRAG_HOVER",
+      "EXPLICIT_COMPONENT_DROP_TARGET_GUIDE",
+      "DATA_TRANSFER_READS_ZERO",
+      "CONTINUOUS_SOURCE_REVALIDATION",
+      "ATOMIC_PUBLISHER_PREVIEW",
+      "ATOMIC_PUBLISHER_DELETE_PREVIEW",
+      "DELETION_FOCUS_MANAGEMENT",
+      "APP_OWNED_DRAG_HINTS"
+    ]
+  },
+  "boundary": {
+    "trackedFiles": 23,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 2034,
+        "sha256": "6efc3da8192134bfe41d8b4855db67f4084fd2d6818e87b2fab660722c300c87"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 10920,
+        "sha256": "a678302fd2931172d32f6509dc37018a294bc938ccca73df646a715516a6db38"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 47675,
+        "sha256": "c832498a4bc2f94e005da89de91f77d38759e6aa3c421a7ec133d02b5aa78e2e"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 58399,
+        "sha256": "de1c61540651709b4a82d587765d7f1ec3d444f7d125cff5dc0d4906a3e348f2"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 18521,
+        "sha256": "ae18d9ea0fe37ee553e758a73a9ca2e54e97c7fbcf048c21cd3bd131aadc1b25"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-preview.ts",
+        "bytes": 3704,
+        "sha256": "75fa2d605f8c5ceebc2668c1f4c739155c7791b895132dc9a5fac183384e3d34"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-slots.ts",
+        "bytes": 40174,
+        "sha256": "7e41cc2c4e8f9da91a7737160619836a8f61dc9445f3b2c118fd0793a6dc405b"
+      },
+      {
+        "path": "apps/desen-app/test/adapter-canvas.test.tsx",
+        "bytes": 11338,
+        "sha256": "6f09674b0f0dd22bdc61e158c8567df4fdbdbe3ca3d96710b54f5e9138ce8de0"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 49491,
+        "sha256": "a98974dea7dde6a8aab7c9864d425f7cc9b7af9f5ed3e7b457840497498bf799"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-data.test.ts",
+        "bytes": 7259,
+        "sha256": "ac69505e2391db6ad61ad18f82ac9b6f699b2aebb2b0367f2c497335f6a08bcd"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-preview.test.ts",
+        "bytes": 4001,
+        "sha256": "1e514ec48f41d6e565197595d1bd4cbbbacf42b50d960cb7f28b4ad27b4510dc"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-slots.test.ts",
+        "bytes": 43443,
+        "sha256": "93c6b850c235ab09308fb36b9f99d6a5715d28514374c5c709a3c1eacb729ab2"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json",
+        "bytes": 26133,
+        "sha256": "6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec"
+      },
+      {
+        "path": "examples/sign-in/official-derived.bundle.desen.json",
+        "bytes": 4899,
+        "sha256": "334450fa1864bf280a30342090a46ba1d2f2dc96552b9430afdde5fcada902b0"
+      },
+      {
+        "path": "examples/sign-in/official-derived.source.desen.json",
+        "bytes": 4724,
+        "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+      },
+      {
+        "path": "package.json",
+        "bytes": 88541,
+        "sha256": "08824da0ef0f0fc2085259b2f60c2376ff184eabd3708594b0b53d105790734f"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129394,
+        "sha256": "463a35abf13fd9ba6acb897aca52a11e7a90c8fcfedbce085e82f89c23418d89"
+      },
+      {
+        "path": "scripts/generate-desen-app-named-slot-authoring-proof.mjs",
+        "bytes": 814,
+        "sha256": "c56c3fbefe3a7e1aa55f5922d6e8254d67077c0c28e706a4bdf9de8101b61e13"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-named-slot-authoring-proof.mjs",
+        "bytes": 53049,
+        "sha256": "e4339ce6ae42a5247e79d1c5442801f4ce03878c22952aed97d73950c843fe78"
+      },
+      {
+        "path": "scripts/verify-desen-app-named-slot-authoring.mjs",
+        "bytes": 819,
+        "sha256": "f9791d1b10d1c9081802efa80fad8ec2a6902e7cc852300b401f60e7e21a08ab"
+      },
+      {
+        "path": "tests/desen-app-named-slot-authoring.test.mjs",
+        "bytes": 20597,
+        "sha256": "8fd06599c09dc15522857bbd27f2d4b368fc625296f28cbe428cbf5753ce07fb"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-named-slot-authoring-proof.mjs",
+      "scripts/generate-desen-app-named-slot-authoring-proof.mjs",
+      "scripts/verify-desen-app-named-slot-authoring.mjs",
+      "tests/desen-app-named-slot-authoring.test.mjs"
+    ],
+    "parentArtifacts": 1,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M09-T08 is NOT_PROVEN: local-state and binding editing are not implemented.",
+    "M09-T09 is NOT_PROVEN: event and closed-action editing are not implemented.",
+    "M09-T10 is NOT_PROVEN: no Design/Run mode is claimed.",
+    "M09-T12 is NOT_PROVEN: no save/open or durable persistence UI is claimed.",
+    "M09-T14 is NOT_PROVEN: session preview is not control-plane publication or activation.",
+    "P-08 remains NOT_PROVEN until the remaining visual authoring and browser-E2E owners pass.",
+    "A component requiring its own materialized child slot is rejected; no private subtree transaction is invented.",
+    "No private DOM, component geometry, hit testing, canvas picking, or managed-tree inspection is claimed.",
+    "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence."
+  ]
+}

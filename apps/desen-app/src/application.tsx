@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Fragment, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
 import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 
@@ -8,6 +8,16 @@ import {
   applyAuthoringInspectorEdit,
   prepareAuthoringInspectorModel,
 } from "./authoring-inspector.js";
+import {
+  applyAuthoringNodeDelete,
+  applyAuthoringSlotEdit,
+  createAuthoringSlotSelection,
+  evaluateAuthoringNodeDeletion,
+  evaluateAuthoringSlotInsertion,
+  evaluateAuthoringSlotPlacement,
+  isSameAuthoringSlotSelection,
+  projectAuthoringSlotSelection,
+} from "./authoring-slots.js";
 import {
   createAuthoringComponentSelection,
   isSameAuthoringComponentSelection,
@@ -30,10 +40,11 @@ import settingsUrl from "./assets/settings.svg";
 import themeUrl from "./assets/theme.svg";
 import styles from "./application.module.css";
 
-import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
+import type { DragEvent, KeyboardEvent, MouseEvent, ReactNode } from "react";
 import type {
   AuthoringBehaviorLayer,
   AuthoringLayerNode,
+  AuthoringSlotContract,
   CatalogAuthoringModel,
   CatalogComponentSummary,
 } from "./authoring-data.js";
@@ -42,6 +53,14 @@ import type {
   AuthoringInspectorEditResult,
 } from "./authoring-inspector.js";
 import type { AuthoringComponentSelection } from "./authoring-selection.js";
+import type {
+  AuthoringSlotEdit,
+  AuthoringSlotEditResult,
+  AuthoringSlotProjection,
+  AuthoringSlotRoute,
+  AuthoringSlotSelection,
+  AuthoringSlotState,
+} from "./authoring-slots.js";
 import type { DesenAppRoute } from "./project-navigation.js";
 import type { DesenAppProjectSummary, DesenAppSurfaceSummary } from "./project-data.js";
 
@@ -308,17 +327,292 @@ function ProjectsHome() {
 
 type AuthoringTab = "layers" | "components";
 
+type AuthoringDragIntent =
+  | Readonly<{ readonly kind: "component"; readonly componentId: string }>
+  | Readonly<{ readonly kind: "node"; readonly nodeId: string }>;
+
 interface LayerSelectionProps {
+  readonly activeSlot: AuthoringSlotSelection | null;
+  readonly authoringModel: CatalogAuthoringModel;
+  readonly dragIntent: AuthoringDragIntent | null;
+  readonly onApplyIntent: (
+    target: AuthoringSlotSelection,
+    index: number,
+    intent: AuthoringDragIntent,
+  ) => void;
+  readonly onChooseSlot: (target: AuthoringSlotSelection) => void;
+  readonly onClearDrag: () => void;
+  readonly onStartDrag: (intent: AuthoringDragIntent) => void;
   readonly onToggleSelection: (node: AuthoringLayerNode) => void;
+  readonly route: AuthoringSlotRoute;
+  readonly rootNodeId: string;
   readonly selectedSourceNodeId: string | null;
 }
 
-function LayerNode({
-  node,
-  onToggleSelection,
+function declaredSlotStates(
+  owner: AuthoringBehaviorLayer | AuthoringLayerNode,
+): readonly AuthoringSlotState[] {
+  const slotsByName = new Map(owner.slots.map((slot) => [slot.name, slot]));
+  return owner.slotContracts.map((contract) => {
+    const sourceSlot = slotsByName.get(contract.name);
+    return Object.freeze({
+      name: contract.name,
+      present: sourceSlot !== undefined,
+      contract,
+      children: sourceSlot?.children ?? Object.freeze([]),
+    });
+  });
+}
+
+function slotTarget(
+  route: AuthoringSlotRoute,
+  owner: AuthoringBehaviorLayer | AuthoringLayerNode,
+  slot: AuthoringSlotState,
+): AuthoringSlotSelection {
+  return createAuthoringSlotSelection({
+    projectId: route.projectId,
+    surfaceId: route.surfaceId,
+    ownerKind: owner.kind,
+    ownerId: owner.id,
+    ownerCapabilityId: owner.capabilityId,
+    slot: slot.name,
+  });
+}
+
+function slotCardinalityLabel(slot: AuthoringSlotState): string {
+  const maximum =
+    slot.contract.maximum === null ? "no maximum" : `maximum ${slot.contract.maximum}`;
+  return `${slot.children.length} ${slot.children.length === 1 ? "item" : "items"} · minimum ${slot.contract.minimum} · ${maximum}`;
+}
+
+function slotAcceptanceLabel(contract: AuthoringSlotContract): string {
+  if (!contract.constrainsChildren) return "Any component";
+  const accepted = [...contract.acceptedCategories, ...contract.acceptedCapabilityIds];
+  return accepted.length === 0 ? "Accepts none" : `Accepts ${accepted.join(", ")}`;
+}
+
+function prepareNativeDrag(event: DragEvent<HTMLElement>, effect: "copy" | "move"): void {
+  event.dataTransfer.effectAllowed = effect;
+  // The browser payload is deliberately an inert hint. Current React state plus the latest
+  // validator-admitted Source and Catalog are the only authority used when a drop is applied.
+  event.dataTransfer.setData("text/plain", "DESEN App authoring item");
+}
+
+function SlotBoundary({
+  index,
+  owner,
+  slot,
+  activeSlot,
+  authoringModel,
+  dragIntent,
+  onApplyIntent,
+  route,
+  rootNodeId,
   selectedSourceNodeId,
-}: Readonly<LayerSelectionProps & { readonly node: AuthoringLayerNode }>) {
+}: Readonly<
+  Pick<
+    LayerSelectionProps,
+    | "activeSlot"
+    | "authoringModel"
+    | "dragIntent"
+    | "onApplyIntent"
+    | "route"
+    | "rootNodeId"
+    | "selectedSourceNodeId"
+  > & {
+    readonly index: number;
+    readonly owner: AuthoringBehaviorLayer | AuthoringLayerNode;
+    readonly slot: AuthoringSlotState;
+  }
+>) {
+  const target = slotTarget(route, owner, slot);
+  const selectedPlacement =
+    selectedSourceNodeId === null || selectedSourceNodeId === rootNodeId
+      ? null
+      : evaluateAuthoringSlotPlacement(route, authoringModel, target, selectedSourceNodeId, index);
+  const selectedMovable =
+    selectedPlacement?.accepted === true && selectedPlacement.changesSource === true;
+  const dragAccepted =
+    dragIntent?.kind === "node"
+      ? (() => {
+          const compatibility = evaluateAuthoringSlotPlacement(
+            route,
+            authoringModel,
+            target,
+            dragIntent.nodeId,
+            index,
+          );
+          return compatibility.accepted && compatibility.changesSource;
+        })()
+      : dragIntent?.kind === "component"
+        ? (() => {
+            const component = authoringModel.components.find(
+              ({ id }) => id === dragIntent.componentId,
+            );
+            return (
+              component !== undefined &&
+              evaluateAuthoringSlotInsertion(route, authoringModel, target, component.id, index)
+                .accepted
+            );
+          })()
+        : false;
+  const dropReady = dragIntent !== null && dragAccepted;
+  const [dragHovered, setDragHovered] = useState(false);
+  const dragEnterDepth = useRef(0);
+
+  useEffect(() => {
+    dragEnterDepth.current = 0;
+    setDragHovered(false);
+  }, [dragIntent]);
+
+  const active = activeSlot !== null && isSameAuthoringSlotSelection(activeSlot, target);
+  const position = index + 1;
+  const selectedPosition =
+    selectedPlacement?.accepted === true ? selectedPlacement.finalIndex + 1 : position;
+  const placementLabel =
+    selectedPlacement?.accepted === true && !selectedPlacement.changesSource
+      ? `Keep ${selectedSourceNodeId ?? "selected layer"} at its current position ${selectedPosition} in ${owner.displayName} ${owner.id} ${slot.name} slot`
+      : `Move ${selectedSourceNodeId ?? "selected layer"} to ${owner.displayName} ${owner.id} ${slot.name} slot at position ${selectedPosition}`;
+
+  function receiveDrop(event: DragEvent<HTMLLIElement>): void {
+    if (dragIntent === null || !dropReady) return;
+    event.preventDefault();
+    dragEnterDepth.current = 0;
+    setDragHovered(false);
+    onApplyIntent(target, index, dragIntent);
+  }
+
+  function admitNativeDrag(event: DragEvent<HTMLLIElement>): void {
+    if (dragIntent === null || !dropReady) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = dragIntent.kind === "component" ? "copy" : "move";
+  }
+
+  return (
+    <li
+      aria-label={`${owner.displayName} ${owner.id} ${slot.name} slot insertion boundary at position ${position}`}
+      className={styles.slotBoundary}
+      data-active-slot={active}
+      data-drop-hovered={dropReady && dragHovered}
+      data-drop-ready={dropReady}
+      onDragEnter={(event) => {
+        if (!dropReady) return;
+        admitNativeDrag(event);
+        dragEnterDepth.current += 1;
+        setDragHovered(true);
+      }}
+      onDragLeave={() => {
+        if (!dropReady) return;
+        dragEnterDepth.current = Math.max(0, dragEnterDepth.current - 1);
+        if (dragEnterDepth.current === 0) setDragHovered(false);
+      }}
+      onDragOver={(event) => {
+        admitNativeDrag(event);
+        if (dropReady) setDragHovered(true);
+      }}
+      onDrop={receiveDrop}
+    >
+      <span aria-hidden="true" className={styles.slotBoundaryLine} />
+      <button
+        aria-label={placementLabel}
+        disabled={!selectedMovable}
+        onClick={() => {
+          if (selectedSourceNodeId === null) return;
+          onApplyIntent(target, index, { kind: "node", nodeId: selectedSourceNodeId });
+        }}
+        type="button"
+      >
+        Place
+      </button>
+    </li>
+  );
+}
+
+function LayerSlot({
+  owner,
+  slot,
+  ...interaction
+}: Readonly<
+  LayerSelectionProps & {
+    readonly owner: AuthoringBehaviorLayer | AuthoringLayerNode;
+    readonly slot: AuthoringSlotState;
+  }
+>) {
+  const target = slotTarget(interaction.route, owner, slot);
+  const active =
+    interaction.activeSlot !== null && isSameAuthoringSlotSelection(interaction.activeSlot, target);
+  const contractLabel = `${slot.contract.required ? "Required" : "Optional"} · ${slot.present ? "Present" : "Absent"} · ${slotCardinalityLabel(slot)} · ${slotAcceptanceLabel(slot.contract)}`;
+
+  return (
+    <div className={styles.layerSlot} data-present={slot.present}>
+      <button
+        aria-label={`Choose ${owner.displayName} ${owner.id} ${slot.name} slot · ${contractLabel}`}
+        aria-pressed={active}
+        className={styles.slotRow}
+        onClick={() => interaction.onChooseSlot(target)}
+        type="button"
+      >
+        <span aria-hidden="true" className={styles.slotGuide} />
+        <span>
+          <strong>{slot.name} slot</strong>
+          <small>
+            {slot.contract.required ? "Required" : "Optional"} ·{" "}
+            {slot.present ? "Present" : "Absent"}
+            {" · "}
+            {slotCardinalityLabel(slot)} · {slotAcceptanceLabel(slot.contract)}
+          </small>
+        </span>
+        <span aria-hidden="true" className={styles.slotAddMark}>
+          +
+        </span>
+      </button>
+      <ul>
+        <SlotBoundary index={0} owner={owner} slot={slot} {...interaction} />
+        {slot.children.map((child, index) => (
+          <Fragment key={child.id}>
+            <LayerNode node={child} movable {...interaction} />
+            <SlotBoundary index={index + 1} owner={owner} slot={slot} {...interaction} />
+          </Fragment>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function LayerNode({
+  activeSlot,
+  authoringModel,
+  dragIntent,
+  movable = false,
+  node,
+  onApplyIntent,
+  onChooseSlot,
+  onClearDrag,
+  onStartDrag,
+  onToggleSelection,
+  route,
+  rootNodeId,
+  selectedSourceNodeId,
+}: Readonly<
+  LayerSelectionProps & {
+    readonly movable?: boolean;
+    readonly node: AuthoringLayerNode;
+  }
+>) {
   const selected = selectedSourceNodeId === node.id;
+  const interaction = {
+    activeSlot,
+    authoringModel,
+    dragIntent,
+    onApplyIntent,
+    onChooseSlot,
+    onClearDrag,
+    onStartDrag,
+    onToggleSelection,
+    route,
+    rootNodeId,
+    selectedSourceNodeId,
+  } satisfies LayerSelectionProps;
 
   return (
     <li className={styles.layerNode}>
@@ -327,6 +621,14 @@ function LayerNode({
         aria-pressed={selected}
         className={styles.layerRow}
         data-category={node.capabilityId.split("/").at(-1)}
+        data-dragging={dragIntent?.kind === "node" && dragIntent.nodeId === node.id}
+        draggable={movable}
+        onDragEnd={onClearDrag}
+        onDragStart={(event) => {
+          if (!movable) return;
+          onStartDrag(Object.freeze({ kind: "node", nodeId: node.id }));
+          prepareNativeDrag(event, "move");
+        }}
         onClick={() => onToggleSelection(node)}
         type="button"
       >
@@ -340,42 +642,44 @@ function LayerNode({
       {node.behaviors.length > 0 ? (
         <ul aria-label={`${node.id} behaviors`} className={styles.behaviorList}>
           {node.behaviors.map((behavior) => (
-            <BehaviorNode
-              behavior={behavior}
-              key={behavior.id}
-              onToggleSelection={onToggleSelection}
-              selectedSourceNodeId={selectedSourceNodeId}
-            />
+            <BehaviorNode behavior={behavior} key={behavior.id} {...interaction} />
           ))}
         </ul>
       ) : null}
-      {node.slots.map((slot) => (
-        <div className={styles.layerSlot} key={slot.name}>
-          <div className={styles.slotRow}>
-            <span aria-hidden="true" className={styles.slotGuide} />
-            <span>{slot.name} slot</span>
-          </div>
-          <ul>
-            {slot.children.map((child) => (
-              <LayerNode
-                key={child.id}
-                node={child}
-                onToggleSelection={onToggleSelection}
-                selectedSourceNodeId={selectedSourceNodeId}
-              />
-            ))}
-          </ul>
-        </div>
+      {declaredSlotStates(node).map((slot) => (
+        <LayerSlot key={slot.name} owner={node} slot={slot} {...interaction} />
       ))}
     </li>
   );
 }
 
 function BehaviorNode({
+  activeSlot,
+  authoringModel,
   behavior,
+  dragIntent,
+  onApplyIntent,
+  onChooseSlot,
+  onClearDrag,
+  onStartDrag,
   onToggleSelection,
+  route,
+  rootNodeId,
   selectedSourceNodeId,
 }: Readonly<LayerSelectionProps & { readonly behavior: AuthoringBehaviorLayer }>) {
+  const interaction = {
+    activeSlot,
+    authoringModel,
+    dragIntent,
+    onApplyIntent,
+    onChooseSlot,
+    onClearDrag,
+    onStartDrag,
+    onToggleSelection,
+    route,
+    rootNodeId,
+    selectedSourceNodeId,
+  } satisfies LayerSelectionProps;
   return (
     <li className={styles.behaviorNode}>
       <div className={styles.layerRow} data-category="Behavior">
@@ -387,23 +691,8 @@ function BehaviorNode({
         <span className={styles.behaviorBadge}>behavior</span>
         {behavior.conditional ? <span className={styles.conditionalBadge}>Conditional</span> : null}
       </div>
-      {behavior.slots.map((slot) => (
-        <div className={styles.layerSlot} key={slot.name}>
-          <div className={styles.slotRow}>
-            <span aria-hidden="true" className={styles.slotGuide} />
-            <span>{slot.name} slot</span>
-          </div>
-          <ul>
-            {slot.children.map((child) => (
-              <LayerNode
-                key={child.id}
-                node={child}
-                onToggleSelection={onToggleSelection}
-                selectedSourceNodeId={selectedSourceNodeId}
-              />
-            ))}
-          </ul>
-        </div>
+      {declaredSlotStates(behavior).map((slot) => (
+        <LayerSlot key={slot.name} owner={behavior} slot={slot} {...interaction} />
       ))}
     </li>
   );
@@ -411,9 +700,8 @@ function BehaviorNode({
 
 function LayerTree({
   model,
-  onToggleSelection,
-  selectedSourceNodeId,
   selectedSurface,
+  ...interaction
 }: Readonly<
   LayerSelectionProps & {
     readonly model: CatalogAuthoringModel;
@@ -438,7 +726,7 @@ function LayerTree({
     <div className={styles.layersView}>
       <div className={styles.panelSectionHeading}>
         <span>Surface</span>
-        <small>Read only</small>
+        <small>Session draft</small>
       </div>
       <div className={styles.surfaceSummary}>
         <span aria-hidden="true" className={styles.surfaceGlyph} />
@@ -452,11 +740,7 @@ function LayerTree({
       </div>
       <section aria-label={`${selectedSurface.name} layer hierarchy`}>
         <ul className={styles.layerTree}>
-          <LayerNode
-            node={surfaceTree.root}
-            onToggleSelection={onToggleSelection}
-            selectedSourceNodeId={selectedSourceNodeId}
-          />
+          <LayerNode node={surfaceTree.root} {...interaction} />
         </ul>
       </section>
     </div>
@@ -477,8 +761,43 @@ function groupComponents(
     .map(([category, items]) => [category, Object.freeze(items)] as const);
 }
 
-function ComponentLibrary({ model }: Readonly<{ readonly model: CatalogAuthoringModel }>) {
+const COMPONENT_PALETTE_RENDER_LIMIT = 24;
+
+function ComponentLibrary({
+  active,
+  dragIntent,
+  model,
+  onApplyIntent,
+  onClearDrag,
+  onRequestSlotChoice,
+  onStartDrag,
+  route,
+  slotProjection,
+}: Readonly<{
+  readonly active: boolean;
+  readonly dragIntent: AuthoringDragIntent | null;
+  readonly model: CatalogAuthoringModel;
+  readonly onApplyIntent: (
+    target: AuthoringSlotSelection,
+    index: number,
+    intent: AuthoringDragIntent,
+  ) => void;
+  readonly onClearDrag: () => void;
+  readonly onRequestSlotChoice: () => void;
+  readonly onStartDrag: (intent: AuthoringDragIntent) => void;
+  readonly route: AuthoringSlotRoute;
+  readonly slotProjection: AuthoringSlotProjection | null;
+}>) {
   const [query, setQuery] = useState("");
+  const [targetDragHovered, setTargetDragHovered] = useState(false);
+  const targetDragEnterDepth = useRef(0);
+
+  useEffect(() => {
+    targetDragEnterDepth.current = 0;
+    setTargetDragHovered(false);
+  }, [dragIntent]);
+
+  if (!active) return null;
   const normalizedQuery = query.trim().toLocaleLowerCase("en-US");
   const components = model.components.filter((component) => {
     if (normalizedQuery === "") return true;
@@ -487,7 +806,37 @@ function ComponentLibrary({ model }: Readonly<{ readonly model: CatalogAuthoring
       .toLocaleLowerCase("en-US")
       .includes(normalizedQuery);
   });
-  const groups = groupComponents(components);
+  const visibleComponents = components.slice(0, COMPONENT_PALETTE_RENDER_LIMIT);
+  const groups = groupComponents(visibleComponents);
+  const readySlot = slotProjection?.status === "ready" ? slotProjection : null;
+  const draggedComponent =
+    dragIntent?.kind === "component"
+      ? model.components.find(({ id }) => id === dragIntent.componentId)
+      : undefined;
+  const draggedComponentAccepted =
+    readySlot !== null &&
+    draggedComponent !== undefined &&
+    evaluateAuthoringSlotInsertion(
+      route,
+      model,
+      readySlot.selection,
+      draggedComponent.id,
+      readySlot.slot.children.length,
+    ).accepted;
+  const componentDropReady = dragIntent?.kind === "component" && draggedComponentAccepted;
+
+  function addComponent(componentId: string): void {
+    if (readySlot === null) return;
+    onApplyIntent(readySlot.selection, readySlot.slot.children.length, {
+      kind: "component",
+      componentId,
+    });
+  }
+
+  const targetName =
+    readySlot === null
+      ? "Placement target · choose a named slot"
+      : `Placement target · ${readySlot.owner.displayName} ${readySlot.owner.id} ${readySlot.slot.name} slot · ${slotCardinalityLabel(readySlot.slot)}`;
 
   return (
     <div className={styles.componentsView}>
@@ -509,8 +858,78 @@ function ComponentLibrary({ model }: Readonly<{ readonly model: CatalogAuthoring
         />
       </label>
       <p aria-live="polite" className={styles.componentCount} role="status">
-        {components.length} of {model.components.length} components
+        {visibleComponents.length === components.length
+          ? `${components.length} of ${model.components.length} components`
+          : `Showing ${visibleComponents.length} of ${components.length} matches · ${model.components.length} components total`}
       </p>
+
+      <div
+        aria-label={targetName}
+        className={styles.componentSlotTarget}
+        data-drop-hovered={componentDropReady && targetDragHovered}
+        data-drop-ready={componentDropReady}
+        data-guide={readySlot === null}
+        data-ready={readySlot !== null}
+        role="group"
+        onDragEnter={(event) => {
+          if (!componentDropReady) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "copy";
+          targetDragEnterDepth.current += 1;
+          setTargetDragHovered(true);
+        }}
+        onDragLeave={() => {
+          if (!componentDropReady) return;
+          targetDragEnterDepth.current = Math.max(0, targetDragEnterDepth.current - 1);
+          if (targetDragEnterDepth.current === 0) setTargetDragHovered(false);
+        }}
+        onDragOver={(event) => {
+          if (!componentDropReady) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "copy";
+          setTargetDragHovered(true);
+        }}
+        onDrop={(event) => {
+          if (!componentDropReady || dragIntent?.kind !== "component") return;
+          event.preventDefault();
+          targetDragEnterDepth.current = 0;
+          setTargetDragHovered(false);
+          addComponent(dragIntent.componentId);
+        }}
+      >
+        {readySlot === null ? (
+          <>
+            <span className={styles.componentTargetCopy}>
+              <strong>No drop target selected</strong>
+              <span>Choose a named slot in Layers before placing a component.</span>
+            </span>
+            <button
+              className={styles.componentTargetAction}
+              onClick={onRequestSlotChoice}
+              type="button"
+            >
+              Choose slot in Layers
+            </button>
+          </>
+        ) : (
+          <>
+            <span className={styles.componentTargetCopy}>
+              <strong>
+                {draggedComponent === undefined
+                  ? readySlot.owner.displayName
+                  : `Drop ${draggedComponent.displayName} here`}
+              </strong>
+              <small>
+                {readySlot.owner.id} · {readySlot.slot.name} slot
+                {draggedComponent === undefined
+                  ? ""
+                  : ` · position ${readySlot.slot.children.length + 1}`}
+              </small>
+            </span>
+            <span className={styles.slotContractBadge}>{slotCardinalityLabel(readySlot.slot)}</span>
+          </>
+        )}
+      </div>
 
       {groups.length > 0 ? (
         <div className={styles.componentGroups}>
@@ -520,22 +939,74 @@ function ComponentLibrary({ model }: Readonly<{ readonly model: CatalogAuthoring
               <ul>
                 {items.map((component) => (
                   <li key={component.id}>
-                    <span
-                      aria-hidden="true"
-                      className={styles.componentGlyph}
-                      data-category={component.semanticCategory}
-                    >
-                      {component.displayName.slice(0, 1)}
-                    </span>
-                    <span className={styles.componentIdentity}>
-                      <strong>{component.displayName}</strong>
-                      {component.description === undefined ? null : (
-                        <small>{component.description}</small>
-                      )}
-                    </span>
-                    <span className={styles.componentMeta}>
-                      {component.semanticCategory ?? "Other"}
-                    </span>
+                    {(() => {
+                      const compatibility =
+                        readySlot === null
+                          ? null
+                          : evaluateAuthoringSlotInsertion(
+                              route,
+                              model,
+                              readySlot.selection,
+                              component.id,
+                              readySlot.slot.children.length,
+                            );
+                      const enabled = compatibility?.accepted === true;
+                      const action =
+                        readySlot === null
+                          ? "Choose slot"
+                          : enabled
+                            ? "Insert"
+                            : compatibility?.reason === "maximum-reached"
+                              ? "Slot full"
+                              : compatibility?.reason === "minimum-unreachable"
+                                ? "Needs batch insert"
+                                : compatibility?.reason === "component-template-unavailable"
+                                  ? "Needs template"
+                                  : compatibility?.reason === "default-profile-exceeded"
+                                    ? "Defaults too large"
+                                    : compatibility?.reason === "defaults-invalid"
+                                      ? "Invalid defaults"
+                                      : "Not accepted";
+                      return (
+                        <button
+                          aria-label={
+                            readySlot === null
+                              ? `${component.displayName} · choose a named slot first`
+                              : enabled
+                                ? `Insert ${component.displayName} into ${readySlot.owner.displayName} ${readySlot.owner.id} ${readySlot.slot.name} slot at position ${readySlot.slot.children.length + 1}`
+                                : `${action} · ${component.displayName} in ${readySlot.owner.displayName} ${readySlot.owner.id} ${readySlot.slot.name} slot`
+                          }
+                          className={styles.componentItem}
+                          disabled={!enabled}
+                          draggable={enabled}
+                          onClick={() => addComponent(component.id)}
+                          onDragEnd={onClearDrag}
+                          onDragStart={(event) => {
+                            if (!enabled) return;
+                            onStartDrag(
+                              Object.freeze({ kind: "component", componentId: component.id }),
+                            );
+                            prepareNativeDrag(event, "copy");
+                          }}
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={styles.componentGlyph}
+                            data-category={component.semanticCategory}
+                          >
+                            {component.displayName.slice(0, 1)}
+                          </span>
+                          <span className={styles.componentIdentity}>
+                            <strong>{component.displayName}</strong>
+                            {component.description === undefined ? null : (
+                              <small>{component.description}</small>
+                            )}
+                          </span>
+                          <span className={styles.componentMeta}>{action}</span>
+                        </button>
+                      );
+                    })()}
                   </li>
                 ))}
               </ul>
@@ -557,21 +1028,106 @@ function ComponentLibrary({ model }: Readonly<{ readonly model: CatalogAuthoring
 
 function AuthoringPanel({
   model,
+  onDeleteSelection,
+  onSlotEdit,
   onToggleSelection,
+  route,
   selection,
   selectedSourceNodeId,
   selectedSurface,
-}: Readonly<
-  LayerSelectionProps & {
-    readonly model: CatalogAuthoringModel;
-    readonly selection: AuthoringComponentSelection | null;
-    readonly selectedSurface: DesenAppSurfaceSummary;
-  }
->) {
+}: Readonly<{
+  readonly model: CatalogAuthoringModel;
+  readonly onDeleteSelection: () => AuthoringSlotEditResult;
+  readonly onSlotEdit: (
+    target: AuthoringSlotSelection,
+    edit: AuthoringSlotEdit,
+  ) => AuthoringSlotEditResult;
+  readonly onToggleSelection: (node: AuthoringLayerNode) => void;
+  readonly route: AuthoringSlotRoute;
+  readonly selection: AuthoringComponentSelection | null;
+  readonly selectedSourceNodeId: string | null;
+  readonly selectedSurface: DesenAppSurfaceSummary;
+}>) {
   const [activeTab, setActiveTab] = useState<AuthoringTab>("layers");
+  const [activeSlot, setActiveSlot] = useState<AuthoringSlotSelection | null>(null);
+  const [dragIntent, setDragIntent] = useState<AuthoringDragIntent | null>(null);
+  const [notice, setNotice] = useState("");
   const panelId = useId();
   const layersTab = useRef<HTMLButtonElement>(null);
   const componentsTab = useRef<HTMLButtonElement>(null);
+  const slotProjection =
+    activeSlot === null ? null : projectAuthoringSlotSelection(activeSlot, route, model);
+  const surfaceRootNodeId =
+    model.surfaces.find(({ id }) => id === selectedSurface.id)?.root.id ?? null;
+  const deletionCompatibility =
+    selection === null ? null : evaluateAuthoringNodeDeletion(route, model, selection);
+  const deletionReason =
+    selection === null || deletionCompatibility?.accepted === true
+      ? "Deletes this layer and its nested Source subtree."
+      : selection.sourceNodeId === surfaceRootNodeId
+        ? "The surface root cannot be deleted."
+        : deletionCompatibility?.reason === "cardinality-rejected"
+          ? "The owning slot minimum requires this layer."
+          : "This layer is no longer a current deletion target.";
+
+  useEffect(() => {
+    if (slotProjection?.status !== "rejected") return;
+    setActiveSlot(null);
+    setDragIntent(null);
+    setNotice("The previous slot target is no longer current.");
+  }, [model, slotProjection?.status]);
+
+  function chooseSlot(target: AuthoringSlotSelection): void {
+    setActiveSlot((current) =>
+      current !== null && isSameAuthoringSlotSelection(current, target) ? current : target,
+    );
+    setActiveTab("components");
+    componentsTab.current?.focus();
+    setNotice(`Choose a Catalog component for ${target.ownerId} · ${target.slot}.`);
+  }
+
+  function toggleLayer(node: AuthoringLayerNode): void {
+    setNotice("");
+    onToggleSelection(node);
+  }
+
+  function applyIntent(
+    target: AuthoringSlotSelection,
+    index: number,
+    intent: AuthoringDragIntent,
+  ): void {
+    const targetProjection = projectAuthoringSlotSelection(target, route, model);
+    const result = onSlotEdit(
+      target,
+      intent.kind === "component"
+        ? { kind: "insert", componentId: intent.componentId, index }
+        : { kind: "place", nodeId: intent.nodeId, index },
+    );
+    setDragIntent(null);
+    if (!result.ok) {
+      const message =
+        result.reason === "acceptance-rejected"
+          ? "That component is not accepted by this slot."
+          : result.reason === "cardinality-rejected"
+            ? "This move would violate the slot item limits."
+            : result.reason === "defaults-invalid"
+              ? "The Catalog defaults cannot create a valid component here."
+              : result.reason === "preview-unavailable"
+                ? "The working preview could not accept this Source change."
+                : result.reason === "target-invalid"
+                  ? "The selected node or slot is no longer current."
+                  : "The slot change was rejected safely.";
+      setNotice(message);
+      return;
+    }
+    setNotice(
+      result.operation === "insert"
+        ? `Inserted ${model.components.find(({ id }) => id === (intent.kind === "component" ? intent.componentId : ""))?.displayName ?? result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot at position ${index + 1}` : "the selected slot"}.`
+        : result.operation === "move"
+          ? `Moved ${result.nodeId} to ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`
+          : `Reordered ${result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`,
+    );
+  }
 
   function selectAdjacentTab(event: KeyboardEvent<HTMLButtonElement>): void {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
@@ -590,6 +1146,34 @@ function AuthoringPanel({
               : "components";
     setActiveTab(nextTab);
     (nextTab === "layers" ? layersTab : componentsTab).current?.focus();
+  }
+
+  function requestSlotChoice(): void {
+    setActiveTab("layers");
+    layersTab.current?.focus();
+    setNotice("Choose a named slot in Layers, then return to Components.");
+  }
+
+  function deleteSelection(): void {
+    if (selection === null || deletionCompatibility?.accepted !== true) return;
+    const result = onDeleteSelection();
+    setDragIntent(null);
+    if (!result.ok) {
+      setNotice(
+        result.reason === "cardinality-rejected"
+          ? "The owning slot minimum requires this layer."
+          : result.reason === "preview-unavailable"
+            ? "The working preview could not accept this Source deletion."
+            : result.reason === "target-invalid"
+              ? "The selected layer is no longer a current deletion target."
+              : "The layer deletion was rejected safely.",
+      );
+      return;
+    }
+    setActiveSlot(null);
+    setActiveTab("layers");
+    layersTab.current?.focus();
+    setNotice(`Deleted ${selection.displayName} layer · ${result.nodeId}.`);
   }
 
   return (
@@ -641,12 +1225,23 @@ function AuthoringPanel({
         role="tabpanel"
         tabIndex={activeTab === "layers" ? 0 : -1}
       >
-        <LayerTree
-          model={model}
-          onToggleSelection={onToggleSelection}
-          selectedSourceNodeId={selectedSourceNodeId}
-          selectedSurface={selectedSurface}
-        />
+        {activeTab === "layers" ? (
+          <LayerTree
+            activeSlot={activeSlot}
+            authoringModel={model}
+            dragIntent={dragIntent}
+            model={model}
+            onApplyIntent={applyIntent}
+            onChooseSlot={chooseSlot}
+            onClearDrag={() => setDragIntent(null)}
+            onStartDrag={setDragIntent}
+            onToggleSelection={toggleLayer}
+            rootNodeId={model.surfaces.find(({ id }) => id === selectedSurface.id)?.root.id ?? ""}
+            route={route}
+            selectedSourceNodeId={selectedSourceNodeId}
+            selectedSurface={selectedSurface}
+          />
+        ) : null}
       </div>
       <div
         aria-labelledby={`${panelId}-components-tab`}
@@ -656,12 +1251,38 @@ function AuthoringPanel({
         role="tabpanel"
         tabIndex={activeTab === "components" ? 0 : -1}
       >
-        <ComponentLibrary model={model} />
+        <ComponentLibrary
+          active={activeTab === "components"}
+          dragIntent={dragIntent}
+          model={model}
+          onApplyIntent={applyIntent}
+          onClearDrag={() => setDragIntent(null)}
+          onRequestSlotChoice={requestSlotChoice}
+          onStartDrag={setDragIntent}
+          route={route}
+          slotProjection={slotProjection}
+        />
       </div>
-      <p aria-live="polite" className={styles.authoringBoundary}>
-        {selection === null
-          ? "Choose a Source layer to inspect and edit its properties."
-          : `Selected · ${selection.displayName}${selection.conditional ? " · Conditional" : ""}`}
+      {selection === null ? null : (
+        <div className={styles.authoringSelectionActions}>
+          <button
+            aria-describedby={`${panelId}-delete-layer-description`}
+            aria-label={`Delete ${selection.displayName} layer · ${selection.sourceNodeId}`}
+            className={styles.deleteLayerAction}
+            disabled={deletionCompatibility?.accepted !== true}
+            onClick={deleteSelection}
+            type="button"
+          >
+            Delete layer
+          </button>
+          <small id={`${panelId}-delete-layer-description`}>{deletionReason}</small>
+        </div>
+      )}
+      <p aria-atomic="true" aria-live="polite" className={styles.authoringBoundary} role="status">
+        {notice ||
+          (selection === null
+            ? "Choose a Source layer to inspect, move, or edit its properties."
+            : `Selected · ${selection.displayName}${selection.conditional ? " · Conditional" : ""}`)}
       </p>
     </aside>
   );
@@ -724,6 +1345,33 @@ function SurfaceEditor({
     return result;
   }
 
+  function editNamedSlot(
+    target: AuthoringSlotSelection,
+    edit: AuthoringSlotEdit,
+  ): AuthoringSlotEditResult {
+    const result = applyAuthoringSlotEdit(document, referenceCatalog, route, target, edit);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    if (!nextPreview.ok) {
+      return Object.freeze({ ok: false, reason: "preview-unavailable" });
+    }
+    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    return result;
+  }
+
+  function deleteSelectedLayer(): AuthoringSlotEditResult {
+    if (selection === null) return Object.freeze({ ok: false, reason: "edit-rejected" });
+    const result = applyAuthoringNodeDelete(document, referenceCatalog, route, selection);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    if (!nextPreview.ok) {
+      return Object.freeze({ ok: false, reason: "preview-unavailable" });
+    }
+    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    setSelection(null);
+    return result;
+  }
+
   if (!preparedModel.ok) {
     return (
       <section className={styles.surfaceEditor} aria-labelledby="workspace-title">
@@ -748,7 +1396,10 @@ function SurfaceEditor({
 
       <AuthoringPanel
         model={model}
+        onDeleteSelection={deleteSelectedLayer}
+        onSlotEdit={editNamedSlot}
         onToggleSelection={toggleSelection}
+        route={route}
         selection={selection}
         selectedSourceNodeId={selection?.sourceNodeId ?? null}
         selectedSurface={selectedSurface}
@@ -776,9 +1427,9 @@ function SurfaceEditor({
         <div className={styles.boundaryNote}>
           <strong>Preview data</strong>
           <span>
-            Catalog-backed property edits stay in this session and refresh the exact adapter
-            preview. Selection and Inspector chrome never enter the managed component tree. Save,
-            control-plane publication, and activation remain unavailable.
+            Catalog-backed property and named-slot edits stay in this session and refresh the exact
+            adapter preview. Selection, placement, and Inspector chrome never enter the managed
+            component tree. Save, control-plane publication, and activation remain unavailable.
           </span>
         </div>
       </div>

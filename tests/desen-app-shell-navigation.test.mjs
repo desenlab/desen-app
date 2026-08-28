@@ -80,7 +80,16 @@ test("[authority] binds M09-T01 to the exact completed G08 artifact", () => {
     DESEN_APP_SHELL_NAVIGATION_ROOT_TEST_NAMES,
   );
   assert.equal(built.currentCompatibility.result, "PASS");
-  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T06");
+  assert.equal(built.currentCompatibility.additiveSuccessor.task, "M09-T07");
+  assert.deepEqual(built.currentCompatibility.additiveSuccessor.artifact, {
+    task: "M09-T07",
+    proofId: "desen-app-named-slot-authoring",
+    profile: "desen.app.named-slot-authoring-proof.v1",
+    result: "PASS",
+    path: "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json",
+    bytes: 24_830,
+    sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+  });
 });
 
 test("[shell] records the closed route, fixture, guidance, and accessibility profile", () => {
@@ -167,6 +176,7 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     "apps/desen-app/src/authoring-preview.ts",
     "apps/desen-app/src/inspector-panel.tsx",
     "apps/desen-app/src/structured-json.ts",
+    "apps/desen-app/src/authoring-slots.ts",
   ]);
   assert.equal(
     built.currentCompatibility.additiveSuccessor
@@ -202,6 +212,88 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     true,
   );
   assert.equal(built.currentCompatibility.additiveSuccessor.dynamicValuesRemainLocked, true);
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.completeNamedSlotProjectionAllowed,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.catalogAdmissionAndCardinalityPreflightAllowed,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.publicStableIdInsertMoveAndReorderAllowed,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.publicValidatedNodeDeletionAllowed,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.deletionPreflightRunsPublicMutationAndValidation,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.rootAndSourceMinimumDeletionDisabled,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.behaviorOwnedDeletePreservesEmptySlot,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.exactOwnDataDeletionSelectionCapture,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.continuousCompleteSourceRevalidation,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.failedDeletionPreservesCurrentDocument,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.deletionSourceAndPreviewCommitAtomically,
+    true,
+  );
+  assert.equal(built.currentCompatibility.additiveSuccessor.deletionFocusManaged, true);
+  assert.equal(built.currentCompatibility.additiveSuccessor.browserDataTransferReadsZero, true);
+  assert.equal(built.currentCompatibility.additiveSuccessor.expandedDropReadyBoundaries, true);
+  assert.equal(built.currentCompatibility.additiveSuccessor.stableNestedDragHover, true);
+  assert.equal(built.currentCompatibility.additiveSuccessor.explicitComponentDropTargetGuide, true);
+  assert.equal(built.currentCompatibility.additiveSuccessor.keyboardPlacementControl, true);
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.insertionAdmissionCachedPerModelAndExactTarget,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.placementAdmissionCachedPerModelAndExactTarget,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.cachedPlacementBaseMaterializesBoundaryFinalIndex,
+    true,
+  );
+  assert.equal(built.currentCompatibility.additiveSuccessor.componentPaletteRenderLimit, 24);
+  assert.equal(built.currentCompatibility.additiveSuccessor.activeTabOnlyAuthoringWork, true);
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.exactSlotSelectionAndEditCaptureAllowed,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.atomicPublisherBackedSlotEditsAllowed,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.application.package.namedSlotTestCommand,
+    "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+  );
+  assert.equal(
+    built.currentCompatibility.application.package.namedSlotRootCommands[
+      "test:desen-app-named-slot-authoring"
+    ],
+    "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node --test tests/desen-app-named-slot-authoring.test.mjs",
+  );
   assert.equal(built.currentCompatibility.boundary.imports.exactReferenceAdapterRegistry, true);
   assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);

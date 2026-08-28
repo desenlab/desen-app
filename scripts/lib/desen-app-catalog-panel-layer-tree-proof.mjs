@@ -13,11 +13,13 @@ const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-CATALOG-PANEL-LAYER-TREE.md";
+const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const SHELL_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const REFERENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/reference-catalog-web-capability-artifact.json";
 const CATALOG_PATH = "packages/reference-catalog-web/catalog.json";
 const SOURCE_PATH = "examples/sign-in/official-derived.source.desen.json";
+const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const AUTHORING_SOURCE_PATH = "apps/desen-app/src/authoring-data.ts";
 const AUTHORING_SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
@@ -25,6 +27,7 @@ const AUTHORING_INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.
 const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
 const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
+const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const OFFICIAL_BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
@@ -34,6 +37,7 @@ const AUTHORING_INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.t
 const AUTHORING_PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
 const INSPECTOR_PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
 const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
+const AUTHORING_SLOT_TEST_PATH = "apps/desen-app/test/authoring-slots.test.ts";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
@@ -104,6 +108,8 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   ...new Set([
     ...TRACKED_PATHS,
+    ROOT_PACKAGE_PATH,
+    NAMED_SLOT_ARTIFACT_PATH,
     ADAPTER_CANVAS_SOURCE_PATH,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_SELECTION_TEST_PATH,
@@ -111,10 +117,12 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_PREVIEW_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
+    AUTHORING_SLOT_SOURCE_PATH,
     AUTHORING_INSPECTOR_TEST_PATH,
     AUTHORING_PREVIEW_TEST_PATH,
     INSPECTOR_PANEL_TEST_PATH,
     STRUCTURED_JSON_TEST_PATH,
+    AUTHORING_SLOT_TEST_PATH,
   ]),
 ]);
 const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
@@ -125,6 +133,7 @@ const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
   AUTHORING_PREVIEW_SOURCE_PATH,
   INSPECTOR_PANEL_SOURCE_PATH,
   STRUCTURED_JSON_SOURCE_PATH,
+  AUTHORING_SLOT_SOURCE_PATH,
 ]);
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
   TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
@@ -136,6 +145,15 @@ const SELF_RESEALED_PATHS = Object.freeze([
 const FROZEN_ARTIFACT_PIN = Object.freeze({
   bytes: 25_375,
   sha256: "85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61",
+});
+const NAMED_SLOT_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T07",
+  proofId: "desen-app-named-slot-authoring",
+  profile: "desen.app.named-slot-authoring-proof.v1",
+  result: "PASS",
+  path: NAMED_SLOT_ARTIFACT_PATH,
+  bytes: 24_830,
+  sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
 });
 const EXPECTED_VALIDATOR_IMPORTS = Object.freeze([
   "validateDesenInteractionCatalogSet",
@@ -781,8 +799,18 @@ function verifySource(bytes) {
   });
 }
 
-function verifyPackage(bytes) {
+function verifyPackage(bytes, rootBytes) {
   const manifest = parseJson(bytes, APP_PACKAGE_PATH);
+  const root = parseJson(rootBytes, ROOT_PACKAGE_PATH);
+  const namedSlotCommand =
+    "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx";
+  const namedSlotPrefix =
+    "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && ";
+  const namedSlotRootCommands = {
+    "generate:desen-app-named-slot-authoring": `${namedSlotPrefix}node scripts/generate-desen-app-named-slot-authoring-proof.mjs`,
+    "verify:desen-app-named-slot-authoring": `${namedSlotPrefix}node scripts/verify-desen-app-named-slot-authoring.mjs`,
+    "test:desen-app-named-slot-authoring": `${namedSlotPrefix}node --test tests/desen-app-named-slot-authoring.test.mjs`,
+  };
   const expectedDependencies = {
     "@desen/catalog-sdk": "workspace:*",
     "@desen/editor-core": "workspace:*",
@@ -814,7 +842,7 @@ function verifyPackage(bytes) {
     manifest.scripts?.typecheck !== "tsc -p tsconfig.json --noEmit" ||
     manifest.scripts?.test !== "vitest run" ||
     manifest.scripts?.["test:authoring"] !==
-      "vitest run test/authoring-data.test.ts test/application.test.tsx" ||
+      "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/application.test.tsx" ||
     manifest.scripts?.["test:canvas"] !==
       "vitest run test/adapter-canvas.test.tsx test/application.test.tsx test/main-lifecycle.test.tsx" ||
     manifest.scripts?.["test:selection"] !==
@@ -823,6 +851,10 @@ function verifyPackage(bytes) {
       "vitest run test/authoring-inspector.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
     manifest.scripts?.["test:structured-inspector"] !==
       "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
+    manifest.scripts?.["test:named-slots"] !== namedSlotCommand ||
+    Object.entries(namedSlotRootCommands).some(
+      ([name, command]) => root.scripts?.[name] !== command,
+    ) ||
     manifest.scripts?.["test:shell"] !==
       "vitest run test/project-navigation.test.ts test/application.test.tsx test/main-lifecycle.test.tsx"
   ) {
@@ -838,6 +870,8 @@ function verifyPackage(bytes) {
     selectionSuccessorTestScript: manifest.scripts["test:selection"],
     inspectorSuccessorTestScript: manifest.scripts["test:inspector"],
     structuredInspectorSuccessorTestScript: manifest.scripts["test:structured-inspector"],
+    namedSlotSuccessorTestScript: namedSlotCommand,
+    namedSlotRootCommands,
     editorCoreDependency: true,
     catalogSdkDependency: true,
     publisherDependency: true,
@@ -876,6 +910,7 @@ function resolveRelativeImport(importerPath, specifier) {
       candidate === AUTHORING_PREVIEW_SOURCE_PATH ||
       candidate === INSPECTOR_PANEL_SOURCE_PATH ||
       candidate === STRUCTURED_JSON_SOURCE_PATH ||
+      candidate === AUTHORING_SLOT_SOURCE_PATH ||
       candidate === SOURCE_PATH ||
       candidate === OFFICIAL_BUNDLE_PATH,
   );
@@ -1022,6 +1057,17 @@ function inspectImportsAndExecutionBoundary(files) {
       ]),
     ],
     [AUTHORING_PREVIEW_SOURCE_PATH, new Set(["createDesenEditorDocument", "publishDesenSource"])],
+    [
+      AUTHORING_SLOT_SOURCE_PATH,
+      new Set([
+        "createDesenEditorContinuousValidator",
+        "deleteDesenEditorNode",
+        "insertDesenEditorNode",
+        "moveDesenEditorNode",
+        "reorderDesenEditorNode",
+        "setDesenEditorOwnerProp",
+      ]),
+    ],
   ]);
   const exactAdapterPackages = new Set([
     "@desen/reference-catalog-web/catalog.json",
@@ -1057,6 +1103,7 @@ function inspectImportsAndExecutionBoundary(files) {
     "querySelector",
     "querySelectorAll",
   ]);
+  let namedSlotDragDropHandlers = 0;
 
   for (const relativePath of CURRENT_TYPESCRIPT_SOURCE_PATHS) {
     const source = decodeUtf8(files.get(relativePath), relativePath);
@@ -1115,6 +1162,7 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_INSPECTOR_SOURCE_PATH,
               INSPECTOR_PANEL_SOURCE_PATH,
               STRUCTURED_JSON_SOURCE_PATH,
+              AUTHORING_SLOT_SOURCE_PATH,
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null
@@ -1128,6 +1176,7 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_SOURCE_PATH,
               AUTHORING_INSPECTOR_SOURCE_PATH,
               AUTHORING_PREVIEW_SOURCE_PATH,
+              AUTHORING_SLOT_SOURCE_PATH,
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null
@@ -1146,9 +1195,11 @@ function inspectImportsAndExecutionBoundary(files) {
           publisherImports += 1;
         } else if (specifier === "@desen/protocol") {
           if (
-            ![AUTHORING_INSPECTOR_SOURCE_PATH, STRUCTURED_JSON_SOURCE_PATH].includes(
-              relativePath,
-            ) ||
+            ![
+              AUTHORING_INSPECTOR_SOURCE_PATH,
+              STRUCTURED_JSON_SOURCE_PATH,
+              AUTHORING_SLOT_SOURCE_PATH,
+            ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null ||
             shape.typeOnly
@@ -1242,6 +1293,7 @@ function inspectImportsAndExecutionBoundary(files) {
             APPLICATION_SOURCE_PATH,
             AUTHORING_INSPECTOR_SOURCE_PATH,
             AUTHORING_PREVIEW_SOURCE_PATH,
+            AUTHORING_SLOT_SOURCE_PATH,
           ].includes(relativePath) &&
             !isPlatformMemberReceiver(node)))
       ) {
@@ -1329,7 +1381,10 @@ function inspectImportsAndExecutionBoundary(files) {
               property.name.getText(sourceFile),
             )
           ) {
-            fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained drag/drop mutation behavior.`);
+            if (relativePath !== APPLICATION_SOURCE_PATH) {
+              fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained drag/drop mutation behavior.`);
+            }
+            namedSlotDragDropHandlers += 1;
           }
         }
       }
@@ -1350,14 +1405,25 @@ function inspectImportsAndExecutionBoundary(files) {
     referenceCatalogImports !== 4 ||
     validatorImports !== 1 ||
     publicDiagnosticIndexTypeOnlyImports !== 1 ||
-    catalogSdkImports !== 5 ||
-    editorCoreImports !== 5 ||
+    catalogSdkImports !== 6 ||
+    editorCoreImports !== 7 ||
     publisherImports !== 3 ||
-    protocolImports !== 2
+    protocolImports !== 3 ||
+    namedSlotDragDropHandlers !== 14
   ) {
     fail(
       "IMPORT_BOUNDARY_DRIFT",
-      "The source graph must retain T02-T05 package and public diagnostic-index edges.",
+      "The source graph must retain T02-T07 package, diagnostic-index, and inert drag-hint edges.",
+      {
+        catalogSdkImports,
+        editorCoreImports,
+        namedSlotDragDropHandlers,
+        protocolImports,
+        publisherImports,
+        publicDiagnosticIndexTypeOnlyImports,
+        referenceCatalogImports,
+        validatorImports,
+      },
     );
   }
 
@@ -1510,6 +1576,9 @@ function inspectImportsAndExecutionBoundary(files) {
       "@desen/editor-core#public-authoring-mutation",
       "@desen/publisher#session-preview-publication",
       "@desen/protocol#canonical-structured-json",
+      "@desen/editor-core#named-slot-mutation",
+      "@desen/catalog-sdk#named-slot-contract-types",
+      "@desen/protocol#named-slot-canonical-json",
     ],
     arbitraryExecutableImports: 0,
     editorCoreImports,
@@ -1527,9 +1596,10 @@ function inspectImportsAndExecutionBoundary(files) {
     selectionAuthoringImports: 1,
     handwrittenManagedTreeElements: 0,
     privateDomAccesses: 0,
-    reviewedSourceMutationCalls: 3,
+    reviewedSourceMutationCalls: 13,
     platformIoCalls: 0,
     dragDropMutationHandlers: 0,
+    reviewedNamedSlotDragDropHandlers: namedSlotDragDropHandlers,
     canvasElements: 0,
     inspectorElements: 0,
   });
@@ -1647,7 +1717,7 @@ function verifyImplementationAndTests(files) {
     requireText(authoringTest, required, AUTHORING_TEST_PATH, "TEST_AUTHORITY_DRIFT");
   }
   for (const required of [
-    "read-only managed adapter canvas",
+    "keeps the exact managed adapter canvas read only",
     "5 of 5 components",
     "Search catalog components",
     "ArrowRight",
@@ -1655,7 +1725,12 @@ function verifyImplementationAndTests(files) {
     "will not substitute the sign-in tree",
     'queryByRole("tree")',
     'querySelector("canvas")',
-    "insert|add|drag",
+    "chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
+    "uses only the App-owned drag intent and ignores forged native transfer authority",
+    "Deleted Alert layer · node.alert.",
+    "expect(document.activeElement).toBe(layersTab)",
+    "disables deletion for the surface root and a slot-minimum preflight without changing preview",
+    "preserves the selected layer, preview, and focus when deletion is rejected",
     "publish|save|run",
     "removes the managed sign-in tree synchronously",
     'matches(":disabled")',
@@ -1857,7 +1932,56 @@ function assertRetainedHistoricalReceipts(frozenArtifact, files) {
   }
 }
 
-/** Authenticates frozen M09-T02 evidence and checks its live additive M09-T06 successor. */
+function authenticateNamedSlotArtifact(bytes) {
+  const pin = NAMED_SLOT_ARTIFACT_PIN;
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T07 named-slot artifact receipt drifted.");
+  }
+  const artifact = parseJson(bytes, NAMED_SLOT_ARTIFACT_PATH);
+  if (
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.completeCatalogDeclaredSlotProjection !== true ||
+    artifact.claim?.absentDestinationMinimumEnforced !== true ||
+    artifact.claim?.publicStableIdInsert !== true ||
+    artifact.claim?.publicCrossSlotMove !== true ||
+    artifact.claim?.publicSameSlotReorder !== true ||
+    artifact.claim?.nodeDeletionPreflight !== true ||
+    artifact.claim?.deletionPreflightRunsPublicMutationAndValidation !== true ||
+    artifact.claim?.publicNestedSubtreeDelete !== true ||
+    artifact.claim?.rootDeletionDisabled !== true ||
+    artifact.claim?.sourceMinimumDeletionDisabled !== true ||
+    artifact.claim?.behaviorOwnedDeletePreservesEmptySlot !== true ||
+    artifact.claim?.exactOwnDataRouteSelectionAndEditCapture !== true ||
+    artifact.claim?.exactOwnDataDeletionSelectionCapture !== true ||
+    artifact.claim?.continuousCompleteSourceRevalidation !== true ||
+    artifact.claim?.failedDeletionPreservesCurrentDocument !== true ||
+    artifact.claim?.sourceAndPreviewCommitAtomically !== true ||
+    artifact.claim?.deletionSourceAndPreviewCommitAtomically !== true ||
+    artifact.claim?.deletionFocusManaged !== true ||
+    artifact.claim?.browserDataTransferReadsZero !== true ||
+    artifact.claim?.expandedDropReadyBoundaries !== true ||
+    artifact.claim?.stableNestedDragHover !== true ||
+    artifact.claim?.explicitComponentDropTargetGuide !== true ||
+    artifact.claim?.keyboardPlacementControl !== true ||
+    artifact.claim?.insertionAdmissionCachedPerModelAndExactTarget !== true ||
+    artifact.claim?.placementAdmissionCachedPerModelAndExactTarget !== true ||
+    artifact.claim?.cachedPlacementBaseMaterializesBoundaryFinalIndex !== true ||
+    artifact.claim?.componentPaletteRenderLimit !== 24 ||
+    artifact.claim?.activeTabOnlyAuthoringWork !== true ||
+    artifact.claim?.slotChromeOutsideManagedCapabilitySubtree !== true
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T07 named-slot artifact identity or claims drifted.",
+    );
+  }
+  return pin;
+}
+
+/** Authenticates frozen M09-T02 evidence and checks its live additive M09-T07 successor. */
 export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const [frozen, files, shellArtifactBytes, referenceArtifactBytes] = await Promise.all([
@@ -1874,7 +1998,8 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
   ];
   const catalog = verifyCatalog(files.get(CATALOG_PATH));
   const source = verifySource(files.get(SOURCE_PATH));
-  const packageContract = verifyPackage(files.get(APP_PACKAGE_PATH));
+  const packageContract = verifyPackage(files.get(APP_PACKAGE_PATH), files.get(ROOT_PACKAGE_PATH));
+  const namedSlotArtifact = authenticateNamedSlotArtifact(files.get(NAMED_SLOT_ARTIFACT_PATH));
   const imports = inspectImportsAndExecutionBoundary(files);
   const implementation = verifyImplementationAndTests(files);
   assertRetainedHistoricalReceipts(frozen.artifact, files);
@@ -1912,7 +2037,8 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
       successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
     },
     successor: {
-      task: "M09-T06",
+      task: "M09-T07",
+      artifact: namedSlotArtifact,
       realAdapterCanvasOwnedBySuccessor: true,
       historicalNoCanvasNonclaimAppliedToCurrentApp: false,
       exactPublicRuntimeAdapterPathAllowed: true,
@@ -1923,6 +2049,30 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
       publisherBackedSessionPreviewImplemented: true,
       historicalNoInspectorOrSourceMutationNonclaimAppliedToCurrentApp: false,
       nestedObjectAndStructuredJsonEditingImplemented: true,
+      completeNamedSlotProjectionImplemented: true,
+      catalogAdmissionAndCardinalityPreflightImplemented: true,
+      publicStableIdInsertMoveAndReorderImplemented: true,
+      publicValidatedNodeDeletionImplemented: true,
+      deletionPreflightRunsPublicMutationAndValidation: true,
+      rootAndSourceMinimumDeletionDisabled: true,
+      behaviorOwnedDeletePreservesEmptySlot: true,
+      exactOwnDataDeletionSelectionCapture: true,
+      continuousCompleteSourceRevalidation: true,
+      failedDeletionPreservesCurrentDocument: true,
+      deletionSourceAndPreviewCommitAtomically: true,
+      deletionFocusManaged: true,
+      browserDataTransferReadsZero: true,
+      expandedDropReadyBoundaries: true,
+      stableNestedDragHover: true,
+      explicitComponentDropTargetGuide: true,
+      keyboardPlacementControl: true,
+      insertionAdmissionCachedPerModelAndExactTarget: true,
+      placementAdmissionCachedPerModelAndExactTarget: true,
+      cachedPlacementBaseMaterializesBoundaryFinalIndex: true,
+      componentPaletteRenderLimit: 24,
+      activeTabOnlyAuthoringWork: true,
+      exactSlotSelectionAndEditCaptureImplemented: true,
+      atomicPublisherBackedSlotEditsImplemented: true,
       dynamicEditingImplemented: false,
       persistenceUiImplemented: false,
       runOrPublishImplemented: false,

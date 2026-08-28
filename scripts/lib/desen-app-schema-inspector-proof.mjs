@@ -13,6 +13,7 @@ const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-SCHEMA-INSPECTOR.md";
+const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const CATALOG_PARENT_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json";
 const SELECTION_PARENT_ARTIFACT_PATH =
@@ -30,6 +31,7 @@ const PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
 const PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
 const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
+const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
 const ADAPTER_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const APPLICATION_CSS_PATH = "apps/desen-app/src/application.module.css";
@@ -40,6 +42,8 @@ const PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
 const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
 const ADAPTER_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
+const AUTHORING_DATA_TEST_PATH = "apps/desen-app/test/authoring-data.test.ts";
+const AUTHORING_SLOT_TEST_PATH = "apps/desen-app/test/authoring-slots.test.ts";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
@@ -89,6 +93,7 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   AUTHORING_DATA_PATH,
   INSPECTOR_SOURCE_PATH,
   PANEL_SOURCE_PATH,
+  APPLICATION_SOURCE_PATH,
   APPLICATION_CSS_PATH,
   INSPECTOR_TEST_PATH,
   APPLICATION_TEST_PATH,
@@ -100,8 +105,12 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   ...new Set([
     ...TRACKED_PATHS,
     STRUCTURED_JSON_SOURCE_PATH,
+    AUTHORING_SLOT_SOURCE_PATH,
     PANEL_TEST_PATH,
     STRUCTURED_JSON_TEST_PATH,
+    AUTHORING_DATA_TEST_PATH,
+    AUTHORING_SLOT_TEST_PATH,
+    NAMED_SLOT_ARTIFACT_PATH,
   ]),
 ]);
 
@@ -117,6 +126,16 @@ const SELF_RESEALED_PATHS = Object.freeze([
 const FROZEN_ARTIFACT_PIN = Object.freeze({
   bytes: 22_998,
   sha256: "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b",
+});
+
+const NAMED_SLOT_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T07",
+  proofId: "desen-app-named-slot-authoring",
+  profile: "desen.app.named-slot-authoring-proof.v1",
+  result: "PASS",
+  path: NAMED_SLOT_ARTIFACT_PATH,
+  bytes: 24_830,
+  sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
 });
 
 const EXPECTED_SOURCE_SHA256 = Object.freeze({
@@ -1174,18 +1193,23 @@ function receipts(files) {
 }
 
 const CURRENT_SUCCESSOR_SHA256 = Object.freeze({
-  [ROOT_PACKAGE_PATH]: "2e5158e6d3d58cdcb4320ffc4b343ec0b30533b84c23c81a080a650280d3334b",
-  [APP_PACKAGE_PATH]: "145a5d118a0327fc10e192fcee23f5e66858dc508a18485b723cac68e852665b",
+  [ROOT_PACKAGE_PATH]: "08824da0ef0f0fc2085259b2f60c2376ff184eabd3708594b0b53d105790734f",
+  [APP_PACKAGE_PATH]: "6efc3da8192134bfe41d8b4855db67f4084fd2d6818e87b2fab660722c300c87",
   [LOCKFILE_PATH]: "463a35abf13fd9ba6acb897aca52a11e7a90c8fcfedbce085e82f89c23418d89",
-  [AUTHORING_DATA_PATH]: "cc185e4094a97a0e36c304f8e6bc7bf2630a481ceb4143d645cbe1f600d1dbd6",
+  [AUTHORING_DATA_PATH]: "ae18d9ea0fe37ee553e758a73a9ca2e54e97c7fbcf048c21cd3bd131aadc1b25",
   [INSPECTOR_SOURCE_PATH]: "8a79b662f5b7bf15147d242b38916162d2f6f75e175d056ba9434177c09ce8e6",
   [PANEL_SOURCE_PATH]: "a9362b4531a00bbe24cf07e9d75e6c58fe27051d77fec48e7f6a1f269bffeca0",
   [STRUCTURED_JSON_SOURCE_PATH]: "9c28b34b37bd02d213750f17c868807d4dd50c9fffb35ce6c3e3e6483a513c36",
-  [APPLICATION_CSS_PATH]: "f8edeac5a918dcd8ba7b2b636a32473ccc7c1082bfa5d743763a85d25225d637",
+  [AUTHORING_SLOT_SOURCE_PATH]: "7e41cc2c4e8f9da91a7737160619836a8f61dc9445f3b2c118fd0793a6dc405b",
+  [APPLICATION_SOURCE_PATH]: "de1c61540651709b4a82d587765d7f1ec3d444f7d125cff5dc0d4906a3e348f2",
+  [APPLICATION_CSS_PATH]: "c832498a4bc2f94e005da89de91f77d38759e6aa3c421a7ec133d02b5aa78e2e",
+  [AUTHORING_DATA_TEST_PATH]: "ac69505e2391db6ad61ad18f82ac9b6f699b2aebb2b0367f2c497335f6a08bcd",
   [INSPECTOR_TEST_PATH]: "77f777f2790962df2e0b984cf06af57200d958a5faf4dee7c9d6845c32b27406",
-  [PANEL_TEST_PATH]: "73280b88d69fa0906f7f6728cb5abc9b732752b7d2ece3a096e13fe59725a7e2",
+  [PANEL_TEST_PATH]: "eb4cd46bc66ef04c6f644c8065ccee21b5d3512da33d13f5afcfe908896ed3bf",
   [STRUCTURED_JSON_TEST_PATH]: "e09774464eb09f99074619ea9d33f78a111e4799127b3ff32ed9841645b3efed",
-  [APPLICATION_TEST_PATH]: "292cb62cfe43b17c39b1548409a77e128ab030fc005bba9a99b98c95ce4f443c",
+  [AUTHORING_SLOT_TEST_PATH]: "93c6b850c235ab09308fb36b9f99d6a5715d28514374c5c709a3c1eacb729ab2",
+  [APPLICATION_TEST_PATH]: "a98974dea7dde6a8aab7c9864d425f7cc9b7af9f5ed3e7b457840497498bf799",
+  [NAMED_SLOT_ARTIFACT_PATH]: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
 });
 
 async function authenticateFrozenArtifact(workspaceRoot) {
@@ -1258,11 +1282,11 @@ function assertRetainedHistoricalReceipts(frozenArtifact, files) {
   }
 }
 
-function inspectStructuredInspectorSuccessor(files) {
+function inspectNamedSlotSuccessor(files) {
   for (const [relativePath, expectedSha256] of Object.entries(CURRENT_SUCCESSOR_SHA256)) {
     const bytes = files.get(relativePath);
     if (bytes === undefined || sha256(bytes) !== expectedSha256) {
-      fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} exact reviewed T06 bytes drifted.`);
+      fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} exact reviewed T07 bytes drifted.`);
     }
   }
   const app = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
@@ -1276,15 +1300,37 @@ function inspectStructuredInspectorSuccessor(files) {
     "verify:desen-app-structured-inspector": `${rootPrefix}node scripts/verify-desen-app-structured-inspector.mjs`,
     "test:desen-app-structured-inspector": `${rootPrefix}node --test tests/desen-app-structured-inspector.test.mjs`,
   };
+  const namedSlotCommand =
+    "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx";
+  const namedSlotPrefix =
+    "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && ";
+  const namedSlotRootCommands = {
+    "generate:desen-app-named-slot-authoring": `${namedSlotPrefix}node scripts/generate-desen-app-named-slot-authoring-proof.mjs`,
+    "verify:desen-app-named-slot-authoring": `${namedSlotPrefix}node scripts/verify-desen-app-named-slot-authoring.mjs`,
+    "test:desen-app-named-slot-authoring": `${namedSlotPrefix}node --test tests/desen-app-named-slot-authoring.test.mjs`,
+  };
   if (
     app.scripts?.["test:structured-inspector"] !== structuredCommand ||
+    app.scripts?.["test:named-slots"] !== namedSlotCommand ||
     app.dependencies?.["@desen/protocol"] !== "workspace:*" ||
-    Object.entries(rootCommands).some(([name, command]) => root.scripts?.[name] !== command)
+    Object.entries(rootCommands).some(([name, command]) => root.scripts?.[name] !== command) ||
+    Object.entries(namedSlotRootCommands).some(
+      ([name, command]) => root.scripts?.[name] !== command,
+    )
   ) {
-    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T06 package or proof command drifted.");
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T06/T07 package or proof command drifted.");
   }
   const sourceMarkers = new Map([
-    [AUTHORING_DATA_PATH, ["deriveComponentInspectorControls", "ComponentInspectorControlPlan"]],
+    [
+      AUTHORING_DATA_PATH,
+      [
+        "deriveComponentInspectorControls",
+        "ComponentInspectorControlPlan",
+        "export interface AuthoringSlotContract",
+        "projectSlotContracts",
+        "readonly defaultProps",
+      ],
+    ],
     [
       INSPECTOR_SOURCE_PATH,
       [
@@ -1321,17 +1367,106 @@ function inspectStructuredInspectorSuccessor(files) {
       STRUCTURED_JSON_TEST_PATH,
       ["rejects duplicate decoded member names at every object level", "dynamic-value"],
     ],
+    [
+      AUTHORING_SLOT_SOURCE_PATH,
+      [
+        "createAuthoringSlotSelection",
+        "projectAuthoringSlotSelection",
+        "evaluateAuthoringSlotInsertion",
+        "evaluateAuthoringSlotPlacement",
+        "evaluateAuthoringNodeDeletion",
+        "applyAuthoringSlotEdit",
+        "applyAuthoringNodeDelete",
+        "createDesenEditorContinuousValidator",
+        "deleteDesenEditorNode",
+        "insertDesenEditorNode",
+        "moveDesenEditorNode",
+        "reorderDesenEditorNode",
+        "setDesenEditorOwnerProp",
+        "maxDefaultPropTransitions: 256",
+        "maxAggregateSnapshotWorkBytes: 33_554_432",
+      ],
+    ],
+    [
+      APPLICATION_SOURCE_PATH,
+      [
+        "createAuthoringSlotSelection",
+        "evaluateAuthoringSlotInsertion",
+        "evaluateAuthoringSlotPlacement",
+        "evaluateAuthoringNodeDeletion",
+        "applyAuthoringSlotEdit",
+        "applyAuthoringNodeDelete",
+        "data-active-slot={active}",
+        'event.dataTransfer.setData("text/plain", "DESEN App authoring item")',
+      ],
+    ],
+    [
+      AUTHORING_SLOT_TEST_PATH,
+      [
+        "inserts reference components with exact defaults and deterministic collision IDs",
+        "projects a declared-but-absent slot with effective min/max semantics",
+        "rejects one insert or move into an absent optional minItems:2 slot",
+        "finishes a cross-owner move across 1,024 sibling nodes",
+        "never invokes accessors on hostile selection or edit objects",
+        "removes a newly inserted nested subtree and preserves the owning slot plus prior siblings",
+        "deletes from a behavior-owned slot and retains its own empty slot key",
+        "disables root deletion and deletion across the owning slot minimum",
+        "deletes the final node from a 1,024-sibling slot within the bounded profile",
+        "captures deletion selections as exact own data and rejects cross-route authority",
+      ],
+    ],
   ]);
   for (const [relativePath, markers] of sourceMarkers) {
     const source = decodeUtf8(files.get(relativePath), relativePath);
     for (const marker of markers) {
       if (!source.includes(marker)) {
-        fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} lost the T06 marker ${marker}.`);
+        fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} lost the T06/T07 marker ${marker}.`);
       }
     }
   }
+  const namedSlotArtifactBytes = files.get(NAMED_SLOT_ARTIFACT_PATH);
+  const namedSlotArtifact = parseJson(namedSlotArtifactBytes, NAMED_SLOT_ARTIFACT_PATH);
+  if (
+    namedSlotArtifactBytes.byteLength !== NAMED_SLOT_ARTIFACT_PIN.bytes ||
+    namedSlotArtifact.task !== NAMED_SLOT_ARTIFACT_PIN.task ||
+    namedSlotArtifact.proofId !== NAMED_SLOT_ARTIFACT_PIN.proofId ||
+    namedSlotArtifact.profile !== NAMED_SLOT_ARTIFACT_PIN.profile ||
+    namedSlotArtifact.result !== NAMED_SLOT_ARTIFACT_PIN.result ||
+    namedSlotArtifact.claim?.completeCatalogDeclaredSlotProjection !== true ||
+    namedSlotArtifact.claim?.absentDestinationMinimumEnforced !== true ||
+    namedSlotArtifact.claim?.publicStableIdInsert !== true ||
+    namedSlotArtifact.claim?.publicCrossSlotMove !== true ||
+    namedSlotArtifact.claim?.publicSameSlotReorder !== true ||
+    namedSlotArtifact.claim?.nodeDeletionPreflight !== true ||
+    namedSlotArtifact.claim?.deletionPreflightRunsPublicMutationAndValidation !== true ||
+    namedSlotArtifact.claim?.publicNestedSubtreeDelete !== true ||
+    namedSlotArtifact.claim?.rootDeletionDisabled !== true ||
+    namedSlotArtifact.claim?.sourceMinimumDeletionDisabled !== true ||
+    namedSlotArtifact.claim?.behaviorOwnedDeletePreservesEmptySlot !== true ||
+    namedSlotArtifact.claim?.exactOwnDataRouteSelectionAndEditCapture !== true ||
+    namedSlotArtifact.claim?.exactOwnDataDeletionSelectionCapture !== true ||
+    namedSlotArtifact.claim?.continuousCompleteSourceRevalidation !== true ||
+    namedSlotArtifact.claim?.failedDeletionPreservesCurrentDocument !== true ||
+    namedSlotArtifact.claim?.sourceAndPreviewCommitAtomically !== true ||
+    namedSlotArtifact.claim?.deletionSourceAndPreviewCommitAtomically !== true ||
+    namedSlotArtifact.claim?.deletionFocusManaged !== true ||
+    namedSlotArtifact.claim?.browserDataTransferReadsZero !== true ||
+    namedSlotArtifact.claim?.expandedDropReadyBoundaries !== true ||
+    namedSlotArtifact.claim?.stableNestedDragHover !== true ||
+    namedSlotArtifact.claim?.explicitComponentDropTargetGuide !== true ||
+    namedSlotArtifact.claim?.keyboardPlacementControl !== true ||
+    namedSlotArtifact.claim?.insertionAdmissionCachedPerModelAndExactTarget !== true ||
+    namedSlotArtifact.claim?.placementAdmissionCachedPerModelAndExactTarget !== true ||
+    namedSlotArtifact.claim?.cachedPlacementBaseMaterializesBoundaryFinalIndex !== true ||
+    namedSlotArtifact.claim?.componentPaletteRenderLimit !== 24 ||
+    namedSlotArtifact.claim?.activeTabOnlyAuthoringWork !== true ||
+    namedSlotArtifact.claim?.slotChromeOutsideManagedCapabilitySubtree !== true
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T07 artifact identity or claims drifted.");
+  }
   return deepFreeze({
-    task: "M09-T06",
+    task: "M09-T07",
+    artifact: NAMED_SLOT_ARTIFACT_PIN,
     nestedObjectInspector: true,
     schemaDerivedChildControls: true,
     structuredJsonFallback: true,
@@ -1341,16 +1476,45 @@ function inspectStructuredInspectorSuccessor(files) {
     publicEditorCoreMutationRetained: true,
     publisherBackedSessionPreviewRetained: true,
     inspectorOutsideManagedCapabilitySubtree: true,
+    completeCatalogDeclaredSlotProjection: true,
+    absentAndEmptySlotsRemainDistinct: true,
+    catalogAdmissionAndCardinalityPreflight: true,
+    publicStableIdInsertMoveAndReorder: true,
+    publicValidatedNodeDeletion: true,
+    deletionPreflightRunsPublicMutationAndValidation: true,
+    rootAndSourceMinimumDeletionDisabled: true,
+    behaviorOwnedDeletePreservesEmptySlot: true,
+    exactOwnDataDeletionSelectionCapture: true,
+    continuousCompleteSourceRevalidation: true,
+    failedDeletionPreservesCurrentDocument: true,
+    deletionSourceAndPreviewCommitAtomically: true,
+    deletionFocusManaged: true,
+    browserDataTransferReadsZero: true,
+    expandedDropReadyBoundaries: true,
+    stableNestedDragHover: true,
+    explicitComponentDropTargetGuide: true,
+    keyboardPlacementControl: true,
+    insertionAdmissionCachedPerModelAndExactTarget: true,
+    placementAdmissionCachedPerModelAndExactTarget: true,
+    cachedPlacementBaseMaterializesBoundaryFinalIndex: true,
+    componentPaletteRenderLimit: 24,
+    activeTabOnlyAuthoringWork: true,
+    nodeAndBehaviorOwnersSupported: true,
+    exactOwnDataRouteSelectionAndEditCapture: true,
+    atomicPublisherBackedSlotEdits: true,
+    slotChromeOutsideManagedCapabilitySubtree: true,
     package: {
       appName: app.name,
       protocolDependency: app.dependencies["@desen/protocol"],
       structuredInspectorTestCommand: structuredCommand,
       rootCommands,
+      namedSlotTestCommand: namedSlotCommand,
+      namedSlotRootCommands,
     },
   });
 }
 
-/** Authenticates frozen M09-T05 evidence and checks its live additive M09-T06 successor. */
+/** Authenticates frozen M09-T05 evidence and checks its live additive M09-T07 successor. */
 export async function buildDesenAppSchemaInspectorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
@@ -1367,7 +1531,7 @@ export async function buildDesenAppSchemaInspectorEvidence(rawOptions = undefine
     ),
   );
   assertRetainedHistoricalReceipts(frozen.artifact, files);
-  const successor = inspectStructuredInspectorSuccessor(files);
+  const successor = inspectNamedSlotSuccessor(files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-schema-inspector",
@@ -1396,6 +1560,10 @@ export async function buildDesenAppSchemaInspectorEvidence(rawOptions = undefine
       currentPathReceipts: receipts(files),
       additiveSuccessorReceipts: [
         STRUCTURED_JSON_SOURCE_PATH,
+        AUTHORING_SLOT_SOURCE_PATH,
+        AUTHORING_DATA_TEST_PATH,
+        AUTHORING_SLOT_TEST_PATH,
+        NAMED_SLOT_ARTIFACT_PATH,
         PANEL_TEST_PATH,
         STRUCTURED_JSON_TEST_PATH,
       ].map((relativePath) => ({

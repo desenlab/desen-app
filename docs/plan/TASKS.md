@@ -1438,7 +1438,7 @@ is next.
 | M09-T04 | DONE        | M09-T03                  | Selection overlays remain outside capability subtrees; no private-DOM authoring |
 | M09-T05 | DONE        | M09-T02–M09-T04          | Schema-driven primitive/enum inspector controls                                 |
 | M09-T06 | DONE        | M09-T05                  | Nested-object controls and honest structured-JSON fallback                      |
-| M09-T07 | NOT_STARTED | M09-T02–M09-T06          | Named-slot drop, move, reorder, cardinality, and acceptance UI                  |
+| M09-T07 | DONE        | M09-T02–M09-T06          | Named-slot drop, move, reorder, cardinality, and acceptance UI                  |
 | M09-T08 | NOT_STARTED | M09-T05                  | Local state and binding editor UI                                               |
 | M09-T09 | NOT_STARTED | M09-T08                  | Sign-in event and closed-action editor UI                                       |
 | M09-T10 | NOT_STARTED | M09-T03, M09-T08–M09-T09 | Design/Run modes on the same source tree                                        |
@@ -1671,6 +1671,48 @@ M09-T06 is `DONE`, advancing implementation progress to 101/145 (70%) and M09 to
 proof gates remain 10/13. P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, dynamic-value editing
 remains M09-T08, and slot/cardinality, state/action, Design/Run, persistence, browser-E2E,
 publication, and activation owners remain outstanding. M09-T07 is next.
+
+M09-T07 turns the Catalog-declared named slots already projected by the App into one bounded
+authoring surface. Layers expose every valid insertion boundary for click/keyboard placement and
+App-owned drag intent. While an admissible drag is active, those boundaries expand across the
+space between neighboring rows, keep hover state stable across nested child events, and show the
+exact target line. Components no longer imply that they can be dropped without a destination: a
+visible target card names the selected owner, slot, cardinality, and next position, while the
+targetless state disables component drag/insert and routes the user back to Layers. Browser
+`DataTransfer` contains only an inert hint and is never mutation authority.
+
+Every insert, cross-slot move, same-slot reorder, and selected-subtree delete is re-authorized
+against the exact current route, Source, Catalog capability identity, slot acceptance rule, and
+effective minimum/maximum. Root deletion, a source-slot minimum violation, stale or cross-route
+selection, cycle, invalid index, rejected capability/category, oversized default staging, and
+complete-validation failure produce no partial Source. Accepted operations use only public Editor
+Core commands, preserve stable Source identities and slot order, pass complete continuous
+validation, then require Publisher preflight before the App atomically replaces its session-owned
+`{document, preview}`. Successful deletion clears the stale selection and returns focus to Layers;
+a rejected deletion preserves selection, preview, and control focus.
+
+The focused named-slot suite passes 70/70, including 27/27 pure slot cases; the complete App suite
+passes 151/151, the independent root proof passes 9/9, and the complete structural CI glob passes
+329/329. The exact 24,830-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json` at
+`sha256:daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f`. It authenticates the
+exact frozen M09-T06 structured-Inspector parent and the current compatibility readers for
+M09-T01–M09-T06. Append-only checkpoint sequence 46 passes 69/69 at
+`sha256:f09ec643d1b2756174ca47fae99837a68f6656bec0c6933e566d5075713a0f5f`, preserving every
+predecessor while extending the chain to 42 artifacts and 84 readers.
+
+The live local CI inventory contains 186 workloads and 88 proof pairs—77 ordinary pairs and 11
+barriers. M09-T07's connected closure contains 55 proof units and 120 workloads; complete
+ownership covers 1,192 tracked paths, including 176 proof-owned paths. The in-app browser was used
+to inspect the targetless guide, explicit selected-slot target, click/keyboard insertion, enabled
+delete affordance, root-delete explanation, and an error-free console. Native browser drag-event
+automation was not observed, so the real-browser E2E claim remains explicitly open; the complete
+dragStart/dragEnter/dragOver/drop chain is covered by the focused App tests.
+
+M09-T07 is `DONE`, advancing implementation progress to 102/145 (70%) and M09 to 7/14 (50%) while
+proof gates remain 10/13. P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, and dynamic
+state/binding editing, event/action authoring, Design/Run, durable save/open, real-browser E2E,
+publication, and activation remain later owners. M09-T08 is next.
 
 ## M10 — First end-to-end proof
 

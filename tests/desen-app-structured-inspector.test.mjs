@@ -17,6 +17,8 @@ import {
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const PARENT_PATH = "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json";
+const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
+const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const SOURCE_PATHS = Object.freeze({
   authoringDataSource: "apps/desen-app/src/authoring-data.ts",
   inspectorSource: "apps/desen-app/src/authoring-inspector.ts",
@@ -106,6 +108,69 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.boundary.parentArtifacts, 1);
   assert.equal(built.artifact.claim.taskStatus, "DONE");
   assert.equal(built.artifact.claim.p08Status, "NOT_PROVEN");
+  assert.equal(built.currentCompatibility.result, "PASS");
+  assert.equal(built.currentCompatibility.successor.task, "M09-T07");
+  assert.deepEqual(built.currentCompatibility.successor.artifact, {
+    task: "M09-T07",
+    proofId: "desen-app-named-slot-authoring",
+    profile: "desen.app.named-slot-authoring-proof.v1",
+    result: "PASS",
+    path: NAMED_SLOT_ARTIFACT_PATH,
+    bytes: 24_830,
+    sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+  });
+  assert.equal(built.currentCompatibility.successor.completeCatalogDeclaredSlotProjection, true);
+  assert.equal(built.currentCompatibility.successor.absentAndEmptySlotsRemainDistinct, true);
+  assert.equal(built.currentCompatibility.successor.catalogAdmissionAndCardinalityPreflight, true);
+  assert.equal(built.currentCompatibility.successor.publicStableIdInsertMoveAndReorder, true);
+  assert.equal(built.currentCompatibility.successor.publicValidatedNodeDeletion, true);
+  assert.equal(
+    built.currentCompatibility.successor.deletionPreflightRunsPublicMutationAndValidation,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.rootAndSourceMinimumDeletionDisabled, true);
+  assert.equal(built.currentCompatibility.successor.behaviorOwnedDeletePreservesEmptySlot, true);
+  assert.equal(built.currentCompatibility.successor.exactOwnDataDeletionSelectionCapture, true);
+  assert.equal(built.currentCompatibility.successor.continuousCompleteSourceRevalidation, true);
+  assert.equal(built.currentCompatibility.successor.failedDeletionPreservesCurrentDocument, true);
+  assert.equal(built.currentCompatibility.successor.deletionSourceAndPreviewCommitAtomically, true);
+  assert.equal(built.currentCompatibility.successor.deletionFocusManaged, true);
+  assert.equal(built.currentCompatibility.successor.browserDataTransferReadsZero, true);
+  assert.equal(built.currentCompatibility.successor.expandedDropReadyBoundaries, true);
+  assert.equal(built.currentCompatibility.successor.stableNestedDragHover, true);
+  assert.equal(built.currentCompatibility.successor.explicitComponentDropTargetGuide, true);
+  assert.equal(built.currentCompatibility.successor.keyboardPlacementControl, true);
+  assert.equal(
+    built.currentCompatibility.successor.insertionAdmissionCachedPerModelAndExactTarget,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.placementAdmissionCachedPerModelAndExactTarget,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.cachedPlacementBaseMaterializesBoundaryFinalIndex,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
+  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
+  assert.equal(built.currentCompatibility.successor.nodeAndBehaviorOwnersSupported, true);
+  assert.equal(built.currentCompatibility.successor.exactOwnDataRouteSelectionAndEditCapture, true);
+  assert.equal(built.currentCompatibility.successor.atomicPublisherBackedSlotEdits, true);
+  assert.equal(
+    built.currentCompatibility.successor.slotChromeOutsideManagedCapabilitySubtree,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.package.namedSlotTestCommand,
+    "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+  );
+  assert.equal(
+    built.currentCompatibility.successor.package.rootCommands[
+      "test:desen-app-named-slot-authoring"
+    ],
+    "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node --test tests/desen-app-named-slot-authoring.test.mjs",
+  );
 });
 
 test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[1], () => {
@@ -254,6 +319,8 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[7], async () => {
   assert.notEqual(second.artifact, built.artifact);
   assert.equal(Object.isFrozen(second.artifact), true);
   assert.equal(Object.isFrozen(second.artifact.boundary.trackedReceipts), true);
+  assert.deepEqual(second.currentCompatibility, built.currentCompatibility);
+  assert.equal(Object.isFrozen(second.currentCompatibility), true);
 });
 
 test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[8], () => {
@@ -556,8 +623,7 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[8], () => {
     },
     {
       ...sourcePolicyInput,
-      applicationSource: replaceOnce(
-        sourcePolicyInput.applicationSource,
+      applicationSource: sourcePolicyInput.applicationSource.replaceAll(
         "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
         "setAuthoringSession(Object.freeze({ document: result.document, preview }))",
       ),
@@ -571,15 +637,38 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[8], () => {
       ),
     },
   ];
-  for (const mutation of mutations) {
+  for (const [mutationIndex, mutation] of mutations.entries()) {
     assert.throws(
       () => verifyDesenAppStructuredInspectorSourcePolicy(mutation),
       expectedError("SOURCE_POLICY_VIOLATION"),
+      `source-policy mutation ${mutationIndex} must fail closed`,
     );
   }
 });
 
 test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[9], async () => {
+  const slotSource = await readFile(path.join(ROOT, AUTHORING_SLOT_SOURCE_PATH), "utf8");
+  await assert.rejects(
+    buildDesenAppStructuredInspectorEvidence({
+      fileOverrides: new Map([
+        [
+          AUTHORING_SLOT_SOURCE_PATH,
+          Buffer.from(
+            slotSource.replace("evaluateAuthoringSlotPlacement", "evaluateUncheckedSlotPlacement"),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  const namedSlotArtifactBytes = await readFile(path.join(ROOT, NAMED_SLOT_ARTIFACT_PATH));
+  await assert.rejects(
+    buildDesenAppStructuredInspectorEvidence({
+      fileOverrides: new Map([[NAMED_SLOT_ARTIFACT_PATH, changedByte(namedSlotArtifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+
   await assert.rejects(
     buildDesenAppStructuredInspectorEvidence({
       parentArtifactBytes: changedByte(parentArtifactBytes),

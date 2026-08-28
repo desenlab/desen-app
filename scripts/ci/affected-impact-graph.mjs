@@ -152,12 +152,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
       ],
     ],
     ["desen-app-structured-inspector", ["desen-app-schema-inspector"]],
+    ["desen-app-named-slot-authoring", ["desen-app-structured-inspector"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "a02725aa4c74e553766b561b535e5be44f67fe74abe9c98188f265fd2fb33fb1";
+  "905d22e40524d26eac056ca32236f0948910a7ac6049b0d35c644f19e629d668";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

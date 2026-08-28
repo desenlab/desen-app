@@ -14,6 +14,19 @@ type JsonObject = Readonly<Record<string, unknown>>;
 
 interface CapabilityMetadata {
   readonly displayName: string;
+  readonly slotContracts: readonly AuthoringSlotContract[];
+}
+
+/** One exact Catalog-declared named-slot contract projected for App-owned manipulation UI. */
+export interface AuthoringSlotContract {
+  readonly name: string;
+  readonly required: boolean;
+  readonly minimum: number;
+  readonly maximum: number | null;
+  readonly constrainsChildren: boolean;
+  readonly acceptedCapabilityIds: readonly string[];
+  readonly acceptedCategories: readonly string[];
+  readonly description: string | undefined;
 }
 
 /** Authoring-safe component metadata projected from one exact Catalog component contract. */
@@ -23,6 +36,10 @@ export interface CatalogComponentSummary {
   readonly authoringCategory: string;
   readonly semanticCategory: string | undefined;
   readonly description: string | undefined;
+  /** Exact inert authoring defaults staged for a newly inserted node before final validation. */
+  readonly defaultProps: JsonObject;
+  /** Complete Catalog-declared named-slot contracts in canonical name order. */
+  readonly slotContracts: readonly AuthoringSlotContract[];
   /** Schema-authoritative control plan derived from this exact validated component manifest. */
   readonly inspector: ComponentInspectorControlPlan;
 }
@@ -40,6 +57,8 @@ export interface AuthoringBehaviorLayer {
   readonly capabilityId: string;
   readonly displayName: string;
   readonly conditional: boolean;
+  /** Complete Catalog-declared named-slot contracts in canonical name order. */
+  readonly slotContracts: readonly AuthoringSlotContract[];
   readonly slots: readonly AuthoringLayerSlot[];
 }
 
@@ -53,6 +72,8 @@ export interface AuthoringLayerNode {
   /** Exact immutable base props currently present on this Source node. */
   readonly props: JsonObject;
   readonly behaviors: readonly AuthoringBehaviorLayer[];
+  /** Complete Catalog-declared named-slot contracts in canonical name order. */
+  readonly slotContracts: readonly AuthoringSlotContract[];
   readonly slots: readonly AuthoringLayerSlot[];
 }
 
@@ -127,9 +148,72 @@ function optionalObject(value: unknown): JsonObject | undefined {
     : undefined;
 }
 
+function readBoolean(value: unknown, path: string): boolean {
+  if (typeof value !== "boolean") return fail(path, "a boolean");
+  return value;
+}
+
+function readNonNegativeInteger(value: unknown, path: string): number {
+  if (!Number.isInteger(value) || (value as number) < 0) {
+    return fail(path, "a non-negative integer");
+  }
+  return value as number;
+}
+
+function readStringArray(value: unknown, path: string): readonly string[] {
+  return Object.freeze(
+    readArray(value, path).map((item, index) => readString(item, `${path}[${index}]`)),
+  );
+}
+
 function ownSlots(owner: JsonObject, path: string): JsonObject {
   if (!Object.hasOwn(owner, "slots")) return Object.freeze({});
   return readObject(owner.slots, `${path}.slots`);
+}
+
+function projectSlotContracts(
+  contract: JsonObject,
+  path: string,
+): readonly AuthoringSlotContract[] {
+  const slots: JsonObject = Object.hasOwn(contract, "slots")
+    ? readObject(contract.slots, `${path}.slots`)
+    : Object.freeze({});
+  return Object.freeze(
+    Object.keys(slots)
+      .sort(compareText)
+      .map((slotName) => {
+        const slotPath = `${path}.slots[${JSON.stringify(slotName)}]`;
+        const slot = readObject(slots[slotName], slotPath);
+        const required = Object.hasOwn(slot, "required")
+          ? readBoolean(slot.required, `${slotPath}.required`)
+          : false;
+        const minimum = Object.hasOwn(slot, "minItems")
+          ? readNonNegativeInteger(slot.minItems, `${slotPath}.minItems`)
+          : required
+            ? 1
+            : 0;
+        const maximum = Object.hasOwn(slot, "maxItems")
+          ? readNonNegativeInteger(slot.maxItems, `${slotPath}.maxItems`)
+          : null;
+        const acceptedCapabilityIds = Object.hasOwn(slot, "accepts")
+          ? readStringArray(slot.accepts, `${slotPath}.accepts`)
+          : Object.freeze([]);
+        const acceptedCategories = Object.hasOwn(slot, "acceptsCategories")
+          ? readStringArray(slot.acceptsCategories, `${slotPath}.acceptsCategories`)
+          : Object.freeze([]);
+        return Object.freeze({
+          name: slotName,
+          required,
+          minimum,
+          maximum,
+          constrainsChildren:
+            Object.hasOwn(slot, "accepts") || Object.hasOwn(slot, "acceptsCategories"),
+          acceptedCapabilityIds,
+          acceptedCategories,
+          description: optionalString(slot.description),
+        });
+      }),
+  );
 }
 
 function projectCapabilityMetadata(
@@ -141,6 +225,7 @@ function projectCapabilityMetadata(
   const authoring = optionalObject(contract.authoring);
   return Object.freeze({
     displayName: optionalString(authoring?.displayName) ?? capabilityId,
+    slotContracts: projectSlotContracts(contract, path),
   });
 }
 
@@ -161,6 +246,8 @@ function projectComponent(componentId: string, contractValue: unknown): CatalogC
     authoringCategory: optionalString(authoring?.category) ?? semanticCategory ?? "Other",
     semanticCategory,
     description: optionalString(contract.description),
+    defaultProps: optionalObject(authoring?.defaultProps) ?? Object.freeze({}),
+    slotContracts: projectSlotContracts(contract, path),
     inspector,
   });
 }
@@ -297,6 +384,7 @@ function projectBehavior(
     capabilityId,
     displayName: metadata.displayName,
     conditional: Object.hasOwn(behavior, "when"),
+    slotContracts: metadata.slotContracts,
     slots: projectSlots(behavior, path, componentsById, behaviorsById, depth),
   });
 }
@@ -338,6 +426,7 @@ function projectLayerNode(
       ? readObject(node.props, `${path}.props`)
       : Object.freeze({}),
     behaviors: Object.freeze(behaviors),
+    slotContracts: metadata.slotContracts,
     slots: projectSlots(node, path, componentsById, behaviorsById, depth),
   });
 }
