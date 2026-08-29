@@ -28,15 +28,19 @@ The current product surface contains:
   inventory, display names, categories, descriptions, identity, version, and target;
 - local component filtering that changes only the visible list and never mutates Catalog or Source
   data;
-- one App-owned global Layers projection fenced by drag owner and epoch, with midpoint hysteresis,
-  stable 32 px insertion gaps, and no tree movement while a drag is active;
-- wide draggable Components card bodies with separate `Add` buttons; only the sticky `Add to`
-  target accepts component drops, while releases anywhere else are inert;
+- dedicated dotted Layers grips plus one App-owned global projection fenced by the innermost drag
+  owner and epoch, with midpoint hysteresis, compact layout-stable insertion lanes, whole-row
+  before/after projection, accepted/current-position feedback, and no tree movement while a drag is
+  active;
+- dedicated dotted native-drag grips on compatible Components cards with separate `Add` buttons;
+  the complete authenticated Components panel accepts a drop for the target summarized by the
+  sticky `Add to` card;
 - App-owned drag intent plus native keyboard and click controls for component insertion, cross-slot
   move, and same-slot reorder;
-- a visible selection-bound Delete control plus guarded Delete/Backspace shortcuts outside editable
-  controls; both explain root and effective-minimum restrictions, automatically target a newly
-  inserted component, clear a successfully deleted selection, and return focus to Layers;
+- a visible selection-bound `Remove layer` control plus guarded Delete/Backspace shortcuts outside
+  editable controls; both explain root and effective-minimum restrictions, automatically switch to
+  Layers and focus a newly inserted component, clear a successfully deleted selection, and return
+  focus to Layers;
 - a third State view that projects the exact current surface-local declarations, bounded usage
   counts, and controlled String, Boolean, Number, and Integer initial values;
 - stable add, atomic type-and-initial update, and unused-state deletion controls that preserve used
@@ -370,11 +374,15 @@ pristine no-port navigation is admitted as `Local draft unchanged`, while edited
 port-backed dirty drafts are guarded across links, traversal, and dirty page exit for the current
 surface/controller lifetime.
 
-The retained authoring UX treats each compatible Components card body as one broad native drag
-source and keeps click insertion on a separate `Add` button. Only the sticky `Add to` target
-accepts a component drop; releases anywhere else are inert. Layers fences one global nested-slot
-projection by drag owner and epoch, applies midpoint hysteresis, renders 32 px insertion gaps, and
-keeps the guarded `Delete` control visible for the selected node.
+The retained authoring UX gives each compatible Components card a dedicated dotted native-drag
+grip and keeps click insertion on a separate `Add` button. The complete authenticated Components
+panel accepts the drop for the target summarized by the sticky `Add to` card. Layers starts
+movement only from a dedicated dotted grip, fences the innermost nested-slot owner and drag epoch,
+applies midpoint hysteresis, keeps compact insertion lanes layout-stable while each visible row
+projects its before/after half, shows accepted and current-position feedback, and retains the last
+admitted placement through coordinate-less or rejected release drift. A successful insert switches
+to Layers, focuses the new node, and exposes the guarded `Remove layer` control plus
+Delete/Backspace shortcuts.
 
 Awaited settlement values are admitted only through exact own enumerable data capture without
 accessor invocation. Valid optional diagnostic pointer/context/subject data is copied into fresh
@@ -397,8 +405,8 @@ with dismissal, live count, `aria-current`, no autofocus, and no Run-to-Design f
 
 The focused nine-file diagnostics suite passes 161/161, the complete twenty-four-file App suite
 passes 339/339, and the independent root mutation proof passes 12/12. Exact evidence is the
-27,353-byte `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
-`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`, binding 39 current
+29,208-byte `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`, binding 39 current
 files and eleven exact proof parents. The local CI authority contains 198 workloads and 94 proof
 pairs—83 ordinary and eleven barriers—with a 62-proof-unit/134-workload connected closure and
 ownership over 1,253 tracked paths, including 188 proof-owned paths. These local receipts make no

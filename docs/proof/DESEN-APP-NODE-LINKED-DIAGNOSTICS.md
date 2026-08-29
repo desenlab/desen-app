@@ -30,6 +30,17 @@ Dynamic validation obligations are copied into a closed callback-free visible me
 are never resolved or executed. Rejected-candidate diagnostics remain outside committed Source,
 canonical dirty-state comparison, persistence generations, and Save requests.
 
+The retained authoring compatibility correction keeps mutation authority unchanged while making
+its native interaction targets explicit. Compatible Components cards expose a dedicated dotted
+drag grip, and the complete authenticated Components panel admits the drop for the target
+summarized by the sticky `Add to` card. Layers starts movement only from its dedicated dotted grip,
+gives pointer ownership to the innermost named slot, keeps compact insertion lanes layout-stable
+while each visible row projects its before/after half, distinguishes accepted placement from the
+current no-op position, and retains the last admitted placement through coordinate-less or rejected
+release drift. Successful insertion switches to Layers, focuses the inserted node, and exposes
+`Remove layer` plus the guarded Delete/Backspace shortcuts. Native transfer bytes remain inert, and
+no native-browser E2E result is inferred.
+
 ## Local receipts
 
 - Focused diagnostics suite: 9 files, 161/161 tests passed.
@@ -37,7 +48,7 @@ canonical dirty-state comparison, persistence generations, and Save requests.
 - Desen App build and typecheck passed in the reviewed product run.
 - Independent proof mutation suite: 12/12 tests passed.
 - Deterministic proof boundary: 39 tracked files and 11 immutable parent artifacts.
-- Deterministic artifact: 27,353 bytes of Prettier-compatible canonical two-space JSON.
+- Deterministic artifact: 29,208 bytes of Prettier-compatible canonical two-space JSON.
 
 The focused inventory is exact: diagnostics projection 7, diagnostics panel 4, Inspector 27, state
 13, event/action 13, named slots 28, adapter canvas 10, application 42, and persistence application 17. The full App 24/339 receipt is retained as reviewed local evidence; the focused 9/161 command is
@@ -45,10 +56,10 @@ the proof-run authority.
 
 The append-only current-reader checkpoint advances sequence 51 head
 `sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` to sequence 52 head
-`sha256:0b2aae1b67d212b4274ad1e75c22053d91ff530055ba8b189d8d9318ef8bd463` across 48 frozen
+`sha256:23b31316ff0dd5dac53f66f110bb7362b9ae1f2af2bc483e4915b66bea48e07b` across 48 frozen
 artifacts and 96 current readers. Promotion pins the selector at
-`sha256:36bc9d960f4755fd82ae016bd697182278ff204a77f7065b874b7434ac609683` and the required-affected
-runner authority at `sha256:42cf5315ba073bd1748c93a30819d983374823c4295fcdc664aa656d3360b0e1`.
+`sha256:a833538c6bca20515608eb2f4398dccea1852fd959df4ca4a804290e94461157` and the required-affected
+runner authority at `sha256:843052663c6200925fd209d3af17d8e3f625d3f88c0d44580c3010672267748d`.
 Checkpoint, promotion, selector, required-affected, and CI quality-gate regression suites pass
 75/75, 19/19, 22/22, 38/38, and 28/28 locally—182/182 combined. These closure receipts are local;
 no required-gate or hosted-CI pass is claimed.
@@ -101,4 +112,4 @@ remains open because DESEN 0.1.0 still defines no interoperable diagnostic-index
 subscription profile. M09-T13 does not claim publication, activation, a concrete storage adapter,
 automated real-browser E2E, a required gate, or a hosted-CI pass.
 
-Final artifact: `sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`
+Final artifact: `sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`

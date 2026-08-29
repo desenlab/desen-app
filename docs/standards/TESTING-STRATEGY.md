@@ -1177,9 +1177,9 @@ readable unmapped/out-of-route diagnostics, inert obligations, opaque selection 
 native selectable controls, dismissal, live count, `aria-current`, no autofocus, placeholder
 separation from the managed Runtime subtree, Design/Run inertness, and no Run-to-Design focus theft.
 
-The deterministic 27,353-byte artifact is
+The deterministic 29,208-byte artifact is
 `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
-`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`. It binds 39 current
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`. It binds 39 current
 files and eleven exact Runtime, Editor Core, and App parents. Structural CI owns 198 workloads and
 94 proof pairs—83 ordinary and eleven barriers—with a 62-proof-unit/134-workload affected closure
 and ownership over 1,253 tracked paths, including 188 proof-owned paths. These local test receipts

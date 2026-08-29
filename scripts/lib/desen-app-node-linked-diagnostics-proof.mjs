@@ -140,6 +140,8 @@ const REQUIRED_TEST_NAMES = Object.freeze({
   [TEST_PATHS.application]: Object.freeze([
     "keeps bound props explicit while boolean and numeric edits fail or apply atomically",
     "switches modes accessibly while preserving selection, authoring views, and local drafts",
+    "uses only the App-owned drag intent and ignores forged native transfer authority",
+    "forgets an admitted gap after the pointer reaches the dragged layer's no-op position",
   ]),
   [TEST_PATHS.persistenceApplication]: Object.freeze([
     "keeps rejected-candidate diagnostics outside Source, dirty state, and Save requests",
@@ -687,7 +689,25 @@ export function verifyDesenAppNodeLinkedDiagnosticsSourcePolicy(rawInput) {
       'hidden={mode === "run"}',
       "<DiagnosticsPanel",
       "selectedSelectionKey: diagnosticSelection?.selectionKey ?? null",
+      'data-component-drag-handle="true"',
+      'data-layer-drag-handle="true"',
+      "data-layer-drop-row-node-id={node.id}",
+      'querySelector<HTMLElement>("[data-layer-drop-row-node-id]")',
+      "onDrop={receiveComponentDrop}",
+      'releaseAdmission.status === "rejected"',
+      "interaction.dragSession.current.lastAcceptedProjection",
+      "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
+      "clientY < midpoint",
+      '"Current position"',
+      "pendingLayerFocus.current = result.nodeId",
+      'setActiveTab("layers")',
+      "Remove layer",
     ],
+    SOURCE_PATHS.application,
+  );
+  assertExcludes(
+    input.application,
+    ["flushSync", "draggable={enabled}", "draggable={movable}"],
     SOURCE_PATHS.application,
   );
   assertOccurrenceCount(
@@ -755,6 +775,22 @@ export function verifyDesenAppNodeLinkedDiagnosticsSourcePolicy(rawInput) {
       '.diagnosticsTarget[aria-current="true"]',
       ".diagnosticPlaceholder",
       ".diagnosticPlaceholder:focus-visible",
+      '.componentsView[data-component-drag-active="true"]',
+      '.componentsView[data-drop-hovered="true"]',
+      ".componentDragHandle",
+      ".layerDragHandle::before",
+      '.slotBoundary[data-drop-ready="true"]',
+      '.slotBoundary[data-drop-noop-hovered="true"]::before',
+      ".deleteLayerGlyph",
+    ],
+    SOURCE_PATHS.applicationCss,
+  );
+  assertExcludes(
+    input.applicationCss,
+    [
+      '[data-drag-active="true"] .slotBoundary',
+      "margin-block: -0.875rem",
+      "transition: min-height 100ms ease",
     ],
     SOURCE_PATHS.applicationCss,
   );
@@ -775,6 +811,16 @@ export function verifyDesenAppNodeLinkedDiagnosticsSourcePolicy(rawInput) {
     obligationsVisibleMetadataOnly: true,
     rejectedCandidateDiagnosticsOutsidePersistence: true,
     editAdaptersReturnFrozenValidationReport: true,
+    dedicatedComponentDragHandle: true,
+    dedicatedLayerDragHandle: true,
+    componentPanelWideDropSurface: true,
+    innermostNestedSlotOwnsPointer: true,
+    stableInsertionLaneGeometry: true,
+    rowHalfProjectionBroadensHitArea: true,
+    noOpPlacementFeedbackVisible: true,
+    releaseDriftRetainsLastAdmittedPlacement: true,
+    insertedNodeFocusedInLayers: true,
+    selectedInstanceRemovalDiscoverable: true,
   });
 }
 
@@ -1183,6 +1229,16 @@ export async function buildDesenAppNodeLinkedDiagnosticsEvidence(rawOptions = un
       publicationClaimed: false,
       activationClaimed: false,
       browserE2eClaimed: false,
+      dedicatedComponentDragHandle: true,
+      dedicatedLayerDragHandle: true,
+      componentPanelWideDropSurface: true,
+      innermostNestedSlotOwnsPointer: true,
+      stableInsertionLaneGeometry: true,
+      rowHalfProjectionBroadensHitArea: true,
+      noOpPlacementFeedbackVisible: true,
+      releaseDriftRetainsLastAdmittedPlacement: true,
+      insertedNodeFocusedInLayers: true,
+      selectedInstanceRemovalDiscoverable: true,
       p08Status: "NOT_PROVEN",
       p16Status: "PROVEN",
       pf086Status: "OPEN",
@@ -1206,6 +1262,8 @@ export async function buildDesenAppNodeLinkedDiagnosticsEvidence(rawOptions = un
           "closed callback-free visible metadata with no resolver or execution authority",
         persistence:
           "transient rejected-candidate state excluded from committed Source, canonical dirty projection, and Save requests",
+        authoringInteraction:
+          "dedicated component and layer grips, one panel-wide authenticated append surface, innermost nested-slot pointer ownership, stable compact lanes with whole-row midpoint projection, explicit no-op feedback, and selected-instance removal discovery without widening mutation authority",
       },
     },
     application: {
@@ -1222,6 +1280,9 @@ export async function buildDesenAppNodeLinkedDiagnosticsEvidence(rawOptions = un
         "hide diagnostics in Run and focus a placeholder only after an explicit current selection",
         "copy dynamic obligations into inert visible metadata without executing them",
         "clear transient diagnostics on every successful committed Source replacement",
+        "start component drag only from its dedicated dotted grip and admit the complete Components panel for the highlighted target",
+        "start layer drag only from its dedicated dotted grip, fence pointer ownership to the innermost named slot, and preserve the last admitted placement through release drift",
+        "switch successful insertion to Layers, focus the new node, and expose Remove layer plus guarded keyboard deletion",
       ],
       ownership: {
         validationReport: "Editor Core continuous validator",
@@ -1231,6 +1292,7 @@ export async function buildDesenAppNodeLinkedDiagnosticsEvidence(rawOptions = un
         placeholderAndPanel: "Desen App Design chrome",
         managedRuntimeSubtree: "unchanged Runtime React adapter boundary",
         persistenceAndDirtyState: "committed authored Source only",
+        dragAndRemovalChrome: "Desen App-owned authoring interaction state outside Runtime",
       },
     },
     tests,
@@ -1259,6 +1321,7 @@ export async function buildDesenAppNodeLinkedDiagnosticsEvidence(rawOptions = un
       "P-16 is PROVEN for the selected Web–React profile; native diagnostic identity remains independently profiled.",
       "PF-086 remains OPEN because interoperable diagnostic-index and editor-subscription profiles are not defined.",
       "P-08 remains NOT_PROVEN; PF-089 remains OPEN.",
+      "The retained authoring compatibility correction does not widen named-slot, cardinality, validator, or native-transfer authority.",
       "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence.",
     ],
   });

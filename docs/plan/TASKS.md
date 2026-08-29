@@ -1917,11 +1917,15 @@ dirty page exit. Generation, dirty, pending, definite failure, conflict/uncertai
 reopen-required state remain visible without color-only meaning. Scenario previews, fixture
 lifecycle, Runtime input, and secrets never enter persistence.
 
-The retained authoring UX treats each compatible Components card body as one broad native drag
-source and keeps click insertion on a separate `Add` button. Only the sticky `Add to` target
-accepts a component drop; releases anywhere else are inert. Layers fences one global nested-slot
-projection by drag owner and epoch, applies midpoint hysteresis, renders 32 px insertion gaps, and
-keeps the guarded `Delete` control visible for the selected node.
+The retained authoring UX gives each compatible Components card a dedicated dotted native-drag
+grip and keeps click insertion on a separate `Add` button. The complete authenticated Components
+panel accepts the drop for the target summarized by the sticky `Add to` card. Layers starts
+movement only from a dedicated dotted grip, fences the innermost nested-slot owner and drag epoch,
+applies midpoint hysteresis, keeps compact insertion lanes layout-stable while each visible row
+projects its before/after half, shows accepted and current-position feedback, and retains the last
+admitted placement through coordinate-less or rejected release drift. A successful insert switches
+to Layers, focuses the new node, and exposes the guarded `Remove layer` control plus
+Delete/Backspace shortcuts.
 
 The focused five-file persistence suite passes 142/142, the complete twenty-two-file App suite
 passes 324/324, and the independent root mutation proof passes 12/12. Exact evidence is the
@@ -1973,18 +1977,18 @@ interaction are Design-only; Run hides and inerts them, returning to Design does
 and a successful edit or session replacement clears the rejected report.
 
 The focused nine-file diagnostics suite passes 161/161, the complete twenty-four-file App suite
-passes 339/339, and the root mutation proof passes 12/12. Exact task evidence is the 27,353-byte
+passes 339/339, and the root mutation proof passes 12/12. Exact task evidence is the 29,208-byte
 `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
-`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`, binding 39 current
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`, binding 39 current
 files and eleven exact proof parents. The local CI inventory contains 198 workloads and 94 proof
 pairs—83 ordinary and eleven barriers. The connected T13 closure contains 62 proof units and 134
 workloads; ownership covers 1,253 tracked paths, including 188 proof-owned paths. The append-only
 current-reader checkpoint advances sequence 51 head
 `sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` to sequence 52 head
-`sha256:0b2aae1b67d212b4274ad1e75c22053d91ff530055ba8b189d8d9318ef8bd463` across 48 frozen
+`sha256:23b31316ff0dd5dac53f66f110bb7362b9ae1f2af2bc483e4915b66bea48e07b` across 48 frozen
 artifacts and 96 current readers. Promotion pins the selector at
-`sha256:36bc9d960f4755fd82ae016bd697182278ff204a77f7065b874b7434ac609683` and the required-affected
-runner authority at `sha256:42cf5315ba073bd1748c93a30819d983374823c4295fcdc664aa656d3360b0e1`.
+`sha256:a833538c6bca20515608eb2f4398dccea1852fd959df4ca4a804290e94461157` and the required-affected
+runner authority at `sha256:843052663c6200925fd209d3af17d8e3f625d3f88c0d44580c3010672267748d`.
 Checkpoint, promotion, selector, required-affected, and CI quality-gate regression suites pass
 75/75, 19/19, 22/22, 38/38, and 28/28 locally—182/182 combined. M09-T13 is `DONE`, advancing
 implementation progress to 108/145 (74%) and M09 to 13/14 (93%). P-16 is `PROVEN`, PF-086 remains

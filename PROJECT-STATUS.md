@@ -1291,18 +1291,18 @@ returning to Design does not steal focus, and successful edit or session replace
 transient report.
 
 The M09-T13 focused nine-file diagnostics suite passes 161/161, the complete twenty-four-file App
-suite passes 339/339, and the independent root mutation proof passes 12/12. The exact 27,353-byte
+suite passes 339/339, and the independent root mutation proof passes 12/12. The exact 29,208-byte
 artifact is `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
-`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`; it binds 39 current
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`; it binds 39 current
 files and eleven exact Runtime, Editor Core, and App proof parents. The live local CI authority is
 198 workloads and 94 proof pairs—83 ordinary and eleven barriers—with a 62-proof-unit/134-workload
 closure and 1,253 tracked paths, including 188 proof-owned paths. The append-only current-reader
 checkpoint advances sequence 51 head
 `sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` to sequence 52 head
-`sha256:0b2aae1b67d212b4274ad1e75c22053d91ff530055ba8b189d8d9318ef8bd463` across 48 frozen
+`sha256:23b31316ff0dd5dac53f66f110bb7362b9ae1f2af2bc483e4915b66bea48e07b` across 48 frozen
 artifacts and 96 current readers. Promotion pins the selector at
-`sha256:36bc9d960f4755fd82ae016bd697182278ff204a77f7065b874b7434ac609683` and the required-affected
-runner authority at `sha256:42cf5315ba073bd1748c93a30819d983374823c4295fcdc664aa656d3360b0e1`.
+`sha256:a833538c6bca20515608eb2f4398dccea1852fd959df4ca4a804290e94461157` and the required-affected
+runner authority at `sha256:843052663c6200925fd209d3af17d8e3f625d3f88c0d44580c3010672267748d`.
 Checkpoint, promotion, selector, required-affected, and CI quality-gate regression suites pass
 75/75, 19/19, 22/22, 38/38, and 28/28 locally—182/182 combined. M09-T13 is `DONE`, P-16 is
 `PROVEN`, PF-086 remains `OPEN`, proof gates remain 10/13, implementation progress is 108/145
@@ -4370,11 +4370,14 @@ M09-T12 evidence:
   drafts require admission across navigation/traversal and protect dirty page exit; generation,
   dirty, pending, failure, uncertainty, and reopen state remain visibly and accessibly distinct;
   scenario previews, fixture state, Runtime inputs, and secrets are never persisted
-- retained authoring UX: each compatible Components card body is a broad native drag source with a
-  separate `Add` button; only the sticky `Add to` target accepts component drops and releases
-  elsewhere are inert; Layers fences one global nested-slot projection by drag owner and epoch,
-  applies midpoint hysteresis, renders 32 px insertion gaps, and keeps the guarded `Delete` control
-  visible for the selected node
+- retained authoring UX: each compatible Components card has a dedicated dotted native-drag grip
+  plus a separate `Add` button; the complete authenticated Components panel accepts a drop for the
+  target summarized by the sticky `Add to` card; Layers starts movement only from a dedicated
+  dotted grip, fences the innermost nested-slot owner and drag epoch, applies midpoint hysteresis,
+  keeps compact insertion lanes layout-stable while each visible row projects its before/after
+  half, shows accepted/current-position feedback, and retains the last admitted placement through
+  coordinate-less or rejected release drift; insertion switches to Layers, focuses the new node,
+  and exposes the guarded `Remove layer` action plus Delete/Backspace shortcuts
 - local proof: the focused five-file persistence suite passes 142/142, the complete twenty-two-file
   App suite passes 324/324, and the independent root mutation proof passes 12/12
 - evidence boundary: the artifact binds 35 current files and three exact parents without tracking

@@ -1072,11 +1072,14 @@ conflict/uncertainty, exhaustion ve reopen-required durumları yalnızca renge b
 görünürdür. Scenario preview, fixture lifecycle, Runtime input ve secret verileri persistence
 isteğine girmez.
 
-Güncel authoring UX'te uyumlu her Components kartının geniş gövdesi native drag kaynağıdır; tıklayarak
-ekleme ayrı `Add` düğmesindedir. Component drop yalnızca sticky `Add to` hedefinde kabul edilir,
-başka yerde bırakma inert kalır. Layers, drag owner ve epoch ile çevrelenmiş tek global nested-slot
-projection'ı midpoint hysteresis ile yönetir, 32 px insertion aralıklarını görünür tutar ve seçili
-node için güvenli `Delete` kontrolünü sürekli gösterir.
+Güncel authoring UX'te uyumlu her Components kartı ayrı noktalı bir native-drag tutamacı ve `Add`
+düğmesi sunar. Drop, sticky `Add to` kartının özetlediği hedef için authenticated Components
+panelinin tamamında kabul edilir. Layers hareketi yalnızca ayrı noktalı tutamacından başlatır, en
+içteki nested-slot owner'ını ve drag epoch'unu fence eder; midpoint hysteresis uygular, kompakt
+insertion aralıklarını layout-stable tutarken her görünür satırı before/after yarısına projekte eder,
+accepted/current-position feedback'i gösterir ve koordinatsız ya da rejected release drift'inde son
+kabul edilen placement'ı korur. Başarılı insert Layers'a geçer, yeni node'a odaklanır ve güvenli
+`Remove layer` eylemiyle Delete/Backspace kısayollarını hemen erişilebilir kılar.
 
 Focused beş dosyalı persistence suite 142/142, complete yirmi iki dosyalı App suite 324/324 ve
 independent root mutation proof 12/12 geçer. Exact artifact 27.053 byte'tır:
@@ -1125,7 +1128,7 @@ replacement reddedilen report'u temizler.
 Dokuz dosyalık odaklı diagnostics suite 161/161, 24 dosyalık tam App suite 339/339 ve bağımsız root
 mutation proof 12/12 geçer. Exact kanıt, 39 güncel dosyayı ve on bir exact proof parent'ını bağlayan
 27.353-byte `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` dosyasıdır;
-`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`. Yerel CI otoritesi
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`. Yerel CI otoritesi
 198 workload ve 94 proof pair'dir: 83 ordinary + 11 barrier. Connected T13 closure 62 proof unit /
 134 workload, ownership ise 1.253 tracked path / 188 proof-owned path'tir. M09-T13 `DONE`, P-16
 `PROVEN`, PF-086 `OPEN`, proof gate sayısı 10/13, genel ilerleme 108/145 (%74), M09 13/14 (%93)

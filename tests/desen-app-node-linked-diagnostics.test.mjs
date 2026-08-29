@@ -143,6 +143,16 @@ test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.taskStatus, "DONE");
   assert.equal(built.artifact.claim.p16Status, "PROVEN");
   assert.equal(built.artifact.claim.pf086Status, "OPEN");
+  assert.equal(built.artifact.claim.dedicatedComponentDragHandle, true);
+  assert.equal(built.artifact.claim.dedicatedLayerDragHandle, true);
+  assert.equal(built.artifact.claim.componentPanelWideDropSurface, true);
+  assert.equal(built.artifact.claim.innermostNestedSlotOwnsPointer, true);
+  assert.equal(built.artifact.claim.stableInsertionLaneGeometry, true);
+  assert.equal(built.artifact.claim.rowHalfProjectionBroadensHitArea, true);
+  assert.equal(built.artifact.claim.noOpPlacementFeedbackVisible, true);
+  assert.equal(built.artifact.claim.releaseDriftRetainsLastAdmittedPlacement, true);
+  assert.equal(built.artifact.claim.insertedNodeFocusedInLayers, true);
+  assert.equal(built.artifact.claim.selectedInstanceRemovalDiscoverable, true);
 });
 
 test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[1], () => {
@@ -153,6 +163,16 @@ test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[1], () => {
   assert.equal(built.artifact.claim.explicitContextIdentityMappingOnly, true);
   assert.equal(built.artifact.claim.diagnosticCodeMessagePointerIdentityInference, false);
   assert.equal(built.artifact.claim.snapshotBoundSelectionReadmitted, true);
+  assert.equal(source.dedicatedComponentDragHandle, true);
+  assert.equal(source.dedicatedLayerDragHandle, true);
+  assert.equal(source.componentPanelWideDropSurface, true);
+  assert.equal(source.innermostNestedSlotOwnsPointer, true);
+  assert.equal(source.stableInsertionLaneGeometry, true);
+  assert.equal(source.rowHalfProjectionBroadensHitArea, true);
+  assert.equal(source.noOpPlacementFeedbackVisible, true);
+  assert.equal(source.releaseDriftRetainsLastAdmittedPlacement, true);
+  assert.equal(source.insertedNodeFocusedInLayers, true);
+  assert.equal(source.selectedInstanceRemovalDiscoverable, true);
 });
 
 test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[2], () => {
@@ -261,6 +281,16 @@ test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[10], async () => {
       "true",
     ],
     ["application", "captureEditDiagnostics(result);", "void result;"],
+    ["application", 'data-component-drag-handle="true"', ""],
+    ["application", 'data-layer-drag-handle="true"', ""],
+    ["application", "data-layer-drop-row-node-id={node.id}", ""],
+    ["application", "onDrop={receiveComponentDrop}", ""],
+    ["application", 'releaseAdmission.status === "rejected"', "false"],
+    ["application", '"Current position"', '"Drop here"'],
+    ["application", "pendingLayerFocus.current = result.nodeId", "void result.nodeId"],
+    ["application", "clientY < midpoint", "false"],
+    ["applicationCss", ".layerDragHandle::before", ".layerGrip::before"],
+    ["applicationCss", '.slotBoundary[data-drop-noop-hovered="true"]::before', ".slotBoundary"],
     ["authoringInspector", "readonly validationReport?:", "readonly rejectedReport?:"],
     [
       "authoringState",
@@ -283,6 +313,14 @@ test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[10], async () => {
       expectedError("SOURCE_POLICY_VIOLATION"),
     );
   }
+  assert.throws(
+    () =>
+      verifyDesenAppNodeLinkedDiagnosticsSourcePolicy({
+        ...sourcePolicyInput,
+        applicationCss: `${sourcePolicyInput.applicationCss}\n[data-drag-active="true"] .slotBoundary { margin-block: -0.875rem; transition: min-height 100ms ease; }\n`,
+      }),
+    expectedError("SOURCE_POLICY_VIOLATION"),
+  );
 
   const diagnosticsTest = testSources.get(TEST_PATHS.authoringDiagnostics);
   await assert.rejects(

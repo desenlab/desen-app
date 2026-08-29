@@ -1265,17 +1265,17 @@ repository-policy paths. The focused inventory, impact, shared-state, equivalenc
 ownership, and selector suites pass 9/9, 27/27, 27/27, 8/8, 30/30, 15/15, and 22/22. The
 append-only current-reader checkpoint advances sequence 51 head
 `sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` to sequence 52 head
-`sha256:0b2aae1b67d212b4274ad1e75c22053d91ff530055ba8b189d8d9318ef8bd463` across 48 frozen
+`sha256:23b31316ff0dd5dac53f66f110bb7362b9ae1f2af2bc483e4915b66bea48e07b` across 48 frozen
 artifacts and 96 current readers. Promotion pins the selector at
-`sha256:36bc9d960f4755fd82ae016bd697182278ff204a77f7065b874b7434ac609683` and the required-affected
-runner authority at `sha256:42cf5315ba073bd1748c93a30819d983374823c4295fcdc664aa656d3360b0e1`.
+`sha256:a833538c6bca20515608eb2f4398dccea1852fd959df4ca4a804290e94461157` and the required-affected
+runner authority at `sha256:843052663c6200925fd209d3af17d8e3f625d3f88c0d44580c3010672267748d`.
 Checkpoint, promotion, selector, required-affected, and CI quality-gate regression suites pass
 75/75, 19/19, 22/22, 38/38, and 28/28 locally—182/182 combined. These are local-authority receipts
 and make no required-gate or hosted-CI claim.
 
-The exact 27,353-byte task artifact is
+The exact 29,208-byte task artifact is
 `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
-`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`, with reviewed report
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`, with reviewed report
 `docs/proof/DESEN-APP-NODE-LINKED-DIAGNOSTICS.md`. Focused diagnostics, complete App, and root
 mutation suites pass 161/161, 339/339, and 12/12. P-16 is `PROVEN`; PF-086 remains `OPEN`;
 implementation progress is 108/145 (74%), M09 is 13/14 (93%), proof gates remain 10/13, and

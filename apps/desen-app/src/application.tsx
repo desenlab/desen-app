@@ -8,7 +8,6 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { flushSync } from "react-dom";
 
 import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 import { createDesenEditorContinuousValidator } from "@desen/editor-core";
@@ -515,7 +514,7 @@ interface AuthoringDropProjection {
 
 type AuthoringDropAdmission =
   | Readonly<{ readonly status: "accepted"; readonly projection: AuthoringDropProjection }>
-  | Readonly<{ readonly status: "noop" }>
+  | Readonly<{ readonly status: "noop"; readonly projection: AuthoringDropProjection }>
   | Readonly<{ readonly status: "rejected" }>
   | Readonly<{ readonly status: "unavailable" }>;
 
@@ -648,7 +647,12 @@ function evaluateDragIntent(
       index,
     );
     if (!compatibility.accepted) return Object.freeze({ status: "rejected" });
-    if (!compatibility.changesSource) return Object.freeze({ status: "noop" });
+    if (!compatibility.changesSource) {
+      return Object.freeze({
+        status: "noop",
+        projection: Object.freeze({ index, target }),
+      });
+    }
     return Object.freeze({
       status: "accepted",
       projection: Object.freeze({ index, target }),
@@ -751,12 +755,14 @@ function SlotBoundary({
       className={styles.slotBoundary}
       data-active-slot={active}
       data-drop-hovered={dropReady && dropHovered}
+      data-drop-noop={dragAdmission?.status === "noop"}
+      data-drop-noop-hovered={dragAdmission?.status === "noop" && dropHovered}
       data-drop-ready={dropReady}
       data-slot-boundary-index={index}
     >
       <span aria-hidden="true" className={styles.slotBoundaryLine} />
       <span aria-hidden="true" className={styles.slotBoundaryCue}>
-        Drop here
+        {dragAdmission?.status === "noop" ? "Current position" : "Drop here"}
       </span>
       <button
         aria-label={placementLabel}
@@ -805,9 +811,11 @@ function LayerSlot({
     if (session.ownerKey !== sessionOwnerKey) session.lastAcceptedProjection = null;
     session.ownerKey = sessionOwnerKey;
     session.admission = admission.status;
-    if (admission.status === "accepted") {
+    if (admission.status === "accepted" || admission.status === "noop") {
       session.activeProjection = admission.projection;
-      session.lastAcceptedProjection = admission.projection;
+      if (admission.status === "accepted") {
+        session.lastAcceptedProjection = admission.projection;
+      }
       interaction.onProjectDrop(admission.projection);
       return;
     }
@@ -827,7 +835,7 @@ function LayerSlot({
 
     const rows = Array.from(list.children).flatMap((child) => {
       if (!(child instanceof HTMLElement) || child.dataset.layerNode !== "true") return [];
-      const row = child.firstElementChild;
+      const row = child.querySelector<HTMLElement>("[data-layer-drop-row-node-id]");
       return row instanceof HTMLElement ? [row] : [];
     });
     let index: number;
@@ -975,9 +983,14 @@ function LayerSlot({
     if (interaction.dragIntent === null) return;
     const list = listRef.current;
     if (list === null) return;
-    const admission = projectNearestDrop(list, event.clientY, event.target);
-    if (admission.status === "rejected" || admission.status === "unavailable") return;
+    // The innermost named slot owns the pointer. A rejected nested slot must never bubble into an
+    // outer owner and silently turn the same coordinates into a different placement target.
     event.stopPropagation();
+    const admission = projectNearestDrop(list, event.clientY, event.target);
+    if (admission.status === "rejected" || admission.status === "unavailable") {
+      publishAdmission(admission);
+      return;
+    }
     event.preventDefault();
     event.dataTransfer.dropEffect =
       admission.status === "noop"
@@ -993,6 +1006,7 @@ function LayerSlot({
     if (interaction.dragIntent === null) return;
     const list = listRef.current;
     if (list === null) return;
+    event.stopPropagation();
     const currentBounds = event.currentTarget.getBoundingClientRect();
     const hasCurrentCoordinates =
       Number.isFinite(event.clientY) &&
@@ -1005,20 +1019,18 @@ function LayerSlot({
     const projection =
       releaseAdmission.status === "accepted"
         ? releaseAdmission.projection
-        : releaseAdmission.status === "unavailable" &&
+        : (releaseAdmission.status === "unavailable" || releaseAdmission.status === "rejected") &&
             interaction.dragSession.current.ownerKey === sessionOwnerKey &&
             interaction.dragSession.current.admission === "accepted"
           ? interaction.dragSession.current.lastAcceptedProjection
           : null;
     if (releaseAdmission.status === "noop") {
-      event.stopPropagation();
       event.preventDefault();
       publishAdmission(releaseAdmission);
       interaction.onClearDrag();
       return;
     }
     if (projection === null) return;
-    event.stopPropagation();
     event.preventDefault();
     interaction.onProjectDrop(null);
     interaction.onApplyIntent(projection.target, projection.index, interaction.dragIntent);
@@ -1122,32 +1134,43 @@ function LayerNode({
 
   return (
     <li className={styles.layerNode} data-layer-node="true">
-      <button
-        aria-label={`${selected ? "Deselect" : "Select"} ${node.displayName} layer · ${node.id}${node.conditional ? " · Conditional" : ""}`}
-        aria-pressed={selected}
+      <div
         className={styles.layerRow}
         data-category={node.capabilityId.split("/").at(-1)}
         data-dragging={dragIntent?.kind === "node" && dragIntent.nodeId === node.id}
-        data-layer-source-node-id={node.id}
-        draggable={movable}
-        onDragEnd={() => {
-          onClearDrag();
-        }}
-        onDragStart={(event) => {
-          if (!movable) return;
-          onStartDrag(Object.freeze({ kind: "node", nodeId: node.id }));
-          prepareNativeDrag(event, "move");
-        }}
-        onClick={() => onToggleSelection(node)}
-        type="button"
+        data-layer-drop-row-node-id={node.id}
+        data-selected={selected}
       >
-        <span aria-hidden="true" className={styles.layerGlyph} />
-        <span className={styles.layerIdentity}>
-          <strong>{node.displayName}</strong>
-          <small>{node.id}</small>
-        </span>
-        {node.conditional ? <span className={styles.conditionalBadge}>Conditional</span> : null}
-      </button>
+        {movable ? (
+          <span
+            aria-hidden="true"
+            className={styles.layerDragHandle}
+            data-layer-drag-handle="true"
+            draggable
+            onDragEnd={onClearDrag}
+            onDragStart={(event) => {
+              prepareNativeDrag(event, "move");
+              onStartDrag(Object.freeze({ kind: "node", nodeId: node.id }));
+            }}
+            title={`Drag ${node.displayName} layer`}
+          />
+        ) : null}
+        <button
+          aria-label={`${selected ? "Deselect" : "Select"} ${node.displayName} layer · ${node.id}${node.conditional ? " · Conditional" : ""}`}
+          aria-pressed={selected}
+          className={styles.layerSelectAction}
+          data-layer-source-node-id={node.id}
+          onClick={() => onToggleSelection(node)}
+          type="button"
+        >
+          <span aria-hidden="true" className={styles.layerGlyph} />
+          <span className={styles.layerIdentity}>
+            <strong>{node.displayName}</strong>
+            <small>{node.id}</small>
+          </span>
+          {node.conditional ? <span className={styles.conditionalBadge}>Conditional</span> : null}
+        </button>
+      </div>
       {node.behaviors.length > 0 ? (
         <ul aria-label={`${node.id} behaviors`} className={styles.behaviorList}>
           {node.behaviors.map((behavior) => (
@@ -1358,12 +1381,12 @@ function ComponentLibrary({
   readonly slotProjection: AuthoringSlotProjection | null;
 }>) {
   const [query, setQuery] = useState("");
-  const [targetDragHovered, setTargetDragHovered] = useState(false);
-  const targetDragEnterDepth = useRef(0);
+  const [panelDragHovered, setPanelDragHovered] = useState(false);
+  const panelDragEnterDepth = useRef(0);
 
   useEffect(() => {
-    targetDragEnterDepth.current = 0;
-    setTargetDragHovered(false);
+    panelDragEnterDepth.current = 0;
+    setPanelDragHovered(false);
   }, [dragIntent]);
 
   if (!active) return null;
@@ -1407,15 +1430,15 @@ function ComponentLibrary({
     event.stopPropagation();
     event.preventDefault();
     event.dataTransfer.dropEffect = "copy";
-    setTargetDragHovered(true);
+    setPanelDragHovered(true);
   }
 
   function receiveComponentDrop(event: DragEvent<HTMLDivElement>): void {
     if (!componentDropReady || dragIntent?.kind !== "component") return;
     event.stopPropagation();
     event.preventDefault();
-    targetDragEnterDepth.current = 0;
-    setTargetDragHovered(false);
+    panelDragEnterDepth.current = 0;
+    setPanelDragHovered(false);
     addComponent(dragIntent.componentId);
   }
 
@@ -1427,16 +1450,20 @@ function ComponentLibrary({
   return (
     <div
       className={styles.componentsView}
-      onDragOver={(event) => {
-        if (dragIntent?.kind !== "component") return;
-        event.preventDefault();
-        event.dataTransfer.dropEffect = "none";
+      data-component-drag-active={dragIntent?.kind === "component"}
+      data-drop-hovered={componentDropReady && panelDragHovered}
+      onDragEnter={(event) => {
+        if (!componentDropReady) return;
+        admitComponentDrop(event);
+        panelDragEnterDepth.current += 1;
       }}
-      onDrop={(event) => {
-        if (dragIntent?.kind !== "component") return;
-        event.preventDefault();
-        onClearDrag();
+      onDragLeave={() => {
+        if (!componentDropReady) return;
+        panelDragEnterDepth.current = Math.max(0, panelDragEnterDepth.current - 1);
+        if (panelDragEnterDepth.current === 0) setPanelDragHovered(false);
       }}
+      onDragOver={admitComponentDrop}
+      onDrop={receiveComponentDrop}
     >
       <div className={styles.catalogSummary}>
         <span>
@@ -1465,22 +1492,10 @@ function ComponentLibrary({
         aria-label={targetName}
         className={styles.componentSlotTarget}
         data-drag-active={dragIntent?.kind === "component"}
-        data-drop-hovered={componentDropReady && targetDragHovered}
+        data-drop-hovered={componentDropReady && panelDragHovered}
         data-drop-ready={componentDropReady}
         data-guide={readySlot === null}
         data-ready={readySlot !== null}
-        onDragEnter={(event) => {
-          if (!componentDropReady) return;
-          admitComponentDrop(event);
-          targetDragEnterDepth.current += 1;
-        }}
-        onDragLeave={() => {
-          if (!componentDropReady) return;
-          targetDragEnterDepth.current = Math.max(0, targetDragEnterDepth.current - 1);
-          if (targetDragEnterDepth.current === 0) setTargetDragHovered(false);
-        }}
-        onDragOver={admitComponentDrop}
-        onDrop={receiveComponentDrop}
         role="group"
       >
         {readySlot === null ? (
@@ -1514,8 +1529,8 @@ function ComponentLibrary({
               <small>
                 {readySlot.owner.id} · {readySlot.slot.name} slot
                 {draggedComponent === undefined
-                  ? ` · appends at position ${readySlot.slot.children.length + 1} · click Add or drag a component here`
-                  : ` · release here to append at position ${readySlot.slot.children.length + 1}`}
+                  ? ` · appends at position ${readySlot.slot.children.length + 1} · click Add or drag a component into this panel`
+                  : ` · release anywhere in this panel to append at position ${readySlot.slot.children.length + 1}`}
               </small>
             </span>
             <span className={styles.componentTargetControls}>
@@ -1588,24 +1603,7 @@ function ComponentLibrary({
                             dragIntent.componentId === component.id
                           }
                           data-enabled={enabled}
-                          draggable={enabled}
-                          onDragEnd={onClearDrag}
-                          onDragStart={(event) => {
-                            if (!enabled) return;
-                            onStartDrag(
-                              Object.freeze({
-                                kind: "component",
-                                componentId: component.id,
-                              }),
-                            );
-                            prepareNativeDrag(event, "copy");
-                          }}
                           role="group"
-                          title={
-                            enabled
-                              ? `Drag ${component.displayName} to the Add to target`
-                              : undefined
-                          }
                         >
                           <span
                             aria-hidden="true"
@@ -1622,9 +1620,23 @@ function ComponentLibrary({
                           </span>
                           <span className={styles.componentItemAction}>
                             {enabled ? (
-                              <span aria-hidden="true" className={styles.componentMeta}>
-                                Drag
-                              </span>
+                              <span
+                                aria-hidden="true"
+                                className={styles.componentDragHandle}
+                                data-component-drag-handle="true"
+                                draggable
+                                onDragEnd={onClearDrag}
+                                onDragStart={(event) => {
+                                  prepareNativeDrag(event, "copy");
+                                  onStartDrag(
+                                    Object.freeze({
+                                      kind: "component",
+                                      componentId: component.id,
+                                    }),
+                                  );
+                                }}
+                                title={`Drag ${component.displayName} anywhere in this panel to add`}
+                              />
                             ) : null}
                             <button
                               aria-label={insertLabel}
@@ -1827,10 +1839,11 @@ function AuthoringPanel({
       setNotice(message);
       return;
     }
-    if (intent.kind === "node") pendingLayerFocus.current = result.nodeId;
+    pendingLayerFocus.current = result.nodeId;
+    if (result.operation === "insert") setActiveTab("layers");
     setNotice(
       result.operation === "insert"
-        ? `Inserted ${model.components.find(({ id }) => id === (intent.kind === "component" ? intent.componentId : ""))?.displayName ?? result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot at position ${index + 1}` : "the selected slot"}. Selected for editing · use the visible Delete action above or press Delete/Backspace.`
+        ? `Inserted ${model.components.find(({ id }) => id === (intent.kind === "component" ? intent.componentId : ""))?.displayName ?? result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot at position ${index + 1}` : "the selected slot"}. Selected in Layers · use Remove layer above or press Delete/Backspace.`
         : result.operation === "move"
           ? `Moved ${result.nodeId} to ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`
           : `Reordered ${result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`,
@@ -1871,15 +1884,13 @@ function AuthoringPanel({
   function startDrag(intent: AuthoringDragIntent): void {
     if (!interactive) return;
     resetDragSession();
-    flushSync(() => {
-      setActiveDropProjection(null);
-      setDragIntent(intent);
-      setNotice(
-        intent.kind === "component"
-          ? "Drag to the highlighted Add to target."
-          : "Release on a highlighted Layers gap.",
-      );
-    });
+    setActiveDropProjection(null);
+    setDragIntent(intent);
+    setNotice(
+      intent.kind === "component"
+        ? "Release anywhere in Components to add to the highlighted target."
+        : "Release on a highlighted Layers gap.",
+    );
   }
 
   function clearDrag(): void {
@@ -2040,7 +2051,8 @@ function AuthoringPanel({
             onClick={deleteSelection}
             type="button"
           >
-            Delete {selection.displayName}
+            <span aria-hidden="true" className={styles.deleteLayerGlyph} />
+            Remove layer
           </button>
           <small id={`${panelId}-delete-layer-description`}>{deletionReason}</small>
         </div>

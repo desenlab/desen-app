@@ -223,9 +223,9 @@ Order, duplicates, node/behavior distinction, unmapped/out-of-route diagnostics,
 obligations remain observable. The Design-only App placeholder is outside the managed Runtime
 subtree and steals no focus.
 
-The exact 27,353-byte artifact is
+The exact 29,208-byte artifact is
 `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
-`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`; focused App, complete
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`; focused App, complete
 App, and root mutation suites pass 161/161, 339/339, and 12/12. P-16 advances to `PROVEN`; PF-086
 remains `OPEN` because this App-specific composition does not define a protocol-wide editor
 subscription/index profile. No other normative status changes, proof gates remain 10/13, and no

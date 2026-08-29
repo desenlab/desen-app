@@ -647,7 +647,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[51],
-    "0b2aae1b67d212b4274ad1e75c22053d91ff530055ba8b189d8d9318ef8bd463",
+    "23b31316ff0dd5dac53f66f110bb7362b9ae1f2af2bc483e4915b66bea48e07b",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -1832,8 +1832,8 @@ test("sequence fifty-two preserves sequence fifty-one, reseals the App chain, an
   assert.deepEqual(current.artifacts.at(-1), {
     task: "M09-T13",
     path: "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json",
-    bytes: 27353,
-    sha256: "b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c",
+    bytes: 29208,
+    sha256: "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
   });
   assert.deepEqual(
     current.readers.slice(0, previous.readers.length).map(identity),
@@ -1854,15 +1854,15 @@ test("sequence fifty-two preserves sequence fifty-one, reseals the App chain, an
       task: "M09-T13",
       role: "proof-library",
       path: "scripts/lib/desen-app-node-linked-diagnostics-proof.mjs",
-      bytes: 53136,
-      sha256: "8a813fef7474f381fe2a022a59325223e39b90896d39469c6b3281a8fdce37de",
+      bytes: 56429,
+      sha256: "4f98c727c5b5f49c95ab0b3c4b9a1a70afe01f3d834d07be9e4a1949c5a80b6f",
     },
     {
       task: "M09-T13",
       role: "root-test",
       path: "tests/desen-app-node-linked-diagnostics.test.mjs",
-      bytes: 15394,
-      sha256: "1d7d53e0f056a432e37a9270a84dd3fd29ab0689c5a10fc916b4c87e00061493",
+      bytes: 17783,
+      sha256: "dd524e430ce145ec1ce42220b977f8c60cde176d22c2bc995cfc25fdd92753ec",
     },
   ]);
   for (const reader of current.readers) {
@@ -1872,7 +1872,7 @@ test("sequence fifty-two preserves sequence fifty-one, reseals the App chain, an
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "0b2aae1b67d212b4274ad1e75c22053d91ff530055ba8b189d8d9318ef8bd463",
+    "23b31316ff0dd5dac53f66f110bb7362b9ae1f2af2bc483e4915b66bea48e07b",
   );
 });
 

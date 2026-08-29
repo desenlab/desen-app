@@ -2133,8 +2133,8 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
     profile: "desen.app.node-linked-diagnostics-proof.v1",
     result: "PASS",
     path: NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
-    bytes: 27_353,
-    sha256: "b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c",
+    bytes: 29_208,
+    sha256: "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
   });
   const artifactBytes = files.get(NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
   if (

@@ -254,10 +254,12 @@ test("rejects moved, duplicated, pending, or mismatched proof and M05-T05 sectio
   }
 });
 
-test("rejects exact P-16 pin or N-021 monotonic successor-closure drift", async () => {
+test("rejects regressed P-16 authority or N-021 monotonic successor-closure drift", async () => {
   const texts = await proofTexts();
   for (const proofMatrixText of [
-    replaceRow(texts.proofMatrixText, "P-16", (row) => row.replace("| PARTIAL ", "| PROVEN  ")),
+    replaceRow(texts.proofMatrixText, "P-16", (row) =>
+      replaceExactOnce(row, "| PROVEN         |", "| NOT_PROVEN     |"),
+    ),
     replaceRow(texts.proofMatrixText, "P-16", (row) => row.replace("M05-T05", "M05-T99")),
     replaceRow(texts.proofMatrixText, "P-16", (row) =>
       row.replace(HISTORICAL_SHA256, "a".repeat(64)),

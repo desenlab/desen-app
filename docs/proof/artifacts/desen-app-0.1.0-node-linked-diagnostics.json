@@ -145,6 +145,16 @@
     "publicationClaimed": false,
     "activationClaimed": false,
     "browserE2eClaimed": false,
+    "dedicatedComponentDragHandle": true,
+    "dedicatedLayerDragHandle": true,
+    "componentPanelWideDropSurface": true,
+    "innermostNestedSlotOwnsPointer": true,
+    "stableInsertionLaneGeometry": true,
+    "rowHalfProjectionBroadensHitArea": true,
+    "noOpPlacementFeedbackVisible": true,
+    "releaseDriftRetainsLastAdmittedPlacement": true,
+    "insertedNodeFocusedInLayers": true,
+    "selectedInstanceRemovalDiscoverable": true,
     "p08Status": "NOT_PROVEN",
     "p16Status": "PROVEN",
     "pf086Status": "OPEN",
@@ -182,7 +192,6 @@
         ],
         "application": [
           "react",
-          "react-dom",
           "@desen/reference-catalog-web/catalog.json",
           "@desen/editor-core",
           "@desen/protocol",
@@ -297,7 +306,17 @@
       "focusRequiresExplicitSelection": true,
       "obligationsVisibleMetadataOnly": true,
       "rejectedCandidateDiagnosticsOutsidePersistence": true,
-      "editAdaptersReturnFrozenValidationReport": true
+      "editAdaptersReturnFrozenValidationReport": true,
+      "dedicatedComponentDragHandle": true,
+      "dedicatedLayerDragHandle": true,
+      "componentPanelWideDropSurface": true,
+      "innermostNestedSlotOwnsPointer": true,
+      "stableInsertionLaneGeometry": true,
+      "rowHalfProjectionBroadensHitArea": true,
+      "noOpPlacementFeedbackVisible": true,
+      "releaseDriftRetainsLastAdmittedPlacement": true,
+      "insertedNodeFocusedInLayers": true,
+      "selectedInstanceRemovalDiscoverable": true
     },
     "protocolProfiles": {
       "report": "one immutable rejected-candidate continuous-validation report with exact document and Catalog fingerprints",
@@ -307,7 +326,8 @@
       "placeholder": "App-owned focusable-on-request sibling outside the managed Runtime capability subtree",
       "mode": "Design-only diagnostics presentation with no mount-authority change and no Run focus steal",
       "obligations": "closed callback-free visible metadata with no resolver or execution authority",
-      "persistence": "transient rejected-candidate state excluded from committed Source, canonical dirty projection, and Save requests"
+      "persistence": "transient rejected-candidate state excluded from committed Source, canonical dirty projection, and Save requests",
+      "authoringInteraction": "dedicated component and layer grips, one panel-wide authenticated append surface, innermost nested-slot pointer ownership, stable compact lanes with whole-row midpoint projection, explicit no-op feedback, and selected-instance removal discovery without widening mutation authority"
     }
   },
   "application": {
@@ -336,7 +356,10 @@
       "render selected invalid diagnostics in App chrome outside the managed Runtime subtree",
       "hide diagnostics in Run and focus a placeholder only after an explicit current selection",
       "copy dynamic obligations into inert visible metadata without executing them",
-      "clear transient diagnostics on every successful committed Source replacement"
+      "clear transient diagnostics on every successful committed Source replacement",
+      "start component drag only from its dedicated dotted grip and admit the complete Components panel for the highlighted target",
+      "start layer drag only from its dedicated dotted grip, fence pointer ownership to the innermost named slot, and preserve the last admitted placement through release drift",
+      "switch successful insertion to Layers, focus the new node, and expose Remove layer plus guarded keyboard deletion"
     ],
     "ownership": {
       "validationReport": "Editor Core continuous validator",
@@ -345,7 +368,8 @@
       "runtimeIdentity": "public Runtime React diagnostic index",
       "placeholderAndPanel": "Desen App Design chrome",
       "managedRuntimeSubtree": "unchanged Runtime React adapter boundary",
-      "persistenceAndDirtyState": "committed authored Source only"
+      "persistenceAndDirtyState": "committed authored Source only",
+      "dragAndRemovalChrome": "Desen App-owned authoring interaction state outside Runtime"
     }
   },
   "tests": {
@@ -428,13 +452,13 @@
       },
       {
         "path": "apps/desen-app/src/application.module.css",
-        "bytes": 89679,
-        "sha256": "7851f5b3127b3795cc002b188e3d1c06e27aa657e3dd8fe83ece9c6fdf6731b5"
+        "bytes": 92707,
+        "sha256": "44be3f7ed59fdead991465c7999c2e512b4d5dcc0129633d77a17a0ac1023d3e"
       },
       {
         "path": "apps/desen-app/src/application.tsx",
-        "bytes": 110735,
-        "sha256": "1941aa7837024c05f1daf22695dae81e2fbf1bbadf53b68ed4129e25bfba446b"
+        "bytes": 111621,
+        "sha256": "57e66fb9872acd63f14d861462ce2668668412e0118aa9fbcc9caa22fc2b2f63"
       },
       {
         "path": "apps/desen-app/src/authoring-diagnostics.ts",
@@ -483,8 +507,8 @@
       },
       {
         "path": "apps/desen-app/test/application.test.tsx",
-        "bytes": 106784,
-        "sha256": "ddb8c39f9037ed6a32aa6a8e8cffb9fbc7dd2db89bae356a00663378c52c3c14"
+        "bytes": 107695,
+        "sha256": "9cb06ffc1d8d2e0086f479443a6b8dda63de5106e27ed091d287013249ccfea6"
       },
       {
         "path": "apps/desen-app/test/authoring-diagnostics.test.ts",
@@ -598,8 +622,8 @@
       },
       {
         "path": "scripts/lib/desen-app-node-linked-diagnostics-proof.mjs",
-        "bytes": 53136,
-        "sha256": "8a813fef7474f381fe2a022a59325223e39b90896d39469c6b3281a8fdce37de"
+        "bytes": 56429,
+        "sha256": "4f98c727c5b5f49c95ab0b3c4b9a1a70afe01f3d834d07be9e4a1949c5a80b6f"
       },
       {
         "path": "scripts/verify-desen-app-node-linked-diagnostics.mjs",
@@ -608,8 +632,8 @@
       },
       {
         "path": "tests/desen-app-node-linked-diagnostics.test.mjs",
-        "bytes": 15394,
-        "sha256": "1d7d53e0f056a432e37a9270a84dd3fd29ab0689c5a10fc916b4c87e00061493"
+        "bytes": 17783,
+        "sha256": "dd524e430ce145ec1ce42220b977f8c60cde176d22c2bc995cfc25fdd92753ec"
       }
     ],
     "proofReaderPaths": [
@@ -640,6 +664,7 @@
     "P-16 is PROVEN for the selected Web–React profile; native diagnostic identity remains independently profiled.",
     "PF-086 remains OPEN because interoperable diagnostic-index and editor-subscription profiles are not defined.",
     "P-08 remains NOT_PROVEN; PF-089 remains OPEN.",
+    "The retained authoring compatibility correction does not widen named-slot, cardinality, validator, or native-transfer authority.",
     "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence."
   ]
 }

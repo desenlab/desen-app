@@ -992,11 +992,16 @@ conflict/uncertainty, and reopen-required states stay visible without color-only
 deliberately supplies no concrete storage adapter; the trusted host owns that separate platform
 boundary.
 
-The retained authoring UX treats each compatible Components card body as one broad native drag
-source and keeps click insertion on a separate `Add` button. Only the sticky `Add to` target
-accepts a component drop; releases anywhere else are inert. Layers fences one global nested-slot
-projection by drag owner and epoch, applies midpoint hysteresis, renders 32 px insertion gaps, and
-keeps the guarded `Delete` control visible for the selected node.
+The retained authoring UX gives each compatible Components card a dedicated dotted native-drag
+grip and keeps click insertion on a separate `Add` button. The complete authenticated Components
+panel accepts the drop for the highlighted target; the sticky `Add to` card remains a persistent
+target summary rather than the only narrow release surface. Layers starts movement only from a
+dedicated dotted grip, fences the innermost nested-slot owner and drag epoch, applies midpoint
+hysteresis, keeps compact insertion lanes layout-stable while each visible row projects its
+before/after half, shows accepted and current-position feedback, and retains the last admitted
+placement through coordinate-less or rejected release drift. A successful insert switches to
+Layers, focuses the new node, and exposes the guarded `Remove layer` control plus Delete/Backspace
+shortcuts.
 
 The focused persistence suite passes 142/142 across five files, the complete App suite passes
 324/324 across twenty-two files, and the independent root mutation proof passes 12/12. Exact
@@ -1051,8 +1056,8 @@ session replacement revokes the rejected report.
 
 The focused nine-file diagnostics suite passes 161/161, the complete twenty-four-file App suite
 passes 339/339, and the independent root mutation proof passes 12/12. Exact evidence is the
-27,353-byte [`desen-app-0.1.0-node-linked-diagnostics.json`](docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json)
-at `sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`. It binds 39 current
+29,208-byte [`desen-app-0.1.0-node-linked-diagnostics.json`](docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json)
+at `sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`. It binds 39 current
 files and eleven exact Runtime, Editor Core, and App proof parents.
 
 The live local CI authority now contains 198 workloads and 94 proof pairs—83 ordinary and eleven

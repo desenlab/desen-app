@@ -33,6 +33,7 @@ const N021_CURRENT_EVIDENCE = [
   "M06-T07 carries that exact behavior and every trace record unchanged through digest calculation, root-authoring removal, and deterministic normalization; exact pointers remain resolvable in the normalized document and no extension or authoring node gains trace authority.",
   `Evidence: \`${ARTIFACT_RELATIVE_PATH}\` \`sha256:${HISTORICAL_ARTIFACT_SHA256}\`; \`${SUCCESSOR_ARTIFACT_RELATIVE_PATH}\` \`sha256:${SUCCESSOR_ARTIFACT_SHA256}\`; \`${LATEST_SUCCESSOR_ARTIFACT_RELATIVE_PATH}\` \`sha256:${LATEST_SUCCESSOR_ARTIFACT_SHA256}\`.`,
 ].join(" ");
+const PROOF_STATUS_RANK = Object.freeze({ NOT_PROVEN: 0, PARTIAL: 1, PROVEN: 2 });
 const COMPATIBILITY_MODE = "immutable-task-time-artifact";
 const MAX_PROOF_DOCUMENT_BYTES = 500_000;
 const MAX_LEDGER_BYTES = 2_000_000;
@@ -531,10 +532,16 @@ function verifyDocumentation(proofText, matrixText, normativeText) {
   );
   const p16 = exactRow(matrixText, "P-16", "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT");
   const p16Cells = p16.split("|").map((cell) => cell.trim());
-  if (p16Cells[3] !== "M05-T05, M09-T13" || p16Cells[4] !== "PARTIAL") {
+  const historicalP16Status = EXPECTED_SEMANTICS.proofClaim.currentStatus;
+  const currentP16Rank = PROOF_STATUS_RANK[p16Cells[4]];
+  if (
+    p16Cells[3] !== "M05-T05, M09-T13" ||
+    currentP16Rank === undefined ||
+    currentP16Rank < PROOF_STATUS_RANK[historicalP16Status]
+  ) {
     fail(
       "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT",
-      "P-16 lost its exact M05-T05 partial-proof status.",
+      "P-16 regressed below its immutable M05-T05 partial-proof authority.",
     );
   }
   verifyLocationPin(
