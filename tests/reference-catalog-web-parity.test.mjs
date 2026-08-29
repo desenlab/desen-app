@@ -671,14 +671,13 @@ test("rejects package-test type-negative trace and command-wiring drift", async 
       (error) => expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
     );
   }
-  const aliasDirectory = path.join(directory, "successor-alias");
-  await symlink(path.dirname(FIXTURES_SCENARIOS_ARTIFACT_PATH), aliasDirectory);
+  const successorCopyPath = path.join(directory, "fixtures-scenarios-successor.json");
+  const successorAliasPath = path.join(directory, "fixtures-scenarios-successor-alias.json");
+  await writeFile(successorCopyPath, await readFile(FIXTURES_SCENARIOS_ARTIFACT_PATH));
+  await symlink(successorCopyPath, successorAliasPath, "file");
   await assert.rejects(
     injected({
-      fixturesScenariosArtifactPath: path.join(
-        aliasDirectory,
-        path.basename(FIXTURES_SCENARIOS_ARTIFACT_PATH),
-      ),
+      fixturesScenariosArtifactPath: successorAliasPath,
     }),
     (error) => expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
   );
