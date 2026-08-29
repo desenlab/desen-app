@@ -252,6 +252,15 @@ async function rejectsCompletedCutover(mutate, code = "AFFECTED_PROMOTION_CUTOVE
 }
 
 test("authenticates the exact 20/20 hosted promotion campaign", async () => {
+  const historicalEvidence = await evidence();
+  assert.equal(
+    historicalEvidence.runnerAuthority.workflowContract.processTimeout,
+    "18m_TERM_30s_KILL",
+  );
+  assert.equal(
+    historicalEvidence.runnerAuthority.dispatcherContract.softDeadlineMilliseconds,
+    17 * 60 * 1_000,
+  );
   const receipt = await verifyAffectedSelectorPromotionEvidence();
   assert.deepEqual(
     {
@@ -270,14 +279,45 @@ test("authenticates the exact 20/20 hosted promotion campaign", async () => {
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "b6270e855ca38709cc0e272f35ffa61ffa1db6da0bb8c5005000f372e51c906c",
+    selectorSha256: "872a061aeea1afe9f82f7578f0fa3cbcfe037a982fde40116e2c88c7e366e2e7",
     ownershipSha256: "7d5a90e56b4b32e2d7e1a0306b09669855642b30558155dba9a07f1ccf7da7a3",
     impactGraphSha256: "b6fae5194e9dd837d05e1ce44808d6b8054742b564420b42901a39e23d4581b1",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "d3b479cc998d6c84d53b9b0d64e6121033d94bbf9b502fcb9e7adc2487b3d908",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "311e9727eb91bd17278f5ae2f711daea5090d7f638a1f1ce0242768980bca262",
+    runnerAuthoritySha256: "1e08a5db4dc33d684a1e119a88dc5bd4f99e5b98cd0e468a81327c709c3ac2bb",
   });
+});
+
+test("rejects rollback of either live exhaustive timeout boundary", async () => {
+  for (const [relativePath, currentFragment, staleFragment] of [
+    [
+      ".github/workflows/ci.yml",
+      "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-affected-quality-gate.mjs",
+      "timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-required-affected-quality-gate.mjs",
+    ],
+    [
+      "scripts/ci/run-required-exhaustive-quality-gate.mjs",
+      "const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000;",
+      "const DEFAULT_GATE_TIMEOUT_MS = 17 * 60 * 1_000;",
+    ],
+  ]) {
+    const root = await promotionWorkspace();
+    try {
+      const target = path.join(root, relativePath);
+      const source = await readFile(target, "utf8");
+      assert.equal(source.split(currentFragment).length - 1, 1);
+      await writeFile(target, source.replace(currentFragment, staleFragment));
+      await assert.rejects(
+        verifyAffectedSelectorPromotionEvidence({ workspaceRoot: root }),
+        (error) =>
+          error instanceof AffectedSelectorPromotionEvidenceError &&
+          error.code === "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
 });
 
 test("rejects a stale or widened live proof-reader checkpoint receipt", () => {

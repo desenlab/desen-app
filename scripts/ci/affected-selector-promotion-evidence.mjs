@@ -571,13 +571,19 @@ const RUNNER_AUTHORITY_KEYS = Object.freeze([
   "dispatcherContract",
   "authoritySha256",
 ]);
-const RUNNER_WORKFLOW_CONTRACT = Object.freeze({
+// The frozen I07-04 artifact retains its reviewed 18-minute wrapper. Live successor authority
+// advances independently so current timeout calibration cannot rewrite historical evidence.
+const HISTORICAL_RUNNER_WORKFLOW_CONTRACT = Object.freeze({
   eligibleSameRepositoryPullRequest: "REQUIRED_AFFECTED",
   untrustedOrUnknownPullRequest: "REQUIRED_EXHAUSTIVE",
   pushMainReleaseAndManual: "REQUIRED_EXHAUSTIVE",
   requiredRunnerCommand: "node scripts/ci/run-required-affected-quality-gate.mjs",
   processTimeout: "18m_TERM_30s_KILL",
   shadowCommandAllowed: false,
+});
+const CURRENT_RUNNER_WORKFLOW_CONTRACT = Object.freeze({
+  ...HISTORICAL_RUNNER_WORKFLOW_CONTRACT,
+  processTimeout: "19m_TERM_30s_KILL",
 });
 const RUNNER_PACKAGE_CONTRACT = Object.freeze({
   script: "ci:required",
@@ -1461,9 +1467,10 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
   ) {
     fail("AFFECTED_PROMOTION_RUNNER_AUTHORITY_DRIFT", "Required runner source partition drifted.");
   }
-  const [workflowSource, packageSource, , , dispatcherSource] = RUNNER_SOURCE_PATHS.map(
-    (sourcePath) => capturedSourceBytes(authority, sourcePath).toString("utf8"),
-  );
+  const [workflowSource, packageSource, , exhaustiveSource, dispatcherSource] =
+    RUNNER_SOURCE_PATHS.map((sourcePath) =>
+      capturedSourceBytes(authority, sourcePath).toString("utf8"),
+    );
   const exactOccurrence = (source, fragment) => source.split(fragment).length - 1;
   const workflowFragments = [
     "pull_request:",
@@ -1473,7 +1480,7 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "DESEN_REQUIRED_BASE_REVISION: ${{ github.event.pull_request.base.sha || '' }}",
     "DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}",
     "github.event.pull_request.head.repo.full_name == github.repository",
-    "timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-required-affected-quality-gate.mjs",
+    "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-affected-quality-gate.mjs",
   ];
   if (
     workflowFragments.some((fragment) =>
@@ -1513,14 +1520,18 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "validateAffectedSelectorPromotionBoundary(promotion, boundary)",
     "validateAffectedSelectorPromotedSelection(",
   ];
-  if (dispatcherFragments.some((fragment) => !dispatcherSource.includes(fragment))) {
+  if (
+    exactOccurrence(exhaustiveSource, "DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000") !== 1 ||
+    exhaustiveSource.includes("DEFAULT_GATE_TIMEOUT_MS = 17 * 60 * 1_000") ||
+    dispatcherFragments.some((fragment) => !dispatcherSource.includes(fragment))
+  ) {
     fail("AFFECTED_PROMOTION_RUNNER_AUTHORITY_DRIFT", "Required dispatcher contract drifted.");
   }
   const base = {
     profile: RUNNER_AUTHORITY_PROFILE,
     result: "EXACT_REQUIRED_FAIL_CLOSED",
     sources,
-    workflowContract: RUNNER_WORKFLOW_CONTRACT,
+    workflowContract: CURRENT_RUNNER_WORKFLOW_CONTRACT,
     packageContract: RUNNER_PACKAGE_CONTRACT,
     dispatcherContract: RUNNER_DISPATCHER_CONTRACT,
   };
@@ -2134,7 +2145,7 @@ export function validateAffectedSelectorPromotionEvidence(rawEvidence) {
     exactRecord(source, SOURCE_RECEIPT_KEYS, `runnerAuthority.sources[${index}]`),
   );
   if (
-    !isDeepStrictEqual(runnerAuthority.workflowContract, RUNNER_WORKFLOW_CONTRACT) ||
+    !isDeepStrictEqual(runnerAuthority.workflowContract, HISTORICAL_RUNNER_WORKFLOW_CONTRACT) ||
     !isDeepStrictEqual(runnerAuthority.packageContract, RUNNER_PACKAGE_CONTRACT) ||
     !isDeepStrictEqual(runnerAuthority.dispatcherContract, RUNNER_DISPATCHER_CONTRACT) ||
     runnerAuthority.authoritySha256 !== calculateRunnerAuthoritySha256(runnerAuthority)

@@ -23,7 +23,7 @@ const UNCHANGED_DIGEST = "a".repeat(64);
 const CHANGED_DIGEST = "b".repeat(64);
 const WORKSPACE_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const REQUIRED_QUALITY_COMMAND =
-  "timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-required-affected-quality-gate.mjs";
+  "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-affected-quality-gate.mjs";
 const RETAINED_LEGACY_COMMAND = "node scripts/run-ci-quality-gate.mjs";
 const REQUIRED_EXHAUSTIVE_ENTRYPOINT = "scripts/ci/run-required-exhaustive-quality-gate.mjs";
 const REQUIRED_QUALITY_ENTRYPOINT = "scripts/ci/run-required-affected-quality-gate.mjs";

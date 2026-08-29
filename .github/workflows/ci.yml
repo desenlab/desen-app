@@ -32,9 +32,10 @@ jobs:
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'required' }}
     name: Quality gate
     runs-on: ubuntu-24.04
-    # The scheduler owns a 17-minute soft deadline; the command wrapper enforces an
-    # 18-minute process ceiling plus 30-second kill grace. Remaining time covers setup,
-    # contract preflight, receipt emission, and hosted-runner variance.
+    # Affected execution keeps its 17-minute soft deadline; exhaustive execution owns an
+    # 18-minute soft deadline. The command wrapper enforces a 19-minute process ceiling plus
+    # 30-second kill grace. Remaining time covers setup, contract preflight, receipt emission,
+    # and hosted-runner variance.
     timeout-minutes: 25
     env:
       CI: "true"
@@ -95,7 +96,7 @@ jobs:
           node --test scripts/ci/test/required-affected-quality-gate.test.mjs
 
       - name: Run required quality gate
-        run: timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-required-affected-quality-gate.mjs
+        run: timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-affected-quality-gate.mjs
 
       - name: Save trusted pnpm store
         if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.pnpm-cache.outputs.cache-hit != 'true' }}

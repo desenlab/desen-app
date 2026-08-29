@@ -1301,10 +1301,10 @@ checkpoint advances sequence 51 head
 `sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` to sequence 52 head
 `sha256:c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9` across 48 frozen
 artifacts and 96 current readers. Promotion pins the selector at
-`sha256:b6270e855ca38709cc0e272f35ffa61ffa1db6da0bb8c5005000f372e51c906c` and the required-affected
-runner authority at `sha256:311e9727eb91bd17278f5ae2f711daea5090d7f638a1f1ce0242768980bca262`.
+`sha256:872a061aeea1afe9f82f7578f0fa3cbcfe037a982fde40116e2c88c7e366e2e7` and the required-affected
+runner authority at `sha256:1e08a5db4dc33d684a1e119a88dc5bd4f99e5b98cd0e468a81327c709c3ac2bb`.
 Checkpoint, promotion, selector, required-affected, and CI quality-gate regression suites pass
-75/75, 19/19, 22/22, 38/38, and 28/28 locally—182/182 combined. M09-T13 is `DONE`, P-16 is
+75/75, 20/20, 22/22, 38/38, and 28/28 locally—183/183 combined. M09-T13 is `DONE`, P-16 is
 `PROVEN`, PF-086 remains `OPEN`, proof gates remain 10/13, implementation progress is 108/145
 (74%), M09 is 13/14 (93%), and M09-T14 is next. These local receipts make no required-gate or
 hosted-CI claim.
