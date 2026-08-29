@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-import { act } from "react";
+import { StrictMode, act } from "react";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as authoringFixtures from "../src/authoring-fixtures.js";
 import * as authoringPreview from "../src/authoring-preview.js";
 import * as authoringSlots from "../src/authoring-slots.js";
 import { DesenAppApplication } from "../src/application.js";
@@ -229,7 +230,7 @@ describe("Desen App application shell", () => {
     expect(screen.getByText("Design preview · controls are disabled.")).toBeTruthy();
     expect(
       screen.getByText(
-        "Catalog-backed property and named-slot edits stay in this session and refresh the exact adapter preview. Selection, placement, and Inspector chrome never enter the managed component tree. Save, control-plane publication, and activation remain unavailable.",
+        "Catalog-backed edits stay in this session. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree.",
       ),
     ).toBeTruthy();
     expect(screen.getByRole("complementary", { name: "Inspector" })).toBeTruthy();
@@ -331,20 +332,25 @@ describe("Desen App application shell", () => {
     expect(dropTarget.textContent).toContain("Stack");
     expect(dropTarget.textContent).toContain("sign-in.layout · default");
     expect(dropTarget.textContent).toContain("5 items");
-    expect(dropTarget.textContent).toContain("Drop here or click a component below");
+    expect(dropTarget.textContent).toContain(
+      "Click Add or drag a component anywhere in this panel",
+    );
     expect(managedSubtree?.contains(dropTarget)).toBe(false);
 
     const addAlert = componentView.getByRole("button", {
       name: "Insert Alert into Stack sign-in.layout default slot at position 6",
     }) as HTMLButtonElement;
     expect(addAlert.disabled).toBe(false);
-    expect(addAlert.draggable).toBe(true);
+    expect(addAlert.draggable).toBe(false);
+    expect(addAlert.querySelector("[draggable='true']")).toBeTruthy();
     expect(managedSubtree?.contains(addAlert)).toBe(false);
     fireEvent.click(addAlert);
 
     expect(
       within(authoring)
-        .getByText("Inserted Alert in Stack default slot at position 6.")
+        .getByText(
+          "Inserted Alert in Stack default slot at position 6. Selected for editing · use Delete or Backspace to remove.",
+        )
         .getAttribute("role"),
     ).toBe("status");
     expect(dropTarget.textContent).toContain("6 items");
@@ -588,24 +594,38 @@ describe("Desen App application shell", () => {
     expect(reads).toBe(0);
     expect(screen.queryByRole("button", { name: "Select Alert layer · node.alert" })).toBeNull();
 
-    fireEvent.dragStart(alert, { dataTransfer });
+    const alertDragHandle = alert.querySelector("[draggable='true']") as HTMLElement;
+    expect(alertDragHandle).toBeTruthy();
+    fireEvent.click(alertDragHandle);
+    expect(screen.queryByRole("button", { name: "Select Alert layer · node.alert" })).toBeNull();
+    fireEvent.dragStart(alertDragHandle, { dataTransfer });
     expect(dataTransfer.effectAllowed).toBe("copy");
     expect(writes).toEqual([["text/plain", "DESEN App authoring item"]]);
     expect(target.getAttribute("data-drag-active")).toBe("true");
     expect(target.getAttribute("data-drop-ready")).toBe("true");
-    const dropPrompt = within(target).getByText("Drop Alert here");
+    const panelDropSurface = target.parentElement as HTMLElement;
+    expect(panelDropSurface.getAttribute("data-component-drag-active")).toBe("true");
+    const dropPrompt = within(target).getByText("Release to add");
     fireEvent.dragEnter(target, { dataTransfer });
     fireEvent.dragEnter(dropPrompt, { dataTransfer });
     fireEvent.dragLeave(dropPrompt, { dataTransfer });
     expect(target.getAttribute("data-drop-hovered")).toBe("true");
-    fireEvent.dragOver(dropPrompt, { dataTransfer });
+    fireEvent.dragLeave(target, { dataTransfer });
+    expect(target.getAttribute("data-drop-hovered")).toBe("false");
+    fireEvent.dragEnter(target, { dataTransfer });
+    const panelSearch = componentView.getByRole("searchbox", {
+      name: "Search catalog components",
+    });
+    fireEvent.dragOver(panelSearch, { dataTransfer });
     expect(dataTransfer.dropEffect).toBe("copy");
-    fireEvent.drop(dropPrompt, { dataTransfer });
+    fireEvent.drop(panelSearch, { dataTransfer });
 
     expect(reads).toBe(0);
     expect(
       within(screen.getByRole("complementary", { name: "Authoring panel" }))
-        .getByText("Inserted Alert in Stack default slot at position 6.")
+        .getByText(
+          "Inserted Alert in Stack default slot at position 6. Selected for editing · use Delete or Backspace to remove.",
+        )
         .getAttribute("role"),
     ).toBe("status");
     expect(
@@ -709,8 +729,13 @@ describe("Desen App application shell", () => {
     });
     fireEvent(titleLayer, dragOver);
     expect(dataTransfer.dropEffect).toBe("move");
-    expect(titleLayer.closest("li")?.getAttribute("data-row-drop-position")).toBe("before");
-    expect(titleLayer.getAttribute("data-row-drop-position")).toBeNull();
+    expect(
+      within(hierarchy)
+        .getByRole("listitem", {
+          name: "Stack sign-in.layout default slot insertion boundary at position 1",
+        })
+        .getAttribute("data-drop-hovered"),
+    ).toBe("true");
     const drop = new Event("drop", { bubbles: true, cancelable: true });
     Object.defineProperties(drop, {
       clientY: { value: 105 },
@@ -762,7 +787,13 @@ describe("Desen App application shell", () => {
       dataTransfer: { value: dataTransfer },
     });
     fireEvent(reorderedTitle, lowerHalfDragOver);
-    expect(reorderedTitle.closest("li")?.getAttribute("data-row-drop-position")).toBe("after");
+    expect(
+      within(hierarchy)
+        .getByRole("listitem", {
+          name: "Stack sign-in.layout default slot insertion boundary at position 3",
+        })
+        .getAttribute("data-drop-hovered"),
+    ).toBe("true");
     const lowerHalfDrop = new Event("drop", { bubbles: true, cancelable: true });
     Object.defineProperties(lowerHalfDrop, {
       clientY: { value: 135 },
@@ -778,6 +809,144 @@ describe("Desen App application shell", () => {
       "Select Button layer · sign-in.submit",
     );
     expect(dataTransfer.getData).not.toHaveBeenCalled();
+  });
+
+  it("uses the release position when it crosses a row midpoint after the last dragover", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    const submitLayer = within(hierarchy).getByRole("button", {
+      name: "Select Button layer · sign-in.submit",
+    });
+    const titleLayer = within(hierarchy).getByRole("button", {
+      name: "Select Text layer · sign-in.title",
+    });
+    const slotList = titleLayer.closest("li")?.parentElement as HTMLUListElement;
+    const slotSurface = slotList.parentElement as HTMLDivElement;
+    const dataTransfer = {
+      dropEffect: "none",
+      effectAllowed: "none",
+      getData: vi.fn(),
+      setData: vi.fn(),
+    };
+    Object.defineProperty(titleLayer, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        bottom: 140,
+        height: 40,
+        left: 0,
+        right: 240,
+        top: 100,
+        width: 240,
+        x: 0,
+        y: 100,
+        toJSON: () => ({}),
+      }),
+    });
+    Object.defineProperty(slotSurface, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        bottom: 400,
+        height: 320,
+        left: 0,
+        right: 240,
+        top: 80,
+        width: 240,
+        x: 0,
+        y: 80,
+        toJSON: () => ({}),
+      }),
+    });
+
+    fireEvent.dragStart(submitLayer, { dataTransfer });
+    const lowerHalfDragOver = new Event("dragover", { bubbles: true, cancelable: true });
+    Object.defineProperties(lowerHalfDragOver, {
+      clientY: { value: 135 },
+      dataTransfer: { value: dataTransfer },
+    });
+    fireEvent(titleLayer, lowerHalfDragOver);
+    expect(
+      within(hierarchy)
+        .getByRole("listitem", {
+          name: "Stack sign-in.layout default slot insertion boundary at position 2",
+        })
+        .getAttribute("data-drop-hovered"),
+    ).toBe("true");
+
+    const upperHalfDrop = new Event("drop", { bubbles: true, cancelable: true });
+    Object.defineProperties(upperHalfDrop, {
+      clientY: { value: 105 },
+      dataTransfer: { value: dataTransfer },
+    });
+    fireEvent(titleLayer, upperHalfDrop);
+
+    const reorderedLayers = within(hierarchy).getAllByRole("button", {
+      name: /^(?:Select|Deselect) .+ layer · /,
+    });
+    expect(reorderedLayers[1]?.getAttribute("aria-label")).toBe(
+      "Select Button layer · sign-in.submit",
+    );
+    expect(reorderedLayers[2]?.getAttribute("aria-label")).toBe(
+      "Select Text layer · sign-in.title",
+    );
+  });
+
+  it("keeps the admitted gap stable while the pointer jitters around a row midpoint", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    const submitLayer = within(hierarchy).getByRole("button", {
+      name: "Select Button layer · sign-in.submit",
+    });
+    const titleLayer = within(hierarchy).getByRole("button", {
+      name: "Select Text layer · sign-in.title",
+    });
+    Object.defineProperty(titleLayer, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        bottom: 140,
+        height: 40,
+        left: 0,
+        right: 240,
+        top: 100,
+        width: 240,
+        x: 0,
+        y: 100,
+        toJSON: () => ({}),
+      }),
+    });
+    const dataTransfer = {
+      dropEffect: "none",
+      effectAllowed: "none",
+      getData: vi.fn(),
+      setData: vi.fn(),
+    };
+    const dragOverAt = (clientY: number): void => {
+      const event = new Event("dragover", { bubbles: true, cancelable: true });
+      Object.defineProperties(event, {
+        clientY: { value: clientY },
+        dataTransfer: { value: dataTransfer },
+      });
+      fireEvent(titleLayer, event);
+    };
+    const before = within(hierarchy).getByRole("listitem", {
+      name: "Stack sign-in.layout default slot insertion boundary at position 1",
+    });
+    const after = within(hierarchy).getByRole("listitem", {
+      name: "Stack sign-in.layout default slot insertion boundary at position 2",
+    });
+
+    fireEvent.dragStart(submitLayer, { dataTransfer });
+    dragOverAt(118);
+    expect(before.getAttribute("data-drop-hovered")).toBe("true");
+    dragOverAt(122);
+    expect(before.getAttribute("data-drop-hovered")).toBe("true");
+    expect(after.getAttribute("data-drop-hovered")).toBe("false");
+    dragOverAt(126);
+    expect(after.getAttribute("data-drop-hovered")).toBe("true");
+    fireEvent.dragEnd(submitLayer, { dataTransfer });
   });
 
   it("drops from a visible row with the last admitted projection when drop coordinates are absent", async () => {
@@ -799,8 +968,6 @@ describe("Desen App application shell", () => {
     const titleLayer = within(hierarchy).getByRole("button", {
       name: "Select Text layer · sign-in.title",
     });
-    const titleRow = titleLayer.closest("li");
-    expect(titleRow).toBeTruthy();
     Object.defineProperty(titleLayer, "getBoundingClientRect", {
       configurable: true,
       value: () => ({
@@ -825,7 +992,13 @@ describe("Desen App application shell", () => {
       fireEvent(titleLayer, event);
     }
     expect(dataTransfer.dropEffect).toBe("move");
-    expect(titleRow?.getAttribute("data-row-drop-position")).toBe("after");
+    expect(
+      within(hierarchy)
+        .getByRole("listitem", {
+          name: "Stack sign-in.layout default slot insertion boundary at position 2",
+        })
+        .getAttribute("data-drop-hovered"),
+    ).toBe("true");
 
     const coordinateLessDrop = new Event("drop", { bubbles: true, cancelable: true });
     Object.defineProperty(coordinateLessDrop, "dataTransfer", { value: dataTransfer });
@@ -916,13 +1089,52 @@ describe("Desen App application shell", () => {
     expect(dataTransfer.effectAllowed).toBe("move");
     expect(writes).toEqual([["text/plain", "DESEN App authoring item"]]);
     expect(nestedEnd.getAttribute("data-drop-ready")).toBe("true");
+    const nestedStart = within(hierarchy).getByLabelText(
+      "Stack node.stack default slot insertion boundary at position 1",
+    );
+    const nestedEmail = within(hierarchy).getByRole("button", {
+      name: "Deselect Text field layer · sign-in.email",
+    });
+    Object.defineProperty(nestedEmail, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        bottom: 140,
+        height: 40,
+        left: 0,
+        right: 240,
+        top: 100,
+        width: 240,
+        x: 0,
+        y: 100,
+        toJSON: () => ({}),
+      }),
+    });
+    const nestedHeaderDragOver = new Event("dragover", { bubbles: true, cancelable: true });
+    Object.defineProperties(nestedHeaderDragOver, {
+      clientY: { value: 80 },
+      dataTransfer: { value: dataTransfer },
+    });
+    fireEvent(nestedAfterKeyboard, nestedHeaderDragOver);
+    expect(nestedStart.getAttribute("data-drop-hovered")).toBe("true");
+    expect(hierarchy.querySelectorAll("[data-drop-hovered='true']")).toHaveLength(1);
+
+    const outerStart = within(hierarchy).getByLabelText(
+      "Stack sign-in.layout default slot insertion boundary at position 1",
+    );
+    fireEvent.dragOver(outerStart, { dataTransfer });
+    expect(outerStart.getAttribute("data-drop-hovered")).toBe("true");
+    expect(nestedStart.getAttribute("data-drop-hovered")).toBe("false");
+    expect(hierarchy.querySelectorAll("[data-drop-hovered='true']")).toHaveLength(1);
+
     const nestedBoundaryLine = nestedEnd.querySelector("[aria-hidden='true']");
     expect(nestedBoundaryLine).toBeTruthy();
     fireEvent.dragEnter(nestedEnd, { dataTransfer });
     fireEvent.dragEnter(nestedBoundaryLine as HTMLElement, { dataTransfer });
     fireEvent.dragLeave(nestedBoundaryLine as HTMLElement, { dataTransfer });
-    expect(nestedEnd.getAttribute("data-drop-hovered")).toBe("true");
     fireEvent.dragOver(nestedBoundaryLine as HTMLElement, { dataTransfer });
+    expect(nestedEnd.getAttribute("data-drop-hovered")).toBe("true");
+    expect(outerStart.getAttribute("data-drop-hovered")).toBe("false");
+    expect(hierarchy.querySelectorAll("[data-drop-hovered='true']")).toHaveLength(1);
     expect(dataTransfer.dropEffect).toBe("move");
     fireEvent.drop(nestedBoundaryLine as HTMLElement, { dataTransfer });
 
@@ -1277,13 +1489,14 @@ describe("Desen App application shell", () => {
     });
     expect(target.textContent).toContain("Stack");
     expect(target.textContent).toContain("sign-in.layout · default");
-    expect(target.textContent).toContain("Drop here or click a component below");
+    expect(target.textContent).toContain("Click Add or drag a component anywhere in this panel");
     const alert = componentView.getByRole("button", {
       name: "Insert Alert into Stack sign-in.layout default slot at position 6",
     }) as HTMLButtonElement;
     expect(alert.disabled).toBe(false);
-    expect(alert.draggable).toBe(true);
-    expect(alert.textContent).toContain("Drag or click");
+    expect(alert.draggable).toBe(false);
+    expect(alert.querySelector("[draggable='true']")).toBeTruthy();
+    expect(alert.textContent).toContain("Add");
     const changeTarget = componentView.getByRole("button", { name: "Change target in Layers" });
     fireEvent.click(changeTarget);
     expect(layersTab.getAttribute("aria-selected")).toBe("true");
@@ -1448,7 +1661,7 @@ describe("Desen App application shell", () => {
     const placementTarget = componentView.getByRole("group", {
       name: "Placement target · Stack sign-in.layout default slot · 5 items · minimum 0 · no maximum",
     });
-    fireEvent.dragStart(alert, {
+    fireEvent.dragStart(alert.querySelector("[draggable='true']") as HTMLElement, {
       dataTransfer: {
         dropEffect: "none",
         effectAllowed: "none",
@@ -1477,11 +1690,11 @@ describe("Desen App application shell", () => {
     expect((inspector as HTMLElement).hidden).toBe(true);
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     expect(screen.getByRole("status", { name: "Mode safety" }).textContent).toBe(
-      "Run mode · managed controls are interactive; external effects remain blocked.",
+      "Run mode · controls are interactive against synthetic fixtures; live effects remain blocked.",
     );
     expect(
       screen.getByText(
-        "Controls are live against this same in-memory Source preview. Runtime state may change here; external navigation, operations, resources, storage, publication, and activation remain blocked.",
+        "Controls are live against this in-memory preview. Only the exact synthetic sign-in fixture is available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked.",
       ),
     ).toBeTruthy();
     const runCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
@@ -1579,6 +1792,215 @@ describe("Desen App application shell", () => {
       ).placeholder,
     ).toBe("");
     expect(previewPreflight).toHaveBeenCalledTimes(preflightCountInRun);
+  });
+
+  it("keeps Catalog scenarios transient across Design and Run without changing Source values", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    const fidelity = screen.getByRole("region", { name: "Preview context and fidelity" });
+    expect(within(fidelity).getByText("Synthetic preview")).toBeTruthy();
+    expect(within(fidelity).getByText("Same production adapters")).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+    const scenarioRegion = screen.getByRole("region", { name: "Scenario preview" });
+    const scenario = within(scenarioRegion).getByRole("combobox", {
+      name: "Component values",
+    }) as HTMLSelectElement;
+    expect([...scenario.options].map(({ textContent }) => textContent)).toEqual([
+      "Source values",
+      "default",
+      "invalid",
+    ]);
+    expect(within(scenarioRegion).getByText("Preview only · not saved or published")).toBeTruthy();
+
+    fireEvent.change(scenario, { target: { value: "catalog:invalid" } });
+    const invalidEmail = (await within(
+      screen.getByRole("group", { name: "Sign-in adapter canvas" }),
+    ).findByLabelText("Email")) as HTMLInputElement;
+    await waitFor(() => {
+      expect(invalidEmail.value).toBe("bad");
+      expect(invalidEmail.getAttribute("aria-invalid")).toBe("true");
+    });
+    expect(screen.getByText("Scenario preview")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Run" }));
+    expect(
+      (
+        within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+          "Email",
+        ) as HTMLInputElement
+      ).value,
+    ).toBe("bad");
+    expect(within(fidelity).getByText("Same production adapters")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Design" }));
+    const restoredScenario = within(
+      screen.getByRole("region", { name: "Scenario preview" }),
+    ).getByRole("combobox", { name: "Component values" }) as HTMLSelectElement;
+    expect(restoredScenario.value).toBe("catalog:invalid");
+    fireEvent.change(restoredScenario, { target: { value: "source" } });
+    await waitFor(() => {
+      expect(
+        (
+          within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+            "Email",
+          ) as HTMLInputElement
+        ).value,
+      ).toBe("");
+    });
+  });
+
+  it("runs real pending lifecycle and settles only exact synthetic success and failure fixtures", async () => {
+    window.history.replaceState(null, "", "/projects/account-app/surfaces/sign-in");
+    render(
+      <StrictMode>
+        <DesenAppApplication />
+      </StrictMode>,
+    );
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Run" }));
+
+    let controls = screen.getByRole("complementary", { name: "Run controls" });
+    const synthetic = within(controls).getByRole("radio", { name: /^Synthetic/ });
+    const integration = within(controls).getByRole("radio", { name: /^Integration/ });
+    const production = within(controls).getByRole("radio", { name: /^Production/ });
+    expect((synthetic as HTMLInputElement).checked).toBe(true);
+    expect((integration as HTMLInputElement).disabled).toBe(true);
+    expect((production as HTMLInputElement).disabled).toBe(true);
+    expect(within(controls).getByText(/Integration and production calls are off/)).toBeTruthy();
+
+    let outcome = within(controls).getByRole("combobox", {
+      name: "Next sign-in outcome",
+    }) as HTMLSelectElement;
+    expect([...outcome.options].map(({ value }) => value)).toEqual([
+      "success",
+      "invalidCredentials",
+    ]);
+    expect([...outcome.options].map(({ value }) => value)).not.toContain("pending");
+    fireEvent.change(outcome, { target: { value: "invalidCredentials" } });
+
+    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const email = within(canvas).getByLabelText("Email") as HTMLInputElement;
+    const password = within(canvas).getByLabelText("Password") as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(email, {
+        target: { value: "person@example.com" },
+      });
+      await Promise.resolve();
+    });
+    await act(async () => {
+      fireEvent.change(password, {
+        target: { value: "fixture-only" },
+      });
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(email.value).toBe("person@example.com");
+      expect(password.value).toBe("fixture-only");
+    });
+    fireEvent.click(within(canvas).getByRole("button", { name: "Sign in" }));
+
+    await waitFor(() => {
+      controls = screen.getByRole("complementary", { name: "Run controls" });
+      expect(within(controls).getByRole("status").textContent).toContain("Pending");
+      expect(
+        (
+          within(controls).getByRole("button", {
+            name: "Complete fixture",
+          }) as HTMLButtonElement
+        ).disabled,
+      ).toBe(false);
+      expect(
+        within(canvas).getByRole("button", { name: "Sign in" }).getAttribute("aria-busy"),
+      ).toBe("true");
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Design" }));
+    expect(screen.queryByRole("complementary", { name: "Run controls" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Run" }));
+    controls = screen.getByRole("complementary", { name: "Run controls" });
+    expect(within(controls).getByRole("status").textContent).toContain("Pending");
+
+    fireEvent.click(within(controls).getByRole("button", { name: "Complete fixture" }));
+    expect((await within(canvas).findByRole("alert")).textContent).toBe(
+      "Sign-in failed. Check your details and try again.",
+    );
+    await waitFor(() => {
+      expect(within(controls).getByRole("status").textContent).toContain("Invalid credentials");
+    });
+
+    outcome = within(controls).getByRole("combobox", {
+      name: "Next sign-in outcome",
+    }) as HTMLSelectElement;
+    fireEvent.change(outcome, { target: { value: "success" } });
+    fireEvent.click(within(canvas).getByRole("button", { name: "Sign in" }));
+    await waitFor(() => {
+      expect(within(controls).getByRole("status").textContent).toContain("Pending");
+    });
+    fireEvent.click(within(controls).getByRole("button", { name: "Complete fixture" }));
+    await waitFor(() => {
+      expect(within(controls).getByRole("status").textContent).toContain(
+        "Production navigation remains blocked",
+      );
+      expect(within(canvas).queryByRole("alert")).toBeNull();
+      expect(window.location.pathname).toBe("/projects/account-app/surfaces/sign-in");
+    });
+  });
+
+  it("revokes the previous fixture authority synchronously when a scenario replaces its Bundle", async () => {
+    const createFixtureController = authoringFixtures.createAuthoringSignInFixtureController;
+    const controllers: ReturnType<typeof createFixtureController>[] = [];
+    const contexts: Parameters<typeof createFixtureController>[0][] = [];
+    vi.spyOn(authoringFixtures, "createAuthoringSignInFixtureController").mockImplementation(
+      (context) => {
+        contexts.push(context);
+        const controller = createFixtureController(context);
+        controllers.push(controller);
+        return controller;
+      },
+    );
+
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+    const firstController = controllers[0];
+    const firstContext = contexts[0];
+    expect(firstController).toBeDefined();
+    expect(firstContext).toBeDefined();
+    if (firstController === undefined || firstContext === undefined) {
+      throw new Error("Expected the initial fixture authority.");
+    }
+    const request = {
+      context: {
+        ...firstContext,
+        requestId: "fixture-authority-replacement",
+      },
+      capabilityId: "com.example.auth/signIn",
+      invocationAlias: "signIn",
+      input: {},
+      effect: "network" as const,
+    };
+    const pending = firstController.operationPort.invoke(request);
+    expect(firstController.read().status).toBe("pending");
+
+    const scenario = within(screen.getByRole("complementary", { name: "Inspector" })).getByRole(
+      "combobox",
+      { name: "Component values" },
+    );
+    fireEvent.change(scenario, { target: { value: "catalog:invalid" } });
+
+    const replacement = controllers.at(-1);
+    expect(replacement).toBeDefined();
+    expect(replacement).not.toBe(firstController);
+    expect(firstController.operationPort.invoke(request)).toEqual({ status: "denied" });
+    await expect(Promise.resolve(pending)).resolves.toEqual({ status: "denied" });
+    expect(replacement?.read().status).toBe("idle");
+    await waitFor(() => expect(firstController.read().status).toBe("disposed"));
   });
 
   it("resets the ephemeral mode to Design when a new surface route mounts", async () => {

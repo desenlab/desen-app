@@ -16,6 +16,8 @@ const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-STRUCTURED-INSPECTOR.md";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const STATE_BINDING_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json";
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const PARENT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
@@ -120,6 +122,7 @@ const TRACKED_PATHS = Object.freeze([
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ROOT_PACKAGE_PATH,
   APP_PACKAGE_PATH,
+  LOCKFILE_PATH,
   AUTHORING_DATA_PATH,
   INSPECTOR_SOURCE_PATH,
   STRUCTURED_JSON_SOURCE_PATH,
@@ -148,6 +151,7 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     EVENT_ACTION_PANEL_TEST_PATH,
     NAMED_SLOT_ARTIFACT_PATH,
     STATE_BINDING_ARTIFACT_PATH,
+    FIXTURES_SCENARIOS_ARTIFACT_PATH,
   ]),
 ]);
 
@@ -184,6 +188,28 @@ const STATE_BINDING_ARTIFACT_PIN = Object.freeze({
   bytes: 28_766,
   sha256: "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
 });
+
+const FIXTURES_SCENARIOS_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T11",
+  proofId: "desen-app-fixtures-scenarios-fidelity",
+  profile: "desen.app.fixtures-scenarios-fidelity-proof.v1",
+  result: "PASS",
+  path: FIXTURES_SCENARIOS_ARTIFACT_PATH,
+  bytes: 29_407,
+  sha256: "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+});
+
+const T11_LIVE_RECEIPT_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  LOCKFILE_PATH,
+  PANEL_SOURCE_PATH,
+  ADAPTER_SOURCE_PATH,
+  APPLICATION_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+  ADAPTER_TEST_PATH,
+  APPLICATION_TEST_PATH,
+]);
 
 const EXPECTED_STRUCTURED_JSON_TEST_NAMES = Object.freeze([
   "returns a detached recursively frozen JSON value without prototype-name interpretation",
@@ -559,7 +585,7 @@ function assertIncludes(rawSource, markers, label) {
   }
 }
 
-function assertNoPrivateDomAuthority(rawSource, label, allowRowDropGeometry = false) {
+function assertNoPrivateDomAuthority(rawSource, label, allowLayerDropGeometry = false) {
   const forbidden = [
     "querySelector(",
     "elementsFromPoint(",
@@ -569,9 +595,13 @@ function assertNoPrivateDomAuthority(rawSource, label, allowRowDropGeometry = fa
   ];
   const rowDropGeometryCalls = rawSource.split("getBoundingClientRect(").length - 1;
   if (
-    (!allowRowDropGeometry && rowDropGeometryCalls !== 0) ||
-    (allowRowDropGeometry &&
-      (rowDropGeometryCalls !== 1 ||
+    (!allowLayerDropGeometry && rowDropGeometryCalls !== 0) ||
+    (allowLayerDropGeometry &&
+      (rowDropGeometryCalls !== 4 ||
+        !rawSource.includes("function projectNearestDrop(") ||
+        !rawSource.includes("rows[hoveredRowIndex]?.getBoundingClientRect()") ||
+        !rawSource.includes("row.getBoundingClientRect()") ||
+        !rawSource.includes("scrollSurface.getBoundingClientRect()") ||
         !rawSource.includes("event.currentTarget.getBoundingClientRect()")))
   ) {
     forbidden.push("getBoundingClientRect(");
@@ -1146,6 +1176,7 @@ function inspectApplicationSource(rawSource) {
   const sourceFile = parseTypeScript(rawSource, APPLICATION_SOURCE_PATH);
   const imports = assertPublicImports(sourceFile, APPLICATION_SOURCE_PATH, [
     "@desen/reference-catalog-web/catalog.json",
+    "@desen/runtime-core",
   ]);
   assertCalls(
     sourceFile,
@@ -1628,6 +1659,7 @@ function authenticateStateBindingSuccessorArtifact(files) {
 
 function inspectStateBindingSuccessor(files) {
   for (const [relativePath, expectedSha256] of Object.entries(CURRENT_SUCCESSOR_SHA256)) {
+    if (T11_LIVE_RECEIPT_PATHS.includes(relativePath)) continue;
     const bytes = files.get(relativePath);
     if (bytes === undefined || sha256(bytes) !== expectedSha256) {
       fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} exact reviewed T08 bytes drifted.`);
@@ -1770,10 +1802,11 @@ function inspectStateBindingSuccessor(files) {
         "applyAuthoringSlotEdit",
         "applyAuthoringNodeDelete",
         "function acceptsDragIntent(",
-        "function projectedRowDrop(event: DragEvent<HTMLButtonElement>)",
-        "const bounds = event.currentTarget.getBoundingClientRect()",
-        'const position = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after"',
-        "data-row-drop-position={rowDropPosition ?? undefined}",
+        "function projectNearestDrop(",
+        "const midpoint =",
+        "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
+        "const [activeDropProjection, setActiveDropProjection] = useState<AuthoringDropProjection | null>",
+        "data-drop-hovered={dropReady && dropHovered}",
         'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
         "sourceNodeId: result.nodeId",
         "data-active-slot={active}",
@@ -1791,13 +1824,10 @@ function inspectStateBindingSuccessor(files) {
       [
         ".valueSourceControl",
         ".statePanel",
-        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.875rem;",
-        '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;\n  min-height: 1.625rem;',
-        "margin-block: 0",
-        ".layerNode[data-row-drop-position] {\n  z-index: 4;",
-        ".layerNode[data-row-drop-position] > .layerRow",
-        '.layerNode[data-row-drop-position="before"]::before',
-        '.layerNode[data-row-drop-position="after"]::before',
+        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.5rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+        '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;',
+        '.slotBoundary[data-drop-hovered="true"] {\n  z-index: 4;',
+        '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
         ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
         '.authoringPanel[data-active-tab="actions"]',
         ".eventActionPanel {",
@@ -1807,9 +1837,9 @@ function inspectStateBindingSuccessor(files) {
       APPLICATION_TEST_PATH,
       [
         "snaps a native layer drag to the before or after half of a visible layer row",
-        'closest("li")?.getAttribute("data-row-drop-position")',
-        'toBe("before")',
-        'toBe("after")',
+        "uses the release position when it crosses a row midpoint after the last dragover",
+        "keeps the admitted gap stable while the pointer jitters around a row midpoint",
+        "Stack sign-in.layout default slot insertion boundary at position 1",
         "updates surface-local state and changes a compatible binding in the live preview",
         "Bound Value to state.password.",
         'name: "Delete Alert layer · node.alert"',
@@ -1957,6 +1987,65 @@ function inspectStateBindingSuccessor(files) {
 }
 
 /** Builds detached deterministic M09-T06 structured-inspector evidence. */
+function authenticateFixturesScenariosSuccessor(files) {
+  const artifactBytes = files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  if (
+    artifactBytes.byteLength !== FIXTURES_SCENARIOS_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FIXTURES_SCENARIOS_ARTIFACT_PIN.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact bytes drifted.");
+  }
+  const artifact = parseJson(artifactBytes, FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  const parent = artifact.prerequisites?.[0];
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  if (
+    artifact.task !== FIXTURES_SCENARIOS_ARTIFACT_PIN.task ||
+    artifact.proofId !== FIXTURES_SCENARIOS_ARTIFACT_PIN.proofId ||
+    artifact.profile !== FIXTURES_SCENARIOS_ARTIFACT_PIN.profile ||
+    artifact.result !== FIXTURES_SCENARIOS_ARTIFACT_PIN.result ||
+    parent?.task !== "M09-T10" ||
+    parent?.bytes !== 17_900 ||
+    parent?.sha256 !== "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334" ||
+    artifact.claim?.scenarioSourceAndBundleEphemeral !== true ||
+    artifact.claim?.pendingRuntimeLifecycleExercised !== true ||
+    artifact.claim?.exactOperationAndPreviewContextAuthorization !== true ||
+    artifact.claim?.operationInputOrPasswordRetained !== false ||
+    artifact.claim?.stableAppOwnedOperationPort !== true ||
+    artifact.claim?.s001Status !== "TESTED" ||
+    artifact.claim?.pf028Status !== "CLOSED" ||
+    artifact.tests?.focusedTestCases !== 86 ||
+    !Array.isArray(trackedReceipts)
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact identity or claims drifted.");
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
+  for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    const authority = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T11 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: FIXTURES_SCENARIOS_ARTIFACT_PIN.task,
+    artifact: FIXTURES_SCENARIOS_ARTIFACT_PIN,
+    exactDesignRunParent: true,
+    scenariosEphemeral: true,
+    pendingRuntimeLifecycleExercised: true,
+    exactOperationAndPreviewContextAuthorization: true,
+    operationInputOrPasswordRetained: false,
+    stableAppOwnedOperationPort: true,
+    focusedTestCases: 86,
+    s001Status: "TESTED",
+    pf028Status: "CLOSED",
+  });
+}
+
 async function _buildFreshDesenAppStructuredInspectorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
@@ -2097,6 +2186,7 @@ export async function buildDesenAppStructuredInspectorEvidence(rawOptions = unde
   const parent = authenticateParent(options.parentArtifactBytes ?? files.get(PARENT_ARTIFACT_PATH));
   assertRetainedHistoricalReceipts(frozen.artifact, files);
   const successor = inspectStateBindingSuccessor(files);
+  const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-structured-inspector",
@@ -2121,6 +2211,7 @@ export async function buildDesenAppStructuredInspectorEvidence(rawOptions = unde
       selectionOverlayBoundaryRetained: frozen.artifact.claim.selectionOverlayBoundaryRetained,
     },
     successor,
+    fixturesScenariosSuccessor,
     boundary: {
       retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
       successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
@@ -2135,6 +2226,7 @@ export async function buildDesenAppStructuredInspectorEvidence(rawOptions = unde
         EVENT_ACTION_PANEL_PATH,
         EVENT_ACTION_TEST_PATH,
         EVENT_ACTION_PANEL_TEST_PATH,
+        FIXTURES_SCENARIOS_ARTIFACT_PATH,
       ].map((relativePath) => ({
         path: relativePath,
         bytes: files.get(relativePath).byteLength,

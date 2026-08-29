@@ -27,6 +27,8 @@ const AUTHORING_SLOT_TEST = "apps/desen-app/test/authoring-slots.test.ts";
 const NAMED_SLOT_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const NAMED_SLOT_ARTIFACT_PIN_SHA256 =
   "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f";
+const FIXTURES_SCENARIOS_ARTIFACT =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let selectionSource;
@@ -37,6 +39,7 @@ let inspectorSource;
 let slotSource;
 let slotTestSource;
 let namedSlotArtifactBytes;
+let fixturesScenariosArtifactBytes;
 let built;
 
 function expectedError(code) {
@@ -86,6 +89,7 @@ before(async () => {
     slotSource,
     slotTestSource,
     namedSlotArtifactBytes,
+    fixturesScenariosArtifactBytes,
   ] = await Promise.all([
     readFile(path.join(ROOT, PARENT_ARTIFACT)),
     readFile(path.join(ROOT, SELECTION_SOURCE), "utf8"),
@@ -96,6 +100,7 @@ before(async () => {
     readFile(path.join(ROOT, AUTHORING_SLOT_SOURCE), "utf8"),
     readFile(path.join(ROOT, AUTHORING_SLOT_TEST), "utf8"),
     readFile(path.join(ROOT, NAMED_SLOT_ARTIFACT)),
+    readFile(path.join(ROOT, FIXTURES_SCENARIOS_ARTIFACT)),
   ]);
   built = await buildDesenAppSelectionOverlayEvidence();
 });
@@ -132,6 +137,12 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[0], () => {
   assert.equal(
     built.currentCompatibility.successor.artifact.exactLiveSourceAndTestReceipts.length,
     8,
+  );
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.task, "M09-T11");
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.focusedTestCases, 86);
+  assert.equal(
+    built.currentCompatibility.fixturesScenariosSuccessor.pendingRuntimeLifecycleExercised,
+    true,
   );
   assert.deepEqual(
     built.currentCompatibility.successor.artifact.exactLiveSourceAndTestReceipts.map(
@@ -405,12 +416,12 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       'event.dataTransfer.setData("text/plain", "DESEN App authoring item");',
       'event.dataTransfer.getData("text/plain");\n  event.dataTransfer.setData("text/plain", "DESEN App authoring item");',
     ],
-    [APPLICATION_CSS, cssSource, "margin-block: 0;", "margin-block: -1.125rem;"],
+    [APPLICATION_CSS, cssSource, "min-height: 1.5rem;", "min-height: 0.25rem;"],
     [
       APPLICATION_CSS,
       cssSource,
-      ".layerNode[data-row-drop-position] {",
-      ".layerNode[data-row-drop-disabled] {",
+      '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
+      '.slotBoundary[data-drop-disabled="true"] .slotBoundaryLine',
     ],
     [
       AUTHORING_SLOT_TEST,
@@ -431,6 +442,14 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
   await assert.rejects(
     buildDesenAppSelectionOverlayEvidence({
       fileOverrides: new Map([[NAMED_SLOT_ARTIFACT, changedByte(namedSlotArtifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppSelectionOverlayEvidence({
+      fileOverrides: new Map([
+        [FIXTURES_SCENARIOS_ARTIFACT, changedByte(fixturesScenariosArtifactBytes)],
+      ]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );

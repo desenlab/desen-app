@@ -22,6 +22,8 @@ const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json"
 const SHELL_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const HOST_SOURCE_AUDIT_ARTIFACT =
   "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json";
+const FIXTURES_SCENARIOS_ARTIFACT =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION = "apps/desen-app/src/application.tsx";
 const AUTHORING_SELECTION = "apps/desen-app/src/authoring-selection.ts";
@@ -33,6 +35,7 @@ let built;
 let hostSourceAuditArtifact;
 let hostSourceAuditArtifactBytes;
 let shellArtifactBytes;
+let fixturesScenariosArtifactBytes;
 
 function expectedError(code) {
   return (error) => error instanceof DesenAppRealAdapterCanvasProofError && error.code === code;
@@ -79,6 +82,7 @@ before(async () => {
     built,
     hostSourceAuditArtifactBytes,
     shellArtifactBytes,
+    fixturesScenariosArtifactBytes,
   ] = await Promise.all([
     readFile(path.join(ROOT, ADAPTER_CANVAS), "utf8"),
     readFile(path.join(ROOT, APPLICATION), "utf8"),
@@ -86,6 +90,7 @@ before(async () => {
     buildDesenAppRealAdapterCanvasEvidence(),
     readFile(path.join(ROOT, HOST_SOURCE_AUDIT_ARTIFACT)),
     readFile(path.join(ROOT, SHELL_ARTIFACT)),
+    readFile(path.join(ROOT, FIXTURES_SCENARIOS_ARTIFACT)),
   ]);
   hostSourceAuditArtifact = JSON.parse(hostSourceAuditArtifactBytes);
 });
@@ -128,6 +133,12 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[0], () => {
     bytes: 24_830,
     sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
   });
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.task, "M09-T11");
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.focusedTestCases, 86);
+  assert.equal(
+    built.currentCompatibility.fixturesScenariosSuccessor.pendingRuntimeLifecycleExercised,
+    true,
+  );
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[1], () => {
@@ -192,8 +203,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   );
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
-  assert.equal(currentRuntime.moduleCount, 133);
-  assert.equal(currentRuntime.staticEdges, 397);
+  assert.equal(currentRuntime.moduleCount, 141);
+  assert.equal(currentRuntime.staticEdges, 415);
   assert.equal(currentRuntime.dynamicEdges, 0);
   assert.equal(currentRuntime.sharedRuntimeModuleCount, 19);
   assert.equal(currentRuntime.realComponentModuleCount, 5);
@@ -539,8 +550,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[7], () => {
       "catalogs: [referenceCatalog], ...({ catalogs: [] as never }),",
     ],
     [
-      "hostPorts: ADAPTER_CANVAS_HOST_PORTS,",
-      "hostPorts: ADAPTER_CANVAS_HOST_PORTS, ...({ hostPorts: {} as RuntimeHostPorts }),",
+      "catalogs: [referenceCatalog],\n      hostPorts,",
+      "catalogs: [referenceCatalog],\n      hostPorts: {} as RuntimeHostPorts,",
     ],
     ["result={result}", "result={undefined as never}"],
   ]) {
@@ -654,6 +665,12 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
     }),
     expectedError("PREREQUISITE_DRIFT"),
   );
+  await assert.rejects(
+    buildDesenAppRealAdapterCanvasEvidence({
+      fixturesScenariosArtifactBytes: changedByte(fixturesScenariosArtifactBytes),
+    }),
+    expectedError("PREREQUISITE_DRIFT"),
+  );
 
   const proofDocument = exactProofDocument(built.artifactSha256);
   const verified = await verifyDesenAppRealAdapterCanvasEvidence({
@@ -662,7 +679,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
-  assert.equal(verified.currentGraphModules, 133);
+  assert.equal(verified.currentGraphModules, 141);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 

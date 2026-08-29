@@ -108,6 +108,9 @@ importers:
       '@desen/runtime-react':
         specifier: workspace:*
         version: link:../../packages/runtime-react
+      '@desen/testkit':
+        specifier: workspace:*
+        version: link:../../packages/testkit
       '@desen/validator':
         specifier: workspace:*
         version: link:../../packages/validator

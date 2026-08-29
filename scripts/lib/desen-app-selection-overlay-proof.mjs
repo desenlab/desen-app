@@ -17,6 +17,9 @@ const PARENT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-real-adapter-
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
+const LOCKFILE_PATH = "pnpm-lock.yaml";
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
 const ADAPTER_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
@@ -92,7 +95,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     PANEL_TEST_PATH,
     STRUCTURED_JSON_TEST_PATH,
     AUTHORING_SLOT_TEST_PATH,
-    "pnpm-lock.yaml",
+    LOCKFILE_PATH,
+    FIXTURES_SCENARIOS_ARTIFACT_PATH,
   ]),
 ]);
 
@@ -120,6 +124,28 @@ const NAMED_SLOT_ARTIFACT_PIN = Object.freeze({
   sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
 });
 
+const FIXTURES_SCENARIOS_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T11",
+  proofId: "desen-app-fixtures-scenarios-fidelity",
+  profile: "desen.app.fixtures-scenarios-fidelity-proof.v1",
+  result: "PASS",
+  path: FIXTURES_SCENARIOS_ARTIFACT_PATH,
+  bytes: 29_407,
+  sha256: "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+});
+
+const T11_LIVE_RECEIPT_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  LOCKFILE_PATH,
+  PANEL_SOURCE_PATH,
+  ADAPTER_SOURCE_PATH,
+  APPLICATION_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+  ADAPTER_TEST_PATH,
+  APPLICATION_TEST_PATH,
+]);
+
 const NAMED_SLOT_LIVE_SOURCE_AND_TEST_PATHS = Object.freeze([
   ADAPTER_SOURCE_PATH,
   AUTHORING_DATA_PATH,
@@ -133,9 +159,9 @@ const NAMED_SLOT_LIVE_SOURCE_AND_TEST_PATHS = Object.freeze([
 
 const EXPECTED_SOURCE_SHA256 = Object.freeze({
   [SELECTION_SOURCE_PATH]: "e97eed87734fff6fdc3a40dbc81754a88318238090e4c1dfcc53062e8ff7fc7c",
-  [ADAPTER_SOURCE_PATH]: "c49dfb6a0644d72d01786e7c1f88ff441d16674695550c33a98439d66ef0b305",
-  [APPLICATION_SOURCE_PATH]: "6bece435ba9ecf5e281d5184ee81beea27a885a3d2ad551c0a78f81c397e2d82",
-  [APPLICATION_CSS_PATH]: "8430ca5368953a7590f9bbb82c03de08552e14f0ee97d4d3ff40dc649a1fbaa6",
+  [ADAPTER_SOURCE_PATH]: "911dadf85606f60c4b6e73d793dc9e3bf3ff0c938b606bb7bc04f2ea958772f9",
+  [APPLICATION_SOURCE_PATH]: "b2afd9138c8219a2435d63b66411197d3ca2c51a5f4734d4ead5c7a8d43ad956",
+  [APPLICATION_CSS_PATH]: "3b7eaa736f2cc85113267a800e831b1bb70504cf363959a243137434e8a91a29",
 });
 
 const PRIVATE_DOM_PROPERTIES = Object.freeze([
@@ -481,6 +507,12 @@ function assertNoPrivateInspection(sourceFile, relativePath, allowApplicationNav
         (text) =>
           text === "document.getElementById" ||
           text === "document.querySelector" ||
+          text === "eventElement?.closest" ||
+          text === "exactBoundary?.parentElement" ||
+          text === "event.currentTarget.closest" ||
+          text === "rows[hoveredRowIndex]?.getBoundingClientRect" ||
+          text === "row.getBoundingClientRect" ||
+          text === "scrollSurface.getBoundingClientRect" ||
           text === "event.currentTarget.getBoundingClientRect",
       )
     : [];
@@ -489,6 +521,12 @@ function assertNoPrivateInspection(sourceFile, relativePath, allowApplicationNav
         (text) =>
           text !== "document.getElementById" &&
           text !== "document.querySelector" &&
+          text !== "eventElement?.closest" &&
+          text !== "exactBoundary?.parentElement" &&
+          text !== "event.currentTarget.closest" &&
+          text !== "rows[hoveredRowIndex]?.getBoundingClientRect" &&
+          text !== "row.getBoundingClientRect" &&
+          text !== "scrollSurface.getBoundingClientRect" &&
           text !== "event.currentTarget.getBoundingClientRect",
       )
     : privateProperties;
@@ -496,7 +534,14 @@ function assertNoPrivateInspection(sourceFile, relativePath, allowApplicationNav
     .filter(({ text }) => PRIVATE_DOM_GLOBALS.includes(text))
     .filter((identifier) => {
       if (!allowApplicationNavigation) return true;
-      if (identifier.text === "document" || identifier.text === "HTMLElement") return false;
+      if (
+        identifier.text === "document" ||
+        identifier.text === "HTMLElement" ||
+        identifier.text === "Element" ||
+        identifier.text === "Node"
+      ) {
+        return false;
+      }
       return !(
         identifier.text === "Node" &&
         ts.isBinaryExpression(identifier.parent) &&
@@ -525,10 +570,11 @@ function assertNoPrivateInspection(sourceFile, relativePath, allowApplicationNav
   return Object.freeze({
     privateDomOrGeometryCalls: 0,
     privateReactReferences: 0,
-    allowedAppNavigationDomCalls: allowed.length,
-    allowedRowDropGeometryCalls: allowed.filter(
-      (text) => text === "event.currentTarget.getBoundingClientRect",
+    allowedAppNavigationDomCalls: allowed.filter(
+      (text) => text === "document.getElementById" || text === "document.querySelector",
     ).length,
+    allowedRowDropGeometryCalls: allowed.filter((text) => text.endsWith("getBoundingClientRect"))
+      .length,
   });
 }
 
@@ -765,12 +811,12 @@ function inspectApplicationSource(rawSource) {
   }
   const privateInspection = assertNoPrivateInspection(sourceFile, APPLICATION_SOURCE_PATH, true);
   if (
-    privateInspection.allowedAppNavigationDomCalls !== 3 ||
-    privateInspection.allowedRowDropGeometryCalls !== 1
+    privateInspection.allowedAppNavigationDomCalls !== 2 ||
+    privateInspection.allowedRowDropGeometryCalls !== 4
   ) {
     fail(
       "SOURCE_POLICY_VIOLATION",
-      "Only two historical navigation/focus calls plus one row-local drop projection are allowed.",
+      "Only two navigation/focus calls plus four exact layer-drop geometry reads are allowed.",
       privateInspection,
     );
   }
@@ -805,10 +851,10 @@ function inspectApplicationSource(rawSource) {
   const stateCalls = collectDescendants(surfaceBody, ts.isCallExpression).filter(
     (call) => ts.isIdentifier(call.expression) && call.expression.text === "useState",
   );
-  if (stateCalls.length !== 3) {
+  if (stateCalls.length !== 4) {
     fail(
       "SOURCE_POLICY_VIOLATION",
-      "SurfaceEditor must own route-local mode, selection, and authoring-session state.",
+      "SurfaceEditor must own route-local mode, selection, authoring-session, and scenario state.",
     );
   }
   const projectShell = exactFunction(sourceFile, "ProjectShell");
@@ -1228,6 +1274,65 @@ function authenticateNamedSlotArtifact(bytes, files) {
   });
 }
 
+function authenticateFixturesScenariosSuccessor(files) {
+  const artifactBytes = files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  if (
+    artifactBytes.byteLength !== FIXTURES_SCENARIOS_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FIXTURES_SCENARIOS_ARTIFACT_PIN.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact bytes drifted.");
+  }
+  const artifact = parseJson(artifactBytes, FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  const parent = artifact.prerequisites?.[0];
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  if (
+    artifact.task !== FIXTURES_SCENARIOS_ARTIFACT_PIN.task ||
+    artifact.proofId !== FIXTURES_SCENARIOS_ARTIFACT_PIN.proofId ||
+    artifact.profile !== FIXTURES_SCENARIOS_ARTIFACT_PIN.profile ||
+    artifact.result !== FIXTURES_SCENARIOS_ARTIFACT_PIN.result ||
+    parent?.task !== "M09-T10" ||
+    parent?.bytes !== 17_900 ||
+    parent?.sha256 !== "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334" ||
+    artifact.claim?.scenarioSourceAndBundleEphemeral !== true ||
+    artifact.claim?.pendingRuntimeLifecycleExercised !== true ||
+    artifact.claim?.exactOperationAndPreviewContextAuthorization !== true ||
+    artifact.claim?.operationInputOrPasswordRetained !== false ||
+    artifact.claim?.stableAppOwnedOperationPort !== true ||
+    artifact.claim?.s001Status !== "TESTED" ||
+    artifact.claim?.pf028Status !== "CLOSED" ||
+    artifact.tests?.focusedTestCases !== 86 ||
+    !Array.isArray(trackedReceipts)
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact identity or claims drifted.");
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
+  for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    const authority = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T11 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: FIXTURES_SCENARIOS_ARTIFACT_PIN.task,
+    artifact: FIXTURES_SCENARIOS_ARTIFACT_PIN,
+    exactDesignRunParent: true,
+    scenariosEphemeral: true,
+    pendingRuntimeLifecycleExercised: true,
+    exactOperationAndPreviewContextAuthorization: true,
+    operationInputOrPasswordRetained: false,
+    stableAppOwnedOperationPort: true,
+    focusedTestCases: 86,
+    s001Status: "TESTED",
+    pf028Status: "CLOSED",
+  });
+}
+
 function inspectSchemaInspectorSuccessor(files) {
   const authoring = decodeUtf8(files.get(AUTHORING_DATA_PATH), AUTHORING_DATA_PATH);
   const inspector = decodeUtf8(files.get(INSPECTOR_SOURCE_PATH), INSPECTOR_SOURCE_PATH);
@@ -1303,17 +1408,22 @@ function inspectSchemaInspectorSuccessor(files) {
       [
         "evaluateAuthoringNodeDeletion",
         "applyAuthoringNodeDelete",
-        "const dragEnterDepth = useRef(0)",
-        "const targetDragEnterDepth = useRef(0)",
-        "data-drop-hovered={dropReady && dragHovered}",
+        "const [activeDropProjection, setActiveDropProjection] = useState<AuthoringDropProjection | null>",
+        "const projectDrop = useCallback((next: AuthoringDropProjection | null) =>",
+        "onProjectDrop={projectDrop}",
+        "function projectNearestDrop(",
+        "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
+        "data-drop-hovered={dropReady && dropHovered}",
+        "const panelDragEnterDepth = useRef(0)",
         "data-drop-hovered={componentDropReady && targetDragHovered}",
         "data-guide={readySlot === null}",
-        "data-row-drop-position={rowDropPosition ?? undefined}",
+        "className={styles.componentDragHandle}",
+        'title="Drag anywhere in this panel to add"',
         'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
         "sourceNodeId: result.nodeId",
         "No drop target selected",
         "Choose slot in Layers",
-        "`Drop ${draggedComponent.displayName} here`",
+        'draggedComponent === undefined ? "Insert target" : "Release to add"',
         "function deleteSelectedLayer(): AuthoringSlotEditResult",
         "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
         "setSelection(null);",
@@ -1325,15 +1435,14 @@ function inspectSchemaInspectorSuccessor(files) {
       applicationCss,
       APPLICATION_CSS_PATH,
       [
+        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.5rem;\n  align-items: center;\n  padding: 0 0.125rem;",
         '.slotBoundary[data-drop-ready="true"]',
-        "min-height: 0.875rem",
-        "margin-block: 0",
-        ".layerNode[data-row-drop-position] {\n  z-index: 4;",
-        ".layerNode[data-row-drop-position] > .layerRow",
-        ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
         '.slotBoundary[data-drop-hovered="true"]',
+        '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
+        ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
         '.componentSlotTarget[data-guide="true"]',
         '.componentSlotTarget[data-drop-hovered="true"]',
+        ".componentDragHandle {",
       ],
     ],
   ]) {
@@ -1387,7 +1496,10 @@ function inspectSchemaInspectorSuccessor(files) {
     ) ||
     !applicationTests.includes("expect(reads).toBe(0)") ||
     !applicationTests.includes('getAttribute("data-drop-hovered")') ||
-    !applicationTests.includes('getByText("Drop Alert here")') ||
+    !applicationTests.includes(
+      "const alertDragHandle = alert.querySelector(\"[draggable='true']\")",
+    ) ||
+    !applicationTests.includes('getByText("Release to add")') ||
     !applicationTests.includes('toContain("No drop target selected")') ||
     !applicationTests.includes('name: "Choose slot in Layers"') ||
     application.includes("dataTransfer.getData") ||
@@ -1437,7 +1549,7 @@ function receipts(files) {
     );
 }
 
-/** Authenticates frozen M09-T04 evidence and checks its live additive M09-T07 successor. */
+/** Authenticates frozen M09-T04 evidence and exact additive M09-T07/T11 successors. */
 export async function buildDesenAppSelectionOverlayEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
@@ -1460,6 +1572,7 @@ export async function buildDesenAppSelectionOverlayEvidence(rawOptions = undefin
     files,
   );
   const successor = inspectSchemaInspectorSuccessor(files);
+  const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
   assertRetainedHistoricalReceipts(frozen.artifact, files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
@@ -1535,6 +1648,7 @@ export async function buildDesenAppSelectionOverlayEvidence(rawOptions = undefin
         STRUCTURED_JSON_TEST_PATH,
         AUTHORING_SLOT_TEST_PATH,
         NAMED_SLOT_ARTIFACT_PATH,
+        FIXTURES_SCENARIOS_ARTIFACT_PATH,
       ].map((relativePath) => ({
         path: relativePath,
         bytes: files.get(relativePath).byteLength,
@@ -1542,6 +1656,7 @@ export async function buildDesenAppSelectionOverlayEvidence(rawOptions = undefin
       })),
     },
     successor: deepFreeze({ ...successor, artifact: namedSlotArtifact }),
+    fixturesScenariosSuccessor,
   });
   return deepFreeze({
     artifact: frozen.artifact,

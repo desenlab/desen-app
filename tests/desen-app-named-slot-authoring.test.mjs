@@ -17,6 +17,8 @@ import {
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const PARENT_PATH = "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json";
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SOURCE_PATHS = Object.freeze({
   authoringDataSource: "apps/desen-app/src/authoring-data.ts",
   slotSource: "apps/desen-app/src/authoring-slots.ts",
@@ -28,6 +30,7 @@ const SOURCE_PATHS = Object.freeze({
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let sourcePolicyInput;
+let fixturesScenariosArtifactBytes;
 let built;
 
 function expectedError(code) {
@@ -84,6 +87,9 @@ before(async () => {
     ),
   );
   parentArtifactBytes = await readFile(path.join(ROOT, PARENT_PATH));
+  fixturesScenariosArtifactBytes = await readFile(
+    path.join(ROOT, FIXTURES_SCENARIOS_ARTIFACT_PATH),
+  );
   built = await buildDesenAppNamedSlotAuthoringEvidence();
 });
 
@@ -113,6 +119,12 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[0], () => {
     bytes: 28_766,
     sha256: "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
   });
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.task, "M09-T11");
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.focusedTestCases, 86);
+  assert.equal(
+    built.currentCompatibility.fixturesScenariosSuccessor.pendingRuntimeLifecycleExercised,
+    true,
+  );
 });
 
 test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[1], () => {
@@ -377,7 +389,7 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[7], () => {
       ...sourcePolicyInput,
       applicationSource: replaceOnce(
         sourcePolicyInput.applicationSource,
-        "data-drop-hovered={dropReady && dragHovered}",
+        "data-drop-hovered={dropReady && dropHovered}",
         "data-drop-hovered={false}",
       ),
     },
@@ -385,8 +397,8 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[7], () => {
       ...sourcePolicyInput,
       applicationSource: replaceOnce(
         sourcePolicyInput.applicationSource,
-        "function projectedRowDrop(event: DragEvent<HTMLButtonElement>)",
-        "function uncheckedRowDrop(event: DragEvent<HTMLButtonElement>)",
+        "function projectNearestDrop(",
+        "function uncheckedNearestDrop(",
       ),
     },
     {
@@ -433,16 +445,16 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[7], () => {
       ...sourcePolicyInput,
       applicationCss: replaceOnce(
         sourcePolicyInput.applicationCss,
-        "margin-block: 0",
-        "margin-block: -1.125rem",
+        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.5rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0;\n  align-items: center;\n  padding: 0;",
       ),
     },
     {
       ...sourcePolicyInput,
       applicationCss: replaceOnce(
         sourcePolicyInput.applicationCss,
-        ".layerNode[data-row-drop-position] {\n  z-index: 4;",
-        ".layerNode[data-row-drop-disabled] {\n  z-index: 4;",
+        '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
+        '.slotBoundary[data-drop-disabled="true"] .slotBoundaryLine',
       ),
     },
     {
@@ -454,10 +466,11 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[7], () => {
       ),
     },
   ];
-  for (const mutation of mutations) {
+  for (const [index, mutation] of mutations.entries()) {
     assert.throws(
       () => verifyDesenAppNamedSlotAuthoringSourcePolicy(mutation),
       expectedError("SOURCE_POLICY_VIOLATION"),
+      `mutation ${index} must fail closed`,
     );
   }
 });
@@ -490,6 +503,14 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[8], async () => {
       parentArtifactBytes: changedByte(parentArtifactBytes),
     }),
     expectedError("PARENT_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppNamedSlotAuthoringEvidence({
+      fileOverrides: new Map([
+        [FIXTURES_SCENARIOS_ARTIFACT_PATH, changedByte(fixturesScenariosArtifactBytes)],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
   await assert.rejects(
     verifyDesenAppNamedSlotAuthoringEvidence({

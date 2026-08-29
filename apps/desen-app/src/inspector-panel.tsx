@@ -4,7 +4,7 @@ import styles from "./application.module.css";
 import { formatStructuredJson, parseStructuredJsonText } from "./structured-json.js";
 import { isAuthoringInspectorStateCompatible } from "./authoring-inspector.js";
 
-import type { FormEvent, KeyboardEvent, RefCallback } from "react";
+import type { FormEvent, KeyboardEvent, ReactNode, RefCallback } from "react";
 import type { ComponentInspectorFallbackReason, JsonPrimitive } from "@desen/catalog-sdk";
 import type {
   AuthoringInspectorEdit,
@@ -22,6 +22,7 @@ interface InspectorPanelProps {
   readonly onEdit: (edit: AuthoringInspectorEdit) => AuthoringInspectorEditResult;
   readonly onBindingEdit?:
     ((edit: AuthoringInspectorBindingEdit) => AuthoringInspectorEditResult) | undefined;
+  readonly previewControls?: ReactNode;
 }
 
 function primitiveText(value: JsonPrimitive): string {
@@ -750,6 +751,7 @@ export function InspectorPanel({
   inspector,
   onBindingEdit,
   onEdit,
+  previewControls,
 }: Readonly<InspectorPanelProps>) {
   const [notice, setNotice] = useState("");
   const applyBindingEdit =
@@ -774,6 +776,8 @@ export function InspectorPanel({
         </span>
         <span aria-hidden="true" className={styles.inspectorMark} />
       </div>
+
+      {previewControls}
 
       {inspector.status !== "ready" ? (
         <div className={styles.inspectorEmpty}>

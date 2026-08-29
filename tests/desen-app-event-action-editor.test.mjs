@@ -26,10 +26,13 @@ const SOURCE_PATHS = Object.freeze({
   applicationCss: "apps/desen-app/src/application.module.css",
 });
 const DESIGN_RUN_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json";
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SELF_READER_PATH = "scripts/lib/desen-app-event-action-editor-proof.mjs";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let successorArtifactBytes;
+let fixturesScenariosArtifactBytes;
 let selfReaderBytes;
 let sourcePolicyInput;
 let built;
@@ -103,8 +106,9 @@ before(async () => {
       ]),
     ),
   );
-  [successorArtifactBytes, selfReaderBytes] = await Promise.all([
+  [successorArtifactBytes, fixturesScenariosArtifactBytes, selfReaderBytes] = await Promise.all([
     readFile(path.join(ROOT, DESIGN_RUN_ARTIFACT_PATH)),
+    readFile(path.join(ROOT, FIXTURES_SCENARIOS_ARTIFACT_PATH)),
     readFile(path.join(ROOT, SELF_READER_PATH)),
   ]);
   built = await buildDesenAppEventActionEditorEvidence();
@@ -147,6 +151,13 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.currentCompatibility.successor.focusedDesignRunTests, 44);
   assert.equal(built.currentCompatibility.successor.fullAppTests, 210);
   assert.equal(built.currentCompatibility.successor.fixturesAndScenariosImplemented, false);
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.task, "M09-T11");
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.focusedTestCases, 86);
+  assert.equal(
+    built.currentCompatibility.fixturesScenariosSuccessor.pendingRuntimeLifecycleExercised,
+    true,
+  );
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.pf028Status, "CLOSED");
   assert.deepEqual(built.currentCompatibility.retainedAuthoringUx, {
     rootSafeDefaultPlacementTarget: true,
     explicitChangeTarget: true,
@@ -158,9 +169,9 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[0], () => {
     arbitraryCanvasGeometryOrDropClaimed: false,
     nativeBrowserDragE2eClaimed: false,
   });
-  assert.equal(built.currentCompatibility.boundary.retainedHistoricalReceipts, 21);
-  assert.equal(built.currentCompatibility.boundary.successorCompatibilityPaths, 10);
-  assert.equal(built.currentCompatibility.boundary.currentPathReceipts.length, 32);
+  assert.equal(built.currentCompatibility.boundary.retainedHistoricalReceipts, 20);
+  assert.equal(built.currentCompatibility.boundary.successorCompatibilityPaths, 11);
+  assert.equal(built.currentCompatibility.boundary.currentPathReceipts.length, 33);
 });
 
 test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[1], () => {
@@ -318,8 +329,8 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
     },
     {
       key: "applicationSource",
-      search: "const projected = rowDropProjection.current ?? projectedRowDrop(event);",
-      replacement: "const projected = projectedRowDrop(event);",
+      search: ": interaction.activeDropProjection",
+      replacement: ": null",
     },
     {
       key: "applicationSource",
@@ -375,6 +386,14 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[9], async () => {
   await assert.rejects(
     buildDesenAppEventActionEditorEvidence({
       fileOverrides: new Map([[DESIGN_RUN_ARTIFACT_PATH, changedByte(successorArtifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppEventActionEditorEvidence({
+      fileOverrides: new Map([
+        [FIXTURES_SCENARIOS_ARTIFACT_PATH, changedByte(fixturesScenariosArtifactBytes)],
+      ]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );

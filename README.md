@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████████░░░░░░░` **105 / 145 tasks complete (72%)**
+**Overall:** `██████████████████░░░░░░░` **106 / 145 tasks complete (73%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `██████████░░░░` **10 / 14 tasks complete (71%)**
+**M09:** `███████████░░░` **11 / 14 tasks complete (79%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T11`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T12`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -905,7 +905,7 @@ The adapter and application suites pass 9/9 and 35/35, the local focused Design/
 44/44, the complete App suite passes 210/210, and the independent root proof passes 10/10. Exact
 evidence is the `17,900`-byte
 [`desen-app-0.1.0-design-run-modes.json`](docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json)
-at `sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`; the reviewed report is
+at `sha256:bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334`; the reviewed report is
 [`DESEN-APP-DESIGN-RUN-MODES.md`](docs/proof/DESEN-APP-DESIGN-RUN-MODES.md). Its frozen proof and
 root readers are 53,346 bytes/
 `sha256:ff4226241630daded979263dcd0a7fdb071591efbf789d1e7d2d4f4641779dfe` and 15,787 bytes/
@@ -924,6 +924,39 @@ advances only to `PARTIAL` for the exact controlled `state.set` path. P-08 remai
 S-001 remains `PLANNED`, and PF-025, PF-028, and PF-083 remain `OPEN`. Fixtures, scenarios, visible
 approximate-fidelity disclosure, durable save/open, diagnostics navigation, publication,
 activation, and automated real-browser E2E remain unclaimed. M09-T11 is next.
+
+M09-T11 adds transient Catalog-declared props-only scenarios, exact synthetic sign-in fixture
+settlement, and persistent adapter-fidelity disclosure without changing the authored Source or its
+publishable preview. Scenario authority is tied to the exact route, node, capability, Source, and
+preview identities. The real adapter publishes Runtime pending before the user explicitly settles
+the exact success or declared `invalidCredentials` result; request input and password data are
+never observed or retained. Integration and production remain visible but unavailable.
+
+Cleanup synchronously revokes request admission and pending transport, while preview replacement
+cannot publish a late predecessor result. Fidelity is reported conservatively as `same`,
+`equivalent`, `approximate`, or `undeclared`, with every known approximate difference visible. The
+compatibility closure also gives Components a real drag handle and panel-wide insertion target,
+Layers one stable global nested-slot projection, and newly inserted components an immediately
+visible guarded Delete action.
+
+The focused App suite passes 86/86, the complete App suite passes 252/252, and the independent root
+proof passes 11/11. Exact evidence is
+the `29,407`-byte
+[`desen-app-0.1.0-fixtures-scenarios-fidelity.json`](docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json)
+at `sha256:3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d`; the reviewed report is
+[`DESEN-APP-FIXTURES-SCENARIOS-FIDELITY.md`](docs/proof/DESEN-APP-FIXTURES-SCENARIOS-FIDELITY.md).
+The live local CI authority contains 194 workloads and 92 proof pairs—81 ordinary and 11 barriers—
+with a 59-proof-unit/128-workload closure and ownership over 1,232 tracked/184 proof-owned paths.
+Append-only proof-reader sequence 50 advances
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` to
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` across 46 artifacts and
+92 readers. Its checkpoint, promotion, selector plus required-affected, ownership, and remaining
+touched-CI regression suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally.
+M09-T11 is `DONE`; implementation progress is 106/145 (73%), M09 is 11/14 (79%), and proof gates
+remain 10/13. N-035 and S-001 are `TESTED`; P-08 remains `NOT_PROVEN`, P-09 and P-10 remain
+`PARTIAL`, N-036 remains `PLANNED`, PF-028 is `CLOSED`, and PF-025, PF-083, and PF-089 remain
+`OPEN`. Durable save/open, diagnostics, publication/activation, and automated real-browser E2E
+remain unclaimed. M09-T12 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

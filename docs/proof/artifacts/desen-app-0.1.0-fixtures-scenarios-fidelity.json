@@ -1,0 +1,620 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-fixtures-scenarios-fidelity",
+  "profile": "desen.app.fixtures-scenarios-fidelity-proof.v1",
+  "task": "M09-T11",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M09-T10",
+      "proofId": "desen-app-design-run-modes",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
+      "bytes": 17900,
+      "sha256": "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334",
+      "profile": "desen.app.design-run-modes-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M03-T08",
+      "path": "docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json",
+      "bytes": 12713,
+      "sha256": "b0413687bd907b71509db52d3e22b6eda5a4150509ac323bf51e5f8425f897e2",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M03-T09",
+      "path": "docs/proof/artifacts/reference-catalog-web-parity.json",
+      "bytes": 18146,
+      "sha256": "6e350f2af71ac4e1f040afe7a3fcc3035de35b585f0121db6a2b35b4f3552a8a",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "propsOnlyCatalogScenarios": true,
+    "scenarioSourceAndBundleEphemeral": true,
+    "authoredSourceAndPublishablePreviewUnchanged": true,
+    "publicSyntheticFixtureProjection": true,
+    "exactSelectableFixtureOutcomes": [
+      "success:user-1",
+      "error:invalidCredentials"
+    ],
+    "pendingStaticFixtureClaimed": false,
+    "pendingRuntimeLifecycleExercised": true,
+    "exactOperationAndPreviewContextAuthorization": true,
+    "operationInputOrPasswordRetained": false,
+    "stableAppOwnedOperationPort": true,
+    "cleanupSynchronouslyRevokesFixtureAdmission": true,
+    "strictModeReplayRetainsOnlySameLiveFixtureLifetime": true,
+    "pendingRevokedOnPreviewReplacement": true,
+    "dedicatedComponentDragHandleRetained": true,
+    "singleNestedLayerDropProjectionRetained": true,
+    "layerDropHysteresisRetained": true,
+    "visibleExecutionContexts": [
+      "synthetic",
+      "integration",
+      "production"
+    ],
+    "visibleApproximateFidelityDifferences": true,
+    "sameProductionAdapterDisclosure": true,
+    "integrationOrProductionExecutionClaimed": false,
+    "persistenceClaimed": false,
+    "diagnosticsClaimed": false,
+    "publicationClaimed": false,
+    "activationClaimed": false,
+    "browserE2eClaimed": false,
+    "p08Status": "NOT_PROVEN",
+    "p09Status": "PARTIAL",
+    "p10Status": "PARTIAL",
+    "s001Status": "TESTED",
+    "pf025Status": "OPEN",
+    "pf028Status": "CLOSED",
+    "pf083Status": "OPEN",
+    "pf089Status": "OPEN"
+  },
+  "authority": {
+    "source": {
+      "fixture": {
+        "imports": [
+          "@desen/reference-catalog-web/operations",
+          "@desen/testkit",
+          "@desen/runtime-core",
+          "@desen/testkit"
+        ],
+        "publicTestkitProjection": true,
+        "exactOutcomes": [
+          "success:user-1",
+          "error:invalidCredentials"
+        ],
+        "staticPendingOption": false,
+        "unavailableFixtureOption": false,
+        "exactRequestContextAuthorization": true,
+        "requestInputObservedOrRetained": false,
+        "realPromisePending": true,
+        "explicitSettlement": true,
+        "stableOperationPort": true,
+        "synchronousDeactivationRevokesAdmissionAndPending": true,
+        "sameLiveLifetimeCanReactivate": true,
+        "disposeRevokesPending": true,
+        "executableHostBinding": false
+      },
+      "scenario": {
+        "imports": [
+          "@desen/editor-core",
+          "./authoring-data.js",
+          "./authoring-preview.js",
+          "./authoring-selection.js",
+          "@desen/catalog-sdk",
+          "@desen/editor-core",
+          "./authoring-data.js",
+          "./authoring-preview.js",
+          "./authoring-selection.js"
+        ],
+        "authoredSentinel": "source",
+        "propsOnly": true,
+        "stateAndFixturesFailClosed": true,
+        "publicEditorCoreTransitions": true,
+        "freshCatalogAndDocumentAdmission": true,
+        "publisherPreviewPreparedSeparately": true,
+        "authoredDocumentMutation": false,
+        "currentPreviewMutation": false,
+        "persistenceOrPublicationAuthority": false
+      },
+      "fidelity": {
+        "imports": [
+          "./authoring-data.js",
+          "./authoring-slots.js"
+        ],
+        "kinds": [
+          "same",
+          "equivalent",
+          "undeclared",
+          "approximate"
+        ],
+        "conservativePrecedence": true,
+        "sourceSurfaceCapabilitiesOnly": true,
+        "completeDeclaredDifferences": true,
+        "approximateEmptyFallbackVisible": true,
+        "missingOrInvalidMetadataUndeclared": true,
+        "runtimeOrPrivateAdapterInspection": false
+      },
+      "controls": {
+        "imports": [
+          "./authoring-fixtures.js",
+          "./application.module.css",
+          "react",
+          "./authoring-fixtures.js",
+          "./authoring-scenarios.js",
+          "./preview-fidelity.js"
+        ],
+        "visibleExecutionContexts": [
+          "synthetic",
+          "integration",
+          "production"
+        ],
+        "scenarioPreviewOnlyDisclosure": true,
+        "pendingNotSelectable": true,
+        "explicitCompleteControl": true,
+        "approximateAlertPersistent": true,
+        "completeDifferenceList": true,
+        "undeclaredFidelityWarning": true,
+        "politeLifecycleStatus": true
+      },
+      "adapter": {
+        "imports": [
+          "react",
+          "@desen/reference-catalog-web/catalog.json",
+          "@desen/reference-catalog-web/react-adapters",
+          "@desen/reference-catalog-web/tokens",
+          "@desen/runtime-core",
+          "@desen/runtime-react",
+          "../../../examples/sign-in/official-derived.bundle.desen.json",
+          "./authoring-data.js",
+          "./authoring-selection.js",
+          "./application.module.css",
+          "@desen/runtime-core",
+          "@desen/runtime-react",
+          "./authoring-selection.js",
+          "./authoring-data.js"
+        ],
+        "denyOnlyDefaultPorts": true,
+        "appOwnedHostPortsExplicit": true,
+        "hostPortIdentityInMountLifetime": true,
+        "sessionDisposedOnReplacement": true,
+        "managedAdapterTreeReimplementation": false
+      },
+      "application": {
+        "imports": [
+          "react",
+          "@desen/reference-catalog-web/catalog.json",
+          "@desen/runtime-core",
+          "./authoring-data.js",
+          "./adapter-canvas.js",
+          "./authoring-fixtures.js",
+          "./authoring-inspector.js",
+          "./authoring-event-actions.js",
+          "./authoring-state.js",
+          "./authoring-slots.js",
+          "./authoring-selection.js",
+          "./inspector-panel.js",
+          "./event-action-panel.js",
+          "./authoring-scenarios.js",
+          "./preview-fidelity.js",
+          "./preview-controls.js",
+          "./state-panel.js",
+          "./authoring-preview.js",
+          "./project-navigation.js",
+          "./project-data.js",
+          "./assets/breadcrumb-separator.svg",
+          "./assets/desen-logo.svg",
+          "./assets/plus.svg",
+          "./assets/settings.svg",
+          "./assets/theme.svg",
+          "./application.module.css",
+          "react",
+          "@desen/runtime-core",
+          "./authoring-data.js",
+          "./authoring-event-actions.js",
+          "./authoring-inspector.js",
+          "./authoring-state.js",
+          "./authoring-selection.js",
+          "./authoring-scenarios.js",
+          "./authoring-slots.js",
+          "./project-navigation.js",
+          "./project-data.js"
+        ],
+        "scenarioSelectionDesignOnly": true,
+        "scenarioPreviewSeparateFromAuthoringSession": true,
+        "scenarioPersistsAcrossModeToggle": true,
+        "exactEffectivePreviewRevisionBindsController": true,
+        "stableHostPortsPerController": true,
+        "synchronousCleanupClosesFixtureAdmission": true,
+        "strictModeReplayRetainsOnlySameLiveController": true,
+        "pendingControllerDisposedOnPreviewReplacement": true,
+        "componentDragAuthorityLimitedToDedicatedHandle": true,
+        "oneGlobalLayerDropProjection": true,
+        "nestedSlotSurfaceOwnsDropEvents": true,
+        "layerMidpointHysteresis": 4,
+        "onlyOperationPortExecutable": true,
+        "navigationResourcesStorageProductionDenied": true
+      },
+      "inspector": {
+        "imports": [
+          "react",
+          "./application.module.css",
+          "./structured-json.js",
+          "./authoring-inspector.js",
+          "react",
+          "@desen/catalog-sdk",
+          "./authoring-inspector.js",
+          "./structured-json.js"
+        ],
+        "previewControlsAppOwned": true,
+        "managedTreeOwnership": false
+      },
+      "css": {
+        "contextAndFidelityVisible": true,
+        "approximateDifferenceContainerVisible": true,
+        "scenarioAndRunControlsVisible": true,
+        "nestedLayerSlotsAndDedicatedComponentHandleVisible": true,
+        "managedCapabilityStylesChanged": false
+      }
+    },
+    "protocolProfiles": {
+      "scenarios": "Catalog-declared props-only overlays in a separate ephemeral preview",
+      "fixtures": "public testkit synthetic projection with App-owned deferred Runtime port",
+      "context": "synthetic active; integration and production visible but unavailable",
+      "fidelity": "same/equivalent/approximate/undeclared with complete visible differences",
+      "lifecycle": "real Runtime pending followed by explicit fixture settlement"
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/authoring-fixtures.test.ts test/authoring-scenarios.test.ts test/preview-fidelity.test.ts test/preview-controls.test.tsx test/adapter-canvas.test.tsx test/application.test.tsx",
+      "testkitDependency": "workspace:*",
+      "rootPackageName": "desen-workspace",
+      "rootCommands": {
+        "generate:desen-app-fixtures-scenarios-fidelity": "node scripts/verify-desen-app-design-run-modes.mjs && node scripts/verify-reference-sign-in-fixtures-and-host-binding.mjs && node scripts/verify-reference-catalog-web-parity.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:fixtures-scenarios && node scripts/generate-desen-app-fixtures-scenarios-fidelity-proof.mjs",
+        "verify:desen-app-fixtures-scenarios-fidelity": "node scripts/verify-desen-app-design-run-modes.mjs && node scripts/verify-reference-sign-in-fixtures-and-host-binding.mjs && node scripts/verify-reference-catalog-web-parity.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:fixtures-scenarios && node scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs",
+        "test:desen-app-fixtures-scenarios-fidelity": "node scripts/verify-desen-app-design-run-modes.mjs && node scripts/verify-reference-sign-in-fixtures-and-host-binding.mjs && node scripts/verify-reference-catalog-web-parity.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:fixtures-scenarios && node --test tests/desen-app-fixtures-scenarios-fidelity.test.mjs"
+      },
+      "parentsAuthenticatedInsideReader": true
+    },
+    "flow": [
+      "select an authenticated Source component",
+      "choose Source values or one exact Catalog props-only scenario",
+      "prepare a separate transient Source and Publisher preview Bundle",
+      "bind one App fixture controller to the effective preview revision",
+      "retain scenario and pending state across Design and Run presentation changes",
+      "start a real Runtime operation pending lifecycle from the real adapter",
+      "explicitly settle the captured success or invalidCredentials fixture",
+      "synchronously revoke request admission and pending transport during effect cleanup",
+      "dispose and revoke the controller when preview identity changes"
+    ],
+    "ownership": {
+      "scenarioControl": "Desen App Inspector chrome",
+      "fixtureControl": "Desen App Run chrome",
+      "fidelityDisclosure": "Desen App persistent sibling chrome",
+      "managedCapabilitySubtree": "exact Runtime React adapter output",
+      "operationLifecycle": "Runtime Core through App-owned synthetic operation port"
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/app-web test:fixtures-scenarios && node --test tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
+    "appTestNames": {
+      "apps/desen-app/test/authoring-fixtures.test.ts": [
+        "shows synthetic, integration, and production context without activating real bindings",
+        "offers only exact success and declared invalid-credentials fixtures",
+        "publishes a real pending lifecycle before explicit successful settlement",
+        "settles the selected declared public failure without replacing the host port",
+        "denies a forged request with %s without starting lifecycle",
+        "denies a request with %s context",
+        "rejects inherited or accessor-backed authorization fields without invoking them",
+        "rejects inherited or accessor-backed request context without invoking getters",
+        "captures the expected preview identity without retaining caller ownership",
+        "rejects malformed expected preview identity before creating authority",
+        "revokes admission synchronously during cleanup and reactivates only the same live lifetime",
+        "revokes pending work on disposal and ignores late settlement",
+        "revokes a replaced transport while preserving the stable operation port",
+        "never reads, retains, or logs operation input and password data",
+        "rejects unknown outcome values without changing the controller"
+      ],
+      "apps/desen-app/test/authoring-scenarios.test.ts": [
+        "exposes the authored sentinel and exact Catalog scenarios in stable order",
+        "returns an honest idle state and rejects stale route or capability authority",
+        "prepares a shallow transient props overlay and leaves session Source/preview untouched",
+        "restores authored values by exact identity without fabricating another session snapshot",
+        "rejects missing, unprefixed, and stale-preview scenario requests without partial output",
+        "fails closed for scenario state or fixtures instead of partially applying props",
+        "does not invoke hostile route, selection, or scenario-prop accessors"
+      ],
+      "apps/desen-app/test/preview-fidelity.test.ts": [
+        "reports the current reference surface as same-fidelity",
+        "uses approximate, undeclared, equivalent, same precedence over unique nested capabilities",
+        "fails closed to undeclared for missing or invalid fidelity metadata",
+        "retains all approximate differences and supplies an explicit empty-declaration fallback",
+        "rejects invalid routes without reading raw Source or Catalog data",
+        "deduplicates deterministically regardless of traversal and component-library order"
+      ],
+      "apps/desen-app/test/preview-controls.test.tsx": [
+        "renders every approximate difference and undeclared adapter without color-only meaning",
+        "keeps the scenario selector closed to the exact projected values",
+        "shows only synthetic execution and enables explicit completion only while pending"
+      ],
+      "apps/desen-app/test/adapter-canvas.test.tsx": [
+        "renders the official-derived sign-in only through the shared real adapters",
+        "runs real adapter events on the same session and preserves state across mode changes",
+        "keeps an exact host authority stable and hides its tree synchronously on replacement",
+        "fails closed for every unsupported project or surface without mounting sign-in",
+        "removes a previous tree synchronously and disposes the exact route session",
+        "replaces the exact session when a current authoring draft Bundle is rerendered",
+        "balances StrictMode replay and final unmount with exact session disposal",
+        "renders Source-identity selection chrome as a sibling outside the managed subtree",
+        "keeps a selected conditional Source node honest when it is not materialized",
+        "rejects stale and cross-route selection identities without exposing overlay chrome"
+      ],
+      "apps/desen-app/test/application.test.tsx": [
+        "renders an app-native projects gallery with explicit landmarks and current navigation",
+        "filters only the fixed project inventory and provides a clear recovery action",
+        "uses same-document navigation and focuses the new route heading",
+        "reacts to browser traversal and keeps route focus inside the content landmark",
+        "renders the editable Source hierarchy and keeps the exact managed adapter canvas read only",
+        "selects Source layers accessibly and keeps the identity overlay outside managed adapters",
+        "chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
+        "deletes a newly inserted selected layer with %s outside editable controls",
+        "ignores deletion shortcuts from editable controls while retaining the selected layer",
+        "disables deletion for the surface root and a slot-minimum preflight without changing preview",
+        "preserves the selected layer, preview, and focus when deletion is rejected",
+        "uses only the App-owned drag intent and ignores forged native transfer authority",
+        "reorders a selected Source node through the keyboard placement control",
+        "snaps a native layer drag to the before or after half of a visible layer row",
+        "uses the release position when it crosses a row midpoint after the last dragover",
+        "keeps the admitted gap stable while the pointer jitters around a row midpoint",
+        "drops from a visible row with the last admitted projection when drop coordinates are absent",
+        "moves nodes across nested slots with keyboard and App-owned native drag intent",
+        "edits schema-derived string and enum props and refreshes the exact adapter preview",
+        "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
+        "updates surface-local state and changes a compatible binding in the live preview",
+        "keeps bound props explicit while boolean and numeric edits fail or apply atomically",
+        "resets local drafts across Source identities and qualifies repeated edit actions",
+        "switches to the exact Catalog component library and filters only the local view",
+        "commits sign-in event handlers and complete actions through the live authoring session",
+        "keeps the prior event projection and canvas when action preview preflight fails",
+        "switches modes accessibly while preserving selection, authoring views, and local drafts",
+        "rejects stale hidden authoring callbacks while Run interactions leave Source unchanged",
+        "keeps Catalog scenarios transient across Design and Run without changing Source values",
+        "runs real pending lifecycle and settles only exact synthetic success and failure fixtures",
+        "revokes the previous fixture authority synchronously when a scenario replaces its Bundle",
+        "resets the ephemeral mode to Design when a new surface route mounts",
+        "does not substitute the sign-in Source tree or adapter canvas for another preview surface",
+        "removes the managed sign-in tree synchronously when routing to an unsupported surface",
+        "guides a catalog-less project without inventing a surface or enabled action",
+        "fails closed for $pathname"
+      ]
+    },
+    "testDeclarationCounts": {
+      "apps/desen-app/test/authoring-fixtures.test.ts": 15,
+      "apps/desen-app/test/authoring-scenarios.test.ts": 7,
+      "apps/desen-app/test/preview-fidelity.test.ts": 6,
+      "apps/desen-app/test/preview-controls.test.tsx": 3,
+      "apps/desen-app/test/adapter-canvas.test.tsx": 10,
+      "apps/desen-app/test/application.test.tsx": 36
+    },
+    "testCaseCounts": {
+      "apps/desen-app/test/authoring-fixtures.test.ts": 20,
+      "apps/desen-app/test/authoring-scenarios.test.ts": 7,
+      "apps/desen-app/test/preview-fidelity.test.ts": 6,
+      "apps/desen-app/test/preview-controls.test.tsx": 3,
+      "apps/desen-app/test/adapter-canvas.test.tsx": 10,
+      "apps/desen-app/test/application.test.tsx": 40
+    },
+    "focusedTestCases": 86,
+    "rootTestNames": [
+      "[authority] authenticates exact Design/Run, fixture, and parity parents",
+      "[scenario] proves props-only transient Source and Bundle previews",
+      "[fixture] proves exact inert inventory, context, and input non-retention",
+      "[lifecycle] proves real pending then explicit success or public failure",
+      "[fidelity] proves conservative same, equivalent, undeclared, and approximate disclosure",
+      "[ui] proves visible context, scenario, fixture, and complete-difference controls",
+      "[session] proves scenario and pending continuity across Design and Run",
+      "[tests] retains focused positive, negative, and package dependency evidence",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[policy] rejects scenario, fixture, host-authority, fidelity, and UI weakening",
+      "[verification] rejects parent, artifact, report, and filesystem authority drift"
+    ],
+    "semanticCoverage": [
+      "PROPS_ONLY_SCENARIO_EPHEMERAL_SOURCE_AND_BUNDLE",
+      "AUTHORED_SOURCE_AND_PUBLISHABLE_PREVIEW_UNCHANGED",
+      "PUBLIC_TESTKIT_EXACT_SIGN_IN_FIXTURE_PROJECTION",
+      "PENDING_IS_RUNTIME_LIFECYCLE_NOT_STATIC_FIXTURE",
+      "EXACT_CONTEXT_CAPABILITY_ALIAS_EFFECT_AUTHORIZATION",
+      "REQUEST_INPUT_AND_PASSWORD_NOT_OBSERVED_OR_RETAINED",
+      "EXPLICIT_SUCCESS_AND_DECLARED_FAILURE_SETTLEMENT",
+      "DISPOSE_AND_REPLACEMENT_REVOKE_PENDING",
+      "SYNCHRONOUS_EFFECT_CLEANUP_REVOKES_ADMISSION_AND_PENDING",
+      "STRICT_MODE_REPLAY_REACTIVATES_ONLY_THE_SAME_LIVE_CONTROLLER",
+      "VISIBLE_SYNTHETIC_INTEGRATION_PRODUCTION_CONTEXT",
+      "VISIBLE_COMPLETE_APPROXIMATE_FIDELITY_DIFFERENCES",
+      "SCENARIO_AND_PENDING_CONTINUITY_ACROSS_DESIGN_RUN",
+      "DEDICATED_COMPONENT_DRAG_HANDLE_RETAINS_BUTTON_ACTIVATION",
+      "ONE_GLOBAL_DROP_PROJECTION_ACROSS_NESTED_SLOT_SURFACES",
+      "LAYER_DROP_MIDPOINT_HYSTERESIS_RETAINS_ADMITTED_GAP"
+    ]
+  },
+  "boundary": {
+    "trackedFiles": 28,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 2949,
+        "sha256": "04314463f345d548176f07ba10b7552db4ec99d474b88dfcfb952b9ef5b4ce8a"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 12143,
+        "sha256": "911dadf85606f60c4b6e73d793dc9e3bf3ff0c938b606bb7bc04f2ea958772f9"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 75361,
+        "sha256": "3b7eaa736f2cc85113267a800e831b1bb70504cf363959a243137434e8a91a29"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 84477,
+        "sha256": "b2afd9138c8219a2435d63b66411197d3ca2c51a5f4734d4ead5c7a8d43ad956"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-fixtures.ts",
+        "bytes": 19778,
+        "sha256": "d65d334027186654caa76d2661a177b08b28df650f96cdce029d7744f47b9fbf"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-scenarios.ts",
+        "bytes": 20931,
+        "sha256": "6cabe8a6d5ec40a362cc4a32e0ecdfd19f1e5d33168205538b557d14e629fdb6"
+      },
+      {
+        "path": "apps/desen-app/src/inspector-panel.tsx",
+        "bytes": 27997,
+        "sha256": "32deb0a411b963d0029e294cdd6e1234a8522a945669be9cf537cd17e197d7c3"
+      },
+      {
+        "path": "apps/desen-app/src/preview-controls.tsx",
+        "bytes": 8719,
+        "sha256": "2ef5c428034a18b745373e9c588708a65c9835c311dfb0a28bd858ae5a147bf7"
+      },
+      {
+        "path": "apps/desen-app/src/preview-fidelity.ts",
+        "bytes": 8070,
+        "sha256": "d9ec596e20ea5ea9ca5875f4a78da0aa73938eb11d6fb6238194eda832893fe9"
+      },
+      {
+        "path": "apps/desen-app/test/adapter-canvas.test.tsx",
+        "bytes": 17120,
+        "sha256": "6a71a6c8309c944caa63b022fdd379ddd36deb0b10e50879eccc8e6359303eef"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 95914,
+        "sha256": "06f58dfa1bb206e131f32dc8fce6968247cbd55304232139e26961a795b85fcc"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-fixtures.test.ts",
+        "bytes": 16311,
+        "sha256": "ad8b05c450fbef1cb6eaca34bd2739631e8bcfe6453a8dc0f044bc0cba5bbac2"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-scenarios.test.ts",
+        "bytes": 11182,
+        "sha256": "3026b35edff2ab3571a0bc450a7ff4b8fd224b77304fb3d491c5c87c0bc5106e"
+      },
+      {
+        "path": "apps/desen-app/test/preview-controls.test.tsx",
+        "bytes": 5292,
+        "sha256": "e84619ba0848f5c90ae33046b9c23e10e05877ae8f950f21b74aaa5359603160"
+      },
+      {
+        "path": "apps/desen-app/test/preview-fidelity.test.ts",
+        "bytes": 9142,
+        "sha256": "8f4c30281c1b8fdad58e0532e44063fbd6536c22615226d038bc675ecd6fcd9f"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
+        "bytes": 17900,
+        "sha256": "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334"
+      },
+      {
+        "path": "docs/proof/artifacts/reference-catalog-web-parity.json",
+        "bytes": 18146,
+        "sha256": "6e350f2af71ac4e1f040afe7a3fcc3035de35b585f0121db6a2b35b4f3552a8a"
+      },
+      {
+        "path": "docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json",
+        "bytes": 12713,
+        "sha256": "b0413687bd907b71509db52d3e22b6eda5a4150509ac323bf51e5f8425f897e2"
+      },
+      {
+        "path": "examples/sign-in/official-derived.bundle.desen.json",
+        "bytes": 4899,
+        "sha256": "334450fa1864bf280a30342090a46ba1d2f2dc96552b9430afdde5fcada902b0"
+      },
+      {
+        "path": "examples/sign-in/official-derived.source.desen.json",
+        "bytes": 4724,
+        "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+      },
+      {
+        "path": "package.json",
+        "bytes": 93698,
+        "sha256": "06ad3c39091f2d67ab007e1c5dd0ed77448a1003a88bcf9f8871a2d0bcb01985"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129494,
+        "sha256": "1f45e8bc67d87c1fa1073928c1efac23d39ac65be6c56c631e4bbaf4bb962caf"
+      },
+      {
+        "path": "scripts/generate-desen-app-fixtures-scenarios-fidelity-proof.mjs",
+        "bytes": 849,
+        "sha256": "92dfc26099d754d5a52ca7773e5ef7d107eac6dbe6bdc698ead54bc22a37f216"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-fixtures-scenarios-fidelity-proof.mjs",
+        "bytes": 63501,
+        "sha256": "aa61c89861da2793c5dc7762198be37a9941de34031fb0c9ae8b8c314476d28b"
+      },
+      {
+        "path": "scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs",
+        "bytes": 854,
+        "sha256": "7370b13dd2b3c0d53cdc4c88a4d80a482fcaf787cbace2136ca78d2720471a6e"
+      },
+      {
+        "path": "tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
+        "bytes": 19281,
+        "sha256": "1255d3db1a7a44bebf04d4f1f4919105e376ed342d1df6b5118d84a2c2ace91d"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-fixtures-scenarios-fidelity-proof.mjs",
+      "scripts/generate-desen-app-fixtures-scenarios-fidelity-proof.mjs",
+      "scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs",
+      "tests/desen-app-fixtures-scenarios-fidelity.test.mjs"
+    ],
+    "parentArtifacts": 3,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true,
+    "focusedAppTestCases": 86,
+    "focusedAppTestCaseCountPinned": true,
+    "finalCommandWiringPinned": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M09-T11 proves only controlled authoring scenarios and synthetic sign-in fixtures.",
+    "Scenario state and scenario fixture overrides remain unsupported and fail closed.",
+    "Integration and production contexts are visible but unavailable; no real service is called.",
+    "M09-T12 durable save/open remains NOT_PROVEN.",
+    "M09-T13 node-linked diagnostics and invalid placeholders remain NOT_PROVEN.",
+    "M09-T14 publication and activation remain NOT_PROVEN.",
+    "G09 and automated real-browser E2E remain NOT_PROVEN.",
+    "P-08 remains NOT_PROVEN; P-09 and P-10 remain PARTIAL.",
+    "PF-025, PF-083, and PF-089 remain OPEN; no Catalog authoring hint or transient App profile becomes protocol authority.",
+    "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence."
+  ]
+}

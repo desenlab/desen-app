@@ -19,6 +19,8 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json";
 const SHELL_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const REFERENCE_ARTIFACT = "docs/proof/artifacts/reference-catalog-web-capability-artifact.json";
+const FIXTURES_SCENARIOS_ARTIFACT =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const CATALOG = "packages/reference-catalog-web/catalog.json";
 const SOURCE = "examples/sign-in/official-derived.source.desen.json";
 const PACKAGE = "apps/desen-app/package.json";
@@ -32,6 +34,7 @@ const temporaryDirectories = [];
 let built;
 let shellArtifactBytes;
 let referenceArtifactBytes;
+let fixturesScenariosArtifactBytes;
 
 function expectedError(code) {
   return (error) => error instanceof DesenAppCatalogPanelLayerTreeProofError && error.code === code;
@@ -56,11 +59,13 @@ async function temporaryDirectory(prefix) {
 }
 
 before(async () => {
-  [built, shellArtifactBytes, referenceArtifactBytes] = await Promise.all([
-    buildDesenAppCatalogPanelLayerTreeEvidence(),
-    readFile(path.join(ROOT, SHELL_ARTIFACT)),
-    readFile(path.join(ROOT, REFERENCE_ARTIFACT)),
-  ]);
+  [built, shellArtifactBytes, referenceArtifactBytes, fixturesScenariosArtifactBytes] =
+    await Promise.all([
+      buildDesenAppCatalogPanelLayerTreeEvidence(),
+      readFile(path.join(ROOT, SHELL_ARTIFACT)),
+      readFile(path.join(ROOT, REFERENCE_ARTIFACT)),
+      readFile(path.join(ROOT, FIXTURES_SCENARIOS_ARTIFACT)),
+    ]);
 });
 
 after(async () => {
@@ -88,6 +93,8 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.shellCompatibilityRetained, true);
   assert.equal(built.currentCompatibility.result, "PASS");
   assert.equal(built.currentCompatibility.successor.task, "M09-T07");
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.task, "M09-T11");
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.focusedTestCases, 86);
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[1], () => {
@@ -306,7 +313,7 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.currentCompatibility.successor.dynamicEditingImplemented, false);
   assert.equal(built.currentCompatibility.successor.persistenceUiImplemented, false);
   assert.equal(built.currentCompatibility.successor.runOrPublishImplemented, false);
-  assert.equal(built.currentCompatibility.boundary.imports.runtimeCoreImports, 2);
+  assert.equal(built.currentCompatibility.boundary.imports.runtimeCoreImports, 5);
   assert.equal(built.currentCompatibility.boundary.imports.runtimeReactImports, 2);
   assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.adapterImports, 1);
@@ -320,12 +327,12 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.currentCompatibility.boundary.imports.selectionAuthoringImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
   assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
-  assert.equal(built.currentCompatibility.boundary.imports.catalogSdkImports, 10);
-  assert.equal(built.currentCompatibility.boundary.imports.editorCoreImports, 11);
+  assert.equal(built.currentCompatibility.boundary.imports.catalogSdkImports, 11);
+  assert.equal(built.currentCompatibility.boundary.imports.editorCoreImports, 13);
   assert.equal(built.currentCompatibility.boundary.imports.publisherImports, 3);
   assert.equal(built.currentCompatibility.boundary.imports.protocolImports, 4);
   assert.equal(built.currentCompatibility.boundary.imports.reviewedSourceMutationCalls, 13);
-  assert.equal(built.currentCompatibility.boundary.imports.reviewedNamedSlotDragDropHandlers, 18);
+  assert.equal(built.currentCompatibility.boundary.imports.reviewedNamedSlotDragDropHandlers, 13);
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[4], async () => {
@@ -351,6 +358,14 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[5], async () => {
       referenceArtifactBytes: changedByte(referenceArtifactBytes),
     }),
     expectedError("REFERENCE_PREREQUISITE_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [FIXTURES_SCENARIOS_ARTIFACT, changedByte(fixturesScenariosArtifactBytes)],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
 
   const catalog = JSON.parse(await readFile(path.join(ROOT, CATALOG), "utf8"));
@@ -381,8 +396,7 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[5], async () => {
   );
 
   const application = await readFile(path.join(ROOT, APPLICATION), "utf8");
-  const admittedRowDragEnter = `        onDragEnter={(event) => {
-          const projected = projectedRowDrop(event);`;
+  const admittedRowDragEnter = "onDragEnter={updateDropProjection}";
   assert.equal(application.includes(admittedRowDragEnter), true);
   await assert.rejects(
     buildDesenAppCatalogPanelLayerTreeEvidence({

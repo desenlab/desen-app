@@ -27,11 +27,14 @@ const SOURCE_PATHS = Object.freeze({
 });
 const ADAPTER_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let sourcePolicyInput;
 let adapterTestSource;
 let appPackageSource;
+let fixturesScenariosArtifactBytes;
 let built;
 
 function expectedError(code) {
@@ -98,9 +101,10 @@ before(async () => {
       ]),
     ),
   );
-  [adapterTestSource, appPackageSource] = await Promise.all([
+  [adapterTestSource, appPackageSource, fixturesScenariosArtifactBytes] = await Promise.all([
     readFile(path.join(ROOT, ADAPTER_TEST_PATH), "utf8"),
     readFile(path.join(ROOT, APP_PACKAGE_PATH), "utf8"),
+    readFile(path.join(ROOT, FIXTURES_SCENARIOS_ARTIFACT_PATH)),
   ]);
   built = await buildDesenAppDesignRunModesEvidence();
 });
@@ -122,8 +126,15 @@ test(DESEN_APP_DESIGN_RUN_MODES_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.taskStatus, "DONE");
   assert.equal(built.artifact.claim.p08Status, "NOT_PROVEN");
   assert.equal(built.artifact.claim.p09Status, "PARTIAL");
-  assert.equal(built.artifactBytes.byteLength > 0, true);
-  assert.match(built.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(built.artifactBytes.byteLength, 17_900);
+  assert.equal(
+    built.artifactSha256,
+    "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334",
+  );
+  assert.equal(built.currentCompatibility.successor.task, "M09-T11");
+  assert.equal(built.currentCompatibility.successor.focusedTestCases, 86);
+  assert.equal(built.currentCompatibility.successor.pendingRuntimeLifecycleExercised, true);
+  assert.equal(built.currentCompatibility.successor.pf028Status, "CLOSED");
 });
 
 test(DESEN_APP_DESIGN_RUN_MODES_ROOT_TEST_NAMES[1], () => {
@@ -221,8 +232,8 @@ test(DESEN_APP_DESIGN_RUN_MODES_ROOT_TEST_NAMES[8], async () => {
     },
     {
       key: "adapterSource",
-      search: "[bundle, previewRevision, routeIdentity, supported]",
-      replacement: "[bundle, mode, previewRevision, routeIdentity, supported]",
+      search: "[bundle, hostPorts, previewRevision, routeIdentity, supported]",
+      replacement: "[bundle, hostPorts, mode, previewRevision, routeIdentity, supported]",
     },
     {
       key: "adapterSource",
@@ -242,9 +253,8 @@ test(DESEN_APP_DESIGN_RUN_MODES_ROOT_TEST_NAMES[8], async () => {
     },
     {
       key: "adapterSource",
-      search: "hostPorts: ADAPTER_CANVAS_HOST_PORTS,",
-      replacement:
-        'hostPorts: { ...ADAPTER_CANVAS_HOST_PORTS, navigation: { navigate: () => ({ status: "accepted" }) } }, // hostPorts: ADAPTER_CANVAS_HOST_PORTS,',
+      search: "      hostPorts,\n    });",
+      replacement: "      hostPorts: ADAPTER_CANVAS_HOST_PORTS,\n    });",
     },
     {
       key: "applicationSource",
@@ -353,6 +363,15 @@ test(DESEN_APP_DESIGN_RUN_MODES_ROOT_TEST_NAMES[9], async () => {
       expectedError("PARENT_DRIFT"),
     );
   }
+
+  await assert.rejects(
+    buildDesenAppDesignRunModesEvidence({
+      fileOverrides: new Map([
+        [FIXTURES_SCENARIOS_ARTIFACT_PATH, changedByte(fixturesScenariosArtifactBytes)],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
 
   const proofDocument = exactProofDocument(built.artifactSha256);
   const verified = await verifyDesenAppDesignRunModesEvidence({
