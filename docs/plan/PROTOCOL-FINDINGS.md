@@ -2050,12 +2050,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
 
 - Future action: M05-T06 now supplies the explicit production adapter error boundary without
   converting unknown capabilities into guessed placeholders; `PF-055` records its honest
-  attribution limit. M09-T13 must connect the immutable
-  index to end-to-end Desen App diagnostic selection before P-16 can become `PROVEN`. M06-T06 now
-  proves the Publisher-side protocol behavior/source identity relationship recorded by `PF-065`,
-  so the composed evidence advances N-021 to `TESTED`. Native renderers should reuse the observable
-  identity rules but define their own platform instance-compatibility boundary rather than
-  importing React keys.
+  attribution limit. M09-T13 connects the immutable index to end-to-end Desen App diagnostic
+  selection through explicit subject mappings and snapshot-bound occurrence keys, so P-16 is now
+  `PROVEN`. M06-T06 proves the Publisher-side protocol behavior/source identity relationship
+  recorded by `PF-065`, so the composed evidence advances N-021 to `TESTED`. Native renderers
+  should reuse the observable identity rules but define their own platform instance-compatibility
+  boundary rather than importing React keys.
 
 ## PF-055 — React failure containment is whole-surface when exact origin is unavailable
 
@@ -3671,10 +3671,11 @@ This file records implementation discoveries without changing the frozen DESEN 0
   revoked results. Evidence:
   `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`
   `sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`.
-- Future action: M09-T13 must layer node-linked diagnostics without changing persistence
-  generations, and M09-T14 must publish only the exact admitted authored/persisted Source. A
-  concrete App host adapter, interoperable remote-storage profile, or merge protocol still
-  requires a separate explicit profile; PF-085 therefore remains `OPEN`.
+- Future action: M09-T13 layers node-linked diagnostics without changing the admitted Source,
+  preview, persistence request, or persistence generation. M09-T14 must publish only the exact
+  admitted authored/persisted Source. A concrete App host adapter, interoperable remote-storage
+  profile, or merge protocol still requires a separate explicit profile; PF-085 therefore remains
+  `OPEN`.
 
 ## PF-086 — Continuous editor diagnostics require explicit subjects and snapshot identities
 
@@ -3710,11 +3711,29 @@ This file records implementation discoveries without changing the frozen DESEN 0
   Necessary reflection over arbitrary JavaScript `Proxy` values may execute traps; this is not a
   hostile-JavaScript or no-code-execution membrane.
 
-- Future action: M08-T10 must independently prove terminal React/DOM integration, cross-command
-  determinism, and stable identity at the G08 boundary. M09 may schedule validation after edits and
-  render the explicit mappings, but it must not replace subject authority with pointer heuristics
-  or execute dynamic obligations as part of editor validation. Any interoperable diagnostic-index
-  or editor-subscription protocol requires a later explicit profile.
+  M09-T13 carries the exact immutable validation report only on a rejected Source candidate; the
+  invalid document itself never replaces the admitted authored Source, publishable preview, or
+  persistence generation. The App fences that report by its candidate document and Catalog-set
+  fingerprints, exact project/surface route, and the still-current committed-document owner. Route,
+  Catalog, committed Source, successful edit, Open, or lifetime changes therefore revoke stale
+  navigation authority rather than adapting it.
+
+  One pure callback-free App projection creates selectable occurrences only from the Validator's
+  `invalidSubjects`. It preserves duplicate occurrence pointers, keeps node and behavior identities
+  distinct, and treats diagnostic code, message, pointer, capability, and incidental context text
+  only as visible metadata. Unmapped and out-of-route diagnostics remain readable but inert;
+  dynamic obligations remain visible inert metadata and are never executed. A selection stores only
+  an opaque snapshot-bound key and re-admits it from the current projection. In Design mode the
+  App-owned canvas sibling renders a selectable invalid placeholder outside the managed Runtime
+  subtree while preserving the current valid preview; Run mode exposes neither Inspector
+  diagnostics nor placeholder interaction.
+
+- Future action: M08-T10 independently proves terminal React/DOM integration, cross-command
+  determinism, and stable identity at the G08 boundary, and M09-T13 consumes that identity without
+  replacing explicit subjects with pointer heuristics or executing dynamic obligations. M09-T14
+  must publish only the exact admitted authored/persisted Source; any interoperable
+  diagnostic-index or editor-subscription protocol still requires a later explicit profile, so
+  PF-086 remains `OPEN`.
 
 ## PF-087 — Terminal editor evidence needs independent graphs, identity deltas, and an AST platform audit
 

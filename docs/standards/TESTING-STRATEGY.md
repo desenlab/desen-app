@@ -1168,3 +1168,20 @@ the executable CI registrations, shared-state mappings, and direct 12-runtime/9-
 inventories, while code-owned exact source receipts bind their executable bodies and effective
 flow. All proof-authority inputs use bounded identity-safe reads. The compiler-negative inventory
 remains exactly 14 cases.
+
+M09-T13 adds a nine-file focused diagnostics suite with 161 passing cases, a twenty-four-file
+complete App suite with 339 passing cases, and an independent 12/12 root mutation proof. Coverage
+includes rejected-candidate non-admission, exact transient report capture, all fingerprint/route/
+owner/live-index fences, explicit node/behavior occurrence mapping, preserved order and duplicates,
+readable unmapped/out-of-route diagnostics, inert obligations, opaque selection re-admission,
+native selectable controls, dismissal, live count, `aria-current`, no autofocus, placeholder
+separation from the managed Runtime subtree, Design/Run inertness, and no Run-to-Design focus theft.
+
+The deterministic 27,353-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
+`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`. It binds 39 current
+files and eleven exact Runtime, Editor Core, and App parents. Structural CI owns 198 workloads and
+94 proof pairs—83 ordinary and eleven barriers—with a 62-proof-unit/134-workload affected closure
+and ownership over 1,253 tracked paths, including 188 proof-owned paths. These local test receipts
+make no required-gate, hosted-CI, publication/activation, or automated real-browser E2E claim.
+P-16 is `PROVEN`, PF-086 remains `OPEN`, and proof gates remain 10/13.

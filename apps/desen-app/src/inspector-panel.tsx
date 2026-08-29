@@ -17,6 +17,7 @@ import type {
 import type { StructuredJsonParseFailureReason } from "./structured-json.js";
 
 interface InspectorPanelProps {
+  readonly diagnosticsControls?: ReactNode;
   readonly hidden?: boolean | undefined;
   readonly inspector: AuthoringInspectorModelResult;
   readonly onEdit: (edit: AuthoringInspectorEdit) => AuthoringInspectorEditResult;
@@ -747,6 +748,7 @@ function InspectorField(props: Readonly<InspectorFieldProps>) {
 
 /** App-owned property inspector rendered outside the managed capability subtree. */
 export function InspectorPanel({
+  diagnosticsControls,
   hidden = false,
   inspector,
   onBindingEdit,
@@ -778,6 +780,7 @@ export function InspectorPanel({
       </div>
 
       {previewControls}
+      {diagnosticsControls}
 
       {inspector.status !== "ready" ? (
         <div className={styles.inspectorEmpty}>

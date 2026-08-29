@@ -30,6 +30,8 @@ const NAMED_SLOT_ARTIFACT_PIN_SHA256 =
 const FIXTURES_SCENARIOS_ARTIFACT =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let selectionSource;
@@ -338,8 +340,26 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       ...baseline,
       adapterSource: replaceOnce(
         adapterSource,
-        '      </fieldset>\n      {mode === "design" ? <SelectionOverlay projection={projection} /> : null}',
-        '        {mode === "design" ? <SelectionOverlay projection={projection} /> : null}\n      </fieldset>',
+        `      </fieldset>
+      {mode === "design" && selectedDiagnostic !== undefined ? (
+        <DiagnosticPlaceholderOverlay
+          diagnostic={selectedDiagnostic.diagnostic}
+          occurrence={selectedDiagnostic.occurrence}
+          placeholderRef={diagnosticPlaceholderRef}
+        />
+      ) : mode === "design" ? (
+        <SelectionOverlay projection={projection} />
+      ) : null}`,
+        `        {mode === "design" && selectedDiagnostic !== undefined ? (
+          <DiagnosticPlaceholderOverlay
+            diagnostic={selectedDiagnostic.diagnostic}
+            occurrence={selectedDiagnostic.occurrence}
+            placeholderRef={diagnosticPlaceholderRef}
+          />
+        ) : mode === "design" ? (
+          <SelectionOverlay projection={projection} />
+        ) : null}
+      </fieldset>`,
       ),
     },
     {
@@ -349,6 +369,14 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
     {
       ...baseline,
       applicationSource: `import type { DesenEditorDocument } from "@desen/editor-core";\n${applicationSource}`,
+    },
+    {
+      ...baseline,
+      applicationSource: replaceOnce(
+        applicationSource,
+        "createDesenEditorContinuousValidator",
+        "createDesenEditorDocument",
+      ),
     },
   ]) {
     assert.throws(
@@ -410,6 +438,12 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       slotSource,
       "export function applyAuthoringNodeDelete(",
       "export function applyAuthoringNodeRemoval(",
+    ],
+    [
+      AUTHORING_SLOT_SOURCE,
+      slotSource,
+      '? failure("source-invalid", validationReport)',
+      '? failure("source-invalid")',
     ],
     [
       APPLICATION_SOURCE,
@@ -632,6 +666,82 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
   await assert.rejects(
     buildDesenAppSelectionOverlayEvidence({
       fileOverrides: new Map([[SOURCE_PERSISTENCE_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T13 diagnostics closure", async () => {
+  const successor = built.currentCompatibility.nodeLinkedDiagnosticsSuccessor;
+  assert.deepEqual(successor.artifact, {
+    task: "M09-T13",
+    proofId: "desen-app-node-linked-diagnostics",
+    profile: "desen.app.node-linked-diagnostics-proof.v1",
+    result: "PASS",
+    path: NODE_LINKED_DIAGNOSTICS_ARTIFACT,
+    bytes: 27_353,
+    sha256: "b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c",
+  });
+  assert.deepEqual(
+    {
+      focusedTestCases: successor.focusedTestCases,
+      fullAppTestFiles: successor.fullAppTestFiles,
+      fullAppTestCases: successor.fullAppTestCases,
+      trackedFiles: successor.trackedFiles,
+      parentArtifacts: successor.parentArtifacts,
+      rootTests: successor.rootTests,
+      explicitContextIdentityMappingOnly: successor.explicitContextIdentityMappingOnly,
+      diagnosticCodeMessagePointerIdentityInference:
+        successor.diagnosticCodeMessagePointerIdentityInference,
+      duplicateOccurrenceOrderPreserved: successor.duplicateOccurrenceOrderPreserved,
+      unmappedDiagnosticsSelectable: successor.unmappedDiagnosticsSelectable,
+      snapshotAndRouteFenced: successor.snapshotAndRouteFenced,
+      runtimeKindMismatchFailsClosed: successor.runtimeKindMismatchFailsClosed,
+      invalidPlaceholderInsideManagedRuntimeSubtree:
+        successor.invalidPlaceholderInsideManagedRuntimeSubtree,
+      runModeDiagnosticsVisible: successor.runModeDiagnosticsVisible,
+      automaticFocusSteal: successor.automaticFocusSteal,
+      obligationsExecutable: successor.obligationsExecutable,
+      rejectedDiagnosticsPersisted: successor.rejectedDiagnosticsPersisted,
+      rejectedDiagnosticsAffectDirtyState: successor.rejectedDiagnosticsAffectDirtyState,
+      rejectedDiagnosticsIncludedInSave: successor.rejectedDiagnosticsIncludedInSave,
+      p16Status: successor.p16Status,
+      pf086Status: successor.pf086Status,
+    },
+    {
+      focusedTestCases: 161,
+      fullAppTestFiles: 24,
+      fullAppTestCases: 339,
+      trackedFiles: 39,
+      parentArtifacts: 11,
+      rootTests: 12,
+      explicitContextIdentityMappingOnly: true,
+      diagnosticCodeMessagePointerIdentityInference: false,
+      duplicateOccurrenceOrderPreserved: true,
+      unmappedDiagnosticsSelectable: false,
+      snapshotAndRouteFenced: true,
+      runtimeKindMismatchFailsClosed: true,
+      invalidPlaceholderInsideManagedRuntimeSubtree: false,
+      runModeDiagnosticsVisible: false,
+      automaticFocusSteal: false,
+      obligationsExecutable: false,
+      rejectedDiagnosticsPersisted: false,
+      rejectedDiagnosticsAffectDirtyState: false,
+      rejectedDiagnosticsIncludedInSave: false,
+      p16Status: "PROVEN",
+      pf086Status: "OPEN",
+    },
+  );
+  const artifactBytes = await readFile(path.join(ROOT, NODE_LINKED_DIAGNOSTICS_ARTIFACT));
+  await assert.rejects(
+    buildDesenAppSelectionOverlayEvidence({
+      fileOverrides: new Map([[NODE_LINKED_DIAGNOSTICS_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppSelectionOverlayEvidence({
+      fileOverrides: new Map([[ADAPTER_SOURCE, Buffer.from(`${adapterSource}\n`)]]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );

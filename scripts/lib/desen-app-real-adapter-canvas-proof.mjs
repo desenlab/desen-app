@@ -21,6 +21,8 @@ const FIXTURES_SCENARIOS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SOURCE_PERSISTENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const APP_INDEX_PATH = "apps/desen-app/index.html";
@@ -97,7 +99,9 @@ const CURRENT_APP_SOURCE_PATHS = Object.freeze(
     PREVIEW_FIDELITY_SOURCE_PATH,
     STATE_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
+    "apps/desen-app/src/authoring-diagnostics.ts",
     "apps/desen-app/src/authoring-persistence.ts",
+    "apps/desen-app/src/diagnostics-panel.tsx",
     "apps/desen-app/src/persistence-controls.tsx",
   ].sort(),
 );
@@ -146,8 +150,34 @@ const T12_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
   "apps/desen-app/test/project-navigation.test.ts",
   "apps/desen-app/test/state-panel.test.tsx",
 ]);
+const T13_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/adapter-canvas.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-inspector.ts",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/authoring-slots.ts",
+  "apps/desen-app/src/authoring-state.ts",
+  "apps/desen-app/src/diagnostics-panel.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/test/adapter-canvas.test.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-diagnostics.test.ts",
+  "apps/desen-app/test/authoring-event-actions.test.ts",
+  "apps/desen-app/test/authoring-inspector.test.ts",
+  "apps/desen-app/test/authoring-slots.test.ts",
+  "apps/desen-app/test/authoring-state.test.ts",
+  "apps/desen-app/test/diagnostics-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+]);
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ...T12_SUCCESSOR_RECEIPT_PATHS,
+  ...T13_SUCCESSOR_RECEIPT_PATHS,
   APP_PACKAGE_PATH,
   ADAPTER_CANVAS_SOURCE_PATH,
   "apps/desen-app/src/application.module.css",
@@ -168,7 +198,9 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     NAMED_SLOT_ARTIFACT_PATH,
     FIXTURES_SCENARIOS_ARTIFACT_PATH,
     SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
     ...T12_SUCCESSOR_RECEIPT_PATHS,
+    ...T13_SUCCESSOR_RECEIPT_PATHS,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_SELECTION_TEST_PATH,
     AUTHORING_INSPECTOR_SOURCE_PATH,
@@ -259,7 +291,7 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     module: "react",
     defaultImport: null,
     namespaceImport: null,
-    namedImports: Object.freeze(["useEffect", "useMemo", "useState"]),
+    namedImports: Object.freeze(["useEffect", "useMemo", "useRef", "useState"]),
     typeOnly: false,
   }),
   Object.freeze({
@@ -321,6 +353,13 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     typeOnly: false,
   }),
   Object.freeze({
+    module: "./authoring-diagnostics.js",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze(["projectAuthoringDiagnostics"]),
+    typeOnly: false,
+  }),
+  Object.freeze({
     module: "./authoring-selection.js",
     defaultImport: null,
     namespaceImport: null,
@@ -342,6 +381,13 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     typeOnly: true,
   }),
   Object.freeze({
+    module: "@desen/editor-core",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze(["DesenEditorContinuousValidationReport"]),
+    typeOnly: true,
+  }),
+  Object.freeze({
     module: "@desen/runtime-react",
     defaultImport: null,
     namespaceImport: null,
@@ -349,6 +395,13 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
       "RuntimeReactLiveSurfaceInput",
       "RuntimeReactSurfaceFailureRenderer",
     ]),
+    typeOnly: true,
+  }),
+  Object.freeze({
+    module: "react",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze(["RefObject"]),
     typeOnly: true,
   }),
   Object.freeze({
@@ -365,6 +418,17 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     namedImports: Object.freeze(["CatalogAuthoringModel"]),
     typeOnly: true,
   }),
+  Object.freeze({
+    module: "./authoring-diagnostics.js",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze([
+      "AuthoringDiagnosticOccurrence",
+      "AuthoringDiagnosticView",
+      "AuthoringDiagnosticsSnapshotIdentity",
+    ]),
+    typeOnly: true,
+  }),
 ]);
 
 const EXPECTED_JSX_BY_FUNCTION = Object.freeze({
@@ -372,11 +436,21 @@ const EXPECTED_JSX_BY_FUNCTION = Object.freeze({
   readPreviewRevision: Object.freeze([]),
   renderManagedFailure: Object.freeze(["div"]),
   SelectionOverlay: Object.freeze(["div", "span", "span", "strong", "code", "span"]),
+  DiagnosticPlaceholderOverlay: Object.freeze([
+    "div",
+    "span",
+    "span",
+    "strong",
+    "code",
+    "span",
+    "span",
+  ]),
   ManagedAdapterSurface: Object.freeze([
     "fieldset",
     "legend",
     "div",
     "RuntimeReactSurfaceBoundary",
+    "DiagnosticPlaceholderOverlay",
     "SelectionOverlay",
   ]),
   CanvasUnavailable: Object.freeze(["div"]),
@@ -398,10 +472,12 @@ const EXPECTED_CALL_COUNTS = Object.freeze({
   createRuntimeReactAdapterRegistry: 1,
   disposeRuntimeHeadlessSession: 3,
   mountRuntimeHeadlessSession: 1,
+  projectAuthoringDiagnostics: 1,
   projectAuthoringSelection: 1,
   renderRuntimeReactSurface: 1,
-  useEffect: 1,
+  useEffect: 2,
   useMemo: 1,
+  useRef: 2,
   useRuntimeReactSurface: 1,
   useState: 1,
 });
@@ -956,6 +1032,7 @@ function authenticateSourcePersistenceSuccessor(files) {
     );
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    if (T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
     const liveBytes = files.get(relativePath);
     if (
@@ -1065,7 +1142,12 @@ function authenticateFixturesScenariosSuccessor(bytes, files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
-    if (T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
+    if (
+      T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
+    ) {
+      continue;
+    }
     const authority = receiptMap.get(relativePath);
     const liveBytes = files.get(relativePath);
     if (
@@ -1387,7 +1469,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
   const bareReturns = collectDescendants(sourceFile, ts.isReturnStatement).filter(
     (statement) => statement.expression === undefined,
   );
-  if (bareReturns.length !== 5) {
+  if (bareReturns.length !== 6) {
     fail(
       "SOURCE_POLICY_VIOLATION",
       "The reviewed fail-closed control flow gained an automatic-semicolon return split.",
@@ -1647,6 +1729,12 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       ts.isJsxSelfClosingElement(node) &&
       jsxTagText(node.tagName, sourceFile) === "SelectionOverlay",
   );
+  const diagnosticPlaceholders = collectDescendants(
+    managedBody,
+    (node) =>
+      ts.isJsxSelfClosingElement(node) &&
+      jsxTagText(node.tagName, sourceFile) === "DiagnosticPlaceholderOverlay",
+  );
   const fieldsetElement = managedFieldsets[0]?.parent;
   function isWithin(candidate, ancestor) {
     let current = candidate;
@@ -1667,13 +1755,18 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
   const overlayAttributeNames = (selectionOverlays[0]?.attributes.properties ?? []).map(
     (property) => (ts.isJsxAttribute(property) ? property.name.getText(sourceFile) : null),
   );
+  const diagnosticPlaceholderAttributeNames = (
+    diagnosticPlaceholders[0]?.attributes.properties ?? []
+  ).map((property) => (ts.isJsxAttribute(property) ? property.name.getText(sourceFile) : null));
   if (
     managedFieldsets.length !== 1 ||
     managedBoundaries.length !== 1 ||
     selectionOverlays.length !== 1 ||
+    diagnosticPlaceholders.length !== 1 ||
     !ts.isJsxElement(fieldsetElement) ||
     !isWithin(managedBoundaries[0], fieldsetElement) ||
     isWithin(selectionOverlays[0], fieldsetElement) ||
+    isWithin(diagnosticPlaceholders[0], fieldsetElement) ||
     !isDeepStrictEqual(fieldsetAttributeNames, [
       "className",
       "data-adapter-canvas-mode",
@@ -1684,6 +1777,11 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     ]) ||
     !isDeepStrictEqual(boundaryAttributeNames, ["renderFailure", "result"]) ||
     !isDeepStrictEqual(overlayAttributeNames, ["projection"]) ||
+    !isDeepStrictEqual(diagnosticPlaceholderAttributeNames, [
+      "diagnostic",
+      "occurrence",
+      "placeholderRef",
+    ]) ||
     !managedText.includes('data-managed-capability-frame="true"') ||
     !managedText.includes('data-managed-capability-subtree="true"') ||
     !managedText.includes("data-adapter-canvas-mode={mode}") ||
@@ -1694,7 +1792,9 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     !managedText.includes(
       "<RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />",
     ) ||
-    !managedText.includes('mode === "design" ? <SelectionOverlay projection={projection} /> : null')
+    !managedText.includes(
+      'mode === "design" && selectedDiagnostic !== undefined ? ( <DiagnosticPlaceholderOverlay diagnostic={selectedDiagnostic.diagnostic} occurrence={selectedDiagnostic.occurrence} placeholderRef={diagnosticPlaceholderRef} /> ) : mode === "design" ? ( <SelectionOverlay projection={projection} /> ) : null',
+    )
   ) {
     fail(
       "SOURCE_POLICY_VIOLATION",
@@ -1731,7 +1831,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     "selection = null",
     "hostPorts = ADAPTER_CANVAS_HOST_PORTS",
     'mode = "design"',
-    "<ManagedAdapterSurface authoringModel={authoringModel} input={state.input} mode={mode} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
+    "<ManagedAdapterSurface authoringModel={authoringModel} diagnostics={diagnostics} input={state.input} mode={mode} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
     "disposeRuntimeHeadlessSession(session)",
   ]) {
     if (!canvasText.includes(requiredText)) {
@@ -1786,6 +1886,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       !isDeepStrictEqual(canvasAttributeNames, [
         "authoringModel",
         "bundle",
+        "diagnostics",
         "hostPorts",
         "mode",
         "projectId",
@@ -1795,6 +1896,11 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       !canvasElementText.includes("authoringModel={model}") ||
       !canvasElementText.includes(
         "bundle={effectivePreview?.ok === true ? effectivePreview.bundle : null}",
+      ) ||
+      !canvasElementText.includes('diagnostics={ mode === "design"') ||
+      !canvasElementText.includes("report: activeTransientDiagnostics.report") ||
+      !canvasElementText.includes(
+        "selectedSelectionKey: diagnosticSelection?.selectionKey ?? null",
       ) ||
       !canvasElementText.includes("hostPorts={fixtureHostPorts}") ||
       !canvasElementText.includes("mode={mode}") ||
@@ -2163,14 +2269,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 143 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 145 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 425 || dynamicEdges !== 0) {
+  if (staticEdges !== 432 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -2254,6 +2360,7 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   const expectedCanvasEdges = [
     "apps/desen-app/src/application.module.css",
     AUTHORING_DATA_SOURCE_PATH,
+    "apps/desen-app/src/authoring-diagnostics.ts",
     AUTHORING_SELECTION_SOURCE_PATH,
     BUNDLE_PATH,
     "node_modules/react/index.js",
@@ -2452,7 +2559,12 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
   const applicationTests = decodeUtf8(files.get(APPLICATION_TEST_PATH), APPLICATION_TEST_PATH);
   const modeSuccessorPaths = new Set([ADAPTER_CANVAS_SOURCE_PATH, ADAPTER_CANVAS_TEST_PATH]);
   for (const receipt of sourceAndTestReceipts) {
-    if (modeSuccessorPaths.has(receipt.path)) continue;
+    if (
+      modeSuccessorPaths.has(receipt.path) ||
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(receipt.path)
+    ) {
+      continue;
+    }
     const bytes = files.get(receipt.path);
     if (
       bytes === undefined ||
@@ -2856,6 +2968,130 @@ function captureBuildOptions(rawOptions) {
   });
 }
 
+function authenticateNodeLinkedDiagnosticsSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T13",
+    proofId: "desen-app-node-linked-diagnostics",
+    profile: "desen.app.node-linked-diagnostics-proof.v1",
+    result: "PASS",
+    path: NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
+    bytes: 27_353,
+    sha256: "b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c",
+  });
+  const artifactBytes = files.get(NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M09-T13 node-linked-diagnostics artifact drifted.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  const diagnosticsCommand =
+    "vitest run test/authoring-diagnostics.test.ts test/diagnostics-panel.test.tsx test/authoring-inspector.test.ts test/authoring-state.test.ts test/authoring-event-actions.test.ts test/authoring-slots.test.ts test/adapter-canvas.test.tsx test/application.test.tsx test/persistence-application.test.tsx";
+  const appPackage = parseJson(
+    files.get("apps/desen-app/package.json"),
+    "apps/desen-app/package.json",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.immutableRejectedCandidateReport !== true ||
+    artifact.claim?.explicitContextIdentityMappingOnly !== true ||
+    artifact.claim?.diagnosticCodeMessagePointerIdentityInference !== false ||
+    artifact.claim?.duplicateOccurrenceOrderPreserved !== true ||
+    artifact.claim?.unmappedDiagnosticsVisible !== true ||
+    artifact.claim?.unmappedDiagnosticsSelectable !== false ||
+    artifact.claim?.reportSnapshotDocumentFingerprintFenced !== true ||
+    artifact.claim?.reportSnapshotCatalogFingerprintFenced !== true ||
+    artifact.claim?.routeAndSurfaceFenced !== true ||
+    artifact.claim?.runtimeKindMismatchFailsClosed !== true ||
+    artifact.claim?.committedOwnerFingerprintFenced !== true ||
+    artifact.claim?.snapshotBoundSelectionReadmitted !== true ||
+    artifact.claim?.invalidPlaceholderAppOwned !== true ||
+    artifact.claim?.invalidPlaceholderInsideManagedRuntimeSubtree !== false ||
+    artifact.claim?.runModeDiagnosticsVisible !== false ||
+    artifact.claim?.automaticFocusSteal !== false ||
+    artifact.claim?.explicitSelectionFocusOnly !== true ||
+    artifact.claim?.obligationsVisibleMetadataOnly !== true ||
+    artifact.claim?.obligationsExecutable !== false ||
+    artifact.claim?.rejectedDiagnosticsPersisted !== false ||
+    artifact.claim?.rejectedDiagnosticsAffectDirtyState !== false ||
+    artifact.claim?.rejectedDiagnosticsIncludedInSave !== false ||
+    artifact.claim?.lastKnownGoodPreviewPreserved !== true ||
+    artifact.claim?.p16Status !== "PROVEN" ||
+    artifact.claim?.pf086Status !== "OPEN" ||
+    artifact.tests?.focusedTestCases !== 161 ||
+    artifact.tests?.fullAppTestFiles !== 24 ||
+    artifact.tests?.fullAppTestCases !== 339 ||
+    artifact.tests?.rootTestNames?.length !== 12 ||
+    artifact.boundary?.trackedFiles !== 39 ||
+    artifact.boundary?.parentArtifacts !== 11 ||
+    artifact.boundary?.focusedAppTestCases !== 161 ||
+    artifact.boundary?.fullAppTestFiles !== 24 ||
+    artifact.boundary?.fullAppTestCases !== 339 ||
+    trackedReceipts?.length !== 39 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    appPackage.scripts?.["test:diagnostics"] !== diagnosticsCommand
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T13 node-linked-diagnostics identity or claims drifted.",
+    );
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T13 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    focusedTestCases: 161,
+    fullAppTestFiles: 24,
+    fullAppTestCases: 339,
+    trackedFiles: 39,
+    parentArtifacts: 11,
+    rootTests: 12,
+    explicitContextIdentityMappingOnly: true,
+    diagnosticCodeMessagePointerIdentityInference: false,
+    duplicateOccurrenceOrderPreserved: true,
+    unmappedDiagnosticsSelectable: false,
+    snapshotAndRouteFenced: true,
+    runtimeKindMismatchFailsClosed: true,
+    invalidPlaceholderInsideManagedRuntimeSubtree: false,
+    runModeDiagnosticsVisible: false,
+    automaticFocusSteal: false,
+    obligationsExecutable: false,
+    rejectedDiagnosticsPersisted: false,
+    rejectedDiagnosticsAffectDirtyState: false,
+    rejectedDiagnosticsIncludedInSave: false,
+    p16Status: "PROVEN",
+    pf086Status: "OPEN",
+  });
+}
+
 /** Authenticates frozen M09-T03 evidence and exact additive M09-T07/T11 successors. */
 export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
@@ -2891,6 +3127,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
     files,
   );
   const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
+  const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files);
   const hostArtifact = hostSourceAudit.artifact;
   const data = inspectControlledData(files.get(CATALOG_PATH), files.get(BUNDLE_PATH));
   const sourcePolicy = verifyDesenAppRealAdapterCanvasSourcePolicy(
@@ -3016,6 +3253,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
     },
     fixturesScenariosSuccessor,
     sourcePersistenceSuccessor,
+    nodeLinkedDiagnosticsSuccessor,
   });
   return deepFreeze({
     artifact: frozen.artifact,

@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████████░░░░░░░` **107 / 145 tasks complete (74%)**
+**Overall:** `██████████████████░░░░░░░` **108 / 145 tasks complete (74%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `████████████░░` **12 / 14 tasks complete (86%)**
+**M09:** `█████████████░` **13 / 14 tasks complete (93%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T13`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T14`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -1027,6 +1027,44 @@ remain 10/13. `N-012`, `N-018`, and `S-003` remain `TESTED` with App-consumption
 remains `NOT_PROVEN`, P-09 and P-10 remain `PARTIAL`, and PF-085/PF-089 remain `OPEN`.
 Node-linked diagnostics, publication/activation, a concrete App storage adapter, and automated
 real-browser E2E remain unproven. M09-T13 is next.
+
+M09-T13 keeps a rejected candidate outside authored Source, publishable preview, managed Runtime,
+dirty state, Save requests, and persistence generations. Only its exact frozen continuous-
+validation report is retained as transient App state. Candidate document and Catalog-set
+fingerprints, exact project/surface route, the still-current committed-document owner, and the live
+Runtime React diagnostic index fence every projection; stale or inconsistent authority returns no
+partial navigation model.
+
+Selectable targets come only from `context.surfaceId` plus explicit `subject.kind` and
+`subject.id` mappings in `invalidSubjects`. Diagnostic code, message, pointer, capability, and
+incidental context text remain presentation metadata and never infer identity. Original diagnostic
+order, duplicate occurrence pointers, distinct node/behavior identities, visible unmapped and
+out-of-route diagnostics, and inert dynamic obligations are preserved. Selection stores only an
+opaque snapshot-bound key and re-admits it from the current projection.
+
+The compact Inspector diagnostics section uses native target buttons, announces its count, marks
+the current target with `aria-current`, and provides explicit dismissal without autofocus. An
+admitted target renders an App-owned invalid-change placeholder as a sibling outside the managed
+Runtime subtree while the current valid preview remains visible. The surface is Design-only: Run
+hides and inerts diagnostics, returning to Design does not steal focus, and a successful edit or
+session replacement revokes the rejected report.
+
+The focused nine-file diagnostics suite passes 161/161, the complete twenty-four-file App suite
+passes 339/339, and the independent root mutation proof passes 12/12. Exact evidence is the
+27,353-byte [`desen-app-0.1.0-node-linked-diagnostics.json`](docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json)
+at `sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`. It binds 39 current
+files and eleven exact Runtime, Editor Core, and App proof parents.
+
+The live local CI authority now contains 198 workloads and 94 proof pairs—83 ordinary and eleven
+barriers—with a 62-proof-unit/134-workload connected closure. Complete ownership covers 1,253
+tracked paths, including 188 proof-owned paths. The neutral inventory, impact graph, path set, and
+ownership projection are pinned at `sha256:d3b479cc998d6c84d53b9b0d64e6121033d94bbf9b502fcb9e7adc2487b3d908`,
+`sha256:b6fae5194e9dd837d05e1ce44808d6b8054742b564420b42901a39e23d4581b1`,
+`sha256:372a30ee1f8db5b7d1a35e7fd0b46335513724c59bdfa0540513be2e1938d492`, and
+`sha256:7d5a90e56b4b32e2d7e1a0306b09669855642b30558155dba9a07f1ccf7da7a3`.
+These are local receipts and claim no required-gate or hosted-CI result. M09-T13 is `DONE`, P-16 is
+`PROVEN`, PF-086 remains `OPEN`, proof gates remain 10/13, implementation progress is 108/145
+(74%), M09 is 13/14 (93%), and M09-T14 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

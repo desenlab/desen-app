@@ -1150,6 +1150,34 @@ P-09/P-10 remain `PARTIAL`, and PF-085/PF-089 remain `OPEN`. Diagnostics remain 
 publication/activation remain M09-T14; concrete storage is trusted-host authority; automated
 real-browser E2E remains M10 authority.
 
+M09-T13 composes rejected-candidate diagnostics without admitting the invalid candidate into
+authored Source, publishable preview, managed Runtime, dirty state, Save requests, or persistence
+generations. The exact frozen validation report remains transient App state and is fenced by
+candidate document and Catalog-set fingerprints, exact project/surface route, the current
+committed-document owner, and—inside the canvas—the live public Runtime React diagnostic index.
+
+The projection creates targets only from explicit `invalidSubjects` mappings keyed by
+`context.surfaceId`, `subject.kind`, and `subject.id`; diagnostic code, message, pointer,
+capability, and incidental context text never infer identity. Original order, duplicate
+occurrences, node/behavior distinction, unmapped and out-of-route diagnostics, and inert dynamic
+obligations are preserved. Selection stores only an opaque snapshot-bound key and is re-admitted
+from the current projection before use.
+
+The diagnostics panel and invalid-change placeholder are App-owned Design chrome. The placeholder
+is a sibling outside the managed Runtime subtree and preserves the current valid preview. Run hides
+and inerts diagnostics, and returning to Design does not steal focus. This closes P-16 as `PROVEN`
+without defining an interoperable editor subscription/index profile; PF-086 therefore remains
+`OPEN`. Publication and activation remain M09-T14 authority, and automated real-browser E2E
+remains M10 authority.
+
+The M09-T13 architecture is authenticated by the 27,353-byte
+`docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
+`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`. Its eleven-parent
+affected graph deliberately keeps the M05-T05 Runtime diagnostic index fresh, producing a
+62-proof-unit/134-workload connected closure inside the 198-workload/94-proof-pair local
+authority. P-16 is `PROVEN`; PF-086 remains `OPEN` because this App-owned composition does not
+define a protocol-wide editor subscription/index contract.
+
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,
 proof, runtime, or protocol authority. Repository-owned TypeScript, React structure, CSS Modules,

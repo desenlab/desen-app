@@ -375,6 +375,37 @@ describe("Desen App event and closed-action authoring", () => {
     expect(emailActions(original)).toMatchObject([{ value: { $ref: "event.value" } }]);
   });
 
+  it("returns the frozen rejected-candidate report without exposing the candidate", () => {
+    const original = requireDocument();
+    const before = canonicalizeJson(original);
+    const rejected = apply(original, emailSelection(), {
+      kind: "replace-action",
+      actionPointer: "/on/change/0",
+      action: { type: "state.set", path: "missing", value: "next" },
+    });
+
+    expect(rejected).toMatchObject({
+      ok: false,
+      reason: "source-invalid",
+      validationReport: {
+        valid: false,
+        invalidSubjects: [
+          expect.objectContaining({
+            surfaceId: "sign-in",
+            subject: { kind: "node", id: "sign-in.email" },
+          }),
+        ],
+      },
+    });
+    if (rejected.ok || rejected.validationReport === undefined) {
+      throw new Error("Expected rejected-candidate event diagnostics.");
+    }
+    expect(Object.isFrozen(rejected)).toBe(true);
+    expect(Object.isFrozen(rejected.validationReport)).toBe(true);
+    expect(Object.hasOwn(rejected, "document")).toBe(false);
+    expect(canonicalizeJson(original)).toBe(before);
+  });
+
   it("uses post-removal final reorder indices without an App-side adjustment", () => {
     const original = requireDocument();
     const selection = emailSelection();

@@ -528,13 +528,36 @@ describe("Desen App schema-driven authoring inspector", () => {
         value: Number.POSITIVE_INFINITY,
       }),
     ).toEqual({ ok: false, reason: "edit-rejected" });
-    expect(
-      applyAuthoringInspectorEdit(original, referenceCatalog, REFERENCE_ROUTE, layoutSelection, {
+    const rejectedCandidate = applyAuthoringInspectorEdit(
+      original,
+      referenceCatalog,
+      REFERENCE_ROUTE,
+      layoutSelection,
+      {
         kind: "set",
         valuePointer: "/maxWidth",
         value: 0,
-      }),
-    ).toEqual({ ok: false, reason: "source-invalid" });
+      },
+    );
+    expect(rejectedCandidate).toMatchObject({
+      ok: false,
+      reason: "source-invalid",
+      validationReport: {
+        valid: false,
+        invalidSubjects: [
+          expect.objectContaining({
+            surfaceId: "sign-in",
+            subject: { kind: "node", id: "sign-in.layout" },
+          }),
+        ],
+      },
+    });
+    if (rejectedCandidate.ok || rejectedCandidate.validationReport === undefined) {
+      throw new Error("Expected rejected-candidate diagnostics.");
+    }
+    expect(Object.isFrozen(rejectedCandidate)).toBe(true);
+    expect(Object.isFrozen(rejectedCandidate.validationReport)).toBe(true);
+    expect(Object.hasOwn(rejectedCandidate, "document")).toBe(false);
     expect(original).toEqual(originalSnapshot);
   });
 
@@ -1026,7 +1049,11 @@ describe("Desen App schema-driven authoring inspector", () => {
         value: { enabled: true },
         valuePointer: "/settings",
       }),
-    ).toEqual({ ok: false, reason: "source-invalid" });
+    ).toMatchObject({
+      ok: false,
+      reason: "source-invalid",
+      validationReport: { valid: false },
+    });
     expect(document).toEqual(originalSnapshot);
 
     const changed = requireEditSuccess(

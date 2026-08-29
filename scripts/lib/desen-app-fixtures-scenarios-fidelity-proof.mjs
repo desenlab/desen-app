@@ -19,6 +19,8 @@ const SIGN_IN_FIXTURE_ARTIFACT_PATH =
 const PARITY_ARTIFACT_PATH = "docs/proof/artifacts/reference-catalog-web-parity.json";
 const SOURCE_PERSISTENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const LOCKFILE_PATH = "pnpm-lock.yaml";
@@ -105,16 +107,48 @@ const T12_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
   "apps/desen-app/test/project-navigation.test.ts",
   "apps/desen-app/test/state-panel.test.tsx",
 ]);
+const T13_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  "apps/desen-app/src/diagnostics-panel.tsx",
+  "apps/desen-app/src/adapter-canvas.tsx",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/authoring-inspector.ts",
+  "apps/desen-app/src/authoring-state.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-slots.ts",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/test/authoring-diagnostics.test.ts",
+  "apps/desen-app/test/diagnostics-panel.test.tsx",
+  "apps/desen-app/test/authoring-inspector.test.ts",
+  "apps/desen-app/test/authoring-state.test.ts",
+  "apps/desen-app/test/authoring-event-actions.test.ts",
+  "apps/desen-app/test/authoring-slots.test.ts",
+  "apps/desen-app/test/adapter-canvas.test.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+]);
 const SELF_RESEALED_PATHS = Object.freeze([
   "scripts/lib/desen-app-fixtures-scenarios-fidelity-proof.mjs",
   "tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
 ]);
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ...T12_SUCCESSOR_RECEIPT_PATHS,
+  ...T13_SUCCESSOR_RECEIPT_PATHS,
   ...SELF_RESEALED_PATHS,
 ]);
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
-  ...new Set([...TRACKED_PATHS, SOURCE_PERSISTENCE_ARTIFACT_PATH, ...T12_SUCCESSOR_RECEIPT_PATHS]),
+  ...new Set([
+    ...TRACKED_PATHS,
+    SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
+    ...T12_SUCCESSOR_RECEIPT_PATHS,
+    ...T13_SUCCESSOR_RECEIPT_PATHS,
+  ]),
 ]);
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
   TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
@@ -1627,6 +1661,159 @@ function assertRetainedHistoricalReceipts(frozenArtifact, files) {
   }
 }
 
+function authenticateNodeLinkedDiagnosticsSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T13",
+    proofId: "desen-app-node-linked-diagnostics",
+    profile: "desen.app.node-linked-diagnostics-proof.v1",
+    result: "PASS",
+    path: NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
+    bytes: 27_353,
+    sha256: "b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c",
+  });
+  const artifactBytes = files.get(NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M09-T13 node-linked diagnostics artifact drifted.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  const semanticClaims = {
+    taskStatus: artifact.claim?.taskStatus,
+    immutableRejectedCandidateReport: artifact.claim?.immutableRejectedCandidateReport,
+    explicitContextIdentityMappingOnly: artifact.claim?.explicitContextIdentityMappingOnly,
+    diagnosticCodeMessagePointerIdentityInference:
+      artifact.claim?.diagnosticCodeMessagePointerIdentityInference,
+    duplicateOccurrenceOrderPreserved: artifact.claim?.duplicateOccurrenceOrderPreserved,
+    unmappedDiagnosticsVisible: artifact.claim?.unmappedDiagnosticsVisible,
+    unmappedDiagnosticsSelectable: artifact.claim?.unmappedDiagnosticsSelectable,
+    reportSnapshotDocumentFingerprintFenced:
+      artifact.claim?.reportSnapshotDocumentFingerprintFenced,
+    reportSnapshotCatalogFingerprintFenced: artifact.claim?.reportSnapshotCatalogFingerprintFenced,
+    routeAndSurfaceFenced: artifact.claim?.routeAndSurfaceFenced,
+    runtimeKindMismatchFailsClosed: artifact.claim?.runtimeKindMismatchFailsClosed,
+    committedOwnerFingerprintFenced: artifact.claim?.committedOwnerFingerprintFenced,
+    snapshotBoundSelectionReadmitted: artifact.claim?.snapshotBoundSelectionReadmitted,
+    invalidPlaceholderAppOwned: artifact.claim?.invalidPlaceholderAppOwned,
+    invalidPlaceholderInsideManagedRuntimeSubtree:
+      artifact.claim?.invalidPlaceholderInsideManagedRuntimeSubtree,
+    runModeDiagnosticsVisible: artifact.claim?.runModeDiagnosticsVisible,
+    automaticFocusSteal: artifact.claim?.automaticFocusSteal,
+    explicitSelectionFocusOnly: artifact.claim?.explicitSelectionFocusOnly,
+    obligationsVisibleMetadataOnly: artifact.claim?.obligationsVisibleMetadataOnly,
+    obligationsExecutable: artifact.claim?.obligationsExecutable,
+    rejectedDiagnosticsPersisted: artifact.claim?.rejectedDiagnosticsPersisted,
+    rejectedDiagnosticsAffectDirtyState: artifact.claim?.rejectedDiagnosticsAffectDirtyState,
+    rejectedDiagnosticsIncludedInSave: artifact.claim?.rejectedDiagnosticsIncludedInSave,
+    lastKnownGoodPreviewPreserved: artifact.claim?.lastKnownGoodPreviewPreserved,
+    publicationClaimed: artifact.claim?.publicationClaimed,
+    activationClaimed: artifact.claim?.activationClaimed,
+    p08Status: artifact.claim?.p08Status,
+    p16Status: artifact.claim?.p16Status,
+    pf086Status: artifact.claim?.pf086Status,
+    pf089Status: artifact.claim?.pf089Status,
+  };
+  const expectedClaims = {
+    taskStatus: "DONE",
+    immutableRejectedCandidateReport: true,
+    explicitContextIdentityMappingOnly: true,
+    diagnosticCodeMessagePointerIdentityInference: false,
+    duplicateOccurrenceOrderPreserved: true,
+    unmappedDiagnosticsVisible: true,
+    unmappedDiagnosticsSelectable: false,
+    reportSnapshotDocumentFingerprintFenced: true,
+    reportSnapshotCatalogFingerprintFenced: true,
+    routeAndSurfaceFenced: true,
+    runtimeKindMismatchFailsClosed: true,
+    committedOwnerFingerprintFenced: true,
+    snapshotBoundSelectionReadmitted: true,
+    invalidPlaceholderAppOwned: true,
+    invalidPlaceholderInsideManagedRuntimeSubtree: false,
+    runModeDiagnosticsVisible: false,
+    automaticFocusSteal: false,
+    explicitSelectionFocusOnly: true,
+    obligationsVisibleMetadataOnly: true,
+    obligationsExecutable: false,
+    rejectedDiagnosticsPersisted: false,
+    rejectedDiagnosticsAffectDirtyState: false,
+    rejectedDiagnosticsIncludedInSave: false,
+    lastKnownGoodPreviewPreserved: true,
+    publicationClaimed: false,
+    activationClaimed: false,
+    p08Status: "NOT_PROVEN",
+    p16Status: "PROVEN",
+    pf086Status: "OPEN",
+    pf089Status: "OPEN",
+  };
+  const diagnosticsCommand =
+    "vitest run test/authoring-diagnostics.test.ts test/diagnostics-panel.test.tsx test/authoring-inspector.test.ts test/authoring-state.test.ts test/authoring-event-actions.test.ts test/authoring-slots.test.ts test/adapter-canvas.test.tsx test/application.test.tsx test/persistence-application.test.tsx";
+  const appPackage = parseJson(
+    files.get("apps/desen-app/package.json"),
+    "apps/desen-app/package.json",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    !isDeepStrictEqual(semanticClaims, expectedClaims) ||
+    artifact.tests?.focusedTestCases !== 161 ||
+    artifact.tests?.fullAppTestFiles !== 24 ||
+    artifact.tests?.fullAppTestCases !== 339 ||
+    artifact.tests?.rootTestNames?.length !== 12 ||
+    artifact.boundary?.trackedFiles !== 39 ||
+    artifact.boundary?.parentArtifacts !== 11 ||
+    artifact.boundary?.focusedAppTestCases !== 161 ||
+    artifact.boundary?.fullAppTestFiles !== 24 ||
+    artifact.boundary?.fullAppTestCases !== 339 ||
+    trackedReceipts?.length !== 39 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    appPackage.scripts?.["test:diagnostics"] !== diagnosticsCommand
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T13 node-linked diagnostics identity or claims drifted.",
+    );
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T13 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    focusedTestFiles: 9,
+    focusedTestCases: 161,
+    fullAppTestFiles: 24,
+    fullAppTestCases: 339,
+    parentArtifacts: 11,
+    trackedFiles: 39,
+    ...expectedClaims,
+    diagnosticsCommand,
+  });
+}
+
 function authenticateSourcePersistenceSuccessor(files) {
   const pin = Object.freeze({
     task: "M09-T12",
@@ -1727,6 +1914,7 @@ function authenticateSourcePersistenceSuccessor(files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    if (T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -1921,6 +2109,7 @@ export async function buildDesenAppFixturesScenariosFidelityEvidence(rawOptions 
     ],
   });
   const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
+  const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files);
   assertRetainedHistoricalReceipts(frozen.artifact, files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
@@ -1946,6 +2135,7 @@ export async function buildDesenAppFixturesScenariosFidelityEvidence(rawOptions 
       currentPathReceipts: receipts(files),
     },
     sourcePersistenceSuccessor,
+    nodeLinkedDiagnosticsSuccessor,
   });
   return deepFreeze({
     artifact: frozen.artifact,

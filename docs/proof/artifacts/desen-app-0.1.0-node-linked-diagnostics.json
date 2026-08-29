@@ -1,0 +1,645 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-node-linked-diagnostics",
+  "profile": "desen.app.node-linked-diagnostics-proof.v1",
+  "task": "M09-T13",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M05-T05",
+      "proofId": null,
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-reconciliation-diagnostics.json",
+      "bytes": 19234,
+      "sha256": "292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb",
+      "profile": "desen-runtime-react-reconciliation-diagnostics-v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M08-T09",
+      "proofId": "editor-core-continuous-validation",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json",
+      "bytes": 40099,
+      "sha256": "7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a",
+      "profile": "desen.editor-core.continuous-validation-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T04",
+      "proofId": "desen-app-selection-overlay",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json",
+      "bytes": 11997,
+      "sha256": "9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1",
+      "profile": "desen.app.selection-overlay-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T05",
+      "proofId": "desen-app-schema-inspector",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json",
+      "bytes": 22998,
+      "sha256": "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b",
+      "profile": "desen.app.schema-inspector-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T06",
+      "proofId": "desen-app-structured-inspector",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json",
+      "bytes": 26133,
+      "sha256": "6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec",
+      "profile": "desen.app.structured-inspector-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T07",
+      "proofId": "desen-app-named-slot-authoring",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json",
+      "bytes": 24830,
+      "sha256": "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
+      "profile": "desen.app.named-slot-authoring-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T08",
+      "proofId": "desen-app-state-binding-editor",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json",
+      "bytes": 28766,
+      "sha256": "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
+      "profile": "desen.app.state-binding-editor-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T09",
+      "proofId": "desen-app-event-action-editor",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json",
+      "bytes": 23812,
+      "sha256": "0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab",
+      "profile": "desen.app.event-action-editor-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T10",
+      "proofId": "desen-app-design-run-modes",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
+      "bytes": 17900,
+      "sha256": "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334",
+      "profile": "desen.app.design-run-modes-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T11",
+      "proofId": "desen-app-fixtures-scenarios-fidelity",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json",
+      "bytes": 29407,
+      "sha256": "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+      "profile": "desen.app.fixtures-scenarios-fidelity-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T12",
+      "proofId": "desen-app-source-persistence",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json",
+      "bytes": 27053,
+      "sha256": "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
+      "profile": "desen.app.source-persistence-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "immutableRejectedCandidateReport": true,
+    "explicitContextIdentityMappingOnly": true,
+    "diagnosticCodeMessagePointerIdentityInference": false,
+    "duplicateOccurrenceOrderPreserved": true,
+    "unmappedDiagnosticsVisible": true,
+    "unmappedDiagnosticsSelectable": false,
+    "reportSnapshotDocumentFingerprintFenced": true,
+    "reportSnapshotCatalogFingerprintFenced": true,
+    "routeAndSurfaceFenced": true,
+    "runtimeKindMismatchFailsClosed": true,
+    "committedOwnerFingerprintFenced": true,
+    "snapshotBoundSelectionReadmitted": true,
+    "invalidPlaceholderAppOwned": true,
+    "invalidPlaceholderInsideManagedRuntimeSubtree": false,
+    "runModeDiagnosticsVisible": false,
+    "automaticFocusSteal": false,
+    "explicitSelectionFocusOnly": true,
+    "obligationsVisibleMetadataOnly": true,
+    "obligationsExecutable": false,
+    "rejectedDiagnosticsPersisted": false,
+    "rejectedDiagnosticsAffectDirtyState": false,
+    "rejectedDiagnosticsIncludedInSave": false,
+    "lastKnownGoodPreviewPreserved": true,
+    "publicationClaimed": false,
+    "activationClaimed": false,
+    "browserE2eClaimed": false,
+    "p08Status": "NOT_PROVEN",
+    "p16Status": "PROVEN",
+    "pf086Status": "OPEN",
+    "pf089Status": "OPEN"
+  },
+  "authority": {
+    "source": {
+      "imports": {
+        "authoringDiagnostics": [
+          "@desen/protocol",
+          "@desen/editor-core",
+          "@desen/protocol",
+          "@desen/runtime-react"
+        ],
+        "diagnosticsPanel": ["./application.module.css", "./authoring-diagnostics.js"],
+        "adapterCanvas": [
+          "react",
+          "@desen/reference-catalog-web/catalog.json",
+          "@desen/reference-catalog-web/react-adapters",
+          "@desen/reference-catalog-web/tokens",
+          "@desen/runtime-core",
+          "@desen/runtime-react",
+          "../../../examples/sign-in/official-derived.bundle.desen.json",
+          "./authoring-data.js",
+          "./authoring-diagnostics.js",
+          "./authoring-selection.js",
+          "./application.module.css",
+          "@desen/runtime-core",
+          "@desen/editor-core",
+          "@desen/runtime-react",
+          "react",
+          "./authoring-selection.js",
+          "./authoring-data.js",
+          "./authoring-diagnostics.js"
+        ],
+        "application": [
+          "react",
+          "react-dom",
+          "@desen/reference-catalog-web/catalog.json",
+          "@desen/editor-core",
+          "@desen/protocol",
+          "@desen/runtime-core",
+          "./authoring-data.js",
+          "./authoring-diagnostics.js",
+          "./adapter-canvas.js",
+          "./authoring-fixtures.js",
+          "./authoring-persistence.js",
+          "./diagnostics-panel.js",
+          "./authoring-inspector.js",
+          "./authoring-event-actions.js",
+          "./authoring-state.js",
+          "./authoring-slots.js",
+          "./authoring-selection.js",
+          "./inspector-panel.js",
+          "./event-action-panel.js",
+          "./authoring-scenarios.js",
+          "./preview-fidelity.js",
+          "./persistence-controls.js",
+          "./preview-controls.js",
+          "./state-panel.js",
+          "./authoring-preview.js",
+          "./project-navigation.js",
+          "./project-data.js",
+          "./assets/breadcrumb-separator.svg",
+          "./assets/desen-logo.svg",
+          "./assets/plus.svg",
+          "./assets/settings.svg",
+          "./assets/theme.svg",
+          "./application.module.css",
+          "react",
+          "@desen/editor-core",
+          "@desen/runtime-core",
+          "./authoring-data.js",
+          "./authoring-persistence.js",
+          "./authoring-diagnostics.js",
+          "./authoring-event-actions.js",
+          "./authoring-inspector.js",
+          "./authoring-state.js",
+          "./authoring-selection.js",
+          "./authoring-scenarios.js",
+          "./authoring-slots.js",
+          "./project-navigation.js",
+          "./project-data.js",
+          "./persistence-controls.js"
+        ],
+        "inspectorPanel": [
+          "react",
+          "./application.module.css",
+          "./structured-json.js",
+          "./authoring-inspector.js",
+          "react",
+          "@desen/catalog-sdk",
+          "./authoring-inspector.js",
+          "./structured-json.js"
+        ],
+        "authoringInspector": [
+          "@desen/editor-core",
+          "@desen/protocol",
+          "./authoring-data.js",
+          "./authoring-selection.js",
+          "@desen/catalog-sdk",
+          "@desen/editor-core",
+          "./authoring-data.js",
+          "./authoring-selection.js"
+        ],
+        "authoringState": [
+          "@desen/editor-core",
+          "./authoring-data.js",
+          "@desen/catalog-sdk",
+          "@desen/editor-core",
+          "./authoring-data.js"
+        ],
+        "authoringEventActions": [
+          "@desen/editor-core",
+          "@desen/protocol",
+          "./authoring-data.js",
+          "@desen/catalog-sdk",
+          "@desen/editor-core",
+          "./authoring-data.js"
+        ],
+        "authoringSlots": [
+          "@desen/editor-core",
+          "@desen/protocol",
+          "./authoring-data.js",
+          "@desen/catalog-sdk",
+          "@desen/editor-core",
+          "./authoring-data.js",
+          "./authoring-selection.js"
+        ],
+        "persistence": [
+          "./authoring-data.js",
+          "./authoring-preview.js",
+          "@desen/protocol",
+          "@desen/editor-core",
+          "@desen/protocol",
+          "./authoring-data.js",
+          "./authoring-preview.js"
+        ]
+      },
+      "explicitInvalidSubjectMappingOnly": true,
+      "diagnosticTextIdentityInference": false,
+      "duplicateOccurrenceOrderPreserved": true,
+      "unmappedDiagnosticsVisibleAndInert": true,
+      "candidateDocumentAndCatalogFingerprintsRequired": true,
+      "renderedRouteAndRuntimeKindFenced": true,
+      "committedOwnerFingerprintFencedByApplication": true,
+      "snapshotBoundSelectionKeyReadmittedByApplication": true,
+      "invalidPlaceholderOutsideManagedRuntimeSubtree": true,
+      "runModeDiagnosticsHidden": true,
+      "focusRequiresExplicitSelection": true,
+      "obligationsVisibleMetadataOnly": true,
+      "rejectedCandidateDiagnosticsOutsidePersistence": true,
+      "editAdaptersReturnFrozenValidationReport": true
+    },
+    "protocolProfiles": {
+      "report": "one immutable rejected-candidate continuous-validation report with exact document and Catalog fingerprints",
+      "mapping": "only Validator-owned invalidSubjects context identity; diagnostic text and pointers are display metadata",
+      "occurrence": "every explicit occurrence pointer retained in Validator order under one snapshot-bound selection key",
+      "runtime": "current public Runtime React diagnostic index admitted only for the current project and surface",
+      "placeholder": "App-owned focusable-on-request sibling outside the managed Runtime capability subtree",
+      "mode": "Design-only diagnostics presentation with no mount-authority change and no Run focus steal",
+      "obligations": "closed callback-free visible metadata with no resolver or execution authority",
+      "persistence": "transient rejected-candidate state excluded from committed Source, canonical dirty projection, and Save requests"
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/authoring-diagnostics.test.ts test/diagnostics-panel.test.tsx test/authoring-inspector.test.ts test/authoring-state.test.ts test/authoring-event-actions.test.ts test/authoring-slots.test.ts test/adapter-canvas.test.tsx test/application.test.tsx test/persistence-application.test.tsx",
+      "editorCoreDependency": "workspace:*",
+      "protocolDependency": "workspace:*",
+      "runtimeReactDependency": "workspace:*",
+      "rootPackageName": "desen-workspace",
+      "rootCommands": {
+        "generate:desen-app-node-linked-diagnostics": "pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:diagnostics && node scripts/generate-desen-app-node-linked-diagnostics-proof.mjs",
+        "verify:desen-app-node-linked-diagnostics": "pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:diagnostics && node scripts/verify-desen-app-node-linked-diagnostics.mjs",
+        "test:desen-app-node-linked-diagnostics": "pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:diagnostics && node --test tests/desen-app-node-linked-diagnostics.test.mjs"
+      },
+      "parentsAuthenticatedInsideReader": true
+    },
+    "flow": [
+      "capture the exact frozen validation report only from one rejected edit",
+      "fence the candidate report by exact candidate document and Catalog fingerprints",
+      "fence retained transient state by the last-known-good committed Source owner and current App route",
+      "project links only from explicit invalidSubjects context identities",
+      "retain every duplicate occurrence and leave unmapped or outside-route diagnostics non-linkable",
+      "re-admit an opaque snapshot-bound selection key from the current projection",
+      "use the public Runtime diagnostic index only to distinguish materialized identity from invalid placeholder",
+      "render selected invalid diagnostics in App chrome outside the managed Runtime subtree",
+      "hide diagnostics in Run and focus a placeholder only after an explicit current selection",
+      "copy dynamic obligations into inert visible metadata without executing them",
+      "clear transient diagnostics on every successful committed Source replacement"
+    ],
+    "ownership": {
+      "validationReport": "Editor Core continuous validator",
+      "targetMapping": "Validator invalidSubjects entries",
+      "selection": "Desen App snapshot-bound key re-admission",
+      "runtimeIdentity": "public Runtime React diagnostic index",
+      "placeholderAndPanel": "Desen App Design chrome",
+      "managedRuntimeSubtree": "unchanged Runtime React adapter boundary",
+      "persistenceAndDirtyState": "committed authored Source only"
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/app-web test:diagnostics && node --test tests/desen-app-node-linked-diagnostics.test.mjs",
+    "focusedFiles": [
+      "apps/desen-app/test/authoring-diagnostics.test.ts",
+      "apps/desen-app/test/diagnostics-panel.test.tsx",
+      "apps/desen-app/test/authoring-inspector.test.ts",
+      "apps/desen-app/test/authoring-state.test.ts",
+      "apps/desen-app/test/authoring-event-actions.test.ts",
+      "apps/desen-app/test/authoring-slots.test.ts",
+      "apps/desen-app/test/adapter-canvas.test.tsx",
+      "apps/desen-app/test/application.test.tsx",
+      "apps/desen-app/test/persistence-application.test.tsx"
+    ],
+    "testDeclarationCounts": {
+      "apps/desen-app/test/authoring-diagnostics.test.ts": 7,
+      "apps/desen-app/test/diagnostics-panel.test.tsx": 4,
+      "apps/desen-app/test/authoring-inspector.test.ts": 27,
+      "apps/desen-app/test/authoring-state.test.ts": 13,
+      "apps/desen-app/test/authoring-event-actions.test.ts": 13,
+      "apps/desen-app/test/authoring-slots.test.ts": 23,
+      "apps/desen-app/test/adapter-canvas.test.tsx": 10,
+      "apps/desen-app/test/application.test.tsx": 38,
+      "apps/desen-app/test/persistence-application.test.tsx": 17
+    },
+    "testCaseCounts": {
+      "apps/desen-app/test/authoring-diagnostics.test.ts": 7,
+      "apps/desen-app/test/diagnostics-panel.test.tsx": 4,
+      "apps/desen-app/test/authoring-inspector.test.ts": 27,
+      "apps/desen-app/test/authoring-state.test.ts": 13,
+      "apps/desen-app/test/authoring-event-actions.test.ts": 13,
+      "apps/desen-app/test/authoring-slots.test.ts": 28,
+      "apps/desen-app/test/adapter-canvas.test.tsx": 10,
+      "apps/desen-app/test/application.test.tsx": 42,
+      "apps/desen-app/test/persistence-application.test.tsx": 17
+    },
+    "focusedTestCases": 161,
+    "fullAppTestFiles": 24,
+    "fullAppTestCases": 339,
+    "rootTestNames": [
+      "[authority] authenticates exact validation, selection, mode, and persistence parents",
+      "[mapping] proves only explicit context identity mappings create selectable targets",
+      "[occurrences] preserves duplicate order and keeps unmapped diagnostics inert",
+      "[fencing] rejects stale report, Catalog, route, and Runtime-kind authority",
+      "[canvas] keeps the selectable invalid placeholder outside the managed Runtime subtree",
+      "[mode] hides diagnostics in Run and never steals focus without explicit selection",
+      "[obligations] exposes dynamic obligations only as inert visible metadata",
+      "[persistence] keeps rejected diagnostics outside Source, dirty state, and Save requests",
+      "[tests] retains exact nine-file 161-case focused and 24-file 339-case full evidence",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[policy] rejects projector, panel, integration, test, and package weakening",
+      "[verification] rejects parent, artifact, report, destination, and linked-path drift"
+    ],
+    "semanticCoverage": [
+      "EXPLICIT_CONTEXT_IDENTITY_MAPPING",
+      "NO_TEXT_OR_POINTER_IDENTITY_INFERENCE",
+      "DUPLICATE_OCCURRENCE_ORDER",
+      "UNMAPPED_VISIBLE_NON_LINKABLE",
+      "REPORT_SNAPSHOT_CATALOG_ROUTE_RUNTIME_KIND_FENCES",
+      "SNAPSHOT_BOUND_SELECTION_READMISSION",
+      "APP_OWNED_PLACEHOLDER_OUTSIDE_RUNTIME_SUBTREE",
+      "RUN_HIDDEN_NO_FOCUS_STEAL",
+      "INERT_OBLIGATION_METADATA",
+      "DIAGNOSTICS_OUTSIDE_SOURCE_DIRTY_AND_SAVE"
+    ]
+  },
+  "boundary": {
+    "trackedFiles": 39,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 3479,
+        "sha256": "0d88ba24254829b822b72e874fd8f1aa163838c6443383e683e266d11a4f81d9"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 16160,
+        "sha256": "106fe7461c23c223b10303e09e1e57dffd5f3183abb7f962cf0371decf52e6cc"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 89679,
+        "sha256": "7851f5b3127b3795cc002b188e3d1c06e27aa657e3dd8fe83ece9c6fdf6731b5"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 110735,
+        "sha256": "1941aa7837024c05f1daf22695dae81e2fbf1bbadf53b68ed4129e25bfba446b"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-diagnostics.ts",
+        "bytes": 16059,
+        "sha256": "7cddac8f13736d0fe4fc3e36abe46d0affebdc5ceb20e87e5295ec2ec7db5a1e"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-event-actions.ts",
+        "bytes": 43876,
+        "sha256": "10021fe8756b796f97e4dd922ec8df0c251a8f7fc4670efcb581d6bb17e41118"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-inspector.ts",
+        "bytes": 38900,
+        "sha256": "ecb829a3e10b7c532801b71ed1e27e6c4b0a7a2c93919612ffcffa7f42d238c1"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-persistence.ts",
+        "bytes": 31178,
+        "sha256": "a9328d91a58438aa93f03de9b08e67abd19a8b8e75d0c34fad889c48f4736be4"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-slots.ts",
+        "bytes": 41336,
+        "sha256": "924616dc9c7f6f5944f9f8e3519d47562329dcb333c56dd6672255b61db1ab6a"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-state.ts",
+        "bytes": 23742,
+        "sha256": "8120d7ef37cab004fe29ac1af6c8b94348e1f3251dfb2750d2202a885a7fb737"
+      },
+      {
+        "path": "apps/desen-app/src/diagnostics-panel.tsx",
+        "bytes": 5638,
+        "sha256": "1c3889d2b8405db04999689c9570d8f2dee2f6c5b2f7ea2290cc256359f2dd0f"
+      },
+      {
+        "path": "apps/desen-app/src/inspector-panel.tsx",
+        "bytes": 28085,
+        "sha256": "2d2e892241de06a88c20308f511de9c03f6c20d7811fa6e20d61503f627983a1"
+      },
+      {
+        "path": "apps/desen-app/test/adapter-canvas.test.tsx",
+        "bytes": 17120,
+        "sha256": "6a71a6c8309c944caa63b022fdd379ddd36deb0b10e50879eccc8e6359303eef"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 106784,
+        "sha256": "ddb8c39f9037ed6a32aa6a8e8cffb9fbc7dd2db89bae356a00663378c52c3c14"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-diagnostics.test.ts",
+        "bytes": 15737,
+        "sha256": "db1e81774bcad8200ea172112d58b0a6a8f0ab8fe13f655c1954bcf7d74f4742"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-event-actions.test.ts",
+        "bytes": 26778,
+        "sha256": "e3eb0d811ef365dc4ecdc5468038a2ac34f83c0cc3a4a3652f69986a3b395d49"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-inspector.test.ts",
+        "bytes": 53982,
+        "sha256": "8b88461ada80182d6ed7e9c8dee487d6a541d9a148b817567fb646be8c935ad3"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-slots.test.ts",
+        "bytes": 46500,
+        "sha256": "cd695e2d61e28106b424994377b0a1f869646ac231bce4f1c291596fc23c92ad"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-state.test.ts",
+        "bytes": 20901,
+        "sha256": "dcd15a0365a585167de677bc2900c7c1fd31b9c354ce5e59137492e6fbc7a838"
+      },
+      {
+        "path": "apps/desen-app/test/diagnostics-panel.test.tsx",
+        "bytes": 8007,
+        "sha256": "6d60f679a60c6eb5fa9fb0bd1a42027b4e3c171e33aff3d246312a49e8028c72"
+      },
+      {
+        "path": "apps/desen-app/test/persistence-application.test.tsx",
+        "bytes": 35298,
+        "sha256": "24d498649faaf87c04d63e35994abed87c11845df9eff432eb345c00ebd1cecf"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
+        "bytes": 17900,
+        "sha256": "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json",
+        "bytes": 23812,
+        "sha256": "0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json",
+        "bytes": 29407,
+        "sha256": "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json",
+        "bytes": 24830,
+        "sha256": "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json",
+        "bytes": 22998,
+        "sha256": "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json",
+        "bytes": 11997,
+        "sha256": "9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json",
+        "bytes": 27053,
+        "sha256": "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json",
+        "bytes": 28766,
+        "sha256": "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json",
+        "bytes": 26133,
+        "sha256": "6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec"
+      },
+      {
+        "path": "docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json",
+        "bytes": 40099,
+        "sha256": "7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a"
+      },
+      {
+        "path": "docs/proof/artifacts/runtime-react-0.1.0-reconciliation-diagnostics.json",
+        "bytes": 19234,
+        "sha256": "292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb"
+      },
+      {
+        "path": "package.json",
+        "bytes": 95810,
+        "sha256": "f140995332aa50129951769236b5dd9bf0ba3c0c4e051e6490516244bdc653ec"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129494,
+        "sha256": "1f45e8bc67d87c1fa1073928c1efac23d39ac65be6c56c631e4bbaf4bb962caf"
+      },
+      {
+        "path": "scripts/generate-desen-app-node-linked-diagnostics-proof.mjs",
+        "bytes": 819,
+        "sha256": "8c78079ac7daee96db77452fb3a8b31e317bb1d8b4c9e2adc503e7216ce38e7f"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-node-linked-diagnostics-proof.mjs",
+        "bytes": 53136,
+        "sha256": "8a813fef7474f381fe2a022a59325223e39b90896d39469c6b3281a8fdce37de"
+      },
+      {
+        "path": "scripts/verify-desen-app-node-linked-diagnostics.mjs",
+        "bytes": 824,
+        "sha256": "ebee4d60b1d338ceadd8353f1bd84de1a5598a3e4bfd5159745ff15f737f1f7b"
+      },
+      {
+        "path": "tests/desen-app-node-linked-diagnostics.test.mjs",
+        "bytes": 15394,
+        "sha256": "1d7d53e0f056a432e37a9270a84dd3fd29ab0689c5a10fc916b4c87e00061493"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-node-linked-diagnostics-proof.mjs",
+      "scripts/generate-desen-app-node-linked-diagnostics-proof.mjs",
+      "scripts/verify-desen-app-node-linked-diagnostics.mjs",
+      "tests/desen-app-node-linked-diagnostics.test.mjs"
+    ],
+    "parentArtifacts": 11,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true,
+    "focusedAppTestCases": 161,
+    "focusedAppTestCaseCountPinned": true,
+    "fullAppTestFiles": 24,
+    "fullAppTestCases": 339,
+    "fullAppTestCaseCountPinned": true,
+    "finalCommandWiringPinned": true,
+    "historicalProofReadersTracked": false
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M09-T13 proves only App-owned node-linked diagnostics for rejected local authoring candidates.",
+    "Diagnostics do not mutate or replace the last-known-good committed Source or Runtime preview.",
+    "Dynamic obligations remain visible metadata and do not grant Runtime execution authority.",
+    "M09-T14 publication and activation remain NOT_PROVEN.",
+    "A concrete App storage adapter and automated real-browser E2E remain NOT_PROVEN.",
+    "P-16 is PROVEN for the selected Web–React profile; native diagnostic identity remains independently profiled.",
+    "PF-086 remains OPEN because interoperable diagnostic-index and editor-subscription profiles are not defined.",
+    "P-08 remains NOT_PROVEN; PF-089 remains OPEN.",
+    "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence."
+  ]
+}

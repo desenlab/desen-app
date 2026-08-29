@@ -36,34 +36,14 @@ const SOURCE_PATHS = Object.freeze({
 const PERSISTENCE_TEST_PATH = "apps/desen-app/test/authoring-persistence.test.ts";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const ROOT_PACKAGE_PATH = "package.json";
-const PROOF_LIBRARY_PATH = "scripts/lib/desen-app-source-persistence-proof.mjs";
-const PRETTIER_COMPACTION_TARGETS = Object.freeze([
-  Object.freeze({
-    sourceKey: "previewFidelity",
-    sourcePath: SOURCE_PATHS.previewFidelity,
-    expanded: `        "previewFidelity": [
-          "./authoring-data.js",
-          "./authoring-slots.js"
-        ],`,
-    compact: `        "previewFidelity": ["./authoring-data.js", "./authoring-slots.js"],`,
-  }),
-  Object.freeze({
-    sourceKey: "persistenceControls",
-    sourcePath: SOURCE_PATHS.persistenceControls,
-    expanded: `        "persistenceControls": [
-          "react",
-          "./application.module.css"
-        ]`,
-    compact: `        "persistenceControls": ["react", "./application.module.css"]`,
-  }),
-]);
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const temporaryDirectories = [];
 let sourcePolicyInput;
 let parentArtifactBytes;
 let persistenceTestSource;
 let appPackageSource;
 let rootPackageSource;
-let proofLibrarySource;
 let built;
 
 function expectedError(code) {
@@ -129,13 +109,11 @@ before(async () => {
       ]),
     ),
   );
-  [persistenceTestSource, appPackageSource, rootPackageSource, proofLibrarySource] =
-    await Promise.all([
-      readFile(path.join(ROOT, PERSISTENCE_TEST_PATH), "utf8"),
-      readFile(path.join(ROOT, APP_PACKAGE_PATH), "utf8"),
-      readFile(path.join(ROOT, ROOT_PACKAGE_PATH), "utf8"),
-      readFile(path.join(ROOT, PROOF_LIBRARY_PATH), "utf8"),
-    ]);
+  [persistenceTestSource, appPackageSource, rootPackageSource] = await Promise.all([
+    readFile(path.join(ROOT, PERSISTENCE_TEST_PATH), "utf8"),
+    readFile(path.join(ROOT, APP_PACKAGE_PATH), "utf8"),
+    readFile(path.join(ROOT, ROOT_PACKAGE_PATH), "utf8"),
+  ]);
   built = await buildDesenAppSourcePersistenceEvidence();
 });
 
@@ -282,33 +260,10 @@ test(DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES[9], async () => {
   const rebuilt = await buildDesenAppSourcePersistenceEvidence();
   assert.deepEqual(rebuilt.artifactBytes, built.artifactBytes);
   assert.equal(rebuilt.artifactSha256, built.artifactSha256);
-
-  const artifactText = built.artifactBytes.toString("utf8");
-  for (const target of PRETTIER_COMPACTION_TARGETS) {
-    assert.equal(artifactText.split(target.compact).length - 1, 1);
-    assert.equal(artifactText.includes(target.expanded), false);
-    assert.equal(proofLibrarySource.split(target.expanded).length - 1, 1);
-    assert.equal(proofLibrarySource.split(target.compact).length - 1, 1);
-    await assert.rejects(
-      buildDesenAppSourcePersistenceEvidence({
-        fileOverrides: new Map([
-          [
-            target.sourcePath,
-            Buffer.from(`import "./format-drift.js";\n${sourcePolicyInput[target.sourceKey]}`),
-          ],
-        ]),
-      }),
-      expectedError("ARTIFACT_FORMAT_DRIFT"),
-    );
-  }
-  assert.equal(proofLibrarySource.split("if (text.split(expanded).length !== 2)").length - 1, 1);
-  assert.equal(
-    proofLibrarySource.split(
-      'fail("ARTIFACT_FORMAT_DRIFT", "Expected one reviewed Prettier JSON compaction target.")',
-    ).length - 1,
-    1,
-  );
-  assert.equal(proofLibrarySource.split("text = text.replace(expanded, compact)").length - 1, 1);
+  assert.notEqual(rebuilt.artifact, built.artifact);
+  assert.equal(Object.isFrozen(rebuilt.artifact), true);
+  assert.equal(Object.isFrozen(rebuilt.artifact.boundary.trackedReceipts), true);
+  assert.deepEqual(rebuilt.currentCompatibility, built.currentCompatibility);
 });
 
 test(DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES[10], async () => {
@@ -593,4 +548,77 @@ test(DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES[11], async () => {
     expectedError("ARTIFACT_WRITE_UNSAFE"),
   );
   assert.equal(await readFile(sentinel, "utf8"), "sentinel\n");
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T13 diagnostics closure", async () => {
+  const successor = built.currentCompatibility.nodeLinkedDiagnosticsSuccessor;
+  assert.deepEqual(
+    {
+      artifact: successor.artifact,
+      focusedTestFiles: successor.focusedTestFiles,
+      focusedTestCases: successor.focusedTestCases,
+      fullAppTestFiles: successor.fullAppTestFiles,
+      fullAppTestCases: successor.fullAppTestCases,
+      parentArtifacts: successor.parentArtifacts,
+      trackedFiles: successor.trackedFiles,
+      immutableRejectedCandidateReport: successor.immutableRejectedCandidateReport,
+      explicitContextIdentityMappingOnly: successor.explicitContextIdentityMappingOnly,
+      textIdentityInference: successor.diagnosticCodeMessagePointerIdentityInference,
+      duplicateOccurrenceOrderPreserved: successor.duplicateOccurrenceOrderPreserved,
+      unmappedDiagnosticsSelectable: successor.unmappedDiagnosticsSelectable,
+      reportDocumentFenced: successor.reportSnapshotDocumentFingerprintFenced,
+      reportCatalogFenced: successor.reportSnapshotCatalogFingerprintFenced,
+      routeAndSurfaceFenced: successor.routeAndSurfaceFenced,
+      runtimeKindMismatchFailsClosed: successor.runtimeKindMismatchFailsClosed,
+      invalidPlaceholderInsideRuntime: successor.invalidPlaceholderInsideManagedRuntimeSubtree,
+      runModeDiagnosticsVisible: successor.runModeDiagnosticsVisible,
+      obligationsExecutable: successor.obligationsExecutable,
+      rejectedDiagnosticsPersisted: successor.rejectedDiagnosticsPersisted,
+      rejectedDiagnosticsAffectDirtyState: successor.rejectedDiagnosticsAffectDirtyState,
+      rejectedDiagnosticsIncludedInSave: successor.rejectedDiagnosticsIncludedInSave,
+      p16Status: successor.p16Status,
+      pf086Status: successor.pf086Status,
+    },
+    {
+      artifact: {
+        task: "M09-T13",
+        proofId: "desen-app-node-linked-diagnostics",
+        profile: "desen.app.node-linked-diagnostics-proof.v1",
+        result: "PASS",
+        path: NODE_LINKED_DIAGNOSTICS_ARTIFACT,
+        bytes: 27_353,
+        sha256: "b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c",
+      },
+      focusedTestFiles: 9,
+      focusedTestCases: 161,
+      fullAppTestFiles: 24,
+      fullAppTestCases: 339,
+      parentArtifacts: 11,
+      trackedFiles: 39,
+      immutableRejectedCandidateReport: true,
+      explicitContextIdentityMappingOnly: true,
+      textIdentityInference: false,
+      duplicateOccurrenceOrderPreserved: true,
+      unmappedDiagnosticsSelectable: false,
+      reportDocumentFenced: true,
+      reportCatalogFenced: true,
+      routeAndSurfaceFenced: true,
+      runtimeKindMismatchFailsClosed: true,
+      invalidPlaceholderInsideRuntime: false,
+      runModeDiagnosticsVisible: false,
+      obligationsExecutable: false,
+      rejectedDiagnosticsPersisted: false,
+      rejectedDiagnosticsAffectDirtyState: false,
+      rejectedDiagnosticsIncludedInSave: false,
+      p16Status: "PROVEN",
+      pf086Status: "OPEN",
+    },
+  );
+  const artifactBytes = await readFile(path.join(ROOT, NODE_LINKED_DIAGNOSTICS_ARTIFACT));
+  await assert.rejects(
+    buildDesenAppSourcePersistenceEvidence({
+      fileOverrides: new Map([[NODE_LINKED_DIAGNOSTICS_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
 });

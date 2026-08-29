@@ -1101,6 +1101,36 @@ P-09/P-10 `PARTIAL`, PF-085/PF-089 `OPEN` kalır; kanıt kapıları 10/13'tür. 
 publication/activation, concrete App storage adapter ve otomatik gerçek-browser E2E kanıtlanmış
 değildir. Sıradaki iş M09-T13'tür.
 
+M09-T13, reddedilen bir edit adayından yalnızca exact frozen continuous-validation report'unu App
+transient state'inde tutar. Geçersiz aday authored Source, publishable preview, managed Runtime,
+dirty state, Save request veya persistence generation içine hiç girmez. Candidate document ve
+Catalog-set fingerprint'leri, exact project/surface route'u, hâlâ güncel committed-document owner'ı
+ve canvas tarafındaki live Runtime React diagnostic index bütün projection'ları fence eder; stale
+ya da tutarsız otorite partial navigation modeli üretmeden kapanır.
+
+Seçilebilir hedefi yalnızca `invalidSubjects` içindeki explicit `context.surfaceId` +
+`subject.kind` + `subject.id` eşlemesi oluşturur. Diagnostic pointer/code/message/capability ve
+context içindeki rastlantısal metinler identity tahmini değildir. Original diagnostic sırası,
+duplicate occurrence pointer'ları, node/behavior ayrımı, unmapped ve başka route'a ait diagnostics
+korunur; dynamic obligations görünür ama inert metadata'dır ve yürütülmez. Seçim yalnızca opaque
+snapshot-bound key tutar ve güncel ready projection'dan yeniden admit edilir.
+
+Compact App-owned Inspector bölümü mapped occurrence'ları native button olarak sunar, sayıyı canlı
+duyurur, seçimi `aria-current` ile belirtir ve autofocus yapmadan açık dismiss sunar. Seçilen
+occurrence, mevcut geçerli preview'ı koruyarak managed Runtime subtree dışında App-owned invalid-
+change placeholder gösterir. Diagnostics ve placeholder etkileşimi yalnızca Design mode'dadır;
+Run bunları gizleyip inert yapar, Design'a dönüş focus çalmaz ve başarılı edit ya da session
+replacement reddedilen report'u temizler.
+
+Dokuz dosyalık odaklı diagnostics suite 161/161, 24 dosyalık tam App suite 339/339 ve bağımsız root
+mutation proof 12/12 geçer. Exact kanıt, 39 güncel dosyayı ve on bir exact proof parent'ını bağlayan
+27.353-byte `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` dosyasıdır;
+`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`. Yerel CI otoritesi
+198 workload ve 94 proof pair'dir: 83 ordinary + 11 barrier. Connected T13 closure 62 proof unit /
+134 workload, ownership ise 1.253 tracked path / 188 proof-owned path'tir. M09-T13 `DONE`, P-16
+`PROVEN`, PF-086 `OPEN`, proof gate sayısı 10/13, genel ilerleme 108/145 (%74), M09 13/14 (%93)
+ve sıradaki iş M09-T14'tür. Bu yerel receipt'ler required-gate veya hosted-CI sonucu değildir.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

@@ -5,7 +5,10 @@ import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 
 import { validateAffectedChangeBoundaryReceipt } from "./affected-change-boundary.mjs";
-import { EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 } from "./affected-impact-graph.mjs";
+import {
+  EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256,
+  createAffectedImpactClosure,
+} from "./affected-impact-graph.mjs";
 import { EXPECTED_AFFECTED_OBSERVATION_THRESHOLD_SHA256 } from "./affected-observation-threshold.mjs";
 import {
   AFFECTED_OWNERSHIP_CATEGORIES,
@@ -409,6 +412,16 @@ const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "scripts/lib/desen-app-source-persistence-proof.mjs",
   "scripts/verify-desen-app-source-persistence.mjs",
   "tests/desen-app-source-persistence.test.mjs",
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  "apps/desen-app/src/diagnostics-panel.tsx",
+  "apps/desen-app/test/authoring-diagnostics.test.ts",
+  "apps/desen-app/test/diagnostics-panel.test.tsx",
+  "docs/proof/DESEN-APP-NODE-LINKED-DIAGNOSTICS.md",
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json",
+  "scripts/generate-desen-app-node-linked-diagnostics-proof.mjs",
+  "scripts/lib/desen-app-node-linked-diagnostics-proof.mjs",
+  "scripts/verify-desen-app-node-linked-diagnostics.mjs",
+  "tests/desen-app-node-linked-diagnostics.test.mjs",
 ]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
@@ -454,13 +467,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 186,
+    PROOF_UNIT: 188,
     CI_POLICY: 45,
     DEPENDENCY_POLICY: 31,
-    FROZEN_INPUT: 137,
-    PACKAGE_OR_APPLICATION: 481,
-    SHARED_PROOF_INFRASTRUCTURE: 223,
-    PROJECT_DOCUMENTATION: 129,
+    FROZEN_INPUT: 138,
+    PACKAGE_OR_APPLICATION: 485,
+    SHARED_PROOF_INFRASTRUCTURE: 225,
+    PROJECT_DOCUMENTATION: 130,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -842,12 +855,12 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
   currentReaderCount: 50,
   liveVerification: "PASS",
 });
-const M09_T12_PROOF_READER_CHECKPOINT = Object.freeze({
+const M09_T13_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 51,
-  headSha256: "42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921",
-  frozenArtifactCount: 47,
-  currentReaderCount: 94,
+  sequence: 52,
+  headSha256: "0b2aae1b67d212b4274ad1e75c22053d91ff530055ba8b189d8d9318ef8bd463",
+  frozenArtifactCount: 48,
+  currentReaderCount: 96,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -2282,7 +2295,7 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "Current comparison-source receipts do not reproduce the reviewed M09-T12 successor.",
+      "Current comparison-source receipts do not reproduce the reviewed M09-T13 successor.",
     );
   }
   const selectorBytes = capturedSourceBytes(currentAuthority, SELECTOR_SOURCE_PATH);
@@ -2290,12 +2303,12 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 196 ||
-    currentInventory.proofUnitCount !== 93
+    currentInventory.workloadCount !== 198 ||
+    currentInventory.proofUnitCount !== 94
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current workload graph is not the exact reviewed M09-T12 append-only successor.",
+      "The current workload graph is not the exact reviewed M09-T13 append-only successor.",
     );
   }
   const currentProofPairClasses = currentInventory.proofUnits.reduce(
@@ -2305,10 +2318,25 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 82 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 83 || currentProofPairClasses.barrier !== 11) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M09-T12 proof-pair authority is not exactly 82 ordinary and 11 barrier pairs.",
+      "The current M09-T13 proof-pair authority is not exactly 83 ordinary and 11 barrier pairs.",
+    );
+  }
+  const diagnosticsClosure = createAffectedImpactClosure(["desen-app-node-linked-diagnostics"]);
+  if (
+    !isDeepStrictEqual(diagnosticsClosure.ownerProofUnitIds, [
+      "desen-app-node-linked-diagnostics",
+    ]) ||
+    diagnosticsClosure.proofUnitCount !== 62 ||
+    diagnosticsClosure.workloadCount !== 134 ||
+    diagnosticsClosure.impactSha256 !==
+      "9cb1af988b5a6c400ebe8e2123bb9c1bbbac3ac529621cee697ce3f93a0bea9d"
+  ) {
+    fail(
+      "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
+      "The current M09-T13 affected closure is not exactly 62 proof units and 134 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);
@@ -2355,11 +2383,11 @@ export function validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt) {
           liveVerification: liveReceipt.status,
         }
       : null;
-  if (!isDeepStrictEqual(projection, M09_T12_PROOF_READER_CHECKPOINT)) {
+  if (!isDeepStrictEqual(projection, M09_T13_PROOF_READER_CHECKPOINT)) {
     fail(
       "AFFECTED_PROMOTION_CUTOVER_DRIFT",
       "Promotion evidence does not match the live proof-reader checkpoint authority.",
-      { expected: M09_T12_PROOF_READER_CHECKPOINT, actual: projection },
+      { expected: M09_T13_PROOF_READER_CHECKPOINT, actual: projection },
     );
   }
   return liveReceipt;

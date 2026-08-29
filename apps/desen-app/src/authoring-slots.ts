@@ -11,7 +11,11 @@ import { canonicalizeJsonBytes } from "@desen/protocol";
 import { prepareCatalogAuthoringModel } from "./authoring-data.js";
 
 import type { JsonValue } from "@desen/catalog-sdk";
-import type { DesenEditorContentValue, DesenEditorDocument } from "@desen/editor-core";
+import type {
+  DesenEditorContentValue,
+  DesenEditorContinuousValidationReport,
+  DesenEditorDocument,
+} from "@desen/editor-core";
 import type {
   AuthoringBehaviorLayer,
   AuthoringLayerNode,
@@ -106,6 +110,8 @@ export type AuthoringSlotEditFailureReason =
 export interface AuthoringSlotEditFailure {
   readonly ok: false;
   readonly reason: AuthoringSlotEditFailureReason;
+  /** Complete rejected-candidate diagnostics when continuous validation reached that boundary. */
+  readonly validationReport?: DesenEditorContinuousValidationReport;
 }
 
 /** Complete result of one App-owned named-slot edit. */
@@ -584,14 +590,21 @@ function validateCandidate(
   model: CatalogAuthoringModel,
   candidate: DesenEditorDocument,
 ): DesenEditorDocument | undefined {
+  const report = validationReportForCandidate(model, candidate);
+  return report?.valid === true ? candidate : undefined;
+}
+
+function validationReportForCandidate(
+  model: CatalogAuthoringModel,
+  candidate: DesenEditorDocument,
+): DesenEditorContinuousValidationReport | undefined {
   let prepared = VALIDATOR_BY_MODEL.get(model);
   if (prepared === undefined) {
     prepared = createDesenEditorContinuousValidator(model.validationCatalogs);
     VALIDATOR_BY_MODEL.set(model, prepared);
   }
   if (!prepared.ok) return undefined;
-  const report = prepared.validator.validate(candidate);
-  return report.valid ? candidate : undefined;
+  return prepared.validator.validate(candidate);
 }
 
 function withinDefaultProfile(
@@ -639,8 +652,15 @@ function stageDefaultProps(
   return candidate;
 }
 
-function failure(reason: AuthoringSlotEditFailureReason): AuthoringSlotEditFailure {
-  return Object.freeze({ ok: false, reason });
+function failure(
+  reason: AuthoringSlotEditFailureReason,
+  validationReport?: DesenEditorContinuousValidationReport,
+): AuthoringSlotEditFailure {
+  return Object.freeze({
+    ok: false,
+    reason,
+    ...(validationReport === undefined ? {} : { validationReport }),
+  });
 }
 
 /** Creates a frozen named-slot identity without retaining React, DOM, drag-event, or adapter data. */
@@ -963,24 +983,35 @@ export function applyAuthoringNodeDelete(
   if (!prepared.ok) {
     return failure(prepared.reason === "catalog-invalid" ? "catalog-invalid" : "source-invalid");
   }
-  const compatibility = evaluateAuthoringNodeDeletion(
-    capturedRoute,
+  const placement = findNodePlacement(
     prepared.model,
-    capturedSelection,
+    capturedRoute.surfaceId,
+    capturedSelection.sourceNodeId,
   );
-  if (!compatibility.accepted) return failure(compatibility.reason);
+  if (
+    placement === undefined ||
+    placement === null ||
+    placement.node.capabilityId !== capturedSelection.capabilityId ||
+    placement.node.displayName !== capturedSelection.displayName ||
+    placement.node.conditional !== capturedSelection.conditional
+  ) {
+    return failure("target-invalid");
+  }
+  if (placement.slot.children.length - 1 < placement.slot.contract.minimum) {
+    return failure("cardinality-rejected");
+  }
 
   const changed = deleteDesenEditorNode(prepared.model.validationDocument, {
     surfaceId: capturedRoute.surfaceId,
     nodeId: capturedSelection.sourceNodeId,
   });
-  if (!changed.ok) return failure("edit-rejected");
-  const validated = validateCandidate(prepared.model, changed.document);
-  return validated === undefined
-    ? failure("source-invalid")
+  if (!changed.ok) return failure("target-invalid");
+  const validationReport = validationReportForCandidate(prepared.model, changed.document);
+  return validationReport?.valid !== true
+    ? failure("source-invalid", validationReport)
     : Object.freeze({
         ok: true,
-        document: validated,
+        document: changed.document,
         nodeId: capturedSelection.sourceNodeId,
         operation: "delete",
       });
@@ -1035,7 +1066,7 @@ export function applyAuthoringSlotEdit(
       component.id,
       capturedEdit.index,
     );
-    if (!compatibility.accepted) {
+    if (!compatibility.accepted && compatibility.reason !== "defaults-invalid") {
       return failure(
         compatibility.reason === "maximum-reached" || compatibility.reason === "minimum-unreachable"
           ? "cardinality-rejected"
@@ -1062,12 +1093,12 @@ export function applyAuthoringSlotEdit(
       component,
     );
     if (staged === undefined) return failure("defaults-invalid");
-    const validated = validateCandidate(prepared.model, staged);
-    return validated === undefined
-      ? failure("defaults-invalid")
+    const validationReport = validationReportForCandidate(prepared.model, staged);
+    return validationReport?.valid !== true
+      ? failure("defaults-invalid", validationReport)
       : Object.freeze({
           ok: true,
-          document: validated,
+          document: staged,
           nodeId: inserted.insertedNodeId,
           operation: "insert",
         });
@@ -1121,12 +1152,12 @@ export function applyAuthoringSlotEdit(
     operation = "move";
   }
   if (!changed.ok) return failure("edit-rejected");
-  const validated = validateCandidate(prepared.model, changed.document);
-  return validated === undefined
-    ? failure("source-invalid")
+  const validationReport = validationReportForCandidate(prepared.model, changed.document);
+  return validationReport?.valid !== true
+    ? failure("source-invalid", validationReport)
     : Object.freeze({
         ok: true,
-        document: validated,
+        document: changed.document,
         nodeId: capturedEdit.nodeId,
         operation,
       });

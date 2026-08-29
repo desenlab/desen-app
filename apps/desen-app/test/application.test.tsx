@@ -1570,6 +1570,45 @@ describe("Desen App application shell", () => {
     expect(
       within(inspector).getAllByText("This value does not satisfy the Catalog schema."),
     ).toHaveLength(1);
+    const diagnostics = within(inspector).getByRole("region", {
+      name: "Validation diagnostics",
+    });
+    expect(within(diagnostics).getByRole("status").textContent).toBe("1 issue");
+    const diagnosticTarget = within(diagnostics).getByRole("button", {
+      name: /Select Node sign-in\.layout at \/surfaces\/sign-in\/root/u,
+    });
+    expect(diagnosticTarget.getAttribute("aria-current")).toBeNull();
+    const preservedHeading = screen.getByRole("heading", { level: 2, name: "Sign in" });
+
+    fireEvent.click(diagnosticTarget);
+    const placeholder = await screen.findByRole("status", {
+      name: "Invalid change placeholder for node sign-in.layout",
+    });
+    expect(diagnosticTarget.getAttribute("aria-current")).toBe("true");
+    expect(placeholder.textContent).toContain("Current preview preserved");
+    expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBe(preservedHeading);
+    expect(document.activeElement).toBe(placeholder);
+    const managedCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    expect(managedCanvas.contains(placeholder)).toBe(false);
+    expect(placeholder.closest("[data-managed-capability-subtree='true']")).toBeNull();
+
+    const runMode = screen.getByRole("button", { name: "Run" });
+    fireEvent.click(runMode);
+    expect(
+      screen.queryByRole("status", {
+        name: "Invalid change placeholder for node sign-in.layout",
+      }),
+    ).toBeNull();
+    expect(document.activeElement).toBe(runMode);
+    const designMode = screen.getByRole("button", { name: "Design" });
+    fireEvent.click(designMode);
+    expect(
+      await screen.findByRole("status", {
+        name: "Invalid change placeholder for node sign-in.layout",
+      }),
+    ).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBe(preservedHeading);
+    expect(document.activeElement).toBe(designMode);
 
     fireEvent.change(maxWidth, { target: { value: "512" } });
     fireEvent.blur(maxWidth);
@@ -1578,6 +1617,12 @@ describe("Desen App application shell", () => {
       expect(maxWidth.value).toBe("512");
     });
     expect(within(inspector).getByRole("status").textContent).toBe("Updated Max Width.");
+    expect(within(inspector).queryByRole("region", { name: "Validation diagnostics" })).toBeNull();
+    expect(
+      screen.queryByRole("status", {
+        name: "Invalid change placeholder for node sign-in.layout",
+      }),
+    ).toBeNull();
   });
 
   it("resets local drafts across Source identities and qualifies repeated edit actions", async () => {

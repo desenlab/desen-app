@@ -276,6 +276,47 @@ describe("Desen App surface-local state authoring", () => {
     expect(Object.isFrozen(changed.surfaces["sign-in"]?.state.email)).toBe(true);
   });
 
+  it("returns the frozen rejected-candidate report without exposing the candidate", () => {
+    const source = copyJson(officialSignInSource) as unknown as MutableJsonObject;
+    const signIn = mutableSurface(source, "sign-in");
+    const root = requireRecord(signIn.root, "sign-in.root");
+    const slots = requireRecord(root.slots, "sign-in.root.slots");
+    const email = requireRecord((slots.default as unknown[])[1], "sign-in.email");
+    const handlers = requireRecord(email.on, "sign-in.email.on");
+    const change = handlers.change as MutableJsonObject[];
+    requireRecord(change[0], "sign-in.email.on.change.0").value = "literal email";
+    const original = requireDocument(source);
+    const before = copyJson(original);
+
+    const rejected = apply(original, SIGN_IN_ROUTE, {
+      kind: "update",
+      name: "email",
+      type: "boolean",
+      initial: false,
+    });
+
+    expect(rejected).toMatchObject({
+      ok: false,
+      reason: "source-invalid",
+      validationReport: {
+        valid: false,
+        invalidSubjects: [
+          expect.objectContaining({
+            surfaceId: "sign-in",
+            subject: { kind: "node", id: "sign-in.email" },
+          }),
+        ],
+      },
+    });
+    if (rejected.ok || rejected.validationReport === undefined) {
+      throw new Error("Expected rejected-candidate state diagnostics.");
+    }
+    expect(Object.isFrozen(rejected)).toBe(true);
+    expect(Object.isFrozen(rejected.validationReport)).toBe(true);
+    expect(Object.hasOwn(rejected, "document")).toBe(false);
+    expect(original).toEqual(before);
+  });
+
   it("deletes only unused declarations without cascading and retains the required state map", () => {
     const original = requireDocument();
     const inserted = requireSuccess(

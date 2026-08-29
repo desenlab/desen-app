@@ -9,7 +9,11 @@ import { prepareCatalogAuthoringModel } from "./authoring-data.js";
 import { projectAuthoringSelection } from "./authoring-selection.js";
 
 import type { ComponentInspectorControl, JsonPrimitive, JsonValue } from "@desen/catalog-sdk";
-import type { DesenEditorContentValue, DesenEditorDocument } from "@desen/editor-core";
+import type {
+  DesenEditorContentValue,
+  DesenEditorContinuousValidationReport,
+  DesenEditorDocument,
+} from "@desen/editor-core";
 import type {
   AuthoringLayerNode,
   CatalogAuthoringModel,
@@ -110,6 +114,8 @@ export type AuthoringInspectorEditFailureReason =
 export interface AuthoringInspectorEditFailure {
   readonly ok: false;
   readonly reason: AuthoringInspectorEditFailureReason;
+  /** Complete rejected-candidate diagnostics when continuous validation reached that boundary. */
+  readonly validationReport?: DesenEditorContinuousValidationReport;
 }
 
 /** Complete result of one schema-authorized Inspector edit. */
@@ -957,7 +963,9 @@ export function applyAuthoringInspectorEdit(
   const validator = createDesenEditorContinuousValidator(prepared.model.validationCatalogs);
   if (!validator.ok) return Object.freeze({ ok: false, reason: "catalog-invalid" });
   const report = validator.validator.validate(changed);
-  if (!report.valid) return Object.freeze({ ok: false, reason: "source-invalid" });
+  if (!report.valid) {
+    return Object.freeze({ ok: false, reason: "source-invalid", validationReport: report });
+  }
 
   return Object.freeze({ ok: true, document: changed });
 }
@@ -1043,6 +1051,8 @@ export function applyAuthoringInspectorBindingEdit(
   const validator = createDesenEditorContinuousValidator(prepared.model.validationCatalogs);
   if (!validator.ok) return Object.freeze({ ok: false, reason: "catalog-invalid" });
   const report = validator.validator.validate(changed);
-  if (!report.valid) return Object.freeze({ ok: false, reason: "source-invalid" });
+  if (!report.valid) {
+    return Object.freeze({ ok: false, reason: "source-invalid", validationReport: report });
+  }
   return Object.freeze({ ok: true, document: changed });
 }

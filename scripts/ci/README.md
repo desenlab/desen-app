@@ -1237,6 +1237,49 @@ or hosted M09-T11 claim. Sequence 50 advances
 `6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` across 46 artifacts and
 92 readers. The checkpoint, promotion, selector plus required-affected, ownership, and remaining
 touched-CI regression suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally.
+
+M09-T13 registers `desen-app-node-linked-diagnostics` as the 94th proof pair. Its package-level
+generate/verify/test prefix runs only the App build, App typecheck, and focused diagnostics suite;
+the eleven frozen Runtime, Editor Core, and App parent verifiers are not nested and repeated there.
+Their fresh authority is represented only by the affected impact graph. Because the M05-T05
+Runtime diagnostic index joins the prior App-connected graph, the exact T13 closure is 62 proof
+units and 134 workloads at
+`sha256:9cb1af988b5a6c400ebe8e2123bb9c1bbbac3ac529621cee697ce3f93a0bea9d`.
+
+The current exhaustive authority contains 198 workloads and 94 proof pairs—83 ordinary and eleven
+barriers. The neutral inventory is
+`sha256:d3b479cc998d6c84d53b9b0d64e6121033d94bbf9b502fcb9e7adc2487b3d908`; the retained sequential
+plan is `sha256:5dbd8f1365a731846ece0e64888b69eb9607540c09dfb4444e990b8ff030d502`;
+the semantic impact graph is
+`sha256:b6fae5194e9dd837d05e1ce44808d6b8054742b564420b42901a39e23d4581b1`.
+The canonical required workload set and ordered projection are
+`sha256:a130f30f92d68b5d2b7a5d738fd5c7a47dc568e43356c19dc8986e1e7ef443e5` and
+`sha256:dcac647bc7ac839e9a54cfcd246f24aab8fc1b83404114f9ec2d32a9fb1b7c7c`.
+
+Ownership covers 1,253 tracked paths, including 188 proof-owned paths. The path-set and ownership
+pins are `sha256:372a30ee1f8db5b7d1a35e7fd0b46335513724c59bdfa0540513be2e1938d492`
+and `sha256:7d5a90e56b4b32e2d7e1a0306b09669855642b30558155dba9a07f1ccf7da7a3`.
+Category counts are 188 proof-unit, 45 CI-policy, 31 dependency-policy, 138 frozen-input, 485
+package/application, 225 shared-proof-infrastructure, 130 project-documentation, and eleven
+repository-policy paths. The focused inventory, impact, shared-state, equivalence, exhaustive,
+ownership, and selector suites pass 9/9, 27/27, 27/27, 8/8, 30/30, 15/15, and 22/22. The
+append-only current-reader checkpoint advances sequence 51 head
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` to sequence 52 head
+`sha256:0b2aae1b67d212b4274ad1e75c22053d91ff530055ba8b189d8d9318ef8bd463` across 48 frozen
+artifacts and 96 current readers. Promotion pins the selector at
+`sha256:36bc9d960f4755fd82ae016bd697182278ff204a77f7065b874b7434ac609683` and the required-affected
+runner authority at `sha256:42cf5315ba073bd1748c93a30819d983374823c4295fcdc664aa656d3360b0e1`.
+Checkpoint, promotion, selector, required-affected, and CI quality-gate regression suites pass
+75/75, 19/19, 22/22, 38/38, and 28/28 locally—182/182 combined. These are local-authority receipts
+and make no required-gate or hosted-CI claim.
+
+The exact 27,353-byte task artifact is
+`docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
+`sha256:b18cfc2a5999202e0e9641a8efdcdb6972253911372a09bfb73d5b06e1efd12c`, with reviewed report
+`docs/proof/DESEN-APP-NODE-LINKED-DIAGNOSTICS.md`. Focused diagnostics, complete App, and root
+mutation suites pass 161/161, 339/339, and 12/12. P-16 is `PROVEN`; PF-086 remains `OPEN`;
+implementation progress is 108/145 (74%), M09 is 13/14 (93%), proof gates remain 10/13, and
+M09-T14 is next.
 M09-T12 focused persistence, complete App, and root mutation suites pass 5 files/142 cases,
 22 files/324 cases, and 12/12 locally. The current exhaustive authority contains 196 workloads and
 93 proof pairs—82 ordinary and 11 barriers—with a 60-proof-unit/130-workload closure and ownership

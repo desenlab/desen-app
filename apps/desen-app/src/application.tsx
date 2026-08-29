@@ -11,13 +11,16 @@ import {
 import { flushSync } from "react-dom";
 
 import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
-import { canonicalizeJson } from "@desen/protocol";
+import { createDesenEditorContinuousValidator } from "@desen/editor-core";
+import { canonicalizeJson, digestCanonicalJson } from "@desen/protocol";
 import { createRuntimeHostPorts } from "@desen/runtime-core";
 
 import { prepareCatalogAuthoringModel } from "./authoring-data.js";
+import { projectAuthoringDiagnostics } from "./authoring-diagnostics.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
 import { createAuthoringSignInFixtureController } from "./authoring-fixtures.js";
 import { createAuthoringPersistenceController } from "./authoring-persistence.js";
+import { DiagnosticsPanel } from "./diagnostics-panel.js";
 import {
   applyAuthoringInspectorBindingEdit,
   applyAuthoringInspectorEdit,
@@ -77,7 +80,10 @@ import themeUrl from "./assets/theme.svg";
 import styles from "./application.module.css";
 
 import type { DragEvent, KeyboardEvent, MouseEvent, ReactNode } from "react";
-import type { DesenEditorPersistencePort } from "@desen/editor-core";
+import type {
+  DesenEditorContinuousValidationReport,
+  DesenEditorPersistencePort,
+} from "@desen/editor-core";
 import type {
   RuntimeHostPorts,
   RuntimeJsonObject,
@@ -94,6 +100,10 @@ import type {
   AuthoringPersistenceController,
   AuthoringPersistenceState,
 } from "./authoring-persistence.js";
+import type {
+  AuthoringDiagnosticsSnapshotIdentity,
+  AuthoringDiagnosticsViewModelResult,
+} from "./authoring-diagnostics.js";
 import type {
   AuthoringEventActionEdit,
   AuthoringEventActionEditResult,
@@ -445,6 +455,23 @@ function ProjectsHome() {
 
 type AuthoringTab = "layers" | "components" | "state" | "actions";
 type SurfaceEditorMode = "design" | "run";
+
+interface TransientAuthoringDiagnostics {
+  readonly ownerDocumentFingerprint: string;
+  readonly report: DesenEditorContinuousValidationReport;
+  readonly snapshot: AuthoringDiagnosticsSnapshotIdentity;
+}
+
+interface AuthoringDiagnosticSelection {
+  readonly selectionKey: string;
+  readonly focusRequestId: number;
+}
+
+interface AuthoringEditDiagnosticResult {
+  readonly ok: boolean;
+  readonly validationReport?: DesenEditorContinuousValidationReport;
+}
+
 const LAYER_DROP_MIDPOINT_HYSTERESIS_PX = 4;
 
 const APP_FIXTURE_EMPTY_JSON = Object.freeze({}) satisfies RuntimeJsonObject;
@@ -2120,6 +2147,11 @@ function SurfaceEditor({
 }>) {
   const [mode, setMode] = useState<SurfaceEditorMode>("design");
   const [selection, setSelection] = useState<AuthoringComponentSelection | null>(null);
+  const [transientDiagnostics, setTransientDiagnostics] =
+    useState<TransientAuthoringDiagnostics | null>(null);
+  const [diagnosticSelection, setDiagnosticSelection] =
+    useState<AuthoringDiagnosticSelection | null>(null);
+  const diagnosticFocusRequest = useRef(0);
   const [authoringSession, setAuthoringSession] = useState(() =>
     Object.freeze({
       document: REFERENCE_EDITOR_DOCUMENT,
@@ -2174,6 +2206,34 @@ function SurfaceEditor({
   const preparedModel = useMemo(
     () => prepareCatalogAuthoringModel(referenceCatalog, document),
     [document],
+  );
+  const committedDocumentFingerprint = useMemo(() => digestCanonicalJson(document), [document]);
+  const diagnosticsValidator = useMemo(
+    () =>
+      preparedModel.ok
+        ? createDesenEditorContinuousValidator(preparedModel.model.validationCatalogs)
+        : null,
+    [preparedModel],
+  );
+  const activeTransientDiagnostics =
+    transientDiagnostics !== null &&
+    transientDiagnostics.ownerDocumentFingerprint === committedDocumentFingerprint &&
+    transientDiagnostics.snapshot.projectId === route.projectId &&
+    transientDiagnostics.snapshot.surfaceId === route.surfaceId &&
+    diagnosticsValidator?.ok === true &&
+    transientDiagnostics.snapshot.catalogSetFingerprint ===
+      diagnosticsValidator.validator.catalogSetFingerprint
+      ? transientDiagnostics
+      : null;
+  const diagnosticsProjection = useMemo<AuthoringDiagnosticsViewModelResult | null>(
+    () =>
+      activeTransientDiagnostics === null
+        ? null
+        : projectAuthoringDiagnostics(
+            activeTransientDiagnostics.report,
+            activeTransientDiagnostics.snapshot,
+          ),
+    [activeTransientDiagnostics],
   );
   const inspector = useMemo(
     () =>
@@ -2380,6 +2440,51 @@ function SurfaceEditor({
     return modeRef.current === "design";
   }
 
+  function clearTransientDiagnostics(): void {
+    setTransientDiagnostics(null);
+    setDiagnosticSelection(null);
+  }
+
+  function captureEditDiagnostics(result: AuthoringEditDiagnosticResult): void {
+    const report = result.ok ? undefined : result.validationReport;
+    if (
+      report === undefined ||
+      report.valid ||
+      report.documentFingerprint === null ||
+      diagnosticsValidator?.ok !== true ||
+      report.catalogSetFingerprint !== diagnosticsValidator.validator.catalogSetFingerprint
+    ) {
+      clearTransientDiagnostics();
+      return;
+    }
+    const snapshot = Object.freeze({
+      projectId: route.projectId,
+      surfaceId: route.surfaceId,
+      documentFingerprint: report.documentFingerprint,
+      catalogSetFingerprint: diagnosticsValidator.validator.catalogSetFingerprint,
+    }) satisfies AuthoringDiagnosticsSnapshotIdentity;
+    setTransientDiagnostics(
+      Object.freeze({
+        ownerDocumentFingerprint: committedDocumentFingerprint,
+        report,
+        snapshot,
+      }),
+    );
+    setDiagnosticSelection(null);
+  }
+
+  function selectDiagnostic(selectionKey: string): void {
+    if (!isDesignMode() || diagnosticsProjection?.status !== "ready") return;
+    const occurrence = diagnosticsProjection.model.diagnostics
+      .flatMap((diagnostic) => diagnostic.occurrences)
+      .find((candidate) => candidate.selectionKey === selectionKey);
+    if (occurrence === undefined) return;
+    diagnosticFocusRequest.current += 1;
+    setDiagnosticSelection(
+      Object.freeze({ selectionKey, focusRequestId: diagnosticFocusRequest.current }),
+    );
+  }
+
   function commitAuthoringSession(
     nextSession: typeof authoringSession,
     establishesBaseline = false,
@@ -2388,6 +2493,7 @@ function SurfaceEditor({
     inMemoryCurrentCanonical.current = canonicalDocument;
     if (establishesBaseline) inMemoryBaselineCanonical.current = canonicalDocument;
     updateInMemoryDirtyProjection();
+    clearTransientDiagnostics();
     setAuthoringSession(nextSession);
   }
 
@@ -2446,6 +2552,7 @@ function SurfaceEditor({
     }
     if (selection === null) return Object.freeze({ ok: false, reason: "selection-invalid" });
     const result = applyAuthoringInspectorEdit(document, referenceCatalog, route, selection, edit);
+    captureEditDiagnostics(result);
     if (!result.ok) return result;
     const nextPreview = prepareAuthoringPreviewBundle(result.document);
     if (!nextPreview.ok) {
@@ -2467,6 +2574,7 @@ function SurfaceEditor({
       selection,
       edit,
     );
+    captureEditDiagnostics(result);
     if (!result.ok) return result;
     const nextPreview = prepareAuthoringPreviewBundle(result.document);
     if (!nextPreview.ok) {
@@ -2479,6 +2587,7 @@ function SurfaceEditor({
   function editLocalState(edit: AuthoringStateEdit): AuthoringStateEditResult {
     if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
     const result = applyAuthoringStateEdit(document, referenceCatalog, route, edit);
+    captureEditDiagnostics(result);
     if (!result.ok) return result;
     const nextPreview = prepareAuthoringPreviewBundle(result.document);
     if (!nextPreview.ok) {
@@ -2500,6 +2609,7 @@ function SurfaceEditor({
       eventOwnerSelection,
       edit,
     );
+    captureEditDiagnostics(result);
     if (!result.ok) return result;
     const nextPreview = prepareAuthoringPreviewBundle(result.document);
     if (!nextPreview.ok) {
@@ -2515,6 +2625,7 @@ function SurfaceEditor({
   ): AuthoringSlotEditResult {
     if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
     const result = applyAuthoringSlotEdit(document, referenceCatalog, route, target, edit);
+    captureEditDiagnostics(result);
     if (!result.ok) return result;
     const nextPreview = prepareAuthoringPreviewBundle(result.document);
     if (!nextPreview.ok) {
@@ -2543,6 +2654,7 @@ function SurfaceEditor({
     if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
     if (selection === null) return Object.freeze({ ok: false, reason: "edit-rejected" });
     const result = applyAuthoringNodeDelete(document, referenceCatalog, route, selection);
+    captureEditDiagnostics(result);
     if (!result.ok) return result;
     const nextPreview = prepareAuthoringPreviewBundle(result.document);
     if (!nextPreview.ok) {
@@ -2660,6 +2772,18 @@ function SurfaceEditor({
           <DesenAdapterCanvas
             authoringModel={model}
             bundle={effectivePreview?.ok === true ? effectivePreview.bundle : null}
+            diagnostics={
+              mode === "design" &&
+              activeTransientDiagnostics !== null &&
+              diagnosticsProjection?.status === "ready"
+                ? Object.freeze({
+                    report: activeTransientDiagnostics.report,
+                    snapshot: activeTransientDiagnostics.snapshot,
+                    selectedSelectionKey: diagnosticSelection?.selectionKey ?? null,
+                    focusRequestId: diagnosticSelection?.focusRequestId ?? 0,
+                  })
+                : null
+            }
             hostPorts={fixtureHostPorts}
             mode={mode}
             projectId={project.id}
@@ -2679,6 +2803,16 @@ function SurfaceEditor({
       </div>
 
       <InspectorPanel
+        diagnosticsControls={
+          diagnosticsProjection?.status === "ready" ? (
+            <DiagnosticsPanel
+              model={diagnosticsProjection.model}
+              onDismiss={clearTransientDiagnostics}
+              onSelect={selectDiagnostic}
+              selectedSelectionKey={diagnosticSelection?.selectionKey ?? null}
+            />
+          ) : undefined
+        }
         hidden={mode === "run"}
         inspector={inspector}
         onBindingEdit={editSelectedBinding}

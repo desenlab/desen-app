@@ -189,12 +189,28 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
         "desen-app-fixtures-scenarios-fidelity",
       ],
     ],
+    [
+      "desen-app-node-linked-diagnostics",
+      [
+        "runtime-react-reconciliation-diagnostics",
+        "editor-core-continuous-validation",
+        "desen-app-selection-overlay",
+        "desen-app-schema-inspector",
+        "desen-app-structured-inspector",
+        "desen-app-named-slot-authoring",
+        "desen-app-state-binding-editor",
+        "desen-app-event-action-editor",
+        "desen-app-design-run-modes",
+        "desen-app-fixtures-scenarios-fidelity",
+        "desen-app-source-persistence",
+      ],
+    ],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "97099a5cb52895eb80d095e99bf18838688d8a0aecf7af49993f0077466558c5";
+  "b6fae5194e9dd837d05e1ce44808d6b8054742b564420b42901a39e23d4581b1";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {
