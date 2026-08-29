@@ -719,7 +719,7 @@ function inspectApplicationSource(source) {
       'const position = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after"',
       "data-row-drop-position={rowDropPosition ?? undefined}",
       "event.stopPropagation()",
-      "projectAuthoringSlotSelection(activeSlot, route, model)",
+      "projectAuthoringSlotSelection(resolvedActiveSlot, route, model)",
       "evaluateAuthoringSlotInsertion(\n                              route,",
       "evaluateAuthoringSlotPlacement(route, authoringModel, target",
       "selectedPlacement?.accepted === true && selectedPlacement.changesSource === true",

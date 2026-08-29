@@ -1811,14 +1811,14 @@ The adapter suite passes 9/9, the application suite passes 35/35, focused `test:
 44/44, the complete App suite passes 210/210, and the independent root proof passes 10/10. Exact
 evidence is the `17,900`-byte
 `docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json` at
-`sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`. The checkpoint,
+`sha256:bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334`. The checkpoint,
 promotion, and complete serial structural suites pass 72/72, 19/19, and 339/339.
 
 The live local CI inventory contains 192 workloads and 91 proof pairs—80 ordinary and 11 barriers.
 M09-T10's connected closure contains 58 proof units and 126 workloads; complete ownership covers
 1,218 tracked paths, including 182 proof-owned paths. Append-only checkpoint sequence 49
 contains 45 artifacts and 90 readers at
-`sha256:58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962`.
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e`.
 These are local receipts. Manual browser QA exercised the Design/Run switch and Run interaction
 plus the automatic default placement target, visible Delete action, editable-control Backspace
 guard, and successful Delete shortcut, but it is not an automated real-browser or native-drag E2E

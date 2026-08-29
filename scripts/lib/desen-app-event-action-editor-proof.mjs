@@ -128,7 +128,7 @@ const DESIGN_RUN_ARTIFACT_PIN = Object.freeze({
   result: "PASS",
   path: DESIGN_RUN_ARTIFACT_PATH,
   bytes: 17_900,
-  sha256: "0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03",
+  sha256: "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334",
 });
 
 const EXPECTED_EVENT_ACTION_TEST_NAMES = Object.freeze([
@@ -545,8 +545,11 @@ function inspectApplicationSource(source) {
       'aria-label="Change target in Layers"',
       "const projected = rowDropProjection.current ?? projectedRowDrop(event);",
       '(event.key !== "Delete" && event.key !== "Backspace")',
+      "target instanceof HTMLInputElement",
+      "target instanceof HTMLTextAreaElement",
+      "target instanceof HTMLSelectElement",
       "target.isContentEditable",
-      "target.closest(\"input, textarea, select, [contenteditable='true']\")",
+      'target.contentEditable === "true"',
       "className={styles.authoringSelectionActions}",
       "disabled={deletionCompatibility?.accepted !== true}",
     ],

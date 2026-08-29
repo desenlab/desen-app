@@ -136,7 +136,7 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[0], () => {
     result: "PASS",
     path: DESIGN_RUN_ARTIFACT_PATH,
     bytes: 17_900,
-    sha256: "0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03",
+    sha256: "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334",
   });
   assert.equal(built.currentCompatibility.successor.oneImmutableSourceAndBundleSession, true);
   assert.equal(built.currentCompatibility.successor.zeroRuntimeRemountOrDisposeOnToggle, true);

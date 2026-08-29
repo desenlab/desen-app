@@ -1160,7 +1160,7 @@ root readers are 53,346 bytes/
 authority contains 192 workloads and 91 proof pairs—80 ordinary and 11 barriers—with a
 58-proof-unit/126-workload closure and 1,218-path/182-proof-owned ownership. Sequence 49
 contains 45 artifacts and 90 readers at
-`sha256:58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962`.
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e`.
 The checkpoint, promotion, and complete serial structural suites pass 72/72, 19/19, and 339/339.
 
 These are local receipts. Manual browser QA exercised the mode switch and Run interaction plus the
@@ -1384,7 +1384,7 @@ M09-T10 is `DONE`; P-09 is only `PARTIAL` for the exact controlled `state.set` p
   The live local CI authority contains 192 workloads/91 proof pairs—80 ordinary and 11 barriers—a
   58-proof-unit/126-workload closure, 1,218-path/182-proof-owned ownership, and sequence 49
   with 45 artifacts and 90 readers at
-  `sha256:58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962`.
+  `sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e`.
   Manual browser QA is recorded only as manual observation, not automated real-browser or native-
   drag E2E. P-09 is `PARTIAL`; P-08 remains `NOT_PROVEN`; S-001 remains
   `PLANNED`; PF-025, PF-028, and PF-083 remain `OPEN`; fixtures/scenarios/fidelity, persistence,
@@ -4137,7 +4137,7 @@ M09-T10 evidence:
   182/45/31/135/468/219/127/11 for proof unit, CI policy, dependency policy, frozen input,
   package/application, shared proof infrastructure, project documentation, and repository policy
 - checkpoint authority: sequence 49 contains 45 artifacts and 90 readers at
-  `sha256:58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962`
+  `sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e`
 - evidence boundary: these receipts are local; manual browser QA exercised the mode switch, Run
   interaction, automatic default placement target, visible Delete action, editable-control
   Backspace guard, and successful Delete shortcut, but is not automated real-browser or native-drag

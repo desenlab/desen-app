@@ -14,7 +14,7 @@ M09-T12: NOT_PROVEN
 M09-T13: NOT_PROVEN
 M09-T14: NOT_PROVEN
 
-Final artifact: `sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`
+Final artifact: `sha256:bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334`
 
 ## Proven boundary
 

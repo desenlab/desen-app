@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962",
+  "headSha256": "45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e",
   "checkpoints": [
     {
       "sequence": 1,
@@ -23459,7 +23459,7 @@
           "task": "M09-T10",
           "path": "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
           "bytes": 17900,
-          "sha256": "0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03"
+          "sha256": "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334"
         }
       ],
       "readers": [
@@ -24006,15 +24006,15 @@
           "task": "M09-T04",
           "role": "root-test",
           "path": "tests/desen-app-selection-overlay.test.mjs",
-          "bytes": 19903,
-          "sha256": "9c23a52097b9cf70ec8d320988f7f8e44c20d6bde86e7dc7567e4bfee6a21439"
+          "bytes": 20241,
+          "sha256": "332bfd43f96dbb811a9a9512eed8f2acb0657e35a6dffc6fa3050da5bc11471a"
         },
         {
           "task": "M09-T05",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-schema-inspector-proof.mjs",
           "bytes": 80441,
-          "sha256": "89162b37b5a76ade6b019e7e21b40834bdefb9ee212f77f2fc533c0219a2a2b3"
+          "sha256": "54829063e02fbe8b5d21bea5544cd63db4fdce51a179136d4f0c8f65da1a71ba"
         },
         {
           "task": "M09-T05",
@@ -24028,7 +24028,7 @@
           "role": "proof-library",
           "path": "scripts/lib/desen-app-structured-inspector-proof.mjs",
           "bytes": 91732,
-          "sha256": "d64814ec155af7458e50981ca68c19620611488e7c7a4bd25a9f39700e10da4d"
+          "sha256": "d9b96951e8893cde113eb359477b464864a8343ef73521800c940b010ff05b5f"
         },
         {
           "task": "M09-T06",
@@ -24041,8 +24041,8 @@
           "task": "M09-T07",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-named-slot-authoring-proof.mjs",
-          "bytes": 64567,
-          "sha256": "9077a5478962d0f62d36aa33ada32f794ac6e0bd93d8e4bb63efd075dc024dd7"
+          "bytes": 64575,
+          "sha256": "9566191336a2dca5b6287d8973a9f96a2819cb9074fb591415b1845f80c46854"
         },
         {
           "task": "M09-T07",
@@ -24056,7 +24056,7 @@
           "role": "proof-library",
           "path": "scripts/lib/desen-app-state-binding-editor-proof.mjs",
           "bytes": 59649,
-          "sha256": "b6f3c6cc8ee0fb8dc96f1ed2e66027a60517e7df1dc930dd91066ec880d3df4b"
+          "sha256": "70f7f2baec56cb26b65268ed768fd87f306715d3bfc054080d2d37206eb56973"
         },
         {
           "task": "M09-T08",
@@ -24069,15 +24069,15 @@
           "task": "M09-T09",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-event-action-editor-proof.mjs",
-          "bytes": 57839,
-          "sha256": "4e572d864b53f299036aec07b7876229b639cc634d262db9feb79246c822740a"
+          "bytes": 57939,
+          "sha256": "3e197fd8587deef75b70ede38a0a867d2c3dfe3917190a86c9226b1fdb6a7fc5"
         },
         {
           "task": "M09-T09",
           "role": "root-test",
           "path": "tests/desen-app-event-action-editor.test.mjs",
           "bytes": 18396,
-          "sha256": "52f82376b68b8a1261cce5b78a4f7b7626ddf1028799ec3909fa6eae483f0db6"
+          "sha256": "f2315fd6ec409efb4512b0f03387c2ee6b7a30fa776da11a60e01a569469cb8b"
         },
         {
           "task": "M09-T10",

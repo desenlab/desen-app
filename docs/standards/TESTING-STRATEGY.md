@@ -684,7 +684,7 @@ M09-T09 appends sequence 48 at
 live App compatibility readers, and extends the chain to 44 frozen artifacts and 88 current
 readers. This local reader authority makes no required-gate or hosted M09-T09 claim.
 M09-T10 appends sequence 49 at
-`58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962` without rewriting sequences
+`45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` without rewriting sequences
 1–48 or any of the 44 predecessor artifacts. It appends the T10 artifact at index 44, advances only
 reviewed live readers at indexes `[72, 73, 74, 75, 76, 77, 78, 80, 82, 84, 86, 87, 88, 89]`, and extends
 the chain to 45 frozen artifacts and 90 current readers. Its checkpoint suite passes 72/72. This
@@ -792,7 +792,7 @@ P-08 remains `NOT_PROVEN`, while PF-025 and PF-083 remain `OPEN`. These are loca
 rather than a required-gate or hosted-CI claim.
 The exact `17,900`-byte M09-T10 artifact is
 `docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json` at
-`sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`; the report is
+`sha256:bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334`; the report is
 `docs/proof/DESEN-APP-DESIGN-RUN-MODES.md`. Its frozen proof and root readers are 53,346 bytes at
 `sha256:ff4226241630daded979263dcd0a7fdb071591efbf789d1e7d2d4f4641779dfe` and 15,787 bytes at
 `sha256:d27307b0763132e5c21f45c146d3773ab9dbf02371f850dca3d03e11a759f601`. It proves the exact
@@ -834,7 +834,7 @@ root-safe default placement target, explicit target change, enlarged drop lanes,
 projection, visible selected-layer Delete control, and editable-control-safe Delete/Backspace
 shortcuts. It does not claim arbitrary canvas geometry or native-browser drag E2E. The checkpoint,
 promotion, and complete serial structural suites pass 72/72, 19/19, and 339/339. Sequence 49 closes
-at `sha256:58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962` with 45 artifacts and 90
+at `sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` with 45 artifacts and 90
 readers. No required-gate, hosted-CI, fixtures/scenarios, persistence, diagnostics, publication,
 activation, or automated real-browser E2E result is inferred from those local receipts.
 

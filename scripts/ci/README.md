@@ -477,7 +477,7 @@ The current reviewed T10 digest set available at this local task-proof checkpoin
   `4476d5162c2457d991d17c5c9cb450a838c8b084abff634b8fa4195f89465602`;
 - M09-T10 connected closure:
   58 proof units and 126 workloads at
-  `692a6527f967ed4597679aa5e3c1e1ae2a8f175ee607db90fe4b3e8f8d9b24fc`;
+  `ac5ba9fad912e6dbbc1bdd14c919a8209163cec49db4477116dc42af35e05b41`;
 - affected ownership:
   1,218 paths at `75f780c0c2afdfdaedfdd653cc3f36128dc968639d536085eb9b52a72f5f7de6`, with
   182 proof-owned reader paths and projection
@@ -492,11 +492,11 @@ The current reviewed T10 digest set available at this local task-proof checkpoin
 - frozen promotion selection equivalence:
   `97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698`;
 - selector authority:
-  `dc0729efb7458c464a6ed851d14fb109d51b5b019ceb31614a09d8b88bc98508`;
+  `2b961ae5105aa1959f7983f37f83b15f9dd030c052cc547069c2acab54ff0761`;
 - required promotion-runner authority:
-  `3dc1f206db94be40e829fe4b339eee891a0427155a370513d5e227b108e2b277`; and
+  `bc45f16ec8cec627f13ddda6faa29e3cc4b443618748b2475039490ad50fdb5d`; and
 - sequence-49 proof-reader checkpoint:
-  `58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962` across 45 artifacts and
+  `45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` across 45 artifacts and
   90 current readers.
 
 The historical T07 shared-state counts were `6 / 3 / 1 / 75 / 90 / 10 / 1` in the table order
@@ -737,7 +737,7 @@ verifier, and root proof.
 The current M09-T10 `desen-app-design-run-modes` pair is ordinary and non-barrier. Its exact
 semantic impact parents are `desen-app-real-adapter-canvas`, `desen-app-state-binding-editor`, and
 `desen-app-event-action-editor`; its connected closure contains 58 proof units and 126 workloads at
-`sha256:692a6527f967ed4597679aa5e3c1e1ae2a8f175ee607db90fe4b3e8f8d9b24fc`. Its verifier is
+`sha256:ac5ba9fad912e6dbbc1bdd14c919a8209163cec49db4477116dc42af35e05b41`. Its verifier is
 `PROOF_READ_ONLY`; its root mutation test is `PROOF_OS_TEMP_ISOLATED` and receives only
 `NODE_TEST_HARNESS`. Neither side receives workspace-write, listener-port, native-addon,
 filesystem-compatibility, or verifier runtime-probe authority. Its local wrapper authenticates the
@@ -985,7 +985,7 @@ readers at `[86, 87]`. The chain now authenticates 44 frozen artifacts and 88 cu
 checkpoint suite passes 71/71; this local reader authority makes no required-gate or hosted
 M09-T09 claim.
 M09-T10 appends sequence 49 at
-`58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962`. It preserves sequences
+`45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e`. It preserves sequences
 1–48 and all 44 predecessor artifact receipts byte-exact, appends the 17,900-byte M09-T10 artifact
 at `sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`, reseals exact live
 reader indexes `[72, 73, 74, 75, 76, 77, 78, 80, 82, 84, 86, 87]`, and appends its proof/root readers at
@@ -1151,5 +1151,5 @@ required-exhaustive-equivalence, required-exhaustive-runner, promotion, selector
 structural suites pass 44/44, 210/210, 10/10, 72/72, 35/35, 8/8, 30/30, 19/19, 19/19, and
 339/339 locally. These are local-authority receipts and do not claim a required gate or hosted
 result. Sequence 49 is pinned at
-`58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962` with 45 artifacts and 90
+`45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` with 45 artifacts and 90
 readers.

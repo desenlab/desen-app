@@ -614,7 +614,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[48],
-    "58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962",
+    "45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -1646,7 +1646,7 @@ test("sequence forty-nine preserves history, reseals App readers, and appends M0
     task: "M09-T10",
     path: "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
     bytes: 17900,
-    sha256: "0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03",
+    sha256: "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334",
   });
   assert.deepEqual(
     current.readers.slice(0, previous.readers.length).map(identity),
@@ -1693,7 +1693,7 @@ test("sequence forty-nine preserves history, reseals App readers, and appends M0
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962",
+    "45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e",
   );
 });
 

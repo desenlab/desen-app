@@ -86,7 +86,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "f09ec643d1b2756174ca47fae99837a68f6656bec0c6933e566d5075713a0f5f",
   "c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7",
   "5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90",
-  "58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962",
+  "45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
@@ -575,7 +575,7 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     {
       path: "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
       bytes: 17_900,
-      sha256: "0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03",
+      sha256: "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334",
     },
     "scripts/lib/desen-app-design-run-modes-proof.mjs",
     "tests/desen-app-design-run-modes.test.mjs",

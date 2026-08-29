@@ -153,8 +153,8 @@ from selector success. The frozen promotion baseline's selection-equivalence rec
 threshold remains
 `sha256:ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c`.
 The current M09-T10 selector and required promotion-runner authorities are independently pinned at
-`sha256:dc0729efb7458c464a6ed851d14fb109d51b5b019ceb31614a09d8b88bc98508` and
-`sha256:3dc1f206db94be40e829fe4b339eee891a0427155a370513d5e227b108e2b277`; neither is inferred
+`sha256:2b961ae5105aa1959f7983f37f83b15f9dd030c052cc547069c2acab54ff0761` and
+`sha256:bc45f16ec8cec627f13ddda6faa29e3cc4b443618748b2475039490ad50fdb5d`; neither is inferred
 from the other's success.
 
 The reviewed workspace package-test inventory contains 16 test scripts and is pinned as
@@ -774,7 +774,7 @@ suite, artifact verification, and root proof.
 The M09-T10 `desen-app-design-run-modes` pair is ordinary and non-barrier. Its exact formal impact
 parents are `desen-app-real-adapter-canvas`, `desen-app-state-binding-editor`, and
 `desen-app-event-action-editor`; the current connected closure contains 58 proof units and 126
-workloads at `sha256:692a6527f967ed4597679aa5e3c1e1ae2a8f175ee607db90fe4b3e8f8d9b24fc`. Its
+workloads at `sha256:ac5ba9fad912e6dbbc1bdd14c919a8209163cec49db4477116dc42af35e05b41`. Its
 verifier is `PROOF_READ_ONLY`; its root mutation test is `PROOF_OS_TEMP_ISOLATED` and receives only
 `NODE_TEST_HARNESS`. Neither workload receives workspace-write, listener-port, native-addon,
 filesystem-compatibility, or verifier runtime-probe authority. Its local wrapper directly
@@ -1101,7 +1101,7 @@ and extends the current chain to 44 artifacts and 88 readers at
 receipts remain separate authority and are not inferred from task-proof success.
 The exact `17,900`-byte M09-T10 task artifact is
 `docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json` at
-`sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`, with task report
+`sha256:bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334`, with task report
 `docs/proof/DESEN-APP-DESIGN-RUN-MODES.md`. Its exact frozen M09-T03, M09-T08, and M09-T09 parents
 are verified directly before the 44-case focused Design/Run suite, artifact verification, and
 10-case root proof. The proof and root readers are pinned at 53,346 bytes/
@@ -1111,7 +1111,7 @@ Append-only checkpoint sequence 49 preserves sequences 1–48 and all 44 predece
 receipts, appends the T10 artifact at index 44, advances only reviewed live reader indexes
 `[72, 73, 74, 75, 76, 77, 78, 80, 82, 84, 86, 87, 88, 89]`, and extends the current chain to 45 artifacts
 and 90 readers at
-`sha256:58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962`. Reader-checkpoint
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e`. Reader-checkpoint
 receipts remain separate authority and are not inferred from task-proof success.
 The first hosted PR run exposed an isolation-fixture workspace-target symlink denied by Node's
 permission model. The resealed fixture uses only absolute runner-temporary targets, and the exact
@@ -1170,7 +1170,7 @@ suites pass 72/72, 19/19, 19/19, 35/35, 8/8, 30/30, and 339/339. A concurrent cl
 process-kill
 `EPERM` flake; the same repository bytes passed the authoritative serial 339/339 aggregate, so this
 is recorded as a process-cleanup flake rather than a product or proof failure. Sequence 49 is pinned
-at `sha256:58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962` with 45 artifacts and 90
+at `sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` with 45 artifacts and 90
 readers. No M09-T10 required-gate, hosted-CI, fixtures/scenarios, persistence, diagnostics,
 publication, activation, or automated real-browser/native-drag E2E result is claimed in this
 standard. P-09 is only `PARTIAL`; P-08 remains `NOT_PROVEN`; S-001 remains `PLANNED`; PF-025,

@@ -771,7 +771,7 @@ function inspectCssSource(source) {
       ".stateDeleteButton",
       ".stateReadonly",
       ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.875rem;",
-      '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;\n  min-height: 0.875rem;',
+      '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;\n  min-height: 1.625rem;',
       "margin-block: 0",
       ".layerNode[data-row-drop-position] {\n  z-index: 4;",
       ".layerNode[data-row-drop-position] > .layerRow",

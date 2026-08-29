@@ -1385,9 +1385,11 @@ function AuthoringPanel({
 
       const target = event.target;
       if (
-        target instanceof HTMLElement &&
-        (target.isContentEditable ||
-          target.closest("input, textarea, select, [contenteditable='true']") !== null)
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        (target instanceof HTMLElement &&
+          (target.isContentEditable || target.contentEditable === "true"))
       ) {
         return;
       }

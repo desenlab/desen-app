@@ -263,13 +263,13 @@
       },
       {
         "path": "apps/desen-app/src/application.module.css",
-        "bytes": 69428,
-        "sha256": "e24ccfe21a38a7beabd8ed351bbdb67c2c78382144b9b3a2ad33eabf9a51e21b"
+        "bytes": 69391,
+        "sha256": "74808172a6fdb2b81ca3a7f994692db0e541fa870cac6afd5e4c33311ca93309"
       },
       {
         "path": "apps/desen-app/src/application.tsx",
-        "bytes": 75892,
-        "sha256": "ad1027d32cdb9a9a9501c815d2ef4be4b75d346aaaff4379358e5ca5fae9c969"
+        "bytes": 75985,
+        "sha256": "02805bba2932467d15d96b58860ac80069fdea9a1fad82b2b5997334be8d4037"
       },
       {
         "path": "apps/desen-app/src/inspector-panel.tsx",

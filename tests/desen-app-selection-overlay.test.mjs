@@ -345,6 +345,19 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
     );
   }
 
+  assert.throws(
+    () =>
+      verifyDesenAppSelectionOverlaySourcePolicy({
+        ...baseline,
+        applicationSource: replaceOnce(
+          applicationSource,
+          'target.contentEditable === "true"',
+          'target.closest("input") !== null',
+        ),
+      }),
+    expectedError("PRIVATE_STRUCTURE_AUTHORITY"),
+  );
+
   await assert.rejects(
     buildDesenAppSelectionOverlayEvidence({
       fileOverrides: new Map([

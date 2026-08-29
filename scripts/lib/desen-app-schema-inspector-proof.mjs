@@ -1226,8 +1226,8 @@ const CURRENT_SUCCESSOR_SHA256 = Object.freeze({
   [AUTHORING_SLOT_SOURCE_PATH]: "7e41cc2c4e8f9da91a7737160619836a8f61dc9445f3b2c118fd0793a6dc405b",
   [EVENT_ACTION_SOURCE_PATH]: "052933b73bc240ca8f856831eace2fed04dd4ece4ecf272fb108c71303c59897",
   [EVENT_ACTION_PANEL_PATH]: "f5adef07f00504dc55282c3bf5b8c9421b8078e061cba66a7bea9c7e4e482888",
-  [APPLICATION_SOURCE_PATH]: "6bece435ba9ecf5e281d5184ee81beea27a885a3d2ad551c0a78f81c397e2d82",
-  [APPLICATION_CSS_PATH]: "8430ca5368953a7590f9bbb82c03de08552e14f0ee97d4d3ff40dc649a1fbaa6",
+  [APPLICATION_SOURCE_PATH]: "02805bba2932467d15d96b58860ac80069fdea9a1fad82b2b5997334be8d4037",
+  [APPLICATION_CSS_PATH]: "74808172a6fdb2b81ca3a7f994692db0e541fa870cac6afd5e4c33311ca93309",
   [AUTHORING_DATA_TEST_PATH]: "ac69505e2391db6ad61ad18f82ac9b6f699b2aebb2b0367f2c497335f6a08bcd",
   [INSPECTOR_TEST_PATH]: "3037926ac89677c412a25e455407becfe67475aa9cb3ec6b5f511cfe50f212fc",
   [PANEL_TEST_PATH]: "0c891415e34a29bf74baa4e211f82a46243c5dd8091b702d2ad558b24e1590f6",
@@ -1236,7 +1236,7 @@ const CURRENT_SUCCESSOR_SHA256 = Object.freeze({
   [EVENT_ACTION_TEST_PATH]: "933fb29e7227eb7d3b6f2a3d3050b47ac5cc41361fd81441ace7aa424d2e1e80",
   [EVENT_ACTION_PANEL_TEST_PATH]:
     "a5c59eda21ed571fa1531630ac9160046d24587f5045466c21a4dd5e69af0bb9",
-  [APPLICATION_TEST_PATH]: "37e53e584603aad6244e8cf34c3c76d2232df2d39f7d4aaf7a173677784ff5ef",
+  [APPLICATION_TEST_PATH]: "203eca1931f586e81785aaf191e5588b0c8e1e188648d7c2ca5317da1257757f",
   [NAMED_SLOT_ARTIFACT_PATH]: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
   [STATE_BINDING_ARTIFACT_PATH]: "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
 });
@@ -1599,7 +1599,7 @@ function inspectStateBindingSuccessor(files) {
         ".valueSourceControl",
         ".statePanel",
         ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.875rem;",
-        '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;\n  min-height: 0.875rem;',
+        '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;\n  min-height: 1.625rem;',
         "margin-block: 0",
         ".layerNode[data-row-drop-position] {\n  z-index: 4;",
         ".layerNode[data-row-drop-position] > .layerRow",
