@@ -30,6 +30,8 @@ const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
 const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
 const AUTHORING_STATE_SOURCE_PATH = "apps/desen-app/src/authoring-state.ts";
 const STATE_PANEL_SOURCE_PATH = "apps/desen-app/src/state-panel.tsx";
+const AUTHORING_EVENT_ACTION_SOURCE_PATH = "apps/desen-app/src/authoring-event-actions.ts";
+const EVENT_ACTION_PANEL_SOURCE_PATH = "apps/desen-app/src/event-action-panel.tsx";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const OFFICIAL_BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
@@ -122,6 +124,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_SLOT_SOURCE_PATH,
     AUTHORING_STATE_SOURCE_PATH,
     STATE_PANEL_SOURCE_PATH,
+    AUTHORING_EVENT_ACTION_SOURCE_PATH,
+    EVENT_ACTION_PANEL_SOURCE_PATH,
     AUTHORING_INSPECTOR_TEST_PATH,
     AUTHORING_PREVIEW_TEST_PATH,
     INSPECTOR_PANEL_TEST_PATH,
@@ -140,6 +144,8 @@ const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
   AUTHORING_SLOT_SOURCE_PATH,
   AUTHORING_STATE_SOURCE_PATH,
   STATE_PANEL_SOURCE_PATH,
+  AUTHORING_EVENT_ACTION_SOURCE_PATH,
+  EVENT_ACTION_PANEL_SOURCE_PATH,
 ]);
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
   TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
@@ -919,6 +925,8 @@ function resolveRelativeImport(importerPath, specifier) {
       candidate === AUTHORING_SLOT_SOURCE_PATH ||
       candidate === AUTHORING_STATE_SOURCE_PATH ||
       candidate === STATE_PANEL_SOURCE_PATH ||
+      candidate === AUTHORING_EVENT_ACTION_SOURCE_PATH ||
+      candidate === EVENT_ACTION_PANEL_SOURCE_PATH ||
       candidate === SOURCE_PATH ||
       candidate === OFFICIAL_BUNDLE_PATH,
   );
@@ -1086,6 +1094,18 @@ function inspectImportsAndExecutionBoundary(files) {
         "setDesenEditorStateSchema",
       ]),
     ],
+    [
+      AUTHORING_EVENT_ACTION_SOURCE_PATH,
+      new Set([
+        "createDesenEditorContinuousValidator",
+        "deleteDesenEditorAction",
+        "deleteDesenEditorEventHandler",
+        "insertDesenEditorAction",
+        "insertDesenEditorEventHandler",
+        "reorderDesenEditorAction",
+        "replaceDesenEditorAction",
+      ]),
+    ],
   ]);
   const exactAdapterPackages = new Set([
     "@desen/reference-catalog-web/catalog.json",
@@ -1183,6 +1203,8 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_SLOT_SOURCE_PATH,
               AUTHORING_STATE_SOURCE_PATH,
               STATE_PANEL_SOURCE_PATH,
+              AUTHORING_EVENT_ACTION_SOURCE_PATH,
+              EVENT_ACTION_PANEL_SOURCE_PATH,
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null
@@ -1198,6 +1220,7 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_PREVIEW_SOURCE_PATH,
               AUTHORING_SLOT_SOURCE_PATH,
               AUTHORING_STATE_SOURCE_PATH,
+              AUTHORING_EVENT_ACTION_SOURCE_PATH,
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null
@@ -1220,6 +1243,7 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_INSPECTOR_SOURCE_PATH,
               STRUCTURED_JSON_SOURCE_PATH,
               AUTHORING_SLOT_SOURCE_PATH,
+              AUTHORING_EVENT_ACTION_SOURCE_PATH,
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null ||
@@ -1316,6 +1340,7 @@ function inspectImportsAndExecutionBoundary(files) {
             AUTHORING_PREVIEW_SOURCE_PATH,
             AUTHORING_SLOT_SOURCE_PATH,
             AUTHORING_STATE_SOURCE_PATH,
+            AUTHORING_EVENT_ACTION_SOURCE_PATH,
           ].includes(relativePath) &&
             !isPlatformMemberReceiver(node)))
       ) {
@@ -1351,6 +1376,7 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_INSPECTOR_SOURCE_PATH,
               AUTHORING_SLOT_SOURCE_PATH,
               AUTHORING_STATE_SOURCE_PATH,
+              AUTHORING_EVENT_ACTION_SOURCE_PATH,
             ].includes(relativePath);
           if (!localSourceDocument && (member === null || forbiddenPlatformMembers.has(member))) {
             fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained platform I/O authority.`, {
@@ -1434,10 +1460,10 @@ function inspectImportsAndExecutionBoundary(files) {
     referenceCatalogImports !== 4 ||
     validatorImports !== 1 ||
     publicDiagnosticIndexTypeOnlyImports !== 1 ||
-    catalogSdkImports !== 8 ||
-    editorCoreImports !== 9 ||
+    catalogSdkImports !== 10 ||
+    editorCoreImports !== 11 ||
     publisherImports !== 3 ||
-    protocolImports !== 3 ||
+    protocolImports !== 4 ||
     namedSlotDragDropHandlers !== 17
   ) {
     fail(

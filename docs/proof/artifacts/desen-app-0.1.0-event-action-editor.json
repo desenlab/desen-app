@@ -1,0 +1,495 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-event-action-editor",
+  "profile": "desen.app.event-action-editor-proof.v1",
+  "task": "M09-T09",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M09-T08",
+      "proofId": "desen-app-state-binding-editor",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json",
+      "bytes": 28766,
+      "sha256": "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
+      "profile": "desen.app.state-binding-editor-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M08-T06",
+      "proofId": "editor-core-event-action-edits",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
+      "bytes": 31310,
+      "sha256": "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7",
+      "profile": "desen.editor-core.event-action-edits-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "catalogDeclaredEventProjection": true,
+    "exactSelectedComponentOwner": true,
+    "behaviorOwnerUiClaimed": false,
+    "absentEmptyAndPresentHandlerLifecycle": true,
+    "closedActionTypes": [
+      "component.command",
+      "event.emit",
+      "navigate",
+      "operation.invoke",
+      "resource.refresh",
+      "state.set",
+      "state.toggle"
+    ],
+    "recursivelyNestedOperationSettlements": true,
+    "canonicalEscapedActionPointers": true,
+    "exactOwnDataEventActionCapture": true,
+    "publicEditorCoreEventActionMutation": true,
+    "continuousCompleteSourceRevalidation": true,
+    "failedEditPreservesCurrentDocument": true,
+    "publisherSessionPreview": true,
+    "sourceAndPreviewCommitAtomically": true,
+    "eventActionChromeOutsideManagedCapabilitySubtree": true,
+    "actionExecutionClaimed": false,
+    "persistenceClaimed": false,
+    "designRunClaimed": false,
+    "activationClaimed": false,
+    "browserE2eClaimed": false,
+    "p08Status": "NOT_PROVEN",
+    "pf025Status": "OPEN",
+    "pf083Status": "OPEN"
+  },
+  "authority": {
+    "protocolProfiles": {
+      "owner": "exact selected component Source identity",
+      "event": "Catalog-declared event name only",
+      "action": "one complete member of the closed seven-action union",
+      "pointer": "canonical escaped owner-relative RFC 6901 path",
+      "settlement": "operation.invoke onSuccess/onFailure recursively only"
+    },
+    "source": {
+      "eventAction": {
+        "appOwnerKinds": [
+          "component"
+        ],
+        "behaviorOwnerUiClaimed": false,
+        "actionTypes": [
+          "component.command",
+          "event.emit",
+          "navigate",
+          "operation.invoke",
+          "resource.refresh",
+          "state.set",
+          "state.toggle"
+        ],
+        "publicEditorCoreCommands": 6,
+        "catalogDeclaredEventsOnly": true,
+        "absentEmptyAndPresentLifecycle": true,
+        "canonicalEscapedPointers": true,
+        "recursiveOperationSettlements": true,
+        "actionDepthLimit": 64,
+        "actionOccurrenceLimit": 25000,
+        "identityOccurrenceLimit": 25000,
+        "sourceDepthLimit": 64,
+        "exactOwnDataRouteSelectionAndEditCapture": true,
+        "freshOwnerAndPointerAuthorization": true,
+        "continuousCompleteSourceRevalidation": true,
+        "noPartialDocumentOnFailure": true
+      },
+      "panel": {
+        "owner": "Desen App",
+        "catalogEventLifecycleControls": true,
+        "completeActionJsonComposer": true,
+        "inertReferencePreservation": true,
+        "sevenActionStarters": true,
+        "recursiveSettlementLists": true,
+        "replaceDeleteAndReorderControls": true,
+        "accessibleFailureAndFocusRecovery": true,
+        "executionClaimed": false,
+        "managedAdapterImports": 0
+      },
+      "application": {
+        "exactComponentOwnerSelection": true,
+        "fourKeyboardNavigableAuthoringTabs": true,
+        "freshEventActionProjection": true,
+        "publicEditorCoreMutationBoundary": true,
+        "publisherPreflightBeforeCommit": true,
+        "sourceAndPreviewCommitAtomically": true,
+        "publisherFailurePreservesPriorSession": true,
+        "eventActionChromeOutsideManagedCapabilitySubtree": true
+      },
+      "css": {
+        "actionPanelResponsiveWidth": true,
+        "selectedOwnerContext": true,
+        "recursiveSettlementTones": true,
+        "visibleInvalidJsonState": true,
+        "keyboardFocusPresentation": true
+      }
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/structured-json.test.ts test/authoring-data.test.ts test/authoring-selection.test.ts test/authoring-event-actions.test.ts test/event-action-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+      "rootCommands": {
+        "generate:desen-app-event-action-editor": "node scripts/verify-desen-app-state-binding-editor.mjs && node scripts/verify-editor-core-event-action-edits.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:event-actions && node scripts/generate-desen-app-event-action-editor-proof.mjs",
+        "verify:desen-app-event-action-editor": "node scripts/verify-desen-app-state-binding-editor.mjs && node scripts/verify-editor-core-event-action-edits.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:event-actions && node scripts/verify-desen-app-event-action-editor.mjs",
+        "test:desen-app-event-action-editor": "node scripts/verify-desen-app-state-binding-editor.mjs && node scripts/verify-editor-core-event-action-edits.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:event-actions && node --test tests/desen-app-event-action-editor.test.mjs"
+      },
+      "parentsAuthenticatedInsideReader": true
+    },
+    "mutationFlow": [
+      "validator-admitted Catalog and Source projection",
+      "exact route and component owner capture",
+      "Catalog-declared event plus bounded canonical action-list projection",
+      "complete inert action JSON capture",
+      "one of six public Editor Core event/action commands",
+      "continuous complete-Source validation",
+      "Publisher session-local Bundle",
+      "atomic Source and exact adapter session replacement"
+    ],
+    "ownership": {
+      "eventPanel": "Desen App sibling chrome",
+      "actionComposer": "Desen App sibling chrome",
+      "references": "inert Source guidance only",
+      "managedCapabilitySubtree": "Runtime React adapters only"
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/app-web test:event-actions && node --test tests/desen-app-event-action-editor.test.mjs",
+    "appTestNames": {
+      "apps/desen-app/test/structured-json.test.ts": [
+        "returns a detached recursively frozen JSON value without prototype-name interpretation",
+        "rejects malformed JSON and non-finite JSON numbers without exposing partial data",
+        "rejects duplicate decoded member names at every object level",
+        "rejects raw and escaped unpaired Unicode while accepting scalar pairs",
+        "keeps every decoded protocol-reserved object member behind M09-T08",
+        "enforces Publisher depth, value-count, and number-token boundaries exactly",
+        "enforces Publisher decoded-string and raw UTF-8 byte boundaries exactly",
+        "formats objects canonically and arrays semantically before exact round trip",
+        "keeps a deeply indented admitted value editable through compact fallback",
+        "admits reserved-looking members as detached recursively frozen inert data",
+        "keeps duplicate, malformed, non-finite, and non-scalar input fail-closed",
+        "enforces every Publisher Source JSON limit at its exact boundary"
+      ],
+      "apps/desen-app/test/authoring-data.test.ts": [
+        "projects the exact Catalog library and official Source surface trees",
+        "fails closed before projecting malformed Catalog or unresolved Source data",
+        "accepts optional authoring metadata and falls back only to exact inert contract fields",
+        "preserves absent slots, own empty slots, and Source child-array order",
+        "rejects a valid but over-depth Source atomically at the authoring projection boundary",
+        "rejects a valid but over-width Source before its pending authoring work can exceed the occurrence budget"
+      ],
+      "apps/desen-app/test/authoring-selection.test.ts": [
+        "creates only a frozen inert route and Source identity",
+        "keeps idle and pre-render states explicit without inventing a runtime target",
+        "projects repeated component instances while excluding attached behavior identities",
+        "reports a conditional Source component honestly when no runtime instance exists",
+        "rejects cross-route, cross-surface, and stale-capability identities closed",
+        "rejects a forged same-route Source identity instead of treating it as conditional"
+      ],
+      "apps/desen-app/test/authoring-event-actions.test.ts": [
+        "creates exact component owner references and rejects forged behavior values",
+        "projects sign-in change and press with canonical nested settlement pointers",
+        "retains declared absent, present-empty, and present-nonempty handler states",
+        "escapes every owner-relative event token canonically",
+        "maps all six App edits one-to-one to immutable Editor Core transitions",
+        "uses post-removal final reorder indices without an App-side adjustment",
+        "materializes and retains operation success/failure settlement lists",
+        "projects every member of the seven-action union including nested settlements",
+        "fails closed for idle, stale, cross-route, forged behavior, and ambiguous selections",
+        "rejects undeclared events, malformed pointers, and invalid indices before mutation",
+        "enforces the 25,000-action and 64-level projection limits",
+        "contains malformed own-data edits and preserves every caller input on success or failure"
+      ],
+      "apps/desen-app/test/event-action-panel.test.tsx": [
+        "shows the selected component and Catalog events, then adds and deletes an exact handler",
+        "offers all seven complete-action starters and preserves a $ref on insert",
+        "edits one whole action without committing its intermediate JSON draft",
+        "reorders and deletes root actions through exact pointers with focus recovery",
+        "renders recursive operation settlement lists and inserts into an absent Failure list",
+        "reports local JSON and edit failures accessibly without losing the draft",
+        "keeps idle, rejected, and Catalog-empty states honest and non-actionable"
+      ],
+      "apps/desen-app/test/authoring-preview.test.ts": [
+        "admits the official-derived Source as the frozen direct reference editor document",
+        "reproduces the exact session-local baseline Bundle and official revision",
+        "publishes a valid primitive prop edit as a fresh exact Bundle revision",
+        "rejects a runtime-cast non-Source without throwing or exposing a partial Bundle",
+        "rejects a structurally valid but Catalog-invalid prop edit without a partial Bundle"
+      ],
+      "apps/desen-app/test/adapter-canvas.test.tsx": [
+        "renders the official-derived sign-in only through the shared real adapters",
+        "fails closed for every unsupported project or surface without mounting sign-in",
+        "removes a previous tree synchronously and disposes the exact route session",
+        "replaces the exact session when a current authoring draft Bundle is rerendered",
+        "balances StrictMode replay and final unmount with exact session disposal",
+        "renders Source-identity selection chrome as a sibling outside the managed subtree",
+        "keeps a selected conditional Source node honest when it is not materialized",
+        "rejects stale and cross-route selection identities without exposing overlay chrome"
+      ],
+      "apps/desen-app/test/application.test.tsx": [
+        "renders an app-native projects gallery with explicit landmarks and current navigation",
+        "filters only the fixed project inventory and provides a clear recovery action",
+        "uses same-document navigation and focuses the new route heading",
+        "reacts to browser traversal and keeps route focus inside the content landmark",
+        "renders the editable Source hierarchy and keeps the exact managed adapter canvas read only",
+        "selects Source layers accessibly and keeps the identity overlay outside managed adapters",
+        "chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
+        "disables deletion for the surface root and a slot-minimum preflight without changing preview",
+        "preserves the selected layer, preview, and focus when deletion is rejected",
+        "uses only the App-owned drag intent and ignores forged native transfer authority",
+        "reorders a selected Source node through the keyboard placement control",
+        "snaps a native layer drag to the before or after half of a visible layer row",
+        "moves nodes across nested slots with keyboard and App-owned native drag intent",
+        "edits schema-derived string and enum props and refreshes the exact adapter preview",
+        "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
+        "updates surface-local state and changes a compatible binding in the live preview",
+        "keeps bound props explicit while boolean and numeric edits fail or apply atomically",
+        "resets local drafts across Source identities and qualifies repeated edit actions",
+        "switches to the exact Catalog component library and filters only the local view",
+        "commits sign-in event handlers and complete actions through the live authoring session",
+        "keeps the prior event projection and canvas when action preview preflight fails",
+        "does not substitute the sign-in Source tree or adapter canvas for another preview surface",
+        "removes the managed sign-in tree synchronously when routing to an unsupported surface",
+        "guides a catalog-less project without inventing a surface or enabled action",
+        "fails closed for $pathname"
+      ]
+    },
+    "rootTestNames": [
+      "[authority] authenticates exact frozen App and Editor Core parents",
+      "[projection] proves Catalog events, exact owners, lifecycle, and canonical pointers",
+      "[mutation] proves all six public immutable event and action transitions",
+      "[nesting] proves the closed seven-action union and recursive settlement lists",
+      "[safety] proves bounded capture, complete validation, and atomic failure",
+      "[ownership] keeps action chrome App-owned and preview replacement atomic",
+      "[tests] pins focused App behavior and exact package commands",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[policy] rejects weakened event, action, preview, and ownership sources",
+      "[verification] rejects parents, artifact, report, and filesystem authority drift"
+    ],
+    "localCommandReceipts": {
+      "pureEventActions": {
+        "command": "pnpm --filter @desen/app-web exec vitest run test/authoring-event-actions.test.ts",
+        "result": "PASS",
+        "testFiles": 1,
+        "tests": 12
+      },
+      "panel": {
+        "command": "pnpm --filter @desen/app-web exec vitest run test/event-action-panel.test.tsx",
+        "result": "PASS",
+        "testFiles": 1,
+        "tests": 7
+      },
+      "focusedEventActions": {
+        "command": "pnpm --filter @desen/app-web test:event-actions",
+        "result": "PASS",
+        "testFiles": 8,
+        "tests": 84
+      },
+      "fullApp": {
+        "command": "pnpm --filter @desen/app-web test",
+        "result": "PASS",
+        "testFiles": 15,
+        "tests": 202
+      },
+      "rootProof": {
+        "command": "node --test tests/desen-app-event-action-editor.test.mjs",
+        "result": "PASS",
+        "testFiles": 1,
+        "tests": 10
+      }
+    },
+    "semanticCoverage": [
+      "CATALOG_DECLARED_COMPONENT_EVENTS",
+      "ABSENT_EMPTY_NONEMPTY_HANDLER_LIFECYCLE",
+      "CANONICAL_ESCAPED_OWNER_RELATIVE_POINTERS",
+      "SIX_PUBLIC_EDITOR_CORE_MUTATIONS",
+      "SEVEN_CLOSED_ACTION_TYPES",
+      "RECURSIVE_OPERATION_SETTLEMENT_LISTS",
+      "EXACT_OWN_DATA_ROUTE_OWNER_AND_EDIT_CAPTURE",
+      "BOUNDED_DEPTH_OCCURRENCE_AND_IDENTITY_PROJECTION",
+      "COMPLETE_SOURCE_REVALIDATION",
+      "ATOMIC_PUBLISHER_PREVIEW",
+      "APP_OWNED_EVENT_ACTION_CHROME"
+    ]
+  },
+  "boundary": {
+    "trackedFiles": 30,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 2594,
+        "sha256": "203c44a5893822367ef049c56e1680b345976f47d0dfcbeec326c4119aa41225"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 10920,
+        "sha256": "a678302fd2931172d32f6509dc37018a294bc938ccca73df646a715516a6db38"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 66212,
+        "sha256": "be1d1f510a30b970fcf0a6728694cb3e97ba11c93d2ec5426e74374778997e67"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 68793,
+        "sha256": "d90250addf81703d233070132135b249db7ab6a80b7325b470fcb17d10f2e1e7"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 18521,
+        "sha256": "ae18d9ea0fe37ee553e758a73a9ca2e54e97c7fbcf048c21cd3bd131aadc1b25"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-event-actions.ts",
+        "bytes": 43459,
+        "sha256": "052933b73bc240ca8f856831eace2fed04dd4ece4ecf272fb108c71303c59897"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-preview.ts",
+        "bytes": 3704,
+        "sha256": "75fa2d605f8c5ceebc2668c1f4c739155c7791b895132dc9a5fac183384e3d34"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-selection.ts",
+        "bytes": 6147,
+        "sha256": "e97eed87734fff6fdc3a40dbc81754a88318238090e4c1dfcc53062e8ff7fc7c"
+      },
+      {
+        "path": "apps/desen-app/src/event-action-panel.tsx",
+        "bytes": 31890,
+        "sha256": "f5adef07f00504dc55282c3bf5b8c9421b8078e061cba66a7bea9c7e4e482888"
+      },
+      {
+        "path": "apps/desen-app/src/structured-json.ts",
+        "bytes": 13908,
+        "sha256": "74c56059e2cdca1ae018424f27e1c28c54785bbbc89c75d25dfa1858b76c4759"
+      },
+      {
+        "path": "apps/desen-app/test/adapter-canvas.test.tsx",
+        "bytes": 11338,
+        "sha256": "6f09674b0f0dd22bdc61e158c8567df4fdbdbe3ca3d96710b54f5e9138ce8de0"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 62023,
+        "sha256": "61d601ed5411f173348c9b928328aec18887aad4fac243f90962d0ed0315b89a"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-data.test.ts",
+        "bytes": 7259,
+        "sha256": "ac69505e2391db6ad61ad18f82ac9b6f699b2aebb2b0367f2c497335f6a08bcd"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-event-actions.test.ts",
+        "bytes": 25681,
+        "sha256": "933fb29e7227eb7d3b6f2a3d3050b47ac5cc41361fd81441ace7aa424d2e1e80"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-preview.test.ts",
+        "bytes": 4001,
+        "sha256": "1e514ec48f41d6e565197595d1bd4cbbbacf42b50d960cb7f28b4ad27b4510dc"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-selection.test.ts",
+        "bytes": 6779,
+        "sha256": "2cb243e2df249aed20cf3004cb084a2c50af8eeda1b8f32dc59b69b7e72ae875"
+      },
+      {
+        "path": "apps/desen-app/test/event-action-panel.test.tsx",
+        "bytes": 15120,
+        "sha256": "a5c59eda21ed571fa1531630ac9160046d24587f5045466c21a4dd5e69af0bb9"
+      },
+      {
+        "path": "apps/desen-app/test/structured-json.test.ts",
+        "bytes": 10359,
+        "sha256": "254f2f2e6c0a5f1fce72e7881c1b94d7d501fb8be08be693c66e1256e28ba827"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json",
+        "bytes": 28766,
+        "sha256": "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a"
+      },
+      {
+        "path": "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
+        "bytes": 31310,
+        "sha256": "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7"
+      },
+      {
+        "path": "examples/sign-in/official-derived.bundle.desen.json",
+        "bytes": 4899,
+        "sha256": "334450fa1864bf280a30342090a46ba1d2f2dc96552b9430afdde5fcada902b0"
+      },
+      {
+        "path": "examples/sign-in/official-derived.source.desen.json",
+        "bytes": 4724,
+        "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+      },
+      {
+        "path": "package.json",
+        "bytes": 91003,
+        "sha256": "7dd2f6e9a98b415d7e12c0c7cb5d7d22f9456726b5c29e83028914fbd5b2b19e"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129394,
+        "sha256": "463a35abf13fd9ba6acb897aca52a11e7a90c8fcfedbce085e82f89c23418d89"
+      },
+      {
+        "path": "scripts/generate-desen-app-event-action-editor-proof.mjs",
+        "bytes": 806,
+        "sha256": "270426809479945dec276a365fc0e5f1a867a10b35f2fbdfcbab9eb685dabe26"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-event-action-editor-proof.mjs",
+        "bytes": 43630,
+        "sha256": "15ff65fbf230b81c3f594a82b39721d4d0244785693f29c70c3d87441afc6762"
+      },
+      {
+        "path": "scripts/verify-desen-app-event-action-editor.mjs",
+        "bytes": 811,
+        "sha256": "c65235d0c7285f509c9cbf8d5053a6689be018bfe16ab26ca35201f22edb827b"
+      },
+      {
+        "path": "tests/desen-app-event-action-editor.test.mjs",
+        "bytes": 14487,
+        "sha256": "463615865caf0c70e8d144996919837cb22cc89c838e63607c218cafaadee254"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-event-action-editor-proof.mjs",
+      "scripts/generate-desen-app-event-action-editor-proof.mjs",
+      "scripts/verify-desen-app-event-action-editor.mjs",
+      "tests/desen-app-event-action-editor.test.mjs"
+    ],
+    "parentArtifacts": 2,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M09-T09 edits inert Source event handlers and actions; it does not execute them.",
+    "Behavior-owner UI is not claimed; forged behavior selection remains a negative boundary case.",
+    "M09-T10 is NOT_PROVEN: no Design/Run mode is claimed.",
+    "M09-T12 is NOT_PROVEN: no save/open or durable persistence UI is claimed.",
+    "M09-T14 is NOT_PROVEN: session preview is not control-plane publication or activation.",
+    "G09 and real-browser E2E remain NOT_PROVEN.",
+    "P-08 remains NOT_PROVEN until Design/Run, persistence, publication, and browser-E2E owners pass.",
+    "PF-025 and PF-083 remain OPEN; App presentation and addressing do not amend protocol vocabulary.",
+    "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence."
+  ]
+}

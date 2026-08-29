@@ -568,8 +568,10 @@ This file records implementation discoveries without changing the frozen DESEN 0
   over-budget subtree. M09-T08 applies the same boundary to local-state binding compatibility: the
   Inspector derives eligible direct bindings only from the authenticated Catalog `propsSchema` and
   the state declaration schema, while opaque authoring hints cannot widen type compatibility or
-  make an advanced dynamic value editable. Actual widgets and hint interpretation remain editor
-  responsibilities. PF-025 therefore remains `OPEN`.
+  make an advanced dynamic value editable. M09-T09 likewise projects only literal component events
+  from the authenticated Catalog contract; opaque authoring hints cannot invent an event, widen
+  owner authority to behaviors, or change action validity. Actual widgets and hint interpretation
+  remain editor responsibilities. PF-025 therefore remains `OPEN`.
 - Future action: Define a versioned control-hint vocabulary and deterministic precedence rules in
   a later protocol or profile revision, with `propsSchema` remaining the validity authority.
 
@@ -3507,11 +3509,25 @@ This file records implementation discoveries without changing the frozen DESEN 0
   continuous-validation concerns. `PF-014` remains authoritative: event payload scope is immediate
   and is not carried into a later operation settlement turn.
 
-- Future action: M08-T07 must prove authoring isolation and unknown-extension round-trip
-  preservation across all M08 commands. M08-T09 must add continuous semantic validation and
-  invalid-node mapping, and M08-T10 must independently prove deterministic cross-command behavior
-  and the React/DOM boundary. A later protocol revision should standardize event/action edit logs
-  only if interoperable editor command histories become normative.
+  M09-T09 consumes this profile in Desen App without widening it. The UI admits only the exact
+  selected component Source identity and its authenticated Catalog-declared events; behavior-owner
+  UI is not claimed, and a forged behavior selection fails closed. It preserves absent,
+  present-empty, and present-nonempty handler states, projects every member of the closed
+  seven-action union, and addresses recursive operation settlement lists with the same bounded
+  canonical owner-relative pointers.
+
+  The App maps handler/action add, delete, replace, and reorder controls one-to-one to the six
+  public Editor Core transitions. Whole-action JSON drafts remain detached inert data until
+  explicit Apply. Every successful Editor Core result is still provisional until complete Source
+  validation and Publisher preview preflight pass; only then does the App replace its session-local
+  `{document, preview}` pair once. Rejection preserves the prior event projection and canvas. This
+  authoring boundary does not execute actions, define Design/Run semantics, persist changes, or
+  publish/activate them.
+
+- Future action: M09-T10 owns interactive Design/Run execution, while M09-T12 and M09-T14 own
+  persistence and publication/activation. M10 must add real-browser end-to-end evidence. A later
+  protocol revision should standardize event/action edit logs only if interoperable editor command
+  histories become normative.
 
 ## PF-084 — Authoring isolation and extension round trips are parsed-value editor invariants
 

@@ -34,6 +34,8 @@ const SELECTION_SOURCE_PATH = "apps/desen-app/src/authoring-selection.ts";
 const PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
 const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
 const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
+const EVENT_ACTION_SOURCE_PATH = "apps/desen-app/src/authoring-event-actions.ts";
+const EVENT_ACTION_PANEL_PATH = "apps/desen-app/src/event-action-panel.tsx";
 const ADAPTER_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const APPLICATION_CSS_PATH = "apps/desen-app/src/application.module.css";
@@ -46,6 +48,8 @@ const ADAPTER_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const AUTHORING_DATA_TEST_PATH = "apps/desen-app/test/authoring-data.test.ts";
 const AUTHORING_SLOT_TEST_PATH = "apps/desen-app/test/authoring-slots.test.ts";
+const EVENT_ACTION_TEST_PATH = "apps/desen-app/test/authoring-event-actions.test.ts";
+const EVENT_ACTION_PANEL_TEST_PATH = "apps/desen-app/test/event-action-panel.test.tsx";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
@@ -108,10 +112,14 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     ...TRACKED_PATHS,
     STRUCTURED_JSON_SOURCE_PATH,
     AUTHORING_SLOT_SOURCE_PATH,
+    EVENT_ACTION_SOURCE_PATH,
+    EVENT_ACTION_PANEL_PATH,
     PANEL_TEST_PATH,
     STRUCTURED_JSON_TEST_PATH,
     AUTHORING_DATA_TEST_PATH,
     AUTHORING_SLOT_TEST_PATH,
+    EVENT_ACTION_TEST_PATH,
+    EVENT_ACTION_PANEL_TEST_PATH,
     NAMED_SLOT_ARTIFACT_PATH,
     STATE_BINDING_ARTIFACT_PATH,
   ]),
@@ -1206,22 +1214,27 @@ function receipts(files) {
 }
 
 const CURRENT_SUCCESSOR_SHA256 = Object.freeze({
-  [ROOT_PACKAGE_PATH]: "a8e9ad3ef63447c816d95e7fd247d68875b8cdae08750a5181721d2fae93a2a0",
-  [APP_PACKAGE_PATH]: "6d18724a6922be2998ba22e7e3f4071e99bfdf472de1365842bb8aeaa54f4f37",
+  [ROOT_PACKAGE_PATH]: "7dd2f6e9a98b415d7e12c0c7cb5d7d22f9456726b5c29e83028914fbd5b2b19e",
+  [APP_PACKAGE_PATH]: "203c44a5893822367ef049c56e1680b345976f47d0dfcbeec326c4119aa41225",
   [LOCKFILE_PATH]: "463a35abf13fd9ba6acb897aca52a11e7a90c8fcfedbce085e82f89c23418d89",
   [AUTHORING_DATA_PATH]: "ae18d9ea0fe37ee553e758a73a9ca2e54e97c7fbcf048c21cd3bd131aadc1b25",
   [INSPECTOR_SOURCE_PATH]: "76c1bebae33c41b175558bd8c4e1d392a28f86e97e0895863b13df1320d421b2",
   [PANEL_SOURCE_PATH]: "45700d67ff6da373b4e3da9599b675ec793b0007b511775af24a4be5e69a858f",
   [STRUCTURED_JSON_SOURCE_PATH]: "74c56059e2cdca1ae018424f27e1c28c54785bbbc89c75d25dfa1858b76c4759",
   [AUTHORING_SLOT_SOURCE_PATH]: "7e41cc2c4e8f9da91a7737160619836a8f61dc9445f3b2c118fd0793a6dc405b",
-  [APPLICATION_SOURCE_PATH]: "c1daf62dba03a5646bb3d9d21eb3d28a32385b8fe296d61b38007e9f59d29bce",
-  [APPLICATION_CSS_PATH]: "ed91c67f1dab1643642e286da184c8abf96361031eefd32f76aff8a7ea8f5063",
+  [EVENT_ACTION_SOURCE_PATH]: "052933b73bc240ca8f856831eace2fed04dd4ece4ecf272fb108c71303c59897",
+  [EVENT_ACTION_PANEL_PATH]: "f5adef07f00504dc55282c3bf5b8c9421b8078e061cba66a7bea9c7e4e482888",
+  [APPLICATION_SOURCE_PATH]: "d90250addf81703d233070132135b249db7ab6a80b7325b470fcb17d10f2e1e7",
+  [APPLICATION_CSS_PATH]: "be1d1f510a30b970fcf0a6728694cb3e97ba11c93d2ec5426e74374778997e67",
   [AUTHORING_DATA_TEST_PATH]: "ac69505e2391db6ad61ad18f82ac9b6f699b2aebb2b0367f2c497335f6a08bcd",
   [INSPECTOR_TEST_PATH]: "3037926ac89677c412a25e455407becfe67475aa9cb3ec6b5f511cfe50f212fc",
   [PANEL_TEST_PATH]: "0c891415e34a29bf74baa4e211f82a46243c5dd8091b702d2ad558b24e1590f6",
   [STRUCTURED_JSON_TEST_PATH]: "254f2f2e6c0a5f1fce72e7881c1b94d7d501fb8be08be693c66e1256e28ba827",
   [AUTHORING_SLOT_TEST_PATH]: "93c6b850c235ab09308fb36b9f99d6a5715d28514374c5c709a3c1eacb729ab2",
-  [APPLICATION_TEST_PATH]: "dbd802b086a2595c61db87e3ec9512d1a2b5f425852d584f5181b216f4607705",
+  [EVENT_ACTION_TEST_PATH]: "933fb29e7227eb7d3b6f2a3d3050b47ac5cc41361fd81441ace7aa424d2e1e80",
+  [EVENT_ACTION_PANEL_TEST_PATH]:
+    "a5c59eda21ed571fa1531630ac9160046d24587f5045466c21a4dd5e69af0bb9",
+  [APPLICATION_TEST_PATH]: "61d601ed5411f173348c9b928328aec18887aad4fac243f90962d0ed0315b89a",
   [NAMED_SLOT_ARTIFACT_PATH]: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
   [STATE_BINDING_ARTIFACT_PATH]: "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
 });
@@ -1414,10 +1427,20 @@ function inspectStateBindingSuccessor(files) {
     "verify:desen-app-state-binding-editor": `${stateBindingPrefix}node scripts/verify-desen-app-state-binding-editor.mjs`,
     "test:desen-app-state-binding-editor": `${stateBindingPrefix}node --test tests/desen-app-state-binding-editor.test.mjs`,
   };
+  const eventActionCommand =
+    "vitest run test/structured-json.test.ts test/authoring-data.test.ts test/authoring-selection.test.ts test/authoring-event-actions.test.ts test/event-action-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx";
+  const eventActionPrefix =
+    "node scripts/verify-desen-app-state-binding-editor.mjs && node scripts/verify-editor-core-event-action-edits.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:event-actions && ";
+  const eventActionRootCommands = {
+    "generate:desen-app-event-action-editor": `${eventActionPrefix}node scripts/generate-desen-app-event-action-editor-proof.mjs`,
+    "verify:desen-app-event-action-editor": `${eventActionPrefix}node scripts/verify-desen-app-event-action-editor.mjs`,
+    "test:desen-app-event-action-editor": `${eventActionPrefix}node --test tests/desen-app-event-action-editor.test.mjs`,
+  };
   if (
     app.scripts?.["test:structured-inspector"] !== structuredCommand ||
     app.scripts?.["test:named-slots"] !== namedSlotCommand ||
     app.scripts?.["test:state-bindings"] !== stateBindingCommand ||
+    app.scripts?.["test:event-actions"] !== eventActionCommand ||
     app.dependencies?.["@desen/protocol"] !== "workspace:*" ||
     Object.entries(rootCommands).some(([name, command]) => root.scripts?.[name] !== command) ||
     Object.entries(namedSlotRootCommands).some(
@@ -1425,11 +1448,14 @@ function inspectStateBindingSuccessor(files) {
     ) ||
     Object.entries(stateBindingRootCommands).some(
       ([name, command]) => root.scripts?.[name] !== command,
+    ) ||
+    Object.entries(eventActionRootCommands).some(
+      ([name, command]) => root.scripts?.[name] !== command,
     )
   ) {
     fail(
       "SUCCESSOR_POLICY_VIOLATION",
-      "The exact M09-T06/T07/T08 package or proof command drifted.",
+      "The exact retained or additive successor package command drifted.",
     );
   }
   const sourceMarkers = new Map([
@@ -1510,6 +1536,32 @@ function inspectStateBindingSuccessor(files) {
       ],
     ],
     [
+      EVENT_ACTION_SOURCE_PATH,
+      [
+        'readonly ownerKind: "component"',
+        'fields.ownerKind !== "component"',
+        "createDesenEditorContinuousValidator",
+        "deleteDesenEditorAction",
+        "deleteDesenEditorEventHandler",
+        "insertDesenEditorAction",
+        "insertDesenEditorEventHandler",
+        "reorderDesenEditorAction",
+        "replaceDesenEditorAction",
+        "escapeJsonPointerToken",
+        "prepareCatalogAuthoringModel(catalogValue, document)",
+      ],
+    ],
+    [
+      EVENT_ACTION_PANEL_PATH,
+      [
+        "parseInertJsonText",
+        "formatStructuredJson",
+        "export function EventActionPanel(",
+        'aria-label="Selected event component"',
+        "Select a component to inspect its Catalog-declared events.",
+      ],
+    ],
+    [
       APPLICATION_SOURCE_PATH,
       [
         "applyAuthoringInspectorBindingEdit",
@@ -1531,6 +1583,12 @@ function inspectStateBindingSuccessor(files) {
         "sourceNodeId: result.nodeId",
         "data-active-slot={active}",
         'event.dataTransfer.setData("text/plain", "DESEN App authoring item")',
+        "applyAuthoringEventActionEdit",
+        "prepareAuthoringEventActionModel",
+        "function editSelectedEventAction(",
+        "const nextPreview = prepareAuthoringPreviewBundle(result.document)",
+        "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
+        "<EventActionPanel",
       ],
     ],
     [
@@ -1546,6 +1604,8 @@ function inspectStateBindingSuccessor(files) {
         '.layerNode[data-row-drop-position="before"]::before',
         '.layerNode[data-row-drop-position="after"]::before',
         ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
+        '.authoringPanel[data-active-tab="actions"]',
+        ".eventActionPanel {",
       ],
     ],
     [
@@ -1558,6 +1618,9 @@ function inspectStateBindingSuccessor(files) {
         "updates surface-local state and changes a compatible binding in the live preview",
         "Bound Value to state.password.",
         'name: "Delete Alert layer · node.alert"',
+        "commits sign-in event handlers and complete actions through the live authoring session",
+        "keeps the prior event projection and canvas when action preview preflight fails",
+        'vi.spyOn(authoringPreview, "prepareAuthoringPreviewBundle")',
       ],
     ],
     [
@@ -1573,6 +1636,22 @@ function inspectStateBindingSuccessor(files) {
         "disables root deletion and deletion across the owning slot minimum",
         "deletes the final node from a 1,024-sibling slot within the bounded profile",
         "captures deletion selections as exact own data and rejects cross-route authority",
+      ],
+    ],
+    [
+      EVENT_ACTION_TEST_PATH,
+      [
+        "creates exact component owner references and rejects forged behavior values",
+        "maps all six App edits one-to-one to immutable Editor Core transitions",
+        "projects every member of the seven-action union including nested settlements",
+      ],
+    ],
+    [
+      EVENT_ACTION_PANEL_TEST_PATH,
+      [
+        "shows the selected component and Catalog events, then adds and deletes an exact handler",
+        "offers all seven complete-action starters and preserves a $ref on insert",
+        "reports local JSON and edit failures accessibly without losing the draft",
       ],
     ],
   ]);
@@ -1683,6 +1762,8 @@ function inspectStateBindingSuccessor(files) {
       namedSlotRootCommands,
       stateBindingTestCommand: stateBindingCommand,
       stateBindingRootCommands,
+      eventActionTestCommand: eventActionCommand,
+      eventActionRootCommands,
     },
   });
 }
@@ -1740,6 +1821,10 @@ export async function buildDesenAppSchemaInspectorEvidence(rawOptions = undefine
         STATE_BINDING_ARTIFACT_PATH,
         PANEL_TEST_PATH,
         STRUCTURED_JSON_TEST_PATH,
+        EVENT_ACTION_SOURCE_PATH,
+        EVENT_ACTION_PANEL_PATH,
+        EVENT_ACTION_TEST_PATH,
+        EVENT_ACTION_PANEL_TEST_PATH,
       ].map((relativePath) => ({
         path: relativePath,
         bytes: files.get(relativePath).byteLength,

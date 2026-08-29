@@ -6,9 +6,9 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T08 adds a surface-local state editor and direct, type-compatible local-state property
-bindings while keeping state forms, binding controls, selection, and every other authoring control
-in the application-owned shell outside the exact React adapter canvas.
+M09-T09 adds a component-only Catalog event-handler and closed-action editor while keeping event
+projection, whole-action drafts, state forms, binding controls, selection, and every other
+authoring control in the application-owned shell outside the exact React adapter canvas.
 The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
@@ -66,8 +66,15 @@ The current product surface contains:
   primitive declarations whose type is provably compatible with the selected Catalog control;
 - explicit change-binding and use-state-initial transitions, while operation bindings, fallbacks,
   tokens, formats, nested paths, and other advanced dynamic values remain visible and read-only;
-- public Editor Core set/delete commands followed by continuous Catalog validation, with no
-  partial Source returned for stale identity, invalid value, or failed validation;
+- a fourth Events & Actions view that projects only the exact selected Source component and its
+  Catalog-declared events, with absent, present-empty, and present-nonempty handlers kept distinct;
+- handler add/delete plus ordered root and recursive `operation.invoke` success/failure action
+  lists with insert, edit, delete, and move controls;
+- all seven closed action types captured through inert whole-action JSON drafts that stay local
+  until explicit Apply, with `$ref` values preserved as data;
+- public Editor Core property set/delete commands and all six event/action mutations followed by
+  complete continuous Catalog validation, with no partial Source returned for stale identity,
+  invalid value, or failed validation;
 - Publisher preflight for every accepted edit and one atomic session-local `{document, preview}`
   replacement, so a failed publication keeps both the prior Source and prior working preview;
 - explicit not-found states for unknown routes, projects, and surfaces; and
@@ -169,14 +176,29 @@ feeds Integer, and enum binding requires a proven subset. Detaching a direct bin
 declaration's validated primitive initial value. Runtime namespaces and advanced ValueSpecs remain
 read-only rather than being silently simplified.
 
+Event/action projection reauthorizes the exact current route, Source component identity, and
+Catalog capability before exposing only that component's declared events. Behavior-owner UI is
+outside this slice, and forged behavior selections fail closed. Absent, present-empty, and
+present-nonempty handlers remain distinct. Exact canonical escaped owner-relative pointers address
+handler insert/delete and action insert/replace/delete/reorder through the six public Editor Core
+mutations.
+
+The action editor accepts only the closed `component.command`, `event.emit`, `navigate`,
+`operation.invoke`, `resource.refresh`, `state.set`, and `state.toggle` union. Operation success and
+failure lists remain recursively addressable. Whole-action JSON is parsed as inert data, preserves
+valid `$ref` members, and remains a local draft until explicit Apply. Every complete candidate must
+pass continuous Source validation and Publisher preflight before one atomic session-local
+`{document, preview}` replacement; failure preserves the prior document, event projection, canvas,
+selection overlay, and managed capability subtree.
+
 This slice does not expose component rectangles, hit testing, canvas picking, private DOM/native
-structure, or managed-tree inspection. It does not edit repeat/resource bindings, events, or
-actions; persist project data; create user projects; execute interactive Design/Run behavior;
-navigate diagnostics; publish to the control plane; or activate a channel. Event/action authoring
-belongs to M09-T09, interactive Design/Run behavior to M09-T10, durable save/open to M09-T12, and
-publication or activation to M09-T14. Catalog control hints remain opaque under PF-025 and cannot
-widen schema authority. P-08 remains `NOT_PROVEN`, and no real-browser E2E or native-drag
-automation result is claimed.
+structure, or managed-tree inspection. It does not edit repeat/resource bindings or behavior-owned
+event handlers; persist project data; create user projects; execute actions or interactive
+Design/Run behavior; navigate diagnostics; publish to the control plane; or activate a channel.
+Interactive Design/Run behavior belongs to M09-T10, durable save/open to M09-T12, and publication
+or activation to M09-T14. Catalog control hints remain opaque under PF-025 and cannot widen schema
+authority. P-08 remains `NOT_PROVEN`, PF-025 and PF-083 remain `OPEN`, and no real-browser E2E or
+native-drag automation result is claimed.
 
 The App imports only public package entry points for Catalog derivation, Editor Core mutation and
 validation, Publisher preflight, runtime composition, and the exact static reference adapter
@@ -184,11 +206,17 @@ registry. It does not import concrete Catalog components, private package files,
 or control-plane code. Bundle data never selects a module, component, fallback tree, or executable
 host binding.
 
-The focused state-binding suite passes 109/109 and the complete App suite passes 181/181. Local
-in-app-browser inspection covers state-initial refresh, direct String and Boolean binding changes,
-read-only operation binding preservation, keyboard-accessible tabs, and a clean console. These
-measured receipts make no required-gate, global-CI-count, hosted-CI, real-browser E2E, or
-native-drag automation claim.
+The focused event/action suite passes 84/84, the complete App suite passes 202/202, and the
+independent root proof passes 10/10. Exact evidence is the `23,812`-byte
+`docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json` at
+`sha256:0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab`. The live local CI
+authority contains 190 workloads and 90 proof pairs—79 ordinary and 11 barriers—with a
+57-proof-unit/124-workload closure and 1,212 tracked/180 proof-owned paths. Sequence 48 contains 44
+artifacts and 88 readers at
+`sha256:5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90`. These measured receipts
+make no required-gate, hosted-CI, action-execution, Design/Run, persistence, real-browser E2E,
+publication, activation, or native-drag automation claim. M09-T09 is `DONE`, implementation
+progress is 104/145 (72%), M09 is 9/14 (64%), proof gates remain 10/13, and M09-T10 is next.
 
 ## Local commands
 
@@ -203,6 +231,7 @@ pnpm --filter @desen/app-web test:inspector
 pnpm --filter @desen/app-web test:structured-inspector
 pnpm --filter @desen/app-web test:named-slots
 pnpm --filter @desen/app-web test:state-bindings
+pnpm --filter @desen/app-web test:event-actions
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

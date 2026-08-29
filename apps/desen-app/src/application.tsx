@@ -9,6 +9,11 @@ import {
   applyAuthoringInspectorEdit,
   prepareAuthoringInspectorModel,
 } from "./authoring-inspector.js";
+import {
+  applyAuthoringEventActionEdit,
+  createAuthoringEventOwnerSelection,
+  prepareAuthoringEventActionModel,
+} from "./authoring-event-actions.js";
 import { applyAuthoringStateEdit, prepareAuthoringStateModel } from "./authoring-state.js";
 import {
   applyAuthoringNodeDelete,
@@ -25,6 +30,7 @@ import {
   isSameAuthoringComponentSelection,
 } from "./authoring-selection.js";
 import { InspectorPanel } from "./inspector-panel.js";
+import { EventActionPanel } from "./event-action-panel.js";
 import { StatePanel } from "./state-panel.js";
 import { prepareAuthoringPreviewBundle, REFERENCE_EDITOR_DOCUMENT } from "./authoring-preview.js";
 import {
@@ -51,6 +57,12 @@ import type {
   CatalogAuthoringModel,
   CatalogComponentSummary,
 } from "./authoring-data.js";
+import type {
+  AuthoringEventActionEdit,
+  AuthoringEventActionEditResult,
+  AuthoringEventActionModelResult,
+  AuthoringEventOwnerSelection,
+} from "./authoring-event-actions.js";
 import type {
   AuthoringInspectorBindingEdit,
   AuthoringInspectorEdit,
@@ -334,7 +346,7 @@ function ProjectsHome() {
   );
 }
 
-type AuthoringTab = "layers" | "components" | "state";
+type AuthoringTab = "layers" | "components" | "state" | "actions";
 
 type AuthoringDragIntent =
   | Readonly<{ readonly kind: "component"; readonly componentId: string }>
@@ -1117,8 +1129,10 @@ function ComponentLibrary({
 }
 
 function AuthoringPanel({
+  eventActionModel,
   model,
   onDeleteSelection,
+  onEventActionEdit,
   onSlotEdit,
   onStateEdit,
   onToggleSelection,
@@ -1128,8 +1142,10 @@ function AuthoringPanel({
   selectedSurface,
   stateModel,
 }: Readonly<{
+  readonly eventActionModel: AuthoringEventActionModelResult;
   readonly model: CatalogAuthoringModel;
   readonly onDeleteSelection: () => AuthoringSlotEditResult;
+  readonly onEventActionEdit: (edit: AuthoringEventActionEdit) => AuthoringEventActionEditResult;
   readonly onSlotEdit: (
     target: AuthoringSlotSelection,
     edit: AuthoringSlotEdit,
@@ -1150,6 +1166,7 @@ function AuthoringPanel({
   const layersTab = useRef<HTMLButtonElement>(null);
   const componentsTab = useRef<HTMLButtonElement>(null);
   const stateTab = useRef<HTMLButtonElement>(null);
+  const actionsTab = useRef<HTMLButtonElement>(null);
   const slotProjection =
     activeSlot === null ? null : projectAuthoringSlotSelection(activeSlot, route, model);
   const surfaceRootNodeId =
@@ -1227,13 +1244,13 @@ function AuthoringPanel({
   function selectAdjacentTab(event: KeyboardEvent<HTMLButtonElement>): void {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const tabs: readonly AuthoringTab[] = ["layers", "components", "state"];
+    const tabs: readonly AuthoringTab[] = ["layers", "components", "state", "actions"];
     const currentIndex = tabs.indexOf(activeTab);
     const nextTab =
       event.key === "Home"
         ? "layers"
         : event.key === "End"
-          ? "state"
+          ? "actions"
           : (tabs[
               (currentIndex + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length
             ] ?? "layers");
@@ -1242,7 +1259,9 @@ function AuthoringPanel({
       ? layersTab
       : nextTab === "components"
         ? componentsTab
-        : stateTab
+        : nextTab === "state"
+          ? stateTab
+          : actionsTab
     ).current?.focus();
   }
 
@@ -1275,7 +1294,11 @@ function AuthoringPanel({
   }
 
   return (
-    <aside aria-label="Authoring panel" className={styles.authoringPanel}>
+    <aside
+      aria-label="Authoring panel"
+      className={styles.authoringPanel}
+      data-active-tab={activeTab}
+    >
       <div className={styles.authoringHeader}>
         <span>
           <strong>Authoring</strong>
@@ -1326,6 +1349,19 @@ function AuthoringPanel({
           type="button"
         >
           State
+        </button>
+        <button
+          aria-controls={`${panelId}-actions-panel`}
+          aria-selected={activeTab === "actions"}
+          id={`${panelId}-actions-tab`}
+          onClick={() => setActiveTab("actions")}
+          onKeyDown={selectAdjacentTab}
+          ref={actionsTab}
+          role="tab"
+          tabIndex={activeTab === "actions" ? 0 : -1}
+          type="button"
+        >
+          Actions
         </button>
       </div>
       <div
@@ -1384,7 +1420,21 @@ function AuthoringPanel({
       >
         <StatePanel model={stateModel} onEdit={onStateEdit} surfaceName={selectedSurface.name} />
       </div>
-      {selection === null || activeTab === "state" ? null : (
+      <div
+        aria-labelledby={`${panelId}-actions-tab`}
+        className={styles.authoringTabPanel}
+        hidden={activeTab !== "actions"}
+        id={`${panelId}-actions-panel`}
+        role="tabpanel"
+        tabIndex={activeTab === "actions" ? 0 : -1}
+      >
+        <EventActionPanel
+          model={eventActionModel}
+          onEdit={onEventActionEdit}
+          surfaceName={selectedSurface.name}
+        />
+      </div>
+      {selection === null || activeTab === "state" || activeTab === "actions" ? null : (
         <div className={styles.authoringSelectionActions}>
           <button
             aria-describedby={`${panelId}-delete-layer-description`}
@@ -1403,9 +1453,11 @@ function AuthoringPanel({
         {notice ||
           (activeTab === "state"
             ? `Local state · ${selectedSurface.name}`
-            : selection === null
-              ? "Choose a Source layer to inspect, move, or edit its properties."
-              : `Selected · ${selection.displayName}${selection.conditional ? " · Conditional" : ""}`)}
+            : activeTab === "actions"
+              ? `Events and actions · ${selectedSurface.name}`
+              : selection === null
+                ? "Choose a Source layer to inspect, move, or edit its properties."
+                : `Selected · ${selection.displayName}${selection.conditional ? " · Conditional" : ""}`)}
       </p>
     </aside>
   );
@@ -1447,6 +1499,28 @@ function SurfaceEditor({
         ? prepareAuthoringStateModel(preparedModel.model, route)
         : Object.freeze({ status: "rejected", reason: "route-invalid" }),
     [preparedModel, route],
+  );
+  const eventOwnerSelection = useMemo<AuthoringEventOwnerSelection | null>(
+    () =>
+      selection === null
+        ? null
+        : createAuthoringEventOwnerSelection({
+            projectId: selection.projectId,
+            surfaceId: selection.surfaceId,
+            ownerKind: "component",
+            ownerId: selection.sourceNodeId,
+            capabilityId: selection.capabilityId,
+            displayName: selection.displayName,
+            conditional: selection.conditional,
+          }),
+    [selection],
+  );
+  const eventActionModel = useMemo<AuthoringEventActionModelResult>(
+    () =>
+      preparedModel.ok
+        ? prepareAuthoringEventActionModel(preparedModel.model, route, eventOwnerSelection)
+        : Object.freeze({ status: "rejected", reason: "route-invalid" }),
+    [eventOwnerSelection, preparedModel, route],
   );
 
   function toggleSelection(node: AuthoringLayerNode): void {
@@ -1495,6 +1569,26 @@ function SurfaceEditor({
 
   function editLocalState(edit: AuthoringStateEdit): AuthoringStateEditResult {
     const result = applyAuthoringStateEdit(document, referenceCatalog, route, edit);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    if (!nextPreview.ok) {
+      return Object.freeze({ ok: false, reason: "preview-unavailable" });
+    }
+    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    return result;
+  }
+
+  function editSelectedEventAction(edit: AuthoringEventActionEdit): AuthoringEventActionEditResult {
+    if (eventOwnerSelection === null) {
+      return Object.freeze({ ok: false, reason: "owner-invalid" });
+    }
+    const result = applyAuthoringEventActionEdit(
+      document,
+      referenceCatalog,
+      route,
+      eventOwnerSelection,
+      edit,
+    );
     if (!result.ok) return result;
     const nextPreview = prepareAuthoringPreviewBundle(result.document);
     if (!nextPreview.ok) {
@@ -1569,8 +1663,10 @@ function SurfaceEditor({
       </h1>
 
       <AuthoringPanel
+        eventActionModel={eventActionModel}
         model={model}
         onDeleteSelection={deleteSelectedLayer}
+        onEventActionEdit={editSelectedEventAction}
         onSlotEdit={editNamedSlot}
         onStateEdit={editLocalState}
         onToggleSelection={toggleSelection}

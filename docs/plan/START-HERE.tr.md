@@ -925,6 +925,36 @@ P-08 `NOT_PROVEN`, PF-025 `OPEN` ve kanıt kapıları 10/13 kalır. Genel ilerle
 ilerlemesi 8/14'tür (%57). Event/action authoring, Design/Run, durable save/open, gerçek-browser E2E,
 publication ve activation sonraki sahiplerde kalır; sıradaki iş M09-T09'dur.
 
+M09-T09 artık `DONE`'dır. Dördüncü Events & Actions görünümü yalnızca seçili Source component'inin
+doğrulanmış Catalog sözleşmesinde ilan edilen event'leri gösterir; behavior-owner UI iddiası yoktur
+ve sahte behavior seçimi fail-closed kalır. Handler'ın absent, present-empty ve present-nonempty
+hâlleri ayrıdır. Component event handler ekleme/silme ile complete action ekleme, değiştirme,
+sıralama ve silme işlemleri canonical escaped owner-relative pointer'larla yapılır.
+
+Kapalı action birliği `component.command`, `event.emit`, `navigate`, `operation.invoke`,
+`resource.refresh`, `state.set` ve `state.toggle` üyelerinden oluşur. Yalnızca
+`operation.invoke` success/failure listelerini recursive olarak taşır. Whole-action JSON taslağı
+explicit Apply'e kadar inert ve panel-lokaldir; bu görünüm action çalıştırmaz. Her kabul edilen edit
+public Editor Core geçişi, complete Source revalidation ve Publisher preview preflight sonrasında
+tek bir session-local `{document, preview}` değişimiyle commit edilir. Edit ya da preflight reddi
+önceki handler projection'ını, canvas'ı, selection overlay'i ve managed capability subtree'yi korur.
+
+Pure projection 12/12, panel 7/7, focused `test:event-actions` 84/84, complete App 202/202,
+independent root proof 10/10 ve complete structural CI 282/282 geçer. Exact artifact 23.812 byte'tır:
+`docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json`,
+`sha256:0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab`.
+
+Yerel CI authority 190 workload/90 proof pair (79 ordinary + 11 barrier), connected closure 57 proof
+unit/124 workload ve ownership 1.212 tracked/180 proof-owned path'tir. Append-only sequence 48,
+44 artifact ve 88 reader'ı
+`sha256:5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90` başında doğrular;
+checkpoint suite 71/71 geçer. Bunlar required-gate, hosted-CI, action-execution veya gerçek-browser
+E2E sonucu değildir.
+
+P-08 `NOT_PROVEN`, PF-025 ve PF-083 `OPEN`, kanıt kapıları 10/13 kalır. Genel ilerleme 104/145
+(%72), M09 ilerlemesi 9/14'tür (%64). Design/Run, durable save/open, diagnostics navigation,
+publication, activation ve gerçek-browser E2E sonraki sahiplerde kalır; sıradaki iş M09-T10'dur.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

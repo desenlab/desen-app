@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████████░░░░░░░` **103 / 145 tasks complete (71%)**
+**Overall:** `██████████████████░░░░░░░` **104 / 145 tasks complete (72%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `████████░░░░░░` **8 / 14 tasks complete (57%)**
+**M09:** `█████████░░░░░` **9 / 14 tasks complete (64%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T09`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T10`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -852,6 +852,35 @@ M09-T08 is `DONE`; implementation progress is 103/145 (71%), M09 is 8/14 (57%), 
 remain 10/13. P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, and event/action authoring,
 Design/Run, durable save/open, real-browser E2E, publication, and activation remain. The T07 native
 real-browser drag E2E receipt also remains open. M09-T09 is next.
+
+M09-T09 adds one component-only Events & Actions view for the exact selected Source component.
+Only events declared by that component's authenticated Catalog contract are projected, with
+absent, present-empty, and present-nonempty handler states kept distinct; forged behavior
+selections fail closed and behavior-owner UI is not claimed. Six public Editor Core mutations cover
+handler insert/delete and action insert/replace/delete/reorder through exact canonical escaped
+owner-relative pointers.
+
+The editor covers all seven closed action types—`component.command`, `event.emit`, `navigate`,
+`operation.invoke`, `resource.refresh`, `state.set`, and `state.toggle`—plus recursively
+addressable operation success and failure lists. Whole-action JSON drafts stay inert and local
+until explicit Apply. Every accepted endpoint passes complete continuous Source validation and
+Publisher preflight before one atomic session-local `{document, preview}` replacement; a failed
+edit or preview preflight preserves the prior Source, event projection, and canvas.
+
+The focused event/action suite passes 84/84, the complete App suite passes 202/202, and the
+independent root proof passes 10/10. Exact evidence is the `23,812`-byte
+[`desen-app-0.1.0-event-action-editor.json`](docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json)
+at `sha256:0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab`; the reviewed report is
+[`DESEN-APP-EVENT-ACTION-EDITOR.md`](docs/proof/DESEN-APP-EVENT-ACTION-EDITOR.md). The live local CI
+authority contains 190 workloads and 90 proof pairs—79 ordinary and 11 barriers—with a
+57-proof-unit/124-workload closure and 1,212 tracked/180 proof-owned paths. Sequence 48 contains 44
+artifacts and 88 readers at
+`sha256:5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90`.
+
+M09-T09 is `DONE`; implementation progress is 104/145 (72%), M09 is 9/14 (64%), and proof gates
+remain 10/13. P-08 remains `NOT_PROVEN`; PF-025 and PF-083 remain `OPEN`. Action execution,
+Design/Run, durable save/open, real-browser E2E, publication, and activation remain unclaimed.
+M09-T10 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

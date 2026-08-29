@@ -118,6 +118,18 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.p08Status, "NOT_PROVEN");
   assert.equal(built.artifactBytes.byteLength > 0, true);
   assert.match(built.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(built.currentCompatibility.successor.task, "M09-T09");
+  assert.deepEqual(built.currentCompatibility.successor.artifact, {
+    task: "M09-T09",
+    proofId: "desen-app-event-action-editor",
+    profile: "desen.app.event-action-editor-proof.v1",
+    result: "PASS",
+    path: "docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json",
+    bytes: 23_812,
+    sha256: "0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab",
+  });
+  assert.equal(built.currentCompatibility.successor.exactSelectedComponentEvents, true);
+  assert.equal(built.currentCompatibility.successor.behaviorOwnerUiImplemented, false);
 });
 
 test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[1], () => {
@@ -235,6 +247,8 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[6], async () => {
   assert.notEqual(second.artifact, built.artifact);
   assert.equal(Object.isFrozen(second.artifact), true);
   assert.equal(Object.isFrozen(second.artifact.boundary.trackedReceipts), true);
+  assert.deepEqual(second.currentCompatibility, built.currentCompatibility);
+  assert.equal(Object.isFrozen(second.currentCompatibility), true);
 });
 
 test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[7], async () => {

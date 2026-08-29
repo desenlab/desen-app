@@ -28,6 +28,8 @@ const AUTHORING_INSPECTOR_SOURCE_PATH = "apps/desen-app/src/authoring-inspector.
 const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
 const AUTHORING_STATE_SOURCE_PATH = "apps/desen-app/src/authoring-state.ts";
+const AUTHORING_EVENT_ACTION_SOURCE_PATH = "apps/desen-app/src/authoring-event-actions.ts";
+const EVENT_ACTION_PANEL_SOURCE_PATH = "apps/desen-app/src/event-action-panel.tsx";
 const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
 const STATE_PANEL_SOURCE_PATH = "apps/desen-app/src/state-panel.tsx";
 const STRUCTURED_JSON_SOURCE_PATH = "apps/desen-app/src/structured-json.ts";
@@ -38,6 +40,8 @@ const AUTHORING_INSPECTOR_TEST_PATH = "apps/desen-app/test/authoring-inspector.t
 const AUTHORING_PREVIEW_TEST_PATH = "apps/desen-app/test/authoring-preview.test.ts";
 const AUTHORING_SLOT_TEST_PATH = "apps/desen-app/test/authoring-slots.test.ts";
 const AUTHORING_STATE_TEST_PATH = "apps/desen-app/test/authoring-state.test.ts";
+const AUTHORING_EVENT_ACTION_TEST_PATH = "apps/desen-app/test/authoring-event-actions.test.ts";
+const EVENT_ACTION_PANEL_TEST_PATH = "apps/desen-app/test/event-action-panel.test.tsx";
 const INSPECTOR_PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
 const STATE_PANEL_TEST_PATH = "apps/desen-app/test/state-panel.test.tsx";
 const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
@@ -72,6 +76,8 @@ const CURRENT_APP_SOURCE_PATHS = Object.freeze(
     AUTHORING_PREVIEW_SOURCE_PATH,
     AUTHORING_SLOT_SOURCE_PATH,
     AUTHORING_STATE_SOURCE_PATH,
+    AUTHORING_EVENT_ACTION_SOURCE_PATH,
+    EVENT_ACTION_PANEL_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
     STATE_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
@@ -128,6 +134,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_PREVIEW_SOURCE_PATH,
     AUTHORING_SLOT_SOURCE_PATH,
     AUTHORING_STATE_SOURCE_PATH,
+    AUTHORING_EVENT_ACTION_SOURCE_PATH,
+    EVENT_ACTION_PANEL_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
     STATE_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
@@ -135,6 +143,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_PREVIEW_TEST_PATH,
     AUTHORING_SLOT_TEST_PATH,
     AUTHORING_STATE_TEST_PATH,
+    AUTHORING_EVENT_ACTION_TEST_PATH,
+    EVENT_ACTION_PANEL_TEST_PATH,
     INSPECTOR_PANEL_TEST_PATH,
     STATE_PANEL_TEST_PATH,
     STRUCTURED_JSON_TEST_PATH,
@@ -1799,14 +1809,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 131 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 133 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 388 || dynamicEdges !== 0) {
+  if (staticEdges !== 397 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
