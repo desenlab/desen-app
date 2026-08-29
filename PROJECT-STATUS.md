@@ -1269,19 +1269,59 @@ P-08 remains `NOT_PROVEN`, P-09 and P-10 remain `PARTIAL`, and PF-085/PF-089 rem
 gates remain 10/13; implementation progress is 107/145 (74%); M09 is 12/14 (86%); and M09-T13 is
 next.
 
+M09-T13 retains only the exact frozen continuous-validation report from a rejected candidate. The
+invalid document never replaces the admitted authored Source, publishable preview, managed Runtime,
+dirty state, Save request, or persistence generation. Exact candidate document and Catalog-set
+fingerprints, project/surface route, the still-current committed-document owner, and the live
+Runtime React diagnostic index fence every projection; stale or inconsistent authority returns no
+partial navigation model.
+
+Only `invalidSubjects` mappings from `context.surfaceId` plus explicit `subject.kind` and
+`subject.id` create selectable targets. Diagnostic code, message, pointer, capability, and
+incidental context text remain presentation metadata. Original order, duplicate occurrences,
+node/behavior distinction, unmapped and out-of-route diagnostics, and inert obligations are
+preserved. Selection retains only an opaque snapshot-bound key and re-admits it from the current
+projection.
+
+The App-owned Inspector section exposes mapped occurrences as native controls, announces its count,
+marks current selection with `aria-current`, and provides dismissal without autofocus. A selected
+occurrence renders an invalid-change placeholder outside the managed Runtime subtree while the
+current valid preview remains visible. Diagnostics are Design-only: Run hides and inerts them,
+returning to Design does not steal focus, and successful edit or session replacement revokes the
+transient report.
+
+The M09-T13 focused nine-file diagnostics suite passes 161/161, the complete twenty-four-file App
+suite passes 339/339, and the independent root mutation proof passes 12/12. The exact 29,208-byte
+artifact is `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`; it binds 39 current
+files and eleven exact Runtime, Editor Core, and App proof parents. The live local CI authority is
+198 workloads and 94 proof pairs—83 ordinary and eleven barriers—with a 62-proof-unit/134-workload
+closure and 1,253 tracked paths, including 188 proof-owned paths. The append-only current-reader
+checkpoint advances sequence 51 head
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` to sequence 52 head
+`sha256:c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9` across 48 frozen
+artifacts and 96 current readers. Promotion pins the selector at
+`sha256:872a061aeea1afe9f82f7578f0fa3cbcfe037a982fde40116e2c88c7e366e2e7` and the required-affected
+runner authority at `sha256:1e08a5db4dc33d684a1e119a88dc5bd4f99e5b98cd0e468a81327c709c3ac2bb`.
+Checkpoint, promotion, selector, required-affected, and CI quality-gate regression suites pass
+75/75, 20/20, 22/22, 38/38, and 28/28 locally—183/183 combined. M09-T13 is `DONE`, P-16 is
+`PROVEN`, PF-086 remains `OPEN`, proof gates remain 10/13, implementation progress is 108/145
+(74%), M09 is 13/14 (93%), and M09-T14 is next. These local receipts make no required-gate or
+hosted-CI claim.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `107 / 145 tasks complete (74%)`
+- Overall implementation progress: `108 / 145 tasks complete (74%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
-- M09 progress: `12 / 14 tasks complete (86%)`
+- M09 progress: `13 / 14 tasks complete (93%)`
 - Proof-gate progress: `10 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1374,7 +1414,8 @@ next.
   `M09-T09 — Sign-in event and closed-action editor UI`,
   `M09-T10 — Design/Run modes on the same source tree`,
   `M09-T11 — Fixtures, scenarios, and visible approximate-fidelity disclosure`,
-  `M09-T12 — Save/open UI through the public Editor persistence port`
+  `M09-T12 — Save/open UI through the public Editor persistence port`,
+  `M09-T13 — Node-linked diagnostics and selectable invalid placeholders`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -1396,13 +1437,13 @@ next.
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Next implementation task: `M09-T13 — Node-linked diagnostics and selectable invalid placeholders`
+- Next implementation task: `M09-T14 — Publish to control plane and reference-host channel activation`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  12/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T12 are `DONE`; `N-012`, `N-018`,
-  `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`, P-06 is `PROVEN`, P-07, P-09, P-10, and
-  P-16 are `PARTIAL`, proof gates are 10/13, P-08 remains `NOT_PROVEN`, N-036 remains `PLANNED`,
-  PF-028 is `CLOSED`, PF-025, PF-083, PF-085, and PF-089 remain `OPEN`, and implementation
-  progress is 107/145.
+  13/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T13 are `DONE`; `N-012`, `N-018`,
+  `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`, P-06 and P-16 are `PROVEN`, P-07, P-09,
+  and P-10 are `PARTIAL`, proof gates are 10/13, P-08 remains `NOT_PROVEN`, N-036 remains `PLANNED`,
+  PF-028 is `CLOSED`, PF-025, PF-083, PF-085, PF-086, and PF-089 remain `OPEN`, and implementation
+  progress is 108/145.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -4329,11 +4370,14 @@ M09-T12 evidence:
   drafts require admission across navigation/traversal and protect dirty page exit; generation,
   dirty, pending, failure, uncertainty, and reopen state remain visibly and accessibly distinct;
   scenario previews, fixture state, Runtime inputs, and secrets are never persisted
-- retained authoring UX: each compatible Components card body is a broad native drag source with a
-  separate `Add` button; only the sticky `Add to` target accepts component drops and releases
-  elsewhere are inert; Layers fences one global nested-slot projection by drag owner and epoch,
-  applies midpoint hysteresis, renders 32 px insertion gaps, and keeps the guarded `Delete` control
-  visible for the selected node
+- retained authoring UX: each compatible Components card has a dedicated dotted native-drag grip
+  plus a separate `Add` button; the complete authenticated Components panel accepts a drop for the
+  target summarized by the sticky `Add to` card; Layers starts movement only from a dedicated
+  dotted grip, fences the innermost nested-slot owner and drag epoch, applies midpoint hysteresis,
+  keeps compact insertion lanes layout-stable while each visible row projects its before/after
+  half, shows accepted/current-position feedback, and retains the last admitted placement through
+  coordinate-less or rejected release drift; insertion switches to Layers, focuses the new node,
+  and exposes the guarded `Remove layer` action plus Delete/Backspace shortcuts
 - local proof: the focused five-file persistence suite passes 142/142, the complete twenty-two-file
   App suite passes 324/324, and the independent root mutation proof passes 12/12
 - evidence boundary: the artifact binds 35 current files and three exact parents without tracking

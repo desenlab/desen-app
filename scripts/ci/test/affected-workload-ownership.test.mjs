@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 186,
+  PROOF_UNIT: 188,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
-  FROZEN_INPUT: 137,
-  PACKAGE_OR_APPLICATION: 481,
-  SHARED_PROOF_INFRASTRUCTURE: 223,
-  PROJECT_DOCUMENTATION: 129,
+  FROZEN_INPUT: 138,
+  PACKAGE_OR_APPLICATION: 485,
+  SHARED_PROOF_INFRASTRUCTURE: 225,
+  PROJECT_DOCUMENTATION: 130,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1243 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1253 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1243 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1243);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1253);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 186);
+  assert.equal(proofEntries.length, 188);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -244,6 +244,15 @@ test("permits strict selection only for exact verifier and root-test proof input
     [
       "scripts/verify-desen-app-source-persistence.mjs",
       "tests/desen-app-source-persistence.test.mjs",
+    ],
+  );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "desen-app-node-linked-diagnostics")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-desen-app-node-linked-diagnostics.mjs",
+      "tests/desen-app-node-linked-diagnostics.test.mjs",
     ],
   );
   for (const entry of proofEntries) {
@@ -486,6 +495,16 @@ test("the reviewed M09 successor preserves the historical I07-04 ownership proje
     "scripts/lib/desen-app-source-persistence-proof.mjs",
     "scripts/verify-desen-app-source-persistence.mjs",
     "tests/desen-app-source-persistence.test.mjs",
+    "apps/desen-app/src/authoring-diagnostics.ts",
+    "apps/desen-app/src/diagnostics-panel.tsx",
+    "apps/desen-app/test/authoring-diagnostics.test.ts",
+    "apps/desen-app/test/diagnostics-panel.test.tsx",
+    "docs/proof/DESEN-APP-NODE-LINKED-DIAGNOSTICS.md",
+    "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json",
+    "scripts/generate-desen-app-node-linked-diagnostics-proof.mjs",
+    "scripts/lib/desen-app-node-linked-diagnostics-proof.mjs",
+    "scripts/verify-desen-app-node-linked-diagnostics.mjs",
+    "tests/desen-app-node-linked-diagnostics.test.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);

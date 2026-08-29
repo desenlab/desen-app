@@ -20,6 +20,8 @@ const PARENT_PATH = "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.j
 const FIXTURES_SCENARIOS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const SOURCE_PATHS = Object.freeze({
   authoringDataSource: "apps/desen-app/src/authoring-data.ts",
   slotSource: "apps/desen-app/src/authoring-slots.ts",
@@ -212,13 +214,21 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[4], () => {
   assert.equal(application.declaredAbsentSlotsVisible, true);
   assert.equal(application.linearDeclaredPresentJoin, true);
   assert.equal(application.orderedBoundaryControls, true);
-  assert.equal(application.expandedNonOverlappingDropReadyBoundaries, true);
+  assert.equal(application.compactStableDropBoundaries, true);
   assert.equal(application.rowHalfDropTargets, true);
   assert.equal(application.rowGeometryUsedOnlyForBoundedDropProjection, true);
   assert.equal(application.stableNestedDragHoverTracking, true);
+  assert.equal(application.innermostNestedSlotOwnsPointer, true);
+  assert.equal(application.rejectedReleaseRetainsLastAcceptedProjection, true);
+  assert.equal(application.noOpProjectionVisibleAndInert, true);
   assert.equal(application.invalidPlacementControlsDisabled, true);
   assert.equal(application.sameSlotNoOpControlsDisabled, true);
   assert.equal(application.explicitComponentDropTarget, true);
+  assert.equal(application.componentPanelWideDropSurface, true);
+  assert.equal(application.componentPaletteOuterDropInert, false);
+  assert.equal(application.draggableComponentCard, false);
+  assert.equal(application.dedicatedComponentDragHandle, true);
+  assert.equal(application.dedicatedLayerDragHandle, true);
   assert.equal(application.stickyComponentDropTarget, true);
   assert.equal(application.componentDragGuidance, true);
   assert.equal(application.slotlessDisabledPlacementGuide, true);
@@ -241,11 +251,16 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[4], () => {
   assert.equal(adapter.managedSubtreeExplicit, true);
   assert.equal(adapter.selectionOverlayRemainsSibling, true);
   assert.equal(css.managedDescendantSlotSelectors, 0);
-  assert.equal(css.expandedNonOverlappingDropBoundaries, true);
+  assert.equal(css.compactStableDropBoundaries, true);
   assert.equal(css.rowDropPositionPresentation, true);
   assert.equal(css.stableHoveredDropPresentation, true);
+  assert.equal(css.noOpDropPresentation, true);
   assert.equal(css.stickyComponentTargetPresentation, true);
+  assert.equal(css.panelWideComponentDropPresentation, true);
   assert.equal(css.slotlessTargetGuidePresentation, true);
+  assert.equal(css.draggableComponentCardPresentation, false);
+  assert.equal(css.dedicatedComponentDragHandlePresentation, true);
+  assert.equal(css.dedicatedLayerDragHandlePresentation, true);
   assert.equal(built.artifact.claim.appOwnedInertDragHints, true);
   assert.equal(built.artifact.claim.browserDataTransferReadsZero, true);
   assert.equal(built.artifact.claim.expandedDropReadyBoundaries, true);
@@ -436,6 +451,54 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[7], () => {
     },
     {
       ...sourcePolicyInput,
+      applicationSource: replaceOnce(
+        sourcePolicyInput.applicationSource,
+        'data-component-drag-handle="true"',
+        'data-component-drag-handle="false"',
+      ),
+    },
+    {
+      ...sourcePolicyInput,
+      applicationSource: replaceOnce(
+        sourcePolicyInput.applicationSource,
+        'data-layer-drag-handle="true"',
+        'data-layer-drag-handle="false"',
+      ),
+    },
+    {
+      ...sourcePolicyInput,
+      applicationSource: replaceOnce(
+        sourcePolicyInput.applicationSource,
+        "onDrop={receiveComponentDrop}",
+        "onDrop={undefined}",
+      ),
+    },
+    {
+      ...sourcePolicyInput,
+      applicationSource: replaceOnce(
+        sourcePolicyInput.applicationSource,
+        '(releaseAdmission.status === "unavailable" || releaseAdmission.status === "rejected")',
+        'releaseAdmission.status === "unavailable"',
+      ),
+    },
+    {
+      ...sourcePolicyInput,
+      applicationSource: replaceOnce(
+        sourcePolicyInput.applicationSource,
+        "event.stopPropagation();\n    const admission = projectNearestDrop(list, event.clientY, event.target);",
+        "const admission = projectNearestDrop(list, event.clientY, event.target);",
+      ),
+    },
+    {
+      ...sourcePolicyInput,
+      applicationSource: replaceOnce(
+        sourcePolicyInput.applicationSource,
+        'data-drop-noop-hovered={dragAdmission?.status === "noop" && dropHovered}',
+        "data-drop-noop-hovered={false}",
+      ),
+    },
+    {
+      ...sourcePolicyInput,
       applicationCss: replaceOnce(
         sourcePolicyInput.applicationCss,
         '.slotBoundary[data-drop-ready="true"] .slotBoundaryLine',
@@ -446,7 +509,7 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[7], () => {
       ...sourcePolicyInput,
       applicationCss: replaceOnce(
         sourcePolicyInput.applicationCss,
-        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;\n  align-items: center;\n  padding: 0 0.125rem;",
         ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0;\n  align-items: center;\n  padding: 0;",
       ),
     },
@@ -464,6 +527,14 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[7], () => {
         sourcePolicyInput.applicationCss,
         ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
         ".componentSlotTarget {\n  position: relative;\n  top: 0;",
+      ),
+    },
+    {
+      ...sourcePolicyInput,
+      applicationCss: replaceOnce(
+        sourcePolicyInput.applicationCss,
+        '.componentsView[data-drop-hovered="true"]',
+        '.componentSlotTarget[data-drop-hovered="true"]',
       ),
     },
   ];
@@ -651,6 +722,79 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
   await assert.rejects(
     buildDesenAppNamedSlotAuthoringEvidence({
       fileOverrides: new Map([[SOURCE_PERSISTENCE_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T13 diagnostics closure", async () => {
+  const successor = built.currentCompatibility.nodeLinkedDiagnosticsSuccessor;
+  assert.deepEqual(
+    {
+      artifact: successor.artifact,
+      focusedTestFiles: successor.focusedTestFiles,
+      focusedTestCases: successor.focusedTestCases,
+      fullAppTestFiles: successor.fullAppTestFiles,
+      fullAppTestCases: successor.fullAppTestCases,
+      parentArtifacts: successor.parentArtifacts,
+      trackedFiles: successor.trackedFiles,
+      immutableRejectedCandidateReport: successor.immutableRejectedCandidateReport,
+      explicitContextIdentityMappingOnly: successor.explicitContextIdentityMappingOnly,
+      textIdentityInference: successor.diagnosticCodeMessagePointerIdentityInference,
+      duplicateOccurrenceOrderPreserved: successor.duplicateOccurrenceOrderPreserved,
+      unmappedDiagnosticsSelectable: successor.unmappedDiagnosticsSelectable,
+      reportDocumentFenced: successor.reportSnapshotDocumentFingerprintFenced,
+      reportCatalogFenced: successor.reportSnapshotCatalogFingerprintFenced,
+      routeAndSurfaceFenced: successor.routeAndSurfaceFenced,
+      runtimeKindMismatchFailsClosed: successor.runtimeKindMismatchFailsClosed,
+      invalidPlaceholderInsideRuntime: successor.invalidPlaceholderInsideManagedRuntimeSubtree,
+      runModeDiagnosticsVisible: successor.runModeDiagnosticsVisible,
+      obligationsExecutable: successor.obligationsExecutable,
+      rejectedDiagnosticsPersisted: successor.rejectedDiagnosticsPersisted,
+      rejectedDiagnosticsAffectDirtyState: successor.rejectedDiagnosticsAffectDirtyState,
+      rejectedDiagnosticsIncludedInSave: successor.rejectedDiagnosticsIncludedInSave,
+      p16Status: successor.p16Status,
+      pf086Status: successor.pf086Status,
+    },
+    {
+      artifact: {
+        task: "M09-T13",
+        proofId: "desen-app-node-linked-diagnostics",
+        profile: "desen.app.node-linked-diagnostics-proof.v1",
+        result: "PASS",
+        path: NODE_LINKED_DIAGNOSTICS_ARTIFACT,
+        bytes: 29_208,
+        sha256: "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
+      },
+      focusedTestFiles: 9,
+      focusedTestCases: 161,
+      fullAppTestFiles: 24,
+      fullAppTestCases: 339,
+      parentArtifacts: 11,
+      trackedFiles: 39,
+      immutableRejectedCandidateReport: true,
+      explicitContextIdentityMappingOnly: true,
+      textIdentityInference: false,
+      duplicateOccurrenceOrderPreserved: true,
+      unmappedDiagnosticsSelectable: false,
+      reportDocumentFenced: true,
+      reportCatalogFenced: true,
+      routeAndSurfaceFenced: true,
+      runtimeKindMismatchFailsClosed: true,
+      invalidPlaceholderInsideRuntime: false,
+      runModeDiagnosticsVisible: false,
+      obligationsExecutable: false,
+      rejectedDiagnosticsPersisted: false,
+      rejectedDiagnosticsAffectDirtyState: false,
+      rejectedDiagnosticsIncludedInSave: false,
+      p16Status: "PROVEN",
+      pf086Status: "OPEN",
+    },
+  );
+  const artifactBytes = await readFile(path.join(ROOT, NODE_LINKED_DIAGNOSTICS_ARTIFACT));
+  await assert.rejects(
+    buildDesenAppNamedSlotAuthoringEvidence({
+      fileOverrides: new Map([[NODE_LINKED_DIAGNOSTICS_ARTIFACT, changedByte(artifactBytes)]]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );

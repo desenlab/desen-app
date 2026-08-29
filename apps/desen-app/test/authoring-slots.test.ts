@@ -49,12 +49,21 @@ const FIXTURE_ROUTE = Object.freeze({
   surfaceId: "main",
 }) satisfies AuthoringSlotRoute;
 
+type MutableJsonObject = Record<string, unknown>;
+
 function copyJson<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
 function canonical(value: unknown): string {
   return canonicalizeJson(value);
+}
+
+function record(value: unknown, path: string): MutableJsonObject {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new TypeError(`${path} must be an object.`);
+  }
+  return value as MutableJsonObject;
 }
 
 function requireDocument(source: unknown): DesenEditorDocument {
@@ -523,6 +532,59 @@ describe("named-slot authoring with the reference Catalog", () => {
     expectDeeplyFrozen(removed.document);
   });
 
+  it("keeps dry-run inert but returns the exact report when deletion creates a semantic failure", () => {
+    const source = copyJson(officialSignInSource) as unknown as MutableJsonObject;
+    const surfaces = record(source.surfaces, "source.surfaces");
+    const signIn = record(surfaces["sign-in"], "source.surfaces.sign-in");
+    const root = record(signIn.root, "sign-in.root");
+    const slots = record(root.slots, "sign-in.root.slots");
+    const children = slots.default as MutableJsonObject[];
+    const submit = children.find(({ id }) => id === "sign-in.submit");
+    if (submit === undefined) throw new Error("Missing sign-in submit node.");
+    const handlers = record(submit.on, "sign-in.submit.on");
+    const press = handlers.press as unknown[];
+    press.push({
+      type: "component.command",
+      target: "sign-in.email",
+      command: "focus",
+      input: {},
+    });
+    const document = requireDocument(source);
+    const model = requireModel(referenceCatalog, document);
+    const before = canonical(document);
+    const selection = createAuthoringComponentSelection({
+      projectId: REFERENCE_ROUTE.projectId,
+      surfaceId: REFERENCE_ROUTE.surfaceId,
+      sourceNodeId: "sign-in.email",
+      capabilityId: "com.example.ui/TextField",
+      displayName: "Text field",
+      conditional: false,
+    });
+
+    expect(evaluateAuthoringNodeDeletion(REFERENCE_ROUTE, model, selection)).toEqual({
+      accepted: false,
+      reason: "target-invalid",
+    });
+    const rejected = applyAuthoringNodeDelete(
+      document,
+      referenceCatalog,
+      REFERENCE_ROUTE,
+      selection,
+    );
+    expect(rejected).toMatchObject({
+      ok: false,
+      reason: "source-invalid",
+      validationReport: { valid: false },
+    });
+    if (rejected.ok || rejected.validationReport === undefined) {
+      throw new Error("Expected rejected deletion diagnostics.");
+    }
+    expect(Object.isFrozen(rejected)).toBe(true);
+    expect(Object.isFrozen(rejected.validationReport)).toBe(true);
+    expect(Object.hasOwn(rejected, "document")).toBe(false);
+    expect(canonical(document)).toBe(before);
+  });
+
   it.each([
     {
       label: "translates a forward end boundary after removal",
@@ -785,13 +847,30 @@ describe("validator-admitted synthetic slot contracts", () => {
     expect(
       evaluateAuthoringSlotInsertion(FIXTURE_ROUTE, model, target, WIDE_DEFAULT_CAPABILITY, 0),
     ).toEqual({ accepted: false, reason: "default-profile-exceeded" });
-    expect(
-      applyAuthoringSlotEdit(document, catalog, FIXTURE_ROUTE, target, {
-        kind: "insert",
-        componentId: INVALID_DEFAULT_CAPABILITY,
-        index: 0,
-      }),
-    ).toEqual({ ok: false, reason: "defaults-invalid" });
+    const invalidDefaults = applyAuthoringSlotEdit(document, catalog, FIXTURE_ROUTE, target, {
+      kind: "insert",
+      componentId: INVALID_DEFAULT_CAPABILITY,
+      index: 0,
+    });
+    expect(invalidDefaults).toMatchObject({
+      ok: false,
+      reason: "defaults-invalid",
+      validationReport: {
+        valid: false,
+        invalidSubjects: [
+          expect.objectContaining({
+            surfaceId: "main",
+            subject: { kind: "node", id: "node.invaliddefault" },
+          }),
+        ],
+      },
+    });
+    if (invalidDefaults.ok || invalidDefaults.validationReport === undefined) {
+      throw new Error("Expected rejected default diagnostics.");
+    }
+    expect(Object.isFrozen(invalidDefaults)).toBe(true);
+    expect(Object.isFrozen(invalidDefaults.validationReport)).toBe(true);
+    expect(Object.hasOwn(invalidDefaults, "document")).toBe(false);
     expect(
       applyAuthoringSlotEdit(document, catalog, FIXTURE_ROUTE, target, {
         kind: "insert",

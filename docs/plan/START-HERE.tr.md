@@ -1072,11 +1072,14 @@ conflict/uncertainty, exhaustion ve reopen-required durumları yalnızca renge b
 görünürdür. Scenario preview, fixture lifecycle, Runtime input ve secret verileri persistence
 isteğine girmez.
 
-Güncel authoring UX'te uyumlu her Components kartının geniş gövdesi native drag kaynağıdır; tıklayarak
-ekleme ayrı `Add` düğmesindedir. Component drop yalnızca sticky `Add to` hedefinde kabul edilir,
-başka yerde bırakma inert kalır. Layers, drag owner ve epoch ile çevrelenmiş tek global nested-slot
-projection'ı midpoint hysteresis ile yönetir, 32 px insertion aralıklarını görünür tutar ve seçili
-node için güvenli `Delete` kontrolünü sürekli gösterir.
+Güncel authoring UX'te uyumlu her Components kartı ayrı noktalı bir native-drag tutamacı ve `Add`
+düğmesi sunar. Drop, sticky `Add to` kartının özetlediği hedef için authenticated Components
+panelinin tamamında kabul edilir. Layers hareketi yalnızca ayrı noktalı tutamacından başlatır, en
+içteki nested-slot owner'ını ve drag epoch'unu fence eder; midpoint hysteresis uygular, kompakt
+insertion aralıklarını layout-stable tutarken her görünür satırı before/after yarısına projekte eder,
+accepted/current-position feedback'i gösterir ve koordinatsız ya da rejected release drift'inde son
+kabul edilen placement'ı korur. Başarılı insert Layers'a geçer, yeni node'a odaklanır ve güvenli
+`Remove layer` eylemiyle Delete/Backspace kısayollarını hemen erişilebilir kılar.
 
 Focused beş dosyalı persistence suite 142/142, complete yirmi iki dosyalı App suite 324/324 ve
 independent root mutation proof 12/12 geçer. Exact artifact 27.053 byte'tır:
@@ -1100,6 +1103,36 @@ P-09/P-10 `PARTIAL`, PF-085/PF-089 `OPEN` kalır; kanıt kapıları 10/13'tür. 
 (%74), M09 ilerlemesi 12/14'tür (%86). Diagnostics navigation/invalid placeholders,
 publication/activation, concrete App storage adapter ve otomatik gerçek-browser E2E kanıtlanmış
 değildir. Sıradaki iş M09-T13'tür.
+
+M09-T13, reddedilen bir edit adayından yalnızca exact frozen continuous-validation report'unu App
+transient state'inde tutar. Geçersiz aday authored Source, publishable preview, managed Runtime,
+dirty state, Save request veya persistence generation içine hiç girmez. Candidate document ve
+Catalog-set fingerprint'leri, exact project/surface route'u, hâlâ güncel committed-document owner'ı
+ve canvas tarafındaki live Runtime React diagnostic index bütün projection'ları fence eder; stale
+ya da tutarsız otorite partial navigation modeli üretmeden kapanır.
+
+Seçilebilir hedefi yalnızca `invalidSubjects` içindeki explicit `context.surfaceId` +
+`subject.kind` + `subject.id` eşlemesi oluşturur. Diagnostic pointer/code/message/capability ve
+context içindeki rastlantısal metinler identity tahmini değildir. Original diagnostic sırası,
+duplicate occurrence pointer'ları, node/behavior ayrımı, unmapped ve başka route'a ait diagnostics
+korunur; dynamic obligations görünür ama inert metadata'dır ve yürütülmez. Seçim yalnızca opaque
+snapshot-bound key tutar ve güncel ready projection'dan yeniden admit edilir.
+
+Compact App-owned Inspector bölümü mapped occurrence'ları native button olarak sunar, sayıyı canlı
+duyurur, seçimi `aria-current` ile belirtir ve autofocus yapmadan açık dismiss sunar. Seçilen
+occurrence, mevcut geçerli preview'ı koruyarak managed Runtime subtree dışında App-owned invalid-
+change placeholder gösterir. Diagnostics ve placeholder etkileşimi yalnızca Design mode'dadır;
+Run bunları gizleyip inert yapar, Design'a dönüş focus çalmaz ve başarılı edit ya da session
+replacement reddedilen report'u temizler.
+
+Dokuz dosyalık odaklı diagnostics suite 161/161, 24 dosyalık tam App suite 339/339 ve bağımsız root
+mutation proof 12/12 geçer. Exact kanıt, 39 güncel dosyayı ve on bir exact proof parent'ını bağlayan
+27.353-byte `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` dosyasıdır;
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`. Yerel CI otoritesi
+198 workload ve 94 proof pair'dir: 83 ordinary + 11 barrier. Connected T13 closure 62 proof unit /
+134 workload, ownership ise 1.253 tracked path / 188 proof-owned path'tir. M09-T13 `DONE`, P-16
+`PROVEN`, PF-086 `OPEN`, proof gate sayısı 10/13, genel ilerleme 108/145 (%74), M09 13/14 (%93)
+ve sıradaki iş M09-T14'tür. Bu yerel receipt'ler required-gate veya hosted-CI sonucu değildir.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

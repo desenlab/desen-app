@@ -385,6 +385,34 @@ describe("Desen App Source persistence integration", () => {
     expect(afterPortRemoval.defaultPrevented).toBe(false);
   });
 
+  it("keeps rejected-candidate diagnostics outside Source, dirty state, and Save requests", () => {
+    const controlled = createControlledPersistence();
+    renderApplication(controlled.port);
+    fireEvent.click(screen.getByRole("button", { name: "Select Stack layer · sign-in.layout" }));
+    const inspector = screen.getByRole("complementary", { name: "Inspector" });
+    const maxWidth = within(inspector).getByRole("spinbutton", {
+      name: "Max Width",
+    }) as HTMLInputElement;
+    const dirtyBefore = persistenceRegion().querySelector("[data-dirty]")?.textContent;
+
+    fireEvent.change(maxWidth, { target: { value: "0" } });
+    fireEvent.blur(maxWidth);
+
+    expect(within(inspector).getByRole("region", { name: "Validation diagnostics" })).toBeTruthy();
+    expect(persistenceRegion().querySelector("[data-dirty]")?.textContent).toBe(dirtyBefore);
+    fireEvent.click(saveButton());
+    expect(controlled.saveCalls).toHaveLength(1);
+    expect(controlled.saveCalls[0]?.request).toEqual({
+      sourceKey: SOURCE_KEY,
+      expectedGeneration: null,
+      document: REFERENCE_EDITOR_DOCUMENT,
+    });
+    expect(Object.hasOwn(controlled.saveCalls[0]?.request.document ?? {}, "diagnostics")).toBe(
+      false,
+    );
+    expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+  });
+
   it("preserves the session after a missing Open and authorizes a create-only Save", async () => {
     const controlled = createControlledPersistence();
     renderApplication(controlled.port);

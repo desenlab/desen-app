@@ -23,6 +23,18 @@ function stackSlotName(
   return `Choose Stack ${ownerId} default slot · Optional · ${presence} · ${itemCount} ${itemCount === 1 ? "item" : "items"} · minimum 0 · no maximum · ${STACK_SLOT_ACCEPTANCE}`;
 }
 
+function layerDragHandleFor(layerButton: HTMLElement): HTMLElement {
+  const handle = layerButton.parentElement?.querySelector<HTMLElement>(
+    "[data-layer-drag-handle='true']",
+  );
+  if (handle === undefined || handle === null) {
+    throw new Error(
+      `Missing drag handle for ${layerButton.getAttribute("aria-label") ?? "layer"}.`,
+    );
+  }
+  return handle;
+}
+
 describe("Desen App application shell", () => {
   beforeEach(() => {
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -199,13 +211,12 @@ describe("Desen App application shell", () => {
         })
         .getAttribute("aria-pressed"),
     ).toBe("false");
-    expect(
-      within(hierarchy)
-        .getByRole("button", {
-          name: "Select Text field layer · sign-in.email",
-        })
-        .getAttribute("draggable"),
-    ).toBe("true");
+    const emailLayer = within(hierarchy).getByRole("button", {
+      name: "Select Text field layer · sign-in.email",
+    });
+    expect(emailLayer.getAttribute("draggable")).toBeNull();
+    expect(emailLayer.parentElement?.getAttribute("draggable")).toBeNull();
+    expect(layerDragHandleFor(emailLayer).getAttribute("draggable")).toBe("true");
     expect(
       (
         within(hierarchy).getByRole("button", {
@@ -333,7 +344,7 @@ describe("Desen App application shell", () => {
     expect(dropTarget.textContent).toContain("sign-in.layout · default");
     expect(dropTarget.textContent).toContain("5 items");
     expect(dropTarget.textContent).toContain(
-      "appends at position 6 · click Add or drag a component here",
+      "appends at position 6 · click Add or drag a component into this panel",
     );
     expect(managedSubtree?.contains(dropTarget)).toBe(false);
 
@@ -342,27 +353,32 @@ describe("Desen App application shell", () => {
     }) as HTMLButtonElement;
     expect(addAlert.disabled).toBe(false);
     expect(addAlert.draggable).toBe(false);
-    expect(addAlert.querySelector("[draggable='true']")).toBeNull();
     const alertCard = addAlert.closest("[data-component-card='true']") as HTMLDivElement;
-    expect(alertCard.draggable).toBe(true);
-    expect(alertCard.textContent).toContain("Drag");
+    expect(alertCard.draggable).toBe(false);
+    expect(
+      (alertCard.querySelector("[data-component-drag-handle='true']") as HTMLElement).draggable,
+    ).toBe(true);
     expect(managedSubtree?.contains(addAlert)).toBe(false);
     fireEvent.click(addAlert);
 
     expect(
       within(authoring)
         .getByText(
-          "Inserted Alert in Stack default slot at position 6. Selected for editing · use the visible Delete action above or press Delete/Backspace.",
+          "Inserted Alert in Stack default slot at position 6. Selected in Layers · use Remove layer above or press Delete/Backspace.",
         )
         .getAttribute("role"),
     ).toBe("status");
-    expect(dropTarget.textContent).toContain("6 items");
+    expect(layersTab.getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("button", { name: "Deselect Alert layer · node.alert" })).toBe(
+      document.activeElement,
+    );
     const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
     expect(within(canvas).getByRole("status").textContent).toBe("Message");
     const deleteAlert = within(authoring).getByRole("button", {
       name: "Delete Alert layer · node.alert",
     }) as HTMLButtonElement;
     expect(deleteAlert.disabled).toBe(false);
+    expect(deleteAlert.textContent).toBe("Remove layer");
     expect(deleteAlert.getAttribute("aria-keyshortcuts")).toBe("Delete Backspace");
     expect(managedSubtree?.contains(deleteAlert)).toBe(false);
     deleteAlert.focus();
@@ -441,6 +457,8 @@ describe("Desen App application shell", () => {
     expect(screen.getByRole("status", { name: "Selected layer preview" }).textContent).toContain(
       "node.alert",
     );
+
+    fireEvent.click(componentsTab);
 
     const textarea = document.createElement("textarea");
     const select = document.createElement("select");
@@ -600,44 +618,29 @@ describe("Desen App application shell", () => {
     expect(screen.queryByRole("button", { name: "Select Alert layer · node.alert" })).toBeNull();
 
     const alertCard = alert.closest("[data-component-card='true']") as HTMLDivElement;
+    const alertDragHandle = alertCard.querySelector(
+      "[data-component-drag-handle='true']",
+    ) as HTMLElement;
     expect((alert as HTMLButtonElement).draggable).toBe(false);
-    expect(alertCard.draggable).toBe(true);
-    fireEvent.dragStart(alertCard, { dataTransfer });
+    expect(alertCard.draggable).toBe(false);
+    expect(alertDragHandle.draggable).toBe(true);
+    fireEvent.dragStart(alertDragHandle, { dataTransfer });
     expect(dataTransfer.effectAllowed).toBe("copy");
     expect(writes).toEqual([["text/plain", "DESEN App authoring item"]]);
     expect(target.getAttribute("data-drag-active")).toBe("true");
     expect(target.getAttribute("data-drop-ready")).toBe("true");
     const dropPrompt = within(target).getByText("Drop Alert here");
-    fireEvent.dragEnter(target, { dataTransfer });
-    fireEvent.dragEnter(dropPrompt, { dataTransfer });
-    fireEvent.dragLeave(dropPrompt, { dataTransfer });
-    expect(target.getAttribute("data-drop-hovered")).toBe("true");
-    fireEvent.dragLeave(target, { dataTransfer });
-    expect(target.getAttribute("data-drop-hovered")).toBe("false");
-    fireEvent.dragEnd(alertCard, { dataTransfer });
-    expect(target.getAttribute("data-drag-active")).toBe("false");
-
-    fireEvent.dragStart(alertCard, { dataTransfer });
-    fireEvent.dragEnter(target, { dataTransfer });
     const panelSearch = componentView.getByRole("searchbox", {
       name: "Search catalog components",
     });
-    dataTransfer.dropEffect = "none";
-    fireEvent.dragOver(panelSearch, { dataTransfer });
-    expect(dataTransfer.dropEffect).toBe("none");
-    const outsideDrop = new Event("drop", { bubbles: true, cancelable: true });
-    Object.defineProperty(outsideDrop, "dataTransfer", { value: dataTransfer });
-    fireEvent(panelSearch, outsideDrop);
-    expect(outsideDrop.defaultPrevented).toBe(true);
-    expect((panelSearch as HTMLInputElement).value).toBe("");
-    expect(screen.queryByRole("button", { name: "Select Alert layer · node.alert" })).toBeNull();
-    expect(target.getAttribute("data-drag-active")).toBe("false");
-
-    fireEvent.dragStart(alertCard, { dataTransfer });
-    fireEvent.dragEnter(target, { dataTransfer });
-    fireEvent.dragOver(target, { dataTransfer });
+    fireEvent.dragEnter(panelSearch, { dataTransfer });
+    fireEvent.dragEnter(dropPrompt, { dataTransfer });
+    fireEvent.dragLeave(dropPrompt, { dataTransfer });
+    fireEvent.dragOver(dropPrompt, { dataTransfer });
     expect(dataTransfer.dropEffect).toBe("copy");
-    fireEvent.drop(target, { dataTransfer });
+    expect(target.getAttribute("data-drop-hovered")).toBe("true");
+    expect((target.parentElement as HTMLElement).getAttribute("data-drop-hovered")).toBe("true");
+    fireEvent.drop(panelSearch, { dataTransfer });
 
     expect(reads).toBe(0);
     expect(slotEdit).toHaveBeenCalledTimes(1);
@@ -645,7 +648,7 @@ describe("Desen App application shell", () => {
     expect(
       within(authoring)
         .getByText(
-          "Inserted Alert in Stack default slot at position 6. Selected for editing · use the visible Delete action above or press Delete/Backspace.",
+          "Inserted Alert in Stack default slot at position 6. Selected in Layers · use Remove layer above or press Delete/Backspace.",
         )
         .getAttribute("role"),
     ).toBe("status");
@@ -659,14 +662,11 @@ describe("Desen App application shell", () => {
       document.getElementById(deleteAlert.getAttribute("aria-describedby") ?? "")?.textContent,
     ).toBe("Deletes this layer and its nested Source subtree.");
     expect(
-      deleteAlert.compareDocumentPosition(
-        document.getElementById(
-          within(authoring)
-            .getByRole("tab", { name: "Components" })
-            .getAttribute("aria-controls") ?? "",
-        ) as HTMLElement,
-      ) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+      within(authoring).getByRole("tab", { name: "Layers" }).getAttribute("aria-selected"),
+    ).toBe("true");
+    expect(screen.getByRole("button", { name: "Deselect Alert layer · node.alert" })).toBe(
+      document.activeElement,
+    );
     fireEvent.click(deleteAlert);
     expect(screen.queryByRole("button", { name: /Alert layer · node\.alert/ })).toBeNull();
     expect(document.activeElement).toBe(within(authoring).getByRole("tab", { name: "Layers" }));
@@ -753,7 +753,7 @@ describe("Desen App application shell", () => {
       setData: vi.fn(),
     };
 
-    fireEvent.dragStart(submitLayer, { dataTransfer });
+    fireEvent.dragStart(layerDragHandleFor(submitLayer), { dataTransfer });
     const dragGuide = within(
       screen.getByRole("complementary", { name: "Authoring panel" }),
     ).getByText("Moving sign-in.submit · release on a highlighted gap.");
@@ -762,7 +762,9 @@ describe("Desen App application shell", () => {
     const titleLayer = within(hierarchy).getByRole("button", {
       name: "Select Text layer · sign-in.title",
     });
-    Object.defineProperty(titleLayer, "getBoundingClientRect", {
+    const titleRow = titleLayer.parentElement as HTMLElement;
+    const titleDragHandle = layerDragHandleFor(titleLayer);
+    Object.defineProperty(titleRow, "getBoundingClientRect", {
       configurable: true,
       value: () => ({
         bottom: 140,
@@ -781,7 +783,7 @@ describe("Desen App application shell", () => {
       clientY: { value: 105 },
       dataTransfer: { value: dataTransfer },
     });
-    fireEvent(titleLayer, dragOver);
+    fireEvent(titleDragHandle, dragOver);
     expect(dataTransfer.dropEffect).toBe("move");
     expect(
       within(hierarchy)
@@ -795,7 +797,7 @@ describe("Desen App application shell", () => {
       clientY: { value: 105 },
       dataTransfer: { value: dataTransfer },
     });
-    fireEvent(titleLayer, drop);
+    fireEvent(titleDragHandle, drop);
 
     expect(
       within(screen.getByRole("complementary", { name: "Authoring panel" })).getByRole("status")
@@ -817,11 +819,12 @@ describe("Desen App application shell", () => {
     const reorderedSubmit = within(hierarchy).getByRole("button", {
       name: "Select Button layer · sign-in.submit",
     });
-    fireEvent.dragStart(reorderedSubmit, { dataTransfer });
+    fireEvent.dragStart(layerDragHandleFor(reorderedSubmit), { dataTransfer });
     const reorderedTitle = within(hierarchy).getByRole("button", {
       name: "Select Text layer · sign-in.title",
     });
-    Object.defineProperty(reorderedTitle, "getBoundingClientRect", {
+    const reorderedTitleDragHandle = layerDragHandleFor(reorderedTitle);
+    Object.defineProperty(reorderedTitle.parentElement as HTMLElement, "getBoundingClientRect", {
       configurable: true,
       value: () => ({
         bottom: 140,
@@ -840,7 +843,7 @@ describe("Desen App application shell", () => {
       clientY: { value: 135 },
       dataTransfer: { value: dataTransfer },
     });
-    fireEvent(reorderedTitle, lowerHalfDragOver);
+    fireEvent(reorderedTitleDragHandle, lowerHalfDragOver);
     expect(
       within(hierarchy)
         .getByRole("listitem", {
@@ -853,7 +856,7 @@ describe("Desen App application shell", () => {
       clientY: { value: 135 },
       dataTransfer: { value: dataTransfer },
     });
-    fireEvent(reorderedTitle, lowerHalfDrop);
+    fireEvent(reorderedTitleDragHandle, lowerHalfDrop);
 
     const restoredLayers = within(hierarchy).getAllByRole("button", {
       name: /^(?:Select|Deselect) .+ layer · /,
@@ -884,7 +887,7 @@ describe("Desen App application shell", () => {
       getData: vi.fn(),
       setData: vi.fn(),
     };
-    Object.defineProperty(titleLayer, "getBoundingClientRect", {
+    Object.defineProperty(titleLayer.parentElement as HTMLElement, "getBoundingClientRect", {
       configurable: true,
       value: () => ({
         bottom: 140,
@@ -913,7 +916,7 @@ describe("Desen App application shell", () => {
       }),
     });
 
-    fireEvent.dragStart(submitLayer, { dataTransfer });
+    fireEvent.dragStart(layerDragHandleFor(submitLayer), { dataTransfer });
     const lowerHalfDragOver = new Event("dragover", { bubbles: true, cancelable: true });
     Object.defineProperties(lowerHalfDragOver, {
       clientY: { value: 135 },
@@ -957,7 +960,8 @@ describe("Desen App application shell", () => {
     const titleLayer = within(hierarchy).getByRole("button", {
       name: "Select Text layer · sign-in.title",
     });
-    Object.defineProperty(titleLayer, "getBoundingClientRect", {
+    const titleDragHandle = layerDragHandleFor(titleLayer);
+    Object.defineProperty(titleLayer.parentElement as HTMLElement, "getBoundingClientRect", {
       configurable: true,
       value: () => ({
         bottom: 140,
@@ -983,7 +987,7 @@ describe("Desen App application shell", () => {
         clientY: { value: clientY },
         dataTransfer: { value: dataTransfer },
       });
-      fireEvent(titleLayer, event);
+      fireEvent(titleDragHandle, event);
     };
     const before = within(hierarchy).getByRole("listitem", {
       name: "Stack sign-in.layout default slot insertion boundary at position 1",
@@ -992,7 +996,7 @@ describe("Desen App application shell", () => {
       name: "Stack sign-in.layout default slot insertion boundary at position 2",
     });
 
-    fireEvent.dragStart(submitLayer, { dataTransfer });
+    fireEvent.dragStart(layerDragHandleFor(submitLayer), { dataTransfer });
     dragOverAt(118);
     expect(before.getAttribute("data-drop-hovered")).toBe("true");
     dragOverAt(122);
@@ -1000,7 +1004,7 @@ describe("Desen App application shell", () => {
     expect(after.getAttribute("data-drop-hovered")).toBe("false");
     dragOverAt(126);
     expect(after.getAttribute("data-drop-hovered")).toBe("true");
-    fireEvent.dragEnd(submitLayer, { dataTransfer });
+    fireEvent.dragEnd(layerDragHandleFor(submitLayer), { dataTransfer });
   });
 
   it("keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame", async () => {
@@ -1062,7 +1066,7 @@ describe("Desen App application shell", () => {
       setData: vi.fn(),
     };
 
-    fireEvent.dragStart(submitLayer, { dataTransfer });
+    fireEvent.dragStart(layerDragHandleFor(submitLayer), { dataTransfer });
     const noOpEdgeDragOver = new Event("dragover", { bubbles: true, cancelable: true });
     Object.defineProperties(noOpEdgeDragOver, {
       clientX: { value: 20 },
@@ -1086,7 +1090,7 @@ describe("Desen App application shell", () => {
     const staleFrame = frames.get(2);
     expect(staleFrame).toBeTruthy();
 
-    fireEvent.dragEnd(submitLayer, { dataTransfer });
+    fireEvent.dragEnd(layerDragHandleFor(submitLayer), { dataTransfer });
     expect(cancelFrame).toHaveBeenCalledWith(2);
     expect(hierarchy.getAttribute("data-drag-active")).toBe("false");
     expect(hierarchy.querySelectorAll("[data-drop-hovered='true']")).toHaveLength(0);
@@ -1111,12 +1115,12 @@ describe("Desen App application shell", () => {
       getData: vi.fn(() => "forged.node.authority"),
       setData: vi.fn(),
     };
-    fireEvent.dragStart(submitLayer, { dataTransfer });
+    fireEvent.dragStart(layerDragHandleFor(submitLayer), { dataTransfer });
 
     const titleLayer = within(hierarchy).getByRole("button", {
       name: "Select Text layer · sign-in.title",
     });
-    Object.defineProperty(titleLayer, "getBoundingClientRect", {
+    Object.defineProperty(titleLayer.parentElement as HTMLElement, "getBoundingClientRect", {
       configurable: true,
       value: () => ({
         bottom: 140,
@@ -1189,7 +1193,7 @@ describe("Desen App application shell", () => {
       setData: vi.fn(),
     };
 
-    fireEvent.dragStart(submitLayer, { dataTransfer });
+    fireEvent.dragStart(layerDragHandleFor(submitLayer), { dataTransfer });
     fireEvent.dragOver(acceptedBoundary, { dataTransfer });
     expect(acceptedBoundary.getAttribute("data-drop-hovered")).toBe("true");
 
@@ -1197,9 +1201,11 @@ describe("Desen App application shell", () => {
     expect(dataTransfer.dropEffect).toBe("none");
     expect(acceptedBoundary.getAttribute("data-drop-hovered")).toBe("false");
     expect(hierarchy.querySelectorAll("[data-drop-hovered='true']")).toHaveLength(0);
+    expect(noOpBoundary.getAttribute("data-drop-noop-hovered")).toBe("true");
+    expect(noOpBoundary.textContent).toContain("Current position");
 
     fireEvent.drop(noOpBoundary, { dataTransfer });
-    fireEvent.dragEnd(submitLayer, { dataTransfer });
+    fireEvent.dragEnd(layerDragHandleFor(submitLayer), { dataTransfer });
 
     const layers = within(hierarchy).getAllByRole("button", {
       name: /^(?:Select|Deselect) .+ layer · /,
@@ -1277,7 +1283,7 @@ describe("Desen App application shell", () => {
       },
     };
 
-    fireEvent.dragStart(password, { dataTransfer });
+    fireEvent.dragStart(layerDragHandleFor(password), { dataTransfer });
     expect(dataTransfer.effectAllowed).toBe("move");
     expect(writes).toEqual([["text/plain", "DESEN App authoring item"]]);
     expect(nestedEnd.getAttribute("data-drop-ready")).toBe("true");
@@ -1287,7 +1293,7 @@ describe("Desen App application shell", () => {
     const nestedEmail = within(hierarchy).getByRole("button", {
       name: "Deselect Text field layer · sign-in.email",
     });
-    Object.defineProperty(nestedEmail, "getBoundingClientRect", {
+    Object.defineProperty(nestedEmail.parentElement as HTMLElement, "getBoundingClientRect", {
       configurable: true,
       value: () => ({
         bottom: 140,
@@ -1391,7 +1397,7 @@ describe("Desen App application shell", () => {
     };
 
     expect(cyclePlace.disabled).toBe(true);
-    fireEvent.dragStart(parentStack, { dataTransfer: cycleTransfer });
+    fireEvent.dragStart(layerDragHandleFor(parentStack), { dataTransfer: cycleTransfer });
     expect(cycleTarget.getAttribute("data-drop-ready")).toBe("false");
     fireEvent.dragOver(cycleTarget, { dataTransfer: cycleTransfer });
     fireEvent.drop(cycleTarget, { dataTransfer: cycleTransfer });
@@ -1570,6 +1576,45 @@ describe("Desen App application shell", () => {
     expect(
       within(inspector).getAllByText("This value does not satisfy the Catalog schema."),
     ).toHaveLength(1);
+    const diagnostics = within(inspector).getByRole("region", {
+      name: "Validation diagnostics",
+    });
+    expect(within(diagnostics).getByRole("status").textContent).toBe("1 issue");
+    const diagnosticTarget = within(diagnostics).getByRole("button", {
+      name: /Select Node sign-in\.layout at \/surfaces\/sign-in\/root/u,
+    });
+    expect(diagnosticTarget.getAttribute("aria-current")).toBeNull();
+    const preservedHeading = screen.getByRole("heading", { level: 2, name: "Sign in" });
+
+    fireEvent.click(diagnosticTarget);
+    const placeholder = await screen.findByRole("status", {
+      name: "Invalid change placeholder for node sign-in.layout",
+    });
+    expect(diagnosticTarget.getAttribute("aria-current")).toBe("true");
+    expect(placeholder.textContent).toContain("Current preview preserved");
+    expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBe(preservedHeading);
+    expect(document.activeElement).toBe(placeholder);
+    const managedCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    expect(managedCanvas.contains(placeholder)).toBe(false);
+    expect(placeholder.closest("[data-managed-capability-subtree='true']")).toBeNull();
+
+    const runMode = screen.getByRole("button", { name: "Run" });
+    fireEvent.click(runMode);
+    expect(
+      screen.queryByRole("status", {
+        name: "Invalid change placeholder for node sign-in.layout",
+      }),
+    ).toBeNull();
+    expect(document.activeElement).toBe(runMode);
+    const designMode = screen.getByRole("button", { name: "Design" });
+    fireEvent.click(designMode);
+    expect(
+      await screen.findByRole("status", {
+        name: "Invalid change placeholder for node sign-in.layout",
+      }),
+    ).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBe(preservedHeading);
+    expect(document.activeElement).toBe(designMode);
 
     fireEvent.change(maxWidth, { target: { value: "512" } });
     fireEvent.blur(maxWidth);
@@ -1578,6 +1623,12 @@ describe("Desen App application shell", () => {
       expect(maxWidth.value).toBe("512");
     });
     expect(within(inspector).getByRole("status").textContent).toBe("Updated Max Width.");
+    expect(within(inspector).queryByRole("region", { name: "Validation diagnostics" })).toBeNull();
+    expect(
+      screen.queryByRole("status", {
+        name: "Invalid change placeholder for node sign-in.layout",
+      }),
+    ).toBeNull();
   });
 
   it("resets local drafts across Source identities and qualifies repeated edit actions", async () => {
@@ -1682,7 +1733,7 @@ describe("Desen App application shell", () => {
     expect(target.textContent).toContain("Stack");
     expect(target.textContent).toContain("sign-in.layout · default");
     expect(target.textContent).toContain(
-      "appends at position 6 · click Add or drag a component here",
+      "appends at position 6 · click Add or drag a component into this panel",
     );
     const alert = componentView.getByRole("button", {
       name: "Insert Alert into Stack sign-in.layout default slot at position 6",
@@ -1690,8 +1741,10 @@ describe("Desen App application shell", () => {
     expect(alert.disabled).toBe(false);
     expect(alert.draggable).toBe(false);
     const alertCard = alert.closest("[data-component-card='true']") as HTMLDivElement;
-    expect(alertCard.draggable).toBe(true);
-    expect(alertCard.textContent).toContain("Drag");
+    expect(alertCard.draggable).toBe(false);
+    expect(
+      (alertCard.querySelector("[data-component-drag-handle='true']") as HTMLElement).draggable,
+    ).toBe(true);
     expect(alert.textContent).toContain("Add");
     const changeTarget = componentView.getByRole("button", { name: "Change target in Layers" });
     fireEvent.click(changeTarget);
@@ -1857,14 +1910,19 @@ describe("Desen App application shell", () => {
     const placementTarget = componentView.getByRole("group", {
       name: "Placement target · Stack sign-in.layout default slot · 5 items · minimum 0 · no maximum",
     });
-    fireEvent.dragStart(alert.closest("[data-component-card='true']") as HTMLDivElement, {
-      dataTransfer: {
-        dropEffect: "none",
-        effectAllowed: "none",
-        getData: vi.fn(),
-        setData: vi.fn(),
+    fireEvent.dragStart(
+      alert
+        .closest("[data-component-card='true']")
+        ?.querySelector("[data-component-drag-handle='true']") as HTMLElement,
+      {
+        dataTransfer: {
+          dropEffect: "none",
+          effectAllowed: "none",
+          getData: vi.fn(),
+          setData: vi.fn(),
+        },
       },
-    });
+    );
     expect(placementTarget.getAttribute("data-drag-active")).toBe("true");
 
     placeholder = within(inspector).getByRole("textbox", {

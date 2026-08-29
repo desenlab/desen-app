@@ -25,6 +25,8 @@ const HOST_SOURCE_AUDIT_ARTIFACT =
 const FIXTURES_SCENARIOS_ARTIFACT =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION = "apps/desen-app/src/application.tsx";
 const AUTHORING_SELECTION = "apps/desen-app/src/authoring-selection.ts";
@@ -204,9 +206,19 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   );
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
-  assert.equal(currentRuntime.moduleCount, 143);
-  assert.equal(currentRuntime.staticEdges, 425);
+  assert.equal(currentRuntime.moduleCount, 145);
+  assert.equal(currentRuntime.staticEdges, 431);
   assert.equal(currentRuntime.dynamicEdges, 0);
+  assert.equal(
+    currentRuntime.graphSha256,
+    "sha256:3477076800258d529cc59914654aac845af2da4a19153c9c9d5920f8c37b5baa",
+  );
+  assert.equal(
+    graphModule(currentRuntime.modules, APPLICATION).imports.includes(
+      "node_modules/react-dom/index.js",
+    ),
+    false,
+  );
   assert.equal(currentRuntime.sharedRuntimeModuleCount, 19);
   assert.equal(currentRuntime.realComponentModuleCount, 5);
 
@@ -238,6 +250,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
     built.currentCompatibility.application.ui.selectionOverlayOutsideManagedCapabilitySubtree,
     true,
   );
+  assert.equal(built.currentCompatibility.authority.source.application.directReactDomImports, 0);
   assert.equal(
     built.currentCompatibility.successor.historicalNoSelectionOverlayNonclaimAppliedToCurrentApp,
     false,
@@ -290,14 +303,29 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
   );
   assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
   assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
-  assert.equal(built.currentCompatibility.successor.expandedDropReadyBoundariesImplemented, true);
+  assert.equal(built.currentCompatibility.successor.compactStableDropBoundariesImplemented, true);
   assert.equal(built.currentCompatibility.successor.stableNestedDragHoverImplemented, true);
+  assert.equal(
+    built.currentCompatibility.successor.innermostNestedSlotOwnsPointerImplemented,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.rejectedReleaseRetainsLastAcceptedProjection,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.noOpProjectionVisibleAndInert, true);
   assert.equal(built.currentCompatibility.successor.browserDataTransferReads, 0);
   assert.equal(
     built.currentCompatibility.successor.explicitComponentDropTargetGuideImplemented,
     true,
   );
+  assert.equal(built.currentCompatibility.successor.componentPanelWideDropSurfaceImplemented, true);
+  assert.equal(built.currentCompatibility.successor.componentPaletteOuterDropInert, false);
+  assert.equal(built.currentCompatibility.successor.draggableComponentCardImplemented, false);
+  assert.equal(built.currentCompatibility.successor.dedicatedComponentDragHandleImplemented, true);
+  assert.equal(built.currentCompatibility.successor.dedicatedLayerDragHandleImplemented, true);
   assert.equal(built.currentCompatibility.successor.atomicDeletionPreviewAndFocusImplemented, true);
+  assert.equal(built.currentCompatibility.successor.successfulInsertionSelectsNewLayer, true);
   assert.equal(built.currentCompatibility.successor.exactArtifactSourceAndTestReceipts, true);
   assert.equal(built.currentCompatibility.successor.artifactSourceAndTestReceiptCount, 8);
   assert.equal(
@@ -316,8 +344,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[4], () => {
   const directImport = replaceOnce(
     adapterCanvasSource,
-    'import { useEffect, useMemo, useState } from "react";',
-    'import { useEffect, useMemo, useState } from "react";\nimport { Button } from "@desen/reference-catalog-web/components/button";',
+    'import { useEffect, useMemo, useRef, useState } from "react";',
+    'import { useEffect, useMemo, useRef, useState } from "react";\nimport { Button } from "@desen/reference-catalog-web/components/button";',
   );
   assert.throws(
     () => verifyDesenAppRealAdapterCanvasSourcePolicy(directImport, applicationSource),
@@ -375,6 +403,11 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[6], () => {
   );
 
   for (const applicationMutation of [
+    replaceOnce(
+      applicationSource,
+      'import { DesenAdapterCanvas } from "./adapter-canvas.js";',
+      'import { flushSync } from "react-dom";\nimport { DesenAdapterCanvas } from "./adapter-canvas.js";\nvoid flushSync;',
+    ),
     replaceOnce(
       applicationSource,
       'import { DesenAdapterCanvas } from "./adapter-canvas.js";',
@@ -481,8 +514,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[7], () => {
 
   const overlayInsideManagedSubtree = replaceOnce(
     adapterCanvasSource,
-    '        </div>\n      </fieldset>\n      {mode === "design" ? <SelectionOverlay projection={projection} /> : null}',
-    '          {mode === "design" ? <SelectionOverlay projection={projection} /> : null}\n        </div>\n      </fieldset>',
+    "<SelectionOverlay projection={projection} />",
+    '<div data-managed-capability-subtree="true"><SelectionOverlay projection={projection} /></div>',
   );
   assert.throws(
     () =>
@@ -615,6 +648,29 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[7], () => {
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[8], () => {
+  const directReactDomScheduling = cloneGraph();
+  const schedulingApplication = graphModule(directReactDomScheduling, APPLICATION);
+  schedulingApplication.imports[
+    schedulingApplication.imports.indexOf("node_modules/react/index.js")
+  ] = "node_modules/react-dom/index.js";
+  schedulingApplication.imports.sort();
+  assert.throws(
+    () =>
+      verifyDesenAppRealAdapterCanvasGraphPolicy(directReactDomScheduling, hostSourceAuditArtifact),
+    expectedError("VITE_GRAPH_DRIFT"),
+  );
+
+  const currentGraphIdentityMutation = cloneGraph();
+  graphModule(currentGraphIdentityMutation, APPLICATION).codeSha256 = `sha256:${"0".repeat(64)}`;
+  assert.throws(
+    () =>
+      verifyDesenAppRealAdapterCanvasGraphPolicy(
+        currentGraphIdentityMutation,
+        hostSourceAuditArtifact,
+      ),
+    expectedError("VITE_GRAPH_DRIFT"),
+  );
+
   const componentSubstitution = cloneGraph();
   const adapters = graphModule(
     componentSubstitution,
@@ -680,7 +736,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
-  assert.equal(verified.currentGraphModules, 143);
+  assert.equal(verified.currentGraphModules, 145);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 
@@ -739,6 +795,35 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[10], async () => {
     expectedError("ARTIFACT_WRITE_UNSAFE"),
   );
   assert.deepEqual(await readFile(destination), preserved);
+});
+
+test("[successor] rejects legacy target-only, whole-card, and nested fallthrough drag authority", async () => {
+  const mutations = [
+    replaceOnce(
+      applicationSource,
+      "aria-label={targetName}\n        className={styles.componentSlotTarget}",
+      "aria-label={targetName}\n        className={styles.componentSlotTarget}\n        onDrop={receiveComponentDrop}",
+    ),
+    replaceOnce(
+      applicationSource,
+      'data-component-card="true"',
+      'data-component-card="true" draggable={enabled}',
+    ),
+    replaceOnce(
+      applicationSource,
+      "event.stopPropagation();\n    const admission = projectNearestDrop(list, event.clientY, event.target);",
+      "const admission = projectNearestDrop(list, event.clientY, event.target);",
+    ),
+  ];
+
+  for (const mutation of mutations) {
+    await assert.rejects(
+      buildDesenAppRealAdapterCanvasEvidence({
+        fileOverrides: new Map([[APPLICATION, Buffer.from(mutation)]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
 });
 
 test("[successor] authenticates and mutation-tests the exact M09-T12 persistence closure", async () => {
@@ -839,6 +924,76 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
   await assert.rejects(
     buildDesenAppRealAdapterCanvasEvidence({
       fileOverrides: new Map([[SOURCE_PERSISTENCE_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T13 diagnostics closure", async () => {
+  const successor = built.currentCompatibility.nodeLinkedDiagnosticsSuccessor;
+  assert.deepEqual(successor.artifact, {
+    task: "M09-T13",
+    proofId: "desen-app-node-linked-diagnostics",
+    profile: "desen.app.node-linked-diagnostics-proof.v1",
+    result: "PASS",
+    path: NODE_LINKED_DIAGNOSTICS_ARTIFACT,
+    bytes: 29_208,
+    sha256: "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
+  });
+  assert.deepEqual(
+    {
+      focusedTestCases: successor.focusedTestCases,
+      fullAppTestFiles: successor.fullAppTestFiles,
+      fullAppTestCases: successor.fullAppTestCases,
+      trackedFiles: successor.trackedFiles,
+      parentArtifacts: successor.parentArtifacts,
+      rootTests: successor.rootTests,
+      explicitContextIdentityMappingOnly: successor.explicitContextIdentityMappingOnly,
+      diagnosticCodeMessagePointerIdentityInference:
+        successor.diagnosticCodeMessagePointerIdentityInference,
+      duplicateOccurrenceOrderPreserved: successor.duplicateOccurrenceOrderPreserved,
+      unmappedDiagnosticsSelectable: successor.unmappedDiagnosticsSelectable,
+      snapshotAndRouteFenced: successor.snapshotAndRouteFenced,
+      runtimeKindMismatchFailsClosed: successor.runtimeKindMismatchFailsClosed,
+      invalidPlaceholderInsideManagedRuntimeSubtree:
+        successor.invalidPlaceholderInsideManagedRuntimeSubtree,
+      runModeDiagnosticsVisible: successor.runModeDiagnosticsVisible,
+      automaticFocusSteal: successor.automaticFocusSteal,
+      obligationsExecutable: successor.obligationsExecutable,
+      rejectedDiagnosticsPersisted: successor.rejectedDiagnosticsPersisted,
+      rejectedDiagnosticsAffectDirtyState: successor.rejectedDiagnosticsAffectDirtyState,
+      rejectedDiagnosticsIncludedInSave: successor.rejectedDiagnosticsIncludedInSave,
+      p16Status: successor.p16Status,
+      pf086Status: successor.pf086Status,
+    },
+    {
+      focusedTestCases: 161,
+      fullAppTestFiles: 24,
+      fullAppTestCases: 339,
+      trackedFiles: 39,
+      parentArtifacts: 11,
+      rootTests: 12,
+      explicitContextIdentityMappingOnly: true,
+      diagnosticCodeMessagePointerIdentityInference: false,
+      duplicateOccurrenceOrderPreserved: true,
+      unmappedDiagnosticsSelectable: false,
+      snapshotAndRouteFenced: true,
+      runtimeKindMismatchFailsClosed: true,
+      invalidPlaceholderInsideManagedRuntimeSubtree: false,
+      runModeDiagnosticsVisible: false,
+      automaticFocusSteal: false,
+      obligationsExecutable: false,
+      rejectedDiagnosticsPersisted: false,
+      rejectedDiagnosticsAffectDirtyState: false,
+      rejectedDiagnosticsIncludedInSave: false,
+      p16Status: "PROVEN",
+      pf086Status: "OPEN",
+    },
+  );
+  const artifactBytes = await readFile(path.join(ROOT, NODE_LINKED_DIAGNOSTICS_ARTIFACT));
+  await assert.rejects(
+    buildDesenAppRealAdapterCanvasEvidence({
+      fileOverrides: new Map([[NODE_LINKED_DIAGNOSTICS_ARTIFACT, changedByte(artifactBytes)]]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );

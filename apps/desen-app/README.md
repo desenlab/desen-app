@@ -6,11 +6,12 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T12 adds Design-only authored Source Open/Save through a trusted-host-injected public Editor
-Core persistence port. It retains M09-T11's transient Catalog scenarios, exact synthetic operation
-fixtures, and visible adapter fidelity while keeping persistence, scenario, fixture, mode, event,
-state, binding, selection, and every other authoring control in the application-owned shell outside
-the exact React adapter canvas.
+M09-T13 adds Design-only node-linked validation diagnostics and selectable invalid placeholders
+over the public Editor Core continuous-validation report and Runtime React diagnostic index. It
+retains M09-T12's generation-guarded authored Source Open/Save, M09-T11's transient Catalog
+scenarios, exact synthetic operation fixtures, and visible adapter fidelity while keeping
+diagnostics, persistence, scenario, fixture, mode, event, state, binding, selection, and every
+other authoring control in the application-owned shell outside the exact React adapter canvas.
 The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
@@ -27,15 +28,19 @@ The current product surface contains:
   inventory, display names, categories, descriptions, identity, version, and target;
 - local component filtering that changes only the visible list and never mutates Catalog or Source
   data;
-- one App-owned global Layers projection fenced by drag owner and epoch, with midpoint hysteresis,
-  stable 32 px insertion gaps, and no tree movement while a drag is active;
-- wide draggable Components card bodies with separate `Add` buttons; only the sticky `Add to`
-  target accepts component drops, while releases anywhere else are inert;
+- dedicated dotted Layers grips plus one App-owned global projection fenced by the innermost drag
+  owner and epoch, with midpoint hysteresis, compact layout-stable insertion lanes, whole-row
+  before/after projection, accepted/current-position feedback, and no tree movement while a drag is
+  active;
+- dedicated dotted native-drag grips on compatible Components cards with separate `Add` buttons;
+  the complete authenticated Components panel accepts a drop for the target summarized by the
+  sticky `Add to` card;
 - App-owned drag intent plus native keyboard and click controls for component insertion, cross-slot
   move, and same-slot reorder;
-- a visible selection-bound Delete control plus guarded Delete/Backspace shortcuts outside editable
-  controls; both explain root and effective-minimum restrictions, automatically target a newly
-  inserted component, clear a successfully deleted selection, and return focus to Layers;
+- a visible selection-bound `Remove layer` control plus guarded Delete/Backspace shortcuts outside
+  editable controls; both explain root and effective-minimum restrictions, automatically switch to
+  Layers and focus a newly inserted component, clear a successfully deleted selection, and return
+  focus to Layers;
 - a third State view that projects the exact current surface-local declarations, bounded usage
   counts, and controlled String, Boolean, Number, and Integer initial values;
 - stable add, atomic type-and-initial update, and unused-state deletion controls that preserve used
@@ -80,6 +85,16 @@ The current product surface contains:
 - centralized canonical baseline/current tracking with a rerender-safe no-port projection that
   labels pristine state `Local draft unchanged` while guarding edited no-port and port-backed dirty
   drafts across navigation, traversal, and page exit;
+- immutable rejected-candidate validation reports fenced by exact project, surface, candidate
+  document fingerprint, Catalog-set fingerprint, and current committed-document owner;
+- an Inspector diagnostics section that preserves original diagnostic order, makes only explicit
+  `invalidSubjects` occurrences selectable, leaves unmapped or out-of-route diagnostics readable
+  but inert, and retains dynamic obligations as visible non-executed metadata;
+- opaque snapshot-bound diagnostic selection keys re-admitted from the current projection, with
+  duplicate occurrences and node/behavior identity kept distinct;
+- an App-owned Design-only invalid-change placeholder outside the managed Runtime subtree that
+  preserves the current valid preview and never enters Source, dirty state, Save requests, or
+  persistence generations;
 - deny-only navigation, operation, and resource ports plus missing, conflicting, or inert storage,
   token, diagnostics, clock, context, and environment boundaries;
 - route-local Source-node selection admitted only from the validated authoring model and projected
@@ -153,6 +168,18 @@ consults the public diagnostic index. Repeated component instances remain distin
 behavior runtime identities are excluded, and only a selected conditional Source node may report
 an honest non-materialized state. Unknown, stale, cross-route, and forged same-route selections
 fail closed. Route replacement resets the route-owned selection synchronously.
+
+Rejected edits retain only the exact immutable continuous-validation report beside the still-valid
+authored session; the invalid candidate never becomes Source, preview, dirty, or persistence
+authority. The diagnostics projector admits a report only while its exact route, candidate
+document fingerprint, Catalog-set fingerprint, and committed-document owner remain current. Only
+the Validator's explicit `invalidSubjects` mapping may create a target. Diagnostic code, message,
+pointer, capability, and context text are presentation data, never identity inference. Selection
+stores one opaque key and re-admits it from the current projection; the canvas independently
+reprojects against its live public Runtime diagnostic index before rendering an App-owned sibling
+placeholder. Run mode hides and inerts this Design chrome; returning to Design does not steal focus.
+Successful edits or session replacement revoke the rejected report without mutating persistence
+state.
 
 Inspector derivation uses the public Catalog SDK over the exact validator-admitted component
 manifest. An edit command is reduced to an exact own enumerable data snapshot before authority is
@@ -255,13 +282,12 @@ controller, and preview replacement prevents a predecessor from publishing late 
 
 This slice does not expose component rectangles, hit testing, canvas picking, private DOM/native
 structure, or managed-tree inspection. It does not edit repeat/resource bindings or behavior-owned
-event handlers; provide a concrete persistence adapter; create user projects; navigate diagnostics;
-publish to the control plane; or activate a channel. Diagnostics belong to M09-T13, and publication
-or activation to M09-T14. Catalog control hints remain opaque under PF-025 and cannot widen schema
-authority. P-09 and P-10 are only `PARTIAL`; P-08 remains `NOT_PROVEN`, N-012, N-018, N-035,
-S-001, and S-003 are `TESTED`, N-036 remains `PLANNED`, PF-028 is `CLOSED`, and PF-025, PF-083,
-PF-085, and PF-089 remain `OPEN`. No automated real-browser E2E or native-drag automation result is
-claimed.
+event handlers; provide a concrete persistence adapter; create user projects; publish to the
+control plane; or activate a channel. Publication and activation belong to M09-T14. Catalog control
+hints remain opaque under PF-025 and cannot widen schema authority. P-16 is `PROVEN`; P-09 and P-10
+are only `PARTIAL`; P-08 remains `NOT_PROVEN`, N-012, N-018, N-035, S-001, and S-003 are `TESTED`,
+N-036 remains `PLANNED`, PF-028 is `CLOSED`, and PF-025, PF-083, PF-085, PF-086, and PF-089 remain
+`OPEN`. No automated real-browser E2E or native-drag automation result is claimed.
 
 The App imports only public package entry points for Catalog derivation, Editor Core mutation and
 validation, Publisher preflight, runtime composition, and the exact static reference adapter
@@ -348,11 +374,15 @@ pristine no-port navigation is admitted as `Local draft unchanged`, while edited
 port-backed dirty drafts are guarded across links, traversal, and dirty page exit for the current
 surface/controller lifetime.
 
-The retained authoring UX treats each compatible Components card body as one broad native drag
-source and keeps click insertion on a separate `Add` button. Only the sticky `Add to` target
-accepts a component drop; releases anywhere else are inert. Layers fences one global nested-slot
-projection by drag owner and epoch, applies midpoint hysteresis, renders 32 px insertion gaps, and
-keeps the guarded `Delete` control visible for the selected node.
+The retained authoring UX gives each compatible Components card a dedicated dotted native-drag
+grip and keeps click insertion on a separate `Add` button. The complete authenticated Components
+panel accepts the drop for the target summarized by the sticky `Add to` card. Layers starts
+movement only from a dedicated dotted grip, fences the innermost nested-slot owner and drag epoch,
+applies midpoint hysteresis, keeps compact insertion lanes layout-stable while each visible row
+projects its before/after half, shows accepted and current-position feedback, and retains the last
+admitted placement through coordinate-less or rejected release drift. A successful insert switches
+to Layers, focuses the new node, and exposes the guarded `Remove layer` control plus
+Delete/Backspace shortcuts.
 
 Awaited settlement values are admitted only through exact own enumerable data capture without
 accessor invocation. Valid optional diagnostic pointer/context/subject data is copied into fresh
@@ -364,6 +394,25 @@ These local receipts make no required-gate, hosted-CI, concrete App storage-adap
 diagnostic-navigation, publication/activation, automated real-browser E2E, or native-drag claim.
 M09-T12 is `DONE`, implementation progress is 107/145 (74%), M09 is 12/14 (86%), proof gates
 remain 10/13, and M09-T13 is next.
+
+M09-T13 keeps the rejected candidate outside authored Source, publishable preview, managed
+Runtime, dirty state, Save, and persistence. The transient frozen report is fenced by exact
+document/Catalog fingerprints, route, committed owner, and the live Runtime diagnostic index.
+Only explicit current-route invalid-subject mappings create native selectable targets; original
+order, duplicates, node/behavior distinction, unmapped diagnostics, and inert obligations remain
+visible. The App-owned placeholder stays outside the managed Runtime subtree and is Design-only,
+with dismissal, live count, `aria-current`, no autofocus, and no Run-to-Design focus theft.
+
+The focused nine-file diagnostics suite passes 161/161, the complete twenty-four-file App suite
+passes 339/339, and the independent root mutation proof passes 12/12. Exact evidence is the
+29,208-byte `docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`, binding 39 current
+files and eleven exact proof parents. The local CI authority contains 198 workloads and 94 proof
+pairs—83 ordinary and eleven barriers—with a 62-proof-unit/134-workload connected closure and
+ownership over 1,253 tracked paths, including 188 proof-owned paths. These local receipts make no
+required-gate, hosted-CI, publication/activation, concrete storage-adapter, or automated
+real-browser E2E claim. M09-T13 is `DONE`, P-16 is `PROVEN`, PF-086 remains `OPEN`, implementation
+progress is 108/145 (74%), M09 is 13/14 (93%), proof gates remain 10/13, and M09-T14 is next.
 
 ## Local commands
 
@@ -382,6 +431,7 @@ pnpm --filter @desen/app-web test:event-actions
 pnpm --filter @desen/app-web test:design-run
 pnpm --filter @desen/app-web test:fixtures-scenarios
 pnpm --filter @desen/app-web test:persistence
+pnpm --filter @desen/app-web test:diagnostics
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

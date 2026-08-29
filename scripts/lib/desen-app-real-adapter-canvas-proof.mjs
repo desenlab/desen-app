@@ -21,6 +21,8 @@ const FIXTURES_SCENARIOS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SOURCE_PERSISTENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const APP_INDEX_PATH = "apps/desen-app/index.html";
@@ -97,7 +99,9 @@ const CURRENT_APP_SOURCE_PATHS = Object.freeze(
     PREVIEW_FIDELITY_SOURCE_PATH,
     STATE_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
+    "apps/desen-app/src/authoring-diagnostics.ts",
     "apps/desen-app/src/authoring-persistence.ts",
+    "apps/desen-app/src/diagnostics-panel.tsx",
     "apps/desen-app/src/persistence-controls.tsx",
   ].sort(),
 );
@@ -146,8 +150,34 @@ const T12_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
   "apps/desen-app/test/project-navigation.test.ts",
   "apps/desen-app/test/state-panel.test.tsx",
 ]);
+const T13_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/adapter-canvas.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-inspector.ts",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/authoring-slots.ts",
+  "apps/desen-app/src/authoring-state.ts",
+  "apps/desen-app/src/diagnostics-panel.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/test/adapter-canvas.test.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-diagnostics.test.ts",
+  "apps/desen-app/test/authoring-event-actions.test.ts",
+  "apps/desen-app/test/authoring-inspector.test.ts",
+  "apps/desen-app/test/authoring-slots.test.ts",
+  "apps/desen-app/test/authoring-state.test.ts",
+  "apps/desen-app/test/diagnostics-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+]);
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ...T12_SUCCESSOR_RECEIPT_PATHS,
+  ...T13_SUCCESSOR_RECEIPT_PATHS,
   APP_PACKAGE_PATH,
   ADAPTER_CANVAS_SOURCE_PATH,
   "apps/desen-app/src/application.module.css",
@@ -168,7 +198,9 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     NAMED_SLOT_ARTIFACT_PATH,
     FIXTURES_SCENARIOS_ARTIFACT_PATH,
     SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
     ...T12_SUCCESSOR_RECEIPT_PATHS,
+    ...T13_SUCCESSOR_RECEIPT_PATHS,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_SELECTION_TEST_PATH,
     AUTHORING_INSPECTOR_SOURCE_PATH,
@@ -259,7 +291,7 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     module: "react",
     defaultImport: null,
     namespaceImport: null,
-    namedImports: Object.freeze(["useEffect", "useMemo", "useState"]),
+    namedImports: Object.freeze(["useEffect", "useMemo", "useRef", "useState"]),
     typeOnly: false,
   }),
   Object.freeze({
@@ -321,6 +353,13 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     typeOnly: false,
   }),
   Object.freeze({
+    module: "./authoring-diagnostics.js",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze(["projectAuthoringDiagnostics"]),
+    typeOnly: false,
+  }),
+  Object.freeze({
     module: "./authoring-selection.js",
     defaultImport: null,
     namespaceImport: null,
@@ -342,6 +381,13 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     typeOnly: true,
   }),
   Object.freeze({
+    module: "@desen/editor-core",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze(["DesenEditorContinuousValidationReport"]),
+    typeOnly: true,
+  }),
+  Object.freeze({
     module: "@desen/runtime-react",
     defaultImport: null,
     namespaceImport: null,
@@ -349,6 +395,13 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
       "RuntimeReactLiveSurfaceInput",
       "RuntimeReactSurfaceFailureRenderer",
     ]),
+    typeOnly: true,
+  }),
+  Object.freeze({
+    module: "react",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze(["RefObject"]),
     typeOnly: true,
   }),
   Object.freeze({
@@ -365,6 +418,17 @@ const EXPECTED_ADAPTER_IMPORTS = Object.freeze([
     namedImports: Object.freeze(["CatalogAuthoringModel"]),
     typeOnly: true,
   }),
+  Object.freeze({
+    module: "./authoring-diagnostics.js",
+    defaultImport: null,
+    namespaceImport: null,
+    namedImports: Object.freeze([
+      "AuthoringDiagnosticOccurrence",
+      "AuthoringDiagnosticView",
+      "AuthoringDiagnosticsSnapshotIdentity",
+    ]),
+    typeOnly: true,
+  }),
 ]);
 
 const EXPECTED_JSX_BY_FUNCTION = Object.freeze({
@@ -372,11 +436,21 @@ const EXPECTED_JSX_BY_FUNCTION = Object.freeze({
   readPreviewRevision: Object.freeze([]),
   renderManagedFailure: Object.freeze(["div"]),
   SelectionOverlay: Object.freeze(["div", "span", "span", "strong", "code", "span"]),
+  DiagnosticPlaceholderOverlay: Object.freeze([
+    "div",
+    "span",
+    "span",
+    "strong",
+    "code",
+    "span",
+    "span",
+  ]),
   ManagedAdapterSurface: Object.freeze([
     "fieldset",
     "legend",
     "div",
     "RuntimeReactSurfaceBoundary",
+    "DiagnosticPlaceholderOverlay",
     "SelectionOverlay",
   ]),
   CanvasUnavailable: Object.freeze(["div"]),
@@ -398,10 +472,12 @@ const EXPECTED_CALL_COUNTS = Object.freeze({
   createRuntimeReactAdapterRegistry: 1,
   disposeRuntimeHeadlessSession: 3,
   mountRuntimeHeadlessSession: 1,
+  projectAuthoringDiagnostics: 1,
   projectAuthoringSelection: 1,
   renderRuntimeReactSurface: 1,
-  useEffect: 1,
+  useEffect: 2,
   useMemo: 1,
+  useRef: 2,
   useRuntimeReactSurface: 1,
   useState: 1,
 });
@@ -480,6 +556,44 @@ const EXPECTED_GRAPH_DATA_MODULES = Object.freeze([
   "examples/sign-in/official-derived.source.desen.json",
   "packages/reference-catalog-web/catalog.json",
 ]);
+
+const EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS = Object.freeze([
+  "apps/desen-app/src/adapter-canvas.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/assets/breadcrumb-separator.svg",
+  "apps/desen-app/src/assets/desen-logo.svg",
+  "apps/desen-app/src/assets/plus.svg",
+  "apps/desen-app/src/assets/settings.svg",
+  "apps/desen-app/src/assets/theme.svg",
+  "apps/desen-app/src/authoring-data.ts",
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-fixtures.ts",
+  "apps/desen-app/src/authoring-inspector.ts",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/authoring-preview.ts",
+  "apps/desen-app/src/authoring-scenarios.ts",
+  "apps/desen-app/src/authoring-selection.ts",
+  "apps/desen-app/src/authoring-slots.ts",
+  "apps/desen-app/src/authoring-state.ts",
+  "apps/desen-app/src/diagnostics-panel.tsx",
+  "apps/desen-app/src/event-action-panel.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/persistence-controls.tsx",
+  "apps/desen-app/src/preview-controls.tsx",
+  "apps/desen-app/src/preview-fidelity.ts",
+  "apps/desen-app/src/project-data.ts",
+  "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/state-panel.tsx",
+  "node_modules/react/index.js",
+  "node_modules/react/jsx-runtime.js",
+  "packages/editor-core/dist/index.js",
+  "packages/protocol/dist/index.js",
+  "packages/reference-catalog-web/catalog.json",
+  "packages/runtime-core/dist/index.js",
+]);
+const EXPECTED_CURRENT_VITE_GRAPH_SHA256 =
+  "sha256:3477076800258d529cc59914654aac845af2da4a19153c9c9d5920f8c37b5baa";
 
 const ALLOWED_RUNTIME_PACKAGE_EDGES = Object.freeze({
   "catalog-sdk": Object.freeze(["catalog-sdk", "protocol"]),
@@ -956,6 +1070,7 @@ function authenticateSourcePersistenceSuccessor(files) {
     );
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    if (T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
     const liveBytes = files.get(relativePath);
     if (
@@ -1065,7 +1180,12 @@ function authenticateFixturesScenariosSuccessor(bytes, files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
-    if (T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
+    if (
+      T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
+    ) {
+      continue;
+    }
     const authority = receiptMap.get(relativePath);
     const liveBytes = files.get(relativePath);
     if (
@@ -1387,7 +1507,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
   const bareReturns = collectDescendants(sourceFile, ts.isReturnStatement).filter(
     (statement) => statement.expression === undefined,
   );
-  if (bareReturns.length !== 5) {
+  if (bareReturns.length !== 6) {
     fail(
       "SOURCE_POLICY_VIOLATION",
       "The reviewed fail-closed control flow gained an automatic-semicolon return split.",
@@ -1647,6 +1767,12 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       ts.isJsxSelfClosingElement(node) &&
       jsxTagText(node.tagName, sourceFile) === "SelectionOverlay",
   );
+  const diagnosticPlaceholders = collectDescendants(
+    managedBody,
+    (node) =>
+      ts.isJsxSelfClosingElement(node) &&
+      jsxTagText(node.tagName, sourceFile) === "DiagnosticPlaceholderOverlay",
+  );
   const fieldsetElement = managedFieldsets[0]?.parent;
   function isWithin(candidate, ancestor) {
     let current = candidate;
@@ -1667,13 +1793,18 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
   const overlayAttributeNames = (selectionOverlays[0]?.attributes.properties ?? []).map(
     (property) => (ts.isJsxAttribute(property) ? property.name.getText(sourceFile) : null),
   );
+  const diagnosticPlaceholderAttributeNames = (
+    diagnosticPlaceholders[0]?.attributes.properties ?? []
+  ).map((property) => (ts.isJsxAttribute(property) ? property.name.getText(sourceFile) : null));
   if (
     managedFieldsets.length !== 1 ||
     managedBoundaries.length !== 1 ||
     selectionOverlays.length !== 1 ||
+    diagnosticPlaceholders.length !== 1 ||
     !ts.isJsxElement(fieldsetElement) ||
     !isWithin(managedBoundaries[0], fieldsetElement) ||
     isWithin(selectionOverlays[0], fieldsetElement) ||
+    isWithin(diagnosticPlaceholders[0], fieldsetElement) ||
     !isDeepStrictEqual(fieldsetAttributeNames, [
       "className",
       "data-adapter-canvas-mode",
@@ -1684,6 +1815,11 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     ]) ||
     !isDeepStrictEqual(boundaryAttributeNames, ["renderFailure", "result"]) ||
     !isDeepStrictEqual(overlayAttributeNames, ["projection"]) ||
+    !isDeepStrictEqual(diagnosticPlaceholderAttributeNames, [
+      "diagnostic",
+      "occurrence",
+      "placeholderRef",
+    ]) ||
     !managedText.includes('data-managed-capability-frame="true"') ||
     !managedText.includes('data-managed-capability-subtree="true"') ||
     !managedText.includes("data-adapter-canvas-mode={mode}") ||
@@ -1694,7 +1830,9 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     !managedText.includes(
       "<RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />",
     ) ||
-    !managedText.includes('mode === "design" ? <SelectionOverlay projection={projection} /> : null')
+    !managedText.includes(
+      'mode === "design" && selectedDiagnostic !== undefined ? ( <DiagnosticPlaceholderOverlay diagnostic={selectedDiagnostic.diagnostic} occurrence={selectedDiagnostic.occurrence} placeholderRef={diagnosticPlaceholderRef} /> ) : mode === "design" ? ( <SelectionOverlay projection={projection} /> ) : null',
+    )
   ) {
     fail(
       "SOURCE_POLICY_VIOLATION",
@@ -1731,7 +1869,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     "selection = null",
     "hostPorts = ADAPTER_CANVAS_HOST_PORTS",
     'mode = "design"',
-    "<ManagedAdapterSurface authoringModel={authoringModel} input={state.input} mode={mode} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
+    "<ManagedAdapterSurface authoringModel={authoringModel} diagnostics={diagnostics} input={state.input} mode={mode} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
     "disposeRuntimeHeadlessSession(session)",
   ]) {
     if (!canvasText.includes(requiredText)) {
@@ -1786,6 +1924,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       !isDeepStrictEqual(canvasAttributeNames, [
         "authoringModel",
         "bundle",
+        "diagnostics",
         "hostPorts",
         "mode",
         "projectId",
@@ -1795,6 +1934,11 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       !canvasElementText.includes("authoringModel={model}") ||
       !canvasElementText.includes(
         "bundle={effectivePreview?.ok === true ? effectivePreview.bundle : null}",
+      ) ||
+      !canvasElementText.includes('diagnostics={ mode === "design"') ||
+      !canvasElementText.includes("report: activeTransientDiagnostics.report") ||
+      !canvasElementText.includes(
+        "selectedSelectionKey: diagnosticSelection?.selectionKey ?? null",
       ) ||
       !canvasElementText.includes("hostPorts={fixtureHostPorts}") ||
       !canvasElementText.includes("mode={mode}") ||
@@ -1812,12 +1956,14 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
         (specifier) =>
           (specifier.startsWith("@desen/runtime-") && specifier !== "@desen/runtime-core") ||
           (specifier.startsWith("@desen/reference-catalog-web") &&
-            specifier !== "@desen/reference-catalog-web/catalog.json"),
+            specifier !== "@desen/reference-catalog-web/catalog.json") ||
+          specifier === "react-dom" ||
+          specifier.startsWith("react-dom/"),
       )
     ) {
       fail(
         "SOURCE_POLICY_VIOLATION",
-        "Registry/runtime authority must remain isolated behind adapter-canvas.tsx.",
+        "Registry/runtime authority and ReactDOM scheduling must remain outside application.tsx.",
       );
     }
     const shadowCanvasDeclarations = collectDescendants(
@@ -1844,6 +1990,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       selectedRouteTuple: true,
       sourceIdentitySelectionProp: true,
       directRuntimeImports: 0,
+      directReactDomImports: 0,
       inertCatalogImports: 1,
     });
   }
@@ -2163,14 +2310,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 143 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 145 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 425 || dynamicEdges !== 0) {
+  if (staticEdges !== 431 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -2250,10 +2397,18 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
       "The App application lost its adapter-canvas, Source-selection, or named-slot module edge.",
     );
   }
+  if (!isDeepStrictEqual(application.imports, EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS)) {
+    fail(
+      "VITE_GRAPH_DRIFT",
+      "The current application import graph drifted or regained a direct ReactDOM scheduling edge.",
+      { actual: application.imports },
+    );
+  }
   const canvas = findGraphModule(graph, ADAPTER_CANVAS_SOURCE_PATH);
   const expectedCanvasEdges = [
     "apps/desen-app/src/application.module.css",
     AUTHORING_DATA_SOURCE_PATH,
+    "apps/desen-app/src/authoring-diagnostics.ts",
     AUTHORING_SELECTION_SOURCE_PATH,
     BUNDLE_PATH,
     "node_modules/react/index.js",
@@ -2325,6 +2480,12 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
       }),
     );
   }
+  const graphSha256 = `sha256:${sha256(Buffer.from(JSON.stringify(graph)))}`;
+  if (graphSha256 !== EXPECTED_CURRENT_VITE_GRAPH_SHA256) {
+    fail("VITE_GRAPH_DRIFT", "The exact current successor Vite graph identity drifted.", {
+      actual: graphSha256,
+    });
+  }
   return deepFreeze({
     tool: "vite@8.1.5",
     authority: "programmatic build({ write: false }) Plugin.moduleParsed",
@@ -2336,7 +2497,7 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     unresolvedEdges: 0,
     reachableProductionSourceFiles: CURRENT_APP_SOURCE_PATHS.length,
     dataModules,
-    graphSha256: `sha256:${sha256(Buffer.from(JSON.stringify(graph)))}`,
+    graphSha256,
     modules: graph,
     sharedHostGraphSha256: rawHostArtifact.runtimeResolution.graphSha256,
     sharedRuntimeModuleCount: identityReceipts.length,
@@ -2452,7 +2613,12 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
   const applicationTests = decodeUtf8(files.get(APPLICATION_TEST_PATH), APPLICATION_TEST_PATH);
   const modeSuccessorPaths = new Set([ADAPTER_CANVAS_SOURCE_PATH, ADAPTER_CANVAS_TEST_PATH]);
   for (const receipt of sourceAndTestReceipts) {
-    if (modeSuccessorPaths.has(receipt.path)) continue;
+    if (
+      modeSuccessorPaths.has(receipt.path) ||
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(receipt.path)
+    ) {
+      continue;
+    }
     const bytes = files.get(receipt.path);
     if (
       bytes === undefined ||
@@ -2510,18 +2676,41 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "document.elementFromPoint(pending.clientX, pending.clientY)",
     "hitSlotSurface !== pending.slotSurface",
     "function clearUnclaimedDrop(): void {",
-    "const targetDragEnterDepth = useRef(0)",
+    'Readonly<{ readonly status: "noop"; readonly projection: AuthoringDropProjection }>',
+    'status: "noop",\n        projection: Object.freeze({ index, target }),',
     "data-guide={readySlot === null}",
     "className={styles.componentsView}",
-    'event.dataTransfer.dropEffect = "none"',
-    'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+    'data-drop-noop={dragAdmission?.status === "noop"}',
+    'data-drop-noop-hovered={dragAdmission?.status === "noop" && dropHovered}',
+    '{dragAdmission?.status === "noop" ? "Current position" : "Drop here"}',
+    "event.stopPropagation();\n    const admission = projectNearestDrop(list, event.clientY, event.target);",
+    'if (admission.status === "rejected" || admission.status === "unavailable") {\n      publishAdmission(admission);',
+    'if (admission.status === "accepted" || admission.status === "noop") {',
+    '(releaseAdmission.status === "unavailable" || releaseAdmission.status === "rejected")',
+    "interaction.dragSession.current.ownerKey === sessionOwnerKey",
+    'interaction.dragSession.current.admission === "accepted"',
+    "? interaction.dragSession.current.lastAcceptedProjection",
+    'if (releaseAdmission.status === "noop") {',
+    "const [panelDragHovered, setPanelDragHovered] = useState(false)",
+    "const panelDragEnterDepth = useRef(0)",
+    'data-component-drag-active={dragIntent?.kind === "component"}',
+    "data-drop-hovered={componentDropReady && panelDragHovered}",
+    "panelDragEnterDepth.current += 1",
+    "panelDragEnterDepth.current = Math.max(0, panelDragEnterDepth.current - 1)",
     'if (!componentDropReady) return;\n    event.stopPropagation();\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
     "className={styles.componentSlotTarget}",
     "onDragOver={admitComponentDrop}",
     "onDrop={receiveComponentDrop}",
     'data-component-card="true"',
     "className={styles.componentItem}",
-    "draggable={enabled}",
+    'data-component-drag-handle="true"',
+    "className={styles.componentDragHandle}",
+    "title={`Drag ${component.displayName} anywhere in this panel to add`}",
+    'data-layer-drag-handle="true"',
+    "className={styles.layerDragHandle}",
+    "title={`Drag ${node.displayName} layer`}",
+    "className={styles.layerSelectAction}",
+    "data-layer-source-node-id={node.id}",
     "className={styles.componentAddAction}",
     "draggable={false}",
     "event.preventDefault();\n                                event.stopPropagation();",
@@ -2531,7 +2720,9 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "applyAuthoringNodeDelete(document, referenceCatalog, route, selection)",
     'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
     "sourceNodeId: result.nodeId",
+    'setActiveTab("layers")',
     "setSelection(null)",
+    "Remove layer",
     "layersTab.current?.focus()",
   ]) {
     if (!application.includes(marker)) {
@@ -2541,28 +2732,76 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
   for (const forbidden of [
     "dataTransfer.getData",
     "function acceptsDragIntent(",
-    "panelDragEnterDepth",
-    "componentDragHandle",
-    'title="Drag anywhere in this panel to add"',
+    "targetDragEnterDepth",
+    "targetDragHovered",
+    "draggable={enabled}",
+    "draggable={movable}",
+    "flushSync",
   ]) {
     if (application.includes(forbidden)) {
       fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App retained ${forbidden}.`);
     }
   }
+  const componentLibraryStart = application.indexOf("function ComponentLibrary(");
+  const authoringPanelStart = application.indexOf("function AuthoringPanel(");
+  if (componentLibraryStart < 0 || authoringPanelStart <= componentLibraryStart) {
+    fail("SOURCE_POLICY_VIOLATION", "The live M09-T07 Components panel boundary drifted.");
+  }
+  const componentLibrary = application.slice(componentLibraryStart, authoringPanelStart);
+  const componentTargetStart = componentLibrary.indexOf("aria-label={targetName}");
+  const componentGroupsStart = componentLibrary.indexOf("{groups.length > 0 ? (");
+  if (componentTargetStart < 0 || componentGroupsStart <= componentTargetStart) {
+    fail("SOURCE_POLICY_VIOLATION", "The live M09-T07 component target boundary drifted.");
+  }
+  const componentTarget = componentLibrary.slice(componentTargetStart, componentGroupsStart);
+  if (
+    ["onDragEnter=", "onDragLeave=", "onDragOver=", "onDrop="].some((marker) =>
+      componentTarget.includes(marker),
+    ) ||
+    componentLibrary.split("onDragOver={admitComponentDrop}").length !== 2 ||
+    componentLibrary.split("onDrop={receiveComponentDrop}").length !== 2
+  ) {
+    fail(
+      "SOURCE_POLICY_VIOLATION",
+      "The Components panel must own exactly one panel-wide drop surface while target chrome stays informational.",
+    );
+  }
   for (const marker of [
-    ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+    ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;\n  align-items: center;\n  padding: 0 0.125rem;",
     '.slotBoundary[data-drop-ready="true"]',
+    '.slotBoundary[data-drop-noop="true"]::before',
     '.slotBoundary[data-drop-hovered="true"]',
     '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
+    '.slotBoundary[data-drop-noop-hovered="true"] .slotBoundaryCue',
+    '.slotBoundary[data-drop-noop-hovered="true"] .slotBoundaryLine',
+    '.componentsView[data-component-drag-active="true"]',
+    '.componentsView[data-drop-hovered="true"]',
     ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
+    '.componentSlotTarget[data-drag-active="true"]',
     '.componentSlotTarget[data-guide="true"]',
     '.componentSlotTarget[data-drop-hovered="true"]',
     ".layerDragGuide {",
+    ".layerDragHandle {",
+    ".layerDragHandle::before {",
     ".componentItem {",
+    ".componentDragHandle {",
+    ".componentDragHandle::before {",
     ".componentAddAction {",
+    ".deleteLayerAction {",
+    ".deleteLayerGlyph {",
   ]) {
     if (!css.includes(marker)) {
       fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App CSS lost ${marker}.`);
+    }
+  }
+  for (const forbidden of [
+    "margin-block: -1.125rem",
+    "margin-block: -0.875rem",
+    "transition: min-height",
+    '[data-drag-active="true"] .slotBoundary',
+  ]) {
+    if (css.includes(forbidden)) {
+      fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App CSS retained ${forbidden}.`);
     }
   }
   for (const marker of [
@@ -2585,8 +2824,11 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     'getAttribute("data-drop-hovered")',
     "const alertCard = alert.closest(\"[data-component-card='true']\")",
     "expect((alert as HTMLButtonElement).draggable).toBe(false)",
-    "expect(alertCard.draggable).toBe(true)",
-    "expect(outsideDrop.defaultPrevented).toBe(true)",
+    "expect(alertCard.draggable).toBe(false)",
+    "[data-component-drag-handle='true']",
+    "expect(alertDragHandle.draggable).toBe(true)",
+    "fireEvent.drop(panelSearch, { dataTransfer })",
+    'expect(layerDragHandleFor(emailLayer).getAttribute("draggable")).toBe("true")',
     "expect(slotEdit).toHaveBeenCalledTimes(1)",
     "uses the release position when it crosses a row midpoint after the last dragover",
     "keeps the admitted gap stable while the pointer jitters around a row midpoint",
@@ -2594,6 +2836,10 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "expect(elementFromPoint).toHaveBeenCalledWith(20, 195)",
     "expect(cancelFrame).toHaveBeenCalledWith(2)",
     "drops from a visible row with the last admitted projection when drop coordinates are absent",
+    'getAttribute("data-drop-noop-hovered")',
+    'toContain("Current position")',
+    "Selected in Layers · use Remove layer above or press Delete/Backspace.",
+    'expect(deleteAlert.textContent).toBe("Remove layer")',
     "No drop target selected",
   ]) {
     if (!applicationTests.includes(marker)) {
@@ -2615,18 +2861,25 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     componentPaletteRenderLimit: 24,
     activeTabOnlyAuthoringWork: true,
     largeSameSlotBoundaryEvaluationCovered: true,
-    expandedDropReadyBoundariesImplemented: true,
+    compactStableDropBoundariesImplemented: true,
     stableNestedDragHoverImplemented: true,
     stableGlobalLayerDragSessionImplemented: true,
     globalLayerOwnerAndEpochFencingImplemented: true,
+    innermostNestedSlotOwnsPointerImplemented: true,
+    rejectedReleaseRetainsLastAcceptedProjection: true,
+    noOpProjectionVisibleAndInert: true,
     edgeScrollExactSlotRehitTestingImplemented: true,
     browserDataTransferReads: 0,
     explicitComponentDropTargetGuideImplemented: true,
-    componentDropAdmissionLimitedToExplicitTarget: true,
-    componentPaletteOuterDropInert: true,
-    draggableComponentCardImplemented: true,
+    componentPanelWideDropSurfaceImplemented: true,
+    componentDropAdmissionLimitedToExplicitTarget: false,
+    componentPaletteOuterDropInert: false,
+    draggableComponentCardImplemented: false,
+    dedicatedComponentDragHandleImplemented: true,
+    dedicatedLayerDragHandleImplemented: true,
     separateNonDraggableComponentAddActionImplemented: true,
     atomicDeletionPreviewAndFocusImplemented: true,
+    successfulInsertionSelectsNewLayer: true,
     exactArtifactSourceAndTestReceipts: true,
     artifactSourceAndTestReceiptCount: sourceAndTestReceipts.length,
     retainedLiveArtifactSourceAndTestReceiptCount:
@@ -2856,6 +3109,130 @@ function captureBuildOptions(rawOptions) {
   });
 }
 
+function authenticateNodeLinkedDiagnosticsSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T13",
+    proofId: "desen-app-node-linked-diagnostics",
+    profile: "desen.app.node-linked-diagnostics-proof.v1",
+    result: "PASS",
+    path: NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
+    bytes: 29_208,
+    sha256: "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
+  });
+  const artifactBytes = files.get(NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M09-T13 node-linked-diagnostics artifact drifted.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  const diagnosticsCommand =
+    "vitest run test/authoring-diagnostics.test.ts test/diagnostics-panel.test.tsx test/authoring-inspector.test.ts test/authoring-state.test.ts test/authoring-event-actions.test.ts test/authoring-slots.test.ts test/adapter-canvas.test.tsx test/application.test.tsx test/persistence-application.test.tsx";
+  const appPackage = parseJson(
+    files.get("apps/desen-app/package.json"),
+    "apps/desen-app/package.json",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.immutableRejectedCandidateReport !== true ||
+    artifact.claim?.explicitContextIdentityMappingOnly !== true ||
+    artifact.claim?.diagnosticCodeMessagePointerIdentityInference !== false ||
+    artifact.claim?.duplicateOccurrenceOrderPreserved !== true ||
+    artifact.claim?.unmappedDiagnosticsVisible !== true ||
+    artifact.claim?.unmappedDiagnosticsSelectable !== false ||
+    artifact.claim?.reportSnapshotDocumentFingerprintFenced !== true ||
+    artifact.claim?.reportSnapshotCatalogFingerprintFenced !== true ||
+    artifact.claim?.routeAndSurfaceFenced !== true ||
+    artifact.claim?.runtimeKindMismatchFailsClosed !== true ||
+    artifact.claim?.committedOwnerFingerprintFenced !== true ||
+    artifact.claim?.snapshotBoundSelectionReadmitted !== true ||
+    artifact.claim?.invalidPlaceholderAppOwned !== true ||
+    artifact.claim?.invalidPlaceholderInsideManagedRuntimeSubtree !== false ||
+    artifact.claim?.runModeDiagnosticsVisible !== false ||
+    artifact.claim?.automaticFocusSteal !== false ||
+    artifact.claim?.explicitSelectionFocusOnly !== true ||
+    artifact.claim?.obligationsVisibleMetadataOnly !== true ||
+    artifact.claim?.obligationsExecutable !== false ||
+    artifact.claim?.rejectedDiagnosticsPersisted !== false ||
+    artifact.claim?.rejectedDiagnosticsAffectDirtyState !== false ||
+    artifact.claim?.rejectedDiagnosticsIncludedInSave !== false ||
+    artifact.claim?.lastKnownGoodPreviewPreserved !== true ||
+    artifact.claim?.p16Status !== "PROVEN" ||
+    artifact.claim?.pf086Status !== "OPEN" ||
+    artifact.tests?.focusedTestCases !== 161 ||
+    artifact.tests?.fullAppTestFiles !== 24 ||
+    artifact.tests?.fullAppTestCases !== 339 ||
+    artifact.tests?.rootTestNames?.length !== 12 ||
+    artifact.boundary?.trackedFiles !== 39 ||
+    artifact.boundary?.parentArtifacts !== 11 ||
+    artifact.boundary?.focusedAppTestCases !== 161 ||
+    artifact.boundary?.fullAppTestFiles !== 24 ||
+    artifact.boundary?.fullAppTestCases !== 339 ||
+    trackedReceipts?.length !== 39 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    appPackage.scripts?.["test:diagnostics"] !== diagnosticsCommand
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T13 node-linked-diagnostics identity or claims drifted.",
+    );
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T13 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    focusedTestCases: 161,
+    fullAppTestFiles: 24,
+    fullAppTestCases: 339,
+    trackedFiles: 39,
+    parentArtifacts: 11,
+    rootTests: 12,
+    explicitContextIdentityMappingOnly: true,
+    diagnosticCodeMessagePointerIdentityInference: false,
+    duplicateOccurrenceOrderPreserved: true,
+    unmappedDiagnosticsSelectable: false,
+    snapshotAndRouteFenced: true,
+    runtimeKindMismatchFailsClosed: true,
+    invalidPlaceholderInsideManagedRuntimeSubtree: false,
+    runModeDiagnosticsVisible: false,
+    automaticFocusSteal: false,
+    obligationsExecutable: false,
+    rejectedDiagnosticsPersisted: false,
+    rejectedDiagnosticsAffectDirtyState: false,
+    rejectedDiagnosticsIncludedInSave: false,
+    p16Status: "PROVEN",
+    pf086Status: "OPEN",
+  });
+}
+
 /** Authenticates frozen M09-T03 evidence and exact additive M09-T07/T11 successors. */
 export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
@@ -2891,6 +3268,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
     files,
   );
   const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
+  const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files);
   const hostArtifact = hostSourceAudit.artifact;
   const data = inspectControlledData(files.get(CATALOG_PATH), files.get(BUNDLE_PATH));
   const sourcePolicy = verifyDesenAppRealAdapterCanvasSourcePolicy(
@@ -3016,6 +3394,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
     },
     fixturesScenariosSuccessor,
     sourcePersistenceSuccessor,
+    nodeLinkedDiagnosticsSuccessor,
   });
   return deepFreeze({
     artifact: frozen.artifact,

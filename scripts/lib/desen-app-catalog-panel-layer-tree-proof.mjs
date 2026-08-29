@@ -18,6 +18,8 @@ const FIXTURES_SCENARIOS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SOURCE_PERSISTENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const SHELL_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const REFERENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/reference-catalog-web-capability-artifact.json";
@@ -124,8 +126,34 @@ const T12_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
   "apps/desen-app/test/project-navigation.test.ts",
   "apps/desen-app/test/state-panel.test.tsx",
 ]);
+const T13_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/adapter-canvas.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-inspector.ts",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/authoring-slots.ts",
+  "apps/desen-app/src/authoring-state.ts",
+  "apps/desen-app/src/diagnostics-panel.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/test/adapter-canvas.test.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-diagnostics.test.ts",
+  "apps/desen-app/test/authoring-event-actions.test.ts",
+  "apps/desen-app/test/authoring-inspector.test.ts",
+  "apps/desen-app/test/authoring-slots.test.ts",
+  "apps/desen-app/test/authoring-state.test.ts",
+  "apps/desen-app/test/diagnostics-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+]);
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ...T12_SUCCESSOR_RECEIPT_PATHS,
+  ...T13_SUCCESSOR_RECEIPT_PATHS,
   "apps/desen-app/package.json",
   "apps/desen-app/README.md",
   "apps/desen-app/src/application.tsx",
@@ -149,7 +177,9 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     NAMED_SLOT_ARTIFACT_PATH,
     FIXTURES_SCENARIOS_ARTIFACT_PATH,
     SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
     ...T12_SUCCESSOR_RECEIPT_PATHS,
+    ...T13_SUCCESSOR_RECEIPT_PATHS,
     ADAPTER_CANVAS_SOURCE_PATH,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_SELECTION_TEST_PATH,
@@ -182,6 +212,7 @@ const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
   ...new Set([
     ...TYPESCRIPT_SOURCE_PATHS,
     ...T12_SUCCESSOR_RECEIPT_PATHS.filter((entry) => /\/src\/.+\.(?:ts|tsx)$/u.test(entry)),
+    ...T13_SUCCESSOR_RECEIPT_PATHS.filter((entry) => /\/src\/.+\.(?:ts|tsx)$/u.test(entry)),
     ADAPTER_CANVAS_SOURCE_PATH,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_INSPECTOR_SOURCE_PATH,
@@ -257,9 +288,9 @@ const EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS = Object.freeze(
     ["onDragEnd", 2],
     ["onDragEnter", 3],
     ["onDragLeave", 2],
-    ["onDragOver", 4],
+    ["onDragOver", 3],
     ["onDragStart", 3],
-    ["onDrop", 3],
+    ["onDrop", 2],
   ]),
 );
 const EXPECTED_COMPONENTS = Object.freeze([
@@ -1027,6 +1058,7 @@ function resolveRelativeImport(importerPath, specifier) {
       candidate === PREVIEW_CONTROLS_SOURCE_PATH ||
       candidate === PREVIEW_FIDELITY_SOURCE_PATH ||
       T12_SUCCESSOR_RECEIPT_PATHS.includes(candidate) ||
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(candidate) ||
       candidate === SOURCE_PATH ||
       candidate === OFFICIAL_BUNDLE_PATH,
   );
@@ -1141,7 +1173,6 @@ function inspectImportsAndExecutionBoundary(files) {
   let t11OperationRegistrationImports = 0;
   let exactRegistryConstructionCalls = 0;
   let publicDiagnosticIndexTypeOnlyImports = 0;
-  let applicationFlushSyncImports = 0;
   const successorImportDeclarations = new Map();
   const successorImportedNames = new Map();
   const platformGlobalRoots = new Set(["document", "globalThis", "navigator", "self", "window"]);
@@ -1275,25 +1306,10 @@ function inspectImportsAndExecutionBoundary(files) {
         if (specifier.startsWith(".")) {
           resolvedPath = resolveRelativeImport(relativePath, specifier);
         } else if (specifier === "react-dom") {
-          const bindings = node.importClause?.namedBindings;
-          if (
-            relativePath !== APPLICATION_SOURCE_PATH ||
-            shape.defaultImport !== null ||
-            shape.namespaceImport !== null ||
-            shape.typeOnly ||
-            !isDeepStrictEqual(shape.namedImports, ["flushSync"]) ||
-            bindings === undefined ||
-            !ts.isNamedImports(bindings) ||
-            bindings.elements.length !== 1 ||
-            bindings.elements[0].propertyName !== undefined ||
-            bindings.elements[0].name.text !== "flushSync"
-          ) {
-            fail(
-              "IMPORT_BOUNDARY_DRIFT",
-              "The App may import only the exact flushSync binding from react-dom.",
-            );
-          }
-          applicationFlushSyncImports += 1;
+          fail(
+            "IMPORT_BOUNDARY_DRIFT",
+            "The M09-T13 successor must retain its surrendered react-dom application authority.",
+          );
         } else if (specifier === "react" || specifier === "react-dom/client") {
           if (relativePath === AUTHORING_SELECTION_SOURCE_PATH) {
             fail(
@@ -1350,13 +1366,16 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_STATE_SOURCE_PATH,
               AUTHORING_EVENT_ACTION_SOURCE_PATH,
               AUTHORING_SCENARIOS_SOURCE_PATH,
+              ADAPTER_CANVAS_SOURCE_PATH,
+              "apps/desen-app/src/authoring-diagnostics.ts",
               "apps/desen-app/src/application.tsx",
               "apps/desen-app/src/authoring-persistence.ts",
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null ||
             ([
-              "apps/desen-app/src/application.tsx",
+              ADAPTER_CANVAS_SOURCE_PATH,
+              "apps/desen-app/src/authoring-diagnostics.ts",
               "apps/desen-app/src/authoring-persistence.ts",
             ].includes(relativePath) &&
               shape.typeOnly !== true)
@@ -1381,11 +1400,16 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_SLOT_SOURCE_PATH,
               AUTHORING_EVENT_ACTION_SOURCE_PATH,
               APPLICATION_SOURCE_PATH,
+              "apps/desen-app/src/authoring-diagnostics.ts",
               "apps/desen-app/src/authoring-persistence.ts",
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null ||
-            (shape.typeOnly && relativePath !== "apps/desen-app/src/authoring-persistence.ts")
+            (shape.typeOnly &&
+              ![
+                "apps/desen-app/src/authoring-diagnostics.ts",
+                "apps/desen-app/src/authoring-persistence.ts",
+              ].includes(relativePath))
           ) {
             fail("IMPORT_BOUNDARY_DRIFT", "Protocol entered outside the T06 inspector path.");
           }
@@ -1443,7 +1467,9 @@ function inspectImportsAndExecutionBoundary(files) {
           }
           t11TestkitImports += 1;
         } else if (
-          relativePath === AUTHORING_SELECTION_SOURCE_PATH &&
+          [AUTHORING_SELECTION_SOURCE_PATH, "apps/desen-app/src/authoring-diagnostics.ts"].includes(
+            relativePath,
+          ) &&
           specifier === "@desen/runtime-react"
         ) {
           if (
@@ -1525,6 +1551,7 @@ function inspectImportsAndExecutionBoundary(files) {
         (relativePath === ADAPTER_CANVAS_SOURCE_PATH ||
           relativePath === AUTHORING_SELECTION_SOURCE_PATH ||
           (!T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
+            !T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
             ![
               APPLICATION_SOURCE_PATH,
               AUTHORING_INSPECTOR_SOURCE_PATH,
@@ -1584,6 +1611,7 @@ function inspectImportsAndExecutionBoundary(files) {
         ts.isIdentifier(node.expression) &&
         forbiddenCallPattern.test(node.expression.text) &&
         !T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
+        !T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
         admittedT05Calls.get(relativePath)?.has(node.expression.text) !== true
       ) {
         fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained later-slice execution authority.`, {
@@ -1663,15 +1691,14 @@ function inspectImportsAndExecutionBoundary(files) {
   if (
     referenceCatalogImports !== 4 ||
     validatorImports !== 1 ||
-    publicDiagnosticIndexTypeOnlyImports !== 1 ||
+    publicDiagnosticIndexTypeOnlyImports !== 2 ||
     catalogSdkImports !== 11 ||
-    editorCoreImports !== 15 ||
+    editorCoreImports !== 18 ||
     publisherImports !== 3 ||
-    protocolImports !== 7 ||
+    protocolImports !== 9 ||
     t11RuntimeCoreImports !== 3 ||
     t11TestkitImports !== 2 ||
     t11OperationRegistrationImports !== 1 ||
-    applicationFlushSyncImports !== 1 ||
     !isDeepStrictEqual(namedSlotDragDropHandlers, EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS)
   ) {
     fail(
@@ -1679,7 +1706,7 @@ function inspectImportsAndExecutionBoundary(files) {
       "The source graph must retain T02-T07 package, diagnostic-index, and inert drag-hint edges.",
       {
         catalogSdkImports,
-        applicationFlushSyncImports,
+        applicationReactDomImports: 0,
         editorCoreImports,
         namedSlotDragDropHandlers: Object.fromEntries(namedSlotDragDropHandlers),
         protocolImports,
@@ -1857,7 +1884,7 @@ function inspectImportsAndExecutionBoundary(files) {
     t11TestkitImports,
     t11OperationRegistrationImports,
     publicDiagnosticIndexTypeOnlyImports,
-    applicationFlushSyncImports,
+    applicationReactDomImports: 0,
     adapterImports: 1,
     exactReferenceAdapterRegistryConstructions: 1,
     officialBundleImports: 1,
@@ -1945,9 +1972,23 @@ function verifyImplementationAndTests(files) {
     "interaction.dragSession.current.ownerKey === sessionOwnerKey",
     "interaction.dragSession.current.lastAcceptedProjection",
     "dragSession.current = createAuthoringDragSession(current.epoch + 1);",
-    "flushSync(() => {",
+    'data-component-drag-handle="true"',
+    'data-layer-drag-handle="true"',
+    "data-layer-drop-row-node-id={node.id}",
+    'querySelector<HTMLElement>("[data-layer-drop-row-node-id]")',
+    "panelDragEnterDepth",
+    "onDrop={receiveComponentDrop}",
   ]) {
     requireText(application, required, APPLICATION_SOURCE_PATH, "SUCCESSOR_POLICY_VIOLATION");
+  }
+  for (const forbidden of ["flushSync", "draggable={enabled}", "draggable={movable}"]) {
+    if (application.includes(forbidden)) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `${APPLICATION_SOURCE_PATH} reacquired superseded drag authority.`,
+        { forbidden },
+      );
+    }
   }
   for (const required of [
     'const SUPPORTED_PROJECT_ID = "account-app"',
@@ -2095,9 +2136,12 @@ function verifyImplementationAndTests(files) {
         ownerIdentity: "OWNER_KIND_OWNER_ID_SLOT_JSON_TUPLE",
         epochFencedAnimationFrames: true,
         hitTestConfinedToExactSlotSurface: true,
-        rejectedOrUnavailableClearsFallback: true,
+        releaseDriftRetainsLastAcceptedProjection: true,
         coordinateLessFallbackRequiresSameAcceptedOwner: true,
-        synchronousIntentPublication: true,
+        reactDomAuthoritySurrendered: true,
+        dedicatedComponentDragHandle: true,
+        dedicatedLayerDragHandle: true,
+        componentPanelWideDropSurface: true,
       },
       successorSchemaInspector: {
         task: "M09-T05",
@@ -2378,6 +2422,7 @@ function authenticateSourcePersistenceSuccessor(files) {
     );
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    if (T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -2486,7 +2531,12 @@ function authenticateFixturesScenariosSuccessor(files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
-    if (T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
+    if (
+      T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
+    ) {
+      continue;
+    }
     const authority = receiptMap.get(relativePath);
     const liveBytes = files.get(relativePath);
     if (
@@ -2516,6 +2566,130 @@ function authenticateFixturesScenariosSuccessor(files) {
   });
 }
 
+function authenticateNodeLinkedDiagnosticsSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T13",
+    proofId: "desen-app-node-linked-diagnostics",
+    profile: "desen.app.node-linked-diagnostics-proof.v1",
+    result: "PASS",
+    path: NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
+    bytes: 29_208,
+    sha256: "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
+  });
+  const artifactBytes = files.get(NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M09-T13 node-linked-diagnostics artifact drifted.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  const diagnosticsCommand =
+    "vitest run test/authoring-diagnostics.test.ts test/diagnostics-panel.test.tsx test/authoring-inspector.test.ts test/authoring-state.test.ts test/authoring-event-actions.test.ts test/authoring-slots.test.ts test/adapter-canvas.test.tsx test/application.test.tsx test/persistence-application.test.tsx";
+  const appPackage = parseJson(
+    files.get("apps/desen-app/package.json"),
+    "apps/desen-app/package.json",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.immutableRejectedCandidateReport !== true ||
+    artifact.claim?.explicitContextIdentityMappingOnly !== true ||
+    artifact.claim?.diagnosticCodeMessagePointerIdentityInference !== false ||
+    artifact.claim?.duplicateOccurrenceOrderPreserved !== true ||
+    artifact.claim?.unmappedDiagnosticsVisible !== true ||
+    artifact.claim?.unmappedDiagnosticsSelectable !== false ||
+    artifact.claim?.reportSnapshotDocumentFingerprintFenced !== true ||
+    artifact.claim?.reportSnapshotCatalogFingerprintFenced !== true ||
+    artifact.claim?.routeAndSurfaceFenced !== true ||
+    artifact.claim?.runtimeKindMismatchFailsClosed !== true ||
+    artifact.claim?.committedOwnerFingerprintFenced !== true ||
+    artifact.claim?.snapshotBoundSelectionReadmitted !== true ||
+    artifact.claim?.invalidPlaceholderAppOwned !== true ||
+    artifact.claim?.invalidPlaceholderInsideManagedRuntimeSubtree !== false ||
+    artifact.claim?.runModeDiagnosticsVisible !== false ||
+    artifact.claim?.automaticFocusSteal !== false ||
+    artifact.claim?.explicitSelectionFocusOnly !== true ||
+    artifact.claim?.obligationsVisibleMetadataOnly !== true ||
+    artifact.claim?.obligationsExecutable !== false ||
+    artifact.claim?.rejectedDiagnosticsPersisted !== false ||
+    artifact.claim?.rejectedDiagnosticsAffectDirtyState !== false ||
+    artifact.claim?.rejectedDiagnosticsIncludedInSave !== false ||
+    artifact.claim?.lastKnownGoodPreviewPreserved !== true ||
+    artifact.claim?.p16Status !== "PROVEN" ||
+    artifact.claim?.pf086Status !== "OPEN" ||
+    artifact.tests?.focusedTestCases !== 161 ||
+    artifact.tests?.fullAppTestFiles !== 24 ||
+    artifact.tests?.fullAppTestCases !== 339 ||
+    artifact.tests?.rootTestNames?.length !== 12 ||
+    artifact.boundary?.trackedFiles !== 39 ||
+    artifact.boundary?.parentArtifacts !== 11 ||
+    artifact.boundary?.focusedAppTestCases !== 161 ||
+    artifact.boundary?.fullAppTestFiles !== 24 ||
+    artifact.boundary?.fullAppTestCases !== 339 ||
+    trackedReceipts?.length !== 39 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    appPackage.scripts?.["test:diagnostics"] !== diagnosticsCommand
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T13 node-linked-diagnostics identity or claims drifted.",
+    );
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T13 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    focusedTestCases: 161,
+    fullAppTestFiles: 24,
+    fullAppTestCases: 339,
+    trackedFiles: 39,
+    parentArtifacts: 11,
+    rootTests: 12,
+    explicitContextIdentityMappingOnly: true,
+    diagnosticCodeMessagePointerIdentityInference: false,
+    duplicateOccurrenceOrderPreserved: true,
+    unmappedDiagnosticsSelectable: false,
+    snapshotAndRouteFenced: true,
+    runtimeKindMismatchFailsClosed: true,
+    invalidPlaceholderInsideManagedRuntimeSubtree: false,
+    runModeDiagnosticsVisible: false,
+    automaticFocusSteal: false,
+    obligationsExecutable: false,
+    rejectedDiagnosticsPersisted: false,
+    rejectedDiagnosticsAffectDirtyState: false,
+    rejectedDiagnosticsIncludedInSave: false,
+    p16Status: "PROVEN",
+    pf086Status: "OPEN",
+  });
+}
+
 /** Authenticates frozen M09-T02 evidence and exact additive M09-T07/T11 successors. */
 export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
@@ -2539,6 +2713,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
   const implementation = verifyImplementationAndTests(files);
   const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
   const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
+  const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files);
   assertRetainedHistoricalReceipts(frozen.artifact, files);
   if (options.fileOverrides.size !== 0) {
     fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue current compatibility evidence.");
@@ -2621,6 +2796,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
     },
     fixturesScenariosSuccessor,
     sourcePersistenceSuccessor,
+    nodeLinkedDiagnosticsSuccessor,
   });
   return deepFreeze({
     artifact: frozen.artifact,

@@ -210,3 +210,23 @@ status in M08-T10.
 
 M12-T01 must retain failed, blocked, and justified deviations rather than weakening or deleting a
 clause. Recommended clauses may be deviated from only with an explicit rationale.
+
+## M09-T13 App diagnostics coverage extension
+
+M09-T13 adds App-consumption evidence for the already frozen M08-T09 continuous-validation report
+and M05-T05 Runtime diagnostic index. The rejected candidate remains outside Source, preview,
+managed Runtime, dirty state, Save, and persistence. Exact report/document/Catalog/route/owner and
+live Runtime-index fences fail stale authority closed. Only explicit current-route
+`context.surfaceId` plus `subject.kind`/`subject.id` invalid-subject mappings create selectable
+occurrences; pointer, code, message, capability, and incidental context text do not infer identity.
+Order, duplicates, node/behavior distinction, unmapped/out-of-route diagnostics, and inert
+obligations remain observable. The Design-only App placeholder is outside the managed Runtime
+subtree and steals no focus.
+
+The exact 29,208-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`; focused App, complete
+App, and root mutation suites pass 161/161, 339/339, and 12/12. P-16 advances to `PROVEN`; PF-086
+remains `OPEN` because this App-specific composition does not define a protocol-wide editor
+subscription/index profile. No other normative status changes, proof gates remain 10/13, and no
+required-gate or hosted-CI result is inferred.

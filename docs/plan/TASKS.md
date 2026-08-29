@@ -1444,7 +1444,7 @@ is next.
 | M09-T10 | DONE        | M09-T03, M09-T08–M09-T09 | Design/Run modes on the same source tree                                        |
 | M09-T11 | DONE        | M09-T10                  | Fixtures, scenarios, and visible approximate-fidelity disclosure                |
 | M09-T12 | DONE        | M09-T01, M08-T08         | Save/open UI through editor persistence port                                    |
-| M09-T13 | NOT_STARTED | M09-T04–M09-T11          | Node-linked diagnostics and selectable invalid placeholders                     |
+| M09-T13 | DONE        | M09-T04–M09-T11          | Node-linked diagnostics and selectable invalid placeholders                     |
 | M09-T14 | NOT_STARTED | M09-T10–M09-T13, G07     | Publish to control plane and reference-host channel activation                  |
 | G09     | NOT_STARTED | M09-T01–M09-T14          | User authors, tests, saves, and publishes sign-in visually                      |
 
@@ -1917,11 +1917,15 @@ dirty page exit. Generation, dirty, pending, definite failure, conflict/uncertai
 reopen-required state remain visible without color-only meaning. Scenario previews, fixture
 lifecycle, Runtime input, and secrets never enter persistence.
 
-The retained authoring UX treats each compatible Components card body as one broad native drag
-source and keeps click insertion on a separate `Add` button. Only the sticky `Add to` target
-accepts a component drop; releases anywhere else are inert. Layers fences one global nested-slot
-projection by drag owner and epoch, applies midpoint hysteresis, renders 32 px insertion gaps, and
-keeps the guarded `Delete` control visible for the selected node.
+The retained authoring UX gives each compatible Components card a dedicated dotted native-drag
+grip and keeps click insertion on a separate `Add` button. The complete authenticated Components
+panel accepts the drop for the target summarized by the sticky `Add to` card. Layers starts
+movement only from a dedicated dotted grip, fences the innermost nested-slot owner and drag epoch,
+applies midpoint hysteresis, keeps compact insertion lanes layout-stable while each visible row
+projects its before/after half, shows accepted and current-position feedback, and retains the last
+admitted placement through coordinate-less or rejected release drift. A successful insert switches
+to Layers, focuses the new node, and exposes the guarded `Remove layer` control plus
+Delete/Backspace shortcuts.
 
 The focused five-file persistence suite passes 142/142, the complete twenty-two-file App suite
 passes 324/324, and the independent root mutation proof passes 12/12. Exact evidence is the
@@ -1949,6 +1953,47 @@ proof gates remain 10/13. `N-012`, `N-018`, and `S-003` remain `TESTED` with App
 evidence. P-08 remains `NOT_PROVEN`, P-09/P-10 remain `PARTIAL`, and PF-085/PF-089 remain `OPEN`.
 Diagnostics navigation and invalid placeholders, publication/activation, a concrete App storage
 adapter, and automated real-browser E2E remain later owners. M09-T13 is next.
+
+M09-T13 retains only the exact frozen continuous-validation report from a rejected edit candidate;
+the invalid document never replaces the admitted authored Source, publishable preview, managed
+Runtime session, dirty state, Save request, or persistence generation. The transient report is
+fenced by exact candidate document and Catalog-set fingerprints, project/surface route, and the
+still-current committed-document owner. The canvas independently reprojects it against the current
+public Runtime React diagnostic index, and every stale or inconsistent identity fails closed
+without partial navigation authority.
+
+Only explicit `invalidSubjects` mappings from `context.surfaceId` plus `subject.kind` and
+`subject.id` create selectable targets. Diagnostic pointer, code, message, capability, and
+incidental context text never infer identity. Original order, duplicate occurrence pointers,
+node/behavior distinction, unmapped diagnostics, and out-of-route diagnostics are preserved;
+dynamic obligations remain visible inert metadata and are never executed. Selection stores only
+an opaque snapshot-bound key and re-admits it from the current ready projection.
+
+The compact App-owned Inspector section exposes mapped occurrences as native buttons, announces the
+diagnostic count, marks the selected target with `aria-current`, and supports explicit dismissal
+without autofocus. A selected occurrence renders an App-owned invalid-change placeholder outside
+the managed Runtime subtree while preserving the current valid preview. Diagnostics and placeholder
+interaction are Design-only; Run hides and inerts them, returning to Design does not steal focus,
+and a successful edit or session replacement clears the rejected report.
+
+The focused nine-file diagnostics suite passes 161/161, the complete twenty-four-file App suite
+passes 339/339, and the root mutation proof passes 12/12. Exact task evidence is the 29,208-byte
+`docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json` at
+`sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`, binding 39 current
+files and eleven exact proof parents. The local CI inventory contains 198 workloads and 94 proof
+pairs—83 ordinary and eleven barriers. The connected T13 closure contains 62 proof units and 134
+workloads; ownership covers 1,253 tracked paths, including 188 proof-owned paths. The append-only
+current-reader checkpoint advances sequence 51 head
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` to sequence 52 head
+`sha256:c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9` across 48 frozen
+artifacts and 96 current readers. Promotion pins the selector at
+`sha256:872a061aeea1afe9f82f7578f0fa3cbcfe037a982fde40116e2c88c7e366e2e7` and the required-affected
+runner authority at `sha256:1e08a5db4dc33d684a1e119a88dc5bd4f99e5b98cd0e468a81327c709c3ac2bb`.
+Checkpoint, promotion, selector, required-affected, and CI quality-gate regression suites pass
+75/75, 20/20, 22/22, 38/38, and 28/28 locally—183/183 combined. M09-T13 is `DONE`, advancing
+implementation progress to 108/145 (74%) and M09 to 13/14 (93%). P-16 is `PROVEN`, PF-086 remains
+`OPEN`, proof gates remain 10/13, and M09-T14 is next. These local receipts make no required-gate
+or hosted-CI claim.
 
 ## M10 — First end-to-end proof
 

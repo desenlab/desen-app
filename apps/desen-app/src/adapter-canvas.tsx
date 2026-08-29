@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 import { REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT } from "@desen/reference-catalog-web/react-adapters";
@@ -17,19 +17,27 @@ import {
 
 import officialDerivedSignInBundle from "../../../examples/sign-in/official-derived.bundle.desen.json";
 import { REFERENCE_AUTHORING_MODEL } from "./authoring-data.js";
+import { projectAuthoringDiagnostics } from "./authoring-diagnostics.js";
 import { projectAuthoringSelection } from "./authoring-selection.js";
 import styles from "./application.module.css";
 
 import type { RuntimeHostPorts, RuntimeJsonObject } from "@desen/runtime-core";
+import type { DesenEditorContinuousValidationReport } from "@desen/editor-core";
 import type {
   RuntimeReactLiveSurfaceInput,
   RuntimeReactSurfaceFailureRenderer,
 } from "@desen/runtime-react";
+import type { RefObject } from "react";
 import type {
   AuthoringComponentSelection,
   AuthoringSelectionProjection,
 } from "./authoring-selection.js";
 import type { CatalogAuthoringModel } from "./authoring-data.js";
+import type {
+  AuthoringDiagnosticOccurrence,
+  AuthoringDiagnosticsSnapshotIdentity,
+  AuthoringDiagnosticView,
+} from "./authoring-diagnostics.js";
 
 const SUPPORTED_PROJECT_ID = "account-app";
 const SUPPORTED_SURFACE_ID = "sign-in";
@@ -143,8 +151,52 @@ function SelectionOverlay({
   );
 }
 
+function DiagnosticPlaceholderOverlay({
+  diagnostic,
+  occurrence,
+  placeholderRef,
+}: Readonly<{
+  readonly diagnostic: AuthoringDiagnosticView;
+  readonly occurrence: AuthoringDiagnosticOccurrence;
+  readonly placeholderRef: RefObject<HTMLDivElement | null>;
+}>) {
+  const instanceCount = occurrence.runtimeNodeIds.length;
+  return (
+    <div
+      aria-label={`Invalid change placeholder for ${occurrence.kind} ${occurrence.subjectId}`}
+      className={styles.diagnosticPlaceholder}
+      data-diagnostic-placeholder="source-identity"
+      data-materialized={occurrence.previewStatus === "materialized" ? "true" : "false"}
+      ref={placeholderRef}
+      role="status"
+      tabIndex={-1}
+    >
+      <span className={styles.diagnosticPlaceholderLabel}>Invalid change</span>
+      <span className={styles.diagnosticPlaceholderIdentity}>
+        <strong>{occurrence.kind === "node" ? "Component" : "Behavior"}</strong>
+        <code>{occurrence.subjectId}</code>
+      </span>
+      <span className={styles.diagnosticPlaceholderMessage}>{diagnostic.message}</span>
+      <span className={styles.diagnosticPlaceholderStatus}>
+        {occurrence.previewStatus === "materialized"
+          ? `Current preview preserved · ${instanceCount} matching ${instanceCount === 1 ? "instance" : "instances"}`
+          : "Invalid draft is not rendered · current preview preserved"}
+      </span>
+    </div>
+  );
+}
+
+/** Snapshot-bound rejected-candidate diagnostics shown only by App-owned Design chrome. */
+export interface DesenAdapterCanvasDiagnostics {
+  readonly report: DesenEditorContinuousValidationReport;
+  readonly snapshot: AuthoringDiagnosticsSnapshotIdentity;
+  readonly selectedSelectionKey: string | null;
+  readonly focusRequestId: number;
+}
+
 function ManagedAdapterSurface({
   authoringModel,
+  diagnostics,
   input,
   mode,
   projectId,
@@ -152,6 +204,7 @@ function ManagedAdapterSurface({
   surfaceId,
 }: Readonly<{
   readonly authoringModel: CatalogAuthoringModel;
+  readonly diagnostics: DesenAdapterCanvasDiagnostics | null;
   readonly input: RuntimeReactLiveSurfaceInput;
   readonly mode: DesenAdapterCanvasMode;
   readonly projectId: string;
@@ -172,6 +225,39 @@ function ManagedAdapterSurface({
     authoringModel,
     renderedIdentity,
   );
+  const diagnosticsProjection =
+    diagnostics === null
+      ? null
+      : projectAuthoringDiagnostics(
+          diagnostics.report,
+          diagnostics.snapshot,
+          result.status === "rendered"
+            ? Object.freeze({
+                projectId,
+                surfaceId,
+                diagnosticIndex: result.surface.diagnosticIndex,
+              })
+            : undefined,
+        );
+  const selectedDiagnostic =
+    diagnosticsProjection?.status === "ready" && diagnostics?.selectedSelectionKey !== null
+      ? diagnosticsProjection.model.diagnostics
+          .flatMap((diagnostic) =>
+            diagnostic.occurrences.map((occurrence) => ({ diagnostic, occurrence })),
+          )
+          .find(({ occurrence }) => occurrence.selectionKey === diagnostics?.selectedSelectionKey)
+      : undefined;
+  const diagnosticPlaceholderRef = useRef<HTMLDivElement>(null);
+  const handledFocusRequest = useRef(0);
+
+  useEffect(() => {
+    const requestId = diagnostics?.focusRequestId ?? 0;
+    if (requestId <= handledFocusRequest.current) return;
+    handledFocusRequest.current = requestId;
+    if (mode === "design" && selectedDiagnostic !== undefined) {
+      diagnosticPlaceholderRef.current?.focus({ preventScroll: true });
+    }
+  }, [diagnostics?.focusRequestId, mode, selectedDiagnostic]);
 
   return (
     <>
@@ -188,7 +274,15 @@ function ManagedAdapterSurface({
           <RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />
         </div>
       </fieldset>
-      {mode === "design" ? <SelectionOverlay projection={projection} /> : null}
+      {mode === "design" && selectedDiagnostic !== undefined ? (
+        <DiagnosticPlaceholderOverlay
+          diagnostic={selectedDiagnostic.diagnostic}
+          occurrence={selectedDiagnostic.occurrence}
+          placeholderRef={diagnosticPlaceholderRef}
+        />
+      ) : mode === "design" ? (
+        <SelectionOverlay projection={projection} />
+      ) : null}
     </>
   );
 }
@@ -218,6 +312,8 @@ export interface DesenAdapterCanvasProps {
   readonly authoringModel?: CatalogAuthoringModel;
   /** Current immutable preview Bundle; omission preserves the controlled baseline fixture. */
   readonly bundle?: unknown;
+  /** Rejected-candidate diagnostics that remain outside Runtime and persistence authority. */
+  readonly diagnostics?: DesenAdapterCanvasDiagnostics | null;
   /** Interaction presentation; omission keeps the safe interaction-disabled Design default. */
   readonly mode?: DesenAdapterCanvasMode;
   /** App-owned Runtime ports; omission preserves the deny-all preview boundary. */
@@ -241,6 +337,7 @@ export interface DesenAdapterCanvasProps {
 export function DesenAdapterCanvas({
   authoringModel = REFERENCE_AUTHORING_MODEL,
   bundle = officialDerivedSignInBundle,
+  diagnostics = null,
   hostPorts = ADAPTER_CANVAS_HOST_PORTS,
   mode = "design",
   projectId,
@@ -338,6 +435,7 @@ export function DesenAdapterCanvas({
       <div className={styles.adapterCanvasViewport}>
         <ManagedAdapterSurface
           authoringModel={authoringModel}
+          diagnostics={diagnostics}
           input={state.input}
           mode={mode}
           projectId={projectId}

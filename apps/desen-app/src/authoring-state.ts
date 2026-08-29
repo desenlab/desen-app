@@ -9,7 +9,11 @@ import {
 import { prepareCatalogAuthoringModel } from "./authoring-data.js";
 
 import type { JsonValue } from "@desen/catalog-sdk";
-import type { DesenEditorDocument, DesenEditorStateDeclaration } from "@desen/editor-core";
+import type {
+  DesenEditorContinuousValidationReport,
+  DesenEditorDocument,
+  DesenEditorStateDeclaration,
+} from "@desen/editor-core";
 import type { CatalogAuthoringModel } from "./authoring-data.js";
 
 type JsonObject = Readonly<Record<string, unknown>>;
@@ -95,6 +99,8 @@ export type AuthoringStateEditFailureReason =
 export interface AuthoringStateEditFailure {
   readonly ok: false;
   readonly reason: AuthoringStateEditFailureReason;
+  /** Complete rejected-candidate diagnostics when continuous validation reached that boundary. */
+  readonly validationReport?: DesenEditorContinuousValidationReport;
 }
 
 /** Complete result of one App-owned primitive local-state edit. */
@@ -136,8 +142,15 @@ function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
-function failure(reason: AuthoringStateEditFailureReason): AuthoringStateEditFailure {
-  return Object.freeze({ ok: false, reason });
+function failure(
+  reason: AuthoringStateEditFailureReason,
+  validationReport?: DesenEditorContinuousValidationReport,
+): AuthoringStateEditFailure {
+  return Object.freeze({
+    ok: false,
+    reason,
+    ...(validationReport === undefined ? {} : { validationReport }),
+  });
 }
 
 function exactOwnData(
@@ -635,6 +648,7 @@ export function applyAuthoringStateEdit(
 
   const validator = createDesenEditorContinuousValidator(prepared.model.validationCatalogs);
   if (!validator.ok) return failure("catalog-invalid");
-  if (!validator.validator.validate(candidate).valid) return failure("source-invalid");
+  const validationReport = validator.validator.validate(candidate);
+  if (!validationReport.valid) return failure("source-invalid", validationReport);
   return Object.freeze({ ok: true, document: candidate });
 }

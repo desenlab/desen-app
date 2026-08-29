@@ -35,6 +35,8 @@ const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let sourcePolicyInput;
@@ -214,15 +216,18 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[6], () => {
   assert.equal(application.oneGlobalLayerDropProjection, true);
   assert.equal(application.nestedSlotSurfaceOwnsDropEvents, true);
   assert.equal(application.layerMidpointHysteresis, 4);
-  assert.equal(currentApplication.draggableComponentCard, true);
+  assert.equal(currentApplication.applicationReactDomImports, 0);
+  assert.equal(currentApplication.reactDomAuthoritySurrendered, true);
+  assert.equal(currentApplication.componentDragAuthorityLimitedToDedicatedHandle, true);
+  assert.equal(currentApplication.dedicatedLayerDragHandle, true);
   assert.equal(currentApplication.separateNonDraggableComponentAddAction, true);
-  assert.equal(currentApplication.componentDropAdmissionLimitedToExplicitTarget, true);
-  assert.equal(currentApplication.componentPaletteOuterDropInert, true);
+  assert.equal(currentApplication.componentPanelWideDropSurface, true);
+  assert.equal(currentApplication.stickyComponentTargetSummaryOnly, true);
   assert.equal(currentApplication.stableGlobalLayerDragSession, true);
   assert.equal(currentApplication.globalLayerOwnerAndEpochFencing, true);
   assert.equal(currentApplication.edgeScrollExactSlotRehitTesting, true);
   assert.equal(currentCss.nestedLayerSlotsAndGlobalDragGuideVisible, true);
-  assert.equal(currentCss.draggableComponentCardAndSeparateAddActionVisible, true);
+  assert.equal(currentCss.dedicatedDragHandlesAndSeparateAddActionVisible, true);
   assert.equal(adapter.hostPortIdentityInMountLifetime, true);
   assert.equal(adapter.sessionDisposedOnReplacement, true);
 });
@@ -343,13 +348,8 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
     },
     {
       key: "applicationSource",
-      search: 'import { flushSync } from "react-dom";',
-      replacement: 'import { createPortal } from "react-dom";',
-    },
-    {
-      key: "applicationSource",
-      search: "flushSync(() => {",
-      replacement: "queueMicrotask(() => {",
+      search: '} from "react";',
+      replacement: '} from "react";\nimport { flushSync } from "react-dom";',
     },
     {
       key: "applicationSource",
@@ -368,8 +368,8 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
     },
     {
       key: "applicationSource",
-      search: "draggable={enabled}",
-      replacement: "draggable={false}",
+      search: 'data-component-drag-handle="true"',
+      replacement: 'data-component-drag-handle="false"',
     },
     {
       key: "applicationSource",
@@ -400,15 +400,13 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
     },
     {
       key: "applicationSource",
-      search: 'event.dataTransfer.dropEffect = "none"',
-      replacement: 'event.dataTransfer.dropEffect = "copy"',
+      search: 'admission.status === "noop"\n        ? "none"',
+      replacement: 'admission.status === "accepted"\n        ? "none"',
     },
     {
       key: "applicationSource",
-      search:
-        'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
-      replacement:
-        'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        addComponent(dragIntent.componentId);',
+      search: "panelDragEnterDepth.current += 1",
+      replacement: "panelDragEnterDepth.current = 1",
     },
     {
       key: "applicationSource",
@@ -738,6 +736,79 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
   await assert.rejects(
     buildDesenAppFixturesScenariosFidelityEvidence({
       fileOverrides: new Map([[SOURCE_PERSISTENCE_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T13 diagnostics closure", async () => {
+  const successor = built.currentCompatibility.nodeLinkedDiagnosticsSuccessor;
+  assert.deepEqual(
+    {
+      artifact: successor.artifact,
+      focusedTestFiles: successor.focusedTestFiles,
+      focusedTestCases: successor.focusedTestCases,
+      fullAppTestFiles: successor.fullAppTestFiles,
+      fullAppTestCases: successor.fullAppTestCases,
+      parentArtifacts: successor.parentArtifacts,
+      trackedFiles: successor.trackedFiles,
+      immutableRejectedCandidateReport: successor.immutableRejectedCandidateReport,
+      explicitContextIdentityMappingOnly: successor.explicitContextIdentityMappingOnly,
+      textIdentityInference: successor.diagnosticCodeMessagePointerIdentityInference,
+      duplicateOccurrenceOrderPreserved: successor.duplicateOccurrenceOrderPreserved,
+      unmappedDiagnosticsSelectable: successor.unmappedDiagnosticsSelectable,
+      reportDocumentFenced: successor.reportSnapshotDocumentFingerprintFenced,
+      reportCatalogFenced: successor.reportSnapshotCatalogFingerprintFenced,
+      routeAndSurfaceFenced: successor.routeAndSurfaceFenced,
+      runtimeKindMismatchFailsClosed: successor.runtimeKindMismatchFailsClosed,
+      invalidPlaceholderInsideRuntime: successor.invalidPlaceholderInsideManagedRuntimeSubtree,
+      runModeDiagnosticsVisible: successor.runModeDiagnosticsVisible,
+      obligationsExecutable: successor.obligationsExecutable,
+      rejectedDiagnosticsPersisted: successor.rejectedDiagnosticsPersisted,
+      rejectedDiagnosticsAffectDirtyState: successor.rejectedDiagnosticsAffectDirtyState,
+      rejectedDiagnosticsIncludedInSave: successor.rejectedDiagnosticsIncludedInSave,
+      p16Status: successor.p16Status,
+      pf086Status: successor.pf086Status,
+    },
+    {
+      artifact: {
+        task: "M09-T13",
+        proofId: "desen-app-node-linked-diagnostics",
+        profile: "desen.app.node-linked-diagnostics-proof.v1",
+        result: "PASS",
+        path: NODE_LINKED_DIAGNOSTICS_ARTIFACT,
+        bytes: 29_208,
+        sha256: "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
+      },
+      focusedTestFiles: 9,
+      focusedTestCases: 161,
+      fullAppTestFiles: 24,
+      fullAppTestCases: 339,
+      parentArtifacts: 11,
+      trackedFiles: 39,
+      immutableRejectedCandidateReport: true,
+      explicitContextIdentityMappingOnly: true,
+      textIdentityInference: false,
+      duplicateOccurrenceOrderPreserved: true,
+      unmappedDiagnosticsSelectable: false,
+      reportDocumentFenced: true,
+      reportCatalogFenced: true,
+      routeAndSurfaceFenced: true,
+      runtimeKindMismatchFailsClosed: true,
+      invalidPlaceholderInsideRuntime: false,
+      runModeDiagnosticsVisible: false,
+      obligationsExecutable: false,
+      rejectedDiagnosticsPersisted: false,
+      rejectedDiagnosticsAffectDirtyState: false,
+      rejectedDiagnosticsIncludedInSave: false,
+      p16Status: "PROVEN",
+      pf086Status: "OPEN",
+    },
+  );
+  const artifactBytes = await readFile(path.join(ROOT, NODE_LINKED_DIAGNOSTICS_ARTIFACT));
+  await assert.rejects(
+    buildDesenAppFixturesScenariosFidelityEvidence({
+      fileOverrides: new Map([[NODE_LINKED_DIAGNOSTICS_ARTIFACT, changedByte(artifactBytes)]]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );

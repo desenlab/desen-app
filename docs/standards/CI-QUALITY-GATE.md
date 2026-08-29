@@ -930,13 +930,15 @@ primary reason and exit code, immediately terminates every active group, and pre
 launches. Later signals may escalate but cannot replace that record. Every active child `close` and
 isolation cleanup is still awaited before the gate settles.
 
-The runner owns a 17-minute soft complete-gate deadline, 15-minute per-workload deadlines, and a
-five-second child-termination grace.
-Because authentic settlement still awaits child `close`, cleanup, and boundary capture, the Phase A
-command also has an 18-minute operating-system ceiling with a 30-second kill grace. GitHub's
-25-minute job ceiling remains outside both. An outer-ceiling failure is red and cannot serve as
-promotion evidence; setup, contract checks, receipt emission, and hosted variance retain their own
-headroom.
+Affected execution owns a 17-minute soft complete-gate deadline; exhaustive execution owns an
+18-minute soft complete-gate deadline. Both retain 15-minute per-workload deadlines and a
+five-second child-termination grace. Because authentic settlement still awaits child `close`,
+cleanup, and boundary capture, the Phase A command also has a 19-minute operating-system ceiling
+with a 30-second kill grace. GitHub's 25-minute job ceiling remains outside both. An outer-ceiling
+failure is red and cannot serve as promotion evidence; setup, contract checks, receipt emission,
+and hosted variance retain their own headroom. The frozen I07-04 promotion artifact preserves its
+historical 17-minute soft and 18-minute process ceilings; live successor authority authenticates
+the current 17-minute affected, 18-minute exhaustive, and 19-minute process boundaries separately.
 
 The required execution design layers three closing guards:
 
@@ -1305,3 +1307,22 @@ Global progress and next-task ownership remain in the project status documents.
 `DEBT-I07-007` keeps the sequential runner, rollback-only equivalence adapter, and other rollback
 references under I07-05 until their exact machine-checked removal conditions in
 `docs/plan/DEBT-REGISTER.md` are satisfied.
+
+M09-T13 appends `desen-app-node-linked-diagnostics` as proof pair 94 without nesting its eleven
+parent verifiers inside the task package script. Fresh parent authority belongs only to the
+affected impact graph, which closes over 62 proof units and 134 workloads because the M05-T05
+Runtime diagnostic index joins the prior App-connected graph. The exhaustive authority is 198
+workloads: eight serial prefix workloads, 83 ordinary proof pairs, eleven barrier pairs, and two
+serial suffix workloads. Required and shadow exhaustive plan identities are
+`sha256:1262f64954e55a9e45dfe05474ead238109c3cc02d0da030e082cf865668407f` and
+`sha256:e34aad7f0c153f9157d6b4447bdc1a863cca662451c66c0209a14fa8cec17588`.
+
+The neutral inventory, semantic impact graph, tracked-path set, and ownership projection are
+`sha256:d3b479cc998d6c84d53b9b0d64e6121033d94bbf9b502fcb9e7adc2487b3d908`,
+`sha256:b6fae5194e9dd837d05e1ce44808d6b8054742b564420b42901a39e23d4581b1`,
+`sha256:372a30ee1f8db5b7d1a35e7fd0b46335513724c59bdfa0540513be2e1938d492`, and
+`sha256:7d5a90e56b4b32e2d7e1a0306b09669855642b30558155dba9a07f1ccf7da7a3`.
+Ownership covers 1,253 tracked paths, including 188 proof-owned paths, split into 188 proof-unit,
+45 CI-policy, 31 dependency-policy, 138 frozen-input, 485 package/application, 225 shared-proof-
+infrastructure, 130 project-documentation, and eleven repository-policy paths. These are local
+authority receipts and make no required-gate or hosted-CI claim.

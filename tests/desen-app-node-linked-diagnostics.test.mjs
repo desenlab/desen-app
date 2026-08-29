@@ -1,0 +1,434 @@
+import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
+import { mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { after, before, test } from "node:test";
+
+import {
+  DESEN_APP_NODE_LINKED_DIAGNOSTICS_FOCUSED_TEST_CASES,
+  DESEN_APP_NODE_LINKED_DIAGNOSTICS_PARENT_PINS,
+  DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES,
+  DesenAppNodeLinkedDiagnosticsProofError,
+  buildDesenAppNodeLinkedDiagnosticsEvidence,
+  verifyDesenAppNodeLinkedDiagnosticsEvidence,
+  verifyDesenAppNodeLinkedDiagnosticsSourcePolicy,
+  writeDesenAppNodeLinkedDiagnosticsEvidence,
+} from "../scripts/lib/desen-app-node-linked-diagnostics-proof.mjs";
+
+const ROOT = path.resolve(import.meta.dirname, "..");
+const SOURCE_PATHS = Object.freeze({
+  authoringDiagnostics: "apps/desen-app/src/authoring-diagnostics.ts",
+  diagnosticsPanel: "apps/desen-app/src/diagnostics-panel.tsx",
+  adapterCanvas: "apps/desen-app/src/adapter-canvas.tsx",
+  application: "apps/desen-app/src/application.tsx",
+  applicationCss: "apps/desen-app/src/application.module.css",
+  inspectorPanel: "apps/desen-app/src/inspector-panel.tsx",
+  authoringInspector: "apps/desen-app/src/authoring-inspector.ts",
+  authoringState: "apps/desen-app/src/authoring-state.ts",
+  authoringEventActions: "apps/desen-app/src/authoring-event-actions.ts",
+  authoringSlots: "apps/desen-app/src/authoring-slots.ts",
+  persistence: "apps/desen-app/src/authoring-persistence.ts",
+});
+const TEST_PATHS = Object.freeze({
+  authoringDiagnostics: "apps/desen-app/test/authoring-diagnostics.test.ts",
+  diagnosticsPanel: "apps/desen-app/test/diagnostics-panel.test.tsx",
+  authoringInspector: "apps/desen-app/test/authoring-inspector.test.ts",
+  authoringState: "apps/desen-app/test/authoring-state.test.ts",
+  authoringEventActions: "apps/desen-app/test/authoring-event-actions.test.ts",
+  authoringSlots: "apps/desen-app/test/authoring-slots.test.ts",
+  adapterCanvas: "apps/desen-app/test/adapter-canvas.test.tsx",
+  application: "apps/desen-app/test/application.test.tsx",
+  persistenceApplication: "apps/desen-app/test/persistence-application.test.tsx",
+});
+const APP_PACKAGE_PATH = "apps/desen-app/package.json";
+const ROOT_PACKAGE_PATH = "package.json";
+const temporaryDirectories = [];
+let sourcePolicyInput;
+let testSources;
+let parentArtifactBytes;
+let appPackageSource;
+let rootPackageSource;
+let built;
+
+function expectedError(code) {
+  return (error) => error instanceof DesenAppNodeLinkedDiagnosticsProofError && error.code === code;
+}
+
+function replaceOnce(source, search, replacement) {
+  const index = source.indexOf(search);
+  assert.notEqual(index, -1, `Missing mutation marker ${search}`);
+  return `${source.slice(0, index)}${replacement}${source.slice(index + search.length)}`;
+}
+
+function changedByte(bytes) {
+  const changed = Buffer.from(bytes);
+  changed[Math.floor(changed.byteLength / 2)] ^= 1;
+  return changed;
+}
+
+function exactProofDocument(artifactSha256) {
+  return Buffer.from(
+    [
+      "# Desen App node-linked diagnostics",
+      "",
+      "Task: M09-T13",
+      "",
+      "Status: DONE",
+      "",
+      "P-08: NOT_PROVEN",
+      "P-16: PROVEN",
+      "PF-086: OPEN",
+      "PF-089: OPEN",
+      "M09-T14: NOT_PROVEN",
+      "",
+      `Final artifact: \`sha256:${artifactSha256}\``,
+      "",
+    ].join("\n"),
+  );
+}
+
+async function temporaryDirectory(prefix) {
+  const directory = await realpath(await mkdtemp(path.join(os.tmpdir(), prefix)));
+  temporaryDirectories.push(directory);
+  return directory;
+}
+
+before(async () => {
+  sourcePolicyInput = Object.fromEntries(
+    await Promise.all(
+      Object.entries(SOURCE_PATHS).map(async ([key, relativePath]) => [
+        key,
+        await readFile(path.join(ROOT, relativePath), "utf8"),
+      ]),
+    ),
+  );
+  testSources = new Map(
+    await Promise.all(
+      Object.values(TEST_PATHS).map(async (relativePath) => [
+        relativePath,
+        await readFile(path.join(ROOT, relativePath), "utf8"),
+      ]),
+    ),
+  );
+  parentArtifactBytes = new Map(
+    await Promise.all(
+      DESEN_APP_NODE_LINKED_DIAGNOSTICS_PARENT_PINS.map(async ({ path: relativePath }) => [
+        relativePath,
+        await readFile(path.join(ROOT, relativePath)),
+      ]),
+    ),
+  );
+  [appPackageSource, rootPackageSource] = await Promise.all([
+    readFile(path.join(ROOT, APP_PACKAGE_PATH), "utf8"),
+    readFile(path.join(ROOT, ROOT_PACKAGE_PATH), "utf8"),
+  ]);
+  built = await buildDesenAppNodeLinkedDiagnosticsEvidence();
+});
+
+after(async () => {
+  await Promise.all(
+    temporaryDirectories.map((directory) => rm(directory, { recursive: true, force: true })),
+  );
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[0], () => {
+  assert.equal(built.artifact.schemaVersion, 1);
+  assert.equal(built.artifact.proofId, "desen-app-node-linked-diagnostics");
+  assert.equal(built.artifact.profile, "desen.app.node-linked-diagnostics-proof.v1");
+  assert.equal(built.artifact.task, "M09-T13");
+  assert.equal(built.artifact.result, "PASS");
+  assert.deepEqual(built.artifact.prerequisites, DESEN_APP_NODE_LINKED_DIAGNOSTICS_PARENT_PINS);
+  assert.equal(built.artifact.boundary.parentArtifacts, 11);
+  assert.equal(built.artifact.claim.taskStatus, "DONE");
+  assert.equal(built.artifact.claim.p16Status, "PROVEN");
+  assert.equal(built.artifact.claim.pf086Status, "OPEN");
+  assert.equal(built.artifact.claim.dedicatedComponentDragHandle, true);
+  assert.equal(built.artifact.claim.dedicatedLayerDragHandle, true);
+  assert.equal(built.artifact.claim.componentPanelWideDropSurface, true);
+  assert.equal(built.artifact.claim.innermostNestedSlotOwnsPointer, true);
+  assert.equal(built.artifact.claim.stableInsertionLaneGeometry, true);
+  assert.equal(built.artifact.claim.rowHalfProjectionBroadensHitArea, true);
+  assert.equal(built.artifact.claim.noOpPlacementFeedbackVisible, true);
+  assert.equal(built.artifact.claim.releaseDriftRetainsLastAdmittedPlacement, true);
+  assert.equal(built.artifact.claim.insertedNodeFocusedInLayers, true);
+  assert.equal(built.artifact.claim.selectedInstanceRemovalDiscoverable, true);
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[1], () => {
+  const source = built.artifact.authority.source;
+  assert.equal(source.explicitInvalidSubjectMappingOnly, true);
+  assert.equal(source.diagnosticTextIdentityInference, false);
+  assert.equal(source.snapshotBoundSelectionKeyReadmittedByApplication, true);
+  assert.equal(built.artifact.claim.explicitContextIdentityMappingOnly, true);
+  assert.equal(built.artifact.claim.diagnosticCodeMessagePointerIdentityInference, false);
+  assert.equal(built.artifact.claim.snapshotBoundSelectionReadmitted, true);
+  assert.equal(source.dedicatedComponentDragHandle, true);
+  assert.equal(source.dedicatedLayerDragHandle, true);
+  assert.equal(source.componentPanelWideDropSurface, true);
+  assert.equal(source.innermostNestedSlotOwnsPointer, true);
+  assert.equal(source.stableInsertionLaneGeometry, true);
+  assert.equal(source.rowHalfProjectionBroadensHitArea, true);
+  assert.equal(source.noOpPlacementFeedbackVisible, true);
+  assert.equal(source.releaseDriftRetainsLastAdmittedPlacement, true);
+  assert.equal(source.insertedNodeFocusedInLayers, true);
+  assert.equal(source.selectedInstanceRemovalDiscoverable, true);
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[2], () => {
+  const claim = built.artifact.claim;
+  assert.equal(claim.duplicateOccurrenceOrderPreserved, true);
+  assert.equal(claim.unmappedDiagnosticsVisible, true);
+  assert.equal(claim.unmappedDiagnosticsSelectable, false);
+  assert.equal(built.artifact.authority.source.duplicateOccurrenceOrderPreserved, true);
+  assert.equal(built.artifact.authority.source.unmappedDiagnosticsVisibleAndInert, true);
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[3], () => {
+  const claim = built.artifact.claim;
+  assert.equal(claim.reportSnapshotDocumentFingerprintFenced, true);
+  assert.equal(claim.reportSnapshotCatalogFingerprintFenced, true);
+  assert.equal(claim.routeAndSurfaceFenced, true);
+  assert.equal(claim.runtimeKindMismatchFailsClosed, true);
+  assert.equal(claim.committedOwnerFingerprintFenced, true);
+  assert.equal(built.artifact.authority.source.renderedRouteAndRuntimeKindFenced, true);
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[4], () => {
+  const claim = built.artifact.claim;
+  assert.equal(claim.invalidPlaceholderAppOwned, true);
+  assert.equal(claim.invalidPlaceholderInsideManagedRuntimeSubtree, false);
+  assert.equal(claim.lastKnownGoodPreviewPreserved, true);
+  assert.equal(
+    built.artifact.authority.source.invalidPlaceholderOutsideManagedRuntimeSubtree,
+    true,
+  );
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[5], () => {
+  const claim = built.artifact.claim;
+  assert.equal(claim.runModeDiagnosticsVisible, false);
+  assert.equal(claim.automaticFocusSteal, false);
+  assert.equal(claim.explicitSelectionFocusOnly, true);
+  assert.equal(built.artifact.authority.source.runModeDiagnosticsHidden, true);
+  assert.equal(built.artifact.authority.source.focusRequiresExplicitSelection, true);
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[6], () => {
+  assert.equal(built.artifact.claim.obligationsVisibleMetadataOnly, true);
+  assert.equal(built.artifact.claim.obligationsExecutable, false);
+  assert.equal(built.artifact.authority.source.obligationsVisibleMetadataOnly, true);
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[7], () => {
+  const claim = built.artifact.claim;
+  assert.equal(claim.rejectedDiagnosticsPersisted, false);
+  assert.equal(claim.rejectedDiagnosticsAffectDirtyState, false);
+  assert.equal(claim.rejectedDiagnosticsIncludedInSave, false);
+  assert.equal(
+    built.artifact.authority.source.rejectedCandidateDiagnosticsOutsidePersistence,
+    true,
+  );
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[8], () => {
+  assert.equal(built.artifact.tests.focusedFiles.length, 9);
+  assert.equal(
+    built.artifact.tests.focusedTestCases,
+    DESEN_APP_NODE_LINKED_DIAGNOSTICS_FOCUSED_TEST_CASES,
+  );
+  assert.deepEqual(built.artifact.tests.testCaseCounts, {
+    "apps/desen-app/test/authoring-diagnostics.test.ts": 7,
+    "apps/desen-app/test/diagnostics-panel.test.tsx": 4,
+    "apps/desen-app/test/authoring-inspector.test.ts": 27,
+    "apps/desen-app/test/authoring-state.test.ts": 13,
+    "apps/desen-app/test/authoring-event-actions.test.ts": 13,
+    "apps/desen-app/test/authoring-slots.test.ts": 28,
+    "apps/desen-app/test/adapter-canvas.test.tsx": 10,
+    "apps/desen-app/test/application.test.tsx": 42,
+    "apps/desen-app/test/persistence-application.test.tsx": 17,
+  });
+  assert.equal(built.artifact.tests.fullAppTestFiles, 24);
+  assert.equal(built.artifact.tests.fullAppTestCases, 339);
+  assert.equal(built.artifact.boundary.trackedFiles, 39);
+  assert.equal(built.artifact.boundary.historicalProofReadersTracked, false);
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[9], async () => {
+  const rebuilt = await buildDesenAppNodeLinkedDiagnosticsEvidence();
+  assert.deepEqual(rebuilt.artifactBytes, built.artifactBytes);
+  assert.equal(rebuilt.artifactSha256, built.artifactSha256);
+  assert.deepEqual(JSON.parse(built.artifactBytes), built.artifact);
+  assert.match(built.artifactSha256, /^[0-9a-f]{64}$/u);
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[10], async () => {
+  const sourceMutations = [
+    ["authoringDiagnostics", "report.invalidSubjects", "[]"],
+    ["authoringDiagnostics", "mapping.occurrencePointers.map", "[].map"],
+    [
+      "authoringDiagnostics",
+      "report.documentFingerprint !== snapshot.documentFingerprint",
+      "false",
+    ],
+    ["authoringDiagnostics", "runtimeNodeIdsByBehaviorId", "runtimeNodeIdsBySourceNodeId"],
+    ["diagnosticsPanel", '<section aria-label="Validation diagnostics"', "<section"],
+    ["diagnosticsPanel", 'type="button"', 'autoFocus type="button"'],
+    ["adapterCanvas", 'data-diagnostic-placeholder="source-identity"', ""],
+    [
+      "application",
+      "transientDiagnostics.ownerDocumentFingerprint === committedDocumentFingerprint",
+      "true",
+    ],
+    ["application", "captureEditDiagnostics(result);", "void result;"],
+    ["application", 'data-component-drag-handle="true"', ""],
+    ["application", 'data-layer-drag-handle="true"', ""],
+    ["application", "data-layer-drop-row-node-id={node.id}", ""],
+    ["application", "onDrop={receiveComponentDrop}", ""],
+    ["application", 'releaseAdmission.status === "rejected"', "false"],
+    ["application", '"Current position"', '"Drop here"'],
+    ["application", "pendingLayerFocus.current = result.nodeId", "void result.nodeId"],
+    ["application", "clientY < midpoint", "false"],
+    ["applicationCss", ".layerDragHandle::before", ".layerGrip::before"],
+    ["applicationCss", '.slotBoundary[data-drop-noop-hovered="true"]::before', ".slotBoundary"],
+    ["authoringInspector", "readonly validationReport?:", "readonly rejectedReport?:"],
+    [
+      "authoringState",
+      'return failure("source-invalid", validationReport)',
+      'return failure("source-invalid")',
+    ],
+    [
+      "persistence",
+      "export interface AuthoringPersistenceState",
+      "validationReport\nexport interface AuthoringPersistenceState",
+    ],
+  ];
+  for (const [key, marker, replacement] of sourceMutations) {
+    assert.throws(
+      () =>
+        verifyDesenAppNodeLinkedDiagnosticsSourcePolicy({
+          ...sourcePolicyInput,
+          [key]: replaceOnce(sourcePolicyInput[key], marker, replacement),
+        }),
+      expectedError("SOURCE_POLICY_VIOLATION"),
+    );
+  }
+  assert.throws(
+    () =>
+      verifyDesenAppNodeLinkedDiagnosticsSourcePolicy({
+        ...sourcePolicyInput,
+        applicationCss: `${sourcePolicyInput.applicationCss}\n[data-drag-active="true"] .slotBoundary { margin-block: -0.875rem; transition: min-height 100ms ease; }\n`,
+      }),
+    expectedError("SOURCE_POLICY_VIOLATION"),
+  );
+
+  const diagnosticsTest = testSources.get(TEST_PATHS.authoringDiagnostics);
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([
+        [
+          TEST_PATHS.authoringDiagnostics,
+          Buffer.from(
+            replaceOnce(
+              diagnosticsTest,
+              "creates links only from invalidSubjects and leaves code/message/pointer guesses visible but inert",
+              "creates links from convenient metadata",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("TEST_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([
+        [
+          TEST_PATHS.diagnosticsPanel,
+          Buffer.from(`${testSources.get(TEST_PATHS.diagnosticsPanel)}\nit("drift", () => {});\n`),
+        ],
+      ]),
+    }),
+    expectedError("TEST_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([
+        [
+          APP_PACKAGE_PATH,
+          Buffer.from(replaceOnce(appPackageSource, "test:diagnostics", "test:diagnostics-drift")),
+        ],
+      ]),
+    }),
+    expectedError("PACKAGE_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([
+        [
+          ROOT_PACKAGE_PATH,
+          Buffer.from(
+            replaceOnce(
+              rootPackageSource,
+              "generate:desen-app-node-linked-diagnostics",
+              "generate:desen-app-node-linked-diagnostics-drift",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("PACKAGE_POLICY_VIOLATION"),
+  );
+});
+
+test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[11], async () => {
+  const proofDocument = exactProofDocument(built.artifactSha256);
+  const verified = await verifyDesenAppNodeLinkedDiagnosticsEvidence({
+    artifactBytes: built.artifactBytes,
+    proofDocument,
+  });
+  assert.equal(verified.focusedTestCases, 161);
+  assert.equal(verified.trackedFiles, 39);
+  assert.equal(verified.prerequisites, 11);
+  assert.equal(verified.p16Status, "PROVEN");
+  assert.equal(verified.pf086Status, "OPEN");
+
+  for (const pin of DESEN_APP_NODE_LINKED_DIAGNOSTICS_PARENT_PINS) {
+    await assert.rejects(
+      buildDesenAppNodeLinkedDiagnosticsEvidence({
+        fileOverrides: new Map([[pin.path, changedByte(parentArtifactBytes.get(pin.path))]]),
+      }),
+      expectedError("PARENT_DRIFT"),
+    );
+  }
+  await assert.rejects(
+    verifyDesenAppNodeLinkedDiagnosticsEvidence({
+      artifactBytes: changedByte(built.artifactBytes),
+      proofDocument,
+    }),
+    expectedError("ARTIFACT_DRIFT"),
+  );
+  await assert.rejects(
+    verifyDesenAppNodeLinkedDiagnosticsEvidence({
+      artifactBytes: built.artifactBytes,
+      proofDocument: Buffer.from("Task: M09-T13\nStatus: DONE\n"),
+    }),
+    expectedError("PROOF_DOCUMENT_DRIFT"),
+  );
+
+  const directory = await temporaryDirectory("desen-app-node-linked-diagnostics-");
+  const artifactPath = path.join(directory, "artifact.json");
+  const written = await writeDesenAppNodeLinkedDiagnosticsEvidence({ artifactPath });
+  assert.equal(written.artifactSha256, built.artifactSha256);
+  assert.deepEqual(await readFile(artifactPath), built.artifactBytes);
+
+  const sentinel = path.join(directory, "sentinel.json");
+  const linkedArtifact = path.join(directory, "linked-artifact.json");
+  await writeFile(sentinel, "sentinel\n");
+  await symlink(sentinel, linkedArtifact);
+  await assert.rejects(
+    writeDesenAppNodeLinkedDiagnosticsEvidence({ artifactPath: linkedArtifact }),
+    expectedError("ARTIFACT_WRITE_UNSAFE"),
+  );
+  assert.equal(await readFile(sentinel, "utf8"), "sentinel\n");
+});

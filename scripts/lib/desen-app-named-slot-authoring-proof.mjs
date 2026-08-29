@@ -19,6 +19,8 @@ const FIXTURES_SCENARIOS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SOURCE_PERSISTENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const PARENT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
@@ -98,9 +100,35 @@ const T12_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
   "apps/desen-app/test/project-navigation.test.ts",
   "apps/desen-app/test/state-panel.test.tsx",
 ]);
+const T13_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  "apps/desen-app/src/diagnostics-panel.tsx",
+  "apps/desen-app/src/adapter-canvas.tsx",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/authoring-inspector.ts",
+  "apps/desen-app/src/authoring-state.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-slots.ts",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/test/authoring-diagnostics.test.ts",
+  "apps/desen-app/test/diagnostics-panel.test.tsx",
+  "apps/desen-app/test/authoring-inspector.test.ts",
+  "apps/desen-app/test/authoring-state.test.ts",
+  "apps/desen-app/test/authoring-event-actions.test.ts",
+  "apps/desen-app/test/authoring-slots.test.ts",
+  "apps/desen-app/test/adapter-canvas.test.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+]);
 
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ...T12_SUCCESSOR_RECEIPT_PATHS,
+  ...T13_SUCCESSOR_RECEIPT_PATHS,
   ROOT_PACKAGE_PATH,
   APP_PACKAGE_PATH,
   LOCKFILE_PATH,
@@ -119,6 +147,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     STATE_BINDING_ARTIFACT_PATH,
     FIXTURES_SCENARIOS_ARTIFACT_PATH,
     SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
+    ...T13_SUCCESSOR_RECEIPT_PATHS,
     ...T12_SUCCESSOR_RECEIPT_PATHS,
   ]),
 ]);
@@ -552,7 +582,8 @@ function inspectSlotSource(source) {
       "placement.slot.children.length - 1 < placement.slot.contract.minimum",
       "nodeContainsOwner(placement.node, capturedSelection)",
       "insertDesenEditorNode(model.validationDocument",
-      "const validated = validateCandidate(prepared.model, changed.document)",
+      "const validationReport = validationReportForCandidate(prepared.model, changed.document)",
+      '? failure("source-invalid", validationReport)',
       "placement === undefined || placement === null",
       "does not invent a private subtree transaction",
     ],
@@ -651,9 +682,12 @@ function inspectSlotSource(source) {
     [
       "const capturedSelection = captureComponentSelection(selection)",
       "prepareCatalogAuthoringModel(catalogValue, document)",
-      "evaluateAuthoringNodeDeletion(",
+      "findNodePlacement(",
+      "placement.node.capabilityId !== capturedSelection.capabilityId",
+      "placement.slot.children.length - 1 < placement.slot.contract.minimum",
       "deleteDesenEditorNode(prepared.model.validationDocument",
-      "const validated = validateCandidate(prepared.model, changed.document)",
+      "const validationReport = validationReportForCandidate(prepared.model, changed.document)",
+      '? failure("source-invalid", validationReport)',
       'operation: "delete"',
     ],
     "deletion mutation",
@@ -780,30 +814,41 @@ function inspectApplicationSource(source) {
       "hitSlotSurface !== pending.slotSurface",
       "function clearUnclaimedDrop(): void {",
       "data-drop-hovered={dropReady && dropHovered}",
+      'data-drop-noop={dragAdmission?.status === "noop"}',
+      'data-drop-noop-hovered={dragAdmission?.status === "noop" && dropHovered}',
+      '{dragAdmission?.status === "noop" ? "Current position" : "Drop here"}',
       "data-drop-ready={dropReady}",
       "onDragEnter={updateDropProjection}",
       "onDragOver={updateDropProjection}",
       "onDrop={receiveDrop}",
       "interaction.onApplyIntent(projection.target, projection.index, interaction.dragIntent)",
-      "event.stopPropagation()",
+      "event.stopPropagation();\n    const admission = projectNearestDrop(list, event.clientY, event.target);",
+      'if (admission.status === "rejected" || admission.status === "unavailable") {\n      publishAdmission(admission);',
+      'if (admission.status === "accepted" || admission.status === "noop") {',
+      'if (admission.status === "accepted") {\n        session.lastAcceptedProjection = admission.projection;',
+      '(releaseAdmission.status === "unavailable" || releaseAdmission.status === "rejected")',
+      "interaction.dragSession.current.ownerKey === sessionOwnerKey",
+      'interaction.dragSession.current.admission === "accepted"',
+      "? interaction.dragSession.current.lastAcceptedProjection",
+      'if (releaseAdmission.status === "noop") {',
       "projectAuthoringSlotSelection(resolvedActiveSlot, route, model)",
       "evaluateAuthoringSlotInsertion(\n                              route,",
       "evaluateAuthoringSlotPlacement(route, authoringModel, target",
       "selectedPlacement?.accepted === true && selectedPlacement.changesSource === true",
-      'if (!compatibility.changesSource) return Object.freeze({ status: "noop" })',
+      'Readonly<{ readonly status: "noop"; readonly projection: AuthoringDropProjection }>',
+      'status: "noop",\n        projection: Object.freeze({ index, target }),',
       "slot insertion boundary at position",
       'role="group"',
       "const componentDropReady =",
-      "const [targetDragHovered, setTargetDragHovered] = useState(false)",
-      "const targetDragEnterDepth = useRef(0)",
-      "data-drop-hovered={componentDropReady && targetDragHovered}",
+      "const [panelDragHovered, setPanelDragHovered] = useState(false)",
+      "const panelDragEnterDepth = useRef(0)",
+      'data-component-drag-active={dragIntent?.kind === "component"}',
+      "data-drop-hovered={componentDropReady && panelDragHovered}",
       "data-drop-ready={componentDropReady}",
       "data-guide={readySlot === null}",
-      "targetDragEnterDepth.current += 1",
-      "targetDragEnterDepth.current = Math.max(0, targetDragEnterDepth.current - 1)",
+      "panelDragEnterDepth.current += 1",
+      "panelDragEnterDepth.current = Math.max(0, panelDragEnterDepth.current - 1)",
       "className={styles.componentsView}",
-      'event.dataTransfer.dropEffect = "none"',
-      'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
       'if (!componentDropReady) return;\n    event.stopPropagation();\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
       "onDragOver={admitComponentDrop}",
       "onDrop={receiveComponentDrop}",
@@ -813,8 +858,14 @@ function inspectApplicationSource(source) {
       "className={styles.componentSlotTarget}",
       'data-component-card="true"',
       "className={styles.componentItem}",
-      "draggable={enabled}",
-      "? `Drag ${component.displayName} to the Add to target`",
+      'data-component-drag-handle="true"',
+      "className={styles.componentDragHandle}",
+      "title={`Drag ${component.displayName} anywhere in this panel to add`}",
+      'data-layer-drag-handle="true"',
+      "className={styles.layerDragHandle}",
+      "title={`Drag ${node.displayName} layer`}",
+      "className={styles.layerSelectAction}",
+      "data-layer-source-node-id={node.id}",
       "className={styles.componentAddAction}",
       "draggable={false}",
       "event.preventDefault();\n                                event.stopPropagation();",
@@ -837,8 +888,9 @@ function inspectApplicationSource(source) {
       "commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
       'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
       "sourceNodeId: result.nodeId",
+      'setActiveTab("layers")',
       "setSelection(null)",
-      "Deletes this layer and its nested Source subtree.",
+      "Remove layer",
       "aria-label={`Delete ${selection.displayName} layer · ${selection.sourceNodeId}`}",
       "disabled={deletionCompatibility?.accepted !== true}",
       "onClick={deleteSelection}",
@@ -856,30 +908,63 @@ function inspectApplicationSource(source) {
       "dataTransfer.getData",
       "elementsFromPoint",
       "function acceptsDragIntent(",
-      "panelDragEnterDepth",
-      "componentDragHandle",
-      'title="Drag anywhere in this panel to add"',
+      "targetDragEnterDepth",
+      "targetDragHovered",
+      "draggable={enabled}",
+      "draggable={movable}",
+      "flushSync",
     ],
     "application.tsx",
   );
+  const componentLibrary = sourceSection(
+    source,
+    "function ComponentLibrary(",
+    "function AuthoringPanel(",
+    "ComponentLibrary",
+  );
+  const componentTarget = sourceSection(
+    componentLibrary,
+    "aria-label={targetName}",
+    "{groups.length > 0 ? (",
+    "component target chrome",
+  );
+  assertExcludes(
+    componentTarget,
+    ["onDragEnter=", "onDragLeave=", "onDragOver=", "onDrop="],
+    "component target chrome",
+  );
+  if (
+    componentLibrary.split("onDragOver={admitComponentDrop}").length !== 2 ||
+    componentLibrary.split("onDrop={receiveComponentDrop}").length !== 2
+  ) {
+    fail(
+      "SOURCE_POLICY_VIOLATION",
+      "The Components panel must own exactly one authenticated drag-over and drop surface.",
+    );
+  }
   return deepFreeze({
     appOwnedDragIntent: true,
     browserPayloadIsInertHint: true,
     declaredAbsentSlotsVisible: true,
     linearDeclaredPresentJoin: true,
     orderedBoundaryControls: true,
-    expandedNonOverlappingDropReadyBoundaries: true,
+    compactStableDropBoundaries: true,
     rowHalfDropTargets: true,
     rowGeometryUsedOnlyForBoundedDropProjection: true,
     stableNestedDragHoverTracking: true,
     stableGlobalLayerDragSession: true,
     globalLayerOwnerAndEpochFencing: true,
+    innermostNestedSlotOwnsPointer: true,
+    rejectedReleaseRetainsLastAcceptedProjection: true,
+    noOpProjectionVisibleAndInert: true,
     edgeScrollRehitTestsExactSlotSurface: true,
     componentCompatibilityVisible: true,
     explicitComponentDropTarget: true,
-    componentDropAdmissionLimitedToExplicitTarget: true,
-    componentPaletteOuterDropInert: true,
-    draggableComponentCard: true,
+    componentPanelWideDropSurface: true,
+    componentPaletteOuterDropInert: false,
+    draggableComponentCard: false,
+    dedicatedComponentDragHandle: true,
+    dedicatedLayerDragHandle: true,
     separateNonDraggableComponentAddAction: true,
     stickyComponentDropTarget: true,
     componentDragGuidance: true,
@@ -911,12 +996,18 @@ function inspectCssSource(source) {
   assertIncludes(
     source,
     [
-      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;\n  align-items: center;\n  padding: 0 0.125rem;",
       '.slotBoundary[data-drop-ready="true"]',
       '.slotBoundary[data-drop-ready="true"]::before',
+      '.slotBoundary[data-drop-noop="true"]::before',
       '.slotBoundary[data-drop-hovered="true"]',
+      '.slotBoundary[data-drop-noop-hovered="true"]::before',
       '.slotBoundary[data-drop-ready="true"] .slotBoundaryLine',
       '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
+      '.slotBoundary[data-drop-noop-hovered="true"] .slotBoundaryCue',
+      '.slotBoundary[data-drop-noop-hovered="true"] .slotBoundaryLine',
+      '.componentsView[data-component-drag-active="true"]',
+      '.componentsView[data-drop-hovered="true"]',
       ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
       '.componentSlotTarget[data-drag-active="true"]',
       '.componentSlotTarget[data-ready="true"]',
@@ -924,7 +1015,11 @@ function inspectCssSource(source) {
       '.componentSlotTarget[data-drop-ready="true"]',
       '.componentSlotTarget[data-drop-hovered="true"]',
       ".layerDragGuide {",
+      ".layerDragHandle {",
+      ".layerDragHandle::before {",
       ".componentItem {",
+      ".componentDragHandle {",
+      ".componentDragHandle::before {",
       ".componentAddAction {",
     ],
     "application.module.css",
@@ -943,19 +1038,28 @@ function inspectCssSource(source) {
   }
   assertExcludes(
     source,
-    ["margin-block: -1.125rem", "transition: min-height"],
+    [
+      "margin-block: -1.125rem",
+      "margin-block: -0.875rem",
+      "transition: min-height",
+      '[data-drag-active="true"] .slotBoundary',
+    ],
     "application.module.css",
   );
   return deepFreeze({
     namedSlotSelectors: true,
     selectedTargetPresentation: true,
-    expandedNonOverlappingDropBoundaries: true,
+    compactStableDropBoundaries: true,
     rowDropPositionPresentation: true,
     stableHoveredDropPresentation: true,
+    noOpDropPresentation: true,
     stableGlobalDragGuidePresentation: true,
     stickyComponentTargetPresentation: true,
+    panelWideComponentDropPresentation: true,
     slotlessTargetGuidePresentation: true,
-    draggableComponentCardPresentation: true,
+    draggableComponentCardPresentation: false,
+    dedicatedComponentDragHandlePresentation: true,
+    dedicatedLayerDragHandlePresentation: true,
     separateComponentAddActionPresentation: true,
     managedDescendantSlotSelectors: 0,
   });
@@ -1102,14 +1206,23 @@ function inspectTests(files) {
       "preserves the selected layer, preview, and focus when deletion is rejected",
       "expect(document.activeElement).toBe(deleteTitle)",
       "expect(reads).toBe(0)",
+      "function layerDragHandleFor(layerButton: HTMLElement): HTMLElement",
+      "\"[data-layer-drag-handle='true']\"",
       "const alertCard = alert.closest(\"[data-component-card='true']\")",
       "expect((alert as HTMLButtonElement).draggable).toBe(false)",
-      "expect(alertCard.draggable).toBe(true)",
-      "expect(outsideDrop.defaultPrevented).toBe(true)",
+      "expect(alertCard.draggable).toBe(false)",
+      "expect(alertDragHandle.draggable).toBe(true)",
+      "\"[data-component-drag-handle='true']\"",
+      "fireEvent.drop(panelSearch, { dataTransfer })",
+      '(target.parentElement as HTMLElement).getAttribute("data-drop-hovered")',
       "expect(slotEdit).toHaveBeenCalledTimes(1)",
       'getAttribute("data-drop-hovered")',
       'getAttribute("data-drop-ready")',
       "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+      "drops from a visible row with the last admitted projection when drop coordinates are absent",
+      "forgets an admitted gap after the pointer reaches the dragged layer's no-op position",
+      'getAttribute("data-drop-noop-hovered")',
+      'toContain("Current position")',
       "expect(elementFromPoint).toHaveBeenCalledWith(20, 195)",
       "expect(cancelFrame).toHaveBeenCalledWith(2)",
       "No drop target selected",
@@ -1389,6 +1502,159 @@ function authenticateStateBindingSuccessor(files) {
   });
 }
 
+function authenticateNodeLinkedDiagnosticsSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T13",
+    proofId: "desen-app-node-linked-diagnostics",
+    profile: "desen.app.node-linked-diagnostics-proof.v1",
+    result: "PASS",
+    path: NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
+    bytes: 29_208,
+    sha256: "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
+  });
+  const artifactBytes = files.get(NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M09-T13 node-linked diagnostics artifact drifted.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  const semanticClaims = {
+    taskStatus: artifact.claim?.taskStatus,
+    immutableRejectedCandidateReport: artifact.claim?.immutableRejectedCandidateReport,
+    explicitContextIdentityMappingOnly: artifact.claim?.explicitContextIdentityMappingOnly,
+    diagnosticCodeMessagePointerIdentityInference:
+      artifact.claim?.diagnosticCodeMessagePointerIdentityInference,
+    duplicateOccurrenceOrderPreserved: artifact.claim?.duplicateOccurrenceOrderPreserved,
+    unmappedDiagnosticsVisible: artifact.claim?.unmappedDiagnosticsVisible,
+    unmappedDiagnosticsSelectable: artifact.claim?.unmappedDiagnosticsSelectable,
+    reportSnapshotDocumentFingerprintFenced:
+      artifact.claim?.reportSnapshotDocumentFingerprintFenced,
+    reportSnapshotCatalogFingerprintFenced: artifact.claim?.reportSnapshotCatalogFingerprintFenced,
+    routeAndSurfaceFenced: artifact.claim?.routeAndSurfaceFenced,
+    runtimeKindMismatchFailsClosed: artifact.claim?.runtimeKindMismatchFailsClosed,
+    committedOwnerFingerprintFenced: artifact.claim?.committedOwnerFingerprintFenced,
+    snapshotBoundSelectionReadmitted: artifact.claim?.snapshotBoundSelectionReadmitted,
+    invalidPlaceholderAppOwned: artifact.claim?.invalidPlaceholderAppOwned,
+    invalidPlaceholderInsideManagedRuntimeSubtree:
+      artifact.claim?.invalidPlaceholderInsideManagedRuntimeSubtree,
+    runModeDiagnosticsVisible: artifact.claim?.runModeDiagnosticsVisible,
+    automaticFocusSteal: artifact.claim?.automaticFocusSteal,
+    explicitSelectionFocusOnly: artifact.claim?.explicitSelectionFocusOnly,
+    obligationsVisibleMetadataOnly: artifact.claim?.obligationsVisibleMetadataOnly,
+    obligationsExecutable: artifact.claim?.obligationsExecutable,
+    rejectedDiagnosticsPersisted: artifact.claim?.rejectedDiagnosticsPersisted,
+    rejectedDiagnosticsAffectDirtyState: artifact.claim?.rejectedDiagnosticsAffectDirtyState,
+    rejectedDiagnosticsIncludedInSave: artifact.claim?.rejectedDiagnosticsIncludedInSave,
+    lastKnownGoodPreviewPreserved: artifact.claim?.lastKnownGoodPreviewPreserved,
+    publicationClaimed: artifact.claim?.publicationClaimed,
+    activationClaimed: artifact.claim?.activationClaimed,
+    p08Status: artifact.claim?.p08Status,
+    p16Status: artifact.claim?.p16Status,
+    pf086Status: artifact.claim?.pf086Status,
+    pf089Status: artifact.claim?.pf089Status,
+  };
+  const expectedClaims = {
+    taskStatus: "DONE",
+    immutableRejectedCandidateReport: true,
+    explicitContextIdentityMappingOnly: true,
+    diagnosticCodeMessagePointerIdentityInference: false,
+    duplicateOccurrenceOrderPreserved: true,
+    unmappedDiagnosticsVisible: true,
+    unmappedDiagnosticsSelectable: false,
+    reportSnapshotDocumentFingerprintFenced: true,
+    reportSnapshotCatalogFingerprintFenced: true,
+    routeAndSurfaceFenced: true,
+    runtimeKindMismatchFailsClosed: true,
+    committedOwnerFingerprintFenced: true,
+    snapshotBoundSelectionReadmitted: true,
+    invalidPlaceholderAppOwned: true,
+    invalidPlaceholderInsideManagedRuntimeSubtree: false,
+    runModeDiagnosticsVisible: false,
+    automaticFocusSteal: false,
+    explicitSelectionFocusOnly: true,
+    obligationsVisibleMetadataOnly: true,
+    obligationsExecutable: false,
+    rejectedDiagnosticsPersisted: false,
+    rejectedDiagnosticsAffectDirtyState: false,
+    rejectedDiagnosticsIncludedInSave: false,
+    lastKnownGoodPreviewPreserved: true,
+    publicationClaimed: false,
+    activationClaimed: false,
+    p08Status: "NOT_PROVEN",
+    p16Status: "PROVEN",
+    pf086Status: "OPEN",
+    pf089Status: "OPEN",
+  };
+  const diagnosticsCommand =
+    "vitest run test/authoring-diagnostics.test.ts test/diagnostics-panel.test.tsx test/authoring-inspector.test.ts test/authoring-state.test.ts test/authoring-event-actions.test.ts test/authoring-slots.test.ts test/adapter-canvas.test.tsx test/application.test.tsx test/persistence-application.test.tsx";
+  const appPackage = parseJson(
+    files.get("apps/desen-app/package.json"),
+    "apps/desen-app/package.json",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    !isDeepStrictEqual(semanticClaims, expectedClaims) ||
+    artifact.tests?.focusedTestCases !== 161 ||
+    artifact.tests?.fullAppTestFiles !== 24 ||
+    artifact.tests?.fullAppTestCases !== 339 ||
+    artifact.tests?.rootTestNames?.length !== 12 ||
+    artifact.boundary?.trackedFiles !== 39 ||
+    artifact.boundary?.parentArtifacts !== 11 ||
+    artifact.boundary?.focusedAppTestCases !== 161 ||
+    artifact.boundary?.fullAppTestFiles !== 24 ||
+    artifact.boundary?.fullAppTestCases !== 339 ||
+    trackedReceipts?.length !== 39 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    appPackage.scripts?.["test:diagnostics"] !== diagnosticsCommand
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T13 node-linked diagnostics identity or claims drifted.",
+    );
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T13 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    focusedTestFiles: 9,
+    focusedTestCases: 161,
+    fullAppTestFiles: 24,
+    fullAppTestCases: 339,
+    parentArtifacts: 11,
+    trackedFiles: 39,
+    ...expectedClaims,
+    diagnosticsCommand,
+  });
+}
+
 function authenticateSourcePersistenceSuccessor(files) {
   const pin = Object.freeze({
     task: "M09-T12",
@@ -1487,6 +1753,7 @@ function authenticateSourcePersistenceSuccessor(files) {
     );
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    if (T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -1582,7 +1849,12 @@ function authenticateFixturesScenariosSuccessor(files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
-    if (T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
+    if (
+      T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
+    ) {
+      continue;
+    }
     const authority = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -1773,6 +2045,7 @@ export async function buildDesenAppNamedSlotAuthoringEvidence(rawOptions = undef
   const successor = authenticateStateBindingSuccessor(files);
   const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
   const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
+  const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-named-slot-authoring",
@@ -1798,6 +2071,7 @@ export async function buildDesenAppNamedSlotAuthoringEvidence(rawOptions = undef
     successor,
     fixturesScenariosSuccessor,
     sourcePersistenceSuccessor,
+    nodeLinkedDiagnosticsSuccessor,
     package: packageContract,
     testPolicy: {
       applicationTestNames: tests.appTestNames[APPLICATION_TEST_PATH],

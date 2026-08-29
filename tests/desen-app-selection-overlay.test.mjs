@@ -30,6 +30,8 @@ const NAMED_SLOT_ARTIFACT_PIN_SHA256 =
 const FIXTURES_SCENARIOS_ARTIFACT =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
+const NODE_LINKED_DIAGNOSTICS_ARTIFACT =
+  "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let selectionSource;
@@ -225,6 +227,11 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[4], () => {
     assert.equal(authority.privateInspection.privateDomOrGeometryCalls, 0);
     assert.equal(authority.privateInspection.privateReactReferences, 0);
   }
+  assert.equal(
+    built.currentCompatibility.authority.source.application.privateInspection
+      .allowedAuthoringLayerRowLookupDomCalls,
+    1,
+  );
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
@@ -271,9 +278,20 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
   assert.equal(built.currentCompatibility.successor.behaviorOwnedDeletePreservesEmptySlot, true);
   assert.equal(built.currentCompatibility.successor.failedDeletionPreservesCurrentDocument, true);
   assert.equal(built.currentCompatibility.successor.browserDataTransferReadsZero, true);
-  assert.equal(built.currentCompatibility.successor.expandedDropReadyBoundaries, true);
+  assert.equal(built.currentCompatibility.successor.compactStableDropBoundaries, true);
   assert.equal(built.currentCompatibility.successor.stableNestedDragHover, true);
+  assert.equal(built.currentCompatibility.successor.innermostNestedSlotOwnsPointer, true);
+  assert.equal(
+    built.currentCompatibility.successor.rejectedReleaseRetainsLastAcceptedProjection,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.noOpProjectionVisibleAndInert, true);
   assert.equal(built.currentCompatibility.successor.explicitComponentDropTargetGuide, true);
+  assert.equal(built.currentCompatibility.successor.componentPanelWideDropSurface, true);
+  assert.equal(built.currentCompatibility.successor.componentPaletteOuterDropInert, false);
+  assert.equal(built.currentCompatibility.successor.draggableComponentCard, false);
+  assert.equal(built.currentCompatibility.successor.dedicatedComponentDragHandle, true);
+  assert.equal(built.currentCompatibility.successor.dedicatedLayerDragHandle, true);
   assert.equal(built.currentCompatibility.successor.deletionSourceAndPreviewCommitAtomically, true);
   assert.equal(built.currentCompatibility.successor.deletionFocusManaged, true);
   assert.deepEqual(built.currentCompatibility.successor.artifact.authenticatedClaims, {
@@ -338,8 +356,26 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       ...baseline,
       adapterSource: replaceOnce(
         adapterSource,
-        '      </fieldset>\n      {mode === "design" ? <SelectionOverlay projection={projection} /> : null}',
-        '        {mode === "design" ? <SelectionOverlay projection={projection} /> : null}\n      </fieldset>',
+        `      </fieldset>
+      {mode === "design" && selectedDiagnostic !== undefined ? (
+        <DiagnosticPlaceholderOverlay
+          diagnostic={selectedDiagnostic.diagnostic}
+          occurrence={selectedDiagnostic.occurrence}
+          placeholderRef={diagnosticPlaceholderRef}
+        />
+      ) : mode === "design" ? (
+        <SelectionOverlay projection={projection} />
+      ) : null}`,
+        `        {mode === "design" && selectedDiagnostic !== undefined ? (
+          <DiagnosticPlaceholderOverlay
+            diagnostic={selectedDiagnostic.diagnostic}
+            occurrence={selectedDiagnostic.occurrence}
+            placeholderRef={diagnosticPlaceholderRef}
+          />
+        ) : mode === "design" ? (
+          <SelectionOverlay projection={projection} />
+        ) : null}
+      </fieldset>`,
       ),
     },
     {
@@ -349,6 +385,14 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
     {
       ...baseline,
       applicationSource: `import type { DesenEditorDocument } from "@desen/editor-core";\n${applicationSource}`,
+    },
+    {
+      ...baseline,
+      applicationSource: replaceOnce(
+        applicationSource,
+        "createDesenEditorContinuousValidator",
+        "createDesenEditorDocument",
+      ),
     },
   ]) {
     assert.throws(
@@ -365,6 +409,18 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
           applicationSource,
           'target.contentEditable === "true"',
           'target.closest("input") !== null',
+        ),
+      }),
+    expectedError("PRIVATE_STRUCTURE_AUTHORITY"),
+  );
+  assert.throws(
+    () =>
+      verifyDesenAppSelectionOverlaySourcePolicy({
+        ...baseline,
+        applicationSource: replaceOnce(
+          applicationSource,
+          'child.querySelector<HTMLElement>("[data-layer-drop-row-node-id]")',
+          'child.querySelector<HTMLElement>("[data-managed-capability-subtree]")',
         ),
       }),
     expectedError("PRIVATE_STRUCTURE_AUTHORITY"),
@@ -412,6 +468,12 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       "export function applyAuthoringNodeRemoval(",
     ],
     [
+      AUTHORING_SLOT_SOURCE,
+      slotSource,
+      '? failure("source-invalid", validationReport)',
+      '? failure("source-invalid")',
+    ],
+    [
       APPLICATION_SOURCE,
       applicationSource,
       'event.dataTransfer.setData("text/plain", "DESEN App authoring item");',
@@ -420,7 +482,7 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
     [
       APPLICATION_CSS,
       cssSource,
-      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;\n  align-items: center;\n  padding: 0 0.125rem;",
       ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.25rem;\n  align-items: center;\n  padding: 0 0.125rem;",
     ],
     [
@@ -632,6 +694,82 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
   await assert.rejects(
     buildDesenAppSelectionOverlayEvidence({
       fileOverrides: new Map([[SOURCE_PERSISTENCE_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T13 diagnostics closure", async () => {
+  const successor = built.currentCompatibility.nodeLinkedDiagnosticsSuccessor;
+  assert.deepEqual(successor.artifact, {
+    task: "M09-T13",
+    proofId: "desen-app-node-linked-diagnostics",
+    profile: "desen.app.node-linked-diagnostics-proof.v1",
+    result: "PASS",
+    path: NODE_LINKED_DIAGNOSTICS_ARTIFACT,
+    bytes: 29_208,
+    sha256: "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
+  });
+  assert.deepEqual(
+    {
+      focusedTestCases: successor.focusedTestCases,
+      fullAppTestFiles: successor.fullAppTestFiles,
+      fullAppTestCases: successor.fullAppTestCases,
+      trackedFiles: successor.trackedFiles,
+      parentArtifacts: successor.parentArtifacts,
+      rootTests: successor.rootTests,
+      explicitContextIdentityMappingOnly: successor.explicitContextIdentityMappingOnly,
+      diagnosticCodeMessagePointerIdentityInference:
+        successor.diagnosticCodeMessagePointerIdentityInference,
+      duplicateOccurrenceOrderPreserved: successor.duplicateOccurrenceOrderPreserved,
+      unmappedDiagnosticsSelectable: successor.unmappedDiagnosticsSelectable,
+      snapshotAndRouteFenced: successor.snapshotAndRouteFenced,
+      runtimeKindMismatchFailsClosed: successor.runtimeKindMismatchFailsClosed,
+      invalidPlaceholderInsideManagedRuntimeSubtree:
+        successor.invalidPlaceholderInsideManagedRuntimeSubtree,
+      runModeDiagnosticsVisible: successor.runModeDiagnosticsVisible,
+      automaticFocusSteal: successor.automaticFocusSteal,
+      obligationsExecutable: successor.obligationsExecutable,
+      rejectedDiagnosticsPersisted: successor.rejectedDiagnosticsPersisted,
+      rejectedDiagnosticsAffectDirtyState: successor.rejectedDiagnosticsAffectDirtyState,
+      rejectedDiagnosticsIncludedInSave: successor.rejectedDiagnosticsIncludedInSave,
+      p16Status: successor.p16Status,
+      pf086Status: successor.pf086Status,
+    },
+    {
+      focusedTestCases: 161,
+      fullAppTestFiles: 24,
+      fullAppTestCases: 339,
+      trackedFiles: 39,
+      parentArtifacts: 11,
+      rootTests: 12,
+      explicitContextIdentityMappingOnly: true,
+      diagnosticCodeMessagePointerIdentityInference: false,
+      duplicateOccurrenceOrderPreserved: true,
+      unmappedDiagnosticsSelectable: false,
+      snapshotAndRouteFenced: true,
+      runtimeKindMismatchFailsClosed: true,
+      invalidPlaceholderInsideManagedRuntimeSubtree: false,
+      runModeDiagnosticsVisible: false,
+      automaticFocusSteal: false,
+      obligationsExecutable: false,
+      rejectedDiagnosticsPersisted: false,
+      rejectedDiagnosticsAffectDirtyState: false,
+      rejectedDiagnosticsIncludedInSave: false,
+      p16Status: "PROVEN",
+      pf086Status: "OPEN",
+    },
+  );
+  const artifactBytes = await readFile(path.join(ROOT, NODE_LINKED_DIAGNOSTICS_ARTIFACT));
+  await assert.rejects(
+    buildDesenAppSelectionOverlayEvidence({
+      fileOverrides: new Map([[NODE_LINKED_DIAGNOSTICS_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppSelectionOverlayEvidence({
+      fileOverrides: new Map([[ADAPTER_SOURCE, Buffer.from(`${adapterSource}\n`)]]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
