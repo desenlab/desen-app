@@ -288,9 +288,9 @@ const EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS = Object.freeze(
     ["onDragEnd", 2],
     ["onDragEnter", 3],
     ["onDragLeave", 2],
-    ["onDragOver", 4],
+    ["onDragOver", 3],
     ["onDragStart", 3],
-    ["onDrop", 3],
+    ["onDrop", 2],
   ]),
 );
 const EXPECTED_COMPONENTS = Object.freeze([
@@ -1173,7 +1173,6 @@ function inspectImportsAndExecutionBoundary(files) {
   let t11OperationRegistrationImports = 0;
   let exactRegistryConstructionCalls = 0;
   let publicDiagnosticIndexTypeOnlyImports = 0;
-  let applicationFlushSyncImports = 0;
   const successorImportDeclarations = new Map();
   const successorImportedNames = new Map();
   const platformGlobalRoots = new Set(["document", "globalThis", "navigator", "self", "window"]);
@@ -1307,25 +1306,10 @@ function inspectImportsAndExecutionBoundary(files) {
         if (specifier.startsWith(".")) {
           resolvedPath = resolveRelativeImport(relativePath, specifier);
         } else if (specifier === "react-dom") {
-          const bindings = node.importClause?.namedBindings;
-          if (
-            relativePath !== APPLICATION_SOURCE_PATH ||
-            shape.defaultImport !== null ||
-            shape.namespaceImport !== null ||
-            shape.typeOnly ||
-            !isDeepStrictEqual(shape.namedImports, ["flushSync"]) ||
-            bindings === undefined ||
-            !ts.isNamedImports(bindings) ||
-            bindings.elements.length !== 1 ||
-            bindings.elements[0].propertyName !== undefined ||
-            bindings.elements[0].name.text !== "flushSync"
-          ) {
-            fail(
-              "IMPORT_BOUNDARY_DRIFT",
-              "The App may import only the exact flushSync binding from react-dom.",
-            );
-          }
-          applicationFlushSyncImports += 1;
+          fail(
+            "IMPORT_BOUNDARY_DRIFT",
+            "The M09-T13 successor must retain its surrendered react-dom application authority.",
+          );
         } else if (specifier === "react" || specifier === "react-dom/client") {
           if (relativePath === AUTHORING_SELECTION_SOURCE_PATH) {
             fail(
@@ -1715,7 +1699,6 @@ function inspectImportsAndExecutionBoundary(files) {
     t11RuntimeCoreImports !== 3 ||
     t11TestkitImports !== 2 ||
     t11OperationRegistrationImports !== 1 ||
-    applicationFlushSyncImports !== 1 ||
     !isDeepStrictEqual(namedSlotDragDropHandlers, EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS)
   ) {
     fail(
@@ -1723,7 +1706,7 @@ function inspectImportsAndExecutionBoundary(files) {
       "The source graph must retain T02-T07 package, diagnostic-index, and inert drag-hint edges.",
       {
         catalogSdkImports,
-        applicationFlushSyncImports,
+        applicationReactDomImports: 0,
         editorCoreImports,
         namedSlotDragDropHandlers: Object.fromEntries(namedSlotDragDropHandlers),
         protocolImports,
@@ -1901,7 +1884,7 @@ function inspectImportsAndExecutionBoundary(files) {
     t11TestkitImports,
     t11OperationRegistrationImports,
     publicDiagnosticIndexTypeOnlyImports,
-    applicationFlushSyncImports,
+    applicationReactDomImports: 0,
     adapterImports: 1,
     exactReferenceAdapterRegistryConstructions: 1,
     officialBundleImports: 1,
@@ -1989,9 +1972,23 @@ function verifyImplementationAndTests(files) {
     "interaction.dragSession.current.ownerKey === sessionOwnerKey",
     "interaction.dragSession.current.lastAcceptedProjection",
     "dragSession.current = createAuthoringDragSession(current.epoch + 1);",
-    "flushSync(() => {",
+    'data-component-drag-handle="true"',
+    'data-layer-drag-handle="true"',
+    "data-layer-drop-row-node-id={node.id}",
+    'querySelector<HTMLElement>("[data-layer-drop-row-node-id]")',
+    "panelDragEnterDepth",
+    "onDrop={receiveComponentDrop}",
   ]) {
     requireText(application, required, APPLICATION_SOURCE_PATH, "SUCCESSOR_POLICY_VIOLATION");
+  }
+  for (const forbidden of ["flushSync", "draggable={enabled}", "draggable={movable}"]) {
+    if (application.includes(forbidden)) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `${APPLICATION_SOURCE_PATH} reacquired superseded drag authority.`,
+        { forbidden },
+      );
+    }
   }
   for (const required of [
     'const SUPPORTED_PROJECT_ID = "account-app"',
@@ -2139,9 +2136,12 @@ function verifyImplementationAndTests(files) {
         ownerIdentity: "OWNER_KIND_OWNER_ID_SLOT_JSON_TUPLE",
         epochFencedAnimationFrames: true,
         hitTestConfinedToExactSlotSurface: true,
-        rejectedOrUnavailableClearsFallback: true,
+        releaseDriftRetainsLastAcceptedProjection: true,
         coordinateLessFallbackRequiresSameAcceptedOwner: true,
-        synchronousIntentPublication: true,
+        reactDomAuthoritySurrendered: true,
+        dedicatedComponentDragHandle: true,
+        dedicatedLayerDragHandle: true,
+        componentPanelWideDropSurface: true,
       },
       successorSchemaInspector: {
         task: "M09-T05",

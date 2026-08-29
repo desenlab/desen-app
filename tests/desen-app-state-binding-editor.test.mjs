@@ -230,15 +230,22 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[4], () => {
   const currentCss = built.currentCompatibility.source.css;
   assert.equal(currentApplication.stableGlobalLayerDragSession, true);
   assert.equal(currentApplication.globalLayerOwnerAndEpochFencing, true);
-  assert.equal(currentApplication.explicitStickyComponentDropTarget, true);
-  assert.equal(currentApplication.componentPaletteOuterDropInert, true);
-  assert.equal(currentApplication.draggableComponentCard, true);
+  assert.equal(currentApplication.guardedLastAcceptedProjection, true);
+  assert.equal(currentApplication.releaseDriftRetainsLastAcceptedProjection, true);
+  assert.equal(currentApplication.nestedSlotSurfaceOwnsDropEvents, true);
+  assert.equal(currentApplication.explicitNoOpPlacementFeedback, true);
+  assert.equal(currentApplication.componentDragAuthorityLimitedToDedicatedHandle, true);
+  assert.equal(currentApplication.dedicatedLayerDragHandle, true);
+  assert.equal(currentApplication.componentPanelWideDropSurface, true);
+  assert.equal(currentApplication.stickyComponentTargetSummaryOnly, true);
   assert.equal(currentApplication.separateNonDraggableComponentAddAction, true);
   assert.equal(currentApplication.retainedInsertSelectionForDeleteDiscoverability, true);
-  assert.equal(currentCss.stableThirtyTwoPixelSlotGaps, true);
+  assert.equal(currentCss.stableCompactSlotGaps, true);
   assert.equal(currentCss.stableGlobalDragGuidePresentation, true);
-  assert.equal(currentCss.stickyExplicitComponentTargetPresentation, true);
-  assert.equal(currentCss.draggableComponentCardPresentation, true);
+  assert.equal(currentCss.noOpPlacementFeedbackPresentation, true);
+  assert.equal(currentCss.panelWideComponentDropPresentation, true);
+  assert.equal(currentCss.stickyComponentTargetSummaryPresentation, true);
+  assert.equal(currentCss.dedicatedDragHandlesPresentation, true);
   assert.equal(currentCss.separateComponentAddActionPresentation, true);
   assert.equal(built.artifact.claim.publisherSessionPreview, true);
   assert.equal(built.artifact.claim.sourceAndPreviewCommitAtomically, true);
@@ -325,8 +332,24 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[7], async () => {
     },
     {
       key: "applicationSource",
-      search: 'event.dataTransfer.dropEffect = "none"',
-      replacement: 'event.dataTransfer.dropEffect = "copy"',
+      search: 'admission.status === "noop"\n        ? "none"',
+      replacement: 'admission.status === "noop"\n        ? "move"',
+    },
+    {
+      key: "applicationSource",
+      search: 'releaseAdmission.status === "rejected"',
+      replacement: 'releaseAdmission.status === "noop"',
+    },
+    {
+      key: "applicationSource",
+      search:
+        "event.stopPropagation();\n    const admission = projectNearestDrop(list, event.clientY, event.target);",
+      replacement: "const admission = projectNearestDrop(list, event.clientY, event.target);",
+    },
+    {
+      key: "applicationSource",
+      search: "panelDragEnterDepth.current += 1",
+      replacement: "panelDragEnterDepth.current += 0",
     },
     {
       key: "applicationSource",
@@ -335,8 +358,13 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[7], async () => {
     },
     {
       key: "applicationSource",
-      search: "draggable={enabled}",
-      replacement: "draggable={false}",
+      search: 'data-component-drag-handle="true"',
+      replacement: 'data-component-drag-handle="false"',
+    },
+    {
+      key: "applicationSource",
+      search: 'data-layer-drag-handle="true"',
+      replacement: 'data-layer-drag-handle="false"',
     },
     {
       key: "applicationSource",
@@ -355,8 +383,9 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[7], async () => {
     },
     {
       key: "applicationCss",
-      search: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;",
-      replacement: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1rem;",
+      search: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;",
+      replacement:
+        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.25rem;",
     },
     {
       key: "applicationCss",

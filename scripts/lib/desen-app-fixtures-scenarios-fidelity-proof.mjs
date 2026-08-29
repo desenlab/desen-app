@@ -974,19 +974,10 @@ function inspectApplicationSource(source) {
       ts.isStringLiteral(statement.moduleSpecifier) &&
       statement.moduleSpecifier.text === "react-dom",
   );
-  const reactDomBindings = reactDomImports[0]?.importClause?.namedBindings;
-  if (
-    reactDomImports.length !== 1 ||
-    reactDomImports[0]?.importClause?.isTypeOnly === true ||
-    reactDomBindings === undefined ||
-    !ts.isNamedImports(reactDomBindings) ||
-    reactDomBindings.elements.length !== 1 ||
-    reactDomBindings.elements[0]?.propertyName !== undefined ||
-    reactDomBindings.elements[0]?.name.text !== "flushSync"
-  ) {
+  if (reactDomImports.length !== 0) {
     fail(
       "SOURCE_POLICY_VIOLATION",
-      "application.tsx may import only the exact flushSync binding from react-dom.",
+      "The M09-T13 successor must retain its surrendered react-dom application authority.",
     );
   }
   assertIncludes(
@@ -1035,18 +1026,20 @@ function inspectApplicationSource(source) {
       "document.elementFromPoint(pending.clientX, pending.clientY)",
       "hitSlotSurface !== pending.slotSurface",
       "function clearUnclaimedDrop(): void {",
-      'import { flushSync } from "react-dom"',
-      "flushSync(() => {",
       "className={styles.componentsView}",
-      'event.dataTransfer.dropEffect = "none"',
-      'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+      "panelDragEnterDepth.current += 1",
+      'admission.status === "noop"\n        ? "none"',
       'if (!componentDropReady) return;\n    event.stopPropagation();\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
       "className={styles.componentSlotTarget}",
       "onDragOver={admitComponentDrop}",
       "onDrop={receiveComponentDrop}",
       'data-component-card="true"',
       "className={styles.componentItem}",
-      "draggable={enabled}",
+      'data-component-drag-handle="true"',
+      "className={styles.componentDragHandle}",
+      'data-layer-drag-handle="true"',
+      "data-layer-drop-row-node-id={node.id}",
+      'querySelector<HTMLElement>("[data-layer-drop-row-node-id]")',
       "className={styles.componentAddAction}",
       "draggable={false}",
       "event.preventDefault();\n                                event.stopPropagation();",
@@ -1068,8 +1061,9 @@ function inspectApplicationSource(source) {
       "bindReferenceSignInHostOperation",
       "host-operations",
       "function acceptsDragIntent(",
-      "panelDragEnterDepth",
-      "componentDragHandle",
+      "flushSync",
+      "draggable={enabled}",
+      "draggable={movable}",
       'title="Drag anywhere in this panel to add"',
     ],
     APPLICATION_SOURCE_PATH,
@@ -1084,11 +1078,13 @@ function inspectApplicationSource(source) {
     synchronousCleanupClosesFixtureAdmission: true,
     strictModeReplayRetainsOnlySameLiveController: true,
     pendingControllerDisposedOnPreviewReplacement: true,
-    exactReactDomFlushSyncBinding: true,
-    draggableComponentCard: true,
+    applicationReactDomImports: 0,
+    reactDomAuthoritySurrendered: true,
+    componentDragAuthorityLimitedToDedicatedHandle: true,
+    dedicatedLayerDragHandle: true,
     separateNonDraggableComponentAddAction: true,
-    componentDropAdmissionLimitedToExplicitTarget: true,
-    componentPaletteOuterDropInert: true,
+    componentPanelWideDropSurface: true,
+    stickyComponentTargetSummaryOnly: true,
     stableGlobalLayerDragSession: true,
     globalLayerOwnerAndEpochFencing: true,
     edgeScrollExactSlotRehitTesting: true,
@@ -1130,6 +1126,9 @@ function inspectCss(source) {
       '.slotBoundary[data-drop-hovered="true"]::before',
       ".layerDragGuide {",
       ".componentItem {",
+      ".componentDragHandle",
+      ".layerDragHandle::before",
+      '.componentsView[data-component-drag-active="true"]',
       ".componentAddAction {",
     ],
     APPLICATION_CSS_PATH,
@@ -1139,7 +1138,7 @@ function inspectCss(source) {
     approximateDifferenceContainerVisible: true,
     scenarioAndRunControlsVisible: true,
     nestedLayerSlotsAndGlobalDragGuideVisible: true,
-    draggableComponentCardAndSeparateAddActionVisible: true,
+    dedicatedDragHandlesAndSeparateAddActionVisible: true,
     managedCapabilityStylesChanged: false,
   });
 }
@@ -1370,15 +1369,15 @@ function inspectTests(files) {
     [
       "const alertCard = alert.closest(\"[data-component-card='true']\")",
       "expect((alert as HTMLButtonElement).draggable).toBe(false)",
-      "expect(alertCard.draggable).toBe(true)",
+      "expect(alertCard.draggable).toBe(false)",
+      "expect(alertDragHandle.draggable).toBe(true)",
       "expect(reads).toBe(0)",
-      "fireEvent.dragOver(panelSearch",
-      "expect(outsideDrop.defaultPrevented).toBe(true)",
-      'expect((panelSearch as HTMLInputElement).value).toBe("")',
+      "fireEvent.dragEnter(panelSearch",
+      "fireEvent.drop(panelSearch",
       "expect(slotEdit).toHaveBeenCalledTimes(1)",
       "fireEvent.drop(target",
     ],
-    "draggable component-card, explicit target, and inert outer-drop test",
+    "dedicated component grip and panel-wide authenticated drop test",
     "TEST_POLICY_VIOLATION",
   );
   assertIncludes(
@@ -1390,10 +1389,11 @@ function inspectTests(files) {
     [
       "expect(addAlert.draggable).toBe(false)",
       "const alertCard = addAlert.closest(\"[data-component-card='true']\")",
-      "expect(alertCard.draggable).toBe(true)",
+      "expect(alertCard.draggable).toBe(false)",
+      "alertCard.querySelector(\"[data-component-drag-handle='true']\")",
       "fireEvent.click(addAlert)",
     ],
-    "component-card drag and separate Add activation test",
+    "dedicated component grip and separate Add activation test",
     "TEST_POLICY_VIOLATION",
   );
   assertIncludes(
@@ -2025,10 +2025,11 @@ export async function buildDesenAppFixturesScenariosFidelityEvidence(rawOptions 
       cleanupSynchronouslyRevokesFixtureAdmission: true,
       strictModeReplayRetainsOnlySameLiveFixtureLifetime: true,
       pendingRevokedOnPreviewReplacement: true,
-      draggableComponentCardRetained: true,
+      componentDragAuthorityLimitedToDedicatedHandleRetained: true,
+      dedicatedLayerDragHandleRetained: true,
       separateNonDraggableComponentAddActionRetained: true,
-      explicitComponentSlotTargetOnlyRetained: true,
-      inertComponentPaletteOuterDropGuardRetained: true,
+      componentPanelWideDropSurfaceRetained: true,
+      stickyComponentTargetSummaryOnlyRetained: true,
       stableGlobalLayerDragSessionRetained: true,
       globalLayerOwnerAndEpochFencingRetained: true,
       edgeScrollExactSlotRehitTestingRetained: true,

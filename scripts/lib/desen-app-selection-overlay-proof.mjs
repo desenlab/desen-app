@@ -554,42 +554,54 @@ function importModules(sourceFile) {
 }
 
 function assertNoPrivateInspection(sourceFile, relativePath, allowApplicationNavigation = false) {
-  const privateProperties = collectDescendants(sourceFile, ts.isPropertyAccessExpression)
-    .filter((access) => PRIVATE_DOM_PROPERTIES.includes(access.name.text))
-    .map((access) => access.getText(sourceFile));
+  const privateProperties = collectDescendants(sourceFile, ts.isPropertyAccessExpression).filter(
+    (access) => PRIVATE_DOM_PROPERTIES.includes(access.name.text),
+  );
+  function isExactAuthoringLayerRowLookup(access) {
+    if (
+      access.getText(sourceFile) !== "child.querySelector" ||
+      !ts.isCallExpression(access.parent) ||
+      access.parent.expression !== access ||
+      access.parent.arguments.length !== 1 ||
+      !ts.isStringLiteral(access.parent.arguments[0]) ||
+      access.parent.arguments[0].text !== "[data-layer-drop-row-node-id]" ||
+      access.parent.typeArguments?.length !== 1 ||
+      access.parent.typeArguments[0].getText(sourceFile) !== "HTMLElement"
+    ) {
+      return false;
+    }
+    let ancestor = access.parent.parent;
+    while (ancestor !== undefined) {
+      if (ts.isFunctionDeclaration(ancestor)) {
+        return ancestor.name?.text === "projectNearestDrop";
+      }
+      ancestor = ancestor.parent;
+    }
+    return false;
+  }
+  function isAllowedApplicationProperty(access) {
+    const text = access.getText(sourceFile);
+    return (
+      text === "document.getElementById" ||
+      text === "document.querySelector" ||
+      text === "document.elementFromPoint" ||
+      text === "hitTarget?.closest" ||
+      text === "authoringPanel.current?.querySelectorAll" ||
+      text === "eventElement?.closest" ||
+      text === "exactBoundary?.parentElement" ||
+      text === "event.currentTarget.closest" ||
+      text === "rows[hoveredRowIndex]?.getBoundingClientRect" ||
+      text === "row.getBoundingClientRect" ||
+      text === "scrollSurface.getBoundingClientRect" ||
+      text === "event.currentTarget.getBoundingClientRect" ||
+      isExactAuthoringLayerRowLookup(access)
+    );
+  }
   const allowed = allowApplicationNavigation
-    ? privateProperties.filter(
-        (text) =>
-          text === "document.getElementById" ||
-          text === "document.querySelector" ||
-          text === "document.elementFromPoint" ||
-          text === "hitTarget?.closest" ||
-          text === "authoringPanel.current?.querySelectorAll" ||
-          text === "eventElement?.closest" ||
-          text === "exactBoundary?.parentElement" ||
-          text === "event.currentTarget.closest" ||
-          text === "rows[hoveredRowIndex]?.getBoundingClientRect" ||
-          text === "row.getBoundingClientRect" ||
-          text === "scrollSurface.getBoundingClientRect" ||
-          text === "event.currentTarget.getBoundingClientRect",
-      )
+    ? privateProperties.filter(isAllowedApplicationProperty)
     : [];
   const forbiddenProperties = allowApplicationNavigation
-    ? privateProperties.filter(
-        (text) =>
-          text !== "document.getElementById" &&
-          text !== "document.querySelector" &&
-          text !== "document.elementFromPoint" &&
-          text !== "hitTarget?.closest" &&
-          text !== "authoringPanel.current?.querySelectorAll" &&
-          text !== "eventElement?.closest" &&
-          text !== "exactBoundary?.parentElement" &&
-          text !== "event.currentTarget.closest" &&
-          text !== "rows[hoveredRowIndex]?.getBoundingClientRect" &&
-          text !== "row.getBoundingClientRect" &&
-          text !== "scrollSurface.getBoundingClientRect" &&
-          text !== "event.currentTarget.getBoundingClientRect",
-      )
+    ? privateProperties.filter((access) => !isAllowedApplicationProperty(access))
     : privateProperties;
   const privateGlobals = collectDescendants(sourceFile, ts.isIdentifier)
     .filter(({ text }) => PRIVATE_DOM_GLOBALS.includes(text))
@@ -639,7 +651,7 @@ function assertNoPrivateInspection(sourceFile, relativePath, allowApplicationNav
     reactPrivateKeys.length !== 0
   ) {
     fail("PRIVATE_STRUCTURE_AUTHORITY", `${relativePath} admits private DOM or React authority.`, {
-      properties: forbiddenProperties,
+      properties: forbiddenProperties.map((access) => access.getText(sourceFile)),
       globals: privateGlobals.map(({ text }) => text),
       reactPrivate: reactPrivate.map(({ text }) => text),
     });
@@ -648,16 +660,20 @@ function assertNoPrivateInspection(sourceFile, relativePath, allowApplicationNav
     privateDomOrGeometryCalls: 0,
     privateReactReferences: 0,
     allowedAppNavigationDomCalls: allowed.filter(
-      (text) => text === "document.getElementById" || text === "document.querySelector",
+      (access) =>
+        access.getText(sourceFile) === "document.getElementById" ||
+        access.getText(sourceFile) === "document.querySelector",
     ).length,
-    allowedRowDropGeometryCalls: allowed.filter((text) => text.endsWith("getBoundingClientRect"))
-      .length,
-    allowedLayerDragSessionDomCalls: allowed.filter((text) =>
-      ["document.elementFromPoint", "hitTarget?.closest"].includes(text),
+    allowedRowDropGeometryCalls: allowed.filter((access) =>
+      access.getText(sourceFile).endsWith("getBoundingClientRect"),
+    ).length,
+    allowedLayerDragSessionDomCalls: allowed.filter((access) =>
+      ["document.elementFromPoint", "hitTarget?.closest"].includes(access.getText(sourceFile)),
     ).length,
     allowedAuthoringPanelFocusDomCalls: allowed.filter(
-      (text) => text === "authoringPanel.current?.querySelectorAll",
+      (access) => access.getText(sourceFile) === "authoringPanel.current?.querySelectorAll",
     ).length,
+    allowedAuthoringLayerRowLookupDomCalls: allowed.filter(isExactAuthoringLayerRowLookup).length,
     allowedLayerDragFrameGlobals: collectDescendants(sourceFile, ts.isIdentifier).filter(
       (identifier) =>
         identifier.text === "window" &&
@@ -931,11 +947,12 @@ function inspectApplicationSource(rawSource) {
     privateInspection.allowedRowDropGeometryCalls !== 5 ||
     privateInspection.allowedLayerDragSessionDomCalls !== 3 ||
     privateInspection.allowedAuthoringPanelFocusDomCalls !== 1 ||
+    privateInspection.allowedAuthoringLayerRowLookupDomCalls !== 1 ||
     privateInspection.allowedLayerDragFrameGlobals !== 6
   ) {
     fail(
       "SOURCE_POLICY_VIOLATION",
-      "Only two navigation/focus calls, five layer-drag geometry reads, three exact drag-session DOM reads, one authoring-panel focus lookup, and six frame-scheduler globals are allowed.",
+      "Only two navigation/focus calls, five layer-drag geometry reads, three exact drag-session DOM reads, one authoring-panel focus lookup, one exact App-owned Layers row lookup, and six frame-scheduler globals are allowed.",
       privateInspection,
     );
   }
@@ -1720,25 +1737,43 @@ function inspectSchemaInspectorSuccessor(files) {
         "document.elementFromPoint(pending.clientX, pending.clientY)",
         "hitSlotSurface !== pending.slotSurface",
         "function clearUnclaimedDrop(): void {",
-        "const targetDragEnterDepth = useRef(0)",
-        "data-drop-hovered={componentDropReady && targetDragHovered}",
+        'Readonly<{ readonly status: "noop"; readonly projection: AuthoringDropProjection }>',
+        'data-drop-noop={dragAdmission?.status === "noop"}',
+        'data-drop-noop-hovered={dragAdmission?.status === "noop" && dropHovered}',
+        '{dragAdmission?.status === "noop" ? "Current position" : "Drop here"}',
+        "event.stopPropagation();\n    const admission = projectNearestDrop(list, event.clientY, event.target);",
+        'if (admission.status === "rejected" || admission.status === "unavailable") {\n      publishAdmission(admission);',
+        '(releaseAdmission.status === "unavailable" || releaseAdmission.status === "rejected")',
+        "interaction.dragSession.current.ownerKey === sessionOwnerKey",
+        'interaction.dragSession.current.admission === "accepted"',
+        "interaction.dragSession.current.lastAcceptedProjection",
+        'if (releaseAdmission.status === "noop") {',
+        "const panelDragEnterDepth = useRef(0)",
+        'data-component-drag-active={dragIntent?.kind === "component"}',
+        "data-drop-hovered={componentDropReady && panelDragHovered}",
         "data-guide={readySlot === null}",
         "className={styles.componentsView}",
-        'event.dataTransfer.dropEffect = "none"',
-        'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
         'if (!componentDropReady) return;\n    event.stopPropagation();\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
         "className={styles.componentSlotTarget}",
         "onDragOver={admitComponentDrop}",
         "onDrop={receiveComponentDrop}",
         'data-component-card="true"',
         "className={styles.componentItem}",
-        "draggable={enabled}",
+        'data-component-drag-handle="true"',
+        "className={styles.componentDragHandle}",
+        "title={`Drag ${component.displayName} anywhere in this panel to add`}",
+        'data-layer-drag-handle="true"',
+        "className={styles.layerDragHandle}",
+        "title={`Drag ${node.displayName} layer`}",
+        "className={styles.layerSelectAction}",
+        "data-layer-source-node-id={node.id}",
         "className={styles.componentAddAction}",
         "draggable={false}",
         "event.preventDefault();\n                                event.stopPropagation();",
         "onClick={() => addComponent(component.id)}",
         'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
         "sourceNodeId: result.nodeId",
+        'setActiveTab("layers")',
         "No drop target selected",
         "Choose slot in Layers",
         '? "Add to"',
@@ -1754,15 +1789,21 @@ function inspectSchemaInspectorSuccessor(files) {
       applicationCss,
       APPLICATION_CSS_PATH,
       [
-        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;\n  align-items: center;\n  padding: 0 0.125rem;",
         '.slotBoundary[data-drop-ready="true"]',
         '.slotBoundary[data-drop-hovered="true"]',
+        '.slotBoundary[data-drop-noop-hovered="true"]::before',
         '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
+        '.slotBoundary[data-drop-noop-hovered="true"] .slotBoundaryLine',
+        '.componentsView[data-component-drag-active="true"]',
+        '.componentsView[data-drop-hovered="true"]',
         ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
         '.componentSlotTarget[data-guide="true"]',
         '.componentSlotTarget[data-drop-hovered="true"]',
         ".layerDragGuide {",
+        ".layerDragHandle::before {",
         ".componentItem {",
+        ".componentDragHandle {",
         ".componentAddAction {",
       ],
     ],
@@ -1821,8 +1862,11 @@ function inspectSchemaInspectorSuccessor(files) {
       "const alertCard = alert.closest(\"[data-component-card='true']\")",
     ) ||
     !applicationTests.includes("expect((alert as HTMLButtonElement).draggable).toBe(false)") ||
-    !applicationTests.includes("expect(alertCard.draggable).toBe(true)") ||
-    !applicationTests.includes("expect(outsideDrop.defaultPrevented).toBe(true)") ||
+    !applicationTests.includes("expect(alertCard.draggable).toBe(false)") ||
+    !applicationTests.includes("expect(alertDragHandle.draggable).toBe(true)") ||
+    !applicationTests.includes("fireEvent.drop(panelSearch, { dataTransfer })") ||
+    !applicationTests.includes('getAttribute("data-drop-noop-hovered")') ||
+    !applicationTests.includes('toContain("Current position")') ||
     !applicationTests.includes("expect(slotEdit).toHaveBeenCalledTimes(1)") ||
     !applicationTests.includes(
       "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
@@ -1836,9 +1880,11 @@ function inspectSchemaInspectorSuccessor(files) {
     !application.includes("if (!active) return null") ||
     !application.includes('active={activeTab === "components"}') ||
     application.includes("function acceptsDragIntent(") ||
-    application.includes("panelDragEnterDepth") ||
-    application.includes("componentDragHandle") ||
-    application.includes('title="Drag anywhere in this panel to add"')
+    application.includes("targetDragEnterDepth") ||
+    application.includes("targetDragHovered") ||
+    application.includes("draggable={enabled}") ||
+    application.includes("draggable={movable}") ||
+    application.includes("flushSync")
   ) {
     fail(
       "SUCCESSOR_POLICY_VIOLATION",
@@ -1863,15 +1909,20 @@ function inspectSchemaInspectorSuccessor(files) {
     behaviorOwnedDeletePreservesEmptySlot: true,
     failedDeletionPreservesCurrentDocument: true,
     browserDataTransferReadsZero: true,
-    expandedDropReadyBoundaries: true,
+    compactStableDropBoundaries: true,
     stableNestedDragHover: true,
     stableGlobalLayerDragSession: true,
     globalLayerOwnerAndEpochFencing: true,
+    innermostNestedSlotOwnsPointer: true,
+    rejectedReleaseRetainsLastAcceptedProjection: true,
+    noOpProjectionVisibleAndInert: true,
     edgeScrollExactSlotRehitTesting: true,
     explicitComponentDropTargetGuide: true,
-    componentDropAdmissionLimitedToExplicitTarget: true,
-    componentPaletteOuterDropInert: true,
-    draggableComponentCard: true,
+    componentPanelWideDropSurface: true,
+    componentPaletteOuterDropInert: false,
+    draggableComponentCard: false,
+    dedicatedComponentDragHandle: true,
+    dedicatedLayerDragHandle: true,
     separateNonDraggableComponentAddAction: true,
     deletionSourceAndPreviewCommitAtomically: true,
     deletionFocusManaged: true,

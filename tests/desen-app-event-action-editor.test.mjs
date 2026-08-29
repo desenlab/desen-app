@@ -164,13 +164,17 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[0], () => {
   assert.deepEqual(built.currentCompatibility.retainedAuthoringUx, {
     rootSafeDefaultPlacementTarget: true,
     explicitChangeTarget: true,
-    stableThirtyTwoPixelLayerGaps: true,
+    stableCompactLayerGaps: true,
     stableGlobalLayerDragSession: true,
     globalLayerOwnerAndEpochFencing: true,
     guardedLastAcceptedProjection: true,
-    explicitStickyComponentDropTarget: true,
-    componentPaletteOuterDropInert: true,
-    draggableComponentCard: true,
+    releaseDriftRetainsLastAcceptedProjection: true,
+    nestedSlotSurfaceOwnsDropEvents: true,
+    explicitNoOpPlacementFeedback: true,
+    componentDragAuthorityLimitedToDedicatedHandle: true,
+    dedicatedLayerDragHandle: true,
+    componentPanelWideDropSurface: true,
+    stickyComponentTargetSummaryOnly: true,
     separateNonDraggableComponentAddAction: true,
     visibleSelectedLayerDeleteControl: true,
     guardedDeleteAndBackspace: true,
@@ -349,8 +353,24 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
     },
     {
       key: "applicationSource",
-      search: 'event.dataTransfer.dropEffect = "none"',
-      replacement: 'event.dataTransfer.dropEffect = "copy"',
+      search: 'admission.status === "noop"\n        ? "none"',
+      replacement: 'admission.status === "noop"\n        ? "move"',
+    },
+    {
+      key: "applicationSource",
+      search: 'releaseAdmission.status === "rejected"',
+      replacement: 'releaseAdmission.status === "noop"',
+    },
+    {
+      key: "applicationSource",
+      search:
+        "event.stopPropagation();\n    const admission = projectNearestDrop(list, event.clientY, event.target);",
+      replacement: "const admission = projectNearestDrop(list, event.clientY, event.target);",
+    },
+    {
+      key: "applicationSource",
+      search: "panelDragEnterDepth.current += 1",
+      replacement: "panelDragEnterDepth.current += 0",
     },
     {
       key: "applicationSource",
@@ -359,8 +379,13 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
     },
     {
       key: "applicationSource",
-      search: "draggable={enabled}",
-      replacement: "draggable={false}",
+      search: 'data-component-drag-handle="true"',
+      replacement: 'data-component-drag-handle="false"',
+    },
+    {
+      key: "applicationSource",
+      search: 'data-layer-drag-handle="true"',
+      replacement: 'data-layer-drag-handle="false"',
     },
     {
       key: "applicationSource",
@@ -384,8 +409,9 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
     },
     {
       key: "applicationCss",
-      search: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;",
-      replacement: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1rem;",
+      search: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;",
+      replacement:
+        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.25rem;",
     },
   ];
   for (const mutation of mutations) {

@@ -557,6 +557,44 @@ const EXPECTED_GRAPH_DATA_MODULES = Object.freeze([
   "packages/reference-catalog-web/catalog.json",
 ]);
 
+const EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS = Object.freeze([
+  "apps/desen-app/src/adapter-canvas.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/assets/breadcrumb-separator.svg",
+  "apps/desen-app/src/assets/desen-logo.svg",
+  "apps/desen-app/src/assets/plus.svg",
+  "apps/desen-app/src/assets/settings.svg",
+  "apps/desen-app/src/assets/theme.svg",
+  "apps/desen-app/src/authoring-data.ts",
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-fixtures.ts",
+  "apps/desen-app/src/authoring-inspector.ts",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/authoring-preview.ts",
+  "apps/desen-app/src/authoring-scenarios.ts",
+  "apps/desen-app/src/authoring-selection.ts",
+  "apps/desen-app/src/authoring-slots.ts",
+  "apps/desen-app/src/authoring-state.ts",
+  "apps/desen-app/src/diagnostics-panel.tsx",
+  "apps/desen-app/src/event-action-panel.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/persistence-controls.tsx",
+  "apps/desen-app/src/preview-controls.tsx",
+  "apps/desen-app/src/preview-fidelity.ts",
+  "apps/desen-app/src/project-data.ts",
+  "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/state-panel.tsx",
+  "node_modules/react/index.js",
+  "node_modules/react/jsx-runtime.js",
+  "packages/editor-core/dist/index.js",
+  "packages/protocol/dist/index.js",
+  "packages/reference-catalog-web/catalog.json",
+  "packages/runtime-core/dist/index.js",
+]);
+const EXPECTED_CURRENT_VITE_GRAPH_SHA256 =
+  "sha256:3477076800258d529cc59914654aac845af2da4a19153c9c9d5920f8c37b5baa";
+
 const ALLOWED_RUNTIME_PACKAGE_EDGES = Object.freeze({
   "catalog-sdk": Object.freeze(["catalog-sdk", "protocol"]),
   "editor-core": Object.freeze(["editor-core", "protocol", "validator"]),
@@ -1918,12 +1956,14 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
         (specifier) =>
           (specifier.startsWith("@desen/runtime-") && specifier !== "@desen/runtime-core") ||
           (specifier.startsWith("@desen/reference-catalog-web") &&
-            specifier !== "@desen/reference-catalog-web/catalog.json"),
+            specifier !== "@desen/reference-catalog-web/catalog.json") ||
+          specifier === "react-dom" ||
+          specifier.startsWith("react-dom/"),
       )
     ) {
       fail(
         "SOURCE_POLICY_VIOLATION",
-        "Registry/runtime authority must remain isolated behind adapter-canvas.tsx.",
+        "Registry/runtime authority and ReactDOM scheduling must remain outside application.tsx.",
       );
     }
     const shadowCanvasDeclarations = collectDescendants(
@@ -1950,6 +1990,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       selectedRouteTuple: true,
       sourceIdentitySelectionProp: true,
       directRuntimeImports: 0,
+      directReactDomImports: 0,
       inertCatalogImports: 1,
     });
   }
@@ -2276,7 +2317,7 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 432 || dynamicEdges !== 0) {
+  if (staticEdges !== 431 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -2356,6 +2397,13 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
       "The App application lost its adapter-canvas, Source-selection, or named-slot module edge.",
     );
   }
+  if (!isDeepStrictEqual(application.imports, EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS)) {
+    fail(
+      "VITE_GRAPH_DRIFT",
+      "The current application import graph drifted or regained a direct ReactDOM scheduling edge.",
+      { actual: application.imports },
+    );
+  }
   const canvas = findGraphModule(graph, ADAPTER_CANVAS_SOURCE_PATH);
   const expectedCanvasEdges = [
     "apps/desen-app/src/application.module.css",
@@ -2432,6 +2480,12 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
       }),
     );
   }
+  const graphSha256 = `sha256:${sha256(Buffer.from(JSON.stringify(graph)))}`;
+  if (graphSha256 !== EXPECTED_CURRENT_VITE_GRAPH_SHA256) {
+    fail("VITE_GRAPH_DRIFT", "The exact current successor Vite graph identity drifted.", {
+      actual: graphSha256,
+    });
+  }
   return deepFreeze({
     tool: "vite@8.1.5",
     authority: "programmatic build({ write: false }) Plugin.moduleParsed",
@@ -2443,7 +2497,7 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     unresolvedEdges: 0,
     reachableProductionSourceFiles: CURRENT_APP_SOURCE_PATHS.length,
     dataModules,
-    graphSha256: `sha256:${sha256(Buffer.from(JSON.stringify(graph)))}`,
+    graphSha256,
     modules: graph,
     sharedHostGraphSha256: rawHostArtifact.runtimeResolution.graphSha256,
     sharedRuntimeModuleCount: identityReceipts.length,
@@ -2622,18 +2676,41 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "document.elementFromPoint(pending.clientX, pending.clientY)",
     "hitSlotSurface !== pending.slotSurface",
     "function clearUnclaimedDrop(): void {",
-    "const targetDragEnterDepth = useRef(0)",
+    'Readonly<{ readonly status: "noop"; readonly projection: AuthoringDropProjection }>',
+    'status: "noop",\n        projection: Object.freeze({ index, target }),',
     "data-guide={readySlot === null}",
     "className={styles.componentsView}",
-    'event.dataTransfer.dropEffect = "none"',
-    'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+    'data-drop-noop={dragAdmission?.status === "noop"}',
+    'data-drop-noop-hovered={dragAdmission?.status === "noop" && dropHovered}',
+    '{dragAdmission?.status === "noop" ? "Current position" : "Drop here"}',
+    "event.stopPropagation();\n    const admission = projectNearestDrop(list, event.clientY, event.target);",
+    'if (admission.status === "rejected" || admission.status === "unavailable") {\n      publishAdmission(admission);',
+    'if (admission.status === "accepted" || admission.status === "noop") {',
+    '(releaseAdmission.status === "unavailable" || releaseAdmission.status === "rejected")',
+    "interaction.dragSession.current.ownerKey === sessionOwnerKey",
+    'interaction.dragSession.current.admission === "accepted"',
+    "? interaction.dragSession.current.lastAcceptedProjection",
+    'if (releaseAdmission.status === "noop") {',
+    "const [panelDragHovered, setPanelDragHovered] = useState(false)",
+    "const panelDragEnterDepth = useRef(0)",
+    'data-component-drag-active={dragIntent?.kind === "component"}',
+    "data-drop-hovered={componentDropReady && panelDragHovered}",
+    "panelDragEnterDepth.current += 1",
+    "panelDragEnterDepth.current = Math.max(0, panelDragEnterDepth.current - 1)",
     'if (!componentDropReady) return;\n    event.stopPropagation();\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
     "className={styles.componentSlotTarget}",
     "onDragOver={admitComponentDrop}",
     "onDrop={receiveComponentDrop}",
     'data-component-card="true"',
     "className={styles.componentItem}",
-    "draggable={enabled}",
+    'data-component-drag-handle="true"',
+    "className={styles.componentDragHandle}",
+    "title={`Drag ${component.displayName} anywhere in this panel to add`}",
+    'data-layer-drag-handle="true"',
+    "className={styles.layerDragHandle}",
+    "title={`Drag ${node.displayName} layer`}",
+    "className={styles.layerSelectAction}",
+    "data-layer-source-node-id={node.id}",
     "className={styles.componentAddAction}",
     "draggable={false}",
     "event.preventDefault();\n                                event.stopPropagation();",
@@ -2643,7 +2720,9 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "applyAuthoringNodeDelete(document, referenceCatalog, route, selection)",
     'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
     "sourceNodeId: result.nodeId",
+    'setActiveTab("layers")',
     "setSelection(null)",
+    "Remove layer",
     "layersTab.current?.focus()",
   ]) {
     if (!application.includes(marker)) {
@@ -2653,28 +2732,76 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
   for (const forbidden of [
     "dataTransfer.getData",
     "function acceptsDragIntent(",
-    "panelDragEnterDepth",
-    "componentDragHandle",
-    'title="Drag anywhere in this panel to add"',
+    "targetDragEnterDepth",
+    "targetDragHovered",
+    "draggable={enabled}",
+    "draggable={movable}",
+    "flushSync",
   ]) {
     if (application.includes(forbidden)) {
       fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App retained ${forbidden}.`);
     }
   }
+  const componentLibraryStart = application.indexOf("function ComponentLibrary(");
+  const authoringPanelStart = application.indexOf("function AuthoringPanel(");
+  if (componentLibraryStart < 0 || authoringPanelStart <= componentLibraryStart) {
+    fail("SOURCE_POLICY_VIOLATION", "The live M09-T07 Components panel boundary drifted.");
+  }
+  const componentLibrary = application.slice(componentLibraryStart, authoringPanelStart);
+  const componentTargetStart = componentLibrary.indexOf("aria-label={targetName}");
+  const componentGroupsStart = componentLibrary.indexOf("{groups.length > 0 ? (");
+  if (componentTargetStart < 0 || componentGroupsStart <= componentTargetStart) {
+    fail("SOURCE_POLICY_VIOLATION", "The live M09-T07 component target boundary drifted.");
+  }
+  const componentTarget = componentLibrary.slice(componentTargetStart, componentGroupsStart);
+  if (
+    ["onDragEnter=", "onDragLeave=", "onDragOver=", "onDrop="].some((marker) =>
+      componentTarget.includes(marker),
+    ) ||
+    componentLibrary.split("onDragOver={admitComponentDrop}").length !== 2 ||
+    componentLibrary.split("onDrop={receiveComponentDrop}").length !== 2
+  ) {
+    fail(
+      "SOURCE_POLICY_VIOLATION",
+      "The Components panel must own exactly one panel-wide drop surface while target chrome stays informational.",
+    );
+  }
   for (const marker of [
-    ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+    ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;\n  align-items: center;\n  padding: 0 0.125rem;",
     '.slotBoundary[data-drop-ready="true"]',
+    '.slotBoundary[data-drop-noop="true"]::before',
     '.slotBoundary[data-drop-hovered="true"]',
     '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
+    '.slotBoundary[data-drop-noop-hovered="true"] .slotBoundaryCue',
+    '.slotBoundary[data-drop-noop-hovered="true"] .slotBoundaryLine',
+    '.componentsView[data-component-drag-active="true"]',
+    '.componentsView[data-drop-hovered="true"]',
     ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
+    '.componentSlotTarget[data-drag-active="true"]',
     '.componentSlotTarget[data-guide="true"]',
     '.componentSlotTarget[data-drop-hovered="true"]',
     ".layerDragGuide {",
+    ".layerDragHandle {",
+    ".layerDragHandle::before {",
     ".componentItem {",
+    ".componentDragHandle {",
+    ".componentDragHandle::before {",
     ".componentAddAction {",
+    ".deleteLayerAction {",
+    ".deleteLayerGlyph {",
   ]) {
     if (!css.includes(marker)) {
       fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App CSS lost ${marker}.`);
+    }
+  }
+  for (const forbidden of [
+    "margin-block: -1.125rem",
+    "margin-block: -0.875rem",
+    "transition: min-height",
+    '[data-drag-active="true"] .slotBoundary',
+  ]) {
+    if (css.includes(forbidden)) {
+      fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App CSS retained ${forbidden}.`);
     }
   }
   for (const marker of [
@@ -2697,8 +2824,11 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     'getAttribute("data-drop-hovered")',
     "const alertCard = alert.closest(\"[data-component-card='true']\")",
     "expect((alert as HTMLButtonElement).draggable).toBe(false)",
-    "expect(alertCard.draggable).toBe(true)",
-    "expect(outsideDrop.defaultPrevented).toBe(true)",
+    "expect(alertCard.draggable).toBe(false)",
+    "[data-component-drag-handle='true']",
+    "expect(alertDragHandle.draggable).toBe(true)",
+    "fireEvent.drop(panelSearch, { dataTransfer })",
+    'expect(layerDragHandleFor(emailLayer).getAttribute("draggable")).toBe("true")',
     "expect(slotEdit).toHaveBeenCalledTimes(1)",
     "uses the release position when it crosses a row midpoint after the last dragover",
     "keeps the admitted gap stable while the pointer jitters around a row midpoint",
@@ -2706,6 +2836,10 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "expect(elementFromPoint).toHaveBeenCalledWith(20, 195)",
     "expect(cancelFrame).toHaveBeenCalledWith(2)",
     "drops from a visible row with the last admitted projection when drop coordinates are absent",
+    'getAttribute("data-drop-noop-hovered")',
+    'toContain("Current position")',
+    "Selected in Layers · use Remove layer above or press Delete/Backspace.",
+    'expect(deleteAlert.textContent).toBe("Remove layer")',
     "No drop target selected",
   ]) {
     if (!applicationTests.includes(marker)) {
@@ -2727,18 +2861,25 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     componentPaletteRenderLimit: 24,
     activeTabOnlyAuthoringWork: true,
     largeSameSlotBoundaryEvaluationCovered: true,
-    expandedDropReadyBoundariesImplemented: true,
+    compactStableDropBoundariesImplemented: true,
     stableNestedDragHoverImplemented: true,
     stableGlobalLayerDragSessionImplemented: true,
     globalLayerOwnerAndEpochFencingImplemented: true,
+    innermostNestedSlotOwnsPointerImplemented: true,
+    rejectedReleaseRetainsLastAcceptedProjection: true,
+    noOpProjectionVisibleAndInert: true,
     edgeScrollExactSlotRehitTestingImplemented: true,
     browserDataTransferReads: 0,
     explicitComponentDropTargetGuideImplemented: true,
-    componentDropAdmissionLimitedToExplicitTarget: true,
-    componentPaletteOuterDropInert: true,
-    draggableComponentCardImplemented: true,
+    componentPanelWideDropSurfaceImplemented: true,
+    componentDropAdmissionLimitedToExplicitTarget: false,
+    componentPaletteOuterDropInert: false,
+    draggableComponentCardImplemented: false,
+    dedicatedComponentDragHandleImplemented: true,
+    dedicatedLayerDragHandleImplemented: true,
     separateNonDraggableComponentAddActionImplemented: true,
     atomicDeletionPreviewAndFocusImplemented: true,
+    successfulInsertionSelectsNewLayer: true,
     exactArtifactSourceAndTestReceipts: true,
     artifactSourceAndTestReceiptCount: sourceAndTestReceipts.length,
     retainedLiveArtifactSourceAndTestReceiptCount:

@@ -218,13 +218,24 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[0], () => {
   );
   assert.equal(built.currentCompatibility.successor.nonOverlappingStableSlotBoundaries, true);
   assert.equal(built.currentCompatibility.successor.rowHalfDropTargets, true);
-  assert.equal(built.currentCompatibility.successor.stickyComponentDropTarget, true);
+  assert.equal(built.currentCompatibility.successor.stickyComponentTargetSummary, true);
   assert.equal(built.currentCompatibility.successor.stableGlobalLayerDragSession, true);
   assert.equal(built.currentCompatibility.successor.globalLayerOwnerAndEpochFencing, true);
-  assert.equal(built.currentCompatibility.successor.stableThirtyTwoPixelLayerGaps, true);
-  assert.equal(built.currentCompatibility.successor.explicitStickyComponentDropTarget, true);
-  assert.equal(built.currentCompatibility.successor.componentPaletteOuterDropInert, true);
-  assert.equal(built.currentCompatibility.successor.draggableComponentCard, true);
+  assert.equal(built.currentCompatibility.successor.stableCompactLayerGaps, true);
+  assert.equal(built.currentCompatibility.successor.guardedLastAcceptedProjection, true);
+  assert.equal(
+    built.currentCompatibility.successor.releaseDriftRetainsLastAcceptedProjection,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.nestedSlotSurfaceOwnsDropEvents, true);
+  assert.equal(built.currentCompatibility.successor.explicitNoOpPlacementFeedback, true);
+  assert.equal(
+    built.currentCompatibility.successor.componentDragAuthorityLimitedToDedicatedHandle,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.dedicatedLayerDragHandle, true);
+  assert.equal(built.currentCompatibility.successor.componentPanelWideDropSurface, true);
+  assert.equal(built.currentCompatibility.successor.stickyComponentTargetSummaryOnly, true);
   assert.equal(built.currentCompatibility.successor.separateNonDraggableComponentAddAction, true);
   assert.equal(built.currentCompatibility.successor.successfulInsertionSelectsNewLayer, true);
   assert.equal(built.currentCompatibility.successor.persistenceImplemented, false);
@@ -758,6 +769,18 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[9], async () => {
       "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
       "dragSession.current = createAuthoringDragSession(current.epoch)",
     ],
+    [
+      'admission.status === "noop"\n        ? "none"',
+      'admission.status === "noop"\n        ? "move"',
+    ],
+    ['releaseAdmission.status === "rejected"', 'releaseAdmission.status === "noop"'],
+    [
+      "event.stopPropagation();\n    const admission = projectNearestDrop(list, event.clientY, event.target);",
+      "const admission = projectNearestDrop(list, event.clientY, event.target);",
+    ],
+    ['data-component-drag-handle="true"', 'data-component-drag-handle="false"'],
+    ['data-layer-drag-handle="true"', 'data-layer-drag-handle="false"'],
+    ["panelDragEnterDepth.current += 1", "panelDragEnterDepth.current += 0"],
     ["onDrop={receiveComponentDrop}", "onDrop={() => undefined}"],
     ["className={styles.componentAddAction}", "className={styles.removedComponentAddAction}"],
   ]) {

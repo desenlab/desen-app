@@ -647,7 +647,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[51],
-    "23b31316ff0dd5dac53f66f110bb7362b9ae1f2af2bc483e4915b66bea48e07b",
+    "c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -1872,7 +1872,7 @@ test("sequence fifty-two preserves sequence fifty-one, reseals the App chain, an
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "23b31316ff0dd5dac53f66f110bb7362b9ae1f2af2bc483e4915b66bea48e07b",
+    "c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9",
   );
 });
 

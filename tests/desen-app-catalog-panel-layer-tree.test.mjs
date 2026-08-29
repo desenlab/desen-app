@@ -318,7 +318,7 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.currentCompatibility.successor.runOrPublishImplemented, false);
   assert.equal(built.currentCompatibility.boundary.imports.runtimeCoreImports, 5);
   assert.equal(built.currentCompatibility.boundary.imports.runtimeReactImports, 2);
-  assert.equal(built.currentCompatibility.boundary.imports.applicationFlushSyncImports, 1);
+  assert.equal(built.currentCompatibility.boundary.imports.applicationReactDomImports, 0);
   assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 2);
   assert.equal(built.currentCompatibility.boundary.imports.adapterImports, 1);
   assert.equal(
@@ -336,15 +336,18 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.currentCompatibility.boundary.imports.publisherImports, 3);
   assert.equal(built.currentCompatibility.boundary.imports.protocolImports, 9);
   assert.equal(built.currentCompatibility.boundary.imports.reviewedSourceMutationCalls, 13);
-  assert.equal(built.currentCompatibility.boundary.imports.reviewedNamedSlotDragDropHandlers, 20);
+  assert.equal(built.currentCompatibility.boundary.imports.reviewedNamedSlotDragDropHandlers, 18);
   assert.deepEqual(built.currentCompatibility.application.ui.currentDragSession, {
     singlePanelSession: true,
     ownerIdentity: "OWNER_KIND_OWNER_ID_SLOT_JSON_TUPLE",
     epochFencedAnimationFrames: true,
     hitTestConfinedToExactSlotSurface: true,
-    rejectedOrUnavailableClearsFallback: true,
+    releaseDriftRetainsLastAcceptedProjection: true,
     coordinateLessFallbackRequiresSameAcceptedOwner: true,
-    synchronousIntentPublication: true,
+    reactDomAuthoritySurrendered: true,
+    dedicatedComponentDragHandle: true,
+    dedicatedLayerDragHandle: true,
+    componentPanelWideDropSurface: true,
   });
 });
 
@@ -412,15 +415,7 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[5], async () => {
   await assert.rejects(
     buildDesenAppCatalogPanelLayerTreeEvidence({
       fileOverrides: new Map([
-        [
-          APPLICATION,
-          Buffer.from(
-            application.replace(
-              'import { flushSync } from "react-dom";',
-              'import { createPortal, flushSync } from "react-dom";',
-            ),
-          ),
-        ],
+        [APPLICATION, Buffer.from(`import { flushSync } from "react-dom";\n${application}`)],
       ]),
     }),
     expectedError("IMPORT_BOUNDARY_DRIFT"),

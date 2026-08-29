@@ -207,8 +207,18 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
   assert.equal(currentRuntime.moduleCount, 145);
-  assert.equal(currentRuntime.staticEdges, 432);
+  assert.equal(currentRuntime.staticEdges, 431);
   assert.equal(currentRuntime.dynamicEdges, 0);
+  assert.equal(
+    currentRuntime.graphSha256,
+    "sha256:3477076800258d529cc59914654aac845af2da4a19153c9c9d5920f8c37b5baa",
+  );
+  assert.equal(
+    graphModule(currentRuntime.modules, APPLICATION).imports.includes(
+      "node_modules/react-dom/index.js",
+    ),
+    false,
+  );
   assert.equal(currentRuntime.sharedRuntimeModuleCount, 19);
   assert.equal(currentRuntime.realComponentModuleCount, 5);
 
@@ -240,6 +250,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
     built.currentCompatibility.application.ui.selectionOverlayOutsideManagedCapabilitySubtree,
     true,
   );
+  assert.equal(built.currentCompatibility.authority.source.application.directReactDomImports, 0);
   assert.equal(
     built.currentCompatibility.successor.historicalNoSelectionOverlayNonclaimAppliedToCurrentApp,
     false,
@@ -292,14 +303,29 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
   );
   assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
   assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
-  assert.equal(built.currentCompatibility.successor.expandedDropReadyBoundariesImplemented, true);
+  assert.equal(built.currentCompatibility.successor.compactStableDropBoundariesImplemented, true);
   assert.equal(built.currentCompatibility.successor.stableNestedDragHoverImplemented, true);
+  assert.equal(
+    built.currentCompatibility.successor.innermostNestedSlotOwnsPointerImplemented,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.rejectedReleaseRetainsLastAcceptedProjection,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.noOpProjectionVisibleAndInert, true);
   assert.equal(built.currentCompatibility.successor.browserDataTransferReads, 0);
   assert.equal(
     built.currentCompatibility.successor.explicitComponentDropTargetGuideImplemented,
     true,
   );
+  assert.equal(built.currentCompatibility.successor.componentPanelWideDropSurfaceImplemented, true);
+  assert.equal(built.currentCompatibility.successor.componentPaletteOuterDropInert, false);
+  assert.equal(built.currentCompatibility.successor.draggableComponentCardImplemented, false);
+  assert.equal(built.currentCompatibility.successor.dedicatedComponentDragHandleImplemented, true);
+  assert.equal(built.currentCompatibility.successor.dedicatedLayerDragHandleImplemented, true);
   assert.equal(built.currentCompatibility.successor.atomicDeletionPreviewAndFocusImplemented, true);
+  assert.equal(built.currentCompatibility.successor.successfulInsertionSelectsNewLayer, true);
   assert.equal(built.currentCompatibility.successor.exactArtifactSourceAndTestReceipts, true);
   assert.equal(built.currentCompatibility.successor.artifactSourceAndTestReceiptCount, 8);
   assert.equal(
@@ -377,6 +403,11 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[6], () => {
   );
 
   for (const applicationMutation of [
+    replaceOnce(
+      applicationSource,
+      'import { DesenAdapterCanvas } from "./adapter-canvas.js";',
+      'import { flushSync } from "react-dom";\nimport { DesenAdapterCanvas } from "./adapter-canvas.js";\nvoid flushSync;',
+    ),
     replaceOnce(
       applicationSource,
       'import { DesenAdapterCanvas } from "./adapter-canvas.js";',
@@ -617,6 +648,29 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[7], () => {
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[8], () => {
+  const directReactDomScheduling = cloneGraph();
+  const schedulingApplication = graphModule(directReactDomScheduling, APPLICATION);
+  schedulingApplication.imports[
+    schedulingApplication.imports.indexOf("node_modules/react/index.js")
+  ] = "node_modules/react-dom/index.js";
+  schedulingApplication.imports.sort();
+  assert.throws(
+    () =>
+      verifyDesenAppRealAdapterCanvasGraphPolicy(directReactDomScheduling, hostSourceAuditArtifact),
+    expectedError("VITE_GRAPH_DRIFT"),
+  );
+
+  const currentGraphIdentityMutation = cloneGraph();
+  graphModule(currentGraphIdentityMutation, APPLICATION).codeSha256 = `sha256:${"0".repeat(64)}`;
+  assert.throws(
+    () =>
+      verifyDesenAppRealAdapterCanvasGraphPolicy(
+        currentGraphIdentityMutation,
+        hostSourceAuditArtifact,
+      ),
+    expectedError("VITE_GRAPH_DRIFT"),
+  );
+
   const componentSubstitution = cloneGraph();
   const adapters = graphModule(
     componentSubstitution,
@@ -741,6 +795,35 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[10], async () => {
     expectedError("ARTIFACT_WRITE_UNSAFE"),
   );
   assert.deepEqual(await readFile(destination), preserved);
+});
+
+test("[successor] rejects legacy target-only, whole-card, and nested fallthrough drag authority", async () => {
+  const mutations = [
+    replaceOnce(
+      applicationSource,
+      "aria-label={targetName}\n        className={styles.componentSlotTarget}",
+      "aria-label={targetName}\n        className={styles.componentSlotTarget}\n        onDrop={receiveComponentDrop}",
+    ),
+    replaceOnce(
+      applicationSource,
+      'data-component-card="true"',
+      'data-component-card="true" draggable={enabled}',
+    ),
+    replaceOnce(
+      applicationSource,
+      "event.stopPropagation();\n    const admission = projectNearestDrop(list, event.clientY, event.target);",
+      "const admission = projectNearestDrop(list, event.clientY, event.target);",
+    ),
+  ];
+
+  for (const mutation of mutations) {
+    await assert.rejects(
+      buildDesenAppRealAdapterCanvasEvidence({
+        fileOverrides: new Map([[APPLICATION, Buffer.from(mutation)]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
 });
 
 test("[successor] authenticates and mutation-tests the exact M09-T12 persistence closure", async () => {

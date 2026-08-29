@@ -318,7 +318,7 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node --test tests/desen-app-named-slot-authoring.test.mjs",
   );
   assert.equal(built.currentCompatibility.boundary.imports.exactReferenceAdapterRegistry, true);
-  assert.equal(built.currentCompatibility.boundary.imports.applicationFlushSyncImports, 1);
+  assert.equal(built.currentCompatibility.boundary.imports.applicationReactDomImports, 0);
   assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
   assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
@@ -434,15 +434,7 @@ test("[mutation] rejects prerequisite, route, package, and scope-boundary drift"
   await assert.rejects(
     buildDesenAppShellNavigationEvidence({
       fileOverrides: new Map([
-        [
-          APPLICATION,
-          Buffer.from(
-            application.replace(
-              'import { flushSync } from "react-dom";',
-              'import { createPortal, flushSync } from "react-dom";',
-            ),
-          ),
-        ],
+        [APPLICATION, Buffer.from(`import { flushSync } from "react-dom";\n${application}`)],
       ]),
     }),
     expectedError("IMPORT_BOUNDARY_DRIFT"),

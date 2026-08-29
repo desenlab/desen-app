@@ -227,6 +227,11 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[4], () => {
     assert.equal(authority.privateInspection.privateDomOrGeometryCalls, 0);
     assert.equal(authority.privateInspection.privateReactReferences, 0);
   }
+  assert.equal(
+    built.currentCompatibility.authority.source.application.privateInspection
+      .allowedAuthoringLayerRowLookupDomCalls,
+    1,
+  );
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
@@ -273,9 +278,20 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
   assert.equal(built.currentCompatibility.successor.behaviorOwnedDeletePreservesEmptySlot, true);
   assert.equal(built.currentCompatibility.successor.failedDeletionPreservesCurrentDocument, true);
   assert.equal(built.currentCompatibility.successor.browserDataTransferReadsZero, true);
-  assert.equal(built.currentCompatibility.successor.expandedDropReadyBoundaries, true);
+  assert.equal(built.currentCompatibility.successor.compactStableDropBoundaries, true);
   assert.equal(built.currentCompatibility.successor.stableNestedDragHover, true);
+  assert.equal(built.currentCompatibility.successor.innermostNestedSlotOwnsPointer, true);
+  assert.equal(
+    built.currentCompatibility.successor.rejectedReleaseRetainsLastAcceptedProjection,
+    true,
+  );
+  assert.equal(built.currentCompatibility.successor.noOpProjectionVisibleAndInert, true);
   assert.equal(built.currentCompatibility.successor.explicitComponentDropTargetGuide, true);
+  assert.equal(built.currentCompatibility.successor.componentPanelWideDropSurface, true);
+  assert.equal(built.currentCompatibility.successor.componentPaletteOuterDropInert, false);
+  assert.equal(built.currentCompatibility.successor.draggableComponentCard, false);
+  assert.equal(built.currentCompatibility.successor.dedicatedComponentDragHandle, true);
+  assert.equal(built.currentCompatibility.successor.dedicatedLayerDragHandle, true);
   assert.equal(built.currentCompatibility.successor.deletionSourceAndPreviewCommitAtomically, true);
   assert.equal(built.currentCompatibility.successor.deletionFocusManaged, true);
   assert.deepEqual(built.currentCompatibility.successor.artifact.authenticatedClaims, {
@@ -397,6 +413,18 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       }),
     expectedError("PRIVATE_STRUCTURE_AUTHORITY"),
   );
+  assert.throws(
+    () =>
+      verifyDesenAppSelectionOverlaySourcePolicy({
+        ...baseline,
+        applicationSource: replaceOnce(
+          applicationSource,
+          'child.querySelector<HTMLElement>("[data-layer-drop-row-node-id]")',
+          'child.querySelector<HTMLElement>("[data-managed-capability-subtree]")',
+        ),
+      }),
+    expectedError("PRIVATE_STRUCTURE_AUTHORITY"),
+  );
 
   await assert.rejects(
     buildDesenAppSelectionOverlayEvidence({
@@ -454,7 +482,7 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
     [
       APPLICATION_CSS,
       cssSource,
-      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;\n  align-items: center;\n  padding: 0 0.125rem;",
       ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.25rem;\n  align-items: center;\n  padding: 0 0.125rem;",
     ],
     [

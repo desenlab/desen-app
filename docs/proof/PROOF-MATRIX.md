@@ -2867,10 +2867,10 @@ path-set, and ownership pins `sha256:d3b479cc998d6c84d53b9b0d64e6121033d94bbf9b5
 `sha256:7d5a90e56b4b32e2d7e1a0306b09669855642b30558155dba9a07f1ccf7da7a3`.
 The append-only current-reader checkpoint advances sequence 51 head
 `sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` to sequence 52 head
-`sha256:23b31316ff0dd5dac53f66f110bb7362b9ae1f2af2bc483e4915b66bea48e07b` across 48 frozen
+`sha256:c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9` across 48 frozen
 artifacts and 96 current readers. Promotion pins the selector at
-`sha256:a833538c6bca20515608eb2f4398dccea1852fd959df4ca4a804290e94461157` and the required-affected
-runner authority at `sha256:843052663c6200925fd209d3af17d8e3f625d3f88c0d44580c3010672267748d`.
+`sha256:b6270e855ca38709cc0e272f35ffa61ffa1db6da0bb8c5005000f372e51c906c` and the required-affected
+runner authority at `sha256:311e9727eb91bd17278f5ae2f711daea5090d7f638a1f1ce0242768980bca262`.
 Checkpoint, promotion, selector, required-affected, and CI quality-gate regression suites pass
 75/75, 19/19, 22/22, 38/38, and 28/28 locally—182/182 combined. These local receipts make no
 required-gate or hosted-CI claim. M09-T13 is `DONE`, implementation progress is 108/145 (74%), M09

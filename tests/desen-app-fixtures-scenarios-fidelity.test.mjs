@@ -216,15 +216,18 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[6], () => {
   assert.equal(application.oneGlobalLayerDropProjection, true);
   assert.equal(application.nestedSlotSurfaceOwnsDropEvents, true);
   assert.equal(application.layerMidpointHysteresis, 4);
-  assert.equal(currentApplication.draggableComponentCard, true);
+  assert.equal(currentApplication.applicationReactDomImports, 0);
+  assert.equal(currentApplication.reactDomAuthoritySurrendered, true);
+  assert.equal(currentApplication.componentDragAuthorityLimitedToDedicatedHandle, true);
+  assert.equal(currentApplication.dedicatedLayerDragHandle, true);
   assert.equal(currentApplication.separateNonDraggableComponentAddAction, true);
-  assert.equal(currentApplication.componentDropAdmissionLimitedToExplicitTarget, true);
-  assert.equal(currentApplication.componentPaletteOuterDropInert, true);
+  assert.equal(currentApplication.componentPanelWideDropSurface, true);
+  assert.equal(currentApplication.stickyComponentTargetSummaryOnly, true);
   assert.equal(currentApplication.stableGlobalLayerDragSession, true);
   assert.equal(currentApplication.globalLayerOwnerAndEpochFencing, true);
   assert.equal(currentApplication.edgeScrollExactSlotRehitTesting, true);
   assert.equal(currentCss.nestedLayerSlotsAndGlobalDragGuideVisible, true);
-  assert.equal(currentCss.draggableComponentCardAndSeparateAddActionVisible, true);
+  assert.equal(currentCss.dedicatedDragHandlesAndSeparateAddActionVisible, true);
   assert.equal(adapter.hostPortIdentityInMountLifetime, true);
   assert.equal(adapter.sessionDisposedOnReplacement, true);
 });
@@ -345,13 +348,8 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
     },
     {
       key: "applicationSource",
-      search: 'import { flushSync } from "react-dom";',
-      replacement: 'import { createPortal } from "react-dom";',
-    },
-    {
-      key: "applicationSource",
-      search: "flushSync(() => {",
-      replacement: "queueMicrotask(() => {",
+      search: '} from "react";',
+      replacement: '} from "react";\nimport { flushSync } from "react-dom";',
     },
     {
       key: "applicationSource",
@@ -370,8 +368,8 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
     },
     {
       key: "applicationSource",
-      search: "draggable={enabled}",
-      replacement: "draggable={false}",
+      search: 'data-component-drag-handle="true"',
+      replacement: 'data-component-drag-handle="false"',
     },
     {
       key: "applicationSource",
@@ -402,15 +400,13 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
     },
     {
       key: "applicationSource",
-      search: 'event.dataTransfer.dropEffect = "none"',
-      replacement: 'event.dataTransfer.dropEffect = "copy"',
+      search: 'admission.status === "noop"\n        ? "none"',
+      replacement: 'admission.status === "accepted"\n        ? "none"',
     },
     {
       key: "applicationSource",
-      search:
-        'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
-      replacement:
-        'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        addComponent(dragIntent.componentId);',
+      search: "panelDragEnterDepth.current += 1",
+      replacement: "panelDragEnterDepth.current = 1",
     },
     {
       key: "applicationSource",

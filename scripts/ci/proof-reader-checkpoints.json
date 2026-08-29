@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "23b31316ff0dd5dac53f66f110bb7362b9ae1f2af2bc483e4915b66bea48e07b",
+  "headSha256": "c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9",
   "checkpoints": [
     {
       "sequence": 1,
@@ -26759,127 +26759,127 @@
           "task": "M09-T01",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-shell-navigation-proof.mjs",
-          "bytes": 75948,
-          "sha256": "608ee06ebc4565e54c55c206cef3a50c62ed3edb1821c645c945556e2e2ab1df"
+          "bytes": 74830,
+          "sha256": "a2d85bf7c32cb98d0864af290735a94713260c2c93214678756f4cf2e93abff9"
         },
         {
           "task": "M09-T01",
           "role": "root-test",
           "path": "tests/desen-app-shell-navigation.test.mjs",
-          "bytes": 33861,
-          "sha256": "bffb8cdbddbebf624e4b27cff0805f1e488bcf32d384f6a91a4e8d833918ed72"
+          "bytes": 33700,
+          "sha256": "39dc85d3dc8ff6f7c3f72b1a052d3019a376885dd8829cfc4f6c1c3411e929f1"
         },
         {
           "task": "M09-T02",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs",
-          "bytes": 114482,
-          "sha256": "f9232af6ae7214983b9b58bc5955ebcc278ceb0b5d067e32b811d5413fc018e3"
+          "bytes": 114436,
+          "sha256": "a26c770087188662a6204731f544f10849c527bb6a14f030a355f21dc4ab4ef1"
         },
         {
           "task": "M09-T02",
           "role": "root-test",
           "path": "tests/desen-app-catalog-panel-layer-tree.test.mjs",
-          "bytes": 37420,
-          "sha256": "51392f17ef9d8241f512734206737e3d33aeff679f7dd7bfb6124d309e1d310a"
+          "bytes": 37382,
+          "sha256": "c742264f24968fa527c88a419deeba82e4a9343c9e00a8dd5c776e1d39b12ee4"
         },
         {
           "task": "M09-T03",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-real-adapter-canvas-proof.mjs",
-          "bytes": 136117,
-          "sha256": "8ada2c81786615e7859a2b1e17881c056816d443253e7f597301609ed84122f5"
+          "bytes": 142948,
+          "sha256": "4441fcb0129a3a4b33777979ee80b9a89baf559e1aac8b623a156a39c7225a87"
         },
         {
           "task": "M09-T03",
           "role": "root-test",
           "path": "tests/desen-app-real-adapter-canvas.test.mjs",
-          "bytes": 37648,
-          "sha256": "8e102f2494b9005a2c938ba53f5e24b972d10c2efea8b6414dae693b2bce5f55"
+          "bytes": 41051,
+          "sha256": "fb12ba1646ce67150c062358e6b8cb3e56e7c287e0317f4a867a494d52c95a24"
         },
         {
           "task": "M09-T04",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-selection-overlay-proof.mjs",
-          "bytes": 92851,
-          "sha256": "b7e4166c4ff2a5fe4b8aa5e8ac63167126d1e0f4d45ee7df71d9d4ee299c0cd9"
+          "bytes": 95561,
+          "sha256": "1db18d4b273c1d5e577ed6badab977c6d105794ca0a68880e70fa3ffe5327d4e"
         },
         {
           "task": "M09-T04",
           "role": "root-test",
           "path": "tests/desen-app-selection-overlay.test.mjs",
-          "bytes": 31050,
-          "sha256": "48613067cefc0d563454b6f6da63dd0cf8494712c9a87fd3b6c30d615672f3c6"
+          "bytes": 32351,
+          "sha256": "0107448a4cfad741dafebd5ce08a57308cb8615cd1cf2346512a0e4b9cffcf29"
         },
         {
           "task": "M09-T05",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-schema-inspector-proof.mjs",
-          "bytes": 102367,
-          "sha256": "421875f55133652c98486800238e998a06f7c368df1aac0528d55efc34a59ae2"
+          "bytes": 103628,
+          "sha256": "da1930bb4e67c85a80d9bf4d17ec81f9a171c69c8dfcb93eb4cb6baddbaa7c40"
         },
         {
           "task": "M09-T05",
           "role": "root-test",
           "path": "tests/desen-app-schema-inspector.test.mjs",
-          "bytes": 32678,
-          "sha256": "a2e06e029cc618d0e50a0b879964915043e210f897fa508b9ae0649fadd135f6"
+          "bytes": 33829,
+          "sha256": "c7b6d8e870d10c57508995ec47c5270ef4eaab19bcd6931e6396a2448ee6dffd"
         },
         {
           "task": "M09-T06",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-structured-inspector-proof.mjs",
-          "bytes": 115615,
-          "sha256": "69cfa59b1640d6818191f0fc08bec4a7c2c792694056385d2c8c0fcb71b819b0"
+          "bytes": 116876,
+          "sha256": "eff53fac94a6584b33c043fee298693d96a598d81627ea55283ca2918c26133f"
         },
         {
           "task": "M09-T06",
           "role": "root-test",
           "path": "tests/desen-app-structured-inspector.test.mjs",
-          "bytes": 44790,
-          "sha256": "46d8ffb09198117c3787a48f5ebc1fe5326cad95c082f937383a5d3b4e985285"
+          "bytes": 45941,
+          "sha256": "42b082f685ee1c18772653c9d416a8854999bd00b56ce3068e63037599bb741b"
         },
         {
           "task": "M09-T07",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-named-slot-authoring-proof.mjs",
-          "bytes": 88647,
-          "sha256": "62fdc61604c6f56f4b3c8d6e2897693de78b54773fc3ebb8a14c95c3d2d5b0b4"
+          "bytes": 92232,
+          "sha256": "958385f0f862d0762c533bcc728d352953147bfa21169f32825a5d7801fbdb6b"
         },
         {
           "task": "M09-T07",
           "role": "root-test",
           "path": "tests/desen-app-named-slot-authoring.test.mjs",
-          "bytes": 32451,
-          "sha256": "9df8a553d8f74f21123bd5f91698d5610f61cc2f19b7c87edac1929fb1b10c6d"
+          "bytes": 35017,
+          "sha256": "b91f964f3288023aa8c7151104049f5d7b56ec332e98ce0e255be32e2c493dad"
         },
         {
           "task": "M09-T08",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-state-binding-editor-proof.mjs",
-          "bytes": 82269,
-          "sha256": "570e838f770e55dd3ab9a77cfac3fdca635471e56d13d75bf5a0c9a74d926c7d"
+          "bytes": 83585,
+          "sha256": "cab0faa87d7c5378450496b053d98b9bb9c04d6c7c9c58070344f8ab13c949a4"
         },
         {
           "task": "M09-T08",
           "role": "root-test",
           "path": "tests/desen-app-state-binding-editor.test.mjs",
-          "bytes": 28581,
-          "sha256": "6ef173582a7da88263159eaba86f4e38d676d739116f3fc02b5c7d9fe5021946"
+          "bytes": 29879,
+          "sha256": "8bcc91f393e8ece1776d93ac0600e35e5ca8673b79c0fda02d23b7fad2806d44"
         },
         {
           "task": "M09-T09",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-event-action-editor-proof.mjs",
-          "bytes": 82640,
-          "sha256": "339f517597b9c37a1c66818741515960fdf397645d2f5c3545525d138d1820f0"
+          "bytes": 84197,
+          "sha256": "0d6f68979eef2413f35f3f73346cf5d1ffb0887b3dc181869457cfbd806d63dd"
         },
         {
           "task": "M09-T09",
           "role": "root-test",
           "path": "tests/desen-app-event-action-editor.test.mjs",
-          "bytes": 29267,
-          "sha256": "ae1cff0829619215bbc6ed45106e874c9df6524363e052647860642fac79b92e"
+          "bytes": 30235,
+          "sha256": "e57cf09957d9b52860851dc593ce90296facf7359bcca36e4f188786432f74f7"
         },
         {
           "task": "M09-T10",
@@ -26899,15 +26899,15 @@
           "task": "M09-T11",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-fixtures-scenarios-fidelity-proof.mjs",
-          "bytes": 89958,
-          "sha256": "7f495a97c127ee87e3b6a03458a18801b45d0746f16ea8f683c396dd1ff7f44c"
+          "bytes": 89975,
+          "sha256": "6188fa5ff659cd53661653bf733ae478742338d3f5409de4ac58442f06dbbbaa"
         },
         {
           "task": "M09-T11",
           "role": "root-test",
           "path": "tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
-          "bytes": 32865,
-          "sha256": "fc51a40442a00c0dcbf30f2234f8b95e8227e0afee074d16c545398c20184f7d"
+          "bytes": 32812,
+          "sha256": "218130f2bfd3bcecbaf58a782291798fc1fe9b8bf26920189294e79890dd1135"
         },
         {
           "task": "M09-T12",

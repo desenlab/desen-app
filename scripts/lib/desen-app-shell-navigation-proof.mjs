@@ -871,7 +871,6 @@ function inspectImports(files) {
     [
       APPLICATION_SOURCE_PATH,
       new Set([
-        "react-dom",
         "@desen/editor-core",
         "@desen/protocol",
         "@desen/reference-catalog-web/catalog.json",
@@ -883,7 +882,6 @@ function inspectImports(files) {
     [...exactSuccessorPackageImports].map(([relativePath]) => [relativePath, new Set()]),
   );
   let publicDiagnosticIndexTypeOnlyImports = 0;
-  let applicationFlushSyncImports = 0;
   for (const relativePath of CURRENT_TYPESCRIPT_SOURCE_PATHS) {
     const source = decodeUtf8(files.get(relativePath), relativePath);
     const sourceFile = ts.createSourceFile(
@@ -930,29 +928,6 @@ function inspectImports(files) {
     const visit = (node) => {
       if (ts.isImportDeclaration(node)) {
         recordSpecifier(node.moduleSpecifier, "import");
-        if (
-          relativePath === APPLICATION_SOURCE_PATH &&
-          ts.isStringLiteralLike(node.moduleSpecifier) &&
-          node.moduleSpecifier.text === "react-dom"
-        ) {
-          const clause = node.importClause;
-          const bindings = clause?.namedBindings;
-          if (
-            clause?.isTypeOnly === true ||
-            clause?.name !== undefined ||
-            bindings === undefined ||
-            !ts.isNamedImports(bindings) ||
-            bindings.elements.length !== 1 ||
-            bindings.elements[0].propertyName !== undefined ||
-            bindings.elements[0].name.text !== "flushSync"
-          ) {
-            fail(
-              "IMPORT_BOUNDARY_DRIFT",
-              "The App may import only the exact flushSync binding from react-dom.",
-            );
-          }
-          applicationFlushSyncImports += 1;
-        }
         if (
           relativePath === AUTHORING_SELECTION_SOURCE_PATH &&
           ts.isStringLiteralLike(node.moduleSpecifier) &&
@@ -1004,12 +979,6 @@ function inspectImports(files) {
     fail(
       "IMPORT_BOUNDARY_DRIFT",
       "M09-T04 must retain one type-only RuntimeReactDiagnosticIndex import.",
-    );
-  }
-  if (applicationFlushSyncImports !== 1) {
-    fail(
-      "IMPORT_BOUNDARY_DRIFT",
-      "The App must retain one exact react-dom flushSync import for synchronous drag intent.",
     );
   }
   const authoringImports = imports.filter(
@@ -1117,7 +1086,7 @@ function inspectImports(files) {
       ]),
     ),
     exactReferenceAdapterRegistry: true,
-    applicationFlushSyncImports,
+    applicationReactDomImports: 0,
     publicDiagnosticIndexTypeOnlyImports,
     handwrittenManagedTreeElements: 0,
     privateDomAccesses: 0,
