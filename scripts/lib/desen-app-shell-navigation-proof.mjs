@@ -120,9 +120,11 @@ const ADDITIVE_SUCCESSOR_SOURCE_PATHS = Object.freeze([
   PREVIEW_FIDELITY_SOURCE_PATH,
 ]);
 const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
-  ...SOURCE_PATHS.filter((entry) => /\.(?:ts|tsx)$/u.test(entry)),
-  ...ADDITIVE_SUCCESSOR_SOURCE_PATHS,
-  ...T12_SUCCESSOR_RECEIPT_PATHS.filter((entry) => /\/src\/.+\.(?:ts|tsx)$/u.test(entry)),
+  ...new Set([
+    ...SOURCE_PATHS.filter((entry) => /\.(?:ts|tsx)$/u.test(entry)),
+    ...ADDITIVE_SUCCESSOR_SOURCE_PATHS,
+    ...T12_SUCCESSOR_RECEIPT_PATHS.filter((entry) => /\/src\/.+\.(?:ts|tsx)$/u.test(entry)),
+  ]),
 ]);
 const TEST_PATHS = Object.freeze(
   APP_PATHS.filter((relativePath) => /\/test\//u.test(relativePath)),
@@ -831,6 +833,7 @@ function inspectImports(files) {
     [
       APPLICATION_SOURCE_PATH,
       new Set([
+        "react-dom",
         "@desen/editor-core",
         "@desen/protocol",
         "@desen/reference-catalog-web/catalog.json",
@@ -842,6 +845,7 @@ function inspectImports(files) {
     [...exactSuccessorPackageImports].map(([relativePath]) => [relativePath, new Set()]),
   );
   let publicDiagnosticIndexTypeOnlyImports = 0;
+  let applicationFlushSyncImports = 0;
   for (const relativePath of CURRENT_TYPESCRIPT_SOURCE_PATHS) {
     const source = decodeUtf8(files.get(relativePath), relativePath);
     const sourceFile = ts.createSourceFile(
@@ -888,6 +892,29 @@ function inspectImports(files) {
     const visit = (node) => {
       if (ts.isImportDeclaration(node)) {
         recordSpecifier(node.moduleSpecifier, "import");
+        if (
+          relativePath === APPLICATION_SOURCE_PATH &&
+          ts.isStringLiteralLike(node.moduleSpecifier) &&
+          node.moduleSpecifier.text === "react-dom"
+        ) {
+          const clause = node.importClause;
+          const bindings = clause?.namedBindings;
+          if (
+            clause?.isTypeOnly === true ||
+            clause?.name !== undefined ||
+            bindings === undefined ||
+            !ts.isNamedImports(bindings) ||
+            bindings.elements.length !== 1 ||
+            bindings.elements[0].propertyName !== undefined ||
+            bindings.elements[0].name.text !== "flushSync"
+          ) {
+            fail(
+              "IMPORT_BOUNDARY_DRIFT",
+              "The App may import only the exact flushSync binding from react-dom.",
+            );
+          }
+          applicationFlushSyncImports += 1;
+        }
         if (
           relativePath === AUTHORING_SELECTION_SOURCE_PATH &&
           ts.isStringLiteralLike(node.moduleSpecifier) &&
@@ -939,6 +966,12 @@ function inspectImports(files) {
     fail(
       "IMPORT_BOUNDARY_DRIFT",
       "M09-T04 must retain one type-only RuntimeReactDiagnosticIndex import.",
+    );
+  }
+  if (applicationFlushSyncImports !== 1) {
+    fail(
+      "IMPORT_BOUNDARY_DRIFT",
+      "The App must retain one exact react-dom flushSync import for synchronous drag intent.",
     );
   }
   const authoringImports = imports.filter(
@@ -1046,6 +1079,7 @@ function inspectImports(files) {
       ]),
     ),
     exactReferenceAdapterRegistry: true,
+    applicationFlushSyncImports,
     publicDiagnosticIndexTypeOnlyImports,
     handwrittenManagedTreeElements: 0,
     privateDomAccesses: 0,
@@ -1204,8 +1238,8 @@ function authenticateSourcePersistenceSuccessor(files) {
     profile: "desen.app.source-persistence-proof.v1",
     result: "PASS",
     path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
-    bytes: 27_088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
   const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
   if (
@@ -1278,14 +1312,14 @@ function authenticateSourcePersistenceSuccessor(files) {
     artifact.claim?.runtimeInputOrSecretPersisted !== false ||
     artifact.claim?.concretePersistenceAdapterClaimed !== false ||
     !persistenceControlsSource.includes('return "Local draft unchanged";') ||
-    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.focusedTestCases !== 142 ||
     artifact.tests?.fullAppTestFiles !== 22 ||
-    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
     artifact.boundary?.trackedFiles !== 35 ||
     artifact.boundary?.parentArtifacts !== 3 ||
-    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
     artifact.boundary?.fullAppTestFiles !== 22 ||
-    artifact.boundary?.fullAppTestCases !== 322 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
     trackedReceipts?.length !== 35 ||
     !isDeepStrictEqual(
       receiptPaths,
@@ -1314,9 +1348,9 @@ function authenticateSourcePersistenceSuccessor(files) {
   return deepFreeze({
     task: pin.task,
     artifact: pin,
-    focusedTestCases: 140,
+    focusedTestCases: 142,
     fullAppTestFiles: 22,
-    fullAppTestCases: 322,
+    fullAppTestCases: 324,
     exactProjectScopedSourceKey: "account-app-source",
     publicEditorCorePersistencePort: true,
     authoredSourceOnly: true,

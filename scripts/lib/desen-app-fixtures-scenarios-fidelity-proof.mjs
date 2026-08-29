@@ -199,11 +199,12 @@ const EXPECTED_FOCUSED_TEST_CASE_COUNTS = Object.freeze({
   [FIDELITY_TEST_PATH]: 6,
   [CONTROLS_TEST_PATH]: 3,
   [ADAPTER_TEST_PATH]: 10,
-  [APPLICATION_TEST_PATH]: 40,
+  [APPLICATION_TEST_PATH]: 42,
 });
 
 /** Exact reviewed App cases in the six-file M09-T11 focused suite. */
 export const DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES = 86;
+const CURRENT_DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES = 88;
 
 /** Exact immutable proof receipts bounding the M09-T11 App authority. */
 export const DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_PARENT_PINS = Object.freeze([
@@ -657,6 +658,7 @@ function exactAllowedModules(modules) {
 function appShellModule(specifier) {
   return (
     specifier === "react" ||
+    specifier === "react-dom" ||
     specifier.startsWith(".") ||
     (specifier.startsWith("@desen/") &&
       !specifier.includes("/host-operations") &&
@@ -927,7 +929,32 @@ function inspectAdapterSource(source) {
 }
 
 function inspectApplicationSource(source) {
-  const { imports } = inspectModuleAuthority(source, APPLICATION_SOURCE_PATH, appShellModule);
+  const { imports, sourceFile } = inspectModuleAuthority(
+    source,
+    APPLICATION_SOURCE_PATH,
+    appShellModule,
+  );
+  const reactDomImports = sourceFile.statements.filter(
+    (statement) =>
+      ts.isImportDeclaration(statement) &&
+      ts.isStringLiteral(statement.moduleSpecifier) &&
+      statement.moduleSpecifier.text === "react-dom",
+  );
+  const reactDomBindings = reactDomImports[0]?.importClause?.namedBindings;
+  if (
+    reactDomImports.length !== 1 ||
+    reactDomImports[0]?.importClause?.isTypeOnly === true ||
+    reactDomBindings === undefined ||
+    !ts.isNamedImports(reactDomBindings) ||
+    reactDomBindings.elements.length !== 1 ||
+    reactDomBindings.elements[0]?.propertyName !== undefined ||
+    reactDomBindings.elements[0]?.name.text !== "flushSync"
+  ) {
+    fail(
+      "SOURCE_POLICY_VIOLATION",
+      "application.tsx may import only the exact flushSync binding from react-dom.",
+    );
+  }
   assertIncludes(
     source,
     [
@@ -959,11 +986,37 @@ function inspectApplicationSource(source) {
       "current.index === next.index",
       "isSameAuthoringSlotSelection(current.target, next.target)",
       "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
-      'data-layer-slot-surface="true"',
+      ".closest<HTMLDivElement>('[data-layer-slot-surface=\"true\"]')",
       "activeDropProjection={activeDropProjection}",
       "onProjectDrop={projectDrop}",
-      "className={styles.componentDragHandle}",
-      'title="Drag anywhere in this panel to add"',
+      "type AuthoringDropAdmission =",
+      "function evaluateDragIntent(",
+      "interface AuthoringDragSession {",
+      "function createAuthoringDragSession(epoch = 0): AuthoringDragSession",
+      "const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession())",
+      "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
+      "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+      "pending.sessionEpoch !== currentSession.epoch",
+      "pending.ownerKey !== currentSession.ownerKey",
+      "document.elementFromPoint(pending.clientX, pending.clientY)",
+      "hitSlotSurface !== pending.slotSurface",
+      "function clearUnclaimedDrop(): void {",
+      'import { flushSync } from "react-dom"',
+      "flushSync(() => {",
+      "className={styles.componentsView}",
+      'event.dataTransfer.dropEffect = "none"',
+      'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+      'if (!componentDropReady) return;\n    event.stopPropagation();\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
+      "className={styles.componentSlotTarget}",
+      "onDragOver={admitComponentDrop}",
+      "onDrop={receiveComponentDrop}",
+      'data-component-card="true"',
+      "className={styles.componentItem}",
+      "draggable={enabled}",
+      "className={styles.componentAddAction}",
+      "draggable={false}",
+      "event.preventDefault();\n                                event.stopPropagation();",
+      "onClick={() => addComponent(component.id)}",
       "if (!isDesignMode() || scenarioOwnerKey === null) return",
       "<PreviewContextDisclosure fidelity={fidelity}",
       "hostPorts={fixtureHostPorts}",
@@ -976,7 +1029,15 @@ function inspectApplicationSource(source) {
   );
   assertExcludes(
     source,
-    ["scenarioDocument", "bindReferenceSignInHostOperation", "host-operations"],
+    [
+      "scenarioDocument",
+      "bindReferenceSignInHostOperation",
+      "host-operations",
+      "function acceptsDragIntent(",
+      "panelDragEnterDepth",
+      "componentDragHandle",
+      'title="Drag anywhere in this panel to add"',
+    ],
     APPLICATION_SOURCE_PATH,
   );
   return deepFreeze({
@@ -989,8 +1050,14 @@ function inspectApplicationSource(source) {
     synchronousCleanupClosesFixtureAdmission: true,
     strictModeReplayRetainsOnlySameLiveController: true,
     pendingControllerDisposedOnPreviewReplacement: true,
-    componentDragAuthorityLimitedToDedicatedHandle: true,
-    oneGlobalLayerDropProjection: true,
+    exactReactDomFlushSyncBinding: true,
+    draggableComponentCard: true,
+    separateNonDraggableComponentAddAction: true,
+    componentDropAdmissionLimitedToExplicitTarget: true,
+    componentPaletteOuterDropInert: true,
+    stableGlobalLayerDragSession: true,
+    globalLayerOwnerAndEpochFencing: true,
+    edgeScrollExactSlotRehitTesting: true,
     nestedSlotSurfaceOwnsDropEvents: true,
     layerMidpointHysteresis: 4,
     onlyOperationPortExecutable: true,
@@ -1027,7 +1094,9 @@ function inspectCss(source) {
       ".runControlsBoundary",
       ".layerSlot > ul",
       '.slotBoundary[data-drop-hovered="true"]::before',
-      ".componentDragHandle::before",
+      ".layerDragGuide {",
+      ".componentItem {",
+      ".componentAddAction {",
     ],
     APPLICATION_CSS_PATH,
   );
@@ -1035,7 +1104,8 @@ function inspectCss(source) {
     contextAndFidelityVisible: true,
     approximateDifferenceContainerVisible: true,
     scenarioAndRunControlsVisible: true,
-    nestedLayerSlotsAndDedicatedComponentHandleVisible: true,
+    nestedLayerSlotsAndGlobalDragGuideVisible: true,
+    draggableComponentCardAndSeparateAddActionVisible: true,
     managedCapabilityStylesChanged: false,
   });
 }
@@ -1160,10 +1230,10 @@ function inspectTests(files) {
     });
   }
   const focusedTestCases = Object.values(testCaseCounts).reduce((total, count) => total + count, 0);
-  if (focusedTestCases !== DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES) {
-    fail("TEST_POLICY_VIOLATION", "The exact M09-T11 focused case total drifted.", {
+  if (focusedTestCases !== CURRENT_DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES) {
+    fail("TEST_POLICY_VIOLATION", "The current compatible focused case total drifted.", {
       actual: focusedTestCases,
-      expected: DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES,
+      expected: CURRENT_DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES,
     });
   }
   for (const [relativePath, requiredNames] of Object.entries(EXPECTED_TEST_NAMES)) {
@@ -1264,11 +1334,17 @@ function inspectTests(files) {
       "uses only the App-owned drag intent and ignores forged native transfer authority",
     ),
     [
-      "alert.querySelector(\"[draggable='true']\")",
+      "const alertCard = alert.closest(\"[data-component-card='true']\")",
+      "expect((alert as HTMLButtonElement).draggable).toBe(false)",
+      "expect(alertCard.draggable).toBe(true)",
       "expect(reads).toBe(0)",
-      "fireEvent.drop(panelSearch",
+      "fireEvent.dragOver(panelSearch",
+      "expect(outsideDrop.defaultPrevented).toBe(true)",
+      'expect((panelSearch as HTMLInputElement).value).toBe("")',
+      "expect(slotEdit).toHaveBeenCalledTimes(1)",
+      "fireEvent.drop(target",
     ],
-    "dedicated component drag-handle test",
+    "draggable component-card, explicit target, and inert outer-drop test",
     "TEST_POLICY_VIOLATION",
   );
   assertIncludes(
@@ -1277,8 +1353,13 @@ function inspectTests(files) {
       APPLICATION_TEST_PATH,
       "chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
     ),
-    ["expect(addAlert.draggable).toBe(false)", "addAlert.querySelector(\"[draggable='true']\")"],
-    "component activation and drag-handle separation test",
+    [
+      "expect(addAlert.draggable).toBe(false)",
+      "const alertCard = addAlert.closest(\"[data-component-card='true']\")",
+      "expect(alertCard.draggable).toBe(true)",
+      "fireEvent.click(addAlert)",
+    ],
+    "component-card drag and separate Add activation test",
     "TEST_POLICY_VIOLATION",
   );
   assertIncludes(
@@ -1295,6 +1376,22 @@ function inspectTests(files) {
       "expect(reads).toBe(0)",
     ],
     "global nested-slot drop projection test",
+    "TEST_POLICY_VIOLATION",
+  );
+  assertIncludes(
+    namedTestBody(
+      sources.get(APPLICATION_TEST_PATH),
+      APPLICATION_TEST_PATH,
+      "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+    ),
+    [
+      "const elementFromPoint = vi.fn(() => acceptedBoundary)",
+      'expect(dataTransfer.dropEffect).toBe("none")',
+      "expect(elementFromPoint).toHaveBeenCalledWith(20, 195)",
+      "expect(cancelFrame).toHaveBeenCalledWith(2)",
+      "act(() => staleFrame?.(2))",
+    ],
+    "stable global drag-session re-hit-test and stale-frame fencing test",
     "TEST_POLICY_VIOLATION",
   );
   assertIncludes(
@@ -1347,8 +1444,11 @@ function inspectTests(files) {
       "VISIBLE_SYNTHETIC_INTEGRATION_PRODUCTION_CONTEXT",
       "VISIBLE_COMPLETE_APPROXIMATE_FIDELITY_DIFFERENCES",
       "SCENARIO_AND_PENDING_CONTINUITY_ACROSS_DESIGN_RUN",
-      "DEDICATED_COMPONENT_DRAG_HANDLE_RETAINS_BUTTON_ACTIVATION",
-      "ONE_GLOBAL_DROP_PROJECTION_ACROSS_NESTED_SLOT_SURFACES",
+      "DRAGGABLE_COMPONENT_CARD_WITH_SEPARATE_NON_DRAGGABLE_ADD_ACTION",
+      "EXPLICIT_COMPONENT_SLOT_TARGET_ONLY_WITH_INERT_OUTER_DROP_GUARD",
+      "STABLE_GLOBAL_LAYER_DRAG_SESSION_ACROSS_NESTED_SLOT_SURFACES",
+      "GLOBAL_LAYER_OWNER_AND_EPOCH_FENCING",
+      "EDGE_SCROLL_REHIT_TESTS_THE_EXACT_SLOT_SURFACE",
       "LAYER_DROP_MIDPOINT_HYSTERESIS_RETAINS_ADMITTED_GAP",
     ],
   });
@@ -1534,8 +1634,8 @@ function authenticateSourcePersistenceSuccessor(files) {
     profile: "desen.app.source-persistence-proof.v1",
     result: "PASS",
     path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
-    bytes: 27_088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
   const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
   if (
@@ -1605,14 +1705,14 @@ function authenticateSourcePersistenceSuccessor(files) {
     artifact.claim?.runtimeInputOrSecretPersisted !== false ||
     artifact.claim?.concretePersistenceAdapterClaimed !== false ||
     !persistenceControlsSource.includes('return "Local draft unchanged";') ||
-    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.focusedTestCases !== 142 ||
     artifact.tests?.fullAppTestFiles !== 22 ||
-    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
     artifact.boundary?.trackedFiles !== 35 ||
     artifact.boundary?.parentArtifacts !== 3 ||
-    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
     artifact.boundary?.fullAppTestFiles !== 22 ||
-    artifact.boundary?.fullAppTestCases !== 322 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
     trackedReceipts?.length !== 35 ||
     !isDeepStrictEqual(
       receiptPaths,
@@ -1641,9 +1741,9 @@ function authenticateSourcePersistenceSuccessor(files) {
   return deepFreeze({
     task: pin.task,
     artifact: pin,
-    focusedTestCases: 140,
+    focusedTestCases: 142,
     fullAppTestFiles: 22,
-    fullAppTestCases: 322,
+    fullAppTestCases: 324,
     exactProjectScopedSourceKey: "account-app-source",
     publicEditorCorePersistencePort: true,
     authoredSourceOnly: true,
@@ -1737,8 +1837,13 @@ export async function buildDesenAppFixturesScenariosFidelityEvidence(rawOptions 
       cleanupSynchronouslyRevokesFixtureAdmission: true,
       strictModeReplayRetainsOnlySameLiveFixtureLifetime: true,
       pendingRevokedOnPreviewReplacement: true,
-      dedicatedComponentDragHandleRetained: true,
-      singleNestedLayerDropProjectionRetained: true,
+      draggableComponentCardRetained: true,
+      separateNonDraggableComponentAddActionRetained: true,
+      explicitComponentSlotTargetOnlyRetained: true,
+      inertComponentPaletteOuterDropGuardRetained: true,
+      stableGlobalLayerDragSessionRetained: true,
+      globalLayerOwnerAndEpochFencingRetained: true,
+      edgeScrollExactSlotRehitTestingRetained: true,
       layerDropHysteresisRetained: true,
       visibleExecutionContexts: ["synthetic", "integration", "production"],
       visibleApproximateFidelityDifferences: true,

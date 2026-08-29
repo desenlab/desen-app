@@ -87,7 +87,7 @@ const EXPECTED_FOCUSED_TEST_CASE_COUNTS = Object.freeze({
   [TEST_PATHS.controls]: 22,
   [TEST_PATHS.application]: 16,
   [TEST_PATHS.navigation]: 32,
-  [TEST_PATHS.shell]: 40,
+  [TEST_PATHS.shell]: 42,
 });
 
 const EXPECTED_TEST_DECLARATION_COUNTS = Object.freeze({
@@ -95,7 +95,7 @@ const EXPECTED_TEST_DECLARATION_COUNTS = Object.freeze({
   [TEST_PATHS.controls]: 12,
   [TEST_PATHS.application]: 16,
   [TEST_PATHS.navigation]: 12,
-  [TEST_PATHS.shell]: 36,
+  [TEST_PATHS.shell]: 38,
 });
 
 const REQUIRED_TEST_NAMES = Object.freeze({
@@ -145,7 +145,7 @@ const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 
 /** Exact reviewed App cases in the five-file M09-T12 focused suite. */
-export const DESEN_APP_SOURCE_PERSISTENCE_FOCUSED_TEST_CASES = 140;
+export const DESEN_APP_SOURCE_PERSISTENCE_FOCUSED_TEST_CASES = 142;
 
 /** Exact immutable proof receipts bounding the M09-T12 App authority. */
 export const DESEN_APP_SOURCE_PERSISTENCE_PARENT_PINS = Object.freeze([
@@ -191,7 +191,7 @@ export const DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES = Object.freeze([
   "[ui] proves Design-only controls, visible state, and explicit dirty-open confirmation",
   "[navigation] proves pristine admission plus dirty no-port and port-backed navigation protection",
   "[boundary] proves authored Source only and excludes scenario, secret, and concrete storage",
-  "[tests] retains exact five-file 140-case focused evidence",
+  "[tests] retains exact five-file 142-case focused evidence",
   "[determinism] builds byte-identical detached evidence twice",
   "[policy] rejects persistence, navigation, UI, test, and package weakening",
   "[verification] rejects parent, artifact, report, and destination authority drift",
@@ -231,7 +231,30 @@ function deepFreeze(value) {
 }
 
 function canonicalArtifactBytes(artifact) {
-  return Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`);
+  let text = JSON.stringify(artifact, null, 2);
+  const prettierCompactions = [
+    [
+      `        "previewFidelity": [
+          "./authoring-data.js",
+          "./authoring-slots.js"
+        ],`,
+      `        "previewFidelity": ["./authoring-data.js", "./authoring-slots.js"],`,
+    ],
+    [
+      `        "persistenceControls": [
+          "react",
+          "./application.module.css"
+        ]`,
+      `        "persistenceControls": ["react", "./application.module.css"]`,
+    ],
+  ];
+  for (const [expanded, compact] of prettierCompactions) {
+    if (text.split(expanded).length !== 2) {
+      fail("ARTIFACT_FORMAT_DRIFT", "Expected one reviewed Prettier JSON compaction target.");
+    }
+    text = text.replace(expanded, compact);
+  }
+  return Buffer.from(`${text}\n`);
 }
 
 function exactOwnDataOptions(value, allowedKeys, label) {
@@ -921,7 +944,7 @@ function inspectTests(files) {
     ),
     focusedTestCases,
     fullAppTestFiles: 22,
-    fullAppTestCases: 322,
+    fullAppTestCases: 324,
     rootTestNames: DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES,
     semanticCoverage: [
       "EXACT_PROJECT_SCOPED_SOURCE_KEY",

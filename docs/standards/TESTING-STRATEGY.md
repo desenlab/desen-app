@@ -228,16 +228,16 @@ closure, required plan, and shadow plan are respectively pinned at
 `sha256:230b004ecbd81c0be68456c4ad15326b8473177cf927f5dc330fdc8fdf7c152c`.
 Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
 `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 frozen
 artifacts and 94 current readers. The promoted selector and independent required-runner authorities
-are pinned at `sha256:d15cfbd9c7de2bea53eefbe58bb7aa23a9138559a8a1989c6c02c508df843cd1` and
-`sha256:e3ac0368a8163e83b85ba05176d142abc03cbe3786a5dd306534001c7c1f96e3`.
+are pinned at `sha256:ff4cdbac5be5b545843ca1aaf9842630e41e4f96e3cfccfa67d10e62436f93c6` and
+`sha256:727e48f526547f6630d369b53b52da511bb1fb61389bbca1c36a757ad018bf93`.
 The exact current Design/Run affected-selection plan is independently pinned at
-`sha256:d8a6ccf3ace5cff7f954b7e18043e9567a47c86c4774b66977ab3a2b573f4409`.
+`sha256:a59b853be95d7c834821d48786c8d3579552cb0eaebc571232cc06b43f4a9f4a`.
 The 51-checkpoint manifest reseals changed reader indexes 70–93. Its appended T12 proof library and
-root reader are exactly 55,293 bytes at
-`sha256:3fd171a97c6dfc7e5dadc70bbaececd157b4209270d8f2bb8c65237d19f4948a` and 21,588 bytes at
-`sha256:9c6ca5bbc6234c87b73d9fb9d139e48a7ccf207f9888f43c000afc4e3835fda8`.
+root reader are exactly 56,014 bytes at
+`sha256:18c759c87011e4ed30b044eaa02b9ccf2cc9e4134c33f7cfd0f292070ffc5add` and 23,578 bytes at
+`sha256:baee083f499523e8d5ea47b322f2d1c162097c27b95897946e72dcb25e99f033`.
 
 The historical M08-T10 affected ownership covers 1,119 tracked paths at
 `sha256:4755d3f896dc904ea8572bbd84329916000daef09455a9927239e11eab0427a1`, including 162
@@ -873,12 +873,12 @@ cleanup revocation, visible unavailable real contexts, and complete conservative
 disclosure. Durable persistence, diagnostics, publication/activation, and automated
 real-browser/native-drag E2E remain unproven. These are local task receipts rather than a
 required-gate or hosted-CI claim.
-The exact `27,088`-byte M09-T12 artifact is
+The exact `27,053`-byte M09-T12 artifact is
 `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json` at
-`sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`; the report is
-`docs/proof/DESEN-APP-SOURCE-PERSISTENCE.md`, exactly 4,800 bytes at
-`sha256:7b464620be5653de51f440d9498af0468ee8639fad805c3a8db2eb2c8fbe738e`. Its focused five-file
-persistence, complete App, and independent root mutation suites pass 140/140, 322/322, and 12/12.
+`sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`; the report is
+`docs/proof/DESEN-APP-SOURCE-PERSISTENCE.md`, exactly 5,009 bytes at
+`sha256:63d5d115e719ccdd91ecf68eea91bcd6f8c68c6513a8fbdea3bfd9f855637821`. Its focused five-file
+persistence, complete App, and independent root mutation suites pass 142/142, 324/324, and 12/12.
 It authenticates exact M09-T01, M08-T08, and M09-T11 parents and binds 35 current files without
 tracking historical App readers. It proves route-owned generation-guarded authored Source
 Open/Save, all-or-nothing open admission, stale-lifetime isolation, and complete canonical Source
@@ -941,14 +941,14 @@ touched-CI suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally. No requi
 persistence, diagnostics, publication/activation, or automated real-browser/native-drag E2E result
 is inferred from those local receipts.
 The M09-T12 focused five-file persistence, complete App, and independent root mutation suites pass
-140/140, 322/322, and 12/12. The current exhaustive authority contains 196 workloads and 93 proof
+142/142, 324/324, and 12/12. The current exhaustive authority contains 196 workloads and 93 proof
 pairs—82 ordinary and 11 barriers—with a 60-proof-unit/130-workload closure and ownership over
 1,243 tracked paths, including 186 proof-owned paths. No required-gate, hosted-CI, concrete App
 storage adapter, diagnostics, publication/activation, or automated real-browser E2E result is
 inferred from those local receipts.
 Sequence 51 advances exact sequence-50 predecessor
 `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 artifacts and
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 artifacts and
 94 readers. Checkpoint, promotion, selector plus required-affected, ownership, and remaining
 touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and 128/128—294/294 combined.
 

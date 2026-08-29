@@ -243,6 +243,8 @@ const EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
 
 const EXPECTED_APPLICATION_TEST_NAMES = Object.freeze([
   "snaps a native layer drag to the before or after half of a visible layer row",
+  "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+  "uses only the App-owned drag intent and ignores forged native transfer authority",
   "updates surface-local state and changes a compatible binding in the live preview",
   "keeps bound props explicit while boolean and numeric edits fail or apply atomically",
   "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
@@ -727,12 +729,30 @@ function inspectApplicationSource(source) {
       "<InspectorPanel",
       "onBindingEdit={editSelectedBinding}",
       "navigation, resources, storage, publication, activation, integration, and production calls remain blocked.",
-      "function acceptsDragIntent(",
+      "type AuthoringDropAdmission =",
+      "function evaluateDragIntent(",
+      "interface AuthoringDragSession {",
+      "function createAuthoringDragSession(epoch = 0): AuthoringDragSession",
+      "const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession())",
+      "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
       "function projectNearestDrop(",
-      "const midpoint =",
-      "clientY < midpoint",
-      "data-drop-hovered={dropReady && dropHovered}",
-      'data-drag-active={dragIntent?.kind === "component"}',
+      "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
+      "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+      "pending.sessionEpoch !== currentSession.epoch",
+      "pending.ownerKey !== currentSession.ownerKey",
+      "function clearUnclaimedDrop(): void {",
+      "className={styles.componentsView}",
+      'event.dataTransfer.dropEffect = "none"',
+      'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+      "className={styles.componentSlotTarget}",
+      "onDragOver={admitComponentDrop}",
+      "onDrop={receiveComponentDrop}",
+      'data-component-card="true"',
+      "className={styles.componentItem}",
+      "draggable={enabled}",
+      "className={styles.componentAddAction}",
+      "draggable={false}",
+      "onClick={() => addComponent(component.id)}",
       'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
       "sourceNodeId: result.nodeId",
     ],
@@ -740,7 +760,14 @@ function inspectApplicationSource(source) {
   );
   assertExcludes(
     source,
-    ["dataTransfer.getData", "document.elementFromPoint", "elementsFromPoint"],
+    [
+      "dataTransfer.getData",
+      "elementsFromPoint",
+      "function acceptsDragIntent(",
+      "panelDragEnterDepth",
+      "componentDragHandle",
+      'title="Drag anywhere in this panel to add"',
+    ],
     "application.tsx",
   );
   return deepFreeze({
@@ -752,8 +779,12 @@ function inspectApplicationSource(source) {
     bindingSourceAndPreviewCommitAtomically: true,
     publisherFailurePreservesPriorSession: true,
     stateAndInspectorChromeOutsideManagedCapabilitySubtree: true,
-    retainedNamedSlotRowHalfDropTargets: true,
-    retainedStickyComponentDropTarget: true,
+    stableGlobalLayerDragSession: true,
+    globalLayerOwnerAndEpochFencing: true,
+    explicitStickyComponentDropTarget: true,
+    componentPaletteOuterDropInert: true,
+    draggableComponentCard: true,
+    separateNonDraggableComponentAddAction: true,
     retainedInsertSelectionForDeleteDiscoverability: true,
     saveAuthority: false,
     publicationAuthority: false,
@@ -824,12 +855,12 @@ function inspectCssSource(source) {
       ".stateCard",
       ".stateDeleteButton",
       ".stateReadonly",
-      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.5rem;",
-      '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;',
-      '.slotBoundary[data-drop-hovered="true"] {\n  z-index: 4;',
-      '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;",
+      '.slotBoundary[data-drop-hovered="true"]::before',
+      ".layerDragGuide {",
       ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
-      '.componentSlotTarget[data-drag-active="true"]',
+      ".componentItem {",
+      ".componentAddAction {",
     ],
     "application.module.css",
   );
@@ -853,9 +884,11 @@ function inspectCssSource(source) {
   return deepFreeze({
     appOwnedStateAndBindingSelectors: true,
     managedDescendantStateOrBindingSelectors: 0,
-    retainedNonOverlappingStableSlotBoundaries: true,
-    retainedRowDropPositionPresentation: true,
-    retainedStickyComponentTargetPresentation: true,
+    stableThirtyTwoPixelSlotGaps: true,
+    stableGlobalDragGuidePresentation: true,
+    stickyExplicitComponentTargetPresentation: true,
+    draggableComponentCardPresentation: true,
+    separateComponentAddActionPresentation: true,
   });
 }
 
@@ -1280,8 +1313,8 @@ function authenticateSourcePersistenceSuccessor(files) {
     profile: "desen.app.source-persistence-proof.v1",
     result: "PASS",
     path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
-    bytes: 27_088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
   const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
   if (
@@ -1350,14 +1383,14 @@ function authenticateSourcePersistenceSuccessor(files) {
     artifact.claim?.runtimeInputOrSecretPersisted !== false ||
     artifact.claim?.concretePersistenceAdapterClaimed !== false ||
     !persistenceControlsSource.includes('return "Local draft unchanged";') ||
-    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.focusedTestCases !== 142 ||
     artifact.tests?.fullAppTestFiles !== 22 ||
-    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
     artifact.boundary?.trackedFiles !== 35 ||
     artifact.boundary?.parentArtifacts !== 3 ||
-    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
     artifact.boundary?.fullAppTestFiles !== 22 ||
-    artifact.boundary?.fullAppTestCases !== 322 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
     trackedReceipts?.length !== 35 ||
     !isDeepStrictEqual(
       receiptPaths,
@@ -1384,9 +1417,9 @@ function authenticateSourcePersistenceSuccessor(files) {
   return deepFreeze({
     task: pin.task,
     artifact: pin,
-    focusedTestCases: 140,
+    focusedTestCases: 142,
     fullAppTestFiles: 22,
-    fullAppTestCases: 322,
+    fullAppTestCases: 324,
     exactProjectScopedSourceKey: "account-app-source",
     publicEditorCorePersistencePort: true,
     authoredSourceOnly: true,

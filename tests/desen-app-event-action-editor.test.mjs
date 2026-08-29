@@ -162,8 +162,14 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[0], () => {
   assert.deepEqual(built.currentCompatibility.retainedAuthoringUx, {
     rootSafeDefaultPlacementTarget: true,
     explicitChangeTarget: true,
-    enlargedDropLanes: true,
-    lastValidRowDropProjection: true,
+    stableThirtyTwoPixelLayerGaps: true,
+    stableGlobalLayerDragSession: true,
+    globalLayerOwnerAndEpochFencing: true,
+    guardedLastAcceptedProjection: true,
+    explicitStickyComponentDropTarget: true,
+    componentPaletteOuterDropInert: true,
+    draggableComponentCard: true,
+    separateNonDraggableComponentAddAction: true,
     visibleSelectedLayerDeleteControl: true,
     guardedDeleteAndBackspace: true,
     namedSlotAndValidatorAuthorityChanged: false,
@@ -330,8 +336,34 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
     },
     {
       key: "applicationSource",
-      search: ": interaction.activeDropProjection",
-      replacement: ": null",
+      search:
+        "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+      replacement: "const sessionOwnerKey = target.ownerId",
+    },
+    {
+      key: "applicationSource",
+      search: "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
+      replacement: "dragSession.current = createAuthoringDragSession(current.epoch)",
+    },
+    {
+      key: "applicationSource",
+      search: 'event.dataTransfer.dropEffect = "none"',
+      replacement: 'event.dataTransfer.dropEffect = "copy"',
+    },
+    {
+      key: "applicationSource",
+      search: "onDrop={receiveComponentDrop}",
+      replacement: "onDrop={() => undefined}",
+    },
+    {
+      key: "applicationSource",
+      search: "draggable={enabled}",
+      replacement: "draggable={false}",
+    },
+    {
+      key: "applicationSource",
+      search: "className={styles.componentAddAction}",
+      replacement: "className={styles.removedComponentAddAction}",
     },
     {
       key: "applicationSource",
@@ -350,8 +382,8 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
     },
     {
       key: "applicationCss",
-      search: '.slotBoundary[data-drop-ready="true"] {',
-      replacement: '.removedSlotBoundary[data-drop-ready="true"] {',
+      search: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;",
+      replacement: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1rem;",
     },
   ];
   for (const mutation of mutations) {
@@ -519,12 +551,12 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
         profile: "desen.app.source-persistence-proof.v1",
         result: "PASS",
         path: SOURCE_PERSISTENCE_ARTIFACT,
-        bytes: 27_088,
-        sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+        bytes: 27_053,
+        sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
       },
-      focusedTestCases: 140,
+      focusedTestCases: 142,
       fullAppTestFiles: 22,
-      fullAppTestCases: 322,
+      fullAppTestCases: 324,
       sourceKey: "account-app-source",
       publicPort: true,
       authoredSourceOnly: true,

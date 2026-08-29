@@ -1461,8 +1461,8 @@ function authenticateSourcePersistenceSuccessor(files) {
     profile: "desen.app.source-persistence-proof.v1",
     result: "PASS",
     path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
-    bytes: 27_088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
   const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
   if (
@@ -1531,14 +1531,14 @@ function authenticateSourcePersistenceSuccessor(files) {
     artifact.claim?.runtimeInputOrSecretPersisted !== false ||
     artifact.claim?.concretePersistenceAdapterClaimed !== false ||
     !persistenceControlsSource.includes('return "Local draft unchanged";') ||
-    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.focusedTestCases !== 142 ||
     artifact.tests?.fullAppTestFiles !== 22 ||
-    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
     artifact.boundary?.trackedFiles !== 35 ||
     artifact.boundary?.parentArtifacts !== 3 ||
-    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
     artifact.boundary?.fullAppTestFiles !== 22 ||
-    artifact.boundary?.fullAppTestCases !== 322 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
     trackedReceipts?.length !== 35 ||
     !isDeepStrictEqual(
       receiptPaths,
@@ -1565,9 +1565,9 @@ function authenticateSourcePersistenceSuccessor(files) {
   return deepFreeze({
     task: pin.task,
     artifact: pin,
-    focusedTestCases: 140,
+    focusedTestCases: 142,
     fullAppTestFiles: 22,
-    fullAppTestCases: 322,
+    fullAppTestCases: 324,
     exactProjectScopedSourceKey: "account-app-source",
     publicEditorCorePersistencePort: true,
     authoredSourceOnly: true,

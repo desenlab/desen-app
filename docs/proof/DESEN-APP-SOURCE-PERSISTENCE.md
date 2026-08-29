@@ -49,15 +49,18 @@ depending on color.
 
 ## Local receipts
 
-- Focused persistence suite: 5 files, 140/140 tests passed.
-- Full Desen App suite: 22 files, 322/322 tests passed.
+- Focused persistence suite: 5 files, 142/142 tests passed.
+- Full Desen App suite: 22 files, 324/324 tests passed.
 - Desen App typecheck and lint passed in the reviewed product run.
 - Independent proof mutation suite: 12/12 tests passed.
 - Deterministic proof boundary: 35 tracked files and 3 immutable parent artifacts.
+- Deterministic artifact: 27,053 bytes of Prettier-compatible JSON. The two reviewed short import
+  arrays are compact exactly once; their expanded forms and any compaction-target format drift are
+  rejected.
 
 The focused case inventory is exact: authoring persistence 30, persistence controls 22,
-persistence application 16, project navigation 32, and application compatibility 40. The full App
-22/322 receipt is retained as reviewed local evidence; the focused 5/140 command is the proof-run
+persistence application 16, project navigation 32, and application compatibility 42. The full App
+22/324 receipt is retained as reviewed local evidence; the focused 5/142 command is the proof-run
 authority.
 
 ## Frozen parents
@@ -93,4 +96,4 @@ M09-T14: NOT_PROVEN
 M09-T12 does not claim publication, activation, node-linked diagnostics, a concrete persistence
 adapter, automated real-browser E2E, a required gate, or a hosted-CI pass.
 
-Final artifact: `sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`
+Final artifact: `sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`

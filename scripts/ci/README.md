@@ -579,13 +579,13 @@ The current reviewed T12 successor digest set is:
   `b67aee6813b36d63dcdfe8c7d2fd9d6b4ee398cce6773b8f9336a03f324e03bb` and
   `230b004ecbd81c0be68456c4ad15326b8473177cf927f5dc330fdc8fdf7c152c`;
 - selector authority:
-  `d15cfbd9c7de2bea53eefbe58bb7aa23a9138559a8a1989c6c02c508df843cd1`; and
+  `ff4cdbac5be5b545843ca1aaf9842630e41e4f96e3cfccfa67d10e62436f93c6`; and
 - required promotion-runner authority:
-  `e3ac0368a8163e83b85ba05176d142abc03cbe3786a5dd306534001c7c1f96e3`.
+  `727e48f526547f6630d369b53b52da511bb1fb61389bbca1c36a757ad018bf93`.
 
 Append-only proof-reader sequence 51 advances exact predecessor
 `6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-`b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+`42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 frozen
 artifacts and 94 current readers; none of these identities is inferred from inventory counts.
 
 The historical T07 shared-state counts were `6 / 3 / 1 / 75 / 90 / 10 / 1` in the table order
@@ -1237,21 +1237,21 @@ or hosted M09-T11 claim. Sequence 50 advances
 `6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` across 46 artifacts and
 92 readers. The checkpoint, promotion, selector plus required-affected, ownership, and remaining
 touched-CI regression suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally.
-M09-T12 focused persistence, complete App, and root mutation suites pass 5 files/136 cases,
-22 files/318 cases, and 12/12 locally. The current exhaustive authority contains 196 workloads and
+M09-T12 focused persistence, complete App, and root mutation suites pass 5 files/142 cases,
+22 files/324 cases, and 12/12 locally. The current exhaustive authority contains 196 workloads and
 93 proof pairs—82 ordinary and 11 barriers—with a 60-proof-unit/130-workload closure and ownership
 over 1,243 tracked paths, including 186 proof-owned paths. These are local-authority receipts and do
 not claim a required gate or hosted result. Sequence 51 advances exact predecessor
 `6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-`b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 artifacts and
+`42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 artifacts and
 94 readers. The checkpoint, promotion, selector plus required-affected, ownership, and remaining
 touched-CI regression suites pass 74/74, 19/19, 58/58, 15/15, and 128/128 locally (294/294
 combined).
-The exact 27,088-byte M09-T12 Source-persistence artifact is
+The exact 27,053-byte M09-T12 Source-persistence artifact is
 `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json` at
-`sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`, with reviewed report
+`sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`, with reviewed report
 `docs/proof/DESEN-APP-SOURCE-PERSISTENCE.md`. The focused persistence, complete App, and independent
-root mutation suites pass 5 files/136 cases, 22 files/318 cases, and 12/12 tests. The App consumes
+root mutation suites pass 5 files/142 cases, 22 files/324 cases, and 12/12 tests. The App consumes
 only the trusted-host-injected public Editor Core port; a concrete adapter, publication/activation,
 node-linked diagnostics, and automated real-browser E2E remain unproven. These local task receipts
 make no required-gate or hosted M09-T12 claim.

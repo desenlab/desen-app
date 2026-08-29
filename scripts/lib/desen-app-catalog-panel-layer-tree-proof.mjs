@@ -253,13 +253,13 @@ const EXPECTED_VALIDATOR_IMPORTS = Object.freeze([
 ]);
 const EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS = Object.freeze(
   new Map([
-    ["draggable", 2],
+    ["draggable", 3],
     ["onDragEnd", 2],
-    ["onDragEnter", 2],
-    ["onDragLeave", 1],
-    ["onDragOver", 2],
-    ["onDragStart", 2],
-    ["onDrop", 2],
+    ["onDragEnter", 3],
+    ["onDragLeave", 2],
+    ["onDragOver", 4],
+    ["onDragStart", 3],
+    ["onDrop", 3],
   ]),
 );
 const EXPECTED_COMPONENTS = Object.freeze([
@@ -1141,6 +1141,7 @@ function inspectImportsAndExecutionBoundary(files) {
   let t11OperationRegistrationImports = 0;
   let exactRegistryConstructionCalls = 0;
   let publicDiagnosticIndexTypeOnlyImports = 0;
+  let applicationFlushSyncImports = 0;
   const successorImportDeclarations = new Map();
   const successorImportedNames = new Map();
   const platformGlobalRoots = new Set(["document", "globalThis", "navigator", "self", "window"]);
@@ -1273,6 +1274,26 @@ function inspectImportsAndExecutionBoundary(files) {
         let resolvedPath = null;
         if (specifier.startsWith(".")) {
           resolvedPath = resolveRelativeImport(relativePath, specifier);
+        } else if (specifier === "react-dom") {
+          const bindings = node.importClause?.namedBindings;
+          if (
+            relativePath !== APPLICATION_SOURCE_PATH ||
+            shape.defaultImport !== null ||
+            shape.namespaceImport !== null ||
+            shape.typeOnly ||
+            !isDeepStrictEqual(shape.namedImports, ["flushSync"]) ||
+            bindings === undefined ||
+            !ts.isNamedImports(bindings) ||
+            bindings.elements.length !== 1 ||
+            bindings.elements[0].propertyName !== undefined ||
+            bindings.elements[0].name.text !== "flushSync"
+          ) {
+            fail(
+              "IMPORT_BOUNDARY_DRIFT",
+              "The App may import only the exact flushSync binding from react-dom.",
+            );
+          }
+          applicationFlushSyncImports += 1;
         } else if (specifier === "react" || specifier === "react-dom/client") {
           if (relativePath === AUTHORING_SELECTION_SOURCE_PATH) {
             fail(
@@ -1650,6 +1671,7 @@ function inspectImportsAndExecutionBoundary(files) {
     t11RuntimeCoreImports !== 3 ||
     t11TestkitImports !== 2 ||
     t11OperationRegistrationImports !== 1 ||
+    applicationFlushSyncImports !== 1 ||
     !isDeepStrictEqual(namedSlotDragDropHandlers, EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS)
   ) {
     fail(
@@ -1657,6 +1679,7 @@ function inspectImportsAndExecutionBoundary(files) {
       "The source graph must retain T02-T07 package, diagnostic-index, and inert drag-hint edges.",
       {
         catalogSdkImports,
+        applicationFlushSyncImports,
         editorCoreImports,
         namedSlotDragDropHandlers: Object.fromEntries(namedSlotDragDropHandlers),
         protocolImports,
@@ -1834,6 +1857,7 @@ function inspectImportsAndExecutionBoundary(files) {
     t11TestkitImports,
     t11OperationRegistrationImports,
     publicDiagnosticIndexTypeOnlyImports,
+    applicationFlushSyncImports,
     adapterImports: 1,
     exactReferenceAdapterRegistryConstructions: 1,
     officialBundleImports: 1,
@@ -1912,6 +1936,20 @@ function verifyImplementationAndTests(files) {
     requireText(application, required, APPLICATION_SOURCE_PATH);
   }
   for (const required of [
+    "interface AuthoringDragSession {",
+    "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot]);",
+    "pending.sessionEpoch !== currentSession.epoch",
+    "pending.ownerKey !== currentSession.ownerKey",
+    "hitSlotSurface !== pending.slotSurface",
+    'admission.status === "rejected" || admission.status === "unavailable"',
+    "interaction.dragSession.current.ownerKey === sessionOwnerKey",
+    "interaction.dragSession.current.lastAcceptedProjection",
+    "dragSession.current = createAuthoringDragSession(current.epoch + 1);",
+    "flushSync(() => {",
+  ]) {
+    requireText(application, required, APPLICATION_SOURCE_PATH, "SUCCESSOR_POLICY_VIOLATION");
+  }
+  for (const required of [
     'const SUPPORTED_PROJECT_ID = "account-app"',
     'const SUPPORTED_SURFACE_ID = "sign-in"',
     "REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT",
@@ -1976,6 +2014,9 @@ function verifyImplementationAndTests(files) {
     'querySelector("canvas")',
     "chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
     "uses only the App-owned drag intent and ignores forged native transfer authority",
+    "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+    "forgets an admitted gap after the pointer reaches the dragged layer's no-op position",
+    "moves nodes across nested slots with keyboard and App-owned native drag intent",
     "Deleted Alert layer · node.alert.",
     "expect(document.activeElement).toBe(layersTab)",
     "disables deletion for the surface root and a slot-minimum preflight without changing preview",
@@ -2048,6 +2089,15 @@ function verifyImplementationAndTests(files) {
         publicDiagnosticIndexOnly: true,
         outsideManagedCapabilitySubtree: true,
         privateDomOrReactInspection: false,
+      },
+      currentDragSession: {
+        singlePanelSession: true,
+        ownerIdentity: "OWNER_KIND_OWNER_ID_SLOT_JSON_TUPLE",
+        epochFencedAnimationFrames: true,
+        hitTestConfinedToExactSlotSurface: true,
+        rejectedOrUnavailableClearsFallback: true,
+        coordinateLessFallbackRequiresSameAcceptedOwner: true,
+        synchronousIntentPublication: true,
       },
       successorSchemaInspector: {
         task: "M09-T05",
@@ -2237,8 +2287,8 @@ function authenticateSourcePersistenceSuccessor(files) {
     profile: "desen.app.source-persistence-proof.v1",
     result: "PASS",
     path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
-    bytes: 27_088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
   const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
   if (
@@ -2307,14 +2357,14 @@ function authenticateSourcePersistenceSuccessor(files) {
     artifact.claim?.runtimeInputOrSecretPersisted !== false ||
     artifact.claim?.concretePersistenceAdapterClaimed !== false ||
     !persistenceControlsSource.includes('return "Local draft unchanged";') ||
-    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.focusedTestCases !== 142 ||
     artifact.tests?.fullAppTestFiles !== 22 ||
-    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
     artifact.boundary?.trackedFiles !== 35 ||
     artifact.boundary?.parentArtifacts !== 3 ||
-    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
     artifact.boundary?.fullAppTestFiles !== 22 ||
-    artifact.boundary?.fullAppTestCases !== 322 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
     trackedReceipts?.length !== 35 ||
     !isDeepStrictEqual(
       receiptPaths,
@@ -2341,9 +2391,9 @@ function authenticateSourcePersistenceSuccessor(files) {
   return deepFreeze({
     task: pin.task,
     artifact: pin,
-    focusedTestCases: 140,
+    focusedTestCases: 142,
     fullAppTestFiles: 22,
-    fullAppTestCases: 322,
+    fullAppTestCases: 324,
     exactProjectScopedSourceKey: "account-app-source",
     publicEditorCorePersistencePort: true,
     authoredSourceOnly: true,

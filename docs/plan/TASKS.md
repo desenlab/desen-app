@@ -1917,10 +1917,16 @@ dirty page exit. Generation, dirty, pending, definite failure, conflict/uncertai
 reopen-required state remain visible without color-only meaning. Scenario previews, fixture
 lifecycle, Runtime input, and secrets never enter persistence.
 
-The focused five-file persistence suite passes 140/140, the complete twenty-two-file App suite
-passes 322/322, and the independent root mutation proof passes 12/12. Exact evidence is the
-27,088-byte `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json` at
-`sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`. It authenticates exact
+The retained authoring UX treats each compatible Components card body as one broad native drag
+source and keeps click insertion on a separate `Add` button. Only the sticky `Add to` target
+accepts a component drop; releases anywhere else are inert. Layers fences one global nested-slot
+projection by drag owner and epoch, applies midpoint hysteresis, renders 32 px insertion gaps, and
+keeps the guarded `Delete` control visible for the selected node.
+
+The focused five-file persistence suite passes 142/142, the complete twenty-two-file App suite
+passes 324/324, and the independent root mutation proof passes 12/12. Exact evidence is the
+27,053-byte `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json` at
+`sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`. It authenticates exact
 M09-T01, M08-T08, and M09-T11 parents and binds 35 current files without tracking historical App
 readers.
 
@@ -1933,7 +1939,7 @@ no required-gate or hosted-CI claim.
 
 Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
 `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 frozen
 artifacts and 94 current readers. Checkpoint, promotion, selector plus required-affected,
 ownership, and remaining touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and
 128/128—294/294 combined.

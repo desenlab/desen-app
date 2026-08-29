@@ -611,25 +611,29 @@ function assertIncludes(rawSource, markers, label) {
 }
 
 function assertNoPrivateDomAuthority(rawSource, label, allowLayerDropGeometry = false) {
-  const forbidden = [
-    "querySelector(",
-    "elementsFromPoint(",
-    "elementFromPoint(",
-    "__react",
-    "ReactDOM.findDOMNode",
-  ];
+  const forbidden = ["querySelector(", "elementsFromPoint(", "__react", "ReactDOM.findDOMNode"];
   const rowDropGeometryCalls = rawSource.split("getBoundingClientRect(").length - 1;
+  const layerDropRehitCalls = rawSource.split("elementFromPoint(").length - 1;
   if (
     (!allowLayerDropGeometry && rowDropGeometryCalls !== 0) ||
     (allowLayerDropGeometry &&
-      (rowDropGeometryCalls !== 4 ||
+      (rowDropGeometryCalls !== 5 ||
         !rawSource.includes("function projectNearestDrop(") ||
         !rawSource.includes("rows[hoveredRowIndex]?.getBoundingClientRect()") ||
         !rawSource.includes("row.getBoundingClientRect()") ||
         !rawSource.includes("scrollSurface.getBoundingClientRect()") ||
-        !rawSource.includes("event.currentTarget.getBoundingClientRect()")))
+        rawSource.split("event.currentTarget.getBoundingClientRect()").length - 1 !== 2))
   ) {
     forbidden.push("getBoundingClientRect(");
+  }
+  if (
+    (!allowLayerDropGeometry && layerDropRehitCalls !== 0) ||
+    (allowLayerDropGeometry &&
+      (layerDropRehitCalls !== 1 ||
+        !rawSource.includes("document.elementFromPoint(pending.clientX, pending.clientY)") ||
+        !rawSource.includes("hitSlotSurface !== pending.slotSurface")))
+  ) {
+    forbidden.push("elementFromPoint(");
   }
   const found = forbidden.filter((marker) => rawSource.includes(marker));
   if (found.length !== 0) {
@@ -1842,12 +1846,33 @@ function inspectStateBindingSuccessor(files) {
         "evaluateAuthoringNodeDeletion",
         "applyAuthoringSlotEdit",
         "applyAuthoringNodeDelete",
-        "function acceptsDragIntent(",
+        "type AuthoringDropAdmission =",
+        "function evaluateDragIntent(",
+        "interface AuthoringDragSession {",
+        "function createAuthoringDragSession(epoch = 0): AuthoringDragSession",
+        "const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession())",
+        "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
         "function projectNearestDrop(",
-        "const midpoint =",
         "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
         "const [activeDropProjection, setActiveDropProjection] = useState<AuthoringDropProjection | null>",
-        "data-drop-hovered={dropReady && dropHovered}",
+        "const projectDrop = useCallback((next: AuthoringDropProjection | null) =>",
+        "onProjectDrop={projectDrop}",
+        "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+        "pending.sessionEpoch !== currentSession.epoch",
+        "pending.ownerKey !== currentSession.ownerKey",
+        "function clearUnclaimedDrop(): void {",
+        "className={styles.componentsView}",
+        'event.dataTransfer.dropEffect = "none"',
+        'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+        "className={styles.componentSlotTarget}",
+        "onDragOver={admitComponentDrop}",
+        "onDrop={receiveComponentDrop}",
+        'data-component-card="true"',
+        "className={styles.componentItem}",
+        "draggable={enabled}",
+        "className={styles.componentAddAction}",
+        "draggable={false}",
+        "onClick={() => addComponent(component.id)}",
         'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
         "sourceNodeId: result.nodeId",
         "data-active-slot={active}",
@@ -1865,11 +1890,12 @@ function inspectStateBindingSuccessor(files) {
       [
         ".valueSourceControl",
         ".statePanel",
-        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.5rem;\n  align-items: center;\n  padding: 0 0.125rem;",
-        '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;',
-        '.slotBoundary[data-drop-hovered="true"] {\n  z-index: 4;',
-        '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
+        ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+        '.slotBoundary[data-drop-hovered="true"]::before',
+        ".layerDragGuide {",
         ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
+        ".componentItem {",
+        ".componentAddAction {",
         '.authoringPanel[data-active-tab="actions"]',
         ".eventActionPanel {",
       ],
@@ -1880,6 +1906,8 @@ function inspectStateBindingSuccessor(files) {
         "snaps a native layer drag to the before or after half of a visible layer row",
         "uses the release position when it crosses a row midpoint after the last dragover",
         "keeps the admitted gap stable while the pointer jitters around a row midpoint",
+        "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+        "uses only the App-owned drag intent and ignores forged native transfer authority",
         "Stack sign-in.layout default slot insertion boundary at position 1",
         "updates surface-local state and changes a compatible binding in the live preview",
         "Bound Value to state.password.",
@@ -1928,6 +1956,17 @@ function inspectStateBindingSuccessor(files) {
       if (!source.includes(marker)) {
         fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} lost the T07 marker ${marker}.`);
       }
+    }
+  }
+  const applicationSource = decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH);
+  for (const retiredMarker of [
+    "function acceptsDragIntent(",
+    "panelDragEnterDepth",
+    "componentDragHandle",
+    'title="Drag anywhere in this panel to add"',
+  ]) {
+    if (applicationSource.includes(retiredMarker)) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The retired drag marker returned: ${retiredMarker}.`);
     }
   }
   const applicationCss = decodeUtf8(files.get(APPLICATION_CSS_PATH), APPLICATION_CSS_PATH);
@@ -2014,6 +2053,13 @@ function inspectStateBindingSuccessor(files) {
     nonOverlappingStableSlotBoundaries: true,
     rowHalfDropTargets: true,
     stickyComponentDropTarget: true,
+    stableGlobalLayerDragSession: true,
+    globalLayerOwnerAndEpochFencing: true,
+    stableThirtyTwoPixelLayerGaps: true,
+    explicitStickyComponentDropTarget: true,
+    componentPaletteOuterDropInert: true,
+    draggableComponentCard: true,
+    separateNonDraggableComponentAddAction: true,
     successfulInsertionSelectsNewLayer: true,
     package: {
       appName: app.name,
@@ -2035,8 +2081,8 @@ function authenticateSourcePersistenceSuccessor(files) {
     profile: "desen.app.source-persistence-proof.v1",
     result: "PASS",
     path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
-    bytes: 27_088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
   const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
   if (
@@ -2108,14 +2154,14 @@ function authenticateSourcePersistenceSuccessor(files) {
     artifact.claim?.runtimeInputOrSecretPersisted !== false ||
     artifact.claim?.concretePersistenceAdapterClaimed !== false ||
     !persistenceControlsSource.includes('return "Local draft unchanged";') ||
-    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.focusedTestCases !== 142 ||
     artifact.tests?.fullAppTestFiles !== 22 ||
-    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
     artifact.boundary?.trackedFiles !== 35 ||
     artifact.boundary?.parentArtifacts !== 3 ||
-    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
     artifact.boundary?.fullAppTestFiles !== 22 ||
-    artifact.boundary?.fullAppTestCases !== 322 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
     trackedReceipts?.length !== 35 ||
     !isDeepStrictEqual(
       receiptPaths,
@@ -2142,9 +2188,9 @@ function authenticateSourcePersistenceSuccessor(files) {
   return deepFreeze({
     task: pin.task,
     artifact: pin,
-    focusedTestCases: 140,
+    focusedTestCases: 142,
     fullAppTestFiles: 22,
-    fullAppTestCases: 322,
+    fullAppTestCases: 324,
     exactProjectScopedSourceKey: "account-app-source",
     publicEditorCorePersistencePort: true,
     authoredSourceOnly: true,

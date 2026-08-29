@@ -231,6 +231,13 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[1], () => {
   assert.equal(built.currentCompatibility.successor.nonOverlappingStableSlotBoundaries, true);
   assert.equal(built.currentCompatibility.successor.rowHalfDropTargets, true);
   assert.equal(built.currentCompatibility.successor.stickyComponentDropTarget, true);
+  assert.equal(built.currentCompatibility.successor.stableGlobalLayerDragSession, true);
+  assert.equal(built.currentCompatibility.successor.globalLayerOwnerAndEpochFencing, true);
+  assert.equal(built.currentCompatibility.successor.stableThirtyTwoPixelLayerGaps, true);
+  assert.equal(built.currentCompatibility.successor.explicitStickyComponentDropTarget, true);
+  assert.equal(built.currentCompatibility.successor.componentPaletteOuterDropInert, true);
+  assert.equal(built.currentCompatibility.successor.draggableComponentCard, true);
+  assert.equal(built.currentCompatibility.successor.separateNonDraggableComponentAddAction, true);
   assert.equal(built.currentCompatibility.successor.successfulInsertionSelectsNewLayer, true);
   assert.equal(built.currentCompatibility.successor.persistenceImplemented, false);
   assert.equal(built.currentCompatibility.successor.eventActionEditingImplemented, false);
@@ -385,6 +392,27 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[7], async () => {
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
+  const applicationSource = await readFile(path.join(ROOT, SOURCE_PATHS.applicationSource), "utf8");
+  for (const [search, replacement] of [
+    [
+      "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
+      "dragSession.current = createAuthoringDragSession(current.epoch)",
+    ],
+    ["onDrop={receiveComponentDrop}", "onDrop={() => undefined}"],
+    ["className={styles.componentAddAction}", "className={styles.removedComponentAddAction}"],
+  ]) {
+    await assert.rejects(
+      buildDesenAppSchemaInspectorEvidence({
+        fileOverrides: new Map([
+          [
+            SOURCE_PATHS.applicationSource,
+            Buffer.from(applicationSource.replace(search, replacement)),
+          ],
+        ]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
   const namedSlotArtifactBytes = await readFile(path.join(ROOT, NAMED_SLOT_ARTIFACT_PATH));
   await assert.rejects(
     buildDesenAppSchemaInspectorEvidence({
@@ -550,12 +578,12 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
         profile: "desen.app.source-persistence-proof.v1",
         result: "PASS",
         path: SOURCE_PERSISTENCE_ARTIFACT,
-        bytes: 27_088,
-        sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+        bytes: 27_053,
+        sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
       },
-      focusedTestCases: 140,
+      focusedTestCases: 142,
       fullAppTestFiles: 22,
-      fullAppTestCases: 322,
+      fullAppTestCases: 324,
       sourceKey: "account-app-source",
       publicPort: true,
       authoredSourceOnly: true,

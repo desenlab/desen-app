@@ -992,13 +992,19 @@ conflict/uncertainty, and reopen-required states stay visible without color-only
 deliberately supplies no concrete storage adapter; the trusted host owns that separate platform
 boundary.
 
-The focused persistence suite passes 140/140 across five files, the complete App suite passes
-322/322 across twenty-two files, and the independent root mutation proof passes 12/12. Exact
-evidence is the 27,088-byte
+The retained authoring UX treats each compatible Components card body as one broad native drag
+source and keeps click insertion on a separate `Add` button. Only the sticky `Add to` target
+accepts a component drop; releases anywhere else are inert. Layers fences one global nested-slot
+projection by drag owner and epoch, applies midpoint hysteresis, renders 32 px insertion gaps, and
+keeps the guarded `Delete` control visible for the selected node.
+
+The focused persistence suite passes 142/142 across five files, the complete App suite passes
+324/324 across twenty-two files, and the independent root mutation proof passes 12/12. Exact
+evidence is the 27,053-byte
 [`desen-app-0.1.0-source-persistence.json`](docs/proof/artifacts/desen-app-0.1.0-source-persistence.json)
-at `sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`; the reviewed 4,800-byte
+at `sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`; the reviewed 5,009-byte
 report is [`DESEN-APP-SOURCE-PERSISTENCE.md`](docs/proof/DESEN-APP-SOURCE-PERSISTENCE.md) at
-`sha256:7b464620be5653de51f440d9498af0468ee8639fad805c3a8db2eb2c8fbe738e`. The artifact
+`sha256:63d5d115e719ccdd91ecf68eea91bcd6f8c68c6513a8fbdea3bfd9f855637821`. The artifact
 authenticates exact M09-T01, M08-T08, and M09-T11 parents and binds 35 current files without
 tracking historical App readers.
 
@@ -1011,7 +1017,7 @@ projection are pinned at `sha256:c1d3eb2b4b56e9a97d700f89ac0c0ff9c24bf158c3d18bd
 `sha256:6511d79ff42cb84dd303f771b821a061cd89c72462dddf2ccd3966397c602983`.
 Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
 `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 frozen
 artifacts and 94 current readers. Checkpoint, promotion, selector plus required-affected,
 ownership, and remaining touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and
 128/128—294/294 combined.

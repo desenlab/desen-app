@@ -1240,12 +1240,12 @@ The current surface/controller guard admits pristine no-port navigation as `Loca
 edited no-port and port-backed dirty drafts require admission across App links and browser traversal,
 and `beforeunload` protects dirty page exit. Generation, dirty, pending, failure,
 conflict/uncertainty, and reopen state are visible without relying on color. The focused five-file
-suite passes 140/140, the complete twenty-two-file App suite passes
-322/322, and the independent root mutation proof passes 12/12.
+suite passes 142/142, the complete twenty-two-file App suite passes
+324/324, and the independent root mutation proof passes 12/12.
 
-The deterministic 27,088-byte artifact is
+The deterministic 27,053-byte artifact is
 `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json` at
-`sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`. It authenticates exact
+`sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`. It authenticates exact
 M09-T01, M08-T08, and M09-T11 parents, binds 35 current files, and deliberately excludes historical
 App readers. These remain local receipts; no required-gate, hosted-CI, concrete App adapter,
 diagnostics, publication/activation, or automated real-browser E2E result is inferred.
@@ -1259,7 +1259,7 @@ projection are pinned at `sha256:c1d3eb2b4b56e9a97d700f89ac0c0ff9c24bf158c3d18bd
 `sha256:6511d79ff42cb84dd303f771b821a061cd89c72462dddf2ccd3966397c602983`.
 Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
 `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 frozen
 artifacts and 94 current readers. Checkpoint, promotion, selector plus required-affected,
 ownership, and remaining touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and
 128/128—294/294 combined.
@@ -4300,8 +4300,8 @@ M09-T11 evidence:
 M09-T12 evidence:
 
 - `docs/proof/DESEN-APP-SOURCE-PERSISTENCE.md`
-- `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`, exactly `27,088` bytes at
-  `sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`
+- `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`, exactly `27,053` bytes at
+  `sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`
 - prerequisite authority: exact M09-T01 shell/navigation, M08-T08 Editor persistence, and M09-T11
   scenario/fixture/fidelity artifacts are authenticated before any T12 claim
 - persistence authority: one public `DesenEditorPersistencePort` is captured from the trusted host;
@@ -4329,8 +4329,13 @@ M09-T12 evidence:
   drafts require admission across navigation/traversal and protect dirty page exit; generation,
   dirty, pending, failure, uncertainty, and reopen state remain visibly and accessibly distinct;
   scenario previews, fixture state, Runtime inputs, and secrets are never persisted
-- local proof: the focused five-file persistence suite passes 140/140, the complete twenty-two-file
-  App suite passes 322/322, and the independent root mutation proof passes 12/12
+- retained authoring UX: each compatible Components card body is a broad native drag source with a
+  separate `Add` button; only the sticky `Add to` target accepts component drops and releases
+  elsewhere are inert; Layers fences one global nested-slot projection by drag owner and epoch,
+  applies midpoint hysteresis, renders 32 px insertion gaps, and keeps the guarded `Delete` control
+  visible for the selected node
+- local proof: the focused five-file persistence suite passes 142/142, the complete twenty-two-file
+  App suite passes 324/324, and the independent root mutation proof passes 12/12
 - evidence boundary: the artifact binds 35 current files and three exact parents without tracking
   historical App readers; these are local receipts and make no required-gate, hosted-CI, concrete
   App adapter, diagnostics, publication/activation, or automated real-browser E2E claim
@@ -4339,7 +4344,7 @@ M09-T12 evidence:
   neutral inventory, impact graph, path set, and ownership projection are exact code-owned digests
 - reader checkpoint: sequence 51 advances sequence-50 head
   `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-  `sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 artifacts and
+  `sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 artifacts and
   94 readers; checkpoint/promotion/selector-plus-required-affected/ownership/remaining-touched
   suites pass 74/74, 19/19, 58/58, 15/15, and 128/128—294/294 combined
 - coverage decision: M09-T12 is `DONE`; `N-012`, `N-018`, and `S-003` remain `TESTED` with

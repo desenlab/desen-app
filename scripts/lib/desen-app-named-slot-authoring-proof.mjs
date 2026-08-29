@@ -215,6 +215,7 @@ const EXPECTED_APPLICATION_TEST_NAMES = Object.freeze([
   "preserves the selected layer, preview, and focus when deletion is rejected",
   "uses only the App-owned drag intent and ignores forged native transfer authority",
   "snaps a native layer drag to the before or after half of a visible layer row",
+  "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
   "reorders a selected Source node through the keyboard placement control",
   "moves nodes across nested slots with keyboard and App-owned native drag intent",
   "switches to the exact Catalog component library and filters only the local view",
@@ -759,14 +760,25 @@ function inspectApplicationSource(source) {
       "return owner.slotContracts.map((contract) =>",
       'event.dataTransfer.setData("text/plain", "DESEN App authoring item")',
       "const [dragIntent, setDragIntent] = useState<AuthoringDragIntent | null>(null)",
-      "const dropReady = dragIntent !== null && dragAccepted",
-      "function acceptsDragIntent(",
+      'const dropReady = dragAdmission?.status === "accepted"',
+      "type AuthoringDropAdmission =",
+      "function evaluateDragIntent(",
+      "interface AuthoringDragSession {",
+      "function createAuthoringDragSession(epoch = 0): AuthoringDragSession",
+      "const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession())",
+      "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
       "const [activeDropProjection, setActiveDropProjection] = useState<AuthoringDropProjection | null>",
       "const projectDrop = useCallback((next: AuthoringDropProjection | null) =>",
       "onProjectDrop={projectDrop}",
       "const activeDropIndex =",
+      "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
       "function projectNearestDrop(",
       "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
+      "pending.sessionEpoch !== currentSession.epoch",
+      "pending.ownerKey !== currentSession.ownerKey",
+      "document.elementFromPoint(pending.clientX, pending.clientY)",
+      "hitSlotSurface !== pending.slotSurface",
+      "function clearUnclaimedDrop(): void {",
       "data-drop-hovered={dropReady && dropHovered}",
       "data-drop-ready={dropReady}",
       "onDragEnter={updateDropProjection}",
@@ -778,22 +790,35 @@ function inspectApplicationSource(source) {
       "evaluateAuthoringSlotInsertion(\n                              route,",
       "evaluateAuthoringSlotPlacement(route, authoringModel, target",
       "selectedPlacement?.accepted === true && selectedPlacement.changesSource === true",
-      "compatibility.accepted && compatibility.changesSource",
+      'if (!compatibility.changesSource) return Object.freeze({ status: "noop" })',
       "slot insertion boundary at position",
       'role="group"',
       "const componentDropReady =",
       "const [targetDragHovered, setTargetDragHovered] = useState(false)",
-      "const panelDragEnterDepth = useRef(0)",
+      "const targetDragEnterDepth = useRef(0)",
       "data-drop-hovered={componentDropReady && targetDragHovered}",
       "data-drop-ready={componentDropReady}",
       "data-guide={readySlot === null}",
-      "panelDragEnterDepth.current += 1",
-      "panelDragEnterDepth.current = Math.max(0, panelDragEnterDepth.current - 1)",
+      "targetDragEnterDepth.current += 1",
+      "targetDragEnterDepth.current = Math.max(0, targetDragEnterDepth.current - 1)",
+      "className={styles.componentsView}",
+      'event.dataTransfer.dropEffect = "none"',
+      'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+      'if (!componentDropReady) return;\n    event.stopPropagation();\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
+      "onDragOver={admitComponentDrop}",
+      "onDrop={receiveComponentDrop}",
       "No drop target selected",
       "Choose a named slot in Layers before placing a component.",
       "Choose slot in Layers",
-      'title="Drag anywhere in this panel to add"',
-      "className={styles.componentDragHandle}",
+      "className={styles.componentSlotTarget}",
+      'data-component-card="true"',
+      "className={styles.componentItem}",
+      "draggable={enabled}",
+      "? `Drag ${component.displayName} to the Add to target`",
+      "className={styles.componentAddAction}",
+      "draggable={false}",
+      "event.preventDefault();\n                                event.stopPropagation();",
+      "onClick={() => addComponent(component.id)}",
       "const COMPONENT_PALETTE_RENDER_LIMIT = 24",
       "const visibleComponents = components.slice(0, COMPONENT_PALETTE_RENDER_LIMIT)",
       "const groups = groupComponents(visibleComponents)",
@@ -827,7 +852,14 @@ function inspectApplicationSource(source) {
   );
   assertExcludes(
     source,
-    ["dataTransfer.getData", "document.elementFromPoint", "elementsFromPoint"],
+    [
+      "dataTransfer.getData",
+      "elementsFromPoint",
+      "function acceptsDragIntent(",
+      "panelDragEnterDepth",
+      "componentDragHandle",
+      'title="Drag anywhere in this panel to add"',
+    ],
     "application.tsx",
   );
   return deepFreeze({
@@ -840,8 +872,15 @@ function inspectApplicationSource(source) {
     rowHalfDropTargets: true,
     rowGeometryUsedOnlyForBoundedDropProjection: true,
     stableNestedDragHoverTracking: true,
+    stableGlobalLayerDragSession: true,
+    globalLayerOwnerAndEpochFencing: true,
+    edgeScrollRehitTestsExactSlotSurface: true,
     componentCompatibilityVisible: true,
     explicitComponentDropTarget: true,
+    componentDropAdmissionLimitedToExplicitTarget: true,
+    componentPaletteOuterDropInert: true,
+    draggableComponentCard: true,
+    separateNonDraggableComponentAddAction: true,
     stickyComponentDropTarget: true,
     componentDragGuidance: true,
     slotlessDisabledPlacementGuide: true,
@@ -872,20 +911,21 @@ function inspectCssSource(source) {
   assertIncludes(
     source,
     [
-      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.5rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;\n  align-items: center;\n  padding: 0 0.125rem;",
       '.slotBoundary[data-drop-ready="true"]',
       '.slotBoundary[data-drop-ready="true"]::before',
       '.slotBoundary[data-drop-hovered="true"]',
       '.slotBoundary[data-drop-ready="true"] .slotBoundaryLine',
       '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
-      ".componentSlotTarget",
-      "position: sticky",
-      "top: 0.25rem",
+      ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
       '.componentSlotTarget[data-drag-active="true"]',
       '.componentSlotTarget[data-ready="true"]',
       '.componentSlotTarget[data-guide="true"]',
       '.componentSlotTarget[data-drop-ready="true"]',
       '.componentSlotTarget[data-drop-hovered="true"]',
+      ".layerDragGuide {",
+      ".componentItem {",
+      ".componentAddAction {",
     ],
     "application.module.css",
   );
@@ -912,8 +952,11 @@ function inspectCssSource(source) {
     expandedNonOverlappingDropBoundaries: true,
     rowDropPositionPresentation: true,
     stableHoveredDropPresentation: true,
+    stableGlobalDragGuidePresentation: true,
     stickyComponentTargetPresentation: true,
     slotlessTargetGuidePresentation: true,
+    draggableComponentCardPresentation: true,
+    separateComponentAddActionPresentation: true,
     managedDescendantSlotSelectors: 0,
   });
 }
@@ -1059,8 +1102,16 @@ function inspectTests(files) {
       "preserves the selected layer, preview, and focus when deletion is rejected",
       "expect(document.activeElement).toBe(deleteTitle)",
       "expect(reads).toBe(0)",
+      "const alertCard = alert.closest(\"[data-component-card='true']\")",
+      "expect((alert as HTMLButtonElement).draggable).toBe(false)",
+      "expect(alertCard.draggable).toBe(true)",
+      "expect(outsideDrop.defaultPrevented).toBe(true)",
+      "expect(slotEdit).toHaveBeenCalledTimes(1)",
       'getAttribute("data-drop-hovered")',
       'getAttribute("data-drop-ready")',
+      "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+      "expect(elementFromPoint).toHaveBeenCalledWith(20, 195)",
+      "expect(cancelFrame).toHaveBeenCalledWith(2)",
       "No drop target selected",
       "Choose slot in Layers",
       "Choose a named slot in Layers, then return to Components.",
@@ -1345,8 +1396,8 @@ function authenticateSourcePersistenceSuccessor(files) {
     profile: "desen.app.source-persistence-proof.v1",
     result: "PASS",
     path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
-    bytes: 27_088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
   const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
   if (
@@ -1415,14 +1466,14 @@ function authenticateSourcePersistenceSuccessor(files) {
     artifact.claim?.runtimeInputOrSecretPersisted !== false ||
     artifact.claim?.concretePersistenceAdapterClaimed !== false ||
     !persistenceControlsSource.includes('return "Local draft unchanged";') ||
-    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.focusedTestCases !== 142 ||
     artifact.tests?.fullAppTestFiles !== 22 ||
-    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
     artifact.boundary?.trackedFiles !== 35 ||
     artifact.boundary?.parentArtifacts !== 3 ||
-    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
     artifact.boundary?.fullAppTestFiles !== 22 ||
-    artifact.boundary?.fullAppTestCases !== 322 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
     trackedReceipts?.length !== 35 ||
     !isDeepStrictEqual(
       receiptPaths,
@@ -1449,9 +1500,9 @@ function authenticateSourcePersistenceSuccessor(files) {
   return deepFreeze({
     task: pin.task,
     artifact: pin,
-    focusedTestCases: 140,
+    focusedTestCases: 142,
     fullAppTestFiles: 22,
-    fullAppTestCases: 322,
+    fullAppTestCases: 324,
     exactProjectScopedSourceKey: "account-app-source",
     publicEditorCorePersistencePort: true,
     authoredSourceOnly: true,

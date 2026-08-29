@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7",
+  "headSha256": "42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921",
   "checkpoints": [
     {
       "sequence": 1,
@@ -25306,8 +25306,8 @@
         {
           "task": "M09-T12",
           "path": "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json",
-          "bytes": 27088,
-          "sha256": "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544"
+          "bytes": 27053,
+          "sha256": "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734"
         }
       ],
       "readers": [
@@ -25805,169 +25805,169 @@
           "task": "M09-T01",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-shell-navigation-proof.mjs",
-          "bytes": 67358,
-          "sha256": "64c66f67176f95b8beaf18cb0df0be88643dae72832ae27ae50e6efd2a24d4a3"
+          "bytes": 68538,
+          "sha256": "1371922acd163c1101c9557d7dc45115c7c50227dc4eadb805ce174502675d1a"
         },
         {
           "task": "M09-T01",
           "role": "root-test",
           "path": "tests/desen-app-shell-navigation.test.mjs",
-          "bytes": 30098,
-          "sha256": "087c04d5f5d49fc5a311760f28dac9090c4d636662277499d674c864f9e8b5ca"
+          "bytes": 30609,
+          "sha256": "4f11ad9bd5c9749c2bfe38fa6089eeae63ab1e256bcbe231c6118101ba66109a"
         },
         {
           "task": "M09-T02",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs",
-          "bytes": 104395,
-          "sha256": "b100ce6197ddcf52fafd3f4872744a8cb9403571b4eba9f0f53b3f066d6a0e7d"
+          "bytes": 106767,
+          "sha256": "dcbde73e1bb1e91c2cb7e732cef2b9746c0855541e29b468caf94d065e3823de"
         },
         {
           "task": "M09-T02",
           "role": "root-test",
           "path": "tests/desen-app-catalog-panel-layer-tree.test.mjs",
-          "bytes": 32437,
-          "sha256": "7d0d866e1232a573b6370973112b2613678e05e057312037f69f925b1d12421c"
+          "bytes": 34156,
+          "sha256": "9fb718786808764fe49bd60b5978a1d9d8596402a3f73b612a3856fbb06c0d38"
         },
         {
           "task": "M09-T03",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-real-adapter-canvas-proof.mjs",
-          "bytes": 124212,
-          "sha256": "dfd3a4d071e9750d8b649b797121c441b9de078fcb088a74734cb95d51db48a5"
+          "bytes": 126537,
+          "sha256": "26584a460c75c1354b033491c4be04e2e47c0b7388ceadc915ff389fff34cc70"
         },
         {
           "task": "M09-T03",
           "role": "root-test",
           "path": "tests/desen-app-real-adapter-canvas.test.mjs",
           "bytes": 34472,
-          "sha256": "5b4585c1214922aff7508d5467391a1d49d092a9c0a022dc7c7c7bb9e7006244"
+          "sha256": "792c1c12b0a096f4795a380a1c47330983ada58da27df4221f89b4081b55bc98"
         },
         {
           "task": "M09-T04",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-selection-overlay-proof.mjs",
-          "bytes": 80780,
-          "sha256": "07972d6899862f429d4d4b8418a13bfa8d3e8861f12bdfa57cb5baa4523d3d25"
+          "bytes": 84909,
+          "sha256": "0d50b4174619c0f18eba3b87d6fbfca18601e91656c9714c2d6d6518cd0c4687"
         },
         {
           "task": "M09-T04",
           "role": "root-test",
           "path": "tests/desen-app-selection-overlay.test.mjs",
-          "bytes": 26394,
-          "sha256": "98af21c85b0ff5033897ccd99c59aef92469ac91cf87d1acc1cb9a5039859b84"
+          "bytes": 26639,
+          "sha256": "1648365ecb820f09673e7ec310bfd89cd48794a5dcb146aa398e0acff7ff02c1"
         },
         {
           "task": "M09-T05",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-schema-inspector-proof.mjs",
-          "bytes": 93200,
-          "sha256": "45bb162f52df825a719ffbbc984531877bf374625c848006d8d313dc5bbe51b4"
+          "bytes": 95286,
+          "sha256": "ff898e81431610422926ccaa84a81b9b16d17f6270337f3c393086f86c306fd6"
         },
         {
           "task": "M09-T05",
           "role": "root-test",
           "path": "tests/desen-app-schema-inspector.test.mjs",
-          "bytes": 27985,
-          "sha256": "e31fd0522b34f994438dc0571c3f62e915251984290188df1f824904cbf30ae4"
+          "bytes": 29426,
+          "sha256": "cf592c2772de315c8ecc879f06890506f2705b0600eb0f97f91c4d6a54ae673b"
         },
         {
           "task": "M09-T06",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-structured-inspector-proof.mjs",
-          "bytes": 105209,
-          "sha256": "e9ff250dec049a896ded7506fb7f76ac4704669b85226abfc7abfaead82d85d6"
+          "bytes": 107694,
+          "sha256": "c30df75eb428c9db9b714fd2d3fe53dd169f9b2e1a573b9a884a0187332acdf9"
         },
         {
           "task": "M09-T06",
           "role": "root-test",
           "path": "tests/desen-app-structured-inspector.test.mjs",
-          "bytes": 40089,
-          "sha256": "69c4a557b09725133e645831e6b8ea731b60c7fe354d3f0fd331adaddc0b210d"
+          "bytes": 41534,
+          "sha256": "430444fe0d7f3c966ffa9e6b321ef97c0965f05b486a352aa4491846e9bd0493"
         },
         {
           "task": "M09-T07",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-named-slot-authoring-proof.mjs",
-          "bytes": 77146,
-          "sha256": "b304d55fd6de22352aa06cbae8c15690ffc3c849f6f19587c86ecfbeabaf5c8d"
+          "bytes": 79890,
+          "sha256": "802f95ecba5600b0976600fc02eec8a6c57e99298612f73d1a5c5198fc032951"
         },
         {
           "task": "M09-T07",
           "role": "root-test",
           "path": "tests/desen-app-named-slot-authoring.test.mjs",
-          "bytes": 28968,
-          "sha256": "b2d7a585abcf36e4a49a7f7dd9900289ef01d451d9e905da926e3e962ed96054"
+          "bytes": 28966,
+          "sha256": "3970d7b860741c3072d69834e061e5071240e7019570867167709888d88b3e7f"
         },
         {
           "task": "M09-T08",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-state-binding-editor-proof.mjs",
-          "bytes": 72202,
-          "sha256": "2a5f32ed81f49222cfb3e89538600eb3bd242cd3929280ac7cfdf63ca009e931"
+          "bytes": 73688,
+          "sha256": "79ae7d748db96dbd59d7f75424188524e1a736baa3caded1f66dd8de525fde9f"
         },
         {
           "task": "M09-T08",
           "role": "root-test",
           "path": "tests/desen-app-state-binding-editor.test.mjs",
-          "bytes": 23015,
-          "sha256": "002a1ea0435d976060ec6cda2047b404dda38a457cea887596e358a35dbca06b"
+          "bytes": 25096,
+          "sha256": "0f4beb79c946918099a8fb2a6bdcddf56fdf10eed03b08e923fa0fe7dc759f35"
         },
         {
           "task": "M09-T09",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-event-action-editor-proof.mjs",
-          "bytes": 71164,
-          "sha256": "1f7cff709ad28fc424edaa91cec84391b5bc928882530287ca16ec0890e04e59"
+          "bytes": 74059,
+          "sha256": "79456837bfdccb170e7da18433c48d6f388321c742637efab2956887bc3dec37"
         },
         {
           "task": "M09-T09",
           "role": "root-test",
           "path": "tests/desen-app-event-action-editor.test.mjs",
-          "bytes": 24546,
-          "sha256": "9be0dc177bd42551c06cc8d72599cbf26a6ae20df4283611f8c3ece82821961c"
+          "bytes": 25783,
+          "sha256": "44013181a9fd0fef2984e5f086b2f5009bd60dfa1b923cbbd8dec9cbd22635a1"
         },
         {
           "task": "M09-T10",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-design-run-modes-proof.mjs",
           "bytes": 75421,
-          "sha256": "bd1f5a87b084c541061ba27b2401fb537e3ce059e9d8e6ee29b9be1782141094"
+          "sha256": "546a988e3d622b3c4790744fee7b5fcadcbafe64091bb9cdac8e6095e366ef50"
         },
         {
           "task": "M09-T10",
           "role": "root-test",
           "path": "tests/desen-app-design-run-modes.test.mjs",
           "bytes": 21889,
-          "sha256": "3456a84843901e86ae8fe104d69884010892c842579acec9fa4cc26d98f3d71c"
+          "sha256": "33fe4cd0183dd447b86891bdf914b0cba6f4409f326aee63d104a6f79e2938b1"
         },
         {
           "task": "M09-T11",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-fixtures-scenarios-fidelity-proof.mjs",
-          "bytes": 76969,
-          "sha256": "b7c51fff842bf2f7a588afa989ba574736bdf0751027f4fe881563c335b47b06"
+          "bytes": 81554,
+          "sha256": "a6913de98670b9f233f97f7855aa66385a3a69d607b3ba47ae590a29f321747d"
         },
         {
           "task": "M09-T11",
           "role": "root-test",
           "path": "tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
-          "bytes": 24601,
-          "sha256": "ed5892f30ee648c42d7ba6f343494511dbc057abfd0e2c1853dad03ae452ba50"
+          "bytes": 29373,
+          "sha256": "76a7d3751ab86ccf181fbea6a8b3f1543698a0cf26c7c1ae0c72acdabf687172"
         },
         {
           "task": "M09-T12",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-source-persistence-proof.mjs",
-          "bytes": 55293,
-          "sha256": "3fd171a97c6dfc7e5dadc70bbaececd157b4209270d8f2bb8c65237d19f4948a"
+          "bytes": 56014,
+          "sha256": "18c759c87011e4ed30b044eaa02b9ccf2cc9e4134c33f7cfd0f292070ffc5add"
         },
         {
           "task": "M09-T12",
           "role": "root-test",
           "path": "tests/desen-app-source-persistence.test.mjs",
-          "bytes": 21588,
-          "sha256": "9c6ca5bbc6234c87b73d9fb9d139e48a7ccf207f9888f43c000afc4e3835fda8"
+          "bytes": 23578,
+          "sha256": "baee083f499523e8d5ea47b322f2d1c162097c27b95897946e72dcb25e99f033"
         }
       ]
     }

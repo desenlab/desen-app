@@ -144,16 +144,16 @@ workload-id, ordered-equivalence, T12-closure, required-plan, and shadow-plan au
 `sha256:230b004ecbd81c0be68456c4ad15326b8473177cf927f5dc330fdc8fdf7c152c`.
 Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
 `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 frozen
 artifacts and 94 current readers. The promoted selector and independently verified required runner
-are pinned at `sha256:d15cfbd9c7de2bea53eefbe58bb7aa23a9138559a8a1989c6c02c508df843cd1` and
-`sha256:e3ac0368a8163e83b85ba05176d142abc03cbe3786a5dd306534001c7c1f96e3`.
+are pinned at `sha256:ff4cdbac5be5b545843ca1aaf9842630e41e4f96e3cfccfa67d10e62436f93c6` and
+`sha256:727e48f526547f6630d369b53b52da511bb1fb61389bbca1c36a757ad018bf93`.
 The exact current Design/Run affected-selection plan is independently pinned at
-`sha256:d8a6ccf3ace5cff7f954b7e18043e9567a47c86c4774b66977ab3a2b573f4409`.
+`sha256:a59b853be95d7c834821d48786c8d3579552cb0eaebc571232cc06b43f4a9f4a`.
 The 51-checkpoint manifest reseals changed reader indexes 70–93. Its appended T12 proof library and
-root reader are exactly 55,293 bytes at
-`sha256:3fd171a97c6dfc7e5dadc70bbaececd157b4209270d8f2bb8c65237d19f4948a` and 21,588 bytes at
-`sha256:9c6ca5bbc6234c87b73d9fb9d139e48a7ccf207f9888f43c000afc4e3835fda8`.
+root reader are exactly 56,014 bytes at
+`sha256:18c759c87011e4ed30b044eaa02b9ccf2cc9e4134c33f7cfd0f292070ffc5add` and 23,578 bytes at
+`sha256:baee083f499523e8d5ea47b322f2d1c162097c27b95897946e72dcb25e99f033`.
 The historical M09-T07 selector-only semantic impact graph is pinned independently as
 `sha256:905d22e40524d26eac056ca32236f0948910a7ac6049b0d35c644f19e629d668`.
 The historical M09-T07 successor contains 176 proof-owned reader paths across 1,192 tracked paths.
@@ -1273,8 +1273,8 @@ N-035 and S-001 are `TESTED`; PF-028 is `CLOSED`; P-08 remains `NOT_PROVEN`, P-0
 P-10 remain `PARTIAL`, N-036 remains `PLANNED`, and PF-025, PF-083, and PF-089 remain `OPEN`;
 implementation progress is 106/145 (73%), M09 is 11/14 (79%), and M09-T12 is next.
 The M09-T12 focused five-file persistence, complete App, and independent root mutation suites pass
-140/140, 322/322, and 12/12 locally. The task artifact is exactly 27,088 bytes at
-`sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`. The task proof also pins
+142/142, 324/324, and 12/12 locally. The task artifact is exactly 27,053 bytes at
+`sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`. The task proof also pins
 complete canonical Source dirty authority rather than identity/version, same-value/revert
 cleanliness, successful Open/Save baselines, current-vs-dispatched-save-snapshot settlement, and
 centralized commits. Its rerender-safe no-port projection admits pristine navigation. The exact
@@ -1298,7 +1298,7 @@ P-09/P-10 remain `PARTIAL`, and PF-085/PF-089 remain `OPEN`; implementation prog
 (74%), M09 is 12/14 (86%), proof gates remain 10/13, and M09-T13 is next.
 Sequence 51 advances exact sequence-50 predecessor
 `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 artifacts and
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 artifacts and
 94 readers. Checkpoint, promotion, selector plus required-affected, ownership, and remaining
 touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and 128/128—294/294 combined.
 Global progress and next-task ownership remain in the project status documents.

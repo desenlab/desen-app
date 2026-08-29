@@ -213,6 +213,8 @@ const EXPECTED_PANEL_TEST_NAMES = Object.freeze([
 
 const EXPECTED_APPLICATION_TEST_NAMES = Object.freeze([
   "switches to the exact Catalog component library and filters only the local view",
+  "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+  "uses only the App-owned drag intent and ignores forged native transfer authority",
   "commits sign-in event handlers and complete actions through the live authoring session",
   "keeps the prior event projection and canvas when action preview preflight fails",
   "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
@@ -598,8 +600,32 @@ function inspectApplicationSource(source) {
       'activeTab === "actions"',
       "const resolvedActiveSlot = activeSlot ?? defaultSlot;",
       'aria-label="Change target in Layers"',
-      "const hasNoCoordinates =",
-      ": interaction.activeDropProjection",
+      "type AuthoringDropAdmission =",
+      "function evaluateDragIntent(",
+      "interface AuthoringDragSession {",
+      "function createAuthoringDragSession(epoch = 0): AuthoringDragSession",
+      "const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession())",
+      "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
+      "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+      "pending.sessionEpoch !== currentSession.epoch",
+      "pending.ownerKey !== currentSession.ownerKey",
+      "interaction.dragSession.current.ownerKey === sessionOwnerKey",
+      'interaction.dragSession.current.admission === "accepted"',
+      "interaction.dragSession.current.lastAcceptedProjection",
+      "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
+      "function clearUnclaimedDrop(): void {",
+      "className={styles.componentsView}",
+      'event.dataTransfer.dropEffect = "none"',
+      'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+      "className={styles.componentSlotTarget}",
+      "onDragOver={admitComponentDrop}",
+      "onDrop={receiveComponentDrop}",
+      'data-component-card="true"',
+      "className={styles.componentItem}",
+      "draggable={enabled}",
+      "className={styles.componentAddAction}",
+      "draggable={false}",
+      "onClick={() => addComponent(component.id)}",
       '(event.key !== "Delete" && event.key !== "Backspace")',
       "target instanceof HTMLInputElement",
       "target instanceof HTMLTextAreaElement",
@@ -611,7 +637,18 @@ function inspectApplicationSource(source) {
     ],
     "application.tsx",
   );
-  assertExcludes(source, ["@desen/editor-core/src", "@desen/publisher/src"], "application.tsx");
+  assertExcludes(
+    source,
+    [
+      "@desen/editor-core/src",
+      "@desen/publisher/src",
+      "function acceptsDragIntent(",
+      "panelDragEnterDepth",
+      "componentDragHandle",
+      'title="Drag anywhere in this panel to add"',
+    ],
+    "application.tsx",
+  );
   inspectEventActionCommitFlow(source);
   return deepFreeze({
     exactComponentOwnerSelection: true,
@@ -624,7 +661,14 @@ function inspectApplicationSource(source) {
     eventActionChromeOutsideManagedCapabilitySubtree: true,
     retainedRootSafeDefaultPlacementTarget: true,
     retainedExplicitChangeTarget: true,
-    retainedLastValidRowDropProjection: true,
+    stableGlobalLayerDragSession: true,
+    globalLayerOwnerAndEpochFencing: true,
+    guardedLastAcceptedProjection: true,
+    layerMidpointHysteresis: 4,
+    explicitStickyComponentDropTarget: true,
+    componentPaletteOuterDropInert: true,
+    draggableComponentCard: true,
+    separateNonDraggableComponentAddAction: true,
     retainedVisibleSelectedLayerDeleteControl: true,
     retainedGuardedDeleteAndBackspace: true,
   });
@@ -764,8 +808,11 @@ function inspectCssSource(source) {
       ".actionJsonTextarea {",
       '.actionJsonTextarea[aria-invalid="true"]',
       ".actionCardControls button:focus-visible",
-      '.slotBoundary[data-drop-ready="true"] {',
-      "min-height: 1.625rem;",
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;",
+      ".layerDragGuide {",
+      ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
+      ".componentItem {",
+      ".componentAddAction {",
       ".authoringSelectionActions {",
       ".deleteLayerAction {",
     ],
@@ -777,7 +824,10 @@ function inspectCssSource(source) {
     recursiveSettlementTones: true,
     visibleInvalidJsonState: true,
     keyboardFocusPresentation: true,
-    retainedEnlargedDropLanePresentation: true,
+    stableThirtyTwoPixelLayerGapPresentation: true,
+    stableGlobalDragGuidePresentation: true,
+    stickyExplicitComponentTargetPresentation: true,
+    draggableComponentCardAndSeparateAddPresentation: true,
     retainedVisibleDeletePresentation: true,
   });
 }
@@ -1253,8 +1303,8 @@ function authenticateSourcePersistenceSuccessor(files) {
     profile: "desen.app.source-persistence-proof.v1",
     result: "PASS",
     path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
-    bytes: 27_088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
   const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
   if (
@@ -1323,14 +1373,14 @@ function authenticateSourcePersistenceSuccessor(files) {
     artifact.claim?.runtimeInputOrSecretPersisted !== false ||
     artifact.claim?.concretePersistenceAdapterClaimed !== false ||
     !persistenceControlsSource.includes('return "Local draft unchanged";') ||
-    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.focusedTestCases !== 142 ||
     artifact.tests?.fullAppTestFiles !== 22 ||
-    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
     artifact.boundary?.trackedFiles !== 35 ||
     artifact.boundary?.parentArtifacts !== 3 ||
-    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
     artifact.boundary?.fullAppTestFiles !== 22 ||
-    artifact.boundary?.fullAppTestCases !== 322 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
     trackedReceipts?.length !== 35 ||
     !isDeepStrictEqual(
       receiptPaths,
@@ -1357,9 +1407,9 @@ function authenticateSourcePersistenceSuccessor(files) {
   return deepFreeze({
     task: pin.task,
     artifact: pin,
-    focusedTestCases: 140,
+    focusedTestCases: 142,
     fullAppTestFiles: 22,
-    fullAppTestCases: 322,
+    fullAppTestCases: 324,
     exactProjectScopedSourceKey: "account-app-source",
     publicEditorCorePersistencePort: true,
     authoredSourceOnly: true,
@@ -1638,8 +1688,15 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
     retainedAuthoringUx: {
       rootSafeDefaultPlacementTarget: source.application.retainedRootSafeDefaultPlacementTarget,
       explicitChangeTarget: source.application.retainedExplicitChangeTarget,
-      enlargedDropLanes: source.css.retainedEnlargedDropLanePresentation,
-      lastValidRowDropProjection: source.application.retainedLastValidRowDropProjection,
+      stableThirtyTwoPixelLayerGaps: source.css.stableThirtyTwoPixelLayerGapPresentation,
+      stableGlobalLayerDragSession: source.application.stableGlobalLayerDragSession,
+      globalLayerOwnerAndEpochFencing: source.application.globalLayerOwnerAndEpochFencing,
+      guardedLastAcceptedProjection: source.application.guardedLastAcceptedProjection,
+      explicitStickyComponentDropTarget: source.application.explicitStickyComponentDropTarget,
+      componentPaletteOuterDropInert: source.application.componentPaletteOuterDropInert,
+      draggableComponentCard: source.application.draggableComponentCard,
+      separateNonDraggableComponentAddAction:
+        source.application.separateNonDraggableComponentAddAction,
       visibleSelectedLayerDeleteControl:
         source.application.retainedVisibleSelectedLayerDeleteControl,
       guardedDeleteAndBackspace: source.application.retainedGuardedDeleteAndBackspace,

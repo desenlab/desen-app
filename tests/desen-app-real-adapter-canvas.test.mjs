@@ -205,7 +205,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
   assert.equal(currentRuntime.moduleCount, 143);
-  assert.equal(currentRuntime.staticEdges, 424);
+  assert.equal(currentRuntime.staticEdges, 425);
   assert.equal(currentRuntime.dynamicEdges, 0);
   assert.equal(currentRuntime.sharedRuntimeModuleCount, 19);
   assert.equal(currentRuntime.realComponentModuleCount, 5);
@@ -792,12 +792,12 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
         profile: "desen.app.source-persistence-proof.v1",
         result: "PASS",
         path: SOURCE_PERSISTENCE_ARTIFACT,
-        bytes: 27_088,
-        sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+        bytes: 27_053,
+        sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
       },
-      focusedTestCases: 140,
+      focusedTestCases: 142,
       fullAppTestFiles: 22,
-      fullAppTestCases: 322,
+      fullAppTestCases: 324,
       sourceKey: "account-app-source",
       publicPort: true,
       authoredSourceOnly: true,

@@ -865,8 +865,8 @@ function authenticateSourcePersistenceSuccessor(files) {
     profile: "desen.app.source-persistence-proof.v1",
     result: "PASS",
     path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
-    bytes: 27_088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
   const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
   if (
@@ -935,14 +935,14 @@ function authenticateSourcePersistenceSuccessor(files) {
     artifact.claim?.runtimeInputOrSecretPersisted !== false ||
     artifact.claim?.concretePersistenceAdapterClaimed !== false ||
     !persistenceControlsSource.includes('return "Local draft unchanged";') ||
-    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.focusedTestCases !== 142 ||
     artifact.tests?.fullAppTestFiles !== 22 ||
-    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
     artifact.boundary?.trackedFiles !== 35 ||
     artifact.boundary?.parentArtifacts !== 3 ||
-    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
     artifact.boundary?.fullAppTestFiles !== 22 ||
-    artifact.boundary?.fullAppTestCases !== 322 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
     trackedReceipts?.length !== 35 ||
     !isDeepStrictEqual(
       receiptPaths,
@@ -969,9 +969,9 @@ function authenticateSourcePersistenceSuccessor(files) {
   return deepFreeze({
     task: pin.task,
     artifact: pin,
-    focusedTestCases: 140,
+    focusedTestCases: 142,
     fullAppTestFiles: 22,
-    fullAppTestCases: 322,
+    fullAppTestCases: 324,
     exactProjectScopedSourceKey: "account-app-source",
     publicEditorCorePersistencePort: true,
     authoredSourceOnly: true,
@@ -2170,7 +2170,7 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 424 || dynamicEdges !== 0) {
+  if (staticEdges !== 425 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -2498,14 +2498,37 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "function projectNearestDrop(",
     "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
     "data-drop-hovered={dropReady && dropHovered}",
-    "const panelDragEnterDepth = useRef(0)",
+    "type AuthoringDropAdmission =",
+    "function evaluateDragIntent(",
+    "interface AuthoringDragSession {",
+    "function createAuthoringDragSession(epoch = 0): AuthoringDragSession",
+    "const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession())",
+    "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
+    "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+    "pending.sessionEpoch !== currentSession.epoch",
+    "pending.ownerKey !== currentSession.ownerKey",
+    "document.elementFromPoint(pending.clientX, pending.clientY)",
+    "hitSlotSurface !== pending.slotSurface",
+    "function clearUnclaimedDrop(): void {",
+    "const targetDragEnterDepth = useRef(0)",
     "data-guide={readySlot === null}",
-    "className={styles.componentDragHandle}",
-    'title="Drag anywhere in this panel to add"',
+    "className={styles.componentsView}",
+    'event.dataTransfer.dropEffect = "none"',
+    'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+    'if (!componentDropReady) return;\n    event.stopPropagation();\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
+    "className={styles.componentSlotTarget}",
+    "onDragOver={admitComponentDrop}",
+    "onDrop={receiveComponentDrop}",
+    'data-component-card="true"',
+    "className={styles.componentItem}",
+    "draggable={enabled}",
+    "className={styles.componentAddAction}",
+    "draggable={false}",
+    "event.preventDefault();\n                                event.stopPropagation();",
+    "onClick={() => addComponent(component.id)}",
     "No drop target selected",
     "evaluateAuthoringNodeDeletion(route, model, selection)",
     "applyAuthoringNodeDelete(document, referenceCatalog, route, selection)",
-    "function acceptsDragIntent(",
     'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
     "sourceNodeId: result.nodeId",
     "setSelection(null)",
@@ -2515,18 +2538,28 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
       fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App source lost ${marker}.`);
     }
   }
-  if (application.includes("dataTransfer.getData")) {
-    fail("SOURCE_POLICY_VIOLATION", "The live M09-T07 App reads browser DataTransfer authority.");
+  for (const forbidden of [
+    "dataTransfer.getData",
+    "function acceptsDragIntent(",
+    "panelDragEnterDepth",
+    "componentDragHandle",
+    'title="Drag anywhere in this panel to add"',
+  ]) {
+    if (application.includes(forbidden)) {
+      fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App retained ${forbidden}.`);
+    }
   }
   for (const marker of [
-    ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.5rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+    ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;\n  align-items: center;\n  padding: 0 0.125rem;",
     '.slotBoundary[data-drop-ready="true"]',
     '.slotBoundary[data-drop-hovered="true"]',
     '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
     ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
     '.componentSlotTarget[data-guide="true"]',
     '.componentSlotTarget[data-drop-hovered="true"]',
-    ".componentDragHandle {",
+    ".layerDragGuide {",
+    ".componentItem {",
+    ".componentAddAction {",
   ]) {
     if (!css.includes(marker)) {
       fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App CSS lost ${marker}.`);
@@ -2550,10 +2583,16 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "preserves the selected layer, preview, and focus when deletion is rejected",
     "expect(reads).toBe(0)",
     'getAttribute("data-drop-hovered")',
-    "const alertDragHandle = alert.querySelector(\"[draggable='true']\")",
-    'getByText("Release to add")',
+    "const alertCard = alert.closest(\"[data-component-card='true']\")",
+    "expect((alert as HTMLButtonElement).draggable).toBe(false)",
+    "expect(alertCard.draggable).toBe(true)",
+    "expect(outsideDrop.defaultPrevented).toBe(true)",
+    "expect(slotEdit).toHaveBeenCalledTimes(1)",
     "uses the release position when it crosses a row midpoint after the last dragover",
     "keeps the admitted gap stable while the pointer jitters around a row midpoint",
+    "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+    "expect(elementFromPoint).toHaveBeenCalledWith(20, 195)",
+    "expect(cancelFrame).toHaveBeenCalledWith(2)",
     "drops from a visible row with the last admitted projection when drop coordinates are absent",
     "No drop target selected",
   ]) {
@@ -2578,8 +2617,15 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     largeSameSlotBoundaryEvaluationCovered: true,
     expandedDropReadyBoundariesImplemented: true,
     stableNestedDragHoverImplemented: true,
+    stableGlobalLayerDragSessionImplemented: true,
+    globalLayerOwnerAndEpochFencingImplemented: true,
+    edgeScrollExactSlotRehitTestingImplemented: true,
     browserDataTransferReads: 0,
     explicitComponentDropTargetGuideImplemented: true,
+    componentDropAdmissionLimitedToExplicitTarget: true,
+    componentPaletteOuterDropInert: true,
+    draggableComponentCardImplemented: true,
+    separateNonDraggableComponentAddActionImplemented: true,
     atomicDeletionPreviewAndFocusImplemented: true,
     exactArtifactSourceAndTestReceipts: true,
     artifactSourceAndTestReceiptCount: sourceAndTestReceipts.length,

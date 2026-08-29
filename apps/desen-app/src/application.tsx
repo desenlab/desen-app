@@ -8,6 +8,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { flushSync } from "react-dom";
 
 import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 import { canonicalizeJson } from "@desen/protocol";
@@ -485,11 +486,42 @@ interface AuthoringDropProjection {
   readonly target: AuthoringSlotSelection;
 }
 
+type AuthoringDropAdmission =
+  | Readonly<{ readonly status: "accepted"; readonly projection: AuthoringDropProjection }>
+  | Readonly<{ readonly status: "noop" }>
+  | Readonly<{ readonly status: "rejected" }>
+  | Readonly<{ readonly status: "unavailable" }>;
+
+interface AuthoringDragSession {
+  activeProjection: AuthoringDropProjection | null;
+  admission: AuthoringDropAdmission["status"];
+  epoch: number;
+  lastAcceptedProjection: AuthoringDropProjection | null;
+  ownerKey: string | null;
+  pendingScroll: Readonly<{
+    readonly clientX: number;
+    readonly clientY: number;
+    readonly delta: number;
+    readonly eventTarget: Element | null;
+    readonly list: HTMLUListElement;
+    readonly ownerKey: string;
+    readonly scrollSurface: HTMLElement;
+    readonly sessionEpoch: number;
+    readonly slotSurface: HTMLDivElement;
+  }> | null;
+  scrollFrame: number | null;
+}
+
+interface AuthoringDragSessionRef {
+  current: AuthoringDragSession;
+}
+
 interface LayerSelectionProps {
   readonly activeDropProjection: AuthoringDropProjection | null;
   readonly activeSlot: AuthoringSlotSelection | null;
   readonly authoringModel: CatalogAuthoringModel;
   readonly dragIntent: AuthoringDragIntent | null;
+  readonly dragSession: AuthoringDragSessionRef;
   readonly onApplyIntent: (
     target: AuthoringSlotSelection,
     index: number,
@@ -573,13 +605,13 @@ function prepareNativeDrag(event: DragEvent<HTMLElement>, effect: "copy" | "move
   event.dataTransfer.setData("text/plain", "DESEN App authoring item");
 }
 
-function acceptsDragIntent(
+function evaluateDragIntent(
   route: AuthoringSlotRoute,
   authoringModel: CatalogAuthoringModel,
   target: AuthoringSlotSelection,
   index: number,
   dragIntent: AuthoringDragIntent,
-): boolean {
+): AuthoringDropAdmission {
   if (dragIntent.kind === "node") {
     const compatibility = evaluateAuthoringSlotPlacement(
       route,
@@ -588,14 +620,51 @@ function acceptsDragIntent(
       dragIntent.nodeId,
       index,
     );
-    return compatibility.accepted && compatibility.changesSource;
+    if (!compatibility.accepted) return Object.freeze({ status: "rejected" });
+    if (!compatibility.changesSource) return Object.freeze({ status: "noop" });
+    return Object.freeze({
+      status: "accepted",
+      projection: Object.freeze({ index, target }),
+    });
   }
 
   const component = authoringModel.components.find(({ id }) => id === dragIntent.componentId);
-  return (
-    component !== undefined &&
-    evaluateAuthoringSlotInsertion(route, authoringModel, target, component.id, index).accepted
-  );
+  if (
+    component === undefined ||
+    !evaluateAuthoringSlotInsertion(route, authoringModel, target, component.id, index).accepted
+  ) {
+    return Object.freeze({ status: "rejected" });
+  }
+  return Object.freeze({
+    status: "accepted",
+    projection: Object.freeze({ index, target }),
+  });
+}
+
+function requestAuthoringFrame(callback: FrameRequestCallback): number {
+  return typeof window.requestAnimationFrame === "function"
+    ? window.requestAnimationFrame(callback)
+    : window.setTimeout(() => callback(Date.now()), 16);
+}
+
+function cancelAuthoringFrame(frame: number): void {
+  if (typeof window.cancelAnimationFrame === "function") {
+    window.cancelAnimationFrame(frame);
+    return;
+  }
+  window.clearTimeout(frame);
+}
+
+function createAuthoringDragSession(epoch = 0): AuthoringDragSession {
+  return {
+    activeProjection: null,
+    admission: "unavailable",
+    epoch,
+    lastAcceptedProjection: null,
+    ownerKey: null,
+    pendingScroll: null,
+    scrollFrame: null,
+  };
 }
 
 function SlotBoundary({
@@ -634,9 +703,11 @@ function SlotBoundary({
       : evaluateAuthoringSlotPlacement(route, authoringModel, target, selectedSourceNodeId, index);
   const selectedMovable =
     selectedPlacement?.accepted === true && selectedPlacement.changesSource === true;
-  const dragAccepted =
-    dragIntent !== null && acceptsDragIntent(route, authoringModel, target, index, dragIntent);
-  const dropReady = dragIntent !== null && dragAccepted;
+  const dragAdmission =
+    dragIntent === null
+      ? null
+      : evaluateDragIntent(route, authoringModel, target, index, dragIntent);
+  const dropReady = dragAdmission?.status === "accepted";
 
   const active = activeSlot !== null && isSameAuthoringSlotSelection(activeSlot, target);
   const position = index + 1;
@@ -657,6 +728,9 @@ function SlotBoundary({
       data-slot-boundary-index={index}
     >
       <span aria-hidden="true" className={styles.slotBoundaryLine} />
+      <span aria-hidden="true" className={styles.slotBoundaryCue}>
+        Drop here
+      </span>
       <button
         aria-label={placementLabel}
         disabled={!selectedMovable}
@@ -687,18 +761,42 @@ function LayerSlot({
     interaction.activeSlot !== null && isSameAuthoringSlotSelection(interaction.activeSlot, target);
   const contractLabel = `${slot.contract.required ? "Required" : "Optional"} · ${slot.present ? "Present" : "Absent"} · ${slotCardinalityLabel(slot)} · ${slotAcceptanceLabel(slot.contract)}`;
   const listRef = useRef<HTMLUListElement>(null);
+  const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot]);
   const activeDropIndex =
     interaction.activeDropProjection !== null &&
     isSameAuthoringSlotSelection(interaction.activeDropProjection.target, target)
       ? interaction.activeDropProjection.index
       : null;
 
+  function publishAdmission(admission: AuthoringDropAdmission): void {
+    const session = interaction.dragSession.current;
+    if (session.ownerKey !== sessionOwnerKey && session.scrollFrame !== null) {
+      cancelAuthoringFrame(session.scrollFrame);
+      session.scrollFrame = null;
+      session.pendingScroll = null;
+    }
+    if (session.ownerKey !== sessionOwnerKey) session.lastAcceptedProjection = null;
+    session.ownerKey = sessionOwnerKey;
+    session.admission = admission.status;
+    if (admission.status === "accepted") {
+      session.activeProjection = admission.projection;
+      session.lastAcceptedProjection = admission.projection;
+      interaction.onProjectDrop(admission.projection);
+      return;
+    }
+    session.activeProjection = null;
+    if (admission.status === "rejected" || admission.status === "unavailable") {
+      session.lastAcceptedProjection = null;
+    }
+    interaction.onProjectDrop(null);
+  }
+
   function projectNearestDrop(
     list: HTMLUListElement,
     clientY: number,
     eventTarget: EventTarget | null,
-  ): Readonly<{ readonly index: number; readonly target: AuthoringSlotSelection }> | null {
-    if (interaction.dragIntent === null) return null;
+  ): AuthoringDropAdmission {
+    if (interaction.dragIntent === null) return Object.freeze({ status: "unavailable" });
 
     const rows = Array.from(list.children).flatMap((child) => {
       if (!(child instanceof HTMLElement) || child.dataset.layerNode !== "true") return [];
@@ -710,8 +808,11 @@ function LayerSlot({
     const exactBoundary = eventElement?.closest<HTMLElement>("[data-slot-boundary-index]");
     if (exactBoundary?.parentElement === list) {
       index = Number(exactBoundary.dataset.slotBoundaryIndex);
+      if (!Number.isInteger(index) || index < 0 || index > rows.length) {
+        return Object.freeze({ status: "unavailable" });
+      }
     } else if (!Number.isFinite(clientY)) {
-      return null;
+      return Object.freeze({ status: "unavailable" });
     } else {
       const hoveredRowIndex =
         eventTarget instanceof Node ? rows.findIndex((row) => row.contains(eventTarget)) : -1;
@@ -719,7 +820,14 @@ function LayerSlot({
         const hoveredBounds = rows[hoveredRowIndex]?.getBoundingClientRect();
         const midpoint =
           hoveredBounds === undefined ? clientY : hoveredBounds.top + hoveredBounds.height / 2;
-        const previousIndex = activeDropIndex ?? undefined;
+        const session = interaction.dragSession.current;
+        const previousProjection =
+          session.ownerKey === sessionOwnerKey ? session.activeProjection : null;
+        const previousIndex =
+          previousProjection !== null &&
+          isSameAuthoringSlotSelection(previousProjection.target, target)
+            ? previousProjection.index
+            : undefined;
         index =
           previousIndex !== undefined &&
           Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX &&
@@ -740,31 +848,16 @@ function LayerSlot({
       }
     }
 
-    return acceptsDragIntent(
+    return evaluateDragIntent(
       interaction.route,
       interaction.authoringModel,
       target,
       index,
       interaction.dragIntent,
-    )
-      ? Object.freeze({ index, target })
-      : null;
+    );
   }
 
-  function updateDropProjection(event: DragEvent<HTMLDivElement>): void {
-    if (interaction.dragIntent === null) return;
-    event.stopPropagation();
-    const list = listRef.current;
-    if (list === null) return;
-    const projection = projectNearestDrop(list, event.clientY, event.target);
-    if (projection === null) {
-      interaction.onProjectDrop(null);
-      return;
-    }
-    event.preventDefault();
-    event.dataTransfer.dropEffect = interaction.dragIntent.kind === "component" ? "copy" : "move";
-    interaction.onProjectDrop(projection);
-
+  function scheduleEdgeScroll(event: DragEvent<HTMLDivElement>, list: HTMLUListElement): void {
     const scrollSurface = event.currentTarget.closest<HTMLElement>('[role="tabpanel"]');
     if (scrollSurface === null) return;
     const scrollBounds = scrollSurface.getBoundingClientRect();
@@ -775,12 +868,102 @@ function LayerSlot({
         : event.clientY > scrollBounds.bottom - edge
           ? 12
           : 0;
-    if (delta !== 0) scrollSurface.scrollTop += delta;
+    const session = interaction.dragSession.current;
+    session.pendingScroll = Object.freeze({
+      clientX: event.clientX,
+      clientY: event.clientY,
+      delta,
+      eventTarget: event.target instanceof Element ? event.target : null,
+      list,
+      ownerKey: sessionOwnerKey,
+      scrollSurface,
+      sessionEpoch: session.epoch,
+      slotSurface: event.currentTarget,
+    });
+    if (delta === 0) {
+      if (session.scrollFrame !== null) cancelAuthoringFrame(session.scrollFrame);
+      session.scrollFrame = null;
+      session.pendingScroll = null;
+      return;
+    }
+    if (session.scrollFrame !== null) return;
+
+    function scrollStep(): void {
+      const currentSession = interaction.dragSession.current;
+      currentSession.scrollFrame = null;
+      const pending = currentSession.pendingScroll;
+      if (
+        pending === null ||
+        pending.delta === 0 ||
+        pending.sessionEpoch !== currentSession.epoch ||
+        pending.ownerKey !== currentSession.ownerKey
+      ) {
+        return;
+      }
+      if (
+        !pending.list.isConnected ||
+        !pending.slotSurface.isConnected ||
+        !pending.scrollSurface.isConnected
+      ) {
+        publishAdmission(Object.freeze({ status: "unavailable" }));
+        currentSession.pendingScroll = null;
+        return;
+      }
+      const before = pending.scrollSurface.scrollTop;
+      pending.scrollSurface.scrollTop += pending.delta;
+      if (pending.scrollSurface.scrollTop === before) {
+        currentSession.pendingScroll = null;
+        return;
+      }
+      const hitTarget =
+        typeof document.elementFromPoint === "function"
+          ? document.elementFromPoint(pending.clientX, pending.clientY)
+          : null;
+      const hitSlotSurface = hitTarget?.closest<HTMLDivElement>('[data-layer-slot-surface="true"]');
+      if (hitTarget !== null && hitSlotSurface !== pending.slotSurface) {
+        publishAdmission(Object.freeze({ status: "unavailable" }));
+        currentSession.pendingScroll = null;
+        return;
+      }
+      const admission = projectNearestDrop(
+        pending.list,
+        pending.clientY,
+        hitTarget ?? pending.eventTarget,
+      );
+      publishAdmission(admission);
+      const nextSession = interaction.dragSession.current;
+      if (
+        nextSession.epoch === pending.sessionEpoch &&
+        nextSession.ownerKey === pending.ownerKey &&
+        nextSession.pendingScroll !== null
+      ) {
+        nextSession.scrollFrame = requestAuthoringFrame(scrollStep);
+      }
+    }
+
+    session.scrollFrame = requestAuthoringFrame(scrollStep);
+  }
+
+  function updateDropProjection(event: DragEvent<HTMLDivElement>): void {
+    if (interaction.dragIntent === null) return;
+    const list = listRef.current;
+    if (list === null) return;
+    const admission = projectNearestDrop(list, event.clientY, event.target);
+    if (admission.status === "rejected" || admission.status === "unavailable") return;
+    event.stopPropagation();
+    event.preventDefault();
+    event.dataTransfer.dropEffect =
+      admission.status === "noop"
+        ? "none"
+        : interaction.dragIntent.kind === "component"
+          ? "copy"
+          : "move";
+    publishAdmission(admission);
+    scheduleEdgeScroll(event, list);
   }
 
   function receiveDrop(event: DragEvent<HTMLDivElement>): void {
     if (interaction.dragIntent === null) return;
-    event.stopPropagation();
     const list = listRef.current;
     if (list === null) return;
     const currentBounds = event.currentTarget.getBoundingClientRect();
@@ -789,17 +972,26 @@ function LayerSlot({
       event.clientY >= currentBounds.top &&
       event.clientY <= currentBounds.bottom &&
       currentBounds.height > 0;
-    const hasNoCoordinates =
-      (!Number.isFinite(event.clientX) || event.clientX === 0) &&
-      (!Number.isFinite(event.clientY) || event.clientY === 0);
-    const projection = hasCurrentCoordinates
+    const releaseAdmission = hasCurrentCoordinates
       ? projectNearestDrop(list, event.clientY, event.target)
-      : currentBounds.height <= 0 || hasNoCoordinates
-        ? activeDropIndex === null
-          ? null
-          : interaction.activeDropProjection
-        : null;
+      : Object.freeze({ status: "unavailable" } as const);
+    const projection =
+      releaseAdmission.status === "accepted"
+        ? releaseAdmission.projection
+        : releaseAdmission.status === "unavailable" &&
+            interaction.dragSession.current.ownerKey === sessionOwnerKey &&
+            interaction.dragSession.current.admission === "accepted"
+          ? interaction.dragSession.current.lastAcceptedProjection
+          : null;
+    if (releaseAdmission.status === "noop") {
+      event.stopPropagation();
+      event.preventDefault();
+      publishAdmission(releaseAdmission);
+      interaction.onClearDrag();
+      return;
+    }
     if (projection === null) return;
+    event.stopPropagation();
     event.preventDefault();
     interaction.onProjectDrop(null);
     interaction.onApplyIntent(projection.target, projection.index, interaction.dragIntent);
@@ -865,6 +1057,7 @@ function LayerNode({
   activeSlot,
   authoringModel,
   dragIntent,
+  dragSession,
   movable = false,
   node,
   onApplyIntent,
@@ -888,6 +1081,7 @@ function LayerNode({
     activeSlot,
     authoringModel,
     dragIntent,
+    dragSession,
     onApplyIntent,
     onChooseSlot,
     onClearDrag,
@@ -907,6 +1101,7 @@ function LayerNode({
         className={styles.layerRow}
         data-category={node.capabilityId.split("/").at(-1)}
         data-dragging={dragIntent?.kind === "node" && dragIntent.nodeId === node.id}
+        data-layer-source-node-id={node.id}
         draggable={movable}
         onDragEnd={() => {
           onClearDrag();
@@ -946,6 +1141,7 @@ function BehaviorNode({
   authoringModel,
   behavior,
   dragIntent,
+  dragSession,
   onApplyIntent,
   onChooseSlot,
   onClearDrag,
@@ -961,6 +1157,7 @@ function BehaviorNode({
     activeSlot,
     authoringModel,
     dragIntent,
+    dragSession,
     onApplyIntent,
     onChooseSlot,
     onClearDrag,
@@ -1013,6 +1210,18 @@ function LayerTree({
     );
   }
 
+  function clearUnclaimedDrop(): void {
+    const session = interaction.dragSession.current;
+    if (session.scrollFrame !== null) cancelAuthoringFrame(session.scrollFrame);
+    session.activeProjection = null;
+    session.admission = "rejected";
+    session.lastAcceptedProjection = null;
+    session.ownerKey = null;
+    session.pendingScroll = null;
+    session.scrollFrame = null;
+    interaction.onProjectDrop(null);
+  }
+
   return (
     <div className={styles.layersView}>
       <div className={styles.panelSectionHeading}>
@@ -1029,7 +1238,49 @@ function LayerTree({
       <div className={styles.panelSectionHeading}>
         <span>DESEN node / slot tree</span>
       </div>
-      <section aria-label={`${selectedSurface.name} layer hierarchy`}>
+      <p
+        aria-live="polite"
+        className={styles.layerDragGuide}
+        data-active={interaction.dragIntent?.kind === "node"}
+      >
+        {interaction.dragIntent?.kind === "node"
+          ? `Moving ${interaction.dragIntent.nodeId} · release on a highlighted gap.`
+          : "Drag a layer to reorder it, or select it and use Place."}
+      </p>
+      <section
+        aria-label={`${selectedSurface.name} layer hierarchy`}
+        data-drag-active={interaction.dragIntent?.kind === "node"}
+        onDragEnter={(event) => {
+          if (interaction.dragIntent !== null && !event.defaultPrevented) {
+            clearUnclaimedDrop();
+          }
+        }}
+        onDragLeave={(event) => {
+          if (interaction.dragIntent === null) return;
+          if (event.relatedTarget instanceof Node) {
+            if (event.currentTarget.contains(event.relatedTarget)) return;
+            clearUnclaimedDrop();
+            return;
+          }
+          const bounds = event.currentTarget.getBoundingClientRect();
+          if (
+            Number.isFinite(event.clientX) &&
+            Number.isFinite(event.clientY) &&
+            event.clientX >= bounds.left &&
+            event.clientX <= bounds.right &&
+            event.clientY >= bounds.top &&
+            event.clientY <= bounds.bottom
+          ) {
+            return;
+          }
+          clearUnclaimedDrop();
+        }}
+        onDragOver={(event) => {
+          if (interaction.dragIntent !== null && !event.defaultPrevented) {
+            clearUnclaimedDrop();
+          }
+        }}
+      >
         <ul className={styles.layerTree}>
           <LayerNode node={surfaceTree.root} {...interaction} />
         </ul>
@@ -1081,10 +1332,10 @@ function ComponentLibrary({
 }>) {
   const [query, setQuery] = useState("");
   const [targetDragHovered, setTargetDragHovered] = useState(false);
-  const panelDragEnterDepth = useRef(0);
+  const targetDragEnterDepth = useRef(0);
 
   useEffect(() => {
-    panelDragEnterDepth.current = 0;
+    targetDragEnterDepth.current = 0;
     setTargetDragHovered(false);
   }, [dragIntent]);
 
@@ -1126,6 +1377,7 @@ function ComponentLibrary({
 
   function admitComponentDrop(event: DragEvent<HTMLDivElement>): void {
     if (!componentDropReady) return;
+    event.stopPropagation();
     event.preventDefault();
     event.dataTransfer.dropEffect = "copy";
     setTargetDragHovered(true);
@@ -1133,8 +1385,9 @@ function ComponentLibrary({
 
   function receiveComponentDrop(event: DragEvent<HTMLDivElement>): void {
     if (!componentDropReady || dragIntent?.kind !== "component") return;
+    event.stopPropagation();
     event.preventDefault();
-    panelDragEnterDepth.current = 0;
+    targetDragEnterDepth.current = 0;
     setTargetDragHovered(false);
     addComponent(dragIntent.componentId);
   }
@@ -1147,20 +1400,16 @@ function ComponentLibrary({
   return (
     <div
       className={styles.componentsView}
-      data-component-drag-active={dragIntent?.kind === "component"}
-      data-drop-hovered={componentDropReady && targetDragHovered}
-      onDragEnter={(event) => {
-        if (!componentDropReady) return;
-        admitComponentDrop(event);
-        panelDragEnterDepth.current += 1;
+      onDragOver={(event) => {
+        if (dragIntent?.kind !== "component") return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "none";
       }}
-      onDragLeave={() => {
-        if (!componentDropReady) return;
-        panelDragEnterDepth.current = Math.max(0, panelDragEnterDepth.current - 1);
-        if (panelDragEnterDepth.current === 0) setTargetDragHovered(false);
+      onDrop={(event) => {
+        if (dragIntent?.kind !== "component") return;
+        event.preventDefault();
+        onClearDrag();
       }}
-      onDragOver={admitComponentDrop}
-      onDrop={receiveComponentDrop}
     >
       <div className={styles.catalogSummary}>
         <span>
@@ -1193,6 +1442,18 @@ function ComponentLibrary({
         data-drop-ready={componentDropReady}
         data-guide={readySlot === null}
         data-ready={readySlot !== null}
+        onDragEnter={(event) => {
+          if (!componentDropReady) return;
+          admitComponentDrop(event);
+          targetDragEnterDepth.current += 1;
+        }}
+        onDragLeave={() => {
+          if (!componentDropReady) return;
+          targetDragEnterDepth.current = Math.max(0, targetDragEnterDepth.current - 1);
+          if (targetDragEnterDepth.current === 0) setTargetDragHovered(false);
+        }}
+        onDragOver={admitComponentDrop}
+        onDrop={receiveComponentDrop}
         role="group"
       >
         {readySlot === null ? (
@@ -1214,18 +1475,20 @@ function ComponentLibrary({
             <span aria-hidden="true" className={styles.componentDropGlyph} />
             <span className={styles.componentTargetCopy}>
               <span className={styles.componentTargetEyebrow}>
-                {draggedComponent === undefined ? "Insert target" : "Release to add"}
+                {draggedComponent === undefined
+                  ? "Add to"
+                  : `Drop ${draggedComponent.displayName} here`}
               </span>
               <strong>
                 {draggedComponent === undefined
                   ? `${readySlot.owner.displayName} · ${readySlot.slot.name}`
-                  : draggedComponent.displayName}
+                  : `${readySlot.owner.displayName} · ${readySlot.slot.name}`}
               </strong>
               <small>
                 {readySlot.owner.id} · {readySlot.slot.name} slot
                 {draggedComponent === undefined
-                  ? " · Click Add or drag a component anywhere in this panel"
-                  : ` · position ${readySlot.slot.children.length + 1} · release anywhere in this panel`}
+                  ? ` · appends at position ${readySlot.slot.children.length + 1} · click Add or drag a component here`
+                  : ` · release here to append at position ${readySlot.slot.children.length + 1}`}
               </small>
             </span>
             <span className={styles.componentTargetControls}>
@@ -1282,19 +1545,40 @@ function ComponentLibrary({
                                     : compatibility?.reason === "defaults-invalid"
                                       ? "Invalid defaults"
                                       : "Not accepted";
+                      const insertLabel =
+                        readySlot === null
+                          ? `${component.displayName} · choose a named slot first`
+                          : enabled
+                            ? `Insert ${component.displayName} into ${readySlot.owner.displayName} ${readySlot.owner.id} ${readySlot.slot.name} slot at position ${readySlot.slot.children.length + 1}`
+                            : `${action} · ${component.displayName} in ${readySlot.owner.displayName} ${readySlot.owner.id} ${readySlot.slot.name} slot`;
                       return (
-                        <button
-                          aria-label={
-                            readySlot === null
-                              ? `${component.displayName} · choose a named slot first`
-                              : enabled
-                                ? `Insert ${component.displayName} into ${readySlot.owner.displayName} ${readySlot.owner.id} ${readySlot.slot.name} slot at position ${readySlot.slot.children.length + 1}`
-                                : `${action} · ${component.displayName} in ${readySlot.owner.displayName} ${readySlot.owner.id} ${readySlot.slot.name} slot`
-                          }
+                        <div
+                          aria-label={`${component.displayName} component${enabled && readySlot !== null ? ` · drag to ${readySlot.owner.displayName} ${readySlot.owner.id} ${readySlot.slot.name} slot or use Add` : ` · ${action}`}`}
                           className={styles.componentItem}
-                          disabled={!enabled}
-                          onClick={() => addComponent(component.id)}
-                          type="button"
+                          data-component-card="true"
+                          data-dragging={
+                            dragIntent?.kind === "component" &&
+                            dragIntent.componentId === component.id
+                          }
+                          data-enabled={enabled}
+                          draggable={enabled}
+                          onDragEnd={onClearDrag}
+                          onDragStart={(event) => {
+                            if (!enabled) return;
+                            onStartDrag(
+                              Object.freeze({
+                                kind: "component",
+                                componentId: component.id,
+                              }),
+                            );
+                            prepareNativeDrag(event, "copy");
+                          }}
+                          role="group"
+                          title={
+                            enabled
+                              ? `Drag ${component.displayName} to the Add to target`
+                              : undefined
+                          }
                         >
                           <span
                             aria-hidden="true"
@@ -1311,27 +1595,26 @@ function ComponentLibrary({
                           </span>
                           <span className={styles.componentItemAction}>
                             {enabled ? (
-                              <span
-                                aria-hidden="true"
-                                className={styles.componentDragHandle}
-                                draggable
-                                onClick={(event) => event.stopPropagation()}
-                                onDragEnd={onClearDrag}
-                                onDragStart={(event) => {
-                                  onStartDrag(
-                                    Object.freeze({
-                                      kind: "component",
-                                      componentId: component.id,
-                                    }),
-                                  );
-                                  prepareNativeDrag(event, "copy");
-                                }}
-                                title="Drag anywhere in this panel to add"
-                              />
+                              <span aria-hidden="true" className={styles.componentMeta}>
+                                Drag
+                              </span>
                             ) : null}
-                            <span className={styles.componentMeta}>{enabled ? "Add" : action}</span>
+                            <button
+                              aria-label={insertLabel}
+                              className={styles.componentAddAction}
+                              disabled={!enabled}
+                              draggable={false}
+                              onClick={() => addComponent(component.id)}
+                              onDragStart={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                              }}
+                              type="button"
+                            >
+                              {enabled ? "Add" : action}
+                            </button>
                           </span>
-                        </button>
+                        </div>
                       );
                     })()}
                   </li>
@@ -1399,6 +1682,14 @@ function AuthoringPanel({
   const componentsTab = useRef<HTMLButtonElement>(null);
   const stateTab = useRef<HTMLButtonElement>(null);
   const actionsTab = useRef<HTMLButtonElement>(null);
+  const authoringPanel = useRef<HTMLElement>(null);
+  const pendingLayerFocus = useRef<string | null>(null);
+  const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession());
+  const resetDragSession = useCallback(() => {
+    const current = dragSession.current;
+    if (current.scrollFrame !== null) cancelAuthoringFrame(current.scrollFrame);
+    dragSession.current = createAuthoringDragSession(current.epoch + 1);
+  }, []);
   const defaultSlot = useMemo(() => defaultAuthoringSlotSelection(route, model), [model, route]);
   const resolvedActiveSlot = activeSlot ?? defaultSlot;
   const projectDrop = useCallback((next: AuthoringDropProjection | null) => {
@@ -1429,17 +1720,37 @@ function AuthoringPanel({
 
   useEffect(() => {
     if (slotProjection?.status !== "rejected") return;
+    resetDragSession();
     setActiveSlot(null);
     setActiveDropProjection(null);
     setDragIntent(null);
     setNotice("The previous slot target is no longer current.");
-  }, [model, slotProjection?.status]);
+  }, [model, resetDragSession, slotProjection?.status]);
 
   useEffect(() => {
     if (interactive) return;
+    resetDragSession();
     setActiveDropProjection(null);
     setDragIntent(null);
-  }, [interactive]);
+  }, [interactive, resetDragSession]);
+
+  useEffect(() => {
+    resetDragSession();
+    setActiveDropProjection(null);
+    setDragIntent(null);
+    const pendingNodeId = pendingLayerFocus.current;
+    if (pendingNodeId !== null) {
+      const nextLayer = Array.from(
+        authoringPanel.current?.querySelectorAll<HTMLElement>("[data-layer-source-node-id]") ?? [],
+      ).find(({ dataset }) => dataset.layerSourceNodeId === pendingNodeId);
+      if (nextLayer !== undefined) {
+        nextLayer.focus();
+        pendingLayerFocus.current = null;
+      }
+    }
+  }, [model, resetDragSession, route.projectId, route.surfaceId]);
+
+  useEffect(() => () => resetDragSession(), [resetDragSession]);
 
   function chooseSlot(target: AuthoringSlotSelection): void {
     if (!interactive) return;
@@ -1470,6 +1781,7 @@ function AuthoringPanel({
         ? { kind: "insert", componentId: intent.componentId, index }
         : { kind: "place", nodeId: intent.nodeId, index },
     );
+    resetDragSession();
     setActiveDropProjection(null);
     setDragIntent(null);
     if (!result.ok) {
@@ -1488,9 +1800,10 @@ function AuthoringPanel({
       setNotice(message);
       return;
     }
+    if (intent.kind === "node") pendingLayerFocus.current = result.nodeId;
     setNotice(
       result.operation === "insert"
-        ? `Inserted ${model.components.find(({ id }) => id === (intent.kind === "component" ? intent.componentId : ""))?.displayName ?? result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot at position ${index + 1}` : "the selected slot"}. Selected for editing · use Delete or Backspace to remove.`
+        ? `Inserted ${model.components.find(({ id }) => id === (intent.kind === "component" ? intent.componentId : ""))?.displayName ?? result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot at position ${index + 1}` : "the selected slot"}. Selected for editing · use the visible Delete action above or press Delete/Backspace.`
         : result.operation === "move"
           ? `Moved ${result.nodeId} to ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`
           : `Reordered ${result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`,
@@ -1528,10 +1841,31 @@ function AuthoringPanel({
     setNotice("Choose a named slot in Layers, then return to Components.");
   }
 
+  function startDrag(intent: AuthoringDragIntent): void {
+    if (!interactive) return;
+    resetDragSession();
+    flushSync(() => {
+      setActiveDropProjection(null);
+      setDragIntent(intent);
+      setNotice(
+        intent.kind === "component"
+          ? "Drag to the highlighted Add to target."
+          : "Release on a highlighted Layers gap.",
+      );
+    });
+  }
+
+  function clearDrag(): void {
+    resetDragSession();
+    setActiveDropProjection(null);
+    setDragIntent(null);
+  }
+
   const deleteSelection = useCallback((): void => {
     if (!interactive) return;
     if (selection === null || deletionCompatibility?.accepted !== true) return;
     const result = onDeleteSelection();
+    resetDragSession();
     setDragIntent(null);
     if (!result.ok) {
       setNotice(
@@ -1549,7 +1883,13 @@ function AuthoringPanel({
     setActiveTab("layers");
     layersTab.current?.focus();
     setNotice(`Deleted ${selection.displayName} layer · ${result.nodeId}.`);
-  }, [deletionCompatibility?.accepted, interactive, onDeleteSelection, selection]);
+  }, [
+    deletionCompatibility?.accepted,
+    interactive,
+    onDeleteSelection,
+    resetDragSession,
+    selection,
+  ]);
 
   useEffect(() => {
     if (!interactive || selection === null || deletionCompatibility?.accepted !== true) return;
@@ -1590,6 +1930,7 @@ function AuthoringPanel({
       className={styles.authoringPanel}
       data-active-tab={activeTab}
       hidden={hidden}
+      ref={authoringPanel}
     >
       <div className={styles.authoringHeader}>
         <span>
@@ -1665,6 +2006,7 @@ function AuthoringPanel({
           </span>
           <button
             aria-describedby={`${panelId}-delete-layer-description`}
+            aria-keyshortcuts="Delete Backspace"
             aria-label={`Delete ${selection.displayName} layer · ${selection.sourceNodeId}`}
             className={styles.deleteLayerAction}
             disabled={deletionCompatibility?.accepted !== true}
@@ -1690,19 +2032,13 @@ function AuthoringPanel({
             activeSlot={resolvedActiveSlot}
             authoringModel={model}
             dragIntent={dragIntent}
+            dragSession={dragSession}
             model={model}
             onApplyIntent={applyIntent}
             onChooseSlot={chooseSlot}
-            onClearDrag={() => {
-              setActiveDropProjection(null);
-              setDragIntent(null);
-            }}
+            onClearDrag={clearDrag}
             onProjectDrop={projectDrop}
-            onStartDrag={(intent) => {
-              if (!interactive) return;
-              setActiveDropProjection(null);
-              setDragIntent(intent);
-            }}
+            onStartDrag={startDrag}
             onToggleSelection={toggleLayer}
             rootNodeId={model.surfaces.find(({ id }) => id === selectedSurface.id)?.root.id ?? ""}
             route={route}
@@ -1724,11 +2060,9 @@ function AuthoringPanel({
           dragIntent={dragIntent}
           model={model}
           onApplyIntent={applyIntent}
-          onClearDrag={() => setDragIntent(null)}
+          onClearDrag={clearDrag}
           onRequestSlotChoice={requestSlotChoice}
-          onStartDrag={(intent) => {
-            if (interactive) setDragIntent(intent);
-          }}
+          onStartDrag={startDrag}
           route={route}
           slotProjection={slotProjection}
         />

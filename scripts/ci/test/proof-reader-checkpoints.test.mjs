@@ -636,7 +636,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[50],
-    "b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7",
+    "42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -1771,8 +1771,8 @@ test("sequence fifty-one preserves sequence fifty, reseals the App chain, and ap
   assert.deepEqual(current.artifacts.at(-1), {
     task: "M09-T12",
     path: "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json",
-    bytes: 27088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
   assert.deepEqual(
     current.readers.slice(0, previous.readers.length).map(identity),
@@ -1793,15 +1793,15 @@ test("sequence fifty-one preserves sequence fifty, reseals the App chain, and ap
       task: "M09-T12",
       role: "proof-library",
       path: "scripts/lib/desen-app-source-persistence-proof.mjs",
-      bytes: 55293,
-      sha256: "3fd171a97c6dfc7e5dadc70bbaececd157b4209270d8f2bb8c65237d19f4948a",
+      bytes: 56014,
+      sha256: "18c759c87011e4ed30b044eaa02b9ccf2cc9e4134c33f7cfd0f292070ffc5add",
     },
     {
       task: "M09-T12",
       role: "root-test",
       path: "tests/desen-app-source-persistence.test.mjs",
-      bytes: 21588,
-      sha256: "9c6ca5bbc6234c87b73d9fb9d139e48a7ccf207f9888f43c000afc4e3835fda8",
+      bytes: 23578,
+      sha256: "baee083f499523e8d5ea47b322f2d1c162097c27b95897946e72dcb25e99f033",
     },
   ]);
   for (const reader of current.readers) {
@@ -1811,7 +1811,7 @@ test("sequence fifty-one preserves sequence fifty, reseals the App chain, and ap
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7",
+    "42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921",
   );
 });
 

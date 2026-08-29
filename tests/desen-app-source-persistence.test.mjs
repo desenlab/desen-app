@@ -36,12 +36,34 @@ const SOURCE_PATHS = Object.freeze({
 const PERSISTENCE_TEST_PATH = "apps/desen-app/test/authoring-persistence.test.ts";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const ROOT_PACKAGE_PATH = "package.json";
+const PROOF_LIBRARY_PATH = "scripts/lib/desen-app-source-persistence-proof.mjs";
+const PRETTIER_COMPACTION_TARGETS = Object.freeze([
+  Object.freeze({
+    sourceKey: "previewFidelity",
+    sourcePath: SOURCE_PATHS.previewFidelity,
+    expanded: `        "previewFidelity": [
+          "./authoring-data.js",
+          "./authoring-slots.js"
+        ],`,
+    compact: `        "previewFidelity": ["./authoring-data.js", "./authoring-slots.js"],`,
+  }),
+  Object.freeze({
+    sourceKey: "persistenceControls",
+    sourcePath: SOURCE_PATHS.persistenceControls,
+    expanded: `        "persistenceControls": [
+          "react",
+          "./application.module.css"
+        ]`,
+    compact: `        "persistenceControls": ["react", "./application.module.css"]`,
+  }),
+]);
 const temporaryDirectories = [];
 let sourcePolicyInput;
 let parentArtifactBytes;
 let persistenceTestSource;
 let appPackageSource;
 let rootPackageSource;
+let proofLibrarySource;
 let built;
 
 function expectedError(code) {
@@ -107,11 +129,13 @@ before(async () => {
       ]),
     ),
   );
-  [persistenceTestSource, appPackageSource, rootPackageSource] = await Promise.all([
-    readFile(path.join(ROOT, PERSISTENCE_TEST_PATH), "utf8"),
-    readFile(path.join(ROOT, APP_PACKAGE_PATH), "utf8"),
-    readFile(path.join(ROOT, ROOT_PACKAGE_PATH), "utf8"),
-  ]);
+  [persistenceTestSource, appPackageSource, rootPackageSource, proofLibrarySource] =
+    await Promise.all([
+      readFile(path.join(ROOT, PERSISTENCE_TEST_PATH), "utf8"),
+      readFile(path.join(ROOT, APP_PACKAGE_PATH), "utf8"),
+      readFile(path.join(ROOT, ROOT_PACKAGE_PATH), "utf8"),
+      readFile(path.join(ROOT, PROOF_LIBRARY_PATH), "utf8"),
+    ]);
   built = await buildDesenAppSourcePersistenceEvidence();
 });
 
@@ -246,10 +270,10 @@ test(DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES[8], () => {
     "apps/desen-app/test/persistence-controls.test.tsx": 22,
     "apps/desen-app/test/persistence-application.test.tsx": 16,
     "apps/desen-app/test/project-navigation.test.ts": 32,
-    "apps/desen-app/test/application.test.tsx": 40,
+    "apps/desen-app/test/application.test.tsx": 42,
   });
   assert.equal(built.artifact.tests.fullAppTestFiles, 22);
-  assert.equal(built.artifact.tests.fullAppTestCases, 322);
+  assert.equal(built.artifact.tests.fullAppTestCases, 324);
   assert.equal(built.artifact.boundary.trackedFiles, 35);
   assert.equal(built.artifact.boundary.historicalProofReadersTracked, false);
 });
@@ -258,6 +282,33 @@ test(DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES[9], async () => {
   const rebuilt = await buildDesenAppSourcePersistenceEvidence();
   assert.deepEqual(rebuilt.artifactBytes, built.artifactBytes);
   assert.equal(rebuilt.artifactSha256, built.artifactSha256);
+
+  const artifactText = built.artifactBytes.toString("utf8");
+  for (const target of PRETTIER_COMPACTION_TARGETS) {
+    assert.equal(artifactText.split(target.compact).length - 1, 1);
+    assert.equal(artifactText.includes(target.expanded), false);
+    assert.equal(proofLibrarySource.split(target.expanded).length - 1, 1);
+    assert.equal(proofLibrarySource.split(target.compact).length - 1, 1);
+    await assert.rejects(
+      buildDesenAppSourcePersistenceEvidence({
+        fileOverrides: new Map([
+          [
+            target.sourcePath,
+            Buffer.from(`import "./format-drift.js";\n${sourcePolicyInput[target.sourceKey]}`),
+          ],
+        ]),
+      }),
+      expectedError("ARTIFACT_FORMAT_DRIFT"),
+    );
+  }
+  assert.equal(proofLibrarySource.split("if (text.split(expanded).length !== 2)").length - 1, 1);
+  assert.equal(
+    proofLibrarySource.split(
+      'fail("ARTIFACT_FORMAT_DRIFT", "Expected one reviewed Prettier JSON compaction target.")',
+    ).length - 1,
+    1,
+  );
+  assert.equal(proofLibrarySource.split("text = text.replace(expanded, compact)").length - 1, 1);
 });
 
 test(DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES[10], async () => {
@@ -501,7 +552,7 @@ test(DESEN_APP_SOURCE_PERSISTENCE_ROOT_TEST_NAMES[11], async () => {
     artifactBytes: built.artifactBytes,
     proofDocument,
   });
-  assert.equal(verified.focusedTestCases, 140);
+  assert.equal(verified.focusedTestCases, 142);
   assert.equal(verified.trackedFiles, 35);
 
   for (const pin of DESEN_APP_SOURCE_PERSISTENCE_PARENT_PINS) {

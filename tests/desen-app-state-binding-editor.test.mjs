@@ -224,6 +224,20 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[4], () => {
   );
   assert.equal(built.artifact.authority.source.css.retainedRowDropPositionPresentation, true);
   assert.equal(built.artifact.authority.source.css.retainedStickyComponentTargetPresentation, true);
+  const currentApplication = built.currentCompatibility.source.application;
+  const currentCss = built.currentCompatibility.source.css;
+  assert.equal(currentApplication.stableGlobalLayerDragSession, true);
+  assert.equal(currentApplication.globalLayerOwnerAndEpochFencing, true);
+  assert.equal(currentApplication.explicitStickyComponentDropTarget, true);
+  assert.equal(currentApplication.componentPaletteOuterDropInert, true);
+  assert.equal(currentApplication.draggableComponentCard, true);
+  assert.equal(currentApplication.separateNonDraggableComponentAddAction, true);
+  assert.equal(currentApplication.retainedInsertSelectionForDeleteDiscoverability, true);
+  assert.equal(currentCss.stableThirtyTwoPixelSlotGaps, true);
+  assert.equal(currentCss.stableGlobalDragGuidePresentation, true);
+  assert.equal(currentCss.stickyExplicitComponentTargetPresentation, true);
+  assert.equal(currentCss.draggableComponentCardPresentation, true);
+  assert.equal(currentCss.separateComponentAddActionPresentation, true);
   assert.equal(built.artifact.claim.publisherSessionPreview, true);
   assert.equal(built.artifact.claim.sourceAndPreviewCommitAtomically, true);
   assert.equal(built.artifact.claim.stateAndBindingChromeOutsideManagedCapabilitySubtree, true);
@@ -298,6 +312,37 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[7], async () => {
     },
     {
       key: "applicationSource",
+      search:
+        "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+      replacement: "const sessionOwnerKey = target.ownerId",
+    },
+    {
+      key: "applicationSource",
+      search: "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
+      replacement: "dragSession.current = createAuthoringDragSession(current.epoch)",
+    },
+    {
+      key: "applicationSource",
+      search: 'event.dataTransfer.dropEffect = "none"',
+      replacement: 'event.dataTransfer.dropEffect = "copy"',
+    },
+    {
+      key: "applicationSource",
+      search: "onDrop={receiveComponentDrop}",
+      replacement: "onDrop={() => undefined}",
+    },
+    {
+      key: "applicationSource",
+      search: "draggable={enabled}",
+      replacement: "draggable={false}",
+    },
+    {
+      key: "applicationSource",
+      search: "className={styles.componentAddAction}",
+      replacement: "className={styles.removedComponentAddAction}",
+    },
+    {
+      key: "applicationSource",
       search: "sourceNodeId: result.nodeId",
       replacement: "sourceNodeId: selection?.sourceNodeId ?? result.nodeId",
     },
@@ -308,8 +353,8 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[7], async () => {
     },
     {
       key: "applicationCss",
-      search: '.slotBoundary[data-drop-hovered="true"] {\n  z-index: 4;',
-      replacement: '.slotBoundary[data-drop-disabled="true"] {\n  z-index: 4;',
+      search: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;",
+      replacement: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1rem;",
     },
     {
       key: "applicationCss",
@@ -466,12 +511,12 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
         profile: "desen.app.source-persistence-proof.v1",
         result: "PASS",
         path: SOURCE_PERSISTENCE_ARTIFACT,
-        bytes: 27_088,
-        sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+        bytes: 27_053,
+        sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
       },
-      focusedTestCases: 140,
+      focusedTestCases: 142,
       fullAppTestFiles: 22,
-      fullAppTestCases: 322,
+      fullAppTestCases: 324,
       sourceKey: "account-app-source",
       publicPort: true,
       authoredSourceOnly: true,

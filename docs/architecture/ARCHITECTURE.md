@@ -1137,6 +1137,13 @@ cleanup cannot revoke a newer surface, canceled or throwing traversal restores t
 `beforeunload` protects dirty page exit. Generation, dirty, pending, conflict/uncertainty, and
 reopen state remain accessible text, not color-only presentation.
 
+The current App shell treats each compatible Components card body as one broad native drag source
+and keeps click insertion on a separate `Add` button. Only the sticky `Add to` target admits a
+component drop; releases anywhere else are inert. Layers owns one nested-slot projection fenced by
+drag owner and epoch, applies midpoint hysteresis, exposes stable 32 px insertion gaps, and keeps
+the guarded `Delete` control visible for the selected node. Native transfer bytes remain inert and
+authorize no edit.
+
 This closes only the M09-T12 App-consumption boundary. `N-012`, `N-018`, and `S-003` retain their
 `TESTED` status with an additional authored-Source save/open path. P-08 remains `NOT_PROVEN`,
 P-09/P-10 remain `PARTIAL`, and PF-085/PF-089 remain `OPEN`. Diagnostics remain M09-T13;

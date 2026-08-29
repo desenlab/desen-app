@@ -316,6 +316,7 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.currentCompatibility.successor.runOrPublishImplemented, false);
   assert.equal(built.currentCompatibility.boundary.imports.runtimeCoreImports, 5);
   assert.equal(built.currentCompatibility.boundary.imports.runtimeReactImports, 2);
+  assert.equal(built.currentCompatibility.boundary.imports.applicationFlushSyncImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.adapterImports, 1);
   assert.equal(
@@ -333,7 +334,16 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.currentCompatibility.boundary.imports.publisherImports, 3);
   assert.equal(built.currentCompatibility.boundary.imports.protocolImports, 7);
   assert.equal(built.currentCompatibility.boundary.imports.reviewedSourceMutationCalls, 13);
-  assert.equal(built.currentCompatibility.boundary.imports.reviewedNamedSlotDragDropHandlers, 13);
+  assert.equal(built.currentCompatibility.boundary.imports.reviewedNamedSlotDragDropHandlers, 20);
+  assert.deepEqual(built.currentCompatibility.application.ui.currentDragSession, {
+    singlePanelSession: true,
+    ownerIdentity: "OWNER_KIND_OWNER_ID_SLOT_JSON_TUPLE",
+    epochFencedAnimationFrames: true,
+    hitTestConfinedToExactSlotSurface: true,
+    rejectedOrUnavailableClearsFallback: true,
+    coordinateLessFallbackRequiresSameAcceptedOwner: true,
+    synchronousIntentPublication: true,
+  });
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[4], async () => {
@@ -397,6 +407,43 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[5], async () => {
   );
 
   const application = await readFile(path.join(ROOT, APPLICATION), "utf8");
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [
+          APPLICATION,
+          Buffer.from(
+            application.replace(
+              'import { flushSync } from "react-dom";',
+              'import { createPortal, flushSync } from "react-dom";',
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
+  );
+  for (const [retained, replacement] of [
+    [
+      "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot]);",
+      "const sessionOwnerKey = target.ownerId;",
+    ],
+    [
+      "dragSession.current = createAuthoringDragSession(current.epoch + 1);",
+      "dragSession.current = createAuthoringDragSession(current.epoch);",
+    ],
+    ["hitSlotSurface !== pending.slotSurface", "hitSlotSurface === pending.slotSurface"],
+  ]) {
+    assert.equal(application.includes(retained), true);
+    await assert.rejects(
+      buildDesenAppCatalogPanelLayerTreeEvidence({
+        fileOverrides: new Map([
+          [APPLICATION, Buffer.from(application.replace(retained, replacement))],
+        ]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
   const admittedRowDragEnter = "onDragEnter={updateDropProjection}";
   assert.equal(application.includes(admittedRowDragEnter), true);
   await assert.rejects(
@@ -729,12 +776,12 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
         profile: "desen.app.source-persistence-proof.v1",
         result: "PASS",
         path: SOURCE_PERSISTENCE_ARTIFACT,
-        bytes: 27_088,
-        sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+        bytes: 27_053,
+        sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
       },
-      focusedTestCases: 140,
+      focusedTestCases: 142,
       fullAppTestFiles: 22,
-      fullAppTestCases: 322,
+      fullAppTestCases: 324,
       sourceKey: "account-app-source",
       publicPort: true,
       authoredSourceOnly: true,

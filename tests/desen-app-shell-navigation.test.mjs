@@ -316,6 +316,7 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node --test tests/desen-app-named-slot-authoring.test.mjs",
   );
   assert.equal(built.currentCompatibility.boundary.imports.exactReferenceAdapterRegistry, true);
+  assert.equal(built.currentCompatibility.boundary.imports.applicationFlushSyncImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
   assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
@@ -428,6 +429,22 @@ test("[mutation] rejects prerequisite, route, package, and scope-boundary drift"
   );
 
   const application = await readFile(path.join(ROOT, APPLICATION), "utf8");
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [
+          APPLICATION,
+          Buffer.from(
+            application.replace(
+              'import { flushSync } from "react-dom";',
+              'import { createPortal, flushSync } from "react-dom";',
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
+  );
   await assert.rejects(
     buildDesenAppShellNavigationEvidence({
       fileOverrides: new Map([
@@ -707,12 +724,12 @@ test("[successor] authenticates and mutation-tests the exact M09-T12 persistence
     profile: "desen.app.source-persistence-proof.v1",
     result: "PASS",
     path: SOURCE_PERSISTENCE_ARTIFACT,
-    bytes: 27_088,
-    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
   });
-  assert.equal(successor.focusedTestCases, 140);
+  assert.equal(successor.focusedTestCases, 142);
   assert.equal(successor.fullAppTestFiles, 22);
-  assert.equal(successor.fullAppTestCases, 322);
+  assert.equal(successor.fullAppTestCases, 324);
   assert.equal(successor.exactProjectScopedSourceKey, "account-app-source");
   assert.equal(successor.publicEditorCorePersistencePort, true);
   assert.equal(successor.authoredSourceOnly, true);

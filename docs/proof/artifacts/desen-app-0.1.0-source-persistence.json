@@ -127,10 +127,7 @@
           "./authoring-preview.js",
           "./authoring-selection.js"
         ],
-        "previewFidelity": [
-          "./authoring-data.js",
-          "./authoring-slots.js"
-        ],
+        "previewFidelity": ["./authoring-data.js", "./authoring-slots.js"],
         "previewControls": [
           "./authoring-fixtures.js",
           "./application.module.css",
@@ -157,6 +154,7 @@
         ],
         "application": [
           "react",
+          "react-dom",
           "@desen/reference-catalog-web/catalog.json",
           "@desen/protocol",
           "@desen/runtime-core",
@@ -227,10 +225,7 @@
           "./authoring-data.js",
           "./authoring-preview.js"
         ],
-        "persistenceControls": [
-          "react",
-          "./application.module.css"
-        ]
+        "persistenceControls": ["react", "./application.module.css"]
       },
       "route": {
         "projectId": "account-app",
@@ -349,18 +344,18 @@
       "apps/desen-app/test/persistence-controls.test.tsx": 12,
       "apps/desen-app/test/persistence-application.test.tsx": 16,
       "apps/desen-app/test/project-navigation.test.ts": 12,
-      "apps/desen-app/test/application.test.tsx": 36
+      "apps/desen-app/test/application.test.tsx": 38
     },
     "testCaseCounts": {
       "apps/desen-app/test/authoring-persistence.test.ts": 30,
       "apps/desen-app/test/persistence-controls.test.tsx": 22,
       "apps/desen-app/test/persistence-application.test.tsx": 16,
       "apps/desen-app/test/project-navigation.test.ts": 32,
-      "apps/desen-app/test/application.test.tsx": 40
+      "apps/desen-app/test/application.test.tsx": 42
     },
-    "focusedTestCases": 140,
+    "focusedTestCases": 142,
     "fullAppTestFiles": 22,
-    "fullAppTestCases": 322,
+    "fullAppTestCases": 324,
     "rootTestNames": [
       "[authority] authenticates exact shell, Editor persistence, and T11 App parents",
       "[source] proves one route-owned Source identity through the public Editor Core port",
@@ -370,7 +365,7 @@
       "[ui] proves Design-only controls, visible state, and explicit dirty-open confirmation",
       "[navigation] proves pristine admission plus dirty no-port and port-backed navigation protection",
       "[boundary] proves authored Source only and excludes scenario, secret, and concrete storage",
-      "[tests] retains exact five-file 140-case focused evidence",
+      "[tests] retains exact five-file 142-case focused evidence",
       "[determinism] builds byte-identical detached evidence twice",
       "[policy] rejects persistence, navigation, UI, test, and package weakening",
       "[verification] rejects parent, artifact, report, and destination authority drift"
@@ -416,13 +411,13 @@
       },
       {
         "path": "apps/desen-app/src/application.module.css",
-        "bytes": 79884,
-        "sha256": "f1aa43a4a1ce83344cc6343b8ea7598a7440c9b37ffb335ed10e4a8e1d006158"
+        "bytes": 81171,
+        "sha256": "cc82715e1fdee67362953ff8ff2b83c8eda4a603e70873b5c5a6255125155871"
       },
       {
         "path": "apps/desen-app/src/application.tsx",
-        "bytes": 93775,
-        "sha256": "33cc552f99b8244cf45626ce43c59c7d14596c21e13d19265509efdc1aac84a6"
+        "bytes": 105664,
+        "sha256": "c4a2f9448717bef2a0d9c35372c5a3cc1f9cb55bf9129010567804a2db18b1cc"
       },
       {
         "path": "apps/desen-app/src/authoring-data.ts",
@@ -481,8 +476,8 @@
       },
       {
         "path": "apps/desen-app/test/application.test.tsx",
-        "bytes": 95972,
-        "sha256": "d89010ffb5856ac2f2c8e4cf0e2c6e582a73f3f66f22a4dc5a95222673005c6e"
+        "bytes": 104633,
+        "sha256": "0239aa5ef160cbee720321a0a5af47ac5a02886edbb9f3473aeb224373baffbd"
       },
       {
         "path": "apps/desen-app/test/authoring-persistence.test.ts",
@@ -566,8 +561,8 @@
       },
       {
         "path": "scripts/lib/desen-app-source-persistence-proof.mjs",
-        "bytes": 55293,
-        "sha256": "3fd171a97c6dfc7e5dadc70bbaececd157b4209270d8f2bb8c65237d19f4948a"
+        "bytes": 56014,
+        "sha256": "18c759c87011e4ed30b044eaa02b9ccf2cc9e4134c33f7cfd0f292070ffc5add"
       },
       {
         "path": "scripts/verify-desen-app-source-persistence.mjs",
@@ -576,8 +571,8 @@
       },
       {
         "path": "tests/desen-app-source-persistence.test.mjs",
-        "bytes": 21588,
-        "sha256": "9c6ca5bbc6234c87b73d9fb9d139e48a7ccf207f9888f43c000afc4e3835fda8"
+        "bytes": 23578,
+        "sha256": "baee083f499523e8d5ea47b322f2d1c162097c27b95897946e72dcb25e99f033"
       }
     ],
     "proofReaderPaths": [
@@ -590,10 +585,10 @@
     "parentArtifacts": 3,
     "immutableInputs": true,
     "sourceSymlinksRejected": true,
-    "focusedAppTestCases": 140,
+    "focusedAppTestCases": 142,
     "focusedAppTestCaseCountPinned": true,
     "fullAppTestFiles": 22,
-    "fullAppTestCases": 322,
+    "fullAppTestCases": 324,
     "fullAppTestCaseCountPinned": true,
     "finalCommandWiringPinned": true,
     "historicalProofReadersTracked": false

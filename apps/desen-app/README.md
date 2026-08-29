@@ -27,13 +27,12 @@ The current product surface contains:
   inventory, display names, categories, descriptions, identity, version, and target;
 - local component filtering that changes only the visible list and never mutates Catalog or Source
   data;
-- stable, enlarged, non-overlapping slot boundaries plus the upper and lower half of each visible
-  layer row as before/after targets, retaining the last valid row projection through drop without
-  moving the tree while a drag is active;
-- one sticky Components placement target that resolves to the selected compatible slot or a safe
-  root default, with visible drag grips, click guidance, and an explicit Layers target-change action;
-- App-owned inert drag intent plus native keyboard and click placement controls for component
-  insertion, cross-slot move, and same-slot reorder;
+- one App-owned global Layers projection fenced by drag owner and epoch, with midpoint hysteresis,
+  stable 32 px insertion gaps, and no tree movement while a drag is active;
+- wide draggable Components card bodies with separate `Add` buttons; only the sticky `Add to`
+  target accepts component drops, while releases anywhere else are inert;
+- App-owned drag intent plus native keyboard and click controls for component insertion, cross-slot
+  move, and same-slot reorder;
 - a visible selection-bound Delete control plus guarded Delete/Backspace shortcuts outside editable
   controls; both explain root and effective-minimum restrictions, automatically target a newly
   inserted component, clear a successfully deleted selection, and return focus to Layers;
@@ -319,11 +318,11 @@ Append-only proof-reader sequence 50 advances
 92 readers. Checkpoint, promotion, selector plus required-affected, ownership, and remaining
 touched-CI regression suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally.
 
-The M09-T12 focused persistence suite passes 140/140 across five files, the complete App suite
-passes 322/322 across twenty-two files, and the independent root mutation proof passes 12/12. Exact
-evidence is the `27,088`-byte
+The M09-T12 focused persistence suite passes 142/142 across five files, the complete App suite
+passes 324/324 across twenty-two files, and the independent root mutation proof passes 12/12. Exact
+evidence is the `27,053`-byte
 `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json` at
-`sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`. It authenticates the
+`sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`. It authenticates the
 exact M09-T01 shell/navigation, M08-T08 Editor persistence, and M09-T11 App scenario/fixture/fidelity
 parents and binds 35 current files without tracking historical App readers.
 
@@ -332,7 +331,7 @@ with a 60-proof-unit/130-workload connected closure. Ownership covers 1,243 trac
 including 186 proof-owned paths.
 Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
 `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
-`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 frozen
 artifacts and 94 current readers. Checkpoint, promotion, selector plus required-affected,
 ownership, and remaining touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and
 128/128—294/294 combined.
@@ -348,6 +347,12 @@ updates surface-owned canonical baseline/current refs and a rerender-safe no-por
 pristine no-port navigation is admitted as `Local draft unchanged`, while edited no-port and
 port-backed dirty drafts are guarded across links, traversal, and dirty page exit for the current
 surface/controller lifetime.
+
+The retained authoring UX treats each compatible Components card body as one broad native drag
+source and keeps click insertion on a separate `Add` button. Only the sticky `Add to` target
+accepts a component drop; releases anywhere else are inert. Layers fences one global nested-slot
+projection by drag owner and epoch, applies midpoint hysteresis, renders 32 px insertion gaps, and
+keeps the guarded `Delete` control visible for the selected node.
 
 Awaited settlement values are admitted only through exact own enumerable data capture without
 accessor invocation. Valid optional diagnostic pointer/context/subject data is copied into fresh

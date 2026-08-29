@@ -1072,10 +1072,16 @@ conflict/uncertainty, exhaustion ve reopen-required durumları yalnızca renge b
 görünürdür. Scenario preview, fixture lifecycle, Runtime input ve secret verileri persistence
 isteğine girmez.
 
-Focused beş dosyalı persistence suite 140/140, complete yirmi iki dosyalı App suite 322/322 ve
-independent root mutation proof 12/12 geçer. Exact artifact 27.088 byte'tır:
+Güncel authoring UX'te uyumlu her Components kartının geniş gövdesi native drag kaynağıdır; tıklayarak
+ekleme ayrı `Add` düğmesindedir. Component drop yalnızca sticky `Add to` hedefinde kabul edilir,
+başka yerde bırakma inert kalır. Layers, drag owner ve epoch ile çevrelenmiş tek global nested-slot
+projection'ı midpoint hysteresis ile yönetir, 32 px insertion aralıklarını görünür tutar ve seçili
+node için güvenli `Delete` kontrolünü sürekli gösterir.
+
+Focused beş dosyalı persistence suite 142/142, complete yirmi iki dosyalı App suite 324/324 ve
+independent root mutation proof 12/12 geçer. Exact artifact 27.053 byte'tır:
 `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`,
-`sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`. Üç exact parent'ı
+`sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`. Üç exact parent'ı
 doğrular, 35 current dosyayı bağlar ve historical App reader'larını takip etmez.
 
 Yerel CI inventory 196 workload/93 proof pair'dir (82 ordinary + 11 barrier); connected closure 60
@@ -1084,7 +1090,7 @@ receipt'lerdir; required-gate veya hosted-CI sonucu değildir.
 
 Append-only proof-reader sequence 51, sequence-50'nin exact
 `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` başından
-`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` başına 47 frozen
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` başına 47 frozen
 artifact ve 94 current reader ile ilerler. Checkpoint, promotion, selector + required-affected,
 ownership ve remaining touched-CI suite'leri sırasıyla 74/74, 19/19, 58/58 (21 + 37), 15/15 ve
 128/128; birlikte 294/294 geçer.

@@ -3670,7 +3670,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   reflection and opened-document admission so reentrant edits or disposal cannot publish stale or
   revoked results. Evidence:
   `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`
-  `sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`.
+  `sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`.
 - Future action: M09-T13 must layer node-linked diagnostics without changing persistence
   generations, and M09-T14 must publish only the exact admitted authored/persisted Source. A
   concrete App host adapter, interoperable remote-storage profile, or merge protocol still
@@ -3841,7 +3841,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   fresh frozen data, and post-reflection/admission authority fences prevent malformed or reentrant
   settlements from publishing stale state. Evidence:
   `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`
-  `sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`.
+  `sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`.
 - Future action: M09-T14 must publish only the authored/persisted Source through the public Publisher
   and control-plane boundaries. M10-T02–M10-T04 own automated browser evidence for pending,
   failure, success, navigation, and a separately authorized real host operation binding. M12-T04
