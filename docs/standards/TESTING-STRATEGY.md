@@ -179,7 +179,7 @@ pinned at `sha256:6246c4865e28a737e5990a7204dedaad6cae3e6c989a70a6cd496c84c29d07
 
 The historical M09-T06 and M09-T07 successors contain 184 workloads/87 proof pairs and 186
 workloads/88 proof pairs respectively. The historical M09-T08 and M09-T09 successors contain 188
-workloads/89 proof pairs and 190 workloads/90 proof pairs respectively. The current M09-T10
+workloads/89 proof pairs and 190 workloads/90 proof pairs respectively. The historical M09-T10
 successor contains 192 workloads and 91 proof pairs, split into 80 ordinary pairs and 11 barriers.
 Its three formal impact parents are `desen-app-real-adapter-canvas`,
 `desen-app-state-binding-editor`, and `desen-app-event-action-editor`; the connected closure
@@ -188,6 +188,23 @@ contains 58 proof units and 126 workloads. M09-T08's three formal impact parents
 `desen-app-named-slot-authoring`; the connected closure contains 56 proof units and 122 workloads.
 Exact plan, inventory, selector, runner, ownership, and checkpoint digests remain machine-verified
 CI authorities rather than values inferred from these counts.
+
+The current M09-T11 successor contains 194 workloads and 92 proof pairs, split into 81 ordinary
+pairs and 11 barriers. Its three formal impact parents are `desen-app-design-run-modes`,
+`reference-sign-in-fixtures-and-host-binding`, and `reference-catalog-web-parity`; the connected
+closure contains 59 proof units and 128 workloads. Exact plan, inventory, selector, runner,
+ownership, and checkpoint digests remain code-owned authorities rather than values inferred from
+these counts. The neutral inventory, workload set, and impact graph are
+`sha256:82b41b49abfd3b97f695af068e66168374ad2e994c7100b4442d06984032c7fc`,
+`sha256:4a33777d8bb5cf515137b6539eaefab36229c5c345848bbc6be1d7a55b132acf`, and
+`sha256:d028537891400c806dff4f7a4d7be3b3e783381369052b7d8079fdfd10759b73`; the exact T11 closure
+is `sha256:e0e1843e59db8002aa31ec0e6c2d6c435744d3c6985612373074e0b41312ded1`.
+Append-only proof-reader sequence 50 advances
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` to
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` across 46 artifacts and
+92 readers. The independently promoted selector and runner authorities are
+`sha256:b97d10bd27576ed5fc543dfd94fe7981cf2cf7bc2159aa6d431e2100312a6819` and
+`sha256:a9e640b59786e2ee8f16c7bbd1f14be895d1ec71050f25a8fca6ffbe85104d6e`.
 
 The historical M08-T10 affected ownership covers 1,119 tracked paths at
 `sha256:4755d3f896dc904ea8572bbd84329916000daef09455a9927239e11eab0427a1`, including 162
@@ -236,11 +253,16 @@ proof-owned paths across 1,184 tracked paths. Its ownership-category counts are
 proof-owned paths across 1,192 tracked paths. Its ownership-category counts are
 `176 / 45 / 31 / 132 / 460 / 213 / 124 / 11`. The historical M09-T08 and M09-T09 authorities
 contain 178 proof-owned paths across 1,202 tracked paths and 180 proof-owned paths across 1,212
-tracked paths respectively. The current M09-T10 authority contains 182 proof-owned paths across
+tracked paths respectively. The historical M09-T10 authority contains 182 proof-owned paths across
 1,218 tracked paths. Its exact ownership-category projection is
 `182 / 45 / 31 / 135 / 468 / 219 / 127 / 11` for proof unit, CI policy, dependency policy, frozen
 input, package/application, shared proof infrastructure, project documentation, and repository
-policy respectively. The 16 reviewed
+policy respectively. The current M09-T11 authority contains 184 proof-owned paths across 1,232
+tracked paths. Its path-set and ownership-projection digests are
+`sha256:3d77bb0de542b1d153deb9fb87f2ba5adbc45e2153d9b156074026b04a755fff` and
+`sha256:86e1d1555580e1496686f11858c1bd4b69ce7b0f84a429b930ee9dc1c0f1f153`; exact category counts
+are `184 / 45 / 31 / 136 / 476 / 221 / 128 / 11` in the same order.
+The 16 reviewed
 workspace test scripts are pinned by
 `sha256:4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab`. Contract and
 hostile-input tests cover exact
@@ -696,10 +718,11 @@ and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact o
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04, G07,
-M08-T10, G08, and M09-T01–T10 are `DONE`; proof gates are 10/13, implementation progress is
-105/145, M08 is 10/10, M09 is 10/14, `N-012`, `N-014`, `N-018`, `N-042`, `S-002`, and `S-003` are
-`TESTED`, P-06 and P-18 are `PROVEN`, P-09 is `PARTIAL`, P-08 remains `NOT_PROVEN`, S-001 remains
-`PLANNED`, PF-025, PF-028, and PF-083 remain `OPEN`, and M09-T11 is next. The
+M08-T10, G08, and M09-T01–T11 are `DONE`; proof gates are 10/13, implementation progress is
+106/145, M08 is 10/10, M09 is 11/14, `N-012`, `N-014`, `N-018`, `N-035`, `N-042`, `S-001`,
+`S-002`, and `S-003` are `TESTED`, P-06 and P-18 are `PROVEN`, P-09 and P-10 are `PARTIAL`, P-08
+remains `NOT_PROVEN`, N-036 remains `PLANNED`, PF-028 is `CLOSED`, PF-025, PF-083, and PF-089
+remain `OPEN`, and M09-T12 is next. The
 exact 30,014-byte M08-T05 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
 `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`; the report is
@@ -800,6 +823,16 @@ same-session Design/Run boundary and controlled adapter → Runtime React/Core �
 while P-09 remains only `PARTIAL`; P-08 remains `NOT_PROVEN`; S-001 remains `PLANNED`; and PF-025,
 PF-028, and PF-083 remain `OPEN`. These are local task receipts rather than a required-gate or
 hosted-CI claim.
+The exact `29,407`-byte M09-T11 artifact is
+`docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json` at
+`sha256:3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d`; the report is
+`docs/proof/DESEN-APP-FIXTURES-SCENARIOS-FIDELITY.md`. Its focused fixtures/scenarios/fidelity,
+complete App, and independent root suites pass 86/86, 252/252, and 11/11. It proves props-only
+transient scenarios, exact synthetic pending/success/declared-failure lifecycle, synchronous
+cleanup revocation, visible unavailable real contexts, and complete conservative fidelity
+disclosure. Durable persistence, diagnostics, publication/activation, and automated
+real-browser/native-drag E2E remain unproven. These are local task receipts rather than a
+required-gate or hosted-CI claim.
 The first hosted PR run exposed an isolation-fixture workspace-target symlink denied by Node's
 permission model. The resealed fixture uses only absolute runner-temporary targets, and the exact
 isolation suite passes 8/8 without permission widening. This is a corrective local receipt, not a
@@ -837,6 +870,16 @@ promotion, and complete serial structural suites pass 72/72, 19/19, and 339/339.
 at `sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` with 45 artifacts and 90
 readers. No required-gate, hosted-CI, fixtures/scenarios, persistence, diagnostics, publication,
 activation, or automated real-browser E2E result is inferred from those local receipts.
+The M09-T11 focused fixtures/scenarios/fidelity, complete App, and independent root suites pass
+86/86, 252/252, and 11/11. The current exhaustive authority contains 194 workloads and 92 proof
+pairs—81 ordinary and 11 barriers—with a 59-proof-unit/128-workload closure and ownership over
+1,232 tracked paths, including 184 proof-owned paths. Sequence 50 advances
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` to
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` across 46 artifacts and
+92 readers; checkpoint, promotion, selector plus required-affected, ownership, and remaining
+touched-CI suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally. No required-gate, hosted-CI, durable
+persistence, diagnostics, publication/activation, or automated real-browser/native-drag E2E result
+is inferred from those local receipts.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one or more live readers through the reviewed checkpoint append procedure only when every previously pinned

@@ -5,8 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { setDesenEditorOwnerProp } from "@desen/editor-core";
 import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
+import { createRuntimeHostPorts } from "@desen/runtime-core";
 
 import type * as RuntimeCore from "@desen/runtime-core";
+import type { RuntimeHostPorts, RuntimeJsonObject } from "@desen/runtime-core";
 
 const lifecycle = vi.hoisted(() => ({
   mounted: [] as object[],
@@ -41,6 +43,33 @@ import {
   REFERENCE_EDITOR_DOCUMENT,
 } from "../src/authoring-preview.js";
 import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
+
+const EMPTY_RUNTIME_JSON = Object.freeze({}) satisfies RuntimeJsonObject;
+
+function createTestHostPorts(): RuntimeHostPorts {
+  return createRuntimeHostPorts({
+    navigation: { navigate: () => ({ status: "denied" }) },
+    storage: {
+      getBundle: () => ({ status: "missing" }),
+      putBundle: () => ({ status: "conflict" }),
+      readActivation: () => ({ status: "missing" }),
+      commitActivation: () => ({ status: "conflict", generation: null }),
+    },
+    operations: { invoke: () => ({ status: "denied" }) },
+    resources: { load: () => ({ status: "denied" }) },
+    tokens: { resolve: () => ({ status: "missing" }) },
+    context: {
+      getSnapshot: () => EMPTY_RUNTIME_JSON,
+      subscribe: () => () => undefined,
+    },
+    environment: {
+      getSnapshot: () => EMPTY_RUNTIME_JSON,
+      subscribe: () => () => undefined,
+    },
+    clock: { now: () => 1 },
+    diagnostics: { report: () => undefined },
+  });
+}
 
 function componentSelection(
   sourceNodeId: string,
@@ -126,9 +155,7 @@ describe("Desen App exact React adapter canvas", () => {
     expect(runCanvas.getAttribute("data-adapter-canvas-mode")).toBe("run");
     expect(runCanvas.getAttribute("data-adapter-interactions")).toBe("enabled");
     expect(
-      screen.getByText(
-        "Run preview · real adapter controls are enabled; external effects remain denied.",
-      ),
+      screen.getByText("Run preview · real adapter controls use the selected synthetic fixture."),
     ).toBeTruthy();
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     expect(lifecycle.mounted).toEqual([session]);
@@ -165,6 +192,49 @@ describe("Desen App exact React adapter canvas", () => {
     expect(screen.getByRole("status", { name: "Selected layer preview" })).toBeTruthy();
     expect(lifecycle.mounted).toEqual([session]);
     expect(lifecycle.disposed).toHaveLength(0);
+  });
+
+  it("keeps an exact host authority stable and hides its tree synchronously on replacement", async () => {
+    const firstHostPorts = createTestHostPorts();
+    const secondHostPorts = createTestHostPorts();
+    const view = render(
+      <DesenAdapterCanvas hostPorts={firstHostPorts} projectId="account-app" surfaceId="sign-in" />,
+    );
+
+    expect(await screen.findByRole("group", { name: "Sign-in adapter canvas" })).toBeTruthy();
+    const firstSession = lifecycle.mounted[0];
+    expect(firstSession).toBeDefined();
+    const firstCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+
+    view.rerender(
+      <DesenAdapterCanvas
+        hostPorts={firstHostPorts}
+        mode="run"
+        projectId="account-app"
+        surfaceId="sign-in"
+      />,
+    );
+    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBe(firstCanvas);
+    expect(lifecycle.mounted).toEqual([firstSession]);
+    expect(lifecycle.disposed).toHaveLength(0);
+
+    view.rerender(
+      <DesenAdapterCanvas
+        hostPorts={secondHostPorts}
+        mode="run"
+        projectId="account-app"
+        surfaceId="sign-in"
+      />,
+    );
+
+    const secondCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    expect(secondCanvas).not.toBe(firstCanvas);
+    expect(firstCanvas.isConnected).toBe(false);
+    await waitFor(() => {
+      expect(lifecycle.mounted).toHaveLength(2);
+      expect(lifecycle.disposed).toEqual([firstSession]);
+    });
+    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBe(secondCanvas);
   });
 
   it("fails closed for every unsupported project or surface without mounting sign-in", () => {

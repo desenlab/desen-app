@@ -17,6 +17,10 @@ import {
 const TEST_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(TEST_DIRECTORY, "..");
 const PACKAGE_TEST_DIRECTORY = path.join(WORKSPACE_ROOT, "packages/reference-catalog-web/test");
+const FIXTURES_SCENARIOS_ARTIFACT_PATH = path.join(
+  WORKSPACE_ROOT,
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json",
+);
 
 async function loadApis() {
   const stamp = `${Date.now()}-${Math.random()}`;
@@ -125,6 +129,7 @@ test("accepts the tracked deterministic M03-T09 evidence", async () => {
   assert.equal(result.trackedFiles, 23);
   assert.equal(result.proofMatrixStatus, "P-06 PARTIAL");
   assert.equal(result.normativeStatus, "S-004 TESTED");
+  assert.equal(result.successorNormativeStatus, "S-001 TESTED");
 });
 
 test("builds byte-identical injected evidence twice", async () => {
@@ -135,6 +140,13 @@ test("builds byte-identical injected evidence twice", async () => {
   assert.equal(first.artifact.prerequisite.packageDigest.result, "SKIPPED");
   assert.equal(first.artifact.prerequisite.signIn.result, "SKIPPED");
   assert.equal(first.artifact.catalogScope.officialCatalogRepublished, false);
+  assert.deepEqual(first.fixturesScenariosSuccessor, {
+    task: "M09-T11",
+    artifactBytes: 29_407,
+    artifactSha256: "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+    historicalParityParentAuthenticated: true,
+    s001Status: "TESTED",
+  });
 });
 
 test("keeps unrelated normative and root-script growth outside task-owned evidence bytes", async () => {
@@ -599,16 +611,6 @@ test("rejects package-test type-negative trace and command-wiring drift", async 
     path.join(WORKSPACE_ROOT, "docs/proof/NORMATIVE-COVERAGE.md"),
     "utf8",
   );
-  const compatibility = verifyReferenceCatalogWebParityNormativeCompatibility(normativeCoverage);
-  assert.deepEqual(compatibility.historicalProjection, [
-    { id: "N-030", status: "PLANNED" },
-    { id: "N-033", status: "PLANNED" },
-    { id: "N-034", status: "PLANNED" },
-    { id: "S-001", status: "PLANNED" },
-    { id: "S-004", status: "TESTED" },
-  ]);
-  assert.equal(compatibility.currentStatuses.find(({ id }) => id === "N-033")?.status, "TESTED");
-  assert.equal(compatibility.currentStatuses.find(({ id }) => id === "N-034")?.status, "TESTED");
   const withNormativeStatus = (id, status) =>
     normativeCoverage
       .split("\n")
@@ -619,20 +621,67 @@ test("rejects package-test type-negative trace and command-wiring drift", async 
         return cells.join("|");
       })
       .join("\n");
+  const { fixturesScenariosSuccessor } = await injected();
+  const compatibility = verifyReferenceCatalogWebParityNormativeCompatibility(
+    normativeCoverage,
+    fixturesScenariosSuccessor,
+  );
+  assert.deepEqual(compatibility.historicalProjection, [
+    { id: "N-030", status: "PLANNED" },
+    { id: "N-033", status: "PLANNED" },
+    { id: "N-034", status: "PLANNED" },
+    { id: "S-001", status: "PLANNED" },
+    { id: "S-004", status: "TESTED" },
+  ]);
+  assert.equal(compatibility.currentStatuses.find(({ id }) => id === "N-033")?.status, "TESTED");
+  assert.equal(compatibility.currentStatuses.find(({ id }) => id === "N-034")?.status, "TESTED");
+  assert.equal(compatibility.currentStatuses.find(({ id }) => id === "S-001")?.status, "TESTED");
+  assert.throws(
+    () => verifyReferenceCatalogWebParityNormativeCompatibility(normativeCoverage),
+    (error) => expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
+  );
+  assert.doesNotThrow(() =>
+    verifyReferenceCatalogWebParityNormativeCompatibility(withNormativeStatus("S-001", "PLANNED")),
+  );
   for (const id of ["N-033", "N-034"]) {
     assert.doesNotThrow(() =>
-      verifyReferenceCatalogWebParityNormativeCompatibility(withNormativeStatus(id, "PLANNED")),
+      verifyReferenceCatalogWebParityNormativeCompatibility(
+        withNormativeStatus(id, "PLANNED"),
+        fixturesScenariosSuccessor,
+      ),
     );
     for (const invalidStatus of ["NOT_STARTED", "IMPLEMENTED"]) {
       assert.throws(
         () =>
           verifyReferenceCatalogWebParityNormativeCompatibility(
             withNormativeStatus(id, invalidStatus),
+            fixturesScenariosSuccessor,
           ),
         (error) => expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
       );
     }
   }
+  for (const invalidStatus of ["NOT_STARTED", "IMPLEMENTED"]) {
+    assert.throws(
+      () =>
+        verifyReferenceCatalogWebParityNormativeCompatibility(
+          withNormativeStatus("S-001", invalidStatus),
+          fixturesScenariosSuccessor,
+        ),
+      (error) => expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
+    );
+  }
+  const aliasDirectory = path.join(directory, "successor-alias");
+  await symlink(path.dirname(FIXTURES_SCENARIOS_ARTIFACT_PATH), aliasDirectory);
+  await assert.rejects(
+    injected({
+      fixturesScenariosArtifactPath: path.join(
+        aliasDirectory,
+        path.basename(FIXTURES_SCENARIOS_ARTIFACT_PATH),
+      ),
+    }),
+    (error) => expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
+  );
   const foundationTestPath = await mutatedCopy(
     path.join(PACKAGE_TEST_DIRECTORY, "foundation-components.test.tsx"),
     directory,
@@ -682,7 +731,12 @@ test("rejects package-test type-negative trace and command-wiring drift", async 
     (source) =>
       source
         .split("\n")
-        .map((line) => (line.startsWith("| S-001 ") ? line.replace("| PLANNED", "| TESTED") : line))
+        .map((line) => {
+          if (!line.startsWith("| S-001 ")) return line;
+          const cells = line.split("|");
+          cells[5] = " IMPLEMENTED ";
+          return cells.join("|");
+        })
         .join("\n"),
   );
   await assert.rejects(injected({ normativeCoveragePath }), (error) =>

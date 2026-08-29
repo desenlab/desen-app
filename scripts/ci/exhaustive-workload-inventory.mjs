@@ -105,6 +105,11 @@ const DIRECT_PROOF_VERIFIER_PREREQUISITES = SAFE_OBJECT_FREEZE({
     "node scripts/verify-desen-app-state-binding-editor.mjs",
     "node scripts/verify-desen-app-event-action-editor.mjs",
   ]),
+  "desen-app-fixtures-scenarios-fidelity": SAFE_OBJECT_FREEZE([
+    "node scripts/verify-desen-app-design-run-modes.mjs",
+    "node scripts/verify-reference-sign-in-fixtures-and-host-binding.mjs",
+    "node scripts/verify-reference-catalog-web-parity.mjs",
+  ]),
 });
 const EXPECTED_CHECK_SUFFIX = SAFE_OBJECT_FREEZE([
   "pnpm lint",
@@ -134,11 +139,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "ec52c27dbc9ea1db400cae2fa1ec7ab7b58b468eb83ee396ea7c082107fc06cb";
+  "4c086021423a728182e484e4ca218f419b58ae66a0b1a6607f1c5f4a1d677f09";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "f167a05bbac9b7959ed6f179e2adacef3382d21a6e6056c568aeddab891a58ec";
+  "3daf978eeb28f95aa523c54f5c1ad19cdb4fe81add9a53a971996f550f33e1cb";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "a91f9e647b3a4bfcd8a45e2fe473b0c86a7acd2edc450897eab851e2dca47fc5";
+  "239097eb37432275fe71f5a14d8f6ec8688be5db11a2961cf8e8b503e8bcb175";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -595,6 +600,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "desen-app-design-run-modes",
     "scripts/verify-desen-app-design-run-modes.mjs",
     "tests/desen-app-design-run-modes.test.mjs",
+  ],
+  [
+    "desen-app-fixtures-scenarios-fidelity",
+    "scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs",
+    "tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
   ],
 ]);
 
@@ -1555,7 +1565,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "853175eac4b6da232424cc6f47ad8455db3970ae1a72744bf7324b56403bf59f";
+  "82b41b49abfd3b97f695af068e66168374ad2e994c7100b4442d06984032c7fc";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

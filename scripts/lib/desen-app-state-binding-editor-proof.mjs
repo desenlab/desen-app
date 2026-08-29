@@ -18,6 +18,8 @@ const EDITOR_STATE_ARTIFACT_PATH =
   "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const EVENT_ACTION_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json";
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const LOCKFILE_PATH = "pnpm-lock.yaml";
@@ -96,6 +98,7 @@ const TRACKED_PATHS = Object.freeze([
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ROOT_PACKAGE_PATH,
   APP_PACKAGE_PATH,
+  LOCKFILE_PATH,
   INSPECTOR_PANEL_SOURCE_PATH,
   ADAPTER_SOURCE_PATH,
   APPLICATION_SOURCE_PATH,
@@ -107,7 +110,7 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
 ]);
 
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
-  ...new Set([...TRACKED_PATHS, EVENT_ACTION_ARTIFACT_PATH]),
+  ...new Set([...TRACKED_PATHS, EVENT_ACTION_ARTIFACT_PATH, FIXTURES_SCENARIOS_ARTIFACT_PATH]),
 ]);
 
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
@@ -133,6 +136,28 @@ const EVENT_ACTION_ARTIFACT_PIN = Object.freeze({
   bytes: 23_812,
   sha256: "0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab",
 });
+
+const FIXTURES_SCENARIOS_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T11",
+  proofId: "desen-app-fixtures-scenarios-fidelity",
+  profile: "desen.app.fixtures-scenarios-fidelity-proof.v1",
+  result: "PASS",
+  path: FIXTURES_SCENARIOS_ARTIFACT_PATH,
+  bytes: 29_407,
+  sha256: "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+});
+
+const T11_LIVE_RECEIPT_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  LOCKFILE_PATH,
+  INSPECTOR_PANEL_SOURCE_PATH,
+  ADAPTER_SOURCE_PATH,
+  APPLICATION_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+  ADAPTER_TEST_PATH,
+  APPLICATION_TEST_PATH,
+]);
 
 const EXPECTED_STRUCTURED_JSON_TEST_NAMES = Object.freeze([
   "admits reserved-looking members as detached recursively frozen inert data",
@@ -672,12 +697,12 @@ function inspectApplicationSource(source) {
       "<DesenAdapterCanvas",
       "<InspectorPanel",
       "onBindingEdit={editSelectedBinding}",
-      "Save, control-plane publication, and activation remain unavailable.",
+      "navigation, resources, storage, publication, activation, integration, and production calls remain blocked.",
       "function acceptsDragIntent(",
-      "function projectedRowDrop(event: DragEvent<HTMLButtonElement>)",
-      "const bounds = event.currentTarget.getBoundingClientRect()",
-      'const position = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after"',
-      "data-row-drop-position={rowDropPosition ?? undefined}",
+      "function projectNearestDrop(",
+      "const midpoint =",
+      "clientY < midpoint",
+      "data-drop-hovered={dropReady && dropHovered}",
       'data-drag-active={dragIntent?.kind === "component"}',
       'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
       "sourceNodeId: result.nodeId",
@@ -770,13 +795,10 @@ function inspectCssSource(source) {
       ".stateCard",
       ".stateDeleteButton",
       ".stateReadonly",
-      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.875rem;",
-      '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;\n  min-height: 1.625rem;',
-      "margin-block: 0",
-      ".layerNode[data-row-drop-position] {\n  z-index: 4;",
-      ".layerNode[data-row-drop-position] > .layerRow",
-      '.layerNode[data-row-drop-position="before"]::before',
-      '.layerNode[data-row-drop-position="after"]::before',
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.5rem;",
+      '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;',
+      '.slotBoundary[data-drop-hovered="true"] {\n  z-index: 4;',
+      '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
       ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
       '.componentSlotTarget[data-drag-active="true"]',
     ],
@@ -1222,6 +1244,71 @@ function authenticateEventActionSuccessor(files) {
   });
 }
 
+function authenticateFixturesScenariosSuccessor(files) {
+  const artifactBytes = files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  if (
+    artifactBytes.byteLength !== FIXTURES_SCENARIOS_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FIXTURES_SCENARIOS_ARTIFACT_PIN.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact bytes drifted.");
+  }
+  const artifact = parseJson(artifactBytes, FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  const parent = artifact.prerequisites?.[0];
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  if (
+    artifact.task !== FIXTURES_SCENARIOS_ARTIFACT_PIN.task ||
+    artifact.proofId !== FIXTURES_SCENARIOS_ARTIFACT_PIN.proofId ||
+    artifact.profile !== FIXTURES_SCENARIOS_ARTIFACT_PIN.profile ||
+    artifact.result !== FIXTURES_SCENARIOS_ARTIFACT_PIN.result ||
+    parent?.task !== "M09-T10" ||
+    parent?.bytes !== 17_900 ||
+    parent?.sha256 !== "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334" ||
+    artifact.claim?.scenarioSourceAndBundleEphemeral !== true ||
+    artifact.claim?.authoredSourceAndPublishablePreviewUnchanged !== true ||
+    artifact.claim?.pendingRuntimeLifecycleExercised !== true ||
+    artifact.claim?.exactOperationAndPreviewContextAuthorization !== true ||
+    artifact.claim?.operationInputOrPasswordRetained !== false ||
+    artifact.claim?.stableAppOwnedOperationPort !== true ||
+    artifact.claim?.cleanupSynchronouslyRevokesFixtureAdmission !== true ||
+    artifact.claim?.pendingRevokedOnPreviewReplacement !== true ||
+    artifact.claim?.s001Status !== "TESTED" ||
+    artifact.claim?.pf028Status !== "CLOSED" ||
+    artifact.tests?.focusedTestCases !== 86 ||
+    !Array.isArray(trackedReceipts)
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact identity or claims drifted.");
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
+  for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    const authority = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The live M09-T11 successor receipt drifted: ${relativePath}.`,
+      );
+    }
+  }
+  return deepFreeze({
+    task: FIXTURES_SCENARIOS_ARTIFACT_PIN.task,
+    artifact: FIXTURES_SCENARIOS_ARTIFACT_PIN,
+    exactDesignRunParent: true,
+    scenariosEphemeral: true,
+    pendingRuntimeLifecycleExercised: true,
+    exactOperationAndPreviewContextAuthorization: true,
+    operationInputOrPasswordRetained: false,
+    stableAppOwnedOperationPort: true,
+    focusedTestCases: 86,
+    s001Status: "TESTED",
+    pf028Status: "CLOSED",
+  });
+}
+
 /** Builds detached deterministic M09-T08 state-binding editor evidence. */
 async function _buildFreshDesenAppStateBindingEditorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
@@ -1375,6 +1462,7 @@ export async function buildDesenAppStateBindingEditorEvidence(rawOptions = undef
   const tests = inspectTests(files);
   const packageContract = inspectPackages(files);
   const successor = authenticateEventActionSuccessor(files);
+  const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-state-binding-editor",
@@ -1399,6 +1487,7 @@ export async function buildDesenAppStateBindingEditorEvidence(rawOptions = undef
     },
     source,
     successor,
+    fixturesScenariosSuccessor,
     package: packageContract,
     testPolicy: {
       applicationTestNames: tests.appTestNames[APPLICATION_TEST_PATH],
@@ -1413,6 +1502,7 @@ export async function buildDesenAppStateBindingEditorEvidence(rawOptions = undef
         APPLICATION_CSS_PATH,
         APPLICATION_TEST_PATH,
         EVENT_ACTION_ARTIFACT_PATH,
+        FIXTURES_SCENARIOS_ARTIFACT_PATH,
       ].map((relativePath) => ({
         path: relativePath,
         bytes: files.get(relativePath).byteLength,

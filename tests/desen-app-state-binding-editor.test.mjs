@@ -31,9 +31,12 @@ const SOURCE_PATHS = Object.freeze({
   applicationSource: "apps/desen-app/src/application.tsx",
   applicationCss: "apps/desen-app/src/application.module.css",
 });
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let sourcePolicyInput;
+let fixturesScenariosArtifactBytes;
 let built;
 
 function expectedError(code) {
@@ -97,6 +100,9 @@ before(async () => {
       ]),
     ),
   );
+  fixturesScenariosArtifactBytes = await readFile(
+    path.join(ROOT, FIXTURES_SCENARIOS_ARTIFACT_PATH),
+  );
   built = await buildDesenAppStateBindingEditorEvidence();
 });
 
@@ -130,6 +136,12 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[0], () => {
   });
   assert.equal(built.currentCompatibility.successor.exactSelectedComponentEvents, true);
   assert.equal(built.currentCompatibility.successor.behaviorOwnerUiImplemented, false);
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.task, "M09-T11");
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.focusedTestCases, 86);
+  assert.equal(
+    built.currentCompatibility.fixturesScenariosSuccessor.pendingRuntimeLifecycleExercised,
+    true,
+  );
 });
 
 test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[1], () => {
@@ -280,8 +292,8 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[7], async () => {
     },
     {
       key: "applicationSource",
-      search: "function projectedRowDrop(event: DragEvent<HTMLButtonElement>)",
-      replacement: "function uncheckedRowDrop(event: DragEvent<HTMLButtonElement>)",
+      search: "function projectNearestDrop(",
+      replacement: "function uncheckedNearestDrop(",
     },
     {
       key: "applicationSource",
@@ -295,8 +307,8 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[7], async () => {
     },
     {
       key: "applicationCss",
-      search: ".layerNode[data-row-drop-position] {\n  z-index: 4;",
-      replacement: ".layerNode[data-row-drop-disabled] {\n  z-index: 4;",
+      search: '.slotBoundary[data-drop-hovered="true"] {\n  z-index: 4;',
+      replacement: '.slotBoundary[data-drop-disabled="true"] {\n  z-index: 4;',
     },
     {
       key: "applicationCss",
@@ -329,6 +341,15 @@ test(DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES[8], async () => {
       expectedError("PARENT_DRIFT"),
     );
   }
+
+  await assert.rejects(
+    buildDesenAppStateBindingEditorEvidence({
+      fileOverrides: new Map([
+        [FIXTURES_SCENARIOS_ARTIFACT_PATH, changedByte(fixturesScenariosArtifactBytes)],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
 
   const proofDocument = exactProofDocument(built.artifactSha256);
   const verified = await verifyDesenAppStateBindingEditorEvidence({

@@ -17,6 +17,8 @@ import {
 const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const PREREQUISITE = "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json";
+const FIXTURES_SCENARIOS_ARTIFACT =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const NAVIGATION = "apps/desen-app/src/project-navigation.ts";
 const APPLICATION = "apps/desen-app/src/application.tsx";
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
@@ -27,6 +29,7 @@ const PACKAGE = "apps/desen-app/package.json";
 const ROOT_PACKAGE = "package.json";
 const temporaryDirectories = [];
 let built;
+let fixturesScenariosArtifactBytes;
 
 function expectedError(code) {
   return (error) => error instanceof DesenAppShellNavigationProofError && error.code === code;
@@ -51,7 +54,10 @@ async function temporaryDirectory(prefix) {
 }
 
 before(async () => {
-  built = await buildDesenAppShellNavigationEvidence();
+  [built, fixturesScenariosArtifactBytes] = await Promise.all([
+    buildDesenAppShellNavigationEvidence(),
+    readFile(path.join(ROOT, FIXTURES_SCENARIOS_ARTIFACT)),
+  ]);
 });
 
 after(async () => {
@@ -90,6 +96,12 @@ test("[authority] binds M09-T01 to the exact completed G08 artifact", () => {
     bytes: 24_830,
     sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
   });
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.task, "M09-T11");
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.focusedTestCases, 86);
+  assert.equal(
+    built.currentCompatibility.fixturesScenariosSuccessor.operationInputOrPasswordRetained,
+    false,
+  );
 });
 
 test("[shell] records the closed route, fixture, guidance, and accessibility profile", () => {
@@ -181,6 +193,10 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     "apps/desen-app/src/state-panel.tsx",
     "apps/desen-app/src/authoring-event-actions.ts",
     "apps/desen-app/src/event-action-panel.tsx",
+    "apps/desen-app/src/authoring-fixtures.ts",
+    "apps/desen-app/src/authoring-scenarios.ts",
+    "apps/desen-app/src/preview-controls.tsx",
+    "apps/desen-app/src/preview-fidelity.ts",
   ]);
   assert.equal(
     built.currentCompatibility.additiveSuccessor
@@ -327,6 +343,14 @@ test("[mutation] rejects prerequisite, route, package, and scope-boundary drift"
   await assert.rejects(
     buildDesenAppShellNavigationEvidence({ prerequisiteBytes: changedByte(prerequisite) }),
     expectedError("PREREQUISITE_DRIFT"),
+  );
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [FIXTURES_SCENARIOS_ARTIFACT, changedByte(fixturesScenariosArtifactBytes)],
+      ]),
+    }),
+    expectedError("BOUNDARY_DRIFT"),
   );
 
   const navigation = await readFile(path.join(ROOT, NAVIGATION), "utf8");

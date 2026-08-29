@@ -620,7 +620,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
 
 ## PF-028 — Pending is lifecycle state, not a static operation fixture payload
 
-- Status: OPEN
+- Status: CLOSED
 - Blocks proof: No; the exact Catalog shape and normative lifecycle text support one conservative
   implementation.
 - Protocol location: SPEC Sections 20.4, 22.3, and 23.3; Catalog Schema
@@ -635,8 +635,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
   `pending` fixture key. M04-T09 owns the runtime transition into pending, and later Run Mode
   evidence must show that state while a controlled fixture or trusted host result is unresolved.
   M09-T10 proves only the real adapter → Runtime React/Core → closed `state.set` path on one
-  in-memory session. Its operation port remains denied and it adds no fixture or scenario, so it
-  does not claim pending, success, or failure operation lifecycle evidence. PF-028 remains `OPEN`.
+  in-memory session. M09-T11 closes the ambiguity for the App profile: fixture data still contains
+  only exact success and declared error outcomes, while the real adapter invocation publishes a
+  Runtime `pending` lifecycle before the App explicitly settles one selected synthetic outcome.
+  Cleanup and preview replacement revoke unresolved work. The proof rejects a static pending
+  fixture and authenticates the exact M03-T08 parent, so no schema widening or third result payload
+  is introduced. PF-028 is therefore `CLOSED`.
 - Future action: Clarify the implementation guide so “pending fixture coverage” means exercising
   runtime pending state during fixture-backed execution, not adding a third static fixture shape.
 
@@ -3765,3 +3769,49 @@ This file records implementation discoveries without changing the frozen DESEN 0
   through their public boundaries. They must retain explicit route/failure ownership or document
   and test any widening; no later slice may retroactively present M09-T01 fixtures as durable
   project or protocol authority.
+
+## PF-089 — Authoring preview context needs an explicit transient authority profile
+
+- Status: OPEN
+- Blocks proof: No; M09-T11 can expose one conservative App profile over already authenticated
+  Catalog scenarios, synthetic fixtures, Runtime lifecycle, and adapter-fidelity metadata without
+  changing frozen protocol bytes or granting live-service authority.
+- Protocol location: SPEC Sections 3.2, 5.2, 16.2, and 17; normative rows `N-035`, `N-036`, and
+  `S-001`; related findings `PF-024`, `PF-028`, `PF-081`, `PF-083`, and `PF-088`
+- Observation: DESEN 0.1.0 distinguishes authoring metadata, fixtures, and adapter-fidelity
+  declarations, but it does not prescribe an editor's preview-context identity, scenario
+  selection lifecycle, synthetic operation settlement UI, StrictMode replay behavior, or the
+  labels and admission rules that separate synthetic, integration, and production execution. A
+  scenario applied directly to the authored Source, an inferred fixture from an operation input,
+  or a context label that silently enables a live binding would each create authority outside the
+  protocol.
+- Implementation decision: M09-T11 admits one scenario only against the exact current route,
+  selected Source node, Catalog capability, Source revision, and preview revision. `source` and
+  `catalog:<scenarioId>` remain distinct identities. A Catalog scenario contributes only a shallow
+  props overlay to a separate transient Source, which is independently published into a transient
+  preview Bundle; it never mutates the authored Source or its publishable preview. Scenario state
+  and fixture members are unsupported in this App slice and fail closed rather than being
+  partially interpreted.
+
+  Synthetic execution uses only the public testkit projection for the exact sign-in operation and
+  exposes only `success:user-1` and declared `invalidCredentials`. Pending is a real Runtime
+  lifecycle state, never a static fixture. The App-owned port authorizes the exact context,
+  capability, alias, effect, and preview identity before starting. It neither reads nor retains
+  request input or password data. Integration and Production remain visible but unavailable and
+  cannot select or call an executable binding.
+
+  Effect cleanup closes admission and revokes pending transport synchronously. StrictMode may
+  reactivate only the same still-live controller; disposal is terminal, and preview replacement
+  binds a new controller while preventing a predecessor from publishing late settlement. Scenario
+  and pending state survive Design/Run presentation changes because mode does not replace the
+  effective preview identity. Fidelity disclosure stays App-owned and conservative:
+  `same`/`equivalent`/`approximate`/`undeclared`, with every declared approximate difference
+  visible and missing or invalid metadata mapped to `undeclared`.
+
+- Future action: M09-T12 must persist only the authored Source, never a transient scenario preview
+  or fixture lifecycle. M09-T14 must publish only the authored/persisted Source through the public
+  Publisher and control-plane boundaries. M10-T02–M10-T04 own automated browser evidence for
+  pending, failure, success, navigation, and a separately authorized real host operation binding.
+  M12-T04 still owns the repository-wide secret/synthetic-data audit for N-036. A future protocol
+  revision should standardize preview-context or scenario-persistence semantics only if they must
+  interoperate across editors.

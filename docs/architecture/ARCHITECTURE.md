@@ -1053,6 +1053,45 @@ boundary. Manual local browser QA covers the mode switch, Run interaction, autom
 placement target, visible Delete action, editable-control Backspace guard, and successful Delete
 shortcut only; it is not promoted to automated real-browser or native-drag E2E evidence.
 
+M09-T11 adds one App-owned preview-context layer without changing the authored session authority.
+The authored sentinel and `catalog:<scenarioId>` identities are distinct. A Catalog scenario is
+admitted only for the exact current route, Source node, capability, Source revision, and preview
+revision; its shallow props overlay is applied to a detached transient Source and separately
+published preview Bundle. Neither the authored Source nor its publishable preview is replaced.
+Scenario state and fixture overrides are unsupported in this slice and fail closed.
+
+Synthetic fixture execution is a separate authority from scenario selection. The App imports the
+public testkit projection, exposes only exact success and declared `invalidCredentials`, and binds
+one controller to the effective preview identity. The real adapter and Runtime publish pending
+before explicit fixture settlement. Authorization rechecks exact context, capability, alias,
+effect, and preview identity without observing or retaining operation input/password data.
+Integration and Production remain visible unavailable contexts and select no executable binding.
+
+Fixture cleanup is synchronous at the authority edge: admission closes and pending transport is
+revoked before effect cleanup returns. React StrictMode replay can reactivate only the same
+still-live controller; disposal is terminal. A scenario/preview replacement creates a new bound
+controller and prevents the predecessor from publishing a late result. Design/Run does not enter
+that controller identity, so mode presentation changes preserve scenario selection and pending
+lifecycle without changing Source, Bundle, or Runtime authority.
+
+Fidelity disclosure is persistent App-owned sibling chrome, not adapter or document execution
+authority. The closed classification is `same`, `equivalent`, `approximate`, or `undeclared`.
+Every approximate difference is rendered; absent or invalid metadata becomes `undeclared`. This
+closes N-035 and S-001 for the reviewed Web slice while making no arbitrary-adapter or pixel-parity
+claim. PF-089 records the transient context profile; PF-028 closes because pending is exercised as
+Runtime lifecycle rather than represented as static fixture data.
+
+The T11 compatibility repair refines presentation without widening mutation authority. Components
+uses a dedicated draggable grip and treats the panel as an append target; successful insertion
+auto-selects the node beside the visible guarded Delete control. Layers keeps one global
+slot/index projection across nested drop surfaces, stable geometry, midpoint hysteresis, and the
+last admitted coordinate-less projection. Native transfer bytes remain inert hints, and no managed
+geometry or native-browser drag E2E authority is introduced.
+
+M09-T11 therefore leaves P-08 `NOT_PROVEN` and P-09/P-10 `PARTIAL`. N-036 remains `PLANNED` for
+the repository-wide M12-T04 audit. Durable Source persistence belongs to M09-T12, diagnostics to
+M09-T13, publication/activation to M09-T14, and automated browser operation evidence to M10.
+
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,
 proof, runtime, or protocol authority. Repository-owned TypeScript, React structure, CSS Modules,

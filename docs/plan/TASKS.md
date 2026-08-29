@@ -1442,7 +1442,7 @@ is next.
 | M09-T08 | DONE        | M09-T05                  | Local state and binding editor UI                                               |
 | M09-T09 | DONE        | M09-T08                  | Sign-in event and closed-action editor UI                                       |
 | M09-T10 | DONE        | M09-T03, M09-T08–M09-T09 | Design/Run modes on the same source tree                                        |
-| M09-T11 | NOT_STARTED | M09-T10                  | Fixtures, scenarios, and visible approximate-fidelity disclosure                |
+| M09-T11 | DONE        | M09-T10                  | Fixtures, scenarios, and visible approximate-fidelity disclosure                |
 | M09-T12 | NOT_STARTED | M09-T01, M08-T08         | Save/open UI through editor persistence port                                    |
 | M09-T13 | NOT_STARTED | M09-T04–M09-T11          | Node-linked diagnostics and selectable invalid placeholders                     |
 | M09-T14 | NOT_STARTED | M09-T10–M09-T13, G07     | Publish to control plane and reference-host channel activation                  |
@@ -1830,6 +1830,60 @@ remains `NOT_PROVEN`; S-001 remains `PLANNED`; and PF-025, PF-028, and PF-083 re
 Fixtures, scenarios, visible approximate-fidelity disclosure, durable save/open, diagnostics
 navigation and placeholders, publication, activation, and automated real-browser E2E remain later
 owners. M09-T11 is next.
+
+M09-T11 adds Catalog-declared props-only scenarios as separate transient previews without changing
+the authored Source or its publishable preview. Scenario admission rechecks the exact route, node,
+capability, Source revision, and preview revision; authored values and Catalog scenarios remain
+distinct, while scenario state or fixture overrides fail closed. Design/Run changes preserve the
+active scenario because mode remains presentation-only.
+
+The Run chrome now exposes the public testkit sign-in fixture projection through one explicitly
+synthetic App-owned controller. Only exact success and declared `invalidCredentials` outcomes are
+selectable. The real adapter action publishes Runtime pending before explicit settlement; request
+input and password data are neither read nor retained. Integration and production contexts remain
+visible but unavailable. Cleanup synchronously closes admission and revokes pending transport,
+StrictMode may reactivate only the same live controller, and preview replacement revokes its
+predecessor before late settlement can publish.
+
+Persistent App-owned chrome discloses `same`, `equivalent`, `approximate`, or `undeclared` adapter
+fidelity and lists every known approximate difference. Missing or invalid metadata resolves
+conservatively to `undeclared`; the exact reference sign-in slice reports the already authenticated
+production adapter. The retained authoring compatibility patch gives Components one real drag
+handle and a panel-wide insertion target, Layers one stable global nested-slot projection with
+midpoint hysteresis, and a newly inserted selection an immediately visible guarded Delete action.
+Browser transfer bytes and managed-tree geometry remain non-authoritative.
+
+The focused App suite passes 86/86, the complete App suite passes 252/252, and the independent root
+proof passes 11/11. Exact evidence is
+the `29,407`-byte
+`docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json` at
+`sha256:3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d`. It authenticates the
+exact M09-T10 Design/Run, M03-T08 sign-in fixture, and M03-T09 reference-parity parents and binds 28
+tracked files. These are local task receipts; no required-gate, hosted-CI, real-browser, or
+native-drag result is inferred.
+
+The live local CI authority contains 194 workloads and 92 proof pairs—81 ordinary and 11 barriers.
+M09-T11's connected closure contains 59 proof units and 128 workloads; complete ownership covers
+1,232 tracked paths, including 184 proof-owned paths. These CI inventory and ownership receipts are
+local and make no hosted result claim.
+
+Append-only proof-reader sequence 50 advances exact predecessor
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` to
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` across 46 frozen
+artifacts and 92 current readers. The checkpoint, promotion, selector plus required-affected,
+ownership, and remaining touched-CI regression suites pass 73/73, 19/19, 56/56, 15/15, and 127/127.
+
+Manual in-app browser inspection confirms the explicit Components insert target, dedicated grip,
+click-to-add path, immediate visible Delete control, and stable Layers gaps. The available browser
+client exposes no native drag automation method, so this inspection is not promoted to automated
+real-browser/native-drag E2E; the complete drag event chain remains focused-test evidence.
+
+M09-T11 is `DONE`, advancing implementation progress to 106/145 (73%) and M09 to 11/14 (79%) while
+proof gates remain 10/13. N-035 and S-001 advance to `TESTED`; P-09 and P-10 remain `PARTIAL`, P-08
+remains `NOT_PROVEN`, and N-036 remains `PLANNED`. PF-028 closes because pending is now exercised
+as Runtime lifecycle rather than static fixture data; PF-025, PF-083, and the new non-blocking
+PF-089 remain `OPEN`. Durable save/open, diagnostic navigation and invalid placeholders,
+publication, activation, and automated real-browser E2E remain later owners. M09-T12 is next.
 
 ## M10 — First end-to-end proof
 

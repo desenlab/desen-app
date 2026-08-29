@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 182,
+  PROOF_UNIT: 184,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
-  FROZEN_INPUT: 135,
-  PACKAGE_OR_APPLICATION: 468,
-  SHARED_PROOF_INFRASTRUCTURE: 219,
-  PROJECT_DOCUMENTATION: 127,
+  FROZEN_INPUT: 136,
+  PACKAGE_OR_APPLICATION: 476,
+  SHARED_PROOF_INFRASTRUCTURE: 221,
+  PROJECT_DOCUMENTATION: 128,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1218 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1232 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1218 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1218);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1232);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 182);
+  assert.equal(proofEntries.length, 184);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -226,6 +226,15 @@ test("permits strict selection only for exact verifier and root-test proof input
     [
       "scripts/verify-desen-app-event-action-editor.mjs",
       "tests/desen-app-event-action-editor.test.mjs",
+    ],
+  );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "desen-app-fixtures-scenarios-fidelity")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs",
+      "tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
     ],
   );
   for (const entry of proofEntries) {
@@ -481,20 +490,20 @@ test("the reviewed M09 successor preserves the historical I07-04 ownership proje
   );
   historicalPaths.sort((left, right) => Buffer.from(left).compare(Buffer.from(right)));
   assert.deepEqual(calculateAffectedWorkloadOwnershipReview(historicalPaths), {
-    trackedPathCount: 1025,
-    trackedPathSetSha256: "f1f20d1ad378707d4f2b5814276cb9f4f6d92b69d749658905e111304ffeab96",
-    proofOwnedPathCount: 144,
+    trackedPathCount: 1039,
+    trackedPathSetSha256: "44dce94427dbe3f8e856be0b583cc1e7425ba77d98786b328cfaae7874729b16",
+    proofOwnedPathCount: 146,
     categoryCounts: {
-      PROOF_UNIT: 144,
+      PROOF_UNIT: 146,
       CI_POLICY: 42,
       DEPENDENCY_POLICY: 31,
-      FROZEN_INPUT: 115,
-      PACKAGE_OR_APPLICATION: 393,
-      SHARED_PROOF_INFRASTRUCTURE: 181,
-      PROJECT_DOCUMENTATION: 108,
+      FROZEN_INPUT: 116,
+      PACKAGE_OR_APPLICATION: 401,
+      SHARED_PROOF_INFRASTRUCTURE: 183,
+      PROJECT_DOCUMENTATION: 109,
       REPOSITORY_POLICY: 11,
     },
-    ownershipSha256: "37864eb66a81ee122e34861fb55069a270d6a22d96f856b5d7e5a108f4833f6a",
+    ownershipSha256: "bc7a53593efd0a99da372d6ee83781f17a3bb5f138ea364bd4d5e868a5b53ad7",
   });
 });
 

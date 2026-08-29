@@ -21,6 +21,8 @@ const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const STATE_BINDING_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json";
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const EVENT_ACTION_SOURCE_PATH = "apps/desen-app/src/authoring-event-actions.ts";
 const EVENT_ACTION_PANEL_PATH = "apps/desen-app/src/event-action-panel.tsx";
 const EVENT_ACTION_TEST_PATH = "apps/desen-app/test/authoring-event-actions.test.ts";
@@ -39,6 +41,7 @@ const SOURCE_PATHS = Object.freeze({
 });
 const temporaryDirectories = [];
 let parentArtifactBytes;
+let fixturesScenariosArtifactBytes;
 let sourcePolicyInput;
 let built;
 
@@ -95,6 +98,9 @@ before(async () => {
     ),
   );
   parentArtifactBytes = await readFile(path.join(ROOT, PARENT_PATH));
+  fixturesScenariosArtifactBytes = await readFile(
+    path.join(ROOT, FIXTURES_SCENARIOS_ARTIFACT_PATH),
+  );
   built = await buildDesenAppStructuredInspectorEvidence();
 });
 
@@ -136,14 +142,21 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[0], () => {
   });
   assert.deepEqual(
     built.currentCompatibility.boundary.additiveSuccessorReceipts
-      .slice(-4)
+      .slice(-5)
       .map(({ path: relativePath }) => relativePath),
     [
       EVENT_ACTION_SOURCE_PATH,
       EVENT_ACTION_PANEL_PATH,
       EVENT_ACTION_TEST_PATH,
       EVENT_ACTION_PANEL_TEST_PATH,
+      FIXTURES_SCENARIOS_ARTIFACT_PATH,
     ],
+  );
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.task, "M09-T11");
+  assert.equal(built.currentCompatibility.fixturesScenariosSuccessor.focusedTestCases, 86);
+  assert.equal(
+    built.currentCompatibility.fixturesScenariosSuccessor.pendingRuntimeLifecycleExercised,
+    true,
   );
   assert.equal(built.currentCompatibility.successor.completeCatalogDeclaredSlotProjection, true);
   assert.equal(built.currentCompatibility.successor.absentAndEmptySlotsRemainDistinct, true);
@@ -741,6 +754,14 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[9], async () => {
     buildDesenAppStructuredInspectorEvidence({
       fileOverrides: new Map([
         [STATE_BINDING_ARTIFACT_PATH, changedByte(stateBindingArtifactBytes)],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppStructuredInspectorEvidence({
+      fileOverrides: new Map([
+        [FIXTURES_SCENARIOS_ARTIFACT_PATH, changedByte(fixturesScenariosArtifactBytes)],
       ]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),

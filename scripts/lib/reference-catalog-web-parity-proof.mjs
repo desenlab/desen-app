@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { lstat, readFile, readlink, realpath } from "node:fs/promises";
+import { constants as fileConstants } from "node:fs";
+import { lstat, open, readFile, readlink, realpath } from "node:fs/promises";
 import path from "node:path";
 import { types as utilTypes } from "node:util";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -19,6 +20,14 @@ import {
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
+const FIXTURES_SCENARIOS_ARTIFACT_PATH = path.join(
+  WORKSPACE_ROOT,
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json",
+);
+const FIXTURES_SCENARIOS_ARTIFACT_RELATIVE_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
+const AUTHORITY_READ_FLAGS =
+  fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 
 /** Absolute path to the deterministic M03-T09 parity artifact. */
 export const DEFAULT_REFERENCE_CATALOG_WEB_PARITY_ARTIFACT_PATH = path.join(
@@ -108,6 +117,7 @@ const DEFAULT_PATHS = Object.freeze({
   rootTestPath: path.join(WORKSPACE_ROOT, "tests/reference-catalog-web-parity.test.mjs"),
   packageDigestArtifactPath: DEFAULT_WEB_REACT_PACKAGE_DIGEST_ARTIFACT_PATH,
   signInArtifactPath: DEFAULT_REFERENCE_SIGN_IN_FIXTURES_AND_HOST_BINDING_ARTIFACT_PATH,
+  fixturesScenariosArtifactPath: FIXTURES_SCENARIOS_ARTIFACT_PATH,
 });
 
 const BUILD_OPTION_NAMES = Object.freeze([
@@ -331,6 +341,22 @@ const PROOF_MATRIX_STATUS_RANK = Object.freeze({
 });
 const HISTORICAL_P06_STATUS = "PARTIAL";
 const MONOTONIC_NORMATIVE_STATUS_IDS = new Set(["N-033", "N-034"]);
+const FIXTURES_SCENARIOS_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T11",
+  proofId: "desen-app-fixtures-scenarios-fidelity",
+  profile: "desen.app.fixtures-scenarios-fidelity-proof.v1",
+  result: "PASS",
+  bytes: 29_407,
+  sha256: "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+});
+const HISTORICAL_PARITY_ARTIFACT_PIN = Object.freeze({
+  task: "M03-T09",
+  path: "docs/proof/artifacts/reference-catalog-web-parity.json",
+  bytes: 18_146,
+  sha256: "6e350f2af71ac4e1f040afe7a3fcc3035de35b585f0121db6a2b35b4f3552a8a",
+  result: "PASS",
+  immutable: true,
+});
 const HISTORICAL_SELF_RECORD = Object.freeze({
   path: "scripts/lib/reference-catalog-web-parity-proof.mjs",
   bytes: 69_947,
@@ -1406,6 +1432,96 @@ function inspectTraceability(traceability) {
   });
 }
 
+async function authenticateFixturesScenariosSuccessor(artifactPath) {
+  let bytes;
+  let artifact;
+  try {
+    const workspace = await realpath(WORKSPACE_ROOT);
+    const exactArtifactPath = path.join(workspace, FIXTURES_SCENARIOS_ARTIFACT_RELATIVE_PATH);
+    assertCondition(
+      path.resolve(artifactPath) === path.resolve(FIXTURES_SCENARIOS_ARTIFACT_PATH),
+      "REFERENCE_PARITY_CLAIM_DRIFT",
+      "The M09-T11 S-001 successor must use its exact workspace authority path.",
+    );
+    let cursor = workspace;
+    for (const segment of FIXTURES_SCENARIOS_ARTIFACT_RELATIVE_PATH.split("/")) {
+      cursor = path.join(cursor, segment);
+      const entry = await lstat(cursor);
+      assertCondition(
+        !entry.isSymbolicLink(),
+        "REFERENCE_PARITY_CLAIM_DRIFT",
+        "The M09-T11 S-001 successor authority may not traverse a symlink.",
+      );
+    }
+    assertCondition(
+      (await realpath(artifactPath)) === exactArtifactPath,
+      "REFERENCE_PARITY_CLAIM_DRIFT",
+      "The M09-T11 S-001 successor escaped its exact workspace authority root.",
+    );
+    const handle = await open(exactArtifactPath, AUTHORITY_READ_FLAGS);
+    try {
+      const before = await handle.stat();
+      bytes = await handle.readFile();
+      const after = await handle.stat();
+      assertCondition(
+        before.isFile() &&
+          after.isFile() &&
+          before.dev === after.dev &&
+          before.ino === after.ino &&
+          before.size === after.size &&
+          before.mtimeMs === after.mtimeMs &&
+          before.ctimeMs === after.ctimeMs &&
+          after.size === bytes.length,
+        "REFERENCE_PARITY_CLAIM_DRIFT",
+        "The M09-T11 S-001 successor authority changed while it was read.",
+      );
+    } finally {
+      await handle.close();
+    }
+    artifact = JSON.parse(bytes.toString("utf8"));
+  } catch (error) {
+    if (error instanceof ReferenceCatalogWebParityEvidenceError) throw error;
+    fail(
+      "REFERENCE_PARITY_CLAIM_DRIFT",
+      "The exact M09-T11 S-001 successor authority is unavailable or invalid.",
+    );
+  }
+  assertCondition(
+    bytes.length === FIXTURES_SCENARIOS_ARTIFACT_PIN.bytes &&
+      sha256(bytes) === FIXTURES_SCENARIOS_ARTIFACT_PIN.sha256,
+    "REFERENCE_PARITY_CLAIM_DRIFT",
+    "The exact M09-T11 S-001 successor artifact receipt drifted.",
+  );
+  const historicalParent = artifact.prerequisites?.find(
+    (candidate) => candidate?.task === HISTORICAL_PARITY_ARTIFACT_PIN.task,
+  );
+  assertCondition(
+    artifact?.schemaVersion === 1 &&
+      artifact.task === FIXTURES_SCENARIOS_ARTIFACT_PIN.task &&
+      artifact.proofId === FIXTURES_SCENARIOS_ARTIFACT_PIN.proofId &&
+      artifact.profile === FIXTURES_SCENARIOS_ARTIFACT_PIN.profile &&
+      artifact.result === FIXTURES_SCENARIOS_ARTIFACT_PIN.result &&
+      jsonText(historicalParent) === jsonText(HISTORICAL_PARITY_ARTIFACT_PIN) &&
+      artifact.claim?.taskStatus === "DONE" &&
+      artifact.claim?.s001Status === "TESTED" &&
+      artifact.claim?.publicSyntheticFixtureProjection === true &&
+      artifact.claim?.pendingRuntimeLifecycleExercised === true &&
+      jsonText(artifact.claim?.visibleExecutionContexts) ===
+        jsonText(["synthetic", "integration", "production"]) &&
+      artifact.claim?.visibleApproximateFidelityDifferences === true &&
+      artifact.claim?.sameProductionAdapterDisclosure === true,
+    "REFERENCE_PARITY_CLAIM_DRIFT",
+    "The exact M09-T11 artifact no longer proves the reviewed S-001 advance.",
+  );
+  return Object.freeze({
+    task: FIXTURES_SCENARIOS_ARTIFACT_PIN.task,
+    artifactBytes: FIXTURES_SCENARIOS_ARTIFACT_PIN.bytes,
+    artifactSha256: FIXTURES_SCENARIOS_ARTIFACT_PIN.sha256,
+    historicalParityParentAuthenticated: true,
+    s001Status: "TESTED",
+  });
+}
+
 /**
  * Validates current M03-T09 normative ownership while preserving its task-time artifact
  * projection.
@@ -1414,7 +1530,10 @@ function inspectTraceability(traceability) {
  * M03-T09 artifact must continue to describe the status observed when that artifact was produced.
  * N-033 advanced under M04 and N-034 advances under M05 without rewriting historical evidence.
  */
-export function verifyReferenceCatalogWebParityNormativeCompatibility(normativeCoverage) {
+export function verifyReferenceCatalogWebParityNormativeCompatibility(
+  normativeCoverage,
+  fixturesScenariosSuccessor = undefined,
+) {
   const currentStatuses = HISTORICAL_NORMATIVE_STATUSES.map(({ id, status: historicalStatus }) => {
     const rows = normativeCoverage.split("\n").filter((line) => line.startsWith(`| ${id} `));
     const cells =
@@ -1436,11 +1555,24 @@ export function verifyReferenceCatalogWebParityNormativeCompatibility(normativeC
     const currentStatus = cells[4] ?? "";
     const historicalRank = NORMATIVE_STATUS_RANK[historicalStatus];
     const currentRank = NORMATIVE_STATUS_RANK[currentStatus];
+    const exactS001SuccessorAdvance =
+      id === "S-001" &&
+      historicalStatus === "PLANNED" &&
+      currentStatus === "TESTED" &&
+      fixturesScenariosSuccessor?.task === FIXTURES_SCENARIOS_ARTIFACT_PIN.task &&
+      fixturesScenariosSuccessor?.artifactSha256 === FIXTURES_SCENARIOS_ARTIFACT_PIN.sha256 &&
+      fixturesScenariosSuccessor?.historicalParityParentAuthenticated === true &&
+      fixturesScenariosSuccessor?.s001Status === "TESTED" &&
+      ownerTasks.includes("M09-T11") &&
+      (cells[5] ?? "").includes(
+        "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json",
+      ) &&
+      (cells[5] ?? "").includes(FIXTURES_SCENARIOS_ARTIFACT_PIN.sha256);
     assertCondition(
       currentRank !== undefined &&
         (MONOTONIC_NORMATIVE_STATUS_IDS.has(id)
           ? currentRank >= historicalRank
-          : currentStatus === historicalStatus),
+          : currentStatus === historicalStatus || exactS001SuccessorAdvance),
       "REFERENCE_PARITY_CLAIM_DRIFT",
       `${id} status regressed or became unknown after M03-T09.`,
     );
@@ -1452,7 +1584,12 @@ export function verifyReferenceCatalogWebParityNormativeCompatibility(normativeC
   });
 }
 
-function inspectClaimDocuments(proofDocument, normativeCoverage, proofMatrix) {
+function inspectClaimDocuments(
+  proofDocument,
+  normativeCoverage,
+  proofMatrix,
+  fixturesScenariosSuccessor,
+) {
   const proof = proofDocument.replace(/\s+/g, " ").trim();
   const requiredProofClaims = [
     "it does not claim to implement or republish the complete example Catalog",
@@ -1470,8 +1607,10 @@ function inspectClaimDocuments(proofDocument, normativeCoverage, proofMatrix) {
     "The user-facing M03-T09 proof lost a required scope or status boundary.",
   );
 
-  const normativeCompatibility =
-    verifyReferenceCatalogWebParityNormativeCompatibility(normativeCoverage);
+  const normativeCompatibility = verifyReferenceCatalogWebParityNormativeCompatibility(
+    normativeCoverage,
+    fixturesScenariosSuccessor,
+  );
 
   // The matrix embeds this artifact's digest, so hashing the whole document here
   // would create a self-reference. Validate the governing row semantically instead.
@@ -1640,6 +1779,7 @@ export async function buildReferenceCatalogWebParityEvidence(options = undefined
   );
 
   const [
+    fixturesScenariosSuccessor,
     loadedParityConsumer,
     loadedComponentApi,
     loadedOperationsApi,
@@ -1648,6 +1788,7 @@ export async function buildReferenceCatalogWebParityEvidence(options = undefined
     loadedCatalogSdkApi,
     loadedValidatorApi,
   ] = await Promise.all([
+    authenticateFixturesScenariosSuccessor(paths.fixturesScenariosArtifactPath),
     normalized.parityApi === undefined ? importFresh(paths.parityConsumerPath) : undefined,
     normalized.componentApi ?? importFresh(paths.componentsConsumerPath),
     normalized.operationsApi ?? importFresh(paths.operationsConsumerPath),
@@ -1799,6 +1940,7 @@ export async function buildReferenceCatalogWebParityEvidence(options = undefined
     text.proofDocumentPath,
     text.normativeCoveragePath,
     text.proofMatrixPath,
+    fixturesScenariosSuccessor,
   );
   inspectRootWiring(rootPackage);
   const trackedFiles = await trackedFileHashes();
@@ -1906,7 +2048,12 @@ export async function buildReferenceCatalogWebParityEvidence(options = undefined
   const artifactBytes = Buffer.from(artifactText);
   parityCapture.assertStable();
   componentCapture.assertStable();
-  return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  return Object.freeze({
+    artifact,
+    artifactBytes,
+    artifactSha256: sha256(artifactBytes),
+    fixturesScenariosSuccessor,
+  });
 }
 
 /** Verifies an artifact against a fresh deterministic M03-T09 evidence build. */
@@ -1967,6 +2114,7 @@ export async function verifyReferenceCatalogWebParityEvidence(options = undefine
     trackedFiles: expected.artifact.evidence.trackedFiles.length,
     proofMatrixStatus: `${expected.artifact.evidence.claimDocuments.proofMatrixStatuses[0].id} ${expected.artifact.evidence.claimDocuments.proofMatrixStatuses[0].status}`,
     normativeStatus: "S-004 TESTED",
+    successorNormativeStatus: `S-001 ${expected.fixturesScenariosSuccessor.s001Status}`,
   });
 }
 

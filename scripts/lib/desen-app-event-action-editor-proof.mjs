@@ -18,6 +18,8 @@ const STATE_BINDING_ARTIFACT_PATH =
 const EDITOR_EVENT_ACTION_ARTIFACT_PATH =
   "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json";
 const DESIGN_RUN_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json";
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const LOCKFILE_PATH = "pnpm-lock.yaml";
@@ -93,6 +95,7 @@ const TRACKED_PATHS = Object.freeze([
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ROOT_PACKAGE_PATH,
   APP_PACKAGE_PATH,
+  LOCKFILE_PATH,
   "apps/desen-app/src/inspector-panel.tsx",
   ADAPTER_SOURCE_PATH,
   APPLICATION_SOURCE_PATH,
@@ -104,7 +107,12 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
 ]);
 
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
-  ...new Set([...TRACKED_PATHS, ...SUCCESSOR_COMPATIBILITY_PATHS, DESIGN_RUN_ARTIFACT_PATH]),
+  ...new Set([
+    ...TRACKED_PATHS,
+    ...SUCCESSOR_COMPATIBILITY_PATHS,
+    DESIGN_RUN_ARTIFACT_PATH,
+    FIXTURES_SCENARIOS_ARTIFACT_PATH,
+  ]),
 ]);
 
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
@@ -130,6 +138,28 @@ const DESIGN_RUN_ARTIFACT_PIN = Object.freeze({
   bytes: 17_900,
   sha256: "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334",
 });
+
+const FIXTURES_SCENARIOS_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T11",
+  proofId: "desen-app-fixtures-scenarios-fidelity",
+  profile: "desen.app.fixtures-scenarios-fidelity-proof.v1",
+  result: "PASS",
+  path: FIXTURES_SCENARIOS_ARTIFACT_PATH,
+  bytes: 29_407,
+  sha256: "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+});
+
+const T11_LIVE_RECEIPT_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  LOCKFILE_PATH,
+  "apps/desen-app/src/inspector-panel.tsx",
+  ADAPTER_SOURCE_PATH,
+  APPLICATION_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+  ADAPTER_TEST_PATH,
+  APPLICATION_TEST_PATH,
+]);
 
 const EXPECTED_EVENT_ACTION_TEST_NAMES = Object.freeze([
   "creates exact component owner references and rejects forged behavior values",
@@ -543,7 +573,8 @@ function inspectApplicationSource(source) {
       'activeTab === "actions"',
       "const resolvedActiveSlot = activeSlot ?? defaultSlot;",
       'aria-label="Change target in Layers"',
-      "const projected = rowDropProjection.current ?? projectedRowDrop(event);",
+      "const hasNoCoordinates =",
+      ": interaction.activeDropProjection",
       '(event.key !== "Delete" && event.key !== "Backspace")',
       "target instanceof HTMLInputElement",
       "target instanceof HTMLTextAreaElement",
@@ -1190,6 +1221,77 @@ function authenticateDesignRunSuccessor(files) {
   });
 }
 
+function authenticateFixturesScenariosSuccessor(files) {
+  const artifactBytes = files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  if (
+    artifactBytes.byteLength !== FIXTURES_SCENARIOS_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FIXTURES_SCENARIOS_ARTIFACT_PIN.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact bytes drifted.");
+  }
+  const artifact = parseJson(artifactBytes, FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  const parent = artifact.prerequisites?.[0];
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  if (
+    artifact.task !== FIXTURES_SCENARIOS_ARTIFACT_PIN.task ||
+    artifact.proofId !== FIXTURES_SCENARIOS_ARTIFACT_PIN.proofId ||
+    artifact.profile !== FIXTURES_SCENARIOS_ARTIFACT_PIN.profile ||
+    artifact.result !== FIXTURES_SCENARIOS_ARTIFACT_PIN.result ||
+    parent?.task !== DESIGN_RUN_ARTIFACT_PIN.task ||
+    parent?.bytes !== DESIGN_RUN_ARTIFACT_PIN.bytes ||
+    parent?.sha256 !== DESIGN_RUN_ARTIFACT_PIN.sha256 ||
+    artifact.claim?.scenarioSourceAndBundleEphemeral !== true ||
+    artifact.claim?.authoredSourceAndPublishablePreviewUnchanged !== true ||
+    artifact.claim?.pendingRuntimeLifecycleExercised !== true ||
+    artifact.claim?.exactOperationAndPreviewContextAuthorization !== true ||
+    artifact.claim?.operationInputOrPasswordRetained !== false ||
+    artifact.claim?.stableAppOwnedOperationPort !== true ||
+    artifact.claim?.cleanupSynchronouslyRevokesFixtureAdmission !== true ||
+    artifact.claim?.pendingRevokedOnPreviewReplacement !== true ||
+    artifact.claim?.integrationOrProductionExecutionClaimed !== false ||
+    artifact.claim?.persistenceClaimed !== false ||
+    artifact.claim?.diagnosticsClaimed !== false ||
+    artifact.claim?.publicationClaimed !== false ||
+    artifact.claim?.activationClaimed !== false ||
+    artifact.claim?.browserE2eClaimed !== false ||
+    artifact.claim?.s001Status !== "TESTED" ||
+    artifact.claim?.pf028Status !== "CLOSED" ||
+    artifact.tests?.focusedTestCases !== 86 ||
+    !Array.isArray(trackedReceipts)
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact identity or claims drifted.");
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
+  for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    const authority = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The live M09-T11 successor receipt drifted: ${relativePath}.`,
+      );
+    }
+  }
+  return deepFreeze({
+    task: FIXTURES_SCENARIOS_ARTIFACT_PIN.task,
+    artifact: FIXTURES_SCENARIOS_ARTIFACT_PIN,
+    exactDesignRunParent: DESIGN_RUN_ARTIFACT_PIN,
+    scenariosEphemeral: true,
+    pendingRuntimeLifecycleExercised: true,
+    exactOperationAndPreviewContextAuthorization: true,
+    operationInputOrPasswordRetained: false,
+    stableAppOwnedOperationPort: true,
+    focusedTestCases: 86,
+    s001Status: "TESTED",
+    pf028Status: "CLOSED",
+  });
+}
+
 /** Retained task-time builder used only to define the frozen M09-T09 evidence shape. */
 async function _buildFreshDesenAppEventActionEditorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
@@ -1316,6 +1418,7 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
   const tests = inspectTests(files);
   const packageContract = inspectPackages(files);
   const successor = authenticateDesignRunSuccessor(files);
+  const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-event-action-editor",
@@ -1343,6 +1446,7 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
     },
     source,
     successor,
+    fixturesScenariosSuccessor,
     retainedAuthoringUx: {
       rootSafeDefaultPlacementTarget: source.application.retainedRootSafeDefaultPlacementTarget,
       explicitChangeTarget: source.application.retainedExplicitChangeTarget,
@@ -1367,6 +1471,7 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
       additiveSuccessorReceipts: [
         ROOT_PACKAGE_PATH,
         APP_PACKAGE_PATH,
+        LOCKFILE_PATH,
         "apps/desen-app/src/inspector-panel.tsx",
         ADAPTER_SOURCE_PATH,
         APPLICATION_SOURCE_PATH,
@@ -1374,6 +1479,7 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
         ADAPTER_TEST_PATH,
         APPLICATION_TEST_PATH,
         DESIGN_RUN_ARTIFACT_PATH,
+        FIXTURES_SCENARIOS_ARTIFACT_PATH,
       ].map((relativePath) => ({
         path: relativePath,
         bytes: files.get(relativePath).byteLength,

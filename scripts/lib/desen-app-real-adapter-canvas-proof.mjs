@@ -17,6 +17,8 @@ const SHELL_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-shell-navigati
 const HOST_SOURCE_AUDIT_ARTIFACT_PATH =
   "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const APP_INDEX_PATH = "apps/desen-app/index.html";
@@ -29,6 +31,10 @@ const AUTHORING_PREVIEW_SOURCE_PATH = "apps/desen-app/src/authoring-preview.ts";
 const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
 const AUTHORING_STATE_SOURCE_PATH = "apps/desen-app/src/authoring-state.ts";
 const AUTHORING_EVENT_ACTION_SOURCE_PATH = "apps/desen-app/src/authoring-event-actions.ts";
+const AUTHORING_FIXTURES_SOURCE_PATH = "apps/desen-app/src/authoring-fixtures.ts";
+const AUTHORING_SCENARIOS_SOURCE_PATH = "apps/desen-app/src/authoring-scenarios.ts";
+const PREVIEW_CONTROLS_SOURCE_PATH = "apps/desen-app/src/preview-controls.tsx";
+const PREVIEW_FIDELITY_SOURCE_PATH = "apps/desen-app/src/preview-fidelity.ts";
 const EVENT_ACTION_PANEL_SOURCE_PATH = "apps/desen-app/src/event-action-panel.tsx";
 const INSPECTOR_PANEL_SOURCE_PATH = "apps/desen-app/src/inspector-panel.tsx";
 const STATE_PANEL_SOURCE_PATH = "apps/desen-app/src/state-panel.tsx";
@@ -42,6 +48,10 @@ const AUTHORING_SLOT_TEST_PATH = "apps/desen-app/test/authoring-slots.test.ts";
 const AUTHORING_STATE_TEST_PATH = "apps/desen-app/test/authoring-state.test.ts";
 const AUTHORING_EVENT_ACTION_TEST_PATH = "apps/desen-app/test/authoring-event-actions.test.ts";
 const EVENT_ACTION_PANEL_TEST_PATH = "apps/desen-app/test/event-action-panel.test.tsx";
+const AUTHORING_FIXTURES_TEST_PATH = "apps/desen-app/test/authoring-fixtures.test.ts";
+const AUTHORING_SCENARIOS_TEST_PATH = "apps/desen-app/test/authoring-scenarios.test.ts";
+const PREVIEW_CONTROLS_TEST_PATH = "apps/desen-app/test/preview-controls.test.tsx";
+const PREVIEW_FIDELITY_TEST_PATH = "apps/desen-app/test/preview-fidelity.test.ts";
 const INSPECTOR_PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx";
 const STATE_PANEL_TEST_PATH = "apps/desen-app/test/state-panel.test.tsx";
 const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
@@ -77,8 +87,12 @@ const CURRENT_APP_SOURCE_PATHS = Object.freeze(
     AUTHORING_SLOT_SOURCE_PATH,
     AUTHORING_STATE_SOURCE_PATH,
     AUTHORING_EVENT_ACTION_SOURCE_PATH,
+    AUTHORING_FIXTURES_SOURCE_PATH,
+    AUTHORING_SCENARIOS_SOURCE_PATH,
     EVENT_ACTION_PANEL_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
+    PREVIEW_CONTROLS_SOURCE_PATH,
+    PREVIEW_FIDELITY_SOURCE_PATH,
     STATE_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
   ].sort(),
@@ -128,6 +142,7 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     ...TRACKED_PATHS,
     ROOT_PACKAGE_PATH,
     NAMED_SLOT_ARTIFACT_PATH,
+    FIXTURES_SCENARIOS_ARTIFACT_PATH,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_SELECTION_TEST_PATH,
     AUTHORING_INSPECTOR_SOURCE_PATH,
@@ -135,8 +150,12 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_SLOT_SOURCE_PATH,
     AUTHORING_STATE_SOURCE_PATH,
     AUTHORING_EVENT_ACTION_SOURCE_PATH,
+    AUTHORING_FIXTURES_SOURCE_PATH,
+    AUTHORING_SCENARIOS_SOURCE_PATH,
     EVENT_ACTION_PANEL_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
+    PREVIEW_CONTROLS_SOURCE_PATH,
+    PREVIEW_FIDELITY_SOURCE_PATH,
     STATE_PANEL_SOURCE_PATH,
     STRUCTURED_JSON_SOURCE_PATH,
     AUTHORING_INSPECTOR_TEST_PATH,
@@ -145,7 +164,11 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_STATE_TEST_PATH,
     AUTHORING_EVENT_ACTION_TEST_PATH,
     EVENT_ACTION_PANEL_TEST_PATH,
+    AUTHORING_FIXTURES_TEST_PATH,
+    AUTHORING_SCENARIOS_TEST_PATH,
     INSPECTOR_PANEL_TEST_PATH,
+    PREVIEW_CONTROLS_TEST_PATH,
+    PREVIEW_FIDELITY_TEST_PATH,
     STATE_PANEL_TEST_PATH,
     STRUCTURED_JSON_TEST_PATH,
   ]),
@@ -166,6 +189,34 @@ const NAMED_SLOT_ARTIFACT_PIN = Object.freeze({
   bytes: 24_830,
   sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
 });
+const FIXTURES_SCENARIOS_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T11",
+  proofId: "desen-app-fixtures-scenarios-fidelity",
+  profile: "desen.app.fixtures-scenarios-fidelity-proof.v1",
+  result: "PASS",
+  path: FIXTURES_SCENARIOS_ARTIFACT_PATH,
+  bytes: 29_407,
+  sha256: "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+});
+const T11_LIVE_RECEIPT_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  "pnpm-lock.yaml",
+  ADAPTER_CANVAS_SOURCE_PATH,
+  "apps/desen-app/src/application.module.css",
+  APPLICATION_SOURCE_PATH,
+  AUTHORING_FIXTURES_SOURCE_PATH,
+  AUTHORING_SCENARIOS_SOURCE_PATH,
+  INSPECTOR_PANEL_SOURCE_PATH,
+  PREVIEW_CONTROLS_SOURCE_PATH,
+  PREVIEW_FIDELITY_SOURCE_PATH,
+  ADAPTER_CANVAS_TEST_PATH,
+  APPLICATION_TEST_PATH,
+  AUTHORING_FIXTURES_TEST_PATH,
+  AUTHORING_SCENARIOS_TEST_PATH,
+  PREVIEW_CONTROLS_TEST_PATH,
+  PREVIEW_FIDELITY_TEST_PATH,
+]);
 const NAMED_SLOT_SOURCE_AND_TEST_PATHS = Object.freeze([
   AUTHORING_DATA_SOURCE_PATH,
   AUTHORING_SLOT_SOURCE_PATH,
@@ -345,6 +396,7 @@ const EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
 const CURRENT_EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
   EXPECTED_ADAPTER_TEST_NAMES[0],
   "runs real adapter events on the same session and preserves state across mode changes",
+  "keeps an exact host authority stable and hides its tree synchronously on replacement",
   ...EXPECTED_ADAPTER_TEST_NAMES.slice(1, 3),
   "replaces the exact session when a current authoring draft Bundle is rerendered",
   EXPECTED_ADAPTER_TEST_NAMES[3],
@@ -416,6 +468,7 @@ const ALLOWED_RUNTIME_PACKAGE_EDGES = Object.freeze({
   ]),
   "runtime-core": Object.freeze(["protocol", "runtime-core", "validator"]),
   "runtime-react": Object.freeze(["protocol", "runtime-core", "runtime-react", "validator"]),
+  testkit: Object.freeze(["protocol", "testkit"]),
   validator: Object.freeze(["protocol", "validator"]),
 });
 
@@ -754,6 +807,82 @@ function authenticateNamedSlotArtifact(bytes) {
     return Object.freeze({ path: relativePath, bytes: receipt.bytes, sha256: receipt.sha256 });
   });
   return Object.freeze({ pin, sourceAndTestReceipts: Object.freeze(sourceAndTestReceipts) });
+}
+
+function authenticateFixturesScenariosSuccessor(bytes, files) {
+  const pin = FIXTURES_SCENARIOS_ARTIFACT_PIN;
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("PREREQUISITE_DRIFT", "The exact M09-T11 fixtures/scenarios artifact receipt drifted.");
+  }
+  const artifact = parseJson(bytes, FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  const parent = artifact.prerequisites?.[0];
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    parent?.task !== "M09-T10" ||
+    parent?.proofId !== "desen-app-design-run-modes" ||
+    parent?.bytes !== 17_900 ||
+    parent?.sha256 !== "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334" ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.scenarioSourceAndBundleEphemeral !== true ||
+    artifact.claim?.authoredSourceAndPublishablePreviewUnchanged !== true ||
+    artifact.claim?.publicSyntheticFixtureProjection !== true ||
+    artifact.claim?.pendingStaticFixtureClaimed !== false ||
+    artifact.claim?.pendingRuntimeLifecycleExercised !== true ||
+    artifact.claim?.exactOperationAndPreviewContextAuthorization !== true ||
+    artifact.claim?.operationInputOrPasswordRetained !== false ||
+    artifact.claim?.stableAppOwnedOperationPort !== true ||
+    artifact.claim?.cleanupSynchronouslyRevokesFixtureAdmission !== true ||
+    artifact.claim?.pendingRevokedOnPreviewReplacement !== true ||
+    !isDeepStrictEqual(artifact.claim?.visibleExecutionContexts, [
+      "synthetic",
+      "integration",
+      "production",
+    ]) ||
+    artifact.claim?.visibleApproximateFidelityDifferences !== true ||
+    artifact.claim?.integrationOrProductionExecutionClaimed !== false ||
+    artifact.claim?.s001Status !== "TESTED" ||
+    artifact.claim?.pf028Status !== "CLOSED" ||
+    artifact.tests?.focusedTestCases !== 86 ||
+    artifact.tests?.testCaseCounts?.[ADAPTER_CANVAS_TEST_PATH] !== 10 ||
+    artifact.tests?.testCaseCounts?.[APPLICATION_TEST_PATH] !== 40 ||
+    !Array.isArray(trackedReceipts)
+  ) {
+    fail("PREREQUISITE_DRIFT", "The exact M09-T11 artifact identity or claims drifted.");
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
+  for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    const authority = receiptMap.get(relativePath);
+    const liveBytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      liveBytes === undefined ||
+      authority.bytes !== liveBytes.byteLength ||
+      authority.sha256 !== sha256(liveBytes)
+    ) {
+      fail("PREREQUISITE_DRIFT", `The live M09-T11 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    exactDesignRunParent: true,
+    scenarioSourceAndBundleEphemeral: true,
+    pendingRuntimeLifecycleExercised: true,
+    exactOperationAndPreviewContextAuthorization: true,
+    operationInputOrPasswordRetained: false,
+    stableAppOwnedOperationPort: true,
+    fixtureAdmissionRevokedOnCleanupAndReplacement: true,
+    visibleExecutionContexts: ["synthetic", "integration", "production"],
+    visibleApproximateFidelityDifferences: true,
+    focusedTestCases: 86,
+    s001Status: "TESTED",
+    pf028Status: "CLOSED",
+  });
 }
 
 function inspectControlledData(catalogBytes, bundleBytes) {
@@ -1273,9 +1402,10 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     mountCalls[0].arguments.length !== 1 ||
     !isDeepStrictEqual(mountPropertyNames, ["bundle", "catalogs", "hostPorts"]) ||
     !ts.isShorthandPropertyAssignment(mountProperties[0]) ||
+    !ts.isShorthandPropertyAssignment(mountProperties[2]) ||
     !mountText.includes("bundle") ||
     !mountText.includes("catalogs: [referenceCatalog]") ||
-    !mountText.includes("hostPorts: ADAPTER_CANVAS_HOST_PORTS")
+    !mountText.includes("hostPorts")
   ) {
     fail(
       "SOURCE_POLICY_VIOLATION",
@@ -1389,6 +1519,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     "if (!supported) return <CanvasUnavailable />",
     "state.routeIdentity !== routeIdentity",
     "selection = null",
+    "hostPorts = ADAPTER_CANVAS_HOST_PORTS",
     'mode = "design"',
     "<ManagedAdapterSurface authoringModel={authoringModel} input={state.input} mode={mode} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
     "disposeRuntimeHeadlessSession(session)",
@@ -1445,13 +1576,17 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       !isDeepStrictEqual(canvasAttributeNames, [
         "authoringModel",
         "bundle",
+        "hostPorts",
         "mode",
         "projectId",
         "selection",
         "surfaceId",
       ]) ||
       !canvasElementText.includes("authoringModel={model}") ||
-      !canvasElementText.includes("bundle={preview.ok ? preview.bundle : null}") ||
+      !canvasElementText.includes(
+        "bundle={effectivePreview?.ok === true ? effectivePreview.bundle : null}",
+      ) ||
+      !canvasElementText.includes("hostPorts={fixtureHostPorts}") ||
       !canvasElementText.includes("mode={mode}") ||
       !canvasElementText.includes("projectId={project.id}") ||
       !canvasElementText.includes('selection={mode === "design" ? selection : null}') ||
@@ -1465,7 +1600,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     if (
       appImports.some(
         (specifier) =>
-          specifier.startsWith("@desen/runtime-") ||
+          (specifier.startsWith("@desen/runtime-") && specifier !== "@desen/runtime-core") ||
           (specifier.startsWith("@desen/reference-catalog-web") &&
             specifier !== "@desen/reference-catalog-web/catalog.json"),
       )
@@ -1522,7 +1657,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     jsxByFunction,
     functionFingerprints,
     controlledIdentity: Object.fromEntries(observedStringConstants),
-    hostPortsPolicy: "EXACT_INERT_ALL_DENY",
+    hostPortsPolicy: "EXACT_INERT_ALL_DENY_DEFAULT_WITH_EXPLICIT_APP_OVERRIDE",
     exactPublicRegistryInput: true,
     exactPublisherOrOfficialFallbackBundleMount: true,
     manualManagedTreeElements: 0,
@@ -1818,14 +1953,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 133 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 141 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 397 || dynamicEdges !== 0) {
+  if (staticEdges !== 415 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -2042,6 +2177,7 @@ function inspectPackage(appBytes, rootBytes) {
     "@desen/reference-catalog-web": "workspace:*",
     "@desen/runtime-core": "workspace:*",
     "@desen/runtime-react": "workspace:*",
+    "@desen/testkit": "workspace:*",
     "@desen/validator": "workspace:*",
     react: "19.2.8",
     "react-dom": "19.2.8",
@@ -2060,7 +2196,9 @@ function inspectPackage(appBytes, rootBytes) {
     manifest.scripts?.["test:structured-inspector"] !==
       "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
     manifest.scripts?.["test:named-slots"] !==
-      "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx"
+      "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
+    manifest.scripts?.["test:fixtures-scenarios"] !==
+      "vitest run test/authoring-fixtures.test.ts test/authoring-scenarios.test.ts test/preview-fidelity.test.ts test/preview-controls.test.tsx test/adapter-canvas.test.tsx test/application.test.tsx"
   ) {
     fail("PACKAGE_CONTRACT_DRIFT", "The Desen App exact T03 package/runtime contract drifted.");
   }
@@ -2088,6 +2226,7 @@ function inspectPackage(appBytes, rootBytes) {
     inspectorFocusedTest: manifest.scripts["test:inspector"],
     structuredInspectorFocusedTest: manifest.scripts["test:structured-inspector"],
     namedSlotFocusedTest: manifest.scripts["test:named-slots"],
+    fixturesScenariosFocusedTest: manifest.scripts["test:fixtures-scenarios"],
     namedSlotRootCommands,
   });
 }
@@ -2143,16 +2282,20 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "if (!active) return null",
     '{activeTab === "layers" ? (',
     'active={activeTab === "components"}',
-    "data-drop-hovered={dropReady && dragHovered}",
-    "dragEnterDepth.current += 1",
+    "const [activeDropProjection, setActiveDropProjection] = useState<AuthoringDropProjection | null>",
+    "const projectDrop = useCallback((next: AuthoringDropProjection | null) =>",
+    "onProjectDrop={projectDrop}",
+    "function projectNearestDrop(",
+    "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
+    "data-drop-hovered={dropReady && dropHovered}",
+    "const panelDragEnterDepth = useRef(0)",
     "data-guide={readySlot === null}",
+    "className={styles.componentDragHandle}",
+    'title="Drag anywhere in this panel to add"',
     "No drop target selected",
     "evaluateAuthoringNodeDeletion(route, model, selection)",
     "applyAuthoringNodeDelete(document, referenceCatalog, route, selection)",
     "function acceptsDragIntent(",
-    "function projectedRowDrop(event: DragEvent<HTMLButtonElement>)",
-    "const bounds = event.currentTarget.getBoundingClientRect()",
-    "data-row-drop-position={rowDropPosition ?? undefined}",
     'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
     "sourceNodeId: result.nodeId",
     "setSelection(null)",
@@ -2166,17 +2309,14 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     fail("SOURCE_POLICY_VIOLATION", "The live M09-T07 App reads browser DataTransfer authority.");
   }
   for (const marker of [
+    ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.5rem;\n  align-items: center;\n  padding: 0 0.125rem;",
     '.slotBoundary[data-drop-ready="true"]',
-    "min-height: 0.875rem",
-    "margin-block: 0",
     '.slotBoundary[data-drop-hovered="true"]',
-    ".layerNode[data-row-drop-position] {\n  z-index: 4;",
-    ".layerNode[data-row-drop-position] > .layerRow",
-    '.layerNode[data-row-drop-position="before"]::before',
-    '.layerNode[data-row-drop-position="after"]::before',
+    '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
     ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
     '.componentSlotTarget[data-guide="true"]',
     '.componentSlotTarget[data-drop-hovered="true"]',
+    ".componentDragHandle {",
   ]) {
     if (!css.includes(marker)) {
       fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App CSS lost ${marker}.`);
@@ -2200,9 +2340,11 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "preserves the selected layer, preview, and focus when deletion is rejected",
     "expect(reads).toBe(0)",
     'getAttribute("data-drop-hovered")',
-    'closest("li")?.getAttribute("data-row-drop-position")',
-    'toBe("before")',
-    'toBe("after")',
+    "const alertDragHandle = alert.querySelector(\"[draggable='true']\")",
+    'getByText("Release to add")',
+    "uses the release position when it crosses a row midpoint after the last dragover",
+    "keeps the admitted gap stable while the pointer jitters around a row midpoint",
+    "drops from a visible row with the last admitted projection when drop coordinates are absent",
     "No drop target selected",
   ]) {
     if (!applicationTests.includes(marker)) {
@@ -2433,7 +2575,12 @@ function verifyProofDocument(proofDocument, artifactSha256) {
 function captureBuildOptions(rawOptions) {
   const options = exactOwnDataOptions(
     rawOptions,
-    ["hostSourceAuditArtifactBytes", "shellArtifactBytes", "workspaceRoot"],
+    [
+      "fixturesScenariosArtifactBytes",
+      "hostSourceAuditArtifactBytes",
+      "shellArtifactBytes",
+      "workspaceRoot",
+    ],
     "build options",
   );
   return Object.freeze({
@@ -2446,10 +2593,14 @@ function captureBuildOptions(rawOptions) {
       options.hostSourceAuditArtifactBytes === undefined
         ? undefined
         : captureBytes(options.hostSourceAuditArtifactBytes, "hostSourceAuditArtifactBytes"),
+    fixturesScenariosArtifactBytes:
+      options.fixturesScenariosArtifactBytes === undefined
+        ? undefined
+        : captureBytes(options.fixturesScenariosArtifactBytes, "fixturesScenariosArtifactBytes"),
   });
 }
 
-/** Authenticates frozen M09-T03 evidence and checks its live additive M09-T07 successor. */
+/** Authenticates frozen M09-T03 evidence and exact additive M09-T07/T11 successors. */
 export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const canonicalWorkspaceRoot = await realpath(options.workspaceRoot);
@@ -2479,6 +2630,10 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
   const shellPin = authenticateShellArtifact(shellBytes);
   const hostSourceAudit = authenticateHostSourceAuditArtifact(hostBytes);
   const namedSlotEvidence = authenticateNamedSlotArtifact(files.get(NAMED_SLOT_ARTIFACT_PATH));
+  const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(
+    options.fixturesScenariosArtifactBytes ?? files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH),
+    files,
+  );
   const hostArtifact = hostSourceAudit.artifact;
   const data = inspectControlledData(files.get(CATALOG_PATH), files.get(BUNDLE_PATH));
   const sourcePolicy = verifyDesenAppRealAdapterCanvasSourcePolicy(
@@ -2578,6 +2733,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
         INSPECTOR_PANEL_TEST_PATH,
         STRUCTURED_JSON_TEST_PATH,
         NAMED_SLOT_ARTIFACT_PATH,
+        FIXTURES_SCENARIOS_ARTIFACT_PATH,
       ].map((relativePath) => ({
         path: relativePath,
         bytes: files.get(relativePath).byteLength,
@@ -2601,6 +2757,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
       persistenceImplemented: false,
       runOrPublishImplemented: false,
     },
+    fixturesScenariosSuccessor,
   });
   return deepFreeze({
     artifact: frozen.artifact,

@@ -20,7 +20,8 @@
     "test:named-slots": "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
     "test:state-bindings": "vitest run test/structured-json.test.ts test/authoring-state.test.ts test/authoring-inspector.test.ts test/state-panel.test.tsx test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
     "test:event-actions": "vitest run test/structured-json.test.ts test/authoring-data.test.ts test/authoring-selection.test.ts test/authoring-event-actions.test.ts test/event-action-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
-    "test:design-run": "vitest run test/adapter-canvas.test.tsx test/application.test.tsx"
+    "test:design-run": "vitest run test/adapter-canvas.test.tsx test/application.test.tsx",
+    "test:fixtures-scenarios": "vitest run test/authoring-fixtures.test.ts test/authoring-scenarios.test.ts test/preview-fidelity.test.ts test/preview-controls.test.tsx test/adapter-canvas.test.tsx test/application.test.tsx"
   },
   "dependencies": {
     "@desen/catalog-sdk": "workspace:*",
@@ -30,6 +31,7 @@
     "@desen/reference-catalog-web": "workspace:*",
     "@desen/runtime-core": "workspace:*",
     "@desen/runtime-react": "workspace:*",
+    "@desen/testkit": "workspace:*",
     "@desen/validator": "workspace:*",
     "react": "19.2.8",
     "react-dom": "19.2.8"

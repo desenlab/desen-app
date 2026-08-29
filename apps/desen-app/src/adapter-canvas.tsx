@@ -74,6 +74,7 @@ interface ReadyCanvasState {
   readonly status: "ready";
   readonly routeIdentity: RouteIdentity;
   readonly previewRevision: string;
+  readonly hostPorts: RuntimeHostPorts;
   readonly input: RuntimeReactLiveSurfaceInput;
 }
 
@@ -81,6 +82,7 @@ interface FailedCanvasState {
   readonly status: "failed";
   readonly routeIdentity: RouteIdentity;
   readonly previewRevision: string;
+  readonly hostPorts: RuntimeHostPorts;
 }
 
 type AdapterCanvasState = ReadyCanvasState | FailedCanvasState | undefined;
@@ -218,6 +220,8 @@ export interface DesenAdapterCanvasProps {
   readonly bundle?: unknown;
   /** Interaction presentation; omission keeps the safe interaction-disabled Design default. */
   readonly mode?: DesenAdapterCanvasMode;
+  /** App-owned Runtime ports; omission preserves the deny-all preview boundary. */
+  readonly hostPorts?: RuntimeHostPorts;
   /** Exact App project route identity. */
   readonly projectId: string;
   /** Optional App-owned Source selection containing no runtime or platform authority. */
@@ -237,6 +241,7 @@ export interface DesenAdapterCanvasProps {
 export function DesenAdapterCanvas({
   authoringModel = REFERENCE_AUTHORING_MODEL,
   bundle = officialDerivedSignInBundle,
+  hostPorts = ADAPTER_CANVAS_HOST_PORTS,
   mode = "design",
   projectId,
   selection = null,
@@ -254,17 +259,17 @@ export function DesenAdapterCanvas({
     if (!supported || previewRevision === undefined) return;
 
     if (ADAPTER_CANVAS_REGISTRY.status !== "created") {
-      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision }));
+      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision, hostPorts }));
       return;
     }
 
     const mounted = mountRuntimeHeadlessSession({
       bundle,
       catalogs: [referenceCatalog],
-      hostPorts: ADAPTER_CANVAS_HOST_PORTS,
+      hostPorts,
     });
     if (mounted.status !== "mounted") {
-      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision }));
+      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision, hostPorts }));
       return;
     }
 
@@ -275,7 +280,7 @@ export function DesenAdapterCanvas({
       mounted.snapshot.revision !== previewRevision
     ) {
       disposeRuntimeHeadlessSession(session);
-      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision }));
+      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision, hostPorts }));
       return;
     }
 
@@ -297,22 +302,23 @@ export function DesenAdapterCanvas({
       preflight.surface.surfaceId !== SUPPORTED_SURFACE_ID
     ) {
       disposeRuntimeHeadlessSession(session);
-      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision }));
+      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision, hostPorts }));
       return;
     }
 
-    setState(Object.freeze({ status: "ready", routeIdentity, previewRevision, input }));
+    setState(Object.freeze({ status: "ready", routeIdentity, previewRevision, hostPorts, input }));
     return () => {
       disposeRuntimeHeadlessSession(session);
     };
-  }, [bundle, previewRevision, routeIdentity, supported]);
+  }, [bundle, hostPorts, previewRevision, routeIdentity, supported]);
 
   if (!supported) return <CanvasUnavailable />;
   if (previewRevision === undefined) return <CanvasUnavailable />;
   if (
     state === undefined ||
     state.routeIdentity !== routeIdentity ||
-    state.previewRevision !== previewRevision
+    state.previewRevision !== previewRevision ||
+    state.hostPorts !== hostPorts
   ) {
     return <CanvasLoading />;
   }
@@ -327,7 +333,7 @@ export function DesenAdapterCanvas({
       <p className={styles.adapterCanvasNote} data-adapter-canvas-status={mode}>
         {mode === "design"
           ? "Design preview · controls are disabled."
-          : "Run preview · real adapter controls are enabled; external effects remain denied."}
+          : "Run preview · real adapter controls use the selected synthetic fixture."}
       </p>
       <div className={styles.adapterCanvasViewport}>
         <ManagedAdapterSurface

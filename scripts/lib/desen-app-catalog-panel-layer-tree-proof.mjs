@@ -14,6 +14,8 @@ const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-CATALOG-PANEL-LAYER-TREE.md";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
+const FIXTURES_SCENARIOS_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
 const SHELL_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const REFERENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/reference-catalog-web-capability-artifact.json";
@@ -32,6 +34,10 @@ const AUTHORING_STATE_SOURCE_PATH = "apps/desen-app/src/authoring-state.ts";
 const STATE_PANEL_SOURCE_PATH = "apps/desen-app/src/state-panel.tsx";
 const AUTHORING_EVENT_ACTION_SOURCE_PATH = "apps/desen-app/src/authoring-event-actions.ts";
 const EVENT_ACTION_PANEL_SOURCE_PATH = "apps/desen-app/src/event-action-panel.tsx";
+const AUTHORING_FIXTURES_SOURCE_PATH = "apps/desen-app/src/authoring-fixtures.ts";
+const AUTHORING_SCENARIOS_SOURCE_PATH = "apps/desen-app/src/authoring-scenarios.ts";
+const PREVIEW_CONTROLS_SOURCE_PATH = "apps/desen-app/src/preview-controls.tsx";
+const PREVIEW_FIDELITY_SOURCE_PATH = "apps/desen-app/src/preview-fidelity.ts";
 const APPLICATION_SOURCE_PATH = "apps/desen-app/src/application.tsx";
 const ADAPTER_CANVAS_SOURCE_PATH = "apps/desen-app/src/adapter-canvas.tsx";
 const OFFICIAL_BUNDLE_PATH = "examples/sign-in/official-derived.bundle.desen.json";
@@ -43,6 +49,11 @@ const INSPECTOR_PANEL_TEST_PATH = "apps/desen-app/test/inspector-panel.test.tsx"
 const STRUCTURED_JSON_TEST_PATH = "apps/desen-app/test/structured-json.test.ts";
 const AUTHORING_SLOT_TEST_PATH = "apps/desen-app/test/authoring-slots.test.ts";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
+const ADAPTER_CANVAS_TEST_PATH = "apps/desen-app/test/adapter-canvas.test.tsx";
+const AUTHORING_FIXTURES_TEST_PATH = "apps/desen-app/test/authoring-fixtures.test.ts";
+const AUTHORING_SCENARIOS_TEST_PATH = "apps/desen-app/test/authoring-scenarios.test.ts";
+const PREVIEW_CONTROLS_TEST_PATH = "apps/desen-app/test/preview-controls.test.tsx";
+const PREVIEW_FIDELITY_TEST_PATH = "apps/desen-app/test/preview-fidelity.test.ts";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
@@ -114,6 +125,7 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     ...TRACKED_PATHS,
     ROOT_PACKAGE_PATH,
     NAMED_SLOT_ARTIFACT_PATH,
+    FIXTURES_SCENARIOS_ARTIFACT_PATH,
     ADAPTER_CANVAS_SOURCE_PATH,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_SELECTION_TEST_PATH,
@@ -125,12 +137,21 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_STATE_SOURCE_PATH,
     STATE_PANEL_SOURCE_PATH,
     AUTHORING_EVENT_ACTION_SOURCE_PATH,
+    AUTHORING_FIXTURES_SOURCE_PATH,
+    AUTHORING_SCENARIOS_SOURCE_PATH,
     EVENT_ACTION_PANEL_SOURCE_PATH,
+    PREVIEW_CONTROLS_SOURCE_PATH,
+    PREVIEW_FIDELITY_SOURCE_PATH,
     AUTHORING_INSPECTOR_TEST_PATH,
     AUTHORING_PREVIEW_TEST_PATH,
     INSPECTOR_PANEL_TEST_PATH,
     STRUCTURED_JSON_TEST_PATH,
     AUTHORING_SLOT_TEST_PATH,
+    ADAPTER_CANVAS_TEST_PATH,
+    AUTHORING_FIXTURES_TEST_PATH,
+    AUTHORING_SCENARIOS_TEST_PATH,
+    PREVIEW_CONTROLS_TEST_PATH,
+    PREVIEW_FIDELITY_TEST_PATH,
   ]),
 ]);
 const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
@@ -145,7 +166,11 @@ const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
   AUTHORING_STATE_SOURCE_PATH,
   STATE_PANEL_SOURCE_PATH,
   AUTHORING_EVENT_ACTION_SOURCE_PATH,
+  AUTHORING_FIXTURES_SOURCE_PATH,
+  AUTHORING_SCENARIOS_SOURCE_PATH,
   EVENT_ACTION_PANEL_SOURCE_PATH,
+  PREVIEW_CONTROLS_SOURCE_PATH,
+  PREVIEW_FIDELITY_SOURCE_PATH,
 ]);
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
   TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
@@ -167,6 +192,34 @@ const NAMED_SLOT_ARTIFACT_PIN = Object.freeze({
   bytes: 24_830,
   sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
 });
+const FIXTURES_SCENARIOS_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T11",
+  proofId: "desen-app-fixtures-scenarios-fidelity",
+  profile: "desen.app.fixtures-scenarios-fidelity-proof.v1",
+  result: "PASS",
+  path: FIXTURES_SCENARIOS_ARTIFACT_PATH,
+  bytes: 29_407,
+  sha256: "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+});
+const T11_LIVE_RECEIPT_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  "pnpm-lock.yaml",
+  ADAPTER_CANVAS_SOURCE_PATH,
+  "apps/desen-app/src/application.module.css",
+  APPLICATION_SOURCE_PATH,
+  AUTHORING_FIXTURES_SOURCE_PATH,
+  AUTHORING_SCENARIOS_SOURCE_PATH,
+  INSPECTOR_PANEL_SOURCE_PATH,
+  PREVIEW_CONTROLS_SOURCE_PATH,
+  PREVIEW_FIDELITY_SOURCE_PATH,
+  ADAPTER_CANVAS_TEST_PATH,
+  APPLICATION_TEST_PATH,
+  AUTHORING_FIXTURES_TEST_PATH,
+  AUTHORING_SCENARIOS_TEST_PATH,
+  PREVIEW_CONTROLS_TEST_PATH,
+  PREVIEW_FIDELITY_TEST_PATH,
+]);
 const EXPECTED_VALIDATOR_IMPORTS = Object.freeze([
   "validateDesenInteractionCatalogSet",
   "validateDesenSourceInteractionContracts",
@@ -175,11 +228,11 @@ const EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS = Object.freeze(
   new Map([
     ["draggable", 2],
     ["onDragEnd", 2],
-    ["onDragEnter", 3],
-    ["onDragLeave", 3],
-    ["onDragOver", 3],
+    ["onDragEnter", 2],
+    ["onDragLeave", 1],
+    ["onDragOver", 2],
     ["onDragStart", 2],
-    ["onDrop", 3],
+    ["onDrop", 2],
   ]),
 );
 const EXPECTED_COMPONENTS = Object.freeze([
@@ -842,6 +895,7 @@ function verifyPackage(bytes, rootBytes) {
     "@desen/reference-catalog-web": "workspace:*",
     "@desen/runtime-core": "workspace:*",
     "@desen/runtime-react": "workspace:*",
+    "@desen/testkit": "workspace:*",
     "@desen/validator": "workspace:*",
     react: "19.2.8",
     "react-dom": "19.2.8",
@@ -875,6 +929,8 @@ function verifyPackage(bytes, rootBytes) {
     manifest.scripts?.["test:structured-inspector"] !==
       "vitest run test/structured-json.test.ts test/authoring-inspector.test.ts test/inspector-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx" ||
     manifest.scripts?.["test:named-slots"] !== namedSlotCommand ||
+    manifest.scripts?.["test:fixtures-scenarios"] !==
+      "vitest run test/authoring-fixtures.test.ts test/authoring-scenarios.test.ts test/preview-fidelity.test.ts test/preview-controls.test.tsx test/adapter-canvas.test.tsx test/application.test.tsx" ||
     Object.entries(namedSlotRootCommands).some(
       ([name, command]) => root.scripts?.[name] !== command,
     ) ||
@@ -894,6 +950,7 @@ function verifyPackage(bytes, rootBytes) {
     inspectorSuccessorTestScript: manifest.scripts["test:inspector"],
     structuredInspectorSuccessorTestScript: manifest.scripts["test:structured-inspector"],
     namedSlotSuccessorTestScript: namedSlotCommand,
+    fixturesScenariosSuccessorTestScript: manifest.scripts["test:fixtures-scenarios"],
     namedSlotRootCommands,
     editorCoreDependency: true,
     catalogSdkDependency: true,
@@ -937,7 +994,11 @@ function resolveRelativeImport(importerPath, specifier) {
       candidate === AUTHORING_STATE_SOURCE_PATH ||
       candidate === STATE_PANEL_SOURCE_PATH ||
       candidate === AUTHORING_EVENT_ACTION_SOURCE_PATH ||
+      candidate === AUTHORING_FIXTURES_SOURCE_PATH ||
+      candidate === AUTHORING_SCENARIOS_SOURCE_PATH ||
       candidate === EVENT_ACTION_PANEL_SOURCE_PATH ||
+      candidate === PREVIEW_CONTROLS_SOURCE_PATH ||
+      candidate === PREVIEW_FIDELITY_SOURCE_PATH ||
       candidate === SOURCE_PATH ||
       candidate === OFFICIAL_BUNDLE_PATH,
   );
@@ -1047,6 +1108,9 @@ function inspectImportsAndExecutionBoundary(files) {
   let editorCoreImports = 0;
   let publisherImports = 0;
   let protocolImports = 0;
+  let t11RuntimeCoreImports = 0;
+  let t11TestkitImports = 0;
+  let t11OperationRegistrationImports = 0;
   let exactRegistryConstructionCalls = 0;
   let publicDiagnosticIndexTypeOnlyImports = 0;
   const successorImportDeclarations = new Map();
@@ -1117,6 +1181,7 @@ function inspectImportsAndExecutionBoundary(files) {
         "replaceDesenEditorAction",
       ]),
     ],
+    [AUTHORING_SCENARIOS_SOURCE_PATH, new Set(["setDesenEditorOwnerProp"])],
   ]);
   const exactAdapterPackages = new Set([
     "@desen/reference-catalog-web/catalog.json",
@@ -1218,6 +1283,7 @@ function inspectImportsAndExecutionBoundary(files) {
               STATE_PANEL_SOURCE_PATH,
               AUTHORING_EVENT_ACTION_SOURCE_PATH,
               EVENT_ACTION_PANEL_SOURCE_PATH,
+              AUTHORING_SCENARIOS_SOURCE_PATH,
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null
@@ -1234,6 +1300,7 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_SLOT_SOURCE_PATH,
               AUTHORING_STATE_SOURCE_PATH,
               AUTHORING_EVENT_ACTION_SOURCE_PATH,
+              AUTHORING_SCENARIOS_SOURCE_PATH,
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null
@@ -1265,6 +1332,58 @@ function inspectImportsAndExecutionBoundary(files) {
             fail("IMPORT_BOUNDARY_DRIFT", "Protocol entered outside the T06 inspector path.");
           }
           protocolImports += 1;
+        } else if (
+          specifier === "@desen/runtime-core" &&
+          [APPLICATION_SOURCE_PATH, AUTHORING_FIXTURES_SOURCE_PATH].includes(relativePath)
+        ) {
+          const expectedNames =
+            relativePath === APPLICATION_SOURCE_PATH
+              ? shape.typeOnly
+                ? ["RuntimeHostPorts", "RuntimeJsonObject", "RuntimeOperationPort"]
+                : ["createRuntimeHostPorts"]
+              : ["RuntimeHostCallResult", "RuntimeOperationPort", "RuntimeOperationRequest"];
+          if (
+            shape.defaultImport !== null ||
+            shape.namespaceImport !== null ||
+            !isDeepStrictEqual(shape.namedImports, [...expectedNames].sort(compareText)) ||
+            (relativePath === AUTHORING_FIXTURES_SOURCE_PATH && shape.typeOnly !== true)
+          ) {
+            fail("IMPORT_BOUNDARY_DRIFT", "The exact M09-T11 Runtime Core binding drifted.");
+          }
+          t11RuntimeCoreImports += 1;
+        } else if (
+          relativePath === AUTHORING_FIXTURES_SOURCE_PATH &&
+          specifier === "@desen/reference-catalog-web/operations"
+        ) {
+          if (
+            shape.defaultImport !== null ||
+            shape.namespaceImport !== null ||
+            shape.typeOnly ||
+            !isDeepStrictEqual(shape.namedImports, ["signInOperationRegistration"])
+          ) {
+            fail("IMPORT_BOUNDARY_DRIFT", "The exact public sign-in operation binding drifted.");
+          }
+          t11OperationRegistrationImports += 1;
+        } else if (
+          relativePath === AUTHORING_FIXTURES_SOURCE_PATH &&
+          specifier === "@desen/testkit"
+        ) {
+          const expectedNames = shape.typeOnly
+            ? ["SyntheticFixtureValue"]
+            : [
+                "SYNTHETIC_FIXTURE_CONTEXT",
+                "createSyntheticFixtureSnapshot",
+                "lookupSyntheticOperationError",
+                "lookupSyntheticOperationSuccess",
+              ];
+          if (
+            shape.defaultImport !== null ||
+            shape.namespaceImport !== null ||
+            !isDeepStrictEqual(shape.namedImports, [...expectedNames].sort(compareText))
+          ) {
+            fail("IMPORT_BOUNDARY_DRIFT", "The exact public synthetic fixture binding drifted.");
+          }
+          t11TestkitImports += 1;
         } else if (
           relativePath === AUTHORING_SELECTION_SOURCE_PATH &&
           specifier === "@desen/runtime-react"
@@ -1354,6 +1473,7 @@ function inspectImportsAndExecutionBoundary(files) {
             AUTHORING_SLOT_SOURCE_PATH,
             AUTHORING_STATE_SOURCE_PATH,
             AUTHORING_EVENT_ACTION_SOURCE_PATH,
+            AUTHORING_SCENARIOS_SOURCE_PATH,
           ].includes(relativePath) &&
             !isPlatformMemberReceiver(node)))
       ) {
@@ -1390,6 +1510,7 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_SLOT_SOURCE_PATH,
               AUTHORING_STATE_SOURCE_PATH,
               AUTHORING_EVENT_ACTION_SOURCE_PATH,
+              AUTHORING_SCENARIOS_SOURCE_PATH,
             ].includes(relativePath);
           if (!localSourceDocument && (member === null || forbiddenPlatformMembers.has(member))) {
             fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained platform I/O authority.`, {
@@ -1414,7 +1535,13 @@ function inspectImportsAndExecutionBoundary(files) {
         ts.isIdentifier(node.expression) &&
         admittedAdapterRuntimeCalls.has(node.expression.text)
       ) {
-        if (relativePath !== ADAPTER_CANVAS_SOURCE_PATH) {
+        if (
+          relativePath !== ADAPTER_CANVAS_SOURCE_PATH &&
+          !(
+            relativePath === APPLICATION_SOURCE_PATH &&
+            node.expression.text === "createRuntimeHostPorts"
+          )
+        ) {
           fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained M09-T03 runtime authority.`, {
             call: node.expression.text,
           });
@@ -1477,10 +1604,13 @@ function inspectImportsAndExecutionBoundary(files) {
     referenceCatalogImports !== 4 ||
     validatorImports !== 1 ||
     publicDiagnosticIndexTypeOnlyImports !== 1 ||
-    catalogSdkImports !== 10 ||
-    editorCoreImports !== 11 ||
+    catalogSdkImports !== 11 ||
+    editorCoreImports !== 13 ||
     publisherImports !== 3 ||
     protocolImports !== 4 ||
+    t11RuntimeCoreImports !== 3 ||
+    t11TestkitImports !== 2 ||
+    t11OperationRegistrationImports !== 1 ||
     !isDeepStrictEqual(namedSlotDragDropHandlers, EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS)
   ) {
     fail(
@@ -1495,6 +1625,9 @@ function inspectImportsAndExecutionBoundary(files) {
         publicDiagnosticIndexTypeOnlyImports,
         referenceCatalogImports,
         validatorImports,
+        t11OperationRegistrationImports,
+        t11RuntimeCoreImports,
+        t11TestkitImports,
       },
     );
   }
@@ -1657,8 +1790,10 @@ function inspectImportsAndExecutionBoundary(files) {
     catalogSdkImports,
     publisherImports,
     protocolImports,
-    runtimeCoreImports: 2,
+    runtimeCoreImports: 2 + t11RuntimeCoreImports,
     runtimeReactImports: 2,
+    t11TestkitImports,
+    t11OperationRegistrationImports,
     publicDiagnosticIndexTypeOnlyImports,
     adapterImports: 1,
     exactReferenceAdapterRegistryConstructions: 1,
@@ -2056,7 +2191,82 @@ function authenticateNamedSlotArtifact(bytes) {
   return pin;
 }
 
-/** Authenticates frozen M09-T02 evidence and checks its live additive M09-T07 successor. */
+function authenticateFixturesScenariosSuccessor(files) {
+  const bytes = files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  const pin = FIXTURES_SCENARIOS_ARTIFACT_PIN;
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact receipt drifted.");
+  }
+  const artifact = parseJson(bytes, FIXTURES_SCENARIOS_ARTIFACT_PATH);
+  const parent = artifact.prerequisites?.[0];
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    parent?.task !== "M09-T10" ||
+    parent?.bytes !== 17_900 ||
+    parent?.sha256 !== "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334" ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.scenarioSourceAndBundleEphemeral !== true ||
+    artifact.claim?.authoredSourceAndPublishablePreviewUnchanged !== true ||
+    artifact.claim?.publicSyntheticFixtureProjection !== true ||
+    artifact.claim?.pendingStaticFixtureClaimed !== false ||
+    artifact.claim?.pendingRuntimeLifecycleExercised !== true ||
+    artifact.claim?.exactOperationAndPreviewContextAuthorization !== true ||
+    artifact.claim?.operationInputOrPasswordRetained !== false ||
+    artifact.claim?.stableAppOwnedOperationPort !== true ||
+    artifact.claim?.cleanupSynchronouslyRevokesFixtureAdmission !== true ||
+    artifact.claim?.pendingRevokedOnPreviewReplacement !== true ||
+    !isDeepStrictEqual(artifact.claim?.visibleExecutionContexts, [
+      "synthetic",
+      "integration",
+      "production",
+    ]) ||
+    artifact.claim?.visibleApproximateFidelityDifferences !== true ||
+    artifact.claim?.s001Status !== "TESTED" ||
+    artifact.claim?.pf028Status !== "CLOSED" ||
+    artifact.tests?.focusedTestCases !== 86 ||
+    artifact.tests?.testCaseCounts?.[ADAPTER_CANVAS_TEST_PATH] !== 10 ||
+    artifact.tests?.testCaseCounts?.[APPLICATION_TEST_PATH] !== 40 ||
+    !Array.isArray(trackedReceipts)
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact identity or claims drifted.");
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
+  for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    const authority = receiptMap.get(relativePath);
+    const liveBytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      liveBytes === undefined ||
+      authority.bytes !== liveBytes.byteLength ||
+      authority.sha256 !== sha256(liveBytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T11 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    exactDesignRunParent: true,
+    scenariosEphemeral: true,
+    pendingRuntimeLifecycleExercised: true,
+    exactOperationAndPreviewContextAuthorization: true,
+    operationInputOrPasswordRetained: false,
+    stableAppOwnedOperationPort: true,
+    fixtureAdmissionRevokedOnCleanupAndReplacement: true,
+    visibleExecutionContexts: ["synthetic", "integration", "production"],
+    visibleApproximateFidelityDifferences: true,
+    focusedTestCases: 86,
+    s001Status: "TESTED",
+    pf028Status: "CLOSED",
+  });
+}
+
+/** Authenticates frozen M09-T02 evidence and exact additive M09-T07/T11 successors. */
 export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const [frozen, files, shellArtifactBytes, referenceArtifactBytes] = await Promise.all([
@@ -2077,6 +2287,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
   const namedSlotArtifact = authenticateNamedSlotArtifact(files.get(NAMED_SLOT_ARTIFACT_PATH));
   const imports = inspectImportsAndExecutionBoundary(files);
   const implementation = verifyImplementationAndTests(files);
+  const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
   assertRetainedHistoricalReceipts(frozen.artifact, files);
   if (options.fileOverrides.size !== 0) {
     fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue current compatibility evidence.");
@@ -2110,6 +2321,11 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
       imports,
       retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
       successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
+      t11SuccessorReceipts: T11_LIVE_RECEIPT_PATHS.map((relativePath) => ({
+        path: relativePath,
+        bytes: files.get(relativePath).byteLength,
+        sha256: sha256(files.get(relativePath)),
+      })),
     },
     successor: {
       task: "M09-T07",
@@ -2152,6 +2368,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
       persistenceUiImplemented: false,
       runOrPublishImplemented: false,
     },
+    fixturesScenariosSuccessor,
   });
   return deepFreeze({
     artifact: frozen.artifact,

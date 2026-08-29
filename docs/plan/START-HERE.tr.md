@@ -996,6 +996,49 @@ Fixture, scenario, görünür approximate-fidelity disclosure, durable save/open
 navigation/placeholders, publication, activation ve otomatik gerçek-browser E2E sonraki sahiplerde
 kalır; sıradaki iş M09-T11'dir.
 
+M09-T11 artık `DONE`'dır. Catalog'da tanımlı scenario'lar, exact route/node/capability ile Source ve
+preview revision authority'si yeniden doğrulandıktan sonra yalnızca ayrı, geçici bir Source ve
+Publisher preview Bundle üzerinde props-only overlay olarak uygulanır. Authored değerler ile
+`catalog:<scenarioId>` kimlikleri ayrıdır; asıl Source ve publish edilebilir preview değişmez.
+Scenario state veya fixture override'ı desteklenmez ve kısmi uygulama yerine fail-closed davranır.
+
+Run chrome yalnızca public testkit projection'ındaki exact synthetic success ve tanımlı
+`invalidCredentials` sonuçlarını sunar. Gerçek adapter action'ı explicit settlement öncesinde
+Runtime pending lifecycle'ı üretir. Request input ve password verisi okunmaz ya da tutulmaz;
+Integration ve Production bağlamları görünür fakat unavailable'dır. Effect cleanup admission'ı ve
+pending transport'u senkron olarak kapatır; StrictMode yalnızca aynı canlı controller'ı tekrar
+aktive edebilir, preview değişimi ise önceki controller'ın geç sonucunu yayınlamasını engeller.
+
+Kalıcı App-owned chrome fidelity'yi `same`, `equivalent`, `approximate` veya `undeclared` olarak
+gösterir ve bilinen bütün approximate farkları listeler. Eksik/geçersiz metadata güvenli biçimde
+`undeclared` olur; controlled sign-in yüzeyi daha önce doğrulanmış production adapter'ını raporlar.
+Uyumluluk düzeltmesi ayrıca Components için gerçek bir drag handle ve panel-wide insert hedefi,
+Layers için nested slot'lar arasında tek global projection ve midpoint hysteresis, yeni eklenen
+bileşen için de hemen görünür korumalı Delete eylemi sağlar. Native transfer bytes veya managed
+geometry mutation authority değildir.
+
+Focused altı dosyalı suite 86/86, complete 19 dosyalı App suite 252/252 ve independent root proof
+11/11 geçer. Exact artifact 29.407 byte'tır:
+`docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json`,
+`sha256:3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d`. Bunlar yerel task
+receipt'leridir; required-gate, hosted-CI, durable persistence, diagnostics, publication/activation
+veya otomatik gerçek-browser/native-drag E2E sonucu değildir.
+
+Yerel CI authority 194 workload/92 proof pair'dir (81 ordinary + 11 barrier); connected closure 59
+proof unit/128 workload ve ownership 1.232 tracked/184 proof-owned path'tir. Bu inventory
+receipt'leri hosted-CI sonucu değildir.
+
+Append-only proof-reader sequence 50,
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` predecessor'ından
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` başına 46 artifact ve
+92 reader ile ilerler. Checkpoint, promotion, selector + required-affected, ownership ve kalan
+touched-CI regression suite'leri yerelde sırasıyla 73/73, 19/19, 56/56, 15/15 ve 127/127 geçer.
+
+N-035 ve S-001 `TESTED`, PF-028 `CLOSED` olur. P-08 `NOT_PROVEN`, P-09/P-10 `PARTIAL`, N-036
+`PLANNED`, PF-025/PF-083/PF-089 `OPEN` kalır; kanıt kapıları 10/13'tür. Genel ilerleme 106/145
+(%73), M09 ilerlemesi 11/14'tür (%79). Sıradaki iş, public editor persistence port'u üzerinden
+save/open UI ekleyen M09-T12'dir.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

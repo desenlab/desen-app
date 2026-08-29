@@ -6,9 +6,10 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T10 adds one accessible same-session Design/Run boundary while keeping mode controls, event
-projection, whole-action drafts, state forms, binding controls, selection, and every other
-authoring control in the application-owned shell outside the exact React adapter canvas.
+M09-T11 adds transient Catalog scenarios, exact synthetic operation fixtures, and visible adapter
+fidelity disclosure while keeping scenario, fixture, mode, event, state, binding, selection, and
+every other authoring control in the application-owned shell outside the exact React adapter
+canvas.
 The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
@@ -53,6 +54,15 @@ The current product surface contains:
   authoring callbacks, and enables only the exact real adapter interactions;
 - exact Email adapter event → Runtime React → Runtime Core → `state.set` → same-subtree rerender
   behavior without changing Source or Bundle revision or remounting Runtime authority;
+- Catalog-declared props-only scenarios prepared as separate transient Source/Bundle previews,
+  with the authored Source and publishable preview unchanged;
+- one explicitly synthetic fixture controller exposing only exact success and declared
+  `invalidCredentials` settlement after a real Runtime pending lifecycle;
+- visible but unavailable Integration and Production contexts that cannot start a real service;
+- synchronous cleanup and preview-replacement revocation, with operation input and password data
+  never read, logged, or retained;
+- persistent `same`, `equivalent`, `approximate`, or `undeclared` adapter-fidelity disclosure that
+  lists every known approximate difference;
 - deny-only navigation, operation, and resource ports plus missing, conflicting, or inert storage,
   token, diagnostics, clock, context, and environment boundaries;
 - route-local Source-node selection admitted only from the validated authoring model and projected
@@ -219,15 +229,21 @@ action, updates Runtime-local state, and rerenders the same managed subtree. Nav
 operations, and resources remain denied; storage and token access remains missing, conflicting, or
 inert. Run adds no executable host binding.
 
+Scenario selection is admitted only for the exact current route, selected node, capability, Source
+revision, and preview revision. A selected Catalog scenario produces a props-only overlay in a
+separate transient preview; scenario state or fixture overrides fail closed. Synthetic fixture
+execution binds one controller to that effective preview identity. Cleanup synchronously closes
+request admission and revokes pending work, StrictMode may reactivate only the same still-live
+controller, and preview replacement prevents a predecessor from publishing late settlement.
+
 This slice does not expose component rectangles, hit testing, canvas picking, private DOM/native
 structure, or managed-tree inspection. It does not edit repeat/resource bindings or behavior-owned
-event handlers; persist project data; create user projects; orchestrate fixtures or scenarios;
-navigate diagnostics; publish to the control plane; or activate a channel. Fixtures, scenarios,
-and visible approximate-fidelity disclosure belong to M09-T11, durable save/open to M09-T12, and
-publication or activation to M09-T14. Catalog control hints remain opaque under PF-025 and cannot
-widen schema authority. P-09 is only `PARTIAL` for the exact controlled `state.set` path. P-08
-remains `NOT_PROVEN`, S-001 remains `PLANNED`, PF-025, PF-028, and PF-083 remain `OPEN`, and no
-automated real-browser E2E or native-drag automation result is claimed.
+event handlers; persist project data; create user projects; navigate diagnostics; publish to the
+control plane; or activate a channel. Durable save/open belongs to M09-T12, diagnostics to M09-T13,
+and publication or activation to M09-T14. Catalog control hints remain opaque under PF-025 and
+cannot widen schema authority. P-09 and P-10 are only `PARTIAL`; P-08 remains `NOT_PROVEN`, N-035
+and S-001 are `TESTED`, N-036 remains `PLANNED`, PF-028 is `CLOSED`, PF-025, PF-083, and PF-089
+remain `OPEN`, and no automated real-browser E2E or native-drag automation result is claimed.
 
 The App imports only public package entry points for Catalog derivation, Editor Core mutation and
 validation, Publisher preflight, runtime composition, and the exact static reference adapter
@@ -251,7 +267,7 @@ The M09-T10 adapter and application suites pass 9/9 and 35/35, the focused Desig
 44/44, the complete App suite passes 210/210, and the independent root proof passes 10/10. Exact
 evidence is the `17,900`-byte
 `docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json` at
-`sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`. The live local CI
+`sha256:bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334`. The live local CI
 authority contains 192 workloads and 91 proof pairs—80 ordinary and 11 barriers—with a
 58-proof-unit/126-workload closure and 1,218 tracked/182 proof-owned paths. Sequence 49 contains
 45 artifacts and 90 readers at
@@ -264,6 +280,25 @@ shortcut. It is not automated real-browser or native-drag E2E evidence. M09-T10 
 implementation progress is 105/145 (72%), M09 is 10/14 (71%), and proof gates remain 10/13. P-09
 is only `PARTIAL`; P-08 remains `NOT_PROVEN`; S-001 remains `PLANNED`; PF-025, PF-028, and PF-083
 remain `OPEN`; and M09-T11 is next.
+
+The M09-T11 focused fixtures/scenarios/fidelity suite passes 86/86, the complete App suite passes
+252/252, and the independent root proof passes 11/11. Exact evidence is the `29,407`-byte
+`docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json` at
+`sha256:3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d`. It authenticates the
+exact M09-T10, M03-T08, and M03-T09 parents and binds 28 tracked files. These local task receipts
+make no required-gate, hosted-CI, durable-persistence, diagnostic-navigation,
+publication/activation, real-browser E2E, or native-drag claim. M09-T11 is `DONE`, implementation
+progress is 106/145 (73%), M09 is 11/14 (79%), proof gates remain 10/13, and M09-T12 is next.
+
+The live local CI authority contains 194 workloads and 92 proof pairs—81 ordinary and 11 barriers—
+with a 59-proof-unit/128-workload closure and ownership over 1,232 tracked paths, including 184
+proof-owned paths. Those inventory receipts likewise make no hosted-CI claim.
+
+Append-only proof-reader sequence 50 advances
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` to
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` across 46 artifacts and
+92 readers. Checkpoint, promotion, selector plus required-affected, ownership, and remaining
+touched-CI regression suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally.
 
 ## Local commands
 
@@ -280,6 +315,7 @@ pnpm --filter @desen/app-web test:named-slots
 pnpm --filter @desen/app-web test:state-bindings
 pnpm --filter @desen/app-web test:event-actions
 pnpm --filter @desen/app-web test:design-run
+pnpm --filter @desen/app-web test:fixtures-scenarios
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

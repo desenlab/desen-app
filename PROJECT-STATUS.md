@@ -1153,7 +1153,7 @@ geometry, hit-testing, or drop claim.
 The adapter suite passes 9/9, application suite 35/35, focused Design/Run suite 44/44, complete App
 suite 210/210, and independent root proof 10/10. Exact evidence is the `17,900`-byte
 `docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json` at
-`sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`; its frozen proof and
+`sha256:bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334`; its frozen proof and
 root readers are 53,346 bytes/
 `sha256:ff4226241630daded979263dcd0a7fdb071591efbf789d1e7d2d4f4641779dfe` and 15,787 bytes/
 `sha256:d27307b0763132e5c21f45c146d3773ab9dbf02371f850dca3d03e11a759f601`. The live local CI
@@ -1171,19 +1171,58 @@ M09-T10 is `DONE`; P-09 is only `PARTIAL` for the exact controlled `state.set` p
 `NOT_PROVEN`; S-001 remains `PLANNED`; PF-025, PF-028, and PF-083 remain `OPEN`; proof gates remain
 10/13; implementation progress is 105/145 (72%); M09 is 10/14 (71%); and M09-T11 is next.
 
+M09-T11 now adds transient Catalog-declared props-only scenarios, exact synthetic sign-in fixture
+settlement, and visible conservative adapter-fidelity disclosure. Scenario authority is
+reauthenticated against the exact route, Source node, capability, Source revision, and preview
+revision. Scenario Source and Bundle values remain separate from the authored Source and its
+publishable preview; unsupported scenario state or fixture overrides fail closed.
+
+The public testkit projection supplies only exact success and declared `invalidCredentials`
+outcomes. The real adapter action publishes Runtime pending before explicit settlement, while
+request input and password data are never read or retained. Integration and production contexts
+are visible but unavailable. Effect cleanup closes admission and revokes pending transport
+synchronously; StrictMode replay may reactivate only the same live controller, and preview
+replacement revokes its predecessor before late settlement can publish.
+
+App-owned chrome reports `same`, `equivalent`, `approximate`, or `undeclared` fidelity and lists
+every known approximate difference. Missing or invalid fidelity metadata fails conservatively to
+`undeclared`; the exact sign-in slice reports the already authenticated production adapter. The
+compatibility closure also retains a dedicated Components drag handle, panel-wide insert target,
+one global nested Layers projection with midpoint hysteresis, and the immediately visible guarded
+Delete action after insertion.
+
+The focused App suite passes 86/86, the complete App suite passes 252/252, and the independent root
+proof passes 11/11. The deterministic `29,407`-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json` at
+`sha256:3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d`; it authenticates the
+exact M09-T10, M03-T08, and M03-T09 parents and binds 28 tracked files. These are local receipts;
+no required-gate, hosted-CI, durable-persistence, diagnostics, publication/activation, or
+real-browser/native-drag E2E result is inferred.
+
+Append-only proof-reader sequence 50 advances
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` to
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` across 46 artifacts and
+92 readers. Checkpoint, promotion, selector plus required-affected, ownership, and the other
+touched-CI regression suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally.
+
+M09-T11 is `DONE`; N-035 and S-001 are `TESTED`; PF-028 is `CLOSED`; P-08 remains `NOT_PROVEN`,
+P-09 and P-10 remain `PARTIAL`, N-036 remains `PLANNED`, and PF-025, PF-083, and PF-089 remain
+`OPEN`. Proof gates remain 10/13; implementation progress is 106/145 (73%); M09 is 11/14 (79%);
+and M09-T12 is next.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `105 / 145 tasks complete (72%)`
+- Overall implementation progress: `106 / 145 tasks complete (73%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
-- M09 progress: `10 / 14 tasks complete (71%)`
+- M09 progress: `11 / 14 tasks complete (79%)`
 - Proof-gate progress: `10 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1274,7 +1313,8 @@ M09-T10 is `DONE`; P-09 is only `PARTIAL` for the exact controlled `state.set` p
   `M09-T07 — Named-slot drop, move, reorder, cardinality, acceptance, and deletion UI`,
   `M09-T08 — Local state and binding editor UI`,
   `M09-T09 — Sign-in event and closed-action editor UI`,
-  `M09-T10 — Design/Run modes on the same source tree`
+  `M09-T10 — Design/Run modes on the same source tree`,
+  `M09-T11 — Fixtures, scenarios, and visible approximate-fidelity disclosure`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -1296,12 +1336,12 @@ M09-T10 is `DONE`; P-09 is only `PARTIAL` for the exact controlled `state.set` p
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Next implementation task: `M09-T11 — Fixtures, scenarios, and visible approximate-fidelity disclosure`
+- Next implementation task: `M09-T12 — Save/open UI through editor persistence port`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  10/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T10 are `DONE`; `N-042` is `TESTED`, P-06
-  is `PROVEN`, P-07, P-09, and P-16 are `PARTIAL`, proof gates are 10/13, P-08 remains
-  `NOT_PROVEN`, S-001 remains `PLANNED`, PF-025, PF-028, and PF-083 remain `OPEN`, and
-  implementation progress is 105/145.
+  11/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T11 are `DONE`; `N-035`, `N-042`, and
+  `S-001` are `TESTED`, P-06 is `PROVEN`, P-07, P-09, P-10, and P-16 are `PARTIAL`, proof gates
+  are 10/13, P-08 remains `NOT_PROVEN`, N-036 remains `PLANNED`, PF-028 is `CLOSED`, PF-025,
+  PF-083, and PF-089 remain `OPEN`, and implementation progress is 106/145.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -1379,7 +1419,7 @@ M09-T10 is `DONE`; P-09 is only `PARTIAL` for the exact controlled `state.set` p
   target change, enlarged Layers drop lanes with the last valid row projection, visible selected-
   layer Delete action, and editable-control-safe Delete/Backspace shortcuts without changing
   named-slot or validator authority. Its `17,900`-byte artifact is pinned at
-  `sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`; focused Design/Run tests
+  `sha256:bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334`; focused Design/Run tests
   pass 44/44, the complete App suite passes 210/210, and the independent root proof passes 10/10.
   The live local CI authority contains 192 workloads/91 proof pairs—80 ordinary and 11 barriers—a
   58-proof-unit/126-workload closure, 1,218-path/182-proof-owned ownership, and sequence 49
@@ -4104,7 +4144,7 @@ M09-T10 evidence:
 
 - `docs/proof/DESEN-APP-DESIGN-RUN-MODES.md`
 - `docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json`, exactly `17,900` bytes at
-  `sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`
+  `sha256:bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334`
 - frozen proof/root readers: 53,346-byte `scripts/lib/desen-app-design-run-modes-proof.mjs` at
   `sha256:ff4226241630daded979263dcd0a7fdb071591efbf789d1e7d2d4f4641779dfe` and 15,787-byte
   `tests/desen-app-design-run-modes.test.mjs` at
@@ -4150,6 +4190,51 @@ M09-T10 evidence:
   `state.set` path; P-08 remains `NOT_PROVEN`; S-001 remains `PLANNED`; PF-025, PF-028, and PF-083
   remain `OPEN`; proof gates remain 10/13; overall progress advances to 105/145 (72%); M09 advances
   to 10/14 (71%); M09-T11 is next
+
+M09-T11 evidence:
+
+- `docs/proof/DESEN-APP-FIXTURES-SCENARIOS-FIDELITY.md`
+- `docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json`, exactly `29,407` bytes at
+  `sha256:3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d`
+- prerequisite authority: the exact M09-T10 Design/Run, M03-T08 sign-in fixture/host-binding, and
+  M03-T09 reference-parity artifacts are authenticated before any T11 claim
+- scenario authority: one exact current route, Source node, capability, Source revision, and
+  preview revision admits either authored values or one Catalog-declared props-only overlay in a
+  separate transient Source/Bundle preview; scenario state and fixture overrides fail closed
+- fixture authority: only the public testkit synthetic success and declared `invalidCredentials`
+  outcomes are selectable; Integration and Production are visible but unavailable, and request
+  input/password data are never observed or retained
+- lifecycle authority: the real adapter action publishes Runtime pending before explicit
+  settlement; cleanup synchronously closes admission and revokes pending transport, StrictMode may
+  reactivate only the same live controller, and preview replacement blocks late predecessor
+  publication
+- fidelity authority: App-owned chrome reports `same`, `equivalent`, `approximate`, or
+  `undeclared`, lists every known approximate difference, and fails missing/invalid declarations
+  conservatively to `undeclared`
+- retained compatibility boundary: Components uses a dedicated drag handle and panel-wide insert
+  surface; Layers owns one global nested-slot projection with midpoint hysteresis; successful
+  insertion exposes the visible guarded Delete action; native payloads and managed geometry remain
+  non-authoritative
+- local proof: the focused six-file suite passes 86/86, the complete 19-file App suite passes
+  252/252, and the independent root proof passes 11/11
+- CI authority: the live local inventory contains 194 workloads and 92 proof pairs—81 ordinary and
+  11 barriers—with a 59-proof-unit/128-workload closure and ownership over 1,232 tracked paths,
+  including 184 proof-owned paths
+- reader checkpoint: sequence 50 advances
+  `sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` to
+  `sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` across 46 artifacts and
+  92 readers; checkpoint/promotion/selector-plus-required-affected/ownership/other touched-CI
+  suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally
+- browser inspection: the in-app browser confirms the explicit Components target, dedicated grip,
+  click-to-add path, immediate visible Delete control, and stable Layers gaps; the client exposes
+  no native drag automation method, so this remains manual inspection rather than browser E2E
+- evidence boundary: these are local task receipts; no required-gate, hosted-CI, durable save/open,
+  diagnostics navigation/placeholders, publication/activation, automated real-browser E2E, or
+  native-drag result is inferred
+- coverage decision: M09-T11 is `DONE`; N-035 and S-001 are `TESTED`; PF-028 is `CLOSED`; P-08
+  remains `NOT_PROVEN`, P-09 and P-10 remain `PARTIAL`, N-036 remains `PLANNED`, and PF-025,
+  PF-083, and PF-089 remain `OPEN`; proof gates remain 10/13; overall progress advances to 106/145
+  (73%); M09 advances to 11/14 (79%); M09-T12 is next
 
 ## Status vocabulary
 
