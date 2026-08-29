@@ -669,6 +669,12 @@
   box-shadow: var(--desen-app-shadow-overlay);
 }
 
+.authoringPanel[hidden],
+.inspectorPanel[hidden],
+.editorStatus[hidden] {
+  display: none;
+}
+
 .inspectorHeader {
   display: flex;
   min-height: 3rem;
@@ -2341,11 +2347,12 @@
   min-height: 0.875rem;
   align-items: center;
   padding: 0 0.25rem;
+  transition: min-height 120ms ease;
 }
 
 .slotBoundary[data-drop-ready="true"] {
   z-index: 3;
-  min-height: 0.875rem;
+  min-height: 1.625rem;
   padding: 0 0.125rem;
   margin-block: 0;
 }
@@ -2602,6 +2609,19 @@
   outline-offset: 2px;
 }
 
+.componentTargetControls {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 0.3125rem;
+  justify-items: end;
+}
+
+.componentTargetControls .componentTargetAction {
+  min-height: 1.375rem;
+  padding-inline: 0.4375rem;
+  font-size: 0.5rem;
+}
+
 .slotContractBadge {
   flex: 0 0 auto;
   padding: 0.1875rem 0.375rem;
@@ -2665,6 +2685,10 @@
 .componentItem:disabled {
   cursor: not-allowed;
   opacity: 0.48;
+}
+
+.componentItem[draggable="true"] {
+  cursor: grab;
 }
 
 .componentItem[draggable="true"]:active {
@@ -2802,18 +2826,60 @@
 .authoringSelectionActions {
   display: grid;
   flex: 0 0 auto;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.25rem 0.625rem;
   align-items: center;
   padding: 0.5rem 0.75rem;
-  background: var(--desen-app-surface);
+  background: color-mix(in srgb, var(--desen-app-accent) 4%, var(--desen-app-surface));
   border-top: 1px solid var(--desen-app-border);
 }
 
 .authoringSelectionActions small {
+  grid-column: 1 / -1;
   color: var(--desen-app-text-soft);
   font-size: 0.5rem;
   line-height: 0.75rem;
+}
+
+.selectedLayerSummary {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 1fr auto;
+  gap: 0.0625rem 0.375rem;
+}
+
+.selectedLayerSummary > span {
+  grid-column: 1;
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+  line-height: 0.6875rem;
+}
+
+.selectedLayerSummary strong {
+  grid-column: 1;
+  overflow: hidden;
+  font-size: 0.625rem;
+  font-weight: 620;
+  line-height: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectedLayerSummary kbd {
+  display: grid;
+  min-width: 1.375rem;
+  height: 1.375rem;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--desen-app-text-muted);
+  font: inherit;
+  font-size: 0.625rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-bottom-color: var(--desen-app-border-strong);
+  border-radius: 0.3125rem;
+  place-items: center;
 }
 
 .deleteLayerAction {
@@ -2884,7 +2950,7 @@
   border-bottom: 1px solid var(--desen-app-border);
 }
 
-.surfaceFrameHeader > div {
+.surfaceIdentity {
   display: grid;
   min-width: 0;
   gap: 0.125rem;
@@ -2896,12 +2962,64 @@
   font-weight: 560;
 }
 
-.surfaceFrameHeader > div > span {
+.surfaceIdentity > span {
   overflow: hidden;
   color: var(--desen-app-text-muted);
   font-size: 0.625rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.surfaceFrameTools {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.modeControl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 0.1875rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+}
+
+.modeControl button {
+  min-width: 3.25rem;
+  min-height: 1.625rem;
+  padding: 0 0.5rem;
+  color: var(--desen-app-text-muted);
+  font: inherit;
+  font-size: 0.5625rem;
+  font-weight: 590;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 0.3125rem;
+}
+
+.modeControl button[aria-pressed="true"] {
+  color: var(--desen-app-text);
+  background: var(--desen-app-surface);
+  box-shadow: var(--desen-app-shadow-xs);
+}
+
+.modeControl button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: 2px;
+}
+
+.modeSafety {
+  min-height: 1.875rem;
+  padding: 0.4375rem 0.75rem;
+  margin: 0;
+  color: var(--desen-app-text-soft);
+  font-size: 0.53125rem;
+  line-height: 0.875rem;
+  background: color-mix(in srgb, var(--desen-app-surface-subtle) 72%, transparent);
+  border-bottom: 1px solid var(--desen-app-border);
 }
 
 .surfaceFrameBody {
@@ -2911,6 +3029,29 @@
   flex: 1;
   padding: 1.5rem;
   background: color-mix(in srgb, var(--desen-app-canvas) 68%, white);
+}
+
+.surfaceFrame[data-mode="run"] {
+  width: min(46rem, calc(100vw - 3rem));
+  height: min(42rem, calc(100vh - 9.5rem));
+  height: min(42rem, calc(100dvh - 9.5rem));
+  min-height: 30rem;
+  border-radius: 1rem;
+  box-shadow: var(--desen-app-shadow-overlay);
+}
+
+.surfaceFrame[data-mode="run"] .surfaceFrameBody {
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background: color-mix(in srgb, var(--desen-app-canvas) 82%, white);
+}
+
+.surfaceFrame[data-mode="run"] .adapterCanvas {
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.surfaceFrame[data-mode="run"] .adapterCanvasSurface {
+  box-shadow: 0 1.25rem 3.5rem color-mix(in srgb, var(--desen-app-text) 10%, transparent);
 }
 
 .adapterCanvas {

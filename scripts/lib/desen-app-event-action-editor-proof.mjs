@@ -17,6 +17,7 @@ const STATE_BINDING_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json";
 const EDITOR_EVENT_ACTION_ARTIFACT_PATH =
   "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json";
+const DESIGN_RUN_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const LOCKFILE_PATH = "pnpm-lock.yaml";
@@ -88,6 +89,47 @@ const TRACKED_PATHS = Object.freeze([
   EDITOR_EVENT_ACTION_ARTIFACT_PATH,
   ...PROOF_READER_PATHS,
 ]);
+
+const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  "apps/desen-app/src/inspector-panel.tsx",
+  ADAPTER_SOURCE_PATH,
+  APPLICATION_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+  ADAPTER_TEST_PATH,
+  APPLICATION_TEST_PATH,
+  "scripts/lib/desen-app-event-action-editor-proof.mjs",
+  "tests/desen-app-event-action-editor.test.mjs",
+]);
+
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...new Set([...TRACKED_PATHS, ...SUCCESSOR_COMPATIBILITY_PATHS, DESIGN_RUN_ARTIFACT_PATH]),
+]);
+
+const RETAINED_HISTORICAL_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
+);
+
+const SELF_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-event-action-editor-proof.mjs",
+  "tests/desen-app-event-action-editor.test.mjs",
+]);
+
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 23_812,
+  sha256: "0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab",
+});
+
+const DESIGN_RUN_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T10",
+  proofId: "desen-app-design-run-modes",
+  profile: "desen.app.design-run-modes-proof.v1",
+  result: "PASS",
+  path: DESIGN_RUN_ARTIFACT_PATH,
+  bytes: 17_900,
+  sha256: "0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03",
+});
 
 const EXPECTED_EVENT_ACTION_TEST_NAMES = Object.freeze([
   "creates exact component owner references and rejects forged behavior values",
@@ -245,12 +287,16 @@ function captureBytes(value, label) {
 
 function captureOverrides(value) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+  if (
+    !(value instanceof Map) ||
+    utilTypes.isProxy(value) ||
+    value.size > CURRENT_COMPATIBILITY_PATHS.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
   for (const [relativePath, bytes] of value) {
-    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+    if (!CURRENT_COMPATIBILITY_PATHS.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
@@ -312,12 +358,17 @@ async function readRegularAuthority(absolutePath, label) {
 
 async function readTrackedFiles(workspaceRoot, overrides) {
   const output = new Map();
-  for (const relativePath of TRACKED_PATHS) {
-    output.set(
-      relativePath,
-      overrides.get(relativePath) ??
-        (await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath)),
-    );
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
+    const live = await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath);
+    const override = overrides.get(relativePath);
+    if (
+      override !== undefined &&
+      SELF_RESEALED_PATHS.includes(relativePath) &&
+      !isDeepStrictEqual(override, live)
+    ) {
+      fail("BOUNDARY_DRIFT", `${relativePath} cannot be substituted by a caller.`);
+    }
+    output.set(relativePath, override ?? live);
   }
   return output;
 }
@@ -490,6 +541,14 @@ function inspectApplicationSource(source) {
       "model={eventActionModel}",
       "onEdit={onEventActionEdit}",
       'activeTab === "actions"',
+      "const resolvedActiveSlot = activeSlot ?? defaultSlot;",
+      'aria-label="Change target in Layers"',
+      "const projected = rowDropProjection.current ?? projectedRowDrop(event);",
+      '(event.key !== "Delete" && event.key !== "Backspace")',
+      "target.isContentEditable",
+      "target.closest(\"input, textarea, select, [contenteditable='true']\")",
+      "className={styles.authoringSelectionActions}",
+      "disabled={deletionCompatibility?.accepted !== true}",
     ],
     "application.tsx",
   );
@@ -504,6 +563,11 @@ function inspectApplicationSource(source) {
     sourceAndPreviewCommitAtomically: true,
     publisherFailurePreservesPriorSession: true,
     eventActionChromeOutsideManagedCapabilitySubtree: true,
+    retainedRootSafeDefaultPlacementTarget: true,
+    retainedExplicitChangeTarget: true,
+    retainedLastValidRowDropProjection: true,
+    retainedVisibleSelectedLayerDeleteControl: true,
+    retainedGuardedDeleteAndBackspace: true,
   });
 }
 
@@ -641,6 +705,10 @@ function inspectCssSource(source) {
       ".actionJsonTextarea {",
       '.actionJsonTextarea[aria-invalid="true"]',
       ".actionCardControls button:focus-visible",
+      '.slotBoundary[data-drop-ready="true"] {',
+      "min-height: 1.625rem;",
+      ".authoringSelectionActions {",
+      ".deleteLayerAction {",
     ],
     "application.module.css",
   );
@@ -650,6 +718,8 @@ function inspectCssSource(source) {
     recursiveSettlementTones: true,
     visibleInvalidJsonState: true,
     keyboardFocusPresentation: true,
+    retainedEnlargedDropLanePresentation: true,
+    retainedVisibleDeletePresentation: true,
   });
 }
 
@@ -957,8 +1027,168 @@ function receipts(files) {
     );
 }
 
-/** Builds detached deterministic M09-T09 event/action editor evidence. */
-export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefined) {
+async function authenticateFrozenArtifact(workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    "frozen M09-T09 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T09 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(artifactBytes, "frozen M09-T09 proof artifact");
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-event-action-editor" ||
+    artifact?.profile !== "desen.app.event-action-editor-proof.v1" ||
+    artifact?.task !== "M09-T09" ||
+    artifact?.result !== "PASS" ||
+    artifact?.claim?.taskStatus !== "DONE" ||
+    artifact?.claim?.catalogDeclaredEventProjection !== true ||
+    artifact?.claim?.exactSelectedComponentOwner !== true ||
+    artifact?.claim?.behaviorOwnerUiClaimed !== false ||
+    artifact?.claim?.absentEmptyAndPresentHandlerLifecycle !== true ||
+    artifact?.claim?.recursivelyNestedOperationSettlements !== true ||
+    artifact?.claim?.canonicalEscapedActionPointers !== true ||
+    artifact?.claim?.publicEditorCoreEventActionMutation !== true ||
+    artifact?.claim?.continuousCompleteSourceRevalidation !== true ||
+    artifact?.claim?.sourceAndPreviewCommitAtomically !== true ||
+    artifact?.claim?.eventActionChromeOutsideManagedCapabilitySubtree !== true ||
+    artifact?.claim?.actionExecutionClaimed !== false ||
+    artifact?.claim?.designRunClaimed !== false ||
+    artifact?.claim?.persistenceClaimed !== false ||
+    artifact?.claim?.activationClaimed !== false ||
+    artifact?.claim?.browserE2eClaimed !== false ||
+    artifact?.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact?.boundary?.trackedFiles !== TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== TRACKED_PATHS.length ||
+    !isDeepStrictEqual(
+      trackedReceipts.map((candidate) => candidate?.path),
+      [...TRACKED_PATHS].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    trackedReceipts.some(
+      (candidate) =>
+        candidate === null ||
+        typeof candidate !== "object" ||
+        !Number.isSafeInteger(candidate.bytes) ||
+        candidate.bytes < 0 ||
+        typeof candidate.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(candidate.sha256),
+    ) ||
+    !isDeepStrictEqual(
+      artifact?.tests?.rootTestNames,
+      DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES,
+    )
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T09 artifact identity or retained claims drifted.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedHistoricalReceipts(frozenArtifact, files) {
+  const taskTimeReceipts = new Map(
+    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    const authority = taskTimeReceipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M09-T09 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
+}
+
+function authenticateDesignRunSuccessor(files) {
+  const artifactBytes = files.get(DESIGN_RUN_ARTIFACT_PATH);
+  if (
+    artifactBytes.byteLength !== DESIGN_RUN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== DESIGN_RUN_ARTIFACT_PIN.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T10 artifact bytes drifted.");
+  }
+  const artifact = parseJson(artifactBytes, DESIGN_RUN_ARTIFACT_PATH);
+  const localReceipts = artifact.tests?.localCommandReceipts;
+  const applicationTestNames = artifact.tests?.appTestNames?.[APPLICATION_TEST_PATH];
+  const retainedUxTestNames = [
+    "deletes a newly inserted selected layer with %s outside editable controls",
+    "ignores deletion shortcuts from editable controls while retaining the selected layer",
+    "drops from a visible row with the last admitted projection when drop coordinates are absent",
+    "chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
+  ];
+  if (
+    artifact.task !== DESIGN_RUN_ARTIFACT_PIN.task ||
+    artifact.proofId !== DESIGN_RUN_ARTIFACT_PIN.proofId ||
+    artifact.profile !== DESIGN_RUN_ARTIFACT_PIN.profile ||
+    artifact.result !== DESIGN_RUN_ARTIFACT_PIN.result ||
+    artifact.claim?.oneImmutableSourceAndBundleSession !== true ||
+    artifact.claim?.modeExcludedFromRuntimeMountIdentity !== true ||
+    artifact.claim?.zeroRuntimeRemountOrDisposeOnToggle !== true ||
+    artifact.claim?.sameManagedCapabilitySubtreeOnToggle !== true ||
+    artifact.claim?.designControlsDisabled !== true ||
+    artifact.claim?.designSelectionAndAuthoringOnly !== true ||
+    artifact.claim?.runAdapterEventToRuntimeStateSet !== true ||
+    artifact.claim?.runStateSetRerendersAdapter !== true ||
+    artifact.claim?.sourceRevisionUnchangedOnToggle !== true ||
+    artifact.claim?.bundleRevisionUnchangedOnToggle !== true ||
+    artifact.claim?.centralAuthoringGuardsInRun !== true ||
+    artifact.claim?.allExternalHostPortsDeniedOrInert !== true ||
+    artifact.claim?.fixturesAndScenariosClaimed !== false ||
+    artifact.claim?.persistenceClaimed !== false ||
+    artifact.claim?.diagnosticsClaimed !== false ||
+    artifact.claim?.publicationClaimed !== false ||
+    artifact.claim?.activationClaimed !== false ||
+    artifact.claim?.browserE2eClaimed !== false ||
+    artifact.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact.claim?.p09Status !== "PARTIAL" ||
+    artifact.claim?.pf025Status !== "OPEN" ||
+    artifact.claim?.pf028Status !== "OPEN" ||
+    artifact.claim?.pf083Status !== "OPEN" ||
+    localReceipts?.adapter?.tests !== 9 ||
+    localReceipts?.application?.tests !== 35 ||
+    localReceipts?.focusedDesignRun?.tests !== 44 ||
+    localReceipts?.fullApp?.tests !== 210 ||
+    localReceipts?.rootProof?.tests !== 10 ||
+    !Array.isArray(applicationTestNames) ||
+    retainedUxTestNames.some((name) => !applicationTestNames.includes(name))
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T10 artifact identity or claims drifted.");
+  }
+  return deepFreeze({
+    task: DESIGN_RUN_ARTIFACT_PIN.task,
+    artifact: DESIGN_RUN_ARTIFACT_PIN,
+    oneImmutableSourceAndBundleSession: true,
+    zeroRuntimeRemountOrDisposeOnToggle: true,
+    sameManagedCapabilitySubtreeOnToggle: true,
+    exactAdapterStateSetExecution: true,
+    centralRunAuthoringGuards: true,
+    externalHostPortsDeniedOrInert: true,
+    retainedAuthoringUxTests: retainedUxTestNames,
+    focusedDesignRunTests: 44,
+    fullAppTests: 210,
+    fixturesAndScenariosImplemented: false,
+    persistenceImplemented: false,
+    diagnosticsImplemented: false,
+    publicationImplemented: false,
+    activationImplemented: false,
+    browserE2eImplemented: false,
+  });
+}
+
+/** Retained task-time builder used only to define the frozen M09-T09 evidence shape. */
+async function _buildFreshDesenAppEventActionEditorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
   const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
@@ -1060,6 +1290,100 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
   });
   const artifactBytes = canonicalArtifactBytes(artifact);
   return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+}
+
+/** Authenticates frozen M09-T09 evidence and checks its live additive M09-T10 successor. */
+export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefined) {
+  const options = captureBuildOptions(rawOptions);
+  const workspaceRoot = await realpath(options.workspaceRoot);
+  const [frozen, files] = await Promise.all([
+    authenticateFrozenArtifact(workspaceRoot),
+    readTrackedFiles(workspaceRoot, options.fileOverrides),
+  ]);
+  const parents = DESEN_APP_EVENT_ACTION_EDITOR_PARENT_PINS.map((pin) =>
+    authenticateParent(files.get(pin.path), pin),
+  );
+  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  const source = verifyDesenAppEventActionEditorSourcePolicy({
+    eventActionSource: decodeUtf8(files.get(EVENT_ACTION_SOURCE_PATH), EVENT_ACTION_SOURCE_PATH),
+    eventActionPanel: decodeUtf8(files.get(EVENT_ACTION_PANEL_PATH), EVENT_ACTION_PANEL_PATH),
+    applicationSource: decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH),
+    applicationCss: decodeUtf8(files.get(APPLICATION_CSS_PATH), APPLICATION_CSS_PATH),
+  });
+  const tests = inspectTests(files);
+  const packageContract = inspectPackages(files);
+  const successor = authenticateDesignRunSuccessor(files);
+  const currentCompatibility = deepFreeze({
+    schemaVersion: 1,
+    proofId: "desen-app-event-action-editor",
+    profile: "desen.app.event-action-editor-proof.v1",
+    task: "M09-T09",
+    result: "PASS",
+    prerequisites: parents,
+    retainedClaim: {
+      taskStatus: frozen.artifact.claim.taskStatus,
+      catalogDeclaredEventProjection: frozen.artifact.claim.catalogDeclaredEventProjection,
+      exactSelectedComponentOwner: frozen.artifact.claim.exactSelectedComponentOwner,
+      behaviorOwnerUiClaimed: frozen.artifact.claim.behaviorOwnerUiClaimed,
+      absentEmptyAndPresentHandlerLifecycle:
+        frozen.artifact.claim.absentEmptyAndPresentHandlerLifecycle,
+      recursivelyNestedOperationSettlements:
+        frozen.artifact.claim.recursivelyNestedOperationSettlements,
+      canonicalEscapedActionPointers: frozen.artifact.claim.canonicalEscapedActionPointers,
+      publicEditorCoreEventActionMutation:
+        frozen.artifact.claim.publicEditorCoreEventActionMutation,
+      continuousCompleteSourceRevalidation:
+        frozen.artifact.claim.continuousCompleteSourceRevalidation,
+      sourceAndPreviewCommitAtomically: frozen.artifact.claim.sourceAndPreviewCommitAtomically,
+      eventActionChromeOutsideManagedCapabilitySubtree:
+        frozen.artifact.claim.eventActionChromeOutsideManagedCapabilitySubtree,
+    },
+    source,
+    successor,
+    retainedAuthoringUx: {
+      rootSafeDefaultPlacementTarget: source.application.retainedRootSafeDefaultPlacementTarget,
+      explicitChangeTarget: source.application.retainedExplicitChangeTarget,
+      enlargedDropLanes: source.css.retainedEnlargedDropLanePresentation,
+      lastValidRowDropProjection: source.application.retainedLastValidRowDropProjection,
+      visibleSelectedLayerDeleteControl:
+        source.application.retainedVisibleSelectedLayerDeleteControl,
+      guardedDeleteAndBackspace: source.application.retainedGuardedDeleteAndBackspace,
+      namedSlotAndValidatorAuthorityChanged: false,
+      arbitraryCanvasGeometryOrDropClaimed: false,
+      nativeBrowserDragE2eClaimed: false,
+    },
+    package: packageContract,
+    testPolicy: {
+      applicationTestNames: tests.appTestNames[APPLICATION_TEST_PATH],
+      rootTestNames: tests.rootTestNames,
+    },
+    boundary: {
+      retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
+      successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
+      currentPathReceipts: receipts(files),
+      additiveSuccessorReceipts: [
+        ROOT_PACKAGE_PATH,
+        APP_PACKAGE_PATH,
+        "apps/desen-app/src/inspector-panel.tsx",
+        ADAPTER_SOURCE_PATH,
+        APPLICATION_SOURCE_PATH,
+        APPLICATION_CSS_PATH,
+        ADAPTER_TEST_PATH,
+        APPLICATION_TEST_PATH,
+        DESIGN_RUN_ARTIFACT_PATH,
+      ].map((relativePath) => ({
+        path: relativePath,
+        bytes: files.get(relativePath).byteLength,
+        sha256: sha256(files.get(relativePath)),
+      })),
+    },
+  });
+  return deepFreeze({
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+  });
 }
 
 function verifyProofDocument(bytes, artifactSha256) {

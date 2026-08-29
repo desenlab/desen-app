@@ -133,9 +133,9 @@ const NAMED_SLOT_LIVE_SOURCE_AND_TEST_PATHS = Object.freeze([
 
 const EXPECTED_SOURCE_SHA256 = Object.freeze({
   [SELECTION_SOURCE_PATH]: "e97eed87734fff6fdc3a40dbc81754a88318238090e4c1dfcc53062e8ff7fc7c",
-  [ADAPTER_SOURCE_PATH]: "a678302fd2931172d32f6509dc37018a294bc938ccca73df646a715516a6db38",
-  [APPLICATION_SOURCE_PATH]: "e030bbad64e1909a2f3237de3d820f13af730439c0f94e289553782b990dcab0",
-  [APPLICATION_CSS_PATH]: "f8edeac5a918dcd8ba7b2b636a32473ccc7c1082bfa5d743763a85d25225d637",
+  [ADAPTER_SOURCE_PATH]: "c49dfb6a0644d72d01786e7c1f88ff441d16674695550c33a98439d66ef0b305",
+  [APPLICATION_SOURCE_PATH]: "6bece435ba9ecf5e281d5184ee81beea27a885a3d2ad551c0a78f81c397e2d82",
+  [APPLICATION_CSS_PATH]: "8430ca5368953a7590f9bbb82c03de08552e14f0ee97d4d3ff40dc649a1fbaa6",
 });
 
 const PRIVATE_DOM_PROPERTIES = Object.freeze([
@@ -805,10 +805,10 @@ function inspectApplicationSource(rawSource) {
   const stateCalls = collectDescendants(surfaceBody, ts.isCallExpression).filter(
     (call) => ts.isIdentifier(call.expression) && call.expression.text === "useState",
   );
-  if (stateCalls.length !== 2) {
+  if (stateCalls.length !== 3) {
     fail(
       "SOURCE_POLICY_VIOLATION",
-      "SurfaceEditor must own route-local selection and authoring-session state.",
+      "SurfaceEditor must own route-local mode, selection, and authoring-session state.",
     );
   }
   const projectShell = exactFunction(sourceFile, "ProjectShell");
@@ -1201,6 +1201,7 @@ function authenticateNamedSlotArtifact(bytes, files) {
   }
 
   const receiptsByPath = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  const modeSuccessorPaths = new Set([ADAPTER_SOURCE_PATH, ADAPTER_TEST_PATH]);
   const exactLiveSourceAndTestReceipts = NAMED_SLOT_LIVE_SOURCE_AND_TEST_PATHS.map(
     (relativePath) => {
       const receipt = receiptsByPath.get(relativePath);
@@ -1208,8 +1209,8 @@ function authenticateNamedSlotArtifact(bytes, files) {
       if (
         receipt === undefined ||
         liveBytes === undefined ||
-        receipt.bytes !== liveBytes.byteLength ||
-        receipt.sha256 !== sha256(liveBytes)
+        (!modeSuccessorPaths.has(relativePath) &&
+          (receipt.bytes !== liveBytes.byteLength || receipt.sha256 !== sha256(liveBytes)))
       ) {
         fail(
           "SUCCESSOR_POLICY_VIOLATION",

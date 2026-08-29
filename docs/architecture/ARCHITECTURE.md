@@ -1013,6 +1013,46 @@ execution. It adds no behavior-owner UI, Design/Run authority, durable persisten
 navigation, control-plane publication, channel activation, or real-browser E2E claim. P-08 remains
 `NOT_PROVEN`; PF-025 and PF-083 remain `OPEN`; M09-T10 owns the next Design/Run boundary.
 
+M09-T10 makes Design/Run an App-owned closed presentation and admission state over one immutable
+session-local `{document, preview}`. The same Source revision, Publisher Bundle revision, Runtime
+Core session, and managed Runtime React subtree remain authoritative in both modes. Mode is
+deliberately absent from the Runtime mount-effect identity, so switching modes neither mounts nor
+disposes Runtime authority and preserves Runtime-local state. It also preserves App-owned Source
+selection, active authoring view and search, and unapplied Inspector drafts; only transient drag
+intent is cleared, and a new surface route initializes Design again.
+
+Design disables the managed fieldset and admits only App-owned selection and authoring chrome. Run
+hides that chrome and its selection overlay while keeping drafts mounted, centrally rejects all
+seven authoring callback paths through the current mode reference, and enables the exact real
+adapter controls. The proven execution slice is intentionally narrow: the Email adapter event
+crosses the public Runtime React bridge into Runtime Core, executes the Source's closed `state.set`
+action, updates Runtime-local state, and rerenders the same managed subtree. The transition and
+interaction do not change Source or Bundle revision.
+
+The canvas retains its deny-only host boundary in Run: navigation, operation invocation, and
+resource loading are denied; storage reads and token resolution are missing; storage writes and
+activation commits conflict; diagnostics, clock, context, and environment stay bounded to the
+existing inert local implementations. Neither mode imports private Runtime, Editor, Publisher, or
+adapter internals, and no mode value can select executable code or a host binding.
+
+The T10 closure retains the M09-T07 authoring interaction architecture. Components resolves a
+placement target to the selected compatible named slot or a safe root default and exposes an
+explicit Layers target-change action. Layers enlarges non-overlapping slot/row drop lanes and keeps
+the last validator-admitted row projection for a coordinate-less drop event. A selected layer owns
+one visible Delete action and guarded Delete/Backspace shortcuts that ignore editable controls.
+These remain App-owned intent and presentation over the existing named-slot, cardinality, Editor
+Core, continuous-validator, and Publisher-preflight authorities; they do not introduce arbitrary
+canvas geometry, hit testing, managed-tree inspection, or native-browser drag evidence.
+
+M09-T10 therefore proves only the controlled sign-in `state.set` path on one in-memory session.
+P-09 advances to `PARTIAL`, not `PROVEN`; P-08 remains `NOT_PROVEN`; S-001 remains `PLANNED`; and
+PF-025, PF-028, and PF-083 remain `OPEN`. Fixtures, scenarios, and visible approximate-fidelity
+disclosure belong to M09-T11. Durable persistence, diagnostics navigation and placeholders,
+publication, activation, operation lifecycle, and automated real-browser E2E remain outside this
+boundary. Manual local browser QA covers the mode switch, Run interaction, automatic default
+placement target, visible Delete action, editable-control Backspace guard, and successful Delete
+shortcut only; it is not promoted to automated real-browser or native-drag E2E evidence.
+
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,
 proof, runtime, or protocol authority. Repository-owned TypeScript, React structure, CSS Modules,

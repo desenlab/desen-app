@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { StrictMode } from "react";
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { StrictMode, act } from "react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { setDesenEditorOwnerProp } from "@desen/editor-core";
@@ -88,8 +88,83 @@ describe("Desen App exact React adapter canvas", () => {
     expect(submit.matches(":disabled")).toBe(true);
     expect(within(canvas).queryByRole("alert")).toBeNull();
     expect(screen.getByText("Design preview · controls are disabled.")).toBeTruthy();
+    expect(canvas.getAttribute("data-adapter-canvas-mode")).toBe("design");
+    expect(canvas.getAttribute("data-adapter-interactions")).toBe("disabled");
     expect(document.querySelector("canvas")).toBeNull();
     expect(lifecycle.mounted).toHaveLength(1);
+  });
+
+  it("runs real adapter events on the same session and preserves state across mode changes", async () => {
+    const selection = componentSelection("sign-in.email", "com.example.ui/TextField", "Text field");
+    const view = render(
+      <DesenAdapterCanvas projectId="account-app" selection={selection} surfaceId="sign-in" />,
+    );
+
+    const designCanvas = await screen.findByRole("group", { name: "Sign-in adapter canvas" });
+    const managedSubtree = designCanvas.querySelector("[data-managed-capability-subtree='true']");
+    const session = lifecycle.mounted[0];
+    expect(session).toBeDefined();
+    expect(managedSubtree).toBeTruthy();
+    expect((designCanvas as HTMLFieldSetElement).disabled).toBe(true);
+    expect(screen.getByRole("status", { name: "Selected layer preview" })).toBeTruthy();
+
+    view.rerender(
+      <DesenAdapterCanvas
+        mode="run"
+        projectId="account-app"
+        selection={selection}
+        surfaceId="sign-in"
+      />,
+    );
+
+    const runCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    expect(runCanvas).toBe(designCanvas);
+    expect(runCanvas.querySelector("[data-managed-capability-subtree='true']")).toBe(
+      managedSubtree,
+    );
+    expect((runCanvas as HTMLFieldSetElement).disabled).toBe(false);
+    expect(runCanvas.getAttribute("data-adapter-canvas-mode")).toBe("run");
+    expect(runCanvas.getAttribute("data-adapter-interactions")).toBe("enabled");
+    expect(
+      screen.getByText(
+        "Run preview · real adapter controls are enabled; external effects remain denied.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
+    expect(lifecycle.mounted).toEqual([session]);
+    expect(lifecycle.disposed).toHaveLength(0);
+
+    const email = within(runCanvas).getByLabelText("Email") as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(email, { target: { value: "run-mode@example.test" } });
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(email.value).toBe("run-mode@example.test"));
+
+    view.rerender(
+      <DesenAdapterCanvas
+        mode="design"
+        projectId="account-app"
+        selection={selection}
+        surfaceId="sign-in"
+      />,
+    );
+
+    const restoredDesignCanvas = screen.getByRole("group", {
+      name: "Sign-in adapter canvas",
+    });
+    expect(restoredDesignCanvas).toBe(designCanvas);
+    expect(restoredDesignCanvas.querySelector("[data-managed-capability-subtree='true']")).toBe(
+      managedSubtree,
+    );
+    expect((restoredDesignCanvas as HTMLFieldSetElement).disabled).toBe(true);
+    expect(within(restoredDesignCanvas).getByLabelText("Email")).toHaveProperty(
+      "value",
+      "run-mode@example.test",
+    );
+    expect(screen.getByRole("status", { name: "Selected layer preview" })).toBeTruthy();
+    expect(lifecycle.mounted).toEqual([session]);
+    expect(lifecycle.disposed).toHaveLength(0);
   });
 
   it("fails closed for every unsupported project or surface without mounting sign-in", () => {

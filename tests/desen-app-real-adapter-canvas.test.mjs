@@ -384,8 +384,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[6], () => {
     ),
     replaceOnce(
       applicationSource,
-      "  const model = preparedModel.model;\n\n  return (\n    <section className={styles.surfaceEditor}",
-      '  const model = preparedModel.model;\n  if (import.meta.env.PROD) (selectedSurface as { id: string }).id = "sign-in";\n\n  return (\n    <section className={styles.surfaceEditor}',
+      "  const model = preparedModel.model;\n\n  return (",
+      '  const model = preparedModel.model;\n  if (import.meta.env.PROD) (selectedSurface as { id: string }).id = "sign-in";\n\n  return (',
     ),
   ]) {
     assert.throws(
@@ -469,8 +469,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[7], () => {
 
   const overlayInsideManagedSubtree = replaceOnce(
     adapterCanvasSource,
-    "        </div>\n      </fieldset>\n      <SelectionOverlay projection={projection} />",
-    "          <SelectionOverlay projection={projection} />\n        </div>\n      </fieldset>",
+    '        </div>\n      </fieldset>\n      {mode === "design" ? <SelectionOverlay projection={projection} /> : null}',
+    '          {mode === "design" ? <SelectionOverlay projection={projection} /> : null}\n        </div>\n      </fieldset>',
   );
   assert.throws(
     () =>

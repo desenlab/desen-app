@@ -955,6 +955,47 @@ P-08 `NOT_PROVEN`, PF-025 ve PF-083 `OPEN`, kanıt kapıları 10/13 kalır. Gene
 (%72), M09 ilerlemesi 9/14'tür (%64). Design/Run, durable save/open, diagnostics navigation,
 publication, activation ve gerçek-browser E2E sonraki sahiplerde kalır; sıradaki iş M09-T10'dur.
 
+M09-T10 artık `DONE`'dır. Kontrollü sign-in yüzeyi tek bir App-owned Design/Run kontrolü kullanır;
+iki mod da aynı immutable session-local `{document, preview}` çiftini, Source ve Bundle revision'ını,
+Runtime session'ını ve managed Runtime React subtree'sini paylaşır. Mode, Runtime mount identity'ye
+girmez; dolayısıyla geçiş remount/dispose üretmez ve Runtime local state'i korur. Source selection,
+aktif authoring görünümü ve araması ile uygulanmamış Inspector taslakları da korunur; yalnızca geçici
+drag intent temizlenir. Yeni bir surface route Design modunda başlar.
+
+Design modunda gerçek adapter kontrolleri disabled kalır ve App-owned selection/authoring açıktır.
+Run modunda authoring panelleri ile selection overlay gizlenir, elde tutulmuş yedi authoring callback
+merkezî mode guard'ı tarafından reddedilir ve gerçek adapter etkileşimi açılır. Kanıtlanan yürütme
+yolu yalnızca gerçek adapter event'i → Runtime React → Runtime Core → kapalı `state.set` action'ı →
+aynı managed subtree'nin yeniden render edilmesidir. Navigation, operation ve resource port'ları
+deny-only; storage/token sınırları missing, conflict veya inert kalır. Source ya da Bundle revision'ı
+değişmez.
+
+T10 kapanışı M09-T07 authoring UX sağlamlaştırmasını da korur: Components sürüklemesi güvenli root
+varsayılan hedefi ve açık Layers hedef-değiştirme eylemini kullanır; Layers daha geniş bırakma
+aralıkları gösterir ve drop anında koordinat yoksa son geçerli satır projeksiyonunu korur; seçili
+layer görünür Delete eylemi ile editable kontroller dışında korumalı Delete/Backspace kısayollarını
+sunur. Named-slot, cardinality ve continuous-validator authority değişmez. Bu, arbitrary canvas
+geometry, hit-testing veya drop kanıtı değildir.
+
+Adapter 9/9, application 35/35, focused `test:design-run` 44/44, complete App 210/210 ve independent
+root proof 10/10 geçer. Exact artifact 17.900 byte'tır:
+`docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json`,
+`sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`. Yerel CI authority 192
+workload/91 proof pair'dir (80 ordinary + 11 barrier); connected closure 58 proof unit/126 workload,
+ownership 1.218 tracked/182 proof-owned path'tir. Append-only sequence 49, 45 artifact ve 90
+reader'ı `sha256:18677ff5d4b734d4fdcb7839f704b72298376091dc9d50eec1edfd31611dc635`
+başında doğrular. Checkpoint, promotion ve complete serial structural suite'ler sırasıyla 72/72,
+19/19 ve 339/339 geçer.
+
+Yerel browser'da mode geçişi ve Run etkileşimi ile otomatik varsayılan yerleştirme hedefi, görünür
+Delete eylemi, editable-control Backspace guard'ı ve başarılı Delete kısayolu manuel olarak kontrol
+edildi; bu, otomatik gerçek-browser veya native-drag E2E kanıtı değildir. P-09 yalnızca kontrollü
+`state.set` yolu için `PARTIAL` olur; P-08 `NOT_PROVEN`, S-001 `PLANNED`, PF-025, PF-028 ve PF-083
+`OPEN`, kanıt kapıları 10/13 kalır. Genel ilerleme 105/145 (%72), M09 ilerlemesi 10/14'tür (%71).
+Fixture, scenario, görünür approximate-fidelity disclosure, durable save/open, diagnostics
+navigation/placeholders, publication, activation ve otomatik gerçek-browser E2E sonraki sahiplerde
+kalır; sıradaki iş M09-T11'dir.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

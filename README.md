@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████████░░░░░░░` **104 / 145 tasks complete (72%)**
+**Overall:** `██████████████████░░░░░░░` **105 / 145 tasks complete (72%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `█████████░░░░░` **9 / 14 tasks complete (64%)**
+**M09:** `██████████░░░░` **10 / 14 tasks complete (71%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T10`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T11`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -881,6 +881,49 @@ M09-T09 is `DONE`; implementation progress is 104/145 (72%), M09 is 9/14 (64%), 
 remain 10/13. P-08 remains `NOT_PROVEN`; PF-025 and PF-083 remain `OPEN`. Action execution,
 Design/Run, durable save/open, real-browser E2E, publication, and activation remain unclaimed.
 M09-T10 is next.
+
+M09-T10 adds one accessible App-owned Design/Run control to the controlled sign-in surface. Both
+modes retain the same immutable session-local `{document, preview}`, Source revision, Bundle
+revision, Runtime session, and managed Runtime React subtree because mode is excluded from Runtime
+mount identity. A toggle therefore preserves Runtime local state, Source selection, the active
+authoring view and search, and unapplied Inspector drafts; it clears only transient drag intent. A
+new surface route starts in Design.
+
+Design keeps the exact adapter controls disabled and admits App-owned selection and authoring. Run
+hides the authoring panels and selection overlay, centrally rejects every retained authoring
+callback, enables the real adapter, and proves the exact adapter event → Runtime React → Runtime
+Core → closed `state.set` → same-subtree rerender path. Navigation, operation, and resource ports
+remain denied; storage and token ports remain missing, conflicting, or inert.
+
+The T10 closure retains the M09-T07 UX hardening: Components drag uses a root-safe default target
+and an explicit target-change action; Layers uses enlarged drop lanes and retains the last valid
+row projection through drop; and the selected layer exposes a visible Delete action plus guarded
+Delete/Backspace shortcuts outside editable controls. Named-slot, cardinality, and validator
+authority remain unchanged. This is not an arbitrary canvas geometry, hit-testing, or drop claim.
+
+The adapter and application suites pass 9/9 and 35/35, the local focused Design/Run suite passes
+44/44, the complete App suite passes 210/210, and the independent root proof passes 10/10. Exact
+evidence is the `17,900`-byte
+[`desen-app-0.1.0-design-run-modes.json`](docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json)
+at `sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`; the reviewed report is
+[`DESEN-APP-DESIGN-RUN-MODES.md`](docs/proof/DESEN-APP-DESIGN-RUN-MODES.md). Its frozen proof and
+root readers are 53,346 bytes/
+`sha256:ff4226241630daded979263dcd0a7fdb071591efbf789d1e7d2d4f4641779dfe` and 15,787 bytes/
+`sha256:d27307b0763132e5c21f45c146d3773ab9dbf02371f850dca3d03e11a759f601`. The live local CI
+authority contains 192 workloads and 91 proof pairs—80 ordinary and 11 barriers—with a
+58-proof-unit/126-workload closure and 1,218 tracked/182 proof-owned paths. Sequence 49 contains
+45 artifacts and 90 readers at
+`sha256:18677ff5d4b734d4fdcb7839f704b72298376091dc9d50eec1edfd31611dc635`. The checkpoint,
+promotion, and complete serial structural suites pass 72/72, 19/19, and 339/339.
+
+Manual browser QA exercised the mode switch and Run interaction plus the automatic default
+placement target, visible Delete action, editable-control Backspace guard, and successful Delete
+shortcut, but it is not automated real-browser or native-drag E2E evidence. M09-T10 is `DONE`;
+implementation progress is 105/145 (72%), M09 is 10/14 (71%), and proof gates remain 10/13. P-09
+advances only to `PARTIAL` for the exact controlled `state.set` path. P-08 remains `NOT_PROVEN`,
+S-001 remains `PLANNED`, and PF-025, PF-028, and PF-083 remain `OPEN`. Fixtures, scenarios, visible
+approximate-fidelity disclosure, durable save/open, diagnostics navigation, publication,
+activation, and automated real-browser E2E remain unclaimed. M09-T11 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

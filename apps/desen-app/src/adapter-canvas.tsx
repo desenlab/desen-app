@@ -144,12 +144,14 @@ function SelectionOverlay({
 function ManagedAdapterSurface({
   authoringModel,
   input,
+  mode,
   projectId,
   selection,
   surfaceId,
 }: Readonly<{
   readonly authoringModel: CatalogAuthoringModel;
   readonly input: RuntimeReactLiveSurfaceInput;
+  readonly mode: DesenAdapterCanvasMode;
   readonly projectId: string;
   readonly selection: AuthoringComponentSelection | null;
   readonly surfaceId: string;
@@ -173,8 +175,10 @@ function ManagedAdapterSurface({
     <>
       <fieldset
         className={styles.adapterCanvasManaged}
+        data-adapter-canvas-mode={mode}
+        data-adapter-interactions={mode === "run" ? "enabled" : "disabled"}
         data-managed-capability-frame="true"
-        disabled
+        disabled={mode === "design"}
         style={REFERENCE_WEB_TOKEN_CSS_PROPERTIES}
       >
         <legend className={styles.adapterCanvasLegend}>Sign-in adapter canvas</legend>
@@ -182,7 +186,7 @@ function ManagedAdapterSurface({
           <RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />
         </div>
       </fieldset>
-      <SelectionOverlay projection={projection} />
+      {mode === "design" ? <SelectionOverlay projection={projection} /> : null}
     </>
   );
 }
@@ -203,12 +207,17 @@ function CanvasLoading() {
   );
 }
 
-/** Exact interaction-disabled React-adapter canvas for the controlled account sign-in draft. */
+/** Closed interaction mode for the exact controlled React-adapter canvas. */
+export type DesenAdapterCanvasMode = "design" | "run";
+
+/** Exact React-adapter canvas for the controlled account sign-in draft. */
 export interface DesenAdapterCanvasProps {
   /** Current validated authoring projection used only for Source-identity overlay admission. */
   readonly authoringModel?: CatalogAuthoringModel;
   /** Current immutable preview Bundle; omission preserves the controlled baseline fixture. */
   readonly bundle?: unknown;
+  /** Interaction presentation; omission keeps the safe interaction-disabled Design default. */
+  readonly mode?: DesenAdapterCanvasMode;
   /** Exact App project route identity. */
   readonly projectId: string;
   /** Optional App-owned Source selection containing no runtime or platform authority. */
@@ -222,11 +231,13 @@ export interface DesenAdapterCanvasProps {
  *
  * @remarks The App supplies no managed component tree and accepts only the exact controlled route.
  * Baseline callers may omit `bundle`; authoring callers pass a Publisher-produced session draft.
+ * Design and Run share one Bundle/session lifetime; changing mode cannot remount Runtime authority.
  * Other project/surface tuples fail closed without mounting or substituting the sign-in surface.
  */
 export function DesenAdapterCanvas({
   authoringModel = REFERENCE_AUTHORING_MODEL,
   bundle = officialDerivedSignInBundle,
+  mode = "design",
   projectId,
   selection = null,
   surfaceId,
@@ -308,12 +319,21 @@ export function DesenAdapterCanvas({
   if (state.status === "failed") return <CanvasUnavailable />;
 
   return (
-    <div className={styles.adapterCanvas}>
-      <p className={styles.adapterCanvasNote}>Design preview · controls are disabled.</p>
+    <div
+      className={styles.adapterCanvas}
+      data-adapter-canvas-mode={mode}
+      data-adapter-interactions={mode === "run" ? "enabled" : "disabled"}
+    >
+      <p className={styles.adapterCanvasNote} data-adapter-canvas-status={mode}>
+        {mode === "design"
+          ? "Design preview · controls are disabled."
+          : "Run preview · real adapter controls are enabled; external effects remain denied."}
+      </p>
       <div className={styles.adapterCanvasViewport}>
         <ManagedAdapterSurface
           authoringModel={authoringModel}
           input={state.input}
+          mode={mode}
           projectId={projectId}
           selection={selection}
           surfaceId={surfaceId}

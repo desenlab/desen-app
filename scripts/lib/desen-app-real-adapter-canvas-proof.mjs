@@ -343,7 +343,9 @@ const EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
   "balances StrictMode replay and final unmount with exact session disposal",
 ]);
 const CURRENT_EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
-  ...EXPECTED_ADAPTER_TEST_NAMES.slice(0, 3),
+  EXPECTED_ADAPTER_TEST_NAMES[0],
+  "runs real adapter events on the same session and preserves state across mode changes",
+  ...EXPECTED_ADAPTER_TEST_NAMES.slice(1, 3),
   "replaces the exact session when a current authoring draft Bundle is rerendered",
   EXPECTED_ADAPTER_TEST_NAMES[3],
   "renders Source-identity selection chrome as a sibling outside the managed subtree",
@@ -1334,6 +1336,8 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     isWithin(selectionOverlays[0], fieldsetElement) ||
     !isDeepStrictEqual(fieldsetAttributeNames, [
       "className",
+      "data-adapter-canvas-mode",
+      "data-adapter-interactions",
       "data-managed-capability-frame",
       "disabled",
       "style",
@@ -1342,17 +1346,19 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     !isDeepStrictEqual(overlayAttributeNames, ["projection"]) ||
     !managedText.includes('data-managed-capability-frame="true"') ||
     !managedText.includes('data-managed-capability-subtree="true"') ||
-    !managedText.includes("disabled") ||
+    !managedText.includes("data-adapter-canvas-mode={mode}") ||
+    !managedText.includes('data-adapter-interactions={mode === "run" ? "enabled" : "disabled"}') ||
+    !managedText.includes('disabled={mode === "design"}') ||
     !managedText.includes("style={REFERENCE_WEB_TOKEN_CSS_PROPERTIES}") ||
     !managedText.includes("diagnosticIndex: result.surface.diagnosticIndex") ||
     !managedText.includes(
       "<RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />",
     ) ||
-    !managedText.includes("<SelectionOverlay projection={projection} />")
+    !managedText.includes('mode === "design" ? <SelectionOverlay projection={projection} /> : null')
   ) {
     fail(
       "SOURCE_POLICY_VIOLATION",
-      "Selection chrome must remain a diagnostic-index projection sibling outside the disabled managed subtree.",
+      "Selection chrome must remain a Design-only diagnostic-index sibling outside the mode-controlled managed subtree.",
     );
   }
 
@@ -1383,7 +1389,8 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     "if (!supported) return <CanvasUnavailable />",
     "state.routeIdentity !== routeIdentity",
     "selection = null",
-    "<ManagedAdapterSurface authoringModel={authoringModel} input={state.input} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
+    'mode = "design"',
+    "<ManagedAdapterSurface authoringModel={authoringModel} input={state.input} mode={mode} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
     "disposeRuntimeHeadlessSession(session)",
   ]) {
     if (!canvasText.includes(requiredText)) {
@@ -1438,14 +1445,16 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       !isDeepStrictEqual(canvasAttributeNames, [
         "authoringModel",
         "bundle",
+        "mode",
         "projectId",
         "selection",
         "surfaceId",
       ]) ||
       !canvasElementText.includes("authoringModel={model}") ||
       !canvasElementText.includes("bundle={preview.ok ? preview.bundle : null}") ||
+      !canvasElementText.includes("mode={mode}") ||
       !canvasElementText.includes("projectId={project.id}") ||
-      !canvasElementText.includes("selection={selection}") ||
+      !canvasElementText.includes('selection={mode === "design" ? selection : null}') ||
       !canvasElementText.includes("surfaceId={selectedSurface.id}")
     ) {
       fail("SOURCE_POLICY_VIOLATION", "The App canvas lost its exact selected route tuple.");
@@ -2092,7 +2101,9 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
   );
   const slotTests = decodeUtf8(files.get(AUTHORING_SLOT_TEST_PATH), AUTHORING_SLOT_TEST_PATH);
   const applicationTests = decodeUtf8(files.get(APPLICATION_TEST_PATH), APPLICATION_TEST_PATH);
+  const modeSuccessorPaths = new Set([ADAPTER_CANVAS_SOURCE_PATH, ADAPTER_CANVAS_TEST_PATH]);
   for (const receipt of sourceAndTestReceipts) {
+    if (modeSuccessorPaths.has(receipt.path)) continue;
     const bytes = files.get(receipt.path);
     if (
       bytes === undefined ||
@@ -2220,6 +2231,9 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     atomicDeletionPreviewAndFocusImplemented: true,
     exactArtifactSourceAndTestReceipts: true,
     artifactSourceAndTestReceiptCount: sourceAndTestReceipts.length,
+    retainedLiveArtifactSourceAndTestReceiptCount:
+      sourceAndTestReceipts.length - modeSuccessorPaths.size,
+    modeSuccessorSemanticPaths: [...modeSuccessorPaths].sort(),
   });
 }
 

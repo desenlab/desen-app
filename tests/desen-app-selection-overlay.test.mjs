@@ -326,8 +326,8 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       ...baseline,
       adapterSource: replaceOnce(
         adapterSource,
-        "      </fieldset>\n      <SelectionOverlay projection={projection} />",
-        "        <SelectionOverlay projection={projection} />\n      </fieldset>",
+        '      </fieldset>\n      {mode === "design" ? <SelectionOverlay projection={projection} /> : null}',
+        '        {mode === "design" ? <SelectionOverlay projection={projection} /> : null}\n      </fieldset>',
       ),
     },
     {

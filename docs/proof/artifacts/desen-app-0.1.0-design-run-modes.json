@@ -1,0 +1,379 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-design-run-modes",
+  "profile": "desen.app.design-run-modes-proof.v1",
+  "task": "M09-T10",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M09-T03",
+      "proofId": "desen-app-real-adapter-canvas",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json",
+      "bytes": 73111,
+      "sha256": "8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151",
+      "profile": "desen.app.real-adapter-canvas-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T08",
+      "proofId": "desen-app-state-binding-editor",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json",
+      "bytes": 28766,
+      "sha256": "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
+      "profile": "desen.app.state-binding-editor-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T09",
+      "proofId": "desen-app-event-action-editor",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json",
+      "bytes": 23812,
+      "sha256": "0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab",
+      "profile": "desen.app.event-action-editor-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "oneImmutableSourceAndBundleSession": true,
+    "modeExcludedFromRuntimeMountIdentity": true,
+    "zeroRuntimeRemountOrDisposeOnToggle": true,
+    "sameManagedCapabilitySubtreeOnToggle": true,
+    "designControlsDisabled": true,
+    "designSelectionAndAuthoringOnly": true,
+    "runAdapterEventToRuntimeStateSet": true,
+    "runStateSetRerendersAdapter": true,
+    "sourceRevisionUnchangedOnToggle": true,
+    "bundleRevisionUnchangedOnToggle": true,
+    "centralAuthoringGuardsInRun": true,
+    "allExternalHostPortsDeniedOrInert": true,
+    "accessibleModeControl": true,
+    "fixturesAndScenariosClaimed": false,
+    "persistenceClaimed": false,
+    "diagnosticsClaimed": false,
+    "publicationClaimed": false,
+    "activationClaimed": false,
+    "browserE2eClaimed": false,
+    "p08Status": "NOT_PROVEN",
+    "p09Status": "PARTIAL",
+    "pf025Status": "OPEN",
+    "pf028Status": "OPEN",
+    "pf083Status": "OPEN"
+  },
+  "authority": {
+    "protocolProfiles": {
+      "design": "App selection and authoring chrome; Runtime controls disabled",
+      "run": "exact public adapter event through Runtime React/Core action execution",
+      "session": "one immutable {document, preview} with the same Source and Bundle revision",
+      "lifecycle": "mode excluded from Runtime mount-effect identity",
+      "hostPorts": "navigation, operations, resources denied; storage/tokens missing or conflict"
+    },
+    "source": {
+      "adapter": {
+        "modes": [
+          "design",
+          "run"
+        ],
+        "designDefault": true,
+        "oneRuntimeSessionAcrossModeToggle": true,
+        "modeExcludedFromMountEffectIdentity": true,
+        "sameManagedCapabilitySubtree": true,
+        "designControlsDisabled": true,
+        "designSelectionOverlayOnly": true,
+        "runAdapterInteractionsEnabled": true,
+        "exactPublicRuntimeReactBoundary": true,
+        "hostPortsDeniedOrInert": true,
+        "externalEffectsDenied": true
+      },
+      "application": {
+        "modeState": "App-owned closed union",
+        "oneImmutableAuthoringSession": true,
+        "sameDocumentAndPreviewAcrossToggle": true,
+        "exactBundleRevisionUnchanged": true,
+        "exactSourceRevisionUnchanged": true,
+        "centralRunModeAuthoringGuards": true,
+        "runSelectionSuppressed": true,
+        "runPanelsMountedButNoninteractive": true,
+        "accessiblePressedModeControl": true,
+        "liveSafetyStatus": true
+      },
+      "inspector": {
+        "hiddenAdmissionExplicit": true,
+        "runMutationControlsUnreachable": true,
+        "modeTogglePreservesUnappliedDraft": true,
+        "remainsAppOwnedChrome": true
+      },
+      "css": {
+        "visibleModeControl": true,
+        "explicitRunPresentation": true,
+        "noManagedCapabilityTreeOwnership": true
+      }
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/adapter-canvas.test.tsx test/application.test.tsx",
+      "rootCommands": {
+        "generate:desen-app-design-run-modes": "node scripts/verify-desen-app-real-adapter-canvas.mjs && node scripts/verify-desen-app-state-binding-editor.mjs && node scripts/verify-desen-app-event-action-editor.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:design-run && node scripts/generate-desen-app-design-run-modes-proof.mjs",
+        "verify:desen-app-design-run-modes": "node scripts/verify-desen-app-real-adapter-canvas.mjs && node scripts/verify-desen-app-state-binding-editor.mjs && node scripts/verify-desen-app-event-action-editor.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:design-run && node scripts/verify-desen-app-design-run-modes.mjs",
+        "test:desen-app-design-run-modes": "node scripts/verify-desen-app-real-adapter-canvas.mjs && node scripts/verify-desen-app-state-binding-editor.mjs && node scripts/verify-desen-app-event-action-editor.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:design-run && node --test tests/desen-app-design-run-modes.test.mjs"
+      },
+      "parentsAuthenticatedInsideReader": true
+    },
+    "modeFlow": [
+      "one App-owned closed Design/Run state",
+      "same immutable authoring Source and Publisher Bundle session",
+      "mode excluded from Runtime session mount identity",
+      "Design disables managed controls and admits selection/authoring",
+      "Run suppresses selection and centrally rejects authoring",
+      "Run adapter event enters Runtime React then Runtime Core",
+      "closed state.set action updates Runtime local state",
+      "Runtime React rerenders the same managed capability subtree"
+    ],
+    "ownership": {
+      "modeControl": "Desen App sibling chrome",
+      "selectionOverlay": "Design-only App sibling chrome",
+      "managedCapabilitySubtree": "exact Runtime React adapter output",
+      "execution": "Runtime Core through public Runtime React bridge"
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/app-web test:design-run && node --test tests/desen-app-design-run-modes.test.mjs",
+    "appTestNames": {
+      "apps/desen-app/test/adapter-canvas.test.tsx": [
+        "renders the official-derived sign-in only through the shared real adapters",
+        "runs real adapter events on the same session and preserves state across mode changes",
+        "fails closed for every unsupported project or surface without mounting sign-in",
+        "removes a previous tree synchronously and disposes the exact route session",
+        "replaces the exact session when a current authoring draft Bundle is rerendered",
+        "balances StrictMode replay and final unmount with exact session disposal",
+        "renders Source-identity selection chrome as a sibling outside the managed subtree",
+        "keeps a selected conditional Source node honest when it is not materialized",
+        "rejects stale and cross-route selection identities without exposing overlay chrome"
+      ],
+      "apps/desen-app/test/application.test.tsx": [
+        "renders an app-native projects gallery with explicit landmarks and current navigation",
+        "filters only the fixed project inventory and provides a clear recovery action",
+        "uses same-document navigation and focuses the new route heading",
+        "reacts to browser traversal and keeps route focus inside the content landmark",
+        "renders the editable Source hierarchy and keeps the exact managed adapter canvas read only",
+        "selects Source layers accessibly and keeps the identity overlay outside managed adapters",
+        "chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
+        "deletes a newly inserted selected layer with %s outside editable controls",
+        "ignores deletion shortcuts from editable controls while retaining the selected layer",
+        "disables deletion for the surface root and a slot-minimum preflight without changing preview",
+        "preserves the selected layer, preview, and focus when deletion is rejected",
+        "uses only the App-owned drag intent and ignores forged native transfer authority",
+        "reorders a selected Source node through the keyboard placement control",
+        "snaps a native layer drag to the before or after half of a visible layer row",
+        "drops from a visible row with the last admitted projection when drop coordinates are absent",
+        "moves nodes across nested slots with keyboard and App-owned native drag intent",
+        "edits schema-derived string and enum props and refreshes the exact adapter preview",
+        "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
+        "updates surface-local state and changes a compatible binding in the live preview",
+        "keeps bound props explicit while boolean and numeric edits fail or apply atomically",
+        "resets local drafts across Source identities and qualifies repeated edit actions",
+        "switches to the exact Catalog component library and filters only the local view",
+        "commits sign-in event handlers and complete actions through the live authoring session",
+        "keeps the prior event projection and canvas when action preview preflight fails",
+        "switches modes accessibly while preserving selection, authoring views, and local drafts",
+        "rejects stale hidden authoring callbacks while Run interactions leave Source unchanged",
+        "resets the ephemeral mode to Design when a new surface route mounts",
+        "does not substitute the sign-in Source tree or adapter canvas for another preview surface",
+        "removes the managed sign-in tree synchronously when routing to an unsupported surface",
+        "guides a catalog-less project without inventing a surface or enabled action",
+        "fails closed for $pathname"
+      ]
+    },
+    "rootTestNames": [
+      "[authority] authenticates the exact T03, T08, and T09 parents",
+      "[session] proves one immutable Source and Bundle across both modes",
+      "[lifecycle] proves mode is excluded from Runtime mount identity",
+      "[design] proves interaction-disabled selection and authoring only",
+      "[run] proves adapter event to Runtime state action and rerender",
+      "[safety] proves revision stability, central guards, and denied host ports",
+      "[tests] pins accessible mode behavior, exclusions, and package commands",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[policy] rejects weakened mode, lifecycle, execution, and authoring sources",
+      "[verification] rejects parents, artifact, report, and filesystem authority drift"
+    ],
+    "localCommandReceipts": {
+      "adapter": {
+        "command": "pnpm --filter @desen/app-web exec vitest run test/adapter-canvas.test.tsx",
+        "result": "PASS",
+        "testFiles": 1,
+        "tests": 9
+      },
+      "application": {
+        "command": "pnpm --filter @desen/app-web exec vitest run test/application.test.tsx",
+        "result": "PASS",
+        "testFiles": 1,
+        "tests": 35
+      },
+      "focusedDesignRun": {
+        "command": "pnpm --filter @desen/app-web test:design-run",
+        "result": "PASS",
+        "testFiles": 2,
+        "tests": 44
+      },
+      "fullApp": {
+        "command": "pnpm --filter @desen/app-web test",
+        "result": "PASS",
+        "testFiles": 15,
+        "tests": 210
+      },
+      "rootProof": {
+        "command": "node --test tests/desen-app-design-run-modes.test.mjs",
+        "result": "PASS",
+        "testFiles": 1,
+        "tests": 10
+      }
+    },
+    "semanticCoverage": [
+      "ONE_IMMUTABLE_SOURCE_AND_BUNDLE_SESSION",
+      "MODE_EXCLUDED_FROM_RUNTIME_MOUNT_IDENTITY",
+      "ZERO_REMOUNT_OR_DISPOSE_ON_TOGGLE",
+      "SAME_MANAGED_CAPABILITY_SUBTREE",
+      "DESIGN_INTERACTIONS_DISABLED_AND_SELECTION_ONLY",
+      "RUN_ADAPTER_EVENT_TO_RUNTIME_STATE_SET_RERENDER",
+      "SOURCE_AND_BUNDLE_REVISION_STABLE",
+      "CENTRAL_RUN_AUTHORING_GUARDS",
+      "ALL_EXTERNAL_HOST_PORTS_DENIED_OR_INERT",
+      "ACCESSIBLE_DESIGN_RUN_CONTROL",
+      "FIXTURE_PERSISTENCE_DIAGNOSTICS_PUBLICATION_E2E_EXCLUDED"
+    ]
+  },
+  "boundary": {
+    "trackedFiles": 20,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 2686,
+        "sha256": "bf39a240b872fb4ef422fa93a4f124907cbcac61359bf8139ea3f684b4420f22"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 11830,
+        "sha256": "c49dfb6a0644d72d01786e7c1f88ff441d16674695550c33a98439d66ef0b305"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 69428,
+        "sha256": "e24ccfe21a38a7beabd8ed351bbdb67c2c78382144b9b3a2ad33eabf9a51e21b"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 75892,
+        "sha256": "ad1027d32cdb9a9a9501c815d2ef4be4b75d346aaaff4379358e5ca5fae9c969"
+      },
+      {
+        "path": "apps/desen-app/src/inspector-panel.tsx",
+        "bytes": 27902,
+        "sha256": "9ff88328b2b9a29cb67844aa525953f321e757225ff2026e5feb90d1efe148fb"
+      },
+      {
+        "path": "apps/desen-app/test/adapter-canvas.test.tsx",
+        "bytes": 14477,
+        "sha256": "399f8cc6831c638aedf00524e598bca4c4102713894ec0c5110e13aa2b2fedaf"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 79011,
+        "sha256": "203eca1931f586e81785aaf191e5588b0c8e1e188648d7c2ca5317da1257757f"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json",
+        "bytes": 23812,
+        "sha256": "0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json",
+        "bytes": 73111,
+        "sha256": "8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json",
+        "bytes": 28766,
+        "sha256": "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a"
+      },
+      {
+        "path": "examples/sign-in/official-derived.bundle.desen.json",
+        "bytes": 4899,
+        "sha256": "334450fa1864bf280a30342090a46ba1d2f2dc96552b9430afdde5fcada902b0"
+      },
+      {
+        "path": "examples/sign-in/official-derived.source.desen.json",
+        "bytes": 4724,
+        "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+      },
+      {
+        "path": "package.json",
+        "bytes": 92281,
+        "sha256": "ba0affa5c1be20d04b41d55b10170a066090e709afbb5445f9d40565d961282d"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129394,
+        "sha256": "463a35abf13fd9ba6acb897aca52a11e7a90c8fcfedbce085e82f89c23418d89"
+      },
+      {
+        "path": "scripts/generate-desen-app-design-run-modes-proof.mjs",
+        "bytes": 777,
+        "sha256": "aa6c36f1b67d2dea784a99958238fd52cfc30b8226a6c6ea42dc9abae8b1ddec"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-design-run-modes-proof.mjs",
+        "bytes": 53346,
+        "sha256": "ff4226241630daded979263dcd0a7fdb071591efbf789d1e7d2d4f4641779dfe"
+      },
+      {
+        "path": "scripts/verify-desen-app-design-run-modes.mjs",
+        "bytes": 782,
+        "sha256": "003ad511069c9f3f7de8f58bfc736561a1223ce7bca3a22a159867dbf2c88089"
+      },
+      {
+        "path": "tests/desen-app-design-run-modes.test.mjs",
+        "bytes": 15787,
+        "sha256": "d27307b0763132e5c21f45c146d3773ab9dbf02371f850dca3d03e11a759f601"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-design-run-modes-proof.mjs",
+      "scripts/generate-desen-app-design-run-modes-proof.mjs",
+      "scripts/verify-desen-app-design-run-modes.mjs",
+      "tests/desen-app-design-run-modes.test.mjs"
+    ],
+    "parentArtifacts": 3,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M09-T10 proves only the controlled sign-in Design/Run slice on one in-memory session.",
+    "Fixtures and scenarios remain M09-T11; no operation fixture or scenario orchestration is claimed.",
+    "M09-T12 is NOT_PROVEN: no save/open or durable persistence UI is claimed.",
+    "M09-T13 is NOT_PROVEN: no node-linked diagnostics navigation or placeholder UI is claimed.",
+    "M09-T14 is NOT_PROVEN: no control-plane publication or channel activation is claimed.",
+    "G09 and real-browser E2E remain NOT_PROVEN.",
+    "P-08 remains NOT_PROVEN until persistence, publication, and browser-E2E owners pass.",
+    "P-09 is PARTIAL: state.set is exercised; operation lifecycle remains a later owner.",
+    "PF-025, PF-028, and PF-083 remain OPEN; Design/Run presentation does not provide operation fixtures or amend protocol vocabulary.",
+    "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence."
+  ]
+}

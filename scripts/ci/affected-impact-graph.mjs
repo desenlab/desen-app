@@ -165,12 +165,20 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
       "desen-app-event-action-editor",
       ["desen-app-state-binding-editor", "editor-core-event-action-edits"],
     ],
+    [
+      "desen-app-design-run-modes",
+      [
+        "desen-app-real-adapter-canvas",
+        "desen-app-state-binding-editor",
+        "desen-app-event-action-editor",
+      ],
+    ],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "523d219c845502bfbcf2c51cf773b34ce62d261e41d2f9e1dfac9cffe6cbd197";
+  "4476d5162c2457d991d17c5c9cb450a838c8b084abff634b8fa4195f89465602";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

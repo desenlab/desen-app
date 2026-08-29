@@ -78,8 +78,10 @@ const TRACKED_PATHS = Object.freeze([
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ROOT_PACKAGE_PATH,
   APP_PACKAGE_PATH,
+  ADAPTER_SOURCE_PATH,
   APPLICATION_SOURCE_PATH,
   APPLICATION_CSS_PATH,
+  ADAPTER_TEST_PATH,
   APPLICATION_TEST_PATH,
   "scripts/lib/desen-app-named-slot-authoring-proof.mjs",
   "tests/desen-app-named-slot-authoring.test.mjs",
