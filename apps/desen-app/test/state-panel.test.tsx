@@ -103,7 +103,7 @@ describe("Desen App local state panel", () => {
         .disabled,
     ).toBe(false);
     expect(screen.getByRole("status").textContent).toBe(
-      "State edits stay in this session until save is implemented.",
+      "State edits remain local until Save source succeeds.",
     );
     expect(onEdit).not.toHaveBeenCalled();
   });

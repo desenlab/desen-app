@@ -6,10 +6,11 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T11 adds transient Catalog scenarios, exact synthetic operation fixtures, and visible adapter
-fidelity disclosure while keeping scenario, fixture, mode, event, state, binding, selection, and
-every other authoring control in the application-owned shell outside the exact React adapter
-canvas.
+M09-T12 adds Design-only authored Source Open/Save through a trusted-host-injected public Editor
+Core persistence port. It retains M09-T11's transient Catalog scenarios, exact synthetic operation
+fixtures, and visible adapter fidelity while keeping persistence, scenario, fixture, mode, event,
+state, binding, selection, and every other authoring control in the application-owned shell outside
+the exact React adapter canvas.
 The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
@@ -63,6 +64,23 @@ The current product surface contains:
   never read, logged, or retained;
 - persistent `same`, `equivalent`, `approximate`, or `undeclared` adapter-fidelity disclosure that
   lists every known approximate difference;
+- one fixed route-owned `account-app-source` persistence identity independent of `Source.id`, with
+  an injected public `DesenEditorPersistencePort` and no App-owned concrete storage adapter;
+- Design-only Open/Save controls with visible generation, dirty, pending, conflict, uncertainty,
+  exhaustion, and reopen-required states;
+- all-or-nothing stored Source, Catalog, surface, and publishable-preview admission before an Open
+  can replace the current authored session;
+- generation-guarded create, update, and unchanged saves with no automatic retry or merge, plus an
+  explicit reopen requirement after conflict, exhaustion, or indeterminate commit;
+- exact own-enumerable settlement capture without accessor invocation, fresh frozen copies of valid
+  optional diagnostic pointer/context/subject data, and validated CAS generation relationships;
+- retryable draft-preserving failure for malformed Open, indeterminate/reopen lock for malformed
+  Save, and post-reflection/post-admission token fences against reentrant edit or disposal;
+- complete authored Source canonical-content dirty authority with same-value/revert cleanliness,
+  Open/Save baselines, and current-versus-dispatched-save-snapshot settlement;
+- centralized canonical baseline/current tracking with a rerender-safe no-port projection that
+  labels pristine state `Local draft unchanged` while guarding edited no-port and port-backed dirty
+  drafts across navigation, traversal, and page exit;
 - deny-only navigation, operation, and resource ports plus missing, conflicting, or inert storage,
   token, diagnostics, clock, context, and environment boundaries;
 - route-local Source-node selection admitted only from the validated authoring model and projected
@@ -238,12 +256,13 @@ controller, and preview replacement prevents a predecessor from publishing late 
 
 This slice does not expose component rectangles, hit testing, canvas picking, private DOM/native
 structure, or managed-tree inspection. It does not edit repeat/resource bindings or behavior-owned
-event handlers; persist project data; create user projects; navigate diagnostics; publish to the
-control plane; or activate a channel. Durable save/open belongs to M09-T12, diagnostics to M09-T13,
-and publication or activation to M09-T14. Catalog control hints remain opaque under PF-025 and
-cannot widen schema authority. P-09 and P-10 are only `PARTIAL`; P-08 remains `NOT_PROVEN`, N-035
-and S-001 are `TESTED`, N-036 remains `PLANNED`, PF-028 is `CLOSED`, PF-025, PF-083, and PF-089
-remain `OPEN`, and no automated real-browser E2E or native-drag automation result is claimed.
+event handlers; provide a concrete persistence adapter; create user projects; navigate diagnostics;
+publish to the control plane; or activate a channel. Diagnostics belong to M09-T13, and publication
+or activation to M09-T14. Catalog control hints remain opaque under PF-025 and cannot widen schema
+authority. P-09 and P-10 are only `PARTIAL`; P-08 remains `NOT_PROVEN`, N-012, N-018, N-035,
+S-001, and S-003 are `TESTED`, N-036 remains `PLANNED`, PF-028 is `CLOSED`, and PF-025, PF-083,
+PF-085, and PF-089 remain `OPEN`. No automated real-browser E2E or native-drag automation result is
+claimed.
 
 The App imports only public package entry points for Catalog derivation, Editor Core mutation and
 validation, Publisher preflight, runtime composition, and the exact static reference adapter
@@ -300,6 +319,47 @@ Append-only proof-reader sequence 50 advances
 92 readers. Checkpoint, promotion, selector plus required-affected, ownership, and remaining
 touched-CI regression suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally.
 
+The M09-T12 focused persistence suite passes 140/140 across five files, the complete App suite
+passes 322/322 across twenty-two files, and the independent root mutation proof passes 12/12. Exact
+evidence is the `27,088`-byte
+`docs/proof/artifacts/desen-app-0.1.0-source-persistence.json` at
+`sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`. It authenticates the
+exact M09-T01 shell/navigation, M08-T08 Editor persistence, and M09-T11 App scenario/fixture/fidelity
+parents and binds 35 current files without tracking historical App readers.
+
+The live local CI authority contains 196 workloads and 93 proof pairs—82 ordinary and 11 barriers—
+with a 60-proof-unit/130-workload connected closure. Ownership covers 1,243 tracked paths,
+including 186 proof-owned paths.
+Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
+`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+artifacts and 94 current readers. Checkpoint, promotion, selector plus required-affected,
+ownership, and remaining touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and
+128/128—294/294 combined.
+
+Only the controller's immutable authored Source snapshot is saved with the expected generation.
+Scenario previews, fixture state, Runtime input, and secrets never enter the request. Open admits
+the complete stored Source and matching preview atomically; failed, rejected, wrong-document, and
+stale results preserve the current draft. Complete authored Source canonical content—not identity
+or version—determines dirty state. Same-value replacements and canonical reverts are clean;
+successful Open/Save establish baselines, current-vs-dispatched-save-snapshot comparison preserves
+newer edits, and `reopenRequired` stays authoritative. One centralized authored-session commit path
+updates surface-owned canonical baseline/current refs and a rerender-safe no-port projection;
+pristine no-port navigation is admitted as `Local draft unchanged`, while edited no-port and
+port-backed dirty drafts are guarded across links, traversal, and dirty page exit for the current
+surface/controller lifetime.
+
+Awaited settlement values are admitted only through exact own enumerable data capture without
+accessor invocation. Valid optional diagnostic pointer/context/subject data is copied into fresh
+frozen values; CAS generation relationships are checked before publication. Malformed Open remains
+retryable and preserves the draft, malformed Save becomes indeterminate/reopen-required, and
+operation authority is rechecked after settlement reflection and opened-document admission.
+
+These local receipts make no required-gate, hosted-CI, concrete App storage-adapter,
+diagnostic-navigation, publication/activation, automated real-browser E2E, or native-drag claim.
+M09-T12 is `DONE`, implementation progress is 107/145 (74%), M09 is 12/14 (86%), proof gates
+remain 10/13, and M09-T13 is next.
+
 ## Local commands
 
 ```bash
@@ -316,6 +376,7 @@ pnpm --filter @desen/app-web test:state-bindings
 pnpm --filter @desen/app-web test:event-actions
 pnpm --filter @desen/app-web test:design-run
 pnpm --filter @desen/app-web test:fixtures-scenarios
+pnpm --filter @desen/app-web test:persistence
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

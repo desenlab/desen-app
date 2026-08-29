@@ -1443,7 +1443,7 @@ is next.
 | M09-T09 | DONE        | M09-T08                  | Sign-in event and closed-action editor UI                                       |
 | M09-T10 | DONE        | M09-T03, M09-T08–M09-T09 | Design/Run modes on the same source tree                                        |
 | M09-T11 | DONE        | M09-T10                  | Fixtures, scenarios, and visible approximate-fidelity disclosure                |
-| M09-T12 | NOT_STARTED | M09-T01, M08-T08         | Save/open UI through editor persistence port                                    |
+| M09-T12 | DONE        | M09-T01, M08-T08         | Save/open UI through editor persistence port                                    |
 | M09-T13 | NOT_STARTED | M09-T04–M09-T11          | Node-linked diagnostics and selectable invalid placeholders                     |
 | M09-T14 | NOT_STARTED | M09-T10–M09-T13, G07     | Publish to control plane and reference-host channel activation                  |
 | G09     | NOT_STARTED | M09-T01–M09-T14          | User authors, tests, saves, and publishes sign-in visually                      |
@@ -1884,6 +1884,65 @@ remains `NOT_PROVEN`, and N-036 remains `PLANNED`. PF-028 closes because pending
 as Runtime lifecycle rather than static fixture data; PF-025, PF-083, and the new non-blocking
 PF-089 remain `OPEN`. Durable save/open, diagnostic navigation and invalid placeholders,
 publication, activation, and automated real-browser E2E remain later owners. M09-T12 is next.
+
+M09-T12 consumes only the public Editor Core `DesenEditorPersistencePort` through one App-owned,
+Design-only persistence controller. The exact `account-app/sign-in` route derives one fixed
+`account-app-source` key independently of `Source.id`; the App imports no concrete Editor Web,
+control-plane, browser-storage, native-storage, or filesystem adapter.
+
+Open publishes a replacement only after the complete stored Source, exact document identity,
+Catalog projection, surface, and publishable preview are admitted together. Missing, failed,
+rejected, wrong-document, edited-in-flight, disposed, and stale-lifetime results preserve the
+current authored draft. Save dispatches only the immutable authored Source snapshot and exact
+expected generation. Create, update, and unchanged remain distinct; conflict, exhausted
+generation, and indeterminate commit require explicit reopen with no retry or merge. Complete
+admitted authored Source canonical content—not identity or document version—determines dirty state.
+Same-value replacements and canonical reverts are clean; successful Open/Save establish baselines,
+current-vs-dispatched-snapshot comparison preserves newer edits, and `reopenRequired` remains
+authoritative until an admitted Open.
+
+Awaited Open/Save results are captured from exact own enumerable data without accessor invocation.
+Valid optional diagnostic pointer/context/subject data is copied into fresh frozen values, and every
+CAS result must satisfy the dispatched generation relationship. Malformed Open remains a retryable
+failure with the draft intact; malformed Save becomes indeterminate and reopen-required. Token
+rechecks after settlement reflection and opened-document admission prevent reentrant edit/dispose
+from publishing stale authority.
+
+Dirty Open requires explicit cancelable inline confirmation. One centralized authored-session
+commit path updates surface-owned canonical baseline/current refs and a rerender-safe no-port dirty
+projection. The current surface/controller guard admits pristine no-port navigation. Its exact
+clean label is `Local draft unchanged`. Edited no-port and port-backed dirty drafts require
+admission across App navigation and browser traversal. Owner-safe cleanup cannot revoke a newer surface, and `beforeunload` protects
+dirty page exit. Generation, dirty, pending, definite failure, conflict/uncertainty, exhaustion, and
+reopen-required state remain visible without color-only meaning. Scenario previews, fixture
+lifecycle, Runtime input, and secrets never enter persistence.
+
+The focused five-file persistence suite passes 140/140, the complete twenty-two-file App suite
+passes 322/322, and the independent root mutation proof passes 12/12. Exact evidence is the
+27,088-byte `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json` at
+`sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`. It authenticates exact
+M09-T01, M08-T08, and M09-T11 parents and binds 35 current files without tracking historical App
+readers.
+
+The live local CI inventory contains 196 workloads and 93 proof pairs—82 ordinary and 11 barriers.
+M09-T12's connected closure contains 60 proof units and 130 workloads. Complete ownership covers
+1,243 tracked paths, including 186 proof-owned paths, split into 186 proof-unit, 45 CI-policy, 31
+dependency-policy, 137 frozen-input, 481 package/application, 223 shared-proof-infrastructure, 129
+project-documentation, and 11 repository-policy paths. These are local inventory receipts and make
+no required-gate or hosted-CI claim.
+
+Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
+`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+artifacts and 94 current readers. Checkpoint, promotion, selector plus required-affected,
+ownership, and remaining touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and
+128/128—294/294 combined.
+
+M09-T12 is `DONE`, advancing implementation progress to 107/145 (74%) and M09 to 12/14 (86%) while
+proof gates remain 10/13. `N-012`, `N-018`, and `S-003` remain `TESTED` with App-consumption
+evidence. P-08 remains `NOT_PROVEN`, P-09/P-10 remain `PARTIAL`, and PF-085/PF-089 remain `OPEN`.
+Diagnostics navigation and invalid placeholders, publication/activation, a concrete App storage
+adapter, and automated real-browser E2E remain later owners. M09-T13 is next.
 
 ## M10 — First end-to-end proof
 

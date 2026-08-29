@@ -230,7 +230,7 @@ describe("Desen App application shell", () => {
     expect(screen.getByText("Design preview · controls are disabled.")).toBeTruthy();
     expect(
       screen.getByText(
-        "Catalog-backed edits stay in this session. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree.",
+        "Catalog-backed edits change only the authored Source and persist only through Save source. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree.",
       ),
     ).toBeTruthy();
     expect(screen.getByRole("complementary", { name: "Inspector" })).toBeTruthy();
@@ -245,7 +245,7 @@ describe("Desen App application shell", () => {
       within(modeControl).getByRole("button", { name: "Run" }).getAttribute("aria-pressed"),
     ).toBe("false");
     expect(screen.getByRole("status", { name: "Mode safety" }).textContent).toBe(
-      "Design mode · managed controls are disabled; edits stay in this session draft.",
+      "Design mode · managed controls are disabled; authored changes remain local until Save source succeeds.",
     );
     expect(screen.queryByRole("tab", { name: /design|run/i })).toBeNull();
     expect(document.querySelector("canvas")).toBeNull();
@@ -1253,7 +1253,7 @@ describe("Desen App application shell", () => {
       within(inspector).getAllByText("This value is too large for the exact adapter preview."),
     ).toHaveLength(1);
     expect(within(inspector).getByRole("status").textContent).toBe(
-      "Edits stay in this session until save is implemented.",
+      "Edits remain local until Save source succeeds.",
     );
     expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
     expect(screen.queryByText("Preview unavailable")).toBeNull();
@@ -1369,7 +1369,7 @@ describe("Desen App application shell", () => {
     expect(maxWidth.getAttribute("aria-invalid")).toBe("true");
     expect(within(inspector).getByRole("alert").textContent).toBe("Enter a finite number.");
     expect(within(inspector).getByRole("status").textContent).toBe(
-      "Edits stay in this session until save is implemented.",
+      "Edits remain local until Save source succeeds.",
     );
 
     fireEvent.change(maxWidth, { target: { value: "0" } });

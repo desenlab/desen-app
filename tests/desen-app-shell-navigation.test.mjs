@@ -19,6 +19,7 @@ const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const PREREQUISITE = "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json";
 const FIXTURES_SCENARIOS_ARTIFACT =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
+const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const NAVIGATION = "apps/desen-app/src/project-navigation.ts";
 const APPLICATION = "apps/desen-app/src/application.tsx";
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
@@ -695,5 +696,63 @@ test("[filesystem] rejects linked prerequisite, artifact, and proof authorities"
       proofDocumentPath: proofLink,
     }),
     expectedError("AUTHORITY_UNSAFE"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T12 persistence closure", async () => {
+  const successor = built.currentCompatibility.sourcePersistenceSuccessor;
+  assert.deepEqual(successor.artifact, {
+    task: "M09-T12",
+    proofId: "desen-app-source-persistence",
+    profile: "desen.app.source-persistence-proof.v1",
+    result: "PASS",
+    path: SOURCE_PERSISTENCE_ARTIFACT,
+    bytes: 27_088,
+    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+  });
+  assert.equal(successor.focusedTestCases, 140);
+  assert.equal(successor.fullAppTestFiles, 22);
+  assert.equal(successor.fullAppTestCases, 322);
+  assert.equal(successor.exactProjectScopedSourceKey, "account-app-source");
+  assert.equal(successor.publicEditorCorePersistencePort, true);
+  assert.equal(successor.authoredSourceOnly, true);
+  assert.equal(successor.sourceKeyIndependentOfDocumentId, true);
+  assert.equal(successor.awaitedSettlementsCapturedAsExactOwnEnumerableData, true);
+  assert.equal(successor.settlementAccessorInvocation, false);
+  assert.equal(successor.validOptionalDiagnosticDataCopiedAndFrozen, true);
+  assert.equal(successor.casGenerationRelationshipsValidated, true);
+  assert.equal(successor.openedDocumentReauthorized, true);
+  assert.equal(successor.failedOrRejectedOpenPreservesDraft, true);
+  assert.equal(successor.malformedOpenRetryableAndDraftPreserved, true);
+  assert.equal(successor.generationExhaustionRequiresReopen, true);
+  assert.equal(successor.automaticRetryOrMerge, false);
+  assert.equal(successor.unexpectedDispatchedSaveIndeterminate, true);
+  assert.equal(successor.malformedSaveIndeterminateAndReopenRequired, true);
+  assert.equal(successor.staleOpenCannotReplaceEditedSession, true);
+  assert.equal(successor.staleLifetimeSettlementIgnored, true);
+  assert.equal(successor.postReflectionAndAdmissionAuthorityRechecked, true);
+  assert.equal(successor.reentrantSettlementCannotPublishRevokedState, true);
+  assert.equal(successor.dirtyOpenRequiresExplicitConfirmation, true);
+  assert.equal(successor.designModeOnlyControls, true);
+  assert.equal(successor.visibleGenerationDirtyAndReopenState, true);
+  assert.equal(successor.completeAuthoredSourceCanonicalDirtyComparison, true);
+  assert.equal(successor.identityOrVersionDirtyAuthority, false);
+  assert.equal(successor.sameCanonicalReplacementRemainsClean, true);
+  assert.equal(successor.canonicalRevertReturnsClean, true);
+  assert.equal(successor.successfulOpenOrSaveEstablishesCanonicalBaseline, true);
+  assert.equal(successor.newerEditRemainsDirtyAfterOlderSave, true);
+  assert.equal(successor.noPortCanonicalBaselineAndCurrentTracked, true);
+  assert.equal(successor.noPortDirtyProjectionRerenderSafe, true);
+  assert.equal(successor.cleanNoPortLabelAccurate, true);
+  assert.equal(successor.cleanNoPortStatusText, "Local draft unchanged");
+  assert.equal(successor.navigationAndPageExitGuarded, true);
+  assert.equal(successor.scenarioPreviewPersisted, false);
+  assert.equal(successor.runtimeInputOrSecretPersisted, false);
+  const artifactBytes = await readFile(path.join(ROOT, SOURCE_PERSISTENCE_ARTIFACT));
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([[SOURCE_PERSISTENCE_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
 });

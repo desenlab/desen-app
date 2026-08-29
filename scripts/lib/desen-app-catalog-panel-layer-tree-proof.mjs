@@ -16,6 +16,8 @@ const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-CATALOG-PANEL-LAYER-TREE.md";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const FIXTURES_SCENARIOS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
+const SOURCE_PERSISTENCE_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const SHELL_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const REFERENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/reference-catalog-web-capability-artifact.json";
@@ -103,7 +105,27 @@ const TRACKED_PATHS = Object.freeze([
   SOURCE_PATH,
   ...PROOF_PATHS,
 ]);
+const T12_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/persistence-controls.tsx",
+  "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/state-panel.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-persistence.test.ts",
+  "apps/desen-app/test/inspector-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+  "apps/desen-app/test/persistence-controls.test.tsx",
+  "apps/desen-app/test/project-navigation.test.ts",
+  "apps/desen-app/test/state-panel.test.tsx",
+]);
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ...T12_SUCCESSOR_RECEIPT_PATHS,
   "apps/desen-app/package.json",
   "apps/desen-app/README.md",
   "apps/desen-app/src/application.tsx",
@@ -126,6 +148,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     ROOT_PACKAGE_PATH,
     NAMED_SLOT_ARTIFACT_PATH,
     FIXTURES_SCENARIOS_ARTIFACT_PATH,
+    SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    ...T12_SUCCESSOR_RECEIPT_PATHS,
     ADAPTER_CANVAS_SOURCE_PATH,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_SELECTION_TEST_PATH,
@@ -155,22 +179,25 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   ]),
 ]);
 const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
-  ...TYPESCRIPT_SOURCE_PATHS,
-  ADAPTER_CANVAS_SOURCE_PATH,
-  AUTHORING_SELECTION_SOURCE_PATH,
-  AUTHORING_INSPECTOR_SOURCE_PATH,
-  AUTHORING_PREVIEW_SOURCE_PATH,
-  INSPECTOR_PANEL_SOURCE_PATH,
-  STRUCTURED_JSON_SOURCE_PATH,
-  AUTHORING_SLOT_SOURCE_PATH,
-  AUTHORING_STATE_SOURCE_PATH,
-  STATE_PANEL_SOURCE_PATH,
-  AUTHORING_EVENT_ACTION_SOURCE_PATH,
-  AUTHORING_FIXTURES_SOURCE_PATH,
-  AUTHORING_SCENARIOS_SOURCE_PATH,
-  EVENT_ACTION_PANEL_SOURCE_PATH,
-  PREVIEW_CONTROLS_SOURCE_PATH,
-  PREVIEW_FIDELITY_SOURCE_PATH,
+  ...new Set([
+    ...TYPESCRIPT_SOURCE_PATHS,
+    ...T12_SUCCESSOR_RECEIPT_PATHS.filter((entry) => /\/src\/.+\.(?:ts|tsx)$/u.test(entry)),
+    ADAPTER_CANVAS_SOURCE_PATH,
+    AUTHORING_SELECTION_SOURCE_PATH,
+    AUTHORING_INSPECTOR_SOURCE_PATH,
+    AUTHORING_PREVIEW_SOURCE_PATH,
+    INSPECTOR_PANEL_SOURCE_PATH,
+    STRUCTURED_JSON_SOURCE_PATH,
+    AUTHORING_SLOT_SOURCE_PATH,
+    AUTHORING_STATE_SOURCE_PATH,
+    STATE_PANEL_SOURCE_PATH,
+    AUTHORING_EVENT_ACTION_SOURCE_PATH,
+    AUTHORING_FIXTURES_SOURCE_PATH,
+    AUTHORING_SCENARIOS_SOURCE_PATH,
+    EVENT_ACTION_PANEL_SOURCE_PATH,
+    PREVIEW_CONTROLS_SOURCE_PATH,
+    PREVIEW_FIDELITY_SOURCE_PATH,
+  ]),
 ]);
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
   TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
@@ -999,6 +1026,7 @@ function resolveRelativeImport(importerPath, specifier) {
       candidate === EVENT_ACTION_PANEL_SOURCE_PATH ||
       candidate === PREVIEW_CONTROLS_SOURCE_PATH ||
       candidate === PREVIEW_FIDELITY_SOURCE_PATH ||
+      T12_SUCCESSOR_RECEIPT_PATHS.includes(candidate) ||
       candidate === SOURCE_PATH ||
       candidate === OFFICIAL_BUNDLE_PATH,
   );
@@ -1301,9 +1329,16 @@ function inspectImportsAndExecutionBoundary(files) {
               AUTHORING_STATE_SOURCE_PATH,
               AUTHORING_EVENT_ACTION_SOURCE_PATH,
               AUTHORING_SCENARIOS_SOURCE_PATH,
+              "apps/desen-app/src/application.tsx",
+              "apps/desen-app/src/authoring-persistence.ts",
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
-            shape.namespaceImport !== null
+            shape.namespaceImport !== null ||
+            ([
+              "apps/desen-app/src/application.tsx",
+              "apps/desen-app/src/authoring-persistence.ts",
+            ].includes(relativePath) &&
+              shape.typeOnly !== true)
           ) {
             fail("IMPORT_BOUNDARY_DRIFT", "Editor Core entered outside the T05 inspector path.");
           }
@@ -1324,10 +1359,12 @@ function inspectImportsAndExecutionBoundary(files) {
               STRUCTURED_JSON_SOURCE_PATH,
               AUTHORING_SLOT_SOURCE_PATH,
               AUTHORING_EVENT_ACTION_SOURCE_PATH,
+              APPLICATION_SOURCE_PATH,
+              "apps/desen-app/src/authoring-persistence.ts",
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null ||
-            shape.typeOnly
+            (shape.typeOnly && relativePath !== "apps/desen-app/src/authoring-persistence.ts")
           ) {
             fail("IMPORT_BOUNDARY_DRIFT", "Protocol entered outside the T06 inspector path.");
           }
@@ -1466,15 +1503,16 @@ function inspectImportsAndExecutionBoundary(files) {
         platformGlobalRoots.has(node.text) &&
         (relativePath === ADAPTER_CANVAS_SOURCE_PATH ||
           relativePath === AUTHORING_SELECTION_SOURCE_PATH ||
-          (![
-            APPLICATION_SOURCE_PATH,
-            AUTHORING_INSPECTOR_SOURCE_PATH,
-            AUTHORING_PREVIEW_SOURCE_PATH,
-            AUTHORING_SLOT_SOURCE_PATH,
-            AUTHORING_STATE_SOURCE_PATH,
-            AUTHORING_EVENT_ACTION_SOURCE_PATH,
-            AUTHORING_SCENARIOS_SOURCE_PATH,
-          ].includes(relativePath) &&
+          (!T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
+            ![
+              APPLICATION_SOURCE_PATH,
+              AUTHORING_INSPECTOR_SOURCE_PATH,
+              AUTHORING_PREVIEW_SOURCE_PATH,
+              AUTHORING_SLOT_SOURCE_PATH,
+              AUTHORING_STATE_SOURCE_PATH,
+              AUTHORING_EVENT_ACTION_SOURCE_PATH,
+              AUTHORING_SCENARIOS_SOURCE_PATH,
+            ].includes(relativePath) &&
             !isPlatformMemberReceiver(node)))
       ) {
         fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained broad platform-global authority.`, {
@@ -1524,6 +1562,7 @@ function inspectImportsAndExecutionBoundary(files) {
         ts.isCallExpression(node) &&
         ts.isIdentifier(node.expression) &&
         forbiddenCallPattern.test(node.expression.text) &&
+        !T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
         admittedT05Calls.get(relativePath)?.has(node.expression.text) !== true
       ) {
         fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained later-slice execution authority.`, {
@@ -1605,9 +1644,9 @@ function inspectImportsAndExecutionBoundary(files) {
     validatorImports !== 1 ||
     publicDiagnosticIndexTypeOnlyImports !== 1 ||
     catalogSdkImports !== 11 ||
-    editorCoreImports !== 13 ||
+    editorCoreImports !== 15 ||
     publisherImports !== 3 ||
-    protocolImports !== 4 ||
+    protocolImports !== 7 ||
     t11RuntimeCoreImports !== 3 ||
     t11TestkitImports !== 2 ||
     t11OperationRegistrationImports !== 1 ||
@@ -2191,6 +2230,166 @@ function authenticateNamedSlotArtifact(bytes) {
   return pin;
 }
 
+function authenticateSourcePersistenceSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T12",
+    proofId: "desen-app-source-persistence",
+    profile: "desen.app.source-persistence-proof.v1",
+    result: "PASS",
+    path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    bytes: 27_088,
+    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+  });
+  const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  )
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T12 source-persistence artifact drifted.");
+  const artifact = parseJson(artifactBytes, SOURCE_PERSISTENCE_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  const persistenceCommand =
+    "vitest run test/authoring-persistence.test.ts test/persistence-controls.test.tsx test/persistence-application.test.tsx test/project-navigation.test.ts test/application.test.tsx";
+  const appPackage = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
+  const persistenceControlsSource = decodeUtf8(
+    files.get("apps/desen-app/src/persistence-controls.tsx"),
+    "apps/desen-app/src/persistence-controls.tsx",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.publicEditorCorePersistencePort !== true ||
+    artifact.claim?.exactProjectScopedSourceKey !== "account-app-source" ||
+    artifact.claim?.authoredSourceOnly !== true ||
+    artifact.claim?.sourceKeyIndependentOfDocumentId !== true ||
+    artifact.claim?.awaitedSettlementsCapturedAsExactOwnEnumerableData !== true ||
+    artifact.claim?.settlementAccessorInvocation !== false ||
+    artifact.claim?.validOptionalDiagnosticDataCopiedAndFrozen !== true ||
+    artifact.claim?.casGenerationRelationshipsValidated !== true ||
+    artifact.claim?.openedDocumentReauthorized !== true ||
+    artifact.claim?.failedOrRejectedOpenPreservesDraft !== true ||
+    artifact.claim?.malformedOpenRetryableAndDraftPreserved !== true ||
+    artifact.claim?.generationExhaustionRequiresReopen !== true ||
+    artifact.claim?.automaticRetryOrMerge !== false ||
+    artifact.claim?.unexpectedDispatchedSaveIndeterminate !== true ||
+    artifact.claim?.malformedSaveIndeterminateAndReopenRequired !== true ||
+    artifact.claim?.staleOpenCannotReplaceEditedSession !== true ||
+    artifact.claim?.staleLifetimeSettlementIgnored !== true ||
+    artifact.claim?.postReflectionAndAdmissionAuthorityRechecked !== true ||
+    artifact.claim?.reentrantSettlementCannotPublishRevokedState !== true ||
+    artifact.claim?.dirtyOpenRequiresExplicitConfirmation !== true ||
+    artifact.claim?.designModeOnlyControls !== true ||
+    artifact.claim?.visibleGenerationDirtyAndReopenState !== true ||
+    artifact.claim?.completeAuthoredSourceCanonicalDirtyComparison !== true ||
+    artifact.claim?.identityOrVersionDirtyAuthority !== false ||
+    artifact.claim?.sameCanonicalReplacementRemainsClean !== true ||
+    artifact.claim?.canonicalRevertReturnsClean !== true ||
+    artifact.claim?.successfulOpenOrSaveEstablishesCanonicalBaseline !== true ||
+    artifact.claim?.newerEditRemainsDirtyAfterOlderSave !== true ||
+    artifact.claim?.centralizedAuthoringSessionCommit !== true ||
+    artifact.claim?.noPortCanonicalBaselineAndCurrentTracked !== true ||
+    artifact.claim?.noPortDirtyProjectionRerenderSafe !== true ||
+    artifact.claim?.cleanNoPortLabelAccurate !== true ||
+    artifact.claim?.pristineNoPortNavigationAdmitted !== true ||
+    artifact.claim?.editedNoPortDraftNavigationAndPageExitGuarded !== true ||
+    artifact.claim?.openAdmissionAtomic !== true ||
+    artifact.claim?.createUpdateUnchangedGenerationCas !== true ||
+    artifact.claim?.conflictOrIndeterminateRequiresReopen !== true ||
+    artifact.claim?.navigationAndPageExitGuarded !== true ||
+    artifact.claim?.scenarioPreviewPersisted !== false ||
+    artifact.claim?.runtimeInputOrSecretPersisted !== false ||
+    artifact.claim?.concretePersistenceAdapterClaimed !== false ||
+    !persistenceControlsSource.includes('return "Local draft unchanged";') ||
+    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.fullAppTestFiles !== 22 ||
+    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.boundary?.trackedFiles !== 35 ||
+    artifact.boundary?.parentArtifacts !== 3 ||
+    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.fullAppTestFiles !== 22 ||
+    artifact.boundary?.fullAppTestCases !== 322 ||
+    trackedReceipts?.length !== 35 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    appPackage.scripts?.["test:persistence"] !== persistenceCommand
+  )
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T12 source-persistence identity or claims drifted.",
+    );
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    )
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T12 receipt drifted: ${relativePath}.`);
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    focusedTestCases: 140,
+    fullAppTestFiles: 22,
+    fullAppTestCases: 322,
+    exactProjectScopedSourceKey: "account-app-source",
+    publicEditorCorePersistencePort: true,
+    authoredSourceOnly: true,
+    sourceKeyIndependentOfDocumentId: true,
+    awaitedSettlementsCapturedAsExactOwnEnumerableData: true,
+    settlementAccessorInvocation: false,
+    validOptionalDiagnosticDataCopiedAndFrozen: true,
+    casGenerationRelationshipsValidated: true,
+    openedDocumentReauthorized: true,
+    failedOrRejectedOpenPreservesDraft: true,
+    malformedOpenRetryableAndDraftPreserved: true,
+    generationExhaustionRequiresReopen: true,
+    automaticRetryOrMerge: false,
+    unexpectedDispatchedSaveIndeterminate: true,
+    malformedSaveIndeterminateAndReopenRequired: true,
+    staleOpenCannotReplaceEditedSession: true,
+    staleLifetimeSettlementIgnored: true,
+    postReflectionAndAdmissionAuthorityRechecked: true,
+    reentrantSettlementCannotPublishRevokedState: true,
+    dirtyOpenRequiresExplicitConfirmation: true,
+    designModeOnlyControls: true,
+    visibleGenerationDirtyAndReopenState: true,
+    completeAuthoredSourceCanonicalDirtyComparison: true,
+    identityOrVersionDirtyAuthority: false,
+    sameCanonicalReplacementRemainsClean: true,
+    canonicalRevertReturnsClean: true,
+    successfulOpenOrSaveEstablishesCanonicalBaseline: true,
+    newerEditRemainsDirtyAfterOlderSave: true,
+    centralizedAuthoringSessionCommit: true,
+    noPortCanonicalBaselineAndCurrentTracked: true,
+    noPortDirtyProjectionRerenderSafe: true,
+    cleanNoPortLabelAccurate: true,
+    cleanNoPortStatusText: "Local draft unchanged",
+    pristineNoPortNavigationAdmitted: true,
+    editedNoPortDraftNavigationAndPageExitGuarded: true,
+    openAdmissionAtomic: true,
+    createUpdateUnchangedGenerationCas: true,
+    conflictOrIndeterminateRequiresReopen: true,
+    navigationAndPageExitGuarded: true,
+    scenarioPreviewPersisted: false,
+    runtimeInputOrSecretPersisted: false,
+    concretePersistenceAdapterClaimed: false,
+    persistenceCommand,
+  });
+}
+
 function authenticateFixturesScenariosSuccessor(files) {
   const bytes = files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH);
   const pin = FIXTURES_SCENARIOS_ARTIFACT_PIN;
@@ -2237,6 +2436,7 @@ function authenticateFixturesScenariosSuccessor(files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    if (T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const authority = receiptMap.get(relativePath);
     const liveBytes = files.get(relativePath);
     if (
@@ -2288,6 +2488,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
   const imports = inspectImportsAndExecutionBoundary(files);
   const implementation = verifyImplementationAndTests(files);
   const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
+  const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
   assertRetainedHistoricalReceipts(frozen.artifact, files);
   if (options.fileOverrides.size !== 0) {
     fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue current compatibility evidence.");
@@ -2369,6 +2570,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
       runOrPublishImplemented: false,
     },
     fixturesScenariosSuccessor,
+    sourcePersistenceSuccessor,
   });
   return deepFreeze({
     artifact: frozen.artifact,

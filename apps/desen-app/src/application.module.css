@@ -3719,3 +3719,203 @@
     padding: 1.25rem;
   }
 }
+
+.persistenceControls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.375rem 0.625rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background: var(--desen-app-surface);
+  border-bottom: 1px solid var(--desen-app-border);
+}
+
+.persistenceControls[data-persistence-state="conflict"],
+.persistenceControls[data-persistence-state="indeterminate"],
+.persistenceControls[data-persistence-state="failed"],
+.persistenceControls[data-persistence-state="exhausted"] {
+  background: color-mix(in srgb, #d97706 5%, var(--desen-app-surface));
+}
+
+.persistenceActions {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0.1875rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+}
+
+.persistenceActions button {
+  min-width: 4.75rem;
+  min-height: 1.75rem;
+  padding: 0 0.625rem;
+  color: var(--desen-app-text);
+  font: inherit;
+  font-size: 0.5625rem;
+  font-weight: 590;
+  cursor: pointer;
+  background: var(--desen-app-surface);
+  border: 0;
+  border-radius: 0.3125rem;
+  box-shadow: var(--desen-app-shadow-xs);
+}
+
+.persistenceActions button:last-child {
+  color: white;
+  background: var(--desen-app-primary);
+}
+
+.persistenceActions button:disabled {
+  color: var(--desen-app-text-soft);
+  cursor: not-allowed;
+  background: transparent;
+  box-shadow: none;
+}
+
+.persistenceActions button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: 2px;
+}
+
+.persistenceMeta {
+  display: flex;
+  min-width: 0;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.persistenceMeta > span {
+  padding: 0.1875rem 0.4375rem;
+  color: var(--desen-app-text-muted);
+  font-size: 0.5rem;
+  font-weight: 590;
+  line-height: 0.75rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.persistenceMeta > span[data-dirty="true"],
+.persistenceMeta > span[data-reopen-required="true"] {
+  color: color-mix(in srgb, #9a5b08 76%, var(--desen-app-text));
+  border-color: color-mix(in srgb, #d97706 28%, var(--desen-app-border));
+}
+
+.persistenceStatus,
+.persistenceAdmission {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.53125rem;
+  line-height: 0.8125rem;
+}
+
+.persistenceStatus {
+  min-height: 0.8125rem;
+  font-weight: 540;
+}
+
+.persistenceAdmission {
+  color: var(--desen-app-text-soft);
+}
+
+.persistenceOpenConfirmation {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: color-mix(in srgb, #d97706 6%, var(--desen-app-surface));
+  border: 1px solid color-mix(in srgb, #d97706 26%, var(--desen-app-border));
+  border-radius: 0.5rem;
+}
+
+.persistenceOpenConfirmation[hidden] {
+  display: none;
+}
+
+.persistenceOpenConfirmation > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.0625rem;
+}
+
+.persistenceOpenConfirmation strong {
+  color: var(--desen-app-text);
+  font-size: 0.5625rem;
+  font-weight: 620;
+}
+
+.persistenceOpenConfirmation small {
+  color: var(--desen-app-text-muted);
+  font-size: 0.5rem;
+  line-height: 0.75rem;
+}
+
+.persistenceOpenConfirmation > div {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.persistenceOpenConfirmation button {
+  min-height: 1.625rem;
+  padding: 0 0.5rem;
+  color: var(--desen-app-text-muted);
+  font: inherit;
+  font-size: 0.53125rem;
+  font-weight: 590;
+  cursor: pointer;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.375rem;
+}
+
+.persistenceOpenConfirmation button:last-child {
+  color: white;
+  background: var(--desen-app-primary);
+  border-color: var(--desen-app-primary);
+}
+
+.persistenceOpenConfirmation button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: 2px;
+}
+
+@media (max-width: 25rem) {
+  .persistenceControls {
+    grid-template-columns: 1fr;
+  }
+
+  .persistenceActions {
+    width: 100%;
+  }
+
+  .persistenceMeta {
+    justify-content: flex-start;
+  }
+
+  .persistenceStatus,
+  .persistenceAdmission {
+    grid-column: 1;
+  }
+
+  .persistenceOpenConfirmation {
+    grid-column: 1;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .persistenceOpenConfirmation > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

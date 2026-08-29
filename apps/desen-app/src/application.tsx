@@ -10,11 +10,13 @@ import {
 } from "react";
 
 import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
+import { canonicalizeJson } from "@desen/protocol";
 import { createRuntimeHostPorts } from "@desen/runtime-core";
 
 import { prepareCatalogAuthoringModel } from "./authoring-data.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
 import { createAuthoringSignInFixtureController } from "./authoring-fixtures.js";
+import { createAuthoringPersistenceController } from "./authoring-persistence.js";
 import {
   applyAuthoringInspectorBindingEdit,
   applyAuthoringInspectorEdit,
@@ -48,6 +50,7 @@ import {
   prepareAuthoringScenarioPreview,
 } from "./authoring-scenarios.js";
 import { projectPreviewFidelity } from "./preview-fidelity.js";
+import { PersistenceControls } from "./persistence-controls.js";
 import {
   PreviewContextDisclosure,
   RunControls,
@@ -57,6 +60,7 @@ import { StatePanel } from "./state-panel.js";
 import { prepareAuthoringPreviewBundle, REFERENCE_EDITOR_DOCUMENT } from "./authoring-preview.js";
 import {
   createDesenAppProjectPath,
+  installDesenAppNavigationGuard,
   navigateDesenApp,
   readDesenAppLocation,
   readDesenAppRoute,
@@ -72,6 +76,7 @@ import themeUrl from "./assets/theme.svg";
 import styles from "./application.module.css";
 
 import type { DragEvent, KeyboardEvent, MouseEvent, ReactNode } from "react";
+import type { DesenEditorPersistencePort } from "@desen/editor-core";
 import type {
   RuntimeHostPorts,
   RuntimeJsonObject,
@@ -84,6 +89,10 @@ import type {
   CatalogAuthoringModel,
   CatalogComponentSummary,
 } from "./authoring-data.js";
+import type {
+  AuthoringPersistenceController,
+  AuthoringPersistenceState,
+} from "./authoring-persistence.js";
 import type {
   AuthoringEventActionEdit,
   AuthoringEventActionEditResult,
@@ -112,6 +121,65 @@ import type {
 } from "./authoring-slots.js";
 import type { DesenAppRoute } from "./project-navigation.js";
 import type { DesenAppProjectSummary, DesenAppSurfaceSummary } from "./project-data.js";
+import type {
+  PersistenceControlProjection,
+  PersistenceControlStatus,
+} from "./persistence-controls.js";
+
+function subscribeUnavailablePersistence(): () => void {
+  return () => undefined;
+}
+
+function readUnavailablePersistence(): null {
+  return null;
+}
+
+function projectPersistenceControlStatus(
+  state: AuthoringPersistenceState | null,
+): PersistenceControlStatus {
+  if (state === null || state.disposed) return Object.freeze({ state: "unavailable" });
+  if (state.pending === "opening") return Object.freeze({ state: "opening" });
+  if (state.pending === "saving") return Object.freeze({ state: "saving" });
+  if (state.saveResult !== null) {
+    if (
+      state.saveResult.status === "created" ||
+      state.saveResult.status === "updated" ||
+      state.saveResult.status === "unchanged"
+    ) {
+      return Object.freeze({ state: "success", operation: "save" });
+    }
+    if (state.saveResult.status === "conflict") return Object.freeze({ state: "conflict" });
+    if (state.saveResult.status === "indeterminate") {
+      return Object.freeze({ state: "indeterminate" });
+    }
+    if (state.saveResult.status === "generation-exhausted") {
+      return Object.freeze({ state: "exhausted" });
+    }
+    return Object.freeze({ state: "failed", operation: "save" });
+  }
+  if (state.openResult?.status === "opened") {
+    return Object.freeze({ state: "success", operation: "open" });
+  }
+  if (state.openResult?.status === "missing") return Object.freeze({ state: "missing" });
+  if (state.openResult?.status === "failed") {
+    return Object.freeze({ state: "failed", operation: "open" });
+  }
+  return Object.freeze({ state: "ready" });
+}
+
+function projectPersistenceControls(
+  state: AuthoringPersistenceState | null,
+  inMemoryDirty: boolean,
+): PersistenceControlProjection {
+  return Object.freeze({
+    generation: state?.generation ?? null,
+    dirty: state?.dirty ?? inMemoryDirty,
+    reopenRequired: state?.reopenRequired ?? false,
+    status: projectPersistenceControlStatus(state),
+  });
+}
+
+const REFERENCE_EDITOR_DOCUMENT_CANONICAL = canonicalizeJson(REFERENCE_EDITOR_DOCUMENT);
 
 interface AppLinkProps {
   readonly href: string;
@@ -1708,9 +1776,11 @@ function AuthoringPanel({
 }
 
 function SurfaceEditor({
+  persistencePort,
   project,
   selectedSurface,
 }: Readonly<{
+  readonly persistencePort: DesenEditorPersistencePort | null;
   readonly project: DesenAppProjectSummary;
   readonly selectedSurface: DesenAppSurfaceSummary;
 }>) {
@@ -1725,6 +1795,15 @@ function SurfaceEditor({
   const [scenarioChoice, setScenarioChoice] = useState<
     Readonly<{ readonly ownerKey: string | null; readonly value: AuthoringScenarioValue }>
   >(() => Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
+  const inMemoryBaselineCanonical = useRef(REFERENCE_EDITOR_DOCUMENT_CANONICAL);
+  const inMemoryCurrentCanonical = useRef(REFERENCE_EDITOR_DOCUMENT_CANONICAL);
+  const inMemoryDraftDirty = useRef(false);
+  const [inMemoryDirtyProjection, setInMemoryDirtyProjection] = useState(false);
+  const updateInMemoryDirtyProjection = useCallback(() => {
+    const dirty = inMemoryCurrentCanonical.current !== inMemoryBaselineCanonical.current;
+    inMemoryDraftDirty.current = dirty;
+    setInMemoryDirtyProjection((current) => (current === dirty ? current : dirty));
+  }, []);
   const modeRef = useRef<SurfaceEditorMode>("design");
   const designModeButton = useRef<HTMLButtonElement>(null);
   const runModeButton = useRef<HTMLButtonElement>(null);
@@ -1733,6 +1812,30 @@ function SurfaceEditor({
   const route = useMemo(
     () => Object.freeze({ projectId: project.id, surfaceId: selectedSurface.id }),
     [project.id, selectedSurface.id],
+  );
+  const persistenceCreation = useMemo(
+    () =>
+      persistencePort === null
+        ? null
+        : createAuthoringPersistenceController({
+            route,
+            document: REFERENCE_EDITOR_DOCUMENT,
+            catalog: referenceCatalog,
+            persistencePort,
+          }),
+    [persistencePort, route],
+  );
+  const persistenceController =
+    persistenceCreation?.ok === true ? persistenceCreation.controller : null;
+  const persistenceState = useSyncExternalStore(
+    persistenceController?.subscribe ?? subscribeUnavailablePersistence,
+    persistenceController?.read ?? readUnavailablePersistence,
+    persistenceController?.read ?? readUnavailablePersistence,
+  );
+  const persistenceControllerLifetime = useRef<AuthoringPersistenceController | null>(null);
+  const persistenceProjection = useMemo(
+    () => projectPersistenceControls(persistenceState, inMemoryDirtyProjection),
+    [inMemoryDirtyProjection, persistenceState],
   );
   const preparedModel = useMemo(
     () => prepareCatalogAuthoringModel(referenceCatalog, document),
@@ -1859,11 +1962,103 @@ function SurfaceEditor({
     };
   }, [fixtureController]);
 
+  useEffect(() => {
+    if (persistenceController === null) return;
+    persistenceControllerLifetime.current = persistenceController;
+    return () => {
+      if (persistenceControllerLifetime.current === persistenceController) {
+        persistenceControllerLifetime.current = null;
+      }
+      queueMicrotask(() => {
+        if (persistenceControllerLifetime.current !== persistenceController) {
+          persistenceController.dispose();
+        }
+      });
+    };
+  }, [persistenceController]);
+
+  useEffect(() => {
+    if (
+      persistenceState === null ||
+      persistenceState.disposed ||
+      !(
+        persistenceState.saveResult?.status === "created" ||
+        persistenceState.saveResult?.status === "updated" ||
+        persistenceState.saveResult?.status === "unchanged"
+      ) ||
+      persistenceState.savedDocument === null
+    ) {
+      return;
+    }
+    inMemoryBaselineCanonical.current = canonicalizeJson(persistenceState.savedDocument);
+    updateInMemoryDirtyProjection();
+  }, [persistenceState, updateInMemoryDirtyProjection]);
+
+  useEffect(() => {
+    if (
+      persistenceController !== null &&
+      (persistenceState === null || persistenceState.disposed || !persistenceState.dirty)
+    ) {
+      return;
+    }
+
+    const hasCurrentUnsavedSource = () => {
+      if (persistenceController === null) return inMemoryDraftDirty.current;
+      if (persistenceControllerLifetime.current !== persistenceController) return null;
+      const current = persistenceController.read();
+      if (current.disposed) return null;
+      return current.dirty;
+    };
+    const removeNavigationGuard = installDesenAppNavigationGuard(() => {
+      const dirty = hasCurrentUnsavedSource();
+      if (dirty === null) return false;
+      return (
+        !dirty ||
+        window.confirm(
+          "Discard unsaved changes? Leaving this surface will permanently discard the current authored Source draft.",
+        )
+      );
+    });
+    const protectPageExit = (event: BeforeUnloadEvent) => {
+      if (hasCurrentUnsavedSource() !== true) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", protectPageExit);
+    return () => {
+      removeNavigationGuard();
+      window.removeEventListener("beforeunload", protectPageExit);
+    };
+  }, [persistenceController, persistenceState]);
+
+  useEffect(() => {
+    if (
+      persistenceController === null ||
+      persistenceController.read().disposed ||
+      persistenceController.read().session.document === document
+    ) {
+      return;
+    }
+    persistenceController.replaceAuthoredDocument(document);
+  }, [document, persistenceController]);
+
   function isDesignMode(): boolean {
     return modeRef.current === "design";
   }
 
+  function commitAuthoringSession(
+    nextSession: typeof authoringSession,
+    establishesBaseline = false,
+  ): void {
+    const canonicalDocument = canonicalizeJson(nextSession.document);
+    inMemoryCurrentCanonical.current = canonicalDocument;
+    if (establishesBaseline) inMemoryBaselineCanonical.current = canonicalDocument;
+    updateInMemoryDirtyProjection();
+    setAuthoringSession(nextSession);
+  }
+
   function chooseMode(nextMode: SurfaceEditorMode): void {
+    if (persistenceState?.pending === "opening") return;
     modeRef.current = nextMode;
     setMode(nextMode);
     (nextMode === "design" ? designModeButton : runModeButton).current?.focus();
@@ -1872,6 +2067,28 @@ function SurfaceEditor({
   function chooseScenario(value: AuthoringScenarioValue): void {
     if (!isDesignMode() || scenarioOwnerKey === null) return;
     setScenarioChoice(Object.freeze({ ownerKey: scenarioOwnerKey, value }));
+  }
+
+  async function openAuthoredSource(): Promise<void> {
+    if (!isDesignMode() || persistenceController === null) return;
+    const result = await persistenceController.open();
+    if (
+      result.status !== "opened" ||
+      !isDesignMode() ||
+      persistenceControllerLifetime.current !== persistenceController ||
+      persistenceController.read().disposed ||
+      persistenceController.read().session !== result.session
+    ) {
+      return;
+    }
+    commitAuthoringSession(result.session, true);
+    setSelection(null);
+    setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
+  }
+
+  function saveAuthoredSource(): void {
+    if (!isDesignMode() || persistenceController === null) return;
+    void persistenceController.save();
   }
 
   function toggleSelection(node: AuthoringLayerNode): void {
@@ -1900,7 +2117,7 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
     return result;
   }
 
@@ -1921,7 +2138,7 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
     return result;
   }
 
@@ -1933,7 +2150,7 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
     return result;
   }
 
@@ -1954,7 +2171,7 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
     return result;
   }
 
@@ -1969,7 +2186,7 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
     if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok) {
       const component = preparedModel.model.components.find(({ id }) => id === edit.componentId);
       if (component !== undefined) {
@@ -1997,7 +2214,7 @@ function SurfaceEditor({
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
-    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
     setSelection(null);
     return result;
   }
@@ -2057,6 +2274,7 @@ function SurfaceEditor({
               <button
                 aria-describedby={modeStatusId}
                 aria-pressed={mode === "design"}
+                disabled={persistenceState?.pending === "opening"}
                 onClick={() => chooseMode("design")}
                 ref={designModeButton}
                 type="button"
@@ -2066,6 +2284,7 @@ function SurfaceEditor({
               <button
                 aria-describedby={modeStatusId}
                 aria-pressed={mode === "run"}
+                disabled={persistenceState?.pending === "opening"}
                 onClick={() => chooseMode("run")}
                 ref={runModeButton}
                 type="button"
@@ -2077,6 +2296,17 @@ function SurfaceEditor({
           </div>
         </div>
 
+        <PersistenceControls
+          busy={persistenceState?.pending === "opening" || persistenceState?.pending === "saving"}
+          confirmationScope={persistenceController}
+          designMode={mode === "design"}
+          onOpen={() => {
+            void openAuthoredSource();
+          }}
+          onSave={saveAuthoredSource}
+          projection={persistenceProjection}
+        />
+
         <p
           aria-atomic="true"
           aria-label="Mode safety"
@@ -2086,7 +2316,7 @@ function SurfaceEditor({
           role="status"
         >
           {mode === "design"
-            ? "Design mode · managed controls are disabled; edits stay in this session draft."
+            ? "Design mode · managed controls are disabled; authored changes remain local until Save source succeeds."
             : "Run mode · controls are interactive against synthetic fixtures; live effects remain blocked."}
         </p>
 
@@ -2108,7 +2338,7 @@ function SurfaceEditor({
           <strong>{mode === "design" ? "Preview data" : "Runtime preview"}</strong>
           <span>
             {mode === "design"
-              ? "Catalog-backed edits stay in this session. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree."
+              ? "Catalog-backed edits change only the authored Source and persist only through Save source. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree."
               : "Controls are live against this in-memory preview. Only the exact synthetic sign-in fixture is available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked."}
           </span>
         </div>
@@ -2158,9 +2388,11 @@ function SurfaceEditor({
 }
 
 function ProjectShell({
+  persistencePort,
   project,
   selectedSurface,
 }: Readonly<{
+  readonly persistencePort: DesenEditorPersistencePort | null;
   readonly project: DesenAppProjectSummary;
   readonly selectedSurface: DesenAppSurfaceSummary | undefined;
 }>) {
@@ -2228,6 +2460,7 @@ function ProjectShell({
   return (
     <SurfaceEditor
       key={`${project.id}:${selectedSurface.id}`}
+      persistencePort={persistencePort}
       project={project}
       selectedSurface={selectedSurface}
     />
@@ -2265,7 +2498,13 @@ function routeTitle(route: DesenAppRoute): string {
     : `${surface.name} · ${project.name} · DESEN`;
 }
 
-function RouteView({ route }: Readonly<{ readonly route: DesenAppRoute }>) {
+function RouteView({
+  persistencePort,
+  route,
+}: Readonly<{
+  readonly persistencePort: DesenEditorPersistencePort | null;
+  readonly route: DesenAppRoute;
+}>) {
   if (route.kind === "projects") return <ProjectsHome />;
   if (route.kind === "not-found") return <NotFound pathname={route.pathname} />;
 
@@ -2279,7 +2518,13 @@ function RouteView({ route }: Readonly<{ readonly route: DesenAppRoute }>) {
     );
   }
   if (route.surfaceId === undefined)
-    return <ProjectShell project={project} selectedSurface={undefined} />;
+    return (
+      <ProjectShell
+        persistencePort={persistencePort}
+        project={project}
+        selectedSurface={undefined}
+      />
+    );
 
   const surface = findDesenAppSurface(project, route.surfaceId);
   if (surface === undefined) {
@@ -2290,11 +2535,18 @@ function RouteView({ route }: Readonly<{ readonly route: DesenAppRoute }>) {
       />
     );
   }
-  return <ProjectShell project={project} selectedSurface={surface} />;
+  return (
+    <ProjectShell persistencePort={persistencePort} project={project} selectedSurface={surface} />
+  );
+}
+
+/** Trusted host-owned capabilities injected into the App shell. */
+export interface DesenAppApplicationProps {
+  readonly persistencePort?: DesenEditorPersistencePort | null;
 }
 
 /** M09 Desen App shell with exact routes, schema-driven Source editing, and adapter preview. */
-export function DesenAppApplication() {
+export function DesenAppApplication({ persistencePort = null }: DesenAppApplicationProps = {}) {
   const routeLocation = useSyncExternalStore(
     subscribeDesenAppNavigation,
     readDesenAppLocation,
@@ -2318,7 +2570,7 @@ export function DesenAppApplication() {
       <SkipToMainContentLink />
       <AppHeader route={route} />
       <main className={styles.main} id="desen-app-content" tabIndex={-1}>
-        <RouteView route={route} />
+        <RouteView persistencePort={persistencePort} route={route} />
       </main>
     </div>
   );

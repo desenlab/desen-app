@@ -52,17 +52,19 @@ The gate runs from a fresh workspace in this order:
 3. verify generated structural-validator bytes;
 4. build and typecheck the workspace once through a cache-read-disabled Turbo graph;
 5. run every package's complete test suite once with controlled concurrency;
-6. run all 92 proof verifiers directly in the reviewed order, ending with the M09-T11 Desen App
-   fixtures/scenarios/fidelity proof;
-7. run all 92 root proof and mutation files as separate fail-fast processes; and
+6. run all 93 proof verifiers directly in the reviewed order, ending with the M09-T12 Desen App
+   Source-persistence proof;
+7. run all 93 root proof and mutation files as separate fail-fast processes; and
 8. run the dependency graph and hostile boundary fixtures.
 
 The historical M09-T07 legacy expansion contains 4,437 leaf process invocations and 296 distinct
 leaves. The historical M09-T10 expansion contains 691 prerequisite segments, 4,477 ordered leaf
-process invocations, and 305 distinct leaves. The current M09-T11 optimized gate contains all 194
+process invocations, and 305 distinct leaves. The current M09-T12 optimized gate contains all 196
 registered workloads. Its exact legacy expansion remains machine-generated authority. Repeated prerequisite
 checks inside proof builders remain intact because those checks are evidence, not orchestration
 overhead.
+The current expansion contains 715 prerequisite segments, 4,505 ordered leaf invocations, and 311
+distinct leaves.
 The measurement recursively expands exact root-level `pnpm <script>` references beginning at
 `check`; commands with no further local root-script indirection are leaves, and the distinct
 inventory is sorted before hashing.
@@ -71,9 +73,9 @@ inventory is sorted before hashing.
 
 The gate refuses to run when any of these conditions changes without an explicit review:
 
-- the 92 task IDs, verifier files, root test files, or their order;
-- any of the 691 legacy prerequisite command segments;
-- the exact 194-step normalized execution plan;
+- the 93 task IDs, verifier files, root test files, or their order;
+- any of the 715 legacy prerequisite command segments;
+- the exact 196-step normalized execution plan;
 - a focused package test that is no longer included by its full package suite;
 - any drift in the reviewed `test` command of any workspace package, including packages without a
   focused prerequisite;
@@ -114,7 +116,7 @@ plan is pinned at `sha256:c038b0292d6caadb182862315369448dcd505ec926251e0e2aef8c
 scheduler-neutral inventory is pinned at
 `sha256:853175eac4b6da232424cc6f47ad8455db3970ae1a72744bf7324b56403bf59f` and the semantic impact
 graph at `sha256:4476d5162c2457d991d17c5c9cb450a838c8b084abff634b8fa4195f89465602`.
-The current M09-T11 prerequisite, ordered-leaf, distinct-leaf, retained-plan, neutral-inventory,
+The historical M09-T11 prerequisite, ordered-leaf, distinct-leaf, retained-plan, neutral-inventory,
 workload-set, and impact-graph authorities are respectively
 `sha256:4c086021423a728182e484e4ca218f419b58ae66a0b1a6607f1c5f4a1d677f09`,
 `sha256:3daf978eeb28f95aa523c54f5c1ad19cdb4fe81add9a53a971996f550f33e1cb`,
@@ -123,6 +125,35 @@ workload-set, and impact-graph authorities are respectively
 `sha256:82b41b49abfd3b97f695af068e66168374ad2e994c7100b4442d06984032c7fc`,
 `sha256:4a33777d8bb5cf515137b6539eaefab36229c5c345848bbc6be1d7a55b132acf`, and
 `sha256:d028537891400c806dff4f7a4d7be3b3e783381369052b7d8079fdfd10759b73`.
+The current M09-T12 neutral inventory and semantic impact graph are pinned at
+`sha256:c1d3eb2b4b56e9a97d700f89ac0c0ff9c24bf158c3d18bd8e3d40c9c52b63eb7` and
+`sha256:97099a5cb52895eb80d095e99bf18838688d8a0aecf7af49993f0077466558c5`. The full prerequisite,
+leaf, retained-plan, workload-set, selector, and runner projections remain machine-owned
+authorities and are not inferred from these two digests or aggregate counts.
+The exact current CI contract, prerequisite, ordered-leaf, distinct-leaf, retained-plan,
+workload-id, ordered-equivalence, T12-closure, required-plan, and shadow-plan authorities are
+`sha256:92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014`,
+`sha256:2e1232681017a4e580acea5c523c07ee766175b8b1097c7a865ada56a3310a35`,
+`sha256:cd11dc7cfac0fcb117572d2cd6a239fa20f3d31b3c1c8ca22f4dc34439aadc0d`,
+`sha256:f90a95cc791a26eb2170f3af27da743223d1458663dfcf3a2f657988cd7db278`,
+`sha256:0cf877430268ce6b4518999361d4867bc69dbffd81637f3935100793b7cf6fa2`,
+`sha256:ae68e7156d0fcd08ed61ec5820261e175211db3944b496379fdbe5746a759b0e`,
+`sha256:8799636c57969e7afebb65ce702dae6f08d9334e6f0a204a15d500b26358ad63`,
+`sha256:bc7ef479fb426e6a61d6589c27dd5b3bcb4ff4593e0810f4f01be110650ad0f2`,
+`sha256:b67aee6813b36d63dcdfe8c7d2fd9d6b4ee398cce6773b8f9336a03f324e03bb`, and
+`sha256:230b004ecbd81c0be68456c4ad15326b8473177cf927f5dc330fdc8fdf7c152c`.
+Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
+`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+artifacts and 94 current readers. The promoted selector and independently verified required runner
+are pinned at `sha256:d15cfbd9c7de2bea53eefbe58bb7aa23a9138559a8a1989c6c02c508df843cd1` and
+`sha256:e3ac0368a8163e83b85ba05176d142abc03cbe3786a5dd306534001c7c1f96e3`.
+The exact current Design/Run affected-selection plan is independently pinned at
+`sha256:d8a6ccf3ace5cff7f954b7e18043e9567a47c86c4774b66977ab3a2b573f4409`.
+The 51-checkpoint manifest reseals changed reader indexes 70–93. Its appended T12 proof library and
+root reader are exactly 55,293 bytes at
+`sha256:3fd171a97c6dfc7e5dadc70bbaececd157b4209270d8f2bb8c65237d19f4948a` and 21,588 bytes at
+`sha256:9c6ca5bbc6234c87b73d9fb9d139e48a7ccf207f9888f43c000afc4e3835fda8`.
 The historical M09-T07 selector-only semantic impact graph is pinned independently as
 `sha256:905d22e40524d26eac056ca32236f0948910a7ac6049b0d35c644f19e629d668`.
 The historical M09-T07 successor contains 176 proof-owned reader paths across 1,192 tracked paths.
@@ -142,13 +173,17 @@ Its exact path set and ownership projection are pinned at
 `sha256:75f780c0c2afdfdaedfdd653cc3f36128dc968639d536085eb9b52a72f5f7de6` and
 `sha256:eee064ac0466c87d117b4219ad76365fda288a980c61ab701342f0514777c9ab`.
 Its exact path set, category projection, selector, and runner digests remain machine-verified CI
-authorities rather than values inferred from those totals. The current M09-T11 successor contains
+authorities rather than values inferred from those totals. The historical M09-T11 successor contains
 184 proof-owned reader paths across 1,232 tracked paths. Its path set and ownership projection are
 `sha256:3d77bb0de542b1d153deb9fb87f2ba5adbc45e2153d9b156074026b04a755fff` and
 `sha256:86e1d1555580e1496686f11858c1bd4b69ce7b0f84a429b930ee9dc1c0f1f153`; category counts are
 `184 / 45 / 31 / 136 / 476 / 221 / 128 / 11` in the order above. The prior M08-T10 and
 M09-T01–M09-T10 ownership receipts remain historical rather than being presented as the M09-T11
-successor.
+successor. The current M09-T12 successor contains 186 proof-owned reader paths across 1,243
+tracked paths. Its path set and ownership projection are
+`sha256:f216ba32517fd708d24b9d78035894e20951f5cd420d419a66e5ce0b813881c5` and
+`sha256:6511d79ff42cb84dd303f771b821a061cd89c72462dddf2ccd3966397c602983`; category counts are
+`186 / 45 / 31 / 137 / 481 / 223 / 129 / 11` in the order above.
 The preceding M07-T03 retained/neutral workload-set equality receipt remains historically pinned as
 `sha256:49977fca154b0bf06639b8e3f0b667d04e060603cc14ec99660c8c434b7f5edb`, and its ordered
 projection is pinned as
@@ -170,7 +205,7 @@ The historical M09-T10 selector and required promotion-runner authorities are in
 `sha256:2b961ae5105aa1959f7983f37f83b15f9dd030c052cc547069c2acab54ff0761` and
 `sha256:bc45f16ec8cec627f13ddda6faa29e3cc4b443618748b2475039490ad50fdb5d`; neither is inferred
 from the other's success.
-The current M09-T11 required plan, shadow plan, and selector authorities are independently pinned
+The historical M09-T11 required plan, shadow plan, and selector authorities are independently pinned
 at `sha256:e0933cb5f272fbc2aba058ac5a6c256a23f14bc4cfe8018c8b919c3851f92cac`,
 `sha256:01aadef839eec54e43b252d4bdfea183ac0256806399d3f71c898451fa7a33ff`, and
 `sha256:be2ef9371615a503515df2d111107b8c885c6661b95b24d71ebc56c99991672a`; the required runner
@@ -285,9 +320,12 @@ those counts. Its required, shadow, workload-set, and ordered-equivalence projec
 `sha256:55a04119bc9b6a3041d24ede83d36613ac7dac98cd871cded240387952ce750e`,
 `sha256:997c1d93c209defe69668b4ac913078f7d2e2c7c1d807900e589b54e1af38a43`, and
 `sha256:d202066339b60259cbb07705702e0cebf1773c8577aa12f2d3328cd515eb0273`. These local receipts
-make no hosted M09-T10 pass claim. The current M09-T11 successor contains 92 proof pairs and 194
+make no hosted M09-T10 pass claim. The historical M09-T11 successor contains 92 proof pairs and 194
 normalized single-pass workloads, split into 81 ordinary pairs and 11 barriers; its exact
 projections remain code-owned and are not inferred from those totals.
+The current M09-T12 successor contains 93 proof pairs and 196 normalized single-pass workloads,
+split into 82 ordinary pairs and 11 barriers. Its connected closure contains 60 proof units and
+130 workloads; exact projections remain code-owned and are not inferred from these totals.
 
 `SIGINT` and `SIGTERM` become permanent cancellation state, are forwarded to the active process
 group, stop later steps, and preserve exit codes 130 and 143. This prevents a superseded workflow
@@ -808,12 +846,21 @@ suite, artifact verification, and root proof.
 
 The M09-T11 `desen-app-fixtures-scenarios-fidelity` pair is ordinary and non-barrier. Its exact
 formal impact parents are `desen-app-design-run-modes`, `reference-sign-in-fixtures-and-host-binding`,
-and `reference-catalog-web-parity`; the current connected closure contains 59 proof units and 128
+and `reference-catalog-web-parity`; the historical connected closure contains 59 proof units and 128
 workloads. Its verifier is `PROOF_READ_ONLY`; its root mutation test is
 `PROOF_OS_TEMP_ISOLATED` and receives only `NODE_TEST_HARNESS`. Neither workload receives
 workspace-write, listener-port, native-addon, filesystem-compatibility, or verifier runtime-probe
 authority. Its local wrapper authenticates all three exact parents before App typecheck/build, the
 86-case focused suite, artifact verification, and the 11-case root proof.
+
+The M09-T12 `desen-app-source-persistence` pair is ordinary and non-barrier. Its exact formal impact
+parents are `desen-app-shell-navigation`, `editor-core-persistence`, and
+`desen-app-fixtures-scenarios-fidelity`; the current connected closure contains 60 proof units and
+130 workloads. Its verifier is `PROOF_READ_ONLY`; its root mutation test is
+`PROOF_OS_TEMP_ISOLATED` and receives only `NODE_TEST_HARNESS`. Neither workload receives
+workspace-write, listener-port, native-addon, filesystem-compatibility, or verifier runtime-probe
+authority. Its local wrapper authenticates all three exact parents before App build, typecheck, the
+136-case focused persistence suite, artifact verification, and the 12-case root mutation proof.
 
 Only these verifier proofs receive both runner-owned temp-write and child-runtime-probe authority:
 
@@ -1225,6 +1272,35 @@ ownership, and remaining touched-CI suites pass 73/73, 19/19, 56/56, 15/15, and 
 N-035 and S-001 are `TESTED`; PF-028 is `CLOSED`; P-08 remains `NOT_PROVEN`, P-09 and
 P-10 remain `PARTIAL`, N-036 remains `PLANNED`, and PF-025, PF-083, and PF-089 remain `OPEN`;
 implementation progress is 106/145 (73%), M09 is 11/14 (79%), and M09-T12 is next.
+The M09-T12 focused five-file persistence, complete App, and independent root mutation suites pass
+140/140, 322/322, and 12/12 locally. The task artifact is exactly 27,088 bytes at
+`sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`. The task proof also pins
+complete canonical Source dirty authority rather than identity/version, same-value/revert
+cleanliness, successful Open/Save baselines, current-vs-dispatched-save-snapshot settlement, and
+centralized commits. Its rerender-safe no-port projection admits pristine navigation. The exact
+clean label is `Local draft unchanged`. Edited no-port and port-backed dirty drafts are guarded for
+the current surface/controller lifetime. The proof also pins exact own-enumerable settlement
+capture without accessor invocation, fresh frozen copies of valid optional diagnostics, exact CAS
+generation validation, retryable draft-retaining malformed Open, indeterminate reopen-locked
+malformed Save, and post-reflection/admission authority fences against reentrant stale publication.
+The live exhaustive
+authority contains 196 workloads and 93 proof pairs—82 ordinary and 11 barriers—with a
+60-proof-unit/130-workload connected closure and ownership over 1,243 tracked paths, including 186
+proof-owned paths. Its neutral inventory, semantic impact graph, path set, and ownership projection
+are pinned at `sha256:c1d3eb2b4b56e9a97d700f89ac0c0ff9c24bf158c3d18bd8e3d40c9c52b63eb7`,
+`sha256:97099a5cb52895eb80d095e99bf18838688d8a0aecf7af49993f0077466558c5`,
+`sha256:f216ba32517fd708d24b9d78035894e20951f5cd420d419a66e5ce0b813881c5`, and
+`sha256:6511d79ff42cb84dd303f771b821a061cd89c72462dddf2ccd3966397c602983`.
+No required-gate, hosted-CI, concrete App storage adapter, diagnostics, publication/activation, or
+automated real-browser E2E result is claimed in this standard. M09-T12 is `DONE`; `N-012`,
+`N-018`, and `S-003` remain `TESTED` with App-consumption evidence; P-08 remains `NOT_PROVEN`,
+P-09/P-10 remain `PARTIAL`, and PF-085/PF-089 remain `OPEN`; implementation progress is 107/145
+(74%), M09 is 12/14 (86%), proof gates remain 10/13, and M09-T13 is next.
+Sequence 51 advances exact sequence-50 predecessor
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
+`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 artifacts and
+94 readers. Checkpoint, promotion, selector plus required-affected, ownership, and remaining
+touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and 128/128—294/294 combined.
 Global progress and next-task ownership remain in the project status documents.
 `DEBT-I07-007` keeps the sequential runner, rollback-only equivalence adapter, and other rollback
 references under I07-05 until their exact machine-checked removal conditions in

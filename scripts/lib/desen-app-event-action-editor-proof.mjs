@@ -20,6 +20,8 @@ const EDITOR_EVENT_ACTION_ARTIFACT_PATH =
 const DESIGN_RUN_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json";
 const FIXTURES_SCENARIOS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
+const SOURCE_PERSISTENCE_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const LOCKFILE_PATH = "pnpm-lock.yaml";
@@ -92,7 +94,28 @@ const TRACKED_PATHS = Object.freeze([
   ...PROOF_READER_PATHS,
 ]);
 
+const T12_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/persistence-controls.tsx",
+  "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/state-panel.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-persistence.test.ts",
+  "apps/desen-app/test/inspector-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+  "apps/desen-app/test/persistence-controls.test.tsx",
+  "apps/desen-app/test/project-navigation.test.ts",
+  "apps/desen-app/test/state-panel.test.tsx",
+]);
+
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ...T12_SUCCESSOR_RECEIPT_PATHS,
   ROOT_PACKAGE_PATH,
   APP_PACKAGE_PATH,
   LOCKFILE_PATH,
@@ -112,6 +135,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     ...SUCCESSOR_COMPATIBILITY_PATHS,
     DESIGN_RUN_ARTIFACT_PATH,
     FIXTURES_SCENARIOS_ARTIFACT_PATH,
+    SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    ...T12_SUCCESSOR_RECEIPT_PATHS,
   ]),
 ]);
 
@@ -566,7 +591,7 @@ function inspectApplicationSource(source) {
       "function editSelectedEventAction(",
       "const result = applyAuthoringEventActionEdit(",
       "const nextPreview = prepareAuthoringPreviewBundle(result.document)",
-      "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
+      "commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
       "<EventActionPanel",
       "model={eventActionModel}",
       "onEdit={onEventActionEdit}",
@@ -700,7 +725,7 @@ function inspectEventActionCommitFlow(source) {
   );
   const commitIndexes = [];
   matches[0].body.forEachChild(function collectCommits(node) {
-    if (ts.isCallExpression(node) && callName(node) === "setAuthoringSession") {
+    if (ts.isCallExpression(node) && callName(node) === "commitAuthoringSession") {
       const owningStatementIndex = statements.findIndex(
         (statement) => statement.pos <= node.pos && node.end <= statement.end,
       );
@@ -1221,6 +1246,166 @@ function authenticateDesignRunSuccessor(files) {
   });
 }
 
+function authenticateSourcePersistenceSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T12",
+    proofId: "desen-app-source-persistence",
+    profile: "desen.app.source-persistence-proof.v1",
+    result: "PASS",
+    path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    bytes: 27_088,
+    sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+  });
+  const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  )
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T12 source-persistence artifact drifted.");
+  const artifact = parseJson(artifactBytes, SOURCE_PERSISTENCE_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  const persistenceCommand =
+    "vitest run test/authoring-persistence.test.ts test/persistence-controls.test.tsx test/persistence-application.test.tsx test/project-navigation.test.ts test/application.test.tsx";
+  const appPackage = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
+  const persistenceControlsSource = decodeUtf8(
+    files.get("apps/desen-app/src/persistence-controls.tsx"),
+    "apps/desen-app/src/persistence-controls.tsx",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.publicEditorCorePersistencePort !== true ||
+    artifact.claim?.exactProjectScopedSourceKey !== "account-app-source" ||
+    artifact.claim?.authoredSourceOnly !== true ||
+    artifact.claim?.sourceKeyIndependentOfDocumentId !== true ||
+    artifact.claim?.awaitedSettlementsCapturedAsExactOwnEnumerableData !== true ||
+    artifact.claim?.settlementAccessorInvocation !== false ||
+    artifact.claim?.validOptionalDiagnosticDataCopiedAndFrozen !== true ||
+    artifact.claim?.casGenerationRelationshipsValidated !== true ||
+    artifact.claim?.openedDocumentReauthorized !== true ||
+    artifact.claim?.failedOrRejectedOpenPreservesDraft !== true ||
+    artifact.claim?.malformedOpenRetryableAndDraftPreserved !== true ||
+    artifact.claim?.generationExhaustionRequiresReopen !== true ||
+    artifact.claim?.automaticRetryOrMerge !== false ||
+    artifact.claim?.unexpectedDispatchedSaveIndeterminate !== true ||
+    artifact.claim?.malformedSaveIndeterminateAndReopenRequired !== true ||
+    artifact.claim?.staleOpenCannotReplaceEditedSession !== true ||
+    artifact.claim?.staleLifetimeSettlementIgnored !== true ||
+    artifact.claim?.postReflectionAndAdmissionAuthorityRechecked !== true ||
+    artifact.claim?.reentrantSettlementCannotPublishRevokedState !== true ||
+    artifact.claim?.dirtyOpenRequiresExplicitConfirmation !== true ||
+    artifact.claim?.designModeOnlyControls !== true ||
+    artifact.claim?.visibleGenerationDirtyAndReopenState !== true ||
+    artifact.claim?.completeAuthoredSourceCanonicalDirtyComparison !== true ||
+    artifact.claim?.identityOrVersionDirtyAuthority !== false ||
+    artifact.claim?.sameCanonicalReplacementRemainsClean !== true ||
+    artifact.claim?.canonicalRevertReturnsClean !== true ||
+    artifact.claim?.successfulOpenOrSaveEstablishesCanonicalBaseline !== true ||
+    artifact.claim?.newerEditRemainsDirtyAfterOlderSave !== true ||
+    artifact.claim?.centralizedAuthoringSessionCommit !== true ||
+    artifact.claim?.noPortCanonicalBaselineAndCurrentTracked !== true ||
+    artifact.claim?.noPortDirtyProjectionRerenderSafe !== true ||
+    artifact.claim?.cleanNoPortLabelAccurate !== true ||
+    artifact.claim?.pristineNoPortNavigationAdmitted !== true ||
+    artifact.claim?.editedNoPortDraftNavigationAndPageExitGuarded !== true ||
+    artifact.claim?.openAdmissionAtomic !== true ||
+    artifact.claim?.createUpdateUnchangedGenerationCas !== true ||
+    artifact.claim?.conflictOrIndeterminateRequiresReopen !== true ||
+    artifact.claim?.navigationAndPageExitGuarded !== true ||
+    artifact.claim?.scenarioPreviewPersisted !== false ||
+    artifact.claim?.runtimeInputOrSecretPersisted !== false ||
+    artifact.claim?.concretePersistenceAdapterClaimed !== false ||
+    !persistenceControlsSource.includes('return "Local draft unchanged";') ||
+    artifact.tests?.focusedTestCases !== 140 ||
+    artifact.tests?.fullAppTestFiles !== 22 ||
+    artifact.tests?.fullAppTestCases !== 322 ||
+    artifact.boundary?.trackedFiles !== 35 ||
+    artifact.boundary?.parentArtifacts !== 3 ||
+    artifact.boundary?.focusedAppTestCases !== 140 ||
+    artifact.boundary?.fullAppTestFiles !== 22 ||
+    artifact.boundary?.fullAppTestCases !== 322 ||
+    trackedReceipts?.length !== 35 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    appPackage.scripts?.["test:persistence"] !== persistenceCommand
+  )
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T12 source-persistence identity or claims drifted.",
+    );
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    )
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T12 receipt drifted: ${relativePath}.`);
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    focusedTestCases: 140,
+    fullAppTestFiles: 22,
+    fullAppTestCases: 322,
+    exactProjectScopedSourceKey: "account-app-source",
+    publicEditorCorePersistencePort: true,
+    authoredSourceOnly: true,
+    sourceKeyIndependentOfDocumentId: true,
+    awaitedSettlementsCapturedAsExactOwnEnumerableData: true,
+    settlementAccessorInvocation: false,
+    validOptionalDiagnosticDataCopiedAndFrozen: true,
+    casGenerationRelationshipsValidated: true,
+    openedDocumentReauthorized: true,
+    failedOrRejectedOpenPreservesDraft: true,
+    malformedOpenRetryableAndDraftPreserved: true,
+    generationExhaustionRequiresReopen: true,
+    automaticRetryOrMerge: false,
+    unexpectedDispatchedSaveIndeterminate: true,
+    malformedSaveIndeterminateAndReopenRequired: true,
+    staleOpenCannotReplaceEditedSession: true,
+    staleLifetimeSettlementIgnored: true,
+    postReflectionAndAdmissionAuthorityRechecked: true,
+    reentrantSettlementCannotPublishRevokedState: true,
+    dirtyOpenRequiresExplicitConfirmation: true,
+    designModeOnlyControls: true,
+    visibleGenerationDirtyAndReopenState: true,
+    completeAuthoredSourceCanonicalDirtyComparison: true,
+    identityOrVersionDirtyAuthority: false,
+    sameCanonicalReplacementRemainsClean: true,
+    canonicalRevertReturnsClean: true,
+    successfulOpenOrSaveEstablishesCanonicalBaseline: true,
+    newerEditRemainsDirtyAfterOlderSave: true,
+    centralizedAuthoringSessionCommit: true,
+    noPortCanonicalBaselineAndCurrentTracked: true,
+    noPortDirtyProjectionRerenderSafe: true,
+    cleanNoPortLabelAccurate: true,
+    cleanNoPortStatusText: "Local draft unchanged",
+    pristineNoPortNavigationAdmitted: true,
+    editedNoPortDraftNavigationAndPageExitGuarded: true,
+    openAdmissionAtomic: true,
+    createUpdateUnchangedGenerationCas: true,
+    conflictOrIndeterminateRequiresReopen: true,
+    navigationAndPageExitGuarded: true,
+    scenarioPreviewPersisted: false,
+    runtimeInputOrSecretPersisted: false,
+    concretePersistenceAdapterClaimed: false,
+    persistenceCommand,
+  });
+}
+
 function authenticateFixturesScenariosSuccessor(files) {
   const artifactBytes = files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH);
   if (
@@ -1263,6 +1448,7 @@ function authenticateFixturesScenariosSuccessor(files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    if (T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const authority = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -1419,6 +1605,7 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
   const packageContract = inspectPackages(files);
   const successor = authenticateDesignRunSuccessor(files);
   const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
+  const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-event-action-editor",
@@ -1447,6 +1634,7 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
     source,
     successor,
     fixturesScenariosSuccessor,
+    sourcePersistenceSuccessor,
     retainedAuthoringUx: {
       rootSafeDefaultPlacementTarget: source.application.retainedRootSafeDefaultPlacementTarget,
       explicitChangeTarget: source.application.retainedExplicitChangeTarget,

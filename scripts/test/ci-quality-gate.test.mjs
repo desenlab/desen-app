@@ -332,17 +332,17 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 92,
-    verifierCount: 92,
-    rootTestCount: 92,
+    proofCount: 93,
+    verifierCount: 93,
+    rootTestCount: 93,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
-    legacyPrerequisiteCount: 703,
-    legacyPrerequisiteSha256: "4c086021423a728182e484e4ca218f419b58ae66a0b1a6607f1c5f4a1d677f09",
-    legacyLeafInvocationCount: 4491,
-    legacyLeafInvocationSha256: "3daf978eeb28f95aa523c54f5c1ad19cdb4fe81add9a53a971996f550f33e1cb",
-    distinctLeafWorkloadCount: 308,
-    distinctLeafWorkloadSha256: "239097eb37432275fe71f5a14d8f6ec8688be5db11a2961cf8e8b503e8bcb175",
+    legacyPrerequisiteCount: 715,
+    legacyPrerequisiteSha256: "2e1232681017a4e580acea5c523c07ee766175b8b1097c7a865ada56a3310a35",
+    legacyLeafInvocationCount: 4505,
+    legacyLeafInvocationSha256: "cd11dc7cfac0fcb117572d2cd6a239fa20f3d31b3c1c8ca22f4dc34439aadc0d",
+    distinctLeafWorkloadCount: 311,
+    distinctLeafWorkloadSha256: "f90a95cc791a26eb2170f3af27da743223d1458663dfcf3a2f657988cd7db278",
     testConfigurationFileCount: 0,
     workspaceTestScriptCount: 16,
     workspaceTestScriptSha256: "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab",
@@ -708,6 +708,19 @@ test("direct proof-verifier prerequisites require their exact reviewed proof and
     (error) =>
       error instanceof QualityGateError && /unclassified legacy prerequisite/u.test(error.message),
   );
+
+  const persistenceInventory = await currentInventory();
+  persistenceInventory.packageJson = clone(persistenceInventory.packageJson);
+  persistenceInventory.packageJson.scripts["verify:desen-app-source-persistence"] =
+    persistenceInventory.packageJson.scripts["verify:desen-app-source-persistence"].replace(
+      "node scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs",
+      "node scripts/verify-desen-app-design-run-modes.mjs",
+    );
+  assert.throws(
+    () => validateProofInventory(persistenceInventory),
+    (error) =>
+      error instanceof QualityGateError && /unclassified legacy prerequisite/u.test(error.message),
+  );
 });
 
 test("inventory validation rejects hidden test configuration and manifest overrides", async () => {
@@ -768,8 +781,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 194);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 92);
+  assert.equal(steps.length, 196);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 93);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -998,6 +1011,24 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
       ],
     },
   );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "verify-desen-app-source-persistence"),
+    {
+      id: "verify-desen-app-source-persistence",
+      label: "Proof verifier: desen-app-source-persistence",
+      command: "node",
+      args: ["scripts/verify-desen-app-source-persistence.mjs"],
+    },
+  );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "test-desen-app-source-persistence"),
+    {
+      id: "test-desen-app-source-persistence",
+      label: "Root proof and mutation test: desen-app-source-persistence",
+      command: "node",
+      args: ["--test", "--test-concurrency=1", "tests/desen-app-source-persistence.test.mjs"],
+    },
+  );
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -1018,8 +1049,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 194,
-    planSha256: "397b9268dfe5e4c0dd22229ab95027f65278f1314eed16dd81fa9b5c66d346a5",
+    stepCount: 196,
+    planSha256: "0cf877430268ce6b4518999361d4867bc69dbffd81637f3935100793b7cf6fa2",
   });
 
   const missingTypecheck = clone(steps);

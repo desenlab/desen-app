@@ -3647,12 +3647,34 @@ This file records implementation discoveries without changing the frozen DESEN 0
   envelopes. The existing control plane remains the sole Node/SQLite/filesystem durability
   authority; editor-core gains no Node, DOM, React, HTTP, SQLite, or filesystem dependency.
 
-- Future action: M08-T09 must layer Catalog-backed continuous semantic diagnostics and invalid-node
-  mapping over an opened immutable Source without changing persistence generations. M08-T10 owns
-  terminal React/DOM integration and cross-command determinism. M09-T12 may consume only the public
-  persistence port for save/open UI; it must not depend on the local transport adapter's internal
-  response shapes or acquire storage-path authority. Any interoperable remote-storage or merge
-  protocol requires a later explicit profile.
+- M09-T12 App consumption: the exact `account-app/sign-in` route now derives one fixed
+  `account-app-source` key independently of `Source.id` and captures only the public
+  `DesenEditorPersistencePort` injected by the trusted host. Open reauthorizes the stored complete
+  Source, document identity, Catalog projection, surface, and publishable preview before atomic
+  replacement. Save dispatches only the immutable authored Source snapshot with its exact expected
+  generation. Conflict, exhaustion, and indeterminate commit require reopen; the App neither
+  retries nor merges and imports no Editor Web, control-plane, browser/native-storage, or
+  filesystem adapter. Scenario previews, fixture state, Runtime input, and secrets are excluded.
+  Complete admitted authored Source canonical content—not identity or document version—is the dirty
+  authority. Same-value replacements and canonical reverts are clean; successful Open/Save
+  establish baselines, current-vs-dispatched-save-snapshot settlement preserves newer edits, and
+  `reopenRequired` remains authoritative. One centralized authored-session commit path updates
+  surface-owned canonical baseline/current refs and a rerender-safe no-port projection. Pristine
+  no-port navigation is admitted as `Local draft unchanged`; edited no-port and port-backed dirty
+  drafts require explicit admission for the current surface/controller lifetime, and stale
+  edit/lifetime/host settlements cannot replace current state. Settlements are captured from exact
+  own enumerable data without invoking accessors; valid optional diagnostic pointer, context, and
+  subject data is copied into fresh frozen values, and exact CAS generation relationships are
+  validated. Malformed Open stays controlled and retryable while retaining the draft; malformed
+  Save becomes indeterminate and requires reopen. Authority is held and rechecked after settlement
+  reflection and opened-document admission so reentrant edits or disposal cannot publish stale or
+  revoked results. Evidence:
+  `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`
+  `sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`.
+- Future action: M09-T13 must layer node-linked diagnostics without changing persistence
+  generations, and M09-T14 must publish only the exact admitted authored/persisted Source. A
+  concrete App host adapter, interoperable remote-storage profile, or merge protocol still
+  requires a separate explicit profile; PF-085 therefore remains `OPEN`.
 
 ## PF-086 — Continuous editor diagnostics require explicit subjects and snapshot identities
 
@@ -3808,10 +3830,21 @@ This file records implementation discoveries without changing the frozen DESEN 0
   `same`/`equivalent`/`approximate`/`undeclared`, with every declared approximate difference
   visible and missing or invalid metadata mapped to `undeclared`.
 
-- Future action: M09-T12 must persist only the authored Source, never a transient scenario preview
-  or fixture lifecycle. M09-T14 must publish only the authored/persisted Source through the public
-  Publisher and control-plane boundaries. M10-T02–M10-T04 own automated browser evidence for
-  pending, failure, success, navigation, and a separately authorized real host operation binding.
-  M12-T04 still owns the repository-wide secret/synthetic-data audit for N-036. A future protocol
-  revision should standardize preview-context or scenario-persistence semantics only if they must
-  interoperate across editors.
+- M09-T12 persistence consumption: the App saves only the controller's immutable authored Source
+  snapshot. The transient scenario preview, fixture lifecycle, Runtime operation input, and secrets
+  never enter the public Editor Core persistence request. A successful Open resets transient
+  selection/scenario presentation only after the exact stored authored Source and matching preview
+  are admitted atomically; failed and stale opens preserve the current draft. Complete canonical
+  authored Source content controls dirty state and the successful Open/Save baseline; canonical
+  same-value/revert transitions are clean, without persisting transient presentation. Exact
+  own-enumerable settlement capture avoids accessor execution, optional diagnostics are copied into
+  fresh frozen data, and post-reflection/admission authority fences prevent malformed or reentrant
+  settlements from publishing stale state. Evidence:
+  `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`
+  `sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`.
+- Future action: M09-T14 must publish only the authored/persisted Source through the public Publisher
+  and control-plane boundaries. M10-T02–M10-T04 own automated browser evidence for pending,
+  failure, success, navigation, and a separately authorized real host operation binding. M12-T04
+  still owns the repository-wide secret/synthetic-data audit for N-036. A future protocol revision
+  should standardize preview-context or scenario-persistence semantics only if they must
+  interoperate across editors; PF-089 remains `OPEN`.

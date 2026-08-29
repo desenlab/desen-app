@@ -29,6 +29,7 @@ const NAMED_SLOT_ARTIFACT_PIN_SHA256 =
   "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f";
 const FIXTURES_SCENARIOS_ARTIFACT =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
+const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let selectionSource;
@@ -525,5 +526,108 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[9], async () => {
       proofDocument: exactProofDocument(built.artifactSha256),
     }),
     expectedError("AUTHORITY_UNSAFE"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T12 persistence closure", async () => {
+  const successor = built.currentCompatibility.sourcePersistenceSuccessor;
+  assert.deepEqual(
+    {
+      artifact: successor.artifact,
+      focusedTestCases: successor.focusedTestCases,
+      fullAppTestFiles: successor.fullAppTestFiles,
+      fullAppTestCases: successor.fullAppTestCases,
+      sourceKey: successor.exactProjectScopedSourceKey,
+      publicPort: successor.publicEditorCorePersistencePort,
+      authoredSourceOnly: successor.authoredSourceOnly,
+      sourceKeyIndependentOfDocumentId: successor.sourceKeyIndependentOfDocumentId,
+      exactOwnSettlementCapture: successor.awaitedSettlementsCapturedAsExactOwnEnumerableData,
+      settlementAccessorInvocation: successor.settlementAccessorInvocation,
+      frozenOptionalDiagnosticCopy: successor.validOptionalDiagnosticDataCopiedAndFrozen,
+      casGenerationRelations: successor.casGenerationRelationshipsValidated,
+      openedDocumentReauthorized: successor.openedDocumentReauthorized,
+      failedOpenPreservesDraft: successor.failedOrRejectedOpenPreservesDraft,
+      malformedOpenRetryable: successor.malformedOpenRetryableAndDraftPreserved,
+      generationExhaustionRequiresReopen: successor.generationExhaustionRequiresReopen,
+      automaticRetryOrMerge: successor.automaticRetryOrMerge,
+      unexpectedSaveIndeterminate: successor.unexpectedDispatchedSaveIndeterminate,
+      malformedSaveReopenLock: successor.malformedSaveIndeterminateAndReopenRequired,
+      staleOpenCannotReplace: successor.staleOpenCannotReplaceEditedSession,
+      staleLifetimeIgnored: successor.staleLifetimeSettlementIgnored,
+      postSettlementAuthorityRecheck: successor.postReflectionAndAdmissionAuthorityRechecked,
+      reentrantSettlementCannotPublish: successor.reentrantSettlementCannotPublishRevokedState,
+      dirtyOpenConfirmation: successor.dirtyOpenRequiresExplicitConfirmation,
+      designModeOnlyControls: successor.designModeOnlyControls,
+      visiblePersistenceState: successor.visibleGenerationDirtyAndReopenState,
+      completeCanonicalDirty: successor.completeAuthoredSourceCanonicalDirtyComparison,
+      identityOrVersionDirtyAuthority: successor.identityOrVersionDirtyAuthority,
+      sameCanonicalReplacementRemainsClean: successor.sameCanonicalReplacementRemainsClean,
+      canonicalRevertReturnsClean: successor.canonicalRevertReturnsClean,
+      openOrSaveBaseline: successor.successfulOpenOrSaveEstablishesCanonicalBaseline,
+      currentVsSaveSnapshot: successor.newerEditRemainsDirtyAfterOlderSave,
+      noPortCanonicalTracking: successor.noPortCanonicalBaselineAndCurrentTracked,
+      noPortRerenderSafe: successor.noPortDirtyProjectionRerenderSafe,
+      cleanNoPortLabelAccurate: successor.cleanNoPortLabelAccurate,
+      cleanNoPortStatusText: successor.cleanNoPortStatusText,
+      navigationGuarded: successor.navigationAndPageExitGuarded,
+      scenarioPreviewPersisted: successor.scenarioPreviewPersisted,
+      runtimeInputOrSecretPersisted: successor.runtimeInputOrSecretPersisted,
+    },
+    {
+      artifact: {
+        task: "M09-T12",
+        proofId: "desen-app-source-persistence",
+        profile: "desen.app.source-persistence-proof.v1",
+        result: "PASS",
+        path: SOURCE_PERSISTENCE_ARTIFACT,
+        bytes: 27_088,
+        sha256: "75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544",
+      },
+      focusedTestCases: 140,
+      fullAppTestFiles: 22,
+      fullAppTestCases: 322,
+      sourceKey: "account-app-source",
+      publicPort: true,
+      authoredSourceOnly: true,
+      sourceKeyIndependentOfDocumentId: true,
+      exactOwnSettlementCapture: true,
+      settlementAccessorInvocation: false,
+      frozenOptionalDiagnosticCopy: true,
+      casGenerationRelations: true,
+      openedDocumentReauthorized: true,
+      failedOpenPreservesDraft: true,
+      malformedOpenRetryable: true,
+      generationExhaustionRequiresReopen: true,
+      automaticRetryOrMerge: false,
+      unexpectedSaveIndeterminate: true,
+      malformedSaveReopenLock: true,
+      staleOpenCannotReplace: true,
+      staleLifetimeIgnored: true,
+      postSettlementAuthorityRecheck: true,
+      reentrantSettlementCannotPublish: true,
+      dirtyOpenConfirmation: true,
+      designModeOnlyControls: true,
+      visiblePersistenceState: true,
+      completeCanonicalDirty: true,
+      identityOrVersionDirtyAuthority: false,
+      sameCanonicalReplacementRemainsClean: true,
+      canonicalRevertReturnsClean: true,
+      openOrSaveBaseline: true,
+      currentVsSaveSnapshot: true,
+      noPortCanonicalTracking: true,
+      noPortRerenderSafe: true,
+      cleanNoPortLabelAccurate: true,
+      cleanNoPortStatusText: "Local draft unchanged",
+      navigationGuarded: true,
+      scenarioPreviewPersisted: false,
+      runtimeInputOrSecretPersisted: false,
+    },
+  );
+  const artifactBytes = await readFile(path.join(ROOT, SOURCE_PERSISTENCE_ARTIFACT));
+  await assert.rejects(
+    buildDesenAppSelectionOverlayEvidence({
+      fileOverrides: new Map([[SOURCE_PERSISTENCE_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
 });

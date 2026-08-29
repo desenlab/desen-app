@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████████░░░░░░░` **106 / 145 tasks complete (73%)**
+**Overall:** `██████████████████░░░░░░░` **107 / 145 tasks complete (74%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `███████████░░░` **11 / 14 tasks complete (79%)**
+**M09:** `████████████░░` **12 / 14 tasks complete (86%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T12`
+**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T13`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -957,6 +957,70 @@ remain 10/13. N-035 and S-001 are `TESTED`; P-08 remains `NOT_PROVEN`, P-09 and 
 `PARTIAL`, N-036 remains `PLANNED`, PF-028 is `CLOSED`, and PF-025, PF-083, and PF-089 remain
 `OPEN`. Durable save/open, diagnostics, publication/activation, and automated real-browser E2E
 remain unclaimed. M09-T12 is next.
+
+M09-T12 adds Design-only Open/Save controls over a trusted-host-injected public Editor Core
+`DesenEditorPersistencePort`. The exact `account-app/sign-in` route owns one fixed
+`account-app-source` storage identity independently of `Source.id`. Open reauthorizes the complete
+stored document, Catalog projection, surface, and publishable preview before replacing the current
+authored session atomically. Failed, missing, wrong-document, and stale opens preserve the current
+draft.
+
+Awaited Open/Save settlements are captured only from exact own enumerable data descriptors without
+invoking accessors. Valid optional diagnostic pointers, contexts, and subjects are copied into fresh
+frozen data, and every CAS outcome must match the dispatched expected-generation relationship. A
+malformed Open becomes a controlled retryable failure that retains the draft; a malformed Save is
+indeterminate and requires reopen. Operation authority is rechecked after settlement reflection and
+opened-document admission, so a reentrant edit or disposal cannot publish stale state.
+
+Save sends only the controller's immutable authored Source snapshot with its exact expected
+generation. Create, update, and unchanged remain distinct CAS outcomes; conflict, exhausted
+generation, and indeterminate commit require an explicit reopen, with no automatic retry or merge.
+A complete admitted authored Source canonical value—not object identity or document version—is the
+dirty authority. Same-value replacements and canonical reverts are clean; successful Open and Save
+establish the baseline, and Save settlement compares current canonical content with the dispatched
+snapshot so newer edits stay dirty. `reopenRequired` continues to override canonical cleanliness
+until an admitted Open. Stale work cannot publish after an edit, route unmount, StrictMode replay,
+trusted-host replacement, or disposal. Catalog scenarios, fixtures, Runtime input, and secrets never
+enter the persistence request.
+
+Dirty Open requires explicit inline confirmation. One centralized authored-session commit path
+updates surface-owned canonical baseline/current refs and a rerender-safe no-port dirty projection.
+The current surface/controller guard admits pristine no-port navigation. Its exact clean label is
+`Local draft unchanged`. Edited no-port and port-backed dirty drafts require admission across App
+links and browser traversal, while `beforeunload` protects dirty page exit. Generation, dirty, pending,
+conflict/uncertainty, and reopen-required states stay visible without color-only meaning. The App
+deliberately supplies no concrete storage adapter; the trusted host owns that separate platform
+boundary.
+
+The focused persistence suite passes 140/140 across five files, the complete App suite passes
+322/322 across twenty-two files, and the independent root mutation proof passes 12/12. Exact
+evidence is the 27,088-byte
+[`desen-app-0.1.0-source-persistence.json`](docs/proof/artifacts/desen-app-0.1.0-source-persistence.json)
+at `sha256:75a7007c2fd60bd5da28c6f2175e9db7ebab763f67e8a7ca9eaaa03b468f7544`; the reviewed 4,800-byte
+report is [`DESEN-APP-SOURCE-PERSISTENCE.md`](docs/proof/DESEN-APP-SOURCE-PERSISTENCE.md) at
+`sha256:7b464620be5653de51f440d9498af0468ee8639fad805c3a8db2eb2c8fbe738e`. The artifact
+authenticates exact M09-T01, M08-T08, and M09-T11 parents and binds 35 current files without
+tracking historical App readers.
+
+The live local CI authority contains 196 workloads and 93 proof pairs—82 ordinary and 11 barriers—
+with a 60-proof-unit/130-workload connected closure. Ownership covers 1,243 tracked paths,
+including 186 proof-owned paths. Its neutral inventory, impact graph, path set, and ownership
+projection are pinned at `sha256:c1d3eb2b4b56e9a97d700f89ac0c0ff9c24bf158c3d18bd8e3d40c9c52b63eb7`,
+`sha256:97099a5cb52895eb80d095e99bf18838688d8a0aecf7af49993f0077466558c5`,
+`sha256:f216ba32517fd708d24b9d78035894e20951f5cd420d419a66e5ce0b813881c5`, and
+`sha256:6511d79ff42cb84dd303f771b821a061cd89c72462dddf2ccd3966397c602983`.
+Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
+`sha256:b84c6d734be40d6ef14c21be3d582c1ecead13040d8112cef711953be97e7ab7` across 47 frozen
+artifacts and 94 current readers. Checkpoint, promotion, selector plus required-affected,
+ownership, and remaining touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and
+128/128—294/294 combined.
+
+M09-T12 is `DONE`; implementation progress is 107/145 (74%), M09 is 12/14 (86%), and proof gates
+remain 10/13. `N-012`, `N-018`, and `S-003` remain `TESTED` with App-consumption evidence; P-08
+remains `NOT_PROVEN`, P-09 and P-10 remain `PARTIAL`, and PF-085/PF-089 remain `OPEN`.
+Node-linked diagnostics, publication/activation, a concrete App storage adapter, and automated
+real-browser E2E remain unproven. M09-T13 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge
