@@ -3,6 +3,15 @@ const ROUTE_SEGMENT = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const MAX_ROUTE_LENGTH = 256;
 const MAX_ROUTE_SEGMENT_LENGTH = 64;
 
+type DesenAppNavigationGuard = (destination: string) => boolean;
+
+interface InstalledNavigationGuard {
+  readonly guard: DesenAppNavigationGuard;
+  readonly owner: object;
+}
+
+let installedNavigationGuard: InstalledNavigationGuard | null = null;
+
 /** Closed route profile owned by the M09-T01 Desen App shell. */
 export type DesenAppRoute =
   | Readonly<{ readonly kind: "projects"; readonly pathname: "/projects" }>
@@ -101,15 +110,60 @@ export function readDesenAppServerLocation(): string {
   return "/projects";
 }
 
+/**
+ * Installs the current surface's synchronous navigation admission guard.
+ *
+ * @remarks A newer surface replaces the previous owner, while a stale cleanup can revoke only its
+ * own exact registration. Guard rejection and exceptions fail closed without changing history.
+ */
+export function installDesenAppNavigationGuard(guard: DesenAppNavigationGuard): () => void {
+  if (typeof guard !== "function") {
+    throw new TypeError("Desen App navigation guard must be a function.");
+  }
+  const owner = Object.freeze({});
+  installedNavigationGuard = Object.freeze({ guard, owner });
+  return () => {
+    if (installedNavigationGuard?.owner === owner) installedNavigationGuard = null;
+  };
+}
+
+function navigationIsAdmitted(destination: string): boolean {
+  const installed = installedNavigationGuard;
+  if (installed === null) return true;
+  try {
+    const guard = installed.guard;
+    return guard(destination) === true;
+  } catch {
+    return false;
+  }
+}
+
 /** Subscribes to browser traversal, fragment drift, and app-owned same-document navigation. */
 export function subscribeDesenAppNavigation(onStoreChange: () => void): () => void {
-  window.addEventListener("popstate", onStoreChange);
-  window.addEventListener("hashchange", onStoreChange);
-  window.addEventListener(DESEN_APP_NAVIGATION_EVENT, onStoreChange);
+  let acceptedLocation = readDesenAppLocation();
+
+  function receiveBrowserTraversal(): void {
+    const destination = readDesenAppLocation();
+    if (destination !== acceptedLocation && !navigationIsAdmitted(destination)) {
+      window.history.pushState(null, "", acceptedLocation);
+      return;
+    }
+    acceptedLocation = destination;
+    onStoreChange();
+  }
+
+  function receiveAppNavigation(): void {
+    acceptedLocation = readDesenAppLocation();
+    onStoreChange();
+  }
+
+  window.addEventListener("popstate", receiveBrowserTraversal);
+  window.addEventListener("hashchange", receiveBrowserTraversal);
+  window.addEventListener(DESEN_APP_NAVIGATION_EVENT, receiveAppNavigation);
   return () => {
-    window.removeEventListener("popstate", onStoreChange);
-    window.removeEventListener("hashchange", onStoreChange);
-    window.removeEventListener(DESEN_APP_NAVIGATION_EVENT, onStoreChange);
+    window.removeEventListener("popstate", receiveBrowserTraversal);
+    window.removeEventListener("hashchange", receiveBrowserTraversal);
+    window.removeEventListener(DESEN_APP_NAVIGATION_EVENT, receiveAppNavigation);
   };
 }
 
@@ -135,6 +189,7 @@ export function navigateDesenApp(pathname: string, replace = false): void {
     throw new TypeError("Desen App navigation requires one canonical shell route.");
   }
   if (readDesenAppLocation() === destination.pathname) return;
+  if (!navigationIsAdmitted(destination.pathname)) return;
   if (replace) {
     window.history.replaceState(null, "", destination.pathname);
   } else {

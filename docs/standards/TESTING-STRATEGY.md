@@ -189,7 +189,7 @@ contains 58 proof units and 126 workloads. M09-T08's three formal impact parents
 Exact plan, inventory, selector, runner, ownership, and checkpoint digests remain machine-verified
 CI authorities rather than values inferred from these counts.
 
-The current M09-T11 successor contains 194 workloads and 92 proof pairs, split into 81 ordinary
+The historical M09-T11 successor contains 194 workloads and 92 proof pairs, split into 81 ordinary
 pairs and 11 barriers. Its three formal impact parents are `desen-app-design-run-modes`,
 `reference-sign-in-fixtures-and-host-binding`, and `reference-catalog-web-parity`; the connected
 closure contains 59 proof units and 128 workloads. Exact plan, inventory, selector, runner,
@@ -205,6 +205,39 @@ Append-only proof-reader sequence 50 advances
 92 readers. The independently promoted selector and runner authorities are
 `sha256:b97d10bd27576ed5fc543dfd94fe7981cf2cf7bc2159aa6d431e2100312a6819` and
 `sha256:a9e640b59786e2ee8f16c7bbd1f14be895d1ec71050f25a8fca6ffbe85104d6e`.
+
+The current M09-T12 successor contains 196 workloads and 93 proof pairs, split into 82 ordinary
+pairs and 11 barriers. Its exact formal impact parents are `desen-app-shell-navigation`,
+`editor-core-persistence`, and `desen-app-fixtures-scenarios-fidelity`; the connected closure
+contains 60 proof units and 130 workloads. The neutral inventory and impact graph are pinned at
+`sha256:c1d3eb2b4b56e9a97d700f89ac0c0ff9c24bf158c3d18bd8e3d40c9c52b63eb7` and
+`sha256:97099a5cb52895eb80d095e99bf18838688d8a0aecf7af49993f0077466558c5`. These code-owned
+authorities, not totals inferred from prose, define the reviewed workload graph.
+The CI contract, 715-segment prerequisite inventory, 4,505-entry ordered leaf inventory,
+311-entry distinct leaf inventory, retained plan, workload-id set, ordered equivalence, exact T12
+closure, required plan, and shadow plan are respectively pinned at
+`sha256:92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014`,
+`sha256:2e1232681017a4e580acea5c523c07ee766175b8b1097c7a865ada56a3310a35`,
+`sha256:cd11dc7cfac0fcb117572d2cd6a239fa20f3d31b3c1c8ca22f4dc34439aadc0d`,
+`sha256:f90a95cc791a26eb2170f3af27da743223d1458663dfcf3a2f657988cd7db278`,
+`sha256:0cf877430268ce6b4518999361d4867bc69dbffd81637f3935100793b7cf6fa2`,
+`sha256:ae68e7156d0fcd08ed61ec5820261e175211db3944b496379fdbe5746a759b0e`,
+`sha256:8799636c57969e7afebb65ce702dae6f08d9334e6f0a204a15d500b26358ad63`,
+`sha256:bc7ef479fb426e6a61d6589c27dd5b3bcb4ff4593e0810f4f01be110650ad0f2`,
+`sha256:b67aee6813b36d63dcdfe8c7d2fd9d6b4ee398cce6773b8f9336a03f324e03bb`, and
+`sha256:230b004ecbd81c0be68456c4ad15326b8473177cf927f5dc330fdc8fdf7c152c`.
+Append-only proof-reader sequence 51 advances exact sequence-50 predecessor
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 frozen
+artifacts and 94 current readers. The promoted selector and independent required-runner authorities
+are pinned at `sha256:ff4cdbac5be5b545843ca1aaf9842630e41e4f96e3cfccfa67d10e62436f93c6` and
+`sha256:727e48f526547f6630d369b53b52da511bb1fb61389bbca1c36a757ad018bf93`.
+The exact current Design/Run affected-selection plan is independently pinned at
+`sha256:a59b853be95d7c834821d48786c8d3579552cb0eaebc571232cc06b43f4a9f4a`.
+The 51-checkpoint manifest reseals changed reader indexes 70–93. Its appended T12 proof library and
+root reader are exactly 56,014 bytes at
+`sha256:18c759c87011e4ed30b044eaa02b9ccf2cc9e4134c33f7cfd0f292070ffc5add` and 23,578 bytes at
+`sha256:baee083f499523e8d5ea47b322f2d1c162097c27b95897946e72dcb25e99f033`.
 
 The historical M08-T10 affected ownership covers 1,119 tracked paths at
 `sha256:4755d3f896dc904ea8572bbd84329916000daef09455a9927239e11eab0427a1`, including 162
@@ -257,11 +290,18 @@ tracked paths respectively. The historical M09-T10 authority contains 182 proof-
 1,218 tracked paths. Its exact ownership-category projection is
 `182 / 45 / 31 / 135 / 468 / 219 / 127 / 11` for proof unit, CI policy, dependency policy, frozen
 input, package/application, shared proof infrastructure, project documentation, and repository
-policy respectively. The current M09-T11 authority contains 184 proof-owned paths across 1,232
+policy respectively. The historical M09-T11 authority contains 184 proof-owned paths across 1,232
 tracked paths. Its path-set and ownership-projection digests are
 `sha256:3d77bb0de542b1d153deb9fb87f2ba5adbc45e2153d9b156074026b04a755fff` and
 `sha256:86e1d1555580e1496686f11858c1bd4b69ce7b0f84a429b930ee9dc1c0f1f153`; exact category counts
 are `184 / 45 / 31 / 136 / 476 / 221 / 128 / 11` in the same order.
+The current M09-T12 authority contains 186 proof-owned paths across 1,243 tracked paths. Its
+path-set and ownership-projection digests are
+`sha256:f216ba32517fd708d24b9d78035894e20951f5cd420d419a66e5ce0b813881c5` and
+`sha256:6511d79ff42cb84dd303f771b821a061cd89c72462dddf2ccd3966397c602983`; exact category counts
+are `186 / 45 / 31 / 137 / 481 / 223 / 129 / 11` for proof unit, CI policy, dependency policy,
+frozen input, package/application, shared proof infrastructure, project documentation, and
+repository policy.
 The 16 reviewed
 workspace test scripts are pinned by
 `sha256:4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab`. Contract and
@@ -718,11 +758,11 @@ and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact o
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04, G07,
-M08-T10, G08, and M09-T01–T11 are `DONE`; proof gates are 10/13, implementation progress is
-106/145, M08 is 10/10, M09 is 11/14, `N-012`, `N-014`, `N-018`, `N-035`, `N-042`, `S-001`,
+M08-T10, G08, and M09-T01–T12 are `DONE`; proof gates are 10/13, implementation progress is
+107/145, M08 is 10/10, M09 is 12/14, `N-012`, `N-014`, `N-018`, `N-035`, `N-042`, `S-001`,
 `S-002`, and `S-003` are `TESTED`, P-06 and P-18 are `PROVEN`, P-09 and P-10 are `PARTIAL`, P-08
-remains `NOT_PROVEN`, N-036 remains `PLANNED`, PF-028 is `CLOSED`, PF-025, PF-083, and PF-089
-remain `OPEN`, and M09-T12 is next. The
+remains `NOT_PROVEN`, N-036 remains `PLANNED`, PF-028 is `CLOSED`, PF-025, PF-083, PF-085, and
+PF-089 remain `OPEN`, and M09-T13 is next. The
 exact 30,014-byte M08-T05 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
 `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`; the report is
@@ -833,6 +873,26 @@ cleanup revocation, visible unavailable real contexts, and complete conservative
 disclosure. Durable persistence, diagnostics, publication/activation, and automated
 real-browser/native-drag E2E remain unproven. These are local task receipts rather than a
 required-gate or hosted-CI claim.
+The exact `27,053`-byte M09-T12 artifact is
+`docs/proof/artifacts/desen-app-0.1.0-source-persistence.json` at
+`sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`; the report is
+`docs/proof/DESEN-APP-SOURCE-PERSISTENCE.md`, exactly 5,009 bytes at
+`sha256:63d5d115e719ccdd91ecf68eea91bcd6f8c68c6513a8fbdea3bfd9f855637821`. Its focused five-file
+persistence, complete App, and independent root mutation suites pass 142/142, 324/324, and 12/12.
+It authenticates exact M09-T01, M08-T08, and M09-T11 parents and binds 35 current files without
+tracking historical App readers. It proves route-owned generation-guarded authored Source
+Open/Save, all-or-nothing open admission, stale-lifetime isolation, and complete canonical Source
+dirty authority rather than identity or version. It covers same-value/revert cleanliness,
+successful Open/Save baselines, current-vs-dispatched-save-snapshot settlement, centralized
+commits, rerender-safe no-port projection with the exact `Local draft unchanged` clean label,
+edited no-port and port-backed dirty-draft protection, and exclusion of
+scenario/fixture/Runtime-secret state. Settlement tests pin exact own-enumerable capture without
+accessor invocation, fresh frozen copies of valid optional diagnostics, exact CAS generation
+validation, retryable draft-retaining malformed Open, indeterminate reopen-locked malformed Save,
+and post-reflection/admission reentrant authority fences. A concrete App storage adapter,
+diagnostics,
+publication/activation, and automated real-browser E2E remain unproven. These are local task
+receipts rather than a required-gate or hosted-CI claim.
 The first hosted PR run exposed an isolation-fixture workspace-target symlink denied by Node's
 permission model. The resealed fixture uses only absolute runner-temporary targets, and the exact
 isolation suite passes 8/8 without permission widening. This is a corrective local receipt, not a
@@ -871,7 +931,7 @@ at `sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` wit
 readers. No required-gate, hosted-CI, fixtures/scenarios, persistence, diagnostics, publication,
 activation, or automated real-browser E2E result is inferred from those local receipts.
 The M09-T11 focused fixtures/scenarios/fidelity, complete App, and independent root suites pass
-86/86, 252/252, and 11/11. The current exhaustive authority contains 194 workloads and 92 proof
+86/86, 252/252, and 11/11. The historical exhaustive authority contains 194 workloads and 92 proof
 pairs—81 ordinary and 11 barriers—with a 59-proof-unit/128-workload closure and ownership over
 1,232 tracked paths, including 184 proof-owned paths. Sequence 50 advances
 `sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e` to
@@ -880,6 +940,17 @@ pairs—81 ordinary and 11 barriers—with a 59-proof-unit/128-workload closure 
 touched-CI suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally. No required-gate, hosted-CI, durable
 persistence, diagnostics, publication/activation, or automated real-browser/native-drag E2E result
 is inferred from those local receipts.
+The M09-T12 focused five-file persistence, complete App, and independent root mutation suites pass
+142/142, 324/324, and 12/12. The current exhaustive authority contains 196 workloads and 93 proof
+pairs—82 ordinary and 11 barriers—with a 60-proof-unit/130-workload closure and ownership over
+1,243 tracked paths, including 186 proof-owned paths. No required-gate, hosted-CI, concrete App
+storage adapter, diagnostics, publication/activation, or automated real-browser E2E result is
+inferred from those local receipts.
+Sequence 51 advances exact sequence-50 predecessor
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` to
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` across 47 artifacts and
+94 readers. Checkpoint, promotion, selector plus required-affected, ownership, and remaining
+touched-CI suites pass 74/74, 19/19, 58/58 (21 + 37), 15/15, and 128/128—294/294 combined.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one or more live readers through the reviewed checkpoint append procedure only when every previously pinned

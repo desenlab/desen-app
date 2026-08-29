@@ -34,6 +34,7 @@ const FIXTURE_TEST_PATH = "apps/desen-app/test/authoring-fixtures.test.ts";
 const APPLICATION_TEST_PATH = "apps/desen-app/test/application.test.tsx";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
+const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let sourcePolicyInput;
@@ -201,6 +202,8 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[5], () => {
 
 test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[6], () => {
   const application = built.artifact.authority.source.application;
+  const currentApplication = built.currentCompatibility.source.application;
+  const currentCss = built.currentCompatibility.source.css;
   const adapter = built.artifact.authority.source.adapter;
   assert.equal(application.scenarioSelectionDesignOnly, true);
   assert.equal(application.scenarioPreviewSeparateFromAuthoringSession, true);
@@ -211,6 +214,15 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[6], () => {
   assert.equal(application.oneGlobalLayerDropProjection, true);
   assert.equal(application.nestedSlotSurfaceOwnsDropEvents, true);
   assert.equal(application.layerMidpointHysteresis, 4);
+  assert.equal(currentApplication.draggableComponentCard, true);
+  assert.equal(currentApplication.separateNonDraggableComponentAddAction, true);
+  assert.equal(currentApplication.componentDropAdmissionLimitedToExplicitTarget, true);
+  assert.equal(currentApplication.componentPaletteOuterDropInert, true);
+  assert.equal(currentApplication.stableGlobalLayerDragSession, true);
+  assert.equal(currentApplication.globalLayerOwnerAndEpochFencing, true);
+  assert.equal(currentApplication.edgeScrollExactSlotRehitTesting, true);
+  assert.equal(currentCss.nestedLayerSlotsAndGlobalDragGuideVisible, true);
+  assert.equal(currentCss.draggableComponentCardAndSeparateAddActionVisible, true);
   assert.equal(adapter.hostPortIdentityInMountLifetime, true);
   assert.equal(adapter.sessionDisposedOnReplacement, true);
 });
@@ -223,6 +235,8 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[7], () => {
     "vitest run test/authoring-fixtures.test.ts test/authoring-scenarios.test.ts test/preview-fidelity.test.ts test/preview-controls.test.tsx test/adapter-canvas.test.tsx test/application.test.tsx",
   );
   assert.equal(Object.keys(built.artifact.application.package.rootCommands).length, 3);
+  assert.equal(built.currentCompatibility.tests.testCaseCounts[APPLICATION_TEST_PATH], 42);
+  assert.equal(built.currentCompatibility.tests.focusedTestCases, 88);
   assert.equal(built.artifact.boundary.focusedAppTestCaseCountPinned, true);
   assert.equal(built.artifact.boundary.finalCommandWiringPinned, true);
   assert.equal(built.artifact.tests.rootTestNames.length, 11);
@@ -329,6 +343,16 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
     },
     {
       key: "applicationSource",
+      search: 'import { flushSync } from "react-dom";',
+      replacement: 'import { createPortal } from "react-dom";',
+    },
+    {
+      key: "applicationSource",
+      search: "flushSync(() => {",
+      replacement: "queueMicrotask(() => {",
+    },
+    {
+      key: "applicationSource",
       search: 'data-layer-slot-surface="true"',
       replacement: 'data-layer-slot-surface="false"',
     },
@@ -339,8 +363,113 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
     },
     {
       key: "applicationSource",
-      search: "className={styles.componentDragHandle}",
-      replacement: "className={styles.componentGlyph}",
+      search: 'data-component-card="true"',
+      replacement: 'data-component-card="false"',
+    },
+    {
+      key: "applicationSource",
+      search: "draggable={enabled}",
+      replacement: "draggable={false}",
+    },
+    {
+      key: "applicationSource",
+      search: "className={styles.componentAddAction}",
+      replacement: "className={styles.componentItemAction}",
+    },
+    {
+      key: "applicationSource",
+      search: "draggable={false}",
+      replacement: "draggable={enabled}",
+    },
+    {
+      key: "applicationSource",
+      search: "event.preventDefault();\n                                event.stopPropagation();",
+      replacement: "event.preventDefault();",
+    },
+    {
+      key: "applicationSource",
+      search: "onDragOver={admitComponentDrop}",
+      replacement: "onDragOver={() => undefined}",
+    },
+    {
+      key: "applicationSource",
+      search:
+        'if (!componentDropReady) return;\n    event.stopPropagation();\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
+      replacement:
+        'if (!componentDropReady) return;\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
+    },
+    {
+      key: "applicationSource",
+      search: 'event.dataTransfer.dropEffect = "none"',
+      replacement: 'event.dataTransfer.dropEffect = "copy"',
+    },
+    {
+      key: "applicationSource",
+      search:
+        'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+      replacement:
+        'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        addComponent(dragIntent.componentId);',
+    },
+    {
+      key: "applicationSource",
+      search: "onDrop={receiveComponentDrop}",
+      replacement: "onDrop={() => undefined}",
+    },
+    {
+      key: "applicationSource",
+      search: "onClick={() => addComponent(component.id)}",
+      replacement: "onClick={() => undefined}",
+    },
+    {
+      key: "applicationSource",
+      search:
+        "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+      replacement: "const sessionOwnerKey = target.ownerId",
+    },
+    {
+      key: "applicationSource",
+      search: "pending.sessionEpoch !== currentSession.epoch",
+      replacement: "pending.sessionEpoch === currentSession.epoch",
+    },
+    {
+      key: "applicationSource",
+      search: "pending.ownerKey !== currentSession.ownerKey",
+      replacement: "pending.ownerKey === currentSession.ownerKey",
+    },
+    {
+      key: "applicationSource",
+      search: "document.elementFromPoint(pending.clientX, pending.clientY)",
+      replacement: "pending.eventTarget",
+    },
+    {
+      key: "applicationSource",
+      search: "hitSlotSurface !== pending.slotSurface",
+      replacement: "hitSlotSurface === pending.slotSurface",
+    },
+    {
+      key: "applicationSource",
+      search: "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
+      replacement: "dragSession.current = createAuthoringDragSession(current.epoch)",
+    },
+    {
+      key: "applicationSource",
+      search: "function clearUnclaimedDrop(): void {",
+      replacement: "function keepUnclaimedDrop(): void {",
+    },
+    {
+      key: "applicationCss",
+      search: ".layerDragGuide {",
+      replacement: ".removedLayerDragGuide {",
+    },
+    {
+      key: "applicationCss",
+      search: ".componentItem {",
+      replacement: ".removedComponentItem {",
+    },
+    {
+      key: "applicationCss",
+      search: ".componentAddAction {",
+      replacement: ".removedComponentAddAction {",
     },
     {
       key: "applicationSource",
@@ -508,5 +637,108 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[10], async () => {
       proofDocument,
     }),
     expectedError("AUTHORITY_UNSAFE"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T12 persistence closure", async () => {
+  const successor = built.currentCompatibility.sourcePersistenceSuccessor;
+  assert.deepEqual(
+    {
+      artifact: successor.artifact,
+      focusedTestCases: successor.focusedTestCases,
+      fullAppTestFiles: successor.fullAppTestFiles,
+      fullAppTestCases: successor.fullAppTestCases,
+      sourceKey: successor.exactProjectScopedSourceKey,
+      publicPort: successor.publicEditorCorePersistencePort,
+      authoredSourceOnly: successor.authoredSourceOnly,
+      sourceKeyIndependentOfDocumentId: successor.sourceKeyIndependentOfDocumentId,
+      exactOwnSettlementCapture: successor.awaitedSettlementsCapturedAsExactOwnEnumerableData,
+      settlementAccessorInvocation: successor.settlementAccessorInvocation,
+      frozenOptionalDiagnosticCopy: successor.validOptionalDiagnosticDataCopiedAndFrozen,
+      casGenerationRelations: successor.casGenerationRelationshipsValidated,
+      openedDocumentReauthorized: successor.openedDocumentReauthorized,
+      failedOpenPreservesDraft: successor.failedOrRejectedOpenPreservesDraft,
+      malformedOpenRetryable: successor.malformedOpenRetryableAndDraftPreserved,
+      generationExhaustionRequiresReopen: successor.generationExhaustionRequiresReopen,
+      automaticRetryOrMerge: successor.automaticRetryOrMerge,
+      unexpectedSaveIndeterminate: successor.unexpectedDispatchedSaveIndeterminate,
+      malformedSaveReopenLock: successor.malformedSaveIndeterminateAndReopenRequired,
+      staleOpenCannotReplace: successor.staleOpenCannotReplaceEditedSession,
+      staleLifetimeIgnored: successor.staleLifetimeSettlementIgnored,
+      postSettlementAuthorityRecheck: successor.postReflectionAndAdmissionAuthorityRechecked,
+      reentrantSettlementCannotPublish: successor.reentrantSettlementCannotPublishRevokedState,
+      dirtyOpenConfirmation: successor.dirtyOpenRequiresExplicitConfirmation,
+      designModeOnlyControls: successor.designModeOnlyControls,
+      visiblePersistenceState: successor.visibleGenerationDirtyAndReopenState,
+      completeCanonicalDirty: successor.completeAuthoredSourceCanonicalDirtyComparison,
+      identityOrVersionDirtyAuthority: successor.identityOrVersionDirtyAuthority,
+      sameCanonicalReplacementRemainsClean: successor.sameCanonicalReplacementRemainsClean,
+      canonicalRevertReturnsClean: successor.canonicalRevertReturnsClean,
+      openOrSaveBaseline: successor.successfulOpenOrSaveEstablishesCanonicalBaseline,
+      currentVsSaveSnapshot: successor.newerEditRemainsDirtyAfterOlderSave,
+      noPortCanonicalTracking: successor.noPortCanonicalBaselineAndCurrentTracked,
+      noPortRerenderSafe: successor.noPortDirtyProjectionRerenderSafe,
+      cleanNoPortLabelAccurate: successor.cleanNoPortLabelAccurate,
+      cleanNoPortStatusText: successor.cleanNoPortStatusText,
+      navigationGuarded: successor.navigationAndPageExitGuarded,
+      scenarioPreviewPersisted: successor.scenarioPreviewPersisted,
+      runtimeInputOrSecretPersisted: successor.runtimeInputOrSecretPersisted,
+    },
+    {
+      artifact: {
+        task: "M09-T12",
+        proofId: "desen-app-source-persistence",
+        profile: "desen.app.source-persistence-proof.v1",
+        result: "PASS",
+        path: SOURCE_PERSISTENCE_ARTIFACT,
+        bytes: 27_053,
+        sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
+      },
+      focusedTestCases: 142,
+      fullAppTestFiles: 22,
+      fullAppTestCases: 324,
+      sourceKey: "account-app-source",
+      publicPort: true,
+      authoredSourceOnly: true,
+      sourceKeyIndependentOfDocumentId: true,
+      exactOwnSettlementCapture: true,
+      settlementAccessorInvocation: false,
+      frozenOptionalDiagnosticCopy: true,
+      casGenerationRelations: true,
+      openedDocumentReauthorized: true,
+      failedOpenPreservesDraft: true,
+      malformedOpenRetryable: true,
+      generationExhaustionRequiresReopen: true,
+      automaticRetryOrMerge: false,
+      unexpectedSaveIndeterminate: true,
+      malformedSaveReopenLock: true,
+      staleOpenCannotReplace: true,
+      staleLifetimeIgnored: true,
+      postSettlementAuthorityRecheck: true,
+      reentrantSettlementCannotPublish: true,
+      dirtyOpenConfirmation: true,
+      designModeOnlyControls: true,
+      visiblePersistenceState: true,
+      completeCanonicalDirty: true,
+      identityOrVersionDirtyAuthority: false,
+      sameCanonicalReplacementRemainsClean: true,
+      canonicalRevertReturnsClean: true,
+      openOrSaveBaseline: true,
+      currentVsSaveSnapshot: true,
+      noPortCanonicalTracking: true,
+      noPortRerenderSafe: true,
+      cleanNoPortLabelAccurate: true,
+      cleanNoPortStatusText: "Local draft unchanged",
+      navigationGuarded: true,
+      scenarioPreviewPersisted: false,
+      runtimeInputOrSecretPersisted: false,
+    },
+  );
+  const artifactBytes = await readFile(path.join(ROOT, SOURCE_PERSISTENCE_ARTIFACT));
+  await assert.rejects(
+    buildDesenAppFixturesScenariosFidelityEvidence({
+      fileOverrides: new Map([[SOURCE_PERSISTENCE_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
 });

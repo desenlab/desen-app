@@ -20,6 +20,8 @@ const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slo
 const EVENT_ACTION_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json";
 const FIXTURES_SCENARIOS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
+const SOURCE_PERSISTENCE_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const LOCKFILE_PATH = "pnpm-lock.yaml";
@@ -95,7 +97,28 @@ const TRACKED_PATHS = Object.freeze([
   ...PROOF_READER_PATHS,
 ]);
 
+const T12_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/persistence-controls.tsx",
+  "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/state-panel.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-persistence.test.ts",
+  "apps/desen-app/test/inspector-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+  "apps/desen-app/test/persistence-controls.test.tsx",
+  "apps/desen-app/test/project-navigation.test.ts",
+  "apps/desen-app/test/state-panel.test.tsx",
+]);
+
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ...T12_SUCCESSOR_RECEIPT_PATHS,
   ROOT_PACKAGE_PATH,
   APP_PACKAGE_PATH,
   LOCKFILE_PATH,
@@ -110,7 +133,13 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
 ]);
 
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
-  ...new Set([...TRACKED_PATHS, EVENT_ACTION_ARTIFACT_PATH, FIXTURES_SCENARIOS_ARTIFACT_PATH]),
+  ...new Set([
+    ...TRACKED_PATHS,
+    EVENT_ACTION_ARTIFACT_PATH,
+    FIXTURES_SCENARIOS_ARTIFACT_PATH,
+    SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    ...T12_SUCCESSOR_RECEIPT_PATHS,
+  ]),
 ]);
 
 const RETAINED_HISTORICAL_PATHS = Object.freeze(
@@ -214,6 +243,8 @@ const EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
 
 const EXPECTED_APPLICATION_TEST_NAMES = Object.freeze([
   "snaps a native layer drag to the before or after half of a visible layer row",
+  "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+  "uses only the App-owned drag intent and ignores forged native transfer authority",
   "updates surface-local state and changes a compatible binding in the live preview",
   "keeps bound props explicit while boolean and numeric edits fail or apply atomically",
   "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
@@ -691,19 +722,37 @@ function inspectApplicationSource(source) {
       "function editSelectedBinding(edit: AuthoringInspectorBindingEdit)",
       "function editLocalState(edit: AuthoringStateEdit)",
       "prepareAuthoringPreviewBundle(result.document)",
-      "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
+      "commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
       "<aside",
       'aria-label="Authoring panel"',
       "<DesenAdapterCanvas",
       "<InspectorPanel",
       "onBindingEdit={editSelectedBinding}",
       "navigation, resources, storage, publication, activation, integration, and production calls remain blocked.",
-      "function acceptsDragIntent(",
+      "type AuthoringDropAdmission =",
+      "function evaluateDragIntent(",
+      "interface AuthoringDragSession {",
+      "function createAuthoringDragSession(epoch = 0): AuthoringDragSession",
+      "const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession())",
+      "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
       "function projectNearestDrop(",
-      "const midpoint =",
-      "clientY < midpoint",
-      "data-drop-hovered={dropReady && dropHovered}",
-      'data-drag-active={dragIntent?.kind === "component"}',
+      "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
+      "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+      "pending.sessionEpoch !== currentSession.epoch",
+      "pending.ownerKey !== currentSession.ownerKey",
+      "function clearUnclaimedDrop(): void {",
+      "className={styles.componentsView}",
+      'event.dataTransfer.dropEffect = "none"',
+      'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+      "className={styles.componentSlotTarget}",
+      "onDragOver={admitComponentDrop}",
+      "onDrop={receiveComponentDrop}",
+      'data-component-card="true"',
+      "className={styles.componentItem}",
+      "draggable={enabled}",
+      "className={styles.componentAddAction}",
+      "draggable={false}",
+      "onClick={() => addComponent(component.id)}",
       'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
       "sourceNodeId: result.nodeId",
     ],
@@ -711,7 +760,14 @@ function inspectApplicationSource(source) {
   );
   assertExcludes(
     source,
-    ["dataTransfer.getData", "document.elementFromPoint", "elementsFromPoint"],
+    [
+      "dataTransfer.getData",
+      "elementsFromPoint",
+      "function acceptsDragIntent(",
+      "panelDragEnterDepth",
+      "componentDragHandle",
+      'title="Drag anywhere in this panel to add"',
+    ],
     "application.tsx",
   );
   return deepFreeze({
@@ -723,8 +779,12 @@ function inspectApplicationSource(source) {
     bindingSourceAndPreviewCommitAtomically: true,
     publisherFailurePreservesPriorSession: true,
     stateAndInspectorChromeOutsideManagedCapabilitySubtree: true,
-    retainedNamedSlotRowHalfDropTargets: true,
-    retainedStickyComponentDropTarget: true,
+    stableGlobalLayerDragSession: true,
+    globalLayerOwnerAndEpochFencing: true,
+    explicitStickyComponentDropTarget: true,
+    componentPaletteOuterDropInert: true,
+    draggableComponentCard: true,
+    separateNonDraggableComponentAddAction: true,
     retainedInsertSelectionForDeleteDiscoverability: true,
     saveAuthority: false,
     publicationAuthority: false,
@@ -745,7 +805,7 @@ function inspectStatePanelSource(source) {
       'kind: "update"',
       'kind: "insert"',
       "publication are not available here.",
-      "State edits stay in this session until save is implemented.",
+      "State edits remain local until Save source succeeds.",
     ],
     "state-panel.tsx",
   );
@@ -795,12 +855,12 @@ function inspectCssSource(source) {
       ".stateCard",
       ".stateDeleteButton",
       ".stateReadonly",
-      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.5rem;",
-      '.slotBoundary[data-drop-ready="true"] {\n  z-index: 3;',
-      '.slotBoundary[data-drop-hovered="true"] {\n  z-index: 4;',
-      '.slotBoundary[data-drop-hovered="true"] .slotBoundaryLine',
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;",
+      '.slotBoundary[data-drop-hovered="true"]::before',
+      ".layerDragGuide {",
       ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
-      '.componentSlotTarget[data-drag-active="true"]',
+      ".componentItem {",
+      ".componentAddAction {",
     ],
     "application.module.css",
   );
@@ -824,9 +884,11 @@ function inspectCssSource(source) {
   return deepFreeze({
     appOwnedStateAndBindingSelectors: true,
     managedDescendantStateOrBindingSelectors: 0,
-    retainedNonOverlappingStableSlotBoundaries: true,
-    retainedRowDropPositionPresentation: true,
-    retainedStickyComponentTargetPresentation: true,
+    stableThirtyTwoPixelSlotGaps: true,
+    stableGlobalDragGuidePresentation: true,
+    stickyExplicitComponentTargetPresentation: true,
+    draggableComponentCardPresentation: true,
+    separateComponentAddActionPresentation: true,
   });
 }
 
@@ -1244,6 +1306,166 @@ function authenticateEventActionSuccessor(files) {
   });
 }
 
+function authenticateSourcePersistenceSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T12",
+    proofId: "desen-app-source-persistence",
+    profile: "desen.app.source-persistence-proof.v1",
+    result: "PASS",
+    path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
+  });
+  const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  )
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T12 source-persistence artifact drifted.");
+  const artifact = parseJson(artifactBytes, SOURCE_PERSISTENCE_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  const persistenceCommand =
+    "vitest run test/authoring-persistence.test.ts test/persistence-controls.test.tsx test/persistence-application.test.tsx test/project-navigation.test.ts test/application.test.tsx";
+  const appPackage = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
+  const persistenceControlsSource = decodeUtf8(
+    files.get("apps/desen-app/src/persistence-controls.tsx"),
+    "apps/desen-app/src/persistence-controls.tsx",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.publicEditorCorePersistencePort !== true ||
+    artifact.claim?.exactProjectScopedSourceKey !== "account-app-source" ||
+    artifact.claim?.authoredSourceOnly !== true ||
+    artifact.claim?.sourceKeyIndependentOfDocumentId !== true ||
+    artifact.claim?.awaitedSettlementsCapturedAsExactOwnEnumerableData !== true ||
+    artifact.claim?.settlementAccessorInvocation !== false ||
+    artifact.claim?.validOptionalDiagnosticDataCopiedAndFrozen !== true ||
+    artifact.claim?.casGenerationRelationshipsValidated !== true ||
+    artifact.claim?.openedDocumentReauthorized !== true ||
+    artifact.claim?.failedOrRejectedOpenPreservesDraft !== true ||
+    artifact.claim?.malformedOpenRetryableAndDraftPreserved !== true ||
+    artifact.claim?.generationExhaustionRequiresReopen !== true ||
+    artifact.claim?.automaticRetryOrMerge !== false ||
+    artifact.claim?.unexpectedDispatchedSaveIndeterminate !== true ||
+    artifact.claim?.malformedSaveIndeterminateAndReopenRequired !== true ||
+    artifact.claim?.staleOpenCannotReplaceEditedSession !== true ||
+    artifact.claim?.staleLifetimeSettlementIgnored !== true ||
+    artifact.claim?.postReflectionAndAdmissionAuthorityRechecked !== true ||
+    artifact.claim?.reentrantSettlementCannotPublishRevokedState !== true ||
+    artifact.claim?.dirtyOpenRequiresExplicitConfirmation !== true ||
+    artifact.claim?.designModeOnlyControls !== true ||
+    artifact.claim?.visibleGenerationDirtyAndReopenState !== true ||
+    artifact.claim?.completeAuthoredSourceCanonicalDirtyComparison !== true ||
+    artifact.claim?.identityOrVersionDirtyAuthority !== false ||
+    artifact.claim?.sameCanonicalReplacementRemainsClean !== true ||
+    artifact.claim?.canonicalRevertReturnsClean !== true ||
+    artifact.claim?.successfulOpenOrSaveEstablishesCanonicalBaseline !== true ||
+    artifact.claim?.newerEditRemainsDirtyAfterOlderSave !== true ||
+    artifact.claim?.centralizedAuthoringSessionCommit !== true ||
+    artifact.claim?.noPortCanonicalBaselineAndCurrentTracked !== true ||
+    artifact.claim?.noPortDirtyProjectionRerenderSafe !== true ||
+    artifact.claim?.cleanNoPortLabelAccurate !== true ||
+    artifact.claim?.pristineNoPortNavigationAdmitted !== true ||
+    artifact.claim?.editedNoPortDraftNavigationAndPageExitGuarded !== true ||
+    artifact.claim?.openAdmissionAtomic !== true ||
+    artifact.claim?.createUpdateUnchangedGenerationCas !== true ||
+    artifact.claim?.conflictOrIndeterminateRequiresReopen !== true ||
+    artifact.claim?.navigationAndPageExitGuarded !== true ||
+    artifact.claim?.scenarioPreviewPersisted !== false ||
+    artifact.claim?.runtimeInputOrSecretPersisted !== false ||
+    artifact.claim?.concretePersistenceAdapterClaimed !== false ||
+    !persistenceControlsSource.includes('return "Local draft unchanged";') ||
+    artifact.tests?.focusedTestCases !== 142 ||
+    artifact.tests?.fullAppTestFiles !== 22 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
+    artifact.boundary?.trackedFiles !== 35 ||
+    artifact.boundary?.parentArtifacts !== 3 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
+    artifact.boundary?.fullAppTestFiles !== 22 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
+    trackedReceipts?.length !== 35 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    appPackage.scripts?.["test:persistence"] !== persistenceCommand
+  )
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T12 source-persistence identity or claims drifted.",
+    );
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    )
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T12 receipt drifted: ${relativePath}.`);
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    focusedTestCases: 142,
+    fullAppTestFiles: 22,
+    fullAppTestCases: 324,
+    exactProjectScopedSourceKey: "account-app-source",
+    publicEditorCorePersistencePort: true,
+    authoredSourceOnly: true,
+    sourceKeyIndependentOfDocumentId: true,
+    awaitedSettlementsCapturedAsExactOwnEnumerableData: true,
+    settlementAccessorInvocation: false,
+    validOptionalDiagnosticDataCopiedAndFrozen: true,
+    casGenerationRelationshipsValidated: true,
+    openedDocumentReauthorized: true,
+    failedOrRejectedOpenPreservesDraft: true,
+    malformedOpenRetryableAndDraftPreserved: true,
+    generationExhaustionRequiresReopen: true,
+    automaticRetryOrMerge: false,
+    unexpectedDispatchedSaveIndeterminate: true,
+    malformedSaveIndeterminateAndReopenRequired: true,
+    staleOpenCannotReplaceEditedSession: true,
+    staleLifetimeSettlementIgnored: true,
+    postReflectionAndAdmissionAuthorityRechecked: true,
+    reentrantSettlementCannotPublishRevokedState: true,
+    dirtyOpenRequiresExplicitConfirmation: true,
+    designModeOnlyControls: true,
+    visibleGenerationDirtyAndReopenState: true,
+    completeAuthoredSourceCanonicalDirtyComparison: true,
+    identityOrVersionDirtyAuthority: false,
+    sameCanonicalReplacementRemainsClean: true,
+    canonicalRevertReturnsClean: true,
+    successfulOpenOrSaveEstablishesCanonicalBaseline: true,
+    newerEditRemainsDirtyAfterOlderSave: true,
+    centralizedAuthoringSessionCommit: true,
+    noPortCanonicalBaselineAndCurrentTracked: true,
+    noPortDirtyProjectionRerenderSafe: true,
+    cleanNoPortLabelAccurate: true,
+    cleanNoPortStatusText: "Local draft unchanged",
+    pristineNoPortNavigationAdmitted: true,
+    editedNoPortDraftNavigationAndPageExitGuarded: true,
+    openAdmissionAtomic: true,
+    createUpdateUnchangedGenerationCas: true,
+    conflictOrIndeterminateRequiresReopen: true,
+    navigationAndPageExitGuarded: true,
+    scenarioPreviewPersisted: false,
+    runtimeInputOrSecretPersisted: false,
+    concretePersistenceAdapterClaimed: false,
+    persistenceCommand,
+  });
+}
+
 function authenticateFixturesScenariosSuccessor(files) {
   const artifactBytes = files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH);
   if (
@@ -1280,6 +1502,7 @@ function authenticateFixturesScenariosSuccessor(files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    if (T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const authority = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -1463,6 +1686,7 @@ export async function buildDesenAppStateBindingEditorEvidence(rawOptions = undef
   const packageContract = inspectPackages(files);
   const successor = authenticateEventActionSuccessor(files);
   const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
+  const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-state-binding-editor",
@@ -1488,6 +1712,7 @@ export async function buildDesenAppStateBindingEditorEvidence(rawOptions = undef
     source,
     successor,
     fixturesScenariosSuccessor,
+    sourcePersistenceSuccessor,
     package: packageContract,
     testPolicy: {
       applicationTestNames: tests.appTestNames[APPLICATION_TEST_PATH],

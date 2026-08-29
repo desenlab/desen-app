@@ -1092,6 +1092,64 @@ M09-T11 therefore leaves P-08 `NOT_PROVEN` and P-09/P-10 `PARTIAL`. N-036 remain
 the repository-wide M12-T04 audit. Durable Source persistence belongs to M09-T12, diagnostics to
 M09-T13, publication/activation to M09-T14, and automated browser operation evidence to M10.
 
+M09-T12 composes one App-owned persistence state machine over the public Editor Core
+`DesenEditorPersistencePort`; it does not import Editor Web, the control plane, or a concrete
+storage implementation. The exact `account-app/sign-in` route derives the fixed
+`account-app-source` key independently of document identity. The trusted host injects the port,
+while route/configuration/port shapes and methods are captured as exact own data before use.
+
+Open is a two-phase read/admit transition. The port first returns a candidate complete Source;
+the App then rechecks the exact document identity, Catalog projection, surface, and separately
+prepared publishable preview. Only a completely admitted `{document, preview}` session replaces
+the authored session. Missing, failed, malformed, wrong-document, edited-in-flight, disposed, and
+stale-lifetime settlements publish no partial Source or preview replacement.
+
+Awaited settlement values first cross an exact own-enumerable data-descriptor capture that does not
+invoke accessors. Recognized diagnostics copy a valid optional JSON pointer, context, and subject
+into fresh frozen data. Open treats malformed settlements as controlled retryable failures while
+retaining the draft; Save treats them as indeterminate and requires reopen. The operation token is
+held and rechecked after settlement reflection and again after opened-document admission, so
+reentrant edits or disposal cannot publish stale or revoked state.
+
+Save snapshots only the controller's current immutable authored Source and current observed
+generation. The public port retains create-only, exact-generation update, and unchanged outcomes.
+Each created, updated, unchanged, conflict, or exhausted settlement must satisfy its exact
+relationship to the dispatched expected generation before it can publish.
+Conflict, safe-integer generation exhaustion, and an indeterminate dispatched commit set a
+reopen-required lock; the App neither retries nor merges. A definite failure leaves retry
+admission. Complete admitted authored Source canonical content—not object identity or document
+version—is the dirty authority. Same-value replacements and canonical reverts are clean;
+successful Open/Save establish canonical baselines, current-vs-dispatched-snapshot comparison
+preserves newer edits, and `reopenRequired` remains authoritative until an admitted Open.
+
+The current surface/controller lifetime is separate from React presentation. A route unmount,
+StrictMode cleanup and replay, trusted-host port replacement, or explicit disposal revokes stale
+work. Opening a stored Source also clears selection and transient scenario identity only after the
+exact newly opened controller session remains current. Scenario previews, fixture state, Runtime
+input, and secrets are never accepted as persistence inputs.
+
+Persistence controls are App-owned Design chrome outside the managed Runtime subtree. Dirty Open
+requires an explicit inline discard confirmation. One centralized authored-session commit path
+updates surface-owned canonical baseline/current refs and a rerender-safe no-port dirty projection.
+The current surface/controller guard admits pristine no-port navigation. Its exact clean label is
+`Local draft unchanged`. Edited no-port and port-backed dirty drafts require admission. Owner-safe
+cleanup cannot revoke a newer surface, canceled or throwing traversal restores the last admitted location, and
+`beforeunload` protects dirty page exit. Generation, dirty, pending, conflict/uncertainty, and
+reopen state remain accessible text, not color-only presentation.
+
+The current App shell treats each compatible Components card body as one broad native drag source
+and keeps click insertion on a separate `Add` button. Only the sticky `Add to` target admits a
+component drop; releases anywhere else are inert. Layers owns one nested-slot projection fenced by
+drag owner and epoch, applies midpoint hysteresis, exposes stable 32 px insertion gaps, and keeps
+the guarded `Delete` control visible for the selected node. Native transfer bytes remain inert and
+authorize no edit.
+
+This closes only the M09-T12 App-consumption boundary. `N-012`, `N-018`, and `S-003` retain their
+`TESTED` status with an additional authored-Source save/open path. P-08 remains `NOT_PROVEN`,
+P-09/P-10 remain `PARTIAL`, and PF-085/PF-089 remain `OPEN`. Diagnostics remain M09-T13;
+publication/activation remain M09-T14; concrete storage is trusted-host authority; automated
+real-browser E2E remains M10 authority.
+
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,
 proof, runtime, or protocol authority. Repository-owned TypeScript, React structure, CSS Modules,

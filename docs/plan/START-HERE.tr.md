@@ -1039,6 +1039,68 @@ N-035 ve S-001 `TESTED`, PF-028 `CLOSED` olur. P-08 `NOT_PROVEN`, P-09/P-10 `PAR
 (%73), M09 ilerlemesi 11/14'tür (%79). Sıradaki iş, public editor persistence port'u üzerinden
 save/open UI ekleyen M09-T12'dir.
 
+M09-T12 artık `DONE`'dır. Desen App, yalnızca trusted host'un enjekte ettiği public Editor Core
+`DesenEditorPersistencePort` üzerinden Design-mode Open/Save sunar. Exact `account-app/sign-in`
+route'u, `Source.id`'den bağımsız tek `account-app-source` anahtarını seçer. App concrete Editor Web,
+control-plane, browser/native storage ya da filesystem adapter'ı sahiplenmez.
+
+Open sonucu, complete stored Source, exact document identity, Catalog projection, surface ve
+publishable preview birlikte kabul edilmeden authored session'ı değiştiremez. Missing, failed,
+rejected, wrong-document, edit sırasında eskiyen, dispose edilen veya stale-lifetime sonuçları
+mevcut taslağı korur. Save yalnızca controller'ın immutable authored Source snapshot'ını exact
+expected generation ile gönderir. Create/update/unchanged ayrıdır; conflict, generation exhaustion
+ve indeterminate commit açık bir reopen gerektirir, otomatik retry veya merge yoktur. Dirty kararı
+object identity veya document version'dan değil, admit edilmiş complete authored Source'un canonical
+content'inden çıkar. Same-value replacement ve saved canonical content'e dönüş clean'dir;
+başarılı Open/Save baseline kurar, settlement current canonical content'i dispatched save snapshot
+ile karşılaştırır ve `reopenRequired` admission'a kadar güvenlik kilidi olarak kalır.
+
+Await edilen Open/Save settlement'ları accessor çalıştırmadan yalnızca exact own enumerable data
+descriptor'larından capture edilir. Geçerli optional diagnostic pointer/context/subject alanları
+fresh frozen veriye kopyalanır ve her CAS sonucu dispatched expected-generation ilişkisini
+sağlamalıdır. Malformed Open taslağı koruyan retryable controlled failure, malformed Save ise
+indeterminate/reopen-required olur. Settlement reflection ve opened-document admission sonrasında
+token yeniden kontrol edildiği için reentrant edit/dispose stale state yayımlayamaz.
+
+Dirty Open için iptal edilebilir açık inline onay gerekir. Tek merkezi authored-session commit yolu,
+surface-owned canonical baseline/current ref'lerini ve rerender-safe no-port dirty projection'ını
+günceller. Güncel surface/controller guard, pristine no-port navigation'ı kabul eder. Exact clean
+etiketi `Local draft unchanged`'dır. Edited no-port ve port-backed dirty taslaklar App
+navigation/browser traversal boyunca admission gerektirir. Owner-safe cleanup daha yeni surface'i kaldıramaz ve
+`beforeunload` dirty page exit'i korur. Generation, dirty, pending, definite failure,
+conflict/uncertainty, exhaustion ve reopen-required durumları yalnızca renge bağlı olmadan
+görünürdür. Scenario preview, fixture lifecycle, Runtime input ve secret verileri persistence
+isteğine girmez.
+
+Güncel authoring UX'te uyumlu her Components kartının geniş gövdesi native drag kaynağıdır; tıklayarak
+ekleme ayrı `Add` düğmesindedir. Component drop yalnızca sticky `Add to` hedefinde kabul edilir,
+başka yerde bırakma inert kalır. Layers, drag owner ve epoch ile çevrelenmiş tek global nested-slot
+projection'ı midpoint hysteresis ile yönetir, 32 px insertion aralıklarını görünür tutar ve seçili
+node için güvenli `Delete` kontrolünü sürekli gösterir.
+
+Focused beş dosyalı persistence suite 142/142, complete yirmi iki dosyalı App suite 324/324 ve
+independent root mutation proof 12/12 geçer. Exact artifact 27.053 byte'tır:
+`docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`,
+`sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`. Üç exact parent'ı
+doğrular, 35 current dosyayı bağlar ve historical App reader'larını takip etmez.
+
+Yerel CI inventory 196 workload/93 proof pair'dir (82 ordinary + 11 barrier); connected closure 60
+proof unit/130 workload ve ownership 1.243 tracked/186 proof-owned path'tir. Bunlar local
+receipt'lerdir; required-gate veya hosted-CI sonucu değildir.
+
+Append-only proof-reader sequence 51, sequence-50'nin exact
+`sha256:6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` başından
+`sha256:42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921` başına 47 frozen
+artifact ve 94 current reader ile ilerler. Checkpoint, promotion, selector + required-affected,
+ownership ve remaining touched-CI suite'leri sırasıyla 74/74, 19/19, 58/58 (21 + 37), 15/15 ve
+128/128; birlikte 294/294 geçer.
+
+`N-012`, `N-018` ve `S-003`, App-consumption evidence ile `TESTED` kalır. P-08 `NOT_PROVEN`,
+P-09/P-10 `PARTIAL`, PF-085/PF-089 `OPEN` kalır; kanıt kapıları 10/13'tür. Genel ilerleme 107/145
+(%74), M09 ilerlemesi 12/14'tür (%86). Diagnostics navigation/invalid placeholders,
+publication/activation, concrete App storage adapter ve otomatik gerçek-browser E2E kanıtlanmış
+değildir. Sıradaki iş M09-T13'tür.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

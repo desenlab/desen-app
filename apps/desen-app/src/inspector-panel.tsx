@@ -828,7 +828,7 @@ export function InspectorPanel({
       )}
 
       <p aria-live="polite" className={styles.inspectorNotice} role="status">
-        {notice || "Edits stay in this session until save is implemented."}
+        {notice || "Edits remain local until Save source succeeds."}
       </p>
     </aside>
   );

@@ -20,6 +20,8 @@ const EDITOR_EVENT_ACTION_ARTIFACT_PATH =
 const DESIGN_RUN_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json";
 const FIXTURES_SCENARIOS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
+const SOURCE_PERSISTENCE_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const LOCKFILE_PATH = "pnpm-lock.yaml";
@@ -92,7 +94,28 @@ const TRACKED_PATHS = Object.freeze([
   ...PROOF_READER_PATHS,
 ]);
 
+const T12_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/persistence-controls.tsx",
+  "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/state-panel.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-persistence.test.ts",
+  "apps/desen-app/test/inspector-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+  "apps/desen-app/test/persistence-controls.test.tsx",
+  "apps/desen-app/test/project-navigation.test.ts",
+  "apps/desen-app/test/state-panel.test.tsx",
+]);
+
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ...T12_SUCCESSOR_RECEIPT_PATHS,
   ROOT_PACKAGE_PATH,
   APP_PACKAGE_PATH,
   LOCKFILE_PATH,
@@ -112,6 +135,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     ...SUCCESSOR_COMPATIBILITY_PATHS,
     DESIGN_RUN_ARTIFACT_PATH,
     FIXTURES_SCENARIOS_ARTIFACT_PATH,
+    SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    ...T12_SUCCESSOR_RECEIPT_PATHS,
   ]),
 ]);
 
@@ -188,6 +213,8 @@ const EXPECTED_PANEL_TEST_NAMES = Object.freeze([
 
 const EXPECTED_APPLICATION_TEST_NAMES = Object.freeze([
   "switches to the exact Catalog component library and filters only the local view",
+  "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+  "uses only the App-owned drag intent and ignores forged native transfer authority",
   "commits sign-in event handlers and complete actions through the live authoring session",
   "keeps the prior event projection and canvas when action preview preflight fails",
   "preserves the prior Source and preview when Publisher rejects an oversized valid prop",
@@ -566,15 +593,39 @@ function inspectApplicationSource(source) {
       "function editSelectedEventAction(",
       "const result = applyAuthoringEventActionEdit(",
       "const nextPreview = prepareAuthoringPreviewBundle(result.document)",
-      "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
+      "commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
       "<EventActionPanel",
       "model={eventActionModel}",
       "onEdit={onEventActionEdit}",
       'activeTab === "actions"',
       "const resolvedActiveSlot = activeSlot ?? defaultSlot;",
       'aria-label="Change target in Layers"',
-      "const hasNoCoordinates =",
-      ": interaction.activeDropProjection",
+      "type AuthoringDropAdmission =",
+      "function evaluateDragIntent(",
+      "interface AuthoringDragSession {",
+      "function createAuthoringDragSession(epoch = 0): AuthoringDragSession",
+      "const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession())",
+      "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
+      "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+      "pending.sessionEpoch !== currentSession.epoch",
+      "pending.ownerKey !== currentSession.ownerKey",
+      "interaction.dragSession.current.ownerKey === sessionOwnerKey",
+      'interaction.dragSession.current.admission === "accepted"',
+      "interaction.dragSession.current.lastAcceptedProjection",
+      "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
+      "function clearUnclaimedDrop(): void {",
+      "className={styles.componentsView}",
+      'event.dataTransfer.dropEffect = "none"',
+      'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+      "className={styles.componentSlotTarget}",
+      "onDragOver={admitComponentDrop}",
+      "onDrop={receiveComponentDrop}",
+      'data-component-card="true"',
+      "className={styles.componentItem}",
+      "draggable={enabled}",
+      "className={styles.componentAddAction}",
+      "draggable={false}",
+      "onClick={() => addComponent(component.id)}",
       '(event.key !== "Delete" && event.key !== "Backspace")',
       "target instanceof HTMLInputElement",
       "target instanceof HTMLTextAreaElement",
@@ -586,7 +637,18 @@ function inspectApplicationSource(source) {
     ],
     "application.tsx",
   );
-  assertExcludes(source, ["@desen/editor-core/src", "@desen/publisher/src"], "application.tsx");
+  assertExcludes(
+    source,
+    [
+      "@desen/editor-core/src",
+      "@desen/publisher/src",
+      "function acceptsDragIntent(",
+      "panelDragEnterDepth",
+      "componentDragHandle",
+      'title="Drag anywhere in this panel to add"',
+    ],
+    "application.tsx",
+  );
   inspectEventActionCommitFlow(source);
   return deepFreeze({
     exactComponentOwnerSelection: true,
@@ -599,7 +661,14 @@ function inspectApplicationSource(source) {
     eventActionChromeOutsideManagedCapabilitySubtree: true,
     retainedRootSafeDefaultPlacementTarget: true,
     retainedExplicitChangeTarget: true,
-    retainedLastValidRowDropProjection: true,
+    stableGlobalLayerDragSession: true,
+    globalLayerOwnerAndEpochFencing: true,
+    guardedLastAcceptedProjection: true,
+    layerMidpointHysteresis: 4,
+    explicitStickyComponentDropTarget: true,
+    componentPaletteOuterDropInert: true,
+    draggableComponentCard: true,
+    separateNonDraggableComponentAddAction: true,
     retainedVisibleSelectedLayerDeleteControl: true,
     retainedGuardedDeleteAndBackspace: true,
   });
@@ -700,7 +769,7 @@ function inspectEventActionCommitFlow(source) {
   );
   const commitIndexes = [];
   matches[0].body.forEachChild(function collectCommits(node) {
-    if (ts.isCallExpression(node) && callName(node) === "setAuthoringSession") {
+    if (ts.isCallExpression(node) && callName(node) === "commitAuthoringSession") {
       const owningStatementIndex = statements.findIndex(
         (statement) => statement.pos <= node.pos && node.end <= statement.end,
       );
@@ -739,8 +808,11 @@ function inspectCssSource(source) {
       ".actionJsonTextarea {",
       '.actionJsonTextarea[aria-invalid="true"]',
       ".actionCardControls button:focus-visible",
-      '.slotBoundary[data-drop-ready="true"] {',
-      "min-height: 1.625rem;",
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 2rem;",
+      ".layerDragGuide {",
+      ".componentSlotTarget {\n  position: sticky;\n  top: 0.25rem;",
+      ".componentItem {",
+      ".componentAddAction {",
       ".authoringSelectionActions {",
       ".deleteLayerAction {",
     ],
@@ -752,7 +824,10 @@ function inspectCssSource(source) {
     recursiveSettlementTones: true,
     visibleInvalidJsonState: true,
     keyboardFocusPresentation: true,
-    retainedEnlargedDropLanePresentation: true,
+    stableThirtyTwoPixelLayerGapPresentation: true,
+    stableGlobalDragGuidePresentation: true,
+    stickyExplicitComponentTargetPresentation: true,
+    draggableComponentCardAndSeparateAddPresentation: true,
     retainedVisibleDeletePresentation: true,
   });
 }
@@ -1221,6 +1296,166 @@ function authenticateDesignRunSuccessor(files) {
   });
 }
 
+function authenticateSourcePersistenceSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T12",
+    proofId: "desen-app-source-persistence",
+    profile: "desen.app.source-persistence-proof.v1",
+    result: "PASS",
+    path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
+  });
+  const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  )
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T12 source-persistence artifact drifted.");
+  const artifact = parseJson(artifactBytes, SOURCE_PERSISTENCE_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  const persistenceCommand =
+    "vitest run test/authoring-persistence.test.ts test/persistence-controls.test.tsx test/persistence-application.test.tsx test/project-navigation.test.ts test/application.test.tsx";
+  const appPackage = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
+  const persistenceControlsSource = decodeUtf8(
+    files.get("apps/desen-app/src/persistence-controls.tsx"),
+    "apps/desen-app/src/persistence-controls.tsx",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.publicEditorCorePersistencePort !== true ||
+    artifact.claim?.exactProjectScopedSourceKey !== "account-app-source" ||
+    artifact.claim?.authoredSourceOnly !== true ||
+    artifact.claim?.sourceKeyIndependentOfDocumentId !== true ||
+    artifact.claim?.awaitedSettlementsCapturedAsExactOwnEnumerableData !== true ||
+    artifact.claim?.settlementAccessorInvocation !== false ||
+    artifact.claim?.validOptionalDiagnosticDataCopiedAndFrozen !== true ||
+    artifact.claim?.casGenerationRelationshipsValidated !== true ||
+    artifact.claim?.openedDocumentReauthorized !== true ||
+    artifact.claim?.failedOrRejectedOpenPreservesDraft !== true ||
+    artifact.claim?.malformedOpenRetryableAndDraftPreserved !== true ||
+    artifact.claim?.generationExhaustionRequiresReopen !== true ||
+    artifact.claim?.automaticRetryOrMerge !== false ||
+    artifact.claim?.unexpectedDispatchedSaveIndeterminate !== true ||
+    artifact.claim?.malformedSaveIndeterminateAndReopenRequired !== true ||
+    artifact.claim?.staleOpenCannotReplaceEditedSession !== true ||
+    artifact.claim?.staleLifetimeSettlementIgnored !== true ||
+    artifact.claim?.postReflectionAndAdmissionAuthorityRechecked !== true ||
+    artifact.claim?.reentrantSettlementCannotPublishRevokedState !== true ||
+    artifact.claim?.dirtyOpenRequiresExplicitConfirmation !== true ||
+    artifact.claim?.designModeOnlyControls !== true ||
+    artifact.claim?.visibleGenerationDirtyAndReopenState !== true ||
+    artifact.claim?.completeAuthoredSourceCanonicalDirtyComparison !== true ||
+    artifact.claim?.identityOrVersionDirtyAuthority !== false ||
+    artifact.claim?.sameCanonicalReplacementRemainsClean !== true ||
+    artifact.claim?.canonicalRevertReturnsClean !== true ||
+    artifact.claim?.successfulOpenOrSaveEstablishesCanonicalBaseline !== true ||
+    artifact.claim?.newerEditRemainsDirtyAfterOlderSave !== true ||
+    artifact.claim?.centralizedAuthoringSessionCommit !== true ||
+    artifact.claim?.noPortCanonicalBaselineAndCurrentTracked !== true ||
+    artifact.claim?.noPortDirtyProjectionRerenderSafe !== true ||
+    artifact.claim?.cleanNoPortLabelAccurate !== true ||
+    artifact.claim?.pristineNoPortNavigationAdmitted !== true ||
+    artifact.claim?.editedNoPortDraftNavigationAndPageExitGuarded !== true ||
+    artifact.claim?.openAdmissionAtomic !== true ||
+    artifact.claim?.createUpdateUnchangedGenerationCas !== true ||
+    artifact.claim?.conflictOrIndeterminateRequiresReopen !== true ||
+    artifact.claim?.navigationAndPageExitGuarded !== true ||
+    artifact.claim?.scenarioPreviewPersisted !== false ||
+    artifact.claim?.runtimeInputOrSecretPersisted !== false ||
+    artifact.claim?.concretePersistenceAdapterClaimed !== false ||
+    !persistenceControlsSource.includes('return "Local draft unchanged";') ||
+    artifact.tests?.focusedTestCases !== 142 ||
+    artifact.tests?.fullAppTestFiles !== 22 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
+    artifact.boundary?.trackedFiles !== 35 ||
+    artifact.boundary?.parentArtifacts !== 3 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
+    artifact.boundary?.fullAppTestFiles !== 22 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
+    trackedReceipts?.length !== 35 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    appPackage.scripts?.["test:persistence"] !== persistenceCommand
+  )
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T12 source-persistence identity or claims drifted.",
+    );
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    )
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T12 receipt drifted: ${relativePath}.`);
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    focusedTestCases: 142,
+    fullAppTestFiles: 22,
+    fullAppTestCases: 324,
+    exactProjectScopedSourceKey: "account-app-source",
+    publicEditorCorePersistencePort: true,
+    authoredSourceOnly: true,
+    sourceKeyIndependentOfDocumentId: true,
+    awaitedSettlementsCapturedAsExactOwnEnumerableData: true,
+    settlementAccessorInvocation: false,
+    validOptionalDiagnosticDataCopiedAndFrozen: true,
+    casGenerationRelationshipsValidated: true,
+    openedDocumentReauthorized: true,
+    failedOrRejectedOpenPreservesDraft: true,
+    malformedOpenRetryableAndDraftPreserved: true,
+    generationExhaustionRequiresReopen: true,
+    automaticRetryOrMerge: false,
+    unexpectedDispatchedSaveIndeterminate: true,
+    malformedSaveIndeterminateAndReopenRequired: true,
+    staleOpenCannotReplaceEditedSession: true,
+    staleLifetimeSettlementIgnored: true,
+    postReflectionAndAdmissionAuthorityRechecked: true,
+    reentrantSettlementCannotPublishRevokedState: true,
+    dirtyOpenRequiresExplicitConfirmation: true,
+    designModeOnlyControls: true,
+    visibleGenerationDirtyAndReopenState: true,
+    completeAuthoredSourceCanonicalDirtyComparison: true,
+    identityOrVersionDirtyAuthority: false,
+    sameCanonicalReplacementRemainsClean: true,
+    canonicalRevertReturnsClean: true,
+    successfulOpenOrSaveEstablishesCanonicalBaseline: true,
+    newerEditRemainsDirtyAfterOlderSave: true,
+    centralizedAuthoringSessionCommit: true,
+    noPortCanonicalBaselineAndCurrentTracked: true,
+    noPortDirtyProjectionRerenderSafe: true,
+    cleanNoPortLabelAccurate: true,
+    cleanNoPortStatusText: "Local draft unchanged",
+    pristineNoPortNavigationAdmitted: true,
+    editedNoPortDraftNavigationAndPageExitGuarded: true,
+    openAdmissionAtomic: true,
+    createUpdateUnchangedGenerationCas: true,
+    conflictOrIndeterminateRequiresReopen: true,
+    navigationAndPageExitGuarded: true,
+    scenarioPreviewPersisted: false,
+    runtimeInputOrSecretPersisted: false,
+    concretePersistenceAdapterClaimed: false,
+    persistenceCommand,
+  });
+}
+
 function authenticateFixturesScenariosSuccessor(files) {
   const artifactBytes = files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH);
   if (
@@ -1263,6 +1498,7 @@ function authenticateFixturesScenariosSuccessor(files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    if (T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const authority = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -1419,6 +1655,7 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
   const packageContract = inspectPackages(files);
   const successor = authenticateDesignRunSuccessor(files);
   const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
+  const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
   const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-event-action-editor",
@@ -1447,11 +1684,19 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
     source,
     successor,
     fixturesScenariosSuccessor,
+    sourcePersistenceSuccessor,
     retainedAuthoringUx: {
       rootSafeDefaultPlacementTarget: source.application.retainedRootSafeDefaultPlacementTarget,
       explicitChangeTarget: source.application.retainedExplicitChangeTarget,
-      enlargedDropLanes: source.css.retainedEnlargedDropLanePresentation,
-      lastValidRowDropProjection: source.application.retainedLastValidRowDropProjection,
+      stableThirtyTwoPixelLayerGaps: source.css.stableThirtyTwoPixelLayerGapPresentation,
+      stableGlobalLayerDragSession: source.application.stableGlobalLayerDragSession,
+      globalLayerOwnerAndEpochFencing: source.application.globalLayerOwnerAndEpochFencing,
+      guardedLastAcceptedProjection: source.application.guardedLastAcceptedProjection,
+      explicitStickyComponentDropTarget: source.application.explicitStickyComponentDropTarget,
+      componentPaletteOuterDropInert: source.application.componentPaletteOuterDropInert,
+      draggableComponentCard: source.application.draggableComponentCard,
+      separateNonDraggableComponentAddAction:
+        source.application.separateNonDraggableComponentAddAction,
       visibleSelectedLayerDeleteControl:
         source.application.retainedVisibleSelectedLayerDeleteControl,
       guardedDeleteAndBackspace: source.application.retainedGuardedDeleteAndBackspace,

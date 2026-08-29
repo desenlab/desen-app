@@ -1,0 +1,607 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-source-persistence",
+  "profile": "desen.app.source-persistence-proof.v1",
+  "task": "M09-T12",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M09-T01",
+      "proofId": "desen-app-shell-navigation",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json",
+      "bytes": 12118,
+      "sha256": "c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220",
+      "profile": "desen.app.shell-navigation-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M08-T08",
+      "proofId": "editor-core-persistence",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-persistence.json",
+      "bytes": 49785,
+      "sha256": "51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe",
+      "profile": "desen.editor-core.persistence-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T11",
+      "proofId": "desen-app-fixtures-scenarios-fidelity",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json",
+      "bytes": 29407,
+      "sha256": "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+      "profile": "desen.app.fixtures-scenarios-fidelity-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "publicEditorCorePersistencePort": true,
+    "exactProjectScopedSourceKey": "account-app-source",
+    "sourceKeyIndependentOfDocumentId": true,
+    "authoredSourceOnly": true,
+    "scenarioPreviewPersisted": false,
+    "runtimeInputOrSecretPersisted": false,
+    "awaitedSettlementsCapturedAsExactOwnEnumerableData": true,
+    "settlementAccessorInvocation": false,
+    "validOptionalDiagnosticDataCopiedAndFrozen": true,
+    "casGenerationRelationshipsValidated": true,
+    "openAdmissionAtomic": true,
+    "openedDocumentReauthorized": true,
+    "failedOrRejectedOpenPreservesDraft": true,
+    "malformedOpenRetryableAndDraftPreserved": true,
+    "createUpdateUnchangedGenerationCas": true,
+    "conflictOrIndeterminateRequiresReopen": true,
+    "generationExhaustionRequiresReopen": true,
+    "automaticRetryOrMerge": false,
+    "unexpectedDispatchedSaveIndeterminate": true,
+    "malformedSaveIndeterminateAndReopenRequired": true,
+    "newerEditRemainsDirtyAfterOlderSave": true,
+    "completeAuthoredSourceCanonicalDirtyComparison": true,
+    "identityOrVersionDirtyAuthority": false,
+    "sameCanonicalReplacementRemainsClean": true,
+    "canonicalRevertReturnsClean": true,
+    "successfulOpenOrSaveEstablishesCanonicalBaseline": true,
+    "staleOpenCannotReplaceEditedSession": true,
+    "staleLifetimeSettlementIgnored": true,
+    "postReflectionAndAdmissionAuthorityRechecked": true,
+    "reentrantSettlementCannotPublishRevokedState": true,
+    "dirtyOpenRequiresExplicitConfirmation": true,
+    "navigationAndPageExitGuarded": true,
+    "centralizedAuthoringSessionCommit": true,
+    "noPortCanonicalBaselineAndCurrentTracked": true,
+    "noPortDirtyProjectionRerenderSafe": true,
+    "cleanNoPortLabelAccurate": true,
+    "pristineNoPortNavigationAdmitted": true,
+    "editedNoPortDraftNavigationAndPageExitGuarded": true,
+    "designModeOnlyControls": true,
+    "visibleGenerationDirtyAndReopenState": true,
+    "concretePersistenceAdapterClaimed": false,
+    "diagnosticsClaimed": false,
+    "publicationClaimed": false,
+    "activationClaimed": false,
+    "browserE2eClaimed": false,
+    "p08Status": "NOT_PROVEN",
+    "n012Status": "TESTED",
+    "n018Status": "TESTED",
+    "s003Status": "TESTED",
+    "pf085Status": "OPEN",
+    "pf089Status": "OPEN"
+  },
+  "authority": {
+    "source": {
+      "imports": {
+        "authoringData": [
+          "@desen/reference-catalog-web/catalog.json",
+          "@desen/catalog-sdk",
+          "@desen/validator",
+          "../../../examples/sign-in/official-derived.source.desen.json",
+          "@desen/catalog-sdk",
+          "@desen/editor-core"
+        ],
+        "authoringPreview": [
+          "@desen/editor-core",
+          "@desen/publisher",
+          "@desen/reference-catalog-web/catalog.json",
+          "../../../examples/sign-in/official-derived.source.desen.json",
+          "@desen/editor-core",
+          "@desen/publisher"
+        ],
+        "authoringFixtures": [
+          "@desen/reference-catalog-web/operations",
+          "@desen/testkit",
+          "@desen/runtime-core",
+          "@desen/testkit"
+        ],
+        "authoringScenarios": [
+          "@desen/editor-core",
+          "./authoring-data.js",
+          "./authoring-preview.js",
+          "./authoring-selection.js",
+          "@desen/catalog-sdk",
+          "@desen/editor-core",
+          "./authoring-data.js",
+          "./authoring-preview.js",
+          "./authoring-selection.js"
+        ],
+        "previewFidelity": ["./authoring-data.js", "./authoring-slots.js"],
+        "previewControls": [
+          "./authoring-fixtures.js",
+          "./application.module.css",
+          "react",
+          "./authoring-fixtures.js",
+          "./authoring-scenarios.js",
+          "./preview-fidelity.js"
+        ],
+        "adapterCanvas": [
+          "react",
+          "@desen/reference-catalog-web/catalog.json",
+          "@desen/reference-catalog-web/react-adapters",
+          "@desen/reference-catalog-web/tokens",
+          "@desen/runtime-core",
+          "@desen/runtime-react",
+          "../../../examples/sign-in/official-derived.bundle.desen.json",
+          "./authoring-data.js",
+          "./authoring-selection.js",
+          "./application.module.css",
+          "@desen/runtime-core",
+          "@desen/runtime-react",
+          "./authoring-selection.js",
+          "./authoring-data.js"
+        ],
+        "application": [
+          "react",
+          "react-dom",
+          "@desen/reference-catalog-web/catalog.json",
+          "@desen/protocol",
+          "@desen/runtime-core",
+          "./authoring-data.js",
+          "./adapter-canvas.js",
+          "./authoring-fixtures.js",
+          "./authoring-persistence.js",
+          "./authoring-inspector.js",
+          "./authoring-event-actions.js",
+          "./authoring-state.js",
+          "./authoring-slots.js",
+          "./authoring-selection.js",
+          "./inspector-panel.js",
+          "./event-action-panel.js",
+          "./authoring-scenarios.js",
+          "./preview-fidelity.js",
+          "./persistence-controls.js",
+          "./preview-controls.js",
+          "./state-panel.js",
+          "./authoring-preview.js",
+          "./project-navigation.js",
+          "./project-data.js",
+          "./assets/breadcrumb-separator.svg",
+          "./assets/desen-logo.svg",
+          "./assets/plus.svg",
+          "./assets/settings.svg",
+          "./assets/theme.svg",
+          "./application.module.css",
+          "react",
+          "@desen/editor-core",
+          "@desen/runtime-core",
+          "./authoring-data.js",
+          "./authoring-persistence.js",
+          "./authoring-event-actions.js",
+          "./authoring-inspector.js",
+          "./authoring-state.js",
+          "./authoring-selection.js",
+          "./authoring-scenarios.js",
+          "./authoring-slots.js",
+          "./project-navigation.js",
+          "./project-data.js",
+          "./persistence-controls.js"
+        ],
+        "inspectorPanel": [
+          "react",
+          "./application.module.css",
+          "./structured-json.js",
+          "./authoring-inspector.js",
+          "react",
+          "@desen/catalog-sdk",
+          "./authoring-inspector.js",
+          "./structured-json.js"
+        ],
+        "statePanel": [
+          "react",
+          "./application.module.css",
+          "react",
+          "@desen/catalog-sdk",
+          "./authoring-state.js"
+        ],
+        "projectNavigation": [],
+        "persistence": [
+          "./authoring-data.js",
+          "./authoring-preview.js",
+          "@desen/protocol",
+          "@desen/editor-core",
+          "@desen/protocol",
+          "./authoring-data.js",
+          "./authoring-preview.js"
+        ],
+        "persistenceControls": ["react", "./application.module.css"]
+      },
+      "route": {
+        "projectId": "account-app",
+        "surfaceId": "sign-in"
+      },
+      "sourceKey": "account-app-source",
+      "documentId": "com.example.account-app",
+      "publicEditorCorePersistencePort": true,
+      "authoredSourceOnly": true,
+      "scenarioPreviewPersisted": false,
+      "runtimeInputOrSecretPersisted": false,
+      "exactOwnDataAuthorityCapture": true,
+      "awaitedSettlementsCapturedAsExactOwnEnumerableData": true,
+      "settlementAccessorInvocation": false,
+      "validOptionalDiagnosticDataCopiedAndFrozen": true,
+      "casGenerationRelationshipsValidated": true,
+      "openAdmissionAtomic": true,
+      "openedDocumentReauthorized": true,
+      "failedOrRejectedOpenPreservesDraft": true,
+      "malformedOpenRetryableAndDraftPreserved": true,
+      "generationCompareAndSet": true,
+      "automaticRetryOrMerge": false,
+      "uncertaintyRequiresReopen": true,
+      "malformedSaveIndeterminateAndReopenRequired": true,
+      "newerEditRemainsDirtyAfterOlderSave": true,
+      "completeAuthoredSourceCanonicalDirtyComparison": true,
+      "identityOrVersionDirtyAuthority": false,
+      "sameCanonicalReplacementRemainsClean": true,
+      "canonicalRevertReturnsClean": true,
+      "successfulOpenOrSaveEstablishesCanonicalBaseline": true,
+      "staleOpenCannotReplaceEditedSession": true,
+      "staleLifetimeSettlementIgnored": true,
+      "postReflectionAndAdmissionAuthorityRechecked": true,
+      "reentrantSettlementCannotPublishRevokedState": true,
+      "dirtyOpenRequiresExplicitConfirmation": true,
+      "navigationAndPageExitGuarded": true,
+      "centralizedAuthoringSessionCommit": true,
+      "noPortCanonicalBaselineAndCurrentTracked": true,
+      "noPortDirtyProjectionRerenderSafe": true,
+      "cleanNoPortLabelAccurate": true,
+      "pristineNoPortNavigationAdmitted": true,
+      "editedNoPortDraftNavigationAndPageExitGuarded": true,
+      "designModeOnlyControls": true,
+      "visibleGenerationDirtyAndReopenState": true,
+      "concretePersistenceAdapterClaimed": false
+    },
+    "protocolProfiles": {
+      "storageIdentity": "one route-owned account-app-source key independent of Source.id",
+      "port": "public Editor Core DesenEditorPersistencePort injected by the trusted host",
+      "settlementCapture": "awaited open/save values captured only from exact own enumerable data descriptors without invoking accessors",
+      "diagnostics": "recognized diagnostic code plus valid optional pointer, context, and subject copied into fresh frozen data",
+      "open": "complete Source plus publishable preview admitted atomically before replacement",
+      "save": "exact immutable authored Source snapshot with validated expected-generation CAS settlement relationships",
+      "dirty": "complete admitted authored Source canonical content compared across current, saved, and dispatched snapshots",
+      "uncertainty": "conflict, exhaustion, and uncertainty require an explicit reopen",
+      "noPort": "surface-owned canonical baseline/current refs with a rerender-safe dirty projection and accurate clean local-draft label",
+      "navigation": "pristine no-port navigation is admitted while edited no-port and port-backed dirty drafts require admission"
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/authoring-persistence.test.ts test/persistence-controls.test.tsx test/persistence-application.test.tsx test/project-navigation.test.ts test/application.test.tsx",
+      "editorCoreDependency": "workspace:*",
+      "editorWebDependency": null,
+      "rootPackageName": "desen-workspace",
+      "rootCommands": {
+        "generate:desen-app-source-persistence": "node scripts/verify-desen-app-shell-navigation.mjs && node scripts/verify-editor-core-persistence.mjs && node scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:persistence && node scripts/generate-desen-app-source-persistence-proof.mjs",
+        "verify:desen-app-source-persistence": "node scripts/verify-desen-app-shell-navigation.mjs && node scripts/verify-editor-core-persistence.mjs && node scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:persistence && node scripts/verify-desen-app-source-persistence.mjs",
+        "test:desen-app-source-persistence": "node scripts/verify-desen-app-shell-navigation.mjs && node scripts/verify-editor-core-persistence.mjs && node scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:persistence && node --test tests/desen-app-source-persistence.test.mjs"
+      },
+      "parentsAuthenticatedInsideReader": true
+    },
+    "flow": [
+      "capture one exact project route and public persistence port",
+      "capture awaited settlements from exact own enumerable data without invoking accessors",
+      "copy valid optional diagnostic pointer, context, and subject into fresh frozen data",
+      "derive the fixed project-owned Source key",
+      "open then reauthorize document id, Catalog projection, surface, and preview",
+      "keep malformed Open retryable while preserving the draft and lock malformed Save as indeterminate until reopen",
+      "hold and recheck the operation token after settlement reflection and opened-document admission",
+      "replace authored Source and preview only after complete admission",
+      "save only the controller's immutable authored Source snapshot with expected generation",
+      "validate every created, updated, unchanged, conflict, and exhausted generation relationship",
+      "derive dirty state from complete admitted Source canonical content rather than identity or version",
+      "keep a newer canonical edit dirty, or clean a canonical revert, when an earlier snapshot settles",
+      "establish the canonical baseline only after an admitted Open or successful Save",
+      "label a clean no-port state as Local draft unchanged rather than saved",
+      "require reopen after conflict, exhausted generation, or uncertain commit",
+      "commit every authored-session replacement through one centralized dirty-state owner",
+      "admit pristine no-port navigation while guarding edited no-port and port-backed dirty drafts",
+      "confirm destructive dirty Open or navigation and protect dirty page exit",
+      "ignore stale work after edit, route unmount, StrictMode replay, or host replacement"
+    ],
+    "ownership": {
+      "persistencePort": "trusted host injection using the public Editor Core interface",
+      "sourceIdentity": "Desen App fixed project route",
+      "authoredDocument": "App authoring session only",
+      "dirtyProjection": "current surface/controller canonical baseline, current content, and rerender-safe projection",
+      "persistenceControls": "Desen App Design chrome",
+      "navigationGuard": "current surface/controller lifetime",
+      "concreteStorage": "not owned or claimed by the App"
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/app-web test:persistence && node --test tests/desen-app-source-persistence.test.mjs",
+    "focusedFiles": [
+      "apps/desen-app/test/authoring-persistence.test.ts",
+      "apps/desen-app/test/persistence-controls.test.tsx",
+      "apps/desen-app/test/persistence-application.test.tsx",
+      "apps/desen-app/test/project-navigation.test.ts",
+      "apps/desen-app/test/application.test.tsx"
+    ],
+    "testDeclarationCounts": {
+      "apps/desen-app/test/authoring-persistence.test.ts": 24,
+      "apps/desen-app/test/persistence-controls.test.tsx": 12,
+      "apps/desen-app/test/persistence-application.test.tsx": 16,
+      "apps/desen-app/test/project-navigation.test.ts": 12,
+      "apps/desen-app/test/application.test.tsx": 38
+    },
+    "testCaseCounts": {
+      "apps/desen-app/test/authoring-persistence.test.ts": 30,
+      "apps/desen-app/test/persistence-controls.test.tsx": 22,
+      "apps/desen-app/test/persistence-application.test.tsx": 16,
+      "apps/desen-app/test/project-navigation.test.ts": 32,
+      "apps/desen-app/test/application.test.tsx": 42
+    },
+    "focusedTestCases": 142,
+    "fullAppTestFiles": 22,
+    "fullAppTestCases": 324,
+    "rootTestNames": [
+      "[authority] authenticates exact shell, Editor persistence, and T11 App parents",
+      "[source] proves one route-owned Source identity through the public Editor Core port",
+      "[open] proves exact settlement capture, admission, retryable malformed failure, and draft preservation",
+      "[save] proves copied diagnostics, CAS relationships, malformed uncertainty, and reentrant revocation",
+      "[dirty] proves complete canonical-content baselines, reverts, and stale settlement isolation",
+      "[ui] proves Design-only controls, visible state, and explicit dirty-open confirmation",
+      "[navigation] proves pristine admission plus dirty no-port and port-backed navigation protection",
+      "[boundary] proves authored Source only and excludes scenario, secret, and concrete storage",
+      "[tests] retains exact five-file 142-case focused evidence",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[policy] rejects persistence, navigation, UI, test, and package weakening",
+      "[verification] rejects parent, artifact, report, and destination authority drift"
+    ],
+    "semanticCoverage": [
+      "EXACT_PROJECT_SCOPED_SOURCE_KEY",
+      "PUBLIC_EDITOR_CORE_PERSISTENCE_PORT",
+      "EXACT_OWN_ENUMERABLE_SETTLEMENT_CAPTURE_WITHOUT_ACCESSORS",
+      "VALIDATED_FRESH_FROZEN_OPTIONAL_DIAGNOSTIC_COPY",
+      "CAS_SETTLEMENT_GENERATION_RELATIONSHIPS",
+      "MALFORMED_OPEN_RETRYABLE_DRAFT_PRESERVATION",
+      "MALFORMED_SAVE_INDETERMINATE_REOPEN_LOCK",
+      "POST_REFLECTION_AND_ADMISSION_REENTRANT_AUTHORITY_RECHECK",
+      "ATOMIC_OPEN_ADMISSION_AND_DRAFT_PRESERVATION",
+      "GENERATION_COMPARE_AND_SET_WITHOUT_RETRY_OR_MERGE",
+      "INDETERMINATE_CONFLICT_AND_EXHAUSTION_REOPEN_LOCK",
+      "NEWER_EDIT_AND_STALE_LIFETIME_ISOLATION",
+      "COMPLETE_AUTHORED_SOURCE_CANONICAL_DIRTY_BASELINE",
+      "CANONICAL_SAME_VALUE_AND_REVERT_CLEANLINESS",
+      "SAVE_SETTLEMENT_CURRENT_VERSUS_SNAPSHOT_CANONICAL",
+      "DIRTY_OPEN_INLINE_CONFIRMATION",
+      "DIRTY_NAVIGATION_TRAVERSAL_AND_PAGE_EXIT_GUARD",
+      "NO_PORT_PRISTINE_ADMISSION_AND_EDITED_DRAFT_GUARD",
+      "NO_PORT_CANONICAL_BASELINE_CURRENT_AND_RERENDER_PROJECTION",
+      "CLEAN_NO_PORT_STATUS_LABEL",
+      "CENTRALIZED_AUTHORED_SESSION_COMMIT",
+      "AUTHORED_SOURCE_ONLY_NO_SCENARIO_OR_RUNTIME_SECRET",
+      "STRICT_MODE_AND_HOST_AUTHORITY_REPLACEMENT"
+    ]
+  },
+  "boundary": {
+    "trackedFiles": 35,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 3153,
+        "sha256": "3356e8bf4e92f415ebdc833dc4ead281711af7c14696f6f0325588273fe57a3a"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 12143,
+        "sha256": "911dadf85606f60c4b6e73d793dc9e3bf3ff0c938b606bb7bc04f2ea958772f9"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 81171,
+        "sha256": "cc82715e1fdee67362953ff8ff2b83c8eda4a603e70873b5c5a6255125155871"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 105664,
+        "sha256": "c4a2f9448717bef2a0d9c35372c5a3cc1f9cb55bf9129010567804a2db18b1cc"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 18521,
+        "sha256": "ae18d9ea0fe37ee553e758a73a9ca2e54e97c7fbcf048c21cd3bd131aadc1b25"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-fixtures.ts",
+        "bytes": 19778,
+        "sha256": "d65d334027186654caa76d2661a177b08b28df650f96cdce029d7744f47b9fbf"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-persistence.ts",
+        "bytes": 31178,
+        "sha256": "a9328d91a58438aa93f03de9b08e67abd19a8b8e75d0c34fad889c48f4736be4"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-preview.ts",
+        "bytes": 3704,
+        "sha256": "75fa2d605f8c5ceebc2668c1f4c739155c7791b895132dc9a5fac183384e3d34"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-scenarios.ts",
+        "bytes": 20931,
+        "sha256": "6cabe8a6d5ec40a362cc4a32e0ecdfd19f1e5d33168205538b557d14e629fdb6"
+      },
+      {
+        "path": "apps/desen-app/src/inspector-panel.tsx",
+        "bytes": 27990,
+        "sha256": "c5fa0f8d24818f3b016720e5e267c58dbe1a4afb0c4255d19e3f38f6e6d1a36b"
+      },
+      {
+        "path": "apps/desen-app/src/persistence-controls.tsx",
+        "bytes": 9272,
+        "sha256": "478578110307b00e0caeb7bef395a32e59bda4b0624f1b1ce2af430436a13d1e"
+      },
+      {
+        "path": "apps/desen-app/src/preview-controls.tsx",
+        "bytes": 8719,
+        "sha256": "2ef5c428034a18b745373e9c588708a65c9835c311dfb0a28bd858ae5a147bf7"
+      },
+      {
+        "path": "apps/desen-app/src/preview-fidelity.ts",
+        "bytes": 8070,
+        "sha256": "d9ec596e20ea5ea9ca5875f4a78da0aa73938eb11d6fb6238194eda832893fe9"
+      },
+      {
+        "path": "apps/desen-app/src/project-navigation.ts",
+        "bytes": 7692,
+        "sha256": "c07848bfda7a23e7e948b8e22864835ec7644acdfacb253ab7b4c1c103f1d2e7"
+      },
+      {
+        "path": "apps/desen-app/src/state-panel.tsx",
+        "bytes": 14173,
+        "sha256": "b979c246b10b3023a3b2e239cfd6bf2d370f126658e53ea5b748bdb819448a18"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 104633,
+        "sha256": "0239aa5ef160cbee720321a0a5af47ac5a02886edbb9f3473aeb224373baffbd"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-persistence.test.ts",
+        "bytes": 38540,
+        "sha256": "2da7d0a4d4302cc5c50e984668efec8c61ed5011b347fe67afd4e75ed5e2eff6"
+      },
+      {
+        "path": "apps/desen-app/test/inspector-panel.test.tsx",
+        "bytes": 21856,
+        "sha256": "12ba1dd630c84600116fed967f8d9318d71291b4f58fc92bbc60304237e0a725"
+      },
+      {
+        "path": "apps/desen-app/test/persistence-application.test.tsx",
+        "bytes": 33973,
+        "sha256": "b64c82dfc8a41c321aa2fbd120b2a935381536120424e976e3521e55b1b35d60"
+      },
+      {
+        "path": "apps/desen-app/test/persistence-controls.test.tsx",
+        "bytes": 13484,
+        "sha256": "60402e1194c2643a95a4d6984883cb9fa394886f75b5f4424b5b147caacbed07"
+      },
+      {
+        "path": "apps/desen-app/test/project-navigation.test.ts",
+        "bytes": 9579,
+        "sha256": "e229981bd79910a9ee9e138a7a9037785df1d721a6aa422fc2b8c343732e4659"
+      },
+      {
+        "path": "apps/desen-app/test/state-panel.test.tsx",
+        "bytes": 12159,
+        "sha256": "a3c79bab4795760cbd1f79920c568cd026911f355f47621c1f41d99895d98273"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json",
+        "bytes": 29407,
+        "sha256": "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json",
+        "bytes": 12118,
+        "sha256": "c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220"
+      },
+      {
+        "path": "docs/proof/artifacts/editor-core-0.1.0-persistence.json",
+        "bytes": 49785,
+        "sha256": "51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe"
+      },
+      {
+        "path": "examples/sign-in/official-derived.bundle.desen.json",
+        "bytes": 4899,
+        "sha256": "334450fa1864bf280a30342090a46ba1d2f2dc96552b9430afdde5fcada902b0"
+      },
+      {
+        "path": "examples/sign-in/official-derived.source.desen.json",
+        "bytes": 4724,
+        "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+      },
+      {
+        "path": "package.json",
+        "bytes": 94989,
+        "sha256": "fb3915162dbcc1336244e330b890e036c87e0d2a90e4e71505245b0796d4f42d"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129494,
+        "sha256": "1f45e8bc67d87c1fa1073928c1efac23d39ac65be6c56c631e4bbaf4bb962caf"
+      },
+      {
+        "path": "scripts/generate-desen-app-source-persistence-proof.mjs",
+        "bytes": 793,
+        "sha256": "d723bf5d7bcc1ef4fc06133db1f7747d08252606463d9cbefd4223bf7581e6a2"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-source-persistence-proof.mjs",
+        "bytes": 56014,
+        "sha256": "18c759c87011e4ed30b044eaa02b9ccf2cc9e4134c33f7cfd0f292070ffc5add"
+      },
+      {
+        "path": "scripts/verify-desen-app-source-persistence.mjs",
+        "bytes": 798,
+        "sha256": "d3d5dc25dede7078beb3d8a5f76b822bebfb12d9ef59b1dc771fa2e4980a68b7"
+      },
+      {
+        "path": "tests/desen-app-source-persistence.test.mjs",
+        "bytes": 23578,
+        "sha256": "baee083f499523e8d5ea47b322f2d1c162097c27b95897946e72dcb25e99f033"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-source-persistence-proof.mjs",
+      "scripts/generate-desen-app-source-persistence-proof.mjs",
+      "scripts/verify-desen-app-source-persistence.mjs",
+      "tests/desen-app-source-persistence.test.mjs"
+    ],
+    "parentArtifacts": 3,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true,
+    "focusedAppTestCases": 142,
+    "focusedAppTestCaseCountPinned": true,
+    "fullAppTestFiles": 22,
+    "fullAppTestCases": 324,
+    "fullAppTestCaseCountPinned": true,
+    "finalCommandWiringPinned": true,
+    "historicalProofReadersTracked": false
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M09-T12 proves only App-owned authored Source persistence over an injected public port.",
+    "The App does not provide or claim a concrete browser, native, or control-plane adapter.",
+    "Catalog scenarios, fixture state, Runtime input, and secrets are not persistence inputs.",
+    "M09-T13 node-linked diagnostics and invalid placeholders remain NOT_PROVEN.",
+    "M09-T14 publication and activation remain NOT_PROVEN.",
+    "G09 and automated real-browser E2E remain NOT_PROVEN.",
+    "P-08 remains NOT_PROVEN; PF-085 and PF-089 remain OPEN.",
+    "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence."
+  ]
+}

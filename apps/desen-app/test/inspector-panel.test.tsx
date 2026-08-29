@@ -337,7 +337,7 @@ describe("Desen App nested and structured Inspector panel", () => {
     render(<InspectorPanel inspector={readyModel([ratio], 1)} onEdit={onEdit} />);
 
     const input = screen.getByRole("spinbutton", { name: "Ratio" }) as HTMLInputElement;
-    const defaultFooter = "Edits stay in this session until save is implemented.";
+    const defaultFooter = "Edits remain local until Save source succeeds.";
     fireEvent.change(input, { target: { value: "" } });
     fireEvent.blur(input);
 
@@ -444,7 +444,7 @@ describe("Desen App nested and structured Inspector panel", () => {
     expect(screen.getAllByRole("alert")).toHaveLength(1);
     expect(screen.getByRole("alert").textContent).toBe(message);
     expect(screen.getByRole("status").textContent).toBe(
-      "Edits stay in this session until save is implemented.",
+      "Edits remain local until Save source succeeds.",
     );
     expect(textarea.getAttribute("aria-invalid")).toBe("true");
     const describedBy = textarea.getAttribute("aria-describedby")?.split(" ") ?? [];
@@ -455,7 +455,7 @@ describe("Desen App nested and structured Inspector panel", () => {
     fireEvent.change(textarea, { target: { value: '{"safe":true}' } });
     expect(screen.queryByRole("alert")).toBeNull();
     expect(screen.getByRole("status").textContent).toBe(
-      "Edits stay in this session until save is implemented.",
+      "Edits remain local until Save source succeeds.",
     );
     fireEvent.change(textarea, { target: { value: text } });
     fireEvent.click(screen.getByRole("button", { name: "Apply Options JSON" }));
@@ -464,7 +464,7 @@ describe("Desen App nested and structured Inspector panel", () => {
     expect(screen.queryByRole("alert")).toBeNull();
     expect((textarea as HTMLTextAreaElement).value).toBe(["{", '  "alpha": true', "}"].join("\n"));
     expect(screen.getByRole("status").textContent).toBe(
-      "Edits stay in this session until save is implemented.",
+      "Edits remain local until Save source succeeds.",
     );
     expect(onEdit).not.toHaveBeenCalled();
   });

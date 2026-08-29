@@ -464,6 +464,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs",
       "tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
     ],
+    [
+      "desen-app-source-persistence",
+      "scripts/verify-desen-app-source-persistence.mjs",
+      "tests/desen-app-source-persistence.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -520,6 +525,11 @@ const DIRECT_PROOF_VERIFIER_PREREQUISITES = Object.freeze({
     "node scripts/verify-reference-sign-in-fixtures-and-host-binding.mjs",
     "node scripts/verify-reference-catalog-web-parity.mjs",
   ]),
+  "desen-app-source-persistence": Object.freeze([
+    "node scripts/verify-desen-app-shell-navigation.mjs",
+    "node scripts/verify-editor-core-persistence.mjs",
+    "node scripts/verify-desen-app-fixtures-scenarios-fidelity.mjs",
+  ]),
 });
 
 const EXPECTED_CHECK_SUFFIX = Object.freeze([
@@ -549,14 +559,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "4c086021423a728182e484e4ca218f419b58ae66a0b1a6607f1c5f4a1d677f09";
+  "2e1232681017a4e580acea5c523c07ee766175b8b1097c7a865ada56a3310a35";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "3daf978eeb28f95aa523c54f5c1ad19cdb4fe81add9a53a971996f550f33e1cb";
+  "cd11dc7cfac0fcb117572d2cd6a239fa20f3d31b3c1c8ca22f4dc34439aadc0d";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "239097eb37432275fe71f5a14d8f6ec8688be5db11a2961cf8e8b503e8bcb175";
+  "f90a95cc791a26eb2170f3af27da743223d1458663dfcf3a2f657988cd7db278";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "397b9268dfe5e4c0dd22229ab95027f65278f1314eed16dd81fa9b5c66d346a5";
+const QUALITY_GATE_PLAN_SHA256 = "0cf877430268ce6b4518999361d4867bc69dbffd81637f3935100793b7cf6fa2";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:

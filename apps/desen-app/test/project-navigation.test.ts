@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   createDesenAppProjectPath,
+  installDesenAppNavigationGuard,
   navigateDesenApp,
   normalizeInitialDesenAppLocation,
   readDesenAppLocation,
@@ -11,12 +12,16 @@ import {
   subscribeDesenAppNavigation,
 } from "../src/project-navigation.js";
 
+let removeNavigationGuard: (() => void) | null = null;
+
 describe("Desen App project navigation", () => {
   beforeEach(() => {
     window.history.replaceState(null, "", "/projects");
   });
 
   afterEach(() => {
+    removeNavigationGuard?.();
+    removeNavigationGuard = null;
     vi.restoreAllMocks();
   });
 
@@ -117,6 +122,57 @@ describe("Desen App project navigation", () => {
     expect(readDesenAppLocation()).toBe("/projects/account-app/surfaces/sign-in");
     expect(onStoreChange).toHaveBeenCalledTimes(2);
 
+    unsubscribe();
+  });
+
+  it("admits canonical app navigation only through the current exact guard owner", () => {
+    const firstGuard = vi.fn(() => false);
+    const removeFirst = installDesenAppNavigationGuard(firstGuard);
+    const secondGuard = vi.fn(() => false);
+    removeNavigationGuard = installDesenAppNavigationGuard(secondGuard);
+    const pushState = vi.spyOn(window.history, "pushState");
+
+    removeFirst();
+    navigateDesenApp("/projects");
+    expect(secondGuard).not.toHaveBeenCalled();
+    expect(() => navigateDesenApp("/projects?mode=design")).toThrow(TypeError);
+    expect(secondGuard).not.toHaveBeenCalled();
+
+    navigateDesenApp("/projects/account-app");
+    expect(secondGuard).toHaveBeenCalledWith("/projects/account-app");
+    expect(pushState).not.toHaveBeenCalled();
+    expect(readDesenAppLocation()).toBe("/projects");
+
+    secondGuard.mockReturnValue(true);
+    navigateDesenApp("/projects/account-app");
+    expect(pushState).toHaveBeenCalledWith(null, "", "/projects/account-app");
+  });
+
+  it("restores the last admitted location when traversal is canceled or guard admission throws", () => {
+    const onStoreChange = vi.fn();
+    const unsubscribe = subscribeDesenAppNavigation(onStoreChange);
+    const guard = vi.fn<() => boolean>(() => false);
+    removeNavigationGuard = installDesenAppNavigationGuard(guard);
+
+    window.history.pushState(null, "", "/projects/account-app");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    expect(guard).toHaveBeenLastCalledWith("/projects/account-app");
+    expect(readDesenAppLocation()).toBe("/projects");
+    expect(onStoreChange).not.toHaveBeenCalled();
+
+    guard.mockImplementation(() => {
+      throw new Error("prompt unavailable");
+    });
+    window.history.pushState(null, "", "/projects/account-app");
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    expect(readDesenAppLocation()).toBe("/projects");
+    expect(onStoreChange).not.toHaveBeenCalled();
+
+    guard.mockReturnValue(true);
+    window.history.pushState(null, "", "/projects/account-app");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    expect(readDesenAppLocation()).toBe("/projects/account-app");
+    expect(onStoreChange).toHaveBeenCalledTimes(1);
     unsubscribe();
   });
 

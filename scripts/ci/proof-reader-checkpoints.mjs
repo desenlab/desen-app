@@ -88,11 +88,12 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90",
   "45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e",
   "6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4",
+  "42e88946b598566a46237af8d30587fa765d9d58807e864464fc5525fbc64921",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
   25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
-  46,
+  46, 47,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
@@ -591,6 +592,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/desen-app-fixtures-scenarios-fidelity-proof.mjs",
     "tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M09-T12",
+    {
+      path: "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json",
+      bytes: 27_053,
+      sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
+    },
+    "scripts/lib/desen-app-source-persistence-proof.mjs",
+    "tests/desen-app-source-persistence.test.mjs",
   ),
 ]);
 

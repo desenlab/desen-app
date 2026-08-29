@@ -1271,19 +1271,6 @@
 .componentsView {
   position: relative;
   border-radius: 0.625rem;
-  transition:
-    background 120ms ease,
-    box-shadow 120ms ease;
-}
-
-.componentsView[data-component-drag-active="true"] {
-  background: color-mix(in srgb, var(--desen-app-accent) 4%, transparent);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--desen-app-accent) 24%, transparent);
-}
-
-.componentsView[data-drop-hovered="true"] {
-  background: color-mix(in srgb, var(--desen-app-accent) 8%, var(--desen-app-surface));
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--desen-app-accent) 64%, transparent);
 }
 
 .statePanel {
@@ -2124,6 +2111,32 @@
   padding-bottom: 0.25rem;
 }
 
+.layerDragGuide {
+  position: sticky;
+  top: 0.25rem;
+  z-index: 6;
+  display: flex;
+  min-height: 2.5rem;
+  align-items: center;
+  padding: 0.4375rem 0.5rem;
+  margin: 0 0 0.375rem;
+  color: var(--desen-app-text-soft);
+  font-size: 0.53125rem;
+  font-weight: 560;
+  line-height: 0.75rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+  box-shadow: var(--desen-app-shadow-xs);
+}
+
+.layerDragGuide[data-active="true"] {
+  color: var(--desen-app-accent);
+  font-weight: 620;
+  background: color-mix(in srgb, var(--desen-app-accent) 9%, var(--desen-app-surface));
+  border-color: color-mix(in srgb, var(--desen-app-accent) 30%, var(--desen-app-border));
+}
+
 .behaviorList {
   padding-left: 1rem;
 }
@@ -2388,7 +2401,7 @@
 .slotBoundary {
   position: relative;
   display: flex;
-  min-height: 1.5rem;
+  min-height: 2rem;
   align-items: center;
   padding: 0 0.125rem;
 }
@@ -2426,6 +2439,30 @@
   height: 1px;
   background: transparent;
   border-radius: 99px;
+}
+
+.slotBoundaryCue {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  padding: 0.125rem 0.375rem;
+  color: var(--desen-app-accent);
+  font-size: 0.46875rem;
+  font-weight: 680;
+  line-height: 0.625rem;
+  pointer-events: none;
+  opacity: 0;
+  background: var(--desen-app-surface);
+  border: 1px solid color-mix(in srgb, var(--desen-app-accent) 38%, var(--desen-app-border));
+  border-radius: 99px;
+  transform: translate(-50%, -50%);
+  transition: opacity 90ms ease;
+  white-space: nowrap;
+}
+
+.slotBoundary[data-drop-hovered="true"] .slotBoundaryCue {
+  opacity: 1;
 }
 
 .slotBoundary button {
@@ -2560,6 +2597,7 @@
   background: color-mix(in srgb, var(--desen-app-accent) 11%, var(--desen-app-surface));
   border-color: color-mix(in srgb, var(--desen-app-accent) 68%, var(--desen-app-border));
   border-style: solid;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--desen-app-accent) 10%, transparent);
 }
 
 .componentSlotTarget[data-ready="true"] {
@@ -2717,22 +2755,26 @@
   color: inherit;
   font: inherit;
   text-align: left;
-  cursor: pointer;
+  cursor: default;
   background: transparent;
   border: 0;
   border-radius: 0.5rem;
 }
 
-.componentItem:hover:not(:disabled) {
+.componentItem[draggable="true"] {
+  cursor: grab;
+}
+
+.componentItem[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.componentItem[data-enabled="true"]:hover,
+.componentItem[data-dragging="true"] {
   background: var(--desen-app-surface-subtle);
 }
 
-.componentItem:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
-  outline-offset: -2px;
-}
-
-.componentItem:disabled {
+.componentItem[data-enabled="false"] {
   cursor: not-allowed;
   opacity: 0.48;
 }
@@ -2742,33 +2784,6 @@
   flex: 0 0 auto;
   gap: 0.375rem;
   align-items: center;
-}
-
-.componentDragHandle {
-  position: relative;
-  width: 1.75rem;
-  height: 1.75rem;
-  flex: 0 0 auto;
-  cursor: grab;
-  border-radius: 0.375rem;
-}
-
-.componentDragHandle::before {
-  position: absolute;
-  inset: 0.375rem 0.5rem;
-  background-image: radial-gradient(circle, var(--desen-app-text-soft) 1px, transparent 1.25px);
-  background-position: 0 0;
-  background-size: 0.25rem 0.25rem;
-  content: "";
-  opacity: 0.72;
-}
-
-.componentDragHandle:hover {
-  background: var(--desen-app-surface-subtle);
-}
-
-.componentDragHandle:active {
-  cursor: grabbing;
 }
 
 .componentGlyph {
@@ -2847,6 +2862,35 @@
   border-radius: 99px;
 }
 
+.componentAddAction {
+  min-width: 2.5rem;
+  height: 1.625rem;
+  padding: 0 0.5rem;
+  color: var(--desen-app-accent);
+  font-size: 0.5rem;
+  font-weight: 660;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--desen-app-accent) 8%, var(--desen-app-surface));
+  border: 1px solid color-mix(in srgb, var(--desen-app-accent) 28%, var(--desen-app-border));
+  border-radius: 0.375rem;
+}
+
+.componentAddAction:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--desen-app-accent) 14%, var(--desen-app-surface));
+}
+
+.componentAddAction:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: 1px;
+}
+
+.componentAddAction:disabled {
+  color: var(--desen-app-text-soft);
+  cursor: not-allowed;
+  background: var(--desen-app-surface);
+  border-color: var(--desen-app-border);
+}
+
 .componentEmpty,
 .panelEmptyState {
   display: grid;
@@ -2896,8 +2940,9 @@
   gap: 0.25rem 0.625rem;
   align-items: center;
   padding: 0.5rem 0.75rem;
-  background: color-mix(in srgb, var(--desen-app-accent) 4%, var(--desen-app-surface));
+  background: color-mix(in srgb, var(--desen-app-accent) 7%, var(--desen-app-surface));
   border-bottom: 1px solid var(--desen-app-border);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--desen-app-accent) 64%, transparent);
 }
 
 .authoringSelectionActions small {
@@ -3717,5 +3762,205 @@
 
   .surfaceFrameBody {
     padding: 1.25rem;
+  }
+}
+
+.persistenceControls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.375rem 0.625rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background: var(--desen-app-surface);
+  border-bottom: 1px solid var(--desen-app-border);
+}
+
+.persistenceControls[data-persistence-state="conflict"],
+.persistenceControls[data-persistence-state="indeterminate"],
+.persistenceControls[data-persistence-state="failed"],
+.persistenceControls[data-persistence-state="exhausted"] {
+  background: color-mix(in srgb, #d97706 5%, var(--desen-app-surface));
+}
+
+.persistenceActions {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0.1875rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+}
+
+.persistenceActions button {
+  min-width: 4.75rem;
+  min-height: 1.75rem;
+  padding: 0 0.625rem;
+  color: var(--desen-app-text);
+  font: inherit;
+  font-size: 0.5625rem;
+  font-weight: 590;
+  cursor: pointer;
+  background: var(--desen-app-surface);
+  border: 0;
+  border-radius: 0.3125rem;
+  box-shadow: var(--desen-app-shadow-xs);
+}
+
+.persistenceActions button:last-child {
+  color: white;
+  background: var(--desen-app-primary);
+}
+
+.persistenceActions button:disabled {
+  color: var(--desen-app-text-soft);
+  cursor: not-allowed;
+  background: transparent;
+  box-shadow: none;
+}
+
+.persistenceActions button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: 2px;
+}
+
+.persistenceMeta {
+  display: flex;
+  min-width: 0;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.persistenceMeta > span {
+  padding: 0.1875rem 0.4375rem;
+  color: var(--desen-app-text-muted);
+  font-size: 0.5rem;
+  font-weight: 590;
+  line-height: 0.75rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.persistenceMeta > span[data-dirty="true"],
+.persistenceMeta > span[data-reopen-required="true"] {
+  color: color-mix(in srgb, #9a5b08 76%, var(--desen-app-text));
+  border-color: color-mix(in srgb, #d97706 28%, var(--desen-app-border));
+}
+
+.persistenceStatus,
+.persistenceAdmission {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.53125rem;
+  line-height: 0.8125rem;
+}
+
+.persistenceStatus {
+  min-height: 0.8125rem;
+  font-weight: 540;
+}
+
+.persistenceAdmission {
+  color: var(--desen-app-text-soft);
+}
+
+.persistenceOpenConfirmation {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: color-mix(in srgb, #d97706 6%, var(--desen-app-surface));
+  border: 1px solid color-mix(in srgb, #d97706 26%, var(--desen-app-border));
+  border-radius: 0.5rem;
+}
+
+.persistenceOpenConfirmation[hidden] {
+  display: none;
+}
+
+.persistenceOpenConfirmation > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.0625rem;
+}
+
+.persistenceOpenConfirmation strong {
+  color: var(--desen-app-text);
+  font-size: 0.5625rem;
+  font-weight: 620;
+}
+
+.persistenceOpenConfirmation small {
+  color: var(--desen-app-text-muted);
+  font-size: 0.5rem;
+  line-height: 0.75rem;
+}
+
+.persistenceOpenConfirmation > div {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.persistenceOpenConfirmation button {
+  min-height: 1.625rem;
+  padding: 0 0.5rem;
+  color: var(--desen-app-text-muted);
+  font: inherit;
+  font-size: 0.53125rem;
+  font-weight: 590;
+  cursor: pointer;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.375rem;
+}
+
+.persistenceOpenConfirmation button:last-child {
+  color: white;
+  background: var(--desen-app-primary);
+  border-color: var(--desen-app-primary);
+}
+
+.persistenceOpenConfirmation button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: 2px;
+}
+
+@media (max-width: 25rem) {
+  .persistenceControls {
+    grid-template-columns: 1fr;
+  }
+
+  .persistenceActions {
+    width: 100%;
+  }
+
+  .persistenceMeta {
+    justify-content: flex-start;
+  }
+
+  .persistenceStatus,
+  .persistenceAdmission {
+    grid-column: 1;
+  }
+
+  .persistenceOpenConfirmation {
+    grid-column: 1;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .persistenceOpenConfirmation > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

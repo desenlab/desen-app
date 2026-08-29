@@ -17,6 +17,8 @@ const DESIGN_RUN_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-design-ru
 const SIGN_IN_FIXTURE_ARTIFACT_PATH =
   "docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json";
 const PARITY_ARTIFACT_PATH = "docs/proof/artifacts/reference-catalog-web-parity.json";
+const SOURCE_PERSISTENCE_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const LOCKFILE_PATH = "pnpm-lock.yaml";
@@ -83,6 +85,44 @@ const TRACKED_PATHS = Object.freeze([
   PARITY_ARTIFACT_PATH,
   ...PROOF_READER_PATHS,
 ]);
+
+const T12_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/persistence-controls.tsx",
+  "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/state-panel.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-persistence.test.ts",
+  "apps/desen-app/test/inspector-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+  "apps/desen-app/test/persistence-controls.test.tsx",
+  "apps/desen-app/test/project-navigation.test.ts",
+  "apps/desen-app/test/state-panel.test.tsx",
+]);
+const SELF_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-fixtures-scenarios-fidelity-proof.mjs",
+  "tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
+]);
+const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ...T12_SUCCESSOR_RECEIPT_PATHS,
+  ...SELF_RESEALED_PATHS,
+]);
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...new Set([...TRACKED_PATHS, SOURCE_PERSISTENCE_ARTIFACT_PATH, ...T12_SUCCESSOR_RECEIPT_PATHS]),
+]);
+const RETAINED_HISTORICAL_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
+);
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 29_407,
+  sha256: "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+});
 
 const SOURCE_POLICY_KEYS = Object.freeze([
   "fixtureSource",
@@ -159,11 +199,12 @@ const EXPECTED_FOCUSED_TEST_CASE_COUNTS = Object.freeze({
   [FIDELITY_TEST_PATH]: 6,
   [CONTROLS_TEST_PATH]: 3,
   [ADAPTER_TEST_PATH]: 10,
-  [APPLICATION_TEST_PATH]: 40,
+  [APPLICATION_TEST_PATH]: 42,
 });
 
 /** Exact reviewed App cases in the six-file M09-T11 focused suite. */
 export const DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES = 86;
+const CURRENT_DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES = 88;
 
 /** Exact immutable proof receipts bounding the M09-T11 App authority. */
 export const DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_PARENT_PINS = Object.freeze([
@@ -243,10 +284,6 @@ function deepFreeze(value) {
   return value;
 }
 
-function canonicalArtifactBytes(artifact) {
-  return Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`);
-}
-
 function exactOwnDataOptions(value, allowedKeys, label) {
   if (value === undefined) return Object.freeze(Object.create(null));
   if (
@@ -296,12 +333,16 @@ function captureBytes(value, label) {
 
 function captureOverrides(value) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+  if (
+    !(value instanceof Map) ||
+    utilTypes.isProxy(value) ||
+    value.size > CURRENT_COMPATIBILITY_PATHS.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
   for (const [relativePath, bytes] of value) {
-    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+    if (!CURRENT_COMPATIBILITY_PATHS.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
@@ -363,12 +404,9 @@ async function readRegularAuthority(absolutePath, label) {
 
 async function readTrackedFiles(workspaceRoot, overrides) {
   const output = new Map();
-  for (const relativePath of TRACKED_PATHS) {
-    output.set(
-      relativePath,
-      overrides.get(relativePath) ??
-        (await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath)),
-    );
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
+    const live = await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath);
+    output.set(relativePath, overrides.get(relativePath) ?? live);
   }
   return output;
 }
@@ -620,6 +658,7 @@ function exactAllowedModules(modules) {
 function appShellModule(specifier) {
   return (
     specifier === "react" ||
+    specifier === "react-dom" ||
     specifier.startsWith(".") ||
     (specifier.startsWith("@desen/") &&
       !specifier.includes("/host-operations") &&
@@ -890,7 +929,32 @@ function inspectAdapterSource(source) {
 }
 
 function inspectApplicationSource(source) {
-  const { imports } = inspectModuleAuthority(source, APPLICATION_SOURCE_PATH, appShellModule);
+  const { imports, sourceFile } = inspectModuleAuthority(
+    source,
+    APPLICATION_SOURCE_PATH,
+    appShellModule,
+  );
+  const reactDomImports = sourceFile.statements.filter(
+    (statement) =>
+      ts.isImportDeclaration(statement) &&
+      ts.isStringLiteral(statement.moduleSpecifier) &&
+      statement.moduleSpecifier.text === "react-dom",
+  );
+  const reactDomBindings = reactDomImports[0]?.importClause?.namedBindings;
+  if (
+    reactDomImports.length !== 1 ||
+    reactDomImports[0]?.importClause?.isTypeOnly === true ||
+    reactDomBindings === undefined ||
+    !ts.isNamedImports(reactDomBindings) ||
+    reactDomBindings.elements.length !== 1 ||
+    reactDomBindings.elements[0]?.propertyName !== undefined ||
+    reactDomBindings.elements[0]?.name.text !== "flushSync"
+  ) {
+    fail(
+      "SOURCE_POLICY_VIOLATION",
+      "application.tsx may import only the exact flushSync binding from react-dom.",
+    );
+  }
   assertIncludes(
     source,
     [
@@ -922,11 +986,37 @@ function inspectApplicationSource(source) {
       "current.index === next.index",
       "isSameAuthoringSlotSelection(current.target, next.target)",
       "Math.abs(clientY - midpoint) <= LAYER_DROP_MIDPOINT_HYSTERESIS_PX",
-      'data-layer-slot-surface="true"',
+      ".closest<HTMLDivElement>('[data-layer-slot-surface=\"true\"]')",
       "activeDropProjection={activeDropProjection}",
       "onProjectDrop={projectDrop}",
-      "className={styles.componentDragHandle}",
-      'title="Drag anywhere in this panel to add"',
+      "type AuthoringDropAdmission =",
+      "function evaluateDragIntent(",
+      "interface AuthoringDragSession {",
+      "function createAuthoringDragSession(epoch = 0): AuthoringDragSession",
+      "const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession())",
+      "dragSession.current = createAuthoringDragSession(current.epoch + 1)",
+      "const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot])",
+      "pending.sessionEpoch !== currentSession.epoch",
+      "pending.ownerKey !== currentSession.ownerKey",
+      "document.elementFromPoint(pending.clientX, pending.clientY)",
+      "hitSlotSurface !== pending.slotSurface",
+      "function clearUnclaimedDrop(): void {",
+      'import { flushSync } from "react-dom"',
+      "flushSync(() => {",
+      "className={styles.componentsView}",
+      'event.dataTransfer.dropEffect = "none"',
+      'if (dragIntent?.kind !== "component") return;\n        event.preventDefault();\n        onClearDrag();',
+      'if (!componentDropReady) return;\n    event.stopPropagation();\n    event.preventDefault();\n    event.dataTransfer.dropEffect = "copy";',
+      "className={styles.componentSlotTarget}",
+      "onDragOver={admitComponentDrop}",
+      "onDrop={receiveComponentDrop}",
+      'data-component-card="true"',
+      "className={styles.componentItem}",
+      "draggable={enabled}",
+      "className={styles.componentAddAction}",
+      "draggable={false}",
+      "event.preventDefault();\n                                event.stopPropagation();",
+      "onClick={() => addComponent(component.id)}",
       "if (!isDesignMode() || scenarioOwnerKey === null) return",
       "<PreviewContextDisclosure fidelity={fidelity}",
       "hostPorts={fixtureHostPorts}",
@@ -939,7 +1029,15 @@ function inspectApplicationSource(source) {
   );
   assertExcludes(
     source,
-    ["scenarioDocument", "bindReferenceSignInHostOperation", "host-operations"],
+    [
+      "scenarioDocument",
+      "bindReferenceSignInHostOperation",
+      "host-operations",
+      "function acceptsDragIntent(",
+      "panelDragEnterDepth",
+      "componentDragHandle",
+      'title="Drag anywhere in this panel to add"',
+    ],
     APPLICATION_SOURCE_PATH,
   );
   return deepFreeze({
@@ -952,8 +1050,14 @@ function inspectApplicationSource(source) {
     synchronousCleanupClosesFixtureAdmission: true,
     strictModeReplayRetainsOnlySameLiveController: true,
     pendingControllerDisposedOnPreviewReplacement: true,
-    componentDragAuthorityLimitedToDedicatedHandle: true,
-    oneGlobalLayerDropProjection: true,
+    exactReactDomFlushSyncBinding: true,
+    draggableComponentCard: true,
+    separateNonDraggableComponentAddAction: true,
+    componentDropAdmissionLimitedToExplicitTarget: true,
+    componentPaletteOuterDropInert: true,
+    stableGlobalLayerDragSession: true,
+    globalLayerOwnerAndEpochFencing: true,
+    edgeScrollExactSlotRehitTesting: true,
     nestedSlotSurfaceOwnsDropEvents: true,
     layerMidpointHysteresis: 4,
     onlyOperationPortExecutable: true,
@@ -990,7 +1094,9 @@ function inspectCss(source) {
       ".runControlsBoundary",
       ".layerSlot > ul",
       '.slotBoundary[data-drop-hovered="true"]::before',
-      ".componentDragHandle::before",
+      ".layerDragGuide {",
+      ".componentItem {",
+      ".componentAddAction {",
     ],
     APPLICATION_CSS_PATH,
   );
@@ -998,7 +1104,8 @@ function inspectCss(source) {
     contextAndFidelityVisible: true,
     approximateDifferenceContainerVisible: true,
     scenarioAndRunControlsVisible: true,
-    nestedLayerSlotsAndDedicatedComponentHandleVisible: true,
+    nestedLayerSlotsAndGlobalDragGuideVisible: true,
+    draggableComponentCardAndSeparateAddActionVisible: true,
     managedCapabilityStylesChanged: false,
   });
 }
@@ -1123,10 +1230,10 @@ function inspectTests(files) {
     });
   }
   const focusedTestCases = Object.values(testCaseCounts).reduce((total, count) => total + count, 0);
-  if (focusedTestCases !== DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES) {
-    fail("TEST_POLICY_VIOLATION", "The exact M09-T11 focused case total drifted.", {
+  if (focusedTestCases !== CURRENT_DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES) {
+    fail("TEST_POLICY_VIOLATION", "The current compatible focused case total drifted.", {
       actual: focusedTestCases,
-      expected: DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES,
+      expected: CURRENT_DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_FOCUSED_TEST_CASES,
     });
   }
   for (const [relativePath, requiredNames] of Object.entries(EXPECTED_TEST_NAMES)) {
@@ -1227,11 +1334,17 @@ function inspectTests(files) {
       "uses only the App-owned drag intent and ignores forged native transfer authority",
     ),
     [
-      "alert.querySelector(\"[draggable='true']\")",
+      "const alertCard = alert.closest(\"[data-component-card='true']\")",
+      "expect((alert as HTMLButtonElement).draggable).toBe(false)",
+      "expect(alertCard.draggable).toBe(true)",
       "expect(reads).toBe(0)",
-      "fireEvent.drop(panelSearch",
+      "fireEvent.dragOver(panelSearch",
+      "expect(outsideDrop.defaultPrevented).toBe(true)",
+      'expect((panelSearch as HTMLInputElement).value).toBe("")',
+      "expect(slotEdit).toHaveBeenCalledTimes(1)",
+      "fireEvent.drop(target",
     ],
-    "dedicated component drag-handle test",
+    "draggable component-card, explicit target, and inert outer-drop test",
     "TEST_POLICY_VIOLATION",
   );
   assertIncludes(
@@ -1240,8 +1353,13 @@ function inspectTests(files) {
       APPLICATION_TEST_PATH,
       "chooses an exact named-slot target and inserts Catalog defaults into Source and preview",
     ),
-    ["expect(addAlert.draggable).toBe(false)", "addAlert.querySelector(\"[draggable='true']\")"],
-    "component activation and drag-handle separation test",
+    [
+      "expect(addAlert.draggable).toBe(false)",
+      "const alertCard = addAlert.closest(\"[data-component-card='true']\")",
+      "expect(alertCard.draggable).toBe(true)",
+      "fireEvent.click(addAlert)",
+    ],
+    "component-card drag and separate Add activation test",
     "TEST_POLICY_VIOLATION",
   );
   assertIncludes(
@@ -1258,6 +1376,22 @@ function inspectTests(files) {
       "expect(reads).toBe(0)",
     ],
     "global nested-slot drop projection test",
+    "TEST_POLICY_VIOLATION",
+  );
+  assertIncludes(
+    namedTestBody(
+      sources.get(APPLICATION_TEST_PATH),
+      APPLICATION_TEST_PATH,
+      "keeps edge scrolling through a no-op gap, re-hit-tests, and fences a stale frame",
+    ),
+    [
+      "const elementFromPoint = vi.fn(() => acceptedBoundary)",
+      'expect(dataTransfer.dropEffect).toBe("none")',
+      "expect(elementFromPoint).toHaveBeenCalledWith(20, 195)",
+      "expect(cancelFrame).toHaveBeenCalledWith(2)",
+      "act(() => staleFrame?.(2))",
+    ],
+    "stable global drag-session re-hit-test and stale-frame fencing test",
     "TEST_POLICY_VIOLATION",
   );
   assertIncludes(
@@ -1310,8 +1444,11 @@ function inspectTests(files) {
       "VISIBLE_SYNTHETIC_INTEGRATION_PRODUCTION_CONTEXT",
       "VISIBLE_COMPLETE_APPROXIMATE_FIDELITY_DIFFERENCES",
       "SCENARIO_AND_PENDING_CONTINUITY_ACROSS_DESIGN_RUN",
-      "DEDICATED_COMPONENT_DRAG_HANDLE_RETAINS_BUTTON_ACTIVATION",
-      "ONE_GLOBAL_DROP_PROJECTION_ACROSS_NESTED_SLOT_SURFACES",
+      "DRAGGABLE_COMPONENT_CARD_WITH_SEPARATE_NON_DRAGGABLE_ADD_ACTION",
+      "EXPLICIT_COMPONENT_SLOT_TARGET_ONLY_WITH_INERT_OUTER_DROP_GUARD",
+      "STABLE_GLOBAL_LAYER_DRAG_SESSION_ACROSS_NESTED_SLOT_SURFACES",
+      "GLOBAL_LAYER_OWNER_AND_EPOCH_FENCING",
+      "EDGE_SCROLL_REHIT_TESTS_THE_EXACT_SLOT_SURFACE",
       "LAYER_DROP_MIDPOINT_HYSTERESIS_RETAINS_ADMITTED_GAP",
     ],
   });
@@ -1419,11 +1556,248 @@ function receipts(files) {
     );
 }
 
+async function authenticateFrozenArtifact(workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    "frozen M09-T11 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T11 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(artifactBytes, "frozen M09-T11 proof artifact");
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M09-T11" ||
+    artifact.proofId !== "desen-app-fixtures-scenarios-fidelity" ||
+    artifact.profile !== "desen.app.fixtures-scenarios-fidelity-proof.v1" ||
+    artifact.result !== "PASS" ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.scenarioSourceAndBundleEphemeral !== true ||
+    artifact.claim?.pendingRuntimeLifecycleExercised !== true ||
+    artifact.claim?.operationInputOrPasswordRetained !== false ||
+    artifact.claim?.s001Status !== "TESTED" ||
+    artifact.claim?.pf028Status !== "CLOSED" ||
+    artifact.tests?.focusedTestCases !== 86 ||
+    artifact.boundary?.trackedFiles !== TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== TRACKED_PATHS.length ||
+    trackedReceipts.some(
+      (candidate) =>
+        candidate === null ||
+        typeof candidate !== "object" ||
+        typeof candidate.path !== "string" ||
+        !Number.isSafeInteger(candidate.bytes) ||
+        candidate.bytes < 0 ||
+        typeof candidate.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(candidate.sha256),
+    ) ||
+    !isDeepStrictEqual(
+      artifact.tests?.rootTestNames,
+      DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES,
+    )
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T11 identity or retained claims drifted.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedHistoricalReceipts(frozenArtifact, files) {
+  const receiptMap = new Map(
+    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M09-T11 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
+}
+
+function authenticateSourcePersistenceSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T12",
+    proofId: "desen-app-source-persistence",
+    profile: "desen.app.source-persistence-proof.v1",
+    result: "PASS",
+    path: SOURCE_PERSISTENCE_ARTIFACT_PATH,
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
+  });
+  const artifactBytes = files.get(SOURCE_PERSISTENCE_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T12 source-persistence artifact drifted.");
+  }
+  const artifact = parseJson(artifactBytes, SOURCE_PERSISTENCE_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  const persistenceCommand =
+    "vitest run test/authoring-persistence.test.ts test/persistence-controls.test.tsx test/persistence-application.test.tsx test/project-navigation.test.ts test/application.test.tsx";
+  const appPackage = parseJson(files.get(APP_PACKAGE_PATH), APP_PACKAGE_PATH);
+  const persistenceControlsSource = decodeUtf8(
+    files.get("apps/desen-app/src/persistence-controls.tsx"),
+    "apps/desen-app/src/persistence-controls.tsx",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.publicEditorCorePersistencePort !== true ||
+    artifact.claim?.exactProjectScopedSourceKey !== "account-app-source" ||
+    artifact.claim?.authoredSourceOnly !== true ||
+    artifact.claim?.sourceKeyIndependentOfDocumentId !== true ||
+    artifact.claim?.awaitedSettlementsCapturedAsExactOwnEnumerableData !== true ||
+    artifact.claim?.settlementAccessorInvocation !== false ||
+    artifact.claim?.validOptionalDiagnosticDataCopiedAndFrozen !== true ||
+    artifact.claim?.casGenerationRelationshipsValidated !== true ||
+    artifact.claim?.openedDocumentReauthorized !== true ||
+    artifact.claim?.failedOrRejectedOpenPreservesDraft !== true ||
+    artifact.claim?.malformedOpenRetryableAndDraftPreserved !== true ||
+    artifact.claim?.generationExhaustionRequiresReopen !== true ||
+    artifact.claim?.automaticRetryOrMerge !== false ||
+    artifact.claim?.unexpectedDispatchedSaveIndeterminate !== true ||
+    artifact.claim?.malformedSaveIndeterminateAndReopenRequired !== true ||
+    artifact.claim?.staleOpenCannotReplaceEditedSession !== true ||
+    artifact.claim?.staleLifetimeSettlementIgnored !== true ||
+    artifact.claim?.postReflectionAndAdmissionAuthorityRechecked !== true ||
+    artifact.claim?.reentrantSettlementCannotPublishRevokedState !== true ||
+    artifact.claim?.dirtyOpenRequiresExplicitConfirmation !== true ||
+    artifact.claim?.designModeOnlyControls !== true ||
+    artifact.claim?.visibleGenerationDirtyAndReopenState !== true ||
+    artifact.claim?.completeAuthoredSourceCanonicalDirtyComparison !== true ||
+    artifact.claim?.identityOrVersionDirtyAuthority !== false ||
+    artifact.claim?.sameCanonicalReplacementRemainsClean !== true ||
+    artifact.claim?.canonicalRevertReturnsClean !== true ||
+    artifact.claim?.successfulOpenOrSaveEstablishesCanonicalBaseline !== true ||
+    artifact.claim?.newerEditRemainsDirtyAfterOlderSave !== true ||
+    artifact.claim?.centralizedAuthoringSessionCommit !== true ||
+    artifact.claim?.noPortCanonicalBaselineAndCurrentTracked !== true ||
+    artifact.claim?.noPortDirtyProjectionRerenderSafe !== true ||
+    artifact.claim?.cleanNoPortLabelAccurate !== true ||
+    artifact.claim?.pristineNoPortNavigationAdmitted !== true ||
+    artifact.claim?.editedNoPortDraftNavigationAndPageExitGuarded !== true ||
+    artifact.claim?.openAdmissionAtomic !== true ||
+    artifact.claim?.createUpdateUnchangedGenerationCas !== true ||
+    artifact.claim?.conflictOrIndeterminateRequiresReopen !== true ||
+    artifact.claim?.navigationAndPageExitGuarded !== true ||
+    artifact.claim?.scenarioPreviewPersisted !== false ||
+    artifact.claim?.runtimeInputOrSecretPersisted !== false ||
+    artifact.claim?.concretePersistenceAdapterClaimed !== false ||
+    !persistenceControlsSource.includes('return "Local draft unchanged";') ||
+    artifact.tests?.focusedTestCases !== 142 ||
+    artifact.tests?.fullAppTestFiles !== 22 ||
+    artifact.tests?.fullAppTestCases !== 324 ||
+    artifact.boundary?.trackedFiles !== 35 ||
+    artifact.boundary?.parentArtifacts !== 3 ||
+    artifact.boundary?.focusedAppTestCases !== 142 ||
+    artifact.boundary?.fullAppTestFiles !== 22 ||
+    artifact.boundary?.fullAppTestCases !== 324 ||
+    trackedReceipts?.length !== 35 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    appPackage.scripts?.["test:persistence"] !== persistenceCommand
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T12 source-persistence identity or claims drifted.",
+    );
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T12 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: pin,
+    focusedTestCases: 142,
+    fullAppTestFiles: 22,
+    fullAppTestCases: 324,
+    exactProjectScopedSourceKey: "account-app-source",
+    publicEditorCorePersistencePort: true,
+    authoredSourceOnly: true,
+    sourceKeyIndependentOfDocumentId: true,
+    awaitedSettlementsCapturedAsExactOwnEnumerableData: true,
+    settlementAccessorInvocation: false,
+    validOptionalDiagnosticDataCopiedAndFrozen: true,
+    casGenerationRelationshipsValidated: true,
+    openedDocumentReauthorized: true,
+    failedOrRejectedOpenPreservesDraft: true,
+    malformedOpenRetryableAndDraftPreserved: true,
+    generationExhaustionRequiresReopen: true,
+    automaticRetryOrMerge: false,
+    unexpectedDispatchedSaveIndeterminate: true,
+    malformedSaveIndeterminateAndReopenRequired: true,
+    staleOpenCannotReplaceEditedSession: true,
+    staleLifetimeSettlementIgnored: true,
+    postReflectionAndAdmissionAuthorityRechecked: true,
+    reentrantSettlementCannotPublishRevokedState: true,
+    dirtyOpenRequiresExplicitConfirmation: true,
+    designModeOnlyControls: true,
+    visibleGenerationDirtyAndReopenState: true,
+    completeAuthoredSourceCanonicalDirtyComparison: true,
+    identityOrVersionDirtyAuthority: false,
+    sameCanonicalReplacementRemainsClean: true,
+    canonicalRevertReturnsClean: true,
+    successfulOpenOrSaveEstablishesCanonicalBaseline: true,
+    newerEditRemainsDirtyAfterOlderSave: true,
+    centralizedAuthoringSessionCommit: true,
+    noPortCanonicalBaselineAndCurrentTracked: true,
+    noPortDirtyProjectionRerenderSafe: true,
+    cleanNoPortLabelAccurate: true,
+    cleanNoPortStatusText: "Local draft unchanged",
+    pristineNoPortNavigationAdmitted: true,
+    editedNoPortDraftNavigationAndPageExitGuarded: true,
+    openAdmissionAtomic: true,
+    createUpdateUnchangedGenerationCas: true,
+    conflictOrIndeterminateRequiresReopen: true,
+    navigationAndPageExitGuarded: true,
+    scenarioPreviewPersisted: false,
+    runtimeInputOrSecretPersisted: false,
+    concretePersistenceAdapterClaimed: false,
+    persistenceCommand,
+  });
+}
+
 /** Builds detached deterministic M09-T11 fixture, scenario, and fidelity evidence. */
 export async function buildDesenAppFixturesScenariosFidelityEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
-  const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const [frozen, files] = await Promise.all([
+    authenticateFrozenArtifact(workspaceRoot),
+    readTrackedFiles(workspaceRoot, options.fileOverrides),
+  ]);
   const parents = DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_PARENT_PINS.map((pin) =>
     authenticateParent(files.get(pin.path), pin),
   );
@@ -1440,7 +1814,7 @@ export async function buildDesenAppFixturesScenariosFidelityEvidence(rawOptions 
   const tests = inspectTests(files);
   const packageContract = inspectPackages(files);
   const trackedReceipts = receipts(files);
-  const artifact = deepFreeze({
+  const currentProjection = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-fixtures-scenarios-fidelity",
     profile: "desen.app.fixtures-scenarios-fidelity-proof.v1",
@@ -1463,8 +1837,13 @@ export async function buildDesenAppFixturesScenariosFidelityEvidence(rawOptions 
       cleanupSynchronouslyRevokesFixtureAdmission: true,
       strictModeReplayRetainsOnlySameLiveFixtureLifetime: true,
       pendingRevokedOnPreviewReplacement: true,
-      dedicatedComponentDragHandleRetained: true,
-      singleNestedLayerDropProjectionRetained: true,
+      draggableComponentCardRetained: true,
+      separateNonDraggableComponentAddActionRetained: true,
+      explicitComponentSlotTargetOnlyRetained: true,
+      inertComponentPaletteOuterDropGuardRetained: true,
+      stableGlobalLayerDragSessionRetained: true,
+      globalLayerOwnerAndEpochFencingRetained: true,
+      edgeScrollExactSlotRehitTestingRetained: true,
       layerDropHysteresisRetained: true,
       visibleExecutionContexts: ["synthetic", "integration", "production"],
       visibleApproximateFidelityDifferences: true,
@@ -1541,8 +1920,39 @@ export async function buildDesenAppFixturesScenariosFidelityEvidence(rawOptions 
       "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence.",
     ],
   });
-  const artifactBytes = canonicalArtifactBytes(artifact);
-  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
+  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  const currentCompatibility = deepFreeze({
+    schemaVersion: 1,
+    proofId: "desen-app-fixtures-scenarios-fidelity",
+    profile: "desen.app.fixtures-scenarios-fidelity-proof.v1",
+    task: "M09-T11",
+    result: "PASS",
+    retainedClaim: {
+      taskStatus: frozen.artifact.claim.taskStatus,
+      scenarioSourceAndBundleEphemeral: frozen.artifact.claim.scenarioSourceAndBundleEphemeral,
+      pendingRuntimeLifecycleExercised: frozen.artifact.claim.pendingRuntimeLifecycleExercised,
+      operationInputOrPasswordRetained: frozen.artifact.claim.operationInputOrPasswordRetained,
+      s001Status: frozen.artifact.claim.s001Status,
+      pf028Status: frozen.artifact.claim.pf028Status,
+    },
+    prerequisites: parents,
+    source: currentProjection.authority.source,
+    package: packageContract,
+    tests,
+    boundary: {
+      retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
+      successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
+      currentPathReceipts: receipts(files),
+    },
+    sourcePersistenceSuccessor,
+  });
+  return deepFreeze({
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+  });
 }
 
 function verifyProofDocument(bytes, artifactSha256) {

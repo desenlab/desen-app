@@ -181,12 +181,20 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
         "reference-catalog-web-parity",
       ],
     ],
+    [
+      "desen-app-source-persistence",
+      [
+        "desen-app-shell-navigation",
+        "editor-core-persistence",
+        "desen-app-fixtures-scenarios-fidelity",
+      ],
+    ],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "d028537891400c806dff4f7a4d7be3b3e783381369052b7d8079fdfd10759b73";
+  "97099a5cb52895eb80d095e99bf18838688d8a0aecf7af49993f0077466558c5";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

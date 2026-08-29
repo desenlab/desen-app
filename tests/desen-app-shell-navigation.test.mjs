@@ -19,6 +19,7 @@ const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const PREREQUISITE = "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json";
 const FIXTURES_SCENARIOS_ARTIFACT =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
+const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const NAVIGATION = "apps/desen-app/src/project-navigation.ts";
 const APPLICATION = "apps/desen-app/src/application.tsx";
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
@@ -315,6 +316,7 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node --test tests/desen-app-named-slot-authoring.test.mjs",
   );
   assert.equal(built.currentCompatibility.boundary.imports.exactReferenceAdapterRegistry, true);
+  assert.equal(built.currentCompatibility.boundary.imports.applicationFlushSyncImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.publicDiagnosticIndexTypeOnlyImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
   assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
@@ -427,6 +429,22 @@ test("[mutation] rejects prerequisite, route, package, and scope-boundary drift"
   );
 
   const application = await readFile(path.join(ROOT, APPLICATION), "utf8");
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([
+        [
+          APPLICATION,
+          Buffer.from(
+            application.replace(
+              'import { flushSync } from "react-dom";',
+              'import { createPortal, flushSync } from "react-dom";',
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
+  );
   await assert.rejects(
     buildDesenAppShellNavigationEvidence({
       fileOverrides: new Map([
@@ -695,5 +713,63 @@ test("[filesystem] rejects linked prerequisite, artifact, and proof authorities"
       proofDocumentPath: proofLink,
     }),
     expectedError("AUTHORITY_UNSAFE"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T12 persistence closure", async () => {
+  const successor = built.currentCompatibility.sourcePersistenceSuccessor;
+  assert.deepEqual(successor.artifact, {
+    task: "M09-T12",
+    proofId: "desen-app-source-persistence",
+    profile: "desen.app.source-persistence-proof.v1",
+    result: "PASS",
+    path: SOURCE_PERSISTENCE_ARTIFACT,
+    bytes: 27_053,
+    sha256: "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
+  });
+  assert.equal(successor.focusedTestCases, 142);
+  assert.equal(successor.fullAppTestFiles, 22);
+  assert.equal(successor.fullAppTestCases, 324);
+  assert.equal(successor.exactProjectScopedSourceKey, "account-app-source");
+  assert.equal(successor.publicEditorCorePersistencePort, true);
+  assert.equal(successor.authoredSourceOnly, true);
+  assert.equal(successor.sourceKeyIndependentOfDocumentId, true);
+  assert.equal(successor.awaitedSettlementsCapturedAsExactOwnEnumerableData, true);
+  assert.equal(successor.settlementAccessorInvocation, false);
+  assert.equal(successor.validOptionalDiagnosticDataCopiedAndFrozen, true);
+  assert.equal(successor.casGenerationRelationshipsValidated, true);
+  assert.equal(successor.openedDocumentReauthorized, true);
+  assert.equal(successor.failedOrRejectedOpenPreservesDraft, true);
+  assert.equal(successor.malformedOpenRetryableAndDraftPreserved, true);
+  assert.equal(successor.generationExhaustionRequiresReopen, true);
+  assert.equal(successor.automaticRetryOrMerge, false);
+  assert.equal(successor.unexpectedDispatchedSaveIndeterminate, true);
+  assert.equal(successor.malformedSaveIndeterminateAndReopenRequired, true);
+  assert.equal(successor.staleOpenCannotReplaceEditedSession, true);
+  assert.equal(successor.staleLifetimeSettlementIgnored, true);
+  assert.equal(successor.postReflectionAndAdmissionAuthorityRechecked, true);
+  assert.equal(successor.reentrantSettlementCannotPublishRevokedState, true);
+  assert.equal(successor.dirtyOpenRequiresExplicitConfirmation, true);
+  assert.equal(successor.designModeOnlyControls, true);
+  assert.equal(successor.visibleGenerationDirtyAndReopenState, true);
+  assert.equal(successor.completeAuthoredSourceCanonicalDirtyComparison, true);
+  assert.equal(successor.identityOrVersionDirtyAuthority, false);
+  assert.equal(successor.sameCanonicalReplacementRemainsClean, true);
+  assert.equal(successor.canonicalRevertReturnsClean, true);
+  assert.equal(successor.successfulOpenOrSaveEstablishesCanonicalBaseline, true);
+  assert.equal(successor.newerEditRemainsDirtyAfterOlderSave, true);
+  assert.equal(successor.noPortCanonicalBaselineAndCurrentTracked, true);
+  assert.equal(successor.noPortDirtyProjectionRerenderSafe, true);
+  assert.equal(successor.cleanNoPortLabelAccurate, true);
+  assert.equal(successor.cleanNoPortStatusText, "Local draft unchanged");
+  assert.equal(successor.navigationAndPageExitGuarded, true);
+  assert.equal(successor.scenarioPreviewPersisted, false);
+  assert.equal(successor.runtimeInputOrSecretPersisted, false);
+  const artifactBytes = await readFile(path.join(ROOT, SOURCE_PERSISTENCE_ARTIFACT));
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([[SOURCE_PERSISTENCE_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
 });

@@ -416,7 +416,7 @@ export function StatePanel({ model, onEdit, surfaceName }: Readonly<StatePanelPr
       )}
 
       <p aria-atomic="true" aria-live="polite" className={styles.stateNotice} role="status">
-        {notice || "State edits stay in this session until save is implemented."}
+        {notice || "State edits remain local until Save source succeeds."}
       </p>
     </section>
   );
