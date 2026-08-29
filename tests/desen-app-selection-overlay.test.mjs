@@ -326,8 +326,8 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       ...baseline,
       adapterSource: replaceOnce(
         adapterSource,
-        "      </fieldset>\n      <SelectionOverlay projection={projection} />",
-        "        <SelectionOverlay projection={projection} />\n      </fieldset>",
+        '      </fieldset>\n      {mode === "design" ? <SelectionOverlay projection={projection} /> : null}',
+        '        {mode === "design" ? <SelectionOverlay projection={projection} /> : null}\n      </fieldset>',
       ),
     },
     {
@@ -344,6 +344,19 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       expectedSourcePolicyError,
     );
   }
+
+  assert.throws(
+    () =>
+      verifyDesenAppSelectionOverlaySourcePolicy({
+        ...baseline,
+        applicationSource: replaceOnce(
+          applicationSource,
+          'target.contentEditable === "true"',
+          'target.closest("input") !== null',
+        ),
+      }),
+    expectedError("PRIVATE_STRUCTURE_AUTHORITY"),
+  );
 
   await assert.rejects(
     buildDesenAppSelectionOverlayEvidence({

@@ -570,8 +570,14 @@ This file records implementation discoveries without changing the frozen DESEN 0
   the state declaration schema, while opaque authoring hints cannot widen type compatibility or
   make an advanced dynamic value editable. M09-T09 likewise projects only literal component events
   from the authenticated Catalog contract; opaque authoring hints cannot invent an event, widen
-  owner authority to behaviors, or change action validity. Actual widgets and hint interpretation
-  remain editor responsibilities. PF-025 therefore remains `OPEN`.
+  owner authority to behaviors, or change action validity. M09-T10's Design/Run admission uses only
+  App-owned closed mode state and the already authenticated Source/Bundle/Runtime session; opaque
+  hints cannot enable Runtime interactions, bypass the central Run authoring guard, or widen a host
+  port. The retained M09-T07 root-safe Components target, explicit target-change action, enlarged
+  Layers drop lanes, last valid row projection, and selected-layer deletion affordances likewise
+  derive only from the authenticated named-slot model and current validation result; no hint can
+  invent a target, relax cardinality, or bypass continuous validation. Actual widgets and hint
+  interpretation remain editor responsibilities. PF-025 therefore remains `OPEN`.
 - Future action: Define a versioned control-hint vocabulary and deterministic precedence rules in
   a later protocol or profile revision, with `propsSchema` remaining the validity authority.
 
@@ -628,6 +634,9 @@ This file records implementation discoveries without changing the frozen DESEN 0
   `success: { userId: "user-1" }` and `errors.invalidCredentials: {}`. It does not invent a
   `pending` fixture key. M04-T09 owns the runtime transition into pending, and later Run Mode
   evidence must show that state while a controlled fixture or trusted host result is unresolved.
+  M09-T10 proves only the real adapter → Runtime React/Core → closed `state.set` path on one
+  in-memory session. Its operation port remains denied and it adds no fixture or scenario, so it
+  does not claim pending, success, or failure operation lifecycle evidence. PF-028 remains `OPEN`.
 - Future action: Clarify the implementation guide so “pending fixture coverage” means exercising
   runtime pending state during fixture-backed execution, not adding a third static fixture shape.
 
@@ -3524,10 +3533,20 @@ This file records implementation discoveries without changing the frozen DESEN 0
   authoring boundary does not execute actions, define Design/Run semantics, persist changes, or
   publish/activate them.
 
-- Future action: M09-T10 owns interactive Design/Run execution, while M09-T12 and M09-T14 own
-  persistence and publication/activation. M10 must add real-browser end-to-end evidence. A later
-  protocol revision should standardize event/action edit logs only if interoperable editor command
-  histories become normative.
+  M09-T10 consumes only one already-authenticated closed action at Runtime: the real Email adapter
+  event crosses public Runtime React into Runtime Core, executes Source `state.set`, updates
+  Runtime-local state, and rerenders the same managed subtree without a Runtime remount or a Source
+  or Bundle revision change. Design remains interaction-disabled; Run suppresses selection and
+  centrally rejects authoring. The retained Components/Layers target, row-projection, and guarded
+  deletion UX remains App-owned presentation over the already proven named-slot transitions; it
+  adds no address vocabulary, arbitrary canvas geometry, or managed-tree authority. This does not
+  generalize the editor lifecycle or owner authority, and the operation port remains denied. PF-083
+  therefore remains `OPEN`.
+
+- Future action: M09-T11 owns fixtures, scenarios, and visible approximate-fidelity disclosure;
+  M09-T12 and M09-T14 own persistence and publication/activation. M10 must add operation lifecycle
+  and real-browser end-to-end evidence. A later protocol revision should standardize event/action
+  edit logs only if interoperable editor command histories become normative.
 
 ## PF-084 — Authoring isolation and extension round trips are parsed-value editor invariants
 

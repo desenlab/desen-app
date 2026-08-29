@@ -1129,19 +1129,61 @@ publication, or activation pass is claimed. M09-T09 is `DONE`; P-08 remains `NOT
 and PF-083 remain `OPEN`, proof gates remain 10/13, implementation progress is 104/145 (72%), M09
 is 9/14 (64%), and M09-T10 is next.
 
+M09-T10 now adds one accessible App-owned Design/Run control over the controlled sign-in surface.
+Both modes retain the same immutable session-local `{document, preview}`, Source revision, Bundle
+revision, Runtime session, and managed Runtime React subtree because mode is excluded from Runtime
+mount identity. The toggle therefore preserves Runtime local state, Source selection, active
+authoring view and search, and unapplied Inspector drafts; it clears only transient drag intent. A
+new surface route starts in Design.
+
+Design keeps the real adapter controls disabled and admits App-owned selection and authoring. Run
+hides those panels and the selection overlay, centrally rejects all seven retained authoring
+callback paths, enables the real adapter, and proves only the exact adapter event → Runtime React →
+Runtime Core → closed `state.set` → same-subtree rerender path. Navigation, operation, and resource
+ports remain denied; storage and token boundaries remain missing, conflicting, or inert. Source and
+Bundle revisions remain unchanged.
+
+The T10 closure also retains the M09-T07 authoring UX hardening: Components drag starts from a safe
+root default with an explicit Layers target-change action, Layers exposes enlarged row drop lanes
+and retains the last valid row projection through drop, and the selected layer exposes a visible
+Delete action plus guarded Delete/Backspace shortcuts outside editable controls. Named-slot,
+cardinality, and continuous-validator authority are unchanged. This is not an arbitrary canvas
+geometry, hit-testing, or drop claim.
+
+The adapter suite passes 9/9, application suite 35/35, focused Design/Run suite 44/44, complete App
+suite 210/210, and independent root proof 10/10. Exact evidence is the `17,900`-byte
+`docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json` at
+`sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`; its frozen proof and
+root readers are 53,346 bytes/
+`sha256:ff4226241630daded979263dcd0a7fdb071591efbf789d1e7d2d4f4641779dfe` and 15,787 bytes/
+`sha256:d27307b0763132e5c21f45c146d3773ab9dbf02371f850dca3d03e11a759f601`. The live local CI
+authority contains 192 workloads and 91 proof pairs—80 ordinary and 11 barriers—with a
+58-proof-unit/126-workload closure and 1,218-path/182-proof-owned ownership. Sequence 49
+contains 45 artifacts and 90 readers at
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e`.
+The checkpoint, promotion, and complete serial structural suites pass 72/72, 19/19, and 339/339.
+
+These are local receipts. Manual browser QA exercised the mode switch and Run interaction plus the
+automatic default placement target, visible Delete action, editable-control Backspace guard, and
+successful Delete shortcut. It is not automated real-browser or native-drag E2E evidence. No
+required-gate or hosted-CI pass is claimed.
+M09-T10 is `DONE`; P-09 is only `PARTIAL` for the exact controlled `state.set` path; P-08 remains
+`NOT_PROVEN`; S-001 remains `PLANNED`; PF-025, PF-028, and PF-083 remain `OPEN`; proof gates remain
+10/13; implementation progress is 105/145 (72%); M09 is 10/14 (71%); and M09-T11 is next.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `104 / 145 tasks complete (72%)`
+- Overall implementation progress: `105 / 145 tasks complete (72%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
-- M09 progress: `9 / 14 tasks complete (64%)`
+- M09 progress: `10 / 14 tasks complete (71%)`
 - Proof-gate progress: `10 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1231,7 +1273,8 @@ is 9/14 (64%), and M09-T10 is next.
   `M09-T06 — Nested-object controls and honest structured-JSON fallback`,
   `M09-T07 — Named-slot drop, move, reorder, cardinality, acceptance, and deletion UI`,
   `M09-T08 — Local state and binding editor UI`,
-  `M09-T09 — Sign-in event and closed-action editor UI`
+  `M09-T09 — Sign-in event and closed-action editor UI`,
+  `M09-T10 — Design/Run modes on the same source tree`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -1253,11 +1296,12 @@ is 9/14 (64%), and M09-T10 is next.
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Next implementation task: `M09-T10 — Design/Run modes on the same source tree`
+- Next implementation task: `M09-T11 — Fixtures, scenarios, and visible approximate-fidelity disclosure`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  9/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T09 are `DONE`; `N-042` is `TESTED`, P-06
-  is `PROVEN`, P-07 and P-16 are `PARTIAL`, proof gates are 10/13, P-08 remains `NOT_PROVEN`,
-  PF-025 and PF-083 remain `OPEN`, and implementation progress is 104/145.
+  10/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T10 are `DONE`; `N-042` is `TESTED`, P-06
+  is `PROVEN`, P-07, P-09, and P-16 are `PARTIAL`, proof gates are 10/13, P-08 remains
+  `NOT_PROVEN`, S-001 remains `PLANNED`, PF-025, PF-028, and PF-083 remain `OPEN`, and
+  implementation progress is 105/145.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -1327,7 +1371,24 @@ is 9/14 (64%), and M09-T10 is next.
   ownership, and sequence 48 with 44 artifacts and 88 readers at
   `sha256:5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90`. Behavior-owner UI,
   action execution, Design/Run, durable persistence, real-browser E2E, publication, and activation
-  are not claimed.
+  are not claimed. M09-T10 is `DONE` with one same-session App-owned Design/Run mode, unchanged
+  Source and Bundle revisions, zero mode-toggle Runtime remount/disposal, preserved Runtime state,
+  selection, authoring view/search, and unapplied Inspector drafts, central Run authoring guards,
+  deny-only external host ports, and the exact adapter event → Runtime React/Core → `state.set` →
+  same-subtree rerender path. It retains the T07 root-safe Components placement target, explicit
+  target change, enlarged Layers drop lanes with the last valid row projection, visible selected-
+  layer Delete action, and editable-control-safe Delete/Backspace shortcuts without changing
+  named-slot or validator authority. Its `17,900`-byte artifact is pinned at
+  `sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`; focused Design/Run tests
+  pass 44/44, the complete App suite passes 210/210, and the independent root proof passes 10/10.
+  The live local CI authority contains 192 workloads/91 proof pairs—80 ordinary and 11 barriers—a
+  58-proof-unit/126-workload closure, 1,218-path/182-proof-owned ownership, and sequence 49
+  with 45 artifacts and 90 readers at
+  `sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e`.
+  Manual browser QA is recorded only as manual observation, not automated real-browser or native-
+  drag E2E. P-09 is `PARTIAL`; P-08 remains `NOT_PROVEN`; S-001 remains
+  `PLANNED`; PF-025, PF-028, and PF-083 remain `OPEN`; fixtures/scenarios/fidelity, persistence,
+  diagnostics, publication, and activation are not claimed.
 
 ## Completed preparation
 
@@ -4038,6 +4099,57 @@ M09-T09 evidence:
 - coverage decision: M09-T09 is `DONE`; P-08 remains `NOT_PROVEN`; PF-025 and PF-083 remain `OPEN`;
   proof gates remain 10/13; overall progress advances to 104/145 (72%); M09 advances to 9/14 (64%);
   M09-T10 is next
+
+M09-T10 evidence:
+
+- `docs/proof/DESEN-APP-DESIGN-RUN-MODES.md`
+- `docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json`, exactly `17,900` bytes at
+  `sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`
+- frozen proof/root readers: 53,346-byte `scripts/lib/desen-app-design-run-modes-proof.mjs` at
+  `sha256:ff4226241630daded979263dcd0a7fdb071591efbf789d1e7d2d4f4641779dfe` and 15,787-byte
+  `tests/desen-app-design-run-modes.test.mjs` at
+  `sha256:d27307b0763132e5c21f45c146d3773ab9dbf02371f850dca3d03e11a759f601`
+- session authority: Design and Run retain the same immutable session-local `{document, preview}`,
+  Source revision, Bundle revision, Runtime session, and managed Runtime React subtree; mode is
+  excluded from Runtime mount identity, so toggle causes no remount or disposal
+- preservation boundary: toggling preserves Runtime local state, current Source selection, active
+  authoring view and search, and unapplied Inspector drafts; transient drag intent is cleared and a
+  newly mounted surface route resets to Design
+- Design boundary: managed adapter controls are disabled while App-owned selection and authoring
+  are admitted
+- Run boundary: App-owned authoring panels and selection overlay are hidden, all seven retained
+  authoring callbacks fail closed at the central mode guard, and the real adapter is interactive
+- execution boundary: only the exact adapter event → Runtime React → Runtime Core → closed
+  `state.set` → same-managed-subtree rerender path is proven; Source and Bundle revision remain
+  unchanged
+- port boundary: navigation, operations, and resources remain denied; storage and token ports are
+  missing, conflicting, or inert, and no executable host binding is added
+- retained T07 UX boundary: Components drag uses a root-safe default target plus explicit target
+  change; Layers uses enlarged drop lanes and the last valid row projection; selected-layer Delete
+  is visible and Delete/Backspace is guarded outside editable controls; named-slot, cardinality,
+  and continuous-validator authority remain unchanged, with no arbitrary canvas geometry/drop claim
+- local proof: adapter passes 9/9, application passes 35/35, focused `test:design-run` passes 44/44,
+  complete App passes 210/210, independent root proof passes 10/10, checkpoint passes 72/72,
+  promotion passes 19/19, and complete serial structural CI passes 339/339
+- CI authority: the live local inventory registers 192 workloads and 91 proof pairs, split into 80
+  ordinary pairs and 11 barriers; the connected closure contains 58 proof units and 126 workloads;
+  complete ownership covers 1,218 tracked paths and 182 proof-owned paths; category counts are
+  182/45/31/135/468/219/127/11 for proof unit, CI policy, dependency policy, frozen input,
+  package/application, shared proof infrastructure, project documentation, and repository policy
+- checkpoint authority: sequence 49 contains 45 artifacts and 90 readers at
+  `sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e`
+- evidence boundary: these receipts are local; manual browser QA exercised the mode switch, Run
+  interaction, automatic default placement target, visible Delete action, editable-control
+  Backspace guard, and successful Delete shortcut, but is not automated real-browser or native-drag
+  E2E; no required-gate or hosted-CI result is inferred
+- scope nonclaims: fixtures, scenarios, visible approximate-fidelity disclosure, operation
+  lifecycle, durable save/open, diagnostics navigation/placeholders, control-plane publication,
+  activation, arbitrary-future-Catalog, native-target, and pixel-fidelity guarantees remain
+  unproven
+- coverage decision: M09-T10 is `DONE`; P-09 is only `PARTIAL` for the exact controlled
+  `state.set` path; P-08 remains `NOT_PROVEN`; S-001 remains `PLANNED`; PF-025, PF-028, and PF-083
+  remain `OPEN`; proof gates remain 10/13; overall progress advances to 105/145 (72%); M09 advances
+  to 10/14 (71%); M09-T11 is next
 
 ## Status vocabulary
 

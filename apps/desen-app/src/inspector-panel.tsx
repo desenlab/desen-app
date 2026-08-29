@@ -17,6 +17,7 @@ import type {
 import type { StructuredJsonParseFailureReason } from "./structured-json.js";
 
 interface InspectorPanelProps {
+  readonly hidden?: boolean | undefined;
   readonly inspector: AuthoringInspectorModelResult;
   readonly onEdit: (edit: AuthoringInspectorEdit) => AuthoringInspectorEditResult;
   readonly onBindingEdit?:
@@ -441,6 +442,12 @@ function TextOrNumberField({
             if (nextTarget instanceof Node && event.currentTarget.form?.contains(nextTarget)) {
               return;
             }
+            if (
+              nextTarget instanceof Element &&
+              nextTarget.closest("[data-preserve-inspector-draft='true']") !== null
+            ) {
+              return;
+            }
             commit();
           }}
           onChange={(event) => {
@@ -739,6 +746,7 @@ function InspectorField(props: Readonly<InspectorFieldProps>) {
 
 /** App-owned property inspector rendered outside the managed capability subtree. */
 export function InspectorPanel({
+  hidden = false,
   inspector,
   onBindingEdit,
   onEdit,
@@ -753,7 +761,12 @@ export function InspectorPanel({
   }, [inspector.status, inspector.status === "ready" ? inspector.selection.sourceNodeId : null]);
 
   return (
-    <aside aria-label="Inspector" className={styles.inspectorPanel} data-authoring-inspector="true">
+    <aside
+      aria-label="Inspector"
+      className={styles.inspectorPanel}
+      data-authoring-inspector="true"
+      hidden={hidden}
+    >
       <div className={styles.inspectorHeader}>
         <span>
           <strong>Inspector</strong>

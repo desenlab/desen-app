@@ -378,6 +378,12 @@ const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "scripts/lib/desen-app-event-action-editor-proof.mjs",
   "scripts/verify-desen-app-event-action-editor.mjs",
   "tests/desen-app-event-action-editor.test.mjs",
+  "docs/proof/DESEN-APP-DESIGN-RUN-MODES.md",
+  "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
+  "scripts/generate-desen-app-design-run-modes-proof.mjs",
+  "scripts/lib/desen-app-design-run-modes-proof.mjs",
+  "scripts/verify-desen-app-design-run-modes.mjs",
+  "tests/desen-app-design-run-modes.test.mjs",
 ]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
@@ -423,13 +429,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 180,
+    PROOF_UNIT: 182,
     CI_POLICY: 45,
     DEPENDENCY_POLICY: 31,
-    FROZEN_INPUT: 134,
+    FROZEN_INPUT: 135,
     PACKAGE_OR_APPLICATION: 468,
-    SHARED_PROOF_INFRASTRUCTURE: 217,
-    PROJECT_DOCUMENTATION: 126,
+    SHARED_PROOF_INFRASTRUCTURE: 219,
+    PROJECT_DOCUMENTATION: 127,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -811,12 +817,12 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
   currentReaderCount: 50,
   liveVerification: "PASS",
 });
-const M09_T09_PROOF_READER_CHECKPOINT = Object.freeze({
+const M09_T10_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 48,
-  headSha256: "5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90",
-  frozenArtifactCount: 44,
-  currentReaderCount: 88,
+  sequence: 49,
+  headSha256: "45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e",
+  frozenArtifactCount: 45,
+  currentReaderCount: 90,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -2251,7 +2257,7 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "Current comparison-source receipts do not reproduce the reviewed M09-T09 successor.",
+      "Current comparison-source receipts do not reproduce the reviewed M09-T10 successor.",
     );
   }
   const selectorBytes = capturedSourceBytes(currentAuthority, SELECTOR_SOURCE_PATH);
@@ -2259,12 +2265,12 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 190 ||
-    currentInventory.proofUnitCount !== 90
+    currentInventory.workloadCount !== 192 ||
+    currentInventory.proofUnitCount !== 91
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current workload graph is not the exact reviewed M09-T09 append-only successor.",
+      "The current workload graph is not the exact reviewed M09-T10 append-only successor.",
     );
   }
   const currentProofPairClasses = currentInventory.proofUnits.reduce(
@@ -2274,10 +2280,10 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 79 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 80 || currentProofPairClasses.barrier !== 11) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M09-T09 proof-pair authority is not exactly 79 ordinary and 11 barrier pairs.",
+      "The current M09-T10 proof-pair authority is not exactly 80 ordinary and 11 barrier pairs.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);
@@ -2324,11 +2330,11 @@ export function validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt) {
           liveVerification: liveReceipt.status,
         }
       : null;
-  if (!isDeepStrictEqual(projection, M09_T09_PROOF_READER_CHECKPOINT)) {
+  if (!isDeepStrictEqual(projection, M09_T10_PROOF_READER_CHECKPOINT)) {
     fail(
       "AFFECTED_PROMOTION_CUTOVER_DRIFT",
       "Promotion evidence does not match the live proof-reader checkpoint authority.",
-      { expected: M09_T09_PROOF_READER_CHECKPOINT, actual: projection },
+      { expected: M09_T10_PROOF_READER_CHECKPOINT, actual: projection },
     );
   }
   return liveReceipt;

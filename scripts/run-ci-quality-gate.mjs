@@ -454,6 +454,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-desen-app-event-action-editor.mjs",
       "tests/desen-app-event-action-editor.test.mjs",
     ],
+    [
+      "desen-app-design-run-modes",
+      "scripts/verify-desen-app-design-run-modes.mjs",
+      "tests/desen-app-design-run-modes.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -500,6 +505,11 @@ const DIRECT_PROOF_VERIFIER_PREREQUISITES = Object.freeze({
     "node scripts/verify-desen-app-state-binding-editor.mjs",
     "node scripts/verify-editor-core-event-action-edits.mjs",
   ]),
+  "desen-app-design-run-modes": Object.freeze([
+    "node scripts/verify-desen-app-real-adapter-canvas.mjs",
+    "node scripts/verify-desen-app-state-binding-editor.mjs",
+    "node scripts/verify-desen-app-event-action-editor.mjs",
+  ]),
 });
 
 const EXPECTED_CHECK_SUFFIX = Object.freeze([
@@ -529,14 +539,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "181d43e958b7eb52c864f72078672a6e73a12bbca1bc07ccfbca82f0bcebee71";
+  "ec52c27dbc9ea1db400cae2fa1ec7ab7b58b468eb83ee396ea7c082107fc06cb";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "2945c487cb33f055eefe72d859f1b907560a5861e170690ccb98cbebc351b4c4";
+  "f167a05bbac9b7959ed6f179e2adacef3382d21a6e6056c568aeddab891a58ec";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "42d43078f6ea3d2d5d5d571c0ef2097d61f6a65dc7a9c03ed9eab8515f1565a3";
+  "a91f9e647b3a4bfcd8a45e2fe473b0c86a7acd2edc450897eab851e2dca47fc5";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "d90a0f6f7fe34d92f9a11a34be8d5d952962a60903233ccac1587ade8bde4c87";
+const QUALITY_GATE_PLAN_SHA256 = "c038b0292d6caadb182862315369448dcd505ec926251e0e2aef8cf90d78b58f";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:

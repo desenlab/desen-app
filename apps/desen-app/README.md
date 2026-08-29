@@ -6,7 +6,7 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T09 adds a component-only Catalog event-handler and closed-action editor while keeping event
+M09-T10 adds one accessible same-session Design/Run boundary while keeping mode controls, event
 projection, whole-action drafts, state forms, binding controls, selection, and every other
 authoring control in the application-owned shell outside the exact React adapter canvas.
 The current product surface contains:
@@ -25,15 +25,16 @@ The current product surface contains:
   inventory, display names, categories, descriptions, identity, version, and target;
 - local component filtering that changes only the visible list and never mutates Catalog or Source
   data;
-- stable, non-overlapping slot boundaries plus the upper and lower half of each visible layer row
-  as before/after targets, without moving the tree while a drag is active;
-- one sticky Components drop target for the selected compatible slot, with visible drag grips and
-  click guidance, or a disabled guide that returns the user to Layers when no slot is selected;
+- stable, enlarged, non-overlapping slot boundaries plus the upper and lower half of each visible
+  layer row as before/after targets, retaining the last valid row projection through drop without
+  moving the tree while a drag is active;
+- one sticky Components placement target that resolves to the selected compatible slot or a safe
+  root default, with visible drag grips, click guidance, and an explicit Layers target-change action;
 - App-owned inert drag intent plus native keyboard and click placement controls for component
   insertion, cross-slot move, and same-slot reorder;
-- a selection-bound deletion control that explains root and effective-minimum restrictions,
-  automatically targets a newly inserted component, clears a successfully deleted selection, and
-  returns focus to Layers;
+- a visible selection-bound Delete control plus guarded Delete/Backspace shortcuts outside editable
+  controls; both explain root and effective-minimum restrictions, automatically target a newly
+  inserted component, clear a successfully deleted selection, and return focus to Layers;
 - a third State view that projects the exact current surface-local declarations, bounded usage
   counts, and controlled String, Boolean, Number, and Integer initial values;
 - stable add, atomic type-and-initial update, and unused-state deletion controls that preserve used
@@ -44,8 +45,16 @@ The current product surface contains:
   `REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT` used by the reference host;
 - exact runtime document, revision, surface, Catalog-set, registry, and snapshot authority checks
   before the managed tree becomes visible;
-- a native disabled fieldset that keeps the real heading and labels accessible while preventing
-  this Design preview from dispatching input or action events;
+- one accessible App-owned Design/Run control over the same immutable Source, Publisher Bundle,
+  Runtime session, and managed Runtime React subtree;
+- a native disabled fieldset in Design that keeps the real heading and labels accessible while
+  preventing the preview from dispatching input or action events;
+- a Run presentation that hides App-owned authoring and selection chrome, centrally rejects stale
+  authoring callbacks, and enables only the exact real adapter interactions;
+- exact Email adapter event → Runtime React → Runtime Core → `state.set` → same-subtree rerender
+  behavior without changing Source or Bundle revision or remounting Runtime authority;
+- deny-only navigation, operation, and resource ports plus missing, conflicting, or inert storage,
+  token, diagnostics, clock, context, and environment boundaries;
 - route-local Source-node selection admitted only from the validated authoring model and projected
   through the public callback-free Runtime React diagnostic index;
 - native layer buttons with pressed state, Select/Deselect names, conditional context, wrapped
@@ -106,7 +115,8 @@ surface and Source depth to 64; own empty slots remain distinct from absent opti
 The canvas mounts only for the exact `account-app:sign-in` route tuple. It creates a public
 `runtime-core` headless session with explicit inert/denying host ports, preflights that session
 through `runtime-react`, and renders it through `useRuntimeReactSurface` plus
-`RuntimeReactSurfaceBoundary`. Recovery, Profile, and every other tuple report that no exact
+`RuntimeReactSurfaceBoundary`. Design and Run share that exact session and managed subtree because
+mode is excluded from mount identity. Recovery, Profile, and every other tuple report that no exact
 adapter preview is available; they never borrow the sign-in Bundle or retain its managed tree.
 StrictMode replay, route replacement, and unmount dispose the exact session they created.
 
@@ -152,13 +162,17 @@ closed. Each complete candidate must pass continuous validation and Publisher pr
 atomic session-local `{document, preview}` commit. A failed mutation or publication preserves the
 prior Source, preview, selection, and focus.
 
-The browser drag payload is an inert hint and is never read as authority. Stable slot boundaries
-and the upper or lower half of each visible row expose the nearest before/after placement without
-overlap or drag-time layout movement, while exact placement semantics still come from the App-owned
-drag intent and current validated model. The Components target remains visible while its list
-scrolls, and successful insertion immediately selects the new node so its deletion control is
-available. Components whose insertion would require inventing a private required child subtree
-remain unavailable.
+The browser drag payload is an inert hint and is never read as authority. Enlarged stable slot
+boundaries and the upper or lower half of each visible row expose the nearest before/after placement
+without overlap or drag-time layout movement. The last valid admitted row projection survives the
+drop event when browser coordinates are absent, while exact placement semantics still come from the
+App-owned drag intent and current validated model. The Components target remains visible while its
+list scrolls, resolves to a safe root target until the user chooses another compatible slot, and
+provides an explicit target-change action. Successful insertion immediately selects the new node so
+the visible Delete control and guarded Delete/Backspace shortcuts are available; shortcuts ignore
+editable controls. Components whose insertion would require inventing a private required child
+subtree remain unavailable. These affordances do not claim arbitrary canvas geometry, hit testing,
+or native-browser drag E2E, and they do not change named-slot, cardinality, or validator authority.
 
 Local-state projection re-admits the exact current Source and Catalog, authenticates the current
 surface route, and scans at most 100,000 inert values to count direct state references plus
@@ -191,14 +205,29 @@ pass continuous Source validation and Publisher preflight before one atomic sess
 `{document, preview}` replacement; failure preserves the prior document, event projection, canvas,
 selection overlay, and managed capability subtree.
 
+Design/Run is one App-owned closed mode over that same immutable session-local
+`{document, preview}`. Switching modes does not rewrite Source, regenerate the Bundle, remount the
+Runtime session, or replace the managed Runtime React subtree. Runtime local state, Source
+selection, the active authoring tab and component search, and unapplied Inspector drafts remain in
+place; the App clears only transient drag intent. A new surface route starts in Design.
+
+Design disables managed controls and admits selection and authoring. Run hides the authoring
+panels and selection overlay, retains their local drafts, and checks the current mode again inside
+all seven authoring callback paths before any edit or Publisher preflight. The real Email adapter
+event then crosses public Runtime React and Runtime Core, executes the Source's closed `state.set`
+action, updates Runtime-local state, and rerenders the same managed subtree. Navigation,
+operations, and resources remain denied; storage and token access remains missing, conflicting, or
+inert. Run adds no executable host binding.
+
 This slice does not expose component rectangles, hit testing, canvas picking, private DOM/native
 structure, or managed-tree inspection. It does not edit repeat/resource bindings or behavior-owned
-event handlers; persist project data; create user projects; execute actions or interactive
-Design/Run behavior; navigate diagnostics; publish to the control plane; or activate a channel.
-Interactive Design/Run behavior belongs to M09-T10, durable save/open to M09-T12, and publication
-or activation to M09-T14. Catalog control hints remain opaque under PF-025 and cannot widen schema
-authority. P-08 remains `NOT_PROVEN`, PF-025 and PF-083 remain `OPEN`, and no real-browser E2E or
-native-drag automation result is claimed.
+event handlers; persist project data; create user projects; orchestrate fixtures or scenarios;
+navigate diagnostics; publish to the control plane; or activate a channel. Fixtures, scenarios,
+and visible approximate-fidelity disclosure belong to M09-T11, durable save/open to M09-T12, and
+publication or activation to M09-T14. Catalog control hints remain opaque under PF-025 and cannot
+widen schema authority. P-09 is only `PARTIAL` for the exact controlled `state.set` path. P-08
+remains `NOT_PROVEN`, S-001 remains `PLANNED`, PF-025, PF-028, and PF-083 remain `OPEN`, and no
+automated real-browser E2E or native-drag automation result is claimed.
 
 The App imports only public package entry points for Catalog derivation, Editor Core mutation and
 validation, Publisher preflight, runtime composition, and the exact static reference adapter
@@ -218,6 +247,24 @@ make no required-gate, hosted-CI, action-execution, Design/Run, persistence, rea
 publication, activation, or native-drag automation claim. M09-T09 is `DONE`, implementation
 progress is 104/145 (72%), M09 is 9/14 (64%), proof gates remain 10/13, and M09-T10 is next.
 
+The M09-T10 adapter and application suites pass 9/9 and 35/35, the focused Design/Run suite passes
+44/44, the complete App suite passes 210/210, and the independent root proof passes 10/10. Exact
+evidence is the `17,900`-byte
+`docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json` at
+`sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`. The live local CI
+authority contains 192 workloads and 91 proof pairs—80 ordinary and 11 barriers—with a
+58-proof-unit/126-workload closure and 1,218 tracked/182 proof-owned paths. Sequence 49 contains
+45 artifacts and 90 readers at
+`sha256:45ed64e604400f18b15b3b4ef44bc35634a6c1567b46174329ec36529168272e`. The checkpoint,
+promotion, and complete serial structural suites pass 72/72, 19/19, and 339/339.
+
+Manual browser QA exercised the Design/Run switch and Run interaction plus the automatic default
+placement target, visible Delete action, editable-control Backspace guard, and successful Delete
+shortcut. It is not automated real-browser or native-drag E2E evidence. M09-T10 is `DONE`,
+implementation progress is 105/145 (72%), M09 is 10/14 (71%), and proof gates remain 10/13. P-09
+is only `PARTIAL`; P-08 remains `NOT_PROVEN`; S-001 remains `PLANNED`; PF-025, PF-028, and PF-083
+remain `OPEN`; and M09-T11 is next.
+
 ## Local commands
 
 ```bash
@@ -232,6 +279,7 @@ pnpm --filter @desen/app-web test:structured-inspector
 pnpm --filter @desen/app-web test:named-slots
 pnpm --filter @desen/app-web test:state-bindings
 pnpm --filter @desen/app-web test:event-actions
+pnpm --filter @desen/app-web test:design-run
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

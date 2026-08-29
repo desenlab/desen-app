@@ -25,8 +25,12 @@ const SOURCE_PATHS = Object.freeze({
   applicationSource: "apps/desen-app/src/application.tsx",
   applicationCss: "apps/desen-app/src/application.module.css",
 });
+const DESIGN_RUN_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json";
+const SELF_READER_PATH = "scripts/lib/desen-app-event-action-editor-proof.mjs";
 const temporaryDirectories = [];
 let parentArtifactBytes;
+let successorArtifactBytes;
+let selfReaderBytes;
 let sourcePolicyInput;
 let built;
 
@@ -99,6 +103,10 @@ before(async () => {
       ]),
     ),
   );
+  [successorArtifactBytes, selfReaderBytes] = await Promise.all([
+    readFile(path.join(ROOT, DESIGN_RUN_ARTIFACT_PATH)),
+    readFile(path.join(ROOT, SELF_READER_PATH)),
+  ]);
   built = await buildDesenAppEventActionEditorEvidence();
 });
 
@@ -120,6 +128,39 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.artifact.claim.p08Status, "NOT_PROVEN");
   assert.equal(built.artifactBytes.byteLength > 0, true);
   assert.match(built.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(built.currentCompatibility.successor.task, "M09-T10");
+  assert.deepEqual(built.currentCompatibility.successor.artifact, {
+    task: "M09-T10",
+    proofId: "desen-app-design-run-modes",
+    profile: "desen.app.design-run-modes-proof.v1",
+    result: "PASS",
+    path: DESIGN_RUN_ARTIFACT_PATH,
+    bytes: 17_900,
+    sha256: "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334",
+  });
+  assert.equal(built.currentCompatibility.successor.oneImmutableSourceAndBundleSession, true);
+  assert.equal(built.currentCompatibility.successor.zeroRuntimeRemountOrDisposeOnToggle, true);
+  assert.equal(built.currentCompatibility.successor.sameManagedCapabilitySubtreeOnToggle, true);
+  assert.equal(built.currentCompatibility.successor.exactAdapterStateSetExecution, true);
+  assert.equal(built.currentCompatibility.successor.centralRunAuthoringGuards, true);
+  assert.equal(built.currentCompatibility.successor.externalHostPortsDeniedOrInert, true);
+  assert.equal(built.currentCompatibility.successor.focusedDesignRunTests, 44);
+  assert.equal(built.currentCompatibility.successor.fullAppTests, 210);
+  assert.equal(built.currentCompatibility.successor.fixturesAndScenariosImplemented, false);
+  assert.deepEqual(built.currentCompatibility.retainedAuthoringUx, {
+    rootSafeDefaultPlacementTarget: true,
+    explicitChangeTarget: true,
+    enlargedDropLanes: true,
+    lastValidRowDropProjection: true,
+    visibleSelectedLayerDeleteControl: true,
+    guardedDeleteAndBackspace: true,
+    namedSlotAndValidatorAuthorityChanged: false,
+    arbitraryCanvasGeometryOrDropClaimed: false,
+    nativeBrowserDragE2eClaimed: false,
+  });
+  assert.equal(built.currentCompatibility.boundary.retainedHistoricalReceipts, 21);
+  assert.equal(built.currentCompatibility.boundary.successorCompatibilityPaths, 10);
+  assert.equal(built.currentCompatibility.boundary.currentPathReceipts.length, 32);
 });
 
 test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[1], () => {
@@ -216,6 +257,8 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[7], async () => {
   assert.notEqual(second.artifact, built.artifact);
   assert.equal(Object.isFrozen(second.artifact), true);
   assert.equal(Object.isFrozen(second.artifact.boundary.trackedReceipts), true);
+  assert.deepEqual(second.currentCompatibility, built.currentCompatibility);
+  assert.equal(Object.isFrozen(second.currentCompatibility), true);
 });
 
 test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
@@ -264,9 +307,39 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
       replacement: "<UncheckedEventActionPanel",
     },
     {
+      key: "applicationSource",
+      search: "const resolvedActiveSlot = activeSlot ?? defaultSlot;",
+      replacement: "const resolvedActiveSlot = activeSlot;",
+    },
+    {
+      key: "applicationSource",
+      search: 'aria-label="Change target in Layers"',
+      replacement: 'aria-label="Target"',
+    },
+    {
+      key: "applicationSource",
+      search: "const projected = rowDropProjection.current ?? projectedRowDrop(event);",
+      replacement: "const projected = projectedRowDrop(event);",
+    },
+    {
+      key: "applicationSource",
+      search: '(event.key !== "Delete" && event.key !== "Backspace")',
+      replacement: 'event.key !== "Delete"',
+    },
+    {
+      key: "applicationSource",
+      search: "className={styles.authoringSelectionActions}",
+      replacement: "className={styles.removedAuthoringSelectionActions}",
+    },
+    {
       key: "applicationCss",
       search: ".eventActionPanel {",
       replacement: ".removedEventActionPanel {",
+    },
+    {
+      key: "applicationCss",
+      search: '.slotBoundary[data-drop-ready="true"] {',
+      replacement: '.removedSlotBoundary[data-drop-ready="true"] {',
     },
   ];
   for (const mutation of mutations) {
@@ -298,6 +371,19 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[9], async () => {
       expectedError("PARENT_DRIFT"),
     );
   }
+
+  await assert.rejects(
+    buildDesenAppEventActionEditorEvidence({
+      fileOverrides: new Map([[DESIGN_RUN_ARTIFACT_PATH, changedByte(successorArtifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppEventActionEditorEvidence({
+      fileOverrides: new Map([[SELF_READER_PATH, changedByte(selfReaderBytes)]]),
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
 
   const proofDocument = exactProofDocument(built.artifactSha256);
   const verified = await verifyDesenAppEventActionEditorEvidence({
