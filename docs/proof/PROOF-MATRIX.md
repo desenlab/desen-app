@@ -2707,7 +2707,7 @@ promotion, and complete serial structural suites pass 72/72, 19/19, and 339/339.
 The local CI authority contains 192 workloads and 91 proof pairs—80 ordinary and 11 barriers—with
 a 58-proof-unit/126-workload connected closure and ownership over 1,218 tracked paths, including
 182 proof-owned paths. Append-only checkpoint sequence 49 authenticates 45 artifacts and 90 readers
-at `sha256:18677ff5d4b734d4fdcb7839f704b72298376091dc9d50eec1edfd31611dc635`.
+at `sha256:58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962`.
 
 These are local receipts. Manual browser QA exercised the mode switch and Run interaction plus the
 automatic default placement target, visible Delete action, editable-control Backspace guard, and

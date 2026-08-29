@@ -614,7 +614,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[48],
-    "18677ff5d4b734d4fdcb7839f704b72298376091dc9d50eec1edfd31611dc635",
+    "58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -1656,8 +1656,24 @@ test("sequence forty-nine preserves history, reseals App readers, and appends M0
     current.readers.flatMap((reader, index) =>
       JSON.stringify(reader) === JSON.stringify(previous.readers[index]) ? [] : [index],
     ),
-    [74, 75, 76, 77, 78, 80, 82, 84, 86, 87, 88, 89],
+    [72, 73, 74, 75, 76, 77, 78, 80, 82, 84, 86, 87, 88, 89],
   );
+  assert.deepEqual(current.readers.slice(72, 74), [
+    {
+      task: "M09-T02",
+      role: "proof-library",
+      path: "scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs",
+      bytes: 84880,
+      sha256: "d1074f44bba9fca7ef87bb797b72dd0857081215454c710cc32c356e5310a115",
+    },
+    {
+      task: "M09-T02",
+      role: "root-test",
+      path: "tests/desen-app-catalog-panel-layer-tree.test.mjs",
+      bytes: 26481,
+      sha256: "df0b4fe2e192551e74e0fd39da735c55f3e834e1cc6c12cc65f0bcf2848ec313",
+    },
+  ]);
   assert.deepEqual(current.readers.slice(-2).map(identity), [
     {
       task: "M09-T10",
@@ -1677,7 +1693,7 @@ test("sequence forty-nine preserves history, reseals App readers, and appends M0
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "18677ff5d4b734d4fdcb7839f704b72298376091dc9d50eec1edfd31611dc635",
+    "58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962",
   );
 });
 

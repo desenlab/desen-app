@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "18677ff5d4b734d4fdcb7839f704b72298376091dc9d50eec1edfd31611dc635",
+  "headSha256": "58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962",
   "checkpoints": [
     {
       "sequence": 1,
@@ -23971,15 +23971,15 @@
           "task": "M09-T02",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs",
-          "bytes": 84197,
-          "sha256": "a5766e2827c0fbb244618d3e3b50c4e0dc676fbda43e428cb8ebc1e06a5b4c9f"
+          "bytes": 84880,
+          "sha256": "d1074f44bba9fca7ef87bb797b72dd0857081215454c710cc32c356e5310a115"
         },
         {
           "task": "M09-T02",
           "role": "root-test",
           "path": "tests/desen-app-catalog-panel-layer-tree.test.mjs",
-          "bytes": 25751,
-          "sha256": "a36f198cf2351ee16aba0f13b3b52f24a491d96235368beb2f8a2ac09087ba60"
+          "bytes": 26481,
+          "sha256": "df0b4fe2e192551e74e0fd39da735c55f3e834e1cc6c12cc65f0bcf2848ec313"
         },
         {
           "task": "M09-T03",

@@ -684,9 +684,9 @@ M09-T09 appends sequence 48 at
 live App compatibility readers, and extends the chain to 44 frozen artifacts and 88 current
 readers. This local reader authority makes no required-gate or hosted M09-T09 claim.
 M09-T10 appends sequence 49 at
-`18677ff5d4b734d4fdcb7839f704b72298376091dc9d50eec1edfd31611dc635` without rewriting sequences
+`58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962` without rewriting sequences
 1–48 or any of the 44 predecessor artifacts. It appends the T10 artifact at index 44, advances only
-reviewed live readers at indexes `[74, 75, 76, 77, 78, 80, 82, 84, 86, 87, 88, 89]`, and extends
+reviewed live readers at indexes `[72, 73, 74, 75, 76, 77, 78, 80, 82, 84, 86, 87, 88, 89]`, and extends
 the chain to 45 frozen artifacts and 90 current readers. Its checkpoint suite passes 72/72. This
 local reader authority makes no required-gate or hosted M09-T10 claim.
 These are joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
@@ -834,7 +834,7 @@ root-safe default placement target, explicit target change, enlarged drop lanes,
 projection, visible selected-layer Delete control, and editable-control-safe Delete/Backspace
 shortcuts. It does not claim arbitrary canvas geometry or native-browser drag E2E. The checkpoint,
 promotion, and complete serial structural suites pass 72/72, 19/19, and 339/339. Sequence 49 closes
-at `sha256:18677ff5d4b734d4fdcb7839f704b72298376091dc9d50eec1edfd31611dc635` with 45 artifacts and 90
+at `sha256:58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962` with 45 artifacts and 90
 readers. No required-gate, hosted-CI, fixtures/scenarios, persistence, diagnostics, publication,
 activation, or automated real-browser E2E result is inferred from those local receipts.
 

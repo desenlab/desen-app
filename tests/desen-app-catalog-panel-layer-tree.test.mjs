@@ -22,6 +22,7 @@ const REFERENCE_ARTIFACT = "docs/proof/artifacts/reference-catalog-web-capabilit
 const CATALOG = "packages/reference-catalog-web/catalog.json";
 const SOURCE = "examples/sign-in/official-derived.source.desen.json";
 const PACKAGE = "apps/desen-app/package.json";
+const APPLICATION = "apps/desen-app/src/application.tsx";
 const AUTHORING = "apps/desen-app/src/authoring-data.ts";
 const AUTHORING_SELECTION = "apps/desen-app/src/authoring-selection.ts";
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
@@ -324,7 +325,7 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.currentCompatibility.boundary.imports.publisherImports, 3);
   assert.equal(built.currentCompatibility.boundary.imports.protocolImports, 4);
   assert.equal(built.currentCompatibility.boundary.imports.reviewedSourceMutationCalls, 13);
-  assert.equal(built.currentCompatibility.boundary.imports.reviewedNamedSlotDragDropHandlers, 17);
+  assert.equal(built.currentCompatibility.boundary.imports.reviewedNamedSlotDragDropHandlers, 18);
 });
 
 test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[4], async () => {
@@ -377,6 +378,27 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[5], async () => {
       fileOverrides: new Map([[PACKAGE, Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`)]]),
     }),
     expectedError("PACKAGE_DRIFT"),
+  );
+
+  const application = await readFile(path.join(ROOT, APPLICATION), "utf8");
+  const admittedRowDragEnter = `        onDragEnter={(event) => {
+          const projected = projectedRowDrop(event);`;
+  assert.equal(application.includes(admittedRowDragEnter), true);
+  await assert.rejects(
+    buildDesenAppCatalogPanelLayerTreeEvidence({
+      fileOverrides: new Map([
+        [
+          APPLICATION,
+          Buffer.from(
+            application.replace(
+              admittedRowDragEnter,
+              admittedRowDragEnter.replace("onDragEnter", "onDragOver"),
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("IMPORT_BOUNDARY_DRIFT"),
   );
 
   const authoring = await readFile(path.join(ROOT, AUTHORING), "utf8");

@@ -171,6 +171,17 @@ const EXPECTED_VALIDATOR_IMPORTS = Object.freeze([
   "validateDesenInteractionCatalogSet",
   "validateDesenSourceInteractionContracts",
 ]);
+const EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS = Object.freeze(
+  new Map([
+    ["draggable", 2],
+    ["onDragEnd", 2],
+    ["onDragEnter", 3],
+    ["onDragLeave", 3],
+    ["onDragOver", 3],
+    ["onDragStart", 2],
+    ["onDrop", 3],
+  ]),
+);
 const EXPECTED_COMPONENTS = Object.freeze([
   Object.freeze({
     id: "com.example.ui/Alert",
@@ -1141,7 +1152,9 @@ function inspectImportsAndExecutionBoundary(files) {
     "querySelector",
     "querySelectorAll",
   ]);
-  let namedSlotDragDropHandlers = 0;
+  const namedSlotDragDropHandlers = new Map(
+    [...EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS].map(([name]) => [name, 0]),
+  );
 
   for (const relativePath of CURRENT_TYPESCRIPT_SOURCE_PATHS) {
     const source = decodeUtf8(files.get(relativePath), relativePath);
@@ -1439,7 +1452,11 @@ function inspectImportsAndExecutionBoundary(files) {
             if (relativePath !== APPLICATION_SOURCE_PATH) {
               fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained drag/drop mutation behavior.`);
             }
-            namedSlotDragDropHandlers += 1;
+            const handlerName = property.name.getText(sourceFile);
+            namedSlotDragDropHandlers.set(
+              handlerName,
+              (namedSlotDragDropHandlers.get(handlerName) ?? 0) + 1,
+            );
           }
         }
       }
@@ -1464,7 +1481,7 @@ function inspectImportsAndExecutionBoundary(files) {
     editorCoreImports !== 11 ||
     publisherImports !== 3 ||
     protocolImports !== 4 ||
-    namedSlotDragDropHandlers !== 17
+    !isDeepStrictEqual(namedSlotDragDropHandlers, EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS)
   ) {
     fail(
       "IMPORT_BOUNDARY_DRIFT",
@@ -1472,7 +1489,7 @@ function inspectImportsAndExecutionBoundary(files) {
       {
         catalogSdkImports,
         editorCoreImports,
-        namedSlotDragDropHandlers,
+        namedSlotDragDropHandlers: Object.fromEntries(namedSlotDragDropHandlers),
         protocolImports,
         publisherImports,
         publicDiagnosticIndexTypeOnlyImports,
@@ -1654,7 +1671,10 @@ function inspectImportsAndExecutionBoundary(files) {
     reviewedSourceMutationCalls: 13,
     platformIoCalls: 0,
     dragDropMutationHandlers: 0,
-    reviewedNamedSlotDragDropHandlers: namedSlotDragDropHandlers,
+    reviewedNamedSlotDragDropHandlers: [...namedSlotDragDropHandlers.values()].reduce(
+      (total, count) => total + count,
+      0,
+    ),
     canvasElements: 0,
     inspectorElements: 0,
   });

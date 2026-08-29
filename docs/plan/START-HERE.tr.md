@@ -983,7 +983,7 @@ root proof 10/10 geçer. Exact artifact 17.900 byte'tır:
 `sha256:0c0c5450b32bc1e841cc046f49a8eb9a48dfee512b1c83186ed549aa3a5ebe03`. Yerel CI authority 192
 workload/91 proof pair'dir (80 ordinary + 11 barrier); connected closure 58 proof unit/126 workload,
 ownership 1.218 tracked/182 proof-owned path'tir. Append-only sequence 49, 45 artifact ve 90
-reader'ı `sha256:18677ff5d4b734d4fdcb7839f704b72298376091dc9d50eec1edfd31611dc635`
+reader'ı `sha256:58c9969adde3240c05bc41e3d56214054bc8a5145998e47e93e16fc077e61962`
 başında doğrular. Checkpoint, promotion ve complete serial structural suite'ler sırasıyla 72/72,
 19/19 ve 339/339 geçer.
 
