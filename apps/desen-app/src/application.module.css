@@ -1192,7 +1192,7 @@
 .authoringTabs {
   display: grid;
   flex: 0 0 auto;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   padding: 0.25rem;
   background: var(--desen-app-surface-subtle);
   border-bottom: 1px solid var(--desen-app-border);
@@ -1200,7 +1200,7 @@
 
 .authoringTabs button {
   min-height: 1.875rem;
-  padding: 0 0.625rem;
+  padding: 0 0.375rem;
   color: var(--desen-app-text-muted);
   font-size: 0.625rem;
   font-weight: 560;
@@ -1443,6 +1443,520 @@
   min-height: 1.625rem;
   padding-top: 0.5rem;
   border-top: 1px solid var(--desen-app-border);
+}
+
+.authoringPanel[data-active-tab="actions"] {
+  width: 20rem;
+}
+
+.eventActionPanel {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.625rem;
+}
+
+.eventActionHeader,
+.eventCardHeader,
+.actionListHeader,
+.actionNewHeader,
+.actionCardHeader,
+.eventHandlerControls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.eventActionHeader h2,
+.eventCardHeader h3,
+.actionListHeader h4,
+.actionNewHeader strong {
+  margin: 0;
+  color: var(--desen-app-text);
+  font-size: 0.6875rem;
+  font-weight: 620;
+  line-height: 0.9375rem;
+}
+
+.eventActionHeader small,
+.actionNewHeader small,
+.eventEyebrow,
+.eventHandlerControls > span {
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+  font-weight: 560;
+  line-height: 0.75rem;
+}
+
+.eventEyebrow {
+  display: block;
+  margin-bottom: 0.0625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.eventActionCount,
+.eventHandlerBadge,
+.actionTypeBadge,
+.actionListHeader > span {
+  flex: 0 0 auto;
+  padding: 0.1875rem 0.4375rem;
+  color: var(--desen-app-text-muted);
+  font-size: 0.5rem;
+  font-weight: 580;
+  line-height: 0.6875rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 99px;
+}
+
+.eventActionScope,
+.eventDescription,
+.eventActionNotice,
+.actionListHint,
+.actionJsonHelp,
+.actionJsonError,
+.eventActionIdle p,
+.eventActionRejected p,
+.eventActionEmpty p,
+.eventHandlerEmpty p {
+  margin: 0;
+  color: var(--desen-app-text-soft);
+  font-size: 0.53125rem;
+  line-height: 0.8125rem;
+}
+
+.eventActionBody,
+.eventList,
+.eventCard > article,
+.eventHandlerBody,
+.actionListSection,
+.actionList,
+.actionCard,
+.actionSettlementLists,
+.actionJsonEditor,
+.actionNewForm {
+  display: grid;
+}
+
+.eventActionBody,
+.eventCard > article,
+.eventHandlerBody,
+.actionListSection,
+.actionCard,
+.actionJsonEditor,
+.actionNewForm {
+  gap: 0.5rem;
+}
+
+.eventOwnerContext {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5625rem;
+  background: color-mix(in srgb, var(--desen-app-accent) 5%, var(--desen-app-surface));
+  border: 1px solid color-mix(in srgb, var(--desen-app-accent) 20%, var(--desen-app-border));
+  border-radius: 0.625rem;
+}
+
+.eventOwnerIcon {
+  display: grid;
+  width: 1.625rem;
+  height: 1.625rem;
+  place-items: center;
+  color: var(--desen-app-accent);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--desen-app-accent) 10%, white);
+  border: 1px solid color-mix(in srgb, var(--desen-app-accent) 24%, var(--desen-app-border));
+  border-radius: 0.4375rem;
+}
+
+.eventOwnerContext > div:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 0.0625rem;
+}
+
+.eventOwnerContext strong,
+.eventOwnerContext code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eventOwnerContext strong {
+  font-size: 0.625rem;
+  font-weight: 610;
+}
+
+.eventOwnerContext code,
+.eventOwnerContext > span,
+.eventOwnerContext > small {
+  color: var(--desen-app-text-muted);
+  font-family: inherit;
+  font-size: 0.5rem;
+  line-height: 0.6875rem;
+}
+
+.eventOwnerContext > span {
+  padding: 0.1875rem 0.375rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 99px;
+}
+
+.eventOwnerContext > small {
+  grid-column: 2 / -1;
+}
+
+.actionReferenceGuide {
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+}
+
+.actionReferenceGuide > summary,
+.eventPayloadSchema > summary {
+  padding: 0.4375rem 0.5rem;
+  color: var(--desen-app-text-muted);
+  font-size: 0.53125rem;
+  font-weight: 570;
+  cursor: pointer;
+}
+
+.actionReferenceGuide > dl {
+  display: grid;
+  padding: 0 0.5rem 0.5rem;
+  margin: 0;
+  gap: 0.375rem;
+}
+
+.actionReferenceGroup {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.actionReferenceGroup dt {
+  color: var(--desen-app-text-soft);
+  font-size: 0.46875rem;
+  font-weight: 620;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.actionReferenceGroup dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.actionReferenceChip {
+  display: inline-grid;
+  max-width: 100%;
+  padding: 0.25rem 0.375rem;
+  color: var(--desen-app-text-muted);
+  font-size: 0.46875rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.375rem;
+}
+
+.actionReferenceChip code {
+  overflow: hidden;
+  color: var(--desen-app-text-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eventList,
+.actionList {
+  padding: 0;
+  margin: 0;
+  gap: 0.5rem;
+  list-style: none;
+}
+
+.eventCard {
+  padding: 0.625rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.6875rem;
+  box-shadow: 0 1px 1px rgb(24 31 43 / 3%);
+}
+
+.eventHandlerBadge[data-present="true"] {
+  color: #16734a;
+  background: color-mix(in srgb, var(--desen-app-success) 9%, white);
+  border-color: color-mix(in srgb, var(--desen-app-success) 28%, var(--desen-app-border));
+}
+
+.eventPayloadSchema {
+  background: var(--desen-app-surface-subtle);
+  border-radius: 0.4375rem;
+}
+
+.eventPayloadSchema pre {
+  max-height: 9rem;
+  padding: 0 0.5rem 0.5rem;
+  margin: 0;
+  overflow: auto;
+  color: var(--desen-app-text-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.46875rem;
+  line-height: 0.6875rem;
+  white-space: pre-wrap;
+}
+
+.eventHandlerBody {
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--desen-app-border);
+}
+
+.eventHandlerEmpty,
+.eventActionIdle,
+.eventActionRejected,
+.eventActionEmpty {
+  display: grid;
+  gap: 0.375rem;
+  padding: 0.75rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px dashed var(--desen-app-border-strong);
+  border-radius: 0.5625rem;
+}
+
+.eventActionIdle,
+.eventActionRejected,
+.eventActionEmpty {
+  min-height: 8rem;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.eventActionIdle strong,
+.eventActionRejected strong,
+.eventActionEmpty strong {
+  font-size: 0.625rem;
+  font-weight: 610;
+}
+
+.eventHandlerEmpty button,
+.eventHandlerControls button,
+.actionAddToggle,
+.actionCardControls button,
+.actionJsonControls button {
+  min-height: 1.625rem;
+  padding: 0 0.4375rem;
+  color: var(--desen-app-text-muted);
+  font: inherit;
+  font-size: 0.53125rem;
+  font-weight: 580;
+  cursor: pointer;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border-strong);
+  border-radius: 0.375rem;
+}
+
+.eventHandlerEmpty button,
+.actionAddToggle,
+.actionJsonControls button[type="submit"] {
+  justify-self: start;
+  color: white;
+  background: var(--desen-app-primary);
+  border-color: var(--desen-app-primary);
+}
+
+.eventHandlerControls button,
+.actionCardControls button:last-child {
+  color: #9f332d;
+  border-color: color-mix(in srgb, #c55b52 24%, var(--desen-app-border));
+}
+
+.actionListSection {
+  padding: 0.5rem;
+  background: color-mix(in srgb, var(--desen-app-surface-subtle) 68%, white);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5625rem;
+}
+
+.actionListSection[data-action-list-tone="success"] {
+  border-left: 2px solid color-mix(in srgb, var(--desen-app-success) 54%, var(--desen-app-border));
+}
+
+.actionListSection[data-action-list-tone="failure"] {
+  border-left: 2px solid color-mix(in srgb, #c55b52 54%, var(--desen-app-border));
+}
+
+.actionListHeader h4 {
+  font-size: 0.59375rem;
+}
+
+.actionListEmpty {
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.5rem;
+  color: var(--desen-app-text-muted);
+  font-size: 0.53125rem;
+  background: var(--desen-app-surface);
+  border: 1px dashed var(--desen-app-border);
+  border-radius: 0.4375rem;
+}
+
+.actionListEmpty small {
+  color: var(--desen-app-text-soft);
+  font-size: 0.46875rem;
+  line-height: 0.6875rem;
+}
+
+.actionCard {
+  padding: 0.5rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+}
+
+.actionCardHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.actionOrder {
+  display: grid;
+  width: 1.375rem;
+  height: 1.375rem;
+  place-items: center;
+  color: var(--desen-app-text-muted);
+  font-size: 0.5rem;
+  font-weight: 650;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.375rem;
+}
+
+.actionIdentity {
+  display: grid;
+  min-width: 0;
+  gap: 0.0625rem;
+}
+
+.actionIdentity strong {
+  font-size: 0.59375rem;
+  font-weight: 610;
+}
+
+.actionIdentity code {
+  overflow: hidden;
+  color: var(--desen-app-text-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.46875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actionTypeBadge {
+  max-width: 6.75rem;
+  overflow: hidden;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actionCardControls,
+.actionJsonControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.actionCardControls button:disabled,
+.actionJsonControls button:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.actionSettlementLists {
+  gap: 0.375rem;
+  padding-left: 0.375rem;
+  border-left: 1px solid var(--desen-app-border-strong);
+}
+
+.actionNewForm,
+.actionJsonEditor {
+  padding: 0.5rem;
+  background: color-mix(in srgb, var(--desen-app-accent) 4%, var(--desen-app-surface));
+  border: 1px solid color-mix(in srgb, var(--desen-app-accent) 20%, var(--desen-app-border));
+  border-radius: 0.5rem;
+}
+
+.actionTypeField {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+}
+
+.actionTypeField select {
+  width: 100%;
+  height: 1.875rem;
+  padding: 0 0.5rem;
+  color: var(--desen-app-text);
+  font: inherit;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border-strong);
+  border-radius: 0.4375rem;
+}
+
+.actionJsonTextarea {
+  width: 100%;
+  min-height: 8.5rem;
+  padding: 0.5rem;
+  resize: vertical;
+  color: var(--desen-app-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.5rem;
+  line-height: 0.75rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border-strong);
+  border-radius: 0.4375rem;
+}
+
+.actionJsonTextarea[aria-invalid="true"] {
+  border-color: #c55b52;
+}
+
+.actionJsonHelp code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: inherit;
+}
+
+.actionJsonError {
+  color: #9f332d;
+}
+
+.eventActionNotice {
+  min-height: 1.625rem;
+  padding-top: 0.5rem;
+  margin-top: auto;
+  border-top: 1px solid var(--desen-app-border);
+}
+
+.eventHandlerEmpty button:focus-visible,
+.eventHandlerControls button:focus-visible,
+.actionAddToggle:focus-visible,
+.actionCardControls button:focus-visible,
+.actionJsonControls button:focus-visible,
+.actionTypeField select:focus-visible,
+.actionJsonTextarea:focus-visible,
+.actionReferenceGuide > summary:focus-visible,
+.eventPayloadSchema > summary:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: 1px;
 }
 
 .panelSectionHeading {
@@ -2761,6 +3275,10 @@
     position: static;
     width: min(100%, 30rem);
     max-height: 33rem;
+  }
+
+  .authoringPanel[data-active-tab="actions"] {
+    width: min(100%, 30rem);
   }
 
   .surfaceFrame {

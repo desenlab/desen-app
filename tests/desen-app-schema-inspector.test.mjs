@@ -24,6 +24,10 @@ const AUTHORING_SLOT_SOURCE_PATH = "apps/desen-app/src/authoring-slots.ts";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
 const STATE_BINDING_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json";
+const EVENT_ACTION_SOURCE_PATH = "apps/desen-app/src/authoring-event-actions.ts";
+const EVENT_ACTION_PANEL_PATH = "apps/desen-app/src/event-action-panel.tsx";
+const EVENT_ACTION_TEST_PATH = "apps/desen-app/test/authoring-event-actions.test.ts";
+const EVENT_ACTION_PANEL_TEST_PATH = "apps/desen-app/test/event-action-panel.test.tsx";
 const SOURCE_PATHS = Object.freeze({
   authoringDataSource: "apps/desen-app/src/authoring-data.ts",
   inspectorSource: "apps/desen-app/src/authoring-inspector.ts",
@@ -139,6 +143,17 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[0], () => {
     bytes: 24_830,
     sha256: "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f",
   });
+  assert.deepEqual(
+    built.currentCompatibility.boundary.additiveSuccessorReceipts
+      .slice(-4)
+      .map(({ path: relativePath }) => relativePath),
+    [
+      EVENT_ACTION_SOURCE_PATH,
+      EVENT_ACTION_PANEL_PATH,
+      EVENT_ACTION_TEST_PATH,
+      EVENT_ACTION_PANEL_TEST_PATH,
+    ],
+  );
 });
 
 test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[1], () => {
@@ -227,6 +242,16 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[1], () => {
       "verify:desen-app-state-binding-editor"
     ],
     "node scripts/verify-desen-app-schema-inspector.mjs && node scripts/verify-editor-core-state-binding-edits.mjs && node scripts/verify-desen-app-named-slot-authoring.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:state-bindings && node scripts/verify-desen-app-state-binding-editor.mjs",
+  );
+  assert.equal(
+    built.currentCompatibility.successor.package.eventActionTestCommand,
+    "vitest run test/structured-json.test.ts test/authoring-data.test.ts test/authoring-selection.test.ts test/authoring-event-actions.test.ts test/event-action-panel.test.tsx test/authoring-preview.test.ts test/adapter-canvas.test.tsx test/application.test.tsx",
+  );
+  assert.equal(
+    built.currentCompatibility.successor.package.eventActionRootCommands[
+      "verify:desen-app-event-action-editor"
+    ],
+    "node scripts/verify-desen-app-state-binding-editor.mjs && node scripts/verify-editor-core-event-action-edits.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:event-actions && node scripts/verify-desen-app-event-action-editor.mjs",
   );
   assert.deepEqual(built.artifact.claim.controlKinds, [
     "boolean",
@@ -358,6 +383,18 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[7], async () => {
     buildDesenAppSchemaInspectorEvidence({
       fileOverrides: new Map([
         [STATE_BINDING_ARTIFACT_PATH, changedByte(stateBindingArtifactBytes)],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  const eventActionSource = await readFile(path.join(ROOT, EVENT_ACTION_SOURCE_PATH), "utf8");
+  await assert.rejects(
+    buildDesenAppSchemaInspectorEvidence({
+      fileOverrides: new Map([
+        [
+          EVENT_ACTION_SOURCE_PATH,
+          Buffer.from(eventActionSource.replace('ownerKind: "component"', 'ownerKind: "behavior"')),
+        ],
       ]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),

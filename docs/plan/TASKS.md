@@ -1440,7 +1440,7 @@ is next.
 | M09-T06 | DONE        | M09-T05                  | Nested-object controls and honest structured-JSON fallback                      |
 | M09-T07 | DONE        | M09-T02–M09-T06          | Named-slot drop, move, reorder, cardinality, and acceptance UI                  |
 | M09-T08 | DONE        | M09-T05                  | Local state and binding editor UI                                               |
-| M09-T09 | NOT_STARTED | M09-T08                  | Sign-in event and closed-action editor UI                                       |
+| M09-T09 | DONE        | M09-T08                  | Sign-in event and closed-action editor UI                                       |
 | M09-T10 | NOT_STARTED | M09-T03, M09-T08–M09-T09 | Design/Run modes on the same source tree                                        |
 | M09-T11 | NOT_STARTED | M09-T10                  | Fixtures, scenarios, and visible approximate-fidelity disclosure                |
 | M09-T12 | NOT_STARTED | M09-T01, M08-T08         | Save/open UI through editor persistence port                                    |
@@ -1748,6 +1748,40 @@ M09-T08 is `DONE`, advancing implementation progress to 103/145 (71%) and M09 to
 proof gates remain 10/13. P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, and event/action
 authoring, Design/Run, durable save/open, real-browser E2E, publication, and activation remain later
 owners. M09-T09 is next.
+
+M09-T09 adds one component-scoped Events & Actions view for the exact selected Source component.
+The projection exposes only events declared by that component's authenticated Catalog contract and
+keeps absent, present-empty, and present-nonempty handler states distinct. Behavior-owner UI is not
+claimed; forged behavior selections fail closed. Handler creation/deletion and complete action
+insert, replace, reorder, and delete operations use exact canonical escaped owner-relative pointers.
+
+The editor covers the closed seven-action union: `component.command`, `event.emit`, `navigate`,
+`operation.invoke`, `resource.refresh`, `state.set`, and `state.toggle`. Operation success and
+failure lists remain recursively addressable. Whole-action JSON is captured as inert data and
+committed only on explicit Apply; intermediate drafts do not mutate Source. Every accepted edit
+uses a public Editor Core transition, complete Source revalidation, and Publisher preflight before
+one atomic session-local `{document, preview}` replacement. A failed edit or preview preflight
+preserves the prior handler projection, canvas, selection overlay, and managed capability subtree.
+
+The pure projection suite passes 12/12, the panel suite passes 7/7, the focused
+`test:event-actions` suite passes 84/84, the complete App suite passes 202/202, and the independent
+root proof passes 10/10. The complete structural CI receipt passes 282/282. Exact evidence is the `23,812`-byte
+`docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json` at
+`sha256:0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab`.
+
+The live local CI inventory contains 190 workloads and 90 proof pairs—79 ordinary pairs and 11
+barriers. M09-T09's connected closure contains 57 proof units and 124 workloads; complete ownership
+covers 1,212 tracked paths, including 180 proof-owned paths. Append-only checkpoint sequence 48
+contains 44 artifacts and 88 readers at
+`sha256:5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90`; its checkpoint suite
+passes 71/71. These are local receipts; no required-gate, hosted-CI,
+real-browser E2E, action-execution, Design/Run, persistence, publication, or activation pass is
+claimed.
+
+M09-T09 is `DONE`, advancing implementation progress to 104/145 (72%) and M09 to 9/14 (64%) while
+proof gates remain 10/13. P-08 remains `NOT_PROVEN`; PF-025 and PF-083 remain `OPEN`; Design/Run,
+durable save/open, diagnostics navigation, real-browser E2E, publication, and activation remain
+later owners. M09-T10 is next.
 
 ## M10 — First end-to-end proof
 

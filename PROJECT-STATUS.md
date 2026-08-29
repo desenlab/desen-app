@@ -1102,19 +1102,46 @@ required-gate, hosted-CI, native-drag, or real-browser E2E pass is claimed. M09-
 remains `NOT_PROVEN`, PF-025 remains `OPEN`, proof gates remain 10/13, implementation progress is
 103/145 (71%), M09 is 8/14 (57%), and M09-T09 is next.
 
+M09-T09 now adds one component-scoped Events & Actions view for the exact selected Source
+component. It exposes only that component's Catalog-declared events and keeps absent,
+present-empty, and present-nonempty handler states distinct. Behavior-owner UI is not claimed, and
+forged behavior selections fail closed. Six public Editor Core mutations cover handler
+insert/delete plus action insert/replace/delete/reorder through exact canonical escaped
+owner-relative pointers.
+
+The App covers the closed seven-action union—`component.command`, `event.emit`, `navigate`,
+`operation.invoke`, `resource.refresh`, `state.set`, and `state.toggle`—including recursively
+addressable operation success and failure lists. Whole-action JSON drafts remain inert and local
+until explicit Apply. Every accepted edit passes complete continuous Source validation and
+Publisher preflight before one atomic session-local `{document, preview}` replacement; rejection
+preserves the prior projection and canvas.
+
+The focused event/action suite passes 84/84, the complete App suite passes 202/202, and the
+independent root proof passes 10/10. Exact evidence is the `23,812`-byte
+`docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json` at
+`sha256:0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab`. The live local CI
+authority contains 190 workloads and 90 proof pairs—79 ordinary and 11 barriers—with a
+57-proof-unit/124-workload closure and 1,212-path/180-proof-owned ownership. Sequence 48 contains
+44 artifacts and 88 readers at
+`sha256:5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90`. These are local
+receipts; no required-gate, hosted-CI, action-execution, Design/Run, persistence, real-browser E2E,
+publication, or activation pass is claimed. M09-T09 is `DONE`; P-08 remains `NOT_PROVEN`, PF-025
+and PF-083 remain `OPEN`, proof gates remain 10/13, implementation progress is 104/145 (72%), M09
+is 9/14 (64%), and M09-T10 is next.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `102 / 145 tasks complete (70%)`
+- Overall implementation progress: `104 / 145 tasks complete (72%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
-- M09 progress: `7 / 14 tasks complete (50%)`
+- M09 progress: `9 / 14 tasks complete (64%)`
 - Proof-gate progress: `10 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1202,7 +1229,9 @@ remains `NOT_PROVEN`, PF-025 remains `OPEN`, proof gates remain 10/13, implement
   `M09-T04 — Source-identity selection outside managed capability subtrees`,
   `M09-T05 — Schema-driven primitive/enum inspector controls`,
   `M09-T06 — Nested-object controls and honest structured-JSON fallback`,
-  `M09-T07 — Named-slot drop, move, reorder, cardinality, acceptance, and deletion UI`
+  `M09-T07 — Named-slot drop, move, reorder, cardinality, acceptance, and deletion UI`,
+  `M09-T08 — Local state and binding editor UI`,
+  `M09-T09 — Sign-in event and closed-action editor UI`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -1224,11 +1253,11 @@ remains `NOT_PROVEN`, PF-025 remains `OPEN`, proof gates remain 10/13, implement
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Next implementation task: `M09-T09 — Sign-in event and closed-action editor UI`
+- Next implementation task: `M09-T10 — Design/Run modes on the same source tree`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  8/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T08 are `DONE`; `N-042` is `TESTED`, P-06
+  9/14, M07 is 11/11, I07-04, G07, G08, and M09-T01–M09-T09 are `DONE`; `N-042` is `TESTED`, P-06
   is `PROVEN`, P-07 and P-16 are `PARTIAL`, proof gates are 10/13, P-08 remains `NOT_PROVEN`,
-  PF-025 remains `OPEN`, and implementation progress is 103/145.
+  PF-025 and PF-083 remain `OPEN`, and implementation progress is 104/145.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -1287,6 +1316,18 @@ remains `NOT_PROVEN`, PF-025 remains `OPEN`, proof gates remain 10/13, implement
   1,202-path/178-proof-owned ownership, and sequence 47 with 43 artifacts and 86 readers at
   `sha256:c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7`. These are local receipts and make no required-gate, hosted-CI,
   real-browser E2E, event/action, Design/Run, durable persistence, publication, or activation claim.
+  M09-T09 is `DONE` with a component-only Catalog event-handler and closed seven-action editor,
+  recursively addressable operation settlement lists, inert whole-action JSON drafts, all six
+  public Editor Core event/action mutations, complete continuous Source validation, and atomic
+  Publisher-preflighted session replacement. Its `23,812`-byte artifact is pinned at
+  `sha256:0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab`;
+  focused event/action tests pass 84/84, the complete App suite passes 202/202, and the independent
+  root proof passes 10/10. The live local CI authority contains 190 workloads/90 proof pairs—79
+  ordinary and 11 barriers—a 57-proof-unit/124-workload closure, 1,212-path/180-proof-owned
+  ownership, and sequence 48 with 44 artifacts and 88 readers at
+  `sha256:5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90`. Behavior-owner UI,
+  action execution, Design/Run, durable persistence, real-browser E2E, publication, and activation
+  are not claimed.
 
 ## Completed preparation
 
@@ -3965,6 +4006,38 @@ M09-T08 evidence:
 - coverage decision: M09-T08 is `DONE`; P-08 remains `NOT_PROVEN`; PF-025 remains `OPEN`; proof
   gates remain 10/13; overall progress advances to 103/145 (71%); M09 advances to 8/14 (57%);
   M09-T09 is next
+
+M09-T09 evidence:
+
+- `docs/proof/DESEN-APP-EVENT-ACTION-EDITOR.md`
+- `docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json`, exactly
+  `23,812` bytes at `sha256:0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab`
+- owner authority: the Events & Actions view projects only Catalog-declared events for one exact
+  selected Source component, distinguishes absent, present-empty, and present-nonempty handlers,
+  and rejects forged behavior selections without claiming behavior-owner UI
+- mutation boundary: all six public Editor Core mutations cover handler insert/delete and action
+  insert/replace/delete/reorder through exact canonical escaped owner-relative pointers
+- action boundary: the editor covers the complete closed seven-action union and recursively
+  addressable `operation.invoke` success and failure lists; whole-action JSON drafts stay inert and
+  local until an exact explicit Apply
+- preview boundary: every accepted endpoint passes complete continuous Source validation and
+  Publisher preflight before one atomic session-local `{document, preview}` replacement; failure
+  preserves the prior document, event projection, canvas, selection overlay, and managed subtree
+- local proof: the focused `test:event-actions` suite passes 84/84, the complete App suite passes
+  202/202, and the independent root proof passes 10/10
+- CI authority: the live local inventory registers 190 workloads and 90 proof pairs, split into 79
+  ordinary pairs and 11 barriers; the connected closure contains 57 proof units and 124 workloads;
+  complete ownership covers 1,212 tracked paths and 180 proof-owned paths
+- checkpoint authority: sequence 48 contains 44 artifacts and 88 readers at
+  `sha256:5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90`
+- evidence boundary: these task, CI, ownership, and checkpoint receipts are local; no required-gate,
+  hosted-CI, action-execution, Design/Run, persistence, or real-browser E2E result is inferred
+- scope nonclaims: behavior-owner UI, action execution, Design/Run, durable save/open, diagnostics
+  navigation/placeholders, control-plane publication, activation, arbitrary-future-Catalog,
+  native-target, and pixel-fidelity guarantees remain unproven
+- coverage decision: M09-T09 is `DONE`; P-08 remains `NOT_PROVEN`; PF-025 and PF-083 remain `OPEN`;
+  proof gates remain 10/13; overall progress advances to 104/145 (72%); M09 advances to 9/14 (64%);
+  M09-T10 is next
 
 ## Status vocabulary
 

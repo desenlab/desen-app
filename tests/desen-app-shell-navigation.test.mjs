@@ -179,6 +179,8 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     "apps/desen-app/src/authoring-slots.ts",
     "apps/desen-app/src/authoring-state.ts",
     "apps/desen-app/src/state-panel.tsx",
+    "apps/desen-app/src/authoring-event-actions.ts",
+    "apps/desen-app/src/event-action-panel.tsx",
   ]);
   assert.equal(
     built.currentCompatibility.additiveSuccessor

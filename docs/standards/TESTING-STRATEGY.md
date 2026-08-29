@@ -178,8 +178,11 @@ pinned at `sha256:6246c4865e28a737e5990a7204dedaad6cae3e6c989a70a6cd496c84c29d07
 `sha256:0dfd1eb4210839d739572a943f421026ca40aecc4f285832148f66d242f9970c`.
 
 The historical M09-T06 and M09-T07 successors contain 184 workloads/87 proof pairs and 186
-workloads/88 proof pairs respectively. The current M09-T08 successor contains 188 workloads and 89
-proof pairs, split into 78 ordinary pairs and 11 barriers. Its three formal impact parents are
+workloads/88 proof pairs respectively. The historical M09-T08 successor contains 188 workloads and
+89 proof pairs. The current M09-T09 successor contains 190 workloads and 90 proof pairs, split into
+79 ordinary pairs and 11 barriers. Its two formal impact parents are
+`desen-app-state-binding-editor` and `editor-core-event-action-edits`; the connected closure
+contains 57 proof units and 124 workloads. M09-T08's three formal impact parents were
 `desen-app-schema-inspector`, `editor-core-state-binding-edits`, and
 `desen-app-named-slot-authoring`; the connected closure contains 56 proof units and 122 workloads.
 Exact plan, inventory, selector, runner, ownership, and checkpoint digests remain machine-verified
@@ -230,9 +233,12 @@ from selector success. Its ownership-category counts are
 proof-owned paths across 1,184 tracked paths. Its ownership-category counts are
 `174 / 45 / 31 / 131 / 458 / 211 / 123 / 11`. The historical M09-T07 authority contains 176
 proof-owned paths across 1,192 tracked paths. Its ownership-category counts are
-`176 / 45 / 31 / 132 / 460 / 213 / 124 / 11`. The current M09-T08 authority contains 178
-proof-owned paths across 1,202 tracked paths; its complete category projection remains a
-machine-verified CI authority rather than a value inferred from those totals. The 16 reviewed
+`176 / 45 / 31 / 132 / 460 / 213 / 124 / 11`. The historical M09-T08 authority contains 178
+proof-owned paths across 1,202 tracked paths. The current M09-T09 authority contains 180 proof-owned
+paths across 1,212 tracked paths. Its exact ownership-category projection is
+`180 / 45 / 31 / 134 / 468 / 217 / 126 / 11` for proof unit, CI policy, dependency policy, frozen
+input, package/application, shared proof infrastructure, project documentation, and repository
+policy respectively. The 16 reviewed
 workspace test scripts are pinned by
 `sha256:4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab`. Contract and
 hostile-input tests cover exact
@@ -244,14 +250,14 @@ sequential plan and rejects PASS receipts containing missing, duplicated, skippe
 cancelled, timed-out, failed, or unclosed work.
 
 Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 3
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 75 `PROOF_READ_ONLY`, 90
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 77 `PROOF_READ_ONLY`, 92
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 77 proof pairs are eligible for pair-level overlap
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 79 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
 always drain the scheduler as eleven exclusive proof-pair barriers.
-The normalized topology is eight serial prefix workloads, 77 ordinary proof pairs, eleven
-exclusive proof-pair barriers, and two serial suffix workloads: `8 + (77 * 2) + (11 * 2) + 2 =
-186`.
+The normalized topology is eight serial prefix workloads, 79 ordinary proof pairs, eleven
+exclusive proof-pair barriers, and two serial suffix workloads: `8 + (79 * 2) + (11 * 2) + 2 =
+190`.
 
 The M07-T04 `control-plane-reference-preflight` verifier is an ordinary `PROOF_READ_ONLY` step.
 Its root mutation test is `PROOF_OS_TEMP_ISOLATED`: it may write only inside its runner-owned temp
@@ -429,6 +435,16 @@ filesystem-compatibility, or verifier runtime-probe authority. The task wrapper 
 three frozen parents before App build, typecheck, the 109-case focused state/binding suite, artifact
 verification, and the independent root proof. Required-gate and hosted outcomes remain separate
 authorities.
+
+The M09-T09 `desen-app-event-action-editor` verifier/root pair is ordinary and non-barrier. Its
+exact formal impact parents are `desen-app-state-binding-editor` and
+`editor-core-event-action-edits`; the connected closure contains 57 proof units and 124 workloads.
+The verifier is `PROOF_READ_ONLY`; the root is `PROOF_OS_TEMP_ISOLATED` and receives only
+`NODE_TEST_HARNESS`. Neither receives workspace-write, listener-port, native-addon,
+filesystem-compatibility, or verifier runtime-probe authority. The task wrapper authenticates both
+frozen parents before App build, typecheck, the 84-case focused event/action suite, artifact
+verification, and the independent 10-case root proof. Required-gate and hosted outcomes remain
+separate authorities.
 
 The M08-T05 focused package layer passes 14/14 runtime cases and 14 compiler-negative assertions.
 The cumulative package suite passes 69/69. The emitted public-package layer passes 38/38 runtime
@@ -660,6 +676,11 @@ M09-T08 appends sequence 47 at `c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b56
 predecessor artifact receipts byte-exact, appends the T08 artifact at index 42, and extends the chain
 to 43 frozen artifacts and 86 current readers. This local reader authority makes no required-gate
 or hosted M09-T08 claim.
+M09-T09 appends sequence 48 at
+`5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90` without rewriting sequences
+1–47 or any of the 43 predecessor artifacts. It appends the T09 artifact at index 43, reseals the
+live App compatibility readers, and extends the chain to 44 frozen artifacts and 88 current
+readers. This local reader authority makes no required-gate or hosted M09-T09 claim.
 These are joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact one-file
 [canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
@@ -667,10 +688,10 @@ and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact o
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04, G07,
-M08-T10, G08, and M09-T01–T08 are `DONE`; proof gates are 10/13, implementation progress is
-103/145, M08 is 10/10, M09 is 8/14, `N-012`, `N-014`, `N-018`, `N-042`, `S-002`, and `S-003` are
+M08-T10, G08, and M09-T01–T09 are `DONE`; proof gates are 10/13, implementation progress is
+104/145, M08 is 10/10, M09 is 9/14, `N-012`, `N-014`, `N-018`, `N-042`, `S-002`, and `S-003` are
 `TESTED`, P-06 and P-18 are `PROVEN`, P-08 remains `NOT_PROVEN`, PF-025 remains `OPEN`, and
-M09-T09 is next. The
+M09-T10 is next. The
 exact 30,014-byte M08-T05 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
 `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`; the report is
@@ -751,6 +772,16 @@ surface-local primitive state list/add/update/delete, bounded conservative usage
 direct compatible local-state binding change/detach, and Publisher-atomic preview. Runtime and
 advanced dynamic bindings remain read-only; P-08 remains `NOT_PROVEN` and PF-025 remains `OPEN`.
 These are local task receipts rather than a required-gate or hosted-CI claim.
+The exact `23,812`-byte M09-T09 artifact is
+`docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json` at
+`sha256:0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab`; the report is
+`docs/proof/DESEN-APP-EVENT-ACTION-EDITOR.md`. Its pure projection, panel, focused event/action,
+complete App, and independent root suites pass 12/12, 7/7, 84/84, 202/202, and 10/10. It covers
+Catalog-declared component events, exact handler lifecycle, canonical bounded action pointers, all
+six public Editor Core mutations, the closed seven-action union, recursively nested operation
+settlements, and Publisher-atomic preview. Behavior-owner UI and action execution are not claimed;
+P-08 remains `NOT_PROVEN`, while PF-025 and PF-083 remain `OPEN`. These are local task receipts
+rather than a required-gate or hosted-CI claim.
 The first hosted PR run exposed an isolation-fixture workspace-target symlink denied by Node's
 permission model. The resealed fixture uses only absolute runner-temporary targets, and the exact
 isolation suite passes 8/8 without permission widening. This is a corrective local receipt, not a
@@ -773,6 +804,12 @@ named-slot, complete App, independent root, and complete structural CI suites pa
 receipt is `278/278`. Sequence 47 closes at
 `sha256:c28ba9a9f274ac0bc3f7dc7ed6de51df35128b109b374b563f5c0239891f58f7` with 43 artifacts and 86 readers. No required-gate or hosted-CI
 result is inferred from those local receipts.
+The M09-T09 pure projection, panel, focused event/action, complete App, and independent root suites
+pass 12/12, 7/7, 84/84, 202/202, and 10/10; the complete structural CI receipt passes 282/282.
+Sequence 48's checkpoint suite passes 71/71 and closes at
+`sha256:5ecf9e630e2c91cb97a7c85c60e8318fdf694039711a64bf1797e481aca0ff90` with 44 artifacts and 88
+readers. No required-gate, hosted-CI, action-execution, or real-browser E2E result is inferred from
+those local receipts.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one or more live readers through the reviewed checkpoint append procedure only when every previously pinned

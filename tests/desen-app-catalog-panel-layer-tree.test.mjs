@@ -319,10 +319,10 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.currentCompatibility.boundary.imports.selectionAuthoringImports, 1);
   assert.equal(built.currentCompatibility.boundary.imports.handwrittenManagedTreeElements, 0);
   assert.equal(built.currentCompatibility.boundary.imports.privateDomAccesses, 0);
-  assert.equal(built.currentCompatibility.boundary.imports.catalogSdkImports, 8);
-  assert.equal(built.currentCompatibility.boundary.imports.editorCoreImports, 9);
+  assert.equal(built.currentCompatibility.boundary.imports.catalogSdkImports, 10);
+  assert.equal(built.currentCompatibility.boundary.imports.editorCoreImports, 11);
   assert.equal(built.currentCompatibility.boundary.imports.publisherImports, 3);
-  assert.equal(built.currentCompatibility.boundary.imports.protocolImports, 3);
+  assert.equal(built.currentCompatibility.boundary.imports.protocolImports, 4);
   assert.equal(built.currentCompatibility.boundary.imports.reviewedSourceMutationCalls, 13);
   assert.equal(built.currentCompatibility.boundary.imports.reviewedNamedSlotDragDropHandlers, 17);
 });

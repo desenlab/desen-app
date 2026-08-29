@@ -1,0 +1,363 @@
+import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
+import { mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { after, before, test } from "node:test";
+
+import {
+  DESEN_APP_EVENT_ACTION_EDITOR_PARENT_PINS,
+  DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES,
+  DesenAppEventActionEditorProofError,
+  buildDesenAppEventActionEditorEvidence,
+  verifyDesenAppEventActionEditorEvidence,
+  verifyDesenAppEventActionEditorSourcePolicy,
+  writeDesenAppEventActionEditorEvidence,
+} from "../scripts/lib/desen-app-event-action-editor-proof.mjs";
+
+const ROOT = path.resolve(import.meta.dirname, "..");
+const PARENT_PATHS = Object.freeze(
+  DESEN_APP_EVENT_ACTION_EDITOR_PARENT_PINS.map(({ path: relativePath }) => relativePath),
+);
+const SOURCE_PATHS = Object.freeze({
+  eventActionSource: "apps/desen-app/src/authoring-event-actions.ts",
+  eventActionPanel: "apps/desen-app/src/event-action-panel.tsx",
+  applicationSource: "apps/desen-app/src/application.tsx",
+  applicationCss: "apps/desen-app/src/application.module.css",
+});
+const temporaryDirectories = [];
+let parentArtifactBytes;
+let sourcePolicyInput;
+let built;
+
+function expectedError(code) {
+  return (error) => error instanceof DesenAppEventActionEditorProofError && error.code === code;
+}
+
+function changedByte(bytes) {
+  const changed = Buffer.from(bytes);
+  changed[Math.floor(changed.byteLength / 2)] ^= 1;
+  return changed;
+}
+
+function replaceOnce(source, search, replacement) {
+  const index = source.indexOf(search);
+  assert.notEqual(index, -1, `Missing mutation marker ${search}`);
+  return `${source.slice(0, index)}${replacement}${source.slice(index + search.length)}`;
+}
+
+function replaceOnceAfter(source, anchor, search, replacement) {
+  const anchorIndex = source.indexOf(anchor);
+  assert.notEqual(anchorIndex, -1, `Missing mutation anchor ${anchor}`);
+  const index = source.indexOf(search, anchorIndex + anchor.length);
+  assert.notEqual(index, -1, `Missing mutation marker ${search} after ${anchor}`);
+  return `${source.slice(0, index)}${replacement}${source.slice(index + search.length)}`;
+}
+
+function exactProofDocument(artifactSha256) {
+  return Buffer.from(
+    [
+      "# Desen App event and closed-action editor",
+      "",
+      "Task: M09-T09",
+      "",
+      "Status: DONE",
+      "",
+      "P-08: NOT_PROVEN",
+      "PF-025: OPEN",
+      "PF-083: OPEN",
+      "M09-T10: NOT_PROVEN",
+      "M09-T12: NOT_PROVEN",
+      "M09-T14: NOT_PROVEN",
+      "",
+      `Final artifact: \`sha256:${artifactSha256}\``,
+      "",
+    ].join("\n"),
+  );
+}
+
+async function temporaryDirectory(prefix) {
+  const directory = await realpath(await mkdtemp(path.join(os.tmpdir(), prefix)));
+  temporaryDirectories.push(directory);
+  return directory;
+}
+
+before(async () => {
+  sourcePolicyInput = Object.fromEntries(
+    await Promise.all(
+      Object.entries(SOURCE_PATHS).map(async ([key, relativePath]) => [
+        key,
+        await readFile(path.join(ROOT, relativePath), "utf8"),
+      ]),
+    ),
+  );
+  parentArtifactBytes = new Map(
+    await Promise.all(
+      PARENT_PATHS.map(async (relativePath) => [
+        relativePath,
+        await readFile(path.join(ROOT, relativePath)),
+      ]),
+    ),
+  );
+  built = await buildDesenAppEventActionEditorEvidence();
+});
+
+after(async () => {
+  await Promise.all(
+    temporaryDirectories.map((directory) => rm(directory, { recursive: true, force: true })),
+  );
+});
+
+test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[0], () => {
+  assert.equal(built.artifact.schemaVersion, 1);
+  assert.equal(built.artifact.proofId, "desen-app-event-action-editor");
+  assert.equal(built.artifact.profile, "desen.app.event-action-editor-proof.v1");
+  assert.equal(built.artifact.task, "M09-T09");
+  assert.equal(built.artifact.result, "PASS");
+  assert.deepEqual(built.artifact.prerequisites, DESEN_APP_EVENT_ACTION_EDITOR_PARENT_PINS);
+  assert.equal(built.artifact.boundary.parentArtifacts, 2);
+  assert.equal(built.artifact.claim.taskStatus, "DONE");
+  assert.equal(built.artifact.claim.p08Status, "NOT_PROVEN");
+  assert.equal(built.artifactBytes.byteLength > 0, true);
+  assert.match(built.artifactSha256, /^[0-9a-f]{64}$/u);
+});
+
+test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[1], () => {
+  const authority = built.artifact.authority.source.eventAction;
+  assert.deepEqual(authority.appOwnerKinds, ["component"]);
+  assert.equal(authority.behaviorOwnerUiClaimed, false);
+  assert.equal(authority.catalogDeclaredEventsOnly, true);
+  assert.equal(authority.absentEmptyAndPresentLifecycle, true);
+  assert.equal(authority.canonicalEscapedPointers, true);
+  assert.equal(authority.freshOwnerAndPointerAuthorization, true);
+  assert.equal(built.artifact.claim.catalogDeclaredEventProjection, true);
+  assert.equal(built.artifact.claim.exactSelectedComponentOwner, true);
+  assert.equal(built.artifact.claim.behaviorOwnerUiClaimed, false);
+  assert.equal(built.artifact.claim.absentEmptyAndPresentHandlerLifecycle, true);
+});
+
+test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[2], () => {
+  const authority = built.artifact.authority.source.eventAction;
+  assert.equal(authority.publicEditorCoreCommands, 6);
+  assert.equal(authority.continuousCompleteSourceRevalidation, true);
+  assert.equal(authority.noPartialDocumentOnFailure, true);
+  assert.equal(built.artifact.claim.publicEditorCoreEventActionMutation, true);
+  assert.equal(built.artifact.claim.continuousCompleteSourceRevalidation, true);
+  assert.equal(built.artifact.claim.failedEditPreservesCurrentDocument, true);
+});
+
+test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[3], () => {
+  const authority = built.artifact.authority.source.eventAction;
+  assert.deepEqual(authority.actionTypes, [
+    "component.command",
+    "event.emit",
+    "navigate",
+    "operation.invoke",
+    "resource.refresh",
+    "state.set",
+    "state.toggle",
+  ]);
+  assert.equal(authority.recursiveOperationSettlements, true);
+  assert.equal(built.artifact.claim.recursivelyNestedOperationSettlements, true);
+  assert.equal(built.artifact.authority.source.panel.sevenActionStarters, true);
+  assert.equal(built.artifact.authority.source.panel.recursiveSettlementLists, true);
+});
+
+test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[4], () => {
+  const authority = built.artifact.authority.source.eventAction;
+  assert.equal(authority.actionDepthLimit, 64);
+  assert.equal(authority.actionOccurrenceLimit, 25_000);
+  assert.equal(authority.identityOccurrenceLimit, 25_000);
+  assert.equal(authority.sourceDepthLimit, 64);
+  assert.equal(authority.exactOwnDataRouteSelectionAndEditCapture, true);
+  assert.equal(built.artifact.claim.exactOwnDataEventActionCapture, true);
+});
+
+test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[5], () => {
+  const panel = built.artifact.authority.source.panel;
+  const application = built.artifact.authority.source.application;
+  assert.equal(panel.owner, "Desen App");
+  assert.equal(panel.completeActionJsonComposer, true);
+  assert.equal(panel.inertReferencePreservation, true);
+  assert.equal(panel.executionClaimed, false);
+  assert.equal(panel.managedAdapterImports, 0);
+  assert.equal(application.publisherPreflightBeforeCommit, true);
+  assert.equal(application.sourceAndPreviewCommitAtomically, true);
+  assert.equal(application.publisherFailurePreservesPriorSession, true);
+  assert.equal(application.eventActionChromeOutsideManagedCapabilitySubtree, true);
+  assert.equal(built.artifact.claim.sourceAndPreviewCommitAtomically, true);
+  assert.equal(built.artifact.claim.eventActionChromeOutsideManagedCapabilitySubtree, true);
+});
+
+test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[6], () => {
+  const receipts = built.artifact.tests.localCommandReceipts;
+  assert.equal(receipts.pureEventActions.tests, 12);
+  assert.equal(receipts.panel.tests, 7);
+  assert.equal(receipts.focusedEventActions.tests, 84);
+  assert.equal(receipts.fullApp.tests, 202);
+  assert.equal(receipts.rootProof.tests, 10);
+  assert.equal(receipts.focusedEventActions.testFiles, 8);
+  assert.equal(receipts.fullApp.testFiles, 15);
+  assert.equal(
+    built.artifact.application.package.rootCommands["verify:desen-app-event-action-editor"],
+    "node scripts/verify-desen-app-state-binding-editor.mjs && node scripts/verify-editor-core-event-action-edits.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:event-actions && node scripts/verify-desen-app-event-action-editor.mjs",
+  );
+  assert.equal(built.artifact.claim.actionExecutionClaimed, false);
+  assert.equal(built.artifact.claim.persistenceClaimed, false);
+  assert.equal(built.artifact.claim.designRunClaimed, false);
+  assert.equal(built.artifact.claim.activationClaimed, false);
+  assert.equal(built.artifact.claim.browserE2eClaimed, false);
+});
+
+test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[7], async () => {
+  const second = await buildDesenAppEventActionEditorEvidence();
+  assert.deepEqual(second.artifactBytes, built.artifactBytes);
+  assert.equal(second.artifactSha256, built.artifactSha256);
+  assert.notEqual(second.artifact, built.artifact);
+  assert.equal(Object.isFrozen(second.artifact), true);
+  assert.equal(Object.isFrozen(second.artifact.boundary.trackedReceipts), true);
+});
+
+test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
+  const mutations = [
+    {
+      key: "eventActionSource",
+      search: "export function applyAuthoringEventActionEdit(",
+      replacement: "export function applyUncheckedEventActionEdit(",
+    },
+    {
+      key: "eventActionSource",
+      search: "maxActionOccurrences: 25_000",
+      replacement: "maxActionOccurrences: Number.POSITIVE_INFINITY",
+    },
+    {
+      key: "eventActionSource",
+      search: "createDesenEditorContinuousValidator(prepared.model.validationCatalogs)",
+      replacement: "createUncheckedValidator(prepared.model.validationCatalogs)",
+    },
+    {
+      key: "eventActionPanel",
+      search: "const parsed = parseInertJsonText(draft);",
+      replacement: "const parsed = JSON.parse(draft);",
+    },
+    {
+      key: "eventActionPanel",
+      search: "The complete JSON object is committed unchanged.",
+      replacement: "Each field commits immediately.",
+    },
+    {
+      key: "applicationSource",
+      search: "function editSelectedEventAction(",
+      replacement: "function editUncheckedEventAction(",
+    },
+    {
+      key: "applicationSource",
+      after: "function editSelectedEventAction(",
+      search:
+        '    if (!nextPreview.ok) {\n      return Object.freeze({ ok: false, reason: "preview-unavailable" });\n    }\n    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));',
+      replacement:
+        '    setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));\n    if (!nextPreview.ok) {\n      return Object.freeze({ ok: false, reason: "preview-unavailable" });\n    }',
+    },
+    {
+      key: "applicationSource",
+      search: "<EventActionPanel",
+      replacement: "<UncheckedEventActionPanel",
+    },
+    {
+      key: "applicationCss",
+      search: ".eventActionPanel {",
+      replacement: ".removedEventActionPanel {",
+    },
+  ];
+  for (const mutation of mutations) {
+    assert.throws(
+      () =>
+        verifyDesenAppEventActionEditorSourcePolicy({
+          ...sourcePolicyInput,
+          [mutation.key]: mutation.after
+            ? replaceOnceAfter(
+                sourcePolicyInput[mutation.key],
+                mutation.after,
+                mutation.search,
+                mutation.replacement,
+              )
+            : replaceOnce(sourcePolicyInput[mutation.key], mutation.search, mutation.replacement),
+        }),
+      expectedError("SOURCE_POLICY_VIOLATION"),
+      `${mutation.key} mutation must fail closed: ${mutation.search}`,
+    );
+  }
+});
+
+test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[9], async () => {
+  for (const [relativePath, bytes] of parentArtifactBytes) {
+    await assert.rejects(
+      buildDesenAppEventActionEditorEvidence({
+        fileOverrides: new Map([[relativePath, changedByte(bytes)]]),
+      }),
+      expectedError("PARENT_DRIFT"),
+    );
+  }
+
+  const proofDocument = exactProofDocument(built.artifactSha256);
+  const verified = await verifyDesenAppEventActionEditorEvidence({
+    artifactBytes: built.artifactBytes,
+    proofDocument,
+  });
+  assert.equal(verified.result, "PASS");
+  assert.equal(verified.prerequisites, 2);
+  assert.equal(verified.p08Status, "NOT_PROVEN");
+
+  await assert.rejects(
+    verifyDesenAppEventActionEditorEvidence({
+      artifactBytes: changedByte(built.artifactBytes),
+      proofDocument,
+    }),
+    expectedError("ARTIFACT_DRIFT"),
+  );
+  await assert.rejects(
+    verifyDesenAppEventActionEditorEvidence({
+      artifactBytes: built.artifactBytes,
+      proofDocument: exactProofDocument("0".repeat(64)),
+    }),
+    expectedError("PROOF_DOCUMENT_DRIFT"),
+  );
+
+  const directory = await temporaryDirectory("desen-m09-t09-boundaries-");
+  const destination = path.join(directory, "artifact.json");
+  const written = await writeDesenAppEventActionEditorEvidence({ artifactPath: destination });
+  assert.equal(written.artifactSha256, built.artifactSha256);
+  assert.deepEqual(await readFile(destination), built.artifactBytes);
+
+  const preserved = Buffer.from("preserve-existing-destination");
+  await writeFile(destination, preserved);
+  await assert.rejects(
+    writeDesenAppEventActionEditorEvidence({
+      artifactPath: destination,
+      beforeAtomicRename: async ({ temporaryPath }) => {
+        await writeFile(temporaryPath, "tampered");
+      },
+    }),
+    expectedError("ARTIFACT_WRITE_UNSAFE"),
+  );
+  assert.deepEqual(await readFile(destination), preserved);
+
+  const linkedDestination = path.join(directory, "linked-destination.json");
+  await symlink(destination, linkedDestination);
+  await assert.rejects(
+    writeDesenAppEventActionEditorEvidence({ artifactPath: linkedDestination }),
+    expectedError("ARTIFACT_WRITE_UNSAFE"),
+  );
+
+  const artifactTarget = path.join(directory, "artifact-target.json");
+  const artifactLink = path.join(directory, "artifact-link.json");
+  await writeFile(artifactTarget, built.artifactBytes);
+  await symlink(artifactTarget, artifactLink);
+  await assert.rejects(
+    verifyDesenAppEventActionEditorEvidence({
+      artifactPath: artifactLink,
+      proofDocument,
+    }),
+    expectedError("AUTHORITY_UNSAFE"),
+  );
+});

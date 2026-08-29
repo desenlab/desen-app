@@ -87,7 +87,7 @@ async function waitFor(predicate, message) {
   assert.fail(message);
 }
 
-test("the dependency-derived plan owns the exact 188-node exhaustive inventory", () => {
+test("the dependency-derived plan owns the exact 190-node exhaustive inventory", () => {
   const plan = createRequiredExhaustivePlan();
   const inventory = createExhaustiveWorkloadInventory();
   const ownedIds = [
@@ -102,13 +102,13 @@ test("the dependency-derived plan owns the exact 188-node exhaustive inventory",
   assert.equal(PROOF_PAIR_CONCURRENCY, 2);
   assert.equal(DEFAULT_STEP_TIMEOUT_MS, 15 * 60 * 1_000);
   assert.equal(DEFAULT_GATE_TIMEOUT_MS, 17 * 60 * 1_000);
-  assert.equal(plan.stepCount, 188);
-  assert.equal(plan.proofPairCount, 89);
+  assert.equal(plan.stepCount, 190);
+  assert.equal(plan.proofPairCount, 90);
   assert.equal(plan.prefix.length, 8);
   assert.equal(plan.suffix.length, 2);
-  assert.equal(plan.planSha256, "86af002c1fc656c397a36e6aae2aae5d99ea30a43ec3d0742053a9ae14ca8d98");
-  assert.equal(ownedIds.length, 188);
-  assert.equal(new Set(ownedIds).size, 188);
+  assert.equal(plan.planSha256, "209eab3f5d9f6a567d0d8b83d2210237affb986471b8f0d1953d3cd33da23da9");
+  assert.equal(ownedIds.length, 190);
+  assert.equal(new Set(ownedIds).size, 190);
   assert.deepEqual([...ownedIds].sort(), inventory.nodes.map(({ id }) => id).sort());
   for (const pair of plan.proofPairs) {
     assert.deepEqual(pair.rootTest.dependencies, [pair.verifier.id]);
@@ -133,7 +133,7 @@ test("authority defaults to REQUIRED, accepts only explicit SHADOW, and fixes EX
   assert.equal(observationPlan.scope, "EXHAUSTIVE");
   assert.equal(
     observationPlan.planSha256,
-    "e4f13684f3c26f60bd7f5564a32ef4fc4654d098a04f39e4fdd98b6dd32582a7",
+    "b2c14e29bf699100d8420673d0daa9d6e2f94b6ba45d72748701e247ca43d6fe",
   );
   assert.throws(
     () => createRequiredExhaustivePlan({ scope: "AFFECTED" }),
@@ -218,7 +218,7 @@ test("REQUIRED authority rejects injected success runners and repository seams",
   assert.equal(executionCount, 0);
 });
 
-test("all 188 successful closes produce stable inventory-ordered receipts", async () => {
+test("all 190 successful closes produce stable inventory-ordered receipts", async () => {
   const plan = createShadowPlan();
   const calls = [];
   const receipt = await runShadowPlan(plan, {
@@ -229,8 +229,8 @@ test("all 188 successful closes produce stable inventory-ordered receipts", asyn
     ...successfulGuardOptions(),
   });
 
-  assert.equal(calls.length, 188);
-  assert.equal(new Set(calls).size, 188);
+  assert.equal(calls.length, 190);
+  assert.equal(new Set(calls).size, 190);
   assert.equal(calls.filter((id) => id === "editor-core-public-package-contract").length, 1);
   assert.equal(
     calls.indexOf("editor-core-public-package-contract"),
@@ -272,7 +272,7 @@ test("all 188 successful closes produce stable inventory-ordered receipts", asyn
     true,
   );
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 188);
+  assert.equal(receipt.observedClosedCount, 190);
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
     plan.nodes.map(({ id }) => id),
@@ -332,7 +332,7 @@ test("dynamic workers keep two safe ordinary pairs active and drain for all barr
   assert.equal(maximumActive, 2);
   assert.equal(thirdPairStartedWhileFirstHeld, true);
   assert.equal(barrierPairs.length, 11);
-  assert.equal(plan.proofPairs.length - barrierPairs.length, 78);
+  assert.equal(plan.proofPairs.length - barrierPairs.length, 79);
   assert.equal(exclusiveBarrierSteps.size, 22);
 });
 
@@ -1059,7 +1059,7 @@ test("build-output and untracked closing guards run after a primary proof failur
   assert.equal(untrackedSnapshots, 2);
 });
 
-test("untracked drift fails the gate even after all 188 steps close successfully", async () => {
+test("untracked drift fails the gate even after all 190 steps close successfully", async () => {
   const plan = createShadowPlan();
   const untrackedDrift = new Error("untracked drift");
   await assert.rejects(
@@ -1074,7 +1074,7 @@ test("untracked drift fails the gate even after all 188 steps close successfully
     (error) => {
       assert.equal(error, untrackedDrift);
       assert.equal(error.requiredExhaustiveReceipt.status, "FAIL");
-      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 188);
+      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 190);
       return true;
     },
   );
@@ -1103,7 +1103,7 @@ test("the full gate authenticates repository inputs and hosted revision without 
   assert.equal(receipt.inventory.authority, "SHADOW");
   assert.equal(receipt.inventory.scope, "EXHAUSTIVE");
   assert.equal(receipt.execution.status, "PASS");
-  assert.equal(receipt.execution.observedClosedCount, 188);
+  assert.equal(receipt.execution.observedClosedCount, 190);
   assert.equal(receipt.execution.cleanInput.revision, revision);
 });
 

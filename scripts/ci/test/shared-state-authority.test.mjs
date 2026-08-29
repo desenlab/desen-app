@@ -108,20 +108,20 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 188 steps across the seven reviewed execution classes", () => {
+test("owns exactly 190 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 188);
-  assert.equal(new Set(ALL_STEP_IDS).size, 188);
+  assert.equal(ALL_STEP_IDS.length, 190);
+  assert.equal(new Set(ALL_STEP_IDS).size, 190);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 3,
     PACKAGE_TEST_EXCLUSIVE: 1,
-    PROOF_READ_ONLY: 76,
-    PROOF_OS_TEMP_ISOLATED: 91,
+    PROOF_READ_ONLY: 77,
+    PROOF_OS_TEMP_ISOLATED: 92,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
@@ -156,10 +156,10 @@ test("owns exactly 188 steps across the seven reviewed execution classes", () =>
 });
 
 test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 89);
-  assert.equal(new Set(PROOF_IDS).size, 89);
+  assert.equal(PROOF_IDS.length, 90);
+  assert.equal(new Set(PROOF_IDS).size, 90);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
-  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 78);
+  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 79);
   assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 11);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
@@ -174,7 +174,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "runtime-core-state-navigation-actions",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 78);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 79);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -824,6 +824,38 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       barrier: false,
     },
   });
+  assert.deepEqual(classifyProofPairState("desen-app-event-action-editor"), {
+    proofId: "desen-app-event-action-editor",
+    barrier: false,
+    verifier: {
+      schemaVersion: 2,
+      stepId: "verify-desen-app-event-action-editor",
+      executionClass: "PROOF_READ_ONLY",
+      workspaceReads: ["."],
+      workspaceWrites: [],
+      tempPolicy: "NONE",
+      tempKey: null,
+      ports: [],
+      childProcessPolicy: "NONE",
+      nativeAddonPolicy: "NONE",
+      filesystemCompatibilityPolicy: "NONE",
+      barrier: false,
+    },
+    rootTest: {
+      schemaVersion: 2,
+      stepId: "test-desen-app-event-action-editor",
+      executionClass: "PROOF_OS_TEMP_ISOLATED",
+      workspaceReads: ["."],
+      workspaceWrites: [],
+      tempPolicy: "RUNNER_SCOPED_OS",
+      tempKey: "test-desen-app-event-action-editor",
+      ports: [],
+      childProcessPolicy: "NODE_TEST_HARNESS",
+      nativeAddonPolicy: "NONE",
+      filesystemCompatibilityPolicy: "NONE",
+      barrier: false,
+    },
+  });
   assert.deepEqual(NATIVE_ADDON_PROOF_IDS, [
     "reference-host-web-source-audit",
     "control-plane-local-api",
@@ -947,7 +979,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    89,
+    90,
   );
 });
 
@@ -1689,7 +1721,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 170,
+    NONE: 172,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,

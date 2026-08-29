@@ -988,6 +988,31 @@ durable save/open, diagnostics navigation, control-plane publication, channel ac
 real-browser end-to-end claim. P-08 and PF-025 therefore remain open; M09-T09 owns the next
 event/action authoring boundary.
 
+M09-T09 adds a separate event/action projection over the exact selected component Source identity.
+The route, current authoring model, selected component identity, Catalog contract, declared event,
+handler presence, and canonical owner-relative action-list pointer are re-derived before any edit.
+The UI does not generalize this authority to behavior owners: only component event declarations are
+projected, while forged behavior selections fail closed. Absent handlers remain distinguishable
+from present empty lists and present nonempty lists.
+
+The action model is the protocol's closed union rather than an open executable registry:
+`component.command`, `event.emit`, `navigate`, `operation.invoke`, `resource.refresh`, `state.set`,
+and `state.toggle`. Only `operation.invoke` owns recursive `onSuccess` and `onFailure` lists. Every
+list is addressed through a bounded canonical escaped RFC 6901 pointer; reorder uses the final
+post-removal index. Whole-action JSON drafts remain detached inert data until explicit Apply and
+are never evaluated, dispatched, or used to select executable code.
+
+All six handler/action mutations cross the public Editor Core boundary, rerun complete Source
+validation, and then run Publisher preview preflight. The App commits exactly once only after both
+results succeed, replacing the session-local Source and preview together. A failed preflight keeps
+the prior event projection, canvas object, selection overlay, and managed Runtime React subtree.
+Events & Actions chrome is an App-owned sibling outside that subtree.
+
+M09-T09 therefore proves authoring of inert component event/action Source data, not action
+execution. It adds no behavior-owner UI, Design/Run authority, durable persistence, diagnostics
+navigation, control-plane publication, channel activation, or real-browser E2E claim. P-08 remains
+`NOT_PROVEN`; PF-025 and PF-083 remain `OPEN`; M09-T10 owns the next Design/Run boundary.
+
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,
 proof, runtime, or protocol authority. Repository-owned TypeScript, React structure, CSS Modules,

@@ -161,12 +161,16 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
         "desen-app-named-slot-authoring",
       ],
     ],
+    [
+      "desen-app-event-action-editor",
+      ["desen-app-state-binding-editor", "editor-core-event-action-edits"],
+    ],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "d18c797bbdf4905dd7bf0973faf620f972b2c6958fd4797121a9a0503bb66d49";
+  "523d219c845502bfbcf2c51cf773b34ce62d261e41d2f9e1dfac9cffe6cbd197";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

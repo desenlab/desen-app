@@ -17,6 +17,7 @@ const SCHEMA_INSPECTOR_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-sch
 const EDITOR_STATE_ARTIFACT_PATH =
   "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json";
 const NAMED_SLOT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json";
+const EVENT_ACTION_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const LOCKFILE_PATH = "pnpm-lock.yaml";
@@ -91,6 +92,44 @@ const TRACKED_PATHS = Object.freeze([
   NAMED_SLOT_ARTIFACT_PATH,
   ...PROOF_READER_PATHS,
 ]);
+
+const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
+  APP_PACKAGE_PATH,
+  APPLICATION_SOURCE_PATH,
+  APPLICATION_CSS_PATH,
+  APPLICATION_TEST_PATH,
+  "scripts/lib/desen-app-state-binding-editor-proof.mjs",
+  "tests/desen-app-state-binding-editor.test.mjs",
+]);
+
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...new Set([...TRACKED_PATHS, EVENT_ACTION_ARTIFACT_PATH]),
+]);
+
+const RETAINED_HISTORICAL_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
+);
+
+const SELF_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-state-binding-editor-proof.mjs",
+  "tests/desen-app-state-binding-editor.test.mjs",
+]);
+
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 28_766,
+  sha256: "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a",
+});
+
+const EVENT_ACTION_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T09",
+  proofId: "desen-app-event-action-editor",
+  profile: "desen.app.event-action-editor-proof.v1",
+  result: "PASS",
+  path: EVENT_ACTION_ARTIFACT_PATH,
+  bytes: 23_812,
+  sha256: "0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab",
+});
 
 const EXPECTED_STRUCTURED_JSON_TEST_NAMES = Object.freeze([
   "admits reserved-looking members as detached recursively frozen inert data",
@@ -285,12 +324,16 @@ function captureBytes(value, label) {
 
 function captureOverrides(value) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+  if (
+    !(value instanceof Map) ||
+    utilTypes.isProxy(value) ||
+    value.size > CURRENT_COMPATIBILITY_PATHS.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
   for (const [relativePath, bytes] of value) {
-    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+    if (!CURRENT_COMPATIBILITY_PATHS.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
@@ -352,12 +395,17 @@ async function readRegularAuthority(absolutePath, label) {
 
 async function readTrackedFiles(workspaceRoot, overrides) {
   const output = new Map();
-  for (const relativePath of TRACKED_PATHS) {
-    output.set(
-      relativePath,
-      overrides.get(relativePath) ??
-        (await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath)),
-    );
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
+    const live = await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath);
+    const override = overrides.get(relativePath);
+    if (
+      override !== undefined &&
+      SELF_RESEALED_PATHS.includes(relativePath) &&
+      !isDeepStrictEqual(override, live)
+    ) {
+      fail("BOUNDARY_DRIFT", `${relativePath} cannot be substituted by a caller.`);
+    }
+    output.set(relativePath, override ?? live);
   }
   return output;
 }
@@ -610,13 +658,14 @@ function inspectApplicationSource(source) {
       "applyAuthoringInspectorBindingEdit",
       "applyAuthoringStateEdit",
       "prepareAuthoringStateModel",
-      'type AuthoringTab = "layers" | "components" | "state"',
+      'type AuthoringTab = "layers" | "components" | "state" | "actions"',
       "<StatePanel model={stateModel} onEdit={onStateEdit} surfaceName={selectedSurface.name} />",
       "function editSelectedBinding(edit: AuthoringInspectorBindingEdit)",
       "function editLocalState(edit: AuthoringStateEdit)",
       "prepareAuthoringPreviewBundle(result.document)",
       "setAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))",
-      '<aside aria-label="Authoring panel"',
+      "<aside",
+      'aria-label="Authoring panel"',
       "<DesenAdapterCanvas",
       "<InspectorPanel",
       "onBindingEdit={editSelectedBinding}",
@@ -1047,8 +1096,131 @@ function receipts(files) {
     );
 }
 
+async function authenticateFrozenArtifact(workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    "frozen M09-T08 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T08 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(artifactBytes, "frozen M09-T08 proof artifact");
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-state-binding-editor" ||
+    artifact?.profile !== "desen.app.state-binding-editor-proof.v1" ||
+    artifact?.task !== "M09-T08" ||
+    artifact?.result !== "PASS" ||
+    artifact?.claim?.taskStatus !== "DONE" ||
+    artifact?.claim?.surfaceLocalPrimitiveStateList !== true ||
+    artifact?.claim?.primitiveStateAddUpdateDelete !== true ||
+    artifact?.claim?.boundedConservativeUsageCount !== true ||
+    artifact?.claim?.directCompatibleLocalStatePropBinding !== true ||
+    artifact?.claim?.exactDirectBindingChange !== true ||
+    artifact?.claim?.exactDirectBindingDetachToInitial !== true ||
+    artifact?.claim?.runtimeAndAdvancedBindingReadOnly !== true ||
+    artifact?.claim?.continuousCompleteSourceRevalidation !== true ||
+    artifact?.claim?.sourceAndPreviewCommitAtomically !== true ||
+    artifact?.claim?.stateAndBindingChromeOutsideManagedCapabilitySubtree !== true ||
+    artifact?.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact?.boundary?.trackedFiles !== TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== TRACKED_PATHS.length ||
+    !isDeepStrictEqual(
+      trackedReceipts.map((candidate) => candidate?.path),
+      [...TRACKED_PATHS].sort((left, right) => left.localeCompare(right, "en-US")),
+    ) ||
+    trackedReceipts.some(
+      (candidate) =>
+        candidate === null ||
+        typeof candidate !== "object" ||
+        !Number.isSafeInteger(candidate.bytes) ||
+        candidate.bytes < 0 ||
+        typeof candidate.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(candidate.sha256),
+    ) ||
+    !isDeepStrictEqual(
+      artifact?.tests?.rootTestNames,
+      DESEN_APP_STATE_BINDING_EDITOR_ROOT_TEST_NAMES,
+    )
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T08 artifact identity or retained claims drifted.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedHistoricalReceipts(frozenArtifact, files) {
+  const taskTimeReceipts = new Map(
+    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    const authority = taskTimeReceipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M09-T08 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
+}
+
+function authenticateEventActionSuccessor(files) {
+  const artifactBytes = files.get(EVENT_ACTION_ARTIFACT_PATH);
+  if (
+    artifactBytes.byteLength !== EVENT_ACTION_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== EVENT_ACTION_ARTIFACT_PIN.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T09 artifact bytes drifted.");
+  }
+  const artifact = parseJson(artifactBytes, EVENT_ACTION_ARTIFACT_PATH);
+  if (
+    artifact.task !== EVENT_ACTION_ARTIFACT_PIN.task ||
+    artifact.proofId !== EVENT_ACTION_ARTIFACT_PIN.proofId ||
+    artifact.profile !== EVENT_ACTION_ARTIFACT_PIN.profile ||
+    artifact.result !== EVENT_ACTION_ARTIFACT_PIN.result ||
+    artifact.claim?.catalogDeclaredEventProjection !== true ||
+    artifact.claim?.exactSelectedComponentOwner !== true ||
+    artifact.claim?.behaviorOwnerUiClaimed !== false ||
+    artifact.claim?.publicEditorCoreEventActionMutation !== true ||
+    artifact.claim?.continuousCompleteSourceRevalidation !== true ||
+    artifact.claim?.sourceAndPreviewCommitAtomically !== true ||
+    artifact.claim?.eventActionChromeOutsideManagedCapabilitySubtree !== true ||
+    artifact.claim?.actionExecutionClaimed !== false ||
+    artifact.claim?.designRunClaimed !== false ||
+    artifact.claim?.persistenceClaimed !== false ||
+    artifact.claim?.activationClaimed !== false ||
+    artifact.claim?.browserE2eClaimed !== false
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T09 artifact identity or claims drifted.");
+  }
+  return deepFreeze({
+    task: EVENT_ACTION_ARTIFACT_PIN.task,
+    artifact: EVENT_ACTION_ARTIFACT_PIN,
+    exactSelectedComponentEvents: true,
+    behaviorOwnerUiImplemented: false,
+    publicEditorCoreEventActionMutation: true,
+    atomicPublisherBackedPreview: true,
+    actionExecutionImplemented: false,
+    designRunImplemented: false,
+    persistenceImplemented: false,
+    activationImplemented: false,
+    browserE2eImplemented: false,
+  });
+}
+
 /** Builds detached deterministic M09-T08 state-binding editor evidence. */
-export async function buildDesenAppStateBindingEditorEvidence(rawOptions = undefined) {
+async function _buildFreshDesenAppStateBindingEditorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
   const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
@@ -1165,6 +1337,92 @@ export async function buildDesenAppStateBindingEditorEvidence(rawOptions = undef
   });
   const artifactBytes = canonicalArtifactBytes(artifact);
   return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+}
+
+/** Authenticates frozen M09-T08 evidence and checks its live additive M09-T09 successor. */
+export async function buildDesenAppStateBindingEditorEvidence(rawOptions = undefined) {
+  const options = captureBuildOptions(rawOptions);
+  const workspaceRoot = await realpath(options.workspaceRoot);
+  const [frozen, files] = await Promise.all([
+    authenticateFrozenArtifact(workspaceRoot),
+    readTrackedFiles(workspaceRoot, options.fileOverrides),
+  ]);
+  const parents = DESEN_APP_STATE_BINDING_EDITOR_PARENT_PINS.map((pin) =>
+    authenticateParent(files.get(pin.path), pin),
+  );
+  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  const source = verifyDesenAppStateBindingEditorSourcePolicy({
+    authoringDataSource: decodeUtf8(files.get(AUTHORING_DATA_PATH), AUTHORING_DATA_PATH),
+    stateSource: decodeUtf8(files.get(STATE_SOURCE_PATH), STATE_SOURCE_PATH),
+    inspectorSource: decodeUtf8(files.get(INSPECTOR_SOURCE_PATH), INSPECTOR_SOURCE_PATH),
+    structuredJsonSource: decodeUtf8(
+      files.get(STRUCTURED_JSON_SOURCE_PATH),
+      STRUCTURED_JSON_SOURCE_PATH,
+    ),
+    statePanelSource: decodeUtf8(files.get(STATE_PANEL_SOURCE_PATH), STATE_PANEL_SOURCE_PATH),
+    inspectorPanelSource: decodeUtf8(
+      files.get(INSPECTOR_PANEL_SOURCE_PATH),
+      INSPECTOR_PANEL_SOURCE_PATH,
+    ),
+    previewSource: decodeUtf8(files.get(PREVIEW_SOURCE_PATH), PREVIEW_SOURCE_PATH),
+    adapterSource: decodeUtf8(files.get(ADAPTER_SOURCE_PATH), ADAPTER_SOURCE_PATH),
+    applicationSource: decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH),
+    applicationCss: decodeUtf8(files.get(APPLICATION_CSS_PATH), APPLICATION_CSS_PATH),
+  });
+  const tests = inspectTests(files);
+  const packageContract = inspectPackages(files);
+  const successor = authenticateEventActionSuccessor(files);
+  const currentCompatibility = deepFreeze({
+    schemaVersion: 1,
+    proofId: "desen-app-state-binding-editor",
+    profile: "desen.app.state-binding-editor-proof.v1",
+    task: "M09-T08",
+    result: "PASS",
+    prerequisites: parents,
+    retainedClaim: {
+      taskStatus: frozen.artifact.claim.taskStatus,
+      surfaceLocalPrimitiveStateList: frozen.artifact.claim.surfaceLocalPrimitiveStateList,
+      primitiveStateAddUpdateDelete: frozen.artifact.claim.primitiveStateAddUpdateDelete,
+      boundedConservativeUsageCount: frozen.artifact.claim.boundedConservativeUsageCount,
+      directCompatibleLocalStatePropBinding:
+        frozen.artifact.claim.directCompatibleLocalStatePropBinding,
+      exactDirectBindingChange: frozen.artifact.claim.exactDirectBindingChange,
+      exactDirectBindingDetachToInitial: frozen.artifact.claim.exactDirectBindingDetachToInitial,
+      continuousCompleteSourceRevalidation:
+        frozen.artifact.claim.continuousCompleteSourceRevalidation,
+      sourceAndPreviewCommitAtomically: frozen.artifact.claim.sourceAndPreviewCommitAtomically,
+      stateAndBindingChromeOutsideManagedCapabilitySubtree:
+        frozen.artifact.claim.stateAndBindingChromeOutsideManagedCapabilitySubtree,
+    },
+    source,
+    successor,
+    package: packageContract,
+    testPolicy: {
+      applicationTestNames: tests.appTestNames[APPLICATION_TEST_PATH],
+      rootTestNames: tests.rootTestNames,
+    },
+    boundary: {
+      retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
+      successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
+      currentPathReceipts: receipts(files),
+      additiveSuccessorReceipts: [
+        APPLICATION_SOURCE_PATH,
+        APPLICATION_CSS_PATH,
+        APPLICATION_TEST_PATH,
+        EVENT_ACTION_ARTIFACT_PATH,
+      ].map((relativePath) => ({
+        path: relativePath,
+        bytes: files.get(relativePath).byteLength,
+        sha256: sha256(files.get(relativePath)),
+      })),
+    },
+  });
+  return deepFreeze({
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+  });
 }
 
 function verifyProofDocument(bytes, artifactSha256) {

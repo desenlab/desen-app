@@ -3,6 +3,7 @@ import { act } from "react";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as authoringPreview from "../src/authoring-preview.js";
 import * as authoringSlots from "../src/authoring-slots.js";
 import { DesenAppApplication } from "../src/application.js";
 
@@ -1038,6 +1039,7 @@ describe("Desen App application shell", () => {
     const layersTab = screen.getByRole("tab", { name: "Layers" });
     const componentsTab = screen.getByRole("tab", { name: "Components" });
     const stateTab = screen.getByRole("tab", { name: "State" });
+    const actionsTab = screen.getByRole("tab", { name: "Actions" });
     fireEvent.keyDown(layersTab, { key: "ArrowRight" });
     expect(componentsTab.getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(componentsTab);
@@ -1045,15 +1047,18 @@ describe("Desen App application shell", () => {
     expect(stateTab.getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(stateTab);
     fireEvent.keyDown(stateTab, { key: "ArrowRight" });
+    expect(actionsTab.getAttribute("aria-selected")).toBe("true");
+    expect(document.activeElement).toBe(actionsTab);
+    fireEvent.keyDown(actionsTab, { key: "ArrowRight" });
     expect(layersTab.getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(layersTab);
     fireEvent.keyDown(layersTab, { key: "ArrowLeft" });
-    expect(stateTab.getAttribute("aria-selected")).toBe("true");
-    expect(document.activeElement).toBe(stateTab);
-    fireEvent.keyDown(stateTab, { key: "Home" });
+    expect(actionsTab.getAttribute("aria-selected")).toBe("true");
+    expect(document.activeElement).toBe(actionsTab);
+    fireEvent.keyDown(actionsTab, { key: "Home" });
     expect(layersTab.getAttribute("aria-selected")).toBe("true");
     fireEvent.keyDown(layersTab, { key: "End" });
-    expect(stateTab.getAttribute("aria-selected")).toBe("true");
+    expect(actionsTab.getAttribute("aria-selected")).toBe("true");
     fireEvent.click(componentsTab);
 
     const componentsPanel = document.getElementById(
@@ -1113,6 +1118,115 @@ describe("Desen App application shell", () => {
         .getByText("Choose a named slot in Layers, then return to Components.")
         .getAttribute("role"),
     ).toBe("status");
+  });
+
+  it("commits sign-in event handlers and complete actions through the live authoring session", async () => {
+    const previewPreflight = vi.spyOn(authoringPreview, "prepareAuthoringPreviewBundle");
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+    fireEvent.click(screen.getByRole("tab", { name: "Actions" }));
+
+    const panel = screen.getByRole("region", { name: "Events & Actions" });
+    expect(within(panel).getByText("sign-in.email")).toBeTruthy();
+    expect(within(panel).getByText("Handler added")).toBeTruthy();
+    expect(within(panel).getByRole("article", { name: "action 1 in change" })).toBeTruthy();
+
+    fireEvent.click(within(panel).getByRole("button", { name: "Delete change event handler" }));
+    expect(within(panel).getByText("No handler")).toBeTruthy();
+    const addHandler = within(panel).getByRole("button", { name: "Add change event handler" });
+    expect(document.activeElement).toBe(addHandler);
+
+    fireEvent.click(addHandler);
+    const addAction = within(panel).getByRole("button", { name: "Add action to change" });
+    expect(document.activeElement).toBe(addAction);
+    fireEvent.click(addAction);
+
+    const actionDraft = within(panel).getByRole("textbox", {
+      name: "New action JSON for change",
+    });
+    fireEvent.change(actionDraft, {
+      target: {
+        value: '{"type":"state.set","path":"email","value":{"$ref":"event.value"}}',
+      },
+    });
+    fireEvent.click(within(panel).getByRole("button", { name: "Add complete action" }));
+
+    expect(within(panel).getByRole("article", { name: "action 1 in change" })).toBeTruthy();
+    expect(within(panel).getByRole("status").textContent).toBe("Added Set state to change.");
+    expect(previewPreflight).toHaveBeenCalledTimes(4);
+    const committedDocument = previewPreflight.mock.calls[3]?.[0];
+    expect(committedDocument).toBeDefined();
+    expect(
+      committedDocument?.surfaces["sign-in"]?.root.slots?.default?.find(
+        ({ id }) => id === "sign-in.email",
+      )?.on?.change,
+    ).toEqual([
+      {
+        type: "state.set",
+        path: "email",
+        value: { $ref: "event.value" },
+      },
+    ]);
+    expect(previewPreflight.mock.results[3]?.value).toMatchObject({ ok: true });
+    expect(await screen.findByRole("group", { name: "Sign-in adapter canvas" })).toBeTruthy();
+    const managedSubtree = document.querySelector("[data-managed-capability-subtree]");
+    expect(managedSubtree).toBeTruthy();
+    expect(managedSubtree?.contains(panel)).toBe(false);
+  });
+
+  it("keeps the prior event projection and canvas when action preview preflight fails", async () => {
+    const preparePreview = authoringPreview.prepareAuthoringPreviewBundle;
+    const previewPreflight = vi
+      .spyOn(authoringPreview, "prepareAuthoringPreviewBundle")
+      .mockImplementationOnce(preparePreview)
+      .mockReturnValueOnce(Object.freeze({ ok: false, reason: "publication-rejected" }));
+
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+    expect(previewPreflight).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+    fireEvent.click(screen.getByRole("tab", { name: "Actions" }));
+
+    const panel = screen.getByRole("region", { name: "Events & Actions" });
+    const baselineCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const baselineManagedSubtree = document.querySelector(
+      "[data-managed-capability-subtree='true']",
+    );
+    const baselineOverlay = screen.getByRole("status", { name: "Selected layer preview" });
+    expect(within(panel).getByText("Handler added")).toBeTruthy();
+    expect(within(panel).getByRole("article", { name: "action 1 in change" })).toBeTruthy();
+
+    const deleteHandler = within(panel).getByRole("button", {
+      name: "Delete change event handler",
+    });
+    fireEvent.click(deleteHandler);
+
+    expect(previewPreflight).toHaveBeenCalledTimes(2);
+    const rejectedCandidate = previewPreflight.mock.calls[1]?.[0];
+    expect(rejectedCandidate).toBeDefined();
+    expect(
+      rejectedCandidate?.surfaces["sign-in"]?.root.slots?.default?.find(
+        ({ id }) => id === "sign-in.email",
+      )?.on?.change,
+    ).toBeUndefined();
+    expect(within(panel).getByRole("status").textContent).toBe(
+      "The exact adapter preview could not accept this Source change.",
+    );
+    expect(within(panel).getByText("Handler added")).toBeTruthy();
+    expect(within(panel).getByRole("article", { name: "action 1 in change" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBe(baselineCanvas);
+    expect(document.querySelector("[data-managed-capability-subtree='true']")).toBe(
+      baselineManagedSubtree,
+    );
+    expect(screen.getByRole("status", { name: "Selected layer preview" })).toBe(baselineOverlay);
+    expect(within(baselineCanvas).getByLabelText("Email")).toBeTruthy();
   });
 
   it("does not substitute the sign-in Source tree or adapter canvas for another preview surface", () => {

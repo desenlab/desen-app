@@ -449,6 +449,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-desen-app-state-binding-editor.mjs",
       "tests/desen-app-state-binding-editor.test.mjs",
     ],
+    [
+      "desen-app-event-action-editor",
+      "scripts/verify-desen-app-event-action-editor.mjs",
+      "tests/desen-app-event-action-editor.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -491,6 +496,10 @@ const DIRECT_PROOF_VERIFIER_PREREQUISITES = Object.freeze({
     "node scripts/verify-editor-core-state-binding-edits.mjs",
     "node scripts/verify-desen-app-named-slot-authoring.mjs",
   ]),
+  "desen-app-event-action-editor": Object.freeze([
+    "node scripts/verify-desen-app-state-binding-editor.mjs",
+    "node scripts/verify-editor-core-event-action-edits.mjs",
+  ]),
 });
 
 const EXPECTED_CHECK_SUFFIX = Object.freeze([
@@ -520,14 +529,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "27dc2ee009837434a8d16c5bddebca8d693f1133f8214aa870f94cf482467073";
+  "181d43e958b7eb52c864f72078672a6e73a12bbca1bc07ccfbca82f0bcebee71";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "f75015245b76738433e188edc5171f4fdc22d8a91cfd0bc266f485e42caa1ba5";
+  "2945c487cb33f055eefe72d859f1b907560a5861e170690ccb98cbebc351b4c4";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "7460545faa6ff0ab3eb46f1631abaaeab8645d7bdd3bfe42fd381256a7848de6";
+  "42d43078f6ea3d2d5d5d571c0ef2097d61f6a65dc7a9c03ed9eab8515f1565a3";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "cdb0d2b50441bc7f94ad2794c4af88807a87dbef7f886d6dfc6c3414ff29e2b8";
+const QUALITY_GATE_PLAN_SHA256 = "d90a0f6f7fe34d92f9a11a34be8d5d952962a60903233ccac1587ade8bde4c87";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
