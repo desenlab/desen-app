@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "332cdaa40a2393d018c96478812ffdd8b41b8abf5c0adb293c21379214698701";
+  "1111da0809034955e1c6bece8bcf3a2cbfd16fe426bed824fd1ec39edbdc0c5d";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb";
+  "5098df5720b0a626f4d2d63b4d83ceb7965ff971867d7225a73325ee6cb40269";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "5146f101cb767c49f6f0b87fd6939be6bdfc348e5f4dcf8dd77399ac921d4ee3";
+  "d283baa502c7df645da32bf41181d3fa9b354369e0c6977dc64b9016bdf157ef";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -625,6 +625,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "desen-app-publish-activation",
     "scripts/verify-desen-app-publish-activation.mjs",
     "tests/desen-app-publish-activation.test.mjs",
+  ],
+  [
+    "desen-app-empty-project-browser-e2e",
+    "scripts/verify-desen-app-empty-project-browser-e2e.mjs",
+    "tests/desen-app-empty-project-browser-e2e.test.mjs",
   ],
 ]);
 
@@ -1592,7 +1597,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "c6655119e0b24594bced92b6b916917e0f336351c19cf338ee21d3b8d141f684";
+  "84c3ec71a7b336a1578804c62e7e37ba6051d3208ed5d0c6c204e13238e9930a";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

@@ -332,17 +332,17 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 95,
-    verifierCount: 95,
-    rootTestCount: 95,
+    proofCount: 96,
+    verifierCount: 96,
+    rootTestCount: 96,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
     legacyPrerequisiteCount: 735,
-    legacyPrerequisiteSha256: "332cdaa40a2393d018c96478812ffdd8b41b8abf5c0adb293c21379214698701",
-    legacyLeafInvocationCount: 4529,
-    legacyLeafInvocationSha256: "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb",
-    distinctLeafWorkloadCount: 319,
-    distinctLeafWorkloadSha256: "5146f101cb767c49f6f0b87fd6939be6bdfc348e5f4dcf8dd77399ac921d4ee3",
+    legacyPrerequisiteSha256: "1111da0809034955e1c6bece8bcf3a2cbfd16fe426bed824fd1ec39edbdc0c5d",
+    legacyLeafInvocationCount: 4531,
+    legacyLeafInvocationSha256: "5098df5720b0a626f4d2d63b4d83ceb7965ff971867d7225a73325ee6cb40269",
+    distinctLeafWorkloadCount: 321,
+    distinctLeafWorkloadSha256: "d283baa502c7df645da32bf41181d3fa9b354369e0c6977dc64b9016bdf157ef",
     testConfigurationFileCount: 0,
     workspaceTestScriptCount: 16,
     workspaceTestScriptSha256: "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab",
@@ -807,8 +807,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 200);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 95);
+  assert.equal(steps.length, 202);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 96);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -1073,6 +1073,28 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
       args: ["--test", "--test-concurrency=1", "tests/desen-app-publish-activation.test.mjs"],
     },
   );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "verify-desen-app-empty-project-browser-e2e"),
+    {
+      id: "verify-desen-app-empty-project-browser-e2e",
+      label: "Proof verifier: desen-app-empty-project-browser-e2e",
+      command: "node",
+      args: ["scripts/verify-desen-app-empty-project-browser-e2e.mjs"],
+    },
+  );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "test-desen-app-empty-project-browser-e2e"),
+    {
+      id: "test-desen-app-empty-project-browser-e2e",
+      label: "Root proof and mutation test: desen-app-empty-project-browser-e2e",
+      command: "node",
+      args: [
+        "--test",
+        "--test-concurrency=1",
+        "tests/desen-app-empty-project-browser-e2e.test.mjs",
+      ],
+    },
+  );
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -1093,8 +1115,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 200,
-    planSha256: "beeda57842e1a9bdee6a13cd7be323b48a722ce4352319d085886b7fc76bfefe",
+    stepCount: 202,
+    planSha256: "79ccfaca8c4ab340962bc4d5f4b14d43206fcaee52c03b89222ad0141fa62acb",
   });
 
   const missingTypecheck = clone(steps);

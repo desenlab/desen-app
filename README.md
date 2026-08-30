@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████████░░░░░░` **109 / 145 tasks complete (75%)**
+**Overall:** `███████████████████░░░░░░` **110 / 145 tasks complete (76%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -26,9 +26,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `░░░░░░░░░` **0 / 9 tasks complete (0%)**
+**M10:** `█░░░░░░░░` **1 / 9 tasks complete (11%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **Next:** `M10-T01`
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T01:** `DONE`; exact-head hosted gates are required for merge · **Next:** `M10-T02`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -1159,6 +1159,24 @@ are 11/13. P-07, P-09, and P-10 remain `PARTIAL`; P-08 remains `NOT_PROVEN`; P-1
 Automated real-browser E2E and native drag are not proven by this compatibility evidence; M10-T01
 is next.
 
+**M10-T01 checkpoint:** an isolated production browser-proof bundle starts from an explicitly empty,
+structurally admitted Source/project and authors the sign-in surface through the visible Desen App
+UI. The passing local Chromium scenario covers native Components and Layers drag, rejects forged
+`DataTransfer` mutation, and proves the full canonical and real-persistence before/after boundary:
+the exact empty Source is Generation 1, the forged drop leaves its document, save count, and
+disabled Save state identical, and the completed authored Source is Generation 2. It re-admits the
+stored canonical Source and requires exact managed static subtree plus `420 × 720` frame parity in
+Design and Run.
+The complete App suite passes 377/377 and the separately discovered browser scenario passes 1/1;
+the independent proof reader passes 11/11. The 10,259-byte artifact is pinned at
+`sha256:959dde63ef28bc7fd25967a9193e39e082c9178bc12f40b83036c5dd6042df77`. Reader checkpoint
+sequence 57 records 50 artifacts and 100 readers at
+`sha256:690c73294f6926822fb1535ac60ea40636545890031db72b7a8d63930a27cc57`. P-08 is `PROVEN`;
+P-07, P-09, and P-10 remain `PARTIAL`. M10 is 1/9, implementation progress is 110/145 (76%),
+proof gates remain 11/13, and M10-T02 is next. Input/pending, failure, success/navigation, and a
+real host operation remain unproven, G10 stays open, and no exact-head hosted-CI success is claimed
+by these local receipts.
+
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge
 spike retained as evidence.
@@ -1290,12 +1308,16 @@ packages/
 
 ```bash
 pnpm install
+pnpm exec playwright install chromium
 pnpm verify:protocol-snapshot
+pnpm test:e2e
 pnpm check
 ```
 
-`pnpm proof` and `pnpm test:e2e` deliberately return `NOT_IMPLEMENTED` until their G10 runners
-exist; an absent proof runner is never treated as a successful proof.
+The Playwright install command is a one-time local browser setup. `pnpm test:e2e` then builds the
+isolated M10 browser-proof application and runs package-pinned Chromium.
+`pnpm proof` deliberately returns `NOT_IMPLEMENTED` until the complete G10 runner exists; an
+absent proof runner is never treated as a successful proof.
 
 The exact DESEN 0.1.0 input snapshot is vendored and checksum-enforced. Schema-derived types,
 canonical JSON and SHA-256 primitives, the 36-code diagnostic registry, and RFC 6901 JSON Pointer

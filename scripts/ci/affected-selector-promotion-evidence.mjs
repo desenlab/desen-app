@@ -436,6 +436,19 @@ const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "scripts/lib/desen-app-publish-activation-proof.mjs",
   "scripts/verify-desen-app-publish-activation.mjs",
   "tests/desen-app-publish-activation.test.mjs",
+  "apps/desen-app/e2e/empty-project-to-sign-in.pw.ts",
+  "apps/desen-app/e2e/index.html",
+  "apps/desen-app/e2e/playwright.config.ts",
+  "apps/desen-app/e2e/proof-application.tsx",
+  "apps/desen-app/e2e/tsconfig.json",
+  "apps/desen-app/e2e/vite.config.ts",
+  "apps/desen-app/src/reference-empty-project.ts",
+  "docs/proof/DESEN-APP-EMPTY-PROJECT-BROWSER-E2E.md",
+  "docs/proof/artifacts/desen-app-0.1.0-empty-project-browser-e2e.json",
+  "scripts/generate-desen-app-empty-project-browser-e2e-proof.mjs",
+  "scripts/lib/desen-app-empty-project-browser-e2e-proof.mjs",
+  "scripts/verify-desen-app-empty-project-browser-e2e.mjs",
+  "tests/desen-app-empty-project-browser-e2e.test.mjs",
 ]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
@@ -481,13 +494,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 190,
+    PROOF_UNIT: 192,
     CI_POLICY: 45,
     DEPENDENCY_POLICY: 31,
-    FROZEN_INPUT: 139,
-    PACKAGE_OR_APPLICATION: 493,
-    SHARED_PROOF_INFRASTRUCTURE: 227,
-    PROJECT_DOCUMENTATION: 131,
+    FROZEN_INPUT: 140,
+    PACKAGE_OR_APPLICATION: 500,
+    SHARED_PROOF_INFRASTRUCTURE: 229,
+    PROJECT_DOCUMENTATION: 132,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -598,6 +611,9 @@ const HISTORICAL_RUNNER_WORKFLOW_CONTRACT = Object.freeze({
 const CURRENT_RUNNER_WORKFLOW_CONTRACT = Object.freeze({
   ...HISTORICAL_RUNNER_WORKFLOW_CONTRACT,
   processTimeout: "19m_TERM_30s_KILL",
+  browserE2e: "PARALLEL_REQUIRED_EXACT_HEAD",
+  browserE2eCommand: "pnpm test:e2e",
+  browserE2eTimeout: "15m",
 });
 const RUNNER_PACKAGE_CONTRACT = Object.freeze({
   script: "ci:required",
@@ -877,10 +893,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 56,
-  headSha256: "1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a",
-  frozenArtifactCount: 49,
-  currentReaderCount: 98,
+  sequence: 57,
+  headSha256: "690c73294f6926822fb1535ac60ea40636545890031db72b7a8d63930a27cc57",
+  frozenArtifactCount: 50,
+  currentReaderCount: 100,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -1495,12 +1511,22 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}",
     "github.event.pull_request.head.repo.full_name == github.repository",
     "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-affected-quality-gate.mjs",
+    "github.event_name != 'workflow_dispatch' || inputs.mode == 'required'",
+    "browser-e2e:",
+    "name: Browser E2E",
+    "ref: ${{ github.event.pull_request.head.sha || github.sha }}",
+    "pnpm exec playwright install --with-deps chromium",
+    "pnpm test:e2e",
+    "pnpm verify:desen-app-empty-project-browser-e2e",
+    "pnpm test:desen-app-empty-project-browser-e2e",
   ];
   if (
     workflowFragments.some((fragment) =>
       fragment === "github.event.pull_request.head.repo.full_name == github.repository"
-        ? exactOccurrence(workflowSource, fragment) !== 2
-        : exactOccurrence(workflowSource, fragment) !== 1,
+        ? exactOccurrence(workflowSource, fragment) !== 3
+        : fragment === "github.event_name != 'workflow_dispatch' || inputs.mode == 'required'"
+          ? exactOccurrence(workflowSource, fragment) !== 2
+          : exactOccurrence(workflowSource, fragment) !== 1,
     ) ||
     workflowSource.includes("run-shadow-affected-quality-gate.mjs") ||
     !workflowSource.includes(
@@ -2320,7 +2346,7 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "Current comparison-source receipts do not reproduce the reviewed M09-T14 successor.",
+      "Current comparison-source receipts do not reproduce the reviewed M10-T01 successor.",
     );
   }
   const selectorBytes = capturedSourceBytes(currentAuthority, SELECTOR_SOURCE_PATH);
@@ -2328,12 +2354,12 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 200 ||
-    currentInventory.proofUnitCount !== 95
+    currentInventory.workloadCount !== 202 ||
+    currentInventory.proofUnitCount !== 96
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current workload graph is not the exact reviewed M09-T14 append-only successor.",
+      "The current workload graph is not the exact reviewed M10-T01 append-only successor.",
     );
   }
   const currentProofPairClasses = currentInventory.proofUnits.reduce(
@@ -2343,25 +2369,27 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 84 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 85 || currentProofPairClasses.barrier !== 11) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M09-T14 proof-pair authority is not exactly 84 ordinary and 11 barrier pairs.",
+      "The current M10-T01 proof-pair authority is not exactly 85 ordinary and 11 barrier pairs.",
     );
   }
-  const publishActivationClosure = createAffectedImpactClosure(["desen-app-publish-activation"]);
+  const emptyProjectBrowserClosure = createAffectedImpactClosure([
+    "desen-app-empty-project-browser-e2e",
+  ]);
   if (
-    !isDeepStrictEqual(publishActivationClosure.ownerProofUnitIds, [
-      "desen-app-publish-activation",
+    !isDeepStrictEqual(emptyProjectBrowserClosure.ownerProofUnitIds, [
+      "desen-app-empty-project-browser-e2e",
     ]) ||
-    publishActivationClosure.proofUnitCount !== 63 ||
-    publishActivationClosure.workloadCount !== 136 ||
-    publishActivationClosure.impactSha256 !==
-      "d2183d819b118872a1e7f040a4b8b1cec7ded723ee35b0b26bea17c7c99335fc"
+    emptyProjectBrowserClosure.proofUnitCount !== 64 ||
+    emptyProjectBrowserClosure.workloadCount !== 138 ||
+    emptyProjectBrowserClosure.impactSha256 !==
+      "971a68645c1dac5bc8aaf78b26afbd5b0b1a9d9f5c0453e0454a035ff0d154eb"
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M09-T14 affected closure is not exactly 63 proof units and 136 workloads.",
+      "The current M10-T01 affected closure is not exactly 64 proof units and 138 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);

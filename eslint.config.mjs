@@ -73,6 +73,7 @@ export default tseslint.config(
   {
     ignores: [
       "**/dist/**",
+      "**/dist-e2e/**",
       "**/coverage/**",
       "**/.turbo/**",
       "**/node_modules/**",

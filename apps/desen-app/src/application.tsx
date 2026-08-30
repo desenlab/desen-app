@@ -82,6 +82,7 @@ import styles from "./application.module.css";
 
 import type { CSSProperties, DragEvent, MouseEvent, ReactNode } from "react";
 import type {
+  DesenEditorDocument,
   DesenEditorContinuousValidationReport,
   DesenEditorPersistencePort,
 } from "@desen/editor-core";
@@ -370,7 +371,6 @@ function projectPublicationControls(
   });
 }
 
-const REFERENCE_EDITOR_DOCUMENT_CANONICAL = canonicalizeJson(REFERENCE_EDITOR_DOCUMENT);
 const UNAVAILABLE_PREVIEW_REVISION = `sha256:${"0".repeat(64)}`;
 
 interface AppLinkProps {
@@ -2280,11 +2280,13 @@ function AuthoringPanel({
 }
 
 function SurfaceEditor({
+  initialDocument,
   persistencePort,
   publicationPort,
   project,
   selectedSurface,
 }: Readonly<{
+  readonly initialDocument: DesenEditorDocument;
   readonly persistencePort: DesenEditorPersistencePort | null;
   readonly publicationPort: AuthoringPublicationPort | null;
   readonly project: DesenAppProjectSummary;
@@ -2297,17 +2299,21 @@ function SurfaceEditor({
   const [diagnosticSelection, setDiagnosticSelection] =
     useState<AuthoringDiagnosticSelection | null>(null);
   const diagnosticFocusRequest = useRef(0);
+  // A surface session owns one Source baseline. A parent must remount the keyed editor to open a
+  // different Source; prop identity changes cannot replace only persistence/publication authority.
+  const [mountedInitialDocument] = useState(() => initialDocument);
+  const [initialDocumentCanonical] = useState(() => canonicalizeJson(mountedInitialDocument));
   const [authoringSession, setAuthoringSession] = useState(() =>
     Object.freeze({
-      document: REFERENCE_EDITOR_DOCUMENT,
-      preview: prepareAuthoringPreviewBundle(REFERENCE_EDITOR_DOCUMENT),
+      document: mountedInitialDocument,
+      preview: prepareAuthoringPreviewBundle(mountedInitialDocument),
     }),
   );
   const [scenarioChoice, setScenarioChoice] = useState<
     Readonly<{ readonly ownerKey: string | null; readonly value: AuthoringScenarioValue }>
   >(() => Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
-  const inMemoryBaselineCanonical = useRef(REFERENCE_EDITOR_DOCUMENT_CANONICAL);
-  const inMemoryCurrentCanonical = useRef(REFERENCE_EDITOR_DOCUMENT_CANONICAL);
+  const inMemoryBaselineCanonical = useRef(initialDocumentCanonical);
+  const inMemoryCurrentCanonical = useRef(initialDocumentCanonical);
   const inMemoryDraftDirty = useRef(false);
   const [inMemoryDirtyProjection, setInMemoryDirtyProjection] = useState(false);
   const updateInMemoryDirtyProjection = useCallback(() => {
@@ -2330,11 +2336,11 @@ function SurfaceEditor({
         ? null
         : createAuthoringPersistenceController({
             route,
-            document: REFERENCE_EDITOR_DOCUMENT,
+            document: mountedInitialDocument,
             catalog: referenceCatalog,
             persistencePort,
           }),
-    [persistencePort, route],
+    [mountedInitialDocument, persistencePort, route],
   );
   const persistenceController =
     persistenceCreation?.ok === true ? persistenceCreation.controller : null;
@@ -2350,7 +2356,7 @@ function SurfaceEditor({
   );
   const publicationBinding = useMemo(() => {
     if (publicationPort === null) return null;
-    const initialPreview = prepareAuthoringPreviewBundle(REFERENCE_EDITOR_DOCUMENT);
+    const initialPreview = prepareAuthoringPreviewBundle(mountedInitialDocument);
     if (!initialPreview.ok) return null;
     const lifetime: AuthoringPublicationLifetimeFence = { active: false };
     return Object.freeze({
@@ -2358,7 +2364,7 @@ function SurfaceEditor({
       creation: createAuthoringPublicationController({
         route,
         snapshot: Object.freeze({
-          document: REFERENCE_EDITOR_DOCUMENT,
+          document: mountedInitialDocument,
           savedDocument: null,
           sourceGeneration: null,
           persistenceAuthority: persistenceController === null ? "unavailable" : "ready",
@@ -2367,7 +2373,7 @@ function SurfaceEditor({
         publicationPort: createLifetimeFencedPublicationPort(publicationPort, lifetime),
       }),
     });
-  }, [persistenceController, publicationPort, route]);
+  }, [mountedInitialDocument, persistenceController, publicationPort, route]);
   const publicationCreation = publicationBinding?.creation ?? null;
   const publicationController =
     publicationCreation?.ok === true ? publicationCreation.controller : null;
@@ -2535,11 +2541,11 @@ function SurfaceEditor({
   const fixtureController = useMemo(
     () =>
       createAuthoringSignInFixtureController({
-        documentId: REFERENCE_EDITOR_DOCUMENT.id,
+        documentId: document.id,
         revision: fixtureRevision,
         surfaceId: selectedSurface.id,
       }),
-    [fixtureRevision, selectedSurface.id],
+    [document.id, fixtureRevision, selectedSurface.id],
   );
   const fixtureHostPorts = useMemo(
     () => createAuthoringFixtureHostPorts(fixtureController.operationPort),
@@ -3203,11 +3209,13 @@ function SurfaceEditor({
 }
 
 function ProjectShell({
+  initialDocument,
   persistencePort,
   publicationPort,
   project,
   selectedSurface,
 }: Readonly<{
+  readonly initialDocument: DesenEditorDocument;
   readonly persistencePort: DesenEditorPersistencePort | null;
   readonly publicationPort: AuthoringPublicationPort | null;
   readonly project: DesenAppProjectSummary;
@@ -3277,6 +3285,7 @@ function ProjectShell({
   return (
     <SurfaceEditor
       key={`${project.id}:${selectedSurface.id}`}
+      initialDocument={initialDocument}
       persistencePort={persistencePort}
       publicationPort={publicationPort}
       project={project}
@@ -3324,10 +3333,12 @@ function hasResolvedSurfaceEditor(route: DesenAppRoute): boolean {
 }
 
 function RouteView({
+  initialDocument,
   persistencePort,
   publicationPort,
   route,
 }: Readonly<{
+  readonly initialDocument: DesenEditorDocument;
   readonly persistencePort: DesenEditorPersistencePort | null;
   readonly publicationPort: AuthoringPublicationPort | null;
   readonly route: DesenAppRoute;
@@ -3347,6 +3358,7 @@ function RouteView({
   if (route.surfaceId === undefined)
     return (
       <ProjectShell
+        initialDocument={initialDocument}
         persistencePort={persistencePort}
         publicationPort={publicationPort}
         project={project}
@@ -3365,6 +3377,7 @@ function RouteView({
   }
   return (
     <ProjectShell
+      initialDocument={initialDocument}
       persistencePort={persistencePort}
       publicationPort={publicationPort}
       project={project}
@@ -3375,12 +3388,15 @@ function RouteView({
 
 /** Trusted host-owned capabilities injected into the App shell. */
 export interface DesenAppApplicationProps {
+  /** Initial validated Source captured when a surface editor session mounts. */
+  readonly initialDocument?: DesenEditorDocument;
   readonly persistencePort?: DesenEditorPersistencePort | null;
   readonly publicationPort?: AuthoringPublicationPort | null;
 }
 
 /** M09 Desen App shell with exact routes, schema-driven Source editing, and adapter preview. */
 export function DesenAppApplication({
+  initialDocument = REFERENCE_EDITOR_DOCUMENT,
   persistencePort = null,
   publicationPort = null,
 }: DesenAppApplicationProps = {}) {
@@ -3414,6 +3430,7 @@ export function DesenAppApplication({
         tabIndex={-1}
       >
         <RouteView
+          initialDocument={initialDocument}
           persistencePort={persistencePort}
           publicationPort={publicationPort}
           route={route}

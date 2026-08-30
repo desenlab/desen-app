@@ -504,7 +504,24 @@ until M10-T07, N-036 remains `PLANNED`, and PF-085/PF-086/PF-089 remain `OPEN`. 
 real-browser E2E and native drag are not proven by this compatibility evidence and remain M10-T01
 work.
 
+M10-T01 adds the first automated real-browser authoring proof without changing the normal product
+bootstrap. A separate admitted Source starts with the exact `web-react` reference Catalog, one
+`sign-in` surface, its required `Stack` root, and no child component, state, binding, event, or
+action. The isolated production proof entry injects that Source and a real public Editor Core
+compare-and-set persistence port; it is not imported by the normal App build.
+
+The Chromium flow authors title, email, password, and button components through visible controls;
+creates local state, direct bindings, and change actions; uses native Components and Layers drag;
+deletes a temporary layer; compares Design and Run against the same `420 × 720` frame; saves once;
+and re-admits the exact canonical stored Source. A forged `DataTransfer` drop without App-owned
+drag intent is the negative case and remains inert. The browser proof deliberately does not enter
+credentials, settle fixtures, navigate, invoke a real host operation, publish, activate, or test
+recovery; those remain M10-T02–M10-T07.
+
 ## Local commands
+
+Install the package-pinned Chromium runtime once with `pnpm exec playwright install chromium`
+before the first browser-proof run.
 
 ```bash
 pnpm --filter @desen/app-web dev
@@ -523,6 +540,7 @@ pnpm --filter @desen/app-web test:fixtures-scenarios
 pnpm --filter @desen/app-web test:persistence
 pnpm --filter @desen/app-web test:diagnostics
 pnpm --filter @desen/app-web test:publication
+pnpm test:e2e
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```
