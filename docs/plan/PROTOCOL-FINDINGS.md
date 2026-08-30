@@ -1984,13 +1984,26 @@ This file records implementation discoveries without changing the frozen DESEN 0
   declared `focus` command through its narrow private handle; TextField `change` and Button
   `press` forward fresh inert payloads. The other adapters add no undeclared interaction.
 
-  The current reference Catalog therefore moves from the immutable M03 package digest
+  The first executable reference Catalog successor therefore moved from the immutable M03 package digest
   `sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   to the successor digest
   `sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0`.
   The successor frames the projected Catalog plus every one of 80 regular `dist/**` files, for 81
   entries and 252,072 bytes. M03 proof bytes and their old tuple remain unchanged behind strict
-  task-time compatibility readers; M05-T04 owns the current package inventory.
+  task-time compatibility readers; M05-T04 owns that executable inventory profile.
+
+  The corrective M09 editor successor changes the target implementation bytes again without
+  changing the frozen protocol or Source. Its current Web–React package digest is
+  `sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051`: 80 regular
+  `dist/**` files total 243,740 bytes, and the projected Catalog plus those files produce 81
+  framed entries and 252,637 framed bytes. The official-derived Bundle revision is
+  `sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13`; its Source digest
+  remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`.
+  The M03 and later task-time package and Bundle tuples remain historical authority: no frozen
+  artifact or historical pin is rewritten. Compatibility checkpoint sequence 56 advances the
+  exact sequence-55 head to
+  `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
+  49 frozen artifacts and 98 reader identities.
 
 - Future action: M05-T05 proves stable React reconciliation keys and runtime-to-source diagnostics
   without widening an adapter's authority. M05-T06 contains committed adapter exceptions under

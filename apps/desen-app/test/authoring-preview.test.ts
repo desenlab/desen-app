@@ -10,8 +10,8 @@ import {
 
 import type { DesenEditorDocument } from "@desen/editor-core";
 
-const BASELINE_REVISION = "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb";
-const EDITED_REVISION = "sha256:353dc7e7eaf797e3e5cc9f2e07454fb6a014fea530fa15ddc57f24307b1a56c6";
+const BASELINE_REVISION = "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13";
+const EDITED_REVISION = "sha256:582b95347becd2bfe8ee7de4421ab7fbea950861e079875ede270e5c94326d86";
 const { publication: omittedFixturePublication, ...SESSION_LOCAL_BASELINE_BUNDLE } =
   officialSignInBundle;
 void omittedFixturePublication;

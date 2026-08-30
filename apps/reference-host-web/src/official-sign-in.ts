@@ -33,13 +33,13 @@ export const REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID = "com.example.account-
 
 /** Exact immutable revision of the controlled official-derived reference Bundle. */
 export const REFERENCE_HOST_OFFICIAL_SIGN_IN_REVISION =
-  "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb";
+  "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13";
 
 const REFERENCE_PACKAGE_ID = "run.desen.reference.sign-in";
 const REFERENCE_PACKAGE_VERSION = "0.1.0";
 const REFERENCE_PACKAGE_TARGET = "web-react";
 const REFERENCE_PACKAGE_DIGEST =
-  "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0";
+  "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051";
 const SIGN_IN_SURFACE_ID = "sign-in";
 const HOME_SURFACE_ID = "home";
 const SIGN_IN_INVOCATION_ALIAS = "signIn";

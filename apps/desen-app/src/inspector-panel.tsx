@@ -18,13 +18,19 @@ import type { StructuredJsonParseFailureReason } from "./structured-json.js";
 
 interface InspectorPanelProps {
   readonly diagnosticsControls?: ReactNode;
+  /** App-owned event and action controls retained in the right-sidebar Actions view. */
+  readonly eventActionControls?: ReactNode;
   readonly hidden?: boolean | undefined;
   readonly inspector: AuthoringInspectorModelResult;
   readonly onEdit: (edit: AuthoringInspectorEdit) => AuthoringInspectorEditResult;
   readonly onBindingEdit?:
     ((edit: AuthoringInspectorBindingEdit) => AuthoringInspectorEditResult) | undefined;
   readonly previewControls?: ReactNode;
+  /** App-owned local-state controls retained in the right-sidebar State view. */
+  readonly stateControls?: ReactNode;
 }
+
+type InspectorTab = "inspector" | "state" | "actions";
 
 function primitiveText(value: JsonPrimitive): string {
   if (value === null) return "Null";
@@ -749,13 +755,20 @@ function InspectorField(props: Readonly<InspectorFieldProps>) {
 /** App-owned property inspector rendered outside the managed capability subtree. */
 export function InspectorPanel({
   diagnosticsControls,
+  eventActionControls,
   hidden = false,
   inspector,
   onBindingEdit,
   onEdit,
   previewControls,
+  stateControls,
 }: Readonly<InspectorPanelProps>) {
+  const [activeTab, setActiveTab] = useState<InspectorTab>("inspector");
   const [notice, setNotice] = useState("");
+  const panelId = useId();
+  const inspectorTab = useRef<HTMLButtonElement>(null);
+  const stateTab = useRef<HTMLButtonElement>(null);
+  const actionsTab = useRef<HTMLButtonElement>(null);
   const applyBindingEdit =
     onBindingEdit ??
     (() => Object.freeze({ ok: false as const, reason: "control-unavailable" as const }));
@@ -764,10 +777,37 @@ export function InspectorPanel({
     setNotice("");
   }, [inspector.status, inspector.status === "ready" ? inspector.selection.sourceNodeId : null]);
 
+  function selectTab(nextTab: InspectorTab): void {
+    setActiveTab(nextTab);
+    (nextTab === "inspector"
+      ? inspectorTab
+      : nextTab === "state"
+        ? stateTab
+        : actionsTab
+    ).current?.focus();
+  }
+
+  function selectAdjacentTab(event: KeyboardEvent<HTMLButtonElement>): void {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const tabs: readonly InspectorTab[] = ["inspector", "state", "actions"];
+    const currentIndex = tabs.indexOf(activeTab);
+    const nextTab =
+      event.key === "Home"
+        ? "inspector"
+        : event.key === "End"
+          ? "actions"
+          : (tabs[
+              (currentIndex + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length
+            ] ?? "inspector");
+    selectTab(nextTab);
+  }
+
   return (
     <aside
       aria-label="Inspector"
       className={styles.inspectorPanel}
+      data-active-tab={activeTab}
       data-authoring-inspector="true"
       hidden={hidden}
     >
@@ -778,61 +818,141 @@ export function InspectorPanel({
         </span>
         <span aria-hidden="true" className={styles.inspectorMark} />
       </div>
+      <div aria-label="Inspector views" className={styles.inspectorTabs} role="tablist">
+        <button
+          aria-controls={`${panelId}-inspector-panel`}
+          aria-selected={activeTab === "inspector"}
+          id={`${panelId}-inspector-tab`}
+          onClick={() => selectTab("inspector")}
+          onKeyDown={selectAdjacentTab}
+          ref={inspectorTab}
+          role="tab"
+          tabIndex={activeTab === "inspector" ? 0 : -1}
+          type="button"
+        >
+          Inspector
+        </button>
+        <button
+          aria-controls={`${panelId}-state-panel`}
+          aria-selected={activeTab === "state"}
+          id={`${panelId}-state-tab`}
+          onClick={() => selectTab("state")}
+          onKeyDown={selectAdjacentTab}
+          ref={stateTab}
+          role="tab"
+          tabIndex={activeTab === "state" ? 0 : -1}
+          type="button"
+        >
+          State
+        </button>
+        <button
+          aria-controls={`${panelId}-actions-panel`}
+          aria-selected={activeTab === "actions"}
+          id={`${panelId}-actions-tab`}
+          onClick={() => selectTab("actions")}
+          onKeyDown={selectAdjacentTab}
+          ref={actionsTab}
+          role="tab"
+          tabIndex={activeTab === "actions" ? 0 : -1}
+          type="button"
+        >
+          Actions
+        </button>
+      </div>
 
-      {previewControls}
-      {diagnosticsControls}
+      <div
+        aria-labelledby={`${panelId}-inspector-tab`}
+        className={styles.inspectorTabPanel}
+        hidden={activeTab !== "inspector"}
+        id={`${panelId}-inspector-panel`}
+        role="tabpanel"
+        tabIndex={activeTab === "inspector" ? 0 : -1}
+      >
+        {previewControls}
+        {diagnosticsControls}
 
-      {inspector.status !== "ready" ? (
-        <div className={styles.inspectorEmpty}>
-          <span aria-hidden="true" className={styles.inspectorEmptyGlyph} />
-          <strong>
-            {inspector.status === "idle" ? "Select a layer" : "Selection unavailable"}
-          </strong>
-          <p>
-            {inspector.status === "idle"
-              ? "Choose a Source layer to edit its Catalog properties."
-              : "The current route no longer admits this Source identity."}
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className={styles.inspectorIdentity}>
-            <span aria-hidden="true" className={styles.componentGlyph}>
-              {inspector.selection.displayName.slice(0, 1)}
-            </span>
-            <span>
-              <strong>{inspector.selection.displayName}</strong>
-              <small>{inspector.selection.sourceNodeId}</small>
-              <code>{inspector.selection.capabilityId}</code>
-            </span>
-            {inspector.selection.conditional ? (
-              <span className={styles.conditionalBadge}>Conditional</span>
-            ) : null}
+        {inspector.status !== "ready" ? (
+          <div className={styles.inspectorEmpty}>
+            <span aria-hidden="true" className={styles.inspectorEmptyGlyph} />
+            <strong>
+              {inspector.status === "idle" ? "Select a layer" : "Selection unavailable"}
+            </strong>
+            <p>
+              {inspector.status === "idle"
+                ? "Choose a Source layer to edit its Catalog properties."
+                : "The current route no longer admits this Source identity."}
+            </p>
           </div>
-          <div className={styles.inspectorBody}>
-            <div className={styles.panelSectionHeading}>
-              <span>Properties</span>
-              <small>{inspector.controlCount} controls</small>
+        ) : (
+          <>
+            <div className={styles.inspectorIdentity}>
+              <span aria-hidden="true" className={styles.componentGlyph}>
+                {inspector.selection.displayName.slice(0, 1)}
+              </span>
+              <span>
+                <strong>{inspector.selection.displayName}</strong>
+                <small>{inspector.selection.sourceNodeId}</small>
+                <code>{inspector.selection.capabilityId}</code>
+              </span>
+              {inspector.selection.conditional ? (
+                <span className={styles.conditionalBadge}>Conditional</span>
+              ) : null}
             </div>
-            <div className={styles.inspectorFields}>
-              {inspector.fields.map((field) => (
-                <InspectorField
-                  field={field}
-                  key={`${inspector.selection.sourceNodeId}:${field.control.valuePointer}`}
-                  localStates={inspector.localStates}
-                  onBindingEdit={applyBindingEdit}
-                  onEdit={onEdit}
-                  onNotice={setNotice}
-                />
-              ))}
+            <div className={styles.inspectorBody}>
+              <div className={styles.panelSectionHeading}>
+                <span>Properties</span>
+                <small>{inspector.controlCount} controls</small>
+              </div>
+              <div className={styles.inspectorFields}>
+                {inspector.fields.map((field) => (
+                  <InspectorField
+                    field={field}
+                    key={`${inspector.selection.sourceNodeId}:${field.control.valuePointer}`}
+                    localStates={inspector.localStates}
+                    onBindingEdit={applyBindingEdit}
+                    onEdit={onEdit}
+                    onNotice={setNotice}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
 
-      <p aria-live="polite" className={styles.inspectorNotice} role="status">
-        {notice || "Edits remain local until Save source succeeds."}
-      </p>
+        <p aria-live="polite" className={styles.inspectorNotice} role="status">
+          {notice || "Edits remain local until Save source succeeds."}
+        </p>
+      </div>
+      <div
+        aria-labelledby={`${panelId}-state-tab`}
+        className={styles.inspectorTabPanel}
+        hidden={activeTab !== "state"}
+        id={`${panelId}-state-panel`}
+        role="tabpanel"
+        tabIndex={activeTab === "state" ? 0 : -1}
+      >
+        {stateControls ?? (
+          <div className={styles.inspectorTabUnavailable}>
+            <strong>State controls unavailable</strong>
+            <p>This surface does not expose local state controls.</p>
+          </div>
+        )}
+      </div>
+      <div
+        aria-labelledby={`${panelId}-actions-tab`}
+        className={styles.inspectorTabPanel}
+        hidden={activeTab !== "actions"}
+        id={`${panelId}-actions-panel`}
+        role="tabpanel"
+        tabIndex={activeTab === "actions" ? 0 : -1}
+      >
+        {eventActionControls ?? (
+          <div className={styles.inspectorTabUnavailable}>
+            <strong>Action controls unavailable</strong>
+            <p>This surface does not expose event and action controls.</p>
+          </div>
+        )}
+      </div>
     </aside>
   );
 }

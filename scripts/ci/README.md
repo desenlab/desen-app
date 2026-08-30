@@ -1318,7 +1318,7 @@ artifacts and 98 current readers. Compatibility sequence 54 is the immutable pre
 preserves those artifact and reader identities, advances the exact sequence-53 head to
 `sha256:0772221371ffe1a35fe955b8cad34c725d0f9ae933714f81f10b3451214a6638`, and reseals only
 M08-T08 proof-library/root-test readers `[64, 65]`. Its frozen 49,785-byte artifact remains
-`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Current sequence 55
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Sequence 55
 preserves the same 49 frozen artifacts and 98 reader identities, links that exact sequence-54
 predecessor head to `sha256:f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17`,
 and reseals only M09-T01–T14 proof-library/root-test reader indexes `[70..97]`. The current T14
@@ -1420,3 +1420,19 @@ claim a required gate or hosted result. Sequence 50 advances exact predecessor
 `6abea41064a05efe363df0f66d1e7d1b4923af08f819acf4c266b092985192a4` across 46 artifacts and
 92 readers. The checkpoint, promotion, selector plus required-affected, ownership, and remaining
 touched-CI regression suites pass 73/73, 19/19, 56/56, 15/15, and 127/127 locally.
+
+The corrective M09 compatibility successor updates the current Web–React package digest to
+`sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051` for 80 regular
+distribution files/243,740 bytes and 81 framed entries/252,637 framed bytes. The current
+official-derived Bundle revision is
+`sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13`; the Source digest
+remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`.
+Append-only sequence 56 advances the exact sequence-55 head to
+`sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
+49 frozen artifacts and 98 reader identities. The sequence-56-derived current CI compatibility
+authority pins selector
+`sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
+`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
+affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`;
+the preceding M09-T14 values remain historical receipts. This reseal rewrites no historical
+artifact or pin, makes no hosted-CI claim, and does not advance M10 beyond 0/9.

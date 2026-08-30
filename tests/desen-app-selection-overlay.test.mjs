@@ -207,8 +207,26 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.artifact.application.overlay.relationship.includes("sibling"), true);
   assert.equal(built.artifact.application.overlay.componentGeometry, false);
   assert.equal(currentAdapter.exactSharedRegistryRetained, true);
-  assert.equal(currentAdapter.overlayOutsideManagedFieldset, true);
-  assert.equal(currentAdapter.overlayReceivesNoManagedChildOrDomHandle, true);
+  assert.equal(currentAdapter.overlayOutsideManagedFieldset, undefined);
+  assert.equal(currentAdapter.overlayReceivesNoManagedChildOrDomHandle, undefined);
+  assert.equal(currentAdapter.optionalDesignChromeOverlayOutsideManagedFieldset, true);
+  assert.equal(currentAdapter.optionalDesignChromeReceivesNoManagedChildOrDomHandle, true);
+  assert.equal(built.currentCompatibility.application.overlay, undefined);
+  assert.deepEqual(built.currentCompatibility.application.currentAuthoringChrome, {
+    selectionStatusOwner: "LEFT_AUTHORING_PANEL",
+    diagnosticStatusOwner: "RIGHT_INSPECTOR",
+    splitAuthoringPanesAlwaysRendered: true,
+    outsideManagedCapabilitySubtree: true,
+    previewFrameEditorChromeRendered: false,
+  });
+  assert.deepEqual(built.currentCompatibility.application.optionalAdapterDesignChromeCapability, {
+    selectionOverlayAvailable: true,
+    diagnosticPlaceholderAvailable: true,
+    explicitApplicationOptInRequired: true,
+    relationship: "DOM sibling outside disabled managed fieldset",
+    pointerEvents: "none",
+    componentGeometry: false,
+  });
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[4], () => {
@@ -247,6 +265,17 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
     panelLiveStatus: true,
     tabKeyboardWrap: true,
   });
+  assert.equal(built.currentCompatibility.application.accessibility.panelLiveStatus, undefined);
+  assert.equal(built.currentCompatibility.application.accessibility.tabKeyboardWrap, undefined);
+  assert.deepEqual(built.currentCompatibility.application.accessibility, {
+    nativeLayerButtons: true,
+    pressedState: true,
+    dynamicSelectDeselectName: true,
+    conditionalName: true,
+    authoringStatusLive: true,
+    splitAuthoringPanesAlwaysRendered: true,
+    rightInspectorTabKeyboardWrap: true,
+  });
   assert.equal(built.artifact.claim.routeResetSynchronous, true);
   assert.equal(built.artifact.tests.selectionTestNames.length, 6);
   assert.equal(built.artifact.tests.adapterTestNames.length, 3);
@@ -270,7 +299,11 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
   assert.equal(built.currentCompatibility.successor.publisherBackedSessionPreview, true);
   assert.equal(built.currentCompatibility.successor.sourceAndPreviewCommitAtomically, true);
   assert.equal(built.currentCompatibility.successor.inspectorOutsideManagedCapabilitySubtree, true);
-  assert.equal(built.currentCompatibility.successor.selectionOverlayBoundaryRetained, true);
+  assert.equal(built.currentCompatibility.successor.selectionOverlayBoundaryRetained, undefined);
+  assert.equal(
+    built.currentCompatibility.successor.optionalAdapterDesignChromeBoundaryRetained,
+    true,
+  );
   assert.equal(built.currentCompatibility.successor.completeNamedSlotProjectionImplemented, true);
   assert.equal(
     built.currentCompatibility.successor.publicStableIdInsertMoveAndReorderImplemented,
@@ -321,7 +354,7 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[5], () => {
   );
   assert.equal(built.currentCompatibility.successor.exactTargetAdmissionCachesImplemented, true);
   assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
-  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
+  assert.equal(built.currentCompatibility.successor.splitAuthoringPanesAlwaysRendered, true);
 });
 
 test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[6], async () => {
@@ -343,7 +376,8 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
     cssSource,
   };
   assert.equal(
-    verifyDesenAppSelectionOverlaySourcePolicy(baseline).adapter.overlayOutsideManagedFieldset,
+    verifyDesenAppSelectionOverlaySourcePolicy(baseline).adapter
+      .optionalDesignChromeOverlayOutsideManagedFieldset,
     true,
   );
 
@@ -361,22 +395,22 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
       adapterSource: replaceOnce(
         adapterSource,
         `      </fieldset>
-      {mode === "design" && selectedDiagnostic !== undefined ? (
+      {showDesignChrome && mode === "design" && selectedDiagnostic !== undefined ? (
         <DiagnosticPlaceholderOverlay
           diagnostic={selectedDiagnostic.diagnostic}
           occurrence={selectedDiagnostic.occurrence}
           placeholderRef={diagnosticPlaceholderRef}
         />
-      ) : mode === "design" ? (
+      ) : showDesignChrome && mode === "design" ? (
         <SelectionOverlay projection={projection} />
       ) : null}`,
-        `        {mode === "design" && selectedDiagnostic !== undefined ? (
+        `        {showDesignChrome && mode === "design" && selectedDiagnostic !== undefined ? (
           <DiagnosticPlaceholderOverlay
             diagnostic={selectedDiagnostic.diagnostic}
             occurrence={selectedDiagnostic.occurrence}
             placeholderRef={diagnosticPlaceholderRef}
           />
-        ) : mode === "design" ? (
+        ) : showDesignChrome && mode === "design" ? (
           <SelectionOverlay projection={projection} />
         ) : null}
       </fieldset>`,
@@ -419,7 +453,7 @@ test(DESEN_APP_SELECTION_OVERLAY_ROOT_TEST_NAMES[7], async () => {
   );
   for (const [search, replacement] of [
     [
-      "slotSurface.closest<HTMLElement>('[role=\"tabpanel\"]')",
+      "slotSurface.closest<HTMLElement>('[data-authoring-pane-scroll=\"layers\"]')",
       "slotSurface.closest<HTMLElement>('[data-managed-capability-subtree]')",
     ],
     [

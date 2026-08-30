@@ -1,21 +1,67 @@
 // @vitest-environment jsdom
 
-import { cleanup, render } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { cleanup, render, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  Alert,
+  Button,
   STACK_CAPABILITY_ID,
   TEXT_CAPABILITY_ID,
   Stack,
   Text,
+  TextField,
   stackComponentRegistration,
   textComponentRegistration,
 } from "../src/components/index.js";
+import { StackReactAdapter } from "../src/react-adapters/index.js";
+
+import type {
+  RuntimeReactComponentAdapterProps,
+  RuntimeReactInteractionPort,
+} from "@desen/runtime-react";
+
+const STACK_ADAPTER_IDENTITY = Object.freeze({
+  capabilityId: "com.example.ui/Stack",
+  runtimeNodeId: "runtime:sign-in.layout",
+  sourceNodeId: "sign-in.layout",
+});
+
+const EMPTY_STACK_STYLE = Object.freeze({
+  base: Object.freeze({}),
+}) as RuntimeReactComponentAdapterProps["style"];
+
+const UNAVAILABLE_STACK_INTERACTIONS = Object.freeze({
+  attachCommands: () => Object.freeze({ status: "unavailable" } as const),
+  detachCommands: () => Object.freeze({ status: "unavailable" } as const),
+  dispatchEvent: () => Object.freeze({ status: "unavailable" } as const),
+} satisfies RuntimeReactInteractionPort);
 
 function expectDeeplyFrozen(value: unknown): void {
   if (value === null || typeof value !== "object") return;
   expect(Object.isFrozen(value)).toBe(true);
   for (const nested of Object.values(value)) expectDeeplyFrozen(nested);
+}
+
+function layoutContract(element: HTMLElement) {
+  return Object.freeze({
+    maxWidth: element.style.maxWidth,
+    minWidth: element.style.minWidth,
+    width: element.style.width,
+  });
+}
+
+function adapterStack(children: readonly ReactNode[]) {
+  return (
+    <StackReactAdapter
+      identity={STACK_ADAPTER_IDENTITY}
+      interactions={UNAVAILABLE_STACK_INTERACTIONS}
+      props={Object.freeze({ direction: "vertical", gap: "md", maxWidth: 420 })}
+      slots={Object.freeze({ default: Object.freeze([...children]) })}
+      style={EMPTY_STACK_STYLE}
+    />
+  );
 }
 
 afterEach(cleanup);
@@ -56,7 +102,70 @@ describe("reference Stack and Text capabilities", () => {
     expect((stack as HTMLElement).style.flexDirection).toBe("row");
     expect((stack as HTMLElement).style.gap).toBe("var(--desen-space-md, 1rem)");
     expect((stack as HTMLElement).style.maxWidth).toBe("420px");
+    expect((stack as HTMLElement).style.minWidth).toBe("0px");
+    expect((stack as HTMLElement).style.width).toBe("100%");
     expect((stack as HTMLElement).style.alignItems).toBe("center");
+  });
+
+  it("keeps a maxWidth layout frame independent from conditional child content", () => {
+    const { container, rerender } = render(
+      <Stack direction="vertical" maxWidth={420}>
+        <Text text="Sign in" role="heading" />
+        <TextField label="Email" value="" />
+        <TextField label="Password" secure value="" />
+        <Button label="Sign in" />
+      </Stack>,
+    );
+    const frame = container.firstElementChild as HTMLElement;
+    const baseline = layoutContract(frame);
+
+    rerender(
+      <Stack direction="vertical" maxWidth={420}>
+        <Text text="Sign in" role="heading" />
+        <TextField label="Email" value="" />
+        <TextField label="Password" secure value="" />
+        <Alert text="Sign-in failed. Check your details and try again." tone="critical" />
+        <Button label="Sign in" />
+      </Stack>,
+    );
+
+    expect(layoutContract(frame)).toEqual(baseline);
+    expect(baseline).toEqual({ maxWidth: "420px", minWidth: "0px", width: "100%" });
+    expect(within(frame).getByRole("alert").textContent).toBe(
+      "Sign-in failed. Check your details and try again.",
+    );
+    expect(frame.style.position).toBe("");
+    expect(frame.style.transform).toBe("");
+  });
+
+  it("preserves the same frame contract through the public Stack React adapter", () => {
+    const baselineChildren = Object.freeze([
+      <Text key="title" role="heading" text="Sign in" />,
+      <TextField key="email" label="Email" value="" />,
+      <Button key="submit" label="Sign in" />,
+    ]);
+    const { container, rerender } = render(adapterStack(baselineChildren));
+    const frame = container.firstElementChild as HTMLElement;
+    const baseline = layoutContract(frame);
+
+    rerender(
+      adapterStack(
+        Object.freeze([
+          ...baselineChildren.slice(0, 2),
+          <Alert
+            key="invalid-credentials"
+            text="Sign-in failed. Check your details and try again."
+            tone="critical"
+          />,
+          baselineChildren[2],
+        ]),
+      ),
+    );
+
+    expect(container.firstElementChild).toBe(frame);
+    expect(layoutContract(frame)).toEqual(baseline);
+    expect(baseline).toEqual({ maxWidth: "420px", minWidth: "0px", width: "100%" });
+    expect(within(frame).getByRole("alert")).toBeTruthy();
   });
 
   it("keeps Stack defaults deterministic and does not invent spacing", () => {

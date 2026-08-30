@@ -50,9 +50,9 @@ const WORKSPACE_ROOT = resolve(import.meta.dirname, "../../..");
 const BUNDLE_PATH = join(WORKSPACE_ROOT, "examples/sign-in/official-derived.bundle.desen.json");
 const CATALOG_PATH = join(WORKSPACE_ROOT, "packages/reference-catalog-web/catalog.json");
 const DISTRIBUTION_ROOT = join(WORKSPACE_ROOT, "packages/reference-catalog-web/dist");
-const EXPECTED_REVISION = "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb";
+const EXPECTED_REVISION = "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13";
 const EXPECTED_PACKAGE_DIGEST =
-  "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0";
+  "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051";
 const OBSERVE_BEHAVIOR = "com.example.interactions/Observe";
 const PROFILE_RESOURCE = "com.example.account/profile";
 
@@ -257,7 +257,7 @@ describe("M07-T06 staged runtime indexes", () => {
           target: "web-react",
           packageDigest: EXPECTED_PACKAGE_DIGEST,
           artifactCount: 80,
-          artifactByteLength: 243_175,
+          artifactByteLength: 243_740,
           componentCount: 5,
           behaviorCount: 0,
           operationCount: 1,
@@ -794,7 +794,7 @@ describe("M07-T06 staged runtime indexes", () => {
     for (const [field, exact, stage] of [
       ["maxPackages", 1, "package-snapshots"],
       ["maxArtifactEntries", 80, "package-snapshots"],
-      ["maxArtifactBytes", 243_175, "package-snapshots"],
+      ["maxArtifactBytes", 243_740, "package-snapshots"],
       ["maxCapabilityEntries", 6, "runtime-indexes"],
       ["maxSurfaces", 2, "runtime-indexes"],
       ["maxSourceNodes", 8, "runtime-indexes"],

@@ -179,6 +179,26 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
   );
   assert.equal(
     built.currentCompatibility.additiveSuccessor.stableSourceSelectionOverlayAllowed,
+    undefined,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.stableSourceSelectionStatusAllowed,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.selectionStatusOwner,
+    "LEFT_AUTHORING_PANEL",
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.diagnosticStatusOwner,
+    "RIGHT_INSPECTOR",
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.previewFrameEditorChromeRendered,
+    false,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.optionalAdapterDesignChromeCapabilityAllowed,
     true,
   );
   assert.equal(
@@ -221,6 +241,19 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
   );
   assert.equal(
     built.currentCompatibility.additiveSuccessor.persistenceAndControlPlanePublishStillDisallowed,
+    undefined,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.sourcePersistenceSuccessorAuthenticated,
+    true,
+  );
+  assert.equal(built.currentCompatibility.additiveSuccessor.currentDesignRunImplemented, true);
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.publishActivationSuccessorAuthenticated,
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.authoringPreviewExternalEffectsRemainDenied,
     true,
   );
   assert.equal(
@@ -301,7 +334,11 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
     true,
   );
   assert.equal(built.currentCompatibility.additiveSuccessor.componentPaletteRenderLimit, 24);
-  assert.equal(built.currentCompatibility.additiveSuccessor.activeTabOnlyAuthoringWork, true);
+  assert.equal(built.currentCompatibility.additiveSuccessor.activeTabOnlyAuthoringWork, undefined);
+  assert.equal(
+    built.currentCompatibility.additiveSuccessor.splitAuthoringPanesAlwaysRendered,
+    true,
+  );
   assert.equal(
     built.currentCompatibility.additiveSuccessor.exactSlotSelectionAndEditCaptureAllowed,
     true,

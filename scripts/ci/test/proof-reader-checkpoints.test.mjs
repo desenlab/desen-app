@@ -104,7 +104,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   const result = await verifyProofReaderCheckpoints();
 
   assert.equal(manifest.schemaVersion, 1);
-  assert.equal(manifest.checkpoints.length, 55);
+  assert.equal(manifest.checkpoints.length, 56);
   assert.equal(manifest.checkpoints[0].sequence, 1);
   assert.equal(manifest.checkpoints[0].predecessorSha256, GENESIS_PREDECESSOR_SHA256);
   assert.equal(manifest.checkpoints[1].sequence, 2);
@@ -474,12 +474,14 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   assert.equal(manifest.checkpoints[53].readers.length, 98);
   assert.equal(manifest.checkpoints[54].artifacts.length, 49);
   assert.equal(manifest.checkpoints[54].readers.length, 98);
+  assert.equal(manifest.checkpoints[55].artifacts.length, 49);
+  assert.equal(manifest.checkpoints[55].readers.length, 98);
   assert.equal(
     calculateProofReaderCheckpointSha256(manifest.checkpoints.at(-1)),
     manifest.headSha256,
   );
-  assert.equal(manifest.headSha256, PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[54]);
-  assert.equal(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length, 55);
+  assert.equal(manifest.headSha256, PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[55]);
+  assert.equal(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length, 56);
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[7],
     "f707fb4c3338aeda79eb6242b645b5e864ce54b1e3955373e8edebcd7e026b8a",
@@ -672,6 +674,10 @@ test("the reviewed chain authenticates its immutable genesis and current readers
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[54],
     "f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17",
   );
+  assert.equal(
+    PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[55],
+    "1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a",
+  );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
     "95a4ebc5261c98569d0e42320aa300f70ec568d1083af38d869b06c82398368c",
@@ -687,7 +693,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
     [
       6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20,
       25, 25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43,
-      44, 45, 46, 47, 48, 49, 49, 49,
+      44, 45, 46, 47, 48, 49, 49, 49, 49,
     ],
   );
   assert.equal(Object.isFrozen(PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS), true);
@@ -699,7 +705,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
     headSha256: manifest.headSha256,
-    checkpoints: 55,
+    checkpoints: 56,
     frozenArtifacts: 49,
     currentReaders: 98,
   });
@@ -1983,7 +1989,7 @@ test("sequence fifty-four preserves sequence fifty-three and reseals only the M0
   );
 });
 
-test("sequence fifty-five preserves sequence fifty-four and reseals only the M09 readers", async () => {
+test("sequence fifty-five preserves sequence fifty-four and reseals only the M09 readers", () => {
   const previous = baselineManifest.checkpoints[53];
   const current = baselineManifest.checkpoints[54];
   const identity = ({ task, role, path: readerPath }) => ({ task, role, path: readerPath });
@@ -2033,6 +2039,79 @@ test("sequence fifty-five preserves sequence fifty-four and reseals only the M09
     { bytes: 56645, sha256: "2d00b026c18586cb6dce8e4f3e25a10a46183bb03943eb695eedbb9905c4b9a9" },
     { bytes: 15281, sha256: "a36422e4cb419e09e050aa18eede4dd6c8606d0e9d83afc875f00a0804ee229f" },
   ]);
+  assert.equal(
+    calculateProofReaderCheckpointSha256(current),
+    "f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17",
+  );
+});
+
+test("sequence fifty-six preserves frozen authority and reseals only compatibility successors", async () => {
+  const previous = baselineManifest.checkpoints[54];
+  const current = baselineManifest.checkpoints[55];
+  const identity = ({ task, role, path: readerPath }) => ({ task, role, path: readerPath });
+  const receipt = ({ bytes, sha256 }) => ({ bytes, sha256 });
+  const changedReaderIndexes = [
+    0, 1, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 70, 71, 72, 73,
+    74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 86, 88, 89, 90, 92, 94, 96,
+  ];
+
+  assert.equal(current.sequence, 56);
+  assert.equal(current.predecessorSha256, PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[54]);
+  assert.deepEqual(current.artifacts, previous.artifacts);
+  assert.deepEqual(current.readers.map(identity), previous.readers.map(identity));
+  assert.deepEqual(
+    current.readers.flatMap((reader, index) =>
+      JSON.stringify(reader) === JSON.stringify(previous.readers[index]) ? [] : [index],
+    ),
+    changedReaderIndexes,
+  );
+  assert.deepEqual(
+    changedReaderIndexes.map((index) => receipt(current.readers[index])),
+    [
+      { bytes: 186159, sha256: "9dff5ff65524b29843610c9bc10efbda9c0cb94db1c03a3767e2da746252ab2c" },
+      { bytes: 50013, sha256: "061404f11ad8fc9f0e49239713d3f0592e48edbbf72d4354df39e0b43259ea0b" },
+      { bytes: 80739, sha256: "c19e0c0dceb89283d841574db6e28acd356854cc40486c10a27e3e5a08e4f729" },
+      { bytes: 24620, sha256: "45b049fe9bb6380ca5e53638aad4ba2f42154faa6bdcde7897426c6d9cf6f12f" },
+      { bytes: 90181, sha256: "7c7c626bba860d524bac72e0fc7cfa3fedddbea8a42c9594a2f019265512260c" },
+      { bytes: 26410, sha256: "85cd0f9a17787b674b21a8e1be3bc016758e54d37598e5d9b71b17b73b6d939c" },
+      { bytes: 88986, sha256: "77fcf4f6e366dd8e2b92f05cd9192304fabdf163c99d21e8c91c3201d8c226ff" },
+      { bytes: 25567, sha256: "2b2c18b43b78eaa3fd636737667c86126cc54bbfabe9d7d8b4ce2f85c29a7d00" },
+      { bytes: 67012, sha256: "fa2fb2616233b8447b9a93c80c916f9fa6e6c19e9df7da5a099852905627f6ba" },
+      { bytes: 18066, sha256: "9136dbe11747678bbda40ae63768f20daa7005f7db83f17fce03d40a3cef840b" },
+      { bytes: 69471, sha256: "b862654c6e9ac5b564e6735d9c8a5bb10f324ea5bc605e159fea6745f5ea716b" },
+      { bytes: 19855, sha256: "f45e786b394682f3a8be9688cc745fe8a940845ab74443fdbb1fa54115177f8a" },
+      { bytes: 72867, sha256: "0f0772bbdd4512ab5546b4661cbf6ebfd6095c47cd8a63d884790780141e41bb" },
+      { bytes: 20827, sha256: "d1b0b86968addcfc3000ce62b450dca4d81ec0ac7104573df1755007e5ad1e6c" },
+      { bytes: 31446, sha256: "fe4a7bd0a65f09e2b8b80ab038249d51804757705956519ba28b28289a2535cc" },
+      { bytes: 6111, sha256: "28f6c3dbac4ec942fd9a51aeb7f602efe3546af12d87a74b9fc9d05e86da6af4" },
+      { bytes: 33804, sha256: "6cb2160eabdf2d8d33bd70410a021670e73e5f579e307abb316c2ef9ec824a60" },
+      { bytes: 7739, sha256: "b0f87e75eb340e36eedda33ae5089c77b6ed9a9c162da78e1dc627f5138949a3" },
+      { bytes: 60730, sha256: "7b2603d4354e25b4dd988c4ebcbdfd7abf9ceff1d594509dd2c868602403df33" },
+      { bytes: 13842, sha256: "b0991ab2e481008415480658dcf6101677de6f6ea62a1827722f6f485f47ce78" },
+      { bytes: 87106, sha256: "059cde9538255d10cf1fec758d278c2636b65e86f7040fc8cb5fc22374344e17" },
+      { bytes: 40243, sha256: "ec50a6946a4d3d992d436905d9d8c6dcf57b519507f5fc677cc6b26f98b3e18b" },
+      { bytes: 128257, sha256: "906dfe44d112b0d0b93698c97368a303a9aef73cc5b7b99d7d0a28ca76ec3495" },
+      { bytes: 46004, sha256: "cba5a01eaecf392efce1d37a35085e720e3acf27bab666c34c2a32dd9a29f94f" },
+      { bytes: 159669, sha256: "7c8a0c329bea484331b7abfcbebbadfbb19b4164379d04231f5ace656df0b1e7" },
+      { bytes: 49452, sha256: "71122e7646fc76a08a1c33d9fa2855eac02e86240b02a16b8285fdab69fa2b8c" },
+      { bytes: 112310, sha256: "1837b947aa9649e4564b5042a88fbaf36a3fb7e971599c852db4c28923306dca" },
+      { bytes: 42472, sha256: "619b17e19452e259871b5e1dc36cced280a44d809feb3187d05d7af71d55947e" },
+      { bytes: 116762, sha256: "5c4e751bed6fda8dc28869dad6491e64bf4aa25c0e577293b66b08125c8cbfe6" },
+      { bytes: 39940, sha256: "5498f3a09eb1673e5ad1e008f6cbcd0a48e3b8d6cad56dc2ec34186a550b57f3" },
+      { bytes: 130820, sha256: "507cc1970214e47016e9c5be5fa8914b90b2a45f6e813dcd468c7761b2b94e29" },
+      { bytes: 54372, sha256: "f4cdf48282c53c64d41e7eb84bf1b183eedb6863b631466ebbfe0f1a87269c22" },
+      { bytes: 104781, sha256: "2c85df1d40accfff092ce113d608469ed0c928516fe223b06dcd9880388c39b7" },
+      { bytes: 40917, sha256: "2c1c0e25351aff14811bcd185284e648fdc0b8f36cab67ee9ef0f564ff9f3d3d" },
+      { bytes: 95981, sha256: "9a1f0a36c08fbaad3816f2d70719c8825b75ca041e6fd85179ddca0de39cc8d1" },
+      { bytes: 97644, sha256: "947497261e27f4791fbdc8d865e576cc2ba879d4a12a86ff3436fc8b5d5a43f9" },
+      { bytes: 97021, sha256: "3eec34f93c2df7f02e7b7f109054c5746b9bb8f2d6cd8c6fc2fecb182d54dea7" },
+      { bytes: 32395, sha256: "d90b41eb8be9099859e48cb3a0876f5479785400c0f87919cd8f7e3cda808a8f" },
+      { bytes: 103671, sha256: "ae31db2c3c7dc375e9a9c30a87be7e04d395eed7631de9bac1ec895bc522cda2" },
+      { bytes: 80523, sha256: "f0752b2caba13d02125694142b368bac1ae78fe347aa40dcd85e64b1e95a7012" },
+      { bytes: 75278, sha256: "215c6a1ce0790270465a9acffacd2f932f5e1c30efee6be1103c4076f01d3658" },
+      { bytes: 60150, sha256: "13f2401afaf4710251ac5514d9d9d2917eb9e961b44747a67d99307e7bad0739" },
+    ],
+  );
   for (const reader of current.readers) {
     const bytes = await readFile(path.join(WORKSPACE_ROOT, reader.path));
     assert.equal(bytes.byteLength, reader.bytes);
@@ -2040,7 +2119,7 @@ test("sequence fifty-five preserves sequence fifty-four and reseals only the M09
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17",
+    "1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a",
   );
 });
 
@@ -5239,12 +5318,12 @@ test("one changed reader is a valid review candidate while ninety-seven peers re
   assert.deepEqual(candidate, {
     status: "REVIEW_REQUIRED",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    anchoredCheckpoints: 55,
-    candidateSequence: 56,
+    anchoredCheckpoints: 56,
+    candidateSequence: 57,
     predecessorSha256: baselineManifest.headSha256,
     candidateSha256: manifest.headSha256,
   });
-  assert.equal(successor.sequence, 56);
+  assert.equal(successor.sequence, 57);
   assert.equal(successor.predecessorSha256, baselineManifest.headSha256);
   assert.notDeepEqual(successor.readers[0], reviewedReaders[0]);
   assert.deepEqual(successor.readers.slice(1), reviewedReaders.slice(1));

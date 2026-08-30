@@ -35,6 +35,30 @@ function layerDragHandleFor(layerButton: HTMLElement): HTMLElement {
   return handle;
 }
 
+function authoringPanel(): HTMLElement {
+  return screen.getByRole("complementary", { name: "Authoring panel" });
+}
+
+function authoringPane(name: "Components" | "Layers"): HTMLElement {
+  return within(authoringPanel()).getByRole("region", { name });
+}
+
+function componentLibrary(): ReturnType<typeof within> {
+  return within(authoringPane("Components"));
+}
+
+function layersPane(): HTMLElement {
+  return authoringPane("Layers");
+}
+
+function authoringStatus(): HTMLElement {
+  return within(authoringPanel()).getByRole("status", { name: "Authoring status" });
+}
+
+function inspectorPanel(): HTMLElement {
+  return screen.getByRole("complementary", { name: "Inspector" });
+}
+
 describe("Desen App application shell", () => {
   beforeEach(() => {
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -167,21 +191,27 @@ describe("Desen App application shell", () => {
     expect(within(breadcrumb).getByText("Sign-in").getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("heading", { level: 2, name: "Sign-in" })).toBeTruthy();
     expect(screen.getAllByText("account.sign-in")).toHaveLength(1);
-    expect(screen.getByRole("complementary", { name: "Authoring panel" })).toBeTruthy();
-    const layersTab = screen.getByRole("tab", { name: "Layers" });
-    const componentsTab = screen.getByRole("tab", { name: "Components" });
-    expect(layersTab.getAttribute("aria-selected")).toBe("true");
-    expect(componentsTab.getAttribute("aria-selected")).toBe("false");
-    const layersPanel = document.getElementById(layersTab.getAttribute("aria-controls") ?? "");
-    const componentsPanel = document.getElementById(
-      componentsTab.getAttribute("aria-controls") ?? "",
-    );
-    expect(layersPanel?.getAttribute("role")).toBe("tabpanel");
-    expect(layersPanel?.hidden).toBe(false);
-    expect(componentsPanel?.getAttribute("role")).toBe("tabpanel");
-    expect(componentsPanel?.hidden).toBe(true);
-    expect(layersPanel?.getAttribute("aria-labelledby")).toBe(layersTab.id);
-    expect(componentsPanel?.getAttribute("aria-labelledby")).toBe(componentsTab.id);
+    const editorMain = screen.getByRole("main");
+    expect(editorMain.getAttribute("data-surface-editor")).toBe("true");
+    const workplane = document.querySelector<HTMLElement>("[data-canvas-workplane='true']");
+    const canvasPlane = document.querySelector<HTMLElement>("[data-canvas-plane='true']");
+    const pageFrame = document.querySelector<HTMLElement>("[data-canvas-frame='portrait']");
+    expect(workplane).toBeTruthy();
+    expect(canvasPlane).toBeTruthy();
+    expect(pageFrame?.getAttribute("data-canvas-frame-width")).toBe("420");
+    expect(pageFrame?.getAttribute("data-canvas-frame-height")).toBe("720");
+    expect(workplane?.contains(canvasPlane)).toBe(true);
+    expect(canvasPlane?.contains(pageFrame)).toBe(true);
+    expect(workplane?.contains(authoringPanel())).toBe(false);
+    expect(authoringPanel()).toBeTruthy();
+    const components = authoringPane("Components");
+    const layers = layersPane();
+    expect(components.hidden).toBe(false);
+    expect(layers.hidden).toBe(false);
+    expect(
+      within(components).getByRole("searchbox", { name: "Search catalog components" }),
+    ).toBeTruthy();
+    expect(within(layers).getByRole("region", { name: "Sign-in layer hierarchy" })).toBeTruthy();
 
     const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
     expect(within(hierarchy).getByText("sign-in.layout")).toBeTruthy();
@@ -267,7 +297,7 @@ describe("Desen App application shell", () => {
     expect(document.querySelector("canvas")).toBeNull();
   });
 
-  it("selects Source layers accessibly and keeps the identity overlay outside managed adapters", async () => {
+  it("selects Source layers accessibly while keeping the preview frame free of editor chrome", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
 
@@ -283,18 +313,14 @@ describe("Desen App application shell", () => {
     expect(emailLayer.getAttribute("aria-pressed")).toBe("true");
     expect(emailLayer.getAttribute("aria-label")).toBe("Deselect Text field layer · sign-in.email");
     expect(screen.getByText("Selected · Text field")).toBeTruthy();
-    const overlay = await screen.findByRole("status", { name: "Selected layer preview" });
     const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
-    const managedSubtree = document.querySelector("[data-managed-capability-subtree='true']");
-    expect(overlay.textContent).toContain("Text field");
-    expect(overlay.textContent).toContain("sign-in.email");
-    expect(overlay.textContent).toContain("Visible in preview");
-    expect(canvas.parentElement).toBe(overlay.parentElement);
-    expect(managedSubtree?.contains(overlay)).toBe(false);
+    expect(authoringStatus().textContent).toBe("Selected · Text field");
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
+    expect(within(canvas).queryByRole("status")).toBeNull();
 
     fireEvent.click(within(canvas).getByRole("button", { name: "Sign in" }));
     expect(emailLayer.getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByRole("status", { name: "Selected layer preview" })).toBe(overlay);
+    expect(authoringStatus().textContent).toBe("Selected · Text field");
 
     fireEvent.click(emailLayer);
     expect(emailLayer.getAttribute("aria-pressed")).toBe("false");
@@ -304,20 +330,19 @@ describe("Desen App application shell", () => {
       name: "Select Alert layer · sign-in.error · Conditional",
     });
     fireEvent.click(conditionalLayer);
-    const conditionalOverlay = screen.getByRole("status", { name: "Selected layer preview" });
     expect(conditionalLayer.getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByText("Selected · Alert · Conditional")).toBeTruthy();
-    expect(conditionalOverlay.getAttribute("data-materialized")).toBe("false");
-    expect(conditionalOverlay.textContent).toContain("Hidden by condition");
+    expect(authoringStatus().textContent).toBe("Selected · Alert · Conditional");
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
   });
 
   it("chooses an exact named-slot target and inserts Catalog defaults into Source and preview", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
 
-    const authoring = screen.getByRole("complementary", { name: "Authoring panel" });
-    const layersTab = within(authoring).getByRole("tab", { name: "Layers" });
-    const componentsTab = within(authoring).getByRole("tab", { name: "Components" });
+    const authoring = authoringPanel();
+    const layers = layersPane();
+    const componentView = componentLibrary();
     const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
     const stackSlot = within(hierarchy).getByRole("button", {
       name: stackSlotName(5),
@@ -328,20 +353,16 @@ describe("Desen App application shell", () => {
     expect(managedSubtree?.contains(stackSlot)).toBe(false);
     fireEvent.click(stackSlot);
 
-    expect(layersTab.getAttribute("aria-selected")).toBe("false");
-    expect(componentsTab.getAttribute("aria-selected")).toBe("true");
-    expect(document.activeElement).toBe(componentsTab);
+    expect(layers.hidden).toBe(false);
+    expect(componentView.getByRole("searchbox", { name: "Search catalog components" })).toBe(
+      document.activeElement,
+    );
     expect(
       within(authoring)
         .getByText("Choose a Catalog component for sign-in.layout · default.")
         .getAttribute("role"),
     ).toBe("status");
 
-    const componentsPanel = document.getElementById(
-      componentsTab.getAttribute("aria-controls") ?? "",
-    );
-    expect(componentsPanel).toBeTruthy();
-    const componentView = within(componentsPanel as HTMLElement);
     const dropTarget = componentView.getByRole("group", {
       name: "Placement target · Stack sign-in.layout default slot · 5 items · minimum 0 · no maximum",
     });
@@ -373,7 +394,6 @@ describe("Desen App application shell", () => {
         )
         .getAttribute("role"),
     ).toBe("status");
-    expect(layersTab.getAttribute("aria-selected")).toBe("true");
     expect(screen.getByRole("button", { name: "Deselect Alert layer · node.alert" })).toBe(
       document.activeElement,
     );
@@ -389,11 +409,8 @@ describe("Desen App application shell", () => {
     deleteAlert.focus();
     fireEvent.click(deleteAlert);
 
-    expect(within(authoring).getByRole("status").textContent).toBe(
-      "Deleted Alert layer · node.alert.",
-    );
-    expect(document.activeElement).toBe(layersTab);
-    expect(layersTab.getAttribute("aria-selected")).toBe("true");
+    expect(authoringStatus().textContent).toBe("Deleted Alert layer · node.alert.");
+    expect(layers.contains(document.activeElement)).toBe(true);
     expect(screen.queryByRole("button", { name: "Select Alert layer · node.alert" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Delete Alert layer · node.alert" })).toBeNull();
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
@@ -409,13 +426,8 @@ describe("Desen App application shell", () => {
       renderApplication("/projects/account-app/surfaces/sign-in");
       expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
 
-      const authoring = screen.getByRole("complementary", { name: "Authoring panel" });
-      const componentsTab = within(authoring).getByRole("tab", { name: "Components" });
-      fireEvent.click(componentsTab);
-      const componentsPanel = document.getElementById(
-        componentsTab.getAttribute("aria-controls") ?? "",
-      );
-      const componentView = within(componentsPanel as HTMLElement);
+      const authoring = authoringPanel();
+      const componentView = componentLibrary();
       fireEvent.click(
         componentView.getByRole("button", {
           name: "Insert Alert into Stack sign-in.layout default slot at position 6",
@@ -425,17 +437,13 @@ describe("Desen App application shell", () => {
       expect(
         within(authoring).getByRole("button", { name: "Delete Alert layer · node.alert" }),
       ).toBeTruthy();
-      expect(screen.getByRole("status", { name: "Selected layer preview" }).textContent).toContain(
-        "node.alert",
-      );
+      expect(authoringStatus().textContent).toContain("Inserted Alert");
 
       fireEvent.keyDown(document.body, { key });
 
       expect(screen.queryByRole("button", { name: /Alert layer · node\.alert/ })).toBeNull();
-      expect(within(authoring).getByRole("status").textContent).toBe(
-        "Deleted Alert layer · node.alert.",
-      );
-      expect(document.activeElement).toBe(within(authoring).getByRole("tab", { name: "Layers" }));
+      expect(authoringStatus().textContent).toBe("Deleted Alert layer · node.alert.");
+      expect(layersPane().contains(document.activeElement)).toBe(true);
     },
   );
 
@@ -444,13 +452,8 @@ describe("Desen App application shell", () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
 
-    const authoring = screen.getByRole("complementary", { name: "Authoring panel" });
-    const componentsTab = within(authoring).getByRole("tab", { name: "Components" });
-    fireEvent.click(componentsTab);
-    const componentsPanel = document.getElementById(
-      componentsTab.getAttribute("aria-controls") ?? "",
-    );
-    const componentView = within(componentsPanel as HTMLElement);
+    const authoring = authoringPanel();
+    const componentView = componentLibrary();
     fireEvent.click(
       componentView.getByRole("button", {
         name: "Insert Alert into Stack sign-in.layout default slot at position 6",
@@ -459,11 +462,7 @@ describe("Desen App application shell", () => {
     expect(
       within(authoring).getByRole("button", { name: "Delete Alert layer · node.alert" }),
     ).toBeTruthy();
-    expect(screen.getByRole("status", { name: "Selected layer preview" }).textContent).toContain(
-      "node.alert",
-    );
-
-    fireEvent.click(componentsTab);
+    expect(authoringStatus().textContent).toContain("Inserted Alert");
 
     const textarea = document.createElement("textarea");
     const select = document.createElement("select");
@@ -551,7 +550,9 @@ describe("Desen App application shell", () => {
       screen.getByRole("button", { name: "Deselect Text layer · sign-in.title" }),
     ).toBeTruthy();
     expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
-    expect(screen.getByRole("status", { name: "Selected layer preview" })).toBeTruthy();
+    expect(within(authoring).getByText("Selected layer").parentElement?.textContent).toContain(
+      "Text",
+    );
     expect(screen.getByRole("button", { name: stackSlotName(5) })).toBeTruthy();
   });
 
@@ -572,14 +573,16 @@ describe("Desen App application shell", () => {
     fireEvent.click(deleteTitle);
 
     expect(document.activeElement).toBe(deleteTitle);
-    expect(within(authoring).getByRole("status").textContent).toBe(
+    expect(authoringStatus().textContent).toBe(
       "The working preview could not accept this Source deletion.",
     );
     expect(
       screen.getByRole("button", { name: "Deselect Text layer · sign-in.title" }),
     ).toBeTruthy();
     expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
-    expect(screen.getByRole("status", { name: "Selected layer preview" })).toBeTruthy();
+    expect(within(authoring).getByText("Selected layer").parentElement?.textContent).toContain(
+      "Text",
+    );
     expect(screen.getByRole("button", { name: stackSlotName(5) })).toBeTruthy();
   });
 
@@ -593,11 +596,7 @@ describe("Desen App application shell", () => {
         name: stackSlotName(5),
       }),
     );
-    const componentView = within(
-      document.getElementById(
-        screen.getByRole("tab", { name: "Components" }).getAttribute("aria-controls") ?? "",
-      ) as HTMLElement,
-    );
+    const componentView = componentLibrary();
     const alert = componentView.getByRole("button", {
       name: "Insert Alert into Stack sign-in.layout default slot at position 6",
     });
@@ -678,15 +677,12 @@ describe("Desen App application shell", () => {
     expect(
       document.getElementById(deleteAlert.getAttribute("aria-describedby") ?? "")?.textContent,
     ).toBe("Deletes this layer and its nested Source subtree.");
-    expect(
-      within(authoring).getByRole("tab", { name: "Layers" }).getAttribute("aria-selected"),
-    ).toBe("true");
     expect(screen.getByRole("button", { name: "Deselect Alert layer · node.alert" })).toBe(
       document.activeElement,
     );
     fireEvent.click(deleteAlert);
     expect(screen.queryByRole("button", { name: /Alert layer · node\.alert/ })).toBeNull();
-    expect(document.activeElement).toBe(within(authoring).getByRole("tab", { name: "Layers" }));
+    expect(layersPane().contains(document.activeElement)).toBe(true);
   });
 
   it("reorders a selected Source node through the keyboard placement control", async () => {
@@ -713,9 +709,7 @@ describe("Desen App application shell", () => {
     fireEvent.click(moveFirst);
 
     const authoring = screen.getByRole("complementary", { name: "Authoring panel" });
-    expect(within(authoring).getByRole("status").textContent).toBe(
-      "Reordered sign-in.submit in Stack default slot.",
-    );
+    expect(authoringStatus().textContent).toBe("Reordered sign-in.submit in Stack default slot.");
     const reorderedLayer = within(hierarchy).getByRole("button", {
       name: "Deselect Button layer · sign-in.submit",
     });
@@ -822,10 +816,7 @@ describe("Desen App application shell", () => {
     });
     fireEvent(firstBoundaryHitArea as HTMLElement, drop);
 
-    expect(
-      within(screen.getByRole("complementary", { name: "Authoring panel" })).getByRole("status")
-        .textContent,
-    ).toBe("Reordered sign-in.submit in Stack default slot.");
+    expect(authoringStatus().textContent).toBe("Reordered sign-in.submit in Stack default slot.");
     const reorderedLayers = within(hierarchy).getAllByRole("button", {
       name: /^(?:Select|Deselect) .+ layer · /,
     });
@@ -1048,10 +1039,8 @@ describe("Desen App application shell", () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
 
-    const authoring = screen.getByRole("complementary", { name: "Authoring panel" });
-    const layersTab = within(authoring).getByRole("tab", { name: "Layers" });
-    const scrollSurface = document.getElementById(
-      layersTab.getAttribute("aria-controls") ?? "",
+    const scrollSurface = layersPane().querySelector<HTMLElement>(
+      "[data-authoring-pane-scroll='layers']",
     ) as HTMLElement;
     Object.defineProperty(scrollSurface, "getBoundingClientRect", {
       configurable: true,
@@ -1179,10 +1168,7 @@ describe("Desen App application shell", () => {
     Object.defineProperty(coordinateLessDrop, "dataTransfer", { value: dataTransfer });
     fireEvent(titleLayer, coordinateLessDrop);
 
-    expect(
-      within(screen.getByRole("complementary", { name: "Authoring panel" })).getByRole("status")
-        .textContent,
-    ).toBe("Reordered sign-in.submit in Stack default slot.");
+    expect(authoringStatus().textContent).toBe("Reordered sign-in.submit in Stack default slot.");
     const reorderedLayers = within(hierarchy).getAllByRole("button", {
       name: /^(?:Select|Deselect) .+ layer · /,
     });
@@ -1235,10 +1221,9 @@ describe("Desen App application shell", () => {
     });
     expect(layers[1]?.getAttribute("aria-label")).toBe("Select Text layer · sign-in.title");
     expect(layers[5]?.getAttribute("aria-label")).toBe("Select Button layer · sign-in.submit");
-    expect(
-      within(screen.getByRole("complementary", { name: "Authoring panel" })).getByRole("status")
-        .textContent,
-    ).toBe("Release when the wide highlighted Layers gap locks in.");
+    expect(authoringStatus().textContent).toBe(
+      "Placement target · Stack sign-in.layout · default slot.",
+    );
   });
 
   it("moves nodes across nested slots with keyboard and App-owned native drag intent", async () => {
@@ -1252,8 +1237,6 @@ describe("Desen App application shell", () => {
         name: "Insert Stack into Stack sign-in.layout default slot at position 6",
       }),
     );
-    fireEvent.click(within(authoring).getByRole("tab", { name: "Layers" }));
-
     const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
     expect(
       within(hierarchy).getByRole("button", {
@@ -1272,9 +1255,7 @@ describe("Desen App application shell", () => {
     expect(moveEmail.disabled).toBe(false);
     fireEvent.click(moveEmail);
 
-    expect(within(authoring).getByRole("status").textContent).toBe(
-      "Moved sign-in.email to Stack default slot.",
-    );
+    expect(authoringStatus().textContent).toBe("Moved sign-in.email to Stack default slot.");
     const nestedAfterKeyboard = within(hierarchy).getByRole("button", {
       name: stackSlotName(1, "node.stack"),
     });
@@ -1360,9 +1341,7 @@ describe("Desen App application shell", () => {
     fireEvent.drop(nestedBoundaryLine as HTMLElement, { dataTransfer });
 
     expect(reads).toBe(0);
-    expect(within(authoring).getByRole("status").textContent).toBe(
-      "Moved sign-in.password to Stack default slot.",
-    );
+    expect(authoringStatus().textContent).toBe("Moved sign-in.password to Stack default slot.");
     expect(
       within(hierarchy).getByRole("button", {
         name: stackSlotName(2, "node.stack"),
@@ -1394,8 +1373,6 @@ describe("Desen App application shell", () => {
         name: "Insert Stack into Stack node.stack default slot at position 3",
       }),
     );
-    fireEvent.click(within(authoring).getByRole("tab", { name: "Layers" }));
-
     const refreshedHierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
     const parentStack = within(refreshedHierarchy).getByRole("button", {
       name: "Select Stack layer · node.stack",
@@ -1438,7 +1415,7 @@ describe("Desen App application shell", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Select Text layer · sign-in.title" }));
     const inspector = screen.getByRole("complementary", { name: "Inspector" });
-    expect(within(inspector).getByText("sign-in.title")).toBeTruthy();
+    expect(within(inspector).getAllByText("sign-in.title")).toHaveLength(2);
     expect(within(inspector).getByText("com.example.ui/Text")).toBeTruthy();
     expect(within(inspector).getByText("2 controls")).toBeTruthy();
 
@@ -1490,8 +1467,9 @@ describe("Desen App application shell", () => {
     const emailInput = within(canvas).getByLabelText("Email") as HTMLInputElement;
     expect(emailInput.value).toBe("");
 
-    fireEvent.click(screen.getByRole("tab", { name: "State" }));
-    const statePanel = screen.getByRole("region", { name: "Local state" });
+    const inspector = inspectorPanel();
+    fireEvent.click(within(inspector).getByRole("tab", { name: "State" }));
+    const statePanel = within(inspector).getByRole("region", { name: "Local state" });
     expect(within(statePanel).getByRole("list", { name: "Sign-in local state" })).toBeTruthy();
     expect(within(statePanel).getByLabelText("email usage count").textContent).toBe("Used by 3");
     const emailInitial = within(statePanel).getByRole("textbox", {
@@ -1510,11 +1488,10 @@ describe("Desen App application shell", () => {
     );
     expect(within(statePanel).getByRole("status").textContent).toBe("Updated email local state.");
 
-    fireEvent.click(screen.getByRole("tab", { name: "Layers" }));
+    fireEvent.click(within(inspector).getByRole("tab", { name: "Inspector" }));
     fireEvent.click(
       screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
     );
-    const inspector = screen.getByRole("complementary", { name: "Inspector" });
     const valueSource = within(inspector).getByRole("combobox", {
       name: "Value value source",
     });
@@ -1532,7 +1509,7 @@ describe("Desen App application shell", () => {
       "Bound Value to state.password.",
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: "State" }));
+    fireEvent.click(within(inspector).getByRole("tab", { name: "State" }));
     expect(within(statePanel).getByLabelText("email usage count").textContent).toBe("Used by 2");
     expect(within(statePanel).getByLabelText("password usage count").textContent).toBe("Used by 4");
     expect(
@@ -1609,17 +1586,18 @@ describe("Desen App application shell", () => {
     expect(diagnosticTarget.getAttribute("aria-current")).toBeNull();
     const preservedHeading = screen.getByRole("heading", { level: 2, name: "Sign in" });
 
+    diagnosticTarget.focus();
     fireEvent.click(diagnosticTarget);
-    const placeholder = await screen.findByRole("status", {
-      name: "Invalid change placeholder for node sign-in.layout",
-    });
     expect(diagnosticTarget.getAttribute("aria-current")).toBe("true");
-    expect(placeholder.textContent).toContain("Current preview preserved");
     expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBe(preservedHeading);
-    expect(document.activeElement).toBe(placeholder);
+    expect(document.activeElement).toBe(diagnosticTarget);
     const managedCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
-    expect(managedCanvas.contains(placeholder)).toBe(false);
-    expect(placeholder.closest("[data-managed-capability-subtree='true']")).toBeNull();
+    expect(
+      screen.queryByRole("status", {
+        name: "Invalid change placeholder for node sign-in.layout",
+      }),
+    ).toBeNull();
+    expect(managedCanvas.querySelector("[data-managed-capability-subtree='true']")).toBeTruthy();
 
     const runMode = screen.getByRole("button", { name: "Run" });
     fireEvent.click(runMode);
@@ -1631,11 +1609,12 @@ describe("Desen App application shell", () => {
     expect(document.activeElement).toBe(runMode);
     const designMode = screen.getByRole("button", { name: "Design" });
     fireEvent.click(designMode);
+    expect(diagnosticTarget.getAttribute("aria-current")).toBe("true");
     expect(
-      await screen.findByRole("status", {
+      screen.queryByRole("status", {
         name: "Invalid change placeholder for node sign-in.layout",
       }),
-    ).toBeTruthy();
+    ).toBeNull();
     expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBe(preservedHeading);
     expect(document.activeElement).toBe(designMode);
 
@@ -1684,39 +1663,16 @@ describe("Desen App application shell", () => {
     expect(within(inspector).getByRole("button", { name: "Apply Placeholder" })).toBeTruthy();
   });
 
-  it("switches to the exact Catalog component library and filters only the local view", () => {
+  it("keeps Components and Layers visible while filtering the exact local Catalog view", () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
 
-    const layersTab = screen.getByRole("tab", { name: "Layers" });
-    const componentsTab = screen.getByRole("tab", { name: "Components" });
-    const stateTab = screen.getByRole("tab", { name: "State" });
-    const actionsTab = screen.getByRole("tab", { name: "Actions" });
-    fireEvent.keyDown(layersTab, { key: "ArrowRight" });
-    expect(componentsTab.getAttribute("aria-selected")).toBe("true");
-    expect(document.activeElement).toBe(componentsTab);
-    fireEvent.keyDown(componentsTab, { key: "ArrowRight" });
-    expect(stateTab.getAttribute("aria-selected")).toBe("true");
-    expect(document.activeElement).toBe(stateTab);
-    fireEvent.keyDown(stateTab, { key: "ArrowRight" });
-    expect(actionsTab.getAttribute("aria-selected")).toBe("true");
-    expect(document.activeElement).toBe(actionsTab);
-    fireEvent.keyDown(actionsTab, { key: "ArrowRight" });
-    expect(layersTab.getAttribute("aria-selected")).toBe("true");
-    expect(document.activeElement).toBe(layersTab);
-    fireEvent.keyDown(layersTab, { key: "ArrowLeft" });
-    expect(actionsTab.getAttribute("aria-selected")).toBe("true");
-    expect(document.activeElement).toBe(actionsTab);
-    fireEvent.keyDown(actionsTab, { key: "Home" });
-    expect(layersTab.getAttribute("aria-selected")).toBe("true");
-    fireEvent.keyDown(layersTab, { key: "End" });
-    expect(actionsTab.getAttribute("aria-selected")).toBe("true");
-    fireEvent.click(componentsTab);
-
-    const componentsPanel = document.getElementById(
-      componentsTab.getAttribute("aria-controls") ?? "",
-    );
-    expect(componentsPanel).toBeTruthy();
-    const componentView = within(componentsPanel as HTMLElement);
+    const components = authoringPane("Components");
+    const layers = layersPane();
+    const componentView = within(components);
+    expect(components.hidden).toBe(false);
+    expect(layers.hidden).toBe(false);
+    expect(within(layers).getByRole("region", { name: "Sign-in layer hierarchy" })).toBeTruthy();
+    expect(within(authoringPanel()).queryByRole("tab")).toBeNull();
     expect(componentView.getByText("run.desen.reference.sign-in")).toBeTruthy();
     expect(componentView.getByText("v0.1.0")).toBeTruthy();
     expect(componentView.getByRole("status").textContent).toBe("5 of 5 components");
@@ -1733,14 +1689,6 @@ describe("Desen App application shell", () => {
     expect(componentView.queryByText("Text field")).toBeNull();
     expect(window.location.pathname).toBe("/projects/account-app/surfaces/sign-in");
 
-    fireEvent.click(layersTab);
-    expect(document.getElementById(layersTab.getAttribute("aria-controls") ?? "")?.hidden).toBe(
-      false,
-    );
-    expect(document.getElementById(componentsTab.getAttribute("aria-controls") ?? "")?.hidden).toBe(
-      true,
-    );
-    fireEvent.click(componentsTab);
     const resumedSearch = componentView.getByRole("searchbox", {
       name: "Search catalog components",
     }) as HTMLInputElement;
@@ -1771,8 +1719,7 @@ describe("Desen App application shell", () => {
     expect(alert.textContent).toContain("Add");
     const changeTarget = componentView.getByRole("button", { name: "Change target in Layers" });
     fireEvent.click(changeTarget);
-    expect(layersTab.getAttribute("aria-selected")).toBe("true");
-    expect(document.activeElement).toBe(layersTab);
+    expect(layers.contains(document.activeElement)).toBe(true);
     expect(
       screen
         .getByText("Choose a named slot in Layers, then return to Components.")
@@ -1788,9 +1735,10 @@ describe("Desen App application shell", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
     );
-    fireEvent.click(screen.getByRole("tab", { name: "Actions" }));
+    const inspector = inspectorPanel();
+    fireEvent.click(within(inspector).getByRole("tab", { name: "Actions" }));
 
-    const panel = screen.getByRole("region", { name: "Events & Actions" });
+    const panel = within(inspector).getByRole("region", { name: "Events & Actions" });
     expect(within(panel).getByText("sign-in.email")).toBeTruthy();
     expect(within(panel).getByText("Handler added")).toBeTruthy();
     expect(within(panel).getByRole("article", { name: "action 1 in change" })).toBeTruthy();
@@ -1852,14 +1800,14 @@ describe("Desen App application shell", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
     );
-    fireEvent.click(screen.getByRole("tab", { name: "Actions" }));
+    const inspector = inspectorPanel();
+    fireEvent.click(within(inspector).getByRole("tab", { name: "Actions" }));
 
-    const panel = screen.getByRole("region", { name: "Events & Actions" });
+    const panel = within(inspector).getByRole("region", { name: "Events & Actions" });
     const baselineCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
     const baselineManagedSubtree = document.querySelector(
       "[data-managed-capability-subtree='true']",
     );
-    const baselineOverlay = screen.getByRole("status", { name: "Selected layer preview" });
     expect(within(panel).getByText("Handler added")).toBeTruthy();
     expect(within(panel).getByRole("article", { name: "action 1 in change" })).toBeTruthy();
 
@@ -1885,7 +1833,8 @@ describe("Desen App application shell", () => {
     expect(document.querySelector("[data-managed-capability-subtree='true']")).toBe(
       baselineManagedSubtree,
     );
-    expect(screen.getByRole("status", { name: "Selected layer preview" })).toBe(baselineOverlay);
+    expect(authoringStatus().textContent).toBe("Selected · Text field");
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     expect(within(baselineCanvas).getByLabelText("Email")).toBeTruthy();
   });
 
@@ -1917,12 +1866,9 @@ describe("Desen App application shell", () => {
         name: stackSlotName(5),
       }),
     );
-    const authoring = screen.getByRole("complementary", { name: "Authoring panel" });
-    const componentsTab = within(authoring).getByRole("tab", { name: "Components" });
-    const componentsPanel = document.getElementById(
-      componentsTab.getAttribute("aria-controls") ?? "",
-    ) as HTMLElement;
-    const componentView = within(componentsPanel);
+    const authoring = authoringPanel();
+    const components = authoringPane("Components");
+    const componentView = within(components);
     const componentSearch = componentView.getByRole("searchbox", {
       name: "Search catalog components",
     }) as HTMLInputElement;
@@ -1985,7 +1931,8 @@ describe("Desen App application shell", () => {
     expect(designButton.getAttribute("aria-pressed")).toBe("true");
     expect((authoring as HTMLElement).hidden).toBe(false);
     expect((inspector as HTMLElement).hidden).toBe(false);
-    expect(componentsTab.getAttribute("aria-selected")).toBe("true");
+    expect(components.hidden).toBe(false);
+    expect(layersPane().hidden).toBe(false);
     expect(componentSearch.value).toBe("feedback");
     await waitFor(() => {
       expect(placementTarget.getAttribute("data-drag-active")).toBe("false");
@@ -1997,9 +1944,10 @@ describe("Desen App application shell", () => {
         }) as HTMLInputElement
       ).value,
     ).toBe("Unapplied design hint");
-    expect(screen.getByRole("status", { name: "Selected layer preview" }).textContent).toContain(
-      "sign-in.email",
+    expect(within(authoring).getByText("Selected layer").parentElement?.textContent).toContain(
+      "Text field",
     );
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     expect(
       (
         within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
@@ -2053,7 +2001,8 @@ describe("Desen App application shell", () => {
     expect(
       screen.getByRole("button", { name: "Deselect Text field layer · sign-in.email" }),
     ).toBeTruthy();
-    expect(screen.getByRole("status", { name: "Selected layer preview" })).toBeTruthy();
+    expect(authoringStatus().textContent).toBe("Selected · Text field");
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     expect(
       (
         within(screen.getByRole("complementary", { name: "Inspector" })).getByRole("textbox", {
@@ -2262,7 +2211,13 @@ describe("Desen App application shell", () => {
       input: {},
       effect: "network" as const,
     };
-    const pending = firstController.operationPort.invoke(request);
+    let pending: ReturnType<typeof firstController.operationPort.invoke> | undefined;
+    act(() => {
+      pending = firstController.operationPort.invoke(request);
+    });
+    if (pending === undefined) {
+      throw new Error("Expected the fixture invocation to create a pending Runtime result.");
+    }
     expect(firstController.read().status).toBe("pending");
 
     const scenario = within(screen.getByRole("complementary", { name: "Inspector" })).getByRole(
@@ -2319,15 +2274,8 @@ describe("Desen App application shell", () => {
     expect(screen.queryByLabelText("Password")).toBeNull();
     expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();
 
-    const componentsTab = screen.getByRole("tab", { name: "Components" });
-    fireEvent.click(componentsTab);
-    const componentsPanel = document.getElementById(
-      componentsTab.getAttribute("aria-controls") ?? "",
-    );
-    expect(within(componentsPanel as HTMLElement).getByRole("status").textContent).toBe(
-      "5 of 5 components",
-    );
-    const componentView = within(componentsPanel as HTMLElement);
+    const componentView = componentLibrary();
+    expect(componentView.getByRole("status").textContent).toBe("5 of 5 components");
     const target = componentView.getByRole("group", {
       name: "Placement target · choose a named slot",
     });
@@ -2349,7 +2297,8 @@ describe("Desen App application shell", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
     );
-    expect(await screen.findByRole("status", { name: "Selected layer preview" })).toBeTruthy();
+    expect(authoringStatus().textContent).toBe("Selected · Text field");
+    expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
 
     fireEvent.click(screen.getByRole("link", { name: "Account app" }));
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();

@@ -58,14 +58,14 @@ const TYPED_ARRAY_BYTE_OFFSET_GETTER = Object.getOwnPropertyDescriptor(
 const UINT8_ARRAY_SET = Uint8Array.prototype.set;
 
 const EXPECTED_PROTOCOL = "0.1.0";
-const EXPECTED_REVISION = "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb";
+const EXPECTED_REVISION = "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13";
 const EXPECTED_PACKAGE_ID = "run.desen.reference.sign-in";
 const EXPECTED_PACKAGE_VERSION = "0.1.0";
 const EXPECTED_TARGET = "web-react";
 const EXPECTED_PACKAGE_DIGEST =
-  "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0";
+  "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051";
 const EXPECTED_ARTIFACT_COUNT = 80;
-const EXPECTED_DISTRIBUTION_BYTES = 243_175;
+const EXPECTED_DISTRIBUTION_BYTES = 243_740;
 const EXPECTED_PUBLIC_EXPORT_COUNT = 85;
 const EXPECTED_PUBLIC_RUNTIME_EXPORT_COUNT = 28;
 const EXPECTED_TSDOC_EXPORT_COUNT = 13;
@@ -553,7 +553,11 @@ async function authenticatedFrozenArtifactProjection() {
   if (artifact.schemaVersion !== 1 || artifact.task !== "M07-T06" || artifact.result !== "PASS") {
     fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T06 artifact identity drifted.");
   }
-  return artifact;
+  return Object.freeze({
+    artifact: deepFreeze(artifact),
+    artifactBytes: Buffer.from(frozen.bytes),
+    artifactSha256: frozen.sha256,
+  });
 }
 
 function parseTypescript(source, relativePath, code = "TEST_AUTHORITY_DRIFT") {
@@ -1684,7 +1688,8 @@ export async function buildControlPlaneRuntimeStagingEvidence(options) {
     new Set(["prerequisiteBytes", "runtimeReceipt", "trackedFileBytes"]),
     "build options",
   );
-  const frozenArtifact = await authenticatedFrozenArtifactProjection();
+  const frozen = await authenticatedFrozenArtifactProjection();
+  const frozenArtifact = frozen.artifact;
   const trackedPaths = [
     ...TRACKED_TASK_FILES,
     TRACEABILITY,
@@ -1728,7 +1733,7 @@ export async function buildControlPlaneRuntimeStagingEvidence(options) {
     packageTestProjection(trackedFileBytes),
     implementationProjection(trackedFileBytes),
   ]);
-  const artifact = deepFreeze({
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     profile: "desen.control-plane.runtime-staging-proof.v1",
     task: "M07-T06",
@@ -1836,15 +1841,17 @@ export async function buildControlPlaneRuntimeStagingEvidence(options) {
       "node --test tests/control-plane-runtime-staging.test.mjs",
     ],
   });
-  const artifactText = await format(JSON.stringify(artifact), {
+  const currentCompatibilityText = await format(JSON.stringify(currentCompatibility), {
     parser: "json",
     printWidth: 100,
   });
-  const artifactBytes = Buffer.from(artifactText, "utf8");
+  const currentCompatibilityBytes = Buffer.from(currentCompatibilityText, "utf8");
   return Object.freeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifact: frozenArtifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+    currentCompatibilitySha256: sha256(currentCompatibilityBytes),
     normativeCoverageEvidenceSha256s: normativeCoverage.evidenceSha256s,
     runtimeReceipt,
   });
@@ -1931,6 +1938,12 @@ export async function verifyControlPlaneRuntimeStagingEvidence(options) {
     task: "M07-T06",
     result: "PASS",
     artifactSha256: built.artifactSha256,
+    currentCompatibilitySha256: built.currentCompatibilitySha256,
+    currentRevision: built.currentCompatibility.claims.officialSuccess.stagedRevision,
+    currentPackageDigest:
+      built.currentCompatibility.claims.officialSuccess.packages[0].packageDigest,
+    currentDistributionBytes:
+      built.currentCompatibility.claims.officialSuccess.packages[0].artifactByteLength,
     packageRuntimeCases: built.artifact.tests.packageRuntimeCases,
     compileTimeNegativeCases: built.artifact.tests.compileTimeNegativeCases,
     rootMutationCases: built.artifact.tests.rootMutationCases,

@@ -1326,3 +1326,19 @@ Ownership covers 1,253 tracked paths, including 188 proof-owned paths, split int
 45 CI-policy, 31 dependency-policy, 138 frozen-input, 485 package/application, 225 shared-proof-
 infrastructure, 130 project-documentation, and eleven repository-policy paths. These are local
 authority receipts and make no required-gate or hosted-CI claim.
+
+The corrective M09 compatibility successor records the current Web–React package digest as
+`sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051` for 80 regular
+distribution files/243,740 bytes and 81 framed entries/252,637 framed bytes. The matching
+official-derived Bundle revision is
+`sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13`, while the Source
+digest remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`.
+Append-only reader checkpoint sequence 56 advances the exact sequence-55 head to
+`sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a`, preserving all 49
+frozen artifacts and 98 reader identities. The sequence-56-derived current CI compatibility
+authority pins selector
+`sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
+`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
+affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`;
+the preceding M09-T14 values remain historical receipts. It rewrites no historical artifact or
+pin, makes no hosted Quality-gate claim, and leaves M10 at 0/9.

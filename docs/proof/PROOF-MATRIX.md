@@ -742,7 +742,7 @@ arbitrary prop, style, DOM, native-event, or dynamic-loader authority. The refer
 declares no behavior capability; generic behavior event and no-command lifecycle are tested with a
 synthetic exact Catalog fixture.
 
-Adding the executable subpath produces the current exact reference package digest
+Adding the executable subpath produced the first exact executable-successor package digest
 `sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0`
 over 80 `dist/**` files and the projected Catalog: 81 framed entries and 252,072 bytes. The M03-T10,
 M04-T17, and M05-T03 artifacts remain byte-identical prerequisites behind strict task-time
@@ -2929,7 +2929,7 @@ artifacts and 98 current readers. Compatibility sequence 54 is the immutable pre
 preserves those artifact and reader identities, advances the exact sequence-53 head to
 `sha256:0772221371ffe1a35fe955b8cad34c725d0f9ae933714f81f10b3451214a6638`, and reseals only
 M08-T08 proof-library/root-test readers `[64, 65]`. Its frozen 49,785-byte artifact remains
-`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Current sequence 55
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Sequence 55
 preserves the same 49 frozen artifacts and 98 reader identities, links that exact sequence-54
 predecessor head to `sha256:f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17`,
 and reseals only M09-T01–T14 proof-library/root-test reader indexes `[70..97]`. The current T14
@@ -2938,12 +2938,28 @@ readers authenticate the exact `10,000 ms` per-test timeout successor at
 edit reproduces the frozen 24,485-byte test receipt, while the frozen T14 artifact remains
 `sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b` unchanged. Checkpoint,
 promotion, selector, and fourteen M09 root reader suites pass 78/78, 20/20, 23/23, and 179/179.
-Promotion pins the current selector at
+Historical M09-T14 promotion pins the selector at
 `sha256:2855cbeedb55ede5d9db18a6b186ac07796afbc4d512f5a0aa9197bc5f177fd1`, the
 required-affected runner authority at
 `sha256:b77b35a81915ec41554ab3505895fe98c0a4299ec9bf7d680dec320bbf3fb744`, and the T10 affected
 plan at `sha256:e3cced8e1a9cbe6f1f5c296aa3992b07ef030c81ac9267c2deff714953ce0e39`. The integrated CI
 policy regression passes 330/330.
+
+The corrective M09 compatibility successor is narrative-only here and does not replace any task
+artifact or historical pin. The current Web–React package digest is
+`sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051` over 80 regular
+distribution files totaling 243,740 bytes; the projected Catalog plus those files form 81 framed
+entries totaling 252,637 bytes. The corresponding official-derived Bundle revision is
+`sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13`, and the Source digest
+remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`.
+Reader checkpoint sequence 56 advances the exact sequence-55 head to
+`sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a`, preserving all 49
+frozen artifacts and 98 reader identities. This compatibility receipt records no M10 completion;
+M10 remains 0/9. The sequence-56-derived current CI compatibility authority pins selector
+`sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
+`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
+affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`.
+The preceding M09-T14 promotion receipts remain historical and unchanged.
 
 These local receipts make no required-gate or hosted-CI claim. They close the fixed local
 saved-Source publication and activation profile, not remote deployment, arbitrary channel

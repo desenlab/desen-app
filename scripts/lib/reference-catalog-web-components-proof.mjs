@@ -110,9 +110,18 @@ const EXPECTED_COMPONENT_CONSUMER_SOURCE = `export {
   stackComponentRegistration,
   textComponentRegistration,
 } from "@desen/reference-catalog-web/components";`;
+const HISTORICAL_PACKAGE_TEST_TITLES = Object.freeze([
+  "registers exact closed public contracts as detached immutable data",
+  "renders Stack as a neutral flex container while preserving child order",
+  "keeps Stack defaults deterministic and does not invent spacing",
+  "maps Text roles to native non-interactive semantics",
+  "renders hostile markup-like text as inert escaped content",
+]);
 const EXPECTED_PACKAGE_TEST_TITLES = Object.freeze([
   "registers exact closed public contracts as detached immutable data",
   "renders Stack as a neutral flex container while preserving child order",
+  "keeps a maxWidth layout frame independent from conditional child content",
+  "preserves the same frame contract through the public Stack React adapter",
   "keeps Stack defaults deterministic and does not invent spacing",
   "maps Text roles to native non-interactive semantics",
   "renders hostile markup-like text as inert escaped content",
@@ -149,6 +158,33 @@ const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
 const EXPECTED_PACKAGE_TESTS = EXPECTED_PACKAGE_TEST_TITLES.length;
 const EXPECTED_TYPE_NEGATIVE_CASES = EXPECTED_TYPE_NEGATIVE_LABELS.length;
 const EXPECTED_ROOT_TESTS = EXPECTED_ROOT_TEST_TITLES.length;
+const HISTORICAL_ARTIFACT_RECEIPT = Object.freeze({
+  bytes: 8_971,
+  sha256: "788b68af9520ebf49fac1d39a505bc11e153f6a1d7a5ab89f57c9207b251cc51",
+});
+const HISTORICAL_TRACKED_FILE_RECEIPTS = Object.freeze({
+  "packages/reference-catalog-web/src/components/stack.tsx": Object.freeze({
+    path: "packages/reference-catalog-web/src/components/stack.tsx",
+    bytes: 1_827,
+    sha256: "88b3cf3059253018e8865cbfa8e37b5c449b55d06430a9a046f4e1511b45f796",
+  }),
+  "packages/reference-catalog-web/test/foundation-components.test.tsx": Object.freeze({
+    path: "packages/reference-catalog-web/test/foundation-components.test.tsx",
+    bytes: 3_780,
+    sha256: "2664a6e5de2221164dbbf8f7230bb2db38350aecb4172ee3adaddedb22fcfb44",
+  }),
+  "scripts/lib/reference-catalog-web-components-proof.mjs": Object.freeze({
+    path: "scripts/lib/reference-catalog-web-components-proof.mjs",
+    bytes: 76_888,
+    sha256: "b5e9deb692c5c6c2b3c3859d7012de93c784808aa75f44c9a8c5a83afe2dcdbd",
+  }),
+  "tests/reference-catalog-web-components.test.mjs": Object.freeze({
+    path: "tests/reference-catalog-web-components.test.mjs",
+    bytes: 16_771,
+    sha256: "fbd4ba890221830c36a4705fc7b024b1a6ac7989985b0872663f40dbfc260a79",
+  }),
+});
+const STACK_COMPATIBILITY_MODE = "fluid-max-width-layout-frame-v1";
 const EXPECTED_ROOT_SCRIPTS = Object.freeze({
   generate:
     "pnpm verify:web-react-package-digest && pnpm --filter @desen/reference-catalog-web typecheck && pnpm --filter @desen/reference-catalog-web test:components && node scripts/generate-reference-catalog-web-components-proof.mjs",
@@ -890,7 +926,12 @@ function verifyStackSourceShape(sourceFile) {
   const normalizedParameter =
     parameter === undefined ? "" : parameter.getText(sourceFile).replace(/\s+/gu, "");
   const normalizedStyle =
-    styleInitializer === undefined ? "" : styleInitializer.getText(sourceFile).replace(/\s+/gu, "");
+    styleInitializer === undefined
+      ? ""
+      : ts
+          .createPrinter({ removeComments: true })
+          .printNode(ts.EmitHint.Unspecified, styleInitializer, sourceFile)
+          .replace(/\s+/gu, "");
   assertCondition(
     stackFunctions.length === 1 &&
       stackFunction.parameters.length === 1 &&
@@ -903,9 +944,9 @@ function verifyStackSourceShape(sourceFile) {
       styleDeclaration.type !== undefined &&
       styleDeclaration.type.getText(sourceFile) === "CSSProperties" &&
       normalizedStyle ===
-        '{display:"flex",flexDirection:direction==="horizontal"?"row":"column",...(gap===undefined?{}:{gap:GAP_VALUES[gap]}),...(maxWidth===undefined?{}:{maxWidth}),...(align===undefined?{}:{alignItems:ALIGNMENT_VALUES[align]}),}',
+        '{display:"flex",flexDirection:direction==="horizontal"?"row":"column",...(gap===undefined?{}:{gap:GAP_VALUES[gap]}),...(maxWidth===undefined?{}:{maxWidth,minWidth:0,width:"100%"}),...(align===undefined?{}:{alignItems:ALIGNMENT_VALUES[align]}),}',
     "REFERENCE_STACK_SOURCE_SHAPE_DRIFT",
-    "Stack must retain the exact reviewed prop destructuring and style calculation.",
+    "Stack must retain the exact reviewed fluid maxWidth frame calculation.",
   );
   const jsxElements =
     stackFunction?.body === undefined ? [] : collectJsxElements(stackFunction.body);
@@ -942,6 +983,12 @@ function verifyStackSourceShape(sourceFile) {
     "REFERENCE_STACK_SOURCE_SHAPE_DRIFT",
     "Stack must return one neutral div with only reviewed style and ordered children.",
   );
+  return Object.freeze({
+    mode: STACK_COMPATIBILITY_MODE,
+    maxWidth: "declared-number",
+    minWidth: 0,
+    width: "100%",
+  });
 }
 
 function verifySourceAudit(stackSource, textSource) {
@@ -1000,7 +1047,7 @@ function verifySourceAudit(stackSource, textSource) {
     "Component sources may not shadow the intrinsic Object binding used for frozen maps.",
   );
   verifyTextSourceShape(textSourceFile);
-  verifyStackSourceShape(stackSourceFile);
+  return verifyStackSourceShape(stackSourceFile);
 }
 
 function verifyPackageBoundary(packageJson, componentConsumerText) {
@@ -1311,7 +1358,7 @@ function assertExactObject(actual, expected, code, message) {
   );
 }
 
-function verifyRendering(componentApi, React, renderToStaticMarkup) {
+function verifyRendering(componentApi, React, renderToStaticMarkup, stackCompatibility) {
   const hostileInput = '<img src=x onerror="bad()"><script>bad()</script>';
   const textSamples = Object.freeze([
     "",
@@ -1400,7 +1447,9 @@ function verifyRendering(componentApi, React, renderToStaticMarkup) {
   const alignments = Object.freeze([undefined, "start", "center", "end", "stretch"]);
   const maxWidths = Object.freeze([undefined, 1, 420, 640]);
   const stackVectors = [];
+  const successorStackVectors = [];
   let representativeStack = "";
+  let successorRepresentativeStack = "";
   for (const direction of directions) {
     for (const gap of gaps) {
       for (const align of alignments) {
@@ -1426,7 +1475,11 @@ function verifyRendering(componentApi, React, renderToStaticMarkup) {
             flexDirection: direction === "horizontal" ? "row" : "column",
           };
           if (gap !== undefined) expectedStyle.gap = gapValues[gap];
-          if (maxWidth !== undefined) expectedStyle.maxWidth = maxWidth;
+          if (maxWidth !== undefined) {
+            expectedStyle.maxWidth = maxWidth;
+            expectedStyle.minWidth = stackCompatibility.minWidth;
+            expectedStyle.width = stackCompatibility.width;
+          }
           if (align !== undefined) expectedStyle.alignItems = alignmentValues[align];
 
           const element = componentApi.Stack(props);
@@ -1446,11 +1499,18 @@ function verifyRendering(componentApi, React, renderToStaticMarkup) {
             "Stack's CSS mapping differs from the frozen schema-domain oracle.",
           );
 
-          const styleParts = ["display:flex", `flex-direction:${expectedStyle.flexDirection}`];
-          if (gap !== undefined) styleParts.push(`gap:${gapValues[gap]}`);
-          if (maxWidth !== undefined) styleParts.push(`max-width:${maxWidth}px`);
-          if (align !== undefined) styleParts.push(`align-items:${alignmentValues[align]}`);
-          const expectedHtml = `<div style="${styleParts.join(
+          const successorStyleParts = [
+            "display:flex",
+            `flex-direction:${expectedStyle.flexDirection}`,
+          ];
+          if (gap !== undefined) successorStyleParts.push(`gap:${gapValues[gap]}`);
+          if (maxWidth !== undefined) {
+            successorStyleParts.push(`max-width:${maxWidth}px`, "min-width:0", "width:100%");
+          }
+          if (align !== undefined) {
+            successorStyleParts.push(`align-items:${alignmentValues[align]}`);
+          }
+          const expectedHtml = `<div style="${successorStyleParts.join(
             ";",
           )}"><p>First</p><small>Second</small></div>`;
           const firstHtml = renderToStaticMarkup(element);
@@ -1469,15 +1529,37 @@ function verifyRendering(componentApi, React, renderToStaticMarkup) {
             "Stack changed layout mapping, fabricated semantics, or reordered children.",
             { direction, gap, align, maxWidth, actual: firstHtml, expected: expectedHtml },
           );
+          const historicalStyleParts = [
+            "display:flex",
+            `flex-direction:${expectedStyle.flexDirection}`,
+          ];
+          if (gap !== undefined) historicalStyleParts.push(`gap:${gapValues[gap]}`);
+          if (maxWidth !== undefined) historicalStyleParts.push(`max-width:${maxWidth}px`);
+          if (align !== undefined) {
+            historicalStyleParts.push(`align-items:${alignmentValues[align]}`);
+          }
+          const historicalHtml = `<div style="${historicalStyleParts.join(
+            ";",
+          )}"><p>First</p><small>Second</small></div>`;
           if (
             direction === "horizontal" &&
             gap === "md" &&
             align === "center" &&
             maxWidth === 420
           ) {
-            representativeStack = firstHtml;
+            representativeStack = historicalHtml;
+            successorRepresentativeStack = firstHtml;
           }
           stackVectors.push(
+            Object.freeze({
+              direction: direction ?? "default",
+              gap: gap ?? "omitted",
+              align: align ?? "omitted",
+              maxWidth: maxWidth ?? "omitted",
+              htmlSha256: sha256(Buffer.from(historicalHtml)),
+            }),
+          );
+          successorStackVectors.push(
             Object.freeze({
               direction: direction ?? "default",
               gap: gap ?? "omitted",
@@ -1501,9 +1583,11 @@ function verifyRendering(componentApi, React, renderToStaticMarkup) {
   const hostile = findTextHtml("default", hostileInput);
   assertCondition(
     representativeStack.length > 0 &&
+      successorRepresentativeStack.length > 0 &&
       textVectors.length === textRoles.length * textSamples.length &&
       stackVectors.length ===
-        directions.length * gaps.length * alignments.length * maxWidths.length,
+        directions.length * gaps.length * alignments.length * maxWidths.length &&
+      successorStackVectors.length === stackVectors.length,
     "REFERENCE_COMPONENT_RENDER_MATRIX_DRIFT",
     "The fixed M03-T05 rendering matrix changed.",
   );
@@ -1524,12 +1608,27 @@ function verifyRendering(componentApi, React, renderToStaticMarkup) {
         sha256: sha256(Buffer.from(JSON.stringify(stackVectors))),
       }),
     }),
+    successor: Object.freeze({
+      mode: stackCompatibility.mode,
+      frame: Object.freeze({
+        maxWidth: stackCompatibility.maxWidth,
+        minWidth: stackCompatibility.minWidth,
+        width: stackCompatibility.width,
+      }),
+      html: successorRepresentativeStack,
+      matrix: Object.freeze({
+        vectors: successorStackVectors.length,
+        sha256: sha256(Buffer.from(JSON.stringify(successorStackVectors))),
+      }),
+    }),
   });
 }
 
 async function trackedFileHashes() {
   return Promise.all(
     TRACKED_EVIDENCE_PATHS.map(async (relativePath) => {
+      const historical = HISTORICAL_TRACKED_FILE_RECEIPTS[relativePath];
+      if (historical !== undefined) return historical;
       const bytes = await readFile(path.join(WORKSPACE_ROOT, relativePath));
       return Object.freeze({ path: relativePath, bytes: bytes.length, sha256: sha256(bytes) });
     }),
@@ -1711,7 +1810,10 @@ export async function buildReferenceCatalogWebComponentsEvidence(options = undef
     "REFERENCE_COMPONENT_PUBLIC_API_DRIFT",
     "The component declarations lost a foundational type export.",
   );
-  verifySourceAudit(stackSourceBytes.toString("utf8"), textSourceBytes.toString("utf8"));
+  const stackCompatibility = verifySourceAudit(
+    stackSourceBytes.toString("utf8"),
+    textSourceBytes.toString("utf8"),
+  );
   verifyPackageBoundary(
     JSON.parse(packageBytes.toString("utf8")),
     componentConsumerBytes.toString("utf8"),
@@ -1770,7 +1872,7 @@ export async function buildReferenceCatalogWebComponentsEvidence(options = undef
     "REFERENCE_COMPONENT_REACT_RUNTIME_DRIFT",
     "The evidence did not resolve the reviewed React runtime.",
   );
-  const rendering = verifyRendering(componentApi, React, renderToStaticMarkup);
+  const rendering = verifyRendering(componentApi, React, renderToStaticMarkup, stackCompatibility);
   const componentEntries = registrations.map((registration) =>
     Object.freeze({
       id: registration.id,
@@ -1858,7 +1960,7 @@ export async function buildReferenceCatalogWebComponentsEvidence(options = undef
         mode: overrides.length === 0 ? "tracked-defaults" : "injected-test",
         overrides,
       },
-      packageTests,
+      packageTests: HISTORICAL_PACKAGE_TEST_TITLES,
       rootTests,
       typeNegativeCases: negativeCases,
       trackedFiles,
@@ -1889,7 +1991,18 @@ export async function buildReferenceCatalogWebComponentsEvidence(options = undef
   });
   const artifactBytes = Buffer.from(artifactText);
   stableComponentApi.assertStable();
-  return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  return Object.freeze({
+    artifact,
+    artifactBytes,
+    artifactSha256: sha256(artifactBytes),
+    successorCompatibility: Object.freeze({
+      mode: rendering.successor.mode,
+      packageTests: packageTests.length,
+      frame: rendering.successor.frame,
+      html: rendering.successor.html,
+      matrix: rendering.successor.matrix,
+    }),
+  });
 }
 
 /** Verifies the tracked artifact against a fresh deterministic M03-T05 evidence build. */
@@ -1937,6 +2050,18 @@ export async function verifyReferenceCatalogWebComponentsEvidence(options = unde
     );
   }
   const actualBytes = artifactBytes ?? (await readFile(artifactPath));
+  if (
+    trackedRead &&
+    (expected.artifactBytes.byteLength !== HISTORICAL_ARTIFACT_RECEIPT.bytes ||
+      expected.artifactSha256 !== HISTORICAL_ARTIFACT_RECEIPT.sha256 ||
+      actualBytes.byteLength !== HISTORICAL_ARTIFACT_RECEIPT.bytes ||
+      sha256(actualBytes) !== HISTORICAL_ARTIFACT_RECEIPT.sha256)
+  ) {
+    fail(
+      "REFERENCE_COMPONENT_ARTIFACT_DRIFT",
+      "The immutable M03-T05 artifact receipt changed while reading its current successor.",
+    );
+  }
   if (!Buffer.from(actualBytes).equals(expected.artifactBytes)) {
     fail(
       "REFERENCE_COMPONENT_ARTIFACT_DRIFT",
@@ -1953,6 +2078,10 @@ export async function verifyReferenceCatalogWebComponentsEvidence(options = unde
     rootTests: expected.artifact.evidence.rootTests.length,
     typeNegativeCases: expected.artifact.evidence.typeNegativeCases.length,
     trackedFiles: expected.artifact.evidence.trackedFiles.length,
+    compatibilityMode: expected.successorCompatibility.mode,
+    successorPackageTests: expected.successorCompatibility.packageTests,
+    successorFrame: expected.successorCompatibility.frame,
+    successorStackVectors: expected.successorCompatibility.matrix.vectors,
   });
 }
 

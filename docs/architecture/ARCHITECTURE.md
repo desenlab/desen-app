@@ -718,6 +718,29 @@ reorder, and deletion through the same public mutation and publication boundarie
 bounded surface-local primitive-state editor and exact direct local-state prop bindings without
 widening the literal Inspector parser or managed runtime subtree.
 
+The current surface-editor composition uses a route-sized workplane as the lowest application
+layer. Application navigation, the command bar, a permanent vertically split Components/Layers
+dock, and a right Inspector/State/Actions tabbed dock float above that plane and remain outside the
+managed Runtime React output. The plane contains one centered page frame whose exact dimensions
+come from the selected surface's validator-admitted Source `authoring.canvas` declaration; invalid
+or missing frame metadata produces no invented fallback, and Source-space `x`/`y` values do not
+place the single selected surface. Design and Run preserve the same workplane and frame
+coordinates, so changing interaction mode neither moves nor resizes the authored page.
+
+The corrective M09 compatibility successor also keeps a declared Stack `maxWidth` fluid inside
+that page frame by applying `width: 100%` and `min-width: 0`; conditionally materializing the Alert
+therefore cannot enlarge either the Stack or the authored page. Because this changes executable
+Web–React bytes, the current package digest is
+`sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051` over 80 regular
+distribution files totaling 243,740 bytes and 81 framed entries totaling 252,637 bytes. The
+official-derived Bundle revision is
+`sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13`; the Source digest
+remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`.
+Historical task-time tuples and all frozen artifact bytes remain unchanged. Reader checkpoint
+sequence 56 advances the exact sequence-55 head to
+`sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a`, preserving 49 frozen
+artifacts and 98 reader identities.
+
 The first slice owns three exact route forms: `/projects`, `/projects/:projectId`, and
 `/projects/:projectId/surfaces/:surfaceId`. The bare root is replaced with `/projects`; app-owned
 navigation stays on the current origin and uses the browser History API plus one private

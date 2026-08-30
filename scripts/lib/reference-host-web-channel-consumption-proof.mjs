@@ -10,6 +10,7 @@ import { promisify, types as utilTypes } from "node:util";
 import { format } from "prettier";
 import ts from "typescript";
 
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -1718,6 +1719,20 @@ function publicDistribution(distribution) {
 /** Builds deterministic M07-T11 evidence without mutating the workspace. */
 export async function buildReferenceHostWebChannelConsumptionEvidence(options) {
   const captured = captureOptions(options, "build");
+  const frozen = await readCheckpointedFrozenArtifact("M07-T11");
+  if (frozen.path !== ARTIFACT) {
+    fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T11 artifact path drifted.");
+  }
+  const frozenArtifact = parseJson(Buffer.from(frozen.bytes), ARTIFACT);
+  if (
+    frozenArtifact?.schemaVersion !== 1 ||
+    frozenArtifact.proofId !== PROOF_ID ||
+    frozenArtifact.profile !== PROFILE ||
+    frozenArtifact.task !== "M07-T11" ||
+    frozenArtifact.result !== "PASS"
+  ) {
+    fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T11 artifact identity drifted.");
+  }
   const prerequisites = await prerequisiteProjection(captured.prerequisiteBytes);
   const tracked = await readTrackedFiles(captured.trackedFileBytes);
   const packageBoundaries = auditPackageManifests(tracked);
@@ -1737,7 +1752,7 @@ export async function buildReferenceHostWebChannelConsumptionEvidence(options) {
   const traceRows = traceProjection(tracked);
   const runtimeSuiteReceipt =
     captured.runtimeSuiteReceipt ?? (await runReferenceHostWebChannelConsumptionSuite());
-  const artifact = deepFreeze({
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: PROOF_ID,
     profile: PROFILE,
@@ -1827,12 +1842,17 @@ export async function buildReferenceHostWebChannelConsumptionEvidence(options) {
       "node --test tests/reference-host-web-channel-consumption.test.mjs",
     ],
   });
-  const artifactText = await format(JSON.stringify(artifact), { parser: "json", printWidth: 100 });
-  const artifactBytes = Buffer.from(artifactText, "utf8");
+  const currentCompatibilityText = await format(JSON.stringify(currentCompatibility), {
+    parser: "json",
+    printWidth: 100,
+  });
+  const currentCompatibilityBytes = Buffer.from(currentCompatibilityText, "utf8");
   return deepFreeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifact: deepFreeze(frozenArtifact),
+    artifactBytes: Buffer.from(frozen.bytes),
+    artifactSha256: frozen.sha256,
+    currentCompatibility,
+    currentCompatibilitySha256: sha256(currentCompatibilityBytes),
     runtimeSuiteReceipt,
   });
 }
@@ -1900,6 +1920,7 @@ export async function verifyReferenceHostWebChannelConsumptionEvidence(options) 
     task: "M07-T11",
     result: "PASS",
     artifactSha256: built.artifactSha256,
+    currentCompatibilitySha256: built.currentCompatibilitySha256,
     prerequisiteArtifacts: built.artifact.prerequisites.length,
     runtimeCases: built.artifact.tests.runtimeCaseCount,
     rootMutationCases: built.artifact.tests.rootMutationCaseCount,

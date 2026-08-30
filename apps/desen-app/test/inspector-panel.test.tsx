@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { useState } from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -133,6 +134,16 @@ function successfulBindingEdit(edit: AuthoringInspectorBindingEdit): AuthoringIn
   return Object.freeze({ ok: true, document: REFERENCE_EDITOR_DOCUMENT });
 }
 
+function DraftProbe({ label }: Readonly<{ readonly label: string }>) {
+  const [value, setValue] = useState("");
+  return (
+    <label>
+      {label}
+      <input onChange={(event) => setValue(event.currentTarget.value)} value={value} />
+    </label>
+  );
+}
+
 describe("Desen App nested and structured Inspector panel", () => {
   beforeEach(() => {
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -141,6 +152,77 @@ describe("Desen App nested and structured Inspector panel", () => {
   afterEach(() => {
     cleanup();
     document.body.replaceChildren();
+  });
+
+  it("keeps right-sidebar tab panels mounted while providing keyboard-accessible Inspector, State, and Actions views", () => {
+    render(
+      <InspectorPanel
+        eventActionControls={<DraftProbe label="Action draft" />}
+        inspector={readyModel([], 0)}
+        onEdit={vi.fn()}
+        stateControls={<DraftProbe label="State draft" />}
+      />,
+    );
+
+    const inspector = screen.getByRole("complementary", { name: "Inspector" });
+    const tabs = within(inspector).getAllByRole("tab");
+    expect(within(inspector).getByRole("tablist", { name: "Inspector views" })).toBeTruthy();
+    expect(tabs.map((tab) => tab.textContent)).toEqual(["Inspector", "State", "Actions"]);
+
+    const inspectorTab = within(inspector).getByRole("tab", { name: "Inspector" });
+    const stateTab = within(inspector).getByRole("tab", { name: "State" });
+    const actionsTab = within(inspector).getByRole("tab", { name: "Actions" });
+    const inspectorPanel = document.getElementById(
+      inspectorTab.getAttribute("aria-controls") ?? "",
+    ) as HTMLElement;
+    const statePanel = document.getElementById(
+      stateTab.getAttribute("aria-controls") ?? "",
+    ) as HTMLElement;
+    const actionsPanel = document.getElementById(
+      actionsTab.getAttribute("aria-controls") ?? "",
+    ) as HTMLElement;
+
+    for (const [tab, panel] of [
+      [inspectorTab, inspectorPanel],
+      [stateTab, statePanel],
+      [actionsTab, actionsPanel],
+    ] as const) {
+      expect(tab.getAttribute("aria-controls")).toBe(panel.id);
+      expect(panel.getAttribute("role")).toBe("tabpanel");
+      expect(panel.getAttribute("aria-labelledby")).toBe(tab.id);
+    }
+    expect(inspectorTab.getAttribute("aria-selected")).toBe("true");
+    expect(statePanel.hidden).toBe(true);
+    expect(actionsPanel.hidden).toBe(true);
+
+    fireEvent.keyDown(inspectorTab, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(stateTab);
+    expect(stateTab.getAttribute("aria-selected")).toBe("true");
+    expect(statePanel.hidden).toBe(false);
+    const stateDraft = within(statePanel).getByRole("textbox", { name: "State draft" });
+    fireEvent.change(stateDraft, { target: { value: "state draft is retained" } });
+
+    fireEvent.keyDown(stateTab, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(actionsTab);
+    expect(actionsTab.getAttribute("aria-selected")).toBe("true");
+    const actionDraft = within(actionsPanel).getByRole("textbox", { name: "Action draft" });
+    fireEvent.change(actionDraft, { target: { value: "action draft is retained" } });
+
+    fireEvent.keyDown(actionsTab, { key: "Home" });
+    expect(document.activeElement).toBe(inspectorTab);
+    expect(inspectorTab.getAttribute("aria-selected")).toBe("true");
+    fireEvent.keyDown(inspectorTab, { key: "End" });
+    expect(document.activeElement).toBe(actionsTab);
+    fireEvent.keyDown(actionsTab, { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(stateTab);
+    expect(
+      (within(statePanel).getByRole("textbox", { name: "State draft" }) as HTMLInputElement).value,
+    ).toBe("state draft is retained");
+    fireEvent.keyDown(stateTab, { key: "ArrowRight" });
+    expect(
+      (within(actionsPanel).getByRole("textbox", { name: "Action draft" }) as HTMLInputElement)
+        .value,
+    ).toBe("action draft is retained");
   });
 
   it("changes or detaches a compatible direct local-state value source", () => {

@@ -198,7 +198,8 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[0], () => {
     true,
   );
   assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
-  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
+  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, undefined);
+  assert.equal(built.currentCompatibility.successor.splitAuthoringPanesAlwaysRendered, true);
   assert.equal(built.currentCompatibility.successor.nodeAndBehaviorOwnersSupported, true);
   assert.equal(built.currentCompatibility.successor.exactOwnDataRouteSelectionAndEditCapture, true);
   assert.equal(built.currentCompatibility.successor.atomicPublisherBackedSlotEdits, true);
@@ -738,7 +739,7 @@ test(DESEN_APP_STRUCTURED_INSPECTOR_ROOT_TEST_NAMES[8], () => {
       ...sourcePolicyInput,
       applicationSource: replaceOnce(
         sourcePolicyInput.applicationSource,
-        "slotSurface.closest<HTMLElement>('[role=\"tabpanel\"]')",
+        "slotSurface.closest<HTMLElement>('[data-authoring-pane-scroll=\"layers\"]')",
         "slotSurface.closest<HTMLElement>('[data-managed-capability-subtree]')",
       ),
     },

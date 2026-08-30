@@ -213,7 +213,8 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[1], () => {
     true,
   );
   assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
-  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
+  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, undefined);
+  assert.equal(built.currentCompatibility.successor.splitAuthoringPanesAlwaysRendered, true);
   assert.equal(built.currentCompatibility.successor.nodeAndBehaviorOwnersSupported, true);
   assert.equal(built.currentCompatibility.successor.exactOwnDataRouteSelectionAndEditCapture, true);
   assert.equal(built.currentCompatibility.successor.atomicPublisherBackedSlotEdits, true);

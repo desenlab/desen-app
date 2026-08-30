@@ -238,9 +238,9 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[4], () => {
   assert.equal(application.browserDataTransferReads, 0);
   assert.equal(application.componentPaletteRenderLimit, 24);
   assert.equal(application.completeFilteredMatchCountRetained, true);
-  assert.equal(application.inactiveLayerTreeNotRendered, true);
-  assert.equal(application.inactiveComponentPaletteShortCircuited, true);
-  assert.equal(application.activeTabOnlyAuthoringWork, true);
+  assert.equal(application.splitAuthoringPanesAlwaysRendered, true);
+  assert.equal(application.componentPaletteAndLayerTreeConcurrent, true);
+  assert.equal(application.authoringWorkSplitAcrossPermanentPanes, true);
   assert.equal(application.publicNodeDeletionPreflight, true);
   assert.equal(application.invalidDeletionControlsDisabled, true);
   assert.equal(application.deletionReasonAssociatedWithControl, true);
@@ -248,7 +248,7 @@ test(DESEN_APP_NAMED_SLOT_AUTHORING_ROOT_TEST_NAMES[4], () => {
   assert.equal(application.deletionSourceAndPreviewCommitAtomically, true);
   assert.equal(application.successfulDeletionClearsSelection, true);
   assert.equal(application.successfulInsertionSelectsNewLayer, true);
-  assert.equal(application.deletionFocusReturnsToLayersTab, true);
+  assert.equal(application.deletionFocusReturnsToLayersPane, true);
   assert.equal(application.failedDeletionPreservesSelectionAndFocus, true);
   assert.equal(application.slotChromeOutsideManagedCapabilitySubtree, true);
   assert.equal(adapter.managedSubtreeExplicit, true);

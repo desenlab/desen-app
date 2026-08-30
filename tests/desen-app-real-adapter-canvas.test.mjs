@@ -215,7 +215,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   assert.equal(currentRuntime.dynamicEdges, 0);
   assert.equal(
     currentRuntime.graphSha256,
-    "sha256:076a321a624f6d3dc08cf59a50bd9422fa395645ecd279ad407e6f1babb2314d",
+    "sha256:31ae666ee8c899f362b68a11a8b9eda5f353e9e8c4177d662bcfc766dba51f84",
   );
   assert.equal(
     graphModule(currentRuntime.modules, APPLICATION).imports.includes(
@@ -249,14 +249,40 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.artifact.application.lifecycle.mismatchDisposesBeforeFailure, true);
   assert.equal(built.artifact.application.lifecycle.preflightFailureDisposesBeforeFailure, true);
   assert.equal(built.artifact.application.lifecycle.effectCleanupDisposes, true);
-  assert.equal(built.currentCompatibility.application.ui.selectionOverlay, true);
+  assert.equal(built.currentCompatibility.application.ui.selectionOverlay, undefined);
   assert.equal(
     built.currentCompatibility.application.ui.selectionOverlayOutsideManagedCapabilitySubtree,
+    undefined,
+  );
+  assert.deepEqual(built.currentCompatibility.application.ui.selectionStatus, {
+    owner: "LEFT_AUTHORING_PANEL",
+    live: true,
+    outsideManagedCapabilitySubtree: true,
+  });
+  assert.deepEqual(built.currentCompatibility.application.ui.diagnosticStatus, {
+    owner: "RIGHT_INSPECTOR",
+    selectable: true,
+    outsideManagedCapabilitySubtree: true,
+  });
+  assert.equal(built.currentCompatibility.application.ui.previewFrameEditorChromeRendered, false);
+  assert.equal(
+    built.currentCompatibility.application.ui.optionalAdapterDesignChromeCapabilityRetained,
     true,
   );
   assert.equal(built.currentCompatibility.authority.source.application.directReactDomImports, 0);
   assert.equal(
+    built.currentCompatibility.successor.stableSourceSelectionOverlayOwnedBySuccessor,
+    undefined,
+  );
+  assert.equal(
     built.currentCompatibility.successor.historicalNoSelectionOverlayNonclaimAppliedToCurrentApp,
+    undefined,
+  );
+  assert.equal(built.currentCompatibility.successor.stableSourceSelectionStatusOwnedByApp, true);
+  assert.equal(built.currentCompatibility.successor.selectionStatusRehomedToAuthoringPanel, true);
+  assert.equal(built.currentCompatibility.successor.diagnosticStatusRehomedToRightInspector, true);
+  assert.equal(
+    built.currentCompatibility.successor.currentApplicationAdapterDesignChromeEnabled,
     false,
   );
   assert.equal(built.currentCompatibility.successor.publicDiagnosticIndexOnly, true);
@@ -306,7 +332,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
     true,
   );
   assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
-  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
+  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, undefined);
+  assert.equal(built.currentCompatibility.successor.splitAuthoringPanesAlwaysRendered, true);
   assert.equal(built.currentCompatibility.successor.compactStableDropBoundariesImplemented, true);
   assert.equal(built.currentCompatibility.successor.stableNestedDragHoverImplemented, true);
   assert.equal(
@@ -347,6 +374,11 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
     "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node scripts/verify-desen-app-named-slot-authoring.mjs",
   );
   assert.equal(built.currentCompatibility.successor.dynamicEditingImplemented, false);
+  assert.equal(built.currentCompatibility.successor.persistenceImplemented, undefined);
+  assert.equal(built.currentCompatibility.successor.runOrPublishImplemented, undefined);
+  assert.equal(built.currentCompatibility.successor.sourcePersistenceSuccessorAuthenticated, true);
+  assert.equal(built.currentCompatibility.successor.currentDesignRunImplemented, true);
+  assert.equal(built.currentCompatibility.successor.publishActivationSuccessorAuthenticated, true);
 });
 
 test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[4], () => {
@@ -423,8 +455,8 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[6], () => {
     ),
     replaceOnce(
       applicationSource,
-      "surfaceId={selectedSurface.id}\n          />",
-      'surfaceId={selectedSurface.id}\n            {...({ surfaceId: "sign-in" })}\n          />',
+      "showStatus={false}\n                  surfaceId={selectedSurface.id}\n                />",
+      'showStatus={false}\n                  surfaceId={selectedSurface.id}\n                  {...({ surfaceId: "sign-in" })}\n                />',
     ),
     replaceOnce(
       replaceOnce(
@@ -715,6 +747,28 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[8], () => {
     `sha256:${"0".repeat(64)}`;
   assert.throws(
     () => verifyDesenAppRealAdapterCanvasGraphPolicy(codeSubstitution, hostSourceAuditArtifact),
+    expectedError("HOST_GRAPH_IDENTITY_DRIFT"),
+  );
+
+  const stackSubstitution = cloneGraph();
+  graphModule(
+    stackSubstitution,
+    "packages/reference-catalog-web/dist/components/stack.js",
+  ).codeSha256 = `sha256:${"0".repeat(64)}`;
+  assert.throws(
+    () => verifyDesenAppRealAdapterCanvasGraphPolicy(stackSubstitution, hostSourceAuditArtifact),
+    expectedError("HOST_GRAPH_IDENTITY_DRIFT"),
+  );
+
+  const forgedSuccessorHost = structuredClone(hostSourceAuditArtifact);
+  const forgedHostStack = forgedSuccessorHost.runtimeResolution.modules.find(
+    ({ id }) => id === "packages/reference-catalog-web/dist/components/stack.js",
+  );
+  forgedHostStack.codeBytes = 1_797;
+  forgedHostStack.codeSha256 =
+    "sha256:239cd6b6e1ab0face17c98705c523b9dcd8483ab3b5f771406f1f4d3d65c24de";
+  assert.throws(
+    () => verifyDesenAppRealAdapterCanvasGraphPolicy(cloneGraph(), forgedSuccessorHost),
     expectedError("HOST_GRAPH_IDENTITY_DRIFT"),
   );
 });

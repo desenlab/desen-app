@@ -875,10 +875,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
   currentReaderCount: 50,
   liveVerification: "PASS",
 });
-const M09_T14_PROOF_READER_CHECKPOINT = Object.freeze({
+const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 55,
-  headSha256: "f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17",
+  sequence: 56,
+  headSha256: "1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a",
   frozenArtifactCount: 49,
   currentReaderCount: 98,
   liveVerification: "PASS",
@@ -2408,11 +2408,11 @@ export function validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt) {
           liveVerification: liveReceipt.status,
         }
       : null;
-  if (!isDeepStrictEqual(projection, M09_T14_PROOF_READER_CHECKPOINT)) {
+  if (!isDeepStrictEqual(projection, CURRENT_PROOF_READER_CHECKPOINT)) {
     fail(
       "AFFECTED_PROMOTION_CUTOVER_DRIFT",
       "Promotion evidence does not match the live proof-reader checkpoint authority.",
-      { expected: M09_T14_PROOF_READER_CHECKPOINT, actual: projection },
+      { expected: CURRENT_PROOF_READER_CHECKPOINT, actual: projection },
     );
   }
   return liveReceipt;

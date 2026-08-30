@@ -149,6 +149,7 @@ test("[determinism] two independent evidence builds are byte-identical", async (
   });
   assert.deepEqual(second.artifactBytes, built.artifactBytes);
   assert.equal(second.artifactSha256, built.artifactSha256);
+  assert.equal(second.currentCompatibilitySha256, built.currentCompatibilitySha256);
   assert.notEqual(second.runtimeSuiteReceipt, built.runtimeSuiteReceipt);
 });
 
@@ -380,6 +381,7 @@ test("[artifact] verifies exact bytes and rejects one changed byte", async () =>
   assert.equal(receipt.runtimeCases, 9);
   assert.equal(receipt.rootMutationCases, 13);
   assert.equal(receipt.prerequisiteArtifacts, 13);
+  assert.equal(receipt.currentCompatibilitySha256, built.currentCompatibilitySha256);
   await assert.rejects(
     verifyReferenceHostWebChannelConsumptionEvidence({
       artifactBytes: changedByte(built.artifactBytes),

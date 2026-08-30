@@ -79,7 +79,7 @@ const APP_SQLITE_SOURCE_SHA256 = "cec7d1437d7e222facdc5681ae720ec6bc3b77fe3f9f5f
 const APP_TEST_SHA256 = "4263aa47e7f6d647fe9e08acd19dc305fd53f0acc06383c9b300381a27a008f2";
 const APP_TEST_SUPPORT_SHA256 = "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5";
 const APP_TYPE_TEST_SHA256 = "ddda51882a5783b9a3fe291da84fbddd7d7cb298a91c6f0a1ec4ae7515a8d0d8";
-const ROOT_TEST_SHA256 = "5a607fdd2e713a31076fa5d73c7c789224d85829230f2d3e6b2d43b1095edc6e";
+const ROOT_TEST_SHA256 = "f45e786b394682f3a8be9688cc745fe8a940845ab74443fdbb1fa54115177f8a";
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
 
@@ -597,7 +597,11 @@ async function authenticatedFrozenArtifactProjection() {
   if (artifact.schemaVersion !== 1 || artifact.task !== "M07-T10" || artifact.result !== "PASS") {
     fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T10 artifact identity drifted.");
   }
-  return artifact;
+  return Object.freeze({
+    artifact: deepFreeze(artifact),
+    artifactBytes: Buffer.from(frozen.bytes),
+    artifactSha256: frozen.sha256,
+  });
 }
 
 function compareText(left, right) {
@@ -1481,7 +1485,8 @@ export async function buildControlPlaneRuntimeTransitionRacesEvidence(options) {
     new Set(["prerequisiteBytes", "runtimeSuiteReceipt", "trackedFileBytes"]),
     "build options",
   );
-  const frozenArtifact = await authenticatedFrozenArtifactProjection();
+  const frozen = await authenticatedFrozenArtifactProjection();
+  const frozenArtifact = frozen.artifact;
   const prerequisiteBytes = captureByteOverrides(
     captured.prerequisiteBytes,
     CONTROL_PLANE_RUNTIME_TRANSITION_RACES_PREREQUISITE_PINS.map(({ path: pinPath }) => pinPath),
@@ -1508,7 +1513,7 @@ export async function buildControlPlaneRuntimeTransitionRacesEvidence(options) {
     ]);
   const { distribution, publicBoundary } = boundaryAndDistribution;
 
-  const artifact = deepFreeze({
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: PROOF_ID,
     profile: "desen.control-plane.runtime-transition-races-proof.v1",
@@ -1598,12 +1603,17 @@ export async function buildControlPlaneRuntimeTransitionRacesEvidence(options) {
       "node --test tests/control-plane-runtime-transition-races.test.mjs",
     ],
   });
-  const artifactText = await format(JSON.stringify(artifact), { parser: "json", printWidth: 100 });
-  const artifactBytes = Buffer.from(artifactText, "utf8");
+  const currentCompatibilityText = await format(JSON.stringify(currentCompatibility), {
+    parser: "json",
+    printWidth: 100,
+  });
+  const currentCompatibilityBytes = Buffer.from(currentCompatibilityText, "utf8");
   return Object.freeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifact: frozenArtifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+    currentCompatibilitySha256: sha256(currentCompatibilityBytes),
     runtimeSuiteReceipt,
   });
 }
@@ -1689,6 +1699,7 @@ export async function verifyControlPlaneRuntimeTransitionRacesEvidence(options) 
     task: "M07-T10",
     result: "PASS",
     artifactSha256: built.artifactSha256,
+    currentCompatibilitySha256: built.currentCompatibilitySha256,
     transitionCases: built.artifact.claims.transitionMatrix.caseCount,
     packageRuntimeCases: built.artifact.tests.packageRuntimeCases,
     compileTimeNegativeCases: built.artifact.tests.compilerNegativeCases,

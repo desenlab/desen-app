@@ -11,7 +11,7 @@ const REFERENCE_CATALOG_PACKAGE = Object.freeze({
   id: "run.desen.reference.sign-in",
   version: "0.1.0",
   target: "web-react",
-  observedPackageDigest: "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+  observedPackageDigest: "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051",
   catalog: referenceCatalog,
 }) satisfies PublishCatalogPackageCandidate;
 

@@ -12,6 +12,210 @@ import type { DesenEditorDocument } from "@desen/editor-core";
 
 type JsonObject = Readonly<Record<string, unknown>>;
 
+const AUTHORING_SURFACE_ID = /^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u;
+const REQUIRED_AUTHORING_FRAME_KEYS = Object.freeze(["height", "width", "x", "y"] as const);
+
+/** Visual safety limits applied before Source canvas metadata can influence App layout. */
+export const AUTHORING_CANVAS_FRAME_LIMITS = Object.freeze({
+  maxHeight: 16_384,
+  maxWidth: 16_384,
+  minHeight: 1,
+  minWidth: 1,
+});
+
+/** Exact dimensions of the selected authored page frame, with no placement authority. */
+export interface AuthoringCanvasFrame {
+  readonly width: number;
+  readonly height: number;
+  /** Factual dimension label; it intentionally does not infer a device category. */
+  readonly label: string;
+}
+
+/** Stable reason why the selected Source frame could not be projected. */
+export type AuthoringCanvasFrameRejectionReason =
+  | "authoring-missing"
+  | "canvas-invalid"
+  | "canvas-missing"
+  | "document-invalid"
+  | "frame-invalid"
+  | "frame-missing"
+  | "surface-id-invalid"
+  | "surface-missing";
+
+/** Complete immutable success projection for one selected Source surface. */
+export interface AuthoringCanvasFrameReady {
+  readonly status: "ready";
+  readonly frame: AuthoringCanvasFrame;
+}
+
+/** Fail-closed projection with no partial frame, coordinate, or fallback authority. */
+export interface AuthoringCanvasFrameRejected {
+  readonly status: "rejected";
+  readonly reason: AuthoringCanvasFrameRejectionReason;
+}
+
+/** Closed active-canvas projection for the selected Source surface. */
+export type AuthoringCanvasFrameProjection =
+  AuthoringCanvasFrameReady | AuthoringCanvasFrameRejected;
+
+function rejectedAuthoringCanvasFrame(
+  reason: AuthoringCanvasFrameRejectionReason,
+): AuthoringCanvasFrameRejected {
+  return Object.freeze({ status: "rejected", reason });
+}
+
+function ownDataObject(value: unknown): JsonObject | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
+
+  try {
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) return undefined;
+
+    for (const key of Reflect.ownKeys(value)) {
+      if (typeof key !== "string") return undefined;
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (descriptor?.enumerable !== true || !("value" in descriptor)) return undefined;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return value as JsonObject;
+}
+
+function ownDataValue(record: JsonObject, key: string): unknown {
+  try {
+    const descriptor = Object.getOwnPropertyDescriptor(record, key);
+    return descriptor?.enumerable === true && "value" in descriptor ? descriptor.value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function hasOwnDataValue(record: JsonObject, key: string): boolean {
+  try {
+    const descriptor = Object.getOwnPropertyDescriptor(record, key);
+    return descriptor?.enumerable === true && "value" in descriptor;
+  } catch {
+    return false;
+  }
+}
+
+function hasExactAuthoringFrameKeys(record: JsonObject): boolean {
+  try {
+    const ownKeys = Reflect.ownKeys(record);
+    return (
+      ownKeys.length === REQUIRED_AUTHORING_FRAME_KEYS.length &&
+      ownKeys.every(
+        (key) =>
+          typeof key === "string" &&
+          REQUIRED_AUTHORING_FRAME_KEYS.some((requiredKey) => requiredKey === key),
+      )
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isBoundedPositiveSafeInteger(
+  value: unknown,
+  minimum: number,
+  maximum: number,
+): value is number {
+  return (
+    typeof value === "number" && Number.isSafeInteger(value) && value >= minimum && value <= maximum
+  );
+}
+
+function isSafeCanvasCoordinate(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value);
+}
+
+function projectDeclaredAuthoringFrame(value: unknown): AuthoringCanvasFrame | undefined {
+  const record = ownDataObject(value);
+  if (record === undefined || !hasExactAuthoringFrameKeys(record)) return undefined;
+
+  const width = ownDataValue(record, "width");
+  const height = ownDataValue(record, "height");
+  const x = ownDataValue(record, "x");
+  const y = ownDataValue(record, "y");
+
+  if (
+    !isBoundedPositiveSafeInteger(
+      width,
+      AUTHORING_CANVAS_FRAME_LIMITS.minWidth,
+      AUTHORING_CANVAS_FRAME_LIMITS.maxWidth,
+    ) ||
+    !isBoundedPositiveSafeInteger(
+      height,
+      AUTHORING_CANVAS_FRAME_LIMITS.minHeight,
+      AUTHORING_CANVAS_FRAME_LIMITS.maxHeight,
+    ) ||
+    !isSafeCanvasCoordinate(x) ||
+    !isSafeCanvasCoordinate(y)
+  ) {
+    return undefined;
+  }
+
+  // The active route owns centering. Source-space coordinates can describe a multi-frame source
+  // workspace, but they cannot become CSS placement authority for this single selected surface.
+  return Object.freeze({ width, height, label: `${width} × ${height} px` });
+}
+
+/**
+ * Projects the selected Source surface's declared frame into inert App layout dimensions.
+ *
+ * The candidate crosses the same exact Catalog-aware validation boundary as the authoring model.
+ * No default frame is fabricated, and Source-space x/y values are admitted but never exposed.
+ */
+export function projectAuthoringCanvasFrame(
+  document: DesenEditorDocument,
+  surfaceId: string,
+): AuthoringCanvasFrameProjection {
+  if (typeof surfaceId !== "string" || !AUTHORING_SURFACE_ID.test(surfaceId)) {
+    return rejectedAuthoringCanvasFrame("surface-id-invalid");
+  }
+
+  let admittedDocument: unknown;
+  try {
+    const catalogSet = validateDesenInteractionCatalogSet([referenceCatalog]);
+    if (!catalogSet.valid) return rejectedAuthoringCanvasFrame("document-invalid");
+    const source = validateDesenSourceInteractionContracts(document, catalogSet.value);
+    if (!source.valid) return rejectedAuthoringCanvasFrame("document-invalid");
+    admittedDocument = source.value;
+  } catch {
+    return rejectedAuthoringCanvasFrame("document-invalid");
+  }
+
+  const documentRecord = ownDataObject(admittedDocument);
+  if (documentRecord === undefined) return rejectedAuthoringCanvasFrame("document-invalid");
+
+  const surfaces = ownDataObject(ownDataValue(documentRecord, "surfaces"));
+  if (surfaces === undefined || !hasOwnDataValue(surfaces, surfaceId)) {
+    return rejectedAuthoringCanvasFrame("surface-missing");
+  }
+  if (!hasOwnDataValue(documentRecord, "authoring")) {
+    return rejectedAuthoringCanvasFrame("authoring-missing");
+  }
+
+  const authoring = ownDataObject(ownDataValue(documentRecord, "authoring"));
+  if (authoring === undefined) return rejectedAuthoringCanvasFrame("canvas-invalid");
+  if (!hasOwnDataValue(authoring, "canvas")) {
+    return rejectedAuthoringCanvasFrame("canvas-missing");
+  }
+
+  const canvas = ownDataObject(ownDataValue(authoring, "canvas"));
+  if (canvas === undefined) return rejectedAuthoringCanvasFrame("canvas-invalid");
+  if (!hasOwnDataValue(canvas, surfaceId)) {
+    return rejectedAuthoringCanvasFrame("frame-missing");
+  }
+
+  const frame = projectDeclaredAuthoringFrame(ownDataValue(canvas, surfaceId));
+  return frame === undefined
+    ? rejectedAuthoringCanvasFrame("frame-invalid")
+    : Object.freeze({ status: "ready", frame });
+}
+
 interface CapabilityMetadata {
   readonly displayName: string;
   readonly slotContracts: readonly AuthoringSlotContract[];

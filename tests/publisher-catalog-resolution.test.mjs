@@ -34,7 +34,7 @@ test("accepts real deterministic M06-T02 Catalog-resolution evidence", async () 
     id: "run.desen.reference.sign-in",
     version: "0.1.0",
     target: "web-react",
-    packageDigest: "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+    packageDigest: "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051",
   });
 });
 
@@ -44,6 +44,11 @@ test("two independent evidence builds are byte-identical and preserve honest non
 
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
   assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.equal(first.currentCompatibilitySha256, second.currentCompatibilitySha256);
+  assert.equal(
+    first.currentCompatibility.fixture.exactTuple.packageDigest,
+    "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051",
+  );
   assert.equal(first.artifact.trustBoundary.packageByteAuthenticationPerformedHere, false);
   assert.equal(first.artifact.trustBoundary.canonicalCatalogJsonUsedAsPackageDigest, false);
   assert.match(

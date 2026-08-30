@@ -82,7 +82,7 @@ const APP_SUITE_NAME = "M07-T09 bounded activation fault matrix";
 const APP_TEST_SHA256 = "c654b23a18d1386b287073796d5f6a887dead9fd2c891efdd8aa2e3d47047f67";
 const APP_TEST_SUPPORT_SHA256 = "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5";
 const APP_TYPE_TEST_SHA256 = "70ba16f2896f97a8957d8e47ad07f76536e42dcacfe23d8afe34e05d2f726212";
-const ROOT_TEST_SHA256 = "a9aa2e79bd1f323bcb2a9976b6dc9be2da8590cd2708fcafda0bbf72034c63bb";
+const ROOT_TEST_SHA256 = "9136dbe11747678bbda40ae63768f20daa7005f7db83f17fce03d40a3cef840b";
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
 
@@ -687,7 +687,11 @@ async function authenticatedFrozenArtifactProjection() {
   if (artifact.schemaVersion !== 1 || artifact.task !== "M07-T09" || artifact.result !== "PASS") {
     fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T09 artifact identity drifted.");
   }
-  return artifact;
+  return Object.freeze({
+    artifact: deepFreeze(artifact),
+    artifactBytes: Buffer.from(frozen.bytes),
+    artifactSha256: frozen.sha256,
+  });
 }
 
 function compareText(left, right) {
@@ -1486,7 +1490,8 @@ export async function buildControlPlaneRuntimeFaultInjectionEvidence(options) {
     new Set(["prerequisiteBytes", "runtimeSuiteReceipt", "trackedFileBytes"]),
     "build options",
   );
-  const frozenArtifact = await authenticatedFrozenArtifactProjection();
+  const frozen = await authenticatedFrozenArtifactProjection();
+  const frozenArtifact = frozen.artifact;
   const prerequisiteBytes = captureByteOverrides(
     captured.prerequisiteBytes,
     CONTROL_PLANE_RUNTIME_FAULT_INJECTION_PREREQUISITE_PINS.map(({ path: pinPath }) => pinPath),
@@ -1520,7 +1525,7 @@ export async function buildControlPlaneRuntimeFaultInjectionEvidence(options) {
     traceProjection(trackedFileBytes),
   ]);
 
-  const artifact = deepFreeze({
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: PROOF_ID,
     profile: "desen.control-plane.runtime-fault-injection-proof.v1",
@@ -1591,12 +1596,17 @@ export async function buildControlPlaneRuntimeFaultInjectionEvidence(options) {
       "node --test tests/control-plane-runtime-fault-injection.test.mjs",
     ],
   });
-  const artifactText = await format(JSON.stringify(artifact), { parser: "json", printWidth: 100 });
-  const artifactBytes = Buffer.from(artifactText, "utf8");
+  const currentCompatibilityText = await format(JSON.stringify(currentCompatibility), {
+    parser: "json",
+    printWidth: 100,
+  });
+  const currentCompatibilityBytes = Buffer.from(currentCompatibilityText, "utf8");
   return Object.freeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifact: frozenArtifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+    currentCompatibilitySha256: sha256(currentCompatibilityBytes),
     runtimeSuiteReceipt,
   });
 }
@@ -1682,6 +1692,7 @@ export async function verifyControlPlaneRuntimeFaultInjectionEvidence(options) {
     task: "M07-T09",
     result: "PASS",
     artifactSha256: built.artifactSha256,
+    currentCompatibilitySha256: built.currentCompatibilitySha256,
     faultCases: built.artifact.claims.boundaryMatrix.caseCount,
     packageRuntimeCases: built.artifact.tests.packageRuntimeCases,
     compileTimeNegativeCases: built.artifact.tests.compilerNegativeCases,

@@ -201,6 +201,7 @@ function ManagedAdapterSurface({
   mode,
   projectId,
   selection,
+  showDesignChrome,
   surfaceId,
 }: Readonly<{
   readonly authoringModel: CatalogAuthoringModel;
@@ -209,6 +210,8 @@ function ManagedAdapterSurface({
   readonly mode: DesenAdapterCanvasMode;
   readonly projectId: string;
   readonly selection: AuthoringComponentSelection | null;
+  /** The embedding host may re-home presentation into its own durable chrome. */
+  readonly showDesignChrome: boolean;
   readonly surfaceId: string;
 }>) {
   const result = useRuntimeReactSurface(input);
@@ -254,10 +257,10 @@ function ManagedAdapterSurface({
     const requestId = diagnostics?.focusRequestId ?? 0;
     if (requestId <= handledFocusRequest.current) return;
     handledFocusRequest.current = requestId;
-    if (mode === "design" && selectedDiagnostic !== undefined) {
+    if (showDesignChrome && mode === "design" && selectedDiagnostic !== undefined) {
       diagnosticPlaceholderRef.current?.focus({ preventScroll: true });
     }
-  }, [diagnostics?.focusRequestId, mode, selectedDiagnostic]);
+  }, [diagnostics?.focusRequestId, mode, selectedDiagnostic, showDesignChrome]);
 
   return (
     <>
@@ -274,13 +277,13 @@ function ManagedAdapterSurface({
           <RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />
         </div>
       </fieldset>
-      {mode === "design" && selectedDiagnostic !== undefined ? (
+      {showDesignChrome && mode === "design" && selectedDiagnostic !== undefined ? (
         <DiagnosticPlaceholderOverlay
           diagnostic={selectedDiagnostic.diagnostic}
           occurrence={selectedDiagnostic.occurrence}
           placeholderRef={diagnosticPlaceholderRef}
         />
-      ) : mode === "design" ? (
+      ) : showDesignChrome && mode === "design" ? (
         <SelectionOverlay projection={projection} />
       ) : null}
     </>
@@ -316,6 +319,10 @@ export interface DesenAdapterCanvasProps {
   readonly diagnostics?: DesenAdapterCanvasDiagnostics | null;
   /** Interaction presentation; omission keeps the safe interaction-disabled Design default. */
   readonly mode?: DesenAdapterCanvasMode;
+  /** Whether App-owned selection and diagnostic cards are rendered on the adapter frame. */
+  readonly showDesignChrome?: boolean;
+  /** Whether the host-owned Design/Run status is rendered directly above the exact adapter output. */
+  readonly showStatus?: boolean;
   /** App-owned Runtime ports; omission preserves the deny-all preview boundary. */
   readonly hostPorts?: RuntimeHostPorts;
   /** Exact App project route identity. */
@@ -342,6 +349,8 @@ export function DesenAdapterCanvas({
   mode = "design",
   projectId,
   selection = null,
+  showDesignChrome = true,
+  showStatus = true,
   surfaceId,
 }: DesenAdapterCanvasProps) {
   const routeIdentity = useMemo(
@@ -427,11 +436,13 @@ export function DesenAdapterCanvas({
       data-adapter-canvas-mode={mode}
       data-adapter-interactions={mode === "run" ? "enabled" : "disabled"}
     >
-      <p className={styles.adapterCanvasNote} data-adapter-canvas-status={mode}>
-        {mode === "design"
-          ? "Design preview · controls are disabled."
-          : "Run preview · real adapter controls use the selected synthetic fixture."}
-      </p>
+      {showStatus ? (
+        <p className={styles.adapterCanvasNote} data-adapter-canvas-status={mode}>
+          {mode === "design"
+            ? "Design preview · controls are disabled."
+            : "Run preview · real adapter controls use the selected synthetic fixture."}
+        </p>
+      ) : null}
       <div className={styles.adapterCanvasViewport}>
         <ManagedAdapterSurface
           authoringModel={authoringModel}
@@ -440,6 +451,7 @@ export function DesenAdapterCanvas({
           mode={mode}
           projectId={projectId}
           selection={selection}
+          showDesignChrome={showDesignChrome}
           surfaceId={surfaceId}
         />
       </div>

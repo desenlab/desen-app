@@ -229,8 +229,14 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
   assert.equal(built.currentCompatibility.successor.exactPublicRuntimeAdapterPathAllowed, true);
   assert.equal(
     built.currentCompatibility.successor.sourceIdentitySelectionOverlayImplemented,
+    undefined,
+  );
+  assert.equal(
+    built.currentCompatibility.successor.sourceIdentitySelectionStatusRehomedToAuthoringPanel,
     true,
   );
+  assert.equal(built.currentCompatibility.successor.diagnosticStatusRehomedToRightInspector, true);
+  assert.equal(built.currentCompatibility.successor.previewFrameEditorChromeRendered, false);
   assert.equal(
     built.currentCompatibility.successor.historicalNoSelectionNonclaimAppliedToCurrentApp,
     false,
@@ -298,7 +304,8 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
     true,
   );
   assert.equal(built.currentCompatibility.successor.componentPaletteRenderLimit, 24);
-  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, true);
+  assert.equal(built.currentCompatibility.successor.activeTabOnlyAuthoringWork, undefined);
+  assert.equal(built.currentCompatibility.successor.splitAuthoringPanesAlwaysRendered, true);
   assert.equal(
     built.currentCompatibility.successor.exactSlotSelectionAndEditCaptureImplemented,
     true,
@@ -318,8 +325,11 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
     "node scripts/verify-desen-app-structured-inspector.mjs && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:named-slots && node scripts/verify-desen-app-named-slot-authoring.mjs",
   );
   assert.equal(built.currentCompatibility.successor.dynamicEditingImplemented, false);
-  assert.equal(built.currentCompatibility.successor.persistenceUiImplemented, false);
-  assert.equal(built.currentCompatibility.successor.runOrPublishImplemented, false);
+  assert.equal(built.currentCompatibility.successor.persistenceUiImplemented, undefined);
+  assert.equal(built.currentCompatibility.successor.runOrPublishImplemented, undefined);
+  assert.equal(built.currentCompatibility.successor.currentPersistenceUiImplemented, true);
+  assert.equal(built.currentCompatibility.successor.currentDesignRunImplemented, true);
+  assert.equal(built.currentCompatibility.successor.currentPublishActivationImplemented, true);
   assert.equal(built.currentCompatibility.boundary.imports.runtimeCoreImports, 5);
   assert.equal(built.currentCompatibility.boundary.imports.runtimeReactImports, 2);
   assert.equal(built.currentCompatibility.boundary.imports.applicationReactDomImports, 0);
@@ -352,6 +362,61 @@ test(DESEN_APP_CATALOG_PANEL_LAYER_TREE_ROOT_TEST_NAMES[3], () => {
     dedicatedComponentDragHandle: true,
     dedicatedLayerDragHandle: true,
     componentPanelWideDropSurface: true,
+  });
+  assert.equal(built.currentCompatibility.application.ui.tabs, undefined);
+  assert.equal(built.currentCompatibility.application.ui.tabKeyboardKeys, undefined);
+  assert.equal(built.currentCompatibility.application.ui.successorSelectionOverlay, undefined);
+  assert.deepEqual(
+    {
+      authoringLayout: built.currentCompatibility.application.ui.authoringLayout,
+      authoringPanes: built.currentCompatibility.application.ui.authoringPanes,
+      splitAuthoringPanesAlwaysRendered:
+        built.currentCompatibility.application.ui.splitAuthoringPanesAlwaysRendered,
+    },
+    {
+      authoringLayout: "PERMANENT_VERTICAL_SPLIT",
+      authoringPanes: ["Components", "Layers"],
+      splitAuthoringPanesAlwaysRendered: true,
+    },
+  );
+  assert.deepEqual(built.currentCompatibility.application.ui.currentSelectionStatus, {
+    task: "M09-T04",
+    exactSourceIdentityOnly: true,
+    publicDiagnosticIndexOnly: true,
+    owner: "LEFT_AUTHORING_PANEL",
+    outsideManagedCapabilitySubtree: true,
+    previewFrameEditorChromeRendered: false,
+    privateDomOrReactInspection: false,
+  });
+  assert.deepEqual(built.currentCompatibility.application.ui.currentDiagnosticStatus, {
+    owner: "RIGHT_INSPECTOR",
+    outsideManagedCapabilitySubtree: true,
+    previewFrameDiagnosticPlaceholderRendered: false,
+  });
+  assert.equal(
+    built.currentCompatibility.application.ui.layerHierarchySemantics,
+    "AUTHORING_SOURCE_TREE_WITH_PUBLIC_EDITOR_CORE_MUTATIONS",
+  );
+  assert.equal(
+    built.currentCompatibility.application.ui.insertionControls,
+    "CATALOG_ADMITTED_ADD_AND_DEDICATED_DRAG_HANDLE",
+  );
+  assert.equal(
+    built.currentCompatibility.application.ui.successorCanvas.officialBundleOnly,
+    undefined,
+  );
+  assert.equal(
+    built.currentCompatibility.application.ui.successorCanvas.controlsDisabled,
+    undefined,
+  );
+  assert.deepEqual(built.currentCompatibility.application.ui.successorCanvas, {
+    task: "M09-T03",
+    exactPublicReferenceRegistry: true,
+    publisherBackedDraftOrOfficialFallback: true,
+    designControlsDisabled: true,
+    runControlsInteractiveAgainstSyntheticFixture: true,
+    previewFrameEditorChromeRendered: false,
+    unknownSurfaceSubstitution: false,
   });
 });
 
