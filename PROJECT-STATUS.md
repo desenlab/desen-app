@@ -1371,8 +1371,12 @@ remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635
 Compatibility sequence 56 advances the exact sequence-55 head to
 `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
 49 frozen artifacts and 98 reader identities. Historical package/Bundle tuples, frozen artifacts,
-and their pins remain unchanged. No task is marked complete by this compatibility repair: M10
-remains 0/9 and M10-T01 remains next.
+and their pins remain unchanged. The sequence-56-derived current CI compatibility authority pins
+selector `sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
+`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
+affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`; the preceding M09-T14
+promotion receipts remain historical and unchanged. No task is marked complete by this
+compatibility repair: M10 remains 0/9 and M10-T01 remains next.
 
 ## Current milestone
 
@@ -4539,6 +4543,11 @@ M09-T14/G09 evidence:
   advances the exact sequence-55 head to
   `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
   49 frozen artifacts, 98 reader identities, and historical pins; M10 remains 0/9
+- current CI compatibility authority derived from sequence 56: selector
+  `sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
+  `sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and T10 affected plan
+  `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`; the M09-T14 values
+  above remain historical receipts
 
 ## Status vocabulary
 

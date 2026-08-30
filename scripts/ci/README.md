@@ -1429,5 +1429,10 @@ official-derived Bundle revision is
 remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`.
 Append-only sequence 56 advances the exact sequence-55 head to
 `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
-49 frozen artifacts and 98 reader identities. This reseal rewrites no historical artifact or pin,
-makes no hosted-CI claim, and does not advance M10 beyond 0/9.
+49 frozen artifacts and 98 reader identities. The sequence-56-derived current CI compatibility
+authority pins selector
+`sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
+`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
+affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`;
+the preceding M09-T14 values remain historical receipts. This reseal rewrites no historical
+artifact or pin, makes no hosted-CI claim, and does not advance M10 beyond 0/9.

@@ -1146,8 +1146,12 @@ remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635
 Compatibility checkpoint sequence 56 advances the exact sequence-55 head to
 `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a`, preserving all 49
 frozen artifacts and 98 reader identities. Historical package/Bundle tuples and proof pins remain
-unchanged. This is corrective compatibility work, not an M10 completion: M10 remains 0/9 and
-M10-T01 remains next.
+unchanged. The sequence-56-derived current CI compatibility authority pins selector
+`sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
+`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
+affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`; the preceding M09-T14
+promotion receipts remain historical and unchanged. This is corrective compatibility work, not an
+M10 completion: M10 remains 0/9 and M10-T01 remains next.
 
 M09-T14 and G09 are `DONE`; implementation progress is 109/145 (75%), M09 is 14/14, and proof gates
 are 11/13. P-07, P-09, and P-10 remain `PARTIAL`; P-08 remains `NOT_PROVEN`; P-12 remains

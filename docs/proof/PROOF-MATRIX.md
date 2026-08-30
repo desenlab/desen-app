@@ -2938,7 +2938,7 @@ readers authenticate the exact `10,000 ms` per-test timeout successor at
 edit reproduces the frozen 24,485-byte test receipt, while the frozen T14 artifact remains
 `sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b` unchanged. Checkpoint,
 promotion, selector, and fourteen M09 root reader suites pass 78/78, 20/20, 23/23, and 179/179.
-Promotion pins the current selector at
+Historical M09-T14 promotion pins the selector at
 `sha256:2855cbeedb55ede5d9db18a6b186ac07796afbc4d512f5a0aa9197bc5f177fd1`, the
 required-affected runner authority at
 `sha256:b77b35a81915ec41554ab3505895fe98c0a4299ec9bf7d680dec320bbf3fb744`, and the T10 affected
@@ -2955,7 +2955,11 @@ remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635
 Reader checkpoint sequence 56 advances the exact sequence-55 head to
 `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a`, preserving all 49
 frozen artifacts and 98 reader identities. This compatibility receipt records no M10 completion;
-M10 remains 0/9.
+M10 remains 0/9. The sequence-56-derived current CI compatibility authority pins selector
+`sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
+`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
+affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`.
+The preceding M09-T14 promotion receipts remain historical and unchanged.
 
 These local receipts make no required-gate or hosted-CI claim. They close the fixed local
 saved-Source publication and activation profile, not remote deployment, arbitrary channel
