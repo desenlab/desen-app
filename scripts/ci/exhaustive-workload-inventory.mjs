@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "8f76601e8d7439b8aa43b0f2e92e1aa4be572d6883824e97f32441519389927f";
+  "332cdaa40a2393d018c96478812ffdd8b41b8abf5c0adb293c21379214698701";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "1e8b4a2d5c990d879dcb8cd8cb85e1b791ac8376a2872c740e2b42757fc4c579";
+  "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "d144bf2b6f4850042ab93ddf903be9fee4fde5af0b44082bcaf6b7cbe4f7a72d";
+  "5146f101cb767c49f6f0b87fd6939be6bdfc348e5f4dcf8dd77399ac921d4ee3";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -621,6 +621,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "scripts/verify-desen-app-node-linked-diagnostics.mjs",
     "tests/desen-app-node-linked-diagnostics.test.mjs",
   ],
+  [
+    "desen-app-publish-activation",
+    "scripts/verify-desen-app-publish-activation.mjs",
+    "tests/desen-app-publish-activation.test.mjs",
+  ],
 ]);
 
 const NO_SHARED_MUTATION = SAFE_OBJECT_FREEZE({
@@ -1006,7 +1011,7 @@ function classifyPrerequisite({
   if (task === "test:public-package") {
     const expectedScript =
       "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs";
-    const reviewedEditorCoreProof = [
+    const reviewedPublicPackageProof = [
       "editor-core-source-document",
       "editor-core-stable-id-insert",
       "editor-core-structural-edits",
@@ -1017,11 +1022,18 @@ function classifyPrerequisite({
       "editor-core-persistence",
       "editor-core-continuous-validation",
       "editor-core-terminal-integration",
+      "desen-app-publish-activation",
     ].includes(currentProofId);
     const reviewedPackage =
-      packageName === "@desen/editor-core" ||
-      (currentProofId === "editor-core-persistence" && packageName === "@desen/editor-web");
-    if (!reviewedEditorCoreProof || !reviewedPackage || packageScripts[task] !== expectedScript) {
+      (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
+      ((currentProofId === "editor-core-persistence" ||
+        currentProofId === "desen-app-publish-activation") &&
+        packageName === "@desen/editor-web");
+    if (
+      !reviewedPublicPackageProof ||
+      !reviewedPackage ||
+      packageScripts[task] !== expectedScript
+    ) {
       fail(currentProofId + " uses an unreviewed public-package contract test.", {
         command,
         actual: packageScripts[task],
@@ -1580,7 +1592,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "d3b479cc998d6c84d53b9b0d64e6121033d94bbf9b502fcb9e7adc2487b3d908";
+  "c6655119e0b24594bced92b6b916917e0f336351c19cf338ee21d3b8d141f684";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

@@ -20,6 +20,8 @@ const SOURCE_PERSISTENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
+const PUBLISH_ACTIVATION_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json";
 const SHELL_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const REFERENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/reference-catalog-web-capability-artifact.json";
@@ -151,9 +153,41 @@ const T13_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
   "apps/desen-app/test/diagnostics-panel.test.tsx",
   "apps/desen-app/test/persistence-application.test.tsx",
 ]);
+const T14_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-preview.ts",
+  "apps/desen-app/src/authoring-publication.ts",
+  "apps/desen-app/src/publication-controls.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-publication.test.ts",
+  "apps/desen-app/test/publication-activation-integration.test.ts",
+  "apps/desen-app/test/publication-application.test.tsx",
+  "apps/desen-app/test/publication-controls.test.tsx",
+  "packages/editor-web/package.json",
+  "packages/editor-web/src/index.ts",
+  "packages/editor-web/src/local-bundle-channel-publication.ts",
+  "packages/editor-web/test/local-bundle-channel-publication.test.ts",
+  "packages/editor-web/test/public-package.mjs",
+  "packages/editor-web/test/public-package.types.mts",
+]);
+const T14_PUBLICATION_APPLICATION_TEST_PATH =
+  "apps/desen-app/test/publication-application.test.tsx";
+const T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT = Object.freeze({
+  bytes: 24_485,
+  sha256: "52e29b84745ff331556529612015b95b581bf3007118352ebad796ca9541e0e3",
+});
+const T14_LIVE_PUBLICATION_APPLICATION_TEST_RECEIPT = Object.freeze({
+  bytes: 24_493,
+  sha256: "5eba8a2b15cbcf992d0f04d0d7ad719c1a9fc42cdb66635ebc0eab679a221901",
+});
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ...T12_SUCCESSOR_RECEIPT_PATHS,
   ...T13_SUCCESSOR_RECEIPT_PATHS,
+  ...T14_SUCCESSOR_RECEIPT_PATHS,
   "apps/desen-app/package.json",
   "apps/desen-app/README.md",
   "apps/desen-app/src/application.tsx",
@@ -178,8 +212,10 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     FIXTURES_SCENARIOS_ARTIFACT_PATH,
     SOURCE_PERSISTENCE_ARTIFACT_PATH,
     NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
+    PUBLISH_ACTIVATION_ARTIFACT_PATH,
     ...T12_SUCCESSOR_RECEIPT_PATHS,
     ...T13_SUCCESSOR_RECEIPT_PATHS,
+    ...T14_SUCCESSOR_RECEIPT_PATHS,
     ADAPTER_CANVAS_SOURCE_PATH,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_SELECTION_TEST_PATH,
@@ -213,6 +249,9 @@ const CURRENT_TYPESCRIPT_SOURCE_PATHS = Object.freeze([
     ...TYPESCRIPT_SOURCE_PATHS,
     ...T12_SUCCESSOR_RECEIPT_PATHS.filter((entry) => /\/src\/.+\.(?:ts|tsx)$/u.test(entry)),
     ...T13_SUCCESSOR_RECEIPT_PATHS.filter((entry) => /\/src\/.+\.(?:ts|tsx)$/u.test(entry)),
+    ...T14_SUCCESSOR_RECEIPT_PATHS.filter((entry) =>
+      /^apps\/desen-app\/src\/.+\.(?:ts|tsx)$/u.test(entry),
+    ),
     ADAPTER_CANVAS_SOURCE_PATH,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_INSPECTOR_SOURCE_PATH,
@@ -286,11 +325,11 @@ const EXPECTED_NAMED_SLOT_DRAG_DROP_HANDLERS = Object.freeze(
   new Map([
     ["draggable", 3],
     ["onDragEnd", 2],
-    ["onDragEnter", 3],
-    ["onDragLeave", 2],
-    ["onDragOver", 3],
+    ["onDragEnter", 5],
+    ["onDragLeave", 3],
+    ["onDragOver", 5],
     ["onDragStart", 3],
-    ["onDrop", 2],
+    ["onDrop", 4],
   ]),
 );
 const EXPECTED_COMPONENTS = Object.freeze([
@@ -959,8 +998,12 @@ function verifyPackage(bytes, rootBytes) {
     "react-dom": "19.2.8",
   };
   const expectedDevDependencies = {
+    "@desen/control-plane-api": "workspace:*",
+    "@desen/editor-web": "workspace:*",
+    "@desen/reference-host-web-server": "workspace:*",
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.2",
+    "@types/node": "24.13.3",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     jsdom: "29.1.1",
@@ -1059,6 +1102,7 @@ function resolveRelativeImport(importerPath, specifier) {
       candidate === PREVIEW_FIDELITY_SOURCE_PATH ||
       T12_SUCCESSOR_RECEIPT_PATHS.includes(candidate) ||
       T13_SUCCESSOR_RECEIPT_PATHS.includes(candidate) ||
+      T14_SUCCESSOR_RECEIPT_PATHS.includes(candidate) ||
       candidate === SOURCE_PATH ||
       candidate === OFFICIAL_BUNDLE_PATH,
   );
@@ -1370,6 +1414,7 @@ function inspectImportsAndExecutionBoundary(files) {
               "apps/desen-app/src/authoring-diagnostics.ts",
               "apps/desen-app/src/application.tsx",
               "apps/desen-app/src/authoring-persistence.ts",
+              "apps/desen-app/src/authoring-publication.ts",
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null ||
@@ -1402,6 +1447,7 @@ function inspectImportsAndExecutionBoundary(files) {
               APPLICATION_SOURCE_PATH,
               "apps/desen-app/src/authoring-diagnostics.ts",
               "apps/desen-app/src/authoring-persistence.ts",
+              "apps/desen-app/src/authoring-publication.ts",
             ].includes(relativePath) ||
             shape.defaultImport !== null ||
             shape.namespaceImport !== null ||
@@ -1552,6 +1598,7 @@ function inspectImportsAndExecutionBoundary(files) {
           relativePath === AUTHORING_SELECTION_SOURCE_PATH ||
           (!T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
             !T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
+            !T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
             ![
               APPLICATION_SOURCE_PATH,
               AUTHORING_INSPECTOR_SOURCE_PATH,
@@ -1612,6 +1659,7 @@ function inspectImportsAndExecutionBoundary(files) {
         forbiddenCallPattern.test(node.expression.text) &&
         !T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
         !T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
+        !T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) &&
         admittedT05Calls.get(relativePath)?.has(node.expression.text) !== true
       ) {
         fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained later-slice execution authority.`, {
@@ -1693,9 +1741,9 @@ function inspectImportsAndExecutionBoundary(files) {
     validatorImports !== 1 ||
     publicDiagnosticIndexTypeOnlyImports !== 2 ||
     catalogSdkImports !== 11 ||
-    editorCoreImports !== 18 ||
+    editorCoreImports !== 20 ||
     publisherImports !== 3 ||
-    protocolImports !== 9 ||
+    protocolImports !== 10 ||
     t11RuntimeCoreImports !== 3 ||
     t11TestkitImports !== 2 ||
     t11OperationRegistrationImports !== 1 ||
@@ -1977,6 +2025,13 @@ function verifyImplementationAndTests(files) {
     "data-layer-drop-row-node-id={node.id}",
     'querySelector<HTMLElement>("[data-layer-drop-row-node-id]")',
     "panelDragEnterDepth",
+    "className={styles.slotBoundaryHitArea}",
+    'data-slot-boundary-hit-area="true"',
+    "onDragEnter={onBoundaryDragEnter}",
+    "onDragOver={onBoundaryDragOver}",
+    "onDrop={onBoundaryDrop}",
+    "onDragEnter={enterComponentDrop}",
+    "onDragLeave={leaveComponentDrop}",
     "onDrop={receiveComponentDrop}",
   ]) {
     requireText(application, required, APPLICATION_SOURCE_PATH, "SUCCESSOR_POLICY_VIOLATION");
@@ -2422,7 +2477,12 @@ function authenticateSourcePersistenceSuccessor(files) {
     );
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
-    if (T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
+    if (
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
+      T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
+    ) {
+      continue;
+    }
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -2533,7 +2593,8 @@ function authenticateFixturesScenariosSuccessor(files) {
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
     if (
       T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
-      T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
+      T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
     ) {
       continue;
     }
@@ -2652,6 +2713,7 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
   for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
+    if (T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -2690,6 +2752,153 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
   });
 }
 
+function authenticatePublishActivationSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T14",
+    gate: "G09",
+    proofId: "desen-app-publish-activation",
+    profile: "desen.app.publish-activation-proof.v1",
+    result: "PASS",
+    path: PUBLISH_ACTIVATION_ARTIFACT_PATH,
+    bytes: 24_763,
+    sha256: "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b",
+  });
+  const artifactBytes = files.get(PUBLISH_ACTIVATION_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M09-T14/G09 publish-activation artifact drifted.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, PUBLISH_ACTIVATION_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.gate !== pin.gate ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.gateStatus !== "DONE" ||
+    artifact.claim?.savedAuthoredSourceOnly !== true ||
+    artifact.claim?.publisherRerunFromSavedSource !== true ||
+    artifact.claim?.scenarioPreviewPublished !== false ||
+    artifact.claim?.fixtureDataPublished !== false ||
+    artifact.claim?.operationInputOrSecretPublished !== false ||
+    artifact.claim?.rejectedDiagnosticsPublished !== false ||
+    artifact.claim?.exactCanonicalBundleBytesStored !== true ||
+    artifact.claim?.fixedPreviewChannelCompareAndSet !== true ||
+    artifact.claim?.mutableChannelIsActivationAuthority !== false ||
+    artifact.claim?.sourceGenerationDistinct !== true ||
+    artifact.claim?.channelGenerationDistinct !== true ||
+    artifact.claim?.durableActivationGenerationDistinct !== true ||
+    artifact.claim?.activeRevisionRequiresReferenceHostReceipt !== true ||
+    artifact.claim?.staleCompletionCanBecomeActive !== false ||
+    artifact.claim?.blindRetryAfterIndeterminate !== false ||
+    artifact.claim?.conflictActivatesCandidate !== false ||
+    artifact.claim?.lastKnownGoodActivationPreserved !== true ||
+    artifact.claim?.realPublicControlPlaneAndReferenceHostIntegration !== true ||
+    artifact.claim?.browserAppImportsNodeCompositionPackages !== false ||
+    artifact.claim?.publicationClaimed !== true ||
+    artifact.claim?.activationClaimed !== true ||
+    artifact.claim?.browserE2eClaimed !== false ||
+    artifact.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact.claim?.pf085Status !== "OPEN" ||
+    artifact.claim?.pf086Status !== "OPEN" ||
+    artifact.claim?.pf089Status !== "OPEN" ||
+    artifact.tests?.focusedTestDeclarations !== 45 ||
+    artifact.tests?.rootTestNames?.length !== 12 ||
+    artifact.tests?.realPublicIntegration !== true ||
+    artifact.boundary?.trackedFiles !== 33 ||
+    artifact.boundary?.parentArtifacts !== 9 ||
+    trackedReceipts?.length !== 33 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    )
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T14/G09 publish-activation identity or claims drifted.",
+    );
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (relativePath === T14_PUBLICATION_APPLICATION_TEST_PATH) {
+      const liveSource =
+        bytes === undefined ? "" : decodeUtf8(bytes, T14_PUBLICATION_APPLICATION_TEST_PATH);
+      const timeoutMarker = "}, 10_000);";
+      const timeoutMarkerOccurrences = liveSource.split(timeoutMarker).length - 1;
+      const frozenBytes = Buffer.from(liveSource.replace(timeoutMarker, "});"), "utf8");
+      if (
+        receipt?.bytes !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.bytes ||
+        receipt.sha256 !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.sha256 ||
+        bytes?.byteLength !== T14_LIVE_PUBLICATION_APPLICATION_TEST_RECEIPT.bytes ||
+        sha256(bytes ?? Buffer.alloc(0)) !== T14_LIVE_PUBLICATION_APPLICATION_TEST_RECEIPT.sha256 ||
+        timeoutMarkerOccurrences !== 1 ||
+        frozenBytes.byteLength !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.bytes ||
+        sha256(frozenBytes) !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.sha256
+      ) {
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          `The exact M09-T14 timeout successor drifted: ${relativePath}.`,
+        );
+      }
+      continue;
+    }
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T14 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    gate: pin.gate,
+    artifact: pin,
+    focusedTestDeclarations: 45,
+    trackedFiles: 33,
+    parentArtifacts: 9,
+    rootTests: 12,
+    savedAuthoredSourceOnly: true,
+    publisherRerunFromSavedSource: true,
+    scenarioPreviewPublished: false,
+    fixtureDataPublished: false,
+    operationInputOrSecretPublished: false,
+    rejectedDiagnosticsPublished: false,
+    exactCanonicalBundleBytesStored: true,
+    fixedPreviewChannelCompareAndSet: true,
+    mutableChannelIsActivationAuthority: false,
+    distinctSourceChannelAndActivationGenerations: true,
+    activeRevisionRequiresReferenceHostReceipt: true,
+    staleCompletionCanBecomeActive: false,
+    blindRetryAfterIndeterminate: false,
+    conflictActivatesCandidate: false,
+    lastKnownGoodActivationPreserved: true,
+    realPublicControlPlaneAndReferenceHostIntegration: true,
+    browserAppImportsNodeCompositionPackages: false,
+    publicationClaimed: true,
+    activationClaimed: true,
+    browserE2eClaimed: false,
+    p08Status: "NOT_PROVEN",
+    pf085Status: "OPEN",
+    pf086Status: "OPEN",
+    pf089Status: "OPEN",
+  });
+}
+
 /** Authenticates frozen M09-T02 evidence and exact additive M09-T07/T11 successors. */
 export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
@@ -2714,6 +2923,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
   const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(files);
   const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
   const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files);
+  const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
   assertRetainedHistoricalReceipts(frozen.artifact, files);
   if (options.fileOverrides.size !== 0) {
     fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue current compatibility evidence.");
@@ -2797,6 +3007,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
     fixturesScenariosSuccessor,
     sourcePersistenceSuccessor,
     nodeLinkedDiagnosticsSuccessor,
+    publishActivationSuccessor,
   });
   return deepFreeze({
     artifact: frozen.artifact,

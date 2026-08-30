@@ -19,6 +19,7 @@ import { projectAuthoringDiagnostics } from "./authoring-diagnostics.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
 import { createAuthoringSignInFixtureController } from "./authoring-fixtures.js";
 import { createAuthoringPersistenceController } from "./authoring-persistence.js";
+import { createAuthoringPublicationController } from "./authoring-publication.js";
 import { DiagnosticsPanel } from "./diagnostics-panel.js";
 import {
   applyAuthoringInspectorBindingEdit,
@@ -54,6 +55,7 @@ import {
 } from "./authoring-scenarios.js";
 import { projectPreviewFidelity } from "./preview-fidelity.js";
 import { PersistenceControls } from "./persistence-controls.js";
+import { PublicationControls } from "./publication-controls.js";
 import {
   PreviewContextDisclosure,
   RunControls,
@@ -100,6 +102,12 @@ import type {
   AuthoringPersistenceState,
 } from "./authoring-persistence.js";
 import type {
+  AuthoringPublicationController,
+  AuthoringPublicationPort,
+  AuthoringPublicationSnapshot,
+  AuthoringPublicationState,
+} from "./authoring-publication.js";
+import type {
   AuthoringDiagnosticsSnapshotIdentity,
   AuthoringDiagnosticsViewModelResult,
 } from "./authoring-diagnostics.js";
@@ -135,6 +143,10 @@ import type {
   PersistenceControlProjection,
   PersistenceControlStatus,
 } from "./persistence-controls.js";
+import type {
+  PublicationControlProjection,
+  PublicationControlStatus,
+} from "./publication-controls.js";
 
 function subscribeUnavailablePersistence(): () => void {
   return () => undefined;
@@ -142,6 +154,49 @@ function subscribeUnavailablePersistence(): () => void {
 
 function readUnavailablePersistence(): null {
   return null;
+}
+
+function subscribeUnavailablePublication(): () => void {
+  return () => undefined;
+}
+
+function readUnavailablePublication(): null {
+  return null;
+}
+
+interface AuthoringPublicationLifetimeFence {
+  active: boolean;
+}
+
+function createLifetimeFencedPublicationPort(
+  publicationPort: AuthoringPublicationPort,
+  lifetime: AuthoringPublicationLifetimeFence,
+): AuthoringPublicationPort {
+  const publishBundleToChannel = publicationPort.publishBundleToChannel;
+  const activateReferenceHost = publicationPort.activateReferenceHost;
+  function requireActiveLifetime(): void {
+    if (!lifetime.active) throw new TypeError("The publication lifetime is inactive.");
+  }
+  const fencedPublishBundleToChannel: AuthoringPublicationPort["publishBundleToChannel"] = async (
+    request,
+  ) => {
+    requireActiveLifetime();
+    const settlement = await publishBundleToChannel(request);
+    requireActiveLifetime();
+    return settlement;
+  };
+  const fencedActivateReferenceHost: AuthoringPublicationPort["activateReferenceHost"] = async (
+    request,
+  ) => {
+    requireActiveLifetime();
+    const settlement = await activateReferenceHost(request);
+    requireActiveLifetime();
+    return settlement;
+  };
+  return Object.freeze({
+    publishBundleToChannel: fencedPublishBundleToChannel,
+    activateReferenceHost: fencedActivateReferenceHost,
+  });
 }
 
 function projectPersistenceControlStatus(
@@ -189,7 +244,134 @@ function projectPersistenceControls(
   });
 }
 
+function publicationSnapshotIsSaved(snapshot: AuthoringPublicationSnapshot): boolean {
+  if (
+    snapshot.persistenceAuthority !== "ready" ||
+    snapshot.savedDocument === null ||
+    snapshot.sourceGeneration === null
+  ) {
+    return false;
+  }
+  try {
+    return canonicalizeJson(snapshot.document) === canonicalizeJson(snapshot.savedDocument);
+  } catch {
+    return false;
+  }
+}
+
+function projectPublicationControlStatus(
+  state: AuthoringPublicationState | null,
+): PublicationControlStatus {
+  if (state === null || state.disposed) return Object.freeze({ state: "unavailable" });
+  if (state.pending !== null) {
+    return Object.freeze({
+      state: "pending",
+      stage: state.pending === "control-plane" ? "channel" : "activation",
+      sourceGeneration: state.snapshot.sourceGeneration ?? 0,
+      revision: state.pending === "control-plane" ? null : state.snapshot.previewRevision,
+    });
+  }
+
+  const result = state.result;
+  if (result?.status === "published") {
+    return Object.freeze({
+      state: "active",
+      relationship: result.relationship,
+      revision: result.revision,
+      sourceGeneration: result.sourceGeneration,
+      channelGeneration: result.channelGeneration,
+      activationGeneration: result.activationGeneration,
+    });
+  }
+  if (result?.status === "indeterminate") {
+    return Object.freeze({
+      state: "indeterminate",
+      stage: result.stage === "control-plane" ? "channel" : "activation",
+      sourceGeneration: result.sourceGeneration,
+      revision: result.revision,
+    });
+  }
+  if (result?.status === "failed") {
+    if (result.reason === "control-plane-conflict") {
+      return Object.freeze({
+        state: "conflict",
+        currentChannelGeneration: result.currentChannelGeneration ?? null,
+        sourceGeneration: result.sourceGeneration ?? state.snapshot.sourceGeneration ?? 0,
+        revision: result.revision ?? state.snapshot.previewRevision,
+      });
+    }
+    if (
+      result.reason === "reference-host-failed" ||
+      result.reason === "reference-host-unavailable" ||
+      result.reason === "reference-host-revision-mismatch"
+    ) {
+      if (
+        result.revision !== undefined &&
+        result.sourceGeneration !== undefined &&
+        result.channelGeneration !== undefined
+      ) {
+        return Object.freeze({
+          state: "preserved",
+          activeRevision: result.activeRevision ?? null,
+          publishedRevision: result.revision,
+          sourceGeneration: result.sourceGeneration,
+          channelGeneration: result.channelGeneration,
+        });
+      }
+      return Object.freeze({
+        state: "failed",
+        stage: "activation",
+        sourceGeneration: state.snapshot.sourceGeneration,
+        revision: state.snapshot.previewRevision,
+      });
+    }
+    if (
+      result.reason === "source-dirty" ||
+      result.reason === "source-not-saved" ||
+      result.reason === "persistence-not-ready"
+    ) {
+      return Object.freeze({ state: "save-required" });
+    }
+    if (result.reason === "stale-operation") {
+      return Object.freeze({
+        state: "stale",
+        sourceGeneration: result.sourceGeneration ?? state.snapshot.sourceGeneration ?? 0,
+      });
+    }
+    if (result.reason === "disposed") return Object.freeze({ state: "unavailable" });
+    return Object.freeze({
+      state: "failed",
+      stage:
+        result.reason === "publisher-rejected" || result.reason === "preview-revision-stale"
+          ? "publisher"
+          : "channel",
+      sourceGeneration: result.sourceGeneration ?? state.snapshot.sourceGeneration,
+      revision: result.revision ?? state.snapshot.previewRevision,
+    });
+  }
+  if (state.snapshot.persistenceAuthority === "unavailable") {
+    return Object.freeze({ state: "unavailable" });
+  }
+  if (!publicationSnapshotIsSaved(state.snapshot)) {
+    return Object.freeze({ state: "save-required" });
+  }
+  return Object.freeze({
+    state: "ready",
+    sourceGeneration: state.snapshot.sourceGeneration ?? 0,
+  });
+}
+
+function projectPublicationControls(
+  state: AuthoringPublicationState | null,
+): PublicationControlProjection {
+  return Object.freeze({
+    channelName: "preview",
+    status: projectPublicationControlStatus(state),
+  });
+}
+
 const REFERENCE_EDITOR_DOCUMENT_CANONICAL = canonicalizeJson(REFERENCE_EDITOR_DOCUMENT);
+const UNAVAILABLE_PREVIEW_REVISION = `sha256:${"0".repeat(64)}`;
 
 interface AppLinkProps {
   readonly href: string;
@@ -710,6 +892,9 @@ function SlotBoundary({
   route,
   rootNodeId,
   selectedSourceNodeId,
+  onBoundaryDragEnter,
+  onBoundaryDragOver,
+  onBoundaryDrop,
 }: Readonly<
   Pick<
     LayerSelectionProps,
@@ -725,6 +910,9 @@ function SlotBoundary({
     readonly owner: AuthoringBehaviorLayer | AuthoringLayerNode;
     readonly slot: AuthoringSlotState;
     readonly dropHovered: boolean;
+    readonly onBoundaryDragEnter: (event: DragEvent<HTMLLIElement>) => void;
+    readonly onBoundaryDragOver: (event: DragEvent<HTMLLIElement>) => void;
+    readonly onBoundaryDrop: (event: DragEvent<HTMLLIElement>) => void;
   }
 >) {
   const target = slotTarget(route, owner, slot);
@@ -759,7 +947,15 @@ function SlotBoundary({
       data-drop-noop-hovered={dragAdmission?.status === "noop" && dropHovered}
       data-drop-ready={dropReady}
       data-slot-boundary-index={index}
+      onDragEnter={onBoundaryDragEnter}
+      onDragOver={onBoundaryDragOver}
+      onDrop={onBoundaryDrop}
     >
+      <span
+        aria-hidden="true"
+        className={styles.slotBoundaryHitArea}
+        data-slot-boundary-hit-area="true"
+      />
       <span aria-hidden="true" className={styles.slotBoundaryLine} />
       <span aria-hidden="true" className={styles.slotBoundaryCue}>
         {dragAdmission?.status === "noop" ? "Current position" : "Drop here"}
@@ -794,6 +990,7 @@ function LayerSlot({
     interaction.activeSlot !== null && isSameAuthoringSlotSelection(interaction.activeSlot, target);
   const contractLabel = `${slot.contract.required ? "Required" : "Optional"} · ${slot.present ? "Present" : "Absent"} · ${slotCardinalityLabel(slot)} · ${slotAcceptanceLabel(slot.contract)}`;
   const listRef = useRef<HTMLUListElement>(null);
+  const slotSurfaceRef = useRef<HTMLDivElement>(null);
   const sessionOwnerKey = JSON.stringify([target.ownerKind, target.ownerId, target.slot]);
   const activeDropIndex =
     interaction.activeDropProjection !== null &&
@@ -892,8 +1089,12 @@ function LayerSlot({
     );
   }
 
-  function scheduleEdgeScroll(event: DragEvent<HTMLDivElement>, list: HTMLUListElement): void {
-    const scrollSurface = event.currentTarget.closest<HTMLElement>('[role="tabpanel"]');
+  function scheduleEdgeScroll(
+    event: DragEvent<HTMLElement>,
+    list: HTMLUListElement,
+    slotSurface: HTMLDivElement,
+  ): void {
+    const scrollSurface = slotSurface.closest<HTMLElement>('[role="tabpanel"]');
     if (scrollSurface === null) return;
     const scrollBounds = scrollSurface.getBoundingClientRect();
     const edge = 32;
@@ -913,7 +1114,7 @@ function LayerSlot({
       ownerKey: sessionOwnerKey,
       scrollSurface,
       sessionEpoch: session.epoch,
-      slotSurface: event.currentTarget,
+      slotSurface,
     });
     if (delta === 0) {
       if (session.scrollFrame !== null) cancelAuthoringFrame(session.scrollFrame);
@@ -979,10 +1180,11 @@ function LayerSlot({
     session.scrollFrame = requestAuthoringFrame(scrollStep);
   }
 
-  function updateDropProjection(event: DragEvent<HTMLDivElement>): void {
+  function updateDropProjection(event: DragEvent<HTMLElement>): void {
     if (interaction.dragIntent === null) return;
     const list = listRef.current;
-    if (list === null) return;
+    const slotSurface = slotSurfaceRef.current;
+    if (list === null || slotSurface === null) return;
     // The innermost named slot owns the pointer. A rejected nested slot must never bubble into an
     // outer owner and silently turn the same coordinates into a different placement target.
     event.stopPropagation();
@@ -999,15 +1201,16 @@ function LayerSlot({
           ? "copy"
           : "move";
     publishAdmission(admission);
-    scheduleEdgeScroll(event, list);
+    scheduleEdgeScroll(event, list, slotSurface);
   }
 
-  function receiveDrop(event: DragEvent<HTMLDivElement>): void {
+  function receiveDrop(event: DragEvent<HTMLElement>): void {
     if (interaction.dragIntent === null) return;
     const list = listRef.current;
-    if (list === null) return;
+    const slotSurface = slotSurfaceRef.current;
+    if (list === null || slotSurface === null) return;
     event.stopPropagation();
-    const currentBounds = event.currentTarget.getBoundingClientRect();
+    const currentBounds = slotSurface.getBoundingClientRect();
     const hasCurrentCoordinates =
       Number.isFinite(event.clientY) &&
       event.clientY >= currentBounds.top &&
@@ -1044,6 +1247,7 @@ function LayerSlot({
       onDragEnter={updateDropProjection}
       onDragOver={updateDropProjection}
       onDrop={receiveDrop}
+      ref={slotSurfaceRef}
     >
       <button
         aria-label={`Choose ${owner.displayName} ${owner.id} ${slot.name} slot · ${contractLabel}`}
@@ -1070,6 +1274,9 @@ function LayerSlot({
         <SlotBoundary
           dropHovered={activeDropIndex === 0}
           index={0}
+          onBoundaryDragEnter={updateDropProjection}
+          onBoundaryDragOver={updateDropProjection}
+          onBoundaryDrop={receiveDrop}
           owner={owner}
           slot={slot}
           {...interaction}
@@ -1080,6 +1287,9 @@ function LayerSlot({
             <SlotBoundary
               dropHovered={activeDropIndex === index + 1}
               index={index + 1}
+              onBoundaryDragEnter={updateDropProjection}
+              onBoundaryDragOver={updateDropProjection}
+              onBoundaryDrop={receiveDrop}
               owner={owner}
               slot={slot}
               {...interaction}
@@ -1294,8 +1504,8 @@ function LayerTree({
         data-active={interaction.dragIntent?.kind === "node"}
       >
         {interaction.dragIntent?.kind === "node"
-          ? `Moving ${interaction.dragIntent.nodeId} · release on a highlighted gap.`
-          : "Drag a layer to reorder it, or select it and use Place."}
+          ? `Moving ${interaction.dragIntent.nodeId} · release when the wide highlighted gap locks in.`
+          : "Drag the dotted grip; each row snaps to the gap above or below it. Place also works."}
       </p>
       <section
         aria-label={`${selectedSurface.name} layer hierarchy`}
@@ -1433,6 +1643,19 @@ function ComponentLibrary({
     setPanelDragHovered(true);
   }
 
+  function enterComponentDrop(event: DragEvent<HTMLDivElement>): void {
+    if (!componentDropReady) return;
+    admitComponentDrop(event);
+    panelDragEnterDepth.current += 1;
+  }
+
+  function leaveComponentDrop(event: DragEvent<HTMLDivElement>): void {
+    if (!componentDropReady) return;
+    event.stopPropagation();
+    panelDragEnterDepth.current = Math.max(0, panelDragEnterDepth.current - 1);
+    if (panelDragEnterDepth.current === 0) setPanelDragHovered(false);
+  }
+
   function receiveComponentDrop(event: DragEvent<HTMLDivElement>): void {
     if (!componentDropReady || dragIntent?.kind !== "component") return;
     event.stopPropagation();
@@ -1452,16 +1675,8 @@ function ComponentLibrary({
       className={styles.componentsView}
       data-component-drag-active={dragIntent?.kind === "component"}
       data-drop-hovered={componentDropReady && panelDragHovered}
-      onDragEnter={(event) => {
-        if (!componentDropReady) return;
-        admitComponentDrop(event);
-        panelDragEnterDepth.current += 1;
-      }}
-      onDragLeave={() => {
-        if (!componentDropReady) return;
-        panelDragEnterDepth.current = Math.max(0, panelDragEnterDepth.current - 1);
-        if (panelDragEnterDepth.current === 0) setPanelDragHovered(false);
-      }}
+      onDragEnter={enterComponentDrop}
+      onDragLeave={leaveComponentDrop}
       onDragOver={admitComponentDrop}
       onDrop={receiveComponentDrop}
     >
@@ -1496,6 +1711,10 @@ function ComponentLibrary({
         data-drop-ready={componentDropReady}
         data-guide={readySlot === null}
         data-ready={readySlot !== null}
+        onDragEnter={enterComponentDrop}
+        onDragLeave={leaveComponentDrop}
+        onDragOver={admitComponentDrop}
+        onDrop={receiveComponentDrop}
         role="group"
       >
         {readySlot === null ? (
@@ -1518,8 +1737,8 @@ function ComponentLibrary({
             <span className={styles.componentTargetCopy}>
               <span className={styles.componentTargetEyebrow}>
                 {draggedComponent === undefined
-                  ? "Add to"
-                  : `Drop ${draggedComponent.displayName} here`}
+                  ? "Drop target"
+                  : `Release to add ${draggedComponent.displayName}`}
               </span>
               <strong>
                 {draggedComponent === undefined
@@ -1529,8 +1748,8 @@ function ComponentLibrary({
               <small>
                 {readySlot.owner.id} · {readySlot.slot.name} slot
                 {draggedComponent === undefined
-                  ? ` · appends at position ${readySlot.slot.children.length + 1} · click Add or drag a component into this panel`
-                  : ` · release anywhere in this panel to append at position ${readySlot.slot.children.length + 1}`}
+                  ? ` · position ${readySlot.slot.children.length + 1} · drag a dotted grip to this target, or click Add`
+                  : ` · drop on this target or anywhere in Components · position ${readySlot.slot.children.length + 1}`}
               </small>
             </span>
             <span className={styles.componentTargetControls}>
@@ -1635,7 +1854,7 @@ function ComponentLibrary({
                                     }),
                                   );
                                 }}
-                                title={`Drag ${component.displayName} anywhere in this panel to add`}
+                                title={`Drag ${component.displayName} to the highlighted drop target above`}
                               />
                             ) : null}
                             <button
@@ -1888,8 +2107,8 @@ function AuthoringPanel({
     setDragIntent(intent);
     setNotice(
       intent.kind === "component"
-        ? "Release anywhere in Components to add to the highlighted target."
-        : "Release on a highlighted Layers gap.",
+        ? `Dragging ${model.components.find(({ id }) => id === intent.componentId)?.displayName ?? "component"} · release on the highlighted drop target in Components.`
+        : "Release when the wide highlighted Layers gap locks in.",
     );
   }
 
@@ -2150,10 +2369,12 @@ function AuthoringPanel({
 
 function SurfaceEditor({
   persistencePort,
+  publicationPort,
   project,
   selectedSurface,
 }: Readonly<{
   readonly persistencePort: DesenEditorPersistencePort | null;
+  readonly publicationPort: AuthoringPublicationPort | null;
   readonly project: DesenAppProjectSummary;
   readonly selectedSurface: DesenAppSurfaceSummary;
 }>) {
@@ -2215,6 +2436,63 @@ function SurfaceEditor({
     () => projectPersistenceControls(persistenceState, inMemoryDirtyProjection),
     [inMemoryDirtyProjection, persistenceState],
   );
+  const publicationBinding = useMemo(() => {
+    if (publicationPort === null) return null;
+    const initialPreview = prepareAuthoringPreviewBundle(REFERENCE_EDITOR_DOCUMENT);
+    if (!initialPreview.ok) return null;
+    const lifetime: AuthoringPublicationLifetimeFence = { active: false };
+    return Object.freeze({
+      lifetime,
+      creation: createAuthoringPublicationController({
+        route,
+        snapshot: Object.freeze({
+          document: REFERENCE_EDITOR_DOCUMENT,
+          savedDocument: null,
+          sourceGeneration: null,
+          persistenceAuthority: persistenceController === null ? "unavailable" : "ready",
+          previewRevision: initialPreview.revision,
+        }),
+        publicationPort: createLifetimeFencedPublicationPort(publicationPort, lifetime),
+      }),
+    });
+  }, [persistenceController, publicationPort, route]);
+  const publicationCreation = publicationBinding?.creation ?? null;
+  const publicationController =
+    publicationCreation?.ok === true ? publicationCreation.controller : null;
+  const publicationState = useSyncExternalStore(
+    publicationController?.subscribe ?? subscribeUnavailablePublication,
+    publicationController?.read ?? readUnavailablePublication,
+    publicationController?.read ?? readUnavailablePublication,
+  );
+  const publicationControllerLifetime = useRef<AuthoringPublicationController | null>(null);
+  const publicationProjection = useMemo(
+    () => projectPublicationControls(publicationState),
+    [publicationState],
+  );
+  const publicationPending = publicationState !== null && publicationState.pending !== null;
+  const readCurrentPublicationSnapshot = useCallback((): AuthoringPublicationSnapshot => {
+    const livePersistence =
+      persistenceController !== null &&
+      persistenceControllerLifetime.current === persistenceController &&
+      !persistenceController.read().disposed
+        ? persistenceController.read()
+        : null;
+    const persistenceAuthority =
+      livePersistence === null
+        ? "unavailable"
+        : livePersistence.pending !== null
+          ? "pending"
+          : livePersistence.reopenRequired
+            ? "reopen-required"
+            : "ready";
+    return Object.freeze({
+      document,
+      savedDocument: livePersistence?.savedDocument ?? null,
+      sourceGeneration: livePersistence?.generation ?? null,
+      persistenceAuthority,
+      previewRevision: preview.ok ? preview.revision : UNAVAILABLE_PREVIEW_REVISION,
+    });
+  }, [document, persistenceController, preview]);
   const preparedModel = useMemo(
     () => prepareCatalogAuthoringModel(referenceCatalog, document),
     [document],
@@ -2384,6 +2662,23 @@ function SurfaceEditor({
   }, [persistenceController]);
 
   useEffect(() => {
+    if (publicationController === null || publicationBinding === null) return;
+    publicationBinding.lifetime.active = true;
+    publicationControllerLifetime.current = publicationController;
+    return () => {
+      publicationBinding.lifetime.active = false;
+      if (publicationControllerLifetime.current === publicationController) {
+        publicationControllerLifetime.current = null;
+      }
+      queueMicrotask(() => {
+        if (publicationControllerLifetime.current !== publicationController) {
+          publicationController.dispose();
+        }
+      });
+    };
+  }, [publicationBinding, publicationController]);
+
+  useEffect(() => {
     if (
       persistenceState === null ||
       persistenceState.disposed ||
@@ -2402,6 +2697,7 @@ function SurfaceEditor({
 
   useEffect(() => {
     if (
+      !publicationPending &&
       persistenceController !== null &&
       (persistenceState === null || persistenceState.disposed || !persistenceState.dirty)
     ) {
@@ -2415,7 +2711,16 @@ function SurfaceEditor({
       if (current.disposed) return null;
       return current.dirty;
     };
+    const hasCurrentPublication = () => {
+      if (publicationController === null) return false;
+      if (publicationControllerLifetime.current !== publicationController) return null;
+      const current = publicationController.read();
+      if (current.disposed) return null;
+      return current.pending !== null;
+    };
     const removeNavigationGuard = installDesenAppNavigationGuard(() => {
+      const publishing = hasCurrentPublication();
+      if (publishing === null || publishing) return false;
       const dirty = hasCurrentUnsavedSource();
       if (dirty === null) return false;
       return (
@@ -2426,7 +2731,7 @@ function SurfaceEditor({
       );
     });
     const protectPageExit = (event: BeforeUnloadEvent) => {
-      if (hasCurrentUnsavedSource() !== true) return;
+      if (hasCurrentPublication() !== true && hasCurrentUnsavedSource() !== true) return;
       event.preventDefault();
       event.returnValue = "";
     };
@@ -2435,7 +2740,7 @@ function SurfaceEditor({
       removeNavigationGuard();
       window.removeEventListener("beforeunload", protectPageExit);
     };
-  }, [persistenceController, persistenceState]);
+  }, [persistenceController, persistenceState, publicationController, publicationPending]);
 
   useEffect(() => {
     if (
@@ -2448,8 +2753,17 @@ function SurfaceEditor({
     persistenceController.replaceAuthoredDocument(document);
   }, [document, persistenceController]);
 
+  useEffect(() => {
+    if (publicationController === null || !preview.ok) return;
+    publicationController.replaceSnapshot(readCurrentPublicationSnapshot());
+  }, [persistenceState, preview, publicationController, readCurrentPublicationSnapshot]);
+
   function isDesignMode(): boolean {
-    return modeRef.current === "design";
+    if (modeRef.current !== "design") return false;
+    if (publicationController === null) return true;
+    if (publicationControllerLifetime.current !== publicationController) return false;
+    const current = publicationController.read();
+    return !current.disposed && current.pending === null;
   }
 
   function clearTransientDiagnostics(): void {
@@ -2510,7 +2824,7 @@ function SurfaceEditor({
   }
 
   function chooseMode(nextMode: SurfaceEditorMode): void {
-    if (persistenceState?.pending === "opening") return;
+    if (persistenceState?.pending === "opening" || publicationPending) return;
     modeRef.current = nextMode;
     setMode(nextMode);
     (nextMode === "design" ? designModeButton : runModeButton).current?.focus();
@@ -2541,6 +2855,20 @@ function SurfaceEditor({
   function saveAuthoredSource(): void {
     if (!isDesignMode() || persistenceController === null) return;
     void persistenceController.save();
+  }
+
+  function publishSavedSource(): void {
+    if (
+      !isDesignMode() ||
+      publicationController === null ||
+      publicationControllerLifetime.current !== publicationController ||
+      !preview.ok
+    ) {
+      return;
+    }
+    const replacement = publicationController.replaceSnapshot(readCurrentPublicationSnapshot());
+    if (!replacement.ok) return;
+    void publicationController.publish();
   }
 
   function toggleSelection(node: AuthoringLayerNode): void {
@@ -2702,7 +3030,7 @@ function SurfaceEditor({
       <AuthoringPanel
         eventActionModel={eventActionModel}
         hidden={mode === "run"}
-        interactive={mode === "design"}
+        interactive={mode === "design" && !publicationPending}
         model={model}
         onDeleteSelection={deleteSelectedLayer}
         onEventActionEdit={editSelectedEventAction}
@@ -2732,7 +3060,7 @@ function SurfaceEditor({
               <button
                 aria-describedby={modeStatusId}
                 aria-pressed={mode === "design"}
-                disabled={persistenceState?.pending === "opening"}
+                disabled={persistenceState?.pending === "opening" || publicationPending}
                 onClick={() => chooseMode("design")}
                 ref={designModeButton}
                 type="button"
@@ -2742,7 +3070,7 @@ function SurfaceEditor({
               <button
                 aria-describedby={modeStatusId}
                 aria-pressed={mode === "run"}
-                disabled={persistenceState?.pending === "opening"}
+                disabled={persistenceState?.pending === "opening" || publicationPending}
                 onClick={() => chooseMode("run")}
                 ref={runModeButton}
                 type="button"
@@ -2755,7 +3083,11 @@ function SurfaceEditor({
         </div>
 
         <PersistenceControls
-          busy={persistenceState?.pending === "opening" || persistenceState?.pending === "saving"}
+          busy={
+            publicationPending ||
+            persistenceState?.pending === "opening" ||
+            persistenceState?.pending === "saving"
+          }
           confirmationScope={persistenceController}
           designMode={mode === "design"}
           onOpen={() => {
@@ -2763,6 +3095,13 @@ function SurfaceEditor({
           }}
           onSave={saveAuthoredSource}
           projection={persistenceProjection}
+        />
+
+        <PublicationControls
+          busy={persistenceState?.pending === "opening" || persistenceState?.pending === "saving"}
+          designMode={mode === "design"}
+          onPublish={publishSavedSource}
+          projection={publicationProjection}
         />
 
         <p
@@ -2869,10 +3208,12 @@ function SurfaceEditor({
 
 function ProjectShell({
   persistencePort,
+  publicationPort,
   project,
   selectedSurface,
 }: Readonly<{
   readonly persistencePort: DesenEditorPersistencePort | null;
+  readonly publicationPort: AuthoringPublicationPort | null;
   readonly project: DesenAppProjectSummary;
   readonly selectedSurface: DesenAppSurfaceSummary | undefined;
 }>) {
@@ -2941,6 +3282,7 @@ function ProjectShell({
     <SurfaceEditor
       key={`${project.id}:${selectedSurface.id}`}
       persistencePort={persistencePort}
+      publicationPort={publicationPort}
       project={project}
       selectedSurface={selectedSurface}
     />
@@ -2980,9 +3322,11 @@ function routeTitle(route: DesenAppRoute): string {
 
 function RouteView({
   persistencePort,
+  publicationPort,
   route,
 }: Readonly<{
   readonly persistencePort: DesenEditorPersistencePort | null;
+  readonly publicationPort: AuthoringPublicationPort | null;
   readonly route: DesenAppRoute;
 }>) {
   if (route.kind === "projects") return <ProjectsHome />;
@@ -3001,6 +3345,7 @@ function RouteView({
     return (
       <ProjectShell
         persistencePort={persistencePort}
+        publicationPort={publicationPort}
         project={project}
         selectedSurface={undefined}
       />
@@ -3016,17 +3361,26 @@ function RouteView({
     );
   }
   return (
-    <ProjectShell persistencePort={persistencePort} project={project} selectedSurface={surface} />
+    <ProjectShell
+      persistencePort={persistencePort}
+      publicationPort={publicationPort}
+      project={project}
+      selectedSurface={surface}
+    />
   );
 }
 
 /** Trusted host-owned capabilities injected into the App shell. */
 export interface DesenAppApplicationProps {
   readonly persistencePort?: DesenEditorPersistencePort | null;
+  readonly publicationPort?: AuthoringPublicationPort | null;
 }
 
 /** M09 Desen App shell with exact routes, schema-driven Source editing, and adapter preview. */
-export function DesenAppApplication({ persistencePort = null }: DesenAppApplicationProps = {}) {
+export function DesenAppApplication({
+  persistencePort = null,
+  publicationPort = null,
+}: DesenAppApplicationProps = {}) {
   const routeLocation = useSyncExternalStore(
     subscribeDesenAppNavigation,
     readDesenAppLocation,
@@ -3050,7 +3404,11 @@ export function DesenAppApplication({ persistencePort = null }: DesenAppApplicat
       <SkipToMainContentLink />
       <AppHeader route={route} />
       <main className={styles.main} id="desen-app-content" tabIndex={-1}>
-        <RouteView persistencePort={persistencePort} route={route} />
+        <RouteView
+          persistencePort={persistencePort}
+          publicationPort={publicationPort}
+          route={route}
+        />
       </main>
     </div>
   );

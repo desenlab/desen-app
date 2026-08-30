@@ -474,6 +474,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-desen-app-node-linked-diagnostics.mjs",
       "tests/desen-app-node-linked-diagnostics.test.mjs",
     ],
+    [
+      "desen-app-publish-activation",
+      "scripts/verify-desen-app-publish-activation.mjs",
+      "tests/desen-app-publish-activation.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -564,14 +569,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "8f76601e8d7439b8aa43b0f2e92e1aa4be572d6883824e97f32441519389927f";
+  "332cdaa40a2393d018c96478812ffdd8b41b8abf5c0adb293c21379214698701";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "1e8b4a2d5c990d879dcb8cd8cb85e1b791ac8376a2872c740e2b42757fc4c579";
+  "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "d144bf2b6f4850042ab93ddf903be9fee4fde5af0b44082bcaf6b7cbe4f7a72d";
+  "5146f101cb767c49f6f0b87fd6939be6bdfc348e5f4dcf8dd77399ac921d4ee3";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "5dbd8f1365a731846ece0e64888b69eb9607540c09dfb4444e990b8ff030d502";
+const QUALITY_GATE_PLAN_SHA256 = "beeda57842e1a9bdee6a13cd7be323b48a722ce4352319d085886b7fc76bfefe";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -881,23 +886,25 @@ function classifyLegacyPrerequisite({
   if (task === "test:public-package") {
     const expectedScript =
       "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs";
-    if (
-      ![
-        "editor-core-source-document",
-        "editor-core-stable-id-insert",
-        "editor-core-structural-edits",
-        "editor-core-content-edits",
-        "editor-core-state-binding-edits",
-        "editor-core-event-action-edits",
-        "editor-core-authoring-round-trip",
-        "editor-core-persistence",
-        "editor-core-continuous-validation",
-        "editor-core-terminal-integration",
-      ].includes(currentProofId) ||
-      (packageName !== "@desen/editor-core" &&
-        !(currentProofId === "editor-core-persistence" && packageName === "@desen/editor-web")) ||
-      packageManifest.scripts?.[task] !== expectedScript
-    ) {
+    const reviewedProof = [
+      "editor-core-source-document",
+      "editor-core-stable-id-insert",
+      "editor-core-structural-edits",
+      "editor-core-content-edits",
+      "editor-core-state-binding-edits",
+      "editor-core-event-action-edits",
+      "editor-core-authoring-round-trip",
+      "editor-core-persistence",
+      "editor-core-continuous-validation",
+      "editor-core-terminal-integration",
+      "desen-app-publish-activation",
+    ].includes(currentProofId);
+    const reviewedPackage =
+      (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
+      ((currentProofId === "editor-core-persistence" ||
+        currentProofId === "desen-app-publish-activation") &&
+        packageName === "@desen/editor-web");
+    if (!reviewedProof || !reviewedPackage || packageManifest.scripts?.[task] !== expectedScript) {
       throw new QualityGateError(
         `${currentProofId} uses an unreviewed public-package contract test.`,
         { command, actual: packageManifest.scripts?.[task] },

@@ -21,6 +21,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:local-source-persistence": "vitest run test/local-source-persistence.test.ts",
+    "test:publication": "vitest run test/local-bundle-channel-publication.test.ts",
     "test:public-package": "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
     "test:coverage": "vitest run --coverage --passWithNoTests"
   },

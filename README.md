@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████████░░░░░░░` **108 / 145 tasks complete (74%)**
+**Overall:** `███████████████████░░░░░░` **109 / 145 tasks complete (75%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,9 +24,11 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M09:** `█████████████░` **13 / 14 tasks complete (93%)**
+**M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**Proof gates:** **10 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G08:** `DONE` · **Next:** `M09-T14`
+**M10:** `░░░░░░░░░` **0 / 9 tasks complete (0%)**
+
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **Next:** `M10-T01`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -1070,6 +1072,74 @@ ownership projection are pinned at `sha256:d3b479cc998d6c84d53b9b0d64e6121033d94
 These are local receipts and claim no required-gate or hosted-CI result. M09-T13 is `DONE`, P-16 is
 `PROVEN`, PF-086 remains `OPEN`, proof gates remain 10/13, implementation progress is 108/145
 (74%), M09 is 13/14 (93%), and M09-T14 is next.
+
+M09-T14 closes the fixed `account-app/sign-in` publication path without turning an editor preview
+into deployment authority. Publish is admitted only when the current authored Source is clean and
+canonically identical to its last successfully saved Source generation. The App reruns the public
+Publisher from that exact Source, requires the fresh Bundle revision to match the current
+publishable-preview revision, and sends only the exact canonical Bundle bytes plus revision through
+an injected trusted-host port.
+
+The Editor Web adapter stores those immutable bytes by revision and advances only the fixed
+`preview` channel through compare-and-set. Channel movement remains separate from activation: the
+App reports Active only after a distinct server-owned reference-host receipt names that same
+revision and its durable generation. Conflict, stale, failed, mismatched, or indeterminate outcomes
+never become active and preserve the last-known-good revision. Synchronous external-store delivery
+keeps the visible stage current, while a same-tick host-port replacement revokes the predecessor
+lifetime before late channel or activation settlements can reach the new UI. Scenario projections,
+fixtures, Runtime inputs, secrets, and rejected-candidate diagnostics are excluded from
+publication. Browser production code imports neither Node control-plane composition nor the
+reference-host server.
+
+The same closure retains the user-requested authoring compatibility repair. Dedicated Layers and
+Components grips are enlarged to `28 × 32 px` and `32 × 32 px`, respectively, without shifting
+layout. Layers exposes stable, non-overlapping, full-width `20 px` insertion lanes that directly
+own boundary events, with row-half fallback and innermost-slot fencing. The sticky Components
+`Drop target` directly owns the drop while the authenticated panel remains a same-target fallback.
+`Add` immediately selects the inserted node, leaving the existing visible guarded `Remove layer`
+and Delete/Backspace paths available.
+
+The focused App publication suite passes 31/31 across four files, including 2/2 real public
+control-plane → fixed-channel → reference-host integration cases. The Editor Web publication and
+emitted public-package suites pass 10/10 and 4/4, and the independent root mutation proof passes
+12/12. Exact evidence is the 24,763-byte
+[`desen-app-0.1.0-publish-activation.json`](docs/proof/artifacts/desen-app-0.1.0-publish-activation.json)
+at `sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b`; it authenticates nine
+exact parents, 33 current tracked receipts, and 45 focused declarations. The local exhaustive
+authority contains 200 workloads and 95 proof pairs—84 ordinary and 11 barriers—with a
+63-proof-unit/136-workload T14 closure and ownership over 1,267 tracked paths, including 190
+proof-owned paths. Its neutral inventory, impact graph, path set, and ownership projection are
+pinned at `sha256:c6655119e0b24594bced92b6b916917e0f336351c19cf338ee21d3b8d141f684`,
+`sha256:4a2e2d7d4d15a8f3d563aee7b248b14bba6ce44c27b464773a825d9c44fc58bf`,
+`sha256:e8e1841e828a63bf84d57e457047ffaef7e6ca1998b6e7c89201758d44dec5f5`, and
+`sha256:18497e4c50dd0dfa8f8dd7adaf9b6130779db7c0799798ef99e3de8bcf764486`.
+Append-only sequence 53 historically advances exact sequence-52 head
+`sha256:c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9` to
+`sha256:48a1457317c593b846cd4750eb309e846c33248824559d27810441584f0144d8` across 49 artifacts
+and 98 current readers. Compatibility sequence 54 is the immutable predecessor: it preserves
+those 49 frozen artifacts and 98 reader identities, advances that exact sequence-53 head to
+`sha256:0772221371ffe1a35fe955b8cad34c725d0f9ae933714f81f10b3451214a6638`, and reseals only
+M08-T08 proof-library/root-test readers `[64, 65]`. The frozen 49,785-byte M08-T08 artifact remains
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Current sequence 55
+preserves the same 49 frozen artifacts and 98 reader identities, links that exact sequence-54
+predecessor head to `sha256:f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17`,
+and reseals only M09-T01–T14 proof-library/root-test reader indexes `[70..97]`. The current T14
+readers authenticate the exact `10,000 ms` per-test timeout successor at
+`sha256:5eba8a2b15cbcf992d0f04d0d7ad719c1a9fc42cdb66635ebc0eab679a221901`; reversing that one
+edit reproduces the frozen 24,485-byte test receipt, while the frozen T14 artifact remains
+`sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b` unchanged. Checkpoint,
+promotion, selector, and fourteen M09 root reader suites pass 78/78, 20/20, 23/23, and 179/179.
+Promotion pins the selector at
+`sha256:2855cbeedb55ede5d9db18a6b186ac07796afbc4d512f5a0aa9197bc5f177fd1`, the required-affected
+runner at `sha256:b77b35a81915ec41554ab3505895fe98c0a4299ec9bf7d680dec320bbf3fb744`, and the T10 affected
+plan at `sha256:e3cced8e1a9cbe6f1f5c296aa3992b07ef030c81ac9267c2deff714953ce0e39`. The integrated CI
+policy regression passes 330/330. These local receipts make no required-gate or hosted-CI claim.
+
+M09-T14 and G09 are `DONE`; implementation progress is 109/145 (75%), M09 is 14/14, and proof gates
+are 11/13. P-07, P-09, and P-10 remain `PARTIAL`; P-08 remains `NOT_PROVEN`; P-12 remains
+`NOT_PROVEN` until M10-T07; N-036 remains `PLANNED`; and PF-085, PF-086, and PF-089 remain `OPEN`.
+Automated real-browser E2E and native drag are not proven by this compatibility evidence; M10-T01
+is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

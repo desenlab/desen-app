@@ -13,6 +13,8 @@ import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
+const PUBLISH_ACTIVATION_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-NODE-LINKED-DIAGNOSTICS.md";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
@@ -86,6 +88,55 @@ const TRACKED_PATHS = Object.freeze([
   PERSISTENCE_PARENT_PATH,
   ...PROOF_READER_PATHS,
 ]);
+const T14_PUBLICATION_APPLICATION_TEST_PATH =
+  "apps/desen-app/test/publication-application.test.tsx";
+const T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT = Object.freeze({
+  bytes: 24_485,
+  sha256: "52e29b84745ff331556529612015b95b581bf3007118352ebad796ca9541e0e3",
+});
+const T14_LIVE_PUBLICATION_APPLICATION_TEST_RECEIPT = Object.freeze({
+  bytes: 24_493,
+  sha256: "5eba8a2b15cbcf992d0f04d0d7ad719c1a9fc42cdb66635ebc0eab679a221901",
+});
+const T14_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-preview.ts",
+  "apps/desen-app/src/authoring-publication.ts",
+  "apps/desen-app/src/publication-controls.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-publication.test.ts",
+  "apps/desen-app/test/publication-activation-integration.test.ts",
+  T14_PUBLICATION_APPLICATION_TEST_PATH,
+  "apps/desen-app/test/publication-controls.test.tsx",
+  "packages/editor-web/package.json",
+  "packages/editor-web/src/index.ts",
+  "packages/editor-web/src/local-bundle-channel-publication.ts",
+  "packages/editor-web/test/local-bundle-channel-publication.test.ts",
+  "packages/editor-web/test/public-package.mjs",
+  "packages/editor-web/test/public-package.types.mts",
+]);
+const SELF_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-node-linked-diagnostics-proof.mjs",
+  "tests/desen-app-node-linked-diagnostics.test.mjs",
+]);
+const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
+  ...T14_SUCCESSOR_RECEIPT_PATHS,
+  ...SELF_RESEALED_PATHS,
+]);
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...new Set([...TRACKED_PATHS, PUBLISH_ACTIVATION_ARTIFACT_PATH, ...T14_SUCCESSOR_RECEIPT_PATHS]),
+]);
+const RETAINED_HISTORICAL_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath)),
+);
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 29_208,
+  sha256: "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
+});
 
 const EXPECTED_TEST_DECLARATION_COUNTS = Object.freeze({
   [TEST_PATHS.authoringDiagnostics]: 7,
@@ -318,21 +369,6 @@ function deepFreeze(value) {
   return value;
 }
 
-function canonicalArtifactBytes(artifact) {
-  let text = JSON.stringify(artifact, null, 2);
-  const expanded = `        "diagnosticsPanel": [
-          "./application.module.css",
-          "./authoring-diagnostics.js"
-        ],`;
-  const compact =
-    '        "diagnosticsPanel": ["./application.module.css", "./authoring-diagnostics.js"],';
-  if (text.split(expanded).length !== 2) {
-    fail("ARTIFACT_FORMAT_DRIFT", "Expected one reviewed Prettier JSON compaction target.");
-  }
-  text = text.replace(expanded, compact);
-  return Buffer.from(`${text}\n`);
-}
-
 function exactOwnDataOptions(value, allowedKeys, label) {
   if (value === undefined) return Object.freeze(Object.create(null));
   if (
@@ -381,12 +417,16 @@ function captureBytes(value, label) {
 
 function captureOverrides(value) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+  if (
+    !(value instanceof Map) ||
+    utilTypes.isProxy(value) ||
+    value.size > CURRENT_COMPATIBILITY_PATHS.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
   for (const [relativePath, bytes] of value) {
-    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+    if (!CURRENT_COMPATIBILITY_PATHS.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
@@ -445,7 +485,7 @@ async function readRegularAuthority(absolutePath, label) {
 
 async function readTrackedFiles(workspaceRoot, overrides) {
   const files = new Map();
-  for (const relativePath of TRACKED_PATHS) {
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
     files.set(
       relativePath,
       overrides.get(relativePath) ??
@@ -691,6 +731,11 @@ export function verifyDesenAppNodeLinkedDiagnosticsSourcePolicy(rawInput) {
       "selectedSelectionKey: diagnosticSelection?.selectionKey ?? null",
       'data-component-drag-handle="true"',
       'data-layer-drag-handle="true"',
+      "className={styles.slotBoundaryHitArea}",
+      'data-slot-boundary-hit-area="true"',
+      "onDragEnter={onBoundaryDragEnter}",
+      "onDragOver={onBoundaryDragOver}",
+      "onDrop={onBoundaryDrop}",
       "data-layer-drop-row-node-id={node.id}",
       'querySelector<HTMLElement>("[data-layer-drop-row-node-id]")',
       "onDrop={receiveComponentDrop}",
@@ -716,6 +761,14 @@ export function verifyDesenAppNodeLinkedDiagnosticsSourcePolicy(rawInput) {
     6,
     SOURCE_PATHS.application,
   );
+  for (const handler of [
+    "onDragEnter={enterComponentDrop}",
+    "onDragLeave={leaveComponentDrop}",
+    "onDragOver={admitComponentDrop}",
+    "onDrop={receiveComponentDrop}",
+  ]) {
+    assertOccurrenceCount(input.application, handler, 2, SOURCE_PATHS.application);
+  }
 
   assertIncludes(
     input.inspectorPanel,
@@ -780,7 +833,12 @@ export function verifyDesenAppNodeLinkedDiagnosticsSourcePolicy(rawInput) {
       ".componentDragHandle",
       ".layerDragHandle::before",
       '.slotBoundary[data-drop-ready="true"]',
+      ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.25rem;",
+      ".slotBoundaryHitArea {\n  position: absolute;\n  inset: 0;",
+      '.slotBoundary[data-drop-ready="true"] .slotBoundaryHitArea,\n.slotBoundary[data-drop-noop="true"] .slotBoundaryHitArea {\n  pointer-events: auto;',
       '.slotBoundary[data-drop-noop-hovered="true"]::before',
+      ".layerDragHandle {\n  position: relative;\n  width: 1.75rem;\n  height: 2rem;\n  flex: 0 0 auto;\n  margin: -0.25rem;",
+      ".componentDragHandle {\n  position: relative;\n  width: 2rem;\n  height: 2rem;\n  flex: 0 0 auto;\n  margin: -0.1875rem -0.25rem;",
       ".deleteLayerGlyph",
     ],
     SOURCE_PATHS.applicationCss,
@@ -1174,11 +1232,287 @@ function receipts(files) {
     );
 }
 
+async function authenticateFrozenArtifact(workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    "frozen M09-T13 proof artifact",
+  );
+  if (
+    artifactBytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T13 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(artifactBytes, "frozen M09-T13 proof artifact");
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M09-T13" ||
+    artifact.proofId !== "desen-app-node-linked-diagnostics" ||
+    artifact.profile !== "desen.app.node-linked-diagnostics-proof.v1" ||
+    artifact.result !== "PASS" ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.immutableRejectedCandidateReport !== true ||
+    artifact.claim?.explicitContextIdentityMappingOnly !== true ||
+    artifact.claim?.diagnosticCodeMessagePointerIdentityInference !== false ||
+    artifact.claim?.duplicateOccurrenceOrderPreserved !== true ||
+    artifact.claim?.unmappedDiagnosticsSelectable !== false ||
+    artifact.claim?.reportSnapshotDocumentFingerprintFenced !== true ||
+    artifact.claim?.reportSnapshotCatalogFingerprintFenced !== true ||
+    artifact.claim?.routeAndSurfaceFenced !== true ||
+    artifact.claim?.runtimeKindMismatchFailsClosed !== true ||
+    artifact.claim?.invalidPlaceholderInsideManagedRuntimeSubtree !== false ||
+    artifact.claim?.runModeDiagnosticsVisible !== false ||
+    artifact.claim?.automaticFocusSteal !== false ||
+    artifact.claim?.obligationsExecutable !== false ||
+    artifact.claim?.rejectedDiagnosticsPersisted !== false ||
+    artifact.claim?.rejectedDiagnosticsAffectDirtyState !== false ||
+    artifact.claim?.rejectedDiagnosticsIncludedInSave !== false ||
+    artifact.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact.claim?.p16Status !== "PROVEN" ||
+    artifact.claim?.pf086Status !== "OPEN" ||
+    artifact.claim?.pf089Status !== "OPEN" ||
+    artifact.tests?.focusedTestCases !== DESEN_APP_NODE_LINKED_DIAGNOSTICS_FOCUSED_TEST_CASES ||
+    artifact.tests?.fullAppTestFiles !== 24 ||
+    artifact.tests?.fullAppTestCases !== 339 ||
+    artifact.boundary?.trackedFiles !== TRACKED_PATHS.length ||
+    artifact.boundary?.parentArtifacts !== 11 ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== TRACKED_PATHS.length ||
+    trackedReceipts.some(
+      (candidate) =>
+        candidate === null ||
+        typeof candidate !== "object" ||
+        typeof candidate.path !== "string" ||
+        !Number.isSafeInteger(candidate.bytes) ||
+        candidate.bytes < 0 ||
+        typeof candidate.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(candidate.sha256),
+    ) ||
+    !isDeepStrictEqual(
+      artifact.tests?.rootTestNames,
+      DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES,
+    )
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M09-T13 identity or retained claims drifted.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedHistoricalReceipts(frozenArtifact, files) {
+  const receiptMap = new Map(
+    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M09-T13 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
+}
+
+function isExactPublicationApplicationTimeoutSuccessor(bytes) {
+  if (
+    bytes.byteLength !== T14_LIVE_PUBLICATION_APPLICATION_TEST_RECEIPT.bytes ||
+    sha256(bytes) !== T14_LIVE_PUBLICATION_APPLICATION_TEST_RECEIPT.sha256
+  ) {
+    return false;
+  }
+  const source = decodeUtf8(bytes, T14_PUBLICATION_APPLICATION_TEST_PATH);
+  const liveClosing = "  }, 10_000);";
+  if (source.split(liveClosing).length - 1 !== 1) return false;
+  const frozenBytes = Buffer.from(source.replace(liveClosing, "  });"));
+  if (
+    frozenBytes.byteLength !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.bytes ||
+    sha256(frozenBytes) !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.sha256
+  ) {
+    return false;
+  }
+  const sourceFile = parseTypeScript(source, T14_PUBLICATION_APPLICATION_TEST_PATH);
+  let namedTestCalls = 0;
+  let exactTimeoutCalls = 0;
+  function visit(node) {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "it" &&
+      node.arguments.length >= 1 &&
+      ts.isStringLiteral(node.arguments[0]) &&
+      node.arguments[0].text ===
+        "does not surface late replaced-port or unmounted settlements as current success"
+    ) {
+      namedTestCalls += 1;
+      if (
+        node.arguments.length === 3 &&
+        ts.isNumericLiteral(node.arguments[2]) &&
+        node.arguments[2].getText(sourceFile) === "10_000"
+      ) {
+        exactTimeoutCalls += 1;
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return namedTestCalls === 1 && exactTimeoutCalls === 1;
+}
+
+function authenticatePublishActivationSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T14",
+    gate: "G09",
+    proofId: "desen-app-publish-activation",
+    profile: "desen.app.publish-activation-proof.v1",
+    result: "PASS",
+    path: PUBLISH_ACTIVATION_ARTIFACT_PATH,
+    bytes: 24_763,
+    sha256: "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b",
+  });
+  const artifactBytes = files.get(PUBLISH_ACTIVATION_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M09-T14/G09 publish-activation artifact drifted.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, PUBLISH_ACTIVATION_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.gate !== pin.gate ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.gateStatus !== "DONE" ||
+    artifact.claim?.savedAuthoredSourceOnly !== true ||
+    artifact.claim?.publisherRerunFromSavedSource !== true ||
+    artifact.claim?.scenarioPreviewPublished !== false ||
+    artifact.claim?.fixtureDataPublished !== false ||
+    artifact.claim?.operationInputOrSecretPublished !== false ||
+    artifact.claim?.rejectedDiagnosticsPublished !== false ||
+    artifact.claim?.exactCanonicalBundleBytesStored !== true ||
+    artifact.claim?.fixedPreviewChannelCompareAndSet !== true ||
+    artifact.claim?.mutableChannelIsActivationAuthority !== false ||
+    artifact.claim?.sourceGenerationDistinct !== true ||
+    artifact.claim?.channelGenerationDistinct !== true ||
+    artifact.claim?.durableActivationGenerationDistinct !== true ||
+    artifact.claim?.activeRevisionRequiresReferenceHostReceipt !== true ||
+    artifact.claim?.staleCompletionCanBecomeActive !== false ||
+    artifact.claim?.blindRetryAfterIndeterminate !== false ||
+    artifact.claim?.conflictActivatesCandidate !== false ||
+    artifact.claim?.lastKnownGoodActivationPreserved !== true ||
+    artifact.claim?.realPublicControlPlaneAndReferenceHostIntegration !== true ||
+    artifact.claim?.browserAppImportsNodeCompositionPackages !== false ||
+    artifact.claim?.publicationClaimed !== true ||
+    artifact.claim?.activationClaimed !== true ||
+    artifact.claim?.browserE2eClaimed !== false ||
+    artifact.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact.claim?.pf085Status !== "OPEN" ||
+    artifact.claim?.pf086Status !== "OPEN" ||
+    artifact.claim?.pf089Status !== "OPEN" ||
+    artifact.tests?.focusedTestDeclarations !== 45 ||
+    artifact.tests?.rootTestNames?.length !== 12 ||
+    artifact.tests?.realPublicIntegration !== true ||
+    artifact.boundary?.trackedFiles !== 33 ||
+    artifact.boundary?.parentArtifacts !== 9 ||
+    trackedReceipts?.length !== 33 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    )
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T14/G09 publish-activation identity or claims drifted.",
+    );
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (relativePath === T14_PUBLICATION_APPLICATION_TEST_PATH) {
+      if (
+        receipt?.bytes !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.bytes ||
+        receipt.sha256 !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.sha256 ||
+        bytes === undefined ||
+        !isExactPublicationApplicationTimeoutSuccessor(bytes)
+      ) {
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          `The exact live M09-T14 timeout successor drifted: ${relativePath}.`,
+        );
+      }
+      continue;
+    }
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T14 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    gate: pin.gate,
+    artifact: pin,
+    focusedTestDeclarations: 45,
+    trackedFiles: 33,
+    parentArtifacts: 9,
+    rootTests: 12,
+    savedAuthoredSourceOnly: true,
+    publisherRerunFromSavedSource: true,
+    scenarioPreviewPublished: false,
+    fixtureDataPublished: false,
+    operationInputOrSecretPublished: false,
+    rejectedDiagnosticsPublished: false,
+    exactCanonicalBundleBytesStored: true,
+    fixedPreviewChannelCompareAndSet: true,
+    mutableChannelIsActivationAuthority: false,
+    distinctSourceChannelAndActivationGenerations: true,
+    activeRevisionRequiresReferenceHostReceipt: true,
+    staleCompletionCanBecomeActive: false,
+    blindRetryAfterIndeterminate: false,
+    conflictActivatesCandidate: false,
+    lastKnownGoodActivationPreserved: true,
+    realPublicControlPlaneAndReferenceHostIntegration: true,
+    browserAppImportsNodeCompositionPackages: false,
+    publicationClaimed: true,
+    activationClaimed: true,
+    browserE2eClaimed: false,
+    p08Status: "NOT_PROVEN",
+    pf085Status: "OPEN",
+    pf086Status: "OPEN",
+    pf089Status: "OPEN",
+  });
+}
+
 /** Builds detached deterministic M09-T13 node-linked diagnostics evidence. */
 export async function buildDesenAppNodeLinkedDiagnosticsEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
-  const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const [frozen, files] = await Promise.all([
+    authenticateFrozenArtifact(workspaceRoot),
+    readTrackedFiles(workspaceRoot, options.fileOverrides),
+  ]);
   const parents = DESEN_APP_NODE_LINKED_DIAGNOSTICS_PARENT_PINS.map((pin) =>
     authenticateParent(files.get(pin.path), pin),
   );
@@ -1193,7 +1527,7 @@ export async function buildDesenAppNodeLinkedDiagnosticsEvidence(rawOptions = un
   const tests = inspectTests(files);
   const packageContract = inspectPackages(files);
   const trackedReceipts = receipts(files);
-  const artifact = deepFreeze({
+  const currentProjection = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-node-linked-diagnostics",
     profile: "desen.app.node-linked-diagnostics-proof.v1",
@@ -1325,8 +1659,43 @@ export async function buildDesenAppNodeLinkedDiagnosticsEvidence(rawOptions = un
       "No required-gate, global CI count, or hosted-CI pass is inferred from local evidence.",
     ],
   });
-  const artifactBytes = canonicalArtifactBytes(artifact);
-  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
+  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  const currentCompatibility = deepFreeze({
+    schemaVersion: 1,
+    proofId: "desen-app-node-linked-diagnostics",
+    profile: "desen.app.node-linked-diagnostics-proof.v1",
+    task: "M09-T13",
+    result: "PASS",
+    retainedClaim: {
+      taskStatus: frozen.artifact.claim.taskStatus,
+      immutableRejectedCandidateReport: frozen.artifact.claim.immutableRejectedCandidateReport,
+      explicitContextIdentityMappingOnly: frozen.artifact.claim.explicitContextIdentityMappingOnly,
+      rejectedDiagnosticsPersisted: frozen.artifact.claim.rejectedDiagnosticsPersisted,
+      publicationClaimed: frozen.artifact.claim.publicationClaimed,
+      activationClaimed: frozen.artifact.claim.activationClaimed,
+      p08Status: frozen.artifact.claim.p08Status,
+      p16Status: frozen.artifact.claim.p16Status,
+      pf086Status: frozen.artifact.claim.pf086Status,
+      pf089Status: frozen.artifact.claim.pf089Status,
+    },
+    prerequisites: parents,
+    source: currentProjection.authority.source,
+    package: packageContract,
+    tests,
+    boundary: {
+      retainedHistoricalReceipts: RETAINED_HISTORICAL_PATHS.length,
+      successorCompatibilityPaths: SUCCESSOR_COMPATIBILITY_PATHS.length,
+      currentPathReceipts: receipts(files),
+    },
+    publishActivationSuccessor,
+  });
+  return deepFreeze({
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+  });
 }
 
 function verifyProofDocument(bytes, artifactSha256) {

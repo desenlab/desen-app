@@ -6,12 +6,12 @@ DESEN Developer Platform at `desen.run`.
 
 ## Status
 
-M09-T13 adds Design-only node-linked validation diagnostics and selectable invalid placeholders
-over the public Editor Core continuous-validation report and Runtime React diagnostic index. It
-retains M09-T12's generation-guarded authored Source Open/Save, M09-T11's transient Catalog
-scenarios, exact synthetic operation fixtures, and visible adapter fidelity while keeping
-diagnostics, persistence, scenario, fixture, mode, event, state, binding, selection, and every
-other authoring control in the application-owned shell outside the exact React adapter canvas.
+M09-T14 adds fixed-channel publication and separate durable reference-host activation for the exact
+clean saved Source. It retains M09-T13's Design-only node-linked diagnostics, M09-T12's
+generation-guarded authored Source Open/Save, M09-T11's transient Catalog scenarios, exact synthetic
+operation fixtures, and visible adapter fidelity while keeping publication, diagnostics,
+persistence, scenario, fixture, mode, event, state, binding, selection, and every other authoring
+control in the application-owned shell outside the exact React adapter canvas.
 The current product surface contains:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
@@ -28,19 +28,19 @@ The current product surface contains:
   inventory, display names, categories, descriptions, identity, version, and target;
 - local component filtering that changes only the visible list and never mutates Catalog or Source
   data;
-- dedicated dotted Layers grips plus one App-owned global projection fenced by the innermost drag
-  owner and epoch, with midpoint hysteresis, compact layout-stable insertion lanes, whole-row
-  before/after projection, accepted/current-position feedback, and no tree movement while a drag is
-  active;
-- dedicated dotted native-drag grips on compatible Components cards with separate `Add` buttons;
-  the complete authenticated Components panel accepts a drop for the target summarized by the
-  sticky `Add to` card;
+- dedicated dotted Layers grips enlarged to `28 × 32 px` without layout shift, plus one App-owned
+  global projection fenced by the innermost drag owner and epoch; stable, non-overlapping,
+  full-width `20 px` insertion lanes directly own boundary events, with row-half fallback,
+  accepted/current-position feedback, and no tree movement while a drag is active;
+- dedicated dotted native-drag grips enlarged to `32 × 32 px` without layout shift on compatible
+  Components cards with separate `Add` buttons; the sticky `Drop target` directly owns the drop,
+  while the complete authenticated Components panel remains a same-target fallback;
 - App-owned drag intent plus native keyboard and click controls for component insertion, cross-slot
   move, and same-slot reorder;
 - a visible selection-bound `Remove layer` control plus guarded Delete/Backspace shortcuts outside
-  editable controls; both explain root and effective-minimum restrictions, automatically switch to
-  Layers and focus a newly inserted component, clear a successfully deleted selection, and return
-  focus to Layers;
+  editable controls; `Add` automatically selects the inserted component, and the guarded removal
+  paths explain root and effective-minimum restrictions, clear a successfully deleted selection,
+  and return focus to Layers;
 - a third State view that projects the exact current surface-local declarations, bounded usage
   counts, and controlled String, Boolean, Number, and Integer initial values;
 - stable add, atomic type-and-initial update, and unused-state deletion controls that preserve used
@@ -85,6 +85,17 @@ The current product surface contains:
 - centralized canonical baseline/current tracking with a rerender-safe no-port projection that
   labels pristine state `Local draft unchanged` while guarding edited no-port and port-backed dirty
   drafts across navigation, traversal, and page exit;
+- one publication controller that admits only the exact current clean Source canonically equal to
+  its last successful saved generation, reruns the public Publisher, and requires the fresh Bundle
+  revision to equal the current publishable-preview revision;
+- an injected trusted-host publication port that receives only canonical Bundle bytes and their
+  revision, with scenario, fixture, Runtime-input, secret, and rejected-diagnostic state excluded;
+- a fixed `preview` channel compare-and-set stage followed by a separate server-owned durable
+  reference-host activation receipt for the same revision, with Source, channel, and activation
+  generations kept distinct;
+- visible Saved Source, preview-channel, and reference-host stages that never report Active for a
+  conflict, stale completion, failed or mismatched activation, or indeterminate mutation, while
+  preserving the last-known-good revision;
 - immutable rejected-candidate validation reports fenced by exact project, surface, candidate
   document fingerprint, Catalog-set fingerprint, and current committed-document owner;
 - an Inspector diagnostics section that preserves original diagnostic order, makes only explicit
@@ -282,18 +293,18 @@ controller, and preview replacement prevents a predecessor from publishing late 
 
 This slice does not expose component rectangles, hit testing, canvas picking, private DOM/native
 structure, or managed-tree inspection. It does not edit repeat/resource bindings or behavior-owned
-event handlers; provide a concrete persistence adapter; create user projects; publish to the
-control plane; or activate a channel. Publication and activation belong to M09-T14. Catalog control
-hints remain opaque under PF-025 and cannot widen schema authority. P-16 is `PROVEN`; P-09 and P-10
-are only `PARTIAL`; P-08 remains `NOT_PROVEN`, N-012, N-018, N-035, S-001, and S-003 are `TESTED`,
-N-036 remains `PLANNED`, PF-028 is `CLOSED`, and PF-025, PF-083, PF-085, PF-086, and PF-089 remain
-`OPEN`. No automated real-browser E2E or native-drag automation result is claimed.
+event handlers; provide a concrete persistence adapter; create user projects; select arbitrary
+channels; or perform remote deployment. Catalog control hints remain opaque under PF-025 and cannot
+widen schema authority. P-16 is `PROVEN`; P-07, P-09, and P-10 are only `PARTIAL`; P-08 remains
+`NOT_PROVEN`; P-12 remains `NOT_PROVEN` until M10-T07; N-012, N-018, N-035, S-001, and S-003 are
+`TESTED`; N-036 remains `PLANNED`; PF-028 is `CLOSED`; and PF-025, PF-083, PF-085, PF-086, and
+PF-089 remain `OPEN`. No automated real-browser E2E or native-drag automation result is claimed.
 
 The App imports only public package entry points for Catalog derivation, Editor Core mutation and
-validation, Publisher preflight, runtime composition, and the exact static reference adapter
-registry. It does not import concrete Catalog components, private package files, editor internals,
-or control-plane code. Bundle data never selects a module, component, fallback tree, or executable
-host binding.
+validation, Publisher execution, runtime composition, and the exact static reference adapter
+registry. Its browser production graph does not import concrete Catalog components, private
+package files, editor internals, Node control-plane composition, or the reference-host server.
+Bundle data never selects a module, component, fallback tree, or executable host binding.
 
 The focused event/action suite passes 84/84, the complete App suite passes 202/202, and the
 independent root proof passes 10/10. Exact evidence is the `23,812`-byte
@@ -414,6 +425,66 @@ required-gate, hosted-CI, publication/activation, concrete storage-adapter, or a
 real-browser E2E claim. M09-T13 is `DONE`, P-16 is `PROVEN`, PF-086 remains `OPEN`, implementation
 progress is 108/145 (74%), M09 is 13/14 (93%), proof gates remain 10/13, and M09-T14 is next.
 
+M09-T14 admits Publish only when the exact current authored Source is clean and canonically equal
+to the last successfully saved Source generation. The controller reruns the public Publisher from
+that Source, requires the fresh Bundle revision to equal the current publishable-preview revision,
+and crosses the trusted-host boundary with only canonical Bundle bytes and the revision. Scenario
+previews, fixture state, Runtime operation inputs, secrets, and rejected-candidate diagnostics are
+not fields of the snapshot or request.
+
+The public Editor Web adapter stores immutable Bundle bytes by exact revision and compare-and-sets
+only the configured `preview` channel. That discovery pointer cannot itself authorize Active. The
+App waits for a separate reference-host receipt carrying the same revision and durable activation
+generation. Conflicts do not invoke activation; failed, mismatched, stale, or indeterminate
+settlements never become current success and preserve the last-known-good revision. Synchronous
+external-store delivery keeps the visible stage current, and same-tick host-port replacement
+revokes the predecessor lifetime before late channel or activation settlements can reach the new
+UI.
+
+The user-requested authoring compatibility repair enlarges dedicated Layers and Components grips
+to `28 × 32 px` and `32 × 32 px`, respectively, without layout shift. Layers uses stable,
+non-overlapping, full-width `20 px` lanes with direct boundary-event ownership, row-half fallback,
+and innermost-slot fencing. The sticky Components `Drop target` directly owns the drop while the
+authenticated panel remains a same-target fallback. `Add` immediately selects the inserted node,
+and the existing visible guarded `Remove layer` and Delete/Backspace paths remain available.
+
+The focused four-file App publication suite passes 31/31, including 2/2 real public control-plane →
+fixed-channel → reference-host integration cases. Editor Web publication passes 10/10, its emitted
+public-package cases pass 4/4, and the independent root mutation proof passes 12/12. Exact evidence
+is the 24,763-byte
+`docs/proof/artifacts/desen-app-0.1.0-publish-activation.json` at
+`sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b`; it authenticates nine
+parents, 33 current tracked receipts, and 45 focused declarations. The local exhaustive authority
+contains 200 workloads and 95 proof pairs—84 ordinary and 11 barriers—with a
+63-proof-unit/136-workload T14 closure and ownership over 1,267 tracked paths, including 190
+proof-owned paths. Append-only sequence 53 historically advances exact sequence-52 head
+`sha256:c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9` to
+`sha256:48a1457317c593b846cd4750eb309e846c33248824559d27810441584f0144d8` across 49 artifacts
+and 98 current readers. Compatibility sequence 54 is the immutable predecessor: it preserves those
+49 frozen artifacts and 98 reader identities, advances the exact sequence-53 head to
+`sha256:0772221371ffe1a35fe955b8cad34c725d0f9ae933714f81f10b3451214a6638`, and reseals only
+M08-T08 proof-library/root-test readers `[64, 65]`. Its frozen 49,785-byte artifact remains
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Current sequence 55
+preserves the same 49 frozen artifacts and 98 reader identities, links that exact sequence-54
+predecessor head to `sha256:f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17`,
+and reseals only M09-T01–T14 proof-library/root-test reader indexes `[70..97]`. The current T14
+readers authenticate the exact `10,000 ms` per-test timeout successor at
+`sha256:5eba8a2b15cbcf992d0f04d0d7ad719c1a9fc42cdb66635ebc0eab679a221901`; reversing that one
+edit reproduces the frozen 24,485-byte test receipt, while the frozen T14 artifact remains
+`sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b` unchanged. Checkpoint,
+promotion, selector, and fourteen M09 root reader suites pass 78/78, 20/20, 23/23, and 179/179.
+Promotion pins the selector at
+`sha256:2855cbeedb55ede5d9db18a6b186ac07796afbc4d512f5a0aa9197bc5f177fd1`, the required-affected
+runner at `sha256:b77b35a81915ec41554ab3505895fe98c0a4299ec9bf7d680dec320bbf3fb744`, and the T10 affected
+plan at `sha256:e3cced8e1a9cbe6f1f5c296aa3992b07ef030c81ac9267c2deff714953ce0e39`. The integrated CI
+policy regression passes 330/330. These local receipts make no required-gate or hosted-CI claim.
+
+M09-T14 and G09 are `DONE`; implementation progress is 109/145 (75%), M09 is 14/14, and proof gates
+are 11/13. P-07/P-09/P-10 remain `PARTIAL`, P-08 remains `NOT_PROVEN`, P-12 remains `NOT_PROVEN`
+until M10-T07, N-036 remains `PLANNED`, and PF-085/PF-086/PF-089 remain `OPEN`. Automated
+real-browser E2E and native drag are not proven by this compatibility evidence and remain M10-T01
+work.
+
 ## Local commands
 
 ```bash
@@ -432,6 +503,7 @@ pnpm --filter @desen/app-web test:design-run
 pnpm --filter @desen/app-web test:fixtures-scenarios
 pnpm --filter @desen/app-web test:persistence
 pnpm --filter @desen/app-web test:diagnostics
+pnpm --filter @desen/app-web test:publication
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

@@ -43,6 +43,9 @@ const TEST_PATHS = Object.freeze({
 });
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const ROOT_PACKAGE_PATH = "package.json";
+const PUBLISH_ACTIVATION_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json";
+const PUBLICATION_SOURCE_PATH = "apps/desen-app/src/authoring-publication.ts";
+const PUBLICATION_APPLICATION_TEST = "apps/desen-app/test/publication-application.test.tsx";
 const temporaryDirectories = [];
 let sourcePolicyInput;
 let testSources;
@@ -284,7 +287,11 @@ test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[10], async () => {
     ["application", 'data-component-drag-handle="true"', ""],
     ["application", 'data-layer-drag-handle="true"', ""],
     ["application", "data-layer-drop-row-node-id={node.id}", ""],
-    ["application", "onDrop={receiveComponentDrop}", ""],
+    [
+      "application",
+      "onDragEnter={enterComponentDrop}\n        onDragLeave={leaveComponentDrop}\n        onDragOver={admitComponentDrop}\n        onDrop={receiveComponentDrop}",
+      "onDragEnter={undefined}\n        onDragLeave={undefined}\n        onDragOver={undefined}\n        onDrop={undefined}",
+    ],
     ["application", 'releaseAdmission.status === "rejected"', "false"],
     ["application", '"Current position"', '"Drop here"'],
     ["application", "pendingLayerFocus.current = result.nodeId", "void result.nodeId"],
@@ -317,7 +324,11 @@ test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[10], async () => {
     () =>
       verifyDesenAppNodeLinkedDiagnosticsSourcePolicy({
         ...sourcePolicyInput,
-        applicationCss: `${sourcePolicyInput.applicationCss}\n[data-drag-active="true"] .slotBoundary { margin-block: -0.875rem; transition: min-height 100ms ease; }\n`,
+        applicationCss: replaceOnce(
+          sourcePolicyInput.applicationCss,
+          ".slotBoundaryHitArea {\n  position: absolute;\n  inset: 0;",
+          ".slotBoundaryHitArea {\n  position: absolute;\n  inset: -0.5rem 0;",
+        ),
       }),
     expectedError("SOURCE_POLICY_VIOLATION"),
   );
@@ -431,4 +442,111 @@ test(DESEN_APP_NODE_LINKED_DIAGNOSTICS_ROOT_TEST_NAMES[11], async () => {
     expectedError("ARTIFACT_WRITE_UNSAFE"),
   );
   assert.equal(await readFile(sentinel, "utf8"), "sentinel\n");
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T14/G09 publish-activation closure", async () => {
+  assert.equal(built.artifactBytes.byteLength, 29_208);
+  assert.equal(
+    built.artifactSha256,
+    "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
+  );
+  assert.deepEqual(built.currentCompatibility.retainedClaim, {
+    taskStatus: "DONE",
+    immutableRejectedCandidateReport: true,
+    explicitContextIdentityMappingOnly: true,
+    rejectedDiagnosticsPersisted: false,
+    publicationClaimed: false,
+    activationClaimed: false,
+    p08Status: "NOT_PROVEN",
+    p16Status: "PROVEN",
+    pf086Status: "OPEN",
+    pf089Status: "OPEN",
+  });
+
+  const successor = built.currentCompatibility.publishActivationSuccessor;
+  assert.deepEqual(successor, {
+    task: "M09-T14",
+    gate: "G09",
+    artifact: {
+      task: "M09-T14",
+      gate: "G09",
+      proofId: "desen-app-publish-activation",
+      profile: "desen.app.publish-activation-proof.v1",
+      result: "PASS",
+      path: PUBLISH_ACTIVATION_ARTIFACT,
+      bytes: 24_763,
+      sha256: "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b",
+    },
+    focusedTestDeclarations: 45,
+    trackedFiles: 33,
+    parentArtifacts: 9,
+    rootTests: 12,
+    savedAuthoredSourceOnly: true,
+    publisherRerunFromSavedSource: true,
+    scenarioPreviewPublished: false,
+    fixtureDataPublished: false,
+    operationInputOrSecretPublished: false,
+    rejectedDiagnosticsPublished: false,
+    exactCanonicalBundleBytesStored: true,
+    fixedPreviewChannelCompareAndSet: true,
+    mutableChannelIsActivationAuthority: false,
+    distinctSourceChannelAndActivationGenerations: true,
+    activeRevisionRequiresReferenceHostReceipt: true,
+    staleCompletionCanBecomeActive: false,
+    blindRetryAfterIndeterminate: false,
+    conflictActivatesCandidate: false,
+    lastKnownGoodActivationPreserved: true,
+    realPublicControlPlaneAndReferenceHostIntegration: true,
+    browserAppImportsNodeCompositionPackages: false,
+    publicationClaimed: true,
+    activationClaimed: true,
+    browserE2eClaimed: false,
+    p08Status: "NOT_PROVEN",
+    pf085Status: "OPEN",
+    pf086Status: "OPEN",
+    pf089Status: "OPEN",
+  });
+
+  const [artifactBytes, publicationSourceBytes, publicationApplicationBytes] = await Promise.all([
+    readFile(path.join(ROOT, PUBLISH_ACTIVATION_ARTIFACT)),
+    readFile(path.join(ROOT, PUBLICATION_SOURCE_PATH)),
+    readFile(path.join(ROOT, PUBLICATION_APPLICATION_TEST)),
+  ]);
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([[PUBLISH_ACTIVATION_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([[PUBLICATION_SOURCE_PATH, changedByte(publicationSourceBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([
+        [PUBLICATION_APPLICATION_TEST, changedByte(publicationApplicationBytes)],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([
+        [
+          PUBLICATION_APPLICATION_TEST,
+          Buffer.from(
+            replaceOnce(
+              publicationApplicationBytes.toString("utf8"),
+              "  }, 10_000);",
+              "  }, 20_000);",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
 });

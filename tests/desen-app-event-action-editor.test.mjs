@@ -31,6 +31,9 @@ const FIXTURES_SCENARIOS_ARTIFACT_PATH =
 const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const NODE_LINKED_DIAGNOSTICS_ARTIFACT =
   "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
+const PUBLISH_ACTIVATION_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json";
+const PUBLISH_ACTIVATION_RECEIPT = "packages/editor-web/src/local-bundle-channel-publication.ts";
+const PUBLICATION_APPLICATION_TEST = "apps/desen-app/test/publication-application.test.tsx";
 const SELF_READER_PATH = "scripts/lib/desen-app-event-action-editor-proof.mjs";
 const temporaryDirectories = [];
 let parentArtifactBytes;
@@ -174,7 +177,7 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[0], () => {
     componentDragAuthorityLimitedToDedicatedHandle: true,
     dedicatedLayerDragHandle: true,
     componentPanelWideDropSurface: true,
-    stickyComponentTargetSummaryOnly: true,
+    stickyComponentTargetDirectDropSurface: true,
     separateNonDraggableComponentAddAction: true,
     visibleSelectedLayerDeleteControl: true,
     guardedDeleteAndBackspace: true,
@@ -182,9 +185,9 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[0], () => {
     arbitraryCanvasGeometryOrDropClaimed: false,
     nativeBrowserDragE2eClaimed: false,
   });
-  assert.equal(built.currentCompatibility.boundary.retainedHistoricalReceipts, 18);
-  assert.equal(built.currentCompatibility.boundary.successorCompatibilityPaths, 51);
-  assert.equal(built.currentCompatibility.boundary.currentPathReceipts.length, 55);
+  assert.equal(built.currentCompatibility.boundary.retainedHistoricalReceipts, 17);
+  assert.equal(built.currentCompatibility.boundary.successorCompatibilityPaths, 70);
+  assert.equal(built.currentCompatibility.boundary.currentPathReceipts.length, 68);
 });
 
 test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[1], () => {
@@ -374,8 +377,10 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
     },
     {
       key: "applicationSource",
-      search: "onDrop={receiveComponentDrop}",
-      replacement: "onDrop={() => undefined}",
+      search:
+        "onDragEnter={enterComponentDrop}\n        onDragLeave={leaveComponentDrop}\n        onDragOver={admitComponentDrop}\n        onDrop={receiveComponentDrop}",
+      replacement:
+        "onDragEnter={undefined}\n        onDragLeave={undefined}\n        onDragOver={undefined}\n        onDrop={undefined}",
     },
     {
       key: "applicationSource",
@@ -409,7 +414,7 @@ test(DESEN_APP_EVENT_ACTION_EDITOR_ROOT_TEST_NAMES[8], () => {
     },
     {
       key: "applicationCss",
-      search: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;",
+      search: ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.25rem;",
       replacement:
         ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.25rem;",
     },
@@ -699,6 +704,129 @@ test("[successor] authenticates and mutation-tests the exact M09-T13 diagnostics
   await assert.rejects(
     buildDesenAppEventActionEditorEvidence({
       fileOverrides: new Map([[NODE_LINKED_DIAGNOSTICS_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T14/G09 publish-activation closure", async () => {
+  const successor = built.currentCompatibility.publishActivationSuccessor;
+  assert.equal(successor.task, "M09-T14");
+  assert.equal(successor.gate, "G09");
+  assert.deepEqual(successor.artifact, {
+    task: "M09-T14",
+    gate: "G09",
+    proofId: "desen-app-publish-activation",
+    profile: "desen.app.publish-activation-proof.v1",
+    result: "PASS",
+    path: PUBLISH_ACTIVATION_ARTIFACT,
+    bytes: 24_763,
+    sha256: "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b",
+  });
+  assert.deepEqual(
+    {
+      focusedTestDeclarations: successor.focusedTestDeclarations,
+      trackedFiles: successor.trackedFiles,
+      parentArtifacts: successor.parentArtifacts,
+      rootTests: successor.rootTests,
+      savedAuthoredSourceOnly: successor.savedAuthoredSourceOnly,
+      publisherRerunFromSavedSource: successor.publisherRerunFromSavedSource,
+      scenarioPreviewPublished: successor.scenarioPreviewPublished,
+      fixtureDataPublished: successor.fixtureDataPublished,
+      operationInputOrSecretPublished: successor.operationInputOrSecretPublished,
+      rejectedDiagnosticsPublished: successor.rejectedDiagnosticsPublished,
+      exactCanonicalBundleBytesStored: successor.exactCanonicalBundleBytesStored,
+      fixedPreviewChannelCompareAndSet: successor.fixedPreviewChannelCompareAndSet,
+      mutableChannelIsActivationAuthority: successor.mutableChannelIsActivationAuthority,
+      distinctSourceChannelAndActivationGenerations:
+        successor.distinctSourceChannelAndActivationGenerations,
+      activeRevisionRequiresReferenceHostReceipt:
+        successor.activeRevisionRequiresReferenceHostReceipt,
+      staleCompletionCanBecomeActive: successor.staleCompletionCanBecomeActive,
+      blindRetryAfterIndeterminate: successor.blindRetryAfterIndeterminate,
+      conflictActivatesCandidate: successor.conflictActivatesCandidate,
+      lastKnownGoodActivationPreserved: successor.lastKnownGoodActivationPreserved,
+      realPublicControlPlaneAndReferenceHostIntegration:
+        successor.realPublicControlPlaneAndReferenceHostIntegration,
+      browserAppImportsNodeCompositionPackages: successor.browserAppImportsNodeCompositionPackages,
+      publicationClaimed: successor.publicationClaimed,
+      activationClaimed: successor.activationClaimed,
+      browserE2eClaimed: successor.browserE2eClaimed,
+      p08Status: successor.p08Status,
+      pf085Status: successor.pf085Status,
+      pf086Status: successor.pf086Status,
+      pf089Status: successor.pf089Status,
+    },
+    {
+      focusedTestDeclarations: 45,
+      trackedFiles: 33,
+      parentArtifacts: 9,
+      rootTests: 12,
+      savedAuthoredSourceOnly: true,
+      publisherRerunFromSavedSource: true,
+      scenarioPreviewPublished: false,
+      fixtureDataPublished: false,
+      operationInputOrSecretPublished: false,
+      rejectedDiagnosticsPublished: false,
+      exactCanonicalBundleBytesStored: true,
+      fixedPreviewChannelCompareAndSet: true,
+      mutableChannelIsActivationAuthority: false,
+      distinctSourceChannelAndActivationGenerations: true,
+      activeRevisionRequiresReferenceHostReceipt: true,
+      staleCompletionCanBecomeActive: false,
+      blindRetryAfterIndeterminate: false,
+      conflictActivatesCandidate: false,
+      lastKnownGoodActivationPreserved: true,
+      realPublicControlPlaneAndReferenceHostIntegration: true,
+      browserAppImportsNodeCompositionPackages: false,
+      publicationClaimed: true,
+      activationClaimed: true,
+      browserE2eClaimed: false,
+      p08Status: "NOT_PROVEN",
+      pf085Status: "OPEN",
+      pf086Status: "OPEN",
+      pf089Status: "OPEN",
+    },
+  );
+  const [artifactBytes, receiptBytes, publicationApplicationBytes] = await Promise.all([
+    readFile(path.join(ROOT, PUBLISH_ACTIVATION_ARTIFACT)),
+    readFile(path.join(ROOT, PUBLISH_ACTIVATION_RECEIPT)),
+    readFile(path.join(ROOT, PUBLICATION_APPLICATION_TEST)),
+  ]);
+  await assert.rejects(
+    buildDesenAppEventActionEditorEvidence({
+      fileOverrides: new Map([[PUBLISH_ACTIVATION_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppEventActionEditorEvidence({
+      fileOverrides: new Map([[PUBLISH_ACTIVATION_RECEIPT, changedByte(receiptBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppEventActionEditorEvidence({
+      fileOverrides: new Map([
+        [PUBLICATION_APPLICATION_TEST, changedByte(publicationApplicationBytes)],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppEventActionEditorEvidence({
+      fileOverrides: new Map([
+        [
+          PUBLICATION_APPLICATION_TEST,
+          Buffer.from(
+            replaceOnce(
+              publicationApplicationBytes.toString("utf8"),
+              "  }, 10_000);",
+              "  }, 20_000);",
+            ),
+          ),
+        ],
+      ]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );

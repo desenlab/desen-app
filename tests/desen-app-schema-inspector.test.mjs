@@ -29,6 +29,10 @@ const FIXTURES_SCENARIOS_ARTIFACT_PATH =
 const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const NODE_LINKED_DIAGNOSTICS_ARTIFACT =
   "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
+const PUBLISH_ACTIVATION_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json";
+const PUBLISH_ACTIVATION_RECEIPT = "packages/editor-web/src/local-bundle-channel-publication.ts";
+const T14_PUBLICATION_APPLICATION_TEST_PATH =
+  "apps/desen-app/test/publication-application.test.tsx";
 const EVENT_ACTION_SOURCE_PATH = "apps/desen-app/src/authoring-event-actions.ts";
 const EVENT_ACTION_PANEL_PATH = "apps/desen-app/src/event-action-panel.tsx";
 const EVENT_ACTION_TEST_PATH = "apps/desen-app/test/authoring-event-actions.test.ts";
@@ -249,7 +253,8 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[1], () => {
   );
   assert.equal(built.currentCompatibility.successor.dedicatedLayerDragHandle, true);
   assert.equal(built.currentCompatibility.successor.componentPanelWideDropSurface, true);
-  assert.equal(built.currentCompatibility.successor.stickyComponentTargetSummaryOnly, true);
+  assert.equal(built.currentCompatibility.successor.stickyComponentTargetSummaryOnly, false);
+  assert.equal(built.currentCompatibility.successor.stickyComponentTargetDirectDropSurface, true);
   assert.equal(built.currentCompatibility.successor.separateNonDraggableComponentAddAction, true);
   assert.equal(built.currentCompatibility.successor.successfulInsertionSelectsNewLayer, true);
   assert.equal(built.currentCompatibility.successor.persistenceImplemented, false);
@@ -423,7 +428,10 @@ test(DESEN_APP_SCHEMA_INSPECTOR_ROOT_TEST_NAMES[7], async () => {
     ['data-component-drag-handle="true"', 'data-component-drag-handle="false"'],
     ['data-layer-drag-handle="true"', 'data-layer-drag-handle="false"'],
     ["panelDragEnterDepth.current += 1", "panelDragEnterDepth.current += 0"],
-    ["onDrop={receiveComponentDrop}", "onDrop={() => undefined}"],
+    [
+      "onDragEnter={enterComponentDrop}\n        onDragLeave={leaveComponentDrop}\n        onDragOver={admitComponentDrop}\n        onDrop={receiveComponentDrop}",
+      "onDragEnter={undefined}\n        onDragLeave={undefined}\n        onDragOver={undefined}\n        onDrop={undefined}",
+    ],
     ["className={styles.componentAddAction}", "className={styles.removedComponentAddAction}"],
   ]) {
     await assert.rejects(
@@ -720,6 +728,132 @@ test("[successor] authenticates and mutation-tests the exact M09-T13 diagnostics
   await assert.rejects(
     buildDesenAppSchemaInspectorEvidence({
       fileOverrides: new Map([[NODE_LINKED_DIAGNOSTICS_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T14/G09 publish-activation closure", async () => {
+  const successor = built.currentCompatibility.publishActivationSuccessor;
+  assert.equal(successor.task, "M09-T14");
+  assert.equal(successor.gate, "G09");
+  assert.deepEqual(successor.artifact, {
+    task: "M09-T14",
+    gate: "G09",
+    proofId: "desen-app-publish-activation",
+    profile: "desen.app.publish-activation-proof.v1",
+    result: "PASS",
+    path: PUBLISH_ACTIVATION_ARTIFACT,
+    bytes: 24_763,
+    sha256: "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b",
+  });
+  assert.deepEqual(
+    {
+      focusedTestDeclarations: successor.focusedTestDeclarations,
+      trackedFiles: successor.trackedFiles,
+      parentArtifacts: successor.parentArtifacts,
+      rootTests: successor.rootTests,
+      savedAuthoredSourceOnly: successor.savedAuthoredSourceOnly,
+      publisherRerunFromSavedSource: successor.publisherRerunFromSavedSource,
+      scenarioPreviewPublished: successor.scenarioPreviewPublished,
+      fixtureDataPublished: successor.fixtureDataPublished,
+      operationInputOrSecretPublished: successor.operationInputOrSecretPublished,
+      rejectedDiagnosticsPublished: successor.rejectedDiagnosticsPublished,
+      exactCanonicalBundleBytesStored: successor.exactCanonicalBundleBytesStored,
+      fixedPreviewChannelCompareAndSet: successor.fixedPreviewChannelCompareAndSet,
+      mutableChannelIsActivationAuthority: successor.mutableChannelIsActivationAuthority,
+      distinctSourceChannelAndActivationGenerations:
+        successor.distinctSourceChannelAndActivationGenerations,
+      activeRevisionRequiresReferenceHostReceipt:
+        successor.activeRevisionRequiresReferenceHostReceipt,
+      staleCompletionCanBecomeActive: successor.staleCompletionCanBecomeActive,
+      blindRetryAfterIndeterminate: successor.blindRetryAfterIndeterminate,
+      conflictActivatesCandidate: successor.conflictActivatesCandidate,
+      lastKnownGoodActivationPreserved: successor.lastKnownGoodActivationPreserved,
+      realPublicControlPlaneAndReferenceHostIntegration:
+        successor.realPublicControlPlaneAndReferenceHostIntegration,
+      browserAppImportsNodeCompositionPackages: successor.browserAppImportsNodeCompositionPackages,
+      publicationClaimed: successor.publicationClaimed,
+      activationClaimed: successor.activationClaimed,
+      browserE2eClaimed: successor.browserE2eClaimed,
+      p08Status: successor.p08Status,
+      pf085Status: successor.pf085Status,
+      pf086Status: successor.pf086Status,
+      pf089Status: successor.pf089Status,
+    },
+    {
+      focusedTestDeclarations: 45,
+      trackedFiles: 33,
+      parentArtifacts: 9,
+      rootTests: 12,
+      savedAuthoredSourceOnly: true,
+      publisherRerunFromSavedSource: true,
+      scenarioPreviewPublished: false,
+      fixtureDataPublished: false,
+      operationInputOrSecretPublished: false,
+      rejectedDiagnosticsPublished: false,
+      exactCanonicalBundleBytesStored: true,
+      fixedPreviewChannelCompareAndSet: true,
+      mutableChannelIsActivationAuthority: false,
+      distinctSourceChannelAndActivationGenerations: true,
+      activeRevisionRequiresReferenceHostReceipt: true,
+      staleCompletionCanBecomeActive: false,
+      blindRetryAfterIndeterminate: false,
+      conflictActivatesCandidate: false,
+      lastKnownGoodActivationPreserved: true,
+      realPublicControlPlaneAndReferenceHostIntegration: true,
+      browserAppImportsNodeCompositionPackages: false,
+      publicationClaimed: true,
+      activationClaimed: true,
+      browserE2eClaimed: false,
+      p08Status: "NOT_PROVEN",
+      pf085Status: "OPEN",
+      pf086Status: "OPEN",
+      pf089Status: "OPEN",
+    },
+  );
+  const [artifactBytes, receiptBytes, publicationApplicationTestBytes] = await Promise.all([
+    readFile(path.join(ROOT, PUBLISH_ACTIVATION_ARTIFACT)),
+    readFile(path.join(ROOT, PUBLISH_ACTIVATION_RECEIPT)),
+    readFile(path.join(ROOT, T14_PUBLICATION_APPLICATION_TEST_PATH)),
+  ]);
+  await assert.rejects(
+    buildDesenAppSchemaInspectorEvidence({
+      fileOverrides: new Map([[PUBLISH_ACTIVATION_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppSchemaInspectorEvidence({
+      fileOverrides: new Map([[PUBLISH_ACTIVATION_RECEIPT, changedByte(receiptBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppSchemaInspectorEvidence({
+      fileOverrides: new Map([
+        [T14_PUBLICATION_APPLICATION_TEST_PATH, changedByte(publicationApplicationTestBytes)],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  const publicationApplicationTestSource = publicationApplicationTestBytes.toString("utf8");
+  assert.equal(
+    publicationApplicationTestSource.split("}, 10_000);").length - 1,
+    1,
+    "Expected one exact T14 timeout successor marker.",
+  );
+  await assert.rejects(
+    buildDesenAppSchemaInspectorEvidence({
+      fileOverrides: new Map([
+        [
+          T14_PUBLICATION_APPLICATION_TEST_PATH,
+          Buffer.from(
+            publicationApplicationTestSource.replace("}, 10_000);", "}, 20_000);"),
+            "utf8",
+          ),
+        ],
+      ]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );

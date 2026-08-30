@@ -23,6 +23,8 @@ const SOURCE_PERSISTENCE_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
+const PUBLISH_ACTIVATION_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json";
 const ROOT_PACKAGE_PATH = "package.json";
 const APP_PACKAGE_PATH = "apps/desen-app/package.json";
 const APP_INDEX_PATH = "apps/desen-app/index.html";
@@ -101,8 +103,10 @@ const CURRENT_APP_SOURCE_PATHS = Object.freeze(
     STRUCTURED_JSON_SOURCE_PATH,
     "apps/desen-app/src/authoring-diagnostics.ts",
     "apps/desen-app/src/authoring-persistence.ts",
+    "apps/desen-app/src/authoring-publication.ts",
     "apps/desen-app/src/diagnostics-panel.tsx",
     "apps/desen-app/src/persistence-controls.tsx",
+    "apps/desen-app/src/publication-controls.tsx",
   ].sort(),
 );
 const CURRENT_APP_TYPESCRIPT_SOURCE_PATHS = Object.freeze(
@@ -175,9 +179,41 @@ const T13_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
   "apps/desen-app/test/diagnostics-panel.test.tsx",
   "apps/desen-app/test/persistence-application.test.tsx",
 ]);
+const T14_SUCCESSOR_RECEIPT_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-preview.ts",
+  "apps/desen-app/src/authoring-publication.ts",
+  "apps/desen-app/src/publication-controls.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-publication.test.ts",
+  "apps/desen-app/test/publication-activation-integration.test.ts",
+  "apps/desen-app/test/publication-application.test.tsx",
+  "apps/desen-app/test/publication-controls.test.tsx",
+  "packages/editor-web/package.json",
+  "packages/editor-web/src/index.ts",
+  "packages/editor-web/src/local-bundle-channel-publication.ts",
+  "packages/editor-web/test/local-bundle-channel-publication.test.ts",
+  "packages/editor-web/test/public-package.mjs",
+  "packages/editor-web/test/public-package.types.mts",
+]);
+const T14_PUBLICATION_APPLICATION_TEST_PATH =
+  "apps/desen-app/test/publication-application.test.tsx";
+const T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT = Object.freeze({
+  bytes: 24_485,
+  sha256: "52e29b84745ff331556529612015b95b581bf3007118352ebad796ca9541e0e3",
+});
+const T14_LIVE_PUBLICATION_APPLICATION_TEST_RECEIPT = Object.freeze({
+  bytes: 24_493,
+  sha256: "5eba8a2b15cbcf992d0f04d0d7ad719c1a9fc42cdb66635ebc0eab679a221901",
+});
 const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   ...T12_SUCCESSOR_RECEIPT_PATHS,
   ...T13_SUCCESSOR_RECEIPT_PATHS,
+  ...T14_SUCCESSOR_RECEIPT_PATHS,
   APP_PACKAGE_PATH,
   ADAPTER_CANVAS_SOURCE_PATH,
   "apps/desen-app/src/application.module.css",
@@ -199,8 +235,10 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     FIXTURES_SCENARIOS_ARTIFACT_PATH,
     SOURCE_PERSISTENCE_ARTIFACT_PATH,
     NODE_LINKED_DIAGNOSTICS_ARTIFACT_PATH,
+    PUBLISH_ACTIVATION_ARTIFACT_PATH,
     ...T12_SUCCESSOR_RECEIPT_PATHS,
     ...T13_SUCCESSOR_RECEIPT_PATHS,
+    ...T14_SUCCESSOR_RECEIPT_PATHS,
     AUTHORING_SELECTION_SOURCE_PATH,
     AUTHORING_SELECTION_TEST_PATH,
     AUTHORING_INSPECTOR_SOURCE_PATH,
@@ -572,6 +610,7 @@ const EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS = Object.freeze([
   "apps/desen-app/src/authoring-inspector.ts",
   "apps/desen-app/src/authoring-persistence.ts",
   "apps/desen-app/src/authoring-preview.ts",
+  "apps/desen-app/src/authoring-publication.ts",
   "apps/desen-app/src/authoring-scenarios.ts",
   "apps/desen-app/src/authoring-selection.ts",
   "apps/desen-app/src/authoring-slots.ts",
@@ -584,6 +623,7 @@ const EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS = Object.freeze([
   "apps/desen-app/src/preview-fidelity.ts",
   "apps/desen-app/src/project-data.ts",
   "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/publication-controls.tsx",
   "apps/desen-app/src/state-panel.tsx",
   "node_modules/react/index.js",
   "node_modules/react/jsx-runtime.js",
@@ -593,7 +633,7 @@ const EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS = Object.freeze([
   "packages/runtime-core/dist/index.js",
 ]);
 const EXPECTED_CURRENT_VITE_GRAPH_SHA256 =
-  "sha256:3477076800258d529cc59914654aac845af2da4a19153c9c9d5920f8c37b5baa";
+  "sha256:076a321a624f6d3dc08cf59a50bd9422fa395645ecd279ad407e6f1babb2314d";
 
 const ALLOWED_RUNTIME_PACKAGE_EDGES = Object.freeze({
   "catalog-sdk": Object.freeze(["catalog-sdk", "protocol"]),
@@ -1070,7 +1110,12 @@ function authenticateSourcePersistenceSuccessor(files) {
     );
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
-    if (T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
+    if (
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
+      T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
+    ) {
+      continue;
+    }
     const receipt = receiptMap.get(relativePath);
     const liveBytes = files.get(relativePath);
     if (
@@ -1182,7 +1227,8 @@ function authenticateFixturesScenariosSuccessor(bytes, files) {
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
     if (
       T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
-      T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
+      T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
     ) {
       continue;
     }
@@ -2310,14 +2356,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 145 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 147 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 431 || dynamicEdges !== 0) {
+  if (staticEdges !== 439 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -2615,7 +2661,8 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
   for (const receipt of sourceAndTestReceipts) {
     if (
       modeSuccessorPaths.has(receipt.path) ||
-      T13_SUCCESSOR_RECEIPT_PATHS.includes(receipt.path)
+      T13_SUCCESSOR_RECEIPT_PATHS.includes(receipt.path) ||
+      T14_SUCCESSOR_RECEIPT_PATHS.includes(receipt.path)
     ) {
       continue;
     }
@@ -2705,7 +2752,7 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "className={styles.componentItem}",
     'data-component-drag-handle="true"',
     "className={styles.componentDragHandle}",
-    "title={`Drag ${component.displayName} anywhere in this panel to add`}",
+    "title={`Drag ${component.displayName} to the highlighted drop target above`}",
     'data-layer-drag-handle="true"',
     "className={styles.layerDragHandle}",
     "title={`Drag ${node.displayName} layer`}",
@@ -2755,19 +2802,25 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
   }
   const componentTarget = componentLibrary.slice(componentTargetStart, componentGroupsStart);
   if (
-    ["onDragEnter=", "onDragLeave=", "onDragOver=", "onDrop="].some((marker) =>
-      componentTarget.includes(marker),
-    ) ||
-    componentLibrary.split("onDragOver={admitComponentDrop}").length !== 2 ||
-    componentLibrary.split("onDrop={receiveComponentDrop}").length !== 2
+    ![
+      "onDragEnter={enterComponentDrop}",
+      "onDragLeave={leaveComponentDrop}",
+      "onDragOver={admitComponentDrop}",
+      "onDrop={receiveComponentDrop}",
+    ].every(
+      (marker) => componentTarget.includes(marker) && componentLibrary.split(marker).length === 3,
+    )
   ) {
     fail(
       "SOURCE_POLICY_VIOLATION",
-      "The Components panel must own exactly one panel-wide drop surface while target chrome stays informational.",
+      "The Components panel fallback and sticky target must each retain all four authenticated drop handlers.",
     );
   }
   for (const marker of [
-    ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 0.75rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+    ".slotBoundary {\n  position: relative;\n  display: flex;\n  min-height: 1.25rem;\n  align-items: center;\n  padding: 0 0.125rem;",
+    ".slotBoundaryHitArea {\n  position: absolute;\n  inset: 0;\n  z-index: 5;\n  pointer-events: none;",
+    '.slotBoundary[data-drop-ready="true"] .slotBoundaryHitArea,\n.slotBoundary[data-drop-noop="true"] .slotBoundaryHitArea {\n  pointer-events: auto;',
+    '.slotBoundary[data-drop-ready="true"]::before {\n  position: absolute;\n  inset: 0.125rem;',
     '.slotBoundary[data-drop-ready="true"]',
     '.slotBoundary[data-drop-noop="true"]::before',
     '.slotBoundary[data-drop-hovered="true"]',
@@ -2781,10 +2834,10 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     '.componentSlotTarget[data-guide="true"]',
     '.componentSlotTarget[data-drop-hovered="true"]',
     ".layerDragGuide {",
-    ".layerDragHandle {",
+    ".layerDragHandle {\n  position: relative;\n  width: 1.75rem;\n  height: 2rem;\n  flex: 0 0 auto;\n  margin: -0.25rem;",
     ".layerDragHandle::before {",
     ".componentItem {",
-    ".componentDragHandle {",
+    ".componentDragHandle {\n  position: relative;\n  width: 2rem;\n  height: 2rem;\n  flex: 0 0 auto;\n  margin: -0.1875rem -0.25rem;",
     ".componentDragHandle::before {",
     ".componentAddAction {",
     ".deleteLayerAction {",
@@ -2827,7 +2880,9 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "expect(alertCard.draggable).toBe(false)",
     "[data-component-drag-handle='true']",
     "expect(alertDragHandle.draggable).toBe(true)",
-    "fireEvent.drop(panelSearch, { dataTransfer })",
+    "fireEvent.dragEnter(dropPrompt, { dataTransfer })",
+    "fireEvent.dragOver(panelSearch, { dataTransfer })",
+    "fireEvent.drop(target, { dataTransfer })",
     'expect(layerDragHandleFor(emailLayer).getAttribute("draggable")).toBe("true")',
     "expect(slotEdit).toHaveBeenCalledTimes(1)",
     "uses the release position when it crosses a row midpoint after the last dragover",
@@ -2872,6 +2927,7 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     browserDataTransferReads: 0,
     explicitComponentDropTargetGuideImplemented: true,
     componentPanelWideDropSurfaceImplemented: true,
+    componentTargetDirectDropSurfaceImplemented: true,
     componentDropAdmissionLimitedToExplicitTarget: false,
     componentPaletteOuterDropInert: false,
     draggableComponentCardImplemented: false,
@@ -3195,6 +3251,7 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
   }
   const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
   for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
+    if (T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -3230,6 +3287,153 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
     rejectedDiagnosticsIncludedInSave: false,
     p16Status: "PROVEN",
     pf086Status: "OPEN",
+  });
+}
+
+function authenticatePublishActivationSuccessor(files) {
+  const pin = Object.freeze({
+    task: "M09-T14",
+    gate: "G09",
+    proofId: "desen-app-publish-activation",
+    profile: "desen.app.publish-activation-proof.v1",
+    result: "PASS",
+    path: PUBLISH_ACTIVATION_ARTIFACT_PATH,
+    bytes: 24_763,
+    sha256: "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b",
+  });
+  const artifactBytes = files.get(PUBLISH_ACTIVATION_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M09-T14/G09 publish-activation artifact drifted.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, PUBLISH_ACTIVATION_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.gate !== pin.gate ||
+    artifact.proofId !== pin.proofId ||
+    artifact.profile !== pin.profile ||
+    artifact.result !== pin.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.gateStatus !== "DONE" ||
+    artifact.claim?.savedAuthoredSourceOnly !== true ||
+    artifact.claim?.publisherRerunFromSavedSource !== true ||
+    artifact.claim?.scenarioPreviewPublished !== false ||
+    artifact.claim?.fixtureDataPublished !== false ||
+    artifact.claim?.operationInputOrSecretPublished !== false ||
+    artifact.claim?.rejectedDiagnosticsPublished !== false ||
+    artifact.claim?.exactCanonicalBundleBytesStored !== true ||
+    artifact.claim?.fixedPreviewChannelCompareAndSet !== true ||
+    artifact.claim?.mutableChannelIsActivationAuthority !== false ||
+    artifact.claim?.sourceGenerationDistinct !== true ||
+    artifact.claim?.channelGenerationDistinct !== true ||
+    artifact.claim?.durableActivationGenerationDistinct !== true ||
+    artifact.claim?.activeRevisionRequiresReferenceHostReceipt !== true ||
+    artifact.claim?.staleCompletionCanBecomeActive !== false ||
+    artifact.claim?.blindRetryAfterIndeterminate !== false ||
+    artifact.claim?.conflictActivatesCandidate !== false ||
+    artifact.claim?.lastKnownGoodActivationPreserved !== true ||
+    artifact.claim?.realPublicControlPlaneAndReferenceHostIntegration !== true ||
+    artifact.claim?.browserAppImportsNodeCompositionPackages !== false ||
+    artifact.claim?.publicationClaimed !== true ||
+    artifact.claim?.activationClaimed !== true ||
+    artifact.claim?.browserE2eClaimed !== false ||
+    artifact.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact.claim?.pf085Status !== "OPEN" ||
+    artifact.claim?.pf086Status !== "OPEN" ||
+    artifact.claim?.pf089Status !== "OPEN" ||
+    artifact.tests?.focusedTestDeclarations !== 45 ||
+    artifact.tests?.rootTestNames?.length !== 12 ||
+    artifact.tests?.realPublicIntegration !== true ||
+    artifact.boundary?.trackedFiles !== 33 ||
+    artifact.boundary?.parentArtifacts !== 9 ||
+    trackedReceipts?.length !== 33 ||
+    !isDeepStrictEqual(
+      receiptPaths,
+      [...receiptPaths].sort((left, right) => left.localeCompare(right, "en-US")),
+    )
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T14/G09 publish-activation identity or claims drifted.",
+    );
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (relativePath === T14_PUBLICATION_APPLICATION_TEST_PATH) {
+      const liveSource =
+        bytes === undefined ? "" : decodeUtf8(bytes, T14_PUBLICATION_APPLICATION_TEST_PATH);
+      const timeoutMarker = "}, 10_000);";
+      const timeoutMarkerOccurrences = liveSource.split(timeoutMarker).length - 1;
+      const frozenBytes = Buffer.from(liveSource.replace(timeoutMarker, "});"), "utf8");
+      if (
+        receipt?.bytes !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.bytes ||
+        receipt.sha256 !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.sha256 ||
+        bytes?.byteLength !== T14_LIVE_PUBLICATION_APPLICATION_TEST_RECEIPT.bytes ||
+        sha256(bytes ?? Buffer.alloc(0)) !== T14_LIVE_PUBLICATION_APPLICATION_TEST_RECEIPT.sha256 ||
+        timeoutMarkerOccurrences !== 1 ||
+        frozenBytes.byteLength !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.bytes ||
+        sha256(frozenBytes) !== T14_FROZEN_PUBLICATION_APPLICATION_TEST_RECEIPT.sha256
+      ) {
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          `The exact M09-T14 timeout successor drifted: ${relativePath}.`,
+        );
+      }
+      continue;
+    }
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The live M09-T14 receipt drifted: ${relativePath}.`);
+    }
+  }
+  return deepFreeze({
+    task: pin.task,
+    gate: pin.gate,
+    artifact: pin,
+    focusedTestDeclarations: 45,
+    trackedFiles: 33,
+    parentArtifacts: 9,
+    rootTests: 12,
+    savedAuthoredSourceOnly: true,
+    publisherRerunFromSavedSource: true,
+    scenarioPreviewPublished: false,
+    fixtureDataPublished: false,
+    operationInputOrSecretPublished: false,
+    rejectedDiagnosticsPublished: false,
+    exactCanonicalBundleBytesStored: true,
+    fixedPreviewChannelCompareAndSet: true,
+    mutableChannelIsActivationAuthority: false,
+    distinctSourceChannelAndActivationGenerations: true,
+    activeRevisionRequiresReferenceHostReceipt: true,
+    staleCompletionCanBecomeActive: false,
+    blindRetryAfterIndeterminate: false,
+    conflictActivatesCandidate: false,
+    lastKnownGoodActivationPreserved: true,
+    realPublicControlPlaneAndReferenceHostIntegration: true,
+    browserAppImportsNodeCompositionPackages: false,
+    publicationClaimed: true,
+    activationClaimed: true,
+    browserE2eClaimed: false,
+    p08Status: "NOT_PROVEN",
+    pf085Status: "OPEN",
+    pf086Status: "OPEN",
+    pf089Status: "OPEN",
   });
 }
 
@@ -3269,6 +3473,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
   );
   const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
   const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files);
+  const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
   const hostArtifact = hostSourceAudit.artifact;
   const data = inspectControlledData(files.get(CATALOG_PATH), files.get(BUNDLE_PATH));
   const sourcePolicy = verifyDesenAppRealAdapterCanvasSourcePolicy(
@@ -3395,6 +3600,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
     fixturesScenariosSuccessor,
     sourcePersistenceSuccessor,
     nodeLinkedDiagnosticsSuccessor,
+    publishActivationSuccessor,
   });
   return deepFreeze({
     artifact: frozen.artifact,

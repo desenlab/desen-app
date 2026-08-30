@@ -332,17 +332,17 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 94,
-    verifierCount: 94,
-    rootTestCount: 94,
+    proofCount: 95,
+    verifierCount: 95,
+    rootTestCount: 95,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
-    legacyPrerequisiteCount: 721,
-    legacyPrerequisiteSha256: "8f76601e8d7439b8aa43b0f2e92e1aa4be572d6883824e97f32441519389927f",
-    legacyLeafInvocationCount: 4513,
-    legacyLeafInvocationSha256: "1e8b4a2d5c990d879dcb8cd8cb85e1b791ac8376a2872c740e2b42757fc4c579",
-    distinctLeafWorkloadCount: 314,
-    distinctLeafWorkloadSha256: "d144bf2b6f4850042ab93ddf903be9fee4fde5af0b44082bcaf6b7cbe4f7a72d",
+    legacyPrerequisiteCount: 735,
+    legacyPrerequisiteSha256: "332cdaa40a2393d018c96478812ffdd8b41b8abf5c0adb293c21379214698701",
+    legacyLeafInvocationCount: 4529,
+    legacyLeafInvocationSha256: "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb",
+    distinctLeafWorkloadCount: 319,
+    distinctLeafWorkloadSha256: "5146f101cb767c49f6f0b87fd6939be6bdfc348e5f4dcf8dd77399ac921d4ee3",
     testConfigurationFileCount: 0,
     workspaceTestScriptCount: 16,
     workspaceTestScriptSha256: "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab",
@@ -761,6 +761,32 @@ test("inventory validation pins every workspace package test command", async () 
     () => validateProofInventory(shellInventory),
     (error) => error instanceof QualityGateError && /unsafe shell syntax/u.test(error.message),
   );
+
+  const publicPackageInventory = await currentInventory();
+  publicPackageInventory.workspacePackages = clone(publicPackageInventory.workspacePackages);
+  const editorWebManifest = publicPackageInventory.workspacePackages.find(
+    ({ name }) => name === "@desen/editor-web",
+  );
+  editorWebManifest.scripts["test:public-package"] = "node --test test/public-package.mjs";
+  assert.throws(
+    () => validateProofInventory(publicPackageInventory),
+    (error) =>
+      error instanceof QualityGateError &&
+      /unreviewed public-package contract test/u.test(error.message),
+  );
+
+  const substitutedPublicPackage = await currentInventory();
+  substitutedPublicPackage.packageJson.scripts["verify:desen-app-publish-activation"] =
+    substitutedPublicPackage.packageJson.scripts["verify:desen-app-publish-activation"].replace(
+      "pnpm --filter @desen/editor-web test:public-package",
+      "pnpm --filter @desen/editor-core test:public-package",
+    );
+  assert.throws(
+    () => validateProofInventory(substitutedPublicPackage),
+    (error) =>
+      error instanceof QualityGateError &&
+      /unreviewed public-package contract test/u.test(error.message),
+  );
 });
 
 test("inventory validation pins the exact pnpm workspace manifest and package globs", async () => {
@@ -781,8 +807,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 198);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 94);
+  assert.equal(steps.length, 200);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 95);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -1029,6 +1055,24 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
       args: ["--test", "--test-concurrency=1", "tests/desen-app-source-persistence.test.mjs"],
     },
   );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "verify-desen-app-publish-activation"),
+    {
+      id: "verify-desen-app-publish-activation",
+      label: "Proof verifier: desen-app-publish-activation",
+      command: "node",
+      args: ["scripts/verify-desen-app-publish-activation.mjs"],
+    },
+  );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "test-desen-app-publish-activation"),
+    {
+      id: "test-desen-app-publish-activation",
+      label: "Root proof and mutation test: desen-app-publish-activation",
+      command: "node",
+      args: ["--test", "--test-concurrency=1", "tests/desen-app-publish-activation.test.mjs"],
+    },
+  );
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -1049,8 +1093,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 198,
-    planSha256: "5dbd8f1365a731846ece0e64888b69eb9607540c09dfb4444e990b8ff030d502",
+    stepCount: 200,
+    planSha256: "beeda57842e1a9bdee6a13cd7be323b48a722ce4352319d085886b7fc76bfefe",
   });
 
   const missingTypecheck = clone(steps);
