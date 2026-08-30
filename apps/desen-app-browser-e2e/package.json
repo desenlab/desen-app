@@ -1,0 +1,27 @@
+{
+  "name": "@desen/app-browser-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Isolated real-browser proof harness for Desen App",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:e2e": "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts"
+  },
+  "dependencies": {
+    "@desen/editor-core": "workspace:*",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@desen/app-web": "workspace:*",
+    "@playwright/test": "1.62.1",
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "vite": "8.1.5"
+  }
+}

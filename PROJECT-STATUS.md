@@ -1371,15 +1371,13 @@ remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635
 Compatibility sequence 56 advances the exact sequence-55 head to
 `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
 49 frozen artifacts and 98 reader identities. Historical package/Bundle tuples, frozen artifacts,
-and their pins remain unchanged. The sequence-56-derived current CI compatibility authority pins
-selector `sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
-`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
-affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`; the preceding M09-T14
-promotion receipts remain historical and unchanged. No task is marked complete by this
-compatibility repair: M10 remains 0/9 and M10-T01 remains next.
+and their pins remain unchanged. No task is marked complete by this compatibility repair: M10
+remains 0/9 and M10-T01 remains next.
 
 M10-T01 now proves the first real-browser authoring slice from an explicitly empty, structurally
-admitted Source/project. One isolated production Chromium scenario uses the visible Desen App UI to
+admitted Source/project. The dedicated `@desen/app-browser-e2e` workspace owns Playwright, Vite,
+Chromium, and failure artifacts while the root and product App manifests remain unchanged. One
+isolated production Chromium scenario uses the visible Desen App UI to
 create state, components, slots, props, bindings, actions, order, and deletion; its successful
 Components and Layers gestures use native drag, while a forged-`DataTransfer` negative case leaves
 Source unchanged. The negative case first persists the exact canonical empty Source as Generation
@@ -4559,17 +4557,14 @@ M09-T14/G09 evidence:
   advances the exact sequence-55 head to
   `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
   49 frozen artifacts, 98 reader identities, and historical pins; M10 remains 0/9
-- current CI compatibility authority derived from sequence 56: selector
-  `sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
-  `sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and T10 affected plan
-  `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`; the M09-T14 values
-  above remain historical receipts
 
 ### M10-T01 empty-project browser E2E evidence
 
 - isolated production proof entry starts from an explicitly empty, structurally admitted
   `account-app/sign-in` Source/project with the exact reference Catalog, one Stack root, and the
-  declared `420 × 720` frame; the normal product entry remains unchanged
+  declared `420 × 720` frame; the normal product entry remains unchanged; the dedicated
+  `@desen/app-browser-e2e` workspace owns the harness/toolchain while root and App manifests own no
+  M10 browser-E2E dependency or command
 - one local Chromium scenario authors state, components, slots, props, bindings, actions, layer
   order, and deletion entirely through the visible browser UI, then saves through the public
   persistence port, reads canonical Source back, and re-admits it through the public validator
@@ -4580,21 +4575,35 @@ M09-T14/G09 evidence:
   Generation 2
 - exact managed static subtree and frame parity are required across Design and Run
 - the Playwright spec is isolated from Vitest discovery as
-  `apps/desen-app/e2e/empty-project-to-sign-in.pw.ts`; the complete App suite passes 377/377 and the
-  browser scenario passes 1/1 locally; the independent proof reader passes 11/11; the deterministic
-  verifier passes without pretending to launch or replace the browser scenario
-- exact evidence: 10,259-byte
+  `apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts`; the complete App suite passes 377/377
+  and the browser scenario passes 1/1 locally; the independent proof reader passes 11/11; the
+  deterministic verifier passes without pretending to launch or replace the browser scenario
+- immutable task-time evidence: 10,259-byte
   `docs/proof/artifacts/desen-app-0.1.0-empty-project-browser-e2e.json` at
   `sha256:959dde63ef28bc7fd25967a9193e39e082c9178bc12f40b83036c5dd6042df77`
-- current neutral CI universe: 202 workloads and 96 proof units; inventory
-  `sha256:84c3ec71a7b336a1578804c62e7e37ba6051d3208ed5d0c6c204e13238e9930a`, impact graph
-  `sha256:1b66be8200ff54c811adc30eac4d22fe6a122e1745ebe476516572ea2bb20bab`, and the 64-proof-unit /
-  138-workload T01 connected closure
-  `sha256:971a68645c1dac5bc8aaf78b26afbd5b0b1a9d9f5c0453e0454a035ff0d154eb`; shared-state,
-  inventory, and impact regression cases pass 65/65 locally
-- reader checkpoint sequence 57 advances the exact sequence-56 head to
+- append-only corrective evidence: `M10-T01-COMPAT` is a compatibility label, not a new plan task;
+  its distinct 16,025-byte
+  `docs/proof/artifacts/desen-app-0.1.0-browser-e2e-workspace-compatibility.json` authenticates 32
+  current harness, package, lockfile, workflow, boundary, and reader files at
+  `sha256:e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d`; its independent reader
+  passes 11/11
+- deny-by-default browser-workspace boundary evidence: only `editor-core` and the reviewed App
+  `application.tsx`, `reference-empty-project.ts`, and `styles.css` entries are admitted; the
+  positive/negative fixture verifier passes 19/19 and `pnpm boundaries` passes across 808 modules /
+  3,319 dependencies
+- current neutral CI universe: 204 workloads and 97 proof units; inventory
+  `sha256:bc71b712811d517e2de08c153ab8dc3ac5fe688fa1b7aafea84ee68636e79292`, impact graph
+  `sha256:755972e86cde34527c842cb6769202163675c2e179466d1cc2b474c1a9725d9b`, and the 65-proof-unit /
+  140-workload current compatibility closure
+  `sha256:99b33b797b32ecf72c35ffe5160e1f89bdc7b96b0bd156b7e14895193116f3e4`; shared-state,
+  inventory, and impact regression cases pass 66/66 locally
+- historical reader checkpoint sequence 57 advances the exact sequence-56 head to
   `sha256:690c73294f6926822fb1535ac60ea40636545890031db72b7a8d63930a27cc57` across 50 frozen
-  artifacts and 100 current readers
+  artifacts and 100 readers
+- current reader checkpoint sequence 58 preserves sequences 1–57 and advances that exact head to
+  `sha256:08396f779b0c1c63cf56d9a9292dcd0a103228c57fe39e1173d95a4a106a92e5` across 51 frozen
+  artifacts and 102 current readers; the dedicated checkpoint suite passes 81/81, and this local
+  corrective authority makes no exact-head hosted claim or additional plan-task completion
 - coverage decision: M10-T01 is `DONE`; P-08 is `PROVEN`; P-07, P-09, and P-10 remain `PARTIAL`;
   proof gates remain 11/13; overall progress advances to 110/145 (76%); M10 advances to 1/9 (11%);
   M10-T02 is next

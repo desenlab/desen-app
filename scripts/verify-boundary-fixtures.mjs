@@ -12,6 +12,15 @@ const cases = [
   { name: "allowed-validator-protocol", expectedRule: null },
   { name: "allowed-runtime-react-validator", expectedRule: null },
   { name: "allowed-reference-host-server-control-plane-root", expectedRule: null },
+  { name: "allowed-desen-app-browser-e2e-reviewed-imports", expectedRule: null },
+  {
+    name: "desen-app-browser-e2e-imports-publisher",
+    expectedRule: "application-desen-app-browser-e2e-allowed-dependencies",
+  },
+  {
+    name: "desen-app-browser-e2e-imports-unreviewed-app-source",
+    expectedRule: "desen-app-browser-e2e-reviewed-app-source-only",
+  },
   {
     name: "protocol-imports-runtime",
     expectedRule: "package-protocol-allowed-dependencies",

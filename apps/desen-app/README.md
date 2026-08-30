@@ -520,8 +520,10 @@ recovery; those remain M10-T02–M10-T07.
 
 ## Local commands
 
-Install the package-pinned Chromium runtime once with `pnpm exec playwright install chromium`
-before the first browser-proof run.
+Install the package-pinned Chromium runtime once with
+`pnpm --filter @desen/app-browser-e2e exec playwright install chromium` before the first
+browser-proof run. Browser tooling and generated artifacts are owned by the separate
+`@desen/app-browser-e2e` workspace rather than this product package.
 
 ```bash
 pnpm --filter @desen/app-web dev
@@ -540,7 +542,7 @@ pnpm --filter @desen/app-web test:fixtures-scenarios
 pnpm --filter @desen/app-web test:persistence
 pnpm --filter @desen/app-web test:diagnostics
 pnpm --filter @desen/app-web test:publication
-pnpm test:e2e
+pnpm --filter @desen/app-browser-e2e test:e2e
 pnpm --filter @desen/app-web test:shell
 pnpm --filter @desen/app-web build
 ```

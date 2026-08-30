@@ -2077,7 +2077,9 @@ and move to M10-T01.
 | M10-T09 | NOT_STARTED | M10-T08         | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
 | G10     | NOT_STARTED | M10-T01–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
 
-M10-T01 is `DONE`. The isolated production browser-proof bundle starts from an explicitly empty,
+M10-T01 is `DONE`. The dedicated `@desen/app-browser-e2e` workspace owns Playwright, Vite,
+Chromium, and failure artifacts while the root and product App manifests retain no M10 browser-E2E
+ownership. Its isolated production browser-proof bundle starts from an explicitly empty,
 structurally admitted `account-app/sign-in` Source/project with the exact reference Catalog, one
 Stack root, and the declared `420 × 720` portrait frame. In one Playwright Chromium scenario, a
 user authors the sign-in surface through the visible browser UI: state, components, slots, props,
@@ -2092,20 +2094,35 @@ compare-and-set adapter, re-admitted by the public validator, and checked for ex
 subtree plus frame parity across Design and Run.
 
 The Playwright spec is isolated from Vitest discovery as
-`apps/desen-app/e2e/empty-project-to-sign-in.pw.ts`; the complete App suite passes 377/377 and the
-browser scenario passes 1/1 locally. The independent proof reader passes 11/11 and the
-deterministic artifact verifier passes. Exact evidence is the 10,259-byte
+`apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts`; the complete App suite passes 377/377
+and the browser scenario passes 1/1 locally. The immutable task-time evidence remains the
+10,259-byte
 `docs/proof/artifacts/desen-app-0.1.0-empty-project-browser-e2e.json` at
-`sha256:959dde63ef28bc7fd25967a9193e39e082c9178bc12f40b83036c5dd6042df77`. Append-only reader
-checkpoint sequence 57 advances sequence 56 to
+`sha256:959dde63ef28bc7fd25967a9193e39e082c9178bc12f40b83036c5dd6042df77`; the artifact and
+sequence-57 authority remain byte-identical, while sequence 58 reseals the current task-time
+reader without depending on the relocated live E2E source paths. The append-only 16,025-byte
+current-workspace compatibility receipt is
+`docs/proof/artifacts/desen-app-0.1.0-browser-e2e-workspace-compatibility.json` at
+`sha256:e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d`. Its direct verifier
+passes, its mutation suite passes 11/11, and its 32 exact current-file receipts cover the dedicated
+package ownership, filtered browser workflow, package-local artifacts, root/product-manifest
+non-ownership, lock importer, and deny-by-default dependency boundaries. The focused boundary
+fixture verifier passes 19/19 and the full boundary graph passes across 808 modules and 3,319
+dependencies. `M10-T01-COMPAT` is only a unique corrective-receipt label, not a new plan task or a
+second M10-T01 completion.
+
+Historical append-only reader checkpoint sequence 57 advances sequence 56 to
 `sha256:690c73294f6926822fb1535ac60ea40636545890031db72b7a8d63930a27cc57` across 50 frozen
-artifacts and 100 current readers. The current neutral CI universe contains 202 workloads and 96
+artifacts and 100 current readers. Corrective sequence 58 preserves sequences 1–57 and advances
+that exact head to `sha256:08396f779b0c1c63cf56d9a9292dcd0a103228c57fe39e1173d95a4a106a92e5`
+across 51 frozen artifacts and 102 current readers; its dedicated checkpoint suite passes 81/81.
+The current neutral CI universe contains 204 workloads and 97
 proof units; its inventory and impact graph are pinned at
-`sha256:84c3ec71a7b336a1578804c62e7e37ba6051d3208ed5d0c6c204e13238e9930a` and
-`sha256:1b66be8200ff54c811adc30eac4d22fe6a122e1745ebe476516572ea2bb20bab`, while the 64-proof-unit /
-138-workload T01 connected closure is
-`sha256:971a68645c1dac5bc8aaf78b26afbd5b0b1a9d9f5c0453e0454a035ff0d154eb`; shared-state,
-inventory, and impact regression cases pass 65/65 locally. P-08 advances to `PROVEN`; P-07, P-09,
+`sha256:bc71b712811d517e2de08c153ab8dc3ac5fe688fa1b7aafea84ee68636e79292` and
+`sha256:755972e86cde34527c842cb6769202163675c2e179466d1cc2b474c1a9725d9b`, while the 65-proof-unit /
+140-workload current compatibility closure is
+`sha256:99b33b797b32ecf72c35ffe5160e1f89bdc7b96b0bd156b7e14895193116f3e4`; shared-state,
+inventory, and impact regression cases pass 66/66 locally. P-08 advances to `PROVEN`; P-07, P-09,
 and P-10 remain `PARTIAL`. Typed input and pending state (M10-T02), invalid credentials and visible
 failure (M10-T03), and success, navigation, and a real host operation (M10-T04) remain unproven.
 G10 stays open, proof gates remain 11/13, and these local receipts make no exact-head hosted-CI

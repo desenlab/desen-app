@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { createDesenEditorDocument } from "@desen/editor-core";
 
-import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "../src/reference-empty-project.js";
+import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "../desen-app/src/reference-empty-project.js";
 
 import type { Locator, Page } from "@playwright/test";
 
@@ -87,7 +87,7 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
     if (message.type() === "error") runtimeFailures.push(`console: ${message.text()}`);
   });
 
-  await page.goto("/e2e/index.html");
+  await page.goto("/");
   await expect(page.getByRole("heading", { level: 2, name: "Sign-in" })).toBeVisible();
   await expect(page).toHaveURL(/\/projects\/account-app\/surfaces\/sign-in$/u);
 

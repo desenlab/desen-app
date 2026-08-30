@@ -115,6 +115,7 @@ const DESEN_APP_CONNECTED_PROOF_UNITS = Object.freeze([
   "desen-app-node-linked-diagnostics",
   "desen-app-publish-activation",
   "desen-app-empty-project-browser-e2e",
+  "desen-app-browser-e2e-workspace-compatibility",
 ]);
 
 function sha256(value) {
@@ -296,7 +297,7 @@ test("continuous validation selects the exact T03-T07-connected successor closur
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["editor-core-continuous-validation"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("editor-web-public-package-contract"), true);
   assert.equal(plan.nodeIds.includes("verify-editor-core-continuous-validation"), true);
   assert.equal(plan.nodeIds.includes("test-editor-core-continuous-validation"), true);
@@ -310,7 +311,7 @@ test("terminal integration selects every formal editor parent and frozen P-18 ru
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["editor-core-terminal-integration"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("editor-web-public-package-contract"), true);
 });
 
@@ -323,7 +324,7 @@ test("catalog panel selects the exact shell and Catalog-connected successor clos
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-catalog-panel-layer-tree"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-desen-app-catalog-panel-layer-tree"), true);
   assert.equal(plan.nodeIds.includes("test-desen-app-catalog-panel-layer-tree"), true);
 });
@@ -335,8 +336,8 @@ test("adapter canvas selects the exact shell and source-audit-connected successo
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-real-adapter-canvas"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-reference-host-web-source-audit"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-shell-navigation"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
@@ -352,8 +353,8 @@ test("selection overlay selects the exact adapter-canvas-connected closure", asy
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-selection-overlay"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
   assert.equal(plan.nodeIds.includes("test-desen-app-real-adapter-canvas"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-selection-overlay"), true);
@@ -367,8 +368,8 @@ test("schema inspector selects its exact Catalog, selection, and Publisher closu
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-schema-inspector"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-desen-app-catalog-panel-layer-tree"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-selection-overlay"), true);
   assert.equal(plan.nodeIds.includes("verify-publisher-official-golden"), true);
@@ -383,8 +384,8 @@ test("structured inspector selects its exact schema-inspector closure", async ()
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-structured-inspector"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-desen-app-schema-inspector"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-structured-inspector"), true);
   assert.equal(plan.nodeIds.includes("test-desen-app-structured-inspector"), true);
@@ -397,8 +398,8 @@ test("named-slot authoring selects its exact structured-inspector closure", asyn
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-named-slot-authoring"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-desen-app-structured-inspector"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-named-slot-authoring"), true);
   assert.equal(plan.nodeIds.includes("test-desen-app-named-slot-authoring"), true);
@@ -413,8 +414,8 @@ test("event/action editor selects its exact App and Editor Core closure", async 
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-event-action-editor"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-editor-core-event-action-edits"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-state-binding-editor"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-event-action-editor"), true);
@@ -430,9 +431,9 @@ test("Design/Run modes select their exact canvas, state, and action closure", as
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-design-run-modes"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
-  assert.equal(plan.planSha256, "95717cb872bfc661ba19b38dfe6aeca4c57417de40708fedd517d8e0271dd0d7");
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
+  assert.equal(plan.planSha256, "09e4f74b52d486d7eaf91ec8d5cbf3fe61347b22479a07369a83191e215da348");
   assert.equal(plan.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-state-binding-editor"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-event-action-editor"), true);
@@ -449,8 +450,8 @@ test("fixtures/scenarios select exact Design/Run, fixture, and parity closure", 
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-fixtures-scenarios-fidelity"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-reference-sign-in-fixtures-and-host-binding"), true);
   assert.equal(plan.nodeIds.includes("verify-reference-catalog-web-parity"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-design-run-modes"), true);
@@ -465,8 +466,8 @@ test("source persistence selects exact shell, Editor Core, and T11 closure", asy
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-source-persistence"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-editor-core-persistence"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-shell-navigation"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
@@ -483,8 +484,8 @@ test("node-linked diagnostics select exact Runtime, Editor Core, and App authori
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-node-linked-diagnostics"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-runtime-react-reconciliation-diagnostics"), true);
   assert.equal(plan.nodeIds.includes("verify-editor-core-continuous-validation"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-source-persistence"), true);
@@ -499,8 +500,8 @@ test("publication selects exact App, Publisher, control-plane, and reference-hos
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-publish-activation"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   for (const proofId of [
     "desen-app-design-run-modes",
     "desen-app-fixtures-scenarios-fidelity",
@@ -526,11 +527,27 @@ test("empty-project browser E2E selects the exact published authoring closure", 
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-empty-project-browser-e2e"]);
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(plan.proofUnitCount, 64);
-  assert.equal(plan.workloadCount, 138);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
   assert.equal(plan.nodeIds.includes("verify-desen-app-publish-activation"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-empty-project-browser-e2e"), true);
   assert.equal(plan.nodeIds.includes("test-desen-app-empty-project-browser-e2e"), true);
+});
+
+test("Browser E2E workspace compatibility selects its exact historical proof closure", async () => {
+  const plan = createShadowAffectedSelection(
+    await affectedBoundary(currentPaths(), [
+      "scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs",
+    ]),
+  );
+  assert.equal(plan.effectiveScope, "AFFECTED");
+  assert.deepEqual(plan.ownerProofUnitIds, ["desen-app-browser-e2e-workspace-compatibility"]);
+  assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
+  assert.equal(plan.proofUnitCount, 65);
+  assert.equal(plan.workloadCount, 140);
+  assert.equal(plan.nodeIds.includes("verify-desen-app-empty-project-browser-e2e"), true);
+  assert.equal(plan.nodeIds.includes("verify-desen-app-browser-e2e-workspace-compatibility"), true);
+  assert.equal(plan.nodeIds.includes("test-desen-app-browser-e2e-workspace-compatibility"), true);
 });
 
 test("multiple proof owners form one canonical union independent of diff order", async () => {
@@ -564,7 +581,7 @@ test("policy, package, documentation, and shared inputs always expand to exhaust
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, "POLICY_DRIFT");
     assert.equal(plan.strictSubset, false);
-    assert.equal(plan.workloadCount, 202);
+    assert.equal(plan.workloadCount, 204);
   }
 });
 
@@ -597,7 +614,7 @@ test("all boundary uncertainty classes expand to exhaustive without partial path
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, category);
     assert.deepEqual(plan.changedPaths, []);
-    assert.equal(plan.workloadCount, 202);
+    assert.equal(plan.workloadCount, 204);
   }
 });
 

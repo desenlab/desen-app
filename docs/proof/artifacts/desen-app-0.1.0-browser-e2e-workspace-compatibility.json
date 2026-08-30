@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-browser-e2e-workspace-compatibility",
+  "profile": "desen.app.browser-e2e-workspace-compatibility-proof.v1",
+  "task": "M10-T01",
+  "compatibilityReceipt": "M10-T01-COMPAT",
+  "gate": null,
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M10-T01",
+      "gate": null,
+      "proofId": "desen-app-empty-project-browser-e2e",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-empty-project-browser-e2e.json",
+      "bytes": 10259,
+      "sha256": "959dde63ef28bc7fd25967a9193e39e082c9178bc12f40b83036c5dd6042df77",
+      "profile": "desen.app.empty-project-browser-e2e-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "correctiveReceiptOnly": true,
+    "dedicatedBoundaryPolicyCovered": true,
+    "p08Status": "PROVEN",
+    "beginsFromExplicitlyEmptySource": true,
+    "exactCatalogResolved": true,
+    "visualAuthoringCovered": true,
+    "nativeComponentDragCovered": true,
+    "nativeLayerDragCovered": true,
+    "forgedDataTransferRejected": true,
+    "authoredDeletionCovered": true,
+    "exactSourceSavedAndReadBack": true,
+    "savedSourceStructurallyAdmitted": true,
+    "designRunStaticParityCovered": true,
+    "runtimeInputAndPendingCovered": false,
+    "invalidCredentialsAndPublicFailureCovered": false,
+    "successNavigationAndHostOperationCovered": false,
+    "remoteDeploymentCovered": false,
+    "g10Closed": false
+  },
+  "authority": {
+    "source": {
+      "explicitEmptyBootstrap": true,
+      "admittedBeforeExport": true,
+      "exactCatalogIdentity": "run.desen.reference.sign-in@0.1.0#web-react",
+      "initialNodes": 1,
+      "initialLocalStateEntries": 0,
+      "initialBindings": 0,
+      "initialEventsAndActions": 0,
+      "browserTestName": "authors and saves a valid sign-in Source from the empty project in a real browser",
+      "browserTestDeclarations": 1,
+      "browserSpecReceipt": {
+        "path": "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+        "bytes": 12756,
+        "sha256": "662b617e335d9ff2e5c15f8cd43b03ca2b4a5dca0a471f8f053334fa5c57a0b0"
+      },
+      "nativeComponentDrag": true,
+      "nativeLayerDrag": true,
+      "nativeDragCalls": 2,
+      "forgedDataTransferRejected": true,
+      "deletionCovered": true,
+      "persistencePortReal": true,
+      "canonicalSavedSourceReadBack": true,
+      "structuralReadmission": true,
+      "designRunStaticParity": true,
+      "frame": { "preset": "portrait", "width": 420, "height": 720 },
+      "runtimeConsoleErrorsAllowed": 0,
+      "browserExecutionPerformedByReader": false
+    },
+    "package": {
+      "rootPackageName": "desen-workspace",
+      "appPackageName": "@desen/app-web",
+      "browserPackageName": "@desen/app-browser-e2e",
+      "rootBrowserCommandReserved": "node scripts/not-implemented.mjs browser-e2e G10",
+      "rootOwnsBrowserE2e": false,
+      "appOwnsBrowserE2e": false,
+      "dedicatedWorkspaceOwnership": true,
+      "playwrightPackage": "@playwright/test",
+      "playwrightVersion": "1.62.1",
+      "browserProject": "chromium",
+      "browserProfile": "Desktop Chrome",
+      "browserBuildCommand": "vite build",
+      "browserTypecheckCommand": "tsc -p tsconfig.json --noEmit",
+      "browserCommand": "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts",
+      "workflowBrowserCommand": "pnpm --filter @desen/app-browser-e2e test:e2e",
+      "browserWorkflow": {
+        "jobIf": "${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'required' }}",
+        "orderedStepNames": [
+          "Check out exact head",
+          "Verify exact head",
+          "Set up Node.js",
+          "Enable Corepack",
+          "Read pnpm store path",
+          "Restore trusted pnpm store",
+          "Install exact dependencies",
+          "Install Chromium runtime",
+          "Run browser E2E proof",
+          "Verify frozen browser-proof evidence",
+          "Upload browser failure evidence"
+        ],
+        "requiredSteps": [
+          "Install Chromium runtime",
+          "Run browser E2E proof",
+          "Verify frozen browser-proof evidence"
+        ]
+      },
+      "exactLockfileClosure": true
+    },
+    "boundary": {
+      "command": "pnpm boundaries",
+      "dedicatedInternalPackageAllowlist": ["editor-core"],
+      "reviewedAppSourceEntries": [
+        "apps/desen-app/src/application.tsx",
+        "apps/desen-app/src/reference-empty-project.ts",
+        "apps/desen-app/src/styles.css"
+      ],
+      "positiveFixture": "allowed-desen-app-browser-e2e-reviewed-imports",
+      "negativeFixtures": [
+        {
+          "name": "desen-app-browser-e2e-imports-publisher",
+          "rule": "application-desen-app-browser-e2e-allowed-dependencies"
+        },
+        {
+          "name": "desen-app-browser-e2e-imports-unreviewed-app-source",
+          "rule": "desen-app-browser-e2e-reviewed-app-source-only"
+        }
+      ]
+    },
+    "authoredOutcome": {
+      "surface": "sign-in",
+      "statePaths": ["email", "password"],
+      "orderedComponentIds": ["node.text", "node.textfield", "node.textfield-2", "node.button"],
+      "orderedComponentUses": [
+        "com.example.ui/Text",
+        "com.example.ui/TextField",
+        "com.example.ui/TextField",
+        "com.example.ui/Button"
+      ],
+      "bindings": ["state.email", "state.password"],
+      "actions": [
+        "change -> state.set(email, event.value)",
+        "change -> state.set(password, event.value)"
+      ],
+      "deletedTransientComponent": "node.alert"
+    },
+    "execution": {
+      "productionBundlePreview": true,
+      "isolatedWorkspacePackage": "@desen/app-browser-e2e",
+      "configuredBrowser": "Chromium through Playwright Desktop Chrome",
+      "nativeGestureAuthority": "Playwright locator.dragTo for both positive drag paths",
+      "negativeAuthority": "one isolated forged DataTransfer dragenter/dragover/drop sequence that must not mutate Source",
+      "persistenceAuthority": "public createDesenEditorPersistencePort over an isolated deterministic CAS adapter",
+      "validatorAuthority": "public createDesenEditorDocument over the exact saved read-back",
+      "browserRerunOwnedByProofReader": false,
+      "hostedExecutionRequired": true
+    }
+  },
+  "tests": {
+    "browserCommand": "pnpm --filter @desen/app-browser-e2e test:e2e",
+    "browserSpec": "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+    "browserTestName": "authors and saves a valid sign-in Source from the empty project in a real browser",
+    "browserTestDeclarations": 1,
+    "configuredProjects": ["chromium"],
+    "workers": 1,
+    "retries": 0,
+    "proofReaderCommand": "node --test tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
+    "verifierCommand": "node scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs",
+    "rootTestNames": [
+      "[authority] authenticates the exact immutable M10-T01 task-time proof",
+      "[bootstrap] retains an explicitly empty admitted Source and exact Catalog identity",
+      "[browser] retains one real-browser empty-project-to-saved-sign-in scenario",
+      "[drag] distinguishes native Components and Layers gestures from forged transfer data",
+      "[persistence] saves through the public persistence port and re-admits canonical Source",
+      "[parity] keeps the same declared 420 by 720 frame and static content in Design and Run",
+      "[dependency] pins Playwright and Chromium configuration to exact workspace contracts",
+      "[boundary] keeps T02 through T04 runtime lifecycle claims outside M10-T01",
+      "[determinism] builds byte-identical detached evidence and exact tracked receipts",
+      "[policy] rejects weakened source, browser, package, lockfile, and parent authority",
+      "[verification] rejects artifact, proof-report, option, and destination drift"
+    ],
+    "browserExecutedByVerifier": false
+  },
+  "boundary": {
+    "trackedFiles": 32,
+    "trackedReceipts": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "bytes": 8803,
+        "sha256": "5532116a7378c717056fa4226e6b7fc25c08e04c8bcdd72ae4c5c5a799da6324"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+        "bytes": 12756,
+        "sha256": "662b617e335d9ff2e5c15f8cd43b03ca2b4a5dca0a471f8f053334fa5c57a0b0"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/index.html",
+        "bytes": 424,
+        "sha256": "d201d15b3703a9d5e052dc16ba842b9ab389dff1ea7467a5a94d8c2dc48f1b55"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/package.json",
+        "bytes": 809,
+        "sha256": "36e0787049599075e63f0fbaad31e60304015b9f7a3b21bd6a44de9256e0d622"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/playwright.config.ts",
+        "bytes": 1349,
+        "sha256": "9bbed16f467e50b18c85ed767bb141bfed149d97d0bbd576e0ab2ffe8fde0d57"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/proof-application.tsx",
+        "bytes": 4229,
+        "sha256": "216bb812ca5e2b0057a6594d2ae36bfb7e63a4f755abc01468663830c48be9fa"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/tsconfig.json",
+        "bytes": 192,
+        "sha256": "36cb488de2aaa26689b71186eefc513e851526a201a239aacc3d361cecdb1a32"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/vite.config.ts",
+        "bytes": 307,
+        "sha256": "5637e69a447719ef058212d8805340aa170d92efcfbc848884540a51c5396c45"
+      },
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 3845,
+        "sha256": "d6b076c782bd3dd11718d99ed0e93b3938d849bacfff2f10e34fc4e0da16186e"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 126618,
+        "sha256": "622fdf26123d54de5a0e17015e6525f73bb7569facef36e5d4583340d8fd5090"
+      },
+      {
+        "path": "apps/desen-app/src/reference-empty-project.ts",
+        "bytes": 1781,
+        "sha256": "66015c0ac0d1c13dd609906ca45f176a8a4b820d0ff756569c678278039e5170"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 107788,
+        "sha256": "931f3097888c3f3e8c1636acd01d92975bdcbf06b37a6a55bb767dad1d905c7b"
+      },
+      {
+        "path": "dependency-cruiser.config.cjs",
+        "bytes": 9155,
+        "sha256": "b338a41d5e12ce6e8d849f356d4f7358747993f7802fd3b69c163073cfee3b35"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-empty-project-browser-e2e.json",
+        "bytes": 10259,
+        "sha256": "959dde63ef28bc7fd25967a9193e39e082c9178bc12f40b83036c5dd6042df77"
+      },
+      {
+        "path": "package.json",
+        "bytes": 97170,
+        "sha256": "5baf41a8ada5bec8ce025da441cf3b9980a2d4594c0342f6c161afad6591c351"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 131780,
+        "sha256": "da2883dc9d1e7ff90ddc64df26c9a1a517432199adae3d32f46ecf875fee9bf6"
+      },
+      {
+        "path": "scripts/generate-desen-app-browser-e2e-workspace-compatibility-proof.mjs",
+        "bytes": 885,
+        "sha256": "4b9669d94fdee93515057d98deab0bcc10ee226abdb91866f0e2a0d8b890d360"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-browser-e2e-workspace-compatibility-proof.mjs",
+        "bytes": 53568,
+        "sha256": "c51a6ae86eacee28771a273b0a243dba0269e271cd07667bfd00e10815c4fa8f"
+      },
+      {
+        "path": "scripts/verify-boundary-fixtures.mjs",
+        "bytes": 4542,
+        "sha256": "71e351e1f111b40cd1446c54db295484562053f7572b448c7c67429fc3a00d18"
+      },
+      {
+        "path": "scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs",
+        "bytes": 945,
+        "sha256": "8cd8b0109d9fc02102bb8ebb1ba6e649501f6446c69b7d1c835293001683759f"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app-browser-e2e/proof-application.ts",
+        "bytes": 383,
+        "sha256": "e8aeb87d79d5652ec04df135ac514812b276c142d953cdd8e593bc3ab056ca90"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/application.tsx",
+        "bytes": 44,
+        "sha256": "2b8a3bc57c292abb7680bd255a0652614437d2db4d8a83f864e0db301ab6bd81"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/reference-empty-project.ts",
+        "bytes": 59,
+        "sha256": "ec37415bd8474ae7b439ecf16ba335762e55aa74fb2b4b6f8efa72eeb8120854"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/styles.css",
+        "bytes": 33,
+        "sha256": "78a573e5cc84f1bebf03558cd73b4cffd485d04271234eab8bafeb220c35d0f6"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/packages/editor-core/src/index.ts",
+        "bytes": 45,
+        "sha256": "ebc3a7f24d5db5899e49b7e7efe0ba4a1e67210f3bf6d23ed8cc67d041ffb506"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-imports-publisher/apps/desen-app-browser-e2e/proof-application.ts",
+        "bytes": 139,
+        "sha256": "f7eaa1a9a65e63c9e8e4070a1805101616d36966baa447328996e493aa22a541"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-imports-publisher/packages/publisher/src/index.ts",
+        "bytes": 42,
+        "sha256": "7385da57df1eebbdef5002764b6a013589378d538d2c458a74fc7443121c4e5e"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-imports-unreviewed-app-source/apps/desen-app-browser-e2e/proof-application.ts",
+        "bytes": 136,
+        "sha256": "838c1fc11c98245e1e084285affafcc902a7edcee73f5903b401116847020bc2"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-imports-unreviewed-app-source/apps/desen-app/src/main.ts",
+        "bytes": 50,
+        "sha256": "9386015d12d4d95712acb218f6a6e31b115e954461a6cbb9d725926675b91bc5"
+      },
+      {
+        "path": "tests/boundaries/README.md",
+        "bytes": 1008,
+        "sha256": "aa2668a40dbc82c0d64aac77304082b2104286a2519b95ebcfdf8dea665255e9"
+      },
+      {
+        "path": "tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
+        "bytes": 22468,
+        "sha256": "b20a2711a1a569ecd22aa11410616f9e007e8a1fefd17619f36f0c15147f8365"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-browser-e2e-workspace-compatibility-proof.mjs",
+      "scripts/generate-desen-app-browser-e2e-workspace-compatibility-proof.mjs",
+      "scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs",
+      "tests/desen-app-browser-e2e-workspace-compatibility.test.mjs"
+    ],
+    "parentArtifacts": 1,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true,
+    "browserExecutionSeparateFromStaticReader": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M10-T01-COMPAT is a corrective receipt for M10-T01, not a new plan task or completion claim.",
+    "M10-T01 proves only empty-project visual authoring, persistence, validation, and Design/Run static parity for the sign-in Source.",
+    "M10-T02 input dispatch and visible pending state remain NOT_PROVEN by this artifact.",
+    "M10-T03 invalid-credentials and public failure rendering remain NOT_PROVEN by this artifact.",
+    "M10-T04 successful navigation and one real host operation remain NOT_PROVEN by this artifact.",
+    "Remote deployment and G10 closure remain NOT_PROVEN.",
+    "The deterministic proof reader never launches a browser; an exact-head Browser E2E job must execute the pinned scenario.",
+    "No hosted-CI pass is inferred from locally generated artifact bytes alone."
+  ]
+}

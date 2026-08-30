@@ -95,11 +95,12 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17",
   "1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a",
   "690c73294f6926822fb1535ac60ea40636545890031db72b7a8d63930a27cc57",
+  "08396f779b0c1c63cf56d9a9292dcd0a103228c57fe39e1173d95a4a106a92e5",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
   25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
-  46, 47, 48, 49, 49, 49, 49, 50,
+  46, 47, 48, 49, 49, 49, 49, 50, 51,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
@@ -638,6 +639,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/desen-app-empty-project-browser-e2e-proof.mjs",
     "tests/desen-app-empty-project-browser-e2e.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M10-T01-COMPAT",
+    {
+      path: "docs/proof/artifacts/desen-app-0.1.0-browser-e2e-workspace-compatibility.json",
+      bytes: 16_025,
+      sha256: "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
+    },
+    "scripts/lib/desen-app-browser-e2e-workspace-compatibility-proof.mjs",
+    "tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
   ),
 ]);
 

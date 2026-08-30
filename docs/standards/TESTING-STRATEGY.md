@@ -37,7 +37,8 @@ operation remain the explicit M10-T02–M10-T07 owners.
 
 The hosted `Browser E2E` job runs on the exact pull-request head in parallel with `Quality gate`.
 Browser installation and production-bundle startup therefore do not consume the bounded required
-quality runner's critical path. Local reproduction is `pnpm test:e2e`; retries are disabled, one
+quality runner's critical path. Local reproduction is
+`pnpm --filter @desen/app-browser-e2e test:e2e`; retries are disabled, one
 worker is used, and trace, screenshot, and video are retained only on failure.
 
 ## Coverage policy

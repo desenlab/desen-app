@@ -3,9 +3,9 @@ import { createRoot } from "react-dom/client";
 
 import { createDesenEditorPersistencePort } from "@desen/editor-core";
 
-import { DesenAppApplication } from "../src/application.js";
-import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "../src/reference-empty-project.js";
-import "../src/styles.css";
+import { DesenAppApplication } from "../desen-app/src/application.js";
+import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "../desen-app/src/reference-empty-project.js";
+import "../desen-app/src/styles.css";
 
 import type {
   DesenEditorPersistenceAdapter,

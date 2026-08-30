@@ -1335,10 +1335,13 @@ official-derived Bundle revision is
 digest remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`.
 Append-only reader checkpoint sequence 56 advances the exact sequence-55 head to
 `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a`, preserving all 49
-frozen artifacts and 98 reader identities. The sequence-56-derived current CI compatibility
-authority pins selector
-`sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
-`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
-affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`;
-the preceding M09-T14 values remain historical receipts. It rewrites no historical artifact or
-pin, makes no hosted Quality-gate claim, and leaves M10 at 0/9.
+frozen artifacts and 98 reader identities. It rewrites no historical artifact or pin, makes no
+hosted Quality-gate claim, and leaves M10 at 0/9.
+
+M10-T01 later appends sequence 57 at
+`sha256:690c73294f6926822fb1535ac60ea40636545890031db72b7a8d63930a27cc57` with 50 frozen
+artifacts and 100 readers. The corrective `M10-T01-COMPAT` authority preserves sequences 1–57 and
+appends sequence 58 at
+`sha256:08396f779b0c1c63cf56d9a9292dcd0a103228c57fe39e1173d95a4a106a92e5` with 51 frozen
+artifacts and 102 current readers. Its dedicated checkpoint suite passes 81/81. These are local
+reader-authority receipts; they do not add a plan task or infer an exact-head hosted result.

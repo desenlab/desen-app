@@ -279,13 +279,13 @@ test("authenticates the exact 20/20 hosted promotion campaign", async () => {
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "94b05e3256b577e8015e78d4eb10e38760757f804a531dc2fcc7ffaaa0cf5c2a",
-    ownershipSha256: "2c5e4a23dcbf996834b5fe269423dacd88b3f8d2c7358fc0690d8fe8c7da8a31",
-    impactGraphSha256: "1b66be8200ff54c811adc30eac4d22fe6a122e1745ebe476516572ea2bb20bab",
+    selectorSha256: "dada3935b7f96c90b35388249b667b00a20a12e8f4ffea3141ca491f5850d612",
+    ownershipSha256: "0f4bc744c49a1d7951d5510bbf1de02ce3f44a7e0ea2e8a62238f2adedd84ba7",
+    impactGraphSha256: "755972e86cde34527c842cb6769202163675c2e179466d1cc2b474c1a9725d9b",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
-    inventorySha256: "84c3ec71a7b336a1578804c62e7e37ba6051d3208ed5d0c6c204e13238e9930a",
+    inventorySha256: "bc71b712811d517e2de08c153ab8dc3ac5fe688fa1b7aafea84ee68636e79292",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "4fb42b6824affc65fc9fa2e3508cb91d7c3f07197dc8d45554bf7bc6d7437973",
+    runnerAuthoritySha256: "58b0db6adc405d3392ed961a071c1770cf658f504a7c6ce3d7c72926559e9db2",
   });
 });
 
@@ -324,10 +324,10 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "690c73294f6926822fb1535ac60ea40636545890031db72b7a8d63930a27cc57",
-    checkpoints: 57,
-    frozenArtifacts: 50,
-    currentReaders: 100,
+    headSha256: "08396f779b0c1c63cf56d9a9292dcd0a103228c57fe39e1173d95a4a106a92e5",
+    checkpoints: 58,
+    frozenArtifacts: 51,
+    currentReaders: 102,
   };
   assert.equal(validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt), liveReceipt);
   for (const [field, replacement] of [

@@ -24,9 +24,11 @@ const CHANGED_DIGEST = "b".repeat(64);
 const WORKSPACE_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const REQUIRED_QUALITY_COMMAND =
   "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-affected-quality-gate.mjs";
-const BROWSER_E2E_COMMAND = "pnpm test:e2e";
-const BROWSER_PROOF_VERIFIER_COMMAND = "pnpm verify:desen-app-empty-project-browser-e2e";
-const BROWSER_PROOF_TEST_COMMAND = "pnpm test:desen-app-empty-project-browser-e2e";
+const BROWSER_E2E_COMMAND = "pnpm --filter @desen/app-browser-e2e test:e2e";
+const BROWSER_PROOF_VERIFIER_COMMAND =
+  "node scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs";
+const BROWSER_PROOF_TEST_COMMAND =
+  "node --test tests/desen-app-browser-e2e-workspace-compatibility.test.mjs";
 const RETAINED_LEGACY_COMMAND = "node scripts/run-ci-quality-gate.mjs";
 const REQUIRED_EXHAUSTIVE_ENTRYPOINT = "scripts/ci/run-required-exhaustive-quality-gate.mjs";
 const REQUIRED_QUALITY_ENTRYPOINT = "scripts/ci/run-required-affected-quality-gate.mjs";
@@ -138,25 +140,25 @@ function expectEquivalenceError(code) {
   };
 }
 
-test("proves all 202 exact ordered commands and both reviewed digests", () => {
+test("proves all 204 exact ordered commands and both reviewed digests", () => {
   const result = verifyRequiredExhaustiveInventoryEquivalence();
 
   assert.deepEqual(result, {
     status: "PASS",
-    workloadCount: 202,
+    workloadCount: 204,
     exactlyOnce: true,
     retainedPlanSha256: EXPECTED_RETAINED_PLAN_SHA256,
     neutralInventorySha256: EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    orderedProjectionSha256: "1433aee5c3e861aca981230bb6c34e4e99a210be96258c9575f3831189d9a2e2",
+    orderedProjectionSha256: "38e8aaab24fc98f73114cb2d6837e32ce2c1d69a76b30b8bb076b07a59f09e08",
     workloadSetSha256: EXPECTED_REQUIRED_WORKLOAD_SET_SHA256,
   });
   assert.equal(
     EXPECTED_RETAINED_PLAN_SHA256,
-    "79ccfaca8c4ab340962bc4d5f4b14d43206fcaee52c03b89222ad0141fa62acb",
+    "3fbc260e165660b1e0daedc24c459870a45c4bb7ab0d337001e0e4bd7510d6b9",
   );
   assert.equal(
     EXPECTED_REQUIRED_WORKLOAD_SET_SHA256,
-    "8635d177a0e396bbf9101c64db9c4f5b941e4618c6575fb3ff1d42710a6a1a96",
+    "d492679ed3c3b87487929c93f8808cc4ddbaaa72463ad1a814ad0a16bd13c625",
   );
   assert.equal(Object.isFrozen(result), true);
 });
@@ -185,7 +187,7 @@ test("PASS requires every exact workload closed successfully and ignores arrival
   const normalized = normalizeRequiredExecutionReceipt(reversed);
 
   assert.equal(normalized.status, "PASS");
-  assert.equal(normalized.workloads.length, 202);
+  assert.equal(normalized.workloads.length, 204);
   assert.deepEqual(
     normalized.workloads.map(({ id }) => id),
     canonicalIds(),

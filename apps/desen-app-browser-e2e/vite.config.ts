@@ -6,7 +6,7 @@ export default defineConfig({
   root: import.meta.dirname,
   build: {
     emptyOutDir: true,
-    outDir: resolve(import.meta.dirname, "../dist-e2e"),
+    outDir: resolve(import.meta.dirname, "dist"),
   },
   preview: {
     host: "127.0.0.1",

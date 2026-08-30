@@ -14,6 +14,8 @@ const neutralFiles = [
 
 const browserFiles = [
   "apps/desen-app/**/*.{ts,tsx}",
+  "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+  "apps/desen-app-browser-e2e/proof-application.tsx",
   "apps/desen-run/**/*.{ts,tsx}",
   "apps/reference-host-web/**/*.{ts,tsx}",
   "packages/runtime-web/**/*.{ts,tsx}",
@@ -23,6 +25,8 @@ const browserFiles = [
 
 const nodeFiles = [
   "apps/control-plane-api/**/*.{ts,tsx}",
+  "apps/desen-app-browser-e2e/*.config.ts",
+  "apps/desen-app-browser-e2e/*.pw.ts",
   "scripts/**/*.{js,cjs,mjs,ts}",
   "tests/**/*.{js,cjs,mjs,ts}",
   "*.config.{js,cjs,mjs,ts}",

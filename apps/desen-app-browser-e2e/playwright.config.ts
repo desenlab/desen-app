@@ -3,19 +3,25 @@ import { resolve } from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
 const APP_ORIGIN = "http://127.0.0.1:4174";
-const WORKSPACE_ROOT = resolve(import.meta.dirname, "../../..");
+const PACKAGE_ROOT = import.meta.dirname;
+const WORKSPACE_ROOT = resolve(PACKAGE_ROOT, "../..");
 
 export default defineConfig({
   testDir: ".",
   testMatch: "**/*.pw.ts",
-  outputDir: "../test-results",
+  outputDir: resolve(PACKAGE_ROOT, "test-results"),
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
   workers: 1,
   timeout: 60_000,
   expect: { timeout: 10_000 },
-  reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : "line",
+  reporter: process.env.CI
+    ? [
+        ["line"],
+        ["html", { open: "never", outputFolder: resolve(PACKAGE_ROOT, "playwright-report") }],
+      ]
+    : "line",
   use: {
     ...devices["Desktop Chrome"],
     baseURL: APP_ORIGIN,
@@ -37,7 +43,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm --filter @desen/app-web exec vite preview --config e2e/vite.config.ts",
+    command: "pnpm --filter @desen/app-browser-e2e exec vite preview --config vite.config.ts",
     cwd: WORKSPACE_ROOT,
     reuseExistingServer: false,
     timeout: 60_000,
