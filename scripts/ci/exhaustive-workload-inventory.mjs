@@ -144,16 +144,31 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "332cdaa40a2393d018c96478812ffdd8b41b8abf5c0adb293c21379214698701";
+  "38640b401f5294cd8420ddd511c807a2f90a7d6b2079c98b3f451b9288c7e9b0";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
   "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
   "5146f101cb767c49f6f0b87fd6939be6bdfc348e5f4dcf8dd77399ac921d4ee3";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
-  "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab";
+  "73b68c61533e2947169ba3e2298a9f13ec261ae00c32184773402bf03fcce715";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = SAFE_OBJECT_FREEZE(["apps/*", "packages/*"]);
+const DIRECT_CI_PROOF_PAIR_IDS = SAFE_OBJECT_FREEZE([
+  "desen-app-empty-project-browser-e2e",
+  "desen-app-browser-e2e-workspace-compatibility",
+]);
+const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
+  [
+    ["build", "vite build"],
+    ["lint", "eslint . --max-warnings=0"],
+    ["typecheck", "tsc -p tsconfig.json --noEmit"],
+    [
+      "test:e2e",
+      "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts",
+    ],
+  ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
+);
 const FORBIDDEN_COMMAND_PATTERN =
   /generate|writ(?:e|er)|--affected\b|--since\b|changed-files?|git-diff/i;
 const SHELL_METACHARACTER_PATTERN = /[\n\r;&|><\x60$()*?{}!]|\[|\]/;
@@ -625,6 +640,16 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "desen-app-publish-activation",
     "scripts/verify-desen-app-publish-activation.mjs",
     "tests/desen-app-publish-activation.test.mjs",
+  ],
+  [
+    "desen-app-empty-project-browser-e2e",
+    "scripts/verify-desen-app-empty-project-browser-e2e.mjs",
+    "tests/desen-app-empty-project-browser-e2e.test.mjs",
+  ],
+  [
+    "desen-app-browser-e2e-workspace-compatibility",
+    "scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs",
+    "tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
   ],
 ]);
 
@@ -1448,7 +1473,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
   );
   assertExactArray(
     [...testConfigurationFiles].sort(),
-    [],
+    ["apps/desen-app-browser-e2e/vite.config.ts"],
     "The root and workspace test-configuration file set",
   );
   if (SAFE_OBJECT_HAS_OWN(packageJson, "vitest")) {
@@ -1481,12 +1506,35 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
     });
   }
 
+  const browserE2ePackage = workspacePackageMap.get("@desen/app-browser-e2e");
+  if (!browserE2ePackage) {
+    fail("The reviewed Browser E2E workspace package is missing.");
+  }
+  assertExactArray(
+    SAFE_REFLECT_OWN_KEYS(browserE2ePackage.scripts).sort(),
+    EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS.map(({ name }) => name).sort(),
+    "The Browser E2E workspace package script set",
+  );
+  for (const { name, command } of EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS) {
+    if (browserE2ePackage.scripts[name] !== command) {
+      fail("The Browser E2E workspace package script drifted from review.", {
+        script: name,
+        expected: command,
+        actual: browserE2ePackage.scripts[name],
+      });
+    }
+  }
+
+  const rootOwnedProofIds = proofIds.filter((id) => !DIRECT_CI_PROOF_PAIR_IDS.includes(id));
   const expectedCheckCommands = [
     "pnpm format:check",
-    ...proofIds.map((id) => "pnpm verify:" + id),
+    ...rootOwnedProofIds.map((id) => "pnpm verify:" + id),
     ...EXPECTED_CHECK_SUFFIX,
   ];
-  const expectedTestCommands = [...proofIds.map((id) => "pnpm test:" + id), "turbo run test"];
+  const expectedTestCommands = [
+    ...rootOwnedProofIds.map((id) => "pnpm test:" + id),
+    "turbo run test",
+  ];
   assertExactArray(
     splitRootScript(scripts.check, "The root check script"),
     expectedCheckCommands,
@@ -1499,6 +1547,17 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
   );
 
   for (const [proofIndex, [id, verifierFile, rootTestFile]] of PROOF_UNIT_TUPLES.entries()) {
+    if (DIRECT_CI_PROOF_PAIR_IDS.includes(id)) {
+      for (const prefix of ["generate:", "verify:", "test:"]) {
+        if (SAFE_OBJECT_HAS_OWN(scripts, prefix + id)) {
+          fail(id + " must remain a direct CI proof pair outside the root package-script graph.", {
+            script: prefix + id,
+          });
+        }
+      }
+      prerequisiteInventory.push({ id, verify: [], test: [] });
+      continue;
+    }
     const verifierCommands = splitRootScript(scripts["verify:" + id], "verify:" + id);
     const testCommands = splitRootScript(scripts["test:" + id], "test:" + id);
     if (verifierCommands.at(-1) !== "node " + verifierFile) {
@@ -1592,7 +1651,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "c6655119e0b24594bced92b6b916917e0f336351c19cf338ee21d3b8d141f684";
+  "bc71b712811d517e2de08c153ab8dc3ac5fe688fa1b7aafea84ee68636e79292";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

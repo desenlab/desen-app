@@ -372,6 +372,56 @@ test(DESEN_APP_PUBLISH_ACTIVATION_ROOT_TEST_NAMES[10], async () => {
   );
 });
 
+test("[M10 successor] authenticates immutable browser evidence and rejects current substitutions", async () => {
+  const successor = built.currentCompatibility.emptyProjectBrowserE2eSuccessor;
+  assert.deepEqual(
+    {
+      task: successor.task,
+      artifactSha256: successor.artifact.sha256,
+      immutable: successor.artifact.immutable,
+      compatibilitySha256: successor.compatibilityArtifact.sha256,
+      compatibilityReceipt: successor.compatibilityArtifact.compatibilityReceipt,
+      p08Status: successor.p08Status,
+      runtimeInputAndPendingCovered: successor.runtimeInputAndPendingCovered,
+      g10Closed: successor.g10Closed,
+    },
+    {
+      task: "M10-T01",
+      artifactSha256: "959dde63ef28bc7fd25967a9193e39e082c9178bc12f40b83036c5dd6042df77",
+      immutable: true,
+      compatibilitySha256: "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
+      compatibilityReceipt: "M10-T01-COMPAT",
+      p08Status: "PROVEN",
+      runtimeInputAndPendingCovered: false,
+      g10Closed: false,
+    },
+  );
+  const mutationPaths = [
+    successor.artifact.path,
+    successor.compatibilityArtifact.path,
+    ...successor.currentProjection.changedHistoricalPaths.map(
+      ({ path: relativePath }) => relativePath,
+    ),
+  ];
+  assert.deepEqual(mutationPaths, [
+    "docs/proof/artifacts/desen-app-0.1.0-empty-project-browser-e2e.json",
+    "docs/proof/artifacts/desen-app-0.1.0-browser-e2e-workspace-compatibility.json",
+    "pnpm-lock.yaml",
+    "apps/desen-app/src/application.tsx",
+    "apps/desen-app/test/application.test.tsx",
+    "dependency-cruiser.config.cjs",
+  ]);
+  for (const relativePath of mutationPaths) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
+    await assert.rejects(
+      buildDesenAppPublishActivationEvidence({
+        fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+});
+
 test(DESEN_APP_PUBLISH_ACTIVATION_ROOT_TEST_NAMES[11], async () => {
   const firstParent = DESEN_APP_PUBLISH_ACTIVATION_PARENT_PINS[0];
   await assert.rejects(

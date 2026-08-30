@@ -51,6 +51,7 @@ const allowedApplicationDependencies = {
     "runtime-core",
     "testkit",
   ],
+  "desen-app-browser-e2e": ["editor-core"],
   "desen-app": [
     "protocol",
     "validator",
@@ -149,6 +150,18 @@ module.exports = {
     },
     ...packageAllowlistRules,
     ...applicationAllowlistRules,
+    {
+      name: "desen-app-browser-e2e-reviewed-app-source-only",
+      severity: "error",
+      comment:
+        "The isolated browser proof may compose only the reviewed Desen App application, empty-project bootstrap, and stylesheet entries.",
+      from: { path: "^apps/desen-app-browser-e2e/" },
+      to: {
+        path: "^apps/(?!desen-app-browser-e2e/)",
+        pathNot:
+          "^apps/desen-app/src/(?:application\\.tsx|reference-empty-project\\.ts|styles\\.css)$",
+      },
+    },
     {
       name: "neutral-packages-no-node-builtins",
       severity: "error",

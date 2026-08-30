@@ -218,12 +218,14 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
         "reference-host-web-channel-consumption",
       ],
     ],
+    ["desen-app-empty-project-browser-e2e", ["desen-app-publish-activation"]],
+    ["desen-app-browser-e2e-workspace-compatibility", ["desen-app-empty-project-browser-e2e"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "4a2e2d7d4d15a8f3d563aee7b248b14bba6ce44c27b464773a825d9c44fc58bf";
+  "755972e86cde34527c842cb6769202163675c2e179466d1cc2b474c1a9725d9b";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

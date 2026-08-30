@@ -7,6 +7,11 @@ continues to accept a documented dependency. They are intentionally outside `app
 The fixture set includes a direct `catalog-sdk` → `runtime-react` edge so the platform-neutral
 manifest boundary remains executable rather than documentation-only.
 
+The Desen App browser-proof fixtures separately prove its two deny-by-default boundaries: the
+allowed case composes only `editor-core` plus the reviewed App application, empty-project, and
+stylesheet entries; one negative case rejects an undeclared `publisher` package edge, and another
+rejects an unreviewed App source entry.
+
 Run them after installing workspace dependencies:
 
 ```bash

@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-29
+Last updated: 2026-08-30
 
 ## Plain-language status
 
@@ -1371,12 +1371,25 @@ remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635
 Compatibility sequence 56 advances the exact sequence-55 head to
 `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
 49 frozen artifacts and 98 reader identities. Historical package/Bundle tuples, frozen artifacts,
-and their pins remain unchanged. The sequence-56-derived current CI compatibility authority pins
-selector `sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
-`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
-affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`; the preceding M09-T14
-promotion receipts remain historical and unchanged. No task is marked complete by this
-compatibility repair: M10 remains 0/9 and M10-T01 remains next.
+and their pins remain unchanged. No task is marked complete by this compatibility repair: M10
+remains 0/9 and M10-T01 remains next.
+
+M10-T01 now proves the first real-browser authoring slice from an explicitly empty, structurally
+admitted Source/project. The dedicated `@desen/app-browser-e2e` workspace owns Playwright, Vite,
+Chromium, and failure artifacts while the root and product App manifests remain unchanged. One
+isolated production Chromium scenario uses the visible Desen App UI to
+create state, components, slots, props, bindings, actions, order, and deletion; its successful
+Components and Layers gestures use native drag, while a forged-`DataTransfer` negative case leaves
+Source unchanged. The negative case first persists the exact canonical empty Source as Generation
+1, then proves its canonical and persisted document, save count, and disabled Save state remain
+identical after the forged drop; the completed authored Source is Generation 2. The authored
+sign-in surface reads canonical Source back, passes public validation, and preserves its exact
+managed static subtree and declared `420 × 720` frame across Design and Run. The complete App suite
+passes 377/377, the
+separately discovered browser scenario passes 1/1, and the 11/11 independent proof-reader cases plus
+deterministic verifier pass. P-08 advances to `PROVEN`; typed input/pending, failure, and
+success/navigation with a real host operation remain M10-T02–M10-T04 work. G10 stays open, proof
+gates remain 11/13, and no exact-head hosted-CI pass is inferred from the local receipts.
 
 ## Current milestone
 
@@ -1384,14 +1397,14 @@ compatibility repair: M10 remains 0/9 and M10-T01 remains next.
   `G06`, `G07`, `G08`, `G09`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M10 — First end-to-end proof`
-- Overall implementation progress: `109 / 145 tasks complete (75%)`
+- Overall implementation progress: `110 / 145 tasks complete (76%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
 - M09 progress: `14 / 14 tasks complete (100%)`
-- M10 progress: `0 / 9 tasks complete (0%)`
+- M10 progress: `1 / 9 tasks complete (11%)`
 - Proof-gate progress: `11 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1486,7 +1499,8 @@ compatibility repair: M10 remains 0/9 and M10-T01 remains next.
   `M09-T11 — Fixtures, scenarios, and visible approximate-fidelity disclosure`,
   `M09-T12 — Save/open UI through the public Editor persistence port`,
   `M09-T13 — Node-linked diagnostics and selectable invalid placeholders`,
-  `M09-T14 — Saved-Source publication and separate reference-host activation`
+  `M09-T14 — Saved-Source publication and separate reference-host activation`,
+  `M10-T01 — Empty-project-to-sign-in browser E2E`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -1508,13 +1522,13 @@ compatibility repair: M10 remains 0/9 and M10-T01 remains next.
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Next implementation task: `M10-T01 — Empty-project-to-sign-in browser E2E`
+- Next implementation task: `M10-T02 — Input and pending fixture test`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  14/14, M07 is 11/11, I07-04, G07, G08, G09, and M09-T01–M09-T14 are `DONE`; `N-012`, `N-018`,
-  `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`, P-06 and P-16 are `PROVEN`, P-07, P-09,
-  and P-10 are `PARTIAL`, proof gates are 11/13, P-08 and P-12 remain `NOT_PROVEN`, N-036 remains `PLANNED`,
-  PF-028 is `CLOSED`, PF-025, PF-083, PF-085, PF-086, and PF-089 remain `OPEN`, and implementation
-  progress is 109/145.
+  14/14, M10 is 1/9, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, and M10-T01 are
+  `DONE`; `N-012`, `N-018`, `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`; P-06, P-08,
+  and P-16 are `PROVEN`; P-07, P-09, and P-10 are `PARTIAL`; proof gates are 11/13; P-12 remains
+  `NOT_PROVEN`; N-036 remains `PLANNED`; PF-028 is `CLOSED`; PF-025, PF-083, PF-085, PF-086, and
+  PF-089 remain `OPEN`; and implementation progress is 110/145.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -4543,11 +4557,63 @@ M09-T14/G09 evidence:
   advances the exact sequence-55 head to
   `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
   49 frozen artifacts, 98 reader identities, and historical pins; M10 remains 0/9
-- current CI compatibility authority derived from sequence 56: selector
-  `sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
-  `sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and T10 affected plan
-  `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`; the M09-T14 values
-  above remain historical receipts
+
+### M10-T01 empty-project browser E2E evidence
+
+- isolated production proof entry starts from an explicitly empty, structurally admitted
+  `account-app/sign-in` Source/project with the exact reference Catalog, one Stack root, and the
+  declared `420 × 720` frame; the normal product entry remains unchanged; the dedicated
+  `@desen/app-browser-e2e` workspace owns the harness/toolchain while root and App manifests own no
+  M10 browser-E2E dependency or command
+- one local Chromium scenario authors state, components, slots, props, bindings, actions, layer
+  order, and deletion entirely through the visible browser UI, then saves through the public
+  persistence port, reads canonical Source back, and re-admits it through the public validator
+- Components insertion and Layers reordering use native `locator.dragTo`; an adversarial forged
+  `DataTransfer` event has no authenticated in-memory drag intent; the exact canonical empty Source
+  is persisted as Generation 1 before the event, and its canonical and persisted document, save
+  count, and disabled Save state remain identical afterward; the completed authored save is
+  Generation 2
+- exact managed static subtree and frame parity are required across Design and Run
+- the Playwright spec is isolated from Vitest discovery as
+  `apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts`; the complete App suite passes 377/377
+  and the browser scenario passes 1/1 locally; the independent proof reader passes 11/11; the
+  deterministic verifier passes without pretending to launch or replace the browser scenario
+- immutable task-time evidence: 10,259-byte
+  `docs/proof/artifacts/desen-app-0.1.0-empty-project-browser-e2e.json` at
+  `sha256:959dde63ef28bc7fd25967a9193e39e082c9178bc12f40b83036c5dd6042df77`
+- append-only corrective evidence: `M10-T01-COMPAT` is a compatibility label, not a new plan task;
+  its distinct 16,025-byte
+  `docs/proof/artifacts/desen-app-0.1.0-browser-e2e-workspace-compatibility.json` authenticates 32
+  current harness, package, lockfile, workflow, boundary, and reader files at
+  `sha256:e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d`; its independent reader
+  passes 11/11
+- deny-by-default browser-workspace boundary evidence: only `editor-core` and the reviewed App
+  `application.tsx`, `reference-empty-project.ts`, and `styles.css` entries are admitted; the
+  positive/negative fixture verifier passes 19/19 and `pnpm boundaries` passes across 808 modules /
+  3,319 dependencies
+- current neutral CI universe: 204 workloads and 97 proof units; inventory
+  `sha256:bc71b712811d517e2de08c153ab8dc3ac5fe688fa1b7aafea84ee68636e79292`, impact graph
+  `sha256:755972e86cde34527c842cb6769202163675c2e179466d1cc2b474c1a9725d9b`, and the 65-proof-unit /
+  140-workload current compatibility closure
+  `sha256:99b33b797b32ecf72c35ffe5160e1f89bdc7b96b0bd156b7e14895193116f3e4`; shared-state,
+  inventory, and impact regression cases pass 66/66 locally
+- historical reader checkpoint sequence 57 advances the exact sequence-56 head to
+  `sha256:690c73294f6926822fb1535ac60ea40636545890031db72b7a8d63930a27cc57` across 50 frozen
+  artifacts and 100 readers
+- reader checkpoint sequence 58 preserves sequences 1–57 and advances that exact head to
+  `sha256:08396f779b0c1c63cf56d9a9292dcd0a103228c57fe39e1173d95a4a106a92e5` across 51 frozen
+  artifacts and 102 current readers
+- current reader checkpoint sequence 59 preserves sequences 1–58 and advances that exact head to
+  `sha256:349a292c9137f0f66c5cd58f384aa2175082613500905fdb723f15b246cbd2e8`, resealing only the
+  changed M10-T01 root-test reader while retaining the same 51 artifacts and 102 reader identities;
+  the dedicated checkpoint suite passes 82/82, and this local corrective authority makes no
+  exact-head hosted claim or additional plan-task completion
+- coverage decision: M10-T01 is `DONE`; P-08 is `PROVEN`; P-07, P-09, and P-10 remain `PARTIAL`;
+  proof gates remain 11/13; overall progress advances to 110/145 (76%); M10 advances to 1/9 (11%);
+  M10-T02 is next
+- explicit nonclaims: typed input/pending, invalid credentials/visible failure,
+  success/navigation/real host operation, remote deployment, and G10 closure remain unproven; the
+  local receipts make no exact-head hosted `Quality gate` or `Browser E2E` success claim
 
 ## Status vocabulary
 

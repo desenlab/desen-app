@@ -17,6 +17,8 @@ every dependency to have a documented responsibility.
   host's programmatic resolved-module-graph audit
 - Testing Library React 16.3.2 and jsdom 29.1.1 for user-observable adapter, host, and Desen App
   shell semantics
+- Playwright 1.62.1 with its package-pinned Chromium runtime for the isolated Desen App browser
+  proof; the browser job executes in parallel with the repository quality gate
 - Fastify 5.11.2 for the fixed-loopback, bearer-authenticated local control-plane transport
 - better-sqlite3 13.0.3 behind the local Source-generation and channel-pointer repositories; its
   native import is isolated to the exact control-plane local-API proof pair
@@ -35,7 +37,6 @@ every dependency to have a documented responsibility.
 | Unit/integration tests   | Vitest                                  | Fast TypeScript-native package tests                                |
 | Property tests           | fast-check                              | Determinism, canonicalization, limits, and state-machine invariants |
 | React tests              | Testing Library                         | User-observable adapter and editor behavior                         |
-| Browser proof            | Playwright                              | Cross-application Desen App-to-host evidence                        |
 | Web styling              | CSS variables/tokens and CSS Modules    | No CSS or DOM implementation detail leaks into capability contracts |
 | Immutable artifacts      | Content-addressed local files initially | Bundle bytes can be independently hashed and audited                |
 | Browser LKG              | IndexedDB behind a storage port         | Persistent last-known-good across browser restart                   |

@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████████░░░░░░` **109 / 145 tasks complete (75%)**
+**Overall:** `███████████████████░░░░░░` **110 / 145 tasks complete (76%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -26,9 +26,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `░░░░░░░░░` **0 / 9 tasks complete (0%)**
+**M10:** `█░░░░░░░░` **1 / 9 tasks complete (11%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **Next:** `M10-T01`
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T01:** `DONE`; exact-head hosted gates are required for merge · **Next:** `M10-T02`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -1146,18 +1146,48 @@ remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635
 Compatibility checkpoint sequence 56 advances the exact sequence-55 head to
 `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a`, preserving all 49
 frozen artifacts and 98 reader identities. Historical package/Bundle tuples and proof pins remain
-unchanged. The sequence-56-derived current CI compatibility authority pins selector
-`sha256:18c78a4eb4fba8630d791e4673de393a2146e45e78c0ad71aa508ebdb42b48d6`, required runner
-`sha256:75c0160eff9a7a1432ed92c2f85f8b032279caeca0e4e3b06fc488fceabec11a`, and the current T10
-affected plan `sha256:bf5dc9b8779aaf6871ee80923827464809984ae494047ef50f83516c117c468a`; the preceding M09-T14
-promotion receipts remain historical and unchanged. This is corrective compatibility work, not an
-M10 completion: M10 remains 0/9 and M10-T01 remains next.
+unchanged. This is corrective compatibility work, not an M10 completion: M10 remains 0/9 and
+M10-T01 remains next.
 
 M09-T14 and G09 are `DONE`; implementation progress is 109/145 (75%), M09 is 14/14, and proof gates
 are 11/13. P-07, P-09, and P-10 remain `PARTIAL`; P-08 remains `NOT_PROVEN`; P-12 remains
 `NOT_PROVEN` until M10-T07; N-036 remains `PLANNED`; and PF-085, PF-086, and PF-089 remain `OPEN`.
 Automated real-browser E2E and native drag are not proven by this compatibility evidence; M10-T01
 is next.
+
+**M10-T01 checkpoint:** the dedicated `@desen/app-browser-e2e` workspace builds an isolated
+production browser-proof bundle from an explicitly empty, structurally admitted Source/project and
+authors the sign-in surface through the visible Desen App UI. Playwright, Chromium, the harness,
+and failure artifacts remain outside the root and product App manifests. The passing local Chromium
+scenario covers native Components and Layers drag, rejects forged
+`DataTransfer` mutation, and proves the full canonical and real-persistence before/after boundary:
+the exact empty Source is Generation 1, the forged drop leaves its document, save count, and
+disabled Save state identical, and the completed authored Source is Generation 2. It re-admits the
+stored canonical Source and requires exact managed static subtree plus `420 × 720` frame parity in
+Design and Run.
+The complete App suite passes 377/377 and the separately discovered browser scenario passes 1/1.
+The immutable task-time proof remains the 10,259-byte historical artifact at
+`sha256:959dde63ef28bc7fd25967a9193e39e082c9178bc12f40b83036c5dd6042df77`; reader checkpoint
+sequence 57 records that generation among 50 artifacts and 100 readers at
+`sha256:690c73294f6926822fb1535ac60ea40636545890031db72b7a8d63930a27cc57`. P-08 is `PROVEN`;
+P-07, P-09, and P-10 remain `PARTIAL`. M10 is 1/9, implementation progress is 110/145 (76%),
+proof gates remain 11/13, and M10-T02 is next. Input/pending, failure, success/navigation, and a
+real host operation remain unproven, G10 stays open, and no exact-head hosted-CI success is claimed
+by these local receipts.
+
+The corrective `M10-T01-COMPAT` receipt is append-only and is not another plan task. Its separate
+16,025-byte artifact authenticates 32 current harness, package, workflow, and boundary files at
+`sha256:e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d`; its independent reader
+passes 11/11. The explicit browser-workspace boundary fixtures pass 19/19, and the full boundary
+run passes across 808 modules and 3,319 dependencies. Append-only reader checkpoint sequence 58
+preserves sequences 1–57 and advances the exact sequence-57 head to
+`sha256:08396f779b0c1c63cf56d9a9292dcd0a103228c57fe39e1173d95a4a106a92e5` across 51 frozen
+artifacts and 102 current readers. The permission-model fixture correction preserves sequences
+1–58 and appends sequence 59 at
+`sha256:349a292c9137f0f66c5cd58f384aa2175082613500905fdb723f15b246cbd2e8`, resealing only the
+changed M10-T01 root-test reader while retaining the same 51 artifacts and 102 reader identities;
+the dedicated checkpoint suite passes 82/82. These corrective authorities do not add another plan
+task or claim an exact-head hosted result.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge
@@ -1290,12 +1320,17 @@ packages/
 
 ```bash
 pnpm install
+pnpm --filter @desen/app-browser-e2e exec playwright install chromium
 pnpm verify:protocol-snapshot
+pnpm --filter @desen/app-browser-e2e test:e2e
 pnpm check
 ```
 
-`pnpm proof` and `pnpm test:e2e` deliberately return `NOT_IMPLEMENTED` until their G10 runners
-exist; an absent proof runner is never treated as a successful proof.
+The filtered Playwright install command is a one-time local browser setup. The dedicated workspace
+command then builds the product dependency closure and isolated M10 proof application before it
+runs package-pinned Chromium. Root `pnpm test:e2e` stays reserved for the future G10 runner.
+`pnpm proof` deliberately returns `NOT_IMPLEMENTED` until the complete G10 runner exists; an
+absent proof runner is never treated as a successful proof.
 
 The exact DESEN 0.1.0 input snapshot is vendored and checksum-enforced. Schema-derived types,
 canonical JSON and SHA-256 primitives, the 36-code diagnostic registry, and RFC 6901 JSON Pointer

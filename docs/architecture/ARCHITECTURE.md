@@ -1728,6 +1728,27 @@ generic root replaces its current surface. Any server rejection, malformed deliv
 or disposed late response preserves the previous surface. ADR 0015 records the exact boundary and
 its local Web-only nonclaims.
 
+## M10-T01 empty-project browser boundary
+
+The first browser-proof slice adds a trusted-host bootstrap seam to `DesenAppApplication`. The
+default remains the completed reference document used by the product shell; the isolated proof
+entry supplies a separately admitted Source with the same exact Catalog requirement, one empty
+sign-in surface, its required Stack root, and no children, state, bindings, events, or actions.
+The initial document is captured when the surface editor session mounts and is never inferred from
+route text, DOM state, or test data.
+
+The proof bundle is a separate Vite entry and output directory. Its in-memory compare-and-set
+adapter implements the public Editor Core persistence contract and exposes only a non-production,
+non-enumerable readback surface so the test can validate the canonical bytes it caused the App to
+save. Production application builds do not import that entry or expose that readback API.
+
+Positive insertion and reorder use native Chromium drag input against the same handles a person
+uses. A synthetic `DataTransfer` chain exists only as a negative authority test: without the
+current App-owned drag intent it must be inert. The saved Source is re-admitted through the public
+validator, and Design/Run parity is asserted over the same authored node order and explicit frame.
+M10-T01 grants no form-execution, fixture-settlement, host-operation, publication, activation, or
+recovery claim; those remain M10-T02–M10-T07.
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific

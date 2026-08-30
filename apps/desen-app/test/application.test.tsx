@@ -7,6 +7,7 @@ import * as authoringFixtures from "../src/authoring-fixtures.js";
 import * as authoringPreview from "../src/authoring-preview.js";
 import * as authoringSlots from "../src/authoring-slots.js";
 import { DesenAppApplication } from "../src/application.js";
+import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "../src/reference-empty-project.js";
 
 function renderApplication(pathname = "/projects") {
   window.history.replaceState(null, "", pathname);
@@ -295,6 +296,43 @@ describe("Desen App application shell", () => {
     );
     expect(screen.queryByRole("tab", { name: /design|run/i })).toBeNull();
     expect(document.querySelector("canvas")).toBeNull();
+  });
+
+  it("admits an explicit empty-project bootstrap without substituting completed sign-in content", () => {
+    window.history.replaceState(null, "", "/projects/account-app/surfaces/sign-in");
+    render(<DesenAppApplication initialDocument={EMPTY_REFERENCE_PROJECT_DOCUMENT} />);
+
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    expect(
+      within(hierarchy).getByRole("button", {
+        name: stackSlotName(0, "sign-in.layout", "Absent"),
+      }),
+    ).toBeTruthy();
+    expect(
+      within(hierarchy).getAllByRole("button", { name: /^(?:Select|Deselect) .+ layer · /u }),
+    ).toHaveLength(1);
+    expect(within(hierarchy).queryByText("sign-in.title")).toBeNull();
+    expect(within(hierarchy).queryByText("sign-in.email")).toBeNull();
+    expect(within(hierarchy).queryByText("sign-in.password")).toBeNull();
+    expect(within(hierarchy).queryByText("sign-in.submit")).toBeNull();
+    expect(screen.queryByRole("heading", { level: 2, name: "Sign in" })).toBeNull();
+    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBeTruthy();
+  });
+
+  it("captures one initial Source for the complete mounted surface session", () => {
+    window.history.replaceState(null, "", "/projects/account-app/surfaces/sign-in");
+    const view = render(<DesenAppApplication initialDocument={EMPTY_REFERENCE_PROJECT_DOCUMENT} />);
+    const initialHierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    expect(initialHierarchy.querySelectorAll("[data-layer-source-node-id]")).toHaveLength(1);
+
+    view.rerender(
+      <DesenAppApplication initialDocument={authoringPreview.REFERENCE_EDITOR_DOCUMENT} />,
+    );
+
+    const retainedHierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    expect(retainedHierarchy.querySelectorAll("[data-layer-source-node-id]")).toHaveLength(1);
+    expect(within(retainedHierarchy).queryByText("sign-in.title")).toBeNull();
+    expect(screen.queryByRole("heading", { level: 2, name: "Sign in" })).toBeNull();
   });
 
   it("selects Source layers accessibly while keeping the preview frame free of editor chrome", async () => {

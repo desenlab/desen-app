@@ -153,6 +153,8 @@ export const PROOF_IDS = Object.freeze([
   "desen-app-source-persistence",
   "desen-app-node-linked-diagnostics",
   "desen-app-publish-activation",
+  "desen-app-empty-project-browser-e2e",
+  "desen-app-browser-e2e-workspace-compatibility",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -301,6 +303,8 @@ export const BUILD_OUTPUT_ROOTS = Object.freeze([
   "apps/control-plane-api/.turbo",
   "apps/desen-app/dist",
   "apps/desen-app/.turbo",
+  "apps/desen-app-browser-e2e/dist",
+  "apps/desen-app-browser-e2e/.turbo",
   "apps/desen-run/dist",
   "apps/desen-run/.turbo",
   "apps/reference-host-web/dist",
@@ -563,8 +567,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 200) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 200 steps.", {
+if (METADATA_BY_STEP_ID.size !== 204) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 204 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

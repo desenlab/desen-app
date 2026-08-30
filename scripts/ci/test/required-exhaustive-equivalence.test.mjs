@@ -24,6 +24,11 @@ const CHANGED_DIGEST = "b".repeat(64);
 const WORKSPACE_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const REQUIRED_QUALITY_COMMAND =
   "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-affected-quality-gate.mjs";
+const BROWSER_E2E_COMMAND = "pnpm --filter @desen/app-browser-e2e test:e2e";
+const BROWSER_PROOF_VERIFIER_COMMAND =
+  "node scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs";
+const BROWSER_PROOF_TEST_COMMAND =
+  "node --test tests/desen-app-browser-e2e-workspace-compatibility.test.mjs";
 const RETAINED_LEGACY_COMMAND = "node scripts/run-ci-quality-gate.mjs";
 const REQUIRED_EXHAUSTIVE_ENTRYPOINT = "scripts/ci/run-required-exhaustive-quality-gate.mjs";
 const REQUIRED_QUALITY_ENTRYPOINT = "scripts/ci/run-required-affected-quality-gate.mjs";
@@ -135,25 +140,25 @@ function expectEquivalenceError(code) {
   };
 }
 
-test("proves all 200 exact ordered commands and both reviewed digests", () => {
+test("proves all 204 exact ordered commands and both reviewed digests", () => {
   const result = verifyRequiredExhaustiveInventoryEquivalence();
 
   assert.deepEqual(result, {
     status: "PASS",
-    workloadCount: 200,
+    workloadCount: 204,
     exactlyOnce: true,
     retainedPlanSha256: EXPECTED_RETAINED_PLAN_SHA256,
     neutralInventorySha256: EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    orderedProjectionSha256: "4006f34222b00bfa6095bf7019fb7fef194f9b3a30f67f5b3ecefe599729e45a",
+    orderedProjectionSha256: "38e8aaab24fc98f73114cb2d6837e32ce2c1d69a76b30b8bb076b07a59f09e08",
     workloadSetSha256: EXPECTED_REQUIRED_WORKLOAD_SET_SHA256,
   });
   assert.equal(
     EXPECTED_RETAINED_PLAN_SHA256,
-    "beeda57842e1a9bdee6a13cd7be323b48a722ce4352319d085886b7fc76bfefe",
+    "3fbc260e165660b1e0daedc24c459870a45c4bb7ab0d337001e0e4bd7510d6b9",
   );
   assert.equal(
     EXPECTED_REQUIRED_WORKLOAD_SET_SHA256,
-    "0eb90130ebcf32072ba7188ce6937fc65e1d2d11ffb5dceefb1e9cb2a0066813",
+    "d492679ed3c3b87487929c93f8808cc4ddbaaa72463ad1a814ad0a16bd13c625",
   );
   assert.equal(Object.isFrozen(result), true);
 });
@@ -182,7 +187,7 @@ test("PASS requires every exact workload closed successfully and ignores arrival
   const normalized = normalizeRequiredExecutionReceipt(reversed);
 
   assert.equal(normalized.status, "PASS");
-  assert.equal(normalized.workloads.length, 200);
+  assert.equal(normalized.workloads.length, 204);
   assert.deepEqual(
     normalized.workloads.map(({ id }) => id),
     canonicalIds(),
@@ -337,7 +342,7 @@ test("official CI admits only required exhaustive authority and a manual legacy 
   assert.equal(scalarValue(concurrency, "cancel-in-progress", 2), "true");
 
   const jobs = extractMappingBlock(workflow, "jobs", 0);
-  assert.deepEqual(directMappingKeys(jobs, 2), ["quality", "legacy-rollback"]);
+  assert.deepEqual(directMappingKeys(jobs, 2), ["quality", "browser-e2e", "legacy-rollback"]);
 
   const requiredJob = extractMappingBlock(jobs, "quality", 2);
   assert.equal(
@@ -353,6 +358,19 @@ test("official CI admits only required exhaustive authority and a manual legacy 
   assert.match(requiredJob, /DESEN_REQUIRED_SAME_REPOSITORY/u);
   assert.doesNotMatch(requiredJob, /DESEN_CI_(?:BASE_SHA|HEAD_SHA|SAME_REPOSITORY)/u);
   assert.match(requiredJob, /actions\/cache\/save/u);
+
+  const browserJob = extractMappingBlock(jobs, "browser-e2e", 2);
+  assert.equal(
+    scalarValue(browserJob, "if", 4),
+    "${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'required' }}",
+  );
+  assert.equal(scalarValue(browserJob, "timeout-minutes", 4), "15");
+  assert.equal(exactRunCount(browserJob, BROWSER_E2E_COMMAND), 1);
+  assert.equal(exactTextCount(browserJob, BROWSER_PROOF_VERIFIER_COMMAND), 1);
+  assert.equal(exactTextCount(browserJob, BROWSER_PROOF_TEST_COMMAND), 1);
+  assert.match(browserJob, /playwright install --with-deps chromium/u);
+  assert.match(browserJob, /DESEN_BROWSER_E2E_HEAD_REVISION/u);
+  assert.doesNotMatch(browserJob, /DESEN_REQUIRED_(?:BASE|HEAD)_REVISION/u);
 
   const legacyJob = extractMappingBlock(jobs, "legacy-rollback", 2);
   assert.equal(
