@@ -3006,8 +3006,11 @@ Historical reader checkpoint sequence 57 advances the exact sequence-56 head to
 artifacts and 100 current readers. Corrective reader checkpoint sequence 58 preserves sequences
 1–57 and advances that exact head to
 `sha256:08396f779b0c1c63cf56d9a9292dcd0a103228c57fe39e1173d95a4a106a92e5` across 51 frozen
-artifacts and 102 current readers; its dedicated checkpoint suite passes 81/81. The current neutral
-inventory contains 204 workloads and 97
+artifacts and 102 current readers. The permission-model fixture correction preserves sequences
+1–58 and appends sequence 59 at
+`sha256:349a292c9137f0f66c5cd58f384aa2175082613500905fdb723f15b246cbd2e8`, resealing only the
+changed M10-T01 root-test reader while retaining those 51 artifacts and 102 reader identities; the
+dedicated checkpoint suite passes 82/82. The current neutral inventory contains 204 workloads and 97
 proof units at `sha256:bc71b712811d517e2de08c153ab8dc3ac5fe688fa1b7aafea84ee68636e79292`;
 the impact graph is
 `sha256:755972e86cde34527c842cb6769202163675c2e179466d1cc2b474c1a9725d9b`, and the 65-proof-unit /

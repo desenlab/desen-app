@@ -1437,5 +1437,9 @@ M10-T01 later appends sequence 57 at
 artifacts and 100 readers. Corrective authority `M10-T01-COMPAT` preserves sequences 1–57 and
 appends sequence 58 at
 `sha256:08396f779b0c1c63cf56d9a9292dcd0a103228c57fe39e1173d95a4a106a92e5` with 51 frozen
-artifacts and 102 current readers. The dedicated checkpoint suite passes 81/81. This is a local
-reader-authority receipt, not a new plan task or an exact-head hosted result.
+artifacts and 102 current readers. The permission-model fixture correction preserves sequences
+1–58 and appends sequence 59 at
+`sha256:349a292c9137f0f66c5cd58f384aa2175082613500905fdb723f15b246cbd2e8`, resealing only the
+changed M10-T01 root-test reader while retaining the same 51 artifacts and 102 reader identities.
+The dedicated checkpoint suite passes 82/82. These are local reader-authority receipts, not a new
+plan task or an exact-head hosted result.

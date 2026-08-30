@@ -354,12 +354,18 @@ test(DESEN_APP_EMPTY_PROJECT_BROWSER_E2E_ROOT_TEST_NAMES[10], async () => {
   );
 
   const directory = await temporaryDirectory("desen-m10-t01-reader-");
+  const artifactTarget = path.join(directory, "artifact-target.json");
+  const reportTarget = path.join(directory, "report-target.md");
   const artifactLink = path.join(directory, "artifact-link.json");
   const reportLink = path.join(directory, "report-link.md");
   const destinationLink = path.join(directory, "destination-link.json");
   await Promise.all([
-    symlink(DEFAULT_DESEN_APP_EMPTY_PROJECT_BROWSER_E2E_ARTIFACT_PATH, artifactLink),
-    symlink(PROOF_DOCUMENT_PATH, reportLink),
+    writeFile(artifactTarget, historical),
+    writeFile(reportTarget, proofDocument),
+  ]);
+  await Promise.all([
+    symlink(artifactTarget, artifactLink),
+    symlink(reportTarget, reportLink),
     symlink(path.join(directory, "missing-target.json"), destinationLink),
   ]);
   await assert.rejects(

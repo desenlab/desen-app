@@ -4600,10 +4600,14 @@ M09-T14/G09 evidence:
 - historical reader checkpoint sequence 57 advances the exact sequence-56 head to
   `sha256:690c73294f6926822fb1535ac60ea40636545890031db72b7a8d63930a27cc57` across 50 frozen
   artifacts and 100 readers
-- current reader checkpoint sequence 58 preserves sequences 1–57 and advances that exact head to
+- reader checkpoint sequence 58 preserves sequences 1–57 and advances that exact head to
   `sha256:08396f779b0c1c63cf56d9a9292dcd0a103228c57fe39e1173d95a4a106a92e5` across 51 frozen
-  artifacts and 102 current readers; the dedicated checkpoint suite passes 81/81, and this local
-  corrective authority makes no exact-head hosted claim or additional plan-task completion
+  artifacts and 102 current readers
+- current reader checkpoint sequence 59 preserves sequences 1–58 and advances that exact head to
+  `sha256:349a292c9137f0f66c5cd58f384aa2175082613500905fdb723f15b246cbd2e8`, resealing only the
+  changed M10-T01 root-test reader while retaining the same 51 artifacts and 102 reader identities;
+  the dedicated checkpoint suite passes 82/82, and this local corrective authority makes no
+  exact-head hosted claim or additional plan-task completion
 - coverage decision: M10-T01 is `DONE`; P-08 is `PROVEN`; P-07, P-09, and P-10 remain `PARTIAL`;
   proof gates remain 11/13; overall progress advances to 110/145 (76%); M10 advances to 1/9 (11%);
   M10-T02 is next

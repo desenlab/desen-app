@@ -433,7 +433,7 @@ test("Design/Run modes select their exact canvas, state, and action closure", as
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, 65);
   assert.equal(plan.workloadCount, 140);
-  assert.equal(plan.planSha256, "09e4f74b52d486d7eaf91ec8d5cbf3fe61347b22479a07369a83191e215da348");
+  assert.equal(plan.planSha256, "4f2d9f295bf5e9845fd360cedf8b678d0e603544c4749d6a0c0759b5f1c63ec9");
   assert.equal(plan.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-state-binding-editor"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-event-action-editor"), true);
