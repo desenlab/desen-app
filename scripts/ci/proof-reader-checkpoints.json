@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17",
+  "headSha256": "1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a",
   "checkpoints": [
     {
       "sequence": 1,
@@ -29893,6 +29893,994 @@
           "path": "scripts/lib/desen-app-publish-activation-proof.mjs",
           "bytes": 56645,
           "sha256": "2d00b026c18586cb6dce8e4f3e25a10a46183bb03943eb695eedbb9905c4b9a9"
+        },
+        {
+          "task": "M09-T14",
+          "role": "root-test",
+          "path": "tests/desen-app-publish-activation.test.mjs",
+          "bytes": 15281,
+          "sha256": "a36422e4cb419e09e050aa18eede4dd6c8606d0e9d83afc875f00a0804ee229f"
+        }
+      ]
+    },
+    {
+      "sequence": 56,
+      "predecessorSha256": "f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17",
+      "artifacts": [
+        {
+          "task": "M05-T09",
+          "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+          "bytes": 59871,
+          "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89"
+        },
+        {
+          "task": "M06-T01",
+          "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
+          "bytes": 11756,
+          "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63"
+        },
+        {
+          "task": "M06-T05",
+          "path": "docs/proof/artifacts/publisher-0.1.0-execution-preflight.json",
+          "bytes": 21310,
+          "sha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67"
+        },
+        {
+          "task": "M06-T08",
+          "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+          "bytes": 10688,
+          "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+        },
+        {
+          "task": "M06-T09",
+          "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+          "bytes": 17320,
+          "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+        },
+        {
+          "task": "M06-T11",
+          "path": "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json",
+          "bytes": 95467,
+          "sha256": "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8"
+        },
+        {
+          "task": "M06-T10",
+          "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+          "bytes": 13179,
+          "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+        },
+        {
+          "task": "M07-T01",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+          "bytes": 22396,
+          "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+        },
+        {
+          "task": "M07-T02",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+          "bytes": 48642,
+          "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+        },
+        {
+          "task": "M07-T03",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json",
+          "bytes": 62743,
+          "sha256": "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628"
+        },
+        {
+          "task": "M05-T04",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+          "bytes": 52430,
+          "sha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0"
+        },
+        {
+          "task": "M07-T04",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+          "bytes": 34612,
+          "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394"
+        },
+        {
+          "task": "M05-T06",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+          "bytes": 9534,
+          "sha256": "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723"
+        },
+        {
+          "task": "M07-T05",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+          "bytes": 41945,
+          "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+        },
+        {
+          "task": "M07-T06",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-staging.json",
+          "bytes": 47622,
+          "sha256": "d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494"
+        },
+        {
+          "task": "M07-T07",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-activation.json",
+          "bytes": 49892,
+          "sha256": "3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334"
+        },
+        {
+          "task": "M07-T08",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-recovery.json",
+          "bytes": 44224,
+          "sha256": "c65d4f2de1407fffb891b5d3ba2fc8a3a8d4e3f0fb76c8b8f2719be6b310b3f9"
+        },
+        {
+          "task": "M07-T09",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json",
+          "bytes": 64493,
+          "sha256": "9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9"
+        },
+        {
+          "task": "M07-T10",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-transition-races.json",
+          "bytes": 58059,
+          "sha256": "f5f10dd422f9e1fc7ca4445b84bf192280e59fb747d8d2ed40357cba3ebc0f39"
+        },
+        {
+          "task": "M07-T11",
+          "path": "docs/proof/artifacts/reference-host-web-0.1.0-channel-consumption.json",
+          "bytes": 39307,
+          "sha256": "48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0"
+        },
+        {
+          "task": "M06-T02",
+          "path": "docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json",
+          "bytes": 10936,
+          "sha256": "02c5c567c8603470f0f45515dfd1713e528147bcc15ed72daa580807388015f6"
+        },
+        {
+          "task": "M06-T03",
+          "path": "docs/proof/artifacts/publisher-0.1.0-source-preflight.json",
+          "bytes": 12499,
+          "sha256": "07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387"
+        },
+        {
+          "task": "M06-T04",
+          "path": "docs/proof/artifacts/publisher-0.1.0-capability-preflight.json",
+          "bytes": 20474,
+          "sha256": "2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e"
+        },
+        {
+          "task": "M06-T06",
+          "path": "docs/proof/artifacts/publisher-0.1.0-source-preservation.json",
+          "bytes": 21723,
+          "sha256": "261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff"
+        },
+        {
+          "task": "M06-T07",
+          "path": "docs/proof/artifacts/publisher-0.1.0-source-normalization.json",
+          "bytes": 8715,
+          "sha256": "59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e"
+        },
+        {
+          "task": "M08-T01",
+          "path": "docs/proof/artifacts/editor-core-0.1.0-source-document.json",
+          "bytes": 23270,
+          "sha256": "aaa3a2447b71361361f471a822bba78e90a3f97f493b23ad3314f51c62ad4025"
+        },
+        {
+          "task": "M08-T02",
+          "path": "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
+          "bytes": 19561,
+          "sha256": "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547"
+        },
+        {
+          "task": "M08-T03",
+          "path": "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json",
+          "bytes": 22402,
+          "sha256": "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b"
+        },
+        {
+          "task": "M08-T04",
+          "path": "docs/proof/artifacts/editor-core-0.1.0-content-edits.json",
+          "bytes": 26988,
+          "sha256": "1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066"
+        },
+        {
+          "task": "M08-T05",
+          "path": "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json",
+          "bytes": 30014,
+          "sha256": "b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8"
+        },
+        {
+          "task": "M08-T06",
+          "path": "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
+          "bytes": 31310,
+          "sha256": "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7"
+        },
+        {
+          "task": "M08-T07",
+          "path": "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json",
+          "bytes": 62304,
+          "sha256": "33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db"
+        },
+        {
+          "task": "M08-T08",
+          "path": "docs/proof/artifacts/editor-core-0.1.0-persistence.json",
+          "bytes": 49785,
+          "sha256": "51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe"
+        },
+        {
+          "task": "M08-T09",
+          "path": "docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json",
+          "bytes": 40099,
+          "sha256": "7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a"
+        },
+        {
+          "task": "M08-T10",
+          "path": "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json",
+          "bytes": 325549,
+          "sha256": "5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b"
+        },
+        {
+          "task": "M09-T01",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json",
+          "bytes": 12118,
+          "sha256": "c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220"
+        },
+        {
+          "task": "M09-T02",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-catalog-panel-layer-tree.json",
+          "bytes": 25375,
+          "sha256": "85a310feaf1a0cc3656055cd3a76eeb02e02a278c21d22167853b53c03f1ee61"
+        },
+        {
+          "task": "M09-T03",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json",
+          "bytes": 73111,
+          "sha256": "8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151"
+        },
+        {
+          "task": "M09-T04",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-selection-overlay.json",
+          "bytes": 11997,
+          "sha256": "9a3805545ea49820c744fc07b9c3b0c2919b3e2fb524f9855df1cec9058901b1"
+        },
+        {
+          "task": "M09-T05",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-schema-inspector.json",
+          "bytes": 22998,
+          "sha256": "473ab3248ed7b7b4de0e558df47159a74c28c134b46569aa91130745fd69660b"
+        },
+        {
+          "task": "M09-T06",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json",
+          "bytes": 26133,
+          "sha256": "6ea4eb3f51fdfc39eeca676d7ebafb145d66a9efdfa03af9c33a7aa39aa6aaec"
+        },
+        {
+          "task": "M09-T07",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-named-slot-authoring.json",
+          "bytes": 24830,
+          "sha256": "daae817af45d8ead7052fd84df4edefd7d29cdd9ebe9cc1baea5b22b27dae90f"
+        },
+        {
+          "task": "M09-T08",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json",
+          "bytes": 28766,
+          "sha256": "b7298375cba4b82258d1c293ecb66c3ae6641408ae9f5753da121ac44fcf601a"
+        },
+        {
+          "task": "M09-T09",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json",
+          "bytes": 23812,
+          "sha256": "0060ef39273ea36666f1701d5d3fa0f1610b95f40d88304ba980dcdc73cb29ab"
+        },
+        {
+          "task": "M09-T10",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
+          "bytes": 17900,
+          "sha256": "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334"
+        },
+        {
+          "task": "M09-T11",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json",
+          "bytes": 29407,
+          "sha256": "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d"
+        },
+        {
+          "task": "M09-T12",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json",
+          "bytes": 27053,
+          "sha256": "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734"
+        },
+        {
+          "task": "M09-T13",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json",
+          "bytes": 29208,
+          "sha256": "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972"
+        },
+        {
+          "task": "M09-T14",
+          "path": "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json",
+          "bytes": 24763,
+          "sha256": "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b"
+        }
+      ],
+      "readers": [
+        {
+          "task": "M05-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+          "bytes": 186159,
+          "sha256": "9dff5ff65524b29843610c9bc10efbda9c0cb94db1c03a3767e2da746252ab2c"
+        },
+        {
+          "task": "M05-T09",
+          "role": "root-test",
+          "path": "tests/reference-host-web-source-audit.test.mjs",
+          "bytes": 50013,
+          "sha256": "061404f11ad8fc9f0e49239713d3f0592e48edbbf72d4354df39e0b43259ea0b"
+        },
+        {
+          "task": "M06-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-publish-result-proof.mjs",
+          "bytes": 53285,
+          "sha256": "aa1a684353270f7c13ebaf8ae93ae817c9790740da4cd4f860a606c95e9d7540"
+        },
+        {
+          "task": "M06-T01",
+          "role": "root-test",
+          "path": "tests/publisher-publish-result.test.mjs",
+          "bytes": 14341,
+          "sha256": "a74453dfb2899c34a066b67c3b9a8291c347b0fb7ff4ef26149f0cc280d67914"
+        },
+        {
+          "task": "M06-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+          "bytes": 62440,
+          "sha256": "69877ace9ab03ac16dd6ce3061b9826cf2651658b6b5e5240d0970d29b2006fa"
+        },
+        {
+          "task": "M06-T05",
+          "role": "root-test",
+          "path": "tests/publisher-execution-preflight.test.mjs",
+          "bytes": 12217,
+          "sha256": "21b73eac28315f25f9192a96eda49bb2b9d8414e6f2d577dcf1c77601d712cdc"
+        },
+        {
+          "task": "M06-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+          "bytes": 42871,
+          "sha256": "c1b52466cd9f445aebb267facb30627d8408fc76d4a05b1183d30acd1bc8ae1e"
+        },
+        {
+          "task": "M06-T08",
+          "role": "root-test",
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "bytes": 15860,
+          "sha256": "70c485572ec9fff92c404afc867f7f351ee9a450c14c8f04620eaf4ecd751594"
+        },
+        {
+          "task": "M06-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+          "bytes": 67091,
+          "sha256": "1b13ef097335bce73d3207884660f7e82dc596643a3ff1490475b2991f99ded4"
+        },
+        {
+          "task": "M06-T09",
+          "role": "root-test",
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "bytes": 36472,
+          "sha256": "e701044e81fb501d0a795044250c491660a5ed6168a31604ee4cf5406f183166"
+        },
+        {
+          "task": "M06-T11",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+          "bytes": 95912,
+          "sha256": "16440576b209d8d21426c79448e733ee6b88e2912fd22d1f4df1a1e1327d1532"
+        },
+        {
+          "task": "M06-T11",
+          "role": "root-test",
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "bytes": 43459,
+          "sha256": "07351c9a830b244fa60c8ac7d2a26c5436211ffa60a8dd2bc9bde83714f0ba43"
+        },
+        {
+          "task": "M06-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-official-golden-proof.mjs",
+          "bytes": 50294,
+          "sha256": "2fd4a3499b4b45fc3a7a805554b2342e5e53bcec809132c7e301750d5d889148"
+        },
+        {
+          "task": "M06-T10",
+          "role": "root-test",
+          "path": "tests/publisher-official-golden.test.mjs",
+          "bytes": 34459,
+          "sha256": "3e64765c660fb81355073fabb1971a99aa6eb7e64d112bd5d3fd89cb79241ac9"
+        },
+        {
+          "task": "M07-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "bytes": 20700,
+          "sha256": "6a49be968ee5ace988b200588246cc0bd6eccd66c3854c52c69c4e0b127dae21"
+        },
+        {
+          "task": "M07-T01",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "bytes": 13558,
+          "sha256": "e4b1f457067a3b94f3f3e5bd5e663445d5450d414f9369279afd320e503af9b1"
+        },
+        {
+          "task": "M07-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "bytes": 1913,
+          "sha256": "1cd2614369baa2a0dcdbc3b820c9d15cd04f10a9170afa4e3378db8aebe96a24"
+        },
+        {
+          "task": "M07-T02",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "bytes": 6588,
+          "sha256": "03d6be297479e118eb959f9a5f2f4348fd07f66f16fb85220f4db336dd8cb75d"
+        },
+        {
+          "task": "M07-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "bytes": 1881,
+          "sha256": "488fbdd84f8d010277d0b0e3c93532b56ddcfe46f6bb294d0c527298719c8b9b"
+        },
+        {
+          "task": "M07-T03",
+          "role": "root-test",
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "bytes": 6558,
+          "sha256": "3a836ceefb654b44b7b9c7ad86b518ce36d1ce30e4a486fb99d5bd8c156cec5f"
+        },
+        {
+          "task": "M05-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-interactions-proof.mjs",
+          "bytes": 42177,
+          "sha256": "1eb04ac69a9d910a30574523d59cc0124d2559d65b2dc9fd8442b56cd970484b"
+        },
+        {
+          "task": "M05-T04",
+          "role": "root-test",
+          "path": "tests/runtime-react-interactions.test.mjs",
+          "bytes": 20532,
+          "sha256": "7caf970857815ad181c23d76b8ca2d7470fd7d0b113d5b484902de3e33765c78"
+        },
+        {
+          "task": "M07-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "bytes": 1892,
+          "sha256": "e568d29bb14a69c97165f33933d6415a2d13a77f63c50c1aa4cdd41568e9f308"
+        },
+        {
+          "task": "M07-T04",
+          "role": "root-test",
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "bytes": 6605,
+          "sha256": "55c5ad298c144f60ad52737cd683e37d04d2d86c5c10f4e469242c4af571ec6a"
+        },
+        {
+          "task": "M05-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+          "bytes": 48199,
+          "sha256": "0d22959f0c393d86c89257abab12e05c929bbb7eb0b32d8941cc600161ab8ade"
+        },
+        {
+          "task": "M05-T06",
+          "role": "root-test",
+          "path": "tests/runtime-react-failure-boundary.test.mjs",
+          "bytes": 23940,
+          "sha256": "6ed88ea9539df3303f83cbeb067f9a538a35ef2576ceb457c595c9ef03d78b38"
+        },
+        {
+          "task": "M07-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "bytes": 1769,
+          "sha256": "d47df9aa72a47a97a26a33025ab49813ad191b1d2d5d08f36091afb66faadcbd"
+        },
+        {
+          "task": "M07-T05",
+          "role": "root-test",
+          "path": "tests/control-plane-local-api.test.mjs",
+          "bytes": 6356,
+          "sha256": "b75186bb3c6a01fe4928d52c286a3eaf6f03ea2a5395fe3a8dd686e4c43b4849"
+        },
+        {
+          "task": "M07-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-runtime-staging-proof.mjs",
+          "bytes": 80739,
+          "sha256": "c19e0c0dceb89283d841574db6e28acd356854cc40486c10a27e3e5a08e4f729"
+        },
+        {
+          "task": "M07-T06",
+          "role": "root-test",
+          "path": "tests/control-plane-runtime-staging.test.mjs",
+          "bytes": 24620,
+          "sha256": "45b049fe9bb6380ca5e53638aad4ba2f42154faa6bdcde7897426c6d9cf6f12f"
+        },
+        {
+          "task": "M07-T07",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-runtime-activation-proof.mjs",
+          "bytes": 90181,
+          "sha256": "7c7c626bba860d524bac72e0fc7cfa3fedddbea8a42c9594a2f019265512260c"
+        },
+        {
+          "task": "M07-T07",
+          "role": "root-test",
+          "path": "tests/control-plane-runtime-activation.test.mjs",
+          "bytes": 26410,
+          "sha256": "85cd0f9a17787b674b21a8e1be3bc016758e54d37598e5d9b71b17b73b6d939c"
+        },
+        {
+          "task": "M07-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-runtime-recovery-proof.mjs",
+          "bytes": 88986,
+          "sha256": "77fcf4f6e366dd8e2b92f05cd9192304fabdf163c99d21e8c91c3201d8c226ff"
+        },
+        {
+          "task": "M07-T08",
+          "role": "root-test",
+          "path": "tests/control-plane-runtime-recovery.test.mjs",
+          "bytes": 25567,
+          "sha256": "2b2c18b43b78eaa3fd636737667c86126cc54bbfabe9d7d8b4ce2f85c29a7d00"
+        },
+        {
+          "task": "M07-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-runtime-fault-injection-proof.mjs",
+          "bytes": 67012,
+          "sha256": "fa2fb2616233b8447b9a93c80c916f9fa6e6c19e9df7da5a099852905627f6ba"
+        },
+        {
+          "task": "M07-T09",
+          "role": "root-test",
+          "path": "tests/control-plane-runtime-fault-injection.test.mjs",
+          "bytes": 18066,
+          "sha256": "9136dbe11747678bbda40ae63768f20daa7005f7db83f17fce03d40a3cef840b"
+        },
+        {
+          "task": "M07-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-runtime-transition-races-proof.mjs",
+          "bytes": 69471,
+          "sha256": "b862654c6e9ac5b564e6735d9c8a5bb10f324ea5bc605e159fea6745f5ea716b"
+        },
+        {
+          "task": "M07-T10",
+          "role": "root-test",
+          "path": "tests/control-plane-runtime-transition-races.test.mjs",
+          "bytes": 19855,
+          "sha256": "f45e786b394682f3a8be9688cc745fe8a940845ab74443fdbb1fa54115177f8a"
+        },
+        {
+          "task": "M07-T11",
+          "role": "proof-library",
+          "path": "scripts/lib/reference-host-web-channel-consumption-proof.mjs",
+          "bytes": 72867,
+          "sha256": "0f0772bbdd4512ab5546b4661cbf6ebfd6095c47cd8a63d884790780141e41bb"
+        },
+        {
+          "task": "M07-T11",
+          "role": "root-test",
+          "path": "tests/reference-host-web-channel-consumption.test.mjs",
+          "bytes": 20827,
+          "sha256": "d1b0b86968addcfc3000ce62b450dca4d81ec0ac7104573df1755007e5ad1e6c"
+        },
+        {
+          "task": "M06-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-catalog-resolution-proof.mjs",
+          "bytes": 31446,
+          "sha256": "fe4a7bd0a65f09e2b8b80ab038249d51804757705956519ba28b28289a2535cc"
+        },
+        {
+          "task": "M06-T02",
+          "role": "root-test",
+          "path": "tests/publisher-catalog-resolution.test.mjs",
+          "bytes": 6111,
+          "sha256": "28f6c3dbac4ec942fd9a51aeb7f602efe3546af12d87a74b9fc9d05e86da6af4"
+        },
+        {
+          "task": "M06-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-source-preflight-proof.mjs",
+          "bytes": 33804,
+          "sha256": "6cb2160eabdf2d8d33bd70410a021670e73e5f579e307abb316c2ef9ec824a60"
+        },
+        {
+          "task": "M06-T03",
+          "role": "root-test",
+          "path": "tests/publisher-source-preflight.test.mjs",
+          "bytes": 7739,
+          "sha256": "b0f87e75eb340e36eedda33ae5089c77b6ed9a9c162da78e1dc627f5138949a3"
+        },
+        {
+          "task": "M06-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-capability-preflight-proof.mjs",
+          "bytes": 60730,
+          "sha256": "7b2603d4354e25b4dd988c4ebcbdfd7abf9ceff1d594509dd2c868602403df33"
+        },
+        {
+          "task": "M06-T04",
+          "role": "root-test",
+          "path": "tests/publisher-capability-preflight.test.mjs",
+          "bytes": 13842,
+          "sha256": "b0991ab2e481008415480658dcf6101677de6f6ea62a1827722f6f485f47ce78"
+        },
+        {
+          "task": "M06-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-source-preservation-proof.mjs",
+          "bytes": 66933,
+          "sha256": "7b67bde413bee77027e598490745515329f099e463c103639895a7c876b0831e"
+        },
+        {
+          "task": "M06-T06",
+          "role": "root-test",
+          "path": "tests/publisher-source-preservation.test.mjs",
+          "bytes": 15579,
+          "sha256": "54db666b90a500298a2ef28ceb35f4326caedf3be196b3811d682ab45354637b"
+        },
+        {
+          "task": "M06-T07",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-source-normalization-proof.mjs",
+          "bytes": 54819,
+          "sha256": "baf868c1a1696800c6df9e33a90dc3df6152e95e8c526c238243ce582050fc6e"
+        },
+        {
+          "task": "M06-T07",
+          "role": "root-test",
+          "path": "tests/publisher-source-normalization.test.mjs",
+          "bytes": 23417,
+          "sha256": "af1ec59e6b4de03588773cb264772e0b045b33418bb7bf5bcd7af3dc07847ced"
+        },
+        {
+          "task": "M08-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/editor-core-source-document-proof.mjs",
+          "bytes": 141098,
+          "sha256": "9ed24466463ad57c0449627d64d30a768e8ac43419e34848e85e4e2b5083046e"
+        },
+        {
+          "task": "M08-T01",
+          "role": "root-test",
+          "path": "tests/editor-core-source-document.test.mjs",
+          "bytes": 49634,
+          "sha256": "78d0b0a6927dfc3752a6ff03fb3d96b36c321732078130c03672b0cfaa831bf8"
+        },
+        {
+          "task": "M08-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/editor-core-stable-id-insert-proof.mjs",
+          "bytes": 92146,
+          "sha256": "1fa4386b58b7e660f34ea50feb410624c1ab2a5645dd2e13c2555772d8dea8a1"
+        },
+        {
+          "task": "M08-T02",
+          "role": "root-test",
+          "path": "tests/editor-core-stable-id-insert.test.mjs",
+          "bytes": 26333,
+          "sha256": "1c69c59a5adb8528129ca3f610da68d80186345c7920756883bd66aefd3f7498"
+        },
+        {
+          "task": "M08-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/editor-core-structural-edits-proof.mjs",
+          "bytes": 97221,
+          "sha256": "707df8e85d5242895554474f3f7a7b2016bb55e8e8af40f36c27e1888d08c7d0"
+        },
+        {
+          "task": "M08-T03",
+          "role": "root-test",
+          "path": "tests/editor-core-structural-edits.test.mjs",
+          "bytes": 22545,
+          "sha256": "3a29dd0dd9346c0aa9ac8c3d654f54fdda8b91774cad6c12f1a37cc9464fc1ae"
+        },
+        {
+          "task": "M08-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/editor-core-content-edits-proof.mjs",
+          "bytes": 103228,
+          "sha256": "fd81bde3ca258646ba58683d728846c5d7ece2b1a84fd3d2f8b8e075be264026"
+        },
+        {
+          "task": "M08-T04",
+          "role": "root-test",
+          "path": "tests/editor-core-content-edits.test.mjs",
+          "bytes": 26377,
+          "sha256": "614bee826366aee846bb3961257b21b1bc98d7acbd8206d70ee5f8bfe0c1359c"
+        },
+        {
+          "task": "M08-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/editor-core-state-binding-edits-proof.mjs",
+          "bytes": 104771,
+          "sha256": "81d6c1de23b48ddf7d54e4ee423195703ede8a465a2afda53097dc3eef62336c"
+        },
+        {
+          "task": "M08-T05",
+          "role": "root-test",
+          "path": "tests/editor-core-state-binding-edits.test.mjs",
+          "bytes": 30264,
+          "sha256": "920184769a5ccb26b6711f34639b4f73ddebfe9466d340909aff03940ca3e6cc"
+        },
+        {
+          "task": "M08-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/editor-core-event-action-edits-proof.mjs",
+          "bytes": 104309,
+          "sha256": "5383908c77c55d424004bc8c81d3f4f7a7968dd99658ea7c22edf55673b19996"
+        },
+        {
+          "task": "M08-T06",
+          "role": "root-test",
+          "path": "tests/editor-core-event-action-edits.test.mjs",
+          "bytes": 29745,
+          "sha256": "940f12c13dc8e6e6526e00ca0de87d49527a1500e887dc9391a005e1bebbf757"
+        },
+        {
+          "task": "M08-T07",
+          "role": "proof-library",
+          "path": "scripts/lib/editor-core-authoring-round-trip-proof.mjs",
+          "bytes": 141122,
+          "sha256": "15b9b2dda874c25ff0a6dee65660089179058a33418ed740c3f16a72ff185499"
+        },
+        {
+          "task": "M08-T07",
+          "role": "root-test",
+          "path": "tests/editor-core-authoring-round-trip.test.mjs",
+          "bytes": 25312,
+          "sha256": "2fb1e3a135b6a871d355b96debb15edb6bb0824d8947bc59c41ac9a48d3e24fe"
+        },
+        {
+          "task": "M08-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/editor-core-persistence-proof.mjs",
+          "bytes": 78526,
+          "sha256": "236867741922e60b25d7bb680b0d4ac07d602310b6ad7a00de741ec810b076a6"
+        },
+        {
+          "task": "M08-T08",
+          "role": "root-test",
+          "path": "tests/editor-core-persistence.test.mjs",
+          "bytes": 21719,
+          "sha256": "3a2a0e1a3aece594323f4ae0dab24a73f289ff546c6eb906f770ee8b945a72e6"
+        },
+        {
+          "task": "M08-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/editor-core-continuous-validation-proof.mjs",
+          "bytes": 71199,
+          "sha256": "dc53c7888b8debd893e415587f16c6f5888b6a5eefbdfd9788c66db1a3352ae7"
+        },
+        {
+          "task": "M08-T09",
+          "role": "root-test",
+          "path": "tests/editor-core-continuous-validation.test.mjs",
+          "bytes": 15083,
+          "sha256": "8f4c0c26699e588b0908c3e0255840d7f827cb2e61f6438d35fe76fc959bd7aa"
+        },
+        {
+          "task": "M08-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/editor-core-terminal-integration-proof.mjs",
+          "bytes": 90824,
+          "sha256": "f451ee7337caf6c9974e78d5c9947f052c9eb39a0c853d3015e25bad39c675e4"
+        },
+        {
+          "task": "M08-T10",
+          "role": "root-test",
+          "path": "tests/editor-core-terminal-integration.test.mjs",
+          "bytes": 14852,
+          "sha256": "bf65bd2c607d43e6ae1466accf85fba7e54b518e70eb190cc476496ede1f8a44"
+        },
+        {
+          "task": "M09-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-shell-navigation-proof.mjs",
+          "bytes": 87106,
+          "sha256": "059cde9538255d10cf1fec758d278c2636b65e86f7040fc8cb5fc22374344e17"
+        },
+        {
+          "task": "M09-T01",
+          "role": "root-test",
+          "path": "tests/desen-app-shell-navigation.test.mjs",
+          "bytes": 40243,
+          "sha256": "ec50a6946a4d3d992d436905d9d8c6dcf57b519507f5fc677cc6b26f98b3e18b"
+        },
+        {
+          "task": "M09-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs",
+          "bytes": 128257,
+          "sha256": "906dfe44d112b0d0b93698c97368a303a9aef73cc5b7b99d7d0a28ca76ec3495"
+        },
+        {
+          "task": "M09-T02",
+          "role": "root-test",
+          "path": "tests/desen-app-catalog-panel-layer-tree.test.mjs",
+          "bytes": 46004,
+          "sha256": "cba5a01eaecf392efce1d37a35085e720e3acf27bab666c34c2a32dd9a29f94f"
+        },
+        {
+          "task": "M09-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-real-adapter-canvas-proof.mjs",
+          "bytes": 159669,
+          "sha256": "7c8a0c329bea484331b7abfcbebbadfbb19b4164379d04231f5ace656df0b1e7"
+        },
+        {
+          "task": "M09-T03",
+          "role": "root-test",
+          "path": "tests/desen-app-real-adapter-canvas.test.mjs",
+          "bytes": 49452,
+          "sha256": "71122e7646fc76a08a1c33d9fa2855eac02e86240b02a16b8285fdab69fa2b8c"
+        },
+        {
+          "task": "M09-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-selection-overlay-proof.mjs",
+          "bytes": 112310,
+          "sha256": "1837b947aa9649e4564b5042a88fbaf36a3fb7e971599c852db4c28923306dca"
+        },
+        {
+          "task": "M09-T04",
+          "role": "root-test",
+          "path": "tests/desen-app-selection-overlay.test.mjs",
+          "bytes": 42472,
+          "sha256": "619b17e19452e259871b5e1dc36cced280a44d809feb3187d05d7af71d55947e"
+        },
+        {
+          "task": "M09-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-schema-inspector-proof.mjs",
+          "bytes": 116762,
+          "sha256": "5c4e751bed6fda8dc28869dad6491e64bf4aa25c0e577293b66b08125c8cbfe6"
+        },
+        {
+          "task": "M09-T05",
+          "role": "root-test",
+          "path": "tests/desen-app-schema-inspector.test.mjs",
+          "bytes": 39940,
+          "sha256": "5498f3a09eb1673e5ad1e008f6cbcd0a48e3b8d6cad56dc2ec34186a550b57f3"
+        },
+        {
+          "task": "M09-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-structured-inspector-proof.mjs",
+          "bytes": 130820,
+          "sha256": "507cc1970214e47016e9c5be5fa8914b90b2a45f6e813dcd468c7761b2b94e29"
+        },
+        {
+          "task": "M09-T06",
+          "role": "root-test",
+          "path": "tests/desen-app-structured-inspector.test.mjs",
+          "bytes": 54372,
+          "sha256": "f4cdf48282c53c64d41e7eb84bf1b183eedb6863b631466ebbfe0f1a87269c22"
+        },
+        {
+          "task": "M09-T07",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-named-slot-authoring-proof.mjs",
+          "bytes": 104781,
+          "sha256": "2c85df1d40accfff092ce113d608469ed0c928516fe223b06dcd9880388c39b7"
+        },
+        {
+          "task": "M09-T07",
+          "role": "root-test",
+          "path": "tests/desen-app-named-slot-authoring.test.mjs",
+          "bytes": 40917,
+          "sha256": "2c1c0e25351aff14811bcd185284e648fdc0b8f36cab67ee9ef0f564ff9f3d3d"
+        },
+        {
+          "task": "M09-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-state-binding-editor-proof.mjs",
+          "bytes": 95981,
+          "sha256": "9a1f0a36c08fbaad3816f2d70719c8825b75ca041e6fd85179ddca0de39cc8d1"
+        },
+        {
+          "task": "M09-T08",
+          "role": "root-test",
+          "path": "tests/desen-app-state-binding-editor.test.mjs",
+          "bytes": 35490,
+          "sha256": "d97518d57b05fd4f3fd60e77ea0613b92cbae0e4baf5115f18d66b1ea1514973"
+        },
+        {
+          "task": "M09-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-event-action-editor-proof.mjs",
+          "bytes": 97644,
+          "sha256": "947497261e27f4791fbdc8d865e576cc2ba879d4a12a86ff3436fc8b5d5a43f9"
+        },
+        {
+          "task": "M09-T09",
+          "role": "root-test",
+          "path": "tests/desen-app-event-action-editor.test.mjs",
+          "bytes": 35923,
+          "sha256": "ee4bb509d4e6de2d5113c3e891d4b920c215b28ffb54e23896a85cb50bac8e52"
+        },
+        {
+          "task": "M09-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-design-run-modes-proof.mjs",
+          "bytes": 97021,
+          "sha256": "3eec34f93c2df7f02e7b7f109054c5746b9bb8f2d6cd8c6fc2fecb182d54dea7"
+        },
+        {
+          "task": "M09-T10",
+          "role": "root-test",
+          "path": "tests/desen-app-design-run-modes.test.mjs",
+          "bytes": 32395,
+          "sha256": "d90b41eb8be9099859e48cb3a0876f5479785400c0f87919cd8f7e3cda808a8f"
+        },
+        {
+          "task": "M09-T11",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-fixtures-scenarios-fidelity-proof.mjs",
+          "bytes": 103671,
+          "sha256": "ae31db2c3c7dc375e9a9c30a87be7e04d395eed7631de9bac1ec895bc522cda2"
+        },
+        {
+          "task": "M09-T11",
+          "role": "root-test",
+          "path": "tests/desen-app-fixtures-scenarios-fidelity.test.mjs",
+          "bytes": 38532,
+          "sha256": "c125e414b14f7dd1c87ae043809072fd839050bd874cd32d1125e5f9c5a8b740"
+        },
+        {
+          "task": "M09-T12",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-source-persistence-proof.mjs",
+          "bytes": 80523,
+          "sha256": "f0752b2caba13d02125694142b368bac1ae78fe347aa40dcd85e64b1e95a7012"
+        },
+        {
+          "task": "M09-T12",
+          "role": "root-test",
+          "path": "tests/desen-app-source-persistence.test.mjs",
+          "bytes": 30752,
+          "sha256": "492bcb844472d45a79bedc92d926a64b79f1aa8da784b395cd6d87695f133509"
+        },
+        {
+          "task": "M09-T13",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-node-linked-diagnostics-proof.mjs",
+          "bytes": 75278,
+          "sha256": "215c6a1ce0790270465a9acffacd2f932f5e1c30efee6be1103c4076f01d3658"
+        },
+        {
+          "task": "M09-T13",
+          "role": "root-test",
+          "path": "tests/desen-app-node-linked-diagnostics.test.mjs",
+          "bytes": 22048,
+          "sha256": "1c9144ce7db4b80c8d36f3f7a5007eee3d8342d3a17c88c5b2de0918514ae812"
+        },
+        {
+          "task": "M09-T14",
+          "role": "proof-library",
+          "path": "scripts/lib/desen-app-publish-activation-proof.mjs",
+          "bytes": 60150,
+          "sha256": "13f2401afaf4710251ac5514d9d9d2917eb9e961b44747a67d99307e7bad0739"
         },
         {
           "task": "M09-T14",

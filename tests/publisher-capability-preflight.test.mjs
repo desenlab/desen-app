@@ -78,6 +78,7 @@ test("two independent builds are byte-identical and retain the exact PIPE-032 sp
 
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
   assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.equal(first.currentCompatibilitySha256, second.currentCompatibilitySha256);
   assert.equal(first.artifact.pipelineOwnership.trace, "PIPE-032");
   assert.equal(first.artifact.pipelineOwnership.m06T04ComponentAndInteractionSlice, "COMPLETE");
   assert.equal(

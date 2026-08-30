@@ -47,6 +47,11 @@ test("two independent evidence builds are byte-identical and retain honest noncl
 
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
   assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.equal(first.currentCompatibilitySha256, second.currentCompatibilitySha256);
+  assert.equal(
+    first.currentCompatibility.fixture.exactTuple.packageDigest,
+    "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051",
+  );
   assert.equal(first.artifact.claims.completeNonterminalAuthority.bundleAbsent, true);
   assert.equal(first.artifact.orderingDecision.invalidCatalogPrecedesIndeterminateReference, true);
   assert.match(first.artifact.nonclaims.join("\n"), /does not normalize Source data/u);

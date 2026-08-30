@@ -1341,7 +1341,7 @@ and 98 current readers. Compatibility sequence 54 is the immutable predecessor: 
 identities, advances the exact sequence-53 head to
 `sha256:0772221371ffe1a35fe955b8cad34c725d0f9ae933714f81f10b3451214a6638`, and reseals only
 M08-T08 readers `[64, 65]`; its frozen 49,785-byte artifact remains
-`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Current sequence 55
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Sequence 55
 preserves the same 49 frozen artifacts and 98 reader identities, links that exact sequence-54
 predecessor head to `sha256:f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17`,
 and reseals only M09-T01–T14 proof-library/root-test reader indexes `[70..97]`. The current T14
@@ -1358,6 +1358,21 @@ runner `sha256:b77b35a81915ec41554ab3505895fe98c0a4299ec9bf7d680dec320bbf3fb744`
 until M10-T07, N-036 remains `PLANNED`, and PF-085/PF-086/PF-089 remain `OPEN`. Automated
 real-browser E2E and native drag are not proven here. These local receipts make no required-gate or
 hosted-CI claim.
+
+The corrective M09 compatibility successor retains the route-sized editor workplane, one
+Source-declared page frame, and identical Design/Run geometry, and makes a declared Stack
+`maxWidth` fluid so a conditionally materialized Alert cannot widen the authored page. The current
+Web–React package digest is
+`sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051`: 80 regular
+distribution files total 243,740 bytes and, with the projected Catalog, produce 81 framed entries
+and 252,637 framed bytes. The current official-derived Bundle revision is
+`sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13`; the Source digest
+remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`.
+Compatibility sequence 56 advances the exact sequence-55 head to
+`sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
+49 frozen artifacts and 98 reader identities. Historical package/Bundle tuples, frozen artifacts,
+and their pins remain unchanged. No task is marked complete by this compatibility repair: M10
+remains 0/9 and M10-T01 remains next.
 
 ## Current milestone
 
@@ -4496,7 +4511,7 @@ M09-T14/G09 evidence:
   identities while advancing the exact sequence-53 head to
   `sha256:0772221371ffe1a35fe955b8cad34c725d0f9ae933714f81f10b3451214a6638` and resealing only
   M08-T08 proof-library/root-test readers `[64, 65]`; the frozen 49,785-byte M08-T08 artifact
-  remains `sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`; current sequence 55
+  remains `sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`; sequence 55
   preserves the same 49 frozen artifacts and 98 reader identities, links that exact sequence-54
   predecessor head to `sha256:f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17`,
   and reseals only M09-T01–T14 proof-library/root-test reader indexes `[70..97]`
@@ -4516,6 +4531,14 @@ M09-T14/G09 evidence:
   PF-085/PF-086/PF-089 remain `OPEN`; proof gates advance to 11/13; overall progress advances to
   109/145 (75%); M09 advances to 14/14; this compatibility evidence does not prove automated
   real-browser E2E or native drag, which remain M10-T01 work
+- corrective compatibility successor: the current Web–React package digest is
+  `sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051` over 80 regular
+  distribution files/243,740 bytes and 81 framed entries/252,637 framed bytes; the current Bundle
+  revision is `sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13`, the Source digest
+  remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`, and sequence 56
+  advances the exact sequence-55 head to
+  `sha256:1a2049082f981614c33fb2f1576cfd8d52e9dbd6dbb44f5177d3cf290064c51a` while preserving all
+  49 frozen artifacts, 98 reader identities, and historical pins; M10 remains 0/9
 
 ## Status vocabulary
 

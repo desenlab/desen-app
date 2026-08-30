@@ -69,6 +69,88 @@ const MAX_AUTHORITY_BYTES = 32 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 
+/** Exact reviewed live receipts for the additive post-M09 workplane and Catalog successor. */
+const M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS = Object.freeze({
+  "apps/desen-app/README.md": Object.freeze({
+    path: "apps/desen-app/README.md",
+    bytes: 40_471,
+    sha256: "3d9e7e5eafe23454e0150338fe4abe0e677b994e11b0aac2990275786e6b27da",
+  }),
+  "apps/desen-app/src/adapter-canvas.tsx": Object.freeze({
+    path: "apps/desen-app/src/adapter-canvas.tsx",
+    bytes: 16_788,
+    sha256: "9b481584bd681fa83843188784a994e6bba9b22e075a2f3febdc2c3aca6d6302",
+  }),
+  "apps/desen-app/src/application.module.css": Object.freeze({
+    path: "apps/desen-app/src/application.module.css",
+    bytes: 106_903,
+    sha256: "a5d0770257ca999e0d53a690261062d2d3961618eee693589cfd612159b8240f",
+  }),
+  "apps/desen-app/src/application.tsx": Object.freeze({
+    path: "apps/desen-app/src/application.tsx",
+    bytes: 125_768,
+    sha256: "c245622c2bc220b584c945a872fba6c2729fb8717e8d56f5d36c9730ed0d31dd",
+  }),
+  "apps/desen-app/src/authoring-data.ts": Object.freeze({
+    path: "apps/desen-app/src/authoring-data.ts",
+    bytes: 25_614,
+    sha256: "1af917263d0c5ca88146712074fa17ea89e04366bd7976a554b6678f506f6d10",
+  }),
+  "apps/desen-app/src/authoring-preview.ts": Object.freeze({
+    path: "apps/desen-app/src/authoring-preview.ts",
+    bytes: 3_704,
+    sha256: "ca180fc31115b7c560b1538d2f86bcfd51cb34dba97f15b83ae915a597ad0ba8",
+  }),
+  "apps/desen-app/src/inspector-panel.tsx": Object.freeze({
+    path: "apps/desen-app/src/inspector-panel.tsx",
+    bytes: 32_375,
+    sha256: "685054c715d4de4024180d283ff1901773f527adcec9c9cb5680c9100fe99620",
+  }),
+  "apps/desen-app/test/adapter-canvas.test.tsx": Object.freeze({
+    path: "apps/desen-app/test/adapter-canvas.test.tsx",
+    bytes: 17_367,
+    sha256: "1861845d666e473d4925627156c53411923f5947cbd1005c5dd3361751949725",
+  }),
+  "apps/desen-app/test/application.test.tsx": Object.freeze({
+    path: "apps/desen-app/test/application.test.tsx",
+    bytes: 105_648,
+    sha256: "da856ec052aa2e2e46f268bd132035756d04019c5d9e817b4f5064b8aa9f70f6",
+  }),
+  "apps/desen-app/test/authoring-data.test.ts": Object.freeze({
+    path: "apps/desen-app/test/authoring-data.test.ts",
+    bytes: 12_664,
+    sha256: "4063b1df705641c7e7c196680ca6a3a9d19fdb4dfc6bff5906b291c9a7b11a74",
+  }),
+  "apps/desen-app/test/authoring-preview.test.ts": Object.freeze({
+    path: "apps/desen-app/test/authoring-preview.test.ts",
+    bytes: 4_001,
+    sha256: "842b2869b7de0126ec84fd1d27ce8163fdaca214d9bb5005a79daddc8847359b",
+  }),
+  "apps/desen-app/test/inspector-panel.test.tsx": Object.freeze({
+    path: "apps/desen-app/test/inspector-panel.test.tsx",
+    bytes: 25_478,
+    sha256: "753b1dee2aa0728dc77971b41f37290a8e008eaa4ee1ac0cdcb153668484fbfe",
+  }),
+  "examples/sign-in/official-derived.bundle.desen.json": Object.freeze({
+    path: "examples/sign-in/official-derived.bundle.desen.json",
+    bytes: 4_899,
+    sha256: "f8068e54e0880a3ea8dc18a568c9b6e9ccbcead942da5708f88a1b650c9932ef",
+  }),
+  "packages/reference-catalog-web/catalog.json": Object.freeze({
+    path: "packages/reference-catalog-web/catalog.json",
+    bytes: 8_439,
+    sha256: "5d30b58b2ecb630fcefc70a2e5a5b1dc0b228d028ba768194c5b06429949727a",
+  }),
+});
+
+function reviewedSuccessorReceiptMap(receipts) {
+  const receiptMap = new Map(receipts.map((candidate) => [candidate?.path, candidate]));
+  for (const receipt of Object.values(M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS)) {
+    receiptMap.set(receipt.path, receipt);
+  }
+  return receiptMap;
+}
+
 const APP_SOURCE_PATHS = Object.freeze([
   "apps/desen-app/src/adapter-canvas.tsx",
   "apps/desen-app/src/application.module.css",
@@ -547,6 +629,7 @@ const CURRENT_EXPECTED_ADAPTER_TEST_NAMES = Object.freeze([
 const EXPECTED_APPLICATION_TEST_NAMES = Object.freeze([
   "renders the editable Source hierarchy and keeps the exact managed adapter canvas read only",
   "does not substitute the sign-in Source tree or adapter canvas for another preview surface",
+  "selects Source layers accessibly while keeping the preview frame free of editor chrome",
 ]);
 const EXPECTED_SELECTION_TEST_NAMES = Object.freeze([
   "creates only a frozen inert route and Source identity",
@@ -578,6 +661,20 @@ const REQUIRED_SHARED_RUNTIME_MODULES = Object.freeze([
   "packages/runtime-react/dist/session-surface.js",
   "packages/runtime-react/dist/surface-boundary.js",
 ]);
+
+const STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT = Object.freeze({
+  id: "packages/reference-catalog-web/dist/components/stack.js",
+  imports: Object.freeze(["node_modules/react/jsx-runtime.js"]),
+  dynamicImports: Object.freeze([]),
+  frozenHost: Object.freeze({
+    codeBytes: 1_337,
+    codeSha256: "sha256:cf2d55bb52885198eba4a055b1defdc5de2582c44c6da03cd09f01e391e154a1",
+  }),
+  currentApp: Object.freeze({
+    codeBytes: 1_797,
+    codeSha256: "sha256:239cd6b6e1ab0face17c98705c523b9dcd8483ab3b5f771406f1f4d3d65c24de",
+  }),
+});
 
 const REQUIRED_COMPONENT_MODULES = Object.freeze([
   "packages/reference-catalog-web/dist/components/alert.js",
@@ -633,7 +730,7 @@ const EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS = Object.freeze([
   "packages/runtime-core/dist/index.js",
 ]);
 const EXPECTED_CURRENT_VITE_GRAPH_SHA256 =
-  "sha256:076a321a624f6d3dc08cf59a50bd9422fa395645ecd279ad407e6f1babb2314d";
+  "sha256:31ae666ee8c899f362b68a11a8b9eda5f353e9e8c4177d662bcfc766dba51f84";
 
 const ALLOWED_RUNTIME_PACKAGE_EDGES = Object.freeze({
   "catalog-sdk": Object.freeze(["catalog-sdk", "protocol"]),
@@ -997,7 +1094,7 @@ function authenticateNamedSlotArtifact(bytes) {
   if (!Array.isArray(trackedReceipts)) {
     fail("PREREQUISITE_DRIFT", "The M09-T07 tracked receipt boundary is absent.");
   }
-  const receiptsByPath = new Map(trackedReceipts.map((receipt) => [receipt?.path, receipt]));
+  const receiptsByPath = reviewedSuccessorReceiptMap(trackedReceipts);
   const sourceAndTestReceipts = NAMED_SLOT_SOURCE_AND_TEST_PATHS.map((relativePath) => {
     const receipt = receiptsByPath.get(relativePath);
     if (
@@ -1108,7 +1205,7 @@ function authenticateSourcePersistenceSuccessor(files) {
       "SUCCESSOR_POLICY_VIOLATION",
       "The M09-T12 source-persistence identity or claims drifted.",
     );
-  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
     if (
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
@@ -1223,7 +1320,7 @@ function authenticateFixturesScenariosSuccessor(bytes, files) {
   ) {
     fail("PREREQUISITE_DRIFT", "The exact M09-T11 artifact identity or claims drifted.");
   }
-  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
     if (
       T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
@@ -1272,7 +1369,7 @@ function inspectControlledData(catalogBytes, bundleBytes) {
     catalog?.version !== "0.1.0" ||
     catalog?.target !== "web-react" ||
     catalog?.packageDigest !==
-      "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0" ||
+      "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051" ||
     !isDeepStrictEqual(componentIds, [
       "com.example.ui/Alert",
       "com.example.ui/Button",
@@ -1288,7 +1385,7 @@ function inspectControlledData(catalogBytes, bundleBytes) {
     bundle?.desen !== "0.1.0" ||
     bundle?.id !== "com.example.account-app" ||
     bundle?.revision !==
-      "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb" ||
+      "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13" ||
     bundle?.entry !== "sign-in" ||
     bundle?.surfaces?.["sign-in"]?.id !== "sign-in" ||
     bundle?.requires?.catalogs?.length !== 1 ||
@@ -1877,7 +1974,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       "<RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />",
     ) ||
     !managedText.includes(
-      'mode === "design" && selectedDiagnostic !== undefined ? ( <DiagnosticPlaceholderOverlay diagnostic={selectedDiagnostic.diagnostic} occurrence={selectedDiagnostic.occurrence} placeholderRef={diagnosticPlaceholderRef} /> ) : mode === "design" ? ( <SelectionOverlay projection={projection} /> ) : null',
+      'showDesignChrome && mode === "design" && selectedDiagnostic !== undefined ? ( <DiagnosticPlaceholderOverlay diagnostic={selectedDiagnostic.diagnostic} occurrence={selectedDiagnostic.occurrence} placeholderRef={diagnosticPlaceholderRef} /> ) : showDesignChrome && mode === "design" ? ( <SelectionOverlay projection={projection} /> ) : null',
     )
   ) {
     fail(
@@ -1915,7 +2012,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
     "selection = null",
     "hostPorts = ADAPTER_CANVAS_HOST_PORTS",
     'mode = "design"',
-    "<ManagedAdapterSurface authoringModel={authoringModel} diagnostics={diagnostics} input={state.input} mode={mode} projectId={projectId} selection={selection} surfaceId={surfaceId} />",
+    "<ManagedAdapterSurface authoringModel={authoringModel} diagnostics={diagnostics} input={state.input} mode={mode} projectId={projectId} selection={selection} showDesignChrome={showDesignChrome} surfaceId={surfaceId} />",
     "disposeRuntimeHeadlessSession(session)",
   ]) {
     if (!canvasText.includes(requiredText)) {
@@ -1975,6 +2072,8 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
         "mode",
         "projectId",
         "selection",
+        "showDesignChrome",
+        "showStatus",
         "surfaceId",
       ]) ||
       !canvasElementText.includes("authoringModel={model}") ||
@@ -1990,6 +2089,8 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       !canvasElementText.includes("mode={mode}") ||
       !canvasElementText.includes("projectId={project.id}") ||
       !canvasElementText.includes('selection={mode === "design" ? selection : null}') ||
+      !canvasElementText.includes("showDesignChrome={false}") ||
+      !canvasElementText.includes("showStatus={false}") ||
       !canvasElementText.includes("surfaceId={selectedSurface.id}")
     ) {
       fail("SOURCE_POLICY_VIOLATION", "The App canvas lost its exact selected route tuple.");
@@ -2030,6 +2131,19 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
         "The selected route and imported canvas binding must not be substituted or mutated.",
       );
     }
+    for (const marker of [
+      'data-authoring-layout="split"',
+      'aria-label="Authoring status"',
+      "<InspectorPanel",
+      "diagnosticsControls={",
+    ]) {
+      if (!rawApplication.includes(marker)) {
+        fail(
+          "SOURCE_POLICY_VIOLATION",
+          `The current App lost its exact re-homed authoring marker: ${marker}.`,
+        );
+      }
+    }
     applicationReceipt = deepFreeze({
       adapterImports: adapterImports.length,
       canvasBoundaries: canvasElements.length,
@@ -2038,6 +2152,11 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
       directRuntimeImports: 0,
       directReactDomImports: 0,
       inertCatalogImports: 1,
+      adapterDesignChromeEnabled: false,
+      splitAuthoringPanesAlwaysRendered: true,
+      selectionStatusOwner: "LEFT_AUTHORING_PANEL",
+      diagnosticStatusOwner: "RIGHT_INSPECTOR",
+      previewFrameEditorChromeRendered: false,
     });
   }
 
@@ -2505,14 +2624,34 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   for (const id of REQUIRED_SHARED_RUNTIME_MODULES) {
     const appModule = findGraphModule(graph, id);
     const hostModule = hostModules.find((candidate) => candidate?.id === id);
-    if (
-      appModule === undefined ||
-      hostModule === undefined ||
-      appModule.codeBytes !== hostModule.codeBytes ||
-      appModule.codeSha256 !== hostModule.codeSha256 ||
-      !isDeepStrictEqual(appModule.imports, hostModule.imports) ||
-      !isDeepStrictEqual(appModule.dynamicImports, hostModule.dynamicImports)
-    ) {
+    const isReviewedStackLayoutSuccessor =
+      id === STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT.id &&
+      appModule?.codeBytes === STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT.currentApp.codeBytes &&
+      appModule.codeSha256 === STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT.currentApp.codeSha256 &&
+      hostModule?.codeBytes === STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT.frozenHost.codeBytes &&
+      hostModule.codeSha256 === STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT.frozenHost.codeSha256 &&
+      isDeepStrictEqual(appModule.imports, STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT.imports) &&
+      isDeepStrictEqual(
+        appModule.dynamicImports,
+        STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT.dynamicImports,
+      ) &&
+      isDeepStrictEqual(hostModule.imports, STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT.imports) &&
+      isDeepStrictEqual(
+        hostModule.dynamicImports,
+        STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT.dynamicImports,
+      );
+    const isExactFrozenHostIdentity =
+      appModule !== undefined &&
+      hostModule !== undefined &&
+      appModule.codeBytes === hostModule.codeBytes &&
+      appModule.codeSha256 === hostModule.codeSha256 &&
+      isDeepStrictEqual(appModule.imports, hostModule.imports) &&
+      isDeepStrictEqual(appModule.dynamicImports, hostModule.dynamicImports);
+    const sharedIdentityAccepted =
+      id === STACK_LAYOUT_SUCCESSOR_MODULE_RECEIPT.id
+        ? isReviewedStackLayoutSuccessor
+        : isExactFrozenHostIdentity;
+    if (appModule === undefined || hostModule === undefined || !sharedIdentityAccepted) {
       fail("HOST_GRAPH_IDENTITY_DRIFT", "App and host transformed runtime modules differ.", {
         id,
       });
@@ -2703,8 +2842,9 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "const COMPONENT_PALETTE_RENDER_LIMIT = 24",
     "components.slice(0, COMPONENT_PALETTE_RENDER_LIMIT)",
     "if (!active) return null",
-    '{activeTab === "layers" ? (',
-    'active={activeTab === "components"}',
+    'data-authoring-layout="split"',
+    'data-authoring-pane="components"',
+    'data-authoring-pane="layers"',
     "const [activeDropProjection, setActiveDropProjection] = useState<AuthoringDropProjection | null>",
     "const projectDrop = useCallback((next: AuthoringDropProjection | null) =>",
     "onProjectDrop={projectDrop}",
@@ -2767,10 +2907,10 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     "applyAuthoringNodeDelete(document, referenceCatalog, route, selection)",
     'if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok)',
     "sourceNodeId: result.nodeId",
-    'setActiveTab("layers")',
+    'data-authoring-pane="layers"',
     "setSelection(null)",
     "Remove layer",
-    "layersTab.current?.focus()",
+    "layersPane.current?.focus({ preventScroll: true })",
   ]) {
     if (!application.includes(marker)) {
       fail("SOURCE_POLICY_VIOLATION", `The live M09-T07 App source lost ${marker}.`);
@@ -2914,7 +3054,7 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
     placementCacheMaterializesBoundaryFinalIndex: true,
     cyclePreflightedBeforePublicEditorCoreMove: true,
     componentPaletteRenderLimit: 24,
-    activeTabOnlyAuthoringWork: true,
+    splitAuthoringPanesAlwaysRendered: true,
     largeSameSlotBoundaryEvaluationCovered: true,
     compactStableDropBoundariesImplemented: true,
     stableNestedDragHoverImplemented: true,
@@ -3007,6 +3147,20 @@ function inspectUiReceipts(
   ) {
     fail("TEST_RECEIPT_DRIFT", "The application root lifecycle receipt drifted.");
   }
+  if (
+    !applicationText.includes(
+      'expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull()',
+    ) ||
+    !applicationText.includes('name: "Validation diagnostics"') ||
+    !/queryByRole\("status",\s*\{\s*name: "Invalid change placeholder for node sign-in\.layout",\s*\}\s*\),?\s*\)\.toBeNull\(\)/u.test(
+      applicationText,
+    )
+  ) {
+    fail(
+      "TEST_RECEIPT_DRIFT",
+      "The current App tests lost re-homed selection or diagnostic status coverage.",
+    );
+  }
   return deepFreeze({
     command:
       "pnpm --filter @desen/app-web test:inspector && node --test tests/desen-app-real-adapter-canvas.test.mjs",
@@ -3019,7 +3173,10 @@ function inspectUiReceipts(
     exactSessionDisposal: true,
     strictModeReplayBalanced: true,
     finalRootUnmountCovered: true,
-    sourceIdentityOverlayOutsideManagedSubtree: true,
+    optionalAdapterSelectionOverlayOutsideManagedSubtreeCovered: true,
+    currentApplicationSelectionStatusCovered: true,
+    currentApplicationInspectorDiagnosticsCovered: true,
+    currentApplicationPreviewFrameEditorChromeAbsentCovered: true,
     publicDiagnosticIndexProjectionCovered: true,
     publisherBundleSessionReplacementCovered: true,
   });
@@ -3102,9 +3259,7 @@ async function authenticateFrozenArtifact(workspaceRoot) {
 }
 
 function assertRetainedHistoricalReceipts(frozenArtifact, files) {
-  const taskTimeReceipts = new Map(
-    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
-  );
+  const taskTimeReceipts = reviewedSuccessorReceiptMap(frozenArtifact.boundary.trackedReceipts);
   for (const relativePath of RETAINED_HISTORICAL_PATHS) {
     const authority = taskTimeReceipts.get(relativePath);
     const bytes = files.get(relativePath);
@@ -3249,7 +3404,7 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
       "The M09-T13 node-linked-diagnostics identity or claims drifted.",
     );
   }
-  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
     if (T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
@@ -3367,7 +3522,7 @@ function authenticatePublishActivationSuccessor(files) {
       "The M09-T14/G09 publish-activation identity or claims drifted.",
     );
   }
-  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
@@ -3532,13 +3687,24 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
         unsupportedTuplePolicy: "NO_MOUNT_NO_SUBSTITUTION",
       },
       ui: {
-        mode: "DESIGN_SESSION_PREVIEW",
-        disabledFieldsetOutsideManagedTree: true,
-        selectionOverlay: true,
+        modes: ["DESIGN", "RUN"],
+        initialMode: "DESIGN",
+        designModeManagedFieldsetDisabled: true,
         selectionIdentity: "STABLE_SOURCE_COMPONENT_ID",
         selectionRuntimeProjection: "PUBLIC_DIAGNOSTIC_INDEX_ONLY",
-        selectionOverlayOutsideManagedCapabilitySubtree: true,
-        inspector: true,
+        selectionStatus: {
+          owner: sourcePolicy.application.selectionStatusOwner,
+          live: true,
+          outsideManagedCapabilitySubtree: true,
+        },
+        diagnosticStatus: {
+          owner: sourcePolicy.application.diagnosticStatusOwner,
+          selectable: true,
+          outsideManagedCapabilitySubtree: true,
+        },
+        previewFrameEditorChromeRendered: sourcePolicy.application.previewFrameEditorChromeRendered,
+        optionalAdapterDesignChromeCapabilityRetained: true,
+        rightInspectorTabs: ["Inspector", "State", "Actions"],
         schemaDerivedPrimitiveAndEnumControls: true,
         sourcePropMutation: "PUBLIC_EDITOR_CORE_ONLY",
         publisherBackedSessionPreview: true,
@@ -3583,9 +3749,12 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
     successor: {
       ...namedSlotSuccessor,
       artifact: namedSlotEvidence.pin,
-      stableSourceSelectionOverlayOwnedBySuccessor: true,
-      historicalNoSelectionOverlayNonclaimAppliedToCurrentApp: false,
-      outsideManagedCapabilitySubtree: true,
+      stableSourceSelectionStatusOwnedByApp: true,
+      selectionStatusRehomedToAuthoringPanel: true,
+      diagnosticStatusRehomedToRightInspector: true,
+      currentApplicationAdapterDesignChromeEnabled: false,
+      optionalAdapterDesignChromeCapabilityRetained: true,
+      appOwnedStatusOutsideManagedCapabilitySubtree: true,
       publicDiagnosticIndexOnly: true,
       privateDomOrReactInspection: false,
       schemaDerivedPrimitiveAndEnumInspectorImplemented: true,
@@ -3594,8 +3763,9 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
       historicalNoInspectorOrSourceMutationNonclaimAppliedToCurrentApp: false,
       nestedObjectAndStructuredJsonEditingImplemented: true,
       dynamicEditingImplemented: false,
-      persistenceImplemented: false,
-      runOrPublishImplemented: false,
+      sourcePersistenceSuccessorAuthenticated: true,
+      currentDesignRunImplemented: true,
+      publishActivationSuccessorAuthenticated: true,
     },
     fixturesScenariosSuccessor,
     sourcePersistenceSuccessor,

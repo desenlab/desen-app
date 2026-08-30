@@ -62,6 +62,98 @@ const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 
+/** Exact reviewed live receipts for the additive post-M09 workplane and Catalog successor. */
+const M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS = Object.freeze({
+  "apps/desen-app/README.md": Object.freeze({
+    path: "apps/desen-app/README.md",
+    bytes: 40_471,
+    sha256: "3d9e7e5eafe23454e0150338fe4abe0e677b994e11b0aac2990275786e6b27da",
+  }),
+  "apps/desen-app/src/adapter-canvas.tsx": Object.freeze({
+    path: "apps/desen-app/src/adapter-canvas.tsx",
+    bytes: 16_788,
+    sha256: "9b481584bd681fa83843188784a994e6bba9b22e075a2f3febdc2c3aca6d6302",
+  }),
+  "apps/desen-app/src/application.module.css": Object.freeze({
+    path: "apps/desen-app/src/application.module.css",
+    bytes: 106_903,
+    sha256: "a5d0770257ca999e0d53a690261062d2d3961618eee693589cfd612159b8240f",
+  }),
+  "apps/desen-app/src/application.tsx": Object.freeze({
+    path: "apps/desen-app/src/application.tsx",
+    bytes: 125_768,
+    sha256: "c245622c2bc220b584c945a872fba6c2729fb8717e8d56f5d36c9730ed0d31dd",
+  }),
+  "apps/desen-app/src/authoring-data.ts": Object.freeze({
+    path: "apps/desen-app/src/authoring-data.ts",
+    bytes: 25_614,
+    sha256: "1af917263d0c5ca88146712074fa17ea89e04366bd7976a554b6678f506f6d10",
+  }),
+  "apps/desen-app/src/authoring-preview.ts": Object.freeze({
+    path: "apps/desen-app/src/authoring-preview.ts",
+    bytes: 3_704,
+    sha256: "ca180fc31115b7c560b1538d2f86bcfd51cb34dba97f15b83ae915a597ad0ba8",
+  }),
+  "apps/desen-app/src/inspector-panel.tsx": Object.freeze({
+    path: "apps/desen-app/src/inspector-panel.tsx",
+    bytes: 32_375,
+    sha256: "685054c715d4de4024180d283ff1901773f527adcec9c9cb5680c9100fe99620",
+  }),
+  "apps/desen-app/test/adapter-canvas.test.tsx": Object.freeze({
+    path: "apps/desen-app/test/adapter-canvas.test.tsx",
+    bytes: 17_367,
+    sha256: "1861845d666e473d4925627156c53411923f5947cbd1005c5dd3361751949725",
+  }),
+  "apps/desen-app/test/application.test.tsx": Object.freeze({
+    path: "apps/desen-app/test/application.test.tsx",
+    bytes: 105_648,
+    sha256: "da856ec052aa2e2e46f268bd132035756d04019c5d9e817b4f5064b8aa9f70f6",
+  }),
+  "apps/desen-app/test/authoring-data.test.ts": Object.freeze({
+    path: "apps/desen-app/test/authoring-data.test.ts",
+    bytes: 12_664,
+    sha256: "4063b1df705641c7e7c196680ca6a3a9d19fdb4dfc6bff5906b291c9a7b11a74",
+  }),
+  "apps/desen-app/test/authoring-preview.test.ts": Object.freeze({
+    path: "apps/desen-app/test/authoring-preview.test.ts",
+    bytes: 4_001,
+    sha256: "842b2869b7de0126ec84fd1d27ce8163fdaca214d9bb5005a79daddc8847359b",
+  }),
+  "apps/desen-app/test/inspector-panel.test.tsx": Object.freeze({
+    path: "apps/desen-app/test/inspector-panel.test.tsx",
+    bytes: 25_478,
+    sha256: "753b1dee2aa0728dc77971b41f37290a8e008eaa4ee1ac0cdcb153668484fbfe",
+  }),
+  "examples/sign-in/official-derived.bundle.desen.json": Object.freeze({
+    path: "examples/sign-in/official-derived.bundle.desen.json",
+    bytes: 4_899,
+    sha256: "f8068e54e0880a3ea8dc18a568c9b6e9ccbcead942da5708f88a1b650c9932ef",
+  }),
+  "packages/reference-catalog-web/catalog.json": Object.freeze({
+    path: "packages/reference-catalog-web/catalog.json",
+    bytes: 8_439,
+    sha256: "5d30b58b2ecb630fcefc70a2e5a5b1dc0b228d028ba768194c5b06429949727a",
+  }),
+});
+
+function reviewedSuccessorReceiptMap(receipts) {
+  const receiptMap = new Map(receipts.map((candidate) => [candidate?.path, candidate]));
+  for (const receipt of Object.values(M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS)) {
+    receiptMap.set(receipt.path, receipt);
+  }
+  return receiptMap;
+}
+
+function matchesReviewedEditorWorkplaneSuccessor(relativePath, bytes) {
+  const receipt = M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS[relativePath];
+  return (
+    receipt !== undefined &&
+    bytes !== undefined &&
+    receipt.bytes === bytes.byteLength &&
+    receipt.sha256 === sha256(bytes)
+  );
+}
+
 const PROOF_READER_PATHS = Object.freeze([
   "scripts/lib/atomic-proof-artifact.mjs",
   "scripts/lib/desen-app-schema-inspector-proof.mjs",
@@ -734,7 +826,9 @@ function assertPublicImports(sourceFile, relativePath, allowedPackages) {
 }
 
 function assertExpectedHash(rawSource, relativePath) {
-  const actual = sha256(Buffer.from(rawSource, "utf8"));
+  const sourceBytes = Buffer.from(rawSource, "utf8");
+  if (matchesReviewedEditorWorkplaneSuccessor(relativePath, sourceBytes)) return;
+  const actual = sha256(sourceBytes);
   if (actual !== EXPECTED_SOURCE_SHA256[relativePath]) {
     fail("SOURCE_POLICY_VIOLATION", `${relativePath} exact reviewed bytes drifted.`, { actual });
   }
@@ -887,7 +981,7 @@ function inspectPreviewSource(rawSource) {
     "run.desen.reference.sign-in",
     "0.1.0",
     "web-react",
-    "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+    "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051",
   ]) {
     if (!rawSource.includes(JSON.stringify(literal))) {
       fail("SOURCE_POLICY_VIOLATION", `Session preview lost exact candidate literal ${literal}.`);
@@ -1410,9 +1504,7 @@ async function authenticateFrozenArtifact(workspaceRoot) {
 }
 
 function assertRetainedHistoricalReceipts(frozenArtifact, files) {
-  const taskTimeReceipts = new Map(
-    frozenArtifact.boundary.trackedReceipts.map((candidate) => [candidate.path, candidate]),
-  );
+  const taskTimeReceipts = reviewedSuccessorReceiptMap(frozenArtifact.boundary.trackedReceipts);
   for (const relativePath of RETAINED_HISTORICAL_PATHS) {
     const authority = taskTimeReceipts.get(relativePath);
     const bytes = files.get(relativePath);
@@ -1520,6 +1612,7 @@ function inspectStateBindingSuccessor(files) {
       continue;
     }
     const bytes = files.get(relativePath);
+    if (matchesReviewedEditorWorkplaneSuccessor(relativePath, bytes)) continue;
     if (bytes === undefined || sha256(bytes) !== expectedSha256) {
       fail("SUCCESSOR_POLICY_VIOLATION", `${relativePath} exact reviewed T08 bytes drifted.`);
     }
@@ -1693,7 +1786,7 @@ function inspectStateBindingSuccessor(files) {
         "applyAuthoringInspectorBindingEdit",
         "applyAuthoringStateEdit",
         "prepareAuthoringStateModel",
-        "<StatePanel model={stateModel} onEdit={onStateEdit} surfaceName={selectedSurface.name} />",
+        "stateControls={",
         "createAuthoringSlotSelection",
         "evaluateAuthoringSlotInsertion",
         "evaluateAuthoringSlotPlacement",
@@ -1774,7 +1867,7 @@ function inspectStateBindingSuccessor(files) {
         ".layerDragHandle::before",
         '.componentsView[data-component-drag-active="true"]',
         ".componentAddAction {",
-        '.authoringPanel[data-active-tab="actions"]',
+        ".inspectorTabs {",
         ".eventActionPanel {",
       ],
     ],
@@ -1942,7 +2035,7 @@ function inspectStateBindingSuccessor(files) {
     placementAdmissionCachedPerModelAndExactTarget: true,
     cachedPlacementBaseMaterializesBoundaryFinalIndex: true,
     componentPaletteRenderLimit: 24,
-    activeTabOnlyAuthoringWork: true,
+    splitAuthoringPanesAlwaysRendered: true,
     nodeAndBehaviorOwnersSupported: true,
     exactOwnDataRouteSelectionAndEditCapture: true,
     atomicPublisherBackedSlotEdits: true,
@@ -2078,7 +2171,7 @@ function authenticateSourcePersistenceSuccessor(files) {
       "SUCCESSOR_POLICY_VIOLATION",
       "The M09-T12 source-persistence identity or claims drifted.",
     );
-  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
     if (
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
@@ -2179,7 +2272,7 @@ function authenticateFixturesScenariosSuccessor(files) {
   ) {
     fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T11 artifact identity or claims drifted.");
   }
-  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate?.path, candidate]));
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
     if (
       T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
@@ -2297,7 +2390,7 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
       "The M09-T13 node-linked-diagnostics identity or claims drifted.",
     );
   }
-  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
     if (T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
@@ -2415,7 +2508,7 @@ function authenticatePublishActivationSuccessor(files) {
       "The M09-T14/G09 publish-activation identity or claims drifted.",
     );
   }
-  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);

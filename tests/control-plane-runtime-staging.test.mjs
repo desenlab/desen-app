@@ -116,6 +116,18 @@ test("[authority] builds the exact versioned M07-T06 artifact and official stagi
     built.artifact.claims.officialSuccess.stagedRevision,
     "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb",
   );
+  assert.equal(
+    built.currentCompatibility.claims.officialSuccess.stagedRevision,
+    "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13",
+  );
+  assert.equal(
+    built.currentCompatibility.claims.officialSuccess.packages[0].packageDigest,
+    "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051",
+  );
+  assert.equal(
+    built.currentCompatibility.claims.officialSuccess.packages[0].artifactByteLength,
+    243_740,
+  );
   assert.equal(built.artifact.claims.officialSuccess.packages.length, 1);
   assert.equal(built.artifact.claims.officialSuccess.surfaces.length, 2);
   assert.equal(built.artifact.claims.officialSuccess.runtimeObligationCount, 7);
@@ -178,6 +190,7 @@ test("[determinism] two independent evidence builds produce byte-identical artif
   const second = await buildControlPlaneRuntimeStagingEvidence();
   assert.deepEqual(second.artifactBytes, built.artifactBytes);
   assert.equal(second.artifactSha256, built.artifactSha256);
+  assert.equal(second.currentCompatibilitySha256, built.currentCompatibilitySha256);
   assert.notEqual(second.runtimeReceipt, built.runtimeReceipt);
 });
 
@@ -191,6 +204,10 @@ test("[authority] verifies exact artifact bytes and one final proof-document pin
     task: "M07-T06",
     result: "PASS",
     artifactSha256: built.artifactSha256,
+    currentCompatibilitySha256: built.currentCompatibilitySha256,
+    currentRevision: "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13",
+    currentPackageDigest: "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051",
+    currentDistributionBytes: 243_740,
     packageRuntimeCases: 13,
     compileTimeNegativeCases: 13,
     rootMutationCases: 17,

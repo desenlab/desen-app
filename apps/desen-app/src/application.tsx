@@ -14,7 +14,7 @@ import { createDesenEditorContinuousValidator } from "@desen/editor-core";
 import { canonicalizeJson, digestCanonicalJson } from "@desen/protocol";
 import { createRuntimeHostPorts } from "@desen/runtime-core";
 
-import { prepareCatalogAuthoringModel } from "./authoring-data.js";
+import { prepareCatalogAuthoringModel, projectAuthoringCanvasFrame } from "./authoring-data.js";
 import { projectAuthoringDiagnostics } from "./authoring-diagnostics.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
 import { createAuthoringSignInFixtureController } from "./authoring-fixtures.js";
@@ -80,7 +80,7 @@ import settingsUrl from "./assets/settings.svg";
 import themeUrl from "./assets/theme.svg";
 import styles from "./application.module.css";
 
-import type { DragEvent, KeyboardEvent, MouseEvent, ReactNode } from "react";
+import type { CSSProperties, DragEvent, MouseEvent, ReactNode } from "react";
 import type {
   DesenEditorContinuousValidationReport,
   DesenEditorPersistencePort,
@@ -634,7 +634,6 @@ function ProjectsHome() {
   );
 }
 
-type AuthoringTab = "layers" | "components" | "state" | "actions";
 type SurfaceEditorMode = "design" | "run";
 
 interface TransientAuthoringDiagnostics {
@@ -1094,7 +1093,7 @@ function LayerSlot({
     list: HTMLUListElement,
     slotSurface: HTMLDivElement,
   ): void {
-    const scrollSurface = slotSurface.closest<HTMLElement>('[role="tabpanel"]');
+    const scrollSurface = slotSurface.closest<HTMLElement>('[data-authoring-pane-scroll="layers"]');
     if (scrollSurface === null) return;
     const scrollBounds = scrollSurface.getBoundingClientRect();
     const edge = 32;
@@ -1492,7 +1491,7 @@ function LayerTree({
         <span aria-hidden="true" className={styles.surfaceGlyph} />
         <span>
           <strong>{selectedSurface.name}</strong>
-          <small>{surfaceTree.id}</small>
+          <small>{selectedSurface.capabilityId}</small>
         </span>
       </div>
       <div className={styles.panelSectionHeading}>
@@ -1895,52 +1894,42 @@ function ComponentLibrary({
 }
 
 function AuthoringPanel({
-  eventActionModel,
   hidden,
   interactive,
   model,
   onDeleteSelection,
-  onEventActionEdit,
   onSlotEdit,
-  onStateEdit,
   onToggleSelection,
   route,
   selection,
   selectedSourceNodeId,
   selectedSurface,
-  stateModel,
 }: Readonly<{
-  readonly eventActionModel: AuthoringEventActionModelResult;
   readonly hidden: boolean;
   readonly interactive: boolean;
   readonly model: CatalogAuthoringModel;
   readonly onDeleteSelection: () => AuthoringSlotEditResult;
-  readonly onEventActionEdit: (edit: AuthoringEventActionEdit) => AuthoringEventActionEditResult;
   readonly onSlotEdit: (
     target: AuthoringSlotSelection,
     edit: AuthoringSlotEdit,
   ) => AuthoringSlotEditResult;
-  readonly onStateEdit: (edit: AuthoringStateEdit) => AuthoringStateEditResult;
   readonly onToggleSelection: (node: AuthoringLayerNode) => void;
   readonly route: AuthoringSlotRoute;
   readonly selection: AuthoringComponentSelection | null;
   readonly selectedSourceNodeId: string | null;
   readonly selectedSurface: DesenAppSurfaceSummary;
-  readonly stateModel: AuthoringStateModelResult;
 }>) {
-  const [activeTab, setActiveTab] = useState<AuthoringTab>("layers");
   const [activeSlot, setActiveSlot] = useState<AuthoringSlotSelection | null>(null);
   const [activeDropProjection, setActiveDropProjection] = useState<AuthoringDropProjection | null>(
     null,
   );
   const [dragIntent, setDragIntent] = useState<AuthoringDragIntent | null>(null);
+  const [dragNotice, setDragNotice] = useState("");
   const [notice, setNotice] = useState("");
   const panelId = useId();
-  const layersTab = useRef<HTMLButtonElement>(null);
-  const componentsTab = useRef<HTMLButtonElement>(null);
-  const stateTab = useRef<HTMLButtonElement>(null);
-  const actionsTab = useRef<HTMLButtonElement>(null);
   const authoringPanel = useRef<HTMLElement>(null);
+  const componentsPane = useRef<HTMLDivElement>(null);
+  const layersPane = useRef<HTMLDivElement>(null);
   const pendingLayerFocus = useRef<string | null>(null);
   const dragSession = useRef<AuthoringDragSession>(createAuthoringDragSession());
   const resetDragSession = useCallback(() => {
@@ -1982,6 +1971,7 @@ function AuthoringPanel({
     setActiveSlot(null);
     setActiveDropProjection(null);
     setDragIntent(null);
+    setDragNotice("");
     setNotice("The previous slot target is no longer current.");
   }, [model, resetDragSession, slotProjection?.status]);
 
@@ -1990,12 +1980,14 @@ function AuthoringPanel({
     resetDragSession();
     setActiveDropProjection(null);
     setDragIntent(null);
+    setDragNotice("");
   }, [interactive, resetDragSession]);
 
   useEffect(() => {
     resetDragSession();
     setActiveDropProjection(null);
     setDragIntent(null);
+    setDragNotice("");
     const pendingNodeId = pendingLayerFocus.current;
     if (pendingNodeId !== null) {
       const nextLayer = Array.from(
@@ -2015,13 +2007,14 @@ function AuthoringPanel({
     setActiveSlot((current) =>
       current !== null && isSameAuthoringSlotSelection(current, target) ? current : target,
     );
-    setActiveTab("components");
-    componentsTab.current?.focus();
+    componentsPane.current?.scrollTo?.({ behavior: "smooth", top: 0 });
+    componentsPane.current?.querySelector<HTMLInputElement>('input[type="search"]')?.focus();
     setNotice(`Choose a Catalog component for ${target.ownerId} · ${target.slot}.`);
   }
 
   function toggleLayer(node: AuthoringLayerNode): void {
     if (!interactive) return;
+    setDragNotice("");
     setNotice("");
     onToggleSelection(node);
   }
@@ -2042,6 +2035,7 @@ function AuthoringPanel({
     resetDragSession();
     setActiveDropProjection(null);
     setDragIntent(null);
+    setDragNotice("");
     if (!result.ok) {
       const message =
         result.reason === "acceptance-rejected"
@@ -2059,7 +2053,6 @@ function AuthoringPanel({
       return;
     }
     pendingLayerFocus.current = result.nodeId;
-    if (result.operation === "insert") setActiveTab("layers");
     setNotice(
       result.operation === "insert"
         ? `Inserted ${model.components.find(({ id }) => id === (intent.kind === "component" ? intent.componentId : ""))?.displayName ?? result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot at position ${index + 1}` : "the selected slot"}. Selected in Layers · use Remove layer above or press Delete/Backspace.`
@@ -2069,34 +2062,10 @@ function AuthoringPanel({
     );
   }
 
-  function selectAdjacentTab(event: KeyboardEvent<HTMLButtonElement>): void {
-    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-    event.preventDefault();
-    const tabs: readonly AuthoringTab[] = ["layers", "components", "state", "actions"];
-    const currentIndex = tabs.indexOf(activeTab);
-    const nextTab =
-      event.key === "Home"
-        ? "layers"
-        : event.key === "End"
-          ? "actions"
-          : (tabs[
-              (currentIndex + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length
-            ] ?? "layers");
-    setActiveTab(nextTab);
-    (nextTab === "layers"
-      ? layersTab
-      : nextTab === "components"
-        ? componentsTab
-        : nextTab === "state"
-          ? stateTab
-          : actionsTab
-    ).current?.focus();
-  }
-
   function requestSlotChoice(): void {
     if (!interactive) return;
-    setActiveTab("layers");
-    layersTab.current?.focus();
+    layersPane.current?.focus({ preventScroll: true });
+    layersPane.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
     setNotice("Choose a named slot in Layers, then return to Components.");
   }
 
@@ -2105,7 +2074,7 @@ function AuthoringPanel({
     resetDragSession();
     setActiveDropProjection(null);
     setDragIntent(intent);
-    setNotice(
+    setDragNotice(
       intent.kind === "component"
         ? `Dragging ${model.components.find(({ id }) => id === intent.componentId)?.displayName ?? "component"} · release on the highlighted drop target in Components.`
         : "Release when the wide highlighted Layers gap locks in.",
@@ -2116,6 +2085,7 @@ function AuthoringPanel({
     resetDragSession();
     setActiveDropProjection(null);
     setDragIntent(null);
+    setDragNotice("");
   }
 
   const deleteSelection = useCallback((): void => {
@@ -2124,6 +2094,7 @@ function AuthoringPanel({
     const result = onDeleteSelection();
     resetDragSession();
     setDragIntent(null);
+    setDragNotice("");
     if (!result.ok) {
       setNotice(
         result.reason === "cardinality-rejected"
@@ -2137,8 +2108,7 @@ function AuthoringPanel({
       return;
     }
     setActiveSlot(null);
-    setActiveTab("layers");
-    layersTab.current?.focus();
+    layersPane.current?.focus({ preventScroll: true });
     setNotice(`Deleted ${selection.displayName} layer · ${result.nodeId}.`);
   }, [
     deletionCompatibility?.accepted,
@@ -2185,7 +2155,7 @@ function AuthoringPanel({
     <aside
       aria-label="Authoring panel"
       className={styles.authoringPanel}
-      data-active-tab={activeTab}
+      data-authoring-layout="split"
       hidden={hidden}
       ref={authoringPanel}
     >
@@ -2200,91 +2170,75 @@ function AuthoringPanel({
           title="Catalog connected"
         />
       </div>
-      <div aria-label="Authoring views" className={styles.authoringTabs} role="tablist">
-        <button
-          aria-controls={`${panelId}-layers-panel`}
-          aria-selected={activeTab === "layers"}
-          id={`${panelId}-layers-tab`}
-          onClick={() => setActiveTab("layers")}
-          onKeyDown={selectAdjacentTab}
-          ref={layersTab}
-          role="tab"
-          tabIndex={activeTab === "layers" ? 0 : -1}
-          type="button"
-        >
-          Layers
-        </button>
-        <button
-          aria-controls={`${panelId}-components-panel`}
-          aria-selected={activeTab === "components"}
-          id={`${panelId}-components-tab`}
-          onClick={() => setActiveTab("components")}
-          onKeyDown={selectAdjacentTab}
-          ref={componentsTab}
-          role="tab"
-          tabIndex={activeTab === "components" ? 0 : -1}
-          type="button"
-        >
-          Components
-        </button>
-        <button
-          aria-controls={`${panelId}-state-panel`}
-          aria-selected={activeTab === "state"}
-          id={`${panelId}-state-tab`}
-          onClick={() => setActiveTab("state")}
-          onKeyDown={selectAdjacentTab}
-          ref={stateTab}
-          role="tab"
-          tabIndex={activeTab === "state" ? 0 : -1}
-          type="button"
-        >
-          State
-        </button>
-        <button
-          aria-controls={`${panelId}-actions-panel`}
-          aria-selected={activeTab === "actions"}
-          id={`${panelId}-actions-tab`}
-          onClick={() => setActiveTab("actions")}
-          onKeyDown={selectAdjacentTab}
-          ref={actionsTab}
-          role="tab"
-          tabIndex={activeTab === "actions" ? 0 : -1}
-          type="button"
-        >
-          Actions
-        </button>
-      </div>
-      {selection === null || activeTab === "state" || activeTab === "actions" ? null : (
-        <div className={styles.authoringSelectionActions}>
-          <span className={styles.selectedLayerSummary}>
-            <span>Selected layer</span>
-            <strong>{selection.displayName}</strong>
-            <kbd aria-label="Delete or Backspace shortcut">⌫</kbd>
-          </span>
-          <button
-            aria-describedby={`${panelId}-delete-layer-description`}
-            aria-keyshortcuts="Delete Backspace"
-            aria-label={`Delete ${selection.displayName} layer · ${selection.sourceNodeId}`}
-            className={styles.deleteLayerAction}
-            disabled={deletionCompatibility?.accepted !== true}
-            onClick={deleteSelection}
-            type="button"
-          >
-            <span aria-hidden="true" className={styles.deleteLayerGlyph} />
-            Remove layer
-          </button>
-          <small id={`${panelId}-delete-layer-description`}>{deletionReason}</small>
-        </div>
-      )}
-      <div
-        aria-labelledby={`${panelId}-layers-tab`}
-        className={styles.authoringTabPanel}
-        hidden={activeTab !== "layers"}
-        id={`${panelId}-layers-panel`}
-        role="tabpanel"
-        tabIndex={activeTab === "layers" ? 0 : -1}
+      <section
+        aria-labelledby={`${panelId}-components-heading`}
+        className={styles.authoringPane}
+        data-authoring-pane="components"
       >
-        {activeTab === "layers" ? (
+        <div className={styles.authoringPaneHeader}>
+          <span>
+            <strong id={`${panelId}-components-heading`}>Components</strong>
+            <small>Catalog library</small>
+          </span>
+        </div>
+        <div
+          className={styles.authoringPaneBody}
+          data-authoring-pane-scroll="components"
+          ref={componentsPane}
+          tabIndex={-1}
+        >
+          <ComponentLibrary
+            active
+            dragIntent={dragIntent}
+            model={model}
+            onApplyIntent={applyIntent}
+            onClearDrag={clearDrag}
+            onRequestSlotChoice={requestSlotChoice}
+            onStartDrag={startDrag}
+            route={route}
+            slotProjection={slotProjection}
+          />
+        </div>
+      </section>
+      <section
+        aria-labelledby={`${panelId}-layers-heading`}
+        className={styles.authoringPane}
+        data-authoring-pane="layers"
+      >
+        <div className={styles.authoringPaneHeader}>
+          <span>
+            <strong id={`${panelId}-layers-heading`}>Layers</strong>
+            <small>Source tree</small>
+          </span>
+        </div>
+        {selection === null ? null : (
+          <div className={styles.authoringSelectionActions}>
+            <span className={styles.selectedLayerSummary}>
+              <span>Selected layer</span>
+              <strong>{selection.displayName}</strong>
+              <kbd aria-label="Delete or Backspace shortcut">⌫</kbd>
+            </span>
+            <button
+              aria-describedby={`${panelId}-delete-layer-description`}
+              aria-keyshortcuts="Delete Backspace"
+              aria-label={`Delete ${selection.displayName} layer · ${selection.sourceNodeId}`}
+              className={styles.deleteLayerAction}
+              disabled={deletionCompatibility?.accepted !== true}
+              onClick={deleteSelection}
+              type="button"
+            >
+              <span aria-hidden="true" className={styles.deleteLayerGlyph} />
+              Remove layer
+            </button>
+            <small id={`${panelId}-delete-layer-description`}>{deletionReason}</small>
+          </div>
+        )}
+        <div
+          className={styles.authoringPaneBody}
+          data-authoring-pane-scroll="layers"
+          ref={layersPane}
+          tabIndex={-1}
+        >
           <LayerTree
             activeDropProjection={activeDropProjection}
             activeSlot={resolvedActiveSlot}
@@ -2303,65 +2257,23 @@ function AuthoringPanel({
             selectedSourceNodeId={selectedSourceNodeId}
             selectedSurface={selectedSurface}
           />
-        ) : null}
-      </div>
-      <div
-        aria-labelledby={`${panelId}-components-tab`}
-        className={styles.authoringTabPanel}
-        hidden={activeTab !== "components"}
-        id={`${panelId}-components-panel`}
-        role="tabpanel"
-        tabIndex={activeTab === "components" ? 0 : -1}
+        </div>
+      </section>
+      <p
+        aria-atomic="true"
+        aria-label="Authoring status"
+        aria-live="polite"
+        className={styles.authoringBoundary}
+        data-authoring-boundary="true"
+        role="status"
       >
-        <ComponentLibrary
-          active={activeTab === "components"}
-          dragIntent={dragIntent}
-          model={model}
-          onApplyIntent={applyIntent}
-          onClearDrag={clearDrag}
-          onRequestSlotChoice={requestSlotChoice}
-          onStartDrag={startDrag}
-          route={route}
-          slotProjection={slotProjection}
-        />
-      </div>
-      <div
-        aria-labelledby={`${panelId}-state-tab`}
-        className={styles.authoringTabPanel}
-        hidden={activeTab !== "state"}
-        id={`${panelId}-state-panel`}
-        role="tabpanel"
-        tabIndex={activeTab === "state" ? 0 : -1}
-      >
-        <StatePanel model={stateModel} onEdit={onStateEdit} surfaceName={selectedSurface.name} />
-      </div>
-      <div
-        aria-labelledby={`${panelId}-actions-tab`}
-        className={styles.authoringTabPanel}
-        hidden={activeTab !== "actions"}
-        id={`${panelId}-actions-panel`}
-        role="tabpanel"
-        tabIndex={activeTab === "actions" ? 0 : -1}
-      >
-        <EventActionPanel
-          model={eventActionModel}
-          onEdit={onEventActionEdit}
-          surfaceName={selectedSurface.name}
-        />
-      </div>
-      <p aria-atomic="true" aria-live="polite" className={styles.authoringBoundary} role="status">
-        {notice ||
-          (activeTab === "state"
-            ? `Local state · ${selectedSurface.name}`
-            : activeTab === "actions"
-              ? `Events and actions · ${selectedSurface.name}`
-              : activeTab === "components"
-                ? slotProjection?.status === "ready"
-                  ? `Placement target · ${slotProjection.owner.displayName} ${slotProjection.owner.id} · ${slotProjection.slot.name} slot.`
-                  : "Choose a named slot in Layers before placing a component."
-                : selection === null
-                  ? "Choose a Source layer to inspect, move, or edit its properties."
-                  : `Selected · ${selection.displayName}${selection.conditional ? " · Conditional" : ""}`)}
+        {dragNotice ||
+          notice ||
+          (selection === null
+            ? slotProjection?.status === "ready"
+              ? `Placement target · ${slotProjection.owner.displayName} ${slotProjection.owner.id} · ${slotProjection.slot.name} slot.`
+              : "Choose a Source layer to inspect, move, or edit its properties."
+            : `Selected · ${selection.displayName}${selection.conditional ? " · Conditional" : ""}`)}
       </p>
     </aside>
   );
@@ -2497,6 +2409,18 @@ function SurfaceEditor({
     () => prepareCatalogAuthoringModel(referenceCatalog, document),
     [document],
   );
+  const canvasFrame = useMemo(
+    () => projectAuthoringCanvasFrame(document, selectedSurface.id),
+    [document, selectedSurface.id],
+  );
+  const canvasFrameOrientation =
+    canvasFrame.status !== "ready"
+      ? null
+      : canvasFrame.frame.height > canvasFrame.frame.width
+        ? "Portrait"
+        : canvasFrame.frame.height < canvasFrame.frame.width
+          ? "Landscape"
+          : "Square";
   const committedDocumentFingerprint = useMemo(() => digestCanonicalJson(document), [document]);
   const diagnosticsValidator = useMemo(
     () =>
@@ -3027,131 +2951,200 @@ function SurfaceEditor({
         {project.name}
       </h1>
 
+      <header aria-label="Workspace commands" className={styles.workspaceCommandBar}>
+        <div className={styles.workspaceIdentity}>
+          <div className={styles.workspaceIdentityCopy}>
+            <h2 id="workspace-title">{selectedSurface.name}</h2>
+            <small>
+              {canvasFrame.status === "ready"
+                ? `${canvasFrameOrientation} · ${canvasFrame.frame.label}`
+                : "Canvas frame unavailable"}
+            </small>
+          </div>
+          <SurfaceState state={selectedSurface.state} />
+        </div>
+
+        <div className={styles.workspaceCommands}>
+          <span className={styles.workspacePreviewStatus} data-workspace-preview-status={mode}>
+            {mode === "design"
+              ? "Design preview · controls are disabled."
+              : "Run preview · real adapter controls use the selected synthetic fixture."}
+          </span>
+          <span className={styles.workspaceSessionStatus}>
+            <span>{project.navigationStatus}</span>
+            <span aria-hidden="true">·</span>
+            <span>
+              {activeScenarioValue === AUTHORING_SOURCE_SCENARIO_VALUE
+                ? preview.ok
+                  ? "Session draft"
+                  : "Preview unavailable"
+                : effectivePreview?.ok === true
+                  ? "Scenario preview"
+                  : "Scenario unavailable"}
+            </span>
+          </span>
+          <div
+            aria-label="Design and Run mode"
+            className={styles.modeControl}
+            data-preserve-inspector-draft="true"
+            role="group"
+          >
+            <button
+              aria-describedby={modeStatusId}
+              aria-pressed={mode === "design"}
+              disabled={persistenceState?.pending === "opening" || publicationPending}
+              onClick={() => chooseMode("design")}
+              ref={designModeButton}
+              type="button"
+            >
+              Design
+            </button>
+            <button
+              aria-describedby={modeStatusId}
+              aria-pressed={mode === "run"}
+              disabled={persistenceState?.pending === "opening" || publicationPending}
+              onClick={() => chooseMode("run")}
+              ref={runModeButton}
+              type="button"
+            >
+              Run
+            </button>
+          </div>
+          <details className={styles.workspaceLifecycle}>
+            <summary>
+              <span>
+                <strong>Source &amp; release</strong>
+                <small>Open, save, and publish the exact Source</small>
+              </span>
+              <span aria-hidden="true" className={styles.workspaceLifecycleChevron} />
+            </summary>
+            <div className={styles.workspaceLifecycleBody}>
+              <PersistenceControls
+                busy={
+                  publicationPending ||
+                  persistenceState?.pending === "opening" ||
+                  persistenceState?.pending === "saving"
+                }
+                confirmationScope={persistenceController}
+                designMode={mode === "design"}
+                onOpen={() => {
+                  void openAuthoredSource();
+                }}
+                onSave={saveAuthoredSource}
+                projection={persistenceProjection}
+              />
+
+              <PublicationControls
+                busy={
+                  persistenceState?.pending === "opening" || persistenceState?.pending === "saving"
+                }
+                designMode={mode === "design"}
+                onPublish={publishSavedSource}
+                projection={publicationProjection}
+              />
+            </div>
+          </details>
+          <details className={styles.workspaceBoundary}>
+            <summary>
+              <strong>{mode === "design" ? "Preview boundary" : "Runtime boundary"}</strong>
+              <span>
+                {mode === "design" ? "Catalog fixture · no live calls" : "Synthetic fixture only"}
+              </span>
+            </summary>
+            <p>
+              {mode === "design"
+                ? "Catalog-backed edits change only the authored Source and persist only through Save source. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree."
+                : "Controls are live against this in-memory preview. Only the exact synthetic sign-in fixture is available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked."}
+            </p>
+          </details>
+          <p
+            aria-atomic="true"
+            aria-label="Mode safety"
+            aria-live="polite"
+            className={styles.visuallyHidden}
+            id={modeStatusId}
+            role="status"
+          >
+            {mode === "design"
+              ? "Design mode · managed controls are disabled; authored changes remain local until Save source succeeds."
+              : "Run mode · controls are interactive against synthetic fixtures; live effects remain blocked."}
+          </p>
+        </div>
+      </header>
+
       <AuthoringPanel
-        eventActionModel={eventActionModel}
         hidden={mode === "run"}
         interactive={mode === "design" && !publicationPending}
         model={model}
         onDeleteSelection={deleteSelectedLayer}
-        onEventActionEdit={editSelectedEventAction}
         onSlotEdit={editNamedSlot}
-        onStateEdit={editLocalState}
         onToggleSelection={toggleSelection}
         route={route}
         selection={selection}
         selectedSourceNodeId={selection?.sourceNodeId ?? null}
         selectedSurface={selectedSurface}
-        stateModel={stateModel}
       />
 
-      <div className={styles.surfaceFrame} data-mode={mode}>
-        <div className={styles.surfaceFrameHeader}>
-          <div className={styles.surfaceIdentity}>
-            <h2 id="workspace-title">{selectedSurface.name}</h2>
-            <span>{selectedSurface.capabilityId}</span>
-          </div>
-          <div className={styles.surfaceFrameTools}>
-            <div
-              aria-label="Design and Run mode"
-              className={styles.modeControl}
-              data-preserve-inspector-draft="true"
-              role="group"
-            >
-              <button
-                aria-describedby={modeStatusId}
-                aria-pressed={mode === "design"}
-                disabled={persistenceState?.pending === "opening" || publicationPending}
-                onClick={() => chooseMode("design")}
-                ref={designModeButton}
-                type="button"
-              >
-                Design
-              </button>
-              <button
-                aria-describedby={modeStatusId}
-                aria-pressed={mode === "run"}
-                disabled={persistenceState?.pending === "opening" || publicationPending}
-                onClick={() => chooseMode("run")}
-                ref={runModeButton}
-                type="button"
-              >
-                Run
-              </button>
-            </div>
-            <SurfaceState state={selectedSurface.state} />
-          </div>
-        </div>
-
-        <PersistenceControls
-          busy={
-            publicationPending ||
-            persistenceState?.pending === "opening" ||
-            persistenceState?.pending === "saving"
+      <section
+        aria-labelledby="workspace-title"
+        className={styles.canvasWorkspace}
+        data-canvas-workspace="true"
+        data-mode={mode}
+      >
+        <div
+          className={styles.canvasStage}
+          data-canvas-ready={canvasFrame.status === "ready" ? "true" : "false"}
+          data-canvas-workplane="true"
+          style={
+            canvasFrame.status === "ready"
+              ? ({
+                  "--desen-canvas-frame-height": `${canvasFrame.frame.height}px`,
+                  "--desen-canvas-frame-width": `${canvasFrame.frame.width}px`,
+                } as CSSProperties)
+              : undefined
           }
-          confirmationScope={persistenceController}
-          designMode={mode === "design"}
-          onOpen={() => {
-            void openAuthoredSource();
-          }}
-          onSave={saveAuthoredSource}
-          projection={persistenceProjection}
-        />
-
-        <PublicationControls
-          busy={persistenceState?.pending === "opening" || persistenceState?.pending === "saving"}
-          designMode={mode === "design"}
-          onPublish={publishSavedSource}
-          projection={publicationProjection}
-        />
-
-        <p
-          aria-atomic="true"
-          aria-label="Mode safety"
-          aria-live="polite"
-          className={styles.modeSafety}
-          id={modeStatusId}
-          role="status"
         >
-          {mode === "design"
-            ? "Design mode · managed controls are disabled; authored changes remain local until Save source succeeds."
-            : "Run mode · controls are interactive against synthetic fixtures; live effects remain blocked."}
-        </p>
-
-        <PreviewContextDisclosure fidelity={fidelity} />
-
-        <div className={styles.surfaceFrameBody}>
-          <DesenAdapterCanvas
-            authoringModel={model}
-            bundle={effectivePreview?.ok === true ? effectivePreview.bundle : null}
-            diagnostics={
-              mode === "design" &&
-              activeTransientDiagnostics !== null &&
-              diagnosticsProjection?.status === "ready"
-                ? Object.freeze({
-                    report: activeTransientDiagnostics.report,
-                    snapshot: activeTransientDiagnostics.snapshot,
-                    selectedSelectionKey: diagnosticSelection?.selectionKey ?? null,
-                    focusRequestId: diagnosticSelection?.focusRequestId ?? 0,
-                  })
-                : null
-            }
-            hostPorts={fixtureHostPorts}
-            mode={mode}
-            projectId={project.id}
-            selection={mode === "design" ? selection : null}
-            surfaceId={selectedSurface.id}
-          />
+          <div className={styles.canvasPlane} data-canvas-plane="true">
+            {canvasFrame.status === "ready" ? (
+              <section
+                aria-label={`${canvasFrameOrientation?.toLowerCase() ?? "declared"} page frame · ${canvasFrame.frame.label}`}
+                className={styles.canvasFrame}
+                data-canvas-frame={canvasFrameOrientation?.toLowerCase() ?? "declared"}
+                data-canvas-frame-height={canvasFrame.frame.height}
+                data-canvas-frame-width={canvasFrame.frame.width}
+              >
+                <DesenAdapterCanvas
+                  authoringModel={model}
+                  bundle={effectivePreview?.ok === true ? effectivePreview.bundle : null}
+                  diagnostics={
+                    mode === "design" &&
+                    activeTransientDiagnostics !== null &&
+                    diagnosticsProjection?.status === "ready"
+                      ? Object.freeze({
+                          report: activeTransientDiagnostics.report,
+                          snapshot: activeTransientDiagnostics.snapshot,
+                          selectedSelectionKey: diagnosticSelection?.selectionKey ?? null,
+                          focusRequestId: diagnosticSelection?.focusRequestId ?? 0,
+                        })
+                      : null
+                  }
+                  hostPorts={fixtureHostPorts}
+                  mode={mode}
+                  projectId={project.id}
+                  selection={mode === "design" ? selection : null}
+                  showDesignChrome={false}
+                  showStatus={false}
+                  surfaceId={selectedSurface.id}
+                />
+              </section>
+            ) : (
+              <div className={styles.canvasFrameUnavailable} role="alert">
+                This Source does not declare a usable authoring canvas frame.
+              </div>
+            )}
+          </div>
         </div>
-
-        <div className={styles.boundaryNote}>
-          <strong>{mode === "design" ? "Preview data" : "Runtime preview"}</strong>
-          <span>
-            {mode === "design"
-              ? "Catalog-backed edits change only the authored Source and persist only through Save source. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree."
-              : "Controls are live against this in-memory preview. Only the exact synthetic sign-in fixture is available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked."}
-          </span>
-        </div>
-      </div>
+      </section>
 
       <InspectorPanel
         diagnosticsControls={
@@ -3164,15 +3157,32 @@ function SurfaceEditor({
             />
           ) : undefined
         }
+        eventActionControls={
+          <EventActionPanel
+            model={eventActionModel}
+            onEdit={editSelectedEventAction}
+            surfaceName={selectedSurface.name}
+          />
+        }
         hidden={mode === "run"}
         inspector={inspector}
         onBindingEdit={editSelectedBinding}
         onEdit={editSelectedProperty}
         previewControls={
-          <ScenarioPreviewControl
-            model={scenarioModel}
-            onChange={chooseScenario}
-            value={activeScenarioValue}
+          <>
+            <ScenarioPreviewControl
+              model={scenarioModel}
+              onChange={chooseScenario}
+              value={activeScenarioValue}
+            />
+            <PreviewContextDisclosure fidelity={fidelity} />
+          </>
+        }
+        stateControls={
+          <StatePanel
+            model={stateModel}
+            onEdit={editLocalState}
+            surfaceName={selectedSurface.name}
           />
         }
       />
@@ -3188,20 +3198,6 @@ function SurfaceEditor({
           snapshot={fixtureSnapshot}
         />
       ) : null}
-
-      <div className={styles.editorStatus} hidden={mode === "run"}>
-        <span>{project.navigationStatus}</span>
-        <span aria-hidden="true">·</span>
-        <span>
-          {activeScenarioValue === AUTHORING_SOURCE_SCENARIO_VALUE
-            ? preview.ok
-              ? "Session draft"
-              : "Preview unavailable"
-            : effectivePreview?.ok === true
-              ? "Scenario preview"
-              : "Scenario unavailable"}
-        </span>
-      </div>
     </section>
   );
 }
@@ -3320,6 +3316,13 @@ function routeTitle(route: DesenAppRoute): string {
     : `${surface.name} · ${project.name} · DESEN`;
 }
 
+/** Whether the current route has an admitted surface editor, rather than a gallery or error view. */
+function hasResolvedSurfaceEditor(route: DesenAppRoute): boolean {
+  if (route.kind !== "project" || route.surfaceId === undefined) return false;
+  const project = findDesenAppProject(route.projectId);
+  return project !== undefined && findDesenAppSurface(project, route.surfaceId) !== undefined;
+}
+
 function RouteView({
   persistencePort,
   publicationPort,
@@ -3387,6 +3390,7 @@ export function DesenAppApplication({
     readDesenAppServerLocation,
   );
   const route = readDesenAppRoute(routeLocation);
+  const surfaceEditorRoute = hasResolvedSurfaceEditor(route);
   const previousRouteLocation = useRef(routeLocation);
 
   useEffect(() => {
@@ -3403,7 +3407,12 @@ export function DesenAppApplication({
     <div className={styles.app}>
       <SkipToMainContentLink />
       <AppHeader route={route} />
-      <main className={styles.main} id="desen-app-content" tabIndex={-1}>
+      <main
+        className={styles.main}
+        data-surface-editor={surfaceEditorRoute ? "true" : undefined}
+        id="desen-app-content"
+        tabIndex={-1}
+      >
         <RouteView
           persistencePort={persistencePort}
           publicationPort={publicationPort}

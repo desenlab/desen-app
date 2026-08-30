@@ -483,7 +483,7 @@ describe("official-derived sign-in in the independent reference host", () => {
   it("pins the exact controlled document and revision identities", () => {
     expect(REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID).toBe("com.example.account-app");
     expect(REFERENCE_HOST_OFFICIAL_SIGN_IN_REVISION).toBe(
-      "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb",
+      "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13",
     );
   });
 });

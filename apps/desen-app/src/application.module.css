@@ -481,6 +481,15 @@
   padding: 6rem 1rem 2rem;
 }
 
+.main[data-surface-editor="true"] {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 0;
+  overflow: hidden;
+}
+
 .main:focus {
   outline: none;
 }
@@ -932,16 +941,13 @@
 }
 
 .authoringPanel {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 5;
-  display: flex;
-  width: 17.5rem;
-  max-height: calc(100vh - 10rem);
-  max-height: calc(100dvh - 10rem);
+  position: static;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr) auto;
   overflow: hidden;
-  flex-direction: column;
   background: color-mix(in srgb, var(--desen-app-surface) 97%, transparent);
   border: 1px solid var(--desen-app-border);
   border-radius: 0.875rem;
@@ -949,14 +955,11 @@
 }
 
 .inspectorPanel {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 5;
+  position: static;
+  z-index: 1;
   display: flex;
-  width: 17.5rem;
-  max-height: calc(100vh - 10rem);
-  max-height: calc(100dvh - 10rem);
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
   flex-direction: column;
   background: color-mix(in srgb, var(--desen-app-surface) 97%, transparent);
@@ -966,14 +969,11 @@
 }
 
 .runControls {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 5;
+  position: static;
+  z-index: 1;
   display: flex;
-  width: 17.5rem;
-  max-height: calc(100vh - 10rem);
-  max-height: calc(100dvh - 10rem);
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
   flex-direction: column;
   background: color-mix(in srgb, var(--desen-app-surface) 97%, transparent);
@@ -983,8 +983,7 @@
 }
 
 .authoringPanel[hidden],
-.inspectorPanel[hidden],
-.editorStatus[hidden] {
+.inspectorPanel[hidden] {
   display: none;
 }
 
@@ -1054,6 +1053,80 @@
   top: 0.5rem;
   right: 0.375rem;
   left: 0.375rem;
+}
+
+.inspectorTabs {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0.25rem;
+  background: var(--desen-app-surface-subtle);
+  border-bottom: 1px solid var(--desen-app-border);
+}
+
+.inspectorTabs button {
+  min-height: 1.875rem;
+  padding: 0 0.375rem;
+  color: var(--desen-app-text-muted);
+  font: inherit;
+  font-size: 0.59375rem;
+  font-weight: 590;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 0.4375rem;
+}
+
+.inspectorTabs button[aria-selected="true"] {
+  color: var(--desen-app-text);
+  background: var(--desen-app-surface);
+  box-shadow: var(--desen-app-shadow-xs);
+}
+
+.inspectorTabs button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: -1px;
+}
+
+.inspectorTabPanel {
+  display: flex;
+  min-height: 0;
+  overflow: auto;
+  flex: 1;
+  flex-direction: column;
+  scrollbar-color: var(--desen-app-border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.inspectorTabPanel[hidden] {
+  display: none;
+}
+
+.inspectorTabPanel:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: -2px;
+}
+
+.inspectorTabUnavailable {
+  display: grid;
+  min-height: 100%;
+  align-content: center;
+  justify-items: center;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.inspectorTabUnavailable strong {
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.inspectorTabUnavailable p {
+  max-width: 12rem;
+  margin: 0.25rem 0 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.5625rem;
+  line-height: 0.875rem;
 }
 
 .inspectorEmpty {
@@ -1517,34 +1590,46 @@
   box-sizing: content-box;
 }
 
-.authoringTabs {
-  display: grid;
+.authoringPane {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.authoringPane + .authoringPane {
+  border-top: 1px solid var(--desen-app-border);
+}
+
+.authoringPaneHeader {
+  display: flex;
+  min-height: 2.5rem;
   flex: 0 0 auto;
-  grid-template-columns: repeat(4, 1fr);
-  padding: 0.25rem;
-  background: var(--desen-app-surface-subtle);
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: color-mix(in srgb, var(--desen-app-surface-subtle) 66%, var(--desen-app-surface));
   border-bottom: 1px solid var(--desen-app-border);
 }
 
-.authoringTabs button {
-  min-height: 1.875rem;
-  padding: 0 0.375rem;
-  color: var(--desen-app-text-muted);
+.authoringPaneHeader > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.0625rem;
+}
+
+.authoringPaneHeader strong {
   font-size: 0.625rem;
-  font-weight: 560;
-  cursor: pointer;
-  background: transparent;
-  border: 0;
-  border-radius: 0.4375rem;
+  font-weight: 630;
+  line-height: 0.8125rem;
 }
 
-.authoringTabs button[aria-selected="true"] {
-  color: var(--desen-app-text);
-  background: var(--desen-app-surface);
-  box-shadow: var(--desen-app-shadow-xs);
+.authoringPaneHeader small {
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+  line-height: 0.6875rem;
 }
 
-.authoringTabPanel {
+.authoringPaneBody {
   min-height: 0;
   overflow: auto;
   flex: 1;
@@ -1552,7 +1637,7 @@
   scrollbar-width: thin;
 }
 
-.authoringTabPanel:focus-visible {
+.authoringPaneBody:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
   outline-offset: -2px;
 }
@@ -1789,10 +1874,6 @@
   min-height: 1.625rem;
   padding-top: 0.5rem;
   border-top: 1px solid var(--desen-app-border);
-}
-
-.authoringPanel[data-active-tab="actions"] {
-  width: 20rem;
 }
 
 .eventActionPanel {
@@ -3463,85 +3544,206 @@
 
 .surfaceEditor {
   position: relative;
+  isolation: isolate;
   display: grid;
-  min-height: calc(100vh - 8rem);
-  min-height: calc(100dvh - 8rem);
-  padding-bottom: 3.5rem;
-  place-items: center;
-}
-
-.surfaceEditor[data-mode="run"] {
-  grid-template-columns: minmax(0, 1fr) 17.5rem;
-  column-gap: 1rem;
-  align-items: start;
-  justify-items: center;
-}
-
-.surfaceEditor[data-mode="run"] .surfaceFrame {
-  width: min(46rem, 100%);
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.surfaceEditor[data-mode="run"] .runControls {
-  position: static;
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: end;
-}
-
-.surfaceFrame {
-  display: flex;
-  width: min(22rem, calc(100vw - 2rem));
-  height: min(37.625rem, calc(100vh - 11.5rem));
-  height: min(37.625rem, calc(100dvh - 11.5rem));
-  min-height: 28rem;
-  overflow: hidden;
-  flex-direction: column;
-  background: var(--desen-app-surface);
-  border: 1px solid var(--desen-app-border);
-  border-radius: 0.75rem;
-}
-
-.surfaceFrameHeader {
-  display: flex;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 0.75rem;
+  align-items: stretch;
+  padding: 6rem 1rem 1rem;
+}
+
+/* The editor canvas is the route's full working plane; every dock floats above this layer. */
+.surfaceEditor::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--desen-app-border) 18%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      color-mix(in srgb, var(--desen-app-border) 18%, transparent) 1px,
+      transparent 1px
+    ),
+    color-mix(in srgb, var(--desen-app-canvas) 88%, var(--desen-app-surface));
+  background-position: center;
+  background-size: 1.5rem 1.5rem;
+  content: "";
+  pointer-events: none;
+}
+
+.workspaceCommandBar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  min-width: 0;
+  min-height: 3.5rem;
+  gap: 0.75rem;
+  grid-column: 1 / -1;
+  grid-row: 1;
   align-items: center;
   justify-content: space-between;
-  min-height: 4rem;
-  padding: 0.75rem;
-  border-bottom: 1px solid var(--desen-app-border);
+  padding: 0.5rem 0.625rem 0.5rem 0.75rem;
+  background: color-mix(in srgb, var(--desen-app-surface) 97%, transparent);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.875rem;
+  box-shadow: var(--desen-app-shadow-xs);
 }
 
-.surfaceIdentity {
-  display: grid;
-  min-width: 0;
-  gap: 0.125rem;
-}
-
-.surfaceFrameHeader h2 {
-  margin: 0;
-  font-size: 0.75rem;
-  font-weight: 560;
-}
-
-.surfaceIdentity > span {
-  overflow: hidden;
-  color: var(--desen-app-text-muted);
-  font-size: 0.625rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.surfaceFrameTools {
+.workspaceIdentity,
+.workspaceCommands {
   display: flex;
-  flex: 0 0 auto;
+  min-width: 0;
   gap: 0.5rem;
   align-items: center;
 }
 
+.workspaceIdentity {
+  flex: 1 1 auto;
+}
+
+.workspaceIdentityCopy {
+  display: grid;
+  min-width: 0;
+  gap: 0.0625rem;
+}
+
+.workspaceIdentityCopy h2,
+.workspaceIdentityCopy small {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspaceIdentityCopy h2 {
+  color: var(--desen-app-text);
+  font-size: 0.75rem;
+  font-weight: 620;
+  line-height: 0.875rem;
+}
+
+.workspaceIdentityCopy small {
+  color: var(--desen-app-text-soft);
+  font-size: 0.53125rem;
+  line-height: 0.6875rem;
+}
+
+.workspaceCommands {
+  flex: 0 1 auto;
+  justify-content: flex-end;
+}
+
+.authoringPanel {
+  z-index: 3;
+  width: clamp(15rem, 23vw, 18.5rem);
+  margin: 0.75rem;
+  grid-column: 1;
+  grid-row: 2;
+  align-self: stretch;
+  justify-self: start;
+}
+
+.canvasWorkspace {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.inspectorPanel,
+.runControls {
+  z-index: 3;
+  width: clamp(15rem, 23vw, 18.5rem);
+  margin: 0.75rem;
+  grid-column: 1;
+  grid-row: 2;
+  align-self: stretch;
+  justify-self: end;
+}
+
+.canvasStage {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-color: var(--desen-app-border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.canvasPlane {
+  --desen-canvas-plane-x-gutter: clamp(1rem, 3vw, 3.5rem);
+  --desen-canvas-plane-top-gutter: calc(9.5rem + clamp(0.75rem, 1.5vw, 1.5rem));
+  --desen-canvas-plane-bottom-gutter: clamp(1rem, 3vw, 3.5rem);
+  display: grid;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  padding: var(--desen-canvas-plane-top-gutter) var(--desen-canvas-plane-x-gutter)
+    var(--desen-canvas-plane-bottom-gutter);
+  place-items: center;
+}
+
+.canvasStage[data-canvas-ready="true"] .canvasPlane {
+  min-width: max(
+    100%,
+    calc(var(--desen-canvas-frame-width) + (var(--desen-canvas-plane-x-gutter) * 2))
+  );
+  min-height: max(
+    100%,
+    calc(
+      var(--desen-canvas-frame-height) + var(--desen-canvas-plane-top-gutter) +
+        var(--desen-canvas-plane-bottom-gutter)
+    )
+  );
+}
+
+.canvasFrame {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: var(--desen-canvas-frame-width);
+  height: var(--desen-canvas-frame-height);
+  min-width: var(--desen-canvas-frame-width);
+  min-height: var(--desen-canvas-frame-height);
+  margin: 0;
+  overflow: hidden;
+  background: var(--desen-app-surface);
+  border: 1px solid color-mix(in srgb, var(--desen-app-border-strong) 74%, white);
+  border-radius: 0.75rem;
+  box-shadow: 0 1.5rem 4rem color-mix(in srgb, var(--desen-app-text) 10%, transparent);
+}
+
+.canvasFrameUnavailable {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 24rem);
+  padding: 1rem;
+  margin: 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  text-align: center;
+  background: var(--desen-app-surface);
+  border: 1px dashed var(--desen-app-border-strong);
+  border-radius: 0.75rem;
+  box-shadow: var(--desen-app-shadow-xs);
+}
+
 .modeControl {
   display: grid;
+  flex: 0 0 auto;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   padding: 0.1875rem;
   background: var(--desen-app-surface-subtle);
@@ -3574,15 +3776,173 @@
   outline-offset: 2px;
 }
 
-.modeSafety {
-  min-height: 1.875rem;
-  padding: 0.4375rem 0.75rem;
-  margin: 0;
+.workspacePreviewStatus,
+.workspaceSessionStatus {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--desen-app-text-muted);
+  font-size: 0.5rem;
+  font-weight: 590;
+  line-height: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspacePreviewStatus {
+  display: inline-flex;
+  flex: 0 1 13rem;
+  gap: 0.3125rem;
+  align-items: center;
+}
+
+.workspacePreviewStatus::before {
+  width: 0.375rem;
+  height: 0.375rem;
+  flex: 0 0 auto;
+  background: var(--desen-app-accent);
+  border-radius: 50%;
+  content: "";
+}
+
+.workspacePreviewStatus[data-workspace-preview-status="run"]::before {
+  background: var(--desen-app-success);
+}
+
+.workspaceSessionStatus {
+  display: inline-flex;
+  flex: 0 1 10rem;
+  gap: 0.25rem;
+  align-items: center;
   color: var(--desen-app-text-soft);
+}
+
+.workspaceLifecycle,
+.workspaceBoundary {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  min-width: 0;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.625rem;
+  box-shadow: var(--desen-app-shadow-xs);
+}
+
+.workspaceLifecycle summary,
+.workspaceBoundary summary {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 2rem;
+  padding: 0.375rem 0.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.workspaceLifecycle summary::-webkit-details-marker,
+.workspaceBoundary summary::-webkit-details-marker {
+  display: none;
+}
+
+.workspaceLifecycle summary > span:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 0.03125rem;
+}
+
+.workspaceLifecycle summary strong,
+.workspaceBoundary summary strong {
+  color: var(--desen-app-text);
+  font-size: 0.5625rem;
+  font-weight: 620;
+  line-height: 0.75rem;
+}
+
+.workspaceLifecycle summary small,
+.workspaceBoundary summary span {
+  overflow: hidden;
+  color: var(--desen-app-text-soft);
+  font-size: 0.46875rem;
+  line-height: 0.625rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspaceLifecycle summary:focus-visible,
+.workspaceBoundary summary:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: 2px;
+}
+
+.workspaceLifecycleChevron {
+  position: relative;
+  display: block;
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  border-right: 1px solid var(--desen-app-text-muted);
+  border-bottom: 1px solid var(--desen-app-text-muted);
+  transform: rotate(45deg) translate(-0.0625rem, -0.0625rem);
+  transition: transform 140ms ease;
+}
+
+.workspaceLifecycle[open] .workspaceLifecycleChevron {
+  transform: rotate(225deg) translate(-0.0625rem, -0.0625rem);
+}
+
+.workspaceLifecycleBody {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  display: grid;
+  width: min(42rem, calc(100vw - 2rem));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--desen-app-shadow-overlay);
+}
+
+.workspaceLifecycleBody > :first-child {
+  border-right: 1px solid var(--desen-app-border);
+}
+
+.workspaceLifecycleBody .persistenceControls,
+.workspaceLifecycleBody .publicationControls {
+  min-width: 0;
+  border-bottom: 0;
+}
+
+.workspaceBoundary summary {
+  justify-content: flex-start;
+}
+
+.workspaceBoundary p {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 0.625rem;
+  margin: 0;
+  color: var(--desen-app-text-muted);
   font-size: 0.53125rem;
-  line-height: 0.875rem;
-  background: color-mix(in srgb, var(--desen-app-surface-subtle) 72%, transparent);
-  border-bottom: 1px solid var(--desen-app-border);
+  line-height: 0.8125rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.625rem;
+  box-shadow: var(--desen-app-shadow-overlay);
+}
+
+.workspaceBoundary:not([open]) p {
+  display: none;
+}
+
+.workspaceToolbar h2 {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .previewDisclosure {
@@ -3659,43 +4019,13 @@
   font-weight: 600;
 }
 
-.surfaceFrameBody {
-  display: block;
-  min-height: 0;
-  overflow: auto;
-  flex: 1;
-  padding: 1.5rem;
-  background: color-mix(in srgb, var(--desen-app-canvas) 68%, white);
-}
-
-.surfaceFrame[data-mode="run"] {
-  width: min(46rem, calc(100vw - 3rem));
-  height: min(42rem, calc(100vh - 9.5rem));
-  height: min(42rem, calc(100dvh - 9.5rem));
-  min-height: 30rem;
-  border-radius: 1rem;
-  box-shadow: var(--desen-app-shadow-overlay);
-}
-
-.surfaceFrame[data-mode="run"] .surfaceFrameBody {
-  padding: clamp(1.5rem, 4vw, 3rem);
-  background: color-mix(in srgb, var(--desen-app-canvas) 82%, white);
-}
-
-.surfaceFrame[data-mode="run"] .adapterCanvas {
-  max-width: 34rem;
-  margin: 0 auto;
-}
-
-.surfaceFrame[data-mode="run"] .adapterCanvasSurface {
-  box-shadow: 0 1.25rem 3.5rem color-mix(in srgb, var(--desen-app-text) 10%, transparent);
-}
-
 .adapterCanvas {
   display: grid;
   width: 100%;
+  height: 100%;
   min-width: 0;
-  gap: 0.75rem;
+  min-height: 0;
+  gap: 0;
   padding: 0;
   margin: 0;
   color: var(--desen-app-text);
@@ -3705,12 +4035,17 @@
 
 .adapterCanvasViewport {
   position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   isolation: isolate;
 }
 
 .adapterCanvasManaged {
   width: 100%;
+  height: 100%;
   min-width: 0;
+  min-height: 0;
   padding: 0;
   margin: 0;
   color: var(--desen-app-text);
@@ -3761,13 +4096,17 @@
 }
 
 .adapterCanvasSurface {
+  display: grid;
   width: 100%;
+  height: 100%;
   min-height: 17rem;
-  padding: 1.25rem;
-  background: var(--desen-app-surface);
-  border: 1px solid var(--desen-app-border);
-  border-radius: 0.75rem;
-  box-shadow: var(--desen-app-shadow-xs);
+  align-content: center;
+  justify-items: center;
+  padding: clamp(2rem, 10%, 4.5rem) 1.5rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .selectionOverlay {
@@ -3922,24 +4261,6 @@
   border-radius: 0.75rem;
 }
 
-.boundaryNote {
-  display: grid;
-  gap: 0.25rem;
-  padding: 0.75rem;
-  border-top: 1px solid var(--desen-app-border);
-}
-
-.boundaryNote strong {
-  font-size: 0.625rem;
-  font-weight: 560;
-}
-
-.boundaryNote span {
-  color: var(--desen-app-text-muted);
-  font-size: 0.5625rem;
-  line-height: 0.875rem;
-}
-
 .runControlsBody {
   display: grid;
   min-height: 0;
@@ -4045,29 +4366,6 @@
 .runControlsBoundary {
   padding: 0.625rem 0.75rem;
   border-top: 1px solid var(--desen-app-border);
-}
-
-.editorStatus {
-  position: fixed;
-  bottom: 1rem;
-  left: 50%;
-  z-index: 10;
-  display: flex;
-  gap: 0.375rem;
-  align-items: center;
-  min-height: 2rem;
-  max-width: calc(100vw - 2rem);
-  padding: 0.5rem 0.75rem;
-  overflow: hidden;
-  color: var(--desen-app-text-muted);
-  font-size: 0.625rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  background: var(--desen-app-surface);
-  border: 1px solid var(--desen-app-border);
-  border-radius: 99px;
-  box-shadow: var(--desen-app-shadow-overlay);
-  transform: translateX(-50%);
 }
 
 .notFound {
@@ -4202,53 +4500,105 @@
   }
 
   .surfaceEditor {
+    height: calc(100vh - 8.75rem);
+    height: calc(100dvh - 8.75rem);
     min-height: calc(100vh - 8.75rem);
     min-height: calc(100dvh - 8.75rem);
-    padding-bottom: 3rem;
-  }
-
-  .surfaceFrame {
-    height: min(35rem, calc(100vh - 11.25rem));
-    height: min(35rem, calc(100dvh - 11.25rem));
-    min-height: 25rem;
-  }
-
-  .editorStatus {
-    bottom: 0.75rem;
+    padding-bottom: 0.5rem;
   }
 }
 
 @media (max-width: 64rem) {
+  .main[data-surface-editor="true"] {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
   .surfaceEditor {
-    display: flex;
+    display: grid;
+    height: auto;
     min-height: auto;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-    padding-bottom: 3.75rem;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(48rem, 72vh) auto auto;
+    gap: 0.75rem;
+    align-items: stretch;
+    padding-bottom: 2rem;
+  }
+
+  .workspaceCommandBar {
+    flex-wrap: wrap;
+  }
+
+  .workspaceCommands {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .workspaceLifecycle,
+  .workspaceBoundary {
+    width: 100%;
+  }
+
+  .workspaceLifecycleBody,
+  .workspaceBoundary p {
+    inset-inline: 0;
+    width: auto;
+  }
+
+  .workspacePreviewStatus,
+  .workspaceSessionStatus {
+    flex-basis: auto;
+  }
+
+  .canvasWorkspace {
+    position: relative;
+    inset: auto;
+    z-index: 1;
+    width: min(100%, 46rem);
+    min-height: 48rem;
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: center;
   }
 
   .authoringPanel,
   .inspectorPanel,
   .runControls {
-    position: static;
-    width: min(100%, 30rem);
-    max-height: 33rem;
+    width: min(100%, 46rem);
+    margin: 0;
+    max-height: 38rem;
+    grid-column: 1;
+    justify-self: center;
   }
 
-  .authoringPanel[data-active-tab="actions"] {
-    width: min(100%, 30rem);
+  .authoringPanel {
+    min-height: 34rem;
+    grid-row: 3;
   }
 
-  .surfaceFrame {
-    flex: 0 0 auto;
+  .inspectorPanel,
+  .runControls {
+    grid-row: 4;
   }
 
-  .editorStatus {
-    position: static;
-    max-width: 100%;
-    margin-top: -0.25rem;
-    transform: none;
+  .canvasStage {
+    min-height: 48rem;
+  }
+
+  .canvasPlane {
+    min-height: 48rem;
+  }
+
+  .workspaceLifecycleBody {
+    grid-template-columns: 1fr;
+  }
+
+  .workspaceLifecycleBody > :first-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--desen-app-border);
   }
 }
 
@@ -4265,8 +4615,15 @@
     padding: 0 0.4rem;
   }
 
-  .surfaceFrameBody {
-    padding: 1.25rem;
+  .canvasStage {
+    min-height: 36rem;
+  }
+
+  .canvasPlane {
+    --desen-canvas-plane-x-gutter: 1.25rem;
+    --desen-canvas-plane-top-gutter: 1.25rem;
+    --desen-canvas-plane-bottom-gutter: 1.25rem;
+    min-height: 36rem;
   }
 }
 

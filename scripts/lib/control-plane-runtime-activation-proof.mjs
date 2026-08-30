@@ -68,7 +68,7 @@ const TYPED_ARRAY_BYTE_OFFSET_GETTER = Object.getOwnPropertyDescriptor(
 const UINT8_ARRAY_SET = Uint8Array.prototype.set;
 const execFileAsync = promisify(execFile);
 
-const EXPECTED_REVISION = "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb";
+const EXPECTED_REVISION = "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13";
 const REVISION_A = `sha256:${"a".repeat(64)}`;
 const REVISION_B = `sha256:${"b".repeat(64)}`;
 const TRACE_IDS = Object.freeze([
@@ -483,7 +483,11 @@ async function authenticatedFrozenArtifactProjection() {
   if (artifact.schemaVersion !== 1 || artifact.task !== "M07-T07" || artifact.result !== "PASS") {
     fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T07 artifact identity drifted.");
   }
-  return artifact;
+  return Object.freeze({
+    artifact: deepFreeze(artifact),
+    artifactBytes: Buffer.from(frozen.bytes),
+    artifactSha256: frozen.sha256,
+  });
 }
 
 function parseTypescript(source, relativePath, code = "TEST_AUTHORITY_DRIFT") {
@@ -1919,7 +1923,8 @@ export async function buildControlPlaneRuntimeActivationEvidence(options) {
     new Set(["prerequisiteBytes", "runtimeReceipt", "trackedFileBytes"]),
     "build options",
   );
-  const frozenArtifact = await authenticatedFrozenArtifactProjection();
+  const frozen = await authenticatedFrozenArtifactProjection();
+  const frozenArtifact = frozen.artifact;
   const trackedPaths = [
     ...TRACKED_TASK_FILES,
     TRACEABILITY,
@@ -1968,7 +1973,7 @@ export async function buildControlPlaneRuntimeActivationEvidence(options) {
   if (JSON.stringify(runtimeReceipt.publicModuleKeys) !== JSON.stringify(expectedRuntimeKeys)) {
     fail("RUNTIME_PROBE_MISMATCH", "Built runtime exports disagree with the package-root source.");
   }
-  const artifact = deepFreeze({
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "control-plane-runtime-activation",
     profile: "desen.control-plane.runtime-activation-proof.v1",
@@ -2035,12 +2040,17 @@ export async function buildControlPlaneRuntimeActivationEvidence(options) {
       "node --test tests/control-plane-runtime-activation.test.mjs",
     ],
   });
-  const artifactText = await format(JSON.stringify(artifact), { parser: "json", printWidth: 100 });
-  const artifactBytes = Buffer.from(artifactText, "utf8");
+  const currentCompatibilityText = await format(JSON.stringify(currentCompatibility), {
+    parser: "json",
+    printWidth: 100,
+  });
+  const currentCompatibilityBytes = Buffer.from(currentCompatibilityText, "utf8");
   return Object.freeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifact: frozenArtifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+    currentCompatibilitySha256: sha256(currentCompatibilityBytes),
     runtimeReceipt,
   });
 }
@@ -2116,6 +2126,9 @@ export async function verifyControlPlaneRuntimeActivationEvidence(options) {
     task: "M07-T07",
     result: "PASS",
     artifactSha256: built.artifactSha256,
+    currentCompatibilitySha256: built.currentCompatibilitySha256,
+    currentRevision:
+      built.currentCompatibility.claims.officialFirstActivation.record.activeRevision,
     packageRuntimeCases: built.artifact.tests.packageRuntimeCases,
     compileTimeNegativeCases: built.artifact.tests.compileTimeNegativeCases,
     rootMutationCases: built.artifact.tests.rootMutationCases,

@@ -9,6 +9,7 @@ import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import { verifyReferenceCatalogWebComponentsEvidence } from "./reference-catalog-web-components-proof.mjs";
 import {
   DEFAULT_REFERENCE_SIGN_IN_FIXTURES_AND_HOST_BINDING_ARTIFACT_PATH,
   verifyReferenceSignInFixturesAndHostBindingEvidence,
@@ -257,10 +258,19 @@ const EXPECTED_PARITY_TYPE_EXPORTS = Object.freeze([
   "ReferenceWebTrustedComponentBindings",
 ]);
 
+const HISTORICAL_FOUNDATION_TEST_TITLES = Object.freeze([
+  "registers exact closed public contracts as detached immutable data",
+  "renders Stack as a neutral flex container while preserving child order",
+  "keeps Stack defaults deterministic and does not invent spacing",
+  "maps Text roles to native non-interactive semantics",
+  "renders hostile markup-like text as inert escaped content",
+]);
 const EXPECTED_PACKAGE_TESTS = Object.freeze({
   foundation: Object.freeze([
     "registers exact closed public contracts as detached immutable data",
     "renders Stack as a neutral flex container while preserving child order",
+    "keeps a maxWidth layout frame independent from conditional child content",
+    "preserves the same frame contract through the public Stack React adapter",
     "keeps Stack defaults deterministic and does not invent spacing",
     "maps Text roles to native non-interactive semantics",
     "renders hostile markup-like text as inert escaped content",
@@ -367,6 +377,17 @@ const HISTORICAL_ROOT_TEST_RECORD = Object.freeze({
   bytes: 26_148,
   sha256: "e5dfc582b0743522db9e7ed2fa29df0a41dade40890a8ed950a4a8b220e55951",
 });
+const HISTORICAL_STACK_SOURCE_RECORD = Object.freeze({
+  path: "packages/reference-catalog-web/src/components/stack.tsx",
+  bytes: 1_827,
+  sha256: "88b3cf3059253018e8865cbfa8e37b5c449b55d06430a9a046f4e1511b45f796",
+});
+const HISTORICAL_FOUNDATION_TEST_RECORD = Object.freeze({
+  path: "packages/reference-catalog-web/test/foundation-components.test.tsx",
+  bytes: 3_780,
+  sha256: "2664a6e5de2221164dbbf8f7230bb2db38350aecb4172ee3adaddedb22fcfb44",
+});
+const STACK_COMPATIBILITY_MODE = "fluid-max-width-layout-frame-v1";
 
 const STRONG_TRACE_IDS = Object.freeze([
   "A-005",
@@ -1374,7 +1395,7 @@ function extractNegativeCases(source) {
 }
 
 function inspectInventories(text) {
-  const packageTests = {
+  const successorPackageTests = {
     foundation: extractTestTitles(text.foundationTestPath),
     interaction: extractTestTitles(text.interactiveTestPath),
     metadata: extractTestTitles(text.metadataTestPath),
@@ -1382,7 +1403,7 @@ function inspectInventories(text) {
   };
   for (const [group, expected] of Object.entries(EXPECTED_PACKAGE_TESTS)) {
     assertJsonEqual(
-      packageTests[group],
+      successorPackageTests[group],
       expected,
       "REFERENCE_PARITY_TEST_INVENTORY_DRIFT",
       `${group} package-test inventory drifted.`,
@@ -1402,7 +1423,15 @@ function inspectInventories(text) {
     "REFERENCE_PARITY_TYPE_INVENTORY_DRIFT",
     "Compiler-negative parity inventory drifted.",
   );
-  return Object.freeze({ packageTests, rootTests, typeNegativeCases: negatives });
+  return Object.freeze({
+    packageTests: Object.freeze({
+      ...successorPackageTests,
+      foundation: HISTORICAL_FOUNDATION_TEST_TITLES,
+    }),
+    successorPackageTests: Object.freeze(successorPackageTests),
+    rootTests,
+    typeNegativeCases: negatives,
+  });
 }
 
 function collectTraceRows(value, rows = new Map()) {
@@ -1713,6 +1742,12 @@ async function trackedFileHashes() {
     TRACKED_EVIDENCE_PATHS.map(async (relativePath) => {
       if (relativePath === HISTORICAL_SELF_RECORD.path) return HISTORICAL_SELF_RECORD;
       if (relativePath === HISTORICAL_ROOT_TEST_RECORD.path) return HISTORICAL_ROOT_TEST_RECORD;
+      if (relativePath === HISTORICAL_STACK_SOURCE_RECORD.path) {
+        return HISTORICAL_STACK_SOURCE_RECORD;
+      }
+      if (relativePath === HISTORICAL_FOUNDATION_TEST_RECORD.path) {
+        return HISTORICAL_FOUNDATION_TEST_RECORD;
+      }
       const absolutePath = path.join(workspace, relativePath);
       const [entry, resolved] = await Promise.all([lstat(absolutePath), realpath(absolutePath)]);
       assertCondition(
@@ -2053,6 +2088,11 @@ export async function buildReferenceCatalogWebParityEvidence(options = undefined
     artifactBytes,
     artifactSha256: sha256(artifactBytes),
     fixturesScenariosSuccessor,
+    successorCompatibility: Object.freeze({
+      mode: STACK_COMPATIBILITY_MODE,
+      foundationPackageTests: inventories.successorPackageTests.foundation.length,
+      packageTests: Object.values(inventories.successorPackageTests).flat().length,
+    }),
   });
 }
 
@@ -2093,12 +2133,40 @@ export async function verifyReferenceCatalogWebParityEvidence(options = undefine
   }
   const expected = await buildReferenceCatalogWebParityEvidence(buildOptions);
   const actualBytes = Buffer.from(normalized.artifactBytes ?? (await readFile(artifactPath)));
+  if (
+    tracked &&
+    (actualBytes.byteLength !== HISTORICAL_PARITY_ARTIFACT_PIN.bytes ||
+      sha256(actualBytes) !== HISTORICAL_PARITY_ARTIFACT_PIN.sha256 ||
+      expected.artifactBytes.byteLength !== HISTORICAL_PARITY_ARTIFACT_PIN.bytes ||
+      expected.artifactSha256 !== HISTORICAL_PARITY_ARTIFACT_PIN.sha256)
+  ) {
+    fail(
+      "REFERENCE_PARITY_ARTIFACT_DRIFT",
+      "The immutable M03-T09 artifact receipt changed while reading its current successor.",
+    );
+  }
   assertCondition(
     actualBytes.equals(expected.artifactBytes),
     "REFERENCE_PARITY_ARTIFACT_DRIFT",
     "The M03-T09 artifact differs from a fresh deterministic build.",
     { expectedSha256: expected.artifactSha256, actualSha256: sha256(actualBytes) },
   );
+  const componentSuccessor = tracked
+    ? await verifyReferenceCatalogWebComponentsEvidence()
+    : undefined;
+  if (
+    tracked &&
+    (componentSuccessor?.artifactSha256 !==
+      "788b68af9520ebf49fac1d39a505bc11e153f6a1d7a5ab89f57c9207b251cc51" ||
+      componentSuccessor.compatibilityMode !== STACK_COMPATIBILITY_MODE ||
+      componentSuccessor.successorPackageTests !==
+        expected.successorCompatibility.foundationPackageTests)
+  ) {
+    fail(
+      "REFERENCE_PARITY_COMPONENT_SUCCESSOR_DRIFT",
+      "The reviewed M03-T05 Stack successor did not authenticate before parity verification.",
+    );
+  }
   return Object.freeze({
     result: "PASS",
     artifactSha256: expected.artifactSha256,
@@ -2115,6 +2183,10 @@ export async function verifyReferenceCatalogWebParityEvidence(options = undefine
     proofMatrixStatus: `${expected.artifact.evidence.claimDocuments.proofMatrixStatuses[0].id} ${expected.artifact.evidence.claimDocuments.proofMatrixStatuses[0].status}`,
     normativeStatus: "S-004 TESTED",
     successorNormativeStatus: `S-001 ${expected.fixturesScenariosSuccessor.s001Status}`,
+    compatibilityMode: expected.successorCompatibility.mode,
+    successorPackageTests: expected.successorCompatibility.packageTests,
+    successorFoundationPackageTests: expected.successorCompatibility.foundationPackageTests,
+    componentSuccessorArtifactSha256: componentSuccessor?.artifactSha256,
   });
 }
 

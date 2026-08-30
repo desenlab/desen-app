@@ -30,7 +30,7 @@ const EXPECTED_TUPLE = Object.freeze({
   id: "run.desen.reference.sign-in",
   version: "0.1.0",
   target: "web-react",
-  packageDigest: "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+  packageDigest: "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051",
 });
 
 const PREREQUISITES = Object.freeze([
@@ -699,10 +699,14 @@ async function authenticatedFrozenArtifactProjection() {
     }
     seenPaths.add(receipt.path);
   }
+  const frozenArtifact = freezeJson(artifact);
   return Object.freeze({
-    trackedFiles: freezeJson(artifact.trackedFiles),
-    rootApiPrivacy: freezeJson(artifact.claims.rootApiPrivacy),
-    tests: freezeJson(artifact.tests),
+    artifact: frozenArtifact,
+    artifactBytes: Buffer.from(authority.bytes),
+    artifactSha256: authority.sha256,
+    trackedFiles: frozenArtifact.trackedFiles,
+    rootApiPrivacy: frozenArtifact.claims.rootApiPrivacy,
+    tests: frozenArtifact.tests,
   });
 }
 
@@ -798,7 +802,7 @@ export async function buildPublisherCatalogResolutionEvidence(rawOptions = undef
     );
   }
 
-  const artifact = Object.freeze({
+  const currentCompatibility = Object.freeze({
     schemaVersion: 1,
     profile: "desen.publisher.catalog-resolution-proof.v1",
     task: "M06-T02",
@@ -849,17 +853,19 @@ export async function buildPublisherCatalogResolutionEvidence(rawOptions = undef
     ]),
   });
 
-  const artifactText = await format(JSON.stringify(artifact), {
+  const currentCompatibilityText = await format(JSON.stringify(currentCompatibility), {
     parser: "json",
     printWidth: 100,
     tabWidth: 2,
     endOfLine: "lf",
   });
-  const artifactBytes = Buffer.from(artifactText, "utf8");
+  const currentCompatibilityBytes = Buffer.from(currentCompatibilityText, "utf8");
   return Object.freeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifact: frozenArtifact.artifact,
+    artifactBytes: frozenArtifact.artifactBytes,
+    artifactSha256: frozenArtifact.artifactSha256,
+    currentCompatibility,
+    currentCompatibilitySha256: sha256(currentCompatibilityBytes),
   });
 }
 
@@ -893,7 +899,7 @@ export async function verifyPublisherCatalogResolutionEvidence(rawOptions = unde
     proofVectors: 9,
     trackedFiles: built.artifact.trackedFiles.length,
     tests: built.artifact.tests,
-    exactTuple: built.artifact.fixture.exactTuple,
+    exactTuple: built.currentCompatibility.fixture.exactTuple,
     proofDocumentPinned: true,
   });
 }

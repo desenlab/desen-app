@@ -130,6 +130,17 @@ test("accepts the tracked deterministic M03-T09 evidence", async () => {
   assert.equal(result.proofMatrixStatus, "P-06 PARTIAL");
   assert.equal(result.normativeStatus, "S-004 TESTED");
   assert.equal(result.successorNormativeStatus, "S-001 TESTED");
+  assert.equal(
+    result.artifactSha256,
+    "6e350f2af71ac4e1f040afe7a3fcc3035de35b585f0121db6a2b35b4f3552a8a",
+  );
+  assert.equal(result.compatibilityMode, "fluid-max-width-layout-frame-v1");
+  assert.equal(result.successorPackageTests, 28);
+  assert.equal(result.successorFoundationPackageTests, 7);
+  assert.equal(
+    result.componentSuccessorArtifactSha256,
+    "788b68af9520ebf49fac1d39a505bc11e153f6a1d7a5ab89f57c9207b251cc51",
+  );
 });
 
 test("builds byte-identical injected evidence twice", async () => {
@@ -140,6 +151,9 @@ test("builds byte-identical injected evidence twice", async () => {
   assert.equal(first.artifact.prerequisite.packageDigest.result, "SKIPPED");
   assert.equal(first.artifact.prerequisite.signIn.result, "SKIPPED");
   assert.equal(first.artifact.catalogScope.officialCatalogRepublished, false);
+  assert.equal(first.artifact.evidence.packageTests.foundation.length, 5);
+  assert.equal(first.successorCompatibility.foundationPackageTests, 7);
+  assert.equal(first.successorCompatibility.packageTests, 28);
   assert.deepEqual(first.fixturesScenariosSuccessor, {
     task: "M09-T11",
     artifactBytes: 29_407,

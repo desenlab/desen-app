@@ -69,8 +69,8 @@ const TYPED_ARRAY_BYTE_OFFSET_GETTER = Object.getOwnPropertyDescriptor(
 const UINT8_ARRAY_SET = Uint8Array.prototype.set;
 const execFileAsync = promisify(execFile);
 
-const REVISION_A = "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb";
-const REVISION_B = "sha256:cdd16ae0764d3de1199e0e93a0baf7b183ea50ecb207f21cbd197bd1bbcb4ca6";
+const REVISION_A = "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13";
+const REVISION_B = "sha256:c344310d7e83089d8cc3a8b16d7d6fbc739afe424d88c80f258ffb64341ff61c";
 const TRACE_IDS = Object.freeze(["PIPE-017", "A-009"]);
 const CI_TUPLE = Object.freeze([
   "control-plane-runtime-recovery",
@@ -86,7 +86,7 @@ const EXPECTED_IMPLEMENTATION_SEMANTIC_SHA256 = Object.freeze({
   [APP_FACTORY]: "c218626f5be645e8f685ce872fa222f908549f6c147cfc84613e6ff625b83931",
 });
 const EXPECTED_TEST_AUTHORITY_SHA256 = Object.freeze({
-  [APP_RECOVERY_TEST]: "904b0495417f5978c4eb71f3d3be18c5cab3dc9e9027b6e37721d4a630baadde",
+  [APP_RECOVERY_TEST]: "a6ae9ea380fe246a9d9136428638726f27061a087e53ca5a63a215acf8500d01",
   [APP_RECOVERY_TYPE_TEST]: "0760afa5ac944fbfcb5b5e46fffe416286214d7dc8c0111058c276de31b8cf52",
 });
 const EXPECTED_RUNTIME_RECOVERY_SUITE_NAME = "M07-T08 restart recovery";
@@ -635,7 +635,11 @@ async function authenticatedFrozenArtifactProjection() {
   if (artifact.schemaVersion !== 1 || artifact.task !== "M07-T08" || artifact.result !== "PASS") {
     fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T08 artifact identity drifted.");
   }
-  return artifact;
+  return Object.freeze({
+    artifact: deepFreeze(artifact),
+    artifactBytes: Buffer.from(frozen.bytes),
+    artifactSha256: frozen.sha256,
+  });
 }
 
 async function prerequisiteReceipts(overrides) {
@@ -1966,12 +1970,12 @@ function expectedRuntimeReceipt() {
       before: {
         row: record,
         bytes: 8_192,
-        sha256: "d82f0b5dcad4ff2b8398724b79fe91f01243cc04d6747ca98a137b35e9564f61",
+        sha256: "8217382a675399c17a25f9176388edb2d28057e92fbbb2b0a0387edbdd11be75",
       },
       after: {
         row: record,
         bytes: 8_192,
-        sha256: "d82f0b5dcad4ff2b8398724b79fe91f01243cc04d6747ca98a137b35e9564f61",
+        sha256: "8217382a675399c17a25f9176388edb2d28057e92fbbb2b0a0387edbdd11be75",
       },
       recordUnchanged: true,
       databaseBytesUnchanged: true,
@@ -2035,7 +2039,8 @@ export async function buildControlPlaneRuntimeRecoveryEvidence(options) {
     new Set(["prerequisiteBytes", "runtimeReceipt", "trackedFileBytes"]),
     "build options",
   );
-  const frozenArtifact = await authenticatedFrozenArtifactProjection();
+  const frozen = await authenticatedFrozenArtifactProjection();
+  const frozenArtifact = frozen.artifact;
   const prerequisiteBytes = captureByteOverrides(
     captured.prerequisiteBytes,
     CONTROL_PLANE_RUNTIME_RECOVERY_PREREQUISITE_PINS.map(({ path: pinPath }) => pinPath),
@@ -2068,7 +2073,7 @@ export async function buildControlPlaneRuntimeRecoveryEvidence(options) {
     testProjection(trackedFileBytes),
     traceProjection(trackedFileBytes),
   ]);
-  const artifact = deepFreeze({
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "control-plane-runtime-recovery",
     profile: "desen.control-plane.runtime-recovery-proof.v1",
@@ -2123,12 +2128,17 @@ export async function buildControlPlaneRuntimeRecoveryEvidence(options) {
       "node --test tests/control-plane-runtime-recovery.test.mjs",
     ],
   });
-  const artifactText = await format(JSON.stringify(artifact), { parser: "json", printWidth: 100 });
-  const artifactBytes = Buffer.from(artifactText, "utf8");
+  const currentCompatibilityText = await format(JSON.stringify(currentCompatibility), {
+    parser: "json",
+    printWidth: 100,
+  });
+  const currentCompatibilityBytes = Buffer.from(currentCompatibilityText, "utf8");
   return Object.freeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifact: frozenArtifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+    currentCompatibilitySha256: sha256(currentCompatibilityBytes),
     runtimeReceipt,
   });
 }
@@ -2210,6 +2220,10 @@ export async function verifyControlPlaneRuntimeRecoveryEvidence(options) {
     task: "M07-T08",
     result: "PASS",
     artifactSha256: built.artifactSha256,
+    currentCompatibilitySha256: built.currentCompatibilitySha256,
+    currentActiveRevision: built.currentCompatibility.claims.durableRecord.activeRevision,
+    currentPreviousGoodRevision:
+      built.currentCompatibility.claims.durableRecord.previousGoodRevision,
     packageRuntimeCases: built.artifact.tests.packageRuntimeCases,
     compileTimeNegativeCases: built.artifact.tests.compileTimeNegativeCases,
     rootMutationCases: built.artifact.tests.rootMutationCases,

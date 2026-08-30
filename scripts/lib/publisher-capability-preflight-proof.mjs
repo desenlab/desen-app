@@ -1342,10 +1342,14 @@ async function authenticatedFrozenArtifactProjection() {
   ) {
     fail("PUBLISHER_CAPABILITY_ARTIFACT_DRIFT", "The authenticated M06-T04 projection drifted.");
   }
+  const frozenArtifact = freezeJson(artifact);
   return Object.freeze({
-    trackedFiles: freezeJson(artifact.trackedFiles),
-    rootApiPrivacy: freezeJson(artifact.claims.rootApiPrivacy),
-    tests: freezeJson(artifact.tests),
+    artifact: frozenArtifact,
+    artifactBytes: Buffer.from(authority.bytes),
+    artifactSha256: authority.sha256,
+    trackedFiles: frozenArtifact.trackedFiles,
+    rootApiPrivacy: frozenArtifact.claims.rootApiPrivacy,
+    tests: frozenArtifact.tests,
   });
 }
 
@@ -1504,7 +1508,7 @@ export async function buildPublisherCapabilityPreflightEvidence(rawOptions = und
     );
   }
 
-  const artifact = Object.freeze({
+  const currentCompatibility = Object.freeze({
     schemaVersion: 1,
     profile: "desen.publisher.capability-preflight-proof.v1",
     task: "M06-T04",
@@ -1583,17 +1587,19 @@ export async function buildPublisherCapabilityPreflightEvidence(rawOptions = und
     ]),
   });
 
-  const artifactText = await format(JSON.stringify(artifact), {
+  const currentCompatibilityText = await format(JSON.stringify(currentCompatibility), {
     parser: "json",
     printWidth: 100,
     tabWidth: 2,
     endOfLine: "lf",
   });
-  const artifactBytes = Buffer.from(artifactText, "utf8");
+  const currentCompatibilityBytes = Buffer.from(currentCompatibilityText, "utf8");
   return Object.freeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifact: frozenArtifact.artifact,
+    artifactBytes: frozenArtifact.artifactBytes,
+    artifactSha256: frozenArtifact.artifactSha256,
+    currentCompatibility,
+    currentCompatibilitySha256: sha256(currentCompatibilityBytes),
   });
 }
 

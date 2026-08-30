@@ -41,7 +41,12 @@ export function Stack({ align, children, direction = "vertical", gap, maxWidth }
     display: "flex",
     flexDirection: direction === "horizontal" ? "row" : "column",
     ...(gap === undefined ? {} : { gap: GAP_VALUES[gap] }),
-    ...(maxWidth === undefined ? {} : { maxWidth }),
+    // A declared maxWidth defines a responsive layout frame, not an intrinsic-content hint.
+    // Without the fluid width, conditional children (for example an Alert) can change the
+    // computed width of a centered Stack between runtime states. The combination below keeps the
+    // authored frame stable at its available width up to the declared cap while still shrinking
+    // safely in narrower hosts.
+    ...(maxWidth === undefined ? {} : { maxWidth, minWidth: 0, width: "100%" }),
     ...(align === undefined ? {} : { alignItems: ALIGNMENT_VALUES[align] }),
   };
 

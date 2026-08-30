@@ -186,6 +186,19 @@ test("builds a deterministic real Vite graph and semantic TypeScript inventory",
   assert.equal(first.artifact.sourceAudit.sourceFiles, 13);
   assert.equal(first.artifact.sourceAudit.publicRuntimeReactRenderPreflightCalls, 1);
   assert.equal(first.artifact.sourceAudit.jsxElements, 18);
+  const currentReceipts = new Map(
+    first.artifact.evidence.trackedFiles.map((receipt) => [receipt.path, receipt]),
+  );
+  assert.deepEqual(currentReceipts.get("examples/sign-in/official-derived.bundle.desen.json"), {
+    path: "examples/sign-in/official-derived.bundle.desen.json",
+    bytes: 4_899,
+    sha256: "sha256:f8068e54e0880a3ea8dc18a568c9b6e9ccbcead942da5708f88a1b650c9932ef",
+  });
+  assert.deepEqual(currentReceipts.get("packages/reference-catalog-web/catalog.json"), {
+    path: "packages/reference-catalog-web/catalog.json",
+    bytes: 8_439,
+    sha256: "sha256:5d30b58b2ecb630fcefc70a2e5a5b1dc0b228d028ba768194c5b06429949727a",
+  });
   assert.equal(first.artifact.runtimeResolution.tool, "vite@8.1.5");
   assert.equal(first.artifact.runtimeResolution.observer, "moduleParsed");
   assert.equal(first.artifact.runtimeResolution.independentBuilds, 2);

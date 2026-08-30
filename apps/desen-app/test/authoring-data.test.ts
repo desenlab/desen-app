@@ -2,10 +2,34 @@ import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 import { describe, expect, it } from "vitest";
 
 import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
-import { prepareCatalogAuthoringModel, REFERENCE_AUTHORING_MODEL } from "../src/authoring-data.js";
+import {
+  AUTHORING_CANVAS_FRAME_LIMITS,
+  prepareCatalogAuthoringModel,
+  projectAuthoringCanvasFrame,
+  REFERENCE_AUTHORING_MODEL,
+} from "../src/authoring-data.js";
+
+import type { DesenEditorDocument } from "@desen/editor-core";
+
+type MutableRecord = Record<string, unknown>;
 
 function copyJson<Value>(value: Value): Value {
   return JSON.parse(JSON.stringify(value)) as Value;
+}
+
+function requireRecord(value: unknown, path: string): MutableRecord {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new TypeError(`${path} must be an object.`);
+  }
+  return value as MutableRecord;
+}
+
+function authoringCanvas(source: MutableRecord): MutableRecord {
+  return requireRecord(requireRecord(source.authoring, "authoring").canvas, "authoring.canvas");
+}
+
+function asEditorDocument(source: unknown): DesenEditorDocument {
+  return source as DesenEditorDocument;
 }
 
 function requirePrepared(
@@ -182,6 +206,122 @@ describe("Desen App catalog authoring read model", () => {
     expect(prepareCatalogAuthoringModel(referenceCatalog, source)).toEqual({
       ok: false,
       reason: "projection-limit",
+    });
+  });
+});
+
+describe("Desen App active authoring canvas frame projection", () => {
+  it("projects the exact Sign-in frame without exposing Source-space placement", () => {
+    const result = projectAuthoringCanvasFrame(asEditorDocument(officialSignInSource), "sign-in");
+
+    expect(result).toEqual({
+      status: "ready",
+      frame: { width: 420, height: 720, label: "420 × 720 px" },
+    });
+    expect(Object.isFrozen(result)).toBe(true);
+    if (result.status !== "ready") throw new Error("Expected the Sign-in frame to be ready.");
+    expect(Object.isFrozen(result.frame)).toBe(true);
+    expect(result.frame).not.toHaveProperty("x");
+    expect(result.frame).not.toHaveProperty("y");
+
+    const moved = copyJson(officialSignInSource) as unknown as MutableRecord;
+    authoringCanvas(moved)["sign-in"] = {
+      x: -999_999,
+      y: 999_999,
+      width: 420,
+      height: 720,
+    };
+    expect(projectAuthoringCanvasFrame(asEditorDocument(moved), "sign-in")).toEqual(result);
+  });
+
+  it("never fabricates a frame for a missing surface or missing authoring metadata", () => {
+    const withoutFrame = copyJson(officialSignInSource) as unknown as MutableRecord;
+    delete authoringCanvas(withoutFrame)["sign-in"];
+    expect(projectAuthoringCanvasFrame(asEditorDocument(withoutFrame), "sign-in")).toEqual({
+      status: "rejected",
+      reason: "frame-missing",
+    });
+    expect(projectAuthoringCanvasFrame(asEditorDocument(officialSignInSource), "settings")).toEqual(
+      { status: "rejected", reason: "surface-missing" },
+    );
+
+    const withoutAuthoring = copyJson(officialSignInSource) as unknown as MutableRecord;
+    delete withoutAuthoring.authoring;
+    expect(projectAuthoringCanvasFrame(asEditorDocument(withoutAuthoring), "sign-in")).toEqual({
+      status: "rejected",
+      reason: "authoring-missing",
+    });
+
+    const withoutCanvas = copyJson(officialSignInSource) as unknown as MutableRecord;
+    delete requireRecord(withoutCanvas.authoring, "authoring").canvas;
+    expect(projectAuthoringCanvasFrame(asEditorDocument(withoutCanvas), "sign-in")).toEqual({
+      status: "rejected",
+      reason: "canvas-missing",
+    });
+  });
+
+  it("rejects malformed or unbounded frame metadata before it can influence layout", () => {
+    const malformedCanvas = copyJson(officialSignInSource) as unknown as MutableRecord;
+    requireRecord(malformedCanvas.authoring, "authoring").canvas = [];
+    expect(projectAuthoringCanvasFrame(asEditorDocument(malformedCanvas), "sign-in")).toEqual({
+      status: "rejected",
+      reason: "canvas-invalid",
+    });
+
+    const zeroWidth = copyJson(officialSignInSource) as unknown as MutableRecord;
+    authoringCanvas(zeroWidth)["sign-in"] = { x: 0, y: 0, width: 0, height: 720 };
+    expect(projectAuthoringCanvasFrame(asEditorDocument(zeroWidth), "sign-in")).toEqual({
+      status: "rejected",
+      reason: "frame-invalid",
+    });
+
+    const hugeHeight = copyJson(officialSignInSource) as unknown as MutableRecord;
+    authoringCanvas(hugeHeight)["sign-in"] = {
+      x: 0,
+      y: 0,
+      width: 420,
+      height: AUTHORING_CANVAS_FRAME_LIMITS.maxHeight + 1,
+    };
+    expect(projectAuthoringCanvasFrame(asEditorDocument(hugeHeight), "sign-in")).toEqual({
+      status: "rejected",
+      reason: "frame-invalid",
+    });
+
+    const fractionalCoordinate = copyJson(officialSignInSource) as unknown as MutableRecord;
+    authoringCanvas(fractionalCoordinate)["sign-in"] = {
+      x: 0.5,
+      y: 0,
+      width: 420,
+      height: 720,
+    };
+    expect(projectAuthoringCanvasFrame(asEditorDocument(fractionalCoordinate), "sign-in")).toEqual({
+      status: "rejected",
+      reason: "frame-invalid",
+    });
+  });
+
+  it("rejects invalid documents, surface identities, and accessor metadata", () => {
+    const forged = { kind: "desen.bundle", desen: "0.1.0", id: "forged" };
+    expect(projectAuthoringCanvasFrame(asEditorDocument(forged), "sign-in")).toEqual({
+      status: "rejected",
+      reason: "document-invalid",
+    });
+    expect(
+      projectAuthoringCanvasFrame(asEditorDocument(officialSignInSource), "__proto__"),
+    ).toEqual({ status: "rejected", reason: "surface-id-invalid" });
+
+    const hostile = copyJson(officialSignInSource) as unknown as MutableRecord;
+    const frame = requireRecord(authoringCanvas(hostile)["sign-in"], "authoring.canvas.sign-in");
+    Object.defineProperty(frame, "width", {
+      configurable: true,
+      enumerable: true,
+      get(): never {
+        throw new Error("Authoring metadata must stay inert.");
+      },
+    });
+    expect(projectAuthoringCanvasFrame(asEditorDocument(hostile), "sign-in")).toEqual({
+      status: "rejected",
+      reason: "document-invalid",
     });
   });
 });

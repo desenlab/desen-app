@@ -105,7 +105,12 @@ describe("Desen App exact React adapter canvas", () => {
     const canvas = await screen.findByRole("group", { name: "Sign-in adapter canvas" });
     expect(canvas).toBeInstanceOf(HTMLFieldSetElement);
     expect((canvas as HTMLFieldSetElement).disabled).toBe(true);
-    expect(within(canvas).getByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+    const heading = within(canvas).getByRole("heading", { level: 2, name: "Sign in" });
+    expect(heading).toBeTruthy();
+    const sourceStack = heading.parentElement as HTMLElement;
+    expect(sourceStack.style.maxWidth).toBe("420px");
+    expect(sourceStack.style.minWidth).toBe("0px");
+    expect(sourceStack.style.width).toBe("100%");
 
     const email = within(canvas).getByLabelText("Email") as HTMLInputElement;
     const password = within(canvas).getByLabelText("Password") as HTMLInputElement;

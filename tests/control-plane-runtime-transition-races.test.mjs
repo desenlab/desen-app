@@ -211,6 +211,7 @@ test("[determinism] two independent evidence builds are byte-identical", async (
   });
   assert.deepEqual(second.artifactBytes, built.artifactBytes);
   assert.equal(second.artifactSha256, built.artifactSha256);
+  assert.equal(second.currentCompatibilitySha256, built.currentCompatibilitySha256);
   assert.notEqual(second.runtimeSuiteReceipt, built.runtimeSuiteReceipt);
 });
 
@@ -388,6 +389,7 @@ test("[artifact] verifies exact bytes and rejects one changed byte", async () =>
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.transitionCases, 15);
+  assert.equal(verified.currentCompatibilitySha256, built.currentCompatibilitySha256);
   assert.equal(verified.packageRuntimeCases, 16);
   assert.equal(verified.compileTimeNegativeCases, 9);
   assert.equal(verified.rootMutationCases, 12);

@@ -50,7 +50,18 @@ test("accepts the tracked deterministic M03-T05 evidence", async () => {
   assert.equal(result.rootTests, 18);
   assert.equal(result.typeNegativeCases, 7);
   assert.equal(result.trackedFiles, 13);
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "788b68af9520ebf49fac1d39a505bc11e153f6a1d7a5ab89f57c9207b251cc51",
+  );
+  assert.equal(result.compatibilityMode, "fluid-max-width-layout-frame-v1");
+  assert.equal(result.successorPackageTests, 7);
+  assert.deepEqual(result.successorFrame, {
+    maxWidth: "declared-number",
+    minWidth: 0,
+    width: "100%",
+  });
+  assert.equal(result.successorStackVectors, 420);
 });
 
 test("two independent reference component evidence builds are byte-identical", async () => {
@@ -63,6 +74,13 @@ test("two independent reference component evidence builds are byte-identical", a
 
   assert.equal(first.artifactBytes.toString("hex"), second.artifactBytes.toString("hex"));
   assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.equal(first.artifact.evidence.packageTests.length, 5);
+  assert.equal(first.successorCompatibility.packageTests, 7);
+  assert.deepEqual(first.successorCompatibility.frame, {
+    maxWidth: "declared-number",
+    minWidth: 0,
+    width: "100%",
+  });
 });
 
 test("records every explicit build option as injected evidence", async () => {
@@ -260,6 +278,21 @@ test("rejects conditional Stack source behavior outside sampled numbers", async 
   await assert.rejects(
     buildReferenceCatalogWebComponentsEvidence({
       stackSourcePath: forgedPath,
+      verifyPrerequisite: false,
+    }),
+    hasEvidenceCode("REFERENCE_STACK_SOURCE_SHAPE_DRIFT"),
+  );
+
+  const intrinsicWidthSource = source.replace(
+    '{ maxWidth, minWidth: 0, width: "100%" }',
+    "{ maxWidth }",
+  );
+  assert.notEqual(intrinsicWidthSource, source);
+  const intrinsicWidthPath = path.join(directory, "intrinsic-width-stack.tsx");
+  await writeFile(intrinsicWidthPath, intrinsicWidthSource);
+  await assert.rejects(
+    buildReferenceCatalogWebComponentsEvidence({
+      stackSourcePath: intrinsicWidthPath,
       verifyPrerequisite: false,
     }),
     hasEvidenceCode("REFERENCE_STACK_SOURCE_SHAPE_DRIFT"),

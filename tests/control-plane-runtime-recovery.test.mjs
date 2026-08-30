@@ -122,6 +122,10 @@ test("[authority] builds the exact M07-T08 recovery artifact from the built API 
       generation: 1,
     },
   );
+  assert.equal(
+    built.currentCompatibility.claims.durableRecord.previousGoodRevision,
+    "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13",
+  );
   assert.equal(built.artifact.claims.rawRestartState.status, "recovery-required");
   assert.equal(built.artifact.claims.rawRestartState.authorityAbsent, true);
   assert.equal(built.artifact.claims.authorityReconstruction.status, "recovered");
@@ -208,6 +212,7 @@ test("[determinism] two independent evidence builds are byte-identical", async (
   });
   assert.deepEqual(second.artifactBytes, built.artifactBytes);
   assert.equal(second.artifactSha256, built.artifactSha256);
+  assert.equal(second.currentCompatibilitySha256, built.currentCompatibilitySha256);
   assert.notEqual(second.runtimeReceipt, built.runtimeReceipt);
 });
 
@@ -462,6 +467,11 @@ test("[artifact] verifies exact bytes and rejects one changed byte", async () =>
     task: "M07-T08",
     result: "PASS",
     artifactSha256: built.artifactSha256,
+    currentCompatibilitySha256: built.currentCompatibilitySha256,
+    currentActiveRevision:
+      "sha256:c344310d7e83089d8cc3a8b16d7d6fbc739afe424d88c80f258ffb64341ff61c",
+    currentPreviousGoodRevision:
+      "sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13",
     packageRuntimeCases: built.artifact.tests.packageRuntimeCases,
     compileTimeNegativeCases: built.artifact.tests.compileTimeNegativeCases,
     rootMutationCases: 9,

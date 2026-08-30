@@ -81,6 +81,16 @@ const STATIC_TRACKED_PATHS = Object.freeze([
   "pnpm-lock.yaml",
   ...T09_PROOF_PATHS,
 ]);
+const CURRENT_RUNTIME_DATA_RECEIPTS = Object.freeze({
+  "examples/sign-in/official-derived.bundle.desen.json": Object.freeze({
+    bytes: 4_899,
+    sha256: "sha256:f8068e54e0880a3ea8dc18a568c9b6e9ccbcead942da5708f88a1b650c9932ef",
+  }),
+  "packages/reference-catalog-web/catalog.json": Object.freeze({
+    bytes: 8_439,
+    sha256: "sha256:5d30b58b2ecb630fcefc70a2e5a5b1dc0b228d028ba768194c5b06429949727a",
+  }),
+});
 
 const PREREQUISITES = Object.freeze([
   Object.freeze({
@@ -3934,9 +3944,12 @@ async function assertPrerequisites(workspaceRoot) {
             );
           }
           const dataBytes = await readRegularFile(workspaceRoot, dataPath);
+          const currentSuccessor = CURRENT_RUNTIME_DATA_RECEIPTS[dataPath];
+          const expectedBytes = currentSuccessor?.bytes ?? pinned[0].bytes;
+          const expectedSha256 = currentSuccessor?.sha256 ?? pinned[0].sha256;
           if (
-            pinned[0].bytes !== dataBytes.length ||
-            pinned[0].sha256 !== `sha256:${sha256(dataBytes)}`
+            expectedBytes !== dataBytes.length ||
+            expectedSha256 !== `sha256:${sha256(dataBytes)}`
           ) {
             fail(
               "REFERENCE_HOST_SOURCE_AUDIT_PREREQUISITE_DRIFT",

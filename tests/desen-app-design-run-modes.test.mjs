@@ -141,6 +141,21 @@ test(DESEN_APP_DESIGN_RUN_MODES_ROOT_TEST_NAMES[0], () => {
   assert.equal(built.currentCompatibility.successor.focusedTestCases, 86);
   assert.equal(built.currentCompatibility.successor.pendingRuntimeLifecycleExercised, true);
   assert.equal(built.currentCompatibility.successor.pf028Status, "CLOSED");
+  assert.deepEqual(
+    {
+      responsiveDisclosureBothInlineEdgesClamped:
+        built.currentCompatibility.source.css.responsiveDisclosureBothInlineEdgesClamped,
+      responsiveDisclosureOwnerFullWidth:
+        built.currentCompatibility.source.css.responsiveDisclosureOwnerFullWidth,
+      responsiveDisclosureWidthAuto:
+        built.currentCompatibility.source.css.responsiveDisclosureWidthAuto,
+    },
+    {
+      responsiveDisclosureBothInlineEdgesClamped: true,
+      responsiveDisclosureOwnerFullWidth: true,
+      responsiveDisclosureWidthAuto: true,
+    },
+  );
 });
 
 test(DESEN_APP_DESIGN_RUN_MODES_ROOT_TEST_NAMES[1], () => {
@@ -303,8 +318,45 @@ test(DESEN_APP_DESIGN_RUN_MODES_ROOT_TEST_NAMES[8], async () => {
     },
     {
       key: "applicationCss",
-      search: '.surfaceFrame[data-mode="run"]',
-      replacement: ".removedRunSurface",
+      search: ".surfaceEditor::before {",
+      replacement: ".removedEditorWorkplane {",
+    },
+    {
+      key: "applicationCss",
+      search: `.workspaceLifecycle,
+  .workspaceBoundary {
+    width: 100%;
+  }`,
+      replacement: `.workspaceLifecycle,
+  .workspaceBoundary {
+    max-width: 100%;
+  }`,
+    },
+    {
+      key: "applicationCss",
+      search: `.workspaceLifecycleBody,
+  .workspaceBoundary p {
+    inset-inline: 0;
+    width: auto;
+  }`,
+      replacement: `.workspaceLifecycleBody,
+  .workspaceBoundary p {
+    inset-inline-start: 0;
+    width: auto;
+  }`,
+    },
+    {
+      key: "applicationCss",
+      search: `.workspaceLifecycleBody,
+  .workspaceBoundary p {
+    inset-inline: 0;
+    width: auto;
+  }`,
+      replacement: `.workspaceLifecycleBody,
+  .workspaceBoundary p {
+    inset-inline: 0;
+    width: 100%;
+  }`,
     },
   ];
   for (const mutation of mutations) {

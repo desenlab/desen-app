@@ -223,6 +223,10 @@ arbitrary DOM prop, raw HTML, or executable document value surface.
   direction, or CSS ordering. Declared child order therefore remains DOM and reading order.
 - Stack maps only the declared direction, gap, maximum-width, and cross-axis alignment values.
   Spacing uses `--desen-space-*` variables with pinned provider-compatible fallbacks.
+- A declared Stack `maxWidth` is a fluid upper-bounded frame: the Web target applies `width: 100%`
+  and `min-width: 0` alongside the declared maximum. The parent therefore owns the available width,
+  while long or conditionally materialized children such as Alert cannot enlarge the Stack or the
+  authored page. Without `maxWidth`, Stack does not add this frame-sizing policy.
 - Text maps `body` → `<p>`, `heading` → `<h2>` beneath the host application's top-level heading,
   and `caption` → `<small>`.
 - Text creates an ordinary React text node and never uses `dangerouslySetInnerHTML`, so
@@ -342,6 +346,15 @@ before canonicalization; repeated aliases are counted at every serialized occurr
 The focused evidence comprises 18 package tests, 5 compiler-negative API cases, 16 independent
 root proof/mutation tests, and 269 fixed mutation vectors. It compares the complete preimage with
 an independent Node.js framing and SHA-256 oracle.
+
+The current corrective M09 successor has package digest
+`sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051`. Its 80 regular
+distribution files total 243,740 bytes; together with the projected Catalog they form 81 framed
+entries and 252,637 framed bytes. The corresponding official-derived Bundle revision is
+`sha256:6e539a76ddd0bc9b4eff82e73508b62a3980ae5dbc73dd85ccf0c1cae6957e13`, while the Source
+digest remains `sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`.
+Earlier package and Bundle tuples remain immutable task-time evidence; this current identity does
+not rewrite any frozen proof artifact or historical pin.
 
 ## Explicit non-responsibilities
 

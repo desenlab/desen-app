@@ -22,10 +22,13 @@ The current product surface contains:
 - same-origin History API transitions, browser back/forward observation, and canonical replacement
   of the bare `/` entry with `/projects`;
 - fixture-only project search with an explicit empty result and recovery action;
-- a compact authoring panel whose Layers view preserves the official sign-in Source node, named
-  slot, child order, conditional marker, and attached-behavior structure;
-- a Components view derived from the exact `@desen/reference-catalog-web/catalog.json` component
-  inventory, display names, categories, descriptions, identity, version, and target;
+- a permanent left authoring dock split vertically into a Components region and a Layers region,
+  so component discovery and the current Source hierarchy remain visible together rather than
+  competing behind tabs;
+- a Components region derived from the exact `@desen/reference-catalog-web/catalog.json` component
+  inventory, display names, categories, descriptions, identity, version, and target, plus a Layers
+  region that preserves the official sign-in Source node, named slot, child order, conditional
+  marker, and attached-behavior structure;
 - local component filtering that changes only the visible list and never mutates Catalog or Source
   data;
 - dedicated dotted Layers grips enlarged to `28 × 32 px` without layout shift, plus one App-owned
@@ -41,18 +44,24 @@ The current product surface contains:
   editable controls; `Add` automatically selects the inserted component, and the guarded removal
   paths explain root and effective-minimum restrictions, clear a successfully deleted selection,
   and return focus to Layers;
-- a third State view that projects the exact current surface-local declarations, bounded usage
-  counts, and controlled String, Boolean, Number, and Integer initial values;
+- a State tab in the right inspector dock that projects the exact current surface-local
+  declarations, bounded usage counts, and controlled String, Boolean, Number, and Integer initial
+  values;
 - stable add, atomic type-and-initial update, and unused-state deletion controls that preserve used
   declarations without cascading into references or actions;
 - an explicit no-substitution state for Recovery and Profile, which have no exact Source tree in
   the official fixture;
-- a sign-in canvas mounted from the official-derived Bundle through the same public
-  `REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT` used by the reference host;
+- a full-route working plane that forms the editor's lowest visual layer, with application
+  navigation, commands, and left/right docks floating above it instead of consuming canvas space;
+- one centered page frame whose exact `420 × 720 px` dimensions come from the selected surface's
+  validated Source `authoring.canvas` declaration, with no inferred device class or fabricated
+  fallback size;
+- a sign-in canvas mounted inside that page frame from the official-derived Bundle through the same
+  public `REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT` used by the reference host;
 - exact runtime document, revision, surface, Catalog-set, registry, and snapshot authority checks
   before the managed tree becomes visible;
 - one accessible App-owned Design/Run control over the same immutable Source, Publisher Bundle,
-  Runtime session, and managed Runtime React subtree;
+  Runtime session, managed Runtime React subtree, and page-frame coordinates;
 - a native disabled fieldset in Design that keeps the real heading and labels accessible while
   preventing the preview from dispatching input or action events;
 - a Run presentation that hides App-owned authoring and selection chrome, centrally rejects stale
@@ -114,8 +123,9 @@ The current product surface contains:
   keyboard navigation, and immediate live selection status;
 - a compact pointer-inert selection card that is a DOM sibling outside the disabled managed
   capability fieldset and exposes no component geometry or private capability structure;
-- one App-owned Inspector whose labels, descriptions, requiredness, primitive types, enum options,
-  and current value states come from the exact validated Catalog schema and selected Source node;
+- one App-owned right dock with Inspector, State, and Actions tabs; the Inspector labels,
+  descriptions, requiredness, primitive types, enum options, and current value states come from the
+  exact validated Catalog schema and selected Source node;
 - native string, boolean, number, integer, and exact primitive-enum controls;
 - recursive closed-object fieldsets with qualified names, canonical child order, and exact RFC
   6901 value pointers;
@@ -128,8 +138,8 @@ The current product surface contains:
   primitive declarations whose type is provably compatible with the selected Catalog control;
 - explicit change-binding and use-state-initial transitions, while operation bindings, fallbacks,
   tokens, formats, nested paths, and other advanced dynamic values remain visible and read-only;
-- a fourth Events & Actions view that projects only the exact selected Source component and its
-  Catalog-declared events, with absent, present-empty, and present-nonempty handlers kept distinct;
+- an Actions tab that projects only the exact selected Source component and its Catalog-declared
+  events, with absent, present-empty, and present-nonempty handlers kept distinct;
 - handler add/delete plus ordered root and recursive `operation.invoke` success/failure action
   lists with insert, edit, delete, and move controls;
 - all seven closed action types captured through inert whole-action JSON drafts that stay local
@@ -172,6 +182,15 @@ through `runtime-react`, and renders it through `useRuntimeReactSurface` plus
 mode is excluded from mount identity. Recovery, Profile, and every other tuple report that no exact
 adapter preview is available; they never borrow the sign-in Bundle or retain its managed tree.
 StrictMode replay, route replacement, and unmount dispose the exact session they created.
+
+The surface editor uses one route-sized workplane as its coordinate space. The top navigation,
+command bar, permanent Components/Layers dock, and tabbed Inspector/State/Actions dock are
+application-owned floating siblings above that plane; none is placed inside the managed output.
+The selected page is the plane's only white frame. Its dimensions are read from the validated
+surface entry in Source `authoring.canvas`, while Source workspace `x`/`y` values do not receive
+single-surface placement authority. Missing or invalid frame metadata fails closed instead of
+guessing a mobile or desktop size. Design and Run retain the same centered frame coordinates, and
+only the managed adapter content inside the frame changes interaction mode.
 
 Selection stores only exact project, surface, Source-node, capability, display, and conditional
 primitives. The current route and validated authoring model must admit that identity before the App
