@@ -2521,17 +2521,20 @@
 
 .layerDragHandle {
   position: relative;
-  width: 1.25rem;
-  height: 1.5rem;
+  width: 1.75rem;
+  height: 2rem;
   flex: 0 0 auto;
+  margin: -0.25rem;
   cursor: grab;
   border-radius: 0.25rem;
   opacity: 0.68;
+  touch-action: none;
+  user-select: none;
 }
 
 .layerDragHandle::before {
   position: absolute;
-  inset: 0.25rem 0.3125rem;
+  inset: 0.5rem 0.5625rem;
   background-image: radial-gradient(circle, var(--desen-app-text-soft) 1px, transparent 1.25px);
   background-position: center;
   background-size: 0.25rem 0.25rem;
@@ -2758,7 +2761,7 @@
 .slotBoundary {
   position: relative;
   display: flex;
-  min-height: 0.75rem;
+  min-height: 1.25rem;
   align-items: center;
   padding: 0 0.125rem;
 }
@@ -2767,9 +2770,21 @@
   z-index: 3;
 }
 
+.slotBoundaryHitArea {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.slotBoundary[data-drop-ready="true"] .slotBoundaryHitArea,
+.slotBoundary[data-drop-noop="true"] .slotBoundaryHitArea {
+  pointer-events: auto;
+}
+
 .slotBoundary[data-drop-ready="true"]::before {
   position: absolute;
-  inset: 0.25rem 0.125rem;
+  inset: 0.125rem;
   z-index: 0;
   pointer-events: none;
   background: color-mix(in srgb, var(--desen-app-accent) 3%, transparent);
@@ -2780,7 +2795,7 @@
 
 .slotBoundary[data-drop-noop="true"]::before {
   position: absolute;
-  inset: 0.25rem 0.125rem;
+  inset: 0.125rem;
   z-index: 0;
   pointer-events: none;
   background: color-mix(in srgb, var(--desen-app-text-soft) 5%, transparent);
@@ -2961,7 +2976,7 @@
   top: 0.25rem;
   z-index: 4;
   display: flex;
-  min-height: 3.125rem;
+  min-height: 4rem;
   gap: 0.625rem;
   align-items: center;
   justify-content: space-between;
@@ -2979,7 +2994,6 @@
 }
 
 .componentSlotTarget[data-drag-active="true"] {
-  min-height: 5rem;
   background: color-mix(in srgb, var(--desen-app-accent) 11%, var(--desen-app-surface));
   border-color: color-mix(in srgb, var(--desen-app-accent) 68%, var(--desen-app-border));
   border-style: solid;
@@ -2998,7 +3012,6 @@
 }
 
 .componentSlotTarget[data-drop-ready="true"] {
-  min-height: 4rem;
   background: color-mix(in srgb, var(--desen-app-accent) 8%, var(--desen-app-surface));
   border-color: color-mix(in srgb, var(--desen-app-accent) 58%, var(--desen-app-border));
 }
@@ -3166,16 +3179,19 @@
 
 .componentDragHandle {
   position: relative;
-  width: 1.5rem;
-  height: 1.625rem;
+  width: 2rem;
+  height: 2rem;
   flex: 0 0 auto;
+  margin: -0.1875rem -0.25rem;
   cursor: grab;
   border-radius: 0.375rem;
+  touch-action: none;
+  user-select: none;
 }
 
 .componentDragHandle::before {
   position: absolute;
-  inset: 0.3125rem 0.4375rem;
+  inset: 0.5rem 0.6875rem;
   background-image: radial-gradient(circle, var(--desen-app-text-soft) 1px, transparent 1.25px);
   background-position: 0 0;
   background-size: 0.25rem 0.25rem;
@@ -4451,5 +4467,259 @@
   .persistenceOpenConfirmation > div {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.publicationControls {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6875rem 0.75rem;
+  background: color-mix(in srgb, var(--desen-app-surface-subtle) 52%, var(--desen-app-surface));
+  border-bottom: 1px solid var(--desen-app-border);
+}
+
+.publicationControls[data-publication-state="active"] {
+  background: color-mix(in srgb, #16a34a 5%, var(--desen-app-surface));
+}
+
+.publicationControls[data-publication-state="conflict"],
+.publicationControls[data-publication-state="preserved"],
+.publicationControls[data-publication-state="indeterminate"],
+.publicationControls[data-publication-state="failed"] {
+  background: color-mix(in srgb, #d97706 6%, var(--desen-app-surface));
+}
+
+.publicationHeading {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.publicationHeading > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.0625rem;
+}
+
+.publicationHeading small {
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+  font-weight: 620;
+  letter-spacing: 0.055em;
+  line-height: 0.6875rem;
+  text-transform: uppercase;
+}
+
+.publicationHeading strong {
+  color: var(--desen-app-text);
+  font-size: 0.625rem;
+  font-weight: 650;
+  line-height: 0.875rem;
+}
+
+.publicationHeading button {
+  min-width: 5.5rem;
+  min-height: 1.875rem;
+  padding: 0 0.75rem;
+  color: white;
+  font: inherit;
+  font-size: 0.5625rem;
+  font-weight: 630;
+  cursor: pointer;
+  background: var(--desen-app-primary);
+  border: 1px solid var(--desen-app-primary);
+  border-radius: 0.4375rem;
+  box-shadow: var(--desen-app-shadow-xs);
+}
+
+.publicationHeading button:disabled {
+  color: var(--desen-app-text-soft);
+  cursor: not-allowed;
+  background: var(--desen-app-surface-subtle);
+  border-color: var(--desen-app-border);
+  box-shadow: none;
+}
+
+.publicationHeading button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: 2px;
+}
+
+.publicationStages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.publicationStages li {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.0625rem 0.3125rem;
+  min-width: 0;
+  padding-right: 0.5rem;
+  color: var(--desen-app-text-soft);
+}
+
+.publicationStages li:not(:last-child)::after {
+  position: absolute;
+  top: 0.21875rem;
+  right: 0;
+  left: 0.75rem;
+  height: 1px;
+  background: var(--desen-app-border);
+  content: "";
+}
+
+.publicationStages li > span {
+  position: relative;
+  z-index: 1;
+  grid-row: 1 / 3;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.0625rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border-strong);
+  border-radius: 50%;
+}
+
+.publicationStages li > small,
+.publicationStages li > strong {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  width: max-content;
+  max-width: 100%;
+  padding-right: 0.25rem;
+  background: color-mix(in srgb, var(--desen-app-surface-subtle) 52%, var(--desen-app-surface));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.publicationControls[data-publication-state="active"] .publicationStages li > small,
+.publicationControls[data-publication-state="active"] .publicationStages li > strong,
+.publicationControls[data-publication-state="conflict"] .publicationStages li > small,
+.publicationControls[data-publication-state="conflict"] .publicationStages li > strong,
+.publicationControls[data-publication-state="preserved"] .publicationStages li > small,
+.publicationControls[data-publication-state="preserved"] .publicationStages li > strong,
+.publicationControls[data-publication-state="indeterminate"] .publicationStages li > small,
+.publicationControls[data-publication-state="indeterminate"] .publicationStages li > strong,
+.publicationControls[data-publication-state="failed"] .publicationStages li > small,
+.publicationControls[data-publication-state="failed"] .publicationStages li > strong {
+  background: transparent;
+}
+
+.publicationStages li > small {
+  color: inherit;
+  font-size: 0.4375rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  line-height: 0.5625rem;
+  text-transform: uppercase;
+}
+
+.publicationStages li > strong {
+  color: inherit;
+  font-size: 0.5rem;
+  font-weight: 580;
+  line-height: 0.6875rem;
+}
+
+.publicationStages li[data-stage-state="current"] {
+  color: var(--desen-app-accent);
+}
+
+.publicationStages li[data-stage-state="current"] > span {
+  background: var(--desen-app-accent);
+  border-color: var(--desen-app-accent);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--desen-app-accent) 14%, transparent);
+}
+
+.publicationStages li[data-stage-state="done"] {
+  color: color-mix(in srgb, #15803d 78%, var(--desen-app-text));
+}
+
+.publicationStages li[data-stage-state="done"] > span {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.publicationStages li[data-stage-state="failed"] {
+  color: color-mix(in srgb, #b45309 80%, var(--desen-app-text));
+}
+
+.publicationStages li[data-stage-state="failed"] > span {
+  background: #d97706;
+  border-color: #d97706;
+}
+
+.publicationStatus,
+.publicationAdmission {
+  margin: 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.53125rem;
+  line-height: 0.8125rem;
+}
+
+.publicationStatus {
+  min-height: 0.8125rem;
+  font-weight: 550;
+}
+
+.publicationAdmission {
+  color: var(--desen-app-text-soft);
+}
+
+.publicationReceipt {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+}
+
+.publicationReceipt > div {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: baseline;
+  padding: 0.1875rem 0.4375rem;
+  background: color-mix(in srgb, #16a34a 7%, var(--desen-app-surface));
+  border: 1px solid color-mix(in srgb, #16a34a 24%, var(--desen-app-border));
+  border-radius: 99px;
+}
+
+.publicationReceipt dt,
+.publicationReceipt dd {
+  margin: 0;
+  font-size: 0.46875rem;
+  line-height: 0.6875rem;
+}
+
+.publicationReceipt dt {
+  color: var(--desen-app-text-soft);
+}
+
+.publicationReceipt dd {
+  color: var(--desen-app-text);
+  font-weight: 620;
+}
+
+@media (max-width: 32rem) {
+  .publicationStages {
+    gap: 0.375rem;
+  }
+
+  .publicationStages li:not(:last-child)::after {
+    display: none;
+  }
+
+  .publicationStages li > small,
+  .publicationStages li > strong {
+    background: transparent;
   }
 }

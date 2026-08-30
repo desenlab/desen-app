@@ -19,6 +19,8 @@ import {
 const ROOT = path.resolve(import.meta.dirname, "..");
 const TRACKED_PERSISTENCE_SOURCE = "packages/editor-core/src/persistence.ts";
 const TRACKED_CONTINUOUS_VALIDATION_SOURCE = "packages/editor-core/src/continuous-validation.ts";
+const PUBLISH_ACTIVATION_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json";
+const PUBLISH_ACTIVATION_RECEIPT = "packages/editor-web/src/local-bundle-channel-publication.ts";
 const temporaryDirectories = [];
 let built;
 
@@ -156,6 +158,64 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
     publicRuntimeCasesAdded: 0,
     publicCompilerNegativeAssertionsAdded: 0,
   });
+  assert.deepEqual(built.currentCompatibility.publishActivationSuccessor, {
+    task: "M09-T14",
+    gate: "G09",
+    artifact: {
+      task: "M09-T14",
+      gate: "G09",
+      proofId: "desen-app-publish-activation",
+      profile: "desen.app.publish-activation-proof.v1",
+      result: "PASS",
+      path: PUBLISH_ACTIVATION_ARTIFACT,
+      bytes: 24_763,
+      sha256: "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b",
+    },
+    editorWebReceiptPaths: [
+      "packages/editor-web/package.json",
+      "packages/editor-web/src/index.ts",
+      "packages/editor-web/src/local-bundle-channel-publication.ts",
+      "packages/editor-web/test/local-bundle-channel-publication.test.ts",
+      "packages/editor-web/test/public-package.mjs",
+      "packages/editor-web/test/public-package.types.mts",
+    ],
+    retainedT08ReceiptHandoffPaths: [
+      "packages/editor-web/dist/index.d.ts",
+      "packages/editor-web/dist/index.js",
+      "packages/editor-web/package.json",
+      "packages/editor-web/src/index.ts",
+      "packages/editor-web/test/public-package.mjs",
+      "packages/editor-web/test/public-package.types.mts",
+    ],
+    focusedTestDeclarations: 45,
+    trackedFiles: 33,
+    parentArtifacts: 9,
+    rootTests: 12,
+    savedAuthoredSourceOnly: true,
+    publisherRerunFromSavedSource: true,
+    scenarioPreviewPublished: false,
+    fixtureDataPublished: false,
+    operationInputOrSecretPublished: false,
+    rejectedDiagnosticsPublished: false,
+    exactCanonicalBundleBytesStored: true,
+    fixedPreviewChannelCompareAndSet: true,
+    mutableChannelIsActivationAuthority: false,
+    distinctSourceChannelAndActivationGenerations: true,
+    activeRevisionRequiresReferenceHostReceipt: true,
+    staleCompletionCanBecomeActive: false,
+    blindRetryAfterIndeterminate: false,
+    conflictActivatesCandidate: false,
+    lastKnownGoodActivationPreserved: true,
+    realPublicControlPlaneAndReferenceHostIntegration: true,
+    browserAppImportsNodeCompositionPackages: false,
+    publicationClaimed: true,
+    activationClaimed: true,
+    browserE2eClaimed: false,
+    p08Status: "NOT_PROVEN",
+    pf085Status: "OPEN",
+    pf086Status: "OPEN",
+    pf089Status: "OPEN",
+  });
   assert.equal(built.currentCompatibility.packageBoundary.currentEmittedFiles, 36);
   assert.equal(built.currentCompatibility.packageBoundary.staticEsmEdges, 24);
   assert.equal(built.currentCompatibility.packageBoundary.editorWebOwnsTransportAdapter, true);
@@ -167,6 +227,13 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
     built.currentCompatibility.tests.editorCoreContinuousValidationCompilerNegativeAssertions,
     9,
   );
+  assert.equal(built.currentCompatibility.tests.editorWebPublicRuntimeCases, 4);
+  assert.equal(built.currentCompatibility.tests.editorWebPublicCompilerNegativeAssertions, 10);
+  assert.deepEqual(built.currentCompatibility.receiptCompatibility, {
+    retainedTaskTimeReceipts: 32,
+    currentExactRetainedReceipts: 26,
+    publishActivationHandoffReceipts: 6,
+  });
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-persistence.json",
     bytes: 49_785,
@@ -190,7 +257,12 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
     "packages/editor-core/test/continuous-validation.test.ts",
     "packages/editor-core/test/continuous-validation.types.ts",
     "packages/editor-core/test/terminal-integration.test.ts",
+    PUBLISH_ACTIVATION_ARTIFACT,
+    PUBLISH_ACTIVATION_RECEIPT,
+    "packages/editor-web/dist/local-bundle-channel-publication.d.ts",
+    "packages/editor-web/dist/local-bundle-channel-publication.js",
     "packages/editor-web/src/local-source-persistence.ts",
+    "packages/editor-web/test/local-bundle-channel-publication.test.ts",
     "scripts/lib/editor-core-persistence-proof.mjs",
     "scripts/generate-editor-core-persistence-proof.mjs",
     "scripts/verify-editor-core-persistence.mjs",
@@ -327,6 +399,34 @@ test("[mutation] rejects prerequisite, tracked-file, and runtime substitution", 
     buildEditorCorePersistenceEvidence({ runtime: editorCore }),
     expectedError("RUNTIME_OVERRIDE_REJECTED"),
   );
+  const [publishActivationArtifact, publishActivationReceipt] = await Promise.all([
+    readFile(path.join(ROOT, PUBLISH_ACTIVATION_ARTIFACT)),
+    readFile(path.join(ROOT, PUBLISH_ACTIVATION_RECEIPT)),
+  ]);
+  await assert.rejects(
+    buildEditorCorePersistenceEvidence({
+      fileOverrides: {
+        [PUBLISH_ACTIVATION_ARTIFACT]: changedByte(publishActivationArtifact),
+      },
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildEditorCorePersistenceEvidence({
+      fileOverrides: {
+        [PUBLISH_ACTIVATION_RECEIPT]: changedByte(publishActivationReceipt),
+      },
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildEditorCorePersistenceEvidence({
+      fileOverrides: {
+        [PUBLISH_ACTIVATION_ARTIFACT]: publishActivationArtifact,
+      },
+    }),
+    expectedError("TRACKED_FILE_OVERRIDE_REJECTED"),
+  );
 });
 
 test("[artifact] verifies exact bytes and one visible proof-document pin", async () => {
@@ -432,6 +532,12 @@ test("[options] rejects linked authority and active, inherited, proxy, or shared
   assert.equal(
     built.currentCompatibility.nonclaims.includes(
       "M08-T10 terminal-integration bytes are compatibility-only successor authority and are not part of the frozen M08-T08 claim.",
+    ),
+    true,
+  );
+  assert.equal(
+    built.currentCompatibility.nonclaims.includes(
+      "M09-T14 publish-activation bytes are authenticated successor authority and are not part of the frozen M08-T08 claim.",
     ),
     true,
   );

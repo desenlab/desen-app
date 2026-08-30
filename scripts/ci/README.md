@@ -1125,9 +1125,11 @@ selecting and closing 10 workloads for one proof unit as a strict subset without
 All 17 G07-due entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04, G07,
 M08-T10, G08, and M09-T01–T08 are `DONE`; proof gates are 10/13, implementation is 103/145,
 M08 is 10/10, M09 is 8/14, `N-012`, `N-014`, `N-018`, `N-042`, `S-002`, and `S-003` are `TESTED`,
-P-06 and P-18 are `PROVEN`, P-08 remains `NOT_PROVEN`. M09-T09 through M09-T12 are also `DONE`;
-implementation is 107/145, M09 is 12/14, `N-012`, `N-018`, `N-035`, `S-001`, and `S-003` are
-`TESTED`, PF-028 is `CLOSED`, and M09-T13 is next. The exact 30,014-byte
+P-06 and P-18 are `PROVEN`, P-08 remains `NOT_PROVEN`. M09-T09 through M09-T14 and G09 are also
+`DONE`; implementation is 109/145, M09 is 14/14, proof gates are 11/13, `N-012`, `N-018`,
+`N-035`, `S-001`, and `S-003` are `TESTED`, PF-028 is `CLOSED`, P-07/P-09/P-10 remain `PARTIAL`,
+P-08/P-12 remain `NOT_PROVEN`, N-036 remains `PLANNED`, and PF-085/PF-086/PF-089 remain `OPEN`.
+M10-T01 is next. The exact 30,014-byte
 M08-T05 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
 `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`, with reviewed report
@@ -1283,6 +1285,72 @@ The exact 29,208-byte task artifact is
 mutation suites pass 161/161, 339/339, and 12/12. P-16 is `PROVEN`; PF-086 remains `OPEN`;
 implementation progress is 108/145 (74%), M09 is 13/14 (93%), proof gates remain 10/13, and
 M09-T14 is next.
+
+M09-T14 registers `desen-app-publish-activation` as the 95th proof pair. Its package-level prefix
+runs only the public Editor Web build, typecheck, publication, and emitted-package checks followed
+by the App build, typecheck, and focused publication suite; its nine frozen parents are represented
+by the affected impact graph instead of being recursively replayed inside the wrapper. The exact
+T14 connected closure is 63 proof units and 136 workloads.
+
+The current exhaustive authority contains 200 workloads and 95 proof pairs—84 ordinary and eleven
+barriers. The neutral inventory is
+`sha256:c6655119e0b24594bced92b6b916917e0f336351c19cf338ee21d3b8d141f684`; the retained sequential
+plan is `sha256:beeda57842e1a9bdee6a13cd7be323b48a722ce4352319d085886b7fc76bfefe`;
+the semantic impact graph is
+`sha256:4a2e2d7d4d15a8f3d563aee7b248b14bba6ce44c27b464773a825d9c44fc58bf`. The canonical required
+workload set and ordered projection are
+`sha256:0eb90130ebcf32072ba7188ce6937fc65e1d2d11ffb5dceefb1e9cb2a0066813` and
+`sha256:4006f34222b00bfa6095bf7019fb7fef194f9b3a30f67f5b3ecefe599729e45a`. Required and shadow
+plans are pinned at `sha256:cd96c112e64d37beaba7ffb75e45beb91280ffa917f3b1916d5aa059346fcaea`
+and `sha256:a65b567ab999136e2018d970809b94e9e054ed57dc2ad8855267acc0f2b07b3c`.
+
+Ownership covers 1,267 tracked paths, including 190 proof-owned paths. The path-set and ownership
+pins are `sha256:e8e1841e828a63bf84d57e457047ffaef7e6ca1998b6e7c89201758d44dec5f5` and
+`sha256:18497e4c50dd0dfa8f8dd7adaf9b6130779db7c0799798ef99e3de8bcf764486`.
+Category counts are 190 proof-unit, 45 CI-policy, 31 dependency-policy, 139 frozen-input, 493
+package/application, 227 shared-proof-infrastructure, 131 project-documentation, and eleven
+repository-policy paths.
+
+The historical append-only sequence 53 checkpoint advances sequence 52 head
+`sha256:c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9` to
+`sha256:48a1457317c593b846cd4750eb309e846c33248824559d27810441584f0144d8` across 49 frozen
+artifacts and 98 current readers. Compatibility sequence 54 is the immutable predecessor: it
+preserves those artifact and reader identities, advances the exact sequence-53 head to
+`sha256:0772221371ffe1a35fe955b8cad34c725d0f9ae933714f81f10b3451214a6638`, and reseals only
+M08-T08 proof-library/root-test readers `[64, 65]`. Its frozen 49,785-byte artifact remains
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Current sequence 55
+preserves the same 49 frozen artifacts and 98 reader identities, links that exact sequence-54
+predecessor head to `sha256:f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17`,
+and reseals only M09-T01–T14 proof-library/root-test reader indexes `[70..97]`. The current T14
+readers authenticate the exact `10,000 ms` per-test timeout successor at
+`sha256:5eba8a2b15cbcf992d0f04d0d7ad719c1a9fc42cdb66635ebc0eab679a221901`; reversing that one
+edit reproduces the frozen 24,485-byte test receipt, while the frozen T14 artifact remains
+`sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b` unchanged. Checkpoint,
+promotion, selector, and fourteen M09 root reader suites pass 78/78, 20/20, 23/23, and 179/179.
+Promotion pins the selector at
+`sha256:2855cbeedb55ede5d9db18a6b186ac07796afbc4d512f5a0aa9197bc5f177fd1`, the
+required-affected runner authority at
+`sha256:b77b35a81915ec41554ab3505895fe98c0a4299ec9bf7d680dec320bbf3fb744`, and the T10 affected
+plan at `sha256:e3cced8e1a9cbe6f1f5c296aa3992b07ef030c81ac9267c2deff714953ce0e39`. The integrated
+legacy, inventory, impact, ownership, selector, shared-state, equivalence, required-affected,
+required-exhaustive, promotion, and checkpoint policy suite passes 330/330; the checkpoint and
+promotion CLI verifiers also pass.
+
+The exact 24,763-byte task artifact is
+`docs/proof/artifacts/desen-app-0.1.0-publish-activation.json` at
+`sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b`, with reviewed report
+`docs/proof/DESEN-APP-PUBLISH-ACTIVATION.md`. Focused App publication, Editor Web publication,
+emitted public-package runtime, and independent root mutation suites pass 31/31, 10/10, 4/4, and
+12/12. The same closure records the user-requested authoring compatibility repair: dedicated Layers
+and Components grips are `28 × 32 px` and `32 × 32 px` without layout shift; stable,
+non-overlapping, full-width `20 px` Layers lanes directly own boundary events with row-half fallback
+and innermost-slot fencing; the sticky Components `Drop target` directly owns drop while the
+authenticated panel remains a same-target fallback; and `Add` immediately selects the new node so
+the visible guarded `Remove layer` and Delete/Backspace paths remain available. This is not
+automated native-drag or real-browser E2E evidence; those remain M10-T01 work. These local authority
+receipts make no required-gate or hosted-CI claim. M09-T14 and G09 are `DONE`; implementation
+progress is 109/145 (75%), M09 is 14/14, proof gates are 11/13, and M10-T01 is next.
+
 M09-T12 focused persistence, complete App, and root mutation suites pass 5 files/142 cases,
 22 files/324 cases, and 12/12 locally. The current exhaustive authority contains 196 workloads and
 93 proof pairs—82 ordinary and 11 barriers—with a 60-proof-unit/130-workload closure and ownership

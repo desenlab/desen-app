@@ -1430,23 +1430,23 @@ is next.
 
 ## M09 — Desen App Web MVP
 
-| ID      | Status      | Depends on               | Deliverable / evidence                                                          |
-| ------- | ----------- | ------------------------ | ------------------------------------------------------------------------------- |
-| M09-T01 | DONE        | G08                      | Desen App shell and project navigation                                          |
-| M09-T02 | DONE        | M09-T01                  | Catalog-driven component panel and layer tree                                   |
-| M09-T03 | DONE        | M09-T01, G05             | Canvas uses the exact React adapters used by the reference host                 |
-| M09-T04 | DONE        | M09-T03                  | Selection overlays remain outside capability subtrees; no private-DOM authoring |
-| M09-T05 | DONE        | M09-T02–M09-T04          | Schema-driven primitive/enum inspector controls                                 |
-| M09-T06 | DONE        | M09-T05                  | Nested-object controls and honest structured-JSON fallback                      |
-| M09-T07 | DONE        | M09-T02–M09-T06          | Named-slot drop, move, reorder, cardinality, and acceptance UI                  |
-| M09-T08 | DONE        | M09-T05                  | Local state and binding editor UI                                               |
-| M09-T09 | DONE        | M09-T08                  | Sign-in event and closed-action editor UI                                       |
-| M09-T10 | DONE        | M09-T03, M09-T08–M09-T09 | Design/Run modes on the same source tree                                        |
-| M09-T11 | DONE        | M09-T10                  | Fixtures, scenarios, and visible approximate-fidelity disclosure                |
-| M09-T12 | DONE        | M09-T01, M08-T08         | Save/open UI through editor persistence port                                    |
-| M09-T13 | DONE        | M09-T04–M09-T11          | Node-linked diagnostics and selectable invalid placeholders                     |
-| M09-T14 | NOT_STARTED | M09-T10–M09-T13, G07     | Publish to control plane and reference-host channel activation                  |
-| G09     | NOT_STARTED | M09-T01–M09-T14          | User authors, tests, saves, and publishes sign-in visually                      |
+| ID      | Status | Depends on               | Deliverable / evidence                                                          |
+| ------- | ------ | ------------------------ | ------------------------------------------------------------------------------- |
+| M09-T01 | DONE   | G08                      | Desen App shell and project navigation                                          |
+| M09-T02 | DONE   | M09-T01                  | Catalog-driven component panel and layer tree                                   |
+| M09-T03 | DONE   | M09-T01, G05             | Canvas uses the exact React adapters used by the reference host                 |
+| M09-T04 | DONE   | M09-T03                  | Selection overlays remain outside capability subtrees; no private-DOM authoring |
+| M09-T05 | DONE   | M09-T02–M09-T04          | Schema-driven primitive/enum inspector controls                                 |
+| M09-T06 | DONE   | M09-T05                  | Nested-object controls and honest structured-JSON fallback                      |
+| M09-T07 | DONE   | M09-T02–M09-T06          | Named-slot drop, move, reorder, cardinality, and acceptance UI                  |
+| M09-T08 | DONE   | M09-T05                  | Local state and binding editor UI                                               |
+| M09-T09 | DONE   | M09-T08                  | Sign-in event and closed-action editor UI                                       |
+| M09-T10 | DONE   | M09-T03, M09-T08–M09-T09 | Design/Run modes on the same source tree                                        |
+| M09-T11 | DONE   | M09-T10                  | Fixtures, scenarios, and visible approximate-fidelity disclosure                |
+| M09-T12 | DONE   | M09-T01, M08-T08         | Save/open UI through editor persistence port                                    |
+| M09-T13 | DONE   | M09-T04–M09-T11          | Node-linked diagnostics and selectable invalid placeholders                     |
+| M09-T14 | DONE   | M09-T10–M09-T13, G07     | Publish to control plane and reference-host channel activation                  |
+| G09     | DONE   | M09-T01–M09-T14          | User authors, tests, saves, and publishes sign-in visually                      |
 
 M09-T01 establishes the first application-owned React/Vite shell behind the exact completed G08
 prerequisite. It provides a full-viewport project gallery, project-level surface galleries, a
@@ -1994,6 +1994,73 @@ Checkpoint, promotion, selector, required-affected, and CI quality-gate regressi
 implementation progress to 108/145 (74%) and M09 to 13/14 (93%). P-16 is `PROVEN`, PF-086 remains
 `OPEN`, proof gates remain 10/13, and M09-T14 is next. These local receipts make no required-gate
 or hosted-CI claim.
+
+M09-T14 publishes only the exact current authored Source that is both clean and canonically equal
+to the last successfully saved Source generation. The App reruns the public Publisher from that
+Source, requires the resulting Bundle revision to equal the current publishable-preview revision,
+and sends only the canonical Bundle bytes plus revision through a trusted-host-injected port.
+Scenario projections, synthetic fixtures, Runtime operation inputs, secrets, and
+rejected-candidate diagnostics never enter the publication snapshot or request.
+
+The public Editor Web adapter stores the immutable Bundle under its exact revision and uses
+compare-and-set to move only the fixed `preview` channel. Channel discovery remains distinct from
+activation authority. Active becomes visible only after a separate server-owned reference-host
+receipt names the same revision and its durable activation generation. Channel conflicts never
+invoke activation; failed or mismatched activation preserves the last-known-good revision; stale
+settlements are fenced; and indeterminate mutations authorize neither blind retry nor current
+success. Synchronous external-store delivery keeps visible stages current, while same-tick
+host-port replacement revokes the predecessor lifetime before late settlements can reach the new
+UI. The browser App imports no Node control-plane composition or reference-host server.
+
+The user-requested authoring compatibility repair enlarges the dedicated Layers and Components
+grips to `28 × 32 px` and `32 × 32 px`, respectively, without layout shift. Stable,
+non-overlapping, full-width `20 px` Layers lanes directly own boundary events, with row-half
+fallback and innermost-slot fencing. The sticky Components `Drop target` directly owns the drop,
+while the authenticated panel remains a same-target fallback. `Add` immediately selects the new
+node, leaving the existing visible guarded `Remove layer` and Delete/Backspace paths available.
+
+The focused four-file App publication suite passes 31/31, including 2/2 real public
+control-plane → fixed-channel → reference-host integration cases. The Editor Web publication suite
+passes 10/10, the emitted public-package runtime cases pass 4/4, and the independent root mutation
+proof passes 12/12. Exact evidence is the 24,763-byte
+`docs/proof/artifacts/desen-app-0.1.0-publish-activation.json` at
+`sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b`; it authenticates nine
+exact parents, 33 current tracked receipts, and 45 focused declarations. The local exhaustive
+authority contains 200 workloads and 95 proof pairs—84 ordinary and 11 barriers—with a
+63-proof-unit/136-workload T14 closure and ownership over 1,267 tracked paths, including 190
+proof-owned paths. Neutral inventory, impact graph, path-set, and ownership pins are
+`sha256:c6655119e0b24594bced92b6b916917e0f336351c19cf338ee21d3b8d141f684`,
+`sha256:4a2e2d7d4d15a8f3d563aee7b248b14bba6ce44c27b464773a825d9c44fc58bf`,
+`sha256:e8e1841e828a63bf84d57e457047ffaef7e6ca1998b6e7c89201758d44dec5f5`, and
+`sha256:18497e4c50dd0dfa8f8dd7adaf9b6130779db7c0799798ef99e3de8bcf764486`.
+
+Append-only current-reader sequence 53 historically advances exact sequence-52 head
+`sha256:c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9` to
+`sha256:48a1457317c593b846cd4750eb309e846c33248824559d27810441584f0144d8` across 49 frozen
+artifacts and 98 current readers. Compatibility sequence 54 is the immutable predecessor: it
+preserves those artifact and reader identities, advances the exact sequence-53 head to
+`sha256:0772221371ffe1a35fe955b8cad34c725d0f9ae933714f81f10b3451214a6638`, and reseals only
+M08-T08 proof-library/root-test readers `[64, 65]`. The frozen 49,785-byte M08-T08 artifact remains
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Current sequence 55
+preserves the same 49 frozen artifacts and 98 reader identities, links that exact sequence-54
+predecessor head to `sha256:f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17`,
+and reseals only M09-T01–T14 proof-library/root-test reader indexes `[70..97]`. The current T14
+readers authenticate the exact `10,000 ms` per-test timeout successor at
+`sha256:5eba8a2b15cbcf992d0f04d0d7ad719c1a9fc42cdb66635ebc0eab679a221901`; reversing that one
+edit reproduces the frozen 24,485-byte test receipt, while the frozen T14 artifact remains
+`sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b` unchanged. Checkpoint,
+promotion, selector, and fourteen M09 root reader suites pass 78/78, 20/20, 23/23, and 179/179.
+Promotion pins the selector at
+`sha256:2855cbeedb55ede5d9db18a6b186ac07796afbc4d512f5a0aa9197bc5f177fd1`, required-affected
+runner authority at `sha256:b77b35a81915ec41554ab3505895fe98c0a4299ec9bf7d680dec320bbf3fb744`, and the T10 affected
+plan at `sha256:e3cced8e1a9cbe6f1f5c296aa3992b07ef030c81ac9267c2deff714953ce0e39`. The integrated CI
+policy regression passes 330/330. These local receipts make no required-gate or hosted-CI claim.
+
+M09-T14 and G09 are `DONE`, advancing implementation progress to 109/145 (75%), M09 to 14/14, and
+proof gates to 11/13. P-07, P-09, and P-10 remain `PARTIAL`; P-08 remains `NOT_PROVEN`; P-12
+remains `NOT_PROVEN` until M10-T07; N-036 remains `PLANNED`; and PF-085, PF-086, and PF-089 remain
+`OPEN`. Automated real-browser E2E and native drag remain unproven by this compatibility evidence
+and move to M10-T01.
 
 ## M10 — First end-to-end proof
 

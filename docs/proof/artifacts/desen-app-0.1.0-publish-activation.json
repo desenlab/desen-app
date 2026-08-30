@@ -1,0 +1,530 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-publish-activation",
+  "profile": "desen.app.publish-activation-proof.v1",
+  "task": "M09-T14",
+  "gate": "G09",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M09-T10",
+      "proofId": "desen-app-design-run-modes",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
+      "bytes": 17900,
+      "sha256": "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334",
+      "profile": "desen.app.design-run-modes-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T11",
+      "proofId": "desen-app-fixtures-scenarios-fidelity",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json",
+      "bytes": 29407,
+      "sha256": "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d",
+      "profile": "desen.app.fixtures-scenarios-fidelity-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T12",
+      "proofId": "desen-app-source-persistence",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json",
+      "bytes": 27053,
+      "sha256": "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734",
+      "profile": "desen.app.source-persistence-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T13",
+      "proofId": "desen-app-node-linked-diagnostics",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json",
+      "bytes": 29208,
+      "sha256": "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972",
+      "profile": "desen.app.node-linked-diagnostics-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M06-T10",
+      "proofId": null,
+      "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+      "bytes": 13179,
+      "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2",
+      "profile": "desen.publisher.official-golden-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M06-T09",
+      "proofId": null,
+      "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+      "bytes": 17320,
+      "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df",
+      "profile": "desen.publisher.bundle-publication-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M07-T05",
+      "proofId": "control-plane-local-api",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+      "bytes": 41945,
+      "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9",
+      "profile": "desen.control-plane.local-api-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M07-T11",
+      "proofId": "reference-host-web-channel-consumption",
+      "path": "docs/proof/artifacts/reference-host-web-0.1.0-channel-consumption.json",
+      "bytes": 39307,
+      "sha256": "48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0",
+      "profile": "desen.reference-host-web.channel-consumption-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "I07-04",
+      "proofId": null,
+      "path": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+      "bytes": 88341,
+      "sha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+      "profile": "desen.ci.affected-selector-promotion-evidence.v1",
+      "result": "HOSTED_CUTOVER_VERIFIED",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "gateStatus": "DONE",
+    "savedAuthoredSourceOnly": true,
+    "publisherRerunFromSavedSource": true,
+    "scenarioPreviewPublished": false,
+    "fixtureDataPublished": false,
+    "operationInputOrSecretPublished": false,
+    "rejectedDiagnosticsPublished": false,
+    "exactCanonicalBundleBytesStored": true,
+    "fixedPreviewChannelCompareAndSet": true,
+    "mutableChannelIsActivationAuthority": false,
+    "sourceGenerationDistinct": true,
+    "channelGenerationDistinct": true,
+    "durableActivationGenerationDistinct": true,
+    "activeRevisionRequiresReferenceHostReceipt": true,
+    "staleCompletionCanBecomeActive": false,
+    "blindRetryAfterIndeterminate": false,
+    "conflictActivatesCandidate": false,
+    "lastKnownGoodActivationPreserved": true,
+    "realPublicControlPlaneAndReferenceHostIntegration": true,
+    "browserAppImportsNodeCompositionPackages": false,
+    "publicationClaimed": true,
+    "activationClaimed": true,
+    "browserE2eClaimed": false,
+    "p08Status": "NOT_PROVEN",
+    "pf085Status": "OPEN",
+    "pf086Status": "OPEN",
+    "pf089Status": "OPEN"
+  },
+  "authority": {
+    "source": {
+      "imports": {
+        "authoringPreview": [
+          "@desen/editor-core",
+          "@desen/publisher",
+          "@desen/reference-catalog-web/catalog.json",
+          "../../../examples/sign-in/official-derived.source.desen.json",
+          "@desen/editor-core",
+          "@desen/publisher"
+        ],
+        "authoringPublication": [
+          "@desen/editor-core",
+          "@desen/protocol",
+          "./authoring-preview.js",
+          "@desen/editor-core"
+        ],
+        "publicationControls": ["react", "./application.module.css"],
+        "application": [
+          "react",
+          "@desen/reference-catalog-web/catalog.json",
+          "@desen/editor-core",
+          "@desen/protocol",
+          "@desen/runtime-core",
+          "./authoring-data.js",
+          "./authoring-diagnostics.js",
+          "./adapter-canvas.js",
+          "./authoring-fixtures.js",
+          "./authoring-persistence.js",
+          "./authoring-publication.js",
+          "./diagnostics-panel.js",
+          "./authoring-inspector.js",
+          "./authoring-event-actions.js",
+          "./authoring-state.js",
+          "./authoring-slots.js",
+          "./authoring-selection.js",
+          "./inspector-panel.js",
+          "./event-action-panel.js",
+          "./authoring-scenarios.js",
+          "./preview-fidelity.js",
+          "./persistence-controls.js",
+          "./publication-controls.js",
+          "./preview-controls.js",
+          "./state-panel.js",
+          "./authoring-preview.js",
+          "./project-navigation.js",
+          "./project-data.js",
+          "./assets/breadcrumb-separator.svg",
+          "./assets/desen-logo.svg",
+          "./assets/plus.svg",
+          "./assets/settings.svg",
+          "./assets/theme.svg",
+          "./application.module.css",
+          "react",
+          "@desen/editor-core",
+          "@desen/runtime-core",
+          "./authoring-data.js",
+          "./authoring-persistence.js",
+          "./authoring-publication.js",
+          "./authoring-diagnostics.js",
+          "./authoring-event-actions.js",
+          "./authoring-inspector.js",
+          "./authoring-state.js",
+          "./authoring-selection.js",
+          "./authoring-scenarios.js",
+          "./authoring-slots.js",
+          "./project-navigation.js",
+          "./project-data.js",
+          "./persistence-controls.js",
+          "./publication-controls.js"
+        ],
+        "editorWebPublication": ["./local-source-json.js"],
+        "editorWebIndex": [],
+        "editorWebPublicPackageTypes": ["@desen/editor-web", "@desen/editor-web"]
+      },
+      "publicPublisherRootOnly": true,
+      "savedAuthoredSourceOnly": true,
+      "transientScenarioFixtureOperationAndDiagnosticsExcluded": true,
+      "publisherRerunBeforePublication": true,
+      "exactBundleBytesForwarded": true,
+      "fixedPreviewChannel": true,
+      "channelCompareAndSet": true,
+      "sourceChannelAndActivationGenerationsDistinct": true,
+      "staleOperationFenced": true,
+      "indeterminateOutcomeBlocksBlindAuthority": true,
+      "lastKnownGoodActivationPreserved": true,
+      "browserAppImportsNodeCompositionPackages": false,
+      "editorWebUsesInjectedFetchOnly": true
+    },
+    "protocolProfiles": {
+      "input": "one exact clean persisted authored Source generation, never an effective scenario preview, fixture, operation input, or rejected diagnostic candidate",
+      "publisher": "fresh public publishDesenSource execution through the App preview helper with the exact reference Catalog",
+      "publication": "exact canonical Bundle bytes stored by immutable revision before one fixed preview-channel compare-and-set",
+      "activation": "server-owned reference-host channel consumption with a distinct durable activation generation and exact active revision",
+      "containment": "stale, conflict, failed, and indeterminate outcomes never claim the candidate active and preserve last-known-good authority"
+    }
+  },
+  "application": {
+    "package": {
+      "appName": "@desen/app-web",
+      "appTestCommand": "vitest run test/authoring-publication.test.ts test/publication-controls.test.tsx test/publication-application.test.tsx test/publication-activation-integration.test.ts",
+      "editorWebName": "@desen/editor-web",
+      "editorWebTestCommand": "vitest run test/local-bundle-channel-publication.test.ts",
+      "publisherDependency": "workspace:*",
+      "rootPackageName": "desen-workspace",
+      "rootCommands": {
+        "generate": "pnpm --filter @desen/editor-web build && pnpm --filter @desen/editor-web typecheck && pnpm --filter @desen/editor-web test:publication && pnpm --filter @desen/editor-web test:public-package && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:publication && node scripts/generate-desen-app-publish-activation-proof.mjs",
+        "verify": "pnpm --filter @desen/editor-web build && pnpm --filter @desen/editor-web typecheck && pnpm --filter @desen/editor-web test:publication && pnpm --filter @desen/editor-web test:public-package && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:publication && node scripts/verify-desen-app-publish-activation.mjs",
+        "test": "pnpm --filter @desen/editor-web build && pnpm --filter @desen/editor-web typecheck && pnpm --filter @desen/editor-web test:publication && pnpm --filter @desen/editor-web test:public-package && pnpm --filter @desen/app-web build && pnpm --filter @desen/app-web typecheck && pnpm --filter @desen/app-web test:publication && node --test tests/desen-app-publish-activation.test.mjs"
+      }
+    },
+    "flow": [
+      "admit only a ready persisted snapshot whose current and saved authored Source canonical forms match",
+      "rerun the public Publisher from that exact authored Source and require the current preview revision",
+      "canonicalize and forward the resulting exact Bundle bytes with its closed revision",
+      "store immutable Bundle bytes before moving the fixed preview channel with compare-and-set",
+      "ask the server-owned reference host to consume that exact channel generation and revision",
+      "claim Active only after an exact durable activation receipt for the same revision",
+      "preserve last-known-good activation and expose conflict, failure, stale, or indeterminate outcomes without blind retry"
+    ],
+    "ownership": {
+      "authoredSourceAndGeneration": "Desen App persistence session",
+      "bundleAndRevision": "public Publisher",
+      "immutableBundleAndChannelCas": "public Editor Web adapter over local control-plane API",
+      "activationAndActiveRevision": "server-owned reference-host channel controller",
+      "presentation": "Desen App Design-mode publication controls"
+    }
+  },
+  "tests": {
+    "command": "pnpm --filter @desen/editor-web test:publication && pnpm --filter @desen/editor-web test:public-package && pnpm --filter @desen/app-web test:publication && node --test tests/desen-app-publish-activation.test.mjs",
+    "focusedFiles": [
+      "apps/desen-app/test/authoring-publication.test.ts",
+      "apps/desen-app/test/publication-controls.test.tsx",
+      "apps/desen-app/test/publication-application.test.tsx",
+      "apps/desen-app/test/publication-activation-integration.test.ts",
+      "packages/editor-web/test/local-bundle-channel-publication.test.ts",
+      "packages/editor-web/test/public-package.mjs"
+    ],
+    "testDeclarationCounts": {
+      "apps/desen-app/test/authoring-publication.test.ts": 15,
+      "apps/desen-app/test/publication-controls.test.tsx": 8,
+      "apps/desen-app/test/publication-application.test.tsx": 6,
+      "apps/desen-app/test/publication-activation-integration.test.ts": 2,
+      "packages/editor-web/test/local-bundle-channel-publication.test.ts": 10,
+      "packages/editor-web/test/public-package.mjs": 4
+    },
+    "focusedTestDeclarations": 45,
+    "requiredTestNames": {
+      "apps/desen-app/test/authoring-publication.test.ts": [
+        "captures only the exact route, snapshot, and two-method trusted-host port",
+        "blocks every unsaved, unauthorized, dirty, or stale-preview state before host I/O",
+        "reruns the public Publisher and emits no bytes when semantic publication rejects",
+        "passes exact canonical fresh Bundle bytes, then activates only the fixed preview receipt",
+        "retains every exact durable activation relationship, including identical preservation",
+        "preserves conflict generation and never activates after a definite channel rejection",
+        "reports host LKG preservation with the already-published channel receipt",
+        "contains thrown, explicit-indeterminate, and malformed host activation outcomes",
+        "fences synchronous reentrant replacement before a channel callback can authorize activation",
+        "fences late activation after replacement and after controller disposal"
+      ],
+      "apps/desen-app/test/publication-controls.test.tsx": [
+        "publishes only an admitted saved generation and explains transient-data isolation",
+        "claims Active only with distinct Source, channel, and durable activation receipts",
+        "reports channel conflict without presenting reference-host activation",
+        "shows a separately preserved last-known-good revision after activation rejection",
+        "blocks blind retry after an indeterminate publication result"
+      ],
+      "apps/desen-app/test/publication-application.test.tsx": [
+        "authors, runs, saves, publishes, and visibly activates one exact edited durable revision",
+        "single-dispatches pending work and fences persistence, modes, navigation, and authoring mutation",
+        "does not ask the reference host to activate a control-plane conflict",
+        "shows a mismatched durable host revision only as last-known-good preservation",
+        "does not surface late replaced-port or unmounted settlements as current success",
+        "keeps persistence and publication independently unavailable without trusted public ports"
+      ],
+      "apps/desen-app/test/publication-activation-integration.test.ts": [
+        "keeps exact saved Source, Publisher Bundle, fixed channel, and active revision equal",
+        "keeps repeated publication unchanged and preserves the durable active revision"
+      ],
+      "packages/editor-web/test/local-bundle-channel-publication.test.ts": [
+        "publishes to a missing fixed channel in the exact GET, Bundle PUT, channel CAS order",
+        "updates and preserves existing channel generations with exact If-Match CAS",
+        "returns the exact channel conflict without retrying or overwriting a concurrent winner",
+        "distinguishes pre-mutation read failures from Bundle and channel commit ambiguity",
+        "keeps malformed or mismatched post-PUT responses indeterminate",
+        "rejects non-loopback, active, weak, dynamic-channel, and implicit-fetch configuration"
+      ],
+      "packages/editor-web/test/public-package.mjs": [
+        "emitted editor-web root has the exact local adapter runtime surface",
+        "emitted publication port keeps its channel fixed in trusted configuration"
+      ]
+    },
+    "rootTestNames": [
+      "[authority] authenticates exact App, Publisher, control-plane, reference-host, and G07 parents",
+      "[source] reruns the public Publisher from the exact saved authored Source only",
+      "[transients] excludes scenarios, fixtures, operation inputs, and rejected diagnostics",
+      "[publication] sends exact Bundle bytes before fixed-channel compare-and-set",
+      "[activation] distinguishes Source, channel, and durable activation generations",
+      "[containment] preserves last-known-good activation and fences stale or uncertain work",
+      "[boundary] keeps Node control-plane and reference-host packages outside browser App imports",
+      "[integration] exercises real public control-plane and reference-host channel consumption",
+      "[tests] retains exact focused source-level semantic evidence",
+      "[determinism] builds byte-identical detached evidence twice",
+      "[policy] rejects source, test, package, and linked-path weakening",
+      "[verification] rejects parent, artifact, report, destination, and option drift"
+    ],
+    "realPublicIntegration": true
+  },
+  "boundary": {
+    "trackedFiles": 33,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 3845,
+        "sha256": "d6b076c782bd3dd11718d99ed0e93b3938d849bacfff2f10e34fc4e0da16186e"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 99291,
+        "sha256": "c9adce091fcd00299cdc86164871570d2ac1fcd7850d000ecb3ed8a8542a8ab3"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 124878,
+        "sha256": "78b2722e9101048fa9df25621620fd903dd06680f3c6160d31bee703927d0709"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-preview.ts",
+        "bytes": 3704,
+        "sha256": "75fa2d605f8c5ceebc2668c1f4c739155c7791b895132dc9a5fac183384e3d34"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-publication.ts",
+        "bytes": 35200,
+        "sha256": "243ea97ca06e1ef6686f492d857c0cd1db286205919697bb4d84e5bf339ff87f"
+      },
+      {
+        "path": "apps/desen-app/src/publication-controls.tsx",
+        "bytes": 9241,
+        "sha256": "d1d9ba7a2b38b392325d743d282369e183e2d7b3fe671845b95bbe6c49e14069"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 108940,
+        "sha256": "c8ddece3d9c57908d3327f36612514080aa9d630364fe2a645feecf4cacf6ee2"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-publication.test.ts",
+        "bytes": 24301,
+        "sha256": "1b30de20b13cde1661472dd1015dd3d051370246c8db10ec5f706a7b13fe3809"
+      },
+      {
+        "path": "apps/desen-app/test/publication-activation-integration.test.ts",
+        "bytes": 13567,
+        "sha256": "a8e55c9895da9d629fd754a8ac183537d5e0447770b8449e412e832e3cca83e9"
+      },
+      {
+        "path": "apps/desen-app/test/publication-application.test.tsx",
+        "bytes": 24485,
+        "sha256": "52e29b84745ff331556529612015b95b581bf3007118352ebad796ca9541e0e3"
+      },
+      {
+        "path": "apps/desen-app/test/publication-controls.test.tsx",
+        "bytes": 7150,
+        "sha256": "56b26039c2e4bacda703f3ba964bba3d1cb2f9983ce5555e193521093e79928e"
+      },
+      {
+        "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+        "bytes": 41945,
+        "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json",
+        "bytes": 17900,
+        "sha256": "bc5b7ffef0c39737882072f9340bcade86f084db8e7923fcb03aa7364d077334"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json",
+        "bytes": 29407,
+        "sha256": "3f08980e687d48ba267f78c7d4dd1ae1eb59db5cc6bb3401d88705ee0416cc9d"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json",
+        "bytes": 29208,
+        "sha256": "8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json",
+        "bytes": 27053,
+        "sha256": "717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734"
+      },
+      {
+        "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+        "bytes": 17320,
+        "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+      },
+      {
+        "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+        "bytes": 13179,
+        "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+      },
+      {
+        "path": "docs/proof/artifacts/reference-host-web-0.1.0-channel-consumption.json",
+        "bytes": 39307,
+        "sha256": "48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0"
+      },
+      {
+        "path": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "bytes": 88341,
+        "sha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549"
+      },
+      {
+        "path": "package.json",
+        "bytes": 97170,
+        "sha256": "5baf41a8ada5bec8ce025da441cf3b9980a2d4594c0342f6c161afad6591c351"
+      },
+      {
+        "path": "packages/editor-web/package.json",
+        "bytes": 1105,
+        "sha256": "5bde6f6c967d2faa8724c01921598365d32739e5d6053622d7afd7695ab01702"
+      },
+      {
+        "path": "packages/editor-web/src/index.ts",
+        "bytes": 1503,
+        "sha256": "399457bad57a24c0b59eacbb3213a24436b06dc35a286a991cd7dfab68f00b9a"
+      },
+      {
+        "path": "packages/editor-web/src/local-bundle-channel-publication.ts",
+        "bytes": 30049,
+        "sha256": "f154037a1bc8ba846a006ef9e5a15caaf7a7101177dd98b152504d379f1a79d0"
+      },
+      {
+        "path": "packages/editor-web/test/local-bundle-channel-publication.test.ts",
+        "bytes": 15407,
+        "sha256": "7cedfdfd86ab419c70567a20b8c6d820b483b8a49e7aed54a4d27fef50d07037"
+      },
+      {
+        "path": "packages/editor-web/test/public-package.mjs",
+        "bytes": 4531,
+        "sha256": "cc57ce9578abd94c204bd32820bbdf52bb5c90b10f321400ea51885da8a9d325"
+      },
+      {
+        "path": "packages/editor-web/test/public-package.types.mts",
+        "bytes": 5798,
+        "sha256": "0bc92671ce1669529616701b44c1d680b5e99e9ce9964b61ac596d54a2c93e05"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 129905,
+        "sha256": "c7a42312808ffe0dca128297a1049ef5aab5dadc1e922f32457e94af14e57db2"
+      },
+      {
+        "path": "scripts/generate-desen-app-publish-activation-proof.mjs",
+        "bytes": 805,
+        "sha256": "545880f1db295ab8046c9ce19a959b4ed40b6120a741552d3bd3453d40eea283"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-publish-activation-proof.mjs",
+        "bytes": 49397,
+        "sha256": "f6c8430faaa4ca7a5af2f935a106cf59b55a0065afe46a2f948f510931cd88ac"
+      },
+      {
+        "path": "scripts/verify-desen-app-publish-activation.mjs",
+        "bytes": 810,
+        "sha256": "082ef0934b23babcff92e02e72df75ce63705d2cdfc3a2bf25487c7e693c09b3"
+      },
+      {
+        "path": "tests/desen-app-publish-activation.test.mjs",
+        "bytes": 13038,
+        "sha256": "add104d6c3fd28a982d8f1762680c3b22e0987f9fbd19fa03896d4b593ee7c27"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-publish-activation-proof.mjs",
+      "scripts/generate-desen-app-publish-activation-proof.mjs",
+      "scripts/verify-desen-app-publish-activation.mjs",
+      "tests/desen-app-publish-activation.test.mjs"
+    ],
+    "parentArtifacts": 9,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true,
+    "historicalArtifactsReadOnly": true,
+    "realPublicIntegration": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M09-T14/G09 proves only saved authored Source publication through the local preview channel and reference-host activation.",
+    "Scenario projections, fixtures, operation inputs, secrets, and rejected diagnostic candidates remain transient and unpublished.",
+    "A mutable channel remains discovery metadata and never becomes activation authority.",
+    "A concrete browser E2E and remote deployment path remain NOT_PROVEN.",
+    "P-08 remains NOT_PROVEN; PF-085, PF-086, and PF-089 remain OPEN.",
+    "No required-gate or hosted-CI pass is inferred from this local evidence."
+  ]
+}

@@ -121,12 +121,24 @@ importers:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
     devDependencies:
+      '@desen/control-plane-api':
+        specifier: workspace:*
+        version: link:../control-plane-api
+      '@desen/editor-web':
+        specifier: workspace:*
+        version: link:../../packages/editor-web
+      '@desen/reference-host-web-server':
+        specifier: workspace:*
+        version: link:../reference-host-web-server
       '@testing-library/dom':
         specifier: 10.4.1
         version: 10.4.1
       '@testing-library/react':
         specifier: 16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@types/node':
+        specifier: 24.13.3
+        version: 24.13.3
       '@types/react':
         specifier: 19.2.17
         version: 19.2.17

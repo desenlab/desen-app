@@ -25,6 +25,8 @@ const MAX_AUTHORITY_BYTES = 32 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 const ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-persistence.json";
+const PUBLISH_ACTIVATION_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/EDITOR-CORE-PERSISTENCE.md";
 const FROZEN_ARTIFACT_PIN = Object.freeze({
   bytes: 49_785,
@@ -151,6 +153,41 @@ const PREREQUISITE_PINS = Object.freeze([
   }),
 ]);
 
+const PUBLISH_ACTIVATION_ARTIFACT_PIN = Object.freeze({
+  task: "M09-T14",
+  gate: "G09",
+  proofId: "desen-app-publish-activation",
+  profile: "desen.app.publish-activation-proof.v1",
+  result: "PASS",
+  path: PUBLISH_ACTIVATION_ARTIFACT_PATH,
+  bytes: 24_763,
+  sha256: "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b",
+});
+const PUBLISH_ACTIVATION_EDITOR_WEB_RECEIPT_PATHS = Object.freeze(
+  [
+    "packages/editor-web/package.json",
+    "packages/editor-web/src/index.ts",
+    "packages/editor-web/src/local-bundle-channel-publication.ts",
+    "packages/editor-web/test/local-bundle-channel-publication.test.ts",
+    "packages/editor-web/test/public-package.mjs",
+    "packages/editor-web/test/public-package.types.mts",
+  ].sort(compareText),
+);
+const PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS = Object.freeze(
+  [
+    "packages/editor-web/dist/index.d.ts",
+    "packages/editor-web/dist/index.js",
+    "packages/editor-web/package.json",
+    "packages/editor-web/src/index.ts",
+    "packages/editor-web/test/public-package.mjs",
+    "packages/editor-web/test/public-package.types.mts",
+  ].sort(compareText),
+);
+const PUBLISH_ACTIVATION_AUTHORITY_PATHS = Object.freeze([
+  PUBLISH_ACTIVATION_ARTIFACT_PATH,
+  ...PUBLISH_ACTIVATION_EDITOR_WEB_RECEIPT_PATHS,
+]);
+
 const TRACKED_SOURCE_PATHS = Object.freeze([
   FIXTURE_PATH,
   "package.json",
@@ -175,13 +212,11 @@ const TRACKED_SOURCE_PATHS = Object.freeze([
   "packages/editor-core/test/persistence.types.ts",
   "packages/editor-core/test/public-package.mjs",
   "packages/editor-core/test/public-package.types.mts",
-  "packages/editor-web/package.json",
-  "packages/editor-web/src/index.ts",
+  PUBLISH_ACTIVATION_ARTIFACT_PATH,
+  ...PUBLISH_ACTIVATION_EDITOR_WEB_RECEIPT_PATHS,
   "packages/editor-web/src/local-source-json.ts",
   "packages/editor-web/src/local-source-persistence.ts",
   "packages/editor-web/test/local-source-persistence.test.ts",
-  "packages/editor-web/test/public-package.mjs",
-  "packages/editor-web/test/public-package.types.mts",
   "packages/editor-web/tsconfig.build.json",
   "packages/editor-web/tsconfig.json",
   "packages/editor-web/tsconfig.public-package.json",
@@ -240,6 +275,11 @@ const RETAINED_T08_RECEIPT_PATHS = Object.freeze(
     "packages/editor-web/dist/local-source-persistence.js",
     "packages/editor-web/dist/local-source-persistence.d.ts",
   ].sort(compareText),
+);
+const RETAINED_T08_EXACT_RECEIPT_PATHS = Object.freeze(
+  RETAINED_T08_RECEIPT_PATHS.filter(
+    (relativePath) => !PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS.includes(relativePath),
+  ),
 );
 
 const BUILD_OPTION_KEYS = Object.freeze([
@@ -443,6 +483,7 @@ async function trackedBytes(relativePath, options) {
   const live = await readNoFollow(path.join(WORKSPACE_ROOT, relativePath), relativePath);
   const override = options.fileOverrides.get(relativePath);
   if (override !== undefined && !override.equals(live)) {
+    if (PUBLISH_ACTIVATION_AUTHORITY_PATHS.includes(relativePath)) return override;
     fail("TRACKED_FILE_DRIFT", `Tracked M08-T08 authority drifted: ${relativePath}.`);
   }
   return override ?? live;
@@ -774,11 +815,138 @@ async function authenticateFrozenArtifact() {
   });
 }
 
+function authenticatePublishActivationSuccessor(files) {
+  const artifactBytes = files.get(PUBLISH_ACTIVATION_ARTIFACT_PATH);
+  if (
+    artifactBytes?.byteLength !== PUBLISH_ACTIVATION_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== PUBLISH_ACTIVATION_ARTIFACT_PIN.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M09-T14/G09 publish-activation artifact drifted.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, PUBLISH_ACTIVATION_ARTIFACT_PATH);
+  const trackedReceipts = artifact.boundary?.trackedReceipts;
+  const receiptPaths = Array.isArray(trackedReceipts)
+    ? trackedReceipts.map((candidate) => candidate?.path)
+    : [];
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== PUBLISH_ACTIVATION_ARTIFACT_PIN.task ||
+    artifact.gate !== PUBLISH_ACTIVATION_ARTIFACT_PIN.gate ||
+    artifact.proofId !== PUBLISH_ACTIVATION_ARTIFACT_PIN.proofId ||
+    artifact.profile !== PUBLISH_ACTIVATION_ARTIFACT_PIN.profile ||
+    artifact.result !== PUBLISH_ACTIVATION_ARTIFACT_PIN.result ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.gateStatus !== "DONE" ||
+    artifact.claim?.savedAuthoredSourceOnly !== true ||
+    artifact.claim?.publisherRerunFromSavedSource !== true ||
+    artifact.claim?.scenarioPreviewPublished !== false ||
+    artifact.claim?.fixtureDataPublished !== false ||
+    artifact.claim?.operationInputOrSecretPublished !== false ||
+    artifact.claim?.rejectedDiagnosticsPublished !== false ||
+    artifact.claim?.exactCanonicalBundleBytesStored !== true ||
+    artifact.claim?.fixedPreviewChannelCompareAndSet !== true ||
+    artifact.claim?.mutableChannelIsActivationAuthority !== false ||
+    artifact.claim?.sourceGenerationDistinct !== true ||
+    artifact.claim?.channelGenerationDistinct !== true ||
+    artifact.claim?.durableActivationGenerationDistinct !== true ||
+    artifact.claim?.activeRevisionRequiresReferenceHostReceipt !== true ||
+    artifact.claim?.staleCompletionCanBecomeActive !== false ||
+    artifact.claim?.blindRetryAfterIndeterminate !== false ||
+    artifact.claim?.conflictActivatesCandidate !== false ||
+    artifact.claim?.lastKnownGoodActivationPreserved !== true ||
+    artifact.claim?.realPublicControlPlaneAndReferenceHostIntegration !== true ||
+    artifact.claim?.browserAppImportsNodeCompositionPackages !== false ||
+    artifact.claim?.publicationClaimed !== true ||
+    artifact.claim?.activationClaimed !== true ||
+    artifact.claim?.browserE2eClaimed !== false ||
+    artifact.claim?.p08Status !== "NOT_PROVEN" ||
+    artifact.claim?.pf085Status !== "OPEN" ||
+    artifact.claim?.pf086Status !== "OPEN" ||
+    artifact.claim?.pf089Status !== "OPEN" ||
+    artifact.tests?.focusedTestDeclarations !== 45 ||
+    artifact.tests?.rootTestNames?.length !== 12 ||
+    artifact.tests?.realPublicIntegration !== true ||
+    artifact.boundary?.trackedFiles !== 33 ||
+    artifact.boundary?.parentArtifacts !== 9 ||
+    trackedReceipts?.length !== 33 ||
+    JSON.stringify(receiptPaths) !== JSON.stringify([...receiptPaths].sort(compareText))
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The M09-T14/G09 publish-activation identity or claims drifted.",
+    );
+  }
+  const receiptMap = new Map(trackedReceipts.map((candidate) => [candidate.path, candidate]));
+  for (const relativePath of PUBLISH_ACTIVATION_EDITOR_WEB_RECEIPT_PATHS) {
+    const receipt = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      receipt === undefined ||
+      bytes === undefined ||
+      receipt.bytes !== bytes.byteLength ||
+      receipt.sha256 !== sha256(bytes)
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The live M09-T14 Editor Web receipt drifted: ${relativePath}.`,
+      );
+    }
+  }
+  return deepFreeze({
+    task: PUBLISH_ACTIVATION_ARTIFACT_PIN.task,
+    gate: PUBLISH_ACTIVATION_ARTIFACT_PIN.gate,
+    artifact: PUBLISH_ACTIVATION_ARTIFACT_PIN,
+    editorWebReceiptPaths: PUBLISH_ACTIVATION_EDITOR_WEB_RECEIPT_PATHS,
+    retainedT08ReceiptHandoffPaths: PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS,
+    focusedTestDeclarations: 45,
+    trackedFiles: 33,
+    parentArtifacts: 9,
+    rootTests: 12,
+    savedAuthoredSourceOnly: true,
+    publisherRerunFromSavedSource: true,
+    scenarioPreviewPublished: false,
+    fixtureDataPublished: false,
+    operationInputOrSecretPublished: false,
+    rejectedDiagnosticsPublished: false,
+    exactCanonicalBundleBytesStored: true,
+    fixedPreviewChannelCompareAndSet: true,
+    mutableChannelIsActivationAuthority: false,
+    distinctSourceChannelAndActivationGenerations: true,
+    activeRevisionRequiresReferenceHostReceipt: true,
+    staleCompletionCanBecomeActive: false,
+    blindRetryAfterIndeterminate: false,
+    conflictActivatesCandidate: false,
+    lastKnownGoodActivationPreserved: true,
+    realPublicControlPlaneAndReferenceHostIntegration: true,
+    browserAppImportsNodeCompositionPackages: false,
+    publicationClaimed: true,
+    activationClaimed: true,
+    browserE2eClaimed: false,
+    p08Status: "NOT_PROVEN",
+    pf085Status: "OPEN",
+    pf086Status: "OPEN",
+    pf089Status: "OPEN",
+  });
+}
+
 function assertRetainedT08Receipts(frozenArtifact, files) {
+  if (
+    RETAINED_T08_RECEIPT_PATHS.length !== 32 ||
+    PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS.length !== 6 ||
+    RETAINED_T08_EXACT_RECEIPT_PATHS.length !== 26 ||
+    PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS.some(
+      (relativePath) => !RETAINED_T08_RECEIPT_PATHS.includes(relativePath),
+    )
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The retained M08-T08 to M09-T14 receipt handoff drifted.");
+  }
   const receiptByPath = new Map(
     frozenArtifact.trackedFiles.map((receipt) => [receipt.path, receipt]),
   );
-  for (const relativePath of RETAINED_T08_RECEIPT_PATHS) {
+  for (const relativePath of RETAINED_T08_EXACT_RECEIPT_PATHS) {
     const receipt = receiptByPath.get(relativePath);
     const bytes = files.get(relativePath);
     if (receipt?.bytes !== bytes?.byteLength || receipt?.sha256 !== sha256(bytes)) {
@@ -1422,8 +1590,8 @@ function verifyTestAuthority(files) {
     tests.editorCorePublicRuntimeCases !== 50 ||
     tests.editorCorePublicCompilerNegativeAssertions !== 102 ||
     tests.editorWebFocusedRuntimeCases !== 12 ||
-    tests.editorWebPublicRuntimeCases !== 3 ||
-    tests.editorWebPublicCompilerNegativeAssertions !== 6 ||
+    tests.editorWebPublicRuntimeCases !== 4 ||
+    tests.editorWebPublicCompilerNegativeAssertions !== 10 ||
     tests.rootProofCases !== EDITOR_CORE_PERSISTENCE_ROOT_TEST_NAMES.length
   ) {
     fail("TEST_INVENTORY_DRIFT", "The reviewed M08-T08 package or root test inventory drifted.", {
@@ -1501,9 +1669,6 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
   const files = new Map();
   for (const relativePath of paths)
     files.set(relativePath, await trackedBytes(relativePath, options));
-  if (options.fileOverrides.size !== 0) {
-    fail("TRACKED_FILE_OVERRIDE_REJECTED", "Caller file overrides cannot issue M08-T08 PASS.");
-  }
   const validSource = parseJson(files.get(FIXTURE_PATH), FIXTURE_PATH);
   const integration = await runIntegration(validSource);
   const tests = verifyTestAuthority(files);
@@ -1513,6 +1678,10 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
     "frozen M08-T07 prerequisite",
   );
   const editorCoreCompatibility = verifyEditorCoreCompatibility(files, t07Artifact);
+  const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
+  if (options.fileOverrides.size !== 0) {
+    fail("TRACKED_FILE_OVERRIDE_REJECTED", "Caller file overrides cannot issue M08-T08 PASS.");
+  }
   assertRetainedT08Receipts(frozen.artifact, files);
   const trackedFiles = paths.map((relativePath) => {
     const bytes = files.get(relativePath);
@@ -1566,6 +1735,12 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
       persistencePortRemainsPlatformNeutral: true,
       editorWebOwnsTransportAdapter: true,
     },
+    receiptCompatibility: {
+      retainedTaskTimeReceipts: RETAINED_T08_RECEIPT_PATHS.length,
+      currentExactRetainedReceipts: RETAINED_T08_EXACT_RECEIPT_PATHS.length,
+      publishActivationHandoffReceipts: PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS.length,
+    },
+    publishActivationSuccessor,
     trackedFiles,
     nonclaims: [
       "Input JSON whitespace, object-member order, and original lexical bytes are not preserved; canonical parsed Source values are.",
@@ -1575,6 +1750,7 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
       "An indeterminate PUT is resolved only by reopening; it is never converted into a definite failure or automatic retry.",
       "M08-T09 continuous-validation bytes are compatibility-only successor authority and are not part of the frozen M08-T08 claim.",
       "M08-T10 terminal-integration bytes are compatibility-only successor authority and are not part of the frozen M08-T08 claim.",
+      "M09-T14 publish-activation bytes are authenticated successor authority and are not part of the frozen M08-T08 claim.",
       "React renderer, DOM behavior, selection, and viewport policy remain outside M08-T08.",
       "Undo/redo, selection policy, viewport policy, multi-user synchronization, and remote persistence remain outside M08-T08.",
     ],

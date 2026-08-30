@@ -31,15 +31,16 @@ are never resolved or executed. Rejected-candidate diagnostics remain outside co
 canonical dirty-state comparison, persistence generations, and Save requests.
 
 The retained authoring compatibility correction keeps mutation authority unchanged while making
-its native interaction targets explicit. Compatible Components cards expose a dedicated dotted
-drag grip, and the complete authenticated Components panel admits the drop for the target
-summarized by the sticky `Add to` card. Layers starts movement only from its dedicated dotted grip,
-gives pointer ownership to the innermost named slot, keeps compact insertion lanes layout-stable
-while each visible row projects its before/after half, distinguishes accepted placement from the
-current no-op position, and retains the last admitted placement through coordinate-less or rejected
-release drift. Successful insertion switches to Layers, focuses the inserted node, and exposes
-`Remove layer` plus the guarded Delete/Backspace shortcuts. Native transfer bytes remain inert, and
-no native-browser E2E result is inferred.
+its native interaction targets explicit. Compatible Components cards expose an enlarged dedicated
+dotted drag grip; the sticky `Drop target` card directly admits the drop, while the complete
+authenticated Components panel remains a forgiving fallback for the same current target. Layers
+starts movement only from its enlarged dotted grip, gives pointer ownership to the innermost named
+slot, and keeps compact insertion lanes layout-stable while a wider magnetic hit surface plus each
+visible row's halves project the exact before/after boundary. Accepted placement remains distinct
+from the current no-op position, and the last admitted placement survives coordinate-less or
+rejected release drift. Successful insertion switches to Layers, focuses the inserted node, and
+exposes `Remove layer` plus the guarded Delete/Backspace shortcuts. Native transfer bytes remain
+inert, and no native-browser E2E result is inferred.
 
 ## Local receipts
 

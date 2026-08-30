@@ -3305,12 +3305,14 @@ This file records implementation discoveries without changing the frozen DESEN 0
   rejection, stable-ID preservation, and complete post-edit validation are re-derived for every
   request. Browser drag data is inert rather than command authority; accepted edits still pass the
   public Editor Core transition and Publisher preflight before one atomic preview replacement.
-  The subsequent App compatibility patch removes overlapping boundary hit areas, maps each whole
-  row's top and bottom halves to the adjacent deterministic boundary, retains the selected
-  Components target across the interaction, and auto-selects a newly inserted component so the
-  already-safe Delete action is immediately available. These are App-owned input and selection
-  mechanics only; they grant no additional command authority. Native real-browser drag E2E remains
-  open.
+  The subsequent App compatibility patches remove overlapping boundary hit areas, map each whole
+  row's top and bottom halves to the adjacent deterministic boundary, and give every compact lane a
+  wider layout-stable magnetic surface with direct event ownership. Components retains its selected
+  target across the interaction; the visible sticky target directly accepts the drop while the
+  complete panel remains a forgiving fallback. Successful insertion auto-selects the new component
+  so the already-safe Delete action is immediately available. These are App-owned input and
+  selection mechanics only; they grant no additional command authority. Native real-browser drag
+  E2E remains open.
   This closes the product's conservative authoring profile without changing DESEN 0.1.0 bytes or
   making the editor-only position rules interoperable protocol commands.
 - Future action: The current Editor Core and Desen App profiles must retain the same exact-command,
@@ -3671,11 +3673,18 @@ This file records implementation discoveries without changing the frozen DESEN 0
   revoked results. Evidence:
   `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`
   `sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`.
-- Future action: M09-T13 layers node-linked diagnostics without changing the admitted Source,
-  preview, persistence request, or persistence generation. M09-T14 must publish only the exact
-  admitted authored/persisted Source. A concrete App host adapter, interoperable remote-storage
-  profile, or merge protocol still requires a separate explicit profile; PF-085 therefore remains
-  `OPEN`.
+- M09-T14 publication consumption: publication is admitted only when the current authored Source
+  is canonically equal to the last successful saved document, its generation is positive,
+  persistence is ready, and a fresh public Publisher result reproduces the current Source-preview
+  revision. The fixed-channel adapter reads the initial channel snapshot, writes exact canonical
+  Bundle bytes, and then performs channel compare-and-set without retry or merge. Source,
+  channel, and durable activation generations remain separate receipts. Definite conflict,
+  precommit failure, and Bundle/channel uncertainty are distinct; uncertainty prohibits blind
+  retry. Scenario previews, fixture state, Runtime input, secrets, and rejected diagnostic
+  candidates cannot enter the publication snapshot or request.
+- Future action: A concrete App host adapter, interoperable remote-storage profile, commit
+  reconciliation UX, or merge protocol still requires a separate explicit profile. PF-085
+  therefore remains `OPEN`.
 
 ## PF-086 — Continuous editor diagnostics require explicit subjects and snapshot identities
 
@@ -3728,12 +3737,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
   subtree while preserving the current valid preview; Run mode exposes neither Inspector
   diagnostics nor placeholder interaction.
 
-- Future action: M08-T10 independently proves terminal React/DOM integration, cross-command
-  determinism, and stable identity at the G08 boundary, and M09-T13 consumes that identity without
-  replacing explicit subjects with pointer heuristics or executing dynamic obligations. M09-T14
-  must publish only the exact admitted authored/persisted Source; any interoperable
-  diagnostic-index or editor-subscription protocol still requires a later explicit profile, so
-  PF-086 remains `OPEN`.
+- M09-T14 containment: rejected diagnostic candidates and their transient reports have no field in
+  the publication snapshot or either trusted-host request. Publication re-admits only the current
+  valid saved Source and reruns the Publisher, so diagnostic presentation cannot become Bundle,
+  channel, or activation authority.
+- Future action: Any interoperable diagnostic-index or editor-subscription protocol still requires
+  a later explicit profile, so PF-086 remains `OPEN`.
 
 ## PF-087 — Terminal editor evidence needs independent graphs, identity deltas, and an AST platform audit
 
@@ -3861,9 +3870,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
   settlements from publishing stale state. Evidence:
   `docs/proof/artifacts/desen-app-0.1.0-source-persistence.json`
   `sha256:717d0ddada008edb34909d5defcc4c28e95b36f6dfc0b1abb4d09d9775a6b734`.
-- Future action: M09-T14 must publish only the authored/persisted Source through the public Publisher
-  and control-plane boundaries. M10-T02–M10-T04 own automated browser evidence for pending,
-  failure, success, navigation, and a separately authorized real host operation binding. M12-T04
-  still owns the repository-wide secret/synthetic-data audit for N-036. A future protocol revision
-  should standardize preview-context or scenario-persistence semantics only if they must
-  interoperate across editors; PF-089 remains `OPEN`.
+- M09-T14 publication containment: only the canonically identical last-saved authored Source is
+  freshly republished. The transient scenario/effective preview, fixture lifecycle, Runtime
+  operation input, passwords/secrets, and rejected diagnostic candidate cannot be represented in
+  the exact publication snapshot or Bundle/channel request. Reference-host activation receives
+  only the fixed channel name, channel generation, and exact revision.
+- Future action: M10-T02–M10-T04 own automated browser evidence for pending, failure, success,
+  navigation, and a separately authorized real host operation binding. M12-T04 still owns the
+  repository-wide secret/synthetic-data audit for N-036. A future protocol revision should
+  standardize preview-context or scenario-persistence semantics only if they must interoperate
+  across editors; PF-089 remains `OPEN`.

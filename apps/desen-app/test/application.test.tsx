@@ -247,7 +247,12 @@ describe("Desen App application shell", () => {
     expect(screen.getByRole("complementary", { name: "Inspector" })).toBeTruthy();
     expect(screen.getByText("Select a layer", { selector: "strong" })).toBeTruthy();
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
-    expect(screen.queryByRole("button", { name: /publish/i })).toBeNull();
+    const publication = screen.getByRole("region", { name: "Publish saved Source" });
+    expect(within(publication).getByRole("button", { name: "Publish" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    expect(within(publication).getByRole("status").textContent).toContain("not configured");
     const modeControl = screen.getByRole("group", { name: "Design and Run mode" });
     expect(
       within(modeControl).getByRole("button", { name: "Design" }).getAttribute("aria-pressed"),
@@ -344,7 +349,7 @@ describe("Desen App application shell", () => {
     expect(dropTarget.textContent).toContain("sign-in.layout · default");
     expect(dropTarget.textContent).toContain("5 items");
     expect(dropTarget.textContent).toContain(
-      "appends at position 6 · click Add or drag a component into this panel",
+      "position 6 · drag a dotted grip to this target, or click Add",
     );
     expect(managedSubtree?.contains(dropTarget)).toBe(false);
 
@@ -629,7 +634,18 @@ describe("Desen App application shell", () => {
     expect(writes).toEqual([["text/plain", "DESEN App authoring item"]]);
     expect(target.getAttribute("data-drag-active")).toBe("true");
     expect(target.getAttribute("data-drop-ready")).toBe("true");
-    const dropPrompt = within(target).getByText("Drop Alert here");
+    const dropPrompt = within(target).getByText("Release to add Alert");
+    expect(alertDragHandle.getAttribute("title")).toBe(
+      "Drag Alert to the highlighted drop target above",
+    );
+    expect(target.textContent).toContain(
+      "drop on this target or anywhere in Components · position 6",
+    );
+    expect(
+      within(screen.getByRole("complementary", { name: "Authoring panel" }))
+        .getByText("Dragging Alert · release on the highlighted drop target in Components.")
+        .getAttribute("role"),
+    ).toBe("status");
     const panelSearch = componentView.getByRole("searchbox", {
       name: "Search catalog components",
     });
@@ -640,7 +656,8 @@ describe("Desen App application shell", () => {
     expect(dataTransfer.dropEffect).toBe("copy");
     expect(target.getAttribute("data-drop-hovered")).toBe("true");
     expect((target.parentElement as HTMLElement).getAttribute("data-drop-hovered")).toBe("true");
-    fireEvent.drop(panelSearch, { dataTransfer });
+    fireEvent.dragOver(panelSearch, { dataTransfer });
+    fireEvent.drop(target, { dataTransfer });
 
     expect(reads).toBe(0);
     expect(slotEdit).toHaveBeenCalledTimes(1);
@@ -744,7 +761,9 @@ describe("Desen App application shell", () => {
     });
     const idleDragGuide = within(
       screen.getByRole("complementary", { name: "Authoring panel" }),
-    ).getByText("Drag a layer to reorder it, or select it and use Place.");
+    ).getByText(
+      "Drag the dotted grip; each row snaps to the gap above or below it. Place also works.",
+    );
     expect(idleDragGuide.getAttribute("data-active")).toBe("false");
     const dataTransfer = {
       dropEffect: "none",
@@ -756,7 +775,7 @@ describe("Desen App application shell", () => {
     fireEvent.dragStart(layerDragHandleFor(submitLayer), { dataTransfer });
     const dragGuide = within(
       screen.getByRole("complementary", { name: "Authoring panel" }),
-    ).getByText("Moving sign-in.submit · release on a highlighted gap.");
+    ).getByText("Moving sign-in.submit · release when the wide highlighted gap locks in.");
     expect(dragGuide).toBe(idleDragGuide);
     expect(dragGuide.getAttribute("data-active")).toBe("true");
     const titleLayer = within(hierarchy).getByRole("button", {
@@ -785,19 +804,23 @@ describe("Desen App application shell", () => {
     });
     fireEvent(titleDragHandle, dragOver);
     expect(dataTransfer.dropEffect).toBe("move");
-    expect(
-      within(hierarchy)
-        .getByRole("listitem", {
-          name: "Stack sign-in.layout default slot insertion boundary at position 1",
-        })
-        .getAttribute("data-drop-hovered"),
-    ).toBe("true");
+    const firstBoundary = within(hierarchy).getByRole("listitem", {
+      name: "Stack sign-in.layout default slot insertion boundary at position 1",
+    });
+    expect(firstBoundary.getAttribute("data-drop-hovered")).toBe("true");
+    const firstBoundaryHitArea = firstBoundary.querySelector<HTMLElement>(
+      "[data-slot-boundary-hit-area='true']",
+    );
+    expect(firstBoundaryHitArea).toBeTruthy();
+    expect(firstBoundaryHitArea?.getAttribute("aria-hidden")).toBe("true");
+    fireEvent.dragOver(firstBoundaryHitArea as HTMLElement, { dataTransfer });
+    expect(firstBoundary.getAttribute("data-drop-hovered")).toBe("true");
     const drop = new Event("drop", { bubbles: true, cancelable: true });
     Object.defineProperties(drop, {
       clientY: { value: 105 },
       dataTransfer: { value: dataTransfer },
     });
-    fireEvent(titleDragHandle, drop);
+    fireEvent(firstBoundaryHitArea as HTMLElement, drop);
 
     expect(
       within(screen.getByRole("complementary", { name: "Authoring panel" })).getByRole("status")
@@ -1215,7 +1238,7 @@ describe("Desen App application shell", () => {
     expect(
       within(screen.getByRole("complementary", { name: "Authoring panel" })).getByRole("status")
         .textContent,
-    ).toBe("Release on a highlighted Layers gap.");
+    ).toBe("Release when the wide highlighted Layers gap locks in.");
   });
 
   it("moves nodes across nested slots with keyboard and App-owned native drag intent", async () => {
@@ -1733,7 +1756,7 @@ describe("Desen App application shell", () => {
     expect(target.textContent).toContain("Stack");
     expect(target.textContent).toContain("sign-in.layout · default");
     expect(target.textContent).toContain(
-      "appends at position 6 · click Add or drag a component into this panel",
+      "position 6 · drag a dotted grip to this target, or click Add",
     );
     const alert = componentView.getByRole("button", {
       name: "Insert Alert into Stack sign-in.layout default slot at position 6",

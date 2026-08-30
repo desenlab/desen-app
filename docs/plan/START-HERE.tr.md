@@ -1134,6 +1134,70 @@ mutation proof 12/12 geçer. Exact kanıt, 39 güncel dosyayı ve on bir exact p
 `PROVEN`, PF-086 `OPEN`, proof gate sayısı 10/13, genel ilerleme 108/145 (%74), M09 13/14 (%93)
 ve sıradaki iş M09-T14'tür. Bu yerel receipt'ler required-gate veya hosted-CI sonucu değildir.
 
+M09-T14 ve G09 artık `DONE`'dır. Publish yalnızca güncel authored Source, son başarılı kayıt
+generation'ındaki Source ile canonical olarak birebir aynı ve clean olduğunda açılır. App bu exact
+Source'tan public Publisher'ı yeniden çalıştırır, taze Bundle revision'ının güncel publishable
+preview revision'ıyla eşit olmasını ister ve trusted-host port'una yalnızca canonical Bundle
+byte'ları ile revision'ı geçirir. Scenario projection'ı, synthetic fixture, Runtime operation
+input'u, secret ve reddedilmiş candidate diagnostics publication snapshot/request alanı değildir.
+
+Public Editor Web adapter exact revision altındaki immutable Bundle'ı saklar ve yalnızca sabit
+`preview` channel'ını compare-and-set ile ilerletir. Channel discovery ile activation authority
+ayrıdır: Active ancak aynı revision'ı ve durable activation generation'ını taşıyan ayrı,
+server-owned reference-host receipt'inden sonra görünür. Conflict activation başlatmaz; failed,
+mismatched, stale veya indeterminate sonuçlar current success olmaz ve last-known-good revision'ı
+korur. Synchronous external-store teslimi görünür aşamayı güncel tutar; aynı tick içindeki host-port
+değişimi ise geç channel/activation sonucunun yeni UI'a ulaşmasından önce predecessor lifetime'ı
+iptal eder. Browser App production graph'ı Node control-plane composition veya reference-host
+server import etmez.
+
+Kullanıcının istediği authoring uyumluluk düzeltmesi, layout'u kaydırmadan ayrı Layers ve
+Components tutamaçlarını sırasıyla `28 × 32 px` ve `32 × 32 px` boyutlarına büyütür. Stable,
+çakışmayan ve tam genişlikteki `20 px` Layers aralıkları boundary event'lerini doğrudan sahiplenir;
+row-half fallback ve en içteki slot fencing'i korunur. Sticky Components `Drop target` drop'u
+doğrudan sahiplenir, authenticated panel ise aynı hedef için fallback kalır. `Add` yeni node'u
+hemen seçer; mevcut görünür ve guarded `Remove layer` ile Delete/Backspace yolları kullanılabilir
+kalır.
+
+Dört dosyalık focused App publication suite 31/31 geçer; bunun içinde gerçek public control-plane →
+fixed channel → reference-host entegrasyonu 2/2'dir. Editor Web publication 10/10, emitted public
+package runtime yüzeyi 4/4 ve independent root mutation proof 12/12 geçer. Exact artifact dokuz
+parent, 33 current tracked receipt ve 45 focused declaration bağlayan 24.763-byte
+`docs/proof/artifacts/desen-app-0.1.0-publish-activation.json` dosyasıdır;
+`sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b`. Yerel exhaustive
+authority 200 workload ve 95 proof pair'dir: 84 ordinary + 11 barrier. T14 connected closure 63
+proof unit / 136 workload, ownership ise 1.267 tracked path / 190 proof-owned path'tir. Tarihsel
+append-only sequence 53, exact sequence-52 başı
+`sha256:c42b0c0fe010b04128a31f26b25a5875e72b7566fa64403d0223b4dbada478a9` değerini 49 artifact ve
+98 current reader ile
+`sha256:48a1457317c593b846cd4750eb309e846c33248824559d27810441584f0144d8` değerine ilerletir.
+Compatibility sequence 54 değişmez predecessor'dır: bu 49 frozen artifact ve 98 reader kimliğini
+korur, exact sequence-53 başını
+`sha256:0772221371ffe1a35fe955b8cad34c725d0f9ae933714f81f10b3451214a6638` değerine ilerletir ve
+yalnızca M08-T08 proof-library/root-test reader'larını `[64, 65]` yeniden mühürler. Frozen
+49.785-byte M08-T08 artifact'ı
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe` olarak değişmeden
+kalır. Current sequence 55 aynı 49 frozen artifact ve 98 reader kimliğini korur, bu exact
+sequence-54 predecessor başını
+`sha256:f1ac24425ca2372410835a6c5721057763792010aaf77ccc78b8d30636333a17` değerine ilerletir ve
+yalnızca M09-T01–T14 proof-library/root-test reader indexlerini `[70..97]` yeniden mühürler. Current
+T14 reader'ları exact `10.000 ms` per-test timeout successor'ını full live
+`sha256:5eba8a2b15cbcf992d0f04d0d7ad719c1a9fc42cdb66635ebc0eab679a221901` hash'iyle doğrular;
+bu tek değişikliğin ters projeksiyonu frozen 24.485-byte test receipt'ini üretirken frozen T14
+artifact'ı `sha256:6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b` olarak değişmeden
+kalır. Checkpoint 78/78, promotion 20/20, selector 23/23 ve on dört M09 root reader suite'i 179/179
+geçer. Promotion selector'ı
+`sha256:2855cbeedb55ede5d9db18a6b186ac07796afbc4d512f5a0aa9197bc5f177fd1`, required-affected
+runner'ı `sha256:b77b35a81915ec41554ab3505895fe98c0a4299ec9bf7d680dec320bbf3fb744` ve T10 affected plan'i
+`sha256:e3cced8e1a9cbe6f1f5c296aa3992b07ef030c81ac9267c2deff714953ce0e39` olarak pinler.
+Integrated CI policy regression 330/330 geçer. Bunlar yerel receipt'lerdir; required-gate veya
+hosted-CI sonucu değildir.
+
+Genel ilerleme 109/145 (%75), M09 14/14 ve proof gate sayısı 11/13'tür. P-07/P-09/P-10 `PARTIAL`,
+P-08 `NOT_PROVEN`, P-12 M10-T07'ye kadar `NOT_PROVEN`, N-036 `PLANNED` ve
+PF-085/PF-086/PF-089 `OPEN` kalır. Otomatik gerçek-browser E2E ve native drag bu uyumluluk
+kanıtıyla kanıtlanmamıştır; sıradaki iş M10-T01'dir.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

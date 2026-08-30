@@ -933,11 +933,14 @@ Drag remains an application boundary rather than protocol or runtime authority. 
 payload is inert and never read to authorize an edit; the App-owned drag intent and current model
 determine the subject and destination. Slot boundaries remain stable and non-overlapping, while
 the upper and lower halves of visible layer rows expose the nearest before/after placement without
-moving the tree during a drag. Components keeps one explicit compatible slot target sticky above
-its scrolling list, exposes drag grips and click guidance, or disables component dragging and
-presents a guide back to Layers when no slot is selected. Native keyboard and click controls
-preserve the same insertion and placement paths. Successful insertion selects the exact new node
-so the existing deletion boundary is immediately available.
+moving the tree during a drag. Each stable 20 px lane is its own non-overlapping, full-width
+magnetic hit surface and handles exact native drag/drop events before the enclosing slot fallback.
+Components keeps one explicit compatible slot target sticky above its scrolling list; that visible
+target directly owns drag/drop while the complete panel remains a forgiving fallback. Enlarged
+dotted grips and explicit target copy explain the path, or a guide returns to Layers when no slot
+is selected. Native keyboard and click controls preserve the same insertion and placement paths.
+Successful insertion selects the exact new node so the existing deletion boundary is immediately
+available.
 
 All named-slot chrome, deletion controls, drag intent, and focus state remain App-owned siblings
 outside the managed Runtime React capability subtree. No component geometry, hit testing, canvas
@@ -1137,15 +1140,17 @@ cleanup cannot revoke a newer surface, canceled or throwing traversal restores t
 `beforeunload` protects dirty page exit. Generation, dirty, pending, conflict/uncertainty, and
 reopen state remain accessible text, not color-only presentation.
 
-The current App shell gives each compatible Components card a dedicated dotted native-drag grip
-and keeps click insertion on a separate `Add` button. The complete authenticated Components panel
-admits the drop for the target summarized by the sticky `Add to` card. Layers starts movement only
-from its dedicated dotted grip, assigns pointer ownership to the innermost nested slot, fences that
-owner and drag epoch, applies midpoint hysteresis, keeps compact insertion lanes layout-stable while
-each visible row projects its before/after half, exposes accepted and current-position feedback,
-and retains the last admitted placement through coordinate-less or rejected release drift. A
-successful insert switches to Layers, focuses the new node, and exposes the guarded `Remove layer`
-control plus Delete/Backspace shortcuts. Native transfer bytes remain inert and authorize no edit.
+The current App shell gives each compatible Components card an enlarged dedicated dotted
+native-drag grip and keeps click insertion on a separate `Add` button. The sticky `Drop target`
+card directly owns the drop; the complete authenticated Components panel remains a forgiving
+fallback for that same target without changing admission authority or layout at drag start. Layers
+starts movement only from its enlarged dotted grip, assigns pointer ownership to the innermost
+nested slot, fences that owner and drag epoch, applies midpoint hysteresis, and gives each compact
+layout-stable insertion lane a wider magnetic hit surface while every visible row still projects
+its before/after half. Accepted and current-position feedback remain distinct, and the last admitted
+placement survives coordinate-less or rejected release drift. A successful insert switches to
+Layers, focuses the new node, and exposes the guarded `Remove layer` control plus Delete/Backspace
+shortcuts. Native transfer bytes remain inert and authorize no edit.
 
 This closes only the M09-T12 App-consumption boundary. `N-012`, `N-018`, and `S-003` retain their
 `TESTED` status with an additional authored-Source save/open path. P-08 remains `NOT_PROVEN`,
@@ -1180,6 +1185,38 @@ affected graph deliberately keeps the M05-T05 Runtime diagnostic index fresh, pr
 62-proof-unit/134-workload connected closure inside the 198-workload/94-proof-pair local
 authority. P-16 is `PROVEN`; PF-086 remains `OPEN` because this App-owned composition does not
 define a protocol-wide editor subscription/index contract.
+
+M09-T14 adds one App-owned publication controller behind two exact trusted-host methods. Admission
+requires the current authored Source to be canonically equal to the last successful saved Source,
+the Source generation to be positive, persistence authority to be ready, and a fresh public
+Publisher result to reproduce the current session-preview revision. Only canonical bytes of that
+fresh Bundle cross the host port. Scenario/effective previews, fixture state, Runtime operation
+input, secrets, and rejected diagnostic candidates are absent from the controller snapshot and
+port requests.
+
+The browser-safe Editor Web adapter reads one fixed configured channel, writes the exact immutable
+Bundle, then advances that channel with compare-and-set against the initial snapshot. It has no
+ambient `fetch`, retry, merge, activation, filesystem, or executable-host authority. Definite
+precommit failures, channel conflicts, Bundle-write uncertainty, and channel-write uncertainty
+remain distinct. The browser App imports neither the Node control plane nor the Node reference-host
+server; a trusted composition root injects the closed publication and activation methods.
+
+A channel receipt is discovery, not activation. After a successful channel write the App separately
+asks the reference host to refresh, rerun its complete public verification/activation chain, and
+report the durable active revision and activation generation. The UI presents `Active` only when
+that exact active revision equals the freshly published revision. Source, channel, and activation
+generations remain separate receipts; conflicts never activate, uncertain results prohibit blind
+retry, failed activation preserves the last-known-good host revision, and snapshot replacement or
+disposal fences late settlement.
+
+Design-only publication chrome exposes the exact Saved Source → `preview` channel → reference-host
+sequence and keeps Save/Open, mode changes, authoring callbacks, App navigation, and page exit
+fenced while publication is pending. The G09 integration composes the real public local control
+plane and reference-host channel controller in a Node test; user-observable App workflow coverage
+uses jsdom. Automated real-browser/native-drag evidence remains M10-T01, product-level invalid
+activation restart preservation remains M10-T07, and repository-wide secret/synthetic-data audit
+remains M12-T04. P-08 stays `NOT_PROVEN`, P-09/P-10 remain `PARTIAL`, P-12 remains
+`NOT_PROVEN`, N-036 remains `PLANNED`, and PF-085/PF-086/PF-089 remain `OPEN`.
 
 The M09 UX wireframe is UX input for information architecture and task boundaries, while the
 earlier Desen product exploration is visual-language input. Neither Figma source is architecture,

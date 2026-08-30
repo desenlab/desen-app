@@ -27,6 +27,10 @@ const FIXTURES_SCENARIOS_ARTIFACT =
 const SOURCE_PERSISTENCE_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-source-persistence.json";
 const NODE_LINKED_DIAGNOSTICS_ARTIFACT =
   "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
+const PUBLISH_ACTIVATION_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json";
+const PUBLISH_ACTIVATION_RECEIPT = "packages/editor-web/src/local-bundle-channel-publication.ts";
+const T14_PUBLICATION_APPLICATION_TEST_PATH =
+  "apps/desen-app/test/publication-application.test.tsx";
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION = "apps/desen-app/src/application.tsx";
 const AUTHORING_SELECTION = "apps/desen-app/src/authoring-selection.ts";
@@ -206,12 +210,12 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   );
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
-  assert.equal(currentRuntime.moduleCount, 145);
-  assert.equal(currentRuntime.staticEdges, 431);
+  assert.equal(currentRuntime.moduleCount, 147);
+  assert.equal(currentRuntime.staticEdges, 439);
   assert.equal(currentRuntime.dynamicEdges, 0);
   assert.equal(
     currentRuntime.graphSha256,
-    "sha256:3477076800258d529cc59914654aac845af2da4a19153c9c9d5920f8c37b5baa",
+    "sha256:076a321a624f6d3dc08cf59a50bd9422fa395645ecd279ad407e6f1babb2314d",
   );
   assert.equal(
     graphModule(currentRuntime.modules, APPLICATION).imports.includes(
@@ -320,6 +324,10 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[3], () => {
     true,
   );
   assert.equal(built.currentCompatibility.successor.componentPanelWideDropSurfaceImplemented, true);
+  assert.equal(
+    built.currentCompatibility.successor.componentTargetDirectDropSurfaceImplemented,
+    true,
+  );
   assert.equal(built.currentCompatibility.successor.componentPaletteOuterDropInert, false);
   assert.equal(built.currentCompatibility.successor.draggableComponentCardImplemented, false);
   assert.equal(built.currentCompatibility.successor.dedicatedComponentDragHandleImplemented, true);
@@ -736,7 +744,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
-  assert.equal(verified.currentGraphModules, 145);
+  assert.equal(verified.currentGraphModules, 147);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 
@@ -797,12 +805,12 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[10], async () => {
   assert.deepEqual(await readFile(destination), preserved);
 });
 
-test("[successor] rejects legacy target-only, whole-card, and nested fallthrough drag authority", async () => {
+test("[successor] rejects missing direct target, whole-card, and nested fallthrough drag authority", async () => {
   const mutations = [
     replaceOnce(
       applicationSource,
-      "aria-label={targetName}\n        className={styles.componentSlotTarget}",
-      "aria-label={targetName}\n        className={styles.componentSlotTarget}\n        onDrop={receiveComponentDrop}",
+      "onDragEnter={enterComponentDrop}\n        onDragLeave={leaveComponentDrop}\n        onDragOver={admitComponentDrop}\n        onDrop={receiveComponentDrop}",
+      "onDragEnter={undefined}\n        onDragLeave={undefined}\n        onDragOver={undefined}\n        onDrop={undefined}",
     ),
     replaceOnce(
       applicationSource,
@@ -994,6 +1002,129 @@ test("[successor] authenticates and mutation-tests the exact M09-T13 diagnostics
   await assert.rejects(
     buildDesenAppRealAdapterCanvasEvidence({
       fileOverrides: new Map([[NODE_LINKED_DIAGNOSTICS_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+});
+
+test("[successor] authenticates and mutation-tests the exact M09-T14/G09 publish-activation closure", async () => {
+  const successor = built.currentCompatibility.publishActivationSuccessor;
+  assert.equal(successor.task, "M09-T14");
+  assert.equal(successor.gate, "G09");
+  assert.deepEqual(successor.artifact, {
+    task: "M09-T14",
+    gate: "G09",
+    proofId: "desen-app-publish-activation",
+    profile: "desen.app.publish-activation-proof.v1",
+    result: "PASS",
+    path: PUBLISH_ACTIVATION_ARTIFACT,
+    bytes: 24_763,
+    sha256: "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b",
+  });
+  assert.deepEqual(
+    {
+      focusedTestDeclarations: successor.focusedTestDeclarations,
+      trackedFiles: successor.trackedFiles,
+      parentArtifacts: successor.parentArtifacts,
+      rootTests: successor.rootTests,
+      savedAuthoredSourceOnly: successor.savedAuthoredSourceOnly,
+      publisherRerunFromSavedSource: successor.publisherRerunFromSavedSource,
+      scenarioPreviewPublished: successor.scenarioPreviewPublished,
+      fixtureDataPublished: successor.fixtureDataPublished,
+      operationInputOrSecretPublished: successor.operationInputOrSecretPublished,
+      rejectedDiagnosticsPublished: successor.rejectedDiagnosticsPublished,
+      exactCanonicalBundleBytesStored: successor.exactCanonicalBundleBytesStored,
+      fixedPreviewChannelCompareAndSet: successor.fixedPreviewChannelCompareAndSet,
+      mutableChannelIsActivationAuthority: successor.mutableChannelIsActivationAuthority,
+      distinctSourceChannelAndActivationGenerations:
+        successor.distinctSourceChannelAndActivationGenerations,
+      activeRevisionRequiresReferenceHostReceipt:
+        successor.activeRevisionRequiresReferenceHostReceipt,
+      staleCompletionCanBecomeActive: successor.staleCompletionCanBecomeActive,
+      blindRetryAfterIndeterminate: successor.blindRetryAfterIndeterminate,
+      conflictActivatesCandidate: successor.conflictActivatesCandidate,
+      lastKnownGoodActivationPreserved: successor.lastKnownGoodActivationPreserved,
+      realPublicControlPlaneAndReferenceHostIntegration:
+        successor.realPublicControlPlaneAndReferenceHostIntegration,
+      browserAppImportsNodeCompositionPackages: successor.browserAppImportsNodeCompositionPackages,
+      publicationClaimed: successor.publicationClaimed,
+      activationClaimed: successor.activationClaimed,
+      browserE2eClaimed: successor.browserE2eClaimed,
+      p08Status: successor.p08Status,
+      pf085Status: successor.pf085Status,
+      pf086Status: successor.pf086Status,
+      pf089Status: successor.pf089Status,
+    },
+    {
+      focusedTestDeclarations: 45,
+      trackedFiles: 33,
+      parentArtifacts: 9,
+      rootTests: 12,
+      savedAuthoredSourceOnly: true,
+      publisherRerunFromSavedSource: true,
+      scenarioPreviewPublished: false,
+      fixtureDataPublished: false,
+      operationInputOrSecretPublished: false,
+      rejectedDiagnosticsPublished: false,
+      exactCanonicalBundleBytesStored: true,
+      fixedPreviewChannelCompareAndSet: true,
+      mutableChannelIsActivationAuthority: false,
+      distinctSourceChannelAndActivationGenerations: true,
+      activeRevisionRequiresReferenceHostReceipt: true,
+      staleCompletionCanBecomeActive: false,
+      blindRetryAfterIndeterminate: false,
+      conflictActivatesCandidate: false,
+      lastKnownGoodActivationPreserved: true,
+      realPublicControlPlaneAndReferenceHostIntegration: true,
+      browserAppImportsNodeCompositionPackages: false,
+      publicationClaimed: true,
+      activationClaimed: true,
+      browserE2eClaimed: false,
+      p08Status: "NOT_PROVEN",
+      pf085Status: "OPEN",
+      pf086Status: "OPEN",
+      pf089Status: "OPEN",
+    },
+  );
+  const [artifactBytes, receiptBytes, publicationApplicationTestBytes] = await Promise.all([
+    readFile(path.join(ROOT, PUBLISH_ACTIVATION_ARTIFACT)),
+    readFile(path.join(ROOT, PUBLISH_ACTIVATION_RECEIPT)),
+    readFile(path.join(ROOT, T14_PUBLICATION_APPLICATION_TEST_PATH)),
+  ]);
+  await assert.rejects(
+    buildDesenAppRealAdapterCanvasEvidence({
+      fileOverrides: new Map([[PUBLISH_ACTIVATION_ARTIFACT, changedByte(artifactBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppRealAdapterCanvasEvidence({
+      fileOverrides: new Map([[PUBLISH_ACTIVATION_RECEIPT, changedByte(receiptBytes)]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppRealAdapterCanvasEvidence({
+      fileOverrides: new Map([
+        [T14_PUBLICATION_APPLICATION_TEST_PATH, changedByte(publicationApplicationTestBytes)],
+      ]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppRealAdapterCanvasEvidence({
+      fileOverrides: new Map([
+        [
+          T14_PUBLICATION_APPLICATION_TEST_PATH,
+          Buffer.from(
+            replaceOnce(
+              publicationApplicationTestBytes.toString("utf8"),
+              "}, 10_000);",
+              "}, 20_000);",
+            ),
+          ),
+        ],
+      ]),
     }),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
