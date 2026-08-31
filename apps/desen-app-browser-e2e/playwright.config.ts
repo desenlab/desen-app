@@ -8,7 +8,7 @@ const WORKSPACE_ROOT = resolve(PACKAGE_ROOT, "../..");
 
 export default defineConfig({
   testDir: ".",
-  testMatch: "**/*.pw.ts",
+  testMatch: "empty-project-to-sign-in.pw.ts",
   outputDir: resolve(PACKAGE_ROOT, "test-results"),
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),

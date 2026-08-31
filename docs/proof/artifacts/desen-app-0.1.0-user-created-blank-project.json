@@ -1,0 +1,441 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-user-created-blank-project",
+  "profile": "desen.app.user-created-blank-project-proof.v1",
+  "task": "M10-T01A",
+  "gate": null,
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M10-T01-COMPAT",
+      "gate": null,
+      "proofId": "desen-app-browser-e2e-workspace-compatibility",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-browser-e2e-workspace-compatibility.json",
+      "bytes": 16025,
+      "sha256": "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
+      "profile": "desen.app.browser-e2e-workspace-compatibility-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "p08Status": "PROVEN",
+    "normalProductEntryCovered": true,
+    "zeroProjectStartCovered": true,
+    "visibleProjectCreationCovered": true,
+    "exactBlankProfileCovered": true,
+    "fixtureBootstrapBypassed": true,
+    "durableLocalPersistenceCovered": true,
+    "visualAuthoringCovered": true,
+    "nativeComponentDragCovered": true,
+    "nativeLayerDragCovered": true,
+    "forgedDataTransferRejected": true,
+    "authoredDeletionCovered": true,
+    "generationOneCreationCovered": true,
+    "generationTwoSaveCovered": true,
+    "hardReloadCovered": true,
+    "visibleProjectReopenCovered": true,
+    "exactSourceReadBackCovered": true,
+    "designRunStaticParityCovered": true,
+    "productServerControlPlaneBoundaryCovered": true,
+    "runtimeInputAndPendingCovered": false,
+    "invalidCredentialsAndPublicFailureCovered": false,
+    "successNavigationAndHostOperationCovered": false,
+    "remoteDeploymentCovered": false,
+    "g10Closed": false
+  },
+  "authority": {
+    "source": {
+      "normalProductEntry": true,
+      "productEntryInjectsDocument": false,
+      "visibleNewProjectControl": true,
+      "visibleBlankTemplate": true,
+      "exactProjectId": "account-app",
+      "exactSurfaceId": "sign-in",
+      "exactCatalogIdentity": "run.desen.reference.sign-in@0.1.0#web-react",
+      "frame": { "preset": "portrait", "width": 420, "height": 720 },
+      "localRuntimeProfile": "desen.app.local-runtime.v1",
+      "fixedLoopbackOnly": true,
+      "freshBearerSecret": true,
+      "durableControlPlaneStore": true,
+      "productionBundlePreview": true,
+      "browserTestName": "creates, authors, persists, reloads, and reopens a blank sign-in project through the normal product UI",
+      "browserTestDeclarations": 1,
+      "nativeDragCalls": 2,
+      "forgedDataTransferRejected": true,
+      "initialProjectCount": 0,
+      "creationGeneration": 1,
+      "authoredGeneration": 2,
+      "hardReloadCovered": true,
+      "visibleProjectReopenCovered": true,
+      "browserRuntimeErrorsAllowed": 0,
+      "browserExecutionPerformedByReader": false
+    },
+    "package": {
+      "appPackageName": "@desen/app-web",
+      "browserPackageName": "@desen/app-browser-e2e",
+      "appDevCommand": "node dev/local-dev.mjs",
+      "appLocalRuntimeTestCommand": "vitest run test/local-runtime-persistence.test.ts dev/local-dev-host.test.mjs",
+      "appProductBootstrapTestCommand": "vitest run test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx",
+      "browserCommand": "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts",
+      "browserProject": "product-chromium",
+      "playwrightVersion": "1.62.1",
+      "appOwnsPlaywright": false,
+      "dedicatedBrowserWorkspace": true,
+      "exactHeadBrowserExecution": true,
+      "workflowEvidenceOrder": [
+        "node scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs",
+        "node --test tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
+        "node scripts/verify-desen-app-user-created-blank-project.mjs",
+        "node --test tests/desen-app-user-created-blank-project.test.mjs"
+      ]
+    },
+    "boundary": {
+      "command": "pnpm boundaries",
+      "rootScript": "depcruise --config dependency-cruiser.config.cjs apps packages && node scripts/verify-boundary-fixtures.mjs",
+      "dependencyCruiserVersion": "18.1.0",
+      "productServerPath": "apps/desen-app-browser-e2e/product-proof-server.mjs",
+      "admittedControlPlaneEntry": "apps/control-plane-api/dist/index.js",
+      "rules": [
+        "desen-app-browser-e2e-reviewed-app-source-only",
+        "desen-app-browser-e2e-product-server-control-plane-public-root-only",
+        "desen-app-browser-e2e-product-server-has-no-other-application-dependencies"
+      ],
+      "fixtureCases": [
+        {
+          "name": "allowed-desen-app-browser-e2e-product-server-control-plane-root",
+          "expectedRule": null
+        },
+        {
+          "name": "desen-app-browser-e2e-non-product-server-imports-control-plane",
+          "expectedRule": "desen-app-browser-e2e-reviewed-app-source-only"
+        },
+        {
+          "name": "desen-app-browser-e2e-product-server-imports-control-plane-private",
+          "expectedRule": "desen-app-browser-e2e-product-server-control-plane-public-root-only"
+        },
+        {
+          "name": "desen-app-browser-e2e-product-server-imports-other-app",
+          "expectedRule": "desen-app-browser-e2e-product-server-has-no-other-application-dependencies"
+        }
+      ],
+      "exactFixtureFiles": 8,
+      "authorityFiles": 13,
+      "durableStateIgnored": true,
+      "ignoredDistFixturesReadmitted": true,
+      "executionPerformedByReader": false
+    },
+    "authoredOutcome": {
+      "projectId": "account-app",
+      "surfaceId": "sign-in",
+      "statePaths": ["email", "password"],
+      "orderedComponentIds": ["node.text", "node.textfield", "node.textfield-2", "node.button"],
+      "bindings": ["state.email", "state.password"],
+      "deletedTransientComponent": "node.alert",
+      "createdGeneration": 1,
+      "authoredGeneration": 2
+    },
+    "execution": {
+      "normalProductEntry": "apps/desen-app/src/main.tsx",
+      "productionBundlePreview": true,
+      "realControlPlaneAdapter": true,
+      "fixedLoopbackOnly": true,
+      "transientProofStateRoot": true,
+      "durableLocalDevelopmentStateRoot": ".desen/desen-app/control-plane",
+      "injectedDocumentOrRouteAuthority": false,
+      "browserRerunOwnedByProofReader": false,
+      "hostedExecutionRequired": true
+    }
+  },
+  "tests": {
+    "browserCommand": "pnpm --filter @desen/app-browser-e2e test:e2e",
+    "browserSpec": "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+    "browserTestName": "creates, authors, persists, reloads, and reopens a blank sign-in project through the normal product UI",
+    "browserTestDeclarations": 1,
+    "configuredProjects": ["product-chromium"],
+    "workers": 1,
+    "retries": 0,
+    "productBootstrapCommand": "pnpm --filter @desen/app-web test:product-bootstrap",
+    "localRuntimeCommand": "pnpm --filter @desen/app-web test:local-runtime",
+    "boundaryCommand": "pnpm boundaries",
+    "boundaryFixtureVerifier": "node scripts/verify-boundary-fixtures.mjs",
+    "proofReaderCommand": "node --test tests/desen-app-user-created-blank-project.test.mjs",
+    "verifierCommand": "node scripts/verify-desen-app-user-created-blank-project.mjs",
+    "rootTestNames": [
+      "[authority] authenticates the exact immutable M10-T01-COMPAT predecessor",
+      "[entry] normal main composes the product bootstrap and injected durable port",
+      "[creation] visible New project UI creates only the exact admitted blank profile",
+      "[runtime] local launcher binds a fresh secret, fixed loopback, and durable Source store",
+      "[browser] real Chromium begins at zero projects and uses only visible product controls",
+      "[authoring] native Components and Layers gestures build the sign-in Source",
+      "[persistence] generation one creation and generation two authored save survive reload",
+      "[reopen] project and surface navigation reopen the exact saved Source",
+      "[package] dedicated product E2E and hosted workflow retain exact ownership",
+      "[determinism] detached evidence is byte-stable with complete exact file receipts",
+      "[policy] source, artifact, report, option, and destination drift fail closed"
+    ],
+    "browserExecutedByVerifier": false,
+    "boundaryExecutedByVerifier": false
+  },
+  "boundary": {
+    "trackedFiles": 43,
+    "trackedReceipts": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "bytes": 8948,
+        "sha256": "a773ddb69d21c0d88da95dbb8d307fbf660ce51e2f42ea9a670f05e3f0b31834"
+      },
+      {
+        "path": ".gitignore",
+        "bytes": 277,
+        "sha256": "8e20b6901cad3367dcdf003a449e87767e5cc509bee90e58fc1c91348d4d5945"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/package.json",
+        "bytes": 913,
+        "sha256": "c20240a4756d2a99d3a60eec0af373e85fed6381d510ca2bde4ebee173d86a12"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/playwright.config.ts",
+        "bytes": 1369,
+        "sha256": "843a6986e46648b8d2faa7f88ef21cbbe9da447f51cfb828cd64750e4ff8b10b"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/product-playwright.config.ts",
+        "bytes": 1506,
+        "sha256": "00ce96c3c2cda1e51faba0952d28d9c698a1958ce33e06cb684d4fe7ba63c527"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/product-proof-server.mjs",
+        "bytes": 3706,
+        "sha256": "e78aaabb139f15e3097788b90a271aea49e2354fb782234d9974f0bf19fa705c"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+        "bytes": 13696,
+        "sha256": "d7aebac9688f1330f565e9fe20f2da68799bc9ae9d38a2f052a301ff541ecfc5"
+      },
+      {
+        "path": "apps/desen-app/dev/local-dev-host.mjs",
+        "bytes": 13016,
+        "sha256": "7e1b703c42abc3b6d2b2af114fe696ba2a7ec093499178af4af9ab032fd0ac41"
+      },
+      {
+        "path": "apps/desen-app/dev/local-dev-host.test.mjs",
+        "bytes": 8266,
+        "sha256": "b8626c99789ea61163b8642118b68bb28ceaaee2056bb3c2b79ef32b225ba80f"
+      },
+      {
+        "path": "apps/desen-app/dev/local-dev.mjs",
+        "bytes": 1313,
+        "sha256": "8e7e4fe465a9ce46737bf1bc0c0e1154d62feeac7a96443a5cd7952412881a1e"
+      },
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 4122,
+        "sha256": "7038647aa1809f07ee5131d0df8d0bee75bf1f2cdf0358be738b2c3603b64577"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 112222,
+        "sha256": "3440415a516a563aac8978ea1f604b28903cce8a00d54048f557cd339289040e"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 132468,
+        "sha256": "833f20edda80d840eaff27b29944c6a216f7fbe863d7ad30a65a6bb22b6b4869"
+      },
+      {
+        "path": "apps/desen-app/src/local-runtime-persistence.ts",
+        "bytes": 13170,
+        "sha256": "051b6e7a38d4a98f6e232466c67e6786d65d23b76e4fd9bdc77aafc16b81b335"
+      },
+      {
+        "path": "apps/desen-app/src/main.tsx",
+        "bytes": 1413,
+        "sha256": "b507e0b40d9f84094251b36afcf28554c41ab074233b3f3b451236465f88beec"
+      },
+      {
+        "path": "apps/desen-app/src/product-bootstrap.tsx",
+        "bytes": 14295,
+        "sha256": "6d1d250b2cfe30ccf911d6c71aba20b452d63907e9bf90159fbbf06c016bb66e"
+      },
+      {
+        "path": "apps/desen-app/src/project-data.ts",
+        "bytes": 3494,
+        "sha256": "85185238727976d33fb548e3aaa49679971678d81e97f95e02c595162776de45"
+      },
+      {
+        "path": "apps/desen-app/src/reference-empty-project.ts",
+        "bytes": 1781,
+        "sha256": "66015c0ac0d1c13dd609906ca45f176a8a4b820d0ff756569c678278039e5170"
+      },
+      {
+        "path": "apps/desen-app/src/styles.css",
+        "bytes": 1765,
+        "sha256": "b70ac76a3b4f23ebb242f1c945453553d2563f4b07af4cc2eba892a631c52a12"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 107788,
+        "sha256": "931f3097888c3f3e8c1636acd01d92975bdcbf06b37a6a55bb767dad1d905c7b"
+      },
+      {
+        "path": "apps/desen-app/test/local-runtime-persistence.test.ts",
+        "bytes": 5404,
+        "sha256": "dc169f7c7f9fe43c5af2860544e55f0920241f3c365d46d290f7af3a69b98a44"
+      },
+      {
+        "path": "apps/desen-app/test/main-lifecycle.test.tsx",
+        "bytes": 5719,
+        "sha256": "bde97de9d7a4e131f6b9e011c89145d6ec3a3ab4051f7106174d329b935747ab"
+      },
+      {
+        "path": "apps/desen-app/test/product-bootstrap.test.tsx",
+        "bytes": 18597,
+        "sha256": "28a0eb6b3c99f4e39d99d9dfd3b9c49f660a936512d7d87b850701ed0343dc0e"
+      },
+      {
+        "path": "apps/desen-app/tsconfig.local-dev.json",
+        "bytes": 229,
+        "sha256": "0ceb3261385bc76b58a77873b62e89a97d1cfee258395e975f92ff4167fa9528"
+      },
+      {
+        "path": "dependency-cruiser.config.cjs",
+        "bytes": 10328,
+        "sha256": "46e4c21598239ce464a44ca3b54622d65f2db17145f6da75099f7acb4a7e3290"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-browser-e2e-workspace-compatibility.json",
+        "bytes": 16025,
+        "sha256": "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d"
+      },
+      {
+        "path": "package.json",
+        "bytes": 97170,
+        "sha256": "5baf41a8ada5bec8ce025da441cf3b9980a2d4594c0342f6c161afad6591c351"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 131888,
+        "sha256": "23632d4c1d8bc8832a31db328fa36c7f1523aeb7c52f034ddbb3f8edecc4c002"
+      },
+      {
+        "path": "scripts/generate-desen-app-user-created-blank-project-proof.mjs",
+        "bytes": 834,
+        "sha256": "c435b80b02558dcac730f5c9d1a6621d6dd7e91b270e29ad639eb36bafc23b40"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/desen-app-user-created-blank-project-proof.mjs",
+        "bytes": 41994,
+        "sha256": "abc72449ba985321ffa675a887b1cd0efbb6a0719ac231e9eb688f2cfad37efb"
+      },
+      {
+        "path": "scripts/verify-boundary-fixtures.mjs",
+        "bytes": 5156,
+        "sha256": "c884a14e7e6803cab840db136db0c60ccb74a115a7f04834ef6faaae0f55be15"
+      },
+      {
+        "path": "scripts/verify-desen-app-user-created-blank-project.mjs",
+        "bytes": 901,
+        "sha256": "b4d7122585ada3541d80e69cd48cdc1ba2d8771517f90801ae5962c653fdc8a8"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-control-plane-root/apps/control-plane-api/dist/index.js",
+        "bytes": 64,
+        "sha256": "c1691a356f8366511cb34620ec38103648d8ef07da5934fc76cf7bfb8f5f6ba7"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-control-plane-root/apps/desen-app-browser-e2e/product-proof-server.mjs",
+        "bytes": 148,
+        "sha256": "1dfd664b1890c9fc73c9d3a66467d579f71d3c60a1de96b167ce87749642cf8b"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-control-plane/apps/control-plane-api/dist/index.js",
+        "bytes": 64,
+        "sha256": "c1691a356f8366511cb34620ec38103648d8ef07da5934fc76cf7bfb8f5f6ba7"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-control-plane/apps/desen-app-browser-e2e/proof-application.mjs",
+        "bytes": 163,
+        "sha256": "56f9b5fd3c67f3f62a3d9367ac901df61455e5939687b62b28dfe79360c43917"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-control-plane-private/apps/control-plane-api/dist/runtime-activation-sqlite-internal.js",
+        "bytes": 52,
+        "sha256": "c0d41986d26b7363dc9e36bcd446f1e27af6f6c4a3f5d558d9c52d54e0d28acc"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-control-plane-private/apps/desen-app-browser-e2e/product-proof-server.mjs",
+        "bytes": 189,
+        "sha256": "7f3b331af17c21bb5b348c07b6dfeb56ac4763808aee4f24492ec56d68d85654"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app-browser-e2e/product-proof-server.mjs",
+        "bytes": 142,
+        "sha256": "6b8dbea9ff32fe4a0398a496ce8e98b9542f473ea34f8bb1c99d9e9a03ea720b"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app/src/application.js",
+        "bytes": 44,
+        "sha256": "2b8a3bc57c292abb7680bd255a0652614437d2db4d8a83f864e0db301ab6bd81"
+      },
+      {
+        "path": "tests/boundaries/README.md",
+        "bytes": 1407,
+        "sha256": "39f2900d72b7731193d3a5d7958891adaae38f9cb647ef18ffd03313b8df5e18"
+      },
+      {
+        "path": "tests/desen-app-user-created-blank-project.test.mjs",
+        "bytes": 15457,
+        "sha256": "92641dcc935a9ecdb854f991080d3b4b0841ff0c0ad476c774a57e35dfd11f6f"
+      }
+    ],
+    "proofReaderPaths": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/lib/desen-app-user-created-blank-project-proof.mjs",
+      "scripts/generate-desen-app-user-created-blank-project-proof.mjs",
+      "scripts/verify-desen-app-user-created-blank-project.mjs",
+      "tests/desen-app-user-created-blank-project.test.mjs"
+    ],
+    "boundaryAuthorityPaths": [
+      ".gitignore",
+      "dependency-cruiser.config.cjs",
+      "package.json",
+      "scripts/verify-boundary-fixtures.mjs",
+      "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-control-plane-root/apps/control-plane-api/dist/index.js",
+      "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-control-plane-root/apps/desen-app-browser-e2e/product-proof-server.mjs",
+      "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-control-plane/apps/control-plane-api/dist/index.js",
+      "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-control-plane/apps/desen-app-browser-e2e/proof-application.mjs",
+      "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-control-plane-private/apps/control-plane-api/dist/runtime-activation-sqlite-internal.js",
+      "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-control-plane-private/apps/desen-app-browser-e2e/product-proof-server.mjs",
+      "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app-browser-e2e/product-proof-server.mjs",
+      "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app/src/application.js",
+      "tests/boundaries/README.md"
+    ],
+    "boundaryAuthorityFiles": 13,
+    "parentArtifacts": 1,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true,
+    "browserExecutionSeparateFromStaticReader": true
+  },
+  "result": "PASS",
+  "nonclaims": [
+    "M10-T01A makes the completed M10-T01 authoring scenario reachable through the normal product UI; it does not replace or rewrite M10-T01 or M10-T01-COMPAT evidence.",
+    "M10-T02 typed input dispatch and visible pending state remain NOT_PROVEN by this artifact.",
+    "M10-T03 invalid-credentials and public failure rendering remain NOT_PROVEN by this artifact.",
+    "M10-T04 successful navigation and one real host operation remain NOT_PROVEN by this artifact.",
+    "The supported creation profile remains the exact Account app sign-in Source; arbitrary project schemas or identities are NOT_PROVEN.",
+    "Remote deployment, multi-user persistence, and G10 closure remain NOT_PROVEN.",
+    "The deterministic reader never starts Chromium, Vite, or a network listener; exact-head Browser E2E executes the pinned product scenario separately.",
+    "The deterministic reader authenticates boundary policy and fixture bytes but does not execute dependency-cruiser; pnpm boundaries remains separately required.",
+    "No hosted-CI pass is inferred from locally generated artifact bytes alone."
+  ]
+}

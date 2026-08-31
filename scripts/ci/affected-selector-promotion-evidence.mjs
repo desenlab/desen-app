@@ -466,6 +466,32 @@ const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "tests/boundaries/fixtures/desen-app-browser-e2e-imports-unreviewed-app-source/apps/desen-app-browser-e2e/proof-application.ts",
   "tests/boundaries/fixtures/desen-app-browser-e2e-imports-unreviewed-app-source/apps/desen-app/src/main.ts",
   "tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
+  "apps/desen-app-browser-e2e/product-playwright.config.ts",
+  "apps/desen-app-browser-e2e/product-proof-server.mjs",
+  "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+  "apps/desen-app/dev/local-dev-host.mjs",
+  "apps/desen-app/dev/local-dev-host.test.mjs",
+  "apps/desen-app/dev/local-dev.mjs",
+  "apps/desen-app/src/local-runtime-persistence.ts",
+  "apps/desen-app/src/product-bootstrap.tsx",
+  "apps/desen-app/test/local-runtime-persistence.test.ts",
+  "apps/desen-app/test/product-bootstrap.test.tsx",
+  "apps/desen-app/tsconfig.local-dev.json",
+  "docs/adr/0016-desen-app-local-product-bootstrap.md",
+  "docs/proof/DESEN-APP-USER-CREATED-BLANK-PROJECT.md",
+  "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+  "scripts/generate-desen-app-user-created-blank-project-proof.mjs",
+  "scripts/lib/desen-app-user-created-blank-project-proof.mjs",
+  "scripts/verify-desen-app-user-created-blank-project.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-control-plane-root/apps/control-plane-api/dist/index.js",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-control-plane-root/apps/desen-app-browser-e2e/product-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-control-plane/apps/control-plane-api/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-control-plane/apps/desen-app-browser-e2e/proof-application.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-control-plane-private/apps/control-plane-api/dist/runtime-activation-sqlite-internal.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-control-plane-private/apps/desen-app-browser-e2e/product-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app-browser-e2e/product-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app/src/application.js",
+  "tests/desen-app-user-created-blank-project.test.mjs",
 ]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
@@ -511,13 +537,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 194,
+    PROOF_UNIT: 196,
     CI_POLICY: 45,
     DEPENDENCY_POLICY: 32,
-    FROZEN_INPUT: 141,
-    PACKAGE_OR_APPLICATION: 501,
-    SHARED_PROOF_INFRASTRUCTURE: 240,
-    PROJECT_DOCUMENTATION: 133,
+    FROZEN_INPUT: 142,
+    PACKAGE_OR_APPLICATION: 512,
+    SHARED_PROOF_INFRASTRUCTURE: 250,
+    PROJECT_DOCUMENTATION: 135,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -910,10 +936,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 59,
-  headSha256: "349a292c9137f0f66c5cd58f384aa2175082613500905fdb723f15b246cbd2e8",
-  frozenArtifactCount: 51,
-  currentReaderCount: 102,
+  sequence: 62,
+  headSha256: "15ede557b4167cb7bc0cce89b02cf0e9d9f0f7e92c4c5fdc2d799cb3bcf0be55",
+  frozenArtifactCount: 52,
+  currentReaderCount: 104,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -1536,6 +1562,8 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "pnpm --filter @desen/app-browser-e2e test:e2e",
     "node scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs",
     "node --test tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
+    "node scripts/verify-desen-app-user-created-blank-project.mjs",
+    "node --test tests/desen-app-user-created-blank-project.test.mjs",
   ];
   if (
     workflowFragments.some((fragment) =>
@@ -2363,7 +2391,7 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "Current comparison-source receipts do not reproduce the reviewed M10-T01 successor.",
+      "Current comparison-source receipts do not reproduce the reviewed M10-T01A successor.",
     );
   }
   const selectorBytes = capturedSourceBytes(currentAuthority, SELECTOR_SOURCE_PATH);
@@ -2371,12 +2399,12 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 204 ||
-    currentInventory.proofUnitCount !== 97
+    currentInventory.workloadCount !== 206 ||
+    currentInventory.proofUnitCount !== 98
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current workload graph is not the exact reviewed M10-T01 append-only successor.",
+      "The current workload graph is not the exact reviewed M10-T01A append-only successor.",
     );
   }
   const currentProofPairClasses = currentInventory.proofUnits.reduce(
@@ -2386,27 +2414,27 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 86 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 87 || currentProofPairClasses.barrier !== 11) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M10-T01 proof-pair authority is not exactly 86 ordinary and 11 barrier pairs.",
+      "The current M10-T01A proof-pair authority is not exactly 87 ordinary and 11 barrier pairs.",
     );
   }
-  const browserE2eWorkspaceClosure = createAffectedImpactClosure([
-    "desen-app-browser-e2e-workspace-compatibility",
+  const userCreatedBlankProjectClosure = createAffectedImpactClosure([
+    "desen-app-user-created-blank-project",
   ]);
   if (
-    !isDeepStrictEqual(browserE2eWorkspaceClosure.ownerProofUnitIds, [
-      "desen-app-browser-e2e-workspace-compatibility",
+    !isDeepStrictEqual(userCreatedBlankProjectClosure.ownerProofUnitIds, [
+      "desen-app-user-created-blank-project",
     ]) ||
-    browserE2eWorkspaceClosure.proofUnitCount !== 65 ||
-    browserE2eWorkspaceClosure.workloadCount !== 140 ||
-    browserE2eWorkspaceClosure.impactSha256 !==
-      "99b33b797b32ecf72c35ffe5160e1f89bdc7b96b0bd156b7e14895193116f3e4"
+    userCreatedBlankProjectClosure.proofUnitCount !== 66 ||
+    userCreatedBlankProjectClosure.workloadCount !== 142 ||
+    userCreatedBlankProjectClosure.impactSha256 !==
+      "4f7ed0bb6f6df80671ac3d365960166545ccb4a959ec876f0d2a97d86bbed4f3"
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M10-T01 affected closure is not exactly 65 proof units and 140 workloads.",
+      "The current M10-T01A affected closure is not exactly 66 proof units and 142 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);

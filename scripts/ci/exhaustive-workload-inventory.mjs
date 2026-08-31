@@ -144,7 +144,7 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "38640b401f5294cd8420ddd511c807a2f90a7d6b2079c98b3f451b9288c7e9b0";
+  "5dc114ab24bc7d945475608fd77a84ba3fbc3fe547dac898c263aca3eba894bd";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
   "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
@@ -157,6 +157,7 @@ const EXPECTED_WORKSPACE_PACKAGE_GLOBS = SAFE_OBJECT_FREEZE(["apps/*", "packages
 const DIRECT_CI_PROOF_PAIR_IDS = SAFE_OBJECT_FREEZE([
   "desen-app-empty-project-browser-e2e",
   "desen-app-browser-e2e-workspace-compatibility",
+  "desen-app-user-created-blank-project",
 ]);
 const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
   [
@@ -165,7 +166,7 @@ const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
     [
       "test:e2e",
-      "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts",
+      "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts",
     ],
   ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
 );
@@ -650,6 +651,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "desen-app-browser-e2e-workspace-compatibility",
     "scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs",
     "tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
+  ],
+  [
+    "desen-app-user-created-blank-project",
+    "scripts/verify-desen-app-user-created-blank-project.mjs",
+    "tests/desen-app-user-created-blank-project.test.mjs",
   ],
 ]);
 
@@ -1651,7 +1657,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "bc71b712811d517e2de08c153ab8dc3ac5fe688fa1b7aafea84ee68636e79292";
+  "2b10f2fc39003592cddbd87122182de5acf05bd8c88afbbbd111d3ccc144919c";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

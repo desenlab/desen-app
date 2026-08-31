@@ -36,6 +36,7 @@ const PUBLISH_ACTIVATION_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-publis
 const PUBLISH_ACTIVATION_RECEIPT = "packages/editor-web/src/local-bundle-channel-publication.ts";
 const T14_PUBLICATION_APPLICATION_TEST_PATH =
   "apps/desen-app/test/publication-application.test.tsx";
+const PACKAGE = "apps/desen-app/package.json";
 const temporaryDirectories = [];
 let parentArtifactBytes;
 let selectionSource;
@@ -926,6 +927,100 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
         fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
       }),
       expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+});
+
+test("[M10-T01A successor] authenticates the normal-product blank-project seal and live receipts", async () => {
+  const successor = built.currentCompatibility.userCreatedBlankProjectSuccessor;
+  assert.deepEqual(
+    {
+      task: successor.task,
+      artifactSha256: successor.artifact.sha256,
+      immutable: successor.artifact.immutable,
+      predecessorSha256: successor.predecessor.sha256,
+      normalProductEntryCovered: successor.normalProductEntryCovered,
+      zeroProjectStartCovered: successor.zeroProjectStartCovered,
+      visibleProjectCreationCovered: successor.visibleProjectCreationCovered,
+      fixtureBootstrapBypassed: successor.fixtureBootstrapBypassed,
+      durableLocalPersistenceCovered: successor.durableLocalPersistenceCovered,
+      p08Status: successor.p08Status,
+      runtimeInputAndPendingCovered: successor.runtimeInputAndPendingCovered,
+      g10Closed: successor.g10Closed,
+    },
+    {
+      task: "M10-T01A",
+      artifactSha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+      immutable: true,
+      predecessorSha256: "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
+      normalProductEntryCovered: true,
+      zeroProjectStartCovered: true,
+      visibleProjectCreationCovered: true,
+      fixtureBootstrapBypassed: true,
+      durableLocalPersistenceCovered: true,
+      p08Status: "PROVEN",
+      runtimeInputAndPendingCovered: false,
+      g10Closed: false,
+    },
+  );
+  const mutationPaths = [
+    successor.artifact.path,
+    ...successor.currentProjection.artifactBackedPaths,
+    ...successor.currentProjection.reviewedPaths,
+  ];
+  assert.deepEqual(mutationPaths, [
+    "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+    "apps/desen-app/package.json",
+    "apps/desen-app/src/application.module.css",
+    "apps/desen-app/src/application.tsx",
+    "apps/desen-app/src/local-runtime-persistence.ts",
+    "apps/desen-app/src/main.tsx",
+    "apps/desen-app/src/product-bootstrap.tsx",
+    "apps/desen-app/src/project-data.ts",
+    "apps/desen-app/src/reference-empty-project.ts",
+    "apps/desen-app/src/styles.css",
+    "apps/desen-app/test/application.test.tsx",
+    "apps/desen-app/test/main-lifecycle.test.tsx",
+    "apps/desen-app/tsconfig.local-dev.json",
+    "dependency-cruiser.config.cjs",
+    "package.json",
+    "pnpm-lock.yaml",
+    "apps/desen-app/README.md",
+  ]);
+  for (const relativePath of mutationPaths) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
+    await assert.rejects(
+      buildDesenAppSelectionOverlayEvidence({
+        fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+
+  const packageSource = await readFile(path.join(ROOT, PACKAGE), "utf8");
+  const packageMutations = [
+    (manifest) => {
+      manifest.scripts.dev = "vite";
+    },
+    (manifest) => {
+      manifest.scripts.lint = "eslint src test --max-warnings=0";
+    },
+    (manifest) => {
+      manifest.scripts.typecheck = "tsc -p tsconfig.json --noEmit";
+    },
+    (manifest) => {
+      manifest.devDependencies["@desen/editor-web"] = manifest.dependencies["@desen/editor-web"];
+      delete manifest.dependencies["@desen/editor-web"];
+    },
+  ];
+  for (const mutate of packageMutations) {
+    const manifest = JSON.parse(packageSource);
+    mutate(manifest);
+    await assert.rejects(
+      buildDesenAppSelectionOverlayEvidence({
+        fileOverrides: new Map([[PACKAGE, Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`)]]),
+      }),
+      expectedError("PACKAGE_POLICY_VIOLATION"),
     );
   }
 });

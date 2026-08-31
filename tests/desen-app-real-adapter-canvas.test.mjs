@@ -34,6 +34,7 @@ const T14_PUBLICATION_APPLICATION_TEST_PATH =
 const ADAPTER_CANVAS = "apps/desen-app/src/adapter-canvas.tsx";
 const APPLICATION = "apps/desen-app/src/application.tsx";
 const AUTHORING_SELECTION = "apps/desen-app/src/authoring-selection.ts";
+const PACKAGE = "apps/desen-app/package.json";
 const temporaryDirectories = [];
 let adapterCanvasSource;
 let applicationSource;
@@ -210,12 +211,12 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   );
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
-  assert.equal(currentRuntime.moduleCount, 147);
-  assert.equal(currentRuntime.staticEdges, 439);
+  assert.equal(currentRuntime.moduleCount, 154);
+  assert.equal(currentRuntime.staticEdges, 457);
   assert.equal(currentRuntime.dynamicEdges, 0);
   assert.equal(
     currentRuntime.graphSha256,
-    "sha256:f92d4ea2da26a707ea731a866e788595d050a29ae798209f7855a8b7d62cc587",
+    "sha256:cb43855be994ef4f8bd22f0d6985f166fdaf18cd11fc512cd897cefa258d13dd",
   );
   assert.equal(
     graphModule(currentRuntime.modules, APPLICATION).imports.includes(
@@ -798,7 +799,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
-  assert.equal(verified.currentGraphModules, 147);
+  assert.equal(verified.currentGraphModules, 154);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 
@@ -1105,6 +1106,100 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
     await assert.rejects(
       buildDesenAppRealAdapterCanvasEvidence({
         fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+});
+
+test("[M10-T01A successor] authenticates the normal-product blank-project seal and live receipts", async () => {
+  const successor = built.currentCompatibility.userCreatedBlankProjectSuccessor;
+  assert.deepEqual(
+    {
+      task: successor.task,
+      artifactSha256: successor.artifact.sha256,
+      immutable: successor.artifact.immutable,
+      predecessorSha256: successor.predecessor.sha256,
+      normalProductEntryCovered: successor.normalProductEntryCovered,
+      zeroProjectStartCovered: successor.zeroProjectStartCovered,
+      visibleProjectCreationCovered: successor.visibleProjectCreationCovered,
+      fixtureBootstrapBypassed: successor.fixtureBootstrapBypassed,
+      durableLocalPersistenceCovered: successor.durableLocalPersistenceCovered,
+      p08Status: successor.p08Status,
+      runtimeInputAndPendingCovered: successor.runtimeInputAndPendingCovered,
+      g10Closed: successor.g10Closed,
+    },
+    {
+      task: "M10-T01A",
+      artifactSha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+      immutable: true,
+      predecessorSha256: "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
+      normalProductEntryCovered: true,
+      zeroProjectStartCovered: true,
+      visibleProjectCreationCovered: true,
+      fixtureBootstrapBypassed: true,
+      durableLocalPersistenceCovered: true,
+      p08Status: "PROVEN",
+      runtimeInputAndPendingCovered: false,
+      g10Closed: false,
+    },
+  );
+  const mutationPaths = [
+    successor.artifact.path,
+    ...successor.currentProjection.artifactBackedPaths,
+    ...successor.currentProjection.reviewedPaths,
+  ];
+  assert.deepEqual(mutationPaths, [
+    "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+    "apps/desen-app/package.json",
+    "apps/desen-app/src/application.module.css",
+    "apps/desen-app/src/application.tsx",
+    "apps/desen-app/src/local-runtime-persistence.ts",
+    "apps/desen-app/src/main.tsx",
+    "apps/desen-app/src/product-bootstrap.tsx",
+    "apps/desen-app/src/project-data.ts",
+    "apps/desen-app/src/reference-empty-project.ts",
+    "apps/desen-app/src/styles.css",
+    "apps/desen-app/test/application.test.tsx",
+    "apps/desen-app/test/main-lifecycle.test.tsx",
+    "apps/desen-app/tsconfig.local-dev.json",
+    "dependency-cruiser.config.cjs",
+    "package.json",
+    "pnpm-lock.yaml",
+    "apps/desen-app/README.md",
+  ]);
+  for (const relativePath of mutationPaths) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
+    await assert.rejects(
+      buildDesenAppRealAdapterCanvasEvidence({
+        fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+
+  const packageSource = await readFile(path.join(ROOT, PACKAGE), "utf8");
+  const packageMutations = [
+    (manifest) => {
+      manifest.scripts.dev = "vite";
+    },
+    (manifest) => {
+      manifest.scripts.lint = "eslint src test --max-warnings=0";
+    },
+    (manifest) => {
+      manifest.scripts.typecheck = "tsc -p tsconfig.json --noEmit";
+    },
+    (manifest) => {
+      manifest.devDependencies["@desen/editor-web"] = manifest.dependencies["@desen/editor-web"];
+      delete manifest.dependencies["@desen/editor-web"];
+    },
+  ];
+  for (const mutate of packageMutations) {
+    const manifest = JSON.parse(packageSource);
+    mutate(manifest);
+    await assert.rejects(
+      buildDesenAppRealAdapterCanvasEvidence({
+        fileOverrides: new Map([[PACKAGE, Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`)]]),
       }),
       expectedError("SUCCESSOR_POLICY_VIOLATION"),
     );

@@ -7,9 +7,9 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite",
-    "lint": "eslint src test --max-warnings=0",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "node dev/local-dev.mjs",
+    "lint": "eslint src test dev --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.local-dev.json --noEmit",
     "test": "vitest run",
     "test:authoring": "vitest run test/authoring-data.test.ts test/authoring-slots.test.ts test/application.test.tsx",
     "test:canvas": "vitest run test/adapter-canvas.test.tsx test/application.test.tsx test/main-lifecycle.test.tsx",
@@ -23,12 +23,15 @@
     "test:design-run": "vitest run test/adapter-canvas.test.tsx test/application.test.tsx",
     "test:fixtures-scenarios": "vitest run test/authoring-fixtures.test.ts test/authoring-scenarios.test.ts test/preview-fidelity.test.ts test/preview-controls.test.tsx test/adapter-canvas.test.tsx test/application.test.tsx",
     "test:persistence": "vitest run test/authoring-persistence.test.ts test/persistence-controls.test.tsx test/persistence-application.test.tsx test/project-navigation.test.ts test/application.test.tsx",
+    "test:local-runtime": "vitest run test/local-runtime-persistence.test.ts dev/local-dev-host.test.mjs",
+    "test:product-bootstrap": "vitest run test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx",
     "test:diagnostics": "vitest run test/authoring-diagnostics.test.ts test/diagnostics-panel.test.tsx test/authoring-inspector.test.ts test/authoring-state.test.ts test/authoring-event-actions.test.ts test/authoring-slots.test.ts test/adapter-canvas.test.tsx test/application.test.tsx test/persistence-application.test.tsx",
     "test:publication": "vitest run test/authoring-publication.test.ts test/publication-controls.test.tsx test/publication-application.test.tsx test/publication-activation-integration.test.ts"
   },
   "dependencies": {
     "@desen/catalog-sdk": "workspace:*",
     "@desen/editor-core": "workspace:*",
+    "@desen/editor-web": "workspace:*",
     "@desen/publisher": "workspace:*",
     "@desen/protocol": "workspace:*",
     "@desen/reference-catalog-web": "workspace:*",
@@ -41,7 +44,6 @@
   },
   "devDependencies": {
     "@desen/control-plane-api": "workspace:*",
-    "@desen/editor-web": "workspace:*",
     "@desen/reference-host-web-server": "workspace:*",
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.2",

@@ -25,6 +25,7 @@ const browserFiles = [
 
 const nodeFiles = [
   "apps/control-plane-api/**/*.{ts,tsx}",
+  "apps/desen-app/dev/**/*.{js,mjs,ts}",
   "apps/desen-app-browser-e2e/*.config.ts",
   "apps/desen-app-browser-e2e/*.pw.ts",
   "scripts/**/*.{js,cjs,mjs,ts}",

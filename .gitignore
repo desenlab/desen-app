@@ -3,8 +3,11 @@
 .env.*
 !.env.example
 .turbo/
+.desen/
 coverage/
 dist/
+!tests/boundaries/fixtures/*/apps/control-plane-api/dist/
+!tests/boundaries/fixtures/*/apps/control-plane-api/dist/**
 node_modules/
 playwright-report/
 test-results/

@@ -16,6 +16,8 @@ import {
 } from "../scripts/lib/desen-app-named-slot-authoring-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json";
 const PARENT_PATH = "docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json";
 const FIXTURES_SCENARIOS_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json";
@@ -820,6 +822,7 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
       immutable: successor.artifact.immutable,
       compatibilitySha256: successor.compatibilityArtifact.sha256,
       compatibilityReceipt: successor.compatibilityArtifact.compatibilityReceipt,
+      compatibilityRelationship: successor.currentProjection.relationship,
       p08Status: successor.p08Status,
       runtimeInputAndPendingCovered: successor.runtimeInputAndPendingCovered,
       g10Closed: successor.g10Closed,
@@ -830,6 +833,7 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
       immutable: true,
       compatibilitySha256: "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
       compatibilityReceipt: "M10-T01-COMPAT",
+      compatibilityRelationship: "IMMUTABLE_M10_T01_COMPATIBILITY_RECEIPTS",
       p08Status: "PROVEN",
       runtimeInputAndPendingCovered: false,
       g10Closed: false,
@@ -851,6 +855,65 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
     "dependency-cruiser.config.cjs",
   ]);
   for (const relativePath of mutationPaths) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
+    await assert.rejects(
+      buildDesenAppNamedSlotAuthoringEvidence({
+        fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+});
+
+test("[M10-T01A successor] authenticates the exact user-created blank-project overlay and fails closed", async () => {
+  const successor = built.currentCompatibility.userCreatedBlankProjectSuccessor;
+  assert.deepEqual(
+    {
+      task: successor.task,
+      artifactPath: successor.artifact.path,
+      artifactSha256: successor.artifact.sha256,
+      immutable: successor.artifact.immutable,
+      predecessorTask: successor.predecessor.task,
+      predecessorSha256: successor.predecessor.sha256,
+      trackedReceipts: successor.trackedReceipts.length,
+      p08Status: successor.p08Status,
+      runtimeInputAndPendingCovered: successor.runtimeInputAndPendingCovered,
+      invalidCredentialsAndPublicFailureCovered:
+        successor.invalidCredentialsAndPublicFailureCovered,
+      successNavigationAndHostOperationCovered: successor.successNavigationAndHostOperationCovered,
+      g10Closed: successor.g10Closed,
+    },
+    {
+      task: "M10-T01A",
+      artifactPath: M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
+      artifactSha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+      immutable: true,
+      predecessorTask: "M10-T01-COMPAT",
+      predecessorSha256: "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
+      trackedReceipts: 43,
+      p08Status: "PROVEN",
+      runtimeInputAndPendingCovered: false,
+      invalidCredentialsAndPublicFailureCovered: false,
+      successNavigationAndHostOperationCovered: false,
+      g10Closed: false,
+    },
+  );
+  const trackedPaths = successor.trackedReceipts.map(({ path: relativePath }) => relativePath);
+  assert.equal(new Set(trackedPaths).size, 43);
+  assert.deepEqual(trackedPaths.slice(0, 2), [".github/workflows/ci.yml", ".gitignore"]);
+  assert.deepEqual(trackedPaths.slice(-2), [
+    "tests/boundaries/README.md",
+    "tests/desen-app-user-created-blank-project.test.mjs",
+  ]);
+
+  for (const relativePath of [
+    successor.artifact.path,
+    "apps/desen-app/package.json",
+    "apps/desen-app/src/product-bootstrap.tsx",
+    "apps/desen-app/dev/local-dev-host.mjs",
+    "dependency-cruiser.config.cjs",
+    "tests/boundaries/README.md",
+  ]) {
     const bytes = await readFile(path.join(ROOT, relativePath));
     await assert.rejects(
       buildDesenAppNamedSlotAuthoringEvidence({

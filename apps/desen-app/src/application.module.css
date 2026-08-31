@@ -847,6 +847,257 @@
   margin-top: 0.75rem;
 }
 
+.projectDialog {
+  width: min(calc(100vw - 2rem), 34rem);
+  max-height: min(calc(100dvh - 2rem), 44rem);
+  padding: 0;
+  overflow: hidden auto;
+  color: var(--desen-app-text);
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border-strong);
+  border-radius: 0.875rem;
+  box-shadow: 0 1.5rem 5rem rgb(20 22 28 / 18%);
+}
+
+.projectDialog::backdrop {
+  background: rgb(20 22 28 / 24%);
+  backdrop-filter: blur(0.25rem);
+}
+
+.projectDialogForm {
+  display: grid;
+}
+
+.projectDialogHeader,
+.projectDialogActions,
+.projectDialogSectionHeading,
+.projectTemplateCard {
+  display: flex;
+  align-items: center;
+}
+
+.projectDialogHeader {
+  justify-content: space-between;
+  padding: 1rem 1rem 0.875rem;
+  border-bottom: 1px solid var(--desen-app-border);
+}
+
+.projectDialogHeader > div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.projectDialogHeader h2,
+.projectDialogSectionHeading h3 {
+  margin: 0;
+  font-weight: 580;
+  letter-spacing: -0.02em;
+}
+
+.projectDialogHeader h2 {
+  font-size: 1rem;
+}
+
+.dialogCloseButton {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--desen-app-text-muted);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+  place-items: center;
+}
+
+.dialogCloseButton:hover {
+  color: var(--desen-app-text);
+  border-color: var(--desen-app-border-strong);
+}
+
+.projectTemplateSection {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.projectDialogSectionHeading {
+  justify-content: space-between;
+}
+
+.projectDialogSectionHeading h3 {
+  font-size: 0.75rem;
+}
+
+.projectDialogSectionHeading span,
+.projectTemplateBoundary {
+  color: var(--desen-app-text-muted);
+  font-size: 0.625rem;
+}
+
+.projectTemplateCard {
+  position: relative;
+  gap: 0.75rem;
+  min-height: 6rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--desen-app-accent) 3%, var(--desen-app-surface));
+  border: 1px solid color-mix(in srgb, var(--desen-app-accent) 38%, var(--desen-app-border));
+  border-radius: 0.75rem;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--desen-app-accent) 8%, transparent);
+}
+
+.projectTemplateCard > input {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  accent-color: var(--desen-app-accent);
+}
+
+.projectTemplatePreview {
+  display: grid;
+  width: 4.25rem;
+  height: 4.5rem;
+  flex: 0 0 auto;
+  background: var(--desen-app-canvas);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+  place-items: center;
+}
+
+.projectTemplatePreview > span {
+  width: 1.75rem;
+  height: 3rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border-strong);
+  border-radius: 0.25rem;
+  box-shadow: var(--desen-app-shadow-xs);
+}
+
+.projectTemplateCopy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 0.25rem;
+  padding-right: 1.5rem;
+}
+
+.projectTemplateCopy strong {
+  font-size: 0.75rem;
+  font-weight: 580;
+}
+
+.projectTemplateCopy small {
+  color: var(--desen-app-text-muted);
+  font-size: 0.625rem;
+  line-height: 1.45;
+}
+
+.projectTemplateBadge {
+  align-self: flex-end;
+  padding: 0.1875rem 0.4375rem;
+  color: var(--desen-app-text-muted);
+  font-size: 0.5625rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 99px;
+}
+
+.projectTemplateBoundary,
+.projectDialogError {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.projectDialogError {
+  margin: 0 1rem;
+  padding: 0.625rem 0.75rem;
+  color: var(--desen-app-danger);
+  font-size: 0.6875rem;
+  background: color-mix(in srgb, var(--desen-app-danger) 7%, var(--desen-app-surface));
+  border: 1px solid color-mix(in srgb, var(--desen-app-danger) 22%, var(--desen-app-border));
+  border-radius: 0.5rem;
+}
+
+.projectDialogActions {
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding: 0.875rem 1rem 1rem;
+  border-top: 1px solid var(--desen-app-border);
+}
+
+.projectDialogActions .primaryButton {
+  margin-top: 0;
+}
+
+.productStartup {
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--desen-app-text);
+  background: var(--desen-app-canvas);
+}
+
+.productStartupHeader {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--desen-app-shadow-xs);
+  place-items: center;
+}
+
+.productStartupCard {
+  display: grid;
+  width: min(calc(100% - 2rem), 25.3125rem);
+  gap: 0.75rem;
+  padding: 1.25rem;
+  margin: 0 auto;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.875rem;
+  box-shadow: var(--desen-app-shadow-xs);
+  transform: translateY(calc(50vh - 50%));
+}
+
+.productStartupCard h1,
+.productStartupCard p {
+  margin: 0;
+}
+
+.productStartupCard h1 {
+  font-size: 1.0625rem;
+  font-weight: 580;
+  letter-spacing: -0.025em;
+}
+
+.productStartupCard > p:not(.eyebrow) {
+  color: var(--desen-app-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.productStartupMark {
+  width: 2rem;
+  height: 2rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.625rem;
+}
+
+.productStartupStatus {
+  width: fit-content;
+  color: var(--desen-app-text-muted);
+  font-size: 0.6875rem;
+}
+
 .surfaceGalleryList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(17rem, 18.75rem));

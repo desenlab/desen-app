@@ -416,9 +416,20 @@ function SkipToMainContentLink() {
   );
 }
 
-function AppHeader({ route }: Readonly<{ readonly route: DesenAppRoute }>) {
+function AppHeader({
+  onRequestProjectCreation,
+  projectCreationUnavailableMessage,
+  projects,
+  route,
+}: Readonly<{
+  readonly onRequestProjectCreation: (() => void) | null;
+  readonly projectCreationUnavailableMessage: string;
+  readonly projects: readonly DesenAppProjectSummary[];
+  readonly route: DesenAppRoute;
+}>) {
   const projectsActive = route.kind === "projects" || route.kind === "project";
-  const project = route.kind === "project" ? findDesenAppProject(route.projectId) : undefined;
+  const project =
+    route.kind === "project" ? findDesenAppProject(route.projectId, projects) : undefined;
   const surface =
     project === undefined || route.kind !== "project" || route.surfaceId === undefined
       ? undefined
@@ -447,10 +458,18 @@ function AppHeader({ route }: Readonly<{ readonly route: DesenAppRoute }>) {
             </nav>
             {route.kind === "projects" ? (
               <button
-                aria-describedby="new-project-unavailable"
+                aria-describedby={
+                  onRequestProjectCreation === null ? "new-project-unavailable" : undefined
+                }
                 aria-label="New project"
                 className={styles.addButton}
-                disabled
+                disabled={onRequestProjectCreation === null}
+                onClick={onRequestProjectCreation ?? undefined}
+                title={
+                  onRequestProjectCreation === null
+                    ? projectCreationUnavailableMessage
+                    : "Create project"
+                }
                 type="button"
               >
                 <img alt="" height="12" src={plusUrl} width="12" />
@@ -500,9 +519,11 @@ function AppHeader({ route }: Readonly<{ readonly route: DesenAppRoute }>) {
             SA
           </span>
         </div>
-        <span className={styles.visuallyHidden} id="new-project-unavailable">
-          Project creation unlocks with catalog setup.
-        </span>
+        {onRequestProjectCreation === null ? (
+          <span className={styles.visuallyHidden} id="new-project-unavailable">
+            {projectCreationUnavailableMessage}
+          </span>
+        ) : null}
       </div>
     </header>
   );
@@ -556,11 +577,19 @@ function ProjectCard({ project }: Readonly<{ readonly project: DesenAppProjectSu
   );
 }
 
-function ProjectsHome() {
+function ProjectsHome({
+  fixtures,
+  onRequestProjectCreation,
+  projects: projectInventory,
+}: Readonly<{
+  readonly fixtures: boolean;
+  readonly onRequestProjectCreation: (() => void) | null;
+  readonly projects: readonly DesenAppProjectSummary[];
+}>) {
   const searchHelpId = useId();
   const [query, setQuery] = useState("");
   const normalizedQuery = query.trim().toLocaleLowerCase("en-US");
-  const projects = DESEN_APP_PROJECTS.filter((project) => {
+  const projects = projectInventory.filter((project) => {
     if (normalizedQuery === "") return true;
     const searchable = [
       project.name,
@@ -583,9 +612,13 @@ function ProjectsHome() {
         <div className={styles.collectionHeading}>
           <div>
             <h2 id="all-projects-title">All projects</h2>
-            <p>Open a bounded product surface in OBSS Draft.</p>
+            <p>
+              {fixtures
+                ? "Open a bounded product surface in OBSS Draft."
+                : "Create and reopen Sources stored by your local Desen workspace."}
+            </p>
           </div>
-          <span className={styles.previewBadge}>Preview data</span>
+          {fixtures ? <span className={styles.previewBadge}>Preview data</span> : null}
         </div>
         <div className={styles.heroActions}>
           <label className={styles.searchField}>
@@ -604,17 +637,36 @@ function ProjectsHome() {
         </p>
       </div>
 
-      <p className={styles.previewNotice} aria-label="Preview data boundary">
-        Project names and metadata are inert examples. No Source, save, diagnostics, revision or
-        publication state is being read.
-      </p>
+      {fixtures ? (
+        <p className={styles.previewNotice} aria-label="Preview data boundary">
+          Project names and metadata are inert examples. No Source, save, diagnostics, revision or
+          publication state is being read.
+        </p>
+      ) : null}
 
       <div className={styles.resultsHeading}>
         <p aria-live="polite" role="status">
           {projects.length} {projects.length === 1 ? "project" : "projects"}
         </p>
       </div>
-      {projects.length > 0 ? (
+      {projectInventory.length === 0 && normalizedQuery === "" ? (
+        <div className={styles.emptyState} data-project-empty-state="true">
+          <p>Your workspace is ready</p>
+          <h3>Create the first project.</h3>
+          <span>
+            Start with the exact web-react catalog, one empty Stack, and a declared 420 × 720 page
+            frame.
+          </span>
+          <button
+            className={styles.primaryButton}
+            disabled={onRequestProjectCreation === null}
+            onClick={onRequestProjectCreation ?? undefined}
+            type="button"
+          >
+            Create project
+          </button>
+        </div>
+      ) : projects.length > 0 ? (
         <div className={styles.projectList}>
           {projects.map((project) => (
             <ProjectCard key={project.id} project={project} />
@@ -2281,12 +2333,14 @@ function AuthoringPanel({
 
 function SurfaceEditor({
   initialDocument,
+  preparedPersistenceController,
   persistencePort,
   publicationPort,
   project,
   selectedSurface,
 }: Readonly<{
   readonly initialDocument: DesenEditorDocument;
+  readonly preparedPersistenceController: AuthoringPersistenceController | null | undefined;
   readonly persistencePort: DesenEditorPersistencePort | null;
   readonly publicationPort: AuthoringPublicationPort | null;
   readonly project: DesenAppProjectSummary;
@@ -2330,9 +2384,9 @@ function SurfaceEditor({
     () => Object.freeze({ projectId: project.id, surfaceId: selectedSurface.id }),
     [project.id, selectedSurface.id],
   );
-  const persistenceCreation = useMemo(
+  const ownedPersistenceCreation = useMemo(
     () =>
-      persistencePort === null
+      preparedPersistenceController !== undefined || persistencePort === null
         ? null
         : createAuthoringPersistenceController({
             route,
@@ -2340,10 +2394,15 @@ function SurfaceEditor({
             catalog: referenceCatalog,
             persistencePort,
           }),
-    [mountedInitialDocument, persistencePort, route],
+    [mountedInitialDocument, persistencePort, preparedPersistenceController, route],
   );
   const persistenceController =
-    persistenceCreation?.ok === true ? persistenceCreation.controller : null;
+    preparedPersistenceController !== undefined
+      ? preparedPersistenceController
+      : ownedPersistenceCreation?.ok === true
+        ? ownedPersistenceCreation.controller
+        : null;
+  const ownsPersistenceController = preparedPersistenceController === undefined;
   const persistenceState = useSyncExternalStore(
     persistenceController?.subscribe ?? subscribeUnavailablePersistence,
     persistenceController?.read ?? readUnavailablePersistence,
@@ -2584,12 +2643,15 @@ function SurfaceEditor({
         persistenceControllerLifetime.current = null;
       }
       queueMicrotask(() => {
-        if (persistenceControllerLifetime.current !== persistenceController) {
+        if (
+          ownsPersistenceController &&
+          persistenceControllerLifetime.current !== persistenceController
+        ) {
           persistenceController.dispose();
         }
       });
     };
-  }, [persistenceController]);
+  }, [ownsPersistenceController, persistenceController]);
 
   useEffect(() => {
     if (publicationController === null || publicationBinding === null) return;
@@ -2648,20 +2710,41 @@ function SurfaceEditor({
       if (current.disposed) return null;
       return current.pending !== null;
     };
+    const hasCurrentPersistenceHazard = () => {
+      if (persistenceController === null || ownsPersistenceController) return false;
+      if (persistenceControllerLifetime.current !== persistenceController) return null;
+      const current = persistenceController.read();
+      if (current.disposed) return null;
+      return current.pending !== null || current.reopenRequired;
+    };
     const removeNavigationGuard = installDesenAppNavigationGuard(() => {
       const publishing = hasCurrentPublication();
       if (publishing === null || publishing) return false;
+      const persistenceHazard = hasCurrentPersistenceHazard();
+      if (persistenceHazard === null || persistenceHazard) return false;
       const dirty = hasCurrentUnsavedSource();
       if (dirty === null) return false;
-      return (
-        !dirty ||
-        window.confirm(
+      if (!dirty) return true;
+      if (
+        !window.confirm(
           "Discard unsaved changes? Leaving this surface will permanently discard the current authored Source draft.",
         )
-      );
+      ) {
+        return false;
+      }
+      if (persistenceController === null || ownsPersistenceController) return true;
+      const current = persistenceController.read();
+      if (current.disposed || current.savedDocument === null) return false;
+      return persistenceController.replaceAuthoredDocument(current.savedDocument).ok;
     });
     const protectPageExit = (event: BeforeUnloadEvent) => {
-      if (hasCurrentPublication() !== true && hasCurrentUnsavedSource() !== true) return;
+      if (
+        hasCurrentPublication() !== true &&
+        hasCurrentPersistenceHazard() !== true &&
+        hasCurrentUnsavedSource() !== true
+      ) {
+        return;
+      }
       event.preventDefault();
       event.returnValue = "";
     };
@@ -2670,7 +2753,13 @@ function SurfaceEditor({
       removeNavigationGuard();
       window.removeEventListener("beforeunload", protectPageExit);
     };
-  }, [persistenceController, persistenceState, publicationController, publicationPending]);
+  }, [
+    ownsPersistenceController,
+    persistenceController,
+    persistenceState,
+    publicationController,
+    publicationPending,
+  ]);
 
   useEffect(() => {
     if (
@@ -3209,13 +3298,17 @@ function SurfaceEditor({
 }
 
 function ProjectShell({
+  fixtures,
   initialDocument,
+  preparedPersistenceController,
   persistencePort,
   publicationPort,
   project,
   selectedSurface,
 }: Readonly<{
+  readonly fixtures: boolean;
   readonly initialDocument: DesenEditorDocument;
+  readonly preparedPersistenceController: AuthoringPersistenceController | null | undefined;
   readonly persistencePort: DesenEditorPersistencePort | null;
   readonly publicationPort: AuthoringPublicationPort | null;
   readonly project: DesenAppProjectSummary;
@@ -3234,7 +3327,7 @@ function ProjectShell({
               <h2 id="surfaces-title">All surfaces</h2>
               <p>{project.description}</p>
             </div>
-            <span className={styles.previewBadge}>Preview data</span>
+            {fixtures ? <span className={styles.previewBadge}>Preview data</span> : null}
           </div>
         </div>
 
@@ -3286,6 +3379,7 @@ function ProjectShell({
     <SurfaceEditor
       key={`${project.id}:${selectedSurface.id}`}
       initialDocument={initialDocument}
+      preparedPersistenceController={preparedPersistenceController}
       persistencePort={persistencePort}
       publicationPort={publicationPort}
       project={project}
@@ -3313,10 +3407,10 @@ function NotFound({
   );
 }
 
-function routeTitle(route: DesenAppRoute): string {
+function routeTitle(route: DesenAppRoute, projects: readonly DesenAppProjectSummary[]): string {
   if (route.kind === "projects") return "Projects · DESEN";
   if (route.kind === "not-found") return "Not found · DESEN";
-  const project = findDesenAppProject(route.projectId);
+  const project = findDesenAppProject(route.projectId, projects);
   if (project === undefined) return "Project not found · DESEN";
   if (route.surfaceId === undefined) return `${project.name} · DESEN`;
   const surface = findDesenAppSurface(project, route.surfaceId);
@@ -3326,27 +3420,45 @@ function routeTitle(route: DesenAppRoute): string {
 }
 
 /** Whether the current route has an admitted surface editor, rather than a gallery or error view. */
-function hasResolvedSurfaceEditor(route: DesenAppRoute): boolean {
+function hasResolvedSurfaceEditor(
+  route: DesenAppRoute,
+  projects: readonly DesenAppProjectSummary[],
+): boolean {
   if (route.kind !== "project" || route.surfaceId === undefined) return false;
-  const project = findDesenAppProject(route.projectId);
+  const project = findDesenAppProject(route.projectId, projects);
   return project !== undefined && findDesenAppSurface(project, route.surfaceId) !== undefined;
 }
 
 function RouteView({
+  fixtures,
   initialDocument,
+  onRequestProjectCreation,
+  preparedPersistenceController,
   persistencePort,
+  projects,
   publicationPort,
   route,
 }: Readonly<{
+  readonly fixtures: boolean;
   readonly initialDocument: DesenEditorDocument;
+  readonly onRequestProjectCreation: (() => void) | null;
+  readonly preparedPersistenceController: AuthoringPersistenceController | null | undefined;
   readonly persistencePort: DesenEditorPersistencePort | null;
+  readonly projects: readonly DesenAppProjectSummary[];
   readonly publicationPort: AuthoringPublicationPort | null;
   readonly route: DesenAppRoute;
 }>) {
-  if (route.kind === "projects") return <ProjectsHome />;
+  if (route.kind === "projects")
+    return (
+      <ProjectsHome
+        fixtures={fixtures}
+        onRequestProjectCreation={onRequestProjectCreation}
+        projects={projects}
+      />
+    );
   if (route.kind === "not-found") return <NotFound pathname={route.pathname} />;
 
-  const project = findDesenAppProject(route.projectId);
+  const project = findDesenAppProject(route.projectId, projects);
   if (project === undefined) {
     return (
       <NotFound
@@ -3358,7 +3470,9 @@ function RouteView({
   if (route.surfaceId === undefined)
     return (
       <ProjectShell
+        fixtures={fixtures}
         initialDocument={initialDocument}
+        preparedPersistenceController={preparedPersistenceController}
         persistencePort={persistencePort}
         publicationPort={publicationPort}
         project={project}
@@ -3377,7 +3491,9 @@ function RouteView({
   }
   return (
     <ProjectShell
+      fixtures={fixtures}
       initialDocument={initialDocument}
+      preparedPersistenceController={preparedPersistenceController}
       persistencePort={persistencePort}
       publicationPort={publicationPort}
       project={project}
@@ -3390,14 +3506,31 @@ function RouteView({
 export interface DesenAppApplicationProps {
   /** Initial validated Source captured when a surface editor session mounts. */
   readonly initialDocument?: DesenEditorDocument;
+  /** Whether the supplied project inventory is inert demonstration data. */
+  readonly projectInventoryIsFixture?: boolean;
+  /** Exact admitted projects visible to route resolution and the gallery. */
+  readonly projects?: readonly DesenAppProjectSummary[];
+  /** Product-owned request that opens the supported blank-project creation flow. */
+  readonly onRequestProjectCreation?: (() => void) | null;
+  /** Visible-accessibility explanation used only while project creation is unavailable. */
+  readonly projectCreationUnavailableMessage?: string;
+  /** Already opened persistence controller owned by an outer product composition. */
+  readonly preparedPersistenceController?: AuthoringPersistenceController | null;
+  /** Optional raw persistence port used by legacy/direct shell embeddings. */
   readonly persistencePort?: DesenEditorPersistencePort | null;
+  /** Optional publication host boundary for the selected Source. */
   readonly publicationPort?: AuthoringPublicationPort | null;
 }
 
 /** M09 Desen App shell with exact routes, schema-driven Source editing, and adapter preview. */
 export function DesenAppApplication({
   initialDocument = REFERENCE_EDITOR_DOCUMENT,
+  onRequestProjectCreation = null,
+  preparedPersistenceController,
   persistencePort = null,
+  projectCreationUnavailableMessage = "Project creation unlocks with catalog setup.",
+  projectInventoryIsFixture = true,
+  projects = DESEN_APP_PROJECTS,
   publicationPort = null,
 }: DesenAppApplicationProps = {}) {
   const routeLocation = useSyncExternalStore(
@@ -3406,23 +3539,28 @@ export function DesenAppApplication({
     readDesenAppServerLocation,
   );
   const route = readDesenAppRoute(routeLocation);
-  const surfaceEditorRoute = hasResolvedSurfaceEditor(route);
+  const surfaceEditorRoute = hasResolvedSurfaceEditor(route, projects);
   const previousRouteLocation = useRef(routeLocation);
 
   useEffect(() => {
-    document.title = routeTitle(route);
+    document.title = routeTitle(route, projects);
     if (previousRouteLocation.current !== routeLocation) {
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
       document.querySelector<HTMLElement>("[data-route-heading]")?.focus({ preventScroll: true });
       previousRouteLocation.current = routeLocation;
     }
-  }, [routeLocation, route]);
+  }, [projects, routeLocation, route]);
 
   return (
     <div className={styles.app}>
       <SkipToMainContentLink />
-      <AppHeader route={route} />
+      <AppHeader
+        onRequestProjectCreation={onRequestProjectCreation}
+        projectCreationUnavailableMessage={projectCreationUnavailableMessage}
+        projects={projects}
+        route={route}
+      />
       <main
         className={styles.main}
         data-surface-editor={surfaceEditorRoute ? "true" : undefined}
@@ -3430,8 +3568,12 @@ export function DesenAppApplication({
         tabIndex={-1}
       >
         <RouteView
+          fixtures={projectInventoryIsFixture}
           initialDocument={initialDocument}
+          onRequestProjectCreation={onRequestProjectCreation}
+          preparedPersistenceController={preparedPersistenceController}
           persistencePort={persistencePort}
+          projects={projects}
           publicationPort={publicationPort}
           route={route}
         />

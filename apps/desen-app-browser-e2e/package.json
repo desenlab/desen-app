@@ -9,7 +9,7 @@
     "build": "vite build",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:e2e": "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts"
+    "test:e2e": "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts"
   },
   "dependencies": {
     "@desen/editor-core": "workspace:*",
@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@desen/app-web": "workspace:*",
+    "@desen/control-plane-api": "workspace:*",
     "@playwright/test": "1.62.1",
     "@types/node": "24.13.3",
     "@types/react": "19.2.17",

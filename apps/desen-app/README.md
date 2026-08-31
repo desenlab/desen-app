@@ -518,6 +518,28 @@ drag intent is the negative case and remains inert. The browser proof deliberate
 credentials, settle fixtures, navigate, invoke a real host operation, publish, activate, or test
 recovery; those remain M10-T02–M10-T07.
 
+M10-T01A moves that bootstrap into the normal local product. `pnpm --filter @desen/app-web dev`
+now starts both the App and its authenticated loopback Source service at
+`http://127.0.0.1:5173`. On an empty durable store, the Projects screen exposes New project and a
+Figma-aligned modal for the one honestly supported profile: Account app, `web-react@0.1`, one empty
+sign-in Stack, and a `420 × 720` portrait frame. The first successful create is Generation 1; the
+same persistence controller then enters the normal editor, and later saves keep their exact CAS
+generation.
+
+Local Source state is stored under the ignored repository-level
+`.desen/desen-app/control-plane` directory, outside Vite's served App root. The launcher also keeps
+Vite's default secret-file deny rules, denies every `.desen` URL and `/@fs/` path, and returns an
+explicit `403` before SPA fallback. Restarting the launcher preserves that state. A hard browser
+reload opens and re-admits the stored Source before mounting the editor; returning to Projects and
+opening the project uses the same durable document. Missing, rejected, corrupt, or unavailable
+storage never falls back to the M09 fixture inventory. Create conflicts do not overwrite the
+winner and require an explicit reopen.
+
+The current product profile intentionally creates only this exact project identity. It does not
+claim free-form project naming, multiple projects, remote accounts, collaboration, cloud sync,
+deployment, or last-known-good activation recovery. Typed input/pending and fixture outcomes remain
+M10-T02 onward.
+
 ## Local commands
 
 Install the package-pinned Chromium runtime once with
@@ -540,6 +562,8 @@ pnpm --filter @desen/app-web test:event-actions
 pnpm --filter @desen/app-web test:design-run
 pnpm --filter @desen/app-web test:fixtures-scenarios
 pnpm --filter @desen/app-web test:persistence
+pnpm --filter @desen/app-web test:local-runtime
+pnpm --filter @desen/app-web test:product-bootstrap
 pnpm --filter @desen/app-web test:diagnostics
 pnpm --filter @desen/app-web test:publication
 pnpm --filter @desen/app-browser-e2e test:e2e

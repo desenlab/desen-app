@@ -23,6 +23,39 @@ const M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PIN = Object.freeze({
   bytes: 16_025,
   sha256: "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
 });
+const M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json";
+const M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN = Object.freeze({
+  bytes: 20_173,
+  sha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+});
+const M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS = Object.freeze([
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/local-runtime-persistence.ts",
+  "apps/desen-app/src/main.tsx",
+  "apps/desen-app/src/product-bootstrap.tsx",
+  "apps/desen-app/src/project-data.ts",
+  "apps/desen-app/src/reference-empty-project.ts",
+  "apps/desen-app/src/styles.css",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/main-lifecycle.test.tsx",
+  "apps/desen-app/tsconfig.local-dev.json",
+  "dependency-cruiser.config.cjs",
+  "package.json",
+  "pnpm-lock.yaml",
+]);
+const M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT = Object.freeze({
+  path: "apps/desen-app/README.md",
+  bytes: 43_576,
+  sha256: "0273d175de197c7f2171e1771979d131b848f19b670769cd66bbd9040d278e46",
+});
+const M10_USER_CREATED_BLANK_PROJECT_SOURCE_PATHS = Object.freeze([
+  "apps/desen-app/src/local-runtime-persistence.ts",
+  "apps/desen-app/src/product-bootstrap.tsx",
+  "apps/desen-app/src/reference-empty-project.ts",
+]);
 const M10_EMPTY_PROJECT_SUCCESSOR_RECEIPTS = Object.freeze({
   "pnpm-lock.yaml": Object.freeze({
     path: "pnpm-lock.yaml",
@@ -189,7 +222,135 @@ const M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS = Object.freeze({
   }),
 });
 
-function reviewedSuccessorReceiptMap(receipts) {
+function authenticateM10UserCreatedBlankProjectArtifact(files) {
+  const artifactBytes = files.get(M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH);
+  const pin = M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN;
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact immutable M10-T01A user-created blank-project artifact drifted.",
+    );
+  }
+  const artifact = parseJson(
+    artifactBytes,
+    M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
+    "SUCCESSOR_POLICY_VIOLATION",
+  );
+  const prerequisite = artifact?.prerequisites?.[0];
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.task !== "M10-T01A" ||
+    artifact?.gate !== null ||
+    artifact?.proofId !== "desen-app-user-created-blank-project" ||
+    artifact?.profile !== "desen.app.user-created-blank-project-proof.v1" ||
+    artifact?.result !== "PASS" ||
+    !isDeepStrictEqual(artifact?.claim, {
+      taskStatus: "DONE",
+      p08Status: "PROVEN",
+      normalProductEntryCovered: true,
+      zeroProjectStartCovered: true,
+      visibleProjectCreationCovered: true,
+      exactBlankProfileCovered: true,
+      fixtureBootstrapBypassed: true,
+      durableLocalPersistenceCovered: true,
+      visualAuthoringCovered: true,
+      nativeComponentDragCovered: true,
+      nativeLayerDragCovered: true,
+      forgedDataTransferRejected: true,
+      authoredDeletionCovered: true,
+      generationOneCreationCovered: true,
+      generationTwoSaveCovered: true,
+      hardReloadCovered: true,
+      visibleProjectReopenCovered: true,
+      exactSourceReadBackCovered: true,
+      designRunStaticParityCovered: true,
+      productServerControlPlaneBoundaryCovered: true,
+      runtimeInputAndPendingCovered: false,
+      invalidCredentialsAndPublicFailureCovered: false,
+      successNavigationAndHostOperationCovered: false,
+      remoteDeploymentCovered: false,
+      g10Closed: false,
+    }) ||
+    artifact?.claim?.taskStatus !== "DONE" ||
+    artifact?.claim?.p08Status !== "PROVEN" ||
+    artifact?.claim?.normalProductEntryCovered !== true ||
+    artifact?.claim?.zeroProjectStartCovered !== true ||
+    artifact?.claim?.visibleProjectCreationCovered !== true ||
+    artifact?.claim?.exactBlankProfileCovered !== true ||
+    artifact?.claim?.fixtureBootstrapBypassed !== true ||
+    artifact?.claim?.durableLocalPersistenceCovered !== true ||
+    artifact?.claim?.generationOneCreationCovered !== true ||
+    artifact?.claim?.generationTwoSaveCovered !== true ||
+    artifact?.claim?.hardReloadCovered !== true ||
+    artifact?.claim?.visibleProjectReopenCovered !== true ||
+    artifact?.claim?.runtimeInputAndPendingCovered !== false ||
+    artifact?.claim?.invalidCredentialsAndPublicFailureCovered !== false ||
+    artifact?.claim?.successNavigationAndHostOperationCovered !== false ||
+    artifact?.claim?.remoteDeploymentCovered !== false ||
+    artifact?.claim?.g10Closed !== false ||
+    artifact?.authority?.source?.normalProductEntry !== true ||
+    artifact?.authority?.source?.productEntryInjectsDocument !== false ||
+    artifact?.authority?.source?.localRuntimeProfile !== "desen.app.local-runtime.v1" ||
+    artifact?.authority?.source?.fixedLoopbackOnly !== true ||
+    artifact?.authority?.source?.freshBearerSecret !== true ||
+    artifact?.authority?.source?.browserExecutionPerformedByReader !== false ||
+    artifact?.authority?.package?.appPackageName !== "@desen/app-web" ||
+    artifact?.authority?.package?.appDevCommand !== "node dev/local-dev.mjs" ||
+    artifact?.authority?.package?.appLocalRuntimeTestCommand !==
+      "vitest run test/local-runtime-persistence.test.ts dev/local-dev-host.test.mjs" ||
+    artifact?.authority?.package?.appProductBootstrapTestCommand !==
+      "vitest run test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx" ||
+    artifact?.authority?.package?.appOwnsPlaywright !== false ||
+    artifact?.authority?.package?.dedicatedBrowserWorkspace !== true ||
+    artifact?.authority?.package?.playwrightVersion !== "1.62.1" ||
+    artifact?.tests?.browserTestDeclarations !== 1 ||
+    artifact?.tests?.browserExecutedByVerifier !== false ||
+    artifact?.boundary?.trackedFiles !== 43 ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== 43 ||
+    prerequisite?.task !== "M10-T01-COMPAT" ||
+    prerequisite?.path !== M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PATH ||
+    prerequisite?.bytes !== M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PIN.bytes ||
+    prerequisite?.sha256 !== M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PIN.sha256 ||
+    prerequisite?.immutable !== true
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The immutable M10-T01A identity, package authority, or bounded claim drifted.",
+    );
+  }
+  const receiptMap = new Map();
+  for (const receipt of trackedReceipts) {
+    if (
+      receipt === null ||
+      typeof receipt !== "object" ||
+      typeof receipt.path !== "string" ||
+      receiptMap.has(receipt.path) ||
+      !Number.isSafeInteger(receipt.bytes) ||
+      receipt.bytes < 0 ||
+      typeof receipt.sha256 !== "string" ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The immutable M10-T01A receipt set is malformed.");
+    }
+    receiptMap.set(receipt.path, receipt);
+  }
+  for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS) {
+    if (!receiptMap.has(relativePath)) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The immutable M10-T01A receipt set is missing ${relativePath}.`,
+      );
+    }
+  }
+  return { artifact, receiptMap };
+}
+
+function reviewedSuccessorReceiptMap(receipts, files) {
   const receiptMap = new Map(receipts.map((candidate) => [candidate?.path, candidate]));
   for (const receipt of Object.values(M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS)) {
     receiptMap.set(receipt.path, receipt);
@@ -197,6 +358,14 @@ function reviewedSuccessorReceiptMap(receipts) {
   for (const receipt of Object.values(M10_EMPTY_PROJECT_SUCCESSOR_RECEIPTS)) {
     receiptMap.set(receipt.path, receipt);
   }
+  const m10T01AReceipts = authenticateM10UserCreatedBlankProjectArtifact(files).receiptMap;
+  for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS) {
+    receiptMap.set(relativePath, m10T01AReceipts.get(relativePath));
+  }
+  receiptMap.set(
+    M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT.path,
+    M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT,
+  );
   return receiptMap;
 }
 
@@ -319,16 +488,11 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
     ...Object.values(M10_EMPTY_PROJECT_SUCCESSOR_RECEIPTS),
     ...Object.values(M10_UNCHANGED_MANIFEST_RECEIPTS),
   ]) {
-    const bytes = files.get(expected.path);
     const compatibilityReceipt = compatibilityReceiptMap.get(expected.path);
-    if (
-      !isDeepStrictEqual(compatibilityReceipt, expected) ||
-      bytes?.byteLength !== expected.bytes ||
-      sha256(bytes ?? Buffer.alloc(0)) !== expected.sha256
-    ) {
+    if (!isDeepStrictEqual(compatibilityReceipt, expected)) {
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
-        `The exact current M10-T01 compatibility receipt drifted: ${expected.path}.`,
+        `The exact immutable M10-T01 compatibility receipt drifted: ${expected.path}.`,
       );
     }
   }
@@ -349,7 +513,7 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
       correctiveReceiptOnly: compatibility.claim.correctiveReceiptOnly,
     }),
     currentProjection: Object.freeze({
-      relationship: "EXACT_POST_M10_CORRECTIVE_LIVE_RECEIPTS",
+      relationship: "IMMUTABLE_M10_T01_COMPATIBILITY_RECEIPTS",
       changedHistoricalPaths: Object.freeze(Object.values(M10_EMPTY_PROJECT_SUCCESSOR_RECEIPTS)),
       unchangedOriginMainManifests: Object.freeze(Object.values(M10_UNCHANGED_MANIFEST_RECEIPTS)),
     }),
@@ -359,6 +523,59 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
       artifact.claim.invalidCredentialsAndPublicFailureCovered,
     successNavigationAndHostOperationCovered:
       artifact.claim.successNavigationAndHostOperationCovered,
+    g10Closed: artifact.claim.g10Closed,
+  });
+}
+
+function authenticateM10UserCreatedBlankProjectSuccessor(files) {
+  const { artifact, receiptMap } = authenticateM10UserCreatedBlankProjectArtifact(files);
+  for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS) {
+    const expected = receiptMap.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      bytes?.byteLength !== expected.bytes ||
+      sha256(bytes ?? Buffer.alloc(0)) !== expected.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The exact live M10-T01A receipt drifted: ${relativePath}.`,
+      );
+    }
+  }
+  const readme = M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT;
+  const readmeBytes = files.get(readme.path);
+  if (
+    readmeBytes?.byteLength !== readme.bytes ||
+    sha256(readmeBytes ?? Buffer.alloc(0)) !== readme.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The reviewed live M10-T01A README receipt drifted.");
+  }
+  return deepFreeze({
+    task: "M10-T01A",
+    artifact: Object.freeze({
+      path: M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
+      bytes: M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN.bytes,
+      sha256: M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN.sha256,
+      immutable: true,
+    }),
+    predecessor: Object.freeze({
+      path: M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PATH,
+      bytes: M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PIN.bytes,
+      sha256: M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PIN.sha256,
+      immutable: true,
+    }),
+    currentProjection: Object.freeze({
+      relationship: "EXACT_POST_M10_T01A_LIVE_RECEIPTS",
+      artifactBackedPaths: Object.freeze([...M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS]),
+      reviewedPaths: Object.freeze([readme.path]),
+    }),
+    normalProductEntryCovered: artifact.claim.normalProductEntryCovered,
+    zeroProjectStartCovered: artifact.claim.zeroProjectStartCovered,
+    visibleProjectCreationCovered: artifact.claim.visibleProjectCreationCovered,
+    fixtureBootstrapBypassed: artifact.claim.fixtureBootstrapBypassed,
+    durableLocalPersistenceCovered: artifact.claim.durableLocalPersistenceCovered,
+    p08Status: artifact.claim.p08Status,
+    runtimeInputAndPendingCovered: artifact.claim.runtimeInputAndPendingCovered,
     g10Closed: artifact.claim.g10Closed,
   });
 }
@@ -399,15 +616,18 @@ const CURRENT_APP_SOURCE_PATHS = Object.freeze(
     "apps/desen-app/src/authoring-persistence.ts",
     "apps/desen-app/src/authoring-publication.ts",
     "apps/desen-app/src/diagnostics-panel.tsx",
+    ...M10_USER_CREATED_BLANK_PROJECT_SOURCE_PATHS,
     "apps/desen-app/src/persistence-controls.tsx",
     "apps/desen-app/src/publication-controls.tsx",
   ].sort(),
 );
-const CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
-  [...CURRENT_APP_SOURCE_PATHS, "apps/desen-app/src/reference-empty-project.ts"].sort(),
-);
+const CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze([...CURRENT_APP_SOURCE_PATHS].sort());
 const CURRENT_APP_TYPESCRIPT_SOURCE_PATHS = Object.freeze(
-  CURRENT_APP_SOURCE_PATHS.filter((relativePath) => /\.(?:ts|tsx)$/u.test(relativePath)),
+  CURRENT_APP_SOURCE_PATHS.filter(
+    (relativePath) =>
+      /\.(?:ts|tsx)$/u.test(relativePath) &&
+      !M10_USER_CREATED_BLANK_PROJECT_SOURCE_PATHS.includes(relativePath),
+  ),
 );
 const PROOF_READER_PATHS = Object.freeze([
   "scripts/lib/atomic-proof-artifact.mjs",
@@ -525,10 +745,13 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   "tests/desen-app-real-adapter-canvas.test.mjs",
 ]);
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
   M10_EMPTY_PROJECT_BROWSER_E2E_ARTIFACT_PATH,
   M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PATH,
   "dependency-cruiser.config.cjs",
   ...new Set([
+    ...M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS,
+    M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT.path,
     ...TRACKED_PATHS,
     ROOT_PACKAGE_PATH,
     NAMED_SLOT_ARTIFACT_PATH,
@@ -948,11 +1171,12 @@ const EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS = Object.freeze([
   "packages/runtime-core/dist/index.js",
 ]);
 const EXPECTED_CURRENT_VITE_GRAPH_SHA256 =
-  "sha256:f92d4ea2da26a707ea731a866e788595d050a29ae798209f7855a8b7d62cc587";
+  "sha256:cb43855be994ef4f8bd22f0d6985f166fdaf18cd11fc512cd897cefa258d13dd";
 
 const ALLOWED_RUNTIME_PACKAGE_EDGES = Object.freeze({
   "catalog-sdk": Object.freeze(["catalog-sdk", "protocol"]),
   "editor-core": Object.freeze(["editor-core", "protocol", "validator"]),
+  "editor-web": Object.freeze(["editor-core", "editor-web"]),
   publisher: Object.freeze(["catalog-sdk", "protocol", "publisher", "validator"]),
   protocol: Object.freeze(["protocol"]),
   "reference-catalog-web": Object.freeze([
@@ -1266,7 +1490,7 @@ function authenticateHostSourceAuditArtifact(bytes) {
   return Object.freeze({ pin, artifact });
 }
 
-function authenticateNamedSlotArtifact(bytes) {
+function authenticateNamedSlotArtifact(bytes, files) {
   const pin = NAMED_SLOT_ARTIFACT_PIN;
   if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
     fail("PREREQUISITE_DRIFT", "The exact M09-T07 named-slot artifact receipt drifted.");
@@ -1312,7 +1536,7 @@ function authenticateNamedSlotArtifact(bytes) {
   if (!Array.isArray(trackedReceipts)) {
     fail("PREREQUISITE_DRIFT", "The M09-T07 tracked receipt boundary is absent.");
   }
-  const receiptsByPath = reviewedSuccessorReceiptMap(trackedReceipts);
+  const receiptsByPath = reviewedSuccessorReceiptMap(trackedReceipts, files);
   const sourceAndTestReceipts = NAMED_SLOT_SOURCE_AND_TEST_PATHS.map((relativePath) => {
     const receipt = receiptsByPath.get(relativePath);
     if (
@@ -1423,7 +1647,7 @@ function authenticateSourcePersistenceSuccessor(files) {
       "SUCCESSOR_POLICY_VIOLATION",
       "The M09-T12 source-persistence identity or claims drifted.",
     );
-  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
     if (
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
@@ -1538,7 +1762,7 @@ function authenticateFixturesScenariosSuccessor(bytes, files) {
   ) {
     fail("PREREQUISITE_DRIFT", "The exact M09-T11 artifact identity or claims drifted.");
   }
-  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
     if (
       T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
@@ -2693,14 +2917,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 147 || graphIdSet.size !== graph.length) {
+  if (graph.length !== 154 || graphIdSet.size !== graph.length) {
     fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
       modules: graph.length,
     });
   }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 439 || dynamicEdges !== 0) {
+  if (staticEdges !== 457 || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
       staticEdges,
       dynamicEdges,
@@ -2946,6 +3170,7 @@ function inspectPackage(appBytes, rootBytes) {
   const requiredDependencies = {
     "@desen/catalog-sdk": "workspace:*",
     "@desen/editor-core": "workspace:*",
+    "@desen/editor-web": "workspace:*",
     "@desen/publisher": "workspace:*",
     "@desen/protocol": "workspace:*",
     "@desen/reference-catalog-web": "workspace:*",
@@ -2959,8 +3184,16 @@ function inspectPackage(appBytes, rootBytes) {
   if (
     manifest?.name !== "@desen/app-web" ||
     !isDeepStrictEqual(manifest.dependencies, requiredDependencies) ||
+    manifest.devDependencies?.["@desen/editor-web"] !== undefined ||
     manifest.scripts?.build !== "vite build" ||
-    manifest.scripts?.typecheck !== "tsc -p tsconfig.json --noEmit" ||
+    manifest.scripts?.dev !== "node dev/local-dev.mjs" ||
+    manifest.scripts?.lint !== "eslint src test dev --max-warnings=0" ||
+    manifest.scripts?.typecheck !==
+      "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.local-dev.json --noEmit" ||
+    manifest.scripts?.["test:local-runtime"] !==
+      "vitest run test/local-runtime-persistence.test.ts dev/local-dev-host.test.mjs" ||
+    manifest.scripts?.["test:product-bootstrap"] !==
+      "vitest run test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx" ||
     manifest.scripts?.["test:canvas"] !==
       "vitest run test/adapter-canvas.test.tsx test/application.test.tsx test/main-lifecycle.test.tsx" ||
     manifest.scripts?.["test:selection"] !==
@@ -2994,7 +3227,12 @@ function inspectPackage(appBytes, rootBytes) {
     name: manifest.name,
     dependencies: requiredDependencies,
     build: manifest.scripts.build,
+    dev: manifest.scripts.dev,
+    lint: manifest.scripts.lint,
     typecheck: manifest.scripts.typecheck,
+    localRuntimeFocusedTest: manifest.scripts["test:local-runtime"],
+    productBootstrapFocusedTest: manifest.scripts["test:product-bootstrap"],
+    editorWebProductionDependency: true,
     focusedTest: manifest.scripts["test:canvas"],
     selectionFocusedTest: manifest.scripts["test:selection"],
     inspectorFocusedTest: manifest.scripts["test:inspector"],
@@ -3477,7 +3715,10 @@ async function authenticateFrozenArtifact(workspaceRoot) {
 }
 
 function assertRetainedHistoricalReceipts(frozenArtifact, files) {
-  const taskTimeReceipts = reviewedSuccessorReceiptMap(frozenArtifact.boundary.trackedReceipts);
+  const taskTimeReceipts = reviewedSuccessorReceiptMap(
+    frozenArtifact.boundary.trackedReceipts,
+    files,
+  );
   for (const relativePath of RETAINED_HISTORICAL_PATHS) {
     const authority = taskTimeReceipts.get(relativePath);
     const bytes = files.get(relativePath);
@@ -3622,7 +3863,7 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
       "The M09-T13 node-linked-diagnostics identity or claims drifted.",
     );
   }
-  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
     if (T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
@@ -3740,7 +3981,7 @@ function authenticatePublishActivationSuccessor(files) {
       "The M09-T14/G09 publish-activation identity or claims drifted.",
     );
   }
-  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
@@ -3833,6 +4074,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
       ),
   ]);
   const emptyProjectBrowserE2eSuccessor = authenticateM10EmptyProjectBrowserE2eSuccessor(files);
+  const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(files);
   if (!isDeepStrictEqual(discoveredSourcePaths, CURRENT_APP_SOURCE_INVENTORY_PATHS)) {
     fail("SOURCE_INVENTORY_DRIFT", "The complete Desen App production source inventory drifted.", {
       actual: discoveredSourcePaths,
@@ -3840,7 +4082,10 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
   }
   const shellPin = authenticateShellArtifact(shellBytes);
   const hostSourceAudit = authenticateHostSourceAuditArtifact(hostBytes);
-  const namedSlotEvidence = authenticateNamedSlotArtifact(files.get(NAMED_SLOT_ARTIFACT_PATH));
+  const namedSlotEvidence = authenticateNamedSlotArtifact(
+    files.get(NAMED_SLOT_ARTIFACT_PATH),
+    files,
+  );
   const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(
     options.fixturesScenariosArtifactBytes ?? files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH),
     files,
@@ -3873,6 +4118,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
   assertRetainedHistoricalReceipts(frozen.artifact, files);
   const currentCompatibility = deepFreeze({
     emptyProjectBrowserE2eSuccessor,
+    userCreatedBlankProjectSuccessor,
     schemaVersion: 1,
     proofId: "desen-app-real-adapter-canvas",
     profile: "desen.app.real-adapter-canvas-proof.v1",

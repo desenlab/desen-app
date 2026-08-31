@@ -73,6 +73,9 @@ const allowedApplicationDependencies = {
 
 const neutralProductionSourcePath =
   "^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core)/src/";
+const desenAppBrowserProductProofServerPath =
+  "^apps/desen-app-browser-e2e/product-proof-server\\.mjs$";
+const controlPlanePublicBuildEntryPath = "^apps/control-plane-api/dist/index\\.(?:d\\.ts|js)$";
 
 /**
  * Builds a regular expression for package folders. The current package is included because
@@ -155,11 +158,35 @@ module.exports = {
       severity: "error",
       comment:
         "The isolated browser proof may compose only the reviewed Desen App application, empty-project bootstrap, and stylesheet entries.",
-      from: { path: "^apps/desen-app-browser-e2e/" },
+      from: {
+        path: "^apps/desen-app-browser-e2e/",
+        pathNot: desenAppBrowserProductProofServerPath,
+      },
       to: {
         path: "^apps/(?!desen-app-browser-e2e/)",
         pathNot:
           "^apps/desen-app/src/(?:application\\.tsx|reference-empty-project\\.ts|styles\\.css)$",
+      },
+    },
+    {
+      name: "desen-app-browser-e2e-product-server-control-plane-public-root-only",
+      severity: "error",
+      comment:
+        "The normal-product proof server may compose the built public control-plane entry, never its source tree or a deep/private build module.",
+      from: { path: desenAppBrowserProductProofServerPath },
+      to: {
+        path: "^apps/control-plane-api/",
+        pathNot: controlPlanePublicBuildEntryPath,
+      },
+    },
+    {
+      name: "desen-app-browser-e2e-product-server-has-no-other-application-dependencies",
+      severity: "error",
+      comment:
+        "The normal-product proof server has one reviewed application edge and cannot acquire Desen App or another application composition root.",
+      from: { path: desenAppBrowserProductProofServerPath },
+      to: {
+        path: "^apps/(?!desen-app-browser-e2e/|control-plane-api/)",
       },
     },
     {

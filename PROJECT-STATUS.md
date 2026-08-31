@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-30
+Last updated: 2026-08-31
 
 ## Plain-language status
 
@@ -1522,13 +1522,14 @@ gates remain 11/13, and no exact-head hosted-CI pass is inferred from the local 
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
+- Current implementation task: none; `M10-T01A — User-created blank project and durable normal-App authoring` is complete
 - Next implementation task: `M10-T02 — Input and pending fixture test`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  14/14, M10 is 1/9, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, and M10-T01 are
+  14/14, M10 is 2/10, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, and M10-T01A are
   `DONE`; `N-012`, `N-018`, `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`; P-06, P-08,
   and P-16 are `PROVEN`; P-07, P-09, and P-10 are `PARTIAL`; proof gates are 11/13; P-12 remains
   `NOT_PROVEN`; N-036 remains `PLANNED`; PF-028 is `CLOSED`; PF-025, PF-083, PF-085, PF-086, and
-  PF-089 remain `OPEN`; and implementation progress is 110/145.
+  PF-089 remain `OPEN`; M10-T02 is `NOT_STARTED`; and implementation progress is 111/146.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -4614,6 +4615,47 @@ M09-T14/G09 evidence:
 - explicit nonclaims: typed input/pending, invalid credentials/visible failure,
   success/navigation/real host operation, remote deployment, and G10 closure remain unproven; the
   local receipts make no exact-head hosted `Quality gate` or `Browser E2E` success claim
+
+### M10-T01A user-created blank-project evidence
+
+- normal product entry begins with zero projects, presents the one admitted Blank sign-in project
+  profile, persists `account-app/sign-in` as Generation 1, and opens it through the ordinary editor
+  without an injected Source, proof-only route, or fixture fallback
+- the same prepared compare-and-set controller owns later saves; create conflicts never overwrite a
+  winner, indeterminate saves and in-flight saves block navigation, and confirmed discard restores
+  the last durable Source before leaving the editor
+- the trusted local launcher binds a fresh bearer secret to fixed loopback origins and the real
+  control-plane adapter; durable state is outside Vite's served App root, and direct, encoded,
+  case-varying, or `/@fs/` access to `.desen` receives `403` before SPA fallback
+- one normal-product Chromium scenario uses only visible controls to create and author the project,
+  including native Components/Layers drag, state, bindings, actions, order, and deletion; it saves
+  Generation 2, hard reloads, returns to Projects, and reopens the exact durable Source from its card
+- local execution: complete App 407/407; product/lifecycle 16/16; local runtime/launcher 17/17;
+  immutable historical and normal-product Chromium scenarios 1/1 each; dependency graph 818
+  modules / 3,373 dependencies with zero violations and boundary fixtures 23/23; independent root
+  reader 11/11; reader checkpoint 85/85
+- immutable evidence: 20,173-byte / 43-receipt
+  `docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json` at
+  `sha256:6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e`
+- reader checkpoint sequence 61 preserves sequences 1–60 and advances the exact sequence-60 head to
+  `sha256:a80e008bf0f383ab46d097abfec17710131a47656040ec07dc7cc60f965666fb`
+  across 52 artifacts and 104 readers
+- reader checkpoint sequence 62 preserves sequences 1–61 and advances that exact head to
+  `sha256:15ede557b4167cb7bc0cce89b02cf0e9d9f0f7e92c4c5fdc2d799cb3bcf0be55`; only the
+  M10-T01-COMPAT root reader advances for runner-owned temp isolation
+- current CI universe: 206 workloads / 98 proof units; inventory
+  `sha256:2b10f2fc39003592cddbd87122182de5acf05bd8c88afbbbd111d3ccc144919c`, impact graph
+  `sha256:a64db36bfd1797cc16dd79cfaa788e36ec9f7850f19f0ea710ac026e05720b39`, and the 66-proof-unit /
+  142-workload M10-T01A closure
+  `sha256:4f7ed0bb6f6df80671ac3d365960166545ccb4a959ec876f0d2a97d86bbed4f3`
+- ownership: 1,323 tracked paths / 196 proof-owned paths; path set
+  `sha256:f7d1ff1ae43413fa0294419e7dc43f31b25bbb29e62cff9e3ee7d344380afb98`; authority
+  `sha256:7fe30b8f12eed7d421506d3efe27ed3b80fe501bb200a36154f485eb226f865f`
+- coverage decision: M10-T01A is `DONE`; overall progress is 111/146 (76%); M10 is 2/10; M10-T02
+  remains `NOT_STARTED` and is next
+- explicit nonclaims: typed input/pending, invalid credentials/visible failure,
+  success/navigation/real host operation, remote deployment, multi-user persistence, and G10
+  closure remain unproven; these local receipts make no exact-head hosted claim
 
 ## Status vocabulary
 
