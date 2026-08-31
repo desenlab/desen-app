@@ -204,6 +204,11 @@ const M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN = Object.freeze({
   bytes: 10_962,
   sha256: "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
 });
+const M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT = Object.freeze({
+  path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+  bytes: 15_143,
+  sha256: "5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b",
+});
 const M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS = Object.freeze([
   ".github/workflows/ci.yml",
   "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
@@ -927,7 +932,12 @@ async function inspectSecureScrollCompatibility(workspaceRoot, historicalArtifac
     retainedHistoricalReceipts += 1;
   }
   for (const receipt of SECURE_SCROLL_COMPATIBILITY_RECEIPTS) {
-    if (M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(receipt.path)) continue;
+    if (
+      M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(receipt.path) ||
+      receipt.path === M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT.path
+    ) {
+      continue;
+    }
     const bytes =
       fileOverrides.get(receipt.path) ??
       (await readRegularAuthority(path.join(workspaceRoot, receipt.path), receipt.path));
@@ -1063,6 +1073,22 @@ async function authenticateM10VisualBehaviorAuthoringSuccessor(workspaceRoot, fi
       );
     }
   }
+  const hostedBrowserReceipt = M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT;
+  const hostedBrowserBytes =
+    fileOverrides.get(hostedBrowserReceipt.path) ??
+    (await readRegularAuthority(
+      path.join(workspaceRoot, hostedBrowserReceipt.path),
+      hostedBrowserReceipt.path,
+    ));
+  if (
+    hostedBrowserBytes.byteLength !== hostedBrowserReceipt.bytes ||
+    sha256(hostedBrowserBytes) !== hostedBrowserReceipt.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M10-T01B hosted-browser compatibility receipt drifted.",
+    );
+  }
   return deepFreeze({
     task: artifact.task,
     artifact: {
@@ -1074,6 +1100,12 @@ async function authenticateM10VisualBehaviorAuthoringSuccessor(workspaceRoot, fi
     currentProjection: {
       relationship: "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
       currentReceipts: trackedReceipts,
+      hostedBrowserCompatibility: {
+        compatibilityReceipt: "M10-T01B-HOSTED-BROWSER-COMPAT",
+        correctiveReceiptOnly: true,
+        overriddenHistoricalPaths: [hostedBrowserReceipt.path],
+        trackedReceipts: [hostedBrowserReceipt],
+      },
     },
     p08Status: artifact.claim.p08Status,
     p09Status: artifact.claim.p09Status,

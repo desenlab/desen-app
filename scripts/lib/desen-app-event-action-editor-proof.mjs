@@ -151,6 +151,11 @@ const M10_USER_CREATED_BLANK_PROJECT_SECURE_SCROLL_RECEIPTS = Object.freeze([
     sha256: "ee46354d9ff0c09fe6b85e4a7ee66a85221832ce0c198d0319222b3cda90d6b5",
   }),
 ]);
+const M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT = Object.freeze({
+  path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+  bytes: 15_143,
+  sha256: "5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b",
+});
 const M10_USER_CREATED_BLANK_PROJECT_CLAIM = Object.freeze({
   taskStatus: "DONE",
   p08Status: "PROVEN",
@@ -651,7 +656,12 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
     }
   }
   for (const receipt of M10_USER_CREATED_BLANK_PROJECT_SECURE_SCROLL_RECEIPTS) {
-    if (M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(receipt.path)) continue;
+    if (
+      M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(receipt.path) ||
+      receipt.path === M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT.path
+    ) {
+      continue;
+    }
     const live = files.get(receipt.path);
     if (live?.byteLength !== receipt.bytes || sha256(live ?? Buffer.alloc(0)) !== receipt.sha256) {
       fail(
@@ -2860,6 +2870,17 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
       );
     }
   }
+  const hostedBrowserReceipt = M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT;
+  const hostedBrowserBytes = files.get(hostedBrowserReceipt.path);
+  if (
+    hostedBrowserBytes?.byteLength !== hostedBrowserReceipt.bytes ||
+    sha256(hostedBrowserBytes ?? Buffer.alloc(0)) !== hostedBrowserReceipt.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      `The exact M10-T01B hosted-browser compatibility receipt drifted: ${hostedBrowserReceipt.path}.`,
+    );
+  }
   return deepFreeze({
     task: artifact.task,
     artifact: {
@@ -2871,6 +2892,12 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
     currentProjection: {
       relationship: "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
       currentReceipts: trackedReceipts,
+      hostedBrowserCompatibility: {
+        compatibilityReceipt: "M10-T01B-HOSTED-BROWSER-COMPAT",
+        correctiveReceiptOnly: true,
+        overriddenHistoricalPaths: [hostedBrowserReceipt.path],
+        trackedReceipts: [hostedBrowserReceipt],
+      },
     },
     p08Status: artifact.claim.p08Status,
     p09Status: artifact.claim.p09Status,

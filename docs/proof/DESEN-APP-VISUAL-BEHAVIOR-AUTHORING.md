@@ -71,6 +71,14 @@ Append-only reader checkpoint sequence 64 advances sequence 63 head
 artifacts and 106 current readers. Historical bridge receipts advance at indexes `[70..97, 102,
 103]`; the new proof library and mutation reader append at `[104, 105]`.
 
+Corrective sequence 65 preserves those 53 artifacts and 106 reader identities while resealing
+only `[70..97, 102, 103]` for the exact 15,143-byte hosted-browser compatibility spec at
+`sha256:5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b`. It advances sequence
+64 to `sha256:fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14`; the checkpoint
+verifier and 88/88 suite pass. The spec uses the visible atomic **Connect input** flow, and the
+exact two-config Chromium command passes 1/1 + 1/1 locally. No frozen artifact, task status, or
+hosted exact-head claim changes.
+
 The neutral CI authority contains 208 workloads and 99 proof pairs. M10-T01B owns an exact
 67-proof-unit / 144-workload affected closure behind M10-T01A; unknown paths, policy inputs, and
 authority drift still force exhaustive execution.

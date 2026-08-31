@@ -1358,8 +1358,18 @@ generic fixture, Run-control, focused-test, and Chromium receipts. Checkpoint se
 all sequences 1–63 and appends the new artifact and both reader identities without modifying a
 historical artifact.
 
-Local focused and real-browser success is not a hosted exact-head claim. M10-T01B becomes canonical
-only when the unchanged PR head passes both hosted `Quality gate` and `Browser E2E`, then the merged
-main head passes its hosted workflows. The fixed-port local-launcher test may remain excluded while
-the user's deliberate port-5173 product session is active; this environmental exclusion is not
-allowed on the clean hosted runner.
+Corrective checkpoint sequence 65 preserves the same 53 artifacts and 106 reader identities. It
+reseals only `[70..97, 102, 103]` after the Browser E2E spec moved from the removed JSON-first
+action UI to the visible atomic **Connect input** flow. Fifteen historical reader families bind the
+exact 15,143-byte spec at
+`sha256:5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b`; their combined suites
+pass 233/233, the exact two-config Chromium command passes 1/1 + 1/1 locally, and the checkpoint
+suite passes 88/88 at
+`sha256:fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14`. This append-only
+correction changes no plan status and makes no hosted exact-head success claim.
+
+Local focused and real-browser success is not a hosted exact-head claim. Merge authority for this
+corrective head requires both hosted `Quality gate` and `Browser E2E`, followed by the merged main
+head's hosted workflows; this requirement does not reopen the already completed M10-T01B task. The
+fixed-port local-launcher test may remain excluded while the user's deliberate port-5173 product
+session is active; this environmental exclusion is not allowed on the clean hosted runner.

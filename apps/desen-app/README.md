@@ -555,6 +555,11 @@ Catalog fixtures; the panel has no sign-in-specific outcome list. Synthetic is t
 context, while Integration and Production remain visibly unavailable. This usability slice does
 not close the dedicated M10-T02/M10-T03 acceptance matrices or M10-T04 real-host operation proof.
 
+The hosted-browser compatibility correction keeps the frozen M10-T01B artifact and task status
+unchanged. Its current spec uses the same visible **Connect input** flow rather than the retired
+JSON-first action UI; the exact two-config Chromium command passes 1/1 + 1/1 locally. This
+corrective receipt does not claim a hosted exact-head pass, and M10-T02 remains the next task.
+
 ## Local commands
 
 Install the package-pinned Chromium runtime once with

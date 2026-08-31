@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████████░░░░░░` **111 / 146 tasks complete (76%)**
+**Overall:** `███████████████████░░░░░░` **112 / 147 tasks complete (76%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -1231,6 +1231,11 @@ The immutable 10,962-byte artifact carries 31 exact receipts at
 `sha256:cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8`.
 Reader checkpoint sequence 64 freezes 53 artifacts and 106 readers at
 `sha256:2590f7ebf99b927ccded490e511748e8e5abcf0a49108f67c78061aa021da5f0`.
+The hosted-browser compatibility correction keeps those artifacts and reader identities, updates
+the retained journey to the visible atomic **Connect input** flow, and reseals only reader indexes
+`[70..97, 102, 103]`. Corrective sequence 65 closes at
+`sha256:fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14`; the exact two-config
+Chromium command passes 1/1 + 1/1 locally, but no hosted exact-head success is inferred.
 M10-T01B is `DONE`; implementation progress is 112/147 (76%), M10 is 3/11, and M10-T02 remains
 `NOT_STARTED` and next. Dedicated M10-T02/T03 lifecycle matrices, M10-T04 real-host operation
 evidence, remote deployment, multi-user persistence, and G10 remain open.

@@ -2212,6 +2212,16 @@ conditional Alert. The dedicated M10-T01B artifact and verifier are
 `docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json` and
 `scripts/verify-desen-app-visual-behavior-authoring.mjs`.
 
+The append-only hosted-browser correction does not reopen M10-T01B. PR #69 run `33437877845` / job
+`99638637740` exposed a historical spec that still waited for the removed JSON-first action UI;
+the exact 15,143-byte successor
+(`sha256:5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b`) uses the visible atomic
+**Connect input** flow and passes both Chromium configurations 1/1 + 1/1 locally. Fifteen historical
+reader families pass 233/233. Corrective checkpoint sequence 65 preserves all 53 artifacts and 106
+reader identities, reseals only `[70..97, 102, 103]`, and passes 88/88 at
+`sha256:fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14`. M10-T01B remains
+`DONE`, M10-T02 remains `NOT_STARTED`, and no hosted exact-head success is inferred.
+
 M10-T01B is an authoring-usability prerequisite, not a renaming of later proof slices. M10-T02 still
 owns its dedicated typed-input and pending fixture acceptance matrix; M10-T03 still owns the full
 failure-state proof; M10-T04 still owns success, navigation, and a separately authorized real host

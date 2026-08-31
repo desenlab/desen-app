@@ -3145,6 +3145,18 @@ and authenticates 106 current readers. It reseals exact historical reader indexe
 103]` and appends the M10-T01B proof-library/root-test pair at `[104, 105]`; the checkpoint verifier
 passes and its suite passes 87/87. The neutral CI universe contains 208 workloads and 99 proof
 pairs at `sha256:0ca01cd12123640cb6adcdbd23dff2d02e20c971ae504b5feae38953c431915d`.
+
+A corrective hosted-browser compatibility receipt leaves all 53 frozen artifacts and all 106
+reader identities unchanged. The browser spec now exercises the visible atomic **Connect input**
+flow instead of the removed JSON-first action UI; the exact two-config Chromium command passes
+1/1 + 1/1 locally. Fifteen historical App reader families authenticate the exact 15,143-byte spec
+at `sha256:5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b`, and their combined
+suites pass 233/233. Append-only sequence 65 reseals only reader indexes `[70..97, 102, 103]`,
+advances the sequence-64 head to
+`sha256:fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14`, and passes its 88/88
+checkpoint suite. This correction adds no task or gate completion and preserves M10-T01B `DONE`
+and M10-T02 `NOT_STARTED`; the local browser receipt is not a hosted exact-head success claim.
+
 The retained sequential authority is exactly equivalent across all 208 ordered workloads at plan
 `sha256:669dc72f2b419d1f87cc417de190923ce13922061bce5e9a22ebc998cea1e7d5`, ordered projection
 `sha256:be6c8ab1097dedcafeb4812e694719fa547a8bc215347a62c5b6c34b7694468e`, and workload-set
@@ -3160,9 +3172,9 @@ M10-T01B closure contains 67 proof units and 144 workloads at
 covers 1,337 tracked paths, including 198 proof-owned paths, with path-set
 `sha256:f655502ecc821a2a911546d1a5656a3fc635c2162d90f0ba90f7c04e31c30cbe` and authority
 `sha256:d14d9f72079714b5453c7e70cd1b48136358bf614b890c1796d3aad0508a67b6`. The promoted selector,
-including the exact sequence-64 checkpoint, is
-`sha256:46442de01679ff0b0de27dd42cfbd31f25b36ec331e841ec253482aa8596b7f5`; its runner authority is
-`sha256:daa889685453a42879131e5837b25dbb3c8422e6772aa90aa86ee366bf8f402c`.
+including the exact sequence-65 checkpoint, is
+`sha256:9969c5e3afcac86b3e30f19f05fb460a443ce00e0c184cd0b5bffd698c66ebeb`; its runner authority is
+`sha256:3875b9bc6c01ef8732f6a19ad2a01fbb44e5581df6556c79c043b4ab0125f1bf`.
 
 P-08 remains `PROVEN`. M10-T01B improves the normal-product authoring route but does not claim the
 separately planned M10-T02 typed-input/pending closure, M10-T03 invalid-credentials closure,

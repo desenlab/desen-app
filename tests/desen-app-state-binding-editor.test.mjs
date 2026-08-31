@@ -852,6 +852,7 @@ test("[M10-T01B successor] authenticates exact visual authoring evidence and cur
       predecessorTask: successor.predecessor.task,
       relationship: successor.currentProjection.relationship,
       currentReceipts: successor.currentProjection.currentReceipts.length,
+      hostedBrowserCompatibility: successor.currentProjection.hostedBrowserCompatibility,
       p08Status: successor.p08Status,
       p09Status: successor.p09Status,
       visualInputConnectionCovered: successor.visualInputConnectionCovered,
@@ -874,6 +875,18 @@ test("[M10-T01B successor] authenticates exact visual authoring evidence and cur
       predecessorTask: "M10-T01A",
       relationship: "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
       currentReceipts: 31,
+      hostedBrowserCompatibility: {
+        compatibilityReceipt: "M10-T01B-HOSTED-BROWSER-COMPAT",
+        correctiveReceiptOnly: true,
+        overriddenHistoricalPaths: ["apps/desen-app-browser-e2e/user-created-blank-project.pw.ts"],
+        trackedReceipts: [
+          {
+            path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+            bytes: 15_143,
+            sha256: "5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b",
+          },
+        ],
+      },
       p08Status: "PROVEN",
       p09Status: "PARTIAL",
       visualInputConnectionCovered: true,
@@ -892,6 +905,12 @@ test("[M10-T01B successor] authenticates exact visual authoring evidence and cur
     [
       "apps/desen-app/src/behavior-controls.tsx",
       await readFile(path.join(ROOT, "apps/desen-app/src/behavior-controls.tsx")),
+    ],
+    [
+      "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+      await readFile(
+        path.join(ROOT, "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts"),
+      ),
     ],
   ]) {
     for (const mutation of [Buffer.alloc(0), changedByte(bytes)]) {

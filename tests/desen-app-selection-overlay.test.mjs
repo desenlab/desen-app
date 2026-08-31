@@ -1143,18 +1143,34 @@ test("[M10-T01B successor] authenticates visual behavior authoring and fails clo
     successor.currentProjection.artifactBackedPaths.includes("apps/desen-app/README.md"),
     false,
   );
+  assert.deepEqual(successor.currentProjection.hostedBrowserCompatibility, {
+    compatibilityReceipt: "M10-T01B-HOSTED-BROWSER-COMPAT",
+    correctiveReceiptOnly: true,
+    overriddenHistoricalPaths: ["apps/desen-app-browser-e2e/user-created-blank-project.pw.ts"],
+    trackedReceipts: [
+      {
+        path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+        bytes: 15_143,
+        sha256: "5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b",
+      },
+    ],
+  });
 
   const artifactPath = successor.artifact.path;
   const receiptPath = "apps/desen-app/src/authoring-connections.ts";
-  const [artifactBytes, receiptBytes] = await Promise.all([
+  const hostedBrowserPath = "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts";
+  const [artifactBytes, receiptBytes, hostedBrowserBytes] = await Promise.all([
     readFile(path.join(ROOT, artifactPath)),
     readFile(path.join(ROOT, receiptPath)),
+    readFile(path.join(ROOT, hostedBrowserPath)),
   ]);
   for (const [relativePath, bytes] of [
     [artifactPath, changedByte(artifactBytes)],
     [artifactPath, Buffer.alloc(0)],
     [receiptPath, changedByte(receiptBytes)],
     [receiptPath, Buffer.alloc(0)],
+    [hostedBrowserPath, changedByte(hostedBrowserBytes)],
+    [hostedBrowserPath, Buffer.alloc(0)],
   ]) {
     await assert.rejects(
       buildDesenAppSelectionOverlayEvidence({

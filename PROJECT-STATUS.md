@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-31
+Last updated: 2026-09-01
 
 ## Plain-language status
 
@@ -1397,14 +1397,14 @@ gates remain 11/13, and no exact-head hosted-CI pass is inferred from the local 
   `G06`, `G07`, `G08`, `G09`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M10 — First end-to-end proof`
-- Overall implementation progress: `110 / 145 tasks complete (76%)`
+- Overall implementation progress: `112 / 147 tasks complete (76%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
 - M09 progress: `14 / 14 tasks complete (100%)`
-- M10 progress: `1 / 9 tasks complete (11%)`
+- M10 progress: `3 / 11 tasks complete (27%)`
 - Proof-gate progress: `11 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1500,7 +1500,9 @@ gates remain 11/13, and no exact-head hosted-CI pass is inferred from the local 
   `M09-T12 — Save/open UI through the public Editor persistence port`,
   `M09-T13 — Node-linked diagnostics and selectable invalid placeholders`,
   `M09-T14 — Saved-Source publication and separate reference-host activation`,
-  `M10-T01 — Empty-project-to-sign-in browser E2E`
+  `M10-T01 — Empty-project-to-sign-in browser E2E`,
+  `M10-T01A — User-created blank-project authoring`,
+  `M10-T01B — Visual behavior authoring and Catalog-derived Run controls`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -4696,6 +4698,15 @@ M09-T14/G09 evidence:
 - local verification: dedicated behavior-authoring profile 135/135; complete App package excluding
   the deliberately occupied fixed-port launcher file 427/427; production builds and real Chromium
   scenario 1/1
+- hosted-browser corrective: PR #69 run `33437877845` / job `99638637740` exposed that the
+  historical spec still waited for the removed JSON-first action UI. The corrected 15,143-byte
+  spec (`sha256:5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b`) uses the visible
+  atomic **Connect input** flow and passes the exact two-config Chromium command 1/1 + 1/1 locally.
+  Fifteen historical reader families pass 233/233; checkpoint sequence 65 preserves 53 artifacts
+  and 106 reader identities, reseals only `[70..97, 102, 103]`, and passes 88/88 at
+  `sha256:fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14`. This corrective
+  receipt preserves M10-T01B `DONE`, M10-T02 `NOT_STARTED`, and all progress counts; it is not a
+  hosted exact-head success claim
 - immutable evidence:
   `docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json`; verifier:
   `scripts/verify-desen-app-visual-behavior-authoring.mjs`; finding: `PF-091`

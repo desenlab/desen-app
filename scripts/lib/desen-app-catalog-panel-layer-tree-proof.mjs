@@ -35,6 +35,11 @@ const M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN = Object.freeze({
   bytes: 10_962,
   sha256: "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
 });
+const M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT = Object.freeze({
+  path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+  bytes: 15_143,
+  sha256: "5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b",
+});
 const M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS = Object.freeze([
   ".github/workflows/ci.yml",
   "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
@@ -616,7 +621,12 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
 function authenticateM10UserCreatedBlankProjectSuccessor(files) {
   const { artifact, currentReceiptMap } = authenticateM10UserCreatedBlankProjectArtifact(files);
   for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS) {
-    if (M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath)) continue;
+    if (
+      M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath) ||
+      relativePath === M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT.path
+    ) {
+      continue;
+    }
     const expected = currentReceiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -827,6 +837,17 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
       );
     }
   }
+  const hostedBrowserReceipt = M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT;
+  const hostedBrowserBytes = files.get(hostedBrowserReceipt.path);
+  if (
+    hostedBrowserBytes?.byteLength !== hostedBrowserReceipt.bytes ||
+    sha256(hostedBrowserBytes ?? Buffer.alloc(0)) !== hostedBrowserReceipt.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact live M10-T01B hosted-browser compatibility receipt drifted.",
+    );
+  }
   return deepFreeze({
     task: "M10-T01B",
     artifact: {
@@ -840,6 +861,12 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
       relationship: "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
       artifactBackedPaths: M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS,
       trackedReceipts,
+      hostedBrowserCompatibility: {
+        compatibilityReceipt: "M10-T01B-HOSTED-BROWSER-COMPAT",
+        correctiveReceiptOnly: true,
+        overriddenHistoricalPaths: [hostedBrowserReceipt.path],
+        trackedReceipts: [hostedBrowserReceipt],
+      },
     },
     trackedFiles: trackedReceipts.length,
     rootTests: expectedTests.rootTestNames.length,

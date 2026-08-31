@@ -108,8 +108,24 @@ test("[M10-T01B successor] authenticates exact visual authoring evidence and cur
       "scripts/verify-desen-app-visual-behavior-authoring.mjs",
     ],
   );
+  assert.deepEqual(successor.currentProjection.hostedBrowserCompatibility, {
+    compatibilityReceipt: "M10-T01B-HOSTED-BROWSER-COMPAT",
+    correctiveReceiptOnly: true,
+    overriddenHistoricalPaths: ["apps/desen-app-browser-e2e/user-created-blank-project.pw.ts"],
+    trackedReceipts: [
+      {
+        path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+        bytes: 15_143,
+        sha256: "5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b",
+      },
+    ],
+  });
 
-  for (const relativePath of [artifactPath, receiptPath]) {
+  for (const relativePath of [
+    artifactPath,
+    receiptPath,
+    "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+  ]) {
     const bytes = await readFile(path.join(ROOT, relativePath));
     for (const replacement of [Buffer.alloc(0), changedByte(bytes)]) {
       await assert.rejects(
