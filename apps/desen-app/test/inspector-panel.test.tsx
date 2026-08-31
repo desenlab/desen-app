@@ -225,6 +225,57 @@ describe("Desen App nested and structured Inspector panel", () => {
     ).toBe("action draft is retained");
   });
 
+  it("hands focus between an optional boolean setter and switch with non-scrolling focus semantics", () => {
+    const secureControl = Object.freeze({
+      kind: "boolean",
+      property: "secure",
+      required: false,
+      schemaPointer: createJsonPointer(["propsSchema", "properties", "secure"]),
+      valuePointer: createJsonPointer(["secure"]),
+    }) satisfies ComponentInspectorControl;
+    const edits: AuthoringInspectorEdit[] = [];
+
+    function OptionalSecureHarness() {
+      const [value, setValue] = useState<AuthoringInspectorValueState>(
+        Object.freeze({ kind: "absent" }),
+      );
+      const secureField = field(secureControl, "Secure", "Secure", value);
+
+      return (
+        <InspectorPanel
+          inspector={readyModel([secureField], 1)}
+          onEdit={(edit) => {
+            edits.push(edit);
+            if (edit.kind === "delete") {
+              setValue(Object.freeze({ kind: "absent" }));
+            } else if (typeof edit.value === "boolean") {
+              setValue(Object.freeze({ kind: "literal", value: edit.value }));
+            }
+            return successfulEdit(edit);
+          }}
+        />
+      );
+    }
+
+    const focus = vi.spyOn(HTMLElement.prototype, "focus");
+    render(<OptionalSecureHarness />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Set Secure" }));
+    const secure = screen.getByRole("switch", { name: "Secure" });
+    expect(document.activeElement).toBe(secure);
+    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
+
+    fireEvent.click(screen.getByRole("button", { name: "Unset Secure" }));
+    const setSecure = screen.getByRole("button", { name: "Set Secure" });
+    expect(document.activeElement).toBe(setSecure);
+    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
+    expect(edits).toEqual([
+      { kind: "set", value: false, valuePointer: secureControl.valuePointer },
+      { kind: "delete", valuePointer: secureControl.valuePointer },
+    ]);
+    focus.mockRestore();
+  });
+
   it("changes or detaches a compatible direct local-state value source", () => {
     const valueControl = Object.freeze({
       kind: "string",

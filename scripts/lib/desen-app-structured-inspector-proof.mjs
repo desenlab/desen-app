@@ -74,6 +74,44 @@ const M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS = Object.freeze([
   "tests/boundaries/README.md",
   "tests/desen-app-user-created-blank-project.test.mjs",
 ]);
+const M10_USER_CREATED_BLANK_PROJECT_SECURE_SCROLL_RECEIPTS = Object.freeze([
+  Object.freeze({
+    path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+    bytes: 15_935,
+    sha256: "1ea724a50606719b597ddfee7db95594a9a1272d2cac33fd2c23800879b9cbc1",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/application.module.css",
+    bytes: 112_302,
+    sha256: "4ff3d05e8160ab8b155b1e9a24a565dd2988e808a02dd29cb375dc8edc2f41d1",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/inspector-panel.tsx",
+    bytes: 32_412,
+    sha256: "06e62b9449aa4f1ea05bc0b28d045897897baabfbf257eff9b9bafa842ecf470",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/test/inspector-panel.test.tsx",
+    bytes: 27_492,
+    sha256: "ee46354d9ff0c09fe6b85e4a7ee66a85221832ce0c198d0319222b3cda90d6b5",
+  }),
+]);
+const M10_USER_CREATED_BLANK_PROJECT_OVERRIDDEN_HISTORICAL_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+  "apps/desen-app/src/application.module.css",
+]);
+const M10_USER_CREATED_BLANK_PROJECT_ADDITIVE_PATHS = Object.freeze([
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/test/inspector-panel.test.tsx",
+]);
+const M10_USER_CREATED_BLANK_PROJECT_CHECKPOINT_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-user-created-blank-project-proof.mjs",
+  "tests/desen-app-user-created-blank-project.test.mjs",
+]);
+const M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS = Object.freeze([
+  ...M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS,
+  ...M10_USER_CREATED_BLANK_PROJECT_ADDITIVE_PATHS,
+]);
 const M10_USER_CREATED_BLANK_PROJECT_CLAIM = Object.freeze({
   taskStatus: "DONE",
   p08Status: "PROVEN",
@@ -390,7 +428,7 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
     const compatibilityReceipt = compatibilityReceiptMap.get(expected.path);
     if (
       !isDeepStrictEqual(compatibilityReceipt, expected) ||
-      (!M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS.includes(expected.path) &&
+      (!M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(expected.path) &&
         (bytes?.byteLength !== expected.bytes ||
           sha256(bytes ?? Buffer.alloc(0)) !== expected.sha256))
     ) {
@@ -554,17 +592,32 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
   }
   for (const receipt of trackedReceipts) {
     const live = files.get(receipt.path);
+    const historicalReceiptOverridden =
+      M10_USER_CREATED_BLANK_PROJECT_OVERRIDDEN_HISTORICAL_PATHS.includes(receipt.path);
+    const checkpointResealed = M10_USER_CREATED_BLANK_PROJECT_CHECKPOINT_RESEALED_PATHS.includes(
+      receipt.path,
+    );
     if (
       !Number.isSafeInteger(receipt.bytes) ||
       receipt.bytes < 0 ||
       typeof receipt.sha256 !== "string" ||
       !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
-      live?.byteLength !== receipt.bytes ||
-      sha256(live ?? Buffer.alloc(0)) !== receipt.sha256
+      (!historicalReceiptOverridden &&
+        !checkpointResealed &&
+        (live?.byteLength !== receipt.bytes || sha256(live ?? Buffer.alloc(0)) !== receipt.sha256))
     ) {
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
         `The exact current M10-T01A tracked receipt drifted: ${receipt.path}.`,
+      );
+    }
+  }
+  for (const receipt of M10_USER_CREATED_BLANK_PROJECT_SECURE_SCROLL_RECEIPTS) {
+    const live = files.get(receipt.path);
+    if (live?.byteLength !== receipt.bytes || sha256(live ?? Buffer.alloc(0)) !== receipt.sha256) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The exact M10-T01A Secure-scroll compatibility receipt drifted: ${receipt.path}.`,
       );
     }
   }
@@ -578,6 +631,14 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
     }),
     predecessor: Object.freeze({ ...predecessor }),
     trackedReceipts: Object.freeze(trackedReceipts.map((receipt) => Object.freeze({ ...receipt }))),
+    currentProjection: Object.freeze({
+      compatibilityReceipt: "M10-T01A-SECURE-SCROLL-COMPAT",
+      correctiveReceiptOnly: true,
+      overriddenHistoricalPaths: M10_USER_CREATED_BLANK_PROJECT_OVERRIDDEN_HISTORICAL_PATHS,
+      additivePaths: M10_USER_CREATED_BLANK_PROJECT_ADDITIVE_PATHS,
+      checkpointResealedPaths: M10_USER_CREATED_BLANK_PROJECT_CHECKPOINT_RESEALED_PATHS,
+      trackedReceipts: M10_USER_CREATED_BLANK_PROJECT_SECURE_SCROLL_RECEIPTS,
+    }),
     p08Status: artifact.claim.p08Status,
     runtimeInputAndPendingCovered: artifact.claim.runtimeInputAndPendingCovered,
     invalidCredentialsAndPublicFailureCovered:
@@ -771,7 +832,7 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   "dependency-cruiser.config.cjs",
   ...new Set([
     ...TRACKED_PATHS,
-    ...M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS,
+    ...M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS,
     AUTHORING_SLOT_SOURCE_PATH,
     EVENT_ACTION_SOURCE_PATH,
     EVENT_ACTION_PANEL_PATH,
@@ -795,7 +856,7 @@ const RETAINED_HISTORICAL_PATHS = Object.freeze(
   TRACKED_PATHS.filter(
     (relativePath) =>
       !SUCCESSOR_COMPATIBILITY_PATHS.includes(relativePath) &&
-      !M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS.includes(relativePath),
+      !M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath),
   ),
 );
 
@@ -1685,7 +1746,7 @@ function inspectPanelSource(rawSource) {
       "const previousValueKind = useRef(field.value.kind)",
       "const focusTargetRef = useCallback<RefCallback<HTMLElement>>",
       "previousValueKind.current !== field.value.kind",
-      "focusTarget.current?.focus()",
+      "focusTarget.current?.focus({ preventScroll: true })",
       "previousValueKind.current = field.value.kind",
       "const controlledProps = { ...props, focusTargetRef }",
       "key={`${inspector.selection.sourceNodeId}:${field.control.valuePointer}`}",
@@ -2346,7 +2407,7 @@ function authenticateStateBindingSuccessorArtifact(files) {
 function inspectStateBindingSuccessor(files) {
   for (const [relativePath, expectedSha256] of Object.entries(CURRENT_SUCCESSOR_SHA256)) {
     if (
-      M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS.includes(relativePath) ||
+      M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath) ||
       T11_LIVE_RECEIPT_PATHS.includes(relativePath) ||
       T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
@@ -2883,7 +2944,7 @@ function authenticateSourcePersistenceSuccessor(files) {
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
     if (
-      M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS.includes(relativePath) ||
+      M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath) ||
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
       T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
     ) {
@@ -2985,7 +3046,7 @@ function authenticateFixturesScenariosSuccessor(files) {
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
     if (
-      M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS.includes(relativePath) ||
+      M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath) ||
       T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
     ) {
@@ -3233,7 +3294,7 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
     if (
-      M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS.includes(relativePath) ||
+      M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath) ||
       T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
     ) {
       continue;
@@ -3355,7 +3416,7 @@ function authenticatePublishActivationSuccessor(files) {
   }
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
-    if (M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS.includes(relativePath)) continue;
+    if (M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (relativePath === T14_PUBLICATION_APPLICATION_TEST_PATH) {

@@ -708,7 +708,9 @@ function InspectorField(props: Readonly<InspectorFieldProps>) {
   }, []);
 
   useLayoutEffect(() => {
-    if (previousValueKind.current !== field.value.kind) focusTarget.current?.focus();
+    if (previousValueKind.current !== field.value.kind) {
+      focusTarget.current?.focus({ preventScroll: true });
+    }
     previousValueKind.current = field.value.kind;
   }, [field.value.kind]);
 

@@ -919,8 +919,12 @@ The Inspector remains an App-owned `aside` outside the disabled Runtime React fi
 capability subtree. Recursive groups use named fieldsets, repeated schema titles and empty property
 names remain accessibly distinguishable, draft failures stay inline, and stable pointer-keyed
 controls hand focus to a replacement group, textarea, or primitive control when the value kind
-changes. No private DOM/native structure, geometry, hit-test, canvas-picking, adapter, registry, or
-runtime authority is introduced.
+changes. That replacement focus uses non-scrolling browser focus semantics. Optional boolean inputs
+remain geometrically contained by their positioned switch label, and the desktop editor workplane
+clips outer programmatic scrolling; changing an Inspector control kind therefore cannot translate
+the command bar, docks, canvas, or authored page frame. The responsive document-flow layout keeps
+ordinary page scrolling below the desktop breakpoint. No private DOM/native structure, geometry,
+hit-test, canvas-picking, adapter, registry, or runtime authority is introduced.
 
 Exact local evidence is the 26,133-byte
 `docs/proof/artifacts/desen-app-0.1.0-structured-inspector.json` at

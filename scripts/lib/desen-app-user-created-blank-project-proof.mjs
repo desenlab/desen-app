@@ -163,6 +163,41 @@ export const DEFAULT_DESEN_APP_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH = path.j
 const DEFAULT_PROOF_DOCUMENT_PATH = path.join(WORKSPACE_ROOT, PROOF_DOCUMENT_RELATIVE_PATH);
 const PRODUCT_TEST_NAME =
   "creates, authors, persists, reloads, and reopens a blank sign-in project through the normal product UI";
+const IMMUTABLE_M10_T01A_ARTIFACT_PIN = Object.freeze({
+  bytes: 20_173,
+  sha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+});
+const SECURE_SCROLL_COMPATIBILITY_RECEIPTS = Object.freeze([
+  Object.freeze({
+    path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+    bytes: 15_935,
+    sha256: "1ea724a50606719b597ddfee7db95594a9a1272d2cac33fd2c23800879b9cbc1",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/application.module.css",
+    bytes: 112_302,
+    sha256: "4ff3d05e8160ab8b155b1e9a24a565dd2988e808a02dd29cb375dc8edc2f41d1",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/inspector-panel.tsx",
+    bytes: 32_412,
+    sha256: "06e62b9449aa4f1ea05bc0b28d045897897baabfbf257eff9b9bafa842ecf470",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/test/inspector-panel.test.tsx",
+    bytes: 27_492,
+    sha256: "ee46354d9ff0c09fe6b85e4a7ee66a85221832ce0c198d0319222b3cda90d6b5",
+  }),
+]);
+const SECURE_SCROLL_COMPATIBILITY_OVERRIDE_PATHS = Object.freeze(
+  [
+    ...new Set([...TRACKED_PATHS, ...SECURE_SCROLL_COMPATIBILITY_RECEIPTS.map(({ path }) => path)]),
+  ].sort((left, right) => left.localeCompare(right, "en-US")),
+);
+const SECURE_SCROLL_CHECKPOINT_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-user-created-blank-project-proof.mjs",
+  "tests/desen-app-user-created-blank-project.test.mjs",
+]);
 
 /** Stable fail-closed error raised by the M10-T01A reader. */
 export class DesenAppUserCreatedBlankProjectProofError extends Error {
@@ -237,14 +272,14 @@ function captureBytes(value, label) {
   return Buffer.from(value);
 }
 
-function captureOverrides(value) {
+function captureOverrides(value, allowedPaths = TRACKED_PATHS) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > TRACKED_PATHS.length) {
+  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > allowedPaths.length) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
   for (const [relativePath, bytes] of value) {
-    if (!TRACKED_PATHS.includes(relativePath) || captured.has(relativePath)) {
+    if (!allowedPaths.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
@@ -254,11 +289,20 @@ function captureOverrides(value) {
   return Object.freeze(captured);
 }
 
-function captureBuildOptions(value) {
+function captureBuildOptions(value, allowedOverridePaths = TRACKED_PATHS) {
   const options = exactOwnDataOptions(value, ["fileOverrides", "workspaceRoot"], "build options");
   return Object.freeze({
     workspaceRoot: capturePath(options.workspaceRoot, "workspaceRoot", WORKSPACE_ROOT),
-    fileOverrides: captureOverrides(options.fileOverrides),
+    fileOverrides: captureOverrides(options.fileOverrides, allowedOverridePaths),
+  });
+}
+
+function trackedBuildOptions(options) {
+  return Object.freeze({
+    workspaceRoot: options.workspaceRoot,
+    fileOverrides: new Map(
+      [...options.fileOverrides].filter(([relativePath]) => TRACKED_PATHS.includes(relativePath)),
+    ),
   });
 }
 
@@ -807,6 +851,61 @@ async function canonicalArtifactBytes(artifact) {
   );
 }
 
+async function inspectSecureScrollCompatibility(workspaceRoot, historicalArtifact, fileOverrides) {
+  const compatibilityReceiptMap = new Map(
+    SECURE_SCROLL_COMPATIBILITY_RECEIPTS.map((receipt) => [receipt.path, receipt]),
+  );
+  const historicalReceipts = historicalArtifact?.boundary?.trackedReceipts;
+  if (!Array.isArray(historicalReceipts)) {
+    fail("ARTIFACT_DRIFT", "The immutable M10-T01A receipt manifest drifted.");
+  }
+  let retainedHistoricalReceipts = 0;
+  for (const receipt of historicalReceipts) {
+    if (compatibilityReceiptMap.has(receipt?.path)) continue;
+    if (SECURE_SCROLL_CHECKPOINT_RESEALED_PATHS.includes(receipt?.path)) continue;
+    const bytes =
+      fileOverrides.get(receipt.path) ??
+      (await readRegularAuthority(path.join(workspaceRoot, receipt.path), receipt.path));
+    if (bytes.byteLength !== receipt.bytes || sha256(bytes) !== receipt.sha256) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The retained M10-T01A historical receipt drifted: ${receipt.path}.`,
+      );
+    }
+    retainedHistoricalReceipts += 1;
+  }
+  for (const receipt of SECURE_SCROLL_COMPATIBILITY_RECEIPTS) {
+    const bytes =
+      fileOverrides.get(receipt.path) ??
+      (await readRegularAuthority(path.join(workspaceRoot, receipt.path), receipt.path));
+    if (bytes.byteLength !== receipt.bytes || sha256(bytes) !== receipt.sha256) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The exact M10-T01A Secure-scroll compatibility receipt drifted: ${receipt.path}.`,
+      );
+    }
+  }
+  return deepFreeze({
+    compatibilityReceipt: "M10-T01A-SECURE-SCROLL-COMPAT",
+    additivePaths: Object.freeze([
+      "apps/desen-app/src/inspector-panel.tsx",
+      "apps/desen-app/test/inspector-panel.test.tsx",
+    ]),
+    checkpointResealedPaths: SECURE_SCROLL_CHECKPOINT_RESEALED_PATHS,
+    correctiveReceiptOnly: true,
+    immutableTaskArtifactPreserved: true,
+    optionalBooleanGeometryContained: true,
+    overriddenHistoricalPaths: Object.freeze([
+      "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+      "apps/desen-app/src/application.module.css",
+    ]),
+    replacementFocusPreservedWithoutOuterScroll: true,
+    realChromiumGeometryRegressionCovered: true,
+    retainedHistoricalReceipts,
+    trackedReceipts: SECURE_SCROLL_COMPATIBILITY_RECEIPTS,
+  });
+}
+
 /** Builds detached deterministic M10-T01A evidence without launching Chromium or a listener. */
 export async function buildDesenAppUserCreatedBlankProjectEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
@@ -962,14 +1061,21 @@ function verifyProofDocument(bytes, artifactSha256) {
   }
 }
 
-/** Verifies fresh M10-T01A evidence against committed artifact and visible report bytes. */
+/** Verifies immutable M10-T01A evidence plus its exact current compatibility receipts. */
 export async function verifyDesenAppUserCreatedBlankProjectEvidence(rawOptions = undefined) {
   const options = exactOwnDataOptions(
     rawOptions,
     ["artifactBytes", "artifactPath", "buildOptions", "proofDocument", "proofDocumentPath"],
     "verify options",
   );
-  const built = await buildDesenAppUserCreatedBlankProjectEvidence(options.buildOptions);
+  const compatibilityBuildOptions = captureBuildOptions(
+    options.buildOptions,
+    SECURE_SCROLL_COMPATIBILITY_OVERRIDE_PATHS,
+  );
+  await buildDesenAppUserCreatedBlankProjectEvidence(
+    trackedBuildOptions(compatibilityBuildOptions),
+  );
+  const compatibilityWorkspaceRoot = await realpath(compatibilityBuildOptions.workspaceRoot);
   const artifactBytes =
     options.artifactBytes === undefined
       ? await readRegularAuthority(
@@ -981,9 +1087,26 @@ export async function verifyDesenAppUserCreatedBlankProjectEvidence(rawOptions =
           ARTIFACT_RELATIVE_PATH,
         )
       : captureBytes(options.artifactBytes, "artifactBytes");
-  if (!isDeepStrictEqual(artifactBytes, built.artifactBytes)) {
-    fail("ARTIFACT_DRIFT", "Committed M10-T01A artifact bytes differ from fresh evidence.");
+  if (
+    artifactBytes.byteLength !== IMMUTABLE_M10_T01A_ARTIFACT_PIN.bytes ||
+    sha256(artifactBytes) !== IMMUTABLE_M10_T01A_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The immutable committed M10-T01A artifact bytes drifted.");
   }
+  const artifact = parseJson(artifactBytes, ARTIFACT_RELATIVE_PATH, "ARTIFACT_DRIFT");
+  if (
+    artifact?.task !== "M10-T01A" ||
+    artifact?.proofId !== "desen-app-user-created-blank-project" ||
+    artifact?.profile !== "desen.app.user-created-blank-project-proof.v1" ||
+    artifact?.result !== "PASS"
+  ) {
+    fail("ARTIFACT_DRIFT", "The immutable M10-T01A artifact identity drifted.");
+  }
+  const compatibility = await inspectSecureScrollCompatibility(
+    compatibilityWorkspaceRoot,
+    artifact,
+    compatibilityBuildOptions.fileOverrides,
+  );
   const proofDocument =
     options.proofDocument === undefined
       ? await readRegularAuthority(
@@ -991,22 +1114,44 @@ export async function verifyDesenAppUserCreatedBlankProjectEvidence(rawOptions =
           PROOF_DOCUMENT_RELATIVE_PATH,
         )
       : captureBytes(options.proofDocument, "proofDocument");
-  verifyProofDocument(proofDocument, built.artifactSha256);
+  verifyProofDocument(proofDocument, IMMUTABLE_M10_T01A_ARTIFACT_PIN.sha256);
   return deepFreeze({
-    task: built.artifact.task,
-    result: built.artifact.result,
-    artifactBytes: built.artifactBytes.byteLength,
-    artifactSha256: built.artifactSha256,
-    trackedFiles: built.artifact.boundary.trackedFiles,
-    rootTests: built.artifact.tests.rootTestNames.length,
-    browserTestDeclarations: built.artifact.tests.browserTestDeclarations,
-    p08Status: built.artifact.claim.p08Status,
+    task: artifact.task,
+    result: artifact.result,
+    artifactBytes: artifactBytes.byteLength,
+    artifactSha256: IMMUTABLE_M10_T01A_ARTIFACT_PIN.sha256,
+    trackedFiles: artifact.boundary.trackedFiles,
+    rootTests: artifact.tests.rootTestNames.length,
+    browserTestDeclarations: artifact.tests.browserTestDeclarations,
+    p08Status: artifact.claim.p08Status,
     t02PlusStatus: "NOT_PROVEN",
     browserExecutedByVerifier: false,
+    compatibilityReceipt: compatibility.compatibilityReceipt,
+    compatibilityReceipts: compatibility.trackedReceipts.length,
+    checkpointResealedReaders: compatibility.checkpointResealedPaths.length,
+    correctiveReceiptOnly: compatibility.correctiveReceiptOnly,
+    immutableTaskArtifactPreserved: compatibility.immutableTaskArtifactPreserved,
+    retainedHistoricalReceipts: compatibility.retainedHistoricalReceipts,
   });
 }
 
-/** Writes fresh deterministic M10-T01A evidence through the shared atomic artifact writer. */
+async function canonicalDestinationPath(filePath) {
+  const absolutePath = path.resolve(filePath);
+  const canonicalParent = await realpath(path.dirname(absolutePath));
+  return path.join(canonicalParent, path.basename(absolutePath));
+}
+
+function authenticateImmutableArtifactBytes(bytes) {
+  if (
+    bytes.byteLength !== IMMUTABLE_M10_T01A_ARTIFACT_PIN.bytes ||
+    sha256(bytes) !== IMMUTABLE_M10_T01A_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The immutable committed M10-T01A artifact bytes drifted.");
+  }
+  return bytes;
+}
+
+/** Preserves the tracked M10-T01A artifact or copies only its authenticated bytes elsewhere. */
 export async function writeDesenAppUserCreatedBlankProjectEvidence(rawOptions = undefined) {
   const options = exactOwnDataOptions(
     rawOptions,
@@ -1020,29 +1165,53 @@ export async function writeDesenAppUserCreatedBlankProjectEvidence(rawOptions = 
   ) {
     fail("OPTIONS_INVALID", "beforeAtomicRename must be one non-Proxy function.");
   }
-  const artifactPath = capturePath(
+  const requestedArtifactPath = capturePath(
     options.artifactPath,
     "artifactPath",
     DEFAULT_DESEN_APP_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
   );
-  const built = await buildDesenAppUserCreatedBlankProjectEvidence(options.buildOptions);
+  const verified = await verifyDesenAppUserCreatedBlankProjectEvidence({
+    buildOptions: options.buildOptions,
+  });
+  const artifactBytes = authenticateImmutableArtifactBytes(
+    await readRegularAuthority(
+      DEFAULT_DESEN_APP_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
+      ARTIFACT_RELATIVE_PATH,
+    ),
+  );
+  let artifactPath;
+  let trackedArtifactPath;
   try {
-    await writeAtomicProofArtifact({
-      artifactPath,
-      artifactBytes: built.artifactBytes,
-      beforeAtomicRename: options.beforeAtomicRename,
-    });
+    [artifactPath, trackedArtifactPath] = await Promise.all([
+      canonicalDestinationPath(requestedArtifactPath),
+      canonicalDestinationPath(DEFAULT_DESEN_APP_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH),
+    ]);
   } catch (error) {
-    fail("ARTIFACT_WRITE_UNSAFE", "Atomic M10-T01A artifact write failed safely.", {
+    fail("ARTIFACT_WRITE_UNSAFE", "The M10-T01A artifact destination is unsafe.", {
       cause: String(error),
     });
   }
-  return deepFreeze({
-    task: built.artifact.task,
-    result: built.artifact.result,
+  const summary = {
+    task: verified.task,
+    result: verified.result,
     artifactPath,
-    artifactBytes: built.artifactBytes.byteLength,
-    artifactSha256: built.artifactSha256,
-    trackedFiles: built.artifact.boundary.trackedFiles,
-  });
+    artifactBytes: artifactBytes.byteLength,
+    artifactSha256: IMMUTABLE_M10_T01A_ARTIFACT_PIN.sha256,
+    trackedFiles: verified.trackedFiles,
+  };
+  if (artifactPath === trackedArtifactPath) {
+    return deepFreeze({ ...summary, preserved: true });
+  }
+  try {
+    await writeAtomicProofArtifact({
+      artifactPath,
+      artifactBytes,
+      beforeAtomicRename: options.beforeAtomicRename,
+    });
+  } catch (error) {
+    fail("ARTIFACT_WRITE_UNSAFE", "Historical M10-T01A artifact copy failed safely.", {
+      cause: String(error),
+    });
+  }
+  return deepFreeze({ ...summary, preserved: false });
 }

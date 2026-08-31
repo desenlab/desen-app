@@ -1226,3 +1226,11 @@ focused Vitest coverage for StrictMode single-open behavior, missing/existing/fa
 exact create requests, CAS conflicts, explicit reopen, unavailable host composition, and late
 settlement revocation. Local-runtime tests separately cover closed config capture, transport
 limits, random credentials, private state roots, startup rollback, and idempotent shutdown.
+
+The normal-product scenario also protects Inspector replacement-focus geometry at a deliberately
+short `1600 × 840` desktop viewport. Immediately before and after setting the optional second
+TextField `Secure` property—and again after checking its switch—it compares the exact vertical
+bounds of the command bar, authoring shell, canvas, Inspector, and page frame, while requiring zero
+window, document, and editor scroll and no editor scroll-height growth. Component tests separately
+prove both Set and Unset hand focus to the replacement control with `preventScroll`; the browser
+path uses the native switch hit area without forced interaction.
