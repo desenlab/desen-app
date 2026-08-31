@@ -1203,10 +1203,10 @@ Projects-card reopen. The complete App suite passes 407/407; product/lifecycle a
 suites pass 16/16 and 17/17; the historical and normal-product browser scenarios each pass 1/1.
 The immutable 20,173-byte task artifact carries 43 exact receipts and is
 `sha256:6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e`, and its independent
-reader passes 11/11. Reader checkpoint sequence 60 preserves sequences 1–59 and advances the exact
-sequence-59 head to
-`sha256:8f8d69456575c8780fa394f7c46189ac02bb8cecdf24c1a46d81ec0d1ea2c7a1` across 52 frozen
-artifacts and 104 readers; the checkpoint suite passes 83/83. The current CI universe contains 206
+reader passes 11/11. Reader checkpoint sequence 61 preserves sequences 1–60 and advances the exact
+sequence-60 head to
+`sha256:a80e008bf0f383ab46d097abfec17710131a47656040ec07dc7cc60f965666fb` across 52 frozen
+artifacts and 104 readers; the checkpoint suite passes 84/84. The current CI universe contains 206
 workloads and 98 proof units; M10-T01A's affected closure contains 66 proof units and 142 workloads.
 The boundary graph covers 818 modules and 3,373 dependencies with no violation; all 23 fixtures
 pass. Ownership covers 1,323 tracked paths and 196 proof-owned paths.

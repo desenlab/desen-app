@@ -23,6 +23,12 @@ const M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PIN = Object.freeze({
   bytes: 16_025,
   sha256: "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
 });
+const M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json";
+const M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN = Object.freeze({
+  bytes: 20_173,
+  sha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+});
 const M10_EMPTY_PROJECT_SUCCESSOR_RECEIPTS = Object.freeze({
   "pnpm-lock.yaml": Object.freeze({
     path: "pnpm-lock.yaml",
@@ -57,6 +63,83 @@ const M10_UNCHANGED_MANIFEST_RECEIPTS = Object.freeze({
     sha256: "d6b076c782bd3dd11718d99ed0e93b3938d849bacfff2f10e34fc4e0da16186e",
   }),
 });
+const M10_USER_CREATED_BLANK_PROJECT_SUCCESSOR_RECEIPTS = Object.freeze({
+  "apps/desen-app/package.json": Object.freeze({
+    path: "apps/desen-app/package.json",
+    bytes: 4_122,
+    sha256: "7038647aa1809f07ee5131d0df8d0bee75bf1f2cdf0358be738b2c3603b64577",
+  }),
+  "apps/desen-app/src/application.module.css": Object.freeze({
+    path: "apps/desen-app/src/application.module.css",
+    bytes: 112_222,
+    sha256: "3440415a516a563aac8978ea1f604b28903cce8a00d54048f557cd339289040e",
+  }),
+  "apps/desen-app/src/application.tsx": Object.freeze({
+    path: "apps/desen-app/src/application.tsx",
+    bytes: 132_468,
+    sha256: "833f20edda80d840eaff27b29944c6a216f7fbe863d7ad30a65a6bb22b6b4869",
+  }),
+  "apps/desen-app/test/application.test.tsx": Object.freeze({
+    path: "apps/desen-app/test/application.test.tsx",
+    bytes: 107_788,
+    sha256: "931f3097888c3f3e8c1636acd01d92975bdcbf06b37a6a55bb767dad1d905c7b",
+  }),
+  "dependency-cruiser.config.cjs": Object.freeze({
+    path: "dependency-cruiser.config.cjs",
+    bytes: 10_328,
+    sha256: "46e4c21598239ce464a44ca3b54622d65f2db17145f6da75099f7acb4a7e3290",
+  }),
+  "pnpm-lock.yaml": Object.freeze({
+    path: "pnpm-lock.yaml",
+    bytes: 131_888,
+    sha256: "23632d4c1d8bc8832a31db328fa36c7f1523aeb7c52f034ddbb3f8edecc4c002",
+  }),
+});
+const M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS = Object.freeze([
+  ".github/workflows/ci.yml",
+  ".gitignore",
+  "apps/desen-app-browser-e2e/package.json",
+  "apps/desen-app-browser-e2e/playwright.config.ts",
+  "apps/desen-app-browser-e2e/product-playwright.config.ts",
+  "apps/desen-app-browser-e2e/product-proof-server.mjs",
+  "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+  "apps/desen-app/dev/local-dev-host.mjs",
+  "apps/desen-app/dev/local-dev-host.test.mjs",
+  "apps/desen-app/dev/local-dev.mjs",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/local-runtime-persistence.ts",
+  "apps/desen-app/src/main.tsx",
+  "apps/desen-app/src/product-bootstrap.tsx",
+  "apps/desen-app/src/project-data.ts",
+  "apps/desen-app/src/reference-empty-project.ts",
+  "apps/desen-app/src/styles.css",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/local-runtime-persistence.test.ts",
+  "apps/desen-app/test/main-lifecycle.test.tsx",
+  "apps/desen-app/test/product-bootstrap.test.tsx",
+  "apps/desen-app/tsconfig.local-dev.json",
+  "dependency-cruiser.config.cjs",
+  M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PATH,
+  "package.json",
+  "pnpm-lock.yaml",
+  "scripts/generate-desen-app-user-created-blank-project-proof.mjs",
+  "scripts/lib/atomic-proof-artifact.mjs",
+  "scripts/lib/desen-app-user-created-blank-project-proof.mjs",
+  "scripts/verify-boundary-fixtures.mjs",
+  "scripts/verify-desen-app-user-created-blank-project.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-control-plane-root/apps/control-plane-api/dist/index.js",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-control-plane-root/apps/desen-app-browser-e2e/product-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-control-plane/apps/control-plane-api/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-control-plane/apps/desen-app-browser-e2e/proof-application.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-control-plane-private/apps/control-plane-api/dist/runtime-activation-sqlite-internal.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-control-plane-private/apps/desen-app-browser-e2e/product-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app-browser-e2e/product-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app/src/application.js",
+  "tests/boundaries/README.md",
+  "tests/desen-app-user-created-blank-project.test.mjs",
+]);
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/DESEN-APP-DESIGN-RUN-MODES.md";
 const REAL_ADAPTER_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json";
@@ -167,6 +250,9 @@ function reviewedSuccessorReceiptMap(receipts) {
     receiptMap.set(receipt.path, receipt);
   }
   for (const receipt of Object.values(M10_EMPTY_PROJECT_SUCCESSOR_RECEIPTS)) {
+    receiptMap.set(receipt.path, receipt);
+  }
+  for (const receipt of Object.values(M10_USER_CREATED_BLANK_PROJECT_SUCCESSOR_RECEIPTS)) {
     receiptMap.set(receipt.path, receipt);
   }
   return receiptMap;
@@ -293,10 +379,15 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
   ]) {
     const bytes = files.get(expected.path);
     const compatibilityReceipt = compatibilityReceiptMap.get(expected.path);
+    const supersededByUserCreatedBlankProject = Object.hasOwn(
+      M10_USER_CREATED_BLANK_PROJECT_SUCCESSOR_RECEIPTS,
+      expected.path,
+    );
     if (
       !isDeepStrictEqual(compatibilityReceipt, expected) ||
-      bytes?.byteLength !== expected.bytes ||
-      sha256(bytes ?? Buffer.alloc(0)) !== expected.sha256
+      (!supersededByUserCreatedBlankProject &&
+        (bytes?.byteLength !== expected.bytes ||
+          sha256(bytes ?? Buffer.alloc(0)) !== expected.sha256))
     ) {
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
@@ -321,11 +412,179 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
       correctiveReceiptOnly: compatibility.claim.correctiveReceiptOnly,
     }),
     currentProjection: Object.freeze({
-      relationship: "EXACT_POST_M10_CORRECTIVE_LIVE_RECEIPTS",
+      relationship: "IMMUTABLE_M10_T01_COMPATIBILITY_RECEIPTS",
       changedHistoricalPaths: Object.freeze(Object.values(M10_EMPTY_PROJECT_SUCCESSOR_RECEIPTS)),
       unchangedOriginMainManifests: Object.freeze(Object.values(M10_UNCHANGED_MANIFEST_RECEIPTS)),
     }),
     p08Status: artifact.claim.p08Status,
+    runtimeInputAndPendingCovered: artifact.claim.runtimeInputAndPendingCovered,
+    invalidCredentialsAndPublicFailureCovered:
+      artifact.claim.invalidCredentialsAndPublicFailureCovered,
+    successNavigationAndHostOperationCovered:
+      artifact.claim.successNavigationAndHostOperationCovered,
+    g10Closed: artifact.claim.g10Closed,
+  });
+}
+
+function authenticateM10UserCreatedBlankProjectSuccessor(files) {
+  const artifactBytes = files.get(M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH);
+  const pin = M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN;
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact immutable M10-T01A user-created blank-project artifact drifted.",
+    );
+  }
+  const artifact = parseJson(
+    artifactBytes,
+    M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
+    "SUCCESSOR_POLICY_VIOLATION",
+  );
+  const parent = artifact?.prerequisites?.[0];
+  const expectedClaim = {
+    taskStatus: "DONE",
+    p08Status: "PROVEN",
+    normalProductEntryCovered: true,
+    zeroProjectStartCovered: true,
+    visibleProjectCreationCovered: true,
+    exactBlankProfileCovered: true,
+    fixtureBootstrapBypassed: true,
+    durableLocalPersistenceCovered: true,
+    visualAuthoringCovered: true,
+    nativeComponentDragCovered: true,
+    nativeLayerDragCovered: true,
+    forgedDataTransferRejected: true,
+    authoredDeletionCovered: true,
+    generationOneCreationCovered: true,
+    generationTwoSaveCovered: true,
+    hardReloadCovered: true,
+    visibleProjectReopenCovered: true,
+    exactSourceReadBackCovered: true,
+    designRunStaticParityCovered: true,
+    productServerControlPlaneBoundaryCovered: true,
+    runtimeInputAndPendingCovered: false,
+    invalidCredentialsAndPublicFailureCovered: false,
+    successNavigationAndHostOperationCovered: false,
+    remoteDeploymentCovered: false,
+    g10Closed: false,
+  };
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.protocol !== "0.1.0" ||
+    artifact?.target !== "web-react" ||
+    artifact?.task !== "M10-T01A" ||
+    artifact?.gate !== null ||
+    artifact?.proofId !== "desen-app-user-created-blank-project" ||
+    artifact?.profile !== "desen.app.user-created-blank-project-proof.v1" ||
+    artifact?.result !== "PASS" ||
+    !isDeepStrictEqual(artifact?.claim, expectedClaim) ||
+    artifact?.prerequisites?.length !== 1 ||
+    parent?.task !== "M10-T01-COMPAT" ||
+    parent?.gate !== null ||
+    parent?.proofId !== "desen-app-browser-e2e-workspace-compatibility" ||
+    parent?.path !== M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PATH ||
+    parent?.bytes !== M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PIN.bytes ||
+    parent?.sha256 !== M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PIN.sha256 ||
+    parent?.profile !== "desen.app.browser-e2e-workspace-compatibility-proof.v1" ||
+    parent?.result !== "PASS" ||
+    parent?.immutable !== true ||
+    artifact?.authority?.source?.normalProductEntry !== true ||
+    artifact?.authority?.source?.productEntryInjectsDocument !== false ||
+    artifact?.authority?.source?.visibleNewProjectControl !== true ||
+    artifact?.authority?.source?.visibleBlankTemplate !== true ||
+    artifact?.authority?.source?.exactProjectId !== "account-app" ||
+    artifact?.authority?.source?.exactSurfaceId !== "sign-in" ||
+    artifact?.authority?.source?.exactCatalogIdentity !==
+      "run.desen.reference.sign-in@0.1.0#web-react" ||
+    !isDeepStrictEqual(artifact?.authority?.source?.frame, {
+      preset: "portrait",
+      width: 420,
+      height: 720,
+    }) ||
+    artifact?.authority?.source?.localRuntimeProfile !== "desen.app.local-runtime.v1" ||
+    artifact?.authority?.source?.fixedLoopbackOnly !== true ||
+    artifact?.authority?.source?.freshBearerSecret !== true ||
+    artifact?.authority?.source?.durableControlPlaneStore !== true ||
+    artifact?.authority?.source?.productionBundlePreview !== true ||
+    artifact?.authority?.source?.browserTestDeclarations !== 1 ||
+    artifact?.authority?.source?.nativeDragCalls !== 2 ||
+    artifact?.authority?.source?.initialProjectCount !== 0 ||
+    artifact?.authority?.source?.creationGeneration !== 1 ||
+    artifact?.authority?.source?.authoredGeneration !== 2 ||
+    artifact?.authority?.source?.browserRuntimeErrorsAllowed !== 0 ||
+    artifact?.authority?.source?.browserExecutionPerformedByReader !== false ||
+    artifact?.authority?.package?.appPackageName !== "@desen/app-web" ||
+    artifact?.authority?.package?.browserPackageName !== "@desen/app-browser-e2e" ||
+    artifact?.authority?.package?.appDevCommand !== "node dev/local-dev.mjs" ||
+    artifact?.authority?.package?.appLocalRuntimeTestCommand !==
+      "vitest run test/local-runtime-persistence.test.ts dev/local-dev-host.test.mjs" ||
+    artifact?.authority?.package?.appProductBootstrapTestCommand !==
+      "vitest run test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx" ||
+    artifact?.tests?.browserTestDeclarations !== 1 ||
+    artifact?.tests?.configuredProjects?.length !== 1 ||
+    artifact?.tests?.configuredProjects?.[0] !== "product-chromium" ||
+    artifact?.tests?.browserExecutedByVerifier !== false ||
+    artifact?.tests?.boundaryExecutedByVerifier !== false ||
+    artifact?.boundary?.trackedFiles !== M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS.length ||
+    artifact?.boundary?.trackedReceipts?.length !==
+      M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS.length ||
+    artifact?.boundary?.immutableInputs !== true ||
+    artifact?.boundary?.sourceSymlinksRejected !== true ||
+    artifact?.boundary?.browserExecutionSeparateFromStaticReader !== true
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The immutable M10-T01A identity, claims, authority, or predecessor drifted.",
+    );
+  }
+
+  const trackedReceipts = artifact.boundary.trackedReceipts;
+  const receiptPaths = trackedReceipts.map((receipt) => receipt?.path);
+  if (
+    !isDeepStrictEqual(receiptPaths, M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS) ||
+    new Set(receiptPaths).size !== M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS.length
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The immutable M10-T01A receipt closure is not exact, canonical, and unique.",
+    );
+  }
+  for (const receipt of trackedReceipts) {
+    const bytes = files.get(receipt.path);
+    if (
+      !Number.isSafeInteger(receipt.bytes) ||
+      receipt.bytes < 0 ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
+      bytes?.byteLength !== receipt.bytes ||
+      sha256(bytes ?? Buffer.alloc(0)) !== receipt.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The exact current M10-T01A artifact-owned receipt drifted: ${receipt.path}.`,
+      );
+    }
+  }
+
+  return deepFreeze({
+    task: artifact.task,
+    artifact: {
+      path: M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
+      bytes: pin.bytes,
+      sha256: pin.sha256,
+      immutable: true,
+    },
+    predecessor: { ...parent },
+    currentProjection: {
+      relationship: "EXACT_M10_T01A_ARTIFACT_OWNED_LIVE_RECEIPTS",
+      currentReceipts: trackedReceipts,
+    },
+    p08Status: artifact.claim.p08Status,
+    normalProductEntryCovered: artifact.claim.normalProductEntryCovered,
+    durableLocalPersistenceCovered: artifact.claim.durableLocalPersistenceCovered,
+    designRunStaticParityCovered: artifact.claim.designRunStaticParityCovered,
     runtimeInputAndPendingCovered: artifact.claim.runtimeInputAndPendingCovered,
     invalidCredentialsAndPublicFailureCovered:
       artifact.claim.invalidCredentialsAndPublicFailureCovered,
@@ -467,6 +726,7 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   M10_EMPTY_PROJECT_BROWSER_E2E_ARTIFACT_PATH,
   M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PATH,
+  M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
   "dependency-cruiser.config.cjs",
   ...new Set([
     ...TRACKED_PATHS,
@@ -477,6 +737,7 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     ...T13_SUCCESSOR_RECEIPT_PATHS,
     ...T14_SUCCESSOR_RECEIPT_PATHS,
     ...T12_SUCCESSOR_RECEIPT_PATHS,
+    ...M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS,
   ]),
 ]);
 
@@ -2583,8 +2844,10 @@ export async function buildDesenAppDesignRunModesEvidence(rawOptions = undefined
   const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files);
   const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
   const emptyProjectBrowserE2eSuccessor = authenticateM10EmptyProjectBrowserE2eSuccessor(files);
+  const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(files);
   const currentCompatibility = deepFreeze({
     emptyProjectBrowserE2eSuccessor,
+    userCreatedBlankProjectSuccessor,
     schemaVersion: 1,
     proofId: "desen-app-design-run-modes",
     profile: "desen.app.design-run-modes-proof.v1",

@@ -3058,11 +3058,11 @@ artifact reader does not execute Chromium; browser execution remains owned by th
 Browser E2E job. The historical 16,025-byte M10-T01-COMPAT artifact and 3,180-byte report remain
 byte-identical.
 
-Reader checkpoint sequence 60 preserves sequences 1–59, advances the exact sequence-59 head to
-`sha256:8f8d69456575c8780fa394f7c46189ac02bb8cecdf24c1a46d81ec0d1ea2c7a1`, freezes 52
-artifacts, and authenticates 104 current readers. It appends the M10-T01A artifact and reader pair
-while resealing the two compatibility readers as immutable historical readers; the checkpoint
-suite passes 83/83. The neutral CI universe contains 206 workloads and 98 verifier/root-test proof
+Reader checkpoint sequence 61 preserves sequences 1–60, advances the exact sequence-60 head to
+`sha256:a80e008bf0f383ab46d097abfec17710131a47656040ec07dc7cc60f965666fb`, freezes 52
+artifacts, and authenticates 104 current readers. It reseals only the 28 M09 App reader receipts that
+now recognize the exact M10-T01A successor while preserving all historical artifacts; the checkpoint
+suite passes 84/84. The neutral CI universe contains 206 workloads and 98 verifier/root-test proof
 pairs at `sha256:2b10f2fc39003592cddbd87122182de5acf05bd8c88afbbbd111d3ccc144919c`.
 The retained sequential authority is exactly equivalent across all 206 ordered workloads at plan
 `sha256:91519ad61ebc1bfed9d1d2553cf92b517cb4de2ad1313d679e2e26d86c311db1`, ordered projection
@@ -3079,8 +3079,8 @@ Exact-one ownership covers 1,323 tracked paths, including 196 proof-owned paths,
 `sha256:f7d1ff1ae43413fa0294419e7dc43f31b25bbb29e62cff9e3ee7d344380afb98` and authority
 `sha256:7fe30b8f12eed7d421506d3efe27ed3b80fe501bb200a36154f485eb226f865f`.
 The promoted selector is
-`sha256:c1d395467c01245e5504a99b58109c4041e2d6e5b368679f2a99f83e54c28d01`, and its runner
-authority is `sha256:0aeb76bbe64e3a04a888904490a76b340538f854f62d04edfcb61d2fe1e1fd0a`.
+`sha256:2a8c329be6eaad3d6db1d1a8bb7ccbf393b5939f8502bc0c48b2f8fe766bbaa2`, and its runner
+authority is `sha256:fbebcbead782eb59a655aa1c610ef947659e83cc35ed4a8cd12046f10bff438f`.
 
 P-08 remains `PROVEN`, now with normal-product reachability in addition to the historical
 empty-project authoring claim. M10-T01A does not claim typed input and pending operation state

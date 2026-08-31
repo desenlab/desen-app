@@ -635,6 +635,7 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
       immutable: successor.artifact.immutable,
       compatibilitySha256: successor.compatibilityArtifact.sha256,
       compatibilityReceipt: successor.compatibilityArtifact.compatibilityReceipt,
+      compatibilityRelationship: successor.currentProjection.relationship,
       p08Status: successor.p08Status,
       runtimeInputAndPendingCovered: successor.runtimeInputAndPendingCovered,
       g10Closed: successor.g10Closed,
@@ -645,6 +646,7 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
       immutable: true,
       compatibilitySha256: "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
       compatibilityReceipt: "M10-T01-COMPAT",
+      compatibilityRelationship: "IMMUTABLE_M10_T01_COMPATIBILITY_RECEIPTS",
       p08Status: "PROVEN",
       runtimeInputAndPendingCovered: false,
       g10Closed: false,
@@ -674,6 +676,72 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
       expectedError("SUCCESSOR_POLICY_VIOLATION"),
     );
   }
+});
+
+test("[M10-T01A successor] authenticates the exact public local-persistence composition", async () => {
+  const successor = built.currentCompatibility.userCreatedBlankProjectSuccessor;
+  assert.equal(successor.task, "M10-T01A");
+  assert.equal(
+    successor.artifact.sha256,
+    "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+  );
+  assert.equal(successor.currentProjection.currentReceipts.length, 43);
+  assert.equal(built.currentCompatibility.package.editorWebDependency, null);
+  assert.equal(built.currentCompatibility.package.currentEditorWebRuntimeDependency, "workspace:*");
+  assert.equal(
+    built.currentCompatibility.package.currentEditorWebAuthority,
+    "PUBLIC_LOCAL_PERSISTENCE_ADAPTER_ONLY",
+  );
+  for (const [relativePath, code] of [
+    [successor.artifact.path, "SUCCESSOR_POLICY_VIOLATION"],
+    ["apps/desen-app/package.json", "SUCCESSOR_POLICY_VIOLATION"],
+    ["apps/desen-app/src/local-runtime-persistence.ts", "SUCCESSOR_POLICY_VIOLATION"],
+    ["apps/desen-app/src/product-bootstrap.tsx", "SUCCESSOR_POLICY_VIOLATION"],
+    ["dependency-cruiser.config.cjs", "SUCCESSOR_POLICY_VIOLATION"],
+    ["pnpm-lock.yaml", "SUCCESSOR_POLICY_VIOLATION"],
+  ]) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
+    await assert.rejects(
+      buildDesenAppSourcePersistenceEvidence({
+        fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
+      }),
+      expectedError(code),
+    );
+  }
+  const appPackagePath = "apps/desen-app/package.json";
+  const appPackageBytes = await readFile(path.join(ROOT, appPackagePath));
+  await assert.rejects(
+    buildDesenAppSourcePersistenceEvidence({
+      fileOverrides: new Map([
+        [
+          appPackagePath,
+          Buffer.from(
+            appPackageBytes
+              .toString("utf8")
+              .replace('"@desen/editor-web": "workspace:*"', '"@desen/editor-web": "^0.1.0"'),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("PACKAGE_POLICY_VIOLATION"),
+  );
+  const runtimePath = "apps/desen-app/src/local-runtime-persistence.ts";
+  const runtimeBytes = await readFile(path.join(ROOT, runtimePath));
+  await assert.rejects(
+    buildDesenAppSourcePersistenceEvidence({
+      fileOverrides: new Map([
+        [
+          runtimePath,
+          Buffer.from(
+            runtimeBytes
+              .toString("utf8")
+              .replace('from "@desen/editor-web";', 'from "@desen/editor-web/private";'),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("PACKAGE_POLICY_VIOLATION"),
+  );
 });
 
 test("[successor] authenticates and mutation-tests the exact M09-T14/G09 publish-activation closure", async () => {

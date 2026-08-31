@@ -453,6 +453,7 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
       immutable: successor.artifact.immutable,
       compatibilitySha256: successor.compatibilityArtifact.sha256,
       compatibilityReceipt: successor.compatibilityArtifact.compatibilityReceipt,
+      compatibilityRelationship: successor.currentProjection.relationship,
       p08Status: successor.p08Status,
       runtimeInputAndPendingCovered: successor.runtimeInputAndPendingCovered,
       g10Closed: successor.g10Closed,
@@ -463,6 +464,7 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
       immutable: true,
       compatibilitySha256: "e90378e191fddea1264c8c056e2ff7a72fdfd945d1b1113465c12ddbffb1888d",
       compatibilityReceipt: "M10-T01-COMPAT",
+      compatibilityRelationship: "IMMUTABLE_M10_T01_COMPATIBILITY_RECEIPTS",
       p08Status: "PROVEN",
       runtimeInputAndPendingCovered: false,
       g10Closed: false,
@@ -484,6 +486,33 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
     "dependency-cruiser.config.cjs",
   ]);
   for (const relativePath of mutationPaths) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
+    await assert.rejects(
+      buildDesenAppNodeLinkedDiagnosticsEvidence({
+        fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+});
+
+test("[M10-T01A successor] authenticates the exact product-created blank-project closure", async () => {
+  const successor = built.currentCompatibility.userCreatedBlankProjectSuccessor;
+  assert.equal(successor.task, "M10-T01A");
+  assert.equal(
+    successor.artifact.sha256,
+    "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+  );
+  assert.equal(successor.currentProjection.currentReceipts.length, 43);
+  for (const relativePath of [
+    successor.artifact.path,
+    "apps/desen-app/package.json",
+    "apps/desen-app/src/application.module.css",
+    "apps/desen-app/src/local-runtime-persistence.ts",
+    "apps/desen-app/src/product-bootstrap.tsx",
+    "dependency-cruiser.config.cjs",
+    "pnpm-lock.yaml",
+  ]) {
     const bytes = await readFile(path.join(ROOT, relativePath));
     await assert.rejects(
       buildDesenAppNodeLinkedDiagnosticsEvidence({

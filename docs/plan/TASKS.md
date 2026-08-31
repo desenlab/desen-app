@@ -2149,10 +2149,10 @@ local-runtime suites pass 16/16 and 17/17; the immutable historical and normal-p
 scenarios each pass 1/1. The dependency graph covers 818 modules / 3,373 dependencies without a
 violation and all 23 boundary fixtures pass. The independent task reader passes 11/11 over the
 20,173-byte, 43-receipt artifact at
-`sha256:6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e`. Sequence 60 advances
-the exact sequence-59 checkpoint head to
-`sha256:8f8d69456575c8780fa394f7c46189ac02bb8cecdf24c1a46d81ec0d1ea2c7a1` across 52 artifacts
-and 104 readers; its suite passes 83/83. The current CI universe contains 206 workloads / 98 proof
+`sha256:6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e`. Sequence 61 advances
+the exact sequence-60 checkpoint head to
+`sha256:a80e008bf0f383ab46d097abfec17710131a47656040ec07dc7cc60f965666fb` across 52 artifacts
+and 104 readers; its suite passes 84/84. The current CI universe contains 206 workloads / 98 proof
 units, and the M10-T01A affected closure contains 66 proof units / 142 workloads. Ownership covers
 1,323 tracked paths / 196 proof-owned paths. Overall progress is 111/146 (76%), M10 is 2/10, and
 M10-T02 remains `NOT_STARTED` and next. Typed input/pending,

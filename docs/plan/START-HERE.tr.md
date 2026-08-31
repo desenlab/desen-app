@@ -1208,8 +1208,8 @@ düşmeden güvenli kapanır.
 
 Değişmez görev eseri 20.173 bayt ve 43 kesin dosya kaydıdır;
 `sha256:6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e` ile sabittir. Okuyucu
-checkpoint sıra 60, 52 eser ve 104 okuyucuyu
-`sha256:8f8d69456575c8780fa394f7c46189ac02bb8cecdf24c1a46d81ec0d1ea2c7a1` başında doğrular.
+checkpoint sıra 61, 52 eser ve 104 okuyucuyu
+`sha256:a80e008bf0f383ab46d097abfec17710131a47656040ec07dc7cc60f965666fb` başında doğrular.
 Mimari sınır grafiğinde 818 modül / 3.373 bağımlılık ihlalsizdir ve 23 fixture'ın tamamı geçer.
 Genel ilerleme 111/146 (%76), M10 2/10'dur; sıradaki görev M10-T02'dir ve henüz
 `NOT_STARTED` durumundadır. Yazılı girdi/pending, invalid credentials, başarı/navigasyon, uzak ve
