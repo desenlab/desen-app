@@ -2064,18 +2064,19 @@ and move to M10-T01.
 
 ## M10 — First end-to-end proof
 
-| ID      | Status      | Depends on      | Deliverable / evidence                                                        |
-| ------- | ----------- | --------------- | ----------------------------------------------------------------------------- |
-| M10-T01 | DONE        | G09             | Empty-project-to-sign-in browser E2E                                          |
-| M10-T02 | NOT_STARTED | M10-T01         | Input and pending fixture test                                                |
-| M10-T03 | NOT_STARTED | M10-T02         | Failure fixture and visible failure-state test                                |
-| M10-T04 | NOT_STARTED | M10-T02         | Success fixture, navigation, and real host-operation binding test             |
-| M10-T05 | NOT_STARTED | M10-T03–M10-T04 | Label/layout change published and activated without host source change        |
-| M10-T06 | NOT_STARTED | M10-T05         | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
-| M10-T07 | NOT_STARTED | M10-T05, G07    | Corrupt revision and catalog mismatch preserve last-known-good                |
-| M10-T08 | NOT_STARTED | M10-T01–M10-T07 | One-command seed/reset and repeatable sign-in demo runbook                    |
-| M10-T09 | NOT_STARTED | M10-T08         | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
-| G10     | NOT_STARTED | M10-T01–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
+| ID       | Status      | Depends on       | Deliverable / evidence                                                        |
+| -------- | ----------- | ---------------- | ----------------------------------------------------------------------------- |
+| M10-T01  | DONE        | G09              | Empty-project-to-sign-in browser E2E                                          |
+| M10-T01A | DONE        | M10-T01          | User-created blank project and durable normal-App authoring                   |
+| M10-T02  | NOT_STARTED | M10-T01A         | Input and pending fixture test                                                |
+| M10-T03  | NOT_STARTED | M10-T02          | Failure fixture and visible failure-state test                                |
+| M10-T04  | NOT_STARTED | M10-T02          | Success fixture, navigation, and real host-operation binding test             |
+| M10-T05  | NOT_STARTED | M10-T03–M10-T04  | Label/layout change published and activated without host source change        |
+| M10-T06  | NOT_STARTED | M10-T05          | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
+| M10-T07  | NOT_STARTED | M10-T05, G07     | Corrupt revision and catalog mismatch preserve last-known-good                |
+| M10-T08  | NOT_STARTED | M10-T01A–M10-T07 | One-command seed/reset and repeatable sign-in demo runbook                    |
+| M10-T09  | NOT_STARTED | M10-T08          | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
+| G10      | NOT_STARTED | M10-T01A–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
 
 M10-T01 is `DONE`. The dedicated `@desen/app-browser-e2e` workspace owns Playwright, Vite,
 Chromium, and failure artifacts while the root and product App manifests retain no M10 browser-E2E
@@ -2132,6 +2133,32 @@ failure (M10-T03), and success, navigation, and a real host operation (M10-T04) 
 G10 stays open, proof gates remain 11/13, and these local receipts make no exact-head hosted-CI
 claim. Implementation progress advances to 110/145 (76%), M10 to 1/9 (11%), and M10-T02 is next.
 
+M10-T01A is `DONE`. The normal product entry now starts from an honest zero-project state and
+offers one visible Blank sign-in project profile. Creating it writes the exact
+`account-app/sign-in` Source as Generation 1 through the real loopback control-plane adapter, then
+opens the ordinary editor with the same prepared compare-and-set controller. No proof document,
+proof-only route, or fixture fallback is injected. Local state is outside Vite's served App root;
+fixed-loopback origin, fresh bearer, explicit response bounds, and pre-fallback `.desen` / `@fs`
+denials protect the trusted local profile. Conflict, indeterminate-save, pending-save, and discard
+lifecycle paths fail closed.
+
+The normal-product Chromium scenario uses only visible controls for project creation, native
+Components and Layers drag, state, bindings, actions, order, deletion, Generation 2 save, hard
+reload, and Projects-card reopen. The complete App suite passes 407/407; product/lifecycle and
+local-runtime suites pass 16/16 and 17/17; the immutable historical and normal-product browser
+scenarios each pass 1/1. The dependency graph covers 818 modules / 3,373 dependencies without a
+violation and all 23 boundary fixtures pass. The independent task reader passes 11/11 over the
+20,173-byte, 43-receipt artifact at
+`sha256:6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e`. Sequence 60 advances
+the exact sequence-59 checkpoint head to
+`sha256:8f8d69456575c8780fa394f7c46189ac02bb8cecdf24c1a46d81ec0d1ea2c7a1` across 52 artifacts
+and 104 readers; its suite passes 83/83. The current CI universe contains 206 workloads / 98 proof
+units, and the M10-T01A affected closure contains 66 proof units / 142 workloads. Ownership covers
+1,323 tracked paths / 196 proof-owned paths. Overall progress is 111/146 (76%), M10 is 2/10, and
+M10-T02 remains `NOT_STARTED` and next. Typed input/pending,
+invalid credentials, success/navigation/real host operation, remote deployment, multi-user
+persistence, and G10 remain unproven. These local receipts make no exact-head hosted claim.
+
 ### M10-T01 public build-log drafts
 
 **X (EN, 280 characters)**
@@ -2159,6 +2186,43 @@ claim. Implementation progress advances to 110/145 (76%), M10 to 1/9 (11%), and 
 >
 > Bu kanıt görsel üretim yolunu kapatıyor. Yazılı girdi/pending, hata ve gerçek host operasyonuyla
 > başarı/navigasyon akışları sıradaki kapsam; G10 henüz kapanmadı.
+>
+> #DesignTools #WebDevelopment #OpenSource
+
+### M10-T01A public build-log drafts
+
+**X (EN, 250 characters)**
+
+> A blank canvas now survives the real Desen App journey: New project → visual authoring → save → reload → reopen, through the normal UI and durable CAS storage in Chromium. Input/pending is next. What should we test next? github.com/desenlab/desen-app
+
+**LinkedIn**
+
+> [EN]
+>
+> Desen App's blank canvas now lives in the normal product journey. A real Chromium test starts at
+> zero projects, creates the supported sign-in profile from the visible New project flow, authors it
+> through Components, Layers, Inspector, State, and Actions, then saves, hard reloads, returns to
+> Projects, and reopens the same durable Source.
+>
+> The local composition uses generation-guarded storage and fails closed on conflicts, uncertain
+> saves, and unavailable persistence. Typed input/pending, failure, and success/navigation remain
+> the next slices; this is not yet a remote or multi-user deployment claim.
+>
+> Inspect the evidence in the public repository. Which part of the product journey should we test
+> next?
+>
+> [TR]
+>
+> Desen App'in boş tuvali artık normal ürün akışında yaşıyor. Gerçek Chromium testi sıfır projeden
+> başlıyor; görünür New project akışından desteklenen giriş projesini oluşturuyor, Components,
+> Layers, Inspector, State ve Actions üzerinden tasarlıyor; ardından kaydediyor, sayfayı yeniliyor,
+> Projects'e dönüyor ve aynı kalıcı Source'u kartından yeniden açıyor.
+>
+> Yerel kompozisyon nesil korumalı depolama kullanıyor; çakışma, belirsiz kayıt ve erişilemeyen
+> persistence durumlarında güvenli biçimde kapanıyor. Yazılı girdi/pending, hata ve
+> başarı/navigasyon sıradaki kapsam; bu henüz uzak veya çok kullanıcılı deployment iddiası değil.
+>
+> Kanıtları açık repoda inceleyin. Sizce ürün yolculuğunun hangi bölümünü sırada test etmeliyiz?
 >
 > #DesignTools #WebDevelopment #OpenSource
 >

@@ -53,6 +53,24 @@ without adding an icon-package or executable dependency, and CSS Modules plus `-
 variables keep application chrome separate from future Catalog-rendered canvas tokens. This choice
 is internal to the Web application and does not alter a public capability contract.
 
+## Desen App M10-T01A local product profile
+
+The normal local product uses the existing `@desen/control-plane-api` SQLite Source repository and
+the public `@desen/editor-web` local persistence adapter. `pnpm --filter @desen/app-web dev` is an
+App-owned Node launcher rather than a bare Vite command: it starts both authorities, fixes Vite to
+`127.0.0.1:5173`, stores durable developer state under ignored
+the repository-level `.desen/desen-app/control-plane` directory outside Vite's served root, and
+injects a fresh in-memory runtime credential. Vite additionally denies `.desen` and `/@fs/` state
+requests before SPA fallback. The browser
+bundle depends only on the Editor Web adapter; Node control-plane and Vite launcher code remain in
+the development composition and cannot enter the browser graph.
+
+No router, project database abstraction, IndexedDB layer, localStorage use, modal library, UI kit,
+or remote synchronization client is added. The current project inventory is derived from the one
+exact admitted Source profile. A future multi-project or hosted profile must introduce its own
+authenticated project authority behind an explicit App boundary rather than infer identities from
+URLs or reuse this local fixed profile.
+
 ## Explicit constraints
 
 - No framework runtime is allowed to reinterpret DESEN semantics.

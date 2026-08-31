@@ -12,6 +12,12 @@ allowed case composes only `editor-core` plus the reviewed App application, empt
 stylesheet entries; one negative case rejects an undeclared `publisher` package edge, and another
 rejects an unreviewed App source entry.
 
+The normal-product browser proof has one additional, file-scoped composition edge. Its positive
+fixture accepts only `product-proof-server.mjs` loading the built public Control Plane `index`
+entry. Negative fixtures reject that same edge from any other proof file, reject a deep/private
+Control Plane module from the product server, and reject every other application root from the
+product server.
+
 Run them after installing workspace dependencies:
 
 ```bash

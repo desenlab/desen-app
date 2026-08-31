@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 194,
+  PROOF_UNIT: 196,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 32,
-  FROZEN_INPUT: 141,
-  PACKAGE_OR_APPLICATION: 501,
-  SHARED_PROOF_INFRASTRUCTURE: 240,
-  PROJECT_DOCUMENTATION: 133,
+  FROZEN_INPUT: 142,
+  PACKAGE_OR_APPLICATION: 512,
+  SHARED_PROOF_INFRASTRUCTURE: 250,
+  PROJECT_DOCUMENTATION: 135,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1297 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1323 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1297 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1297);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1323);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 194);
+  assert.equal(proofEntries.length, 196);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -271,6 +271,15 @@ test("permits strict selection only for exact verifier and root-test proof input
     [
       "scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs",
       "tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
+    ],
+  );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "desen-app-user-created-blank-project")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-desen-app-user-created-blank-project.mjs",
+      "tests/desen-app-user-created-blank-project.test.mjs",
     ],
   );
   for (const entry of proofEntries) {
@@ -567,6 +576,32 @@ test("the reviewed M10-T01 successor preserves the historical I07-04 ownership p
     "tests/boundaries/fixtures/desen-app-browser-e2e-imports-unreviewed-app-source/apps/desen-app-browser-e2e/proof-application.ts",
     "tests/boundaries/fixtures/desen-app-browser-e2e-imports-unreviewed-app-source/apps/desen-app/src/main.ts",
     "tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
+    "apps/desen-app-browser-e2e/product-playwright.config.ts",
+    "apps/desen-app-browser-e2e/product-proof-server.mjs",
+    "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+    "apps/desen-app/dev/local-dev-host.mjs",
+    "apps/desen-app/dev/local-dev-host.test.mjs",
+    "apps/desen-app/dev/local-dev.mjs",
+    "apps/desen-app/src/local-runtime-persistence.ts",
+    "apps/desen-app/src/product-bootstrap.tsx",
+    "apps/desen-app/test/local-runtime-persistence.test.ts",
+    "apps/desen-app/test/product-bootstrap.test.tsx",
+    "apps/desen-app/tsconfig.local-dev.json",
+    "docs/adr/0016-desen-app-local-product-bootstrap.md",
+    "docs/proof/DESEN-APP-USER-CREATED-BLANK-PROJECT.md",
+    "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+    "scripts/generate-desen-app-user-created-blank-project-proof.mjs",
+    "scripts/lib/desen-app-user-created-blank-project-proof.mjs",
+    "scripts/verify-desen-app-user-created-blank-project.mjs",
+    "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-control-plane-root/apps/control-plane-api/dist/index.js",
+    "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-control-plane-root/apps/desen-app-browser-e2e/product-proof-server.mjs",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-control-plane/apps/control-plane-api/dist/index.js",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-control-plane/apps/desen-app-browser-e2e/proof-application.mjs",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-control-plane-private/apps/control-plane-api/dist/runtime-activation-sqlite-internal.js",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-control-plane-private/apps/desen-app-browser-e2e/product-proof-server.mjs",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app-browser-e2e/product-proof-server.mjs",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app/src/application.js",
+    "tests/desen-app-user-created-blank-project.test.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);

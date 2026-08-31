@@ -3827,11 +3827,15 @@ This file records implementation discoveries without changing the frozen DESEN 0
   supplies information-architecture and task-boundary input, while the earlier Desen product
   exploration supplies visual-language input. Neither Figma source is bundled runtime data or
   evidence authority.
-- Future action: Later M09 tasks may replace fixture summaries with authenticated application
-  state and connect editor, Catalog, canvas, diagnostics, persistence, Run, and publish behavior
-  through their public boundaries. They must retain explicit route/failure ownership or document
-  and test any widening; no later slice may retroactively present M09-T01 fixtures as durable
-  project or protocol authority.
+- M10-T01A product consumption: the normal local product replaces fixture summaries only after the
+  exact route-bound Source is opened and re-admitted through the public persistence boundary. A
+  missing Source produces an empty project inventory and enables one explicit supported template;
+  a stored Source produces one exact project summary. Storage/configuration/admission failure
+  remains a distinct unavailable state and cannot reveal fixtures. The existing URL grammar is
+  unchanged and never manufactures a Source identity from route text.
+- Future action: A hosted or multi-project profile must add an authenticated project authority and
+  document/test its route widening. No later slice may retroactively present M09-T01 fixtures or
+  the fixed M10-T01A local profile as general project-discovery or protocol authority.
 
 ## PF-089 — Authoring preview context needs an explicit transient authority profile
 
@@ -3893,3 +3897,34 @@ This file records implementation discoveries without changing the frozen DESEN 0
   repository-wide secret/synthetic-data audit for N-036. A future protocol revision should
   standardize preview-context or scenario-persistence semantics only if they must interoperate
   across editors; PF-089 remains `OPEN`.
+
+## PF-090 — A local project profile may use one durable Source as project existence authority
+
+- Status: OPEN
+- Blocks proof: No; M10-T01A can make one exact local project honestly usable without defining a
+  general project or workspace protocol.
+- Protocol location: Outside DESEN 0.1.0; related Source persistence boundary `M08-T08`, product
+  routing finding `PF-088`, and recovery owner `M10-T07`
+- Observation: DESEN 0.1.0 defines Source content and identity but does not define projects,
+  workspace membership, project metadata transactions, browser storage selection, remote tenancy,
+  or synchronization. A product that offers arbitrary project names while persisting only one
+  hidden fixed Source would misrepresent its authority. A separate project row would also create a
+  partial-commit problem unless its creation were atomic with the initial Source.
+- Implementation decision: M10-T01A exposes one explicit local profile only:
+  `account-app/sign-in/com.example.account-app` backed by `account-app-source`. The project's
+  existence is the successfully admitted Source record itself. Missing means no project; the exact
+  Generation 1 create writes the empty admitted Source with `expectedGeneration: null`; found means
+  the one project exists. The App does not store a second project record, infer another identity,
+  or offer free-form naming. A compare-and-set conflict never overwrites the winner and may cross
+  into the editor only after an explicit successful reopen.
+
+  The normal local composition uses the existing SQLite control-plane behind a public Editor Web
+  port. A private app-owned directory, fresh launcher-lifetime credential, exact loopback origin,
+  bounded response transport, and fail-closed browser config keep persistence outside React and
+  outside DESEN semantics. The proof browser uses a temporary instance of that same production
+  composition; the ordinary developer launcher uses ignored durable `.desen` state.
+
+- Future action: General multi-project, renaming, deletion, hosted tenancy, collaboration, and sync
+  need a separate authenticated project-store contract and atomicity decision. Browser restart
+  last-known-good activation remains M10-T07; PF-090 stays `OPEN` until a general product project
+  model is either standardized or deliberately documented as application-specific.

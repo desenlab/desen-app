@@ -1,4 +1,4 @@
-/** One fixture-backed surface exposed to the M09-T01 project shell. */
+/** One admitted surface exposed to the Desen App project shell. */
 export interface DesenAppSurfaceSummary {
   readonly id: string;
   readonly name: string;
@@ -7,7 +7,7 @@ export interface DesenAppSurfaceSummary {
   readonly detail: string;
 }
 
-/** Read-only project summary used only to prove shell and navigation behavior. */
+/** Read-only project summary presented by the Desen App shell. */
 export interface DesenAppProjectSummary {
   readonly id: string;
   readonly name: string;
@@ -27,6 +27,29 @@ function project(summary: DesenAppProjectSummary): DesenAppProjectSummary {
     surfaces: Object.freeze(summary.surfaces.map((item) => surface(item))),
   });
 }
+
+/** Exact supported local project profile created by the normal blank-project product flow. */
+export const DESEN_APP_BLANK_PROJECT: DesenAppProjectSummary = project({
+  id: "account-app",
+  name: "Account app",
+  description: "A local sign-in project authored with the exact web-react reference catalog.",
+  catalog: "web-react@0.1",
+  navigationStatus: "1 local surface",
+  surfaces: [
+    {
+      id: "sign-in",
+      name: "Sign-in",
+      capabilityId: "account.sign-in",
+      state: "navigable",
+      detail: "Local authored Source",
+    },
+  ],
+});
+
+/** Product inventory after the supported local blank project has been created. */
+export const DESEN_APP_LOCAL_PROJECTS: readonly DesenAppProjectSummary[] = Object.freeze([
+  DESEN_APP_BLANK_PROJECT,
+]);
 
 /** Exact inert project fixtures admitted by the first Desen App shell slice. */
 export const DESEN_APP_PROJECTS: readonly DesenAppProjectSummary[] = Object.freeze([
@@ -70,9 +93,12 @@ export const DESEN_APP_PROJECTS: readonly DesenAppProjectSummary[] = Object.free
   }),
 ]);
 
-/** Resolves an exact project fixture without aliasing or fallback. */
-export function findDesenAppProject(projectId: string): DesenAppProjectSummary | undefined {
-  return DESEN_APP_PROJECTS.find((candidate) => candidate.id === projectId);
+/** Resolves an exact project from an admitted inventory without aliasing or fallback. */
+export function findDesenAppProject(
+  projectId: string,
+  projects: readonly DesenAppProjectSummary[] = DESEN_APP_PROJECTS,
+): DesenAppProjectSummary | undefined {
+  return projects.find((candidate) => candidate.id === projectId);
 }
 
 /** Resolves an exact surface fixture inside its already resolved project. */

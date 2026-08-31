@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████████░░░░░░` **110 / 145 tasks complete (76%)**
+**Overall:** `███████████████████░░░░░░` **111 / 146 tasks complete (76%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -26,9 +26,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `█░░░░░░░░` **1 / 9 tasks complete (11%)**
+**M10:** `██░░░░░░░░` **2 / 10 tasks complete (20%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T01:** `DONE`; exact-head hosted gates are required for merge · **Next:** `M10-T02`
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T01A:** `DONE` · **Next:** `M10-T02`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -1188,6 +1188,31 @@ artifacts and 102 current readers. The permission-model fixture correction prese
 changed M10-T01 root-test reader while retaining the same 51 artifacts and 102 reader identities;
 the dedicated checkpoint suite passes 82/82. These corrective authorities do not add another plan
 task or claim an exact-head hosted result.
+
+**M10-T01A checkpoint:** the normal Desen App now starts from an honest zero-project state and
+offers one visible, exact blank sign-in profile. Creating it persists Generation 1 through the real
+loopback control-plane adapter, opens the ordinary editor, and reuses the same compare-and-set
+controller for later saves. The product never injects a proof document or silently substitutes the
+old fixture. Local state lives outside Vite's served root, every direct or encoded `.desen` and
+`/@fs/` state path is denied before SPA fallback, and lifecycle, conflict, indeterminate-save, and
+discard paths fail closed.
+
+The normal-product Chromium scenario uses only visible controls for New project, native Components
+and Layers drag, state, bindings, actions, order, deletion, Generation 2 save, hard reload, and
+Projects-card reopen. The complete App suite passes 407/407; product/lifecycle and local-runtime
+suites pass 16/16 and 17/17; the historical and normal-product browser scenarios each pass 1/1.
+The immutable 20,173-byte task artifact carries 43 exact receipts and is
+`sha256:6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e`, and its independent
+reader passes 11/11. Reader checkpoint sequence 60 preserves sequences 1–59 and advances the exact
+sequence-59 head to
+`sha256:8f8d69456575c8780fa394f7c46189ac02bb8cecdf24c1a46d81ec0d1ea2c7a1` across 52 frozen
+artifacts and 104 readers; the checkpoint suite passes 83/83. The current CI universe contains 206
+workloads and 98 proof units; M10-T01A's affected closure contains 66 proof units and 142 workloads.
+The boundary graph covers 818 modules and 3,373 dependencies with no violation; all 23 fixtures
+pass. Ownership covers 1,323 tracked paths and 196 proof-owned paths.
+M10-T01A is `DONE`, implementation progress is 111/146 (76%), M10 is 2/10, and M10-T02 is next.
+Typed input/pending, invalid credentials, success/navigation, remote deployment, multi-user
+persistence, and G10 remain unproven. These local receipts make no exact-head hosted claim.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

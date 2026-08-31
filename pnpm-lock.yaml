@@ -93,6 +93,9 @@ importers:
       '@desen/editor-core':
         specifier: workspace:*
         version: link:../../packages/editor-core
+      '@desen/editor-web':
+        specifier: workspace:*
+        version: link:../../packages/editor-web
       '@desen/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
@@ -124,9 +127,6 @@ importers:
       '@desen/control-plane-api':
         specifier: workspace:*
         version: link:../control-plane-api
-      '@desen/editor-web':
-        specifier: workspace:*
-        version: link:../../packages/editor-web
       '@desen/reference-host-web-server':
         specifier: workspace:*
         version: link:../reference-host-web-server
@@ -170,6 +170,9 @@ importers:
       '@desen/app-web':
         specifier: workspace:*
         version: link:../desen-app
+      '@desen/control-plane-api':
+        specifier: workspace:*
+        version: link:../control-plane-api
       '@playwright/test':
         specifier: 1.62.1
         version: 1.62.1

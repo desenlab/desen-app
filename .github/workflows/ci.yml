@@ -162,6 +162,8 @@ jobs:
         run: |
           node scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs
           node --test tests/desen-app-browser-e2e-workspace-compatibility.test.mjs
+          node scripts/verify-desen-app-user-created-blank-project.mjs
+          node --test tests/desen-app-user-created-blank-project.test.mjs
 
       - name: Upload browser failure evidence
         if: ${{ failure() }}

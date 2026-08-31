@@ -1206,3 +1206,23 @@ files and eleven exact Runtime, Editor Core, and App parents. Structural CI owns
 and ownership over 1,253 tracked paths, including 188 proof-owned paths. These local test receipts
 make no required-gate, hosted-CI, publication/activation, or automated real-browser E2E claim.
 P-16 is `PROVEN`, PF-086 remains `OPEN`, and proof gates remain 10/13.
+
+## M10-T01A normal-product bootstrap testing
+
+The proof-only M10-T01 harness remains an independent historical test. M10-T01A adds a second
+browser scenario against the normal `apps/desen-app/index.html` and `src/main.tsx` production
+entry. Its server builds that entry with a fresh, closed local-runtime configuration, starts the
+real control-plane API over an owner-only temporary SQLite root, serves the production output on a
+fixed loopback origin, and removes its temporary state during teardown. It must not inject
+`initialDocument`, mutate browser history to skip product navigation, or expose the old
+`window.__DESEN_BROWSER_PROOF__` readback bridge.
+
+The scenario begins at `/`, creates the supported blank project through the visible modal, proves
+the Generation 1 empty Source, authors the sign-in structure through the same Components, Layers,
+Inspector, State, and Actions controls available to a person, and saves Generation 2. It then hard
+reloads the production entry, verifies the stored state/bindings/actions/layer order, returns to
+Projects, and reopens the project through visible cards. Browser assertions are paired with
+focused Vitest coverage for StrictMode single-open behavior, missing/existing/failing storage,
+exact create requests, CAS conflicts, explicit reopen, unavailable host composition, and late
+settlement revocation. Local-runtime tests separately cover closed config capture, transport
+limits, random credentials, private state roots, startup rollback, and idempotent shutdown.

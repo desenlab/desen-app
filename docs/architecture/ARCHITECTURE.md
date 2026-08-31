@@ -1749,6 +1749,42 @@ validator, and Design/Run parity is asserted over the same authored node order a
 M10-T01 grants no form-execution, fixture-settlement, host-operation, publication, activation, or
 recovery claim; those remain M10-T02–M10-T07.
 
+## M10-T01A normal-product blank-project boundary
+
+M10-T01A removes the proof-only bootstrap shortcut from the normal local Desen App profile. The
+browser entry now receives one `DesenEditorPersistencePort` from its trusted composition root and
+mounts `DesenAppProduct`. That product creates one App-owned persistence controller for the exact
+`account-app/sign-in/com.example.account-app` profile and completes `openSource` before exposing a
+project inventory or mounting an editor. A missing Source therefore renders a real empty Projects
+state; an accepted stored Source renders the one admitted local project; adapter, storage, or
+document-admission failure renders a controlled unavailable state and never substitutes the M09
+fixtures.
+
+The visible New project flow declares its current limit instead of pretending to support arbitrary
+identities: one `web-react@0.1` blank sign-in template, one empty Stack root, no child/state/binding/
+event/action data, and one explicit `420 × 720` portrait authoring frame. Creating the project is
+the first generation-CAS Source write itself, so no separate project record can be left partially
+committed. A stale concurrent create remains a conflict; the App offers an explicit reopen and
+never retries as an overwrite. The same already-opened controller is passed into the surface
+editor, preserving generation, baseline, and Source authority across the bootstrap-to-editor
+transition. The product owns its lifetime; the editor does not dispose an injected controller and
+late create/open settlements cannot navigate after that product lifetime is revoked.
+
+The normal local launcher composes the existing control-plane API and Editor Web adapter rather
+than introducing browser-local persistence. It creates a private app-owned
+`.desen/desen-app/control-plane`
+root, starts the SQLite-backed control plane on fixed loopback, generates a fresh 256-bit bearer
+secret for each launcher lifetime, admits only the exact App origin, and injects the closed runtime
+configuration into Vite in memory. The browser transport is fixed to that loopback authority,
+omits credentials and referrers, rejects redirects, and bounds time, headers, and response bytes.
+Missing or malformed configuration fails closed; no credential is checked in, logged, placed in an
+environment file, or rendered into product UI.
+
+This is a local, single-profile product bootstrap, not a hosted project service, arbitrary project
+schema, multi-user workspace, synchronization protocol, or browser last-known-good store. It does
+not widen M10-T02–M10-T07: typed input/pending, fixture outcomes, real host operations,
+publish/activation recovery, and product restart LKG remain with their existing owners.
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific

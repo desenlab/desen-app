@@ -14,12 +14,28 @@ const cases = [
   { name: "allowed-reference-host-server-control-plane-root", expectedRule: null },
   { name: "allowed-desen-app-browser-e2e-reviewed-imports", expectedRule: null },
   {
+    name: "allowed-desen-app-browser-e2e-product-server-control-plane-root",
+    expectedRule: null,
+  },
+  {
     name: "desen-app-browser-e2e-imports-publisher",
     expectedRule: "application-desen-app-browser-e2e-allowed-dependencies",
   },
   {
     name: "desen-app-browser-e2e-imports-unreviewed-app-source",
     expectedRule: "desen-app-browser-e2e-reviewed-app-source-only",
+  },
+  {
+    name: "desen-app-browser-e2e-non-product-server-imports-control-plane",
+    expectedRule: "desen-app-browser-e2e-reviewed-app-source-only",
+  },
+  {
+    name: "desen-app-browser-e2e-product-server-imports-control-plane-private",
+    expectedRule: "desen-app-browser-e2e-product-server-control-plane-public-root-only",
+  },
+  {
+    name: "desen-app-browser-e2e-product-server-imports-other-app",
+    expectedRule: "desen-app-browser-e2e-product-server-has-no-other-application-dependencies",
   },
   {
     name: "protocol-imports-runtime",

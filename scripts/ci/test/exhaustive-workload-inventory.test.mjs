@@ -16,7 +16,7 @@ import {
 
 const WORKSPACE_ROOT = resolve(import.meta.dirname, "../../..");
 const COMPATIBILITY_PROJECTION_SHA256 =
-  "3fbc260e165660b1e0daedc24c459870a45c4bb7ab0d337001e0e4bd7510d6b9";
+  "91519ad61ebc1bfed9d1d2553cf92b517cb4de2ad1313d679e2e26d86c311db1";
 
 function cloneInventory() {
   return structuredClone(createExhaustiveWorkloadInventory());
@@ -84,19 +84,19 @@ async function currentRepositoryInputs() {
   };
 }
 
-test("the neutral inventory preserves the exact 204-workload successor projection", () => {
+test("the neutral inventory preserves the exact 206-workload successor projection", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const projection = inventory.nodes.map(({ id, command, args }) => ({ id, command, args }));
   const projectionSha256 = createHash("sha256").update(JSON.stringify(projection)).digest("hex");
 
   assert.equal(inventory.schemaVersion, 1);
   assert.equal(inventory.profile, "desen.ci.exhaustive-workload-inventory.v1");
-  assert.equal(inventory.workloadCount, 204);
-  assert.equal(inventory.proofUnitCount, 97);
+  assert.equal(inventory.workloadCount, 206);
+  assert.equal(inventory.proofUnitCount, 98);
   assert.equal(inventory.inventorySha256, EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256);
   assert.equal(
     EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    "bc71b712811d517e2de08c153ab8dc3ac5fe688fa1b7aafea84ee68636e79292",
+    "2b10f2fc39003592cddbd87122182de5acf05bd8c88afbbbd111d3ccc144919c",
   );
   assert.equal(projectionSha256, COMPATIBILITY_PROJECTION_SHA256);
   assert.deepEqual(
@@ -113,11 +113,11 @@ test("the neutral inventory preserves the exact 204-workload successor projectio
     ],
   );
   assert.equal(
-    inventory.nodes.slice(8, 105).every(({ id }) => id.startsWith("verify-")),
+    inventory.nodes.slice(8, 106).every(({ id }) => id.startsWith("verify-")),
     true,
   );
   assert.equal(
-    inventory.nodes.slice(105, 202).every(({ id }) => id.startsWith("test-")),
+    inventory.nodes.slice(106, 204).every(({ id }) => id.startsWith("test-")),
     true,
   );
   assert.deepEqual(
@@ -125,9 +125,9 @@ test("the neutral inventory preserves the exact 204-workload successor projectio
     ["dependency-boundaries", "boundary-fixtures"],
   );
   assert.deepEqual(inventory.proofUnits.at(-1), {
-    id: "desen-app-browser-e2e-workspace-compatibility",
-    verifierNodeId: "verify-desen-app-browser-e2e-workspace-compatibility",
-    rootTestNodeId: "test-desen-app-browser-e2e-workspace-compatibility",
+    id: "desen-app-user-created-blank-project",
+    verifierNodeId: "verify-desen-app-user-created-blank-project",
+    rootTestNodeId: "test-desen-app-user-created-blank-project",
   });
   assert.equal(validateExhaustiveWorkloadInventory(inventory), inventory);
 });
@@ -137,13 +137,13 @@ test("repository manifests and discovered proof files retain the reviewed parity
   const receipt = validateRepositoryWorkloadInputs(inputs);
 
   assert.deepEqual(receipt, {
-    proofCount: 97,
-    verifierCount: 97,
-    rootTestCount: 97,
+    proofCount: 98,
+    verifierCount: 98,
+    rootTestCount: 98,
     ciContractScriptCount: 5,
     ciContractScriptSha256: EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
     legacyPrerequisiteCount: 735,
-    legacyPrerequisiteSha256: "38640b401f5294cd8420ddd511c807a2f90a7d6b2079c98b3f451b9288c7e9b0",
+    legacyPrerequisiteSha256: "5dc114ab24bc7d945475608fd77a84ba3fbc3fe547dac898c263aca3eba894bd",
     legacyLeafInvocationCount: 4529,
     legacyLeafInvocationSha256: "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb",
     distinctLeafWorkloadCount: 319,
@@ -357,7 +357,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
       ports: "NONE",
     },
   });
-  assert.equal(boundaries.dependencies.length, 97);
+  assert.equal(boundaries.dependencies.length, 98);
 
   for (const unit of inventory.proofUnits) {
     const verifier = nodeById.get(unit.verifierNodeId);

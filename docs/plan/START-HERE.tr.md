@@ -1198,6 +1198,23 @@ P-08 `NOT_PROVEN`, P-12 M10-T07'ye kadar `NOT_PROVEN`, N-036 `PLANNED` ve
 PF-085/PF-086/PF-089 `OPEN` kalır. Otomatik gerçek-browser E2E ve native drag bu uyumluluk
 kanıtıyla kanıtlanmamıştır; sıradaki iş M10-T01'dir.
 
+M10-T01A `DONE` durumundadır. Normal Desen App artık sıfır projeyle açılır; görünür **New project**
+akışındaki tek desteklenen boş sign-in profili gerçek yerel control-plane üzerinden Generation 1
+olarak kaydedilir ve normal editörde açılır. Kullanıcı görünür arayüzden bileşen, layer, state,
+binding ve action düzenleyebilir; Generation 2 kaydı, tam sayfa yenileme ve Projects kartından
+yeniden açma gerçek Chromium senaryosunda doğrulanmıştır. Yerel Source verisi Vite'ın servis ettiği
+kökün dışındadır; çakışma, belirsiz veya devam eden kayıt ve bozuk storage durumları fixture'a
+düşmeden güvenli kapanır.
+
+Değişmez görev eseri 20.173 bayt ve 43 kesin dosya kaydıdır;
+`sha256:6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e` ile sabittir. Okuyucu
+checkpoint sıra 60, 52 eser ve 104 okuyucuyu
+`sha256:8f8d69456575c8780fa394f7c46189ac02bb8cecdf24c1a46d81ec0d1ea2c7a1` başında doğrular.
+Mimari sınır grafiğinde 818 modül / 3.373 bağımlılık ihlalsizdir ve 23 fixture'ın tamamı geçer.
+Genel ilerleme 111/146 (%76), M10 2/10'dur; sıradaki görev M10-T02'dir ve henüz
+`NOT_STARTED` durumundadır. Yazılı girdi/pending, invalid credentials, başarı/navigasyon, uzak ve
+çok kullanıcılı deployment ile G10 kapanışı bu ara görevin kapsamı değildir.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip
