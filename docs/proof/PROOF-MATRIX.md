@@ -3090,3 +3090,24 @@ empty-project authoring claim. M10-T01A does not claim typed input and pending o
 (M10-T02), invalid credentials and visible public failure (M10-T03), success navigation and a real
 host operation (M10-T04), remote deployment, or G10 closure. M10-T01 remains `DONE`; task and gate
 counts do not advance for this corrective intermediate successor, and M10-T02 remains next.
+
+The append-only `M10-T01A-SECURE-SCROLL-COMPAT` receipt closes an editor-geometry regression without
+rewriting the immutable 20,173-byte M10-T01A artifact or any historical artifact. The hidden native
+boolean input is contained by its positioned switch label, replacement control focus uses
+`preventScroll`, and the desktop editor root clips outer programmatic scrolling while the
+responsive layout retains normal document flow. At a real `1600 × 840` Chromium viewport, the
+normal-product scenario requires zero initial window, document, and editor scroll, then preserves
+the exact command-bar, authoring-shell, canvas, Inspector, and `420 × 720` frame bounds through
+**Set Secure** and native switch input. Four exact current receipts cover the 15,935-byte browser
+scenario at `sha256:1ea724a50606719b597ddfee7db95594a9a1272d2cac33fd2c23800879b9cbc1`, the
+112,302-byte App stylesheet at
+`sha256:4ff3d05e8160ab8b155b1e9a24a565dd2988e808a02dd29cb375dc8edc2f41d1`, the
+32,412-byte Inspector source at
+`sha256:06e62b9449aa4f1ea05bc0b28d045897897baabfbf257eff9b9bafa842ecf470`, and its
+27,492-byte component test at
+`sha256:ee46354d9ff0c09fe6b85e4a7ee66a85221832ce0c198d0319222b3cda90d6b5`. Fifteen direct
+verifiers, 218/218 combined historical reader cases, the 1/1 normal-product Chromium scenario, and
+the 86/86 checkpoint suite pass locally. Sequence 63 preserves all 52 frozen artifacts and 104
+reader identities, reseals only `[70..97, 102, 103]`, and advances the exact sequence-62 head to
+`sha256:7245d3334dfaf801692783ed8a500ecc124ed259291ccf433cbc6fab21c76da7`. This correction adds
+no task, gate, or P-status change and makes no hosted exact-head claim.

@@ -240,6 +240,17 @@ test(DESEN_APP_USER_CREATED_BLANK_PROJECT_ROOT_TEST_NAMES[9], async () => {
   for (const boundaryPath of BOUNDARY_AUTHORITY_PATHS) {
     assert.equal(paths.includes(boundaryPath), true);
   }
+  const verified = await verifyDesenAppUserCreatedBlankProjectEvidence();
+  assert.equal(
+    verified.artifactSha256,
+    "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+  );
+  assert.equal(verified.compatibilityReceipt, "M10-T01A-SECURE-SCROLL-COMPAT");
+  assert.equal(verified.compatibilityReceipts, 4);
+  assert.equal(verified.checkpointResealedReaders, 2);
+  assert.equal(verified.correctiveReceiptOnly, true);
+  assert.equal(verified.immutableTaskArtifactPreserved, true);
+  assert.equal(verified.retainedHistoricalReceipts, 39);
 });
 
 test(DESEN_APP_USER_CREATED_BLANK_PROJECT_ROOT_TEST_NAMES[10], async () => {
@@ -338,8 +349,42 @@ test(DESEN_APP_USER_CREATED_BLANK_PROJECT_ROOT_TEST_NAMES[10], async () => {
       buildOptions: {},
       proofDocument: changedByte(exactProofDocument(built.artifactSha256)),
     }),
+    expectedError("ARTIFACT_DRIFT"),
+  );
+  const immutableArtifactBytes = await readFile(
+    path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json"),
+  );
+  await assert.rejects(
+    verifyDesenAppUserCreatedBlankProjectEvidence({
+      artifactBytes: immutableArtifactBytes,
+      buildOptions: {},
+      proofDocument: changedByte(
+        exactProofDocument("6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e"),
+      ),
+    }),
     expectedError("PROOF_DOCUMENT_DRIFT"),
   );
+  for (const relativePath of [
+    "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+    "apps/desen-app/src/inspector-panel.tsx",
+    "apps/desen-app/src/styles.css",
+  ]) {
+    const authorityBytes = await readFile(path.join(ROOT, relativePath));
+    await assert.rejects(
+      verifyDesenAppUserCreatedBlankProjectEvidence({
+        artifactBytes: immutableArtifactBytes,
+        buildOptions: {
+          fileOverrides: new Map([
+            [relativePath, Buffer.concat([authorityBytes, Buffer.from("\n")])],
+          ]),
+        },
+        proofDocument: exactProofDocument(
+          "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+        ),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
   for (const options of [
     { unknown: true },
     { artifactPath: "" },
@@ -357,8 +402,30 @@ test(DESEN_APP_USER_CREATED_BLANK_PROJECT_ROOT_TEST_NAMES[10], async () => {
   const written = await writeDesenAppUserCreatedBlankProjectEvidence({
     artifactPath: destination,
   });
-  assert.equal(written.artifactSha256, built.artifactSha256);
-  assert.deepEqual(await readFile(destination), built.artifactBytes);
+  assert.equal(
+    written.artifactSha256,
+    "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+  );
+  assert.equal(written.preserved, false);
+  assert.deepEqual(await readFile(destination), immutableArtifactBytes);
+
+  const trackedBefore = await readFile(
+    path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json"),
+  );
+  let trackedRenameAttempted = false;
+  const preserved = await writeDesenAppUserCreatedBlankProjectEvidence({
+    beforeAtomicRename() {
+      trackedRenameAttempted = true;
+    },
+  });
+  assert.equal(preserved.preserved, true);
+  assert.equal(trackedRenameAttempted, false);
+  assert.deepEqual(
+    await readFile(
+      path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json"),
+    ),
+    trackedBefore,
+  );
 
   const interrupted = path.join(directory, "interrupted.json");
   await assert.rejects(

@@ -2161,6 +2161,20 @@ progress is 111/146 (76%), M10 is 2/10, and M10-T02 remains `NOT_STARTED` and ne
 invalid credentials, success/navigation/real host operation, remote deployment, multi-user
 persistence, and G10 remain unproven. These local receipts make no exact-head hosted claim.
 
+`M10-T01A-SECURE-SCROLL-COMPAT` is an append-only corrective receipt, not another plan task. The
+optional `Secure` boolean now keeps its invisible native input inside the switch label, replacement
+Inspector controls receive focus with `preventScroll`, and the desktop editor workplane clips outer
+programmatic scrolling without changing the responsive document-flow layout. The normal-product
+Chromium scenario deliberately contracts to `1600 × 840`, requires zero initial window, document,
+and editor scroll, and preserves the exact vertical bounds of the command bar, authoring shell,
+canvas, Inspector, and `420 × 720` frame through **Set Secure** and the native switch interaction.
+The immutable 20,173-byte M10-T01A artifact and all historical artifacts remain unchanged. Fifteen
+direct verifiers, 218/218 combined historical reader cases, the 1/1 product Chromium scenario, and
+the 86/86 checkpoint suite pass locally. Sequence 63 preserves all 52 frozen artifacts and 104
+reader identities, reseals only `[70..97, 102, 103]`, and advances the exact sequence-62 head to
+`sha256:7245d3334dfaf801692783ed8a500ecc124ed259291ccf433cbc6fab21c76da7`. No task, gate,
+progress, or M10-T02 status changes, and no hosted exact-head result is inferred.
+
 ### M10-T01 public build-log drafts
 
 **X (EN, 280 characters)**

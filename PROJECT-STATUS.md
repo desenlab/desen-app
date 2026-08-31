@@ -4643,6 +4643,19 @@ M09-T14/G09 evidence:
 - reader checkpoint sequence 62 preserves sequences 1–61 and advances that exact head to
   `sha256:15ede557b4167cb7bc0cce89b02cf0e9d9f0f7e92c4c5fdc2d799cb3bcf0be55`; only the
   M10-T01-COMPAT root reader advances for runner-owned temp isolation
+- corrective compatibility receipt `M10-T01A-SECURE-SCROLL-COMPAT` preserves the immutable
+  20,173-byte / 43-receipt M10-T01A artifact while containing the optional-boolean switch input
+  inside its label, handing replacement focus over with `preventScroll`, and clipping outer
+  desktop editor scrolling; the responsive document-flow layout remains scrollable
+- the normal-product Chromium regression runs at `1600 × 840`, requires zero window, document, and
+  editor scroll before the edit, and proves unchanged command-bar, authoring-shell, canvas,
+  Inspector, and `420 × 720` frame bounds after **Set Secure** and the native switch interaction;
+  the browser scenario passes 1/1, the focused Inspector suite passes 13/13, fifteen direct
+  verifiers pass, and the combined historical reader suites pass 218/218 locally
+- reader checkpoint sequence 63 preserves sequences 1–62, all 52 frozen artifacts, and all 104
+  reader identities; it advances the exact sequence-62 head to
+  `sha256:7245d3334dfaf801692783ed8a500ecc124ed259291ccf433cbc6fab21c76da7`, reseals only reader
+  indexes `[70..97, 102, 103]`, and its dedicated suite passes 86/86
 - current CI universe: 206 workloads / 98 proof units; inventory
   `sha256:2b10f2fc39003592cddbd87122182de5acf05bd8c88afbbbd111d3ccc144919c`, impact graph
   `sha256:a64db36bfd1797cc16dd79cfaa788e36ec9f7850f19f0ea710ac026e05720b39`, and the 66-proof-unit /
@@ -4655,7 +4668,8 @@ M09-T14/G09 evidence:
   remains `NOT_STARTED` and is next
 - explicit nonclaims: typed input/pending, invalid credentials/visible failure,
   success/navigation/real host operation, remote deployment, multi-user persistence, and G10
-  closure remain unproven; these local receipts make no exact-head hosted claim
+  closure remain unproven; the Secure-scroll compatibility repair adds no task or gate completion,
+  and these local receipts make no exact-head hosted claim
 
 ## Status vocabulary
 

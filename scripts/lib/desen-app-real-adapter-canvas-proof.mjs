@@ -46,6 +46,46 @@ const M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS = Object.freeze([
   "package.json",
   "pnpm-lock.yaml",
 ]);
+const M10_USER_CREATED_BLANK_PROJECT_SECURE_SCROLL_RECEIPTS = Object.freeze([
+  Object.freeze({
+    path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+    bytes: 15_935,
+    sha256: "1ea724a50606719b597ddfee7db95594a9a1272d2cac33fd2c23800879b9cbc1",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/application.module.css",
+    bytes: 112_302,
+    sha256: "4ff3d05e8160ab8b155b1e9a24a565dd2988e808a02dd29cb375dc8edc2f41d1",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/inspector-panel.tsx",
+    bytes: 32_412,
+    sha256: "06e62b9449aa4f1ea05bc0b28d045897897baabfbf257eff9b9bafa842ecf470",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/test/inspector-panel.test.tsx",
+    bytes: 27_492,
+    sha256: "ee46354d9ff0c09fe6b85e4a7ee66a85221832ce0c198d0319222b3cda90d6b5",
+  }),
+]);
+const M10_USER_CREATED_BLANK_PROJECT_OVERRIDDEN_HISTORICAL_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+  "apps/desen-app/src/application.module.css",
+]);
+const M10_USER_CREATED_BLANK_PROJECT_ADDITIVE_PATHS = Object.freeze([
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/test/inspector-panel.test.tsx",
+]);
+const M10_USER_CREATED_BLANK_PROJECT_CHECKPOINT_RESEALED_PATHS = Object.freeze([
+  "scripts/lib/desen-app-user-created-blank-project-proof.mjs",
+  "tests/desen-app-user-created-blank-project.test.mjs",
+]);
+const M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS = Object.freeze([
+  ...new Set([
+    ...M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS,
+    ...M10_USER_CREATED_BLANK_PROJECT_SECURE_SCROLL_RECEIPTS.map((receipt) => receipt.path),
+  ]),
+]);
 const M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT = Object.freeze({
   path: "apps/desen-app/README.md",
   bytes: 43_576,
@@ -347,7 +387,19 @@ function authenticateM10UserCreatedBlankProjectArtifact(files) {
       );
     }
   }
-  return { artifact, receiptMap };
+  for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_OVERRIDDEN_HISTORICAL_PATHS) {
+    if (!receiptMap.has(relativePath)) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The immutable M10-T01A receipt set is missing ${relativePath}.`,
+      );
+    }
+  }
+  const currentReceiptMap = new Map(receiptMap);
+  for (const receipt of M10_USER_CREATED_BLANK_PROJECT_SECURE_SCROLL_RECEIPTS) {
+    currentReceiptMap.set(receipt.path, receipt);
+  }
+  return { artifact, receiptMap, currentReceiptMap };
 }
 
 function reviewedSuccessorReceiptMap(receipts, files) {
@@ -358,8 +410,8 @@ function reviewedSuccessorReceiptMap(receipts, files) {
   for (const receipt of Object.values(M10_EMPTY_PROJECT_SUCCESSOR_RECEIPTS)) {
     receiptMap.set(receipt.path, receipt);
   }
-  const m10T01AReceipts = authenticateM10UserCreatedBlankProjectArtifact(files).receiptMap;
-  for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS) {
+  const m10T01AReceipts = authenticateM10UserCreatedBlankProjectArtifact(files).currentReceiptMap;
+  for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS) {
     receiptMap.set(relativePath, m10T01AReceipts.get(relativePath));
   }
   receiptMap.set(
@@ -528,9 +580,9 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
 }
 
 function authenticateM10UserCreatedBlankProjectSuccessor(files) {
-  const { artifact, receiptMap } = authenticateM10UserCreatedBlankProjectArtifact(files);
-  for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS) {
-    const expected = receiptMap.get(relativePath);
+  const { artifact, currentReceiptMap } = authenticateM10UserCreatedBlankProjectArtifact(files);
+  for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS) {
+    const expected = currentReceiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
       bytes?.byteLength !== expected.bytes ||
@@ -566,8 +618,14 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
     }),
     currentProjection: Object.freeze({
       relationship: "EXACT_POST_M10_T01A_LIVE_RECEIPTS",
+      compatibilityReceipt: "M10-T01A-SECURE-SCROLL-COMPAT",
+      correctiveReceiptOnly: true,
       artifactBackedPaths: Object.freeze([...M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS]),
       reviewedPaths: Object.freeze([readme.path]),
+      overriddenHistoricalPaths: M10_USER_CREATED_BLANK_PROJECT_OVERRIDDEN_HISTORICAL_PATHS,
+      additivePaths: M10_USER_CREATED_BLANK_PROJECT_ADDITIVE_PATHS,
+      checkpointResealedPaths: M10_USER_CREATED_BLANK_PROJECT_CHECKPOINT_RESEALED_PATHS,
+      trackedReceipts: M10_USER_CREATED_BLANK_PROJECT_SECURE_SCROLL_RECEIPTS,
     }),
     normalProductEntryCovered: artifact.claim.normalProductEntryCovered,
     zeroProjectStartCovered: artifact.claim.zeroProjectStartCovered,
@@ -750,7 +808,7 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PATH,
   "dependency-cruiser.config.cjs",
   ...new Set([
-    ...M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS,
+    ...M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS,
     M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT.path,
     ...TRACKED_PATHS,
     ROOT_PACKAGE_PATH,
@@ -1171,7 +1229,7 @@ const EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS = Object.freeze([
   "packages/runtime-core/dist/index.js",
 ]);
 const EXPECTED_CURRENT_VITE_GRAPH_SHA256 =
-  "sha256:cb43855be994ef4f8bd22f0d6985f166fdaf18cd11fc512cd897cefa258d13dd";
+  "sha256:83287e7eb4febbe9b194c56bf368b4c1af24fbfb606d9ea29cce3081a6f4a8ab";
 
 const ALLOWED_RUNTIME_PACKAGE_EDGES = Object.freeze({
   "catalog-sdk": Object.freeze(["catalog-sdk", "protocol"]),

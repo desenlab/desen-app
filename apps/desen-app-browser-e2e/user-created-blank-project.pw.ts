@@ -69,6 +69,45 @@ async function addChangeStateAction(page: Page, stateName: string): Promise<void
   await inspector.getByRole("tab", { name: "Inspector" }).click();
 }
 
+async function readEditorViewportSnapshot(page: Page) {
+  return page.evaluate(() => {
+    const editor = document.querySelector<HTMLElement>('[data-surface-editor="true"]');
+    const commandBar = document.querySelector<HTMLElement>('[aria-label="Workspace commands"]');
+    const authoring = document.querySelector<HTMLElement>('[data-authoring-layout="split"]');
+    const canvas = document.querySelector<HTMLElement>('[data-canvas-workspace="true"]');
+    const inspector = document.querySelector<HTMLElement>('[data-authoring-inspector="true"]');
+    const frame = document.querySelector<HTMLElement>("[data-canvas-frame]");
+    if (
+      editor === null ||
+      commandBar === null ||
+      authoring === null ||
+      canvas === null ||
+      inspector === null ||
+      frame === null
+    ) {
+      throw new Error("Expected the complete surface editor geometry.");
+    }
+
+    const verticalBounds = (element: HTMLElement) => {
+      const bounds = element.getBoundingClientRect();
+      return Object.freeze({ bottom: bounds.bottom, top: bounds.top });
+    };
+
+    return Object.freeze({
+      authoring: verticalBounds(authoring),
+      canvas: verticalBounds(canvas),
+      commandBar: verticalBounds(commandBar),
+      documentScrollTop: document.scrollingElement?.scrollTop ?? 0,
+      editorClientHeight: editor.clientHeight,
+      editorScrollHeight: editor.scrollHeight,
+      editorScrollTop: editor.scrollTop,
+      frame: verticalBounds(frame),
+      inspector: verticalBounds(inspector),
+      windowScrollY: window.scrollY,
+    });
+  });
+}
+
 async function layerIds(page: Page): Promise<(string | null)[]> {
   return page
     .getByRole("region", { name: "Sign-in layer hierarchy" })
@@ -228,8 +267,21 @@ test("creates, authors, persists, reloads, and reopens a blank sign-in project t
     })
     .click();
   await setTextProperty(page, "Label", "Password");
+  await page.setViewportSize({ height: 840, width: 1_600 });
+  const anchoredViewport = await readEditorViewportSnapshot(page);
+  expect(anchoredViewport.windowScrollY).toBe(0);
+  expect(anchoredViewport.documentScrollTop).toBe(0);
+  expect(anchoredViewport.editorScrollTop).toBe(0);
+  expect(anchoredViewport.editorScrollHeight).toBe(anchoredViewport.editorClientHeight);
+
   await inspector.getByRole("button", { name: "Set Secure" }).click();
-  await inspector.getByRole("switch", { name: "Secure" }).check();
+  const secure = inspector.getByRole("switch", { name: "Secure" });
+  await expect(secure).toBeFocused();
+  await expect.poll(() => readEditorViewportSnapshot(page)).toEqual(anchoredViewport);
+
+  await secure.check();
+  await expect.poll(() => readEditorViewportSnapshot(page)).toEqual(anchoredViewport);
+  await page.setViewportSize({ height: 1_000, width: 1_600 });
   await bindValueToState(page, "password");
   await addChangeStateAction(page, "password");
 

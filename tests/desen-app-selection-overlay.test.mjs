@@ -16,6 +16,44 @@ import {
 } from "../scripts/lib/desen-app-selection-overlay-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const M10_T01A_SECURE_SCROLL_CURRENT_PROJECTION = Object.freeze({
+  compatibilityReceipt: "M10-T01A-SECURE-SCROLL-COMPAT",
+  correctiveReceiptOnly: true,
+  overriddenHistoricalPaths: Object.freeze([
+    "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+    "apps/desen-app/src/application.module.css",
+  ]),
+  additivePaths: Object.freeze([
+    "apps/desen-app/src/inspector-panel.tsx",
+    "apps/desen-app/test/inspector-panel.test.tsx",
+  ]),
+  checkpointResealedPaths: Object.freeze([
+    "scripts/lib/desen-app-user-created-blank-project-proof.mjs",
+    "tests/desen-app-user-created-blank-project.test.mjs",
+  ]),
+  trackedReceipts: Object.freeze([
+    Object.freeze({
+      path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+      bytes: 15_935,
+      sha256: "1ea724a50606719b597ddfee7db95594a9a1272d2cac33fd2c23800879b9cbc1",
+    }),
+    Object.freeze({
+      path: "apps/desen-app/src/application.module.css",
+      bytes: 112_302,
+      sha256: "4ff3d05e8160ab8b155b1e9a24a565dd2988e808a02dd29cb375dc8edc2f41d1",
+    }),
+    Object.freeze({
+      path: "apps/desen-app/src/inspector-panel.tsx",
+      bytes: 32_412,
+      sha256: "06e62b9449aa4f1ea05bc0b28d045897897baabfbf257eff9b9bafa842ecf470",
+    }),
+    Object.freeze({
+      path: "apps/desen-app/test/inspector-panel.test.tsx",
+      bytes: 27_492,
+      sha256: "ee46354d9ff0c09fe6b85e4a7ee66a85221832ce0c198d0319222b3cda90d6b5",
+    }),
+  ]),
+});
 const PARENT_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json";
 const SELECTION_SOURCE = "apps/desen-app/src/authoring-selection.ts";
 const ADAPTER_SOURCE = "apps/desen-app/src/adapter-canvas.tsx";
@@ -933,6 +971,26 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
 
 test("[M10-T01A successor] authenticates the normal-product blank-project seal and live receipts", async () => {
   const successor = built.currentCompatibility.userCreatedBlankProjectSuccessor;
+  assert.deepEqual(
+    {
+      compatibilityReceipt: successor.currentProjection.compatibilityReceipt,
+      correctiveReceiptOnly: successor.currentProjection.correctiveReceiptOnly,
+      overriddenHistoricalPaths: successor.currentProjection.overriddenHistoricalPaths,
+      additivePaths: successor.currentProjection.additivePaths,
+      checkpointResealedPaths: successor.currentProjection.checkpointResealedPaths,
+      trackedReceipts: successor.currentProjection.trackedReceipts,
+    },
+    M10_T01A_SECURE_SCROLL_CURRENT_PROJECTION,
+  );
+  for (const { path: relativePath } of M10_T01A_SECURE_SCROLL_CURRENT_PROJECTION.trackedReceipts) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
+    await assert.rejects(
+      buildDesenAppSelectionOverlayEvidence({
+        fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
   assert.deepEqual(
     {
       task: successor.task,
