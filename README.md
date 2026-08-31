@@ -1206,8 +1206,11 @@ The immutable 20,173-byte task artifact carries 43 exact receipts and is
 reader passes 11/11. Reader checkpoint sequence 61 preserves sequences 1–60 and advances the exact
 sequence-60 head to
 `sha256:a80e008bf0f383ab46d097abfec17710131a47656040ec07dc7cc60f965666fb` across 52 frozen
-artifacts and 104 readers; the checkpoint suite passes 84/84. The current CI universe contains 206
-workloads and 98 proof units; M10-T01A's affected closure contains 66 proof units and 142 workloads.
+artifacts and 104 readers. Sequence 62 preserves sequences 1–61 and advances that exact head to
+`sha256:15ede557b4167cb7bc0cce89b02cf0e9d9f0f7e92c4c5fdc2d799cb3bcf0be55` by resealing only the
+M10-T01-COMPAT root reader for runner-owned temp isolation; the checkpoint suite passes 85/85. The
+current CI universe contains 206 workloads and 98 proof units; M10-T01A's affected closure contains
+66 proof units and 142 workloads.
 The boundary graph covers 818 modules and 3,373 dependencies with no violation; all 23 fixtures
 pass. Ownership covers 1,323 tracked paths and 196 proof-owned paths.
 M10-T01A is `DONE`, implementation progress is 111/146 (76%), M10 is 2/10, and M10-T02 is next.

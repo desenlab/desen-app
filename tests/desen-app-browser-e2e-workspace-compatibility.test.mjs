@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
-import { mkdtemp, readFile, rm, symlink } from "node:fs/promises";
+import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, test } from "node:test";
@@ -186,8 +186,10 @@ test(DESEN_APP_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ROOT_TEST_NAMES[9], async () 
   );
 
   const directory = await temporaryDirectory("desen-compat-symlink-");
+  const target = path.join(directory, "artifact-target.json");
   const alias = path.join(directory, "artifact.json");
-  await symlink(DEFAULT_DESEN_APP_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PATH, alias);
+  await writeFile(target, historical, { flag: "wx" });
+  await symlink(target, alias);
   await assert.rejects(
     buildDesenAppBrowserE2eWorkspaceCompatibilityEvidence({ artifactPath: alias }),
     expectedError("ARTIFACT_UNSAFE"),
