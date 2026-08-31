@@ -3064,6 +3064,13 @@ artifacts, and authenticates 104 current readers. It appends the M10-T01A artifa
 while resealing the two compatibility readers as immutable historical readers; the checkpoint
 suite passes 83/83. The neutral CI universe contains 206 workloads and 98 verifier/root-test proof
 pairs at `sha256:2b10f2fc39003592cddbd87122182de5acf05bd8c88afbbbd111d3ccc144919c`.
+The retained sequential authority is exactly equivalent across all 206 ordered workloads at plan
+`sha256:91519ad61ebc1bfed9d1d2553cf92b517cb4de2ad1313d679e2e26d86c311db1`, ordered projection
+`sha256:a090eecd8331ab79bca86e0038269bbddddc956900f50efc72c3fc3431411e82`, and workload-set
+`sha256:7668d5e0258f36acb81e79e1b320f887caded0062c67e38c42945bd6e24ed161`. The required and
+shadow exhaustive scheduler plans are respectively
+`sha256:7070a0c0937c339cb4d3a29e763f1cd34d1cd69a6ce58322ebcb568475bf30cb` and
+`sha256:40cd7c7fda8f66cf428fba3546789e74277e17055884ebe99c6b04a12ddb1782`.
 The 98-proof impact graph is
 `sha256:a64db36bfd1797cc16dd79cfaa788e36ec9f7850f19f0ea710ac026e05720b39`; the terminal
 M10-T01A affected closure contains 66 proof units and 142 workloads at
@@ -3072,8 +3079,8 @@ Exact-one ownership covers 1,323 tracked paths, including 196 proof-owned paths,
 `sha256:f7d1ff1ae43413fa0294419e7dc43f31b25bbb29e62cff9e3ee7d344380afb98` and authority
 `sha256:7fe30b8f12eed7d421506d3efe27ed3b80fe501bb200a36154f485eb226f865f`.
 The promoted selector is
-`sha256:41944b13b8d6b25670630f65de21c11fa4889de841bf32d6793c81025cef15ea`, and its runner
-authority is `sha256:4205036a53d8b4cb0faed54bf863361ed0c28a8d8b37e43c201fe9a3df45f70c`.
+`sha256:c1d395467c01245e5504a99b58109c4041e2d6e5b368679f2a99f83e54c28d01`, and its runner
+authority is `sha256:0aeb76bbe64e3a04a888904490a76b340538f854f62d04edfcb61d2fe1e1fd0a`.
 
 P-08 remains `PROVEN`, now with normal-product reachability in addition to the historical
 empty-project authoring claim. M10-T01A does not claim typed input and pending operation state
