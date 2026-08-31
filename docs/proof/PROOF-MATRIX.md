@@ -3081,9 +3081,9 @@ M10-T01A affected closure contains 66 proof units and 142 workloads at
 Exact-one ownership covers 1,323 tracked paths, including 196 proof-owned paths, with path-set
 `sha256:f7d1ff1ae43413fa0294419e7dc43f31b25bbb29e62cff9e3ee7d344380afb98` and authority
 `sha256:7fe30b8f12eed7d421506d3efe27ed3b80fe501bb200a36154f485eb226f865f`.
-The promoted selector is
-`sha256:a7e46b95bcb77558c634c7c8bdf1eedf89585af453f4cf5e81c1653b27ecbeac`, and its runner
-authority is `sha256:169e7b16d07af815eaf806d59ef80a6f30dc52c43030c150d69c3c558daa7cb8`.
+The current promoted selector, including the exact sequence-63 checkpoint compatibility bridge,
+is `sha256:ffc7c92e7788d8d5483a74a6eb6b2f22cb6db0c7324421d109753efeb44ebf96`, and its runner
+authority is `sha256:d32962da5cdb669789d052178fe653f4a0afed12d065692b4d092a459eddd2f5`.
 
 P-08 remains `PROVEN`, now with normal-product reachability in addition to the historical
 empty-project authoring claim. M10-T01A does not claim typed input and pending operation state
