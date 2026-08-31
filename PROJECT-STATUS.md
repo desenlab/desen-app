@@ -1522,14 +1522,15 @@ gates remain 11/13, and no exact-head hosted-CI pass is inferred from the local 
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Current implementation task: none; `M10-T01A — User-created blank project and durable normal-App authoring` is complete
+- Current implementation task: none; `M10-T01B — Visual behavior authoring and Catalog-derived Run controls` is complete
 - Next implementation task: `M10-T02 — Input and pending fixture test`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  14/14, M10 is 2/10, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, and M10-T01A are
+  14/14, M10 is 3/11, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
+  and M10-T01B are
   `DONE`; `N-012`, `N-018`, `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`; P-06, P-08,
   and P-16 are `PROVEN`; P-07, P-09, and P-10 are `PARTIAL`; proof gates are 11/13; P-12 remains
   `NOT_PROVEN`; N-036 remains `PLANNED`; PF-028 is `CLOSED`; PF-025, PF-083, PF-085, PF-086, and
-  PF-089 remain `OPEN`; M10-T02 is `NOT_STARTED`; and implementation progress is 111/146.
+  PF-089 and PF-091 remain `OPEN`; M10-T02 is `NOT_STARTED`; and implementation progress is 112/147.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -4670,6 +4671,39 @@ M09-T14/G09 evidence:
   success/navigation/real host operation, remote deployment, multi-user persistence, and G10
   closure remain unproven; the Secure-scroll compatibility repair adds no task or gate completion,
   and these local receipts make no exact-head hosted claim
+
+### M10-T01B visual behavior-authoring evidence
+
+- one atomic input recipe owns controlled `Value` plus canonical `change → state.set(event.value)`;
+  reconnection replaces one exact previous recipe write, preserves unrelated ordered actions, and
+  reports connected only when both halves agree, no second write targets the bound state, and the
+  canonical write carries no conditional or extension fields
+- all seven closed action kinds are created and corrected through Source/Catalog-derived visual
+  controls; incompatible state/event mappings are filtered, structured mappings require identical
+  canonical schema identity, structured fixed literals remain advanced-only, Runtime-referenced
+  operation aliases use the Runtime segment grammar, and complete Advanced JSON remains available
+  without becoming the designer baseline
+- selected-layer visibility writes/clears one complete predicate through public Editor Core
+  commands and offers only local-state comparisons or non-conflicting authored operation aliases
+- Run projects zero, one, or multiple exact surface operation aliases into independent Catalog
+  fixture cards; a distinct external export operation/error inventory, nested invocation, alias
+  conflict, hostile request, stale context, no-input-retention, and pre-copy traversal bounds have
+  dedicated positive/negative tests
+- the real Chromium flow starts from the visible blank project, proves the placeholder-only failure
+  mode, repairs both inputs, authors Button operation and conditional Alert without JSON, types full
+  values, observes pending, explicitly settles the Catalog error fixture, and sees the Alert; it
+  also checks per-operation Run-control layout after the generic refactor
+- local verification: dedicated behavior-authoring profile 135/135; complete App package excluding
+  the deliberately occupied fixed-port launcher file 427/427; production builds and real Chromium
+  scenario 1/1
+- immutable evidence:
+  `docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json`; verifier:
+  `scripts/verify-desen-app-visual-behavior-authoring.mjs`; finding: `PF-091`
+- coverage decision: M10-T01B is `DONE`; overall progress is 112/147 (76%); M10 is 3/11; M10-T02
+  remains `NOT_STARTED` and next
+- explicit nonclaims: the Chromium smoke does not close M10-T02's dedicated input/pending matrix,
+  M10-T03's complete failure matrix, M10-T04's success/navigation/real-host operation, P-09/P-10,
+  remote or multi-user persistence, or G10; local receipts alone make no hosted exact-head claim
 
 ## Status vocabulary
 

@@ -15,9 +15,15 @@ import { canonicalizeJson, digestCanonicalJson } from "@desen/protocol";
 import { createRuntimeHostPorts } from "@desen/runtime-core";
 
 import { prepareCatalogAuthoringModel, projectAuthoringCanvasFrame } from "./authoring-data.js";
+import { projectAuthoringBehaviorControls } from "./authoring-behavior-projection.js";
 import { projectAuthoringDiagnostics } from "./authoring-diagnostics.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
-import { createAuthoringSignInFixtureController } from "./authoring-fixtures.js";
+import { applyAuthoringConditionEdit } from "./authoring-conditions.js";
+import { applyAuthoringInputConnection } from "./authoring-connections.js";
+import {
+  createAuthoringOperationFixtureController,
+  prepareAuthoringOperationFixtureModel,
+} from "./authoring-fixtures.js";
 import { createAuthoringPersistenceController } from "./authoring-persistence.js";
 import { createAuthoringPublicationController } from "./authoring-publication.js";
 import { DiagnosticsPanel } from "./diagnostics-panel.js";
@@ -47,6 +53,7 @@ import {
   isSameAuthoringComponentSelection,
 } from "./authoring-selection.js";
 import { InspectorPanel } from "./inspector-panel.js";
+import { InputConnectionControl, VisibilityControl } from "./behavior-controls.js";
 import { EventActionPanel } from "./event-action-panel.js";
 import {
   AUTHORING_SOURCE_SCENARIO_VALUE,
@@ -129,6 +136,11 @@ import type {
   AuthoringStateModelResult,
 } from "./authoring-state.js";
 import type { AuthoringComponentSelection } from "./authoring-selection.js";
+import type {
+  AuthoringConditionEdit,
+  AuthoringConditionEditResult,
+} from "./authoring-conditions.js";
+import type { AuthoringConnectionResult } from "./authoring-connections.js";
 import type { AuthoringScenarioValue } from "./authoring-scenarios.js";
 import type {
   AuthoringSlotEdit,
@@ -2521,6 +2533,13 @@ function SurfaceEditor({
         : Object.freeze({ status: "rejected" as const }),
     [preparedModel, route, selection],
   );
+  const behaviorProjection = useMemo(
+    () =>
+      selection === null
+        ? Object.freeze({ status: "rejected" as const })
+        : projectAuthoringBehaviorControls(document, selectedSurface.id, selection.sourceNodeId),
+    [document, selectedSurface.id, selection],
+  );
   const stateModel = useMemo<AuthoringStateModelResult>(
     () =>
       preparedModel.ok
@@ -2597,21 +2616,25 @@ function SurfaceEditor({
     [preparedModel, route],
   );
   const fixtureRevision = effectivePreview?.ok === true ? effectivePreview.revision : "unavailable";
+  const fixtureModel = useMemo(
+    () => prepareAuthoringOperationFixtureModel(referenceCatalog, document, selectedSurface.id),
+    [document, selectedSurface.id],
+  );
   const fixtureController = useMemo(
     () =>
-      createAuthoringSignInFixtureController({
+      createAuthoringOperationFixtureController(fixtureModel, {
         documentId: document.id,
         revision: fixtureRevision,
         surfaceId: selectedSurface.id,
       }),
-    [document.id, fixtureRevision, selectedSurface.id],
+    [document.id, fixtureModel, fixtureRevision, selectedSurface.id],
   );
   const fixtureHostPorts = useMemo(
     () => createAuthoringFixtureHostPorts(fixtureController.operationPort),
     [fixtureController],
   );
   const fixtureControllerLifetime = useRef<ReturnType<
-    typeof createAuthoringSignInFixtureController
+    typeof createAuthoringOperationFixtureController
   > | null>(null);
   const fixtureSnapshot = useSyncExternalStore(
     fixtureController.subscribe,
@@ -2943,6 +2966,44 @@ function SurfaceEditor({
     return result;
   }
 
+  function connectSelectedInput(stateName: string): AuthoringConnectionResult {
+    if (!isDesignMode() || selection === null) {
+      return Object.freeze({ ok: false, reason: "selection-invalid" });
+    }
+    const result = applyAuthoringInputConnection(document, referenceCatalog, route, selection, {
+      stateName,
+    });
+    captureEditDiagnostics(result);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    return result;
+  }
+
+  function editSelectedCondition(edit: AuthoringConditionEdit): AuthoringConditionEditResult {
+    if (!isDesignMode() || selection === null) {
+      return Object.freeze({ ok: false, reason: "selection-invalid" });
+    }
+    const result = applyAuthoringConditionEdit(document, referenceCatalog, route, selection, edit);
+    captureEditDiagnostics(result);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    setSelection(
+      createAuthoringComponentSelection({
+        projectId: selection.projectId,
+        surfaceId: selection.surfaceId,
+        sourceNodeId: selection.sourceNodeId,
+        capabilityId: selection.capabilityId,
+        displayName: selection.displayName,
+        conditional: edit.kind === "set",
+      }),
+    );
+    return result;
+  }
+
   function editLocalState(edit: AuthoringStateEdit): AuthoringStateEditResult {
     if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
     const result = applyAuthoringStateEdit(document, referenceCatalog, route, edit);
@@ -3149,7 +3210,7 @@ function SurfaceEditor({
             <p>
               {mode === "design"
                 ? "Catalog-backed edits change only the authored Source and persist only through Save source. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree."
-                : "Controls are live against this in-memory preview. Only the exact synthetic sign-in fixture is available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked."}
+                : "Controls are live against this in-memory preview. Only outcomes declared by the current surface's authored operations and authenticated Catalog fixtures are available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked."}
             </p>
           </details>
           <p
@@ -3242,6 +3303,24 @@ function SurfaceEditor({
       </section>
 
       <InspectorPanel
+        behaviorControls={
+          inspector.status === "ready" && behaviorProjection.status === "ready" ? (
+            <div className={styles.behaviorControls}>
+              <InputConnectionControl
+                connectedStateName={behaviorProjection.inputConnectionStateName}
+                inspector={inspector}
+                onConnect={connectSelectedInput}
+              />
+              <VisibilityControl
+                currentWhen={behaviorProjection.currentWhen}
+                localStates={inspector.localStates}
+                onEdit={editSelectedCondition}
+                operationAliases={behaviorProjection.operationAliases}
+                ownerId={inspector.selection.sourceNodeId}
+              />
+            </div>
+          ) : undefined
+        }
         diagnosticsControls={
           diagnosticsProjection?.status === "ready" ? (
             <DiagnosticsPanel
@@ -3284,11 +3363,11 @@ function SurfaceEditor({
 
       {mode === "run" ? (
         <RunControls
-          onComplete={() => {
-            fixtureController.completePending();
+          onComplete={(alias) => {
+            fixtureController.completePending(alias);
           }}
-          onSelectOutcome={(outcomeId) => {
-            fixtureController.selectOutcome(outcomeId);
+          onSelectOutcome={(alias, outcomeId) => {
+            fixtureController.selectOutcome(alias, outcomeId);
           }}
           snapshot={fixtureSnapshot}
         />

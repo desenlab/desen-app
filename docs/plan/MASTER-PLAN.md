@@ -107,7 +107,9 @@ or raw JSON.
 ### M10 — First end-to-end proof
 
 Automate and document the full Desen App → Publisher → separate host workflow, including invalid
-publication and last-known-good cases.
+publication and last-known-good cases. The automated path must remain reproducible through the
+visible no-code behavior controls; raw JSON may be an advanced escape hatch, never the required
+designer journey.
 
 **Gate G10:** The managed sign-in surface has no handwritten React counterpart and can change in
 the host without changing host source code.

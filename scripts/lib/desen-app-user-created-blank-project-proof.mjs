@@ -198,6 +198,54 @@ const SECURE_SCROLL_CHECKPOINT_RESEALED_PATHS = Object.freeze([
   "scripts/lib/desen-app-user-created-blank-project-proof.mjs",
   "tests/desen-app-user-created-blank-project.test.mjs",
 ]);
+const M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json";
+const M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN = Object.freeze({
+  bytes: 10_962,
+  sha256: "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
+});
+const M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS = Object.freeze([
+  ".github/workflows/ci.yml",
+  "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+  "apps/desen-app-browser-e2e/package.json",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-behavior-projection.ts",
+  "apps/desen-app/src/authoring-conditions.ts",
+  "apps/desen-app/src/authoring-connections.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-fixtures.ts",
+  "apps/desen-app/src/behavior-controls.tsx",
+  "apps/desen-app/src/event-action-panel.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/preview-controls.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-behavior-projection.test.ts",
+  "apps/desen-app/test/authoring-conditions.test.ts",
+  "apps/desen-app/test/authoring-connections.test.ts",
+  "apps/desen-app/test/authoring-event-actions.test.ts",
+  "apps/desen-app/test/authoring-fixtures.test.ts",
+  "apps/desen-app/test/behavior-controls.test.tsx",
+  "apps/desen-app/test/event-action-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+  "apps/desen-app/test/preview-controls.test.tsx",
+  "apps/desen-app/test/publication-application.test.tsx",
+  ARTIFACT_RELATIVE_PATH,
+  "packages/reference-catalog-web/catalog.json",
+  "scripts/generate-desen-app-visual-behavior-authoring-proof.mjs",
+  "scripts/lib/atomic-proof-artifact.mjs",
+  "scripts/verify-desen-app-visual-behavior-authoring.mjs",
+]);
+const CURRENT_COMPATIBILITY_OVERRIDE_PATHS = Object.freeze(
+  [
+    ...new Set([
+      ...SECURE_SCROLL_COMPATIBILITY_OVERRIDE_PATHS,
+      M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
+      ...M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS,
+    ]),
+  ].sort((left, right) => left.localeCompare(right, "en-US")),
+);
 
 /** Stable fail-closed error raised by the M10-T01A reader. */
 export class DesenAppUserCreatedBlankProjectProofError extends Error {
@@ -863,6 +911,10 @@ async function inspectSecureScrollCompatibility(workspaceRoot, historicalArtifac
   for (const receipt of historicalReceipts) {
     if (compatibilityReceiptMap.has(receipt?.path)) continue;
     if (SECURE_SCROLL_CHECKPOINT_RESEALED_PATHS.includes(receipt?.path)) continue;
+    if (M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(receipt?.path)) {
+      retainedHistoricalReceipts += 1;
+      continue;
+    }
     const bytes =
       fileOverrides.get(receipt.path) ??
       (await readRegularAuthority(path.join(workspaceRoot, receipt.path), receipt.path));
@@ -875,6 +927,7 @@ async function inspectSecureScrollCompatibility(workspaceRoot, historicalArtifac
     retainedHistoricalReceipts += 1;
   }
   for (const receipt of SECURE_SCROLL_COMPATIBILITY_RECEIPTS) {
+    if (M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(receipt.path)) continue;
     const bytes =
       fileOverrides.get(receipt.path) ??
       (await readRegularAuthority(path.join(workspaceRoot, receipt.path), receipt.path));
@@ -903,6 +956,135 @@ async function inspectSecureScrollCompatibility(workspaceRoot, historicalArtifac
     realChromiumGeometryRegressionCovered: true,
     retainedHistoricalReceipts,
     trackedReceipts: SECURE_SCROLL_COMPATIBILITY_RECEIPTS,
+  });
+}
+
+async function authenticateM10VisualBehaviorAuthoringSuccessor(workspaceRoot, fileOverrides) {
+  const artifactBytes =
+    fileOverrides.get(M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH) ??
+    (await readRegularAuthority(
+      path.join(workspaceRoot, M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH),
+      M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
+    ));
+  const pin = M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN;
+  if (artifactBytes.byteLength !== pin.bytes || sha256(artifactBytes) !== pin.sha256) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact immutable M10-T01B visual-behavior artifact drifted.",
+    );
+  }
+  const artifact = parseJson(
+    artifactBytes,
+    M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
+    "SUCCESSOR_POLICY_VIOLATION",
+  );
+  const predecessor = artifact?.prerequisites?.[0];
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-visual-behavior-authoring" ||
+    artifact?.profile !== "desen.app.visual-behavior-authoring-proof.v1" ||
+    artifact?.task !== "M10-T01B" ||
+    artifact?.gate !== null ||
+    artifact?.result !== "PASS" ||
+    !isDeepStrictEqual(artifact?.claim, {
+      taskStatus: "DONE",
+      p08Status: "PROVEN",
+      p09Status: "PARTIAL",
+      visualInputConnectionCovered: true,
+      visualOperationActionCovered: true,
+      visualConditionalPresenceCovered: true,
+      catalogDerivedRunControlsCovered: true,
+      advancedJsonRetained: true,
+      authoredBrowserSmokeCovered: true,
+      m10T02Closed: false,
+      m10T03Closed: false,
+      m10T04Closed: false,
+      realHostOperationCovered: false,
+      remoteDeploymentCovered: false,
+      g10Closed: false,
+    }) ||
+    predecessor?.task !== "M10-T01A" ||
+    predecessor?.proofId !== "desen-app-user-created-blank-project" ||
+    predecessor?.path !== ARTIFACT_RELATIVE_PATH ||
+    predecessor?.bytes !== IMMUTABLE_M10_T01A_ARTIFACT_PIN.bytes ||
+    predecessor?.sha256 !== IMMUTABLE_M10_T01A_ARTIFACT_PIN.sha256 ||
+    predecessor?.immutable !== true ||
+    artifact?.authority?.source?.atomicInputConnection !== true ||
+    artifact?.authority?.source?.operationTriggerBoundary !== true ||
+    artifact?.authority?.source?.visualActionComposer !== true ||
+    artifact?.authority?.source?.advancedJsonRetained !== true ||
+    artifact?.authority?.source?.visualConditionalPresence !== true ||
+    artifact?.authority?.source?.sourceAndCatalogDerivedFixtures !== true ||
+    artifact?.authority?.source?.genericRunControls !== true ||
+    artifact?.authority?.source?.requestInputRetained !== false ||
+    artifact?.authority?.package?.appPackageName !== "@desen/app-web" ||
+    artifact?.authority?.package?.browserPackageName !== "@desen/app-browser-e2e" ||
+    artifact?.authority?.package?.exactHeadBrowserExecution !== true ||
+    artifact?.authority?.package?.catalogFixtureOnly !== true ||
+    artifact?.authority?.execution?.browserExecutedByVerifier !== false ||
+    artifact?.authority?.execution?.deterministicReaderStartsListener !== false ||
+    artifact?.tests?.browserExecutedByVerifier !== false ||
+    artifact?.boundary?.trackedFiles !== M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.length ||
+    !isDeepStrictEqual(
+      trackedReceipts.map((receipt) => receipt?.path),
+      M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS,
+    ) ||
+    new Set(trackedReceipts.map((receipt) => receipt?.path)).size !==
+      M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.length ||
+    !isDeepStrictEqual(artifact?.boundary?.checkpointOwnedReaderPaths, [
+      "scripts/lib/desen-app-visual-behavior-authoring-proof.mjs",
+      "tests/desen-app-visual-behavior-authoring.test.mjs",
+    ])
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The immutable M10-T01B identity, claims, authority, or receipt manifest drifted.",
+    );
+  }
+  for (const receipt of trackedReceipts) {
+    if (
+      !Number.isSafeInteger(receipt?.bytes) ||
+      receipt.bytes < 0 ||
+      typeof receipt.sha256 !== "string" ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The M10-T01B receipt manifest is malformed.");
+    }
+    const bytes =
+      fileOverrides.get(receipt.path) ??
+      (await readRegularAuthority(path.join(workspaceRoot, receipt.path), receipt.path));
+    if (bytes.byteLength !== receipt.bytes || sha256(bytes) !== receipt.sha256) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The exact current M10-T01B receipt drifted: ${receipt.path}.`,
+      );
+    }
+  }
+  return deepFreeze({
+    task: artifact.task,
+    artifact: {
+      path: M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
+      ...pin,
+      immutable: true,
+    },
+    predecessor: { ...predecessor },
+    currentProjection: {
+      relationship: "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
+      currentReceipts: trackedReceipts,
+    },
+    p08Status: artifact.claim.p08Status,
+    p09Status: artifact.claim.p09Status,
+    visualInputConnectionCovered: artifact.claim.visualInputConnectionCovered,
+    visualOperationActionCovered: artifact.claim.visualOperationActionCovered,
+    visualConditionalPresenceCovered: artifact.claim.visualConditionalPresenceCovered,
+    catalogDerivedRunControlsCovered: artifact.claim.catalogDerivedRunControlsCovered,
+    advancedJsonRetained: artifact.claim.advancedJsonRetained,
+    authoredBrowserSmokeCovered: artifact.claim.authoredBrowserSmokeCovered,
+    m10T02Closed: artifact.claim.m10T02Closed,
+    g10Closed: artifact.claim.g10Closed,
   });
 }
 
@@ -1070,7 +1252,7 @@ export async function verifyDesenAppUserCreatedBlankProjectEvidence(rawOptions =
   );
   const compatibilityBuildOptions = captureBuildOptions(
     options.buildOptions,
-    SECURE_SCROLL_COMPATIBILITY_OVERRIDE_PATHS,
+    CURRENT_COMPATIBILITY_OVERRIDE_PATHS,
   );
   await buildDesenAppUserCreatedBlankProjectEvidence(
     trackedBuildOptions(compatibilityBuildOptions),
@@ -1107,6 +1289,10 @@ export async function verifyDesenAppUserCreatedBlankProjectEvidence(rawOptions =
     artifact,
     compatibilityBuildOptions.fileOverrides,
   );
+  const visualBehaviorAuthoringSuccessor = await authenticateM10VisualBehaviorAuthoringSuccessor(
+    compatibilityWorkspaceRoot,
+    compatibilityBuildOptions.fileOverrides,
+  );
   const proofDocument =
     options.proofDocument === undefined
       ? await readRegularAuthority(
@@ -1132,6 +1318,7 @@ export async function verifyDesenAppUserCreatedBlankProjectEvidence(rawOptions =
     correctiveReceiptOnly: compatibility.correctiveReceiptOnly,
     immutableTaskArtifactPreserved: compatibility.immutableTaskArtifactPreserved,
     retainedHistoricalReceipts: compatibility.retainedHistoricalReceipts,
+    visualBehaviorAuthoringSuccessor,
   });
 }
 

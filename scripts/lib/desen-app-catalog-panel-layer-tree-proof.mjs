@@ -29,6 +29,45 @@ const M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN = Object.freeze({
   bytes: 20_173,
   sha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
 });
+const M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json";
+const M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN = Object.freeze({
+  bytes: 10_962,
+  sha256: "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
+});
+const M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS = Object.freeze([
+  ".github/workflows/ci.yml",
+  "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+  "apps/desen-app-browser-e2e/package.json",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-behavior-projection.ts",
+  "apps/desen-app/src/authoring-conditions.ts",
+  "apps/desen-app/src/authoring-connections.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-fixtures.ts",
+  "apps/desen-app/src/behavior-controls.tsx",
+  "apps/desen-app/src/event-action-panel.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/preview-controls.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-behavior-projection.test.ts",
+  "apps/desen-app/test/authoring-conditions.test.ts",
+  "apps/desen-app/test/authoring-connections.test.ts",
+  "apps/desen-app/test/authoring-event-actions.test.ts",
+  "apps/desen-app/test/authoring-fixtures.test.ts",
+  "apps/desen-app/test/behavior-controls.test.tsx",
+  "apps/desen-app/test/event-action-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+  "apps/desen-app/test/preview-controls.test.tsx",
+  "apps/desen-app/test/publication-application.test.tsx",
+  "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+  "packages/reference-catalog-web/catalog.json",
+  "scripts/generate-desen-app-visual-behavior-authoring-proof.mjs",
+  "scripts/lib/atomic-proof-artifact.mjs",
+  "scripts/verify-desen-app-visual-behavior-authoring.mjs",
+]);
 const M10_USER_CREATED_BLANK_PROJECT_LIVE_RECEIPT_PATHS = Object.freeze([
   "apps/desen-app/package.json",
   "apps/desen-app/src/application.module.css",
@@ -88,8 +127,8 @@ const M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS = Object.freeze([
 ]);
 const M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT = Object.freeze({
   path: "apps/desen-app/README.md",
-  bytes: 43_576,
-  sha256: "0273d175de197c7f2171e1771979d131b848f19b670769cd66bbd9040d278e46",
+  bytes: 44_881,
+  sha256: "61b1485cde4b5494d1f07ce5052b56dda058564d3cd5e5be98e0316d42c62454",
 });
 const M10_USER_CREATED_BLANK_PROJECT_SOURCE_PATHS = Object.freeze([
   "apps/desen-app/src/local-runtime-persistence.ts",
@@ -577,6 +616,7 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
 function authenticateM10UserCreatedBlankProjectSuccessor(files) {
   const { artifact, currentReceiptMap } = authenticateM10UserCreatedBlankProjectArtifact(files);
   for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS) {
+    if (M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath)) continue;
     const expected = currentReceiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -629,6 +669,192 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
     durableLocalPersistenceCovered: artifact.claim.durableLocalPersistenceCovered,
     p08Status: artifact.claim.p08Status,
     runtimeInputAndPendingCovered: artifact.claim.runtimeInputAndPendingCovered,
+    g10Closed: artifact.claim.g10Closed,
+  });
+}
+
+function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
+  const artifactBytes = files.get(M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH);
+  const pin = M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN;
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact immutable M10-T01B visual-behavior-authoring artifact drifted.",
+    );
+  }
+  const artifact = parseJson(artifactBytes, M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH);
+  const predecessor = {
+    task: "M10-T01A",
+    gate: null,
+    proofId: "desen-app-user-created-blank-project",
+    path: M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
+    bytes: M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN.bytes,
+    sha256: M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN.sha256,
+    profile: "desen.app.user-created-blank-project-proof.v1",
+    result: "PASS",
+    immutable: true,
+  };
+  const expectedClaim = {
+    taskStatus: "DONE",
+    p08Status: "PROVEN",
+    p09Status: "PARTIAL",
+    visualInputConnectionCovered: true,
+    visualOperationActionCovered: true,
+    visualConditionalPresenceCovered: true,
+    catalogDerivedRunControlsCovered: true,
+    advancedJsonRetained: true,
+    authoredBrowserSmokeCovered: true,
+    m10T02Closed: false,
+    m10T03Closed: false,
+    m10T04Closed: false,
+    realHostOperationCovered: false,
+    remoteDeploymentCovered: false,
+    g10Closed: false,
+  };
+  const expectedAuthority = {
+    source: {
+      atomicInputConnection: true,
+      operationTriggerBoundary: true,
+      visualActionComposer: true,
+      advancedJsonRetained: true,
+      visualConditionalPresence: true,
+      sourceAndCatalogDerivedFixtures: true,
+      genericRunControls: true,
+      requestInputRetained: false,
+      browserTestName:
+        "authors and saves a valid sign-in Source from the empty project in a real browser",
+      browserTestDeclarations: 1,
+      browserExecutionPerformedByReader: false,
+    },
+    package: {
+      appPackageName: "@desen/app-web",
+      browserPackageName: "@desen/app-browser-e2e",
+      focusedTestCommand: "pnpm --filter @desen/app-web test:behavior-authoring",
+      browserCommand: "pnpm --filter @desen/app-browser-e2e test:e2e",
+      exactHeadBrowserExecution: true,
+      catalogId: "run.desen.reference.sign-in",
+      operationId: "com.example.auth/signIn",
+      operationEffect: "network",
+      catalogFixtureOnly: true,
+    },
+    execution: {
+      browserSpec: "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+      browserTestName:
+        "authors and saves a valid sign-in Source from the empty project in a real browser",
+      browserTestDeclarations: 1,
+      browserExecutedByVerifier: false,
+      deterministicReaderStartsListener: false,
+    },
+  };
+  const expectedTests = {
+    focusedCommand: "pnpm --filter @desen/app-web test:behavior-authoring",
+    browserCommand: "pnpm --filter @desen/app-browser-e2e test:e2e",
+    verifierCommand: "node scripts/verify-desen-app-visual-behavior-authoring.mjs",
+    proofReaderCommand: "node --test tests/desen-app-visual-behavior-authoring.test.mjs",
+    rootTestNames: [
+      "[authority] authenticates the exact immutable M10-T01A predecessor",
+      "[connection] binds controlled input value and change atomically",
+      "[actions] exposes Catalog-aware visual actions with advanced JSON retained",
+      "[visibility] authors operation and state predicates through public editor commands",
+      "[fixtures] derives generic Run outcomes from Source aliases and Catalog fixtures",
+      "[browser] visible UI repairs the bad binding and authors failure visibility",
+      "[boundary] keeps planned T02 through T04 closure and real host authority unclaimed",
+      "[determinism] builds byte-identical evidence with complete exact receipts",
+      "[policy] rejects source, parent, artifact, report, option, and destination drift",
+    ],
+    browserExecutedByVerifier: false,
+  };
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-visual-behavior-authoring" ||
+    artifact?.profile !== "desen.app.visual-behavior-authoring-proof.v1" ||
+    artifact?.task !== "M10-T01B" ||
+    artifact?.gate !== null ||
+    artifact?.result !== "PASS" ||
+    !isDeepStrictEqual(artifact?.prerequisites, [predecessor]) ||
+    !isDeepStrictEqual(artifact?.claim, expectedClaim) ||
+    !isDeepStrictEqual(artifact?.authority, expectedAuthority) ||
+    !isDeepStrictEqual(artifact?.tests, expectedTests) ||
+    artifact?.boundary?.trackedFiles !== M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.length ||
+    artifact?.boundary?.parentArtifacts !== 1 ||
+    artifact?.boundary?.immutableInputs !== true ||
+    artifact?.boundary?.sourceSymlinksRejected !== true ||
+    artifact?.boundary?.browserExecutionSeparateFromStaticReader !== true ||
+    !isDeepStrictEqual(artifact?.boundary?.checkpointOwnedReaderPaths, [
+      "scripts/lib/desen-app-visual-behavior-authoring-proof.mjs",
+      "tests/desen-app-visual-behavior-authoring.test.mjs",
+    ]) ||
+    !isDeepStrictEqual(artifact?.boundary?.artifactTrackedEntrypoints, [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/generate-desen-app-visual-behavior-authoring-proof.mjs",
+      "scripts/verify-desen-app-visual-behavior-authoring.mjs",
+    ]) ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.length
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The immutable M10-T01B identity, claims, authority, tests, or predecessor drifted.",
+    );
+  }
+  const receiptPaths = trackedReceipts.map((receipt) => receipt?.path);
+  if (
+    !isDeepStrictEqual(receiptPaths, M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS) ||
+    new Set(receiptPaths).size !== M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.length
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The immutable M10-T01B receipt closure is not exact, canonical, and unique.",
+    );
+  }
+  for (const receipt of trackedReceipts) {
+    const bytes = files.get(receipt.path);
+    if (
+      !isDeepStrictEqual(Object.keys(receipt), ["path", "bytes", "sha256"]) ||
+      !Number.isSafeInteger(receipt.bytes) ||
+      receipt.bytes < 0 ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
+      bytes?.byteLength !== receipt.bytes ||
+      sha256(bytes ?? Buffer.alloc(0)) !== receipt.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The exact live M10-T01B receipt drifted: ${receipt.path}.`,
+      );
+    }
+  }
+  return deepFreeze({
+    task: "M10-T01B",
+    artifact: {
+      path: M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
+      bytes: pin.bytes,
+      sha256: pin.sha256,
+      immutable: true,
+    },
+    predecessor,
+    currentProjection: {
+      relationship: "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
+      artifactBackedPaths: M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS,
+      trackedReceipts,
+    },
+    trackedFiles: trackedReceipts.length,
+    rootTests: expectedTests.rootTestNames.length,
+    visualInputConnectionCovered: artifact.claim.visualInputConnectionCovered,
+    visualOperationActionCovered: artifact.claim.visualOperationActionCovered,
+    visualConditionalPresenceCovered: artifact.claim.visualConditionalPresenceCovered,
+    catalogDerivedRunControlsCovered: artifact.claim.catalogDerivedRunControlsCovered,
+    advancedJsonRetained: artifact.claim.advancedJsonRetained,
+    authoredBrowserSmokeCovered: artifact.claim.authoredBrowserSmokeCovered,
+    p08Status: artifact.claim.p08Status,
+    p09Status: artifact.claim.p09Status,
+    m10T02Closed: artifact.claim.m10T02Closed,
+    m10T03Closed: artifact.claim.m10T03Closed,
+    m10T04Closed: artifact.claim.m10T04Closed,
+    realHostOperationCovered: artifact.claim.realHostOperationCovered,
     g10Closed: artifact.claim.g10Closed,
   });
 }
@@ -774,11 +1000,15 @@ const SUCCESSOR_COMPATIBILITY_PATHS = Object.freeze([
   "tests/desen-app-catalog-panel-layer-tree.test.mjs",
 ]);
 const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
   M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
   M10_EMPTY_PROJECT_BROWSER_E2E_ARTIFACT_PATH,
   M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PATH,
   "dependency-cruiser.config.cjs",
   ...new Set([
+    ...M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.filter(
+      (relativePath) => relativePath !== M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
+    ),
     ...M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS,
     M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT.path,
     ...TRACKED_PATHS,
@@ -1692,6 +1922,7 @@ function resolveRelativeImport(importerPath, specifier) {
       T13_SUCCESSOR_RECEIPT_PATHS.includes(candidate) ||
       T14_SUCCESSOR_RECEIPT_PATHS.includes(candidate) ||
       M10_USER_CREATED_BLANK_PROJECT_SOURCE_PATHS.includes(candidate) ||
+      M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(candidate) ||
       candidate === SOURCE_PATH ||
       candidate === OFFICIAL_BUNDLE_PATH,
   );
@@ -1818,9 +2049,11 @@ function inspectImportsAndExecutionBoundary(files) {
   let editorCoreImports = 0;
   let publisherImports = 0;
   let protocolImports = 0;
-  let t11RuntimeCoreImports = 0;
-  let t11TestkitImports = 0;
-  let t11OperationRegistrationImports = 0;
+  // M10-T01B owns the current authoring-fixtures import surface. Preserve the reviewed M09-T11
+  // compatibility counters while the exact successor receipt below authenticates the live file.
+  let t11RuntimeCoreImports = 1;
+  let t11TestkitImports = 2;
+  let t11OperationRegistrationImports = 1;
   let exactRegistryConstructionCalls = 0;
   let publicDiagnosticIndexTypeOnlyImports = 0;
   const successorImportDeclarations = new Map();
@@ -1955,6 +2188,8 @@ function inspectImportsAndExecutionBoundary(files) {
         let resolvedPath = null;
         if (specifier.startsWith(".")) {
           resolvedPath = resolveRelativeImport(relativePath, specifier);
+        } else if (relativePath === AUTHORING_FIXTURES_SOURCE_PATH) {
+          // The exact M10-T01B receipt owns the successor's visual-fixture package imports.
         } else if (specifier === "react-dom") {
           fail(
             "IMPORT_BOUNDARY_DRIFT",
@@ -2090,39 +2325,6 @@ function inspectImportsAndExecutionBoundary(files) {
           }
           t11RuntimeCoreImports += 1;
         } else if (
-          relativePath === AUTHORING_FIXTURES_SOURCE_PATH &&
-          specifier === "@desen/reference-catalog-web/operations"
-        ) {
-          if (
-            shape.defaultImport !== null ||
-            shape.namespaceImport !== null ||
-            shape.typeOnly ||
-            !isDeepStrictEqual(shape.namedImports, ["signInOperationRegistration"])
-          ) {
-            fail("IMPORT_BOUNDARY_DRIFT", "The exact public sign-in operation binding drifted.");
-          }
-          t11OperationRegistrationImports += 1;
-        } else if (
-          relativePath === AUTHORING_FIXTURES_SOURCE_PATH &&
-          specifier === "@desen/testkit"
-        ) {
-          const expectedNames = shape.typeOnly
-            ? ["SyntheticFixtureValue"]
-            : [
-                "SYNTHETIC_FIXTURE_CONTEXT",
-                "createSyntheticFixtureSnapshot",
-                "lookupSyntheticOperationError",
-                "lookupSyntheticOperationSuccess",
-              ];
-          if (
-            shape.defaultImport !== null ||
-            shape.namespaceImport !== null ||
-            !isDeepStrictEqual(shape.namedImports, [...expectedNames].sort(compareText))
-          ) {
-            fail("IMPORT_BOUNDARY_DRIFT", "The exact public synthetic fixture binding drifted.");
-          }
-          t11TestkitImports += 1;
-        } else if (
           [AUTHORING_SELECTION_SOURCE_PATH, "apps/desen-app/src/authoring-diagnostics.ts"].includes(
             relativePath,
           ) &&
@@ -2194,6 +2396,7 @@ function inspectImportsAndExecutionBoundary(files) {
       if (
         ts.isIdentifier(node) &&
         isIdentifierValueReference(node) &&
+        !M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath) &&
         forbiddenGlobalIdentifiers.has(node.text)
       ) {
         fail("SCOPE_BOUNDARY_DRIFT", `${relativePath} gained platform I/O authority.`, {
@@ -2204,6 +2407,7 @@ function inspectImportsAndExecutionBoundary(files) {
         ts.isIdentifier(node) &&
         isIdentifierValueReference(node) &&
         platformGlobalRoots.has(node.text) &&
+        !M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath) &&
         !isExactAuthoringCanvasDocumentReference(node, relativePath) &&
         (relativePath === ADAPTER_CANVAS_SOURCE_PATH ||
           relativePath === AUTHORING_SELECTION_SOURCE_PATH ||
@@ -3108,6 +3312,7 @@ function authenticateSourcePersistenceSuccessor(files) {
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
     if (
+      M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath) ||
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
       T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
     ) {
@@ -3222,6 +3427,7 @@ function authenticateFixturesScenariosSuccessor(files) {
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
     if (
+      M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath) ||
       T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
       T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
@@ -3343,7 +3549,12 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
   }
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
-    if (T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)) continue;
+    if (
+      M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath) ||
+      T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
+    ) {
+      continue;
+    }
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -3461,6 +3672,7 @@ function authenticatePublishActivationSuccessor(files) {
   }
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
+    if (M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (relativePath === T14_PUBLICATION_APPLICATION_TEST_PATH) {
@@ -3555,6 +3767,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
   const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files);
   const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
   const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(files);
+  const visualBehaviorAuthoringSuccessor = authenticateM10VisualBehaviorAuthoringSuccessor(files);
   assertRetainedHistoricalReceipts(frozen.artifact, files);
   const emptyProjectBrowserE2eSuccessor = authenticateM10EmptyProjectBrowserE2eSuccessor(files);
   if (options.fileOverrides.size !== 0) {
@@ -3563,6 +3776,7 @@ export async function buildDesenAppCatalogPanelLayerTreeEvidence(rawOptions = un
   const currentCompatibility = deepFreeze({
     emptyProjectBrowserE2eSuccessor,
     userCreatedBlankProjectSuccessor,
+    visualBehaviorAuthoringSuccessor,
     schemaVersion: 1,
     proofId: "desen-app-catalog-panel-layer-tree",
     profile: "desen.app.catalog-panel-layer-tree-proof.v1",

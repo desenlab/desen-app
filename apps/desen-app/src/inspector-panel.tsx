@@ -17,6 +17,8 @@ import type {
 import type { StructuredJsonParseFailureReason } from "./structured-json.js";
 
 interface InspectorPanelProps {
+  /** Atomic no-code input and visibility controls for the selected Source layer. */
+  readonly behaviorControls?: ReactNode;
   readonly diagnosticsControls?: ReactNode;
   /** App-owned event and action controls retained in the right-sidebar Actions view. */
   readonly eventActionControls?: ReactNode;
@@ -756,6 +758,7 @@ function InspectorField(props: Readonly<InspectorFieldProps>) {
 
 /** App-owned property inspector rendered outside the managed capability subtree. */
 export function InspectorPanel({
+  behaviorControls,
   diagnosticsControls,
   eventActionControls,
   hidden = false,
@@ -901,6 +904,7 @@ export function InspectorPanel({
               ) : null}
             </div>
             <div className={styles.inspectorBody}>
+              {behaviorControls}
               <div className={styles.panelSectionHeading}>
                 <span>Properties</span>
                 <small>{inspector.controlCount} controls</small>

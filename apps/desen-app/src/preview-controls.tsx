@@ -1,13 +1,11 @@
-import {
-  AUTHORING_FIXTURE_CONTEXT_MODEL,
-  AUTHORING_SIGN_IN_FIXTURE_OUTCOMES,
-} from "./authoring-fixtures.js";
+import { AUTHORING_FIXTURE_CONTEXT_MODEL } from "./authoring-fixtures.js";
 import styles from "./application.module.css";
 
 import type { ChangeEvent } from "react";
 import type {
-  AuthoringSignInFixtureControllerSnapshot,
-  AuthoringSignInFixtureOutcomeId,
+  AuthoringOperationFixtureControllerSnapshot,
+  AuthoringOperationFixtureOutcomeId,
+  AuthoringOperationFixtureSnapshot,
 } from "./authoring-fixtures.js";
 import type {
   AuthoringScenarioModelResult,
@@ -152,31 +150,29 @@ export function ScenarioPreviewControl({
   );
 }
 
-function fixtureStatusText(snapshot: AuthoringSignInFixtureControllerSnapshot): string {
-  if (snapshot.status === "pending") return "Pending · choose Complete fixture to settle the call.";
-  if (snapshot.status === "succeeded") {
-    return "Success fixture completed. Production navigation remains blocked.";
+function fixtureStatusText(operation: AuthoringOperationFixtureSnapshot): string {
+  if (operation.status === "pending") {
+    return "Pending · complete this fixture to settle the Runtime call.";
   }
-  if (snapshot.status === "failed") {
-    return "Invalid credentials fixture completed. The managed Alert shows the public failure.";
+  if (operation.status === "succeeded") return "Synthetic success completed.";
+  if (operation.status === "failed") return "Synthetic public error completed.";
+  if (operation.status === "unavailable") {
+    return "This operation declares no synthetic outcome in its Catalog manifest.";
   }
-  if (snapshot.status === "disposed") return "This fixture session is no longer active.";
-  return "Fill the form and press Sign in to start a real pending Runtime lifecycle.";
+  if (operation.status === "disposed") return "This fixture session is no longer active.";
+  return "Trigger this operation in the preview to start a real pending Runtime lifecycle.";
 }
 
-/** Compact Run-only controls for the exact synthetic sign-in fixture lifetime. */
+/** Generic Run-only controls for Source-used, Catalog-authenticated operation fixtures. */
 export function RunControls({
   onComplete,
   onSelectOutcome,
   snapshot,
 }: Readonly<{
-  readonly onComplete: () => void;
-  readonly onSelectOutcome: (outcomeId: AuthoringSignInFixtureOutcomeId) => void;
-  readonly snapshot: AuthoringSignInFixtureControllerSnapshot;
+  readonly onComplete: (alias: string) => void;
+  readonly onSelectOutcome: (alias: string, outcomeId: AuthoringOperationFixtureOutcomeId) => void;
+  readonly snapshot: AuthoringOperationFixtureControllerSnapshot;
 }>) {
-  const pending = snapshot.status === "pending";
-  const active = snapshot.status !== "disposed";
-
   return (
     <aside aria-label="Run controls" className={styles.runControls}>
       <div className={styles.inspectorHeader}>
@@ -211,30 +207,76 @@ export function RunControls({
           ))}
         </fieldset>
 
-        <label className={styles.fixtureOutcomeControl}>
-          <span>Next sign-in outcome</span>
-          <select
-            disabled={!active || pending}
-            onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-              onSelectOutcome(event.currentTarget.value as AuthoringSignInFixtureOutcomeId)
-            }
-            value={snapshot.selectedOutcomeId}
-          >
-            {AUTHORING_SIGN_IN_FIXTURE_OUTCOMES.map((outcome) => (
-              <option key={outcome.id} value={outcome.id}>
-                {outcome.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <button disabled={!pending} onClick={onComplete} type="button">
-          Complete fixture
-        </button>
-
-        <p aria-atomic="true" aria-live="polite" role="status">
-          {fixtureStatusText(snapshot)}
-        </p>
+        {snapshot.modelStatus === "rejected" ? (
+          <p role="alert">
+            Operation fixtures unavailable · the selected Source and Catalog could not be
+            authenticated ({snapshot.rejectionReason}).
+          </p>
+        ) : snapshot.operations.length === 0 ? (
+          <p role="status">
+            No simulated operations · add an Invoke operation action in Design mode to expose its
+            Catalog-declared outcomes here.
+          </p>
+        ) : (
+          snapshot.operations.map((operation) => {
+            const pending = operation.status === "pending";
+            const canSelect = !snapshot.disposed && !pending && operation.outcomes.length > 0;
+            return (
+              <fieldset
+                aria-label={`Operation ${operation.alias}`}
+                className={styles.fixtureOperationGroup}
+                key={operation.alias}
+              >
+                <legend>Operation · {operation.alias}</legend>
+                <p className={styles.fixtureOperationIdentity}>
+                  <strong>{operation.alias}</strong>
+                  <br />
+                  <small>
+                    {operation.capabilityId} · {operation.effect}
+                    {operation.description === undefined ? "" : ` · ${operation.description}`}
+                  </small>
+                </p>
+                {operation.outcomes.length > 0 ? (
+                  <label className={styles.fixtureOutcomeControl}>
+                    <span>Next outcome for {operation.alias}</span>
+                    <select
+                      disabled={!canSelect}
+                      onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                        onSelectOutcome(
+                          operation.alias,
+                          event.currentTarget.value as AuthoringOperationFixtureOutcomeId,
+                        )
+                      }
+                      value={operation.selectedOutcomeId ?? ""}
+                    >
+                      {operation.outcomes.map((outcome) => (
+                        <option key={outcome.id} value={outcome.id}>
+                          {outcome.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+                <button
+                  className={styles.fixtureCompleteButton}
+                  disabled={!pending}
+                  onClick={() => onComplete(operation.alias)}
+                  type="button"
+                >
+                  Complete {operation.alias} fixture
+                </button>
+                <p
+                  aria-atomic="true"
+                  aria-live="polite"
+                  className={styles.fixtureOperationStatus}
+                  role="status"
+                >
+                  {fixtureStatusText(operation)}
+                </p>
+              </fieldset>
+            );
+          })
+        )}
       </div>
 
       <p className={styles.runControlsBoundary}>{AUTHORING_FIXTURE_CONTEXT_MODEL.disclosure}</p>

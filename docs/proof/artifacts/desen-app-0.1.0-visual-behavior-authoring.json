@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-visual-behavior-authoring",
+  "profile": "desen.app.visual-behavior-authoring-proof.v1",
+  "task": "M10-T01B",
+  "gate": null,
+  "result": "PASS",
+  "prerequisites": [
+    {
+      "task": "M10-T01A",
+      "gate": null,
+      "proofId": "desen-app-user-created-blank-project",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+      "bytes": 20173,
+      "sha256": "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+      "profile": "desen.app.user-created-blank-project-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "p08Status": "PROVEN",
+    "p09Status": "PARTIAL",
+    "visualInputConnectionCovered": true,
+    "visualOperationActionCovered": true,
+    "visualConditionalPresenceCovered": true,
+    "catalogDerivedRunControlsCovered": true,
+    "advancedJsonRetained": true,
+    "authoredBrowserSmokeCovered": true,
+    "m10T02Closed": false,
+    "m10T03Closed": false,
+    "m10T04Closed": false,
+    "realHostOperationCovered": false,
+    "remoteDeploymentCovered": false,
+    "g10Closed": false
+  },
+  "authority": {
+    "source": {
+      "atomicInputConnection": true,
+      "operationTriggerBoundary": true,
+      "visualActionComposer": true,
+      "advancedJsonRetained": true,
+      "visualConditionalPresence": true,
+      "sourceAndCatalogDerivedFixtures": true,
+      "genericRunControls": true,
+      "requestInputRetained": false,
+      "browserTestName": "authors and saves a valid sign-in Source from the empty project in a real browser",
+      "browserTestDeclarations": 1,
+      "browserExecutionPerformedByReader": false
+    },
+    "package": {
+      "appPackageName": "@desen/app-web",
+      "browserPackageName": "@desen/app-browser-e2e",
+      "focusedTestCommand": "pnpm --filter @desen/app-web test:behavior-authoring",
+      "browserCommand": "pnpm --filter @desen/app-browser-e2e test:e2e",
+      "exactHeadBrowserExecution": true,
+      "catalogId": "run.desen.reference.sign-in",
+      "operationId": "com.example.auth/signIn",
+      "operationEffect": "network",
+      "catalogFixtureOnly": true
+    },
+    "execution": {
+      "browserSpec": "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+      "browserTestName": "authors and saves a valid sign-in Source from the empty project in a real browser",
+      "browserTestDeclarations": 1,
+      "browserExecutedByVerifier": false,
+      "deterministicReaderStartsListener": false
+    }
+  },
+  "tests": {
+    "focusedCommand": "pnpm --filter @desen/app-web test:behavior-authoring",
+    "browserCommand": "pnpm --filter @desen/app-browser-e2e test:e2e",
+    "verifierCommand": "node scripts/verify-desen-app-visual-behavior-authoring.mjs",
+    "proofReaderCommand": "node --test tests/desen-app-visual-behavior-authoring.test.mjs",
+    "rootTestNames": [
+      "[authority] authenticates the exact immutable M10-T01A predecessor",
+      "[connection] binds controlled input value and change atomically",
+      "[actions] exposes Catalog-aware visual actions with advanced JSON retained",
+      "[visibility] authors operation and state predicates through public editor commands",
+      "[fixtures] derives generic Run outcomes from Source aliases and Catalog fixtures",
+      "[browser] visible UI repairs the bad binding and authors failure visibility",
+      "[boundary] keeps planned T02 through T04 closure and real host authority unclaimed",
+      "[determinism] builds byte-identical evidence with complete exact receipts",
+      "[policy] rejects source, parent, artifact, report, option, and destination drift"
+    ],
+    "browserExecutedByVerifier": false
+  },
+  "boundary": {
+    "trackedFiles": 31,
+    "trackedReceipts": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "bytes": 9091,
+        "sha256": "818a3993bef948cd5a9cdd4843ef57540dbf21a04e3a746cdab1d04d6a7a72a7"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+        "bytes": 18474,
+        "sha256": "b0c4e5f3a0e3af23634ba24137d6a478ffbb6cd30216babd62582f4edc5f12e8"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/package.json",
+        "bytes": 913,
+        "sha256": "c20240a4756d2a99d3a60eec0af373e85fed6381d510ca2bde4ebee173d86a12"
+      },
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 4546,
+        "sha256": "c634b5ee1e2d2af0ffd6db8d4841215664591a31999210a8e0b388b71509eb32"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 118529,
+        "sha256": "d2d684ae828467eb4d81f945726074194917a7cec6a80e0e79d6e7e5a8eec2f1"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 136060,
+        "sha256": "964ae5aa0c11d18ff06580058475537b6e7fb7da5b7b2f328d1d6f1539696111"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-behavior-projection.ts",
+        "bytes": 7346,
+        "sha256": "9357102092e49034d2f99acdd81e468c7572206232f94bcb3cb942960c38d283"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-conditions.ts",
+        "bytes": 8179,
+        "sha256": "71702a2506805c874e681112b10757118f5c732ba9e3cb3680c9357eafde0a77"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-connections.ts",
+        "bytes": 25835,
+        "sha256": "5254659773a91d2c11b8a99c119095bb2d466999acb63b923c52da0ef8e2874d"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-event-actions.ts",
+        "bytes": 48353,
+        "sha256": "aa5a9a473f32266d52a5b9a88067067f4ae8657278de1c615ede8261f4b7c464"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-fixtures.ts",
+        "bytes": 35500,
+        "sha256": "82d8d3767c768138ed4efd0c8ca787368d0fffe3df568021518075e65971e230"
+      },
+      {
+        "path": "apps/desen-app/src/behavior-controls.tsx",
+        "bytes": 17603,
+        "sha256": "19e6d45a1dd7441fd6a4ecec95039a75a801940e23dff33c51c0fc2bcc13a111"
+      },
+      {
+        "path": "apps/desen-app/src/event-action-panel.tsx",
+        "bytes": 56304,
+        "sha256": "cc280ec4508ed7d075044f84b3b9451cf75b1909502fb69a0e46236a77d8a1e5"
+      },
+      {
+        "path": "apps/desen-app/src/inspector-panel.tsx",
+        "bytes": 32591,
+        "sha256": "ad2543377377e8d5ae99fbd110a0cf1c63710620e972db388feca95ef7ae7d26"
+      },
+      {
+        "path": "apps/desen-app/src/preview-controls.tsx",
+        "bytes": 10810,
+        "sha256": "8fa80c577ad6de491774d6fc37d0e4a1a15765fab172e36f23d8dbcfe1408988"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 107947,
+        "sha256": "6565aef6bddec1b8a50483163c4c680086466443c6e9d8792181a2d07d3443a2"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-behavior-projection.test.ts",
+        "bytes": 4172,
+        "sha256": "bd08281ba201c1c3c4688820e01c06caad285695c7ff877c1aa762445cc74f06"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-conditions.test.ts",
+        "bytes": 8077,
+        "sha256": "ef42fe3d7344426c5ec66d536c1aec8621cd2800554a41b883dd181eba6b5901"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-connections.test.ts",
+        "bytes": 17426,
+        "sha256": "9b6a077574e4e8970cda9680068007aba10e05e9a5037baf3ceec58c527539e3"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-event-actions.test.ts",
+        "bytes": 27838,
+        "sha256": "dcc02f9f4edb2b336c6d2b6bf097cf2fc4e12a46a77bb99d32384a7a0bc87ee6"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-fixtures.test.ts",
+        "bytes": 17875,
+        "sha256": "4d917dc3839d1146377976054aed42a681d840edbb87d4065758186bee86512e"
+      },
+      {
+        "path": "apps/desen-app/test/behavior-controls.test.tsx",
+        "bytes": 5877,
+        "sha256": "d101e792cd5ca45d965e87d9ba1252f64a4c3e997c1d00aa84731dc3e711444f"
+      },
+      {
+        "path": "apps/desen-app/test/event-action-panel.test.tsx",
+        "bytes": 26722,
+        "sha256": "24ca168e3c65db697da89e424531fbd5c259bf1e61e52b96cac7472c012be1e4"
+      },
+      {
+        "path": "apps/desen-app/test/persistence-application.test.tsx",
+        "bytes": 35333,
+        "sha256": "66570dbcadc5ad3bb44462623fa8dd66197d9a719011d216d618131ff08ee721"
+      },
+      {
+        "path": "apps/desen-app/test/preview-controls.test.tsx",
+        "bytes": 7101,
+        "sha256": "29e05875138696325d3b1ee59ad2fea64e52838a11da1672f66867cafc9576a8"
+      },
+      {
+        "path": "apps/desen-app/test/publication-application.test.tsx",
+        "bytes": 24539,
+        "sha256": "ef32ec4c16c5f2a6288e284d511a90d024100ee6f1438adc7e207deb94e5ea8f"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+        "bytes": 20173,
+        "sha256": "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "5d30b58b2ecb630fcefc70a2e5a5b1dc0b228d028ba768194c5b06429949727a"
+      },
+      {
+        "path": "scripts/generate-desen-app-visual-behavior-authoring-proof.mjs",
+        "bytes": 832,
+        "sha256": "aa46178e2522d25047b09eddc8b41805906464bf0d5074f01162077348b8d7b5"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/verify-desen-app-visual-behavior-authoring.mjs",
+        "bytes": 893,
+        "sha256": "3e6d6d71306c1b3ce42a201f20875a6463644afcfaa9107c340cee6f06d73c4f"
+      }
+    ],
+    "parentArtifacts": 1,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true,
+    "browserExecutionSeparateFromStaticReader": true,
+    "checkpointOwnedReaderPaths": [
+      "scripts/lib/desen-app-visual-behavior-authoring-proof.mjs",
+      "tests/desen-app-visual-behavior-authoring.test.mjs"
+    ],
+    "artifactTrackedEntrypoints": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/generate-desen-app-visual-behavior-authoring-proof.mjs",
+      "scripts/verify-desen-app-visual-behavior-authoring.mjs"
+    ]
+  },
+  "nonClaims": [
+    "The browser smoke validates authoring usability but does not close the separately planned M10-T02 input/pending task.",
+    "M10-T03 invalid-credentials closure and M10-T04 success, navigation, and real host-operation closure remain NOT_PROVEN.",
+    "Synthetic Catalog fixtures remain transient authoring preview authority and are not production integrations.",
+    "Arbitrary project schemas, remote deployment, multi-user persistence, and G10 closure remain NOT_PROVEN.",
+    "The deterministic reader never starts Chromium, Vite, or a network listener; exact-head Browser E2E remains separate.",
+    "No hosted-CI pass is inferred from locally generated artifact bytes alone."
+  ]
+}

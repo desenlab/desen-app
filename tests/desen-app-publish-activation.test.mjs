@@ -55,6 +55,73 @@ const M10_T01A_SECURE_SCROLL_CURRENT_PROJECTION = Object.freeze({
     }),
   ]),
 });
+
+test("[M10-T01B successor] authenticates exact visual authoring evidence and current receipts", async () => {
+  const artifactPath = "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json";
+  const receiptPath = "apps/desen-app/src/behavior-controls.tsx";
+  const successor = built.currentCompatibility.visualBehaviorAuthoringSuccessor;
+  assert.deepEqual(successor.artifact, {
+    path: artifactPath,
+    bytes: 10_962,
+    sha256: "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
+    immutable: true,
+  });
+  assert.equal(successor.task, "M10-T01B");
+  assert.equal(successor.predecessor.task, "M10-T01A");
+  assert.equal(
+    successor.currentProjection.relationship,
+    "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
+  );
+  assert.deepEqual(
+    successor.currentProjection.currentReceipts.map(({ path: relativePath }) => relativePath),
+    [
+      ".github/workflows/ci.yml",
+      "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+      "apps/desen-app-browser-e2e/package.json",
+      "apps/desen-app/package.json",
+      "apps/desen-app/src/application.module.css",
+      "apps/desen-app/src/application.tsx",
+      "apps/desen-app/src/authoring-behavior-projection.ts",
+      "apps/desen-app/src/authoring-conditions.ts",
+      "apps/desen-app/src/authoring-connections.ts",
+      "apps/desen-app/src/authoring-event-actions.ts",
+      "apps/desen-app/src/authoring-fixtures.ts",
+      "apps/desen-app/src/behavior-controls.tsx",
+      "apps/desen-app/src/event-action-panel.tsx",
+      "apps/desen-app/src/inspector-panel.tsx",
+      "apps/desen-app/src/preview-controls.tsx",
+      "apps/desen-app/test/application.test.tsx",
+      "apps/desen-app/test/authoring-behavior-projection.test.ts",
+      "apps/desen-app/test/authoring-conditions.test.ts",
+      "apps/desen-app/test/authoring-connections.test.ts",
+      "apps/desen-app/test/authoring-event-actions.test.ts",
+      "apps/desen-app/test/authoring-fixtures.test.ts",
+      "apps/desen-app/test/behavior-controls.test.tsx",
+      "apps/desen-app/test/event-action-panel.test.tsx",
+      "apps/desen-app/test/persistence-application.test.tsx",
+      "apps/desen-app/test/preview-controls.test.tsx",
+      "apps/desen-app/test/publication-application.test.tsx",
+      "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+      "packages/reference-catalog-web/catalog.json",
+      "scripts/generate-desen-app-visual-behavior-authoring-proof.mjs",
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/verify-desen-app-visual-behavior-authoring.mjs",
+    ],
+  );
+
+  for (const relativePath of [artifactPath, receiptPath]) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
+    for (const replacement of [Buffer.alloc(0), changedByte(bytes)]) {
+      await assert.rejects(
+        buildDesenAppPublishActivationEvidence({
+          fileOverrides: new Map([[relativePath, replacement]]),
+        }),
+        expectedError("SUCCESSOR_POLICY_VIOLATION"),
+      );
+    }
+  }
+});
+
 const SOURCE_PATHS = Object.freeze({
   authoringPreview: "apps/desen-app/src/authoring-preview.ts",
   authoringPublication: "apps/desen-app/src/authoring-publication.ts",
@@ -290,8 +357,8 @@ test(DESEN_APP_PUBLISH_ACTIVATION_ROOT_TEST_NAMES[8], () => {
       sha256: "52e29b84745ff331556529612015b95b581bf3007118352ebad796ca9541e0e3",
     },
     currentReceipt: {
-      bytes: 24_493,
-      sha256: "5eba8a2b15cbcf992d0f04d0d7ad719c1a9fc42cdb66635ebc0eab679a221901",
+      bytes: 24_539,
+      sha256: "ef32ec4c16c5f2a6288e284d511a90d024100ee6f1438adc7e207deb94e5ea8f",
     },
     exactFrozenProjection: true,
   });
@@ -492,7 +559,7 @@ test("[M10-T01A successor] authenticates the exact product-created blank-project
   assert.equal(successor.currentProjection.currentReceipts.length, 43);
   for (const [relativePath, code] of [
     [successor.artifact.path, "SUCCESSOR_POLICY_VIOLATION"],
-    ["apps/desen-app/package.json", "BOUNDARY_DRIFT"],
+    ["apps/desen-app/package.json", "SUCCESSOR_POLICY_VIOLATION"],
     ["apps/desen-app/src/application.module.css", "SUCCESSOR_POLICY_VIOLATION"],
     ["apps/desen-app/src/local-runtime-persistence.ts", "SUCCESSOR_POLICY_VIOLATION"],
     ["apps/desen-app/src/product-bootstrap.tsx", "SUCCESSOR_POLICY_VIOLATION"],

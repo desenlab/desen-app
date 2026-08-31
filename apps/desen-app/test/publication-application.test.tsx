@@ -328,9 +328,9 @@ describe("Desen App publication integration", () => {
     fireEvent.click(screen.getByRole("button", { name: "Run" }));
     const runControls = screen.getByRole("complementary", { name: "Run controls" });
     const outcome = within(runControls).getByRole("combobox", {
-      name: "Next sign-in outcome",
+      name: "Next outcome for signIn",
     });
-    fireEvent.change(outcome, { target: { value: "invalidCredentials" } });
+    fireEvent.change(outcome, { target: { value: "error:invalidCredentials" } });
     const runCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
     const runtimeEmail = within(runCanvas).getByLabelText("Email") as HTMLInputElement;
     const runtimePassword = within(runCanvas).getByLabelText("Password") as HTMLInputElement;
@@ -350,9 +350,11 @@ describe("Desen App publication integration", () => {
     await waitFor(() => {
       expect(within(runControls).getByRole("status").textContent).toContain("Pending");
     });
-    fireEvent.click(within(runControls).getByRole("button", { name: "Complete fixture" }));
+    fireEvent.click(within(runControls).getByRole("button", { name: "Complete signIn fixture" }));
     await waitFor(() => {
-      expect(within(runControls).getByRole("status").textContent).toContain("Invalid credentials");
+      expect(within(runControls).getByRole("status").textContent).toContain(
+        "Synthetic public error completed",
+      );
     });
     fireEvent.click(screen.getByRole("button", { name: "Design" }));
 

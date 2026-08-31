@@ -434,13 +434,13 @@ describe("Desen App Source persistence integration", () => {
   });
 
   it("opens one exact accepted Source atomically and clears transient editor and fixture state", async () => {
-    const createFixtureController = authoringFixtures.createAuthoringSignInFixtureController;
+    const createFixtureController = authoringFixtures.createAuthoringOperationFixtureController;
     const controllers: ReturnType<typeof createFixtureController>[] = [];
-    const contexts: Parameters<typeof createFixtureController>[0][] = [];
-    vi.spyOn(authoringFixtures, "createAuthoringSignInFixtureController").mockImplementation(
-      (context) => {
+    const contexts: Parameters<typeof createFixtureController>[1][] = [];
+    vi.spyOn(authoringFixtures, "createAuthoringOperationFixtureController").mockImplementation(
+      (model, context) => {
         contexts.push(context);
-        const controller = createFixtureController(context);
+        const controller = createFixtureController(model, context);
         controllers.push(controller);
         return controller;
       },
@@ -469,7 +469,7 @@ describe("Desen App Source persistence integration", () => {
       effect: "network" as const,
     };
     const pendingFixture = scenarioController.operationPort.invoke(fixtureRequest);
-    expect(scenarioController.read().status).toBe("pending");
+    expect(scenarioController.read().operations[0]?.status).toBe("pending");
 
     const runButton = screen.getByRole("button", { name: "Run" }) as HTMLButtonElement;
     requestOpen();

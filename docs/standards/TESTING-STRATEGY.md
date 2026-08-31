@@ -1234,3 +1234,30 @@ bounds of the command bar, authoring shell, canvas, Inspector, and page frame, w
 window, document, and editor scroll and no editor scroll-height growth. Component tests separately
 prove both Set and Unset hand focus to the replacement control with `preventScroll`; the browser
 path uses the native switch hit area without forced interaction.
+
+## M10-T01B visual behavior-authoring testing
+
+M10-T01B keeps unit, integration, and browser responsibilities distinct. Unit suites exercise
+atomic input connection/reconnection, half-connection disclosure, schema-compatible visual action
+choices, rejection of a second or conditional/extended write to the bound input state, exact
+structured-schema matching, object-versus-array rejection, advanced-only structured literals,
+visual replacement of existing actions, Runtime-safe operation aliases, complete condition
+set/clear, conflicting aliases, a non-auth operation with a distinct effect/error inventory,
+hostile input objects, exact Runtime context fencing, and pre-copy traversal limits.
+Application tests retain Source, persistence, publication, Inspector, and Design/Run composition.
+
+The isolated Chromium scenario remains the visible empty-project flow. It first constructs the
+reported incorrect placeholder-only binding and proves that successive keystrokes replace the
+placeholder rather than a controlled value. It then repairs both TextFields through **Input
+connection**, creates the Button's Catalog operation action and Alert's operation-failure
+visibility through visual controls, types complete email and password strings, observes pending,
+settles the selected Catalog error, and observes the conditional Alert. It also asserts that the
+generic operation outcome control remains a grid and its completion action retains the intended
+editor styling after the Run controls moved into per-operation fieldsets.
+
+The task proof authenticates exact product sources, tests, browser spec, prerequisite artifact, and
+closed nonclaims. The browser smoke is authoring-usability evidence only: it does not replace the
+dedicated M10-T02 typed-input/pending matrix, M10-T03 failure-state matrix, or M10-T04 real-host
+success/navigation proof. The local launcher test that binds fixed port 5173 may be executed only
+when that product port is free; an occupied developer session is preserved rather than terminated,
+and hosted CI supplies the clean-host execution.

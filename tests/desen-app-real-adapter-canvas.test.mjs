@@ -249,12 +249,12 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   );
 
   const currentRuntime = built.currentCompatibility.authority.runtimeResolution;
-  assert.equal(currentRuntime.moduleCount, 154);
-  assert.equal(currentRuntime.staticEdges, 457);
+  assert.equal(currentRuntime.moduleCount, 156);
+  assert.equal(currentRuntime.staticEdges, 474);
   assert.equal(currentRuntime.dynamicEdges, 0);
   assert.equal(
     currentRuntime.graphSha256,
-    "sha256:83287e7eb4febbe9b194c56bf368b4c1af24fbfb606d9ea29cce3081a6f4a8ab",
+    "sha256:75a2860f9e97fe63406c0b2508a11a359107d2ec391c48ac8b157c1792d77420",
   );
   assert.equal(
     graphModule(currentRuntime.modules, APPLICATION).imports.includes(
@@ -837,7 +837,7 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   });
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
-  assert.equal(verified.currentGraphModules, 154);
+  assert.equal(verified.currentGraphModules, 156);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 
@@ -1258,6 +1258,88 @@ test("[M10-T01A successor] authenticates the normal-product blank-project seal a
     await assert.rejects(
       buildDesenAppRealAdapterCanvasEvidence({
         fileOverrides: new Map([[PACKAGE, Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`)]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+});
+
+test("[M10-T01B successor] authenticates visual behavior authoring and fails closed on substitutions", async () => {
+  const successor = built.currentCompatibility.visualBehaviorAuthoringSuccessor;
+  assert.deepEqual(
+    {
+      task: successor.task,
+      artifact: successor.artifact,
+      predecessor: successor.predecessor,
+      relationship: successor.currentProjection.relationship,
+      trackedFiles: successor.trackedFiles,
+      rootTests: successor.rootTests,
+      visualInputConnectionCovered: successor.visualInputConnectionCovered,
+      visualOperationActionCovered: successor.visualOperationActionCovered,
+      visualConditionalPresenceCovered: successor.visualConditionalPresenceCovered,
+      catalogDerivedRunControlsCovered: successor.catalogDerivedRunControlsCovered,
+      advancedJsonRetained: successor.advancedJsonRetained,
+      p08Status: successor.p08Status,
+      p09Status: successor.p09Status,
+      m10T02Closed: successor.m10T02Closed,
+      realHostOperationCovered: successor.realHostOperationCovered,
+      g10Closed: successor.g10Closed,
+    },
+    {
+      task: "M10-T01B",
+      artifact: {
+        path: "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json",
+        bytes: 10_962,
+        sha256: "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
+        immutable: true,
+      },
+      predecessor: {
+        task: "M10-T01A",
+        gate: null,
+        proofId: "desen-app-user-created-blank-project",
+        path: "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+        bytes: 20_173,
+        sha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+        profile: "desen.app.user-created-blank-project-proof.v1",
+        result: "PASS",
+        immutable: true,
+      },
+      relationship: "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
+      trackedFiles: 31,
+      rootTests: 9,
+      visualInputConnectionCovered: true,
+      visualOperationActionCovered: true,
+      visualConditionalPresenceCovered: true,
+      catalogDerivedRunControlsCovered: true,
+      advancedJsonRetained: true,
+      p08Status: "PROVEN",
+      p09Status: "PARTIAL",
+      m10T02Closed: false,
+      realHostOperationCovered: false,
+      g10Closed: false,
+    },
+  );
+  assert.equal(successor.currentProjection.trackedReceipts.length, 31);
+  assert.equal(
+    successor.currentProjection.artifactBackedPaths.includes("apps/desen-app/README.md"),
+    false,
+  );
+
+  const artifactPath = successor.artifact.path;
+  const receiptPath = "apps/desen-app/src/authoring-connections.ts";
+  const [artifactBytes, receiptBytes] = await Promise.all([
+    readFile(path.join(ROOT, artifactPath)),
+    readFile(path.join(ROOT, receiptPath)),
+  ]);
+  for (const [relativePath, bytes] of [
+    [artifactPath, changedByte(artifactBytes)],
+    [artifactPath, Buffer.alloc(0)],
+    [receiptPath, changedByte(receiptBytes)],
+    [receiptPath, Buffer.alloc(0)],
+  ]) {
+    await assert.rejects(
+      buildDesenAppRealAdapterCanvasEvidence({
+        fileOverrides: new Map([[relativePath, bytes]]),
       }),
       expectedError("SUCCESSOR_POLICY_VIOLATION"),
     );

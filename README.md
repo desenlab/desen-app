@@ -26,9 +26,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `██░░░░░░░░` **2 / 10 tasks complete (20%)**
+**M10:** `███░░░░░░░░` **3 / 11 tasks complete (27%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T01A:** `DONE` · **Next:** `M10-T02`
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T01B:** `DONE` · **Next:** `M10-T02`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -1216,6 +1216,24 @@ pass. Ownership covers 1,323 tracked paths and 196 proof-owned paths.
 M10-T01A is `DONE`, implementation progress is 111/146 (76%), M10 is 2/10, and M10-T02 is next.
 Typed input/pending, invalid credentials, success/navigation, remote deployment, multi-user
 persistence, and G10 remain unproven. These local receipts make no exact-head hosted claim.
+
+**M10-T01B checkpoint:** the normal editor now authors behavior without a JSON-first workflow.
+Text fields connect their controlled value and canonical change write atomically; visual controls
+cover the closed action union and conditional component presence; and Run mode derives generic
+operation fixtures from the authored Source and Catalog rather than a sign-in-specific branch.
+Advanced JSON remains available for expert use. The real Chromium flow starts with the visible
+blank-project product route, repairs text-field connections, types complete values, authors a
+button operation plus failure-visible Alert, observes pending state, and completes the Catalog
+error fixture.
+
+Focused behavior tests pass 135/135, the current App suite passes 427/427, and Chromium passes 1/1.
+The immutable 10,962-byte artifact carries 31 exact receipts at
+`sha256:cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8`.
+Reader checkpoint sequence 64 freezes 53 artifacts and 106 readers at
+`sha256:2590f7ebf99b927ccded490e511748e8e5abcf0a49108f67c78061aa021da5f0`.
+M10-T01B is `DONE`; implementation progress is 112/147 (76%), M10 is 3/11, and M10-T02 remains
+`NOT_STARTED` and next. Dedicated M10-T02/T03 lifecycle matrices, M10-T04 real-host operation
+evidence, remote deployment, multi-user persistence, and G10 remain open.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

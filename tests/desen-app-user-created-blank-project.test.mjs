@@ -253,6 +253,69 @@ test(DESEN_APP_USER_CREATED_BLANK_PROJECT_ROOT_TEST_NAMES[9], async () => {
   assert.equal(verified.retainedHistoricalReceipts, 39);
 });
 
+test("[M10-T01B successor] authenticates exact visual authoring evidence and current receipts", async () => {
+  const verified = await verifyDesenAppUserCreatedBlankProjectEvidence();
+  const successor = verified.visualBehaviorAuthoringSuccessor;
+  assert.deepEqual(
+    {
+      task: successor.task,
+      artifact: successor.artifact,
+      predecessorTask: successor.predecessor.task,
+      relationship: successor.currentProjection.relationship,
+      currentReceipts: successor.currentProjection.currentReceipts.length,
+      p08Status: successor.p08Status,
+      p09Status: successor.p09Status,
+      visualInputConnectionCovered: successor.visualInputConnectionCovered,
+      visualOperationActionCovered: successor.visualOperationActionCovered,
+      visualConditionalPresenceCovered: successor.visualConditionalPresenceCovered,
+      catalogDerivedRunControlsCovered: successor.catalogDerivedRunControlsCovered,
+      advancedJsonRetained: successor.advancedJsonRetained,
+      authoredBrowserSmokeCovered: successor.authoredBrowserSmokeCovered,
+      m10T02Closed: successor.m10T02Closed,
+      g10Closed: successor.g10Closed,
+    },
+    {
+      task: "M10-T01B",
+      artifact: {
+        path: "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json",
+        bytes: 10_962,
+        sha256: "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
+        immutable: true,
+      },
+      predecessorTask: "M10-T01A",
+      relationship: "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
+      currentReceipts: 31,
+      p08Status: "PROVEN",
+      p09Status: "PARTIAL",
+      visualInputConnectionCovered: true,
+      visualOperationActionCovered: true,
+      visualConditionalPresenceCovered: true,
+      catalogDerivedRunControlsCovered: true,
+      advancedJsonRetained: true,
+      authoredBrowserSmokeCovered: true,
+      m10T02Closed: false,
+      g10Closed: false,
+    },
+  );
+
+  for (const [relativePath, bytes] of [
+    [successor.artifact.path, await readFile(path.join(ROOT, successor.artifact.path))],
+    [
+      "apps/desen-app/src/behavior-controls.tsx",
+      await readFile(path.join(ROOT, "apps/desen-app/src/behavior-controls.tsx")),
+    ],
+  ]) {
+    for (const mutation of [Buffer.alloc(0), changedByte(bytes)]) {
+      await assert.rejects(
+        verifyDesenAppUserCreatedBlankProjectEvidence({
+          buildOptions: { fileOverrides: new Map([[relativePath, mutation]]) },
+        }),
+        expectedError("SUCCESSOR_POLICY_VIOLATION"),
+      );
+    }
+  }
+});
+
 test(DESEN_APP_USER_CREATED_BLANK_PROJECT_ROOT_TEST_NAMES[10], async () => {
   const sourceMutations = [
     [

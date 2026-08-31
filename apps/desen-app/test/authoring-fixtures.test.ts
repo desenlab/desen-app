@@ -1,436 +1,486 @@
 import { describe, expect, it, vi } from "vitest";
 
+import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
+import officialSource from "../../../examples/sign-in/official-derived.source.desen.json";
+
 import type { RuntimeOperationRequest } from "@desen/runtime-core";
 
 import {
   AUTHORING_FIXTURE_CONTEXT_MODEL,
-  AUTHORING_SIGN_IN_FIXTURE_OUTCOMES,
-  createAuthoringSignInFixtureController,
+  createAuthoringOperationFixtureController,
+  prepareAuthoringOperationFixtureModel,
 } from "../src/authoring-fixtures.js";
+
+const REVISION = `sha256:${"1".repeat(64)}`;
+const EXPORT_OPERATION_ID = "com.example.reporting/exportReport";
 
 function expectDeeplyFrozen(value: unknown): void {
   if (value === null || typeof value !== "object") return;
   expect(Object.isFrozen(value)).toBe(true);
   for (const key of Reflect.ownKeys(value)) {
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    if (descriptor !== undefined && "value" in descriptor) {
-      expectDeeplyFrozen(descriptor.value);
-    }
+    if (descriptor !== undefined && "value" in descriptor) expectDeeplyFrozen(descriptor.value);
   }
 }
 
+function sourceWithAliases(...aliases: string[]): unknown {
+  const source = structuredClone(officialSource);
+  const children = source.surfaces["sign-in"].root.slots.default;
+  const submit = children.find((node) => node.id === "sign-in.submit");
+  if (submit?.on?.press === undefined) throw new TypeError("Reference submit action is missing.");
+  const invocation = submit.on.press[0];
+  if (invocation?.type !== "operation.invoke") throw new TypeError("Reference invoke is missing.");
+  submit.on.press = aliases.map((alias) => ({ ...structuredClone(invocation), as: alias }));
+  return source;
+}
+
+function catalogWithExportOperation() {
+  const catalog = structuredClone(referenceCatalog);
+  const base = structuredClone(referenceCatalog.operations["com.example.auth/signIn"]);
+  const operation = {
+    ...base,
+    authoring: {
+      fixtures: {
+        errors: { quotaExceeded: {} },
+        success: { receiptId: "receipt-1" },
+      },
+    },
+    description: "Export the current report.",
+    effect: "external" as const,
+    errors: [{ code: "quotaExceeded", description: "The export quota was exceeded." }],
+    outputSchema: {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      additionalProperties: false,
+      properties: { receiptId: { type: "string" } },
+      required: ["receiptId"],
+      type: "object",
+    },
+  };
+  (catalog.operations as Record<string, unknown>)[EXPORT_OPERATION_ID] = operation;
+  return catalog;
+}
+
+function sourceWithExportInvocation(alias = "reportExport") {
+  const source = structuredClone(officialSource);
+  const submit = source.surfaces["sign-in"].root.slots.default.find(
+    (node) => node.id === "sign-in.submit",
+  );
+  if (submit?.on?.press?.[0]?.type !== "operation.invoke") {
+    throw new TypeError("Reference invoke is missing.");
+  }
+  submit.on.press[0] = {
+    ...submit.on.press[0],
+    as: alias,
+    operation: EXPORT_OPERATION_ID,
+  };
+  return source;
+}
+
+function readyModel(...aliases: string[]) {
+  const model = prepareAuthoringOperationFixtureModel(
+    referenceCatalog,
+    sourceWithAliases(...aliases),
+    "sign-in",
+  );
+  expect(model.status).toBe("ready");
+  if (model.status !== "ready") throw new TypeError(model.reason);
+  return model;
+}
+
+function createController(...aliases: string[]) {
+  return createAuthoringOperationFixtureController(readyModel(...aliases), {
+    documentId: "com.example.account-app",
+    revision: REVISION,
+    surfaceId: "sign-in",
+  });
+}
+
 function operationRequest(
+  alias: string,
   overrides: Partial<RuntimeOperationRequest> = {},
 ): RuntimeOperationRequest {
   return {
     context: {
       documentId: "com.example.account-app",
-      revision: `sha256:${"1".repeat(64)}`,
+      revision: REVISION,
       surfaceId: "sign-in",
-      requestId: "operation:signIn:1",
+      requestId: `operation:${alias}:1`,
     },
     capabilityId: "com.example.auth/signIn",
-    invocationAlias: "signIn",
-    input: { email: "person@example.test", password: "fixture-secret" },
+    invocationAlias: alias,
+    input: { opaque: "fixture-secret" },
     effect: "network",
     ...overrides,
   };
 }
 
-function createController() {
-  return createAuthoringSignInFixtureController({
-    documentId: "com.example.account-app",
-    revision: `sha256:${"1".repeat(64)}`,
-    surfaceId: "sign-in",
-  });
-}
-
-describe("Desen App authoring fixture inventory", () => {
-  it("shows synthetic, integration, and production context without activating real bindings", () => {
-    expect(AUTHORING_FIXTURE_CONTEXT_MODEL).toEqual({
-      activeId: "synthetic",
-      disclosure: "Synthetic Catalog data. Integration and production calls are off.",
-      options: [
-        {
-          id: "synthetic",
-          label: "Synthetic",
-          availability: "active",
-          description: "Uses inert authoring fixtures from the authenticated Catalog manifest.",
-        },
-        {
-          id: "integration",
-          label: "Integration",
-          availability: "unavailable",
-          description: "No integration binding is connected in this authoring preview.",
-        },
-        {
-          id: "production",
-          label: "Production",
-          availability: "unavailable",
-          description: "Production calls are off in this authoring preview.",
-        },
-      ],
-    });
+describe("Desen App generic authoring fixture projection", () => {
+  it("keeps synthetic explicit while integration and production remain unavailable", () => {
+    expect(
+      AUTHORING_FIXTURE_CONTEXT_MODEL.options.map(({ id, availability }) => [id, availability]),
+    ).toEqual([
+      ["synthetic", "active"],
+      ["integration", "unavailable"],
+      ["production", "unavailable"],
+    ]);
     expectDeeplyFrozen(AUTHORING_FIXTURE_CONTEXT_MODEL);
   });
 
-  it("offers only exact success and declared invalid-credentials fixtures", () => {
-    expect(AUTHORING_SIGN_IN_FIXTURE_OUTCOMES).toEqual([
+  it("derives every Source alias and only authenticated Catalog fixture outcomes", () => {
+    const model = readyModel("primaryAuth", "backupAuth");
+
+    expect(model.operations.map(({ alias }) => alias)).toEqual(["backupAuth", "primaryAuth"]);
+    expect(model.operations[0]).toMatchObject({
+      alias: "backupAuth",
+      capabilityId: "com.example.auth/signIn",
+      effect: "network",
+      description: "Authenticate with email and password.",
+      outcomes: [
+        {
+          id: "success",
+          label: "Success",
+          kind: "success",
+          errorCode: null,
+          fixtureValue: { userId: "user-1" },
+        },
+        {
+          id: "error:invalidCredentials",
+          label: "Error · invalidCredentials",
+          kind: "error",
+          errorCode: "invalidCredentials",
+          fixtureValue: {},
+        },
+      ],
+    });
+    expect(JSON.stringify(model)).not.toContain("error:unavailable");
+    expectDeeplyFrozen(model);
+  });
+
+  it("derives a non-auth operation, effect, and error inventory from Catalog authority", () => {
+    const model = prepareAuthoringOperationFixtureModel(
+      catalogWithExportOperation(),
+      sourceWithExportInvocation(),
+      "sign-in",
+    );
+
+    expect(model).toMatchObject({
+      status: "ready",
+      operations: [
+        {
+          alias: "reportExport",
+          capabilityId: EXPORT_OPERATION_ID,
+          description: "Export the current report.",
+          effect: "external",
+          outcomes: [
+            {
+              id: "success",
+              fixtureValue: { receiptId: "receipt-1" },
+            },
+            {
+              id: "error:quotaExceeded",
+              errorCode: "quotaExceeded",
+              fixtureValue: {},
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("finds nested invokes and rejects one alias reused for different operations", () => {
+    const catalog = catalogWithExportOperation();
+    const nested = structuredClone(officialSource);
+    const nestedSubmit = nested.surfaces["sign-in"].root.slots.default.find(
+      (node) => node.id === "sign-in.submit",
+    );
+    const parent = nestedSubmit?.on?.press?.[0];
+    if (parent?.type !== "operation.invoke") throw new TypeError("Reference invoke is missing.");
+    (parent as unknown as { onFailure?: unknown[] }).onFailure = [
       {
-        id: "success",
-        label: "Success · user-1",
-        kind: "success",
-        capabilityId: "com.example.auth/signIn",
-        fixtureValue: { userId: "user-1" },
+        ...structuredClone(parent),
+        as: "reportExport",
+        operation: EXPORT_OPERATION_ID,
       },
-      {
-        id: "invalidCredentials",
-        label: "Invalid credentials",
-        kind: "error",
-        capabilityId: "com.example.auth/signIn",
-        fixtureValue: {},
-      },
-    ]);
-    const serialized = JSON.stringify(AUTHORING_SIGN_IN_FIXTURE_OUTCOMES);
-    expect(serialized).not.toContain("pending");
-    expect(serialized).not.toContain("unavailable");
-    expect(serialized).not.toContain("email");
-    expect(serialized).not.toContain("password");
-    expectDeeplyFrozen(AUTHORING_SIGN_IN_FIXTURE_OUTCOMES);
+    ];
+    const nestedModel = prepareAuthoringOperationFixtureModel(catalog, nested, "sign-in");
+    expect(nestedModel.status).toBe("ready");
+    if (nestedModel.status === "ready") {
+      expect(nestedModel.operations.map(({ alias }) => alias)).toEqual(["reportExport", "signIn"]);
+    }
+
+    const conflict = structuredClone(officialSource);
+    const conflictSubmit = conflict.surfaces["sign-in"].root.slots.default.find(
+      (node) => node.id === "sign-in.submit",
+    );
+    const conflictPress = conflictSubmit?.on?.press;
+    const invocation = conflictPress?.[0];
+    if (invocation?.type !== "operation.invoke" || conflictPress === undefined) {
+      throw new TypeError("Reference invoke is missing.");
+    }
+    conflictPress.splice(
+      0,
+      conflictPress.length,
+      { ...structuredClone(invocation), as: "shared" },
+      { ...structuredClone(invocation), as: "shared", operation: EXPORT_OPERATION_ID },
+    );
+    expect(prepareAuthoringOperationFixtureModel(catalog, conflict, "sign-in")).toEqual({
+      status: "rejected",
+      reason: "alias-conflict",
+    });
+  });
+
+  it("represents a surface with no operation action honestly instead of inventing a controller", () => {
+    const model = prepareAuthoringOperationFixtureModel(referenceCatalog, officialSource, "home");
+    expect(model).toMatchObject({ status: "ready", surfaceId: "home", operations: [] });
+    const controller = createAuthoringOperationFixtureController(model, {
+      documentId: "com.example.account-app",
+      revision: REVISION,
+      surfaceId: "home",
+    });
+
+    expect(controller.read()).toEqual({
+      modelStatus: "ready",
+      rejectionReason: null,
+      disposed: false,
+      operations: [],
+    });
+    expect(controller.operationPort.invoke(operationRequest("invented"))).toEqual({
+      status: "denied",
+    });
+  });
+
+  it("represents a used operation with no Catalog fixture as unavailable", () => {
+    const catalog = structuredClone(referenceCatalog);
+    delete (catalog.operations["com.example.auth/signIn"] as { authoring?: unknown }).authoring;
+    const model = prepareAuthoringOperationFixtureModel(
+      catalog,
+      sourceWithAliases("authenticate"),
+      "sign-in",
+    );
+    expect(model.status).toBe("ready");
+    const controller = createAuthoringOperationFixtureController(model, {
+      documentId: "com.example.account-app",
+      revision: REVISION,
+      surfaceId: "sign-in",
+    });
+
+    expect(controller.read().operations[0]).toMatchObject({
+      alias: "authenticate",
+      status: "unavailable",
+      selectedOutcomeId: null,
+      outcomes: [],
+    });
+    expect(controller.operationPort.invoke(operationRequest("authenticate"))).toEqual({
+      status: "denied",
+    });
+    expect(controller.selectOutcome("authenticate", "success")).toEqual({
+      status: "rejected",
+      reason: "unavailable",
+    });
+  });
+
+  it("fails closed for invalid source, missing surface, and rejected preparation", () => {
+    expect(prepareAuthoringOperationFixtureModel(referenceCatalog, {}, "sign-in")).toEqual({
+      status: "rejected",
+      reason: "source-invalid",
+    });
+    const missing = prepareAuthoringOperationFixtureModel(
+      referenceCatalog,
+      officialSource,
+      "missing",
+    );
+    expect(missing).toEqual({ status: "rejected", reason: "surface-missing" });
+    const controller = createAuthoringOperationFixtureController(missing, {
+      documentId: "com.example.account-app",
+      revision: REVISION,
+      surfaceId: "missing",
+    });
+    expect(controller.read()).toEqual({
+      modelStatus: "rejected",
+      rejectionReason: "surface-missing",
+      disposed: false,
+      operations: [],
+    });
+    expect(controller.operationPort.invoke(operationRequest("anything"))).toEqual({
+      status: "denied",
+    });
+  });
+
+  it("rejects an oversized action list before projecting or spreading its members", () => {
+    const oversized = structuredClone(officialSource);
+    const submit = oversized.surfaces["sign-in"].root.slots.default.find(
+      (node) => node.id === "sign-in.submit",
+    );
+    const press = submit?.on?.press;
+    const invocation = press?.[0];
+    if (invocation?.type !== "operation.invoke" || press === undefined) {
+      throw new TypeError("Reference invoke is missing.");
+    }
+    (submit?.on as unknown as { press: typeof press }).press = Array.from(
+      { length: 25_001 },
+      () => invocation,
+    );
+
+    let result: ReturnType<typeof prepareAuthoringOperationFixtureModel> | undefined;
+    expect(() => {
+      result = prepareAuthoringOperationFixtureModel(referenceCatalog, oversized, "sign-in");
+    }).not.toThrow();
+    expect(result).toEqual(expect.objectContaining({ status: "rejected" }));
   });
 });
 
-describe("Desen App deferred sign-in fixture controller", () => {
-  it("publishes a real pending lifecycle before explicit successful settlement", async () => {
-    const controller = createController();
-    const snapshots: unknown[] = [];
-    controller.subscribe((snapshot) => snapshots.push(snapshot));
-
-    const invocation = controller.operationPort.invoke(operationRequest());
-    expect(invocation).toBeInstanceOf(Promise);
-    expect(controller.read()).toEqual({
-      status: "pending",
-      selectedOutcomeId: "success",
-      completedOutcomeId: null,
-    });
-    expect(controller.selectOutcome("invalidCredentials")).toEqual({
-      status: "rejected",
-      reason: "pending",
+describe("Desen App generic deferred operation fixture controller", () => {
+  it("keeps independent aliases pending and settles each captured Catalog outcome explicitly", async () => {
+    const controller = createController("primaryAuth", "backupAuth");
+    expect(controller.selectOutcome("primaryAuth", "error:invalidCredentials")).toMatchObject({
+      status: "selected",
+      alias: "primaryAuth",
     });
 
-    let settled = false;
-    void Promise.resolve(invocation).then(() => {
-      settled = true;
+    const primary = controller.operationPort.invoke(operationRequest("primaryAuth"));
+    const backup = controller.operationPort.invoke(operationRequest("backupAuth"));
+    expect(controller.read().operations.map(({ alias, status }) => [alias, status])).toEqual([
+      ["backupAuth", "pending"],
+      ["primaryAuth", "pending"],
+    ]);
+    expect(controller.completePending("backupAuth")).toEqual({
+      status: "completed",
+      alias: "backupAuth",
+      outcomeId: "success",
     });
-    await Promise.resolve();
-    expect(settled).toBe(false);
-
-    expect(controller.completePending()).toEqual({ status: "completed", outcomeId: "success" });
-    await expect(Promise.resolve(invocation)).resolves.toEqual({
+    await expect(Promise.resolve(backup)).resolves.toEqual({
       status: "succeeded",
       value: { userId: "user-1" },
     });
-    expect(controller.read()).toEqual({
-      status: "succeeded",
-      selectedOutcomeId: "success",
-      completedOutcomeId: "success",
-    });
-    expect(snapshots).toEqual([
-      { status: "pending", selectedOutcomeId: "success", completedOutcomeId: null },
-      { status: "succeeded", selectedOutcomeId: "success", completedOutcomeId: "success" },
-    ]);
-    snapshots.forEach(expectDeeplyFrozen);
-  });
-
-  it("settles the selected declared public failure without replacing the host port", async () => {
-    const controller = createController();
-    const operationPort = controller.operationPort;
-    const invoke = operationPort.invoke;
-
-    expect(controller.selectOutcome("invalidCredentials")).toMatchObject({ status: "selected" });
-    expect(controller.operationPort).toBe(operationPort);
-    expect(controller.operationPort.invoke).toBe(invoke);
-
-    const invocation = controller.operationPort.invoke(operationRequest());
-    expect(controller.completePending()).toEqual({
+    expect(controller.completePending("primaryAuth")).toEqual({
       status: "completed",
-      outcomeId: "invalidCredentials",
+      alias: "primaryAuth",
+      outcomeId: "error:invalidCredentials",
     });
-    await expect(Promise.resolve(invocation)).resolves.toEqual({
+    await expect(Promise.resolve(primary)).resolves.toEqual({
       status: "failed",
       errorCode: "invalidCredentials",
     });
-    expect(controller.read()).toEqual({
-      status: "failed",
-      selectedOutcomeId: "invalidCredentials",
-      completedOutcomeId: "invalidCredentials",
-    });
-
-    expect(controller.selectOutcome("success")).toMatchObject({ status: "selected" });
-    expect(controller.operationPort).toBe(operationPort);
-    expect(controller.operationPort.invoke).toBe(invoke);
-    expect(controller.read()).toEqual({
-      status: "idle",
-      selectedOutcomeId: "success",
-      completedOutcomeId: null,
-    });
+    expect(controller.read().operations.map(({ status }) => status)).toEqual([
+      "succeeded",
+      "failed",
+    ]);
+    expectDeeplyFrozen(controller.read());
   });
 
   it.each([
     ["wrong capability", { capabilityId: "com.example.auth/other" }],
     ["wrong alias", { invocationAlias: "other" }],
     ["wrong effect", { effect: "external" as const }],
-  ])("denies a forged request with %s without starting lifecycle", async (_label, overrides) => {
-    const controller = createController();
-    const result = controller.operationPort.invoke(operationRequest(overrides));
-
-    await expect(Promise.resolve(result)).resolves.toEqual({ status: "denied" });
-    expect(controller.read()).toEqual({
-      status: "idle",
-      selectedOutcomeId: "success",
-      completedOutcomeId: null,
-    });
-    expect(controller.completePending()).toEqual({ status: "ignored", reason: "not-pending" });
+  ])("denies %s without starting a lifecycle", async (_label, override) => {
+    const controller = createController("authenticate");
+    await expect(
+      Promise.resolve(controller.operationPort.invoke(operationRequest("authenticate", override))),
+    ).resolves.toEqual({ status: "denied" });
+    expect(controller.read().operations[0]?.status).toBe("idle");
   });
 
   it.each([
-    ["wrong document", { documentId: "com.example.other-app" }],
-    ["wrong revision", { revision: `sha256:${"2".repeat(64)}` }],
-    ["wrong surface", { surfaceId: "home" }],
-    ["empty request id", { requestId: "" }],
-  ])("denies a request with %s context", async (_label, contextOverride) => {
-    const controller = createController();
-    const request = operationRequest();
-    const result = controller.operationPort.invoke(
-      operationRequest({ context: { ...request.context, ...contextOverride } }),
-    );
-
-    await expect(Promise.resolve(result)).resolves.toEqual({ status: "denied" });
-    expect(controller.read().status).toBe("idle");
-  });
-
-  it("rejects inherited or accessor-backed authorization fields without invoking them", async () => {
-    const controller = createController();
-    const inherited = Object.create(operationRequest()) as RuntimeOperationRequest;
-    const capabilityGetter = vi.fn(() => "com.example.auth/signIn");
-    const accessorBacked = operationRequest();
-    Object.defineProperty(accessorBacked, "capabilityId", {
-      enumerable: true,
-      get: capabilityGetter,
-    });
-
-    await expect(Promise.resolve(controller.operationPort.invoke(inherited))).resolves.toEqual({
-      status: "denied",
-    });
-    await expect(Promise.resolve(controller.operationPort.invoke(accessorBacked))).resolves.toEqual(
-      { status: "denied" },
-    );
-    expect(capabilityGetter).not.toHaveBeenCalled();
-    expect(controller.read().status).toBe("idle");
-  });
-
-  it("rejects inherited or accessor-backed request context without invoking getters", async () => {
-    const controller = createController();
-    const validContext = operationRequest().context;
-    const inheritedContextRequest = operationRequest({
-      context: Object.create(validContext) as RuntimeOperationRequest["context"],
-    });
-    const requestIdGetter = vi.fn(() => "operation:signIn:2");
-    const accessorContext = { ...validContext };
-    Object.defineProperty(accessorContext, "requestId", {
-      enumerable: true,
-      get: requestIdGetter,
-    });
-    const contextGetter = vi.fn(() => validContext);
-    const accessorRequest = operationRequest();
-    Object.defineProperty(accessorRequest, "context", {
-      enumerable: true,
-      get: contextGetter,
-    });
-
-    await expect(
-      Promise.resolve(controller.operationPort.invoke(inheritedContextRequest)),
-    ).resolves.toEqual({ status: "denied" });
+    ["documentId", "com.example.other-app"],
+    ["revision", `sha256:${"2".repeat(64)}`],
+    ["surfaceId", "home"],
+    ["requestId", ""],
+  ])("denies a request with the wrong %s context", async (key, value) => {
+    const controller = createController("authenticate");
+    const request = operationRequest("authenticate");
     await expect(
       Promise.resolve(
         controller.operationPort.invoke(
-          operationRequest({ context: accessorContext as RuntimeOperationRequest["context"] }),
+          operationRequest("authenticate", {
+            context: { ...request.context, [key]: value },
+          }),
         ),
       ),
     ).resolves.toEqual({ status: "denied" });
-    await expect(
-      Promise.resolve(controller.operationPort.invoke(accessorRequest)),
-    ).resolves.toEqual({ status: "denied" });
-    expect(requestIdGetter).not.toHaveBeenCalled();
-    expect(contextGetter).not.toHaveBeenCalled();
-    expect(controller.read().status).toBe("idle");
   });
 
-  it("captures the expected preview identity without retaining caller ownership", async () => {
-    const expected = {
-      documentId: "com.example.account-app",
-      revision: `sha256:${"1".repeat(64)}`,
-      surfaceId: "sign-in",
-    };
-    const controller = createAuthoringSignInFixtureController(expected);
-    expected.documentId = "com.example.forged";
-    expected.revision = `sha256:${"9".repeat(64)}`;
-    expected.surfaceId = "forged";
-
-    const invocation = controller.operationPort.invoke(operationRequest());
-    expect(controller.read().status).toBe("pending");
-    controller.completePending();
+  it("never reads or retains operation input and rejects accessor authorization fields", async () => {
+    const controller = createController("authenticate");
+    const inputAccess = vi.fn(() => {
+      throw new Error("input must remain opaque");
+    });
+    const request = operationRequest("authenticate");
+    Object.defineProperty(request, "input", { enumerable: true, get: inputAccess });
+    const invocation = controller.operationPort.invoke(request);
+    expect(inputAccess).not.toHaveBeenCalled();
+    expect(JSON.stringify(controller.read())).not.toContain("fixture-secret");
+    controller.completePending("authenticate");
     await expect(Promise.resolve(invocation)).resolves.toEqual({
       status: "succeeded",
       value: { userId: "user-1" },
     });
-  });
+    expect(inputAccess).not.toHaveBeenCalled();
 
-  it("rejects malformed expected preview identity before creating authority", () => {
-    const inherited = Object.create({
-      documentId: "com.example.account-app",
-      revision: `sha256:${"1".repeat(64)}`,
-      surfaceId: "sign-in",
+    const capabilityAccess = vi.fn(() => "com.example.auth/signIn");
+    const accessorRequest = operationRequest("authenticate");
+    Object.defineProperty(accessorRequest, "capabilityId", {
+      enumerable: true,
+      get: capabilityAccess,
     });
-    const accessor = {
-      documentId: "com.example.account-app",
-      revision: `sha256:${"1".repeat(64)}`,
-      get surfaceId() {
-        return "sign-in";
-      },
-    };
-
-    expect(() => createAuthoringSignInFixtureController(inherited)).toThrow(TypeError);
-    expect(() => createAuthoringSignInFixtureController(accessor)).toThrow(TypeError);
-    expect(() =>
-      createAuthoringSignInFixtureController({
-        documentId: "com.example.account-app",
-        revision: "",
-        surfaceId: "sign-in",
-      }),
-    ).toThrow(TypeError);
+    expect(controller.operationPort.invoke(accessorRequest)).toEqual({ status: "denied" });
+    expect(capabilityAccess).not.toHaveBeenCalled();
   });
 
-  it("revokes admission synchronously during cleanup and reactivates only the same live lifetime", async () => {
-    const controller = createController();
-    const pending = controller.operationPort.invoke(operationRequest());
-
+  it("revokes pending work on deactivate, supports replay, and terminally disposes", async () => {
+    const controller = createController("authenticate");
+    const pending = controller.operationPort.invoke(operationRequest("authenticate"));
     controller.deactivate();
-    expect(controller.operationPort.invoke(operationRequest())).toEqual({ status: "denied" });
     await expect(Promise.resolve(pending)).resolves.toEqual({ status: "denied" });
-    expect(controller.read()).toEqual({
-      status: "idle",
-      selectedOutcomeId: "success",
-      completedOutcomeId: null,
+    expect(controller.operationPort.invoke(operationRequest("authenticate"))).toEqual({
+      status: "denied",
     });
-    expect(controller.completePending()).toEqual({ status: "ignored", reason: "inactive" });
-    expect(controller.selectOutcome("invalidCredentials")).toEqual({
-      status: "rejected",
+    expect(controller.completePending("authenticate")).toEqual({
+      status: "ignored",
       reason: "inactive",
     });
 
     controller.activate();
-    expect(controller.selectOutcome("invalidCredentials")).toMatchObject({ status: "selected" });
-    const replayInvocation = controller.operationPort.invoke(operationRequest());
-    expect(controller.read().status).toBe("pending");
-    controller.completePending();
-    await expect(Promise.resolve(replayInvocation)).resolves.toEqual({
-      status: "failed",
-      errorCode: "invalidCredentials",
-    });
-
+    const replay = controller.operationPort.invoke(operationRequest("authenticate"));
+    controller.completePending("authenticate");
+    await expect(Promise.resolve(replay)).resolves.toMatchObject({ status: "succeeded" });
     controller.dispose();
     controller.activate();
-    expect(controller.operationPort.invoke(operationRequest())).toEqual({ status: "denied" });
+    expect(controller.read()).toMatchObject({ disposed: true });
+    expect(controller.read().operations[0]?.status).toBe("disposed");
+    expect(controller.operationPort.invoke(operationRequest("authenticate"))).toEqual({
+      status: "denied",
+    });
   });
 
-  it("revokes pending work on disposal and ignores late settlement", async () => {
-    const controller = createController();
-    const invocation = controller.operationPort.invoke(operationRequest());
-
-    controller.dispose();
-    await expect(Promise.resolve(invocation)).resolves.toEqual({ status: "denied" });
-    expect(controller.read()).toEqual({
-      status: "disposed",
-      selectedOutcomeId: "success",
-      completedOutcomeId: null,
-    });
-    expect(controller.completePending()).toEqual({ status: "ignored", reason: "disposed" });
-    expect(controller.selectOutcome("invalidCredentials")).toEqual({
-      status: "rejected",
-      reason: "disposed",
-    });
-    await expect(
-      Promise.resolve(controller.operationPort.invoke(operationRequest())),
-    ).resolves.toEqual({ status: "denied" });
-  });
-
-  it("revokes a replaced transport while preserving the stable operation port", async () => {
-    const controller = createController();
-    const operationPort = controller.operationPort;
-    const first = controller.operationPort.invoke(operationRequest());
-    const second = controller.operationPort.invoke(
-      operationRequest({
-        context: { ...operationRequest().context, requestId: "operation:signIn:2" },
+  it("revokes a replaced transport while retaining one stable host port", async () => {
+    const controller = createController("authenticate");
+    const port = controller.operationPort;
+    const first = port.invoke(operationRequest("authenticate"));
+    const second = port.invoke(
+      operationRequest("authenticate", {
+        context: { ...operationRequest("authenticate").context, requestId: "replacement" },
       }),
     );
-
     await expect(Promise.resolve(first)).resolves.toEqual({ status: "denied" });
-    expect(controller.operationPort).toBe(operationPort);
-    expect(controller.read().status).toBe("pending");
-    controller.completePending();
-    await expect(Promise.resolve(second)).resolves.toEqual({
-      status: "succeeded",
-      value: { userId: "user-1" },
-    });
+    expect(controller.operationPort).toBe(port);
+    controller.completePending("authenticate");
+    await expect(Promise.resolve(second)).resolves.toMatchObject({ status: "succeeded" });
   });
 
-  it("never reads, retains, or logs operation input and password data", async () => {
-    const controller = createController();
-    const secret = "unique-password-that-must-not-be-retained";
-    const inputAccess = vi.fn(() => {
-      throw new Error("operation input must remain opaque");
-    });
-    const request = operationRequest();
-    Object.defineProperty(request, "input", {
-      enumerable: true,
-      get: inputAccess,
-    });
-    const consoleSpies = [
-      vi.spyOn(console, "log").mockImplementation(() => undefined),
-      vi.spyOn(console, "info").mockImplementation(() => undefined),
-      vi.spyOn(console, "warn").mockImplementation(() => undefined),
-      vi.spyOn(console, "error").mockImplementation(() => undefined),
-    ];
-
-    const invocation = controller.operationPort.invoke(request);
-    expect(inputAccess).not.toHaveBeenCalled();
-    expect(JSON.stringify(controller.read())).not.toContain(secret);
-    expect(JSON.stringify(controller)).not.toContain(secret);
-    controller.completePending();
-    await expect(Promise.resolve(invocation)).resolves.toEqual({
-      status: "succeeded",
-      value: { userId: "user-1" },
-    });
-    expect(inputAccess).not.toHaveBeenCalled();
-    consoleSpies.forEach((spy) => expect(spy).not.toHaveBeenCalled());
-    consoleSpies.forEach((spy) => spy.mockRestore());
-  });
-
-  it("rejects unknown outcome values without changing the controller", () => {
-    const controller = createController();
-    expect(controller.selectOutcome("pending" as never)).toEqual({
-      status: "rejected",
-      reason: "unknown-outcome",
-    });
-    expect(controller.selectOutcome("unavailable" as never)).toEqual({
-      status: "rejected",
-      reason: "unknown-outcome",
-    });
-    expect(controller.read()).toEqual({
-      status: "idle",
-      selectedOutcomeId: "success",
-      completedOutcomeId: null,
-    });
+  it("rejects forged ready models and mismatched preview identity", () => {
+    const model = readyModel("authenticate");
+    expect(() =>
+      createAuthoringOperationFixtureController(
+        { ...model },
+        { documentId: model.documentId, revision: REVISION, surfaceId: model.surfaceId },
+      ),
+    ).toThrow(TypeError);
+    expect(() =>
+      createAuthoringOperationFixtureController(model, {
+        documentId: model.documentId,
+        revision: REVISION,
+        surfaceId: "home",
+      }),
+    ).toThrow(TypeError);
   });
 });

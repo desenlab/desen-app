@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 196,
+  PROOF_UNIT: 198,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 32,
-  FROZEN_INPUT: 142,
-  PACKAGE_OR_APPLICATION: 512,
-  SHARED_PROOF_INFRASTRUCTURE: 250,
-  PROJECT_DOCUMENTATION: 135,
+  FROZEN_INPUT: 143,
+  PACKAGE_OR_APPLICATION: 520,
+  SHARED_PROOF_INFRASTRUCTURE: 252,
+  PROJECT_DOCUMENTATION: 136,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1323 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1337 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1323 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1323);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1337);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 196);
+  assert.equal(proofEntries.length, 198);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -282,6 +282,15 @@ test("permits strict selection only for exact verifier and root-test proof input
       "tests/desen-app-user-created-blank-project.test.mjs",
     ],
   );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "desen-app-visual-behavior-authoring")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-desen-app-visual-behavior-authoring.mjs",
+      "tests/desen-app-visual-behavior-authoring.test.mjs",
+    ],
+  );
   for (const entry of proofEntries) {
     assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.SELECT_PROOF_UNIT);
     const verifier = nodeById.get(entry.verifierNodeId);
@@ -310,7 +319,7 @@ test("permits strict selection only for exact verifier and root-test proof input
   }
 });
 
-test("the reviewed M10-T01 successor preserves the historical I07-04 ownership projection", async () => {
+test("the reviewed M10-T01B successor preserves the historical I07-04 ownership projection", async () => {
   const currentPaths = await currentTrackedPaths();
   const current = createAffectedWorkloadOwnership(currentPaths);
   const promotedPaths = [
@@ -602,6 +611,20 @@ test("the reviewed M10-T01 successor preserves the historical I07-04 ownership p
     "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app-browser-e2e/product-proof-server.mjs",
     "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-other-app/apps/desen-app/src/application.js",
     "tests/desen-app-user-created-blank-project.test.mjs",
+    "apps/desen-app/src/authoring-behavior-projection.ts",
+    "apps/desen-app/src/authoring-conditions.ts",
+    "apps/desen-app/src/authoring-connections.ts",
+    "apps/desen-app/src/behavior-controls.tsx",
+    "apps/desen-app/test/authoring-behavior-projection.test.ts",
+    "apps/desen-app/test/authoring-conditions.test.ts",
+    "apps/desen-app/test/authoring-connections.test.ts",
+    "apps/desen-app/test/behavior-controls.test.tsx",
+    "docs/proof/DESEN-APP-VISUAL-BEHAVIOR-AUTHORING.md",
+    "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json",
+    "scripts/generate-desen-app-visual-behavior-authoring-proof.mjs",
+    "scripts/lib/desen-app-visual-behavior-authoring-proof.mjs",
+    "scripts/verify-desen-app-visual-behavior-authoring.mjs",
+    "tests/desen-app-visual-behavior-authoring.test.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);

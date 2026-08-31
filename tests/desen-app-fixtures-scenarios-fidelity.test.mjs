@@ -282,7 +282,7 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[7], () => {
   );
   assert.equal(Object.keys(built.artifact.application.package.rootCommands).length, 3);
   assert.equal(built.currentCompatibility.tests.testCaseCounts[APPLICATION_TEST_PATH], 44);
-  assert.equal(built.currentCompatibility.tests.focusedTestCases, 90);
+  assert.equal(built.currentCompatibility.tests.focusedTestCases, 91);
   assert.equal(built.artifact.boundary.focusedAppTestCaseCountPinned, true);
   assert.equal(built.artifact.boundary.finalCommandWiringPinned, true);
   assert.equal(built.artifact.tests.rootTestNames.length, 11);
@@ -323,8 +323,8 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
   const mutations = [
     {
       key: "fixtureSource",
-      search: "operations: [signInOperationRegistration]",
-      replacement: "operations: []",
+      search: "registrations.push(registerOperation({ id: capabilityId, manifest }));",
+      replacement: 'registrations.push(registerOperation({ id: "forged", manifest }));',
     },
     {
       key: "fixtureSource",
@@ -343,8 +343,8 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
     },
     {
       key: "fixtureSource",
-      search: "if (disposed || !active || !isAuthorizedSignInRequest(request, expectedContext))",
-      replacement: "if (disposed || !isAuthorizedSignInRequest(request, expectedContext))",
+      search: "if (disposed || !active || !hasAuthorizedRequestContext(request, expectedContext))",
+      replacement: "if (disposed || !hasAuthorizedRequestContext(request, expectedContext))",
     },
     {
       key: "scenarioSource",
@@ -548,7 +548,7 @@ test(DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_ROOT_TEST_NAMES[9], async () => {
           Buffer.from(
             replaceOnce(
               fixtureTestSource,
-              "never reads, retains, or logs operation input and password data",
+              "never reads or retains operation input and rejects accessor authorization fields",
               "does not prove secret retention",
             ),
           ),
@@ -954,6 +954,88 @@ test("[M10-T01A successor] authenticates the exact product-created blank-project
     await assert.rejects(
       buildDesenAppFixturesScenariosFidelityEvidence({
         fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+});
+
+test("[M10-T01B successor] authenticates visual behavior authoring and fails closed on substitutions", async () => {
+  const successor = built.currentCompatibility.visualBehaviorAuthoringSuccessor;
+  assert.deepEqual(
+    {
+      task: successor.task,
+      artifact: successor.artifact,
+      predecessor: successor.predecessor,
+      relationship: successor.currentProjection.relationship,
+      trackedFiles: successor.trackedFiles,
+      rootTests: successor.rootTests,
+      visualInputConnectionCovered: successor.visualInputConnectionCovered,
+      visualOperationActionCovered: successor.visualOperationActionCovered,
+      visualConditionalPresenceCovered: successor.visualConditionalPresenceCovered,
+      catalogDerivedRunControlsCovered: successor.catalogDerivedRunControlsCovered,
+      advancedJsonRetained: successor.advancedJsonRetained,
+      p08Status: successor.p08Status,
+      p09Status: successor.p09Status,
+      m10T02Closed: successor.m10T02Closed,
+      realHostOperationCovered: successor.realHostOperationCovered,
+      g10Closed: successor.g10Closed,
+    },
+    {
+      task: "M10-T01B",
+      artifact: {
+        path: "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json",
+        bytes: 10_962,
+        sha256: "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
+        immutable: true,
+      },
+      predecessor: {
+        task: "M10-T01A",
+        gate: null,
+        proofId: "desen-app-user-created-blank-project",
+        path: "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+        bytes: 20_173,
+        sha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+        profile: "desen.app.user-created-blank-project-proof.v1",
+        result: "PASS",
+        immutable: true,
+      },
+      relationship: "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
+      trackedFiles: 31,
+      rootTests: 9,
+      visualInputConnectionCovered: true,
+      visualOperationActionCovered: true,
+      visualConditionalPresenceCovered: true,
+      catalogDerivedRunControlsCovered: true,
+      advancedJsonRetained: true,
+      p08Status: "PROVEN",
+      p09Status: "PARTIAL",
+      m10T02Closed: false,
+      realHostOperationCovered: false,
+      g10Closed: false,
+    },
+  );
+  assert.equal(successor.currentProjection.trackedReceipts.length, 31);
+  assert.equal(
+    successor.currentProjection.artifactBackedPaths.includes("apps/desen-app/README.md"),
+    false,
+  );
+
+  const artifactPath = successor.artifact.path;
+  const receiptPath = "apps/desen-app/src/authoring-connections.ts";
+  const [artifactBytes, receiptBytes] = await Promise.all([
+    readFile(path.join(ROOT, artifactPath)),
+    readFile(path.join(ROOT, receiptPath)),
+  ]);
+  for (const [relativePath, bytes] of [
+    [artifactPath, changedByte(artifactBytes)],
+    [artifactPath, Buffer.alloc(0)],
+    [receiptPath, changedByte(receiptBytes)],
+    [receiptPath, Buffer.alloc(0)],
+  ]) {
+    await assert.rejects(
+      buildDesenAppFixturesScenariosFidelityEvidence({
+        fileOverrides: new Map([[relativePath, bytes]]),
       }),
       expectedError("SUCCESSOR_POLICY_VIOLATION"),
     );

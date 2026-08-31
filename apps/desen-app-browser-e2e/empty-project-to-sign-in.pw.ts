@@ -54,10 +54,28 @@ async function setTextProperty(page: Page, name: string, value: string): Promise
   await expect(inspector.getByRole("status")).toContainText(`Updated ${name}.`);
 }
 
-async function bindValueToState(page: Page, stateName: string): Promise<void> {
+async function bindPropertyToState(
+  page: Page,
+  propertyName: string,
+  stateName: string,
+): Promise<void> {
   const inspector = page.getByRole("complementary", { name: "Inspector" });
-  await inspector.getByRole("combobox", { name: "Value value source" }).selectOption(stateName);
-  await expect(inspector.getByRole("status")).toContainText(`Bound Value to state.${stateName}.`);
+  await inspector
+    .getByRole("combobox", { name: `${propertyName} value source` })
+    .selectOption(stateName);
+  await expect(inspector.getByRole("status")).toContainText(
+    `Bound ${propertyName} to state.${stateName}.`,
+  );
+}
+
+async function restoreLocalProperty(page: Page, propertyName: string): Promise<void> {
+  const inspector = page.getByRole("complementary", { name: "Inspector" });
+  await inspector
+    .getByRole("combobox", { name: `${propertyName} value source` })
+    .selectOption("__local__");
+  await expect(inspector.getByRole("status")).toContainText(
+    `Restored ${propertyName} to the bound state's initial value.`,
+  );
 }
 
 async function addChangeStateAction(page: Page, stateName: string): Promise<void> {
@@ -66,16 +84,60 @@ async function addChangeStateAction(page: Page, stateName: string): Promise<void
   const actions = inspector.getByRole("region", { name: "Events & Actions" });
   await actions.getByRole("button", { name: "Add change event handler" }).click();
   await actions.getByRole("button", { name: "Add action to change" }).click();
-  await actions.getByRole("textbox", { name: "New action JSON for change" }).fill(
-    JSON.stringify({
-      type: "state.set",
-      path: stateName,
-      value: { $ref: "event.value" },
-    }),
-  );
-  await actions.getByRole("button", { name: "Add complete action" }).click();
+  await actions.getByRole("combobox", { name: "State to update" }).selectOption(stateName);
+  await expect(actions.getByRole("combobox", { name: "Value comes from" })).toHaveValue("event");
+  await expect(actions.getByRole("combobox", { name: "Event field" })).toHaveValue("value");
+  await actions.getByRole("button", { name: "Add action" }).click();
   await expect(actions.getByRole("article", { name: "action 1 in change" })).toBeVisible();
   await inspector.getByRole("tab", { name: "Inspector" }).click();
+}
+
+async function connectInput(page: Page, stateName: string): Promise<void> {
+  const inspector = page.getByRole("complementary", { name: "Inspector" });
+  const connection = inspector.getByRole("region", { name: "Input connection" });
+  await connection
+    .getByRole("combobox", { name: "Input connection state" })
+    .selectOption(stateName);
+  await connection.getByRole("button", { name: /^(?:Connect input|Repair connection)$/u }).click();
+  await expect(connection.getByRole("status")).toContainText(
+    `Connected Value and change to state.${stateName}.`,
+  );
+}
+
+async function addOperationAction(page: Page): Promise<void> {
+  const inspector = page.getByRole("complementary", { name: "Inspector" });
+  await inspector.getByRole("tab", { name: "Actions" }).click();
+  const actions = inspector.getByRole("region", { name: "Events & Actions" });
+  await actions.getByRole("button", { name: "Add press event handler" }).click();
+  await actions.getByRole("button", { name: "Add action to press" }).click();
+  await actions
+    .getByRole("combobox", { name: "New action type for press" })
+    .selectOption("operation.invoke");
+  await expect(actions.getByRole("combobox", { name: "Catalog operation" })).toHaveValue(
+    "com.example.auth/signIn",
+  );
+  await expect(actions.getByRole("textbox", { name: "Result name" })).toHaveValue("signIn");
+  await expect(actions.getByRole("combobox", { name: /email/u })).toHaveValue("email");
+  await expect(actions.getByRole("combobox", { name: /password/u })).toHaveValue("password");
+  await actions.getByRole("button", { name: "Add action" }).click();
+  await expect(actions.getByRole("article", { name: "action 1 in press" })).toBeVisible();
+  await inspector.getByRole("tab", { name: "Inspector" }).click();
+}
+
+async function showOnOperationFailure(page: Page): Promise<void> {
+  const inspector = page.getByRole("complementary", { name: "Inspector" });
+  const visibility = inspector.getByRole("region", { name: "Layer visibility" });
+  await visibility
+    .getByRole("combobox", { name: "Layer visibility mode" })
+    .selectOption("operation");
+  await visibility
+    .getByRole("combobox", { name: "Visibility operation result" })
+    .selectOption("signIn");
+  await visibility
+    .getByRole("combobox", { name: "Visibility operation status" })
+    .selectOption("failed");
+  await visibility.getByRole("button", { name: "Apply visibility" }).click();
+  await expect(visibility.getByRole("status")).toContainText("Updated this layer's visibility.");
 }
 
 test("authors and saves a valid sign-in Source from the empty project in a real browser", async ({
@@ -167,8 +229,23 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
     }),
   ).toBeVisible();
   await setTextProperty(page, "Label", "Email");
-  await bindValueToState(page, "email");
+  await bindPropertyToState(page, "Placeholder", "email");
   await addChangeStateAction(page, "email");
+
+  await page.getByRole("button", { name: "Run" }).click();
+  const incorrectlyBoundEmail = page
+    .getByRole("group", { name: "Sign-in adapter canvas" })
+    .getByRole("textbox", { name: "Email" });
+  await incorrectlyBoundEmail.press("a");
+  await expect(incorrectlyBoundEmail).toHaveValue("");
+  await expect(incorrectlyBoundEmail).toHaveAttribute("placeholder", "a");
+  await incorrectlyBoundEmail.press("b");
+  await expect(incorrectlyBoundEmail).toHaveValue("");
+  await expect(incorrectlyBoundEmail).toHaveAttribute("placeholder", "b");
+  await page.getByRole("button", { name: "Design" }).click();
+
+  await restoreLocalProperty(page, "Placeholder");
+  await connectInput(page, "email");
 
   await page
     .getByRole("button", {
@@ -176,6 +253,7 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
     })
     .click();
   await setTextProperty(page, "Label", "Sign in");
+  await addOperationAction(page);
 
   await page
     .getByRole("button", {
@@ -190,8 +268,7 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
   await setTextProperty(page, "Label", "Password");
   await inspector.getByRole("button", { name: "Set Secure" }).click();
   await inspector.getByRole("switch", { name: "Secure" }).check();
-  await bindValueToState(page, "password");
-  await addChangeStateAction(page, "password");
+  await connectInput(page, "password");
 
   const passwordDragHandle = page.locator(
     '[data-layer-drop-row-node-id="node.textfield-2"] [data-layer-drag-handle="true"]',
@@ -218,11 +295,9 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
   await expect(
     hierarchy.getByRole("button", { name: "Deselect Alert layer · node.alert" }),
   ).toBeVisible();
-  await page
-    .getByRole("complementary", { name: "Authoring panel" })
-    .getByRole("button", { name: "Delete Alert layer · node.alert" })
-    .click();
-  await expect(hierarchy.getByText("node.alert", { exact: true })).toHaveCount(0);
+  await setTextProperty(page, "Text", "Unable to sign in. Check your details and try again.");
+  await inspector.getByRole("combobox", { name: "Tone" }).selectOption("critical");
+  await showOnOperationFailure(page);
 
   const frame = page.locator("[data-canvas-frame='portrait']");
   const managedSubtree = page.locator("[data-managed-capability-subtree='true']");
@@ -235,11 +310,36 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
   await expect(runCanvas.getByRole("textbox", { name: "Email" })).toBeVisible();
   await expect(runCanvas.getByLabel("Password")).toBeVisible();
   await expect(runCanvas.getByRole("button", { name: "Sign in" })).toBeVisible();
+  await expect(runCanvas.getByRole("alert")).toHaveCount(0);
   await expect
     .poll(() => managedSubtree.evaluate((node) => node.innerHTML))
     .toBe(designManagedHtml);
   await expect(frame).toHaveAttribute("data-canvas-frame-width", "420");
   await expect(frame).toHaveAttribute("data-canvas-frame-height", "720");
+  const runEmail = runCanvas.getByRole("textbox", { name: "Email" });
+  const runPassword = runCanvas.getByLabel("Password");
+  await runEmail.pressSequentially("designer@example.test");
+  await expect(runEmail).toHaveValue("designer@example.test");
+  await runPassword.pressSequentially("correct horse battery staple");
+  await expect(runPassword).toHaveValue("correct horse battery staple");
+  const runControls = page.getByRole("complementary", { name: "Run controls" });
+  const outcomeControl = runControls
+    .getByRole("combobox", { name: "Next outcome for signIn" })
+    .locator("..");
+  const completeFixture = runControls.getByRole("button", {
+    name: "Complete signIn fixture",
+  });
+  await expect(outcomeControl).toHaveCSS("display", "grid");
+  await expect(completeFixture).toHaveCSS("border-radius", "8px");
+  await runControls
+    .getByRole("combobox", { name: "Next outcome for signIn" })
+    .selectOption("error:invalidCredentials");
+  await runCanvas.getByRole("button", { name: "Sign in" }).click();
+  await expect(runControls.getByRole("status")).toContainText("Pending");
+  await completeFixture.click();
+  await expect(runCanvas.getByRole("alert")).toContainText(
+    "Unable to sign in. Check your details and try again.",
+  );
   await page.getByRole("button", { name: "Design" }).click();
 
   await page.getByText("Source & release", { exact: true }).click();
@@ -268,12 +368,14 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
     "com.example.ui/TextField",
     "com.example.ui/TextField",
     "com.example.ui/Button",
+    "com.example.ui/Alert",
   ]);
   expect(children.map((node) => node.id)).toEqual([
     "node.text",
     "node.textfield",
     "node.textfield-2",
     "node.button",
+    "node.alert",
   ]);
   expect(record(children[0]?.props, "title props")).toMatchObject({
     role: "heading",
@@ -289,11 +391,31 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
     value: { $ref: "state.password" },
   });
   expect(record(children[3]?.props, "button props")).toMatchObject({ label: "Sign in" });
+  expect(record(children[4]?.props, "alert props")).toMatchObject({
+    text: "Unable to sign in. Check your details and try again.",
+    tone: "critical",
+  });
+  expect(children[4]?.when).toEqual({
+    op: "eq",
+    args: [{ $ref: "operation.signIn.status" }, "failed"],
+  });
   expect(record(children[1]?.on, "email events").change).toEqual([
     { type: "state.set", path: "email", value: { $ref: "event.value" } },
   ]);
   expect(record(children[2]?.on, "password events").change).toEqual([
     { type: "state.set", path: "password", value: { $ref: "event.value" } },
+  ]);
+  expect(record(children[3]?.on, "button events").press).toEqual([
+    {
+      type: "operation.invoke",
+      operation: "com.example.auth/signIn",
+      as: "signIn",
+      input: {
+        email: { $ref: "state.email" },
+        password: { $ref: "state.password" },
+      },
+      concurrency: "reject",
+    },
   ]);
   expect(runtimeFailures).toEqual([]);
 });

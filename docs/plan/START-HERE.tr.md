@@ -1216,6 +1216,20 @@ Genel ilerleme 111/146 (%76), M10 2/10'dur; sıradaki görev M10-T02'dir ve hen�
 `NOT_STARTED` durumundadır. Yazılı girdi/pending, invalid credentials, başarı/navigasyon, uzak ve
 çok kullanıcılı deployment ile G10 kapanışı bu ara görevin kapsamı değildir.
 
+M10-T01B `DONE` durumundadır. TextField için **Input connection** artık `Value` state binding'i ile
+`change → state.set(event.value)` aksiyonunu tek doğrulanan işlemde kurar; başka state'e yeniden
+bağlama eski kesin yazımı değiştirir ve yarım bağlantı “Connected” diye gösterilmez. Yeni ve mevcut
+yedi aksiyon türü görsel alanlarla düzenlenebilir, ileri kullanıcılar için Advanced JSON korunur.
+Katman görünürlüğü local state veya yüzeyde gerçekten yazılmış operation result status'una
+bağlanabilir. Run paneli sign-in'e özel seçenek üretmez; kesin Source operation alias'larını ve
+doğrulanmış Catalog fixture'larını genel operation kartlarına dönüştürür.
+
+Gerçek Chromium akışı iki TextField'a tam metin girildiğini, Button operation eşlemesini, gerçek
+pending Promise'i ve explicit Catalog hata settlement'ından sonra koşullu Alert'i görünür
+arayüzden doğrular. Bu bir authoring-usability önkoşuludur; M10-T02'nin özel input/pending matrisi,
+M10-T03'ün failure matrisi ve M10-T04'ün gerçek host success/navigation kanıtı kapanmış sayılmaz.
+Genel ilerleme 112/147 (%76), M10 3/11'dir; M10-T02 `NOT_STARTED` ve sıradaki görevdir.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

@@ -8,7 +8,10 @@ import {
   ScenarioPreviewControl,
 } from "../src/preview-controls.js";
 
-import type { AuthoringSignInFixtureControllerSnapshot } from "../src/authoring-fixtures.js";
+import type {
+  AuthoringOperationFixtureControllerSnapshot,
+  AuthoringOperationFixtureSnapshot,
+} from "../src/authoring-fixtures.js";
 import type { AuthoringScenarioModelResult } from "../src/authoring-scenarios.js";
 import type { PreviewFidelityProjection } from "../src/preview-fidelity.js";
 
@@ -95,14 +98,42 @@ describe("Desen App preview disclosures", () => {
     expect(onChange).toHaveBeenCalledWith("catalog:invalid");
   });
 
-  it("shows only synthetic execution and enables explicit completion only while pending", () => {
+  it("shows generic Source aliases and enables only the matching pending completion", () => {
     const onComplete = vi.fn();
     const onSelectOutcome = vi.fn();
-    const pending = Object.freeze({
+    const operation = Object.freeze({
+      alias: "saveDraft",
+      capabilityId: "com.example.documents/save",
+      description: "Save a document draft.",
+      effect: "network",
+      outcomes: Object.freeze([
+        Object.freeze({
+          id: "success",
+          label: "Success",
+          kind: "success",
+          errorCode: null,
+          description: "Catalog-declared synthetic success.",
+          fixtureValue: Object.freeze({ documentId: "document-7" }),
+        }),
+        Object.freeze({
+          id: "error:conflict",
+          label: "Error · conflict",
+          kind: "error",
+          errorCode: "conflict",
+          description: "The draft changed elsewhere.",
+          fixtureValue: Object.freeze({}),
+        }),
+      ]),
       status: "pending",
-      selectedOutcomeId: "invalidCredentials",
+      selectedOutcomeId: "error:conflict",
       completedOutcomeId: null,
-    }) satisfies AuthoringSignInFixtureControllerSnapshot;
+    }) satisfies AuthoringOperationFixtureSnapshot;
+    const pending = Object.freeze({
+      modelStatus: "ready",
+      rejectionReason: null,
+      disposed: false,
+      operations: Object.freeze([operation]),
+    }) satisfies AuthoringOperationFixtureControllerSnapshot;
 
     render(
       <RunControls onComplete={onComplete} onSelectOutcome={onSelectOutcome} snapshot={pending} />,
@@ -119,17 +150,33 @@ describe("Desen App preview disclosures", () => {
       (within(controls).getByRole("radio", { name: /^Production/ }) as HTMLInputElement).disabled,
     ).toBe(true);
     const outcome = within(controls).getByRole("combobox", {
-      name: "Next sign-in outcome",
+      name: "Next outcome for saveDraft",
     }) as HTMLSelectElement;
     expect(outcome.disabled).toBe(true);
-    expect([...outcome.options].map(({ value }) => value)).toEqual([
-      "success",
-      "invalidCredentials",
-    ]);
-    const complete = within(controls).getByRole("button", { name: "Complete fixture" });
+    expect([...outcome.options].map(({ value }) => value)).toEqual(["success", "error:conflict"]);
+    expect(within(controls).getByText(/com\.example\.documents\/save · network/)).toBeTruthy();
+    const complete = within(controls).getByRole("button", {
+      name: "Complete saveDraft fixture",
+    });
     expect((complete as HTMLButtonElement).disabled).toBe(false);
     fireEvent.click(complete);
-    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledWith("saveDraft");
     expect(within(controls).getByRole("status").textContent).toContain("Pending");
+  });
+
+  it("renders an honest no-operation state without a fabricated outcome selector", () => {
+    const snapshot = Object.freeze({
+      modelStatus: "ready",
+      rejectionReason: null,
+      disposed: false,
+      operations: Object.freeze([]),
+    }) satisfies AuthoringOperationFixtureControllerSnapshot;
+
+    render(<RunControls onComplete={vi.fn()} onSelectOutcome={vi.fn()} snapshot={snapshot} />);
+
+    const controls = screen.getByRole("complementary", { name: "Run controls" });
+    expect(within(controls).getByRole("status").textContent).toContain("No simulated operations");
+    expect(within(controls).queryByRole("combobox")).toBeNull();
+    expect(within(controls).queryByRole("button")).toBeNull();
   });
 });

@@ -1349,3 +1349,17 @@ artifacts and 102 current readers. The permission-model fixture correction prese
 changed M10-T01 root-test reader while retaining the same 51 artifacts and 102 reader identities.
 Its dedicated checkpoint suite passes 82/82. These are local reader-authority receipts; they do not
 add a plan task or infer an exact-head hosted result.
+
+M10-T01B adds `desen-app-visual-behavior-authoring` as an ordinary proof pair and registers its
+verifier and root mutation suite in the exhaustive inventory, shared-state authority, ownership,
+semantic impact graph, affected selector, required runners, and hosted Quality gate. Its immutable
+artifact authenticates the M10-T01A prerequisite plus the exact visual connection/action/condition,
+generic fixture, Run-control, focused-test, and Chromium receipts. Checkpoint sequence 64 preserves
+all sequences 1–63 and appends the new artifact and both reader identities without modifying a
+historical artifact.
+
+Local focused and real-browser success is not a hosted exact-head claim. M10-T01B becomes canonical
+only when the unchanged PR head passes both hosted `Quality gate` and `Browser E2E`, then the merged
+main head passes its hosted workflows. The fixed-port local-launcher test may remain excluded while
+the user's deliberate port-5173 product session is active; this environmental exclusion is not
+allowed on the clean hosted runner.

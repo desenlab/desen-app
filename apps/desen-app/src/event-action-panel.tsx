@@ -13,6 +13,8 @@ import type {
   AuthoringEventActionModelResult,
   AuthoringEventActionReferenceOptions,
   AuthoringEventHandlerModel,
+  AuthoringPrimitiveValueKind,
+  AuthoringSchemaFieldReferenceOption,
 } from "./authoring-event-actions.js";
 import type { StructuredJsonParseFailureReason } from "./structured-json.js";
 
@@ -125,26 +127,47 @@ function firstValue(
 function starterAction(
   type: ActionType,
   references: AuthoringEventActionReferenceOptions,
+  payloadFields: readonly AuthoringSchemaFieldReferenceOption[] = [],
 ): AuthoringAction {
   if (type === "state.set") {
+    const target = references.states[0];
+    const eventField = payloadFields.find(
+      (field) => target !== undefined && valueSchemasAreCompatible(target, field),
+    );
     return {
       type,
-      path: firstValue(references.states, "stateName"),
-      value: null,
+      path: target?.value ?? "stateName",
+      value: eventField === undefined ? null : { $ref: `event.${eventField.value}` },
     } as AuthoringAction;
   }
   if (type === "state.toggle") {
-    return { type, path: firstValue(references.states, "stateName") } as AuthoringAction;
+    return {
+      type,
+      path:
+        references.states.find(({ valueKind }) => valueKind === "boolean")?.value ??
+        firstValue(references.states, "stateName"),
+    } as AuthoringAction;
   }
   if (type === "navigate") {
     return { type, surface: firstValue(references.surfaces, "surfaceId") } as AuthoringAction;
   }
   if (type === "operation.invoke") {
+    const operation = references.operations[0];
+    const input = Object.fromEntries(
+      (operation?.inputFields ?? []).flatMap((field) => {
+        const state = references.states.find(
+          (candidate) =>
+            candidate.value === field.value && valueSchemasAreCompatible(field, candidate),
+        );
+        return state === undefined ? [] : [[field.value, { $ref: `state.${state.value}` }]];
+      }),
+    );
     return {
       type,
-      operation: firstValue(references.operations, "operationId"),
-      as: "result",
-      input: {},
+      operation: operation?.value ?? "operationId",
+      as: operationAlias(operation?.value ?? "operation"),
+      input,
+      concurrency: "reject",
     } as AuthoringAction;
   }
   if (type === "resource.refresh") {
@@ -162,6 +185,31 @@ function starterAction(
     } as AuthoringAction;
   }
   return { type, name: "custom.event" } as AuthoringAction;
+}
+
+function operationAlias(operationId: string): string {
+  const segment = operationId.split("/").at(-1) ?? "operation";
+  const normalized = segment.replace(/[^A-Za-z0-9_-]/gu, "-");
+  if (/^[A-Za-z_]/u.test(normalized)) return normalized;
+  return normalized.length > 0 ? `operation-${normalized}` : "operation";
+}
+
+function isValueReference(value: unknown): value is Readonly<{ readonly $ref: string }> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.keys(value).length === 1 &&
+    typeof (value as Readonly<Record<string, JsonValue>>).$ref === "string"
+  );
+}
+
+function valueKindLabel(kind: AuthoringPrimitiveValueKind): string {
+  if (kind === "boolean") return "True / false";
+  if (kind === "integer") return "Whole number";
+  if (kind === "number") return "Number";
+  if (kind === "string") return "Text";
+  return "Structured data";
 }
 
 function actionType(action: AuthoringActionModel["action"]): ActionType {
@@ -247,14 +295,18 @@ interface ActionJsonEditorProps {
   readonly onApply: (action: AuthoringAction) => AuthoringEventActionEditResult;
   readonly onCancel: () => void;
   readonly onNotice: (message: string) => void;
+  readonly payloadFields: readonly AuthoringSchemaFieldReferenceOption[];
+  readonly references: AuthoringEventActionReferenceOptions;
 }
 
-function ActionJsonEditor({
+function ActionEditor({
   actionLabel,
   current,
   onApply,
   onCancel,
   onNotice,
+  payloadFields,
+  references,
 }: Readonly<ActionJsonEditorProps>) {
   const errorId = useId();
   const helpId = useId();
@@ -263,16 +315,28 @@ function ActionJsonEditor({
     () => formatStructuredJson(current as unknown as JsonValue),
     [current],
   );
+  const [visualAction, setVisualAction] = useState(current);
   const [draft, setDraft] = useState(currentJson);
+  const [advancedDirty, setAdvancedDirty] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    setVisualAction(current);
     setDraft(currentJson);
+    setAdvancedDirty(false);
     setError("");
-  }, [currentJson]);
+  }, [current, currentJson]);
 
   function apply(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
+    if (!advancedDirty) {
+      const visualError = visualActionError(visualAction, references, payloadFields);
+      if (visualError !== null) {
+        setError(visualError);
+        onNotice("");
+        return;
+      }
+    }
     const parsed = parseActionDraft(draft);
     if (!parsed.ok) {
       setError(parsed.message);
@@ -295,25 +359,44 @@ function ActionJsonEditor({
   return (
     <form className={styles.actionJsonEditor} onSubmit={apply}>
       <p className={styles.actionJsonHelp} id={helpId}>
-        Apply replaces the complete action. References such as{" "}
-        <code>{'{"$ref":"state.name"}'}</code> remain inert Source data here.
+        Edit this action through current Source and Catalog choices. Apply still replaces the whole
+        closed action atomically.
       </p>
-      <textarea
-        aria-describedby={[helpId, error.length > 0 ? errorId : null]
-          .filter((id): id is string => id !== null)
-          .join(" ")}
-        aria-invalid={error.length > 0}
-        aria-label={`${actionLabel} JSON`}
-        className={styles.actionJsonTextarea}
-        onChange={(event) => {
-          setDraft(event.currentTarget.value);
+      <VisualActionFields
+        action={visualAction}
+        onChange={(nextAction) => {
+          setVisualAction(nextAction);
+          setDraft(formatStructuredJson(nextAction as unknown as JsonValue));
+          setAdvancedDirty(false);
           setError("");
           onNotice("");
         }}
-        ref={textareaRef}
-        spellCheck={false}
-        value={draft}
+        payloadFields={payloadFields}
+        references={references}
       />
+      <details className={styles.actionAdvancedEditor}>
+        <summary>Advanced JSON</summary>
+        <p className={styles.actionJsonHelp}>
+          Power users can replace the complete action. Visual fields reset this advanced draft.
+        </p>
+        <textarea
+          aria-describedby={[helpId, error.length > 0 ? errorId : null]
+            .filter((id): id is string => id !== null)
+            .join(" ")}
+          aria-invalid={error.length > 0}
+          aria-label={`${actionLabel} JSON`}
+          className={styles.actionJsonTextarea}
+          onChange={(event) => {
+            setDraft(event.currentTarget.value);
+            setAdvancedDirty(true);
+            setError("");
+            onNotice("");
+          }}
+          ref={textareaRef}
+          spellCheck={false}
+          value={draft}
+        />
+      </details>
       <div className={styles.actionJsonControls}>
         <button disabled={draft === currentJson} type="submit">
           Apply action
@@ -321,7 +404,9 @@ function ActionJsonEditor({
         <button
           disabled={draft === currentJson}
           onClick={() => {
+            setVisualAction(current);
             setDraft(currentJson);
+            setAdvancedDirty(false);
             setError("");
             onNotice("");
           }}
@@ -342,12 +427,519 @@ function ActionJsonEditor({
   );
 }
 
+interface VisualActionFieldsProps {
+  readonly action: AuthoringAction;
+  readonly onChange: (action: AuthoringAction) => void;
+  readonly payloadFields: readonly AuthoringSchemaFieldReferenceOption[];
+  readonly references: AuthoringEventActionReferenceOptions;
+}
+
+function compatibleStates(
+  references: AuthoringEventActionReferenceOptions,
+  target: Readonly<{ readonly schemaKey: string; readonly valueKind: AuthoringPrimitiveValueKind }>,
+) {
+  return references.states.filter((state) => valueSchemasAreCompatible(target, state));
+}
+
+function valueSchemasAreCompatible(
+  target: Readonly<{ readonly schemaKey: string; readonly valueKind: AuthoringPrimitiveValueKind }>,
+  source: Readonly<{ readonly schemaKey: string; readonly valueKind: AuthoringPrimitiveValueKind }>,
+): boolean {
+  if (target.valueKind === "structured" || source.valueKind === "structured") {
+    return (
+      target.valueKind === "structured" &&
+      source.valueKind === "structured" &&
+      target.schemaKey === source.schemaKey
+    );
+  }
+  return (
+    target.valueKind === source.valueKind ||
+    (target.valueKind === "number" && source.valueKind === "integer")
+  );
+}
+
+function literalForState(
+  references: AuthoringEventActionReferenceOptions,
+  statePath: string,
+): JsonValue {
+  const state = references.states.find(({ value }) => value === statePath);
+  if (state?.valueKind === "boolean") return false;
+  if (state?.valueKind === "integer" || state?.valueKind === "number") return 0;
+  if (state?.valueKind === "string") return "";
+  return null;
+}
+
+function VisualActionFields({
+  action,
+  onChange,
+  payloadFields,
+  references,
+}: Readonly<VisualActionFieldsProps>) {
+  if (action.type === "state.set") {
+    const reference = isValueReference(action.value) ? action.value.$ref : null;
+    const source = reference?.startsWith("event.")
+      ? "event"
+      : reference?.startsWith("state.")
+        ? "state"
+        : "literal";
+    const target = references.states.find(({ value }) => value === action.path);
+    const eventFields =
+      target === undefined
+        ? []
+        : payloadFields.filter((field) => valueSchemasAreCompatible(target, field));
+    const stateSources = target === undefined ? [] : compatibleStates(references, target);
+    return (
+      <div className={styles.actionVisualFields}>
+        <label>
+          <span>State to update</span>
+          <select
+            onChange={(event) => {
+              const path = event.currentTarget.value;
+              const nextTarget = references.states.find(({ value }) => value === path);
+              const nextEventField = payloadFields.find(
+                (field) => nextTarget !== undefined && valueSchemasAreCompatible(nextTarget, field),
+              );
+              const nextState = references.states.find(
+                (state) => nextTarget !== undefined && valueSchemasAreCompatible(nextTarget, state),
+              );
+              onChange({
+                ...action,
+                path,
+                value:
+                  source === "event" && nextEventField !== undefined
+                    ? { $ref: `event.${nextEventField.value}` }
+                    : source === "state" && nextState !== undefined
+                      ? { $ref: `state.${nextState.value}` }
+                      : literalForState(references, path),
+              });
+            }}
+            value={action.path}
+          >
+            {references.states.length === 0 ? (
+              <option value="stateName">No state yet</option>
+            ) : null}
+            {references.states.map((state) => (
+              <option key={state.value} value={state.value}>
+                {state.label} · {valueKindLabel(state.valueKind)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>Value comes from</span>
+          <select
+            onChange={(event) => {
+              const next = event.currentTarget.value;
+              if (next === "event") {
+                const field = eventFields[0];
+                if (field !== undefined) {
+                  onChange({ ...action, value: { $ref: `event.${field.value}` } });
+                }
+                return;
+              }
+              if (next === "state") {
+                const state = stateSources[0];
+                if (state !== undefined) {
+                  onChange({ ...action, value: { $ref: `state.${state.value}` } });
+                }
+                return;
+              }
+              onChange({ ...action, value: literalForState(references, action.path) });
+            }}
+            value={source}
+          >
+            <option disabled={eventFields.length === 0} value="event">
+              Event value
+            </option>
+            <option disabled={stateSources.length === 0} value="state">
+              Another state
+            </option>
+            <option disabled={target?.valueKind === "structured"} value="literal">
+              Fixed value
+            </option>
+          </select>
+        </label>
+        {source === "event" ? (
+          <label>
+            <span>Event field</span>
+            <select
+              onChange={(event) =>
+                onChange({ ...action, value: { $ref: `event.${event.currentTarget.value}` } })
+              }
+              value={reference?.slice("event.".length) ?? ""}
+            >
+              {eventFields.map((field) => (
+                <option key={field.value} value={field.value}>
+                  {field.label} · {valueKindLabel(field.valueKind)}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : source === "state" ? (
+          <label>
+            <span>Source state</span>
+            <select
+              onChange={(event) =>
+                onChange({ ...action, value: { $ref: `state.${event.currentTarget.value}` } })
+              }
+              value={reference?.slice("state.".length) ?? ""}
+            >
+              {stateSources.map((state) => (
+                <option key={state.value} value={state.value}>
+                  {state.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : target?.valueKind === "boolean" ? (
+          <label>
+            <span>Fixed value</span>
+            <select
+              onChange={(event) =>
+                onChange({ ...action, value: event.currentTarget.value === "true" })
+              }
+              value={action.value === true ? "true" : "false"}
+            >
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </select>
+          </label>
+        ) : target?.valueKind === "integer" || target?.valueKind === "number" ? (
+          <label>
+            <span>Fixed value</span>
+            <input
+              onChange={(event) => {
+                const value = Number(event.currentTarget.value);
+                onChange({ ...action, value: Number.isFinite(value) ? value : 0 });
+              }}
+              step={target.valueKind === "integer" ? 1 : "any"}
+              type="number"
+              value={typeof action.value === "number" ? action.value : 0}
+            />
+          </label>
+        ) : target?.valueKind === "string" ? (
+          <label>
+            <span>Fixed value</span>
+            <input
+              onChange={(event) => onChange({ ...action, value: event.currentTarget.value })}
+              type="text"
+              value={typeof action.value === "string" ? action.value : ""}
+            />
+          </label>
+        ) : (
+          <p className={styles.actionFieldHint}>
+            Structured fixed values are available in Advanced JSON.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (action.type === "state.toggle") {
+    const booleanStates = references.states.filter(({ valueKind }) => valueKind === "boolean");
+    return (
+      <div className={styles.actionVisualFields}>
+        <label>
+          <span>Boolean state</span>
+          <select
+            onChange={(event) => onChange({ ...action, path: event.currentTarget.value })}
+            value={action.path}
+          >
+            {(booleanStates.length > 0 ? booleanStates : references.states).map((state) => (
+              <option key={state.value} value={state.value}>
+                {state.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+    );
+  }
+
+  if (action.type === "navigate") {
+    return (
+      <div className={styles.actionVisualFields}>
+        <label>
+          <span>Destination surface</span>
+          <select
+            onChange={(event) => onChange({ ...action, surface: event.currentTarget.value })}
+            value={action.surface}
+          >
+            {references.surfaces.map((surface) => (
+              <option key={surface.value} value={surface.value}>
+                {surface.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+    );
+  }
+
+  if (action.type === "operation.invoke") {
+    const operation = references.operations.find(({ value }) => value === action.operation);
+    return (
+      <div className={styles.actionVisualFields}>
+        <label>
+          <span>Catalog operation</span>
+          <select
+            onChange={(event) => {
+              const nextOperation = references.operations.find(
+                ({ value }) => value === event.currentTarget.value,
+              );
+              if (nextOperation === undefined) return;
+              const nextInput: Record<string, JsonValue> = {};
+              for (const field of nextOperation.inputFields) {
+                const state = compatibleStates(references, field).find(
+                  ({ value }) => value === field.value,
+                );
+                if (state !== undefined) nextInput[field.value] = { $ref: `state.${state.value}` };
+              }
+              onChange({
+                ...action,
+                operation: nextOperation.value,
+                as: operationAlias(nextOperation.value),
+                input: nextInput,
+              });
+            }}
+            value={action.operation}
+          >
+            {references.operations.length === 0 ? (
+              <option value="operationId">No Catalog operations</option>
+            ) : null}
+            {references.operations.map((candidate) => (
+              <option key={candidate.value} value={candidate.value}>
+                {candidate.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        {operation?.description === undefined ? null : (
+          <p className={styles.actionFieldHint}>{operation.description}</p>
+        )}
+        <label>
+          <span>Result name</span>
+          <input
+            onChange={(event) => onChange({ ...action, as: event.currentTarget.value })}
+            type="text"
+            value={action.as}
+          />
+        </label>
+        <label>
+          <span>If pressed again</span>
+          <select
+            onChange={(event) =>
+              onChange({
+                ...action,
+                concurrency: event.currentTarget.value as "queue" | "reject" | "replace",
+              })
+            }
+            value={action.concurrency ?? "reject"}
+          >
+            <option value="reject">Ignore while running</option>
+            <option value="replace">Replace current run</option>
+            <option value="queue">Queue another run</option>
+          </select>
+        </label>
+        {operation?.inputFields.map((field) => {
+          const current = action.input[field.value];
+          const currentReference = isValueReference(current) ? current.$ref : "";
+          const states = compatibleStates(references, field);
+          return (
+            <label key={field.value}>
+              <span>
+                {field.label} {field.required ? <small>Required</small> : <small>Optional</small>}
+              </span>
+              <select
+                onChange={(event) => {
+                  const nextInput = Object.fromEntries(
+                    Object.entries(action.input).filter(([name]) => name !== field.value),
+                  ) as Record<string, JsonValue>;
+                  if (event.currentTarget.value.length > 0) {
+                    nextInput[field.value] = { $ref: `state.${event.currentTarget.value}` };
+                  }
+                  onChange({ ...action, input: nextInput });
+                }}
+                value={currentReference.startsWith("state.") ? currentReference.slice(6) : ""}
+              >
+                <option value="">Choose state…</option>
+                {states.map((state) => (
+                  <option key={state.value} value={state.value}>
+                    {state.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (action.type === "resource.refresh") {
+    return (
+      <div className={styles.actionVisualFields}>
+        <label>
+          <span>Resource</span>
+          <select
+            onChange={(event) => onChange({ ...action, resource: event.currentTarget.value })}
+            value={action.resource}
+          >
+            {references.resources.map((resource) => (
+              <option key={resource.value} value={resource.value}>
+                {resource.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+    );
+  }
+
+  if (action.type === "component.command") {
+    const currentIndex = references.componentCommands.findIndex(
+      ({ targetId, command }) => targetId === action.target && command === action.command,
+    );
+    return (
+      <div className={styles.actionVisualFields}>
+        <label>
+          <span>Component command</span>
+          <select
+            onChange={(event) => {
+              const selected = references.componentCommands[Number(event.currentTarget.value)];
+              if (selected !== undefined) {
+                onChange({ ...action, target: selected.targetId, command: selected.command });
+              }
+            }}
+            value={currentIndex < 0 ? "" : String(currentIndex)}
+          >
+            {references.componentCommands.length === 0 ? (
+              <option value="">No commands</option>
+            ) : null}
+            {references.componentCommands.map((command, index) => (
+              <option key={`${command.targetId}:${command.command}`} value={String(index)}>
+                {command.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.actionVisualFields}>
+      <label>
+        <span>Event name</span>
+        <input
+          onChange={(event) => onChange({ ...action, name: event.currentTarget.value })}
+          placeholder="checkout.completed"
+          type="text"
+          value={action.name}
+        />
+      </label>
+    </div>
+  );
+}
+
+function visualActionError(
+  action: AuthoringAction,
+  references: AuthoringEventActionReferenceOptions,
+  payloadFields: readonly AuthoringSchemaFieldReferenceOption[],
+): string | null {
+  if (action.type === "state.set" || action.type === "state.toggle") {
+    if (action.type === "state.toggle") {
+      return references.states.some(
+        ({ value, valueKind }) => value === action.path && valueKind === "boolean",
+      )
+        ? null
+        : "Choose a boolean state to toggle.";
+    }
+    const target = references.states.find(({ value }) => value === action.path);
+    if (target === undefined) return "Create a surface state before adding this action.";
+    if (isValueReference(action.value)) {
+      const reference = action.value.$ref;
+      if (reference.startsWith("event.")) {
+        const field = payloadFields.find(({ value }) => value === reference.slice("event.".length));
+        return field !== undefined && valueSchemasAreCompatible(target, field)
+          ? null
+          : "Choose a compatible field from this event.";
+      }
+      if (reference.startsWith("state.")) {
+        const state = references.states.find(
+          ({ value }) => value === reference.slice("state.".length),
+        );
+        return state !== undefined && valueSchemasAreCompatible(target, state)
+          ? null
+          : "Choose a compatible source state.";
+      }
+      return "Choose an event field, local state, or fixed value.";
+    }
+    if (target.valueKind === "structured") {
+      return "Use Advanced JSON to enter a structured fixed value.";
+    }
+    const literalCompatible =
+      target.valueKind === "boolean"
+        ? typeof action.value === "boolean"
+        : target.valueKind === "integer"
+          ? typeof action.value === "number" && Number.isInteger(action.value)
+          : target.valueKind === "number"
+            ? typeof action.value === "number" && Number.isFinite(action.value)
+            : typeof action.value === "string";
+    return literalCompatible ? null : `Enter a ${valueKindLabel(target.valueKind)} fixed value.`;
+  }
+  if (action.type === "navigate") {
+    return references.surfaces.some(({ value }) => value === action.surface)
+      ? null
+      : "Choose a current Source surface.";
+  }
+  if (action.type === "operation.invoke") {
+    const operation = references.operations.find(({ value }) => value === action.operation);
+    if (operation === undefined) return "Choose a Catalog operation.";
+    if (action.as.trim().length === 0) return "Give this operation result a name.";
+    if (!/^[A-Za-z_][A-Za-z0-9_-]{0,127}$/u.test(action.as)) {
+      return "Use a result name that can be referenced by visibility and loading controls.";
+    }
+    const missing = operation.inputFields.find(
+      (field) => field.required && !Object.hasOwn(action.input, field.value),
+    );
+    if (missing !== undefined) return `Connect the required ${missing.label} input to state.`;
+    for (const [name, value] of Object.entries(action.input)) {
+      const field = operation.inputFields.find((candidate) => candidate.value === name);
+      if (field === undefined || !isValueReference(value) || !value.$ref.startsWith("state.")) {
+        return "Visual operation inputs must use declared fields connected to local state.";
+      }
+      const state = references.states.find(
+        (candidate) => candidate.value === value.$ref.slice("state.".length),
+      );
+      if (state === undefined || !valueSchemasAreCompatible(field, state)) {
+        return `Connect ${field.label} to a schema-compatible local state.`;
+      }
+    }
+    return null;
+  }
+  if (action.type === "resource.refresh") {
+    return references.resources.some(({ value }) => value === action.resource)
+      ? null
+      : "Choose a current Source resource.";
+  }
+  if (action.type === "component.command") {
+    return references.componentCommands.some(
+      ({ targetId, command }) => targetId === action.target && command === action.command,
+    )
+      ? null
+      : "Choose a Catalog-declared component command.";
+  }
+  return action.name.trim().length > 0 ? null : "Enter an event name.";
+}
+
 interface NewActionFormProps {
   readonly list: AuthoringActionListModel;
   readonly listLabel: string;
   readonly onEdit: EventActionPanelProps["onEdit"];
   readonly onNotice: (message: string) => void;
   readonly references: AuthoringEventActionReferenceOptions;
+  readonly payloadFields: readonly AuthoringSchemaFieldReferenceOption[];
   readonly toggleRef?: Ref<HTMLButtonElement>;
 }
 
@@ -356,23 +948,31 @@ function NewActionForm({
   listLabel,
   onEdit,
   onNotice,
+  payloadFields,
   references,
   toggleRef,
 }: Readonly<NewActionFormProps>) {
   const errorId = useId();
   const helpId = useId();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const typeSelectRef = useRef<HTMLSelectElement | null>(null);
   const internalToggleRef = useRef<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<ActionType>("state.set");
-  const [draft, setDraft] = useState(() =>
-    formatStructuredJson(starterAction("state.set", references) as unknown as JsonValue),
+  const [visualAction, setVisualAction] = useState(() =>
+    starterAction("state.set", references, payloadFields),
   );
+  const [draft, setDraft] = useState(() =>
+    formatStructuredJson(
+      starterAction("state.set", references, payloadFields) as unknown as JsonValue,
+    ),
+  );
+  const [advancedDirty, setAdvancedDirty] = useState(false);
   const [error, setError] = useState("");
   const [restoreToggleFocus, setRestoreToggleFocus] = useState(false);
 
   useLayoutEffect(() => {
-    if (open) textareaRef.current?.focus();
+    if (open) typeSelectRef.current?.focus();
   }, [open]);
 
   useLayoutEffect(() => {
@@ -397,6 +997,15 @@ function NewActionForm({
 
   function add(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
+    if (!advancedDirty) {
+      const visualError = visualActionError(visualAction, references, payloadFields);
+      if (visualError !== null) {
+        setError(visualError);
+        onNotice("");
+        typeSelectRef.current?.focus();
+        return;
+      }
+    }
     const parsed = parseActionDraft(draft);
     if (!parsed.ok) {
       setError(parsed.message);
@@ -417,7 +1026,10 @@ function NewActionForm({
       textareaRef.current?.focus();
       return;
     }
-    setDraft(formatStructuredJson(starterAction(type, references) as unknown as JsonValue));
+    const nextAction = starterAction(type, references, payloadFields);
+    setVisualAction(nextAction);
+    setDraft(formatStructuredJson(nextAction as unknown as JsonValue));
+    setAdvancedDirty(false);
     setError("");
     setOpen(false);
     setRestoreToggleFocus(true);
@@ -449,19 +1061,21 @@ function NewActionForm({
         <small>Position {list.actions.length + 1}</small>
       </div>
       <label className={styles.actionTypeField}>
-        <span>Starter type</span>
+        <span>Action type</span>
         <select
           aria-describedby={helpId}
           aria-label={`New action type for ${listLabel}`}
           onChange={(event) => {
             const nextType = event.currentTarget.value as ActionType;
+            const nextAction = starterAction(nextType, references, payloadFields);
             setType(nextType);
-            setDraft(
-              formatStructuredJson(starterAction(nextType, references) as unknown as JsonValue),
-            );
+            setVisualAction(nextAction);
+            setDraft(formatStructuredJson(nextAction as unknown as JsonValue));
+            setAdvancedDirty(false);
             setError("");
             onNotice("");
           }}
+          ref={typeSelectRef}
           value={type}
         >
           {ACTION_TYPES.map((actionKind) => (
@@ -472,26 +1086,45 @@ function NewActionForm({
         </select>
       </label>
       <p className={styles.actionJsonHelp} id={helpId}>
-        The starter only seeds the draft. The complete JSON object is committed unchanged.
+        Choose from current Source and Catalog references. No code or JSON is required.
       </p>
-      <textarea
-        aria-describedby={[helpId, error.length > 0 ? errorId : null]
-          .filter((id): id is string => id !== null)
-          .join(" ")}
-        aria-invalid={error.length > 0}
-        aria-label={`New action JSON for ${listLabel}`}
-        className={styles.actionJsonTextarea}
-        onChange={(event) => {
-          setDraft(event.currentTarget.value);
+      <VisualActionFields
+        action={visualAction}
+        onChange={(nextAction) => {
+          setVisualAction(nextAction);
+          setDraft(formatStructuredJson(nextAction as unknown as JsonValue));
+          setAdvancedDirty(false);
           setError("");
           onNotice("");
         }}
-        ref={textareaRef}
-        spellCheck={false}
-        value={draft}
+        payloadFields={payloadFields}
+        references={references}
       />
+      <details className={styles.actionAdvancedEditor}>
+        <summary>Advanced JSON</summary>
+        <p className={styles.actionJsonHelp}>
+          Power users can replace the complete action. Visual fields reset this advanced draft.
+        </p>
+        <textarea
+          aria-describedby={[helpId, error.length > 0 ? errorId : null]
+            .filter((id): id is string => id !== null)
+            .join(" ")}
+          aria-invalid={error.length > 0}
+          aria-label={`New action JSON for ${listLabel}`}
+          className={styles.actionJsonTextarea}
+          onChange={(event) => {
+            setDraft(event.currentTarget.value);
+            setAdvancedDirty(true);
+            setError("");
+            onNotice("");
+          }}
+          ref={textareaRef}
+          spellCheck={false}
+          value={draft}
+        />
+      </details>
       <div className={styles.actionJsonControls}>
-        <button type="submit">Add complete action</button>
+        <button type="submit">Add action</button>
         <button onClick={close} type="button">
           Cancel
         </button>
@@ -514,6 +1147,7 @@ interface ActionCardProps {
   readonly onEdit: EventActionPanelProps["onEdit"];
   readonly onNotice: (message: string) => void;
   readonly onReorder: (index: number) => void;
+  readonly payloadFields: readonly AuthoringSchemaFieldReferenceOption[];
   readonly references: AuthoringEventActionReferenceOptions;
   readonly editButtonRef?: Ref<HTMLButtonElement>;
 }
@@ -527,6 +1161,7 @@ function ActionCard({
   onEdit,
   onNotice,
   onReorder,
+  payloadFields,
   references,
   editButtonRef,
 }: Readonly<ActionCardProps>) {
@@ -596,7 +1231,7 @@ function ActionCard({
       </div>
 
       {editing ? (
-        <ActionJsonEditor
+        <ActionEditor
           actionLabel={actionLabel}
           current={action.action as AuthoringAction}
           onApply={(replacement) => {
@@ -617,6 +1252,8 @@ function ActionCard({
             onNotice("");
           }}
           onNotice={onNotice}
+          payloadFields={payloadFields}
+          references={references}
         />
       ) : null}
 
@@ -628,6 +1265,7 @@ function ActionCard({
             onEdit={onEdit}
             onNotice={onNotice}
             references={references}
+            payloadFields={[]}
             tone="success"
           />
           <ActionListView
@@ -636,6 +1274,7 @@ function ActionCard({
             onEdit={onEdit}
             onNotice={onNotice}
             references={references}
+            payloadFields={[]}
             tone="failure"
           />
         </div>
@@ -650,6 +1289,7 @@ interface ActionListViewProps {
   readonly onEdit: EventActionPanelProps["onEdit"];
   readonly onNotice: (message: string) => void;
   readonly references: AuthoringEventActionReferenceOptions;
+  readonly payloadFields: readonly AuthoringSchemaFieldReferenceOption[];
   readonly tone?: "failure" | "root" | "success";
   readonly addButtonRef?: Ref<HTMLButtonElement>;
 }
@@ -659,6 +1299,7 @@ function ActionListView({
   list,
   onEdit,
   onNotice,
+  payloadFields,
   references,
   tone = "root",
   addButtonRef,
@@ -750,6 +1391,7 @@ function ActionListView({
                   onEdit={onEdit}
                   onNotice={onNotice}
                   onReorder={(index) => reorderAction(action, index)}
+                  payloadFields={payloadFields}
                   references={references}
                 />
               </li>
@@ -762,6 +1404,7 @@ function ActionListView({
         listLabel={label}
         onEdit={onEdit}
         onNotice={onNotice}
+        payloadFields={payloadFields}
         references={references}
         toggleRef={setAddNode}
       />
@@ -852,6 +1495,7 @@ function EventCard({ event, onEdit, onNotice, references }: Readonly<EventCardPr
               list={event.actionList}
               onEdit={onEdit}
               onNotice={onNotice}
+              payloadFields={event.payloadFields}
               references={references}
             />
           </div>
@@ -969,7 +1613,7 @@ export function EventActionPanel({ model, onEdit, surfaceName }: Readonly<EventA
       )}
 
       <p aria-atomic="true" aria-live="polite" className={styles.eventActionNotice} role="status">
-        {notice || "Action JSON drafts stay local until a complete action is applied."}
+        {notice || "Visual changes stay local until the complete action is added."}
       </p>
     </section>
   );

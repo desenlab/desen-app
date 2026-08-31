@@ -29,6 +29,45 @@ const M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN = Object.freeze({
   bytes: 20_173,
   sha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
 });
+const M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json";
+const M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN = Object.freeze({
+  bytes: 10_962,
+  sha256: "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
+});
+const M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS = Object.freeze([
+  ".github/workflows/ci.yml",
+  "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+  "apps/desen-app-browser-e2e/package.json",
+  "apps/desen-app/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/authoring-behavior-projection.ts",
+  "apps/desen-app/src/authoring-conditions.ts",
+  "apps/desen-app/src/authoring-connections.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-fixtures.ts",
+  "apps/desen-app/src/behavior-controls.tsx",
+  "apps/desen-app/src/event-action-panel.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/preview-controls.tsx",
+  "apps/desen-app/test/application.test.tsx",
+  "apps/desen-app/test/authoring-behavior-projection.test.ts",
+  "apps/desen-app/test/authoring-conditions.test.ts",
+  "apps/desen-app/test/authoring-connections.test.ts",
+  "apps/desen-app/test/authoring-event-actions.test.ts",
+  "apps/desen-app/test/authoring-fixtures.test.ts",
+  "apps/desen-app/test/behavior-controls.test.tsx",
+  "apps/desen-app/test/event-action-panel.test.tsx",
+  "apps/desen-app/test/persistence-application.test.tsx",
+  "apps/desen-app/test/preview-controls.test.tsx",
+  "apps/desen-app/test/publication-application.test.tsx",
+  M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
+  "packages/reference-catalog-web/catalog.json",
+  "scripts/generate-desen-app-visual-behavior-authoring-proof.mjs",
+  "scripts/lib/atomic-proof-artifact.mjs",
+  "scripts/verify-desen-app-visual-behavior-authoring.mjs",
+]);
 const M10_USER_CREATED_BLANK_PROJECT_TRACKED_PATHS = Object.freeze([
   ".github/workflows/ci.yml",
   ".gitignore",
@@ -424,6 +463,7 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
     if (
       !isDeepStrictEqual(compatibilityReceipt, expected) ||
       (!M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(expected.path) &&
+        !M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(expected.path) &&
         (bytes?.byteLength !== expected.bytes ||
           sha256(bytes ?? Buffer.alloc(0)) !== expected.sha256))
     ) {
@@ -591,6 +631,9 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
       M10_USER_CREATED_BLANK_PROJECT_OVERRIDDEN_HISTORICAL_PATHS.includes(receipt.path);
     const historicalReceiptIsCheckpointResealed =
       M10_USER_CREATED_BLANK_PROJECT_CHECKPOINT_RESEALED_PATHS.includes(receipt.path);
+    const historicalReceiptIsM10B = M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(
+      receipt.path,
+    );
     if (
       !Number.isSafeInteger(receipt.bytes) ||
       receipt.bytes < 0 ||
@@ -598,6 +641,7 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
       !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
       (!historicalReceiptIsOverridden &&
         !historicalReceiptIsCheckpointResealed &&
+        !historicalReceiptIsM10B &&
         (live?.byteLength !== receipt.bytes || sha256(live ?? Buffer.alloc(0)) !== receipt.sha256))
     ) {
       fail(
@@ -607,6 +651,7 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
     }
   }
   for (const receipt of M10_USER_CREATED_BLANK_PROJECT_SECURE_SCROLL_RECEIPTS) {
+    if (M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(receipt.path)) continue;
     const live = files.get(receipt.path);
     if (live?.byteLength !== receipt.bytes || sha256(live ?? Buffer.alloc(0)) !== receipt.sha256) {
       fail(
@@ -785,10 +830,12 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   M10_EMPTY_PROJECT_BROWSER_E2E_ARTIFACT_PATH,
   M10_BROWSER_E2E_WORKSPACE_COMPATIBILITY_ARTIFACT_PATH,
   M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
+  M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
   "dependency-cruiser.config.cjs",
   ...new Set([
     ...TRACKED_PATHS,
     ...M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS,
+    ...M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS,
     ...SUCCESSOR_COMPATIBILITY_PATHS,
     DESIGN_RUN_ARTIFACT_PATH,
     FIXTURES_SCENARIOS_ARTIFACT_PATH,
@@ -1206,9 +1253,9 @@ function inspectPanelSource(source) {
       '"resource.refresh"',
       '"state.set"',
       '"state.toggle"',
-      "The complete JSON object is committed unchanged.",
-      "Apply replaces the complete action.",
-      '{"$ref":"state.name"}',
+      "Apply still replaces the whole",
+      "Power users can replace the complete action.",
+      "Structured fixed values are available in Advanced JSON.",
       "function ActionListView(",
       "action.onSuccess",
       "action.onFailure",
@@ -1686,7 +1733,7 @@ function inspectTests(files) {
     [
       'within(inspector).getByRole("tab", { name: "Actions" })',
       '"Delete change event handler"',
-      '"Add complete action"',
+      'getByRole("button", { name: "Add action" })',
       'document.querySelector("[data-managed-capability-subtree]")',
     ],
     "application tests",
@@ -1913,6 +1960,7 @@ async function authenticateFrozenArtifact(workspaceRoot) {
 function assertRetainedHistoricalReceipts(frozenArtifact, files) {
   const taskTimeReceipts = reviewedSuccessorReceiptMap(frozenArtifact.boundary.trackedReceipts);
   for (const relativePath of RETAINED_HISTORICAL_PATHS) {
+    if (M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(relativePath)) continue;
     const authority = taskTimeReceipts.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -2132,6 +2180,7 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
   for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
     if (
       M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath) ||
+      M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(relativePath) ||
       T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
     ) {
       continue;
@@ -2261,6 +2310,7 @@ function authenticateSourcePersistenceSuccessor(files) {
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
     if (
       M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath) ||
+      M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(relativePath) ||
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
       T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
     ) {
@@ -2372,6 +2422,7 @@ function authenticateFixturesScenariosSuccessor(files) {
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
     if (
       M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath) ||
+      M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(relativePath) ||
       T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
       T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
@@ -2531,7 +2582,12 @@ function authenticatePublishActivationSuccessor(files) {
   }
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
   for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
-    if (M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath)) continue;
+    if (
+      M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath) ||
+      M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.includes(relativePath)
+    ) {
+      continue;
+    }
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (relativePath === T14_PUBLICATION_APPLICATION_TEST_PATH) {
@@ -2698,6 +2754,137 @@ async function _buildFreshDesenAppEventActionEditorEvidence(rawOptions = undefin
 }
 
 /** Authenticates frozen M09-T09 evidence and checks its live additive M09-T10 successor. */
+function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
+  const artifactBytes = files.get(M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH);
+  const pin = M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN;
+  if (
+    artifactBytes?.byteLength !== pin.bytes ||
+    sha256(artifactBytes ?? Buffer.alloc(0)) !== pin.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact immutable M10-T01B visual-behavior artifact drifted.",
+    );
+  }
+  const artifact = parseJson(
+    artifactBytes,
+    M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
+    "SUCCESSOR_POLICY_VIOLATION",
+  );
+  const predecessor = artifact?.prerequisites?.[0];
+  const trackedReceipts = artifact?.boundary?.trackedReceipts;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.proofId !== "desen-app-visual-behavior-authoring" ||
+    artifact?.profile !== "desen.app.visual-behavior-authoring-proof.v1" ||
+    artifact?.task !== "M10-T01B" ||
+    artifact?.gate !== null ||
+    artifact?.result !== "PASS" ||
+    !isDeepStrictEqual(artifact?.claim, {
+      taskStatus: "DONE",
+      p08Status: "PROVEN",
+      p09Status: "PARTIAL",
+      visualInputConnectionCovered: true,
+      visualOperationActionCovered: true,
+      visualConditionalPresenceCovered: true,
+      catalogDerivedRunControlsCovered: true,
+      advancedJsonRetained: true,
+      authoredBrowserSmokeCovered: true,
+      m10T02Closed: false,
+      m10T03Closed: false,
+      m10T04Closed: false,
+      realHostOperationCovered: false,
+      remoteDeploymentCovered: false,
+      g10Closed: false,
+    }) ||
+    predecessor?.task !== "M10-T01A" ||
+    predecessor?.gate !== null ||
+    predecessor?.proofId !== "desen-app-user-created-blank-project" ||
+    predecessor?.path !== M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH ||
+    predecessor?.bytes !== M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN.bytes ||
+    predecessor?.sha256 !== M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN.sha256 ||
+    predecessor?.profile !== "desen.app.user-created-blank-project-proof.v1" ||
+    predecessor?.result !== "PASS" ||
+    predecessor?.immutable !== true ||
+    artifact?.authority?.source?.atomicInputConnection !== true ||
+    artifact?.authority?.source?.operationTriggerBoundary !== true ||
+    artifact?.authority?.source?.visualActionComposer !== true ||
+    artifact?.authority?.source?.advancedJsonRetained !== true ||
+    artifact?.authority?.source?.visualConditionalPresence !== true ||
+    artifact?.authority?.source?.sourceAndCatalogDerivedFixtures !== true ||
+    artifact?.authority?.source?.genericRunControls !== true ||
+    artifact?.authority?.source?.requestInputRetained !== false ||
+    artifact?.authority?.package?.appPackageName !== "@desen/app-web" ||
+    artifact?.authority?.package?.browserPackageName !== "@desen/app-browser-e2e" ||
+    artifact?.authority?.package?.exactHeadBrowserExecution !== true ||
+    artifact?.authority?.package?.catalogFixtureOnly !== true ||
+    artifact?.authority?.execution?.browserExecutedByVerifier !== false ||
+    artifact?.authority?.execution?.deterministicReaderStartsListener !== false ||
+    artifact?.tests?.browserExecutedByVerifier !== false ||
+    artifact?.boundary?.trackedFiles !== M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.length ||
+    !Array.isArray(trackedReceipts) ||
+    trackedReceipts.length !== M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.length ||
+    !isDeepStrictEqual(
+      trackedReceipts.map((receipt) => receipt?.path),
+      M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS,
+    ) ||
+    new Set(trackedReceipts.map((receipt) => receipt?.path)).size !==
+      M10_VISUAL_BEHAVIOR_AUTHORING_TRACKED_PATHS.length ||
+    !isDeepStrictEqual(artifact?.boundary?.checkpointOwnedReaderPaths, [
+      "scripts/lib/desen-app-visual-behavior-authoring-proof.mjs",
+      "tests/desen-app-visual-behavior-authoring.test.mjs",
+    ])
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The immutable M10-T01B identity, claims, authority, or receipt manifest drifted.",
+    );
+  }
+  for (const receipt of trackedReceipts) {
+    if (
+      !Number.isSafeInteger(receipt?.bytes) ||
+      receipt.bytes < 0 ||
+      typeof receipt.sha256 !== "string" ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The M10-T01B receipt manifest is malformed.");
+    }
+    const bytes = files.get(receipt.path);
+    if (
+      bytes?.byteLength !== receipt.bytes ||
+      sha256(bytes ?? Buffer.alloc(0)) !== receipt.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The exact current M10-T01B receipt drifted: ${receipt.path}.`,
+      );
+    }
+  }
+  return deepFreeze({
+    task: artifact.task,
+    artifact: {
+      path: M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
+      ...pin,
+      immutable: true,
+    },
+    predecessor: { ...predecessor },
+    currentProjection: {
+      relationship: "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
+      currentReceipts: trackedReceipts,
+    },
+    p08Status: artifact.claim.p08Status,
+    p09Status: artifact.claim.p09Status,
+    visualInputConnectionCovered: artifact.claim.visualInputConnectionCovered,
+    visualOperationActionCovered: artifact.claim.visualOperationActionCovered,
+    visualConditionalPresenceCovered: artifact.claim.visualConditionalPresenceCovered,
+    catalogDerivedRunControlsCovered: artifact.claim.catalogDerivedRunControlsCovered,
+    advancedJsonRetained: artifact.claim.advancedJsonRetained,
+    authoredBrowserSmokeCovered: artifact.claim.authoredBrowserSmokeCovered,
+    m10T02Closed: artifact.claim.m10T02Closed,
+    g10Closed: artifact.claim.g10Closed,
+  });
+}
+
 export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
@@ -2706,6 +2893,7 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
     readTrackedFiles(workspaceRoot, options.fileOverrides),
   ]);
   const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(files);
+  const visualBehaviorAuthoringSuccessor = authenticateM10VisualBehaviorAuthoringSuccessor(files);
   const parents = DESEN_APP_EVENT_ACTION_EDITOR_PARENT_PINS.map((pin) =>
     authenticateParent(files.get(pin.path), pin),
   );
@@ -2727,6 +2915,7 @@ export async function buildDesenAppEventActionEditorEvidence(rawOptions = undefi
   const currentCompatibility = deepFreeze({
     emptyProjectBrowserE2eSuccessor,
     userCreatedBlankProjectSuccessor,
+    visualBehaviorAuthoringSuccessor,
     schemaVersion: 1,
     proofId: "desen-app-event-action-editor",
     profile: "desen.app.event-action-editor-proof.v1",
