@@ -157,7 +157,7 @@ module.exports = {
       name: "desen-app-browser-e2e-reviewed-app-source-only",
       severity: "error",
       comment:
-        "The isolated browser proof may compose only the reviewed Desen App application, empty-project bootstrap, and stylesheet entries.",
+        "The isolated browser proof may compose only the reviewed Desen App application, empty-project bootstrap, explicit reference workspace profile, and stylesheet entries.",
       from: {
         path: "^apps/desen-app-browser-e2e/",
         pathNot: desenAppBrowserProductProofServerPath,
@@ -165,7 +165,7 @@ module.exports = {
       to: {
         path: "^apps/(?!desen-app-browser-e2e/)",
         pathNot:
-          "^apps/desen-app/src/(?:application\\.tsx|reference-empty-project\\.ts|styles\\.css)$",
+          "^apps/desen-app/src/(?:application\\.tsx|reference-empty-project\\.ts|reference-sign-in-workspace-profile\\.ts|styles\\.css)$",
       },
     },
     {

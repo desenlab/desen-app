@@ -1454,3 +1454,14 @@ reader families bind the exact 15,143-byte current browser spec at
 `sha256:5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b`; combined reader and
 checkpoint suites pass 233/233 and 88/88. This append-only correction changes no task status and
 does not convert local two-config Chromium success into a hosted exact-head claim.
+
+M10-T01C appends reviewed sequence 66 at
+`sha256:3bf2c27ca51f8ab6751dd0d026bbbf461ac2c6acea6fcc3088f7d011ae96fb83`. It preserves
+sequences 1–65 and their 53 frozen artifacts, adds the exact 19,299-byte evergreen
+product-composition artifact
+(`sha256:779434ca834b8d770c726d905408f0a3d0a7145abbc6eaf2b81f1e77466b46ac`), reseals only
+current reader indexes `[70..97, 102, 103, 104, 105]`, and appends the T01C proof/root readers at
+`[106, 107]`. The resulting authority contains 54 frozen artifacts and 108 current readers; its
+checkpoint suite passes 89/89. The sixteen bridged historical App reader families pass 242/242
+against their exact frozen projections. These are reviewed local receipts, not a hosted exact-head
+result.

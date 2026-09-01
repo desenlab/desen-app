@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile as readLiveFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -14,8 +14,13 @@ import {
   verifyDesenAppUserCreatedBlankProjectSourcePolicy,
   writeDesenAppUserCreatedBlankProjectEvidence,
 } from "../scripts/lib/desen-app-user-created-blank-project-proof.mjs";
+import { createDesenAppHistoricalReaderReadFile } from "./desen-app-historical-reader-fixture.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const readFile = createDesenAppHistoricalReaderReadFile({
+  workspaceRoot: ROOT,
+  liveReadFile: readLiveFile,
+});
 const SOURCE_PATHS = Object.freeze({
   main: "apps/desen-app/src/main.tsx",
   productBootstrap: "apps/desen-app/src/product-bootstrap.tsx",

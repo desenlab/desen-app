@@ -1,16 +1,23 @@
 /* eslint-disable @typescript-eslint/no-invalid-void-type -- Test ports verify receiver-independent
  * persistence callbacks. */
-import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 import { createDesenEditorDocument } from "@desen/editor-core";
 import { createJsonPointer } from "@desen/protocol";
 import { describe, expect, it, vi } from "vitest";
 
 import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
 import {
+  authenticateAuthoringPersistenceControllerProfile,
   createAuthoringPersistenceController,
   deriveAuthoringPersistenceSourceKey,
 } from "../src/authoring-persistence.js";
-import { REFERENCE_EDITOR_DOCUMENT } from "../src/authoring-preview.js";
+import {
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+  REFERENCE_EDITOR_DOCUMENT,
+} from "../src/reference-authoring-profile.js";
+import {
+  createProjectWorkspaceProfile,
+  readProjectWorkspaceProfileAuthority,
+} from "../src/project-workspace-profile.js";
 
 import type {
   DesenEditorDocument,
@@ -24,6 +31,7 @@ import type {
   AuthoringPersistenceControllerCreationResult,
   AuthoringPersistenceRoute,
 } from "../src/authoring-persistence.js";
+import type { ProjectWorkspaceProfileHandle } from "../src/project-workspace-profile.js";
 
 const ROUTE = Object.freeze({
   projectId: "account-app",
@@ -93,12 +101,38 @@ function requireController(
   const result = createAuthoringPersistenceController({
     route: ROUTE,
     document,
-    catalog: referenceCatalog,
+    profile: REFERENCE_AUTHORING_WORKSPACE_PROFILE,
     persistencePort,
   });
   expect(result.ok).toBe(true);
   if (!result.ok) throw new TypeError(`Expected a controller, received ${result.reason}.`);
   return result.controller;
+}
+
+function siblingWorkspaceProfile(): ProjectWorkspaceProfileHandle {
+  const authority = readProjectWorkspaceProfileAuthority(REFERENCE_AUTHORING_WORKSPACE_PROFILE);
+  if (authority.status !== "read") throw new TypeError("Expected the official workspace profile.");
+  const profile = authority.profile;
+  const created = createProjectWorkspaceProfile({
+    profileId: profile.profileId,
+    project: profile.project,
+    route: profile.route,
+    sourceSurfaceId: profile.sourceSurfaceId,
+    documentId: profile.documentId,
+    sourceKey: "account-app-other-source",
+    initialDocument: profile.initialDocument,
+    catalogs: profile.catalogs,
+    catalogPackages: profile.catalogPackages,
+    runtime: {
+      target: profile.runtime.target,
+      registry: profile.runtime.registry,
+      tokenCssProperties: profile.runtime.tokenCssProperties,
+      hostPorts: profile.runtime.hostPorts,
+    },
+    publication: profile.publication,
+  });
+  if (!created.ok) throw new TypeError(`Expected sibling profile: ${created.reason}.`);
+  return created.handle;
 }
 
 function expectCreationFailure(
@@ -111,12 +145,20 @@ function expectCreationFailure(
 
 describe("Desen App authored Source persistence state", () => {
   it("derives the exact project-owned local key without consulting Source.id", () => {
-    expect(deriveAuthoringPersistenceSourceKey(ROUTE)).toBe("account-app-source");
+    expect(deriveAuthoringPersistenceSourceKey(ROUTE, REFERENCE_AUTHORING_WORKSPACE_PROFILE)).toBe(
+      "account-app-source",
+    );
     expect(
-      deriveAuthoringPersistenceSourceKey({ projectId: "account-app", surfaceId: "home" }),
+      deriveAuthoringPersistenceSourceKey(
+        { projectId: "account-app", surfaceId: "foreign-surface" },
+        REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+      ),
     ).toBeNull();
     expect(
-      deriveAuthoringPersistenceSourceKey({ projectId: "checkout-pilot", surfaceId: "sign-in" }),
+      deriveAuthoringPersistenceSourceKey(
+        { projectId: "checkout-pilot", surfaceId: "sign-in" },
+        REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+      ),
     ).toBeNull();
 
     let accessorCalls = 0;
@@ -128,13 +170,33 @@ describe("Desen App authored Source persistence state", () => {
       },
     });
     expect(
-      deriveAuthoringPersistenceSourceKey(hostileRoute as AuthoringPersistenceRoute),
+      deriveAuthoringPersistenceSourceKey(
+        hostileRoute as AuthoringPersistenceRoute,
+        REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+      ),
     ).toBeNull();
     expect(accessorCalls).toBe(0);
 
     const changedId = copyJson(officialSignInSource) as MutableJsonObject;
     changedId.id = "com.example.some-other-document";
-    expect(deriveAuthoringPersistenceSourceKey(ROUTE)).toBe("account-app-source");
+    expect(deriveAuthoringPersistenceSourceKey(ROUTE, REFERENCE_AUTHORING_WORKSPACE_PROFILE)).toBe(
+      "account-app-source",
+    );
+  });
+
+  it("fails closed when a structurally plausible workspace-profile handle was not factory-authenticated", () => {
+    const forgedProfile = Object.freeze({}) as ProjectWorkspaceProfileHandle;
+
+    expect(deriveAuthoringPersistenceSourceKey(ROUTE, forgedProfile)).toBeNull();
+    expectCreationFailure(
+      createAuthoringPersistenceController({
+        route: ROUTE,
+        document: REFERENCE_EDITOR_DOCUMENT,
+        profile: forgedProfile,
+        persistencePort: port(),
+      }),
+      "profile-invalid",
+    );
   });
 
   it("starts with one admitted authored session and a stable immutable external-store snapshot", () => {
@@ -165,17 +227,38 @@ describe("Desen App authored Source persistence state", () => {
     expect(Object.isFrozen(controller)).toBe(true);
   });
 
-  it("fails closed for unknown routes, malformed ports, invalid Catalogs, and document mismatch", () => {
+  it("binds every controller to the exact opaque profile handle that created it", () => {
+    const controller = requireController();
+    const sibling = siblingWorkspaceProfile();
+
+    expect(
+      authenticateAuthoringPersistenceControllerProfile(
+        controller,
+        REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+      ),
+    ).toEqual({ status: "authenticated" });
+    expect(authenticateAuthoringPersistenceControllerProfile(controller, sibling)).toEqual({
+      status: "profile-mismatch",
+    });
+    expect(
+      authenticateAuthoringPersistenceControllerProfile(
+        Object.freeze({}) as AuthoringPersistenceController,
+        REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+      ),
+    ).toEqual({ status: "invalid-controller" });
+  });
+
+  it("fails closed for unknown routes, malformed ports, and document mismatch", () => {
     const base = {
       route: ROUTE,
       document: REFERENCE_EDITOR_DOCUMENT,
-      catalog: referenceCatalog,
+      profile: REFERENCE_AUTHORING_WORKSPACE_PROFILE,
       persistencePort: port(),
     };
     expectCreationFailure(
       createAuthoringPersistenceController({
         ...base,
-        route: { projectId: "account-app", surfaceId: "home" },
+        route: { projectId: "account-app", surfaceId: "foreign-surface" },
       }),
       "route-invalid",
     );
@@ -186,11 +269,6 @@ describe("Desen App authored Source persistence state", () => {
       }),
       "port-invalid",
     );
-    expectCreationFailure(
-      createAuthoringPersistenceController({ ...base, catalog: { kind: "desen.catalog" } }),
-      "catalog-invalid",
-    );
-
     const wrongDocument = copyJson(officialSignInSource) as MutableJsonObject;
     wrongDocument.id = "com.example.wrong-project";
     expectCreationFailure(

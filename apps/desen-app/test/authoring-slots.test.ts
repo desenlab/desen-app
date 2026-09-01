@@ -6,11 +6,11 @@ import { describe, expect, it } from "vitest";
 
 import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
 import {
-  REFERENCE_AUTHORING_MODEL,
   prepareCatalogAuthoringModel,
   type CatalogAuthoringModel,
   type CatalogComponentSummary,
 } from "../src/authoring-data.js";
+import { REFERENCE_AUTHORING_MODEL } from "../src/reference-authoring-profile.js";
 import {
   createAuthoringComponentSelection,
   type AuthoringComponentSelection,

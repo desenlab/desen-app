@@ -3,7 +3,8 @@ import { createDesenEditorDocument } from "@desen/editor-core";
 import { describe, expect, it } from "vitest";
 
 import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
-import { prepareCatalogAuthoringModel, REFERENCE_AUTHORING_MODEL } from "../src/authoring-data.js";
+import { prepareCatalogAuthoringModel } from "../src/authoring-data.js";
+import { REFERENCE_AUTHORING_MODEL } from "../src/reference-authoring-profile.js";
 import { applyAuthoringStateEdit, prepareAuthoringStateModel } from "../src/authoring-state.js";
 
 import type { DesenEditorDocument } from "@desen/editor-core";

@@ -3,10 +3,12 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prepareAuthoringInspectorModel } from "../src/authoring-inspector.js";
-import { REFERENCE_AUTHORING_MODEL } from "../src/authoring-data.js";
 import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
 import { InputConnectionControl, VisibilityControl } from "../src/behavior-controls.js";
-import { REFERENCE_EDITOR_DOCUMENT } from "../src/authoring-preview.js";
+import {
+  REFERENCE_AUTHORING_MODEL,
+  REFERENCE_EDITOR_DOCUMENT,
+} from "../src/reference-authoring-profile.js";
 
 import type {
   AuthoringConditionEdit,

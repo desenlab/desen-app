@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
-import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readFile as readLiveFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -14,8 +22,13 @@ import {
   verifyDesenAppCatalogPanelLayerTreeEvidence,
   writeDesenAppCatalogPanelLayerTreeEvidence,
 } from "../scripts/lib/desen-app-catalog-panel-layer-tree-proof.mjs";
+import { createDesenAppHistoricalReaderReadFile } from "./desen-app-historical-reader-fixture.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const readFile = createDesenAppHistoricalReaderReadFile({
+  workspaceRoot: ROOT,
+  liveReadFile: readLiveFile,
+});
 const M10_T01A_SECURE_SCROLL_CURRENT_PROJECTION = Object.freeze({
   compatibilityReceipt: "M10-T01A-SECURE-SCROLL-COMPAT",
   correctiveReceiptOnly: true,

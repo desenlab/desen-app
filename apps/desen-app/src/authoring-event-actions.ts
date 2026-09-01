@@ -165,9 +165,13 @@ export interface AuthoringComponentCommandReferenceOption {
 
 /** Bounded reference candidates derived from the exact current Source and Catalog. */
 export interface AuthoringEventActionReferenceOptions {
+  /** Exact Source surface currently being authored. */
+  readonly currentSurfaceId: string;
   readonly states: readonly AuthoringStateActionReferenceOption[];
   readonly surfaces: readonly AuthoringActionReferenceOption[];
   readonly operations: readonly AuthoringOperationActionReferenceOption[];
+  /** Result aliases already used anywhere on the current surface. */
+  readonly operationAliases: readonly string[];
   readonly resources: readonly AuthoringActionReferenceOption[];
   readonly componentCommands: readonly AuthoringComponentCommandReferenceOption[];
 }
@@ -736,19 +740,20 @@ function resolveLayerOwner(
   }
 }
 
-function selectedCatalog(model: CatalogAuthoringModel): JsonObject {
+function modelCatalogs(model: CatalogAuthoringModel): readonly JsonObject[] {
   const modelObject = ownDataObject(model);
-  const identity = ownDataObject(ownDataValue(modelObject, "catalog"));
-  const id = readNonEmptyString(identity, "id");
-  const version = readNonEmptyString(identity, "version");
-  const target = readNonEmptyString(identity, "target");
-  const catalogs = dataObjectArray(ownDataValue(modelObject, "validationCatalogs"));
-  const matches = catalogs.filter(
-    (catalog) =>
-      readNonEmptyString(catalog, "id") === id &&
-      readNonEmptyString(catalog, "version") === version &&
-      readNonEmptyString(catalog, "target") === target,
-  );
+  return dataObjectArray(ownDataValue(modelObject, "validationCatalogs"));
+}
+
+function catalogForCapability(
+  catalogs: readonly JsonObject[],
+  category: "components" | "operations",
+  capabilityId: string,
+): JsonObject {
+  const matches = catalogs.filter((catalog) => {
+    const capabilities = ownDataObject(ownDataValue(catalog, category));
+    return optionalOwnDataValue(capabilities, capabilityId) !== undefined;
+  });
   if (matches.length !== 1) throw new EventActionProjectionRejectedError();
   return matches[0] as JsonObject;
 }
@@ -867,6 +872,21 @@ function genericOptions(values: readonly string[]): readonly AuthoringActionRefe
   );
 }
 
+function operationAliases(events: readonly AuthoringEventHandlerModel[]): readonly string[] {
+  const aliases = new Set<string>();
+  const pending = events.map(({ actionList }) => actionList);
+  while (pending.length > 0) {
+    const list = pending.pop();
+    if (list === undefined) continue;
+    for (const action of list.actions) {
+      if (action.action.type === "operation.invoke") aliases.add(action.action.as);
+      if (action.onSuccess !== null) pending.push(action.onSuccess);
+      if (action.onFailure !== null) pending.push(action.onFailure);
+    }
+  }
+  return Object.freeze([...aliases].sort(compareText));
+}
+
 function stateOptions(state: JsonObject): readonly AuthoringStateActionReferenceOption[] {
   return Object.freeze(
     Object.keys(state)
@@ -887,13 +907,19 @@ function stateOptions(state: JsonObject): readonly AuthoringStateActionReference
 }
 
 function operationOptions(
-  operations: JsonObject,
+  catalogs: readonly JsonObject[],
 ): readonly AuthoringOperationActionReferenceOption[] {
   return Object.freeze(
-    Object.keys(operations)
-      .sort(compareText)
-      .map((value) => {
-        const operation = ownDataObject(ownDataValue(operations, value));
+    catalogs
+      .flatMap((catalog) => {
+        const operations = ownDataObject(ownDataValue(catalog, "operations"));
+        return Object.keys(operations).map(
+          (value) => [value, ownDataValue(operations, value)] as const,
+        );
+      })
+      .sort(([left], [right]) => compareText(left, right))
+      .map(([value, operationValue]) => {
+        const operation = ownDataObject(operationValue);
         const descriptionValue = optionalOwnDataValue(operation, "description");
         if (descriptionValue !== undefined && typeof descriptionValue !== "string") {
           throw new EventActionProjectionRejectedError();
@@ -912,10 +938,9 @@ function operationOptions(
 }
 
 function componentCommandOptions(
-  catalog: JsonObject,
+  catalogs: readonly JsonObject[],
   surface: JsonObject,
 ): readonly AuthoringComponentCommandReferenceOption[] {
-  const components = ownDataObject(ownDataValue(catalog, "components"));
   const root = ownDataObject(ownDataValue(surface, "root"));
   const pending = [root];
   const result: AuthoringComponentCommandReferenceOption[] = [];
@@ -929,6 +954,8 @@ function componentCommandOptions(
     }
     const targetId = readNonEmptyString(node, "id");
     const capabilityId = readNonEmptyString(node, "use");
+    const catalog = catalogForCapability(catalogs, "components", capabilityId);
+    const components = ownDataObject(ownDataValue(catalog, "components"));
     const contractValue = optionalOwnDataValue(components, capabilityId);
     if (contractValue === undefined) throw new EventActionProjectionRejectedError();
     const contract = ownDataObject(contractValue);
@@ -969,20 +996,23 @@ function componentCommandOptions(
 }
 
 function referenceOptions(
-  catalog: JsonObject,
+  catalogs: readonly JsonObject[],
   document: DesenEditorDocument,
   surface: JsonObject,
+  surfaceId: string,
+  events: readonly AuthoringEventHandlerModel[],
 ): AuthoringEventActionReferenceOptions {
   const state = ownDataObject(ownDataValue(surface, "state"));
   const resources = ownDataObject(ownDataValue(surface, "resources"));
   const surfaces = ownDataObject(ownDataValue(ownDataObject(document), "surfaces"));
-  const operations = ownDataObject(ownDataValue(catalog, "operations"));
   return Object.freeze({
+    currentSurfaceId: surfaceId,
     states: stateOptions(state),
     surfaces: genericOptions(Object.keys(surfaces)),
-    operations: operationOptions(operations),
+    operations: operationOptions(catalogs),
+    operationAliases: operationAliases(events),
     resources: genericOptions(Object.keys(resources)),
-    componentCommands: componentCommandOptions(catalog, surface),
+    componentCommands: componentCommandOptions(catalogs, surface),
   });
 }
 
@@ -1118,14 +1148,22 @@ export function prepareAuthoringEventActionModel(
     }
     resolveLayerOwner(model, capturedSelection);
     const resolved = resolveRawOwner(model.validationDocument, capturedRoute, capturedSelection);
-    const catalog = selectedCatalog(model);
+    const catalogs = modelCatalogs(model);
+    const catalog = catalogForCapability(catalogs, "components", capturedSelection.capabilityId);
     const contract = ownerContract(catalog, capturedSelection);
+    const events = eventModels(resolved.owner, contract);
     return Object.freeze({
       status: "ready",
       route: capturedRoute,
       owner: capturedSelection,
-      events: eventModels(resolved.owner, contract),
-      referenceOptions: referenceOptions(catalog, model.validationDocument, resolved.surface),
+      events,
+      referenceOptions: referenceOptions(
+        catalogs,
+        model.validationDocument,
+        resolved.surface,
+        capturedRoute.surfaceId,
+        events,
+      ),
     });
   } catch (error) {
     return Object.freeze({

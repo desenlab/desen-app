@@ -459,6 +459,7 @@ const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app-browser-e2e/proof-application.ts",
   "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/application.tsx",
   "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/reference-empty-project.ts",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/reference-sign-in-workspace-profile.ts",
   "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/styles.css",
   "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/packages/editor-core/src/index.ts",
   "tests/boundaries/fixtures/desen-app-browser-e2e-imports-publisher/apps/desen-app-browser-e2e/proof-application.ts",
@@ -506,6 +507,23 @@ const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "scripts/lib/desen-app-visual-behavior-authoring-proof.mjs",
   "scripts/verify-desen-app-visual-behavior-authoring.mjs",
   "tests/desen-app-visual-behavior-authoring.test.mjs",
+  "apps/desen-app/src/project-inventory-fixture.ts",
+  "apps/desen-app/src/project-workspace-profile.ts",
+  "apps/desen-app/src/reference-authoring-profile.ts",
+  "apps/desen-app/src/reference-project-fixtures.ts",
+  "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+  "apps/desen-app/test/evergreen-product-composition.test.tsx",
+  "apps/desen-app/test/project-inventory-fixture.test.ts",
+  "apps/desen-app/test/project-workspace-profile.test.ts",
+  "docs/proof/DESEN-APP-EVERGREEN-PRODUCT-COMPOSITION.md",
+  "docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json",
+  "docs/proof/artifacts/desen-app-0.1.0-t01b-historical-reader-bridge.json.gz",
+  "scripts/generate-desen-app-t01b-historical-reader-bridge.mjs",
+  "scripts/generate-desen-app-evergreen-product-composition-proof.mjs",
+  "scripts/lib/desen-app-evergreen-product-composition-proof.mjs",
+  "scripts/verify-desen-app-evergreen-product-composition.mjs",
+  "tests/desen-app-evergreen-product-composition.test.mjs",
+  "tests/desen-app-historical-reader-fixture.mjs",
 ]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
@@ -551,13 +569,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 198,
+    PROOF_UNIT: 200,
     CI_POLICY: 45,
     DEPENDENCY_POLICY: 32,
-    FROZEN_INPUT: 143,
-    PACKAGE_OR_APPLICATION: 520,
-    SHARED_PROOF_INFRASTRUCTURE: 252,
-    PROJECT_DOCUMENTATION: 136,
+    FROZEN_INPUT: 145,
+    PACKAGE_OR_APPLICATION: 528,
+    SHARED_PROOF_INFRASTRUCTURE: 257,
+    PROJECT_DOCUMENTATION: 137,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -950,10 +968,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 65,
-  headSha256: "fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14",
-  frozenArtifactCount: 53,
-  currentReaderCount: 106,
+  sequence: 66,
+  headSha256: "3bf2c27ca51f8ab6751dd0d026bbbf461ac2c6acea6fcc3088f7d011ae96fb83",
+  frozenArtifactCount: 54,
+  currentReaderCount: 108,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -1580,6 +1598,8 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "node --test tests/desen-app-user-created-blank-project.test.mjs",
     "node scripts/verify-desen-app-visual-behavior-authoring.mjs",
     "node --test tests/desen-app-visual-behavior-authoring.test.mjs",
+    "node scripts/verify-desen-app-evergreen-product-composition.mjs",
+    "node --test tests/desen-app-evergreen-product-composition.test.mjs",
   ];
   if (
     workflowFragments.some((fragment) =>
@@ -2408,7 +2428,7 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "Current comparison-source receipts do not reproduce the reviewed M10-T01B successor.",
+      "Current comparison-source receipts do not reproduce the reviewed M10-T01C successor.",
     );
   }
   const selectorBytes = capturedSourceBytes(currentAuthority, SELECTOR_SOURCE_PATH);
@@ -2416,12 +2436,12 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 208 ||
-    currentInventory.proofUnitCount !== 99
+    currentInventory.workloadCount !== 210 ||
+    currentInventory.proofUnitCount !== 100
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current workload graph is not the exact reviewed M10-T01B append-only successor.",
+      "The current workload graph is not the exact reviewed M10-T01C append-only successor.",
     );
   }
   const currentProofPairClasses = currentInventory.proofUnits.reduce(
@@ -2431,27 +2451,27 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 88 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 89 || currentProofPairClasses.barrier !== 11) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M10-T01B proof-pair authority is not exactly 88 ordinary and 11 barrier pairs.",
+      "The current M10-T01C proof-pair authority is not exactly 89 ordinary and 11 barrier pairs.",
     );
   }
-  const visualBehaviorAuthoringClosure = createAffectedImpactClosure([
-    "desen-app-visual-behavior-authoring",
+  const evergreenProductCompositionClosure = createAffectedImpactClosure([
+    "desen-app-evergreen-product-composition",
   ]);
   if (
-    !isDeepStrictEqual(visualBehaviorAuthoringClosure.ownerProofUnitIds, [
-      "desen-app-visual-behavior-authoring",
+    !isDeepStrictEqual(evergreenProductCompositionClosure.ownerProofUnitIds, [
+      "desen-app-evergreen-product-composition",
     ]) ||
-    visualBehaviorAuthoringClosure.proofUnitCount !== 67 ||
-    visualBehaviorAuthoringClosure.workloadCount !== 144 ||
-    visualBehaviorAuthoringClosure.impactSha256 !==
-      "16890d0b1fbf68372118deb35656055345a9d8ef9e699306fe338c2421091666"
+    evergreenProductCompositionClosure.proofUnitCount !== 68 ||
+    evergreenProductCompositionClosure.workloadCount !== 146 ||
+    evergreenProductCompositionClosure.impactSha256 !==
+      "5668ee90671a8a68ea1eb443359a792f03c2a9b16806f4ae903262301e17ab8a"
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M10-T01B affected closure is not exactly 67 proof units and 144 workloads.",
+      "The current M10-T01C affected closure is not exactly 68 proof units and 146 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);

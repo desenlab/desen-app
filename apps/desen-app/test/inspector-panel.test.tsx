@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createJsonPointer } from "@desen/protocol";
 
 import { InspectorPanel } from "../src/inspector-panel.js";
-import { REFERENCE_EDITOR_DOCUMENT } from "../src/authoring-preview.js";
+import { REFERENCE_EDITOR_DOCUMENT } from "../src/reference-authoring-profile.js";
 
 import type {
   ComponentInspectorControl,

@@ -5,6 +5,7 @@ import { createDesenEditorPersistencePort } from "@desen/editor-core";
 
 import { DesenAppApplication } from "../desen-app/src/application.js";
 import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "../desen-app/src/reference-empty-project.js";
+import { REFERENCE_SIGN_IN_WORKSPACE_PROFILE } from "../desen-app/src/reference-sign-in-workspace-profile.js";
 import "../desen-app/src/styles.css";
 
 import type {
@@ -119,6 +120,7 @@ root.render(
     <DesenAppApplication
       initialDocument={EMPTY_REFERENCE_PROJECT_DOCUMENT}
       persistencePort={persistencePort}
+      workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
     />
   </StrictMode>,
 );

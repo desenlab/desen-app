@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { projectAuthoringBehaviorControls } from "../src/authoring-behavior-projection.js";
-import { REFERENCE_EDITOR_DOCUMENT } from "../src/authoring-preview.js";
+import { REFERENCE_EDITOR_DOCUMENT } from "../src/reference-authoring-profile.js";
 
 describe("Desen App behavior-control projection", () => {
   it("finds the selected condition and operation aliases from exact authored actions", () => {

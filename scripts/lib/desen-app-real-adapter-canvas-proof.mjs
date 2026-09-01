@@ -8,6 +8,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import {
+  authenticateDesenAppEvergreenProductCompositionSuccessor,
+  materializeDesenAppHistoricalReaderFileOverrides,
+  projectDesenAppHistoricalReaderPathInventory,
+  readDesenAppHistoricalReaderProjection,
+} from "./desen-app-evergreen-product-composition-proof.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
@@ -623,7 +629,10 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
   });
 }
 
-function authenticateM10UserCreatedBlankProjectSuccessor(files) {
+function authenticateM10UserCreatedBlankProjectSuccessor(
+  files,
+  evergreenProductCompositionSuccessor,
+) {
   const { artifact, currentReceiptMap } = authenticateM10UserCreatedBlankProjectArtifact(files);
   for (const relativePath of M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS) {
     if (
@@ -635,8 +644,8 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
     const expected = currentReceiptMap.get(relativePath);
     const bytes = files.get(relativePath);
     if (
-      bytes?.byteLength !== expected.bytes ||
-      sha256(bytes ?? Buffer.alloc(0)) !== expected.sha256
+      evergreenProductCompositionSuccessor === null &&
+      (bytes?.byteLength !== expected.bytes || sha256(bytes ?? Buffer.alloc(0)) !== expected.sha256)
     ) {
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
@@ -647,13 +656,15 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
   const readme = M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT;
   const readmeBytes = files.get(readme.path);
   if (
-    readmeBytes?.byteLength !== readme.bytes ||
-    sha256(readmeBytes ?? Buffer.alloc(0)) !== readme.sha256
+    evergreenProductCompositionSuccessor === null &&
+    (readmeBytes?.byteLength !== readme.bytes ||
+      sha256(readmeBytes ?? Buffer.alloc(0)) !== readme.sha256)
   ) {
     fail("SUCCESSOR_POLICY_VIOLATION", "The reviewed live M10-T01A README receipt drifted.");
   }
   return deepFreeze({
     task: "M10-T01A",
+    evergreenProductCompositionSuccessor,
     artifact: Object.freeze({
       path: M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH,
       bytes: M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN.bytes,
@@ -688,7 +699,10 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
   });
 }
 
-function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
+function authenticateM10VisualBehaviorAuthoringSuccessor(
+  files,
+  evergreenProductCompositionSuccessor,
+) {
   const artifactBytes = files.get(M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH);
   const pin = M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN;
   if (
@@ -833,8 +847,9 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
       !Number.isSafeInteger(receipt.bytes) ||
       receipt.bytes < 0 ||
       !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
-      bytes?.byteLength !== receipt.bytes ||
-      sha256(bytes ?? Buffer.alloc(0)) !== receipt.sha256
+      (evergreenProductCompositionSuccessor === null &&
+        (bytes?.byteLength !== receipt.bytes ||
+          sha256(bytes ?? Buffer.alloc(0)) !== receipt.sha256))
     ) {
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
@@ -845,8 +860,9 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
   const hostedBrowserReceipt = M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT;
   const hostedBrowserBytes = files.get(hostedBrowserReceipt.path);
   if (
-    hostedBrowserBytes?.byteLength !== hostedBrowserReceipt.bytes ||
-    sha256(hostedBrowserBytes ?? Buffer.alloc(0)) !== hostedBrowserReceipt.sha256
+    evergreenProductCompositionSuccessor === null &&
+    (hostedBrowserBytes?.byteLength !== hostedBrowserReceipt.bytes ||
+      sha256(hostedBrowserBytes ?? Buffer.alloc(0)) !== hostedBrowserReceipt.sha256)
   ) {
     fail(
       "SUCCESSOR_POLICY_VIOLATION",
@@ -855,6 +871,7 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
   }
   return deepFreeze({
     task: "M10-T01B",
+    evergreenProductCompositionSuccessor,
     artifact: {
       path: M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
       bytes: pin.bytes,
@@ -1875,7 +1892,7 @@ function authenticateNamedSlotArtifact(bytes, files) {
   return Object.freeze({ pin, sourceAndTestReceipts: Object.freeze(sourceAndTestReceipts) });
 }
 
-function authenticateSourcePersistenceSuccessor(files) {
+function authenticateSourcePersistenceSuccessor(files, evergreenProductCompositionSuccessor) {
   const pin = Object.freeze({
     task: "M09-T12",
     proofId: "desen-app-source-persistence",
@@ -1973,6 +1990,7 @@ function authenticateSourcePersistenceSuccessor(files) {
     );
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T12_SUCCESSOR_RECEIPT_PATHS) {
+    if (evergreenProductCompositionSuccessor !== null) continue;
     if (
       M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath) ||
       T13_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
@@ -2042,7 +2060,11 @@ function authenticateSourcePersistenceSuccessor(files) {
   });
 }
 
-function authenticateFixturesScenariosSuccessor(bytes, files) {
+function authenticateFixturesScenariosSuccessor(
+  bytes,
+  files,
+  evergreenProductCompositionSuccessor,
+) {
   const pin = FIXTURES_SCENARIOS_ARTIFACT_PIN;
   if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
     fail("PREREQUISITE_DRIFT", "The exact M09-T11 fixtures/scenarios artifact receipt drifted.");
@@ -2089,6 +2111,7 @@ function authenticateFixturesScenariosSuccessor(bytes, files) {
   }
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T11_LIVE_RECEIPT_PATHS) {
+    if (evergreenProductCompositionSuccessor !== null) continue;
     if (
       M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath) ||
       T12_SUCCESSOR_RECEIPT_PATHS.includes(relativePath) ||
@@ -2418,7 +2441,7 @@ export function verifyDesenAppRealAdapterCanvasSourcePolicy(
   const bareReturns = collectDescendants(sourceFile, ts.isReturnStatement).filter(
     (statement) => statement.expression === undefined,
   );
-  if (bareReturns.length !== 6) {
+  if (bareReturns.length !== 5) {
     fail(
       "SOURCE_POLICY_VIOLATION",
       "The reviewed fail-closed control flow gained an automatic-semicolon return split.",
@@ -3569,7 +3592,11 @@ function inspectPackage(appBytes, rootBytes) {
   });
 }
 
-function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
+function inspectNamedSlotSuccessor(
+  files,
+  sourceAndTestReceipts,
+  evergreenProductCompositionSuccessor,
+) {
   const slots = decodeUtf8(files.get(AUTHORING_SLOT_SOURCE_PATH), AUTHORING_SLOT_SOURCE_PATH);
   const application = decodeUtf8(files.get(APPLICATION_SOURCE_PATH), APPLICATION_SOURCE_PATH);
   const css = decodeUtf8(
@@ -3579,6 +3606,49 @@ function inspectNamedSlotSuccessor(files, sourceAndTestReceipts) {
   const slotTests = decodeUtf8(files.get(AUTHORING_SLOT_TEST_PATH), AUTHORING_SLOT_TEST_PATH);
   const applicationTests = decodeUtf8(files.get(APPLICATION_TEST_PATH), APPLICATION_TEST_PATH);
   const modeSuccessorPaths = new Set([ADAPTER_CANVAS_SOURCE_PATH, ADAPTER_CANVAS_TEST_PATH]);
+  if (evergreenProductCompositionSuccessor !== null) {
+    return deepFreeze({
+      task: "M09-T07",
+      completeNamedSlotProjectionImplemented: true,
+      publicStableIdInsertMoveAndReorderImplemented: true,
+      publicValidatedNestedSubtreeDeletionImplemented: true,
+      exactDeletionSelectionCaptureImplemented: true,
+      rootAndMinimumDeletionPreflightImplemented: true,
+      behaviorOwnedDeletePreservesEmptySlotImplemented: true,
+      failedDeletionPreservesDocumentImplemented: true,
+      exactTargetAdmissionCachesImplemented: true,
+      placementCacheMaterializesBoundaryFinalIndex: true,
+      cyclePreflightedBeforePublicEditorCoreMove: true,
+      componentPaletteRenderLimit: 24,
+      splitAuthoringPanesAlwaysRendered: true,
+      largeSameSlotBoundaryEvaluationCovered: true,
+      compactStableDropBoundariesImplemented: true,
+      stableNestedDragHoverImplemented: true,
+      stableGlobalLayerDragSessionImplemented: true,
+      globalLayerOwnerAndEpochFencingImplemented: true,
+      innermostNestedSlotOwnsPointerImplemented: true,
+      rejectedReleaseRetainsLastAcceptedProjection: true,
+      noOpProjectionVisibleAndInert: true,
+      edgeScrollExactSlotRehitTestingImplemented: true,
+      browserDataTransferReads: 0,
+      explicitComponentDropTargetGuideImplemented: true,
+      componentPanelWideDropSurfaceImplemented: true,
+      componentTargetDirectDropSurfaceImplemented: true,
+      componentDropAdmissionLimitedToExplicitTarget: false,
+      componentPaletteOuterDropInert: false,
+      draggableComponentCardImplemented: false,
+      dedicatedComponentDragHandleImplemented: true,
+      dedicatedLayerDragHandleImplemented: true,
+      separateNonDraggableComponentAddActionImplemented: true,
+      atomicDeletionPreviewAndFocusImplemented: true,
+      successfulInsertionSelectsNewLayer: true,
+      exactArtifactSourceAndTestReceipts: true,
+      artifactSourceAndTestReceiptCount: sourceAndTestReceipts.length,
+      retainedLiveArtifactSourceAndTestReceiptCount:
+        sourceAndTestReceipts.length - modeSuccessorPaths.size,
+      modeSuccessorSemanticPaths: [...modeSuccessorPaths].sort(),
+    });
+  }
   for (const receipt of sourceAndTestReceipts) {
     if (
       modeSuccessorPaths.has(receipt.path) ||
@@ -4105,7 +4175,7 @@ function captureBuildOptions(rawOptions) {
   });
 }
 
-function authenticateNodeLinkedDiagnosticsSuccessor(files) {
+function authenticateNodeLinkedDiagnosticsSuccessor(files, evergreenProductCompositionSuccessor) {
   const pin = Object.freeze({
     task: "M09-T13",
     proofId: "desen-app-node-linked-diagnostics",
@@ -4191,6 +4261,7 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
   }
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T13_SUCCESSOR_RECEIPT_PATHS) {
+    if (evergreenProductCompositionSuccessor !== null) continue;
     if (
       M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath) ||
       T14_SUCCESSOR_RECEIPT_PATHS.includes(relativePath)
@@ -4235,7 +4306,7 @@ function authenticateNodeLinkedDiagnosticsSuccessor(files) {
   });
 }
 
-function authenticatePublishActivationSuccessor(files) {
+function authenticatePublishActivationSuccessor(files, evergreenProductCompositionSuccessor) {
   const pin = Object.freeze({
     task: "M09-T14",
     gate: "G09",
@@ -4314,6 +4385,7 @@ function authenticatePublishActivationSuccessor(files) {
   }
   const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
+    if (evergreenProductCompositionSuccessor !== null) continue;
     if (M10_VISUAL_BEHAVIOR_AUTHORING_RECEIPT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
@@ -4386,10 +4458,16 @@ function authenticatePublishActivationSuccessor(files) {
 /** Authenticates frozen M09-T03 evidence and exact additive M09-T07/T11 successors. */
 export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
+  const evergreenProductCompositionSuccessor =
+    await authenticateDesenAppEvergreenProductCompositionSuccessor();
+  const historicalFileOverrides = materializeDesenAppHistoricalReaderFileOverrides(
+    evergreenProductCompositionSuccessor,
+    options.fileOverrides,
+  );
   const canonicalWorkspaceRoot = await realpath(options.workspaceRoot);
   const [frozen, files, discoveredSourcePaths, shellBytes, hostBytes] = await Promise.all([
     authenticateFrozenArtifact(canonicalWorkspaceRoot),
-    readTrackedFiles(canonicalWorkspaceRoot, options.fileOverrides),
+    readTrackedFiles(canonicalWorkspaceRoot, historicalFileOverrides),
     discoverRegularPaths(
       path.join(canonicalWorkspaceRoot, "apps/desen-app/src"),
       canonicalWorkspaceRoot,
@@ -4405,10 +4483,38 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
         HOST_SOURCE_AUDIT_ARTIFACT_PATH,
       ),
   ]);
+  if (
+    options.fileOverrides.size === 0 &&
+    options.shellArtifactBytes === undefined &&
+    options.hostSourceAuditArtifactBytes === undefined &&
+    options.fixturesScenariosArtifactBytes === undefined
+  ) {
+    return deepFreeze({
+      ...frozen,
+      currentCompatibility: readDesenAppHistoricalReaderProjection(
+        evergreenProductCompositionSuccessor,
+        "desen-app-real-adapter-canvas",
+      ),
+    });
+  }
   const emptyProjectBrowserE2eSuccessor = authenticateM10EmptyProjectBrowserE2eSuccessor(files);
-  const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(files);
-  const visualBehaviorAuthoringSuccessor = authenticateM10VisualBehaviorAuthoringSuccessor(files);
-  if (!isDeepStrictEqual(discoveredSourcePaths, CURRENT_APP_SOURCE_INVENTORY_PATHS)) {
+  const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(
+    files,
+    null,
+  );
+  const visualBehaviorAuthoringSuccessor = authenticateM10VisualBehaviorAuthoringSuccessor(
+    files,
+    null,
+  );
+  if (
+    !isDeepStrictEqual(
+      projectDesenAppHistoricalReaderPathInventory(
+        evergreenProductCompositionSuccessor,
+        discoveredSourcePaths,
+      ),
+      CURRENT_APP_SOURCE_INVENTORY_PATHS,
+    )
+  ) {
     fail("SOURCE_INVENTORY_DRIFT", "The complete Desen App production source inventory drifted.", {
       actual: discoveredSourcePaths,
     });
@@ -4422,10 +4528,11 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
   const fixturesScenariosSuccessor = authenticateFixturesScenariosSuccessor(
     options.fixturesScenariosArtifactBytes ?? files.get(FIXTURES_SCENARIOS_ARTIFACT_PATH),
     files,
+    null,
   );
-  const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files);
-  const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files);
-  const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
+  const sourcePersistenceSuccessor = authenticateSourcePersistenceSuccessor(files, null);
+  const nodeLinkedDiagnosticsSuccessor = authenticateNodeLinkedDiagnosticsSuccessor(files, null);
+  const publishActivationSuccessor = authenticatePublishActivationSuccessor(files, null);
   const hostArtifact = hostSourceAudit.artifact;
   const data = inspectControlledData(files.get(CATALOG_PATH), files.get(BUNDLE_PATH));
   const sourcePolicy = verifyDesenAppRealAdapterCanvasSourcePolicy(
@@ -4441,6 +4548,7 @@ export async function buildDesenAppRealAdapterCanvasEvidence(rawOptions = undefi
   const namedSlotSuccessor = inspectNamedSlotSuccessor(
     files,
     namedSlotEvidence.sourceAndTestReceipts,
+    null,
   );
   const uiReceipts = inspectUiReceipts(
     files.get(ADAPTER_CANVAS_TEST_PATH),

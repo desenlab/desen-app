@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
-import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
-
 import { DesenAppApplication } from "./application.js";
 import { createAuthoringPersistenceController } from "./authoring-persistence.js";
 import { navigateDesenApp, readDesenAppLocation } from "./project-navigation.js";
-import { DESEN_APP_LOCAL_PROJECTS } from "./project-data.js";
-import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "./reference-empty-project.js";
+import { readProjectWorkspaceProfileAuthority } from "./project-workspace-profile.js";
 import desenLogoUrl from "./assets/desen-logo.svg";
 import styles from "./application.module.css";
 
@@ -16,32 +13,35 @@ import type {
   AuthoringPersistenceController,
   AuthoringPersistenceSaveResult,
 } from "./authoring-persistence.js";
-
-const PRODUCT_ROUTE = Object.freeze({ projectId: "account-app", surfaceId: "sign-in" });
-const PRODUCT_SURFACE_PATH = "/projects/account-app/surfaces/sign-in";
-const EMPTY_PROJECT_INVENTORY = Object.freeze([]);
+import type {
+  ProjectWorkspaceProfileHandle,
+  ProjectWorkspaceProfileSnapshot,
+} from "./project-workspace-profile.js";
 
 type ProductBootstrapPhase = "failed" | "missing" | "opening" | "ready";
 
-function isExactLocalProductDocument(document: DesenEditorDocument): boolean {
-  const catalog = document.catalogs[0];
+function matchesWorkspaceProfile(
+  document: DesenEditorDocument,
+  profile: ProjectWorkspaceProfileSnapshot,
+): boolean {
+  const documentSurfaceIds = Object.keys(document.surfaces).sort();
+  const profileSurfaceIds = profile.project.surfaces.map((surface) => surface.sourceId).sort();
   return (
-    document.id === "com.example.account-app" &&
-    document.entry === "sign-in" &&
-    document.catalogs.length === 1 &&
-    catalog?.id === "run.desen.reference.sign-in" &&
-    catalog.version === "0.1.0" &&
-    catalog.target === "web-react" &&
-    Object.keys(document.surfaces).length === 1 &&
-    Object.hasOwn(document.surfaces, "sign-in")
+    document.id === profile.documentId &&
+    document.entry === profile.initialDocument.entry &&
+    documentSurfaceIds.length === profileSurfaceIds.length &&
+    documentSurfaceIds.every((surfaceId, index) => surfaceId === profileSurfaceIds[index])
   );
 }
 
-function phaseForController(controller: AuthoringPersistenceController): ProductBootstrapPhase {
+function phaseForController(
+  controller: AuthoringPersistenceController,
+  profile: ProjectWorkspaceProfileSnapshot,
+): ProductBootstrapPhase {
   const state = controller.read();
   if (state.disposed) return "failed";
   if (state.pending === "opening") return "opening";
-  if (state.generation !== null && !isExactLocalProductDocument(state.session.document)) {
+  if (state.generation !== null && !matchesWorkspaceProfile(state.session.document, profile)) {
     return "failed";
   }
   if (
@@ -83,6 +83,7 @@ interface BlankProjectDialogProps {
   readonly onOpenStoredProject: () => void;
   readonly open: boolean;
   readonly pending: boolean;
+  readonly profile: ProjectWorkspaceProfileSnapshot;
   readonly reopenAvailable: boolean;
 }
 
@@ -93,6 +94,7 @@ function BlankProjectDialog({
   onOpenStoredProject,
   open,
   pending,
+  profile,
   reopenAvailable,
 }: BlankProjectDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -147,24 +149,34 @@ function BlankProjectDialog({
         <section aria-labelledby="project-template-title" className={styles.projectTemplateSection}>
           <div className={styles.projectDialogSectionHeading}>
             <h3 id="project-template-title">Start from</h3>
-            <span>1 supported profile</span>
+            <span>Configured workspace profile</span>
           </div>
           <label className={styles.projectTemplateCard}>
-            <input autoFocus checked name="template" readOnly type="radio" value="blank-sign-in" />
+            <input
+              autoFocus
+              checked
+              name="template"
+              readOnly
+              type="radio"
+              value={profile.profileId}
+            />
             <span aria-hidden="true" className={styles.projectTemplatePreview}>
               <span />
             </span>
             <span className={styles.projectTemplateCopy}>
-              <strong>Blank sign-in project</strong>
+              <strong>Blank {profile.project.name} project</strong>
               <small>
-                Account app · web-react 0.1 · one empty Stack · 420 × 720 portrait frame
+                {profile.runtime.target} · {profile.catalogs.length}{" "}
+                {profile.catalogs.length === 1 ? "Catalog" : "Catalogs"} ·{" "}
+                {profile.project.surfaces.length}{" "}
+                {profile.project.surfaces.length === 1 ? "surface" : "surfaces"}
               </small>
             </span>
             <span className={styles.projectTemplateBadge}>Blank</span>
           </label>
           <p className={styles.projectTemplateBoundary}>
-            This local profile creates the exact supported Account app project. It does not invent
-            an arbitrary project identity or silently replace an existing Source.
+            This workspace creates the exact authenticated {profile.project.name} Source. It does
+            not invent a project identity or silently replace an existing Source.
           </p>
         </section>
 
@@ -248,21 +260,28 @@ function ProductStartup({
 export interface DesenAppProductProps {
   /** Host-provided Source persistence; `null` fails closed without mounting fixture content. */
   readonly persistencePort: DesenEditorPersistencePort | null;
+  /** Factory-authenticated project, Catalog, runtime and publication composition. */
+  readonly workspaceProfile: ProjectWorkspaceProfileHandle;
 }
 
 /** Normal Desen App entry with visible blank-project creation and durable Source reopening. */
-export function DesenAppProduct({ persistencePort }: DesenAppProductProps) {
+export function DesenAppProduct({ persistencePort, workspaceProfile }: DesenAppProductProps) {
+  const authority = readProjectWorkspaceProfileAuthority(workspaceProfile);
+  const profile = authority.status === "read" ? authority.profile : null;
   const creation = useMemo(
     () =>
-      persistencePort === null
+      persistencePort === null || profile === null
         ? null
         : createAuthoringPersistenceController({
-            route: PRODUCT_ROUTE,
-            document: EMPTY_REFERENCE_PROJECT_DOCUMENT,
-            catalog: referenceCatalog,
+            route: {
+              projectId: profile.project.id,
+              surfaceId: profile.sourceSurfaceId,
+            },
+            document: profile.initialDocument,
+            profile: workspaceProfile,
             persistencePort,
           }),
-    [persistencePort],
+    [persistencePort, profile, workspaceProfile],
   );
   const controller = creation?.ok === true ? creation.controller : null;
   const state = useSyncExternalStore(
@@ -276,7 +295,8 @@ export function DesenAppProduct({ persistencePort }: DesenAppProductProps) {
   const [creationPending, setCreationPending] = useState(false);
   const [creationError, setCreationError] = useState<string | null>(null);
   const [reopenAvailable, setReopenAvailable] = useState(false);
-  const phase = controller === null ? "failed" : phaseForController(controller);
+  const phase =
+    controller === null || profile === null ? "failed" : phaseForController(controller, profile);
 
   useEffect(() => {
     if (controller === null) return;
@@ -341,8 +361,8 @@ export function DesenAppProduct({ persistencePort }: DesenAppProductProps) {
       return;
     }
     setDialogOpen(false);
-    navigateDesenApp(PRODUCT_SURFACE_PATH);
-  }, [controller]);
+    if (profile !== null) navigateDesenApp(profile.surfacePath);
+  }, [controller, profile]);
 
   const openStoredProject = useCallback(async () => {
     if (controller === null || controller.read().pending !== null) return;
@@ -358,8 +378,8 @@ export function DesenAppProduct({ persistencePort }: DesenAppProductProps) {
       return;
     }
     setDialogOpen(false);
-    navigateDesenApp(PRODUCT_SURFACE_PATH);
-  }, [controller]);
+    if (profile !== null) navigateDesenApp(profile.surfacePath);
+  }, [controller, profile]);
 
   if (phase === "opening" || phase === "failed") {
     return (
@@ -371,8 +391,11 @@ export function DesenAppProduct({ persistencePort }: DesenAppProductProps) {
     );
   }
 
-  const projects = phase === "ready" ? DESEN_APP_LOCAL_PROJECTS : EMPTY_PROJECT_INVENTORY;
-  const currentDocument = state?.session.document ?? EMPTY_REFERENCE_PROJECT_DOCUMENT;
+  if (profile === null) {
+    return <ProductStartup canRetry={false} failed onRetry={() => undefined} />;
+  }
+
+  const currentDocument = state?.session.document ?? profile.initialDocument;
 
   return (
     <>
@@ -389,8 +412,8 @@ export function DesenAppProduct({ persistencePort }: DesenAppProductProps) {
         }
         preparedPersistenceController={controller}
         projectCreationUnavailableMessage="The supported local project already exists in this workspace."
-        projectInventoryIsFixture={false}
-        projects={projects}
+        profileProjectVisible={phase === "ready"}
+        workspaceProfile={workspaceProfile}
       />
       <BlankProjectDialog
         error={creationError}
@@ -405,6 +428,7 @@ export function DesenAppProduct({ persistencePort }: DesenAppProductProps) {
         }}
         open={dialogOpen}
         pending={creationPending}
+        profile={profile}
         reopenAvailable={reopenAvailable}
       />
     </>

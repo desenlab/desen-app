@@ -555,6 +555,55 @@ Catalog fixtures; the panel has no sign-in-specific outcome list. Synthetic is t
 context, while Integration and Production remain visibly unavailable. This usability slice does
 not close the dedicated M10-T02/M10-T03 acceptance matrices or M10-T04 real-host operation proof.
 
+M10-T01C makes the product composition evergreen instead of letting the first sign-in example
+become an implicit App default. `DesenAppProduct` and `DesenAppApplication` now require a
+factory-authenticated `ProjectWorkspaceProfile`. The normal `main.tsx` root explicitly selects the
+reference sign-in profile; reusable editor, preview, fixture/scenario, persistence, publication,
+runtime-canvas, and product-bootstrap modules do not import or synthesize that example.
+
+A workspace profile captures one exact authority set:
+
+- project metadata and the mapping between App route slugs and Source surface ids;
+- Source document identity plus its independent storage key;
+- the complete admitted Catalog set and Publisher package candidates;
+- runtime target, authenticated React adapter registry, token CSS, and captured host ports; and
+- an optional publication channel and installed-host identity.
+
+Profile creation validates the initial Source, complete Catalog interaction contracts, package
+coverage, runtime authority, and Publisher compatibility before returning an opaque handle. A
+route, Source document, Catalog array position, or publication object cannot grant those rights by
+itself. A profile without a publication binding can still use its admitted authoring and synthetic
+Run boundary, but publishing stays unavailable.
+
+Every current Source is re-admitted against that same handle before the App, persistence, or
+publication path can use it. The document id, authored entry, complete surface inventory, complete
+Catalog requirements, and interaction contracts must still match the profile exactly. Prepared
+persistence controllers are bound to the exact opaque handle, and editor mounts use a private
+per-handle identity, so another handle with identical public ids cannot inherit its draft or
+controller authority.
+
+Project-list examples use a separate opaque, detached, bounded `ProjectInventoryFixtureHandle`.
+That inventory is inert metadata: it cannot be combined with Source, mutation, persistence,
+publication, or project-creation authority, and it cannot open an editable or runnable surface.
+Synthetic Run similarly replaces all nine profile host ports with inert implementations; only the
+explicit Catalog fixture operation controller remains active, so no profile navigation, storage,
+operation, resource, token, context, environment, clock, or diagnostics callback is invoked.
+
+Opening a non-entry surface creates a transient Publisher-admitted canvas Bundle whose entry is the
+selected surface. The authored Source, saved Source, publication snapshot, and published Bundle
+retain the profile's original entry and revision. Publication is available only through a
+factory-authenticated fixed-destination port whose private channel and installed-host binding match
+the profile; caller-supplied request data cannot redirect either effect.
+
+Focused evidence includes a non-authentication feedback project with two surfaces, route slugs
+that differ from its Source ids, and two Catalogs, plus a complete feedback App render through the
+ordinary real-adapter canvas and layer tree. Forged handles, route/Source drift, incomplete Catalog
+packages, forged registries, cross-profile persistence routes, and mismatched publication hosts
+fail closed. The evidence is
+`docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json`, verified by
+`scripts/verify-desen-app-evergreen-product-composition.mjs`. M10-T02 input/pending, M10-T03
+failure, M10-T04 real-host success/navigation, remote/multi-user persistence, and G10 remain open.
+
 ## Local commands
 
 Install the package-pinned Chromium runtime once with

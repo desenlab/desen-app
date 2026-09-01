@@ -1,11 +1,8 @@
-import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 import { deriveComponentInspectorControls, registerComponent } from "@desen/catalog-sdk";
 import {
   validateDesenInteractionCatalogSet,
   validateDesenSourceInteractionContracts,
 } from "@desen/validator";
-
-import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
 
 import type { ComponentInspectorControlPlan, ComponentManifest } from "@desen/catalog-sdk";
 import type { DesenEditorDocument } from "@desen/editor-core";
@@ -171,6 +168,7 @@ function projectDeclaredAuthoringFrame(value: unknown): AuthoringCanvasFrame | u
 export function projectAuthoringCanvasFrame(
   document: DesenEditorDocument,
   surfaceId: string,
+  catalogValues: unknown,
 ): AuthoringCanvasFrameProjection {
   if (typeof surfaceId !== "string" || !AUTHORING_SURFACE_ID.test(surfaceId)) {
     return rejectedAuthoringCanvasFrame("surface-id-invalid");
@@ -178,7 +176,7 @@ export function projectAuthoringCanvasFrame(
 
   let admittedDocument: unknown;
   try {
-    const catalogSet = validateDesenInteractionCatalogSet([referenceCatalog]);
+    const catalogSet = validateDesenInteractionCatalogSet(normalizeCatalogSetInput(catalogValues));
     if (!catalogSet.valid) return rejectedAuthoringCanvasFrame("document-invalid");
     const source = validateDesenSourceInteractionContracts(document, catalogSet.value);
     if (!source.valid) return rejectedAuthoringCanvasFrame("document-invalid");
@@ -287,13 +285,22 @@ export interface AuthoringSurfaceTree {
   readonly root: AuthoringLayerNode;
 }
 
-/** Catalog identity, component library, and exact Source trees admitted by M09-T02. */
+/** One exact identity in the validator-authenticated Catalog set. */
+export interface CatalogAuthoringIdentity {
+  readonly id: string;
+  readonly version: string;
+  readonly target: string;
+}
+
+/** Catalog identities, merged component library, and exact Source trees admitted for authoring. */
 export interface CatalogAuthoringModel {
-  readonly catalog: {
-    readonly id: string;
-    readonly version: string;
-    readonly target: string;
-  };
+  /**
+   * First Catalog identity retained for transitional single-Catalog presentation compatibility.
+   * New composition code must use {@link catalogs} when identity completeness matters.
+   */
+  readonly catalog: CatalogAuthoringIdentity;
+  /** Complete Catalog identities in validator-admitted input order. */
+  readonly catalogs: readonly CatalogAuthoringIdentity[];
   readonly components: readonly CatalogComponentSummary[];
   readonly surfaces: readonly AuthoringSurfaceTree[];
   /** Exact validator-admitted Catalog set reused by later App validation boundaries. */
@@ -314,6 +321,10 @@ const AUTHORING_READ_LIMITS = Object.freeze({
   maxIdentityOccurrencesPerSurface: 25_000,
   maxSourceTreeDepth: 64,
 });
+
+function normalizeCatalogSetInput(catalogValueOrSet: unknown): readonly unknown[] {
+  return Array.isArray(catalogValueOrSet) ? catalogValueOrSet : [catalogValueOrSet];
+}
 
 function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -350,6 +361,14 @@ function optionalObject(value: unknown): JsonObject | undefined {
   return typeof value === "object" && value !== null && !Array.isArray(value)
     ? (value as JsonObject)
     : undefined;
+}
+
+function projectCatalogIdentity(catalog: JsonObject, path: string): CatalogAuthoringIdentity {
+  return Object.freeze({
+    id: readString(catalog.id, `${path}.id`),
+    version: readString(catalog.version, `${path}.version`),
+    target: readString(catalog.target, `${path}.target`),
+  });
 }
 
 function readBoolean(value: unknown, path: string): boolean {
@@ -433,8 +452,11 @@ function projectCapabilityMetadata(
   });
 }
 
-function projectComponent(componentId: string, contractValue: unknown): CatalogComponentSummary {
-  const path = `catalog.components[${JSON.stringify(componentId)}]`;
+function projectComponent(
+  componentId: string,
+  contractValue: unknown,
+  path: string,
+): CatalogComponentSummary {
   const contract = readObject(contractValue, path);
   const authoring = optionalObject(contract.authoring);
   const semanticCategory = optionalString(contract.category);
@@ -636,51 +658,82 @@ function projectLayerNode(
 }
 
 /**
- * Creates a bounded read model only after the exact Catalog and Source pass cumulative validation.
+ * Creates a bounded read model only after the exact Catalog set and Source pass cumulative
+ * validation.
  *
- * No partial model is returned on validation, catalog-resolution, or authoring-read-limit failure.
+ * @remarks A single Catalog value remains accepted as shorthand for a one-entry set. Capabilities
+ * from every admitted Catalog are merged only after set-wide uniqueness validation succeeds. No
+ * partial model is returned on validation, catalog-resolution, or authoring-read-limit failure.
  */
 export function prepareCatalogAuthoringModel(
-  catalogValue: unknown,
+  catalogValueOrSet: unknown,
   sourceValue: unknown,
 ): CatalogAuthoringModelResult {
-  const catalogSet = validateDesenInteractionCatalogSet([catalogValue]);
+  let catalogSet: ReturnType<typeof validateDesenInteractionCatalogSet>;
+  try {
+    catalogSet = validateDesenInteractionCatalogSet(normalizeCatalogSetInput(catalogValueOrSet));
+  } catch {
+    return Object.freeze({ ok: false, reason: "catalog-invalid" });
+  }
   if (!catalogSet.valid) {
     return Object.freeze({ ok: false, reason: "catalog-invalid" });
   }
-  const sourceResult = validateDesenSourceInteractionContracts(sourceValue, catalogSet.value);
+  let sourceResult: ReturnType<typeof validateDesenSourceInteractionContracts>;
+  try {
+    sourceResult = validateDesenSourceInteractionContracts(sourceValue, catalogSet.value);
+  } catch {
+    return Object.freeze({ ok: false, reason: "source-invalid" });
+  }
   if (!sourceResult.valid) {
     return Object.freeze({ ok: false, reason: "source-invalid" });
   }
 
   try {
-    const catalog = readObject(catalogSet.value[0], "catalog");
+    const catalogs = catalogSet.value.map((catalogValue, index) =>
+      readObject(catalogValue, `catalogs[${index}]`),
+    );
+    const catalog = catalogs[0];
+    if (catalog === undefined) return Object.freeze({ ok: false, reason: "catalog-invalid" });
     const source = readObject(sourceResult.value, "source");
-    const componentEntries = Object.entries(readObject(catalog.components, "catalog.components"));
-    const behaviorEntries = Object.entries(optionalObject(catalog.behaviors) ?? Object.freeze({}));
+    const componentEntries = catalogs.flatMap((catalogEntry, catalogIndex) =>
+      Object.entries(
+        readObject(catalogEntry.components, `catalogs[${catalogIndex}].components`),
+      ).map(([capabilityId, contract]) =>
+        Object.freeze({
+          capabilityId,
+          contract,
+          path: `catalogs[${catalogIndex}].components[${JSON.stringify(capabilityId)}]`,
+        }),
+      ),
+    );
+    const behaviorEntries = catalogs.flatMap((catalogEntry, catalogIndex) =>
+      Object.entries(optionalObject(catalogEntry.behaviors) ?? Object.freeze({})).map(
+        ([capabilityId, contract]) =>
+          Object.freeze({
+            capabilityId,
+            contract,
+            path: `catalogs[${catalogIndex}].behaviors[${JSON.stringify(capabilityId)}]`,
+          }),
+      ),
+    );
     const components = Object.freeze(
       componentEntries
-        .map(([componentId, component]) => projectComponent(componentId, component))
-        .sort((left, right) => compareText(left.displayName, right.displayName)),
+        .map(({ capabilityId, contract, path }) => projectComponent(capabilityId, contract, path))
+        .sort(
+          (left, right) =>
+            compareText(left.displayName, right.displayName) || compareText(left.id, right.id),
+        ),
     );
     const componentsById = new Map(
-      componentEntries.map(([componentId, component]) => [
-        componentId,
-        projectCapabilityMetadata(
-          componentId,
-          component,
-          `catalog.components[${JSON.stringify(componentId)}]`,
-        ),
+      componentEntries.map(({ capabilityId, contract, path }) => [
+        capabilityId,
+        projectCapabilityMetadata(capabilityId, contract, path),
       ]),
     );
     const behaviorsById = new Map(
-      behaviorEntries.map(([behaviorId, behavior]) => [
-        behaviorId,
-        projectCapabilityMetadata(
-          behaviorId,
-          behavior,
-          `catalog.behaviors[${JSON.stringify(behaviorId)}]`,
-        ),
+      behaviorEntries.map(({ capabilityId, contract, path }) => [
+        capabilityId,
+        projectCapabilityMetadata(capabilityId, contract, path),
       ]),
     );
     const surfaces = Object.entries(readObject(source.surfaces, "source.surfaces"))
@@ -704,11 +757,12 @@ export function prepareCatalogAuthoringModel(
     return Object.freeze({
       ok: true,
       model: Object.freeze({
-        catalog: Object.freeze({
-          id: readString(catalog.id, "catalog.id"),
-          version: readString(catalog.version, "catalog.version"),
-          target: readString(catalog.target, "catalog.target"),
-        }),
+        catalog: projectCatalogIdentity(catalog, "catalogs[0]"),
+        catalogs: Object.freeze(
+          catalogs.map((catalogEntry, index) =>
+            projectCatalogIdentity(catalogEntry, `catalogs[${index}]`),
+          ),
+        ),
         components,
         surfaces: Object.freeze(surfaces),
         validationCatalogs: catalogSet.value,
@@ -722,14 +776,3 @@ export function prepareCatalogAuthoringModel(
     throw error;
   }
 }
-
-const referenceAuthoringResult = prepareCatalogAuthoringModel(
-  referenceCatalog,
-  officialSignInSource,
-);
-if (!referenceAuthoringResult.ok) {
-  throw new TypeError(`Reference authoring fixture rejected: ${referenceAuthoringResult.reason}.`);
-}
-
-/** Validator-authenticated reference Catalog and official Source projected for M09-T02. */
-export const REFERENCE_AUTHORING_MODEL = referenceAuthoringResult.model;

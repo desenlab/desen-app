@@ -1,0 +1,475 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-evergreen-product-composition",
+  "profile": "desen.app.evergreen-product-composition-proof.v1",
+  "task": "M10-T01C",
+  "gate": null,
+  "result": "PASS",
+  "prerequisites": [
+    {
+      "task": "M10-T01B",
+      "gate": null,
+      "proofId": "desen-app-visual-behavior-authoring",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json",
+      "bytes": 10962,
+      "sha256": "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
+      "profile": "desen.app.visual-behavior-authoring-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "p08Status": "PROVEN",
+    "p09Status": "PARTIAL",
+    "authenticatedWorkspaceProfileCovered": true,
+    "genericReferenceResidueGuardCovered": true,
+    "nonAuthFullAppCompositionCovered": true,
+    "multiSurfaceProfileCovered": true,
+    "multiCatalogSetCovered": true,
+    "nonEntrySurfacePreviewCovered": true,
+    "nonEntrySaveAndPublishBaseAuthorityCovered": true,
+    "exactDocumentAdmissionCovered": true,
+    "opaqueFixtureInventoryCovered": true,
+    "publicationControllerProfileBindingCovered": true,
+    "syntheticRunHostIsolationCovered": true,
+    "exactProfileMutationRejectionCovered": true,
+    "referenceSignInPreservedAsExplicitComposition": true,
+    "m10T02Closed": false,
+    "m10T03Closed": false,
+    "m10T04Closed": false,
+    "productionIntegrationCovered": false,
+    "remoteDeploymentCovered": false,
+    "g10Closed": false
+  },
+  "authority": {
+    "source": {
+      "authenticatedWorkspaceProfile": true,
+      "exactOwnDataAdmission": true,
+      "genericReferenceResidueRejected": true,
+      "fullCatalogSetValidated": true,
+      "packageCatalogBijection": true,
+      "routeAndSourceIdentitySeparated": true,
+      "exactDocumentAdmissionShared": true,
+      "storageIdentityHostOwned": true,
+      "runtimeAuthorityHostOwned": true,
+      "syntheticRunHostCallbacksIsolated": true,
+      "publicationBindingOptional": true,
+      "publicationControllerProfileBound": true,
+      "opaqueFixtureInventoryAuthority": true,
+      "fixtureInventoryAuthorityExclusive": true,
+      "fixtureInventoryCarriesNoWorkspaceAuthority": true,
+      "explicitReferenceCompositionOnly": true
+    },
+    "focusedTests": {
+      "evergreenCases": 3,
+      "profileCases": 11,
+      "nonAuthFullAppRender": true,
+      "routeSlugDiffersFromSourceId": true,
+      "multiSurfaceProfile": true,
+      "multiCatalogProfile": true,
+      "nonEntrySurfacePreview": true,
+      "nonEntrySaveAndPublishBaseAuthorityCovered": true,
+      "wrongSurfaceRejected": true,
+      "missingCatalogPackageRejected": true,
+      "forgedRegistryRejected": true,
+      "forgedHandleRejected": true,
+      "opaqueFixtureInventoryCovered": true,
+      "fixtureAccessorAndHostileInputRejected": true,
+      "applicationFixtureAuthorityLifecycleCovered": true,
+      "fixtureRequestInputRemainsOpaque": true,
+      "fullAppSyntheticHostIsolationCovered": true,
+      "productAgnosticBrowserCanvasNameCovered": true
+    },
+    "package": {
+      "appPackageName": "@desen/app-web",
+      "focusedTestCommand": "pnpm --filter @desen/app-web exec vitest run test/project-workspace-profile.test.ts test/evergreen-product-composition.test.tsx",
+      "generatorScript": "generate:desen-app-evergreen-product-composition",
+      "verifierScript": "verify:desen-app-evergreen-product-composition",
+      "rootTestScript": "test:desen-app-evergreen-product-composition"
+    },
+    "boundary": {
+      "reviewedBrowserHarnessImportOnly": true,
+      "explicitReferenceProfileEdgeAllowed": true,
+      "unrelatedAppSourceStillDenied": true,
+      "positiveBoundaryFixtureCovered": true
+    },
+    "historicalReaderBridge": {
+      "path": "docs/proof/artifacts/desen-app-0.1.0-t01b-historical-reader-bridge.json.gz",
+      "bytes": 1826186,
+      "sha256": "49fb19ef436b48b7189278e649152e660fefea6881e1163213cc61e9e6e77c96",
+      "baseCommit": "a44575d48e073468da6b25eb8b31a375218caf0a",
+      "fileEntries": 76,
+      "successorAddedPaths": 9,
+      "projections": 15,
+      "canonicalDenseManifest": true,
+      "boundedGzip": true
+    }
+  },
+  "tests": {
+    "focusedCommand": "pnpm --filter @desen/app-web exec vitest run test/project-workspace-profile.test.ts test/evergreen-product-composition.test.tsx",
+    "verifierCommand": "node scripts/verify-desen-app-evergreen-product-composition.mjs",
+    "proofReaderCommand": "node --test tests/desen-app-evergreen-product-composition.test.mjs",
+    "rootTestNames": [
+      "[authority] authenticates the exact immutable M10-T01B predecessor",
+      "[profile] admits one exact factory-authenticated workspace authority",
+      "[generic] keeps reusable composition free of reference sign-in defaults",
+      "[catalog-set] threads the complete admitted Catalog set through authoring and runtime",
+      "[routing] keeps route slugs, Source identities, storage, and publication host-owned",
+      "[product] renders a non-auth product through the complete App composition",
+      "[coverage] proves two surfaces and two Catalogs with exact negative admission",
+      "[boundary] keeps production integration, remote deployment, and G10 unclaimed",
+      "[determinism] builds byte-identical evidence with complete exact receipts",
+      "[policy] rejects source, parent, artifact, report, option, and destination drift"
+    ],
+    "browserExecutedByVerifier": false,
+    "deterministicReaderStartsListener": false
+  },
+  "boundary": {
+    "trackedFiles": 64,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+        "bytes": 18474,
+        "sha256": "578fbf77cf7043908ce677f87050d526fde3c1e1cf4fbba7bad95ca4282b2a1e"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/proof-application.tsx",
+        "bytes": 4401,
+        "sha256": "3b86b676129039bb1d22e66181bd30b1e908b26f900642c162046d7539fe5c64"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+        "bytes": 15218,
+        "sha256": "58d00a8fcd6fee7f8f3abb0c9ba76cc17158d0155b568dfdfb977b38cc95c3cd"
+      },
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 4546,
+        "sha256": "c634b5ee1e2d2af0ffd6db8d4841215664591a31999210a8e0b388b71509eb32"
+      },
+      {
+        "path": "apps/desen-app/README.md",
+        "bytes": 48444,
+        "sha256": "25a639ffd1416b0f370d67284d65ef0ed19f7c788d8b827510ce33ec3d475d28"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 15710,
+        "sha256": "ad1f25d20378cc3c2d7ce679c6f9ea2d6bba0e6701a07d06a796e1291fc0838f"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 146400,
+        "sha256": "7a301540388850f186759efcb676e021ebaf537c97fb88959deb50110cd349b1"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-connections.ts",
+        "bytes": 25859,
+        "sha256": "5291421d70599aa8ea1875f160d78b955e8bad0691ea288c56d47dcc0af7178b"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 27268,
+        "sha256": "161e3e37ba2faa6e41eeb479cb6d948557332f0365f02f4b14f887b99cca0846"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-event-actions.ts",
+        "bytes": 49738,
+        "sha256": "f880166bd26964cd022eb7c86333541f60a17e9b5401df51e45ed023a02ae328"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-fixtures.ts",
+        "bytes": 35852,
+        "sha256": "119620da01eb800874d75721a8aa06879cf8a90c669324333beb482c9c29831c"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-persistence.ts",
+        "bytes": 34441,
+        "sha256": "fcf3d6731cdcaf4bc8ab180a50042d060437c7a08004b47346dd5061fbe1043c"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-preview.ts",
+        "bytes": 4486,
+        "sha256": "14d8064ffa7577b948e849c4c9b51c0859fcf404caa9e0f05f085654b6787b72"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-publication.ts",
+        "bytes": 41596,
+        "sha256": "7157c578902c2ef3d7de33a04634492aff17da7f69394c9536b9cfaa782767c4"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-scenarios.ts",
+        "bytes": 20751,
+        "sha256": "672085cbfd631bec50af1ec1ea635a0f192df435cd5a2484488d75eb0e49de23"
+      },
+      {
+        "path": "apps/desen-app/src/event-action-panel.tsx",
+        "bytes": 59231,
+        "sha256": "45f372e2ceeb49b3a4ff0a9f94ebd312a2a031e807d173808dead8895e68fdc6"
+      },
+      {
+        "path": "apps/desen-app/src/main.tsx",
+        "bytes": 1580,
+        "sha256": "69c634abb4a225cd8bf67fc83058e05ad4e03c65c77227138387ac6d1f62631f"
+      },
+      {
+        "path": "apps/desen-app/src/preview-fidelity.ts",
+        "bytes": 7953,
+        "sha256": "6f8f01665f76b0a8de698a64c18b28848604dbc6abed951d7043fc6109506c90"
+      },
+      {
+        "path": "apps/desen-app/src/product-bootstrap.tsx",
+        "bytes": 15191,
+        "sha256": "d35470353bc01c4e9577610a210ab0e1c774e9eb49c5bebd457a4bff17056ac2"
+      },
+      {
+        "path": "apps/desen-app/src/project-data.ts",
+        "bytes": 2594,
+        "sha256": "fa7b0e4bf3e9bbbd702b604317452ecff2bbb0631f5a2d12c784df8256318ce6"
+      },
+      {
+        "path": "apps/desen-app/src/project-inventory-fixture.ts",
+        "bytes": 7871,
+        "sha256": "8037eb05aebffbd0ff47ba4a0a71fbaae637b059e6e91b4a3b9d2c2fbed68133"
+      },
+      {
+        "path": "apps/desen-app/src/project-workspace-profile.ts",
+        "bytes": 28477,
+        "sha256": "13729034aa622b4c4f1d587754342c76bd0aca62375764629bcc46aaa24b0cc4"
+      },
+      {
+        "path": "apps/desen-app/src/publication-controls.tsx",
+        "bytes": 9238,
+        "sha256": "77600a908a55cad3438e85a9af50de2bb73608f54c2f34fc4fc796d106dfc808"
+      },
+      {
+        "path": "apps/desen-app/src/reference-authoring-profile.ts",
+        "bytes": 5924,
+        "sha256": "9a9952ac03090e0c7edf4d860b7e5b18f3c61b47976a87691e9fae020d0ea395"
+      },
+      {
+        "path": "apps/desen-app/src/reference-project-fixtures.ts",
+        "bytes": 2025,
+        "sha256": "66b2c4920ce9e4dff201676bec5094869ac2bdffacc3f4db493efe11abb89e5b"
+      },
+      {
+        "path": "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+        "bytes": 4097,
+        "sha256": "14aa1bd6f5855c0a152059b92ff15caaed373068d3f15056717657b970c902ea"
+      },
+      {
+        "path": "apps/desen-app/test/adapter-canvas.test.tsx",
+        "bytes": 19880,
+        "sha256": "fb88387e4f65555a189e7b4533b23689855d83a00f890fb6cbd602d7d987adb1"
+      },
+      {
+        "path": "apps/desen-app/test/application.test.tsx",
+        "bytes": 112921,
+        "sha256": "b3c3181a8b10c6c0dcc350a9f3eb08ad7d9a3c7264aab26f2609d0ae7c681e38"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-behavior-projection.test.ts",
+        "bytes": 4182,
+        "sha256": "74fab95f068f764d6869c6a91c2a09ab8a6bc259754e918e1f2d14147ad98065"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-data.test.ts",
+        "bytes": 17309,
+        "sha256": "b40bd72aae0cabd291114a134300ab8bddb42788bec7babc24b502258b84ce1b"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-diagnostics.test.ts",
+        "bytes": 15750,
+        "sha256": "8b38beb7918212cdaf66a14ccf64b8a6618c99a83dcfa0d35b830974634948e6"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-event-actions.test.ts",
+        "bytes": 27894,
+        "sha256": "722b7f038c7ae9b9a583d48f4fc3983a84746d3cb7fc1291ab235483cd248deb"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-fixtures.test.ts",
+        "bytes": 17875,
+        "sha256": "4d917dc3839d1146377976054aed42a681d840edbb87d4065758186bee86512e"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-inspector.test.ts",
+        "bytes": 54038,
+        "sha256": "5cfdcf98def085b4ce5e47158c3670a3bcd795441b603d772e4ebc2a70bdeba0"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-persistence.test.ts",
+        "bytes": 41315,
+        "sha256": "69f3d40d633997ee7a7c2171fe945b7c44d60d901a6b0ec2860fc93660940713"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-preview.test.ts",
+        "bytes": 10297,
+        "sha256": "9ad607ef26cb7570345d536960f7e5fb225b0017462d032775ea0833dd045d63"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-publication.test.ts",
+        "bytes": 29389,
+        "sha256": "1492c40ec80a4e77d7e9165d7a08e581e2386bedfca025c7d2470e548d649a8f"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-scenarios.test.ts",
+        "bytes": 13265,
+        "sha256": "1794eef891cf3c31d3427229a69371a973864a0463c782ed0b19b15708a210c8"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-selection.test.ts",
+        "bytes": 6792,
+        "sha256": "be21b58a5a0868d87b614cf2235024a51771d985578695bbeb154801f5b38e35"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-slots.test.ts",
+        "bytes": 46554,
+        "sha256": "6e36b894922bf025b70da406d498477e0f2cad0a485f577123c93124432f5b65"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-state.test.ts",
+        "bytes": 20957,
+        "sha256": "e830cd228bff4c344d1376c61465f5349ee24fac9af007c206ceef892211558a"
+      },
+      {
+        "path": "apps/desen-app/test/behavior-controls.test.tsx",
+        "bytes": 5849,
+        "sha256": "b94918159bef60883e1234535c915ec46d13afd700bdf5f56352da0fdbf3cf6c"
+      },
+      {
+        "path": "apps/desen-app/test/event-action-panel.test.tsx",
+        "bytes": 26802,
+        "sha256": "0730a53d3bca0fa5518f798f2618daa1096b07dc4bfab554f14c073773988f2a"
+      },
+      {
+        "path": "apps/desen-app/test/evergreen-product-composition.test.tsx",
+        "bytes": 12292,
+        "sha256": "abfd8720957f88d41da105fedcf606d1e36e564cd82be6aa4cf3fee652d2877c"
+      },
+      {
+        "path": "apps/desen-app/test/inspector-panel.test.tsx",
+        "bytes": 27502,
+        "sha256": "7e7812311f9495002835d899669b9ab837dbe9c05fc4775b32f597ddd17961b7"
+      },
+      {
+        "path": "apps/desen-app/test/persistence-application.test.tsx",
+        "bytes": 38471,
+        "sha256": "eb356637088ea0a92cf67ef3397f2c9eeb74622386125f66f6584636fed609ce"
+      },
+      {
+        "path": "apps/desen-app/test/preview-fidelity.test.ts",
+        "bytes": 9196,
+        "sha256": "c7784e09bad8b26626a4a16b86d808683fe7d147e8e692f7ad887f77f5043016"
+      },
+      {
+        "path": "apps/desen-app/test/product-bootstrap.test.tsx",
+        "bytes": 18961,
+        "sha256": "cc283b6ba683b32c6649f4ea5c6432244dd7e0be29a1a5d63fd95cdb59a1adb2"
+      },
+      {
+        "path": "apps/desen-app/test/project-inventory-fixture.test.ts",
+        "bytes": 3069,
+        "sha256": "3779935056d92e4b6fbe418ce7835074f1097fd7472f62e26dc87134e3fb10c7"
+      },
+      {
+        "path": "apps/desen-app/test/project-workspace-profile.test.ts",
+        "bytes": 14150,
+        "sha256": "63690d87156911ef16a9a59ec33b4362a9c3c1415bcf982fe5fa98d30f8321c1"
+      },
+      {
+        "path": "apps/desen-app/test/publication-activation-integration.test.ts",
+        "bytes": 14814,
+        "sha256": "f3a90b2fbb320def311007106e25d38fa5215ade24d6d3fcf54ad32402508622"
+      },
+      {
+        "path": "apps/desen-app/test/publication-application.test.tsx",
+        "bytes": 29648,
+        "sha256": "0bab1b4dcfa046e3596e22b16ebd3446c82c4a1ca7cdd1296c62c67153b4b523"
+      },
+      {
+        "path": "apps/desen-app/test/state-panel.test.tsx",
+        "bytes": 12169,
+        "sha256": "486a7b3e6889b706057505a853ba21d2e599129e3851e6cbfc48549919ccedb8"
+      },
+      {
+        "path": "dependency-cruiser.config.cjs",
+        "bytes": 10407,
+        "sha256": "24432091c1ec13fd665d552eaa50e94fd53e4a5df941680447cf1f68139e2544"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-t01b-historical-reader-bridge.json.gz",
+        "bytes": 1826186,
+        "sha256": "49fb19ef436b48b7189278e649152e660fefea6881e1163213cc61e9e6e77c96"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json",
+        "bytes": 10962,
+        "sha256": "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8"
+      },
+      {
+        "path": "package.json",
+        "bytes": 97652,
+        "sha256": "3a31fd293644ca468912930c9374e58a17c411eff0d380d7a09215c846668820"
+      },
+      {
+        "path": "scripts/generate-desen-app-evergreen-product-composition-proof.mjs",
+        "bytes": 856,
+        "sha256": "066a88e72bb7156b30feaa728cc216884bdf9eedd0b73b54a41642cec4df8c49"
+      },
+      {
+        "path": "scripts/generate-desen-app-t01b-historical-reader-bridge.mjs",
+        "bytes": 7618,
+        "sha256": "a0341d4a4700ae3a7400f55d6e8746411db7fbfc02bf80972e3683122cc4ae48"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/verify-desen-app-evergreen-product-composition.mjs",
+        "bytes": 912,
+        "sha256": "d356e1e2f4d558ca6a288f281c7e7f1947b56e38f3bba501b001feb46a5461be"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app-browser-e2e/proof-application.ts",
+        "bytes": 503,
+        "sha256": "46d5789a3c3a0e36994fba3d5e79082f6865641179f557074bbb743f01e94388"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+        "bytes": 75,
+        "sha256": "33f790357a98e76e49b72dc04364f6410265e96f9ba524d9fad88e36e699462e"
+      },
+      {
+        "path": "tests/desen-app-historical-reader-fixture.mjs",
+        "bytes": 1872,
+        "sha256": "28c913aaab7de270d6ca8f7a301bee38755d007f3301fc7d327f9da604917cbe"
+      }
+    ],
+    "parentArtifacts": 1,
+    "historicalReaderBridgeArtifacts": 1,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true,
+    "checkpointOwnedReaderPaths": [
+      "scripts/lib/desen-app-evergreen-product-composition-proof.mjs",
+      "tests/desen-app-evergreen-product-composition.test.mjs"
+    ],
+    "artifactTrackedEntrypoints": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/generate-desen-app-t01b-historical-reader-bridge.mjs",
+      "scripts/generate-desen-app-evergreen-product-composition-proof.mjs",
+      "scripts/verify-desen-app-evergreen-product-composition.mjs",
+      "tests/desen-app-historical-reader-fixture.mjs"
+    ]
+  },
+  "nonClaims": [
+    "This evidence proves trusted single-profile composition, not untrusted profile loading or arbitrary executable selection from DESEN data.",
+    "The non-auth product and multi-Catalog cases prove composition generality, not every Catalog schema or every product workflow.",
+    "M10-T02 through M10-T04, production integration, remote deployment, multi-user persistence, and G10 closure remain NOT_PROVEN.",
+    "The deterministic reader starts no Chromium, Vite, network listener, or external host.",
+    "No hosted-CI pass is inferred from locally generated artifact bytes alone."
+  ]
+}

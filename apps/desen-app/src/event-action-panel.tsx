@@ -101,6 +101,27 @@ function isActionType(value: unknown): value is ActionType {
   return typeof value === "string" && ACTION_TYPES.some((type) => type === value);
 }
 
+function actionTypeIsAvailable(
+  type: ActionType,
+  references: AuthoringEventActionReferenceOptions,
+): boolean {
+  if (type === "state.set") return references.states.length > 0;
+  if (type === "state.toggle") {
+    return references.states.some(({ valueKind }) => valueKind === "boolean");
+  }
+  if (type === "navigate") {
+    return references.surfaces.some(({ value }) => value !== references.currentSurfaceId);
+  }
+  if (type === "operation.invoke") return references.operations.length > 0;
+  if (type === "resource.refresh") return references.resources.length > 0;
+  if (type === "component.command") return references.componentCommands.length > 0;
+  return true;
+}
+
+function firstAvailableActionType(references: AuthoringEventActionReferenceOptions): ActionType {
+  return ACTION_TYPES.find((type) => actionTypeIsAvailable(type, references)) ?? "event.emit";
+}
+
 function parseActionDraft(draft: string): ActionDraftResult {
   const parsed = parseInertJsonText(draft);
   if (!parsed.ok) return Object.freeze({ ok: false, message: jsonFailureMessage(parsed.reason) });
@@ -149,7 +170,10 @@ function starterAction(
     } as AuthoringAction;
   }
   if (type === "navigate") {
-    return { type, surface: firstValue(references.surfaces, "surfaceId") } as AuthoringAction;
+    const destination = references.surfaces.find(
+      ({ value }) => value !== references.currentSurfaceId,
+    );
+    return { type, surface: destination?.value ?? "" } as AuthoringAction;
   }
   if (type === "operation.invoke") {
     const operation = references.operations[0];
@@ -165,7 +189,7 @@ function starterAction(
     return {
       type,
       operation: operation?.value ?? "operationId",
-      as: operationAlias(operation?.value ?? "operation"),
+      as: uniqueOperationAlias(operation?.value ?? "operation", references.operationAliases ?? []),
       input,
       concurrency: "reject",
     } as AuthoringAction;
@@ -192,6 +216,17 @@ function operationAlias(operationId: string): string {
   const normalized = segment.replace(/[^A-Za-z0-9_-]/gu, "-");
   if (/^[A-Za-z_]/u.test(normalized)) return normalized;
   return normalized.length > 0 ? `operation-${normalized}` : "operation";
+}
+
+function uniqueOperationAlias(operationId: string, existingAliases: readonly string[]): string {
+  const base = operationAlias(operationId).slice(0, 128);
+  if (!existingAliases.includes(base)) return base;
+  for (let suffix = 2; suffix <= existingAliases.length + 2; suffix += 1) {
+    const marker = `-${suffix}`;
+    const candidate = `${base.slice(0, 128 - marker.length)}${marker}`;
+    if (!existingAliases.includes(candidate)) return candidate;
+  }
+  return `operation-${existingAliases.length + 1}`;
 }
 
 function isValueReference(value: unknown): value is Readonly<{ readonly $ref: string }> {
@@ -330,7 +365,12 @@ function ActionEditor({
   function apply(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     if (!advancedDirty) {
-      const visualError = visualActionError(visualAction, references, payloadFields);
+      const visualError = visualActionError(
+        visualAction,
+        references,
+        payloadFields,
+        current.type === "operation.invoke" ? current.as : undefined,
+      );
       if (visualError !== null) {
         setError(visualError);
         onNotice("");
@@ -665,9 +705,13 @@ function VisualActionFields({
             onChange={(event) => onChange({ ...action, surface: event.currentTarget.value })}
             value={action.surface}
           >
+            {action.surface.length === 0 ? (
+              <option value="">Add another surface before navigating</option>
+            ) : null}
             {references.surfaces.map((surface) => (
               <option key={surface.value} value={surface.value}>
                 {surface.label}
+                {surface.value === references.currentSurfaceId ? " (current surface)" : ""}
               </option>
             ))}
           </select>
@@ -698,7 +742,10 @@ function VisualActionFields({
               onChange({
                 ...action,
                 operation: nextOperation.value,
-                as: operationAlias(nextOperation.value),
+                as: uniqueOperationAlias(
+                  nextOperation.value,
+                  (references.operationAliases ?? []).filter((alias) => alias !== action.as),
+                ),
                 input: nextInput,
               });
             }}
@@ -725,6 +772,9 @@ function VisualActionFields({
             value={action.as}
           />
         </label>
+        <p className={styles.actionFieldHint}>
+          Suggested from the Catalog operation ID and kept unique on this surface.
+        </p>
         <label>
           <span>If pressed again</span>
           <select
@@ -846,6 +896,7 @@ function visualActionError(
   action: AuthoringAction,
   references: AuthoringEventActionReferenceOptions,
   payloadFields: readonly AuthoringSchemaFieldReferenceOption[],
+  currentOperationAlias?: string,
 ): string | null {
   if (action.type === "state.set" || action.type === "state.toggle") {
     if (action.type === "state.toggle") {
@@ -899,6 +950,12 @@ function visualActionError(
     if (action.as.trim().length === 0) return "Give this operation result a name.";
     if (!/^[A-Za-z_][A-Za-z0-9_-]{0,127}$/u.test(action.as)) {
       return "Use a result name that can be referenced by visibility and loading controls.";
+    }
+    if (
+      action.as !== currentOperationAlias &&
+      (references.operationAliases ?? []).includes(action.as)
+    ) {
+      return "Choose a result name that is unique on this surface.";
     }
     const missing = operation.inputFields.find(
       (field) => field.required && !Object.hasOwn(action.input, field.value),
@@ -958,13 +1015,17 @@ function NewActionForm({
   const typeSelectRef = useRef<HTMLSelectElement | null>(null);
   const internalToggleRef = useRef<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState<ActionType>("state.set");
+  const [type, setType] = useState<ActionType>(() => firstAvailableActionType(references));
   const [visualAction, setVisualAction] = useState(() =>
-    starterAction("state.set", references, payloadFields),
+    starterAction(firstAvailableActionType(references), references, payloadFields),
   );
   const [draft, setDraft] = useState(() =>
     formatStructuredJson(
-      starterAction("state.set", references, payloadFields) as unknown as JsonValue,
+      starterAction(
+        firstAvailableActionType(references),
+        references,
+        payloadFields,
+      ) as unknown as JsonValue,
     ),
   );
   const [advancedDirty, setAdvancedDirty] = useState(false);
@@ -1042,6 +1103,12 @@ function NewActionForm({
         aria-label={`Add action to ${listLabel}`}
         className={styles.actionAddToggle}
         onClick={() => {
+          const nextType = firstAvailableActionType(references);
+          const nextAction = starterAction(nextType, references, payloadFields);
+          setType(nextType);
+          setVisualAction(nextAction);
+          setDraft(formatStructuredJson(nextAction as unknown as JsonValue));
+          setAdvancedDirty(false);
           setOpen(true);
           setError("");
           onNotice("");
@@ -1079,7 +1146,11 @@ function NewActionForm({
           value={type}
         >
           {ACTION_TYPES.map((actionKind) => (
-            <option key={actionKind} value={actionKind}>
+            <option
+              disabled={!actionTypeIsAvailable(actionKind, references)}
+              key={actionKind}
+              value={actionKind}
+            >
               {ACTION_TYPE_LABELS[actionKind]}
             </option>
           ))}

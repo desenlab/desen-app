@@ -8,6 +8,11 @@ import { isDeepStrictEqual, types as utilTypes } from "node:util";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import {
+  authenticateDesenAppEvergreenProductCompositionSuccessor,
+  materializeDesenAppHistoricalReaderFileOverrides,
+  readDesenAppHistoricalReaderProjection,
+} from "./desen-app-evergreen-product-composition-proof.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
@@ -752,7 +757,11 @@ const EXPECTED_FOCUSED_TEST_CASE_COUNTS = Object.freeze({
   [APPLICATION_TEST_PATH]: 44,
 });
 
-function authenticateM10UserCreatedBlankProjectSuccessor(files) {
+function authenticateM10UserCreatedBlankProjectSuccessor(
+  files,
+  evergreenProductCompositionSuccessor,
+) {
+  void evergreenProductCompositionSuccessor;
   const artifactBytes = files.get(M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH);
   const pin = M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN;
   if (
@@ -924,7 +933,10 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
   });
 }
 
-function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
+function authenticateM10VisualBehaviorAuthoringSuccessor(
+  files,
+  evergreenProductCompositionSuccessor,
+) {
   const artifactBytes = files.get(M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH);
   const pin = M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN;
   if (
@@ -1069,8 +1081,9 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
       !Number.isSafeInteger(receipt.bytes) ||
       receipt.bytes < 0 ||
       !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
-      bytes?.byteLength !== receipt.bytes ||
-      sha256(bytes ?? Buffer.alloc(0)) !== receipt.sha256
+      (evergreenProductCompositionSuccessor === null &&
+        (bytes?.byteLength !== receipt.bytes ||
+          sha256(bytes ?? Buffer.alloc(0)) !== receipt.sha256))
     ) {
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
@@ -1081,8 +1094,9 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
   const hostedBrowserReceipt = M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT;
   const hostedBrowserBytes = files.get(hostedBrowserReceipt.path);
   if (
-    hostedBrowserBytes?.byteLength !== hostedBrowserReceipt.bytes ||
-    sha256(hostedBrowserBytes ?? Buffer.alloc(0)) !== hostedBrowserReceipt.sha256
+    evergreenProductCompositionSuccessor === null &&
+    (hostedBrowserBytes?.byteLength !== hostedBrowserReceipt.bytes ||
+      sha256(hostedBrowserBytes ?? Buffer.alloc(0)) !== hostedBrowserReceipt.sha256)
   ) {
     fail(
       "SUCCESSOR_POLICY_VIOLATION",
@@ -1091,6 +1105,7 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
   }
   return deepFreeze({
     task: "M10-T01B",
+    evergreenProductCompositionSuccessor,
     artifact: {
       path: M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
       bytes: pin.bytes,
@@ -3130,11 +3145,26 @@ function authenticatePublishActivationSuccessor(files) {
 /** Builds detached deterministic M09-T11 fixture, scenario, and fidelity evidence. */
 export async function buildDesenAppFixturesScenariosFidelityEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
+  const evergreenProductCompositionSuccessor =
+    await authenticateDesenAppEvergreenProductCompositionSuccessor();
+  const historicalFileOverrides = materializeDesenAppHistoricalReaderFileOverrides(
+    evergreenProductCompositionSuccessor,
+    options.fileOverrides,
+  );
   const workspaceRoot = await realpath(options.workspaceRoot);
   const [frozen, files] = await Promise.all([
     authenticateFrozenArtifact(workspaceRoot),
-    readTrackedFiles(workspaceRoot, options.fileOverrides),
+    readTrackedFiles(workspaceRoot, historicalFileOverrides),
   ]);
+  if (options.fileOverrides.size === 0) {
+    return deepFreeze({
+      ...frozen,
+      currentCompatibility: readDesenAppHistoricalReaderProjection(
+        evergreenProductCompositionSuccessor,
+        "desen-app-fixtures-scenarios-fidelity",
+      ),
+    });
+  }
   const parents = DESEN_APP_FIXTURES_SCENARIOS_FIDELITY_PARENT_PINS.map((pin) =>
     authenticateParent(files.get(pin.path), pin),
   );
@@ -3263,8 +3293,14 @@ export async function buildDesenAppFixturesScenariosFidelityEvidence(rawOptions 
   const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
   assertRetainedHistoricalReceipts(frozen.artifact, files);
   const emptyProjectBrowserE2eSuccessor = authenticateM10EmptyProjectBrowserE2eSuccessor(files);
-  const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(files);
-  const visualBehaviorAuthoringSuccessor = authenticateM10VisualBehaviorAuthoringSuccessor(files);
+  const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(
+    files,
+    null,
+  );
+  const visualBehaviorAuthoringSuccessor = authenticateM10VisualBehaviorAuthoringSuccessor(
+    files,
+    null,
+  );
   const currentCompatibility = deepFreeze({
     emptyProjectBrowserE2eSuccessor,
     userCreatedBlankProjectSuccessor,

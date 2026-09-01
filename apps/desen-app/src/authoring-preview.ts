@@ -1,21 +1,8 @@
 import { createDesenEditorDocument } from "@desen/editor-core";
 import { publishDesenSource } from "@desen/publisher";
-import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
-
-import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
 
 import type { DesenEditorDocument } from "@desen/editor-core";
 import type { PublishCatalogPackageCandidate, PublishSuccess } from "@desen/publisher";
-
-const REFERENCE_CATALOG_PACKAGE = Object.freeze({
-  id: "run.desen.reference.sign-in",
-  version: "0.1.0",
-  target: "web-react",
-  observedPackageDigest: "sha256:d4a4e7e2ea2d68ab8bff085d90e093f2d31b784f0f2fb089c6422ce33914b051",
-  catalog: referenceCatalog,
-}) satisfies PublishCatalogPackageCandidate;
-
-const REFERENCE_CATALOG_PACKAGES = Object.freeze([REFERENCE_CATALOG_PACKAGE]);
 
 /** Safe, non-diagnostic reason why a session-local authoring preview could not be prepared. */
 export type AuthoringPreviewBundleFailureReason =
@@ -44,26 +31,18 @@ function previewFailure(
   return Object.freeze({ ok: false, reason });
 }
 
-function createReferenceEditorDocument(): DesenEditorDocument {
-  const admitted = createDesenEditorDocument(officialSignInSource);
-  if (!admitted.ok) {
-    throw new TypeError("The controlled reference Source could not be admitted for authoring.");
-  }
-  return admitted.document;
-}
-
-/** Frozen direct editor Source admitted from the controlled official-derived sign-in fixture. */
-export const REFERENCE_EDITOR_DOCUMENT: DesenEditorDocument = createReferenceEditorDocument();
-
 /**
- * Publishes one editor Source into an immutable preview Bundle using the exact reference Catalog.
+ * Publishes one editor Source into an immutable preview Bundle using explicit package candidates.
  *
  * @remarks The input is re-admitted before publication so runtime casts cannot bypass the direct
  * Source boundary. This pure helper grants no persistence, deployment, activation, host-operation,
- * or adapter authority. Rejection exposes neither Publisher diagnostics nor a partial Bundle.
+ * adapter, or Catalog-discovery authority. Rejection exposes neither Publisher diagnostics nor a
+ * partial Bundle. The caller must supply candidates captured by its trusted project composition;
+ * this module never substitutes a product fixture or default Catalog.
  */
 export function prepareAuthoringPreviewBundle(
   document: DesenEditorDocument,
+  catalogPackages: readonly PublishCatalogPackageCandidate[],
 ): AuthoringPreviewBundleResult {
   let admitted: ReturnType<typeof createDesenEditorDocument>;
   try {
@@ -82,7 +61,7 @@ export function prepareAuthoringPreviewBundle(
   if (rawSource === undefined) return previewFailure("editor-document-invalid");
 
   try {
-    const published = publishDesenSource(rawSource, REFERENCE_CATALOG_PACKAGES);
+    const published = publishDesenSource(rawSource, catalogPackages);
     if (!published.ok) return previewFailure("publication-rejected");
     return Object.freeze({
       ok: true,
@@ -92,4 +71,41 @@ export function prepareAuthoringPreviewBundle(
   } catch {
     return previewFailure("publication-rejected");
   }
+}
+
+/**
+ * Publishes an inert editor-only Bundle whose entry is the exact selected Source surface.
+ *
+ * @remarks Runtime Core deliberately mounts a Bundle's declared entry surface. A multi-surface
+ * editor therefore needs a fresh, fully Publisher-admitted preview Bundle when the designer opens
+ * a non-entry surface. This helper changes only the transient preview candidate's `entry`; the
+ * authored Source, persistence snapshot, publication revision, Catalog packages and runtime
+ * authority remain untouched. Unknown surfaces fail closed through Editor Core admission.
+ */
+export function prepareAuthoringSurfacePreviewBundle(
+  document: DesenEditorDocument,
+  catalogPackages: readonly PublishCatalogPackageCandidate[],
+  surfaceId: string,
+): AuthoringPreviewBundleResult {
+  let source: ReturnType<typeof createDesenEditorDocument>;
+  try {
+    source = createDesenEditorDocument(document);
+  } catch {
+    return previewFailure("editor-document-invalid");
+  }
+  if (!source.ok || !Object.hasOwn(source.document.surfaces, surfaceId)) {
+    return previewFailure("editor-document-invalid");
+  }
+  if (source.document.entry === surfaceId) {
+    return prepareAuthoringPreviewBundle(source.document, catalogPackages);
+  }
+  let selected: ReturnType<typeof createDesenEditorDocument>;
+  try {
+    selected = createDesenEditorDocument({ ...source.document, entry: surfaceId });
+  } catch {
+    return previewFailure("editor-document-invalid");
+  }
+  return selected.ok
+    ? prepareAuthoringPreviewBundle(selected.document, catalogPackages)
+    : previewFailure("editor-document-invalid");
 }

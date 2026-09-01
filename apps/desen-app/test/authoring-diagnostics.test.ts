@@ -1,8 +1,8 @@
 import { createDesenEditorContinuousValidator } from "@desen/editor-core";
 import { describe, expect, it } from "vitest";
 
-import { REFERENCE_AUTHORING_MODEL } from "../src/authoring-data.js";
 import { projectAuthoringDiagnostics } from "../src/authoring-diagnostics.js";
+import { REFERENCE_AUTHORING_MODEL } from "../src/reference-authoring-profile.js";
 
 import type { DesenEditorContinuousValidationReport } from "@desen/editor-core";
 import type {

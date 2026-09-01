@@ -222,12 +222,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
     ["desen-app-browser-e2e-workspace-compatibility", ["desen-app-empty-project-browser-e2e"]],
     ["desen-app-user-created-blank-project", ["desen-app-browser-e2e-workspace-compatibility"]],
     ["desen-app-visual-behavior-authoring", ["desen-app-user-created-blank-project"]],
+    ["desen-app-evergreen-product-composition", ["desen-app-visual-behavior-authoring"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "3edb1518a74a87c7bffd9a80b4c8c64c94eac6df35bbf66f1f465fb7df00aec5";
+  "68554ddc6af850a0fb30cf3390dd8a172d6bcc30c470e250543b019cafb2ba57";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

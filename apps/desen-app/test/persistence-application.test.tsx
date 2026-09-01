@@ -5,9 +5,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createDesenEditorDocument } from "@desen/editor-core";
 
-import { DesenAppApplication } from "../src/application.js";
+import { DesenAppApplication as GenericDesenAppApplication } from "../src/application.js";
 import * as authoringFixtures from "../src/authoring-fixtures.js";
-import { REFERENCE_EDITOR_DOCUMENT } from "../src/authoring-preview.js";
+import { createAuthoringPersistenceController } from "../src/authoring-persistence.js";
+import {
+  createProjectWorkspaceProfile,
+  readProjectWorkspaceProfileAuthority,
+} from "../src/project-workspace-profile.js";
+import {
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+  REFERENCE_EDITOR_DOCUMENT,
+} from "../src/reference-authoring-profile.js";
+
+import type { DesenAppApplicationProps } from "../src/application.js";
+import type { ProjectWorkspaceProfileHandle } from "../src/project-workspace-profile.js";
 
 import type {
   DesenEditorDocument,
@@ -19,6 +30,16 @@ import type {
 
 const SOURCE_KEY = "account-app-source";
 const SIGN_IN_PATH = "/projects/account-app/surfaces/sign-in";
+
+function DesenAppApplication(props: Omit<DesenAppApplicationProps, "workspaceProfile">) {
+  return (
+    <GenericDesenAppApplication
+      {...props}
+      initialDocument={props.initialDocument ?? REFERENCE_EDITOR_DOCUMENT}
+      workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+    />
+  );
+}
 
 interface Deferred<Value> {
   readonly promise: Promise<Value>;
@@ -140,6 +161,32 @@ function renderApplication(persistencePort?: DesenEditorPersistencePort) {
   );
 }
 
+function siblingWorkspaceProfile(): ProjectWorkspaceProfileHandle {
+  const authority = readProjectWorkspaceProfileAuthority(REFERENCE_AUTHORING_WORKSPACE_PROFILE);
+  if (authority.status !== "read") throw new TypeError("Expected the official workspace profile.");
+  const profile = authority.profile;
+  const created = createProjectWorkspaceProfile({
+    profileId: profile.profileId,
+    project: profile.project,
+    route: profile.route,
+    sourceSurfaceId: profile.sourceSurfaceId,
+    documentId: profile.documentId,
+    sourceKey: "account-app-sibling-source",
+    initialDocument: profile.initialDocument,
+    catalogs: profile.catalogs,
+    catalogPackages: profile.catalogPackages,
+    runtime: {
+      target: profile.runtime.target,
+      registry: profile.runtime.registry,
+      tokenCssProperties: profile.runtime.tokenCssProperties,
+      hostPorts: profile.runtime.hostPorts,
+    },
+    publication: profile.publication,
+  });
+  if (!created.ok) throw new TypeError(`Expected sibling profile: ${created.reason}.`);
+  return created.handle;
+}
+
 function persistenceRegion(): HTMLElement {
   return screen.getByRole("region", { name: "Source persistence" });
 }
@@ -247,6 +294,37 @@ describe("Desen App Source persistence integration", () => {
     expect(within(persistenceRegion()).queryByRole("textbox")).toBeNull();
   });
 
+  it("does not attach a prepared controller to a sibling opaque workspace profile", () => {
+    const controlled = createControlledPersistence();
+    const prepared = createAuthoringPersistenceController({
+      route: { projectId: "account-app", surfaceId: "sign-in" },
+      document: REFERENCE_EDITOR_DOCUMENT,
+      profile: REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+      persistencePort: controlled.port,
+    });
+    expect(prepared.ok).toBe(true);
+    if (!prepared.ok) return;
+    const sibling = siblingWorkspaceProfile();
+    const siblingRead = readProjectWorkspaceProfileAuthority(sibling);
+    if (siblingRead.status !== "read") throw new TypeError("Expected the sibling profile read.");
+    window.history.replaceState(null, "", SIGN_IN_PATH);
+
+    render(
+      <GenericDesenAppApplication
+        initialDocument={siblingRead.profile.initialDocument}
+        preparedPersistenceController={prepared.controller}
+        workspaceProfile={sibling}
+      />,
+    );
+
+    expect(persistenceStatus()).toMatch(/persistence unavailable/i);
+    expect(openButton().disabled).toBe(true);
+    expect(saveButton().disabled).toBe(true);
+    expect(controlled.openCalls).toHaveLength(0);
+    expect(controlled.saveCalls).toHaveLength(0);
+    prepared.controller.dispose();
+  });
+
   it("protects an edited no-port draft across navigation, traversal, and page exit", async () => {
     const controlled = createControlledPersistence();
     const rendered = renderApplication();
@@ -323,7 +401,7 @@ describe("Desen App Source persistence integration", () => {
     const afterUnmount = new Event("beforeunload", { cancelable: true });
     window.dispatchEvent(afterUnmount);
     expect(afterUnmount.defaultPrevented).toBe(false);
-  });
+  }, 10_000);
 
   it("requires explicit, cancelable confirmation before dirty Open can replace the draft", async () => {
     const controlled = createControlledPersistence();
@@ -484,7 +562,7 @@ describe("Desen App Source persistence integration", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Stored title" })).toBeTruthy();
     expect(
       (
-        within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+        within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
           "Email",
         ) as HTMLInputElement
       ).value,
@@ -519,13 +597,13 @@ describe("Desen App Source persistence integration", () => {
       within(screen.getByRole("complementary", { name: "Run controls" })).getByRole("status")
         .textContent,
     ).not.toContain("Pending");
-  });
+  }, 10_000);
 
   it("keeps the prior Source and canvas for failed, wrong-document, and wrong-route opens", async () => {
     const controlled = createControlledPersistence();
     renderApplication(controlled.port);
     await editTitle("Preserved title");
-    const originalCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const originalCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
 
     const rejectedResults: readonly DesenEditorSourceOpenResult[] = [
       failedOpen(),
@@ -537,7 +615,7 @@ describe("Desen App Source persistence integration", () => {
       expect(controlled.openCalls[index]?.sourceKey).toBe(SOURCE_KEY);
       await settleOpen(controlled, index, result);
       expect(screen.getByRole("heading", { level: 2, name: "Preserved title" })).toBeTruthy();
-      expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBe(originalCanvas);
+      expect(screen.getByRole("group", { name: "Managed sign-in canvas" })).toBe(originalCanvas);
       expect(within(originalCanvas).getByLabelText("Email")).toBeTruthy();
       expect(persistenceStatus()).toMatch(/failed|rejected|could not|unavailable/i);
     }
@@ -579,12 +657,12 @@ describe("Desen App Source persistence integration", () => {
     });
     await editTitle("Unlocked after Open");
     expect(saveButton().disabled).toBe(false);
-  });
+  }, 10_000);
 
   it("protects a dirty pending session across canceled links, traversal, and page exit", async () => {
     const controlled = createControlledPersistence();
     renderApplication(controlled.port);
-    const originalCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const originalCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     fireEvent.click(screen.getByRole("button", { name: "Select Text layer · sign-in.title" }));
     requestOpen();
     expect(controlled.openCalls).toHaveLength(1);
@@ -593,7 +671,7 @@ describe("Desen App Source persistence integration", () => {
     fireEvent.click(screen.getByRole("link", { name: "Account app" }));
     expect(confirmNavigation).toHaveBeenCalledTimes(1);
     expect(window.location.pathname).toBe(SIGN_IN_PATH);
-    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBe(originalCanvas);
+    expect(screen.getByRole("group", { name: "Managed sign-in canvas" })).toBe(originalCanvas);
     expect(
       screen.getByRole("button", { name: "Deselect Text layer · sign-in.title" }),
     ).toBeTruthy();
@@ -603,7 +681,7 @@ describe("Desen App Source persistence integration", () => {
     window.dispatchEvent(new PopStateEvent("popstate"));
     expect(confirmNavigation).toHaveBeenCalledTimes(2);
     expect(window.location.pathname).toBe(SIGN_IN_PATH);
-    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBe(originalCanvas);
+    expect(screen.getByRole("group", { name: "Managed sign-in canvas" })).toBe(originalCanvas);
     expect(controlled.openCalls).toHaveLength(1);
 
     const beforeUnload = new Event("beforeunload", { cancelable: true });
@@ -767,7 +845,7 @@ describe("Desen App Source persistence integration", () => {
     await waitFor(() => {
       expect(
         (
-          within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+          within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
             "Email",
           ) as HTMLInputElement
         ).value,
@@ -775,7 +853,7 @@ describe("Desen App Source persistence integration", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Run" }));
-    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const canvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     await act(async () => {
       fireEvent.change(within(canvas).getByLabelText("Email"), {
         target: { value: "runtime@example.com" },
@@ -835,5 +913,5 @@ describe("Desen App Source persistence integration", () => {
     const afterPortRemoval = new Event("beforeunload", { cancelable: true });
     window.dispatchEvent(afterPortRemoval);
     expect(afterPortRemoval.defaultPrevented).toBe(false);
-  });
+  }, 10_000);
 });

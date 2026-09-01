@@ -1228,12 +1228,31 @@ Gerçek Chromium akışı iki TextField'a tam metin girildiğini, Button operati
 pending Promise'i ve explicit Catalog hata settlement'ından sonra koşullu Alert'i görünür
 arayüzden doğrular. Bu bir authoring-usability önkoşuludur; M10-T02'nin özel input/pending matrisi,
 M10-T03'ün failure matrisi ve M10-T04'ün gerçek host success/navigation kanıtı kapanmış sayılmaz.
-Genel ilerleme 112/147 (%76), M10 3/11'dir; M10-T02 `NOT_STARTED` ve sıradaki görevdir.
+Bu checkpoint'te genel ilerleme 112/147 (%76), M10 3/11'dir; ardından evergreen kompozisyon
+boşluğunu kapatmak için M10-T01C ara görevi eklenmiştir.
+
+M10-T01C `DONE` durumundadır. Desen App'in güvenilen ürün kökü artık fabrika tarafından
+doğrulanmış bir `ProjectWorkspaceProfile` seçmek zorundadır. Bu profil proje envanterini, birbirinden
+ayrı App route slug'ı ile Source surface id'sini, kesin belge/storage kimliğini, Catalog seti ve
+paketlerini, runtime adapter/token/port yetkisini ve varsa publication channel/host bağını birlikte
+taşır. Normal ürün kökü referans sign-in profilini açıkça seçer; genel editör, preview, fixture,
+scenario, persistence, publication, runtime-canvas ve product-bootstrap yollarında account/sign-in
+varsayımı kalmaz.
+
+Odaklı kanıt, route slug'ları Source id'lerinden farklı olan, iki surface ve iki Catalog içeren
+auth-dışı feedback profilini kabul eder; feedback yüzeyini de normal App, authoring model, gerçek
+adapter canvas ve layer ağacı üzerinden açar. Sahte profil, route/Source kayması, eksik Catalog
+paketi, sahte adapter registry, başka profile ait persistence route'u ve uyuşmayan publication host
+bağı downstream yetki verilmeden reddedilir. Kanıt eseri
+`docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json`, doğrulayıcısı
+`scripts/verify-desen-app-evergreen-product-composition.mjs` yolundadır. Bu ara görev M10-T02'nin
+input/pending, M10-T03'ün failure veya M10-T04'ün gerçek host success/navigation kanıtını kapatmaz.
+Genel ilerleme 113/148 (%76), M10 4/12'dir; M10-T02 `NOT_STARTED` ve sıradaki görevdir.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip
-görüşmesi ve iki pilot hedefi. Bunlar 145 görevlik ilerleme sayacını değiştirmez.
+görüşmesi ve iki pilot hedefi. Bunlar 148 görevlik ilerleme sayacını değiştirmez.
 
 ## Büyük aşamalar
 

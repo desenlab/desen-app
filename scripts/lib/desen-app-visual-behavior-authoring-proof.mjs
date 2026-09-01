@@ -9,6 +9,10 @@ import { types as utilTypes } from "node:util";
 import { format } from "prettier";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import {
+  authenticateDesenAppEvergreenProductCompositionSuccessor,
+  materializeDesenAppHistoricalReaderFileOverrides,
+} from "./desen-app-evergreen-product-composition-proof.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
@@ -526,7 +530,30 @@ async function canonicalArtifactBytes(artifact) {
 /** Builds detached deterministic M10-T01B evidence from exact current authorities. */
 export async function buildDesenAppVisualBehaviorAuthoringEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
-  const files = await acquireFiles(options);
+  const evergreenProductCompositionSuccessor =
+    await authenticateDesenAppEvergreenProductCompositionSuccessor();
+  const files = await acquireFiles(
+    Object.freeze({
+      ...options,
+      fileOverrides: materializeDesenAppHistoricalReaderFileOverrides(
+        evergreenProductCompositionSuccessor,
+        options.fileOverrides,
+      ),
+    }),
+  );
+  if (options.fileOverrides.size === 0) {
+    const frozenBytes = await readRegularAuthority(
+      path.join(options.workspaceRoot, ARTIFACT_RELATIVE_PATH),
+      ARTIFACT_RELATIVE_PATH,
+    );
+    assertPinnedArtifact(frozenBytes);
+    const frozenArtifact = parseJson(frozenBytes, ARTIFACT_RELATIVE_PATH, "ARTIFACT_DRIFT");
+    return deepFreeze({
+      artifact: frozenArtifact,
+      artifactBytes: frozenBytes,
+      artifactSha256: sha256(frozenBytes),
+    });
+  }
   const parent = authenticateParent(files.get(PARENT_ARTIFACT_PATH));
   const sourceInput = Object.fromEntries(
     Object.entries(SOURCE_PATHS).map(([key, relativePath]) => [

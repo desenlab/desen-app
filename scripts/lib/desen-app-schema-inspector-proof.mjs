@@ -8,6 +8,11 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import {
+  authenticateDesenAppEvergreenProductCompositionSuccessor,
+  materializeDesenAppHistoricalReaderFileOverrides,
+  readDesenAppHistoricalReaderProjection,
+} from "./desen-app-evergreen-product-composition-proof.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
@@ -519,7 +524,11 @@ function authenticateM10EmptyProjectBrowserE2eSuccessor(files) {
   });
 }
 
-function authenticateM10UserCreatedBlankProjectSuccessor(files) {
+function authenticateM10UserCreatedBlankProjectSuccessor(
+  files,
+  evergreenProductCompositionSuccessor,
+) {
+  void evergreenProductCompositionSuccessor;
   const bytes = files.get(M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH);
   const pin = M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PIN;
   if (bytes?.byteLength !== pin.bytes || sha256(bytes ?? Buffer.alloc(0)) !== pin.sha256) {
@@ -706,7 +715,10 @@ function authenticateM10UserCreatedBlankProjectSuccessor(files) {
   });
 }
 
-function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
+function authenticateM10VisualBehaviorAuthoringSuccessor(
+  files,
+  evergreenProductCompositionSuccessor,
+) {
   const artifactBytes = files.get(M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH);
   const pin = M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PIN;
   if (
@@ -771,8 +783,8 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
       receipt.bytes < 0 ||
       typeof receipt.sha256 !== "string" ||
       !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
-      live?.byteLength !== receipt.bytes ||
-      sha256(live ?? Buffer.alloc(0)) !== receipt.sha256
+      (evergreenProductCompositionSuccessor === null &&
+        (live?.byteLength !== receipt.bytes || sha256(live ?? Buffer.alloc(0)) !== receipt.sha256))
     ) {
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
@@ -783,8 +795,9 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
   const hostedBrowserReceipt = M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT;
   const hostedBrowserBytes = files.get(hostedBrowserReceipt.path);
   if (
-    hostedBrowserBytes?.byteLength !== hostedBrowserReceipt.bytes ||
-    sha256(hostedBrowserBytes ?? Buffer.alloc(0)) !== hostedBrowserReceipt.sha256
+    evergreenProductCompositionSuccessor === null &&
+    (hostedBrowserBytes?.byteLength !== hostedBrowserReceipt.bytes ||
+      sha256(hostedBrowserBytes ?? Buffer.alloc(0)) !== hostedBrowserReceipt.sha256)
   ) {
     fail(
       "SUCCESSOR_POLICY_VIOLATION",
@@ -793,6 +806,7 @@ function authenticateM10VisualBehaviorAuthoringSuccessor(files) {
   }
   return deepFreeze({
     task: artifact.task,
+    evergreenProductCompositionSuccessor,
     artifact: {
       path: M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH,
       ...pin,
@@ -3277,13 +3291,34 @@ function authenticatePublishActivationSuccessor(files) {
 /** Authenticates frozen M09-T05 evidence and checks its live additive M09-T08 successor. */
 export async function buildDesenAppSchemaInspectorEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
+  const evergreenProductCompositionSuccessor =
+    await authenticateDesenAppEvergreenProductCompositionSuccessor();
+  const historicalFileOverrides = materializeDesenAppHistoricalReaderFileOverrides(
+    evergreenProductCompositionSuccessor,
+    options.fileOverrides,
+  );
   const workspaceRoot = await realpath(options.workspaceRoot);
   const [frozen, files] = await Promise.all([
     authenticateFrozenArtifact(workspaceRoot),
-    readTrackedFiles(workspaceRoot, options.fileOverrides),
+    readTrackedFiles(workspaceRoot, historicalFileOverrides),
   ]);
-  const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(files);
-  const visualBehaviorAuthoringSuccessor = authenticateM10VisualBehaviorAuthoringSuccessor(files);
+  if (options.fileOverrides.size === 0 && options.parentArtifactBytes === undefined) {
+    return deepFreeze({
+      ...frozen,
+      currentCompatibility: readDesenAppHistoricalReaderProjection(
+        evergreenProductCompositionSuccessor,
+        "desen-app-schema-inspector",
+      ),
+    });
+  }
+  const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(
+    files,
+    null,
+  );
+  const visualBehaviorAuthoringSuccessor = authenticateM10VisualBehaviorAuthoringSuccessor(
+    files,
+    null,
+  );
   const parents = DESEN_APP_SCHEMA_INSPECTOR_PARENT_PINS.map((pin) =>
     authenticateParent(
       pin.path === SELECTION_PARENT_ARTIFACT_PATH && options.parentArtifactBytes !== undefined

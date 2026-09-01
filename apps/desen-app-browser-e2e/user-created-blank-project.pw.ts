@@ -186,8 +186,9 @@ test("creates, authors, persists, reloads, and reopens a blank sign-in project t
   await newProject.click();
   const dialog = page.getByRole("dialog", { name: "Create a project" });
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole("radio", { name: /Blank sign-in project/u })).toBeChecked();
-  await expect(dialog).toContainText("one empty Stack · 420 × 720 portrait frame");
+  await expect(dialog.getByRole("radio", { name: /Blank Account app project/u })).toBeChecked();
+  await expect(dialog).toContainText("web-react · 1 Catalog · 1 surface");
+  await expect(dialog).toContainText("exact authenticated Account app Source");
   await dialog.getByRole("button", { name: "Create project" }).click();
 
   await expect(page).toHaveURL(/\/projects\/account-app\/surfaces\/sign-in$/u);
@@ -297,7 +298,7 @@ test("creates, authors, persists, reloads, and reopens a blank sign-in project t
   await expect(frame).toHaveAttribute("data-canvas-frame-height", "720");
   const designManagedHtml = await managedSubtree.evaluate((node) => node.innerHTML);
   await page.getByRole("button", { name: "Run" }).click();
-  const runCanvas = page.getByRole("group", { name: "Sign-in adapter canvas" });
+  const runCanvas = page.getByRole("group", { name: "Managed sign-in canvas" });
   await expect(runCanvas.getByRole("heading", { level: 2, name: "Sign in" })).toBeVisible();
   await expect(runCanvas.getByRole("textbox", { name: "Email" })).toBeVisible();
   await expect(runCanvas.getByLabel("Password")).toBeVisible();

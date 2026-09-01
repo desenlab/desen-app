@@ -2,6 +2,10 @@
  * boundary whose callbacks are deliberately receiver-independent. */
 import { prepareCatalogAuthoringModel } from "./authoring-data.js";
 import { prepareAuthoringPreviewBundle } from "./authoring-preview.js";
+import {
+  admitProjectWorkspaceDocument,
+  readProjectWorkspaceProfileAuthority,
+} from "./project-workspace-profile.js";
 import { canonicalizeJson, isJsonPointer } from "@desen/protocol";
 
 import type {
@@ -13,13 +17,12 @@ import type {
 import type { DesenDiagnosticContext, DesenDiagnosticSubject } from "@desen/protocol";
 import type { CatalogAuthoringModel } from "./authoring-data.js";
 import type { AuthoringPreviewBundleSuccess } from "./authoring-preview.js";
+import type { ProjectWorkspaceProfileHandle } from "./project-workspace-profile.js";
+import type { PublishCatalogPackageCandidate } from "@desen/publisher";
+import type { DesenValidatedInteractionCatalogSet } from "@desen/validator";
 
-const AUTHORIZED_PROJECT_ID = "account-app";
-const AUTHORIZED_SURFACE_ID = "sign-in";
-const AUTHORIZED_DOCUMENT_ID = "com.example.account-app";
-const AUTHORIZED_SOURCE_KEY = "account-app-source";
 const MAX_GENERATION = Number.MAX_SAFE_INTEGER;
-const CONFIGURATION_KEYS = Object.freeze(["catalog", "document", "persistencePort", "route"]);
+const CONFIGURATION_KEYS = Object.freeze(["document", "persistencePort", "profile", "route"]);
 const PERSISTENCE_PORT_KEYS = Object.freeze(["openSource", "saveSource"]);
 const PERSISTENCE_DIAGNOSTIC_CODES = Object.freeze([
   "run.desen.editor/PERSISTENCE_ADAPTER_FAILURE",
@@ -62,6 +65,7 @@ export type AuthoringPersistenceFailureReason =
   | "persistence-failed"
   | "port-invalid"
   | "preview-unavailable"
+  | "profile-invalid"
   | "projection-limit"
   | "reopen-required"
   | "route-invalid"
@@ -151,11 +155,42 @@ export interface AuthoringPersistenceController {
   readonly dispose: (this: void) => void;
 }
 
+const PERSISTENCE_CONTROLLER_PROFILES = new WeakMap<
+  AuthoringPersistenceController,
+  ProjectWorkspaceProfileHandle
+>();
+
+/** Closed identity check for a factory-created controller and its exact workspace profile. */
+export type AuthoringPersistenceControllerAuthenticationResult =
+  | Readonly<{ readonly status: "authenticated" }>
+  | Readonly<{ readonly status: "invalid-controller" | "profile-mismatch" }>;
+
+/**
+ * Authenticates that a prepared controller was created for the exact same opaque profile handle.
+ *
+ * @remarks Structural controller compatibility cannot transfer Source CAS state, saved-document
+ * authority, or generation receipts between product profiles.
+ */
+export function authenticateAuthoringPersistenceControllerProfile(
+  controller: AuthoringPersistenceController,
+  profile: ProjectWorkspaceProfileHandle,
+): AuthoringPersistenceControllerAuthenticationResult {
+  if (typeof controller !== "object" || controller === null) {
+    return Object.freeze({ status: "invalid-controller" });
+  }
+  const capturedProfile = PERSISTENCE_CONTROLLER_PROFILES.get(controller);
+  return capturedProfile === undefined
+    ? Object.freeze({ status: "invalid-controller" })
+    : capturedProfile === profile
+      ? Object.freeze({ status: "authenticated" })
+      : Object.freeze({ status: "profile-mismatch" });
+}
+
 /** Exact trusted inputs captured by the App-owned persistence controller. */
 export interface AuthoringPersistenceControllerOptions {
   readonly route: AuthoringPersistenceRoute;
   readonly document: DesenEditorDocument;
-  readonly catalog: unknown;
+  readonly profile: ProjectWorkspaceProfileHandle;
   readonly persistencePort: DesenEditorPersistencePort;
 }
 
@@ -171,6 +206,7 @@ export type AuthoringPersistenceControllerCreationResult =
         | "document-mismatch"
         | "port-invalid"
         | "preview-unavailable"
+        | "profile-invalid"
         | "projection-limit"
         | "route-invalid"
       >;
@@ -265,18 +301,23 @@ function allowedOwnData(
   }
 }
 
-function captureRoute(route: unknown): AuthoringPersistenceRoute | undefined {
+function captureRoute(
+  route: unknown,
+  projectId: string,
+  sourceSurfaceIds: ReadonlySet<string>,
+): AuthoringPersistenceRoute | undefined {
   const values = exactOwnData(route, ["projectId", "surfaceId"]);
   if (
     values === undefined ||
-    values.projectId !== AUTHORIZED_PROJECT_ID ||
-    values.surfaceId !== AUTHORIZED_SURFACE_ID
+    values.projectId !== projectId ||
+    typeof values.surfaceId !== "string" ||
+    !sourceSurfaceIds.has(values.surfaceId)
   ) {
     return undefined;
   }
   return Object.freeze({
-    projectId: AUTHORIZED_PROJECT_ID,
-    surfaceId: AUTHORIZED_SURFACE_ID,
+    projectId,
+    surfaceId: values.surfaceId,
   });
 }
 
@@ -459,10 +500,27 @@ function admissionFailure(reason: AdmissionFailure["reason"]): AdmissionFailure 
   return Object.freeze({ ok: false, reason });
 }
 
-function admitSession(catalog: unknown, document: unknown): AdmissionResult {
+function admitSession(
+  profileHandle: ProjectWorkspaceProfileHandle,
+  catalogs: DesenValidatedInteractionCatalogSet,
+  catalogPackages: readonly PublishCatalogPackageCandidate[],
+  surfaceId: string,
+  document: unknown,
+): AdmissionResult {
+  const workspaceAdmission = admitProjectWorkspaceDocument(profileHandle, document);
+  if (workspaceAdmission.status !== "admitted") {
+    return admissionFailure(
+      workspaceAdmission.reason === "catalog-document-mismatch"
+        ? "catalog-invalid"
+        : workspaceAdmission.reason === "document-mismatch" ||
+            workspaceAdmission.reason === "profile-invalid"
+          ? "document-mismatch"
+          : "document-invalid",
+    );
+  }
   let prepared: ReturnType<typeof prepareCatalogAuthoringModel>;
   try {
-    prepared = prepareCatalogAuthoringModel(catalog, document);
+    prepared = prepareCatalogAuthoringModel(catalogs, workspaceAdmission.document);
   } catch {
     return admissionFailure("document-invalid");
   }
@@ -475,10 +533,7 @@ function admitSession(catalog: unknown, document: unknown): AdmissionResult {
           : "document-invalid",
     );
   }
-  if (
-    prepared.model.validationDocument.id !== AUTHORIZED_DOCUMENT_ID ||
-    !prepared.model.surfaces.some(({ id }) => id === AUTHORIZED_SURFACE_ID)
-  ) {
+  if (!prepared.model.surfaces.some(({ id }) => id === surfaceId)) {
     return admissionFailure("document-mismatch");
   }
   let canonicalDocument: string;
@@ -487,7 +542,7 @@ function admitSession(catalog: unknown, document: unknown): AdmissionResult {
   } catch {
     return admissionFailure("document-invalid");
   }
-  const preview = prepareAuthoringPreviewBundle(prepared.model.validationDocument);
+  const preview = prepareAuthoringPreviewBundle(prepared.model.validationDocument, catalogPackages);
   if (!preview.ok) return admissionFailure("preview-unavailable");
   return Object.freeze({
     ok: true,
@@ -544,8 +599,16 @@ function createOperationToken(): OperationToken {
  */
 export function deriveAuthoringPersistenceSourceKey(
   route: AuthoringPersistenceRoute,
+  profile: ProjectWorkspaceProfileHandle,
 ): string | null {
-  return captureRoute(route) === undefined ? null : AUTHORIZED_SOURCE_KEY;
+  const authority = readProjectWorkspaceProfileAuthority(profile);
+  if (authority.status !== "read") return null;
+  const sourceSurfaceIds = new Set(
+    authority.profile.project.surfaces.map((surface) => surface.sourceId),
+  );
+  return captureRoute(route, authority.profile.project.id, sourceSurfaceIds) === undefined
+    ? null
+    : authority.profile.sourceKey;
 }
 
 /**
@@ -563,19 +626,32 @@ export function createAuthoringPersistenceController(
 ): AuthoringPersistenceControllerCreationResult {
   const values = exactOwnData(options, CONFIGURATION_KEYS);
   if (values === undefined) return Object.freeze({ ok: false, reason: "route-invalid" });
-  const route = captureRoute(values.route);
+  const authority = readProjectWorkspaceProfileAuthority(
+    values.profile as ProjectWorkspaceProfileHandle,
+  );
+  if (authority.status !== "read") {
+    return Object.freeze({ ok: false, reason: "profile-invalid" });
+  }
+  const profile = authority.profile;
+  const profileHandle = values.profile as ProjectWorkspaceProfileHandle;
+  const sourceSurfaceIds = new Set(profile.project.surfaces.map((surface) => surface.sourceId));
+  const route = captureRoute(values.route, profile.project.id, sourceSurfaceIds);
   if (route === undefined) return Object.freeze({ ok: false, reason: "route-invalid" });
   const persistencePort = capturePersistencePort(values.persistencePort);
   if (persistencePort === undefined) return Object.freeze({ ok: false, reason: "port-invalid" });
 
-  const initialAdmission = admitSession(values.catalog, values.document as DesenEditorDocument);
+  const initialAdmission = admitSession(
+    profileHandle,
+    profile.catalogs,
+    profile.catalogPackages,
+    route.surfaceId,
+    values.document as DesenEditorDocument,
+  );
   if (!initialAdmission.ok) return initialAdmission;
-  const capturedCatalog = initialAdmission.model.validationCatalogs[0];
-  if (capturedCatalog === undefined) {
-    return Object.freeze({ ok: false, reason: "catalog-invalid" });
-  }
+  const capturedCatalogs = profile.catalogs;
+  const capturedCatalogPackages = profile.catalogPackages;
 
-  const sourceKey = AUTHORIZED_SOURCE_KEY;
+  const sourceKey = profile.sourceKey;
   const openSource = persistencePort.openSource;
   const saveSource = persistencePort.saveSource;
   const listeners = new Set<() => void>();
@@ -633,7 +709,13 @@ export function createAuthoringPersistenceController(
     if (document === state.session.document) {
       return Object.freeze({ ok: true, session: state.session });
     }
-    const admitted = admitSession(capturedCatalog, document);
+    const admitted = admitSession(
+      profileHandle,
+      capturedCatalogs,
+      capturedCatalogPackages,
+      route.surfaceId,
+      document,
+    );
     if (!admitted.ok) return admitted;
     if (admitted.canonicalDocument === currentDocumentCanonical) {
       return Object.freeze({ ok: true, session: state.session });
@@ -736,7 +818,13 @@ export function createAuthoringPersistenceController(
       return result;
     }
 
-    const admitted = admitSession(capturedCatalog, portResult.document);
+    const admitted = admitSession(
+      profileHandle,
+      capturedCatalogs,
+      capturedCatalogPackages,
+      route.surfaceId,
+      portResult.document,
+    );
     if (
       state.disposed ||
       currentOperation !== token ||
@@ -880,5 +968,6 @@ export function createAuthoringPersistenceController(
     save,
     dispose,
   });
+  PERSISTENCE_CONTROLLER_PROFILES.set(controller, profileHandle);
   return Object.freeze({ ok: true, controller });
 }

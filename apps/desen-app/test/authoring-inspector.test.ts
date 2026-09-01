@@ -10,8 +10,9 @@ import {
   applyAuthoringInspectorEdit,
   prepareAuthoringInspectorModel,
 } from "../src/authoring-inspector.js";
-import { prepareCatalogAuthoringModel, REFERENCE_AUTHORING_MODEL } from "../src/authoring-data.js";
+import { prepareCatalogAuthoringModel } from "../src/authoring-data.js";
 import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
+import { REFERENCE_AUTHORING_MODEL } from "../src/reference-authoring-profile.js";
 
 import type { DesenEditorDocument } from "@desen/editor-core";
 import type {

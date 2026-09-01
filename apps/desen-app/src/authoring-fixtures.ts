@@ -79,6 +79,22 @@ function readOwnDataEntries(record: JsonObject): readonly (readonly [string, unk
   return entries;
 }
 
+function operationManifest(
+  catalogs: readonly unknown[],
+  capabilityId: string,
+): OperationManifest | undefined {
+  const matches: OperationManifest[] = [];
+  for (const catalogValue of catalogs) {
+    const catalog = readDataObject(catalogValue);
+    const operations = readDataObject(readOwnDataValue(catalog, "operations"));
+    const manifestValue = readOwnDataValue(operations, capabilityId);
+    if (manifestValue !== undefined) {
+      matches.push(readDataObject(manifestValue) as OperationManifest);
+    }
+  }
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
 function readDataArray(
   value: unknown,
   maximumLength: number = AUTHORING_OPERATION_LIMITS.maxOwnerOccurrences,
@@ -384,14 +400,11 @@ export function prepareAuthoringOperationFixtureModel(
       prepared.model.validationDocument,
       surfaceId,
     );
-    const catalog = readDataObject(prepared.model.validationCatalogs[0]);
-    const operationContracts = readDataObject(readOwnDataValue(catalog, "operations"));
     const manifestByCapability = new Map<string, OperationManifest>();
     const registrations: RegisteredOperation[] = [];
     for (const capabilityId of [...new Set(invocations.values())].sort(compareText)) {
-      const manifestValue = readOwnDataValue(operationContracts, capabilityId);
-      if (manifestValue === undefined) return rejectedModel("operation-missing");
-      const manifest = readDataObject(manifestValue) as OperationManifest;
+      const manifest = operationManifest(prepared.model.validationCatalogs, capabilityId);
+      if (manifest === undefined) return rejectedModel("operation-missing");
       manifestByCapability.set(capabilityId, manifest);
       registrations.push(registerOperation({ id: capabilityId, manifest }));
     }

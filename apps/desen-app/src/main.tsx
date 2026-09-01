@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { createInjectedDesenAppLocalPersistencePort } from "./local-runtime-persistence.js";
 import { DesenAppProduct } from "./product-bootstrap.js";
 import { normalizeInitialDesenAppLocation } from "./project-navigation.js";
+import { REFERENCE_SIGN_IN_WORKSPACE_PROFILE } from "./reference-sign-in-workspace-profile.js";
 import "./styles.css";
 
 import type { DesenEditorPersistencePort } from "@desen/editor-core";
@@ -27,7 +28,10 @@ try {
 const root = createRoot(container);
 root.render(
   <StrictMode>
-    <DesenAppProduct persistencePort={persistencePort} />
+    <DesenAppProduct
+      persistencePort={persistencePort}
+      workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
+    />
   </StrictMode>,
 );
 

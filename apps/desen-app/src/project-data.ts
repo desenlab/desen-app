@@ -1,8 +1,12 @@
+import type { ProjectWorkspaceProfileSnapshot } from "./project-workspace-profile.js";
+
 /** One admitted surface exposed to the Desen App project shell. */
 export interface DesenAppSurfaceSummary {
+  /** URL-safe project-local route slug shown by the App shell. */
   readonly id: string;
+  /** Exact DESEN Source surface identity; it is not constrained by URL-segment grammar. */
+  readonly sourceId: string;
   readonly name: string;
-  readonly capabilityId: string;
   readonly state: "navigable" | "not-configured";
   readonly detail: string;
 }
@@ -28,75 +32,33 @@ function project(summary: DesenAppProjectSummary): DesenAppProjectSummary {
   });
 }
 
-/** Exact supported local project profile created by the normal blank-project product flow. */
-export const DESEN_APP_BLANK_PROJECT: DesenAppProjectSummary = project({
-  id: "account-app",
-  name: "Account app",
-  description: "A local sign-in project authored with the exact web-react reference catalog.",
-  catalog: "web-react@0.1",
-  navigationStatus: "1 local surface",
-  surfaces: [
-    {
-      id: "sign-in",
-      name: "Sign-in",
-      capabilityId: "account.sign-in",
+/** Projects one authenticated workspace profile into inert App routing and gallery metadata. */
+export function projectWorkspaceProfileSummary(
+  profile: ProjectWorkspaceProfileSnapshot,
+): DesenAppProjectSummary {
+  const catalogSummary = profile.catalogs
+    .map((catalog) => `${catalog.id}@${catalog.version}`)
+    .join(" · ");
+  return project({
+    id: profile.project.id,
+    name: profile.project.name,
+    description: profile.project.description,
+    catalog: catalogSummary,
+    navigationStatus: `${profile.project.surfaces.length} local ${profile.project.surfaces.length === 1 ? "surface" : "surfaces"}`,
+    surfaces: profile.project.surfaces.map((item) => ({
+      id: item.id,
+      sourceId: item.sourceId,
+      name: item.name,
       state: "navigable",
-      detail: "Local authored Source",
-    },
-  ],
-});
-
-/** Product inventory after the supported local blank project has been created. */
-export const DESEN_APP_LOCAL_PROJECTS: readonly DesenAppProjectSummary[] = Object.freeze([
-  DESEN_APP_BLANK_PROJECT,
-]);
-
-/** Exact inert project fixtures admitted by the first Desen App shell slice. */
-export const DESEN_APP_PROJECTS: readonly DesenAppProjectSummary[] = Object.freeze([
-  project({
-    id: "account-app",
-    name: "Account app",
-    description: "Sign-in and account recovery surfaces built from the web-react catalog.",
-    catalog: "web-react@0.1",
-    navigationStatus: "3 fixture routes",
-    surfaces: [
-      {
-        id: "sign-in",
-        name: "Sign-in",
-        capabilityId: "account.sign-in",
-        state: "navigable",
-        detail: "Navigation fixture",
-      },
-      {
-        id: "recovery",
-        name: "Recovery",
-        capabilityId: "account.recovery",
-        state: "navigable",
-        detail: "Navigation fixture",
-      },
-      {
-        id: "profile",
-        name: "Profile",
-        capabilityId: "account.profile",
-        state: "navigable",
-        detail: "Navigation fixture",
-      },
-    ],
-  }),
-  project({
-    id: "checkout-pilot",
-    name: "Checkout pilot",
-    description: "A bounded evaluation project. No capability catalog is connected yet.",
-    catalog: undefined,
-    navigationStatus: "Setup route",
-    surfaces: [],
-  }),
-]);
+      detail: item.description,
+    })),
+  });
+}
 
 /** Resolves an exact project from an admitted inventory without aliasing or fallback. */
 export function findDesenAppProject(
   projectId: string,
-  projects: readonly DesenAppProjectSummary[] = DESEN_APP_PROJECTS,
+  projects: readonly DesenAppProjectSummary[],
 ): DesenAppProjectSummary | undefined {
   return projects.find((candidate) => candidate.id === projectId);
 }

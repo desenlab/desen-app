@@ -53,7 +53,7 @@ export type PublicationControlStatus =
 
 /** Complete presentation state for the fixed preview-channel publication workflow. */
 export interface PublicationControlProjection {
-  readonly channelName: "preview";
+  readonly channelName: string;
   readonly status: PublicationControlStatus;
 }
 
