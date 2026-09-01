@@ -2070,7 +2070,7 @@ and move to M10-T01.
 | M10-T01A | DONE        | M10-T01                   | User-created blank project and durable normal-App authoring                   |
 | M10-T01B | DONE        | M10-T01A                  | Visual behavior authoring and Catalog-derived Run controls                    |
 | M10-T01C | DONE        | M10-T01B                  | Evergreen product composition through an authenticated workspace profile      |
-| M10-T02  | NOT_STARTED | M10-T01C                  | Input and pending fixture test                                                |
+| M10-T02  | DONE        | M10-T01C                  | Input and pending fixture test                                                |
 | M10-T03  | NOT_STARTED | M10-T02                   | Failure fixture and visible failure-state test                                |
 | M10-T04  | NOT_STARTED | M10-T02                   | Success fixture, navigation, and real host-operation binding test             |
 | M10-T05  | NOT_STARTED | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
@@ -2280,6 +2280,55 @@ It authenticates 54 artifacts and 108 current readers, passes 89/89 at
 historical checkpoint intact. The sixteen bridged historical App reader/root pairs pass 242/242;
 neither receipt implies hosted exact-head success.
 
+M10-T02 is `DONE`. The normal product now closes the dedicated complete-input and pending-fixture
+acceptance slice through visible no-code controls. A designer starts from the zero-project screen,
+creates the admitted blank project, adds local state, TextFields, and a Button, connects both
+controlled inputs, and maps Press to one Catalog operation. The operation recipe writes the exact
+capability, collision-free result alias, schema-compatible state inputs, explicit concurrency, and
+`operation.<alias>.pending` Loading reference through one validated Source mutation. Automatic
+state suggestion occurs only for an exact input/state name match; schema compatibility alone never
+guesses designer intent.
+
+New connections default to **Ignore while running** (`reject`). Exact repair of one existing root
+invocation preserves unrelated action order, settlement branches, guard, and extensions. Missing
+optional inputs remain absent. Existing declared or additional input values that the visual state
+selector cannot represent stop Repair with an explicit loss-prevention message, and multiple root
+invocations fail closed as ambiguous. The concurrency copy distinguishes another invocation of the
+same result from the Button's own Loading lock.
+
+The real Chromium scenario uses visible **Set Secure**, verifies that control is checked and the
+rendered password input is native `type=password`, types both complete values in multiple chunks,
+authors the
+operation connection without JSON, and observes one unresolved synthetic Promise as
+Runtime pending. Catalog-derived outcome selection disables while pending, explicit completion
+stays available, and Button Loading maps to accessible busy/disabled state while retaining focus.
+The scenario confirms the default repeat policy, then selects `queue` so a leaked Enter activation
+would become a second observable pending invocation. Values and pending survive Design → Run
+without Source mutation or Runtime replacement. Terminal completion remains stable across two
+animation frames, clears Loading, and re-enables the outcome selector without asserting an Alert or
+navigation.
+
+Focused positive and negative coverage passes 82/82, the dedicated Chromium configuration passes
+1/1, and the independent root reader passes 10/10. The deterministic 14,261-byte / 25-receipt
+evidence is
+`docs/proof/artifacts/desen-app-0.1.0-input-pending-fixture.json` at
+`sha256:161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d`. A separately pinned,
+bounded 2,307,407-byte historical-reader bridge at
+`sha256:16f6ec332fb03368e617563560b9930a7608594907ce61d5d15554be4dc7523d` authenticates the exact
+M10-T01C task-time inputs without rewriting its immutable artifact.
+
+The neutral CI universe contains 212 workloads / 101 proof units. The M10-T02 App closure contains
+69 proof units / 148 workloads, and exact-one ownership covers 1,366 tracked paths / 202
+proof-owned paths. Append-only checkpoint sequence 67 preserves sequences 1–66, contains 55
+artifacts / 110 readers, and closes at
+`sha256:9ee6909c0f11ed7149cb9bf6ce1c7943ed99aac2d2c6f9138caea8f5dd2044b7`; its suite passes
+90/90. P-09 and P-10 remain `PARTIAL`; the selected declared error proves only generic
+fixture settlement and terminal cleanup. Visible public failure remains M10-T03; success,
+navigation, and a separately authorized real host operation remain M10-T04; Integration,
+Production, N-036, and G10 remain open. Overall progress advances to 114/148 (77%), M10 advances to
+5/12 (42%), and M10-T03 is next. Local receipts alone make no hosted exact-head `Quality gate`
+claim.
+
 ### M10-T01 public build-log drafts
 
 **X (EN, 280 characters)**
@@ -2436,6 +2485,53 @@ neither receipt implies hosted exact-head success.
 > hangi auth-dışı akışı test etmeliyiz?
 >
 > #DesignTools #ProductEngineering #WebDevelopment #OpenSource
+
+### M10-T02 public build-log drafts
+
+Drafts only. Do not publish automatically.
+
+**X (EN, 279 characters)**
+
+> Desen App now proves complete typed input and an unresolved Runtime pending lifecycle through visible no-code controls in Chromium. Loading blocks repeat activation; Design/Run preserves values and pending. Failure and real-host success remain next. github.com/desenlab/desen-app
+
+**LinkedIn**
+
+> [EN]
+>
+> Desen App now closes its dedicated input and pending acceptance slice through the normal product
+> UI. A designer starts from a blank project, connects complete controlled TextField values to local
+> state, and maps a Button to a Catalog operation without writing JSON. The same atomic recipe owns
+> compatible input mappings, a collision-free result name, explicit concurrency, and Button Loading.
+>
+> A real Chromium journey types email and secure-password values in multiple chunks, observes an
+> unresolved Runtime Promise as accessible pending feedback, and proves that repeated activation is
+> blocked. Values and pending state survive Design/Run presentation changes. Explicit fixture
+> completion then clears Loading without claiming a visible error or navigation.
+>
+> Repair is deliberately lossless: optional inputs can stay absent, advanced values block visual
+> replacement until the designer chooses a safe mapping, and ambiguous operation actions fail
+> closed. M10-T03 still owns visible failure; M10-T04 still owns success, navigation, and a real host
+> operation.
+>
+> [TR]
+>
+> Desen App artık normal ürün arayüzü üzerinden özel input ve pending kabul kapsamını kapatıyor.
+> Tasarımcı boş projeden başlayıp kontrollü TextField değerlerini local state'e bağlıyor ve Button'ı
+> JSON yazmadan Catalog operation'ına eşliyor. Aynı atomik işlem; uyumlu input eşlemelerini,
+> çakışmayan sonuç adını, açık concurrency seçimini ve Button Loading durumunu birlikte kuruyor.
+>
+> Gerçek Chromium yolculuğu e-posta ve güvenli şifre değerlerini parça parça yazıyor, çözülmemiş
+> Runtime Promise'ini erişilebilir pending geri bildirimi olarak görüyor ve tekrar aktivasyonun
+> engellendiğini kanıtlıyor. Değerler ile pending durumu Design/Run görünüm değişiminde korunuyor.
+> Fixture açıkça tamamlandığında Loading temizleniyor; görünür hata veya navigasyon iddiası
+> taşınmıyor.
+>
+> Repair akışı veri kaybına izin vermiyor: isteğe bağlı input boş kalabiliyor, görsel alanların
+> temsil edemediği gelişmiş değerler güvenli bir eşleme seçilene kadar değişikliği durduruyor ve
+> belirsiz operation aksiyonları güvenli biçimde reddediliyor. Görünür hata M10-T03'te; başarı,
+> navigasyon ve gerçek host operation M10-T04'te kapanacak.
+>
+> #DesignTools #NoCode #WebDevelopment #OpenSource
 
 ## M11 — Capability extensibility proof
 

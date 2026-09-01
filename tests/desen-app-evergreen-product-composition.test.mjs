@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
-import { mkdtemp, readFile, realpath, rm } from "node:fs/promises";
+import { mkdtemp, readFile as readLiveFile, realpath, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -21,8 +21,13 @@ import {
   verifyDesenAppEvergreenProductCompositionSourcePolicy,
   writeDesenAppEvergreenProductCompositionEvidence,
 } from "../scripts/lib/desen-app-evergreen-product-composition-proof.mjs";
+import { createDesenAppT01cHistoricalReaderReadFile } from "./desen-app-t01c-historical-reader-fixture.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const readFile = createDesenAppT01cHistoricalReaderReadFile({
+  workspaceRoot: ROOT,
+  liveReadFile: readLiveFile,
+});
 const SOURCE_PATHS = Object.freeze({
   referenceBrowserHarness: "apps/desen-app-browser-e2e/proof-application.tsx",
   adapterCanvas: "apps/desen-app/src/adapter-canvas.tsx",

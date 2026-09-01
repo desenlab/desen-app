@@ -1465,3 +1465,32 @@ current reader indexes `[70..97, 102, 103, 104, 105]`, and appends the T01C proo
 checkpoint suite passes 89/89. The sixteen bridged historical App reader families pass 242/242
 against their exact frozen projections. These are reviewed local receipts, not a hosted exact-head
 result.
+
+M10-T02 appends sequence 67 at
+`sha256:9ee6909c0f11ed7149cb9bf6ce1c7943ed99aac2d2c6f9138caea8f5dd2044b7`. It preserves
+sequences 1–66 and all 54 predecessor artifacts, adds the exact 14,261-byte input/pending artifact
+(`sha256:161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d`), reseals only the
+T01C proof/root readers at indexes `[106, 107]` for their authenticated historical bridge, and
+appends the T02 proof/root readers at `[108, 109]`. The resulting authority contains 55 frozen
+artifacts and 110 current readers; the checkpoint suite passes 90/90.
+
+The neutral inventory now contains 212 workloads / 101 proof units, 4,533 leaf invocations, and
+323 distinct leaves at
+`sha256:ed6bf5f52f7d6d077e0aa126f16ff88aff21d4d95f512e2274b7d4382f02e41f`. The impact graph is
+`sha256:2f7840677851aed7c0e282a0b18bf36fc2f624cf0d051f7c5f7d1e4cf9a41c9f`; the App/T02 closure
+contains 69 proof units and 148 workloads. Exact-one ownership covers 1,366 tracked paths / 202
+proof-owned paths with path-set
+`sha256:7c0ac5595f62da961a40b7a96b74373a0060427c45ddfa66fb30165696964108` and authority
+`sha256:84d6dc6c09ea316ea93b41bb407d1d8972a3ad4312f0423d8ca7262e443f95b3`. The category split is
+202 proof-unit, 45 CI-policy, 32 dependency-policy, 147 frozen-input, 530 package/application, 261
+shared-proof-infrastructure, 138 project-documentation, and eleven repository-policy paths.
+
+Shared-state authority covers all 212 workloads: 90 ordinary and eleven barrier proof units, 90
+OS-temporary roots, 88 `PROOF_READ_ONLY` units, and 103 `PROOF_OS_TEMP_ISOLATED` units. Promotion
+pins the affected selector at
+`sha256:2d83c5824bfe19b645ca5f05c3e38340e2079785d2945e444996f5712d6e14a3` and required-affected
+runner authority at
+`sha256:70e92b42d05a3745ffca73394ea6a9d001af47e92132532abc0d5d2eb8e11a08`. Local checkpoint,
+promotion, required-affected, ownership, selector, shared-state, inventory, impact, and equivalence
+tests pass. No workload, barrier, timeout, isolation rule, or hosted fresh-execution requirement is
+removed; these local authority receipts do not imply an exact-head hosted result.

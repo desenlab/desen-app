@@ -18,7 +18,10 @@ import { projectAuthoringBehaviorControls } from "./authoring-behavior-projectio
 import { projectAuthoringDiagnostics } from "./authoring-diagnostics.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
 import { applyAuthoringConditionEdit } from "./authoring-conditions.js";
-import { applyAuthoringInputConnection } from "./authoring-connections.js";
+import {
+  applyAuthoringInputConnection,
+  applyAuthoringOperationTriggerConnection,
+} from "./authoring-connections.js";
 import {
   createAuthoringOperationFixtureController,
   prepareAuthoringOperationFixtureModel,
@@ -59,7 +62,11 @@ import {
   isSameAuthoringComponentSelection,
 } from "./authoring-selection.js";
 import { InspectorPanel } from "./inspector-panel.js";
-import { InputConnectionControl, VisibilityControl } from "./behavior-controls.js";
+import {
+  InputConnectionControl,
+  OperationConnectionControl,
+  VisibilityControl,
+} from "./behavior-controls.js";
 import { EventActionPanel } from "./event-action-panel.js";
 import {
   AUTHORING_SOURCE_SCENARIO_VALUE,
@@ -154,7 +161,10 @@ import type {
   AuthoringConditionEdit,
   AuthoringConditionEditResult,
 } from "./authoring-conditions.js";
-import type { AuthoringConnectionResult } from "./authoring-connections.js";
+import type {
+  AuthoringConnectionResult,
+  AuthoringOperationTriggerConnectionRecipe,
+} from "./authoring-connections.js";
 import type { AuthoringScenarioValue } from "./authoring-scenarios.js";
 import type {
   AuthoringSlotEdit,
@@ -3124,6 +3134,30 @@ function SurfaceEditor({
     return result;
   }
 
+  function connectSelectedOperation(
+    recipe: AuthoringOperationTriggerConnectionRecipe,
+  ): AuthoringConnectionResult {
+    if (!isDesignMode() || selection === null) {
+      return Object.freeze({ ok: false, reason: "selection-invalid" });
+    }
+    const result = applyAuthoringOperationTriggerConnection(
+      document,
+      workspaceSnapshot.catalogs,
+      route,
+      selection,
+      recipe,
+    );
+    captureEditDiagnostics(result);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
+    if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    return result;
+  }
+
   function editSelectedCondition(edit: AuthoringConditionEdit): AuthoringConditionEditResult {
     if (!isDesignMode() || selection === null) {
       return Object.freeze({ ok: false, reason: "selection-invalid" });
@@ -3484,6 +3518,12 @@ function SurfaceEditor({
                 connectedStateName={behaviorProjection.inputConnectionStateName}
                 inspector={inspector}
                 onConnect={connectSelectedInput}
+              />
+              <OperationConnectionControl
+                inspector={inspector}
+                model={eventActionModel}
+                onConnect={connectSelectedOperation}
+                operationAliases={behaviorProjection.operationAliases}
               />
               <VisibilityControl
                 currentWhen={behaviorProjection.currentWhen}

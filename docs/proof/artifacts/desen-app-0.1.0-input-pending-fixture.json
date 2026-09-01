@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-input-pending-fixture",
+  "profile": "desen.app.input-pending-fixture-proof.v1",
+  "task": "M10-T02",
+  "gate": null,
+  "result": "PASS",
+  "prerequisites": [
+    {
+      "task": "M10-T01C",
+      "gate": null,
+      "proofId": "desen-app-evergreen-product-composition",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json",
+      "bytes": 19299,
+      "sha256": "779434ca834b8d770c726d905408f0a3d0a7145abbc6eaf2b81f1e77466b46ac",
+      "profile": "desen.app.evergreen-product-composition-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "p09Status": "PARTIAL",
+    "p10Status": "PARTIAL",
+    "completeControlledInputCovered": true,
+    "visualOperationConnectionCovered": true,
+    "exactNameOnlyStateSuggestionCovered": true,
+    "secureControlledInputCovered": true,
+    "collisionFreeAliasSuggestionCovered": true,
+    "manuallyReservedAliasRejected": true,
+    "absentOptionalInputPreservationCovered": true,
+    "advancedInputLossPreventionCovered": true,
+    "additionalAdvancedInputLossPreventionCovered": true,
+    "concurrencyMeaningExplicit": true,
+    "rejectConcurrencyCovered": true,
+    "realRuntimePendingCovered": true,
+    "accessibleLoadingFeedbackCovered": true,
+    "repeatedActivationSuppressed": true,
+    "designRunPendingAndValueContinuityCovered": true,
+    "catalogDerivedSyntheticOutcomesCovered": true,
+    "syntheticOperationInputOpaque": true,
+    "genericTerminalCleanupCovered": true,
+    "postSettlementQueueStabilityCovered": true,
+    "m10T03Closed": false,
+    "m10T04Closed": false,
+    "visibleFailureStateCovered": false,
+    "successNavigationCovered": false,
+    "realHostOperationCovered": false,
+    "productionOperationCovered": false,
+    "n036Closed": false,
+    "g10Closed": false
+  },
+  "authority": {
+    "source": {
+      "controlledCurrentStringEmission": true,
+      "secureAndPlainInputShareOneControlledPath": true,
+      "catalogOperationAndStateMapping": true,
+      "exactNameOnlyStateSuggestion": true,
+      "collisionFreeSuggestedAlias": true,
+      "manuallyReservedAliasRejected": true,
+      "absentOptionalInputPreserved": true,
+      "unrepresentableAdvancedInputRepairBlocked": true,
+      "undeclaredAdvancedInputRepairBlocked": true,
+      "concurrencyMeaningExplicit": true,
+      "explicitRejectConcurrency": true,
+      "atomicLoadingPendingReference": true,
+      "repairPreservesBranchesGuardAndExtensions": true,
+      "ambiguousRootInvocationRejected": true,
+      "currentPreviewRevalidatedBeforeCommit": true,
+      "runtimePendingPublishedBeforeTransport": true,
+      "loadingAccessibleAndFocusPreserving": true,
+      "loadingSuppressesActivation": true,
+      "syntheticPromiseExplicitlyUnresolved": true,
+      "fixtureRequestInputOpaque": true,
+      "fixtureDeactivationAndDisposalRevoke": true
+    },
+    "focusedTests": {
+      "authoringConnectionCases": 9,
+      "behaviorControlCases": 11,
+      "authoringFixtureCases": 15,
+      "interactiveComponentCases": 11,
+      "operationLifecycleCases": 36,
+      "operationRepairAndAmbiguityCovered": true,
+      "semanticControlRerenderCovered": true,
+      "collisionFreeAndReservedAliasCovered": true,
+      "exactNameOnlyStateMappingCovered": true,
+      "optionalInputAbsenceRoundTripCovered": true,
+      "declaredAndAdditionalAdvancedInputLossBlocked": true,
+      "catalogDerivedSyntheticOutcomesCovered": true,
+      "opaqueInputAndRevocationCovered": true,
+      "focusPreservingLoadingSuppressionCovered": true,
+      "synchronousPendingAndRejectCovered": true
+    },
+    "browser": {
+      "testName": "routes complete controlled input into one unresolved synthetic operation",
+      "chromiumConfigurations": 1,
+      "visibleBlankProjectStart": true,
+      "fullIncrementalInputCovered": true,
+      "secureAuthoredThroughVisibleUi": true,
+      "nativePasswordTypeObserved": true,
+      "visualOperationConnectionCovered": true,
+      "defaultRejectPresented": true,
+      "queueChosenToDetectLeakedRepeat": true,
+      "realPendingFeedbackCovered": true,
+      "keyboardRepeatSuppressionCovered": true,
+      "designRunContinuityCovered": true,
+      "catalogOutcomeInventoryExact": true,
+      "integrationAndProductionDisabled": true,
+      "terminalCleanupCovered": true,
+      "postSettlementDoubleAnimationFrameObserved": true,
+      "queueRemainedTerminalAfterAnimationFrames": true,
+      "visibleFailureStateAsserted": false,
+      "successNavigationAsserted": false,
+      "directNetworkOrDomMutationUsed": false
+    },
+    "package": {
+      "appPackage": "@desen/app-web",
+      "browserPackage": "@desen/app-browser-e2e",
+      "referenceCatalogPackage": "@desen/reference-catalog-web",
+      "runtimeCorePackage": "@desen/runtime-core",
+      "focusedTestCommands": [
+        "pnpm --filter @desen/app-web exec vitest run test/authoring-connections.test.ts test/behavior-controls.test.tsx test/authoring-fixtures.test.ts",
+        "pnpm --filter @desen/reference-catalog-web exec vitest run test/interactive-components.test.tsx",
+        "pnpm --filter @desen/runtime-core exec vitest run test/operation-lifecycle.test.ts"
+      ],
+      "browserCommand": "pnpm --filter @desen/app-browser-e2e exec playwright test --config input-pending-playwright.config.ts",
+      "browserSuiteIncludesDedicatedConfig": true
+    },
+    "historicalReaderBridge": {
+      "path": "docs/proof/artifacts/desen-app-0.1.0-t01c-historical-reader-bridge.json.gz",
+      "bytes": 2307407,
+      "sha256": "16f6ec332fb03368e617563560b9930a7608594907ce61d5d15554be4dc7523d",
+      "uncompressedBytes": 4557796,
+      "baseCommit": "3814002f89ec8e75019431cd1475a98c97041b0c",
+      "fileEntries": 68,
+      "predecessorGapFiles": 4,
+      "successorAddedPaths": 2,
+      "projections": 1,
+      "canonicalDenseManifest": true,
+      "boundedGzip": true,
+      "parentProjectionAuthenticated": true
+    },
+    "bridgeReproduction": {
+      "exactBaseCommitGenerator": true,
+      "exclusiveDeterministicGzipWrite": true,
+      "successorAddedPathInventoryExact": true,
+      "historicalFixtureUsesBrandedSuccessor": true
+    }
+  },
+  "tests": {
+    "focusedCommands": [
+      "pnpm --filter @desen/app-web exec vitest run test/authoring-connections.test.ts test/behavior-controls.test.tsx test/authoring-fixtures.test.ts",
+      "pnpm --filter @desen/reference-catalog-web exec vitest run test/interactive-components.test.tsx",
+      "pnpm --filter @desen/runtime-core exec vitest run test/operation-lifecycle.test.ts"
+    ],
+    "browserCommand": "pnpm --filter @desen/app-browser-e2e exec playwright test --config input-pending-playwright.config.ts",
+    "verifierCommand": "node scripts/verify-desen-app-input-pending-fixture.mjs",
+    "proofReaderCommand": "node --test tests/desen-app-input-pending-fixture.test.mjs",
+    "rootTestNames": [
+      "[authority] authenticates the immutable M10-T01C parent without invoking its reader",
+      "[input] preserves complete controlled TextField values across incremental typing",
+      "[authoring] maps Press, Catalog inputs, reject concurrency, and Loading without JSON",
+      "[pending] exposes one real unresolved Runtime lifecycle through accessible Button feedback",
+      "[continuity] suppresses repeated activation and preserves pending values across Design and Run",
+      "[fixtures] derives synthetic-only outcomes from Catalog authority without reading operation input",
+      "[terminal] clears pending feedback without claiming visible failure or success navigation",
+      "[boundary] leaves T03, T04, production, N-036, P-09/P-10 closure, and G10 open",
+      "[determinism] builds byte-identical evidence with exact receipts and a bounded T01C bridge",
+      "[policy] rejects source, test, parent, bridge, artifact, report, option, and destination drift"
+    ],
+    "browserExecutedByVerifier": false,
+    "deterministicReaderStartsListener": false
+  },
+  "boundary": {
+    "trackedFiles": 25,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app-browser-e2e/input-pending-fixture.pw.ts",
+        "bytes": 9993,
+        "sha256": "7b7e15a026c874c524c085fa54ae2766c56738009077d2325fed660c81b55161"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/input-pending-playwright.config.ts",
+        "bytes": 1519,
+        "sha256": "8b61ec224f1cc7ace64bd789d3dd741fc7b9e5438c6a5a5143ace6498fa6b77f"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/package.json",
+        "bytes": 976,
+        "sha256": "e8effaf88a556d69dd3004460abb7c11d0964922babdc0d99a1793b10186f270"
+      },
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 4546,
+        "sha256": "c634b5ee1e2d2af0ffd6db8d4841215664591a31999210a8e0b388b71509eb32"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 147611,
+        "sha256": "2bf9104e177e81c5382b0f46262accbf44bfb070b5f6db102ae3e54c83c3b884"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-connections.ts",
+        "bytes": 27291,
+        "sha256": "e23337ebb85fdf43bb6c8370addd26526ecdf96a5b5afdf68ecd8f751b0767b2"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-fixtures.ts",
+        "bytes": 35852,
+        "sha256": "119620da01eb800874d75721a8aa06879cf8a90c669324333beb482c9c29831c"
+      },
+      {
+        "path": "apps/desen-app/src/behavior-controls.tsx",
+        "bytes": 36553,
+        "sha256": "5a26dde1c4a65071979421fdf36ecf5b738376e3692849bbda86d420052d4e8e"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-connections.test.ts",
+        "bytes": 22030,
+        "sha256": "aa1b5f927e05ebcf5283a17223071521d08f402f44403038251d77aaf10fe995"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-fixtures.test.ts",
+        "bytes": 17875,
+        "sha256": "4d917dc3839d1146377976054aed42a681d840edbb87d4065758186bee86512e"
+      },
+      {
+        "path": "apps/desen-app/test/behavior-controls.test.tsx",
+        "bytes": 20214,
+        "sha256": "16a02d066d6e8a43b43ed013c7847f2330fc6b7a4032ea0cb9a23ab034526857"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json",
+        "bytes": 19299,
+        "sha256": "779434ca834b8d770c726d905408f0a3d0a7145abbc6eaf2b81f1e77466b46ac"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-t01c-historical-reader-bridge.json.gz",
+        "bytes": 2307407,
+        "sha256": "16f6ec332fb03368e617563560b9930a7608594907ce61d5d15554be4dc7523d"
+      },
+      {
+        "path": "packages/reference-catalog-web/package.json",
+        "bytes": 2576,
+        "sha256": "da3f52307b1f5383d4b03b82257f1bcd0cb65902c208ba3f82fd5ffeeda1c1ca"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/button.tsx",
+        "bytes": 2893,
+        "sha256": "074edb6e4b8ce9c357fba77636a3e419ee278bc19b41f27ccebeb019d6e7ea72"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/text-field.tsx",
+        "bytes": 3747,
+        "sha256": "80e5d6713c96cfd7e867879aa3c6251f9f2a71b5cb48dc5460acdfecad989eb5"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/interactive-components.test.tsx",
+        "bytes": 10542,
+        "sha256": "da697e2be5210fe83d600c7fed48a28644f7383d1c4a09da7c0dbedcd7f27b07"
+      },
+      {
+        "path": "packages/runtime-core/package.json",
+        "bytes": 2138,
+        "sha256": "196c2d8d69d56415283535647657ccbda786d3e7600e3c1d3f1d41e34f7dd67e"
+      },
+      {
+        "path": "packages/runtime-core/src/operation-lifecycle.ts",
+        "bytes": 60095,
+        "sha256": "6572b542a95155e83e1bc9735eacb3003483b3f990343714492c1e55e6cbf258"
+      },
+      {
+        "path": "packages/runtime-core/test/operation-lifecycle.test.ts",
+        "bytes": 41336,
+        "sha256": "a4e380dbb478f28399b6adfed754803fef8ddb8dc8fb5c98ed27e5f169be4749"
+      },
+      {
+        "path": "scripts/generate-desen-app-input-pending-fixture-proof.mjs",
+        "bytes": 807,
+        "sha256": "d364453b74a24c2986b68a362c6bc18a901d11d7206f5a3fe6bdfaccf415cf35"
+      },
+      {
+        "path": "scripts/generate-desen-app-t01c-historical-reader-bridge.mjs",
+        "bytes": 4156,
+        "sha256": "640edcbcb68e55cd611af6cd8dceb9ac7a1a4a473bf6b4ecd94d5394050a14c3"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/verify-desen-app-input-pending-fixture.mjs",
+        "bytes": 863,
+        "sha256": "8b1376efaa717fdeb61b7fff8197433b9496121d1db6bfd070b69f660c991fb7"
+      },
+      {
+        "path": "tests/desen-app-t01c-historical-reader-fixture.mjs",
+        "bytes": 2329,
+        "sha256": "2062a449c9f0ef0abd6f21b8d416f4166da2425f0bbfbdfdc13cafd1f7872395"
+      }
+    ],
+    "parentArtifacts": 1,
+    "historicalReaderBridgeArtifacts": 1,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true,
+    "checkpointOwnedReaderPaths": [
+      "scripts/lib/desen-app-input-pending-fixture-proof.mjs",
+      "tests/desen-app-input-pending-fixture.test.mjs"
+    ],
+    "artifactTrackedEntrypoints": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/generate-desen-app-input-pending-fixture-proof.mjs",
+      "scripts/verify-desen-app-input-pending-fixture.mjs"
+    ]
+  },
+  "nonClaims": [
+    "M10-T02 proves complete controlled input, one real unresolved synthetic pending lifecycle, loading feedback, repeat suppression, Design/Run continuity, and generic terminal cleanup.",
+    "Selecting and settling a declared error only proves Catalog-derived fixture settlement; visible public failure-state behavior remains M10-T03.",
+    "Success, navigation, and a separately authorized real host operation remain M10-T04.",
+    "Integration and Production remain unavailable in this authoring fixture; production execution and N-036 are NOT_PROVEN.",
+    "P-09 and P-10 remain PARTIAL, G10 remains open, and local evidence does not imply hosted exact-head success.",
+    "The deterministic reader starts no Chromium, Vite, network listener, or external host."
+  ]
+}

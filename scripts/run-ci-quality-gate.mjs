@@ -504,6 +504,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-desen-app-evergreen-product-composition.mjs",
       "tests/desen-app-evergreen-product-composition.test.mjs",
     ],
+    [
+      "desen-app-input-pending-fixture",
+      "scripts/verify-desen-app-input-pending-fixture.mjs",
+      "tests/desen-app-input-pending-fixture.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -594,14 +599,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "eca887c765e85c1b2f06d9f9fc420bcf8af38248ecc546df0385fc6c256501d9";
+  "b3c8bb062a9df86e324f558d0a8c229ea34a7d6522d84653f262520ac8d83a5b";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "dd10d4bd859b4f4bbfb37b78f14810fd47bebac1e03551269a0e81ba9fd09d47";
+  "b0e63dd82840b141d7c8f3b6ae0e29013c88adf2e785f667e9ccb022cc9945c8";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "100e6af6e7c4c5cf6ba23999116b26a5af6321d8598aa00b3f56a9b0d3c2e920";
+  "3b811ef3d87e8647cf77055c6f06f1d55bbd4ee06a6f404c5d0398bb19462e08";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "1d82aaaefd82af63086e0a0ab892f92ae891895ace1878a63d249b7b97878e4c";
+const QUALITY_GATE_PLAN_SHA256 = "8690bb358c80f4f07ab38c889cee4bc97b81252cc85f52fc6cba4b59753e112b";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -626,7 +631,7 @@ const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = Object.freeze(
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
     [
       "test:e2e",
-      "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts",
+      "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts",
     ],
   ].map(([name, command]) => Object.freeze({ name, command })),
 );

@@ -27,6 +27,7 @@ const ROUTE = Object.freeze({
 const INPUT_RECIPE = Object.freeze({ stateName: "email" });
 const OPERATION_RECIPE = Object.freeze({
   alias: "signIn",
+  concurrency: "replace" as const,
   connectLoading: true,
   inputs: Object.freeze([
     Object.freeze({ inputName: "email", stateName: "email" }),
@@ -337,7 +338,39 @@ describe("Desen App atomic connection recipes", () => {
       expect(findNode(repeated.document, "sign-in.submit").on?.press).toHaveLength(2);
   });
 
-  it("rejects incomplete operation mappings and related-operation conflicts atomically", () => {
+  it("round-trips reject concurrency on append and rejects unknown policy atomically", () => {
+    const document = documentFrom(disconnectedOperationSource());
+    const before = canonicalizeJson(document);
+    const selection = selectionFor(document, "sign-in.submit");
+    const appended = applyAuthoringOperationTriggerConnection(
+      document,
+      referenceCatalog,
+      ROUTE,
+      selection,
+      { ...OPERATION_RECIPE, concurrency: "reject" },
+    );
+
+    expect(appended.ok).toBe(true);
+    if (!appended.ok) throw new Error(`Expected operation append, received ${appended.reason}.`);
+    expect(findNode(appended.document, "sign-in.submit").on?.press?.at(-1)).toMatchObject({
+      type: "operation.invoke",
+      concurrency: "reject",
+    });
+    expect(canonicalizeJson(document)).toBe(before);
+
+    const forged = applyAuthoringOperationTriggerConnection(
+      document,
+      referenceCatalog,
+      ROUTE,
+      selection,
+      { ...OPERATION_RECIPE, concurrency: "parallel" as never },
+    );
+    expect(forged).toEqual({ ok: false, reason: "recipe-invalid" });
+    expect(forged).not.toHaveProperty("document");
+    expect(canonicalizeJson(document)).toBe(before);
+  });
+
+  it("rejects incomplete operation mappings atomically", () => {
     const document = documentFrom(disconnectedOperationSource());
     const incomplete = applyAuthoringOperationTriggerConnection(
       document,
@@ -372,18 +405,6 @@ describe("Desen App atomic connection recipes", () => {
     expect(mismatched).toEqual({ ok: false, reason: "connection-incompatible" });
     expect(mismatched).not.toHaveProperty("document");
 
-    const official = documentFrom(officialSignInSource);
-    expect(
-      applyAuthoringOperationTriggerConnection(
-        official,
-        referenceCatalog,
-        ROUTE,
-        selectionFor(official, "sign-in.submit"),
-        OPERATION_RECIPE,
-      ),
-    ).toEqual({ ok: false, reason: "connection-conflict" });
-    expect(canonicalizeJson(official)).toBe(canonicalizeJson(documentFrom(officialSignInSource)));
-
     const accessorInputs: unknown[] = [];
     Object.defineProperty(accessorInputs, "0", {
       enumerable: true,
@@ -400,6 +421,101 @@ describe("Desen App atomic connection recipes", () => {
         { ...OPERATION_RECIPE, inputs: accessorInputs as never },
       ),
     ).toEqual({ ok: false, reason: "recipe-invalid" });
+  });
+
+  it("repairs one root invocation in place while preserving branches, guards, and extensions", () => {
+    const source = copyJson(officialSignInSource) as MutableJsonObject;
+    const layout = mutableNode(source, "sign-in.layout");
+    const slots = record(layout.slots, "layout slots");
+    slots.default = array(slots.default, "layout default").filter(
+      (child) => record(child, "layout child").id !== "sign-in.error",
+    );
+    const submit = mutableNode(source, "sign-in.submit");
+    const press = array(record(submit.on, "submit on").press, "submit press");
+    const invocation = record(press[0], "submit invocation");
+    invocation.onFailure = [{ type: "state.set", path: "email", value: "failed" }];
+    invocation.when = { op: "eq", args: [true, true] };
+    invocation.extensions = { "com.example.action": { retained: true } };
+    record(submit.on, "submit on").press = [
+      { type: "state.set", path: "email", value: "before" },
+      invocation,
+      { type: "state.set", path: "password", value: "after" },
+    ];
+    const document = documentFrom(source);
+    const before = canonicalizeJson(document);
+    const catalog = copyJson(referenceCatalog) as MutableJsonObject;
+    const operations = record(catalog.operations, "operations");
+    operations["com.example.auth/recover"] = copyJson(operations["com.example.auth/signIn"]);
+
+    const result = applyAuthoringOperationTriggerConnection(
+      document,
+      catalog,
+      ROUTE,
+      selectionFor(document, "sign-in.submit"),
+      {
+        ...OPERATION_RECIPE,
+        alias: "recover",
+        concurrency: "reject",
+        operationId: "com.example.auth/recover",
+      },
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(`Expected operation repair, received ${result.reason}.`);
+    expect(canonicalizeJson(document)).toBe(before);
+    const repaired = findNode(result.document, "sign-in.submit");
+    expect(repaired.props?.loading).toEqual({
+      $ref: "operation.recover.pending",
+      fallback: false,
+    });
+    expect(repaired.on?.press).toEqual([
+      { type: "state.set", path: "email", value: "before" },
+      {
+        type: "operation.invoke",
+        operation: "com.example.auth/recover",
+        as: "recover",
+        input: {
+          email: { $ref: "state.email" },
+          password: { $ref: "state.password" },
+        },
+        concurrency: "reject",
+        onSuccess: [{ type: "navigate", surface: "home" }],
+        onFailure: [{ type: "state.set", path: "email", value: "failed" }],
+        when: { op: "eq", args: [true, true] },
+        extensions: { "com.example.action": { retained: true } },
+      },
+      { type: "state.set", path: "password", value: "after" },
+    ]);
+  });
+
+  it("rejects multiple ambiguous root invocations without exposing a candidate", () => {
+    const source = copyJson(officialSignInSource) as MutableJsonObject;
+    const submit = mutableNode(source, "sign-in.submit");
+    const press = array(record(submit.on, "submit on").press, "submit press");
+    press.push({
+      type: "operation.invoke",
+      operation: "com.example.auth/signIn",
+      as: "backupSignIn",
+      input: {
+        email: { $ref: "state.email" },
+        password: { $ref: "state.password" },
+      },
+      concurrency: "queue",
+    });
+    const document = documentFrom(source);
+    const before = canonicalizeJson(document);
+
+    const result = applyAuthoringOperationTriggerConnection(
+      document,
+      referenceCatalog,
+      ROUTE,
+      selectionFor(document, "sign-in.submit"),
+      { ...OPERATION_RECIPE, alias: "authenticate", concurrency: "reject" },
+    );
+
+    expect(result).toEqual({ ok: false, reason: "connection-conflict" });
+    expect(result).not.toHaveProperty("document");
+    expect(canonicalizeJson(document)).toBe(before);
   });
 
   it("requires exact structured schema identity for operation input mappings", () => {

@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 200,
+  PROOF_UNIT: 202,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 32,
-  FROZEN_INPUT: 145,
-  PACKAGE_OR_APPLICATION: 528,
-  SHARED_PROOF_INFRASTRUCTURE: 257,
-  PROJECT_DOCUMENTATION: 137,
+  FROZEN_INPUT: 147,
+  PACKAGE_OR_APPLICATION: 530,
+  SHARED_PROOF_INFRASTRUCTURE: 261,
+  PROJECT_DOCUMENTATION: 138,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1355 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1366 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1355 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1355);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1366);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 200);
+  assert.equal(proofEntries.length, 202);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -300,6 +300,15 @@ test("permits strict selection only for exact verifier and root-test proof input
       "tests/desen-app-evergreen-product-composition.test.mjs",
     ],
   );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "desen-app-input-pending-fixture")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-desen-app-input-pending-fixture.mjs",
+      "tests/desen-app-input-pending-fixture.test.mjs",
+    ],
+  );
   for (const entry of proofEntries) {
     assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.SELECT_PROOF_UNIT);
     const verifier = nodeById.get(entry.verifierNodeId);
@@ -328,7 +337,7 @@ test("permits strict selection only for exact verifier and root-test proof input
   }
 });
 
-test("the reviewed M10-T01C successor preserves the historical I07-04 ownership projection", async () => {
+test("the reviewed M10-T02 successor preserves the historical I07-04 ownership projection", async () => {
   const currentPaths = await currentTrackedPaths();
   const current = createAffectedWorkloadOwnership(currentPaths);
   const promotedPaths = [
@@ -652,6 +661,17 @@ test("the reviewed M10-T01C successor preserves the historical I07-04 ownership 
     "scripts/verify-desen-app-evergreen-product-composition.mjs",
     "tests/desen-app-evergreen-product-composition.test.mjs",
     "tests/desen-app-historical-reader-fixture.mjs",
+    "apps/desen-app-browser-e2e/input-pending-fixture.pw.ts",
+    "apps/desen-app-browser-e2e/input-pending-playwright.config.ts",
+    "docs/proof/DESEN-APP-INPUT-PENDING-FIXTURE.md",
+    "docs/proof/artifacts/desen-app-0.1.0-input-pending-fixture.json",
+    "docs/proof/artifacts/desen-app-0.1.0-t01c-historical-reader-bridge.json.gz",
+    "scripts/generate-desen-app-input-pending-fixture-proof.mjs",
+    "scripts/generate-desen-app-t01c-historical-reader-bridge.mjs",
+    "scripts/lib/desen-app-input-pending-fixture-proof.mjs",
+    "scripts/verify-desen-app-input-pending-fixture.mjs",
+    "tests/desen-app-input-pending-fixture.test.mjs",
+    "tests/desen-app-t01c-historical-reader-fixture.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);
@@ -663,7 +683,7 @@ test("the reviewed M10-T01C successor preserves the historical I07-04 ownership 
   for (const successorPath of successorPaths) {
     assert.ok(
       current.entries.some(({ path: candidate }) => candidate === successorPath),
-      `${successorPath} must be tracked by the reviewed M10-T01C successor`,
+      `${successorPath} must be tracked by the reviewed M10-T02 successor`,
     );
   }
 

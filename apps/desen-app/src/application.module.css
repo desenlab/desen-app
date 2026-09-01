@@ -1521,12 +1521,14 @@
 }
 
 .behaviorControlRow,
+.operationConnectionForm,
 .visibilityForm {
   display: grid;
   gap: 0.4375rem;
 }
 
 .behaviorControlRow label,
+.operationConnectionForm label,
 .visibilityForm label {
   display: grid;
   gap: 0.25rem;
@@ -1536,6 +1538,8 @@
 }
 
 .behaviorControlRow select,
+.operationConnectionForm select,
+.operationConnectionForm input,
 .visibilityForm select,
 .visibilityForm input {
   width: 100%;
@@ -1565,6 +1569,7 @@
 }
 
 .behaviorControlRow button,
+.operationConnectionForm button,
 .visibilityForm button {
   min-height: 1.75rem;
   justify-self: start;
@@ -1580,6 +1585,7 @@
 }
 
 .behaviorControlRow button:disabled,
+.operationConnectionForm button:disabled,
 .visibilityForm button:disabled {
   cursor: default;
   opacity: 0.42;
@@ -1599,8 +1605,22 @@
   min-height: 0.75rem;
 }
 
+.operationPendingDisclosure {
+  margin: 0;
+  padding: 0.4375rem 0.5rem;
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+  line-height: 0.75rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.4375rem;
+}
+
 .behaviorControlRow select:focus-visible,
 .behaviorControlRow button:focus-visible,
+.operationConnectionForm select:focus-visible,
+.operationConnectionForm input:focus-visible,
+.operationConnectionForm button:focus-visible,
 .visibilityForm select:focus-visible,
 .visibilityForm input:focus-visible,
 .visibilityForm textarea:focus-visible,

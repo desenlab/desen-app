@@ -604,6 +604,46 @@ fail closed. The evidence is
 `scripts/verify-desen-app-evergreen-product-composition.mjs`. M10-T02 input/pending, M10-T03
 failure, M10-T04 real-host success/navigation, remote/multi-user persistence, and G10 remain open.
 
+M10-T02 closes the dedicated input and pending fixture slice through the normal product UI. A
+Button's **Operation connection** control selects one Catalog operation, suggests a result name
+that does not collide with any operation alias on the surface, maps declared inputs from
+schema-compatible local state, and chooses explicit concurrency. A state is suggested automatically
+only when its name exactly matches the input; compatible states with other names require an explicit
+choice. Connecting writes that root
+`operation.invoke` together with `operation.<alias>.pending` as the Button Loading value in one
+validated Source mutation; new connections default to **Ignore while running** (`reject`).
+
+Repair is intentionally lossless. One existing root invocation can change operation, result name,
+input mappings, and concurrency while retaining its action position, unrelated actions,
+success/failure branches, condition, and extensions. Optional inputs that were absent remain
+absent. A current input value that the visual selector cannot represent displays a blocking notice
+until the designer chooses a safe state mapping, and multiple root invocations remain an ambiguous
+advanced case instead of being guessed.
+
+Run still uses only the authenticated synthetic fixture context. Its outcome cards derive from the
+current Source alias and Catalog fixtures; Integration and Production remain unavailable. The
+fixture verifies document, surface, revision, capability, alias, and effect identity without
+reading or retaining operation input, and holds one unresolved Promise until explicit completion.
+The shared Button exposes pending as accessible busy/disabled/loading feedback, stays focused, and
+does not emit Press while Loading. Its concurrency option governs another invocation of the same
+result; it does not bypass that Button lock.
+
+The real Chromium acceptance journey starts from the visible blank project, uses **Set Secure**,
+proves the checked Source state renders a native `type=password` field, types both values in
+multiple chunks, connects the Button without JSON, and observes Runtime pending.
+It switches to queue after confirming the default so any leaked Enter activation remains observable,
+preserves complete values and pending across Design/Run, and explicitly completes the fixture. The
+terminal assertion waits two animation frames before requiring Loading cleanup, so a delayed queued
+invocation remains observable; it deliberately does not assert an Alert or navigation.
+Focused tests pass 82/82, Chromium passes 1/1, and the independent proof reader passes 10/10.
+
+Evidence is the 14,261-byte / 25-receipt
+`docs/proof/artifacts/desen-app-0.1.0-input-pending-fixture.json` at
+`sha256:161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d`. M10-T02 is `DONE`,
+but P-09 and P-10 remain `PARTIAL`: visible failure remains M10-T03, and success, navigation, and a
+separately authorized real host operation remain M10-T04. Production execution, remote or
+multi-user persistence, and G10 are not claimed.
+
 ## Local commands
 
 Install the package-pinned Chromium runtime once with
