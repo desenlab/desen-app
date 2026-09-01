@@ -168,6 +168,8 @@ jobs:
           node --test tests/desen-app-visual-behavior-authoring.test.mjs
           node scripts/verify-desen-app-evergreen-product-composition.mjs
           node --test tests/desen-app-evergreen-product-composition.test.mjs
+          node scripts/verify-desen-app-input-pending-fixture.mjs
+          node --test tests/desen-app-input-pending-fixture.test.mjs
 
       - name: Upload browser failure evidence
         if: ${{ failure() }}

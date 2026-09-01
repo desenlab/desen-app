@@ -8,7 +8,17 @@ import type { FormEvent } from "react";
 import type { JsonValue } from "@desen/catalog-sdk";
 import type { DesenEditorContentPredicate } from "@desen/editor-core";
 import type { AuthoringConditionEditResult } from "./authoring-conditions.js";
-import type { AuthoringConnectionResult } from "./authoring-connections.js";
+import type {
+  AuthoringConnectionResult,
+  AuthoringOperationTriggerConnectionRecipe,
+} from "./authoring-connections.js";
+import type {
+  AuthoringClosedAction,
+  AuthoringEventActionModelResult,
+  AuthoringOperationActionReferenceOption,
+  AuthoringSchemaFieldReferenceOption,
+  AuthoringStateActionReferenceOption,
+} from "./authoring-event-actions.js";
 import type {
   AuthoringInspectorModelResult,
   AuthoringInspectorStateOption,
@@ -146,6 +156,506 @@ export function InputConnectionControl({
       {notice.length === 0 ? null : (
         <p aria-live="polite" className={styles.behaviorNotice} role="status">
           {notice}
+        </p>
+      )}
+    </section>
+  );
+}
+
+type OperationAction = Extract<AuthoringClosedAction, { readonly type: "operation.invoke" }>;
+
+type OperationConnectionNotice =
+  | Readonly<{
+      readonly text: string;
+      readonly scope: Readonly<{ readonly kind: "authority"; readonly value: string }>;
+    }>
+  | Readonly<{
+      readonly text: string;
+      readonly scope: Readonly<{
+        readonly kind: "connection";
+        readonly value: string;
+        readonly settledAuthority: string | null;
+      }>;
+    }>;
+
+interface OperationConnectionControlProps {
+  readonly inspector: AuthoringInspectorModelResult;
+  readonly model: AuthoringEventActionModelResult;
+  readonly operationAliases: readonly AuthoringOperationAliasOption[];
+  readonly onConnect: (
+    recipe: AuthoringOperationTriggerConnectionRecipe,
+  ) => AuthoringConnectionResult;
+}
+
+function operationConnectionFailureMessage(result: AuthoringConnectionResult): string {
+  if (result.ok) return "";
+  if (result.reason === "connection-conflict") {
+    return "This press event already contains a conflicting operation. Review it in Actions first.";
+  }
+  if (result.reason === "connection-incompatible") {
+    return "Connect every required operation input to a compatible local state.";
+  }
+  if (result.reason === "operation-unavailable") {
+    return "That operation is no longer declared by the current Catalog.";
+  }
+  if (result.reason === "state-unavailable") return "One mapped state is no longer available.";
+  if (result.reason === "selection-invalid") return "This layer is no longer selected.";
+  return "The complete operation connection could not be applied safely.";
+}
+
+function suggestedOperationAlias(
+  operationId: string,
+  reservedAliases: readonly string[],
+  currentAlias: string | undefined,
+): string {
+  const segment = operationId.split("/").at(-1) ?? "operation";
+  const normalized = segment.replace(/[^A-Za-z0-9_-]/gu, "-");
+  const prefixed = /^[A-Za-z_]/u.test(normalized)
+    ? normalized
+    : normalized.length > 0
+      ? `operation-${normalized}`
+      : "operation";
+  const base = prefixed.slice(0, 128);
+  const reserved = new Set(reservedAliases.filter((alias) => alias !== currentAlias));
+  if (!reserved.has(base)) return base;
+  for (let index = 2; index <= reserved.size + 2; index += 1) {
+    const suffix = `-${index}`;
+    const candidate = `${base.slice(0, 128 - suffix.length)}${suffix}`;
+    if (!reserved.has(candidate)) return candidate;
+  }
+  return "";
+}
+
+function operationFieldAcceptsState(
+  field: AuthoringSchemaFieldReferenceOption,
+  state: AuthoringStateActionReferenceOption,
+): boolean {
+  if (field.valueKind === "structured" || state.valueKind === "structured") {
+    return (
+      field.valueKind === "structured" &&
+      state.valueKind === "structured" &&
+      field.schemaKey === state.schemaKey
+    );
+  }
+  return (
+    field.valueKind === state.valueKind ||
+    (field.valueKind === "number" && state.valueKind === "integer")
+  );
+}
+
+function rootPressOperation(model: AuthoringEventActionModelResult): OperationAction | null {
+  if (model.status !== "ready") return null;
+  const press = model.events.find(({ event }) => event === "press");
+  const operations = (press?.actionList.actions ?? []).flatMap(({ action }) =>
+    action.type === "operation.invoke" ? [action] : [],
+  );
+  return operations.length === 1 ? (operations[0] as OperationAction) : null;
+}
+
+function exactPendingReference(value: JsonValue, alias: string): boolean {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const object = value as Readonly<Record<string, JsonValue>>;
+  const keys = Object.keys(value).sort();
+  return (
+    keys.length === 2 &&
+    keys[0] === "$ref" &&
+    keys[1] === "fallback" &&
+    object.$ref === `operation.${alias}.pending` &&
+    object.fallback === false
+  );
+}
+
+function operationInputState(action: OperationAction | null, inputName: string): string | null {
+  const value = action?.input[inputName];
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  const object = value as Readonly<Record<string, JsonValue>>;
+  const keys = Object.keys(value);
+  const reference = keys.length === 1 && keys[0] === "$ref" ? object.$ref : null;
+  return typeof reference === "string" && reference.startsWith("state.")
+    ? reference.slice("state.".length)
+    : null;
+}
+
+function initialOperationMappings(
+  operation: AuthoringOperationActionReferenceOption,
+  states: readonly AuthoringStateActionReferenceOption[],
+  current: OperationAction | null,
+): Readonly<Record<string, string>> {
+  return Object.freeze(
+    Object.fromEntries(
+      operation.inputFields.map((field) => {
+        const compatible = states.filter((state) => operationFieldAcceptsState(field, state));
+        const currentState = operationInputState(current, field.value);
+        if (current !== null && current.operation === operation.value) {
+          if (!Object.hasOwn(current.input, field.value)) return [field.value, ""];
+          return [field.value, compatible.find(({ value }) => value === currentState)?.value ?? ""];
+        }
+        const selected = compatible.find(({ value }) => value === field.value)?.value ?? "";
+        return [field.value, selected];
+      }),
+    ),
+  );
+}
+
+function unrepresentableOperationInputNames(
+  operation: AuthoringOperationActionReferenceOption | undefined,
+  states: readonly AuthoringStateActionReferenceOption[],
+  current: OperationAction | null,
+): readonly string[] {
+  if (operation === undefined || current === null || current.operation !== operation.value) {
+    return Object.freeze([]);
+  }
+  const declaredInputNames = new Set(operation.inputFields.map(({ value }) => value));
+  return Object.freeze(
+    [
+      ...operation.inputFields.flatMap((field) => {
+        if (!Object.hasOwn(current.input, field.value)) return [];
+        const currentState = operationInputState(current, field.value);
+        return states.some(
+          (state) => state.value === currentState && operationFieldAcceptsState(field, state),
+        )
+          ? []
+          : [field.value];
+      }),
+      ...Object.keys(current.input).filter((inputName) => !declaredInputNames.has(inputName)),
+    ].sort(),
+  );
+}
+
+function operationConnectionSignature(
+  operationId: string,
+  alias: string,
+  concurrency: "queue" | "reject" | "replace" | undefined,
+  inputs: Readonly<Record<string, JsonValue>>,
+  loading: JsonValue | null,
+): string {
+  return JSON.stringify([
+    operationId,
+    alias,
+    concurrency ?? null,
+    Object.keys(inputs)
+      .sort()
+      .map((name) => [name, inputs[name]]),
+    loading,
+  ]);
+}
+
+function recipeConnectionSignature(recipe: AuthoringOperationTriggerConnectionRecipe): string {
+  return operationConnectionSignature(
+    recipe.operationId,
+    recipe.alias,
+    recipe.concurrency,
+    Object.fromEntries(
+      recipe.inputs.map(({ inputName, stateName }) => [
+        inputName,
+        Object.freeze({ $ref: `state.${stateName}` }),
+      ]),
+    ),
+    recipe.connectLoading
+      ? Object.freeze({ $ref: `operation.${recipe.alias}.pending`, fallback: false })
+      : null,
+  );
+}
+
+/** No-code press → operation recipe with a real Runtime-backed pending/loading connection. */
+export function OperationConnectionControl({
+  inspector,
+  model,
+  operationAliases: surfaceOperationAliases,
+  onConnect,
+}: Readonly<OperationConnectionControlProps>) {
+  const press =
+    model.status === "ready" ? model.events.find(({ event }) => event === "press") : null;
+  const loadingField =
+    inspector.status === "ready"
+      ? inspector.fields.find(
+          ({ control }) => control.valuePointer === "/loading" && control.kind === "boolean",
+        )
+      : undefined;
+  const operations = model.status === "ready" ? model.referenceOptions.operations : [];
+  const states = model.status === "ready" ? model.referenceOptions.states : [];
+  const current = rootPressOperation(model);
+  const reservedAliases = surfaceOperationAliases.map(({ alias }) => alias);
+  const defaultOperation =
+    operations.find(({ value }) => value === current?.operation) ?? operations[0];
+  const [operationId, setOperationId] = useState(defaultOperation?.value ?? "");
+  const [alias, setAlias] = useState(
+    current?.as ??
+      (defaultOperation === undefined
+        ? ""
+        : suggestedOperationAlias(defaultOperation.value, reservedAliases, current?.as)),
+  );
+  const [concurrency, setConcurrency] = useState<"queue" | "reject" | "replace">(
+    current?.concurrency ?? "reject",
+  );
+  const [mappings, setMappings] = useState<Readonly<Record<string, string>>>(() =>
+    defaultOperation === undefined
+      ? Object.freeze({})
+      : initialOperationMappings(defaultOperation, states, current),
+  );
+  const [notice, setNotice] = useState<OperationConnectionNotice | null>(null);
+  const selectedOperation = operations.find(({ value }) => value === operationId);
+  const unrepresentableInputs = unrepresentableOperationInputNames(
+    selectedOperation,
+    states,
+    current,
+  ).filter((inputName) => (mappings[inputName] ?? "").length === 0);
+  const loadingConnected =
+    current !== null &&
+    loadingField?.value.kind === "dynamic" &&
+    exactPendingReference(loadingField.value.value, current.as);
+  const ownerId = model.status === "ready" ? model.owner.ownerId : null;
+  const currentConnectionSignature =
+    current === null
+      ? ""
+      : operationConnectionSignature(
+          current.operation,
+          current.as,
+          current.concurrency,
+          current.input,
+          loadingField?.value.kind === "dynamic" ? loadingField.value.value : null,
+        );
+  const authoritySignature = JSON.stringify([
+    ownerId,
+    currentConnectionSignature,
+    operations.map(({ inputFields, value }) => [
+      value,
+      inputFields.map(({ required, schemaKey, value: field, valueKind }) => [
+        field,
+        required,
+        valueKind,
+        schemaKey,
+      ]),
+    ]),
+    states.map(({ schemaKey, value, valueKind }) => [value, valueKind, schemaKey]),
+    surfaceOperationAliases.map(({ alias, operationId }) => [alias, operationId]),
+  ]);
+
+  useEffect(() => {
+    const nextOperation =
+      operations.find(({ value }) => value === current?.operation) ?? operations[0];
+    setOperationId(nextOperation?.value ?? "");
+    setAlias(
+      current?.as ??
+        (nextOperation === undefined
+          ? ""
+          : suggestedOperationAlias(nextOperation.value, reservedAliases, current?.as)),
+    );
+    setConcurrency(current?.concurrency ?? "reject");
+    setMappings(
+      nextOperation === undefined
+        ? Object.freeze({})
+        : initialOperationMappings(nextOperation, states, current),
+    );
+    setNotice((currentNotice) => {
+      if (currentNotice === null) return null;
+      if (currentNotice.scope.kind === "authority") {
+        return currentNotice.scope.value === authoritySignature ? currentNotice : null;
+      }
+      if (currentNotice.scope.value !== currentConnectionSignature) return null;
+      if (currentNotice.scope.settledAuthority === null) {
+        return Object.freeze({
+          ...currentNotice,
+          scope: Object.freeze({
+            ...currentNotice.scope,
+            settledAuthority: authoritySignature,
+          }),
+        });
+      }
+      return currentNotice.scope.settledAuthority === authoritySignature ? currentNotice : null;
+    });
+  }, [authoritySignature]);
+
+  if (
+    model.status !== "ready" ||
+    inspector.status !== "ready" ||
+    press === undefined ||
+    loadingField === undefined ||
+    operations.length === 0
+  ) {
+    return null;
+  }
+
+  const missingRequired =
+    selectedOperation?.inputFields.some(
+      (field) => field.required && (mappings[field.value] ?? "").length === 0,
+    ) ?? true;
+  const aliasValid = /^[A-Za-z_][A-Za-z0-9_-]{0,127}$/u.test(alias);
+  const aliasAvailable = alias === current?.as || !reservedAliases.includes(alias);
+
+  return (
+    <section aria-label="Operation connection" className={styles.behaviorCard}>
+      <div className={styles.behaviorCardHeading}>
+        <span>
+          <strong>Operation connection</strong>
+          <small>Press &amp; pending</small>
+        </span>
+        <span className={styles.behaviorStatus} data-connected={loadingConnected}>
+          {loadingConnected ? "Connected" : "Not connected"}
+        </span>
+      </div>
+      <p>
+        Invokes one Catalog operation from Press and reflects its real pending lifecycle through
+        this component&apos;s Loading property.
+      </p>
+      <div className={styles.operationConnectionForm}>
+        <label>
+          <span>Catalog operation</span>
+          <select
+            aria-label="Operation connection Catalog operation"
+            onChange={(event) => {
+              const next = operations.find(({ value }) => value === event.currentTarget.value);
+              if (next === undefined) return;
+              setOperationId(next.value);
+              setAlias(suggestedOperationAlias(next.value, reservedAliases, current?.as));
+              setMappings(
+                initialOperationMappings(
+                  next,
+                  states,
+                  next.value === current?.operation ? current : null,
+                ),
+              );
+              setNotice(null);
+            }}
+            value={operationId}
+          >
+            {operations.map((operation) => (
+              <option key={operation.value} value={operation.value}>
+                {operation.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>Result name</span>
+          <input
+            aria-label="Operation connection result name"
+            onChange={(event) => {
+              setAlias(event.currentTarget.value);
+              setNotice(null);
+            }}
+            type="text"
+            value={alias}
+          />
+        </label>
+        {aliasAvailable ? null : (
+          <p className={styles.operationPendingDisclosure} role="alert">
+            This result name is already used on this surface. Choose a unique name.
+          </p>
+        )}
+        {selectedOperation?.inputFields.map((field) => {
+          const compatibleStates = states.filter((state) =>
+            operationFieldAcceptsState(field, state),
+          );
+          return (
+            <label key={field.value}>
+              <span>
+                {field.label} {field.required ? <small>Required</small> : <small>Optional</small>}
+              </span>
+              <select
+                aria-label={`Operation connection ${field.label}`}
+                onChange={(event) => {
+                  const stateName = event.currentTarget.value;
+                  setMappings((currentMappings) =>
+                    Object.freeze({
+                      ...currentMappings,
+                      [field.value]: stateName,
+                    }),
+                  );
+                  setNotice(null);
+                }}
+                value={mappings[field.value] ?? ""}
+              >
+                <option value="">Choose state…</option>
+                {compatibleStates.map((state) => (
+                  <option key={state.value} value={state.value}>
+                    {state.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          );
+        })}
+        <label>
+          <span>If operation is already running</span>
+          <select
+            aria-label="Operation connection concurrency"
+            onChange={(event) => {
+              setConcurrency(event.currentTarget.value as "queue" | "reject" | "replace");
+              setNotice(null);
+            }}
+            value={concurrency}
+          >
+            <option value="reject">Ignore while running</option>
+            <option value="replace">Replace current run</option>
+            <option value="queue">Queue another run</option>
+          </select>
+        </label>
+        {unrepresentableInputs.length === 0 ? null : (
+          <p className={styles.operationPendingDisclosure} role="alert">
+            Advanced input values are preserved. Choose replacement states for{" "}
+            {unrepresentableInputs.join(", ")} before repairing, or keep them unchanged in Actions.
+          </p>
+        )}
+        <p className={styles.operationPendingDisclosure}>
+          Pending → Loading · this control blocks activation while pending. Concurrency governs
+          another invocation of the same result.
+        </p>
+        <button
+          disabled={
+            selectedOperation === undefined ||
+            missingRequired ||
+            unrepresentableInputs.length > 0 ||
+            !aliasValid ||
+            !aliasAvailable
+          }
+          onClick={() => {
+            if (selectedOperation === undefined) return;
+            const recipe = Object.freeze({
+              alias,
+              concurrency,
+              connectLoading: true,
+              inputs: Object.freeze(
+                selectedOperation.inputFields.flatMap((field) => {
+                  const stateName = mappings[field.value] ?? "";
+                  return stateName.length === 0
+                    ? []
+                    : [Object.freeze({ inputName: field.value, stateName })];
+                }),
+              ),
+              operationId: selectedOperation.value,
+            });
+            const result = onConnect(recipe);
+            setNotice(
+              result.ok
+                ? Object.freeze({
+                    text: `Connected Press, operation.${alias}, and Loading pending.`,
+                    scope: Object.freeze({
+                      kind: "connection" as const,
+                      value: recipeConnectionSignature(recipe),
+                      settledAuthority:
+                        recipeConnectionSignature(recipe) === currentConnectionSignature
+                          ? authoritySignature
+                          : null,
+                    }),
+                  })
+                : Object.freeze({
+                    text: operationConnectionFailureMessage(result),
+                    scope: Object.freeze({
+                      kind: "authority" as const,
+                      value: authoritySignature,
+                    }),
+                  }),
+            );
+          }}
+          type="button"
+        >
+          {loadingConnected ? "Repair operation" : "Connect operation"}
+        </button>
+      </div>
+      {notice === null ? null : (
+        <p aria-live="polite" className={styles.behaviorNotice} role="status">
+          {notice.text}
         </p>
       )}
     </section>

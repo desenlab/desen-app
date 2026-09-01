@@ -1314,3 +1314,57 @@ and closes at `sha256:3bf2c27ca51f8ab6751dd0d026bbbf461ac2c6acea6fcc3088f7d011ae
 with 54 frozen artifacts and 108 current readers. The checkpoint suite passes 89/89, while the
 sixteen exact historical App reader/root pairs pass 242/242. This is local reader authority and
 makes no hosted exact-head claim.
+
+## M10-T02 input and pending fixture testing
+
+M10-T02 keeps visual recipe, shared component, Runtime lifecycle, browser, and deterministic-proof
+responsibilities independently observable. The focused 82-case slice contains 9
+authoring-connection cases, 11 behavior-control cases, 15 synthetic fixture cases, 11 shared
+interactive-component cases, and 36 Runtime operation-lifecycle cases.
+
+Connection tests prove one atomic operation/Loading mutation, explicit reject/replace/queue values,
+exact repair position, preservation of unrelated actions, settlement programs, guard, and
+extensions, and no mutation for multiple ambiguous root invocations. Control tests cover semantic
+rerendering, collision-free aliases across the whole surface, manually reserved alias rejection,
+exact-name-only automatic state suggestion, optional-input absence, and loss-prevention for both
+declared and additional advanced input values.
+Fixture tests derive outcomes from Catalog authority, keep request inputs opaque, and revoke pending
+work on deactivation, replacement, and disposal. Shared component and Runtime tests separately
+prove complete plain/secure input emission, focus-preserving accessible Loading, activation
+suppression, synchronous pending publication, and reject concurrency.
+
+The dedicated Chromium configuration runs one normal-product scenario from the visible zero-project
+state. It creates the blank project, states, two TextFields, and a Button; uses visible **Set
+Secure**, requires the authored toggle to be checked and the rendered field to be native
+`type=password`; uses visual input and operation controls; and types both values in multiple
+chunks. It verifies that only Synthetic is
+available, selects one exact Catalog-derived declared error, and observes an unresolved Promise
+through Runtime pending, disabled outcome selection, enabled explicit completion, and Button
+busy/disabled/loading attributes. After confirming the default reject choice, it deliberately sets
+queue before activation and presses Enter while the focused Button is busy. Any leaked Press would
+therefore become a second pending invocation after settlement and fail terminal assertions rather
+than disappearing behind reject behavior.
+
+The browser keeps complete input values and pending state across Design → Run, then explicitly
+completes the fixture and waits two animation frames before requiring terminal Loading cleanup.
+That delay makes a queued invocation observable; no Alert visibility or navigation is asserted. The
+scenario passes 1/1. The deterministic verifier remains passive, and its independent
+root mutation suite passes 10/10; neither starts Chromium, Vite, a listener, or an external host.
+
+The 14,261-byte / 25-receipt artifact
+`docs/proof/artifacts/desen-app-0.1.0-input-pending-fixture.json` is pinned at
+`sha256:161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d`. A bounded canonical
+gzip bridge separately authenticates the M10-T01C historical task-time inputs: its 2,307,407 bytes
+are pinned at `sha256:16f6ec332fb03368e617563560b9930a7608594907ce61d5d15554be4dc7523d`
+before decompression and defensive projection. The current neutral inventory contains 212
+workloads / 101 proof units; the App closure contains 69 proof units / 148 workloads, and ownership
+covers 1,366 tracked paths / 202 proof-owned paths.
+
+Checkpoint sequence 67 preserves sequences 1–66 and closes 55 artifacts / 110 readers at
+`sha256:9ee6909c0f11ed7149cb9bf6ce1c7943ed99aac2d2c6f9138caea8f5dd2044b7`; its dedicated suite
+passes 90/90. This authenticates reader identity and impact only; it does not cache a workload pass.
+
+These checks close only M10-T02. P-09 and P-10 remain `PARTIAL`; M10-T03 still owns visible public
+failure, M10-T04 owns success/navigation and a separately authorized real host operation, and G10
+remains open. A local result never substitutes for the hosted exact-head `Quality gate` required
+before merge.

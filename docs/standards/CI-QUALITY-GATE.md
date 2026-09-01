@@ -1374,3 +1374,38 @@ corrective head requires both hosted `Quality gate` and `Browser E2E`, followed 
 head's hosted workflows; this requirement does not reopen the already completed M10-T01B task. The
 fixed-port local-launcher test may remain excluded while the user's deliberate port-5173 product
 session is active; this environmental exclusion is not allowed on the clean hosted runner.
+
+## M10-T02 input/pending CI authority
+
+M10-T02 registers `desen-app-input-pending-fixture` as an ordinary proof pair and adds its dedicated
+Chromium configuration to the existing Browser E2E package command. The hosted workflow executes
+the browser journey and then runs the passive deterministic verifier and independent root mutation
+suite. Integration and Production remain unavailable in that journey; no CI registration grants a
+real host-operation authority or closes M10-T03/M10-T04.
+
+The neutral exhaustive authority contains 212 workloads / 101 proof units, 4,533 leaf invocations,
+and 323 distinct leaves at
+`sha256:ed6bf5f52f7d6d077e0aa126f16ff88aff21d4d95f512e2274b7d4382f02e41f`. Its semantic impact
+graph is `sha256:2f7840677851aed7c0e282a0b18bf36fc2f624cf0d051f7c5f7d1e4cf9a41c9f`; the App/T02 closure
+contains 69 proof units / 148 workloads. Exact-one ownership covers 1,366 tracked paths, including
+202 proof-owned paths, at path-set
+`sha256:7c0ac5595f62da961a40b7a96b74373a0060427c45ddfa66fb30165696964108` and authority
+`sha256:84d6dc6c09ea316ea93b41bb407d1d8972a3ad4312f0423d8ca7262e443f95b3`.
+
+Reviewed checkpoint sequence 67 preserves sequences 1–66 and all 54 predecessor artifacts, adds
+the 14,261-byte M10-T02 artifact at
+`sha256:161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d`, reseals only the
+T01C proof/root readers `[106, 107]`, and appends the T02 proof/root readers `[108, 109]`. The
+resulting 55-artifact / 110-reader authority closes at
+`sha256:9ee6909c0f11ed7149cb9bf6ce1c7943ed99aac2d2c6f9138caea8f5dd2044b7` and passes 90/90.
+Promotion pins the affected selector at
+`sha256:2d83c5824bfe19b645ca5f05c3e38340e2079785d2945e444996f5712d6e14a3` and the
+required-affected runner at
+`sha256:70e92b42d05a3745ffca73394ea6a9d001af47e92132532abc0d5d2eb8e11a08`.
+
+Shared-state metadata remains explicit for every workload: 90 ordinary and eleven barrier proof
+units, 90 OS-temporary roots, 88 read-only proof units, and 103 OS-temporary-isolated proof units.
+M10-T02 removes no workload, barrier, timeout, isolation rule, closing guard, or fresh hosted
+execution. Local checkpoint and selector receipts are identity/impact authority only; merge still
+requires the hosted `Quality gate` for the exact pull-request head, and the browser claim still
+requires the hosted `Browser E2E` job for that same head.

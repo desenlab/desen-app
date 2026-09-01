@@ -1249,6 +1249,35 @@ bağı downstream yetki verilmeden reddedilir. Kanıt eseri
 input/pending, M10-T03'ün failure veya M10-T04'ün gerçek host success/navigation kanıtını kapatmaz.
 Genel ilerleme 113/148 (%76), M10 4/12'dir; M10-T02 `NOT_STARTED` ve sıradaki görevdir.
 
+M10-T02 `DONE` durumundadır. Normal ürün arayüzünde boş projeden başlayarak iki kontrollü
+TextField'ın tam değeri local state'e bağlanır ve Button, JSON yazmadan Catalog'da tanımlı bir
+operation'a eşlenir. Tek doğrulanan tarif; uyumlu input eşlemelerini, çakışmayan result alias'ını,
+seçilen concurrency davranışını ve `operation.<alias>.pending` Loading bağını birlikte yazar. State
+yalnızca input adıyla birebir eşleştiğinde otomatik önerilir; sadece şema uyumu tasarımcı adına
+eşleme tahmin etmek için kullanılmaz.
+Mevcut operation onarılırken ilgisiz aksiyonlar, success/failure dalları, guard ve extension'lar
+korunur; boş optional input boş kalır, görsel alanın temsil edemediği gelişmiş değer ise veri
+kaybına yol açmadan Repair'i durdurur.
+
+Gerçek Chromium senaryosu görünür **Set Secure** kontrolünü kullanır, seçimin etkin ve çıktıdaki
+şifre input'unun native `type=password` olduğunu doğrular, iki değeri de parça parça yazar ve
+çözülmemiş gerçek Runtime Promise'ini pending olarak gözlemler. Button erişilebilir busy/disabled
+durumuna geçer, tekrar aktivasyon engellenir ve değerler ile pending Design → Run geçişinde
+korunur. Explicit fixture completion iki animation frame boyunca terminal kalır ve yalnızca genel
+temizliği kanıtlar: Loading kalkar, fakat Alert veya navigasyon iddiası yapılmaz. Odaklı testler
+82/82, Chromium 1/1 ve bağımsız kök okuyucu 10/10 geçer. 25 kesin kayıt taşıyan 14.261 baytlık kanıt
+`sha256:161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d`, 2.307.407 baytlık
+sınırlı tarihsel köprü ise
+`sha256:16f6ec332fb03368e617563560b9930a7608594907ce61d5d15554be4dc7523d` ile sabittir.
+Eklemeli checkpoint sequence 67, sequence 1–66'yı korur ve 55 artifact / 110 reader zincirini
+`sha256:9ee6909c0f11ed7149cb9bf6ce1c7943ed99aac2d2c6f9138caea8f5dd2044b7` ile kapatır; 90/90
+kontrol geçer.
+
+P-09 ve P-10 `PARTIAL` kalır. Görünür hata M10-T03'ün; başarı, navigasyon ve ayrı yetkilendirilmiş
+gerçek host operation M10-T04'ün kapsamıdır. Integration, Production, N-036 ve G10 hâlâ açıktır.
+Genel ilerleme 114/148 (%77), M10 5/12 (%42) olur; sıradaki görev M10-T03'tür. Yerel kanıtlar bu
+head için hosted `Quality gate` başarısı anlamına gelmez.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

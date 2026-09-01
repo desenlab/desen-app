@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████████░░░░░░` **113 / 148 tasks complete (76%)**
+**Overall:** `███████████████████░░░░░░` **114 / 148 tasks complete (77%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -26,9 +26,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `████░░░░░░░░` **4 / 12 tasks complete (33%)**
+**M10:** `█████░░░░░░░` **5 / 12 tasks complete (42%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T01C:** `DONE` · **Next:** `M10-T02`
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T02:** `DONE` · **Next:** `M10-T03`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -1239,6 +1239,39 @@ Chromium command passes 1/1 + 1/1 locally, but no hosted exact-head success is i
 M10-T01B is `DONE`; implementation progress is 112/147 (76%), M10 is 3/11, and M10-T02 remains
 `NOT_STARTED` and next. Dedicated M10-T02/T03 lifecycle matrices, M10-T04 real-host operation
 evidence, remote deployment, multi-user persistence, and G10 remain open.
+
+**M10-T02 checkpoint:** the normal product now proves complete controlled input and one real
+unresolved Runtime pending lifecycle through visible no-code controls. The operation recipe maps
+Catalog inputs from compatible local state, chooses a collision-free result alias and explicit
+concurrency, and writes the Button Loading reference atomically. It suggests a state automatically
+only when the state and input names match exactly. Repair preserves unrelated
+actions, settlement branches, guards, and extensions; absent optional inputs stay absent, while an
+advanced value that visual controls cannot represent blocks Repair instead of losing data.
+
+The dedicated Chromium journey starts from the visible blank-project flow, uses **Set Secure** and
+checks the rendered password input is native `type=password`, types both values in multiple chunks,
+selects the Catalog-derived synthetic outcome, and observes the unresolved Promise through Runtime
+pending and accessible Button loading. It confirms the
+default repeat policy, selects queue so a leaked activation would remain observable, presses Enter
+while the focused Button is busy, and preserves both values and pending state across Design/Run.
+Explicit completion stays terminal across two animation frames, then clears loading without
+asserting an Alert or navigation. Focused coverage
+passes 82/82, Chromium passes 1/1, and the independent root reader passes 10/10.
+
+The deterministic 14,261-byte / 25-receipt artifact is
+`docs/proof/artifacts/desen-app-0.1.0-input-pending-fixture.json` at
+`sha256:161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d`. Its bounded
+2,307,407-byte historical bridge is pinned at
+`sha256:16f6ec332fb03368e617563560b9930a7608594907ce61d5d15554be4dc7523d` without rewriting the
+immutable M10-T01C predecessor. The neutral CI universe contains 212 workloads / 101 proof units;
+the App closure contains 69 proof units / 148 workloads, and exact-one ownership covers 1,366
+tracked paths / 202 proof-owned paths. Checkpoint sequence 67 preserves sequences 1–66 and closes
+the 55-artifact / 110-reader chain at
+`sha256:9ee6909c0f11ed7149cb9bf6ce1c7943ed99aac2d2c6f9138caea8f5dd2044b7` with 90/90 passing
+cases. M10-T02 is `DONE`; progress is 114/148 (77%), M10 is 5/12
+(42%), and M10-T03 is next. P-09 and P-10 remain `PARTIAL`; visible failure remains M10-T03,
+success/navigation and a separately authorized real host operation remain M10-T04, and G10 stays
+open. Local receipts do not imply a hosted exact-head `Quality gate` pass.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

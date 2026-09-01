@@ -1890,6 +1890,48 @@ routes, and a host id outside the publication binding fail closed before downstr
 I/O. This establishes an evergreen composition seam, not arbitrary executable-code selection,
 remote project discovery, multi-user workspace storage, or the later M10 lifecycle/G10 claims.
 
+## M10-T02 input and pending fixture boundary
+
+M10-T02 connects normal-product visual authoring to the existing generic Runtime lifecycle without
+adding a sign-in execution branch. `OperationConnectionControl` projects only the selected
+component's Catalog-declared event, the current surface's operation inventory, schema-compatible
+local state, and all reserved surface aliases. Its App-owned recipe crosses the public Editor Core
+mutation boundary once, writing one root `operation.invoke` plus the component's
+`operation.<alias>.pending` Loading reference as a validated Source update.
+Schema compatibility determines which mappings are legal, but an automatic state suggestion is
+made only when the state and input names match exactly; similar names never grant intent.
+
+New recipes default to Runtime's `reject` concurrency. Repair is admitted only for exactly one root
+invocation and retains its position, unrelated ordered actions, success/failure programs, guard,
+and extensions while changing only operation, alias, declared input mappings, and concurrency.
+Missing optional inputs remain absent. A declared or additional existing input whose value cannot
+be represented by the visual state selector blocks repair until the designer supplies an explicit
+replacement; multiple root invocations remain ambiguous and fail closed. Alias suggestion consults
+the complete surface inventory, not only the selected component's handler.
+
+The Loading reference does not grant operation authority. Runtime still authenticates the exact
+Source action and publishes pending synchronously before host transport. The shared reference
+Button renders that value as `aria-busy`, `aria-disabled`, and `data-loading`, preserves focus, and
+suppresses its own Press while busy. Concurrency governs another admitted invocation of the same
+result alias; it is not a bypass around the Button lock. The shared controlled TextField emits the
+complete current native string on each change for both plain and secure inputs.
+
+Authoring Run stays inside the M10-T01C synthetic host. Outcome inventory comes from the exact
+current Source alias and authenticated Catalog fixture, and the fixture controller verifies
+document, surface, revision, capability, alias, and effect authority without observing or retaining
+operation input. Its unresolved Promise is released only by explicit completion; deactivation,
+replacement, or disposal revokes pending authority.
+
+After settlement, the browser defers terminal assertions across two animation frames. This keeps a
+delayed queued invocation observable instead of allowing immediate cleanup assertions to conceal
+it.
+
+M10-T02 proves complete input, pending publication, accessible Loading, repeat suppression,
+Design/Run continuity, and generic terminal cleanup. Selecting a declared error does not grant a
+visible failure claim: M10-T03 owns Alert/error presentation. M10-T04 still owns success,
+navigation, and a separately authorized real host operation. Integration, Production, N-036,
+P-09/P-10 closure, and G10 remain outside this boundary.
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific

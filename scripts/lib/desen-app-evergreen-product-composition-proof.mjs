@@ -19,6 +19,18 @@ const PROOF_DOCUMENT_RELATIVE_PATH = "docs/proof/DESEN-APP-EVERGREEN-PRODUCT-COM
 const PARENT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json";
 const HISTORICAL_READER_BRIDGE_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-t01b-historical-reader-bridge.json.gz";
+const T01C_HISTORICAL_READER_BRIDGE_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-t01c-historical-reader-bridge.json.gz";
+const T01C_PREDECESSOR_GAP_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/package.json",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/behavior-controls.tsx",
+  "apps/desen-app/test/authoring-connections.test.ts",
+]);
+const T01C_SUCCESSOR_ADDED_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/input-pending-fixture.pw.ts",
+  "apps/desen-app-browser-e2e/input-pending-playwright.config.ts",
+]);
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const MAX_HISTORICAL_BRIDGE_BYTES = 4 * 1_024 * 1_024;
 const MAX_HISTORICAL_BRIDGE_INFLATED_BYTES = 8 * 1_024 * 1_024;
@@ -198,6 +210,19 @@ export const DESEN_APP_T01B_HISTORICAL_READER_BRIDGE_PIN = Object.freeze({
   projections: 15,
 });
 
+/** Exact M10-T01C task-time authority consumed only after authenticating the M10-T02 successor. */
+export const DESEN_APP_T01C_HISTORICAL_READER_BRIDGE_PIN = Object.freeze({
+  path: T01C_HISTORICAL_READER_BRIDGE_PATH,
+  bytes: 2_307_407,
+  sha256: "16f6ec332fb03368e617563560b9930a7608594907ce61d5d15554be4dc7523d",
+  uncompressedBytes: 4_557_796,
+  baseCommit: "3814002f89ec8e75019431cd1475a98c97041b0c",
+  fileEntries: 68,
+  predecessorGapFiles: 4,
+  successorAddedPaths: 2,
+  projections: 1,
+});
+
 const HISTORICAL_READER_PROOF_IDS = Object.freeze([
   "desen-app-catalog-panel-layer-tree",
   "desen-app-design-run-modes",
@@ -217,6 +242,44 @@ const HISTORICAL_READER_PROOF_IDS = Object.freeze([
 ]);
 const HISTORICAL_BRIDGE_AUTHORITIES = new WeakMap();
 let cachedHistoricalBridgeAuthority;
+
+async function authenticateInputPendingFixtureSuccessor(workspaceRoot) {
+  let successorModule;
+  try {
+    successorModule = await import("./desen-app-input-pending-fixture-proof.mjs");
+  } catch (error) {
+    if (error?.code === "ERR_MODULE_NOT_FOUND") {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "Historical T01C compatibility requires the official M10-T02 successor reader.",
+        { cause: String(error) },
+      );
+    }
+    throw error;
+  }
+  const authenticate = successorModule.authenticateDesenAppInputPendingFixtureSuccessor;
+  const materialize = successorModule.materializeDesenAppT01cHistoricalReaderFileOverrides;
+  const readTaskTimeFile = successorModule.readDesenAppT01cHistoricalReaderTaskTimeFile;
+  if (
+    typeof authenticate !== "function" ||
+    typeof materialize !== "function" ||
+    typeof readTaskTimeFile !== "function"
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The official M10-T02 successor reader does not expose the T01C bridge contract.",
+    );
+  }
+  let successor;
+  try {
+    successor = await authenticate({ workspaceRoot });
+  } catch (error) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The official M10-T02 successor was not authenticated.", {
+      cause: String(error),
+    });
+  }
+  return Object.freeze({ materialize, readTaskTimeFile, successor });
+}
 
 /** Stable fail-closed error raised by the M10-T01C evidence reader. */
 export class DesenAppEvergreenProductCompositionProofError extends Error {
@@ -881,7 +944,31 @@ async function canonicalArtifactBytes(artifact) {
 /** Builds detached deterministic M10-T01C evidence from exact current authorities. */
 export async function buildDesenAppEvergreenProductCompositionEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
-  const files = await acquireFiles(options);
+  const inputPendingSuccessor = await authenticateInputPendingFixtureSuccessor(
+    options.workspaceRoot,
+  );
+  const files = await acquireFiles(
+    Object.freeze({
+      ...options,
+      fileOverrides: inputPendingSuccessor.materialize(
+        inputPendingSuccessor.successor,
+        options.fileOverrides,
+      ),
+    }),
+  );
+  if (options.fileOverrides.size === 0) {
+    const frozenBytes = await readRegularAuthority(
+      path.join(options.workspaceRoot, ARTIFACT_RELATIVE_PATH),
+      ARTIFACT_RELATIVE_PATH,
+    );
+    assertPinnedArtifact(frozenBytes);
+    const frozenArtifact = parseJson(frozenBytes, ARTIFACT_RELATIVE_PATH, "ARTIFACT_DRIFT");
+    return deepFreeze({
+      artifact: frozenArtifact,
+      artifactBytes: frozenBytes,
+      artifactSha256: sha256(frozenBytes),
+    });
+  }
   const parent = authenticateParent(files.get(PARENT_ARTIFACT_PATH));
   const historicalReaderBridge = authenticateHistoricalReaderBridge(
     files.get(HISTORICAL_READER_BRIDGE_PATH),
@@ -1192,7 +1279,7 @@ export function readDesenAppHistoricalReaderProjection(successor, proofId) {
   if (typeof proofId !== "string" || !HISTORICAL_READER_PROOF_IDS.includes(proofId)) {
     fail("OPTIONS_INVALID", "proofId is not one admitted historical reader.");
   }
-  return historicalBridgeAuthority(successor).projections[proofId];
+  return historicalBridgeAuthority(successor).predecessor.projections[proofId];
 }
 
 /** Materializes task-time bytes while preserving every caller-supplied mutation byte exactly. */
@@ -1208,8 +1295,14 @@ export function materializeDesenAppHistoricalReaderFileOverrides(successor, file
     fail("OPTIONS_INVALID", "Historical fileOverrides must be one inert Map.");
   }
   const materialized = new Map(
-    [...authority.files].map(([relativePath, bytes]) => [relativePath, Buffer.from(bytes)]),
+    [...authority.predecessor.files].map(([relativePath, bytes]) => [
+      relativePath,
+      Buffer.from(bytes),
+    ]),
   );
+  for (const [relativePath, bytes] of authority.predecessorGapFiles) {
+    materialized.set(relativePath, Buffer.from(bytes));
+  }
   let overrideBytes = 0;
   for (const [relativePath, bytes] of Map.prototype.entries.call(fileOverrides)) {
     const bytePrototype = bytes instanceof Uint8Array ? Object.getPrototypeOf(bytes) : null;
@@ -1272,14 +1365,21 @@ export function projectDesenAppHistoricalReaderPathInventory(successor, currentP
     }
   }
   return Object.freeze(
-    currentPaths.filter((relativePath) => !authority.successorAddedPaths.has(relativePath)),
+    currentPaths.filter(
+      (relativePath) =>
+        !authority.predecessor.successorAddedPaths.has(relativePath) &&
+        !authority.t01cSuccessorAddedPaths.has(relativePath),
+    ),
   );
 }
 
 /** Returns a defensive copy of one exact T01B task-time file for historical root tests. */
 export function readDesenAppHistoricalReaderTaskTimeFile(successor, relativePath) {
   if (typeof relativePath !== "string") fail("OPTIONS_INVALID", "relativePath must be text.");
-  const bytes = historicalBridgeAuthority(successor).files.get(relativePath);
+  const authority = historicalBridgeAuthority(successor);
+  const bytes =
+    authority.predecessor.files.get(relativePath) ??
+    authority.predecessorGapFiles.get(relativePath);
   if (bytes === undefined) {
     fail("OPTIONS_INVALID", "relativePath has no task-time bridge entry.", { relativePath });
   }
@@ -1309,6 +1409,13 @@ export async function authenticateDesenAppEvergreenProductCompositionSuccessor(
       HISTORICAL_READER_BRIDGE_PATH,
     ),
   );
+  const inputPendingSuccessor = await authenticateInputPendingFixtureSuccessor(workspaceRoot);
+  const predecessorGapFiles = new Map(
+    T01C_PREDECESSOR_GAP_PATHS.map((relativePath) => [
+      relativePath,
+      inputPendingSuccessor.readTaskTimeFile(inputPendingSuccessor.successor, relativePath),
+    ]),
+  );
   const successor = deepFreeze({
     task: "M10-T01C",
     proofId: "desen-app-evergreen-product-composition",
@@ -1327,7 +1434,14 @@ export async function authenticateDesenAppEvergreenProductCompositionSuccessor(
     p09Status: verified.p09Status,
     m10T02Closed: verified.m10T02Closed,
   });
-  HISTORICAL_BRIDGE_AUTHORITIES.set(successor, bridgeAuthority);
+  HISTORICAL_BRIDGE_AUTHORITIES.set(
+    successor,
+    Object.freeze({
+      predecessor: bridgeAuthority,
+      predecessorGapFiles,
+      t01cSuccessorAddedPaths: new Set(T01C_SUCCESSOR_ADDED_PATHS),
+    }),
+  );
   return successor;
 }
 

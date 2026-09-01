@@ -1405,20 +1405,33 @@ non-entry canvas remains transient while Save and Publish preserve the authored 
 can target only the profile's fixed authenticated channel and host. M10-T02–M10-T04 and G10 remain
 open; no hosted exact-head pass is inferred from local evidence.
 
+M10-T02 now proves complete controlled input and one real unresolved Runtime pending lifecycle
+through the normal visible product UI. The no-code operation recipe atomically maps compatible
+state inputs, suggests a mapping only for an exact input/state name match, captures a collision-free
+result alias, explicit concurrency, and Button Loading. Exact repair
+retains unrelated actions and advanced fields, optional absence is preserved, and unrepresentable
+advanced values block a lossy replacement. One Chromium scenario types email and secure password
+in chunks, observes accessible pending, makes leaked repeat activation observable, and preserves
+values plus pending across Design/Run before generic terminal cleanup that remains stable across
+two animation frames. Focused tests pass 82/82,
+Chromium passes 1/1, and the root reader passes 10/10. Visible failure remains M10-T03; success,
+navigation, and a real host operation remain M10-T04. P-09/P-10 remain `PARTIAL`, G10 stays open,
+and local evidence makes no hosted exact-head claim.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`, `G09`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M10 — First end-to-end proof`
-- Overall implementation progress: `113 / 148 tasks complete (76%)`
+- Overall implementation progress: `114 / 148 tasks complete (77%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
 - M09 progress: `14 / 14 tasks complete (100%)`
-- M10 progress: `4 / 12 tasks complete (33%)`
+- M10 progress: `5 / 12 tasks complete (42%)`
 - Proof-gate progress: `11 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1517,7 +1530,8 @@ open; no hosted exact-head pass is inferred from local evidence.
   `M10-T01 — Empty-project-to-sign-in browser E2E`,
   `M10-T01A — User-created blank-project authoring`,
   `M10-T01B — Visual behavior authoring and Catalog-derived Run controls`,
-  `M10-T01C — Evergreen product composition through an authenticated workspace profile`
+  `M10-T01C — Evergreen product composition through an authenticated workspace profile`,
+  `M10-T02 — Input and pending fixture test`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -1539,15 +1553,15 @@ open; no hosted exact-head pass is inferred from local evidence.
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Current implementation task: none; `M10-T01C — Evergreen product composition through an authenticated workspace profile` is complete
-- Next implementation task: `M10-T02 — Input and pending fixture test`
+- Current implementation task: none; `M10-T02 — Input and pending fixture test` is complete
+- Next implementation task: `M10-T03 — Failure fixture and visible failure-state test`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  14/14, M10 is 4/12, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
-  M10-T01B, and M10-T01C are
+  14/14, M10 is 5/12, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
+  M10-T01B, M10-T01C, and M10-T02 are
   `DONE`; `N-012`, `N-018`, `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`; P-06, P-08,
   and P-16 are `PROVEN`; P-07, P-09, and P-10 are `PARTIAL`; proof gates are 11/13; P-12 remains
   `NOT_PROVEN`; N-036 remains `PLANNED`; PF-028 is `CLOSED`; PF-025, PF-083, PF-085, PF-086, and
-  PF-089 and PF-091 remain `OPEN`; M10-T02 is `NOT_STARTED`; and implementation progress is 113/148.
+  PF-089 and PF-091 remain `OPEN`; M10-T03 is `NOT_STARTED`; and implementation progress is 114/148.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -4775,6 +4789,50 @@ M09-T14/G09 evidence:
 - explicit nonclaims: this composition boundary does not close M10-T02 input/pending, M10-T03
   failure, M10-T04 real-host success/navigation, remote or multi-user persistence, P-09/P-10, or
   G10; local receipts alone make no hosted exact-head claim
+
+### M10-T02 input and pending fixture evidence
+
+- the normal visible product flow starts from zero projects, creates the admitted blank project,
+  adds state, two TextFields, and a Button, and connects complete controlled input plus one Catalog
+  operation without JSON
+- one validated operation recipe owns the selected capability, collision-free surface-wide result
+  alias, schema-compatible state inputs, explicit concurrency, and
+  `operation.<alias>.pending` Button Loading reference
+- automatic state suggestion requires an exact input/state name match; merely compatible schemas
+  with different names remain an explicit designer choice
+- new connections default to reject; exact repair retains action position, unrelated actions,
+  success/failure branches, guard, and extensions; absent optional input stays absent, advanced
+  unrepresentable input blocks Repair, and multiple root invocations fail closed as ambiguous
+- the shared plain and secure TextFields emit the complete current native value; Runtime publishes
+  pending before transport, and the shared Button maps Loading to accessible busy/disabled state,
+  retains focus, and suppresses Press while busy
+- the synthetic controller derives outcomes from exact Source/Catalog authority, does not read or
+  retain operation input, keeps one real Promise unresolved until explicit completion, and revokes
+  pending work on deactivation, replacement, or disposal
+- the 1/1 Chromium scenario uses visible **Set Secure**, proves its checked state renders a native
+  `type=password` field, types both values in multiple chunks, confirms reject as the default,
+  selects queue so a leaked Enter activation stays observable, preserves input and
+  pending across Design → Run, and requires terminal Loading cleanup to remain stable for two
+  animation frames without asserting Alert or navigation
+- local verification: 82/82 focused cases across App connection/control/fixture, shared
+  component, and Runtime lifecycle boundaries; Chromium 1/1; deterministic verifier pass;
+  independent root reader 10/10
+- immutable evidence: 14,261-byte / 25-receipt
+  `docs/proof/artifacts/desen-app-0.1.0-input-pending-fixture.json` at
+  `sha256:161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d`
+- historical authority: bounded 2,307,407-byte T01C task-time bridge at
+  `sha256:16f6ec332fb03368e617563560b9930a7608594907ce61d5d15554be4dc7523d`; it authenticates the
+  immutable predecessor inputs without rewriting the parent artifact
+- current CI shape: 212 workloads / 101 proof units; M10-T02 App closure 69 proof units / 148
+  workloads; exact-one ownership 1,366 tracked paths / 202 proof-owned paths
+- reader authority: checkpoint sequence 67 preserves sequences 1–66 and closes 55 artifacts / 110
+  readers at `sha256:9ee6909c0f11ed7149cb9bf6ce1c7943ed99aac2d2c6f9138caea8f5dd2044b7`; 90/90 cases pass
+- coverage decision: M10-T02 is `DONE`; overall progress is 114/148 (77%); M10 is 5/12 (42%);
+  M10-T03 is next
+- explicit nonclaims: the declared error outcome proves generic terminal fixture cleanup only;
+  visible public failure remains M10-T03, success/navigation and a separately authorized real host
+  operation remain M10-T04, P-09/P-10 remain `PARTIAL`, and Integration, Production, N-036, and
+  G10 remain open; local receipts alone make no hosted exact-head claim
 
 ## Status vocabulary
 

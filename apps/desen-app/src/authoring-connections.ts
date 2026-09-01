@@ -53,6 +53,7 @@ export interface AuthoringOperationInputConnection {
 /** One-click press → operation recipe with an optional lifecycle-backed loading prop. */
 export interface AuthoringOperationTriggerConnectionRecipe {
   readonly alias: string;
+  readonly concurrency: "queue" | "reject" | "replace";
   readonly connectLoading: boolean;
   readonly inputs: readonly AuthoringOperationInputConnection[];
   readonly operationId: string;
@@ -234,12 +235,21 @@ function captureInputRecipe(
 function captureOperationRecipe(
   recipe: AuthoringOperationTriggerConnectionRecipe,
 ): AuthoringOperationTriggerConnectionRecipe | undefined {
-  const fields = exactOwnData(recipe, ["alias", "connectLoading", "inputs", "operationId"]);
+  const fields = exactOwnData(recipe, [
+    "alias",
+    "concurrency",
+    "connectLoading",
+    "inputs",
+    "operationId",
+  ]);
   const capturedInputs = exactOwnArray(fields?.inputs, MAX_INPUT_BINDINGS);
   if (
     fields === undefined ||
     typeof fields.alias !== "string" ||
     !RUNTIME_REFERENCE_SEGMENT_PATTERN.test(fields.alias) ||
+    (fields.concurrency !== "queue" &&
+      fields.concurrency !== "reject" &&
+      fields.concurrency !== "replace") ||
     typeof fields.operationId !== "string" ||
     !CAPABILITY_ID_PATTERN.test(fields.operationId) ||
     typeof fields.connectLoading !== "boolean" ||
@@ -267,6 +277,7 @@ function captureOperationRecipe(
   }
   return Object.freeze({
     alias: fields.alias,
+    concurrency: fields.concurrency,
     connectLoading: fields.connectLoading,
     inputs: Object.freeze(inputs),
     operationId: fields.operationId,
@@ -635,9 +646,11 @@ function catalogHasOperation(authority: PreparedConnectionAuthority, operationId
  * Atomically connects a component press event to one declared operation.
  *
  * @remarks Explicit input mappings become state references without executing or inspecting state
- * values. Unrelated press actions retain their exact order. When requested, `loading` is connected
- * to `operation.<alias>.pending` with a literal `false` fallback in the same private candidate.
- * Alias/operation conflicts fail closed and only the fully validated endpoint is returned.
+ * values. Unrelated press actions retain their exact order. One existing root invocation is
+ * repaired in place while retaining its settlement branches, guard, and extensions; multiple root
+ * invocations fail closed because the recipe cannot choose between them. When requested, `loading`
+ * is connected to `operation.<alias>.pending` with a literal `false` fallback in the same private
+ * candidate. Only the fully validated endpoint is returned.
  */
 export function applyAuthoringOperationTriggerConnection(
   document: DesenEditorDocument,
@@ -670,25 +683,31 @@ export function applyAuthoringOperationTriggerConnection(
   for (const mapping of capturedRecipe.inputs) {
     input[mapping.inputName] = Object.freeze({ $ref: `state.${mapping.stateName}` });
   }
+  const existingActions = prepared.target.on?.press;
+  const operationIndexes = (existingActions ?? []).flatMap((candidate, index) =>
+    candidate.type === "operation.invoke" ? [index] : [],
+  );
+  if (operationIndexes.length > 1) return failure("connection-conflict");
+  const operationIndex = operationIndexes[0];
+  const existingOperation =
+    operationIndex === undefined ? undefined : existingActions?.[operationIndex];
   const action = Object.freeze({
     type: "operation.invoke",
     operation: capturedRecipe.operationId,
     as: capturedRecipe.alias,
     input: Object.freeze(input),
-    concurrency: "replace",
+    concurrency: capturedRecipe.concurrency,
+    ...(existingOperation?.type !== "operation.invoke" || existingOperation.onSuccess === undefined
+      ? {}
+      : { onSuccess: existingOperation.onSuccess }),
+    ...(existingOperation?.type !== "operation.invoke" || existingOperation.onFailure === undefined
+      ? {}
+      : { onFailure: existingOperation.onFailure }),
+    ...(existingOperation?.when === undefined ? {} : { when: existingOperation.when }),
+    ...(existingOperation?.extensions === undefined
+      ? {}
+      : { extensions: existingOperation.extensions }),
   }) as DesenEditorAction;
-  const existingActions = prepared.target.on?.press;
-  const related = (existingActions ?? []).filter(
-    (candidate) =>
-      candidate.type === "operation.invoke" &&
-      (candidate.operation === capturedRecipe.operationId || candidate.as === capturedRecipe.alias),
-  );
-  if (
-    related.length > 1 ||
-    (related.length === 1 && !exactAction(related[0] as DesenEditorAction, action))
-  ) {
-    return failure("connection-conflict");
-  }
 
   let candidate = prepared.document;
   if (capturedRecipe.connectLoading) {
@@ -704,7 +723,19 @@ export function applyAuthoringOperationTriggerConnection(
     if (!loading.ok) return failure("edit-rejected");
     candidate = loading.document;
   }
-  if (related.length === 0) {
+  if (operationIndex !== undefined) {
+    if (existingOperation === undefined) return failure("edit-rejected");
+    if (!exactAction(existingOperation, action)) {
+      const replaced = replaceDesenEditorAction(candidate, {
+        surfaceId: prepared.route.surfaceId,
+        ownerId: prepared.selection.sourceNodeId,
+        actionPointer: `/on/press/${operationIndex}`,
+        action,
+      });
+      if (!replaced.ok) return failure("edit-rejected");
+      candidate = replaced.document;
+    }
+  } else {
     const connected = addActionPreservingHandler(
       candidate,
       prepared,
