@@ -1622,7 +1622,8 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "validateAffectedSelectorPromotedSelection(",
   ];
   if (
-    exactOccurrence(exhaustiveSource, "DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000") !== 1 ||
+    exactOccurrence(exhaustiveSource, "DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 30 * 1_000") !==
+      1 ||
     exhaustiveSource.includes("DEFAULT_GATE_TIMEOUT_MS = 17 * 60 * 1_000") ||
     dispatcherFragments.some((fragment) => !dispatcherSource.includes(fragment))
   ) {

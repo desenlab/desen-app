@@ -279,13 +279,13 @@ test("authenticates the exact 20/20 hosted promotion campaign", async () => {
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "9969c5e3afcac86b3e30f19f05fb460a443ce00e0c184cd0b5bffd698c66ebeb",
+    selectorSha256: "7229d661e141d8b8faceb12ce44334080eef429c335030056a796f95c1fa7514",
     ownershipSha256: "d14d9f72079714b5453c7e70cd1b48136358bf614b890c1796d3aad0508a67b6",
     impactGraphSha256: "3edb1518a74a87c7bffd9a80b4c8c64c94eac6df35bbf66f1f465fb7df00aec5",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "0ca01cd12123640cb6adcdbd23dff2d02e20c971ae504b5feae38953c431915d",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "3875b9bc6c01ef8732f6a19ad2a01fbb44e5581df6556c79c043b4ab0125f1bf",
+    runnerAuthoritySha256: "7a6b2e2eeed859b012868dcdb73b36cfcad17c021945e83e3b9296ad88943298",
   });
 });
 
@@ -298,8 +298,8 @@ test("rejects rollback of either live exhaustive timeout boundary", async () => 
     ],
     [
       "scripts/ci/run-required-exhaustive-quality-gate.mjs",
+      "const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 30 * 1_000;",
       "const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000;",
-      "const DEFAULT_GATE_TIMEOUT_MS = 17 * 60 * 1_000;",
     ],
   ]) {
     const root = await promotionWorkspace();
@@ -317,6 +317,31 @@ test("rejects rollback of either live exhaustive timeout boundary", async () => 
     } finally {
       await rm(root, { recursive: true, force: true });
     }
+  }
+});
+
+test("rejects an unreviewed widening of the live exhaustive soft deadline", async () => {
+  const root = await promotionWorkspace();
+  try {
+    const target = path.join(root, "scripts/ci/run-required-exhaustive-quality-gate.mjs");
+    const currentFragment = "const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 30 * 1_000;";
+    const source = await readFile(target, "utf8");
+    assert.equal(source.split(currentFragment).length - 1, 1);
+    await writeFile(
+      target,
+      source.replace(
+        currentFragment,
+        "const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 31 * 1_000;",
+      ),
+    );
+    await assert.rejects(
+      verifyAffectedSelectorPromotionEvidence({ workspaceRoot: root }),
+      (error) =>
+        error instanceof AffectedSelectorPromotionEvidenceError &&
+        error.code === "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
   }
 });
 

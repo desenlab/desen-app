@@ -931,14 +931,15 @@ launches. Later signals may escalate but cannot replace that record. Every activ
 isolation cleanup is still awaited before the gate settles.
 
 Affected execution owns a 17-minute soft complete-gate deadline; exhaustive execution owns an
-18-minute soft complete-gate deadline. Both retain 15-minute per-workload deadlines and a
-five-second child-termination grace. Because authentic settlement still awaits child `close`,
+18-minute 30-second soft complete-gate deadline. Both retain 15-minute per-workload deadlines and
+a five-second child-termination grace. Because authentic settlement still awaits child `close`,
 cleanup, and boundary capture, the Phase A command also has a 19-minute operating-system ceiling
 with a 30-second kill grace. GitHub's 25-minute job ceiling remains outside both. An outer-ceiling
 failure is red and cannot serve as promotion evidence; setup, contract checks, receipt emission,
 and hosted variance retain their own headroom. The frozen I07-04 promotion artifact preserves its
 historical 17-minute soft and 18-minute process ceilings; live successor authority authenticates
-the current 17-minute affected, 18-minute exhaustive, and 19-minute process boundaries separately.
+the current 17-minute affected, 18-minute 30-second exhaustive, and 19-minute process boundaries
+separately.
 
 The required execution design layers three closing guards:
 

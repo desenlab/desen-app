@@ -924,12 +924,13 @@ may escalate to SIGKILL but cannot replace the winner. Settlement still waits fo
 `close` and isolation cleanup.
 
 The code-owned affected timeout remains 17 minutes, while exhaustive execution owns an 18-minute
-soft complete-gate timeout above the 15-minute workload timeouts. Authentic settlement still
-awaits child `close`, cleanup, and boundary capture. Phase A therefore wraps the command in a
+30-second soft complete-gate timeout above the 15-minute workload timeouts. Authentic settlement
+still awaits child `close`, cleanup, and boundary capture. Phase A therefore wraps the command in a
 19-minute operating-system ceiling with a 30-second kill grace, inside a 25-minute hosted job. An
 outer-ceiling failure is never accepted as promotion evidence. The frozen I07-04 artifact retains
 its historical 17-minute soft and 18-minute process ceilings; live successor authority separately
-authenticates the current 17-minute affected, 18-minute exhaustive, and 19-minute process limits.
+authenticates the current 17-minute affected, 18-minute 30-second exhaustive, and 19-minute process
+limits.
 
 The execution boundary authenticates the repository revision and inventory and compares tracked
 bytes, executable modes, tracked-file count, and Git index object ids before and after all 184

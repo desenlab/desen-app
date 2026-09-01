@@ -3172,9 +3172,15 @@ M10-T01B closure contains 67 proof units and 144 workloads at
 covers 1,337 tracked paths, including 198 proof-owned paths, with path-set
 `sha256:f655502ecc821a2a911546d1a5656a3fc635c2162d90f0ba90f7c04e31c30cbe` and authority
 `sha256:d14d9f72079714b5453c7e70cd1b48136358bf614b890c1796d3aad0508a67b6`. The promoted selector,
-including the exact sequence-65 checkpoint, is
-`sha256:9969c5e3afcac86b3e30f19f05fb460a443ce00e0c184cd0b5bffd698c66ebeb`; its runner authority is
-`sha256:3875b9bc6c01ef8732f6a19ad2a01fbb44e5581df6556c79c043b4ab0125f1bf`.
+still authenticating the exact sequence-65 checkpoint, is
+`sha256:7229d661e141d8b8faceb12ce44334080eef429c335030056a796f95c1fa7514`; its runner authority is
+`sha256:7a6b2e2eeed859b012868dcdb73b36cfcad17c021945e83e3b9296ad88943298`.
+
+Hosted PR run `33444059423` closed 206 of the 208 exhaustive workloads before the historical
+18-minute soft deadline interrupted `dependency-boundaries`; only `boundary-fixtures` remained.
+The measured closing pair requires about 24 seconds, so live exhaustive authority now owns an
+18-minute 30-second soft deadline beneath the unchanged 19-minute operating-system ceiling. No
+workload, proof pair, isolation rule, closing guard, or per-workload timeout was removed or relaxed.
 
 P-08 remains `PROVEN`. M10-T01B improves the normal-product authoring route but does not claim the
 separately planned M10-T02 typed-input/pending closure, M10-T03 invalid-credentials closure,
