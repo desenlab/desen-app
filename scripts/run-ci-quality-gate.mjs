@@ -494,6 +494,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-desen-app-user-created-blank-project.mjs",
       "tests/desen-app-user-created-blank-project.test.mjs",
     ],
+    [
+      "desen-app-visual-behavior-authoring",
+      "scripts/verify-desen-app-visual-behavior-authoring.mjs",
+      "tests/desen-app-visual-behavior-authoring.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -584,14 +589,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "5dc114ab24bc7d945475608fd77a84ba3fbc3fe547dac898c263aca3eba894bd";
+  "a6c969e096cac98cdd15e15892528518db351862a28af6fbd72ee3919d18c20b";
 const LEGACY_LEAF_INVOCATION_SHA256 =
   "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
   "5146f101cb767c49f6f0b87fd6939be6bdfc348e5f4dcf8dd77399ac921d4ee3";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "91519ad61ebc1bfed9d1d2553cf92b517cb4de2ad1313d679e2e26d86c311db1";
+const QUALITY_GATE_PLAN_SHA256 = "669dc72f2b419d1f87cc417de190923ce13922061bce5e9a22ebc998cea1e7d5";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -607,6 +612,7 @@ const DIRECT_CI_PROOF_PAIR_IDS = Object.freeze([
   "desen-app-empty-project-browser-e2e",
   "desen-app-browser-e2e-workspace-compatibility",
   "desen-app-user-created-blank-project",
+  "desen-app-visual-behavior-authoring",
 ]);
 const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = Object.freeze(
   [

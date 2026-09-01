@@ -279,13 +279,13 @@ test("authenticates the exact 20/20 hosted promotion campaign", async () => {
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "ffc7c92e7788d8d5483a74a6eb6b2f22cb6db0c7324421d109753efeb44ebf96",
-    ownershipSha256: "7fe30b8f12eed7d421506d3efe27ed3b80fe501bb200a36154f485eb226f865f",
-    impactGraphSha256: "a64db36bfd1797cc16dd79cfaa788e36ec9f7850f19f0ea710ac026e05720b39",
+    selectorSha256: "7229d661e141d8b8faceb12ce44334080eef429c335030056a796f95c1fa7514",
+    ownershipSha256: "d14d9f72079714b5453c7e70cd1b48136358bf614b890c1796d3aad0508a67b6",
+    impactGraphSha256: "3edb1518a74a87c7bffd9a80b4c8c64c94eac6df35bbf66f1f465fb7df00aec5",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
-    inventorySha256: "2b10f2fc39003592cddbd87122182de5acf05bd8c88afbbbd111d3ccc144919c",
+    inventorySha256: "0ca01cd12123640cb6adcdbd23dff2d02e20c971ae504b5feae38953c431915d",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "d32962da5cdb669789d052178fe653f4a0afed12d065692b4d092a459eddd2f5",
+    runnerAuthoritySha256: "7a6b2e2eeed859b012868dcdb73b36cfcad17c021945e83e3b9296ad88943298",
   });
 });
 
@@ -298,8 +298,8 @@ test("rejects rollback of either live exhaustive timeout boundary", async () => 
     ],
     [
       "scripts/ci/run-required-exhaustive-quality-gate.mjs",
+      "const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 30 * 1_000;",
       "const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000;",
-      "const DEFAULT_GATE_TIMEOUT_MS = 17 * 60 * 1_000;",
     ],
   ]) {
     const root = await promotionWorkspace();
@@ -320,14 +320,39 @@ test("rejects rollback of either live exhaustive timeout boundary", async () => 
   }
 });
 
+test("rejects an unreviewed widening of the live exhaustive soft deadline", async () => {
+  const root = await promotionWorkspace();
+  try {
+    const target = path.join(root, "scripts/ci/run-required-exhaustive-quality-gate.mjs");
+    const currentFragment = "const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 30 * 1_000;";
+    const source = await readFile(target, "utf8");
+    assert.equal(source.split(currentFragment).length - 1, 1);
+    await writeFile(
+      target,
+      source.replace(
+        currentFragment,
+        "const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 31 * 1_000;",
+      ),
+    );
+    await assert.rejects(
+      verifyAffectedSelectorPromotionEvidence({ workspaceRoot: root }),
+      (error) =>
+        error instanceof AffectedSelectorPromotionEvidenceError &&
+        error.code === "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "7245d3334dfaf801692783ed8a500ecc124ed259291ccf433cbc6fab21c76da7",
-    checkpoints: 63,
-    frozenArtifacts: 52,
-    currentReaders: 104,
+    headSha256: "fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14",
+    checkpoints: 65,
+    frozenArtifacts: 53,
+    currentReaders: 106,
   };
   assert.equal(validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt), liveReceipt);
   assert.throws(

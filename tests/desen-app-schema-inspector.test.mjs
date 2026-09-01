@@ -53,6 +53,89 @@ const M10_T01A_SECURE_SCROLL_CURRENT_PROJECTION = Object.freeze({
     }),
   ]),
 });
+
+test("[M10-T01B successor] authenticates exact visual authoring evidence and current receipts", async () => {
+  const artifactPath = "docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json";
+  const receiptPath = "apps/desen-app/src/behavior-controls.tsx";
+  const successor = built.currentCompatibility.visualBehaviorAuthoringSuccessor;
+  assert.deepEqual(successor.artifact, {
+    path: artifactPath,
+    bytes: 10_962,
+    sha256: "cd7366014a0cb6f056fa78392f81ef7cb4b5be2f523b95e5984c704be3caf0e8",
+    immutable: true,
+  });
+  assert.equal(successor.task, "M10-T01B");
+  assert.equal(successor.predecessor.task, "M10-T01A");
+  assert.equal(
+    successor.currentProjection.relationship,
+    "EXACT_M10_T01B_ARTIFACT_OWNED_LIVE_RECEIPTS",
+  );
+  assert.deepEqual(
+    successor.currentProjection.currentReceipts.map(({ path: relativePath }) => relativePath),
+    [
+      ".github/workflows/ci.yml",
+      "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
+      "apps/desen-app-browser-e2e/package.json",
+      "apps/desen-app/package.json",
+      "apps/desen-app/src/application.module.css",
+      "apps/desen-app/src/application.tsx",
+      "apps/desen-app/src/authoring-behavior-projection.ts",
+      "apps/desen-app/src/authoring-conditions.ts",
+      "apps/desen-app/src/authoring-connections.ts",
+      "apps/desen-app/src/authoring-event-actions.ts",
+      "apps/desen-app/src/authoring-fixtures.ts",
+      "apps/desen-app/src/behavior-controls.tsx",
+      "apps/desen-app/src/event-action-panel.tsx",
+      "apps/desen-app/src/inspector-panel.tsx",
+      "apps/desen-app/src/preview-controls.tsx",
+      "apps/desen-app/test/application.test.tsx",
+      "apps/desen-app/test/authoring-behavior-projection.test.ts",
+      "apps/desen-app/test/authoring-conditions.test.ts",
+      "apps/desen-app/test/authoring-connections.test.ts",
+      "apps/desen-app/test/authoring-event-actions.test.ts",
+      "apps/desen-app/test/authoring-fixtures.test.ts",
+      "apps/desen-app/test/behavior-controls.test.tsx",
+      "apps/desen-app/test/event-action-panel.test.tsx",
+      "apps/desen-app/test/persistence-application.test.tsx",
+      "apps/desen-app/test/preview-controls.test.tsx",
+      "apps/desen-app/test/publication-application.test.tsx",
+      "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+      "packages/reference-catalog-web/catalog.json",
+      "scripts/generate-desen-app-visual-behavior-authoring-proof.mjs",
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/verify-desen-app-visual-behavior-authoring.mjs",
+    ],
+  );
+  assert.deepEqual(successor.currentProjection.hostedBrowserCompatibility, {
+    compatibilityReceipt: "M10-T01B-HOSTED-BROWSER-COMPAT",
+    correctiveReceiptOnly: true,
+    overriddenHistoricalPaths: ["apps/desen-app-browser-e2e/user-created-blank-project.pw.ts"],
+    trackedReceipts: [
+      {
+        path: "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+        bytes: 15_143,
+        sha256: "5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b",
+      },
+    ],
+  });
+
+  for (const relativePath of [
+    artifactPath,
+    receiptPath,
+    "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts",
+  ]) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
+    for (const replacement of [Buffer.alloc(0), changedByte(bytes)]) {
+      await assert.rejects(
+        buildDesenAppSchemaInspectorEvidence({
+          fileOverrides: new Map([[relativePath, replacement]]),
+        }),
+        expectedError("SUCCESSOR_POLICY_VIOLATION"),
+      );
+    }
+  }
+});
+
 const M10_USER_CREATED_BLANK_PROJECT_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json";
 const PARENT_PATHS = Object.freeze([

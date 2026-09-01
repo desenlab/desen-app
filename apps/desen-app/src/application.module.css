@@ -1461,6 +1461,154 @@
   line-height: 0.75rem;
 }
 
+.behaviorControls {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
+}
+
+.behaviorCard {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.625rem;
+  background: color-mix(in srgb, var(--desen-app-accent) 3%, var(--desen-app-surface));
+  border: 1px solid color-mix(in srgb, var(--desen-app-accent) 16%, var(--desen-app-border));
+  border-radius: 0.625rem;
+}
+
+.behaviorCardHeading {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.behaviorCardHeading > span:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 0.0625rem;
+}
+
+.behaviorCardHeading strong {
+  font-size: 0.625rem;
+  font-weight: 620;
+}
+
+.behaviorCardHeading small,
+.behaviorCard > p,
+.behaviorNotice {
+  margin: 0;
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+  line-height: 0.75rem;
+}
+
+.behaviorStatus {
+  flex: 0 0 auto;
+  padding: 0.1875rem 0.4375rem;
+  color: var(--desen-app-text-muted);
+  font-size: 0.46875rem;
+  font-weight: 590;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 99px;
+}
+
+.behaviorStatus[data-connected="true"] {
+  color: color-mix(in srgb, var(--desen-app-success) 74%, var(--desen-app-text));
+  background: color-mix(in srgb, var(--desen-app-success) 7%, var(--desen-app-surface));
+  border-color: color-mix(in srgb, var(--desen-app-success) 24%, var(--desen-app-border));
+}
+
+.behaviorControlRow,
+.visibilityForm {
+  display: grid;
+  gap: 0.4375rem;
+}
+
+.behaviorControlRow label,
+.visibilityForm label {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+  font-weight: 560;
+}
+
+.behaviorControlRow select,
+.visibilityForm select,
+.visibilityForm input {
+  width: 100%;
+  min-width: 0;
+  height: 1.875rem;
+  padding: 0 0.5rem;
+  color: var(--desen-app-text);
+  font: inherit;
+  font-size: 0.53125rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border-strong);
+  border-radius: 0.4375rem;
+}
+
+.visibilityForm textarea {
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.5rem;
+  resize: vertical;
+  color: var(--desen-app-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.5rem;
+  line-height: 0.75rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border-strong);
+  border-radius: 0.4375rem;
+}
+
+.behaviorControlRow button,
+.visibilityForm button {
+  min-height: 1.75rem;
+  justify-self: start;
+  padding: 0 0.5625rem;
+  color: white;
+  font: inherit;
+  font-size: 0.53125rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--desen-app-primary);
+  border: 1px solid var(--desen-app-primary);
+  border-radius: 0.4375rem;
+}
+
+.behaviorControlRow button:disabled,
+.visibilityForm button:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.behaviorEmpty {
+  padding: 0.5rem;
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+  line-height: 0.75rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px dashed var(--desen-app-border-strong);
+  border-radius: 0.4375rem;
+}
+
+.behaviorNotice {
+  min-height: 0.75rem;
+}
+
+.behaviorControlRow select:focus-visible,
+.behaviorControlRow button:focus-visible,
+.visibilityForm select:focus-visible,
+.visibilityForm input:focus-visible,
+.visibilityForm textarea:focus-visible,
+.visibilityForm button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 72%, white);
+  outline-offset: 1px;
+}
+
 .inspectorBody {
   min-height: 0;
   overflow: auto;
@@ -2595,6 +2743,76 @@
   border-radius: 0.4375rem;
 }
 
+.actionVisualFields {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.5625rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.5rem;
+}
+
+.actionVisualFields label {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+  font-weight: 560;
+}
+
+.actionVisualFields label > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.actionVisualFields label small {
+  color: var(--desen-app-text-muted);
+  font: inherit;
+  font-weight: 500;
+}
+
+.actionVisualFields select,
+.actionVisualFields input {
+  width: 100%;
+  min-width: 0;
+  height: 1.875rem;
+  padding: 0 0.5rem;
+  color: var(--desen-app-text);
+  font: inherit;
+  font-size: 0.53125rem;
+  background: var(--desen-app-surface);
+  border: 1px solid var(--desen-app-border-strong);
+  border-radius: 0.4375rem;
+}
+
+.actionFieldHint {
+  margin: -0.125rem 0 0;
+  color: var(--desen-app-text-soft);
+  font-size: 0.5rem;
+  line-height: 0.75rem;
+}
+
+.actionAdvancedEditor {
+  padding-top: 0.125rem;
+  border-top: 1px solid var(--desen-app-border);
+}
+
+.actionAdvancedEditor > summary {
+  padding: 0.3125rem 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.5rem;
+  font-weight: 580;
+  cursor: pointer;
+}
+
+.actionAdvancedEditor[open] {
+  display: grid;
+  gap: 0.4375rem;
+}
+
 .actionJsonTextarea {
   width: 100%;
   min-height: 8.5rem;
@@ -2635,6 +2853,9 @@
 .actionCardControls button:focus-visible,
 .actionJsonControls button:focus-visible,
 .actionTypeField select:focus-visible,
+.actionVisualFields select:focus-visible,
+.actionVisualFields input:focus-visible,
+.actionAdvancedEditor > summary:focus-visible,
 .actionJsonTextarea:focus-visible,
 .actionReferenceGuide > summary:focus-visible,
 .eventPayloadSchema > summary:focus-visible {
@@ -4579,8 +4800,67 @@
   line-height: 0.8125rem;
 }
 
-.runControlsBody > button {
+.fixtureOperationGroup {
+  display: grid;
+  min-width: 0;
+  gap: 0.5rem;
+  padding: 0.625rem;
+  margin: 0;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.625rem;
+}
+
+.fixtureOperationGroup legend {
+  max-width: 100%;
+  padding: 0 0.25rem;
+  color: var(--desen-app-text-soft);
+  font-size: 0.53125rem;
+  font-weight: 620;
+  overflow-wrap: anywhere;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fixtureOperationIdentity {
+  min-width: 0;
+  margin: 0;
+  color: var(--desen-app-text);
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.fixtureOperationIdentity small {
+  color: var(--desen-app-text-muted);
+  font-size: 0.53125rem;
+  line-height: 0.8125rem;
+}
+
+.fixtureOperationGroup .fixtureOutcomeControl {
+  display: grid;
+  min-width: 0;
+  gap: 0.3125rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.fixtureOperationGroup .fixtureOutcomeControl > span {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.fixtureOperationGroup .fixtureOutcomeControl select {
+  min-width: 0;
+}
+
+.fixtureCompleteButton {
+  width: 100%;
   min-height: 2rem;
+  padding: 0 0.625rem;
   color: white;
   font: inherit;
   font-size: 0.625rem;
@@ -4589,21 +4869,23 @@
   background: var(--desen-app-primary);
   border: 0;
   border-radius: 0.5rem;
+  overflow-wrap: anywhere;
 }
 
-.runControlsBody > button:disabled {
+.fixtureCompleteButton:disabled {
   color: var(--desen-app-text-soft);
   cursor: not-allowed;
   background: var(--desen-app-surface-subtle);
   border: 1px solid var(--desen-app-border);
 }
 
-.runControlsBody > button:focus-visible {
+.fixtureCompleteButton:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--desen-app-accent) 62%, white);
   outline-offset: 2px;
 }
 
 .runControlsBody > p,
+.fixtureOperationStatus,
 .runControlsBoundary {
   margin: 0;
   color: var(--desen-app-text-muted);
@@ -4611,12 +4893,18 @@
   line-height: 0.875rem;
 }
 
-.runControlsBody > p {
+.runControlsBody > p,
+.fixtureOperationStatus {
   min-height: 2.75rem;
   padding: 0.625rem;
   background: color-mix(in srgb, var(--desen-app-accent) 4%, var(--desen-app-surface));
   border: 1px solid color-mix(in srgb, var(--desen-app-accent) 14%, var(--desen-app-border));
   border-radius: 0.5rem;
+}
+
+.fixtureOperationStatus {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .runControlsBoundary {

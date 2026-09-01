@@ -1799,7 +1799,7 @@ describe("Desen App application shell", () => {
         value: '{"type":"state.set","path":"email","value":{"$ref":"event.value"}}',
       },
     });
-    fireEvent.click(within(panel).getByRole("button", { name: "Add complete action" }));
+    fireEvent.click(within(panel).getByRole("button", { name: "Add action" }));
 
     expect(within(panel).getByRole("article", { name: "action 1 in change" })).toBeTruthy();
     expect(within(panel).getByRole("status").textContent).toBe("Added Set state to change.");
@@ -1955,7 +1955,7 @@ describe("Desen App application shell", () => {
     );
     expect(
       screen.getByText(
-        "Controls are live against this in-memory preview. Only the exact synthetic sign-in fixture is available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked.",
+        "Controls are live against this in-memory preview. Only outcomes declared by the current surface's authored operations and authenticated Catalog fixtures are available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked.",
       ),
     ).toBeTruthy();
     const runCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
@@ -2137,14 +2137,14 @@ describe("Desen App application shell", () => {
     expect(within(controls).getByText(/Integration and production calls are off/)).toBeTruthy();
 
     let outcome = within(controls).getByRole("combobox", {
-      name: "Next sign-in outcome",
+      name: "Next outcome for signIn",
     }) as HTMLSelectElement;
     expect([...outcome.options].map(({ value }) => value)).toEqual([
       "success",
-      "invalidCredentials",
+      "error:invalidCredentials",
     ]);
     expect([...outcome.options].map(({ value }) => value)).not.toContain("pending");
-    fireEvent.change(outcome, { target: { value: "invalidCredentials" } });
+    fireEvent.change(outcome, { target: { value: "error:invalidCredentials" } });
 
     const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
     const email = within(canvas).getByLabelText("Email") as HTMLInputElement;
@@ -2173,7 +2173,7 @@ describe("Desen App application shell", () => {
       expect(
         (
           within(controls).getByRole("button", {
-            name: "Complete fixture",
+            name: "Complete signIn fixture",
           }) as HTMLButtonElement
         ).disabled,
       ).toBe(false);
@@ -2188,26 +2188,28 @@ describe("Desen App application shell", () => {
     controls = screen.getByRole("complementary", { name: "Run controls" });
     expect(within(controls).getByRole("status").textContent).toContain("Pending");
 
-    fireEvent.click(within(controls).getByRole("button", { name: "Complete fixture" }));
+    fireEvent.click(within(controls).getByRole("button", { name: "Complete signIn fixture" }));
     expect((await within(canvas).findByRole("alert")).textContent).toBe(
       "Sign-in failed. Check your details and try again.",
     );
     await waitFor(() => {
-      expect(within(controls).getByRole("status").textContent).toContain("Invalid credentials");
+      expect(within(controls).getByRole("status").textContent).toContain(
+        "Synthetic public error completed",
+      );
     });
 
     outcome = within(controls).getByRole("combobox", {
-      name: "Next sign-in outcome",
+      name: "Next outcome for signIn",
     }) as HTMLSelectElement;
     fireEvent.change(outcome, { target: { value: "success" } });
     fireEvent.click(within(canvas).getByRole("button", { name: "Sign in" }));
     await waitFor(() => {
       expect(within(controls).getByRole("status").textContent).toContain("Pending");
     });
-    fireEvent.click(within(controls).getByRole("button", { name: "Complete fixture" }));
+    fireEvent.click(within(controls).getByRole("button", { name: "Complete signIn fixture" }));
     await waitFor(() => {
       expect(within(controls).getByRole("status").textContent).toContain(
-        "Production navigation remains blocked",
+        "Synthetic success completed",
       );
       expect(within(canvas).queryByRole("alert")).toBeNull();
       expect(window.location.pathname).toBe("/projects/account-app/surfaces/sign-in");
@@ -2215,13 +2217,13 @@ describe("Desen App application shell", () => {
   });
 
   it("revokes the previous fixture authority synchronously when a scenario replaces its Bundle", async () => {
-    const createFixtureController = authoringFixtures.createAuthoringSignInFixtureController;
+    const createFixtureController = authoringFixtures.createAuthoringOperationFixtureController;
     const controllers: ReturnType<typeof createFixtureController>[] = [];
-    const contexts: Parameters<typeof createFixtureController>[0][] = [];
-    vi.spyOn(authoringFixtures, "createAuthoringSignInFixtureController").mockImplementation(
-      (context) => {
+    const contexts: Parameters<typeof createFixtureController>[1][] = [];
+    vi.spyOn(authoringFixtures, "createAuthoringOperationFixtureController").mockImplementation(
+      (model, context) => {
         contexts.push(context);
-        const controller = createFixtureController(context);
+        const controller = createFixtureController(model, context);
         controllers.push(controller);
         return controller;
       },
@@ -2256,7 +2258,7 @@ describe("Desen App application shell", () => {
     if (pending === undefined) {
       throw new Error("Expected the fixture invocation to create a pending Runtime result.");
     }
-    expect(firstController.read().status).toBe("pending");
+    expect(firstController.read().operations[0]?.status).toBe("pending");
 
     const scenario = within(screen.getByRole("complementary", { name: "Inspector" })).getByRole(
       "combobox",
@@ -2269,8 +2271,8 @@ describe("Desen App application shell", () => {
     expect(replacement).not.toBe(firstController);
     expect(firstController.operationPort.invoke(request)).toEqual({ status: "denied" });
     await expect(Promise.resolve(pending)).resolves.toEqual({ status: "denied" });
-    expect(replacement?.read().status).toBe("idle");
-    await waitFor(() => expect(firstController.read().status).toBe("disposed"));
+    expect(replacement?.read().operations[0]?.status).toBe("idle");
+    await waitFor(() => expect(firstController.read().disposed).toBe(true));
   });
 
   it("resets the ephemeral mode to Design when a new surface route mounts", async () => {

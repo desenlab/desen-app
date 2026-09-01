@@ -1789,6 +1789,33 @@ schema, multi-user workspace, synchronization protocol, or browser last-known-go
 not widen M10-T02–M10-T07: typed input/pending, fixture outcomes, real host operations,
 publish/activation recovery, and product restart LKG remain with their existing owners.
 
+## M10-T01B visual behavior-authoring boundary
+
+M10-T01B adds an App-owned recipe layer; it does not add a second editor model. Every mutation still
+crosses public Editor Core commands and complete Catalog-backed continuous validation. The input
+recipe privately composes a compatible `Value` state reference with the matching
+`change → state.set(event.value)` action and publishes only the validated endpoint. Reconnecting an
+input replaces one unambiguous prior canonical write, while unrelated actions preserve their exact
+order. The UI reports **Connected** only when both halves agree.
+
+The Actions tab projects schema-compatible choices from the exact selected owner, surface-local
+state, and authenticated Catalog. New and existing actions use the same visual fields for the seven
+closed action kinds; advanced JSON remains a complete-value escape hatch. Operation aliases offered
+to Runtime-backed controls satisfy the Runtime reference-segment grammar. The visibility control
+writes or clears the selected node's complete `when` predicate and offers only current local state
+or non-conflicting authored operation aliases.
+
+Run fixture authority is no longer tied to `com.example.auth/signIn`. A bounded surface traversal
+collects reachable `operation.invoke` aliases, rejects conflicting reuse, and resolves each exact
+capability against authenticated Catalog fixtures. Each alias owns independent selected, pending,
+completed, and disposed state. Its host call must match document, revision, surface, request,
+alias, capability, and effect; request input is never read or retained. Synthetic, Integration, and
+Production remain visibly distinct, with only synthetic Catalog fixtures active.
+
+This layer supplies honest authoring affordances and a browser smoke path. It does not claim a live
+integration, production call, arbitrary operation output editor, M10-T02/M10-T03 acceptance-matrix
+closure, M10-T04 real-host success/navigation, remote persistence, or G10.
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific

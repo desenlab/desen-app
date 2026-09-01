@@ -924,12 +924,13 @@ may escalate to SIGKILL but cannot replace the winner. Settlement still waits fo
 `close` and isolation cleanup.
 
 The code-owned affected timeout remains 17 minutes, while exhaustive execution owns an 18-minute
-soft complete-gate timeout above the 15-minute workload timeouts. Authentic settlement still
-awaits child `close`, cleanup, and boundary capture. Phase A therefore wraps the command in a
+30-second soft complete-gate timeout above the 15-minute workload timeouts. Authentic settlement
+still awaits child `close`, cleanup, and boundary capture. Phase A therefore wraps the command in a
 19-minute operating-system ceiling with a 30-second kill grace, inside a 25-minute hosted job. An
 outer-ceiling failure is never accepted as promotion evidence. The frozen I07-04 artifact retains
 its historical 17-minute soft and 18-minute process ceilings; live successor authority separately
-authenticates the current 17-minute affected, 18-minute exhaustive, and 19-minute process limits.
+authenticates the current 17-minute affected, 18-minute 30-second exhaustive, and 19-minute process
+limits.
 
 The execution boundary authenticates the repository revision and inventory and compares tracked
 bytes, executable modes, tracked-file count, and Git index object ids before and after all 184
@@ -1443,3 +1444,13 @@ artifacts and 102 current readers. The permission-model fixture correction prese
 changed M10-T01 root-test reader while retaining the same 51 artifacts and 102 reader identities.
 The dedicated checkpoint suite passes 82/82. These are local reader-authority receipts, not a new
 plan task or an exact-head hosted result.
+
+M10-T01B later appends sequence 64 at
+`sha256:2590f7ebf99b927ccded490e511748e8e5abcf0a49108f67c78061aa021da5f0` with 53 frozen
+artifacts and 106 readers. The hosted-browser compatibility correction preserves those exact
+artifact and reader identities, reseals only indexes `[70..97, 102, 103]`, and appends sequence 65
+at `sha256:fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14`. Its 15 historical
+reader families bind the exact 15,143-byte current browser spec at
+`sha256:5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b`; combined reader and
+checkpoint suites pass 233/233 and 88/88. This append-only correction changes no task status and
+does not convert local two-config Chromium success into a hosted exact-head claim.

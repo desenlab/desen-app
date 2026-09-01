@@ -332,13 +332,13 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 98,
-    verifierCount: 98,
-    rootTestCount: 98,
+    proofCount: 99,
+    verifierCount: 99,
+    rootTestCount: 99,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
     legacyPrerequisiteCount: 735,
-    legacyPrerequisiteSha256: "5dc114ab24bc7d945475608fd77a84ba3fbc3fe547dac898c263aca3eba894bd",
+    legacyPrerequisiteSha256: "a6c969e096cac98cdd15e15892528518db351862a28af6fbd72ee3919d18c20b",
     legacyLeafInvocationCount: 4529,
     legacyLeafInvocationSha256: "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb",
     distinctLeafWorkloadCount: 319,
@@ -842,8 +842,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 206);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 98);
+  assert.equal(steps.length, 208);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 99);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -1174,6 +1174,28 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
       ],
     },
   );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "verify-desen-app-visual-behavior-authoring"),
+    {
+      id: "verify-desen-app-visual-behavior-authoring",
+      label: "Proof verifier: desen-app-visual-behavior-authoring",
+      command: "node",
+      args: ["scripts/verify-desen-app-visual-behavior-authoring.mjs"],
+    },
+  );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "test-desen-app-visual-behavior-authoring"),
+    {
+      id: "test-desen-app-visual-behavior-authoring",
+      label: "Root proof and mutation test: desen-app-visual-behavior-authoring",
+      command: "node",
+      args: [
+        "--test",
+        "--test-concurrency=1",
+        "tests/desen-app-visual-behavior-authoring.test.mjs",
+      ],
+    },
+  );
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -1194,8 +1216,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 206,
-    planSha256: "91519ad61ebc1bfed9d1d2553cf92b517cb4de2ad1313d679e2e26d86c311db1",
+    stepCount: 208,
+    planSha256: "669dc72f2b419d1f87cc417de190923ce13922061bce5e9a22ebc998cea1e7d5",
   });
 
   const missingTypecheck = clone(steps);

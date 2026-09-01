@@ -3928,3 +3928,48 @@ This file records implementation discoveries without changing the frozen DESEN 0
   need a separate authenticated project-store contract and atomicity decision. Browser restart
   last-known-good activation remains M10-T07; PF-090 stays `OPEN` until a general product project
   model is either standardized or deliberately documented as application-specific.
+
+## PF-091 — Visual behavior recipes and fixture controls are application profiles
+
+- Status: OPEN
+- Blocks proof: No; M10-T01B can provide a conservative no-code authoring profile over public
+  Editor Core commands, the exact current Source, and authenticated Catalog contracts without
+  changing DESEN 0.1.0 bytes or granting live-service authority.
+- Protocol location: Outside DESEN 0.1.0 editor UX; related action/condition semantics in SPEC
+  Sections 5.2, 6.2, and 16.2; related findings `PF-019`, `PF-020`, `PF-025`, `PF-083`, and `PF-089`
+- Observation: DESEN defines controlled values, event actions, predicates, operation aliases, and
+  authoring fixtures, but it does not prescribe how an editor should combine multiple Source edits
+  into one designer-facing connection, choose compatible state/event fields, derive a default
+  operation alias, expose conditional presence, or organize synthetic outcomes. Inferring any of
+  those from labels such as “Email”, “Password”, or “Sign in” would turn example content into hidden
+  product authority. Applying only one half of a controlled-input recipe can also produce the
+  misleading single-character behavior that prompted this task.
+- Implementation decision: M10-T01B treats an input connection as one private candidate containing
+  both `props.value = {"$ref":"state.<name>"}` and the canonical
+  `change → state.set(event.value)` action. Reconnection replaces only the single exact canonical
+  write associated with the previously bound state; unrelated ordered actions are preserved and
+  ambiguity fails closed. The complete candidate must pass Catalog-backed continuous validation
+  before it becomes the authored Source.
+
+  Visual action controls project only current Source states/surfaces/resources and authenticated
+  Catalog operations/events/commands. State and event choices are filtered by compatible primitive
+  schemas. Structured references require identical canonical schemas, so coarse “structured”
+  classification cannot connect objects to arrays or unrelated unions; structured fixed literals
+  stay in the advanced editor until a schema-driven visual control exists. Operation result names
+  use the Runtime reference-segment grammar rather than the broader local identifier grammar.
+  Existing and new actions share the same visual fields; complete JSON remains an explicit advanced
+  escape hatch and never executes in the editor.
+
+  Conditional visibility writes one complete `when` predicate through public Editor Core commands.
+  Operation-status choices come only from reference-safe aliases already authored by reachable
+  `operation.invoke` actions; conflicting aliases are omitted. Run controls likewise scan the exact
+  current surface, authenticate each referenced Catalog operation and synthetic fixture, and expose
+  zero, one, or multiple operation cards without a sign-in-specific branch. Traversal is bounded
+  before array copying or scheduling, and fixture host ports match exact document, revision,
+  surface, alias, capability, and effect while never reading or retaining operation input.
+
+- Future action: M10-T02 and M10-T03 retain their dedicated browser acceptance matrices for typed
+  input/pending and complete failure-state behavior. M10-T04 retains success, navigation, and a
+  separately authorized real host operation. A future interoperable editor-control vocabulary may
+  standardize these recipes; until then PF-091 remains `OPEN` and Catalog control hints under
+  PF-025 remain opaque.

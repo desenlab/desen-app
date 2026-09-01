@@ -7,7 +7,7 @@ import {
   reorderDesenEditorAction,
   replaceDesenEditorAction,
 } from "@desen/editor-core";
-import { escapeJsonPointerToken } from "@desen/protocol";
+import { canonicalizeJson, escapeJsonPointerToken } from "@desen/protocol";
 
 import { prepareCatalogAuthoringModel } from "./authoring-data.js";
 
@@ -128,6 +128,33 @@ export interface AuthoringActionReferenceOption {
   readonly label: string;
 }
 
+/** Value-kind summary used together with an exact schema key by the no-code composer. */
+export type AuthoringPrimitiveValueKind =
+  "boolean" | "integer" | "number" | "string" | "structured";
+
+/** One exact surface-local state entry available to the visual action composer. */
+export interface AuthoringStateActionReferenceOption extends AuthoringActionReferenceOption {
+  readonly valueKind: AuthoringPrimitiveValueKind;
+  /** Canonical exact schema identity used to fail closed for structured values. */
+  readonly schemaKey: string;
+  readonly initialValue: JsonValue;
+}
+
+/** One primitive object field declared by a Catalog event or operation schema. */
+export interface AuthoringSchemaFieldReferenceOption extends AuthoringActionReferenceOption {
+  readonly required: boolean;
+  readonly valueKind: AuthoringPrimitiveValueKind;
+  /** Canonical exact schema identity used to fail closed for structured values. */
+  readonly schemaKey: string;
+}
+
+/** One Catalog operation and the bounded input fields the visual composer may map. */
+export interface AuthoringOperationActionReferenceOption extends AuthoringActionReferenceOption {
+  readonly description: string | undefined;
+  readonly effect: string;
+  readonly inputFields: readonly AuthoringSchemaFieldReferenceOption[];
+}
+
 /** One component-command pair currently addressable on the selected surface. */
 export interface AuthoringComponentCommandReferenceOption {
   readonly targetId: string;
@@ -138,9 +165,9 @@ export interface AuthoringComponentCommandReferenceOption {
 
 /** Bounded reference candidates derived from the exact current Source and Catalog. */
 export interface AuthoringEventActionReferenceOptions {
-  readonly states: readonly AuthoringActionReferenceOption[];
+  readonly states: readonly AuthoringStateActionReferenceOption[];
   readonly surfaces: readonly AuthoringActionReferenceOption[];
-  readonly operations: readonly AuthoringActionReferenceOption[];
+  readonly operations: readonly AuthoringOperationActionReferenceOption[];
   readonly resources: readonly AuthoringActionReferenceOption[];
   readonly componentCommands: readonly AuthoringComponentCommandReferenceOption[];
 }
@@ -167,6 +194,7 @@ export interface AuthoringEventHandlerModel {
   readonly event: string;
   readonly description: string | undefined;
   readonly payloadSchema: JsonObject;
+  readonly payloadFields: readonly AuthoringSchemaFieldReferenceOption[];
   readonly actionList: AuthoringActionListModel;
 }
 
@@ -400,6 +428,49 @@ function optionalObject(object: JsonObject, key: string): JsonObject | undefined
 function optionalObjectArray(object: JsonObject, key: string): readonly JsonObject[] {
   const value = optionalOwnDataValue(object, key);
   return value === undefined ? Object.freeze([]) : dataObjectArray(value);
+}
+
+function schemaValueKind(schema: JsonObject): AuthoringPrimitiveValueKind {
+  const type = optionalOwnDataValue(schema, "type");
+  if (type === "boolean" || type === "integer" || type === "number" || type === "string") {
+    return type;
+  }
+  return "structured";
+}
+
+function schemaCompatibilityKey(schema: JsonObject): string {
+  return canonicalizeJson(schema);
+}
+
+function schemaFieldOptions(schema: JsonObject): readonly AuthoringSchemaFieldReferenceOption[] {
+  const properties = optionalObject(schema, "properties");
+  if (properties === undefined) return Object.freeze([]);
+  const requiredValue = optionalOwnDataValue(schema, "required");
+  const required = new Set<string>();
+  if (requiredValue !== undefined) {
+    for (const field of dataArray(requiredValue)) {
+      if (!isNonEmptyString(field)) throw new EventActionProjectionRejectedError();
+      required.add(field);
+    }
+  }
+  return Object.freeze(
+    Object.keys(properties)
+      .sort(compareText)
+      .map((value) => {
+        const fieldSchema = ownDataObject(ownDataValue(properties, value));
+        const title = optionalOwnDataValue(fieldSchema, "title");
+        if (title !== undefined && typeof title !== "string") {
+          throw new EventActionProjectionRejectedError();
+        }
+        return Object.freeze({
+          value,
+          label: title ?? value,
+          required: required.has(value),
+          valueKind: schemaValueKind(fieldSchema),
+          schemaKey: schemaCompatibilityKey(fieldSchema),
+        });
+      }),
+  );
 }
 
 function captureRoute(route: AuthoringEventActionRoute): AuthoringEventActionRoute | undefined {
@@ -777,6 +848,7 @@ function eventModels(
           event,
           description: descriptionValue,
           payloadSchema,
+          payloadFields: schemaFieldOptions(payloadSchema),
           actionList: projectActionList(
             actionsValue,
             actionsValue !== undefined,
@@ -792,6 +864,50 @@ function eventModels(
 function genericOptions(values: readonly string[]): readonly AuthoringActionReferenceOption[] {
   return Object.freeze(
     [...values].sort(compareText).map((value) => Object.freeze({ value, label: value })),
+  );
+}
+
+function stateOptions(state: JsonObject): readonly AuthoringStateActionReferenceOption[] {
+  return Object.freeze(
+    Object.keys(state)
+      .sort(compareText)
+      .map((value) => {
+        const declaration = ownDataObject(ownDataValue(state, value));
+        const schema = ownDataObject(ownDataValue(declaration, "schema"));
+        const initialValue = ownDataValue(declaration, "initial") as JsonValue;
+        return Object.freeze({
+          value,
+          label: value,
+          valueKind: schemaValueKind(schema),
+          schemaKey: schemaCompatibilityKey(schema),
+          initialValue,
+        });
+      }),
+  );
+}
+
+function operationOptions(
+  operations: JsonObject,
+): readonly AuthoringOperationActionReferenceOption[] {
+  return Object.freeze(
+    Object.keys(operations)
+      .sort(compareText)
+      .map((value) => {
+        const operation = ownDataObject(ownDataValue(operations, value));
+        const descriptionValue = optionalOwnDataValue(operation, "description");
+        if (descriptionValue !== undefined && typeof descriptionValue !== "string") {
+          throw new EventActionProjectionRejectedError();
+        }
+        const effect = readNonEmptyString(operation, "effect");
+        const inputSchema = ownDataObject(ownDataValue(operation, "inputSchema"));
+        return Object.freeze({
+          value,
+          label: value,
+          description: descriptionValue,
+          effect,
+          inputFields: schemaFieldOptions(inputSchema),
+        });
+      }),
   );
 }
 
@@ -862,9 +978,9 @@ function referenceOptions(
   const surfaces = ownDataObject(ownDataValue(ownDataObject(document), "surfaces"));
   const operations = ownDataObject(ownDataValue(catalog, "operations"));
   return Object.freeze({
-    states: genericOptions(Object.keys(state)),
+    states: stateOptions(state),
     surfaces: genericOptions(Object.keys(surfaces)),
-    operations: genericOptions(Object.keys(operations)),
+    operations: operationOptions(operations),
     resources: genericOptions(Object.keys(resources)),
     componentCommands: componentCommandOptions(catalog, surface),
   });

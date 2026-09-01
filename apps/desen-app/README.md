@@ -537,8 +537,23 @@ winner and require an explicit reopen.
 
 The current product profile intentionally creates only this exact project identity. It does not
 claim free-form project naming, multiple projects, remote accounts, collaboration, cloud sync,
-deployment, or last-known-good activation recovery. Typed input/pending and fixture outcomes remain
-M10-T02 onward.
+deployment, or last-known-good activation recovery.
+
+M10-T01B makes behavior authoring usable without a JSON-first workflow. For a TextField, create a
+compatible local state and use **Inspector → Input connection**; this atomically binds `Value` and
+adds the matching `change` state update. Do not bind Placeholder as a substitute for Value. For a
+Button, open **Actions**, add its Catalog-declared event handler, then add **Invoke operation** and
+map each required input to local state. New and existing actions share the same visual fields;
+**Advanced JSON** remains available for complete closed-action values. Structured references are
+offered only when their canonical schemas match exactly (for example, object never maps to array),
+and structured fixed literals stay in Advanced JSON until a schema-driven visual editor owns them.
+
+Select any layer to configure **Visibility** in Inspector. It may remain always visible, compare a
+local state, or follow the status of an operation result name already authored on the surface. In
+Run mode, operation cards and outcomes are derived from those exact actions and authenticated
+Catalog fixtures; the panel has no sign-in-specific outcome list. Synthetic is the only active
+context, while Integration and Production remain visibly unavailable. This usability slice does
+not close the dedicated M10-T02/M10-T03 acceptance matrices or M10-T04 real-host operation proof.
 
 ## Local commands
 

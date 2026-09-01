@@ -230,6 +230,15 @@ describe("Desen App event and closed-action authoring", () => {
     expect(email.events).toHaveLength(1);
     expect(email.events[0]).toMatchObject({
       event: "change",
+      payloadFields: [
+        {
+          label: "value",
+          required: true,
+          schemaKey: '{"type":"string"}',
+          value: "value",
+          valueKind: "string",
+        },
+      ],
       actionList: { pointer: "/on/change", present: true },
     });
     expect(email.events[0]?.actionList.actions[0]).toMatchObject({
@@ -241,10 +250,38 @@ describe("Desen App event and closed-action authoring", () => {
       onFailure: null,
     });
     expect(email.referenceOptions.states.map(({ value }) => value)).toEqual(["email", "password"]);
+    expect(email.referenceOptions.states).toMatchObject([
+      { value: "email", valueKind: "string", schemaKey: '{"type":"string"}', initialValue: "" },
+      {
+        value: "password",
+        valueKind: "string",
+        schemaKey: '{"type":"string"}',
+        initialValue: "",
+      },
+    ]);
     expect(email.referenceOptions.surfaces.map(({ value }) => value)).toEqual(["home", "sign-in"]);
     expect(email.referenceOptions.operations.map(({ value }) => value)).toEqual([
       "com.example.auth/signIn",
     ]);
+    expect(email.referenceOptions.operations[0]).toMatchObject({
+      value: "com.example.auth/signIn",
+      description: "Authenticate with email and password.",
+      effect: "network",
+      inputFields: [
+        {
+          value: "email",
+          valueKind: "string",
+          schemaKey: '{"format":"email","type":"string"}',
+          required: true,
+        },
+        {
+          value: "password",
+          valueKind: "string",
+          schemaKey: '{"minLength":1,"type":"string"}',
+          required: true,
+        },
+      ],
+    });
     expect(
       email.referenceOptions.componentCommands.map(({ targetId, command }) => [targetId, command]),
     ).toEqual([

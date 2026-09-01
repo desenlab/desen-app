@@ -45,28 +45,16 @@ async function setTextProperty(page: Page, name: string, value: string): Promise
   await expect(inspector.getByRole("status")).toContainText(`Updated ${name}.`);
 }
 
-async function bindValueToState(page: Page, stateName: string): Promise<void> {
+async function connectInput(page: Page, stateName: string): Promise<void> {
   const inspector = page.getByRole("complementary", { name: "Inspector" });
-  await inspector.getByRole("combobox", { name: "Value value source" }).selectOption(stateName);
-  await expect(inspector.getByRole("status")).toContainText(`Bound Value to state.${stateName}.`);
-}
-
-async function addChangeStateAction(page: Page, stateName: string): Promise<void> {
-  const inspector = page.getByRole("complementary", { name: "Inspector" });
-  await inspector.getByRole("tab", { name: "Actions" }).click();
-  const actions = inspector.getByRole("region", { name: "Events & Actions" });
-  await actions.getByRole("button", { name: "Add change event handler" }).click();
-  await actions.getByRole("button", { name: "Add action to change" }).click();
-  await actions.getByRole("textbox", { name: "New action JSON for change" }).fill(
-    JSON.stringify({
-      type: "state.set",
-      path: stateName,
-      value: { $ref: "event.value" },
-    }),
+  const connection = inspector.getByRole("region", { name: "Input connection" });
+  await connection
+    .getByRole("combobox", { name: "Input connection state" })
+    .selectOption(stateName);
+  await connection.getByRole("button", { name: /^(?:Connect input|Repair connection)$/u }).click();
+  await expect(connection.getByRole("status")).toContainText(
+    `Connected Value and change to state.${stateName}.`,
   );
-  await actions.getByRole("button", { name: "Add complete action" }).click();
-  await expect(actions.getByRole("article", { name: "action 1 in change" })).toBeVisible();
-  await inspector.getByRole("tab", { name: "Inspector" }).click();
 }
 
 async function readEditorViewportSnapshot(page: Page) {
@@ -251,8 +239,7 @@ test("creates, authors, persists, reloads, and reopens a blank sign-in project t
     })
     .click();
   await setTextProperty(page, "Label", "Email");
-  await bindValueToState(page, "email");
-  await addChangeStateAction(page, "email");
+  await connectInput(page, "email");
 
   await page
     .getByRole("button", {
@@ -282,8 +269,7 @@ test("creates, authors, persists, reloads, and reopens a blank sign-in project t
   await secure.check();
   await expect.poll(() => readEditorViewportSnapshot(page)).toEqual(anchoredViewport);
   await page.setViewportSize({ height: 1_000, width: 1_600 });
-  await bindValueToState(page, "password");
-  await addChangeStateAction(page, "password");
+  await connectInput(page, "password");
 
   const passwordDragHandle = page.locator(
     '[data-layer-drop-row-node-id="node.textfield-2"] [data-layer-drag-handle="true"]',

@@ -2068,15 +2068,16 @@ and move to M10-T01.
 | -------- | ----------- | ---------------- | ----------------------------------------------------------------------------- |
 | M10-T01  | DONE        | G09              | Empty-project-to-sign-in browser E2E                                          |
 | M10-T01A | DONE        | M10-T01          | User-created blank project and durable normal-App authoring                   |
-| M10-T02  | NOT_STARTED | M10-T01A         | Input and pending fixture test                                                |
+| M10-T01B | DONE        | M10-T01A         | Visual behavior authoring and Catalog-derived Run controls                    |
+| M10-T02  | NOT_STARTED | M10-T01B         | Input and pending fixture test                                                |
 | M10-T03  | NOT_STARTED | M10-T02          | Failure fixture and visible failure-state test                                |
 | M10-T04  | NOT_STARTED | M10-T02          | Success fixture, navigation, and real host-operation binding test             |
 | M10-T05  | NOT_STARTED | M10-T03–M10-T04  | Label/layout change published and activated without host source change        |
 | M10-T06  | NOT_STARTED | M10-T05          | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
 | M10-T07  | NOT_STARTED | M10-T05, G07     | Corrupt revision and catalog mismatch preserve last-known-good                |
-| M10-T08  | NOT_STARTED | M10-T01A–M10-T07 | One-command seed/reset and repeatable sign-in demo runbook                    |
+| M10-T08  | NOT_STARTED | M10-T01B–M10-T07 | One-command seed/reset and repeatable sign-in demo runbook                    |
 | M10-T09  | NOT_STARTED | M10-T08          | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
-| G10      | NOT_STARTED | M10-T01A–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
+| G10      | NOT_STARTED | M10-T01B–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
 
 M10-T01 is `DONE`. The dedicated `@desen/app-browser-e2e` workspace owns Playwright, Vite,
 Chromium, and failure artifacts while the root and product App manifests retain no M10 browser-E2E
@@ -2175,6 +2176,59 @@ reader identities, reseals only `[70..97, 102, 103]`, and advances the exact seq
 `sha256:7245d3334dfaf801692783ed8a500ecc124ed259291ccf433cbc6fab21c76da7`. No task, gate,
 progress, or M10-T02 status changes, and no hosted exact-head result is inferred.
 
+M10-T01B is `DONE`. It closes the usability gap between a structurally editable Source and a
+designer-operable behavior flow without adding a sign-in-specific editor mode. A selected input now
+offers one atomic **Input connection** control: the same compatible local state becomes the
+component's controlled `Value` and the target of its `change → state.set(event.value)` action. A
+half-bound input, a second write to the bound state, or a conditional/extended imitation cannot be
+reported as connected, while unrelated actions retain their order and conflicting writes fail
+closed.
+
+The Actions tab now creates all seven closed Source action kinds through Catalog- and Source-derived
+visual fields. A Button can select a Catalog operation, give its result a reference-safe name, map
+declared inputs to compatible local states, and choose concurrency without writing JSON. Advanced
+JSON remains an explicit lossless escape hatch. Structured state/event/input mappings require the
+same canonical schema identity, so an object cannot be offered for an array; structured fixed
+values remain advanced-only until a schema-driven visual editor exists. Inspector visibility can be **Always**, follow a
+local-state comparison, or follow an authored operation result status; the resulting `when`
+predicate is written through the public Editor Core condition commands and complete Source
+validation.
+
+Run controls are projected from the exact current surface's authored `operation.invoke` actions and
+authenticated Catalog fixtures. Zero, one, or multiple operation aliases are represented honestly;
+alias conflicts, missing operations, malformed fixtures, stale Runtime context, and undeclared
+outcomes fail closed. The UI no longer assumes a sign-in operation or invents “success user-1” and
+“invalid credentials” options. Synthetic execution remains visibly separate from unavailable
+Integration and Production contexts, and operation input values are neither read nor retained by
+the fixture controller.
+
+The dedicated behavior-authoring profile passes 135/135, the complete App suite excluding the
+deliberately occupied local launcher port passes 427/427, and
+the real Chromium scenario passes 1/1. That scenario starts from the visible blank-project UI,
+demonstrates why a placeholder-only binding retains one character, repairs both TextFields through
+the atomic control, authors the Button operation and Alert condition without JSON, types full values,
+observes a real pending Promise, explicitly settles the Catalog-derived error fixture, and sees the
+conditional Alert. The dedicated M10-T01B artifact and verifier are
+`docs/proof/artifacts/desen-app-0.1.0-visual-behavior-authoring.json` and
+`scripts/verify-desen-app-visual-behavior-authoring.mjs`.
+
+The append-only hosted-browser correction does not reopen M10-T01B. PR #69 run `33437877845` / job
+`99638637740` exposed a historical spec that still waited for the removed JSON-first action UI;
+the exact 15,143-byte successor
+(`sha256:5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b`) uses the visible atomic
+**Connect input** flow and passes both Chromium configurations 1/1 + 1/1 locally. Fifteen historical
+reader families pass 233/233. Corrective checkpoint sequence 65 preserves all 53 artifacts and 106
+reader identities, reseals only `[70..97, 102, 103]`, and passes 88/88 at
+`sha256:fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14`. M10-T01B remains
+`DONE`, M10-T02 remains `NOT_STARTED`, and no hosted exact-head success is inferred.
+
+M10-T01B is an authoring-usability prerequisite, not a renaming of later proof slices. M10-T02 still
+owns its dedicated typed-input and pending fixture acceptance matrix; M10-T03 still owns the full
+failure-state proof; M10-T04 still owns success, navigation, and a separately authorized real host
+operation. P-09/P-10, remote deployment, multi-user persistence, and G10 therefore remain open.
+Overall progress advances to 112/147 (76%), M10 advances to 3/11, and M10-T02 remains
+`NOT_STARTED` and next.
+
 ### M10-T01 public build-log drafts
 
 **X (EN, 280 characters)**
@@ -2244,6 +2298,45 @@ progress, or M10-T02 status changes, and no hosted exact-head result is inferred
 >
 > Hangi üretim akışını sırada sınamamızı istersiniz? Kanıtı public repoda inceleyebilirsiniz:
 > https://github.com/desenlab/desen-app
+
+### M10-T01B public build-log drafts
+
+**X (EN, ≤280 characters)**
+
+> Desen App behavior authoring is now no-code by default: atomic controlled inputs, visual operation mapping, conditional visibility, and Catalog-derived generic Run outcomes—proven in Chromium. Advanced JSON stays optional; M10-T02 is next. github.com/desenlab/desen-app
+
+**LinkedIn**
+
+> [EN]
+>
+> A visual editor becomes useful when behavior is as direct as layout. Desen App now connects a
+> controlled input to state in one atomic action, maps Button events to Catalog operations through
+> visual fields, and makes layers conditional on local state or authored operation status.
+>
+> Run mode no longer knows about “sign in.” It derives operation cards and synthetic outcomes from
+> the exact current Source and authenticated Catalog. A real Chromium flow types complete values,
+> observes pending, settles a declared error, and reveals the conditional Alert. Advanced JSON
+> remains available, but it is no longer the designer's required path.
+>
+> This is the authoring-usability prerequisite. Dedicated M10-T02/T03 lifecycle matrices and the
+> M10-T04 real-host success/navigation proof remain next.
+>
+> [TR]
+>
+> Görsel bir editör, davranış tanımlamak da yerleşim kadar doğrudan olduğunda gerçekten işe yarar.
+> Desen App artık kontrollü bir input'u state'e tek atomik işlemle bağlıyor, Button event'ini görsel
+> alanlarla Catalog operation'ına eşliyor ve katmanları local state ya da yazılmış operation
+> status'una göre koşullu gösterebiliyor.
+>
+> Run modu artık “sign in” diye özel bir akış bilmiyor. Operation kartlarını ve sentetik sonuçları
+> güncel Source ile doğrulanmış Catalog'dan türetiyor. Gerçek Chromium akışı tam metin giriyor,
+> pending durumunu görüyor, tanımlı hatayı sonuçlandırıyor ve koşullu Alert'i gösteriyor. Advanced
+> JSON korunuyor ama tasarımcının zorunlu yolu değil.
+>
+> Bu, authoring kullanılabilirliği önkoşulu. M10-T02/T03 yaşam döngüsü matrisleri ile M10-T04 gerçek
+> host başarı/navigasyon kanıtı sırada.
+>
+> #DesignTools #NoCode #WebDevelopment #OpenSource
 
 ## M11 — Capability extensibility proof
 

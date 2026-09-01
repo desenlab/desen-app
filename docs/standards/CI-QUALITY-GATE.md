@@ -931,14 +931,15 @@ launches. Later signals may escalate but cannot replace that record. Every activ
 isolation cleanup is still awaited before the gate settles.
 
 Affected execution owns a 17-minute soft complete-gate deadline; exhaustive execution owns an
-18-minute soft complete-gate deadline. Both retain 15-minute per-workload deadlines and a
-five-second child-termination grace. Because authentic settlement still awaits child `close`,
+18-minute 30-second soft complete-gate deadline. Both retain 15-minute per-workload deadlines and
+a five-second child-termination grace. Because authentic settlement still awaits child `close`,
 cleanup, and boundary capture, the Phase A command also has a 19-minute operating-system ceiling
 with a 30-second kill grace. GitHub's 25-minute job ceiling remains outside both. An outer-ceiling
 failure is red and cannot serve as promotion evidence; setup, contract checks, receipt emission,
 and hosted variance retain their own headroom. The frozen I07-04 promotion artifact preserves its
 historical 17-minute soft and 18-minute process ceilings; live successor authority authenticates
-the current 17-minute affected, 18-minute exhaustive, and 19-minute process boundaries separately.
+the current 17-minute affected, 18-minute 30-second exhaustive, and 19-minute process boundaries
+separately.
 
 The required execution design layers three closing guards:
 
@@ -1349,3 +1350,27 @@ artifacts and 102 current readers. The permission-model fixture correction prese
 changed M10-T01 root-test reader while retaining the same 51 artifacts and 102 reader identities.
 Its dedicated checkpoint suite passes 82/82. These are local reader-authority receipts; they do not
 add a plan task or infer an exact-head hosted result.
+
+M10-T01B adds `desen-app-visual-behavior-authoring` as an ordinary proof pair and registers its
+verifier and root mutation suite in the exhaustive inventory, shared-state authority, ownership,
+semantic impact graph, affected selector, required runners, and hosted Quality gate. Its immutable
+artifact authenticates the M10-T01A prerequisite plus the exact visual connection/action/condition,
+generic fixture, Run-control, focused-test, and Chromium receipts. Checkpoint sequence 64 preserves
+all sequences 1–63 and appends the new artifact and both reader identities without modifying a
+historical artifact.
+
+Corrective checkpoint sequence 65 preserves the same 53 artifacts and 106 reader identities. It
+reseals only `[70..97, 102, 103]` after the Browser E2E spec moved from the removed JSON-first
+action UI to the visible atomic **Connect input** flow. Fifteen historical reader families bind the
+exact 15,143-byte spec at
+`sha256:5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b`; their combined suites
+pass 233/233, the exact two-config Chromium command passes 1/1 + 1/1 locally, and the checkpoint
+suite passes 88/88 at
+`sha256:fad195aa82484ec15e347e3681ba6be64e6f1e28d5f724bf1fabeb892a7afe14`. This append-only
+correction changes no plan status and makes no hosted exact-head success claim.
+
+Local focused and real-browser success is not a hosted exact-head claim. Merge authority for this
+corrective head requires both hosted `Quality gate` and `Browser E2E`, followed by the merged main
+head's hosted workflows; this requirement does not reopen the already completed M10-T01B task. The
+fixed-port local-launcher test may remain excluded while the user's deliberate port-5173 product
+session is active; this environmental exclusion is not allowed on the clean hosted runner.

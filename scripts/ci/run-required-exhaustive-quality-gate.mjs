@@ -32,13 +32,13 @@ const REQUIRED_AUTHORITY = "REQUIRED";
 const OPTIONAL_AUTHORITY = "SHADOW";
 const EXHAUSTIVE_SCOPE = "EXHAUSTIVE";
 const EXPECTED_PLAN_SHA256_BY_AUTHORITY = Object.freeze({
-  REQUIRED: "7070a0c0937c339cb4d3a29e763f1cd34d1cd69a6ce58322ebcb568475bf30cb",
-  SHADOW: "40cd7c7fda8f66cf428fba3546789e74277e17055884ebe99c6b04a12ddb1782",
+  REQUIRED: "6376c330cc3bd4457b1474accd1f634a550eeed3bb949654bda8fce2217c8204",
+  SHADOW: "8583bd13385342fbdc897c0215b67a802bf10db20f63c11eb7ef1e941e7774ec",
 });
 const PROOF_PAIR_CONCURRENCY = 2;
 const DEFAULT_STEP_TIMEOUT_MS = 15 * 60 * 1_000;
 const MAXIMUM_STEP_TIMEOUT_MS = 60 * 60 * 1_000;
-const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000;
+const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 30 * 1_000;
 const MAXIMUM_GATE_TIMEOUT_MS = 60 * 60 * 1_000;
 const DEFAULT_TERMINATION_GRACE_MS = 5_000;
 const MAXIMUM_TERMINATION_GRACE_MS = 5_000;
@@ -369,7 +369,7 @@ function deriveExecutionRegions(inventory) {
   ) {
     fail(
       "REQUIRED_EXHAUSTIVE_REGION_INVALID",
-      "The derived execution regions do not own all 206 workloads exactly once.",
+      "The derived execution regions do not own all 208 workloads exactly once.",
     );
   }
 
@@ -396,7 +396,7 @@ function rememberValidatedNode(workload) {
 }
 
 /**
- * Builds the single code-owned exhaustive plan from the authenticated 206-node dependency graph.
+ * Builds the single code-owned exhaustive plan from the authenticated 208-node dependency graph.
  *
  * `REQUIRED` is the default authority. `SHADOW` must be explicitly requested, while scope is
  * permanently fixed to `EXHAUSTIVE`.
@@ -491,7 +491,7 @@ function validatePlanForExecution(candidate, expectedAuthority) {
       );
     }
   }
-  if (candidate.concurrency !== PROOF_PAIR_CONCURRENCY || candidate.stepCount !== 206) {
+  if (candidate.concurrency !== PROOF_PAIR_CONCURRENCY || candidate.stepCount !== 208) {
     fail(
       "REQUIRED_EXHAUSTIVE_PLAN_DRIFT",
       "The exhaustive plan widened concurrency or omitted workloads.",
@@ -1530,10 +1530,10 @@ async function runProofPairRegion(
     }
   }
   flushOrdinarySegment();
-  if (barrierCount !== 11 || plan.proofPairs.length - barrierCount !== 87) {
+  if (barrierCount !== 11 || plan.proofPairs.length - barrierCount !== 88) {
     fail(
       "REQUIRED_EXHAUSTIVE_CLASS_DRIFT",
-      "The shared-state authority must classify exactly 87 ordinary pairs and 11 barrier pairs.",
+      "The shared-state authority must classify exactly 88 ordinary pairs and 11 barrier pairs.",
       { barrierCount, proofPairCount: plan.proofPairs.length },
     );
   }
@@ -1658,8 +1658,8 @@ function createExecutionReceipt(plan, receiptById, forcedFailure = false) {
   ).length;
   const status =
     !forcedFailure &&
-    steps.length === 206 &&
-    observedClosedCount === 206 &&
+    steps.length === 208 &&
+    observedClosedCount === 208 &&
     steps.every(({ status: stepStatus }) => stepStatus === "PASS")
       ? "PASS"
       : "FAIL";
@@ -1702,7 +1702,7 @@ function attachExecutionReceipt(error, receipt) {
  * Executes one authenticated plan: dependency-derived prefix, at most two proof pairs, then suffix.
  *
  * Every supplied runner result must contain an exact successful `close` observation. The returned
- * receipt remains in the stable 206-node inventory order even though proof pairs may overlap.
+ * receipt remains in the stable 208-node inventory order even though proof pairs may overlap.
  */
 export async function runRequiredExhaustivePlan(
   plan,
@@ -1893,11 +1893,11 @@ export async function runRequiredExhaustivePlan(
     throw attachExecutionReceipt(failure, createExecutionReceipt(validatedPlan, receiptById, true));
   }
   const receipt = createExecutionReceipt(validatedPlan, receiptById);
-  if (receipt.status !== "PASS" || completedIds.size !== 206) {
+  if (receipt.status !== "PASS" || completedIds.size !== 208) {
     throw attachExecutionReceipt(
       new RequiredExhaustiveQualityGateError(
         "REQUIRED_EXHAUSTIVE_RECEIPT_INCOMPLETE",
-        "The exhaustive gate did not observe all 206 workloads close successfully.",
+        "The exhaustive gate did not observe all 208 workloads close successfully.",
         { completed: completedIds.size, observedClosed: receipt.observedClosedCount },
       ),
       receipt,
@@ -2113,8 +2113,8 @@ function printableReceipt(boundaryReceipt, error) {
     inventorySha256: execution?.inventorySha256,
     concurrency: execution?.concurrency,
     observedClosedCount: execution?.observedClosedCount ?? 0,
-    stepCount: execution?.stepCount ?? 206,
-    proofPairCount: execution?.proofPairCount ?? 98,
+    stepCount: execution?.stepCount ?? 208,
+    proofPairCount: execution?.proofPairCount ?? 99,
     repository: repository
       ? {
           proofCount: repository.proofCount,
