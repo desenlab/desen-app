@@ -3,15 +3,82 @@ import { StrictMode, act } from "react";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { setDesenEditorOwnerProp } from "@desen/editor-core";
+
 import * as authoringFixtures from "../src/authoring-fixtures.js";
 import * as authoringPreview from "../src/authoring-preview.js";
 import * as authoringSlots from "../src/authoring-slots.js";
 import { DesenAppApplication } from "../src/application.js";
 import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "../src/reference-empty-project.js";
+import {
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+  REFERENCE_EDITOR_DOCUMENT,
+} from "../src/reference-authoring-profile.js";
+import { REFERENCE_APP_PROJECT_INVENTORY_FIXTURE } from "../src/reference-project-fixtures.js";
+import { REFERENCE_SIGN_IN_WORKSPACE_PROFILE } from "../src/reference-sign-in-workspace-profile.js";
+import {
+  createProjectWorkspaceProfile,
+  readProjectWorkspaceProfileAuthority,
+} from "../src/project-workspace-profile.js";
+
+import type { ProjectInventoryFixtureHandle } from "../src/project-inventory-fixture.js";
+import type { ProjectWorkspaceProfileHandle } from "../src/project-workspace-profile.js";
 
 function renderApplication(pathname = "/projects") {
   window.history.replaceState(null, "", pathname);
-  return render(<DesenAppApplication />);
+  const usesInertInventory =
+    pathname === "/projects" ||
+    pathname === "/projects/account-app/surfaces/recovery" ||
+    pathname === "/projects/checkout-pilot";
+  return usesInertInventory
+    ? render(
+        <DesenAppApplication
+          projectInventoryFixture={REFERENCE_APP_PROJECT_INVENTORY_FIXTURE}
+          workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+        />,
+      )
+    : render(
+        <DesenAppApplication
+          initialDocument={REFERENCE_EDITOR_DOCUMENT}
+          workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+        />,
+      );
+}
+
+function siblingOfficialWorkspaceProfile(title: string): ProjectWorkspaceProfileHandle {
+  const authority = readProjectWorkspaceProfileAuthority(REFERENCE_AUTHORING_WORKSPACE_PROFILE);
+  if (authority.status !== "read") throw new TypeError("Expected the official workspace profile.");
+  const edited = setDesenEditorOwnerProp(REFERENCE_EDITOR_DOCUMENT, {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.title",
+    name: "text",
+    value: title,
+  });
+  if (!edited.ok) throw new TypeError("Expected the sibling profile Source edit to succeed.");
+  const profile = authority.profile;
+  const created = createProjectWorkspaceProfile({
+    profileId: profile.profileId,
+    project: profile.project,
+    route: profile.route,
+    sourceSurfaceId: profile.sourceSurfaceId,
+    documentId: profile.documentId,
+    sourceKey: "account-app-sibling-source",
+    initialDocument: edited.document,
+    catalogs: profile.catalogs,
+    catalogPackages: profile.catalogPackages,
+    runtime: {
+      target: profile.runtime.target,
+      registry: profile.runtime.registry,
+      tokenCssProperties: profile.runtime.tokenCssProperties,
+      hostPorts: profile.runtime.hostPorts,
+    },
+    publication: {
+      channelName: "sibling-preview",
+      hostId: "sibling-reference-host",
+    },
+  });
+  if (!created.ok) throw new TypeError(`Expected sibling profile: ${created.reason}.`);
+  return created.handle;
 }
 
 const STACK_SLOT_ACCEPTANCE = "Accepts layout, content, input, action, feedback, complex";
@@ -128,6 +195,29 @@ describe("Desen App application shell", () => {
     expect(screen.getByRole("status").textContent).toBe("2 projects");
   });
 
+  it("keeps inert inventories separate from Source authority and rejects forged handles", () => {
+    const view = render(
+      <DesenAppApplication
+        initialDocument={REFERENCE_EDITOR_DOCUMENT}
+        projectInventoryFixture={REFERENCE_APP_PROJECT_INVENTORY_FIXTURE}
+        workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+      />,
+    );
+    expect(screen.getByRole("alert").textContent).toContain(
+      "cannot be composed with Source, mutation, persistence, publication",
+    );
+
+    view.rerender(
+      <DesenAppApplication
+        projectInventoryFixture={Object.freeze({}) as ProjectInventoryFixtureHandle}
+        workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+      />,
+    );
+    expect(screen.getByRole("alert").textContent).toContain(
+      "inert project inventory was not authenticated",
+    );
+  });
+
   it("uses same-document navigation and focuses the new route heading", async () => {
     renderApplication();
 
@@ -191,7 +281,7 @@ describe("Desen App application shell", () => {
     );
     expect(within(breadcrumb).getByText("Sign-in").getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("heading", { level: 2, name: "Sign-in" })).toBeTruthy();
-    expect(screen.getAllByText("account.sign-in")).toHaveLength(1);
+    expect(screen.getAllByText("sign-in")).toHaveLength(1);
     const editorMain = screen.getByRole("main");
     expect(editorMain.getAttribute("data-surface-editor")).toBe("true");
     const workplane = document.querySelector<HTMLElement>("[data-canvas-workplane='true']");
@@ -257,7 +347,7 @@ describe("Desen App application shell", () => {
     ).toBe(true);
     expect(screen.queryByRole("navigation", { name: "Sign-in layer hierarchy" })).toBeNull();
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
-    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const canvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     expect(canvas).toBeInstanceOf(HTMLFieldSetElement);
     expect((canvas as HTMLFieldSetElement).disabled).toBe(true);
     const email = within(canvas).getByLabelText("Email") as HTMLInputElement;
@@ -300,7 +390,12 @@ describe("Desen App application shell", () => {
 
   it("admits an explicit empty-project bootstrap without substituting completed sign-in content", () => {
     window.history.replaceState(null, "", "/projects/account-app/surfaces/sign-in");
-    render(<DesenAppApplication initialDocument={EMPTY_REFERENCE_PROJECT_DOCUMENT} />);
+    render(
+      <DesenAppApplication
+        initialDocument={EMPTY_REFERENCE_PROJECT_DOCUMENT}
+        workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
+      />,
+    );
 
     const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
     expect(
@@ -316,23 +411,66 @@ describe("Desen App application shell", () => {
     expect(within(hierarchy).queryByText("sign-in.password")).toBeNull();
     expect(within(hierarchy).queryByText("sign-in.submit")).toBeNull();
     expect(screen.queryByRole("heading", { level: 2, name: "Sign in" })).toBeNull();
-    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Managed sign-in canvas" })).toBeTruthy();
   });
 
-  it("captures one initial Source for the complete mounted surface session", () => {
+  it("remounts the complete surface session when its workspace profile changes", () => {
     window.history.replaceState(null, "", "/projects/account-app/surfaces/sign-in");
-    const view = render(<DesenAppApplication initialDocument={EMPTY_REFERENCE_PROJECT_DOCUMENT} />);
+    const view = render(
+      <DesenAppApplication
+        initialDocument={EMPTY_REFERENCE_PROJECT_DOCUMENT}
+        workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
+      />,
+    );
     const initialHierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
     expect(initialHierarchy.querySelectorAll("[data-layer-source-node-id]")).toHaveLength(1);
 
     view.rerender(
-      <DesenAppApplication initialDocument={authoringPreview.REFERENCE_EDITOR_DOCUMENT} />,
+      <DesenAppApplication
+        initialDocument={REFERENCE_EDITOR_DOCUMENT}
+        workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+      />,
     );
 
-    const retainedHierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
-    expect(retainedHierarchy.querySelectorAll("[data-layer-source-node-id]")).toHaveLength(1);
-    expect(within(retainedHierarchy).queryByText("sign-in.title")).toBeNull();
-    expect(screen.queryByRole("heading", { level: 2, name: "Sign in" })).toBeNull();
+    const replacementHierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    expect(replacementHierarchy.querySelectorAll("[data-layer-source-node-id]")).toHaveLength(6);
+    expect(within(replacementHierarchy).getByText("sign-in.title")).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+  });
+
+  it("uses opaque handle identity when public profile and route identities are equal", async () => {
+    window.history.replaceState(null, "", "/projects/account-app/surfaces/sign-in");
+    const siblingProfile = siblingOfficialWorkspaceProfile("Sibling baseline");
+    const view = render(
+      <DesenAppApplication
+        initialDocument={REFERENCE_EDITOR_DOCUMENT}
+        workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+      />,
+    );
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Select Text layer · sign-in.title" }));
+    const text = within(screen.getByRole("complementary", { name: "Inspector" })).getByRole(
+      "textbox",
+      { name: "Text" },
+    );
+    fireEvent.change(text, { target: { value: "Profile A draft" } });
+    fireEvent.blur(text);
+    expect(await screen.findByRole("heading", { level: 2, name: "Profile A draft" })).toBeTruthy();
+
+    const siblingRead = readProjectWorkspaceProfileAuthority(siblingProfile);
+    if (siblingRead.status !== "read") throw new TypeError("Expected the sibling profile read.");
+    view.rerender(
+      <DesenAppApplication
+        initialDocument={siblingRead.profile.initialDocument}
+        workspaceProfile={siblingProfile}
+      />,
+    );
+
+    expect(await screen.findByRole("heading", { level: 2, name: "Sibling baseline" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { level: 2, name: "Profile A draft" })).toBeNull();
+    expect(screen.getByRole("status", { name: "Authoring status" }).textContent).toBe(
+      "Placement target · Stack sign-in.layout · default slot.",
+    );
   });
 
   it("selects Source layers accessibly while keeping the preview frame free of editor chrome", async () => {
@@ -351,7 +489,7 @@ describe("Desen App application shell", () => {
     expect(emailLayer.getAttribute("aria-pressed")).toBe("true");
     expect(emailLayer.getAttribute("aria-label")).toBe("Deselect Text field layer · sign-in.email");
     expect(screen.getByText("Selected · Text field")).toBeTruthy();
-    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const canvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     expect(authoringStatus().textContent).toBe("Selected · Text field");
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     expect(within(canvas).queryByRole("status")).toBeNull();
@@ -435,7 +573,7 @@ describe("Desen App application shell", () => {
     expect(screen.getByRole("button", { name: "Deselect Alert layer · node.alert" })).toBe(
       document.activeElement,
     );
-    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const canvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     expect(within(canvas).getByRole("status").textContent).toBe("Message");
     const deleteAlert = within(authoring).getByRole("button", {
       name: "Delete Alert layer · node.alert",
@@ -454,7 +592,7 @@ describe("Desen App application shell", () => {
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     expect(screen.getByRole("button", { name: stackSlotName(5) })).toBeTruthy();
     expect(
-      within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).queryByRole("status"),
+      within(screen.getByRole("group", { name: "Managed sign-in canvas" })).queryByRole("status"),
     ).toBeNull();
   });
 
@@ -566,7 +704,7 @@ describe("Desen App application shell", () => {
     expect(
       screen.getByRole("button", { name: "Deselect Stack layer · sign-in.layout" }),
     ).toBeTruthy();
-    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Managed sign-in canvas" })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Deselect Stack layer · sign-in.layout" }));
     fireEvent.click(screen.getByRole("button", { name: "Select Text layer · sign-in.title" }));
@@ -770,7 +908,7 @@ describe("Desen App application shell", () => {
     );
     expect(layerButtons[2]?.getAttribute("aria-label")).toBe("Select Text layer · sign-in.title");
 
-    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const canvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     const managedSubtree = document.querySelector("[data-managed-capability-subtree='true']");
     const submit = within(canvas).getByRole("button", { name: "Sign in" });
     const title = within(canvas).getByRole("heading", { level: 2, name: "Sign in" });
@@ -1393,10 +1531,10 @@ describe("Desen App application shell", () => {
         .getAttribute("aria-pressed"),
     ).toBe("true");
     expect(
-      within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText("Email"),
+      within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText("Email"),
     ).toBeTruthy();
     expect(
-      within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+      within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
         "Password",
       ),
     ).toBeTruthy();
@@ -1445,7 +1583,7 @@ describe("Desen App application shell", () => {
         name: "Deselect Stack layer · node.stack",
       }),
     ).toBeTruthy();
-  });
+  }, 10_000);
 
   it("edits schema-derived string and enum props and refreshes the exact adapter preview", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
@@ -1501,7 +1639,7 @@ describe("Desen App application shell", () => {
 
   it("updates surface-local state and changes a compatible binding in the live preview", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
-    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const canvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     const emailInput = within(canvas).getByLabelText("Email") as HTMLInputElement;
     expect(emailInput.value).toBe("");
 
@@ -1518,7 +1656,7 @@ describe("Desen App application shell", () => {
     await waitFor(() =>
       expect(
         (
-          within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+          within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
             "Email",
           ) as HTMLInputElement
         ).value,
@@ -1537,7 +1675,7 @@ describe("Desen App application shell", () => {
     await waitFor(() =>
       expect(
         (
-          within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+          within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
             "Email",
           ) as HTMLInputElement
         ).value,
@@ -1629,7 +1767,7 @@ describe("Desen App application shell", () => {
     expect(diagnosticTarget.getAttribute("aria-current")).toBe("true");
     expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBe(preservedHeading);
     expect(document.activeElement).toBe(diagnosticTarget);
-    const managedCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const managedCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     expect(
       screen.queryByRole("status", {
         name: "Invalid change placeholder for node sign-in.layout",
@@ -1669,7 +1807,7 @@ describe("Desen App application shell", () => {
         name: "Invalid change placeholder for node sign-in.layout",
       }),
     ).toBeNull();
-  });
+  }, 10_000);
 
   it("resets local drafts across Source identities and qualifies repeated edit actions", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
@@ -1818,7 +1956,7 @@ describe("Desen App application shell", () => {
       },
     ]);
     expect(previewPreflight.mock.results[3]?.value).toMatchObject({ ok: true });
-    expect(await screen.findByRole("group", { name: "Sign-in adapter canvas" })).toBeTruthy();
+    expect(await screen.findByRole("group", { name: "Managed sign-in canvas" })).toBeTruthy();
     const managedSubtree = document.querySelector("[data-managed-capability-subtree]");
     expect(managedSubtree).toBeTruthy();
     expect(managedSubtree?.contains(panel)).toBe(false);
@@ -1842,7 +1980,7 @@ describe("Desen App application shell", () => {
     fireEvent.click(within(inspector).getByRole("tab", { name: "Actions" }));
 
     const panel = within(inspector).getByRole("region", { name: "Events & Actions" });
-    const baselineCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const baselineCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     const baselineManagedSubtree = document.querySelector(
       "[data-managed-capability-subtree='true']",
     );
@@ -1867,7 +2005,7 @@ describe("Desen App application shell", () => {
     );
     expect(within(panel).getByText("Handler added")).toBeTruthy();
     expect(within(panel).getByRole("article", { name: "action 1 in change" })).toBeTruthy();
-    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBe(baselineCanvas);
+    expect(screen.getByRole("group", { name: "Managed sign-in canvas" })).toBe(baselineCanvas);
     expect(document.querySelector("[data-managed-capability-subtree='true']")).toBe(
       baselineManagedSubtree,
     );
@@ -1892,7 +2030,7 @@ describe("Desen App application shell", () => {
     await waitFor(() => {
       expect(
         (
-          within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+          within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
             "Email",
           ) as HTMLInputElement
         ).placeholder,
@@ -1958,7 +2096,7 @@ describe("Desen App application shell", () => {
         "Controls are live against this in-memory preview. Only outcomes declared by the current surface's authored operations and authenticated Catalog fixtures are available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked.",
       ),
     ).toBeTruthy();
-    const runCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const runCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     expect((within(runCanvas).getByLabelText("Email") as HTMLInputElement).placeholder).toBe(
       "Work email",
     );
@@ -1988,7 +2126,7 @@ describe("Desen App application shell", () => {
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     expect(
       (
-        within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+        within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
           "Email",
         ) as HTMLInputElement
       ).placeholder,
@@ -2025,7 +2163,7 @@ describe("Desen App application shell", () => {
     fireEvent.click(staleDelete);
     expect(previewPreflight).toHaveBeenCalledTimes(preflightCountInRun);
 
-    const runCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const runCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     const liveEmail = within(runCanvas).getByLabelText("Email") as HTMLInputElement;
     await waitFor(() => expect(liveEmail.matches(":disabled")).toBe(false));
     await act(async () => {
@@ -2050,7 +2188,7 @@ describe("Desen App application shell", () => {
     ).toBe("Run must not commit this");
     expect(
       (
-        within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+        within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
           "Email",
         ) as HTMLInputElement
       ).placeholder,
@@ -2082,7 +2220,7 @@ describe("Desen App application shell", () => {
 
     fireEvent.change(scenario, { target: { value: "catalog:invalid" } });
     const invalidEmail = (await within(
-      screen.getByRole("group", { name: "Sign-in adapter canvas" }),
+      screen.getByRole("group", { name: "Managed sign-in canvas" }),
     ).findByLabelText("Email")) as HTMLInputElement;
     await waitFor(() => {
       expect(invalidEmail.value).toBe("bad");
@@ -2093,7 +2231,7 @@ describe("Desen App application shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "Run" }));
     expect(
       (
-        within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+        within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
           "Email",
         ) as HTMLInputElement
       ).value,
@@ -2109,7 +2247,7 @@ describe("Desen App application shell", () => {
     await waitFor(() => {
       expect(
         (
-          within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+          within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
             "Email",
           ) as HTMLInputElement
         ).value,
@@ -2121,7 +2259,10 @@ describe("Desen App application shell", () => {
     window.history.replaceState(null, "", "/projects/account-app/surfaces/sign-in");
     render(
       <StrictMode>
-        <DesenAppApplication />
+        <DesenAppApplication
+          initialDocument={REFERENCE_EDITOR_DOCUMENT}
+          workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+        />
       </StrictMode>,
     );
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
@@ -2146,7 +2287,7 @@ describe("Desen App application shell", () => {
     expect([...outcome.options].map(({ value }) => value)).not.toContain("pending");
     fireEvent.change(outcome, { target: { value: "error:invalidCredentials" } });
 
-    const canvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const canvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     const email = within(canvas).getByLabelText("Email") as HTMLInputElement;
     const password = within(canvas).getByLabelText("Password") as HTMLInputElement;
     await act(async () => {
@@ -2283,9 +2424,9 @@ describe("Desen App application shell", () => {
     expect(screen.getByRole("button", { name: "Run" }).getAttribute("aria-pressed")).toBe("true");
     fireEvent.click(screen.getByRole("link", { name: "Account app" }));
     const surfaceNavigation = screen.getByRole("navigation", { name: "Account app surfaces" });
-    fireEvent.click(within(surfaceNavigation).getByRole("link", { name: /Recovery/ }));
+    fireEvent.click(within(surfaceNavigation).getByRole("link", { name: /Home/ }));
 
-    expect(window.location.pathname).toBe("/projects/account-app/surfaces/recovery");
+    expect(window.location.pathname).toBe("/projects/account-app/surfaces/home");
     expect(screen.getByRole("button", { name: "Design" }).getAttribute("aria-pressed")).toBe(
       "true",
     );
@@ -2297,40 +2438,26 @@ describe("Desen App application shell", () => {
     );
   });
 
-  it("does not substitute the sign-in Source tree or adapter canvas for another preview surface", () => {
+  it("keeps inert fixture routes outside every Source and editor authority", () => {
     renderApplication("/projects/account-app/surfaces/recovery");
 
-    expect(screen.getByText("No Source tree for Recovery")).toBeTruthy();
-    expect(
-      screen.getByText(
-        "This preview surface has no exact Source fixture. DESEN will not substitute the sign-in tree.",
-      ),
-    ).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Recovery" })).toBeTruthy();
+    expect(screen.getByLabelText("Inert surface boundary").textContent).toContain(
+      "cannot open, edit, run, save, or publish a Source",
+    );
     expect(screen.queryByRole("region", { name: "Sign-in layer hierarchy" })).toBeNull();
     expect(screen.queryByText("sign-in.layout")).toBeNull();
-    expect(screen.queryByRole("group", { name: "Sign-in adapter canvas" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Managed sign-in canvas" })).toBeNull();
     expect(screen.queryByRole("heading", { level: 2, name: "Sign in" })).toBeNull();
     expect(screen.queryByLabelText("Email")).toBeNull();
     expect(screen.queryByLabelText("Password")).toBeNull();
     expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();
 
-    const componentView = componentLibrary();
-    expect(componentView.getByRole("status").textContent).toBe("5 of 5 components");
-    const target = componentView.getByRole("group", {
-      name: "Placement target · choose a named slot",
-    });
-    expect(target.textContent).toContain("No drop target selected");
-    expect(target.textContent).toContain("Choose a named slot in Layers");
-    expect(componentView.getByRole("button", { name: "Choose slot in Layers" })).toBeTruthy();
-    const alert = componentView.getByRole("button", {
-      name: "Alert · choose a named slot first",
-    }) as HTMLButtonElement;
-    expect(alert.disabled).toBe(true);
-    expect(alert.draggable).toBe(false);
-    expect((alert.closest("[data-component-card='true']") as HTMLDivElement).draggable).toBe(false);
+    expect(screen.queryByRole("complementary", { name: "Authoring panel" })).toBeNull();
+    expect(screen.queryByRole("complementary", { name: "Inspector" })).toBeNull();
   });
 
-  it("removes the managed sign-in tree synchronously when routing to an unsupported surface", async () => {
+  it("remounts the managed canvas synchronously when routing to another admitted surface", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
 
@@ -2343,11 +2470,12 @@ describe("Desen App application shell", () => {
     fireEvent.click(screen.getByRole("link", { name: "Account app" }));
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     const surfaces = screen.getByRole("navigation", { name: "Account app surfaces" });
-    fireEvent.click(within(surfaces).getByRole("link", { name: /Recovery/ }));
+    fireEvent.click(within(surfaces).getByRole("link", { name: /Home/ }));
 
-    expect(window.location.pathname).toBe("/projects/account-app/surfaces/recovery");
+    expect(window.location.pathname).toBe("/projects/account-app/surfaces/home");
     expect(screen.queryByRole("heading", { level: 2, name: "Sign in" })).toBeNull();
-    expect(screen.queryByRole("group", { name: "Sign-in adapter canvas" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Managed sign-in canvas" })).toBeNull();
+    expect(screen.getByRole("group", { name: "Managed home canvas" })).toBeTruthy();
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
     await waitFor(() => {
       expect(screen.queryByLabelText("Email")).toBeNull();

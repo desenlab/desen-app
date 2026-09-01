@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "a6c969e096cac98cdd15e15892528518db351862a28af6fbd72ee3919d18c20b";
+  "eca887c765e85c1b2f06d9f9fc420bcf8af38248ecc546df0385fc6c256501d9";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb";
+  "dd10d4bd859b4f4bbfb37b78f14810fd47bebac1e03551269a0e81ba9fd09d47";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "5146f101cb767c49f6f0b87fd6939be6bdfc348e5f4dcf8dd77399ac921d4ee3";
+  "100e6af6e7c4c5cf6ba23999116b26a5af6321d8598aa00b3f56a9b0d3c2e920";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "73b68c61533e2947169ba3e2298a9f13ec261ae00c32184773402bf03fcce715";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -662,6 +662,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "desen-app-visual-behavior-authoring",
     "scripts/verify-desen-app-visual-behavior-authoring.mjs",
     "tests/desen-app-visual-behavior-authoring.test.mjs",
+  ],
+  [
+    "desen-app-evergreen-product-composition",
+    "scripts/verify-desen-app-evergreen-product-composition.mjs",
+    "tests/desen-app-evergreen-product-composition.test.mjs",
   ],
 ]);
 
@@ -1663,7 +1668,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "0ca01cd12123640cb6adcdbd23dff2d02e20c971ae504b5feae38953c431915d";
+  "19f2105ca42b4eb5b60a975eb065fb6d030a363060af701057986b287507ef4d";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

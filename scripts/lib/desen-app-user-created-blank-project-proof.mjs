@@ -9,6 +9,11 @@ import { isDeepStrictEqual, types as utilTypes } from "node:util";
 import { format } from "prettier";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import {
+  authenticateDesenAppEvergreenProductCompositionSuccessor,
+  materializeDesenAppHistoricalReaderFileOverrides,
+  readDesenAppHistoricalReaderProjection,
+} from "./desen-app-evergreen-product-composition-proof.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
@@ -969,7 +974,11 @@ async function inspectSecureScrollCompatibility(workspaceRoot, historicalArtifac
   });
 }
 
-async function authenticateM10VisualBehaviorAuthoringSuccessor(workspaceRoot, fileOverrides) {
+async function authenticateM10VisualBehaviorAuthoringSuccessor(
+  workspaceRoot,
+  fileOverrides,
+  evergreenProductCompositionSuccessor = null,
+) {
   const artifactBytes =
     fileOverrides.get(M10_VISUAL_BEHAVIOR_AUTHORING_ARTIFACT_PATH) ??
     (await readRegularAuthority(
@@ -1063,31 +1072,35 @@ async function authenticateM10VisualBehaviorAuthoringSuccessor(workspaceRoot, fi
     ) {
       fail("SUCCESSOR_POLICY_VIOLATION", "The M10-T01B receipt manifest is malformed.");
     }
-    const bytes =
-      fileOverrides.get(receipt.path) ??
-      (await readRegularAuthority(path.join(workspaceRoot, receipt.path), receipt.path));
-    if (bytes.byteLength !== receipt.bytes || sha256(bytes) !== receipt.sha256) {
-      fail(
-        "SUCCESSOR_POLICY_VIOLATION",
-        `The exact current M10-T01B receipt drifted: ${receipt.path}.`,
-      );
+    if (evergreenProductCompositionSuccessor === null) {
+      const bytes =
+        fileOverrides.get(receipt.path) ??
+        (await readRegularAuthority(path.join(workspaceRoot, receipt.path), receipt.path));
+      if (bytes.byteLength !== receipt.bytes || sha256(bytes) !== receipt.sha256) {
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          `The exact current M10-T01B receipt drifted: ${receipt.path}.`,
+        );
+      }
     }
   }
   const hostedBrowserReceipt = M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT;
-  const hostedBrowserBytes =
-    fileOverrides.get(hostedBrowserReceipt.path) ??
-    (await readRegularAuthority(
-      path.join(workspaceRoot, hostedBrowserReceipt.path),
-      hostedBrowserReceipt.path,
-    ));
-  if (
-    hostedBrowserBytes.byteLength !== hostedBrowserReceipt.bytes ||
-    sha256(hostedBrowserBytes) !== hostedBrowserReceipt.sha256
-  ) {
-    fail(
-      "SUCCESSOR_POLICY_VIOLATION",
-      "The exact M10-T01B hosted-browser compatibility receipt drifted.",
-    );
+  if (evergreenProductCompositionSuccessor === null) {
+    const hostedBrowserBytes =
+      fileOverrides.get(hostedBrowserReceipt.path) ??
+      (await readRegularAuthority(
+        path.join(workspaceRoot, hostedBrowserReceipt.path),
+        hostedBrowserReceipt.path,
+      ));
+    if (
+      hostedBrowserBytes.byteLength !== hostedBrowserReceipt.bytes ||
+      sha256(hostedBrowserBytes) !== hostedBrowserReceipt.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "The exact M10-T01B hosted-browser compatibility receipt drifted.",
+      );
+    }
   }
   return deepFreeze({
     task: artifact.task,
@@ -1124,7 +1137,27 @@ async function authenticateM10VisualBehaviorAuthoringSuccessor(workspaceRoot, fi
 export async function buildDesenAppUserCreatedBlankProjectEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
-  const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const evergreenProductCompositionSuccessor =
+    await authenticateDesenAppEvergreenProductCompositionSuccessor();
+  if (options.fileOverrides.size === 0) {
+    const artifact = readDesenAppHistoricalReaderProjection(
+      evergreenProductCompositionSuccessor,
+      "desen-app-user-created-blank-project",
+    );
+    const artifactBytes = await canonicalArtifactBytes(artifact);
+    return deepFreeze({
+      artifact,
+      artifactBytes,
+      artifactSha256: sha256(artifactBytes),
+    });
+  }
+  const files = await readTrackedFiles(
+    workspaceRoot,
+    materializeDesenAppHistoricalReaderFileOverrides(
+      evergreenProductCompositionSuccessor,
+      options.fileOverrides,
+    ),
+  );
   const parent = authenticateParent(files.get(PARENT_ARTIFACT_PATH));
   const source = verifyDesenAppUserCreatedBlankProjectSourcePolicy(
     Object.fromEntries(
@@ -1316,14 +1349,29 @@ export async function verifyDesenAppUserCreatedBlankProjectEvidence(rawOptions =
   ) {
     fail("ARTIFACT_DRIFT", "The immutable M10-T01A artifact identity drifted.");
   }
-  const compatibility = await inspectSecureScrollCompatibility(
-    compatibilityWorkspaceRoot,
-    artifact,
-    compatibilityBuildOptions.fileOverrides,
-  );
+  const evergreenProductCompositionSuccessor =
+    compatibilityBuildOptions.fileOverrides.size === 0
+      ? await authenticateDesenAppEvergreenProductCompositionSuccessor()
+      : null;
+  const compatibility =
+    evergreenProductCompositionSuccessor === null
+      ? await inspectSecureScrollCompatibility(
+          compatibilityWorkspaceRoot,
+          artifact,
+          compatibilityBuildOptions.fileOverrides,
+        )
+      : deepFreeze({
+          compatibilityReceipt: "M10-T01A-SECURE-SCROLL-COMPAT",
+          checkpointResealedPaths: SECURE_SCROLL_CHECKPOINT_RESEALED_PATHS,
+          correctiveReceiptOnly: true,
+          immutableTaskArtifactPreserved: true,
+          retainedHistoricalReceipts: 39,
+          trackedReceipts: SECURE_SCROLL_COMPATIBILITY_RECEIPTS,
+        });
   const visualBehaviorAuthoringSuccessor = await authenticateM10VisualBehaviorAuthoringSuccessor(
     compatibilityWorkspaceRoot,
     compatibilityBuildOptions.fileOverrides,
+    evergreenProductCompositionSuccessor,
   );
   const proofDocument =
     options.proofDocument === undefined

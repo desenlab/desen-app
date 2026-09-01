@@ -29,6 +29,10 @@ const BROWSER_PROOF_VERIFIER_COMMAND =
   "node scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs";
 const BROWSER_PROOF_TEST_COMMAND =
   "node --test tests/desen-app-browser-e2e-workspace-compatibility.test.mjs";
+const EVERGREEN_PROOF_VERIFIER_COMMAND =
+  "node scripts/verify-desen-app-evergreen-product-composition.mjs";
+const EVERGREEN_PROOF_TEST_COMMAND =
+  "node --test tests/desen-app-evergreen-product-composition.test.mjs";
 const RETAINED_LEGACY_COMMAND = "node scripts/run-ci-quality-gate.mjs";
 const REQUIRED_EXHAUSTIVE_ENTRYPOINT = "scripts/ci/run-required-exhaustive-quality-gate.mjs";
 const REQUIRED_QUALITY_ENTRYPOINT = "scripts/ci/run-required-affected-quality-gate.mjs";
@@ -140,25 +144,25 @@ function expectEquivalenceError(code) {
   };
 }
 
-test("proves all 208 exact ordered commands and both reviewed digests", () => {
+test("proves all 210 exact ordered commands and both reviewed digests", () => {
   const result = verifyRequiredExhaustiveInventoryEquivalence();
 
   assert.deepEqual(result, {
     status: "PASS",
-    workloadCount: 208,
+    workloadCount: 210,
     exactlyOnce: true,
     retainedPlanSha256: EXPECTED_RETAINED_PLAN_SHA256,
     neutralInventorySha256: EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    orderedProjectionSha256: "be6c8ab1097dedcafeb4812e694719fa547a8bc215347a62c5b6c34b7694468e",
+    orderedProjectionSha256: "f0a21805fe6c9069665923ee33bf81dee7c0a70ce78f4b1c9ecc3bd63e850f76",
     workloadSetSha256: EXPECTED_REQUIRED_WORKLOAD_SET_SHA256,
   });
   assert.equal(
     EXPECTED_RETAINED_PLAN_SHA256,
-    "669dc72f2b419d1f87cc417de190923ce13922061bce5e9a22ebc998cea1e7d5",
+    "1d82aaaefd82af63086e0a0ab892f92ae891895ace1878a63d249b7b97878e4c",
   );
   assert.equal(
     EXPECTED_REQUIRED_WORKLOAD_SET_SHA256,
-    "08be15b268b0aa9d86f1996ab9cb5be40cdffd57d5df4e70b39b529ae3cd9a78",
+    "e59457168dba61caebf0a64bbe267332455f723b1fc4d3864c7907f46acb72c0",
   );
   assert.equal(Object.isFrozen(result), true);
 });
@@ -187,7 +191,7 @@ test("PASS requires every exact workload closed successfully and ignores arrival
   const normalized = normalizeRequiredExecutionReceipt(reversed);
 
   assert.equal(normalized.status, "PASS");
-  assert.equal(normalized.workloads.length, 208);
+  assert.equal(normalized.workloads.length, 210);
   assert.deepEqual(
     normalized.workloads.map(({ id }) => id),
     canonicalIds(),
@@ -368,6 +372,8 @@ test("official CI admits only required exhaustive authority and a manual legacy 
   assert.equal(exactRunCount(browserJob, BROWSER_E2E_COMMAND), 1);
   assert.equal(exactTextCount(browserJob, BROWSER_PROOF_VERIFIER_COMMAND), 1);
   assert.equal(exactTextCount(browserJob, BROWSER_PROOF_TEST_COMMAND), 1);
+  assert.equal(exactTextCount(browserJob, EVERGREEN_PROOF_VERIFIER_COMMAND), 1);
+  assert.equal(exactTextCount(browserJob, EVERGREEN_PROOF_TEST_COMMAND), 1);
   assert.match(browserJob, /playwright install --with-deps chromium/u);
   assert.match(browserJob, /DESEN_BROWSER_E2E_HEAD_REVISION/u);
   assert.doesNotMatch(browserJob, /DESEN_REQUIRED_(?:BASE|HEAD)_REVISION/u);

@@ -1,4 +1,3 @@
-import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -6,11 +5,14 @@ import {
   prepareAuthoringScenarioModel,
   prepareAuthoringScenarioPreview,
 } from "../src/authoring-scenarios.js";
-import { REFERENCE_AUTHORING_MODEL } from "../src/authoring-data.js";
+import { prepareCatalogAuthoringModel } from "../src/authoring-data.js";
 import {
-  prepareAuthoringPreviewBundle,
+  prepareReferenceAuthoringPreviewBundle,
+  REFERENCE_AUTHORING_CATALOG_PACKAGES,
+  REFERENCE_AUTHORING_MODEL,
+  REFERENCE_AUTHORING_PROFILE,
   REFERENCE_EDITOR_DOCUMENT,
-} from "../src/authoring-preview.js";
+} from "../src/reference-authoring-profile.js";
 import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
 
 import type { DesenEditorDocument } from "@desen/editor-core";
@@ -19,6 +21,20 @@ import type { AuthoringPreviewBundleSuccess } from "../src/authoring-preview.js"
 import type { AuthoringComponentSelection } from "../src/authoring-selection.js";
 
 const ROUTE = Object.freeze({ projectId: "account-app", surfaceId: "sign-in" });
+const SECONDARY_CATALOG = Object.freeze({
+  kind: "desen.catalog",
+  desen: "0.1.0",
+  id: "com.example.scenario-secondary",
+  version: "0.1.0",
+  target: "web-react",
+  packageDigest: `sha256:${"a".repeat(64)}`,
+  components: Object.freeze({}),
+  behaviors: Object.freeze({}),
+  operations: Object.freeze({}),
+  resources: Object.freeze({}),
+  authoring: Object.freeze({}),
+  extensions: Object.freeze({}),
+});
 type MutableJsonObject = Record<string, unknown>;
 
 function selection(
@@ -37,7 +53,7 @@ function selection(
 }
 
 function currentPreview(): AuthoringPreviewBundleSuccess {
-  const preview = prepareAuthoringPreviewBundle(REFERENCE_EDITOR_DOCUMENT);
+  const preview = prepareReferenceAuthoringPreviewBundle(REFERENCE_EDITOR_DOCUMENT);
   expect(preview.ok).toBe(true);
   if (!preview.ok) throw new Error(`Expected the current preview, received ${preview.reason}.`);
   return preview;
@@ -71,6 +87,12 @@ function modelWithCatalog(catalog: unknown): CatalogAuthoringModel {
     ...REFERENCE_AUTHORING_MODEL,
     validationCatalogs: Object.freeze([catalog]),
   });
+}
+
+function referenceCatalog(): unknown {
+  const catalog = REFERENCE_AUTHORING_PROFILE.catalogs[0];
+  if (catalog === undefined) throw new TypeError("Expected the explicit reference Catalog.");
+  return catalog;
 }
 
 function expectDeeplyFrozen(value: unknown): void {
@@ -131,6 +153,28 @@ describe("Desen App authoring-only scenarios", () => {
     expect(text.status === "ready" && text.options.map(({ value }) => value)).toEqual(["source"]);
   });
 
+  it("selects scenario authority from the matching Catalog in an admitted multi-Catalog set", () => {
+    const prepared = prepareCatalogAuthoringModel(
+      [SECONDARY_CATALOG, ...REFERENCE_AUTHORING_PROFILE.catalogs],
+      REFERENCE_EDITOR_DOCUMENT,
+    );
+    expect(prepared.ok).toBe(true);
+    if (!prepared.ok)
+      throw new Error(`Expected multi-Catalog authoring, received ${prepared.reason}.`);
+
+    const result = prepareAuthoringScenarioModel(prepared.model, ROUTE, selection());
+    expect(result.status).toBe("ready");
+    expect(result.status === "ready" && result.options.map(({ value }) => value)).toEqual([
+      "source",
+      "catalog:default",
+      "catalog:invalid",
+    ]);
+    expect(prepared.model.catalogs.map(({ id }) => id)).toEqual([
+      "com.example.scenario-secondary",
+      "run.desen.reference.sign-in",
+    ]);
+  });
+
   it("returns an honest idle state and rejects stale route or capability authority", () => {
     expect(prepareAuthoringScenarioModel(REFERENCE_AUTHORING_MODEL, ROUTE, null)).toEqual({
       status: "idle",
@@ -141,19 +185,28 @@ describe("Desen App authoring-only scenarios", () => {
         { projectId: "other", surfaceId: "sign-in" },
         selection(),
       ),
-    ).toEqual({ status: "rejected", reason: "route-invalid" });
+    ).toEqual({ status: "rejected", reason: "selection-invalid" });
+
+    const alternateProjectSelection = createAuthoringComponentSelection({
+      projectId: "another-project",
+      surfaceId: "sign-in",
+      sourceNodeId: "sign-in.email",
+      capabilityId: "com.example.ui/TextField",
+      displayName: "Text field",
+      conditional: false,
+    });
     expect(
       prepareAuthoringScenarioModel(
         REFERENCE_AUTHORING_MODEL,
-        { projectId: "forged", surfaceId: "sign-in" },
-        createAuthoringComponentSelection({
-          projectId: "forged",
-          surfaceId: "sign-in",
-          sourceNodeId: "sign-in.email",
-          capabilityId: "com.example.ui/TextField",
-          displayName: "Text field",
-          conditional: false,
-        }),
+        { projectId: "another-project", surfaceId: "sign-in" },
+        alternateProjectSelection,
+      ).status,
+    ).toBe("ready");
+    expect(
+      prepareAuthoringScenarioModel(
+        REFERENCE_AUTHORING_MODEL,
+        { projectId: "", surfaceId: "sign-in" },
+        alternateProjectSelection,
       ),
     ).toEqual({ status: "rejected", reason: "route-invalid" });
     expect(
@@ -178,6 +231,7 @@ describe("Desen App authoring-only scenarios", () => {
       ROUTE,
       selection(),
       "catalog:invalid",
+      REFERENCE_AUTHORING_CATALOG_PACKAGES,
     );
 
     expect(result.ok).toBe(true);
@@ -210,6 +264,7 @@ describe("Desen App authoring-only scenarios", () => {
       ROUTE,
       selection(),
       "source",
+      REFERENCE_AUTHORING_CATALOG_PACKAGES,
     );
 
     expect(result).toEqual({ ok: true, scenarioDocument: document, preview });
@@ -228,6 +283,7 @@ describe("Desen App authoring-only scenarios", () => {
         ROUTE,
         selection(),
         "catalog:missing",
+        REFERENCE_AUTHORING_CATALOG_PACKAGES,
       ),
     ).toEqual({ ok: false, reason: "scenario-invalid" });
     expect(
@@ -238,6 +294,7 @@ describe("Desen App authoring-only scenarios", () => {
         ROUTE,
         selection(),
         "default" as never,
+        REFERENCE_AUTHORING_CATALOG_PACKAGES,
       ),
     ).toEqual({ ok: false, reason: "scenario-invalid" });
     expect(
@@ -248,6 +305,7 @@ describe("Desen App authoring-only scenarios", () => {
         ROUTE,
         selection(),
         "catalog:default",
+        REFERENCE_AUTHORING_CATALOG_PACKAGES,
       ),
     ).toEqual({ ok: false, reason: "preview-unavailable" });
     expect(
@@ -258,13 +316,14 @@ describe("Desen App authoring-only scenarios", () => {
         ROUTE,
         selection(),
         "catalog:default",
+        REFERENCE_AUTHORING_CATALOG_PACKAGES,
       ),
     ).toEqual({ ok: false, reason: "document-invalid" });
   });
 
   it("fails closed for scenario state or fixtures instead of partially applying props", () => {
     for (const unsupported of ["state", "fixtures"] as const) {
-      const catalog: unknown = copyJson(referenceCatalog);
+      const catalog: unknown = copyJson(referenceCatalog());
       mutableTextFieldScenario(catalog, "default")[unsupported] = {};
       const result = prepareAuthoringScenarioModel(modelWithCatalog(catalog), ROUTE, selection());
       expect(result).toEqual({ status: "rejected", reason: "scenario-unsupported" });
@@ -305,7 +364,7 @@ describe("Desen App authoring-only scenarios", () => {
       ),
     ).toEqual({ status: "rejected", reason: "selection-invalid" });
 
-    const catalog: unknown = copyJson(referenceCatalog);
+    const catalog: unknown = copyJson(referenceCatalog());
     const props = Object.defineProperty({}, "label", {
       enumerable: true,
       get() {

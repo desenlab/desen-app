@@ -1261,3 +1261,56 @@ dedicated M10-T02 typed-input/pending matrix, M10-T03 failure-state matrix, or M
 success/navigation proof. The local launcher test that binds fixed port 5173 may be executed only
 when that product port is free; an occupied developer session is preserved rather than terminated,
 and hosted CI supplies the clean-host execution.
+
+## M10-T01C evergreen product-composition testing
+
+M10-T01C separates profile admission, generic composition, and existing product regression. The
+`project-workspace-profile` suite exercises an explicit reference profile and an auth-independent,
+two-surface, two-Catalog feedback profile. It proves route slug/Source-id separation, complete
+Catalog matching independent of caller order, detached immutable snapshots, and rejection of
+accessor-backed inputs, route drift, incomplete package candidates, forged adapter registries, and
+forged profile handles. Current-document cases additionally reject entry drift, hidden/extra,
+missing, or substituted surfaces, and changed complete Catalog requirements after profile creation.
+Persistence and application cases prove that a prepared controller and editor lifetime remain bound
+to the exact opaque handle even when two profiles expose identical public ids and routes.
+
+The `evergreen-product-composition` suite combines a source audit with a complete App render. The
+audit requires generic editor, preview, persistence, publication, fixture/scenario, canvas, and
+product-bootstrap modules to remain free of account, sign-in, reference-Catalog, and example
+defaults. The jsdom integration creates a separate feedback profile, opens the ordinary route,
+renders the real managed feedback canvas and Source layer hierarchy, and proves the sign-in heading
+is absent. Existing App, persistence, publication, and activation suites receive the explicit
+reference profile and preserve their previous behavior; focused negative cases keep cross-profile
+routes, invalid profile handles, incomplete Catalog authority, and wrong host binding from reaching
+storage, Publisher, or host activation.
+
+The inert-inventory suite authenticates a separately created `ProjectInventoryFixtureHandle`,
+proves capture detachment and bounds, and rejects forged handles, accessors, proxies, sparse or
+extended arrays, subclasses, symbols, and non-exact records. Application coverage proves fixture
+routes render metadata only and refuse Source, persistence, publication, mutation, and
+project-creation authority.
+
+Synthetic Run isolation replaces every one of the nine profile host-port families and asserts that
+none of their callbacks is called; only the explicit local Catalog fixture operation controller may
+settle an operation. Multi-surface application coverage opens a non-entry surface and proves the
+canvas renders that selected surface from a transient preview Bundle while Save still sends the
+authored entry document and Publish still uses its base revision and publishes its original entry.
+Fixed-destination publication cases authenticate the port's private channel/host pair, reject
+unbranded and mismatched ports before I/O, and prove publish bytes, publish requests, and activation
+requests are validated, cloned, and reconstructed rather than forwarded as caller-owned objects.
+
+The task-specific artifact is
+`docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json` and the independent
+verifier is `scripts/verify-desen-app-evergreen-product-composition.mjs`. These checks establish the
+composition seam only. They do not substitute for M10-T02's browser input/pending matrix, M10-T03's
+failure-state matrix, M10-T04's separately authorized real-host flow, or the hosted exact-head
+`Quality gate` required before merge and completion reporting.
+
+Reviewed reader checkpoint sequence 66 preserves the exact sequence-65 head and all 53 predecessor
+artifacts, then adds the 19,299-byte M10-T01C artifact at
+`sha256:779434ca834b8d770c726d905408f0a3d0a7145abbc6eaf2b81f1e77466b46ac`. It reseals only
+reader indexes `[70..97, 102, 103, 104, 105]`, appends the T01C proof/root readers at `[106, 107]`,
+and closes at `sha256:3bf2c27ca51f8ab6751dd0d026bbbf461ac2c6acea6fcc3088f7d011ae96fb83`
+with 54 frozen artifacts and 108 current readers. The checkpoint suite passes 89/89, while the
+sixteen exact historical App reader/root pairs pass 242/242. This is local reader authority and
+makes no hosted exact-head claim.

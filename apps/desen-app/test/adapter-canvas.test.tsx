@@ -3,8 +3,7 @@ import { StrictMode, act } from "react";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { setDesenEditorOwnerProp } from "@desen/editor-core";
-import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
+import { createDesenEditorDocument, setDesenEditorOwnerProp } from "@desen/editor-core";
 import { createRuntimeHostPorts } from "@desen/runtime-core";
 
 import type * as RuntimeCore from "@desen/runtime-core";
@@ -39,12 +38,41 @@ vi.mock("@desen/runtime-core", async (importOriginal) => {
 import { DesenAdapterCanvas } from "../src/adapter-canvas.js";
 import { prepareCatalogAuthoringModel } from "../src/authoring-data.js";
 import {
-  prepareAuthoringPreviewBundle,
+  prepareReferenceAuthoringPreviewBundle as prepareAuthoringPreviewBundle,
+  REFERENCE_AUTHORING_PROFILE,
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
   REFERENCE_EDITOR_DOCUMENT,
-} from "../src/authoring-preview.js";
+} from "../src/reference-authoring-profile.js";
 import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
+import { readProjectWorkspaceProfileAuthority } from "../src/project-workspace-profile.js";
+
+import type { DesenAdapterCanvasProps } from "../src/adapter-canvas.js";
 
 const EMPTY_RUNTIME_JSON = Object.freeze({}) satisfies RuntimeJsonObject;
+
+const referenceWorkspaceRead = readProjectWorkspaceProfileAuthority(
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+);
+if (referenceWorkspaceRead.status !== "read") {
+  throw new TypeError("Expected the authenticated reference workspace profile.");
+}
+const REFERENCE_WORKSPACE = referenceWorkspaceRead.profile;
+const referencePreview = prepareAuthoringPreviewBundle(REFERENCE_EDITOR_DOCUMENT);
+if (!referencePreview.ok) {
+  throw new TypeError("Expected the reference authoring preview Bundle.");
+}
+
+const REFERENCE_CANVAS_AUTHORITIES = Object.freeze({
+  authoringModel: REFERENCE_AUTHORING_PROFILE.model,
+  bundle: referencePreview.bundle,
+  catalogs: REFERENCE_WORKSPACE.catalogs,
+  documentId: REFERENCE_WORKSPACE.documentId,
+  hostPorts: REFERENCE_WORKSPACE.runtime.hostPorts,
+  projectId: REFERENCE_WORKSPACE.project.id,
+  registry: REFERENCE_WORKSPACE.runtime.registry,
+  surfaceId: REFERENCE_WORKSPACE.sourceSurfaceId,
+  tokenCssProperties: REFERENCE_WORKSPACE.runtime.tokenCssProperties,
+}) satisfies DesenAdapterCanvasProps;
 
 function createTestHostPorts(): RuntimeHostPorts {
   return createRuntimeHostPorts({
@@ -100,9 +128,9 @@ describe("Desen App exact React adapter canvas", () => {
   });
 
   it("renders the official-derived sign-in only through the shared real adapters", async () => {
-    render(<DesenAdapterCanvas projectId="account-app" surfaceId="sign-in" />);
+    render(<DesenAdapterCanvas {...REFERENCE_CANVAS_AUTHORITIES} />);
 
-    const canvas = await screen.findByRole("group", { name: "Sign-in adapter canvas" });
+    const canvas = await screen.findByRole("group", { name: "Managed sign-in canvas" });
     expect(canvas).toBeInstanceOf(HTMLFieldSetElement);
     expect((canvas as HTMLFieldSetElement).disabled).toBe(true);
     const heading = within(canvas).getByRole("heading", { level: 2, name: "Sign in" });
@@ -131,10 +159,10 @@ describe("Desen App exact React adapter canvas", () => {
   it("runs real adapter events on the same session and preserves state across mode changes", async () => {
     const selection = componentSelection("sign-in.email", "com.example.ui/TextField", "Text field");
     const view = render(
-      <DesenAdapterCanvas projectId="account-app" selection={selection} surfaceId="sign-in" />,
+      <DesenAdapterCanvas {...REFERENCE_CANVAS_AUTHORITIES} selection={selection} />,
     );
 
-    const designCanvas = await screen.findByRole("group", { name: "Sign-in adapter canvas" });
+    const designCanvas = await screen.findByRole("group", { name: "Managed sign-in canvas" });
     const managedSubtree = designCanvas.querySelector("[data-managed-capability-subtree='true']");
     const session = lifecycle.mounted[0];
     expect(session).toBeDefined();
@@ -143,15 +171,10 @@ describe("Desen App exact React adapter canvas", () => {
     expect(screen.getByRole("status", { name: "Selected layer preview" })).toBeTruthy();
 
     view.rerender(
-      <DesenAdapterCanvas
-        mode="run"
-        projectId="account-app"
-        selection={selection}
-        surfaceId="sign-in"
-      />,
+      <DesenAdapterCanvas {...REFERENCE_CANVAS_AUTHORITIES} mode="run" selection={selection} />,
     );
 
-    const runCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const runCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     expect(runCanvas).toBe(designCanvas);
     expect(runCanvas.querySelector("[data-managed-capability-subtree='true']")).toBe(
       managedSubtree,
@@ -174,16 +197,11 @@ describe("Desen App exact React adapter canvas", () => {
     await waitFor(() => expect(email.value).toBe("run-mode@example.test"));
 
     view.rerender(
-      <DesenAdapterCanvas
-        mode="design"
-        projectId="account-app"
-        selection={selection}
-        surfaceId="sign-in"
-      />,
+      <DesenAdapterCanvas {...REFERENCE_CANVAS_AUTHORITIES} mode="design" selection={selection} />,
     );
 
     const restoredDesignCanvas = screen.getByRole("group", {
-      name: "Sign-in adapter canvas",
+      name: "Managed sign-in canvas",
     });
     expect(restoredDesignCanvas).toBe(designCanvas);
     expect(restoredDesignCanvas.querySelector("[data-managed-capability-subtree='true']")).toBe(
@@ -203,74 +221,125 @@ describe("Desen App exact React adapter canvas", () => {
     const firstHostPorts = createTestHostPorts();
     const secondHostPorts = createTestHostPorts();
     const view = render(
-      <DesenAdapterCanvas hostPorts={firstHostPorts} projectId="account-app" surfaceId="sign-in" />,
+      <DesenAdapterCanvas {...REFERENCE_CANVAS_AUTHORITIES} hostPorts={firstHostPorts} />,
     );
 
-    expect(await screen.findByRole("group", { name: "Sign-in adapter canvas" })).toBeTruthy();
+    expect(await screen.findByRole("group", { name: "Managed sign-in canvas" })).toBeTruthy();
     const firstSession = lifecycle.mounted[0];
     expect(firstSession).toBeDefined();
-    const firstCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const firstCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
 
     view.rerender(
       <DesenAdapterCanvas
+        {...REFERENCE_CANVAS_AUTHORITIES}
         hostPorts={firstHostPorts}
         mode="run"
-        projectId="account-app"
-        surfaceId="sign-in"
       />,
     );
-    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBe(firstCanvas);
+    expect(screen.getByRole("group", { name: "Managed sign-in canvas" })).toBe(firstCanvas);
     expect(lifecycle.mounted).toEqual([firstSession]);
     expect(lifecycle.disposed).toHaveLength(0);
 
     view.rerender(
       <DesenAdapterCanvas
+        {...REFERENCE_CANVAS_AUTHORITIES}
         hostPorts={secondHostPorts}
         mode="run"
-        projectId="account-app"
-        surfaceId="sign-in"
       />,
     );
 
-    const secondCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const secondCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     expect(secondCanvas).not.toBe(firstCanvas);
     expect(firstCanvas.isConnected).toBe(false);
     await waitFor(() => {
       expect(lifecycle.mounted).toHaveLength(2);
       expect(lifecycle.disposed).toEqual([firstSession]);
     });
-    expect(screen.getByRole("group", { name: "Sign-in adapter canvas" })).toBe(secondCanvas);
+    expect(screen.getByRole("group", { name: "Managed sign-in canvas" })).toBe(secondCanvas);
   });
 
-  it("fails closed for every unsupported project or surface without mounting sign-in", () => {
-    const view = render(<DesenAdapterCanvas projectId="account-app" surfaceId="recovery" />);
+  it("renders a different project, document, and surface tuple from explicit authorities", async () => {
+    const admitted = createDesenEditorDocument({
+      kind: "desen.source",
+      desen: "0.1.0",
+      id: "com.example.feedback-studio",
+      catalogs: [
+        {
+          id: "run.desen.reference.sign-in",
+          version: "0.1.0",
+          target: "web-react",
+        },
+      ],
+      entry: "feedback",
+      surfaces: {
+        feedback: {
+          id: "feedback",
+          state: {},
+          resources: {},
+          root: {
+            id: "feedback.layout",
+            use: "com.example.ui/Stack",
+            props: { direction: "vertical", gap: "md", maxWidth: 480 },
+            slots: {
+              default: [
+                {
+                  id: "feedback.title",
+                  use: "com.example.ui/Text",
+                  props: { text: "Share feedback", role: "heading" },
+                },
+              ],
+            },
+          },
+        },
+      },
+      authoring: {
+        canvas: { feedback: { x: 0, y: 0, width: 480, height: 720 } },
+      },
+      extensions: {},
+    });
+    expect(admitted.ok).toBe(true);
+    if (!admitted.ok) throw new Error("Expected the alternate Source to be admitted.");
 
-    expect(
-      screen.getByText("No exact adapter preview is available for this surface."),
-    ).toBeTruthy();
-    expect(screen.queryByRole("group", { name: "Sign-in adapter canvas" })).toBeNull();
-    expect(screen.queryByRole("heading", { name: "Sign in" })).toBeNull();
-    expect(screen.queryByLabelText("Email")).toBeNull();
-    expect(lifecycle.mounted).toHaveLength(0);
+    const authoring = prepareCatalogAuthoringModel(
+      REFERENCE_AUTHORING_PROFILE.catalogs,
+      admitted.document,
+    );
+    expect(authoring.ok).toBe(true);
+    if (!authoring.ok) throw new Error("Expected the alternate authoring model.");
+    const preview = prepareAuthoringPreviewBundle(admitted.document);
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) throw new Error("Expected the alternate preview Bundle.");
 
-    view.rerender(<DesenAdapterCanvas projectId="checkout-pilot" surfaceId="sign-in" />);
-    expect(screen.queryByRole("heading", { name: "Sign in" })).toBeNull();
-    expect(screen.queryByLabelText("Password")).toBeNull();
-    expect(lifecycle.mounted).toHaveLength(0);
+    render(
+      <DesenAdapterCanvas
+        {...REFERENCE_CANVAS_AUTHORITIES}
+        authoringModel={authoring.model}
+        bundle={preview.bundle}
+        documentId="com.example.feedback-studio"
+        projectId="feedback-studio"
+        surfaceId="feedback"
+      />,
+    );
+
+    const canvas = await screen.findByRole("group", { name: "Managed feedback canvas" });
+    expect(within(canvas).getByRole("heading", { name: "Share feedback" })).toBeTruthy();
+    expect(within(canvas).queryByRole("heading", { name: "Sign in" })).toBeNull();
+    expect(lifecycle.mounted).toHaveLength(1);
   });
 
   it("removes a previous tree synchronously and disposes the exact route session", async () => {
-    const view = render(<DesenAdapterCanvas projectId="account-app" surfaceId="sign-in" />);
+    const view = render(<DesenAdapterCanvas {...REFERENCE_CANVAS_AUTHORITIES} />);
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
     const firstSession = lifecycle.mounted[0];
     expect(firstSession).toBeDefined();
 
-    view.rerender(<DesenAdapterCanvas projectId="account-app" surfaceId="profile" />);
+    view.rerender(<DesenAdapterCanvas {...REFERENCE_CANVAS_AUTHORITIES} surfaceId="profile" />);
 
     expect(screen.queryByRole("heading", { name: "Sign in" })).toBeNull();
     expect(screen.queryByLabelText("Email")).toBeNull();
     await waitFor(() => {
-      expect(lifecycle.disposed).toEqual([firstSession]);
+      expect(lifecycle.mounted).toHaveLength(2);
+      expect(lifecycle.disposed).toEqual(lifecycle.mounted);
     });
   });
 
@@ -282,10 +351,9 @@ describe("Desen App exact React adapter canvas", () => {
     const selection = componentSelection("sign-in.title", "com.example.ui/Text", "Text");
     const view = render(
       <DesenAdapterCanvas
+        {...REFERENCE_CANVAS_AUTHORITIES}
         bundle={baselinePreview.bundle}
-        projectId="account-app"
         selection={selection}
-        surfaceId="sign-in"
       />,
     );
 
@@ -302,7 +370,10 @@ describe("Desen App exact React adapter canvas", () => {
     expect(edited.ok).toBe(true);
     if (!edited.ok) throw new Error("Expected a valid title prop mutation.");
 
-    const currentAuthoring = prepareCatalogAuthoringModel(referenceCatalog, edited.document);
+    const currentAuthoring = prepareCatalogAuthoringModel(
+      REFERENCE_AUTHORING_PROFILE.catalogs,
+      edited.document,
+    );
     expect(currentAuthoring.ok).toBe(true);
     if (!currentAuthoring.ok) throw new Error("Expected the current authoring model.");
 
@@ -312,16 +383,15 @@ describe("Desen App exact React adapter canvas", () => {
 
     view.rerender(
       <DesenAdapterCanvas
+        {...REFERENCE_CANVAS_AUTHORITIES}
         authoringModel={currentAuthoring.model}
         bundle={currentPreview.bundle}
-        projectId="account-app"
         selection={selection}
-        surfaceId="sign-in"
       />,
     );
 
     expect(screen.queryByRole("heading", { name: "Sign in" })).toBeNull();
-    const canvas = await screen.findByRole("group", { name: "Sign-in adapter canvas" });
+    const canvas = await screen.findByRole("group", { name: "Managed sign-in canvas" });
     expect(within(canvas).getByRole("heading", { level: 2, name: "Welcome back" })).toBeTruthy();
     await waitFor(() => {
       expect(lifecycle.mounted).toHaveLength(2);
@@ -344,7 +414,7 @@ describe("Desen App exact React adapter canvas", () => {
   it("balances StrictMode replay and final unmount with exact session disposal", async () => {
     const view = render(
       <StrictMode>
-        <DesenAdapterCanvas projectId="account-app" surfaceId="sign-in" />
+        <DesenAdapterCanvas {...REFERENCE_CANVAS_AUTHORITIES} />
       </StrictMode>,
     );
 
@@ -361,13 +431,12 @@ describe("Desen App exact React adapter canvas", () => {
   it("renders Source-identity selection chrome as a sibling outside the managed subtree", async () => {
     render(
       <DesenAdapterCanvas
-        projectId="account-app"
+        {...REFERENCE_CANVAS_AUTHORITIES}
         selection={componentSelection("sign-in.email", "com.example.ui/TextField", "Text field")}
-        surfaceId="sign-in"
       />,
     );
 
-    const canvas = await screen.findByRole("group", { name: "Sign-in adapter canvas" });
+    const canvas = await screen.findByRole("group", { name: "Managed sign-in canvas" });
     const overlay = await screen.findByRole("status", { name: "Selected layer preview" });
     const managedSubtree = document.querySelector("[data-managed-capability-subtree='true']");
 
@@ -385,9 +454,8 @@ describe("Desen App exact React adapter canvas", () => {
   it("keeps a selected conditional Source node honest when it is not materialized", async () => {
     render(
       <DesenAdapterCanvas
-        projectId="account-app"
+        {...REFERENCE_CANVAS_AUTHORITIES}
         selection={componentSelection("sign-in.error", "com.example.ui/Alert", "Alert", true)}
-        surfaceId="sign-in"
       />,
     );
 
@@ -407,9 +475,7 @@ describe("Desen App exact React adapter canvas", () => {
       displayName: "Text field",
       conditional: false,
     });
-    const view = render(
-      <DesenAdapterCanvas projectId="account-app" selection={stale} surfaceId="sign-in" />,
-    );
+    const view = render(<DesenAdapterCanvas {...REFERENCE_CANVAS_AUTHORITIES} selection={stale} />);
 
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
@@ -422,9 +488,7 @@ describe("Desen App exact React adapter canvas", () => {
       displayName: "Forged",
       conditional: true,
     });
-    view.rerender(
-      <DesenAdapterCanvas projectId="account-app" selection={forged} surfaceId="sign-in" />,
-    );
+    view.rerender(<DesenAdapterCanvas {...REFERENCE_CANVAS_AUTHORITIES} selection={forged} />);
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
   });
 });

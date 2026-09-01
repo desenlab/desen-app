@@ -6,8 +6,11 @@ import {
   AUTHORING_CANVAS_FRAME_LIMITS,
   prepareCatalogAuthoringModel,
   projectAuthoringCanvasFrame,
-  REFERENCE_AUTHORING_MODEL,
 } from "../src/authoring-data.js";
+import {
+  REFERENCE_AUTHORING_CATALOGS,
+  REFERENCE_AUTHORING_MODEL,
+} from "../src/reference-authoring-profile.js";
 
 import type { DesenEditorDocument } from "@desen/editor-core";
 
@@ -32,6 +35,38 @@ function asEditorDocument(source: unknown): DesenEditorDocument {
   return source as DesenEditorDocument;
 }
 
+function createSplitCatalogProfile(): Readonly<{
+  catalogs: readonly unknown[];
+  source: unknown;
+}> {
+  const foundation = copyJson(referenceCatalog) as unknown as MutableRecord;
+  foundation.id = "com.example.foundation";
+  foundation.packageDigest = `sha256:${"a".repeat(64)}`;
+  foundation.operations = {};
+  const foundationComponents = requireRecord(foundation.components, "foundation.components");
+  foundation.components = {
+    "com.example.ui/Stack": foundationComponents["com.example.ui/Stack"],
+    "com.example.ui/Text": foundationComponents["com.example.ui/Text"],
+    "com.example.ui/TextField": foundationComponents["com.example.ui/TextField"],
+  };
+
+  const interactions = copyJson(referenceCatalog) as unknown as MutableRecord;
+  interactions.id = "com.example.interactions";
+  interactions.packageDigest = `sha256:${"b".repeat(64)}`;
+  const interactionComponents = requireRecord(interactions.components, "interactions.components");
+  interactions.components = {
+    "com.example.ui/Alert": interactionComponents["com.example.ui/Alert"],
+    "com.example.ui/Button": interactionComponents["com.example.ui/Button"],
+  };
+
+  const source = copyJson(officialSignInSource) as unknown as MutableRecord;
+  source.catalogs = [
+    { id: foundation.id, version: foundation.version, target: foundation.target },
+    { id: interactions.id, version: interactions.version, target: interactions.target },
+  ];
+  return Object.freeze({ catalogs: Object.freeze([foundation, interactions]), source });
+}
+
 function requirePrepared(
   result: ReturnType<typeof prepareCatalogAuthoringModel>,
 ): typeof REFERENCE_AUTHORING_MODEL {
@@ -49,6 +84,7 @@ describe("Desen App catalog authoring read model", () => {
       target: "web-react",
       version: "0.1.0",
     });
+    expect(model.catalogs).toEqual([model.catalog]);
     expect(model.components.map((component) => component.id)).toEqual([
       "com.example.ui/Alert",
       "com.example.ui/Button",
@@ -98,6 +134,56 @@ describe("Desen App catalog authoring read model", () => {
     expect(Object.isFrozen(stack?.defaultProps)).toBe(true);
     expect(Object.isFrozen(stack?.slotContracts)).toBe(true);
     expect(Object.isFrozen(signIn?.root.slots[0]?.children)).toBe(true);
+  });
+
+  it("merges capabilities from every Catalog required by a multi-Catalog Source", () => {
+    const profile = createSplitCatalogProfile();
+    const model = requirePrepared(prepareCatalogAuthoringModel(profile.catalogs, profile.source));
+
+    expect(model.catalogs).toEqual([
+      { id: "com.example.foundation", target: "web-react", version: "0.1.0" },
+      { id: "com.example.interactions", target: "web-react", version: "0.1.0" },
+    ]);
+    expect(model.catalog).toEqual(model.catalogs[0]);
+    expect(model.validationCatalogs).toHaveLength(2);
+    expect(model.components.map(({ id }) => id)).toEqual([
+      "com.example.ui/Alert",
+      "com.example.ui/Button",
+      "com.example.ui/Stack",
+      "com.example.ui/Text",
+      "com.example.ui/TextField",
+    ]);
+    expect(
+      model.surfaces
+        .find(({ id }) => id === "sign-in")
+        ?.root.slots[0]?.children.map(({ displayName }) => displayName),
+    ).toEqual(["Text", "Text field", "Text field", "Alert", "Button"]);
+    expect(Object.isFrozen(model.catalogs)).toBe(true);
+    expect(Object.isFrozen(model.validationCatalogs)).toBe(true);
+  });
+
+  it("rejects a missing or requirement-incompatible Catalog without a partial model", () => {
+    const profile = createSplitCatalogProfile();
+    expect(prepareCatalogAuthoringModel(profile.catalogs.slice(0, 1), profile.source)).toEqual({
+      ok: false,
+      reason: "source-invalid",
+    });
+
+    const incompatibleSource = copyJson(profile.source) as MutableRecord;
+    const requirements = incompatibleSource.catalogs as MutableRecord[];
+    if (requirements[1] === undefined) throw new TypeError("Expected the second requirement.");
+    requirements[1].version = "9.0.0";
+    expect(prepareCatalogAuthoringModel(profile.catalogs, incompatibleSource)).toEqual({
+      ok: false,
+      reason: "source-invalid",
+    });
+
+    const revokedSet = Proxy.revocable<unknown[]>([], {});
+    revokedSet.revoke();
+    expect(prepareCatalogAuthoringModel(revokedSet.proxy, profile.source)).toEqual({
+      ok: false,
+      reason: "catalog-invalid",
+    });
   });
 
   it("fails closed before projecting malformed Catalog or unresolved Source data", () => {
@@ -212,7 +298,11 @@ describe("Desen App catalog authoring read model", () => {
 
 describe("Desen App active authoring canvas frame projection", () => {
   it("projects the exact Sign-in frame without exposing Source-space placement", () => {
-    const result = projectAuthoringCanvasFrame(asEditorDocument(officialSignInSource), "sign-in");
+    const result = projectAuthoringCanvasFrame(
+      asEditorDocument(officialSignInSource),
+      "sign-in",
+      REFERENCE_AUTHORING_CATALOGS,
+    );
 
     expect(result).toEqual({
       status: "ready",
@@ -231,30 +321,54 @@ describe("Desen App active authoring canvas frame projection", () => {
       width: 420,
       height: 720,
     };
-    expect(projectAuthoringCanvasFrame(asEditorDocument(moved), "sign-in")).toEqual(result);
+    expect(
+      projectAuthoringCanvasFrame(asEditorDocument(moved), "sign-in", REFERENCE_AUTHORING_CATALOGS),
+    ).toEqual(result);
   });
 
   it("never fabricates a frame for a missing surface or missing authoring metadata", () => {
     const withoutFrame = copyJson(officialSignInSource) as unknown as MutableRecord;
     delete authoringCanvas(withoutFrame)["sign-in"];
-    expect(projectAuthoringCanvasFrame(asEditorDocument(withoutFrame), "sign-in")).toEqual({
+    expect(
+      projectAuthoringCanvasFrame(
+        asEditorDocument(withoutFrame),
+        "sign-in",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
+    ).toEqual({
       status: "rejected",
       reason: "frame-missing",
     });
-    expect(projectAuthoringCanvasFrame(asEditorDocument(officialSignInSource), "settings")).toEqual(
-      { status: "rejected", reason: "surface-missing" },
-    );
+    expect(
+      projectAuthoringCanvasFrame(
+        asEditorDocument(officialSignInSource),
+        "settings",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
+    ).toEqual({ status: "rejected", reason: "surface-missing" });
 
     const withoutAuthoring = copyJson(officialSignInSource) as unknown as MutableRecord;
     delete withoutAuthoring.authoring;
-    expect(projectAuthoringCanvasFrame(asEditorDocument(withoutAuthoring), "sign-in")).toEqual({
+    expect(
+      projectAuthoringCanvasFrame(
+        asEditorDocument(withoutAuthoring),
+        "sign-in",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
+    ).toEqual({
       status: "rejected",
       reason: "authoring-missing",
     });
 
     const withoutCanvas = copyJson(officialSignInSource) as unknown as MutableRecord;
     delete requireRecord(withoutCanvas.authoring, "authoring").canvas;
-    expect(projectAuthoringCanvasFrame(asEditorDocument(withoutCanvas), "sign-in")).toEqual({
+    expect(
+      projectAuthoringCanvasFrame(
+        asEditorDocument(withoutCanvas),
+        "sign-in",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
+    ).toEqual({
       status: "rejected",
       reason: "canvas-missing",
     });
@@ -263,14 +377,26 @@ describe("Desen App active authoring canvas frame projection", () => {
   it("rejects malformed or unbounded frame metadata before it can influence layout", () => {
     const malformedCanvas = copyJson(officialSignInSource) as unknown as MutableRecord;
     requireRecord(malformedCanvas.authoring, "authoring").canvas = [];
-    expect(projectAuthoringCanvasFrame(asEditorDocument(malformedCanvas), "sign-in")).toEqual({
+    expect(
+      projectAuthoringCanvasFrame(
+        asEditorDocument(malformedCanvas),
+        "sign-in",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
+    ).toEqual({
       status: "rejected",
       reason: "canvas-invalid",
     });
 
     const zeroWidth = copyJson(officialSignInSource) as unknown as MutableRecord;
     authoringCanvas(zeroWidth)["sign-in"] = { x: 0, y: 0, width: 0, height: 720 };
-    expect(projectAuthoringCanvasFrame(asEditorDocument(zeroWidth), "sign-in")).toEqual({
+    expect(
+      projectAuthoringCanvasFrame(
+        asEditorDocument(zeroWidth),
+        "sign-in",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
+    ).toEqual({
       status: "rejected",
       reason: "frame-invalid",
     });
@@ -282,7 +408,13 @@ describe("Desen App active authoring canvas frame projection", () => {
       width: 420,
       height: AUTHORING_CANVAS_FRAME_LIMITS.maxHeight + 1,
     };
-    expect(projectAuthoringCanvasFrame(asEditorDocument(hugeHeight), "sign-in")).toEqual({
+    expect(
+      projectAuthoringCanvasFrame(
+        asEditorDocument(hugeHeight),
+        "sign-in",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
+    ).toEqual({
       status: "rejected",
       reason: "frame-invalid",
     });
@@ -294,7 +426,13 @@ describe("Desen App active authoring canvas frame projection", () => {
       width: 420,
       height: 720,
     };
-    expect(projectAuthoringCanvasFrame(asEditorDocument(fractionalCoordinate), "sign-in")).toEqual({
+    expect(
+      projectAuthoringCanvasFrame(
+        asEditorDocument(fractionalCoordinate),
+        "sign-in",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
+    ).toEqual({
       status: "rejected",
       reason: "frame-invalid",
     });
@@ -302,12 +440,22 @@ describe("Desen App active authoring canvas frame projection", () => {
 
   it("rejects invalid documents, surface identities, and accessor metadata", () => {
     const forged = { kind: "desen.bundle", desen: "0.1.0", id: "forged" };
-    expect(projectAuthoringCanvasFrame(asEditorDocument(forged), "sign-in")).toEqual({
+    expect(
+      projectAuthoringCanvasFrame(
+        asEditorDocument(forged),
+        "sign-in",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
+    ).toEqual({
       status: "rejected",
       reason: "document-invalid",
     });
     expect(
-      projectAuthoringCanvasFrame(asEditorDocument(officialSignInSource), "__proto__"),
+      projectAuthoringCanvasFrame(
+        asEditorDocument(officialSignInSource),
+        "__proto__",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
     ).toEqual({ status: "rejected", reason: "surface-id-invalid" });
 
     const hostile = copyJson(officialSignInSource) as unknown as MutableRecord;
@@ -319,7 +467,13 @@ describe("Desen App active authoring canvas frame projection", () => {
         throw new Error("Authoring metadata must stay inert.");
       },
     });
-    expect(projectAuthoringCanvasFrame(asEditorDocument(hostile), "sign-in")).toEqual({
+    expect(
+      projectAuthoringCanvasFrame(
+        asEditorDocument(hostile),
+        "sign-in",
+        REFERENCE_AUTHORING_CATALOGS,
+      ),
+    ).toEqual({
       status: "rejected",
       reason: "document-invalid",
     });

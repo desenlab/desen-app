@@ -8,17 +8,23 @@ import { canonicalizeJsonBytes } from "@desen/protocol";
 
 import { DesenAppApplication } from "../src/application.js";
 import {
-  AUTHORING_PUBLICATION_CHANNEL,
+  createFixedDestinationAuthoringPublicationPort,
   type AuthoringControlPlanePublicationRequest,
   type AuthoringControlPlanePublicationSettlement,
+  type AuthoringHostActivationRequest,
+  type AuthoringHostActivationSettlement,
   type AuthoringPublicationPort,
-  type AuthoringReferenceHostActivationRequest,
-  type AuthoringReferenceHostActivationSettlement,
 } from "../src/authoring-publication.js";
+import { prepareAuthoringSurfacePreviewBundle } from "../src/authoring-preview.js";
 import {
-  prepareAuthoringPreviewBundle,
+  createProjectWorkspaceProfile,
+  readProjectWorkspaceProfileAuthority,
+} from "../src/project-workspace-profile.js";
+import {
+  prepareReferenceAuthoringPreviewBundle as prepareAuthoringPreviewBundle,
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
   REFERENCE_EDITOR_DOCUMENT,
-} from "../src/authoring-preview.js";
+} from "../src/reference-authoring-profile.js";
 
 import type {
   DesenEditorDocument,
@@ -27,14 +33,53 @@ import type {
   DesenEditorSourceSaveRequest,
   DesenEditorSourceSaveResult,
 } from "@desen/editor-core";
+import type { ProjectWorkspaceProfileHandle } from "../src/project-workspace-profile.js";
 
 const SIGN_IN_PATH = "/projects/account-app/surfaces/sign-in";
+const HOME_PATH = "/projects/account-app/surfaces/home";
+const PROFILE_AUTHORITY = readProjectWorkspaceProfileAuthority(
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+);
+if (PROFILE_AUTHORITY.status !== "read") {
+  throw new TypeError("The reference workspace profile must be authenticated in this test.");
+}
+const PROFILE_SNAPSHOT = PROFILE_AUTHORITY.profile;
+const PUBLICATION_BINDING = PROFILE_SNAPSHOT.publication;
+if (PUBLICATION_BINDING === null) {
+  throw new TypeError("The reference workspace profile must authorize publication in this test.");
+}
+const CHANNEL_NAME = PUBLICATION_BINDING.channelName;
+const HOST_ID = PUBLICATION_BINDING.hostId;
 const SOURCE_KEY = "account-app-source";
 const EDITED_TITLE = "Ship the durable sign-in";
 const LATER_TITLE = "A newer unpublished draft";
 const RUNTIME_EMAIL = "runtime-only@example.invalid";
 const RUNTIME_PASSWORD = "runtime-password-must-not-publish";
 const OTHER_REVISION = `sha256:${"b".repeat(64)}`;
+
+function homeRouteWorkspaceProfile(): ProjectWorkspaceProfileHandle {
+  const profile = PROFILE_SNAPSHOT;
+  const created = createProjectWorkspaceProfile({
+    profileId: "reference-official-home-web",
+    project: profile.project,
+    route: { projectId: profile.project.id, surfaceId: "home" },
+    sourceSurfaceId: "home",
+    documentId: profile.documentId,
+    sourceKey: profile.sourceKey,
+    initialDocument: profile.initialDocument,
+    catalogs: profile.catalogs,
+    catalogPackages: profile.catalogPackages,
+    runtime: {
+      target: profile.runtime.target,
+      registry: profile.runtime.registry,
+      tokenCssProperties: profile.runtime.tokenCssProperties,
+      hostPorts: profile.runtime.hostPorts,
+    },
+    publication: profile.publication,
+  });
+  if (!created.ok) throw new TypeError(`Expected home route profile: ${created.reason}.`);
+  return created.handle;
+}
 
 interface Deferred<Value> {
   readonly promise: Promise<Value>;
@@ -59,8 +104,8 @@ interface ChannelCall extends Deferred<AuthoringControlPlanePublicationSettlemen
   readonly request: AuthoringControlPlanePublicationRequest;
 }
 
-interface ActivationCall extends Deferred<AuthoringReferenceHostActivationSettlement> {
-  readonly request: AuthoringReferenceHostActivationRequest;
+interface ActivationCall extends Deferred<AuthoringHostActivationSettlement> {
+  readonly request: AuthoringHostActivationRequest;
 }
 
 interface ControlledPublication {
@@ -99,14 +144,19 @@ function createControlledPersistence(): ControlledPersistence {
 function createControlledPublication(): ControlledPublication {
   const channelCalls: ChannelCall[] = [];
   const activationCalls: ActivationCall[] = [];
-  const port: AuthoringPublicationPort = Object.freeze({
-    publishBundleToChannel(request: AuthoringControlPlanePublicationRequest) {
+  const port = createFixedDestinationAuthoringPublicationPort({
+    channelName: CHANNEL_NAME,
+    hostId: HOST_ID,
+    publishBundleToChannel(request) {
       const pending = createDeferred<AuthoringControlPlanePublicationSettlement>();
-      channelCalls.push({ request, ...pending });
+      channelCalls.push({
+        request: Object.freeze({ ...request, channelName: CHANNEL_NAME }),
+        ...pending,
+      });
       return pending.promise;
     },
-    activateReferenceHost(request: AuthoringReferenceHostActivationRequest) {
-      const pending = createDeferred<AuthoringReferenceHostActivationSettlement>();
+    activatePublishedRevision(request: AuthoringHostActivationRequest) {
+      const pending = createDeferred<AuthoringHostActivationSettlement>();
       activationCalls.push({ request, ...pending });
       return pending.promise;
     },
@@ -147,7 +197,7 @@ async function settleChannel(
 async function settleActivation(
   controlled: ControlledPublication,
   index: number,
-  result: AuthoringReferenceHostActivationSettlement,
+  result: AuthoringHostActivationSettlement,
 ): Promise<void> {
   const call = requireCall(controlled.activationCalls, index, "reference-host activation");
   await act(async () => {
@@ -162,7 +212,12 @@ function renderApplication(
 ) {
   window.history.replaceState(null, "", SIGN_IN_PATH);
   return render(
-    <DesenAppApplication persistencePort={persistencePort} publicationPort={publicationPort} />,
+    <DesenAppApplication
+      initialDocument={REFERENCE_EDITOR_DOCUMENT}
+      persistencePort={persistencePort}
+      publicationPort={publicationPort}
+      workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+    />,
   );
 }
 
@@ -247,7 +302,7 @@ function publishedSettlement(
 ): AuthoringControlPlanePublicationSettlement {
   return Object.freeze({
     status: "published",
-    channelName: AUTHORING_PUBLICATION_CHANNEL,
+    channelName: CHANNEL_NAME,
     revision,
     bundleStatus: "stored",
     channelStatus: "updated",
@@ -259,7 +314,7 @@ function activeSettlement(
   revision: string,
   activationGeneration: number,
   relationship: "activated" | "preserved" | "recovered" = "activated",
-): AuthoringReferenceHostActivationSettlement {
+): AuthoringHostActivationSettlement {
   return Object.freeze({
     status: "active",
     relationship,
@@ -308,7 +363,7 @@ describe("Desen App publication integration", () => {
     await waitFor(() => {
       expect(
         (
-          within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+          within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
             "Email",
           ) as HTMLInputElement
         ).value,
@@ -318,7 +373,7 @@ describe("Desen App publication integration", () => {
     await waitFor(() => {
       expect(
         (
-          within(screen.getByRole("group", { name: "Sign-in adapter canvas" })).getByLabelText(
+          within(screen.getByRole("group", { name: "Managed sign-in canvas" })).getByLabelText(
             "Email",
           ) as HTMLInputElement
         ).value,
@@ -331,7 +386,7 @@ describe("Desen App publication integration", () => {
       name: "Next outcome for signIn",
     });
     fireEvent.change(outcome, { target: { value: "error:invalidCredentials" } });
-    const runCanvas = screen.getByRole("group", { name: "Sign-in adapter canvas" });
+    const runCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
     const runtimeEmail = within(runCanvas).getByLabelText("Email") as HTMLInputElement;
     const runtimePassword = within(runCanvas).getByLabelText("Password") as HTMLInputElement;
     await act(async () => {
@@ -367,7 +422,12 @@ describe("Desen App publication integration", () => {
     });
 
     const channelCall = await beginPublication(publication);
-    expect(Object.keys(channelCall.request).sort()).toEqual(["bundleBytes", "revision"]);
+    expect(Object.keys(channelCall.request).sort()).toEqual([
+      "bundleBytes",
+      "channelName",
+      "revision",
+    ]);
+    expect(channelCall.request.channelName).toBe(CHANNEL_NAME);
     expect(channelCall.request.revision).toBe(expected.preview.revision);
     expect(channelCall.request.bundleBytes).toEqual(canonicalizeJsonBytes(expected.preview.bundle));
     const serializedBundle = new TextDecoder().decode(channelCall.request.bundleBytes);
@@ -383,8 +443,9 @@ describe("Desen App publication integration", () => {
       expect(publication.activationCalls).toHaveLength(1);
     });
     expect(publication.activationCalls[0]?.request).toEqual({
-      channelName: "preview",
+      channelName: CHANNEL_NAME,
       channelGeneration: 7,
+      hostId: HOST_ID,
       revision: channelCall.request.revision,
     });
     await settleActivation(publication, 0, activeSettlement(channelCall.request.revision, 11));
@@ -404,6 +465,58 @@ describe("Desen App publication integration", () => {
         .getAllByRole("listitem")
         .every((item) => item.getAttribute("data-stage-state") === "done"),
     ).toBe(true);
+  }, 10_000);
+
+  it("keeps a non-entry canvas transient while Save and Publish retain the authored entry", async () => {
+    const persistence = createControlledPersistence();
+    const publication = createControlledPublication();
+    const homeProfile = homeRouteWorkspaceProfile();
+    window.history.replaceState(null, "", HOME_PATH);
+    render(
+      <DesenAppApplication
+        initialDocument={REFERENCE_EDITOR_DOCUMENT}
+        persistencePort={persistence.port}
+        publicationPort={publication.port}
+        workspaceProfile={homeProfile}
+      />,
+    );
+
+    const homeCanvas = await screen.findByRole("group", { name: "Managed home canvas" });
+    expect(within(homeCanvas).getByRole("heading", { name: "Welcome" })).toBeTruthy();
+    expect(within(homeCanvas).queryByRole("heading", { name: "Sign in" })).toBeNull();
+    const basePreview = prepareAuthoringPreviewBundle(REFERENCE_EDITOR_DOCUMENT);
+    const transientPreview = prepareAuthoringSurfacePreviewBundle(
+      REFERENCE_EDITOR_DOCUMENT,
+      PROFILE_SNAPSHOT.catalogPackages,
+      "home",
+    );
+    expect(basePreview.ok).toBe(true);
+    expect(transientPreview.ok).toBe(true);
+    if (!basePreview.ok || !transientPreview.ok) return;
+    expect(basePreview.bundle.entry).toBe("sign-in");
+    expect(transientPreview.bundle.entry).toBe("home");
+    expect(transientPreview.revision).not.toBe(basePreview.revision);
+
+    fireEvent.click(saveButton());
+    expect(persistence.saveCalls).toHaveLength(1);
+    expect(persistence.saveCalls[0]?.request.document.entry).toBe("sign-in");
+    await settleSave(persistence, 0, { status: "created", generation: 1 });
+    await waitFor(() => expect(publicationStatus()).toMatch(/ready to publish/u));
+
+    const channelCall = await beginPublication(publication);
+    expect(channelCall.request.revision).toBe(basePreview.revision);
+    expect(channelCall.request.revision).not.toBe(transientPreview.revision);
+    const publishedBundle = JSON.parse(
+      new TextDecoder().decode(channelCall.request.bundleBytes),
+    ) as { readonly entry?: unknown };
+    expect(publishedBundle.entry).toBe("sign-in");
+
+    await settleChannel(publication, 0, publishedSettlement(basePreview.revision, 2));
+    await waitFor(() => expect(publication.activationCalls).toHaveLength(1));
+    await settleActivation(publication, 0, activeSettlement(basePreview.revision, 3));
+    await waitFor(() => {
+      expect(publicationRegion().getAttribute("data-publication-state")).toBe("active");
+    });
   });
 
   it("single-dispatches pending work and fences persistence, modes, navigation, and authoring mutation", async () => {
@@ -549,8 +662,10 @@ describe("Desen App publication integration", () => {
         staleChannelCall.resolve(publishedSettlement(staleChannelCall.request.revision, 5));
         raceRender.rerender(
           <DesenAppApplication
+            initialDocument={REFERENCE_EDITOR_DOCUMENT}
             persistencePort={racePersistence.port}
             publicationPort={replacementPublication.port}
+            workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
           />,
         );
       });
@@ -576,8 +691,10 @@ describe("Desen App publication integration", () => {
     const oldChannelCall = await beginPublication(oldPublication);
     rendered.rerender(
       <DesenAppApplication
+        initialDocument={REFERENCE_EDITOR_DOCUMENT}
         persistencePort={persistence.port}
         publicationPort={currentPublication.port}
+        workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
       />,
     );
     await waitFor(() => {
@@ -631,7 +748,12 @@ describe("Desen App publication integration", () => {
 
     const persistence = createControlledPersistence();
     rendered.rerender(
-      <DesenAppApplication persistencePort={persistence.port} publicationPort={null} />,
+      <DesenAppApplication
+        initialDocument={REFERENCE_EDITOR_DOCUMENT}
+        persistencePort={persistence.port}
+        publicationPort={null}
+        workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+      />,
     );
     expect(openButton().disabled).toBe(false);
     expect(saveButton().disabled).toBe(false);

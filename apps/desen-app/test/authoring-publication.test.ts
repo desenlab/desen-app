@@ -5,13 +5,15 @@ import { canonicalizeJsonBytes } from "@desen/protocol";
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  AUTHORING_PUBLICATION_CHANNEL,
   createAuthoringPublicationController,
+  createFixedDestinationAuthoringPublicationPort,
 } from "../src/authoring-publication.js";
+import { readProjectWorkspaceProfileAuthority } from "../src/project-workspace-profile.js";
 import {
-  prepareAuthoringPreviewBundle,
+  prepareReferenceAuthoringPreviewBundle as prepareAuthoringPreviewBundle,
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
   REFERENCE_EDITOR_DOCUMENT,
-} from "../src/authoring-preview.js";
+} from "../src/reference-authoring-profile.js";
 
 import type { DesenEditorDocument } from "@desen/editor-core";
 import type {
@@ -21,11 +23,19 @@ import type {
   AuthoringPublicationControllerCreationResult,
   AuthoringPublicationPort,
   AuthoringPublicationSnapshot,
-  AuthoringReferenceHostActivationRequest,
-  AuthoringReferenceHostActivationSettlement,
+  AuthoringHostActivationRequest,
+  AuthoringHostActivationSettlement,
 } from "../src/authoring-publication.js";
 
 const ROUTE = Object.freeze({ projectId: "account-app", surfaceId: "sign-in" });
+const PROFILE_AUTHORITY = readProjectWorkspaceProfileAuthority(
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+);
+if (PROFILE_AUTHORITY.status !== "read" || PROFILE_AUTHORITY.profile.publication === null) {
+  throw new TypeError("The reference workspace profile must authorize publication in this test.");
+}
+const CHANNEL_NAME = PROFILE_AUTHORITY.profile.publication.channelName;
+const HOST_ID = PROFILE_AUTHORITY.profile.publication.hostId;
 const PREVIEW = prepareAuthoringPreviewBundle(REFERENCE_EDITOR_DOCUMENT);
 if (!PREVIEW.ok) throw new TypeError("The reference authored Source must publish in this test.");
 const REVISION = PREVIEW.revision;
@@ -42,7 +52,7 @@ interface Deferred<Value> {
 interface PortHarness {
   readonly port: AuthoringPublicationPort;
   readonly channelCalls: AuthoringControlPlanePublicationRequest[];
-  readonly activationCalls: AuthoringReferenceHostActivationRequest[];
+  readonly activationCalls: AuthoringHostActivationRequest[];
 }
 
 function deferred<Value>(): Deferred<Value> {
@@ -93,7 +103,7 @@ function publishedChannel(
 ): AuthoringControlPlanePublicationSettlement {
   return Object.freeze({
     status: "published",
-    channelName: AUTHORING_PUBLICATION_CHANNEL,
+    channelName: CHANNEL_NAME,
     revision,
     bundleStatus,
     channelStatus,
@@ -105,7 +115,7 @@ function activeHost(
   revision = REVISION,
   activationGeneration = ACTIVATION_GENERATION,
   relationship: "activated" | "preserved" | "recovered" = "activated",
-): AuthoringReferenceHostActivationSettlement {
+): AuthoringHostActivationSettlement {
   return Object.freeze({
     status: "active",
     relationship,
@@ -117,22 +127,25 @@ function activeHost(
 function harness(
   publishBundleToChannel: AuthoringPublicationPort["publishBundleToChannel"] = async () =>
     publishedChannel(),
-  activateReferenceHost: AuthoringPublicationPort["activateReferenceHost"] = async () =>
+  activatePublishedRevision: AuthoringPublicationPort["activatePublishedRevision"] = async () =>
     activeHost(),
 ): PortHarness {
   const channelCalls: AuthoringControlPlanePublicationRequest[] = [];
-  const activationCalls: AuthoringReferenceHostActivationRequest[] = [];
+  const activationCalls: AuthoringHostActivationRequest[] = [];
   return {
     channelCalls,
     activationCalls,
-    port: Object.freeze({
-      async publishBundleToChannel(request: AuthoringControlPlanePublicationRequest) {
-        channelCalls.push(request);
-        return publishBundleToChannel(request);
+    port: createFixedDestinationAuthoringPublicationPort({
+      channelName: CHANNEL_NAME,
+      hostId: HOST_ID,
+      async publishBundleToChannel(request) {
+        const fullRequest = Object.freeze({ ...request, channelName: CHANNEL_NAME });
+        channelCalls.push(fullRequest);
+        return publishBundleToChannel(fullRequest);
       },
-      async activateReferenceHost(request: AuthoringReferenceHostActivationRequest) {
+      async activatePublishedRevision(request: AuthoringHostActivationRequest) {
         activationCalls.push(request);
-        return activateReferenceHost(request);
+        return activatePublishedRevision(request);
       },
     }),
   };
@@ -143,6 +156,7 @@ function requireController(
   currentSnapshot: AuthoringPublicationSnapshot = snapshot(),
 ): AuthoringPublicationController {
   const created = createAuthoringPublicationController({
+    profile: REFERENCE_AUTHORING_WORKSPACE_PROFILE,
     route: ROUTE,
     snapshot: currentSnapshot,
     publicationPort: port,
@@ -163,6 +177,7 @@ function expectCreationFailure(
 describe("Desen App saved-Source publication controller", () => {
   it("captures only the exact route, snapshot, and two-method trusted-host port", () => {
     const base = {
+      profile: REFERENCE_AUTHORING_WORKSPACE_PROFILE,
       route: ROUTE,
       snapshot: snapshot(),
       publicationPort: harness().port,
@@ -175,7 +190,8 @@ describe("Desen App saved-Source publication controller", () => {
     expect(created.controller.read()).toBe(state);
     expect(state).toEqual({
       route: ROUTE,
-      channelName: "preview",
+      channelName: CHANNEL_NAME,
+      hostId: HOST_ID,
       snapshot: snapshot(),
       pending: null,
       result: null,
@@ -189,13 +205,17 @@ describe("Desen App saved-Source publication controller", () => {
     expectCreationFailure(
       createAuthoringPublicationController({
         ...base,
-        route: { projectId: "account-app", surfaceId: "home" },
+        route: { projectId: "account-app", surfaceId: "foreign-surface" },
       }),
       "route-invalid",
     );
     expectCreationFailure(
       createAuthoringPublicationController({ ...base, debug: true } as never),
       "route-invalid",
+    );
+    expectCreationFailure(
+      createAuthoringPublicationController({ ...base, profile: Object.freeze({}) as never }),
+      "profile-invalid",
     );
     expectCreationFailure(
       createAuthoringPublicationController({
@@ -247,16 +267,23 @@ describe("Desen App saved-Source publication controller", () => {
         channelReceiverWasUndefined = this === undefined;
         return Promise.resolve(publishedChannel());
       },
-      activateReferenceHost(this: void) {
+      activatePublishedRevision(this: void) {
         activationReceiverWasUndefined = this === undefined;
         return Promise.resolve(activeHost());
       },
     };
-    const controller = requireController(mutablePort);
+    const controller = requireController(
+      createFixedDestinationAuthoringPublicationPort({
+        channelName: CHANNEL_NAME,
+        hostId: HOST_ID,
+        publishBundleToChannel: mutablePort.publishBundleToChannel,
+        activatePublishedRevision: mutablePort.activatePublishedRevision,
+      }),
+    );
     mutablePort.publishBundleToChannel = () => {
       throw new TypeError("late mutation must not replace the captured method");
     };
-    mutablePort.activateReferenceHost = () => {
+    mutablePort.activatePublishedRevision = () => {
       throw new TypeError("late mutation must not replace the captured method");
     };
 
@@ -308,27 +335,26 @@ describe("Desen App saved-Source publication controller", () => {
     }
   });
 
-  it("reruns the public Publisher and emits no bytes when semantic publication rejects", async () => {
+  it("rejects a profile-invalid semantic document before any publication controller or bytes", () => {
     const invalidForCatalog = changedDocument(42);
     expect(prepareAuthoringPreviewBundle(invalidForCatalog)).toEqual({
       ok: false,
       reason: "publication-rejected",
     });
     const port = harness();
-    const controller = requireController(
-      port.port,
-      snapshot({
-        document: invalidForCatalog,
-        savedDocument: invalidForCatalog,
-        previewRevision: REVISION,
+    expectCreationFailure(
+      createAuthoringPublicationController({
+        profile: REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+        route: ROUTE,
+        snapshot: snapshot({
+          document: invalidForCatalog,
+          savedDocument: invalidForCatalog,
+          previewRevision: REVISION,
+        }),
+        publicationPort: port.port,
       }),
+      "document-invalid",
     );
-
-    await expect(controller.publish()).resolves.toEqual({
-      status: "failed",
-      reason: "publisher-rejected",
-      lastKnownGoodPreserved: false,
-    });
     expect(port.channelCalls).toHaveLength(0);
     expect(port.activationCalls).toHaveLength(0);
   });
@@ -340,7 +366,7 @@ describe("Desen App saved-Source publication controller", () => {
     await expect(controller.publish()).resolves.toEqual({
       status: "published",
       relationship: "activated",
-      channelName: "preview",
+      channelName: CHANNEL_NAME,
       revision: REVISION,
       sourceGeneration: SOURCE_GENERATION,
       channelGeneration: CHANNEL_GENERATION,
@@ -348,16 +374,22 @@ describe("Desen App saved-Source publication controller", () => {
     });
 
     expect(port.channelCalls).toHaveLength(1);
-    expect(Object.keys(port.channelCalls[0] ?? {}).sort()).toEqual(["bundleBytes", "revision"]);
+    expect(Object.keys(port.channelCalls[0] ?? {}).sort()).toEqual([
+      "bundleBytes",
+      "channelName",
+      "revision",
+    ]);
     expect(port.channelCalls[0]).toEqual({
       bundleBytes: canonicalizeJsonBytes(PREVIEW.bundle),
+      channelName: CHANNEL_NAME,
       revision: REVISION,
     });
     expect(Object.isFrozen(port.channelCalls[0])).toBe(true);
     expect(port.activationCalls).toEqual([
       {
-        channelName: "preview",
+        channelName: CHANNEL_NAME,
         channelGeneration: CHANNEL_GENERATION,
+        hostId: HOST_ID,
         revision: REVISION,
       },
     ]);
@@ -366,6 +398,116 @@ describe("Desen App saved-Source publication controller", () => {
       expect.objectContaining({ status: "published", revision: REVISION }),
     );
     expect(Object.isFrozen(controller.read().result)).toBe(true);
+  });
+
+  it("lets a fixed-channel adapter reject a profile-channel mismatch before any write", async () => {
+    const fixedChannelWrite = vi.fn(async () => publishedChannel());
+    const activation = vi.fn(async () => activeHost());
+    const boundChannel = "another-preview";
+    const fixedPort = createFixedDestinationAuthoringPublicationPort({
+      channelName: boundChannel,
+      hostId: HOST_ID,
+      async publishBundleToChannel() {
+        return fixedChannelWrite();
+      },
+      activatePublishedRevision: activation,
+    });
+
+    expectCreationFailure(
+      createAuthoringPublicationController({
+        profile: REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+        route: ROUTE,
+        snapshot: snapshot(),
+        publicationPort: fixedPort,
+      }),
+      "port-invalid",
+    );
+    expect(fixedChannelWrite).not.toHaveBeenCalled();
+    expect(activation).not.toHaveBeenCalled();
+  });
+
+  it("reconstructs fixed-destination requests before trusted callbacks observe them", async () => {
+    const publishedRequests: unknown[] = [];
+    const activationRequests: unknown[] = [];
+    const port = createFixedDestinationAuthoringPublicationPort({
+      channelName: CHANNEL_NAME,
+      hostId: HOST_ID,
+      async publishBundleToChannel(request) {
+        publishedRequests.push(request);
+        return publishedChannel();
+      },
+      async activatePublishedRevision(request) {
+        activationRequests.push(request);
+        return activeHost();
+      },
+    });
+    const bytes = canonicalizeJsonBytes(PREVIEW.bundle);
+    const mutablePublish = {
+      bundleBytes: bytes,
+      channelName: CHANNEL_NAME,
+      revision: REVISION,
+    };
+    const publishing = port.publishBundleToChannel(mutablePublish);
+    mutablePublish.channelName = "changed-after-dispatch";
+    mutablePublish.revision = OTHER_REVISION;
+    bytes[0] = 0;
+    await publishing;
+
+    expect(publishedRequests).toHaveLength(1);
+    expect(publishedRequests[0]).toEqual({
+      bundleBytes: canonicalizeJsonBytes(PREVIEW.bundle),
+      revision: REVISION,
+    });
+    expect(Object.isFrozen(publishedRequests[0])).toBe(true);
+
+    const mutableActivation = {
+      channelGeneration: CHANNEL_GENERATION,
+      channelName: CHANNEL_NAME,
+      hostId: HOST_ID,
+      revision: REVISION,
+    };
+    const activating = port.activatePublishedRevision(mutableActivation);
+    mutableActivation.channelGeneration = 99;
+    mutableActivation.channelName = "changed-after-dispatch";
+    mutableActivation.hostId = "changed-host";
+    mutableActivation.revision = OTHER_REVISION;
+    await activating;
+    expect(activationRequests).toEqual([
+      {
+        channelGeneration: CHANNEL_GENERATION,
+        channelName: CHANNEL_NAME,
+        hostId: HOST_ID,
+        revision: REVISION,
+      },
+    ]);
+    expect(Object.isFrozen(activationRequests[0])).toBe(true);
+
+    let accessorReads = 0;
+    const accessorRequest = Object.defineProperty(
+      { bundleBytes: canonicalizeJsonBytes(PREVIEW.bundle), revision: REVISION },
+      "channelName",
+      {
+        enumerable: true,
+        get() {
+          accessorReads += 1;
+          return CHANNEL_NAME;
+        },
+      },
+    );
+    await expect(port.publishBundleToChannel(accessorRequest as never)).resolves.toMatchObject({
+      status: "failed",
+      phase: "request",
+    });
+    await expect(
+      port.publishBundleToChannel({
+        bundleBytes: canonicalizeJsonBytes(PREVIEW.bundle),
+        channelName: CHANNEL_NAME,
+        revision: REVISION,
+        extra: true,
+      } as never),
+    ).resolves.toMatchObject({ status: "failed", phase: "request" });
+    expect(accessorReads).toBe(0);
+    expect(publishedRequests).toHaveLength(1);
   });
 
   it("retains every exact durable activation relationship, including identical preservation", async () => {
@@ -481,7 +623,7 @@ describe("Desen App saved-Source publication controller", () => {
       await expect(requireController(port.port).publish()).resolves.toEqual({
         status: "failed",
         reason:
-          hostStatus === "unavailable" ? "reference-host-unavailable" : "reference-host-failed",
+          hostStatus === "unavailable" ? "host-activation-unavailable" : "host-activation-failed",
         lastKnownGoodPreserved: true,
         revision: REVISION,
         sourceGeneration: SOURCE_GENERATION,
@@ -495,7 +637,7 @@ describe("Desen App saved-Source publication controller", () => {
     );
     await expect(requireController(oldActive.port).publish()).resolves.toEqual({
       status: "failed",
-      reason: "reference-host-revision-mismatch",
+      reason: "host-activation-revision-mismatch",
       lastKnownGoodPreserved: true,
       revision: REVISION,
       sourceGeneration: SOURCE_GENERATION,
@@ -507,7 +649,7 @@ describe("Desen App saved-Source publication controller", () => {
 
   it("contains thrown, explicit-indeterminate, and malformed host activation outcomes", async () => {
     const settlements: (
-      AuthoringReferenceHostActivationSettlement | Readonly<Record<string, unknown>> | "throw"
+      AuthoringHostActivationSettlement | Readonly<Record<string, unknown>> | "throw"
     )[] = [
       { status: "indeterminate" },
       { status: "active", activeRevision: REVISION, activationGeneration: 2 },
@@ -519,12 +661,12 @@ describe("Desen App saved-Source publication controller", () => {
         async () => publishedChannel(),
         async () => {
           if (settlement === "throw") throw new TypeError("host outcome unknown");
-          return settlement as AuthoringReferenceHostActivationSettlement;
+          return settlement as AuthoringHostActivationSettlement;
         },
       );
       await expect(requireController(port.port).publish()).resolves.toEqual({
         status: "indeterminate",
-        stage: "reference-host",
+        stage: "host-activation",
         revision: REVISION,
         sourceGeneration: SOURCE_GENERATION,
         channelGeneration: CHANNEL_GENERATION,
@@ -583,7 +725,7 @@ describe("Desen App saved-Source publication controller", () => {
       expect(controller.read().result).toBeNull();
     }
 
-    for (const pendingStage of ["control-plane", "reference-host"] as const) {
+    for (const pendingStage of ["control-plane", "host-activation"] as const) {
       for (const lifetime of ["replace", "dispose"] as const) {
         const port = harness();
         const controller = requireController(port.port);
@@ -619,14 +761,14 @@ describe("Desen App saved-Source publication controller", () => {
   it("fences late activation after replacement and after controller disposal", async () => {
     const edited = changedDocument("Activation fence edit");
     for (const lifetime of ["replace", "dispose"] as const) {
-      const pending = deferred<AuthoringReferenceHostActivationSettlement>();
+      const pending = deferred<AuthoringHostActivationSettlement>();
       const port = harness(
         async () => publishedChannel(),
         () => pending.promise,
       );
       const controller = requireController(port.port);
       const publication = controller.publish();
-      await vi.waitFor(() => expect(controller.read().pending).toBe("reference-host"));
+      await vi.waitFor(() => expect(controller.read().pending).toBe("host-activation"));
 
       if (lifetime === "replace") {
         expect(

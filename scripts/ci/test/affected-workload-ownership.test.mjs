@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 198,
+  PROOF_UNIT: 200,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 32,
-  FROZEN_INPUT: 143,
-  PACKAGE_OR_APPLICATION: 520,
-  SHARED_PROOF_INFRASTRUCTURE: 252,
-  PROJECT_DOCUMENTATION: 136,
+  FROZEN_INPUT: 145,
+  PACKAGE_OR_APPLICATION: 528,
+  SHARED_PROOF_INFRASTRUCTURE: 257,
+  PROJECT_DOCUMENTATION: 137,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1337 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1355 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1337 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1337);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1355);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 198);
+  assert.equal(proofEntries.length, 200);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -291,6 +291,15 @@ test("permits strict selection only for exact verifier and root-test proof input
       "tests/desen-app-visual-behavior-authoring.test.mjs",
     ],
   );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "desen-app-evergreen-product-composition")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-desen-app-evergreen-product-composition.mjs",
+      "tests/desen-app-evergreen-product-composition.test.mjs",
+    ],
+  );
   for (const entry of proofEntries) {
     assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.SELECT_PROOF_UNIT);
     const verifier = nodeById.get(entry.verifierNodeId);
@@ -319,7 +328,7 @@ test("permits strict selection only for exact verifier and root-test proof input
   }
 });
 
-test("the reviewed M10-T01B successor preserves the historical I07-04 ownership projection", async () => {
+test("the reviewed M10-T01C successor preserves the historical I07-04 ownership projection", async () => {
   const currentPaths = await currentTrackedPaths();
   const current = createAffectedWorkloadOwnership(currentPaths);
   const promotedPaths = [
@@ -578,6 +587,7 @@ test("the reviewed M10-T01B successor preserves the historical I07-04 ownership 
     "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app-browser-e2e/proof-application.ts",
     "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/application.tsx",
     "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/reference-empty-project.ts",
+    "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/reference-sign-in-workspace-profile.ts",
     "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/apps/desen-app/src/styles.css",
     "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-reviewed-imports/packages/editor-core/src/index.ts",
     "tests/boundaries/fixtures/desen-app-browser-e2e-imports-publisher/apps/desen-app-browser-e2e/proof-application.ts",
@@ -625,6 +635,23 @@ test("the reviewed M10-T01B successor preserves the historical I07-04 ownership 
     "scripts/lib/desen-app-visual-behavior-authoring-proof.mjs",
     "scripts/verify-desen-app-visual-behavior-authoring.mjs",
     "tests/desen-app-visual-behavior-authoring.test.mjs",
+    "apps/desen-app/src/project-inventory-fixture.ts",
+    "apps/desen-app/src/project-workspace-profile.ts",
+    "apps/desen-app/src/reference-authoring-profile.ts",
+    "apps/desen-app/src/reference-project-fixtures.ts",
+    "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+    "apps/desen-app/test/evergreen-product-composition.test.tsx",
+    "apps/desen-app/test/project-inventory-fixture.test.ts",
+    "apps/desen-app/test/project-workspace-profile.test.ts",
+    "docs/proof/DESEN-APP-EVERGREEN-PRODUCT-COMPOSITION.md",
+    "docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json",
+    "docs/proof/artifacts/desen-app-0.1.0-t01b-historical-reader-bridge.json.gz",
+    "scripts/generate-desen-app-evergreen-product-composition-proof.mjs",
+    "scripts/generate-desen-app-t01b-historical-reader-bridge.mjs",
+    "scripts/lib/desen-app-evergreen-product-composition-proof.mjs",
+    "scripts/verify-desen-app-evergreen-product-composition.mjs",
+    "tests/desen-app-evergreen-product-composition.test.mjs",
+    "tests/desen-app-historical-reader-fixture.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);
@@ -636,7 +663,7 @@ test("the reviewed M10-T01B successor preserves the historical I07-04 ownership 
   for (const successorPath of successorPaths) {
     assert.ok(
       current.entries.some(({ path: candidate }) => candidate === successorPath),
-      `${successorPath} must be tracked by the reviewed M09 successor`,
+      `${successorPath} must be tracked by the reviewed M10-T01C successor`,
     );
   }
 

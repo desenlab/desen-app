@@ -5,7 +5,7 @@ import {
   isSameAuthoringComponentSelection,
   projectAuthoringSelection,
 } from "../src/authoring-selection.js";
-import { REFERENCE_AUTHORING_MODEL } from "../src/authoring-data.js";
+import { REFERENCE_AUTHORING_MODEL } from "../src/reference-authoring-profile.js";
 
 import type {
   RuntimeReactDiagnosticIndex,

@@ -1816,6 +1816,80 @@ This layer supplies honest authoring affordances and a browser smoke path. It do
 integration, production call, arbitrary operation output editor, M10-T02/M10-T03 acceptance-matrix
 closure, M10-T04 real-host success/navigation, remote persistence, or G10.
 
+## M10-T01C evergreen product-composition boundary
+
+M10-T01C makes the product's example choice an explicit composition-root decision. The exported
+application and product roots require an opaque `ProjectWorkspaceProfile` handle, and only the
+profile factory can authenticate that handle. `main.tsx` deliberately selects the reference
+sign-in profile; generic application, authoring, preview, fixture/scenario, persistence,
+publication, and runtime-canvas modules neither import that profile nor carry an account/sign-in
+fallback.
+
+One admitted profile is the exact authority for:
+
+1. project inventory and the one-to-one mapping from independent App route slugs to Source surface
+   ids;
+2. Source document identity and a separately named host storage key;
+3. the complete validated Catalog set and the exact Publisher package candidates that cover it;
+4. target, factory-authenticated React adapter registry, token CSS properties, and captured runtime
+   ports; and
+5. an optional publication channel plus opaque installed-host identity.
+
+The factory admits its initial Source through Editor Core, validates the complete Catalog set and
+Source interaction contracts, checks exact Catalog/package identity and target coverage, preflights
+Publisher compatibility, authenticates the runtime registry and ports, detaches caller-owned
+metadata, and freezes the resulting snapshot. Route text, a Source document, Catalog array position,
+and publication data cannot independently grant those authorities. A profile with no publication
+binding remains authorable and runnable in its admitted preview boundary but cannot construct a
+publication controller.
+
+Profile admission is not a one-time bootstrap check. `admitProjectWorkspaceDocument` is the shared
+boundary used by the App, persistence-controller construction, and publication snapshot capture.
+It re-admits the current Source through Editor Core and requires the profile's exact document id,
+authored entry surface, complete one-to-one surface inventory, complete Catalog requirement set,
+and valid interaction contracts. A same-id document with an extra, missing, or substituted surface,
+or with a changed entry, therefore cannot widen the profile. Prepared persistence controllers are held
+against the exact opaque profile handle in a private identity map, not matched by route or public
+profile id. Editor remount identity is also per handle, preventing draft/session substitution
+between distinct authorities that deliberately expose identical public metadata.
+
+Static project-gallery examples cross a separate `ProjectInventoryFixtureHandle` boundary. Its
+factory accepts only bounded exact-own-data records and ordinary dense arrays, detaches and freezes
+the captured summaries, and keeps authority in a private identity map. Fixture mode rejects an
+initial Source, prepared or raw persistence, publication, mutation/project-creation callbacks, and
+all editable or runnable surface routing. It is an opaque inert inventory, not a shortcut for an
+official workspace profile.
+
+Authoring Run has an independently constructed synthetic host. All nine profile host-port families
+are replaced: navigation is denied; storage is missing/conflicting; resources are denied; tokens
+are missing; context and environment expose frozen empty snapshots with no-op subscriptions; the
+clock is deterministic; diagnostics are inert; and operations use only the explicit local Catalog
+fixture controller. None of the captured profile callbacks can run in this mode. Captured profile
+ports remain authority for a future separately admitted real-host path, not ambient authority for
+synthetic preview.
+
+Runtime Core mounts a Bundle's declared entry, while an editor may select any admitted surface.
+`prepareAuthoringSurfacePreviewBundle` therefore creates a fresh transient, Publisher-admitted
+canvas Bundle that changes only the preview candidate's entry to the selected surface. The base
+authoring document and preview retain the authored entry; Save persists that document, and Publish
+captures and publishes its base revision. A non-entry canvas can consequently render surface B
+without silently converting authored, persisted, or published surface A into B.
+
+Publication authority is fixed at composition time. A publication-enabled profile names one exact
+channel and installed host, and the App accepts only a port created by the fixed-destination factory
+whose private destination matches both. The wrapper validates exact-own-data publish and activation
+requests, clones Bundle bytes, reconstructs frozen requests, removes caller-selectable channel data
+before the fixed-channel callback, and reconstructs the exact channel/host/generation/revision for
+activation. A forged, unbranded, cross-profile, or redirected port fails before I/O.
+
+The positive composition proof uses an auth-independent feedback Source with two surfaces, route
+slugs distinct from Source ids, and two Catalogs; a separate complete App render reaches its
+feedback heading through the normal real-adapter canvas and layer path. Forged handles,
+route-to-Source drift, incomplete package sets, forged registries, cross-profile persistence
+routes, and a host id outside the publication binding fail closed before downstream authority or
+I/O. This establishes an evergreen composition seam, not arbitrary executable-code selection,
+remote project discovery, multi-user workspace storage, or the later M10 lifecycle/G10 claims.
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific

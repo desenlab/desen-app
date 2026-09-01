@@ -161,7 +161,7 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
       name: /Choose Stack sign-in\.layout default slot · Optional · Absent · 0 items/u,
     }),
   ).toBeVisible();
-  await expect(page.getByRole("group", { name: "Sign-in adapter canvas" })).toBeVisible();
+  await expect(page.getByRole("group", { name: "Managed sign-in canvas" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "Sign in" })).toHaveCount(0);
   await expect(page.getByText("web-react", { exact: true })).toBeVisible();
   await expect(page.getByText("run.desen.reference.sign-in", { exact: true })).toBeVisible();
@@ -234,7 +234,7 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
 
   await page.getByRole("button", { name: "Run" }).click();
   const incorrectlyBoundEmail = page
-    .getByRole("group", { name: "Sign-in adapter canvas" })
+    .getByRole("group", { name: "Managed sign-in canvas" })
     .getByRole("textbox", { name: "Email" });
   await incorrectlyBoundEmail.press("a");
   await expect(incorrectlyBoundEmail).toHaveValue("");
@@ -305,7 +305,7 @@ test("authors and saves a valid sign-in Source from the empty project in a real 
   await expect(frame).toHaveAttribute("data-canvas-frame-height", "720");
   const designManagedHtml = await managedSubtree.evaluate((node) => node.innerHTML);
   await page.getByRole("button", { name: "Run" }).click();
-  const runCanvas = page.getByRole("group", { name: "Sign-in adapter canvas" });
+  const runCanvas = page.getByRole("group", { name: "Managed sign-in canvas" });
   await expect(runCanvas.getByRole("heading", { level: 2, name: "Sign in" })).toBeVisible();
   await expect(runCanvas.getByRole("textbox", { name: "Email" })).toBeVisible();
   await expect(runCanvas.getByLabel("Password")).toBeVisible();

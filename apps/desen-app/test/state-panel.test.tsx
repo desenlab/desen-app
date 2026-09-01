@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { REFERENCE_EDITOR_DOCUMENT } from "../src/authoring-preview.js";
+import { REFERENCE_EDITOR_DOCUMENT } from "../src/reference-authoring-profile.js";
 import { StatePanel } from "../src/state-panel.js";
 
 import type { JsonValue } from "@desen/catalog-sdk";

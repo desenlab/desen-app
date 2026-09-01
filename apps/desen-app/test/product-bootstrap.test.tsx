@@ -7,6 +7,7 @@ import officialSignInSource from "../../../examples/sign-in/official-derived.sou
 import { createDesenEditorDocument } from "@desen/editor-core";
 import { DesenAppProduct } from "../src/product-bootstrap.js";
 import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "../src/reference-empty-project.js";
+import { REFERENCE_SIGN_IN_WORKSPACE_PROFILE } from "../src/reference-sign-in-workspace-profile.js";
 
 import type {
   DesenEditorPersistencePort,
@@ -93,7 +94,12 @@ async function settleSave(
 
 function renderProduct(controlled: ControlledPersistence, path = PROJECTS_PATH) {
   window.history.replaceState(null, "", path);
-  return render(<DesenAppProduct persistencePort={controlled.port} />);
+  return render(
+    <DesenAppProduct
+      persistencePort={controlled.port}
+      workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
+    />,
+  );
 }
 
 async function openMissingWorkspace(controlled: ControlledPersistence): Promise<void> {
@@ -138,7 +144,10 @@ describe("Desen App normal product bootstrap", () => {
     window.history.replaceState(null, "", SURFACE_PATH);
     render(
       <StrictMode>
-        <DesenAppProduct persistencePort={controlled.port} />
+        <DesenAppProduct
+          persistencePort={controlled.port}
+          workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
+        />
       </StrictMode>,
     );
 
@@ -163,8 +172,8 @@ describe("Desen App normal product bootstrap", () => {
     await openMissingWorkspace(controlled);
 
     openCreationDialog();
-    expect(screen.getByText("Blank sign-in project")).toBeTruthy();
-    expect(screen.getByText(/420 × 720 portrait frame/)).toBeTruthy();
+    expect(screen.getByText("Blank Account app project")).toBeTruthy();
+    expect(screen.getByText(/web-react.*1 Catalog.*1 surface/)).toBeTruthy();
     const submit = screen
       .getByRole("dialog", { name: "Create a project" })
       .querySelector<HTMLButtonElement>('button[type="submit"]');
@@ -329,7 +338,12 @@ describe("Desen App normal product bootstrap", () => {
   });
 
   it("does not offer a false retry when the trusted host supplied no persistence authority", () => {
-    render(<DesenAppProduct persistencePort={null} />);
+    render(
+      <DesenAppProduct
+        persistencePort={null}
+        workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
+      />,
+    );
 
     expect(
       screen.getByRole("heading", { name: "DESEN could not open this workspace." }),

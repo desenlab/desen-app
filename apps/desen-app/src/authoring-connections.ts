@@ -507,17 +507,24 @@ export function applyAuthoringInputConnection(
   return completeValidation(prepared, candidate, "connect-input");
 }
 
-function firstCatalog(authority: PreparedConnectionAuthority): JsonObject | undefined {
-  const value = authority.model.validationCatalogs[0];
+function jsonObject(value: unknown): JsonObject | undefined {
   return typeof value === "object" && value !== null && !Array.isArray(value)
     ? (value as JsonObject)
     : undefined;
 }
 
-function jsonObject(value: unknown): JsonObject | undefined {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as JsonObject)
-    : undefined;
+function catalogCapability(
+  authority: PreparedConnectionAuthority,
+  category: "components" | "operations",
+  capabilityId: string,
+): JsonObject | undefined {
+  const matches = authority.model.validationCatalogs.flatMap((catalogValue) => {
+    const catalog = jsonObject(catalogValue);
+    const capabilities = jsonObject(catalog?.[category]);
+    const capability = jsonObject(capabilities?.[capabilityId]);
+    return capability === undefined ? [] : [capability];
+  });
+  return matches.length === 1 ? matches[0] : undefined;
 }
 
 type SchemaValueKind = "boolean" | "integer" | "number" | "string" | "structured";
@@ -547,8 +554,7 @@ function schemasAreCompatible(inputSchema: JsonObject, stateSchema: JsonObject):
 }
 
 function selectedComponentContract(authority: PreparedConnectionAuthority): JsonObject | undefined {
-  const components = jsonObject(firstCatalog(authority)?.components);
-  return jsonObject(components?.[authority.selection.capabilityId]);
+  return catalogCapability(authority, "components", authority.selection.capabilityId);
 }
 
 function selectedComponentEvent(
@@ -585,8 +591,7 @@ function operationInputsAreCompatible(
   recipe: AuthoringOperationTriggerConnectionRecipe,
 ): boolean {
   try {
-    const operations = jsonObject(firstCatalog(authority)?.operations);
-    const operation = jsonObject(operations?.[recipe.operationId]);
+    const operation = catalogCapability(authority, "operations", recipe.operationId);
     const inputSchema = jsonObject(operation?.inputSchema);
     if (inputSchema === undefined || inputSchema.type !== "object") return false;
     const propertiesValue = inputSchema.properties;
@@ -623,13 +628,7 @@ function operationInputsAreCompatible(
 }
 
 function catalogHasOperation(authority: PreparedConnectionAuthority, operationId: string): boolean {
-  const operations = firstCatalog(authority)?.operations;
-  return (
-    typeof operations === "object" &&
-    operations !== null &&
-    !Array.isArray(operations) &&
-    Object.hasOwn(operations, operationId)
-  );
+  return catalogCapability(authority, "operations", operationId) !== undefined;
 }
 
 /**

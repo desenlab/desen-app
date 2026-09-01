@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { EventActionPanel } from "../src/event-action-panel.js";
-import { REFERENCE_EDITOR_DOCUMENT } from "../src/authoring-preview.js";
+import { REFERENCE_EDITOR_DOCUMENT } from "../src/reference-authoring-profile.js";
 
 import type {
   AuthoringActionListModel,
@@ -23,6 +23,8 @@ const STRING_SCHEMA_KEY = '{"type":"string"}';
 const BOOLEAN_SCHEMA_KEY = '{"type":"boolean"}';
 
 const REFERENCES = Object.freeze({
+  currentSurfaceId: "sign-in",
+  operationAliases: Object.freeze([]),
   states: Object.freeze([
     Object.freeze({
       label: "Email",

@@ -9,7 +9,6 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 import { createDesenEditorContinuousValidator } from "@desen/editor-core";
 import { canonicalizeJson, digestCanonicalJson } from "@desen/protocol";
 import { createRuntimeHostPorts } from "@desen/runtime-core";
@@ -24,8 +23,15 @@ import {
   createAuthoringOperationFixtureController,
   prepareAuthoringOperationFixtureModel,
 } from "./authoring-fixtures.js";
-import { createAuthoringPersistenceController } from "./authoring-persistence.js";
-import { createAuthoringPublicationController } from "./authoring-publication.js";
+import {
+  authenticateAuthoringPersistenceControllerProfile,
+  createAuthoringPersistenceController,
+} from "./authoring-persistence.js";
+import {
+  createAuthoringPublicationController,
+  createFixedDestinationAuthoringPublicationPort,
+  readAuthoringPublicationPortDestination,
+} from "./authoring-publication.js";
 import { DiagnosticsPanel } from "./diagnostics-panel.js";
 import {
   applyAuthoringInspectorBindingEdit,
@@ -69,7 +75,14 @@ import {
   ScenarioPreviewControl,
 } from "./preview-controls.js";
 import { StatePanel } from "./state-panel.js";
-import { prepareAuthoringPreviewBundle, REFERENCE_EDITOR_DOCUMENT } from "./authoring-preview.js";
+import {
+  prepareAuthoringPreviewBundle,
+  prepareAuthoringSurfacePreviewBundle,
+} from "./authoring-preview.js";
+import {
+  admitProjectWorkspaceDocument,
+  readProjectWorkspaceProfileAuthority,
+} from "./project-workspace-profile.js";
 import {
   createDesenAppProjectPath,
   installDesenAppNavigationGuard,
@@ -79,7 +92,12 @@ import {
   readDesenAppServerLocation,
   subscribeDesenAppNavigation,
 } from "./project-navigation.js";
-import { DESEN_APP_PROJECTS, findDesenAppProject, findDesenAppSurface } from "./project-data.js";
+import {
+  findDesenAppProject,
+  findDesenAppSurface,
+  projectWorkspaceProfileSummary,
+} from "./project-data.js";
+import { readProjectInventoryFixture } from "./project-inventory-fixture.js";
 import breadcrumbSeparatorUrl from "./assets/breadcrumb-separator.svg";
 import desenLogoUrl from "./assets/desen-logo.svg";
 import plusUrl from "./assets/plus.svg";
@@ -93,11 +111,7 @@ import type {
   DesenEditorContinuousValidationReport,
   DesenEditorPersistencePort,
 } from "@desen/editor-core";
-import type {
-  RuntimeHostPorts,
-  RuntimeJsonObject,
-  RuntimeOperationPort,
-} from "@desen/runtime-core";
+import type { RuntimeHostPorts, RuntimeOperationPort } from "@desen/runtime-core";
 import type {
   AuthoringBehaviorLayer,
   AuthoringLayerNode,
@@ -152,6 +166,11 @@ import type {
 } from "./authoring-slots.js";
 import type { DesenAppRoute } from "./project-navigation.js";
 import type { DesenAppProjectSummary, DesenAppSurfaceSummary } from "./project-data.js";
+import type { ProjectInventoryFixtureHandle } from "./project-inventory-fixture.js";
+import type {
+  ProjectWorkspaceProfileHandle,
+  ProjectWorkspaceProfileSnapshot,
+} from "./project-workspace-profile.js";
 import type {
   PersistenceControlProjection,
   PersistenceControlStatus,
@@ -185,30 +204,32 @@ function createLifetimeFencedPublicationPort(
   publicationPort: AuthoringPublicationPort,
   lifetime: AuthoringPublicationLifetimeFence,
 ): AuthoringPublicationPort {
+  const destination = readAuthoringPublicationPortDestination(publicationPort);
+  if (destination === null) {
+    throw new TypeError("The publication port has no authenticated fixed destination.");
+  }
   const publishBundleToChannel = publicationPort.publishBundleToChannel;
-  const activateReferenceHost = publicationPort.activateReferenceHost;
+  const activatePublishedRevision = publicationPort.activatePublishedRevision;
   function requireActiveLifetime(): void {
     if (!lifetime.active) throw new TypeError("The publication lifetime is inactive.");
   }
-  const fencedPublishBundleToChannel: AuthoringPublicationPort["publishBundleToChannel"] = async (
-    request,
-  ) => {
-    requireActiveLifetime();
-    const settlement = await publishBundleToChannel(request);
-    requireActiveLifetime();
-    return settlement;
-  };
-  const fencedActivateReferenceHost: AuthoringPublicationPort["activateReferenceHost"] = async (
-    request,
-  ) => {
-    requireActiveLifetime();
-    const settlement = await activateReferenceHost(request);
-    requireActiveLifetime();
-    return settlement;
-  };
-  return Object.freeze({
-    publishBundleToChannel: fencedPublishBundleToChannel,
-    activateReferenceHost: fencedActivateReferenceHost,
+  return createFixedDestinationAuthoringPublicationPort({
+    channelName: destination.channelName,
+    hostId: destination.hostId,
+    async publishBundleToChannel(request) {
+      requireActiveLifetime();
+      const settlement = await publishBundleToChannel(
+        Object.freeze({ ...request, channelName: destination.channelName }),
+      );
+      requireActiveLifetime();
+      return settlement;
+    },
+    async activatePublishedRevision(request) {
+      requireActiveLifetime();
+      const settlement = await activatePublishedRevision(request);
+      requireActiveLifetime();
+      return settlement;
+    },
   });
 }
 
@@ -314,9 +335,9 @@ function projectPublicationControlStatus(
       });
     }
     if (
-      result.reason === "reference-host-failed" ||
-      result.reason === "reference-host-unavailable" ||
-      result.reason === "reference-host-revision-mismatch"
+      result.reason === "host-activation-failed" ||
+      result.reason === "host-activation-unavailable" ||
+      result.reason === "host-activation-revision-mismatch"
     ) {
       if (
         result.revision !== undefined &&
@@ -378,7 +399,7 @@ function projectPublicationControls(
   state: AuthoringPublicationState | null,
 ): PublicationControlProjection {
   return Object.freeze({
-    channelName: "preview",
+    channelName: state?.channelName ?? "Unavailable",
     status: projectPublicationControlStatus(state),
   });
 }
@@ -458,7 +479,7 @@ function AppHeader({
         {project === undefined ? (
           <div className={styles.pathCluster}>
             <nav aria-label="Primary" className={styles.pathDock}>
-              <span className={styles.pathMuted}>OBSS Draft</span>
+              <span className={styles.pathMuted}>Workspace</span>
               <img alt="" height="12" src={breadcrumbSeparatorUrl} width="12" />
               <AppLink
                 ariaCurrent={projectsActive ? "page" : undefined}
@@ -527,8 +548,8 @@ function AppHeader({
           >
             <img alt="" height="24" src={settingsUrl} width="24" />
           </span>
-          <span className={styles.profileAvatar} aria-label="Selman Ay">
-            SA
+          <span className={styles.profileAvatar} aria-label="Workspace profile">
+            WS
           </span>
         </div>
         {onRequestProjectCreation === null ? (
@@ -607,7 +628,7 @@ function ProjectsHome({
       project.name,
       project.description,
       project.catalog ?? "",
-      ...project.surfaces.flatMap((surface) => [surface.name, surface.capabilityId]),
+      ...project.surfaces.flatMap((surface) => [surface.name, surface.sourceId]),
     ]
       .join(" ")
       .toLocaleLowerCase("en-US");
@@ -626,7 +647,7 @@ function ProjectsHome({
             <h2 id="all-projects-title">All projects</h2>
             <p>
               {fixtures
-                ? "Open a bounded product surface in OBSS Draft."
+                ? "Open a bounded product surface in this preview workspace."
                 : "Create and reopen Sources stored by your local Desen workspace."}
             </p>
           </div>
@@ -666,8 +687,8 @@ function ProjectsHome({
           <p>Your workspace is ready</p>
           <h3>Create the first project.</h3>
           <span>
-            Start with the exact web-react catalog, one empty Stack, and a declared 420 × 720 page
-            frame.
+            Start from the exact Catalog set, Source inventory, runtime target, and surface frames
+            declared by the authenticated workspace profile.
           </span>
           <button
             className={styles.primaryButton}
@@ -717,30 +738,49 @@ interface AuthoringEditDiagnosticResult {
 }
 
 const LAYER_DROP_MIDPOINT_HYSTERESIS_PX = 4;
+const WORKSPACE_PROFILE_MOUNT_IDENTITIES = new WeakMap<ProjectWorkspaceProfileHandle, string>();
+let nextWorkspaceProfileMountIdentity = 1;
 
-const APP_FIXTURE_EMPTY_JSON = Object.freeze({}) satisfies RuntimeJsonObject;
-const APP_FIXTURE_WEB_ENVIRONMENT = Object.freeze({
-  platform: "web",
-}) satisfies RuntimeJsonObject;
+function workspaceProfileMountIdentity(profile: ProjectWorkspaceProfileHandle): string {
+  const current = WORKSPACE_PROFILE_MOUNT_IDENTITIES.get(profile);
+  if (current !== undefined) return current;
+  if (!Number.isSafeInteger(nextWorkspaceProfileMountIdentity)) {
+    throw new TypeError("The workspace profile mount identity space is exhausted.");
+  }
+  const created = `workspace-profile-${nextWorkspaceProfileMountIdentity}`;
+  nextWorkspaceProfileMountIdentity += 1;
+  WORKSPACE_PROFILE_MOUNT_IDENTITIES.set(profile, created);
+  return created;
+}
 
-function createAuthoringFixtureHostPorts(operationPort: RuntimeOperationPort): RuntimeHostPorts {
+/**
+ * Creates the synthetic authoring host boundary without inheriting product side-effect ports.
+ *
+ * @remarks Every host callback is replaced with a bounded inert implementation. Only the explicit
+ * Catalog fixture operation controller can execute in Run preview; product navigation, storage,
+ * resources, tokens, context, environment, clock and diagnostics never cross this boundary.
+ */
+export function createAuthoringFixtureHostPorts(
+  _baseHostPorts: RuntimeHostPorts,
+  operationPort: RuntimeOperationPort,
+): RuntimeHostPorts {
   return createRuntimeHostPorts({
-    navigation: { navigate: () => ({ status: "denied" }) },
+    navigation: { navigate: () => Object.freeze({ status: "denied" }) },
     storage: {
-      getBundle: () => ({ status: "missing" }),
-      putBundle: () => ({ status: "conflict" }),
-      readActivation: () => ({ status: "missing" }),
-      commitActivation: () => ({ status: "conflict", generation: null }),
+      getBundle: () => Object.freeze({ status: "missing" }),
+      putBundle: () => Object.freeze({ status: "conflict" }),
+      readActivation: () => Object.freeze({ status: "missing" }),
+      commitActivation: () => Object.freeze({ status: "conflict", generation: null }),
     },
     operations: operationPort,
-    resources: { load: () => ({ status: "denied" }) },
-    tokens: { resolve: () => ({ status: "missing" }) },
+    resources: { load: () => Object.freeze({ status: "denied" }) },
+    tokens: { resolve: () => Object.freeze({ status: "missing" }) },
     context: {
-      getSnapshot: () => APP_FIXTURE_EMPTY_JSON,
+      getSnapshot: () => Object.freeze({}),
       subscribe: () => () => undefined,
     },
     environment: {
-      getSnapshot: () => APP_FIXTURE_WEB_ENVIRONMENT,
+      getSnapshot: () => Object.freeze({}),
       subscribe: () => () => undefined,
     },
     clock: { now: () => 1 },
@@ -1519,15 +1559,14 @@ function LayerTree({
     readonly selectedSurface: DesenAppSurfaceSummary;
   }
 >) {
-  const surfaceTree = model.surfaces.find((surface) => surface.id === selectedSurface.id);
+  const surfaceTree = model.surfaces.find((surface) => surface.id === selectedSurface.sourceId);
   if (surfaceTree === undefined) {
     return (
       <div className={styles.panelEmptyState}>
         <span className={styles.emptyGlyph} aria-hidden="true" />
         <strong>No Source tree for {selectedSurface.name}</strong>
         <p>
-          This preview surface has no exact Source fixture. DESEN will not substitute the sign-in
-          tree.
+          This preview surface has no exact Source tree. DESEN will not substitute another surface.
         </p>
       </div>
     );
@@ -1555,7 +1594,7 @@ function LayerTree({
         <span aria-hidden="true" className={styles.surfaceGlyph} />
         <span>
           <strong>{selectedSurface.name}</strong>
-          <small>{selectedSurface.capabilityId}</small>
+          <small>{selectedSurface.sourceId}</small>
         </span>
       </div>
       <div className={styles.panelSectionHeading}>
@@ -1732,6 +1771,13 @@ function ComponentLibrary({
     readySlot === null
       ? "Placement target · choose a named slot"
       : `Placement target · ${readySlot.owner.displayName} ${readySlot.owner.id} ${readySlot.slot.name} slot · ${slotCardinalityLabel(readySlot.slot)}`;
+  const catalogTargets = [...new Set(model.catalogs.map(({ target }) => target))];
+  const catalogTitle =
+    model.catalogs.length === 1 ? model.catalogs[0]?.id : `${model.catalogs.length} Catalogs`;
+  const catalogBadge =
+    model.catalogs.length === 1
+      ? `v${model.catalogs[0]?.version ?? ""}`
+      : `${model.catalogs.length} packages`;
 
   return (
     <div
@@ -1745,10 +1791,10 @@ function ComponentLibrary({
     >
       <div className={styles.catalogSummary}>
         <span>
-          <strong>{model.catalog.target}</strong>
-          <small>{model.catalog.id}</small>
+          <strong>{catalogTargets.join(" · ")}</strong>
+          <small>{catalogTitle}</small>
         </span>
-        <span className={styles.versionBadge}>v{model.catalog.version}</span>
+        <span className={styles.versionBadge}>{catalogBadge}</span>
       </div>
       <label className={styles.componentSearch}>
         <span className={styles.visuallyHidden}>Search catalog components</span>
@@ -2017,7 +2063,7 @@ function AuthoringPanel({
       ? null
       : projectAuthoringSlotSelection(resolvedActiveSlot, route, model);
   const surfaceRootNodeId =
-    model.surfaces.find(({ id }) => id === selectedSurface.id)?.root.id ?? null;
+    model.surfaces.find(({ id }) => id === selectedSurface.sourceId)?.root.id ?? null;
   const deletionCompatibility =
     selection === null ? null : evaluateAuthoringNodeDeletion(route, model, selection);
   const deletionReason =
@@ -2316,7 +2362,9 @@ function AuthoringPanel({
             onProjectDrop={projectDrop}
             onStartDrag={startDrag}
             onToggleSelection={toggleLayer}
-            rootNodeId={model.surfaces.find(({ id }) => id === selectedSurface.id)?.root.id ?? ""}
+            rootNodeId={
+              model.surfaces.find(({ id }) => id === selectedSurface.sourceId)?.root.id ?? ""
+            }
             route={route}
             selectedSourceNodeId={selectedSourceNodeId}
             selectedSurface={selectedSurface}
@@ -2350,6 +2398,8 @@ function SurfaceEditor({
   publicationPort,
   project,
   selectedSurface,
+  workspaceProfile,
+  workspaceSnapshot,
 }: Readonly<{
   readonly initialDocument: DesenEditorDocument;
   readonly preparedPersistenceController: AuthoringPersistenceController | null | undefined;
@@ -2357,6 +2407,8 @@ function SurfaceEditor({
   readonly publicationPort: AuthoringPublicationPort | null;
   readonly project: DesenAppProjectSummary;
   readonly selectedSurface: DesenAppSurfaceSummary;
+  readonly workspaceProfile: ProjectWorkspaceProfileHandle;
+  readonly workspaceSnapshot: ProjectWorkspaceProfileSnapshot;
 }>) {
   const [mode, setMode] = useState<SurfaceEditorMode>("design");
   const [selection, setSelection] = useState<AuthoringComponentSelection | null>(null);
@@ -2372,7 +2424,10 @@ function SurfaceEditor({
   const [authoringSession, setAuthoringSession] = useState(() =>
     Object.freeze({
       document: mountedInitialDocument,
-      preview: prepareAuthoringPreviewBundle(mountedInitialDocument),
+      preview: prepareAuthoringPreviewBundle(
+        mountedInitialDocument,
+        workspaceSnapshot.catalogPackages,
+      ),
     }),
   );
   const [scenarioChoice, setScenarioChoice] = useState<
@@ -2393,28 +2448,46 @@ function SurfaceEditor({
   const modeStatusId = useId();
   const { document, preview } = authoringSession;
   const route = useMemo(
-    () => Object.freeze({ projectId: project.id, surfaceId: selectedSurface.id }),
-    [project.id, selectedSurface.id],
+    () => Object.freeze({ projectId: project.id, surfaceId: selectedSurface.sourceId }),
+    [project.id, selectedSurface.sourceId],
+  );
+  const authenticatedPreparedPersistenceController = useMemo(
+    () =>
+      preparedPersistenceController === undefined || preparedPersistenceController === null
+        ? preparedPersistenceController
+        : authenticateAuthoringPersistenceControllerProfile(
+              preparedPersistenceController,
+              workspaceProfile,
+            ).status === "authenticated"
+          ? preparedPersistenceController
+          : null,
+    [preparedPersistenceController, workspaceProfile],
   );
   const ownedPersistenceCreation = useMemo(
     () =>
-      preparedPersistenceController !== undefined || persistencePort === null
+      authenticatedPreparedPersistenceController !== undefined || persistencePort === null
         ? null
         : createAuthoringPersistenceController({
             route,
             document: mountedInitialDocument,
-            catalog: referenceCatalog,
+            profile: workspaceProfile,
             persistencePort,
           }),
-    [mountedInitialDocument, persistencePort, preparedPersistenceController, route],
+    [
+      mountedInitialDocument,
+      persistencePort,
+      authenticatedPreparedPersistenceController,
+      route,
+      workspaceProfile,
+    ],
   );
   const persistenceController =
-    preparedPersistenceController !== undefined
-      ? preparedPersistenceController
+    authenticatedPreparedPersistenceController !== undefined
+      ? authenticatedPreparedPersistenceController
       : ownedPersistenceCreation?.ok === true
         ? ownedPersistenceCreation.controller
         : null;
-  const ownsPersistenceController = preparedPersistenceController === undefined;
+  const ownsPersistenceController = authenticatedPreparedPersistenceController === undefined;
   const persistenceState = useSyncExternalStore(
     persistenceController?.subscribe ?? subscribeUnavailablePersistence,
     persistenceController?.read ?? readUnavailablePersistence,
@@ -2427,12 +2500,16 @@ function SurfaceEditor({
   );
   const publicationBinding = useMemo(() => {
     if (publicationPort === null) return null;
-    const initialPreview = prepareAuthoringPreviewBundle(mountedInitialDocument);
+    const initialPreview = prepareAuthoringPreviewBundle(
+      mountedInitialDocument,
+      workspaceSnapshot.catalogPackages,
+    );
     if (!initialPreview.ok) return null;
     const lifetime: AuthoringPublicationLifetimeFence = { active: false };
     return Object.freeze({
       lifetime,
       creation: createAuthoringPublicationController({
+        profile: workspaceProfile,
         route,
         snapshot: Object.freeze({
           document: mountedInitialDocument,
@@ -2444,7 +2521,14 @@ function SurfaceEditor({
         publicationPort: createLifetimeFencedPublicationPort(publicationPort, lifetime),
       }),
     });
-  }, [mountedInitialDocument, persistenceController, publicationPort, route]);
+  }, [
+    mountedInitialDocument,
+    persistenceController,
+    publicationPort,
+    route,
+    workspaceProfile,
+    workspaceSnapshot.catalogPackages,
+  ]);
   const publicationCreation = publicationBinding?.creation ?? null;
   const publicationController =
     publicationCreation?.ok === true ? publicationCreation.controller : null;
@@ -2483,12 +2567,13 @@ function SurfaceEditor({
     });
   }, [document, persistenceController, preview]);
   const preparedModel = useMemo(
-    () => prepareCatalogAuthoringModel(referenceCatalog, document),
-    [document],
+    () => prepareCatalogAuthoringModel(workspaceSnapshot.catalogs, document),
+    [document, workspaceSnapshot.catalogs],
   );
   const canvasFrame = useMemo(
-    () => projectAuthoringCanvasFrame(document, selectedSurface.id),
-    [document, selectedSurface.id],
+    () =>
+      projectAuthoringCanvasFrame(document, selectedSurface.sourceId, workspaceSnapshot.catalogs),
+    [document, selectedSurface.sourceId, workspaceSnapshot.catalogs],
   );
   const canvasFrameOrientation =
     canvasFrame.status !== "ready"
@@ -2537,8 +2622,12 @@ function SurfaceEditor({
     () =>
       selection === null
         ? Object.freeze({ status: "rejected" as const })
-        : projectAuthoringBehaviorControls(document, selectedSurface.id, selection.sourceNodeId),
-    [document, selectedSurface.id, selection],
+        : projectAuthoringBehaviorControls(
+            document,
+            selectedSurface.sourceId,
+            selection.sourceNodeId,
+          ),
+    [document, selectedSurface.sourceId, selection],
   );
   const stateModel = useMemo<AuthoringStateModelResult>(
     () =>
@@ -2598,9 +2687,18 @@ function SurfaceEditor({
             route,
             selection,
             activeScenarioValue,
+            workspaceSnapshot.catalogPackages,
           )
         : null,
-    [activeScenarioValue, document, preparedModel, preview, route, selection],
+    [
+      activeScenarioValue,
+      document,
+      preparedModel,
+      preview,
+      route,
+      selection,
+      workspaceSnapshot.catalogPackages,
+    ],
   );
   const effectivePreview =
     activeScenarioValue === AUTHORING_SOURCE_SCENARIO_VALUE
@@ -2608,6 +2706,23 @@ function SurfaceEditor({
       : scenarioPreview?.ok === true
         ? scenarioPreview.preview
         : null;
+  const effectivePreviewDocument =
+    activeScenarioValue === AUTHORING_SOURCE_SCENARIO_VALUE
+      ? document
+      : scenarioPreview?.ok === true
+        ? scenarioPreview.scenarioDocument
+        : null;
+  const surfacePreview = useMemo(
+    () =>
+      effectivePreviewDocument === null
+        ? null
+        : prepareAuthoringSurfacePreviewBundle(
+            effectivePreviewDocument,
+            workspaceSnapshot.catalogPackages,
+            selectedSurface.sourceId,
+          ),
+    [effectivePreviewDocument, selectedSurface.sourceId, workspaceSnapshot.catalogPackages],
+  );
   const fidelity = useMemo(
     () =>
       preparedModel.ok
@@ -2615,23 +2730,32 @@ function SurfaceEditor({
         : Object.freeze({ status: "rejected" as const }),
     [preparedModel, route],
   );
-  const fixtureRevision = effectivePreview?.ok === true ? effectivePreview.revision : "unavailable";
+  const fixtureRevision = surfacePreview?.ok === true ? surfacePreview.revision : "unavailable";
   const fixtureModel = useMemo(
-    () => prepareAuthoringOperationFixtureModel(referenceCatalog, document, selectedSurface.id),
-    [document, selectedSurface.id],
+    () =>
+      prepareAuthoringOperationFixtureModel(
+        workspaceSnapshot.catalogs,
+        document,
+        selectedSurface.sourceId,
+      ),
+    [document, selectedSurface.sourceId, workspaceSnapshot.catalogs],
   );
   const fixtureController = useMemo(
     () =>
       createAuthoringOperationFixtureController(fixtureModel, {
         documentId: document.id,
         revision: fixtureRevision,
-        surfaceId: selectedSurface.id,
+        surfaceId: selectedSurface.sourceId,
       }),
-    [document.id, fixtureModel, fixtureRevision, selectedSurface.id],
+    [document.id, fixtureModel, fixtureRevision, selectedSurface.sourceId],
   );
   const fixtureHostPorts = useMemo(
-    () => createAuthoringFixtureHostPorts(fixtureController.operationPort),
-    [fixtureController],
+    () =>
+      createAuthoringFixtureHostPorts(
+        workspaceSnapshot.runtime.hostPorts,
+        fixtureController.operationPort,
+      ),
+    [fixtureController, workspaceSnapshot.runtime.hostPorts],
   );
   const fixtureControllerLifetime = useRef<ReturnType<
     typeof createAuthoringOperationFixtureController
@@ -2917,7 +3041,7 @@ function SurfaceEditor({
     if (!isDesignMode()) return;
     const candidate = createAuthoringComponentSelection({
       projectId: project.id,
-      surfaceId: selectedSurface.id,
+      surfaceId: selectedSurface.sourceId,
       sourceNodeId: node.id,
       capabilityId: node.capabilityId,
       displayName: node.displayName,
@@ -2933,10 +3057,19 @@ function SurfaceEditor({
       return Object.freeze({ ok: false, reason: "edit-rejected" });
     }
     if (selection === null) return Object.freeze({ ok: false, reason: "selection-invalid" });
-    const result = applyAuthoringInspectorEdit(document, referenceCatalog, route, selection, edit);
+    const result = applyAuthoringInspectorEdit(
+      document,
+      workspaceSnapshot.catalogs,
+      route,
+      selection,
+      edit,
+    );
     captureEditDiagnostics(result);
     if (!result.ok) return result;
-    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
@@ -2951,14 +3084,17 @@ function SurfaceEditor({
     if (selection === null) return Object.freeze({ ok: false, reason: "selection-invalid" });
     const result = applyAuthoringInspectorBindingEdit(
       document,
-      referenceCatalog,
+      workspaceSnapshot.catalogs,
       route,
       selection,
       edit,
     );
     captureEditDiagnostics(result);
     if (!result.ok) return result;
-    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
@@ -2970,12 +3106,19 @@ function SurfaceEditor({
     if (!isDesignMode() || selection === null) {
       return Object.freeze({ ok: false, reason: "selection-invalid" });
     }
-    const result = applyAuthoringInputConnection(document, referenceCatalog, route, selection, {
-      stateName,
-    });
+    const result = applyAuthoringInputConnection(
+      document,
+      workspaceSnapshot.catalogs,
+      route,
+      selection,
+      { stateName },
+    );
     captureEditDiagnostics(result);
     if (!result.ok) return result;
-    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
     if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
     commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
     return result;
@@ -2985,10 +3128,19 @@ function SurfaceEditor({
     if (!isDesignMode() || selection === null) {
       return Object.freeze({ ok: false, reason: "selection-invalid" });
     }
-    const result = applyAuthoringConditionEdit(document, referenceCatalog, route, selection, edit);
+    const result = applyAuthoringConditionEdit(
+      document,
+      workspaceSnapshot.catalogs,
+      route,
+      selection,
+      edit,
+    );
     captureEditDiagnostics(result);
     if (!result.ok) return result;
-    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
     if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
     commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
     setSelection(
@@ -3006,10 +3158,13 @@ function SurfaceEditor({
 
   function editLocalState(edit: AuthoringStateEdit): AuthoringStateEditResult {
     if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
-    const result = applyAuthoringStateEdit(document, referenceCatalog, route, edit);
+    const result = applyAuthoringStateEdit(document, workspaceSnapshot.catalogs, route, edit);
     captureEditDiagnostics(result);
     if (!result.ok) return result;
-    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
@@ -3024,14 +3179,17 @@ function SurfaceEditor({
     }
     const result = applyAuthoringEventActionEdit(
       document,
-      referenceCatalog,
+      workspaceSnapshot.catalogs,
       route,
       eventOwnerSelection,
       edit,
     );
     captureEditDiagnostics(result);
     if (!result.ok) return result;
-    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
@@ -3044,10 +3202,19 @@ function SurfaceEditor({
     edit: AuthoringSlotEdit,
   ): AuthoringSlotEditResult {
     if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
-    const result = applyAuthoringSlotEdit(document, referenceCatalog, route, target, edit);
+    const result = applyAuthoringSlotEdit(
+      document,
+      workspaceSnapshot.catalogs,
+      route,
+      target,
+      edit,
+    );
     captureEditDiagnostics(result);
     if (!result.ok) return result;
-    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
@@ -3058,7 +3225,7 @@ function SurfaceEditor({
         setSelection(
           createAuthoringComponentSelection({
             projectId: project.id,
-            surfaceId: selectedSurface.id,
+            surfaceId: selectedSurface.sourceId,
             sourceNodeId: result.nodeId,
             capabilityId: component.id,
             displayName: component.displayName,
@@ -3073,10 +3240,13 @@ function SurfaceEditor({
   function deleteSelectedLayer(): AuthoringSlotEditResult {
     if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
     if (selection === null) return Object.freeze({ ok: false, reason: "edit-rejected" });
-    const result = applyAuthoringNodeDelete(document, referenceCatalog, route, selection);
+    const result = applyAuthoringNodeDelete(document, workspaceSnapshot.catalogs, route, selection);
     captureEditDiagnostics(result);
     if (!result.ok) return result;
-    const nextPreview = prepareAuthoringPreviewBundle(result.document);
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
@@ -3271,7 +3441,8 @@ function SurfaceEditor({
               >
                 <DesenAdapterCanvas
                   authoringModel={model}
-                  bundle={effectivePreview?.ok === true ? effectivePreview.bundle : null}
+                  bundle={surfacePreview?.ok === true ? surfacePreview.bundle : null}
+                  catalogs={workspaceSnapshot.catalogs}
                   diagnostics={
                     mode === "design" &&
                     activeTransientDiagnostics !== null &&
@@ -3284,13 +3455,16 @@ function SurfaceEditor({
                         })
                       : null
                   }
+                  documentId={workspaceSnapshot.documentId}
                   hostPorts={fixtureHostPorts}
                   mode={mode}
                   projectId={project.id}
+                  registry={workspaceSnapshot.runtime.registry}
                   selection={mode === "design" ? selection : null}
                   showDesignChrome={false}
                   showStatus={false}
-                  surfaceId={selectedSurface.id}
+                  surfaceId={selectedSurface.sourceId}
+                  tokenCssProperties={workspaceSnapshot.runtime.tokenCssProperties}
                 />
               </section>
             ) : (
@@ -3384,6 +3558,8 @@ function ProjectShell({
   publicationPort,
   project,
   selectedSurface,
+  workspaceProfile,
+  workspaceSnapshot,
 }: Readonly<{
   readonly fixtures: boolean;
   readonly initialDocument: DesenEditorDocument;
@@ -3392,6 +3568,8 @@ function ProjectShell({
   readonly publicationPort: AuthoringPublicationPort | null;
   readonly project: DesenAppProjectSummary;
   readonly selectedSurface: DesenAppSurfaceSummary | undefined;
+  readonly workspaceProfile: ProjectWorkspaceProfileHandle;
+  readonly workspaceSnapshot: ProjectWorkspaceProfileSnapshot;
 }>) {
   if (selectedSurface === undefined) {
     return (
@@ -3428,7 +3606,7 @@ function ProjectShell({
                     <span className={styles.surfaceCardFooter}>
                       <span>
                         <strong>{surface.name}</strong>
-                        <small>{surface.capabilityId}</small>
+                        <small>{surface.sourceId}</small>
                       </span>
                       <SurfaceState state={surface.state} />
                     </span>
@@ -3456,13 +3634,15 @@ function ProjectShell({
 
   return (
     <SurfaceEditor
-      key={`${project.id}:${selectedSurface.id}`}
+      key={`${workspaceProfileMountIdentity(workspaceProfile)}:${project.id}:${selectedSurface.id}`}
       initialDocument={initialDocument}
       preparedPersistenceController={preparedPersistenceController}
       persistencePort={persistencePort}
       publicationPort={publicationPort}
       project={project}
       selectedSurface={selectedSurface}
+      workspaceProfile={workspaceProfile}
+      workspaceSnapshot={workspaceSnapshot}
     />
   );
 }
@@ -3502,7 +3682,9 @@ function routeTitle(route: DesenAppRoute, projects: readonly DesenAppProjectSumm
 function hasResolvedSurfaceEditor(
   route: DesenAppRoute,
   projects: readonly DesenAppProjectSummary[],
+  fixtures: boolean,
 ): boolean {
+  if (fixtures) return false;
   if (route.kind !== "project" || route.surfaceId === undefined) return false;
   const project = findDesenAppProject(route.projectId, projects);
   return project !== undefined && findDesenAppSurface(project, route.surfaceId) !== undefined;
@@ -3517,6 +3699,8 @@ function RouteView({
   projects,
   publicationPort,
   route,
+  workspaceProfile,
+  workspaceSnapshot,
 }: Readonly<{
   readonly fixtures: boolean;
   readonly initialDocument: DesenEditorDocument;
@@ -3526,6 +3710,8 @@ function RouteView({
   readonly projects: readonly DesenAppProjectSummary[];
   readonly publicationPort: AuthoringPublicationPort | null;
   readonly route: DesenAppRoute;
+  readonly workspaceProfile: ProjectWorkspaceProfileHandle;
+  readonly workspaceSnapshot: ProjectWorkspaceProfileSnapshot;
 }>) {
   if (route.kind === "projects")
     return (
@@ -3556,6 +3742,8 @@ function RouteView({
         publicationPort={publicationPort}
         project={project}
         selectedSurface={undefined}
+        workspaceProfile={workspaceProfile}
+        workspaceSnapshot={workspaceSnapshot}
       />
     );
 
@@ -3568,6 +3756,27 @@ function RouteView({
       />
     );
   }
+  if (fixtures) {
+    return (
+      <section className={styles.surfaceGallery} aria-labelledby="fixture-surface-title">
+        <h1 className={styles.visuallyHidden} data-route-heading tabIndex={-1}>
+          {project.name}
+        </h1>
+        <div className={styles.collectionToolbar}>
+          <div className={styles.collectionHeading}>
+            <div>
+              <h2 id="fixture-surface-title">{surface.name}</h2>
+              <p>{surface.detail}</p>
+            </div>
+            <span className={styles.previewBadge}>Preview data</span>
+          </div>
+        </div>
+        <p className={styles.previewNotice} aria-label="Inert surface boundary">
+          This route is inert navigation data. It cannot open, edit, run, save, or publish a Source.
+        </p>
+      </section>
+    );
+  }
   return (
     <ProjectShell
       fixtures={fixtures}
@@ -3577,6 +3786,8 @@ function RouteView({
       publicationPort={publicationPort}
       project={project}
       selectedSurface={surface}
+      workspaceProfile={workspaceProfile}
+      workspaceSnapshot={workspaceSnapshot}
     />
   );
 }
@@ -3585,10 +3796,10 @@ function RouteView({
 export interface DesenAppApplicationProps {
   /** Initial validated Source captured when a surface editor session mounts. */
   readonly initialDocument?: DesenEditorDocument;
-  /** Whether the supplied project inventory is inert demonstration data. */
-  readonly projectInventoryIsFixture?: boolean;
-  /** Exact admitted projects visible to route resolution and the gallery. */
-  readonly projects?: readonly DesenAppProjectSummary[];
+  /** Explicit factory-authenticated inert route/gallery examples, never product authority. */
+  readonly projectInventoryFixture?: ProjectInventoryFixtureHandle;
+  /** May hide the profile project while storage reports it missing; cannot add another project. */
+  readonly profileProjectVisible?: boolean;
   /** Product-owned request that opens the supported blank-project creation flow. */
   readonly onRequestProjectCreation?: (() => void) | null;
   /** Visible-accessibility explanation used only while project creation is unavailable. */
@@ -3599,26 +3810,36 @@ export interface DesenAppApplicationProps {
   readonly persistencePort?: DesenEditorPersistencePort | null;
   /** Optional publication host boundary for the selected Source. */
   readonly publicationPort?: AuthoringPublicationPort | null;
+  /** Factory-authenticated project, Source, Catalog, runtime and host composition authority. */
+  readonly workspaceProfile: ProjectWorkspaceProfileHandle;
 }
 
-/** M09 Desen App shell with exact routes, schema-driven Source editing, and adapter preview. */
-export function DesenAppApplication({
-  initialDocument = REFERENCE_EDITOR_DOCUMENT,
+interface AuthenticatedDesenAppApplicationProps extends DesenAppApplicationProps {
+  readonly fixtures: boolean;
+  readonly initialDocument: DesenEditorDocument;
+  readonly projects: readonly DesenAppProjectSummary[];
+  readonly workspaceSnapshot: ProjectWorkspaceProfileSnapshot;
+}
+
+function AuthenticatedDesenAppApplication({
+  fixtures,
+  initialDocument,
   onRequestProjectCreation = null,
   preparedPersistenceController,
   persistencePort = null,
   projectCreationUnavailableMessage = "Project creation unlocks with catalog setup.",
-  projectInventoryIsFixture = true,
-  projects = DESEN_APP_PROJECTS,
+  projects,
   publicationPort = null,
-}: DesenAppApplicationProps = {}) {
+  workspaceProfile,
+  workspaceSnapshot,
+}: AuthenticatedDesenAppApplicationProps) {
   const routeLocation = useSyncExternalStore(
     subscribeDesenAppNavigation,
     readDesenAppLocation,
     readDesenAppServerLocation,
   );
   const route = readDesenAppRoute(routeLocation);
-  const surfaceEditorRoute = hasResolvedSurfaceEditor(route, projects);
+  const surfaceEditorRoute = hasResolvedSurfaceEditor(route, projects, fixtures);
   const previousRouteLocation = useRef(routeLocation);
 
   useEffect(() => {
@@ -3647,7 +3868,7 @@ export function DesenAppApplication({
         tabIndex={-1}
       >
         <RouteView
-          fixtures={projectInventoryIsFixture}
+          fixtures={fixtures}
           initialDocument={initialDocument}
           onRequestProjectCreation={onRequestProjectCreation}
           preparedPersistenceController={preparedPersistenceController}
@@ -3655,8 +3876,94 @@ export function DesenAppApplication({
           projects={projects}
           publicationPort={publicationPort}
           route={route}
+          workspaceProfile={workspaceProfile}
+          workspaceSnapshot={workspaceSnapshot}
         />
       </main>
     </div>
+  );
+}
+
+function UnavailableWorkspace({ message }: Readonly<{ readonly message: string }>) {
+  return (
+    <div className={styles.app}>
+      <main className={styles.main} id="desen-app-content" tabIndex={-1}>
+        <section className={styles.notFound} role="alert">
+          <p className={styles.eyebrow}>Workspace unavailable</p>
+          <h1>The project composition was not authenticated.</h1>
+          <p>{message}</p>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+/** M09+ Desen App shell with exact routes and profile-authenticated composition authority. */
+export function DesenAppApplication(props: DesenAppApplicationProps) {
+  const authority = readProjectWorkspaceProfileAuthority(props.workspaceProfile);
+  if (authority.status !== "read") {
+    return (
+      <UnavailableWorkspace message="DESEN did not infer a Source, Catalog, runtime adapter, or host authority." />
+    );
+  }
+  const workspaceSnapshot = authority.profile;
+  if (props.publicationPort !== undefined && props.publicationPort !== null) {
+    const destination = readAuthoringPublicationPortDestination(props.publicationPort);
+    if (
+      workspaceSnapshot.publication === null ||
+      destination === null ||
+      destination.channelName !== workspaceSnapshot.publication.channelName ||
+      destination.hostId !== workspaceSnapshot.publication.hostId
+    ) {
+      return (
+        <UnavailableWorkspace message="The publication port is not bound to this workspace profile's exact destination." />
+      );
+    }
+  }
+  const documentAdmission = admitProjectWorkspaceDocument(
+    props.workspaceProfile,
+    props.initialDocument ?? workspaceSnapshot.initialDocument,
+  );
+  if (documentAdmission.status !== "admitted") {
+    return (
+      <UnavailableWorkspace message="The current Source does not match this profile's document, entry, surface, or Catalog authority." />
+    );
+  }
+  let fixtures = false;
+  let projects: readonly DesenAppProjectSummary[];
+  if (props.projectInventoryFixture === undefined) {
+    projects =
+      props.profileProjectVisible === false
+        ? Object.freeze([])
+        : Object.freeze([projectWorkspaceProfileSummary(workspaceSnapshot)]);
+  } else {
+    const fixture = readProjectInventoryFixture(props.projectInventoryFixture);
+    if (fixture.status !== "read") {
+      return (
+        <UnavailableWorkspace message="The inert project inventory was not authenticated for this workspace profile." />
+      );
+    }
+    if (
+      props.initialDocument !== undefined ||
+      props.preparedPersistenceController !== undefined ||
+      props.persistencePort !== undefined ||
+      props.publicationPort !== undefined ||
+      props.onRequestProjectCreation !== undefined
+    ) {
+      return (
+        <UnavailableWorkspace message="Inert project inventory cannot be composed with Source, mutation, persistence, publication, or project-creation authority." />
+      );
+    }
+    fixtures = true;
+    projects = fixture.projects;
+  }
+  return (
+    <AuthenticatedDesenAppApplication
+      {...props}
+      fixtures={fixtures}
+      initialDocument={documentAdmission.document}
+      projects={projects}
+      workspaceSnapshot={workspaceSnapshot}
+    />
   );
 }

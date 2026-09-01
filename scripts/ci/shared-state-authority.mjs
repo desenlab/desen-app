@@ -157,6 +157,7 @@ export const PROOF_IDS = Object.freeze([
   "desen-app-browser-e2e-workspace-compatibility",
   "desen-app-user-created-blank-project",
   "desen-app-visual-behavior-authoring",
+  "desen-app-evergreen-product-composition",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -569,8 +570,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 208) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 208 steps.", {
+if (METADATA_BY_STEP_ID.size !== 210) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 210 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

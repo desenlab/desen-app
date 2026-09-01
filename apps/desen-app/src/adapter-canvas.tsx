@@ -1,33 +1,25 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
-import { REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT } from "@desen/reference-catalog-web/react-adapters";
-import { REFERENCE_WEB_TOKEN_CSS_PROPERTIES } from "@desen/reference-catalog-web/tokens";
-import {
-  createRuntimeHostPorts,
-  disposeRuntimeHeadlessSession,
-  mountRuntimeHeadlessSession,
-} from "@desen/runtime-core";
+import { disposeRuntimeHeadlessSession, mountRuntimeHeadlessSession } from "@desen/runtime-core";
 import {
   RuntimeReactSurfaceBoundary,
-  createRuntimeReactAdapterRegistry,
   renderRuntimeReactSurface,
   useRuntimeReactSurface,
 } from "@desen/runtime-react";
 
-import officialDerivedSignInBundle from "../../../examples/sign-in/official-derived.bundle.desen.json";
-import { REFERENCE_AUTHORING_MODEL } from "./authoring-data.js";
 import { projectAuthoringDiagnostics } from "./authoring-diagnostics.js";
 import { projectAuthoringSelection } from "./authoring-selection.js";
 import styles from "./application.module.css";
 
-import type { RuntimeHostPorts, RuntimeJsonObject } from "@desen/runtime-core";
+import type { RuntimeHostPorts } from "@desen/runtime-core";
 import type { DesenEditorContinuousValidationReport } from "@desen/editor-core";
 import type {
+  RuntimeReactAdapterRegistryHandle,
   RuntimeReactLiveSurfaceInput,
   RuntimeReactSurfaceFailureRenderer,
 } from "@desen/runtime-react";
-import type { RefObject } from "react";
+import type { DesenValidatedInteractionCatalogSet } from "@desen/validator";
+import type { CSSProperties, RefObject } from "react";
 import type {
   AuthoringComponentSelection,
   AuthoringSelectionProjection,
@@ -39,40 +31,6 @@ import type {
   AuthoringDiagnosticView,
 } from "./authoring-diagnostics.js";
 
-const SUPPORTED_PROJECT_ID = "account-app";
-const SUPPORTED_SURFACE_ID = "sign-in";
-const EXPECTED_DOCUMENT_ID = "com.example.account-app";
-
-const EMPTY_RUNTIME_JSON = Object.freeze({}) satisfies RuntimeJsonObject;
-const WEB_RUNTIME_ENVIRONMENT = Object.freeze({ platform: "web" }) satisfies RuntimeJsonObject;
-
-const ADAPTER_CANVAS_HOST_PORTS = createRuntimeHostPorts({
-  navigation: { navigate: () => ({ status: "denied" }) },
-  storage: {
-    getBundle: () => ({ status: "missing" }),
-    putBundle: () => ({ status: "conflict" }),
-    readActivation: () => ({ status: "missing" }),
-    commitActivation: () => ({ status: "conflict", generation: null }),
-  },
-  operations: { invoke: () => ({ status: "denied" }) },
-  resources: { load: () => ({ status: "denied" }) },
-  tokens: { resolve: () => ({ status: "missing" }) },
-  context: {
-    getSnapshot: () => EMPTY_RUNTIME_JSON,
-    subscribe: () => () => undefined,
-  },
-  environment: {
-    getSnapshot: () => WEB_RUNTIME_ENVIRONMENT,
-    subscribe: () => () => undefined,
-  },
-  clock: { now: () => 1 },
-  diagnostics: { report: () => undefined },
-} satisfies RuntimeHostPorts);
-
-const ADAPTER_CANVAS_REGISTRY = createRuntimeReactAdapterRegistry(
-  REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT,
-);
-
 interface RouteIdentity {
   readonly projectId: string;
   readonly surfaceId: string;
@@ -82,7 +40,11 @@ interface ReadyCanvasState {
   readonly status: "ready";
   readonly routeIdentity: RouteIdentity;
   readonly previewRevision: string;
+  readonly bundle: unknown;
+  readonly catalogs: DesenValidatedInteractionCatalogSet;
+  readonly documentId: string;
   readonly hostPorts: RuntimeHostPorts;
+  readonly registry: RuntimeReactAdapterRegistryHandle;
   readonly input: RuntimeReactLiveSurfaceInput;
 }
 
@@ -90,17 +52,14 @@ interface FailedCanvasState {
   readonly status: "failed";
   readonly routeIdentity: RouteIdentity;
   readonly previewRevision: string;
+  readonly bundle: unknown;
+  readonly catalogs: DesenValidatedInteractionCatalogSet;
+  readonly documentId: string;
   readonly hostPorts: RuntimeHostPorts;
+  readonly registry: RuntimeReactAdapterRegistryHandle;
 }
 
 type AdapterCanvasState = ReadyCanvasState | FailedCanvasState | undefined;
-
-function isSupportedRoute(routeIdentity: RouteIdentity): boolean {
-  return (
-    routeIdentity.projectId === SUPPORTED_PROJECT_ID &&
-    routeIdentity.surfaceId === SUPPORTED_SURFACE_ID
-  );
-}
 
 function readPreviewRevision(bundle: unknown): string | undefined {
   if (typeof bundle !== "object" || bundle === null || Array.isArray(bundle)) return undefined;
@@ -203,6 +162,7 @@ function ManagedAdapterSurface({
   selection,
   showDesignChrome,
   surfaceId,
+  tokenCssProperties,
 }: Readonly<{
   readonly authoringModel: CatalogAuthoringModel;
   readonly diagnostics: DesenAdapterCanvasDiagnostics | null;
@@ -213,6 +173,7 @@ function ManagedAdapterSurface({
   /** The embedding host may re-home presentation into its own durable chrome. */
   readonly showDesignChrome: boolean;
   readonly surfaceId: string;
+  readonly tokenCssProperties: Readonly<Record<`--${string}`, string>>;
 }>) {
   const result = useRuntimeReactSurface(input);
   const renderedIdentity =
@@ -270,9 +231,9 @@ function ManagedAdapterSurface({
         data-adapter-interactions={mode === "run" ? "enabled" : "disabled"}
         data-managed-capability-frame="true"
         disabled={mode === "design"}
-        style={REFERENCE_WEB_TOKEN_CSS_PROPERTIES}
+        style={tokenCssProperties as CSSProperties}
       >
-        <legend className={styles.adapterCanvasLegend}>Sign-in adapter canvas</legend>
+        <legend className={styles.adapterCanvasLegend}>Managed {surfaceId} canvas</legend>
         <div className={styles.adapterCanvasSurface} data-managed-capability-subtree="true">
           <RuntimeReactSurfaceBoundary renderFailure={renderManagedFailure} result={result} />
         </div>
@@ -309,12 +270,16 @@ function CanvasLoading() {
 /** Closed interaction mode for the exact controlled React-adapter canvas. */
 export type DesenAdapterCanvasMode = "design" | "run";
 
-/** Exact React-adapter canvas for the controlled account sign-in draft. */
+/** Exact React-adapter canvas for one explicitly composed project workspace. */
 export interface DesenAdapterCanvasProps {
   /** Current validated authoring projection used only for Source-identity overlay admission. */
-  readonly authoringModel?: CatalogAuthoringModel;
-  /** Current immutable preview Bundle; omission preserves the controlled baseline fixture. */
-  readonly bundle?: unknown;
+  readonly authoringModel: CatalogAuthoringModel;
+  /** Current immutable preview Bundle admitted by the composed workspace profile. */
+  readonly bundle: unknown;
+  /** Complete validated Catalog set used to mount this exact Bundle. */
+  readonly catalogs: DesenValidatedInteractionCatalogSet;
+  /** Exact DESEN Source document identity authorized by the workspace profile. */
+  readonly documentId: string;
   /** Rejected-candidate diagnostics that remain outside Runtime and persistence authority. */
   readonly diagnostics?: DesenAdapterCanvasDiagnostics | null;
   /** Interaction presentation; omission keeps the safe interaction-disabled Design default. */
@@ -323,75 +288,85 @@ export interface DesenAdapterCanvasProps {
   readonly showDesignChrome?: boolean;
   /** Whether the host-owned Design/Run status is rendered directly above the exact adapter output. */
   readonly showStatus?: boolean;
-  /** App-owned Runtime ports; omission preserves the deny-all preview boundary. */
-  readonly hostPorts?: RuntimeHostPorts;
+  /** App-owned Runtime ports selected by trusted workspace composition. */
+  readonly hostPorts: RuntimeHostPorts;
   /** Exact App project route identity. */
   readonly projectId: string;
   /** Optional App-owned Source selection containing no runtime or platform authority. */
   readonly selection?: AuthoringComponentSelection | null;
-  /** Exact App surface route identity. */
+  /** Factory-authenticated executable React adapter registry selected by the host. */
+  readonly registry: RuntimeReactAdapterRegistryHandle;
+  /** Exact Source surface identity. */
   readonly surfaceId: string;
+  /** Detached host-owned token CSS custom properties for the managed canvas boundary. */
+  readonly tokenCssProperties: Readonly<Record<`--${string}`, string>>;
 }
 
 /**
- * Mounts a validated sign-in preview Bundle through the shared public reference adapter registry.
+ * Mounts a validated preview Bundle through explicitly composed Catalog and runtime authorities.
  *
- * @remarks The App supplies no managed component tree and accepts only the exact controlled route.
- * Baseline callers may omit `bundle`; authoring callers pass a Publisher-produced session draft.
- * Design and Run share one Bundle/session lifetime; changing mode cannot remount Runtime authority.
- * Other project/surface tuples fail closed without mounting or substituting the sign-in surface.
+ * @remarks The App supplies no managed component tree. Design and Run share one Bundle/session
+ * lifetime; changing presentation mode cannot remount Runtime authority. Document, surface,
+ * Catalog, registry, ports and token authorities are mandatory and never inferred from examples.
  */
 export function DesenAdapterCanvas({
-  authoringModel = REFERENCE_AUTHORING_MODEL,
-  bundle = officialDerivedSignInBundle,
+  authoringModel,
+  bundle,
+  catalogs,
   diagnostics = null,
-  hostPorts = ADAPTER_CANVAS_HOST_PORTS,
+  documentId,
+  hostPorts,
   mode = "design",
   projectId,
+  registry,
   selection = null,
   showDesignChrome = true,
   showStatus = true,
   surfaceId,
+  tokenCssProperties,
 }: DesenAdapterCanvasProps) {
   const routeIdentity = useMemo(
     () => Object.freeze({ projectId, surfaceId }),
     [projectId, surfaceId],
   );
   const [state, setState] = useState<AdapterCanvasState>();
-  const supported = isSupportedRoute(routeIdentity);
   const previewRevision = readPreviewRevision(bundle);
 
   useEffect(() => {
-    if (!supported || previewRevision === undefined) return;
-
-    if (ADAPTER_CANVAS_REGISTRY.status !== "created") {
-      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision, hostPorts }));
-      return;
-    }
+    if (previewRevision === undefined) return;
+    const identity = Object.freeze({
+      routeIdentity,
+      previewRevision,
+      bundle,
+      catalogs,
+      documentId,
+      hostPorts,
+      registry,
+    });
 
     const mounted = mountRuntimeHeadlessSession({
       bundle,
-      catalogs: [referenceCatalog],
+      catalogs,
       hostPorts,
     });
     if (mounted.status !== "mounted") {
-      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision, hostPorts }));
+      setState(Object.freeze({ status: "failed", ...identity }));
       return;
     }
 
     const session = mounted.handle;
     if (
-      mounted.snapshot.documentId !== EXPECTED_DOCUMENT_ID ||
-      mounted.snapshot.surfaceId !== SUPPORTED_SURFACE_ID ||
+      mounted.snapshot.documentId !== documentId ||
+      mounted.snapshot.surfaceId !== surfaceId ||
       mounted.snapshot.revision !== previewRevision
     ) {
       disposeRuntimeHeadlessSession(session);
-      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision, hostPorts }));
+      setState(Object.freeze({ status: "failed", ...identity }));
       return;
     }
 
     const input = Object.freeze({
-      registry: ADAPTER_CANVAS_REGISTRY.handle,
+      registry,
       session,
       serverSnapshot: mounted.snapshot,
       catalogSet: mounted.catalogSet,
@@ -404,27 +379,39 @@ export function DesenAdapterCanvas({
     });
     if (
       preflight.status !== "rendered" ||
-      preflight.surface.documentId !== EXPECTED_DOCUMENT_ID ||
-      preflight.surface.surfaceId !== SUPPORTED_SURFACE_ID
+      preflight.surface.documentId !== documentId ||
+      preflight.surface.surfaceId !== surfaceId
     ) {
       disposeRuntimeHeadlessSession(session);
-      setState(Object.freeze({ status: "failed", routeIdentity, previewRevision, hostPorts }));
+      setState(Object.freeze({ status: "failed", ...identity }));
       return;
     }
 
-    setState(Object.freeze({ status: "ready", routeIdentity, previewRevision, hostPorts, input }));
+    setState(Object.freeze({ status: "ready", ...identity, input }));
     return () => {
       disposeRuntimeHeadlessSession(session);
     };
-  }, [bundle, hostPorts, previewRevision, routeIdentity, supported]);
+  }, [
+    bundle,
+    catalogs,
+    documentId,
+    hostPorts,
+    previewRevision,
+    registry,
+    routeIdentity,
+    surfaceId,
+  ]);
 
-  if (!supported) return <CanvasUnavailable />;
   if (previewRevision === undefined) return <CanvasUnavailable />;
   if (
     state === undefined ||
     state.routeIdentity !== routeIdentity ||
     state.previewRevision !== previewRevision ||
-    state.hostPorts !== hostPorts
+    state.bundle !== bundle ||
+    state.catalogs !== catalogs ||
+    state.documentId !== documentId ||
+    state.hostPorts !== hostPorts ||
+    state.registry !== registry
   ) {
     return <CanvasLoading />;
   }
@@ -453,6 +440,7 @@ export function DesenAdapterCanvas({
           selection={selection}
           showDesignChrome={showDesignChrome}
           surfaceId={surfaceId}
+          tokenCssProperties={tokenCssProperties}
         />
       </div>
     </div>

@@ -2064,20 +2064,21 @@ and move to M10-T01.
 
 ## M10 — First end-to-end proof
 
-| ID       | Status      | Depends on       | Deliverable / evidence                                                        |
-| -------- | ----------- | ---------------- | ----------------------------------------------------------------------------- |
-| M10-T01  | DONE        | G09              | Empty-project-to-sign-in browser E2E                                          |
-| M10-T01A | DONE        | M10-T01          | User-created blank project and durable normal-App authoring                   |
-| M10-T01B | DONE        | M10-T01A         | Visual behavior authoring and Catalog-derived Run controls                    |
-| M10-T02  | NOT_STARTED | M10-T01B         | Input and pending fixture test                                                |
-| M10-T03  | NOT_STARTED | M10-T02          | Failure fixture and visible failure-state test                                |
-| M10-T04  | NOT_STARTED | M10-T02          | Success fixture, navigation, and real host-operation binding test             |
-| M10-T05  | NOT_STARTED | M10-T03–M10-T04  | Label/layout change published and activated without host source change        |
-| M10-T06  | NOT_STARTED | M10-T05          | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
-| M10-T07  | NOT_STARTED | M10-T05, G07     | Corrupt revision and catalog mismatch preserve last-known-good                |
-| M10-T08  | NOT_STARTED | M10-T01B–M10-T07 | One-command seed/reset and repeatable sign-in demo runbook                    |
-| M10-T09  | NOT_STARTED | M10-T08          | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
-| G10      | NOT_STARTED | M10-T01B–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
+| ID       | Status      | Depends on                | Deliverable / evidence                                                        |
+| -------- | ----------- | ------------------------- | ----------------------------------------------------------------------------- |
+| M10-T01  | DONE        | G09                       | Empty-project-to-sign-in browser E2E                                          |
+| M10-T01A | DONE        | M10-T01                   | User-created blank project and durable normal-App authoring                   |
+| M10-T01B | DONE        | M10-T01A                  | Visual behavior authoring and Catalog-derived Run controls                    |
+| M10-T01C | DONE        | M10-T01B                  | Evergreen product composition through an authenticated workspace profile      |
+| M10-T02  | NOT_STARTED | M10-T01C                  | Input and pending fixture test                                                |
+| M10-T03  | NOT_STARTED | M10-T02                   | Failure fixture and visible failure-state test                                |
+| M10-T04  | NOT_STARTED | M10-T02                   | Success fixture, navigation, and real host-operation binding test             |
+| M10-T05  | NOT_STARTED | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
+| M10-T06  | NOT_STARTED | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
+| M10-T07  | NOT_STARTED | M10-T05, G07              | Corrupt revision and catalog mismatch preserve last-known-good                |
+| M10-T08  | NOT_STARTED | M10-T01B–M10-T07          | One-command seed/reset and repeatable sign-in demo runbook                    |
+| M10-T09  | NOT_STARTED | M10-T08                   | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
+| G10      | NOT_STARTED | M10-T01C, M10-T02–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
 
 M10-T01 is `DONE`. The dedicated `@desen/app-browser-e2e` workspace owns Playwright, Vite,
 Chromium, and failure artifacts while the root and product App manifests retain no M10 browser-E2E
@@ -2229,6 +2230,56 @@ operation. P-09/P-10, remote deployment, multi-user persistence, and G10 therefo
 Overall progress advances to 112/147 (76%), M10 advances to 3/11, and M10-T02 remains
 `NOT_STARTED` and next.
 
+M10-T01C is `DONE`. The product root now requires one factory-authenticated
+`ProjectWorkspaceProfile` instead of letting generic application code inherit the reference
+sign-in example. That profile captures the exact project inventory, independent App route slug and
+Source surface identity, Source document and storage identities, complete Catalog set and package
+candidates, runtime adapter/token/port authority, and optional publication channel/host binding.
+The normal `main.tsx` composition selects sign-in explicitly; editor, preview, fixture, scenario,
+persistence, publication, runtime-canvas, and product-bootstrap modules carry only the selected
+profile authority and contain no account/sign-in/reference defaults.
+
+The App, persistence, and publication boundaries now share exact current-document admission. The
+document id, authored entry, complete surface inventory, complete Catalog requirements, and
+interaction contracts must still match the selected profile; prepared controllers and editor
+mounts remain tied to that exact opaque handle even when public ids match another profile. Static
+project inventories use a separate opaque, bounded, detached fixture handle and stay inert: they
+cannot be combined with Source, persistence, publication, mutation, project creation, or an
+editable/runnable surface.
+
+Synthetic authoring replaces all nine captured profile host-port families with inert behavior and
+uses only its explicit local Catalog fixture operation controller. Selecting a non-entry surface
+publishes a transient canvas-only preview candidate; the base authored document, Save request,
+Publish revision, and published Bundle preserve the profile entry. Publication itself crosses only
+a factory-authenticated fixed-destination port for the profile's exact channel and installed host;
+publish bytes/requests and activation requests are validated, cloned, and reconstructed before
+side effects.
+
+The focused product evidence admits an authentication-independent two-surface feedback profile
+whose App route slugs differ from its Source surface ids and whose Source resolves two Catalogs.
+A complete App render independently opens a feedback surface through the ordinary project,
+authoring-model, real-adapter canvas, and layer-tree path. Negative coverage rejects forged profile
+handles, route-to-Source drift, incomplete Catalog-package sets, forged adapter registries,
+cross-profile persistence routes, and mismatched publication hosts before they receive downstream
+authority. The deterministic evidence is
+`docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json`; its verifier is
+`scripts/verify-desen-app-evergreen-product-composition.mjs`.
+
+This task changes composition authority, not the M10 lifecycle acceptance scope. M10-T02 still owns
+the dedicated input/pending matrix, M10-T03 owns visible failure, M10-T04 owns separately authorized
+real-host success/navigation, and G10 remains open. Overall progress advances to 113/148 (76%),
+M10 advances to 4/12, and M10-T02 remains `NOT_STARTED` and next. Local evidence alone makes no
+hosted exact-head `Quality gate` claim.
+
+Append-only reader checkpoint sequence 66 preserves sequences 1–65 and all 53 predecessor
+artifacts, adds the exact 19,299-byte M10-T01C artifact
+(`sha256:779434ca834b8d770c726d905408f0a3d0a7145abbc6eaf2b81f1e77466b46ac`), reseals only
+reader indexes `[70..97, 102, 103, 104, 105]`, and appends the T01C proof/root pair at `[106, 107]`.
+It authenticates 54 artifacts and 108 current readers, passes 89/89 at
+`sha256:3bf2c27ca51f8ab6751dd0d026bbbf461ac2c6acea6fcc3088f7d011ae96fb83`, and leaves every
+historical checkpoint intact. The sixteen bridged historical App reader/root pairs pass 242/242;
+neither receipt implies hosted exact-head success.
+
 ### M10-T01 public build-log drafts
 
 **X (EN, 280 characters)**
@@ -2337,6 +2388,54 @@ Overall progress advances to 112/147 (76%), M10 advances to 3/11, and M10-T02 re
 > host başarı/navigasyon kanıtı sırada.
 >
 > #DesignTools #NoCode #WebDevelopment #OpenSource
+
+### M10-T01C public build-log drafts
+
+**X (EN, ≤280 characters)**
+
+> Design tools shouldn't inherit yesterday's demo. Desen App now selects an authenticated project profile at its root; generic paths carry exact route, Source, Catalog, runtime, storage, and host authority. A non-auth flow proves it. M10-T02 is next. github.com/desenlab/desen-app
+
+**LinkedIn**
+
+> [EN]
+>
+> A product editor should not quietly turn its first demo into permanent architecture. Desen App
+> now selects one authenticated project workspace profile at its trusted root. Generic authoring,
+> persistence, runtime, and publication paths receive exact project, Source, Catalog-set, storage,
+> adapter, token, port, and optional host authority from that profile—without knowing about the
+> reference sign-in example. Synthetic Run replaces every captured profile port with an inert host
+> and permits only its explicit local Catalog fixture operation controller.
+>
+> Focused local evidence admits a non-authentication, multi-surface feedback project with different
+> route slugs and Source ids, two Catalogs, and the ordinary real-component App canvas. Forged
+> profiles, identity drift, incomplete Catalog packages, and mismatched host bindings fail closed.
+> A non-entry canvas is transient, Save and Publish preserve the authored entry, and publication can
+> target only the profile's factory-authenticated fixed channel and host.
+>
+> This prepares the product for new workflows; it does not yet close M10's input/pending, failure,
+> real-host success/navigation, or G10 acceptance work. Inspect the evidence in the public
+> repository: which non-auth workflow should we test next?
+>
+> [TR]
+>
+> Bir ürün editörü, ilk demosunu fark ettirmeden kalıcı mimariye dönüştürmemeli. Desen App artık
+> güvenilen kökünde doğrulanmış tek bir proje çalışma alanı profili seçiyor. Genel authoring,
+> persistence, runtime ve publication yolları; kesin proje, Source, Catalog seti, storage, adapter,
+> token, port ve isteğe bağlı host yetkisini bu profilden alıyor; referans sign-in örneğini bilmiyor.
+> Sentetik Run, profilden yakalanan tüm portları inert bir host ile değiştiriyor ve yalnızca açıkça
+> seçilen yerel Catalog fixture operation controller'ına izin veriyor.
+>
+> Odaklı yerel kanıt; route slug'ları ile Source id'leri farklı, iki Catalog kullanan, kimlik
+> doğrulamadan bağımsız ve çok yüzeyli bir feedback projesini normal gerçek-bileşen App tuvalinde
+> açıyor. Sahte profiller, kimlik kayması, eksik Catalog paketleri ve uyuşmayan host bağları güvenli
+> biçimde reddediliyor. Entry olmayan tuval geçici kalıyor, Save ve Publish yazılmış entry'yi
+> koruyor ve publication yalnızca profilin factory ile doğrulanmış sabit kanal ve host'una gidebiliyor.
+>
+> Bu çalışma ürünü yeni akışlara hazırlıyor; M10'un input/pending, failure, gerçek host
+> başarı/navigasyon ve G10 kabul işlerini henüz kapatmıyor. Kanıtı açık repoda inceleyin: sırada
+> hangi auth-dışı akışı test etmeliyiz?
+>
+> #DesignTools #ProductEngineering #WebDevelopment #OpenSource
 
 ## M11 — Capability extensibility proof
 

@@ -6,6 +6,7 @@ import { projectAuthoringSelection } from "./authoring-selection.js";
 
 import type { JsonValue } from "@desen/catalog-sdk";
 import type { DesenEditorDocument } from "@desen/editor-core";
+import type { PublishCatalogPackageCandidate } from "@desen/publisher";
 import type { CatalogAuthoringModel } from "./authoring-data.js";
 import type {
   AuthoringPreviewBundleResult,
@@ -16,7 +17,6 @@ import type { AuthoringComponentSelection } from "./authoring-selection.js";
 type JsonObject = Readonly<Record<string, unknown>>;
 
 const SCENARIO_ID = /^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u;
-const REFERENCE_SCENARIO_PROJECT_ID = "account-app";
 const SCENARIO_ALLOWED_KEYS = Object.freeze([
   "description",
   "extensions",
@@ -105,6 +105,7 @@ interface CapturedScenario {
 
 interface ScenarioProjection {
   readonly catalog: JsonObject;
+  readonly catalogs: readonly unknown[];
   readonly route: AuthoringScenarioRoute;
   readonly selection: AuthoringComponentSelection;
   readonly scenarios: readonly CapturedScenario[];
@@ -324,27 +325,16 @@ function captureJsonValue(
   }
 }
 
-function selectedCatalog(model: CatalogAuthoringModel): JsonObject {
-  const identity = exactOwnData(model.catalog, ["id", "target", "version"]);
-  if (
-    identity === undefined ||
-    !isNonEmptyString(identity.id) ||
-    !isNonEmptyString(identity.version) ||
-    !isNonEmptyString(identity.target)
-  ) {
-    throw new ScenarioProjectionError("catalog-invalid");
-  }
+function selectedCatalog(model: CatalogAuthoringModel, capabilityId: string): JsonObject {
   const catalogs = dataArray(model.validationCatalogs);
-  if (catalogs.length !== 1) throw new ScenarioProjectionError("catalog-invalid");
-  const catalog = ownDataObject(catalogs[0]);
-  if (
-    ownDataValue(catalog, "id") !== identity.id ||
-    ownDataValue(catalog, "version") !== identity.version ||
-    ownDataValue(catalog, "target") !== identity.target
-  ) {
-    throw new ScenarioProjectionError("catalog-invalid");
+  const matches: JsonObject[] = [];
+  for (const value of catalogs) {
+    const catalog = ownDataObject(value);
+    const components = ownDataObject(ownDataValue(catalog, "components"));
+    if (hasOwnData(components, capabilityId)) matches.push(catalog);
   }
-  return catalog;
+  if (matches.length !== 1) throw new ScenarioProjectionError("catalog-invalid");
+  return matches[0] as JsonObject;
 }
 
 function captureScenarios(catalog: JsonObject, capabilityId: string): readonly CapturedScenario[] {
@@ -407,9 +397,6 @@ function projectScenarios(
 ): ScenarioProjection {
   const capturedRoute = captureRoute(route);
   if (capturedRoute === undefined) throw new ScenarioProjectionError("route-invalid");
-  if (capturedRoute.projectId !== REFERENCE_SCENARIO_PROJECT_ID) {
-    throw new ScenarioProjectionError("route-invalid");
-  }
   const capturedSelection = captureSelection(selection);
   if (
     capturedSelection === undefined ||
@@ -427,9 +414,10 @@ function projectScenarios(
   if (selectionProjection.status !== "unavailable") {
     throw new ScenarioProjectionError("selection-invalid");
   }
-  const catalog = selectedCatalog(model);
+  const catalog = selectedCatalog(model, capturedSelection.capabilityId);
   return Object.freeze({
     catalog,
+    catalogs: dataArray(model.validationCatalogs),
     route: capturedRoute,
     selection: capturedSelection,
     scenarios: captureScenarios(catalog, capturedSelection.capabilityId),
@@ -521,10 +509,11 @@ export function prepareAuthoringScenarioPreview(
   route: AuthoringScenarioRoute,
   selection: AuthoringComponentSelection,
   scenarioValue: AuthoringScenarioValue,
+  catalogPackages: readonly PublishCatalogPackageCandidate[],
 ): AuthoringScenarioPreviewResult {
   try {
     const initialProjection = projectScenarios(model, route, selection);
-    const freshModel = prepareCatalogAuthoringModel(initialProjection.catalog, document);
+    const freshModel = prepareCatalogAuthoringModel(initialProjection.catalogs, document);
     if (!freshModel.ok) {
       return previewFailure(
         freshModel.reason === "catalog-invalid"
@@ -538,7 +527,7 @@ export function prepareAuthoringScenarioPreview(
 
     const admittedCurrentPreview = capturedCurrentPreview(currentPreview);
     if (admittedCurrentPreview === undefined) return previewFailure("preview-unavailable");
-    const baselinePreview = prepareAuthoringPreviewBundle(document);
+    const baselinePreview = prepareAuthoringPreviewBundle(document, catalogPackages);
     if (!baselinePreview.ok) return previewFailure("document-invalid");
     if (baselinePreview.revision !== admittedCurrentPreview.revision) {
       return previewFailure("preview-unavailable");
@@ -566,7 +555,7 @@ export function prepareAuthoringScenarioPreview(
       if (!edited.ok) return previewFailure("scenario-invalid");
       scenarioDocument = edited.document;
     }
-    const preview = prepareAuthoringPreviewBundle(scenarioDocument);
+    const preview = prepareAuthoringPreviewBundle(scenarioDocument, catalogPackages);
     if (!preview.ok) return previewFailure("scenario-invalid");
     return Object.freeze({ ok: true, scenarioDocument, preview });
   } catch (error) {

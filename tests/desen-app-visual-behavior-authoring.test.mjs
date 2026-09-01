@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile as readLiveFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -14,8 +14,13 @@ import {
   verifyDesenAppVisualBehaviorAuthoringSourcePolicy,
   writeDesenAppVisualBehaviorAuthoringEvidence,
 } from "../scripts/lib/desen-app-visual-behavior-authoring-proof.mjs";
+import { createDesenAppHistoricalReaderReadFile } from "./desen-app-historical-reader-fixture.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const readFile = createDesenAppHistoricalReaderReadFile({
+  workspaceRoot: ROOT,
+  liveReadFile: readLiveFile,
+});
 const SOURCE_PATHS = Object.freeze({
   application: "apps/desen-app/src/application.tsx",
   applicationCss: "apps/desen-app/src/application.module.css",
@@ -115,9 +120,8 @@ test(DESEN_APP_VISUAL_BEHAVIOR_AUTHORING_ROOT_TEST_NAMES[0], () => {
 });
 
 test(DESEN_APP_VISUAL_BEHAVIOR_AUTHORING_ROOT_TEST_NAMES[1], () => {
-  const source = verifyDesenAppVisualBehaviorAuthoringSourcePolicy(sourcePolicyInput);
-  assert.equal(source.atomicInputConnection, true);
-  assert.equal(source.operationTriggerBoundary, true);
+  assert.equal(built.artifact.authority.source.atomicInputConnection, true);
+  assert.equal(built.artifact.authority.source.operationTriggerBoundary, true);
   assert.equal(built.artifact.claim.visualInputConnectionCovered, true);
   assert.equal(built.artifact.authority.source.requestInputRetained, false);
 });

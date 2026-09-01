@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  REFERENCE_AUTHORING_MODEL,
   type AuthoringBehaviorLayer,
   type AuthoringLayerNode,
   type CatalogAuthoringModel,
   type CatalogComponentSummary,
 } from "../src/authoring-data.js";
+import { REFERENCE_AUTHORING_MODEL } from "../src/reference-authoring-profile.js";
 import type { AuthoringSlotRoute } from "../src/authoring-slots.js";
 import { APPROXIMATE_FIDELITY_FALLBACK, projectPreviewFidelity } from "../src/preview-fidelity.js";
 
@@ -220,7 +220,7 @@ describe("preview fidelity projection", () => {
     });
   });
 
-  it("rejects invalid routes without reading raw Source or Catalog data", () => {
+  it("uses structural App routes without coupling fidelity to one project identity", () => {
     expect(
       projectPreviewFidelity(REFERENCE_AUTHORING_MODEL, {
         projectId: REFERENCE_ROUTE.projectId,
@@ -231,8 +231,8 @@ describe("preview fidelity projection", () => {
       projectPreviewFidelity(REFERENCE_AUTHORING_MODEL, {
         projectId: "other-project",
         surfaceId: REFERENCE_ROUTE.surfaceId,
-      }),
-    ).toEqual({ status: "rejected" });
+      }).status,
+    ).toBe("ready");
     expect(
       projectPreviewFidelity(REFERENCE_AUTHORING_MODEL, {
         projectId: "",

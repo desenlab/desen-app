@@ -1391,20 +1391,34 @@ deterministic verifier pass. P-08 advances to `PROVEN`; typed input/pending, fai
 success/navigation with a real host operation remain M10-T02–M10-T04 work. G10 stays open, proof
 gates remain 11/13, and no exact-head hosted-CI pass is inferred from the local receipts.
 
+M10-T01C now removes the reference sign-in composition from the product's generic paths. The
+trusted root explicitly selects one factory-authenticated `ProjectWorkspaceProfile`; the profile
+binds the exact project inventory, independent route slug and Source surface identity,
+document/storage identities, complete Catalog set and package candidates, runtime
+adapter/token/port authority, and optional publication channel/host. A non-authentication,
+multi-surface, multi-Catalog feedback profile plus a complete feedback App render prove that the
+editor can compose another product without account/sign-in defaults. Forged or drifting profile,
+Catalog, route, registry, persistence, and host authorities fail closed. Current documents and
+prepared controllers remain bound to the exact opaque profile; inert project inventories grant no
+Source or host rights; all nine profile ports are isolated from synthetic Run; and a selected
+non-entry canvas remains transient while Save and Publish preserve the authored entry. Publication
+can target only the profile's fixed authenticated channel and host. M10-T02–M10-T04 and G10 remain
+open; no hosted exact-head pass is inferred from local evidence.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`, `G09`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M10 — First end-to-end proof`
-- Overall implementation progress: `112 / 147 tasks complete (76%)`
+- Overall implementation progress: `113 / 148 tasks complete (76%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
 - M09 progress: `14 / 14 tasks complete (100%)`
-- M10 progress: `3 / 11 tasks complete (27%)`
+- M10 progress: `4 / 12 tasks complete (33%)`
 - Proof-gate progress: `11 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1502,7 +1516,8 @@ gates remain 11/13, and no exact-head hosted-CI pass is inferred from the local 
   `M09-T14 — Saved-Source publication and separate reference-host activation`,
   `M10-T01 — Empty-project-to-sign-in browser E2E`,
   `M10-T01A — User-created blank-project authoring`,
-  `M10-T01B — Visual behavior authoring and Catalog-derived Run controls`
+  `M10-T01B — Visual behavior authoring and Catalog-derived Run controls`,
+  `M10-T01C — Evergreen product composition through an authenticated workspace profile`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -1524,15 +1539,15 @@ gates remain 11/13, and no exact-head hosted-CI pass is inferred from the local 
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Current implementation task: none; `M10-T01B — Visual behavior authoring and Catalog-derived Run controls` is complete
+- Current implementation task: none; `M10-T01C — Evergreen product composition through an authenticated workspace profile` is complete
 - Next implementation task: `M10-T02 — Input and pending fixture test`
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  14/14, M10 is 3/11, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
-  and M10-T01B are
+  14/14, M10 is 4/12, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
+  M10-T01B, and M10-T01C are
   `DONE`; `N-012`, `N-018`, `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`; P-06, P-08,
   and P-16 are `PROVEN`; P-07, P-09, and P-10 are `PARTIAL`; proof gates are 11/13; P-12 remains
   `NOT_PROVEN`; N-036 remains `PLANNED`; PF-028 is `CLOSED`; PF-025, PF-083, PF-085, PF-086, and
-  PF-089 and PF-091 remain `OPEN`; M10-T02 is `NOT_STARTED`; and implementation progress is 112/147.
+  PF-089 and PF-091 remain `OPEN`; M10-T02 is `NOT_STARTED`; and implementation progress is 113/148.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -4715,6 +4730,51 @@ M09-T14/G09 evidence:
 - explicit nonclaims: the Chromium smoke does not close M10-T02's dedicated input/pending matrix,
   M10-T03's complete failure matrix, M10-T04's success/navigation/real-host operation, P-09/P-10,
   remote or multi-user persistence, or G10; local receipts alone make no hosted exact-head claim
+
+### M10-T01C evergreen product-composition evidence
+
+- the normal `main.tsx` composition explicitly selects the reference sign-in workspace while the
+  public product and application roots require a factory-authenticated `ProjectWorkspaceProfile`;
+  no generic editor path infers profile authority from a route, document, Catalog position, or test
+  fixture
+- the immutable profile captures exact project and surface inventory, independent App route slug
+  and Source surface identity, Source document id and storage key, complete ordered Catalog set and
+  Publisher package candidates, authenticated adapter registry, token CSS, runtime ports, and an
+  optional publication channel/host binding
+- App, persistence, and publication share exact current-document re-admission: document id,
+  authored entry, complete surface inventory, complete Catalog requirements, and interaction
+  contracts cannot drift; prepared controllers and editor remounts are bound to the exact opaque
+  profile handle rather than matching public ids
+- editor projection, preview, fixture/scenario resolution, persistence, publication, runtime canvas,
+  and product bootstrap now consume that profile or its authenticated snapshot; generic source
+  modules contain no account-app, sign-in, signIn, reference-Catalog package, or reference-example
+  default
+- project-list fixtures require a distinct opaque, detached, bounded inventory handle and remain
+  inert: they cannot carry Source, mutation, persistence, publication, project-creation, editable
+  surface, or runnable surface authority
+- synthetic authoring replaces all nine profile host-port families with inert implementations and
+  invokes only the explicit local Catalog fixture operation controller; no captured profile callback
+  runs
+- a non-entry route renders a transient selected-surface canvas Bundle while the authored,
+  persisted, and published document keeps its original entry and base revision
+- publication ports are factory-authenticated to the profile's fixed channel and installed host;
+  exact publish bytes/requests and activation requests are validated, cloned, and reconstructed so
+  caller data cannot redirect the destination
+- positive coverage admits an authentication-independent two-surface feedback project whose route
+  slugs differ from its Source surface ids and whose Source requires two Catalogs; an independent
+  complete App render opens a feedback surface through the ordinary project shell, authoring
+  model, real-adapter canvas, and layer hierarchy
+- negative coverage rejects structurally forged profile handles, route-to-Source identity drift,
+  incomplete Catalog-package authority, forged adapter registries, cross-profile persistence
+  routes, and publication requests for a host other than the profile binding before downstream I/O
+- deterministic evidence:
+  `docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json`; verifier:
+  `scripts/verify-desen-app-evergreen-product-composition.mjs`
+- coverage decision: M10-T01C is `DONE`; overall progress is 113/148 (76%); M10 is 4/12; M10-T02
+  remains `NOT_STARTED` and next
+- explicit nonclaims: this composition boundary does not close M10-T02 input/pending, M10-T03
+  failure, M10-T04 real-host success/navigation, remote or multi-user persistence, P-09/P-10, or
+  G10; local receipts alone make no hosted exact-head claim
 
 ## Status vocabulary
 

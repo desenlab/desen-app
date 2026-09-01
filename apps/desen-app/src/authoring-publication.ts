@@ -1,17 +1,25 @@
 /* eslint-disable @typescript-eslint/no-invalid-void-type -- The controller is a React-free
  * external-store boundary whose trusted-host callbacks are deliberately receiver-independent. */
-import { createDesenEditorDocument } from "@desen/editor-core";
 import { canonicalizeJson, canonicalizeJsonBytes, isSha256Digest } from "@desen/protocol";
 
 import { prepareAuthoringPreviewBundle } from "./authoring-preview.js";
+import {
+  admitProjectWorkspaceDocument,
+  readProjectWorkspaceProfileAuthority,
+} from "./project-workspace-profile.js";
 
 import type { DesenEditorDocument } from "@desen/editor-core";
+import type { PublishCatalogPackageCandidate } from "@desen/publisher";
+import type { ProjectWorkspaceProfileHandle } from "./project-workspace-profile.js";
 
-const AUTHORIZED_PROJECT_ID = "account-app";
-const AUTHORIZED_SURFACE_ID = "sign-in";
-const AUTHORIZED_DOCUMENT_ID = "com.example.account-app";
-const CONFIGURATION_KEYS = Object.freeze(["publicationPort", "route", "snapshot"]);
-const PORT_KEYS = Object.freeze(["activateReferenceHost", "publishBundleToChannel"]);
+const CONFIGURATION_KEYS = Object.freeze(["profile", "publicationPort", "route", "snapshot"]);
+const PORT_KEYS = Object.freeze(["activatePublishedRevision", "publishBundleToChannel"]);
+const FIXED_PORT_OPTION_KEYS = Object.freeze([
+  "activatePublishedRevision",
+  "channelName",
+  "hostId",
+  "publishBundleToChannel",
+]);
 const SNAPSHOT_KEYS = Object.freeze([
   "document",
   "persistenceAuthority",
@@ -20,13 +28,10 @@ const SNAPSHOT_KEYS = Object.freeze([
   "sourceGeneration",
 ]);
 
-/** The only mutable discovery channel selected by this reviewed App slice. */
-export const AUTHORING_PUBLICATION_CHANNEL = "preview" as const;
-
-type PublicationPendingStage = "control-plane" | "reference-host";
+type PublicationPendingStage = "control-plane" | "host-activation";
 type PublicationOperationToken = Readonly<Record<never, never>>;
 
-/** Exact App route admitted by the sign-in publication profile. */
+/** Exact App route admitted by the authenticated workspace publication profile. */
 export interface AuthoringPublicationRoute {
   readonly projectId: string;
   readonly surfaceId: string;
@@ -53,6 +58,8 @@ export interface AuthoringPublicationSnapshot {
 /** Exact immutable Bundle request handed to the trusted control-plane adapter. */
 export interface AuthoringControlPlanePublicationRequest {
   readonly bundleBytes: Readonly<Uint8Array>;
+  /** Exact profile-owned channel the trusted fixed-channel adapter must verify before any write. */
+  readonly channelName: string;
   readonly revision: string;
 }
 
@@ -60,7 +67,7 @@ export interface AuthoringControlPlanePublicationRequest {
 export type AuthoringControlPlanePublicationSettlement =
   | Readonly<{
       readonly status: "published";
-      readonly channelName: typeof AUTHORING_PUBLICATION_CHANNEL;
+      readonly channelName: string;
       readonly revision: string;
       readonly bundleStatus: "stored" | "unchanged";
       readonly channelStatus: "created" | "updated" | "unchanged";
@@ -111,15 +118,16 @@ export type AuthoringControlPlanePublicationFailureReason =
   | "storage-unavailable"
   | "unsafe-storage";
 
-/** Exact request to make the server-owned reference host consume the fixed channel. */
-export interface AuthoringReferenceHostActivationRequest {
-  readonly channelName: typeof AUTHORING_PUBLICATION_CHANNEL;
+/** Exact request to make one profile-selected host consume the published channel revision. */
+export interface AuthoringHostActivationRequest {
+  readonly channelName: string;
   readonly channelGeneration: number;
+  readonly hostId: string;
   readonly revision: string;
 }
 
-/** Closed durable-active observation returned by the trusted reference-host adapter. */
-export type AuthoringReferenceHostActivationSettlement =
+/** Closed durable-active observation returned by the trusted host activation adapter. */
+export type AuthoringHostActivationSettlement =
   | Readonly<{
       readonly status: "active";
       readonly relationship: "activated" | "preserved" | "recovered";
@@ -134,18 +142,139 @@ export type AuthoringReferenceHostActivationSettlement =
  * Trusted-host publication edge captured as two exact receiver-independent methods.
  *
  * @remarks The first method owns real control-plane Bundle storage and fixed-channel CAS. The
- * second owns reference-host refresh/activation. Neither method receives Source, scenario,
- * fixture, password, Catalog, executable adapter, filesystem, token, or host-selection data.
+ * second owns profile-selected host refresh/activation. Neither method receives Source, scenario,
+ * fixture, password, Catalog, executable adapter, filesystem, or token data. Destination identities
+ * cross only as profile-captured channel and host values verified before any host effect.
  */
 export interface AuthoringPublicationPort {
   readonly publishBundleToChannel: (
     this: void,
     request: AuthoringControlPlanePublicationRequest,
   ) => Promise<AuthoringControlPlanePublicationSettlement>;
-  readonly activateReferenceHost: (
+  readonly activatePublishedRevision: (
     this: void,
-    request: AuthoringReferenceHostActivationRequest,
-  ) => Promise<AuthoringReferenceHostActivationSettlement>;
+    request: AuthoringHostActivationRequest,
+  ) => Promise<AuthoringHostActivationSettlement>;
+}
+
+/** Side-effect request delegated only after the fixed profile channel has been authenticated. */
+export type AuthoringFixedChannelPublicationRequest = Readonly<
+  Omit<AuthoringControlPlanePublicationRequest, "channelName">
+>;
+
+/** Trusted adapter callbacks bound to one exact profile-owned channel and installed host. */
+export interface AuthoringFixedDestinationPublicationPortOptions {
+  readonly channelName: string;
+  readonly hostId: string;
+  readonly publishBundleToChannel: (
+    this: void,
+    request: AuthoringFixedChannelPublicationRequest,
+  ) => Promise<AuthoringControlPlanePublicationSettlement>;
+  readonly activatePublishedRevision: (
+    this: void,
+    request: AuthoringHostActivationRequest,
+  ) => Promise<AuthoringHostActivationSettlement>;
+}
+
+export interface AuthoringPublicationPortDestination {
+  readonly channelName: string;
+  readonly hostId: string;
+}
+
+const AUTHORING_PUBLICATION_PORT_DESTINATIONS = new WeakMap<
+  AuthoringPublicationPort,
+  AuthoringPublicationPortDestination
+>();
+
+/**
+ * Binds a host adapter to one exact profile destination before it can perform any publication.
+ *
+ * @remarks The wrapper verifies profile destination identities and strips `channelName` before
+ * calling the underlying fixed-channel adapter, so an exact-own-data downstream request cannot be
+ * widened. A mismatched channel or host settles locally without invoking either effect callback.
+ */
+export function createFixedDestinationAuthoringPublicationPort(
+  options: AuthoringFixedDestinationPublicationPortOptions,
+): AuthoringPublicationPort {
+  const values = exactOwnData(options, FIXED_PORT_OPTION_KEYS);
+  if (
+    values === undefined ||
+    typeof values.channelName !== "string" ||
+    values.channelName.length === 0 ||
+    values.channelName.length > 512 ||
+    typeof values.hostId !== "string" ||
+    values.hostId.length === 0 ||
+    values.hostId.length > 512 ||
+    typeof values.publishBundleToChannel !== "function" ||
+    typeof values.activatePublishedRevision !== "function"
+  ) {
+    throw new TypeError("Invalid fixed-destination authoring publication port options.");
+  }
+  const channelName = values.channelName;
+  const hostId = values.hostId;
+  const publishBundleToChannel =
+    values.publishBundleToChannel as AuthoringFixedDestinationPublicationPortOptions["publishBundleToChannel"];
+  const activatePublishedRevision =
+    values.activatePublishedRevision as AuthoringFixedDestinationPublicationPortOptions["activatePublishedRevision"];
+  const port: AuthoringPublicationPort = Object.freeze({
+    async publishBundleToChannel(request: AuthoringControlPlanePublicationRequest) {
+      const captured = exactOwnData(request, ["bundleBytes", "channelName", "revision"]);
+      if (
+        captured === undefined ||
+        captured.channelName !== channelName ||
+        !(captured.bundleBytes instanceof Uint8Array) ||
+        typeof captured.revision !== "string" ||
+        !isSha256Digest(captured.revision)
+      ) {
+        return Object.freeze({
+          status: "failed" as const,
+          phase: "request" as const,
+          reason: "channel-invalid" as const,
+        });
+      }
+      return publishBundleToChannel(
+        Object.freeze({
+          bundleBytes: new Uint8Array(captured.bundleBytes),
+          revision: captured.revision,
+        }),
+      );
+    },
+    async activatePublishedRevision(request: AuthoringHostActivationRequest) {
+      const captured = exactOwnData(request, [
+        "channelGeneration",
+        "channelName",
+        "hostId",
+        "revision",
+      ]);
+      if (
+        captured === undefined ||
+        captured.channelName !== channelName ||
+        captured.hostId !== hostId ||
+        !positiveGeneration(captured.channelGeneration) ||
+        typeof captured.revision !== "string" ||
+        !isSha256Digest(captured.revision)
+      ) {
+        return Object.freeze({ status: "failed" as const });
+      }
+      return activatePublishedRevision(
+        Object.freeze({
+          channelGeneration: captured.channelGeneration,
+          channelName,
+          hostId,
+          revision: captured.revision,
+        }),
+      );
+    },
+  });
+  AUTHORING_PUBLICATION_PORT_DESTINATIONS.set(port, Object.freeze({ channelName, hostId }));
+  return port;
+}
+
+/** Reads the authenticated fixed destination behind an App publication port. */
+export function readAuthoringPublicationPortDestination(
+  port: AuthoringPublicationPort,
+): AuthoringPublicationPortDestination | null {
+  return AUTHORING_PUBLICATION_PORT_DESTINATIONS.get(port) ?? null;
 }
 
 /** Stable controlled reason why the exact current authored session was not published. */
@@ -158,9 +287,9 @@ export type AuthoringPublicationFailureReason =
   | "persistence-not-ready"
   | "preview-revision-stale"
   | "publisher-rejected"
-  | "reference-host-failed"
-  | "reference-host-revision-mismatch"
-  | "reference-host-unavailable"
+  | "host-activation-failed"
+  | "host-activation-revision-mismatch"
+  | "host-activation-unavailable"
   | "source-dirty"
   | "source-not-saved"
   | "stale-operation";
@@ -169,7 +298,7 @@ export type AuthoringPublicationFailureReason =
 export interface AuthoringPublicationSuccess {
   readonly status: "published";
   readonly relationship: "activated" | "preserved" | "recovered";
-  readonly channelName: typeof AUTHORING_PUBLICATION_CHANNEL;
+  readonly channelName: string;
   readonly revision: string;
   readonly sourceGeneration: number;
   readonly channelGeneration: number;
@@ -205,7 +334,8 @@ export type AuthoringPublicationResult =
 /** Immutable external-store state for future publication UI consumption. */
 export interface AuthoringPublicationState {
   readonly route: AuthoringPublicationRoute;
-  readonly channelName: typeof AUTHORING_PUBLICATION_CHANNEL;
+  readonly channelName: string;
+  readonly hostId: string;
   readonly snapshot: AuthoringPublicationSnapshot;
   readonly pending: PublicationPendingStage | null;
   readonly result: AuthoringPublicationResult | null;
@@ -244,6 +374,7 @@ export interface AuthoringPublicationController {
 
 /** Exact trusted inputs captured by one route-bound publication controller. */
 export interface AuthoringPublicationControllerOptions {
+  readonly profile: ProjectWorkspaceProfileHandle;
   readonly route: AuthoringPublicationRoute;
   readonly snapshot: AuthoringPublicationSnapshot;
   readonly publicationPort: AuthoringPublicationPort;
@@ -259,6 +390,8 @@ export type AuthoringPublicationControllerCreationResult =
         | "persistence-authority-invalid"
         | "port-invalid"
         | "preview-revision-invalid"
+        | "profile-invalid"
+        | "publication-unavailable"
         | "route-invalid"
         | "saved-document-invalid"
         | "snapshot-invalid"
@@ -267,7 +400,7 @@ export type AuthoringPublicationControllerCreationResult =
 
 interface CapturedPublicationPort {
   readonly publishBundleToChannel: AuthoringPublicationPort["publishBundleToChannel"];
-  readonly activateReferenceHost: AuthoringPublicationPort["activateReferenceHost"];
+  readonly activatePublishedRevision: AuthoringPublicationPort["activatePublishedRevision"];
 }
 
 interface CapturedDocument {
@@ -315,18 +448,23 @@ function exactOwnData(
   }
 }
 
-function captureRoute(route: unknown): AuthoringPublicationRoute | undefined {
+function captureRoute(
+  route: unknown,
+  projectId: string,
+  sourceSurfaceIds: ReadonlySet<string>,
+): AuthoringPublicationRoute | undefined {
   const values = exactOwnData(route, ["projectId", "surfaceId"]);
   if (
     values === undefined ||
-    values.projectId !== AUTHORIZED_PROJECT_ID ||
-    values.surfaceId !== AUTHORIZED_SURFACE_ID
+    values.projectId !== projectId ||
+    typeof values.surfaceId !== "string" ||
+    !sourceSurfaceIds.has(values.surfaceId)
   ) {
     return undefined;
   }
   return Object.freeze({
-    projectId: AUTHORIZED_PROJECT_ID,
-    surfaceId: AUTHORIZED_SURFACE_ID,
+    projectId,
+    surfaceId: values.surfaceId,
   });
 }
 
@@ -335,15 +473,15 @@ function capturePublicationPort(port: unknown): CapturedPublicationPort | undefi
   if (
     values === undefined ||
     typeof values.publishBundleToChannel !== "function" ||
-    typeof values.activateReferenceHost !== "function"
+    typeof values.activatePublishedRevision !== "function"
   ) {
     return undefined;
   }
   return Object.freeze({
     publishBundleToChannel:
       values.publishBundleToChannel as AuthoringPublicationPort["publishBundleToChannel"],
-    activateReferenceHost:
-      values.activateReferenceHost as AuthoringPublicationPort["activateReferenceHost"],
+    activatePublishedRevision:
+      values.activatePublishedRevision as AuthoringPublicationPort["activatePublishedRevision"],
   });
 }
 
@@ -382,14 +520,14 @@ function controlPlaneFailureReason(
   );
 }
 
-function captureDocument(input: unknown): CapturedDocument | undefined {
+function captureDocument(
+  input: unknown,
+  profile: ProjectWorkspaceProfileHandle,
+  surfaceId: string,
+): CapturedDocument | undefined {
   try {
-    const admitted = createDesenEditorDocument(input);
-    if (
-      !admitted.ok ||
-      admitted.document.id !== AUTHORIZED_DOCUMENT_ID ||
-      !Object.hasOwn(admitted.document.surfaces, AUTHORIZED_SURFACE_ID)
-    ) {
+    const admitted = admitProjectWorkspaceDocument(profile, input);
+    if (admitted.status !== "admitted" || !Object.hasOwn(admitted.document.surfaces, surfaceId)) {
       return undefined;
     }
     return Object.freeze({
@@ -401,17 +539,23 @@ function captureDocument(input: unknown): CapturedDocument | undefined {
   }
 }
 
-function captureSnapshot(input: unknown): SnapshotCaptureResult {
+function captureSnapshot(
+  input: unknown,
+  profile: ProjectWorkspaceProfileHandle,
+  surfaceId: string,
+): SnapshotCaptureResult {
   const values = exactOwnData(input, SNAPSHOT_KEYS);
   if (values === undefined) {
     return Object.freeze({ ok: false, reason: "snapshot-invalid" });
   }
-  const document = captureDocument(values.document);
+  const document = captureDocument(values.document, profile, surfaceId);
   if (document === undefined) {
     return Object.freeze({ ok: false, reason: "document-invalid" });
   }
   const savedDocument =
-    values.savedDocument === null ? null : captureDocument(values.savedDocument);
+    values.savedDocument === null
+      ? null
+      : captureDocument(values.savedDocument, profile, surfaceId);
   if (values.savedDocument !== null && savedDocument === undefined) {
     return Object.freeze({ ok: false, reason: "saved-document-invalid" });
   }
@@ -451,6 +595,7 @@ function captureSnapshot(input: unknown): SnapshotCaptureResult {
 
 function captureControlPlaneSettlement(
   input: unknown,
+  channelName: string,
 ): AuthoringControlPlanePublicationSettlement | undefined {
   const success = exactOwnData(input, [
     "bundleStatus",
@@ -462,7 +607,7 @@ function captureControlPlaneSettlement(
   ]);
   if (
     success?.status === "published" &&
-    success.channelName === AUTHORING_PUBLICATION_CHANNEL &&
+    success.channelName === channelName &&
     typeof success.revision === "string" &&
     isSha256Digest(success.revision) &&
     bundleStatus(success.bundleStatus) &&
@@ -471,7 +616,7 @@ function captureControlPlaneSettlement(
   ) {
     return Object.freeze({
       status: "published",
-      channelName: AUTHORING_PUBLICATION_CHANNEL,
+      channelName,
       revision: success.revision,
       bundleStatus: success.bundleStatus,
       channelStatus: success.channelStatus,
@@ -564,7 +709,7 @@ function captureControlPlaneSettlement(
 
 function captureActivationSettlement(
   input: unknown,
-): AuthoringReferenceHostActivationSettlement | undefined {
+): AuthoringHostActivationSettlement | undefined {
   const active = exactOwnData(input, [
     "activationGeneration",
     "activeRevision",
@@ -675,36 +820,62 @@ function sameSnapshot(left: CapturedSnapshot, right: CapturedSnapshot): boolean 
 }
 
 /**
- * Creates one App-owned Source-to-control-plane-to-reference-host publication state machine.
+ * Creates one App-owned Source-to-control-plane-to-profile-host publication state machine.
  *
  * @remarks Publication is admitted only for the exact current authored Source when its canonical
  * content equals the last successful saved document, its Source generation is positive, and its
  * persistence authority is ready. The Source is republished through the existing public Publisher
  * helper; the fresh revision must equal the current session-preview revision before canonical
  * Bundle bytes cross the host port. A channel update never counts as activation: success is
- * visible only after the reference host returns the same durable active revision.
+ * visible only after the profile-selected host returns the same durable active revision.
  */
 export function createAuthoringPublicationController(
   options: AuthoringPublicationControllerOptions,
 ): AuthoringPublicationControllerCreationResult {
   const values = exactOwnData(options, CONFIGURATION_KEYS);
   if (values === undefined) return Object.freeze({ ok: false, reason: "route-invalid" });
-  const route = captureRoute(values.route);
+  const authority = readProjectWorkspaceProfileAuthority(
+    values.profile as ProjectWorkspaceProfileHandle,
+  );
+  if (authority.status !== "read") {
+    return Object.freeze({ ok: false, reason: "profile-invalid" });
+  }
+  const profile = authority.profile;
+  const profileHandle = values.profile as ProjectWorkspaceProfileHandle;
+  if (profile.publication === null) {
+    return Object.freeze({ ok: false, reason: "publication-unavailable" });
+  }
+  const sourceSurfaceIds = new Set(profile.project.surfaces.map((surface) => surface.sourceId));
+  const route = captureRoute(values.route, profile.project.id, sourceSurfaceIds);
   if (route === undefined) return Object.freeze({ ok: false, reason: "route-invalid" });
+  const portDestination = AUTHORING_PUBLICATION_PORT_DESTINATIONS.get(
+    values.publicationPort as AuthoringPublicationPort,
+  );
+  if (
+    portDestination === undefined ||
+    portDestination.channelName !== profile.publication.channelName ||
+    portDestination.hostId !== profile.publication.hostId
+  ) {
+    return Object.freeze({ ok: false, reason: "port-invalid" });
+  }
   const port = capturePublicationPort(values.publicationPort);
   if (port === undefined) return Object.freeze({ ok: false, reason: "port-invalid" });
-  const initial = captureSnapshot(values.snapshot);
+  const initial = captureSnapshot(values.snapshot, profileHandle, route.surfaceId);
   if (!initial.ok) return initial;
 
   const publishBundleToChannel = port.publishBundleToChannel;
-  const activateReferenceHost = port.activateReferenceHost;
+  const activatePublishedRevision = port.activatePublishedRevision;
+  const channelName = profile.publication.channelName;
+  const hostId = profile.publication.hostId;
+  const catalogPackages: readonly PublishCatalogPackageCandidate[] = profile.catalogPackages;
   const listeners = new Set<() => void>();
   let capturedSnapshot = initial.captured;
   let snapshotVersion = 0;
   let currentOperation: PublicationOperationToken | null = null;
   let state = freezeState({
     route,
-    channelName: AUTHORING_PUBLICATION_CHANNEL,
+    channelName,
+    hostId,
     snapshot: capturedSnapshot.snapshot,
     pending: null,
     result: null,
@@ -742,7 +913,7 @@ export function createAuthoringPublicationController(
 
   const replaceSnapshot: AuthoringPublicationController["replaceSnapshot"] = (snapshot) => {
     if (state.disposed) return Object.freeze({ ok: false, reason: "disposed" });
-    const replacement = captureSnapshot(snapshot);
+    const replacement = captureSnapshot(snapshot, profileHandle, route.surfaceId);
     if (!replacement.ok) return replacement;
     if (sameSnapshot(capturedSnapshot, replacement.captured)) {
       return Object.freeze({ ok: true, snapshot: state.snapshot });
@@ -783,7 +954,10 @@ export function createAuthoringPublicationController(
       return result;
     }
 
-    const freshPreview = prepareAuthoringPreviewBundle(capturedSnapshot.snapshot.document);
+    const freshPreview = prepareAuthoringPreviewBundle(
+      capturedSnapshot.snapshot.document,
+      catalogPackages,
+    );
     if (!freshPreview.ok) {
       const result = publicationFailure("publisher-rejected");
       emitResult(result);
@@ -819,6 +993,7 @@ export function createAuthoringPublicationController(
       rawControlPlaneSettlement = await publishBundleToChannel(
         Object.freeze({
           bundleBytes,
+          channelName,
           revision,
         }),
       );
@@ -835,7 +1010,10 @@ export function createAuthoringPublicationController(
     if (!operationIsCurrent(token, version)) {
       return publicationFailure(state.disposed ? "disposed" : "stale-operation");
     }
-    const controlPlaneSettlement = captureControlPlaneSettlement(rawControlPlaneSettlement);
+    const controlPlaneSettlement = captureControlPlaneSettlement(
+      rawControlPlaneSettlement,
+      channelName,
+    );
     if (!operationIsCurrent(token, version)) {
       return publicationFailure(state.disposed ? "disposed" : "stale-operation");
     }
@@ -885,16 +1063,17 @@ export function createAuthoringPublicationController(
     }
 
     const channelGeneration = controlPlaneSettlement.channelGeneration;
-    emit({ ...state, pending: "reference-host", result: null });
+    emit({ ...state, pending: "host-activation", result: null });
     if (!operationIsCurrent(token, version)) {
       return publicationFailure(state.disposed ? "disposed" : "stale-operation");
     }
     let rawActivationSettlement: unknown;
     try {
-      rawActivationSettlement = await activateReferenceHost(
+      rawActivationSettlement = await activatePublishedRevision(
         Object.freeze({
-          channelName: AUTHORING_PUBLICATION_CHANNEL,
+          channelName,
           channelGeneration,
+          hostId,
           revision,
         }),
       );
@@ -904,7 +1083,7 @@ export function createAuthoringPublicationController(
       }
       currentOperation = null;
       const result = publicationIndeterminate(
-        "reference-host",
+        "host-activation",
         revision,
         sourceGeneration,
         channelGeneration,
@@ -923,7 +1102,7 @@ export function createAuthoringPublicationController(
     currentOperation = null;
     if (activationSettlement === undefined || activationSettlement.status === "indeterminate") {
       const result = publicationIndeterminate(
-        "reference-host",
+        "host-activation",
         revision,
         sourceGeneration,
         channelGeneration,
@@ -933,7 +1112,7 @@ export function createAuthoringPublicationController(
     }
     if (activationSettlement.status === "unavailable") {
       const result = publicationFailure(
-        "reference-host-unavailable",
+        "host-activation-unavailable",
         true,
         Object.freeze({
           published: Object.freeze({ revision, sourceGeneration, channelGeneration }),
@@ -944,7 +1123,7 @@ export function createAuthoringPublicationController(
     }
     if (activationSettlement.status === "failed") {
       const result = publicationFailure(
-        "reference-host-failed",
+        "host-activation-failed",
         true,
         Object.freeze({
           published: Object.freeze({ revision, sourceGeneration, channelGeneration }),
@@ -955,7 +1134,7 @@ export function createAuthoringPublicationController(
     }
     if (activationSettlement.activeRevision !== revision) {
       const result = publicationFailure(
-        "reference-host-revision-mismatch",
+        "host-activation-revision-mismatch",
         true,
         Object.freeze({
           published: Object.freeze({ revision, sourceGeneration, channelGeneration }),
@@ -972,7 +1151,7 @@ export function createAuthoringPublicationController(
     const result = Object.freeze({
       status: "published" as const,
       relationship: activationSettlement.relationship,
-      channelName: AUTHORING_PUBLICATION_CHANNEL,
+      channelName,
       revision,
       sourceGeneration,
       channelGeneration,

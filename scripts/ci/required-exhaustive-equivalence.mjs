@@ -50,15 +50,15 @@ const CLOSED_STATUSES = SAFE_OBJECT_FREEZE(["PASS", "FAIL", "CANCELLED", "TIMED_
 const NOT_STARTED_STATUSES = SAFE_OBJECT_FREEZE(["SKIPPED", "NOT_RUN"]);
 const SIGNALS = SAFE_OBJECT_FREEZE(["SIGINT", "SIGTERM", "ABORT"]);
 const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
-const REQUIRED_WORKLOAD_COUNT = 208;
+const REQUIRED_WORKLOAD_COUNT = 210;
 
 /** Retained sequential-plan digest used only as an equivalence and rollback anchor. */
 export const EXPECTED_RETAINED_PLAN_SHA256 =
-  "669dc72f2b419d1f87cc417de190923ce13922061bce5e9a22ebc998cea1e7d5";
+  "1d82aaaefd82af63086e0a0ab892f92ae891895ace1878a63d249b7b97878e4c";
 
-/** Digest of all 208 workload ids in their canonical inventory order. */
+/** Digest of all 210 workload ids in their canonical inventory order. */
 export const EXPECTED_REQUIRED_WORKLOAD_SET_SHA256 =
-  "08be15b268b0aa9d86f1996ab9cb5be40cdffd57d5df4e70b39b529ae3cd9a78";
+  "e59457168dba61caebf0a64bbe267332455f723b1fc4d3864c7907f46acb72c0";
 
 /** Error raised when exhaustive inventories or terminal receipts are not equivalent. */
 export class RequiredExhaustiveEquivalenceError extends Error {

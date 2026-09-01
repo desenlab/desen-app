@@ -12,13 +12,15 @@ import { openReferenceHostChannelActivationController } from "@desen/reference-h
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
-  AUTHORING_PUBLICATION_CHANNEL,
   createAuthoringPublicationController,
+  createFixedDestinationAuthoringPublicationPort,
 } from "../src/authoring-publication.js";
+import { readProjectWorkspaceProfileAuthority } from "../src/project-workspace-profile.js";
 import {
-  prepareAuthoringPreviewBundle,
+  prepareReferenceAuthoringPreviewBundle as prepareAuthoringPreviewBundle,
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
   REFERENCE_EDITOR_DOCUMENT,
-} from "../src/authoring-preview.js";
+} from "../src/reference-authoring-profile.js";
 
 import type { LocalControlPlane } from "@desen/control-plane-api";
 import type {
@@ -31,16 +33,23 @@ import type {
   ReferenceHostChannelRefreshResult,
 } from "@desen/reference-host-web-server";
 import type {
-  AuthoringControlPlanePublicationRequest,
   AuthoringPublicationController,
   AuthoringPublicationPort,
   AuthoringPublicationSnapshot,
-  AuthoringReferenceHostActivationRequest,
+  AuthoringHostActivationRequest,
 } from "../src/authoring-publication.js";
 
 const API_TOKEN = "m09-t14-public-loopback-token-000001";
 const SOURCE_GENERATION = 37;
 const ROUTE = Object.freeze({ projectId: "account-app", surfaceId: "sign-in" });
+const PROFILE_AUTHORITY = readProjectWorkspaceProfileAuthority(
+  REFERENCE_AUTHORING_WORKSPACE_PROFILE,
+);
+if (PROFILE_AUTHORITY.status !== "read" || PROFILE_AUTHORITY.profile.publication === null) {
+  throw new TypeError("The reference workspace profile must authorize publication in this test.");
+}
+const CHANNEL_NAME = PROFILE_AUTHORITY.profile.publication.channelName;
+const HOST_ID = PROFILE_AUTHORITY.profile.publication.hostId;
 const WORKSPACE_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const INSTALLED_PACKAGE_DIRECTORY = join(WORKSPACE_ROOT, "packages/reference-catalog-web");
 const TRANSIENT_SCENARIO_VALUE = "m09-t14-scenario-only-title";
@@ -60,8 +69,8 @@ interface RealPublicationEnvironment {
   readonly controlPlane: LocalControlPlane;
   readonly referenceHost: ReferenceHostChannelActivationController;
   readonly publicationPort: AuthoringPublicationPort;
-  readonly channelSettlements: LocalDesenBundleChannelPublicationResult<"preview">[];
-  readonly activationRequests: AuthoringReferenceHostActivationRequest[];
+  readonly channelSettlements: LocalDesenBundleChannelPublicationResult<string>[];
+  readonly activationRequests: AuthoringHostActivationRequest[];
   readonly activationRefreshes: ReferenceHostChannelRefreshResult[];
   readonly publicationRequestBodies: Uint8Array[];
 }
@@ -123,7 +132,7 @@ async function openEnvironment(): Promise<RealPublicationEnvironment> {
   const channelPort = createLocalDesenBundleChannelPublicationPort({
     origin: listener.origin,
     apiToken: API_TOKEN,
-    channelName: AUTHORING_PUBLICATION_CHANNEL,
+    channelName: CHANNEL_NAME,
     fetch: loopbackFetch(publicationRequestBodies),
   });
   const referenceHost = await openReferenceHostChannelActivationController({
@@ -131,21 +140,24 @@ async function openEnvironment(): Promise<RealPublicationEnvironment> {
     installedPackageDirectory: INSTALLED_PACKAGE_DIRECTORY,
     controlPlaneOrigin: listener.origin,
     controlPlaneApiToken: API_TOKEN,
-    channelName: AUTHORING_PUBLICATION_CHANNEL,
+    channelName: CHANNEL_NAME,
   });
   referenceHosts.push(referenceHost);
 
-  const channelSettlements: LocalDesenBundleChannelPublicationResult<"preview">[] = [];
-  const activationRequests: AuthoringReferenceHostActivationRequest[] = [];
+  const channelSettlements: LocalDesenBundleChannelPublicationResult<string>[] = [];
+  const activationRequests: AuthoringHostActivationRequest[] = [];
   const activationRefreshes: ReferenceHostChannelRefreshResult[] = [];
-  const publicationPort: AuthoringPublicationPort = Object.freeze({
-    async publishBundleToChannel(request: AuthoringControlPlanePublicationRequest) {
+  const publicationPort = createFixedDestinationAuthoringPublicationPort({
+    channelName: CHANNEL_NAME,
+    hostId: HOST_ID,
+    async publishBundleToChannel(request) {
       const settlement = await channelPort.publishBundleToChannel(request);
       channelSettlements.push(settlement);
       return settlement;
     },
-    async activateReferenceHost(request: AuthoringReferenceHostActivationRequest) {
+    async activatePublishedRevision(request: AuthoringHostActivationRequest) {
       activationRequests.push(request);
+      if (request.hostId !== HOST_ID) return Object.freeze({ status: "failed" as const });
       const published = channelSettlements.at(-1);
       if (
         published?.status !== "published" ||
@@ -185,6 +197,7 @@ function requireController(
   environment: RealPublicationEnvironment,
 ): AuthoringPublicationController {
   const created = createAuthoringPublicationController({
+    profile: REFERENCE_AUTHORING_WORKSPACE_PROFILE,
     route: ROUTE,
     snapshot: snapshot(),
     publicationPort: environment.publicationPort,
@@ -218,6 +231,21 @@ afterEach(async () => {
 });
 
 describe("real saved-Source publication and durable reference-host activation", () => {
+  it("rejects a host activation request that does not match the authenticated profile binding", async () => {
+    const environment = await openEnvironment();
+
+    await expect(
+      environment.publicationPort.activatePublishedRevision({
+        channelName: CHANNEL_NAME,
+        channelGeneration: 1,
+        hostId: "another-host",
+        revision: EXPECTED_REVISION,
+      }),
+    ).resolves.toEqual({ status: "failed" });
+    expect(environment.activationRefreshes).toHaveLength(0);
+    expect(environment.referenceHost.readDelivery()).toBeUndefined();
+  });
+
   it("keeps exact saved Source, Publisher Bundle, fixed channel, and active revision equal", async () => {
     const environment = await openEnvironment();
     const forbiddenSnapshot = {
@@ -228,6 +256,7 @@ describe("real saved-Source publication and durable reference-host activation", 
     };
     expect(
       createAuthoringPublicationController({
+        profile: REFERENCE_AUTHORING_WORKSPACE_PROFILE,
         route: ROUTE,
         snapshot: forbiddenSnapshot as never,
         publicationPort: environment.publicationPort,
@@ -239,7 +268,7 @@ describe("real saved-Source publication and durable reference-host activation", 
     expect(result).toEqual({
       status: "published",
       relationship: "activated",
-      channelName: AUTHORING_PUBLICATION_CHANNEL,
+      channelName: CHANNEL_NAME,
       revision: EXPECTED_REVISION,
       sourceGeneration: SOURCE_GENERATION,
       channelGeneration: 1,
@@ -251,7 +280,7 @@ describe("real saved-Source publication and durable reference-host activation", 
     expect(environment.channelSettlements).toEqual([
       {
         status: "published",
-        channelName: AUTHORING_PUBLICATION_CHANNEL,
+        channelName: CHANNEL_NAME,
         revision: EXPECTED_REVISION,
         bundleStatus: "stored",
         channelStatus: "created",
@@ -267,11 +296,11 @@ describe("real saved-Source publication and durable reference-host activation", 
     expect(storedBundle.body).toEqual(EXPECTED_BUNDLE_BYTES);
     const channel = await authenticatedGet(
       environment.controlPlane,
-      `/v1/channels/${AUTHORING_PUBLICATION_CHANNEL}`,
+      `/v1/channels/${CHANNEL_NAME}`,
     );
     expect(channel.statusCode).toBe(200);
     expect(parseJson(channel.body)).toEqual({
-      channelName: AUTHORING_PUBLICATION_CHANNEL,
+      channelName: CHANNEL_NAME,
       generation: 1,
       revision: EXPECTED_REVISION,
     });
@@ -279,8 +308,9 @@ describe("real saved-Source publication and durable reference-host activation", 
     expect(delivery?.bundle).toEqual(EXPECTED_BUNDLE);
     expect(environment.activationRequests).toEqual([
       {
-        channelName: AUTHORING_PUBLICATION_CHANNEL,
+        channelName: CHANNEL_NAME,
         channelGeneration: 1,
+        hostId: HOST_ID,
         revision: EXPECTED_REVISION,
       },
     ]);
@@ -322,7 +352,7 @@ describe("real saved-Source publication and durable reference-host activation", 
     await expect(controller.publish()).resolves.toEqual({
       status: "published",
       relationship: "preserved",
-      channelName: AUTHORING_PUBLICATION_CHANNEL,
+      channelName: CHANNEL_NAME,
       revision: EXPECTED_REVISION,
       sourceGeneration: SOURCE_GENERATION,
       channelGeneration: 1,
@@ -349,13 +379,15 @@ describe("real saved-Source publication and durable reference-host activation", 
     ]);
     expect(environment.activationRequests).toEqual([
       {
-        channelName: AUTHORING_PUBLICATION_CHANNEL,
+        channelName: CHANNEL_NAME,
         channelGeneration: 1,
+        hostId: HOST_ID,
         revision: EXPECTED_REVISION,
       },
       {
-        channelName: AUTHORING_PUBLICATION_CHANNEL,
+        channelName: CHANNEL_NAME,
         channelGeneration: 1,
+        hostId: HOST_ID,
         revision: EXPECTED_REVISION,
       },
     ]);

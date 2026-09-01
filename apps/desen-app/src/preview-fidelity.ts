@@ -12,8 +12,6 @@ export type PreviewFidelityKind = "approximate" | "undeclared" | "equivalent" | 
 export const APPROXIMATE_FIDELITY_FALLBACK =
   "The Catalog declares approximate adapter fidelity but provides no differences.";
 
-const PREVIEW_PROJECT_ID = "account-app";
-
 /** One unique component capability used by the selected Source surface. */
 export interface PreviewFidelityEntry {
   readonly capabilityId: string;
@@ -186,11 +184,7 @@ export function projectPreviewFidelity(
 ): PreviewFidelityProjection {
   try {
     const capturedRoute = captureRoute(route);
-    if (
-      capturedRoute === undefined ||
-      capturedRoute.projectId !== PREVIEW_PROJECT_ID ||
-      !Array.isArray(model.surfaces)
-    ) {
+    if (capturedRoute === undefined || !Array.isArray(model.surfaces)) {
       return Object.freeze({ status: "rejected" });
     }
     const surfaces = model.surfaces.filter((surface) => surface.id === capturedRoute.surfaceId);

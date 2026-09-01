@@ -109,7 +109,10 @@ or raw JSON.
 Automate and document the full Desen App → Publisher → separate host workflow, including invalid
 publication and last-known-good cases. The automated path must remain reproducible through the
 visible no-code behavior controls; raw JSON may be an advanced escape hatch, never the required
-designer journey.
+designer journey. Before the lifecycle matrices continue, the product composition must also be
+evergreen: a trusted application root selects one authenticated project-workspace profile, while
+generic editor, preview, persistence, runtime, and publication modules remain independent of the
+reference sign-in example.
 
 **Gate G10:** The managed sign-in surface has no handwritten React counterpart and can change in
 the host without changing host source code.

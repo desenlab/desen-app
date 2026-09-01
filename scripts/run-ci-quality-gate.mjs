@@ -499,6 +499,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-desen-app-visual-behavior-authoring.mjs",
       "tests/desen-app-visual-behavior-authoring.test.mjs",
     ],
+    [
+      "desen-app-evergreen-product-composition",
+      "scripts/verify-desen-app-evergreen-product-composition.mjs",
+      "tests/desen-app-evergreen-product-composition.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -589,14 +594,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "a6c969e096cac98cdd15e15892528518db351862a28af6fbd72ee3919d18c20b";
+  "eca887c765e85c1b2f06d9f9fc420bcf8af38248ecc546df0385fc6c256501d9";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "334ab7e87a2285844e0931b5e6a449ce0317fc385aadff9886d15349064991bb";
+  "dd10d4bd859b4f4bbfb37b78f14810fd47bebac1e03551269a0e81ba9fd09d47";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "5146f101cb767c49f6f0b87fd6939be6bdfc348e5f4dcf8dd77399ac921d4ee3";
+  "100e6af6e7c4c5cf6ba23999116b26a5af6321d8598aa00b3f56a9b0d3c2e920";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "669dc72f2b419d1f87cc417de190923ce13922061bce5e9a22ebc998cea1e7d5";
+const QUALITY_GATE_PLAN_SHA256 = "1d82aaaefd82af63086e0a0ab892f92ae891895ace1878a63d249b7b97878e4c";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
