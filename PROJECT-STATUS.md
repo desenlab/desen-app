@@ -1418,20 +1418,30 @@ Chromium passes 1/1, and the root reader passes 10/10. Visible failure remains M
 navigation, and a real host operation remain M10-T04. P-09/P-10 remain `PARTIAL`, G10 stays open,
 and local evidence makes no hosted exact-head claim.
 
+M10-T03 now closes the dedicated visible-failure browser slice through the normal product UI. From
+the current profile's visible blank project, the Chromium journey authors a critical Alert whose
+visibility follows the operation's `failed` status, without raw JSON or direct DOM/network mutation.
+The Alert is absent while idle and pending, appears only after the exact Catalog-declared
+`invalidCredentials` settlement, disappears during a real retry, and returns after the second
+declared failure. The route, complete email/password values, accessible Button Loading cleanup, and
+the `420 × 720` frame plus horizontal document geometry remain stable. Success, navigation, and a
+separately authorized real host operation remain M10-T04; P-09/P-10 remain `PARTIAL`, Integration,
+Production, N-036, and G10 remain open, and local evidence makes no hosted exact-head claim.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`, `G09`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M10 — First end-to-end proof`
-- Overall implementation progress: `114 / 148 tasks complete (77%)`
+- Overall implementation progress: `115 / 148 tasks complete (78%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
 - M09 progress: `14 / 14 tasks complete (100%)`
-- M10 progress: `5 / 12 tasks complete (42%)`
+- M10 progress: `6 / 12 tasks complete (50%)`
 - Proof-gate progress: `11 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1553,15 +1563,17 @@ and local evidence makes no hosted exact-head claim.
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Current implementation task: none; `M10-T02 — Input and pending fixture test` is complete
-- Next implementation task: `M10-T03 — Failure fixture and visible failure-state test`
+- Current implementation task: none; `M10-T03 — Failure fixture and visible failure-state test` is
+  complete
+- Next implementation task: `M10-T04` — Success fixture, navigation, and real host-operation
+  binding test
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  14/14, M10 is 5/12, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
-  M10-T01B, M10-T01C, and M10-T02 are
+  14/14, M10 is 6/12, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
+  M10-T01B, M10-T01C, M10-T02, and M10-T03 are
   `DONE`; `N-012`, `N-018`, `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`; P-06, P-08,
   and P-16 are `PROVEN`; P-07, P-09, and P-10 are `PARTIAL`; proof gates are 11/13; P-12 remains
   `NOT_PROVEN`; N-036 remains `PLANNED`; PF-028 is `CLOSED`; PF-025, PF-083, PF-085, PF-086, and
-  PF-089 and PF-091 remain `OPEN`; M10-T03 is `NOT_STARTED`; and implementation progress is 114/148.
+  PF-089 and PF-091 remain `OPEN`; M10-T04 is `NOT_STARTED`; and implementation progress is 115/148.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -4833,6 +4845,45 @@ M09-T14/G09 evidence:
   visible public failure remains M10-T03, success/navigation and a separately authorized real host
   operation remain M10-T04, P-09/P-10 remain `PARTIAL`, and Integration, Production, N-036, and
   G10 remain open; local receipts alone make no hosted exact-head claim
+
+### M10-T03 failure fixture evidence
+
+- the dedicated Chromium journey starts from the current authenticated profile's visible blank
+  project and uses ordinary Components, Inspector, State, Actions, Design, and Run controls; it uses
+  no raw JSON, direct DOM mutation, network shortcut, or proof-only product route
+- the designer authors controlled email and secure-password state, one Catalog-backed sign-in
+  operation, and a critical Alert whose complete predicate follows
+  `operation.signIn.status == "failed"`
+- only the exact Catalog-derived `error:invalidCredentials` fixture is selected; Integration and
+  Production stay visibly disabled, and the synthetic controller neither reads nor retains the
+  operation input
+- the Alert is absent before invocation and throughout the unresolved Runtime pending interval;
+  declared settlement makes the managed `role="alert"` surface visible and clears accessible
+  Loading without changing the route or either complete input value
+- retry is a second real invocation: pending hides the prior Alert and restores Button Loading;
+  explicit completion publishes the same declared public failure and restores the Alert
+- the exact `420 × 720` portrait frame, horizontal document geometry, route, and controlled values
+  remain stable across idle, pending, first failure, retry pending, and second failure
+- local verification: the deterministic reader binds 139 focused `it`/`it.each` declaration sites;
+  actual focused Vitest execution passes 144/144 (App 52, reference components 11, Runtime 81);
+  dedicated Chromium 1/1; deterministic verifier pass; independent root reader 10/10
+- immutable evidence: 16,868-byte / 34-receipt
+  `docs/proof/artifacts/desen-app-0.1.0-failure-fixture.json` at
+  `sha256:bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20`
+- historical authority: bounded 2,491,742-byte T02 task-time bridge at
+  `sha256:a3ef969f87441e2d8079dc7cd27db3a759acbb645441d206c3b35adc3149ec10`; bounded
+  decompression yields 3,728,371 bytes and 25 exact files from base
+  `d2c632f2cacab5d316d57aa3d51758d2a76d3cd2` without rewriting the immutable predecessor
+- current CI shape: neutral inventory 214 workloads / 102 proof units; M10-T03 closure 70 proof
+  units / 150 workloads; exact-one ownership 1,377 tracked paths / 204 proof-owned paths
+- reader authority: checkpoint sequence 68 preserves sequences 1–67 and closes 56 artifacts / 112
+  readers at `sha256:e685779412ca17b76c78a56ff545bbff5a7fc5efc8bc564247cc49e7c54eeca8`;
+  91/91 cases pass
+- coverage decision: M10-T03 is `DONE`; overall progress is 115/148 (78%); M10 is 6/12 (50%);
+  M10-T04 is next
+- explicit nonclaims: success, navigation, and a separately authorized real host operation remain
+  M10-T04; P-09/P-10 remain `PARTIAL`, Integration, Production, N-036, and G10 remain open; local
+  receipts alone make no hosted exact-head claim
 
 ## Status vocabulary
 

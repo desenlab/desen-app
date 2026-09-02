@@ -1932,6 +1932,33 @@ visible failure claim: M10-T03 owns Alert/error presentation. M10-T04 still owns
 navigation, and a separately authorized real host operation. Integration, Production, N-036,
 P-09/P-10 closure, and G10 remain outside this boundary.
 
+## M10-T03 failure fixture and visible error boundary
+
+M10-T03 keeps the ordinary product journey inside the same authenticated workspace profile and
+synthetic Run host. The designer starts from the visible blank project, authors controlled email and
+secure-password state, connects the Button to the Catalog-declared operation, and adds a critical
+Alert whose complete visibility predicate follows the authored operation result's `failed` status.
+No raw JSON, direct DOM mutation, network shortcut, sign-in-specific Runtime branch, or document-
+selected executable binding is introduced.
+
+The only selectable failure is the exact authenticated Catalog fixture
+`error:invalidCredentials`. Before invocation and while the real Runtime Promise is pending, the
+conditional Alert is absent. Explicit settlement publishes the declared public `failed` lifecycle,
+makes the managed critical Alert visible through normal predicate reevaluation, and clears Button
+Loading without changing the route or either controlled input value. A second invocation is a real
+retry: pending hides the prior Alert and restores Loading, then the same declared settlement makes
+the Alert visible again.
+
+The browser holds the `420 × 720` canvas frame and its horizontal document geometry stable across
+idle, pending, failure, and retry. This is a presentation invariant, not layout authority derived
+from managed DOM geometry. Synthetic remains the only active fixture context; Integration and
+Production remain visibly unavailable, and fixture authority still neither reads nor retains
+operation input.
+
+This boundary closes the dedicated public-failure browser trace only. M10-T04 still owns success,
+navigation, and a separately authorized real host operation. P-09 and P-10 therefore remain
+`PARTIAL`; Integration, Production, N-036, remote or multi-user execution, and G10 remain open.
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific

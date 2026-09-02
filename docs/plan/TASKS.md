@@ -2071,7 +2071,7 @@ and move to M10-T01.
 | M10-T01B | DONE        | M10-T01A                  | Visual behavior authoring and Catalog-derived Run controls                    |
 | M10-T01C | DONE        | M10-T01B                  | Evergreen product composition through an authenticated workspace profile      |
 | M10-T02  | DONE        | M10-T01C                  | Input and pending fixture test                                                |
-| M10-T03  | NOT_STARTED | M10-T02                   | Failure fixture and visible failure-state test                                |
+| M10-T03  | DONE        | M10-T02                   | Failure fixture and visible failure-state test                                |
 | M10-T04  | NOT_STARTED | M10-T02                   | Success fixture, navigation, and real host-operation binding test             |
 | M10-T05  | NOT_STARTED | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
 | M10-T06  | NOT_STARTED | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
@@ -2329,6 +2329,44 @@ Production, N-036, and G10 remain open. Overall progress advances to 114/148 (77
 5/12 (42%), and M10-T03 is next. Local receipts alone make no hosted exact-head `Quality gate`
 claim.
 
+M10-T03 is `DONE`. The dedicated failure-fixture acceptance slice starts from the current
+authenticated profile's visible blank project. A designer uses ordinary no-code controls to create
+controlled email and secure-password state, connect one Button to the Catalog-declared operation,
+and author a critical Alert whose complete visibility predicate follows
+`operation.signIn.status == "failed"`. The browser uses no Advanced JSON, direct DOM mutation,
+network shortcut, or proof-only product route.
+
+The dedicated Chromium journey selects only the exact Catalog-derived
+`error:invalidCredentials` outcome. The Alert is absent while idle and throughout one real
+unresolved Runtime pending lifecycle. Explicit settlement publishes the declared public failure,
+reveals the managed critical Alert, clears accessible Button Loading, preserves both complete input
+values, and keeps the App on the sign-in route. A second Button activation is a real retry: pending
+hides the previous Alert and restores Loading; the second explicit declared settlement reveals the
+Alert again. The `420 × 720` portrait frame and horizontal document geometry remain unchanged across
+idle, pending, failure, retry pending, and repeated failure.
+
+The deterministic reader binds 139 focused `it`/`it.each` declaration sites, while actual focused
+Vitest execution passes 144/144 (App 52, reference components 11, Runtime 81). The dedicated
+Chromium configuration passes 1/1, and the independent root mutation reader passes 10/10. The
+deterministic 16,868-byte / 34-receipt evidence is
+`docs/proof/artifacts/desen-app-0.1.0-failure-fixture.json` at
+`sha256:bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20`. A separately pinned,
+bounded 2,491,742-byte T02 historical-reader bridge at
+`sha256:a3ef969f87441e2d8079dc7cd27db3a759acbb645441d206c3b35adc3149ec10` reconstructs 25 exact
+task-time files from base `d2c632f2cacab5d316d57aa3d51758d2a76d3cd2` without rewriting the
+immutable predecessor artifact.
+
+The neutral CI inventory contains 214 workloads / 102 proof units. The M10-T03 closure contains 70
+proof units / 150 workloads, and exact-one ownership covers 1,377 tracked paths / 204 proof-owned
+paths. Checkpoint sequence 68 preserves sequences 1–67 and closes 56 artifacts / 112 readers at
+`sha256:e685779412ca17b76c78a56ff545bbff5a7fc5efc8bc564247cc49e7c54eeca8`; its suite passes
+91/91.
+
+M10-T03 closes only visible public failure. P-09 and P-10 remain `PARTIAL`; success, navigation, and
+a separately authorized real host operation remain M10-T04. Integration, Production, N-036, and
+G10 remain open. Overall progress advances to 115/148 (78%), M10 advances to 6/12 (50%), and
+M10-T04 is next. Local receipts alone make no hosted exact-head `Quality gate` claim.
+
 ### M10-T01 public build-log drafts
 
 **X (EN, 280 characters)**
@@ -2530,6 +2568,51 @@ Drafts only. Do not publish automatically.
 > temsil edemediği gelişmiş değerler güvenli bir eşleme seçilene kadar değişikliği durduruyor ve
 > belirsiz operation aksiyonları güvenli biçimde reddediliyor. Görünür hata M10-T03'te; başarı,
 > navigasyon ve gerçek host operation M10-T04'te kapanacak.
+>
+> #DesignTools #NoCode #WebDevelopment #OpenSource
+
+### M10-T03 public build-log drafts
+
+Drafts only. Do not publish automatically.
+
+**X (EN, ≤280 characters)**
+
+> Failure should be visible without hidden shortcuts. Desen App now proves a Catalog-declared invalid-credentials Alert through its normal no-code Chromium flow, including pending, retry, and stable input, route, and layout. Real-host success is next. github.com/desenlab/desen-app
+
+**LinkedIn**
+
+> [EN]
+>
+> A designer should be able to prove a product's failure state without code, private service data,
+> or a test-only UI. Desen App now starts from the normal visible blank project, connects controlled
+> email and secure-password state to the Catalog operation, and authors a critical Alert conditioned
+> on the operation's public failed status.
+>
+> In real Chromium, the Alert is absent while idle and pending. Settling the exact Catalog-declared
+> invalid-credentials fixture reveals it, clears accessible Loading, and preserves the route and
+> complete input values. A real retry hides the old Alert while pending and restores it only after
+> the second declared failure. The 420 × 720 frame and horizontal layout remain stable throughout.
+>
+> This closes the visible synthetic-failure slice, not success, navigation, or a real host
+> operation; those remain M10-T04. Integration, Production, and G10 also remain open. Inspect the
+> evidence in the public repository: which failure-state invariant would you test next?
+>
+> [TR]
+>
+> Bir tasarımcı ürünün hata durumunu kod, özel servis verisi veya yalnız teste ait bir arayüz
+> olmadan kanıtlayabilmeli. Desen App artık normal görünür boş projeden başlıyor; kontrollü e-posta
+> ve güvenli şifre state'ini Catalog operation'ına bağlıyor ve operation'ın public failed durumuna
+> koşullu kritik bir Alert yazıyor.
+>
+> Gerçek Chromium akışında Alert idle ve pending sırasında görünmüyor. Catalog'da tanımlı exact
+> invalid-credentials fixture'ı tamamlandığında Alert görünüyor, accessible Loading temizleniyor,
+> route ve tam input değerleri korunuyor. Gerçek retry sırasında eski Alert yeniden gizleniyor ve
+> ancak ikinci tanımlı hata tamamlandığında geri geliyor. 420 × 720 frame ile yatay yerleşim bütün
+> akış boyunca sabit kalıyor.
+>
+> Bu çalışma görünür sentetik failure kapsamını kapatıyor; success, navigation ve gerçek host
+> operation M10-T04'te kalıyor. Integration, Production ve G10 da açık. Kanıtı public repoda
+> inceleyin: sırada hangi failure-state invariant'ını test etmeliyiz?
 >
 > #DesignTools #NoCode #WebDevelopment #OpenSource
 

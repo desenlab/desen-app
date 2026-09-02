@@ -1409,3 +1409,47 @@ M10-T02 removes no workload, barrier, timeout, isolation rule, closing guard, or
 execution. Local checkpoint and selector receipts are identity/impact authority only; merge still
 requires the hosted `Quality gate` for the exact pull-request head, and the browser claim still
 requires the hosted `Browser E2E` job for that same head.
+
+## M10-T03 failure-fixture CI authority
+
+M10-T03 registers `desen-app-failure-fixture` as ordinary proof pair 102, with
+`scripts/verify-desen-app-failure-fixture.mjs` and
+`tests/desen-app-failure-fixture.test.mjs`. Browser E2E now runs base, product, input/pending, and
+failure Playwright configurations, and the frozen hosted workflow names the T03 pair explicitly.
+
+The neutral authority contains 214 workloads / 102 proof units, 735 prerequisite segments, 4,535
+leaf invocations, and 325 distinct leaves. Inventory, prerequisite, leaf-invocation, and
+distinct-leaf digests are
+`sha256:c1cec82a944152060e00caa1ad6f500c7f7e391d7056fe84f61967aef62ef947`,
+`sha256:c1e1319ae65ec34b30f5b8817f5e6396271756bbdd95d4a964b858d7f7dd3c95`,
+`sha256:752e23e301be0554677726de380410fca522ef97ad3e72dbbe37321985d58de8`, and
+`sha256:2ef89a9ee2dc93cd70edfa71be2cda15628094bb03da8ac56a4e310d6870c0dd`.
+The impact graph is
+`sha256:91645dd903e4ade7f10f54dd6b07c65a49b355921a35946ee305ee9782aad0ee`;
+the exact T03 closure is 70 proof units / 150 workloads at
+`sha256:52619a1053d46d20e6efedc7e5e1b17dee372fe63c5438dd14c768ac7ff25cfa`.
+
+Exact-one ownership covers 1,377 tracked / 204 proof-owned paths. Its path-set and authority are
+`sha256:c7c9fe627f39e1fc10ccb5e6aec133ede0eb3f19c6bb7df89caa9023e9d1b48e` and
+`sha256:903c1fabc314e2558e05aff85b810d279b045efdfd52494c2f08b281808533db`.
+All workloads retain one shared-state class: six global, three workspace-output, one package-test,
+89 proof-read-only, 104 proof-OS-temp-isolated, ten tracked-alias, and one workspace-temp. The 102
+pairs remain 91 ordinary / eleven barriers with 91 OS-temporary roots.
+
+Required/shadow exhaustive plans are
+`sha256:f815d05c7edbe293b77b3819982d0076619bdd035e5eebac2112329bad06f904` and
+`sha256:ac389e5063b153586f49303ec14a1228e8ef5605f337700d133884e8069fdb82`;
+rollback equivalence retains plan
+`sha256:e8de24915998a744d1abd6c6efced84059c37e46cf2f23c99ae2cd2b5e5b3e8b`
+and workload set
+`sha256:f709ed72c15555422717ee905fe9a8795ea9a4982e0df043966028420e433a89`.
+
+Checkpoint sequence 68 adds the 16,868-byte artifact at
+`sha256:bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20`,
+reseals only T02 readers `[108, 109]`, appends T03 readers `[110, 111]`, and closes 56 artifacts /
+112 readers at
+`sha256:e685779412ca17b76c78a56ff545bbff5a7fc5efc8bc564247cc49e7c54eeca8`.
+The 91-test checkpoint suite passes. Selector and required-affected runner authorities are
+`sha256:cb0638a65d9ba9bfcfecb780921a195da4c19de5af9512fb2a5169ecbf18fb2f`
+and `sha256:ba00d7c81ca4392d50b0fc869434d531acd82a949cde376de051f93261e6f723`.
+No local receipt claims exact-head hosted success or M10-T04 success/navigation/real-host authority.
