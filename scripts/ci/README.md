@@ -1494,3 +1494,54 @@ runner authority at
 promotion, required-affected, ownership, selector, shared-state, inventory, impact, and equivalence
 tests pass. No workload, barrier, timeout, isolation rule, or hosted fresh-execution requirement is
 removed; these local authority receipts do not imply an exact-head hosted result.
+
+## M10-T03 failure-fixture CI authority
+
+M10-T03 appends `desen-app-failure-fixture` as an ordinary proof pair with
+`scripts/verify-desen-app-failure-fixture.mjs` and
+`tests/desen-app-failure-fixture.test.mjs`. The Browser E2E package command now runs four explicit
+Playwright configurations—base, product, input/pending, and failure—and the frozen hosted workflow
+invokes the T03 verifier/root pair after the failure journey. This registration does not grant a
+real host-operation authority or claim M10-T04 success/navigation.
+
+The neutral inventory contains 214 workloads / 102 proof units, 735 prerequisite segments, 4,535
+leaf invocations, and 325 distinct leaves. Their authorities are respectively
+`sha256:c1cec82a944152060e00caa1ad6f500c7f7e391d7056fe84f61967aef62ef947`,
+`sha256:c1e1319ae65ec34b30f5b8817f5e6396271756bbdd95d4a964b858d7f7dd3c95`,
+`sha256:752e23e301be0554677726de380410fca522ef97ad3e72dbbe37321985d58de8`, and
+`sha256:2ef89a9ee2dc93cd70edfa71be2cda15628094bb03da8ac56a4e310d6870c0dd`.
+The semantic graph is
+`sha256:91645dd903e4ade7f10f54dd6b07c65a49b355921a35946ee305ee9782aad0ee`;
+the T03 successor closure contains 70 proof units / 150 workloads at
+`sha256:52619a1053d46d20e6efedc7e5e1b17dee372fe63c5438dd14c768ac7ff25cfa`.
+
+Exact-one ownership covers 1,377 tracked paths / 204 proof-owned paths. The tracked path set is
+`sha256:c7c9fe627f39e1fc10ccb5e6aec133ede0eb3f19c6bb7df89caa9023e9d1b48e` and the ownership
+projection is
+`sha256:903c1fabc314e2558e05aff85b810d279b045efdfd52494c2f08b281808533db`.
+The category split is 204 proof-unit, 45 CI-policy, 32 dependency-policy, 149 frozen-input, 532
+package/application, 265 shared-proof-infrastructure, 139 project-documentation, and eleven
+repository-policy paths.
+
+Shared-state authority remains exact for all 214 workloads: 91 ordinary and eleven barrier proof
+units, 91 OS-temporary roots, 89 `PROOF_READ_ONLY` units, and 104
+`PROOF_OS_TEMP_ISOLATED` units. Required and shadow exhaustive plans are pinned at
+`sha256:f815d05c7edbe293b77b3819982d0076619bdd035e5eebac2112329bad06f904` and
+`sha256:ac389e5063b153586f49303ec14a1228e8ef5605f337700d133884e8069fdb82`.
+Rollback equivalence retains plan
+`sha256:e8de24915998a744d1abd6c6efced84059c37e46cf2f23c99ae2cd2b5e5b3e8b`
+and workload set
+`sha256:f709ed72c15555422717ee905fe9a8795ea9a4982e0df043966028420e433a89`.
+
+Reviewed checkpoint sequence 68 preserves sequences 1–67 and all 55 predecessor artifacts, adds
+the 16,868-byte T03 artifact at
+`sha256:bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20`,
+reseals only the T02 proof/root readers `[108, 109]`, and appends T03 readers `[110, 111]`.
+The resulting 56-artifact / 112-reader authority closes at
+`sha256:e685779412ca17b76c78a56ff545bbff5a7fc5efc8bc564247cc49e7c54eeca8`;
+its dedicated suite passes 91/91. Promotion pins the selector at
+`sha256:cb0638a65d9ba9bfcfecb780921a195da4c19de5af9512fb2a5169ecbf18fb2f`
+and required-affected runner authority at
+`sha256:ba00d7c81ca4392d50b0fc869434d531acd82a949cde376de051f93261e6f723`.
+These are local authority receipts only: no workload, barrier, timeout, isolation rule, closing
+guard, or exact-head hosted execution requirement is removed.

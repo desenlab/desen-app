@@ -26,9 +26,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `█████░░░░░░░` **5 / 12 tasks complete (42%)**
+**M10:** `██████░░░░░░` **6 / 12 tasks complete (50%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T02:** `DONE` · **Next:** `M10-T03`
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T03:** `DONE` · **Next:** `M10-T04`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -1272,6 +1272,40 @@ cases. M10-T02 is `DONE`; progress is 114/148 (77%), M10 is 5/12
 (42%), and M10-T03 is next. P-09 and P-10 remain `PARTIAL`; visible failure remains M10-T03,
 success/navigation and a separately authorized real host operation remain M10-T04, and G10 stays
 open. Local receipts do not imply a hosted exact-head `Quality gate` pass.
+
+**M10-T03 checkpoint:** the normal product now proves its dedicated visible public-failure slice in
+Chromium. Starting from the current authenticated profile's visible blank project, the designer
+authors controlled email and secure-password state, connects the Button to the Catalog operation,
+and adds a critical Alert conditioned on the operation's `failed` status. The journey uses neither
+raw JSON nor direct DOM or network mutation.
+
+The Alert is absent while idle and while the Runtime call is genuinely pending. Explicitly settling
+the exact Catalog-declared `invalidCredentials` fixture reveals the managed critical Alert, clears
+accessible Button Loading, preserves both complete input values, and leaves the route unchanged. A
+real retry hides the Alert while pending, restores Loading, and reveals the same public failure after
+the second declared settlement. The `420 × 720` frame and horizontal document geometry remain stable
+through idle, pending, failure, and retry.
+
+The deterministic reader binds 139 focused `it`/`it.each` declaration sites, while actual focused
+Vitest execution passes 144/144 (App 52, reference components 11, Runtime 81). The dedicated
+Chromium scenario passes 1/1, and the independent root reader passes 10/10. The deterministic
+16,868-byte / 34-receipt artifact is
+`docs/proof/artifacts/desen-app-0.1.0-failure-fixture.json` at
+`sha256:bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20`. Its bounded
+2,491,742-byte T02 historical bridge is pinned at
+`sha256:a3ef969f87441e2d8079dc7cd27db3a759acbb645441d206c3b35adc3149ec10` without rewriting the
+immutable predecessor.
+
+The neutral CI inventory contains 214 workloads / 102 proof units; the M10-T03 closure contains 70
+proof units / 150 workloads, and exact-one ownership covers 1,377 tracked paths / 204 proof-owned
+paths. Checkpoint sequence 68 preserves sequences 1–67 and closes 56 artifacts / 112 readers at
+`sha256:e685779412ca17b76c78a56ff545bbff5a7fc5efc8bc564247cc49e7c54eeca8` with 91/91 passing
+cases.
+
+M10-T03 is `DONE`; implementation progress is 115/148 (78%) and M10 is 6/12 (50%). P-09 and P-10
+remain `PARTIAL`; success, navigation, and a separately authorized real host operation remain
+M10-T04. Integration, Production, N-036, and G10 remain open, and local receipts do not imply a
+hosted exact-head `Quality gate` pass. M10-T04 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

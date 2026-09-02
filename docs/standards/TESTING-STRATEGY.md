@@ -1368,3 +1368,38 @@ These checks close only M10-T02. P-09 and P-10 remain `PARTIAL`; M10-T03 still o
 failure, M10-T04 owns success/navigation and a separately authorized real host operation, and G10
 remains open. A local result never substitutes for the hosted exact-head `Quality gate` required
 before merge.
+
+## M10-T03 visible failure fixture testing
+
+M10-T03 independently observes product projection, Catalog fixture authority, managed conditional
+rendering, controlled reference components, Runtime lifecycle, and Chromium. Focused Vitest passes
+144/144 (52 App, eleven reference-component, and 81 Runtime cases); the dedicated browser scenario
+passes 1/1 and the independent root mutation reader passes 10/10. The browser proves a public
+failure Alert is absent before/during pending, appears after exact `invalidCredentials` settlement,
+hides during real retry pending, and reappears after the second settlement while inputs, Loading,
+route, and 420 × 720 geometry remain stable.
+
+The 16,868-byte / 34-receipt artifact is
+`sha256:bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20`.
+Its bounded 2,491,742-byte M10-T02 historical bridge is
+`sha256:a3ef969f87441e2d8079dc7cd27db3a759acbb645441d206c3b35adc3149ec10`.
+The passive verifier starts no browser, server, listener, network request, or external host.
+
+CI contains 214 workloads / 102 proof units at inventory
+`sha256:c1cec82a944152060e00caa1ad6f500c7f7e391d7056fe84f61967aef62ef947`.
+The impact graph is
+`sha256:91645dd903e4ade7f10f54dd6b07c65a49b355921a35946ee305ee9782aad0ee`;
+the T03 closure is 70 proof units / 150 workloads at
+`sha256:52619a1053d46d20e6efedc7e5e1b17dee372fe63c5438dd14c768ac7ff25cfa`.
+Ownership covers 1,377 tracked / 204 proof-owned paths at
+`sha256:903c1fabc314e2558e05aff85b810d279b045efdfd52494c2f08b281808533db`.
+Shared state remains 91 ordinary / eleven barriers with 91 OS-temporary roots.
+
+Checkpoint sequence 68 closes 56 artifacts / 112 readers at
+`sha256:e685779412ca17b76c78a56ff545bbff5a7fc5efc8bc564247cc49e7c54eeca8`
+and passes 91/91. Selector and required-affected runner authorities are
+`sha256:cb0638a65d9ba9bfcfecb780921a195da4c19de5af9512fb2a5169ecbf18fb2f`
+and `sha256:ba00d7c81ca4392d50b0fc869434d531acd82a949cde376de051f93261e6f723`.
+These checks close only M10-T03 visible failure. P-09/P-10 remain `PARTIAL`; M10-T04 still owns
+success, navigation, and separately authorized real-host operation. Local results do not imply
+hosted exact-head `Quality gate` or `Browser E2E` success.

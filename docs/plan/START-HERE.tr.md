@@ -1278,6 +1278,34 @@ gerçek host operation M10-T04'ün kapsamıdır. Integration, Production, N-036 
 Genel ilerleme 114/148 (%77), M10 5/12 (%42) olur; sıradaki görev M10-T03'tür. Yerel kanıtlar bu
 head için hosted `Quality gate` başarısı anlamına gelmez.
 
+M10-T03 `DONE` durumundadır. Güncel doğrulanmış profilin görünür boş-proje akışı içinden, JSON
+yazmadan ve doğrudan DOM ya da network değişikliği kullanmadan kontrollü e-posta/şifre state'i,
+Catalog operation'ı ve `operation.signIn.status == "failed"` koşulunu izleyen kritik Alert yazılır.
+Gerçek Chromium yolculuğunda Alert idle ve çözülmemiş Runtime pending durumlarında görünmez; exact
+Catalog `invalidCredentials` fixture'ı tamamlandığında public failure olarak görünür. Retry yeni bir
+gerçek invocation başlatır, pending sırasında önceki Alert'i gizleyip Loading'i geri getirir ve ikinci
+tanımlı settlement sonrasında Alert'i yeniden gösterir.
+
+Bu akış route'u, iki tam kontrollü değeri, accessible Loading temizliğini, `420 × 720` frame'i ve
+yatay document geometry'sini idle, pending, failure ve retry boyunca korur. Deterministik okuyucu
+139 odaklı `it`/`it.each` declaration site'ını bağlar; gerçek odaklı Vitest yürütümü 144/144 (App
+52, reference components 11, Runtime 81), Chromium 1/1 ve bağımsız kök okuyucu 10/10 geçer. 34
+kesin kayıt taşıyan 16.868 baytlık artifact
+`sha256:bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20`, 2.491.742 baytlık
+sınırlı T02 tarihsel köprüsü ise
+`sha256:a3ef969f87441e2d8079dc7cd27db3a759acbb645441d206c3b35adc3149ec10` ile sabittir.
+
+Nötr CI envanteri 214 workload / 102 proof unit, M10-T03 closure'ı 70 proof unit / 150 workload ve
+exact-one ownership 1.377 tracked path / 204 proof-owned path içerir. Checkpoint sequence 68,
+sequence 1–67'yi koruyup 56 artifact / 112 reader zincirini
+`sha256:e685779412ca17b76c78a56ff545bbff5a7fc5efc8bc564247cc49e7c54eeca8` ile kapatır; suite
+91/91 geçer.
+
+M10-T03 yalnız görünür failure matrisini kapatır. P-09 ve P-10 `PARTIAL` kalır; success, navigation
+ve ayrı yetkilendirilmiş gerçek host operation M10-T04'ün kapsamıdır. Integration, Production,
+N-036 ve G10 hâlâ açıktır. Genel ilerleme 115/148 (%78), M10 6/12 (%50) olur; sıradaki görev
+M10-T04'tür. Yerel kanıtlar bu head için hosted `Quality gate` başarısı anlamına gelmez.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

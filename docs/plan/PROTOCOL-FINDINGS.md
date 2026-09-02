@@ -3968,8 +3968,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
   before array copying or scheduling, and fixture host ports match exact document, revision,
   surface, alias, capability, and effect while never reading or retaining operation input.
 
-- Future action: M10-T02 and M10-T03 retain their dedicated browser acceptance matrices for typed
-  input/pending and complete failure-state behavior. M10-T04 retains success, navigation, and a
-  separately authorized real host operation. A future interoperable editor-control vocabulary may
-  standardize these recipes; until then PF-091 remains `OPEN` and Catalog control hints under
-  PF-025 remain opaque.
+- Implementation follow-through: M10-T02 closes its dedicated typed-input/pending browser matrix.
+  M10-T03 closes the separate complete failure-state matrix through the visible blank-project flow:
+  an authored critical Alert is absent while idle and pending, appears only after the exact declared
+  `invalidCredentials` fixture reaches the public `failed` lifecycle, disappears during a real
+  retry, and reappears after the second declared settlement. The route, controlled values, Loading
+  cleanup, and fixed canvas geometry remain stable. The flow uses neither raw JSON nor direct DOM or
+  network mutation.
+- Future action: M10-T04 retains success, navigation, and a separately authorized real host
+  operation. A future interoperable editor-control vocabulary may standardize these recipes; until
+  then PF-091 remains `OPEN` and Catalog control hints under PF-025 remain opaque.

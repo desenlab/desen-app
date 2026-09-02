@@ -13,12 +13,11 @@ import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const MODULE_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(MODULE_DIRECTORY, "../..");
-const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/desen-app-0.1.0-input-pending-fixture.json";
-const PROOF_DOCUMENT_RELATIVE_PATH = "docs/proof/DESEN-APP-INPUT-PENDING-FIXTURE.md";
-const PARENT_ARTIFACT_PATH =
-  "docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json";
-const T01C_HISTORICAL_READER_BRIDGE_PATH =
-  "docs/proof/artifacts/desen-app-0.1.0-t01c-historical-reader-bridge.json.gz";
+const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/desen-app-0.1.0-failure-fixture.json";
+const PROOF_DOCUMENT_RELATIVE_PATH = "docs/proof/DESEN-APP-FAILURE-FIXTURE.md";
+const PARENT_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-input-pending-fixture.json";
+const T02_HISTORICAL_READER_BRIDGE_PATH =
+  "docs/proof/artifacts/desen-app-0.1.0-t02-historical-reader-bridge.json.gz";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const MAX_HISTORICAL_BRIDGE_BYTES = 4 * 1_024 * 1_024;
 const MAX_HISTORICAL_BRIDGE_INFLATED_BYTES = 8 * 1_024 * 1_024;
@@ -29,25 +28,33 @@ const READ_FLAGS =
 
 const SOURCE_PATHS = Object.freeze({
   application: "apps/desen-app/src/application.tsx",
+  behaviorProjection: "apps/desen-app/src/authoring-behavior-projection.ts",
+  conditions: "apps/desen-app/src/authoring-conditions.ts",
   authoringConnections: "apps/desen-app/src/authoring-connections.ts",
   behaviorControls: "apps/desen-app/src/behavior-controls.tsx",
   authoringFixtures: "apps/desen-app/src/authoring-fixtures.ts",
+  alert: "packages/reference-catalog-web/src/components/alert.tsx",
   textField: "packages/reference-catalog-web/src/components/text-field.tsx",
   button: "packages/reference-catalog-web/src/components/button.tsx",
+  headlessSession: "packages/runtime-core/src/headless-session.ts",
   operationLifecycle: "packages/runtime-core/src/operation-lifecycle.ts",
 });
 
 const TEST_PATHS = Object.freeze({
+  evergreenProductComposition: "apps/desen-app/test/evergreen-product-composition.test.tsx",
+  authoringBehaviorProjection: "apps/desen-app/test/authoring-behavior-projection.test.ts",
+  authoringConditions: "apps/desen-app/test/authoring-conditions.test.ts",
   authoringConnections: "apps/desen-app/test/authoring-connections.test.ts",
   behaviorControls: "apps/desen-app/test/behavior-controls.test.tsx",
   authoringFixtures: "apps/desen-app/test/authoring-fixtures.test.ts",
   interactiveComponents: "packages/reference-catalog-web/test/interactive-components.test.tsx",
+  headlessSession: "packages/runtime-core/test/headless-session.test.ts",
   operationLifecycle: "packages/runtime-core/test/operation-lifecycle.test.ts",
 });
 
 const BROWSER_PATHS = Object.freeze({
-  spec: "apps/desen-app-browser-e2e/input-pending-fixture.pw.ts",
-  config: "apps/desen-app-browser-e2e/input-pending-playwright.config.ts",
+  spec: "apps/desen-app-browser-e2e/failure-fixture.pw.ts",
+  config: "apps/desen-app-browser-e2e/failure-playwright.config.ts",
 });
 
 const PACKAGE_PATHS = Object.freeze({
@@ -57,15 +64,17 @@ const PACKAGE_PATHS = Object.freeze({
   runtimeCore: "packages/runtime-core/package.json",
 });
 
+const CATALOG_PATH = "packages/reference-catalog-web/catalog.json";
+
 const BRIDGE_REPRODUCTION_PATHS = Object.freeze([
-  "scripts/generate-desen-app-t01c-historical-reader-bridge.mjs",
-  "tests/desen-app-t01c-historical-reader-fixture.mjs",
+  "scripts/generate-desen-app-t02-historical-reader-bridge.mjs",
+  "tests/desen-app-t02-historical-reader-fixture.mjs",
 ]);
 
 const PROOF_ENTRYPOINT_PATHS = Object.freeze([
   "scripts/lib/atomic-proof-artifact.mjs",
-  "scripts/generate-desen-app-input-pending-fixture-proof.mjs",
-  "scripts/verify-desen-app-input-pending-fixture.mjs",
+  "scripts/generate-desen-app-failure-fixture-proof.mjs",
+  "scripts/verify-desen-app-failure-fixture.mjs",
 ]);
 
 const TRACKED_PATHS = Object.freeze(
@@ -74,65 +83,65 @@ const TRACKED_PATHS = Object.freeze(
     ...Object.values(TEST_PATHS),
     ...Object.values(BROWSER_PATHS),
     ...Object.values(PACKAGE_PATHS),
+    CATALOG_PATH,
     ...BRIDGE_REPRODUCTION_PATHS,
     ...PROOF_ENTRYPOINT_PATHS,
     PARENT_ARTIFACT_PATH,
-    T01C_HISTORICAL_READER_BRIDGE_PATH,
+    T02_HISTORICAL_READER_BRIDGE_PATH,
   ].sort((left, right) => left.localeCompare(right, "en-US")),
 );
 
 const FOCUSED_TEST_COMMANDS = Object.freeze([
-  "pnpm --filter @desen/app-web exec vitest run test/authoring-connections.test.ts test/behavior-controls.test.tsx test/authoring-fixtures.test.ts",
+  "pnpm --filter @desen/app-web exec vitest run test/evergreen-product-composition.test.tsx test/authoring-behavior-projection.test.ts test/authoring-conditions.test.ts test/authoring-connections.test.ts test/behavior-controls.test.tsx test/authoring-fixtures.test.ts",
   "pnpm --filter @desen/reference-catalog-web exec vitest run test/interactive-components.test.tsx",
-  "pnpm --filter @desen/runtime-core exec vitest run test/operation-lifecycle.test.ts",
+  "pnpm --filter @desen/runtime-core exec vitest run test/operation-lifecycle.test.ts test/headless-session.test.ts",
 ]);
 const BROWSER_COMMAND =
-  "pnpm --filter @desen/app-browser-e2e exec playwright test --config input-pending-playwright.config.ts";
-const BROWSER_TEST_NAME =
-  "routes complete controlled input into one unresolved synthetic operation";
+  "pnpm --filter @desen/app-browser-e2e exec playwright test --config failure-playwright.config.ts";
+const BROWSER_TEST_NAME = "authors and retries one visible Catalog-declared public failure";
 
-/** Exact immutable M10-T01C predecessor required by the input/pending proof. */
-export const DESEN_APP_INPUT_PENDING_FIXTURE_PARENT_PIN = Object.freeze({
-  task: "M10-T01C",
+/** Exact immutable M10-T02 predecessor required by the visible-failure proof. */
+export const DESEN_APP_FAILURE_FIXTURE_PARENT_PIN = Object.freeze({
+  task: "M10-T02",
   gate: null,
-  proofId: "desen-app-evergreen-product-composition",
+  proofId: "desen-app-input-pending-fixture",
   path: PARENT_ARTIFACT_PATH,
-  bytes: 19_299,
-  sha256: "779434ca834b8d770c726d905408f0a3d0a7145abbc6eaf2b81f1e77466b46ac",
-  profile: "desen.app.evergreen-product-composition-proof.v1",
+  bytes: 14_261,
+  sha256: "161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d",
+  profile: "desen.app.input-pending-fixture-proof.v1",
   result: "PASS",
   immutable: true,
 });
 
-/** Exact compressed M10-T01C task-time authority for its historical reader pair. */
-export const DESEN_APP_T01C_HISTORICAL_READER_BRIDGE_PIN = Object.freeze({
-  path: T01C_HISTORICAL_READER_BRIDGE_PATH,
-  bytes: 2_307_407,
-  sha256: "16f6ec332fb03368e617563560b9930a7608594907ce61d5d15554be4dc7523d",
-  uncompressedBytes: 4_557_796,
-  baseCommit: "3814002f89ec8e75019431cd1475a98c97041b0c",
-  fileEntries: 68,
-  predecessorGapFiles: 4,
+/** Exact compressed M10-T02 task-time authority for its historical reader pair. */
+export const DESEN_APP_T02_HISTORICAL_READER_BRIDGE_PIN = Object.freeze({
+  path: T02_HISTORICAL_READER_BRIDGE_PATH,
+  bytes: 2_491_742,
+  sha256: "a3ef969f87441e2d8079dc7cd27db3a759acbb645441d206c3b35adc3149ec10",
+  uncompressedBytes: 3_728_371,
+  baseCommit: "d2c632f2cacab5d316d57aa3d51758d2a76d3cd2",
+  fileEntries: 25,
+  predecessorGapFiles: 0,
   successorAddedPaths: 2,
   projections: 1,
 });
 
-/** Independent root cases owned by the append-only M10-T02 proof family. */
-export const DESEN_APP_INPUT_PENDING_FIXTURE_ROOT_TEST_NAMES = Object.freeze([
-  "[authority] authenticates the immutable M10-T01C parent without invoking its reader",
-  "[input] preserves complete controlled TextField values across incremental typing",
-  "[authoring] maps Press, Catalog inputs, reject concurrency, and Loading without JSON",
-  "[pending] exposes one real unresolved Runtime lifecycle through accessible Button feedback",
-  "[continuity] suppresses repeated activation and preserves pending values across Design and Run",
-  "[fixtures] derives synthetic-only outcomes from Catalog authority without reading operation input",
-  "[terminal] clears pending feedback without claiming visible failure or success navigation",
-  "[boundary] leaves T03, T04, production, N-036, P-09/P-10 closure, and G10 open",
-  "[determinism] builds byte-identical evidence with exact receipts and a bounded T01C bridge",
+/** Independent root cases owned by the append-only M10-T03 proof family. */
+export const DESEN_APP_FAILURE_FIXTURE_ROOT_TEST_NAMES = Object.freeze([
+  "[authority] authenticates the immutable M10-T02 parent without invoking its reader",
+  "[authoring] creates a critical Alert and failed predicate through visible controls",
+  "[fixture] admits only the exact Catalog-declared public error outcome",
+  "[failure] exposes one real Runtime failure and authored Alert after pending",
+  "[retry] clears stale failure while pending and reproduces it after settlement",
+  "[continuity] preserves input, route, focus-safe geometry, and exact frame layout",
+  "[generic] keeps reusable product composition free of invalidCredentials assumptions",
+  "[boundary] leaves success, navigation, real host, T04, N-036, P-09/P-10 closure, and G10 open",
+  "[determinism] builds byte-identical evidence with exact receipts and a bounded T02 bridge",
   "[policy] rejects source, test, parent, bridge, artifact, report, option, and destination drift",
 ]);
 
-/** Default destination of the deterministic M10-T02 artifact. */
-export const DEFAULT_DESEN_APP_INPUT_PENDING_FIXTURE_ARTIFACT_PATH = path.join(
+/** Default destination of the deterministic M10-T03 artifact. */
+export const DEFAULT_DESEN_APP_FAILURE_FIXTURE_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   ARTIFACT_RELATIVE_PATH,
 );
@@ -140,64 +149,26 @@ export const DEFAULT_DESEN_APP_INPUT_PENDING_FIXTURE_ARTIFACT_PATH = path.join(
 const DEFAULT_PROOF_DOCUMENT_PATH = path.join(WORKSPACE_ROOT, PROOF_DOCUMENT_RELATIVE_PATH);
 
 // Filled after the detached artifact is generated. The reader and root test remain checkpoint-owned.
-export const DESEN_APP_INPUT_PENDING_FIXTURE_ARTIFACT_PIN = Object.freeze({
-  bytes: 14_261,
-  sha256: "161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d",
+export const DESEN_APP_FAILURE_FIXTURE_ARTIFACT_PIN = Object.freeze({
+  bytes: 16_868,
+  sha256: "bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20",
 });
 
 const SUCCESSOR_AUTHORITIES = new WeakMap();
 let cachedHistoricalBridgeAuthority;
 
-async function authenticateFailureFixtureSuccessor(workspaceRoot) {
-  let successorModule;
-  try {
-    successorModule = await import("./desen-app-failure-fixture-proof.mjs");
-  } catch (error) {
-    if (error?.code === "ERR_MODULE_NOT_FOUND") {
-      fail(
-        "SUCCESSOR_POLICY_VIOLATION",
-        "Historical T02 compatibility requires the official M10-T03 successor reader.",
-        { cause: String(error) },
-      );
-    }
-    throw error;
-  }
-  const authenticate = successorModule.authenticateDesenAppFailureFixtureSuccessor;
-  const materialize = successorModule.materializeDesenAppT02HistoricalReaderFileOverrides;
-  const readTaskTimeFile = successorModule.readDesenAppT02HistoricalReaderTaskTimeFile;
-  if (
-    typeof authenticate !== "function" ||
-    typeof materialize !== "function" ||
-    typeof readTaskTimeFile !== "function"
-  ) {
-    fail(
-      "SUCCESSOR_POLICY_VIOLATION",
-      "The official M10-T03 successor reader does not expose the T02 bridge contract.",
-    );
-  }
-  let successor;
-  try {
-    successor = await authenticate({ workspaceRoot });
-  } catch (error) {
-    fail("SUCCESSOR_POLICY_VIOLATION", "The official M10-T03 successor was not authenticated.", {
-      cause: String(error),
-    });
-  }
-  return Object.freeze({ materialize, readTaskTimeFile, successor });
-}
-
-/** Stable fail-closed error raised by the M10-T02 evidence reader. */
-export class DesenAppInputPendingFixtureProofError extends Error {
+/** Stable fail-closed error raised by the M10-T03 evidence reader. */
+export class DesenAppFailureFixtureProofError extends Error {
   constructor(code, message, details = {}) {
     super(message);
-    this.name = "DesenAppInputPendingFixtureProofError";
+    this.name = "DesenAppFailureFixtureProofError";
     this.code = code;
     this.details = Object.freeze({ ...details });
   }
 }
 
 function fail(code, message, details = {}) {
-  throw new DesenAppInputPendingFixtureProofError(code, message, details);
+  throw new DesenAppFailureFixtureProofError(code, message, details);
 }
 
 function sha256(bytes) {
@@ -320,7 +291,7 @@ async function readRegularAuthority(absolutePath, relativePath) {
     }
     return await handle.readFile();
   } catch (error) {
-    if (error instanceof DesenAppInputPendingFixtureProofError) throw error;
+    if (error instanceof DesenAppFailureFixtureProofError) throw error;
     fail("AUTHORITY_UNSAFE", `Could not read evidence authority: ${relativePath}.`, {
       cause: String(error),
     });
@@ -357,7 +328,7 @@ function parseJson(bytes, relativePath, code = "SOURCE_POLICY_VIOLATION") {
   try {
     return JSON.parse(decodeUtf8(bytes, relativePath, code));
   } catch (error) {
-    if (error instanceof DesenAppInputPendingFixtureProofError) throw error;
+    if (error instanceof DesenAppFailureFixtureProofError) throw error;
     fail(code, `${relativePath} is not valid JSON.`);
   }
 }
@@ -396,21 +367,21 @@ function testDeclarationCount(source) {
 function requireFragments(source, fragments, label, code = "SOURCE_POLICY_VIOLATION") {
   const missing = fragments.filter((fragment) => !source.includes(fragment));
   if (missing.length > 0) {
-    fail(code, `${label} lost required input/pending authority.`, { missing });
+    fail(code, `${label} lost required visible-failure authority.`, { missing });
   }
 }
 
 function forbidFragments(source, fragments, label, code = "SOURCE_POLICY_VIOLATION") {
   const present = fragments.filter((fragment) => source.includes(fragment));
   if (present.length > 0) {
-    fail(code, `${label} acquired authority outside M10-T02.`, { present });
+    fail(code, `${label} acquired authority outside M10-T03.`, { present });
   }
 }
 
 function authenticateParent(bytes) {
-  const pin = DESEN_APP_INPUT_PENDING_FIXTURE_PARENT_PIN;
+  const pin = DESEN_APP_FAILURE_FIXTURE_PARENT_PIN;
   if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
-    fail("PARENT_DRIFT", "The exact immutable M10-T01C parent artifact drifted.");
+    fail("PARENT_DRIFT", "The exact immutable M10-T02 parent artifact drifted.");
   }
   const artifact = parseJson(bytes, pin.path, "PARENT_DRIFT");
   if (
@@ -435,13 +406,14 @@ function authenticateParent(bytes) {
     artifact.profile !== pin.profile ||
     artifact.result !== pin.result ||
     artifact.claim?.taskStatus !== "DONE" ||
-    artifact.claim?.p08Status !== "PROVEN" ||
     artifact.claim?.p09Status !== "PARTIAL" ||
-    artifact.claim?.m10T02Closed !== false ||
-    artifact.boundary?.trackedFiles !== 64 ||
+    artifact.claim?.p10Status !== "PARTIAL" ||
+    artifact.claim?.m10T03Closed !== false ||
+    artifact.claim?.visibleFailureStateCovered !== false ||
+    artifact.boundary?.trackedFiles !== 25 ||
     artifact.tests?.rootTestNames?.length !== 10
   ) {
-    fail("PARENT_DRIFT", "The immutable M10-T01C parent schema or claims drifted.");
+    fail("PARENT_DRIFT", "The immutable M10-T02 parent schema or claims drifted.");
   }
   return Object.freeze({ summary: { ...pin }, artifact: deepFreeze(artifact) });
 }
@@ -459,17 +431,17 @@ function safeRelativePath(relativePath) {
 }
 
 function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
-  const pin = DESEN_APP_T01C_HISTORICAL_READER_BRIDGE_PIN;
+  const pin = DESEN_APP_T02_HISTORICAL_READER_BRIDGE_PIN;
   if (
     compressedBytes.byteLength !== pin.bytes ||
     compressedBytes.byteLength > MAX_HISTORICAL_BRIDGE_BYTES ||
     sha256(compressedBytes) !== pin.sha256
   ) {
-    fail("HISTORICAL_BRIDGE_DRIFT", "The exact compressed T01C historical bridge drifted.");
+    fail("HISTORICAL_BRIDGE_DRIFT", "The exact compressed T02 historical bridge drifted.");
   }
   if (cachedHistoricalBridgeAuthority !== undefined) {
     if (!isDeepStrictEqual(cachedHistoricalBridgeAuthority.projection, parentArtifact)) {
-      fail("HISTORICAL_BRIDGE_DRIFT", "The cached T01C projection differs from its parent.");
+      fail("HISTORICAL_BRIDGE_DRIFT", "The cached T02 projection differs from its parent.");
     }
     return cachedHistoricalBridgeAuthority;
   }
@@ -480,28 +452,28 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
       maxOutputLength: MAX_HISTORICAL_BRIDGE_INFLATED_BYTES,
     });
   } catch (error) {
-    fail("HISTORICAL_BRIDGE_DRIFT", "The T01C bridge is not bounded gzip.", {
+    fail("HISTORICAL_BRIDGE_DRIFT", "The T02 bridge is not bounded gzip.", {
       cause: String(error),
     });
   }
   if (inflated.byteLength !== pin.uncompressedBytes) {
-    fail("HISTORICAL_BRIDGE_DRIFT", "The T01C bridge inflated size drifted.");
+    fail("HISTORICAL_BRIDGE_DRIFT", "The T02 bridge inflated size drifted.");
   }
   let manifest;
   try {
     const source = new TextDecoder("utf-8", { fatal: true }).decode(inflated);
     manifest = JSON.parse(source);
     if (!Buffer.from(`${JSON.stringify(manifest)}\n`, "utf8").equals(inflated)) {
-      fail("HISTORICAL_BRIDGE_DRIFT", "The T01C bridge is not canonical dense JSON.");
+      fail("HISTORICAL_BRIDGE_DRIFT", "The T02 bridge is not canonical dense JSON.");
     }
   } catch (error) {
-    if (error instanceof DesenAppInputPendingFixtureProofError) throw error;
-    fail("HISTORICAL_BRIDGE_DRIFT", "The T01C bridge JSON is invalid.", {
+    if (error instanceof DesenAppFailureFixtureProofError) throw error;
+    fail("HISTORICAL_BRIDGE_DRIFT", "The T02 bridge JSON is invalid.", {
       cause: String(error),
     });
   }
 
-  const projectionKeys = ["desen-app-evergreen-product-composition"];
+  const projectionKeys = ["desen-app-input-pending-fixture"];
   const expectedAddedPaths = [BROWSER_PATHS.spec, BROWSER_PATHS.config].sort((left, right) =>
     left.localeCompare(right, "en-US"),
   );
@@ -515,7 +487,7 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
       "projections",
     ]) ||
     manifest.schemaVersion !== 1 ||
-    manifest.profile !== "desen.app.m10-t01c-historical-reader-bridge.v1" ||
+    manifest.profile !== "desen.app.m10-t02-historical-reader-bridge.v1" ||
     manifest.baseCommit !== pin.baseCommit ||
     !Array.isArray(manifest.successorAddedPaths) ||
     !isDeepStrictEqual(manifest.successorAddedPaths, expectedAddedPaths) ||
@@ -524,7 +496,7 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
     !exactJsonKeys(manifest.projections, projectionKeys) ||
     !isDeepStrictEqual(manifest.projections[projectionKeys[0]], parentArtifact)
   ) {
-    fail("HISTORICAL_BRIDGE_DRIFT", "The T01C bridge identity or parent projection drifted.");
+    fail("HISTORICAL_BRIDGE_DRIFT", "The T02 bridge identity or parent projection drifted.");
   }
 
   const encodedEntries = Object.entries(manifest.files);
@@ -542,18 +514,18 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
         !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(encoded),
     )
   ) {
-    fail("HISTORICAL_BRIDGE_DRIFT", "The T01C task-time file manifest is not canonical.");
+    fail("HISTORICAL_BRIDGE_DRIFT", "The T02 task-time file manifest is not canonical.");
   }
   const files = new Map();
   let decodedBytes = 0;
   for (const [relativePath, encoded] of encodedEntries) {
     const bytes = Buffer.from(encoded, "base64");
     if (bytes.toString("base64") !== encoded || bytes.byteLength > MAX_AUTHORITY_BYTES) {
-      fail("HISTORICAL_BRIDGE_DRIFT", `Invalid T01C task-time file: ${relativePath}.`);
+      fail("HISTORICAL_BRIDGE_DRIFT", `Invalid T02 task-time file: ${relativePath}.`);
     }
     decodedBytes += bytes.byteLength;
     if (decodedBytes > MAX_HISTORICAL_BRIDGE_DECODED_FILE_BYTES) {
-      fail("HISTORICAL_BRIDGE_DRIFT", "The decoded T01C file authority exceeds its bound.");
+      fail("HISTORICAL_BRIDGE_DRIFT", "The decoded T02 file authority exceeds its bound.");
     }
     files.set(relativePath, bytes);
   }
@@ -579,8 +551,8 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
   return cachedHistoricalBridgeAuthority;
 }
 
-/** Verifies the exact M10-T02 implementation profile without executing product code. */
-export function verifyDesenAppInputPendingFixtureSourcePolicy(rawInput) {
+/** Verifies the exact M10-T03 implementation profile without executing product code. */
+export function verifyDesenAppFailureFixtureSourcePolicy(rawInput) {
   const input = exactOwnDataOptions(rawInput, Object.keys(SOURCE_PATHS), "source policy input");
   for (const key of Object.keys(SOURCE_PATHS)) {
     if (typeof input[key] !== "string") {
@@ -706,6 +678,11 @@ export function verifyDesenAppInputPendingFixtureSourcePolicy(rawInput) {
     input.authoringFixtures,
     [
       "export function createAuthoringOperationFixtureController(",
+      "for (const errorCode of Object.keys(fixtures.errors ?? {}).sort(compareText))",
+      "id: `error:${errorCode}`",
+      "description: errorDescriptions.get(errorCode)",
+      'deepFreezeProjection({ status: "failed", errorCode: outcome.errorCode as string })',
+      'state.status = current.outcome.kind === "success" ? "succeeded" : "failed";',
       "Request input is deliberately never read or retained.",
       "const promise = new Promise<RuntimeHostCallResult>",
       'state.status = "pending";',
@@ -722,6 +699,47 @@ export function verifyDesenAppInputPendingFixtureSourcePolicy(rawInput) {
     ["fetch(", "XMLHttpRequest", "ProductionOperation", "integrationOperationPort"],
     SOURCE_PATHS.authoringFixtures,
   );
+  requireFragments(
+    input.alert,
+    ['critical: "alert"', "role={TONE_ROLES[tone]}", "data-tone={tone}"],
+    SOURCE_PATHS.alert,
+  );
+  requireFragments(
+    input.operationLifecycle,
+    [
+      "if (!record.publicErrors.has(result.errorCode))",
+      '"The operation adapter returned an undeclared public error code."',
+      "error: Object.freeze({ code: result.errorCode })",
+    ],
+    SOURCE_PATHS.operationLifecycle,
+  );
+  requireFragments(
+    input.headlessSession,
+    [
+      "subscribeRuntimeActionTurnSettlements",
+      "invalidateSurface(authority, lifetime, reason);",
+      "materializeRuntimeHeadlessSurface({",
+      "commitPublishedReactive(",
+    ],
+    SOURCE_PATHS.headlessSession,
+  );
+  requireFragments(
+    input.behaviorProjection,
+    ["projectAuthoringBehaviorControls(", "Operation names come only from authored"],
+    SOURCE_PATHS.behaviorProjection,
+  );
+  requireFragments(
+    input.conditions,
+    [
+      "applyAuthoringConditionEdit(",
+      "setDesenEditorNodeCondition",
+      "clearDesenEditorNodeCondition",
+    ],
+    SOURCE_PATHS.conditions,
+  );
+  for (const [key, source] of Object.entries(input)) {
+    forbidFragments(source, ["invalidCredentials"], SOURCE_PATHS[key]);
+  }
 
   return deepFreeze({
     controlledCurrentStringEmission: true,
@@ -745,6 +763,12 @@ export function verifyDesenAppInputPendingFixtureSourcePolicy(rawInput) {
     syntheticPromiseExplicitlyUnresolved: true,
     fixtureRequestInputOpaque: true,
     fixtureDeactivationAndDisposalRevoke: true,
+    catalogErrorFixtureProjectionGeneric: true,
+    declaredPublicErrorOnly: true,
+    technicalFailureRedactionPreserved: true,
+    conditionalRuntimeReevaluationPreserved: true,
+    criticalAlertSemanticsPreserved: true,
+    referenceErrorCodeAbsentFromGenericSources: true,
   });
 }
 
@@ -754,6 +778,34 @@ function verifyFocusedTestAuthority(files) {
       key,
       decodeUtf8(files.get(relativePath), relativePath, "TEST_POLICY_VIOLATION"),
     ]),
+  );
+  requireFragments(
+    sources.evergreenProductComposition,
+    [
+      '"authoring-behavior-projection.ts"',
+      '"authoring-conditions.ts"',
+      '"behavior-controls.tsx"',
+      '"invalidCredentials"',
+      "keeps generic editor modules free of the reference sign-in composition",
+    ],
+    TEST_PATHS.evergreenProductComposition,
+    "TEST_POLICY_VIOLATION",
+  );
+  requireFragments(
+    sources.authoringBehaviorProjection,
+    ['{ $ref: "operation.signIn.status" }, "failed"'],
+    TEST_PATHS.authoringBehaviorProjection,
+    "TEST_POLICY_VIOLATION",
+  );
+  requireFragments(
+    sources.authoringConditions,
+    [
+      'const alert = selectionFor(document, "sign-in.error");',
+      "expect(alert.conditional).toBe(true);",
+      "expect(Object.hasOwn(findNode(cleared.document",
+    ],
+    TEST_PATHS.authoringConditions,
+    "TEST_POLICY_VIOLATION",
   );
   requireFragments(
     sources.authoringConnections,
@@ -817,15 +869,31 @@ function verifyFocusedTestAuthority(files) {
       "defaults omitted concurrency to reject and rejected attempts consume no generation",
       'reason: "pending"',
       "keeps synchronous host results asynchronous so pending is observable first",
+      "exposes only declared public failures and publishes the closed failed lifecycle",
+      "redacts undeclared errors, thrown/rejected adapters, and malformed envelopes",
     ],
     TEST_PATHS.operationLifecycle,
     "TEST_POLICY_VIOLATION",
   );
+  requireFragments(
+    sources.headlessSession,
+    [
+      "removes the false interactive Alert subtree and restores it only for current failure",
+      'errorCode: "invalidCredentials"',
+      'sourceNodeId === "sign-in.error"',
+    ],
+    TEST_PATHS.headlessSession,
+    "TEST_POLICY_VIOLATION",
+  );
   return deepFreeze({
+    evergreenProductCompositionCases: testDeclarationCount(sources.evergreenProductComposition),
+    authoringBehaviorProjectionCases: testDeclarationCount(sources.authoringBehaviorProjection),
+    authoringConditionCases: testDeclarationCount(sources.authoringConditions),
     authoringConnectionCases: testDeclarationCount(sources.authoringConnections),
     behaviorControlCases: testDeclarationCount(sources.behaviorControls),
     authoringFixtureCases: testDeclarationCount(sources.authoringFixtures),
     interactiveComponentCases: testDeclarationCount(sources.interactiveComponents),
+    headlessSessionCases: testDeclarationCount(sources.headlessSession),
     operationLifecycleCases: testDeclarationCount(sources.operationLifecycle),
     operationRepairAndAmbiguityCovered: true,
     semanticControlRerenderCovered: true,
@@ -837,6 +905,11 @@ function verifyFocusedTestAuthority(files) {
     opaqueInputAndRevocationCovered: true,
     focusPreservingLoadingSuppressionCovered: true,
     synchronousPendingAndRejectCovered: true,
+    genericReferenceErrorGuardCovered: true,
+    authoredFailedPredicateCovered: true,
+    authoredConditionSetClearCovered: true,
+    declaredFailureAndTechnicalRedactionCovered: true,
+    conditionalAlertRemoveRestoreCovered: true,
   });
 }
 
@@ -854,47 +927,52 @@ function verifyBrowserAuthority(files) {
   requireFragments(
     spec,
     [
-      `test("${BROWSER_TEST_NAME}"`,
+      'test("' + BROWSER_TEST_NAME + '"',
+      'const PUBLIC_FAILURE_MESSAGE = "We could not sign in. Check your details and try again.";',
       'await page.getByRole("button", { name: "New project" }).click();',
       'await addLocalState(page, "email");',
       'await addLocalState(page, "password");',
       'await connectInput(page, "email");',
       'await connectInput(page, "password");',
       'getByRole("button", { name: "Set Secure" }).click();',
-      'getByRole("switch", { name: "Secure" })',
-      "await secure.check();",
-      "await expect(secure).toBeChecked();",
-      'name: "Operation connection concurrency"',
-      ').toHaveValue("reject");',
-      'await concurrency.selectOption("queue");',
-      'await email.pressSequentially("designer");',
-      'await email.pressSequentially("@example.test");',
-      'await password.pressSequentially("correct horse");',
-      'await password.pressSequentially(" battery staple");',
-      'toHaveValue("designer@example.test")',
-      'toHaveValue("correct horse battery staple")',
-      'await expect(password).toHaveAttribute("type", "password");',
+      'getByRole("switch", { name: "Secure" }).check();',
+      'name: "Operation connection"',
+      '"Connected Press, operation.signIn, and Loading pending."',
+      'await insertComponent(page, "Alert", 4);',
+      'await setTextProperty(page, "Text", PUBLIC_FAILURE_MESSAGE);',
+      'getByRole("combobox", { name: "Tone" }).selectOption("critical");',
+      'selectOption("operation");',
+      'selectOption("signIn");',
+      'selectOption("failed");',
+      'await expect(canvas.getByRole("alert")).toHaveCount(0);',
       'getByRole("radio", { name: /^Synthetic/u })',
       'getByRole("radio", { name: /^Integration/u })',
       'getByRole("radio", { name: /^Production/u })',
-      'toEqual(["success", "error:invalidCredentials"]);',
+      '.toEqual(["success", "error:invalidCredentials"]);',
       'await outcome.selectOption("error:invalidCredentials");',
+      'await email.pressSequentially("designer@example.test");',
+      'await password.pressSequentially("correct horse battery staple");',
       "await submit.click();",
-      "await expect(submit).toBeFocused();",
-      "Pending · complete this fixture to settle the Runtime call.",
-      'await expect(submit).toHaveAttribute("aria-busy", "true");',
-      'await expect(submit).toHaveAttribute("aria-disabled", "true");',
-      'await expect(submit).toHaveAttribute("data-loading", "true");',
-      'await page.keyboard.press("Enter");',
-      'await page.getByRole("button", { name: "Design" }).click();',
-      'await page.getByRole("button", { name: "Run" }).click();',
+      '"Pending · complete this fixture to settle the Runtime call."',
       'await expect(canvas.getByRole("alert")).toHaveCount(0);',
-      "await restoredComplete.click();",
-      "requestAnimationFrame(() => requestAnimationFrame(() => resolve()));",
-      "Synthetic public error completed.",
-      'not.toHaveAttribute("aria-busy")',
-      'not.toHaveAttribute("aria-disabled")',
-      'not.toHaveAttribute("data-loading")',
+      'await expect(submit).toHaveAttribute("aria-busy", "true");',
+      'await expect(email).toHaveValue("designer@example.test");',
+      'await expect(password).toHaveValue("correct horse battery staple");',
+      "await complete.click();",
+      "await nextPaint(page);",
+      'const alert = canvas.getByRole("alert");',
+      "await expect(alert).toHaveText(PUBLIC_FAILURE_MESSAGE);",
+      'await expect(alert).toHaveAttribute("data-tone", "critical");',
+      'await expect(submit).not.toHaveAttribute("aria-busy");',
+      "await expect(page).toHaveURL(/\\/projects\\/account-app\\/surfaces\\/sign-in$/u);",
+      "expect(failureFrameBox).toEqual(initialFrameBox);",
+      "initialHorizontalGeometry",
+      "await submit.click();",
+      "await expect(alert).toHaveCount(0);",
+      "await complete.click();",
+      "await nextPaint(page);",
+      'await expect(canvas.getByRole("alert")).toHaveText(PUBLIC_FAILURE_MESSAGE);',
+      "expect(await frame.boundingBox()).toEqual(initialFrameBox);",
       "expect(runtimeFailures).toEqual([]);",
     ],
     BROWSER_PATHS.spec,
@@ -902,24 +980,34 @@ function verifyBrowserAuthority(files) {
   );
   forbidFragments(
     spec,
-    ["page.request", "submit.evaluate", "fetch("],
+    [
+      "page.request",
+      "submit.evaluate",
+      "document.body.innerHTML",
+      "dispatchEvent(",
+      'selectOption("success")',
+      "error:unavailable",
+    ],
     BROWSER_PATHS.spec,
     "TEST_POLICY_VIOLATION",
   );
-  if (occurrenceCount(spec, `test("${BROWSER_TEST_NAME}"`) !== 1) {
-    fail("TEST_POLICY_VIOLATION", "The M10-T02 browser test identity is not unique.");
+  if (occurrenceCount(spec, 'test("' + BROWSER_TEST_NAME + '"') !== 1) {
+    fail("TEST_POLICY_VIOLATION", "The M10-T03 browser test identity is not unique.");
   }
-  if (occurrenceCount(spec, "await page.evaluate(") !== 1) {
+  if (occurrenceCount(spec, "await nextPaint(page);") !== 2) {
     fail(
       "TEST_POLICY_VIOLATION",
-      "The M10-T02 browser test must use one bounded post-settlement animation-frame barrier.",
+      "Both public failures require the bounded double-animation-frame barrier.",
     );
+  }
+  if (occurrenceCount(spec, "await complete.click();") !== 2) {
+    fail("TEST_POLICY_VIOLATION", "The failure retry matrix must settle exactly twice.");
   }
   requireFragments(
     config,
     [
-      'testMatch: "input-pending-fixture.pw.ts"',
-      'name: "input-pending-chromium"',
+      'testMatch: "failure-fixture.pw.ts"',
+      'name: "failure-chromium"',
       "fullyParallel: false",
       "workers: 1",
       "reuseExistingServer: false",
@@ -932,22 +1020,26 @@ function verifyBrowserAuthority(files) {
     testName: BROWSER_TEST_NAME,
     chromiumConfigurations: 1,
     visibleBlankProjectStart: true,
-    fullIncrementalInputCovered: true,
-    secureAuthoredThroughVisibleUi: true,
-    nativePasswordTypeObserved: true,
-    visualOperationConnectionCovered: true,
-    defaultRejectPresented: true,
-    queueChosenToDetectLeakedRepeat: true,
-    realPendingFeedbackCovered: true,
-    keyboardRepeatSuppressionCovered: true,
-    designRunContinuityCovered: true,
+    authoredCriticalAlertCovered: true,
+    authoredFailedPredicateCovered: true,
+    idleAlertAbsent: true,
+    pendingAlertAbsent: true,
+    firstFailureAlertVisible: true,
+    secondFailureAlertVisible: true,
+    retryCleanupCovered: true,
     catalogOutcomeInventoryExact: true,
+    undeclaredUnavailableFixtureAbsent: true,
     integrationAndProductionDisabled: true,
-    terminalCleanupCovered: true,
+    realRuntimePendingBeforeFailure: true,
+    loadingCleanupCovered: true,
+    controlledInputPersistenceCovered: true,
+    routeContinuityCovered: true,
+    frameGeometryStable: true,
+    horizontalGeometryStable: true,
     postSettlementDoubleAnimationFrameObserved: true,
-    queueRemainedTerminalAfterAnimationFrames: true,
-    visibleFailureStateAsserted: false,
+    visibleFailureStateAsserted: true,
     successNavigationAsserted: false,
+    realHostOperationAsserted: false,
     directNetworkOrDomMutationUsed: false,
   });
 }
@@ -960,6 +1052,11 @@ function verifyPackageAuthority(files) {
     PACKAGE_PATHS.referenceCatalog,
   );
   const runtimeCore = parseJson(files.get(PACKAGE_PATHS.runtimeCore), PACKAGE_PATHS.runtimeCore);
+  const catalog = parseJson(files.get(CATALOG_PATH), CATALOG_PATH);
+  const operation = catalog?.operations?.["com.example.auth/signIn"];
+  const fixtures = operation?.authoring?.fixtures;
+  const fixtureErrors = fixtures?.errors;
+  const manifestErrorCodes = operation?.errors?.map(({ code }) => code);
   if (
     app?.name !== "@desen/app-web" ||
     typeof app.scripts?.["test:behavior-authoring"] !== "string" ||
@@ -968,16 +1065,23 @@ function verifyPackageAuthority(files) {
     !app.scripts["test:behavior-authoring"].includes("test/authoring-fixtures.test.ts") ||
     browser?.name !== "@desen/app-browser-e2e" ||
     !browser.scripts?.["test:e2e"]?.endsWith(
-      "playwright test --config input-pending-playwright.config.ts",
+      "playwright test --config failure-playwright.config.ts",
     ) ||
     referenceCatalog?.name !== "@desen/reference-catalog-web" ||
     referenceCatalog.scripts?.["test:interactive-components"] !==
       "vitest run test/interactive-components.test.tsx" ||
     runtimeCore?.name !== "@desen/runtime-core" ||
     runtimeCore.scripts?.["test:operation-lifecycle"] !==
-      "vitest run test/operation-lifecycle.test.ts"
+      "vitest run test/operation-lifecycle.test.ts" ||
+    catalog?.id !== "run.desen.reference.sign-in" ||
+    operation?.effect !== "network" ||
+    !isDeepStrictEqual(manifestErrorCodes, ["invalidCredentials", "unavailable"]) ||
+    !exactJsonKeys(fixtures, ["errors", "success"]) ||
+    !exactJsonKeys(fixtureErrors, ["invalidCredentials"]) ||
+    !isDeepStrictEqual(fixtureErrors.invalidCredentials, {}) ||
+    !isDeepStrictEqual(fixtures.success, { userId: "user-1" })
   ) {
-    fail("SOURCE_POLICY_VIOLATION", "The package-owned M10-T02 test contract drifted.");
+    fail("SOURCE_POLICY_VIOLATION", "The package and Catalog-owned M10-T03 contract drifted.");
   }
   return deepFreeze({
     appPackage: app.name,
@@ -987,6 +1091,10 @@ function verifyPackageAuthority(files) {
     focusedTestCommands: FOCUSED_TEST_COMMANDS,
     browserCommand: BROWSER_COMMAND,
     browserSuiteIncludesDedicatedConfig: true,
+    catalogId: catalog.id,
+    capabilityId: "com.example.auth/signIn",
+    exactFixtureErrorCodes: Object.freeze(Object.keys(fixtureErrors)),
+    unavailableDeclaredButNotFixtureBacked: true,
   });
 }
 
@@ -1004,12 +1112,12 @@ function verifyBridgeReproductionAuthority(files) {
   requireFragments(
     generator,
     [
-      `const EXPECTED_BASE_COMMIT = "${DESEN_APP_T01C_HISTORICAL_READER_BRIDGE_PIN.baseCommit}";`,
-      'profile: "desen.app.m10-t01c-historical-reader-bridge.v1"',
+      `const EXPECTED_BASE_COMMIT = "${DESEN_APP_T02_HISTORICAL_READER_BRIDGE_PIN.baseCommit}";`,
+      'profile: "desen.app.m10-t02-historical-reader-bridge.v1"',
       "successorAddedPaths: [",
       `"${BROWSER_PATHS.spec}"`,
       `"${BROWSER_PATHS.config}"`,
-      '"desen-app-evergreen-product-composition": taskTimeArtifact',
+      '"desen-app-input-pending-fixture": taskTimeArtifact',
       "gzipSync(bytes, { level: 9, mtime: 0 })",
       '{ flag: "wx" }',
     ],
@@ -1019,9 +1127,9 @@ function verifyBridgeReproductionAuthority(files) {
   requireFragments(
     fixture,
     [
-      "authenticateDesenAppInputPendingFixtureSuccessor",
-      "readDesenAppT01cHistoricalReaderTaskTimeFile",
-      "createDesenAppT01cHistoricalReaderReadFile",
+      "authenticateDesenAppFailureFixtureSuccessor",
+      "readDesenAppT02HistoricalReaderTaskTimeFile",
+      "createDesenAppT02HistoricalReaderReadFile",
     ],
     BRIDGE_REPRODUCTION_PATHS[1],
     "HISTORICAL_BRIDGE_DRIFT",
@@ -1038,38 +1146,16 @@ async function canonicalArtifactBytes(artifact) {
   return Buffer.from(await format(JSON.stringify(artifact), { parser: "json" }));
 }
 
-/** Builds detached deterministic M10-T02 evidence from exact current authorities. */
-export async function buildDesenAppInputPendingFixtureEvidence(rawOptions = undefined) {
+/** Builds detached deterministic M10-T03 evidence from exact current authorities. */
+export async function buildDesenAppFailureFixtureEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
-  const failureSuccessor = await authenticateFailureFixtureSuccessor(options.workspaceRoot);
-  const files = await acquireFiles(
-    Object.freeze({
-      ...options,
-      fileOverrides: failureSuccessor.materialize(
-        failureSuccessor.successor,
-        options.fileOverrides,
-      ),
-    }),
-  );
-  if (options.fileOverrides.size === 0) {
-    const frozenBytes = await readRegularAuthority(
-      path.join(options.workspaceRoot, ARTIFACT_RELATIVE_PATH),
-      ARTIFACT_RELATIVE_PATH,
-    );
-    assertPinnedArtifact(frozenBytes);
-    const frozenArtifact = parseJson(frozenBytes, ARTIFACT_RELATIVE_PATH, "ARTIFACT_DRIFT");
-    return deepFreeze({
-      artifact: frozenArtifact,
-      artifactBytes: frozenBytes,
-      artifactSha256: sha256(frozenBytes),
-    });
-  }
+  const files = await acquireFiles(options);
   const parent = authenticateParent(files.get(PARENT_ARTIFACT_PATH));
   const bridge = authenticateHistoricalReaderBridge(
-    files.get(T01C_HISTORICAL_READER_BRIDGE_PATH),
+    files.get(T02_HISTORICAL_READER_BRIDGE_PATH),
     parent.artifact,
   );
-  const source = verifyDesenAppInputPendingFixtureSourcePolicy(
+  const source = verifyDesenAppFailureFixtureSourcePolicy(
     Object.fromEntries(
       Object.entries(SOURCE_PATHS).map(([key, relativePath]) => [
         key,
@@ -1089,9 +1175,9 @@ export async function buildDesenAppInputPendingFixtureEvidence(rawOptions = unde
   );
   const artifact = deepFreeze({
     schemaVersion: 1,
-    proofId: "desen-app-input-pending-fixture",
-    profile: "desen.app.input-pending-fixture-proof.v1",
-    task: "M10-T02",
+    proofId: "desen-app-failure-fixture",
+    profile: "desen.app.failure-fixture-proof.v1",
+    task: "M10-T03",
     gate: null,
     result: "PASS",
     prerequisites: [parent.summary],
@@ -1099,28 +1185,23 @@ export async function buildDesenAppInputPendingFixtureEvidence(rawOptions = unde
       taskStatus: "DONE",
       p09Status: "PARTIAL",
       p10Status: "PARTIAL",
-      completeControlledInputCovered: true,
-      visualOperationConnectionCovered: true,
-      exactNameOnlyStateSuggestionCovered: true,
-      secureControlledInputCovered: true,
-      collisionFreeAliasSuggestionCovered: true,
-      manuallyReservedAliasRejected: true,
-      absentOptionalInputPreservationCovered: true,
-      advancedInputLossPreventionCovered: true,
-      additionalAdvancedInputLossPreventionCovered: true,
-      concurrencyMeaningExplicit: true,
-      rejectConcurrencyCovered: true,
-      realRuntimePendingCovered: true,
-      accessibleLoadingFeedbackCovered: true,
-      repeatedActivationSuppressed: true,
-      designRunPendingAndValueContinuityCovered: true,
-      catalogDerivedSyntheticOutcomesCovered: true,
-      syntheticOperationInputOpaque: true,
-      genericTerminalCleanupCovered: true,
-      postSettlementQueueStabilityCovered: true,
-      m10T03Closed: false,
+      authoredCriticalAlertCovered: true,
+      authoredFailedPredicateCovered: true,
+      catalogDeclaredPublicFailureCovered: true,
+      undeclaredUnavailableFixtureRejected: true,
+      realRuntimeFailureCovered: true,
+      idleAndPendingAlertAbsenceCovered: true,
+      firstAndRetryFailureVisibilityCovered: true,
+      retryCleanupCovered: true,
+      controlledInputPersistenceCovered: true,
+      loadingCleanupCovered: true,
+      routeContinuityCovered: true,
+      frameGeometryStabilityCovered: true,
+      genericReferenceErrorAssumptionRejected: true,
+      technicalFailureRedactionCovered: true,
+      m10T03Closed: true,
       m10T04Closed: false,
-      visibleFailureStateCovered: false,
+      visibleFailureStateCovered: true,
       successNavigationCovered: false,
       realHostOperationCovered: false,
       productionOperationCovered: false,
@@ -1138,9 +1219,9 @@ export async function buildDesenAppInputPendingFixtureEvidence(rawOptions = unde
     tests: {
       focusedCommands: FOCUSED_TEST_COMMANDS,
       browserCommand: BROWSER_COMMAND,
-      verifierCommand: "node scripts/verify-desen-app-input-pending-fixture.mjs",
-      proofReaderCommand: "node --test tests/desen-app-input-pending-fixture.test.mjs",
-      rootTestNames: DESEN_APP_INPUT_PENDING_FIXTURE_ROOT_TEST_NAMES,
+      verifierCommand: "node scripts/verify-desen-app-failure-fixture.mjs",
+      proofReaderCommand: "node --test tests/desen-app-failure-fixture.test.mjs",
+      rootTestNames: DESEN_APP_FAILURE_FIXTURE_ROOT_TEST_NAMES,
       browserExecutedByVerifier: false,
       deterministicReaderStartsListener: false,
     },
@@ -1152,14 +1233,14 @@ export async function buildDesenAppInputPendingFixtureEvidence(rawOptions = unde
       immutableInputs: true,
       sourceSymlinksRejected: true,
       checkpointOwnedReaderPaths: [
-        "scripts/lib/desen-app-input-pending-fixture-proof.mjs",
-        "tests/desen-app-input-pending-fixture.test.mjs",
+        "scripts/lib/desen-app-failure-fixture-proof.mjs",
+        "tests/desen-app-failure-fixture.test.mjs",
       ],
       artifactTrackedEntrypoints: PROOF_ENTRYPOINT_PATHS,
     },
     nonClaims: [
-      "M10-T02 proves complete controlled input, one real unresolved synthetic pending lifecycle, loading feedback, repeat suppression, Design/Run continuity, and generic terminal cleanup.",
-      "Selecting and settling a declared error only proves Catalog-derived fixture settlement; visible public failure-state behavior remains M10-T03.",
+      "M10-T03 proves one dedicated authored visible public failure and retry matrix over the exact M10-T02 input/pending predecessor.",
+      "The only admitted synthetic public failure is the exact Catalog-declared invalidCredentials fixture; unavailable remains declared but has no fixture.",
       "Success, navigation, and a separately authorized real host operation remain M10-T04.",
       "Integration and Production remain unavailable in this authoring fixture; production execution and N-036 are NOT_PROVEN.",
       "P-09 and P-10 remain PARTIAL, G10 remains open, and local evidence does not imply hosted exact-head success.",
@@ -1173,9 +1254,9 @@ export async function buildDesenAppInputPendingFixtureEvidence(rawOptions = unde
 function verifyProofDocument(bytes, artifactSha256) {
   const source = decodeUtf8(bytes, PROOF_DOCUMENT_RELATIVE_PATH, "PROOF_DOCUMENT_DRIFT");
   const expectedHeader = [
-    "# Desen App input and pending fixture",
+    "# Desen App failure fixture",
     "",
-    "Task: M10-T02",
+    "Task: M10-T03",
     "",
     "Status: DONE",
     "",
@@ -1183,48 +1264,48 @@ function verifyProofDocument(bytes, artifactSha256) {
     "",
     "P-10: PARTIAL",
     "",
-    `Predecessor artifact: \`sha256:${DESEN_APP_INPUT_PENDING_FIXTURE_PARENT_PIN.sha256}\``,
+    `Predecessor artifact: \`sha256:${DESEN_APP_FAILURE_FIXTURE_PARENT_PIN.sha256}\``,
     "",
-    `Historical bridge: \`sha256:${DESEN_APP_T01C_HISTORICAL_READER_BRIDGE_PIN.sha256}\``,
+    `Historical bridge: \`sha256:${DESEN_APP_T02_HISTORICAL_READER_BRIDGE_PIN.sha256}\``,
     "",
     `Final artifact: \`sha256:${artifactSha256}\``,
   ].join("\n");
   if (
     !source.startsWith(expectedHeader) ||
-    occurrenceCount(source, "Task: M10-T02") !== 1 ||
+    occurrenceCount(source, "Task: M10-T03") !== 1 ||
     occurrenceCount(source, "Status: DONE") !== 1 ||
     occurrenceCount(source, "P-09: PARTIAL") !== 1 ||
     occurrenceCount(source, "P-10: PARTIAL") !== 1 ||
     occurrenceCount(source, "Final artifact:") !== 1 ||
     source.includes("sha256:PENDING")
   ) {
-    fail("PROOF_DOCUMENT_DRIFT", "The M10-T02 proof report lost its exact authority header.");
+    fail("PROOF_DOCUMENT_DRIFT", "The M10-T03 proof report lost its exact authority header.");
   }
 }
 
 function assertPinnedArtifact(bytes) {
-  const pin = DESEN_APP_INPUT_PENDING_FIXTURE_ARTIFACT_PIN;
+  const pin = DESEN_APP_FAILURE_FIXTURE_ARTIFACT_PIN;
   if (
     pin.bytes <= 0 ||
     !/^[0-9a-f]{64}$/u.test(pin.sha256) ||
     bytes.byteLength !== pin.bytes ||
     sha256(bytes) !== pin.sha256
   ) {
-    fail("ARTIFACT_DRIFT", "The immutable committed M10-T02 artifact bytes drifted.");
+    fail("ARTIFACT_DRIFT", "The immutable committed M10-T03 artifact bytes drifted.");
   }
 }
 
-/** Verifies the frozen M10-T02 artifact against freshly acquired exact authorities. */
-export async function verifyDesenAppInputPendingFixtureEvidence(rawOptions = undefined) {
+/** Verifies the frozen M10-T03 artifact against freshly acquired exact authorities. */
+export async function verifyDesenAppFailureFixtureEvidence(rawOptions = undefined) {
   const options = exactOwnDataOptions(
     rawOptions,
     ["artifactBytes", "artifactPath", "buildOptions", "proofDocument", "proofDocumentPath"],
     "verify options",
   );
-  const built = await buildDesenAppInputPendingFixtureEvidence(options.buildOptions);
+  const built = await buildDesenAppFailureFixtureEvidence(options.buildOptions);
   const artifactPath =
     options.artifactPath === undefined
-      ? DEFAULT_DESEN_APP_INPUT_PENDING_FIXTURE_ARTIFACT_PATH
+      ? DEFAULT_DESEN_APP_FAILURE_FIXTURE_ARTIFACT_PATH
       : path.resolve(options.artifactPath);
   const artifactBytes =
     options.artifactBytes === undefined
@@ -1232,16 +1313,16 @@ export async function verifyDesenAppInputPendingFixtureEvidence(rawOptions = und
       : captureBytes(options.artifactBytes, "artifactBytes");
   assertPinnedArtifact(artifactBytes);
   if (!artifactBytes.equals(built.artifactBytes)) {
-    fail("ARTIFACT_DRIFT", "The committed M10-T02 artifact does not match current authorities.");
+    fail("ARTIFACT_DRIFT", "The committed M10-T03 artifact does not match current authorities.");
   }
   const artifact = parseJson(artifactBytes, ARTIFACT_RELATIVE_PATH, "ARTIFACT_DRIFT");
   if (
-    artifact?.task !== "M10-T02" ||
-    artifact?.proofId !== "desen-app-input-pending-fixture" ||
-    artifact?.profile !== "desen.app.input-pending-fixture-proof.v1" ||
+    artifact?.task !== "M10-T03" ||
+    artifact?.proofId !== "desen-app-failure-fixture" ||
+    artifact?.profile !== "desen.app.failure-fixture-proof.v1" ||
     artifact?.result !== "PASS"
   ) {
-    fail("ARTIFACT_DRIFT", "The committed M10-T02 artifact identity drifted.");
+    fail("ARTIFACT_DRIFT", "The committed M10-T03 artifact identity drifted.");
   }
   const proofDocumentPath =
     options.proofDocumentPath === undefined
@@ -1261,10 +1342,14 @@ export async function verifyDesenAppInputPendingFixtureEvidence(rawOptions = und
     trackedFiles: artifact.boundary.trackedFiles,
     rootTests: artifact.tests.rootTestNames.length,
     focusedCases:
+      focused.evergreenProductCompositionCases +
+      focused.authoringBehaviorProjectionCases +
+      focused.authoringConditionCases +
       focused.authoringConnectionCases +
       focused.behaviorControlCases +
       focused.authoringFixtureCases +
       focused.interactiveComponentCases +
+      focused.headlessSessionCases +
       focused.operationLifecycleCases,
     chromiumScenarios: artifact.authority.browser.chromiumConfigurations,
     p09Status: artifact.claim.p09Status,
@@ -1284,22 +1369,22 @@ function successorAuthority(successor) {
   ) {
     fail(
       "SUCCESSOR_POLICY_VIOLATION",
-      "T01C historical compatibility requires the exact authenticated M10-T02 successor.",
+      "T02 historical compatibility requires the exact authenticated M10-T03 successor.",
     );
   }
   return SUCCESSOR_AUTHORITIES.get(successor);
 }
 
 /**
- * Authenticates the exact official M10-T02 successor for the historical M10-T01C reader.
+ * Authenticates the exact official M10-T03 successor for the historical M10-T02 reader.
  *
- * @remarks This function directly authenticates the frozen T01C artifact and bridge. It never
- * imports or invokes the T01C proof module, avoiding a cyclic reader authority.
+ * @remarks This function directly authenticates the frozen T02 artifact and bridge. It never
+ * imports or invokes the T02 proof module, avoiding a cyclic reader authority.
  */
-export async function authenticateDesenAppInputPendingFixtureSuccessor(rawOptions = undefined) {
+export async function authenticateDesenAppFailureFixtureSuccessor(rawOptions = undefined) {
   const options = exactOwnDataOptions(rawOptions, ["workspaceRoot"], "successor options");
   const workspaceRoot = path.resolve(options.workspaceRoot ?? WORKSPACE_ROOT);
-  const verified = await verifyDesenAppInputPendingFixtureEvidence({
+  const verified = await verifyDesenAppFailureFixtureEvidence({
     artifactPath: path.join(workspaceRoot, ARTIFACT_RELATIVE_PATH),
     proofDocumentPath: path.join(workspaceRoot, PROOF_DOCUMENT_RELATIVE_PATH),
     buildOptions: { workspaceRoot },
@@ -1312,22 +1397,22 @@ export async function authenticateDesenAppInputPendingFixtureSuccessor(rawOption
   );
   const bridge = authenticateHistoricalReaderBridge(
     await readRegularAuthority(
-      path.join(workspaceRoot, T01C_HISTORICAL_READER_BRIDGE_PATH),
-      T01C_HISTORICAL_READER_BRIDGE_PATH,
+      path.join(workspaceRoot, T02_HISTORICAL_READER_BRIDGE_PATH),
+      T02_HISTORICAL_READER_BRIDGE_PATH,
     ),
     parent.artifact,
   );
   const successor = deepFreeze({
-    task: "M10-T02",
-    proofId: "desen-app-input-pending-fixture",
-    profile: "desen.app.input-pending-fixture-proof.v1",
+    task: "M10-T03",
+    proofId: "desen-app-failure-fixture",
+    profile: "desen.app.failure-fixture-proof.v1",
     result: verified.result,
     artifact: {
       path: ARTIFACT_RELATIVE_PATH,
-      ...DESEN_APP_INPUT_PENDING_FIXTURE_ARTIFACT_PIN,
+      ...DESEN_APP_FAILURE_FIXTURE_ARTIFACT_PIN,
       immutable: true,
     },
-    predecessor: { ...DESEN_APP_INPUT_PENDING_FIXTURE_PARENT_PIN },
+    predecessor: { ...DESEN_APP_FAILURE_FIXTURE_PARENT_PIN },
     trackedFiles: verified.trackedFiles,
     p09Status: verified.p09Status,
     p10Status: verified.p10Status,
@@ -1350,8 +1435,8 @@ function validateHistoricalOverrideMap(fileOverrides) {
   }
 }
 
-/** Materializes exact T01C task-time bytes first, then applies caller mutations defensively. */
-export function materializeDesenAppT01cHistoricalReaderFileOverrides(successor, fileOverrides) {
+/** Materializes exact T02 task-time bytes first, then applies caller mutations defensively. */
+export function materializeDesenAppT02HistoricalReaderFileOverrides(successor, fileOverrides) {
   const authority = successorAuthority(successor);
   validateHistoricalOverrideMap(fileOverrides);
   const materialized = new Map(
@@ -1372,14 +1457,14 @@ export function materializeDesenAppT01cHistoricalReaderFileOverrides(successor, 
   return materialized;
 }
 
-/** Returns a defensive copy of one exact M10-T01C task-time file. */
-export function readDesenAppT01cHistoricalReaderTaskTimeFile(successor, relativePath) {
+/** Returns a defensive copy of one exact M10-T02 task-time file. */
+export function readDesenAppT02HistoricalReaderTaskTimeFile(successor, relativePath) {
   if (!safeRelativePath(relativePath)) {
     fail("OPTIONS_INVALID", "relativePath must be one safe relative path.");
   }
   const bytes = successorAuthority(successor).files.get(relativePath);
   if (bytes === undefined) {
-    fail("OPTIONS_INVALID", "relativePath has no T01C task-time bridge entry.", { relativePath });
+    fail("OPTIONS_INVALID", "relativePath has no T02 task-time bridge entry.", { relativePath });
   }
   return Buffer.from(bytes);
 }
@@ -1390,8 +1475,8 @@ async function canonicalDestinationPath(filePath) {
   return path.join(canonicalParent, path.basename(absolutePath));
 }
 
-/** Atomically writes newly built M10-T02 evidence or refuses unsafe tracked replacement. */
-export async function writeDesenAppInputPendingFixtureEvidence(rawOptions = undefined) {
+/** Atomically writes newly built M10-T03 evidence or refuses unsafe tracked replacement. */
+export async function writeDesenAppFailureFixtureEvidence(rawOptions = undefined) {
   const options = exactOwnDataOptions(
     rawOptions,
     ["artifactPath", "beforeAtomicRename", "buildOptions"],
@@ -1406,34 +1491,31 @@ export async function writeDesenAppInputPendingFixtureEvidence(rawOptions = unde
   }
   const artifactPath =
     options.artifactPath === undefined
-      ? DEFAULT_DESEN_APP_INPUT_PENDING_FIXTURE_ARTIFACT_PATH
+      ? DEFAULT_DESEN_APP_FAILURE_FIXTURE_ARTIFACT_PATH
       : path.resolve(options.artifactPath);
-  const built = await buildDesenAppInputPendingFixtureEvidence(options.buildOptions);
+  const built = await buildDesenAppFailureFixtureEvidence(options.buildOptions);
   let destination;
   try {
     destination = await canonicalDestinationPath(artifactPath);
   } catch (error) {
-    fail("ARTIFACT_WRITE_UNSAFE", "The M10-T02 artifact destination is unsafe.", {
+    fail("ARTIFACT_WRITE_UNSAFE", "The M10-T03 artifact destination is unsafe.", {
       cause: String(error),
     });
   }
   if (
     destination ===
-    (await canonicalDestinationPath(DEFAULT_DESEN_APP_INPUT_PENDING_FIXTURE_ARTIFACT_PATH))
+    (await canonicalDestinationPath(DEFAULT_DESEN_APP_FAILURE_FIXTURE_ARTIFACT_PATH))
   ) {
     try {
       const existing = await readRegularAuthority(destination, ARTIFACT_RELATIVE_PATH);
       if (
-        DESEN_APP_INPUT_PENDING_FIXTURE_ARTIFACT_PIN.bytes > 0 &&
+        DESEN_APP_FAILURE_FIXTURE_ARTIFACT_PIN.bytes > 0 &&
         !existing.equals(built.artifactBytes)
       ) {
-        fail("ARTIFACT_WRITE_UNSAFE", "Refusing to rewrite the frozen tracked M10-T02 artifact.");
+        fail("ARTIFACT_WRITE_UNSAFE", "Refusing to rewrite the frozen tracked M10-T03 artifact.");
       }
     } catch (error) {
-      if (
-        error instanceof DesenAppInputPendingFixtureProofError &&
-        error.code !== "AUTHORITY_UNSAFE"
-      ) {
+      if (error instanceof DesenAppFailureFixtureProofError && error.code !== "AUTHORITY_UNSAFE") {
         throw error;
       }
     }
@@ -1445,8 +1527,8 @@ export async function writeDesenAppInputPendingFixtureEvidence(rawOptions = unde
       beforeAtomicRename: options.beforeAtomicRename,
     });
   } catch (error) {
-    if (error instanceof DesenAppInputPendingFixtureProofError) throw error;
-    fail("ARTIFACT_WRITE_UNSAFE", "M10-T02 artifact write failed safely.", {
+    if (error instanceof DesenAppFailureFixtureProofError) throw error;
+    fail("ARTIFACT_WRITE_UNSAFE", "M10-T03 artifact write failed safely.", {
       cause: String(error),
     });
   }

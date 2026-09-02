@@ -87,7 +87,7 @@ async function waitFor(predicate, message) {
   assert.fail(message);
 }
 
-test("the dependency-derived plan owns the exact 212-node exhaustive inventory", () => {
+test("the dependency-derived plan owns the exact 214-node exhaustive inventory", () => {
   const plan = createRequiredExhaustivePlan();
   const inventory = createExhaustiveWorkloadInventory();
   const ownedIds = [
@@ -102,19 +102,19 @@ test("the dependency-derived plan owns the exact 212-node exhaustive inventory",
   assert.equal(PROOF_PAIR_CONCURRENCY, 2);
   assert.equal(DEFAULT_STEP_TIMEOUT_MS, 15 * 60 * 1_000);
   assert.equal(DEFAULT_GATE_TIMEOUT_MS, 18 * 60 * 1_000 + 30 * 1_000);
-  assert.equal(plan.stepCount, 212);
-  assert.equal(plan.proofPairCount, 101);
+  assert.equal(plan.stepCount, 214);
+  assert.equal(plan.proofPairCount, 102);
   assert.equal(plan.prefix.length, 8);
   assert.equal(plan.suffix.length, 2);
-  assert.equal(plan.planSha256, "8853118a28eb662e2292932a4389089990d13855856757b320186c88e32272c1");
-  assert.equal(ownedIds.length, 212);
-  assert.equal(new Set(ownedIds).size, 212);
+  assert.equal(plan.planSha256, "f815d05c7edbe293b77b3819982d0076619bdd035e5eebac2112329bad06f904");
+  assert.equal(ownedIds.length, 214);
+  assert.equal(new Set(ownedIds).size, 214);
   assert.deepEqual([...ownedIds].sort(), inventory.nodes.map(({ id }) => id).sort());
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-6).id,
-      verifier: plan.proofPairs.at(-6).verifier.id,
-      rootTest: plan.proofPairs.at(-6).rootTest.id,
+      id: plan.proofPairs.at(-7).id,
+      verifier: plan.proofPairs.at(-7).verifier.id,
+      rootTest: plan.proofPairs.at(-7).rootTest.id,
     },
     {
       id: "desen-app-empty-project-browser-e2e",
@@ -124,9 +124,9 @@ test("the dependency-derived plan owns the exact 212-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-5).id,
-      verifier: plan.proofPairs.at(-5).verifier.id,
-      rootTest: plan.proofPairs.at(-5).rootTest.id,
+      id: plan.proofPairs.at(-6).id,
+      verifier: plan.proofPairs.at(-6).verifier.id,
+      rootTest: plan.proofPairs.at(-6).rootTest.id,
     },
     {
       id: "desen-app-browser-e2e-workspace-compatibility",
@@ -136,9 +136,9 @@ test("the dependency-derived plan owns the exact 212-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-4).id,
-      verifier: plan.proofPairs.at(-4).verifier.id,
-      rootTest: plan.proofPairs.at(-4).rootTest.id,
+      id: plan.proofPairs.at(-5).id,
+      verifier: plan.proofPairs.at(-5).verifier.id,
+      rootTest: plan.proofPairs.at(-5).rootTest.id,
     },
     {
       id: "desen-app-user-created-blank-project",
@@ -148,9 +148,9 @@ test("the dependency-derived plan owns the exact 212-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-3).id,
-      verifier: plan.proofPairs.at(-3).verifier.id,
-      rootTest: plan.proofPairs.at(-3).rootTest.id,
+      id: plan.proofPairs.at(-4).id,
+      verifier: plan.proofPairs.at(-4).verifier.id,
+      rootTest: plan.proofPairs.at(-4).rootTest.id,
     },
     {
       id: "desen-app-visual-behavior-authoring",
@@ -160,9 +160,9 @@ test("the dependency-derived plan owns the exact 212-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-2).id,
-      verifier: plan.proofPairs.at(-2).verifier.id,
-      rootTest: plan.proofPairs.at(-2).rootTest.id,
+      id: plan.proofPairs.at(-3).id,
+      verifier: plan.proofPairs.at(-3).verifier.id,
+      rootTest: plan.proofPairs.at(-3).rootTest.id,
     },
     {
       id: "desen-app-evergreen-product-composition",
@@ -172,14 +172,26 @@ test("the dependency-derived plan owns the exact 212-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-1).id,
-      verifier: plan.proofPairs.at(-1).verifier.id,
-      rootTest: plan.proofPairs.at(-1).rootTest.id,
+      id: plan.proofPairs.at(-2).id,
+      verifier: plan.proofPairs.at(-2).verifier.id,
+      rootTest: plan.proofPairs.at(-2).rootTest.id,
     },
     {
       id: "desen-app-input-pending-fixture",
       verifier: "verify-desen-app-input-pending-fixture",
       rootTest: "test-desen-app-input-pending-fixture",
+    },
+  );
+  assert.deepEqual(
+    {
+      id: plan.proofPairs.at(-1).id,
+      verifier: plan.proofPairs.at(-1).verifier.id,
+      rootTest: plan.proofPairs.at(-1).rootTest.id,
+    },
+    {
+      id: "desen-app-failure-fixture",
+      verifier: "verify-desen-app-failure-fixture",
+      rootTest: "test-desen-app-failure-fixture",
     },
   );
   for (const pair of plan.proofPairs) {
@@ -205,7 +217,7 @@ test("authority defaults to REQUIRED, accepts only explicit SHADOW, and fixes EX
   assert.equal(observationPlan.scope, "EXHAUSTIVE");
   assert.equal(
     observationPlan.planSha256,
-    "8b99b7f3a426e0ec31178f3bce672d9bde3ab91dae8636f168f3bfe5fa9e1ae6",
+    "ac389e5063b153586f49303ec14a1228e8ef5605f337700d133884e8069fdb82",
   );
   assert.throws(
     () => createRequiredExhaustivePlan({ scope: "AFFECTED" }),
@@ -290,7 +302,7 @@ test("REQUIRED authority rejects injected success runners and repository seams",
   assert.equal(executionCount, 0);
 });
 
-test("all 212 successful closes produce stable inventory-ordered receipts", async () => {
+test("all 214 successful closes produce stable inventory-ordered receipts", async () => {
   const plan = createShadowPlan();
   const calls = [];
   const receipt = await runShadowPlan(plan, {
@@ -301,8 +313,8 @@ test("all 212 successful closes produce stable inventory-ordered receipts", asyn
     ...successfulGuardOptions(),
   });
 
-  assert.equal(calls.length, 212);
-  assert.equal(new Set(calls).size, 212);
+  assert.equal(calls.length, 214);
+  assert.equal(new Set(calls).size, 214);
   assert.equal(calls.filter((id) => id === "editor-core-public-package-contract").length, 1);
   assert.equal(
     calls.indexOf("editor-core-public-package-contract"),
@@ -344,7 +356,7 @@ test("all 212 successful closes produce stable inventory-ordered receipts", asyn
     true,
   );
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 212);
+  assert.equal(receipt.observedClosedCount, 214);
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
     plan.nodes.map(({ id }) => id),
@@ -404,7 +416,7 @@ test("dynamic workers keep two safe ordinary pairs active and drain for all barr
   assert.equal(maximumActive, 2);
   assert.equal(thirdPairStartedWhileFirstHeld, true);
   assert.equal(barrierPairs.length, 11);
-  assert.equal(plan.proofPairs.length - barrierPairs.length, 90);
+  assert.equal(plan.proofPairs.length - barrierPairs.length, 91);
   assert.equal(exclusiveBarrierSteps.size, 22);
 });
 
@@ -1131,7 +1143,7 @@ test("build-output and untracked closing guards run after a primary proof failur
   assert.equal(untrackedSnapshots, 2);
 });
 
-test("untracked drift fails the gate even after all 212 steps close successfully", async () => {
+test("untracked drift fails the gate even after all 214 steps close successfully", async () => {
   const plan = createShadowPlan();
   const untrackedDrift = new Error("untracked drift");
   await assert.rejects(
@@ -1146,7 +1158,7 @@ test("untracked drift fails the gate even after all 212 steps close successfully
     (error) => {
       assert.equal(error, untrackedDrift);
       assert.equal(error.requiredExhaustiveReceipt.status, "FAIL");
-      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 212);
+      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 214);
       return true;
     },
   );
@@ -1175,7 +1187,7 @@ test("the full gate authenticates repository inputs and hosted revision without 
   assert.equal(receipt.inventory.authority, "SHADOW");
   assert.equal(receipt.inventory.scope, "EXHAUSTIVE");
   assert.equal(receipt.execution.status, "PASS");
-  assert.equal(receipt.execution.observedClosedCount, 212);
+  assert.equal(receipt.execution.observedClosedCount, 214);
   assert.equal(receipt.execution.cleanInput.revision, revision);
 });
 
