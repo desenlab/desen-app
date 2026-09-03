@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 206,
+  PROOF_UNIT: 208,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 32,
-  FROZEN_INPUT: 151,
+  FROZEN_INPUT: 152,
   PACKAGE_OR_APPLICATION: 548,
-  SHARED_PROOF_INFRASTRUCTURE: 275,
-  PROJECT_DOCUMENTATION: 143,
+  SHARED_PROOF_INFRASTRUCTURE: 278,
+  PROJECT_DOCUMENTATION: 145,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1411 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1419 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1411 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1411);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1419);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 206);
+  assert.equal(proofEntries.length, 208);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -352,12 +352,14 @@ test("permits strict selection only for exact verifier and root-test proof input
   }
 });
 
-test("keeps CI-03 performance records exhaustive without proof ownership", async () => {
+test("keeps CI-03 and AR-01 documentation exhaustive without proof ownership", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
   for (const documentationPath of [
     "docs/adr/0018-fresh-proof-performance.md",
     "docs/proof/CI-FRESH-PROOF-PERFORMANCE.md",
+    "docs/adr/0019-historical-archive-privacy-amendment.md",
+    "docs/proof/HISTORICAL-ARCHIVE-REDACTION.md",
   ]) {
     assert.deepEqual(resolveAffectedWorkloadOwner(authority, documentationPath), {
       path: documentationPath,
@@ -377,7 +379,7 @@ test("keeps CI-03 performance records exhaustive without proof ownership", async
   }
 });
 
-test("the reviewed CI-03 successor preserves the historical I07-04 ownership projection", async () => {
+test("the reviewed AR-01 successor preserves the historical I07-04 ownership projection", async () => {
   const currentPaths = await currentTrackedPaths();
   const current = createAffectedWorkloadOwnership(currentPaths);
   const promotedPaths = [
@@ -757,6 +759,14 @@ test("the reviewed CI-03 successor preserves the historical I07-04 ownership pro
     "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-unreviewed-dev-module/apps/desen-app/dev/local-operation-private.mjs",
     "docs/adr/0018-fresh-proof-performance.md",
     "docs/proof/CI-FRESH-PROOF-PERFORMANCE.md",
+    "docs/adr/0019-historical-archive-privacy-amendment.md",
+    "docs/proof/HISTORICAL-ARCHIVE-REDACTION.md",
+    "docs/proof/artifacts/historical-archive-redaction.json",
+    "scripts/generate-historical-archive-redaction-proof.mjs",
+    "scripts/lib/historical-archive-redaction-proof.mjs",
+    "scripts/lib/historical-archive-redaction.mjs",
+    "scripts/verify-historical-archive-redaction.mjs",
+    "tests/historical-archive-redaction.test.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);
@@ -768,7 +778,7 @@ test("the reviewed CI-03 successor preserves the historical I07-04 ownership pro
   for (const successorPath of successorPaths) {
     assert.ok(
       current.entries.some(({ path: candidate }) => candidate === successorPath),
-      `${successorPath} must be tracked by the reviewed CI-03 successor`,
+      `${successorPath} must be tracked by the reviewed AR-01 successor`,
     );
   }
 

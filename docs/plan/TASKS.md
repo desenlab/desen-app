@@ -37,13 +37,14 @@ explicitly parallel branches inside M11 may progress independently.
 external release hygiene and does not block local implementation. Until each task is complete, no
 document may claim the corresponding clean-checkout or remote-CI evidence.
 
-## Operational and infrastructure work — excluded from the 145 implementation-task count
+## Operational and infrastructure work — excluded from the implementation-task count
 
 | ID     | Status      | Depends on                           | Deliverable                                                                                                                                       | Evidence                                                           |
 | ------ | ----------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | CI-01  | DONE        | M04-T02, explicit user authorization | Secure single-pass CI orchestration that preserves every proof while removing recursive repetition                                                | `docs/proof/baselines/ci-01-single-pass.json`                      |
 | CI-02  | DONE        | I07-04, explicit user authorization  | Bounded non-authoritative per-task local feedback plus exact PR-head hosted completion authority; exhaustive compatibility coverage retained      | `AGENTS.md`, `scripts/test/ci-quality-gate.test.mjs`, ADR 0011     |
 | CI-03  | DONE        | CI-02, explicit user authorization   | Measured fresh-proof performance improvement without reducing coverage, reusing past success, or increasing the quality-gate deadline             | `docs/proof/CI-FRESH-PROOF-PERFORMANCE.md`                         |
+| AR-01  | DONE        | M10-T04, explicit user authorization | Remove private prose from nested historical archives while preserving technical evidence and preventing republication                             | `docs/proof/HISTORICAL-ARCHIVE-REDACTION.md`                       |
 | I07-01 | DONE        | M07-T01, explicit user authorization | Current-reader checkpoint, machine-enforced cleanup register, and a non-authoritative `SHADOW + EXHAUSTIVE` modular candidate                     | `docs/proof/baselines/i07-01-modular-proof-shadow.json`            |
 | I07-02 | DONE        | I07-01                               | Exact legacy/modular equivalence, shared-state classification, and required-CI cutover to `REQUIRED + EXHAUSTIVE` execution                       | `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json` |
 | I07-03 | DONE        | I07-02                               | Fail-closed `SHADOW + AFFECTED` selector with complete tracked-path ownership, unknown-to-exhaustive fallback, and a frozen observation threshold | `docs/proof/baselines/i07-03-affected-selector-shadow.json`        |
@@ -76,12 +77,27 @@ and all frozen evidence remain intact. Checkpoint 70 preserves 1–69 and reseal
 current-reader receipts at
 `sha256:52e71083e7c6f08986480434b5a327b1de6a2d29487b8f8a7ecbef1ffdb4d4e6`.
 
-The CI-03 and M10-T04 `DONE` rows are conditional closure candidates until the exact final PR head
-passes hosted `Quality gate` and `Browser E2E`. Before that condition, CI-03 is the only active
-task and merge/completion reporting are blocked; afterward the same unchanged revision records
-their closure. Main still runs fresh exhaustive verification after merge. M10-T05 remains
-`NOT_STARTED`; I07-05's legacy-retirement scope, implementation-task totals, and gate counts do
-not change. See the [CI-03 evidence](../proof/CI-FRESH-PROOF-PERFORMANCE.md).
+CI-03 and M10-T04 closed in PR #74 after exact head
+`25eb7c5f8f50b247233c254d77ff58df83f93b1c` passed hosted
+[CI](https://github.com/desenlab/desen-app/actions/runs/33748305698). Its merged main also passed
+[fresh exhaustive CI](https://github.com/desenlab/desen-app/actions/runs/33750209060). Those
+receipts do not authorize later heads. See the [CI-03 evidence](../proof/CI-FRESH-PROOF-PERFORMANCE.md).
+
+`AR-01` is the explicitly authorized archive cleanup before M10-T05. It removes three private
+prose sections from the T01B task-board copy and recursively updates T01C/T02/T03 transports;
+207 other file entries and all technical projections remain unchanged. Four current generators
+sanitize and authenticate their exact output before writing. Current readers admit only the
+redacted transports and report their actual receipts separately from historical artifact hashes.
+The four App verifiers, 40 existing root cases, and 9 independent privacy cases pass locally.
+The 57 previous frozen artifacts and checkpoint entries 1–70 remain intact; Git history is not
+rewritten. The six-command bounded baseline and 408 CI contract tests pass. Checkpoint 71
+authenticates 58 artifacts / 116 readers at
+`sha256:c49ca6eacbc08f18ac6cd5bebb3d0a9c3d21a5b8fe420d92364416a210155bda`.
+AR-01's `DONE` row is a conditional closure candidate until fresh `Quality gate` and `Browser E2E`
+pass for this exact final PR head. Until then AR-01 is the only active task and merge/completion
+are blocked; afterward the same unchanged revision records closure. M10-T05 remains `NOT_STARTED`
+and next after AR-01; implementation progress stays 116/148, M10 stays 7/12, and proof gates stay
+11/13.
 
 Local CI-02 evidence is the passing six-command bounded baseline, the 2/2 focused CI-02 contract
 tests, unchanged 45-checkpoint/41-artifact/82-reader authority, passing infrastructure-debt and

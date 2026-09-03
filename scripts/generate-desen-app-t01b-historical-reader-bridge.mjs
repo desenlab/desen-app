@@ -4,6 +4,8 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 
+import { redactHistoricalArchiveForPublication } from "./lib/historical-archive-redaction.mjs";
+
 const EXPECTED_BASE_COMMIT = "a44575d48e073468da6b25eb8b31a375218caf0a";
 const rawArguments = process.argv.slice(2);
 if (rawArguments.length !== 2 || rawArguments.some((value) => value.length === 0)) {
@@ -158,4 +160,8 @@ const payload = {
   projections,
 };
 const bytes = Buffer.from(`${JSON.stringify(payload)}\n`);
-await writeFile(outputPath, gzipSync(bytes, { level: 9, mtime: 0 }), { flag: "wx" });
+const sanitizedBytes = redactHistoricalArchiveForPublication(
+  "docs/proof/artifacts/desen-app-0.1.0-t01b-historical-reader-bridge.json.gz",
+  gzipSync(bytes, { level: 9, mtime: 0 }),
+);
+await writeFile(outputPath, sanitizedBytes, { flag: "wx" });

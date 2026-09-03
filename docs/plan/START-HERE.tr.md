@@ -26,17 +26,22 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
-**CI-03 — Taze kanıt doğrulamasının performansı**, kullanıcının açık onayıyla M10-T04'ün iki
-zaman aşımından sonra eklendi. Yerel temel kontroller ve odaklı kanıtlar geçti: aynı 73 editör
-kanıt testinin toplam süresi 199 saniyeden 100 saniyeye indi. Bu, bütün GitHub koşusunun süresi
-değil. 216 işin tamamı, negatif testler, her seferinde taze çalışma, mühür geçmişi ve 18 dakika
-30 saniyelik süre sınırı korunuyor.
+**AR-01 — Arşivlerdeki özel metinlerin temizliği**, kullanıcının açık onayıyla M10-T05'ten önce
+yapılıyor. Dört arşivin iç içe kopyalarındaki üç paylaşım taslağı temizlendi; diğer 207 dosya
+girdisi ve teknik kanıtlar değişmedi. Arşiv üreticileri aynı metinleri tekrar yayımlamayacak şekilde
+düzeltildi. Eski mühürler tarihsel kayıt olarak korunuyor; yeni arşivlerin kimlikleri ayrı ve açık
+bir ek kanıtla doğrulanıyor. Git geçmişi değiştirilmiyor; eski commit ve indirilmiş kopyalar
+silinmiş sayılmıyor. [Kapsam ve kanıt](../proof/HISTORICAL-ARCHIVE-REDACTION.md).
 
-CI-03 ve M10-T04'ün `DONE` kayıtları, tam güncel PR commit'inin hosted `Quality gate` ve
-`Browser E2E` kontrollerini geçmesine bağlı. O zamana kadar yalnız CI-03 aktif sayılır ve merge
-yapılmaz; koşul sağlandığında aynı değişmemiş commit kapanış kaydı olur. Merge sonrasında main
-ayrıca taze kapsamlı doğrulanır. M10-T05'e başlanmıyor; I07-05'in eski runner'ı kaldırma kapsamı
-bu işin yerine kullanılmıyor.
+CI-03 ve M10-T04, PR #74'ün tam son commit'inde
+[GitHub kontrolleri](https://github.com/desenlab/desen-app/actions/runs/33748305698) geçtikten
+sonra main'e alındı; [main koşusu](https://github.com/desenlab/desen-app/actions/runs/33750209060)
+da geçti. Bu sonuçlar AR-01'in yeni commit'ine başarı yetkisi vermez. AR-01'in altı sınırlı yerel
+kontrolü, 40 App kanıt testi, 9 gizlilik testi ve 408 CI sözleşme testi geçti. `DONE` kaydı, tam
+güncel PR'ın hosted kontrolleri geçene kadar koşullu bir kapanış adayıdır; o zamana kadar yalnız
+AR-01 aktif kalır. Koşul sağlanınca aynı değişmemiş revizyon kapanış kaydı olur.
+M10-T05 henüz başlamadı ve bu temizlikten sonra sıradaki ürün görevi. Toplam ilerleme 116/148,
+M10 7/12, kanıt kapıları 11/13 olarak kalıyor. I07-05'in eski runner'ı kaldırma kapsamı değişmedi.
 
 Sıradan bir `T` görevinin hızlı yerel geri bildirimi; `pnpm format:check`, `pnpm lint`,
 `pnpm typecheck`, `pnpm build`, `pnpm boundaries` ve

@@ -144,7 +144,7 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "0328ce5a799c73eda1bcd4b5086b80288f20cca637d37c3ab5b12300cce2573d";
+  "862850c9691646bfff56ff8ce133f96fdd4f12b2f698173f0fde2435eae044a7";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
   "e449a5203f03caa6df67289a3c97d1a2111556bf259f904ee6e79932820fcbf1";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
@@ -159,6 +159,7 @@ const DIRECT_CI_PROOF_PAIR_IDS = SAFE_OBJECT_FREEZE([
   "desen-app-browser-e2e-workspace-compatibility",
   "desen-app-user-created-blank-project",
   "desen-app-visual-behavior-authoring",
+  "historical-archive-redaction",
 ]);
 const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
   [
@@ -682,6 +683,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "desen-app-success-host-operation",
     "scripts/verify-desen-app-success-host-operation.mjs",
     "tests/desen-app-success-host-operation.test.mjs",
+  ],
+  [
+    "historical-archive-redaction",
+    "scripts/verify-historical-archive-redaction.mjs",
+    "tests/historical-archive-redaction.test.mjs",
   ],
 ]);
 
@@ -1683,7 +1689,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "d6d00fb7ec87e41c75ada3ce3d65cb0d3cf9286936c437fa836bbec9eed372cc";
+  "63120e32108bb5bcaab93dc79ea5c0e8d2eb0c4dad7e26c786e08a9daf2880a5";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

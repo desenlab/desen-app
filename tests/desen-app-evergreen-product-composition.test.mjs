@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile as readLiveFile, realpath, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 import { gzipSync, gunzipSync } from "node:zlib";
+
+import { getHistoricalArchiveRedactionPin } from "../scripts/lib/historical-archive-redaction.mjs";
 
 import {
   DESEN_APP_EVERGREEN_PRODUCT_COMPOSITION_PARENT_PIN,
@@ -223,7 +226,48 @@ test(DESEN_APP_EVERGREEN_PRODUCT_COMPOSITION_ROOT_TEST_NAMES[8], async () => {
   assert.deepEqual(second.artifact, built.artifact);
   assert.deepEqual(second.artifactBytes, built.artifactBytes);
   assert.equal(second.artifactSha256, built.artifactSha256);
-  const receipts = built.artifact.boundary.trackedReceipts;
+  assert.deepEqual(second.currentVerification, built.currentVerification);
+  const current = built.currentVerification;
+  const transport = getHistoricalArchiveRedactionPin(
+    DESEN_APP_T01B_HISTORICAL_READER_BRIDGE_PIN.path,
+  );
+  assert.equal(current.amendment, "AR-01");
+  assert.equal(current.historicalTechnicalProjectionPreserved, true);
+  assert.equal(current.technicalFilesFreshlyVerified, true);
+  assert.deepEqual(current.archiveTransport, transport);
+  assert.equal(current.historicalArtifact.sha256, built.artifactSha256);
+  assert.notEqual(current.artifactSha256, built.artifactSha256);
+  assert.equal(
+    createHash("sha256").update(current.artifactBytes).digest("hex"),
+    current.artifactSha256,
+  );
+  assert.deepEqual(current.artifact.authority.historicalReaderBridge, {
+    ...built.artifact.authority.historicalReaderBridge,
+    bytes: transport.current.bytes,
+    sha256: transport.current.sha256,
+    ...(Object.hasOwn(built.artifact.authority.historicalReaderBridge, "uncompressedBytes")
+      ? { uncompressedBytes: transport.current.uncompressedBytes }
+      : {}),
+  });
+  const noOp = await buildDesenAppEvergreenProductCompositionEvidence({
+    fileOverrides: new Map([
+      [
+        DESEN_APP_T01B_HISTORICAL_READER_BRIDGE_PIN.path,
+        await readFile(path.join(ROOT, DESEN_APP_T01B_HISTORICAL_READER_BRIDGE_PIN.path)),
+      ],
+    ]),
+  });
+  assert.deepEqual(noOp.currentVerification, current);
+  const originalApplication = await readFile(path.join(ROOT, SOURCE_PATHS.application));
+  await assert.rejects(
+    buildDesenAppEvergreenProductCompositionEvidence({
+      fileOverrides: new Map([
+        [SOURCE_PATHS.application, Buffer.concat([originalApplication, Buffer.from("\n")])],
+      ]),
+    }),
+    expectedError("ARTIFACT_DRIFT"),
+  );
+  const receipts = current.artifact.boundary.trackedReceipts;
   assert.equal(receipts.length, built.artifact.boundary.trackedFiles);
   assert.equal(
     new Set(receipts.map(({ path: relativePath }) => relativePath)).size,
@@ -237,6 +281,11 @@ test(DESEN_APP_EVERGREEN_PRODUCT_COMPOSITION_ROOT_TEST_NAMES[8], async () => {
   );
   assert.equal(Object.isFrozen(built.artifact), true);
   assert.equal(Object.isFrozen(receipts), true);
+  for (const receipt of receipts) {
+    const bytes = await readFile(path.join(ROOT, receipt.path));
+    assert.equal(bytes.byteLength, receipt.bytes, receipt.path);
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), receipt.sha256, receipt.path);
+  }
   assert.deepEqual(built.artifact.authority.historicalReaderBridge, {
     path: DESEN_APP_T01B_HISTORICAL_READER_BRIDGE_PIN.path,
     bytes: DESEN_APP_T01B_HISTORICAL_READER_BRIDGE_PIN.bytes,

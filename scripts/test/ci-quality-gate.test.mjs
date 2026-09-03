@@ -332,13 +332,13 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 103,
-    verifierCount: 103,
-    rootTestCount: 103,
+    proofCount: 104,
+    verifierCount: 104,
+    rootTestCount: 104,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
     legacyPrerequisiteCount: 735,
-    legacyPrerequisiteSha256: "0328ce5a799c73eda1bcd4b5086b80288f20cca637d37c3ab5b12300cce2573d",
+    legacyPrerequisiteSha256: "862850c9691646bfff56ff8ce133f96fdd4f12b2f698173f0fde2435eae044a7",
     legacyLeafInvocationCount: 4537,
     legacyLeafInvocationSha256: "e449a5203f03caa6df67289a3c97d1a2111556bf259f904ee6e79932820fcbf1",
     distinctLeafWorkloadCount: 327,
@@ -842,8 +842,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 216);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 103);
+  assert.equal(steps.length, 218);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 104);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -1292,8 +1292,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 216,
-    planSha256: "d776a2dae959f391cbae65b761cc967278218a4ddd2666d60f810deda544c479",
+    stepCount: 218,
+    planSha256: "9a5c5eebe13111c9be6ce3cd093b3bc8b475ab33d68e7121f9d55e90f005f067",
   });
 
   const missingTypecheck = clone(steps);

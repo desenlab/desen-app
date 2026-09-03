@@ -28,18 +28,24 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M10:** `███████░░░░░` **7 / 12 tasks complete (58%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T04 and CI-03:** `DONE` (exact-head hosted closure required) · **Next product task:** `M10-T05` (not started)
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **M10-T04 and CI-03:** `DONE` (PR #74 and main CI passed) · **AR-01:** conditional `DONE` pending exact-head hosted closure · **Next product task:** `M10-T05` (not started)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
 <!-- task-progress:end -->
 
-[CI-03](docs/proof/CI-FRESH-PROOF-PERFORMANCE.md) is the explicitly authorized verification
-performance interlude after PR #74 timed out twice. Local evidence passes, including the same
-73 M08 tests in 99.833 seconds instead of 199.162. The interlude preserves all fresh workloads,
-immutable evidence, two proof workers, eleven exclusive barriers, and the existing 18m30s
-deadline. CI-03 and M10-T04 close only when this exact PR head passes hosted `Quality gate` and
-`Browser E2E`; local speedups do not authorize merge. Main then runs fresh exhaustive CI.
+[AR-01](docs/proof/HISTORICAL-ARCHIVE-REDACTION.md) is the user-authorized archive cleanup before
+M10-T05. Four nested historical transports are redacted without changing technical projections or
+the 57 existing frozen JSON artifacts. Current generators prevent republication, and current
+verification exposes new transport receipts separately from historical identities. Git history
+is not rewritten. AR-01 must pass its own exact-head hosted checks before closure; earlier
+[CI-03](docs/proof/CI-FRESH-PROOF-PERFORMANCE.md) and M10-T04 results do not authorize this head.
+The two-worker limit, eleven exclusive barriers, fresh execution, and 18m30s deadline are unchanged.
+
+The reviewed CI-02 checkpoint retains this exact conditional-closure contract; it is a historical
+policy record, not an additional active task:
+
+**CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending
 
 **G06 checkpoint:** the built public Publisher deterministically publishes the official valid
 Source and rejects all 127 reviewed task-owned invalid cases at their exact earliest stage with no

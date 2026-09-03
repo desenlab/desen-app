@@ -10,6 +10,11 @@ import { gunzipSync } from "node:zlib";
 import { format } from "prettier";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import {
+  authenticateRedactedHistoricalArchive,
+  getHistoricalArchiveRedactionPin,
+  matchesAmendedHistoricalReceipt,
+} from "./historical-archive-redaction.mjs";
 
 const MODULE_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(MODULE_DIRECTORY, "../..");
@@ -220,7 +225,7 @@ export const DESEN_APP_SUCCESS_HOST_OPERATION_HOST_BINDING_PIN = Object.freeze({
   immutable: true,
 });
 
-/** Exact compressed M10-T03 task-time authority for its historical reader pair. */
+/** Historical M10-T03 identity; current archive bytes require the separate AR-01 transport pin. */
 export const DESEN_APP_T03_HISTORICAL_READER_BRIDGE_PIN = Object.freeze({
   path: T03_HISTORICAL_READER_BRIDGE_PATH,
   bytes: 2_769_997,
@@ -543,7 +548,30 @@ function safeRelativePath(relativePath) {
 }
 
 function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
-  const pin = DESEN_APP_T03_HISTORICAL_READER_BRIDGE_PIN;
+  const historicalPin = DESEN_APP_T03_HISTORICAL_READER_BRIDGE_PIN;
+  let transport;
+  try {
+    transport = authenticateRedactedHistoricalArchive(historicalPin.path, compressedBytes);
+  } catch (error) {
+    fail(
+      "HISTORICAL_BRIDGE_DRIFT",
+      "The amended historical archive transport was not authenticated.",
+      {
+        cause: String(error),
+      },
+    );
+  }
+  if (
+    transport.historical.bytes !== historicalPin.bytes ||
+    transport.historical.sha256 !== historicalPin.sha256 ||
+    transport.historical.baseCommit !== historicalPin.baseCommit
+  ) {
+    fail(
+      "HISTORICAL_BRIDGE_DRIFT",
+      "The archive amendment names a different historical authority.",
+    );
+  }
+  const pin = { ...historicalPin, ...transport.current };
   if (
     compressedBytes.byteLength !== pin.bytes ||
     compressedBytes.byteLength > MAX_HISTORICAL_BRIDGE_BYTES ||
@@ -597,7 +625,7 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
       "projections",
     ]) ||
     manifest.schemaVersion !== 1 ||
-    manifest.profile !== "desen.app.m10-t03-historical-reader-bridge.v1" ||
+    manifest.profile !== pin.profile ||
     manifest.baseCommit !== pin.baseCommit ||
     !Array.isArray(manifest.successorAddedPaths) ||
     !isDeepStrictEqual(manifest.successorAddedPaths, expectedAddedPaths) ||
@@ -649,7 +677,12 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
   }
   for (const receipt of expectedReceipts) {
     const bytes = files.get(receipt.path);
-    if (bytes.byteLength !== receipt.bytes || sha256(bytes) !== receipt.sha256) {
+    if (
+      (bytes.byteLength !== receipt.bytes || sha256(bytes) !== receipt.sha256) &&
+      (receipt.path !==
+        "docs/proof/artifacts/desen-app-0.1.0-t02-historical-reader-bridge.json.gz" ||
+        !matchesAmendedHistoricalReceipt(receipt, bytes))
+    ) {
       fail("HISTORICAL_BRIDGE_DRIFT", `The exact task-time receipt drifted: ${receipt.path}.`);
     }
   }
@@ -1386,7 +1419,101 @@ async function canonicalArtifactBytes(artifact) {
   return Buffer.from(await format(JSON.stringify(artifact), { parser: "json" }));
 }
 
-/** Builds detached deterministic M10-T04 evidence from exact current authorities. */
+// The task artifact remains historical evidence. Only the separately displayed current
+// projection may contain amended transport receipts; no new byte is assigned an old digest.
+async function preserveHistoricalEvidence(currentArtifact, files, workspaceRoot) {
+  const artifactBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_RELATIVE_PATH),
+    ARTIFACT_RELATIVE_PATH,
+  );
+  assertPinnedArtifact(artifactBytes);
+  const artifact = parseJson(artifactBytes, ARTIFACT_RELATIVE_PATH, "ARTIFACT_DRIFT");
+  const transport = getHistoricalArchiveRedactionPin(T03_HISTORICAL_READER_BRIDGE_PATH);
+  const historicalBridge = artifact.authority.historicalReaderBridge;
+  const expectedCurrentBridge = {
+    ...historicalBridge,
+    bytes: transport.current.bytes,
+    sha256: transport.current.sha256,
+    ...(Object.hasOwn(historicalBridge, "uncompressedBytes")
+      ? { uncompressedBytes: transport.current.uncompressedBytes }
+      : {}),
+  };
+  if (
+    historicalBridge.path !== transport.historical.path ||
+    historicalBridge.bytes !== transport.historical.bytes ||
+    historicalBridge.sha256 !== transport.historical.sha256 ||
+    !isDeepStrictEqual(currentArtifact.authority.historicalReaderBridge, expectedCurrentBridge)
+  ) {
+    fail("ARTIFACT_DRIFT", "Only the exact approved historical archive transport may change.");
+  }
+
+  const comparison = structuredClone(currentArtifact);
+  comparison.authority.historicalReaderBridge = historicalBridge;
+  const historicalReceipts = artifact.boundary.trackedReceipts;
+  const currentReceipts = comparison.boundary.trackedReceipts;
+  if (currentReceipts.length !== historicalReceipts.length) {
+    fail("ARTIFACT_DRIFT", "The historical receipt inventory changed.");
+  }
+  const receiptAmendments = [];
+  for (let index = 0; index < historicalReceipts.length; index += 1) {
+    const historical = historicalReceipts[index];
+    const current = currentReceipts[index];
+    if (isDeepStrictEqual(current, historical)) continue;
+    const bytes = files.get(historical.path);
+    if (
+      !exactJsonKeys(current, ["path", "bytes", "sha256"]) ||
+      (historical.path !== T03_HISTORICAL_READER_BRIDGE_PATH &&
+        historical.path !== BRIDGE_REPRODUCTION_PATHS[0]) ||
+      current.path !== historical.path ||
+      bytes === undefined ||
+      current.bytes !== bytes.byteLength ||
+      current.sha256 !== sha256(bytes) ||
+      !matchesAmendedHistoricalReceipt(historical, bytes)
+    ) {
+      fail("ARTIFACT_DRIFT", "An unapproved historical receipt changed.", {
+        relativePath: historical.path,
+      });
+    }
+    receiptAmendments.push({
+      pointer: `/boundary/trackedReceipts/${index}`,
+      historical,
+      current,
+    });
+    currentReceipts[index] = historical;
+  }
+  if (!isDeepStrictEqual(comparison, artifact)) {
+    fail("ARTIFACT_DRIFT", "The archive amendment cannot change historical technical evidence.");
+  }
+
+  const currentArtifactBytes = await canonicalArtifactBytes(currentArtifact);
+  return deepFreeze({
+    artifact,
+    artifactBytes,
+    artifactSha256: sha256(artifactBytes),
+    currentVerification: {
+      profile: "desen.app.historical-archive-redaction-verification.v1",
+      amendment: "AR-01",
+      historicalArtifact: {
+        path: ARTIFACT_RELATIVE_PATH,
+        bytes: artifactBytes.byteLength,
+        sha256: sha256(artifactBytes),
+      },
+      artifact: currentArtifact,
+      artifactBytes: currentArtifactBytes,
+      artifactSha256: sha256(currentArtifactBytes),
+      archiveTransport: transport,
+      receiptAmendments,
+      historicalTechnicalProjectionPreserved: true,
+      technicalFilesFreshlyVerified: true,
+    },
+  });
+}
+/**
+ * Freshly verifies the retained M10-T04 technical projection and its amended archive transport.
+ *
+ * @remarks The original artifact fields retain their historical identity. Current bytes and
+ * receipts are exposed separately in currentVerification; sanitized bytes never acquire old hashes.
+ */
 export async function buildDesenAppSuccessHostOperationEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   const files = await acquireFiles(options);
@@ -1494,8 +1621,7 @@ export async function buildDesenAppSuccessHostOperationEvidence(rawOptions = und
       "Local evidence does not imply hosted exact-head Quality gate or Browser E2E success.",
     ],
   });
-  const artifactBytes = await canonicalArtifactBytes(artifact);
-  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  return preserveHistoricalEvidence(artifact, files, options.workspaceRoot);
 }
 
 function verifyProofDocument(bytes, artifactSha256) {
@@ -1546,7 +1672,7 @@ function assertPinnedArtifact(bytes) {
   }
 }
 
-/** Verifies the frozen M10-T04 artifact against freshly acquired exact authorities. */
+/** Verifies frozen M10-T04 technical evidence and separately reports current AR-01 receipts. */
 export async function verifyDesenAppSuccessHostOperationEvidence(rawOptions = undefined) {
   const options = exactOwnDataOptions(
     rawOptions,
@@ -1589,6 +1715,17 @@ export async function verifyDesenAppSuccessHostOperationEvidence(rawOptions = un
     result: artifact.result,
     artifactBytes: artifactBytes.byteLength,
     artifactSha256: built.artifactSha256,
+    currentVerification: {
+      profile: built.currentVerification.profile,
+      amendment: built.currentVerification.amendment,
+      artifactBytes: built.currentVerification.artifactBytes.byteLength,
+      artifactSha256: built.currentVerification.artifactSha256,
+      archiveTransport: built.currentVerification.archiveTransport,
+      trackedReceipts: built.currentVerification.artifact.boundary.trackedReceipts,
+      receiptAmendments: built.currentVerification.receiptAmendments,
+      historicalTechnicalProjectionPreserved: true,
+      technicalFilesFreshlyVerified: true,
+    },
     trackedFiles: artifact.boundary.trackedFiles,
     rootTests: artifact.tests.rootTestNames.length,
     focusedDeclarationSites: artifact.authority.focusedTests.totalDeclarationSites,
@@ -1654,6 +1791,7 @@ export async function authenticateDesenAppSuccessHostOperationSuccessor(rawOptio
     },
     predecessor: { ...DESEN_APP_SUCCESS_HOST_OPERATION_PARENT_PIN },
     trackedFiles: verified.trackedFiles,
+    currentVerification: verified.currentVerification,
     p09Status: verified.p09Status,
     p10Status: verified.p10Status,
     m10T04Closed: verified.m10T04Closed,
@@ -1674,7 +1812,7 @@ function validateHistoricalOverrideMap(fileOverrides) {
   }
 }
 
-/** Materializes exact T03 task-time bytes first, then applies caller mutations defensively. */
+/** Materializes retained T03 technical bytes and amended archives before caller mutations. */
 export function materializeDesenAppT03HistoricalReaderFileOverrides(successor, fileOverrides) {
   const authority = successorAuthority(successor);
   validateHistoricalOverrideMap(fileOverrides);
@@ -1696,7 +1834,7 @@ export function materializeDesenAppT03HistoricalReaderFileOverrides(successor, f
   return materialized;
 }
 
-/** Returns a defensive copy of one exact M10-T03 task-time file. */
+/** Returns a defensive copy of retained M10-T03 technical or amended archive bytes. */
 export function readDesenAppT03HistoricalReaderTaskTimeFile(successor, relativePath) {
   if (!safeRelativePath(relativePath)) {
     fail("OPTIONS_INVALID", "relativePath must be one safe relative path.");
