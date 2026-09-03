@@ -26,6 +26,18 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
+**CI-03 — Taze kanıt doğrulamasının performansı**, kullanıcının açık onayıyla M10-T04'ün iki
+zaman aşımından sonra eklendi. Yerel temel kontroller ve odaklı kanıtlar geçti: aynı 73 editör
+kanıt testinin toplam süresi 199 saniyeden 100 saniyeye indi. Bu, bütün GitHub koşusunun süresi
+değil. 216 işin tamamı, negatif testler, her seferinde taze çalışma, mühür geçmişi ve 18 dakika
+30 saniyelik süre sınırı korunuyor.
+
+CI-03 ve M10-T04'ün `DONE` kayıtları, tam güncel PR commit'inin hosted `Quality gate` ve
+`Browser E2E` kontrollerini geçmesine bağlı. O zamana kadar yalnız CI-03 aktif sayılır ve merge
+yapılmaz; koşul sağlandığında aynı değişmemiş commit kapanış kaydı olur. Merge sonrasında main
+ayrıca taze kapsamlı doğrulanır. M10-T05'e başlanmıyor; I07-05'in eski runner'ı kaldırma kapsamı
+bu işin yerine kullanılmıyor.
+
 Sıradan bir `T` görevinin hızlı yerel geri bildirimi; `pnpm format:check`, `pnpm lint`,
 `pnpm typecheck`, `pnpm build`, `pnpm boundaries` ve
 `node scripts/ci/verify-proof-reader-checkpoints.mjs` komutlarından oluşur. Bu temel kontrol
@@ -1305,6 +1317,33 @@ M10-T03 yalnız görünür failure matrisini kapatır. P-09 ve P-10 `PARTIAL` ka
 ve ayrı yetkilendirilmiş gerçek host operation M10-T04'ün kapsamıdır. Integration, Production,
 N-036 ve G10 hâlâ açıktır. Genel ilerleme 115/148 (%78), M10 6/12 (%50) olur; sıradaki görev
 M10-T04'tür. Yerel kanıtlar bu head için hosted `Quality gate` başarısı anlamına gelmez.
+
+M10-T04'ün yerel kanıtı geçti. Normal uygulamada **Workspace → Flow app → New project** yoluyla
+iki boş sayfalı bağımsız bir çalışma alanı açılır; mevcut Account app tasarımları değiştirilmez.
+Tasarımcı iki sayfayı, kontrollü alanları, operation bağlantısını, koşullu Alert'i ve **Success →
+Navigate → Result** eylemini görünür kontrollerden, JSON yazmadan kurabilir.
+
+Gerçek Chromium testi önce Synthetic başarı fixture'ının hiç host isteği yapmadan tasarlanan hedef
+sayfayı açtığını doğrular. Açıkça seçilen Integration, ayrı yetkilendirilmiş gerçek yerel HTTP
+servisini çağırır: 401 durumunda kaynak sayfa ve tasarlanan hata görünür kalır; 200 durumunda
+Catalog fixture'ından farklı `local-host-user` sonucu gelir ve aynı Publisher/Runtime adaptörleri
+hedef sayfayı açar. Bu servis **yerel test hesabıdır; production kimlik doğrulaması değildir**.
+
+Run sırasında girilen değerler, cevaplar ve navigasyon Source'a kaydedilmez; kayıt baytları, nesil,
+giriş sayfası ve editör adresi değişmez. Restart run başlangıca döner; Design bağlantı yetkisini
+kapatır; yenileme kayıtlı boş input state'ini geri getirir. Genel editör sign-in'e özel endpoint veya
+sonuç varsaymaz; farklı operation türleri ve fixture'sız bağlantılar da odaklı testlerden geçer.
+
+Tam App paketi 611/611, beş Chromium yolculuğunun tamamı, odaklı T04 kapsamı 177/177 ve bağımsız kök
+okuyucu 10/10 geçer. 51 kesin kayıt içeren 22.456 baytlık artifact
+`sha256:d9d841af06ec9efc51c3f1c74079f0aa4d5e1c7e996f3b97df7e277e4b1f8423` ile sabittir.
+Ayrıntılar: [T04 kanıtı](../proof/DESEN-APP-SUCCESS-HOST-OPERATION.md) ve
+[ADR 0017](../adr/0017-desen-app-explicit-integration-and-run-navigation.md).
+
+P-09/P-10 `PROVEN` olur; genel ilerleme 116/148 (%78), M10 7/12 (%58), sıradaki görev M10-T05'tir.
+T05 henüz başlamadı. Publish/activation, recovery, Production, N-036 ve G10 açık kalır. T04'ün
+`DONE` kaydı, yalnız bu PR'ın kesin güncel head'i hosted `Quality gate` geçince kesinleşir; yerel
+kanıt tek başına merge veya tamamlandı beyanı değildir.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

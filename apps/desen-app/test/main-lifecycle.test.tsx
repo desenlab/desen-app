@@ -149,7 +149,9 @@ it(
       await screen.findByRole("heading", { name: "DESEN could not open this workspace." }),
     ).toBeTruthy();
     expect(screen.getByText(/No fixture project was substituted/)).toBeTruthy();
-    expect(screen.queryByText("Account app")).toBeNull();
+    expect(screen.queryByRole("link", { name: "Account app" })).toBeNull();
+    expect(screen.queryByRole("group", { name: /^Managed / })).toBeNull();
+    expect(screen.queryByRole("button", { name: "New project" })).toBeNull();
   },
   PRODUCTION_ENTRY_TEST_TIMEOUT_MS,
 );

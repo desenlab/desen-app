@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import childProcess from "node:child_process";
 import { mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -1133,16 +1135,36 @@ test("[writer] rejects a non-function atomic hook", async () => {
   );
 });
 
-test("[symlink] rejects an atomic-writer destination symlink", async () => {
+test("[symlink] rejects an atomic-writer destination symlink", async (context) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "desen-t11-writer-link-"));
   const target = path.join(directory, "target.json");
   const artifactPath = path.join(directory, "artifact.json");
   await writeFile(target, "target\n");
   await symlink(target, artifactPath);
+  let runtimeStarts = 0;
+  const spawn = context.mock.method(childProcess, "spawn", () => {
+    runtimeStarts += 1;
+    throw new Error("An invalid destination must not start the runtime proof.");
+  });
+  syncBuiltinESMExports();
   try {
     await assert.rejects(writePublisherInvalidSourceMatrixEvidence({ artifactPath }), TypeError);
+    await assert.rejects(
+      writePublisherInvalidSourceMatrixEvidence({ artifactPath: directory }),
+      TypeError,
+    );
+    await assert.rejects(
+      writePublisherInvalidSourceMatrixEvidence({
+        artifactPath: path.join(directory, "missing-parent", "artifact.json"),
+      }),
+      { code: "ENOENT" },
+    );
+    assert.equal(runtimeStarts, 0);
     assert.equal(await readFile(target, "utf8"), "target\n");
+    assert.deepEqual((await readdir(directory)).sort(), ["artifact.json", "target.json"]);
   } finally {
+    spawn.mock.restore();
+    syncBuiltinESMExports();
     await rm(directory, { recursive: true, force: true });
   }
 });

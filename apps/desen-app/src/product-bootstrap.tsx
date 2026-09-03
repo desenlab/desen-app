@@ -8,6 +8,7 @@ import desenLogoUrl from "./assets/desen-logo.svg";
 import styles from "./application.module.css";
 
 import type { FormEvent } from "react";
+import type { AuthoringIntegrationBindingHandle } from "./authoring-integration.js";
 import type { DesenEditorDocument, DesenEditorPersistencePort } from "@desen/editor-core";
 import type {
   AuthoringPersistenceController,
@@ -262,10 +263,16 @@ export interface DesenAppProductProps {
   readonly persistencePort: DesenEditorPersistencePort | null;
   /** Factory-authenticated project, Catalog, runtime and publication composition. */
   readonly workspaceProfile: ProjectWorkspaceProfileHandle;
+  /** Optional host-composed integration authority for this exact workspace; off until selected. */
+  readonly integrationBinding?: AuthoringIntegrationBindingHandle | null;
 }
 
 /** Normal Desen App entry with visible blank-project creation and durable Source reopening. */
-export function DesenAppProduct({ persistencePort, workspaceProfile }: DesenAppProductProps) {
+export function DesenAppProduct({
+  persistencePort,
+  workspaceProfile,
+  integrationBinding = null,
+}: DesenAppProductProps) {
   const authority = readProjectWorkspaceProfileAuthority(workspaceProfile);
   const profile = authority.status === "read" ? authority.profile : null;
   const creation = useMemo(
@@ -401,6 +408,7 @@ export function DesenAppProduct({ persistencePort, workspaceProfile }: DesenAppP
     <>
       <DesenAppApplication
         initialDocument={currentDocument}
+        integrationBinding={integrationBinding}
         onRequestProjectCreation={
           phase === "missing"
             ? () => {

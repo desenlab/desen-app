@@ -1,10 +1,33 @@
 # Desen App
 
+## M10-T04: test success and real host connections
+
+The normal local launcher now starts Source persistence and a separate local account service.
+Existing Account app designs stay under their original storage identity. Use the **Workspace**
+chooser to select **Flow app**, then **New project** to create two empty surfaces: **Start** and
+**Result**. Design Result, save it, return to Start and design the input/operation flow. In the
+Button's **Actions → Success** list, add **Navigate** and choose Result. All of this uses visible
+controls; raw JSON is not required.
+
+Run starts in **Synthetic**. Complete the Catalog success fixture to open Result without a real
+host call. **Integration** must be selected explicitly and restarts transient inputs. The local
+test service accepts `designer@example.test` / `local-demo-pass`; a mismatch returns a declared
+failure, and success returns `local-host-user` through real loopback HTTP before Runtime runs the
+authored navigation. The connection is a test account, **not production authentication**.
+
+**Restart run** returns to the design origin. **Design** revokes Integration and restores the
+authoring surface. Run inputs, responses, context and navigation never change saved Source bytes.
+The unrelated Account app workspace is never migrated or overwritten. Production, arbitrary
+workspace creation, remote hosts, and publish/activate-without-host-edits remain separate work.
+
+See [ADR 0017](../../docs/adr/0017-desen-app-explicit-integration-and-run-navigation.md) and the
+[M10-T04 evidence](../../docs/proof/DESEN-APP-SUCCESS-HOST-OPERATION.md).
+
 The visual authoring and publishing product intended for `desen.app`. Desen App is one product
 built on DESEN; the protocol and App-independent developer ecosystem live separately on the
 DESEN Developer Platform at `desen.run`.
 
-## Status
+## Historical M09 implementation checkpoint
 
 M09-T14 adds fixed-channel publication and separate durable reference-host activation for the exact
 clean saved Source. It retains M09-T13's Design-only node-linked diagnostics, M09-T12's
@@ -12,7 +35,8 @@ generation-guarded authored Source Open/Save, M09-T11's transient Catalog scenar
 operation fixtures, and visible adapter fidelity while keeping publication, diagnostics,
 persistence, scenario, fixture, mode, event, state, binding, selection, and every other authoring
 control in the application-owned shell outside the exact React adapter canvas.
-The current product surface contains:
+The following records the M09 task-time surface; the M10 follow-through above and below supersedes
+its fixture-only project inventory, disabled Integration, and denied preview navigation:
 
 - a full-viewport `/projects` gallery over two fixed inert project fixtures;
 - a project-level surface gallery and a centered, inert surface frame that preserve the route

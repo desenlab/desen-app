@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "c1e1319ae65ec34b30f5b8817f5e6396271756bbdd95d4a964b858d7f7dd3c95";
+  "0328ce5a799c73eda1bcd4b5086b80288f20cca637d37c3ab5b12300cce2573d";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "752e23e301be0554677726de380410fca522ef97ad3e72dbbe37321985d58de8";
+  "e449a5203f03caa6df67289a3c97d1a2111556bf259f904ee6e79932820fcbf1";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "2ef89a9ee2dc93cd70edfa71be2cda15628094bb03da8ac56a4e310d6870c0dd";
+  "f4d27a96d75ec4881691de4e5c4cba829cf36521c82d3a3dab40d75af6376e0a";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "73b68c61533e2947169ba3e2298a9f13ec261ae00c32184773402bf03fcce715";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -167,7 +167,7 @@ const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
     [
       "test:e2e",
-      "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts",
+      "pnpm --filter @desen/app-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts",
     ],
   ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
 );
@@ -677,6 +677,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "desen-app-failure-fixture",
     "scripts/verify-desen-app-failure-fixture.mjs",
     "tests/desen-app-failure-fixture.test.mjs",
+  ],
+  [
+    "desen-app-success-host-operation",
+    "scripts/verify-desen-app-success-host-operation.mjs",
+    "tests/desen-app-success-host-operation.test.mjs",
   ],
 ]);
 
@@ -1678,7 +1683,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "c1cec82a944152060e00caa1ad6f500c7f7e391d7056fe84f61967aef62ef947";
+  "d6d00fb7ec87e41c75ada3ce3d65cb0d3cf9286936c437fa836bbec9eed372cc";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

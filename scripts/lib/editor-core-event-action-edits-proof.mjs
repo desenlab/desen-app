@@ -2306,8 +2306,12 @@ function assertRetainedT06Receipts(frozenArtifact, files) {
   }
 }
 
+/** Captures own-data options and rebuilds M08-T06 from freshly authenticated inputs. */
 export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undefined) {
-  const options = captureBuildOptions(rawOptions);
+  return buildCapturedEvidence(captureBuildOptions(rawOptions));
+}
+
+async function buildCapturedEvidence(options) {
   if (options.runtime !== undefined) {
     fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
   }
@@ -2581,9 +2585,40 @@ function proofDocumentHasContradictoryStatus(visibleLines) {
   return false;
 }
 
+function readProofDocumentPin(proof) {
+  const { visible: visibleLines, htmlAuthority, rawHtml } = visibleProofDocumentLines(proof);
+  const visiblePinLines = visibleLines.filter((line) => line.startsWith("Final artifact:"));
+  if (
+    visiblePinLines.length !== 1 ||
+    !/^Final artifact: `sha256:[0-9a-f]{64}`$/u.test(visiblePinLines[0]) ||
+    rawHtml ||
+    proofDocumentHasContradictoryStatus([...visibleLines, ...htmlAuthority]) ||
+    visibleLines.join("\n").includes("sha256:PENDING")
+  ) {
+    fail("PROOF_PIN_DRIFT", "The proof document final pin drifted.");
+  }
+  return visiblePinLines[0];
+}
+
+/**
+ * Rejects malformed proof envelopes early; PASS still requires a complete fresh build,
+ * exact artifact bytes, and the final independently reacquired proof pin.
+ */
 export async function verifyEditorCoreEventActionEditsEvidence(rawOptions = undefined) {
   const options = captureVerifyOptions(rawOptions);
-  const built = await buildEditorCoreEventActionEditsEvidence(options.buildOptions);
+  const buildOptions = captureBuildOptions(options.buildOptions);
+  if (buildOptions.runtime !== undefined) {
+    fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
+  }
+  const preflightProofBytes =
+    options.proofDocumentBytes ??
+    (await readNoFollow(
+      options.proofDocumentPath ?? PROOF_DOCUMENT_PATH,
+      "M08-T06 proof document",
+    ));
+  // Envelope admission rejects invalid candidates; only the complete fresh build can issue PASS.
+  readProofDocumentPin(decodeUtf8(preflightProofBytes, "M08-T06 proof document"));
+  const built = await buildCapturedEvidence(buildOptions);
   const committed =
     options.artifactBytes ??
     (await readNoFollow(options.artifactPath ?? ARTIFACT_PATH, "M08-T06 proof artifact"));
@@ -2598,15 +2633,7 @@ export async function verifyEditorCoreEventActionEditsEvidence(rawOptions = unde
     ));
   const proof = decodeUtf8(proofBytes, "M08-T06 proof document");
   const exactPin = `Final artifact: \`sha256:${built.artifactSha256}\``;
-  const { visible: visibleLines, htmlAuthority, rawHtml } = visibleProofDocumentLines(proof);
-  const visiblePinLines = visibleLines.filter((line) => line.startsWith("Final artifact:"));
-  if (
-    visiblePinLines.length !== 1 ||
-    visiblePinLines[0] !== exactPin ||
-    rawHtml ||
-    proofDocumentHasContradictoryStatus([...visibleLines, ...htmlAuthority]) ||
-    visibleLines.join("\n").includes("sha256:PENDING")
-  ) {
+  if (readProofDocumentPin(proof) !== exactPin) {
     fail("PROOF_PIN_DRIFT", "The proof document final pin drifted.");
   }
   return deepFreeze({
@@ -2661,12 +2688,14 @@ function captureWriteOptions(raw) {
   return Object.freeze(source);
 }
 
+/** Rejects unsafe destinations before building and rechecks them before the exact atomic write. */
 export async function writeEditorCoreEventActionEditsEvidence(rawOptions = undefined) {
   const options = captureWriteOptions(rawOptions);
-  const built = await buildEditorCoreEventActionEditsEvidence();
   const destinationPath = await assertSafeDestination(
     options.destinationPath ?? DEFAULT_EDITOR_CORE_EVENT_ACTION_EDITS_ARTIFACT_PATH,
   );
+  const built = await buildEditorCoreEventActionEditsEvidence();
+  await assertSafeDestination(destinationPath);
   await writeAtomicProofArtifact({
     artifactPath: destinationPath,
     artifactBytes: built.artifactBytes,

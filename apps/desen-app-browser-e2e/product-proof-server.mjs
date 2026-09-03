@@ -6,15 +6,18 @@ import process from "node:process";
 
 import { openLocalControlPlane } from "@desen/control-plane-api";
 import { build, preview } from "vite";
+import { openDesenAppLocalOperationHost } from "../desen-app/dev/local-operation-host.mjs";
 
 const APP_HOST = "127.0.0.1";
-const APP_PORT = 4175;
+const WITH_OPERATIONS = process.argv.includes("--with-operations");
+const APP_PORT = WITH_OPERATIONS ? 4176 : 4175;
 const APP_ORIGIN = `http://${APP_HOST}:${APP_PORT}`;
 const APP_ROOT = resolve(import.meta.dirname, "../desen-app");
 const LOCAL_RUNTIME_DEFINE_NAME = "__DESEN_APP_LOCAL_RUNTIME_CONFIG__";
 const LOCAL_RUNTIME_PROFILE = "desen.app.local-runtime.v1";
 
 let controlPlane;
+let operationHost;
 let previewServer;
 let temporaryRoot;
 let shutdownPromise;
@@ -42,6 +45,13 @@ async function cleanup() {
   if (controlPlane !== undefined) {
     try {
       await controlPlane.close();
+    } catch {
+      failed = true;
+    }
+  }
+  if (operationHost !== undefined) {
+    try {
+      await operationHost.close();
     } catch {
       failed = true;
     }
@@ -89,6 +99,22 @@ try {
     profile: LOCAL_RUNTIME_PROFILE,
     controlPlane: Object.freeze({ origin: listener.origin, apiToken }),
   });
+  let operationDefine = {};
+  if (WITH_OPERATIONS) {
+    const operationToken = randomBytes(32).toString("base64url");
+    operationHost = await openDesenAppLocalOperationHost({
+      apiToken: operationToken,
+      allowedOrigin: APP_ORIGIN,
+    });
+    const operationListener = await operationHost.listen(0);
+    operationDefine = {
+      __DESEN_APP_LOCAL_OPERATION_CONFIG__: JSON.stringify({
+        profile: "desen.app.local-operation.v1",
+        origin: operationListener.origin,
+        apiToken: operationToken,
+      }),
+    };
+  }
 
   await build({
     root: APP_ROOT,
@@ -99,6 +125,7 @@ try {
     logLevel: "warn",
     define: {
       [LOCAL_RUNTIME_DEFINE_NAME]: JSON.stringify(localRuntimeConfig),
+      ...operationDefine,
     },
     build: {
       emptyOutDir: true,

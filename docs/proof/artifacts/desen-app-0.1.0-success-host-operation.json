@@ -1,0 +1,507 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-success-host-operation",
+  "profile": "desen.app.success-host-operation-proof.v1",
+  "task": "M10-T04",
+  "gate": null,
+  "result": "PASS",
+  "prerequisites": [
+    {
+      "task": "M10-T03",
+      "gate": null,
+      "proofId": "desen-app-failure-fixture",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-failure-fixture.json",
+      "bytes": 16868,
+      "sha256": "bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20",
+      "profile": "desen.app.failure-fixture-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M03-T08",
+      "gate": null,
+      "proofId": "reference-sign-in-fixtures-and-host-binding",
+      "path": "docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json",
+      "bytes": 12713,
+      "sha256": "b0413687bd907b71509db52d3e22b6eda5a4150509ac323bf51e5f8425f897e2",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "p09Status": "PROVEN",
+    "p10Status": "PROVEN",
+    "m10T04Closed": true,
+    "additiveWorkspacePreservesLegacySource": true,
+    "visibleNoCodeSuccessNavigation": true,
+    "catalogSyntheticSuccessWithNoHostIo": true,
+    "explicitAuthorizedIntegrationExecution": true,
+    "actualLocalHttpHostOperation": true,
+    "dependencyBoundaryExplicitAndNarrow": true,
+    "actualHostOutputDistinctFromFixture": true,
+    "localHostFailureAndSuccessfulRetry": true,
+    "managedDestinationNavigation": true,
+    "runSourceGenerationAndBytesUnchanged": true,
+    "frameGeometryStable": true,
+    "restartAndDesignRestoreOrigin": true,
+    "forgedStaleInactiveAndUnboundRequestsRejected": true,
+    "abortLateSettlementAndReplayFencing": true,
+    "productionAuthenticationCovered": false,
+    "productionOperationCovered": false,
+    "remoteDeploymentCovered": false,
+    "multiUserPersistenceCovered": false,
+    "n036Closed": false,
+    "n040Closed": false,
+    "g10Closed": false
+  },
+  "authority": {
+    "source": {
+      "additiveAuthenticatedTwoSurfaceWorkspace": true,
+      "legacySourceAndStorageIdentityPreserved": true,
+      "guardedWorkspaceNavigation": true,
+      "explicitInactiveIntegrationAuthority": true,
+      "exactProfileDocumentRevisionAliasCapabilityEffect": true,
+      "boundedReplayAndDetachedInput": true,
+      "revocationAbortAndLateSettlementFencing": true,
+      "runtimeOwnsOutputAndPublicErrorValidation": true,
+      "localManagedNavigationNotBrowserNavigation": true,
+      "runDoesNotGrantStorageResourcesOrProduction": true,
+      "explicitTrustedHostOperationBinding": true,
+      "fixedLoopbackEndpointOutsideSource": true,
+      "separateBearerOriginAndHostAuthorization": true,
+      "boundedRequestsResponsesAndTimeouts": true,
+      "publicFailureRedactionAndNoCredentialPersistence": true,
+      "catalogFixtureAndActualLocalHostResultDistinct": true,
+      "genericEditorNotSignInSpecific": true,
+      "runRestartAndDesignRestoreOrigin": true
+    },
+    "focusedTests": {
+      "declarationSites": {
+        "localWorkspaces": 11,
+        "flowProfile": 5,
+        "integration": 26,
+        "localBinding": 14,
+        "localHost": 13,
+        "localDevHost": 8,
+        "runNavigation": 7,
+        "successNavigation": 5,
+        "operationLifecycle": 36
+      },
+      "totalDeclarationSites": 125,
+      "declarationSitesAreNotExpandedVitestExecutionCount": true,
+      "workspaceCreationLegacyPreservationAndDirtyGuard": true,
+      "genericNonAuthIntegrationAndExactIdentityNegatives": true,
+      "sourceRevisionAndAliasEffectMismatchNegatives": true,
+      "cancellationLateResultAndReplayNegatives": true,
+      "fixedHostBindingAndBoundedTransportNegatives": true,
+      "realLocalHttpAndHostOriginTokenNegatives": true,
+      "managedNavigationInertModeAndReentryNegatives": true,
+      "actualAppSuccessNavigation": true,
+      "runtimeOutputValidationAndFailureRedaction": true
+    },
+    "browser": {
+      "chromiumConfigurations": 1,
+      "testName": "authors success navigation and explicitly runs the same Source through a real local host",
+      "normalVisibleProductFlow": true,
+      "emptyTwoSurfaceWorkspaceCreation": true,
+      "destinationContentAuthoredVisibly": true,
+      "designerChosenNonDefaultOperationAlias": true,
+      "successSubactionNavigateAuthoredVisibly": true,
+      "syntheticCatalogSuccessNavigation": true,
+      "syntheticRealHttpCallCount": 0,
+      "explicitIntegrationSelection": true,
+      "productionRemainsDisabled": true,
+      "integrationFixtureControlsAbsent": true,
+      "actualLocalHttpPublicFailureStatus": 401,
+      "actualLocalHttpSuccessStatus": 200,
+      "actualLocalHttpSuccessOutput": { "userId": "local-host-user" },
+      "catalogFixtureSuccessOutput": { "userId": "user-1" },
+      "hostResultDistinctFromCatalogFixture": true,
+      "actualLocalHttpCalls": 2,
+      "publicFailurePreservesOriginAndInput": true,
+      "successfulRetryNavigatesManagedDestination": true,
+      "sourceWriteCountAndBytesUnchangedByRun": true,
+      "runInputAndHostOutputAbsentFromSavedSource": true,
+      "browserUrlRemainsOnDesignOrigin": true,
+      "exactFrameGeometryStable": true,
+      "restartRunAndDesignRestoreOrigin": true,
+      "reloadReopensAuthoredSourceWithoutRunValues": true,
+      "directNetworkOrDomMutationUsed": false,
+      "proofOnlyRouteUsed": false,
+      "productionAuthenticationClaimed": false
+    },
+    "dependencyBoundary": {
+      "authorityFiles": 9,
+      "cases": [
+        {
+          "name": "allowed-desen-app-browser-e2e-product-server-local-operation-host",
+          "expectedRule": null
+        },
+        {
+          "name": "desen-app-browser-e2e-product-server-imports-unreviewed-dev-module",
+          "expectedRule": "desen-app-browser-e2e-product-server-has-no-other-application-dependencies"
+        },
+        {
+          "name": "desen-app-browser-e2e-non-product-server-imports-local-operation-host",
+          "expectedRule": "desen-app-browser-e2e-reviewed-app-source-only"
+        }
+      ],
+      "exactAnchoredProductServerImporter": true,
+      "exactAnchoredLocalListenerTarget": true,
+      "publicControlPlaneEntryOnlyPreserved": true,
+      "neighboringDevModulesRemainDenied": true,
+      "otherBrowserImportersRemainDenied": true,
+      "applicationSourceAndOtherRootsRemainDenied": true,
+      "inertFixtureFiles": true,
+      "boundaryFixtureCasesInSeparateCommand": 26,
+      "dependencyCruiserExecutedByVerifier": false
+    },
+    "package": {
+      "appPackage": "@desen/app-web",
+      "browserPackage": "@desen/app-browser-e2e",
+      "referenceCatalogPackage": "@desen/reference-catalog-web",
+      "runtimeCorePackage": "@desen/runtime-core",
+      "focusedTestCommands": [
+        "pnpm --filter @desen/app-web exec vitest run test/local-workspaces.test.tsx test/reference-flow-workspace-profile.test.ts test/authoring-integration.test.ts test/local-operation-binding.test.ts test/authoring-run-navigation.test.ts test/success-host-navigation.test.tsx dev/local-operation-host.test.mjs dev/local-dev-host.test.mjs",
+        "pnpm --filter @desen/runtime-core exec vitest run test/operation-lifecycle.test.ts"
+      ],
+      "browserCommand": "pnpm --filter @desen/app-browser-e2e exec playwright test --config success-host-playwright.config.ts",
+      "browserSuiteIncludesDedicatedConfig": true,
+      "catalogId": "run.desen.reference.sign-in",
+      "capabilityId": "com.example.auth/signIn",
+      "exactFixtureErrorCodes": ["invalidCredentials"],
+      "unavailableDeclaredButNotFixtureBacked": true,
+      "catalogSuccessOutput": { "userId": "user-1" },
+      "localHostSuccessOutputMustDiffer": true
+    },
+    "historicalReaderBridge": {
+      "path": "docs/proof/artifacts/desen-app-0.1.0-t03-historical-reader-bridge.json.gz",
+      "bytes": 2769997,
+      "sha256": "64f76eaeac8369a9f7ae00086dac914adc3c84979d53c770d2ebe0082576005f",
+      "uncompressedBytes": 4385030,
+      "baseCommit": "a1d26905aec6ee3d4bcb73ca17b02187e7b57420",
+      "fileEntries": 42,
+      "predecessorGapFiles": 8,
+      "successorAddedPaths": 16,
+      "projections": 1,
+      "canonicalDenseManifest": true,
+      "boundedGzip": true,
+      "parentProjectionAuthenticated": true
+    },
+    "bridgeReproduction": {
+      "exactBaseCommitGenerator": true,
+      "exclusiveDeterministicGzipWrite": true,
+      "successorAddedPathInventoryExact": true,
+      "historicalFixtureUsesBrandedSuccessor": true
+    }
+  },
+  "tests": {
+    "focusedCommands": [
+      "pnpm --filter @desen/app-web exec vitest run test/local-workspaces.test.tsx test/reference-flow-workspace-profile.test.ts test/authoring-integration.test.ts test/local-operation-binding.test.ts test/authoring-run-navigation.test.ts test/success-host-navigation.test.tsx dev/local-operation-host.test.mjs dev/local-dev-host.test.mjs",
+      "pnpm --filter @desen/runtime-core exec vitest run test/operation-lifecycle.test.ts"
+    ],
+    "browserCommand": "pnpm --filter @desen/app-browser-e2e exec playwright test --config success-host-playwright.config.ts",
+    "boundaryCommand": "pnpm boundaries",
+    "boundaryFixtureCommand": "node scripts/verify-boundary-fixtures.mjs",
+    "verifierCommand": "node scripts/verify-desen-app-success-host-operation.mjs",
+    "proofReaderCommand": "node --test tests/desen-app-success-host-operation.test.mjs",
+    "rootTestNames": [
+      "[authority] authenticates exact frozen T03 and trusted host-binding parents without invoking their readers",
+      "[workspace] selects an additive empty two-surface workspace without changing legacy Source",
+      "[authoring] creates success navigation and the destination through ordinary visible controls",
+      "[synthetic] completes the Catalog success with no real HTTP or Source write",
+      "[integration] requires explicit activation before the fixed separately authorized local HTTP binding",
+      "[success] navigates after an actual non-Catalog host result and preserves Source and frame",
+      "[failure] preserves origin after real HTTP failure and permits a valid retry",
+      "[revocation] rejects forged identity, alias, effect, late result, and inactive navigation authority",
+      "[determinism] builds byte-identical evidence with exact receipts and a bounded T03 bridge",
+      "[policy] rejects source, tests, parent, bridge, artifact, report, options, and unsafe writes"
+    ],
+    "browserExecutedByVerifier": false,
+    "boundaryExecutedByVerifier": false,
+    "deterministicReaderStartsListener": false
+  },
+  "boundary": {
+    "trackedFiles": 51,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app-browser-e2e/package.json",
+        "bytes": 1095,
+        "sha256": "b06c174829a05063117ea52af95b33e4a61592b0d1ca12d24b569df04fc47128"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/product-proof-server.mjs",
+        "bytes": 4606,
+        "sha256": "9a3afaf578152b3abeb94eccf02ae1e5a7cdcec85adac1ec6d37d89a112d77ca"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/success-host-operation.pw.ts",
+        "bytes": 10364,
+        "sha256": "36f81e3fe8e02a73fb33ad83bda629659dd6dc9895c3f3be68fd0c35743adde8"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/success-host-playwright.config.ts",
+        "bytes": 1331,
+        "sha256": "af1dda46f8d1ebf4d97f7df2efddb9e5c9dd05c95b9c0536f3fcecb6958bc8e7"
+      },
+      {
+        "path": "apps/desen-app/dev/local-dev-host.mjs",
+        "bytes": 15194,
+        "sha256": "2dcf3513b4d74bcac62c14905f0823b9b0723a7d302bbd056993fe3e47b1c7c3"
+      },
+      {
+        "path": "apps/desen-app/dev/local-dev-host.test.mjs",
+        "bytes": 12057,
+        "sha256": "57c819b88352fc7b8a4012a7e00304d191ab14ad9f1f30fad7eb9bfb3504fc61"
+      },
+      {
+        "path": "apps/desen-app/dev/local-operation-host.mjs",
+        "bytes": 13074,
+        "sha256": "986ebd8c05fe6c89ab9347d20fd52de41c244e446dfe4027cd80adedba1d7893"
+      },
+      {
+        "path": "apps/desen-app/dev/local-operation-host.test.mjs",
+        "bytes": 9953,
+        "sha256": "7796ca66187a39ee12caf104aebd5a884fe0cd6e92676dcb122d2405782de285"
+      },
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 4546,
+        "sha256": "c634b5ee1e2d2af0ffd6db8d4841215664591a31999210a8e0b388b71509eb32"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 153414,
+        "sha256": "7323a002f67d8f0a82e77a0bf4850e8caf7079f94f42fda88045b74279dc9f5c"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-connections.ts",
+        "bytes": 27291,
+        "sha256": "e23337ebb85fdf43bb6c8370addd26526ecdf96a5b5afdf68ecd8f751b0767b2"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-event-actions.ts",
+        "bytes": 49738,
+        "sha256": "f880166bd26964cd022eb7c86333541f60a17e9b5401df51e45ed023a02ae328"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-fixtures.ts",
+        "bytes": 35852,
+        "sha256": "119620da01eb800874d75721a8aa06879cf8a90c669324333beb482c9c29831c"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-integration.ts",
+        "bytes": 20932,
+        "sha256": "c189d7ca2dd855eda6202f5ec9b8d9c1d57f19579cad3fdec7bea757d1a85601"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-run-navigation.ts",
+        "bytes": 7049,
+        "sha256": "5c617f21a6df377d94318b708ba74e6b60e4e200793a219e6ff9003be892d2a8"
+      },
+      {
+        "path": "apps/desen-app/src/event-action-panel.tsx",
+        "bytes": 59231,
+        "sha256": "45f372e2ceeb49b3a4ff0a9f94ebd312a2a031e807d173808dead8895e68fdc6"
+      },
+      {
+        "path": "apps/desen-app/src/local-operation-binding.ts",
+        "bytes": 13008,
+        "sha256": "bb1c2d3a8385cc20d6564d672f4741f30cf3d8ba206cca756b5a278f3ea99b9b"
+      },
+      {
+        "path": "apps/desen-app/src/local-workspaces.module.css",
+        "bytes": 1140,
+        "sha256": "122e5bec615b9c57baa63f76d2f5c61053c71e7525a5e07b4f988c0756fd10f2"
+      },
+      {
+        "path": "apps/desen-app/src/local-workspaces.tsx",
+        "bytes": 7618,
+        "sha256": "8db0aec1982af44678ecb31fd3b08a74f7be3f78ff6e02ccdc65ca5a556e661a"
+      },
+      {
+        "path": "apps/desen-app/src/main.tsx",
+        "bytes": 3669,
+        "sha256": "b626d5acc861b5bfdb02326b41d9471420547ac3c895b316ba727f0387e8e2a3"
+      },
+      {
+        "path": "apps/desen-app/src/preview-controls.tsx",
+        "bytes": 14710,
+        "sha256": "02d64108197e669351eb3d5494f05b6179712d75507bcd449385156341c0c1e0"
+      },
+      {
+        "path": "apps/desen-app/src/product-bootstrap.tsx",
+        "bytes": 15532,
+        "sha256": "1be583c78a13438da6f7f45e4e3a4a5151bc09768021798c99fed93f4e6c6edd"
+      },
+      {
+        "path": "apps/desen-app/src/reference-flow-workspace-profile.ts",
+        "bytes": 3122,
+        "sha256": "cc9ef1260f50c9f723cc337d76c08ce1599f08789881c4475b5e8ca49b3afa55"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-integration.test.ts",
+        "bytes": 32530,
+        "sha256": "0e99dc89c4cb404983f1d10c65fb8f9c846e4cf5571a10a66a1544db195d0e9d"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-run-navigation.test.ts",
+        "bytes": 6358,
+        "sha256": "716241fb0c813fe34eefa797991e8ae6f2945485de3b04b8b628b43660bef49e"
+      },
+      {
+        "path": "apps/desen-app/test/local-operation-binding.test.ts",
+        "bytes": 12809,
+        "sha256": "81e6bad4130b809e832c7ed24190c69a8efd90a1a4b3eddcca72104f82ef1c8c"
+      },
+      {
+        "path": "apps/desen-app/test/local-workspaces.test.tsx",
+        "bytes": 15784,
+        "sha256": "12d697e3245d5acce8f0fad0484abee7b0e25e454ca75c05619cfaad3dc99f1e"
+      },
+      {
+        "path": "apps/desen-app/test/reference-flow-workspace-profile.test.ts",
+        "bytes": 4969,
+        "sha256": "4e85a6a3c21423d703d72f7316867c6d2ae0347437c08a1b42a50dd1a206aee8"
+      },
+      {
+        "path": "apps/desen-app/test/success-host-navigation.test.tsx",
+        "bytes": 7922,
+        "sha256": "acc7603c2a27b9a1a204f172fd96ee82831fce423ec944524ce1561472694837"
+      },
+      {
+        "path": "dependency-cruiser.config.cjs",
+        "bytes": 10604,
+        "sha256": "926847cdc392733df695c996a27137ce219e1277a936d53d041108674cd2045e"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-failure-fixture.json",
+        "bytes": 16868,
+        "sha256": "bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-t03-historical-reader-bridge.json.gz",
+        "bytes": 2769997,
+        "sha256": "64f76eaeac8369a9f7ae00086dac914adc3c84979d53c770d2ebe0082576005f"
+      },
+      {
+        "path": "docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json",
+        "bytes": 12713,
+        "sha256": "b0413687bd907b71509db52d3e22b6eda5a4150509ac323bf51e5f8425f897e2"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "5d30b58b2ecb630fcefc70a2e5a5b1dc0b228d028ba768194c5b06429949727a"
+      },
+      {
+        "path": "packages/reference-catalog-web/package.json",
+        "bytes": 2576,
+        "sha256": "da3f52307b1f5383d4b03b82257f1bcd0cb65902c208ba3f82fd5ffeeda1c1ca"
+      },
+      {
+        "path": "packages/runtime-core/package.json",
+        "bytes": 2138,
+        "sha256": "196c2d8d69d56415283535647657ccbda786d3e7600e3c1d3f1d41e34f7dd67e"
+      },
+      {
+        "path": "packages/runtime-core/src/operation-lifecycle.ts",
+        "bytes": 60095,
+        "sha256": "6572b542a95155e83e1bc9735eacb3003483b3f990343714492c1e55e6cbf258"
+      },
+      {
+        "path": "packages/runtime-core/test/operation-lifecycle.test.ts",
+        "bytes": 41336,
+        "sha256": "a4e380dbb478f28399b6adfed754803fef8ddb8dc8fb5c98ed27e5f169be4749"
+      },
+      {
+        "path": "scripts/generate-desen-app-success-host-operation-proof.mjs",
+        "bytes": 823,
+        "sha256": "064f539a815e4afdfbf9018572d25a89de3e2f9cc26514f0ecd8fd946c94de77"
+      },
+      {
+        "path": "scripts/generate-desen-app-t03-historical-reader-bridge.mjs",
+        "bytes": 6289,
+        "sha256": "d7916982990ab2693ac21046f820b490dfc80b4b0d928e71a38f82268683f959"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/verify-boundary-fixtures.mjs",
+        "bytes": 5613,
+        "sha256": "19bc333880b87825b01cc4d1fb1f96f78b8573a04b66d116aee64ca1b63dc503"
+      },
+      {
+        "path": "scripts/verify-desen-app-success-host-operation.mjs",
+        "bytes": 879,
+        "sha256": "12e2630cf8803d88e0c40dd25a559a28f59e872356c81c76598a083159625474"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-local-operation-host/apps/desen-app-browser-e2e/product-proof-server.mjs",
+        "bytes": 252,
+        "sha256": "845860e6ea5586fb9429dee65e0868f83310a3065f22c62d952d19680e7c27b2"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-product-server-local-operation-host/apps/desen-app/dev/local-operation-host.mjs",
+        "bytes": 154,
+        "sha256": "7402a5b9136f9674a3ed141b41033106ca27141a36482ceccb8fd51461c67058"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-local-operation-host/apps/desen-app-browser-e2e/proof-application.mjs",
+        "bytes": 267,
+        "sha256": "05f4dca5e6db62473eb102ab83f0715966943dd78c9d2562e84552e2521dde4f"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-local-operation-host/apps/desen-app/dev/local-operation-host.mjs",
+        "bytes": 146,
+        "sha256": "b28df3f665c08bcf952bb828f0b8fbbf1f0bf3494aa7c41a6838ba3785873a89"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-unreviewed-dev-module/apps/desen-app-browser-e2e/product-proof-server.mjs",
+        "bytes": 231,
+        "sha256": "340fbe7ae58207d66dca464dd076824b5ea33587ef8b944d4c21c60913baf38f"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-unreviewed-dev-module/apps/desen-app/dev/local-operation-private.mjs",
+        "bytes": 112,
+        "sha256": "6d5a02459ff91dd6f41f49bec65ebb31cd36ce1ff7c9228094f14d13eeb85276"
+      },
+      {
+        "path": "tests/boundaries/README.md",
+        "bytes": 1750,
+        "sha256": "4d9798d4e3cdb5009f1d26f53923b3b535d8b29179041452ed2c6c9a4fb24e30"
+      },
+      {
+        "path": "tests/desen-app-t03-historical-reader-fixture.mjs",
+        "bytes": 2345,
+        "sha256": "650a16bca7d6961966394a38f686e0c28e1bab64c5a38485bb1a8dbe8dddcf47"
+      }
+    ],
+    "parentArtifacts": 2,
+    "historicalReaderBridgeArtifacts": 1,
+    "immutableInputs": true,
+    "sourceSymlinksRejected": true,
+    "checkpointOwnedReaderPaths": [
+      "scripts/lib/desen-app-success-host-operation-proof.mjs",
+      "tests/desen-app-success-host-operation.test.mjs"
+    ],
+    "artifactTrackedEntrypoints": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/generate-desen-app-success-host-operation-proof.mjs",
+      "scripts/verify-desen-app-success-host-operation.mjs"
+    ]
+  },
+  "nonClaims": [
+    "M10-T04 proves normal-App synthetic success/navigation and an explicitly selected separately authorized local HTTP operation over the exact T03 and M03-T08 predecessors.",
+    "The real local host executes a documented test-only account and returns local-host-user, not the Catalog's user-1 fixture. It is not production authentication.",
+    "DESEN Source data contains no endpoint, handler, bearer, production credential, or host implementation authority.",
+    "Run navigation is local managed-surface state, not browser history, Source entry mutation, persistence, publication, or activation.",
+    "N-036, N-040, remote deployment, multi-user persistence, production operations, and G10 remain unproven.",
+    "The deterministic reader starts no Chromium, Vite, network listener, or external host. Browser execution remains a separate fresh workload, not a cached seal result.",
+    "Local evidence does not imply hosted exact-head Quality gate or Browser E2E success."
+  ]
+}

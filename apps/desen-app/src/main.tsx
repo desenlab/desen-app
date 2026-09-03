@@ -1,19 +1,53 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { SIGN_IN_OPERATION_ID } from "@desen/reference-catalog-web/operations";
 
+import { createAuthoringIntegrationBinding } from "./authoring-integration.js";
 import { createInjectedDesenAppLocalPersistencePort } from "./local-runtime-persistence.js";
+import {
+  createDesenAppLocalSignInOperation,
+  readInjectedDesenAppLocalOperationConfig,
+} from "./local-operation-binding.js";
+import { DesenAppLocalWorkspaces } from "./local-workspaces.js";
 import { DesenAppProduct } from "./product-bootstrap.js";
 import { normalizeInitialDesenAppLocation } from "./project-navigation.js";
+import { REFERENCE_FLOW_WORKSPACE_PROFILE } from "./reference-flow-workspace-profile.js";
 import { REFERENCE_SIGN_IN_WORKSPACE_PROFILE } from "./reference-sign-in-workspace-profile.js";
 import "./styles.css";
 
 import type { DesenEditorPersistencePort } from "@desen/editor-core";
+import type { AuthoringIntegrationBindingHandle } from "./authoring-integration.js";
 
 normalizeInitialDesenAppLocation();
 
 const container = document.getElementById("desen-app-root");
 if (!(container instanceof Element)) {
   throw new TypeError("The Desen App root container is missing.");
+}
+
+let flowIntegration: AuthoringIntegrationBindingHandle | null = null;
+try {
+  const config = readInjectedDesenAppLocalOperationConfig();
+  if (config !== null) {
+    const binding = createAuthoringIntegrationBinding({
+      profile: REFERENCE_FLOW_WORKSPACE_PROFILE,
+      bindingId: "local-reference-account-service",
+      label: "Local account service",
+      description:
+        "Real local HTTP service · test account only, not production authentication. Use designer@example.test and local-demo-pass.",
+      operations: [
+        {
+          capabilityId: SIGN_IN_OPERATION_ID,
+          effect: "network",
+          invoke: createDesenAppLocalSignInOperation(config, globalThis.fetch.bind(globalThis)),
+        },
+      ],
+    });
+    if (binding.status === "created") flowIntegration = binding.binding;
+  }
+} catch {
+  // A missing or rejected operation authority cannot fall back to a synthetic success or gain
+  // persistence credentials. The independent workspace remains usable with Integration disabled.
 }
 
 let persistencePort: DesenEditorPersistencePort | null = null;
@@ -28,9 +62,28 @@ try {
 const root = createRoot(container);
 root.render(
   <StrictMode>
-    <DesenAppProduct
-      persistencePort={persistencePort}
-      workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
+    <DesenAppLocalWorkspaces
+      workspaces={[
+        {
+          profile: REFERENCE_SIGN_IN_WORKSPACE_PROFILE,
+          render: () => (
+            <DesenAppProduct
+              persistencePort={persistencePort}
+              workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
+            />
+          ),
+        },
+        {
+          profile: REFERENCE_FLOW_WORKSPACE_PROFILE,
+          render: () => (
+            <DesenAppProduct
+              integrationBinding={flowIntegration}
+              persistencePort={persistencePort}
+              workspaceProfile={REFERENCE_FLOW_WORKSPACE_PROFILE}
+            />
+          ),
+        },
+      ]}
     />
   </StrictMode>,
 );

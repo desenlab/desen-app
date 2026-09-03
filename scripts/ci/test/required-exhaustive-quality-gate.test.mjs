@@ -87,7 +87,7 @@ async function waitFor(predicate, message) {
   assert.fail(message);
 }
 
-test("the dependency-derived plan owns the exact 214-node exhaustive inventory", () => {
+test("the dependency-derived plan owns the exact 216-node exhaustive inventory", () => {
   const plan = createRequiredExhaustivePlan();
   const inventory = createExhaustiveWorkloadInventory();
   const ownedIds = [
@@ -102,19 +102,19 @@ test("the dependency-derived plan owns the exact 214-node exhaustive inventory",
   assert.equal(PROOF_PAIR_CONCURRENCY, 2);
   assert.equal(DEFAULT_STEP_TIMEOUT_MS, 15 * 60 * 1_000);
   assert.equal(DEFAULT_GATE_TIMEOUT_MS, 18 * 60 * 1_000 + 30 * 1_000);
-  assert.equal(plan.stepCount, 214);
-  assert.equal(plan.proofPairCount, 102);
+  assert.equal(plan.stepCount, 216);
+  assert.equal(plan.proofPairCount, 103);
   assert.equal(plan.prefix.length, 8);
   assert.equal(plan.suffix.length, 2);
-  assert.equal(plan.planSha256, "f815d05c7edbe293b77b3819982d0076619bdd035e5eebac2112329bad06f904");
-  assert.equal(ownedIds.length, 214);
-  assert.equal(new Set(ownedIds).size, 214);
+  assert.equal(plan.planSha256, "f9a66d3729bea671bfe54405f8c6e4653699d69c38136ed1925cc3a714f3926a");
+  assert.equal(ownedIds.length, 216);
+  assert.equal(new Set(ownedIds).size, 216);
   assert.deepEqual([...ownedIds].sort(), inventory.nodes.map(({ id }) => id).sort());
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-7).id,
-      verifier: plan.proofPairs.at(-7).verifier.id,
-      rootTest: plan.proofPairs.at(-7).rootTest.id,
+      id: plan.proofPairs.at(-8).id,
+      verifier: plan.proofPairs.at(-8).verifier.id,
+      rootTest: plan.proofPairs.at(-8).rootTest.id,
     },
     {
       id: "desen-app-empty-project-browser-e2e",
@@ -124,9 +124,9 @@ test("the dependency-derived plan owns the exact 214-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-6).id,
-      verifier: plan.proofPairs.at(-6).verifier.id,
-      rootTest: plan.proofPairs.at(-6).rootTest.id,
+      id: plan.proofPairs.at(-7).id,
+      verifier: plan.proofPairs.at(-7).verifier.id,
+      rootTest: plan.proofPairs.at(-7).rootTest.id,
     },
     {
       id: "desen-app-browser-e2e-workspace-compatibility",
@@ -136,9 +136,9 @@ test("the dependency-derived plan owns the exact 214-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-5).id,
-      verifier: plan.proofPairs.at(-5).verifier.id,
-      rootTest: plan.proofPairs.at(-5).rootTest.id,
+      id: plan.proofPairs.at(-6).id,
+      verifier: plan.proofPairs.at(-6).verifier.id,
+      rootTest: plan.proofPairs.at(-6).rootTest.id,
     },
     {
       id: "desen-app-user-created-blank-project",
@@ -148,9 +148,9 @@ test("the dependency-derived plan owns the exact 214-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-4).id,
-      verifier: plan.proofPairs.at(-4).verifier.id,
-      rootTest: plan.proofPairs.at(-4).rootTest.id,
+      id: plan.proofPairs.at(-5).id,
+      verifier: plan.proofPairs.at(-5).verifier.id,
+      rootTest: plan.proofPairs.at(-5).rootTest.id,
     },
     {
       id: "desen-app-visual-behavior-authoring",
@@ -160,9 +160,9 @@ test("the dependency-derived plan owns the exact 214-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-3).id,
-      verifier: plan.proofPairs.at(-3).verifier.id,
-      rootTest: plan.proofPairs.at(-3).rootTest.id,
+      id: plan.proofPairs.at(-4).id,
+      verifier: plan.proofPairs.at(-4).verifier.id,
+      rootTest: plan.proofPairs.at(-4).rootTest.id,
     },
     {
       id: "desen-app-evergreen-product-composition",
@@ -172,9 +172,9 @@ test("the dependency-derived plan owns the exact 214-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-2).id,
-      verifier: plan.proofPairs.at(-2).verifier.id,
-      rootTest: plan.proofPairs.at(-2).rootTest.id,
+      id: plan.proofPairs.at(-3).id,
+      verifier: plan.proofPairs.at(-3).verifier.id,
+      rootTest: plan.proofPairs.at(-3).rootTest.id,
     },
     {
       id: "desen-app-input-pending-fixture",
@@ -184,14 +184,26 @@ test("the dependency-derived plan owns the exact 214-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-1).id,
-      verifier: plan.proofPairs.at(-1).verifier.id,
-      rootTest: plan.proofPairs.at(-1).rootTest.id,
+      id: plan.proofPairs.at(-2).id,
+      verifier: plan.proofPairs.at(-2).verifier.id,
+      rootTest: plan.proofPairs.at(-2).rootTest.id,
     },
     {
       id: "desen-app-failure-fixture",
       verifier: "verify-desen-app-failure-fixture",
       rootTest: "test-desen-app-failure-fixture",
+    },
+  );
+  assert.deepEqual(
+    {
+      id: plan.proofPairs.at(-1).id,
+      verifier: plan.proofPairs.at(-1).verifier.id,
+      rootTest: plan.proofPairs.at(-1).rootTest.id,
+    },
+    {
+      id: "desen-app-success-host-operation",
+      verifier: "verify-desen-app-success-host-operation",
+      rootTest: "test-desen-app-success-host-operation",
     },
   );
   for (const pair of plan.proofPairs) {
@@ -217,7 +229,7 @@ test("authority defaults to REQUIRED, accepts only explicit SHADOW, and fixes EX
   assert.equal(observationPlan.scope, "EXHAUSTIVE");
   assert.equal(
     observationPlan.planSha256,
-    "ac389e5063b153586f49303ec14a1228e8ef5605f337700d133884e8069fdb82",
+    "29ded9551d8adcba5f7b86819f344e1619441990c29f5e8ca63d4140530d87ab",
   );
   assert.throws(
     () => createRequiredExhaustivePlan({ scope: "AFFECTED" }),
@@ -247,6 +259,11 @@ test("injected plan, identity, command, dependency, and class drift fail before 
     },
     (inventory) => {
       inventory.nodes[0].dependencies = ["boundary-fixtures"];
+    },
+    (inventory) => {
+      inventory.nodes.find(({ id }) => id === "verify-web-react-package-digest").dependencies = [
+        "test-protocol-snapshot",
+      ];
     },
     (inventory) => {
       inventory.nodes[0].executionClass = "CONCURRENT_PROOF";
@@ -302,7 +319,7 @@ test("REQUIRED authority rejects injected success runners and repository seams",
   assert.equal(executionCount, 0);
 });
 
-test("all 214 successful closes produce stable inventory-ordered receipts", async () => {
+test("all 216 successful closes produce stable inventory-ordered receipts", async () => {
   const plan = createShadowPlan();
   const calls = [];
   const receipt = await runShadowPlan(plan, {
@@ -313,8 +330,8 @@ test("all 214 successful closes produce stable inventory-ordered receipts", asyn
     ...successfulGuardOptions(),
   });
 
-  assert.equal(calls.length, 214);
-  assert.equal(new Set(calls).size, 214);
+  assert.equal(calls.length, 216);
+  assert.equal(new Set(calls).size, 216);
   assert.equal(calls.filter((id) => id === "editor-core-public-package-contract").length, 1);
   assert.equal(
     calls.indexOf("editor-core-public-package-contract"),
@@ -356,7 +373,7 @@ test("all 214 successful closes produce stable inventory-ordered receipts", asyn
     true,
   );
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 214);
+  assert.equal(receipt.observedClosedCount, 216);
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
     plan.nodes.map(({ id }) => id),
@@ -369,6 +386,143 @@ test("all 214 successful closes produce stable inventory-ordered receipts", asyn
     receipt.proofPairs.every(({ status }) => status === "PASS"),
     true,
   );
+});
+
+test("the exact digest pair starts first inside its ordinary segment without changing authority", async () => {
+  const plan = createShadowPlan();
+  const originalPlan = JSON.stringify(plan);
+  const calls = [];
+  const completed = new Set();
+  const receipt = await runShadowPlan(plan, {
+    runStep: async (workload) => {
+      for (const dependency of workload.dependencies) {
+        assert.equal(completed.has(dependency), true, `${workload.id} needs ${dependency}`);
+      }
+      calls.push({ id: workload.id, command: workload.command, args: [...workload.args] });
+      completed.add(workload.id);
+      return pass(workload);
+    },
+    ...successfulGuardOptions(),
+  });
+
+  const ids = calls.map(({ id }) => id);
+  assert.deepEqual(
+    ids.slice(0, plan.prefix.length),
+    plan.prefix.map(({ id }) => id),
+  );
+  assert.deepEqual(ids.slice(plan.prefix.length, plan.prefix.length + 2), [
+    "verify-web-react-package-digest",
+    "verify-protocol-snapshot",
+  ]);
+  assert.deepEqual(
+    ids.slice(-plan.suffix.length),
+    plan.suffix.map(({ id }) => id),
+  );
+  assert.equal(new Set(ids).size, plan.nodes.length);
+  assert.deepEqual(
+    calls.toSorted((left, right) => left.id.localeCompare(right.id)),
+    plan.nodes
+      .map(({ id, command, args }) => ({ id, command, args: [...args] }))
+      .toSorted((left, right) => left.id.localeCompare(right.id)),
+  );
+  for (const { verifier, rootTest } of plan.proofPairs) {
+    assert.equal(ids.indexOf(verifier.id) < ids.indexOf(rootTest.id), true);
+  }
+  assert.deepEqual(
+    receipt.steps.map(({ id }) => id),
+    plan.nodes.map(({ id }) => id),
+  );
+  assert.deepEqual(
+    receipt.proofPairs.map(({ id }) => id),
+    plan.proofPairs.map(({ id }) => id),
+  );
+  assert.equal(JSON.stringify(plan), originalPlan);
+});
+
+test("a held early digest lets its original segment progress but cannot cross the drained barrier", async () => {
+  const plan = createShadowPlan();
+  const firstBarrierIndex = plan.proofPairs.findIndex(
+    ({ id }) => classifyProofPairState(id).barrier,
+  );
+  const segment = plan.proofPairs.slice(0, firstBarrierIndex);
+  const digestPair = segment.find(({ id }) => id === "web-react-package-digest");
+  const otherRootIds = new Set(
+    segment.filter(({ id }) => id !== digestPair.id).map(({ rootTest }) => rootTest.id),
+  );
+  const completedOthers = new Set();
+  const started = [];
+  let releaseDigest;
+  const digestReleased = new Promise((resolvePromise) => {
+    releaseDigest = resolvePromise;
+  });
+  const running = runShadowPlan(plan, {
+    runStep: async (workload) => {
+      started.push(workload.id);
+      if (workload.id === digestPair.verifier.id) await digestReleased;
+      if (otherRootIds.has(workload.id)) completedOthers.add(workload.id);
+      return pass(workload);
+    },
+    ...successfulGuardOptions(),
+  });
+
+  try {
+    await waitFor(() => completedOthers.size === otherRootIds.size, "the original segment stalled");
+    assert.equal(segment.length, 15);
+    assert.equal(started.includes(digestPair.rootTest.id), false);
+    for (const { verifier, rootTest } of plan.proofPairs.slice(firstBarrierIndex)) {
+      assert.equal(started.includes(verifier.id), false);
+      assert.equal(started.includes(rootTest.id), false);
+    }
+  } finally {
+    releaseDigest();
+  }
+  const receipt = await running;
+  assert.equal(receipt.status, "PASS");
+  assert.equal(receipt.observedClosedCount, 216);
+  assert.equal(
+    started.indexOf(digestPair.rootTest.id) <
+      started.indexOf(plan.proofPairs[firstBarrierIndex].verifier.id),
+    true,
+  );
+});
+
+test("cancelling both early ordinary workers cannot launch a root or another pair", async () => {
+  const plan = createShadowPlan();
+  const controller = new AbortController();
+  const cancellation = new RequiredExhaustiveCancellationError("SIGTERM");
+  const started = [];
+  const running = runShadowPlan(plan, {
+    signal: controller.signal,
+    runStep: async (workload, { signal }) => {
+      if (workload.executionClass !== "CONCURRENT_PROOF") return pass(workload);
+      started.push(workload.id);
+      await new Promise((resolvePromise) => {
+        signal.addEventListener("abort", resolvePromise, { once: true });
+      });
+      throw signal.reason;
+    },
+    ...successfulGuardOptions(),
+  });
+  const rejected = assert.rejects(running, (error) => {
+    assert.equal(error, cancellation);
+    assert.equal(error.requiredExhaustiveReceipt.status, "FAIL");
+    assert.deepEqual(
+      error.requiredExhaustiveReceipt.steps
+        .filter(({ status }) => status === "CANCELLED")
+        .map(({ id }) => id)
+        .sort(),
+      ["verify-web-react-package-digest", "verify-protocol-snapshot"].sort(),
+    );
+    return true;
+  });
+  try {
+    await waitFor(() => started.length === 2, "both early workers must start");
+    assert.deepEqual(started, ["verify-web-react-package-digest", "verify-protocol-snapshot"]);
+  } finally {
+    controller.abort(cancellation);
+  }
+  await rejected;
+  assert.equal(started.length, 2);
 });
 
 test("dynamic workers keep two safe ordinary pairs active and drain for all barrier pairs", async () => {
@@ -416,13 +570,14 @@ test("dynamic workers keep two safe ordinary pairs active and drain for all barr
   assert.equal(maximumActive, 2);
   assert.equal(thirdPairStartedWhileFirstHeld, true);
   assert.equal(barrierPairs.length, 11);
-  assert.equal(plan.proofPairs.length - barrierPairs.length, 91);
+  assert.equal(plan.proofPairs.length - barrierPairs.length, 92);
   assert.equal(exclusiveBarrierSteps.size, 22);
 });
 
 test("the first proof failure permanently aborts and awaits its active sibling", async () => {
   const plan = createShadowPlan();
-  const [firstPair, secondPair] = plan.proofPairs;
+  const firstPair = plan.proofPairs.find(({ id }) => id === "web-react-package-digest");
+  const secondPair = plan.proofPairs[0];
   const failure = new Error("injected proof failure");
   const started = [];
   let siblingClosed = false;
@@ -480,6 +635,10 @@ test("representative package, root-test, and boundary failures stop their depend
     },
     {
       targetId: "editor-core-public-package-contract",
+      forbiddenIds: plan.proofPairs.flatMap(({ verifier, rootTest }) => [verifier.id, rootTest.id]),
+    },
+    {
+      targetId: "editor-web-public-package-contract",
       forbiddenIds: plan.proofPairs.flatMap(({ verifier, rootTest }) => [verifier.id, rootTest.id]),
     },
     {
@@ -1143,7 +1302,7 @@ test("build-output and untracked closing guards run after a primary proof failur
   assert.equal(untrackedSnapshots, 2);
 });
 
-test("untracked drift fails the gate even after all 214 steps close successfully", async () => {
+test("untracked drift fails the gate even after all 216 steps close successfully", async () => {
   const plan = createShadowPlan();
   const untrackedDrift = new Error("untracked drift");
   await assert.rejects(
@@ -1158,7 +1317,7 @@ test("untracked drift fails the gate even after all 214 steps close successfully
     (error) => {
       assert.equal(error, untrackedDrift);
       assert.equal(error.requiredExhaustiveReceipt.status, "FAIL");
-      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 214);
+      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 216);
       return true;
     },
   );
@@ -1187,7 +1346,7 @@ test("the full gate authenticates repository inputs and hosted revision without 
   assert.equal(receipt.inventory.authority, "SHADOW");
   assert.equal(receipt.inventory.scope, "EXHAUSTIVE");
   assert.equal(receipt.execution.status, "PASS");
-  assert.equal(receipt.execution.observedClosedCount, 214);
+  assert.equal(receipt.execution.observedClosedCount, 216);
   assert.equal(receipt.execution.cleanInput.revision, revision);
 });
 

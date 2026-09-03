@@ -1349,16 +1349,23 @@ export async function verifyDesenAppUserCreatedBlankProjectEvidence(rawOptions =
   ) {
     fail("ARTIFACT_DRIFT", "The immutable M10-T01A artifact identity drifted.");
   }
+  const historicalSuccessor = await authenticateDesenAppEvergreenProductCompositionSuccessor({
+    workspaceRoot: compatibilityWorkspaceRoot,
+  });
   const evergreenProductCompositionSuccessor =
-    compatibilityBuildOptions.fileOverrides.size === 0
-      ? await authenticateDesenAppEvergreenProductCompositionSuccessor()
-      : null;
+    compatibilityBuildOptions.fileOverrides.size === 0 ? historicalSuccessor : null;
+  // A mutation must be judged against the same authenticated task-time baseline as the build,
+  // not rejected accidentally by unrelated successor bytes read later during receipt checks.
+  const historicalFileOverrides = materializeDesenAppHistoricalReaderFileOverrides(
+    historicalSuccessor,
+    compatibilityBuildOptions.fileOverrides,
+  );
   const compatibility =
     evergreenProductCompositionSuccessor === null
       ? await inspectSecureScrollCompatibility(
           compatibilityWorkspaceRoot,
           artifact,
-          compatibilityBuildOptions.fileOverrides,
+          historicalFileOverrides,
         )
       : deepFreeze({
           compatibilityReceipt: "M10-T01A-SECURE-SCROLL-COMPAT",
@@ -1370,7 +1377,7 @@ export async function verifyDesenAppUserCreatedBlankProjectEvidence(rawOptions =
         });
   const visualBehaviorAuthoringSuccessor = await authenticateM10VisualBehaviorAuthoringSuccessor(
     compatibilityWorkspaceRoot,
-    compatibilityBuildOptions.fileOverrides,
+    historicalFileOverrides,
     evergreenProductCompositionSuccessor,
   );
   const proofDocument =

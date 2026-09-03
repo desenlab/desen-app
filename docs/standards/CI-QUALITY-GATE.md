@@ -1453,3 +1453,57 @@ The 91-test checkpoint suite passes. Selector and required-affected runner autho
 `sha256:cb0638a65d9ba9bfcfecb780921a195da4c19de5af9512fb2a5169ecbf18fb2f`
 and `sha256:ba00d7c81ca4392d50b0fc869434d531acd82a949cde376de051f93261e6f723`.
 No local receipt claims exact-head hosted success or M10-T04 success/navigation/real-host authority.
+
+## M10-T04 success and real-host-operation CI authority
+
+M10-T04 registers `desen-app-success-host-operation` as ordinary proof pair 103. The exact
+historical T03 proof and executable reference host-binding proof are both formal impact parents.
+The neutral inventory is 216 workloads / 103 proof units at
+`sha256:d6d00fb7ec87e41c75ada3ce3d65cb0d3cf9286936c437fa836bbec9eed372cc`;
+the impact graph is
+`sha256:ae57b2b84f3ba3077ecf589b1444d413213b8e54f9f4058368e8a11cc706c28b`.
+The T04 closure is exactly 71 proof units / 152 workloads at
+`sha256:548dcbecc29444b1ba8973a664459980fbbcbfe40b058bc8f624b78b2a69a065`.
+
+Required/shadow exhaustive plans are
+`sha256:f9a66d3729bea671bfe54405f8c6e4653699d69c38136ed1925cc3a714f3926a` and
+`sha256:29ded9551d8adcba5f7b86819f344e1619441990c29f5e8ca63d4140530d87ab`.
+Rollback equivalence retains plan
+`sha256:d776a2dae959f391cbae65b761cc967278218a4ddd2666d60f810deda544c479`
+and workload set
+`sha256:f78a0d48096356f50ccda938cda60ca4703387d58ae29e4bfc4c412e420f2118`.
+All 216 workloads retain one shared-state class: six global, three workspace-output, one
+package-test, 90 proof-read-only, 105 proof-OS-temp-isolated, ten tracked-alias, and one
+workspace-temp. The 103 pairs remain 92 ordinary / eleven barriers with 92 OS-temporary roots.
+
+The fifth dedicated Playwright configuration owns the success/navigation and separately
+authorized host-operation execution. Both new deterministic readers remain passive, with no
+listener or external-network grants. The hosted workflow runs their exact verifier/root pair
+after Browser E2E. No workload, barrier, timeout, isolation rule, closing guard, or fresh hosted
+execution requirement is removed. A local receipt never grants exact-head hosted completion.
+
+The product proof server's local-operation listener import is an anchored, exact source/target
+exception, not a directory allowlist. Three boundary fixtures prove the admitted edge, reject an
+unreviewed dev target, and reject the same target from a non-product-server entry. The six fixture
+files remain shared proof infrastructure and therefore force exhaustive selection.
+
+Exact-one ownership covers 1,409 tracked / 206 proof-owned paths. Its path-set and complete
+authority are
+`sha256:0895c89babc16970f34499279b1e791b1d42a4f0280e6d6dc9a4b523673aa6ef` and
+`sha256:168ce27d3922269d3e51c485108c1acdbafdbbe74175d76d5d20c471162f8fc1`.
+Only the two exact new verifier/root-test paths select the T04 closure; new application,
+architecture, artifact, and shared proof implementation paths remain conservative exhaustive
+inputs. The exact 32-path T04 extension preserves earlier ownership, and the cumulative inverse
+successor delta preserves the frozen I07-04 promotion evidence.
+
+Checkpoint sequence 69 preserves sequences 1–68 and all 56 predecessor artifacts. It adds the
+22,456-byte artifact at
+`sha256:d9d841af06ec9efc51c3f1c74079f0aa4d5e1c7e996f3b97df7e277e4b1f8423`, reseals the T01A/T01C
+proof-library readers and T03 proof/root pair `[102, 106, 110, 111]`, appends T04 readers
+`[112, 113]`, and closes 57 artifacts / 114 readers at
+`sha256:535a09b42d158f9bdf934924f704f3fb278d68da84a3dcbbfa32e38cee375c61`.
+Selector and required-affected runner authorities are
+`sha256:ceb46eba37c63e46743fb03d4389a188928b7bedf13cab7190b276313210eae8` and
+`sha256:a6734be24611dd476051db3c93d8672e2892afe9a1276d154e67127d6c10ea35`.
+These are reviewed identity/impact receipts only; every selected hosted workload still executes
+fresh before the exact current head may merge.

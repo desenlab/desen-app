@@ -2093,7 +2093,7 @@ describe("Desen App application shell", () => {
     );
     expect(
       screen.getByText(
-        "Controls are live against this in-memory preview. Only outcomes declared by the current surface's authored operations and authenticated Catalog fixtures are available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked.",
+        "Controls use authenticated Catalog fixtures and local managed-surface navigation. Resources, storage, publication, activation, integration, and production calls remain blocked; Run never changes the authored Source.",
       ),
     ).toBeTruthy();
     const runCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
@@ -2349,10 +2349,9 @@ describe("Desen App application shell", () => {
     });
     fireEvent.click(within(controls).getByRole("button", { name: "Complete signIn fixture" }));
     await waitFor(() => {
-      expect(within(controls).getByRole("status").textContent).toContain(
-        "Synthetic success completed",
-      );
-      expect(within(canvas).queryByRole("alert")).toBeNull();
+      const destination = screen.getByRole("group", { name: "Managed home canvas" });
+      expect(within(destination).getByRole("heading", { name: "Welcome" })).toBeTruthy();
+      expect(canvas.isConnected).toBe(false);
       expect(window.location.pathname).toBe("/projects/account-app/surfaces/sign-in");
     });
   });
