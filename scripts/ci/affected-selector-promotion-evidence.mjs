@@ -578,6 +578,8 @@ const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-local-operation-host/apps/desen-app/dev/local-operation-host.mjs",
   "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-unreviewed-dev-module/apps/desen-app-browser-e2e/product-proof-server.mjs",
   "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-unreviewed-dev-module/apps/desen-app/dev/local-operation-private.mjs",
+  "docs/adr/0018-fresh-proof-performance.md",
+  "docs/proof/CI-FRESH-PROOF-PERFORMANCE.md",
 ]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
@@ -629,7 +631,7 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     FROZEN_INPUT: 151,
     PACKAGE_OR_APPLICATION: 548,
     SHARED_PROOF_INFRASTRUCTURE: 275,
-    PROJECT_DOCUMENTATION: 141,
+    PROJECT_DOCUMENTATION: 143,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -1022,8 +1024,8 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 69,
-  headSha256: "535a09b42d158f9bdf934924f704f3fb278d68da84a3dcbbfa32e38cee375c61",
+  sequence: 70,
+  headSha256: "52e71083e7c6f08986480434b5a327b1de6a2d29487b8f8a7ecbef1ffdb4d4e6",
   frozenArtifactCount: 57,
   currentReaderCount: 114,
   liveVerification: "PASS",

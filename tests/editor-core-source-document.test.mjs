@@ -1,6 +1,16 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { link, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import fsPromises, {
+  link,
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -926,75 +936,122 @@ test("[inventory] rejects package, public, and root test-authority drift", async
 
 test("[artifact] verifies exact bytes and the exact proof-document pin", async () => {
   const proofDocument = exactProofDocument(built.artifactSha256);
-  const verified = await verifyEditorCoreSourceDocumentEvidence({
-    artifactBytes: built.artifactBytes,
-    proofDocument,
-  });
-  assert.deepEqual(verified, {
-    task: "M08-T01",
-    result: "PASS",
-    artifactSha256: built.artifactSha256,
-    prerequisiteTask: "I07-04",
-    prerequisiteGate: "G07",
-    trackedFiles: 47,
-    rootProofCases: 13,
-  });
-  await assert.rejects(
-    verifyEditorCoreSourceDocumentEvidence({
-      artifactBytes: changedByte(built.artifactBytes),
-      proofDocument,
-    }),
-    expectedError("EDITOR_SOURCE_DOCUMENT_ARTIFACT_DRIFT"),
-  );
-  await assert.rejects(
-    verifyEditorCoreSourceDocumentEvidence({
+  const directory = await temporaryDirectory("desen-m08-t01-proof-preflight-");
+  const proofDocumentPath = path.join(directory, "proof.md");
+  await writeFile(proofDocumentPath, proofDocument);
+  const authorityOpen = test.mock.method(fsPromises, "open");
+  syncBuiltinESMExports();
+  try {
+    const verified = await verifyEditorCoreSourceDocumentEvidence({
       artifactBytes: built.artifactBytes,
-      proofDocument: exactProofDocument("0".repeat(64)),
-    }),
-    expectedError("EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT"),
-  );
-  const hiddenPinDocuments = [
-    `# Test proof\n\n## Result\n\n<!--\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n-->\n`,
-    `# Test proof\n\n## Result\n\n\`\`\`text\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n\`\`\`\n`,
-    `# Test proof\n\n## Result\n\n<div hidden>\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n</div>\n`,
-    `# Test proof\n\n## Result\n\n<div\n class="hidden">\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n</div>\n`,
-    `# Test proof\n\n## Result\n\n<section aria-hidden='true'>\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n</section>\n`,
-    `# Test proof\n\n## Result\n\n<div style="color:red; DISPLAY: none !important">\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n</div>\n`,
-    `# Test proof\n\n## Result\n\n<details>\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n</details>\n`,
-  ];
-  for (const proofDocumentWithHiddenPin of hiddenPinDocuments) {
+      proofDocumentPath,
+    });
+    assert.deepEqual(verified, {
+      task: "M08-T01",
+      result: "PASS",
+      artifactSha256: built.artifactSha256,
+      prerequisiteTask: "I07-04",
+      prerequisiteGate: "G07",
+      trackedFiles: 47,
+      rootProofCases: 13,
+    });
+    assert.equal(
+      authorityOpen.mock.calls.filter(({ arguments: values }) => values[0] === proofDocumentPath)
+        .length,
+      2,
+      "A path-backed proof must be acquired again after the complete fresh build.",
+    );
+    const readsAfterPositive = authorityOpen.mock.callCount();
+    await assert.rejects(
+      verifyEditorCoreSourceDocumentEvidence({
+        artifactBytes: changedByte(built.artifactBytes),
+        proofDocument,
+      }),
+      expectedError("EDITOR_SOURCE_DOCUMENT_ARTIFACT_DRIFT"),
+    );
+    assert.ok(authorityOpen.mock.callCount() > readsAfterPositive);
+
+    const readsBeforeWrongDigest = authorityOpen.mock.callCount();
     await assert.rejects(
       verifyEditorCoreSourceDocumentEvidence({
         artifactBytes: built.artifactBytes,
-        proofDocument: proofDocumentWithHiddenPin,
+        proofDocument: exactProofDocument("0".repeat(64)),
       }),
       expectedError("EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT"),
     );
-  }
-  for (const contradiction of [
-    "Result: FAIL",
-    "**Result:** **FAILED**",
-    "**Status:** **BLOCKED**",
-    "<p>**Status:** **IN_PROGRESS**</p>",
-    "Status: incomplete",
-  ]) {
+    assert.ok(
+      authorityOpen.mock.callCount() > readsBeforeWrongDigest,
+      "A plausible but wrong digest must still be checked against a complete fresh build.",
+    );
+    const readsBeforeMalformedProofs = authorityOpen.mock.callCount();
+    const hiddenPinDocuments = [
+      `# Test proof\n\n## Result\n\n<!--\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n-->\n`,
+      `# Test proof\n\n## Result\n\n\`\`\`text\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n\`\`\`\n`,
+      `# Test proof\n\n## Result\n\n<div hidden>\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n</div>\n`,
+      `# Test proof\n\n## Result\n\n<div\n class="hidden">\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n</div>\n`,
+      `# Test proof\n\n## Result\n\n<section aria-hidden='true'>\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n</section>\n`,
+      `# Test proof\n\n## Result\n\n<div style="color:red; DISPLAY: none !important">\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n</div>\n`,
+      `# Test proof\n\n## Result\n\n<details>\nArtifact: \`${ARTIFACT}\`\nFinal receipt: \`sha256:${built.artifactSha256}\`\n</details>\n`,
+    ];
+    for (const proofDocumentWithHiddenPin of hiddenPinDocuments) {
+      await assert.rejects(
+        verifyEditorCoreSourceDocumentEvidence({
+          artifactBytes: built.artifactBytes,
+          proofDocument: proofDocumentWithHiddenPin,
+        }),
+        expectedError("EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT"),
+      );
+    }
+    for (const contradiction of [
+      "Result: FAIL",
+      "**Result:** **FAILED**",
+      "**Status:** **BLOCKED**",
+      "<p>**Status:** **IN_PROGRESS**</p>",
+      "Status: incomplete",
+    ]) {
+      await assert.rejects(
+        verifyEditorCoreSourceDocumentEvidence({
+          artifactBytes: built.artifactBytes,
+          proofDocument: `${exactProofDocument(built.artifactSha256)}\n${contradiction}\n`,
+        }),
+        expectedError("EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT"),
+      );
+    }
     await assert.rejects(
       verifyEditorCoreSourceDocumentEvidence({
         artifactBytes: built.artifactBytes,
-        proofDocument: `${exactProofDocument(built.artifactSha256)}\n${contradiction}\n`,
+        proofDocument: `${exactProofDocument(
+          built.artifactSha256,
+        )}\n<div hidden>\n**Status:** **FAIL**\n</div>\n`,
       }),
       expectedError("EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT"),
     );
+    for (const malformedPin of ["short", "A".repeat(64), "0".repeat(63)]) {
+      await assert.rejects(
+        verifyEditorCoreSourceDocumentEvidence({
+          artifactBytes: built.artifactBytes,
+          proofDocument: exactProofDocument(malformedPin),
+        }),
+        expectedError("EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT"),
+      );
+    }
+    // Structural invalidity wins over a second artifact fault without entering build authority.
+    await assert.rejects(
+      verifyEditorCoreSourceDocumentEvidence({
+        artifactBytes: changedByte(built.artifactBytes),
+        proofDocument: `${proofDocument}${proofDocument}`,
+      }),
+      expectedError("EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT"),
+    );
+    assert.equal(
+      authorityOpen.mock.callCount(),
+      readsBeforeMalformedProofs,
+      "Malformed proof envelopes must not acquire any build authority.",
+    );
+  } finally {
+    authorityOpen.mock.restore();
+    syncBuiltinESMExports();
   }
-  await assert.rejects(
-    verifyEditorCoreSourceDocumentEvidence({
-      artifactBytes: built.artifactBytes,
-      proofDocument: `${exactProofDocument(
-        built.artifactSha256,
-      )}\n<div hidden>\n**Status:** **FAIL**\n</div>\n`,
-    }),
-    expectedError("EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT"),
-  );
 });
 
 test("[writer] atomically writes exact bytes and preserves an existing destination on failure", async () => {
@@ -1037,13 +1094,33 @@ test("[writer-filesystem] rejects linked and non-file artifact destinations", as
   await symlink(target, symbolic);
   await link(target, hard);
   await mkdir(directoryTarget);
-  for (const artifactPath of [symbolic, hard, directoryTarget]) {
-    await assert.rejects(
-      writeEditorCoreSourceDocumentEvidence({ artifactPath }),
-      expectedError("EDITOR_SOURCE_DOCUMENT_ARTIFACT_WRITE_FAILED"),
+  const linkedParent = path.join(directory, "linked-parent");
+  await symlink(directory, linkedParent);
+  const authorityOpen = test.mock.method(fsPromises, "open");
+  syncBuiltinESMExports();
+  try {
+    for (const artifactPath of [
+      symbolic,
+      hard,
+      directoryTarget,
+      path.join(directory, "missing-parent", "artifact.json"),
+      path.join(linkedParent, "artifact.json"),
+    ]) {
+      await assert.rejects(
+        writeEditorCoreSourceDocumentEvidence({ artifactPath }),
+        expectedError("EDITOR_SOURCE_DOCUMENT_ARTIFACT_WRITE_FAILED"),
+      );
+    }
+    assert.equal(await readFile(target, "utf8"), "existing target\n");
+    assert.equal(
+      authorityOpen.mock.callCount(),
+      0,
+      "Unsafe destinations must be rejected before any fresh-build authority is opened.",
     );
+  } finally {
+    authorityOpen.mock.restore();
+    syncBuiltinESMExports();
   }
-  assert.equal(await readFile(target, "utf8"), "existing target\n");
 });
 
 test("[options] rejects unknown, accessor, inherited, symbol, proxy, and shared inputs", async () => {

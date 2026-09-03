@@ -26,6 +26,18 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
+**CI-03 — Taze kanıt doğrulamasının performansı**, kullanıcının açık onayıyla M10-T04'ün iki
+zaman aşımından sonra eklendi. Yerel temel kontroller ve odaklı kanıtlar geçti: aynı 73 editör
+kanıt testinin toplam süresi 199 saniyeden 100 saniyeye indi. Bu, bütün GitHub koşusunun süresi
+değil. 216 işin tamamı, negatif testler, her seferinde taze çalışma, mühür geçmişi ve 18 dakika
+30 saniyelik süre sınırı korunuyor.
+
+CI-03 ve M10-T04'ün `DONE` kayıtları, tam güncel PR commit'inin hosted `Quality gate` ve
+`Browser E2E` kontrollerini geçmesine bağlı. O zamana kadar yalnız CI-03 aktif sayılır ve merge
+yapılmaz; koşul sağlandığında aynı değişmemiş commit kapanış kaydı olur. Merge sonrasında main
+ayrıca taze kapsamlı doğrulanır. M10-T05'e başlanmıyor; I07-05'in eski runner'ı kaldırma kapsamı
+bu işin yerine kullanılmıyor.
+
 Sıradan bir `T` görevinin hızlı yerel geri bildirimi; `pnpm format:check`, `pnpm lint`,
 `pnpm typecheck`, `pnpm build`, `pnpm boundaries` ve
 `node scripts/ci/verify-proof-reader-checkpoints.mjs` komutlarından oluşur. Bu temel kontrol

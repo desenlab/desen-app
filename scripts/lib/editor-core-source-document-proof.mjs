@@ -260,7 +260,7 @@ const EXPECTED_TEST_AUTHORITY_SHA256 = Object.freeze({
   [PERSISTENCE_TYPES_PATH]: "da5114ec835c91e02df73ef58fd3f2a3f8a85508eb0e939d1c1c845bcfbd87f2",
   [PUBLIC_TEST_PATH]: "ec488542950775d642116d082eb80f4b883cc87050ca0876a1a65c8e4c91dfd1",
   [PUBLIC_TYPES_PATH]: "04a7b314398424563b765f1de60105c775aa13485c4b8913250edd21bd0f632a",
-  [ROOT_TEST_PATH]: "78d0b0a6927dfc3752a6ff03fb3d96b36c321732078130c03672b0cfaa831bf8",
+  [ROOT_TEST_PATH]: "0c59c73eacf169995398fce3ba9f9f452af938c2f85364cc33e0e4cf8b431f15",
   [TERMINAL_INTEGRATION_TEST_PATH]:
     "3d77bef07197e0a914b92e7f7b3a7cc65448c56f0ad03d303edfb6139170997b",
 });
@@ -3602,32 +3602,49 @@ function proofDocumentHasContradictoryStatus(visibleLines) {
   return false;
 }
 
-function proofDocumentHasExactPin(document, artifactSha256) {
-  if (typeof document !== "string") return false;
+function readProofDocumentPin(document) {
+  if (typeof document !== "string") return undefined;
   const artifactLine = `Artifact: \`${ARTIFACT_PATH}\``;
-  const receiptLine = `Final receipt: \`sha256:${artifactSha256}\``;
   const { visible: visibleLines, htmlAuthority, rawHtml } = visibleProofDocumentLines(document);
   const receiptLines = visibleLines.filter((line) =>
     /^Final receipt: `sha256:[0-9a-f]{64}`$/u.test(line),
   );
-  return (
+  if (
     visibleLines.filter((line) => line === "## Result").length === 1 &&
     visibleLines.filter((line) => line === artifactLine).length === 1 &&
-    visibleLines.filter((line) => line === receiptLine).length === 1 &&
     receiptLines.length === 1 &&
     !rawHtml &&
     !proofDocumentHasContradictoryStatus([...visibleLines, ...htmlAuthority]) &&
     !visibleLines.join("\n").includes("sha256:PENDING")
-  );
+  ) {
+    return receiptLines[0];
+  }
+  return undefined;
 }
 
-/** Rebuilds M08-T01 and verifies exact artifact bytes plus the human proof digest pin. */
+/**
+ * Rejects malformed proof envelopes early; PASS still requires a complete fresh build,
+ * exact artifact bytes, and the final independently reacquired proof pin.
+ */
 export async function verifyEditorCoreSourceDocumentEvidence(rawOptions = undefined) {
   const options = captureVerifyOptions(rawOptions);
   if (options.proofDocument !== undefined && typeof options.proofDocument !== "string") {
     fail(
       "EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID",
       "proofDocument must be UTF-8 text when provided.",
+    );
+  }
+  const preflightDocument =
+    options.proofDocument ??
+    fatalUtf8(
+      await readRegularAuthority(options.proofDocumentPath, "M08-T01 proof document"),
+      PROOF_DOCUMENT_PATH,
+    );
+  // Envelope admission is rejection-only; a plausible digest never substitutes for a fresh build.
+  if (readProofDocumentPin(preflightDocument) === undefined) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT",
+      "The M08-T01 proof document lacks one exact final artifact pin.",
     );
   }
   const built = await buildEditorCoreSourceDocumentEvidence(buildOptionsFromCapture(options.build));
@@ -3646,7 +3663,7 @@ export async function verifyEditorCoreSourceDocumentEvidence(rawOptions = undefi
       await readRegularAuthority(options.proofDocumentPath, "M08-T01 proof document"),
       PROOF_DOCUMENT_PATH,
     );
-  if (!proofDocumentHasExactPin(proofDocument, built.artifactSha256)) {
+  if (readProofDocumentPin(proofDocument) !== `Final receipt: \`sha256:${built.artifactSha256}\``) {
     fail(
       "EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT",
       "The M08-T01 proof document lacks one exact final artifact pin.",
@@ -3689,9 +3706,10 @@ async function assertSafeWriteDestination(artifactPath) {
   }
 }
 
-/** Atomically commits exact M08-T01 artifact bytes after a complete successful build. */
+/** Rejects unsafe destinations before building and rechecks them before the exact atomic write. */
 export async function writeEditorCoreSourceDocumentEvidence(rawOptions = undefined) {
   const options = captureWriteOptions(rawOptions);
+  await assertSafeWriteDestination(options.artifactPath);
   const built = await buildEditorCoreSourceDocumentEvidence(buildOptionsFromCapture(options.build));
   await assertSafeWriteDestination(options.artifactPath);
   try {

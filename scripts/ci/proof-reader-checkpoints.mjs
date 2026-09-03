@@ -9,6 +9,9 @@ const SAFE_ARRAY_IS_ARRAY = Array.isArray;
 const SAFE_BUFFER_FROM = Buffer.from.bind(Buffer);
 const SAFE_JSON_PARSE = JSON.parse;
 const SAFE_JSON_STRINGIFY = JSON.stringify;
+const SAFE_MAP = Map;
+const SAFE_MAP_GET = Map.prototype.get;
+const SAFE_MAP_SET = Map.prototype.set;
 const SAFE_NUMBER_IS_SAFE_INTEGER = Number.isSafeInteger;
 const SAFE_OBJECT_FREEZE = Object.freeze;
 const SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR = Object.getOwnPropertyDescriptor;
@@ -107,11 +110,12 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "9ee6909c0f11ed7149cb9bf6ce1c7943ed99aac2d2c6f9138caea8f5dd2044b7",
   "e685779412ca17b76c78a56ff545bbff5a7fc5efc8bc564247cc49e7c54eeca8",
   "535a09b42d158f9bdf934924f704f3fb278d68da84a3dcbbfa32e38cee375c61",
+  "52e71083e7c6f08986480434b5a327b1de6a2d29487b8f8a7ecbef1ffdb4d4e6",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
   25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
-  46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57,
+  46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
@@ -986,55 +990,63 @@ function normalizeReader(rawReader, expected, index) {
 }
 
 function assertUniqueArtifactAuthority(artifacts) {
-  let left = 0;
-  while (left < artifacts.length) {
-    let right = left + 1;
-    while (right < artifacts.length) {
-      if (artifacts[left].task === artifacts[right].task) {
-        fail(
-          "PROOF_READER_CHECKPOINT_SCHEMA_INVALID",
-          "Artifact tasks must be unique inside one checkpoint.",
-          { task: artifacts[left].task },
-        );
-      }
-      if (artifacts[left].path === artifacts[right].path) {
-        fail(
-          "PROOF_READER_CHECKPOINT_SCHEMA_INVALID",
-          "Artifact paths must be unique inside one checkpoint.",
-          { path: artifacts[left].path },
-        );
-      }
-      right += 1;
+  const taskIndexes = new SAFE_MAP();
+  const pathIndexes = new SAFE_MAP();
+  let duplicate;
+  let index = artifacts.length;
+  // Retain the original leftmost-pair error precedence without comparing every pair.
+  while (index > 0) {
+    index -= 1;
+    const artifact = artifacts[index];
+    const nextTask = SAFE_REFLECT_APPLY(SAFE_MAP_GET, taskIndexes, [artifact.task]);
+    const nextPath = SAFE_REFLECT_APPLY(SAFE_MAP_GET, pathIndexes, [artifact.path]);
+    if (nextTask !== undefined && (nextPath === undefined || nextTask <= nextPath)) {
+      duplicate = {
+        message: "Artifact tasks must be unique inside one checkpoint.",
+        details: { task: artifact.task },
+      };
+    } else if (nextPath !== undefined) {
+      duplicate = {
+        message: "Artifact paths must be unique inside one checkpoint.",
+        details: { path: artifact.path },
+      };
     }
-    left += 1;
+    SAFE_REFLECT_APPLY(SAFE_MAP_SET, taskIndexes, [artifact.task, index]);
+    SAFE_REFLECT_APPLY(SAFE_MAP_SET, pathIndexes, [artifact.path, index]);
+  }
+  if (duplicate !== undefined) {
+    fail("PROOF_READER_CHECKPOINT_SCHEMA_INVALID", duplicate.message, duplicate.details);
   }
 }
 
 function assertUniqueReaderAuthority(readers) {
-  let left = 0;
-  while (left < readers.length) {
-    let right = left + 1;
-    while (right < readers.length) {
-      if (readers[left].path === readers[right].path) {
-        fail(
-          "PROOF_READER_CHECKPOINT_SCHEMA_INVALID",
-          "Reader paths must be unique inside one checkpoint.",
-          { path: readers[left].path },
-        );
-      }
-      if (
-        readers[left].task === readers[right].task &&
-        readers[left].role === readers[right].role
-      ) {
-        fail(
-          "PROOF_READER_CHECKPOINT_SCHEMA_INVALID",
-          "Reader task and role authority must be unique inside one checkpoint.",
-          { task: readers[left].task, role: readers[left].role },
-        );
-      }
-      right += 1;
+  const pathIndexes = new SAFE_MAP();
+  const identityIndexes = new SAFE_MAP();
+  let duplicate;
+  let index = readers.length;
+  while (index > 0) {
+    index -= 1;
+    const reader = readers[index];
+    // Both fields have already matched code-owned values, which cannot contain this separator.
+    const identity = `${reader.task}\0${reader.role}`;
+    const nextPath = SAFE_REFLECT_APPLY(SAFE_MAP_GET, pathIndexes, [reader.path]);
+    const nextIdentity = SAFE_REFLECT_APPLY(SAFE_MAP_GET, identityIndexes, [identity]);
+    if (nextPath !== undefined && (nextIdentity === undefined || nextPath <= nextIdentity)) {
+      duplicate = {
+        message: "Reader paths must be unique inside one checkpoint.",
+        details: { path: reader.path },
+      };
+    } else if (nextIdentity !== undefined) {
+      duplicate = {
+        message: "Reader task and role authority must be unique inside one checkpoint.",
+        details: { task: reader.task, role: reader.role },
+      };
     }
-    left += 1;
+    SAFE_REFLECT_APPLY(SAFE_MAP_SET, pathIndexes, [reader.path, index]);
+    SAFE_REFLECT_APPLY(SAFE_MAP_SET, identityIndexes, [identity, index]);
+  }
+  if (duplicate !== undefined) {
+    fail("PROOF_READER_CHECKPOINT_SCHEMA_INVALID", duplicate.message, duplicate.details);
   }
 }
 
@@ -1110,6 +1122,12 @@ function checkpointDigestPayload(checkpoint) {
   };
 }
 
+// Only this invocation's privately normalized records reach this helper. Public raw inputs
+// still pass normalizeCheckpoint; no previous call's validation or filesystem result is reused.
+function normalizedCheckpointSha256(checkpoint) {
+  return sha256(SAFE_BUFFER_FROM(SAFE_JSON_STRINGIFY(checkpointDigestPayload(checkpoint)), "utf8"));
+}
+
 /**
  * Calculates the chain digest for one structurally valid checkpoint.
  *
@@ -1118,7 +1136,7 @@ function checkpointDigestPayload(checkpoint) {
  */
 export function calculateProofReaderCheckpointSha256(rawCheckpoint) {
   const checkpoint = normalizeCheckpoint(rawCheckpoint);
-  return sha256(SAFE_BUFFER_FROM(SAFE_JSON_STRINGIFY(checkpointDigestPayload(checkpoint)), "utf8"));
+  return normalizedCheckpointSha256(checkpoint);
 }
 
 function assertReaderHistoryIsAppendOnly(history, checkpoint, checkpointIndex) {
@@ -1198,6 +1216,7 @@ function normalizeManifest(rawManifest) {
   }
 
   const checkpoints = [];
+  const checkpointDigests = [];
   const history = [];
   let predecessor = GENESIS_PREDECESSOR_SHA256;
   let checkpointIndex = 0;
@@ -1220,8 +1239,9 @@ function normalizeManifest(rawManifest) {
       );
     }
     assertReaderHistoryIsAppendOnly(history, checkpoint, checkpointIndex);
-    predecessor = calculateProofReaderCheckpointSha256(checkpoint);
+    predecessor = normalizedCheckpointSha256(checkpoint);
     checkpoints[checkpointIndex] = checkpoint;
+    checkpointDigests[checkpointIndex] = predecessor;
     checkpointIndex += 1;
   }
   if (manifest.headSha256 !== predecessor) {
@@ -1232,10 +1252,13 @@ function normalizeManifest(rawManifest) {
     );
   }
   return {
-    schemaVersion: 1,
-    profile: PROFILE,
-    headSha256: predecessor,
-    checkpoints,
+    manifest: {
+      schemaVersion: 1,
+      profile: PROFILE,
+      headSha256: predecessor,
+      checkpoints,
+    },
+    checkpointDigests,
   };
 }
 
@@ -1322,7 +1345,7 @@ function normalizeCanonicalCheckpointBytes(rawBytes) {
     );
   }
   const normalized = normalizeManifest(parsed);
-  const canonicalText = `${SAFE_JSON_STRINGIFY(normalized, null, 2)}\n`;
+  const canonicalText = `${SAFE_JSON_STRINGIFY(normalized.manifest, null, 2)}\n`;
   if (text !== canonicalText) {
     fail(
       "PROOF_READER_CHECKPOINT_CANONICAL_DRIFT",
@@ -1332,7 +1355,7 @@ function normalizeCanonicalCheckpointBytes(rawBytes) {
   return normalized;
 }
 
-function assertReviewedCheckpointPrefix(manifest) {
+function assertReviewedCheckpointPrefix(manifest, checkpointDigests) {
   if (manifest.checkpoints.length < PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length) {
     fail(
       "PROOF_READER_CHECKPOINT_HISTORY_UNANCHORED",
@@ -1345,9 +1368,7 @@ function assertReviewedCheckpointPrefix(manifest) {
   }
   let checkpointIndex = 0;
   while (checkpointIndex < PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length) {
-    const actualSha256 = calculateProofReaderCheckpointSha256(
-      manifest.checkpoints[checkpointIndex],
-    );
+    const actualSha256 = checkpointDigests[checkpointIndex];
     const expectedSha256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[checkpointIndex];
     if (actualSha256 !== expectedSha256) {
       fail(
@@ -1364,7 +1385,7 @@ function assertReviewedCheckpointPrefix(manifest) {
   }
 }
 
-function assertExactReviewedCheckpointChain(manifest) {
+function assertExactReviewedCheckpointChain(manifest, checkpointDigests) {
   if (manifest.checkpoints.length !== PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length) {
     fail(
       "PROOF_READER_CHECKPOINT_HISTORY_UNANCHORED",
@@ -1375,16 +1396,16 @@ function assertExactReviewedCheckpointChain(manifest) {
       },
     );
   }
-  assertReviewedCheckpointPrefix(manifest);
+  assertReviewedCheckpointPrefix(manifest, checkpointDigests);
 }
 
 /**
  * Parses, canonical-byte-checks, and authenticates the exact code-reviewed live checkpoint chain.
  */
 export function validateProofReaderCheckpointBytes(rawBytes) {
-  const normalized = normalizeCanonicalCheckpointBytes(rawBytes);
-  assertExactReviewedCheckpointChain(normalized);
-  return deepFreezeJson(normalized);
+  const { manifest, checkpointDigests } = normalizeCanonicalCheckpointBytes(rawBytes);
+  assertExactReviewedCheckpointChain(manifest, checkpointDigests);
+  return deepFreezeJson(manifest);
 }
 
 /**
@@ -1395,7 +1416,7 @@ export function validateProofReaderCheckpointBytes(rawBytes) {
  * an input to human/code review; live verification will reject it until code adopts that digest.
  */
 export function validateProofReaderCheckpointAppendCandidateBytes(rawBytes) {
-  const normalized = normalizeCanonicalCheckpointBytes(rawBytes);
+  const { manifest: normalized, checkpointDigests } = normalizeCanonicalCheckpointBytes(rawBytes);
   const reviewedCount = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length;
   if (normalized.checkpoints.length !== reviewedCount + 1) {
     fail(
@@ -1407,9 +1428,9 @@ export function validateProofReaderCheckpointAppendCandidateBytes(rawBytes) {
       },
     );
   }
-  assertReviewedCheckpointPrefix(normalized);
+  assertReviewedCheckpointPrefix(normalized, checkpointDigests);
   const candidate = normalized.checkpoints[reviewedCount];
-  const candidateSha256 = calculateProofReaderCheckpointSha256(candidate);
+  const candidateSha256 = checkpointDigests[reviewedCount];
   return SAFE_OBJECT_FREEZE({
     status: "REVIEW_REQUIRED",
     profile: PROFILE,

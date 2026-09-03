@@ -261,6 +261,11 @@ test("injected plan, identity, command, dependency, and class drift fail before 
       inventory.nodes[0].dependencies = ["boundary-fixtures"];
     },
     (inventory) => {
+      inventory.nodes.find(({ id }) => id === "verify-web-react-package-digest").dependencies = [
+        "test-protocol-snapshot",
+      ];
+    },
+    (inventory) => {
       inventory.nodes[0].executionClass = "CONCURRENT_PROOF";
     },
   ]) {
@@ -383,6 +388,143 @@ test("all 216 successful closes produce stable inventory-ordered receipts", asyn
   );
 });
 
+test("the exact digest pair starts first inside its ordinary segment without changing authority", async () => {
+  const plan = createShadowPlan();
+  const originalPlan = JSON.stringify(plan);
+  const calls = [];
+  const completed = new Set();
+  const receipt = await runShadowPlan(plan, {
+    runStep: async (workload) => {
+      for (const dependency of workload.dependencies) {
+        assert.equal(completed.has(dependency), true, `${workload.id} needs ${dependency}`);
+      }
+      calls.push({ id: workload.id, command: workload.command, args: [...workload.args] });
+      completed.add(workload.id);
+      return pass(workload);
+    },
+    ...successfulGuardOptions(),
+  });
+
+  const ids = calls.map(({ id }) => id);
+  assert.deepEqual(
+    ids.slice(0, plan.prefix.length),
+    plan.prefix.map(({ id }) => id),
+  );
+  assert.deepEqual(ids.slice(plan.prefix.length, plan.prefix.length + 2), [
+    "verify-web-react-package-digest",
+    "verify-protocol-snapshot",
+  ]);
+  assert.deepEqual(
+    ids.slice(-plan.suffix.length),
+    plan.suffix.map(({ id }) => id),
+  );
+  assert.equal(new Set(ids).size, plan.nodes.length);
+  assert.deepEqual(
+    calls.toSorted((left, right) => left.id.localeCompare(right.id)),
+    plan.nodes
+      .map(({ id, command, args }) => ({ id, command, args: [...args] }))
+      .toSorted((left, right) => left.id.localeCompare(right.id)),
+  );
+  for (const { verifier, rootTest } of plan.proofPairs) {
+    assert.equal(ids.indexOf(verifier.id) < ids.indexOf(rootTest.id), true);
+  }
+  assert.deepEqual(
+    receipt.steps.map(({ id }) => id),
+    plan.nodes.map(({ id }) => id),
+  );
+  assert.deepEqual(
+    receipt.proofPairs.map(({ id }) => id),
+    plan.proofPairs.map(({ id }) => id),
+  );
+  assert.equal(JSON.stringify(plan), originalPlan);
+});
+
+test("a held early digest lets its original segment progress but cannot cross the drained barrier", async () => {
+  const plan = createShadowPlan();
+  const firstBarrierIndex = plan.proofPairs.findIndex(
+    ({ id }) => classifyProofPairState(id).barrier,
+  );
+  const segment = plan.proofPairs.slice(0, firstBarrierIndex);
+  const digestPair = segment.find(({ id }) => id === "web-react-package-digest");
+  const otherRootIds = new Set(
+    segment.filter(({ id }) => id !== digestPair.id).map(({ rootTest }) => rootTest.id),
+  );
+  const completedOthers = new Set();
+  const started = [];
+  let releaseDigest;
+  const digestReleased = new Promise((resolvePromise) => {
+    releaseDigest = resolvePromise;
+  });
+  const running = runShadowPlan(plan, {
+    runStep: async (workload) => {
+      started.push(workload.id);
+      if (workload.id === digestPair.verifier.id) await digestReleased;
+      if (otherRootIds.has(workload.id)) completedOthers.add(workload.id);
+      return pass(workload);
+    },
+    ...successfulGuardOptions(),
+  });
+
+  try {
+    await waitFor(() => completedOthers.size === otherRootIds.size, "the original segment stalled");
+    assert.equal(segment.length, 15);
+    assert.equal(started.includes(digestPair.rootTest.id), false);
+    for (const { verifier, rootTest } of plan.proofPairs.slice(firstBarrierIndex)) {
+      assert.equal(started.includes(verifier.id), false);
+      assert.equal(started.includes(rootTest.id), false);
+    }
+  } finally {
+    releaseDigest();
+  }
+  const receipt = await running;
+  assert.equal(receipt.status, "PASS");
+  assert.equal(receipt.observedClosedCount, 216);
+  assert.equal(
+    started.indexOf(digestPair.rootTest.id) <
+      started.indexOf(plan.proofPairs[firstBarrierIndex].verifier.id),
+    true,
+  );
+});
+
+test("cancelling both early ordinary workers cannot launch a root or another pair", async () => {
+  const plan = createShadowPlan();
+  const controller = new AbortController();
+  const cancellation = new RequiredExhaustiveCancellationError("SIGTERM");
+  const started = [];
+  const running = runShadowPlan(plan, {
+    signal: controller.signal,
+    runStep: async (workload, { signal }) => {
+      if (workload.executionClass !== "CONCURRENT_PROOF") return pass(workload);
+      started.push(workload.id);
+      await new Promise((resolvePromise) => {
+        signal.addEventListener("abort", resolvePromise, { once: true });
+      });
+      throw signal.reason;
+    },
+    ...successfulGuardOptions(),
+  });
+  const rejected = assert.rejects(running, (error) => {
+    assert.equal(error, cancellation);
+    assert.equal(error.requiredExhaustiveReceipt.status, "FAIL");
+    assert.deepEqual(
+      error.requiredExhaustiveReceipt.steps
+        .filter(({ status }) => status === "CANCELLED")
+        .map(({ id }) => id)
+        .sort(),
+      ["verify-web-react-package-digest", "verify-protocol-snapshot"].sort(),
+    );
+    return true;
+  });
+  try {
+    await waitFor(() => started.length === 2, "both early workers must start");
+    assert.deepEqual(started, ["verify-web-react-package-digest", "verify-protocol-snapshot"]);
+  } finally {
+    controller.abort(cancellation);
+  }
+  await rejected;
+  assert.equal(started.length, 2);
+});
+
 test("dynamic workers keep two safe ordinary pairs active and drain for all barrier pairs", async () => {
   const plan = createShadowPlan();
   const barrierPairs = plan.proofPairs.filter(({ id }) => classifyProofPairState(id).barrier);
@@ -434,7 +576,8 @@ test("dynamic workers keep two safe ordinary pairs active and drain for all barr
 
 test("the first proof failure permanently aborts and awaits its active sibling", async () => {
   const plan = createShadowPlan();
-  const [firstPair, secondPair] = plan.proofPairs;
+  const firstPair = plan.proofPairs.find(({ id }) => id === "web-react-package-digest");
+  const secondPair = plan.proofPairs[0];
   const failure = new Error("injected proof failure");
   const started = [];
   let siblingClosed = false;
@@ -492,6 +635,10 @@ test("representative package, root-test, and boundary failures stop their depend
     },
     {
       targetId: "editor-core-public-package-contract",
+      forbiddenIds: plan.proofPairs.flatMap(({ verifier, rootTest }) => [verifier.id, rootTest.id]),
+    },
+    {
+      targetId: "editor-web-public-package-contract",
       forbiddenIds: plan.proofPairs.flatMap(({ verifier, rootTest }) => [verifier.id, rootTest.id]),
     },
     {

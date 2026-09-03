@@ -30,7 +30,7 @@ const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   FROZEN_INPUT: 151,
   PACKAGE_OR_APPLICATION: 548,
   SHARED_PROOF_INFRASTRUCTURE: 275,
-  PROJECT_DOCUMENTATION: 141,
+  PROJECT_DOCUMENTATION: 143,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1409 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1411 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1409 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1409);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1411);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -352,7 +352,32 @@ test("permits strict selection only for exact verifier and root-test proof input
   }
 });
 
-test("the reviewed M10-T04 successor preserves the historical I07-04 ownership projection", async () => {
+test("keeps CI-03 performance records exhaustive without proof ownership", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  for (const documentationPath of [
+    "docs/adr/0018-fresh-proof-performance.md",
+    "docs/proof/CI-FRESH-PROOF-PERFORMANCE.md",
+  ]) {
+    assert.deepEqual(resolveAffectedWorkloadOwner(authority, documentationPath), {
+      path: documentationPath,
+      category: AFFECTED_OWNERSHIP_CATEGORIES.PROJECT_DOCUMENTATION,
+      disposition: AFFECTED_OWNERSHIP_DISPOSITIONS.FORCE_EXHAUSTIVE,
+      proofUnitId: null,
+      verifierNodeId: null,
+      rootTestNodeId: null,
+    });
+    assert.throws(
+      () =>
+        createAffectedWorkloadOwnership(
+          paths.filter((candidate) => candidate !== documentationPath),
+        ),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+});
+
+test("the reviewed CI-03 successor preserves the historical I07-04 ownership projection", async () => {
   const currentPaths = await currentTrackedPaths();
   const current = createAffectedWorkloadOwnership(currentPaths);
   const promotedPaths = [
@@ -730,6 +755,8 @@ test("the reviewed M10-T04 successor preserves the historical I07-04 ownership p
     "tests/boundaries/fixtures/desen-app-browser-e2e-non-product-server-imports-local-operation-host/apps/desen-app/dev/local-operation-host.mjs",
     "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-unreviewed-dev-module/apps/desen-app-browser-e2e/product-proof-server.mjs",
     "tests/boundaries/fixtures/desen-app-browser-e2e-product-server-imports-unreviewed-dev-module/apps/desen-app/dev/local-operation-private.mjs",
+    "docs/adr/0018-fresh-proof-performance.md",
+    "docs/proof/CI-FRESH-PROOF-PERFORMANCE.md",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);
@@ -741,7 +768,7 @@ test("the reviewed M10-T04 successor preserves the historical I07-04 ownership p
   for (const successorPath of successorPaths) {
     assert.ok(
       current.entries.some(({ path: candidate }) => candidate === successorPath),
-      `${successorPath} must be tracked by the reviewed M10-T04 successor`,
+      `${successorPath} must be tracked by the reviewed CI-03 successor`,
     );
   }
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
-import {
+import fsPromises, {
   link,
   mkdir,
   mkdtemp,
@@ -11,6 +11,7 @@ import {
   symlink,
   writeFile,
 } from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -485,72 +486,132 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
 
 test("[artifact] verifies exact artifact bytes and one exact final proof pin", async () => {
   const proofDocumentBytes = exactProofDocument(built.artifactSha256);
-  const verified = await verifyEditorCoreEventActionEditsEvidence({
-    artifactBytes: built.artifactBytes,
-    proofDocumentBytes,
-  });
-  assert.equal(verified.result, "PASS");
-  assert.equal(verified.artifactSha256, built.artifactSha256);
-  assert.deepEqual(
-    verified.prerequisiteSha256s,
-    EDITOR_CORE_EVENT_ACTION_EDITS_PREREQUISITE_PINS.map(({ sha256 }) => sha256),
-  );
-  await assert.rejects(
-    verifyEditorCoreEventActionEditsEvidence({
-      artifactBytes: changedByte(built.artifactBytes),
-      proofDocumentBytes,
-    }),
-    expectedError("ARTIFACT_DRIFT"),
-  );
-  await assert.rejects(
-    verifyEditorCoreEventActionEditsEvidence({
+  const directory = await temporaryDirectory("desen-m08-t06-proof-preflight-");
+  const proofDocumentPath = path.join(directory, "proof.md");
+  await writeFile(proofDocumentPath, proofDocumentBytes);
+  const authorityOpen = test.mock.method(fsPromises, "open");
+  syncBuiltinESMExports();
+  try {
+    const verified = await verifyEditorCoreEventActionEditsEvidence({
       artifactBytes: built.artifactBytes,
-      proofDocumentBytes: `${proofDocumentBytes}${proofDocumentBytes}`,
-    }),
-    expectedError("PROOF_PIN_DRIFT"),
-  );
-  await assert.rejects(
-    verifyEditorCoreEventActionEditsEvidence({
-      artifactBytes: built.artifactBytes,
-      proofDocumentBytes: `# Hidden pin\n\n<!-- Final artifact: \`sha256:${built.artifactSha256}\` -->\n`,
-    }),
-    expectedError("PROOF_PIN_DRIFT"),
-  );
-  await assert.rejects(
-    verifyEditorCoreEventActionEditsEvidence({
-      artifactBytes: built.artifactBytes,
-      proofDocumentBytes: `# Fenced pin\n\n\`\`\`text\nFinal artifact: \`sha256:${built.artifactSha256}\`\n\`\`\`\n`,
-    }),
-    expectedError("PROOF_PIN_DRIFT"),
-  );
-  await assert.rejects(
-    verifyEditorCoreEventActionEditsEvidence({
-      artifactBytes: built.artifactBytes,
-      proofDocumentBytes: `# Space-indented pin\n\n    Final artifact: \`sha256:${built.artifactSha256}\`\n`,
-    }),
-    expectedError("PROOF_PIN_DRIFT"),
-  );
-  await assert.rejects(
-    verifyEditorCoreEventActionEditsEvidence({
-      artifactBytes: built.artifactBytes,
-      proofDocumentBytes: `# Tab-indented pin\n\n\tFinal artifact: \`sha256:${built.artifactSha256}\`\n`,
-    }),
-    expectedError("PROOF_PIN_DRIFT"),
-  );
-  for (const invalidProofDocumentBytes of [
-    `# Template pin\n\n<template>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</template>\n`,
-    `# Hidden pin\n\n<div hidden>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</div>\n`,
-    `# Collapsed pin\n\n<details>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</details>\n`,
-    `${proofDocumentBytes}\nStatus: FAIL\n`,
-    `${proofDocumentBytes}\nsha256:PENDING\n`,
-  ]) {
+      proofDocumentPath,
+    });
+    assert.equal(verified.result, "PASS");
+    assert.equal(verified.artifactSha256, built.artifactSha256);
+    assert.deepEqual(
+      verified.prerequisiteSha256s,
+      EDITOR_CORE_EVENT_ACTION_EDITS_PREREQUISITE_PINS.map(({ sha256 }) => sha256),
+    );
+    assert.equal(
+      authorityOpen.mock.calls.filter(({ arguments: values }) => values[0] === proofDocumentPath)
+        .length,
+      2,
+      "A path-backed proof must be acquired again after the complete fresh build.",
+    );
+    const readsAfterPositive = authorityOpen.mock.callCount();
+    await assert.rejects(
+      verifyEditorCoreEventActionEditsEvidence({
+        artifactBytes: changedByte(built.artifactBytes),
+        proofDocumentBytes,
+      }),
+      expectedError("ARTIFACT_DRIFT"),
+    );
+    assert.ok(authorityOpen.mock.callCount() > readsAfterPositive);
+    const readsBeforeMalformedProofs = authorityOpen.mock.callCount();
+
     await assert.rejects(
       verifyEditorCoreEventActionEditsEvidence({
         artifactBytes: built.artifactBytes,
-        proofDocumentBytes: invalidProofDocumentBytes,
+        proofDocumentBytes: `${proofDocumentBytes}${proofDocumentBytes}`,
       }),
       expectedError("PROOF_PIN_DRIFT"),
     );
+    await assert.rejects(
+      verifyEditorCoreEventActionEditsEvidence({
+        artifactBytes: built.artifactBytes,
+        proofDocumentBytes: `# Hidden pin\n\n<!-- Final artifact: \`sha256:${built.artifactSha256}\` -->\n`,
+      }),
+      expectedError("PROOF_PIN_DRIFT"),
+    );
+    await assert.rejects(
+      verifyEditorCoreEventActionEditsEvidence({
+        artifactBytes: built.artifactBytes,
+        proofDocumentBytes: `# Fenced pin\n\n\`\`\`text\nFinal artifact: \`sha256:${built.artifactSha256}\`\n\`\`\`\n`,
+      }),
+      expectedError("PROOF_PIN_DRIFT"),
+    );
+    await assert.rejects(
+      verifyEditorCoreEventActionEditsEvidence({
+        artifactBytes: built.artifactBytes,
+        proofDocumentBytes: `# Space-indented pin\n\n    Final artifact: \`sha256:${built.artifactSha256}\`\n`,
+      }),
+      expectedError("PROOF_PIN_DRIFT"),
+    );
+    await assert.rejects(
+      verifyEditorCoreEventActionEditsEvidence({
+        artifactBytes: built.artifactBytes,
+        proofDocumentBytes: `# Tab-indented pin\n\n\tFinal artifact: \`sha256:${built.artifactSha256}\`\n`,
+      }),
+      expectedError("PROOF_PIN_DRIFT"),
+    );
+    for (const invalidProofDocumentBytes of [
+      `# Template pin\n\n<template>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</template>\n`,
+      `# Hidden pin\n\n<div hidden>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</div>\n`,
+      `# Collapsed pin\n\n<details>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</details>\n`,
+      `${proofDocumentBytes}\nStatus: FAIL\n`,
+      `${proofDocumentBytes}\nsha256:PENDING\n`,
+    ]) {
+      await assert.rejects(
+        verifyEditorCoreEventActionEditsEvidence({
+          artifactBytes: built.artifactBytes,
+          proofDocumentBytes: invalidProofDocumentBytes,
+        }),
+        expectedError("PROOF_PIN_DRIFT"),
+      );
+    }
+    for (const malformedPin of ["short", "A".repeat(64), "0".repeat(63)]) {
+      await assert.rejects(
+        verifyEditorCoreEventActionEditsEvidence({
+          artifactBytes: built.artifactBytes,
+          proofDocumentBytes: exactProofDocument(malformedPin),
+        }),
+        expectedError("PROOF_PIN_DRIFT"),
+      );
+    }
+    // Structural invalidity wins over a second artifact fault without entering build authority.
+    await assert.rejects(
+      verifyEditorCoreEventActionEditsEvidence({
+        artifactBytes: changedByte(built.artifactBytes),
+        proofDocumentBytes: `${proofDocumentBytes}${proofDocumentBytes}`,
+      }),
+      expectedError("PROOF_PIN_DRIFT"),
+    );
+    await assert.rejects(
+      verifyEditorCoreEventActionEditsEvidence({
+        buildOptions: { unknown: true },
+        proofDocumentBytes: "malformed",
+      }),
+      expectedError("OPTIONS_INVALID"),
+    );
+    assert.equal(
+      authorityOpen.mock.callCount(),
+      readsBeforeMalformedProofs,
+      "Malformed proof envelopes must not acquire any build authority.",
+    );
+    await assert.rejects(
+      verifyEditorCoreEventActionEditsEvidence({
+        artifactBytes: built.artifactBytes,
+        proofDocumentBytes: exactProofDocument("0".repeat(64)),
+      }),
+      expectedError("PROOF_PIN_DRIFT"),
+    );
+    assert.ok(
+      authorityOpen.mock.callCount() > readsBeforeMalformedProofs,
+      "A plausible but wrong digest must still be checked against a complete fresh build.",
+    );
+  } finally {
+    authorityOpen.mock.restore();
+    syncBuiltinESMExports();
   }
 });
 
@@ -584,11 +645,31 @@ test("[writer-filesystem] rejects symlink, hard-link, and non-file destinations"
   await symlink(target, symbolic);
   await link(target, hard);
   await mkdir(nonFile);
-  for (const destinationPath of [symbolic, hard, nonFile]) {
-    await assert.rejects(
-      writeEditorCoreEventActionEditsEvidence({ destinationPath }),
-      expectedError("FILESYSTEM_UNSAFE"),
+  const linkedParent = path.join(directory, "linked-parent");
+  await symlink(directory, linkedParent);
+  const authorityOpen = test.mock.method(fsPromises, "open");
+  syncBuiltinESMExports();
+  try {
+    for (const destinationPath of [
+      symbolic,
+      hard,
+      nonFile,
+      path.join(directory, "missing-parent", "artifact.json"),
+      path.join(linkedParent, "artifact.json"),
+    ]) {
+      await assert.rejects(
+        writeEditorCoreEventActionEditsEvidence({ destinationPath }),
+        expectedError("FILESYSTEM_UNSAFE"),
+      );
+    }
+    assert.equal(
+      authorityOpen.mock.callCount(),
+      0,
+      "Unsafe destinations must be rejected before any fresh-build authority is opened.",
     );
+  } finally {
+    authorityOpen.mock.restore();
+    syncBuiltinESMExports();
   }
 });
 

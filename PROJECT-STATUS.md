@@ -2,6 +2,22 @@
 
 Last updated: 2026-09-03
 
+## CI-03 verification-performance checkpoint
+
+`CI-03 — Fresh proof verification performance` has passed its local implementation evidence and
+bounded baseline after PR #74's earlier M10-T04 head timed out twice at the unchanged 18m30s
+quality-gate limit. Its seven M08 suites still pass 73/73, with measured total time reduced from
+199.162 to 99.833 seconds. Publisher remains 65/65 and the focused CI contracts pass 379/379.
+This does not predict the total hosted time. All 216 workloads, fresh proof execution, negative
+cases, two workers, eleven barriers, frozen evidence, deadline, and product behavior remain intact.
+
+The CI-03 and M10-T04 `DONE` records are conditional on hosted `Quality gate` and `Browser E2E`
+passing for the exact final PR head. Until then, only CI-03 is active and merge/completion remain
+blocked; the earlier passing Browser job cannot authorize a changed head. The same unchanged
+revision records closure once those conditions pass, followed by fresh exhaustive main CI.
+M10-T05 remains unstarted. I07-05's separate legacy-retirement responsibility is unchanged. See
+[the measurement and closure record](docs/proof/CI-FRESH-PROOF-PERFORMANCE.md).
+
 ## Plain-language status
 
 Local implementation preparation is complete and the public development repository is active at

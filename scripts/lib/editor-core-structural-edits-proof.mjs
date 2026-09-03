@@ -548,7 +548,7 @@ const EXPECTED_T08_AUTHORITY_SHA256 = Object.freeze({
   [PERSISTENCE_TYPES_PATH]: "da5114ec835c91e02df73ef58fd3f2a3f8a85508eb0e939d1c1c845bcfbd87f2",
   [PUBLIC_TEST_PATH]: "ec488542950775d642116d082eb80f4b883cc87050ca0876a1a65c8e4c91dfd1",
   [PUBLIC_TYPES_PATH]: "04a7b314398424563b765f1de60105c775aa13485c4b8913250edd21bd0f632a",
-  [ROOT_TEST_PATH]: "3a29dd0dd9346c0aa9ac8c3d654f54fdda8b91774cad6c12f1a37cc9464fc1ae",
+  [ROOT_TEST_PATH]: "8e0d4feb8ac4e1b24298ca4ac01ddc7db793694a25c8e9a06dbe7e6e9ccaffa4",
 });
 const EXPECTED_T10_TEST_AUTHORITY_SHA256 =
   "3d77bef07197e0a914b92e7f7b3a7cc65448c56f0ad03d303edfb6139170997b";
@@ -2184,8 +2184,12 @@ async function authenticateFrozenArtifact() {
   });
 }
 
+/** Captures own-data options and rebuilds M08-T03 from freshly authenticated inputs. */
 export async function buildEditorCoreStructuralEditsEvidence(rawOptions = undefined) {
-  const options = captureBuildOptions(rawOptions);
+  return buildCapturedEvidence(captureBuildOptions(rawOptions));
+}
+
+async function buildCapturedEvidence(options) {
   if (options.runtime !== undefined) {
     fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
   }
@@ -2371,9 +2375,40 @@ function proofDocumentHasContradictoryStatus(visibleLines) {
   });
 }
 
+function readProofDocumentPin(proof) {
+  const { visible, rawHtml } = visibleProofAuthority(proof);
+  const pinLines = visible.filter((line) => line.startsWith("Final artifact:"));
+  if (
+    pinLines.length !== 1 ||
+    !/^Final artifact: `sha256:[0-9a-f]{64}`$/u.test(pinLines[0]) ||
+    rawHtml ||
+    proofDocumentHasContradictoryStatus(visible) ||
+    visible.join("\n").includes("sha256:PENDING")
+  ) {
+    fail("PROOF_PIN_DRIFT", "The proof document final pin drifted.");
+  }
+  return pinLines[0];
+}
+
+/**
+ * Rejects malformed proof envelopes early; PASS still requires a complete fresh build,
+ * exact artifact bytes, and the final independently reacquired proof pin.
+ */
 export async function verifyEditorCoreStructuralEditsEvidence(rawOptions = undefined) {
   const options = captureVerifyOptions(rawOptions);
-  const built = await buildEditorCoreStructuralEditsEvidence(options.buildOptions);
+  const buildOptions = captureBuildOptions(options.buildOptions);
+  if (buildOptions.runtime !== undefined) {
+    fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
+  }
+  const preflightProofBytes =
+    options.proofDocumentBytes ??
+    (await readNoFollow(
+      options.proofDocumentPath ?? PROOF_DOCUMENT_PATH,
+      "M08-T03 proof document",
+    ));
+  // Envelope admission rejects invalid candidates; only the complete fresh build can issue PASS.
+  readProofDocumentPin(decodeUtf8(preflightProofBytes, "M08-T03 proof document"));
+  const built = await buildCapturedEvidence(buildOptions);
   const committed =
     options.artifactBytes ??
     (await readNoFollow(options.artifactPath ?? ARTIFACT_PATH, "M08-T03 proof artifact"));
@@ -2388,15 +2423,7 @@ export async function verifyEditorCoreStructuralEditsEvidence(rawOptions = undef
     ));
   const proof = decodeUtf8(proofBytes, "M08-T03 proof document");
   const exactPin = `Final artifact: \`sha256:${built.artifactSha256}\``;
-  const { visible, rawHtml } = visibleProofAuthority(proof);
-  const pinLines = visible.filter((line) => line.startsWith("Final artifact:"));
-  if (
-    pinLines.length !== 1 ||
-    pinLines[0] !== exactPin ||
-    rawHtml ||
-    proofDocumentHasContradictoryStatus(visible) ||
-    visible.join("\n").includes("sha256:PENDING")
-  ) {
+  if (readProofDocumentPin(proof) !== exactPin) {
     fail("PROOF_PIN_DRIFT", "The proof document final pin drifted.");
   }
   return deepFreeze({
@@ -2448,12 +2475,14 @@ function captureWriteOptions(raw) {
   return Object.freeze(source);
 }
 
+/** Rejects unsafe destinations before building and rechecks them before the exact atomic write. */
 export async function writeEditorCoreStructuralEditsEvidence(rawOptions = undefined) {
   const options = captureWriteOptions(rawOptions);
-  const built = await buildEditorCoreStructuralEditsEvidence();
   const destinationPath = await assertSafeDestination(
     options.destinationPath ?? DEFAULT_EDITOR_CORE_STRUCTURAL_EDITS_ARTIFACT_PATH,
   );
+  const built = await buildEditorCoreStructuralEditsEvidence();
+  await assertSafeDestination(destinationPath);
   await writeAtomicProofArtifact({
     artifactPath: destinationPath,
     artifactBytes: built.artifactBytes,

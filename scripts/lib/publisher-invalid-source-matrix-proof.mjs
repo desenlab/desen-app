@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { constants as fileConstants } from "node:fs";
-import { lstat, open } from "node:fs/promises";
+import { lstat, open, realpath } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { types as utilTypes } from "node:util";
@@ -2639,6 +2639,25 @@ export async function verifyPublisherInvalidSourceMatrixEvidence(rawOptions = un
   });
 }
 
+async function preflightArtifactDestination(artifactPath) {
+  const absolutePath = path.resolve(artifactPath);
+  const parent = await realpath(path.dirname(absolutePath));
+  const destination = path.join(parent, path.basename(absolutePath));
+  let entry;
+  try {
+    entry = await lstat(destination);
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+  }
+  if (entry !== undefined && !entry.isFile()) {
+    throw new TypeError(`Proof artifact destination must be a regular file: ${destination}`);
+  }
+}
+
+/**
+ * Writes freshly executed evidence after destination admission; the atomic writer independently
+ * rechecks destination safety after the build and immediately before rename.
+ */
 export async function writePublisherInvalidSourceMatrixEvidence(rawOptions = undefined) {
   const options = exactOptions(rawOptions, WRITE_OPTION_KEYS);
   const artifactPath =
@@ -2658,6 +2677,8 @@ export async function writePublisherInvalidSourceMatrixEvidence(rawOptions = und
       "The atomic-writer test hook must be a function.",
     );
   }
+  // This preflight grants no write authority and never substitutes for the final atomic checks.
+  await preflightArtifactDestination(artifactPath);
   const built = await buildFromOptions(Object.freeze({}));
   const writeResult = await writeAtomicProofArtifact({
     artifactPath,

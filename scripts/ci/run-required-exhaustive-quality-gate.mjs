@@ -36,6 +36,7 @@ const EXPECTED_PLAN_SHA256_BY_AUTHORITY = Object.freeze({
   SHADOW: "29ded9551d8adcba5f7b86819f344e1619441990c29f5e8ca63d4140530d87ab",
 });
 const PROOF_PAIR_CONCURRENCY = 2;
+const EARLY_ORDINARY_PROOF_PAIR_ID = "web-react-package-digest";
 const DEFAULT_STEP_TIMEOUT_MS = 15 * 60 * 1_000;
 const MAXIMUM_STEP_TIMEOUT_MS = 60 * 60 * 1_000;
 const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 30 * 1_000;
@@ -1516,7 +1517,21 @@ async function runProofPairRegion(
   let barrierCount = 0;
   const flushOrdinarySegment = () => {
     if (ordinarySegment.length === 0) return;
-    segments.push(Object.freeze({ barrier: false, pairs: Object.freeze(ordinarySegment) }));
+    // The reviewed digest pair otherwise creates a long, one-worker tail before the first
+    // exclusive barrier. Promote only this code-owned pair inside its existing segment;
+    // dependencies, pair membership, barrier positions, and canonical receipt order stay intact.
+    const earlyPairIndex = ordinarySegment.findIndex(
+      ({ id }) => id === EARLY_ORDINARY_PROOF_PAIR_ID,
+    );
+    const orderedPairs =
+      earlyPairIndex > 0
+        ? [
+            ordinarySegment[earlyPairIndex],
+            ...ordinarySegment.slice(0, earlyPairIndex),
+            ...ordinarySegment.slice(earlyPairIndex + 1),
+          ]
+        : ordinarySegment;
+    segments.push(Object.freeze({ barrier: false, pairs: Object.freeze(orderedPairs) }));
     ordinarySegment = [];
   };
   for (const pair of plan.proofPairs) {

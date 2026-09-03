@@ -15,6 +15,22 @@ cached success, so every selected hosted workload remains fresh. CI-02 adds no l
 selector, changes no hosted dispatcher or workflow, and leaves I07-05 plus the manual legacy
 rollback path unchanged.
 
+CI-03 is the explicitly authorized performance interlude before M10-T04 closure. It removes
+invocation-private checkpoint normalization/hash repetition, rejects malformed proof requests and
+unsafe output destinations before expensive positive execution, and starts the measured long
+package-digest pair first within its existing ordinary segment. The 216-workload inventory, exact
+commands, dependencies, two proof workers, eleven drained barriers, fresh positive execution,
+negative cases, process permissions, cancellation, and 18m30s exhaustive deadline remain intact.
+No previous PASS is reused. Current-reader edits require a reviewed checkpoint successor; all
+historical artifacts stay byte-identical. See
+[ADR 0018](../../docs/adr/0018-fresh-proof-performance.md) and the
+[measurement and closure record](../../docs/proof/CI-FRESH-PROOF-PERFORMANCE.md).
+
+Reviewed CI-03 checkpoint 70 preserves sequence 1–69 and every frozen artifact. Its head is
+`sha256:52e71083e7c6f08986480434b5a327b1de6a2d29487b8f8a7ecbef1ffdb4d4e6`, still authenticating
+57 artifacts and 114 live readers. Only the sixteen M06-T11/M08-T01–T07 proof/root receipts
+change; no prior PASS is inherited and no extra workload is introduced.
+
 ## Trust layers
 
 1. Frozen task artifacts preserve the exact task-time claim and nonclaim boundary.

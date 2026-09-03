@@ -43,6 +43,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | ------ | ----------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | CI-01  | DONE        | M04-T02, explicit user authorization | Secure single-pass CI orchestration that preserves every proof while removing recursive repetition                                                | `docs/proof/baselines/ci-01-single-pass.json`                      |
 | CI-02  | DONE        | I07-04, explicit user authorization  | Bounded non-authoritative per-task local feedback plus exact PR-head hosted completion authority; exhaustive compatibility coverage retained      | `AGENTS.md`, `scripts/test/ci-quality-gate.test.mjs`, ADR 0011     |
+| CI-03  | DONE        | CI-02, explicit user authorization   | Measured fresh-proof performance improvement without reducing coverage, reusing past success, or increasing the quality-gate deadline             | `docs/proof/CI-FRESH-PROOF-PERFORMANCE.md`                         |
 | I07-01 | DONE        | M07-T01, explicit user authorization | Current-reader checkpoint, machine-enforced cleanup register, and a non-authoritative `SHADOW + EXHAUSTIVE` modular candidate                     | `docs/proof/baselines/i07-01-modular-proof-shadow.json`            |
 | I07-02 | DONE        | I07-01                               | Exact legacy/modular equivalence, shared-state classification, and required-CI cutover to `REQUIRED + EXHAUSTIVE` execution                       | `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json` |
 | I07-03 | DONE        | I07-02                               | Fail-closed `SHADOW + AFFECTED` selector with complete tracked-path ownership, unknown-to-exhaustive fallback, and a frozen observation threshold | `docs/proof/baselines/i07-03-affected-selector-shadow.json`        |
@@ -64,6 +65,23 @@ explicit request. Hosted `main`, release, manual audit, and unsafe/untrusted bou
 fresh exhaustive runs. Checkpoints and seals remain identity/impact authority rather than cached
 success, and selected hosted workloads remain fresh. CI-02 adds no local affected selector, changes
 no hosted dispatcher/workflow, and leaves I07-05 plus the legacy rollback path unchanged.
+
+`CI-03` is the explicitly authorized operational interlude after PR #74's unchanged M10-T04 head
+exceeded the 18m30s exhaustive deadline twice. Its local implementation and bounded baseline pass:
+the same seven M08 root suites pass 73/73 in 99.833 seconds instead of 199.162; Publisher passes
+65/65 in 59.515 seconds instead of 79.206; the focused CI contracts pass 379/379. These are local
+measurements, not whole-gate or hosted timing claims. The 216 workloads, fresh positive execution,
+negative cases, two workers, eleven barriers, deadline, merge requirements, product behavior,
+and all frozen evidence remain intact. Checkpoint 70 preserves 1–69 and reseals only sixteen
+current-reader receipts at
+`sha256:52e71083e7c6f08986480434b5a327b1de6a2d29487b8f8a7ecbef1ffdb4d4e6`.
+
+The CI-03 and M10-T04 `DONE` rows are conditional closure candidates until the exact final PR head
+passes hosted `Quality gate` and `Browser E2E`. Before that condition, CI-03 is the only active
+task and merge/completion reporting are blocked; afterward the same unchanged revision records
+their closure. Main still runs fresh exhaustive verification after merge. M10-T05 remains
+`NOT_STARTED`; I07-05's legacy-retirement scope, implementation-task totals, and gate counts do
+not change. See the [CI-03 evidence and review drafts](../proof/CI-FRESH-PROOF-PERFORMANCE.md).
 
 Local CI-02 evidence is the passing six-command bounded baseline, the 2/2 focused CI-02 contract
 tests, unchanged 45-checkpoint/41-artifact/82-reader authority, passing infrastructure-debt and
