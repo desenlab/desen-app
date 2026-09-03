@@ -2,21 +2,37 @@
 
 Last updated: 2026-09-03
 
-## CI-03 verification-performance checkpoint
+## Current work — AR-01 archive privacy amendment
 
-`CI-03 — Fresh proof verification performance` has passed its local implementation evidence and
-bounded baseline after PR #74's earlier M10-T04 head timed out twice at the unchanged 18m30s
-quality-gate limit. Its seven M08 suites still pass 73/73, with measured total time reduced from
-199.162 to 99.833 seconds. Publisher remains 65/65 and the focused CI contracts pass 379/379.
-This does not predict the total hosted time. All 216 workloads, fresh proof execution, negative
-cases, two workers, eleven barriers, frozen evidence, deadline, and product behavior remain intact.
+The user authorized cleaning the historical archives before M10-T05. AR-01 is the only active
+task while its exact-head hosted closure is pending; it does not change product code,
+implementation counts, or proof-gate status. The four
+current archives and their nested copies now omit the three private prose sections. All 207
+other decoded file entries and their technical projections are unchanged. Current generators
+apply authenticated redaction before writing, and readers report new transport identities
+separately from historical evidence.
 
-The CI-03 and M10-T04 `DONE` records are conditional on hosted `Quality gate` and `Browser E2E`
-passing for the exact final PR head. Until then, only CI-03 is active and merge/completion remain
-blocked; the earlier passing Browser job cannot authorize a changed head. The same unchanged
-revision records closure once those conditions pass, followed by fresh exhaustive main CI.
-M10-T05 remains unstarted. I07-05's separate legacy-retirement responsibility is unchanged. See
-[the measurement and closure record](docs/proof/CI-FRESH-PROOF-PERFORMANCE.md).
+The four affected App verifiers and their 40 root tests pass; the independent privacy suite
+passes 9/9. The six-command bounded baseline and 408 CI contract tests also pass. All 57
+prior frozen JSON artifacts and checkpoint entries 1–70 are preserved. Checkpoint 71 authenticates
+58 artifacts and 116 readers at
+`sha256:c49ca6eacbc08f18ac6cd5bebb3d0a9c3d21a5b8fe420d92364416a210155bda`.
+The task board's `DONE` row is a closure candidate until fresh hosted `Quality gate` and
+`Browser E2E` pass for the exact final PR head; then the unchanged merged revision records closure.
+Git history is not rewritten, so old commits and downloaded copies are not erased. See
+[AR-01 evidence](docs/proof/HISTORICAL-ARCHIVE-REDACTION.md).
+
+M10-T04 and CI-03 are closed in [PR #74](https://github.com/desenlab/desen-app/pull/74): its exact
+head `25eb7c5f8f50b247233c254d77ff58df83f93b1c` passed
+[PR CI](https://github.com/desenlab/desen-app/actions/runs/33748305698), and merged main
+`cd245dd62940ee0fa3858cd8ecabe4557a0db7e1` passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/33750209060). The current
+Markdown cleanup is merged in PR #75 and its main CI also passes. These earlier receipts do not
+authorize AR-01's changed head. M10-T05 remains `NOT_STARTED`, next after AR-01 closure; I07-05
+retains its separate legacy-retirement responsibility.
+
+After AR-01 is verified and merged, development pauses. Do not start M10-T05 or another task until
+an explicit resume request; the remaining work in this session is archive closure only.
 
 ## Plain-language status
 
@@ -1450,14 +1466,16 @@ Production, N-036, and G10 remain open, and local evidence makes no hosted exact
   `G06`, `G07`, `G08`, `G09`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M10 — First end-to-end proof`
-- Overall implementation progress: `115 / 148 tasks complete (78%)`
+- Overall implementation progress: `116 / 148 tasks complete (78%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
 - M09 progress: `14 / 14 tasks complete (100%)`
-- M10 progress: `6 / 12 tasks complete (50%)`
+- M10 progress: `7 / 12 tasks complete (58%)`
+- Operational closure candidate: `AR-01 — Historical archive privacy amendment`; exact-head hosted
+  checks are required before it closes, and M10-T05 has not started
 - Proof-gate progress: `11 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,

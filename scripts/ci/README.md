@@ -31,13 +31,35 @@ Reviewed CI-03 checkpoint 70 preserves sequence 1–69 and every frozen artifact
 57 artifacts and 114 live readers. Only the sixteen M06-T11/M08-T01–T07 proof/root receipts
 change; no prior PASS is inherited and no extra workload is introduced.
 
+## AR-01 archive transport amendment
+
+AR-01 removes private prose from four nested historical bridge transports without changing the
+57 existing frozen JSON artifacts or checkpoint entries 1–70. Current readers admit only the new
+redacted transports, freshly verify technical inputs, and expose actual current receipts separately
+from historical artifact identities. The four current generators authenticate original migration
+input and exact redacted output before writing. The independent
+`node scripts/verify-historical-archive-redaction.mjs` and
+`node --test tests/historical-archive-redaction.test.mjs` pair contains no decoded-content output
+or recursive App-reader execution. Git history is not rewritten.
+
+The semantic impact graph links that pair to `desen-app-success-host-operation`, selecting its
+consumer chain as well. This is not a cross-pair execution dependency: AR-01 independently
+authenticates bytes after the normal package prefix, and every selected workload must succeed
+freshly before the gate can pass. The graph contains 218 workloads / 104 proof pairs, with two
+workers, eleven barriers, and unchanged cancellation and deadline semantics. Archive or shared
+redaction-leaf changes conservatively force exhaustive
+coverage. The checkpoint successor adds only the AR-01 artifact/readers and reseals the eight
+affected App readers. This changes no product milestone or progress count. See
+[ADR 0019](../../docs/adr/0019-historical-archive-privacy-amendment.md) and
+[the scoped evidence](../../docs/proof/HISTORICAL-ARCHIVE-REDACTION.md).
+
 ## Trust layers
 
 1. Frozen task artifacts preserve the exact task-time claim and nonclaim boundary.
 2. `proof-reader-checkpoints.json` records reviewed live reader hardening without rewriting those
    artifacts.
 3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the live exact
-   196-node, 93-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
+   218-node, 104-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
    classes, and inert shared-state metadata without importing either scheduler.
 4. The retained legacy sequential runner is a manual rollback mirror, not the source of the new
    graph.

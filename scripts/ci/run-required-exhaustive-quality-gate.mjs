@@ -32,8 +32,8 @@ const REQUIRED_AUTHORITY = "REQUIRED";
 const OPTIONAL_AUTHORITY = "SHADOW";
 const EXHAUSTIVE_SCOPE = "EXHAUSTIVE";
 const EXPECTED_PLAN_SHA256_BY_AUTHORITY = Object.freeze({
-  REQUIRED: "f9a66d3729bea671bfe54405f8c6e4653699d69c38136ed1925cc3a714f3926a",
-  SHADOW: "29ded9551d8adcba5f7b86819f344e1619441990c29f5e8ca63d4140530d87ab",
+  REQUIRED: "c0890abfe421e5fc328a92e8ebc186707066902a969027be7c470e2e02e2481f",
+  SHADOW: "f502bc7a8c279037b391f59d24921126bf90a96998d497a306c0a23ba650cf38",
 });
 const PROOF_PAIR_CONCURRENCY = 2;
 const EARLY_ORDINARY_PROOF_PAIR_ID = "web-react-package-digest";
@@ -370,7 +370,7 @@ function deriveExecutionRegions(inventory) {
   ) {
     fail(
       "REQUIRED_EXHAUSTIVE_REGION_INVALID",
-      "The derived execution regions do not own all 216 workloads exactly once.",
+      "The derived execution regions do not own all 218 workloads exactly once.",
     );
   }
 
@@ -397,7 +397,7 @@ function rememberValidatedNode(workload) {
 }
 
 /**
- * Builds the single code-owned exhaustive plan from the authenticated 216-node dependency graph.
+ * Builds the single code-owned exhaustive plan from the authenticated 218-node dependency graph.
  *
  * `REQUIRED` is the default authority. `SHADOW` must be explicitly requested, while scope is
  * permanently fixed to `EXHAUSTIVE`.
@@ -492,7 +492,7 @@ function validatePlanForExecution(candidate, expectedAuthority) {
       );
     }
   }
-  if (candidate.concurrency !== PROOF_PAIR_CONCURRENCY || candidate.stepCount !== 216) {
+  if (candidate.concurrency !== PROOF_PAIR_CONCURRENCY || candidate.stepCount !== 218) {
     fail(
       "REQUIRED_EXHAUSTIVE_PLAN_DRIFT",
       "The exhaustive plan widened concurrency or omitted workloads.",
@@ -1545,10 +1545,10 @@ async function runProofPairRegion(
     }
   }
   flushOrdinarySegment();
-  if (barrierCount !== 11 || plan.proofPairs.length - barrierCount !== 92) {
+  if (barrierCount !== 11 || plan.proofPairs.length - barrierCount !== 93) {
     fail(
       "REQUIRED_EXHAUSTIVE_CLASS_DRIFT",
-      "The shared-state authority must classify exactly 92 ordinary pairs and 11 barrier pairs.",
+      "The shared-state authority must classify exactly 93 ordinary pairs and 11 barrier pairs.",
       { barrierCount, proofPairCount: plan.proofPairs.length },
     );
   }
@@ -1673,8 +1673,8 @@ function createExecutionReceipt(plan, receiptById, forcedFailure = false) {
   ).length;
   const status =
     !forcedFailure &&
-    steps.length === 216 &&
-    observedClosedCount === 216 &&
+    steps.length === 218 &&
+    observedClosedCount === 218 &&
     steps.every(({ status: stepStatus }) => stepStatus === "PASS")
       ? "PASS"
       : "FAIL";
@@ -1717,7 +1717,7 @@ function attachExecutionReceipt(error, receipt) {
  * Executes one authenticated plan: dependency-derived prefix, at most two proof pairs, then suffix.
  *
  * Every supplied runner result must contain an exact successful `close` observation. The returned
- * receipt remains in the stable 216-node inventory order even though proof pairs may overlap.
+ * receipt remains in the stable 218-node inventory order even though proof pairs may overlap.
  */
 export async function runRequiredExhaustivePlan(
   plan,
@@ -1908,11 +1908,11 @@ export async function runRequiredExhaustivePlan(
     throw attachExecutionReceipt(failure, createExecutionReceipt(validatedPlan, receiptById, true));
   }
   const receipt = createExecutionReceipt(validatedPlan, receiptById);
-  if (receipt.status !== "PASS" || completedIds.size !== 216) {
+  if (receipt.status !== "PASS" || completedIds.size !== 218) {
     throw attachExecutionReceipt(
       new RequiredExhaustiveQualityGateError(
         "REQUIRED_EXHAUSTIVE_RECEIPT_INCOMPLETE",
-        "The exhaustive gate did not observe all 216 workloads close successfully.",
+        "The exhaustive gate did not observe all 218 workloads close successfully.",
         { completed: completedIds.size, observedClosed: receipt.observedClosedCount },
       ),
       receipt,
@@ -2128,8 +2128,8 @@ function printableReceipt(boundaryReceipt, error) {
     inventorySha256: execution?.inventorySha256,
     concurrency: execution?.concurrency,
     observedClosedCount: execution?.observedClosedCount ?? 0,
-    stepCount: execution?.stepCount ?? 216,
-    proofPairCount: execution?.proofPairCount ?? 103,
+    stepCount: execution?.stepCount ?? 218,
+    proofPairCount: execution?.proofPairCount ?? 104,
     repository: repository
       ? {
           proofCount: repository.proofCount,

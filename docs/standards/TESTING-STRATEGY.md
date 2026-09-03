@@ -1,5 +1,24 @@
 # Testing Strategy
 
+## Historical archive privacy amendments
+
+AR-01 is an operational privacy amendment, not a new product claim. Its dedicated verifier and
+nine root cases authenticate four current redacted transports, recursively inspect their nested
+copies, verify technical-authority digests and safe generator receipts, and preserve all 57 prior
+frozen JSON artifacts plus checkpoint entries 1–70. Positive checks retain the historical App
+readers' full technical projections; negatives cover transport and technical drift, mutable or
+hostile inputs, same-size file changes, acquisition races, unsafe paths, artifact identity, and
+atomic writes. Public artifacts contain receipts only, never decoded private prose.
+
+Current readers accept only the redacted transports and expose actual current receipts separately
+from historical hashes. A historical pin or seal never supplies cached PASS. The new proof/root
+pair's semantic impact closure selects the affected App proof chain without imposing serial
+cross-pair execution; every selected workload still runs fresh and must pass. The exhaustive graph
+contains 218 workloads / 104 proof pairs, retaining two workers, eleven barriers, and the existing
+deadline. The unchanged
+CI-02 bounded baseline and fresh exact-head hosted closure remain required. Git history and old
+downloads are not erased. See [AR-01 evidence](../proof/HISTORICAL-ARCHIVE-REDACTION.md).
+
 ## Test layers
 
 1. **Protocol vectors:** Frozen official valid/invalid fixtures and exact diagnostic expectations.

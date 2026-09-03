@@ -5,6 +5,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 
+import { redactHistoricalArchiveForPublication } from "./lib/historical-archive-redaction.mjs";
+
 const EXPECTED_BASE_COMMIT = "a1d26905aec6ee3d4bcb73ca17b02187e7b57420";
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = await realpath(path.resolve(SCRIPT_DIRECTORY, ".."));
@@ -144,4 +146,8 @@ const payload = {
   },
 };
 const bytes = Buffer.from(`${JSON.stringify(payload)}\n`);
-await writeFile(outputPath, gzipSync(bytes, { level: 9, mtime: 0 }), { flag: "wx" });
+const sanitizedBytes = redactHistoricalArchiveForPublication(
+  "docs/proof/artifacts/desen-app-0.1.0-t03-historical-reader-bridge.json.gz",
+  gzipSync(bytes, { level: 9, mtime: 0 }),
+);
+await writeFile(outputPath, sanitizedBytes, { flag: "wx" });

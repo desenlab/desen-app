@@ -16,7 +16,7 @@ import {
 
 const WORKSPACE_ROOT = resolve(import.meta.dirname, "../../..");
 const COMPATIBILITY_PROJECTION_SHA256 =
-  "d776a2dae959f391cbae65b761cc967278218a4ddd2666d60f810deda544c479";
+  "9a5c5eebe13111c9be6ce3cd093b3bc8b475ab33d68e7121f9d55e90f005f067";
 
 function cloneInventory() {
   return structuredClone(createExhaustiveWorkloadInventory());
@@ -84,19 +84,19 @@ async function currentRepositoryInputs() {
   };
 }
 
-test("the neutral inventory preserves the exact 216-workload successor projection", () => {
+test("the neutral inventory preserves the exact 218-workload successor projection", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const projection = inventory.nodes.map(({ id, command, args }) => ({ id, command, args }));
   const projectionSha256 = createHash("sha256").update(JSON.stringify(projection)).digest("hex");
 
   assert.equal(inventory.schemaVersion, 1);
   assert.equal(inventory.profile, "desen.ci.exhaustive-workload-inventory.v1");
-  assert.equal(inventory.workloadCount, 216);
-  assert.equal(inventory.proofUnitCount, 103);
+  assert.equal(inventory.workloadCount, 218);
+  assert.equal(inventory.proofUnitCount, 104);
   assert.equal(inventory.inventorySha256, EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256);
   assert.equal(
     EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    "d6d00fb7ec87e41c75ada3ce3d65cb0d3cf9286936c437fa836bbec9eed372cc",
+    "63120e32108bb5bcaab93dc79ea5c0e8d2eb0c4dad7e26c786e08a9daf2880a5",
   );
   assert.equal(projectionSha256, COMPATIBILITY_PROJECTION_SHA256);
   assert.deepEqual(
@@ -113,26 +113,31 @@ test("the neutral inventory preserves the exact 216-workload successor projectio
     ],
   );
   assert.equal(
-    inventory.nodes.slice(8, 111).every(({ id }) => id.startsWith("verify-")),
+    inventory.nodes.slice(8, 112).every(({ id }) => id.startsWith("verify-")),
     true,
   );
   assert.equal(
-    inventory.nodes.slice(111, 214).every(({ id }) => id.startsWith("test-")),
+    inventory.nodes.slice(112, 216).every(({ id }) => id.startsWith("test-")),
     true,
   );
   assert.deepEqual(
     inventory.nodes.slice(-2).map(({ id }) => id),
     ["dependency-boundaries", "boundary-fixtures"],
   );
-  assert.deepEqual(inventory.proofUnits.at(-2), {
+  assert.deepEqual(inventory.proofUnits.at(-3), {
     id: "desen-app-failure-fixture",
     verifierNodeId: "verify-desen-app-failure-fixture",
     rootTestNodeId: "test-desen-app-failure-fixture",
   });
-  assert.deepEqual(inventory.proofUnits.at(-1), {
+  assert.deepEqual(inventory.proofUnits.at(-2), {
     id: "desen-app-success-host-operation",
     verifierNodeId: "verify-desen-app-success-host-operation",
     rootTestNodeId: "test-desen-app-success-host-operation",
+  });
+  assert.deepEqual(inventory.proofUnits.at(-1), {
+    id: "historical-archive-redaction",
+    verifierNodeId: "verify-historical-archive-redaction",
+    rootTestNodeId: "test-historical-archive-redaction",
   });
   assert.equal(validateExhaustiveWorkloadInventory(inventory), inventory);
 });
@@ -142,13 +147,13 @@ test("repository manifests and discovered proof files retain the reviewed parity
   const receipt = validateRepositoryWorkloadInputs(inputs);
 
   assert.deepEqual(receipt, {
-    proofCount: 103,
-    verifierCount: 103,
-    rootTestCount: 103,
+    proofCount: 104,
+    verifierCount: 104,
+    rootTestCount: 104,
     ciContractScriptCount: 5,
     ciContractScriptSha256: EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
     legacyPrerequisiteCount: 735,
-    legacyPrerequisiteSha256: "0328ce5a799c73eda1bcd4b5086b80288f20cca637d37c3ab5b12300cce2573d",
+    legacyPrerequisiteSha256: "862850c9691646bfff56ff8ce133f96fdd4f12b2f698173f0fde2435eae044a7",
     legacyLeafInvocationCount: 4537,
     legacyLeafInvocationSha256: "e449a5203f03caa6df67289a3c97d1a2111556bf259f904ee6e79932820fcbf1",
     distinctLeafWorkloadCount: 327,
@@ -362,7 +367,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
       ports: "NONE",
     },
   });
-  assert.equal(boundaries.dependencies.length, 103);
+  assert.equal(boundaries.dependencies.length, 104);
 
   for (const unit of inventory.proofUnits) {
     const verifier = nodeById.get(unit.verifierNodeId);

@@ -229,12 +229,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
       "desen-app-success-host-operation",
       ["desen-app-failure-fixture", "reference-sign-in-fixtures-and-host-binding"],
     ],
+    ["historical-archive-redaction", ["desen-app-success-host-operation"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "ae57b2b84f3ba3077ecf589b1444d413213b8e54f9f4058368e8a11cc706c28b";
+  "73288fdc387a28bf954b30590aaa565dd023c3c1da7c13c24771c85750bcae3d";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {
