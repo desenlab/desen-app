@@ -8,15 +8,23 @@ import {
   DESEN_APP_LOCAL_DEV_ORIGIN,
   DESEN_APP_LOCAL_RUNTIME_DEFINE_NAME,
   DESEN_APP_LOCAL_RUNTIME_PROFILE,
+  DESEN_APP_LOCAL_OPERATION_DEFINE_NAME,
+  DESEN_APP_LOCAL_OPERATION_PROFILE,
   DESEN_APP_LOCAL_VITE_FS_DENY,
   DesenAppLocalDevHostError,
   createDesenAppLocalApiToken,
+  createDesenAppLocalOperationDefine,
   createDesenAppLocalRuntimeDefine,
   prepareDesenAppLocalStateRoot,
   startDesenAppLocalDev,
 } from "./local-dev-host.mjs";
 
 const roots = [];
+
+function deterministicIndependentEntropy(seed) {
+  let next = seed;
+  return () => new Uint8Array(32).fill(next++);
+}
 
 async function temporaryAppDirectory() {
   const root = await mkdtemp(join(tmpdir(), "desen-app-local-dev-"));
@@ -75,12 +83,23 @@ describe("Desen App local development host", () => {
       controlPlane: { origin: "http://127.0.0.1:43127", apiToken: token },
     });
     expect(Object.keys(define)).toEqual([DESEN_APP_LOCAL_RUNTIME_DEFINE_NAME]);
+    expect(
+      JSON.parse(
+        createDesenAppLocalOperationDefine("http://127.0.0.1:43128", token)[
+          DESEN_APP_LOCAL_OPERATION_DEFINE_NAME
+        ],
+      ),
+    ).toEqual({
+      profile: DESEN_APP_LOCAL_OPERATION_PROFILE,
+      origin: "http://127.0.0.1:43128",
+      apiToken: token,
+    });
     expect(() => createDesenAppLocalRuntimeDefine("https://127.0.0.1:43127", token)).toThrowError(
       new DesenAppLocalDevHostError("INVALID_RUNTIME_CONFIG"),
     );
   });
 
-  it("starts control-plane before fixed-port Vite and revokes both exactly once", async () => {
+  it("starts independently authorized services before fixed-port Vite and revokes all exactly once", async () => {
     const appDirectory = await temporaryAppDirectory();
     const stateDirectory = await stateDirectoryFor(appDirectory);
     const controlPlane = {
@@ -96,6 +115,19 @@ describe("Desen App local development host", () => {
       controlPlaneOptions = options;
       return controlPlane;
     });
+    const operationHost = {
+      listen: vi.fn(async () => ({
+        address: "127.0.0.1",
+        port: 43128,
+        origin: "http://127.0.0.1:43128",
+      })),
+      close: vi.fn(async () => undefined),
+    };
+    let operationOptions;
+    const openOperationHost = vi.fn(async (options) => {
+      operationOptions = options;
+      return operationHost;
+    });
     const viteServer = {
       listen: vi.fn(async () => undefined),
       close: vi.fn(async () => undefined),
@@ -110,8 +142,9 @@ describe("Desen App local development host", () => {
       appDirectory,
       stateDirectory,
       openControlPlane,
+      openOperationHost,
       createViteServer,
-      entropy: () => new Uint8Array(32).fill(7),
+      entropy: deterministicIndependentEntropy(7),
     });
 
     expect(controlPlaneOptions.rootDirectory).toBe(
@@ -139,6 +172,17 @@ describe("Desen App local development host", () => {
     expect(viteConfig.plugins.map(({ name }) => name)).toContain("desen-app-local-state-deny");
     const injectedConfig = JSON.parse(viteConfig.define[DESEN_APP_LOCAL_RUNTIME_DEFINE_NAME]);
     expect(injectedConfig.controlPlane.apiToken).toBe(controlPlaneOptions.apiToken);
+    const injectedOperationConfig = JSON.parse(
+      viteConfig.define[DESEN_APP_LOCAL_OPERATION_DEFINE_NAME],
+    );
+    expect(injectedOperationConfig).toEqual({
+      profile: DESEN_APP_LOCAL_OPERATION_PROFILE,
+      origin: "http://127.0.0.1:43128",
+      apiToken: operationOptions.apiToken,
+    });
+    expect(operationOptions.allowedOrigin).toBe(DESEN_APP_LOCAL_DEV_ORIGIN);
+    expect(operationOptions.apiToken).not.toBe(controlPlaneOptions.apiToken);
+    expect(operationHost.listen).toHaveBeenCalledExactlyOnceWith(0);
     expect(viteServer.listen).toHaveBeenCalledTimes(1);
 
     await host.close();
@@ -146,6 +190,7 @@ describe("Desen App local development host", () => {
 
     expect(viteServer.close).toHaveBeenCalledTimes(1);
     expect(controlPlane.close).toHaveBeenCalledTimes(1);
+    expect(operationHost.close).toHaveBeenCalledTimes(1);
   });
 
   it("closes an opened control plane when Vite startup fails", async () => {
@@ -165,18 +210,28 @@ describe("Desen App local development host", () => {
       }),
       close: vi.fn(async () => undefined),
     };
+    const operationHost = {
+      listen: vi.fn(async () => ({
+        address: "127.0.0.1",
+        port: 43128,
+        origin: "http://127.0.0.1:43128",
+      })),
+      close: vi.fn(async () => undefined),
+    };
 
     await expect(
       startDesenAppLocalDev({
         appDirectory,
         stateDirectory,
         openControlPlane: async () => controlPlane,
+        openOperationHost: async () => operationHost,
         createViteServer: async () => viteServer,
-        entropy: () => new Uint8Array(32).fill(9),
+        entropy: deterministicIndependentEntropy(9),
       }),
     ).rejects.toEqual(new DesenAppLocalDevHostError("LOCAL_START_FAILED"));
     expect(viteServer.close).toHaveBeenCalledTimes(1);
     expect(controlPlane.close).toHaveBeenCalledTimes(1);
+    expect(operationHost.close).toHaveBeenCalledTimes(1);
   });
 
   it("returns an exact denial instead of serving local state or the SPA fallback", async () => {
@@ -203,7 +258,7 @@ describe("Desen App local development host", () => {
         controlPlaneRoot = options.rootDirectory;
         return controlPlane;
       },
-      entropy: () => new Uint8Array(32).fill(11),
+      entropy: deterministicIndependentEntropy(11),
     });
 
     try {
@@ -230,5 +285,56 @@ describe("Desen App local development host", () => {
     } finally {
       await host.close();
     }
+  });
+
+  it("does not admit a reused persistence bearer as local operation authority", async () => {
+    const appDirectory = await temporaryAppDirectory();
+    const stateDirectory = await stateDirectoryFor(appDirectory);
+    const openControlPlane = vi.fn();
+    const openOperationHost = vi.fn();
+    await expect(
+      startDesenAppLocalDev({
+        appDirectory,
+        stateDirectory,
+        openControlPlane,
+        openOperationHost,
+        entropy: () => new Uint8Array(32).fill(12),
+      }),
+    ).rejects.toEqual(new DesenAppLocalDevHostError("INVALID_RUNTIME_CONFIG"));
+    expect(openControlPlane).not.toHaveBeenCalled();
+    expect(openOperationHost).not.toHaveBeenCalled();
+  });
+
+  it("revokes Source authority when the separately authorized operation listener cannot start", async () => {
+    const appDirectory = await temporaryAppDirectory();
+    const stateDirectory = await stateDirectoryFor(appDirectory);
+    const controlPlane = {
+      listen: vi.fn(async () => ({
+        address: "127.0.0.1",
+        port: 43127,
+        origin: "http://127.0.0.1:43127",
+      })),
+      close: vi.fn(async () => undefined),
+    };
+    const operationHost = {
+      listen: vi.fn(async () => {
+        throw new Error("private-operation-listener-detail");
+      }),
+      close: vi.fn(async () => undefined),
+    };
+    const createViteServer = vi.fn();
+    await expect(
+      startDesenAppLocalDev({
+        appDirectory,
+        stateDirectory,
+        openControlPlane: async () => controlPlane,
+        openOperationHost: async () => operationHost,
+        createViteServer,
+        entropy: deterministicIndependentEntropy(13),
+      }),
+    ).rejects.toEqual(new DesenAppLocalDevHostError("LOCAL_START_FAILED"));
+    expect(controlPlane.close).toHaveBeenCalledTimes(1);
+    expect(operationHost.close).toHaveBeenCalledTimes(1);
+    expect(createViteServer).not.toHaveBeenCalled();
   });
 });

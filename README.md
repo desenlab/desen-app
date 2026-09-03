@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████████░░░░░░` **114 / 148 tasks complete (77%)**
+**Overall:** `████████████████████░░░░░` **116 / 148 tasks complete (78%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -26,9 +26,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `██████░░░░░░` **6 / 12 tasks complete (50%)**
+**M10:** `███████░░░░░` **7 / 12 tasks complete (58%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T03:** `DONE` · **Next:** `M10-T04`
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **CI-02:** conditional `DONE` on this exact PR head's hosted `Quality gate`; canonical status remains `IN_PROGRESS` while it is pending (prior implementation-head receipt recorded) · **G09:** `DONE` · **M10-T04:** `DONE` (exact-head hosted closure required) · **Next:** `M10-T05`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -1306,6 +1306,30 @@ M10-T03 is `DONE`; implementation progress is 115/148 (78%) and M10 is 6/12 (50%
 remain `PARTIAL`; success, navigation, and a separately authorized real host operation remain
 M10-T04. Integration, Production, N-036, and G10 remain open, and local receipts do not imply a
 hosted exact-head `Quality gate` pass. M10-T04 is next.
+
+**M10-T04 checkpoint:** the ordinary product now offers an additive blank Flow app workspace with
+Start and Result surfaces, leaving existing Account app Sources untouched. A designer authors both
+pages and a Success → Navigate action through visible controls. Synthetic success mounts the
+authored target without a host request. Explicit Integration uses a separately authenticated local
+HTTP service: a real 401 preserves the origin and its authored Alert; a real 200 mounts the target
+through the same Publisher and Runtime adapters. Saved Source bytes, generation and editor URL
+stay unchanged during Run. Restart run and Design restore the authoring origin.
+
+The host binding is opaque and exact-profile-bound; documents never choose an endpoint, credential,
+handler or executable module. The local account service is a test binding, **not production
+authentication**. Generic non-authentication and fixture-free operations, cancellation, replay,
+invalid output and stale authority have focused negative coverage. Production remains disabled.
+
+The complete App suite passes 611/611, all five Chromium journeys pass, and the focused T04 slice
+passes 177/177 (App 141, Runtime 36). The independent task reader passes 10/10 over the 22,456-byte,
+51-receipt artifact at
+`sha256:d9d841af06ec9efc51c3f1c74079f0aa4d5e1c7e996f3b97df7e277e4b1f8423`.
+[The success/host proof](docs/proof/DESEN-APP-SUCCESS-HOST-OPERATION.md) records the exact evidence;
+[ADR 0017](docs/adr/0017-desen-app-explicit-integration-and-run-navigation.md) records the authority
+and navigation decisions. P-09 and P-10 advance to `PROVEN`; P-07, N-036 and G10 retain their later
+owners. M10-T05, publication and activation without host source edits, is next and remains
+`NOT_STARTED`. The `DONE` entry is a closure candidate until this exact PR head's hosted
+`Quality gate` passes; local evidence alone never authorizes merge.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

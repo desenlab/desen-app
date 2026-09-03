@@ -2072,7 +2072,7 @@ and move to M10-T01.
 | M10-T01C | DONE        | M10-T01B                  | Evergreen product composition through an authenticated workspace profile      |
 | M10-T02  | DONE        | M10-T01C                  | Input and pending fixture test                                                |
 | M10-T03  | DONE        | M10-T02                   | Failure fixture and visible failure-state test                                |
-| M10-T04  | NOT_STARTED | M10-T02                   | Success fixture, navigation, and real host-operation binding test             |
+| M10-T04  | DONE        | M10-T02                   | Success fixture, navigation, and real host-operation binding test             |
 | M10-T05  | NOT_STARTED | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
 | M10-T06  | NOT_STARTED | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
 | M10-T07  | NOT_STARTED | M10-T05, G07              | Corrupt revision and catalog mismatch preserve last-known-good                |
@@ -2367,6 +2367,44 @@ a separately authorized real host operation remain M10-T04. Integration, Product
 G10 remain open. Overall progress advances to 115/148 (78%), M10 advances to 6/12 (50%), and
 M10-T04 is next. Local receipts alone make no hosted exact-head `Quality gate` claim.
 
+M10-T04 has passed its local evidence. Its `DONE` entry is a closure candidate until this exact
+current PR head passes hosted `Quality gate`; local receipts alone never authorize merge or a
+completion report. The additive Flow app workspace starts from two blank surfaces and independent
+storage, leaving existing Account app Sources intact. Through ordinary visible controls, a designer
+authors both pages, controlled inputs, a non-default operation alias, a conditional Alert and a
+Success → Navigate action without JSON.
+
+The dedicated Chromium journey first proves Catalog success and managed navigation with zero host
+requests. Explicit Integration restarts transient input and uses a separately authenticated real
+loopback operation service. A real 401 leaves the origin mounted with its authored error; a real
+200 returns `local-host-user`, distinct from the Catalog fixture, and mounts the authored target
+through the same Publisher and Runtime adapters. Saved Source bytes, generation, entry and editor
+URL stay unchanged. Restart run restores the origin; Design revokes Integration and reload restores
+the saved empty input state. The local service is a test binding, not production authentication.
+
+The controller admits only host-created exact-workspace bindings and exact preview context,
+authored alias, Catalog capability and effect. Activation epochs, replay bounds, cancellation,
+schema validation and transient-only navigation prevent stale calls or invalid responses from
+gaining authority. Generic non-authentication and fixture-free operations have explicit tests;
+documents never select endpoints, credentials, handlers or executable modules.
+
+The complete App suite passes 611/611, all five Chromium journeys pass, the focused T04 slice passes
+177/177 (App 141, Runtime 36), and the independent root reader passes 10/10. The deterministic
+22,456-byte / 51-receipt artifact is
+`docs/proof/artifacts/desen-app-0.1.0-success-host-operation.json` at
+`sha256:d9d841af06ec9efc51c3f1c74079f0aa4d5e1c7e996f3b97df7e277e4b1f8423`. It records 125
+declaration sites separately from actual test execution. The bounded 2,769,997-byte T03 historical
+bridge at `sha256:64f76eaeac8369a9f7ae00086dac914adc3c84979d53c770d2ebe0082576005f`
+reconstructs 34 exact T03 task-time files plus eight authenticated historical-reader gaps from
+`a1d26905aec6ee3d4bcb73ca17b02187e7b57420` while preserving frozen predecessor bytes. A positive
+no-op override control and path-specific negative controls prevent an unrelated live-file mismatch
+from masquerading as the intended historical mutation rejection.
+
+P-09 and P-10 advance to `PROVEN`. Overall progress advances to 116/148 (78%) and M10 to 7/12
+(58%); M10-T05 remains `NOT_STARTED` and next. Production identity, remote or multi-user execution,
+T05 publish/activation without host edits, T07 recovery, P-12, N-036 and G10 remain open. ADR 0017
+and `docs/proof/DESEN-APP-SUCCESS-HOST-OPERATION.md` record the decision and exact proof.
+
 ### M10-T01 public build-log drafts
 
 **X (EN, 280 characters)**
@@ -2615,6 +2653,34 @@ Drafts only. Do not publish automatically.
 > inceleyin: sırada hangi failure-state invariant'ını test etmeliyiz?
 >
 > #DesignTools #NoCode #WebDevelopment #OpenSource
+
+### M10-T04 public build-log drafts
+
+Drafts only. Do not publish automatically.
+
+**X (EN, ≤280 characters)**
+
+> Design a flow, not a mockup: Desen App now proves visual Success → Navigate in Chromium, using both an inert fixture and a real local HTTP operation. Saved designs stay unchanged. Production auth is not claimed. Inspect: github.com/desenlab/desen-app
+
+**LinkedIn**
+
+> [EN]
+>
+> From a blank project, a designer can now author two pages and connect Success → Navigate without
+> JSON. Chromium verifies synthetic success with zero host calls and explicit Integration with real
+> local HTTP failure/success. Saved designs stay unchanged. This is a local test binding, not
+> production authentication; publishing/activation is next. What would you build with it? Inspect
+> the public repository: https://github.com/desenlab/desen-app
+>
+> [TR]
+>
+> Tasarımcı artık boş bir projeden iki sayfa tasarlayıp JSON yazmadan başarı sonrası sayfa geçişi
+> kurabiliyor. Chromium hem hiç host çağrısı yapmayan sentetik başarıyı hem açıkça seçilen gerçek
+> yerel HTTP bağlantısının hata/başarı akışını doğruluyor. Kayıtlı tasarım değişmiyor. Bu yerel test
+> bağlantısı; production kimlik doğrulaması değil. Sırada yayınlama/aktivasyon var. Siz ne
+> tasarlardınız? Açık repoyu inceleyin: https://github.com/desenlab/desen-app
+>
+> #DesignTools #NoCode #OpenSource
 
 ## M11 — Capability extensibility proof
 

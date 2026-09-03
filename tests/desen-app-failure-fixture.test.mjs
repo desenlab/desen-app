@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
-import { mkdtemp, readFile, realpath, rm } from "node:fs/promises";
+import { mkdtemp, readFile as readLiveFile, realpath, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -19,8 +19,13 @@ import {
   verifyDesenAppFailureFixtureSourcePolicy,
   writeDesenAppFailureFixtureEvidence,
 } from "../scripts/lib/desen-app-failure-fixture-proof.mjs";
+import { createDesenAppT03HistoricalReaderReadFile } from "./desen-app-t03-historical-reader-fixture.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const readFile = createDesenAppT03HistoricalReaderReadFile({
+  workspaceRoot: ROOT,
+  liveReadFile: readLiveFile,
+});
 const READER_PATH = "scripts/lib/desen-app-failure-fixture-proof.mjs";
 const SOURCE_PATHS = Object.freeze({
   application: "apps/desen-app/src/application.tsx",

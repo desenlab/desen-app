@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-09-01
+Last updated: 2026-09-03
 
 ## Plain-language status
 
@@ -1563,17 +1563,19 @@ Production, N-036, and G10 remain open, and local evidence makes no hosted exact
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Current implementation task: none; `M10-T03 — Failure fixture and visible failure-state test` is
-  complete
-- Next implementation task: `M10-T04` — Success fixture, navigation, and real host-operation
-  binding test
+- Current implementation task: `M10-T04 — Success fixture, navigation, and real host-operation
+binding test` has passed its local evidence; its `DONE` entry is a closure candidate until the
+  exact current PR head passes hosted `Quality gate`. Merge and a completion report remain blocked
+  until that result. Once it passes, no implementation task remains active.
+- Next implementation task: `M10-T05` — Label/layout change published and activated without host
+  source change
 - Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  14/14, M10 is 6/12, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
-  M10-T01B, M10-T01C, M10-T02, and M10-T03 are
+  14/14, M10 is 7/12, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
+  M10-T01B, M10-T01C, M10-T02, M10-T03, and M10-T04 are
   `DONE`; `N-012`, `N-018`, `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`; P-06, P-08,
-  and P-16 are `PROVEN`; P-07, P-09, and P-10 are `PARTIAL`; proof gates are 11/13; P-12 remains
+  P-09, P-10, and P-16 are `PROVEN`; P-07 is `PARTIAL`; proof gates are 11/13; P-12 remains
   `NOT_PROVEN`; N-036 remains `PLANNED`; PF-028 is `CLOSED`; PF-025, PF-083, PF-085, PF-086, and
-  PF-089 and PF-091 remain `OPEN`; M10-T04 is `NOT_STARTED`; and implementation progress is 115/148.
+  PF-089 and PF-091 remain `OPEN`; M10-T05 is `NOT_STARTED`; and implementation progress is 116/148.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -4884,6 +4886,46 @@ M09-T14/G09 evidence:
 - explicit nonclaims: success, navigation, and a separately authorized real host operation remain
   M10-T04; P-09/P-10 remain `PARTIAL`, Integration, Production, N-036, and G10 remain open; local
   receipts alone make no hosted exact-head claim
+
+### M10-T04 success, managed navigation, and real host operation evidence
+
+- the normal product installs a finite authenticated workspace chooser; the additive Flow app
+  owns independent blank Start/Result surfaces and storage, with no migration or overwrite of
+  existing Account app designs
+- visible controls author both pages, controlled inputs, a non-default result alias, a conditional
+  Alert and Success → Navigate; no injected Source, raw JSON, or intercepted response is required
+- Synthetic stays the default and mounts the target with zero host requests; explicit Integration
+  calls a separate real loopback HTTP service through the public reference host-operation seam
+- a real 401 displays the authored failure and keeps the origin; a real 200 returns
+  `local-host-user` (distinct from the Catalog fixture) and mounts the authored target through the
+  same Publisher, Runtime Core, Runtime React and registered adapters
+- exact-profile, exact-preview, alias/capability/effect, activation-epoch and replay checks fence
+  host calls; cancellation and stale settlement cannot navigate or persist transient values;
+  generic non-authentication and fixture-free bindings have focused tests
+- navigation changes only a transient selected-entry preview; saved Source bytes, generation,
+  authored entry, publication candidate and editor URL remain unchanged; Restart run restores the
+  origin, Design revokes Integration, and reload restores empty input state
+- local verification: complete App suite 611/611; all five Chromium journeys pass; focused T04
+  execution 177/177 (App 141, Runtime 36); independent root reader 10/10 and verifier pass. The
+  evidence separately records 125 declaration sites, not an inflated executed-test count.
+- architecture verification: the real dependency graph passes across 854 modules / 3,644 edges;
+  all 26 boundary fixtures pass. Only the exact product proof server may import the shared local
+  operation listener; neighboring App dev modules and other proof importers remain forbidden.
+- immutable evidence: 22,456 bytes / 51 exact receipts at
+  `docs/proof/artifacts/desen-app-0.1.0-success-host-operation.json`,
+  `sha256:d9d841af06ec9efc51c3f1c74079f0aa4d5e1c7e996f3b97df7e277e4b1f8423`
+- the separately bounded 2,769,997-byte T03 historical-reader bridge reconstructs 34 exact T03 files
+  plus eight authenticated historical-reader gaps from `a1d26905aec6ee3d4bcb73ca17b02187e7b57420`
+  without changing predecessor artifacts; positive no-op and path-specific negative controls
+  verify that historical mutations fail for their intended reason;
+  `sha256:64f76eaeac8369a9f7ae00086dac914adc3c84979d53c770d2ebe0082576005f`
+- coverage decision: P-09/P-10 advance to `PROVEN`; progress is 116/148 (78%), M10 is 7/12 (58%);
+  M10-T05 remains `NOT_STARTED` and next. The task's `DONE` entry is conditional on this exact
+  current PR head's hosted `Quality gate`; no local receipt authorizes merge.
+- explicit nonclaims: the service is a local test account, not production identity or remote
+  deployment. P-07/T05 publish-and-activate, T07 last-known-good recovery, P-12, N-036 and G10 remain
+  open; frozen protocol and Runtime Core source are unchanged. See ADR 0017 and
+  `docs/proof/DESEN-APP-SUCCESS-HOST-OPERATION.md`.
 
 ## Status vocabulary
 

@@ -76,6 +76,7 @@ const neutralProductionSourcePath =
 const desenAppBrowserProductProofServerPath =
   "^apps/desen-app-browser-e2e/product-proof-server\\.mjs$";
 const controlPlanePublicBuildEntryPath = "^apps/control-plane-api/dist/index\\.(?:d\\.ts|js)$";
+const desenAppLocalOperationHostPath = "^apps/desen-app/dev/local-operation-host\\.mjs$";
 
 /**
  * Builds a regular expression for package folders. The current package is included because
@@ -183,10 +184,11 @@ module.exports = {
       name: "desen-app-browser-e2e-product-server-has-no-other-application-dependencies",
       severity: "error",
       comment:
-        "The normal-product proof server has one reviewed application edge and cannot acquire Desen App or another application composition root.",
+        "Only the normal-product proof server may reuse the exact local operation listener alongside the public control-plane entry; other App source, dev modules and application roots remain forbidden.",
       from: { path: desenAppBrowserProductProofServerPath },
       to: {
         path: "^apps/(?!desen-app-browser-e2e/|control-plane-api/)",
+        pathNot: desenAppLocalOperationHostPath,
       },
     },
     {

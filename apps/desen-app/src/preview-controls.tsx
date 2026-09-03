@@ -12,6 +12,10 @@ import type {
   AuthoringScenarioValue,
 } from "./authoring-scenarios.js";
 import type { PreviewFidelityProjection } from "./preview-fidelity.js";
+import type {
+  AuthoringIntegrationControllerSnapshot,
+  AuthoringIntegrationDescriptor,
+} from "./authoring-integration.js";
 
 function fidelityLabel(projection: PreviewFidelityProjection): string {
   if (projection.status !== "ready") return "Fidelity unavailable";
@@ -165,10 +169,22 @@ function fixtureStatusText(operation: AuthoringOperationFixtureSnapshot): string
 
 /** Generic Run-only controls for Source-used, Catalog-authenticated operation fixtures. */
 export function RunControls({
+  executionContext = "synthetic",
+  integration = null,
+  integrationSnapshot = null,
+  onContextChange,
+  onRestart,
   onComplete,
   onSelectOutcome,
   snapshot,
+  surfaceName,
 }: Readonly<{
+  readonly executionContext?: "synthetic" | "integration";
+  readonly integration?: AuthoringIntegrationDescriptor | null;
+  readonly integrationSnapshot?: AuthoringIntegrationControllerSnapshot | null;
+  readonly onContextChange?: (context: "synthetic" | "integration") => void;
+  readonly onRestart?: () => void;
+  readonly surfaceName?: string;
   readonly onComplete: (alias: string) => void;
   readonly onSelectOutcome: (alias: string, outcomeId: AuthoringOperationFixtureOutcomeId) => void;
   readonly snapshot: AuthoringOperationFixtureControllerSnapshot;
@@ -186,28 +202,94 @@ export function RunControls({
       <div className={styles.runControlsBody}>
         <fieldset className={styles.fixtureContextGroup}>
           <legend>Execution context</legend>
-          {AUTHORING_FIXTURE_CONTEXT_MODEL.options.map((option) => (
-            <label data-availability={option.availability} key={option.id}>
-              <input
-                checked={option.id === AUTHORING_FIXTURE_CONTEXT_MODEL.activeId}
-                disabled={option.availability === "unavailable"}
-                name="fixture-context"
-                onChange={() => undefined}
-                type="radio"
-                value={option.id}
-              />
-              <span>
-                <strong>{option.label}</strong>
-                <small>
-                  {option.availability === "unavailable" ? "Unavailable · " : "Active · "}
-                  {option.description}
-                </small>
-              </span>
-            </label>
-          ))}
+          {AUTHORING_FIXTURE_CONTEXT_MODEL.options.map((option) => {
+            const available =
+              option.id === "synthetic" ||
+              (option.id === "integration" &&
+                integration !== null &&
+                onContextChange !== undefined);
+            const active = available && option.id === executionContext;
+            return (
+              <label
+                data-availability={available ? (active ? "active" : "available") : "unavailable"}
+                key={option.id}
+              >
+                <input
+                  checked={active}
+                  disabled={!available}
+                  name="fixture-context"
+                  onChange={() => {
+                    if (available && !active) onContextChange?.(option.id);
+                  }}
+                  type="radio"
+                  value={option.id}
+                />
+                <span>
+                  <strong>{option.label}</strong>
+                  <small>
+                    {!available ? "Unavailable · " : active ? "Active · " : "Available · "}
+                    {option.id === "integration" && integration !== null
+                      ? integration.description
+                      : option.description}
+                  </small>
+                </span>
+              </label>
+            );
+          })}
         </fieldset>
+        {integration !== null ? (
+          <p>
+            Changing context restarts the preview. Use test data only; production is not connected.
+          </p>
+        ) : null}
+        {surfaceName !== undefined && onRestart !== undefined ? (
+          <section aria-label="Run navigation" className={styles.runNavigation}>
+            <span>
+              Preview surface · <strong>{surfaceName}</strong>
+            </span>
+            <button className={styles.fixtureCompleteButton} onClick={onRestart} type="button">
+              Restart run
+            </button>
+            <small>Restarts from the design surface. Your authored Source is unchanged.</small>
+          </section>
+        ) : null}
 
-        {snapshot.modelStatus === "rejected" ? (
+        {executionContext === "integration" ? (
+          <section aria-label="Connected host operations" className={styles.integrationOperations}>
+            <h3>{integration?.label ?? "Connection unavailable"}</h3>
+            {integrationSnapshot === null ? (
+              <p role="alert">
+                The exact Source could not be bound to this connection. No host call can run.
+              </p>
+            ) : integrationSnapshot.operations.length === 0 ? (
+              <p>No operations on this surface. Add an Invoke operation action in Design mode.</p>
+            ) : (
+              integrationSnapshot.operations.map((operation) => (
+                <fieldset
+                  aria-label={`Host operation ${operation.alias}`}
+                  className={styles.fixtureOperationGroup}
+                  key={operation.alias}
+                >
+                  <legend>Operation · {operation.alias}</legend>
+                  <small>
+                    {operation.capabilityId} · {operation.effect}
+                  </small>
+                  <p aria-live="polite" role="status">
+                    {!operation.bound
+                      ? "Not connected · this capability has no approved host binding."
+                      : operation.status === "pending"
+                        ? "Waiting for the connected host…"
+                        : operation.status === "responded"
+                          ? "Host response received. Runtime validates the result before continuing."
+                          : operation.status === "denied"
+                            ? "The host call was stopped or denied."
+                            : "Connected · trigger this operation in the preview."}
+                  </p>
+                </fieldset>
+              ))
+            )}
+          </section>
+        ) : snapshot.modelStatus === "rejected" ? (
           <p role="alert">
             Operation fixtures unavailable · the selected Source and Catalog could not be
             authenticated ({snapshot.rejectionReason}).
@@ -279,7 +361,11 @@ export function RunControls({
         )}
       </div>
 
-      <p className={styles.runControlsBoundary}>{AUTHORING_FIXTURE_CONTEXT_MODEL.disclosure}</p>
+      <p className={styles.runControlsBoundary}>
+        {executionContext === "integration"
+          ? "Explicit host connection · no fixture substitution. Production calls and Source writes remain off."
+          : AUTHORING_FIXTURE_CONTEXT_MODEL.disclosure}
+      </p>
     </aside>
   );
 }

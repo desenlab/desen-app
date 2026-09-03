@@ -157,6 +157,44 @@ export const DESEN_APP_FAILURE_FIXTURE_ARTIFACT_PIN = Object.freeze({
 const SUCCESSOR_AUTHORITIES = new WeakMap();
 let cachedHistoricalBridgeAuthority;
 
+async function authenticateSuccessHostOperationSuccessor(workspaceRoot) {
+  let successorModule;
+  try {
+    successorModule = await import("./desen-app-success-host-operation-proof.mjs");
+  } catch (error) {
+    if (error?.code === "ERR_MODULE_NOT_FOUND") {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "Historical T03 compatibility requires the official M10-T04 successor reader.",
+        { cause: String(error) },
+      );
+    }
+    throw error;
+  }
+  const authenticate = successorModule.authenticateDesenAppSuccessHostOperationSuccessor;
+  const materialize = successorModule.materializeDesenAppT03HistoricalReaderFileOverrides;
+  const readTaskTimeFile = successorModule.readDesenAppT03HistoricalReaderTaskTimeFile;
+  if (
+    typeof authenticate !== "function" ||
+    typeof materialize !== "function" ||
+    typeof readTaskTimeFile !== "function"
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The official M10-T04 successor reader does not expose the T03 bridge contract.",
+    );
+  }
+  let successor;
+  try {
+    successor = await authenticate({ workspaceRoot });
+  } catch (error) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The official M10-T04 successor was not authenticated.", {
+      cause: String(error),
+    });
+  }
+  return Object.freeze({ materialize, readTaskTimeFile, successor });
+}
+
 /** Stable fail-closed error raised by the M10-T03 evidence reader. */
 export class DesenAppFailureFixtureProofError extends Error {
   constructor(code, message, details = {}) {
@@ -1149,7 +1187,31 @@ async function canonicalArtifactBytes(artifact) {
 /** Builds detached deterministic M10-T03 evidence from exact current authorities. */
 export async function buildDesenAppFailureFixtureEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
-  const files = await acquireFiles(options);
+  const successHostSuccessor = await authenticateSuccessHostOperationSuccessor(
+    options.workspaceRoot,
+  );
+  const files = await acquireFiles(
+    Object.freeze({
+      ...options,
+      fileOverrides: successHostSuccessor.materialize(
+        successHostSuccessor.successor,
+        options.fileOverrides,
+      ),
+    }),
+  );
+  if (options.fileOverrides.size === 0) {
+    const frozenBytes = await readRegularAuthority(
+      path.join(options.workspaceRoot, ARTIFACT_RELATIVE_PATH),
+      ARTIFACT_RELATIVE_PATH,
+    );
+    assertPinnedArtifact(frozenBytes);
+    const frozenArtifact = parseJson(frozenBytes, ARTIFACT_RELATIVE_PATH, "ARTIFACT_DRIFT");
+    return deepFreeze({
+      artifact: frozenArtifact,
+      artifactBytes: frozenBytes,
+      artifactSha256: sha256(frozenBytes),
+    });
+  }
   const parent = authenticateParent(files.get(PARENT_ARTIFACT_PATH));
   const bridge = authenticateHistoricalReaderBridge(
     files.get(T02_HISTORICAL_READER_BRIDGE_PATH),

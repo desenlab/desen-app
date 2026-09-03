@@ -11,7 +11,6 @@ import {
 
 import { createDesenEditorContinuousValidator } from "@desen/editor-core";
 import { canonicalizeJson, digestCanonicalJson } from "@desen/protocol";
-import { createRuntimeHostPorts } from "@desen/runtime-core";
 
 import { prepareCatalogAuthoringModel, projectAuthoringCanvasFrame } from "./authoring-data.js";
 import { projectAuthoringBehaviorControls } from "./authoring-behavior-projection.js";
@@ -26,6 +25,14 @@ import {
   createAuthoringOperationFixtureController,
   prepareAuthoringOperationFixtureModel,
 } from "./authoring-fixtures.js";
+import {
+  createAuthoringIntegrationController,
+  readAuthoringIntegrationBinding,
+} from "./authoring-integration.js";
+import {
+  createAuthoringRunHostPorts,
+  createAuthoringRunNavigationController,
+} from "./authoring-run-navigation.js";
 import {
   authenticateAuthoringPersistenceControllerProfile,
   createAuthoringPersistenceController,
@@ -119,6 +126,8 @@ import type {
   DesenEditorPersistencePort,
 } from "@desen/editor-core";
 import type { RuntimeHostPorts, RuntimeOperationPort } from "@desen/runtime-core";
+import type { AuthoringIntegrationBindingHandle } from "./authoring-integration.js";
+import type { AuthoringRunDestination } from "./authoring-run-navigation.js";
 import type {
   AuthoringBehaviorLayer,
   AuthoringLayerNode,
@@ -774,28 +783,9 @@ export function createAuthoringFixtureHostPorts(
   _baseHostPorts: RuntimeHostPorts,
   operationPort: RuntimeOperationPort,
 ): RuntimeHostPorts {
-  return createRuntimeHostPorts({
-    navigation: { navigate: () => Object.freeze({ status: "denied" }) },
-    storage: {
-      getBundle: () => Object.freeze({ status: "missing" }),
-      putBundle: () => Object.freeze({ status: "conflict" }),
-      readActivation: () => Object.freeze({ status: "missing" }),
-      commitActivation: () => Object.freeze({ status: "conflict", generation: null }),
-    },
-    operations: operationPort,
-    resources: { load: () => Object.freeze({ status: "denied" }) },
-    tokens: { resolve: () => Object.freeze({ status: "missing" }) },
-    context: {
-      getSnapshot: () => Object.freeze({}),
-      subscribe: () => () => undefined,
-    },
-    environment: {
-      getSnapshot: () => Object.freeze({}),
-      subscribe: () => () => undefined,
-    },
-    clock: { now: () => 1 },
-    diagnostics: { report: () => undefined },
-  } satisfies RuntimeHostPorts);
+  return createAuthoringRunHostPorts(operationPort, {
+    navigate: () => Object.freeze({ status: "denied" }),
+  });
 }
 
 type AuthoringDragIntent =
@@ -2403,6 +2393,7 @@ function AuthoringPanel({
 
 function SurfaceEditor({
   initialDocument,
+  integrationBinding,
   preparedPersistenceController,
   persistencePort,
   publicationPort,
@@ -2412,6 +2403,7 @@ function SurfaceEditor({
   workspaceSnapshot,
 }: Readonly<{
   readonly initialDocument: DesenEditorDocument;
+  readonly integrationBinding: AuthoringIntegrationBindingHandle | null;
   readonly preparedPersistenceController: AuthoringPersistenceController | null | undefined;
   readonly persistencePort: DesenEditorPersistencePort | null;
   readonly publicationPort: AuthoringPublicationPort | null;
@@ -2421,6 +2413,14 @@ function SurfaceEditor({
   readonly workspaceSnapshot: ProjectWorkspaceProfileSnapshot;
 }>) {
   const [mode, setMode] = useState<SurfaceEditorMode>("design");
+  const [executionContext, setExecutionContext] = useState<"synthetic" | "integration">(
+    "synthetic",
+  );
+  const [runDestination, setRunDestination] = useState<AuthoringRunDestination | null>(null);
+  const [runEpoch, setRunEpoch] = useState(0);
+  const previewSurfaceId = runDestination?.surfaceId ?? selectedSurface.sourceId;
+  const previewSurface =
+    project.surfaces.find(({ sourceId }) => sourceId === previewSurfaceId) ?? selectedSurface;
   const [selection, setSelection] = useState<AuthoringComponentSelection | null>(null);
   const [transientDiagnostics, setTransientDiagnostics] =
     useState<TransientAuthoringDiagnostics | null>(null);
@@ -2581,9 +2581,8 @@ function SurfaceEditor({
     [document, workspaceSnapshot.catalogs],
   );
   const canvasFrame = useMemo(
-    () =>
-      projectAuthoringCanvasFrame(document, selectedSurface.sourceId, workspaceSnapshot.catalogs),
-    [document, selectedSurface.sourceId, workspaceSnapshot.catalogs],
+    () => projectAuthoringCanvasFrame(document, previewSurfaceId, workspaceSnapshot.catalogs),
+    [document, previewSurfaceId, workspaceSnapshot.catalogs],
   );
   const canvasFrameOrientation =
     canvasFrame.status !== "ready"
@@ -2729,9 +2728,9 @@ function SurfaceEditor({
         : prepareAuthoringSurfacePreviewBundle(
             effectivePreviewDocument,
             workspaceSnapshot.catalogPackages,
-            selectedSurface.sourceId,
+            previewSurfaceId,
           ),
-    [effectivePreviewDocument, selectedSurface.sourceId, workspaceSnapshot.catalogPackages],
+    [effectivePreviewDocument, previewSurfaceId, workspaceSnapshot.catalogPackages],
   );
   const fidelity = useMemo(
     () =>
@@ -2743,30 +2742,110 @@ function SurfaceEditor({
   const fixtureRevision = surfacePreview?.ok === true ? surfacePreview.revision : "unavailable";
   const fixtureModel = useMemo(
     () =>
-      prepareAuthoringOperationFixtureModel(
-        workspaceSnapshot.catalogs,
-        document,
-        selectedSurface.sourceId,
-      ),
-    [document, selectedSurface.sourceId, workspaceSnapshot.catalogs],
+      prepareAuthoringOperationFixtureModel(workspaceSnapshot.catalogs, document, previewSurfaceId),
+    [document, previewSurfaceId, workspaceSnapshot.catalogs],
   );
   const fixtureController = useMemo(
     () =>
       createAuthoringOperationFixtureController(fixtureModel, {
         documentId: document.id,
         revision: fixtureRevision,
-        surfaceId: selectedSurface.sourceId,
+        surfaceId: previewSurfaceId,
       }),
-    [document.id, fixtureModel, fixtureRevision, selectedSurface.sourceId],
+    [document.id, fixtureModel, fixtureRevision, previewSurfaceId, runEpoch],
   );
-  const fixtureHostPorts = useMemo(
+  const integrationDescriptor = useMemo(
+    () => readAuthoringIntegrationBinding(integrationBinding, workspaceProfile),
+    [integrationBinding, workspaceProfile],
+  );
+  const integrationCreation = useMemo(
     () =>
-      createAuthoringFixtureHostPorts(
-        workspaceSnapshot.runtime.hostPorts,
-        fixtureController.operationPort,
-      ),
-    [fixtureController, workspaceSnapshot.runtime.hostPorts],
+      integrationBinding === null
+        ? null
+        : createAuthoringIntegrationController({
+            binding: integrationBinding,
+            profile: workspaceProfile,
+            document: effectivePreviewDocument ?? document,
+            surfaceId: previewSurfaceId,
+            revision: fixtureRevision,
+          }),
+    [
+      document,
+      effectivePreviewDocument,
+      fixtureRevision,
+      integrationBinding,
+      previewSurfaceId,
+      runEpoch,
+      workspaceProfile,
+    ],
   );
+  const integrationController =
+    integrationCreation?.status === "created" ? integrationCreation.controller : null;
+  const integrationSnapshot = useSyncExternalStore(
+    integrationController?.subscribe ?? subscribeUnavailablePersistence,
+    integrationController?.read ?? readUnavailablePersistence,
+    integrationController?.read ?? readUnavailablePersistence,
+  );
+  const navigationController = useMemo(
+    () =>
+      createAuthoringRunNavigationController({
+        document,
+        revision: fixtureRevision,
+        surfaceId: previewSurfaceId,
+        isRunActive: () => modeRef.current === "run",
+        onNavigate: (destination) => {
+          setRunDestination(destination);
+          setRunEpoch((current) => current + 1);
+          return true;
+        },
+      }),
+    [document, fixtureRevision, previewSurfaceId, runEpoch],
+  );
+  const runHostPorts = useMemo(
+    () =>
+      createAuthoringRunHostPorts(
+        executionContext === "integration"
+          ? (integrationController?.operationPort ?? {
+              invoke: () => Object.freeze({ status: "denied" }),
+            })
+          : fixtureController.operationPort,
+        navigationController.navigationPort,
+        runDestination?.params,
+      ),
+    [
+      executionContext,
+      fixtureController,
+      integrationController,
+      navigationController,
+      runDestination?.params,
+    ],
+  );
+  const navigationLifetime = useRef<typeof navigationController | null>(null);
+  useEffect(() => {
+    navigationController.activate();
+    navigationLifetime.current = navigationController;
+    return () => {
+      navigationController.deactivate();
+      if (navigationLifetime.current === navigationController) navigationLifetime.current = null;
+      queueMicrotask(() => {
+        if (navigationLifetime.current !== navigationController) navigationController.dispose();
+      });
+    };
+  }, [navigationController]);
+  const integrationLifetime = useRef<typeof integrationController>(null);
+  useEffect(() => {
+    if (integrationController === null) return;
+    integrationLifetime.current = integrationController;
+    if (mode === "run" && executionContext === "integration") integrationController.activate();
+    else integrationController.deactivate();
+    return () => {
+      integrationController.deactivate();
+      if (integrationLifetime.current === integrationController) integrationLifetime.current = null;
+      queueMicrotask(() => {
+        if (integrationLifetime.current !== integrationController) integrationController.dispose();
+      });
+    };
+  }, [executionContext, integrationController, mode]);
   const fixtureControllerLifetime = useRef<ReturnType<
     typeof createAuthoringOperationFixtureController
   > | null>(null);
@@ -3001,9 +3080,31 @@ function SurfaceEditor({
 
   function chooseMode(nextMode: SurfaceEditorMode): void {
     if (persistenceState?.pending === "opening" || publicationPending) return;
+    if (nextMode === "design") {
+      integrationController?.deactivate();
+      setExecutionContext("synthetic");
+      if (runDestination !== null || executionContext === "integration") {
+        navigationController.deactivate();
+        setRunDestination(null);
+        setRunEpoch((current) => current + 1);
+      }
+    }
     modeRef.current = nextMode;
     setMode(nextMode);
-    (nextMode === "design" ? designModeButton : runModeButton).current?.focus();
+    (nextMode === "design" ? designModeButton : runModeButton).current?.focus({
+      preventScroll: true,
+    });
+  }
+
+  function restartRun(context: "synthetic" | "integration" = executionContext): void {
+    if (modeRef.current !== "run" || (context === "integration" && integrationDescriptor === null))
+      return;
+    navigationController.deactivate();
+    fixtureController.deactivate();
+    integrationController?.deactivate();
+    setExecutionContext(context);
+    setRunDestination(null);
+    setRunEpoch((current) => current + 1);
   }
 
   function chooseScenario(value: AuthoringScenarioValue): void {
@@ -3314,7 +3415,7 @@ function SurfaceEditor({
       <header aria-label="Workspace commands" className={styles.workspaceCommandBar}>
         <div className={styles.workspaceIdentity}>
           <div className={styles.workspaceIdentityCopy}>
-            <h2 id="workspace-title">{selectedSurface.name}</h2>
+            <h2 id="workspace-title">{previewSurface.name}</h2>
             <small>
               {canvasFrame.status === "ready"
                 ? `${canvasFrameOrientation} · ${canvasFrame.frame.label}`
@@ -3328,7 +3429,9 @@ function SurfaceEditor({
           <span className={styles.workspacePreviewStatus} data-workspace-preview-status={mode}>
             {mode === "design"
               ? "Design preview · controls are disabled."
-              : "Run preview · real adapter controls use the selected synthetic fixture."}
+              : executionContext === "integration"
+                ? "Run preview · connected host operations are enabled."
+                : "Run preview · real adapter controls use the selected synthetic fixture."}
           </span>
           <span className={styles.workspaceSessionStatus}>
             <span>{project.navigationStatus}</span>
@@ -3408,13 +3511,19 @@ function SurfaceEditor({
             <summary>
               <strong>{mode === "design" ? "Preview boundary" : "Runtime boundary"}</strong>
               <span>
-                {mode === "design" ? "Catalog fixture · no live calls" : "Synthetic fixture only"}
+                {mode === "design"
+                  ? "Catalog fixture · no live calls"
+                  : executionContext === "integration"
+                    ? "Explicit host connection"
+                    : "Synthetic fixture only"}
               </span>
             </summary>
             <p>
               {mode === "design"
                 ? "Catalog-backed edits change only the authored Source and persist only through Save source. Scenarios are transient previews and never change the authored Source. Selection, placement, and Inspector chrome never enter the managed component tree."
-                : "Controls are live against this in-memory preview. Only outcomes declared by the current surface's authored operations and authenticated Catalog fixtures are available; navigation, resources, storage, publication, activation, integration, and production calls remain blocked."}
+                : executionContext === "integration"
+                  ? "Only explicitly connected host operations can execute. Navigation stays within this authored Source. Storage, resources, publication, activation and production remain blocked; Run never saves inputs or results."
+                  : "Controls use authenticated Catalog fixtures and local managed-surface navigation. Resources, storage, publication, activation, integration, and production calls remain blocked; Run never changes the authored Source."}
             </p>
           </details>
           <p
@@ -3427,7 +3536,9 @@ function SurfaceEditor({
           >
             {mode === "design"
               ? "Design mode · managed controls are disabled; authored changes remain local until Save source succeeds."
-              : "Run mode · controls are interactive against synthetic fixtures; live effects remain blocked."}
+              : executionContext === "integration"
+                ? "Run mode · explicitly connected host operations are enabled; production remains blocked."
+                : "Run mode · controls are interactive against synthetic fixtures; live effects remain blocked."}
           </p>
         </div>
       </header>
@@ -3490,14 +3601,14 @@ function SurfaceEditor({
                       : null
                   }
                   documentId={workspaceSnapshot.documentId}
-                  hostPorts={fixtureHostPorts}
+                  hostPorts={runHostPorts}
                   mode={mode}
                   projectId={project.id}
                   registry={workspaceSnapshot.runtime.registry}
                   selection={mode === "design" ? selection : null}
                   showDesignChrome={false}
                   showStatus={false}
-                  surfaceId={selectedSurface.sourceId}
+                  surfaceId={previewSurfaceId}
                   tokenCssProperties={workspaceSnapshot.runtime.tokenCssProperties}
                 />
               </section>
@@ -3577,6 +3688,12 @@ function SurfaceEditor({
 
       {mode === "run" ? (
         <RunControls
+          executionContext={executionContext}
+          integration={integrationDescriptor}
+          integrationSnapshot={integrationSnapshot}
+          onContextChange={restartRun}
+          onRestart={() => restartRun()}
+          surfaceName={previewSurface.name}
           onComplete={(alias) => {
             fixtureController.completePending(alias);
           }}
@@ -3593,6 +3710,7 @@ function SurfaceEditor({
 function ProjectShell({
   fixtures,
   initialDocument,
+  integrationBinding,
   preparedPersistenceController,
   persistencePort,
   publicationPort,
@@ -3603,6 +3721,7 @@ function ProjectShell({
 }: Readonly<{
   readonly fixtures: boolean;
   readonly initialDocument: DesenEditorDocument;
+  readonly integrationBinding: AuthoringIntegrationBindingHandle | null;
   readonly preparedPersistenceController: AuthoringPersistenceController | null | undefined;
   readonly persistencePort: DesenEditorPersistencePort | null;
   readonly publicationPort: AuthoringPublicationPort | null;
@@ -3676,6 +3795,7 @@ function ProjectShell({
     <SurfaceEditor
       key={`${workspaceProfileMountIdentity(workspaceProfile)}:${project.id}:${selectedSurface.id}`}
       initialDocument={initialDocument}
+      integrationBinding={integrationBinding}
       preparedPersistenceController={preparedPersistenceController}
       persistencePort={persistencePort}
       publicationPort={publicationPort}
@@ -3733,6 +3853,7 @@ function hasResolvedSurfaceEditor(
 function RouteView({
   fixtures,
   initialDocument,
+  integrationBinding,
   onRequestProjectCreation,
   preparedPersistenceController,
   persistencePort,
@@ -3744,6 +3865,7 @@ function RouteView({
 }: Readonly<{
   readonly fixtures: boolean;
   readonly initialDocument: DesenEditorDocument;
+  readonly integrationBinding: AuthoringIntegrationBindingHandle | null;
   readonly onRequestProjectCreation: (() => void) | null;
   readonly preparedPersistenceController: AuthoringPersistenceController | null | undefined;
   readonly persistencePort: DesenEditorPersistencePort | null;
@@ -3777,6 +3899,7 @@ function RouteView({
       <ProjectShell
         fixtures={fixtures}
         initialDocument={initialDocument}
+        integrationBinding={integrationBinding}
         preparedPersistenceController={preparedPersistenceController}
         persistencePort={persistencePort}
         publicationPort={publicationPort}
@@ -3821,6 +3944,7 @@ function RouteView({
     <ProjectShell
       fixtures={fixtures}
       initialDocument={initialDocument}
+      integrationBinding={integrationBinding}
       preparedPersistenceController={preparedPersistenceController}
       persistencePort={persistencePort}
       publicationPort={publicationPort}
@@ -3836,6 +3960,8 @@ function RouteView({
 export interface DesenAppApplicationProps {
   /** Initial validated Source captured when a surface editor session mounts. */
   readonly initialDocument?: DesenEditorDocument;
+  /** Optional, exact-profile-authenticated host operations; never inferred from Source or URL. */
+  readonly integrationBinding?: AuthoringIntegrationBindingHandle | null;
   /** Explicit factory-authenticated inert route/gallery examples, never product authority. */
   readonly projectInventoryFixture?: ProjectInventoryFixtureHandle;
   /** May hide the profile project while storage reports it missing; cannot add another project. */
@@ -3864,6 +3990,7 @@ interface AuthenticatedDesenAppApplicationProps extends DesenAppApplicationProps
 function AuthenticatedDesenAppApplication({
   fixtures,
   initialDocument,
+  integrationBinding = null,
   onRequestProjectCreation = null,
   preparedPersistenceController,
   persistencePort = null,
@@ -3910,6 +4037,7 @@ function AuthenticatedDesenAppApplication({
         <RouteView
           fixtures={fixtures}
           initialDocument={initialDocument}
+          integrationBinding={integrationBinding}
           onRequestProjectCreation={onRequestProjectCreation}
           preparedPersistenceController={preparedPersistenceController}
           persistencePort={persistencePort}
@@ -3947,6 +4075,15 @@ export function DesenAppApplication(props: DesenAppApplicationProps) {
     );
   }
   const workspaceSnapshot = authority.profile;
+  if (
+    props.integrationBinding !== undefined &&
+    props.integrationBinding !== null &&
+    readAuthoringIntegrationBinding(props.integrationBinding, props.workspaceProfile) === null
+  ) {
+    return (
+      <UnavailableWorkspace message="The integration connection is not authenticated for this exact workspace profile." />
+    );
+  }
   if (props.publicationPort !== undefined && props.publicationPort !== null) {
     const destination = readAuthoringPublicationPortDestination(props.publicationPort);
     if (
@@ -3988,6 +4125,7 @@ export function DesenAppApplication(props: DesenAppApplicationProps) {
       props.preparedPersistenceController !== undefined ||
       props.persistencePort !== undefined ||
       props.publicationPort !== undefined ||
+      props.integrationBinding !== undefined ||
       props.onRequestProjectCreation !== undefined
     ) {
       return (

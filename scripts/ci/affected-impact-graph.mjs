@@ -225,12 +225,16 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
     ["desen-app-evergreen-product-composition", ["desen-app-visual-behavior-authoring"]],
     ["desen-app-input-pending-fixture", ["desen-app-evergreen-product-composition"]],
     ["desen-app-failure-fixture", ["desen-app-input-pending-fixture"]],
+    [
+      "desen-app-success-host-operation",
+      ["desen-app-failure-fixture", "reference-sign-in-fixtures-and-host-binding"],
+    ],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "91645dd903e4ade7f10f54dd6b07c65a49b355921a35946ee305ee9782aad0ee";
+  "ae57b2b84f3ba3077ecf589b1444d413213b8e54f9f4058368e8a11cc706c28b";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

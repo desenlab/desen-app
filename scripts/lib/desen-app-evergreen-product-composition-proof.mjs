@@ -27,6 +27,16 @@ const T01C_PREDECESSOR_GAP_PATHS = Object.freeze([
   "apps/desen-app/src/behavior-controls.tsx",
   "apps/desen-app/test/authoring-connections.test.ts",
 ]);
+const T04_PREDECESSOR_GAP_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/product-proof-server.mjs",
+  "apps/desen-app/dev/local-dev-host.mjs",
+  "apps/desen-app/dev/local-dev-host.test.mjs",
+  "apps/desen-app/src/preview-controls.tsx",
+  "apps/desen-app/test/main-lifecycle.test.tsx",
+  "apps/desen-app/tsconfig.local-dev.json",
+  "scripts/verify-boundary-fixtures.mjs",
+  "tests/boundaries/README.md",
+]);
 const T01C_SUCCESSOR_ADDED_PATHS = Object.freeze([
   "apps/desen-app-browser-e2e/input-pending-fixture.pw.ts",
   "apps/desen-app-browser-e2e/input-pending-playwright.config.ts",
@@ -279,6 +289,40 @@ async function authenticateInputPendingFixtureSuccessor(workspaceRoot) {
     });
   }
   return Object.freeze({ materialize, readTaskTimeFile, successor });
+}
+
+async function authenticateSuccessHostHistoricalGapFiles(workspaceRoot) {
+  try {
+    const successorModule = await import("./desen-app-success-host-operation-proof.mjs");
+    const authenticate = successorModule.authenticateDesenAppSuccessHostOperationSuccessor;
+    const readTaskTimeFile = successorModule.readDesenAppT03HistoricalReaderTaskTimeFile;
+    const projectPathInventory = successorModule.projectDesenAppT03HistoricalReaderPathInventory;
+    if (
+      typeof authenticate !== "function" ||
+      typeof readTaskTimeFile !== "function" ||
+      typeof projectPathInventory !== "function"
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The M10-T04 historical gap contract is unavailable.");
+    }
+    const successor = await authenticate({ workspaceRoot });
+    return Object.freeze({
+      files: new Map(
+        T04_PREDECESSOR_GAP_PATHS.map((relativePath) => [
+          relativePath,
+          readTaskTimeFile(successor, relativePath),
+        ]),
+      ),
+      projectPathInventory: (currentPaths) => projectPathInventory(successor, currentPaths),
+    });
+  } catch (error) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M10-T04 historical gaps were not authenticated.",
+      {
+        cause: String(error),
+      },
+    );
+  }
 }
 
 /** Stable fail-closed error raised by the M10-T01C evidence reader. */
@@ -1364,7 +1408,7 @@ export function projectDesenAppHistoricalReaderPathInventory(successor, currentP
       fail("OPTIONS_INVALID", "Historical path inventory contains unsupported authority.");
     }
   }
-  return Object.freeze(
+  return authority.t04ProjectPathInventory(
     currentPaths.filter(
       (relativePath) =>
         !authority.predecessor.successorAddedPaths.has(relativePath) &&
@@ -1416,6 +1460,18 @@ export async function authenticateDesenAppEvergreenProductCompositionSuccessor(
       inputPendingSuccessor.readTaskTimeFile(inputPendingSuccessor.successor, relativePath),
     ]),
   );
+  // The older bridges omitted these unchanged T01A authorities. Only the authenticated T04
+  // bridge can supply them; the public materializer still applies caller mutations last.
+  const successHostHistorical = await authenticateSuccessHostHistoricalGapFiles(workspaceRoot);
+  for (const [relativePath, bytes] of successHostHistorical.files) {
+    if (bridgeAuthority.files.has(relativePath) || predecessorGapFiles.has(relativePath)) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "A reviewed historical gap would replace existing authority.",
+      );
+    }
+    predecessorGapFiles.set(relativePath, bytes);
+  }
   const successor = deepFreeze({
     task: "M10-T01C",
     proofId: "desen-app-evergreen-product-composition",
@@ -1439,6 +1495,7 @@ export async function authenticateDesenAppEvergreenProductCompositionSuccessor(
     Object.freeze({
       predecessor: bridgeAuthority,
       predecessorGapFiles,
+      t04ProjectPathInventory: successHostHistorical.projectPathInventory,
       t01cSuccessorAddedPaths: new Set(T01C_SUCCESSOR_ADDED_PATHS),
     }),
   );

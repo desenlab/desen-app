@@ -5,6 +5,8 @@ import { dirname, isAbsolute, join, relative, sep } from "node:path";
 import { openLocalControlPlane } from "@desen/control-plane-api";
 import { createServer as createViteServer } from "vite";
 
+import { openDesenAppLocalOperationHost } from "./local-operation-host.mjs";
+
 /** Exact browser origin owned by the normal Desen App local development profile. */
 export const DESEN_APP_LOCAL_DEV_ORIGIN = "http://127.0.0.1:5173";
 
@@ -13,6 +15,12 @@ export const DESEN_APP_LOCAL_RUNTIME_DEFINE_NAME = "__DESEN_APP_LOCAL_RUNTIME_CO
 
 /** Exact versioned local-runtime profile shared with the browser composition. */
 export const DESEN_APP_LOCAL_RUNTIME_PROFILE = "desen.app.local-runtime.v1";
+
+/** Exact independent Vite define for the explicitly selected local Integration service. */
+export const DESEN_APP_LOCAL_OPERATION_DEFINE_NAME = "__DESEN_APP_LOCAL_OPERATION_CONFIG__";
+
+/** Exact local Integration profile, deliberately separate from Source persistence authority. */
+export const DESEN_APP_LOCAL_OPERATION_PROFILE = "desen.app.local-operation.v1";
 
 const LOCAL_RUNTIME_TOKEN_BYTES = 32;
 const LOOPBACK_ORIGIN_PATTERN = /^http:\/\/127\.0\.0\.1:([1-9][0-9]{0,4})$/u;
@@ -272,6 +280,25 @@ export function createDesenAppLocalRuntimeDefine(controlPlaneOrigin, apiToken) {
 }
 
 /**
+ * Builds the separate operation define from one fixed-loopback listener and its own bearer.
+ *
+ * @param {string} origin Exact local operation listener origin.
+ * @param {string} apiToken Independent fresh launcher-owned operation bearer.
+ * @returns {Readonly<Record<string, string>>} Closed, in-memory Vite operation configuration.
+ */
+export function createDesenAppLocalOperationDefine(origin, apiToken) {
+  // Reuse the same finite origin/token rules without sharing either service's secret or shape.
+  createDesenAppLocalRuntimeDefine(origin, apiToken);
+  return Object.freeze({
+    [DESEN_APP_LOCAL_OPERATION_DEFINE_NAME]: JSON.stringify({
+      profile: DESEN_APP_LOCAL_OPERATION_PROFILE,
+      origin,
+      apiToken,
+    }),
+  });
+}
+
+/**
  * @typedef {Readonly<{
  *   appOrigin: typeof DESEN_APP_LOCAL_DEV_ORIGIN;
  *   close: () => Promise<void>;
@@ -285,20 +312,26 @@ export function createDesenAppLocalRuntimeDefine(controlPlaneOrigin, apiToken) {
  *   createViteServer?: typeof createViteServer;
  *   entropy?: (size: number) => Uint8Array;
  *   openControlPlane?: typeof openLocalControlPlane;
+ *   openOperationHost?: typeof openDesenAppLocalOperationHost;
  * }>} StartDesenAppLocalDevOptions
  */
 
 /**
- * Starts durable Source persistence and Vite as one fail-closed local development composition.
+ * Starts independent Source persistence, opt-in local operations, and Vite as one local composition.
  *
  * @param {StartDesenAppLocalDevOptions} options Trusted launcher capabilities and app directory.
  * @returns {Promise<DesenAppLocalDevHost>} Revocable local host handle; no bearer secret is exposed.
  */
 export async function startDesenAppLocalDev(options) {
   const openControlPlane = options.openControlPlane ?? openLocalControlPlane;
+  const openOperationHost = options.openOperationHost ?? openDesenAppLocalOperationHost;
   const makeViteServer = options.createViteServer ?? createViteServer;
   const canonicalAppDirectory = await captureCanonicalAppDirectory(options.appDirectory);
   const apiToken = createDesenAppLocalApiToken(options.entropy);
+  const operationApiToken = createDesenAppLocalApiToken(options.entropy);
+  if (operationApiToken === apiToken) {
+    throw new DesenAppLocalDevHostError("INVALID_RUNTIME_CONFIG");
+  }
   const rootDirectory = await prepareDesenAppLocalStateRoot(options.stateDirectory);
   const canonicalStateDirectory = dirname(dirname(rootDirectory));
   if (
@@ -308,6 +341,7 @@ export async function startDesenAppLocalDev(options) {
     throw new DesenAppLocalDevHostError("UNSAFE_STATE_ROOT");
   }
   let controlPlane;
+  let operationHost;
   let viteServer;
   try {
     controlPlane = await openControlPlane({
@@ -316,13 +350,21 @@ export async function startDesenAppLocalDev(options) {
       allowedOrigins: Object.freeze([DESEN_APP_LOCAL_DEV_ORIGIN]),
     });
     const listener = await controlPlane.listen(0);
+    operationHost = await openOperationHost({
+      apiToken: operationApiToken,
+      allowedOrigin: DESEN_APP_LOCAL_DEV_ORIGIN,
+    });
+    const operationListener = await operationHost.listen(0);
     viteServer = await makeViteServer({
       root: canonicalAppDirectory,
       appType: "spa",
       configFile: false,
       envDir: false,
       clearScreen: false,
-      define: createDesenAppLocalRuntimeDefine(listener.origin, apiToken),
+      define: {
+        ...createDesenAppLocalRuntimeDefine(listener.origin, apiToken),
+        ...createDesenAppLocalOperationDefine(operationListener.origin, operationApiToken),
+      },
       plugins: [createDesenAppLocalStateDenyPlugin()],
       server: {
         host: "127.0.0.1",
@@ -352,6 +394,13 @@ export async function startDesenAppLocalDev(options) {
         // The public failure remains fixed and redacted across cleanup outcomes.
       }
     }
+    if (operationHost !== undefined) {
+      try {
+        await operationHost.close();
+      } catch {
+        // A failed listener cannot leave the independently authorized operation service live.
+      }
+    }
     throw new DesenAppLocalDevHostError("LOCAL_START_FAILED");
   }
 
@@ -366,6 +415,11 @@ export async function startDesenAppLocalDev(options) {
       }
       try {
         await controlPlane.close();
+      } catch {
+        failed = true;
+      }
+      try {
+        await operationHost.close();
       } catch {
         failed = true;
       }

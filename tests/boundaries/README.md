@@ -12,11 +12,15 @@ allowed case composes only `editor-core` plus the reviewed App application, empt
 stylesheet entries; one negative case rejects an undeclared `publisher` package edge, and another
 rejects an unreviewed App source entry.
 
-The normal-product browser proof has one additional, file-scoped composition edge. Its positive
-fixture accepts only `product-proof-server.mjs` loading the built public Control Plane `index`
-entry. Negative fixtures reject that same edge from any other proof file, reject a deep/private
-Control Plane module from the product server, and reject every other application root from the
-product server.
+The normal-product browser proof has two exact file-scoped composition edges. Its positive
+fixtures accept only `product-proof-server.mjs` loading the built public Control Plane `index`
+entry and the same `apps/desen-app/dev/local-operation-host.mjs` listener used by the normal
+developer launcher. Reusing that listener keeps the real-host browser proof from supplying its
+own substitute implementation. Negative fixtures reject both edges from other proof files,
+deep/private Control Plane modules, neighboring unreviewed App dev modules, and
+every other application root from the product server.
+The exception grants no access to the App source tree or the rest of its dev directory. All 26
+cases run against the real root configuration.
 
 Run them after installing workspace dependencies:
 

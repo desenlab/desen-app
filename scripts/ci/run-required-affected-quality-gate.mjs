@@ -422,7 +422,7 @@ function selectedRegions(selection, nodeById) {
   const dependencyBoundary = suffix[0];
   const boundaryFixtures = suffix[1];
   if (
-    exhaustiveRootIds.length !== 102 ||
+    exhaustiveRootIds.length !== 103 ||
     dependencyBoundary.dependencies.length !== exhaustiveRootIds.length ||
     dependencyBoundary.dependencies.some(
       (dependency, index) => dependency !== exhaustiveRootIds[index],

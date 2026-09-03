@@ -1403,3 +1403,49 @@ and `sha256:ba00d7c81ca4392d50b0fc869434d531acd82a949cde376de051f93261e6f723`.
 These checks close only M10-T03 visible failure. P-09/P-10 remain `PARTIAL`; M10-T04 still owns
 success, navigation, and separately authorized real-host operation. Local results do not imply
 hosted exact-head `Quality gate` or `Browser E2E` success.
+
+## M10-T04 success, navigation, and host-operation testing
+
+The dedicated `success-host-playwright.config.ts` runs alongside, rather than replacing, the four
+earlier browser configurations. Browser execution owns real UI and host effects; the new
+`desen-app-success-host-operation` deterministic verifier and root mutation test remain passive
+proof readers. Their ordinary shared-state class grants no listener, application-selected code,
+or external-network authority. Test-only runner seams are not production completion authority.
+
+CI contains 216 workloads / 103 proof units at inventory
+`sha256:d6d00fb7ec87e41c75ada3ce3d65cb0d3cf9286936c437fa836bbec9eed372cc`.
+The impact graph explicitly binds both the frozen T03 failure proof and executable reference
+host-operation proof; it is
+`sha256:ae57b2b84f3ba3077ecf589b1444d413213b8e54f9f4058368e8a11cc706c28b`.
+The T04 closure contains 71 proof units / 152 workloads at
+`sha256:548dcbecc29444b1ba8973a664459980fbbcbfe40b058bc8f624b78b2a69a065`.
+Shared state remains 92 ordinary / eleven barrier pairs with 92 OS-temporary roots. Positive
+tests pin both real parents and passive classification; negative tests reject omitted binding
+authority, missing or substituted workloads, widened listener grants, stale checkpoints, and
+unauthenticated promotion input. Existing failure, input/pending, and historical proof tests
+remain required. The ordinary-T bounded baseline remains unchanged; these local checks never
+substitute for exact-head hosted `Quality gate` and `Browser E2E` results.
+
+The Browser E2E server may import only the exact local-operation listener via its anchored
+dependency-rule exception. One positive and two negative boundary fixtures cover the permitted
+edge, an unreviewed dev target, and the permitted target from an unauthorized browser-proof
+entry. Their six files are conservative shared proof inputs; the passive proof pair still gains
+no listener permission.
+
+The final tracked set contains 1,409 paths / 206 proof-owned paths at ownership
+`sha256:168ce27d3922269d3e51c485108c1acdbafdbbe74175d76d5d20c471162f8fc1`.
+The two exact new verifier/root files select T04; the remaining new product, architecture,
+artifact, and shared proof files force exhaustive coverage. The exact 32-path extension,
+cumulative historical projection, and both formal parents are independently asserted by the CI
+contract tests.
+
+The 22,456-byte / 51-receipt artifact is
+`sha256:d9d841af06ec9efc51c3f1c74079f0aa4d5e1c7e996f3b97df7e277e4b1f8423`.
+Checkpoint sequence 69 preserves the preceding history and closes 57 artifacts / 114 readers at
+`sha256:535a09b42d158f9bdf934924f704f3fb278d68da84a3dcbbfa32e38cee375c61`.
+The T01A/T01C proof-library readers and T03 proof/root pair `[102, 106, 110, 111]` are resealed;
+the immutable T03 and earlier artifacts remain unchanged. Selector and required-affected runner
+authorities are
+`sha256:ceb46eba37c63e46743fb03d4389a188928b7bedf13cab7190b276313210eae8` and
+`sha256:a6734be24611dd476051db3c93d8672e2892afe9a1276d154e67127d6c10ea35`.
+This still authenticates only identity and impact, never a cached execution result.

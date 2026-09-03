@@ -1545,3 +1545,67 @@ and required-affected runner authority at
 `sha256:ba00d7c81ca4392d50b0fc869434d531acd82a949cde376de051f93261e6f723`.
 These are local authority receipts only: no workload, barrier, timeout, isolation rule, closing
 guard, or exact-head hosted execution requirement is removed.
+
+## M10-T04 success and real-host-operation CI authority
+
+M10-T04 appends `desen-app-success-host-operation` as ordinary proof pair 103, with
+`scripts/verify-desen-app-success-host-operation.mjs` and
+`tests/desen-app-success-host-operation.test.mjs`. Its semantic impact parents are the frozen
+T03 failure proof and `reference-sign-in-fixtures-and-host-binding`, because the executable
+application binding is a separate authority from Catalog fixture data. The browser package now
+runs five explicit Playwright configurations: base, product, input/pending, failure, and
+success/host. Real browser and host execution stays in the separate Browser E2E job; neither the
+passive proof verifier nor its independent root test receives listener authority.
+
+The Browser E2E product server has one separately reviewed exact import edge to
+`apps/desen-app/dev/local-operation-host.mjs`. An allowed fixture and two negative fixtures reject
+other dev modules and imports from any other browser-proof entry. This does not widen application
+package allowlists, the control-plane public-root rule, or deterministic proof listener grants.
+
+The neutral inventory contains 216 workloads / 103 proof units, 735 prerequisite segments, 4,537
+leaf invocations, and 327 distinct leaves. Their authorities are respectively
+`sha256:d6d00fb7ec87e41c75ada3ce3d65cb0d3cf9286936c437fa836bbec9eed372cc`,
+`sha256:0328ce5a799c73eda1bcd4b5086b80288f20cca637d37c3ab5b12300cce2573d`,
+`sha256:e449a5203f03caa6df67289a3c97d1a2111556bf259f904ee6e79932820fcbf1`, and
+`sha256:f4d27a96d75ec4881691de4e5c4cba829cf36521c82d3a3dab40d75af6376e0a`.
+The graph is
+`sha256:ae57b2b84f3ba3077ecf589b1444d413213b8e54f9f4058368e8a11cc706c28b`;
+the T04 closure contains 71 proof units / 152 workloads at
+`sha256:548dcbecc29444b1ba8973a664459980fbbcbfe40b058bc8f624b78b2a69a065`.
+
+Required and shadow exhaustive plans are
+`sha256:f9a66d3729bea671bfe54405f8c6e4653699d69c38136ed1925cc3a714f3926a` and
+`sha256:29ded9551d8adcba5f7b86819f344e1619441990c29f5e8ca63d4140530d87ab`.
+Rollback equivalence retains plan
+`sha256:d776a2dae959f391cbae65b761cc967278218a4ddd2666d60f810deda544c479`
+and workload set
+`sha256:f78a0d48096356f50ccda938cda60ca4703387d58ae29e4bfc4c412e420f2118`.
+Shared-state authority covers all 216 workloads with 92 ordinary / eleven barrier pairs, 92
+OS-temporary roots, 90 read-only proof workloads, and 105 OS-temporary-isolated proof workloads.
+The existing concurrency, timeout, guarded filesystem, cancellation, and closing rules remain
+unchanged. Merge still requires fresh hosted `Quality gate` and `Browser E2E` success on the exact
+current pull-request head; no local seal is cached execution success.
+
+Exact-one ownership covers 1,409 tracked paths / 206 proof-owned paths. The ordered path set is
+`sha256:0895c89babc16970f34499279b1e791b1d42a4f0280e6d6dc9a4b523673aa6ef`
+and the ownership authority is
+`sha256:168ce27d3922269d3e51c485108c1acdbafdbbe74175d76d5d20c471162f8fc1`.
+The category split is 206 proof-unit, 45 CI-policy, 32 dependency-policy, 151 frozen-input, 548
+package/application, 275 shared-proof-infrastructure, 141 project-documentation, and eleven
+repository-policy paths. The exact 32-file T04 extension preserves all earlier path ownership,
+and the cumulative inverse successor delta reproduces the historical promotion projection. No new
+application or shared proof source receives narrow proof-unit selection.
+
+Reviewed checkpoint sequence 69 preserves sequences 1–68 and all 56 predecessor artifacts, adds
+the 22,456-byte / 51-receipt T04 artifact at
+`sha256:d9d841af06ec9efc51c3f1c74079f0aa4d5e1c7e996f3b97df7e277e4b1f8423`, reseals the T01A/T01C
+proof-library readers and T03 proof/root pair `[102, 106, 110, 111]`, and appends T04 readers
+`[112, 113]`. The resulting 57-artifact /
+114-reader authority closes at
+`sha256:535a09b42d158f9bdf934924f704f3fb278d68da84a3dcbbfa32e38cee375c61`.
+Promotion binds the selector at
+`sha256:ceb46eba37c63e46743fb03d4389a188928b7bedf13cab7190b276313210eae8`
+and required-affected runner authority at
+`sha256:a6734be24611dd476051db3c93d8672e2892afe9a1276d154e67127d6c10ea35`.
+The immutable I07-04 hosted comparison evidence remains byte-identical; these current identity
+receipts grant no cached workload success and no exact-head hosted completion.

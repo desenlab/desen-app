@@ -18,6 +18,18 @@ const cases = [
     expectedRule: null,
   },
   {
+    name: "allowed-desen-app-browser-e2e-product-server-local-operation-host",
+    expectedRule: null,
+  },
+  {
+    name: "desen-app-browser-e2e-product-server-imports-unreviewed-dev-module",
+    expectedRule: "desen-app-browser-e2e-product-server-has-no-other-application-dependencies",
+  },
+  {
+    name: "desen-app-browser-e2e-non-product-server-imports-local-operation-host",
+    expectedRule: "desen-app-browser-e2e-reviewed-app-source-only",
+  },
+  {
     name: "desen-app-browser-e2e-imports-publisher",
     expectedRule: "application-desen-app-browser-e2e-allowed-dependencies",
   },

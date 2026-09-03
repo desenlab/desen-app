@@ -3892,8 +3892,17 @@ This file records implementation discoveries without changing the frozen DESEN 0
   operation input, passwords/secrets, and rejected diagnostic candidate cannot be represented in
   the exact publication snapshot or Bundle/channel request. Reference-host activation receives
   only the fixed channel name, channel generation, and exact revision.
-- Future action: M10-T02–M10-T04 own automated browser evidence for pending, failure, success,
-  navigation, and a separately authorized real host operation binding. M12-T04 still owns the
+- M10-T04 consumption: an opaque exact-workspace Integration binding is installed only by trusted
+  composition. Synthetic remains the default and never inherits host operations. Explicit
+  Integration selection restarts transient Runtime state; returning to Design revokes pending
+  calls and restores Synthetic. Exact preview context, authored alias, Catalog capability, effect,
+  activation epoch, and replay admission fence every operation. Managed navigation mounts an
+  admitted target through a transient selected-entry preview without changing Source, save
+  generation, publication candidate, or editor URL. The Chromium journey observes real local HTTP
+  401/200 responses independently from the Catalog success fixture. This closes T02–T04's browser
+  lifecycle/host slice, not production identity or a portable preview-context protocol; see
+  ADR 0017 and `docs/proof/DESEN-APP-SUCCESS-HOST-OPERATION.md`.
+- Future action: M12-T04 still owns the
   repository-wide secret/synthetic-data audit for N-036. A future protocol revision should
   standardize preview-context or scenario-persistence semantics only if they must interoperate
   across editors; PF-089 remains `OPEN`.
@@ -3928,6 +3937,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
   need a separate authenticated project-store contract and atomicity decision. Browser restart
   last-known-good activation remains M10-T07; PF-090 stays `OPEN` until a general product project
   model is either standardized or deliberately documented as application-specific.
+
+- M10-T04 additive profile: a finite authenticated workspace chooser installs the existing Account
+  app and an independent blank Flow app with two surfaces. Each profile retains its own Source
+  identity, storage key, exact Catalog, and creation contract. Switching workspaces uses the
+  existing dirty-Source guard; a URL cannot install another profile or connection. Existing saved
+  Account app Sources are neither migrated nor augmented. This is a bounded composition inventory,
+  not arbitrary workspace or project creation; PF-090 remains `OPEN`.
 
 ## PF-091 — Visual behavior recipes and fixture controls are application profiles
 
@@ -3975,6 +3991,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
   retry, and reappears after the second declared settlement. The route, controlled values, Loading
   cleanup, and fixed canvas geometry remain stable. The flow uses neither raw JSON nor direct DOM or
   network mutation.
-- Future action: M10-T04 retains success, navigation, and a separately authorized real host
-  operation. A future interoperable editor-control vocabulary may standardize these recipes; until
+- M10-T04 follow-through: a non-default authored operation alias and visual Success → Navigate
+  action drive both a Catalog success fixture and an explicitly selected host connection. The
+  ordinary blank Flow app provides separate Start and Result surfaces without changing generic
+  editor behavior. Synthetic makes zero host requests; a real local HTTP rejection keeps the
+  origin and authored error visible, while success mounts the authored target. Focused tests also
+  cover non-authentication and fixture-free operations, stale calls, invalid output, and revocation.
+  Source is unchanged by Run, and reloading restores the saved empty input state. No operation
+  endpoint, credential, result, or handler is inferred from labels or selected by document data.
+- Future action: A future interoperable editor-control vocabulary may standardize these recipes; until
   then PF-091 remains `OPEN` and Catalog control hints under PF-025 remain opaque.

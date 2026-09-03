@@ -1,3 +1,37 @@
+.runNavigation {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--desen-app-surface-subtle);
+  border: 1px solid var(--desen-app-border);
+  border-radius: 0.625rem;
+}
+
+.runNavigation > span {
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+.runNavigation > small,
+.integrationOperations > p {
+  margin: 0;
+  color: var(--desen-app-text-muted);
+  font-size: 0.625rem;
+  line-height: 1.6;
+}
+
+.integrationOperations {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.integrationOperations > h3 {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 .app {
   min-height: 100vh;
   min-height: 100dvh;

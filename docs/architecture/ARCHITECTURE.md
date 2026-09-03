@@ -1959,6 +1959,33 @@ This boundary closes the dedicated public-failure browser trace only. M10-T04 st
 navigation, and a separately authorized real host operation. P-09 and P-10 therefore remain
 `PARTIAL`; Integration, Production, N-036, remote or multi-user execution, and G10 remain open.
 
+## M10-T04 explicit Integration and managed success navigation
+
+The ordinary product root now installs two independent local workspace profiles. The original
+Account app Source is untouched; Flow app starts with empty Start and Result surfaces and a
+separate durable key. A guarded workspace chooser exposes only trusted, factory-authenticated
+identities. Users author destination content and operation Success → Navigate actions through
+the existing visible controls; no Source injection or required JSON is introduced.
+
+Synthetic remains the default and cannot inherit real host callbacks. A separate opaque
+Integration binding is tied to an exact profile and Catalog capability/effect inventory. An
+explicit Run selection creates the current document/surface/revision/alias-bound operation
+lifetime. Pending calls are abortable, replay is bounded, and stale settlements are discarded.
+Runtime Core, not the host-status UI, validates candidate outputs and public errors before any
+success or failure action can run.
+
+Managed navigation mounts another existing Source surface through the same adapters, using a
+transient selected-entry preview. It does not change the editor URL, authored entry, saved Source
+generation or publication revision. Origin ports are revoked; Restart run and Design restore
+the design origin. Explicit target frame dimensions preserve the centered canvas geometry.
+
+The launcher-owned local account service is an independently authenticated loopback HTTP
+integration. Its visible test account, fixed endpoint and `local-host-user` result are intentionally
+distinct from Catalog fixtures. It proves the real transport/host boundary, not production login,
+remote deployment or secret classification. See [ADR 0017](../adr/0017-desen-app-explicit-integration-and-run-navigation.md)
+and the [M10-T04 proof](../proof/DESEN-APP-SUCCESS-HOST-OPERATION.md). Earlier sections describe their
+task-time boundaries; this decision adds explicit Integration without weakening Synthetic.
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific
