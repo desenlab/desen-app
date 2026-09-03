@@ -56,9 +56,10 @@ audit, and unsafe or untrusted boundaries remain fresh exhaustive runs. A checkp
 identity and impact authority, never cached success; every hosted selected workload still runs
 fresh.
 
-## Public build-log handoff
+## Private build-log handoff
 
-Every report that marks a task `DONE` must include two ready-to-review social drafts:
+For implementation-task completion, include two ready-to-review social drafts only in the private
+conversation with the user, never in repository files or public GitHub metadata:
 
 - X: English, no more than 280 characters, with a designer-first hook that developers can also
   understand.
@@ -67,7 +68,12 @@ Every report that marks a task `DONE` must include two ready-to-review social dr
 Both drafts must state only evidence-backed outcomes, distinguish what is not proven yet, and end
 with a useful question or invitation to inspect the public repository. Prefer two to four restrained
 hashtags on LinkedIn. Never publish a draft or imply that the user published it without explicit
-approval.
+approval. Committing or pushing a draft to this public repository is publication, even if it is
+labeled "draft" or "not published". Normal code commit/push/merge authorization does not authorize
+publishing social copy. Keep drafts out of `PROJECT-STATUS.md`, task boards, proof documents,
+commit messages, pull-request bodies/comments, and issues; do not relocate them to another tracked
+file. Public documentation contains technical status, decisions, and evidence only. Publishing a
+particular draft requires separate explicit approval for that content and destination.
 
 The public build log starts with `Day 1` on 2026-07-24, the date the repository became public.
 Future day numbers follow the user's confirmed publication sequence; producing a draft alone does
