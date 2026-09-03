@@ -43,9 +43,10 @@ Each proof claim records:
 
 Screenshots and videos are explanatory artifacts, never the sole proof.
 
-## Public build log
+## Private build-log review
 
-Every completed-task report includes channel-specific drafts for the DESEN public build log:
+Implementation-task completion may include channel-specific build-log drafts in the private user
+conversation only. The draft text is not repository documentation or public completion evidence:
 
 - X is English, at most 280 characters, and optimized for a concise question-led conversation.
 - LinkedIn contains `[EN]` and `[TR]` in the same post; Turkish is adapted naturally rather than
@@ -56,7 +57,13 @@ Every completed-task report includes channel-specific drafts for the DESEN publi
   and platform capabilities remain explicit limitations.
 - Each entry connects the technical result to a design-handoff or product consequence and invites
   informed feedback.
-- Drafts are review artifacts and are never published automatically.
+- Drafts stay in the private conversation and are never committed, pushed, or copied into public
+  GitHub metadata without separate explicit approval for the content and destination. Ordinary
+  code commit/push/merge authorization does not grant that approval.
+
+Keep project status, task boards, proof records, commit messages, pull-request bodies/comments,
+and issues limited to technical outcomes and evidence. A "draft" label does not make content in a
+public repository private; do not move drafts into another tracked file.
 
 `Day 1` is anchored to the public-repository date, 2026-07-24. Later numbers advance only with a
 user-confirmed public entry; merely drafting a post does not advance the sequence.

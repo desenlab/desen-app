@@ -155,31 +155,3 @@ The PR's check records and closure report must identify that head and its actual
 the two historical timeouts and the earlier Browser success cannot authorize it. Main performs a
 separate fresh exhaustive run after merge. No next product task starts as part of this interlude.
 A failed or unfinished workload is never a passing receipt.
-
-## CI-03 and M10-T04 public build-log drafts
-
-Drafts for review after exact-head closure only; not published. No publication day is assigned.
-
-**X (EN, ≤280 characters)**
-
-> Designers can now build a two-page flow and connect Success → Navigate in Desen App. Chromium tests cover fixtures and a real local HTTP operation; faster proof checks retain full coverage. Production auth is not claimed. Inspect github.com/desenlab/desen-app.
-
-**LinkedIn**
-
-> [EN]
->
-> A designer can build two pages and connect Success → Navigate without JSON. Chromium checks both
-> synthetic fixtures and an explicitly selected local HTTP operation. Proof verification also
-> avoids redundant work while retaining every workload and fresh execution. This is a local test
-> integration, not production authentication; publishing/activation is the next product proof.
-> What would you build with it? Inspect https://github.com/desenlab/desen-app
->
-> [TR]
->
-> Tasarımcı artık iki sayfa oluşturup JSON yazmadan başarı sonrası sayfa geçişini kurabiliyor.
-> Chromium hem sentetik örnekleri hem açıkça seçilen yerel HTTP bağlantısını denetliyor. Kanıt
-> doğrulamasında da test kapsamı ve her seferinde taze çalışma korunarak gereksiz tekrarlar
-> azaltıldı. Bu yerel test entegrasyonu; production kimlik doğrulaması değil. Sıradaki ürün kanıtı
-> yayınlama/aktivasyon. Siz ne tasarlardınız? İnceleyin: https://github.com/desenlab/desen-app
->
-> #DesignTools #OpenSource #WebDevelopment
