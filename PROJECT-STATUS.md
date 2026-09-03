@@ -31,6 +31,9 @@ Markdown cleanup is merged in PR #75 and its main CI also passes. These earlier 
 authorize AR-01's changed head. M10-T05 remains `NOT_STARTED`, next after AR-01 closure; I07-05
 retains its separate legacy-retirement responsibility.
 
+After AR-01 is verified and merged, development pauses. Do not start M10-T05 or another task until
+an explicit resume request; the remaining work in this session is archive closure only.
+
 ## Plain-language status
 
 Local implementation preparation is complete and the public development repository is active at

@@ -43,6 +43,9 @@ AR-01 aktif kalır. Koşul sağlanınca aynı değişmemiş revizyon kapanış k
 M10-T05 henüz başlamadı ve bu temizlikten sonra sıradaki ürün görevi. Toplam ilerleme 116/148,
 M10 7/12, kanıt kapıları 11/13 olarak kalıyor. I07-05'in eski runner'ı kaldırma kapsamı değişmedi.
 
+Arşiv işi doğrulanıp main'e alındıktan sonra geliştirmeye ara verilecek. Yeni bir devam isteği
+gelmeden M10-T05'e veya başka bir göreve başlanmayacak.
+
 Sıradan bir `T` görevinin hızlı yerel geri bildirimi; `pnpm format:check`, `pnpm lint`,
 `pnpm typecheck`, `pnpm build`, `pnpm boundaries` ve
 `node scripts/ci/verify-proof-reader-checkpoints.mjs` komutlarından oluşur. Bu temel kontrol

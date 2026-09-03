@@ -97,7 +97,7 @@ AR-01's `DONE` row is a conditional closure candidate until fresh `Quality gate`
 pass for this exact final PR head. Until then AR-01 is the only active task and merge/completion
 are blocked; afterward the same unchanged revision records closure. M10-T05 remains `NOT_STARTED`
 and next after AR-01; implementation progress stays 116/148, M10 stays 7/12, and proof gates stay
-11/13.
+11/13. After AR-01 closure, development is paused; M10-T05 must not start automatically.
 
 Local CI-02 evidence is the passing six-command bounded baseline, the 2/2 focused CI-02 contract
 tests, unchanged 45-checkpoint/41-artifact/82-reader authority, passing infrastructure-debt and
