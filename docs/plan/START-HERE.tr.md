@@ -1367,11 +1367,11 @@ bağlantı yoktur ve iki grafikte 22 yönetilen modül bayt düzeyinde aynıdır
 
 116 kesin kayıt içeren 188.599 baytlık artifact
 `docs/proof/artifacts/desen-app-0.1.0-published-host-update.json`,
-`sha256:82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282` ile sabittir. Ayrıntılar
+`sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3` ile sabittir. Ayrıntılar
 [T05 kanıtında](../proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md) ve
 [ADR 0020'de](../adr/0020-desen-app-fixed-destination-publication-and-host-activation.md) kayıtlıdır.
 Eklemeli checkpoint sequence 72, sequence 1–71'i korur ve 59 artifact / 118 reader zincirini
-`sha256:f74d5d69bc7b6523978b7d53f74f1670de4121b76be272e46135380284d1d58d` ile doğrular.
+`sha256:68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8` ile doğrular.
 P-07 `PROVEN`, PF-059 `CLOSED` olur; genel ilerleme 117/148 (%79), M10 8/12 (%67), kanıt kapıları
 11/13'tür. M10-T06 sıradadır. Hatalı yayın, son çalışan sürümü koruma, production kimliği, uzak veya
 çok kullanıcılı dağıtım, native hedefler, P-12, N-036 ve G10 açık kalır. T05'in `DONE` kaydı tam son

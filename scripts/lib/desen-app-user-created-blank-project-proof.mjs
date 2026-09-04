@@ -12,6 +12,7 @@ import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 import {
   authenticateDesenAppEvergreenProductCompositionSuccessor,
   materializeDesenAppHistoricalReaderFileOverrides,
+  materializeDesenAppT01aHistoricalReaderFileOverrides,
   readDesenAppHistoricalReaderProjection,
 } from "./desen-app-evergreen-product-composition-proof.mjs";
 
@@ -21,6 +22,10 @@ const ARTIFACT_RELATIVE_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json";
 const PROOF_DOCUMENT_RELATIVE_PATH = "docs/proof/DESEN-APP-USER-CREATED-BLANK-PROJECT.md";
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
+const MAX_OVERRIDE_BYTES = MAX_AUTHORITY_BYTES;
+const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
+const BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "byteLength").get;
+const BUFFER_GETTER = Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "buffer").get;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 
@@ -287,10 +292,10 @@ function deepFreeze(value) {
 function exactOwnDataOptions(value, allowedKeys, label) {
   if (value === undefined) return Object.freeze(Object.create(null));
   if (
+    utilTypes.isProxy(value) ||
     value === null ||
     typeof value !== "object" ||
     Array.isArray(value) ||
-    utilTypes.isProxy(value) ||
     (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
   ) {
     fail("OPTIONS_INVALID", `${label} must be one inert own-data object.`);
@@ -318,31 +323,62 @@ function capturePath(value, label, fallback) {
 }
 
 function captureBytes(value, label) {
+  if (utilTypes.isProxy(value) || !utilTypes.isUint8Array(value)) {
+    fail("OPTIONS_INVALID", `${label} must be exact non-shared bytes.`);
+  }
+  const prototype = Object.getPrototypeOf(value);
+  let byteLength;
+  let backingBuffer;
+  try {
+    byteLength = Reflect.apply(BYTE_LENGTH_GETTER, value, []);
+    backingBuffer = Reflect.apply(BUFFER_GETTER, value, []);
+  } catch {
+    fail("OPTIONS_INVALID", `${label} must be exact non-shared bytes.`);
+  }
   if (
-    value === null ||
-    typeof value !== "object" ||
-    utilTypes.isProxy(value) ||
-    !utilTypes.isUint8Array(value) ||
-    utilTypes.isSharedArrayBuffer(value.buffer)
+    (prototype !== Uint8Array.prototype && prototype !== Buffer.prototype) ||
+    Object.getOwnPropertyDescriptor(value, "buffer") !== undefined ||
+    Object.getOwnPropertyDescriptor(value, "byteLength") !== undefined ||
+    Object.getOwnPropertyDescriptor(value, "byteOffset") !== undefined ||
+    utilTypes.isSharedArrayBuffer(backingBuffer) ||
+    byteLength > MAX_AUTHORITY_BYTES
   ) {
     fail("OPTIONS_INVALID", `${label} must be exact non-shared bytes.`);
   }
-  return Buffer.from(value);
+  try {
+    const captured = Buffer.alloc(byteLength);
+    Reflect.apply(Uint8Array.prototype.set, captured, [value]);
+    return captured;
+  } catch {
+    fail("OPTIONS_INVALID", `${label} must be exact non-shared bytes.`);
+  }
 }
 
 function captureOverrides(value, allowedPaths = TRACKED_PATHS) {
   if (value === undefined) return Object.freeze(new Map());
-  if (!(value instanceof Map) || utilTypes.isProxy(value) || value.size > allowedPaths.length) {
+  if (
+    utilTypes.isProxy(value) ||
+    !(value instanceof Map) ||
+    Object.getPrototypeOf(value) !== Map.prototype ||
+    Reflect.ownKeys(value).length !== 0 ||
+    value.size > allowedPaths.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one bounded Map.");
   }
   const captured = new Map();
-  for (const [relativePath, bytes] of value) {
+  let totalBytes = 0;
+  for (const [relativePath, bytes] of Map.prototype.entries.call(value)) {
     if (!allowedPaths.includes(relativePath) || captured.has(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an unknown or duplicate path.", {
         path: relativePath,
       });
     }
-    captured.set(relativePath, captureBytes(bytes, `fileOverrides[${relativePath}]`));
+    const capturedBytes = captureBytes(bytes, `fileOverrides[${relativePath}]`);
+    totalBytes += capturedBytes.byteLength;
+    if (totalBytes > MAX_OVERRIDE_BYTES) {
+      fail("OPTIONS_INVALID", "fileOverrides exceeds its aggregate byte budget.");
+    }
+    captured.set(relativePath, capturedBytes);
   }
   return Object.freeze(captured);
 }
@@ -1138,7 +1174,7 @@ export async function buildDesenAppUserCreatedBlankProjectEvidence(rawOptions = 
   const options = captureBuildOptions(rawOptions);
   const workspaceRoot = await realpath(options.workspaceRoot);
   const evergreenProductCompositionSuccessor =
-    await authenticateDesenAppEvergreenProductCompositionSuccessor();
+    await authenticateDesenAppEvergreenProductCompositionSuccessor({ workspaceRoot });
   if (options.fileOverrides.size === 0) {
     const artifact = readDesenAppHistoricalReaderProjection(
       evergreenProductCompositionSuccessor,
@@ -1153,7 +1189,7 @@ export async function buildDesenAppUserCreatedBlankProjectEvidence(rawOptions = 
   }
   const files = await readTrackedFiles(
     workspaceRoot,
-    materializeDesenAppHistoricalReaderFileOverrides(
+    materializeDesenAppT01aHistoricalReaderFileOverrides(
       evergreenProductCompositionSuccessor,
       options.fileOverrides,
     ),

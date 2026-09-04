@@ -1358,12 +1358,12 @@ The task verifier passes, the independent root reader passes 10/10, focused suit
 edges, and 22 byte-identical managed modules shared by both builds. Dependency boundaries pass over
 861 modules / 3,685 dependencies.
 
-The 188,599-byte, 116-receipt artifact is
+The 189,123-byte, 116-receipt artifact is
 [`desen-app-0.1.0-published-host-update.json`](docs/proof/artifacts/desen-app-0.1.0-published-host-update.json)
-at `sha256:82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282`.
+at `sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`.
 Checkpoint sequence 72 preserves sequences 1–71 and authenticates 59 frozen artifacts / 118
 current readers at
-`sha256:f74d5d69bc7b6523978b7d53f74f1670de4121b76be272e46135380284d1d58d`.
+`sha256:68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8`.
 [The T05 proof](docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md) and
 [ADR 0020](docs/adr/0020-desen-app-fixed-destination-publication-and-host-activation.md) record the
 evidence and authority boundary. P-07 advances to `PROVEN`, PF-059 closes, implementation progress

@@ -245,6 +245,14 @@ const T04_PREDECESSOR_GAP_RECEIPTS = Object.freeze([
   }),
 ]);
 
+const T01A_ANCESTOR_GAP_RECEIPTS = Object.freeze([
+  Object.freeze({
+    path: "apps/desen-app/package.json",
+    bytes: 4_122,
+    sha256: "7038647aa1809f07ee5131d0df8d0bee75bf1f2cdf0358be738b2c3603b64577",
+  }),
+]);
+
 const FOCUSED_TEST_COMMANDS = Object.freeze([
   "pnpm --filter @desen/app-web exec vitest run test/local-runtime-publication.test.ts test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx dev/local-publication-host.test.mjs dev/local-dev-host.test.mjs",
   "pnpm --filter @desen/reference-host-web-server exec vitest run test/server.test.ts",
@@ -361,14 +369,24 @@ export const DESEN_APP_PUBLISHED_HOST_UPDATE_APP_CANVAS_PIN = Object.freeze({
 /** Exact clean M10-T04 historical-reader bridge owned by this append-only successor. */
 export const DESEN_APP_T04_HISTORICAL_READER_BRIDGE_PIN = Object.freeze({
   path: T04_HISTORICAL_READER_BRIDGE_PATH,
-  bytes: 3_110_146,
-  sha256: "784552241d8ac1ead3ce20886076f177db86cced534cc4d0e36081497a006d75",
-  uncompressedBytes: 4_878_660,
+  bytes: 3_111_833,
+  sha256: "07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470",
+  uncompressedBytes: 4_884_471,
   baseCommit: "33b922e6746365510c0549ddbf3b08469e58dc11",
   fileEntries: 51,
   predecessorGapFiles: 2,
   successorAddedPaths: 7,
   projections: 1,
+  t01aAncestor: Object.freeze({
+    task: "M10-T01A",
+    baseCommit: "39a3c6c7a477b700b332b725a9ddf5d1956c0ba5",
+    artifact: Object.freeze({
+      path: "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+      bytes: 20_173,
+      sha256: "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
+    }),
+    fileEntries: 1,
+  }),
 });
 
 /** Independent root cases owned by the append-only M10-T05 proof family. */
@@ -394,8 +412,8 @@ const DEFAULT_PROOF_DOCUMENT_PATH = path.join(WORKSPACE_ROOT, PROOF_DOCUMENT_REL
 
 /** Exact frozen artifact identity; the reader and root test remain checkpoint-owned. */
 export const DESEN_APP_PUBLISHED_HOST_UPDATE_ARTIFACT_PIN = Object.freeze({
-  bytes: 188_599,
-  sha256: "82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282",
+  bytes: 189_123,
+  sha256: "80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3",
 });
 
 const SUCCESSOR_AUTHORITIES = new WeakMap();
@@ -921,11 +939,13 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
     });
   }
   const projectionKeys = ["desen-app-success-host-operation"];
+  const t01aAncestorPin = pin.t01aAncestor;
   if (
     !exactJsonKeys(manifest, [
       "schemaVersion",
       "profile",
       "baseCommit",
+      "t01aAncestor",
       "successorAddedPaths",
       "predecessorGapFiles",
       "files",
@@ -934,6 +954,16 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
     manifest.schemaVersion !== 1 ||
     manifest.profile !== "desen.app.m10-t04-historical-reader-bridge.v1" ||
     manifest.baseCommit !== pin.baseCommit ||
+    !exactJsonKeys(manifest.t01aAncestor, ["task", "baseCommit", "artifact", "files"]) ||
+    manifest.t01aAncestor.task !== t01aAncestorPin.task ||
+    manifest.t01aAncestor.baseCommit !== t01aAncestorPin.baseCommit ||
+    !exactJsonKeys(manifest.t01aAncestor.artifact, ["path", "bytes", "sha256"]) ||
+    !isDeepStrictEqual(manifest.t01aAncestor.artifact, t01aAncestorPin.artifact) ||
+    !exactJsonKeys(
+      manifest.t01aAncestor.files,
+      T01A_ANCESTOR_GAP_RECEIPTS.map(({ path: relativePath }) => relativePath),
+    ) ||
+    Object.keys(manifest.t01aAncestor.files).length !== t01aAncestorPin.fileEntries ||
     !isDeepStrictEqual(manifest.successorAddedPaths, SUCCESSOR_ADDED_PATHS) ||
     !exactJsonKeys(
       manifest.predecessorGapFiles,
@@ -1007,6 +1037,33 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
     }
     predecessorGapFiles.set(receipt.path, bytes);
   }
+  const t01aAncestorFiles = new Map();
+  for (const receipt of T01A_ANCESTOR_GAP_RECEIPTS) {
+    const encoded = manifest.t01aAncestor.files[receipt.path];
+    if (
+      typeof encoded !== "string" ||
+      !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(encoded)
+    ) {
+      fail("HISTORICAL_BRIDGE_DRIFT", `Malformed M10-T01A ancestor gap: ${receipt.path}.`);
+    }
+    const bytes = Buffer.from(encoded, "base64");
+    decodedBytes += bytes.byteLength;
+    if (
+      bytes.toString("base64") !== encoded ||
+      bytes.byteLength !== receipt.bytes ||
+      sha256(bytes) !== receipt.sha256 ||
+      decodedBytes > MAX_HISTORICAL_DECODED_BYTES
+    ) {
+      fail("HISTORICAL_BRIDGE_DRIFT", `M10-T01A ancestor gap drifted: ${receipt.path}.`);
+    }
+    if (predecessorGapFiles.has(receipt.path) || !files.has(receipt.path)) {
+      fail(
+        "HISTORICAL_BRIDGE_DRIFT",
+        `M10-T01A ancestor gap is not separate from the T04 file authorities: ${receipt.path}.`,
+      );
+    }
+    t01aAncestorFiles.set(receipt.path, bytes);
+  }
   let amendmentCount = 0;
   for (const receipt of receipts) {
     const bytes = files.get(receipt.path);
@@ -1029,6 +1086,12 @@ function authenticateHistoricalReaderBridge(compressedBytes, parentArtifact) {
   cachedHistoricalBridgeAuthority = Object.freeze({
     files,
     predecessorGapFiles,
+    t01aAncestor: Object.freeze({
+      task: manifest.t01aAncestor.task,
+      baseCommit: manifest.t01aAncestor.baseCommit,
+      artifact: deepFreeze(manifest.t01aAncestor.artifact),
+      files: t01aAncestorFiles,
+    }),
     projection: deepFreeze(manifest.projections[projectionKeys[0]]),
     successorAddedPaths: new Set(manifest.successorAddedPaths),
     summary: deepFreeze({
@@ -1845,7 +1908,11 @@ function verifyBridgeReproductionAuthority(files) {
     generator,
     [
       `const EXPECTED_BASE_COMMIT = "${DESEN_APP_T04_HISTORICAL_READER_BRIDGE_PIN.baseCommit}";`,
+      `const EXPECTED_T01A_BASE_COMMIT = "${DESEN_APP_T04_HISTORICAL_READER_BRIDGE_PIN.t01aAncestor.baseCommit}";`,
+      `sha256: "${DESEN_APP_T04_HISTORICAL_READER_BRIDGE_PIN.t01aAncestor.artifact.sha256}"`,
+      ...T01A_ANCESTOR_GAP_RECEIPTS.map(({ sha256: digest }) => `sha256: "${digest}"`),
       'profile: "desen.app.m10-t04-historical-reader-bridge.v1"',
+      "t01aAncestor",
       ...SUCCESSOR_ADDED_PATHS.map((relativePath) => `"${relativePath}"`),
       ...T04_PREDECESSOR_GAP_RECEIPTS.map(({ path: relativePath }) => `"${relativePath}"`),
       "predecessorGapFiles",
@@ -1870,6 +1937,9 @@ function verifyBridgeReproductionAuthority(files) {
   );
   return deepFreeze({
     exactCleanAr01BaseCommit: true,
+    exactT01aAncestorBaseCommit: true,
+    exactT01aAncestorArtifactReceipt: true,
+    t01aAncestorNamespaceSeparate: true,
     exclusiveDeterministicGzipWrite: true,
     successorAddedPathInventoryExact: true,
     onlyTwoApprovedAr01Amendments: true,
@@ -3000,6 +3070,19 @@ export function readDesenAppT04HistoricalReaderTaskTimeFile(successor, relativeP
     authority.files.get(relativePath) ?? authority.predecessorGapFiles.get(relativePath);
   if (bytes === undefined) {
     fail("OPTIONS_INVALID", "relativePath has no T04 task-time bridge entry.", { relativePath });
+  }
+  return Buffer.from(bytes);
+}
+
+/** Returns a defensive copy of one exact M10-T01A ancestor-gap file. */
+export function readDesenAppT01aHistoricalReaderGapFile(successor, relativePath) {
+  if (!safeRelativePath(relativePath)) {
+    fail("OPTIONS_INVALID", "relativePath must be one safe relative path.");
+  }
+  const authority = successorAuthority(successor);
+  const bytes = authority.t01aAncestor.files.get(relativePath);
+  if (bytes === undefined) {
+    fail("OPTIONS_INVALID", "relativePath has no M10-T01A ancestor gap entry.", { relativePath });
   }
   return Buffer.from(bytes);
 }

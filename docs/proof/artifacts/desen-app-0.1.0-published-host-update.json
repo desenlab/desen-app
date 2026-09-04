@@ -3718,14 +3718,24 @@
     },
     "historicalReaderBridge": {
       "path": "docs/proof/artifacts/desen-app-0.1.0-t04-historical-reader-bridge.json.gz",
-      "bytes": 3110146,
-      "sha256": "784552241d8ac1ead3ce20886076f177db86cced534cc4d0e36081497a006d75",
-      "uncompressedBytes": 4878660,
+      "bytes": 3111833,
+      "sha256": "07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470",
+      "uncompressedBytes": 4884471,
       "baseCommit": "33b922e6746365510c0549ddbf3b08469e58dc11",
       "fileEntries": 51,
       "predecessorGapFiles": 2,
       "successorAddedPaths": 7,
       "projections": 1,
+      "t01aAncestor": {
+        "task": "M10-T01A",
+        "baseCommit": "39a3c6c7a477b700b332b725a9ddf5d1956c0ba5",
+        "artifact": {
+          "path": "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+          "bytes": 20173,
+          "sha256": "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e"
+        },
+        "fileEntries": 1
+      },
       "profile": "desen.app.m10-t04-historical-reader-bridge.v1",
       "canonicalDenseManifest": true,
       "boundedGzip": true,
@@ -3735,6 +3745,9 @@
     },
     "bridgeReproduction": {
       "exactCleanAr01BaseCommit": true,
+      "exactT01aAncestorBaseCommit": true,
+      "exactT01aAncestorArtifactReceipt": true,
+      "t01aAncestorNamespaceSeparate": true,
       "exclusiveDeterministicGzipWrite": true,
       "successorAddedPathInventoryExact": true,
       "onlyTwoApprovedAr01Amendments": true,
@@ -4263,8 +4276,8 @@
       },
       {
         "path": "docs/proof/artifacts/desen-app-0.1.0-t04-historical-reader-bridge.json.gz",
-        "bytes": 3110146,
-        "sha256": "784552241d8ac1ead3ce20886076f177db86cced534cc4d0e36081497a006d75"
+        "bytes": 3111833,
+        "sha256": "07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470"
       },
       {
         "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
@@ -4283,8 +4296,8 @@
       },
       {
         "path": "scripts/generate-desen-app-t04-historical-reader-bridge.mjs",
-        "bytes": 5688,
-        "sha256": "60d1fb319600ead6c5cc0ac7f6d95218ab3902aaef0a916f63dfc47dfef84a42"
+        "bytes": 8530,
+        "sha256": "c6b96dead7d8f9030dec3f99b6551bc3e626531032df31204587bcff81766cfa"
       },
       {
         "path": "scripts/lib/atomic-proof-artifact.mjs",

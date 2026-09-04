@@ -1494,13 +1494,14 @@ contain no unresolved or dynamic edge and write no build output. The verifier st
 listener, product server, or external host; the independent root mutation reader has ten cases and
 remains passive.
 
-The 188,599-byte artifact is
+The 189,123-byte artifact is
 `docs/proof/artifacts/desen-app-0.1.0-published-host-update.json` at
-`sha256:82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282`.
-Its 3,110,146-byte authenticated T04 historical-reader bridge is
-`sha256:784552241d8ac1ead3ce20886076f177db86cced534cc4d0e36081497a006d75`.
+`sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`.
+Its 3,111,833-byte authenticated T04 historical-reader bridge is
+`sha256:07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470`
+and inflates to 4,884,471 bytes.
 Checkpoint sequence 72 closes 59 artifacts / 118 current readers at
-`sha256:f74d5d69bc7b6523978b7d53f74f1670de4121b76be272e46135380284d1d58d`;
+`sha256:68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8`;
 the dedicated checkpoint suite passes 100/100.
 
 The CI inventory contains 220 workloads / 105 proof units at

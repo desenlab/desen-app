@@ -17,6 +17,7 @@ import {
   authenticateDesenAppEvergreenProductCompositionSuccessor,
   buildDesenAppEvergreenProductCompositionEvidence,
   materializeDesenAppHistoricalReaderFileOverrides,
+  materializeDesenAppT01aHistoricalReaderFileOverrides,
   projectDesenAppHistoricalReaderPathInventory,
   readDesenAppHistoricalReaderProjection,
   readDesenAppHistoricalReaderTaskTimeFile,
@@ -384,6 +385,16 @@ test(DESEN_APP_EVERGREEN_PRODUCT_COMPOSITION_ROOT_TEST_NAMES[9], async () => {
     buildDesenAppEvergreenProductCompositionEvidence({ unexpected: true }),
     expectedError("OPTIONS_INVALID"),
   );
+  await assert.rejects(
+    authenticateDesenAppEvergreenProductCompositionSuccessor({ workspaceRoot: 1 }),
+    expectedError("OPTIONS_INVALID"),
+  );
+  const revokedOptions = Proxy.revocable({}, {});
+  revokedOptions.revoke();
+  await assert.rejects(
+    authenticateDesenAppEvergreenProductCompositionSuccessor(revokedOptions.proxy),
+    expectedError("OPTIONS_INVALID"),
+  );
   const accessorOptions = {};
   Object.defineProperty(accessorOptions, "workspaceRoot", { get: () => ROOT, enumerable: true });
   await assert.rejects(
@@ -416,11 +427,70 @@ test(DESEN_APP_EVERGREEN_PRODUCT_COMPOSITION_ROOT_TEST_NAMES[9], async () => {
   callerMutation[0] ^= 1;
   assert.notDeepEqual(materialized.get(taskTimePath), callerMutation);
 
+  const appPackagePath = "apps/desen-app/package.json";
+  const successorAppPackage = materializeDesenAppHistoricalReaderFileOverrides(
+    successor,
+    new Map(),
+  ).get(appPackagePath);
+  const t01aAppPackage = materializeDesenAppT01aHistoricalReaderFileOverrides(
+    successor,
+    new Map(),
+  ).get(appPackagePath);
+  assert.equal(successorAppPackage.byteLength, 4_546);
+  assert.equal(
+    createHash("sha256").update(successorAppPackage).digest("hex"),
+    "c634b5ee1e2d2af0ffd6db8d4841215664591a31999210a8e0b388b71509eb32",
+  );
+  assert.equal(t01aAppPackage.byteLength, 4_122);
+  assert.equal(
+    createHash("sha256").update(t01aAppPackage).digest("hex"),
+    "7038647aa1809f07ee5131d0df8d0bee75bf1f2cdf0358be738b2c3603b64577",
+  );
+  assert.notDeepEqual(t01aAppPackage, successorAppPackage);
+
+  const callerAppPackage = Buffer.from("exact caller package mutation", "utf8");
+  const t01aWithCallerMutation = materializeDesenAppT01aHistoricalReaderFileOverrides(
+    successor,
+    new Map([[appPackagePath, callerAppPackage]]),
+  );
+  assert.deepEqual(t01aWithCallerMutation.get(appPackagePath), callerAppPackage);
+  callerAppPackage[0] ^= 1;
+  assert.notDeepEqual(t01aWithCallerMutation.get(appPackagePath), callerAppPackage);
+
   class HostileMap extends Map {}
   assert.throws(
     () => materializeDesenAppHistoricalReaderFileOverrides(successor, new HostileMap()),
     expectedError("OPTIONS_INVALID"),
   );
+  let proxyPrototypeTrapRan = false;
+  const proxiedMap = new Proxy(new Map(), {
+    getPrototypeOf() {
+      proxyPrototypeTrapRan = true;
+      throw new Error("hostile prototype trap must not run");
+    },
+  });
+  assert.throws(
+    () => materializeDesenAppHistoricalReaderFileOverrides(successor, proxiedMap),
+    expectedError("OPTIONS_INVALID"),
+  );
+  assert.equal(proxyPrototypeTrapRan, false);
+
+  let hostileBufferGetterRan = false;
+  class HostileBytes extends Uint8Array {
+    get buffer() {
+      hostileBufferGetterRan = true;
+      throw new Error("hostile buffer getter must not run");
+    }
+  }
+  assert.throws(
+    () =>
+      materializeDesenAppHistoricalReaderFileOverrides(
+        successor,
+        new Map([[taskTimePath, new HostileBytes(1)]]),
+      ),
+    expectedError("OPTIONS_INVALID"),
+  );
+  assert.equal(hostileBufferGetterRan, false);
   const accessorMap = new Map();
   Object.defineProperty(accessorMap, "entries", { get: () => Map.prototype.entries });
   assert.throws(

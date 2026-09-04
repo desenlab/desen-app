@@ -2448,9 +2448,9 @@ identities remain unchanged across the two publications. Source and Catalog data
 fixed channel, host, endpoint, bearer, activation callback, server implementation, or executable
 module.
 
-The immutable evidence contains 116 tracked receipts in 188,599 bytes at
+The immutable evidence contains 116 tracked receipts in 189,123 bytes at
 `docs/proof/artifacts/desen-app-0.1.0-published-host-update.json`,
-`sha256:82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282`.
+`sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`.
 The task verifier passes, its independent root reader passes 10/10, focused suites pass 74/74,
 18/18, 35/35, and 31/31, and the dedicated Chromium journey passes 1/1. The deterministic reader
 binds 66 declaration sites without treating them as executed tests. Fresh Vite observations contain
@@ -2458,17 +2458,18 @@ binds 66 declaration sites without treating them as executed tests. Fresh Vite o
 unresolved edges and 22 byte-identical managed modules shared by both graphs. Dependency boundaries
 pass across 861 modules / 3,685 dependencies.
 
-The bounded 3,110,146-byte T04 historical-reader bridge at
-`sha256:784552241d8ac1ead3ce20886076f177db86cced534cc4d0e36081497a006d75` inflates to
-4,878,660 bytes and reconstructs 51 files, two authenticated predecessor gaps, seven successor
-paths, and one projection without changing predecessor artifacts. The T04 verifier and its root
+The bounded 3,111,833-byte T04 historical-reader bridge at
+`sha256:07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470` inflates to
+4,884,471 bytes and reconstructs 51 files, two authenticated predecessor gaps, one separately
+authenticated T01A ancestor gap, seven successor paths, and one projection without changing
+predecessor artifacts. The T04 verifier and its root
 reader also pass, including 10/10 root cases. The neutral CI inventory contains 220 workloads / 105
 proof units; the M10-T05 closure contains 73 proof units / 156 workloads, and exact-one ownership
 covers 1,446 tracked paths / 210 proof-owned paths.
 
 Checkpoint sequence 72 preserves sequences 1–71 and authenticates 59 frozen artifacts / 118
 current readers at
-`sha256:f74d5d69bc7b6523978b7d53f74f1670de4121b76be272e46135380284d1d58d`.
+`sha256:68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8`.
 
 P-07 advances to `PROVEN` and PF-059 closes for the audited Web–React profile. Overall progress
 advances to 117/148 (79%) and M10 to 8/12 (67%); proof gates remain 11/13 and M10-T06 is next.

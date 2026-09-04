@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
+import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -19,6 +20,7 @@ import {
   buildDesenAppPublishedHostUpdateEvidence,
   materializeDesenAppT04HistoricalReaderFileOverrides,
   projectDesenAppT04HistoricalReaderPathInventory,
+  readDesenAppT01aHistoricalReaderGapFile,
   readDesenAppT04HistoricalReaderTaskTimeFile,
   verifyDesenAppPublishedHostUpdateBrowserPolicy,
   verifyDesenAppPublishedHostUpdateEvidence,
@@ -30,6 +32,15 @@ import {
 const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-published-host-update.json";
 const REPORT_PATH = "docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md";
+const T01A_APP_PACKAGE_PATH = "apps/desen-app/package.json";
+const T01A_APP_PACKAGE_RECEIPT = Object.freeze({
+  bytes: 4_122,
+  sha256: "7038647aa1809f07ee5131d0df8d0bee75bf1f2cdf0358be738b2c3603b64577",
+});
+const T04_APP_PACKAGE_RECEIPT = Object.freeze({
+  bytes: 4_546,
+  sha256: "c634b5ee1e2d2af0ffd6db8d4841215664591a31999210a8e0b388b71509eb32",
+});
 const SOURCE_PATHS = Object.freeze({
   runtimePublication: "apps/desen-app/src/local-runtime-publication.ts",
   main: "apps/desen-app/src/main.tsx",
@@ -136,11 +147,58 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[0], async () => {
   assert.equal(built.artifact.authority.historicalReaderBridge.predecessorGapFiles, 2);
   assert.equal(built.artifact.authority.historicalReaderBridge.successorAddedPaths, 7);
   assert.equal(built.artifact.authority.historicalReaderBridge.approvedAr01ReceiptAmendments, 2);
+  assert.deepEqual(
+    built.artifact.authority.historicalReaderBridge.t01aAncestor,
+    DESEN_APP_T04_HISTORICAL_READER_BRIDGE_PIN.t01aAncestor,
+  );
+  assert.deepEqual(Object.keys(bridgeManifest.t01aAncestor.files), [T01A_APP_PACKAGE_PATH]);
   assert.equal(successor.task, "M10-T05");
   assert.equal(successor.artifact.sha256, DESEN_APP_PUBLISHED_HOST_UPDATE_ARTIFACT_PIN.sha256);
 
   const historical = materializeDesenAppT04HistoricalReaderFileOverrides(successor, new Map());
   assert.equal(historical.size, 53);
+  const t04AppPackage = historical.get(T01A_APP_PACKAGE_PATH);
+  assert.equal(t04AppPackage.byteLength, T04_APP_PACKAGE_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(t04AppPackage).digest("hex"),
+    T04_APP_PACKAGE_RECEIPT.sha256,
+  );
+  const t04AppPackageDirect = readDesenAppT04HistoricalReaderTaskTimeFile(
+    successor,
+    T01A_APP_PACKAGE_PATH,
+  );
+  assert.equal(t04AppPackageDirect.byteLength, T04_APP_PACKAGE_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(t04AppPackageDirect).digest("hex"),
+    T04_APP_PACKAGE_RECEIPT.sha256,
+  );
+  const firstT01aAppPackage = readDesenAppT01aHistoricalReaderGapFile(
+    successor,
+    T01A_APP_PACKAGE_PATH,
+  );
+  const secondT01aAppPackage = readDesenAppT01aHistoricalReaderGapFile(
+    successor,
+    T01A_APP_PACKAGE_PATH,
+  );
+  assert.equal(firstT01aAppPackage.byteLength, T01A_APP_PACKAGE_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(firstT01aAppPackage).digest("hex"),
+    T01A_APP_PACKAGE_RECEIPT.sha256,
+  );
+  firstT01aAppPackage[0] ^= 1;
+  assert.notDeepEqual(firstT01aAppPackage, secondT01aAppPackage);
+  assert.throws(
+    () => readDesenAppT01aHistoricalReaderGapFile(Object.freeze({}), T01A_APP_PACKAGE_PATH),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  assert.throws(
+    () => readDesenAppT01aHistoricalReaderGapFile(successor, "pnpm-lock.yaml"),
+    expectedError("OPTIONS_INVALID"),
+  );
+  assert.throws(
+    () => readDesenAppT01aHistoricalReaderGapFile(Object.freeze({}), "../escape"),
+    expectedError("OPTIONS_INVALID"),
+  );
   const taskTimePath = "apps/desen-app/src/main.tsx";
   const firstCopy = readDesenAppT04HistoricalReaderTaskTimeFile(successor, taskTimePath);
   const secondCopy = readDesenAppT04HistoricalReaderTaskTimeFile(successor, taskTimePath);
@@ -185,6 +243,10 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[0], async () => {
   assert.equal(
     lightweightSuccessor.artifact.sha256,
     DESEN_APP_PUBLISHED_HOST_UPDATE_ARTIFACT_PIN.sha256,
+  );
+  assert.deepEqual(
+    readDesenAppT01aHistoricalReaderGapFile(lightweightSuccessor, T01A_APP_PACKAGE_PATH),
+    secondT01aAppPackage,
   );
 
   const artifactPath = path.join(lightweightWorkspace, ARTIFACT_PATH);
