@@ -2285,7 +2285,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   visible label and layout through two normal-product Save → Publish → Activate cycles, while the
   separately built host's source and static build identity remain unchanged. Evidence:
   `docs/proof/artifacts/desen-app-0.1.0-published-host-update.json`
-  `sha256:851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64`.
+  `sha256:82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282`.
 
 - Closure decision: PF-059 is closed for the audited App/reference-host Web–React graph and P-07 is
   `PROVEN`. Any legitimate future reference-host or App infrastructure change must still update the

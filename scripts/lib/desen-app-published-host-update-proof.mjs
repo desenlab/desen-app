@@ -252,6 +252,8 @@ const FOCUSED_TEST_COMMANDS = Object.freeze([
 ]);
 const BROWSER_COMMAND =
   "pnpm --filter @desen/app-browser-e2e exec playwright test --config published-host-playwright.config.ts";
+const BROWSER_E2E_SCRIPT =
+  "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts";
 const BROWSER_TEST_NAME =
   "publishes visible label and layout edits into one unchanged independent host build";
 
@@ -392,8 +394,8 @@ const DEFAULT_PROOF_DOCUMENT_PATH = path.join(WORKSPACE_ROOT, PROOF_DOCUMENT_REL
 
 /** Exact frozen artifact identity; the reader and root test remain checkpoint-owned. */
 export const DESEN_APP_PUBLISHED_HOST_UPDATE_ARTIFACT_PIN = Object.freeze({
-  bytes: 188_547,
-  sha256: "851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64",
+  bytes: 188_599,
+  sha256: "82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282",
 });
 
 const SUCCESSOR_AUTHORITIES = new WeakMap();
@@ -2573,9 +2575,7 @@ function verifyPackageAuthority(files) {
     app.scripts?.["test:product-bootstrap"] !==
       "vitest run test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx" ||
     browser?.name !== "@desen/app-browser-e2e" ||
-    !browser.scripts?.["test:e2e"]?.endsWith(
-      "playwright test --config published-host-playwright.config.ts",
-    ) ||
+    browser.scripts?.["test:e2e"] !== BROWSER_E2E_SCRIPT ||
     host?.name !== "@desen/reference-host-web" ||
     host.scripts?.build !== "vite build" ||
     server?.name !== "@desen/reference-host-web-server" ||
@@ -2594,6 +2594,7 @@ function verifyPackageAuthority(files) {
     focusedCommands: FOCUSED_TEST_COMMANDS,
     browserCommand: BROWSER_COMMAND,
     browserSuiteIncludesPublishedHostConfig: true,
+    browserSuiteBuildsDependencyClosures: true,
   });
 }
 

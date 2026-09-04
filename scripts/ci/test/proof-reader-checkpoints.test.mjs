@@ -789,7 +789,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[71],
-    "5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58",
+    "f74d5d69bc7b6523978b7d53f74f1670de4121b76be272e46135380284d1d58d",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -3091,8 +3091,8 @@ test("sequence seventy-two appends M10-T05 and reseals only its exact current re
   assert.deepEqual(current.artifacts[58], {
     task: "M10-T05",
     path: "docs/proof/artifacts/desen-app-0.1.0-published-host-update.json",
-    bytes: 188547,
-    sha256: "851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64",
+    bytes: 188599,
+    sha256: "82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282",
   });
   assert.deepEqual(current.readers.slice(116).map(identity), [
     {
@@ -3135,13 +3135,13 @@ test("sequence seventy-two appends M10-T05 and reseals only its exact current re
       },
       {
         index: 116,
-        bytes: 123158,
-        sha256: "f5f577fecf51ded6d7f3eb3becb1d1e1fe81a6e5542daf7e54d9de85ffca8253",
+        bytes: 123714,
+        sha256: "a2a4593de7e2e6b00b234ecd6b01b543dceb02c3f1f4a1caed7bf87e149ba78b",
       },
       {
         index: 117,
-        bytes: 37545,
-        sha256: "22a54ae49dba1ca32910f5800018808778de40dce2d343463849a8dde117fee4",
+        bytes: 38160,
+        sha256: "6b4df081b2f3b7242a20dd8e95ea3c9dafdbfcc751f98eabc6707d7d5644969c",
       },
     ],
   );
@@ -3156,7 +3156,7 @@ test("sequence seventy-two appends M10-T05 and reseals only its exact current re
   );
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58",
+    "f74d5d69bc7b6523978b7d53f74f1670de4121b76be272e46135380284d1d58d",
   );
 });
 

@@ -3713,7 +3713,8 @@
         "pnpm --filter @desen/reference-host-web-server typecheck"
       ],
       "browserCommand": "pnpm --filter @desen/app-browser-e2e exec playwright test --config published-host-playwright.config.ts",
-      "browserSuiteIncludesPublishedHostConfig": true
+      "browserSuiteIncludesPublishedHostConfig": true,
+      "browserSuiteBuildsDependencyClosures": true
     },
     "historicalReaderBridge": {
       "path": "docs/proof/artifacts/desen-app-0.1.0-t04-historical-reader-bridge.json.gz",
@@ -3777,8 +3778,8 @@
     "trackedReceipts": [
       {
         "path": "apps/desen-app-browser-e2e/package.json",
-        "bytes": 1319,
-        "sha256": "91a345ed90f13a389aa0c91d1d765314ffbb7d3c817de1f25f89c03a4346456a"
+        "bytes": 1325,
+        "sha256": "5013c9fbecd02e64f7d1220807a7d46bbfe55c76c403565421ecbe55d5966bc5"
       },
       {
         "path": "apps/desen-app-browser-e2e/published-host-playwright.config.ts",

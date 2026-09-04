@@ -1692,14 +1692,14 @@ and workload set
 `sha256:39331deb57f2d8526e292a56aa031711bc1ca714631c3967f32f19dc5ff5d42f`.
 
 Reviewed checkpoint sequence 72 preserves sequences 1–71 and all 58 predecessor artifacts. It
-adds the 188,547-byte T05 artifact at
-`sha256:851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64`,
+adds the 188,599-byte T05 artifact at
+`sha256:82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282`,
 reseals only the changed T04 proof/root readers `[112, 113]`, appends T05 readers `[116, 117]`, and
 closes 59 artifacts / 118 readers at
-`sha256:5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58`.
+`sha256:f74d5d69bc7b6523978b7d53f74f1670de4121b76be272e46135380284d1d58d`.
 Promotion binds the current selector at
-`sha256:97f5f7447ee37bc57e84bac56369cfbd5d2ac4440c0c14e9b29a742c1efc6150`
+`sha256:3df347ce80086cac9e3ad735391216402d6bb91332ac4759822a32f6287cb66f`
 and required-affected runner authority at
-`sha256:0145bfe6f8e0d5af78f5b37438e022bce50ac2508290700d53f8a34935ec9c93`.
+`sha256:d17200d8c7a25aa1dba6a2b459c506ca6db59b7f805ed361969662e5c2f97dbb`.
 No workload, barrier, timeout, isolation rule, closing guard, or fresh hosted execution requirement
 is removed. These local identity receipts do not claim an exact-head hosted result or close G10.

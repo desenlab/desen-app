@@ -659,6 +659,25 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
     }),
     expectedError("BOUNDARY_POLICY_VIOLATION"),
   );
+  const browserPackagePath = "apps/desen-app-browser-e2e/package.json";
+  const browserPackage = await readFile(path.join(ROOT, browserPackagePath), "utf8");
+  await assert.rejects(
+    buildDesenAppPublishedHostUpdateEvidence({
+      fileOverrides: new Map([
+        [
+          browserPackagePath,
+          Buffer.from(
+            replaceOnce(
+              browserPackage,
+              "pnpm --filter @desen/reference-host-web... build",
+              "pnpm --filter @desen/reference-host-web build",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("SOURCE_POLICY_VIOLATION"),
+  );
 });
 
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[7], () => {

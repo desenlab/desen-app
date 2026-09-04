@@ -11,16 +11,16 @@ revision A and then revision B after reload, while its HTML, JavaScript, CSS, an
 remain unchanged. Authored Source cannot select the channel, host, endpoint, credential, callback,
 server implementation, or executable module.
 
-The 188,547-byte immutable evidence artifact is
+The 188,599-byte immutable evidence artifact is
 `docs/proof/artifacts/desen-app-0.1.0-published-host-update.json` at
-`sha256:851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64`.
+`sha256:82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282`.
 The verifier passes, the independent root reader passes 10/10, focused suites pass 74/74, 18/18,
 35/35, and 31/31, and the dedicated Chromium journey passes 1/1. Fresh Vite observations close at
 168 App modules / 510 static edges and 104 host modules / 299 static edges, with zero dynamic or
 unresolved edges and 22 byte-identical managed modules shared by both builds. The boundary graph
 passes across 861 modules / 3,685 dependencies. P-07 advances to `PROVEN` and PF-059 closes for the
 audited Web–React profile. Checkpoint sequence 72 authenticates 59 artifacts / 118 readers at
-`sha256:5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58`; proof gates remain
+`sha256:f74d5d69bc7b6523978b7d53f74f1670de4121b76be272e46135380284d1d58d`; proof gates remain
 11/13.
 
 The `DONE` entry does not authorize merge yet. Fresh hosted `Quality gate` and `Browser E2E` must
@@ -4982,9 +4982,9 @@ M09-T14/G09 evidence:
 - fresh Vite audits contain 168 App modules / 510 static edges and 104 host modules / 299 static
   edges, no dynamic or unresolved edges, and 22 byte-identical managed modules shared by both
   builds; the boundary graph passes across 861 modules / 3,685 dependencies
-- immutable evidence: 188,547 bytes / 116 tracked receipts at
+- immutable evidence: 188,599 bytes / 116 tracked receipts at
   `docs/proof/artifacts/desen-app-0.1.0-published-host-update.json`,
-  `sha256:851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64`
+  `sha256:82ffdcb2c77b5cc60eb959a9ec7543e8c322004778ce8b99375005ae4b410282`
 - the 3,110,146-byte T04 historical-reader bridge at
   `sha256:784552241d8ac1ead3ce20886076f177db86cced534cc4d0e36081497a006d75` inflates to
   4,878,660 bytes and reconstructs 51 files, two authenticated predecessor gaps, seven successor
@@ -4993,7 +4993,7 @@ M09-T14/G09 evidence:
 - the neutral CI inventory contains 220 workloads / 105 proof units; T05 closure contains 73 proof
   units / 156 workloads; exact-one ownership covers 1,446 tracked paths / 210 proof-owned paths;
   checkpoint sequence 72 closes 59 artifacts / 118 readers at
-  `sha256:5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58`
+  `sha256:f74d5d69bc7b6523978b7d53f74f1670de4121b76be272e46135380284d1d58d`
 - coverage decision: M10-T05 is a `DONE` closure candidate; P-07 advances to `PROVEN`, PF-059 closes,
   progress advances to 117/148 (79%), and M10 advances to 8/12 (67%); proof gates remain 11/13 and
   M10-T06 is next
