@@ -87,7 +87,7 @@ async function waitFor(predicate, message) {
   assert.fail(message);
 }
 
-test("the dependency-derived plan owns the exact 218-node exhaustive inventory", () => {
+test("the dependency-derived plan owns the exact 220-node exhaustive inventory", () => {
   const plan = createRequiredExhaustivePlan();
   const inventory = createExhaustiveWorkloadInventory();
   const ownedIds = [
@@ -102,19 +102,19 @@ test("the dependency-derived plan owns the exact 218-node exhaustive inventory",
   assert.equal(PROOF_PAIR_CONCURRENCY, 2);
   assert.equal(DEFAULT_STEP_TIMEOUT_MS, 15 * 60 * 1_000);
   assert.equal(DEFAULT_GATE_TIMEOUT_MS, 18 * 60 * 1_000 + 30 * 1_000);
-  assert.equal(plan.stepCount, 218);
-  assert.equal(plan.proofPairCount, 104);
+  assert.equal(plan.stepCount, 220);
+  assert.equal(plan.proofPairCount, 105);
   assert.equal(plan.prefix.length, 8);
   assert.equal(plan.suffix.length, 2);
-  assert.equal(plan.planSha256, "c0890abfe421e5fc328a92e8ebc186707066902a969027be7c470e2e02e2481f");
-  assert.equal(ownedIds.length, 218);
-  assert.equal(new Set(ownedIds).size, 218);
+  assert.equal(plan.planSha256, "30799382d92edf70455a42bc01e13973324bf1a916b5b925ad86c429b926fb2a");
+  assert.equal(ownedIds.length, 220);
+  assert.equal(new Set(ownedIds).size, 220);
   assert.deepEqual([...ownedIds].sort(), inventory.nodes.map(({ id }) => id).sort());
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-9).id,
-      verifier: plan.proofPairs.at(-9).verifier.id,
-      rootTest: plan.proofPairs.at(-9).rootTest.id,
+      id: plan.proofPairs.at(-10).id,
+      verifier: plan.proofPairs.at(-10).verifier.id,
+      rootTest: plan.proofPairs.at(-10).rootTest.id,
     },
     {
       id: "desen-app-empty-project-browser-e2e",
@@ -124,9 +124,9 @@ test("the dependency-derived plan owns the exact 218-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-8).id,
-      verifier: plan.proofPairs.at(-8).verifier.id,
-      rootTest: plan.proofPairs.at(-8).rootTest.id,
+      id: plan.proofPairs.at(-9).id,
+      verifier: plan.proofPairs.at(-9).verifier.id,
+      rootTest: plan.proofPairs.at(-9).rootTest.id,
     },
     {
       id: "desen-app-browser-e2e-workspace-compatibility",
@@ -136,9 +136,9 @@ test("the dependency-derived plan owns the exact 218-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-7).id,
-      verifier: plan.proofPairs.at(-7).verifier.id,
-      rootTest: plan.proofPairs.at(-7).rootTest.id,
+      id: plan.proofPairs.at(-8).id,
+      verifier: plan.proofPairs.at(-8).verifier.id,
+      rootTest: plan.proofPairs.at(-8).rootTest.id,
     },
     {
       id: "desen-app-user-created-blank-project",
@@ -148,9 +148,9 @@ test("the dependency-derived plan owns the exact 218-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-6).id,
-      verifier: plan.proofPairs.at(-6).verifier.id,
-      rootTest: plan.proofPairs.at(-6).rootTest.id,
+      id: plan.proofPairs.at(-7).id,
+      verifier: plan.proofPairs.at(-7).verifier.id,
+      rootTest: plan.proofPairs.at(-7).rootTest.id,
     },
     {
       id: "desen-app-visual-behavior-authoring",
@@ -160,9 +160,9 @@ test("the dependency-derived plan owns the exact 218-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-5).id,
-      verifier: plan.proofPairs.at(-5).verifier.id,
-      rootTest: plan.proofPairs.at(-5).rootTest.id,
+      id: plan.proofPairs.at(-6).id,
+      verifier: plan.proofPairs.at(-6).verifier.id,
+      rootTest: plan.proofPairs.at(-6).rootTest.id,
     },
     {
       id: "desen-app-evergreen-product-composition",
@@ -172,9 +172,9 @@ test("the dependency-derived plan owns the exact 218-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-4).id,
-      verifier: plan.proofPairs.at(-4).verifier.id,
-      rootTest: plan.proofPairs.at(-4).rootTest.id,
+      id: plan.proofPairs.at(-5).id,
+      verifier: plan.proofPairs.at(-5).verifier.id,
+      rootTest: plan.proofPairs.at(-5).rootTest.id,
     },
     {
       id: "desen-app-input-pending-fixture",
@@ -184,9 +184,9 @@ test("the dependency-derived plan owns the exact 218-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-3).id,
-      verifier: plan.proofPairs.at(-3).verifier.id,
-      rootTest: plan.proofPairs.at(-3).rootTest.id,
+      id: plan.proofPairs.at(-4).id,
+      verifier: plan.proofPairs.at(-4).verifier.id,
+      rootTest: plan.proofPairs.at(-4).rootTest.id,
     },
     {
       id: "desen-app-failure-fixture",
@@ -196,9 +196,9 @@ test("the dependency-derived plan owns the exact 218-node exhaustive inventory",
   );
   assert.deepEqual(
     {
-      id: plan.proofPairs.at(-2).id,
-      verifier: plan.proofPairs.at(-2).verifier.id,
-      rootTest: plan.proofPairs.at(-2).rootTest.id,
+      id: plan.proofPairs.at(-3).id,
+      verifier: plan.proofPairs.at(-3).verifier.id,
+      rootTest: plan.proofPairs.at(-3).rootTest.id,
     },
     {
       id: "desen-app-success-host-operation",
@@ -206,9 +206,12 @@ test("the dependency-derived plan owns the exact 218-node exhaustive inventory",
       rootTest: "test-desen-app-success-host-operation",
     },
   );
-  assert.equal(plan.proofPairs.at(-1).id, "historical-archive-redaction");
-  assert.equal(plan.proofPairs.at(-1).verifier.id, "verify-historical-archive-redaction");
-  assert.equal(plan.proofPairs.at(-1).rootTest.id, "test-historical-archive-redaction");
+  assert.equal(plan.proofPairs.at(-2).id, "historical-archive-redaction");
+  assert.equal(plan.proofPairs.at(-2).verifier.id, "verify-historical-archive-redaction");
+  assert.equal(plan.proofPairs.at(-2).rootTest.id, "test-historical-archive-redaction");
+  assert.equal(plan.proofPairs.at(-1).id, "desen-app-published-host-update");
+  assert.equal(plan.proofPairs.at(-1).verifier.id, "verify-desen-app-published-host-update");
+  assert.equal(plan.proofPairs.at(-1).rootTest.id, "test-desen-app-published-host-update");
   for (const pair of plan.proofPairs) {
     assert.deepEqual(pair.rootTest.dependencies, [pair.verifier.id]);
   }
@@ -232,7 +235,7 @@ test("authority defaults to REQUIRED, accepts only explicit SHADOW, and fixes EX
   assert.equal(observationPlan.scope, "EXHAUSTIVE");
   assert.equal(
     observationPlan.planSha256,
-    "f502bc7a8c279037b391f59d24921126bf90a96998d497a306c0a23ba650cf38",
+    "0cb43b3c983e0e7ef6fb7536e08a90a9ce21a811eff22aab5767367c76b12641",
   );
   assert.throws(
     () => createRequiredExhaustivePlan({ scope: "AFFECTED" }),
@@ -322,7 +325,7 @@ test("REQUIRED authority rejects injected success runners and repository seams",
   assert.equal(executionCount, 0);
 });
 
-test("all 218 successful closes produce stable inventory-ordered receipts", async () => {
+test("all 220 successful closes produce stable inventory-ordered receipts", async () => {
   const plan = createShadowPlan();
   const calls = [];
   const receipt = await runShadowPlan(plan, {
@@ -333,8 +336,8 @@ test("all 218 successful closes produce stable inventory-ordered receipts", asyn
     ...successfulGuardOptions(),
   });
 
-  assert.equal(calls.length, 218);
-  assert.equal(new Set(calls).size, 218);
+  assert.equal(calls.length, 220);
+  assert.equal(new Set(calls).size, 220);
   assert.equal(calls.filter((id) => id === "editor-core-public-package-contract").length, 1);
   assert.equal(
     calls.indexOf("editor-core-public-package-contract"),
@@ -376,7 +379,7 @@ test("all 218 successful closes produce stable inventory-ordered receipts", asyn
     true,
   );
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 218);
+  assert.equal(receipt.observedClosedCount, 220);
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
     plan.nodes.map(({ id }) => id),
@@ -481,7 +484,7 @@ test("a held early digest lets its original segment progress but cannot cross th
   }
   const receipt = await running;
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 218);
+  assert.equal(receipt.observedClosedCount, 220);
   assert.equal(
     started.indexOf(digestPair.rootTest.id) <
       started.indexOf(plan.proofPairs[firstBarrierIndex].verifier.id),
@@ -573,7 +576,7 @@ test("dynamic workers keep two safe ordinary pairs active and drain for all barr
   assert.equal(maximumActive, 2);
   assert.equal(thirdPairStartedWhileFirstHeld, true);
   assert.equal(barrierPairs.length, 11);
-  assert.equal(plan.proofPairs.length - barrierPairs.length, 93);
+  assert.equal(plan.proofPairs.length - barrierPairs.length, 94);
   assert.equal(exclusiveBarrierSteps.size, 22);
 });
 
@@ -1305,7 +1308,7 @@ test("build-output and untracked closing guards run after a primary proof failur
   assert.equal(untrackedSnapshots, 2);
 });
 
-test("untracked drift fails the gate even after all 218 steps close successfully", async () => {
+test("untracked drift fails the gate even after all 220 steps close successfully", async () => {
   const plan = createShadowPlan();
   const untrackedDrift = new Error("untracked drift");
   await assert.rejects(
@@ -1320,7 +1323,7 @@ test("untracked drift fails the gate even after all 218 steps close successfully
     (error) => {
       assert.equal(error, untrackedDrift);
       assert.equal(error.requiredExhaustiveReceipt.status, "FAIL");
-      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 218);
+      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 220);
       return true;
     },
   );
@@ -1349,7 +1352,7 @@ test("the full gate authenticates repository inputs and hosted revision without 
   assert.equal(receipt.inventory.authority, "SHADOW");
   assert.equal(receipt.inventory.scope, "EXHAUSTIVE");
   assert.equal(receipt.execution.status, "PASS");
-  assert.equal(receipt.execution.observedClosedCount, 218);
+  assert.equal(receipt.execution.observedClosedCount, 220);
   assert.equal(receipt.execution.cleanInput.revision, revision);
 });
 

@@ -4,6 +4,7 @@ import { SIGN_IN_OPERATION_ID } from "@desen/reference-catalog-web/operations";
 
 import { createAuthoringIntegrationBinding } from "./authoring-integration.js";
 import { createInjectedDesenAppLocalPersistencePort } from "./local-runtime-persistence.js";
+import { createInjectedDesenAppLocalPublicationPort } from "./local-runtime-publication.js";
 import {
   createDesenAppLocalSignInOperation,
   readInjectedDesenAppLocalOperationConfig,
@@ -17,6 +18,7 @@ import "./styles.css";
 
 import type { DesenEditorPersistencePort } from "@desen/editor-core";
 import type { AuthoringIntegrationBindingHandle } from "./authoring-integration.js";
+import type { AuthoringPublicationPort } from "./authoring-publication.js";
 
 normalizeInitialDesenAppLocation();
 
@@ -51,12 +53,19 @@ try {
 }
 
 let persistencePort: DesenEditorPersistencePort | null = null;
+let publicationPort: AuthoringPublicationPort | null = null;
 try {
   const browserFetch = globalThis.fetch.bind(globalThis);
   persistencePort = createInjectedDesenAppLocalPersistencePort(browserFetch);
 } catch {
   // A missing or malformed local-runtime authority is represented by the product's controlled,
   // fixture-free unavailable state. Configuration details and credentials never cross into UI.
+}
+try {
+  publicationPort = createInjectedDesenAppLocalPublicationPort(globalThis.fetch.bind(globalThis));
+} catch {
+  // Publication is an independent optional authority. A malformed activation profile cannot
+  // disable Source persistence or silently acquire a broader destination.
 }
 
 const root = createRoot(container);
@@ -69,6 +78,7 @@ root.render(
           render: () => (
             <DesenAppProduct
               persistencePort={persistencePort}
+              publicationPort={publicationPort}
               workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
             />
           ),

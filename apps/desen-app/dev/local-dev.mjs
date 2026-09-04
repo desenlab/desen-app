@@ -8,6 +8,15 @@ async function main() {
     host = await startDesenAppLocalDev({
       appDirectory: resolve(import.meta.dirname, ".."),
       stateDirectory: resolve(import.meta.dirname, "../../..", ".desen"),
+      publication: {
+        channelName: "preview",
+        clientRootDirectory: resolve(import.meta.dirname, "../../reference-host-web"),
+        hostId: "reference-host-web",
+        installedPackageDirectory: resolve(
+          import.meta.dirname,
+          "../../../packages/reference-catalog-web",
+        ),
+      },
     });
   } catch (error) {
     console.error(
@@ -21,6 +30,9 @@ async function main() {
 
   console.log(`Desen App is ready at ${host.appOrigin}`);
   console.log("Local Source persistence is active in the app-owned .desen directory.");
+  if (host.referenceHostOrigin !== null) {
+    console.log(`Published surfaces are available at ${host.referenceHostOrigin}/home`);
+  }
 
   let shutdownStarted = false;
   const shutdown = async () => {

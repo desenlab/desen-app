@@ -174,6 +174,8 @@ jobs:
           node --test tests/desen-app-failure-fixture.test.mjs
           node scripts/verify-desen-app-success-host-operation.mjs
           node --test tests/desen-app-success-host-operation.test.mjs
+          node scripts/verify-desen-app-published-host-update.mjs
+          node --test tests/desen-app-published-host-update.test.mjs
 
       - name: Upload browser failure evidence
         if: ${{ failure() }}

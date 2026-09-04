@@ -26,6 +26,14 @@ actual route contracts independently: channel reads require exact
 `application/json; charset=utf-8`, while immutable Bundle reads require exact `application/json`.
 Redirected, encoded, BOM-prefixed, over-limit, or differently typed responses fail closed.
 
+The trusted server handle also exposes `activatePublishedRevision` for the fixed local
+publication composition. It accepts only this server's configured channel plus the positive
+channel generation and immutable revision returned by publication. Before and after invoking the
+existing channel-activation controller, it independently reads the channel through the public
+control-plane client. An Active settlement requires both reads and the controller delivery to
+agree with the requested identity. The method is not an HTTP route, does not expose the bearer to
+the browser, and does not create an alternate activation controller.
+
 `204` means no authenticated active runtime is available. A refresh failure preserves an already
 authenticated delivery; `503` is returned only when no safe delivery can be produced. The bearer
 token, control-plane origin, package filesystem paths, previous-good revision, private authorities,
@@ -46,7 +54,7 @@ Catalog currently renders component presentation through DOM `style` attributes,
 attributes receive `style-src-attr 'unsafe-inline'`; inline scripts, inline stylesheet elements,
 evaluation, data scripts, and remote code origins remain forbidden.
 
-This server proves control-plane channel consumption and mounted-surface delivery only. It does
-not implement or proxy the browser's application-level `POST /api/sign-in` binding; a deployment
-must supply that backend in a later composition, and submission otherwise fails closed as
-unavailable.
+This server proves control-plane channel consumption, exact trusted activation reconciliation, and
+mounted-surface delivery only. It does not implement or proxy the browser's application-level
+`POST /api/sign-in` binding; a deployment must supply that backend in a later composition, and
+submission otherwise fails closed as unavailable.

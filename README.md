@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████████░░░░░` **116 / 148 tasks complete (78%)**
+**Overall:** `████████████████████░░░░░` **117 / 148 tasks complete (79%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -26,21 +26,22 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `███████░░░░░` **7 / 12 tasks complete (58%)**
+**M10:** `████████░░░░` **8 / 12 tasks complete (67%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **M10-T04 and CI-03:** `DONE` (PR #74 and main CI passed) · **AR-01:** conditional `DONE` pending exact-head hosted closure · **Next product task:** `M10-T05` (not started)
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **AR-01:** `DONE` (PR #76 and main CI passed) · **M10-T05:** `DONE` closure candidate pending exact-head hosted checks · **P-07:** `PROVEN` · **PF-059:** `CLOSED` · **Next product task:** `M10-T06` (not started)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
 <!-- task-progress:end -->
 
-[AR-01](docs/proof/HISTORICAL-ARCHIVE-REDACTION.md) is the user-authorized archive cleanup before
-M10-T05. Four nested historical transports are redacted without changing technical projections or
-the 57 existing frozen JSON artifacts. Current generators prevent republication, and current
-verification exposes new transport receipts separately from historical identities. Git history
-is not rewritten. AR-01 must pass its own exact-head hosted checks before closure; earlier
-[CI-03](docs/proof/CI-FRESH-PROOF-PERFORMANCE.md) and M10-T04 results do not authorize this head.
-The two-worker limit, eleven exclusive barriers, fresh execution, and 18m30s deadline are unchanged.
+[AR-01](docs/proof/HISTORICAL-ARCHIVE-REDACTION.md) closed in
+[PR #76](https://github.com/desenlab/desen-app/pull/76). Its exact head
+`bde3ea81f261a9839a2b61ecb242d4824083ee2c` passed both hosted checks in
+[run 33762532123](https://github.com/desenlab/desen-app/actions/runs/33762532123), merged as
+`33b922e6746365510c0549ddbf3b08469e58dc11`, and passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/33764464871). Four nested
+historical transports remain redacted without changing their technical projections or rewriting Git
+history. I07-05 retains the separate legacy-runner retirement scope.
 
 The reviewed CI-02 checkpoint retains this exact conditional-closure contract; it is a historical
 policy record, not an additional active task:
@@ -1343,6 +1344,33 @@ and navigation decisions. P-09 and P-10 advance to `PROVEN`; P-07, N-036 and G10
 owners. M10-T05, publication and activation without host source edits, is next and remains
 `NOT_STARTED`. The `DONE` entry is a closure candidate until this exact PR head's hosted
 `Quality gate` passes; local evidence alone never authorizes merge.
+
+**M10-T05 checkpoint:** the normal product now performs two visible Save → Publish → Activate
+cycles from a blank Account project. A separately built reference host first mounts revision A,
+then shows revision B's changed Text label and Stack gap after reload; a second reload preserves B.
+The host HTML, JavaScript, CSS, and source identities remain unchanged. Authored Source never selects
+the fixed channel, host, endpoint, bearer, activation callback, server implementation, or executable
+module.
+
+The task verifier passes, the independent root reader passes 10/10, focused suites pass 74/74,
+18/18, 35/35, and 31/31, and the dedicated Chromium journey passes 1/1. Fresh Vite audits contain
+168 App modules / 510 static edges and 104 host modules / 299 static edges, no dynamic or unresolved
+edges, and 22 byte-identical managed modules shared by both builds. Dependency boundaries pass over
+861 modules / 3,685 dependencies.
+
+The 188,547-byte, 116-receipt artifact is
+[`desen-app-0.1.0-published-host-update.json`](docs/proof/artifacts/desen-app-0.1.0-published-host-update.json)
+at `sha256:851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64`.
+Checkpoint sequence 72 preserves sequences 1–71 and authenticates 59 frozen artifacts / 118
+current readers at
+`sha256:5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58`.
+[The T05 proof](docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md) and
+[ADR 0020](docs/adr/0020-desen-app-fixed-destination-publication-and-host-activation.md) record the
+evidence and authority boundary. P-07 advances to `PROVEN`, PF-059 closes, implementation progress
+becomes 117/148 (79%), and M10 becomes 8/12 (67%); proof gates remain 11/13. M10-T06 is next.
+Invalid publication, last-known-good recovery, production identity, remote or multi-user deployment,
+native targets, P-12, N-036, and G10 remain open. T05's `DONE` entry remains a closure candidate
+until fresh hosted `Quality gate` and `Browser E2E` pass for its exact final PR head.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

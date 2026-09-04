@@ -93,11 +93,12 @@ The 57 previous frozen artifacts and checkpoint entries 1–70 remain intact; Gi
 rewritten. The six-command bounded baseline and 408 CI contract tests pass. Checkpoint 71
 authenticates 58 artifacts / 116 readers at
 `sha256:c49ca6eacbc08f18ac6cd5bebb3d0a9c3d21a5b8fe420d92364416a210155bda`.
-AR-01's `DONE` row is a conditional closure candidate until fresh `Quality gate` and `Browser E2E`
-pass for this exact final PR head. Until then AR-01 is the only active task and merge/completion
-are blocked; afterward the same unchanged revision records closure. M10-T05 remains `NOT_STARTED`
-and next after AR-01; implementation progress stays 116/148, M10 stays 7/12, and proof gates stay
-11/13. After AR-01 closure, development is paused; M10-T05 must not start automatically.
+AR-01 closed in [PR #76](https://github.com/desenlab/desen-app/pull/76). Its exact head
+`bde3ea81f261a9839a2b61ecb242d4824083ee2c` passed `Quality gate` and `Browser E2E` in
+[run 33762532123](https://github.com/desenlab/desen-app/actions/runs/33762532123), merged as
+`33b922e6746365510c0549ddbf3b08469e58dc11`, and that revision passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/33764464871). It changes no
+implementation-task or proof-gate count and I07-05 retains the legacy-runner retirement scope.
 
 Local CI-02 evidence is the passing six-command bounded baseline, the 2/2 focused CI-02 contract
 tests, unchanged 45-checkpoint/41-artifact/82-reader authority, passing infrastructure-debt and
@@ -2107,7 +2108,7 @@ and move to M10-T01.
 | M10-T02  | DONE        | M10-T01C                  | Input and pending fixture test                                                |
 | M10-T03  | DONE        | M10-T02                   | Failure fixture and visible failure-state test                                |
 | M10-T04  | DONE        | M10-T02                   | Success fixture, navigation, and real host-operation binding test             |
-| M10-T05  | NOT_STARTED | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
+| M10-T05  | DONE        | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
 | M10-T06  | NOT_STARTED | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
 | M10-T07  | NOT_STARTED | M10-T05, G07              | Corrupt revision and catalog mismatch preserve last-known-good                |
 | M10-T08  | NOT_STARTED | M10-T01B–M10-T07          | One-command seed/reset and repeatable sign-in demo runbook                    |
@@ -2438,6 +2439,44 @@ P-09 and P-10 advance to `PROVEN`. Overall progress advances to 116/148 (78%) an
 (58%); M10-T05 remains `NOT_STARTED` and next. Production identity, remote or multi-user execution,
 T05 publish/activation without host edits, T07 recovery, P-12, N-036 and G10 remain open. ADR 0017
 and `docs/proof/DESEN-APP-SUCCESS-HOST-OPERATION.md` record the decision and exact proof.
+
+M10-T05 has passed its local evidence. The normal product creates a blank Account project and uses
+visible Inspector controls for two Save → Publish → Activate cycles. The independently built
+reference host first mounts revision A, then shows the changed Text label and Stack gap from
+revision B after reload; a second reload preserves B. Its served HTML, JavaScript, CSS, and source
+identities remain unchanged across the two publications. Source and Catalog data cannot select the
+fixed channel, host, endpoint, bearer, activation callback, server implementation, or executable
+module.
+
+The immutable evidence contains 116 tracked receipts in 188,547 bytes at
+`docs/proof/artifacts/desen-app-0.1.0-published-host-update.json`,
+`sha256:851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64`.
+The task verifier passes, its independent root reader passes 10/10, focused suites pass 74/74,
+18/18, 35/35, and 31/31, and the dedicated Chromium journey passes 1/1. The deterministic reader
+binds 66 declaration sites without treating them as executed tests. Fresh Vite observations contain
+168 App modules / 510 static edges and 104 host modules / 299 static edges, with no dynamic or
+unresolved edges and 22 byte-identical managed modules shared by both graphs. Dependency boundaries
+pass across 861 modules / 3,685 dependencies.
+
+The bounded 3,110,146-byte T04 historical-reader bridge at
+`sha256:784552241d8ac1ead3ce20886076f177db86cced534cc4d0e36081497a006d75` inflates to
+4,878,660 bytes and reconstructs 51 files, two authenticated predecessor gaps, seven successor
+paths, and one projection without changing predecessor artifacts. The T04 verifier and its root
+reader also pass, including 10/10 root cases. The neutral CI inventory contains 220 workloads / 105
+proof units; the M10-T05 closure contains 73 proof units / 156 workloads, and exact-one ownership
+covers 1,446 tracked paths / 210 proof-owned paths.
+
+Checkpoint sequence 72 preserves sequences 1–71 and authenticates 59 frozen artifacts / 118
+current readers at
+`sha256:5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58`.
+
+P-07 advances to `PROVEN` and PF-059 closes for the audited Web–React profile. Overall progress
+advances to 117/148 (79%) and M10 to 8/12 (67%); proof gates remain 11/13 and M10-T06 is next.
+Invalid-publication diagnostics, T07 last-known-good recovery, production identity, remote or
+multi-user deployment, native targets, P-12, N-036, and G10 remain open. M10-T05's `DONE` entry is a
+closure candidate until fresh hosted `Quality gate` and `Browser E2E` pass for the exact final PR
+head; local evidence never authorizes merge. ADR 0020 and
+`docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md` record the decision and exact proof.
 
 ## M11 — Capability extensibility proof
 

@@ -6,11 +6,13 @@ import {
   LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE,
   openLocalControlPlane,
 } from "@desen/control-plane-api";
+import { calculateDesenBundleRevision } from "@desen/protocol";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { REFERENCE_HOST_MAX_DELIVERY_BYTES, openReferenceHostWebServer } from "../src/index.js";
 
 import type { LocalControlPlane } from "@desen/control-plane-api";
+import type { DesenBundle } from "@desen/protocol";
 import type { ReferenceHostWebServer } from "../src/index.js";
 
 const API_TOKEN = "m07-t11-reference-host-token-32-bytes";
@@ -44,7 +46,13 @@ async function temporaryRoot(prefix = "desen-reference-host-server-"): Promise<s
 }
 
 async function environment(): Promise<
-  Readonly<{ readonly origin: string; readonly root: string; readonly revision: string }>
+  Readonly<{
+    readonly api: LocalControlPlane;
+    readonly channelGeneration: number;
+    readonly origin: string;
+    readonly root: string;
+    readonly revision: string;
+  }>
 > {
   const root = await temporaryRoot();
   const api = await openLocalControlPlane({ rootDirectory: root, apiToken: API_TOKEN });
@@ -59,16 +67,21 @@ async function environment(): Promise<
   expect(
     await api.inject({ method: "PUT", path: `/v1/bundles/${revision}`, headers, body: bytes }),
   ).toMatchObject({ statusCode: 201 });
-  expect(
-    await api.inject({
-      method: "PUT",
-      path: `/v1/channels/${CHANNEL_NAME}`,
-      headers: { ...headers, "if-none-match": "*" },
-      body: new TextEncoder().encode(JSON.stringify({ revision })),
-    }),
-  ).toMatchObject({ statusCode: 201 });
+  const channelResponse = await api.inject({
+    method: "PUT",
+    path: `/v1/channels/${CHANNEL_NAME}`,
+    headers: { ...headers, "if-none-match": "*" },
+    body: new TextEncoder().encode(JSON.stringify({ revision })),
+  });
+  expect(channelResponse).toMatchObject({ statusCode: 201 });
+  const channel = JSON.parse(new TextDecoder().decode(channelResponse.body)) as Record<
+    string,
+    unknown
+  >;
+  const channelGeneration = Number(channel.generation);
+  expect(channelGeneration).toBe(1);
   const listener = await api.listen(0);
-  return Object.freeze({ origin: listener.origin, root, revision });
+  return Object.freeze({ api, channelGeneration, origin: listener.origin, root, revision });
 }
 
 afterEach(async () => {
@@ -80,6 +93,202 @@ afterEach(async () => {
 });
 
 describe("reference host loopback Web server", () => {
+  it("activates one exact published channel identity through the server's single controller", async () => {
+    const fixture = await environment();
+    const server = await openReferenceHostWebServer({
+      rootDirectory: fixture.root,
+      installedPackageDirectory: INSTALLED_PACKAGE_DIRECTORY,
+      clientBuildDirectory: CLIENT_BUILD_DIRECTORY,
+      controlPlaneOrigin: fixture.origin,
+      controlPlaneApiToken: API_TOKEN,
+      channelName: CHANNEL_NAME,
+    });
+    servers.push(server);
+    const activatePublishedRevision = server.activatePublishedRevision;
+    const request = Object.freeze({
+      channelName: CHANNEL_NAME,
+      channelGeneration: fixture.channelGeneration,
+      revision: fixture.revision,
+    });
+
+    await expect(activatePublishedRevision(request)).resolves.toEqual({
+      status: "active",
+      relationship: "activated",
+      activeRevision: fixture.revision,
+      activationGeneration: 0,
+    });
+    await expect(activatePublishedRevision(request)).resolves.toEqual({
+      status: "active",
+      relationship: "preserved",
+      activeRevision: fixture.revision,
+      activationGeneration: 0,
+    });
+  });
+
+  it("rejects malformed or mismatched publication identities without activating a candidate", async () => {
+    const fixture = await environment();
+    const server = await openReferenceHostWebServer({
+      rootDirectory: fixture.root,
+      installedPackageDirectory: INSTALLED_PACKAGE_DIRECTORY,
+      clientBuildDirectory: CLIENT_BUILD_DIRECTORY,
+      controlPlaneOrigin: fixture.origin,
+      controlPlaneApiToken: API_TOKEN,
+      channelName: CHANNEL_NAME,
+    });
+    servers.push(server);
+    const wrongRevision = `sha256:${"0".repeat(64)}`;
+    let accessorReads = 0;
+    const accessorRequest = Object.defineProperty(
+      {
+        channelName: CHANNEL_NAME,
+        channelGeneration: fixture.channelGeneration,
+      },
+      "revision",
+      {
+        enumerable: true,
+        get() {
+          accessorReads += 1;
+          return fixture.revision;
+        },
+      },
+    ) as Parameters<ReferenceHostWebServer["activatePublishedRevision"]>[0];
+    const rejected = [
+      {
+        channelName: "release",
+        channelGeneration: fixture.channelGeneration,
+        revision: fixture.revision,
+      },
+      { channelName: CHANNEL_NAME, channelGeneration: 0, revision: fixture.revision },
+      { channelName: CHANNEL_NAME, channelGeneration: 2, revision: fixture.revision },
+      {
+        channelName: CHANNEL_NAME,
+        channelGeneration: fixture.channelGeneration,
+        revision: wrongRevision,
+      },
+      {
+        channelName: CHANNEL_NAME,
+        channelGeneration: fixture.channelGeneration,
+        revision: fixture.revision,
+        hostId: "reference-host-web",
+      },
+    ];
+    for (const request of rejected) {
+      await expect(server.activatePublishedRevision(request)).resolves.toEqual({
+        status: "failed",
+      });
+    }
+    await expect(server.activatePublishedRevision(accessorRequest)).resolves.toEqual({
+      status: "failed",
+    });
+    expect(accessorReads).toBe(0);
+
+    await expect(
+      server.activatePublishedRevision({
+        channelName: CHANNEL_NAME,
+        channelGeneration: fixture.channelGeneration,
+        revision: fixture.revision,
+      }),
+    ).resolves.toEqual({
+      status: "active",
+      relationship: "activated",
+      activeRevision: fixture.revision,
+      activationGeneration: 0,
+    });
+  });
+
+  it("never reports Active when the host preserves a different last-known-good revision", async () => {
+    const fixture = await environment();
+    const server = await openReferenceHostWebServer({
+      rootDirectory: fixture.root,
+      installedPackageDirectory: INSTALLED_PACKAGE_DIRECTORY,
+      clientBuildDirectory: CLIENT_BUILD_DIRECTORY,
+      controlPlaneOrigin: fixture.origin,
+      controlPlaneApiToken: API_TOKEN,
+      channelName: CHANNEL_NAME,
+    });
+    servers.push(server);
+    await expect(
+      server.activatePublishedRevision({
+        channelName: CHANNEL_NAME,
+        channelGeneration: fixture.channelGeneration,
+        revision: fixture.revision,
+      }),
+    ).resolves.toMatchObject({
+      status: "active",
+      activeRevision: fixture.revision,
+    });
+
+    const candidate = JSON.parse(await readFile(BUNDLE_PATH, "utf8")) as unknown as Record<
+      string,
+      unknown
+    >;
+    const requires = candidate.requires as { catalogs: Record<string, unknown>[] };
+    requires.catalogs[0] = {
+      ...requires.catalogs[0],
+      digest: `sha256:${"0".repeat(64)}`,
+    };
+    candidate.revision = calculateDesenBundleRevision(candidate as unknown as DesenBundle);
+    const rejectedRevision = String(candidate.revision);
+    const headers = {
+      authorization: `Bearer ${API_TOKEN}`,
+      "content-type": LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE,
+    };
+    expect(
+      await fixture.api.inject({
+        method: "PUT",
+        path: `/v1/bundles/${rejectedRevision}`,
+        headers,
+        body: new TextEncoder().encode(JSON.stringify(candidate)),
+      }),
+    ).toMatchObject({ statusCode: 201 });
+    const moved = await fixture.api.inject({
+      method: "PUT",
+      path: `/v1/channels/${CHANNEL_NAME}`,
+      headers: { ...headers, "if-match": `"g:${String(fixture.channelGeneration)}"` },
+      body: new TextEncoder().encode(JSON.stringify({ revision: rejectedRevision })),
+    });
+    expect(moved).toMatchObject({ statusCode: 200 });
+    const movedChannel = JSON.parse(new TextDecoder().decode(moved.body)) as Record<
+      string,
+      unknown
+    >;
+    const movedGeneration = Number(movedChannel.generation);
+    expect(movedGeneration).toBe(2);
+
+    await expect(
+      server.activatePublishedRevision({
+        channelName: CHANNEL_NAME,
+        channelGeneration: movedGeneration,
+        revision: rejectedRevision,
+      }),
+    ).resolves.toEqual({ status: "failed" });
+  });
+
+  it("fails closed before refresh when unavailable and after the server lifetime closes", async () => {
+    const fixture = await environment();
+    const server = await openReferenceHostWebServer({
+      rootDirectory: fixture.root,
+      installedPackageDirectory: INSTALLED_PACKAGE_DIRECTORY,
+      clientBuildDirectory: CLIENT_BUILD_DIRECTORY,
+      controlPlaneOrigin: fixture.origin,
+      controlPlaneApiToken: API_TOKEN,
+      channelName: CHANNEL_NAME,
+    });
+    const activatePublishedRevision = server.activatePublishedRevision;
+    const request = Object.freeze({
+      channelName: CHANNEL_NAME,
+      channelGeneration: fixture.channelGeneration,
+      revision: fixture.revision,
+    });
+    await apis.shift()?.close();
+    await expect(activatePublishedRevision(request)).resolves.toEqual({ status: "unavailable" });
+
+    const close = server.close();
+    servers.push(server);
+    await close;
+    await expect(activatePublishedRevision(request)).resolves.toEqual({ status: "unavailable" });
+  });
+
   it("serves the exact active envelope and keeps server authorities out of the response", async () => {
     const fixture = await environment();
     const server = await openReferenceHostWebServer({

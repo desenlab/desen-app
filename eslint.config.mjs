@@ -81,6 +81,7 @@ export default tseslint.config(
       "**/dist-e2e/**",
       "**/coverage/**",
       "**/.turbo/**",
+      "**/.desen/**",
       "**/node_modules/**",
       "**/playwright-report/**",
       "**/test-results/**",

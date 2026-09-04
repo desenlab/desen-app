@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import officialSignInSource from "../../../examples/sign-in/official-derived.source.desen.json";
 import { createDesenEditorDocument } from "@desen/editor-core";
 import { DesenAppProduct } from "../src/product-bootstrap.js";
+import { createFixedDestinationAuthoringPublicationPort } from "../src/authoring-publication.js";
 import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "../src/reference-empty-project.js";
 import { REFERENCE_SIGN_IN_WORKSPACE_PROFILE } from "../src/reference-sign-in-workspace-profile.js";
 
@@ -223,6 +224,43 @@ describe("Desen App normal product bootstrap", () => {
     expect(screen.queryByText("Checkout pilot")).toBeNull();
     const persistence = screen.getByRole("region", { name: "Source persistence" });
     expect(within(persistence).getByRole("status").textContent).toMatch(/generation 4/i);
+  });
+
+  it("passes an explicit fixed-destination publication authority into the normal product editor", async () => {
+    const controlled = controlledPersistence();
+    const publicationPort = createFixedDestinationAuthoringPublicationPort({
+      channelName: "preview",
+      hostId: "reference-host-web",
+      publishBundleToChannel: async () =>
+        Object.freeze({
+          status: "failed" as const,
+          phase: "request" as const,
+          reason: "storage-unavailable" as const,
+        }),
+      activatePublishedRevision: async () => Object.freeze({ status: "unavailable" as const }),
+    });
+    window.history.replaceState(null, "", SURFACE_PATH);
+    render(
+      <DesenAppProduct
+        persistencePort={controlled.port}
+        publicationPort={publicationPort}
+        workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}
+      />,
+    );
+
+    await settleOpen(controlled, 0, {
+      status: "opened",
+      generation: 4,
+      document: EMPTY_REFERENCE_PROJECT_DOCUMENT,
+    });
+    fireEvent.click(screen.getByText("Source & release", { exact: true }));
+    const release = screen.getByRole("region", { name: "Publish saved Source" });
+    expect(within(release).getByRole("status").textContent).toContain(
+      "Saved generation 4 is ready to publish.",
+    );
+    expect(
+      (within(release).getByRole("button", { name: "Publish" }) as HTMLButtonElement).disabled,
+    ).toBe(false);
   });
 
   it("rejects an admitted Source that exceeds the exact one-surface local product profile", async () => {

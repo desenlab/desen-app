@@ -1,12 +1,12 @@
 # Strategic Validation Checkpoints
 
-Last reviewed: 2026-07-24
+Last reviewed: 2026-09-04
 
 ## Purpose
 
 This document records product and interoperability decisions that must be tested at the point when
 the implementation can answer them with evidence. It is not a second implementation task board:
-the 145 tasks and 13 proof gates in `TASKS.md` remain the only items counted by the README progress
+the 148 tasks and 13 proof gates in `TASKS.md` remain the only items counted by the README progress
 bar.
 
 The working position is:
@@ -25,7 +25,8 @@ and must not be duplicated:
 
 - Complete the exact reference capability package through `M03-T07`–`M03-T10` and `G03`.
 - Prove Desen App → Publisher → independent host execution through `M09`, `M10`, and `G10`.
-- Prove that a label or layout change activates without a host source change in `M10-T05`.
+- M10-T05 proves that a label and layout change activate without a host source or build change;
+  see the [published-host evidence](../proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md).
 - Prove that invalid publication is rejected in `M10-T06`.
 - Prove that corrupt or catalog-mismatched revisions preserve the last-known-good surface in
   `M10-T07`.

@@ -108,20 +108,20 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 218 steps across the seven reviewed execution classes", () => {
+test("owns exactly 220 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 218);
-  assert.equal(new Set(ALL_STEP_IDS).size, 218);
+  assert.equal(ALL_STEP_IDS.length, 220);
+  assert.equal(new Set(ALL_STEP_IDS).size, 220);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 3,
     PACKAGE_TEST_EXCLUSIVE: 1,
-    PROOF_READ_ONLY: 91,
-    PROOF_OS_TEMP_ISOLATED: 106,
+    PROOF_READ_ONLY: 92,
+    PROOF_OS_TEMP_ISOLATED: 107,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
@@ -155,11 +155,11 @@ test("owns exactly 218 steps across the seven reviewed execution classes", () =>
   });
 });
 
-test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 104);
-  assert.equal(new Set(PROOF_IDS).size, 104);
+test("pins the exact eleven read-only and sole workspace-temp proof ids", () => {
+  assert.equal(PROOF_IDS.length, 105);
+  assert.equal(new Set(PROOF_IDS).size, 105);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
-  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 93);
+  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 94);
   assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 11);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
@@ -172,6 +172,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "runtime-core-repeat-materialization",
     "runtime-core-resource-lifecycle",
     "runtime-core-state-navigation-actions",
+    "desen-app-published-host-update",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
   assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 93);
@@ -477,8 +478,9 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "control-plane-runtime-transition-races",
     "reference-host-web-channel-consumption",
     "desen-app-real-adapter-canvas",
+    "desen-app-published-host-update",
   ]);
-  assert.equal(CHILD_PROCESS_VERIFIER_PROOF_IDS.length, 13);
+  assert.equal(CHILD_PROCESS_VERIFIER_PROOF_IDS.length, 14);
   for (const proofId of CHILD_PROCESS_VERIFIER_PROOF_IDS) {
     assert.deepEqual(classifyWorkloadStateMetadata(`verify-${proofId}`), {
       schemaVersion: 2,
@@ -505,7 +507,9 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
                     ? "REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE"
                     : proofId === "desen-app-real-adapter-canvas"
                       ? "DESEN_APP_REAL_ADAPTER_CANVAS_VITE"
-                      : "NONE",
+                      : proofId === "desen-app-published-host-update"
+                        ? "DESEN_APP_PUBLISHED_HOST_UPDATE_VITE"
+                        : "NONE",
       filesystemCompatibilityPolicy: "NONE",
       barrier: false,
     });
@@ -1186,8 +1190,9 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "reference-host-web-channel-consumption",
     "editor-core-persistence",
     "desen-app-real-adapter-canvas",
+    "desen-app-published-host-update",
   ]);
-  assert.equal(NATIVE_ADDON_PROOF_IDS.length, 9);
+  assert.equal(NATIVE_ADDON_PROOF_IDS.length, 10);
   assert.deepEqual(NATIVE_ADDON_ROOT_STEP_IDS, [
     "test-publisher-invalid-source-matrix",
     "test-control-plane-local-api",
@@ -1205,7 +1210,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       ]),
       ...NATIVE_ADDON_ROOT_STEP_IDS,
     ]).size,
-    17,
+    18,
   );
   assert.equal(
     classifyWorkloadStateMetadata("verify-reference-host-web-source-audit").nativeAddonPolicy,
@@ -1299,7 +1304,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    104,
+    105,
   );
 });
 
@@ -1316,6 +1321,24 @@ test("T04 real-host evidence readers remain passive and acquire no listener auth
     assert.deepEqual(step.ports, []);
     assert.deepEqual(step.workspaceWrites, []);
     assert.equal(step.nativeAddonPolicy, "NONE");
+    assert.equal(step.filesystemCompatibilityPolicy, "NONE");
+  }
+});
+
+test("T05 live Vite verifier is temp-isolated while its root reader remains passive", () => {
+  const pair = classifyProofPairState("desen-app-published-host-update");
+  assert.equal(pair.barrier, false);
+  assert.equal(pair.verifier.executionClass, "PROOF_OS_TEMP_ISOLATED");
+  assert.equal(pair.verifier.childProcessPolicy, "VERIFIER_RUNTIME_PROBE");
+  assert.equal(pair.verifier.tempPolicy, "RUNNER_SCOPED_OS");
+  assert.equal(pair.verifier.nativeAddonPolicy, "DESEN_APP_PUBLISHED_HOST_UPDATE_VITE");
+  assert.equal(pair.rootTest.executionClass, "PROOF_READ_ONLY");
+  assert.equal(pair.rootTest.childProcessPolicy, "NODE_TEST_HARNESS");
+  assert.equal(pair.rootTest.tempPolicy, "RUNNER_SCOPED_OS");
+  assert.equal(pair.rootTest.nativeAddonPolicy, "NONE");
+  for (const step of [pair.verifier, pair.rootTest]) {
+    assert.deepEqual(step.ports, []);
+    assert.deepEqual(step.workspaceWrites, []);
     assert.equal(step.filesystemCompatibilityPolicy, "NONE");
   }
 });
@@ -2058,7 +2081,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 200,
+    NONE: 202,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,

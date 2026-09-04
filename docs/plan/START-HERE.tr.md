@@ -26,25 +26,24 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
-**AR-01 — Arşivlerdeki özel metinlerin temizliği**, kullanıcının açık onayıyla M10-T05'ten önce
-yapılıyor. Dört arşivin iç içe kopyalarındaki üç paylaşım taslağı temizlendi; diğer 207 dosya
-girdisi ve teknik kanıtlar değişmedi. Arşiv üreticileri aynı metinleri tekrar yayımlamayacak şekilde
-düzeltildi. Eski mühürler tarihsel kayıt olarak korunuyor; yeni arşivlerin kimlikleri ayrı ve açık
-bir ek kanıtla doğrulanıyor. Git geçmişi değiştirilmiyor; eski commit ve indirilmiş kopyalar
-silinmiş sayılmıyor. [Kapsam ve kanıt](../proof/HISTORICAL-ARCHIVE-REDACTION.md).
+**AR-01 — Arşivlerdeki özel metinlerin temizliği**,
+[PR #76](https://github.com/desenlab/desen-app/pull/76) ile kapandı. Tam head
+`bde3ea81f261a9839a2b61ecb242d4824083ee2c`,
+[33762532123 numaralı koşuda](https://github.com/desenlab/desen-app/actions/runs/33762532123)
+`Quality gate` ve `Browser E2E` kontrollerini geçti. Değişiklik
+`33b922e6746365510c0549ddbf3b08469e58dc11` olarak main'e alındı ve
+[taze main CI](https://github.com/desenlab/desen-app/actions/runs/33764464871) başarılı oldu. Teknik
+kanıtlar ve tarihsel kimlikler korunuyor; Git geçmişi yeniden yazılmadı.
+[Kapsam ve kanıt](../proof/HISTORICAL-ARCHIVE-REDACTION.md). I07-05'in eski runner'ı kaldırma
+kapsamı değişmedi.
 
-CI-03 ve M10-T04, PR #74'ün tam son commit'inde
-[GitHub kontrolleri](https://github.com/desenlab/desen-app/actions/runs/33748305698) geçtikten
-sonra main'e alındı; [main koşusu](https://github.com/desenlab/desen-app/actions/runs/33750209060)
-da geçti. Bu sonuçlar AR-01'in yeni commit'ine başarı yetkisi vermez. AR-01'in altı sınırlı yerel
-kontrolü, 40 App kanıt testi, 9 gizlilik testi ve 408 CI sözleşme testi geçti. `DONE` kaydı, tam
-güncel PR'ın hosted kontrolleri geçene kadar koşullu bir kapanış adayıdır; o zamana kadar yalnız
-AR-01 aktif kalır. Koşul sağlanınca aynı değişmemiş revizyon kapanış kaydı olur.
-M10-T05 henüz başlamadı ve bu temizlikten sonra sıradaki ürün görevi. Toplam ilerleme 116/148,
-M10 7/12, kanıt kapıları 11/13 olarak kalıyor. I07-05'in eski runner'ı kaldırma kapsamı değişmedi.
-
-Arşiv işi doğrulanıp main'e alındıktan sonra geliştirmeye ara verilecek. Yeni bir devam isteği
-gelmeden M10-T05'e veya başka bir göreve başlanmayacak.
+**M10-T05 — Yayınlanan değişikliğin aynı host'ta görünmesi** yerel kanıtını geçti ve `DONE` kaydı
+koşullu kapanış adayıdır. Normal ürün içinde iki görünür Save → Publish → Activate döngüsüyle önce
+A, sonra etiket ve aralığı değiştirilmiş B revizyonu yayımlanır. Ayrı derlenen referans host iki
+revizyon arasında yeniden derlenmez; yenilemede B'yi, ikinci yenilemede yine B'yi gösterir. P-07
+`PROVEN`, PF-059 `CLOSED` olur; toplam ilerleme 117/148 (%79), M10 8/12 (%67), kanıt kapıları ise
+11/13'tür. Bir sonraki ürün görevi M10-T06'dır. Merge için tam son PR head'inde taze hosted
+`Quality gate` ve `Browser E2E` hâlâ zorunludur.
 
 Sıradan bir `T` görevinin hızlı yerel geri bildirimi; `pnpm format:check`, `pnpm lint`,
 `pnpm typecheck`, `pnpm build`, `pnpm boundaries` ve
@@ -1352,6 +1351,31 @@ P-09/P-10 `PROVEN` olur; genel ilerleme 116/148 (%78), M10 7/12 (%58), sıradaki
 T05 henüz başlamadı. Publish/activation, recovery, Production, N-036 ve G10 açık kalır. T04'ün
 `DONE` kaydı, yalnız bu PR'ın kesin güncel head'i hosted `Quality gate` geçince kesinleşir; yerel
 kanıt tek başına merge veya tamamlandı beyanı değildir.
+
+M10-T05'in yerel kanıtı geçti. Tasarımcı normal uygulamada boş Account projesi oluşturur; görünür
+Inspector kontrolleriyle Text etiketi ve Stack aralığını düzenler; iki ayrı Save → Publish →
+Activate döngüsü tamamlar. Ayrı derlenen referans host önce A revizyonunu gösterir. Etiket ve aralık
+değiştirildikten sonra aynı host yenilemeyle B'yi, ikinci yenilemeyle yine B'yi gösterir. Host'un
+HTML, JavaScript, CSS ve kaynak kimlikleri bu sırada değişmez. Source; kanal, host, adres, anahtar,
+aktivasyon callback'i, sunucu uygulaması veya çalıştırılabilir modül seçemez.
+
+Görev doğrulayıcısı geçer; bağımsız kök okuyucu 10/10, odaklı test grupları 74/74, 18/18, 35/35 ve
+31/31, özel Chromium yolculuğu 1/1 başarılıdır. Taze Vite gözlemleri App tarafında 168 modül / 510
+statik bağlantı, host tarafında 104 modül / 299 statik bağlantı içerir; dinamik veya çözülemeyen
+bağlantı yoktur ve iki grafikte 22 yönetilen modül bayt düzeyinde aynıdır. Mimari sınırlar 861 modül /
+3.685 bağlantı üzerinde geçer.
+
+116 kesin kayıt içeren 188.547 baytlık artifact
+`docs/proof/artifacts/desen-app-0.1.0-published-host-update.json`,
+`sha256:851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64` ile sabittir. Ayrıntılar
+[T05 kanıtında](../proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md) ve
+[ADR 0020'de](../adr/0020-desen-app-fixed-destination-publication-and-host-activation.md) kayıtlıdır.
+Eklemeli checkpoint sequence 72, sequence 1–71'i korur ve 59 artifact / 118 reader zincirini
+`sha256:5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58` ile doğrular.
+P-07 `PROVEN`, PF-059 `CLOSED` olur; genel ilerleme 117/148 (%79), M10 8/12 (%67), kanıt kapıları
+11/13'tür. M10-T06 sıradadır. Hatalı yayın, son çalışan sürümü koruma, production kimliği, uzak veya
+çok kullanıcılı dağıtım, native hedefler, P-12, N-036 ve G10 açık kalır. T05'in `DONE` kaydı tam son
+PR head'inde taze hosted `Quality gate` ve `Browser E2E` geçene kadar koşullu kapanış adayıdır.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

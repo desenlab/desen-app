@@ -54,6 +54,18 @@ void controller.activate({});
 void controller.putChannel("preview", "sha256:deadbeef");
 
 declare const server: ReferenceHostWebServer;
+void server.activatePublishedRevision({
+  channelName: "preview",
+  channelGeneration: 1,
+  revision: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+});
+void server.activatePublishedRevision({
+  channelName: "preview",
+  channelGeneration: 1,
+  revision: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  // @ts-expect-error M10-T05-N01 A publication request cannot select or smuggle a host identity.
+  hostId: "another-host",
+});
 // @ts-expect-error M07-T11-N08 The bearer secret is never readable from the server handle.
 void server.controlPlaneApiToken;
 // @ts-expect-error M07-T11-N09 Static browser bytes are not a caller-provided response hook.

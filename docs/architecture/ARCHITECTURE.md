@@ -1986,6 +1986,38 @@ remote deployment or secret classification. See [ADR 0017](../adr/0017-desen-app
 and the [M10-T04 proof](../proof/DESEN-APP-SUCCESS-HOST-OPERATION.md). Earlier sections describe their
 task-time boundaries; this decision adds explicit Integration without weakening Synthetic.
 
+## M10-T05 fixed-destination publication into an unchanged host
+
+The normal local Account workspace now receives a browser-safe publication port from trusted
+launcher composition. The launcher fixes one `preview` channel and one `reference-host-web`
+identity; neither Source nor Catalog data can select an origin, endpoint, token, channel, host, or
+module. Source/Bundle persistence and host activation use distinct in-memory loopback bearers.
+Malformed or absent publication configuration leaves that feature unavailable without weakening
+the independent persistence or Run boundaries.
+
+Bundle and channel requests continue through the public Editor Web publication adapter. A bounded
+App transport admits only exact fixed-loopback channel and immutable-Bundle paths. After the
+compare-and-set succeeds, a separate authenticated activation bridge accepts only the returned
+positive channel generation and revision for the fixed destination. It delegates to the already
+open reference-host server rather than constructing an alternate controller.
+
+The reference-host server independently reads the channel before and after its existing verified
+activation refresh. Active is returned only when both channel reads and the controller's delivery
+match the requested revision. The server uses the same application-owned control-plane root that
+received the immutable Bundle; this is a shared storage composition, not a source-code edge between
+the editor and host. Shutdown revokes Vite, the activation bridge, reference host, and operation
+service before the shared control plane, including partial-startup paths.
+
+The Chromium proof uses the ordinary blank-project and Inspector UI for two Save → Publish →
+Activate cycles. It reloads a separately built host and observes both a label and Stack-gap change,
+while hashing the served host document and assets to prove its build did not change. The App and
+reference-host source/import audit still requires the public generic Runtime renderer and shared
+reference adapter registry and rejects handwritten managed alternatives. This closes PF-059 for
+the audited Web–React profile and completes P-07. Invalid publication diagnostics, corrupt or
+Catalog-mismatched last-known-good recovery, arbitrary destinations, remote deployment,
+production identity, native targets, and G10 remain separately owned. See
+[ADR 0020](../adr/0020-desen-app-fixed-destination-publication-and-host-activation.md).
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific

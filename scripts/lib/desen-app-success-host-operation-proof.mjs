@@ -267,6 +267,7 @@ export const DESEN_APP_SUCCESS_HOST_OPERATION_ARTIFACT_PIN = Object.freeze({
 });
 
 const SUCCESSOR_AUTHORITIES = new WeakMap();
+const PUBLISHED_HOST_UPDATE_SUCCESSORS = new Map();
 let cachedHistoricalBridgeAuthority;
 
 /** Stable fail-closed error raised by the M10-T04 evidence reader. */
@@ -426,6 +427,37 @@ async function acquireFiles(options) {
     );
   }
   return files;
+}
+
+async function authenticatePublishedHostUpdateSuccessor(workspaceRoot) {
+  let successorPromise = PUBLISHED_HOST_UPDATE_SUCCESSORS.get(workspaceRoot);
+  if (successorPromise === undefined) {
+    successorPromise = import("./desen-app-published-host-update-proof.mjs")
+      .then(async (successorModule) => {
+        if (
+          typeof successorModule.authenticateDesenAppPublishedHostUpdateSuccessor !== "function" ||
+          typeof successorModule.materializeDesenAppT04HistoricalReaderFileOverrides !== "function"
+        ) {
+          fail(
+            "SUCCESSOR_POLICY_VIOLATION",
+            "The M10-T05 successor does not expose the exact T04 historical bridge contract.",
+          );
+        }
+        const successor = await successorModule.authenticateDesenAppPublishedHostUpdateSuccessor({
+          workspaceRoot,
+        });
+        return Object.freeze({ successor, successorModule });
+      })
+      .catch((error) => {
+        if (error instanceof DesenAppSuccessHostOperationProofError) throw error;
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          "The exact M10-T05 successor could not authenticate T04 historical authority.",
+        );
+      });
+    PUBLISHED_HOST_UPDATE_SUCCESSORS.set(workspaceRoot, successorPromise);
+  }
+  return successorPromise;
 }
 
 function decodeUtf8(bytes, relativePath, code = "SOURCE_POLICY_VIOLATION") {
@@ -1516,7 +1548,17 @@ async function preserveHistoricalEvidence(currentArtifact, files, workspaceRoot)
  */
 export async function buildDesenAppSuccessHostOperationEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
-  const files = await acquireFiles(options);
+  const { successor, successorModule } = await authenticatePublishedHostUpdateSuccessor(
+    options.workspaceRoot,
+  );
+  const historicalFileOverrides =
+    successorModule.materializeDesenAppT04HistoricalReaderFileOverrides(
+      successor,
+      options.fileOverrides,
+    );
+  const files = await acquireFiles(
+    Object.freeze({ ...options, fileOverrides: historicalFileOverrides }),
+  );
   const parent = authenticateParent(files.get(PARENT_ARTIFACT_PATH));
   const hostBinding = authenticateHostBinding(files.get(HOST_BINDING_ARTIFACT_PATH));
   const bridge = authenticateHistoricalReaderBridge(

@@ -9,10 +9,15 @@ import {
   openReferenceHostChannelActivationController,
   readReferenceHostDeliveryBytes,
 } from "./channel-activation-controller.js";
+import { createReferenceHostControlPlaneClient } from "./control-plane-client.js";
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Dirent, Stats } from "node:fs";
 import type { ReferenceHostChannelActivationController } from "./channel-activation-controller.js";
+import type {
+  ReferenceHostChannelRecord,
+  ReferenceHostControlPlaneClient,
+} from "./control-plane-client.js";
 
 const LOOPBACK_ADDRESS = "127.0.0.1" as const;
 const REFRESH_PATH = "/__desen/runtime/refresh";
@@ -24,6 +29,7 @@ const MAX_STATIC_DIRECTORIES = 256;
 const MAX_STATIC_ENTRIES = 384;
 const MAX_STATIC_DEPTH = 16;
 const MAX_STATIC_AGGREGATE_BYTES = 32 * 1_024 * 1_024;
+const REVISION_PATTERN = /^sha256:[0-9a-f]{64}$/u;
 const CONTENT_SECURITY_POLICY = [
   "default-src 'none'",
   "base-uri 'none'",
@@ -71,10 +77,37 @@ export interface ReferenceHostWebServerListenResult {
   readonly origin: string;
 }
 
-/** Closed server lifetime with no token, package, activation, or filesystem authority. */
+/** Exact fixed-channel identity that a trusted publisher asks this host to activate. */
+export interface ReferenceHostPublishedRevisionActivationRequest {
+  /** Server-owned channel name; callers cannot select another host channel. */
+  readonly channelName: string;
+  /** Positive channel generation returned by the completed publication compare-and-set. */
+  readonly channelGeneration: number;
+  /** Exact immutable Bundle revision returned by the completed publication. */
+  readonly revision: string;
+}
+
+/** Closed result of reconciling one exact published channel identity through this host. */
+export type ReferenceHostPublishedRevisionActivationSettlement =
+  | Readonly<{
+      readonly status: "active";
+      readonly relationship: "activated" | "preserved" | "recovered";
+      readonly activeRevision: string;
+      readonly activationGeneration: number;
+    }>
+  | Readonly<{ readonly status: "unavailable" }>
+  | Readonly<{ readonly status: "failed" }>
+  | Readonly<{ readonly status: "indeterminate" }>;
+
+/** Closed server lifetime with no readable token, package, or filesystem authority. */
 export interface ReferenceHostWebServer {
   /** Starts one listener on fixed IPv4 loopback and returns its exact same-origin identity. */
   readonly listen: (this: void, port?: number) => Promise<ReferenceHostWebServerListenResult>;
+  /** Reconciles only one exact, independently re-read publication through this server's controller. */
+  readonly activatePublishedRevision: (
+    this: void,
+    request: ReferenceHostPublishedRevisionActivationRequest,
+  ) => Promise<ReferenceHostPublishedRevisionActivationSettlement>;
   /** Idempotently fences refresh work, closes activation state, and stops the listener. */
   readonly close: (this: void) => Promise<void>;
 }
@@ -103,6 +136,48 @@ function exactOwnDataRecord(
       captured[key] = descriptor.value;
     }
     return captured;
+  } catch {
+    return undefined;
+  }
+}
+
+function capturePublishedRevisionActivationRequest(
+  value: unknown,
+  channelName: string,
+): ReferenceHostPublishedRevisionActivationRequest | undefined {
+  const captured = exactOwnDataRecord(value, ["channelName", "channelGeneration", "revision"]);
+  const channelGeneration = captured?.channelGeneration;
+  const revision = captured?.revision;
+  if (
+    captured?.channelName !== channelName ||
+    typeof channelGeneration !== "number" ||
+    !Number.isSafeInteger(channelGeneration) ||
+    channelGeneration < 1 ||
+    typeof revision !== "string" ||
+    !REVISION_PATTERN.test(revision)
+  ) {
+    return undefined;
+  }
+  return Object.freeze({ channelName, channelGeneration, revision });
+}
+
+function channelMatchesPublishedRevision(
+  channel: ReferenceHostChannelRecord,
+  request: ReferenceHostPublishedRevisionActivationRequest,
+): boolean {
+  return (
+    channel.channelName === request.channelName &&
+    channel.generation === request.channelGeneration &&
+    channel.revision === request.revision
+  );
+}
+
+async function readPublicationChannel(
+  client: ReferenceHostControlPlaneClient,
+): Promise<ReferenceHostChannelRecord | undefined> {
+  try {
+    const read = await client.readChannel();
+    return read.status === "found" ? read.value : undefined;
   } catch {
     return undefined;
   }
@@ -418,6 +493,11 @@ export async function openReferenceHostWebServer(
     throw new TypeError("The reference host client build directory is invalid.");
   }
   let controller: ReferenceHostChannelActivationController | undefined;
+  const controlPlaneClient = createReferenceHostControlPlaneClient({
+    origin: captured.controlPlaneOrigin,
+    apiToken: captured.controlPlaneApiToken,
+    channelName: captured.channelName,
+  });
   controller = await openReferenceHostChannelActivationController({
     rootDirectory: captured.rootDirectory,
     installedPackageDirectory: captured.installedPackageDirectory,
@@ -524,6 +604,74 @@ export async function openReferenceHostWebServer(
   httpServer.on("error", () => undefined);
 
   return Object.freeze({
+    async activatePublishedRevision(
+      requestValue: ReferenceHostPublishedRevisionActivationRequest,
+    ): Promise<ReferenceHostPublishedRevisionActivationSettlement> {
+      const request = capturePublishedRevisionActivationRequest(requestValue, captured.channelName);
+      if (request === undefined) return Object.freeze({ status: "failed" });
+
+      const activeController = controller;
+      if (closed || activeController === undefined) {
+        return Object.freeze({ status: "unavailable" });
+      }
+
+      const channelBeforeRefresh = await readPublicationChannel(controlPlaneClient);
+      if (closed || controller !== activeController) {
+        return Object.freeze({ status: "unavailable" });
+      }
+      if (channelBeforeRefresh === undefined) {
+        return Object.freeze({ status: "unavailable" });
+      }
+      if (!channelMatchesPublishedRevision(channelBeforeRefresh, request)) {
+        return Object.freeze({ status: "failed" });
+      }
+
+      let refresh;
+      try {
+        refresh = await activeController.refresh();
+      } catch {
+        return Object.freeze({ status: "indeterminate" });
+      }
+      if (closed || controller !== activeController) {
+        return Object.freeze({ status: "indeterminate" });
+      }
+
+      const channelAfterRefresh = await readPublicationChannel(controlPlaneClient);
+      if (
+        closed ||
+        controller !== activeController ||
+        channelAfterRefresh === undefined ||
+        !channelMatchesPublishedRevision(channelAfterRefresh, request)
+      ) {
+        return Object.freeze({ status: "indeterminate" });
+      }
+      if (refresh.status === "closed") {
+        return Object.freeze({ status: "indeterminate" });
+      }
+      if (refresh.status === "unavailable") {
+        return Object.freeze({ status: "unavailable" });
+      }
+
+      const activeRevision = refresh.delivery.activation.revision;
+      const activationGeneration = refresh.delivery.activation.generation;
+      if (
+        !REVISION_PATTERN.test(activeRevision) ||
+        !Number.isSafeInteger(activationGeneration) ||
+        activationGeneration < 0 ||
+        !["activated", "preserved", "recovered"].includes(refresh.relationship)
+      ) {
+        return Object.freeze({ status: "indeterminate" });
+      }
+      if (activeRevision !== request.revision) {
+        return Object.freeze({ status: "failed" });
+      }
+      return Object.freeze({
+        status: "active",
+        relationship: refresh.relationship,
+        activeRevision,
+        activationGeneration,
+      });
+    },
     listen(port = 0): Promise<ReferenceHostWebServerListenResult> {
       if (
         closed ||

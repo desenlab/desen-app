@@ -1468,3 +1468,46 @@ authorities are
 `sha256:ceb46eba37c63e46743fb03d4389a188928b7bedf13cab7190b276313210eae8` and
 `sha256:a6734be24611dd476051db3c93d8672e2892afe9a1276d154e67127d6c10ea35`.
 This still authenticates only identity and impact, never a cached execution result.
+
+## M10-T05 published-host update testing
+
+The sixth dedicated Playwright configuration starts the normal Desen App product, an isolated
+local control plane, a separately built reference-host client/server, and an independently
+credentialed activation bridge. Through visible controls it creates a project, authors two Text
+layers, saves and publishes revision A, and observes that exact output in the reference host. It
+then changes both visible text and Stack gap, saves and publishes revision B, reloads the host, and
+observes the update. The host HTML, JavaScript, and CSS fingerprint remains byte-identical across
+both activations, so the changed result is published Source data rather than a rebuilt host.
+
+Focused product coverage keeps channel, host, endpoint, credentials, callbacks, and executable
+modules outside authored Source. Browser publication and server activation use distinct fixed
+loopback authorities, bounded bodies, closed exact-own-data shapes, and no cookies. The trusted
+reference-host handle uses its single existing controller, independently reads the fixed channel
+before and after refresh, requires the exact positive channel generation and SHA revision, and
+returns `active` only when the controller's active revision equals the requested revision. Closed,
+unavailable, failed, or uncertain paths settle fail-closed without exposing credentials.
+
+The deterministic proof inventories 116 current source receipts and 66 focused declaration sites.
+Fresh in-memory Vite audits cover 168 App modules / 510 static edges and 104 host modules / 299
+static edges, including 22 byte-identical transformed managed modules shared by both graphs. They
+contain no unresolved or dynamic edge and write no build output. The verifier starts no Chromium,
+listener, product server, or external host; the independent root mutation reader has ten cases and
+remains passive.
+
+The 188,547-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-published-host-update.json` at
+`sha256:851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64`.
+Its 3,110,146-byte authenticated T04 historical-reader bridge is
+`sha256:784552241d8ac1ead3ce20886076f177db86cced534cc4d0e36081497a006d75`.
+Checkpoint sequence 72 closes 59 artifacts / 118 current readers at
+`sha256:5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58`;
+the dedicated checkpoint suite passes 100/100.
+
+The CI inventory contains 220 workloads / 105 proof units at
+`sha256:66ae36cb2ec1c8a7bc7deee1a733e253cc1861d3b9ca1487c9725f437c3abf5a`.
+The four-parent T05 impact closure contains 73 proof units / 156 workloads, and ownership covers
+1,446 tracked / 210 proof-owned paths. These tests prove only the fixed-destination local reference
+composition and P-07. Remote deployment, production credentials, multi-user persistence,
+invalid-publication rejection, last-known-good recovery, P-12, and G10 remain under later owners.
+Local success never substitutes for fresh hosted exact-head `Quality gate` and `Browser E2E`
+results.

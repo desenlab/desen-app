@@ -1,38 +1,42 @@
 # Project Status
 
-Last updated: 2026-09-03
+Last updated: 2026-09-04
 
-## Current work — AR-01 archive privacy amendment
+## Current work — M10-T05 published host update
 
-The user authorized cleaning the historical archives before M10-T05. AR-01 is the only active
-task while its exact-head hosted closure is pending; it does not change product code,
-implementation counts, or proof-gate status. The four
-current archives and their nested copies now omit the three private prose sections. All 207
-other decoded file entries and their technical projections are unchanged. Current generators
-apply authenticated redaction before writing, and readers report new transport identities
-separately from historical evidence.
+M10-T05 has passed its local evidence and its `DONE` entry is a closure candidate. Through the
+normal visible product, a designer creates a blank Account project, authors a label and layout,
+then completes two Save → Publish → Activate cycles. A separately built reference host first shows
+revision A and then revision B after reload, while its HTML, JavaScript, CSS, and source identities
+remain unchanged. Authored Source cannot select the channel, host, endpoint, credential, callback,
+server implementation, or executable module.
 
-The four affected App verifiers and their 40 root tests pass; the independent privacy suite
-passes 9/9. The six-command bounded baseline and 408 CI contract tests also pass. All 57
-prior frozen JSON artifacts and checkpoint entries 1–70 are preserved. Checkpoint 71 authenticates
-58 artifacts and 116 readers at
-`sha256:c49ca6eacbc08f18ac6cd5bebb3d0a9c3d21a5b8fe420d92364416a210155bda`.
-The task board's `DONE` row is a closure candidate until fresh hosted `Quality gate` and
-`Browser E2E` pass for the exact final PR head; then the unchanged merged revision records closure.
-Git history is not rewritten, so old commits and downloaded copies are not erased. See
-[AR-01 evidence](docs/proof/HISTORICAL-ARCHIVE-REDACTION.md).
+The 188,547-byte immutable evidence artifact is
+`docs/proof/artifacts/desen-app-0.1.0-published-host-update.json` at
+`sha256:851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64`.
+The verifier passes, the independent root reader passes 10/10, focused suites pass 74/74, 18/18,
+35/35, and 31/31, and the dedicated Chromium journey passes 1/1. Fresh Vite observations close at
+168 App modules / 510 static edges and 104 host modules / 299 static edges, with zero dynamic or
+unresolved edges and 22 byte-identical managed modules shared by both builds. The boundary graph
+passes across 861 modules / 3,685 dependencies. P-07 advances to `PROVEN` and PF-059 closes for the
+audited Web–React profile. Checkpoint sequence 72 authenticates 59 artifacts / 118 readers at
+`sha256:5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58`; proof gates remain
+11/13.
 
-M10-T04 and CI-03 are closed in [PR #74](https://github.com/desenlab/desen-app/pull/74): its exact
-head `25eb7c5f8f50b247233c254d77ff58df83f93b1c` passed
-[PR CI](https://github.com/desenlab/desen-app/actions/runs/33748305698), and merged main
-`cd245dd62940ee0fa3858cd8ecabe4557a0db7e1` passed
-[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/33750209060). The current
-Markdown cleanup is merged in PR #75 and its main CI also passes. These earlier receipts do not
-authorize AR-01's changed head. M10-T05 remains `NOT_STARTED`, next after AR-01 closure; I07-05
-retains its separate legacy-retirement responsibility.
+The `DONE` entry does not authorize merge yet. Fresh hosted `Quality gate` and `Browser E2E` must
+pass for the exact final pull-request head; any new commit invalidates those results. M10-T06 is
+next and remains `NOT_STARTED`. Invalid publication diagnostics, last-known-good recovery,
+production identity, remote or multi-user deployment, native targets, P-12, N-036, and G10 remain
+under their existing owners. See the
+[M10-T05 evidence](docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md) and
+[ADR 0020](docs/adr/0020-desen-app-fixed-destination-publication-and-host-activation.md).
 
-After AR-01 is verified and merged, development pauses. Do not start M10-T05 or another task until
-an explicit resume request; the remaining work in this session is archive closure only.
+AR-01 is closed in [PR #76](https://github.com/desenlab/desen-app/pull/76). Its exact head
+`bde3ea81f261a9839a2b61ecb242d4824083ee2c` passed both hosted checks in
+[run 33762532123](https://github.com/desenlab/desen-app/actions/runs/33762532123), merged as
+`33b922e6746365510c0549ddbf3b08469e58dc11`, and that merged revision passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/33764464871). Git history was not
+rewritten. I07-05 retains its separate legacy-retirement responsibility.
 
 ## Plain-language status
 
@@ -1466,16 +1470,16 @@ Production, N-036, and G10 remain open, and local evidence makes no hosted exact
   `G06`, `G07`, `G08`, `G09`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M10 — First end-to-end proof`
-- Overall implementation progress: `116 / 148 tasks complete (78%)`
+- Overall implementation progress: `117 / 148 tasks complete (79%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
 - M09 progress: `14 / 14 tasks complete (100%)`
-- M10 progress: `7 / 12 tasks complete (58%)`
-- Operational closure candidate: `AR-01 — Historical archive privacy amendment`; exact-head hosted
-  checks are required before it closes, and M10-T05 has not started
+- M10 progress: `8 / 12 tasks complete (67%)`
+- Current closure candidate: `M10-T05 — Label/layout change published and activated without host
+source change`; exact-head hosted checks are required before merge
 - Proof-gate progress: `11 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -1575,7 +1579,9 @@ Production, N-036, and G10 remain open, and local evidence makes no hosted exact
   `M10-T01A — User-created blank-project authoring`,
   `M10-T01B — Visual behavior authoring and Catalog-derived Run controls`,
   `M10-T01C — Evergreen product composition through an authenticated workspace profile`,
-  `M10-T02 — Input and pending fixture test`
+  `M10-T02 — Input and pending fixture test`, `M10-T03 — Failure fixture and visible failure-state
+test`, `M10-T04 — Success fixture, navigation, and real host-operation binding test`,
+  `M10-T05 — Label/layout change published and activated without host source change`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -1597,19 +1603,21 @@ Production, N-036, and G10 remain open, and local evidence makes no hosted exact
   revision. Until then merge and a completion report remain blocked. CI-02 adds no local affected
   selector, changes no hosted dispatcher/workflow, and leaves I07-05 plus the manual legacy rollback
   path unchanged.
-- Current implementation task: `M10-T04 — Success fixture, navigation, and real host-operation
-binding test` has passed its local evidence; its `DONE` entry is a closure candidate until the
-  exact current PR head passes hosted `Quality gate`. Merge and a completion report remain blocked
-  until that result. Once it passes, no implementation task remains active.
-- Next implementation task: `M10-T05` — Label/layout change published and activated without host
-  source change
-- Status: CI-02 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
-  14/14, M10 is 7/12, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
+- Current implementation task: `M10-T05 — Label/layout change published and activated without host
+source change` has passed its local evidence; its `DONE` entry is a closure candidate until the
+  exact current PR head passes hosted `Quality gate` and `Browser E2E`. Merge and a completion report
+  remain blocked until those results.
+- Next implementation task: `M10-T06` — Invalid prop/event/slot publication rejected with
+  node-linked diagnostics
+- Status: M10-T05 uses the exact-current-head conditional closure above. M08 is 10/10, M09 is
+  14/14, M10 is 8/12, M07 is 11/11, I07-04, G07, G08, G09, M09-T01–M09-T14, M10-T01, M10-T01A,
   M10-T01B, M10-T01C, M10-T02, M10-T03, and M10-T04 are
-  `DONE`; `N-012`, `N-018`, `N-035`, `N-042`, `S-001`, and `S-003` are `TESTED`; P-06, P-08,
-  P-09, P-10, and P-16 are `PROVEN`; P-07 is `PARTIAL`; proof gates are 11/13; P-12 remains
+  `DONE`; M10-T05 is a `DONE` closure candidate; `N-012`, `N-018`, `N-035`, `N-042`, `S-001`, and
+  `S-003` are `TESTED`; P-06, P-07, P-08, P-09, P-10, and P-16 are `PROVEN`; proof gates are
+  11/13; P-12 remains
   `NOT_PROVEN`; N-036 remains `PLANNED`; PF-028 is `CLOSED`; PF-025, PF-083, PF-085, PF-086, and
-  PF-089 and PF-091 remain `OPEN`; M10-T05 is `NOT_STARTED`; and implementation progress is 116/148.
+  PF-089 and PF-091 remain `OPEN`; PF-059 is `CLOSED`; M10-T06 is `NOT_STARTED`; and implementation
+  progress is 117/148.
   All 17 G07-due
   entries remain `CLOSED`; `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03
   are `DONE` with tracked
@@ -4960,6 +4968,39 @@ M09-T14/G09 evidence:
   deployment. P-07/T05 publish-and-activate, T07 last-known-good recovery, P-12, N-036 and G10 remain
   open; frozen protocol and Runtime Core source are unchanged. See ADR 0017 and
   `docs/proof/DESEN-APP-SUCCESS-HOST-OPERATION.md`.
+
+### M10-T05 published host update evidence
+
+- the normal visible product creates a blank Account project and completes two Save → Publish →
+  Activate cycles; the separately built reference host mounts A, then reloads to the changed Text
+  label and Stack gap in B, and a second reload preserves B
+- the host HTML, JavaScript, CSS, and source identities remain unchanged across both revisions;
+  authored Source cannot select the fixed channel, host, endpoint, bearer, activation callback,
+  server implementation, or executable module
+- focused suites pass 74/74, 18/18, 35/35, and 31/31; the dedicated Chromium journey passes 1/1;
+  the task verifier passes and its independent root reader passes 10/10
+- fresh Vite audits contain 168 App modules / 510 static edges and 104 host modules / 299 static
+  edges, no dynamic or unresolved edges, and 22 byte-identical managed modules shared by both
+  builds; the boundary graph passes across 861 modules / 3,685 dependencies
+- immutable evidence: 188,547 bytes / 116 tracked receipts at
+  `docs/proof/artifacts/desen-app-0.1.0-published-host-update.json`,
+  `sha256:851f9c561744c15e330529d524e5d80e6ff892039fa56aae269558a715502c64`
+- the 3,110,146-byte T04 historical-reader bridge at
+  `sha256:784552241d8ac1ead3ce20886076f177db86cced534cc4d0e36081497a006d75` inflates to
+  4,878,660 bytes and reconstructs 51 files, two authenticated predecessor gaps, seven successor
+  paths, and one projection without changing predecessor artifacts; the T04 verifier and its root
+  reader also pass, including 10/10 root cases
+- the neutral CI inventory contains 220 workloads / 105 proof units; T05 closure contains 73 proof
+  units / 156 workloads; exact-one ownership covers 1,446 tracked paths / 210 proof-owned paths;
+  checkpoint sequence 72 closes 59 artifacts / 118 readers at
+  `sha256:5bd96118b6bae053af092117f17bb7db48c195b928069765c4ba50583a51ee58`
+- coverage decision: M10-T05 is a `DONE` closure candidate; P-07 advances to `PROVEN`, PF-059 closes,
+  progress advances to 117/148 (79%), and M10 advances to 8/12 (67%); proof gates remain 11/13 and
+  M10-T06 is next
+- explicit nonclaims: invalid publication, T07 last-known-good recovery, production identity,
+  remote or multi-user deployment, native targets, P-12, N-036, and G10 remain open. Local evidence
+  does not authorize merge; the exact final PR head still requires fresh hosted `Quality gate` and
+  `Browser E2E`. See ADR 0020 and `docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md`.
 
 ## Status vocabulary
 

@@ -38,12 +38,26 @@ function injectPersistencePort(port: DesenEditorPersistencePort | null) {
   return createInjectedDesenAppLocalPersistencePort;
 }
 
+function injectPublicationPort(
+  implementation: (browserFetchValue: unknown) => unknown = (browserFetchValue) => {
+    void browserFetchValue;
+    return null;
+  },
+) {
+  const createInjectedDesenAppLocalPublicationPort = vi.fn(implementation);
+  vi.doMock("../src/local-runtime-publication.js", () => ({
+    createInjectedDesenAppLocalPublicationPort,
+  }));
+  return createInjectedDesenAppLocalPublicationPort;
+}
+
 beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
   document.body.innerHTML = '<div id="desen-app-root"></div>';
   window.history.replaceState(null, "", "/");
   vi.resetModules();
   vi.doUnmock("../src/local-runtime-persistence.js");
+  vi.doUnmock("../src/local-runtime-publication.js");
 });
 
 afterEach(() => {
@@ -64,6 +78,7 @@ it(
     const createPersistence = injectPersistencePort(
       persistencePort(async () => Object.freeze({ status: "missing" as const })),
     );
+    const createPublication = injectPublicationPort();
 
     await act(async () => {
       await import("../src/main.js");
@@ -79,6 +94,8 @@ it(
     ).toBe(false);
     expect(document.getElementById("desen-app-root")?.textContent).not.toContain("Checkout pilot");
     expect(createPersistence).toHaveBeenCalledTimes(1);
+    expect(createPublication).toHaveBeenCalledTimes(1);
+    expect(createPublication.mock.calls[0]?.[0]).toEqual(expect.any(Function));
     expect(createPersistence.mock.calls[0]?.[0]).toEqual(expect.any(Function));
     const capturedFetch = createPersistence.mock.calls[0]?.[0] as (
       input: string,
@@ -89,6 +106,30 @@ it(
     await capturedFetch("http://127.0.0.1:43127/probe", { method: "GET" });
     expect(startupFetch).toHaveBeenCalledTimes(1);
     expect(replacementFetch).not.toHaveBeenCalled();
+  },
+  PRODUCTION_ENTRY_TEST_TIMEOUT_MS,
+);
+
+it(
+  "keeps the durable product available when independent publication configuration is rejected",
+  async () => {
+    injectPersistencePort(
+      persistencePort(async () => Object.freeze({ status: "missing" as const })),
+    );
+    const createPublication = injectPublicationPort(() => {
+      throw new Error("private-publication-configuration-detail");
+    });
+
+    await act(async () => {
+      await import("../src/main.js");
+      await Promise.resolve();
+    });
+
+    expect(
+      ((await screen.findByRole("button", { name: "New project" })) as HTMLButtonElement).disabled,
+    ).toBe(false);
+    expect(createPublication).toHaveBeenCalledTimes(1);
+    expect(document.body.textContent).not.toContain("private-publication-configuration-detail");
   },
   PRODUCTION_ENTRY_TEST_TIMEOUT_MS,
 );
