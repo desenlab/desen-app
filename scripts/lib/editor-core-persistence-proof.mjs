@@ -282,6 +282,13 @@ const RETAINED_T08_EXACT_RECEIPT_PATHS = Object.freeze(
   ),
 );
 
+const DEPENDENCY_SECURITY_PACKAGE_PATH = "apps/control-plane-api/package.json";
+const DEPENDENCY_SECURITY_PACKAGE_RECEIPTS = Object.freeze({
+  bytes: 2_408,
+  currentSha256: "1fb462974f97bf30df92ad63388871ded078bdbdb2260457293dd4806de86ebf",
+  historicalSha256: "a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2",
+});
+
 const BUILD_OPTION_KEYS = Object.freeze([
   "fileOverrides",
   "m07PrerequisiteBytes",
@@ -932,6 +939,25 @@ function authenticatePublishActivationSuccessor(files) {
   });
 }
 
+/**
+ * Authenticates the exact SEC-01 Fastify manifest successor and returns detached task-time bytes.
+ * Only its reviewed version leaf is projected; unrelated manifest changes and rollback fail.
+ */
+export function projectEditorCorePersistenceDependencySecurityManifest(rawBytes) {
+  const bytes = captureBytes(rawBytes, "dependency security manifest");
+  const pin = DEPENDENCY_SECURITY_PACKAGE_RECEIPTS;
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.currentSha256) {
+    fail("RETAINED_T08_AUTHORITY_DRIFT", "The exact SEC-01 dependency manifest drifted.");
+  }
+  const projected = Buffer.from(
+    bytes.toString("utf8").replace('"fastify": "5.12.2"', '"fastify": "5.11.2"'),
+  );
+  if (projected.byteLength !== pin.bytes || sha256(projected) !== pin.historicalSha256) {
+    fail("RETAINED_T08_AUTHORITY_DRIFT", "The SEC-01 inverse manifest projection drifted.");
+  }
+  return projected;
+}
+
 function assertRetainedT08Receipts(frozenArtifact, files) {
   if (
     RETAINED_T08_RECEIPT_PATHS.length !== 32 ||
@@ -948,7 +974,10 @@ function assertRetainedT08Receipts(frozenArtifact, files) {
   );
   for (const relativePath of RETAINED_T08_EXACT_RECEIPT_PATHS) {
     const receipt = receiptByPath.get(relativePath);
-    const bytes = files.get(relativePath);
+    const bytes =
+      relativePath === DEPENDENCY_SECURITY_PACKAGE_PATH
+        ? projectEditorCorePersistenceDependencySecurityManifest(files.get(relativePath))
+        : files.get(relativePath);
     if (receipt?.bytes !== bytes?.byteLength || receipt?.sha256 !== sha256(bytes)) {
       fail("RETAINED_T08_AUTHORITY_DRIFT", `Retained M08-T08 authority drifted: ${relativePath}.`);
     }
@@ -1737,7 +1766,8 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
     },
     receiptCompatibility: {
       retainedTaskTimeReceipts: RETAINED_T08_RECEIPT_PATHS.length,
-      currentExactRetainedReceipts: RETAINED_T08_EXACT_RECEIPT_PATHS.length,
+      currentExactRetainedReceipts: RETAINED_T08_EXACT_RECEIPT_PATHS.length - 1,
+      dependencySecurityProjectedReceipts: 1,
       publishActivationHandoffReceipts: PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS.length,
     },
     publishActivationSuccessor,

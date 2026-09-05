@@ -622,8 +622,11 @@ channel-consumption roots are explicitly denied native-addon authority. These as
 nineteen exact native-addon steps; every unlisted workload remains denied.
 Regression tests prove
 that every unlisted step remains denied; the source-audit verifier remains workspace-read-only.
-The reviewed production dependency audit for locked Fastify 5.11.2 and better-sqlite3 13.0.3
-reports no known vulnerability.
+The SEC-01 production dependency audit on 2026-09-05, with Fastify 5.12.2, fast-uri 3.1.7/4.1.4,
+and unchanged better-sqlite3 13.0.3, reports zero advisories. This is a dated registry result,
+not a claim of permanent vulnerability freedom; official upstream advisories and focused
+dependency regressions supplement the registry, which can lag new disclosures. Development-only
+dependency findings remain outside SEC-01. See [the security maintenance evidence](../proof/SEC-01-DEPENDENCY-SECURITY.md).
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
 distribution across the 180 workloads: 162 `NONE`, two `FIXTURE_COPY`, fifteen

@@ -112,6 +112,8 @@ test("[authority] builds the exact versioned M07-T06 artifact and official stagi
   assert.equal(built.artifact.profile, "desen.control-plane.runtime-staging-proof.v1");
   assert.equal(built.artifact.task, "M07-T06");
   assert.equal(built.artifact.result, "PASS");
+  assert.equal(built.artifact.claims.registrations.app.dependencies.fastify, "5.11.2");
+  assert.equal(built.currentCompatibility.claims.registrations.app.dependencies.fastify, "5.12.2");
   assert.equal(
     built.artifact.claims.officialSuccess.stagedRevision,
     "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb",
@@ -307,6 +309,8 @@ test("[implementation] rejects staging authority, snapshot, index, or delegation
 
 test("[registration] rejects package-root, package-script, aggregate, or CI tuple drift", async () => {
   const mutations = [
+    [APP_PACKAGE, (source) => source.replace('"fastify": "5.12.2"', '"fastify": "5.11.2"')],
+    [APP_PACKAGE, (source) => source.replace('"fastify": "5.12.2"', '"fastify": "5.12.1"')],
     [
       APP_PACKAGE,
       (source) => source.replace('"test:runtime-staging":', '"test:runtime-staging-old":'),

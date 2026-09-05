@@ -12,6 +12,7 @@ import {
   EDITOR_CORE_PERSISTENCE_ROOT_TEST_NAMES,
   EditorCorePersistenceProofError,
   buildEditorCorePersistenceEvidence,
+  projectEditorCorePersistenceDependencySecurityManifest,
   verifyEditorCorePersistenceEvidence,
   writeEditorCorePersistenceEvidence,
 } from "../scripts/lib/editor-core-persistence-proof.mjs";
@@ -231,7 +232,8 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
   assert.equal(built.currentCompatibility.tests.editorWebPublicCompilerNegativeAssertions, 10);
   assert.deepEqual(built.currentCompatibility.receiptCompatibility, {
     retainedTaskTimeReceipts: 32,
-    currentExactRetainedReceipts: 26,
+    currentExactRetainedReceipts: 25,
+    dependencySecurityProjectedReceipts: 1,
     publishActivationHandoffReceipts: 6,
   });
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
@@ -366,6 +368,31 @@ test("[determinism] two fresh M08-T08 evidence builds are byte-identical", async
 });
 
 test("[mutation] rejects prerequisite, tracked-file, and runtime substitution", async () => {
+  const securityManifest = await readFile(path.join(ROOT, "apps/control-plane-api/package.json"));
+  const projectedManifest =
+    projectEditorCorePersistenceDependencySecurityManifest(securityManifest);
+  assert.equal(JSON.parse(securityManifest.toString("utf8")).dependencies.fastify, "5.12.2");
+  assert.equal(JSON.parse(projectedManifest.toString("utf8")).dependencies.fastify, "5.11.2");
+  assert.deepEqual(
+    projectedManifest,
+    Buffer.from(securityManifest.toString("utf8").replace('"5.12.2"', '"5.11.2"')),
+  );
+  for (const rejectedManifest of [
+    projectedManifest,
+    changedByte(securityManifest),
+    Buffer.from(securityManifest.toString("utf8").replace('"5.12.2"', '"5.12.1"')),
+    Buffer.from(securityManifest.toString("utf8").replace('"13.0.3"', '"13.0.4"')),
+  ]) {
+    assert.throws(
+      () => projectEditorCorePersistenceDependencySecurityManifest(rejectedManifest),
+      expectedError("RETAINED_T08_AUTHORITY_DRIFT"),
+    );
+  }
+  projectedManifest[0] ^= 1;
+  assert.notDeepEqual(
+    projectedManifest,
+    projectEditorCorePersistenceDependencySecurityManifest(securityManifest),
+  );
   const prerequisite = await readFile(
     path.join(ROOT, EDITOR_CORE_PERSISTENCE_PREREQUISITE_PINS[0].path),
   );

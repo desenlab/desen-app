@@ -28,11 +28,15 @@ const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 32,
   FROZEN_INPUT: 154,
-  PACKAGE_OR_APPLICATION: 555,
+  PACKAGE_OR_APPLICATION: 556,
   SHARED_PROOF_INFRASTRUCTURE: 292,
-  PROJECT_DOCUMENTATION: 147,
+  PROJECT_DOCUMENTATION: 148,
   REPOSITORY_POLICY: 11,
 });
+const SEC_01_SUCCESSOR_PATHS = Object.freeze([
+  "apps/control-plane-api/test/dependency-security.test.ts",
+  "docs/proof/SEC-01-DEPENDENCY-SECURITY.md",
+]);
 
 async function currentTrackedPaths() {
   const { stdout } = await EXEC_FILE("git", ["ls-files", "-z"], {
@@ -63,7 +67,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1446 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1448 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,12 +89,52 @@ test("freezes exact-one ownership for all 1446 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1446);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1448);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
   );
   assertDeepFrozen(authority);
+});
+
+test("the exact SEC-01 successor preserves the reviewed T05 ownership authority", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  for (const [trackedPath, category] of [
+    [SEC_01_SUCCESSOR_PATHS[0], AFFECTED_OWNERSHIP_CATEGORIES.PACKAGE_OR_APPLICATION],
+    [SEC_01_SUCCESSOR_PATHS[1], AFFECTED_OWNERSHIP_CATEGORIES.PROJECT_DOCUMENTATION],
+  ]) {
+    assert.deepEqual(resolveAffectedWorkloadOwner(authority, trackedPath), {
+      path: trackedPath,
+      category,
+      disposition: AFFECTED_OWNERSHIP_DISPOSITIONS.FORCE_EXHAUSTIVE,
+      proofUnitId: null,
+      verifierNodeId: null,
+      rootTestNodeId: null,
+    });
+    assert.throws(
+      () => createAffectedWorkloadOwnership(paths.filter((candidate) => candidate !== trackedPath)),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+
+  const predecessorPaths = paths.filter((candidate) => !SEC_01_SUCCESSOR_PATHS.includes(candidate));
+  assert.deepEqual(calculateAffectedWorkloadOwnershipReview(predecessorPaths), {
+    trackedPathCount: 1446,
+    trackedPathSetSha256: "9cc6e2ebb16b60cc804ca2b7380bf1710d4aa960a363ec606b0574c641fbd53c",
+    proofOwnedPathCount: 210,
+    categoryCounts: {
+      PROOF_UNIT: 210,
+      CI_POLICY: 45,
+      DEPENDENCY_POLICY: 32,
+      FROZEN_INPUT: 154,
+      PACKAGE_OR_APPLICATION: 555,
+      SHARED_PROOF_INFRASTRUCTURE: 292,
+      PROJECT_DOCUMENTATION: 147,
+      REPOSITORY_POLICY: 11,
+    },
+    ownershipSha256: "dc6d534f81fa551fc37ca045a88b2424f10d5fc935cdc56f99aaa55a5efbcbc6",
+  });
 });
 
 test("permits strict selection only for exact verifier and root-test proof inputs", async () => {
@@ -843,7 +887,10 @@ test("the reviewed AR-01 successor preserves the historical I07-04 ownership pro
   }
 
   const historicalPaths = currentPaths.filter(
-    (candidate) => !promotedPaths.includes(candidate) && !successorPaths.includes(candidate),
+    (candidate) =>
+      !promotedPaths.includes(candidate) &&
+      !successorPaths.includes(candidate) &&
+      !SEC_01_SUCCESSOR_PATHS.includes(candidate),
   );
   historicalPaths.push(
     "scripts/ci/run-shadow-affected-quality-gate.mjs",

@@ -851,7 +851,7 @@ async function registrationProjection(overrides) {
       "@desen/runtime-core": "workspace:*",
       "@desen/validator": "workspace:*",
       "better-sqlite3": "13.0.3",
-      fastify: "5.11.2",
+      fastify: "5.12.2",
     },
   };
   if (JSON.stringify(appProjection) !== JSON.stringify(expectedAppProjection)) {

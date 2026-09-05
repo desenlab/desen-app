@@ -37,13 +37,23 @@ kanıtlar ve tarihsel kimlikler korunuyor; Git geçmişi yeniden yazılmadı.
 [Kapsam ve kanıt](../proof/HISTORICAL-ARCHIVE-REDACTION.md). I07-05'in eski runner'ı kaldırma
 kapsamı değişmedi.
 
-**M10-T05 — Yayınlanan değişikliğin aynı host'ta görünmesi** yerel kanıtını geçti ve `DONE` kaydı
-koşullu kapanış adayıdır. Normal ürün içinde iki görünür Save → Publish → Activate döngüsüyle önce
+**SEC-01 — Fastify / fast-uri güvenlik düzeltmesi**, kullanıcı isteğiyle M10-T06'dan önce gelir.
+Fastify 5.12.2 ve fast-uri 3.1.7/4.1.4 kullanılır. Güvenlik testleri 44/44, kontrol düzleminin tüm
+testleri 245/245 geçer; üretim bağımlılıkları audit'i sıfır açık bildirir. Geliştirme araçlarındaki
+kapsam dışı bulgular ayrı tutulur. Yerel kanıt geçen `DONE` kaydı koşullu kapanış adayıdır;
+tam son PR head'inde taze `Quality gate` ve `Browser E2E` geçmeden merge veya tamamlanma iddiası
+yapılamaz. **M10-T06 başlamaz; bu güvenlik işi kapanınca beklenir.**
+[Kapsam ve kanıt](../proof/SEC-01-DEPENDENCY-SECURITY.md).
+
+**M10-T05 — Yayınlanan değişikliğin aynı host'ta görünmesi**,
+[PR #77](https://github.com/desenlab/desen-app/pull/77) ile kapandı. Main revizyonu
+`e95c8ceb1601e832dcad53158add10ec03e7951a`,
+[taze CI koşusunu](https://github.com/desenlab/desen-app/actions/runs/33986719329) geçti.
+Normal ürün içinde iki görünür Save → Publish → Activate döngüsüyle önce
 A, sonra etiket ve aralığı değiştirilmiş B revizyonu yayımlanır. Ayrı derlenen referans host iki
 revizyon arasında yeniden derlenmez; yenilemede B'yi, ikinci yenilemede yine B'yi gösterir. P-07
 `PROVEN`, PF-059 `CLOSED` olur; toplam ilerleme 117/148 (%79), M10 8/12 (%67), kanıt kapıları ise
-11/13'tür. Bir sonraki ürün görevi M10-T06'dır. Merge için tam son PR head'inde taze hosted
-`Quality gate` ve `Browser E2E` hâlâ zorunludur.
+11/13'tür. SEC-01 bu ilerleme sayılarını değiştirmez ve M10-T06'yı başlatmaz.
 
 Sıradan bir `T` görevinin hızlı yerel geri bildirimi; `pnpm format:check`, `pnpm lint`,
 `pnpm typecheck`, `pnpm build`, `pnpm boundaries` ve

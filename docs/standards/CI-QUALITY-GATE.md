@@ -893,9 +893,11 @@ The Publisher probe loads the reviewed Rolldown binding; the control-plane pairs
 SQLite binding; and the adapter-canvas pair loads the reviewed Vite/Rollup build binding. The
 source-audit verifier
 remains workspace-read-only; its root test owns the single exclusive workspace-temp exception.
-Fastify 5.11.2 and better-sqlite3 13.0.3 are exact lockfile inputs, and the reviewed production
-dependency audit reports no known vulnerability. That dependency statement remains local evidence;
-M07-T05 and M07-T06 subsequently passed hosted CI. No hosted M07-T09 result is claimed here.
+SEC-01 updates the exact dependency inputs to Fastify 5.12.2 and fast-uri 3.1.7/4.1.4, retaining
+better-sqlite3 13.0.3. The 2026-09-05 production audit reports zero advisories; this dated local
+registry result is supplemented by upstream disclosure review and dependency regression tests,
+not treated as hosted evidence or permanent security assurance. Historical M07-T05/M07-T06
+receipts retain their original dependency identities. See [SEC-01](../proof/SEC-01-DEPENDENCY-SECURITY.md).
 
 Every proof process gets a fresh, identity-checked temp root and generated Node permissions.
 Direct workspace-write grants, child processes, and addons are absent unless the code-owned

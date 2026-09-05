@@ -15,6 +15,24 @@ cached success, so every selected hosted workload remains fresh. CI-02 adds no l
 selector, changes no hosted dispatcher or workflow, and leaves I07-05 plus the manual legacy
 rollback path unchanged.
 
+## SEC-01 dependency-security successor
+
+SEC-01 updates Fastify to 5.12.2 and both installed fast-uri lines to 3.1.7/4.1.4. Checkpoint 73
+preserves all 59 frozen artifacts and sequences 1–72, resealing only the six current readers for
+M07-T06, M08-T08, and M10-T05. Its head is
+`sha256:27166d8cca9e4ce8eadde335306070b404e1e8f28de3e36dd391430a7884d825`. Current dependency
+receipts are authenticated separately from task-time projections; rollback or unrelated changes
+fail explicitly. No frozen bridge is regenerated and no historical success becomes current success.
+
+The new security test and evidence document advance exact ownership to 1,448 tracked paths,
+retaining 210 proof-owned paths. The new path-set hash is
+`sha256:c47ca4048c8cd04a2d1f70facffc9dcb20027fb846284774e991ae23fc578f95`; ownership is
+`sha256:5e9bfed553437553ea36157baef70439ed50c712eeb318f28e14f2c522228c60`. Independent tests
+retain the exact 1,446-path predecessor and the frozen I07-04 campaign. The security suite is
+automatically discovered by the existing package-wide test workload; the 220 workloads, 105 proof
+units, two workers, eleven barriers, permissions, and deadlines do not change. Dependency-policy
+changes force fresh exhaustive hosted validation. See [SEC-01 evidence](../../docs/proof/SEC-01-DEPENDENCY-SECURITY.md).
+
 CI-03 is the explicitly authorized performance interlude before M10-T04 closure. It removes
 invocation-private checkpoint normalization/hash repetition, rejects malformed proof requests and
 unsafe output destinations before expensive positive execution, and starts the measured long

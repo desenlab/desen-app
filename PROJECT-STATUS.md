@@ -2,9 +2,25 @@
 
 Last updated: 2026-09-05
 
-## Current work — M10-T05 published host update
+## Current work — SEC-01 dependency security, before M10-T06
 
-M10-T05 has passed its local evidence and its `DONE` entry is a closure candidate. Through the
+SEC-01 is the explicitly authorized security interlude. Fastify is pinned to 5.12.2 and both
+transitive fast-uri lines to 3.1.7/4.1.4. The focused security suite passes 44/44, the complete
+control-plane suite 245/245, and structural validation 63/63. The production audit reports zero
+advisories; eleven development-only records remain outside scope. Official upstream disclosures
+are checked separately because the registry currently omits recent advisories.
+
+All three affected proof verifiers and their 37 root tests pass. Checkpoint 73 preserves all
+59 frozen artifacts and all 72 previous entries, resealing only six current readers. Its head is
+`sha256:27166d8cca9e4ce8eadde335306070b404e1e8f28de3e36dd391430a7884d825`. The exact-current-head
+hosted `Quality gate` and `Browser E2E` are still required before merge and completion. SEC-01's
+`DONE` task-board row is a conditional closure candidate until those checks pass on the unchanged
+final head. No implementation or gate count advances. M10-T06 remains `NOT_STARTED` and must not
+begin as part of this request. See [SEC-01 evidence](docs/proof/SEC-01-DEPENDENCY-SECURITY.md).
+
+## Last completed implementation — M10-T05 published host update
+
+M10-T05 closed in [PR #77](https://github.com/desenlab/desen-app/pull/77). Through the
 normal visible product, a designer creates a blank Account project, authors a label and layout,
 then completes two Save → Publish → Activate cycles. A separately built reference host first shows
 revision A and then revision B after reload, while its HTML, JavaScript, CSS, and source identities
@@ -23,9 +39,11 @@ audited Web–React profile. Checkpoint sequence 72 authenticates 59 artifacts /
 `sha256:2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249`; proof gates remain
 11/13.
 
-The `DONE` entry does not authorize merge yet. Fresh hosted `Quality gate` and `Browser E2E` must
-pass for the exact final pull-request head; any new commit invalidates those results. M10-T06 is
-next and remains `NOT_STARTED`. Invalid publication diagnostics, last-known-good recovery,
+Its exact head `8b12360b39d7ac94ca3406b966f0daee9955822e` passed both hosted checks in
+[run 33985774365](https://github.com/desenlab/desen-app/actions/runs/33985774365), merged as
+`e95c8ceb1601e832dcad53158add10ec03e7951a`, and passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/33986719329). Those results
+authorize only T05's exact revisions, not SEC-01. Invalid publication diagnostics, last-known-good recovery,
 production identity, remote or multi-user deployment, native targets, P-12, N-036, and G10 remain
 under their existing owners. See the
 [M10-T05 evidence](docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md) and

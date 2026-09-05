@@ -45,11 +45,23 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | CI-02  | DONE        | I07-04, explicit user authorization  | Bounded non-authoritative per-task local feedback plus exact PR-head hosted completion authority; exhaustive compatibility coverage retained      | `AGENTS.md`, `scripts/test/ci-quality-gate.test.mjs`, ADR 0011     |
 | CI-03  | DONE        | CI-02, explicit user authorization   | Measured fresh-proof performance improvement without reducing coverage, reusing past success, or increasing the quality-gate deadline             | `docs/proof/CI-FRESH-PROOF-PERFORMANCE.md`                         |
 | AR-01  | DONE        | M10-T04, explicit user authorization | Remove private prose from nested historical archives while preserving technical evidence and preventing republication                             | `docs/proof/HISTORICAL-ARCHIVE-REDACTION.md`                       |
+| SEC-01 | DONE        | M10-T05, explicit user authorization | Patch Fastify and both fast-uri dependency lines; retain exact historical evidence and add installed-graph security regressions                   | `docs/proof/SEC-01-DEPENDENCY-SECURITY.md`                         |
 | I07-01 | DONE        | M07-T01, explicit user authorization | Current-reader checkpoint, machine-enforced cleanup register, and a non-authoritative `SHADOW + EXHAUSTIVE` modular candidate                     | `docs/proof/baselines/i07-01-modular-proof-shadow.json`            |
 | I07-02 | DONE        | I07-01                               | Exact legacy/modular equivalence, shared-state classification, and required-CI cutover to `REQUIRED + EXHAUSTIVE` execution                       | `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json` |
 | I07-03 | DONE        | I07-02                               | Fail-closed `SHADOW + AFFECTED` selector with complete tracked-path ownership, unknown-to-exhaustive fallback, and a frozen observation threshold | `docs/proof/baselines/i07-03-affected-selector-shadow.json`        |
 | I07-04 | DONE        | I07-03                               | Promote proven PR selection, retain exhaustive main/release/manual coverage, and remove all G07-due current-reader compatibility shims            | `docs/proof/baselines/i07-04-affected-selector-promotion.json`     |
 | I07-05 | NOT_STARTED | I07-04                               | Retire the legacy sequential runner only after rollback, failure, cancellation, hosted, and zero-reference gates pass                             | `docs/proof/baselines/i07-05-legacy-retirement.json`               |
+
+`SEC-01` is the explicitly authorized security interlude before M10-T06, which remains
+`NOT_STARTED`. Its local security suite passes 44/44, complete control-plane tests 245/245,
+structural validation 63/63, three affected root readers 37/37, checkpoint tests 101/101, and the
+three affected verifiers. Fastify 5.12.2 and fast-uri 3.1.7/4.1.4 replace only their vulnerable
+predecessors. The dated production audit reports zero advisories; development-only findings remain
+explicitly outside scope. The `DONE` row is a conditional closure candidate: merge/completion
+requires fresh hosted `Quality gate` and `Browser E2E` on the exact unchanged final PR head.
+Checkpoint 73 retains all earlier entries and frozen artifacts, resealing only six readers. No
+implementation-task total, milestone progress, proof gate, workload count, or M10-T06 scope changes.
+See the [security evidence](../proof/SEC-01-DEPENDENCY-SECURITY.md).
 
 `CI-01` temporarily precedes `M04-T03` in the working order but does not change the protocol task
 dependency graph, milestone totals, or proof-gate counts. It must keep the existing task-specific
