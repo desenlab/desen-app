@@ -1363,7 +1363,7 @@ The 189,123-byte, 116-receipt artifact is
 at `sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`.
 Checkpoint sequence 72 preserves sequences 1–71 and authenticates 59 frozen artifacts / 118
 current readers at
-`sha256:bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1`.
+`sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747`.
 [The T05 proof](docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md) and
 [ADR 0020](docs/adr/0020-desen-app-fixed-destination-publication-and-host-activation.md) record the
 evidence and authority boundary. P-07 advances to `PROVEN`, PF-059 closes, implementation progress

@@ -243,6 +243,7 @@ export const NATIVE_ADDON_ROOT_STEP_IDS = Object.freeze([
   "test-control-plane-runtime-fault-injection",
   "test-editor-core-persistence",
   "test-desen-app-real-adapter-canvas",
+  "test-desen-app-published-host-update",
 ]);
 
 /** Exact root-test steps that need bounded Node-permission API compatibility. */
@@ -404,6 +405,8 @@ const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
     NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE,
   "test-editor-core-persistence": NATIVE_ADDON_POLICIES.EDITOR_CORE_PERSISTENCE_SQLITE,
   "test-desen-app-real-adapter-canvas": NATIVE_ADDON_POLICIES.DESEN_APP_REAL_ADAPTER_CANVAS_VITE,
+  "test-desen-app-published-host-update":
+    NATIVE_ADDON_POLICIES.DESEN_APP_PUBLISHED_HOST_UPDATE_VITE,
 });
 
 /** Stable failure raised when shared-state authority cannot be established safely. */

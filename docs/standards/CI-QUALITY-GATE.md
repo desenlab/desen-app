@@ -884,9 +884,10 @@ verifier/root-test pair, the `publisher-invalid-source-matrix` root test, and th
 `control-plane-runtime-recovery`, and `control-plane-runtime-fault-injection` verifier/root-test
 pairs plus only the `control-plane-runtime-transition-races` and
 `reference-host-web-channel-consumption` verifiers, and the exact `editor-core-persistence`
-verifier/root-test pair, plus the exact `desen-app-real-adapter-canvas` verifier/root-test pair. The
+verifier/root-test pair, plus the exact `desen-app-real-adapter-canvas` and
+`desen-app-published-host-update` verifier/root-test pairs. The
 transition-races and channel-consumption roots are denied native-addon authority. These grants total
-seventeen exact native-addon steps; every unlisted step
+nineteen exact native-addon steps; every unlisted step
 remains denied.
 The Publisher probe loads the reviewed Rolldown binding; the control-plane pairs load the locked
 SQLite binding; and the adapter-canvas pair loads the reviewed Vite/Rollup build binding. The
@@ -1527,8 +1528,10 @@ the T05 closure contains 73 proof units / 156 workloads at
 `sha256:38923448f33f9c7e42b9d09641574ffc0e2c403c1080d7a42eaa56e5f0cd12d2`.
 Shared-state authority contains 94 ordinary and eleven barrier pairs, 93 OS-temporary roots, 92
 read-only proof workloads, and 107 OS-temporary-isolated proof workloads. The T05 verifier receives
-only its exact Vite/runtime-probe class; its root reader receives no listener or external-network
-authority.
+only its exact Vite/runtime-probe class. Both verifier and root receive the exact
+`DESEN_APP_PUBLISHED_HOST_UPDATE_VITE` native-addon policy because both perform fresh Vite builds.
+The root keeps its ordinary Node test harness and isolated temporary directory, with no workspace
+write, listener, or external-network authority.
 
 Exact-one ownership covers 1,446 tracked / 210 proof-owned paths. The path-set and ownership
 digests are
@@ -1545,8 +1548,8 @@ Rollback equivalence retains plan
 and exact workload set
 `sha256:39331deb57f2d8526e292a56aa031711bc1ca714631c3967f32f19dc5ff5d42f`.
 Promotion pins selector and runner authorities at
-`sha256:cadc9e8767eaf4402860f7604f26cecb219661133ccf16663023b2c8a1648240`
-and `sha256:ea90c5e9e9272664ed60f56c3c15eec0a42a37cdc9273ad21762ea07c82c60b1`.
+`sha256:e643745389abf60fd8c3558af2b2e8f1232be1649b4c64a105366d2f28144d13`
+and `sha256:6e25fe5cc63421b08d6f78aaa5c585bc34fdc518895eb0beaa42b5d2c356ff6d`.
 
 Checkpoint sequence 72 preserves all earlier checkpoints and 58 predecessor artifacts, adds the
 189,123-byte T05 artifact at
@@ -1554,7 +1557,7 @@ Checkpoint sequence 72 preserves all earlier checkpoints and 58 predecessor arti
 reseals M07-T11 readers `[38, 39]`, T01A readers `[102, 103]`, evergreen T01C readers `[106, 107]`, and T04 readers
 `[112, 113]`, appends T05 readers `[116, 117]`, and closes 59 artifacts / 118
 readers at
-`sha256:bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1`.
+`sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747`.
 This seal authenticates current reader identity only. Every selected workload must execute fresh,
 and merge still requires hosted `Quality gate` plus `Browser E2E` success for the exact current
 head. G10 and later invalid-publication/recovery owners remain open.

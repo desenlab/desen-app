@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1",
+  "headSha256": "1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747",
   "checkpoints": [
     {
       "sequence": 1,
@@ -48254,8 +48254,8 @@
           "task": "M10-T05",
           "role": "root-test",
           "path": "tests/desen-app-published-host-update.test.mjs",
-          "bytes": 40553,
-          "sha256": "4b5a4667b292971fc4b945370deb444b49c4730f0bff1b83be594b4fe9a21f22"
+          "bytes": 40695,
+          "sha256": "37419632c9d76157e531a3688a1394520cd28396b23b0f6248403c5ab6a2f3b6"
         }
       ]
     }

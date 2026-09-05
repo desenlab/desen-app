@@ -1201,6 +1201,7 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
     "test-control-plane-runtime-fault-injection",
     "test-editor-core-persistence",
     "test-desen-app-real-adapter-canvas",
+    "test-desen-app-published-host-update",
   ]);
   assert.equal(
     new Set([
@@ -1210,7 +1211,7 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
       ]),
       ...NATIVE_ADDON_ROOT_STEP_IDS,
     ]).size,
-    18,
+    19,
   );
   assert.equal(
     classifyWorkloadStateMetadata("verify-reference-host-web-source-audit").nativeAddonPolicy,
@@ -1325,7 +1326,7 @@ test("T04 real-host evidence readers remain passive and acquire no listener auth
   }
 });
 
-test("T05 live Vite verifier is temp-isolated while its root reader remains passive", () => {
+test("T05 live Vite verifier and read-only root reader retain the same native build authority", () => {
   const pair = classifyProofPairState("desen-app-published-host-update");
   assert.equal(pair.barrier, false);
   assert.equal(pair.verifier.executionClass, "PROOF_OS_TEMP_ISOLATED");
@@ -1335,12 +1336,52 @@ test("T05 live Vite verifier is temp-isolated while its root reader remains pass
   assert.equal(pair.rootTest.executionClass, "PROOF_READ_ONLY");
   assert.equal(pair.rootTest.childProcessPolicy, "NODE_TEST_HARNESS");
   assert.equal(pair.rootTest.tempPolicy, "RUNNER_SCOPED_OS");
-  assert.equal(pair.rootTest.nativeAddonPolicy, "NONE");
+  assert.equal(pair.rootTest.nativeAddonPolicy, "DESEN_APP_PUBLISHED_HOST_UPDATE_VITE");
   for (const step of [pair.verifier, pair.rootTest]) {
     assert.deepEqual(step.ports, []);
     assert.deepEqual(step.workspaceWrites, []);
     assert.equal(step.filesystemCompatibilityPolicy, "NONE");
   }
+});
+
+test("T05 root isolation loads pinned Vite while unrelated proof roots still deny native addons", async (context) => {
+  const root = await createProofStepIsolationContext({
+    workspaceRoot: REPOSITORY_ROOT,
+    workload: "test-desen-app-published-host-update",
+    baseEnvironment: process.env,
+  });
+  const ordinary = await createProofStepIsolationContext({
+    workspaceRoot: REPOSITORY_ROOT,
+    workload: "test-desen-app-success-host-operation",
+    baseEnvironment: process.env,
+  });
+  context.after(async () => {
+    await root.dispose();
+    await ordinary.dispose();
+  });
+
+  assert.match(root.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
+  assert.doesNotMatch(ordinary.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
+  assert.deepEqual(root.metadata.ports, []);
+  assert.deepEqual(root.metadata.workspaceWrites, []);
+  assert.equal(root.metadata.childProcessPolicy, "NODE_TEST_HARNESS");
+  assert.equal(root.metadata.filesystemCompatibilityPolicy, "NONE");
+  const viteUrl = pathToFileURL(
+    path.join(REPOSITORY_ROOT, "apps/desen-app/node_modules/vite/dist/node/index.js"),
+  ).href;
+  const loadVite = `import(${JSON.stringify(viteUrl)}).then(({ build, version }) => {
+    if (typeof build !== "function" || version !== "8.1.5") throw new Error("Vite contract drifted");
+    process.stdout.write("pinned-vite-loaded");
+  });`;
+  const allowed = await runNode(loadVite, root.env);
+  assert.equal(allowed.code, 0, allowed.stderr);
+  assert.equal(allowed.stdout, "pinned-vite-loaded");
+  const denied = await runNode(loadVite, ordinary.env);
+  assert.notEqual(denied.code, 0);
+  assert.match(
+    denied.stderr,
+    /Cannot find native binding|Cannot load native addon|ERR_DLOPEN_DISABLED/u,
+  );
 });
 
 test("unknown workloads and drifted metadata fail closed", () => {
@@ -1862,7 +1903,7 @@ test(
   },
 );
 
-test("only the seventeen exact reviewed steps receive native-addon authority", async (context) => {
+test("only the nineteen exact reviewed steps receive native-addon authority", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-native-addon-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const verifier = await createProofStepIsolationContext({

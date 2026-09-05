@@ -913,8 +913,8 @@ pair, the `publisher-invalid-source-matrix` root test, and the exact `control-pl
 `control-plane-runtime-fault-injection` verifier/root-test pairs plus only the
 `control-plane-runtime-transition-races` and `reference-host-web-channel-consumption` verifiers,
 and the exact `editor-core-persistence` verifier/root-test pair, plus the exact
-`desen-app-real-adapter-canvas` verifier/root-test pair. The transition-races and
-channel-consumption roots receive no native-addon grant. These grants cover seventeen exact steps;
+`desen-app-real-adapter-canvas` and `desen-app-published-host-update` verifier/root-test pairs. The transition-races and
+channel-consumption roots receive no native-addon grant. These grants cover nineteen exact steps;
 all unlisted steps remain denied.
 The source-audit verifier remains workspace-read-only; its root test is the sole workspace-temp
 barrier. The publisher root loads only the reviewed Rolldown binding, and the control-plane pairs
@@ -1658,6 +1658,11 @@ explicit Playwright configuration and builds the Desen App, reference-host serve
 reference-host client before executing it. Hosted CI runs the exact verifier/root pair after that
 browser journey.
 
+Both T05 workloads receive the exact `DESEN_APP_PUBLISHED_HOST_UPDATE_VITE` native-addon policy
+required by their fresh in-memory Vite audits. The root retains its ordinary Node test harness,
+runner-owned temporary directory, and workspace-read-only boundary. The grant does not add a
+listener, external-network access, or workspace writes to either workload.
+
 The semantic graph binds the T05 pair to four exact parents: T04 success/host operation, App
 publish/activation, the reference-host source audit, and the real-adapter canvas. The neutral
 inventory contains 220 workloads / 105 proof units, 735 prerequisite segments, 4,539 leaf
@@ -1697,10 +1702,10 @@ adds the 189,123-byte T05 artifact at
 reseals the changed M07-T11 proof/root readers `[38, 39]`, T01A readers `[102, 103]`, evergreen T01C readers `[106, 107]`, and
 T04 readers `[112, 113]`, appends T05 readers `[116, 117]`, and
 closes 59 artifacts / 118 readers at
-`sha256:bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1`.
+`sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747`.
 Promotion binds the current selector at
-`sha256:cadc9e8767eaf4402860f7604f26cecb219661133ccf16663023b2c8a1648240`
+`sha256:e643745389abf60fd8c3558af2b2e8f1232be1649b4c64a105366d2f28144d13`
 and required-affected runner authority at
-`sha256:ea90c5e9e9272664ed60f56c3c15eec0a42a37cdc9273ad21762ea07c82c60b1`.
+`sha256:6e25fe5cc63421b08d6f78aaa5c585bc34fdc518895eb0beaa42b5d2c356ff6d`.
 No workload, barrier, timeout, isolation rule, closing guard, or fresh hosted execution requirement
 is removed. These local identity receipts do not claim an exact-head hosted result or close G10.

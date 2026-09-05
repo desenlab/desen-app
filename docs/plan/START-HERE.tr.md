@@ -1371,7 +1371,7 @@ bağlantı yoktur ve iki grafikte 22 yönetilen modül bayt düzeyinde aynıdır
 [T05 kanıtında](../proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md) ve
 [ADR 0020'de](../adr/0020-desen-app-fixed-destination-publication-and-host-activation.md) kayıtlıdır.
 Eklemeli checkpoint sequence 72, sequence 1–71'i korur ve 59 artifact / 118 reader zincirini
-`sha256:bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1` ile doğrular.
+`sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747` ile doğrular.
 P-07 `PROVEN`, PF-059 `CLOSED` olur; genel ilerleme 117/148 (%79), M10 8/12 (%67), kanıt kapıları
 11/13'tür. M10-T06 sıradadır. Hatalı yayın, son çalışan sürümü koruma, production kimliği, uzak veya
 çok kullanıcılı dağıtım, native hedefler, P-12, N-036 ve G10 açık kalır. T05'in `DONE` kaydı tam son

@@ -1091,10 +1091,13 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
 
   const directory = await mkdtemp(path.join(os.tmpdir(), "desen-app-t05-proof-"));
   temporaryDirectories.push(directory);
+  const target = path.join(directory, "retained-artifact.json");
+  await writeFile(target, artifactBytes);
   const destination = path.join(directory, "artifact.json");
-  await symlink(path.join(ROOT, ARTIFACT_PATH), destination);
+  await symlink(target, destination);
   await assert.rejects(
     writeDesenAppPublishedHostUpdateEvidence({ artifactPath: destination }),
     expectedError("ARTIFACT_WRITE_UNSAFE"),
   );
+  assert.deepEqual(await readFile(target), artifactBytes);
 });

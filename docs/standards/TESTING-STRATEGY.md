@@ -607,8 +607,8 @@ runtime probes are permitted only for the verifier side of
 `control-plane-bundle-verification`, `control-plane-local-api`, and
 `control-plane-runtime-activation`, `control-plane-runtime-recovery`, and
 `control-plane-runtime-fault-injection`, and `control-plane-runtime-transition-races`.
-The `desen-app-real-adapter-canvas` verifier receives the same bounded verifier runtime-probe
-authority for the reviewed Vite build path.
+The `desen-app-real-adapter-canvas` and `desen-app-published-host-update` verifiers receive the
+same bounded verifier runtime-probe authority for their reviewed Vite build paths.
 Native-addon authority is
 permitted only for the exact
 `reference-host-web-source-audit` verifier/root-test pair, the `publisher-invalid-source-matrix`
@@ -617,9 +617,9 @@ verifier/root-test pairs plus the exact `control-plane-runtime-recovery` and
 `control-plane-runtime-fault-injection` pairs plus only the
 `control-plane-runtime-transition-races` and `reference-host-web-channel-consumption` verifiers,
 the exact `editor-core-persistence` verifier/root pair, and the exact
-`desen-app-real-adapter-canvas` verifier/root pair. The transition-races and
+`desen-app-real-adapter-canvas` and `desen-app-published-host-update` verifier/root pairs. The transition-races and
 channel-consumption roots are explicitly denied native-addon authority. These assignments total
-seventeen exact native-addon steps; every unlisted workload remains denied.
+nineteen exact native-addon steps; every unlisted workload remains denied.
 Regression tests prove
 that every unlisted step remains denied; the source-audit verifier remains workspace-read-only.
 The reviewed production dependency audit for locked Fastify 5.11.2 and better-sqlite3 13.0.3
@@ -1494,6 +1494,10 @@ contain no unresolved or dynamic edge and write no build output. The verifier st
 listener, product server, or external host; the independent root mutation reader has ten cases and
 remains passive.
 
+The CI isolation contract explicitly admits the existing T05 Vite native-addon policy for both
+the verifier and the root mutation test. The root is also exercised through that generated
+restricted environment, retaining workspace-read-only and listener-denial checks.
+
 The 189,123-byte artifact is
 `docs/proof/artifacts/desen-app-0.1.0-published-host-update.json` at
 `sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`.
@@ -1501,7 +1505,7 @@ Its 3,111,833-byte authenticated T04 historical-reader bridge is
 `sha256:07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470`
 and inflates to 4,884,471 bytes.
 Checkpoint sequence 72 closes 59 artifacts / 118 current readers at
-`sha256:bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1`;
+`sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747`;
 the dedicated checkpoint suite passes 100/100.
 
 The CI inventory contains 220 workloads / 105 proof units at
