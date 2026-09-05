@@ -253,6 +253,13 @@ const T01A_ANCESTOR_GAP_RECEIPTS = Object.freeze([
   }),
 ]);
 
+const DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS = Object.freeze({
+  path: "pnpm-lock.yaml",
+  bytes: 132_012,
+  currentSha256: "49f1d521ebd2e097508d22f8235e111bfb7e6bdc26a039b517a4a19aba7b2735",
+  historicalSha256: "f1165af2748866387a09d87dcf56a2e9036d553503256312051ce9c15a5ef8b8",
+});
+
 const FOCUSED_TEST_COMMANDS = Object.freeze([
   "pnpm --filter @desen/app-web exec vitest run test/local-runtime-publication.test.ts test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx dev/local-publication-host.test.mjs dev/local-dev-host.test.mjs",
   "pnpm --filter @desen/reference-host-web-server exec vitest run test/server.test.ts",
@@ -2677,6 +2684,14 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   const options = captureBuildOptions(rawOptions);
   const acquired = await acquireFiles(options);
   const files = acquired.files;
+  const dependencyPin = DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS;
+  const dependencyBytes = files.get(dependencyPin.path);
+  if (
+    dependencyBytes.byteLength !== dependencyPin.bytes ||
+    sha256(dependencyBytes) !== dependencyPin.currentSha256
+  ) {
+    fail("DEPENDENCY_SUCCESSOR_DRIFT", "The exact SEC-01 security lockfile successor drifted.");
+  }
   const parents = authenticateParents(files);
   const bridge = authenticateHistoricalReaderBridge(
     files.get(T04_HISTORICAL_READER_BRIDGE_PATH),
@@ -2719,6 +2734,15 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   }
   const trackedReceipts = Object.freeze(
     TRACKED_PATHS.map((relativePath) => {
+      // The live lockfile is authenticated above; only its historical receipt is projected.
+      // All source, dependency-boundary, and independent Vite observations still run fresh.
+      if (relativePath === dependencyPin.path) {
+        return Object.freeze({
+          path: relativePath,
+          bytes: dependencyPin.bytes,
+          sha256: dependencyPin.historicalSha256,
+        });
+      }
       const bytes = files.get(relativePath);
       return Object.freeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) });
     }),
@@ -2831,7 +2855,22 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
     ],
   });
   const artifactBytes = await canonicalArtifactBytes(artifact);
-  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  return deepFreeze({
+    artifact,
+    artifactBytes,
+    artifactSha256: sha256(artifactBytes),
+    dependencySecurityCompatibility: {
+      authority: "SEC-01",
+      path: dependencyPin.path,
+      bytes: dependencyPin.bytes,
+      currentSha256: dependencyPin.currentSha256,
+      historicalSha256: dependencyPin.historicalSha256,
+      fastify: "5.12.2",
+      fastUri: ["3.1.7", "4.1.4"],
+      projectedReceipts: 1,
+      immutableArtifactPreserved: true,
+    },
+  });
 }
 
 function assertPinnedArtifact(bytes) {

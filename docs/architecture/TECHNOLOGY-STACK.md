@@ -19,7 +19,8 @@ every dependency to have a documented responsibility.
   shell semantics
 - Playwright 1.62.1 with its package-pinned Chromium runtime for the isolated Desen App browser
   proof; the browser job executes in parallel with the repository quality gate
-- Fastify 5.11.2 for the fixed-loopback, bearer-authenticated local control-plane transport
+- Fastify 5.12.2 for the fixed-loopback, bearer-authenticated local control-plane transport;
+  SEC-01 also pins transitive fast-uri 3.1.7 and 4.1.4 in the workspace lockfile
 - better-sqlite3 13.0.3 behind the local Source-generation and channel-pointer repositories; its
   native import is isolated to the exact control-plane local-API proof pair
 - the browser's injected `fetch` capability for the reference host's fixed same-origin

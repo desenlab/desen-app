@@ -6,6 +6,16 @@ stores publication outputs, verifies candidate inputs, prepares active-separated
 and commits or reconstructs an exact preflight-joined candidate against one atomic activation
 record. It is proof-environment infrastructure, not the public `desen.run` developer API.
 
+## Dependency security maintenance
+
+SEC-01 pins Fastify 5.12.2 and resolves both transitive fast-uri lines to 3.1.7/4.1.4 without
+changing the loopback, authentication, origin, proxy, JSON, or persistence policies. The focused
+dependency regression suite runs through the existing package-wide `vitest run` command. It
+checks the actual installed dependency graph, not a separately installed test substitute.
+[Security scope and dated evidence](../../docs/proof/SEC-01-DEPENDENCY-SECURITY.md) distinguish
+registry results, upstream disclosures, historical proof identities, and remaining development-only
+findings.
+
 ## Status
 
 M07-T01 implements a persistent, revision-addressed store for exact Bundle bytes. M07-T02 adds a

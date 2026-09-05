@@ -769,9 +769,42 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
   assert.equal(verified.deterministicReaderStartsListener, false);
   assert.equal(verified.viteBuildsExecutedByVerifier, true);
   assert.equal(verified.viteBuildOutputWritten, false);
+  assert.deepEqual(second.dependencySecurityCompatibility, built.dependencySecurityCompatibility);
+  const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
+  const compatibility = built.dependencySecurityCompatibility;
+  assert.equal(compatibility.authority, "SEC-01");
+  assert.equal(compatibility.fastify, "5.12.2");
+  assert.deepEqual(compatibility.fastUri, ["3.1.7", "4.1.4"]);
+  assert.equal(compatibility.projectedReceipts, 1);
+  assert.equal(compatibility.immutableArtifactPreserved, true);
+  assert.equal(
+    createHash("sha256").update(liveLockfile).digest("hex"),
+    compatibility.currentSha256,
+  );
+  const historicalLockfile = built.artifact.boundary.trackedReceipts.find(
+    (receipt) => receipt.path === "pnpm-lock.yaml",
+  );
+  assert.equal(historicalLockfile.sha256, compatibility.historicalSha256);
+  assert.notEqual(historicalLockfile.sha256, compatibility.currentSha256);
+  assert.deepEqual(built.artifactBytes, artifactBytes);
 });
 
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
+  const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
+  for (const rejectedLockfile of [
+    changedByte(liveLockfile),
+    Buffer.from(liveLockfile.toString("utf8").replaceAll("fastify@5.12.2", "fastify@5.11.2")),
+    Buffer.from(liveLockfile.toString("utf8").replaceAll("fast-uri@3.1.7", "fast-uri@3.1.5")),
+    Buffer.from(liveLockfile.toString("utf8").replaceAll("fast-uri@4.1.4", "fast-uri@4.1.2")),
+  ]) {
+    assert.notDeepEqual(rejectedLockfile, liveLockfile);
+    await assert.rejects(
+      buildDesenAppPublishedHostUpdateEvidence({
+        fileOverrides: new Map([["pnpm-lock.yaml", rejectedLockfile]]),
+      }),
+      expectedError("DEPENDENCY_SUCCESSOR_DRIFT"),
+    );
+  }
   const parentBytes = await readFile(path.join(ROOT, DESEN_APP_PUBLISHED_HOST_UPDATE_T04_PIN.path));
   await assert.rejects(
     buildDesenAppPublishedHostUpdateEvidence({
