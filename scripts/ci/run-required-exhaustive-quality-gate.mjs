@@ -36,7 +36,10 @@ const EXPECTED_PLAN_SHA256_BY_AUTHORITY = Object.freeze({
   SHADOW: "0cb43b3c983e0e7ef6fb7536e08a90a9ce21a811eff22aab5767367c76b12641",
 });
 const PROOF_PAIR_CONCURRENCY = 2;
-const EARLY_ORDINARY_PROOF_PAIR_ID = "web-react-package-digest";
+const EARLY_ORDINARY_PROOF_PAIR_IDS = Object.freeze([
+  "web-react-package-digest",
+  "desen-app-published-host-update",
+]);
 const DEFAULT_STEP_TIMEOUT_MS = 15 * 60 * 1_000;
 const MAXIMUM_STEP_TIMEOUT_MS = 60 * 60 * 1_000;
 const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 30 * 1_000;
@@ -1517,11 +1520,11 @@ async function runProofPairRegion(
   let barrierCount = 0;
   const flushOrdinarySegment = () => {
     if (ordinarySegment.length === 0) return;
-    // The reviewed digest pair otherwise creates a long, one-worker tail before the first
-    // exclusive barrier. Promote only this code-owned pair inside its existing segment;
+    // The reviewed digest and published-host pairs otherwise create long, one-worker tails.
+    // Promote only these code-owned pairs inside their separate existing ordinary segments;
     // dependencies, pair membership, barrier positions, and canonical receipt order stay intact.
-    const earlyPairIndex = ordinarySegment.findIndex(
-      ({ id }) => id === EARLY_ORDINARY_PROOF_PAIR_ID,
+    const earlyPairIndex = ordinarySegment.findIndex(({ id }) =>
+      EARLY_ORDINARY_PROOF_PAIR_IDS.includes(id),
     );
     const orderedPairs =
       earlyPairIndex > 0

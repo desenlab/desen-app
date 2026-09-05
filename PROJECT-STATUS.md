@@ -20,7 +20,7 @@ The verifier passes, the independent root reader passes 10/10, focused suites pa
 unresolved edges and 22 byte-identical managed modules shared by both builds. The boundary graph
 passes across 861 modules / 3,685 dependencies. P-07 advances to `PROVEN` and PF-059 closes for the
 audited Web–React profile. Checkpoint sequence 72 authenticates 59 artifacts / 118 readers at
-`sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747`; proof gates remain
+`sha256:2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249`; proof gates remain
 11/13.
 
 The `DONE` entry does not authorize merge yet. Fresh hosted `Quality gate` and `Browser E2E` must
@@ -4994,7 +4994,7 @@ M09-T14/G09 evidence:
 - the neutral CI inventory contains 220 workloads / 105 proof units; T05 closure contains 73 proof
   units / 156 workloads; exact-one ownership covers 1,446 tracked paths / 210 proof-owned paths;
   checkpoint sequence 72 closes 59 artifacts / 118 readers at
-  `sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747`
+  `sha256:2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249`
 - coverage decision: M10-T05 is a `DONE` closure candidate; P-07 advances to `PROVEN`, PF-059 closes,
   progress advances to 117/148 (79%), and M10 advances to 8/12 (67%); proof gates remain 11/13 and
   M10-T06 is next

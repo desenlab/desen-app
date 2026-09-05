@@ -2922,7 +2922,16 @@ export async function verifyDesenAppPublishedHostUpdateEvidence(rawOptions = und
     options.proofDocumentPath === undefined
       ? DEFAULT_PROOF_DOCUMENT_PATH
       : captureAbsolutePath(options.proofDocumentPath, "proofDocumentPath");
-  const built = await buildDesenAppPublishedHostUpdateEvidence(options.buildOptions);
+  const buildOptions = captureBuildOptions(options.buildOptions);
+  // Rejected caller-supplied identities need no compilation. Accepted identities still require
+  // fresh observations below, and all caller-owned options are captured before the first await.
+  if (suppliedArtifactBytes !== undefined) {
+    authenticatePublishedHostUpdateArtifact(suppliedArtifactBytes);
+  }
+  if (suppliedProofDocument !== undefined) {
+    verifyProofDocument(suppliedProofDocument, DESEN_APP_PUBLISHED_HOST_UPDATE_ARTIFACT_PIN.sha256);
+  }
+  const built = await buildDesenAppPublishedHostUpdateEvidence(buildOptions);
   const artifactBytes =
     suppliedArtifactBytes === undefined
       ? await readRegularAuthority(artifactPath, ARTIFACT_RELATIVE_PATH)

@@ -791,7 +791,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[71],
-    "1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747",
+    "2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -3176,13 +3176,13 @@ test("sequence seventy-two appends M10-T05 and reseals only its exact current re
       },
       {
         index: 116,
-        bytes: 127277,
-        sha256: "6b7853b1d137abd9050f7a9be0bf9d7ad24ff8164714216b25d1fc20cf033bcb",
+        bytes: 127795,
+        sha256: "07cd05ebe1b39b95a660a54aad188480567b8491479ae89b846c3751ef21d046",
       },
       {
         index: 117,
-        bytes: 40695,
-        sha256: "37419632c9d76157e531a3688a1394520cd28396b23b0f6248403c5ab6a2f3b6",
+        bytes: 42543,
+        sha256: "d89193e997675c599150ae9c20b6249a20e47c6dcfdad6a9f47d967c52d93d7c",
       },
     ],
   );
@@ -3197,7 +3197,7 @@ test("sequence seventy-two appends M10-T05 and reseals only its exact current re
   );
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747",
+    "2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249",
   );
 });
 

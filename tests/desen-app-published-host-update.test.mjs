@@ -807,6 +807,37 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     expectedError("PROOF_DOCUMENT_DRIFT"),
   );
 
+  const unbuiltWorkspace = await realpath(
+    await mkdtemp(path.join(os.tmpdir(), "desen-app-t05-preflight-")),
+  );
+  temporaryDirectories.push(unbuiltWorkspace);
+  await assert.rejects(
+    verifyDesenAppPublishedHostUpdateEvidence({
+      artifactBytes: changedByte(artifactBytes),
+      proofDocument: report,
+      buildOptions: { workspaceRoot: unbuiltWorkspace },
+    }),
+    expectedError("ARTIFACT_DRIFT"),
+  );
+  await assert.rejects(
+    verifyDesenAppPublishedHostUpdateEvidence({
+      artifactBytes,
+      proofDocument: Buffer.from(
+        replaceOnce(report.toString("utf8"), "Status: DONE", "Status: OPEN"),
+      ),
+      buildOptions: { workspaceRoot: unbuiltWorkspace },
+    }),
+    expectedError("PROOF_DOCUMENT_DRIFT"),
+  );
+  const invalidBuildOptions = { workspaceRoot: unbuiltWorkspace };
+  const invalidBuildVerification = verifyDesenAppPublishedHostUpdateEvidence({
+    artifactBytes,
+    proofDocument: report,
+    buildOptions: invalidBuildOptions,
+  });
+  invalidBuildOptions.workspaceRoot = ROOT;
+  await assert.rejects(invalidBuildVerification, expectedError("SOURCE_INVENTORY_DRIFT"));
+
   let artifactBytesProxyTrapReads = 0;
   const artifactBytesProxy = new Proxy(Buffer.from(artifactBytes), {
     get() {
@@ -912,12 +943,23 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
 
   const initiallyValidArtifactBytes = Buffer.from(artifactBytes);
   const initiallyValidProofDocument = Buffer.from(report);
+  const initiallyValidParentBytes = Buffer.from(parentBytes);
+  const initiallyValidBuildOptions = {
+    workspaceRoot: ROOT,
+    fileOverrides: new Map([
+      [DESEN_APP_PUBLISHED_HOST_UPDATE_T04_PIN.path, initiallyValidParentBytes],
+    ]),
+  };
   const capturedVerification = verifyDesenAppPublishedHostUpdateEvidence({
     artifactBytes: initiallyValidArtifactBytes,
     proofDocument: initiallyValidProofDocument,
+    buildOptions: initiallyValidBuildOptions,
   });
   initiallyValidArtifactBytes[0] ^= 1;
   initiallyValidProofDocument[0] ^= 1;
+  initiallyValidBuildOptions.workspaceRoot = unbuiltWorkspace;
+  initiallyValidParentBytes[0] ^= 1;
+  initiallyValidBuildOptions.fileOverrides.set(SOURCE_PATHS.main, Buffer.from("invalid source"));
   assert.equal((await capturedVerification).result, "PASS");
 
   let fileOverridesProxyTrapReads = 0;
@@ -941,6 +983,14 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   });
   await assert.rejects(
     buildDesenAppPublishedHostUpdateEvidence({ fileOverrides: fileOverridesProxy }),
+    expectedError("OPTIONS_INVALID"),
+  );
+  await assert.rejects(
+    verifyDesenAppPublishedHostUpdateEvidence({
+      artifactBytes,
+      proofDocument: report,
+      buildOptions: { fileOverrides: fileOverridesProxy },
+    }),
     expectedError("OPTIONS_INVALID"),
   );
   assert.equal(fileOverridesProxyTrapReads, 0);

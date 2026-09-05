@@ -2469,7 +2469,7 @@ covers 1,446 tracked paths / 210 proof-owned paths.
 
 Checkpoint sequence 72 preserves sequences 1–71 and authenticates 59 frozen artifacts / 118
 current readers at
-`sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747`.
+`sha256:2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249`.
 
 P-07 advances to `PROVEN` and PF-059 closes for the audited Web–React profile. Overall progress
 advances to 117/148 (79%) and M10 to 8/12 (67%); proof gates remain 11/13 and M10-T06 is next.

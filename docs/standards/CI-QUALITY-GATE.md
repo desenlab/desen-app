@@ -1533,6 +1533,11 @@ only its exact Vite/runtime-probe class. Both verifier and root receive the exac
 The root keeps its ordinary Node test harness and isolated temporary directory, with no workspace
 write, listener, or external-network authority.
 
+The exact T05 verifier/root pair is prioritized only inside its existing ordinary segment to avoid
+a final single-worker tail. All exclusive barriers, dependency checks, two-worker bounds, canonical
+receipts, cancellation/closing guards, fresh executions, and time limits remain unchanged. The
+selection does not add a cached-success path or omit any workload.
+
 Exact-one ownership covers 1,446 tracked / 210 proof-owned paths. The path-set and ownership
 digests are
 `sha256:9cc6e2ebb16b60cc804ca2b7380bf1710d4aa960a363ec606b0574c641fbd53c`
@@ -1548,8 +1553,8 @@ Rollback equivalence retains plan
 and exact workload set
 `sha256:39331deb57f2d8526e292a56aa031711bc1ca714631c3967f32f19dc5ff5d42f`.
 Promotion pins selector and runner authorities at
-`sha256:e643745389abf60fd8c3558af2b2e8f1232be1649b4c64a105366d2f28144d13`
-and `sha256:6e25fe5cc63421b08d6f78aaa5c585bc34fdc518895eb0beaa42b5d2c356ff6d`.
+`sha256:3fef221a77c9f222259774f9f8feaeedccedd7f8574cf3da5bd147cfe52b3680`
+and `sha256:add4dbf618e7f019a76831799df3184e1ee0ca6638f1fa1ee2ac58c86a0f6eba`.
 
 Checkpoint sequence 72 preserves all earlier checkpoints and 58 predecessor artifacts, adds the
 189,123-byte T05 artifact at
@@ -1557,7 +1562,7 @@ Checkpoint sequence 72 preserves all earlier checkpoints and 58 predecessor arti
 reseals M07-T11 readers `[38, 39]`, T01A readers `[102, 103]`, evergreen T01C readers `[106, 107]`, and T04 readers
 `[112, 113]`, appends T05 readers `[116, 117]`, and closes 59 artifacts / 118
 readers at
-`sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747`.
+`sha256:2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249`.
 This seal authenticates current reader identity only. Every selected workload must execute fresh,
 and merge still requires hosted `Quality gate` plus `Browser E2E` success for the exact current
 head. G10 and later invalid-publication/recovery owners remain open.

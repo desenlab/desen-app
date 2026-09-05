@@ -1498,6 +1498,12 @@ The CI isolation contract explicitly admits the existing T05 Vite native-addon p
 the verifier and the root mutation test. The root is also exercised through that generated
 restricted environment, retaining workspace-read-only and listener-denial checks.
 
+Supplied artifact and report bytes are defensively captured and authenticated before compiling
+current sources. Invalid supplied identities fail before source acquisition; accepted identities
+still require all fresh host and App build observations and exact evidence equality. Regression
+controls use an empty workspace to distinguish early rejection from successful verification and
+mutate nested build options after invocation to retain call-time snapshot guarantees.
+
 The 189,123-byte artifact is
 `docs/proof/artifacts/desen-app-0.1.0-published-host-update.json` at
 `sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`.
@@ -1505,7 +1511,7 @@ Its 3,111,833-byte authenticated T04 historical-reader bridge is
 `sha256:07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470`
 and inflates to 4,884,471 bytes.
 Checkpoint sequence 72 closes 59 artifacts / 118 current readers at
-`sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747`;
+`sha256:2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249`;
 the dedicated checkpoint suite passes 100/100.
 
 The CI inventory contains 220 workloads / 105 proof units at

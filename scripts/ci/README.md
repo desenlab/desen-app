@@ -1663,6 +1663,12 @@ required by their fresh in-memory Vite audits. The root retains its ordinary Nod
 runner-owned temporary directory, and workspace-read-only boundary. The grant does not add a
 listener, external-network access, or workspace writes to either workload.
 
+The exhaustive scheduler starts the exact T05 pair early within its existing ordinary segment,
+alongside the existing segment-local package-digest prioritization. This avoids a long single-worker
+tail without crossing an exclusive barrier or changing the two-worker bound, prerequisite checks,
+canonical receipt order, workload inventory, cancellation behavior, or time limits. A held T05 pair
+must drain before the closing region can start, and its failure still cancels and awaits its sibling.
+
 The semantic graph binds the T05 pair to four exact parents: T04 success/host operation, App
 publish/activation, the reference-host source audit, and the real-adapter canvas. The neutral
 inventory contains 220 workloads / 105 proof units, 735 prerequisite segments, 4,539 leaf
@@ -1702,10 +1708,10 @@ adds the 189,123-byte T05 artifact at
 reseals the changed M07-T11 proof/root readers `[38, 39]`, T01A readers `[102, 103]`, evergreen T01C readers `[106, 107]`, and
 T04 readers `[112, 113]`, appends T05 readers `[116, 117]`, and
 closes 59 artifacts / 118 readers at
-`sha256:1e1fee6eefa05a75954ae5b19cc53cb0057abc232f6820117972399ef422f747`.
+`sha256:2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249`.
 Promotion binds the current selector at
-`sha256:e643745389abf60fd8c3558af2b2e8f1232be1649b4c64a105366d2f28144d13`
+`sha256:3fef221a77c9f222259774f9f8feaeedccedd7f8574cf3da5bd147cfe52b3680`
 and required-affected runner authority at
-`sha256:6e25fe5cc63421b08d6f78aaa5c585bc34fdc518895eb0beaa42b5d2c356ff6d`.
+`sha256:add4dbf618e7f019a76831799df3184e1ee0ca6638f1fa1ee2ac58c86a0f6eba`.
 No workload, barrier, timeout, isolation rule, closing guard, or fresh hosted execution requirement
 is removed. These local identity receipts do not claim an exact-head hosted result or close G10.
