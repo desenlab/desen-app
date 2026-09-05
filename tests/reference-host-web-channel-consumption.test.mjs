@@ -21,6 +21,12 @@ const SERVER_CONTROLLER = "apps/reference-host-web-server/src/channel-activation
 const SERVER_INVENTORY = "apps/reference-host-web-server/src/installed-package-inventory.ts";
 const SERVER_HTTP = "apps/reference-host-web-server/src/server.ts";
 const SERVER_TEST = "apps/reference-host-web-server/test/server.test.ts";
+const PUBLICATION_ACTIVATION_TEST_TITLES = Object.freeze([
+  "activates one exact published channel identity through the server's single controller",
+  "rejects malformed or mismatched publication identities without activating a candidate",
+  "never reports Active when the host preserves a different last-known-good revision",
+  "fails closed before refresh when unavailable and after the server lifetime closes",
+]);
 const CLIENT_DELIVERY = "apps/reference-host-web/src/channel-delivery.ts";
 const CLIENT_MAIN = "apps/reference-host-web/src/main.tsx";
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
@@ -138,6 +144,20 @@ test("[authority] builds the exact M07-T11 separately built channel-consumption 
   assert.equal(built.artifact.claims.traceRows[0].id, "PIPE-009");
   assert.equal(built.artifact.tests.runtimeCaseCount, 9);
   assert.equal(built.artifact.tests.runtimeTestCount, 46);
+  assert.equal(built.currentCompatibility.tests.runtimeTestCount, 50);
+  assert.equal(built.currentCompatibility.runtimeSuiteReceipt.testCount, 50);
+  assert.deepEqual(
+    built.currentCompatibility.tests.runtimeTestsByFile[SERVER_TEST].slice(0, 4),
+    PUBLICATION_ACTIVATION_TEST_TITLES,
+  );
+  for (const title of PUBLICATION_ACTIVATION_TEST_TITLES) {
+    assert.equal(
+      built.currentCompatibility.runtimeSuiteReceipt.testTitles.filter((value) => value === title)
+        .length,
+      1,
+    );
+    assert.equal(built.artifact.runtimeSuiteReceipt.testTitles.includes(title), false);
+  }
   assert.ok(built.artifact.nonclaims.some((claim) => claim.includes("POST /api/sign-in backend")));
   assert.equal(built.artifact.tests.rootMutationCaseCount, 13);
   assert.match(built.artifactSha256, /^[0-9a-f]{64}$/u);
@@ -228,6 +248,45 @@ test("[runtime] rejects missing, duplicate, failed, and additional case identiti
     }),
     expectedError("TEST_AUTHORITY_DRIFT"),
   );
+
+  for (const [index, title] of PUBLICATION_ACTIVATION_TEST_TITLES.entries()) {
+    const duplicateTitle =
+      PUBLICATION_ACTIVATION_TEST_TITLES[(index + 1) % PUBLICATION_ACTIVATION_TEST_TITLES.length];
+    const titleLiteral = JSON.stringify(title);
+    const registration = `it(${titleLiteral},`;
+    assert.equal(serverTest.split(registration).length, 2);
+    const sourceVariants = [
+      serverTest.replace(registration, `removedTest(${titleLiteral},`),
+      serverTest.replace(titleLiteral, JSON.stringify(duplicateTitle)),
+      serverTest.replace(titleLiteral, JSON.stringify(`unexpected publication case ${index}`)),
+    ];
+    for (const source of sourceVariants) {
+      await assert.rejects(
+        buildReferenceHostWebChannelConsumptionEvidence({
+          runtimeSuiteReceipt: suiteReceipt(),
+          trackedFileBytes: { [SERVER_TEST]: Buffer.from(source) },
+        }),
+        expectedError("TEST_AUTHORITY_DRIFT"),
+      );
+    }
+
+    const removedReceipt = suiteReceipt();
+    removedReceipt.testTitles = removedReceipt.testTitles.filter((value) => value !== title);
+    const duplicateReceipt = suiteReceipt();
+    duplicateReceipt.testTitles = duplicateReceipt.testTitles
+      .map((value) => (value === title ? duplicateTitle : value))
+      .sort();
+    const unexpectedReceipt = suiteReceipt();
+    unexpectedReceipt.testTitles = unexpectedReceipt.testTitles
+      .map((value) => (value === title ? `unexpected publication case ${index}` : value))
+      .sort();
+    for (const receipt of [removedReceipt, duplicateReceipt, unexpectedReceipt]) {
+      await assert.rejects(
+        buildReferenceHostWebChannelConsumptionEvidence({ runtimeSuiteReceipt: receipt }),
+        expectedError("RUNTIME_SUITE_MISMATCH"),
+      );
+    }
+  }
 });
 
 test("[server-boundary] rejects private imports and weakened static or CSP guards", async () => {

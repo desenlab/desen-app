@@ -1,0 +1,4399 @@
+{
+  "schemaVersion": 1,
+  "proofId": "desen-app-published-host-update",
+  "profile": "desen.app.published-host-update-proof.v1",
+  "task": "M10-T05",
+  "gate": null,
+  "result": "PASS",
+  "prerequisites": [
+    {
+      "task": "M10-T04",
+      "gate": null,
+      "proofId": "desen-app-success-host-operation",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-success-host-operation.json",
+      "bytes": 22456,
+      "sha256": "d9d841af06ec9efc51c3f1c74079f0aa4d5e1c7e996f3b97df7e277e4b1f8423",
+      "profile": "desen.app.success-host-operation-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T14",
+      "gate": "G09",
+      "proofId": "desen-app-publish-activation",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json",
+      "bytes": 24763,
+      "sha256": "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b",
+      "profile": "desen.app.publish-activation-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M05-T09",
+      "gate": "G05",
+      "proofId": null,
+      "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+      "bytes": 59871,
+      "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89",
+      "profile": "desen-reference-host-web-source-audit-v1",
+      "result": "PASS",
+      "immutable": true
+    },
+    {
+      "task": "M09-T03",
+      "gate": null,
+      "proofId": "desen-app-real-adapter-canvas",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json",
+      "bytes": 73111,
+      "sha256": "8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151",
+      "profile": "desen.app.real-adapter-canvas-proof.v1",
+      "result": "PASS",
+      "immutable": true
+    }
+  ],
+  "claim": {
+    "taskStatus": "DONE",
+    "p07Status": "PROVEN",
+    "m10T05Closed": true,
+    "visibleNormalProductAuthoring": true,
+    "twoSavedPublishedAndActivatedRevisions": true,
+    "labelAndLayoutUpdateVisibleInIndependentHost": true,
+    "hostSourceUnchangedAcrossPublishedRevisions": true,
+    "hostBuildUnchangedAcrossPublishedRevisions": true,
+    "immutableHostBuildAndSourceIdentityAtoB": true,
+    "savedAuthoredSourceOnly": true,
+    "exactPublishedRevisionActivation": true,
+    "serverOwnedChannelRereadAndActivation": true,
+    "fixedLauncherOwnedChannelAndHost": true,
+    "browserAndServerAuthoritiesSeparate": true,
+    "currentAppAndReferenceHostSourceImportBuildAudit": true,
+    "samePublicManagedImplementationInAppAndHost": true,
+    "noHandwrittenManagedHostTree": true,
+    "sourceSelectsEndpointCredentialHandlerOrExecutableModule": false,
+    "browserE2eClaimed": true,
+    "productionDeploymentCovered": false,
+    "remoteHostCovered": false,
+    "invalidPublicationCovered": false,
+    "lastKnownGoodRecoveryCovered": false,
+    "m10T06Closed": false,
+    "m10T07Closed": false,
+    "m10T08Closed": false,
+    "m10T09Closed": false,
+    "g10Closed": false
+  },
+  "authority": {
+    "source": {
+      "exactInjectedProfile": true,
+      "independentControlPlaneAndActivationAuthorities": true,
+      "fixedChannelAndHostDestination": true,
+      "sourceCannotSelectEndpointHandlerCredentialOrHostModule": true,
+      "browserCredentialsOmitted": true,
+      "boundedBrowserTransport": true,
+      "exactActivationRevisionRequired": true,
+      "normalProductBootstrapReceivesOptionalPort": true,
+      "flowWorkspaceCannotReceivePublicationPort": true,
+      "serverOwnsChannelRereadAndActivation": true,
+      "activationBridgeStrictAndLoopbackOnly": true,
+      "callbackSettlementClosedAndRedacted": true,
+      "lifecycleIdempotentAndCredentialsZeroed": true
+    },
+    "focusedTests": {
+      "declarationSites": {
+        "runtimePublication": 10,
+        "publicationHost": 13,
+        "localDevHost": 12,
+        "productBootstrap": 13,
+        "mainLifecycle": 5,
+        "referenceServer": 12,
+        "referenceServerTypes": 1
+      },
+      "totalDeclarationSites": 66,
+      "declarationSitesAreNotExpandedExecutionCount": true,
+      "fixedDestinationAndCredentialNegatives": true,
+      "callbackSettlementAndLifecycleNegatives": true,
+      "channelRaceAndClosedHostNegatives": true,
+      "normalProductInjectionCovered": true
+    },
+    "browser": {
+      "chromiumConfigurations": 1,
+      "testName": "publishes visible label and layout edits into one unchanged independent host build",
+      "normalVisibleProductFlow": true,
+      "visibleSourceGenerationA": 2,
+      "visibleSourceGenerationB": 3,
+      "visibleChannelGenerationA": 1,
+      "visibleChannelGenerationB": 2,
+      "distinctPublishedBundleRevisions": true,
+      "labelChangesAcrossActivation": true,
+      "stackGapChangesAcrossActivation": true,
+      "hostBuildFingerprintStableAcrossAAndB": true,
+      "secondReloadPreservesRevisionB": true,
+      "directDomOrNetworkMutationUsed": false,
+      "proofOnlyProductRouteUsed": false,
+      "serverBuildsAppAndHostSeparately": true,
+      "independentCredentials": true,
+      "productionDeploymentClaimed": false
+    },
+    "appSourceAudit": {
+      "inventory": [
+        "apps/desen-app/src/adapter-canvas.tsx",
+        "apps/desen-app/src/application.module.css",
+        "apps/desen-app/src/application.tsx",
+        "apps/desen-app/src/assets/breadcrumb-separator.svg",
+        "apps/desen-app/src/assets/desen-logo.svg",
+        "apps/desen-app/src/assets/plus.svg",
+        "apps/desen-app/src/assets/settings.svg",
+        "apps/desen-app/src/assets/theme.svg",
+        "apps/desen-app/src/authoring-behavior-projection.ts",
+        "apps/desen-app/src/authoring-conditions.ts",
+        "apps/desen-app/src/authoring-connections.ts",
+        "apps/desen-app/src/authoring-data.ts",
+        "apps/desen-app/src/authoring-diagnostics.ts",
+        "apps/desen-app/src/authoring-event-actions.ts",
+        "apps/desen-app/src/authoring-fixtures.ts",
+        "apps/desen-app/src/authoring-inspector.ts",
+        "apps/desen-app/src/authoring-integration.ts",
+        "apps/desen-app/src/authoring-persistence.ts",
+        "apps/desen-app/src/authoring-preview.ts",
+        "apps/desen-app/src/authoring-publication.ts",
+        "apps/desen-app/src/authoring-run-navigation.ts",
+        "apps/desen-app/src/authoring-scenarios.ts",
+        "apps/desen-app/src/authoring-selection.ts",
+        "apps/desen-app/src/authoring-slots.ts",
+        "apps/desen-app/src/authoring-state.ts",
+        "apps/desen-app/src/behavior-controls.tsx",
+        "apps/desen-app/src/diagnostics-panel.tsx",
+        "apps/desen-app/src/event-action-panel.tsx",
+        "apps/desen-app/src/inspector-panel.tsx",
+        "apps/desen-app/src/local-operation-binding.ts",
+        "apps/desen-app/src/local-runtime-persistence.ts",
+        "apps/desen-app/src/local-runtime-publication.ts",
+        "apps/desen-app/src/local-workspaces.module.css",
+        "apps/desen-app/src/local-workspaces.tsx",
+        "apps/desen-app/src/main.tsx",
+        "apps/desen-app/src/persistence-controls.tsx",
+        "apps/desen-app/src/preview-controls.tsx",
+        "apps/desen-app/src/preview-fidelity.ts",
+        "apps/desen-app/src/product-bootstrap.tsx",
+        "apps/desen-app/src/project-data.ts",
+        "apps/desen-app/src/project-inventory-fixture.ts",
+        "apps/desen-app/src/project-navigation.ts",
+        "apps/desen-app/src/project-workspace-profile.ts",
+        "apps/desen-app/src/publication-controls.tsx",
+        "apps/desen-app/src/reference-authoring-profile.ts",
+        "apps/desen-app/src/reference-empty-project.ts",
+        "apps/desen-app/src/reference-flow-workspace-profile.ts",
+        "apps/desen-app/src/reference-project-fixtures.ts",
+        "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+        "apps/desen-app/src/state-panel.tsx",
+        "apps/desen-app/src/structured-json.ts",
+        "apps/desen-app/src/styles.css"
+      ],
+      "completeSourceFiles": 52,
+      "productionGraphSourceFiles": 50,
+      "fixtureOnlySourceFiles": [
+        "apps/desen-app/src/reference-authoring-profile.ts",
+        "apps/desen-app/src/reference-project-fixtures.ts"
+      ],
+      "sourceReceipts": [
+        {
+          "path": "apps/desen-app/src/adapter-canvas.tsx",
+          "bytes": 15710,
+          "sha256": "sha256:ad1f25d20378cc3c2d7ce679c6f9ea2d6bba0e6701a07d06a796e1291fc0838f"
+        },
+        {
+          "path": "apps/desen-app/src/application.module.css",
+          "bytes": 119727,
+          "sha256": "sha256:8b6ee6de86a12e210fca61b57d2be1e7502245dc64c9c74b513a0226b6896571"
+        },
+        {
+          "path": "apps/desen-app/src/application.tsx",
+          "bytes": 153414,
+          "sha256": "sha256:7323a002f67d8f0a82e77a0bf4850e8caf7079f94f42fda88045b74279dc9f5c"
+        },
+        {
+          "path": "apps/desen-app/src/assets/breadcrumb-separator.svg",
+          "bytes": 419,
+          "sha256": "sha256:095027d1707a74b5b904a5f4d1aea3db113a4f96efd380477b67731a4132cd11"
+        },
+        {
+          "path": "apps/desen-app/src/assets/desen-logo.svg",
+          "bytes": 564,
+          "sha256": "sha256:f96d5554a5b1a3c0755214a488cced06a5d47e37ba243fe425e8b617b186c27a"
+        },
+        {
+          "path": "apps/desen-app/src/assets/plus.svg",
+          "bytes": 427,
+          "sha256": "sha256:114cc5ac1e52d62b5a754d4e99099a51b98eb6227330e4e3e49bab6e3c0df1ff"
+        },
+        {
+          "path": "apps/desen-app/src/assets/settings.svg",
+          "bytes": 1080,
+          "sha256": "sha256:93d8579fb0902913ccbb5e2329643220a1694444489f034f2bbd118a5a5898f6"
+        },
+        {
+          "path": "apps/desen-app/src/assets/theme.svg",
+          "bytes": 973,
+          "sha256": "sha256:e4fb6c23bbd2fe4040867f391234ea8653473038f12d1d6d66059b7dbc9feb49"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-behavior-projection.ts",
+          "bytes": 7346,
+          "sha256": "sha256:9357102092e49034d2f99acdd81e468c7572206232f94bcb3cb942960c38d283"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-conditions.ts",
+          "bytes": 8179,
+          "sha256": "sha256:71702a2506805c874e681112b10757118f5c732ba9e3cb3680c9357eafde0a77"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-connections.ts",
+          "bytes": 27291,
+          "sha256": "sha256:e23337ebb85fdf43bb6c8370addd26526ecdf96a5b5afdf68ecd8f751b0767b2"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-data.ts",
+          "bytes": 27268,
+          "sha256": "sha256:161e3e37ba2faa6e41eeb479cb6d948557332f0365f02f4b14f887b99cca0846"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-diagnostics.ts",
+          "bytes": 16059,
+          "sha256": "sha256:7cddac8f13736d0fe4fc3e36abe46d0affebdc5ceb20e87e5295ec2ec7db5a1e"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-event-actions.ts",
+          "bytes": 49738,
+          "sha256": "sha256:f880166bd26964cd022eb7c86333541f60a17e9b5401df51e45ed023a02ae328"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-fixtures.ts",
+          "bytes": 35852,
+          "sha256": "sha256:119620da01eb800874d75721a8aa06879cf8a90c669324333beb482c9c29831c"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-inspector.ts",
+          "bytes": 38900,
+          "sha256": "sha256:ecb829a3e10b7c532801b71ed1e27e6c4b0a7a2c93919612ffcffa7f42d238c1"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-integration.ts",
+          "bytes": 20932,
+          "sha256": "sha256:c189d7ca2dd855eda6202f5ec9b8d9c1d57f19579cad3fdec7bea757d1a85601"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-persistence.ts",
+          "bytes": 34441,
+          "sha256": "sha256:fcf3d6731cdcaf4bc8ab180a50042d060437c7a08004b47346dd5061fbe1043c"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-preview.ts",
+          "bytes": 4486,
+          "sha256": "sha256:14d8064ffa7577b948e849c4c9b51c0859fcf404caa9e0f05f085654b6787b72"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-publication.ts",
+          "bytes": 41596,
+          "sha256": "sha256:7157c578902c2ef3d7de33a04634492aff17da7f69394c9536b9cfaa782767c4"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-run-navigation.ts",
+          "bytes": 7049,
+          "sha256": "sha256:5c617f21a6df377d94318b708ba74e6b60e4e200793a219e6ff9003be892d2a8"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-scenarios.ts",
+          "bytes": 20751,
+          "sha256": "sha256:672085cbfd631bec50af1ec1ea635a0f192df435cd5a2484488d75eb0e49de23"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-selection.ts",
+          "bytes": 6147,
+          "sha256": "sha256:e97eed87734fff6fdc3a40dbc81754a88318238090e4c1dfcc53062e8ff7fc7c"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-slots.ts",
+          "bytes": 41336,
+          "sha256": "sha256:924616dc9c7f6f5944f9f8e3519d47562329dcb333c56dd6672255b61db1ab6a"
+        },
+        {
+          "path": "apps/desen-app/src/authoring-state.ts",
+          "bytes": 23742,
+          "sha256": "sha256:8120d7ef37cab004fe29ac1af6c8b94348e1f3251dfb2750d2202a885a7fb737"
+        },
+        {
+          "path": "apps/desen-app/src/behavior-controls.tsx",
+          "bytes": 36553,
+          "sha256": "sha256:5a26dde1c4a65071979421fdf36ecf5b738376e3692849bbda86d420052d4e8e"
+        },
+        {
+          "path": "apps/desen-app/src/diagnostics-panel.tsx",
+          "bytes": 5638,
+          "sha256": "sha256:1c3889d2b8405db04999689c9570d8f2dee2f6c5b2f7ea2290cc256359f2dd0f"
+        },
+        {
+          "path": "apps/desen-app/src/event-action-panel.tsx",
+          "bytes": 59231,
+          "sha256": "sha256:45f372e2ceeb49b3a4ff0a9f94ebd312a2a031e807d173808dead8895e68fdc6"
+        },
+        {
+          "path": "apps/desen-app/src/inspector-panel.tsx",
+          "bytes": 32591,
+          "sha256": "sha256:ad2543377377e8d5ae99fbd110a0cf1c63710620e972db388feca95ef7ae7d26"
+        },
+        {
+          "path": "apps/desen-app/src/local-operation-binding.ts",
+          "bytes": 13008,
+          "sha256": "sha256:bb1c2d3a8385cc20d6564d672f4741f30cf3d8ba206cca756b5a278f3ea99b9b"
+        },
+        {
+          "path": "apps/desen-app/src/local-runtime-persistence.ts",
+          "bytes": 13170,
+          "sha256": "sha256:051b6e7a38d4a98f6e232466c67e6786d65d23b76e4fd9bdc77aafc16b81b335"
+        },
+        {
+          "path": "apps/desen-app/src/local-runtime-publication.ts",
+          "bytes": 18243,
+          "sha256": "sha256:8a031c4432dde36aad0a3d7d632806cf83f1a65fa0c7e9edd51502a6f676673c"
+        },
+        {
+          "path": "apps/desen-app/src/local-workspaces.module.css",
+          "bytes": 1140,
+          "sha256": "sha256:122e5bec615b9c57baa63f76d2f5c61053c71e7525a5e07b4f988c0756fd10f2"
+        },
+        {
+          "path": "apps/desen-app/src/local-workspaces.tsx",
+          "bytes": 7618,
+          "sha256": "sha256:8db0aec1982af44678ecb31fd3b08a74f7be3f78ff6e02ccdc65ca5a556e661a"
+        },
+        {
+          "path": "apps/desen-app/src/main.tsx",
+          "bytes": 4232,
+          "sha256": "sha256:18371c9d57748db6d7435d2f2cdad470f6da92a39df8946ad1d7f4d9ee0b759e"
+        },
+        {
+          "path": "apps/desen-app/src/persistence-controls.tsx",
+          "bytes": 9272,
+          "sha256": "sha256:478578110307b00e0caeb7bef395a32e59bda4b0624f1b1ce2af430436a13d1e"
+        },
+        {
+          "path": "apps/desen-app/src/preview-controls.tsx",
+          "bytes": 14710,
+          "sha256": "sha256:02d64108197e669351eb3d5494f05b6179712d75507bcd449385156341c0c1e0"
+        },
+        {
+          "path": "apps/desen-app/src/preview-fidelity.ts",
+          "bytes": 7953,
+          "sha256": "sha256:6f8f01665f76b0a8de698a64c18b28848604dbc6abed951d7043fc6109506c90"
+        },
+        {
+          "path": "apps/desen-app/src/product-bootstrap.tsx",
+          "bytes": 15830,
+          "sha256": "sha256:8056bddd161fc383e1a7539ba8e19463112f5fcce6d5b5f43bb7cac56179447c"
+        },
+        {
+          "path": "apps/desen-app/src/project-data.ts",
+          "bytes": 2594,
+          "sha256": "sha256:fa7b0e4bf3e9bbbd702b604317452ecff2bbb0631f5a2d12c784df8256318ce6"
+        },
+        {
+          "path": "apps/desen-app/src/project-inventory-fixture.ts",
+          "bytes": 7871,
+          "sha256": "sha256:8037eb05aebffbd0ff47ba4a0a71fbaae637b059e6e91b4a3b9d2c2fbed68133"
+        },
+        {
+          "path": "apps/desen-app/src/project-navigation.ts",
+          "bytes": 7692,
+          "sha256": "sha256:c07848bfda7a23e7e948b8e22864835ec7644acdfacb253ab7b4c1c103f1d2e7"
+        },
+        {
+          "path": "apps/desen-app/src/project-workspace-profile.ts",
+          "bytes": 28477,
+          "sha256": "sha256:13729034aa622b4c4f1d587754342c76bd0aca62375764629bcc46aaa24b0cc4"
+        },
+        {
+          "path": "apps/desen-app/src/publication-controls.tsx",
+          "bytes": 9238,
+          "sha256": "sha256:77600a908a55cad3438e85a9af50de2bb73608f54c2f34fc4fc796d106dfc808"
+        },
+        {
+          "path": "apps/desen-app/src/reference-authoring-profile.ts",
+          "bytes": 5924,
+          "sha256": "sha256:9a9952ac03090e0c7edf4d860b7e5b18f3c61b47976a87691e9fae020d0ea395"
+        },
+        {
+          "path": "apps/desen-app/src/reference-empty-project.ts",
+          "bytes": 1781,
+          "sha256": "sha256:66015c0ac0d1c13dd609906ca45f176a8a4b820d0ff756569c678278039e5170"
+        },
+        {
+          "path": "apps/desen-app/src/reference-flow-workspace-profile.ts",
+          "bytes": 3122,
+          "sha256": "sha256:cc9ef1260f50c9f723cc337d76c08ce1599f08789881c4475b5e8ca49b3afa55"
+        },
+        {
+          "path": "apps/desen-app/src/reference-project-fixtures.ts",
+          "bytes": 2025,
+          "sha256": "sha256:66b2c4920ce9e4dff201676bec5094869ac2bdffacc3f4db493efe11abb89e5b"
+        },
+        {
+          "path": "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+          "bytes": 4097,
+          "sha256": "sha256:14aa1bd6f5855c0a152059b92ff15caaed373068d3f15056717657b970c902ea"
+        },
+        {
+          "path": "apps/desen-app/src/state-panel.tsx",
+          "bytes": 14173,
+          "sha256": "sha256:b979c246b10b3023a3b2e239cfd6bf2d370f126658e53ea5b748bdb819448a18"
+        },
+        {
+          "path": "apps/desen-app/src/structured-json.ts",
+          "bytes": 13908,
+          "sha256": "sha256:74c56059e2cdca1ae018424f27e1c28c54785bbbc89c75d25dfa1858b76c4759"
+        },
+        {
+          "path": "apps/desen-app/src/styles.css",
+          "bytes": 1765,
+          "sha256": "sha256:b70ac76a3b4f23ebb242f1c945453553d2563f4b07af4cc2eba892a631c52a12"
+        }
+      ],
+      "everyProductionSourceFileReachable": true,
+      "fixtureOnlyModulesExcludedFromProductionGraph": true,
+      "importsResolvedByFreshViteBuild": true
+    },
+    "referenceHostSourceAudit": {
+      "compiler": "typescript@6.0.3",
+      "compilerAuthority": "TypeScript Program and TypeChecker",
+      "sourceFiles": 13,
+      "executableSourceFiles": 12,
+      "importDeclarations": 56,
+      "jsxElements": 18,
+      "compositionFunctions": [
+        {
+          "path": "apps/reference-host-web/src/application.tsx",
+          "name": "HostNotice",
+          "sha256": "sha256:ec6485527af2e9aee1002ad36f7af571e6be84308bc740018ad398665a8875b8",
+          "normalization": "TypeScript Printer(removeComments=true, LF)"
+        },
+        {
+          "path": "apps/reference-host-web/src/application.tsx",
+          "name": "ReferenceHostApplication",
+          "sha256": "sha256:526ba75b0a4989d7f2f91bcc0d173c29e9ff6cfa082494bb24f3f51fb7b318e0",
+          "normalization": "TypeScript Printer(removeComments=true, LF)"
+        },
+        {
+          "path": "apps/reference-host-web/src/failure-view.tsx",
+          "name": "ReferenceHostFailureView",
+          "sha256": "sha256:ed55c24ecae08dee38b234c097db9ec589fd7923589e4189d950af1800e9701d",
+          "normalization": "TypeScript Printer(removeComments=true, LF)"
+        },
+        {
+          "path": "apps/reference-host-web/src/managed-surface.tsx",
+          "name": "ReferenceHostManagedSurface",
+          "sha256": "sha256:4fd8f67663ed4482140ec9137cead37939eb92c1ba0c6a76294cb73dc791b329",
+          "normalization": "TypeScript Printer(removeComments=true, LF)"
+        },
+        {
+          "path": "apps/reference-host-web/src/root.tsx",
+          "name": "renderCurrent",
+          "sha256": "sha256:c157df482689063880e3e3efb2abb5c7d56bd76f092a50ee003c52fd34d36302",
+          "normalization": "TypeScript Printer(removeComments=true, LF)"
+        }
+      ],
+      "executableAuthoritySurface": {
+        "descriptors": 644,
+        "sha256": "sha256:aeb0b94d79d096c170cbe903daaea033a89b5889f4675fa3a91ed004446fc88a",
+        "normalization": "TypeScript checker origins + Printer(removeComments=true, LF) call/construct/write descriptors"
+      },
+      "publicAdapterRegistryCalls": 1,
+      "publicRuntimeReactSurfaceCalls": 1,
+      "publicReactRootCalls": 1,
+      "buildEnvelope": {
+        "viteConfigFile": false,
+        "htmlParser": "jsdom@29.1.1 exact canonical AST",
+        "localViteOrRollupConfigs": [],
+        "postCssSearchRoots": ["apps/reference-host-web", "apps", "."],
+        "workspacePostCssConfigs": [],
+        "htmlEntry": "/src/main.tsx",
+        "htmlRoot": "desen-reference-host-root",
+        "visibleStaticText": "DESEN Reference Host",
+        "productionDependencies": [
+          "@desen/reference-catalog-web",
+          "@desen/runtime-core",
+          "@desen/runtime-react",
+          "@desen/runtime-web",
+          "react",
+          "react-dom"
+        ],
+        "assertions": 45
+      },
+      "runtimeResolution": {
+        "tool": "vite@8.1.5",
+        "authority": "programmatic build({ write: false }) Plugin.moduleParsed",
+        "observer": "moduleParsed",
+        "write": false,
+        "independentBuilds": 2,
+        "moduleCount": 104,
+        "staticEdges": 299,
+        "dynamicEdges": 0,
+        "unresolvedEdges": 0,
+        "graphSha256": "sha256:46e5c224a7803b335c3c48abb6e0d7e173177c728f4bbf67fba3b8860009c420",
+        "backingFiles": 103,
+        "backingSnapshotSha256": "sha256:e474c784ff3c252106a33ff0313d713035bf8bb439b9d48d7c366e416971d133"
+      },
+      "packageBoundary": {
+        "tool": "dependency-cruiser@18.1.0",
+        "authority": "package-boundary evidence only; not runtime resolution authority",
+        "rule": "application-reference-host-web-allowed-dependencies",
+        "ruleSchema": {
+          "comment": "reference-host-web may import only the packages assigned to its responsibility.",
+          "from": { "path": "^apps/reference-host-web/" },
+          "name": "application-reference-host-web-allowed-dependencies",
+          "severity": "error",
+          "to": {
+            "path": "^packages/",
+            "pathNot": "^packages/(?:runtime-core|runtime-react|runtime-web|reference-catalog-web)/"
+          }
+        },
+        "violations": 0,
+        "unresolvedDeclarationsIgnoredForRuntimeResolution": 13,
+        "modules": 20,
+        "dependencies": 28
+      },
+      "sourceReceipts": [
+        {
+          "path": "apps/reference-host-web/src/application.tsx",
+          "bytes": 2115,
+          "sha256": "sha256:47a3acebca2cbab40c5bfa6c5569910fefed6bc277483cf9197d7918729650e1"
+        },
+        {
+          "path": "apps/reference-host-web/src/browser-profile.ts",
+          "bytes": 4876,
+          "sha256": "sha256:8d09a43225303b0f5e4157a33852842e0a642a6694232e97ecc6e3ce41d7a140"
+        },
+        {
+          "path": "apps/reference-host-web/src/channel-delivery.ts",
+          "bytes": 27819,
+          "sha256": "sha256:7e85c02be80245e2f1b015166beedc7d91eb38daea842e167c9f5639fe5a19b7"
+        },
+        {
+          "path": "apps/reference-host-web/src/failure-view.tsx",
+          "bytes": 1727,
+          "sha256": "sha256:a303557ac0d55d8e637b6e5a9660f7b5cb8a8cdd5b62b70132198f78d2c53200"
+        },
+        {
+          "path": "apps/reference-host-web/src/host-ports.ts",
+          "bytes": 4498,
+          "sha256": "sha256:429bbb4f9efc651de3f7c6689b93e0224f5f66c4a0a71769a2e3f75e223df886"
+        },
+        {
+          "path": "apps/reference-host-web/src/main.tsx",
+          "bytes": 1613,
+          "sha256": "sha256:ecc080cff09c3c414501c34a638764a86789e035e008abe4d54555b929bf43f2"
+        },
+        {
+          "path": "apps/reference-host-web/src/managed-surface.tsx",
+          "bytes": 1463,
+          "sha256": "sha256:a3a4010bea578afaaaf03ee69f0f6f68ff2e4e08bfd5d6aacda1bea1d9d3b83e"
+        },
+        {
+          "path": "apps/reference-host-web/src/official-sign-in.ts",
+          "bytes": 19394,
+          "sha256": "sha256:edeae94e1ee69892c1e007655cf07e94da50612dc61d9715937f08e7cf47dffb"
+        },
+        {
+          "path": "apps/reference-host-web/src/recovery-authority.ts",
+          "bytes": 6708,
+          "sha256": "sha256:7be82151b7f8de8e4def12041071f5e5f8ab0dead6c3eacad94d17919337913c"
+        },
+        {
+          "path": "apps/reference-host-web/src/root-policy.ts",
+          "bytes": 3760,
+          "sha256": "sha256:276ff9c4776c493f1c532e137c8a7f15bd1fba2388e213915e03db3d7f13026e"
+        },
+        {
+          "path": "apps/reference-host-web/src/root.tsx",
+          "bytes": 18979,
+          "sha256": "sha256:13b33d9314aa3501b81abf8b1ddb0a0937ec36188bd5b172b487dce7dd2ee7db"
+        },
+        {
+          "path": "apps/reference-host-web/src/sign-in-http-handler.ts",
+          "bytes": 13595,
+          "sha256": "sha256:22b49c404efd2b39b84c2585dcff79574b8329eca11b9c459fe2d424c50645e9"
+        },
+        {
+          "path": "apps/reference-host-web/src/styles.css",
+          "bytes": 2082,
+          "sha256": "sha256:6d82529e07969d9033232aaa72924ec57eae0dd86736ebecdf700680046a7738"
+        }
+      ],
+      "exactJsxOwnershipAllowlistEnforced": true,
+      "directOrHiddenHandwrittenManagedTreesRejected": true,
+      "currentAuditUsesFreshSourceAndBuild": true
+    },
+    "runtimeResolution": {
+      "tool": "vite@8.1.5",
+      "authority": "programmatic build({ write: false }) Plugin.moduleParsed",
+      "observer": "moduleParsed",
+      "write": false,
+      "app": {
+        "moduleCount": 168,
+        "staticEdges": 510,
+        "dynamicEdges": 0,
+        "unresolvedEdges": 0,
+        "reachableProductionSourceFiles": 50,
+        "graphSha256": "sha256:cd0b3a7eb933ace76bc715a10f43f15643c74d6a545f5c73f0da68bd464cddcc"
+      },
+      "host": {
+        "moduleCount": 104,
+        "staticEdges": 299,
+        "dynamicEdges": 0,
+        "unresolvedEdges": 0,
+        "reachableProductionSourceFiles": 13,
+        "graphSha256": "sha256:46e5c224a7803b335c3c48abb6e0d7e173177c728f4bbf67fba3b8860009c420"
+      },
+      "appModules": [
+        {
+          "id": "apps/desen-app/index.html",
+          "imports": [
+            "apps/desen-app/src/main.tsx",
+            "virtual:vite/modulepreload-polyfill.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 61,
+          "codeSha256": "sha256:f98d51b03ea196f8f62b829fe47073ec91c41de006e0a195f2ef70efbc9bf32b"
+        },
+        {
+          "id": "apps/desen-app/src/adapter-canvas.tsx",
+          "imports": [
+            "apps/desen-app/src/application.module.css",
+            "apps/desen-app/src/authoring-diagnostics.ts",
+            "apps/desen-app/src/authoring-selection.ts",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js",
+            "packages/runtime-core/dist/index.js",
+            "packages/runtime-react/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 10546,
+          "codeSha256": "sha256:b5e5050bbbdaf3278f812c6999dd14c9d58b0dbeaec294beeecf85b14e57fa55"
+        },
+        {
+          "id": "apps/desen-app/src/application.module.css",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 32218,
+          "codeSha256": "sha256:1468de2fe192faa447a0fbf72ac75fc04de2c757912f9d30ea1544f0c6a7bd9f"
+        },
+        {
+          "id": "apps/desen-app/src/application.tsx",
+          "imports": [
+            "apps/desen-app/src/adapter-canvas.tsx",
+            "apps/desen-app/src/application.module.css",
+            "apps/desen-app/src/assets/breadcrumb-separator.svg",
+            "apps/desen-app/src/assets/desen-logo.svg",
+            "apps/desen-app/src/assets/plus.svg",
+            "apps/desen-app/src/assets/settings.svg",
+            "apps/desen-app/src/assets/theme.svg",
+            "apps/desen-app/src/authoring-behavior-projection.ts",
+            "apps/desen-app/src/authoring-conditions.ts",
+            "apps/desen-app/src/authoring-connections.ts",
+            "apps/desen-app/src/authoring-data.ts",
+            "apps/desen-app/src/authoring-diagnostics.ts",
+            "apps/desen-app/src/authoring-event-actions.ts",
+            "apps/desen-app/src/authoring-fixtures.ts",
+            "apps/desen-app/src/authoring-inspector.ts",
+            "apps/desen-app/src/authoring-integration.ts",
+            "apps/desen-app/src/authoring-persistence.ts",
+            "apps/desen-app/src/authoring-preview.ts",
+            "apps/desen-app/src/authoring-publication.ts",
+            "apps/desen-app/src/authoring-run-navigation.ts",
+            "apps/desen-app/src/authoring-scenarios.ts",
+            "apps/desen-app/src/authoring-selection.ts",
+            "apps/desen-app/src/authoring-slots.ts",
+            "apps/desen-app/src/authoring-state.ts",
+            "apps/desen-app/src/behavior-controls.tsx",
+            "apps/desen-app/src/diagnostics-panel.tsx",
+            "apps/desen-app/src/event-action-panel.tsx",
+            "apps/desen-app/src/inspector-panel.tsx",
+            "apps/desen-app/src/persistence-controls.tsx",
+            "apps/desen-app/src/preview-controls.tsx",
+            "apps/desen-app/src/preview-fidelity.ts",
+            "apps/desen-app/src/project-data.ts",
+            "apps/desen-app/src/project-inventory-fixture.ts",
+            "apps/desen-app/src/project-navigation.ts",
+            "apps/desen-app/src/project-workspace-profile.ts",
+            "apps/desen-app/src/publication-controls.tsx",
+            "apps/desen-app/src/state-panel.tsx",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js",
+            "packages/editor-core/dist/index.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 129845,
+          "codeSha256": "sha256:08f9d7538c5c7b4184a86f1db55c410a272a81fd757c0beb41c58f27721d442e"
+        },
+        {
+          "id": "apps/desen-app/src/assets/breadcrumb-separator.svg",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 539,
+          "codeSha256": "sha256:5b45c0b189b5070ea41838706773155996c05de8e3fdbde1cf668cd5fd3faf1b"
+        },
+        {
+          "id": "apps/desen-app/src/assets/desen-logo.svg",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 725,
+          "codeSha256": "sha256:82a85378ab4ff8766aa8714cdb9d5c58a1e6149c691630c17fc22142fa737fea"
+        },
+        {
+          "id": "apps/desen-app/src/assets/plus.svg",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 535,
+          "codeSha256": "sha256:be778f92f0b13fd061b44067a3ce6aa94576559ddcb37c9d6fa91d2dc1748655"
+        },
+        {
+          "id": "apps/desen-app/src/assets/settings.svg",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 1310,
+          "codeSha256": "sha256:3994aeb0a3824442b529ca4ede68969172e1f75803ec783e3b53b177c988c10f"
+        },
+        {
+          "id": "apps/desen-app/src/assets/theme.svg",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 1206,
+          "codeSha256": "sha256:3f6f080c3008579d2f5aa64305eb66655f887f70f8ac7924fe3f895fd3a62d29"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-behavior-projection.ts",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 5660,
+          "codeSha256": "sha256:888ac684861b50b92251cd08c790668b19023d22f2c91a2094c80f82b6487a11"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-conditions.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-data.ts",
+            "apps/desen-app/src/authoring-selection.ts",
+            "packages/editor-core/dist/index.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 5510,
+          "codeSha256": "sha256:a2ea5d8efc27cb5e18f059b188cc94dea83f90031b09a12bd2e3aa6856aa5caf"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-connections.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-data.ts",
+            "apps/desen-app/src/authoring-inspector.ts",
+            "apps/desen-app/src/authoring-selection.ts",
+            "packages/editor-core/dist/index.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 20583,
+          "codeSha256": "sha256:3fd2d917fa6a3e98f15c8a062073156c88f537c7201d01742cd8e1621203814a"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-data.ts",
+          "imports": [
+            "packages/catalog-sdk/dist/index.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 17574,
+          "codeSha256": "sha256:5ed4af6ad9945f31a6a7e80d05e1d5476ec37f53dcb381c5af9affe2f68890d4"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-diagnostics.ts",
+          "imports": ["packages/protocol/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 9868,
+          "codeSha256": "sha256:ebf19dd2e54a9c3be08154944c9aa56f5d9354824bb2b2ce512806cfe564027a"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-event-actions.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-data.ts",
+            "packages/editor-core/dist/index.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 32636,
+          "codeSha256": "sha256:2392f7c11567c7e26ee1fe2730a5a17943ad69f317f9d43a179615a71d955a5c"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-fixtures.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-data.ts",
+            "packages/catalog-sdk/dist/index.js",
+            "packages/testkit/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 21936,
+          "codeSha256": "sha256:fe3c0e98639a1dea110ef30162de5c6be4c67c04e94b188bb0f0ad0ba1210c3f"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-inspector.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-data.ts",
+            "apps/desen-app/src/authoring-selection.ts",
+            "packages/editor-core/dist/index.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 28359,
+          "codeSha256": "sha256:a34081ff1c530639bb145e75d42cb4f7880bcff33b6c0db4dc58019bd2751b84"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-integration.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-fixtures.ts",
+            "apps/desen-app/src/authoring-preview.ts",
+            "apps/desen-app/src/project-workspace-profile.ts",
+            "packages/runtime-core/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 12959,
+          "codeSha256": "sha256:ea14fef51b7a3009e53f5be02f2105e0e5c3ea99072bca7be2c6acecb4aadcc3"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-persistence.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-data.ts",
+            "apps/desen-app/src/authoring-preview.ts",
+            "apps/desen-app/src/project-workspace-profile.ts",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 22712,
+          "codeSha256": "sha256:9a208a035d9296ac2c0afdabc39d08a17be3c9dc76a9749efd5a9c423b78d362"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-preview.ts",
+          "imports": [
+            "packages/editor-core/dist/index.js",
+            "packages/publisher/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 2952,
+          "codeSha256": "sha256:c9f62d89fb311a6f7f64c4a68a55924058b296ee900e1913964425535e305de5"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-publication.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-preview.ts",
+            "apps/desen-app/src/project-workspace-profile.ts",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 25205,
+          "codeSha256": "sha256:6ca30df4668f0a9eb6c1c71c7b52140f6912fa08da6e19927badcab864062343"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-run-navigation.ts",
+          "imports": [
+            "packages/editor-core/dist/index.js",
+            "packages/runtime-core/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 4851,
+          "codeSha256": "sha256:37e1a69c0d8812e649a2642d28b2fb5506ca0f57dc7afebf4e2103cc5f9e043f"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-scenarios.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-data.ts",
+            "apps/desen-app/src/authoring-preview.ts",
+            "apps/desen-app/src/authoring-selection.ts",
+            "packages/editor-core/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 14620,
+          "codeSha256": "sha256:72d1ccc714fdb1de760b5cae1a1f64bf3e4047fdf1d4fd736d57b0c6a0d6fc0f"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-selection.ts",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 4038,
+          "codeSha256": "sha256:63be8b91b3b626a7ad9b3400c669e021187f7f91e70cf1f61037183b0dd4468e"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-slots.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-data.ts",
+            "packages/editor-core/dist/index.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 30081,
+          "codeSha256": "sha256:701492347a2eb3f355542267ebeeed5804b8782ec0ecee053d99d5d26422eb6c"
+        },
+        {
+          "id": "apps/desen-app/src/authoring-state.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-data.ts",
+            "packages/editor-core/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 17081,
+          "codeSha256": "sha256:4ba26677779f8d0446cf28456701a78da1c5737b3a9f53148b6161bbfe546d30"
+        },
+        {
+          "id": "apps/desen-app/src/behavior-controls.tsx",
+          "imports": [
+            "apps/desen-app/src/application.module.css",
+            "apps/desen-app/src/authoring-inspector.ts",
+            "apps/desen-app/src/structured-json.ts",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 30902,
+          "codeSha256": "sha256:b84c2e65859b6c94309d4a911608d6f6defa423ce902edf0b9f1df6f961e0c2f"
+        },
+        {
+          "id": "apps/desen-app/src/diagnostics-panel.tsx",
+          "imports": [
+            "apps/desen-app/src/application.module.css",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 5110,
+          "codeSha256": "sha256:d88e27f30f80f1b6e2bde639bd083b02f7b605200f6aeed6349f10ac6d60d283"
+        },
+        {
+          "id": "apps/desen-app/src/event-action-panel.tsx",
+          "imports": [
+            "apps/desen-app/src/application.module.css",
+            "apps/desen-app/src/structured-json.ts",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 52179,
+          "codeSha256": "sha256:514391d10089c7aa34b1710bf9657038f844567644485dcd02290d90be2054d2"
+        },
+        {
+          "id": "apps/desen-app/src/inspector-panel.tsx",
+          "imports": [
+            "apps/desen-app/src/application.module.css",
+            "apps/desen-app/src/authoring-inspector.ts",
+            "apps/desen-app/src/structured-json.ts",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 28935,
+          "codeSha256": "sha256:e319661ec176a8a41838870c7935cc4df677d3c8da879f897b3a2c5a75857ce3"
+        },
+        {
+          "id": "apps/desen-app/src/local-operation-binding.ts",
+          "imports": [
+            "packages/reference-catalog-web/dist/host-operations/index.js",
+            "packages/runtime-core/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 9623,
+          "codeSha256": "sha256:3222b16c097345647cd74533efc2784b80107997828fb8a7cb4d1fc80d1a2ec2"
+        },
+        {
+          "id": "apps/desen-app/src/local-runtime-persistence.ts",
+          "imports": ["packages/editor-web/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 9748,
+          "codeSha256": "sha256:53de13895e1dfe8a29abd9472f15db2343e28f49df891dbfdc5ff1c36437c7bc"
+        },
+        {
+          "id": "apps/desen-app/src/local-runtime-publication.ts",
+          "imports": [
+            "apps/desen-app/src/authoring-publication.ts",
+            "packages/editor-web/dist/index.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 13247,
+          "codeSha256": "sha256:b0681e4a14fb38fcb4c763db05c7cc027ee4daed1a6f27484b42cda81d6b39ff"
+        },
+        {
+          "id": "apps/desen-app/src/local-workspaces.module.css",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 160,
+          "codeSha256": "sha256:ecd819b0779fb3f426262b16aff05c469e7b90cda6d8f6f16d72adad80cbb956"
+        },
+        {
+          "id": "apps/desen-app/src/local-workspaces.tsx",
+          "imports": [
+            "apps/desen-app/src/local-workspaces.module.css",
+            "apps/desen-app/src/project-navigation.ts",
+            "apps/desen-app/src/project-workspace-profile.ts",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 5665,
+          "codeSha256": "sha256:e16958ab08615b56299fdc6f999069a34e73f13b583d466449b10d634a65579f"
+        },
+        {
+          "id": "apps/desen-app/src/main.tsx",
+          "imports": [
+            "apps/desen-app/src/authoring-integration.ts",
+            "apps/desen-app/src/local-operation-binding.ts",
+            "apps/desen-app/src/local-runtime-persistence.ts",
+            "apps/desen-app/src/local-runtime-publication.ts",
+            "apps/desen-app/src/local-workspaces.tsx",
+            "apps/desen-app/src/product-bootstrap.tsx",
+            "apps/desen-app/src/project-navigation.ts",
+            "apps/desen-app/src/reference-flow-workspace-profile.ts",
+            "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+            "apps/desen-app/src/styles.css",
+            "node_modules/react-dom/client.js",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js",
+            "packages/reference-catalog-web/dist/operations/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 3052,
+          "codeSha256": "sha256:5353a73998a912e589924984e574c22131d46a8a3a3b38c8b6ca0bf2bccbc3a1"
+        },
+        {
+          "id": "apps/desen-app/src/persistence-controls.tsx",
+          "imports": [
+            "apps/desen-app/src/application.module.css",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6825,
+          "codeSha256": "sha256:5cecb8b3a698d4cbda23e5ae5c68eefd56f6c8e8ff00861633cda0d6af1ae312"
+        },
+        {
+          "id": "apps/desen-app/src/preview-controls.tsx",
+          "imports": [
+            "apps/desen-app/src/application.module.css",
+            "apps/desen-app/src/authoring-fixtures.ts",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 13100,
+          "codeSha256": "sha256:24e14f9cebb65d0b7d38d05f4cc6f47864174e2cf5700e95e62bdaf1370d4398"
+        },
+        {
+          "id": "apps/desen-app/src/preview-fidelity.ts",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 6109,
+          "codeSha256": "sha256:55b1b5664ceaf3a062d8b0cce803f0082cbbd6442220d558f1e326349a665861"
+        },
+        {
+          "id": "apps/desen-app/src/product-bootstrap.tsx",
+          "imports": [
+            "apps/desen-app/src/application.module.css",
+            "apps/desen-app/src/application.tsx",
+            "apps/desen-app/src/assets/desen-logo.svg",
+            "apps/desen-app/src/authoring-persistence.ts",
+            "apps/desen-app/src/project-navigation.ts",
+            "apps/desen-app/src/project-workspace-profile.ts",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 13924,
+          "codeSha256": "sha256:150d669a1334c0f91411f4337fdbfa7902e30e8a7d4daba5f220e33974517802"
+        },
+        {
+          "id": "apps/desen-app/src/project-data.ts",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 1378,
+          "codeSha256": "sha256:59d1cbd1650546530b34c9a53965c481bcaf2cf4a82589513635ac0b812a1d36"
+        },
+        {
+          "id": "apps/desen-app/src/project-inventory-fixture.ts",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 5963,
+          "codeSha256": "sha256:4e2b0e35f01c7f2dd9b2b931acfdfed01e4ca4d8af64cef12a3c9bb2340e7f19"
+        },
+        {
+          "id": "apps/desen-app/src/project-navigation.ts",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 6605,
+          "codeSha256": "sha256:a8dc6cf53378498b7ea5f3a08c285a2cfbecaed68556c9e892020f5d351544fe"
+        },
+        {
+          "id": "apps/desen-app/src/project-workspace-profile.ts",
+          "imports": [
+            "apps/desen-app/src/project-navigation.ts",
+            "packages/editor-core/dist/index.js",
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/index.js",
+            "packages/runtime-core/dist/index.js",
+            "packages/runtime-react/dist/index.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 18683,
+          "codeSha256": "sha256:faba7453b2827eaf5e5a68eb2125703841607c089cfca763579c4f600e74d370"
+        },
+        {
+          "id": "apps/desen-app/src/publication-controls.tsx",
+          "imports": [
+            "apps/desen-app/src/application.module.css",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 7303,
+          "codeSha256": "sha256:8e5835bdc9703fc90ab7bf5492d152a74a2526b5d42ab58c145bd9a918f14074"
+        },
+        {
+          "id": "apps/desen-app/src/reference-empty-project.ts",
+          "imports": ["packages/editor-core/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 1545,
+          "codeSha256": "sha256:00970f6a7a1973442086953c47c7f242303f6262f1bff5e18e057aaf37d5faf2"
+        },
+        {
+          "id": "apps/desen-app/src/reference-flow-workspace-profile.ts",
+          "imports": [
+            "apps/desen-app/src/project-workspace-profile.ts",
+            "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+            "packages/editor-core/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 2936,
+          "codeSha256": "sha256:96b0fbc82dca57223accf819906c69ddcb255ed303c29021dee557746b79e450"
+        },
+        {
+          "id": "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+          "imports": [
+            "apps/desen-app/src/project-workspace-profile.ts",
+            "apps/desen-app/src/reference-empty-project.ts",
+            "packages/reference-catalog-web/catalog.json",
+            "packages/reference-catalog-web/dist/react-adapters/index.js",
+            "packages/reference-catalog-web/dist/tokens/index.js",
+            "packages/runtime-core/dist/index.js",
+            "packages/runtime-react/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 3603,
+          "codeSha256": "sha256:67c377ba5e45b176e39a3dc45d609ac6fd3d6ebd09959d3093e57919c19e6d38"
+        },
+        {
+          "id": "apps/desen-app/src/state-panel.tsx",
+          "imports": [
+            "apps/desen-app/src/application.module.css",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 13099,
+          "codeSha256": "sha256:3a56ae22069d203a3e5eb5fb180a887a6f92690e96695d94c7c484036da8eadd"
+        },
+        {
+          "id": "apps/desen-app/src/structured-json.ts",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 11322,
+          "codeSha256": "sha256:08757b9b2233f0996434fdb7408e140546e6999d81ebe1cd1c79904f2e8a9d65"
+        },
+        {
+          "id": "apps/desen-app/src/styles.css",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 0,
+          "codeSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "node_modules/react-dom/cjs/react-dom-client.production.js",
+          "imports": [
+            "node_modules/react-dom/index.js",
+            "node_modules/react/index.js",
+            "node_modules/scheduler/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 536016,
+          "codeSha256": "sha256:6cf4932e0c20a4572ae395035ca2e512a42d7d49c1a659fa73d6197069c28df0"
+        },
+        {
+          "id": "node_modules/react-dom/cjs/react-dom.production.js",
+          "imports": ["node_modules/react/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 6655,
+          "codeSha256": "sha256:291e0682e8b69643e8e213b6bc13849527fdd97800fef587d5be7b4a8f6a58ca"
+        },
+        {
+          "id": "node_modules/react-dom/client.js",
+          "imports": [
+            "node_modules/react-dom/cjs/react-dom-client.production.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 1373,
+          "codeSha256": "sha256:00e348ab3d6bc2eef908345d0bc4e008c95bcfecec060dfda5c4967953761396"
+        },
+        {
+          "id": "node_modules/react-dom/index.js",
+          "imports": ["node_modules/react-dom/cjs/react-dom.production.js"],
+          "dynamicImports": [],
+          "codeBytes": 1359,
+          "codeSha256": "sha256:ba1a3e33489f868371561777607e3ee5091df0f7ea3f1a10f789d6b86e4c1505"
+        },
+        {
+          "id": "node_modules/react/cjs/react-jsx-runtime.production.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 976,
+          "codeSha256": "sha256:1e46f15002696985e80c61d47aaa30dabb03c954270a690f5f7dfbbacfa9002b"
+        },
+        {
+          "id": "node_modules/react/cjs/react.production.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 17217,
+          "codeSha256": "sha256:d348b80a78c8ea0bd02b1990c7b7b514f5c276f9e74fee6e3976297585385961"
+        },
+        {
+          "id": "node_modules/react/index.js",
+          "imports": ["node_modules/react/cjs/react.production.js"],
+          "dynamicImports": [],
+          "codeBytes": 186,
+          "codeSha256": "sha256:60caffdecbdc5db3bc4ec4e83df9488345ccb271d07533b9210bf5750918d97e"
+        },
+        {
+          "id": "node_modules/react/jsx-runtime.js",
+          "imports": ["node_modules/react/cjs/react-jsx-runtime.production.js"],
+          "dynamicImports": [],
+          "codeBytes": 210,
+          "codeSha256": "sha256:b392951a77d0a2e6a6bd017e49d768481ae5b63c4109c6c31f622cf7b2433edc"
+        },
+        {
+          "id": "node_modules/scheduler/cjs/scheduler.production.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 10181,
+          "codeSha256": "sha256:679adff761d31e9426604f80c0e99be44a3e6f4c6834b0218ecf0312a67c171f"
+        },
+        {
+          "id": "node_modules/scheduler/index.js",
+          "imports": ["node_modules/scheduler/cjs/scheduler.production.js"],
+          "dynamicImports": [],
+          "codeBytes": 194,
+          "codeSha256": "sha256:145965504d60007bc25486ab930b0367867dcd5d579ccd343c148d69349a7cfb"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/behavior-registration.js",
+          "imports": ["packages/catalog-sdk/dist/registration-core.js"],
+          "dynamicImports": [],
+          "codeBytes": 590,
+          "codeSha256": "sha256:6f022c2c4f59d9444444fc45bad25535a29f15b56e6f09ff466ab38a907fb3a1"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/catalog-manifest.js",
+          "imports": ["packages/catalog-sdk/dist/inert-json.js"],
+          "dynamicImports": [],
+          "codeBytes": 5210,
+          "codeSha256": "sha256:d4faf0e0e29eafd92a74fa675bac6846610ef497512f55258238730748d12b55"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/component-inspector-control.js",
+          "imports": [
+            "packages/catalog-sdk/dist/inert-json.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 12887,
+          "codeSha256": "sha256:6760bcb2563792a2ce9e8e60548622697a4a97d5d55aa724e5b692755f00c867"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/component-registration.js",
+          "imports": ["packages/catalog-sdk/dist/registration-core.js"],
+          "dynamicImports": [],
+          "codeBytes": 688,
+          "codeSha256": "sha256:0877891e7b2e0053d1c27ae6c355face1f28b4b11dc2a5c4b0a9072cd5dc4924"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/index.js",
+          "imports": [
+            "packages/catalog-sdk/dist/behavior-registration.js",
+            "packages/catalog-sdk/dist/catalog-manifest.js",
+            "packages/catalog-sdk/dist/component-inspector-control.js",
+            "packages/catalog-sdk/dist/component-registration.js",
+            "packages/catalog-sdk/dist/operation-registration.js",
+            "packages/catalog-sdk/dist/resource-registration.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 559,
+          "codeSha256": "sha256:35f7181ed34b4c8331867c9a5cde99980d507503d6a017989e79b8e879471365"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/inert-json.js",
+          "imports": ["packages/protocol/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 4523,
+          "codeSha256": "sha256:a2366a224fff48105d8f9c4b13d0e45905dd281285daa469880e68847529260f"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/operation-registration.js",
+          "imports": ["packages/catalog-sdk/dist/registration-core.js"],
+          "dynamicImports": [],
+          "codeBytes": 563,
+          "codeSha256": "sha256:1181d3903bd3b8bbeeb986853245e0fdc2c0ecc7ff1bbb080343e1da123c2786"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/registration-core.js",
+          "imports": ["packages/catalog-sdk/dist/inert-json.js"],
+          "dynamicImports": [],
+          "codeBytes": 1275,
+          "codeSha256": "sha256:5cf7dace77ae294c83ee5b310f84b8d53c10c5791105a8ef5d1128eac102c024"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/resource-registration.js",
+          "imports": ["packages/catalog-sdk/dist/registration-core.js"],
+          "dynamicImports": [],
+          "codeBytes": 569,
+          "codeSha256": "sha256:445d6a95506d43412c4efc8711cf94c38e69d226d83ca28eb49be32b96c7432f"
+        },
+        {
+          "id": "packages/editor-core/dist/content-edits.js",
+          "imports": [
+            "packages/editor-core/dist/source-document.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 38371,
+          "codeSha256": "sha256:bdedf7a4dbe540b54067651bb3af9e269acdb2909d6354fa48c0ca8a6cb1cb69"
+        },
+        {
+          "id": "packages/editor-core/dist/continuous-validation.js",
+          "imports": [
+            "packages/editor-core/dist/source-document.js",
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 7576,
+          "codeSha256": "sha256:7646b7e760c7985af0b815e1d2086c23a4632cb4e8868d1f44109c8054fd0bca"
+        },
+        {
+          "id": "packages/editor-core/dist/event-action-edits.js",
+          "imports": [
+            "packages/editor-core/dist/source-document.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 33618,
+          "codeSha256": "sha256:51fbea68365ea1cf8b0cc76a6c743c06113e8599154e299b854c005cf0c0c040"
+        },
+        {
+          "id": "packages/editor-core/dist/index.js",
+          "imports": [
+            "packages/editor-core/dist/content-edits.js",
+            "packages/editor-core/dist/continuous-validation.js",
+            "packages/editor-core/dist/event-action-edits.js",
+            "packages/editor-core/dist/persistence.js",
+            "packages/editor-core/dist/source-document.js",
+            "packages/editor-core/dist/stable-id-insert.js",
+            "packages/editor-core/dist/state-binding-edits.js",
+            "packages/editor-core/dist/structural-edits.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 1510,
+          "codeSha256": "sha256:5b946f9cd8da3c142a4f3b010f39d9bac57a39d8af083578898c93f51d41bbb9"
+        },
+        {
+          "id": "packages/editor-core/dist/persistence.js",
+          "imports": [
+            "packages/editor-core/dist/source-document.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 14726,
+          "codeSha256": "sha256:97005521aaa3a9118ad868e846d7a3d5545380c3e78245fb9e9cc267d9c3a672"
+        },
+        {
+          "id": "packages/editor-core/dist/source-document.js",
+          "imports": ["packages/validator/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 842,
+          "codeSha256": "sha256:6b38f237b884a9f33ca12622ee038adf93f93a30dff005903103ceb0e1101381"
+        },
+        {
+          "id": "packages/editor-core/dist/stable-id-insert.js",
+          "imports": [
+            "packages/editor-core/dist/source-document.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 16696,
+          "codeSha256": "sha256:82b7f43bb4446daac16ad80a8aea896d75abe1094dbc58aa321797ae421bf339"
+        },
+        {
+          "id": "packages/editor-core/dist/state-binding-edits.js",
+          "imports": [
+            "packages/editor-core/dist/source-document.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 26979,
+          "codeSha256": "sha256:ec163b8d03efe765c05e5931b63d83eadc979db6dd15a598c79663f15fe8d754"
+        },
+        {
+          "id": "packages/editor-core/dist/structural-edits.js",
+          "imports": [
+            "packages/editor-core/dist/source-document.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 27005,
+          "codeSha256": "sha256:d8aaffc638922b7daa66656b06def5a263dc569e3fc75d260d4212d57d14de1b"
+        },
+        {
+          "id": "packages/editor-web/dist/index.js",
+          "imports": [
+            "packages/editor-web/dist/local-bundle-channel-publication.js",
+            "packages/editor-web/dist/local-source-persistence.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 453,
+          "codeSha256": "sha256:1ae38d5aa47dd0e63410833520c2cb3d51a47ca20dab0a4c879fba972ab50c71"
+        },
+        {
+          "id": "packages/editor-web/dist/local-bundle-channel-publication.js",
+          "imports": ["packages/editor-web/dist/local-source-json.js"],
+          "dynamicImports": [],
+          "codeBytes": 22024,
+          "codeSha256": "sha256:79596b8248ea96ee55a3e00b88f5320ec4da621ed469871714734bbeed19aaaf"
+        },
+        {
+          "id": "packages/editor-web/dist/local-source-json.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 6415,
+          "codeSha256": "sha256:1c3db33d5f0bcc6f569f3a4b78170789a472c9896783b3e406ac2aba4fe44dca"
+        },
+        {
+          "id": "packages/editor-web/dist/local-source-persistence.js",
+          "imports": [
+            "packages/editor-core/dist/index.js",
+            "packages/editor-web/dist/local-source-json.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 17213,
+          "codeSha256": "sha256:758e7b036db33ef7ae4195d64f2e699d37b48867b5c35b4ef854546680f1a1e7"
+        },
+        {
+          "id": "packages/protocol/dist/canonicalization.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 17634,
+          "codeSha256": "sha256:64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+        },
+        {
+          "id": "packages/protocol/dist/diagnostics.js",
+          "imports": ["packages/protocol/dist/json-pointer.js"],
+          "dynamicImports": [],
+          "codeBytes": 8905,
+          "codeSha256": "sha256:0a457213b75b7fdd896fa7bd4b37faea7ff9ddc7b97dd24b3bdb99eeca82bdbf"
+        },
+        {
+          "id": "packages/protocol/dist/index.js",
+          "imports": [
+            "packages/protocol/dist/canonicalization.js",
+            "packages/protocol/dist/diagnostics.js",
+            "packages/protocol/dist/json-pointer.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 679,
+          "codeSha256": "sha256:a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+        },
+        {
+          "id": "packages/protocol/dist/json-pointer.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 6499,
+          "codeSha256": "sha256:7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
+        },
+        {
+          "id": "packages/publisher/dist/bundle-publication.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/catalog-pinning.js",
+            "packages/publisher/dist/publish-diagnostics.js",
+            "packages/publisher/dist/publish-result.js",
+            "packages/publisher/dist/source-normalization.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 29627,
+          "codeSha256": "sha256:9b66656ad1ef353c9741629e713067ec194653b41b2b879797f82830c67b0d07"
+        },
+        {
+          "id": "packages/publisher/dist/capability-preflight.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/publish-diagnostics.js",
+            "packages/publisher/dist/source-preflight.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 11955,
+          "codeSha256": "sha256:2d7656c0cb1eb78769b64ef1eed152941def896a04d822acdcca19e7cedcb353"
+        },
+        {
+          "id": "packages/publisher/dist/catalog-pinning.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/publish-diagnostics.js",
+            "packages/publisher/dist/publish-result.js",
+            "packages/publisher/dist/source-normalization.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 18412,
+          "codeSha256": "sha256:4f811d901b369d5345eb78960900fb70f9b068b3417a9d49cfb0ddc4d5d3be75"
+        },
+        {
+          "id": "packages/publisher/dist/catalog-resolution.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/publish-diagnostics.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 32333,
+          "codeSha256": "sha256:b33ea4c7d3b7fef3dbf5dd4795a5f807644e4f16bf8112f78c1b6429b956d142"
+        },
+        {
+          "id": "packages/publisher/dist/execution-preflight.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/capability-preflight.js",
+            "packages/publisher/dist/publish-diagnostics.js",
+            "packages/publisher/dist/source-preflight.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 10937,
+          "codeSha256": "sha256:20b0a5cf186c0e11af73cf3c76d334f35362c5c1ee27ad1048f9ea31f2dd7393"
+        },
+        {
+          "id": "packages/publisher/dist/index.js",
+          "imports": [
+            "packages/publisher/dist/bundle-publication.js",
+            "packages/publisher/dist/publish-result.js",
+            "packages/publisher/dist/source-json.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 515,
+          "codeSha256": "sha256:536274c355b47020d0620d5548a3674ba3b229f1665a21907d0be16efa154250"
+        },
+        {
+          "id": "packages/publisher/dist/publish-diagnostics.js",
+          "imports": ["packages/publisher/dist/publish-result.js"],
+          "dynamicImports": [],
+          "codeBytes": 7962,
+          "codeSha256": "sha256:002a3d9f2af29685ac917bda5681a0899b4be888c9c58e0c09e87d9f3fb4c6a2"
+        },
+        {
+          "id": "packages/publisher/dist/publish-result.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 5740,
+          "codeSha256": "sha256:c0bccb5a472f8fe1d480224d44af23d0156864f4dedc966e4209329bfd1029e6"
+        },
+        {
+          "id": "packages/publisher/dist/source-json.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/publish-diagnostics.js",
+            "packages/publisher/dist/publish-result.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 12150,
+          "codeSha256": "sha256:7e4ebf1474fbb198f1a0077af0732f15e174c41c94115c27d744152ef73bc3ba"
+        },
+        {
+          "id": "packages/publisher/dist/source-normalization.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/publish-diagnostics.js",
+            "packages/publisher/dist/source-preservation.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 12560,
+          "codeSha256": "sha256:b8f67dbeef2d7d909d8e715fdc5c3f448e8b06f96c98c85ebc12b4ce7021567c"
+        },
+        {
+          "id": "packages/publisher/dist/source-preflight.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/catalog-resolution.js",
+            "packages/publisher/dist/publish-diagnostics.js",
+            "packages/publisher/dist/source-json.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 8737,
+          "codeSha256": "sha256:df459b95b87122fc2c1b85500ea8061ae2206bff8082e21c11b5595f5f9186e2"
+        },
+        {
+          "id": "packages/publisher/dist/source-preservation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/publisher/dist/execution-preflight.js",
+            "packages/publisher/dist/publish-diagnostics.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 17582,
+          "codeSha256": "sha256:109cf93eb2a7b4a314f0caceb9b9f84e5a43f4c063193715a507ea198c090353"
+        },
+        {
+          "id": "packages/reference-catalog-web/catalog.json",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 6145,
+          "codeSha256": "sha256:a5122a0faef6f1125aba49d9be8737c6a60151fb9f35933a2e3f2e8b32d1ac17"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/alert.js",
+          "imports": ["node_modules/react/jsx-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 1951,
+          "codeSha256": "sha256:97e9d8a8b596a90905da2ff2ca9fa79c927e86abdc5c36223d82f007517c399f"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/button.js",
+          "imports": ["node_modules/react/jsx-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 2334,
+          "codeSha256": "sha256:d0f9e3734c5b0b7a795c1514d2310bb61f10532f5476290ffb8c9fd8456c8011"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/contracts.js",
+          "imports": ["packages/catalog-sdk/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 4697,
+          "codeSha256": "sha256:f9e205f65f0f28a29435c4d391b332afd1e75b6310135f076c0e53523336f34c"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/interactive-contracts.js",
+          "imports": ["packages/catalog-sdk/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 8780,
+          "codeSha256": "sha256:bc0ff4a6556015fab67cc8549d134fb9c37e13a525c174adf2f0bcb38b29bcf8"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/stack.js",
+          "imports": ["node_modules/react/jsx-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 1797,
+          "codeSha256": "sha256:239cd6b6e1ab0face17c98705c523b9dcd8483ab3b5f771406f1f4d3d65c24de"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/text-field.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 2437,
+          "codeSha256": "sha256:a9f662669e7975f8393f922e2fc5d25d54ca616fa607215b4329e0581cd6143e"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/text.js",
+          "imports": ["node_modules/react/jsx-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 606,
+          "codeSha256": "sha256:562ab4de0201f49cb385b0c4f4329fc803c6833dde2c21e1b07302551a1e0eae"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/host-operations/index.js",
+          "imports": [
+            "packages/reference-catalog-web/dist/host-operations/sign-in.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 215,
+          "codeSha256": "sha256:f41bb3432fc5fd3225109ef7150e642f3fed35d427fb05f7126d490b5856c05c"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/host-operations/sign-in.js",
+          "imports": [
+            "packages/reference-catalog-web/dist/operations/sign-in.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 926,
+          "codeSha256": "sha256:fbcd81c04fc398f5c15d2ec98945ebee047c5b274c6bdc5068fddc11d0745c1b"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/operations/index.js",
+          "imports": [
+            "packages/reference-catalog-web/dist/operations/sign-in.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 249,
+          "codeSha256": "sha256:fa9b7854d3f5fd690e2dec59b0813fcabad057e2d171811dcf0ec253a72f5c23"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/operations/sign-in.js",
+          "imports": ["packages/catalog-sdk/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 2841,
+          "codeSha256": "sha256:b5b5def58fc33ef8567edde42d605efa5a7d9583b3c153d5c670c32b530277de"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/react-adapters/index.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js",
+            "packages/reference-catalog-web/dist/components/alert.js",
+            "packages/reference-catalog-web/dist/components/button.js",
+            "packages/reference-catalog-web/dist/components/contracts.js",
+            "packages/reference-catalog-web/dist/components/interactive-contracts.js",
+            "packages/reference-catalog-web/dist/components/stack.js",
+            "packages/reference-catalog-web/dist/components/text-field.js",
+            "packages/reference-catalog-web/dist/components/text.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 7521,
+          "codeSha256": "sha256:31834b57d0e9c43e68f4ca23b3dabebeb7093040fe631ab718063bbc6112ed99"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/tokens/index.js",
+          "imports": [
+            "packages/reference-catalog-web/dist/tokens/reference-token-document.js",
+            "packages/reference-catalog-web/dist/tokens/web-token-provider.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 409,
+          "codeSha256": "sha256:4b47a66a77ddfb34a8ead7f62a35523c06aff94467f29183eeaba291f779eaf8"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/tokens/reference-token-document.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 3184,
+          "codeSha256": "sha256:9f566e8ca4d8ac065abd531ec30e9a8b01fa6557b44e46c1d03c0c1b163066b3"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/tokens/web-token-provider.js",
+          "imports": [
+            "packages/reference-catalog-web/dist/tokens/reference-token-document.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 11116,
+          "codeSha256": "sha256:81c4897b946483672cb6b70d79b9ec05fad2f45e06dc14bea3dfb0cf7af7ffd5"
+        },
+        {
+          "id": "packages/runtime-core/dist/action-evaluation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/predicate-evaluation.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/token-format-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 15809,
+          "codeSha256": "sha256:fac5bdc2a386e83ed08ebf4b6e856d71f4b9f7c96b6c5dfdee11adcd92673746"
+        },
+        {
+          "id": "packages/runtime-core/dist/action-turns.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/command-event-actions.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/local-state.js",
+            "packages/runtime-core/dist/operation-lifecycle.js",
+            "packages/runtime-core/dist/operation-resource-actions.js",
+            "packages/runtime-core/dist/resource-lifecycle.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/state-navigation-actions.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 74350,
+          "codeSha256": "sha256:4b35385997035a96558dcc5e1ab6cab4d95710f7810d361078aab3dde8e9fc87"
+        },
+        {
+          "id": "packages/runtime-core/dist/adapter-bridges.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/command-event-actions.js",
+            "packages/runtime-core/dist/command-event-ports.js",
+            "packages/runtime-core/dist/node-identity.js",
+            "packages/runtime-core/dist/repeat-materialization.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 61221,
+          "codeSha256": "sha256:646b2e074c4f9a19ccb17b45700f02bfd9af90c3d78606013d4d90229e7a20d3"
+        },
+        {
+          "id": "packages/runtime-core/dist/command-event-actions.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/action-evaluation.js",
+            "packages/runtime-core/dist/command-event-ports.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 53877,
+          "codeSha256": "sha256:336d211a0d56ffa2bd9686a94703eb770e17604ae1226089c5e2705a7c9e6f0f"
+        },
+        {
+          "id": "packages/runtime-core/dist/command-event-ports.js",
+          "imports": [
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 11766,
+          "codeSha256": "sha256:57992f04e6bf12002c6211d581cf4251818d22c76423dca33f55cdca2616ffc8"
+        },
+        {
+          "id": "packages/runtime-core/dist/headless-materialization.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/node-identity.js",
+            "packages/runtime-core/dist/repeat-materialization.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/token-format-resolution.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/runtime-core/dist/variant-style-evaluation.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 43174,
+          "codeSha256": "sha256:646077ae41a4fa3e71846079c57117a1d0c820f835c740da5fc6739cea27b124"
+        },
+        {
+          "id": "packages/runtime-core/dist/headless-session.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/action-turns.js",
+            "packages/runtime-core/dist/adapter-bridges.js",
+            "packages/runtime-core/dist/command-event-actions.js",
+            "packages/runtime-core/dist/command-event-ports.js",
+            "packages/runtime-core/dist/headless-materialization.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/local-state.js",
+            "packages/runtime-core/dist/operation-lifecycle.js",
+            "packages/runtime-core/dist/operation-resource-actions.js",
+            "packages/runtime-core/dist/reactive-host-ports.js",
+            "packages/runtime-core/dist/reactive-reevaluation.js",
+            "packages/runtime-core/dist/resource-lifecycle.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/state-navigation-actions.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 92077,
+          "codeSha256": "sha256:abf33b14dca0008757c088852c1714e553862bee3f26f56ec55acb9abd1ef63c"
+        },
+        {
+          "id": "packages/runtime-core/dist/host-ports.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 3793,
+          "codeSha256": "sha256:219c24fb3c0d8e0176a21f3c368d0d426449b702594f63e4bd5640ad8ba1c0af"
+        },
+        {
+          "id": "packages/runtime-core/dist/index.js",
+          "imports": [
+            "packages/runtime-core/dist/action-turns.js",
+            "packages/runtime-core/dist/adapter-bridges.js",
+            "packages/runtime-core/dist/command-event-actions.js",
+            "packages/runtime-core/dist/command-event-ports.js",
+            "packages/runtime-core/dist/headless-materialization.js",
+            "packages/runtime-core/dist/headless-session.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/local-state.js",
+            "packages/runtime-core/dist/node-identity.js",
+            "packages/runtime-core/dist/operation-lifecycle.js",
+            "packages/runtime-core/dist/operation-resource-actions.js",
+            "packages/runtime-core/dist/predicate-evaluation.js",
+            "packages/runtime-core/dist/reactive-host-ports.js",
+            "packages/runtime-core/dist/reactive-reevaluation.js",
+            "packages/runtime-core/dist/repeat-materialization.js",
+            "packages/runtime-core/dist/resource-lifecycle.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/state-navigation-actions.js",
+            "packages/runtime-core/dist/token-format-resolution.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/runtime-core/dist/variant-style-evaluation.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 3748,
+          "codeSha256": "sha256:f14f1c6e6c746d651b59442347f6bb022abbc0e80de4bad7351f0d46aad52b44"
+        },
+        {
+          "id": "packages/runtime-core/dist/local-state.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/validator/dist/schema-instance-validation.js",
+            "packages/validator/schema-contract-syntax.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 18258,
+          "codeSha256": "sha256:15904738295fdd93b186c54823818c07fc704eb8d8f0d46ff9ae5e4b6025c2e6"
+        },
+        {
+          "id": "packages/runtime-core/dist/node-identity.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6433,
+          "codeSha256": "sha256:c0f3ecb35b5cb19414472454c08c35b756c88bce40dc38341daf325645b8d0f6"
+        },
+        {
+          "id": "packages/runtime-core/dist/operation-lifecycle.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 44923,
+          "codeSha256": "sha256:3229f04505988d9e860b22a098d99835d47bf4ac0bee947c40e6b1d1bb9c2e81"
+        },
+        {
+          "id": "packages/runtime-core/dist/operation-resource-actions.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/action-evaluation.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/operation-lifecycle.js",
+            "packages/runtime-core/dist/resource-lifecycle.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 51586,
+          "codeSha256": "sha256:5c36151a954a2c85f45c178713580d7085d5dc6972de2a0be77d2fb1f1da6044"
+        },
+        {
+          "id": "packages/runtime-core/dist/predicate-evaluation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 32508,
+          "codeSha256": "sha256:1c456e267018977a4959a69d91ead748e2bc68d7cbde3ac1cbcf1655519052bc"
+        },
+        {
+          "id": "packages/runtime-core/dist/reactive-host-ports.js",
+          "imports": [
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6181,
+          "codeSha256": "sha256:56b9af13b550c901f6c995a4a7c55e2e56a07c60364ad8d55794150bb59fabfd"
+        },
+        {
+          "id": "packages/runtime-core/dist/reactive-reevaluation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/local-state.js",
+            "packages/runtime-core/dist/operation-lifecycle.js",
+            "packages/runtime-core/dist/reactive-host-ports.js",
+            "packages/runtime-core/dist/resource-lifecycle.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 31354,
+          "codeSha256": "sha256:45fb6a7c57fd33e89b3661fb14b9eeed151a9149de06ec3fbfe6bdb8e28cd10a"
+        },
+        {
+          "id": "packages/runtime-core/dist/repeat-materialization.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/node-identity.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 14793,
+          "codeSha256": "sha256:f0df8bd5ea97cf048b65a4c41acba6ec5e4bed85a3bef574d1999f063ac6b7ec"
+        },
+        {
+          "id": "packages/runtime-core/dist/resource-lifecycle.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/token-format-resolution.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 41590,
+          "codeSha256": "sha256:4a80b3291ad449cc2ae61e1a2ac2dea80cb28c1c1b47bdce317b6b5af7aa97cb"
+        },
+        {
+          "id": "packages/runtime-core/dist/runtime-json-snapshot.js",
+          "imports": ["packages/runtime-core/dist/value-resolution.js"],
+          "dynamicImports": [],
+          "codeBytes": 1475,
+          "codeSha256": "sha256:cbba03055cece8b86718a16b6d0cc190eb243fff826ab7635f1537703bb6a4a9"
+        },
+        {
+          "id": "packages/runtime-core/dist/state-navigation-actions.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/action-evaluation.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/local-state.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 33300,
+          "codeSha256": "sha256:68beabcdd45fe83cca6d70cb337869b25bc410a20c6fc1f5b1b3eb61ff974dac"
+        },
+        {
+          "id": "packages/runtime-core/dist/token-format-resolution.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 28825,
+          "codeSha256": "sha256:8c442aa642c95fe41ef9de956c012309ecc710b815ed6eba24c74e42ce4403e4"
+        },
+        {
+          "id": "packages/runtime-core/dist/value-resolution.js",
+          "imports": ["packages/protocol/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 21277,
+          "codeSha256": "sha256:c1f55f997c7e28017ee89f0e664f112577d3e2ea37ea47230a447b5dd2c98d9d"
+        },
+        {
+          "id": "packages/runtime-core/dist/variant-style-evaluation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/predicate-evaluation.js",
+            "packages/runtime-core/dist/token-format-resolution.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 37042,
+          "codeSha256": "sha256:16d37842958d1d6ef7b31b83ee080a97cf62174fa0564e9f481fc122b0dcf0cd"
+        },
+        {
+          "id": "packages/runtime-react/dist/adapter-error-boundary.js",
+          "imports": ["node_modules/react/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 8203,
+          "codeSha256": "sha256:b384bd0777168a966b163a3573d33f87a30e28e4e380c5594dae4707bc582f4e"
+        },
+        {
+          "id": "packages/runtime-react/dist/diagnostic-index.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 11693,
+          "codeSha256": "sha256:9c0f7371941703c3561557a79a1585ddfb211a4566ffb6fd5c5c65704dcaf568"
+        },
+        {
+          "id": "packages/runtime-react/dist/index.js",
+          "imports": [
+            "packages/runtime-react/dist/diagnostic-index.js",
+            "packages/runtime-react/dist/live-surface.js",
+            "packages/runtime-react/dist/reconciliation.js",
+            "packages/runtime-react/dist/registry.js",
+            "packages/runtime-react/dist/render-plan.js",
+            "packages/runtime-react/dist/root-error-policy.js",
+            "packages/runtime-react/dist/session-surface.js",
+            "packages/runtime-react/dist/surface-boundary.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 855,
+          "codeSha256": "sha256:a281742af95d30e9bdbcf3ced449a8c8ae9b2138ef4d45a10adde80aff34757a"
+        },
+        {
+          "id": "packages/runtime-react/dist/interactions.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "packages/runtime-core/dist/index.js",
+            "packages/runtime-react/dist/adapter-error-boundary.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 10639,
+          "codeSha256": "sha256:31bde5a23881504feb4937027085d74ace7b35f2eb2a52d49965a5cb695c9820"
+        },
+        {
+          "id": "packages/runtime-react/dist/live-surface.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "packages/runtime-react/dist/render-plan.js",
+            "packages/runtime-react/dist/session-surface.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 4052,
+          "codeSha256": "sha256:4ccf0c6acfc3c0a5d2a07caaf63eb6b8537a1a3e2fece5b880e21736cf136f52"
+        },
+        {
+          "id": "packages/runtime-react/dist/reconciliation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-react/dist/registry.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6936,
+          "codeSha256": "sha256:4ba6fe67718a1cc00c9ed0b09aebec51454c8b04f9b51bc1f2d591434d86f9ef"
+        },
+        {
+          "id": "packages/runtime-react/dist/registry.js",
+          "imports": ["packages/protocol/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 11553,
+          "codeSha256": "sha256:df18d0c22d017aa5fa054cccd6a3ea6ea71b530174bd5c179deede5ea7dee4ab"
+        },
+        {
+          "id": "packages/runtime-react/dist/render-plan.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "packages/runtime-core/dist/index.js",
+            "packages/runtime-react/dist/diagnostic-index.js",
+            "packages/runtime-react/dist/interactions.js",
+            "packages/runtime-react/dist/reconciliation.js",
+            "packages/runtime-react/dist/registry.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 34267,
+          "codeSha256": "sha256:23cce536f8c28bf2dc1eba44338e854d3fa545c1134b72dc7538e36096fd763e"
+        },
+        {
+          "id": "packages/runtime-react/dist/root-error-policy.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 938,
+          "codeSha256": "sha256:e7f2e483f33383e1464ea3c1f41cb59026c5bf3b761835c27993e80f401e6ac5"
+        },
+        {
+          "id": "packages/runtime-react/dist/session-surface.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "packages/runtime-core/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6921,
+          "codeSha256": "sha256:9ec0166bceee78c571fcaf0d919e2a24642f97f72d3ac5239957127e142352ee"
+        },
+        {
+          "id": "packages/runtime-react/dist/surface-boundary.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "packages/runtime-react/dist/adapter-error-boundary.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 8391,
+          "codeSha256": "sha256:07a236a895e49ccbbe03abe69e839ffcd2c7e544e2cd00bc2153558d5ee0e563"
+        },
+        {
+          "id": "packages/testkit/dist/index.js",
+          "imports": ["packages/testkit/dist/synthetic-fixtures.js"],
+          "dynamicImports": [],
+          "codeBytes": 371,
+          "codeSha256": "sha256:6d7e1da6c281a00f9ac15c9f22439a88cd4f38ba2467e394ec8bf8e82a5ae5e0"
+        },
+        {
+          "id": "packages/testkit/dist/synthetic-fixtures.js",
+          "imports": ["packages/protocol/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 17831,
+          "codeSha256": "sha256:0e2b8d199a131604b7a1a90a2e6b431f90d348fae57251c5262db37119a3b1b0"
+        },
+        {
+          "id": "packages/validator/dist/binding-contract-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/interaction-contract-validation.js",
+            "packages/validator/dist/schema-instance-validation.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 46895,
+          "codeSha256": "sha256:82d2d9ae24ca0283c95c914025e4f708bad7f114879460b5931a25459dc2ad19"
+        },
+        {
+          "id": "packages/validator/dist/component-contract-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/schema-instance-validation.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/semantic-validation.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 24587,
+          "codeSha256": "sha256:f9fc4e959275308b74b17f935caebde3eb4829052b0fc18bd6486973f96fa617"
+        },
+        {
+          "id": "packages/validator/dist/embedded-schema-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/structural-diagnostics.js",
+            "packages/validator/dist/uri-reference.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 8707,
+          "codeSha256": "sha256:240e76983e4700658b556a0142c42c0ce9625f4f35be70ddbaecfab9cf2438f1"
+        },
+        {
+          "id": "packages/validator/dist/execution-contract-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/binding-contract-validation.js",
+            "packages/validator/dist/interaction-contract-validation.js",
+            "packages/validator/dist/schema-instance-validation.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/semantic-validation.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 76906,
+          "codeSha256": "sha256:2d84bfa71a348bffe94c8c91711b7a5ea683bd89d8e5a0398e00bda3d63fda4f"
+        },
+        {
+          "id": "packages/validator/dist/generated/0.1.0/structural-validators.js",
+          "imports": ["packages/validator/dist/standalone-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 1001830,
+          "codeSha256": "sha256:322fb4bcaf4359bdb819b1a9ddd2baba21b628cd6c1bb39203932221a3d8bab7"
+        },
+        {
+          "id": "packages/validator/dist/index.js",
+          "imports": [
+            "packages/validator/dist/binding-contract-validation.js",
+            "packages/validator/dist/component-contract-validation.js",
+            "packages/validator/dist/execution-contract-validation.js",
+            "packages/validator/dist/interaction-contract-validation.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/semantic-validation.js",
+            "packages/validator/dist/structural-validation.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 1965,
+          "codeSha256": "sha256:5009c889ea5eeab437f902057cdee9f84ba39c437239f1f5d222ad2ba5e05ec8"
+        },
+        {
+          "id": "packages/validator/dist/interaction-contract-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/component-contract-validation.js",
+            "packages/validator/dist/schema-instance-validation.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 49673,
+          "codeSha256": "sha256:431b473b6aa82a5af848faf74cf5459aa4375e2678f936e51c733212c42af331"
+        },
+        {
+          "id": "packages/validator/dist/schema-instance-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/uri-reference.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 86247,
+          "codeSha256": "sha256:169312f4eb2c304104c4321b57d0b9f07bfe88285753fd1c3f8d569e544901ca"
+        },
+        {
+          "id": "packages/validator/dist/semantic-diagnostics.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6799,
+          "codeSha256": "sha256:f2fa2b0d7a1bb5a06d57e577ec0b1922d5b924cefca5c65314a55108f123c09b"
+        },
+        {
+          "id": "packages/validator/dist/semantic-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/structural-validation.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 27165,
+          "codeSha256": "sha256:1d89f973a8a768771aabf203e55bc9816e1b06365553604c5808318abc483368"
+        },
+        {
+          "id": "packages/validator/dist/standalone-runtime.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 2004,
+          "codeSha256": "sha256:0a3f1eca4cdffbe2ddfef0e7465f2609070e11763a6b809f643c04300b6ed81b"
+        },
+        {
+          "id": "packages/validator/dist/structural-diagnostics.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 2879,
+          "codeSha256": "sha256:118eaf52b80305eecdafabfcfa3d437e4864d54cd0cf8c98f8422b2ff3dd1a0b"
+        },
+        {
+          "id": "packages/validator/dist/structural-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/embedded-schema-validation.js",
+            "packages/validator/dist/generated/0.1.0/structural-validators.js",
+            "packages/validator/dist/structural-diagnostics.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6241,
+          "codeSha256": "sha256:316c1ea98f96ada1cad6a5cb398538fac5c10e94a03e0efa318f07c8d0459c28"
+        },
+        {
+          "id": "packages/validator/dist/uri-reference.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 10282,
+          "codeSha256": "sha256:342c8e315f8b69ce965c46403c578ef1f2ddeeba8bf76d1df67348a833ae3525"
+        },
+        {
+          "id": "packages/validator/dist/validation-internals.js",
+          "imports": ["packages/protocol/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 1381,
+          "codeSha256": "sha256:d0639abec859e8ab371a0ec3a8fc14a2942184a1f61ccb66111faf1070897114"
+        },
+        {
+          "id": "packages/validator/schema-contract-syntax.js",
+          "imports": [
+            "packages/validator/dist/generated/0.1.0/structural-validators.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 87,
+          "codeSha256": "sha256:8b68d387d6432fd70d44f96536bb3c5a7ba636927d805c55b5e6a29155487e84"
+        },
+        {
+          "id": "virtual:vite/modulepreload-polyfill.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 1356,
+          "codeSha256": "sha256:dd838b55e315f155e8a0093fdc4a80b2da5f069c433fc49a15b9962807791374"
+        }
+      ],
+      "hostModules": [
+        {
+          "id": "apps/reference-host-web/index.html",
+          "imports": [
+            "apps/reference-host-web/src/main.tsx",
+            "virtual:vite/modulepreload-polyfill.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 61,
+          "codeSha256": "sha256:f98d51b03ea196f8f62b829fe47073ec91c41de006e0a195f2ef70efbc9bf32b"
+        },
+        {
+          "id": "apps/reference-host-web/src/application.tsx",
+          "imports": [
+            "apps/reference-host-web/src/managed-surface.tsx",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 1581,
+          "codeSha256": "sha256:210255a568647570c7c05f5bc5e558a91345253b7ab0efc1e3e1ed08c58ea75b"
+        },
+        {
+          "id": "apps/reference-host-web/src/browser-profile.ts",
+          "imports": ["packages/runtime-web/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 3903,
+          "codeSha256": "sha256:8fb2e1e66a5f70b2edf8395dea772cda55a9fcdd44c1aa61c1432d1eeff2b74f"
+        },
+        {
+          "id": "apps/reference-host-web/src/channel-delivery.ts",
+          "imports": ["apps/reference-host-web/src/official-sign-in.ts"],
+          "dynamicImports": [],
+          "codeBytes": 19719,
+          "codeSha256": "sha256:458270f8c55766ac92397386c207ebf8917c0597a4404a987e29af8f7d8ace81"
+        },
+        {
+          "id": "apps/reference-host-web/src/failure-view.tsx",
+          "imports": ["node_modules/react/jsx-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 1614,
+          "codeSha256": "sha256:9f11719e01ff4ade94d5b0d89dd25ca0eb0f8e1e3b63f2ab6b08fef6e96b958a"
+        },
+        {
+          "id": "apps/reference-host-web/src/host-ports.ts",
+          "imports": [
+            "apps/reference-host-web/src/browser-profile.ts",
+            "packages/runtime-web/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 2614,
+          "codeSha256": "sha256:da3b2be256c82c6024e8f3908988f26fa50709d2b3289bd29e69dc6945e22db8"
+        },
+        {
+          "id": "apps/reference-host-web/src/main.tsx",
+          "imports": [
+            "apps/reference-host-web/src/channel-delivery.ts",
+            "apps/reference-host-web/src/root.tsx",
+            "apps/reference-host-web/src/sign-in-http-handler.ts",
+            "apps/reference-host-web/src/styles.css"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 1524,
+          "codeSha256": "sha256:4ca20c7a976cfc98fa5d12e73a992b06bd9b9f85c57a918925d221e0a3911718"
+        },
+        {
+          "id": "apps/reference-host-web/src/managed-surface.tsx",
+          "imports": [
+            "apps/reference-host-web/src/failure-view.tsx",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js",
+            "packages/runtime-react/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 1005,
+          "codeSha256": "sha256:ec7482f089cb6959449c57f5dc6e3c0e33847ca4eb977a5367918880d59d2468"
+        },
+        {
+          "id": "apps/reference-host-web/src/official-sign-in.ts",
+          "imports": [
+            "apps/reference-host-web/src/host-ports.ts",
+            "apps/reference-host-web/src/root.tsx",
+            "examples/sign-in/official-derived.bundle.desen.json",
+            "packages/reference-catalog-web/catalog.json",
+            "packages/reference-catalog-web/dist/react-adapters/index.js",
+            "packages/runtime-core/dist/index.js",
+            "packages/runtime-react/dist/index.js",
+            "packages/runtime-web/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 13737,
+          "codeSha256": "sha256:504f1e1648ffdadd62025860a1858567e68c820d8ce3d705235360b4a4d43e6c"
+        },
+        {
+          "id": "apps/reference-host-web/src/recovery-authority.ts",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 3970,
+          "codeSha256": "sha256:1e6290d664698e15f7d88c0c63f088c500ac37ecef9101621b7e1760fdde5fdd"
+        },
+        {
+          "id": "apps/reference-host-web/src/root-policy.ts",
+          "imports": ["packages/runtime-react/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 2052,
+          "codeSha256": "sha256:e086afb26b9df2d571adc91c91c937d77c841a7a921579e258c557a97225ae6b"
+        },
+        {
+          "id": "apps/reference-host-web/src/root.tsx",
+          "imports": [
+            "apps/reference-host-web/src/application.tsx",
+            "apps/reference-host-web/src/recovery-authority.ts",
+            "apps/reference-host-web/src/root-policy.ts",
+            "node_modules/react-dom/client.js",
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js",
+            "packages/runtime-core/dist/index.js",
+            "packages/runtime-react/dist/index.js",
+            "packages/runtime-web/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 13803,
+          "codeSha256": "sha256:fc4febf05ab4cec4f06fa9dd36fe105f56fb14dd92cd1451ce330476c7c2a4f1"
+        },
+        {
+          "id": "apps/reference-host-web/src/sign-in-http-handler.ts",
+          "imports": [
+            "packages/reference-catalog-web/dist/host-operations/index.js",
+            "packages/runtime-core/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 10349,
+          "codeSha256": "sha256:cae803ad1b15e0285d9e18c123522099b611cce28b1763c87cfbef6e4b242783"
+        },
+        {
+          "id": "apps/reference-host-web/src/styles.css",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 0,
+          "codeSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "id": "examples/sign-in/official-derived.bundle.desen.json",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 2544,
+          "codeSha256": "sha256:08986e2a61aa9e0261a10ccd47ba72941d10a0213eda46917ddfb18aa3eb8644"
+        },
+        {
+          "id": "node_modules/react-dom/cjs/react-dom-client.production.js",
+          "imports": [
+            "node_modules/react-dom/index.js",
+            "node_modules/react/index.js",
+            "node_modules/scheduler/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 536016,
+          "codeSha256": "sha256:6cf4932e0c20a4572ae395035ca2e512a42d7d49c1a659fa73d6197069c28df0"
+        },
+        {
+          "id": "node_modules/react-dom/cjs/react-dom.production.js",
+          "imports": ["node_modules/react/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 6655,
+          "codeSha256": "sha256:291e0682e8b69643e8e213b6bc13849527fdd97800fef587d5be7b4a8f6a58ca"
+        },
+        {
+          "id": "node_modules/react-dom/client.js",
+          "imports": [
+            "node_modules/react-dom/cjs/react-dom-client.production.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 1373,
+          "codeSha256": "sha256:00e348ab3d6bc2eef908345d0bc4e008c95bcfecec060dfda5c4967953761396"
+        },
+        {
+          "id": "node_modules/react-dom/index.js",
+          "imports": ["node_modules/react-dom/cjs/react-dom.production.js"],
+          "dynamicImports": [],
+          "codeBytes": 1359,
+          "codeSha256": "sha256:ba1a3e33489f868371561777607e3ee5091df0f7ea3f1a10f789d6b86e4c1505"
+        },
+        {
+          "id": "node_modules/react/cjs/react-jsx-runtime.production.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 976,
+          "codeSha256": "sha256:1e46f15002696985e80c61d47aaa30dabb03c954270a690f5f7dfbbacfa9002b"
+        },
+        {
+          "id": "node_modules/react/cjs/react.production.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 17217,
+          "codeSha256": "sha256:d348b80a78c8ea0bd02b1990c7b7b514f5c276f9e74fee6e3976297585385961"
+        },
+        {
+          "id": "node_modules/react/index.js",
+          "imports": ["node_modules/react/cjs/react.production.js"],
+          "dynamicImports": [],
+          "codeBytes": 186,
+          "codeSha256": "sha256:60caffdecbdc5db3bc4ec4e83df9488345ccb271d07533b9210bf5750918d97e"
+        },
+        {
+          "id": "node_modules/react/jsx-runtime.js",
+          "imports": ["node_modules/react/cjs/react-jsx-runtime.production.js"],
+          "dynamicImports": [],
+          "codeBytes": 210,
+          "codeSha256": "sha256:b392951a77d0a2e6a6bd017e49d768481ae5b63c4109c6c31f622cf7b2433edc"
+        },
+        {
+          "id": "node_modules/scheduler/cjs/scheduler.production.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 10181,
+          "codeSha256": "sha256:679adff761d31e9426604f80c0e99be44a3e6f4c6834b0218ecf0312a67c171f"
+        },
+        {
+          "id": "node_modules/scheduler/index.js",
+          "imports": ["node_modules/scheduler/cjs/scheduler.production.js"],
+          "dynamicImports": [],
+          "codeBytes": 194,
+          "codeSha256": "sha256:145965504d60007bc25486ab930b0367867dcd5d579ccd343c148d69349a7cfb"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/behavior-registration.js",
+          "imports": ["packages/catalog-sdk/dist/registration-core.js"],
+          "dynamicImports": [],
+          "codeBytes": 590,
+          "codeSha256": "sha256:6f022c2c4f59d9444444fc45bad25535a29f15b56e6f09ff466ab38a907fb3a1"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/catalog-manifest.js",
+          "imports": ["packages/catalog-sdk/dist/inert-json.js"],
+          "dynamicImports": [],
+          "codeBytes": 5210,
+          "codeSha256": "sha256:d4faf0e0e29eafd92a74fa675bac6846610ef497512f55258238730748d12b55"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/component-inspector-control.js",
+          "imports": [
+            "packages/catalog-sdk/dist/inert-json.js",
+            "packages/protocol/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 12887,
+          "codeSha256": "sha256:6760bcb2563792a2ce9e8e60548622697a4a97d5d55aa724e5b692755f00c867"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/component-registration.js",
+          "imports": ["packages/catalog-sdk/dist/registration-core.js"],
+          "dynamicImports": [],
+          "codeBytes": 688,
+          "codeSha256": "sha256:0877891e7b2e0053d1c27ae6c355face1f28b4b11dc2a5c4b0a9072cd5dc4924"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/index.js",
+          "imports": [
+            "packages/catalog-sdk/dist/behavior-registration.js",
+            "packages/catalog-sdk/dist/catalog-manifest.js",
+            "packages/catalog-sdk/dist/component-inspector-control.js",
+            "packages/catalog-sdk/dist/component-registration.js",
+            "packages/catalog-sdk/dist/operation-registration.js",
+            "packages/catalog-sdk/dist/resource-registration.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 559,
+          "codeSha256": "sha256:35f7181ed34b4c8331867c9a5cde99980d507503d6a017989e79b8e879471365"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/inert-json.js",
+          "imports": ["packages/protocol/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 4523,
+          "codeSha256": "sha256:a2366a224fff48105d8f9c4b13d0e45905dd281285daa469880e68847529260f"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/operation-registration.js",
+          "imports": ["packages/catalog-sdk/dist/registration-core.js"],
+          "dynamicImports": [],
+          "codeBytes": 563,
+          "codeSha256": "sha256:1181d3903bd3b8bbeeb986853245e0fdc2c0ecc7ff1bbb080343e1da123c2786"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/registration-core.js",
+          "imports": ["packages/catalog-sdk/dist/inert-json.js"],
+          "dynamicImports": [],
+          "codeBytes": 1275,
+          "codeSha256": "sha256:5cf7dace77ae294c83ee5b310f84b8d53c10c5791105a8ef5d1128eac102c024"
+        },
+        {
+          "id": "packages/catalog-sdk/dist/resource-registration.js",
+          "imports": ["packages/catalog-sdk/dist/registration-core.js"],
+          "dynamicImports": [],
+          "codeBytes": 569,
+          "codeSha256": "sha256:445d6a95506d43412c4efc8711cf94c38e69d226d83ca28eb49be32b96c7432f"
+        },
+        {
+          "id": "packages/protocol/dist/canonicalization.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 17634,
+          "codeSha256": "sha256:64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+        },
+        {
+          "id": "packages/protocol/dist/diagnostics.js",
+          "imports": ["packages/protocol/dist/json-pointer.js"],
+          "dynamicImports": [],
+          "codeBytes": 8905,
+          "codeSha256": "sha256:0a457213b75b7fdd896fa7bd4b37faea7ff9ddc7b97dd24b3bdb99eeca82bdbf"
+        },
+        {
+          "id": "packages/protocol/dist/index.js",
+          "imports": [
+            "packages/protocol/dist/canonicalization.js",
+            "packages/protocol/dist/diagnostics.js",
+            "packages/protocol/dist/json-pointer.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 679,
+          "codeSha256": "sha256:a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+        },
+        {
+          "id": "packages/protocol/dist/json-pointer.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 6499,
+          "codeSha256": "sha256:7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
+        },
+        {
+          "id": "packages/reference-catalog-web/catalog.json",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 6145,
+          "codeSha256": "sha256:a5122a0faef6f1125aba49d9be8737c6a60151fb9f35933a2e3f2e8b32d1ac17"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/alert.js",
+          "imports": ["node_modules/react/jsx-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 1951,
+          "codeSha256": "sha256:97e9d8a8b596a90905da2ff2ca9fa79c927e86abdc5c36223d82f007517c399f"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/button.js",
+          "imports": ["node_modules/react/jsx-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 2334,
+          "codeSha256": "sha256:d0f9e3734c5b0b7a795c1514d2310bb61f10532f5476290ffb8c9fd8456c8011"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/contracts.js",
+          "imports": ["packages/catalog-sdk/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 4697,
+          "codeSha256": "sha256:f9e205f65f0f28a29435c4d391b332afd1e75b6310135f076c0e53523336f34c"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/interactive-contracts.js",
+          "imports": ["packages/catalog-sdk/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 8780,
+          "codeSha256": "sha256:bc0ff4a6556015fab67cc8549d134fb9c37e13a525c174adf2f0bcb38b29bcf8"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/stack.js",
+          "imports": ["node_modules/react/jsx-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 1797,
+          "codeSha256": "sha256:239cd6b6e1ab0face17c98705c523b9dcd8483ab3b5f771406f1f4d3d65c24de"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/text-field.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 2437,
+          "codeSha256": "sha256:a9f662669e7975f8393f922e2fc5d25d54ca616fa607215b4329e0581cd6143e"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/text.js",
+          "imports": ["node_modules/react/jsx-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 606,
+          "codeSha256": "sha256:562ab4de0201f49cb385b0c4f4329fc803c6833dde2c21e1b07302551a1e0eae"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/host-operations/index.js",
+          "imports": [
+            "packages/reference-catalog-web/dist/host-operations/sign-in.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 215,
+          "codeSha256": "sha256:f41bb3432fc5fd3225109ef7150e642f3fed35d427fb05f7126d490b5856c05c"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/host-operations/sign-in.js",
+          "imports": [
+            "packages/reference-catalog-web/dist/operations/sign-in.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 926,
+          "codeSha256": "sha256:fbcd81c04fc398f5c15d2ec98945ebee047c5b274c6bdc5068fddc11d0745c1b"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/operations/sign-in.js",
+          "imports": ["packages/catalog-sdk/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 2841,
+          "codeSha256": "sha256:b5b5def58fc33ef8567edde42d605efa5a7d9583b3c153d5c670c32b530277de"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/react-adapters/index.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "node_modules/react/jsx-runtime.js",
+            "packages/reference-catalog-web/dist/components/alert.js",
+            "packages/reference-catalog-web/dist/components/button.js",
+            "packages/reference-catalog-web/dist/components/contracts.js",
+            "packages/reference-catalog-web/dist/components/interactive-contracts.js",
+            "packages/reference-catalog-web/dist/components/stack.js",
+            "packages/reference-catalog-web/dist/components/text-field.js",
+            "packages/reference-catalog-web/dist/components/text.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 7521,
+          "codeSha256": "sha256:31834b57d0e9c43e68f4ca23b3dabebeb7093040fe631ab718063bbc6112ed99"
+        },
+        {
+          "id": "packages/runtime-core/dist/action-evaluation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/predicate-evaluation.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/token-format-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 15809,
+          "codeSha256": "sha256:fac5bdc2a386e83ed08ebf4b6e856d71f4b9f7c96b6c5dfdee11adcd92673746"
+        },
+        {
+          "id": "packages/runtime-core/dist/action-turns.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/command-event-actions.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/local-state.js",
+            "packages/runtime-core/dist/operation-lifecycle.js",
+            "packages/runtime-core/dist/operation-resource-actions.js",
+            "packages/runtime-core/dist/resource-lifecycle.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/state-navigation-actions.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 74350,
+          "codeSha256": "sha256:4b35385997035a96558dcc5e1ab6cab4d95710f7810d361078aab3dde8e9fc87"
+        },
+        {
+          "id": "packages/runtime-core/dist/adapter-bridges.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/command-event-actions.js",
+            "packages/runtime-core/dist/command-event-ports.js",
+            "packages/runtime-core/dist/node-identity.js",
+            "packages/runtime-core/dist/repeat-materialization.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 61221,
+          "codeSha256": "sha256:646b2e074c4f9a19ccb17b45700f02bfd9af90c3d78606013d4d90229e7a20d3"
+        },
+        {
+          "id": "packages/runtime-core/dist/command-event-actions.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/action-evaluation.js",
+            "packages/runtime-core/dist/command-event-ports.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 53877,
+          "codeSha256": "sha256:336d211a0d56ffa2bd9686a94703eb770e17604ae1226089c5e2705a7c9e6f0f"
+        },
+        {
+          "id": "packages/runtime-core/dist/command-event-ports.js",
+          "imports": [
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 11766,
+          "codeSha256": "sha256:57992f04e6bf12002c6211d581cf4251818d22c76423dca33f55cdca2616ffc8"
+        },
+        {
+          "id": "packages/runtime-core/dist/headless-materialization.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/node-identity.js",
+            "packages/runtime-core/dist/repeat-materialization.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/token-format-resolution.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/runtime-core/dist/variant-style-evaluation.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 43174,
+          "codeSha256": "sha256:646077ae41a4fa3e71846079c57117a1d0c820f835c740da5fc6739cea27b124"
+        },
+        {
+          "id": "packages/runtime-core/dist/headless-session.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/action-turns.js",
+            "packages/runtime-core/dist/adapter-bridges.js",
+            "packages/runtime-core/dist/command-event-actions.js",
+            "packages/runtime-core/dist/command-event-ports.js",
+            "packages/runtime-core/dist/headless-materialization.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/local-state.js",
+            "packages/runtime-core/dist/operation-lifecycle.js",
+            "packages/runtime-core/dist/operation-resource-actions.js",
+            "packages/runtime-core/dist/reactive-host-ports.js",
+            "packages/runtime-core/dist/reactive-reevaluation.js",
+            "packages/runtime-core/dist/resource-lifecycle.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/state-navigation-actions.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 92077,
+          "codeSha256": "sha256:abf33b14dca0008757c088852c1714e553862bee3f26f56ec55acb9abd1ef63c"
+        },
+        {
+          "id": "packages/runtime-core/dist/host-ports.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 3793,
+          "codeSha256": "sha256:219c24fb3c0d8e0176a21f3c368d0d426449b702594f63e4bd5640ad8ba1c0af"
+        },
+        {
+          "id": "packages/runtime-core/dist/index.js",
+          "imports": [
+            "packages/runtime-core/dist/action-turns.js",
+            "packages/runtime-core/dist/adapter-bridges.js",
+            "packages/runtime-core/dist/command-event-actions.js",
+            "packages/runtime-core/dist/command-event-ports.js",
+            "packages/runtime-core/dist/headless-materialization.js",
+            "packages/runtime-core/dist/headless-session.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/local-state.js",
+            "packages/runtime-core/dist/node-identity.js",
+            "packages/runtime-core/dist/operation-lifecycle.js",
+            "packages/runtime-core/dist/operation-resource-actions.js",
+            "packages/runtime-core/dist/predicate-evaluation.js",
+            "packages/runtime-core/dist/reactive-host-ports.js",
+            "packages/runtime-core/dist/reactive-reevaluation.js",
+            "packages/runtime-core/dist/repeat-materialization.js",
+            "packages/runtime-core/dist/resource-lifecycle.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/state-navigation-actions.js",
+            "packages/runtime-core/dist/token-format-resolution.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/runtime-core/dist/variant-style-evaluation.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 3748,
+          "codeSha256": "sha256:f14f1c6e6c746d651b59442347f6bb022abbc0e80de4bad7351f0d46aad52b44"
+        },
+        {
+          "id": "packages/runtime-core/dist/local-state.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/validator/dist/schema-instance-validation.js",
+            "packages/validator/schema-contract-syntax.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 18258,
+          "codeSha256": "sha256:15904738295fdd93b186c54823818c07fc704eb8d8f0d46ff9ae5e4b6025c2e6"
+        },
+        {
+          "id": "packages/runtime-core/dist/node-identity.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6433,
+          "codeSha256": "sha256:c0f3ecb35b5cb19414472454c08c35b756c88bce40dc38341daf325645b8d0f6"
+        },
+        {
+          "id": "packages/runtime-core/dist/operation-lifecycle.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 44923,
+          "codeSha256": "sha256:3229f04505988d9e860b22a098d99835d47bf4ac0bee947c40e6b1d1bb9c2e81"
+        },
+        {
+          "id": "packages/runtime-core/dist/operation-resource-actions.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/action-evaluation.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/operation-lifecycle.js",
+            "packages/runtime-core/dist/resource-lifecycle.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 51586,
+          "codeSha256": "sha256:5c36151a954a2c85f45c178713580d7085d5dc6972de2a0be77d2fb1f1da6044"
+        },
+        {
+          "id": "packages/runtime-core/dist/predicate-evaluation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 32508,
+          "codeSha256": "sha256:1c456e267018977a4959a69d91ead748e2bc68d7cbde3ac1cbcf1655519052bc"
+        },
+        {
+          "id": "packages/runtime-core/dist/reactive-host-ports.js",
+          "imports": [
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6181,
+          "codeSha256": "sha256:56b9af13b550c901f6c995a4a7c55e2e56a07c60364ad8d55794150bb59fabfd"
+        },
+        {
+          "id": "packages/runtime-core/dist/reactive-reevaluation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/local-state.js",
+            "packages/runtime-core/dist/operation-lifecycle.js",
+            "packages/runtime-core/dist/reactive-host-ports.js",
+            "packages/runtime-core/dist/resource-lifecycle.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 31354,
+          "codeSha256": "sha256:45fb6a7c57fd33e89b3661fb14b9eeed151a9149de06ec3fbfe6bdb8e28cd10a"
+        },
+        {
+          "id": "packages/runtime-core/dist/repeat-materialization.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/node-identity.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 14793,
+          "codeSha256": "sha256:f0df8bd5ea97cf048b65a4c41acba6ec5e4bed85a3bef574d1999f063ac6b7ec"
+        },
+        {
+          "id": "packages/runtime-core/dist/resource-lifecycle.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/token-format-resolution.js",
+            "packages/runtime-core/dist/value-resolution.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 41590,
+          "codeSha256": "sha256:4a80b3291ad449cc2ae61e1a2ac2dea80cb28c1c1b47bdce317b6b5af7aa97cb"
+        },
+        {
+          "id": "packages/runtime-core/dist/runtime-json-snapshot.js",
+          "imports": ["packages/runtime-core/dist/value-resolution.js"],
+          "dynamicImports": [],
+          "codeBytes": 1475,
+          "codeSha256": "sha256:cbba03055cece8b86718a16b6d0cc190eb243fff826ab7635f1537703bb6a4a9"
+        },
+        {
+          "id": "packages/runtime-core/dist/state-navigation-actions.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/action-evaluation.js",
+            "packages/runtime-core/dist/host-ports.js",
+            "packages/runtime-core/dist/local-state.js",
+            "packages/runtime-core/dist/runtime-json-snapshot.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 33300,
+          "codeSha256": "sha256:68beabcdd45fe83cca6d70cb337869b25bc410a20c6fc1f5b1b3eb61ff974dac"
+        },
+        {
+          "id": "packages/runtime-core/dist/token-format-resolution.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 28825,
+          "codeSha256": "sha256:8c442aa642c95fe41ef9de956c012309ecc710b815ed6eba24c74e42ce4403e4"
+        },
+        {
+          "id": "packages/runtime-core/dist/value-resolution.js",
+          "imports": ["packages/protocol/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 21277,
+          "codeSha256": "sha256:c1f55f997c7e28017ee89f0e664f112577d3e2ea37ea47230a447b5dd2c98d9d"
+        },
+        {
+          "id": "packages/runtime-core/dist/variant-style-evaluation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-core/dist/predicate-evaluation.js",
+            "packages/runtime-core/dist/token-format-resolution.js",
+            "packages/runtime-core/dist/value-resolution.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 37042,
+          "codeSha256": "sha256:16d37842958d1d6ef7b31b83ee080a97cf62174fa0564e9f481fc122b0dcf0cd"
+        },
+        {
+          "id": "packages/runtime-react/dist/adapter-error-boundary.js",
+          "imports": ["node_modules/react/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 8203,
+          "codeSha256": "sha256:b384bd0777168a966b163a3573d33f87a30e28e4e380c5594dae4707bc582f4e"
+        },
+        {
+          "id": "packages/runtime-react/dist/diagnostic-index.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 11693,
+          "codeSha256": "sha256:9c0f7371941703c3561557a79a1585ddfb211a4566ffb6fd5c5c65704dcaf568"
+        },
+        {
+          "id": "packages/runtime-react/dist/index.js",
+          "imports": [
+            "packages/runtime-react/dist/diagnostic-index.js",
+            "packages/runtime-react/dist/live-surface.js",
+            "packages/runtime-react/dist/reconciliation.js",
+            "packages/runtime-react/dist/registry.js",
+            "packages/runtime-react/dist/render-plan.js",
+            "packages/runtime-react/dist/root-error-policy.js",
+            "packages/runtime-react/dist/session-surface.js",
+            "packages/runtime-react/dist/surface-boundary.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 855,
+          "codeSha256": "sha256:a281742af95d30e9bdbcf3ced449a8c8ae9b2138ef4d45a10adde80aff34757a"
+        },
+        {
+          "id": "packages/runtime-react/dist/interactions.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "packages/runtime-core/dist/index.js",
+            "packages/runtime-react/dist/adapter-error-boundary.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 10639,
+          "codeSha256": "sha256:31bde5a23881504feb4937027085d74ace7b35f2eb2a52d49965a5cb695c9820"
+        },
+        {
+          "id": "packages/runtime-react/dist/live-surface.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "packages/runtime-react/dist/render-plan.js",
+            "packages/runtime-react/dist/session-surface.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 4052,
+          "codeSha256": "sha256:4ccf0c6acfc3c0a5d2a07caaf63eb6b8537a1a3e2fece5b880e21736cf136f52"
+        },
+        {
+          "id": "packages/runtime-react/dist/reconciliation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/runtime-react/dist/registry.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6936,
+          "codeSha256": "sha256:4ba6fe67718a1cc00c9ed0b09aebec51454c8b04f9b51bc1f2d591434d86f9ef"
+        },
+        {
+          "id": "packages/runtime-react/dist/registry.js",
+          "imports": ["packages/protocol/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 11553,
+          "codeSha256": "sha256:df18d0c22d017aa5fa054cccd6a3ea6ea71b530174bd5c179deede5ea7dee4ab"
+        },
+        {
+          "id": "packages/runtime-react/dist/render-plan.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "packages/runtime-core/dist/index.js",
+            "packages/runtime-react/dist/diagnostic-index.js",
+            "packages/runtime-react/dist/interactions.js",
+            "packages/runtime-react/dist/reconciliation.js",
+            "packages/runtime-react/dist/registry.js",
+            "packages/validator/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 34267,
+          "codeSha256": "sha256:23cce536f8c28bf2dc1eba44338e854d3fa545c1134b72dc7538e36096fd763e"
+        },
+        {
+          "id": "packages/runtime-react/dist/root-error-policy.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 938,
+          "codeSha256": "sha256:e7f2e483f33383e1464ea3c1f41cb59026c5bf3b761835c27993e80f401e6ac5"
+        },
+        {
+          "id": "packages/runtime-react/dist/session-surface.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "packages/runtime-core/dist/index.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6921,
+          "codeSha256": "sha256:9ec0166bceee78c571fcaf0d919e2a24642f97f72d3ac5239957127e142352ee"
+        },
+        {
+          "id": "packages/runtime-react/dist/surface-boundary.js",
+          "imports": [
+            "node_modules/react/index.js",
+            "packages/runtime-react/dist/adapter-error-boundary.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 8391,
+          "codeSha256": "sha256:07a236a895e49ccbbe03abe69e839ffcd2c7e544e2cd00bc2153558d5ee0e563"
+        },
+        {
+          "id": "packages/runtime-web/dist/browser-platform.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 10819,
+          "codeSha256": "sha256:46ddc2e0d2b0f4a0f63d5c39677aecbec3d827c55784f128b60e2a6c504e5d07"
+        },
+        {
+          "id": "packages/runtime-web/dist/host-authority.js",
+          "imports": [
+            "packages/runtime-core/dist/index.js",
+            "packages/runtime-web/dist/browser-platform.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 23321,
+          "codeSha256": "sha256:fac0b840de84b84695aedd3263444f03773359245aa7fdffde85507e7c9690ac"
+        },
+        {
+          "id": "packages/runtime-web/dist/index.js",
+          "imports": [
+            "packages/runtime-web/dist/browser-platform.js",
+            "packages/runtime-web/dist/host-authority.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 421,
+          "codeSha256": "sha256:f794852f2d1b9546eae3951a203db6da70b7b364ca8b3694f67a2dfc67220a60"
+        },
+        {
+          "id": "packages/validator/dist/binding-contract-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/interaction-contract-validation.js",
+            "packages/validator/dist/schema-instance-validation.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 46895,
+          "codeSha256": "sha256:82d2d9ae24ca0283c95c914025e4f708bad7f114879460b5931a25459dc2ad19"
+        },
+        {
+          "id": "packages/validator/dist/component-contract-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/schema-instance-validation.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/semantic-validation.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 24587,
+          "codeSha256": "sha256:f9fc4e959275308b74b17f935caebde3eb4829052b0fc18bd6486973f96fa617"
+        },
+        {
+          "id": "packages/validator/dist/embedded-schema-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/structural-diagnostics.js",
+            "packages/validator/dist/uri-reference.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 8707,
+          "codeSha256": "sha256:240e76983e4700658b556a0142c42c0ce9625f4f35be70ddbaecfab9cf2438f1"
+        },
+        {
+          "id": "packages/validator/dist/execution-contract-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/binding-contract-validation.js",
+            "packages/validator/dist/interaction-contract-validation.js",
+            "packages/validator/dist/schema-instance-validation.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/semantic-validation.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 76906,
+          "codeSha256": "sha256:2d84bfa71a348bffe94c8c91711b7a5ea683bd89d8e5a0398e00bda3d63fda4f"
+        },
+        {
+          "id": "packages/validator/dist/generated/0.1.0/structural-validators.js",
+          "imports": ["packages/validator/dist/standalone-runtime.js"],
+          "dynamicImports": [],
+          "codeBytes": 1001830,
+          "codeSha256": "sha256:322fb4bcaf4359bdb819b1a9ddd2baba21b628cd6c1bb39203932221a3d8bab7"
+        },
+        {
+          "id": "packages/validator/dist/index.js",
+          "imports": [
+            "packages/validator/dist/binding-contract-validation.js",
+            "packages/validator/dist/component-contract-validation.js",
+            "packages/validator/dist/execution-contract-validation.js",
+            "packages/validator/dist/interaction-contract-validation.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/semantic-validation.js",
+            "packages/validator/dist/structural-validation.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 1965,
+          "codeSha256": "sha256:5009c889ea5eeab437f902057cdee9f84ba39c437239f1f5d222ad2ba5e05ec8"
+        },
+        {
+          "id": "packages/validator/dist/interaction-contract-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/component-contract-validation.js",
+            "packages/validator/dist/schema-instance-validation.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 49673,
+          "codeSha256": "sha256:431b473b6aa82a5af848faf74cf5459aa4375e2678f936e51c733212c42af331"
+        },
+        {
+          "id": "packages/validator/dist/schema-instance-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/uri-reference.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 86247,
+          "codeSha256": "sha256:169312f4eb2c304104c4321b57d0b9f07bfe88285753fd1c3f8d569e544901ca"
+        },
+        {
+          "id": "packages/validator/dist/semantic-diagnostics.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6799,
+          "codeSha256": "sha256:f2fa2b0d7a1bb5a06d57e577ec0b1922d5b924cefca5c65314a55108f123c09b"
+        },
+        {
+          "id": "packages/validator/dist/semantic-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/semantic-diagnostics.js",
+            "packages/validator/dist/structural-validation.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 27165,
+          "codeSha256": "sha256:1d89f973a8a768771aabf203e55bc9816e1b06365553604c5808318abc483368"
+        },
+        {
+          "id": "packages/validator/dist/standalone-runtime.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 2004,
+          "codeSha256": "sha256:0a3f1eca4cdffbe2ddfef0e7465f2609070e11763a6b809f643c04300b6ed81b"
+        },
+        {
+          "id": "packages/validator/dist/structural-diagnostics.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 2879,
+          "codeSha256": "sha256:118eaf52b80305eecdafabfcfa3d437e4864d54cd0cf8c98f8422b2ff3dd1a0b"
+        },
+        {
+          "id": "packages/validator/dist/structural-validation.js",
+          "imports": [
+            "packages/protocol/dist/index.js",
+            "packages/validator/dist/embedded-schema-validation.js",
+            "packages/validator/dist/generated/0.1.0/structural-validators.js",
+            "packages/validator/dist/structural-diagnostics.js",
+            "packages/validator/dist/validation-internals.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 6241,
+          "codeSha256": "sha256:316c1ea98f96ada1cad6a5cb398538fac5c10e94a03e0efa318f07c8d0459c28"
+        },
+        {
+          "id": "packages/validator/dist/uri-reference.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 10282,
+          "codeSha256": "sha256:342c8e315f8b69ce965c46403c578ef1f2ddeeba8bf76d1df67348a833ae3525"
+        },
+        {
+          "id": "packages/validator/dist/validation-internals.js",
+          "imports": ["packages/protocol/dist/index.js"],
+          "dynamicImports": [],
+          "codeBytes": 1381,
+          "codeSha256": "sha256:d0639abec859e8ab371a0ec3a8fc14a2942184a1f61ccb66111faf1070897114"
+        },
+        {
+          "id": "packages/validator/schema-contract-syntax.js",
+          "imports": [
+            "packages/validator/dist/generated/0.1.0/structural-validators.js"
+          ],
+          "dynamicImports": [],
+          "codeBytes": 87,
+          "codeSha256": "sha256:8b68d387d6432fd70d44f96536bb3c5a7ba636927d805c55b5e6a29155487e84"
+        },
+        {
+          "id": "virtual:vite/modulepreload-polyfill.js",
+          "imports": [],
+          "dynamicImports": [],
+          "codeBytes": 1356,
+          "codeSha256": "sha256:dd838b55e315f155e8a0093fdc4a80b2da5f069c433fc49a15b9962807791374"
+        }
+      ],
+      "completeAppSourceFiles": 52,
+      "appFixtureOnlySourceFiles": [
+        "apps/desen-app/src/reference-authoring-profile.ts",
+        "apps/desen-app/src/reference-project-fixtures.ts"
+      ],
+      "completeHostSourceFiles": 13,
+      "sharedManagedModuleCount": 22,
+      "sharedManagedIdentity": [
+        {
+          "id": "packages/reference-catalog-web/dist/components/alert.js",
+          "codeBytes": 1951,
+          "codeSha256": "sha256:97e9d8a8b596a90905da2ff2ca9fa79c927e86abdc5c36223d82f007517c399f",
+          "importsSha256": "sha256:1138353e728f0ec8060ddec542f0d6951800098cd4aa61249df47a23674629cc"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/button.js",
+          "codeBytes": 2334,
+          "codeSha256": "sha256:d0f9e3734c5b0b7a795c1514d2310bb61f10532f5476290ffb8c9fd8456c8011",
+          "importsSha256": "sha256:1138353e728f0ec8060ddec542f0d6951800098cd4aa61249df47a23674629cc"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/contracts.js",
+          "codeBytes": 4697,
+          "codeSha256": "sha256:f9e205f65f0f28a29435c4d391b332afd1e75b6310135f076c0e53523336f34c",
+          "importsSha256": "sha256:2934a9055f588cdc8db1bd5cc81dc2bb2e84e6952c31b299c7da0d363af530c8"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/interactive-contracts.js",
+          "codeBytes": 8780,
+          "codeSha256": "sha256:bc0ff4a6556015fab67cc8549d134fb9c37e13a525c174adf2f0bcb38b29bcf8",
+          "importsSha256": "sha256:2934a9055f588cdc8db1bd5cc81dc2bb2e84e6952c31b299c7da0d363af530c8"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/stack.js",
+          "codeBytes": 1797,
+          "codeSha256": "sha256:239cd6b6e1ab0face17c98705c523b9dcd8483ab3b5f771406f1f4d3d65c24de",
+          "importsSha256": "sha256:1138353e728f0ec8060ddec542f0d6951800098cd4aa61249df47a23674629cc"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/text-field.js",
+          "codeBytes": 2437,
+          "codeSha256": "sha256:a9f662669e7975f8393f922e2fc5d25d54ca616fa607215b4329e0581cd6143e",
+          "importsSha256": "sha256:8c5ab02e954b65432a4e50309c58d6f0ed2006b0d629d8abbd2382d61f3f3757"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/components/text.js",
+          "codeBytes": 606,
+          "codeSha256": "sha256:562ab4de0201f49cb385b0c4f4329fc803c6833dde2c21e1b07302551a1e0eae",
+          "importsSha256": "sha256:1138353e728f0ec8060ddec542f0d6951800098cd4aa61249df47a23674629cc"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/host-operations/index.js",
+          "codeBytes": 215,
+          "codeSha256": "sha256:f41bb3432fc5fd3225109ef7150e642f3fed35d427fb05f7126d490b5856c05c",
+          "importsSha256": "sha256:f91ebefb591b58efc512a8db5ee99a9c5033004b05f076f54b6f95a90b2a7a5f"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/host-operations/sign-in.js",
+          "codeBytes": 926,
+          "codeSha256": "sha256:fbcd81c04fc398f5c15d2ec98945ebee047c5b274c6bdc5068fddc11d0745c1b",
+          "importsSha256": "sha256:970552c59f7bf8d1ab78bd25b0890279c92faf5d97aac6777f66c998753b837d"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/operations/sign-in.js",
+          "codeBytes": 2841,
+          "codeSha256": "sha256:b5b5def58fc33ef8567edde42d605efa5a7d9583b3c153d5c670c32b530277de",
+          "importsSha256": "sha256:2934a9055f588cdc8db1bd5cc81dc2bb2e84e6952c31b299c7da0d363af530c8"
+        },
+        {
+          "id": "packages/reference-catalog-web/dist/react-adapters/index.js",
+          "codeBytes": 7521,
+          "codeSha256": "sha256:31834b57d0e9c43e68f4ca23b3dabebeb7093040fe631ab718063bbc6112ed99",
+          "importsSha256": "sha256:30c42dcd3814db3d812428e4bda9d28aeddffe24fdc98d39e7dbac36da6b47c2"
+        },
+        {
+          "id": "packages/runtime-react/dist/adapter-error-boundary.js",
+          "codeBytes": 8203,
+          "codeSha256": "sha256:b384bd0777168a966b163a3573d33f87a30e28e4e380c5594dae4707bc582f4e",
+          "importsSha256": "sha256:7a8c40489cd09629a295ffe679df0550c94cadb6249481ae549105db103e1f46"
+        },
+        {
+          "id": "packages/runtime-react/dist/diagnostic-index.js",
+          "codeBytes": 11693,
+          "codeSha256": "sha256:9c0f7371941703c3561557a79a1585ddfb211a4566ffb6fd5c5c65704dcaf568",
+          "importsSha256": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "id": "packages/runtime-react/dist/index.js",
+          "codeBytes": 855,
+          "codeSha256": "sha256:a281742af95d30e9bdbcf3ced449a8c8ae9b2138ef4d45a10adde80aff34757a",
+          "importsSha256": "sha256:7101c127f6fb8ba58d2c9d10dff3613fe6c4ab4fb4da99158c0fc3c588b37390"
+        },
+        {
+          "id": "packages/runtime-react/dist/interactions.js",
+          "codeBytes": 10639,
+          "codeSha256": "sha256:31bde5a23881504feb4937027085d74ace7b35f2eb2a52d49965a5cb695c9820",
+          "importsSha256": "sha256:f54f5881f9bfd274bab1b3244b360e92717b6d84327e6cd53c635ecb617e3949"
+        },
+        {
+          "id": "packages/runtime-react/dist/live-surface.js",
+          "codeBytes": 4052,
+          "codeSha256": "sha256:4ccf0c6acfc3c0a5d2a07caaf63eb6b8537a1a3e2fece5b880e21736cf136f52",
+          "importsSha256": "sha256:e50c0204793abd71c8a152cd0325a2c76a3700481fca99b8b865e2e45996e3b4"
+        },
+        {
+          "id": "packages/runtime-react/dist/reconciliation.js",
+          "codeBytes": 6936,
+          "codeSha256": "sha256:4ba6fe67718a1cc00c9ed0b09aebec51454c8b04f9b51bc1f2d591434d86f9ef",
+          "importsSha256": "sha256:d369dab8c400b2805c1b2987513f92b76aa2a2855a483cffe1d9a6e0e37cf1b8"
+        },
+        {
+          "id": "packages/runtime-react/dist/registry.js",
+          "codeBytes": 11553,
+          "codeSha256": "sha256:df18d0c22d017aa5fa054cccd6a3ea6ea71b530174bd5c179deede5ea7dee4ab",
+          "importsSha256": "sha256:35cd0909e60f69775cf759c73c894300a28c8b1a3e0389942105ae37d2ba2639"
+        },
+        {
+          "id": "packages/runtime-react/dist/render-plan.js",
+          "codeBytes": 34267,
+          "codeSha256": "sha256:23cce536f8c28bf2dc1eba44338e854d3fa545c1134b72dc7538e36096fd763e",
+          "importsSha256": "sha256:e9e18ea4e7e6f8932ca2752c94664f304031d79c2fe3eb7a61cbc14d32c1e30f"
+        },
+        {
+          "id": "packages/runtime-react/dist/root-error-policy.js",
+          "codeBytes": 938,
+          "codeSha256": "sha256:e7f2e483f33383e1464ea3c1f41cb59026c5bf3b761835c27993e80f401e6ac5",
+          "importsSha256": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "id": "packages/runtime-react/dist/session-surface.js",
+          "codeBytes": 6921,
+          "codeSha256": "sha256:9ec0166bceee78c571fcaf0d919e2a24642f97f72d3ac5239957127e142352ee",
+          "importsSha256": "sha256:f244ac8e6d3edff6985e5c43c8d5d8612ff0105545c56c3affdbcdac90e76b16"
+        },
+        {
+          "id": "packages/runtime-react/dist/surface-boundary.js",
+          "codeBytes": 8391,
+          "codeSha256": "sha256:07a236a895e49ccbbe03abe69e839ffcd2c7e544e2cd00bc2153558d5ee0e563",
+          "importsSha256": "sha256:70587f89f3d5cb2614483a5ad9b267fedeb8833993da8c88f35a7cae2a782443"
+        }
+      ],
+      "publicRegistryAndRuntimeOnly": true,
+      "noHandwrittenHostManagedTreePreservedByFreshHostAudit": true,
+      "independentBuildsPerApplication": 2,
+      "deterministic": true,
+      "appOutput": {
+        "files": 3,
+        "outputs": [
+          {
+            "fileName": "assets/index-Cpqh5E0t.js",
+            "type": "chunk",
+            "isEntry": true,
+            "bytes": 1534287,
+            "sha256": "sha256:ec0d8846acb9accf6605603d3e105ee5fc8de50becd09ef39b1303a3a62dd7eb"
+          },
+          {
+            "fileName": "assets/index-Dct7x2tj.css",
+            "type": "asset",
+            "isEntry": null,
+            "bytes": 114203,
+            "sha256": "sha256:452b42fa94e1300a83997f4187c689e1c79a9c0310c314baedec96380c2afd37"
+          },
+          {
+            "fileName": "index.html",
+            "type": "asset",
+            "isEntry": null,
+            "bytes": 511,
+            "sha256": "sha256:26ee70807fa7b2b974740e8e0d77ecc0439753dab66429e3ab74e1c292f46e74"
+          }
+        ],
+        "identitySha256": "sha256:9a40cf3d29ab6026ac6a607972704cd7df6b2afd650bf71c5b5093f56d6305db"
+      },
+      "hostOutput": {
+        "files": 3,
+        "outputs": [
+          {
+            "fileName": "assets/index-ClMarVVR.css",
+            "type": "asset",
+            "isEntry": null,
+            "bytes": 1637,
+            "sha256": "sha256:bbfe758b463bca14d58440da1cd0b7c60b3ac4f427ba4c8b41ac7744e2cd1672"
+          },
+          {
+            "fileName": "assets/index-Cweccgkf.js",
+            "type": "chunk",
+            "isEntry": true,
+            "bytes": 1058918,
+            "sha256": "sha256:19b3feaf11bd79385a26d0d1813aaf11bc5e3bfead0e6f6c8dc0c0edc84e11ca"
+          },
+          {
+            "fileName": "index.html",
+            "type": "asset",
+            "isEntry": null,
+            "bytes": 480,
+            "sha256": "sha256:55102ef30602dd2cc34dc536d2eaef3effeb9a57f614b7aee0ff9189b14c54a8"
+          }
+        ],
+        "identitySha256": "sha256:7727a0ce403cd8796e81a1d18877b5148fd475fb1c8e00e8c860b4f93bb51c39"
+      },
+      "hostOutputIdentityAEqualsB": true,
+      "backingFiles": 185,
+      "backingSnapshotSha256": "sha256:ec0921164e7619e6d4410274eb408d0821d08da75d4c9c33e39d22ed09298d52",
+      "backingModulesStableAcrossObservations": true
+    },
+    "dependencyBoundary": {
+      "authorityFiles": 12,
+      "cases": [
+        {
+          "name": "allowed-desen-app-browser-e2e-published-server-reviewed-roots",
+          "expectedRule": null
+        },
+        {
+          "name": "desen-app-browser-e2e-published-server-imports-reference-host-private",
+          "expectedRule": "desen-app-browser-e2e-published-server-reference-host-public-root-only"
+        },
+        {
+          "name": "desen-app-browser-e2e-published-server-imports-unreviewed-dev-module",
+          "expectedRule": "desen-app-browser-e2e-published-server-has-no-other-application-dependencies"
+        },
+        {
+          "name": "desen-app-browser-e2e-non-published-server-imports-local-publication-host",
+          "expectedRule": "desen-app-browser-e2e-reviewed-app-source-only"
+        }
+      ],
+      "exactPublishedServerImporter": true,
+      "publicControlPlaneEntryOnly": true,
+      "publicReferenceHostServerEntryOnly": true,
+      "exactLocalActivationBridgeOnly": true,
+      "neighboringDevModulesDenied": true,
+      "otherBrowserImportersDenied": true,
+      "inertFixtureFiles": true,
+      "dependencyCruiserExecutedByVerifier": false
+    },
+    "package": {
+      "appPackage": "@desen/app-web",
+      "browserPackage": "@desen/app-browser-e2e",
+      "hostPackage": "@desen/reference-host-web",
+      "hostServerPackage": "@desen/reference-host-web-server",
+      "appBuild": "vite build",
+      "hostBuild": "vite build",
+      "focusedCommands": [
+        "pnpm --filter @desen/app-web exec vitest run test/local-runtime-publication.test.ts test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx dev/local-publication-host.test.mjs dev/local-dev-host.test.mjs",
+        "pnpm --filter @desen/reference-host-web-server exec vitest run test/server.test.ts",
+        "pnpm --filter @desen/reference-host-web-server typecheck"
+      ],
+      "browserCommand": "pnpm --filter @desen/app-browser-e2e exec playwright test --config published-host-playwright.config.ts",
+      "browserSuiteIncludesPublishedHostConfig": true,
+      "browserSuiteBuildsDependencyClosures": true
+    },
+    "historicalReaderBridge": {
+      "path": "docs/proof/artifacts/desen-app-0.1.0-t04-historical-reader-bridge.json.gz",
+      "bytes": 3111833,
+      "sha256": "07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470",
+      "uncompressedBytes": 4884471,
+      "baseCommit": "33b922e6746365510c0549ddbf3b08469e58dc11",
+      "fileEntries": 51,
+      "predecessorGapFiles": 2,
+      "successorAddedPaths": 7,
+      "projections": 1,
+      "t01aAncestor": {
+        "task": "M10-T01A",
+        "baseCommit": "39a3c6c7a477b700b332b725a9ddf5d1956c0ba5",
+        "artifact": {
+          "path": "docs/proof/artifacts/desen-app-0.1.0-user-created-blank-project.json",
+          "bytes": 20173,
+          "sha256": "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e"
+        },
+        "fileEntries": 1
+      },
+      "profile": "desen.app.m10-t04-historical-reader-bridge.v1",
+      "canonicalDenseManifest": true,
+      "boundedGzip": true,
+      "parentProjectionAuthenticated": true,
+      "cleanAr01Base": true,
+      "approvedAr01ReceiptAmendments": 2
+    },
+    "bridgeReproduction": {
+      "exactCleanAr01BaseCommit": true,
+      "exactT01aAncestorBaseCommit": true,
+      "exactT01aAncestorArtifactReceipt": true,
+      "t01aAncestorNamespaceSeparate": true,
+      "exclusiveDeterministicGzipWrite": true,
+      "successorAddedPathInventoryExact": true,
+      "onlyTwoApprovedAr01Amendments": true,
+      "historicalFixtureUsesBrandedSuccessor": true
+    }
+  },
+  "tests": {
+    "focusedCommands": [
+      "pnpm --filter @desen/app-web exec vitest run test/local-runtime-publication.test.ts test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx dev/local-publication-host.test.mjs dev/local-dev-host.test.mjs",
+      "pnpm --filter @desen/reference-host-web-server exec vitest run test/server.test.ts",
+      "pnpm --filter @desen/reference-host-web-server typecheck"
+    ],
+    "browserCommand": "pnpm --filter @desen/app-browser-e2e exec playwright test --config published-host-playwright.config.ts",
+    "boundaryCommand": "pnpm boundaries",
+    "boundaryFixtureCommand": "node scripts/verify-boundary-fixtures.mjs",
+    "verifierCommand": "node scripts/verify-desen-app-published-host-update.mjs",
+    "proofReaderCommand": "node --test tests/desen-app-published-host-update.test.mjs",
+    "rootTestNames": [
+      "[authority] authenticates four immutable parents and the clean T04 historical bridge",
+      "[source] fixes publication and activation to launcher-owned destinations outside Source",
+      "[transport] preserves strict bounded separate browser and server activation authorities",
+      "[host] freshly audits the complete independent host source and public managed renderer graph",
+      "[build] proves deterministic App and host Vite graphs with one shared managed implementation",
+      "[browser] records two visible publish/activate revisions against unchanged host build bytes",
+      "[boundary] keeps the proof server on exact public roots and one reviewed activation bridge",
+      "[claims] closes only M10-T05 and P-07 while retaining later recovery and G10 owners",
+      "[determinism] reproduces exact evidence without Chromium, listener, or filesystem output",
+      "[policy] rejects source, graph, browser, parent, bridge, artifact, report, option, and write mutations"
+    ],
+    "browserExecutedByVerifier": false,
+    "dependencyCruiserExecutedByT05Verifier": false,
+    "currentHostAuditExecutesDependencyCruiser": true,
+    "deterministicReaderStartsListener": false,
+    "deterministicReaderStartsChromium": false,
+    "viteBuildsExecutedByVerifier": true,
+    "viteBuildOutputWritten": false,
+    "declarationSitesAreNotExecutionCount": true
+  },
+  "boundary": {
+    "trackedFiles": 116,
+    "trackedReceipts": [
+      {
+        "path": "apps/desen-app-browser-e2e/package.json",
+        "bytes": 1325,
+        "sha256": "5013c9fbecd02e64f7d1220807a7d46bbfe55c76c403565421ecbe55d5966bc5"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/published-host-playwright.config.ts",
+        "bytes": 1381,
+        "sha256": "5159e3f46f5213f7a9487a4e8778fca59f2d5136992219cfbbb2e32ffa03c4d1"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/published-host-proof-server.mjs",
+        "bytes": 5777,
+        "sha256": "be0edaa8d7e3755f18acbb6b4c79eb65fc5258c40338995a04996fabffeefdc3"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/published-host-update.pw.ts",
+        "bytes": 9726,
+        "sha256": "0d067f1868ecf50cea8de05fc86e5be242eb80e7f8074e25139d9cf838da0533"
+      },
+      {
+        "path": "apps/desen-app/dev/local-dev-host.mjs",
+        "bytes": 22741,
+        "sha256": "23d06ba5de5de66682941afa50f047ea55e1363571c16cb4905cd04a94d82fc7"
+      },
+      {
+        "path": "apps/desen-app/dev/local-dev-host.test.mjs",
+        "bytes": 24298,
+        "sha256": "63f115f5c5418209b84d7593b950d82e9f5d508be5f11a4ea5b926cf49150b1e"
+      },
+      {
+        "path": "apps/desen-app/dev/local-dev.mjs",
+        "bytes": 1775,
+        "sha256": "374a97b5b0e41491b6d0e282c66633c11ded4811e6f5f7f7faa163eb3f63ae3a"
+      },
+      {
+        "path": "apps/desen-app/dev/local-publication-host.mjs",
+        "bytes": 18076,
+        "sha256": "3beedd2e54e6685fe100575b87448ce9fc4cda7da6b99ba41d0dd1106b0aa7d9"
+      },
+      {
+        "path": "apps/desen-app/dev/local-publication-host.test.mjs",
+        "bytes": 15175,
+        "sha256": "0d2b2a8dacbc08878fd75e7aa40515c21478d002bcb66f61031f794ad6603d6c"
+      },
+      {
+        "path": "apps/desen-app/package.json",
+        "bytes": 4621,
+        "sha256": "133b549eca53d3f4438259bf020f13ec6e14597e9b05edfa74440191cd67cd1c"
+      },
+      {
+        "path": "apps/desen-app/src/adapter-canvas.tsx",
+        "bytes": 15710,
+        "sha256": "ad1f25d20378cc3c2d7ce679c6f9ea2d6bba0e6701a07d06a796e1291fc0838f"
+      },
+      {
+        "path": "apps/desen-app/src/application.module.css",
+        "bytes": 119727,
+        "sha256": "8b6ee6de86a12e210fca61b57d2be1e7502245dc64c9c74b513a0226b6896571"
+      },
+      {
+        "path": "apps/desen-app/src/application.tsx",
+        "bytes": 153414,
+        "sha256": "7323a002f67d8f0a82e77a0bf4850e8caf7079f94f42fda88045b74279dc9f5c"
+      },
+      {
+        "path": "apps/desen-app/src/assets/breadcrumb-separator.svg",
+        "bytes": 419,
+        "sha256": "095027d1707a74b5b904a5f4d1aea3db113a4f96efd380477b67731a4132cd11"
+      },
+      {
+        "path": "apps/desen-app/src/assets/desen-logo.svg",
+        "bytes": 564,
+        "sha256": "f96d5554a5b1a3c0755214a488cced06a5d47e37ba243fe425e8b617b186c27a"
+      },
+      {
+        "path": "apps/desen-app/src/assets/plus.svg",
+        "bytes": 427,
+        "sha256": "114cc5ac1e52d62b5a754d4e99099a51b98eb6227330e4e3e49bab6e3c0df1ff"
+      },
+      {
+        "path": "apps/desen-app/src/assets/settings.svg",
+        "bytes": 1080,
+        "sha256": "93d8579fb0902913ccbb5e2329643220a1694444489f034f2bbd118a5a5898f6"
+      },
+      {
+        "path": "apps/desen-app/src/assets/theme.svg",
+        "bytes": 973,
+        "sha256": "e4fb6c23bbd2fe4040867f391234ea8653473038f12d1d6d66059b7dbc9feb49"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-behavior-projection.ts",
+        "bytes": 7346,
+        "sha256": "9357102092e49034d2f99acdd81e468c7572206232f94bcb3cb942960c38d283"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-conditions.ts",
+        "bytes": 8179,
+        "sha256": "71702a2506805c874e681112b10757118f5c732ba9e3cb3680c9357eafde0a77"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-connections.ts",
+        "bytes": 27291,
+        "sha256": "e23337ebb85fdf43bb6c8370addd26526ecdf96a5b5afdf68ecd8f751b0767b2"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 27268,
+        "sha256": "161e3e37ba2faa6e41eeb479cb6d948557332f0365f02f4b14f887b99cca0846"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-diagnostics.ts",
+        "bytes": 16059,
+        "sha256": "7cddac8f13736d0fe4fc3e36abe46d0affebdc5ceb20e87e5295ec2ec7db5a1e"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-event-actions.ts",
+        "bytes": 49738,
+        "sha256": "f880166bd26964cd022eb7c86333541f60a17e9b5401df51e45ed023a02ae328"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-fixtures.ts",
+        "bytes": 35852,
+        "sha256": "119620da01eb800874d75721a8aa06879cf8a90c669324333beb482c9c29831c"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-inspector.ts",
+        "bytes": 38900,
+        "sha256": "ecb829a3e10b7c532801b71ed1e27e6c4b0a7a2c93919612ffcffa7f42d238c1"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-integration.ts",
+        "bytes": 20932,
+        "sha256": "c189d7ca2dd855eda6202f5ec9b8d9c1d57f19579cad3fdec7bea757d1a85601"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-persistence.ts",
+        "bytes": 34441,
+        "sha256": "fcf3d6731cdcaf4bc8ab180a50042d060437c7a08004b47346dd5061fbe1043c"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-preview.ts",
+        "bytes": 4486,
+        "sha256": "14d8064ffa7577b948e849c4c9b51c0859fcf404caa9e0f05f085654b6787b72"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-publication.ts",
+        "bytes": 41596,
+        "sha256": "7157c578902c2ef3d7de33a04634492aff17da7f69394c9536b9cfaa782767c4"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-run-navigation.ts",
+        "bytes": 7049,
+        "sha256": "5c617f21a6df377d94318b708ba74e6b60e4e200793a219e6ff9003be892d2a8"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-scenarios.ts",
+        "bytes": 20751,
+        "sha256": "672085cbfd631bec50af1ec1ea635a0f192df435cd5a2484488d75eb0e49de23"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-selection.ts",
+        "bytes": 6147,
+        "sha256": "e97eed87734fff6fdc3a40dbc81754a88318238090e4c1dfcc53062e8ff7fc7c"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-slots.ts",
+        "bytes": 41336,
+        "sha256": "924616dc9c7f6f5944f9f8e3519d47562329dcb333c56dd6672255b61db1ab6a"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-state.ts",
+        "bytes": 23742,
+        "sha256": "8120d7ef37cab004fe29ac1af6c8b94348e1f3251dfb2750d2202a885a7fb737"
+      },
+      {
+        "path": "apps/desen-app/src/behavior-controls.tsx",
+        "bytes": 36553,
+        "sha256": "5a26dde1c4a65071979421fdf36ecf5b738376e3692849bbda86d420052d4e8e"
+      },
+      {
+        "path": "apps/desen-app/src/diagnostics-panel.tsx",
+        "bytes": 5638,
+        "sha256": "1c3889d2b8405db04999689c9570d8f2dee2f6c5b2f7ea2290cc256359f2dd0f"
+      },
+      {
+        "path": "apps/desen-app/src/event-action-panel.tsx",
+        "bytes": 59231,
+        "sha256": "45f372e2ceeb49b3a4ff0a9f94ebd312a2a031e807d173808dead8895e68fdc6"
+      },
+      {
+        "path": "apps/desen-app/src/inspector-panel.tsx",
+        "bytes": 32591,
+        "sha256": "ad2543377377e8d5ae99fbd110a0cf1c63710620e972db388feca95ef7ae7d26"
+      },
+      {
+        "path": "apps/desen-app/src/local-operation-binding.ts",
+        "bytes": 13008,
+        "sha256": "bb1c2d3a8385cc20d6564d672f4741f30cf3d8ba206cca756b5a278f3ea99b9b"
+      },
+      {
+        "path": "apps/desen-app/src/local-runtime-persistence.ts",
+        "bytes": 13170,
+        "sha256": "051b6e7a38d4a98f6e232466c67e6786d65d23b76e4fd9bdc77aafc16b81b335"
+      },
+      {
+        "path": "apps/desen-app/src/local-runtime-publication.ts",
+        "bytes": 18243,
+        "sha256": "8a031c4432dde36aad0a3d7d632806cf83f1a65fa0c7e9edd51502a6f676673c"
+      },
+      {
+        "path": "apps/desen-app/src/local-workspaces.module.css",
+        "bytes": 1140,
+        "sha256": "122e5bec615b9c57baa63f76d2f5c61053c71e7525a5e07b4f988c0756fd10f2"
+      },
+      {
+        "path": "apps/desen-app/src/local-workspaces.tsx",
+        "bytes": 7618,
+        "sha256": "8db0aec1982af44678ecb31fd3b08a74f7be3f78ff6e02ccdc65ca5a556e661a"
+      },
+      {
+        "path": "apps/desen-app/src/main.tsx",
+        "bytes": 4232,
+        "sha256": "18371c9d57748db6d7435d2f2cdad470f6da92a39df8946ad1d7f4d9ee0b759e"
+      },
+      {
+        "path": "apps/desen-app/src/persistence-controls.tsx",
+        "bytes": 9272,
+        "sha256": "478578110307b00e0caeb7bef395a32e59bda4b0624f1b1ce2af430436a13d1e"
+      },
+      {
+        "path": "apps/desen-app/src/preview-controls.tsx",
+        "bytes": 14710,
+        "sha256": "02d64108197e669351eb3d5494f05b6179712d75507bcd449385156341c0c1e0"
+      },
+      {
+        "path": "apps/desen-app/src/preview-fidelity.ts",
+        "bytes": 7953,
+        "sha256": "6f8f01665f76b0a8de698a64c18b28848604dbc6abed951d7043fc6109506c90"
+      },
+      {
+        "path": "apps/desen-app/src/product-bootstrap.tsx",
+        "bytes": 15830,
+        "sha256": "8056bddd161fc383e1a7539ba8e19463112f5fcce6d5b5f43bb7cac56179447c"
+      },
+      {
+        "path": "apps/desen-app/src/project-data.ts",
+        "bytes": 2594,
+        "sha256": "fa7b0e4bf3e9bbbd702b604317452ecff2bbb0631f5a2d12c784df8256318ce6"
+      },
+      {
+        "path": "apps/desen-app/src/project-inventory-fixture.ts",
+        "bytes": 7871,
+        "sha256": "8037eb05aebffbd0ff47ba4a0a71fbaae637b059e6e91b4a3b9d2c2fbed68133"
+      },
+      {
+        "path": "apps/desen-app/src/project-navigation.ts",
+        "bytes": 7692,
+        "sha256": "c07848bfda7a23e7e948b8e22864835ec7644acdfacb253ab7b4c1c103f1d2e7"
+      },
+      {
+        "path": "apps/desen-app/src/project-workspace-profile.ts",
+        "bytes": 28477,
+        "sha256": "13729034aa622b4c4f1d587754342c76bd0aca62375764629bcc46aaa24b0cc4"
+      },
+      {
+        "path": "apps/desen-app/src/publication-controls.tsx",
+        "bytes": 9238,
+        "sha256": "77600a908a55cad3438e85a9af50de2bb73608f54c2f34fc4fc796d106dfc808"
+      },
+      {
+        "path": "apps/desen-app/src/reference-authoring-profile.ts",
+        "bytes": 5924,
+        "sha256": "9a9952ac03090e0c7edf4d860b7e5b18f3c61b47976a87691e9fae020d0ea395"
+      },
+      {
+        "path": "apps/desen-app/src/reference-empty-project.ts",
+        "bytes": 1781,
+        "sha256": "66015c0ac0d1c13dd609906ca45f176a8a4b820d0ff756569c678278039e5170"
+      },
+      {
+        "path": "apps/desen-app/src/reference-flow-workspace-profile.ts",
+        "bytes": 3122,
+        "sha256": "cc9ef1260f50c9f723cc337d76c08ce1599f08789881c4475b5e8ca49b3afa55"
+      },
+      {
+        "path": "apps/desen-app/src/reference-project-fixtures.ts",
+        "bytes": 2025,
+        "sha256": "66b2c4920ce9e4dff201676bec5094869ac2bdffacc3f4db493efe11abb89e5b"
+      },
+      {
+        "path": "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+        "bytes": 4097,
+        "sha256": "14aa1bd6f5855c0a152059b92ff15caaed373068d3f15056717657b970c902ea"
+      },
+      {
+        "path": "apps/desen-app/src/state-panel.tsx",
+        "bytes": 14173,
+        "sha256": "b979c246b10b3023a3b2e239cfd6bf2d370f126658e53ea5b748bdb819448a18"
+      },
+      {
+        "path": "apps/desen-app/src/structured-json.ts",
+        "bytes": 13908,
+        "sha256": "74c56059e2cdca1ae018424f27e1c28c54785bbbc89c75d25dfa1858b76c4759"
+      },
+      {
+        "path": "apps/desen-app/src/styles.css",
+        "bytes": 1765,
+        "sha256": "b70ac76a3b4f23ebb242f1c945453553d2563f4b07af4cc2eba892a631c52a12"
+      },
+      {
+        "path": "apps/desen-app/test/local-runtime-publication.test.ts",
+        "bytes": 19889,
+        "sha256": "99127dafbf87b06446c74a10e7939ef07ee45e4c408b6cafbeb7b3c8ae7ff220"
+      },
+      {
+        "path": "apps/desen-app/test/main-lifecycle.test.tsx",
+        "bytes": 7356,
+        "sha256": "fa23a38ddf07463c6d1632e9f77d6c4d77f41bb1bf34d9619257ae2e128f49e8"
+      },
+      {
+        "path": "apps/desen-app/test/product-bootstrap.test.tsx",
+        "bytes": 20485,
+        "sha256": "2849d59897d6018a38c6ffce509824c4dc066a525dc40ad0898331a88506b91d"
+      },
+      {
+        "path": "apps/desen-app/tsconfig.local-dev.json",
+        "bytes": 315,
+        "sha256": "af5ac79706be3170a3e31d1e2e39ae847d4a80e60a5ddc96a25e5f6e20338018"
+      },
+      {
+        "path": "apps/reference-host-web-server/package.json",
+        "bytes": 1012,
+        "sha256": "e0183641e83c812538aafd61387cb11e4fd9d73adaf291910d32349b79196106"
+      },
+      {
+        "path": "apps/reference-host-web-server/src/channel-activation-controller.ts",
+        "bytes": 19208,
+        "sha256": "5e865ba6060b0b4f45a4633c7eb2ca401915336853d1b71baeefa290025818bf"
+      },
+      {
+        "path": "apps/reference-host-web-server/src/control-plane-client.ts",
+        "bytes": 10575,
+        "sha256": "4ef74a46dfe3301997f86f4b87256dfa07c13d1226669a865c07a6b624e8435a"
+      },
+      {
+        "path": "apps/reference-host-web-server/src/index.ts",
+        "bytes": 1362,
+        "sha256": "fe8e49dea9a54bb269f03b2bb1d6b723785e304aae7d997cbc5cefac07bbe9e6"
+      },
+      {
+        "path": "apps/reference-host-web-server/src/installed-package-inventory.ts",
+        "bytes": 10626,
+        "sha256": "f63c07bee866bbef99ab9fb6462c24a4db05b405b7be789395c5dd04ee6d1ae4"
+      },
+      {
+        "path": "apps/reference-host-web-server/src/server.ts",
+        "bytes": 27403,
+        "sha256": "c66b39baadc7535d3ac80996ba48c7914f45d2ab06d239f137cb29ba40a54489"
+      },
+      {
+        "path": "apps/reference-host-web-server/test-d/production-boundary.test-d.ts",
+        "bytes": 2854,
+        "sha256": "1e4c39e621431524b38a706b2cf3ef071ca3bfd09c648a8babd5a2fae5b5c808"
+      },
+      {
+        "path": "apps/reference-host-web-server/test/server.test.ts",
+        "bytes": 19819,
+        "sha256": "caf74269e92905561222b0a54ffcb0ea43b41064ef0ab63e7e2f168ec1bbd845"
+      },
+      {
+        "path": "apps/reference-host-web-server/tsconfig.build.json",
+        "bytes": 304,
+        "sha256": "38f9a6acefc5bdbbf88d23ec5a0a8ebc52965ae41f94bdd04b2e38fd42f99adf"
+      },
+      {
+        "path": "apps/reference-host-web-server/tsconfig.json",
+        "bytes": 158,
+        "sha256": "5adc018c0067ff420f22812e5e6c92682bc1e56caff5693fd1a523c7ad90656d"
+      },
+      {
+        "path": "apps/reference-host-web/index.html",
+        "bytes": 382,
+        "sha256": "c76fe461f9dace6a40924b5af592eb80287944444d16c62c4be57627584be6ce"
+      },
+      {
+        "path": "apps/reference-host-web/package.json",
+        "bytes": 1249,
+        "sha256": "0332a4002595c0812059352cf69a6d704903b5f49d9ff9362e6654e45000cdc1"
+      },
+      {
+        "path": "apps/reference-host-web/src/application.tsx",
+        "bytes": 2115,
+        "sha256": "47a3acebca2cbab40c5bfa6c5569910fefed6bc277483cf9197d7918729650e1"
+      },
+      {
+        "path": "apps/reference-host-web/src/browser-profile.ts",
+        "bytes": 4876,
+        "sha256": "8d09a43225303b0f5e4157a33852842e0a642a6694232e97ecc6e3ce41d7a140"
+      },
+      {
+        "path": "apps/reference-host-web/src/channel-delivery.ts",
+        "bytes": 27819,
+        "sha256": "7e85c02be80245e2f1b015166beedc7d91eb38daea842e167c9f5639fe5a19b7"
+      },
+      {
+        "path": "apps/reference-host-web/src/failure-view.tsx",
+        "bytes": 1727,
+        "sha256": "a303557ac0d55d8e637b6e5a9660f7b5cb8a8cdd5b62b70132198f78d2c53200"
+      },
+      {
+        "path": "apps/reference-host-web/src/host-ports.ts",
+        "bytes": 4498,
+        "sha256": "429bbb4f9efc651de3f7c6689b93e0224f5f66c4a0a71769a2e3f75e223df886"
+      },
+      {
+        "path": "apps/reference-host-web/src/main.tsx",
+        "bytes": 1613,
+        "sha256": "ecc080cff09c3c414501c34a638764a86789e035e008abe4d54555b929bf43f2"
+      },
+      {
+        "path": "apps/reference-host-web/src/managed-surface.tsx",
+        "bytes": 1463,
+        "sha256": "a3a4010bea578afaaaf03ee69f0f6f68ff2e4e08bfd5d6aacda1bea1d9d3b83e"
+      },
+      {
+        "path": "apps/reference-host-web/src/official-sign-in.ts",
+        "bytes": 19394,
+        "sha256": "edeae94e1ee69892c1e007655cf07e94da50612dc61d9715937f08e7cf47dffb"
+      },
+      {
+        "path": "apps/reference-host-web/src/recovery-authority.ts",
+        "bytes": 6708,
+        "sha256": "7be82151b7f8de8e4def12041071f5e5f8ab0dead6c3eacad94d17919337913c"
+      },
+      {
+        "path": "apps/reference-host-web/src/root-policy.ts",
+        "bytes": 3760,
+        "sha256": "276ff9c4776c493f1c532e137c8a7f15bd1fba2388e213915e03db3d7f13026e"
+      },
+      {
+        "path": "apps/reference-host-web/src/root.tsx",
+        "bytes": 18979,
+        "sha256": "13b33d9314aa3501b81abf8b1ddb0a0937ec36188bd5b172b487dce7dd2ee7db"
+      },
+      {
+        "path": "apps/reference-host-web/src/sign-in-http-handler.ts",
+        "bytes": 13595,
+        "sha256": "22b49c404efd2b39b84c2585dcff79574b8329eca11b9c459fe2d424c50645e9"
+      },
+      {
+        "path": "apps/reference-host-web/src/styles.css",
+        "bytes": 2082,
+        "sha256": "6d82529e07969d9033232aaa72924ec57eae0dd86736ebecdf700680046a7738"
+      },
+      {
+        "path": "apps/reference-host-web/tsconfig.json",
+        "bytes": 185,
+        "sha256": "99eaed090e363413adb250a8c295388847287d412f6dceedc613d13037a62066"
+      },
+      {
+        "path": "dependency-cruiser.config.cjs",
+        "bytes": 12117,
+        "sha256": "fcbf50d18f1c6f0b8b50a765d2431e50bd608a8a9c49367b603d6c24763234f8"
+      },
+      {
+        "path": "docs/adr/0020-desen-app-fixed-destination-publication-and-host-activation.md",
+        "bytes": 5115,
+        "sha256": "cf8eff8e21f614cc1a6fa7a8543f4d19052625cc87b2c91976dd5c3886329bd1"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json",
+        "bytes": 24763,
+        "sha256": "6bd2db0ca490f1d0046f145da7c4b7e9b4b25ec0f8295a159529a0e66534b23b"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json",
+        "bytes": 73111,
+        "sha256": "8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-success-host-operation.json",
+        "bytes": 22456,
+        "sha256": "d9d841af06ec9efc51c3f1c74079f0aa4d5e1c7e996f3b97df7e277e4b1f8423"
+      },
+      {
+        "path": "docs/proof/artifacts/desen-app-0.1.0-t04-historical-reader-bridge.json.gz",
+        "bytes": 3111833,
+        "sha256": "07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470"
+      },
+      {
+        "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+        "bytes": 59871,
+        "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 132012,
+        "sha256": "f1165af2748866387a09d87dcf56a2e9036d553503256312051ce9c15a5ef8b8"
+      },
+      {
+        "path": "scripts/generate-desen-app-published-host-update-proof.mjs",
+        "bytes": 807,
+        "sha256": "47daa8ec3478f5f6a31f342a52c5174b9047f6925de2ee5edc6c1c35f2baa67f"
+      },
+      {
+        "path": "scripts/generate-desen-app-t04-historical-reader-bridge.mjs",
+        "bytes": 8530,
+        "sha256": "c6b96dead7d8f9030dec3f99b6551bc3e626531032df31204587bcff81766cfa"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/verify-boundary-fixtures.mjs",
+        "bytes": 6258,
+        "sha256": "4f0d9e35742cfef92f424e83edc19922e5109792ddffa98a1ec3166a6510c347"
+      },
+      {
+        "path": "scripts/verify-desen-app-published-host-update.mjs",
+        "bytes": 886,
+        "sha256": "0d957b868952c52b9250e47022eb3845a3553939fb1753ea98bf577959990ef5"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-published-server-reviewed-roots/apps/control-plane-api/dist/index.js",
+        "bytes": 67,
+        "sha256": "4f85263905b3b0a2bacc56f6665e03ff02ebbbea60e62ba3a0d45c123584b54f"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-published-server-reviewed-roots/apps/desen-app-browser-e2e/published-host-proof-server.mjs",
+        "bytes": 406,
+        "sha256": "6c99fd5e4f7811d4111a5101c6f71410857c4fbbbe1b7c7ddba45db2ae5811ec"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-published-server-reviewed-roots/apps/desen-app/dev/local-publication-host.mjs",
+        "bytes": 172,
+        "sha256": "36a3fd8c5063e13a2e8506cf4e48157a043a232fe84c357123deaf8d8efd753e"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-published-server-reviewed-roots/apps/reference-host-web-server/dist/index.js",
+        "bytes": 73,
+        "sha256": "25120bc6b1d36e184b2987f159493dac1073454d5239a9326a70518a450e1459"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-non-published-server-imports-local-publication-host/apps/desen-app-browser-e2e/proof-application.mjs",
+        "bytes": 183,
+        "sha256": "7215a34fcdc4e6ebfda69dd14686935b2d2460e69d17a1b0138fdc6e6a24826b"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-non-published-server-imports-local-publication-host/apps/desen-app/dev/local-publication-host.mjs",
+        "bytes": 81,
+        "sha256": "6de3b08f808fd299b5ba6681a569d7a61114b4c5cae6004d8b2eeb43f0d957f6"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-published-server-imports-reference-host-private/apps/desen-app-browser-e2e/published-host-proof-server.mjs",
+        "bytes": 163,
+        "sha256": "b008b32ea6cfcad3ccd1c6cc15ed534fb2c141f6399332f6356587ae71630ff0"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-published-server-imports-reference-host-private/apps/reference-host-web-server/dist/private.js",
+        "bytes": 47,
+        "sha256": "8b1f39f28c95dea7565196de98ee03d38ad4798d8f29edde1d91be23ac003094"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-published-server-imports-unreviewed-dev-module/apps/desen-app-browser-e2e/published-host-proof-server.mjs",
+        "bytes": 177,
+        "sha256": "1b018cb4d5410776c96bed4c51a1d54fe61a0f14c210606d32b5c59dec236481"
+      },
+      {
+        "path": "tests/boundaries/fixtures/desen-app-browser-e2e-published-server-imports-unreviewed-dev-module/apps/desen-app/dev/local-publication-private.mjs",
+        "bytes": 54,
+        "sha256": "2064157b2d8e05da5e4aa51cc3228c43e5098604cfdb003a069bcc6cd70bec04"
+      },
+      {
+        "path": "tests/desen-app-t04-historical-reader-fixture.mjs",
+        "bytes": 2336,
+        "sha256": "27853a9b7add7bae11c8e052b4f5b74be966138743f001e7687eef4d496f44b4"
+      }
+    ],
+    "parentArtifacts": 4,
+    "historicalReaderBridgeArtifacts": 1,
+    "immutableInputs": true,
+    "completeAppSourceFiles": 52,
+    "completeReferenceHostSourceFiles": 13,
+    "completeReferenceHostServerSourceFiles": 5,
+    "sourceSymlinksRejected": true,
+    "checkpointOwnedReaderPaths": [
+      "scripts/lib/desen-app-published-host-update-proof.mjs",
+      "tests/desen-app-published-host-update.test.mjs"
+    ],
+    "artifactTrackedEntrypoints": [
+      "scripts/lib/atomic-proof-artifact.mjs",
+      "scripts/generate-desen-app-published-host-update-proof.mjs",
+      "scripts/verify-desen-app-published-host-update.mjs"
+    ]
+  },
+  "nonClaims": [
+    "M10-T05 proves two local normal-product Save, Publish, Activate cycles and visible independent-host updates while the separately built host source and static build identity remain unchanged.",
+    "The fixed preview channel, reference-host identity, endpoints, bearers, control-plane implementation, activation callback, and executable modules remain trusted launcher/server authority outside authored Source.",
+    "The deterministic reader performs fresh source and Vite write:false audits but starts no browser, network listener, application server, or external host; Chromium remains a distinct CI workload.",
+    "The browser fingerprint uses read-only HTTP GETs solely to authenticate the independent host static HTML and assets; all Source authoring, saving, publication, and activation occurs through visible product controls.",
+    "This local reference composition is not remote deployment, production credentials, multi-user persistence, invalid-publication rejection, last-known-good recovery, or production operations.",
+    "M10-T06, M10-T07, M10-T08, M10-T09, N-036, P-12, and G10 remain owned by their later tasks.",
+    "Local evidence does not imply hosted exact-head Quality gate or Browser E2E success until those workloads pass for the unchanged revision."
+  ]
+}

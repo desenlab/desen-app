@@ -1,5 +1,31 @@
 # Desen App
 
+## M10-T05: publish visible edits to an unchanged host
+
+The normal local launcher now composes the Account app's existing Save and Publish controls with
+one fixed `preview` channel and a separately built Web reference host. Start it with:
+
+```bash
+pnpm --filter @desen/app-web dev
+```
+
+The launcher prints separate editor and published-host URLs. In Design, create or open the Account
+project, make a valid change, choose **Source & release**, save the Source, then publish. The editor
+reports the saved generation, channel generation, immutable Bundle revision, and confirmed host
+activation. Reloading the printed host URL displays the activated revision. A later label or Stack
+gap edit follows the same Save → Publish sequence without changing or rebuilding host source.
+
+The destination is trusted launcher configuration, not document data. Browser publication and host
+activation use separate in-memory loopback authorities; neither credential is saved or displayed.
+The host independently re-reads the fixed channel and activates only the exact generation and
+revision returned by publication. Missing, mismatched, failed, stale, or indeterminate settlement
+never appears as Active.
+
+The M10-T05 Chromium proof performs this journey through the normal visible product and verifies
+that the served host HTML/assets remain byte-identical while the managed label, layout, and Bundle
+revision change. This remains a local reference composition, not remote or production deployment.
+See [ADR 0020](../../docs/adr/0020-desen-app-fixed-destination-publication-and-host-activation.md).
+
 ## M10-T04: test success and real host connections
 
 The normal local launcher now starts Source persistence and a separate local account service.
@@ -18,7 +44,8 @@ authored navigation. The connection is a test account, **not production authenti
 **Restart run** returns to the design origin. **Design** revokes Integration and restores the
 authoring surface. Run inputs, responses, context and navigation never change saved Source bytes.
 The unrelated Account app workspace is never migrated or overwritten. Production, arbitrary
-workspace creation, remote hosts, and publish/activate-without-host-edits remain separate work.
+workspace creation, and remote hosts remain separate work. M10-T05 adds the fixed local
+publish/activate composition for that Account workspace without granting it to Flow.
 
 See [ADR 0017](../../docs/adr/0017-desen-app-explicit-integration-and-run-navigation.md) and the
 [M10-T04 evidence](../../docs/proof/DESEN-APP-SUCCESS-HOST-OPERATION.md).

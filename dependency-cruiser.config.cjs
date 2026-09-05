@@ -75,8 +75,15 @@ const neutralProductionSourcePath =
   "^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core)/src/";
 const desenAppBrowserProductProofServerPath =
   "^apps/desen-app-browser-e2e/product-proof-server\\.mjs$";
+const desenAppBrowserPublishedHostProofServerPath =
+  "^apps/desen-app-browser-e2e/published-host-proof-server\\.mjs$";
+const desenAppBrowserServerPaths =
+  "^apps/desen-app-browser-e2e/(?:product-proof-server|published-host-proof-server)\\.mjs$";
 const controlPlanePublicBuildEntryPath = "^apps/control-plane-api/dist/index\\.(?:d\\.ts|js)$";
 const desenAppLocalOperationHostPath = "^apps/desen-app/dev/local-operation-host\\.mjs$";
+const desenAppLocalPublicationHostPath = "^apps/desen-app/dev/local-publication-host\\.mjs$";
+const referenceHostServerPublicBuildEntryPath =
+  "^apps/reference-host-web-server/dist/index\\.(?:d\\.ts|js)$";
 
 /**
  * Builds a regular expression for package folders. The current package is included because
@@ -161,7 +168,7 @@ module.exports = {
         "The isolated browser proof may compose only the reviewed Desen App application, empty-project bootstrap, explicit reference workspace profile, and stylesheet entries.",
       from: {
         path: "^apps/desen-app-browser-e2e/",
-        pathNot: desenAppBrowserProductProofServerPath,
+        pathNot: desenAppBrowserServerPaths,
       },
       to: {
         path: "^apps/(?!desen-app-browser-e2e/)",
@@ -174,10 +181,21 @@ module.exports = {
       severity: "error",
       comment:
         "The normal-product proof server may compose the built public control-plane entry, never its source tree or a deep/private build module.",
-      from: { path: desenAppBrowserProductProofServerPath },
+      from: { path: desenAppBrowserServerPaths },
       to: {
         path: "^apps/control-plane-api/",
         pathNot: controlPlanePublicBuildEntryPath,
+      },
+    },
+    {
+      name: "desen-app-browser-e2e-published-server-reference-host-public-root-only",
+      severity: "error",
+      comment:
+        "The published-host proof server may compose only the built public reference-host server entry, never its source tree or a deep/private build module.",
+      from: { path: desenAppBrowserPublishedHostProofServerPath },
+      to: {
+        path: "^apps/reference-host-web-server/",
+        pathNot: referenceHostServerPublicBuildEntryPath,
       },
     },
     {
@@ -189,6 +207,17 @@ module.exports = {
       to: {
         path: "^apps/(?!desen-app-browser-e2e/|control-plane-api/)",
         pathNot: desenAppLocalOperationHostPath,
+      },
+    },
+    {
+      name: "desen-app-browser-e2e-published-server-has-no-other-application-dependencies",
+      severity: "error",
+      comment:
+        "Only the reviewed published-host proof server may combine the exact local activation bridge with public control-plane and reference-host entries; every other application edge remains forbidden.",
+      from: { path: desenAppBrowserPublishedHostProofServerPath },
+      to: {
+        path: "^apps/(?!desen-app-browser-e2e/|control-plane-api/|reference-host-web-server/)",
+        pathNot: desenAppLocalPublicationHostPath,
       },
     },
     {

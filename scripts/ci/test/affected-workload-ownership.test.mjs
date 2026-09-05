@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 208,
+  PROOF_UNIT: 210,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 32,
-  FROZEN_INPUT: 152,
-  PACKAGE_OR_APPLICATION: 548,
-  SHARED_PROOF_INFRASTRUCTURE: 278,
-  PROJECT_DOCUMENTATION: 145,
+  FROZEN_INPUT: 154,
+  PACKAGE_OR_APPLICATION: 555,
+  SHARED_PROOF_INFRASTRUCTURE: 292,
+  PROJECT_DOCUMENTATION: 147,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1419 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1446 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1419 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1419);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1446);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 208);
+  assert.equal(proofEntries.length, 210);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -324,6 +324,15 @@ test("permits strict selection only for exact verifier and root-test proof input
       "tests/desen-app-success-host-operation.test.mjs",
     ],
   );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "desen-app-published-host-update")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-desen-app-published-host-update.mjs",
+      "tests/desen-app-published-host-update.test.mjs",
+    ],
+  );
   for (const entry of proofEntries) {
     assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.SELECT_PROOF_UNIT);
     const verifier = nodeById.get(entry.verifierNodeId);
@@ -376,6 +385,30 @@ test("keeps CI-03 and AR-01 documentation exhaustive without proof ownership", a
         ),
       expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
     );
+  }
+});
+
+test("keeps every T05 product and documentation surface conservative outside its exact readers", async () => {
+  const authority = await currentAuthority();
+  for (const [trackedPath, category] of [
+    ["apps/desen-app/package.json", AFFECTED_OWNERSHIP_CATEGORIES.DEPENDENCY_POLICY],
+    ["apps/desen-app/README.md", AFFECTED_OWNERSHIP_CATEGORIES.PACKAGE_OR_APPLICATION],
+    ["apps/desen-app-browser-e2e/README.md", AFFECTED_OWNERSHIP_CATEGORIES.PACKAGE_OR_APPLICATION],
+    [
+      "apps/reference-host-web-server/README.md",
+      AFFECTED_OWNERSHIP_CATEGORIES.PACKAGE_OR_APPLICATION,
+    ],
+    ["docs/architecture/ARCHITECTURE.md", AFFECTED_OWNERSHIP_CATEGORIES.PROJECT_DOCUMENTATION],
+    [
+      "docs/adr/0020-desen-app-fixed-destination-publication-and-host-activation.md",
+      AFFECTED_OWNERSHIP_CATEGORIES.PROJECT_DOCUMENTATION,
+    ],
+  ]) {
+    const entry = authority.entries.find(({ path: candidate }) => candidate === trackedPath);
+    assert.ok(entry, `${trackedPath} must remain in exact ownership`);
+    assert.equal(entry.category, category);
+    assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.FORCE_EXHAUSTIVE);
+    assert.equal(entry.proofUnitId, null);
   }
 });
 
@@ -767,6 +800,33 @@ test("the reviewed AR-01 successor preserves the historical I07-04 ownership pro
     "scripts/lib/historical-archive-redaction.mjs",
     "scripts/verify-historical-archive-redaction.mjs",
     "tests/historical-archive-redaction.test.mjs",
+    "apps/desen-app-browser-e2e/published-host-playwright.config.ts",
+    "apps/desen-app-browser-e2e/published-host-proof-server.mjs",
+    "apps/desen-app-browser-e2e/published-host-update.pw.ts",
+    "apps/desen-app/dev/local-publication-host.mjs",
+    "apps/desen-app/dev/local-publication-host.test.mjs",
+    "apps/desen-app/src/local-runtime-publication.ts",
+    "apps/desen-app/test/local-runtime-publication.test.ts",
+    "docs/adr/0020-desen-app-fixed-destination-publication-and-host-activation.md",
+    "docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md",
+    "docs/proof/artifacts/desen-app-0.1.0-published-host-update.json",
+    "docs/proof/artifacts/desen-app-0.1.0-t04-historical-reader-bridge.json.gz",
+    "scripts/generate-desen-app-published-host-update-proof.mjs",
+    "scripts/generate-desen-app-t04-historical-reader-bridge.mjs",
+    "scripts/lib/desen-app-published-host-update-proof.mjs",
+    "scripts/verify-desen-app-published-host-update.mjs",
+    "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-published-server-reviewed-roots/apps/control-plane-api/dist/index.js",
+    "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-published-server-reviewed-roots/apps/desen-app-browser-e2e/published-host-proof-server.mjs",
+    "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-published-server-reviewed-roots/apps/desen-app/dev/local-publication-host.mjs",
+    "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-published-server-reviewed-roots/apps/reference-host-web-server/dist/index.js",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-non-published-server-imports-local-publication-host/apps/desen-app-browser-e2e/proof-application.mjs",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-non-published-server-imports-local-publication-host/apps/desen-app/dev/local-publication-host.mjs",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-published-server-imports-reference-host-private/apps/desen-app-browser-e2e/published-host-proof-server.mjs",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-published-server-imports-reference-host-private/apps/reference-host-web-server/dist/private.js",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-published-server-imports-unreviewed-dev-module/apps/desen-app-browser-e2e/published-host-proof-server.mjs",
+    "tests/boundaries/fixtures/desen-app-browser-e2e-published-server-imports-unreviewed-dev-module/apps/desen-app/dev/local-publication-private.mjs",
+    "tests/desen-app-published-host-update.test.mjs",
+    "tests/desen-app-t04-historical-reader-fixture.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);

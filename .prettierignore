@@ -23,3 +23,5 @@ docs/proof/artifacts/desen-app-0.1.0-state-binding-editor.json
 docs/proof/artifacts/desen-app-0.1.0-event-action-editor.json
 docs/proof/artifacts/desen-app-0.1.0-design-run-modes.json
 docs/proof/artifacts/desen-app-0.1.0-fixtures-scenarios-fidelity.json
+# Canonical M10-T05 evidence is byte- and SHA-pinned by its verifier.
+docs/proof/artifacts/desen-app-0.1.0-published-host-update.json

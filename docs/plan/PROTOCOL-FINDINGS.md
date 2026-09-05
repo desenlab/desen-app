@@ -2235,12 +2235,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
 
 ## PF-059 — Runtime module resolution is distinct from TypeScript declaration resolution
 
-- Status: OPEN
+- Status: CLOSED
 - Blocks proof: No; M05-T09 resolves the mismatch for the current independent Web–React host and
   closes G05, while M09-T03 applies the exact controlled comparison to Desen App without changing
   protocol semantics.
 - Protocol location: SPEC Sections 9.1 and 24.5 and Appendix A; proof claims `P-06`, `P-07`, and
-  `P-10`; ADR 0010
+  `P-10`; ADR 0010 and ADR 0020
 - Observation: TypeScript commonly resolves a workspace package import to its declaration entry,
   while the browser build resolves the same specifier to executable JavaScript and its transitive
   dependencies. Treating the TypeScript graph as the shipped runtime graph could therefore miss a
@@ -2277,10 +2277,20 @@ This file records implementation discoveries without changing the frozen DESEN 0
   `docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json`
   `sha256:8f89b237c20d80e83d96f17c31146d251c026977a4fff1ab1d0822e489c63151`.
 
-- Future action: M10-T05 must add the corresponding Desen App browser-E2E evidence before P-07 can
-  become `PROVEN`. Any legitimate future reference-host or App infrastructure change must update
-  the semantic allowlist and mutation suite. Native hosts still require target-specific executable
-  registries and graph audits rather than inheriting this Web–React proof.
+  M10-T05 reruns the complete current reference-host source/import audit, inventories every current
+  App and host source, and performs two independent Vite 8.1.5 `build({ write: false })` observations
+  for each application. The resulting graphs contain 168 App modules / 510 static edges and 104 host
+  modules / 299 static edges, with no dynamic or unresolved edges. Twenty-two transformed managed
+  modules have byte-identical identities in both graphs. The dedicated Chromium journey changes a
+  visible label and layout through two normal-product Save → Publish → Activate cycles, while the
+  separately built host's source and static build identity remain unchanged. Evidence:
+  `docs/proof/artifacts/desen-app-0.1.0-published-host-update.json`
+  `sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`.
+
+- Closure decision: PF-059 is closed for the audited App/reference-host Web–React graph and P-07 is
+  `PROVEN`. Any legitimate future reference-host or App infrastructure change must still update the
+  semantic allowlist and mutation suite. Native hosts require target-specific executable registries
+  and graph audits rather than inheriting this Web–React proof.
 
 ## PF-060 — Raw Source parsing needs an explicit interoperable JSON and finite-ingress profile
 

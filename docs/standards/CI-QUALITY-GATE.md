@@ -52,9 +52,9 @@ The gate runs from a fresh workspace in this order:
 3. verify generated structural-validator bytes;
 4. build and typecheck the workspace once through a cache-read-disabled Turbo graph;
 5. run every package's complete test suite once with controlled concurrency;
-6. run all 93 proof verifiers directly in the reviewed order, ending with the M09-T12 Desen App
-   Source-persistence proof;
-7. run all 93 root proof and mutation files as separate fail-fast processes; and
+6. run all 105 proof verifiers directly in the reviewed order, ending with the M10-T05 Desen App
+   published-host-update proof;
+7. run all 105 root proof and mutation files as separate fail-fast processes; and
 8. run the dependency graph and hostile boundary fixtures.
 
 The historical M09-T07 legacy expansion contains 4,437 leaf process invocations and 296 distinct
@@ -63,8 +63,8 @@ process invocations, and 305 distinct leaves. The current M09-T12 optimized gate
 registered workloads. Its exact legacy expansion remains machine-generated authority. Repeated prerequisite
 checks inside proof builders remain intact because those checks are evidence, not orchestration
 overhead.
-The current expansion contains 715 prerequisite segments, 4,505 ordered leaf invocations, and 311
-distinct leaves.
+The current M10-T05 expansion contains 735 prerequisite segments, 4,539 ordered leaf invocations,
+329 distinct leaves, and 220 registered workloads.
 The measurement recursively expands exact root-level `pnpm <script>` references beginning at
 `check`; commands with no further local root-script indirection are leaves, and the distinct
 inventory is sorted before hashing.
@@ -73,9 +73,9 @@ inventory is sorted before hashing.
 
 The gate refuses to run when any of these conditions changes without an explicit review:
 
-- the 93 task IDs, verifier files, root test files, or their order;
-- any of the 715 legacy prerequisite command segments;
-- the exact 196-step normalized execution plan;
+- the 105 task IDs, verifier files, root test files, or their order;
+- any of the 735 legacy prerequisite command segments;
+- the exact 220-step normalized execution plan;
 - a focused package test that is no longer included by its full package suite;
 - any drift in the reviewed `test` command of any workspace package, including packages without a
   focused prerequisite;
@@ -884,9 +884,10 @@ verifier/root-test pair, the `publisher-invalid-source-matrix` root test, and th
 `control-plane-runtime-recovery`, and `control-plane-runtime-fault-injection` verifier/root-test
 pairs plus only the `control-plane-runtime-transition-races` and
 `reference-host-web-channel-consumption` verifiers, and the exact `editor-core-persistence`
-verifier/root-test pair, plus the exact `desen-app-real-adapter-canvas` verifier/root-test pair. The
+verifier/root-test pair, plus the exact `desen-app-real-adapter-canvas` and
+`desen-app-published-host-update` verifier/root-test pairs. The
 transition-races and channel-consumption roots are denied native-addon authority. These grants total
-seventeen exact native-addon steps; every unlisted step
+nineteen exact native-addon steps; every unlisted step
 remains denied.
 The Publisher probe loads the reviewed Rolldown binding; the control-plane pairs load the locked
 SQLite binding; and the adapter-canvas pair loads the reviewed Vite/Rollup build binding. The
@@ -1507,3 +1508,61 @@ Selector and required-affected runner authorities are
 `sha256:a6734be24611dd476051db3c93d8672e2892afe9a1276d154e67127d6c10ea35`.
 These are reviewed identity/impact receipts only; every selected hosted workload still executes
 fresh before the exact current head may merge.
+
+## M10-T05 published-host-update authority
+
+M10-T05 registers `desen-app-published-host-update` as ordinary proof pair 105. The deterministic
+verifier owns a runner-scoped OS-temporary Vite build authority; its independent root reader is
+passive and read-only. The sixth Browser E2E configuration separately owns Chromium, the product
+listener, control-plane listener, activation bridge, and reference host. The browser package builds
+the Desen App, reference-host server, and reference-host client before running the six explicit
+Playwright configurations. The hosted Browser E2E step invokes the T05 verifier/root pair only
+after the real browser journey.
+
+The 220-workload / 105-proof-unit inventory is
+`sha256:66ae36cb2ec1c8a7bc7deee1a733e253cc1861d3b9ca1487c9725f437c3abf5a`.
+It retains 735 prerequisite segments, 4,539 leaf invocations, and 329 distinct leaves. The exact
+four-parent semantic graph is
+`sha256:50ca74533c82b6a02977281f912cc4a37484c22aea7bfa60d343197f1ee81620`;
+the T05 closure contains 73 proof units / 156 workloads at
+`sha256:38923448f33f9c7e42b9d09641574ffc0e2c403c1080d7a42eaa56e5f0cd12d2`.
+Shared-state authority contains 94 ordinary and eleven barrier pairs, 93 OS-temporary roots, 92
+read-only proof workloads, and 107 OS-temporary-isolated proof workloads. The T05 verifier receives
+only its exact Vite/runtime-probe class. Both verifier and root receive the exact
+`DESEN_APP_PUBLISHED_HOST_UPDATE_VITE` native-addon policy because both perform fresh Vite builds.
+The root keeps its ordinary Node test harness and isolated temporary directory, with no workspace
+write, listener, or external-network authority.
+
+The exact T05 verifier/root pair is prioritized only inside its existing ordinary segment to avoid
+a final single-worker tail. All exclusive barriers, dependency checks, two-worker bounds, canonical
+receipts, cancellation/closing guards, fresh executions, and time limits remain unchanged. The
+selection does not add a cached-success path or omit any workload.
+
+Exact-one ownership covers 1,446 tracked / 210 proof-owned paths. The path-set and ownership
+digests are
+`sha256:9cc6e2ebb16b60cc804ca2b7380bf1710d4aa960a363ec606b0574c641fbd53c`
+and `sha256:dc6d534f81fa551fc37ca045a88b2424f10d5fc935cdc56f99aaa55a5efbcbc6`.
+Application, browser, boundary, architecture, artifact, and shared proof inputs remain exhaustive;
+only the exact T05 verifier/root files select the T05 closure.
+
+Required/shadow exhaustive plans are
+`sha256:30799382d92edf70455a42bc01e13973324bf1a916b5b925ad86c429b926fb2a`
+and `sha256:0cb43b3c983e0e7ef6fb7536e08a90a9ce21a811eff22aab5767367c76b12641`.
+Rollback equivalence retains plan
+`sha256:f88698910808b705712c06d7c35c94b9f679df5f13e9f20d7af2d01c295dfad1`
+and exact workload set
+`sha256:39331deb57f2d8526e292a56aa031711bc1ca714631c3967f32f19dc5ff5d42f`.
+Promotion pins selector and runner authorities at
+`sha256:3fef221a77c9f222259774f9f8feaeedccedd7f8574cf3da5bd147cfe52b3680`
+and `sha256:add4dbf618e7f019a76831799df3184e1ee0ca6638f1fa1ee2ac58c86a0f6eba`.
+
+Checkpoint sequence 72 preserves all earlier checkpoints and 58 predecessor artifacts, adds the
+189,123-byte T05 artifact at
+`sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`,
+reseals M07-T11 readers `[38, 39]`, T01A readers `[102, 103]`, evergreen T01C readers `[106, 107]`, and T04 readers
+`[112, 113]`, appends T05 readers `[116, 117]`, and closes 59 artifacts / 118
+readers at
+`sha256:2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249`.
+This seal authenticates current reader identity only. Every selected workload must execute fresh,
+and merge still requires hosted `Quality gate` plus `Browser E2E` success for the exact current
+head. G10 and later invalid-publication/recovery owners remain open.

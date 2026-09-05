@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, realpath, rm, symlink } from "node:fs/promises";
+import { mkdtemp, readFile as readLiveFile, realpath, rm, symlink } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 import { gzipSync, gunzipSync } from "node:zlib";
 
 import { getHistoricalArchiveRedactionPin } from "../scripts/lib/historical-archive-redaction.mjs";
+import { createDesenAppT04HistoricalReaderReadFile } from "./desen-app-t04-historical-reader-fixture.mjs";
 
 import {
   authenticateDesenAppEvergreenProductCompositionSuccessor,
@@ -36,6 +37,10 @@ import {
 } from "../scripts/lib/desen-app-success-host-operation-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const readFile = createDesenAppT04HistoricalReaderReadFile({
+  workspaceRoot: ROOT,
+  liveReadFile: readLiveFile,
+});
 const READER_PATH = "scripts/lib/desen-app-success-host-operation-proof.mjs";
 const SOURCE_PATHS = Object.freeze({
   application: "apps/desen-app/src/application.tsx",
@@ -475,10 +480,19 @@ test(DESEN_APP_SUCCESS_HOST_OPERATION_ROOT_TEST_NAMES[8], async () => {
     exactGapOverrides.size,
     DESEN_APP_T03_HISTORICAL_READER_BRIDGE_PIN.predecessorGapFiles,
   );
+  const legacyCompatibilityOverrides = new Map([
+    ...exactGapOverrides,
+    ["apps/desen-app/package.json", await readFile(path.join(ROOT, "apps/desen-app/package.json"))],
+    [
+      "apps/desen-app/dev/local-dev.mjs",
+      await readFile(path.join(ROOT, "apps/desen-app/dev/local-dev.mjs")),
+    ],
+    ["pnpm-lock.yaml", await readFile(path.join(ROOT, "pnpm-lock.yaml"))],
+  ]);
   // A positive unchanged override must pass before negative probes can establish which authority
   // was rejected. Otherwise unrelated live successor bytes can make every mutation falsely green.
   const unchangedLegacy = await verifyDesenAppUserCreatedBlankProjectEvidence({
-    buildOptions: { fileOverrides: exactGapOverrides },
+    buildOptions: { fileOverrides: legacyCompatibilityOverrides },
   });
   assert.equal(unchangedLegacy.result, "PASS");
   for (const [relativePath, message] of [
@@ -501,7 +515,10 @@ test(DESEN_APP_SUCCESS_HOST_OPERATION_ROOT_TEST_NAMES[8], async () => {
     await assert.rejects(
       verifyDesenAppUserCreatedBlankProjectEvidence({
         buildOptions: {
-          fileOverrides: new Map([[relativePath, Buffer.concat([bytes, Buffer.from("\n")])]]),
+          fileOverrides: new Map([
+            ...legacyCompatibilityOverrides,
+            [relativePath, Buffer.concat([bytes, Buffer.from("\n")])],
+          ]),
         },
       }),
       (error) => {

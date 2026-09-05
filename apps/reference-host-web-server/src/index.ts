@@ -30,6 +30,8 @@ export type {
 export type { LoadReferenceHostInstalledPackageOptions } from "./installed-package-inventory.js";
 export type {
   OpenReferenceHostWebServerOptions,
+  ReferenceHostPublishedRevisionActivationRequest,
+  ReferenceHostPublishedRevisionActivationSettlement,
   ReferenceHostWebServer,
   ReferenceHostWebServerListenResult,
 } from "./server.js";

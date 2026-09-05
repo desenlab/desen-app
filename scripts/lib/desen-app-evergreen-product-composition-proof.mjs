@@ -42,16 +42,44 @@ const T04_PREDECESSOR_GAP_PATHS = Object.freeze([
   "scripts/verify-boundary-fixtures.mjs",
   "tests/boundaries/README.md",
 ]);
+const T01B_SUCCESSOR_GAP_RECEIPTS = Object.freeze([
+  Object.freeze({
+    path: "apps/desen-app/package.json",
+    bytes: 4_546,
+    sha256: "c634b5ee1e2d2af0ffd6db8d4841215664591a31999210a8e0b388b71509eb32",
+  }),
+]);
+const T01A_ANCESTOR_APP_PACKAGE_RECEIPT = Object.freeze({
+  path: "apps/desen-app/package.json",
+  bytes: 4_122,
+  sha256: "7038647aa1809f07ee5131d0df8d0bee75bf1f2cdf0358be738b2c3603b64577",
+});
+const T05_PREDECESSOR_GAP_RECEIPTS = Object.freeze([
+  Object.freeze({
+    path: "apps/desen-app/dev/local-dev.mjs",
+    bytes: 1_313,
+    sha256: "8e7e4fe465a9ce46737bf1bc0c0e1154d62feeac7a96443a5cd7952412881a1e",
+  }),
+  Object.freeze({
+    path: "pnpm-lock.yaml",
+    bytes: 131_888,
+    sha256: "23632d4c1d8bc8832a31db328fa36c7f1523aeb7c52f034ddbb3f8edecc4c002",
+  }),
+]);
 const T01C_SUCCESSOR_ADDED_PATHS = Object.freeze([
   "apps/desen-app-browser-e2e/input-pending-fixture.pw.ts",
   "apps/desen-app-browser-e2e/input-pending-playwright.config.ts",
 ]);
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
+const MAX_OVERRIDE_BYTES = MAX_AUTHORITY_BYTES;
 const MAX_HISTORICAL_BRIDGE_BYTES = 4 * 1_024 * 1_024;
 const MAX_HISTORICAL_BRIDGE_INFLATED_BYTES = 8 * 1_024 * 1_024;
 const MAX_HISTORICAL_BRIDGE_DECODED_FILE_BYTES = 6 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
+const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
+const BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "byteLength").get;
+const BUFFER_GETTER = Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "buffer").get;
 
 const SOURCE_PATHS = Object.freeze({
   referenceBrowserHarness: "apps/desen-app-browser-e2e/proof-application.tsx",
@@ -310,13 +338,24 @@ async function authenticateSuccessHostHistoricalGapFiles(workspaceRoot) {
       fail("SUCCESSOR_POLICY_VIOLATION", "The M10-T04 historical gap contract is unavailable.");
     }
     const successor = await authenticate({ workspaceRoot });
+    const files = new Map(
+      T04_PREDECESSOR_GAP_PATHS.map((relativePath) => [
+        relativePath,
+        readTaskTimeFile(successor, relativePath),
+      ]),
+    );
+    for (const receipt of T01B_SUCCESSOR_GAP_RECEIPTS) {
+      const bytes = readTaskTimeFile(successor, receipt.path);
+      if (bytes.byteLength !== receipt.bytes || sha256(bytes) !== receipt.sha256) {
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          "The exact M10-T01B successor-owned package gap drifted.",
+        );
+      }
+      files.set(receipt.path, bytes);
+    }
     return Object.freeze({
-      files: new Map(
-        T04_PREDECESSOR_GAP_PATHS.map((relativePath) => [
-          relativePath,
-          readTaskTimeFile(successor, relativePath),
-        ]),
-      ),
+      files,
       projectPathInventory: (currentPaths) => projectPathInventory(successor, currentPaths),
     });
   } catch (error) {
@@ -326,6 +365,57 @@ async function authenticateSuccessHostHistoricalGapFiles(workspaceRoot) {
       {
         cause: String(error),
       },
+    );
+  }
+}
+
+async function authenticatePublishedHostHistoricalAuthority(workspaceRoot) {
+  try {
+    const successorModule = await import("./desen-app-published-host-update-proof.mjs");
+    const authenticate = successorModule.authenticateDesenAppPublishedHostUpdateSuccessor;
+    const readTaskTimeFile = successorModule.readDesenAppT04HistoricalReaderTaskTimeFile;
+    const readT01aAncestorFile = successorModule.readDesenAppT01aHistoricalReaderGapFile;
+    const projectPathInventory = successorModule.projectDesenAppT04HistoricalReaderPathInventory;
+    if (
+      typeof authenticate !== "function" ||
+      typeof readTaskTimeFile !== "function" ||
+      typeof readT01aAncestorFile !== "function" ||
+      typeof projectPathInventory !== "function"
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The M10-T05 historical gap contract is unavailable.");
+    }
+    const successor = await authenticate({ workspaceRoot });
+    const files = new Map();
+    for (const receipt of T05_PREDECESSOR_GAP_RECEIPTS) {
+      const bytes = readTaskTimeFile(successor, receipt.path);
+      if (bytes.byteLength !== receipt.bytes || sha256(bytes) !== receipt.sha256) {
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          `The exact M10-T04 predecessor gap drifted: ${receipt.path}.`,
+        );
+      }
+      files.set(receipt.path, bytes);
+    }
+    const t01aAncestorAppPackage = readT01aAncestorFile(
+      successor,
+      T01A_ANCESTOR_APP_PACKAGE_RECEIPT.path,
+    );
+    if (
+      t01aAncestorAppPackage.byteLength !== T01A_ANCESTOR_APP_PACKAGE_RECEIPT.bytes ||
+      sha256(t01aAncestorAppPackage) !== T01A_ANCESTOR_APP_PACKAGE_RECEIPT.sha256
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The exact M10-T01A package ancestor gap drifted.");
+    }
+    return Object.freeze({
+      files,
+      t01aAncestorAppPackage,
+      projectPathInventory: (currentPaths) => projectPathInventory(successor, currentPaths),
+    });
+  } catch (error) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M10-T05 historical gaps were not authenticated.",
+      { cause: String(error) },
     );
   }
 }
@@ -360,10 +450,10 @@ function deepFreeze(value) {
 function exactOwnDataOptions(value, allowedKeys, label) {
   if (value === undefined) return Object.freeze(Object.create(null));
   if (
+    utilTypes.isProxy(value) ||
     value === null ||
     typeof value !== "object" ||
     Array.isArray(value) ||
-    utilTypes.isProxy(value) ||
     (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
   ) {
     fail("OPTIONS_INVALID", `${label} must be one inert own-data object.`);
@@ -386,26 +476,60 @@ function exactOwnDataOptions(value, allowedKeys, label) {
 }
 
 function captureBytes(value, label) {
-  if (!(value instanceof Uint8Array) || utilTypes.isProxy(value)) {
+  if (utilTypes.isProxy(value) || !utilTypes.isUint8Array(value)) {
     fail("OPTIONS_INVALID", `${label} must be one non-Proxy byte array.`);
   }
-  if (value.byteLength > MAX_AUTHORITY_BYTES) {
+  const prototype = Object.getPrototypeOf(value);
+  let byteLength;
+  let backingBuffer;
+  try {
+    byteLength = Reflect.apply(BYTE_LENGTH_GETTER, value, []);
+    backingBuffer = Reflect.apply(BUFFER_GETTER, value, []);
+  } catch {
     fail("OPTIONS_INVALID", `${label} exceeds the evidence authority bound.`);
   }
-  return Buffer.from(value);
+  if (
+    (prototype !== Uint8Array.prototype && prototype !== Buffer.prototype) ||
+    Object.getOwnPropertyDescriptor(value, "buffer") !== undefined ||
+    Object.getOwnPropertyDescriptor(value, "byteLength") !== undefined ||
+    Object.getOwnPropertyDescriptor(value, "byteOffset") !== undefined ||
+    utilTypes.isSharedArrayBuffer(backingBuffer) ||
+    byteLength > MAX_AUTHORITY_BYTES
+  ) {
+    fail("OPTIONS_INVALID", `${label} exceeds the evidence authority bound.`);
+  }
+  try {
+    const captured = Buffer.alloc(byteLength);
+    Reflect.apply(Uint8Array.prototype.set, captured, [value]);
+    return captured;
+  } catch {
+    fail("OPTIONS_INVALID", `${label} exceeds the evidence authority bound.`);
+  }
 }
 
 function captureOverrides(value) {
   if (value === undefined) return new Map();
-  if (!(value instanceof Map) || utilTypes.isProxy(value)) {
+  if (
+    utilTypes.isProxy(value) ||
+    !(value instanceof Map) ||
+    Object.getPrototypeOf(value) !== Map.prototype ||
+    Reflect.ownKeys(value).length !== 0 ||
+    value.size > TRACKED_PATHS.length
+  ) {
     fail("OPTIONS_INVALID", "fileOverrides must be one non-Proxy Map.");
   }
   const captured = new Map();
-  for (const [relativePath, bytes] of value) {
+  let totalBytes = 0;
+  for (const [relativePath, bytes] of Map.prototype.entries.call(value)) {
     if (typeof relativePath !== "string" || !TRACKED_PATHS.includes(relativePath)) {
       fail("OPTIONS_INVALID", "fileOverrides contains an untracked path.", { relativePath });
     }
-    captured.set(relativePath, captureBytes(bytes, `fileOverrides[${relativePath}]`));
+    const capturedBytes = captureBytes(bytes, `fileOverrides[${relativePath}]`);
+    totalBytes += capturedBytes.byteLength;
+    if (totalBytes > MAX_OVERRIDE_BYTES) {
+      fail("OPTIONS_INVALID", "fileOverrides exceeds its aggregate byte budget.");
+    }
+    captured.set(relativePath, capturedBytes);
   }
   return captured;
 }
@@ -1436,16 +1560,16 @@ export function readDesenAppHistoricalReaderProjection(successor, proofId) {
 
 /** Materializes retained technical bytes and redacted archive data, then exact caller mutations. */
 export function materializeDesenAppHistoricalReaderFileOverrides(successor, fileOverrides) {
-  const authority = historicalBridgeAuthority(successor);
   if (
-    !(fileOverrides instanceof Map) ||
     utilTypes.isProxy(fileOverrides) ||
+    !(fileOverrides instanceof Map) ||
     Object.getPrototypeOf(fileOverrides) !== Map.prototype ||
     Reflect.ownKeys(fileOverrides).length !== 0 ||
     fileOverrides.size > 256
   ) {
     fail("OPTIONS_INVALID", "Historical fileOverrides must be one inert Map.");
   }
+  const authority = historicalBridgeAuthority(successor);
   const materialized = new Map(
     [...authority.predecessor.files].map(([relativePath, bytes]) => [
       relativePath,
@@ -1457,7 +1581,6 @@ export function materializeDesenAppHistoricalReaderFileOverrides(successor, file
   }
   let overrideBytes = 0;
   for (const [relativePath, bytes] of Map.prototype.entries.call(fileOverrides)) {
-    const bytePrototype = bytes instanceof Uint8Array ? Object.getPrototypeOf(bytes) : null;
     if (
       typeof relativePath !== "string" ||
       relativePath.length === 0 ||
@@ -1466,21 +1589,53 @@ export function materializeDesenAppHistoricalReaderFileOverrides(successor, file
       path.isAbsolute(relativePath) ||
       relativePath.includes("\\") ||
       relativePath.split("/").includes("..") ||
-      !(bytes instanceof Uint8Array) ||
       utilTypes.isProxy(bytes) ||
+      !utilTypes.isUint8Array(bytes)
+    ) {
+      fail("OPTIONS_INVALID", "Historical fileOverrides contains unsupported authority.");
+    }
+    const bytePrototype = Object.getPrototypeOf(bytes);
+    let byteLength;
+    let backingBuffer;
+    try {
+      byteLength = Reflect.apply(BYTE_LENGTH_GETTER, bytes, []);
+      backingBuffer = Reflect.apply(BUFFER_GETTER, bytes, []);
+    } catch {
+      fail("OPTIONS_INVALID", "Historical fileOverrides contains unsupported authority.");
+    }
+    if (
       (bytePrototype !== Uint8Array.prototype && bytePrototype !== Buffer.prototype) ||
       Object.getOwnPropertyDescriptor(bytes, "buffer") !== undefined ||
       Object.getOwnPropertyDescriptor(bytes, "byteLength") !== undefined ||
       Object.getOwnPropertyDescriptor(bytes, "byteOffset") !== undefined ||
-      (typeof SharedArrayBuffer !== "undefined" && bytes.buffer instanceof SharedArrayBuffer)
+      utilTypes.isSharedArrayBuffer(backingBuffer)
     ) {
       fail("OPTIONS_INVALID", "Historical fileOverrides contains unsupported authority.");
     }
-    overrideBytes += bytes.byteLength;
-    if (bytes.byteLength > MAX_AUTHORITY_BYTES || overrideBytes > MAX_AUTHORITY_BYTES) {
+    overrideBytes += byteLength;
+    if (byteLength > MAX_AUTHORITY_BYTES || overrideBytes > MAX_OVERRIDE_BYTES) {
       fail("OPTIONS_INVALID", "Historical fileOverrides exceeds its byte budget.");
     }
-    materialized.set(relativePath, Buffer.from(bytes));
+    try {
+      const captured = Buffer.alloc(byteLength);
+      Reflect.apply(Uint8Array.prototype.set, captured, [bytes]);
+      materialized.set(relativePath, captured);
+    } catch {
+      fail("OPTIONS_INVALID", "Historical fileOverrides contains unsupported authority.");
+    }
+  }
+  return materialized;
+}
+
+/** Materializes the exact T01A package generation while retaining later compatibility contexts. */
+export function materializeDesenAppT01aHistoricalReaderFileOverrides(successor, fileOverrides) {
+  const materialized = materializeDesenAppHistoricalReaderFileOverrides(successor, fileOverrides);
+  const authority = historicalBridgeAuthority(successor);
+  if (!Map.prototype.has.call(fileOverrides, T01A_ANCESTOR_APP_PACKAGE_RECEIPT.path)) {
+    materialized.set(
+      T01A_ANCESTOR_APP_PACKAGE_RECEIPT.path,
+      Buffer.from(authority.t01aAncestorAppPackage),
+    );
   }
   return materialized;
 }
@@ -1517,11 +1672,13 @@ export function projectDesenAppHistoricalReaderPathInventory(successor, currentP
     }
   }
   return authority.t04ProjectPathInventory(
-    currentPaths.filter(
-      (relativePath) =>
-        !authority.predecessor.successorAddedPaths.has(relativePath) &&
-        !authority.t01cSuccessorAddedPaths.has(relativePath),
-    ),
+    authority
+      .t05ProjectPathInventory(currentPaths)
+      .filter(
+        (relativePath) =>
+          !authority.predecessor.successorAddedPaths.has(relativePath) &&
+          !authority.t01cSuccessorAddedPaths.has(relativePath),
+      ),
   );
 }
 
@@ -1549,7 +1706,16 @@ export async function authenticateDesenAppEvergreenProductCompositionSuccessor(
   rawOptions = undefined,
 ) {
   const options = exactOwnDataOptions(rawOptions, ["workspaceRoot"], "successor options");
-  const workspaceRoot = path.resolve(options.workspaceRoot ?? WORKSPACE_ROOT);
+  const selectedWorkspaceRoot = options.workspaceRoot ?? WORKSPACE_ROOT;
+  if (
+    typeof selectedWorkspaceRoot !== "string" ||
+    selectedWorkspaceRoot.length === 0 ||
+    selectedWorkspaceRoot.length > 16_384 ||
+    selectedWorkspaceRoot.includes("\0")
+  ) {
+    fail("OPTIONS_INVALID", "workspaceRoot must be one non-empty bounded path string.");
+  }
+  const workspaceRoot = path.resolve(selectedWorkspaceRoot);
   const verified = await verifyDesenAppEvergreenProductCompositionEvidence({
     artifactPath: path.join(workspaceRoot, ARTIFACT_RELATIVE_PATH),
     proofDocumentPath: path.join(workspaceRoot, PROOF_DOCUMENT_RELATIVE_PATH),
@@ -1568,14 +1734,25 @@ export async function authenticateDesenAppEvergreenProductCompositionSuccessor(
       inputPendingSuccessor.readTaskTimeFile(inputPendingSuccessor.successor, relativePath),
     ]),
   );
-  // The older bridges omitted these unchanged T01A authorities. Only the authenticated T04
-  // bridge can supply them; the public materializer still applies caller mutations last.
+  // The older bridges omitted authorities that later App successors changed. Authenticated
+  // task-time bridges supply their exact predecessor generations; caller mutations still apply
+  // last so negative tests cannot be hidden by compatibility materialization.
   const successHostHistorical = await authenticateSuccessHostHistoricalGapFiles(workspaceRoot);
   for (const [relativePath, bytes] of successHostHistorical.files) {
     if (bridgeAuthority.files.has(relativePath) || predecessorGapFiles.has(relativePath)) {
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
         "A reviewed historical gap would replace existing authority.",
+      );
+    }
+    predecessorGapFiles.set(relativePath, bytes);
+  }
+  const publishedHostHistorical = await authenticatePublishedHostHistoricalAuthority(workspaceRoot);
+  for (const [relativePath, bytes] of publishedHostHistorical.files) {
+    if (bridgeAuthority.files.has(relativePath) || predecessorGapFiles.has(relativePath)) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "A published-host historical gap would replace existing authority.",
       );
     }
     predecessorGapFiles.set(relativePath, bytes);
@@ -1605,6 +1782,8 @@ export async function authenticateDesenAppEvergreenProductCompositionSuccessor(
       predecessor: bridgeAuthority,
       predecessorGapFiles,
       t04ProjectPathInventory: successHostHistorical.projectPathInventory,
+      t05ProjectPathInventory: publishedHostHistorical.projectPathInventory,
+      t01aAncestorAppPackage: Buffer.from(publishedHostHistorical.t01aAncestorAppPackage),
       t01cSuccessorAddedPaths: new Set(T01C_SUCCESSOR_ADDED_PATHS),
     }),
   );

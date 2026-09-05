@@ -607,8 +607,8 @@ runtime probes are permitted only for the verifier side of
 `control-plane-bundle-verification`, `control-plane-local-api`, and
 `control-plane-runtime-activation`, `control-plane-runtime-recovery`, and
 `control-plane-runtime-fault-injection`, and `control-plane-runtime-transition-races`.
-The `desen-app-real-adapter-canvas` verifier receives the same bounded verifier runtime-probe
-authority for the reviewed Vite build path.
+The `desen-app-real-adapter-canvas` and `desen-app-published-host-update` verifiers receive the
+same bounded verifier runtime-probe authority for their reviewed Vite build paths.
 Native-addon authority is
 permitted only for the exact
 `reference-host-web-source-audit` verifier/root-test pair, the `publisher-invalid-source-matrix`
@@ -617,9 +617,9 @@ verifier/root-test pairs plus the exact `control-plane-runtime-recovery` and
 `control-plane-runtime-fault-injection` pairs plus only the
 `control-plane-runtime-transition-races` and `reference-host-web-channel-consumption` verifiers,
 the exact `editor-core-persistence` verifier/root pair, and the exact
-`desen-app-real-adapter-canvas` verifier/root pair. The transition-races and
+`desen-app-real-adapter-canvas` and `desen-app-published-host-update` verifier/root pairs. The transition-races and
 channel-consumption roots are explicitly denied native-addon authority. These assignments total
-seventeen exact native-addon steps; every unlisted workload remains denied.
+nineteen exact native-addon steps; every unlisted workload remains denied.
 Regression tests prove
 that every unlisted step remains denied; the source-audit verifier remains workspace-read-only.
 The reviewed production dependency audit for locked Fastify 5.11.2 and better-sqlite3 13.0.3
@@ -1468,3 +1468,57 @@ authorities are
 `sha256:ceb46eba37c63e46743fb03d4389a188928b7bedf13cab7190b276313210eae8` and
 `sha256:a6734be24611dd476051db3c93d8672e2892afe9a1276d154e67127d6c10ea35`.
 This still authenticates only identity and impact, never a cached execution result.
+
+## M10-T05 published-host update testing
+
+The sixth dedicated Playwright configuration starts the normal Desen App product, an isolated
+local control plane, a separately built reference-host client/server, and an independently
+credentialed activation bridge. Through visible controls it creates a project, authors two Text
+layers, saves and publishes revision A, and observes that exact output in the reference host. It
+then changes both visible text and Stack gap, saves and publishes revision B, reloads the host, and
+observes the update. The host HTML, JavaScript, and CSS fingerprint remains byte-identical across
+both activations, so the changed result is published Source data rather than a rebuilt host.
+
+Focused product coverage keeps channel, host, endpoint, credentials, callbacks, and executable
+modules outside authored Source. Browser publication and server activation use distinct fixed
+loopback authorities, bounded bodies, closed exact-own-data shapes, and no cookies. The trusted
+reference-host handle uses its single existing controller, independently reads the fixed channel
+before and after refresh, requires the exact positive channel generation and SHA revision, and
+returns `active` only when the controller's active revision equals the requested revision. Closed,
+unavailable, failed, or uncertain paths settle fail-closed without exposing credentials.
+
+The deterministic proof inventories 116 current source receipts and 66 focused declaration sites.
+Fresh in-memory Vite audits cover 168 App modules / 510 static edges and 104 host modules / 299
+static edges, including 22 byte-identical transformed managed modules shared by both graphs. They
+contain no unresolved or dynamic edge and write no build output. The verifier starts no Chromium,
+listener, product server, or external host; the independent root mutation reader has ten cases and
+remains passive.
+
+The CI isolation contract explicitly admits the existing T05 Vite native-addon policy for both
+the verifier and the root mutation test. The root is also exercised through that generated
+restricted environment, retaining workspace-read-only and listener-denial checks.
+
+Supplied artifact and report bytes are defensively captured and authenticated before compiling
+current sources. Invalid supplied identities fail before source acquisition; accepted identities
+still require all fresh host and App build observations and exact evidence equality. Regression
+controls use an empty workspace to distinguish early rejection from successful verification and
+mutate nested build options after invocation to retain call-time snapshot guarantees.
+
+The 189,123-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-published-host-update.json` at
+`sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`.
+Its 3,111,833-byte authenticated T04 historical-reader bridge is
+`sha256:07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470`
+and inflates to 4,884,471 bytes.
+Checkpoint sequence 72 closes 59 artifacts / 118 current readers at
+`sha256:2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249`;
+the dedicated checkpoint suite passes 100/100.
+
+The CI inventory contains 220 workloads / 105 proof units at
+`sha256:66ae36cb2ec1c8a7bc7deee1a733e253cc1861d3b9ca1487c9725f437c3abf5a`.
+The four-parent T05 impact closure contains 73 proof units / 156 workloads, and ownership covers
+1,446 tracked / 210 proof-owned paths. These tests prove only the fixed-destination local reference
+composition and P-07. Remote deployment, production credentials, multi-user persistence,
+invalid-publication rejection, last-known-good recovery, P-12, and G10 remain under later owners.
+Local success never substitutes for fresh hosted exact-head `Quality gate` and `Browser E2E`
+results.

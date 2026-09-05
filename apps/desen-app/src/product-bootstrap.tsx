@@ -14,6 +14,7 @@ import type {
   AuthoringPersistenceController,
   AuthoringPersistenceSaveResult,
 } from "./authoring-persistence.js";
+import type { AuthoringPublicationPort } from "./authoring-publication.js";
 import type {
   ProjectWorkspaceProfileHandle,
   ProjectWorkspaceProfileSnapshot,
@@ -265,6 +266,8 @@ export interface DesenAppProductProps {
   readonly workspaceProfile: ProjectWorkspaceProfileHandle;
   /** Optional host-composed integration authority for this exact workspace; off until selected. */
   readonly integrationBinding?: AuthoringIntegrationBindingHandle | null;
+  /** Optional fixed-destination publication authority for this exact workspace profile. */
+  readonly publicationPort?: AuthoringPublicationPort | null;
 }
 
 /** Normal Desen App entry with visible blank-project creation and durable Source reopening. */
@@ -272,6 +275,7 @@ export function DesenAppProduct({
   persistencePort,
   workspaceProfile,
   integrationBinding = null,
+  publicationPort = null,
 }: DesenAppProductProps) {
   const authority = readProjectWorkspaceProfileAuthority(workspaceProfile);
   const profile = authority.status === "read" ? authority.profile : null;
@@ -419,6 +423,7 @@ export function DesenAppProduct({
             : null
         }
         preparedPersistenceController={controller}
+        publicationPort={publicationPort}
         projectCreationUnavailableMessage="The supported local project already exists in this workspace."
         profileProjectVisible={phase === "ready"}
         workspaceProfile={workspaceProfile}

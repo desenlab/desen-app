@@ -162,6 +162,7 @@ export const PROOF_IDS = Object.freeze([
   "desen-app-failure-fixture",
   "desen-app-success-host-operation",
   "historical-archive-redaction",
+  "desen-app-published-host-update",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -176,6 +177,7 @@ export const READ_ONLY_ROOT_PROOF_IDS = Object.freeze([
   "runtime-core-repeat-materialization",
   "runtime-core-resource-lifecycle",
   "runtime-core-state-navigation-actions",
+  "desen-app-published-host-update",
 ]);
 
 /** The sole proof id whose root test currently requires workspace-scoped temporary writes. */
@@ -196,6 +198,7 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "control-plane-runtime-transition-races",
   "reference-host-web-channel-consumption",
   "desen-app-real-adapter-canvas",
+  "desen-app-published-host-update",
 ]);
 
 /** Exact verifier proof ids that write only inside runner-owned OS temp without spawning children. */
@@ -228,6 +231,7 @@ export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
   "reference-host-web-channel-consumption",
   "editor-core-persistence",
   "desen-app-real-adapter-canvas",
+  "desen-app-published-host-update",
 ]);
 
 /** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
@@ -239,6 +243,7 @@ export const NATIVE_ADDON_ROOT_STEP_IDS = Object.freeze([
   "test-control-plane-runtime-fault-injection",
   "test-editor-core-persistence",
   "test-desen-app-real-adapter-canvas",
+  "test-desen-app-published-host-update",
 ]);
 
 /** Exact root-test steps that need bounded Node-permission API compatibility. */
@@ -366,6 +371,7 @@ const NATIVE_ADDON_POLICIES = Object.freeze({
   REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE: "REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE",
   EDITOR_CORE_PERSISTENCE_SQLITE: "EDITOR_CORE_PERSISTENCE_SQLITE",
   DESEN_APP_REAL_ADAPTER_CANVAS_VITE: "DESEN_APP_REAL_ADAPTER_CANVAS_VITE",
+  DESEN_APP_PUBLISHED_HOST_UPDATE_VITE: "DESEN_APP_PUBLISHED_HOST_UPDATE_VITE",
   NONE: "NONE",
   PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -384,6 +390,7 @@ const NATIVE_ADDON_POLICY_BY_PROOF_ID = Object.freeze({
     NATIVE_ADDON_POLICIES.REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE,
   "editor-core-persistence": NATIVE_ADDON_POLICIES.EDITOR_CORE_PERSISTENCE_SQLITE,
   "desen-app-real-adapter-canvas": NATIVE_ADDON_POLICIES.DESEN_APP_REAL_ADAPTER_CANVAS_VITE,
+  "desen-app-published-host-update": NATIVE_ADDON_POLICIES.DESEN_APP_PUBLISHED_HOST_UPDATE_VITE,
 });
 
 const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
@@ -398,6 +405,8 @@ const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
     NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE,
   "test-editor-core-persistence": NATIVE_ADDON_POLICIES.EDITOR_CORE_PERSISTENCE_SQLITE,
   "test-desen-app-real-adapter-canvas": NATIVE_ADDON_POLICIES.DESEN_APP_REAL_ADAPTER_CANVAS_VITE,
+  "test-desen-app-published-host-update":
+    NATIVE_ADDON_POLICIES.DESEN_APP_PUBLISHED_HOST_UPDATE_VITE,
 });
 
 /** Stable failure raised when shared-state authority cannot be established safely. */
@@ -574,8 +583,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 218) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 218 steps.", {
+if (METADATA_BY_STEP_ID.size !== 220) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 220 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

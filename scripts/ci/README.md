@@ -59,7 +59,7 @@ affected App readers. This changes no product milestone or progress count. See
 2. `proof-reader-checkpoints.json` records reviewed live reader hardening without rewriting those
    artifacts.
 3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the live exact
-   218-node, 104-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
+   220-node, 105-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
    classes, and inert shared-state metadata without importing either scheduler.
 4. The retained legacy sequential runner is a manual rollback mirror, not the source of the new
    graph.
@@ -913,8 +913,8 @@ pair, the `publisher-invalid-source-matrix` root test, and the exact `control-pl
 `control-plane-runtime-fault-injection` verifier/root-test pairs plus only the
 `control-plane-runtime-transition-races` and `reference-host-web-channel-consumption` verifiers,
 and the exact `editor-core-persistence` verifier/root-test pair, plus the exact
-`desen-app-real-adapter-canvas` verifier/root-test pair. The transition-races and
-channel-consumption roots receive no native-addon grant. These grants cover seventeen exact steps;
+`desen-app-real-adapter-canvas` and `desen-app-published-host-update` verifier/root-test pairs. The transition-races and
+channel-consumption roots receive no native-addon grant. These grants cover nineteen exact steps;
 all unlisted steps remain denied.
 The source-audit verifier remains workspace-read-only; its root test is the sole workspace-temp
 barrier. The publisher root loads only the reviewed Rolldown binding, and the control-plane pairs
@@ -1647,3 +1647,71 @@ and required-affected runner authority at
 `sha256:a6734be24611dd476051db3c93d8672e2892afe9a1276d154e67127d6c10ea35`.
 The immutable I07-04 hosted comparison evidence remains byte-identical; these current identity
 receipts grant no cached workload success and no exact-head hosted completion.
+
+## M10-T05 published-host-update CI authority
+
+M10-T05 appends `desen-app-published-host-update` as ordinary proof pair 105. Its verifier is a
+runner-scoped OS-temporary workload because it performs fresh in-memory Vite graph builds; the
+independent root reader remains passive and read-only. Neither deterministic reader starts
+Chromium, a listener, a product server, or an external host. The Browser E2E package owns the sixth
+explicit Playwright configuration and builds the Desen App, reference-host server, and independent
+reference-host client before executing it. Hosted CI runs the exact verifier/root pair after that
+browser journey.
+
+Both T05 workloads receive the exact `DESEN_APP_PUBLISHED_HOST_UPDATE_VITE` native-addon policy
+required by their fresh in-memory Vite audits. The root retains its ordinary Node test harness,
+runner-owned temporary directory, and workspace-read-only boundary. The grant does not add a
+listener, external-network access, or workspace writes to either workload.
+
+The exhaustive scheduler starts the exact T05 pair early within its existing ordinary segment,
+alongside the existing segment-local package-digest prioritization. This avoids a long single-worker
+tail without crossing an exclusive barrier or changing the two-worker bound, prerequisite checks,
+canonical receipt order, workload inventory, cancellation behavior, or time limits. A held T05 pair
+must drain before the closing region can start, and its failure still cancels and awaits its sibling.
+
+The semantic graph binds the T05 pair to four exact parents: T04 success/host operation, App
+publish/activation, the reference-host source audit, and the real-adapter canvas. The neutral
+inventory contains 220 workloads / 105 proof units, 735 prerequisite segments, 4,539 leaf
+invocations, and 329 distinct leaves. Their authorities are respectively
+`sha256:66ae36cb2ec1c8a7bc7deee1a733e253cc1861d3b9ca1487c9725f437c3abf5a`,
+`sha256:88af45661aa52d2fd3d73dafd2b353861ba79d40bda34ad607e4f7be075a0903`,
+`sha256:e1da871804e086baf06101430d5f0762461961f8d41223e0305de0ec6a29e644`, and
+`sha256:64f3abc8fe15a698398c381709b76d6d6c330c210e1229b5a128a6bfd780a773`.
+The graph is
+`sha256:50ca74533c82b6a02977281f912cc4a37484c22aea7bfa60d343197f1ee81620`;
+the exact T05 closure contains 73 proof units / 156 workloads at
+`sha256:38923448f33f9c7e42b9d09641574ffc0e2c403c1080d7a42eaa56e5f0cd12d2`.
+
+Exact-one ownership covers 1,446 tracked paths / 210 proof-owned paths. Its path-set and complete
+authority are
+`sha256:9cc6e2ebb16b60cc804ca2b7380bf1710d4aa960a363ec606b0574c641fbd53c` and
+`sha256:dc6d534f81fa551fc37ca045a88b2424f10d5fc935cdc56f99aaa55a5efbcbc6`.
+The category split is 210 proof-unit, 45 CI-policy, 32 dependency-policy, 154 frozen-input, 555
+package/application, 292 shared-proof-infrastructure, 147 project-documentation, and eleven
+repository-policy paths. Only the exact T05 verifier/root paths receive narrow proof ownership;
+application, browser, boundary, architecture, artifact, and shared proof inputs remain
+conservative exhaustive selectors.
+
+Shared-state authority covers all 220 workloads with 94 ordinary / eleven barrier proof pairs, 93
+OS-temporary roots, 92 read-only proof workloads, and 107 OS-temporary-isolated proof workloads.
+Required and shadow exhaustive plans are
+`sha256:30799382d92edf70455a42bc01e13973324bf1a916b5b925ad86c429b926fb2a` and
+`sha256:0cb43b3c983e0e7ef6fb7536e08a90a9ce21a811eff22aab5767367c76b12641`.
+Rollback equivalence retains plan
+`sha256:f88698910808b705712c06d7c35c94b9f679df5f13e9f20d7af2d01c295dfad1`
+and workload set
+`sha256:39331deb57f2d8526e292a56aa031711bc1ca714631c3967f32f19dc5ff5d42f`.
+
+Reviewed checkpoint sequence 72 preserves sequences 1–71 and all 58 predecessor artifacts. It
+adds the 189,123-byte T05 artifact at
+`sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`,
+reseals the changed M07-T11 proof/root readers `[38, 39]`, T01A readers `[102, 103]`, evergreen T01C readers `[106, 107]`, and
+T04 readers `[112, 113]`, appends T05 readers `[116, 117]`, and
+closes 59 artifacts / 118 readers at
+`sha256:2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249`.
+Promotion binds the current selector at
+`sha256:3fef221a77c9f222259774f9f8feaeedccedd7f8574cf3da5bd147cfe52b3680`
+and required-affected runner authority at
+`sha256:add4dbf618e7f019a76831799df3184e1ee0ca6638f1fa1ee2ac58c86a0f6eba`.
+No workload, barrier, timeout, isolation rule, closing guard, or fresh hosted execution requirement
+is removed. These local identity receipts do not claim an exact-head hosted result or close G10.

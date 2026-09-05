@@ -55,10 +55,11 @@ const temporaryDirectories = [];
 let built;
 let sourcePolicyInput;
 
-function expectedError(code) {
+function expectedError(code, message = undefined) {
   return (error) => {
     assert.ok(error instanceof DesenAppUserCreatedBlankProjectProofError);
     assert.equal(error.code, code);
+    if (message !== undefined) assert.equal(error.message, message);
     return true;
   };
 }
@@ -324,6 +325,12 @@ test("[M10-T01B successor] authenticates exact visual authoring evidence and cur
     ],
     [hostedBrowserPath, await readFile(path.join(ROOT, hostedBrowserPath))],
   ]) {
+    const expectedMessage =
+      relativePath === successor.artifact.path
+        ? "The exact immutable M10-T01B visual-behavior artifact drifted."
+        : relativePath === hostedBrowserPath
+          ? "The exact M10-T01B hosted-browser compatibility receipt drifted."
+          : `The exact current M10-T01B receipt drifted: ${relativePath}.`;
     const mutations =
       relativePath === hostedBrowserPath
         ? [Buffer.concat([bytes, Buffer.from("\n")])]
@@ -333,7 +340,7 @@ test("[M10-T01B successor] authenticates exact visual authoring evidence and cur
         verifyDesenAppUserCreatedBlankProjectEvidence({
           buildOptions: { fileOverrides: new Map([[relativePath, mutation]]) },
         }),
-        expectedError("SUCCESSOR_POLICY_VIOLATION"),
+        expectedError("SUCCESSOR_POLICY_VIOLATION", expectedMessage),
       );
     }
   }
@@ -456,6 +463,12 @@ test(DESEN_APP_USER_CREATED_BLANK_PROJECT_ROOT_TEST_NAMES[10], async () => {
     "apps/desen-app/src/styles.css",
   ]) {
     const authorityBytes = await readFile(path.join(ROOT, relativePath));
+    const expectedMessage =
+      relativePath === "apps/desen-app-browser-e2e/user-created-blank-project.pw.ts"
+        ? "The exact M10-T01B hosted-browser compatibility receipt drifted."
+        : relativePath === "apps/desen-app/src/styles.css"
+          ? `The retained M10-T01A historical receipt drifted: ${relativePath}.`
+          : `The exact current M10-T01B receipt drifted: ${relativePath}.`;
     await assert.rejects(
       verifyDesenAppUserCreatedBlankProjectEvidence({
         artifactBytes: immutableArtifactBytes,
@@ -468,7 +481,7 @@ test(DESEN_APP_USER_CREATED_BLANK_PROJECT_ROOT_TEST_NAMES[10], async () => {
           "6277b82f22bf26e92b670164f2f1e2b7f861409f5b37585fb5053d88c4dadd2e",
         ),
       }),
-      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+      expectedError("SUCCESSOR_POLICY_VIOLATION", expectedMessage),
     );
   }
   for (const options of [
@@ -482,6 +495,55 @@ test(DESEN_APP_USER_CREATED_BLANK_PROJECT_ROOT_TEST_NAMES[10], async () => {
       expectedError("OPTIONS_INVALID"),
     );
   }
+
+  class HostileMap extends Map {
+    [Symbol.iterator]() {
+      throw new Error("hostile iterator must not run");
+    }
+  }
+  await assert.rejects(
+    buildDesenAppUserCreatedBlankProjectEvidence({ fileOverrides: new HostileMap() }),
+    expectedError("OPTIONS_INVALID"),
+  );
+
+  let proxyPrototypeTrapRan = false;
+  const proxiedMap = new Proxy(new Map(), {
+    getPrototypeOf() {
+      proxyPrototypeTrapRan = true;
+      throw new Error("hostile prototype trap must not run");
+    },
+  });
+  await assert.rejects(
+    buildDesenAppUserCreatedBlankProjectEvidence({ fileOverrides: proxiedMap }),
+    expectedError("OPTIONS_INVALID"),
+  );
+  assert.equal(proxyPrototypeTrapRan, false);
+
+  let hostileBufferGetterRan = false;
+  class HostileBytes extends Uint8Array {
+    get buffer() {
+      hostileBufferGetterRan = true;
+      throw new Error("hostile buffer getter must not run");
+    }
+  }
+  await assert.rejects(
+    buildDesenAppUserCreatedBlankProjectEvidence({
+      fileOverrides: new Map([[SOURCE_PATHS.main, new HostileBytes(1)]]),
+    }),
+    expectedError("OPTIONS_INVALID"),
+  );
+  assert.equal(hostileBufferGetterRan, false);
+
+  const boundedChunk = Buffer.alloc(8 * 1_024 * 1_024 + 1);
+  await assert.rejects(
+    buildDesenAppUserCreatedBlankProjectEvidence({
+      fileOverrides: new Map([
+        [SOURCE_PATHS.main, boundedChunk],
+        [SOURCE_PATHS.productBootstrap, boundedChunk],
+      ]),
+    }),
+    expectedError("OPTIONS_INVALID"),
+  );
 
   const directory = await temporaryDirectory("desen-user-created-proof-");
   const destination = path.join(directory, "artifact.json");

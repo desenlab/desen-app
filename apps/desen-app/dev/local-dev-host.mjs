@@ -3,9 +3,11 @@ import { chmod, lstat, mkdir, realpath } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, sep } from "node:path";
 
 import { openLocalControlPlane } from "@desen/control-plane-api";
-import { createServer as createViteServer } from "vite";
+import { openReferenceHostWebServer } from "@desen/reference-host-web-server";
+import { build as buildViteApplication, createServer as createViteServer } from "vite";
 
 import { openDesenAppLocalOperationHost } from "./local-operation-host.mjs";
+import { openDesenAppLocalPublicationHost } from "./local-publication-host.mjs";
 
 /** Exact browser origin owned by the normal Desen App local development profile. */
 export const DESEN_APP_LOCAL_DEV_ORIGIN = "http://127.0.0.1:5173";
@@ -22,9 +24,16 @@ export const DESEN_APP_LOCAL_OPERATION_DEFINE_NAME = "__DESEN_APP_LOCAL_OPERATIO
 /** Exact local Integration profile, deliberately separate from Source persistence authority. */
 export const DESEN_APP_LOCAL_OPERATION_PROFILE = "desen.app.local-operation.v1";
 
+/** Exact Vite define consumed by `readInjectedDesenAppLocalPublicationConfig`. */
+export const DESEN_APP_LOCAL_PUBLICATION_DEFINE_NAME = "__DESEN_APP_LOCAL_PUBLICATION_CONFIG__";
+
+/** Exact profile binding browser-safe channel publication to server-owned host activation. */
+export const DESEN_APP_LOCAL_PUBLICATION_PROFILE = "desen.app.local-publication.v1";
+
 const LOCAL_RUNTIME_TOKEN_BYTES = 32;
 const LOOPBACK_ORIGIN_PATTERN = /^http:\/\/127\.0\.0\.1:([1-9][0-9]{0,4})$/u;
 const VISIBLE_ASCII_PATTERN = /^[\x21-\x7e]+$/u;
+const LOCAL_IDENTIFIER_PATTERN = /^[a-z][a-z0-9-]{0,63}$/u;
 
 /** Vite's pinned default secret-file denies plus the app-owned local state namespace. */
 export const DESEN_APP_LOCAL_VITE_FS_DENY = Object.freeze([
@@ -299,10 +308,61 @@ export function createDesenAppLocalOperationDefine(origin, apiToken) {
 }
 
 /**
+ * Builds the independent publication define for one fixed channel and installed host.
+ *
+ * @param {string} controlPlaneOrigin Exact control-plane loopback origin.
+ * @param {string} controlPlaneApiToken Browser publication bearer.
+ * @param {string} activationOrigin Exact server-owned activation bridge origin.
+ * @param {string} activationApiToken Independent activation bearer.
+ * @param {string} channelName Fixed trusted publication channel.
+ * @param {string} hostId Fixed trusted reference-host identity.
+ * @returns {Readonly<Record<string, string>>} Closed in-memory Vite definition.
+ */
+export function createDesenAppLocalPublicationDefine(
+  controlPlaneOrigin,
+  controlPlaneApiToken,
+  activationOrigin,
+  activationApiToken,
+  channelName,
+  hostId,
+) {
+  createDesenAppLocalRuntimeDefine(controlPlaneOrigin, controlPlaneApiToken);
+  createDesenAppLocalRuntimeDefine(activationOrigin, activationApiToken);
+  if (
+    controlPlaneOrigin === activationOrigin ||
+    controlPlaneApiToken === activationApiToken ||
+    typeof channelName !== "string" ||
+    !LOCAL_IDENTIFIER_PATTERN.test(channelName) ||
+    typeof hostId !== "string" ||
+    !LOCAL_IDENTIFIER_PATTERN.test(hostId)
+  ) {
+    throw new DesenAppLocalDevHostError("INVALID_RUNTIME_CONFIG");
+  }
+  return Object.freeze({
+    [DESEN_APP_LOCAL_PUBLICATION_DEFINE_NAME]: JSON.stringify({
+      profile: DESEN_APP_LOCAL_PUBLICATION_PROFILE,
+      controlPlane: { origin: controlPlaneOrigin, apiToken: controlPlaneApiToken },
+      activation: { origin: activationOrigin, apiToken: activationApiToken },
+      destination: { channelName, hostId },
+    }),
+  });
+}
+
+/**
  * @typedef {Readonly<{
  *   appOrigin: typeof DESEN_APP_LOCAL_DEV_ORIGIN;
+ *   referenceHostOrigin: string | null;
  *   close: () => Promise<void>;
  * }>} DesenAppLocalDevHost
+ */
+
+/**
+ * @typedef {Readonly<{
+ *   channelName: string;
+ *   clientRootDirectory: string;
+ *   hostId: string;
+ *   installedPackageDirectory: string;
+ * }>} DesenAppLocalPublicationComposition
  */
 
 /**
@@ -310,9 +370,13 @@ export function createDesenAppLocalOperationDefine(origin, apiToken) {
  *   appDirectory: string;
  *   stateDirectory: string;
  *   createViteServer?: typeof createViteServer;
+ *   buildReferenceHost?: typeof buildViteApplication;
  *   entropy?: (size: number) => Uint8Array;
  *   openControlPlane?: typeof openLocalControlPlane;
  *   openOperationHost?: typeof openDesenAppLocalOperationHost;
+ *   openPublicationHost?: typeof openDesenAppLocalPublicationHost;
+ *   openReferenceHost?: typeof openReferenceHostWebServer;
+ *   publication?: DesenAppLocalPublicationComposition;
  * }>} StartDesenAppLocalDevOptions
  */
 
@@ -325,11 +389,22 @@ export function createDesenAppLocalOperationDefine(origin, apiToken) {
 export async function startDesenAppLocalDev(options) {
   const openControlPlane = options.openControlPlane ?? openLocalControlPlane;
   const openOperationHost = options.openOperationHost ?? openDesenAppLocalOperationHost;
+  const openPublicationHost = options.openPublicationHost ?? openDesenAppLocalPublicationHost;
+  const openReferenceHost = options.openReferenceHost ?? openReferenceHostWebServer;
+  const buildReferenceHost = options.buildReferenceHost ?? buildViteApplication;
   const makeViteServer = options.createViteServer ?? createViteServer;
   const canonicalAppDirectory = await captureCanonicalAppDirectory(options.appDirectory);
   const apiToken = createDesenAppLocalApiToken(options.entropy);
   const operationApiToken = createDesenAppLocalApiToken(options.entropy);
   if (operationApiToken === apiToken) {
+    throw new DesenAppLocalDevHostError("INVALID_RUNTIME_CONFIG");
+  }
+  const activationApiToken =
+    options.publication === undefined ? undefined : createDesenAppLocalApiToken(options.entropy);
+  if (
+    activationApiToken !== undefined &&
+    (activationApiToken === apiToken || activationApiToken === operationApiToken)
+  ) {
     throw new DesenAppLocalDevHostError("INVALID_RUNTIME_CONFIG");
   }
   const rootDirectory = await prepareDesenAppLocalStateRoot(options.stateDirectory);
@@ -342,6 +417,11 @@ export async function startDesenAppLocalDev(options) {
   }
   let controlPlane;
   let operationHost;
+  /** @type {Awaited<ReturnType<typeof openDesenAppLocalPublicationHost>> | undefined} */
+  let publicationHost;
+  /** @type {Awaited<ReturnType<typeof openReferenceHostWebServer>> | undefined} */
+  let referenceHost;
+  let referenceHostOrigin = null;
   let viteServer;
   try {
     controlPlane = await openControlPlane({
@@ -355,6 +435,83 @@ export async function startDesenAppLocalDev(options) {
       allowedOrigin: DESEN_APP_LOCAL_DEV_ORIGIN,
     });
     const operationListener = await operationHost.listen(0);
+    let publicationDefine = {};
+    if (options.publication !== undefined && activationApiToken !== undefined) {
+      const publication = options.publication;
+      if (
+        publication === null ||
+        typeof publication !== "object" ||
+        Object.getPrototypeOf(publication) !== Object.prototype ||
+        Reflect.ownKeys(publication).length !== 4 ||
+        !Reflect.ownKeys(publication).every(
+          (key) =>
+            typeof key === "string" &&
+            ["channelName", "clientRootDirectory", "hostId", "installedPackageDirectory"].includes(
+              key,
+            ),
+        ) ||
+        typeof publication.channelName !== "string" ||
+        !LOCAL_IDENTIFIER_PATTERN.test(publication.channelName) ||
+        typeof publication.hostId !== "string" ||
+        !LOCAL_IDENTIFIER_PATTERN.test(publication.hostId)
+      ) {
+        throw new DesenAppLocalDevHostError("INVALID_RUNTIME_CONFIG");
+      }
+      const clientRootDirectory = await captureCanonicalAppDirectory(
+        publication.clientRootDirectory,
+      );
+      const installedPackageDirectory = await captureCanonicalAppDirectory(
+        publication.installedPackageDirectory,
+      );
+      const appStateDirectory = dirname(rootDirectory);
+      const clientBuildDirectory = join(appStateDirectory, "reference-host-web-dist");
+      await ensurePrivateDirectory(clientBuildDirectory);
+      const canonicalClientBuildDirectory = await realpath(clientBuildDirectory);
+      if (canonicalClientBuildDirectory !== clientBuildDirectory) {
+        throw new DesenAppLocalDevHostError("UNSAFE_STATE_ROOT");
+      }
+      await buildReferenceHost({
+        root: clientRootDirectory,
+        appType: "spa",
+        configFile: false,
+        envDir: false,
+        clearScreen: false,
+        logLevel: "warn",
+        build: { emptyOutDir: true, outDir: canonicalClientBuildDirectory },
+      });
+      const activeReferenceHost = await openReferenceHost({
+        rootDirectory,
+        installedPackageDirectory,
+        clientBuildDirectory: canonicalClientBuildDirectory,
+        controlPlaneOrigin: listener.origin,
+        controlPlaneApiToken: apiToken,
+        channelName: publication.channelName,
+      });
+      referenceHost = activeReferenceHost;
+      const referenceHostListener = await activeReferenceHost.listen(0);
+      referenceHostOrigin = referenceHostListener.origin;
+      publicationHost = await openPublicationHost({
+        apiToken: activationApiToken,
+        allowedOrigin: DESEN_APP_LOCAL_DEV_ORIGIN,
+        channelName: publication.channelName,
+        hostId: publication.hostId,
+        activatePublishedRevision: ({ channelName, channelGeneration, revision }) =>
+          activeReferenceHost.activatePublishedRevision({
+            channelName,
+            channelGeneration,
+            revision,
+          }),
+      });
+      const publicationListener = await publicationHost.listen(0);
+      publicationDefine = createDesenAppLocalPublicationDefine(
+        listener.origin,
+        apiToken,
+        publicationListener.origin,
+        activationApiToken,
+        publication.channelName,
+        publication.hostId,
+      );
+    }
     viteServer = await makeViteServer({
       root: canonicalAppDirectory,
       appType: "spa",
@@ -364,6 +521,7 @@ export async function startDesenAppLocalDev(options) {
       define: {
         ...createDesenAppLocalRuntimeDefine(listener.origin, apiToken),
         ...createDesenAppLocalOperationDefine(operationListener.origin, operationApiToken),
+        ...publicationDefine,
       },
       plugins: [createDesenAppLocalStateDenyPlugin()],
       server: {
@@ -384,14 +542,21 @@ export async function startDesenAppLocalDev(options) {
       try {
         await viteServer.close();
       } catch {
-        // Startup already failed; continue revoking the storage authority.
+        // Startup already failed; continue revoking every downstream authority.
       }
     }
-    if (controlPlane !== undefined) {
+    if (publicationHost !== undefined) {
       try {
-        await controlPlane.close();
+        await publicationHost.close();
       } catch {
-        // The public failure remains fixed and redacted across cleanup outcomes.
+        // A failed startup still revokes the independent browser activation edge.
+      }
+    }
+    if (referenceHost !== undefined) {
+      try {
+        await referenceHost.close();
+      } catch {
+        // Static-host and durable activation authority are revoked before failure escapes.
       }
     }
     if (operationHost !== undefined) {
@@ -399,6 +564,13 @@ export async function startDesenAppLocalDev(options) {
         await operationHost.close();
       } catch {
         // A failed listener cannot leave the independently authorized operation service live.
+      }
+    }
+    if (controlPlane !== undefined) {
+      try {
+        await controlPlane.close();
+      } catch {
+        // The public failure remains fixed and redacted across cleanup outcomes.
       }
     }
     throw new DesenAppLocalDevHostError("LOCAL_START_FAILED");
@@ -413,13 +585,27 @@ export async function startDesenAppLocalDev(options) {
       } catch {
         failed = true;
       }
+      if (publicationHost !== undefined) {
+        try {
+          await publicationHost.close();
+        } catch {
+          failed = true;
+        }
+      }
+      if (referenceHost !== undefined) {
+        try {
+          await referenceHost.close();
+        } catch {
+          failed = true;
+        }
+      }
       try {
-        await controlPlane.close();
+        await operationHost.close();
       } catch {
         failed = true;
       }
       try {
-        await operationHost.close();
+        await controlPlane.close();
       } catch {
         failed = true;
       }
@@ -428,5 +614,9 @@ export async function startDesenAppLocalDev(options) {
     return closePromise;
   };
 
-  return Object.freeze({ appOrigin: DESEN_APP_LOCAL_DEV_ORIGIN, close });
+  return Object.freeze({
+    appOrigin: DESEN_APP_LOCAL_DEV_ORIGIN,
+    referenceHostOrigin,
+    close,
+  });
 }
