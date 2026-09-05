@@ -3365,7 +3365,7 @@ authenticated T01A ancestor gap, seven successor paths, and one projection witho
 predecessor artifacts. The T04 verifier and its root
 reader also pass, including 10/10 root cases. Checkpoint sequence 72 preserves sequences 1–71 and
 authenticates 59 artifacts / 118 readers at
-`sha256:68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8`.
+`sha256:bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1`.
 
 The neutral CI inventory contains 220 workloads / 105 proof units. The M10-T05 closure contains 73
 proof units / 156 workloads, and exact-one ownership covers 1,446 tracked paths / 210 proof-owned

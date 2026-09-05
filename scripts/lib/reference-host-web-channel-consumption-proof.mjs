@@ -128,6 +128,10 @@ const RUNTIME_TEST_TITLES_BY_FILE = Object.freeze({
     "exercises A-B-C preservation and restart recovery without socket authority",
   ]),
   [`${SERVER_DIRECTORY}/test/server.test.ts`]: Object.freeze([
+    "activates one exact published channel identity through the server's single controller",
+    "rejects malformed or mismatched publication identities without activating a candidate",
+    "never reports Active when the host preserves a different last-known-good revision",
+    "fails closed before refresh when unavailable and after the server lifetime closes",
     "serves the exact active envelope and keeps server authorities out of the response",
     "rejects cross-origin, body-bearing, query, and wrong-method refresh requests",
     "keeps the application authentication backend outside the reference server",

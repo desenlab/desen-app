@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 ## Current work — M10-T05 published host update
 
@@ -20,7 +20,7 @@ The verifier passes, the independent root reader passes 10/10, focused suites pa
 unresolved edges and 22 byte-identical managed modules shared by both builds. The boundary graph
 passes across 861 modules / 3,685 dependencies. P-07 advances to `PROVEN` and PF-059 closes for the
 audited Web–React profile. Checkpoint sequence 72 authenticates 59 artifacts / 118 readers at
-`sha256:68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8`; proof gates remain
+`sha256:bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1`; proof gates remain
 11/13.
 
 The `DONE` entry does not authorize merge yet. Fresh hosted `Quality gate` and `Browser E2E` must
@@ -4994,7 +4994,7 @@ M09-T14/G09 evidence:
 - the neutral CI inventory contains 220 workloads / 105 proof units; T05 closure contains 73 proof
   units / 156 workloads; exact-one ownership covers 1,446 tracked paths / 210 proof-owned paths;
   checkpoint sequence 72 closes 59 artifacts / 118 readers at
-  `sha256:68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8`
+  `sha256:bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1`
 - coverage decision: M10-T05 is a `DONE` closure candidate; P-07 advances to `PROVEN`, PF-059 closes,
   progress advances to 117/148 (79%), and M10 advances to 8/12 (67%); proof gates remain 11/13 and
   M10-T06 is next

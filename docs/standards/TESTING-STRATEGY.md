@@ -1501,7 +1501,7 @@ Its 3,111,833-byte authenticated T04 historical-reader bridge is
 `sha256:07c33e1086e6de68220b42af1bbf75a1be17978972d344bedba5ad5685dc8470`
 and inflates to 4,884,471 bytes.
 Checkpoint sequence 72 closes 59 artifacts / 118 current readers at
-`sha256:68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8`;
+`sha256:bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1`;
 the dedicated checkpoint suite passes 100/100.
 
 The CI inventory contains 220 workloads / 105 proof units at

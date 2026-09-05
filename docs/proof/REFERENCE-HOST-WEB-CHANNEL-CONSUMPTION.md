@@ -65,7 +65,7 @@ arbitrary filesystem path or install code.
 
 ## Closed executable sequence
 
-The focused suite owns 46 exact test identities across the server transport, installed-package
+The frozen M07-T11 artifact records 46 exact test identities across the server transport, installed-package
 inventory, activation controller, HTTP server, browser delivery, production-entry lifecycle, and
 delivered-Bundle activator. Nine of those are the closed protocol case identities:
 
@@ -78,6 +78,13 @@ delivered-Bundle activator. Nine of those are the closed protocol case identitie
 7. `loopback-bearer-enforced`;
 8. `installed-inventory-symlink-rejected`; and
 9. `browser-mount-preserves-good`.
+
+The current compatibility reader also requires the four M10-T05 publication-activation tests,
+bringing the live suite to 50 exact identities. They cover exact activation reconciliation,
+rejected publication identities, preservation of a different last-known-good revision, and
+unavailable or closed server lifetimes. The frozen artifact and its 46-test historical receipt
+remain unchanged; the live suite executes all 50 tests and rejects missing, duplicate, or
+unexpected test identities.
 
 The remaining exact test identities independently retain the raw Bundle-byte envelope, official
 response media types, BOM rejection, bounded-body cleanup, hard-link rejection, fixed `/home`

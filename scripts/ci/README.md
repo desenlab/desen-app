@@ -1694,13 +1694,13 @@ and workload set
 Reviewed checkpoint sequence 72 preserves sequences 1–71 and all 58 predecessor artifacts. It
 adds the 189,123-byte T05 artifact at
 `sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`,
-reseals the changed T01A proof/root readers `[102, 103]`, evergreen T01C readers `[106, 107]`, and
+reseals the changed M07-T11 proof/root readers `[38, 39]`, T01A readers `[102, 103]`, evergreen T01C readers `[106, 107]`, and
 T04 readers `[112, 113]`, appends T05 readers `[116, 117]`, and
 closes 59 artifacts / 118 readers at
-`sha256:68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8`.
+`sha256:bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1`.
 Promotion binds the current selector at
-`sha256:fda00530874a4a9af82eabb023673a65f352b40d40994b061f7384a9fe3ac5d6`
+`sha256:cadc9e8767eaf4402860f7604f26cecb219661133ccf16663023b2c8a1648240`
 and required-affected runner authority at
-`sha256:2be91056afcd2a99f56e77291f09a8cf2868e1d024cd2e3f1eb465c60778e462`.
+`sha256:ea90c5e9e9272664ed60f56c3c15eec0a42a37cdc9273ad21762ea07c82c60b1`.
 No workload, barrier, timeout, isolation rule, closing guard, or fresh hosted execution requirement
 is removed. These local identity receipts do not claim an exact-head hosted result or close G10.

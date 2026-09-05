@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8",
+  "headSha256": "bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1",
   "checkpoints": [
     {
       "sequence": 1,
@@ -47701,15 +47701,15 @@
           "task": "M07-T11",
           "role": "proof-library",
           "path": "scripts/lib/reference-host-web-channel-consumption-proof.mjs",
-          "bytes": 72867,
-          "sha256": "0f0772bbdd4512ab5546b4661cbf6ebfd6095c47cd8a63d884790780141e41bb"
+          "bytes": 73231,
+          "sha256": "000b38f5fd6f44e40b4e7e4f71b2bc38a9d640ecde3321c1cfe0c14bfdc4b28e"
         },
         {
           "task": "M07-T11",
           "role": "root-test",
           "path": "tests/reference-host-web-channel-consumption.test.mjs",
-          "bytes": 20827,
-          "sha256": "d1b0b86968addcfc3000ce62b450dca4d81ec0ac7104573df1755007e5ad1e6c"
+          "bytes": 23611,
+          "sha256": "3fa44d206255ddf355ba6cb3506b106e6a733b99d4761a4b1131591359871569"
         },
         {
           "task": "M06-T02",

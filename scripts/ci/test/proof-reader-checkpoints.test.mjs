@@ -56,7 +56,7 @@ const ARCHIVE_REDACTION_RESEALED_READER_INDEXES = Object.freeze([
   106, 107, 108, 109, 110, 111, 112, 113,
 ]);
 const PUBLISHED_HOST_UPDATE_RESEALED_READER_INDEXES = Object.freeze([
-  102, 103, 106, 107, 112, 113, 116, 117,
+  38, 39, 102, 103, 106, 107, 112, 113, 116, 117,
 ]);
 
 async function assertHistoricalReaderMatchesCurrentWorkspace(reader, index) {
@@ -791,7 +791,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[71],
-    "68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8",
+    "bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -3109,12 +3109,22 @@ test("sequence seventy-two appends M10-T05 and reseals only its exact current re
     },
   ]);
   assert.deepEqual(
-    [102, 103, 106, 107].map((index) => ({
+    [38, 39, 102, 103, 106, 107].map((index) => ({
       index,
       bytes: current.readers[index].bytes,
       sha256: current.readers[index].sha256,
     })),
     [
+      {
+        index: 38,
+        bytes: 73231,
+        sha256: "000b38f5fd6f44e40b4e7e4f71b2bc38a9d640ecde3321c1cfe0c14bfdc4b28e",
+      },
+      {
+        index: 39,
+        bytes: 23611,
+        sha256: "3fa44d206255ddf355ba6cb3506b106e6a733b99d4761a4b1131591359871569",
+      },
       {
         index: 102,
         bytes: 62026,
@@ -3187,7 +3197,7 @@ test("sequence seventy-two appends M10-T05 and reseals only its exact current re
   );
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "68ad309960849bd1808f20f77b72dc78988ea5d672f6f73e56dcf57375d6e2a8",
+    "bf1f0d80b1af2c82ed8f7f5c0c85790052080bb2ecd19145d68a0b10fc8a4ea1",
   );
 });
 
