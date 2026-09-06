@@ -279,13 +279,13 @@ test("authenticates the exact 20/20 hosted promotion campaign", async () => {
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "62e0ae1b869b5c127cfa101cabe95bce75f612641a781148d68af6454c91e237",
-    ownershipSha256: "5e9bfed553437553ea36157baef70439ed50c712eeb318f28e14f2c522228c60",
+    selectorSha256: "5f221e6c17eda748bb26cb2dd7a320edc6730a995b2dd6f873c5ff48fd20f457",
+    ownershipSha256: "c8836a58038204386135eadc7cba83453f95c03dde11ea98b70fba516360afce",
     impactGraphSha256: "50ca74533c82b6a02977281f912cc4a37484c22aea7bfa60d343197f1ee81620",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "66ae36cb2ec1c8a7bc7deee1a733e253cc1861d3b9ca1487c9725f437c3abf5a",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "b54f7cf6a5564921faf2a41b3ec6267e30adf3d633231787065da1a2fec168b5",
+    runnerAuthoritySha256: "84c78f0e904665deff8b3a22c7687eef27047d9fe10fa3325c9c1842d0c1ed53",
   });
 });
 
@@ -349,12 +349,23 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "27166d8cca9e4ce8eadde335306070b404e1e8f28de3e36dd391430a7884d825",
-    checkpoints: 73,
+    headSha256: "da57d8ddad552e2d0ce5ebc7f990aa6d90c722f8af1ae3a31f4247d11a43e308",
+    checkpoints: 74,
     frozenArtifacts: 59,
     currentReaders: 118,
   };
   assert.equal(validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt), liveReceipt);
+  assert.throws(
+    () =>
+      validateAffectedSelectorPromotionLiveCheckpoint({
+        ...liveReceipt,
+        headSha256: "27166d8cca9e4ce8eadde335306070b404e1e8f28de3e36dd391430a7884d825",
+        checkpoints: 73,
+      }),
+    (error) =>
+      error instanceof AffectedSelectorPromotionEvidenceError &&
+      error.code === "AFFECTED_PROMOTION_CUTOVER_DRIFT",
+  );
   assert.throws(
     () =>
       validateAffectedSelectorPromotionLiveCheckpoint({

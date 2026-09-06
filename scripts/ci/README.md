@@ -15,7 +15,24 @@ cached success, so every selected hosted workload remains fresh. CI-02 adds no l
 selector, changes no hosted dispatcher or workflow, and leaves I07-05 plus the manual legacy
 rollback path unchanged.
 
-## SEC-01 dependency-security successor
+## SEC-02 development-dependency security successor
+
+SEC-02 updates only six transitive development-package records and keeps all direct manifests,
+workflow permissions, workload inventory, deadlines, and worker limits unchanged. The existing
+orchestrator-contract workload executes the new installed-consumer positive/negative security
+tests. Network audit remains separate dated evidence; tests do not contact the registry.
+
+Checkpoint 74 preserves sequences 1–73 and all 59 frozen artifacts, resealing only current T05
+reader indexes 116/117 at
+`sha256:da57d8ddad552e2d0ce5ebc7f990aa6d90c722f8af1ae3a31f4247d11a43e308`.
+T05 separately authenticates the exact 132,006-byte current lock and retains its 132,012-byte
+historical receipt. Fresh Vite graph and output equality remain mandatory, with no output hash
+projection or bridge regeneration. The verifier and its 10 root tests pass; checkpoint tests pass
+102/102. The new evidence document extends ownership to 1,449 tracked paths / 210 proof-owned
+paths; the exact SEC-01 and frozen I07-04 path inventories remain independently tested.
+See [SEC-02 evidence](../../docs/proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md).
+
+## SEC-01 dependency-security predecessor
 
 SEC-01 updates Fastify to 5.12.2 and both installed fast-uri lines to 3.1.7/4.1.4. Checkpoint 73
 preserves all 59 frozen artifacts and sequences 1–72, resealing only the six current readers for

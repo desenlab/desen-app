@@ -194,6 +194,7 @@ const PROMOTION_REMOVED_TRACKED_PATHS = Object.freeze([
 const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
   "docs/proof/SEC-01-DEPENDENCY-SECURITY.md",
+  "docs/proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md",
   "docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md",
   "docs/proof/artifacts/editor-core-0.1.0-source-document.json",
   "packages/editor-core/src/source-document.ts",
@@ -668,7 +669,7 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     FROZEN_INPUT: 154,
     PACKAGE_OR_APPLICATION: 556,
     SHARED_PROOF_INFRASTRUCTURE: 292,
-    PROJECT_DOCUMENTATION: 148,
+    PROJECT_DOCUMENTATION: 149,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -1061,8 +1062,8 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 73,
-  headSha256: "27166d8cca9e4ce8eadde335306070b404e1e8f28de3e36dd391430a7884d825",
+  sequence: 74,
+  headSha256: "da57d8ddad552e2d0ce5ebc7f990aa6d90c722f8af1ae3a31f4247d11a43e308",
   frozenArtifactCount: 59,
   currentReaderCount: 118,
   liveVerification: "PASS",

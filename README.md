@@ -34,6 +34,13 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 <!-- task-progress:end -->
 
+**SEC-02:** `DONE` closure candidate pending exact-head hosted checks. This
+[development dependency security](docs/proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md) task
+addresses the remaining Undici/PostCSS and related toolchain findings after
+[SEC-01 merged in PR #78](https://github.com/desenlab/desen-app/pull/78). It does not advance the
+implementation totals or start M10-T06. Local full and production audits report zero findings on
+2026-09-06; the exact-head hosted checks and fresh main CI remain completion authority.
+
 [AR-01](docs/proof/HISTORICAL-ARCHIVE-REDACTION.md) closed in
 [PR #76](https://github.com/desenlab/desen-app/pull/76). Its exact head
 `bde3ea81f261a9839a2b61ecb242d4824083ee2c` passed both hosted checks in

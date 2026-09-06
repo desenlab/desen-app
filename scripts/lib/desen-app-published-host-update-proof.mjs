@@ -255,9 +255,15 @@ const T01A_ANCESTOR_GAP_RECEIPTS = Object.freeze([
 
 const DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS = Object.freeze({
   path: "pnpm-lock.yaml",
-  bytes: 132_012,
-  currentSha256: "49f1d521ebd2e097508d22f8235e111bfb7e6bdc26a039b517a4a19aba7b2735",
+  currentBytes: 132_006,
+  historicalBytes: 132_012,
+  currentSha256: "0f968b0c6622f6bfe732d5ec9a2b6a49268e171a64fae6caf9501f6d25f8f074",
   historicalSha256: "f1165af2748866387a09d87dcf56a2e9036d553503256312051ce9c15a5ef8b8",
+  predecessor: Object.freeze({
+    authority: "SEC-01",
+    bytes: 132_012,
+    sha256: "49f1d521ebd2e097508d22f8235e111bfb7e6bdc26a039b517a4a19aba7b2735",
+  }),
 });
 
 const FOCUSED_TEST_COMMANDS = Object.freeze([
@@ -2687,10 +2693,10 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   const dependencyPin = DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS;
   const dependencyBytes = files.get(dependencyPin.path);
   if (
-    dependencyBytes.byteLength !== dependencyPin.bytes ||
+    dependencyBytes.byteLength !== dependencyPin.currentBytes ||
     sha256(dependencyBytes) !== dependencyPin.currentSha256
   ) {
-    fail("DEPENDENCY_SUCCESSOR_DRIFT", "The exact SEC-01 security lockfile successor drifted.");
+    fail("DEPENDENCY_SUCCESSOR_DRIFT", "The exact SEC-02 security lockfile successor drifted.");
   }
   const parents = authenticateParents(files);
   const bridge = authenticateHistoricalReaderBridge(
@@ -2739,7 +2745,7 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       if (relativePath === dependencyPin.path) {
         return Object.freeze({
           path: relativePath,
-          bytes: dependencyPin.bytes,
+          bytes: dependencyPin.historicalBytes,
           sha256: dependencyPin.historicalSha256,
         });
       }
@@ -2860,13 +2866,22 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
     artifactBytes,
     artifactSha256: sha256(artifactBytes),
     dependencySecurityCompatibility: {
-      authority: "SEC-01",
+      authority: "SEC-02",
       path: dependencyPin.path,
-      bytes: dependencyPin.bytes,
+      currentBytes: dependencyPin.currentBytes,
+      historicalBytes: dependencyPin.historicalBytes,
       currentSha256: dependencyPin.currentSha256,
       historicalSha256: dependencyPin.historicalSha256,
+      predecessor: dependencyPin.predecessor,
       fastify: "5.12.2",
       fastUri: ["3.1.7", "4.1.4"],
+      developmentDependencies: {
+        undici: "7.29.1",
+        postcss: "8.5.28",
+        "js-yaml": ["3.15.2", "4.3.2"],
+        "brace-expansion": "5.0.9",
+        nanoid: "3.3.18",
+      },
       projectedReceipts: 1,
       immutableArtifactPreserved: true,
     },
