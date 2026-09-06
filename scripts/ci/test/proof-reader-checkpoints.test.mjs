@@ -60,12 +60,13 @@ const PUBLISHED_HOST_UPDATE_RESEALED_READER_INDEXES = Object.freeze([
 ]);
 const DEPENDENCY_SECURITY_RESEALED_READER_INDEXES = Object.freeze([28, 29, 64, 65, 116, 117]);
 const DEVELOPMENT_DEPENDENCY_SECURITY_RESEALED_READER_INDEXES = Object.freeze([116, 117]);
+const SECOND_FRESH_PROOF_PERFORMANCE_RESEALED_READER_INDEXES = Object.freeze([116, 117]);
 
 async function assertHistoricalReaderMatchesCurrentWorkspace(reader, index) {
   // Historical generations retain their exact reviewed digests. Only explicitly enumerated
   // successors supply current bytes; no path prefix can exempt a reader.
-  const current = DEVELOPMENT_DEPENDENCY_SECURITY_RESEALED_READER_INDEXES.includes(index)
-    ? baselineManifest.checkpoints[73].readers[index]
+  const current = SECOND_FRESH_PROOF_PERFORMANCE_RESEALED_READER_INDEXES.includes(index)
+    ? baselineManifest.checkpoints[74].readers[index]
     : DEPENDENCY_SECURITY_RESEALED_READER_INDEXES.includes(index)
       ? baselineManifest.checkpoints[72].readers[index]
       : PUBLISHED_HOST_UPDATE_RESEALED_READER_INDEXES.includes(index)
@@ -150,7 +151,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   const result = await verifyProofReaderCheckpoints();
 
   assert.equal(manifest.schemaVersion, 1);
-  assert.equal(manifest.checkpoints.length, 74);
+  assert.equal(manifest.checkpoints.length, 75);
   assert.equal(manifest.checkpoints[0].sequence, 1);
   assert.equal(manifest.checkpoints[0].predecessorSha256, GENESIS_PREDECESSOR_SHA256);
   assert.equal(manifest.checkpoints[1].sequence, 2);
@@ -583,12 +584,19 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(manifest.checkpoints[73].artifacts.length, 59);
   assert.equal(manifest.checkpoints[73].readers.length, 118);
+  assert.equal(manifest.checkpoints[74].sequence, 75);
+  assert.equal(
+    manifest.checkpoints[74].predecessorSha256,
+    PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[73],
+  );
+  assert.equal(manifest.checkpoints[74].artifacts.length, 59);
+  assert.equal(manifest.checkpoints[74].readers.length, 118);
   assert.equal(
     calculateProofReaderCheckpointSha256(manifest.checkpoints.at(-1)),
     manifest.headSha256,
   );
-  assert.equal(manifest.headSha256, PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[73]);
-  assert.equal(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length, 74);
+  assert.equal(manifest.headSha256, PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[74]);
+  assert.equal(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length, 75);
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[7],
     "f707fb4c3338aeda79eb6242b645b5e864ce54b1e3955373e8edebcd7e026b8a",
@@ -829,7 +837,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
       6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20,
       25, 25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43,
       44, 45, 46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57,
-      58, 59, 59, 59,
+      58, 59, 59, 59, 59,
     ],
   );
   assert.equal(Object.isFrozen(PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS), true);
@@ -841,7 +849,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
     headSha256: manifest.headSha256,
-    checkpoints: 74,
+    checkpoints: 75,
     frozenArtifacts: 59,
     currentReaders: 118,
   });
@@ -3341,6 +3349,56 @@ test("sequence seventy-four preserves every artifact and reseals only SEC-02 dev
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
     "da57d8ddad552e2d0ce5ebc7f990aa6d90c722f8af1ae3a31f4247d11a43e308",
+  );
+});
+
+test("sequence seventy-five preserves every artifact and reseals only CI-04 fresh-build readers", async () => {
+  const previous = baselineManifest.checkpoints[73];
+  const current = baselineManifest.checkpoints[74];
+  const identity = ({ task, role, path: readerPath }) => ({ task, role, path: readerPath });
+
+  assert.equal(current.sequence, 75);
+  assert.equal(
+    current.predecessorSha256,
+    "da57d8ddad552e2d0ce5ebc7f990aa6d90c722f8af1ae3a31f4247d11a43e308",
+  );
+  assert.deepEqual(current.artifacts, previous.artifacts);
+  assert.deepEqual(current.readers.map(identity), previous.readers.map(identity));
+  assert.deepEqual(
+    current.readers.flatMap((reader, index) =>
+      JSON.stringify(reader) === JSON.stringify(previous.readers[index]) ? [] : [index],
+    ),
+    SECOND_FRESH_PROOF_PERFORMANCE_RESEALED_READER_INDEXES,
+  );
+  assert.deepEqual(
+    SECOND_FRESH_PROOF_PERFORMANCE_RESEALED_READER_INDEXES.map((index) => ({
+      index,
+      bytes: current.readers[index].bytes,
+      sha256: current.readers[index].sha256,
+    })),
+    [
+      {
+        index: 116,
+        bytes: 131004,
+        sha256: "e9bba118f868749704a93831758e58243db8773a623cb127c312d33a0e14b397",
+      },
+      {
+        index: 117,
+        bytes: 51364,
+        sha256: "7f8e1dc241e1ce2f1904a5c5a9e4d34ec64142b808c86c996a90f53bdfdfa03f",
+      },
+    ],
+  );
+  for (const [index, reader] of current.readers.entries()) {
+    await assertHistoricalReaderMatchesCurrentWorkspace(reader, index);
+  }
+  assert.deepEqual(
+    baselineManifest.checkpoints.slice(0, 74).map(calculateProofReaderCheckpointSha256),
+    PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 74),
+  );
+  assert.equal(
+    calculateProofReaderCheckpointSha256(current),
+    "ed7eea304b03e07112fbeb0b27fd6df82d83d229033c5c3794d0054cc9df2ea1",
   );
 });
 
@@ -6466,6 +6524,113 @@ test("each validation normalizes every receipt once without sharing another call
   assert.equal(result.status, "REVIEW_REQUIRED");
 });
 
+test("schema-directed freezing covers every detached normalized node without a second reflective walk", async () => {
+  const originalOwnKeysDescriptor = Object.getOwnPropertyDescriptor(Reflect, "ownKeys");
+  const originalFreezeDescriptor = Object.getOwnPropertyDescriptor(Object, "freeze");
+  const originalOwnKeys = Reflect.ownKeys;
+  const originalFreeze = Object.freeze;
+  const inspected = new WeakSet();
+  const frozen = [];
+  let observing = false;
+  let instrumented;
+  try {
+    Object.defineProperty(Reflect, "ownKeys", {
+      ...originalOwnKeysDescriptor,
+      value: (target) => {
+        if (observing) inspected.add(target);
+        return originalOwnKeys(target);
+      },
+    });
+    Object.defineProperty(Object, "freeze", {
+      ...originalFreezeDescriptor,
+      value: (target) => {
+        if (observing) frozen.push(target);
+        return originalFreeze(target);
+      },
+    });
+    instrumented = await import("../proof-reader-checkpoints.mjs?schema-directed-freeze");
+  } finally {
+    Object.defineProperty(Reflect, "ownKeys", originalOwnKeysDescriptor);
+    Object.defineProperty(Object, "freeze", originalFreezeDescriptor);
+  }
+
+  observing = true;
+  const manifest = instrumented.validateProofReaderCheckpointBytes(baselineBytes);
+  observing = false;
+  const nodes = [manifest, manifest.checkpoints];
+  for (const checkpoint of manifest.checkpoints) {
+    nodes.push(checkpoint, checkpoint.artifacts, checkpoint.readers);
+    nodes.push(...checkpoint.artifacts, ...checkpoint.readers);
+  }
+  const normalizedNodes = new Set(nodes);
+  const normalizedFreezes = frozen.filter((node) => normalizedNodes.has(node));
+  assert.equal(normalizedFreezes.length, nodes.length);
+  assert.equal(new Set(normalizedFreezes).size, nodes.length);
+  const frozenNodes = new Set(normalizedFreezes);
+  for (const node of nodes) {
+    assert.equal(frozenNodes.has(node), true);
+    assert.equal(Object.isFrozen(node), true);
+    assert.equal(inspected.has(node), false);
+  }
+  assert.deepEqual(manifest, baselineManifest);
+  assert.throws(() => {
+    manifest.checkpoints[0].artifacts[0].bytes += 1;
+  }, TypeError);
+  assert.throws(() => {
+    manifest.checkpoints.at(-1).readers.push({});
+  }, TypeError);
+  assert.throws(() => {
+    Object.defineProperty(manifest, Symbol("extra"), { value: true });
+  }, TypeError);
+  const next = instrumented.validateProofReaderCheckpointBytes(baselineBytes);
+  assert.notEqual(next, manifest);
+  assert.notEqual(next.checkpoints[0].artifacts[0], manifest.checkpoints[0].artifacts[0]);
+  assert.deepEqual(next, manifest);
+});
+
+test("schema-directed freezing uses captured freeze authority and preserves raw toJSON rejection", () => {
+  const originalFreezeDescriptor = Object.getOwnPropertyDescriptor(Object, "freeze");
+  let activeCalls = 0;
+  const active = () => {
+    activeCalls += 1;
+    throw new Error("Mutable or inherited authority was invoked.");
+  };
+  let manifest;
+  try {
+    Object.defineProperty(Object, "freeze", { ...originalFreezeDescriptor, value: active });
+    manifest = validateProofReaderCheckpointBytes(baselineBytes);
+  } finally {
+    Object.defineProperty(Object, "freeze", originalFreezeDescriptor);
+  }
+  assert.equal(Object.isFrozen(manifest), true);
+  assert.equal(Object.isFrozen(manifest.checkpoints.at(-1).readers.at(-1)), true);
+
+  const ownMethod = structuredClone(baselineManifest.checkpoints[0]);
+  ownMethod.toJSON = active;
+  const ownAccessor = structuredClone(baselineManifest.checkpoints[0]);
+  Object.defineProperty(ownAccessor.readers[0], "toJSON", {
+    enumerable: true,
+    get: active,
+  });
+  const inheritedMethod = structuredClone(baselineManifest.checkpoints[0]);
+  Object.setPrototypeOf(inheritedMethod.artifacts[0], { toJSON: active });
+  const inheritedAccessor = structuredClone(baselineManifest.checkpoints[0]);
+  const pollutedPrototype = {};
+  Object.defineProperty(pollutedPrototype, "sha256", { get: active });
+  Object.setPrototypeOf(inheritedAccessor.readers[0], pollutedPrototype);
+  for (const hostile of [ownMethod, ownAccessor, inheritedMethod, inheritedAccessor]) {
+    assert.throws(
+      () => calculateProofReaderCheckpointSha256(hostile),
+      checkpointError("PROOF_READER_CHECKPOINT_SCHEMA_INVALID"),
+    );
+  }
+  assert.equal(activeCalls, 0);
+  assert.equal(
+    calculateProofReaderCheckpointSha256(baselineManifest.checkpoints[0]),
+    EXPECTED_GENESIS_CHECKPOINT_SHA256,
+  );
+});
+
 test("public checkpoint digest inputs remain freshly validated own-data authority", () => {
   const checkpoint = structuredClone(baselineManifest.checkpoints[0]);
   const originalDigest = calculateProofReaderCheckpointSha256(checkpoint);
@@ -6796,12 +6961,12 @@ test("one changed reader is a valid review candidate while one hundred seventeen
   assert.deepEqual(candidate, {
     status: "REVIEW_REQUIRED",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    anchoredCheckpoints: 74,
-    candidateSequence: 75,
+    anchoredCheckpoints: 75,
+    candidateSequence: 76,
     predecessorSha256: baselineManifest.headSha256,
     candidateSha256: manifest.headSha256,
   });
-  assert.equal(successor.sequence, 75);
+  assert.equal(successor.sequence, 76);
   assert.equal(successor.predecessorSha256, baselineManifest.headSha256);
   assert.notDeepEqual(successor.readers[0], reviewedReaders[0]);
   assert.deepEqual(successor.readers.slice(1), reviewedReaders.slice(1));
@@ -6836,9 +7001,9 @@ test("a successor with all readers unchanged is rejected as redundant", () => {
 test("a later checkpoint cannot roll one reader back to any prior receipt", () => {
   const manifest = cloneBaseline();
   const genesisReceipt = structuredClone(manifest.checkpoints[0].readers[0]);
-  appendSuccessor(manifest, (checkpoint) => {
-    changedReaderReceipt(checkpoint.readers[0], "second");
-  });
+  assert.notDeepEqual(manifest.checkpoints.at(-1).readers[0], genesisReceipt);
+  // Existing reviewed generations already supply the intervening changes. One candidate keeps
+  // this rollback check inside the unchanged byte bound as the authentic prefix grows.
   appendSuccessor(manifest, (checkpoint) => {
     checkpoint.readers[0] = genesisReceipt;
     changedReaderReceipt(checkpoint.readers[1], "third");

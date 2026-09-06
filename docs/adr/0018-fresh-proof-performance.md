@@ -45,3 +45,35 @@ filesystem races, cancellation, and unchanged workload sets are tested independe
 Before/after local focused timings and historical hosted timing analysis live in
 [CI-03 evidence](../proof/CI-FRESH-PROOF-PERFORMANCE.md). Completion still requires the exact final
 PR head's hosted Quality gate. Main performs a separate fresh exhaustive run after merge.
+
+## CI-04 extension — isolated exhaustive shards
+
+The user authorized a separate performance interlude on 2026-09-07 after SEC-02's merged main
+timed out twice. The unchanged logical workload set has grown to 220 workloads / 105 proof pairs.
+Measured single-workspace packing offers only about nine seconds of potential margin, so the
+single-workspace performance approach is no longer sufficient by itself.
+
+CI-04 adds three fixed exhaustive proof shards on separate hosted checkouts. Each independently
+runs the full original prefix and uses the existing two-worker runner, eleven total exclusive
+barriers, process isolation, cancellation, and unchanged execution deadlines. Aggregate hosted
+concurrency increases; shared-workspace concurrency does not. Every verifier/root pair has exactly
+one shard owner. No build-output transfer, test-result cache, or shared mutable workspace is used.
+The retained affected path and its measured selection semantics remain available for eligible PRs;
+fresh routing is not execution authority. The monolithic exhaustive and manual legacy runners are
+retained, and I07-05 is not consumed.
+
+An always-evaluated final Quality gate requires exact same-workflow, same-execution-revision and
+same-PR-head shard results plus complete static coverage. It independently builds local outputs
+and executes the two suffix workloads only after every remote prerequisite succeeds. Remote
+GitHub job authority is explicitly different from local observed process-close authority; JSON
+receipts alone cannot invent successful child execution. Failed-job reruns may retain a passing
+producer from an earlier attempt of the same exact run/revisions, with its actual attempt recorded.
+Unknown, missing, failed, cancelled, skipped, foreign, or future producer authority fails closed.
+Replicated prefixes and join preparation are recorded as additional work; the 220-node logical
+inventory and every existing test remain intact.
+
+Deterministic tests cover exact partition/coverage, barriers, two-worker bounds, isolated fresh
+preparation, child failures and cancellation, workspace/output guards, and hostile join inputs.
+Hosted completion requires the exact final PR head and a fresh successful main run. Historical
+timeouts remain failures. The [CI-04 evidence](../proof/CI-FRESH-PROOF-PERFORMANCE.md) separates
+focused local measurements and fixed-duration scheduling estimates from actual hosted results.

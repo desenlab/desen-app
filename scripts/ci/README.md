@@ -15,6 +15,43 @@ cached success, so every selected hosted workload remains fresh. CI-02 adds no l
 selector, changes no hosted dispatcher or workflow, and leaves I07-05 plus the manual legacy
 rollback path unchanged.
 
+## CI-04 isolated exhaustive execution
+
+CI-04 retains the promoted affected route for eligible PRs. A read-only `--route` invocation
+authenticates current promotion and change-boundary inputs; it emits only `AFFECTED` or
+`EXHAUSTIVE`, never a workload success. Affected execution repeats admission through the original
+dispatcher. Main, manual required runs, and conservative PR fallbacks use three fixed isolated
+GitHub jobs followed by the required `Quality gate` join.
+
+`sharded-quality-gate-authority.mjs` owns the 53/24/28 proof-pair partition. Every original command
+remains in the 220-node / 105-pair logical inventory. All eight prefix commands execute freshly in
+each shard; each workspace keeps two proof-pair workers and its assigned drained barriers
+(11/0/0). The join builds its own outputs and runs the two original suffix commands only after
+all remote prerequisites succeed. Total physical workload execution is explicitly 237, including
+replicated preparation. No build-output transfer or cached PASS is used. Existing 18m30s soft /
+19m hard execution limits, child-process permissions, cancellation, and workspace/output seals
+remain mandatory.
+
+Raw receipt validation produces only test authority. REQUIRED join admission captures the fixed
+GitHub `quality` job's ambient `needs` and run/revision context without accepting caller arguments.
+The workflow itself requires every dependency result and always evaluates the final check;
+serialized PASS alone cannot mint REQUIRED execution. This trusts GitHub's injected platform
+context, not cryptographic signatures or an adversarial process capable of replacing its own
+environment. Exact same-run/revision producers from earlier attempts may be retained by GitHub's
+failed-job rerun; their actual attempt remains explicit. Foreign, future, missing, skipped,
+cancelled, malformed, or failed prerequisites cannot pass. Remote job success is never fabricated
+as a local process-close receipt. The monolithic exhaustive and manual legacy runners remain.
+
+Checkpoint 75 preserves sequences 1–74, 59 frozen artifacts, and 118 current readers, changing
+only T05 reader indexes 116/117. Head:
+`ed7eea304b03e07112fbeb0b27fd6df82d83d229033c5c3794d0054cc9df2ea1` (2,011,508 bytes).
+The three new CI paths extend exact ownership to 1,452 paths / 210 proof-owned paths; all force
+exhaustive selection. The private schema-directed freeze and T05 rejection preflight retain
+fresh positive work and add deterministic hostile-input/race coverage. See
+[ADR 0018](../../docs/adr/0018-fresh-proof-performance.md) and
+[CI-04 measurements and closure](../../docs/proof/CI-FRESH-PROOF-PERFORMANCE.md).
+M10-T06 is not part of this interlude.
+
 ## SEC-02 development-dependency security successor
 
 SEC-02 updates only six transitive development-package records and keeps all direct manifests,

@@ -346,14 +346,61 @@ test("official CI admits only required exhaustive authority and a manual legacy 
   assert.equal(scalarValue(concurrency, "cancel-in-progress", 2), "true");
 
   const jobs = extractMappingBlock(workflow, "jobs", 0);
-  assert.deepEqual(directMappingKeys(jobs, 2), ["quality", "browser-e2e", "legacy-rollback"]);
+  assert.deepEqual(directMappingKeys(jobs, 2), [
+    "quality-route",
+    "proof-a",
+    "proof-b",
+    "proof-c",
+    "quality",
+    "browser-e2e",
+    "legacy-rollback",
+  ]);
+
+  const routeJob = extractMappingBlock(jobs, "quality-route", 2);
+  assert.equal(
+    scalarValue(routeJob, "if", 4),
+    "${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'required' }}",
+  );
+  assert.equal(
+    exactRunCount(routeJob, "node scripts/ci/run-required-affected-quality-gate.mjs --route"),
+    1,
+  );
+  for (const shardId of ["proof-a", "proof-b", "proof-c"]) {
+    const shardJob = extractMappingBlock(jobs, shardId, 2);
+    assert.equal(scalarValue(shardJob, "needs", 4), "quality-route");
+    assert.equal(
+      scalarValue(shardJob, "if", 4),
+      "${{ needs.quality-route.outputs.mode == 'EXHAUSTIVE' }}",
+    );
+    assert.equal(scalarValue(shardJob, "timeout-minutes", 4), "25");
+    assert.match(shardJob, /ref: \$\{\{ github\.sha \}\}/u);
+    assert.equal(
+      exactRunCount(
+        shardJob,
+        `timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs shard ${shardId}`,
+      ),
+      1,
+    );
+    assert.doesNotMatch(shardJob, /continue-on-error|actions\/cache\/save|download-artifact/u);
+  }
 
   const requiredJob = extractMappingBlock(jobs, "quality", 2);
   assert.equal(
     scalarValue(requiredJob, "if", 4),
-    "${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'required' }}",
+    "${{ always() && (github.event_name != 'workflow_dispatch' || inputs.mode == 'required') }}",
   );
+  assert.equal(scalarValue(requiredJob, "needs", 4), "[quality-route, proof-a, proof-b, proof-c]");
   assert.equal(exactRunCount(requiredJob, REQUIRED_QUALITY_COMMAND), 1);
+  assert.equal(
+    exactRunCount(
+      requiredJob,
+      "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs join",
+    ),
+    1,
+  );
+  assert.match(requiredJob, /DESEN_REQUIRED_SHARD_JOIN_NEEDS: \$\{\{ toJSON\(needs\) \}\}/u);
+  assert.match(requiredJob, /if: \$\{\{ needs\.quality-route\.outputs\.mode == 'AFFECTED' \}\}/u);
+  assert.match(requiredJob, /if: \$\{\{ needs\.quality-route\.outputs\.mode == 'EXHAUSTIVE' \}\}/u);
   assert.equal(exactRunCount(requiredJob, RETAINED_LEGACY_COMMAND), 0);
   assert.equal(scalarValue(requiredJob, "timeout-minutes", 4), "25");
   assert.match(requiredJob, /fetch-depth: 0/u);
@@ -388,7 +435,7 @@ test("official CI admits only required exhaustive authority and a manual legacy 
 
   assert.equal(exactRunCount(workflow, REQUIRED_QUALITY_COMMAND), 1);
   assert.equal(exactRunCount(workflow, RETAINED_LEGACY_COMMAND), 1);
-  assert.equal(exactTextCount(workflow, REQUIRED_QUALITY_ENTRYPOINT), 1);
+  assert.equal(exactTextCount(workflow, REQUIRED_QUALITY_ENTRYPOINT), 2);
   assert.equal(exactTextCount(workflow, REQUIRED_EXHAUSTIVE_ENTRYPOINT), 0);
   assert.equal(exactTextCount(workflow, RETIRED_SHADOW_ENTRYPOINT), 0);
   assert.equal(exactTextCount(workflow, RETAINED_LEGACY_ENTRYPOINT), 1);

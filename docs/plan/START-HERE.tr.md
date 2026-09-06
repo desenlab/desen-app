@@ -26,6 +26,17 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
+**CI-04 — Taze doğrulama süresinin iyileştirilmesi**, yerel kanıtları geçen kapanış adayıdır. SEC-02
+yamaları main'e alınmış ve sekiz güvenlik uyarısı kapanmış olsa da main kalite kontrolü iki kez
+süre sınırına takılmıştır. CI-04 ve SEC-02'nin `DONE` satırları koşulludur: tam güncel PR kontrolleri
+ve onu izleyen taze main koşusu geçmeden tamamlandı sayılmazlar. Eski başarısız koşular değişmez. Açık kullanıcı
+onayıyla CI-04, testleri azaltmadan, önbelleğe alınmış başarıları kullanmadan ve koşu süre sınırını
+artırmadan tam doğrulamayı üç yalıtılmış işe dağıtır. Her iş kendi ortamını taze hazırlar;
+son kalite kontrolü tüm parçaları ve kapanış kontrollerini zorunlu tutar. Uygun PR'ların mevcut
+etkilenen-kapsam yolu korunur. Yerel önce/sonra ölçümü, aynı kapsamın korunması,
+tam güncel PR kontrolü ve başarılı taze main koşusu gerekir. **M10-T06 başlamaz.**
+[Kapsam ve ölçümler](../proof/CI-FRESH-PROOF-PERFORMANCE.md).
+
 **AR-01 — Arşivlerdeki özel metinlerin temizliği**,
 [PR #76](https://github.com/desenlab/desen-app/pull/76) ile kapandı. Tam head
 `bde3ea81f261a9839a2b61ecb242d4824083ee2c`,

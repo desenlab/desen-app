@@ -43,6 +43,8 @@ async function promotionWorkspace() {
     "docs/proof/baselines/i07-04-affected-selector-promotion.json",
     "scripts/ci/proof-reader-checkpoints.json",
     ...SHADOW_AFFECTED_COMPARISON_AUTHORITY_PATHS,
+    "scripts/ci/run-required-sharded-quality-gate.mjs",
+    "scripts/ci/sharded-quality-gate-authority.mjs",
     ...checkpointHead.artifacts.map(({ path: artifactPath }) => artifactPath),
     ...checkpointHead.readers.map(({ path: readerPath }) => readerPath),
   ])) {
@@ -99,6 +101,30 @@ test("one comparison snapshot owns both receipts and executable semantic checks"
     ]);
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("distributed runner sources cannot drift after import and before fresh authority capture", async () => {
+  for (const relativePath of [
+    "scripts/ci/run-required-sharded-quality-gate.mjs",
+    "scripts/ci/sharded-quality-gate-authority.mjs",
+  ]) {
+    const root = await promotionWorkspace();
+    try {
+      const target = path.join(root, relativePath);
+      const source = await readFile(target);
+      const replacement = Buffer.from(source);
+      replacement[0] = replacement[0] === 120 ? 121 : 120;
+      await writeFile(target, replacement);
+      await assert.rejects(
+        verifyAffectedSelectorPromotionEvidence({ workspaceRoot: root }),
+        (error) =>
+          error instanceof AffectedSelectorPromotionEvidenceError &&
+          error.code === "AFFECTED_PROMOTION_RUNNER_AUTHORITY_DRIFT",
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   }
 });
 
@@ -279,13 +305,13 @@ test("authenticates the exact 20/20 hosted promotion campaign", async () => {
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "5f221e6c17eda748bb26cb2dd7a320edc6730a995b2dd6f873c5ff48fd20f457",
-    ownershipSha256: "c8836a58038204386135eadc7cba83453f95c03dde11ea98b70fba516360afce",
+    selectorSha256: "af2e37e8ab5ece83b0f33d793837d3fdd9d7325707f8a0cc4af3259fd5e35acb",
+    ownershipSha256: "7ebb6e9d5d01e0753844138d520b0b898fc63dfb20074d086861213ab070d799",
     impactGraphSha256: "50ca74533c82b6a02977281f912cc4a37484c22aea7bfa60d343197f1ee81620",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "66ae36cb2ec1c8a7bc7deee1a733e253cc1861d3b9ca1487c9725f437c3abf5a",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "84c78f0e904665deff8b3a22c7687eef27047d9fe10fa3325c9c1842d0c1ed53",
+    runnerAuthoritySha256: "0f06360543eab2b0f05a855bd09649b7ab21cdee44abbb3f1e61f6b2364cbc19",
   });
 });
 
@@ -349,8 +375,8 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "da57d8ddad552e2d0ce5ebc7f990aa6d90c722f8af1ae3a31f4247d11a43e308",
-    checkpoints: 74,
+    headSha256: "ed7eea304b03e07112fbeb0b27fd6df82d83d229033c5c3794d0054cc9df2ea1",
+    checkpoints: 75,
     frozenArtifacts: 59,
     currentReaders: 118,
   };

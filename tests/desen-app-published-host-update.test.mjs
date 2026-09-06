@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import filesystem, {
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -144,6 +153,32 @@ function graphPolicyInput() {
   };
 }
 
+async function observeProofFilesystem(operation, beforeBuild) {
+  const originalOpen = filesystem.open;
+  const originalOpendir = filesystem.opendir;
+  const observations = { opens: new Map(), buildInventories: 0 };
+  try {
+    filesystem.open = async (...args) => {
+      const entryPath = String(args[0]);
+      observations.opens.set(entryPath, (observations.opens.get(entryPath) ?? 0) + 1);
+      return Reflect.apply(originalOpen, filesystem, args);
+    };
+    filesystem.opendir = async (...args) => {
+      if (String(args[0]) === path.join(ROOT, "apps/desen-app/src")) {
+        observations.buildInventories += 1;
+        if (observations.buildInventories === 1) await beforeBuild?.();
+      }
+      return Reflect.apply(originalOpendir, filesystem, args);
+    };
+    syncBuiltinESMExports();
+    return await operation(observations);
+  } finally {
+    filesystem.open = originalOpen;
+    filesystem.opendir = originalOpendir;
+    syncBuiltinESMExports();
+  }
+}
+
 before(async () => {
   [sourcePolicyInput, browserPolicyInput] = await Promise.all([
     Object.fromEntries(
@@ -170,7 +205,13 @@ before(async () => {
     ).toString("utf8"),
   );
   built = await buildDesenAppPublishedHostUpdateEvidence();
-  verified = await verifyDesenAppPublishedHostUpdateEvidence();
+  verified = await observeProofFilesystem(async (observations) => {
+    const result = await verifyDesenAppPublishedHostUpdateEvidence();
+    assert.ok(observations.buildInventories > 0);
+    assert.equal(observations.opens.get(path.join(ROOT, ARTIFACT_PATH)), 2);
+    assert.equal(observations.opens.get(path.join(ROOT, REPORT_PATH)), 2);
+    return result;
+  });
   successor = await authenticateDesenAppPublishedHostUpdateSuccessor();
 });
 
@@ -1269,15 +1310,71 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   );
   assert.equal(accessorReads, 0);
 
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-app-t05-proof-"));
+  const directory = await realpath(await mkdtemp(path.join(os.tmpdir(), "desen-app-t05-proof-")));
   temporaryDirectories.push(directory);
   const target = path.join(directory, "retained-artifact.json");
   await writeFile(target, artifactBytes);
   const destination = path.join(directory, "artifact.json");
   await symlink(target, destination);
-  await assert.rejects(
-    writeDesenAppPublishedHostUpdateEvidence({ artifactPath: destination }),
-    expectedError("ARTIFACT_WRITE_UNSAFE"),
+  await observeProofFilesystem(async (observations) => {
+    for (const artifactPath of [
+      destination,
+      directory,
+      path.join(directory, "missing", "out.json"),
+    ]) {
+      await assert.rejects(
+        writeDesenAppPublishedHostUpdateEvidence({ artifactPath }),
+        expectedError("ARTIFACT_WRITE_UNSAFE"),
+      );
+    }
+    for (const unsafePath of [destination, directory, path.join(directory, "missing.md")]) {
+      await assert.rejects(
+        verifyDesenAppPublishedHostUpdateEvidence({
+          artifactPath: unsafePath,
+          proofDocument: report,
+        }),
+        expectedError("AUTHORITY_UNSAFE"),
+      );
+      await assert.rejects(
+        verifyDesenAppPublishedHostUpdateEvidence({ artifactBytes, proofDocumentPath: unsafePath }),
+        expectedError("AUTHORITY_UNSAFE"),
+      );
+    }
+    assert.equal(observations.buildInventories, 0);
+  });
+  assert.deepEqual(await readFile(target), artifactBytes);
+
+  const proofPath = path.join(directory, "report.md");
+  await writeFile(proofPath, report);
+  await observeProofFilesystem(
+    async (observations) => {
+      await assert.rejects(
+        verifyDesenAppPublishedHostUpdateEvidence({ artifactBytes, proofDocumentPath: proofPath }),
+        expectedError("PROOF_DOCUMENT_DRIFT"),
+      );
+      assert.ok(observations.buildInventories > 0);
+      assert.equal(observations.opens.get(proofPath), 2);
+    },
+    () =>
+      writeFile(
+        proofPath,
+        Buffer.from(replaceOnce(report.toString("utf8"), "Status: DONE", "Status: OPEN")),
+      ),
+  );
+
+  const racedDestination = path.join(directory, "raced-artifact.json");
+  const writerOptions = { workspaceRoot: ROOT };
+  await observeProofFilesystem(
+    async (observations) => {
+      const writing = writeDesenAppPublishedHostUpdateEvidence({
+        artifactPath: racedDestination,
+        buildOptions: writerOptions,
+      });
+      writerOptions.workspaceRoot = unbuiltWorkspace;
+      await assert.rejects(writing, expectedError("ARTIFACT_WRITE_UNSAFE"));
+      assert.ok(observations.buildInventories > 0);
+    },
+    () => symlink(target, racedDestination),
   );
   assert.deepEqual(await readFile(target), artifactBytes);
 });

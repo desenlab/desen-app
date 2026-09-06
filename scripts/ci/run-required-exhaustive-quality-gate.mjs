@@ -22,6 +22,11 @@ import {
   snapshotBuildOutputs,
   snapshotNonIgnoredUntrackedState,
 } from "./shared-state-authority.mjs";
+import {
+  getRequiredProofShard,
+  validateHostedRequiredShardJoinAuthority,
+  validateRequiredShardJoinAuthority,
+} from "./sharded-quality-gate-authority.mjs";
 
 const DEFAULT_WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../..");
 const PROFILE = "desen.ci.required-exhaustive-quality-gate.v1";
@@ -31,6 +36,41 @@ const REPOSITORY_PROFILE = "desen.ci.exhaustive-repository-authentication.v1";
 const REQUIRED_AUTHORITY = "REQUIRED";
 const OPTIONAL_AUTHORITY = "SHADOW";
 const EXHAUSTIVE_SCOPE = "EXHAUSTIVE";
+const SHARD_SCOPE = "EXHAUSTIVE_SHARD";
+const JOIN_SCOPE = "EXHAUSTIVE_JOIN";
+const REGION_PLAN_BINDINGS = new WeakMap();
+const REGION_RUN_OPTION_KEYS = Object.freeze([
+  "authority",
+  "runStep",
+  "signal",
+  "terminalState",
+  "assertCanContinue",
+  "workspaceRoot",
+  "snapshotBuildOutputsFunction",
+  "assertBuildOutputsUnchangedFunction",
+  "snapshotUntrackedStateFunction",
+  "assertUntrackedStateUnchangedFunction",
+]);
+const REGION_EXECUTION_OPTION_KEYS = Object.freeze([
+  ...REGION_RUN_OPTION_KEYS,
+  "scope",
+  "plan",
+  "expectedRevision",
+  "readRevisionFunction",
+  "readInventoryFunction",
+  "captureWorkspaceFunction",
+  "assertCleanInputFunction",
+  "processRegistry",
+  "prepareStepEnvironment",
+  "stepTimeoutMs",
+  "gateTimeoutMs",
+  "terminationGraceMs",
+  "spawnFunction",
+  "forwardSignalFunction",
+  "platform",
+  "killProcessGroup",
+  "printCommandFunction",
+]);
 const EXPECTED_PLAN_SHA256_BY_AUTHORITY = Object.freeze({
   REQUIRED: "30799382d92edf70455a42bc01e13973324bf1a916b5b925ad86c429b926fb2a",
   SHADOW: "0cb43b3c983e0e7ef6fb7536e08a90a9ce21a811eff22aab5767367c76b12641",
@@ -199,6 +239,37 @@ function exactOwnDataRecord(value, expectedKeys, label) {
     }
   }
   return value;
+}
+
+function captureRegionOptions(rawOptions, allowedKeys) {
+  if (rawOptions === undefined) return Object.freeze(Object.create(null));
+  if (
+    rawOptions === null ||
+    typeof rawOptions !== "object" ||
+    utilTypes.isProxy(rawOptions) ||
+    Object.getPrototypeOf(rawOptions) !== Object.prototype
+  ) {
+    fail("REQUIRED_EXHAUSTIVE_AUTHORITY_INVALID", "Region options must be one inert plain object.");
+  }
+  const keys = Reflect.ownKeys(rawOptions);
+  if (
+    keys.length > allowedKeys.length ||
+    keys.some((key) => typeof key !== "string" || !allowedKeys.includes(key))
+  ) {
+    fail("REQUIRED_EXHAUSTIVE_AUTHORITY_INVALID", "Region option fields drifted.");
+  }
+  const captured = Object.create(null);
+  for (const key of keys) {
+    const descriptor = Object.getOwnPropertyDescriptor(rawOptions, key);
+    if (!descriptor || !descriptor.enumerable || !("value" in descriptor)) {
+      fail(
+        "REQUIRED_EXHAUSTIVE_AUTHORITY_INVALID",
+        "Region options must contain only inert own data.",
+      );
+    }
+    captured[key] = descriptor.value;
+  }
+  return Object.freeze(captured);
 }
 
 function exactDenseArray(value, label, maximumLength) {
@@ -443,6 +514,111 @@ export function createRequiredExhaustivePlan({
   for (const workload of plan.nodes) rememberValidatedNode(workload);
   VALIDATED_PLANS.add(plan);
   return plan;
+}
+
+/** Builds one fixed proof shard without admitting caller-selected workloads or command vectors. */
+export function createRequiredExhaustiveProofShardPlan(shardId, rawOptions) {
+  const { authority = REQUIRED_AUTHORITY } = captureRegionOptions(rawOptions, ["authority"]);
+  const shard = getRequiredProofShard(shardId);
+  const parent = createRequiredExhaustivePlan({ authority });
+  if (shard.inventorySha256 !== parent.inventorySha256) {
+    fail("REQUIRED_EXHAUSTIVE_SHARD_DRIFT", "Shard and parent inventory identities disagree.");
+  }
+  const pairIds = new Set(shard.proofPairIds);
+  const proofPairs = Object.freeze(parent.proofPairs.filter(({ id }) => pairIds.has(id)));
+  const selectedIds = new Set([
+    ...parent.prefix.map(({ id }) => id),
+    ...proofPairs.flatMap(({ verifier, rootTest }) => [verifier.id, rootTest.id]),
+  ]);
+  const nodes = Object.freeze(parent.nodes.filter(({ id }) => selectedIds.has(id)));
+  if (
+    proofPairs.length !== shard.proofPairCount ||
+    nodes.length !== shard.stepCount ||
+    parent.prefix.length !== shard.prefixIds.length ||
+    parent.prefix.some(({ id }, index) => id !== shard.prefixIds[index])
+  ) {
+    fail(
+      "REQUIRED_EXHAUSTIVE_SHARD_DRIFT",
+      "Shard coverage differs from the authenticated parent.",
+    );
+  }
+  const plan = Object.freeze({
+    ...parent,
+    profile: "desen.ci.required-exhaustive-shard-plan.v1",
+    scope: SHARD_SCOPE,
+    shardId,
+    parentPlanSha256: parent.planSha256,
+    planSha256: shard.planSha256,
+    nodes,
+    proofPairs,
+    suffix: Object.freeze([]),
+    stepCount: nodes.length,
+    proofPairCount: proofPairs.length,
+    barrierCount: shard.barrierCount,
+  });
+  REGION_PLAN_BINDINGS.set(plan, Object.freeze({ parent, scope: SHARD_SCOPE }));
+  return plan;
+}
+
+/**
+ * Builds a distinct final-join plan from admitted GitHub prerequisite authority. Remote job
+ * success is kept separate from the three local preparation and suffix close observations.
+ */
+export function createRequiredExhaustiveJoinPlan(githubAuthority, rawOptions) {
+  const { authority = REQUIRED_AUTHORITY } = captureRegionOptions(rawOptions, ["authority"]);
+  const admitted =
+    authority === REQUIRED_AUTHORITY
+      ? validateHostedRequiredShardJoinAuthority(githubAuthority)
+      : validateRequiredShardJoinAuthority(githubAuthority);
+  const parent = createRequiredExhaustivePlan({ authority });
+  if (
+    admitted.inventorySha256 !== parent.inventorySha256 ||
+    (authority === REQUIRED_AUTHORITY && admitted.parentPlanSha256 !== parent.planSha256)
+  ) {
+    fail(
+      "REQUIRED_EXHAUSTIVE_JOIN_DRIFT",
+      "GitHub prerequisites do not match the current parent plan.",
+    );
+  }
+  const preparation = parent.prefix.find(({ id }) => id === "workspace-graph");
+  const nodes = Object.freeze([preparation, ...parent.suffix]);
+  const plan = Object.freeze({
+    ...parent,
+    profile: "desen.ci.required-exhaustive-join-plan.v1",
+    scope: JOIN_SCOPE,
+    parentPlanSha256: parent.planSha256,
+    planSha256: admitted.planSha256,
+    nodes,
+    prefix: Object.freeze([preparation]),
+    proofPairs: Object.freeze([]),
+    stepCount: nodes.length,
+    proofPairCount: 0,
+    barrierCount: 0,
+  });
+  REGION_PLAN_BINDINGS.set(
+    plan,
+    Object.freeze({ parent, scope: JOIN_SCOPE, githubAuthority: admitted }),
+  );
+  return plan;
+}
+
+function validateRegionPlan(plan, scope, authority) {
+  const binding = REGION_PLAN_BINDINGS.get(plan);
+  if (binding === undefined || binding.scope !== scope || plan.authority !== authority) {
+    fail(
+      "REQUIRED_EXHAUSTIVE_REGION_UNAUTHENTICATED",
+      "Execution requires its code-owned region plan.",
+    );
+  }
+  validatePlanForExecution(binding.parent, authority);
+  if (scope === JOIN_SCOPE) {
+    if (authority === REQUIRED_AUTHORITY) {
+      validateHostedRequiredShardJoinAuthority(binding.githubAuthority);
+    } else {
+      validateRequiredShardJoinAuthority(binding.githubAuthority);
+    }
+  }
+  return binding;
 }
 
 function validatePlanForExecution(candidate, expectedAuthority) {
@@ -1469,8 +1645,10 @@ async function runObservedWorkload(
   }
 }
 
-function assertDependenciesCompleted(workload, completedIds) {
-  const missing = workload.dependencies.filter((dependencyId) => !completedIds.has(dependencyId));
+function assertDependenciesCompleted(workload, completedIds, githubDependencies) {
+  const missing = workload.dependencies.filter(
+    (dependencyId) => !completedIds.has(dependencyId) && !githubDependencies?.has(dependencyId),
+  );
   if (missing.length > 0) {
     fail(
       "REQUIRED_EXHAUSTIVE_DEPENDENCY_UNSATISFIED",
@@ -1488,9 +1666,10 @@ async function runSequentialRegion(
   externalAssertion,
   receiptById,
   completedIds,
+  githubDependencies,
 ) {
   for (const workload of workloads) {
-    assertDependenciesCompleted(workload, completedIds);
+    assertDependenciesCompleted(workload, completedIds, githubDependencies);
     await runObservedWorkload(
       workload,
       runStep,
@@ -1548,11 +1727,12 @@ async function runProofPairRegion(
     }
   }
   flushOrdinarySegment();
-  if (barrierCount !== 11 || plan.proofPairs.length - barrierCount !== 94) {
+  const expectedBarrierCount = plan.barrierCount ?? 11;
+  if (barrierCount !== expectedBarrierCount) {
     fail(
       "REQUIRED_EXHAUSTIVE_CLASS_DRIFT",
-      "The shared-state authority must classify exactly 94 ordinary pairs and 11 barrier pairs.",
-      { barrierCount, proofPairCount: plan.proofPairs.length },
+      "The shared-state authority must preserve the exact region's ordinary and barrier pairs.",
+      { barrierCount, expectedBarrierCount, proofPairCount: plan.proofPairs.length },
     );
   }
 
@@ -1676,17 +1856,26 @@ function createExecutionReceipt(plan, receiptById, forcedFailure = false) {
   ).length;
   const status =
     !forcedFailure &&
-    steps.length === 220 &&
-    observedClosedCount === 220 &&
+    steps.length === plan.stepCount &&
+    observedClosedCount === plan.stepCount &&
     steps.every(({ status: stepStatus }) => stepStatus === "PASS")
       ? "PASS"
       : "FAIL";
   return Object.freeze({
     schemaVersion: 1,
-    profile: PROFILE,
+    profile:
+      plan.scope === SHARD_SCOPE
+        ? "desen.ci.required-exhaustive-shard-execution.v1"
+        : plan.scope === JOIN_SCOPE
+          ? "desen.ci.required-exhaustive-join-execution.v1"
+          : PROFILE,
     status,
     authority: plan.authority,
     scope: plan.scope,
+    ...(plan.scope === SHARD_SCOPE ? { shardId: plan.shardId } : {}),
+    ...(plan.scope === SHARD_SCOPE || plan.scope === JOIN_SCOPE
+      ? { parentPlanSha256: plan.parentPlanSha256 }
+      : {}),
     planSha256: plan.planSha256,
     inventorySha256: plan.inventorySha256,
     concurrency: plan.concurrency,
@@ -1722,7 +1911,25 @@ function attachExecutionReceipt(error, receipt) {
  * Every supplied runner result must contain an exact successful `close` observation. The returned
  * receipt remains in the stable 220-node inventory order even though proof pairs may overlap.
  */
-export async function runRequiredExhaustivePlan(
+export async function runRequiredExhaustivePlan(plan, options = {}) {
+  return runExhaustiveRegions(plan, options);
+}
+
+/** Executes a branded proof shard with the unchanged local prefix and process-isolation guards. */
+export async function runRequiredExhaustiveProofShardPlan(plan, rawOptions) {
+  const options = captureRegionOptions(rawOptions, REGION_RUN_OPTION_KEYS);
+  const binding = validateRegionPlan(plan, SHARD_SCOPE, options.authority ?? REQUIRED_AUTHORITY);
+  return runExhaustiveRegions(binding.parent, options, plan);
+}
+
+/** Executes only real local join preparation/suffix closes after separately admitted GitHub jobs. */
+export async function runRequiredExhaustiveJoinPlan(plan, rawOptions) {
+  const options = captureRegionOptions(rawOptions, REGION_RUN_OPTION_KEYS);
+  const binding = validateRegionPlan(plan, JOIN_SCOPE, options.authority ?? REQUIRED_AUTHORITY);
+  return runExhaustiveRegions(binding.parent, options, plan, binding.githubAuthority);
+}
+
+async function runExhaustiveRegions(
   plan,
   {
     authority = REQUIRED_AUTHORITY,
@@ -1736,9 +1943,20 @@ export async function runRequiredExhaustivePlan(
     snapshotUntrackedStateFunction = snapshotNonIgnoredUntrackedState,
     assertUntrackedStateUnchangedFunction = assertNonIgnoredUntrackedStateUnchanged,
   } = {},
+  regionPlan,
+  githubAuthority,
 ) {
   assertSupportedAuthority(authority);
-  const validatedPlan = validatePlanForExecution(plan, authority);
+  const parentPlan = validatePlanForExecution(plan, authority);
+  const validatedPlan = regionPlan ?? parentPlan;
+  const admittedGithubAuthority = githubAuthority
+    ? authority === REQUIRED_AUTHORITY
+      ? validateHostedRequiredShardJoinAuthority(githubAuthority)
+      : validateRequiredShardJoinAuthority(githubAuthority)
+    : undefined;
+  const githubDependencies = admittedGithubAuthority
+    ? new Set(admittedGithubAuthority.completedNodeIds)
+    : undefined;
   if (typeof runStep !== "function") {
     fail("REQUIRED_EXHAUSTIVE_RUNNER_MISSING", "The exhaustive plan requires one step runner.");
   }
@@ -1825,6 +2043,7 @@ export async function runRequiredExhaustivePlan(
       externalAssertion,
       receiptById,
       completedIds,
+      githubDependencies,
     );
     assertCanContinue(terminal.signal, externalAssertion);
     buildBefore = await snapshotBuildOutputsFunction(workspaceRoot);
@@ -1834,7 +2053,7 @@ export async function runRequiredExhaustivePlan(
     primaryError = terminal.winner().reason;
   }
 
-  if (!primaryError && buildBefore) {
+  if (!primaryError && buildBefore && validatedPlan.proofPairs.length > 0) {
     try {
       await runProofPairRegion(
         validatedPlan,
@@ -1872,11 +2091,22 @@ export async function runRequiredExhaustivePlan(
         externalAssertion,
         receiptById,
         completedIds,
+        githubDependencies,
       );
       assertCanContinue(terminal.signal, externalAssertion);
     } catch (error) {
       claimTerminalReason(terminal, error);
       primaryError = terminal.winner().reason;
+    }
+  }
+
+  if (githubAuthority && buildBefore) {
+    try {
+      const buildAfterSuffix = await snapshotBuildOutputsFunction(workspaceRoot);
+      assertBuildOutputsUnchangedFunction(buildBefore, buildAfterSuffix);
+    } catch (error) {
+      buildGuardError ??= error;
+      claimTerminalReason(terminal, error);
     }
   }
 
@@ -1911,17 +2141,19 @@ export async function runRequiredExhaustivePlan(
     throw attachExecutionReceipt(failure, createExecutionReceipt(validatedPlan, receiptById, true));
   }
   const receipt = createExecutionReceipt(validatedPlan, receiptById);
-  if (receipt.status !== "PASS" || completedIds.size !== 220) {
+  if (receipt.status !== "PASS" || completedIds.size !== validatedPlan.stepCount) {
     throw attachExecutionReceipt(
       new RequiredExhaustiveQualityGateError(
         "REQUIRED_EXHAUSTIVE_RECEIPT_INCOMPLETE",
-        "The exhaustive gate did not observe all 220 workloads close successfully.",
+        "The exhaustive execution did not observe its complete local workload set close successfully.",
         { completed: completedIds.size, observedClosed: receipt.observedClosedCount },
       ),
       receipt,
     );
   }
-  return receipt;
+  return githubAuthority
+    ? Object.freeze({ ...receipt, githubPrerequisites: githubAuthority })
+    : receipt;
 }
 
 function authenticateRepository(discovered, plan) {
@@ -1943,35 +2175,95 @@ function authenticateRepository(discovered, plan) {
  * authentication. Closing workspace capture and cancellation checks remain authoritative after
  * both success and primary workload failure.
  */
-export async function executeRequiredExhaustiveQualityGate({
-  workspaceRoot = DEFAULT_WORKSPACE_ROOT,
-  authority = REQUIRED_AUTHORITY,
-  scope = EXHAUSTIVE_SCOPE,
-  plan = createRequiredExhaustivePlan({ authority, scope }),
-  runStep,
-  signal,
-  assertCanContinue: externalAssertion,
-  expectedRevision,
-  readRevisionFunction,
-  readInventoryFunction,
-  captureWorkspaceFunction,
-  assertCleanInputFunction = assertExhaustiveGateCleanInput,
-  snapshotBuildOutputsFunction = snapshotBuildOutputs,
-  assertBuildOutputsUnchangedFunction = assertBuildOutputsUnchanged,
-  snapshotUntrackedStateFunction = snapshotNonIgnoredUntrackedState,
-  assertUntrackedStateUnchangedFunction = assertNonIgnoredUntrackedStateUnchanged,
-  processRegistry = createRequiredExhaustiveProcessRegistry(),
-  terminalState,
-  prepareStepEnvironment,
-  stepTimeoutMs = DEFAULT_STEP_TIMEOUT_MS,
-  gateTimeoutMs = DEFAULT_GATE_TIMEOUT_MS,
-  terminationGraceMs = DEFAULT_TERMINATION_GRACE_MS,
-  spawnFunction = spawn,
-  forwardSignalFunction,
-  platform = process.platform,
-  killProcessGroup = process.kill,
-  printCommandFunction = printCommand,
-} = {}) {
+export async function executeRequiredExhaustiveQualityGate(options = {}) {
+  return executeExhaustiveRegions(options);
+}
+
+/** Runs one fixed shard inside the unchanged real-process, clean-input, and closing boundaries. */
+export async function executeRequiredExhaustiveProofShard(rawOptions) {
+  const { shardId, ...options } = captureRegionOptions(rawOptions, [
+    "shardId",
+    ...REGION_EXECUTION_OPTION_KEYS,
+  ]);
+  if (Object.hasOwn(options, "plan")) {
+    fail("REQUIRED_EXHAUSTIVE_AUTHORITY_INJECTED", "A proof shard cannot accept an injected plan.");
+  }
+  const plan = createRequiredExhaustiveProofShardPlan(shardId, {
+    authority: options.authority ?? REQUIRED_AUTHORITY,
+  });
+  const binding = REGION_PLAN_BINDINGS.get(plan);
+  return executeExhaustiveRegions({ ...options, plan: binding.parent }, plan);
+}
+
+/** Runs fresh final preparation and suffix checks with separately authenticated GitHub prerequisites. */
+export async function executeRequiredExhaustiveJoin(rawOptions) {
+  const { githubAuthority, ...options } = captureRegionOptions(rawOptions, [
+    "githubAuthority",
+    ...REGION_EXECUTION_OPTION_KEYS,
+  ]);
+  if (Object.hasOwn(options, "plan")) {
+    fail(
+      "REQUIRED_EXHAUSTIVE_AUTHORITY_INJECTED",
+      "The final join cannot accept an injected plan.",
+    );
+  }
+  const plan = createRequiredExhaustiveJoinPlan(githubAuthority, {
+    authority: options.authority ?? REQUIRED_AUTHORITY,
+  });
+  const binding = REGION_PLAN_BINDINGS.get(plan);
+  if (
+    options.expectedRevision !== undefined &&
+    options.expectedRevision !== binding.githubAuthority.executionRevision
+  ) {
+    fail(
+      "REQUIRED_EXHAUSTIVE_JOIN_DRIFT",
+      "GitHub prerequisites belong to another execution revision.",
+    );
+  }
+  return executeExhaustiveRegions(
+    {
+      ...options,
+      plan: binding.parent,
+      expectedRevision: binding.githubAuthority.executionRevision,
+    },
+    plan,
+    binding.githubAuthority,
+  );
+}
+
+async function executeExhaustiveRegions(
+  {
+    workspaceRoot = DEFAULT_WORKSPACE_ROOT,
+    authority = REQUIRED_AUTHORITY,
+    scope = EXHAUSTIVE_SCOPE,
+    plan = createRequiredExhaustivePlan({ authority, scope }),
+    runStep,
+    signal,
+    assertCanContinue: externalAssertion,
+    expectedRevision,
+    readRevisionFunction,
+    readInventoryFunction,
+    captureWorkspaceFunction,
+    assertCleanInputFunction = assertExhaustiveGateCleanInput,
+    snapshotBuildOutputsFunction = snapshotBuildOutputs,
+    assertBuildOutputsUnchangedFunction = assertBuildOutputsUnchanged,
+    snapshotUntrackedStateFunction = snapshotNonIgnoredUntrackedState,
+    assertUntrackedStateUnchangedFunction = assertNonIgnoredUntrackedStateUnchanged,
+    processRegistry = createRequiredExhaustiveProcessRegistry(),
+    terminalState,
+    prepareStepEnvironment,
+    stepTimeoutMs = DEFAULT_STEP_TIMEOUT_MS,
+    gateTimeoutMs = DEFAULT_GATE_TIMEOUT_MS,
+    terminationGraceMs = DEFAULT_TERMINATION_GRACE_MS,
+    spawnFunction = spawn,
+    forwardSignalFunction,
+    platform = process.platform,
+    killProcessGroup = process.kill,
+    printCommandFunction = printCommand,
+  } = {},
+  regionPlan,
+  githubAuthority,
+) {
   assertSupportedAuthority(authority);
   assertExhaustiveScope(scope);
   if (
@@ -2086,21 +2378,26 @@ export async function executeRequiredExhaustiveQualityGate({
       captureWorkspaceFunction,
       assertCanContinue: assertion,
       authenticateInventory: async (discovered) =>
-        authenticateRepository(discovered, validatedPlan),
+        authenticateRepository(discovered, regionPlan ?? validatedPlan),
       execute: async ({ workspaceRoot: authenticatedRoot, revision }) => {
         try {
           const cleanInput = await assertCleanInputFunction(authenticatedRoot, revision);
-          const execution = await runRequiredExhaustivePlan(validatedPlan, {
-            authority,
-            runStep: stepRunner,
-            terminalState: terminal,
-            assertCanContinue: externalAssertion,
-            workspaceRoot,
-            snapshotBuildOutputsFunction,
-            assertBuildOutputsUnchangedFunction,
-            snapshotUntrackedStateFunction,
-            assertUntrackedStateUnchangedFunction,
-          });
+          const execution = await runExhaustiveRegions(
+            validatedPlan,
+            {
+              authority,
+              runStep: stepRunner,
+              terminalState: terminal,
+              assertCanContinue: externalAssertion,
+              workspaceRoot,
+              snapshotBuildOutputsFunction,
+              assertBuildOutputsUnchangedFunction,
+              snapshotUntrackedStateFunction,
+              assertUntrackedStateUnchangedFunction,
+            },
+            regionPlan,
+            githubAuthority,
+          );
           return Object.freeze({ ...execution, cleanInput });
         } catch (error) {
           claimTerminalReason(terminal, error);

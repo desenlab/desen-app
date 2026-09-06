@@ -155,3 +155,129 @@ The PR's check records and closure report must identify that head and its actual
 the two historical timeouts and the earlier Browser success cannot authorize it. Main performs a
 separate fresh exhaustive run after merge. No next product task starts as part of this interlude.
 A failed or unfinished workload is never a passing receipt.
+
+## CI-04 — Fresh-verification headroom
+
+Status: conditional `DONE` closure candidate, explicitly authorized on 2026-09-07. Local evidence
+passes; completion still requires exact-final-head PR checks and fresh exhaustive successor main
+CI. This separate operational interlude
+depends on completed CI-03 and M10-T05 and unblocks SEC-02's final main-validation obligation.
+It does not begin M10-T06 or advance implementation-task or proof-gate counts.
+
+SEC-02's exact PR head `169b4be4cff52a6181131fc253aa935491bafd3a` passed both required checks;
+the successful Quality retry took 15m15s. It merged as
+`fdd1b8d5ecfbca5139d8aafb02324acddf66a4c2`, with identical Git tree
+`bd0ea5282c175ed6563c7b35c15dfd2221989f62`. Both fresh main Quality attempts in
+[run 34060300431](https://github.com/desenlab/desen-app/actions/runs/34060300431) reached the
+closing phase but exceeded the 1,110,000ms deadline; Browser E2E passed in 4m2s. The first main
+attempt stopped in boundary fixtures, the second during dependency analysis. Neither is a pass.
+All eight remaining GitHub security alerts were independently marked `fixed`; security graph
+repair does not by itself resolve this CI timing failure.
+
+CI-04 preserves the exact 220-workload / 105-proof-pair inventory, every existing positive and
+negative case, two workers per workspace, eleven exclusive barriers, process isolation, fresh
+input reads, frozen artifacts, append-only checkpoint history, cancellation, and the unchanged
+18m30s execution deadline. The distributed schedule described below supersedes this interlude's
+initial single-workspace proposal; aggregate hosted concurrency increases, not concurrency inside
+one shared filesystem. No historical successful run or cached test result authorizes a new run.
+Exact-head hosted PR checks and fresh successful main CI remain mandatory.
+
+### Why another small scheduling change is insufficient
+
+Both failed main attempts completed all 105 proof pairs. Prefix work took 320.2 / 326.2 seconds;
+the proof region took 769.0 / 775.2 seconds. The passing PR needed 240.8 / 600.9 seconds for these
+same phases. Failed-run values are reconstructed from timestamped logs because an interrupted
+run has no complete final receipt. They do not establish a specific hosted hardware cause.
+
+Repacking the existing two-worker segments can save at most approximately nine seconds under
+fixed observed durations. The eleven drained barriers remain necessary for workspace alias and
+source-audit isolation. Shared historical bridge profiling also confirms that each of five
+archives is inflated only once in a cold M09 build; repeated decompression is not the bottleneck.
+Skipping later current-file authentication would not be a valid optimization.
+
+### Distributed exhaustive execution
+
+Fresh, authenticated routing preserves the existing affected selector for eligible PRs. Main,
+manual required runs, and ineligible/unsafe/unknown PR boundaries use three fixed exhaustive
+shards. Routing emits only a mode, never PASS; affected execution repeats its own fresh admission.
+
+The exhaustive partition is canonical proof positions 0–52 / 53–76 / 77–104: 53, 24, and 28 complete
+verifier/root pairs. Every shard runs all eight prefix workloads on its own checkout. No compiled
+outputs, temporary workspace, normalized proof authority, or cached success is shared. Each shard
+keeps the original two-worker process runner and filesystem/cancellation guards. All eleven
+barriers occur in the first shard and still drain that workspace's worker pool.
+
+The final `Quality gate` always evaluates routing and dependency results. It rejects missing,
+failed, skipped, cancelled, foreign-revision, foreign-run, and future-attempt shard authority.
+GitHub's current-workflow `needs` results and bounded exact job outputs are the remote authority;
+serialized PASS alone is insufficient. Successful jobs retained by a failed-job rerun must belong
+to the same run and exact execution/head revisions; their actual producer attempt is recorded.
+They are not represented as locally observed child closes. The join freshly builds its own
+workspace, then runs both original suffix workloads after all remote prerequisites have passed.
+The canonical logical coverage remains 220 workloads. Repeated prefix work and join preparation
+are explicitly additional execution, not hidden omissions or fabricated exactly-once claims.
+
+Replaying fixed main-attempt-2 durations estimates shard proof regions of 266.4 / 264.8 / 263.6
+seconds. Including repeated prefixes, setup, routing, and the fresh join suggests approximately
+14 minutes of critical-path time without queueing, compared with the interrupted 19-minute jobs.
+This is a counterfactual estimate, not a hosted result or an assertion about future runner speed.
+
+### Focused pure-work reductions
+
+The private normalized checkpoint graph now freezes by its validated schema, avoiding a second
+generic reflective walk. All 7,730 objects in the measured checkpoint-74 graph remain frozen
+(7,910 after the checkpoint-75 append), and schema, canonical bytes, digests,
+append-only history, reviewed anchors, and fresh filesystem checks remain unchanged. Rotated warm
+medians on Node 24.10.0 / Apple M1 measure 20.171 → 18.594 ms for validation and 22.562 → 20.627 ms
+for a fresh authenticated file read. These microbenchmarks are not added to projected shard gains.
+
+T05 now rejects malformed path-backed proof requests and unsafe writer destinations before fresh
+App/host builds. Admitted requests still build, then reread their path authority; atomic writer
+rechecks remain mandatory. Replaying all ten unchanged original root cases measures 18.405 →
+15.408 seconds. The expanded suite measures 21.802 seconds because two additional post-admission
+race negatives intentionally perform full fresh builds before rejection. This is not claimed as
+a net whole-suite speedup. Existing tests are retained, with deterministic no-build rejection,
+two-read positive, mutation-after-admission, and writer-race coverage added.
+
+### Local implementation evidence and hosted closure conditions
+
+The exact six-command bounded baseline passes. Dependency boundaries cover 862 modules / 3,689
+dependencies and all 30 boundary fixtures; infrastructure debt retains 19 records (one open,
+18 closed). The 31 new distributed-runner tests, 105 checkpoint tests, 36 original scheduler
+tests, 54 promotion/selector tests, 20 ownership tests, 47 affected-runner tests, and 180 core
+CI/security tests all pass without skipping cases. Final T05 verification passes and its expanded
+ten-case root suite passes in 19.036 seconds; this final sanity run is not a comparative benchmark.
+No full local `pnpm check` was repeated. The unchanged hosted Browser E2E still runs all six journeys.
+
+Checkpoint 75 is 2,011,508 bytes and retains all 74 preceding entries, all 59 immutable artifacts,
+and 118 current readers. Only T05's verifier library and root test are resealed. The checkpoint
+head is `ed7eea304b03e07112fbeb0b27fd6df82d83d229033c5c3794d0054cc9df2ea1`.
+The T05 artifact remains 189,123 bytes at
+`80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3`.
+Ownership covers 1,452 tracked paths, 210 proof-owned paths, and 48 CI-policy paths. Historical
+selector campaigns and their seven compatibility projections remain unchanged; new imported
+runner sources have separate fresh byte/mode admission checks.
+
+Current execution identities:
+
+| Authority                  | SHA-256                                                            |
+| -------------------------- | ------------------------------------------------------------------ |
+| Logical workload inventory | `66ae36cb2ec1c8a7bc7deee1a733e253cc1861d3b9ca1487c9725f437c3abf5a` |
+| Original exhaustive plan   | `30799382d92edf70455a42bc01e13973324bf1a916b5b925ad86c429b926fb2a` |
+| Distributed plan           | `41f16f539ff346e35c3f9a3d1b301e1b7de1f57c500b0a86cd4a43f4fa50bf24` |
+| Selector                   | `af2e37e8ab5ece83b0f33d793837d3fdd9d7325707f8a0cc4af3259fd5e35acb` |
+| Runner source              | `0f06360543eab2b0f05a855bd09649b7ab21cdee44abbb3f1e61f6b2364cbc19` |
+| Ownership                  | `7ebb6e9d5d01e0753844138d520b0b898fc63dfb20074d086861213ab070d799` |
+
+Each successful exhaustive run must observe 114 / 56 / 64 actual local workload closes in its
+three shards and three fresh local join closes: 237 physical executions covering all 220 logical
+workloads and 105 proof pairs. The raw summary validator grants only shadow/test authority.
+Required join admission instead captures GitHub's injected current-job context with no caller
+arguments, validates all four exact `needs` records, and binds local Git state to that revision.
+This trusts the GitHub job environment; it does not claim cryptographic authenticity against a
+process that can forge its own environment.
+
+The task-board `DONE` candidates for CI-04 and SEC-02 take effect only after the unchanged final
+PR head passes both required checks and its merged successor passes fresh main CI. Hosted run
+URLs, exact revisions, job outcomes, and measured end-to-end timings belong in the PR closure
+receipt. No hosted CI-04 success is claimed by these local results. M10-T06 remains not started.

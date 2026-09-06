@@ -1,8 +1,41 @@
 # Project Status
 
-Last updated: 2026-09-06
+Last updated: 2026-09-07
 
-## Current work — SEC-02 development dependency security, before M10-T06
+## CI-04 local evidence complete — conditional hosted closure, before M10-T06
+
+CI-04 is the explicitly authorized performance interlude after SEC-02's merged revision exceeded
+the unchanged 18m30s exhaustive deadline twice. It depends on completed CI-03 and M10-T05;
+SEC-02's final operational closure depends on this interlude, not a prerequisite claimed done.
+The `DONE` rows for CI-04 and SEC-02 are conditional closure candidates: neither is complete
+until both exact-final-head PR checks and a fresh exhaustive successor main run pass. No failed
+SEC-02 run is reclassified. M10-T06 remains `NOT_STARTED`; stop after those checks close.
+
+The task distributes exhaustive verification across three isolated hosted workspaces while
+preserving all 220 logical workloads, 105 proof pairs, existing positive and negative tests,
+two workers per workspace, all eleven exclusive barriers, immutable artifacts, current-input
+freshness, and failure/cancellation authority. Eligible PRs retain the proven affected route.
+Exhaustive shards each rebuild and run the complete prefix; a final joined check requires every
+shard and freshly executes the closing boundaries. It does not raise execution deadlines, reuse
+cached test results, or change product behavior. The six-command bounded baseline, 31 new
+distributed contracts, 105 checkpoint tests, 36 original scheduler tests, 54 promotion/selector
+tests, 20 ownership tests, 47 affected-runner tests, and 180 core CI/security contracts pass locally.
+The final T05 verifier and all ten expanded root cases pass with the frozen artifact unchanged.
+Checkpoint 75 retains all 74 predecessors and 59 artifacts, resealing only T05's two readers.
+Local measurements and the hosted closure conditions are recorded in the
+[performance record](docs/proof/CI-FRESH-PROOF-PERFORMANCE.md).
+
+## SEC-02 security patches merged — successor validation required for closure
+
+[PR #79](https://github.com/desenlab/desen-app/pull/79) passed both required PR checks and merged
+as `fdd1b8d5ecfbca5139d8aafb02324acddf66a4c2`. GitHub marked all eight remaining alerts `fixed`;
+full and production audits were rechecked with zero findings. However,
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34060300431) timed out in both
+Quality attempts; Browser E2E passed. Those unfinished checks are not successful receipts and
+SEC-02 is not yet fully closed. The [verification receipt](https://github.com/desenlab/desen-app/pull/79#issuecomment-5562432562)
+records the exact revisions, failures, and security results.
+
+## SEC-02 implementation-checkpoint evidence
 
 SEC-02 is the explicitly authorized follow-up to the failed Undici and PostCSS Dependabot
 security-update jobs. It addresses remaining development-tool dependency advisories, verifies

@@ -115,12 +115,13 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "2db218584d8ef0497f1da57a6e001e73e85b35c3c7eb02b48e049348d429d249",
   "27166d8cca9e4ce8eadde335306070b404e1e8f28de3e36dd391430a7884d825",
   "da57d8ddad552e2d0ce5ebc7f990aa6d90c722f8af1ae3a31f4247d11a43e308",
+  "ed7eea304b03e07112fbeb0b27fd6df82d83d229033c5c3794d0054cc9df2ea1",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
   25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
   46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57, 58, 59, 59,
-  59,
+  59, 59,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
@@ -1287,25 +1288,29 @@ function normalizeManifest(rawManifest) {
   };
 }
 
-function deepFreezeJson(value) {
-  if (value !== null && typeof value === "object") {
-    if (SAFE_ARRAY_IS_ARRAY(value)) {
-      let index = 0;
-      while (index < value.length) {
-        deepFreezeJson(value[index]);
-        index += 1;
-      }
-    } else {
-      const keys = SAFE_REFLECT_OWN_KEYS(value);
-      let index = 0;
-      while (index < keys.length) {
-        deepFreezeJson(value[keys[index]]);
-        index += 1;
-      }
+function freezeNormalizedManifest(manifest) {
+  // normalizeManifest privately creates this exact graph with primitive receipt fields. Freeze
+  // every owned node without reflecting over those fields again; raw-input checks stay upstream.
+  let checkpointIndex = 0;
+  while (checkpointIndex < manifest.checkpoints.length) {
+    const checkpoint = manifest.checkpoints[checkpointIndex];
+    let artifactIndex = 0;
+    while (artifactIndex < checkpoint.artifacts.length) {
+      SAFE_OBJECT_FREEZE(checkpoint.artifacts[artifactIndex]);
+      artifactIndex += 1;
     }
-    SAFE_OBJECT_FREEZE(value);
+    let readerIndex = 0;
+    while (readerIndex < checkpoint.readers.length) {
+      SAFE_OBJECT_FREEZE(checkpoint.readers[readerIndex]);
+      readerIndex += 1;
+    }
+    SAFE_OBJECT_FREEZE(checkpoint.artifacts);
+    SAFE_OBJECT_FREEZE(checkpoint.readers);
+    SAFE_OBJECT_FREEZE(checkpoint);
+    checkpointIndex += 1;
   }
-  return value;
+  SAFE_OBJECT_FREEZE(manifest.checkpoints);
+  return SAFE_OBJECT_FREEZE(manifest);
 }
 
 function captureInertBytes(value, label, maximumBytes) {
@@ -1430,7 +1435,7 @@ function assertExactReviewedCheckpointChain(manifest, checkpointDigests) {
 export function validateProofReaderCheckpointBytes(rawBytes) {
   const { manifest, checkpointDigests } = normalizeCanonicalCheckpointBytes(rawBytes);
   assertExactReviewedCheckpointChain(manifest, checkpointDigests);
-  return deepFreezeJson(manifest);
+  return freezeNormalizedManifest(manifest);
 }
 
 /**

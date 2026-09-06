@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { appendFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { types as utilTypes } from "node:util";
@@ -1059,18 +1060,80 @@ export async function executeRequiredQualityGate(rawOptions = {}) {
   }
 }
 
+/**
+ * Routes hosted work without executing or authorizing any workload success.
+ *
+ * The affected branch is admitted by the same fresh promotion and change-boundary authority as
+ * execution. Its eventual job repeats this admission; this routing output is never a cached plan
+ * or a passing proof. Unknown and ineligible changes keep the exhaustive route.
+ */
+export async function resolveRequiredQualityGateRoute(rawOptions = {}) {
+  const options = Object.freeze({
+    ...normalizePublicOptions(
+      rawOptions,
+      REQUIRED_GATE_OPTION_KEYS.filter((key) => key !== "testSeams"),
+      "Required quality-gate routing options",
+    ),
+  });
+  const promotion = await verifyAffectedSelectorPromotionEvidence();
+  if (resolveRequiredQualityGateMode(options.eventName) !== "TRY_AFFECTED") {
+    return Object.freeze({ mode: "EXHAUSTIVE" });
+  }
+  const boundary = await captureAffectedChangeBoundary({
+    workspaceRoot: DEFAULT_WORKSPACE_ROOT,
+    baseRevision: options.baseRevision,
+    headRevision: options.headRevision,
+    executionRevision: options.executionRevision,
+    sameRepository: options.sameRepository,
+  });
+  validateAffectedSelectorPromotionBoundary(promotion, boundary);
+  const selection = validateAffectedSelectorPromotedSelection(
+    boundary,
+    promotion,
+    createRequiredAffectedSelection(validateAffectedSelectorPromotedBoundary(boundary, promotion)),
+  );
+  for (const key of [
+    "selectorSha256",
+    "ownershipSha256",
+    "impactGraphSha256",
+    "thresholdSha256",
+    "inventorySha256",
+  ]) {
+    if (selection[key] !== promotion.promotedAuthorities[key]) {
+      fail(
+        "REQUIRED_AFFECTED_PROMOTION_AUTHORITY_DRIFT",
+        `Routing authority field "${key}" drifted from authenticated I07-04 evidence.`,
+      );
+    }
+  }
+  return Object.freeze({
+    mode: selection.effectiveScope === "AFFECTED" ? "AFFECTED" : "EXHAUSTIVE",
+  });
+}
+
 async function main() {
   let result;
   let failure;
   try {
-    result = await executeRequiredQualityGate({
+    const options = {
       eventName: exactEnvironmentValue(process.env, "GITHUB_EVENT_NAME"),
       baseRevision: exactEnvironmentValue(process.env, "DESEN_REQUIRED_BASE_REVISION"),
       headRevision: exactEnvironmentValue(process.env, "DESEN_REQUIRED_HEAD_REVISION"),
       executionRevision: exactEnvironmentValue(process.env, "GITHUB_SHA"),
       sameRepository:
         exactEnvironmentValue(process.env, "DESEN_REQUIRED_SAME_REPOSITORY") === "true",
-    });
+    };
+    if (process.argv.length === 3 && process.argv[2] === "--route") {
+      const route = await resolveRequiredQualityGateRoute(options);
+      const outputPath = exactEnvironmentValue(process.env, "GITHUB_OUTPUT");
+      if (outputPath) await appendFile(outputPath, `mode=${route.mode}\n`, "utf8");
+      process.stdout.write(`DESEN_REQUIRED_QUALITY_ROUTE=${JSON.stringify(route)}\n`);
+      return;
+    }
+    if (process.argv.length !== 2) {
+      fail("REQUIRED_AFFECTED_OPTIONS_INVALID", "Unknown required quality-gate command arguments.");
+    }
+    result = await executeRequiredQualityGate(options);
   } catch (error) {
     failure = error;
   }
