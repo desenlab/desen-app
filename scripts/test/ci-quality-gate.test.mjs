@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { once } from "node:events";
 import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
@@ -1586,3 +1587,297 @@ test(
     }
   },
 );
+
+// SEC-02 exercises the dependencies loaded by real development-tool consumers.
+// Every potentially nonterminating probe is isolated; the deadline is a safety
+// ceiling, not a performance assertion, and the inputs remain deliberately tiny.
+function runToolchainSecurityProbe(consumerChain, probe, parameters = {}) {
+  let consumerRequire = createRequire(import.meta.url);
+  let entry;
+  for (const packageName of consumerChain) {
+    entry = consumerRequire.resolve(packageName);
+    consumerRequire = createRequire(entry);
+  }
+  assert.ok(entry);
+  const result = spawnSync(
+    process.execPath,
+    [
+      "--max-old-space-size=128",
+      "--input-type=module",
+      "--eval",
+      [
+        'import assert from "node:assert/strict";',
+        'import { createRequire } from "node:module";',
+        `const entry = ${JSON.stringify(entry)};`,
+        "const consumerRequire = createRequire(entry);",
+        "const dependency = consumerRequire(entry);",
+        `await (${probe.toString()})({ assert, dependency, consumerRequire, entry, parameters: ${JSON.stringify(parameters)} });`,
+      ].join("\n"),
+    ],
+    {
+      cwd: WORKSPACE_ROOT,
+      encoding: "utf8",
+      timeout: 5_000,
+      killSignal: "SIGKILL",
+      maxBuffer: 64 * 1024,
+    },
+  );
+  const detail = `${consumerChain.join(" → ")}: ${result.error?.message ?? result.stderr}`;
+  assert.equal(result.error, undefined, detail);
+  assert.equal(result.signal, null, detail);
+  assert.equal(result.status, 0, detail);
+}
+
+const SEC_02_BRACE_CONSUMERS = ["eslint", "minimatch", "brace-expansion"];
+const SEC_02_YAML_CONSUMERS = [
+  ["@changesets/cli", "@manypkg/get-packages", "read-yaml-file", "js-yaml"],
+  ["json-schema-to-typescript", "js-yaml"],
+];
+const SEC_02_NANOID_CONSUMERS = ["vitest", "vite", "postcss", "nanoid"];
+
+test("SEC-02 brace expansion preserves ordinary, padded, and empty-option results", () => {
+  runToolchainSecurityProbe(SEC_02_BRACE_CONSUMERS, ({ assert, dependency: { expand } }) => {
+    assert.deepEqual(expand("file-{a,b}-{1..2}"), ["file-a-1", "file-a-2", "file-b-1", "file-b-2"]);
+    assert.deepEqual(expand("{01..03}"), ["01", "02", "03"]);
+    assert.deepEqual(expand("{a,,b}", { max: 2 }), ["a", "b"]);
+    assert.deepEqual(expand("x{a,,b}y", { max: 2 }), ["xay", "xy"]);
+  });
+});
+
+test("SEC-02 brace expansion bounds total output length (GHSA-mh99-v99m-4gvg)", () => {
+  runToolchainSecurityProbe(SEC_02_BRACE_CONSUMERS, ({ assert, dependency: { expand } }) => {
+    for (const pattern of ["{a,b}".repeat(8), "${literal}" + "{a,b}".repeat(8)]) {
+      const output = expand(pattern, { max: 100, maxLength: 64 });
+      assert.ok(output.length > 0);
+      assert.ok(output.reduce((total, item) => total + item.length, 0) <= 64);
+    }
+  });
+});
+
+for (const [label, alternatives, paddingBudget] of [
+  ["padded sequence", 1, 4],
+  ["comma alternatives", 20, 8],
+]) {
+  test(`SEC-02 brace expansion bounds ${label} work (GHSA-rgw5-rvv9-x895)`, () => {
+    runToolchainSecurityProbe(
+      SEC_02_BRACE_CONSUMERS,
+      ({ assert, dependency: { expand }, parameters: { alternatives, paddingBudget } }) => {
+        const part = "{0001..0100}";
+        const pattern =
+          alternatives === 1 ? part : "{" + Array(alternatives).fill(part).join(",") + "}";
+        const originalJoin = Array.prototype.join;
+        let paddingCalls = 0;
+        let output;
+        try {
+          // Count bounded primitive work, so the incomplete fix cannot hide behind
+          // identical truncated output or machine-dependent elapsed time.
+          Array.prototype.join = function (separator) {
+            if (separator === "0") paddingCalls += 1;
+            return Reflect.apply(originalJoin, this, [separator]);
+          };
+          output = expand(pattern, { maxLength: 12 });
+        } finally {
+          Array.prototype.join = originalJoin;
+        }
+        assert.deepEqual(output, ["0001", "0002", "0003"]);
+        assert.ok(paddingCalls <= paddingBudget, `unbounded padding work: ${paddingCalls}`);
+      },
+      { alternatives, paddingBudget },
+    );
+  });
+}
+
+for (const consumerChain of SEC_02_YAML_CONSUMERS) {
+  const label = consumerChain[0];
+  test(`SEC-02 ${label} YAML preserves maps, merges, and duplicate rejection`, () => {
+    runToolchainSecurityProbe(consumerChain, ({ assert, dependency: yaml }) => {
+      const load = yaml.DEFAULT_SAFE_SCHEMA ? yaml.safeLoad : yaml.load;
+      assert.deepEqual(
+        load("defaults: &base { enabled: true }\nitem: { <<: *base, name: example }"),
+        {
+          defaults: { enabled: true },
+          item: { enabled: true, name: "example" },
+        },
+      );
+      assert.deepEqual(load("!!omap\n- first: 1\n- constructor: 2"), [
+        { first: 1 },
+        { constructor: 2 },
+      ]);
+      assert.throws(() => load("!!omap\n- duplicate: 1\n- duplicate: 2"), /cannot resolve/);
+    });
+  });
+
+  test(`SEC-02 ${label} YAML bounds ordered-map key scans (GHSA-5p4m-2wfm-xmqj)`, () => {
+    runToolchainSecurityProbe(consumerChain, ({ assert, dependency: yaml }) => {
+      const load = yaml.DEFAULT_SAFE_SCHEMA ? yaml.safeLoad : yaml.load;
+      const entries = 128;
+      const document =
+        "!!omap\n" +
+        Array.from({ length: entries }, (_, index) => `- sec02-key-${index}: ${index}`).join("\n");
+      const originalIndexOf = Array.prototype.indexOf;
+      let scannedKeys = 0;
+      let output;
+      try {
+        Array.prototype.indexOf = function (needle, fromIndex) {
+          if (typeof needle === "string" && needle.startsWith("sec02-key-")) {
+            scannedKeys += this.length;
+          }
+          return Reflect.apply(originalIndexOf, this, [needle, fromIndex]);
+        };
+        output = load(document);
+      } finally {
+        Array.prototype.indexOf = originalIndexOf;
+      }
+      assert.equal(output.length, entries);
+      assert.deepEqual(output.at(-1), { "sec02-key-127": 127 });
+      assert.ok(scannedKeys <= entries * 2, `quadratic ordered-map scan: ${scannedKeys}`);
+    });
+  });
+
+  test(`SEC-02 ${label} YAML charges empty merges and caps merge sequences`, () => {
+    runToolchainSecurityProbe(consumerChain, ({ assert, dependency: yaml }) => {
+      const load = yaml.DEFAULT_SAFE_SCHEMA ? yaml.safeLoad : yaml.load;
+      assert.deepEqual(load("target: { <<: [{}, {}] }", { maxTotalMergeKeys: 2 }), { target: {} });
+      assert.throws(
+        () => load("target: { <<: [{}, {}, {}] }", { maxTotalMergeKeys: 2 }),
+        /merge keys exceeded maxTotalMergeKeys/,
+      );
+      const sequence = (count) => "target: { <<: [" + Array(count).fill("{}").join(",") + "] }";
+      assert.deepEqual(load(sequence(100)), { target: {} });
+      assert.throws(() => load(sequence(101)), /abnormal merge sequence size/);
+    });
+  });
+}
+
+test("SEC-02 Nano ID preserves ordinary secure and custom generators", () => {
+  runToolchainSecurityProbe(
+    SEC_02_NANOID_CONSUMERS,
+    async ({ assert, dependency, consumerRequire }) => {
+      const asyncEntry = consumerRequire.resolve("nanoid/async");
+      const asynchronous = consumerRequire(asyncEntry);
+      assert.match(dependency.nanoid(16), /^[\w-]{16}$/);
+      assert.match(dependency.customAlphabet("abc", 8)(), /^[abc]{8}$/);
+      assert.equal(dependency.customRandom("abc", 8, (size) => new Uint8Array(size))(), "aaaaaaaa");
+      assert.match(await asynchronous.customAlphabet("abc", 8)(), /^[abc]{8}$/);
+    },
+  );
+});
+
+test("SEC-02 Nano ID zero-size generators terminate (GHSA-2v37-7h3g-55p8)", () => {
+  runToolchainSecurityProbe(
+    SEC_02_NANOID_CONSUMERS,
+    async ({ assert, dependency, consumerRequire }) => {
+      const asyncEntry = consumerRequire.resolve("nanoid/async");
+      const asynchronous = consumerRequire(asyncEntry);
+      const noRandomness = () => assert.fail("zero-sized IDs must not request randomness");
+      assert.equal(dependency.customRandom("abc", 0, noRandomness)(), "");
+      assert.equal(dependency.customRandom("abc", 8, noRandomness)(0), "");
+      assert.equal(dependency.customAlphabet("abc", 0)(), "");
+      assert.equal(dependency.customAlphabet("abc", 8)(0), "");
+      assert.equal(await asynchronous.customAlphabet("abc", 0)(), "");
+      assert.equal(await asynchronous.customAlphabet("abc", 8)(0), "");
+    },
+  );
+});
+
+test("SEC-02 PostCSS accepts an explicit local source map but rejects implicit and escaped files", () => {
+  runToolchainSecurityProbe(
+    ["vitest", "vite", "postcss"],
+    async ({ assert, dependency: postcss }) => {
+      const { mkdir, mkdtemp, rm, symlink, writeFile } = await import("node:fs/promises");
+      const { tmpdir } = await import("node:os");
+      const { join } = await import("node:path");
+      const directory = await mkdtemp(join(tmpdir(), "desen-sec02-map-"));
+      try {
+        const cssDirectory = join(directory, "css");
+        await mkdir(cssDirectory);
+        const from = join(cssDirectory, "style.css");
+        const localMap = join(cssDirectory, "style.css.map");
+        const outsideMap = join(directory, "private.map");
+        const map = JSON.stringify({
+          version: 3,
+          sources: ["source.css"],
+          names: [],
+          mappings: "AAAA",
+        });
+        await writeFile(localMap, map, "utf8");
+        await writeFile(outsideMap, map, "utf8");
+        const css = (reference) => `a { color: red }\n/*# sourceMappingURL=${reference} */`;
+
+        const accepted = postcss.parse(css("style.css.map"), { from });
+        assert.equal(accepted.source.input.map.text, map);
+        assert.deepEqual(accepted.source.input.map.consumer().sources, ["source.css"]);
+        assert.equal(postcss.parse(css(outsideMap)).source.input.map, undefined);
+        assert.equal(postcss.parse(css("../private.map"), { from }).source.input.map, undefined);
+
+        // A textual in-directory name is insufficient when its real path escapes.
+        await symlink(outsideMap, join(cssDirectory, "escaped.map"));
+        assert.equal(postcss.parse(css("escaped.map"), { from }).source.input.map, undefined);
+      } finally {
+        await rm(directory, { recursive: true, force: true });
+      }
+    },
+  );
+});
+
+test("SEC-02 Undici bounds decompression and recovers (GHSA-3xpg-4rpp-hhhm)", () => {
+  runToolchainSecurityProbe(["vitest", "jsdom", "undici"], async ({ assert, dependency }) => {
+    const { gzipSync } = await import("node:zlib");
+    const { MockAgent, interceptors } = dependency;
+    const agent = new MockAgent();
+    agent.disableNetConnect();
+    const origin = "http://sec02.invalid";
+    const pool = agent.get(origin);
+    const client = agent.compose(interceptors.decompress({ maxSize: 1024 }));
+    const reply = (path, body) =>
+      pool.intercept({ path, method: "GET" }).reply(200, gzipSync(body), {
+        headers: { "content-encoding": "gzip" },
+      });
+    try {
+      reply("/boundary", "a".repeat(1024));
+      const boundary = await client.request({ origin, path: "/boundary", method: "GET" });
+      assert.equal(await boundary.body.text(), "a".repeat(1024));
+
+      reply("/oversize", "b".repeat(2048));
+      const oversize = await client.request({ origin, path: "/oversize", method: "GET" });
+      await assert.rejects(oversize.body.text(), {
+        name: "ResponseExceededMaxSizeError",
+        code: "UND_ERR_RES_EXCEEDED_MAX_SIZE",
+      });
+
+      reply("/recovery", "still usable");
+      const recovery = await client.request({ origin, path: "/recovery", method: "GET" });
+      assert.equal(await recovery.body.text(), "still usable");
+      agent.assertNoPendingInterceptors();
+    } finally {
+      await agent.close();
+    }
+  });
+});
+
+test("SEC-02 Undici rejects cookie-attribute injection atomically (GHSA-v3r7-h72x-cjcm)", () => {
+  runToolchainSecurityProbe(["vitest", "jsdom", "undici"], ({ assert, dependency }) => {
+    const { Headers, setCookie } = dependency;
+    const headers = new Headers({ "x-existing": "kept" });
+    for (const cookie of [
+      { name: "session", value: "ok", domain: "example.com; Secure" },
+      { name: "session", value: "ok", unparsed: ["X=ok; HttpOnly"] },
+    ]) {
+      assert.throws(() => setCookie(headers, cookie), /Invalid cookie (?:domain|value)/);
+      assert.equal(headers.get("set-cookie"), null);
+      assert.equal(headers.get("x-existing"), "kept");
+    }
+    setCookie(headers, {
+      name: "session",
+      value: "ok",
+      domain: "example.com",
+      path: "/",
+      unparsed: ["Priority=High"],
+    });
+    assert.equal(
+      headers.get("set-cookie"),
+      "session=ok; Domain=example.com; Path=/; Priority=High",
+    );
+    assert.equal(headers.get("x-existing"), "kept");
+  });
+});

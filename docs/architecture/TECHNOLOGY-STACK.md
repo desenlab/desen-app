@@ -29,6 +29,13 @@ every dependency to have a documented responsibility.
 - Changesets 2.31.1, disabled for external publishing during the proof phase
 - json-schema-to-typescript 15.0.4, build-only and pinned for protocol type generation
 
+SEC-02's development-tool security maintenance pins transitive Undici 7.29.1, PostCSS 8.5.28,
+js-yaml 3.15.2/4.3.2, brace-expansion 5.0.9, and nanoid 3.3.18. Their owning tools and direct
+manifests remain unchanged. The full and production registry audits report zero findings on
+2026-09-06; this is dated evidence, not a future vulnerability-free guarantee. The
+[SEC-02 report](../proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md) records upstream review and
+fresh compatibility checks.
+
 ## Planned implementation choices
 
 | Area                     | Choice                                  | Reason                                                              |

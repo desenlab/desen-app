@@ -41,6 +41,50 @@ const T04_APP_PACKAGE_RECEIPT = Object.freeze({
   bytes: 4_546,
   sha256: "c634b5ee1e2d2af0ffd6db8d4841215664591a31999210a8e0b388b71509eb32",
 });
+const SEC_02_LOCKFILE_PACKAGE_UPDATES = Object.freeze([
+  [
+    "brace-expansion",
+    "5.0.7",
+    "5.0.9",
+    "sha512-7oFy703dxfY3/NLxC1fh2SUCQ0H9rmAY+5EpDVfXjUTTs+HEwR2nYaqLv+GWcTsumwxPfiz6CzCNkwXwBUwqCA==",
+    "sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==",
+  ],
+  [
+    "js-yaml",
+    "3.15.0",
+    "3.15.2",
+    "sha512-ttBQIIQPDeLjpPOohtUdXuXUVoA2uIB6fEH9HyJ7234s5mBJ5wTx20njxplLZQgLaOfpmPQA7X2t5AX6tIPbog==",
+    "sha512-6EuL879VkRA+1Cz578mKMiKvjPNEuk6+r1JaFzoSWejZmtf7xWbIyw1e3KkxlkzTIt9Taw6JBhEppG7utc1P+w==",
+  ],
+  [
+    "js-yaml",
+    "4.3.0",
+    "4.3.2",
+    "sha512-1td788aAnnZ5qs7V2QIRl1owjtYpbKt749Y3xauqQgwIIGF/xXWz1wMTEBx5O3LK3lXLVuqXPdPxj2BoFHaW9Q==",
+    "sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==",
+  ],
+  [
+    "nanoid",
+    "3.3.16",
+    "3.3.18",
+    "sha512-bzlKTyNJ7+LdGIIwy8ijFpIqEQIvafahV7eYykJ8Cvh42EdJeODoJ6gUJXpQJvej1BddH8OqTXZNE/KfbWAu8Q==",
+    "sha512-DTg4MJbGMWkfi6VZFdNt2/caMbQy4Ou+Op/hJQvGEWcnVfoA1QA+xzRKAzw9jD6+GVOOeYr/mIcuDSdug6F6+w==",
+  ],
+  [
+    "postcss",
+    "8.5.20",
+    "8.5.28",
+    "sha512-lW616l85ucIQL+FocMmL7pQFPqBmwejrCMg+iPxyImlrANNJG9NHq/RkyCZopDhd8C3LA03PHRJDjkbGu8vvug==",
+    "sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==",
+  ],
+  [
+    "undici",
+    "7.28.0",
+    "7.29.1",
+    "sha512-cRZYrTDwWznlnRiPjggAGxZXanty6M8RV1ff8Wm4LWXBp7/IG8v5DnOm74DtUBp9OONpK75YlPnIjQqX0dBDtA==",
+    "sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==",
+  ],
+]);
 const SOURCE_PATHS = Object.freeze({
   runtimePublication: "apps/desen-app/src/local-runtime-publication.ts",
   main: "apps/desen-app/src/main.tsx",
@@ -772,9 +816,24 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
   assert.deepEqual(second.dependencySecurityCompatibility, built.dependencySecurityCompatibility);
   const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
   const compatibility = built.dependencySecurityCompatibility;
-  assert.equal(compatibility.authority, "SEC-01");
+  assert.equal(compatibility.authority, "SEC-02");
+  assert.equal(compatibility.currentBytes, liveLockfile.byteLength);
+  assert.equal(compatibility.currentBytes, 132_006);
+  assert.equal(compatibility.historicalBytes, 132_012);
+  assert.deepEqual(compatibility.predecessor, {
+    authority: "SEC-01",
+    bytes: 132_012,
+    sha256: "49f1d521ebd2e097508d22f8235e111bfb7e6bdc26a039b517a4a19aba7b2735",
+  });
   assert.equal(compatibility.fastify, "5.12.2");
   assert.deepEqual(compatibility.fastUri, ["3.1.7", "4.1.4"]);
+  assert.deepEqual(compatibility.developmentDependencies, {
+    undici: "7.29.1",
+    postcss: "8.5.28",
+    "js-yaml": ["3.15.2", "4.3.2"],
+    "brace-expansion": "5.0.9",
+    nanoid: "3.3.18",
+  });
   assert.equal(compatibility.projectedReceipts, 1);
   assert.equal(compatibility.immutableArtifactPreserved, true);
   assert.equal(
@@ -785,14 +844,52 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
     (receipt) => receipt.path === "pnpm-lock.yaml",
   );
   assert.equal(historicalLockfile.sha256, compatibility.historicalSha256);
+  assert.equal(historicalLockfile.bytes, compatibility.historicalBytes);
   assert.notEqual(historicalLockfile.sha256, compatibility.currentSha256);
   assert.deepEqual(built.artifactBytes, artifactBytes);
 });
 
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
+  let priorLockfileText = liveLockfile.toString("utf8");
+  for (const [
+    name,
+    priorVersion,
+    currentVersion,
+    priorIntegrity,
+    currentIntegrity,
+  ] of SEC_02_LOCKFILE_PACKAGE_UPDATES) {
+    assert.ok(priorLockfileText.includes(`${name}@${currentVersion}:`));
+    priorLockfileText = replaceOnce(priorLockfileText, currentIntegrity, priorIntegrity)
+      .replaceAll(`${name}@${currentVersion}:`, `${name}@${priorVersion}:`)
+      .replaceAll(`${name}: ${currentVersion}`, `${name}: ${priorVersion}`);
+  }
+  const priorBraceHeader = [
+    "  brace-expansion@5.0.7:",
+    `    resolution: {integrity: ${SEC_02_LOCKFILE_PACKAGE_UPDATES[0][3]}}`,
+  ].join("\n");
+  priorLockfileText = replaceOnce(
+    priorLockfileText,
+    `${priorBraceHeader}\n    engines: {node: 20 || >=22}`,
+    `${priorBraceHeader}\n    engines: {node: 18 || 20 || >=22}`,
+  );
+  const priorLockfile = Buffer.from(priorLockfileText);
+  assert.equal(priorLockfile.byteLength, built.dependencySecurityCompatibility.predecessor.bytes);
+  assert.equal(
+    createHash("sha256").update(priorLockfile).digest("hex"),
+    "49f1d521ebd2e097508d22f8235e111bfb7e6bdc26a039b517a4a19aba7b2735",
+  );
   for (const rejectedLockfile of [
+    priorLockfile,
     changedByte(liveLockfile),
+    Buffer.from(liveLockfile.toString("utf8").replaceAll("picocolors: 1.1.1", "picocolors: 1.1.2")),
+    ...SEC_02_LOCKFILE_PACKAGE_UPDATES.map(([name, priorVersion, currentVersion]) =>
+      Buffer.from(
+        liveLockfile
+          .toString("utf8")
+          .replaceAll(`${name}@${currentVersion}:`, `${name}@${priorVersion}:`),
+      ),
+    ),
     Buffer.from(liveLockfile.toString("utf8").replaceAll("fastify@5.12.2", "fastify@5.11.2")),
     Buffer.from(liveLockfile.toString("utf8").replaceAll("fast-uri@3.1.7", "fast-uri@3.1.5")),
     Buffer.from(liveLockfile.toString("utf8").replaceAll("fast-uri@4.1.4", "fast-uri@4.1.2")),

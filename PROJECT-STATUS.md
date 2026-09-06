@@ -1,8 +1,32 @@
 # Project Status
 
-Last updated: 2026-09-05
+Last updated: 2026-09-06
 
-## Current work — SEC-01 dependency security, before M10-T06
+## Current work — SEC-02 development dependency security, before M10-T06
+
+SEC-02 is the explicitly authorized follow-up to the failed Undici and PostCSS Dependabot
+security-update jobs. It addresses remaining development-tool dependency advisories, verifies
+the installed graph and fresh build compatibility, and preserves all frozen evidence. It does not
+start M10-T06 or advance implementation-task or proof-gate counts. Completion requires the normal
+bounded local evidence and passing exact-head hosted checks, followed by fresh main CI.
+
+The six transitive records are patched: Undici 7.29.1, PostCSS 8.5.28, js-yaml 3.15.2/4.3.2,
+brace-expansion 5.0.9, and nanoid 3.3.18. Full and production audits report zero findings on
+2026-09-06. The 15 new installed-consumer regressions, complete 43-test orchestrator suite,
+T05 verifier/root 10/10, checkpoint 102/102, and hosted-contract preflight 394/394 pass locally.
+The frozen T05 artifact is reproduced unchanged by fresh Vite builds. Checkpoint 74 preserves all
+59 artifacts and the preceding 73 entries, resealing only the two T05 readers. Its head is
+`sha256:da57d8ddad552e2d0ce5ebc7f990aa6d90c722f8af1ae3a31f4247d11a43e308`.
+The `DONE` task-board row is conditional until the exact final PR head passes both hosted checks;
+no current GitHub completion is implied by local evidence. See
+[SEC-02 evidence](docs/proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md).
+
+SEC-01 closed in [PR #78](https://github.com/desenlab/desen-app/pull/78), merged as
+`90082809a4b5a68830cd84dbdf728ea2a6db6388`, with successful
+[main CI](https://github.com/desenlab/desen-app/actions/runs/33992215073). Its production audit was
+clean; the remaining development-only findings were not part of that earlier task.
+
+## SEC-01 dependency-security evidence at its implementation checkpoint
 
 SEC-01 is the explicitly authorized security interlude. Fastify is pinned to 5.12.2 and both
 transitive fast-uri lines to 3.1.7/4.1.4. The focused security suite passes 44/44, the complete

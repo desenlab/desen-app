@@ -37,13 +37,21 @@ kanıtlar ve tarihsel kimlikler korunuyor; Git geçmişi yeniden yazılmadı.
 [Kapsam ve kanıt](../proof/HISTORICAL-ARCHIVE-REDACTION.md). I07-05'in eski runner'ı kaldırma
 kapsamı değişmedi.
 
-**SEC-01 — Fastify / fast-uri güvenlik düzeltmesi**, kullanıcı isteğiyle M10-T06'dan önce gelir.
-Fastify 5.12.2 ve fast-uri 3.1.7/4.1.4 kullanılır. Güvenlik testleri 44/44, kontrol düzleminin tüm
-testleri 245/245 geçer; üretim bağımlılıkları audit'i sıfır açık bildirir. Geliştirme araçlarındaki
-kapsam dışı bulgular ayrı tutulur. Yerel kanıt geçen `DONE` kaydı koşullu kapanış adayıdır;
-tam son PR head'inde taze `Quality gate` ve `Browser E2E` geçmeden merge veya tamamlanma iddiası
-yapılamaz. **M10-T06 başlamaz; bu güvenlik işi kapanınca beklenir.**
+**SEC-01 — Fastify / fast-uri güvenlik düzeltmesi**,
+[PR #78](https://github.com/desenlab/desen-app/pull/78) ile kapandı; main revizyonu
+`90082809a4b5a68830cd84dbdf728ea2a6db6388` için
+[taze CI](https://github.com/desenlab/desen-app/actions/runs/33992215073) geçti. Fastify 5.12.2 ve
+fast-uri 3.1.7/4.1.4 kullanılır. O görevin dışında tutulan geliştirme bağımlılıkları artık SEC-02'nin
+kapsamındadır.
 [Kapsam ve kanıt](../proof/SEC-01-DEPENDENCY-SECURITY.md).
+
+**SEC-02 — Geliştirme bağımlılıklarının güvenliği**, başarısız Undici/PostCSS Dependabot
+güncellemeleri üzerine açık kullanıcı onayıyla yürütülür. Undici, PostCSS, js-yaml, brace-expansion
+ve nanoid yamaları uygulanır; 2026-09-06 tarihli tam ve üretim audit'leri sıfır açık bildirir.
+Önceki kanıtlar değiştirilmez; taze derleme aynı ürün çıktısını doğrular. Yerel kontroller ve tam
+güncel head'deki hosted `Quality gate` / `Browser E2E`, ardından main CI geçmeden tamamlandı
+denmez. **M10-T06 başlamaz; bu güvenlik işi kapanınca beklenir.**
+[Kapsam ve kanıt](../proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md).
 
 **M10-T05 — Yayınlanan değişikliğin aynı host'ta görünmesi**,
 [PR #77](https://github.com/desenlab/desen-app/pull/77) ile kapandı. Main revizyonu
