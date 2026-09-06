@@ -2985,6 +2985,14 @@ export async function verifyDesenAppPublishedHostUpdateEvidence(rawOptions = und
   if (suppliedProofDocument !== undefined) {
     verifyProofDocument(suppliedProofDocument, DESEN_APP_PUBLISHED_HOST_UPDATE_ARTIFACT_PIN.sha256);
   }
+  // Path admission can reject unsafe inputs but cannot authorize their contents.
+  // The existing reads below reacquire both authorities after the fresh builds.
+  if (suppliedArtifactBytes === undefined) {
+    await readRegularAuthority(artifactPath, ARTIFACT_RELATIVE_PATH);
+  }
+  if (suppliedProofDocument === undefined) {
+    await readRegularAuthority(proofDocumentPath, PROOF_DOCUMENT_RELATIVE_PATH);
+  }
   const built = await buildDesenAppPublishedHostUpdateEvidence(buildOptions);
   const artifactBytes =
     suppliedArtifactBytes === undefined
@@ -3171,6 +3179,23 @@ async function canonicalDestinationPath(filePath) {
   return path.join(canonicalParent, path.basename(absolutePath));
 }
 
+async function preflightArtifactDestination(artifactPath) {
+  try {
+    const destination = await canonicalDestinationPath(artifactPath);
+    const metadata = await lstat(destination).catch((error) => {
+      if (error?.code === "ENOENT") return undefined;
+      throw error;
+    });
+    if (metadata !== undefined && !metadata.isFile()) {
+      throw new TypeError("The artifact destination must be a regular file.");
+    }
+  } catch (error) {
+    fail("ARTIFACT_WRITE_UNSAFE", "The M10-T05 artifact destination is unsafe.", {
+      cause: String(error),
+    });
+  }
+}
+
 /** Atomically writes newly built M10-T05 evidence or refuses unsafe frozen replacement. */
 export async function writeDesenAppPublishedHostUpdateEvidence(rawOptions = undefined) {
   const options = exactOwnDataOptions(
@@ -3189,7 +3214,11 @@ export async function writeDesenAppPublishedHostUpdateEvidence(rawOptions = unde
     options.artifactPath === undefined
       ? DEFAULT_DESEN_APP_PUBLISHED_HOST_UPDATE_ARTIFACT_PATH
       : captureAbsolutePath(options.artifactPath, "artifactPath");
-  const built = await buildDesenAppPublishedHostUpdateEvidence(options.buildOptions);
+  const buildOptions = captureBuildOptions(options.buildOptions);
+  // This mirrors the atomic writer's existing policy without retaining a write
+  // capability: canonical destination and inode checks still run after the build.
+  await preflightArtifactDestination(artifactPath);
+  const built = await buildDesenAppPublishedHostUpdateEvidence(buildOptions);
   let destination;
   try {
     destination = await canonicalDestinationPath(artifactPath);

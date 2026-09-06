@@ -25,7 +25,7 @@ const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   PROOF_UNIT: 210,
-  CI_POLICY: 45,
+  CI_POLICY: 48,
   DEPENDENCY_POLICY: 32,
   FROZEN_INPUT: 154,
   PACKAGE_OR_APPLICATION: 556,
@@ -38,6 +38,11 @@ const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "docs/proof/SEC-01-DEPENDENCY-SECURITY.md",
 ]);
 const SEC_02_SUCCESSOR_PATH = "docs/proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md";
+const CI_04_SUCCESSOR_PATHS = Object.freeze([
+  "scripts/ci/run-required-sharded-quality-gate.mjs",
+  "scripts/ci/sharded-quality-gate-authority.mjs",
+  "scripts/ci/test/sharded-quality-gate.test.mjs",
+]);
 
 async function currentTrackedPaths() {
   const { stdout } = await EXEC_FILE("git", ["ls-files", "-z"], {
@@ -68,7 +73,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1449 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1452 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -90,12 +95,40 @@ test("freezes exact-one ownership for all 1449 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1449);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1452);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
   );
   assertDeepFrozen(authority);
+});
+
+test("the CI-04 execution sources retain every SEC-02 owner and force exhaustive review", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  for (const relativePath of CI_04_SUCCESSOR_PATHS) {
+    const owner = resolveAffectedWorkloadOwner(authority, relativePath);
+    assert.equal(owner.category, AFFECTED_OWNERSHIP_CATEGORIES.CI_POLICY);
+    assert.equal(owner.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.FORCE_EXHAUSTIVE);
+    assert.equal(owner.proofUnitId, null);
+    assert.throws(
+      () =>
+        createAffectedWorkloadOwnership(paths.filter((candidate) => candidate !== relativePath)),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+  assert.deepEqual(
+    calculateAffectedWorkloadOwnershipReview(
+      paths.filter((candidate) => !CI_04_SUCCESSOR_PATHS.includes(candidate)),
+    ),
+    {
+      trackedPathCount: 1449,
+      trackedPathSetSha256: "6fc4ae57156724abb4b42d88fb84e00d70ce15e2c6787e5850b079492d8bd828",
+      proofOwnedPathCount: 210,
+      categoryCounts: { ...EXPECTED_CATEGORY_COUNTS, CI_POLICY: 45 },
+      ownershipSha256: "c8836a58038204386135eadc7cba83453f95c03dde11ea98b70fba516360afce",
+    },
+  );
 });
 
 test("the SEC-02 documentation successor preserves the exact SEC-01 ownership authority", async () => {
@@ -109,7 +142,10 @@ test("the SEC-02 documentation successor preserves the exact SEC-01 ownership au
     verifierNodeId: null,
     rootTestNodeId: null,
   });
-  const previousPaths = paths.filter((candidate) => candidate !== SEC_02_SUCCESSOR_PATH);
+  const previousPaths = paths.filter(
+    (candidate) =>
+      candidate !== SEC_02_SUCCESSOR_PATH && !CI_04_SUCCESSOR_PATHS.includes(candidate),
+  );
   assert.throws(
     () => createAffectedWorkloadOwnership(previousPaths),
     expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
@@ -118,7 +154,7 @@ test("the SEC-02 documentation successor preserves the exact SEC-01 ownership au
     trackedPathCount: 1448,
     trackedPathSetSha256: "c47ca4048c8cd04a2d1f70facffc9dcb20027fb846284774e991ae23fc578f95",
     proofOwnedPathCount: 210,
-    categoryCounts: { ...EXPECTED_CATEGORY_COUNTS, PROJECT_DOCUMENTATION: 148 },
+    categoryCounts: { ...EXPECTED_CATEGORY_COUNTS, CI_POLICY: 45, PROJECT_DOCUMENTATION: 148 },
     ownershipSha256: "5e9bfed553437553ea36157baef70439ed50c712eeb318f28e14f2c522228c60",
   });
 });
@@ -146,7 +182,9 @@ test("the exact SEC-01 successor preserves the reviewed T05 ownership authority"
 
   const predecessorPaths = paths.filter(
     (candidate) =>
-      !SEC_01_SUCCESSOR_PATHS.includes(candidate) && candidate !== SEC_02_SUCCESSOR_PATH,
+      !SEC_01_SUCCESSOR_PATHS.includes(candidate) &&
+      candidate !== SEC_02_SUCCESSOR_PATH &&
+      !CI_04_SUCCESSOR_PATHS.includes(candidate),
   );
   assert.deepEqual(calculateAffectedWorkloadOwnershipReview(predecessorPaths), {
     trackedPathCount: 1446,
@@ -920,7 +958,8 @@ test("the reviewed AR-01 successor preserves the historical I07-04 ownership pro
       !promotedPaths.includes(candidate) &&
       !successorPaths.includes(candidate) &&
       !SEC_01_SUCCESSOR_PATHS.includes(candidate) &&
-      candidate !== SEC_02_SUCCESSOR_PATH,
+      candidate !== SEC_02_SUCCESSOR_PATH &&
+      !CI_04_SUCCESSOR_PATHS.includes(candidate),
   );
   historicalPaths.push(
     "scripts/ci/run-shadow-affected-quality-gate.mjs",

@@ -34,7 +34,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 <!-- task-progress:end -->
 
-**SEC-02:** `DONE` closure candidate pending exact-head hosted checks. This
+**CI-04:** `DONE` conditional closure candidate — [fresh-verification performance](docs/proof/CI-FRESH-PROOF-PERFORMANCE.md) retains all tests and 220 logical workloads across three isolated workspaces. Local evidence passes; closure requires exact-final-head PR checks and fresh main CI. M10-T06 is not started and implementation/gate counts are unchanged.
+
+**SEC-02:** patches [merged in PR #79](https://github.com/desenlab/desen-app/pull/79); its `DONE` closure candidate depends on successful CI-04 successor main validation after two main Quality timeouts. This
 [development dependency security](docs/proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md) task
 addresses the remaining Undici/PostCSS and related toolchain findings after
 [SEC-01 merged in PR #78](https://github.com/desenlab/desen-app/pull/78). It does not advance the

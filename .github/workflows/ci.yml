@@ -28,15 +28,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
+  quality-route:
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'required' }}
-    name: Quality gate
+    name: Quality routing
     runs-on: ubuntu-24.04
-    # Affected execution keeps its 17-minute soft deadline; exhaustive execution owns an
-    # 18-minute soft deadline. The command wrapper enforces a 19-minute process ceiling plus
-    # 30-second kill grace. Remaining time covers setup, contract preflight, receipt emission,
-    # and hosted-runner variance.
-    timeout-minutes: 25
+    timeout-minutes: 5
+    outputs:
+      mode: ${{ steps.route.outputs.mode }}
     env:
       CI: "true"
       DESEN_REQUIRED_BASE_REVISION: ${{ github.event.pull_request.base.sha || '' }}
@@ -49,6 +47,232 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.10.0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Read pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore trusted pnpm store
+        id: pnpm-cache
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-
+
+      - name: Install exact dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Route fresh required execution
+        id: route
+        run: node scripts/ci/run-required-affected-quality-gate.mjs --route
+
+  proof-a:
+    needs: quality-route
+    if: ${{ needs.quality-route.outputs.mode == 'EXHAUSTIVE' }}
+    name: Exhaustive proof A
+    runs-on: ubuntu-24.04
+    # Each isolated workspace keeps the existing two-worker, 18m30s soft / 19m hard bounds.
+    timeout-minutes: 25
+    outputs:
+      receipt: ${{ steps.execute.outputs.receipt }}
+    env:
+      CI: "true"
+      DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.10.0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Read pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore trusted pnpm store
+        id: pnpm-cache
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-
+
+      - name: Install exact dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run fresh exhaustive shard
+        id: execute
+        run: timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-a
+
+  proof-b:
+    needs: quality-route
+    if: ${{ needs.quality-route.outputs.mode == 'EXHAUSTIVE' }}
+    name: Exhaustive proof B
+    runs-on: ubuntu-24.04
+    # Each isolated workspace keeps the existing two-worker, 18m30s soft / 19m hard bounds.
+    timeout-minutes: 25
+    outputs:
+      receipt: ${{ steps.execute.outputs.receipt }}
+    env:
+      CI: "true"
+      DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.10.0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Read pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore trusted pnpm store
+        id: pnpm-cache
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-
+
+      - name: Install exact dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run fresh exhaustive shard
+        id: execute
+        run: timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-b
+
+  proof-c:
+    needs: quality-route
+    if: ${{ needs.quality-route.outputs.mode == 'EXHAUSTIVE' }}
+    name: Exhaustive proof C
+    runs-on: ubuntu-24.04
+    # Each isolated workspace keeps the existing two-worker, 18m30s soft / 19m hard bounds.
+    timeout-minutes: 25
+    outputs:
+      receipt: ${{ steps.execute.outputs.receipt }}
+    env:
+      CI: "true"
+      DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.10.0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Read pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore trusted pnpm store
+        id: pnpm-cache
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-
+
+      - name: Install exact dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run fresh exhaustive shard
+        id: execute
+        run: timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-c
+
+  quality:
+    needs: [quality-route, proof-a, proof-b, proof-c]
+    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.mode == 'required') }}
+    name: Quality gate
+    runs-on: ubuntu-24.04
+    # The required check never succeeds merely because a dependency was skipped or cancelled.
+    # Affected execution retains its original runner. Exhaustive execution joins all three
+    # exact-revision shards, rebuilds locally, and runs the unchanged closing boundary workloads.
+    timeout-minutes: 25
+    env:
+      CI: "true"
+      DESEN_REQUIRED_BASE_REVISION: ${{ github.event.pull_request.base.sha || '' }}
+      DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}
+      DESEN_REQUIRED_SAME_REPOSITORY: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+
+    steps:
+      - name: Require a valid routing result
+        env:
+          DESEN_ROUTE_RESULT: ${{ needs.quality-route.result }}
+          DESEN_ROUTE_MODE: ${{ needs.quality-route.outputs.mode }}
+          DESEN_SHARD_A_RESULT: ${{ needs.proof-a.result }}
+          DESEN_SHARD_B_RESULT: ${{ needs.proof-b.result }}
+          DESEN_SHARD_C_RESULT: ${{ needs.proof-c.result }}
+        run: |
+          test "$DESEN_ROUTE_RESULT" = success
+          case "$DESEN_ROUTE_MODE" in
+            AFFECTED)
+              test "$DESEN_SHARD_A_RESULT" = skipped
+              test "$DESEN_SHARD_B_RESULT" = skipped
+              test "$DESEN_SHARD_C_RESULT" = skipped
+              ;;
+            EXHAUSTIVE)
+              test "$DESEN_SHARD_A_RESULT" = success
+              test "$DESEN_SHARD_B_RESULT" = success
+              test "$DESEN_SHARD_C_RESULT" = success
+              ;;
+            *) exit 1 ;;
+          esac
+
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -94,9 +318,17 @@ jobs:
           node scripts/ci/verify-affected-selector-promotion-evidence.mjs
           node --test scripts/ci/test/affected-selector-promotion-evidence.test.mjs
           node --test scripts/ci/test/required-affected-quality-gate.test.mjs
+          node --test scripts/ci/test/sharded-quality-gate.test.mjs
 
       - name: Run required quality gate
+        if: ${{ needs.quality-route.outputs.mode == 'AFFECTED' }}
         run: timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-affected-quality-gate.mjs
+
+      - name: Join fresh exhaustive quality gate
+        if: ${{ needs.quality-route.outputs.mode == 'EXHAUSTIVE' }}
+        env:
+          DESEN_REQUIRED_SHARD_JOIN_NEEDS: ${{ toJSON(needs) }}
+        run: timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs join
 
       - name: Save trusted pnpm store
         if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.pnpm-cache.outputs.cache-hit != 'true' }}

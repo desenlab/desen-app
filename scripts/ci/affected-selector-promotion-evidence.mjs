@@ -192,6 +192,9 @@ const PROMOTION_REMOVED_TRACKED_PATHS = Object.freeze([
   "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
 ]);
 const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "scripts/ci/run-required-sharded-quality-gate.mjs",
+  "scripts/ci/sharded-quality-gate-authority.mjs",
+  "scripts/ci/test/sharded-quality-gate.test.mjs",
   "apps/control-plane-api/test/dependency-security.test.ts",
   "docs/proof/SEC-01-DEPENDENCY-SECURITY.md",
   "docs/proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md",
@@ -664,7 +667,7 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
     PROOF_UNIT: 210,
-    CI_POLICY: 45,
+    CI_POLICY: 48,
     DEPENDENCY_POLICY: 32,
     FROZEN_INPUT: 154,
     PACKAGE_OR_APPLICATION: 556,
@@ -780,6 +783,13 @@ const HISTORICAL_RUNNER_WORKFLOW_CONTRACT = Object.freeze({
 const CURRENT_RUNNER_WORKFLOW_CONTRACT = Object.freeze({
   ...HISTORICAL_RUNNER_WORKFLOW_CONTRACT,
   processTimeout: "19m_TERM_30s_KILL",
+  exhaustiveSchedule: "THREE_ISOLATED_SHARDS_WITH_REQUIRED_JOIN",
+  exhaustiveShardCount: 3,
+  proofPairWorkersPerWorkspace: 2,
+  shardJobIds: Object.freeze(["proof-a", "proof-b", "proof-c"]),
+  shardContext: "SAME_WORKFLOW_RUN_EXECUTION_REVISION_AND_PR_HEAD",
+  joinPreparation: "FRESH_WORKSPACE_GRAPH",
+  affectedRouting: "FRESH_ADMISSION_REPEATED_BY_EXECUTION",
   browserE2e: "PARALLEL_REQUIRED_EXACT_HEAD",
   browserE2eCommand: "pnpm --filter @desen/app-browser-e2e test:e2e",
   browserE2eTimeout: "15m",
@@ -805,7 +815,12 @@ const RUNNER_SOURCE_PATHS = Object.freeze([
   "scripts/ci/affected-selector-promotion-evidence.mjs",
   "scripts/ci/run-required-exhaustive-quality-gate.mjs",
   "scripts/ci/run-required-affected-quality-gate.mjs",
+  "scripts/ci/run-required-sharded-quality-gate.mjs",
+  "scripts/ci/sharded-quality-gate-authority.mjs",
 ]);
+// Distributed execution is new runner authority, not a change to the historical selector
+// comparison algorithm or its frozen campaign. Capture these sources freshly in the same pass.
+const ADDITIONAL_RUNNER_SOURCE_PATHS = Object.freeze(RUNNER_SOURCE_PATHS.slice(5));
 const EXPECTED_ADDED_PATH_AUTHORITIES = Object.freeze([
   Object.freeze({
     path: PROMOTION_ADDED_TRACKED_PATHS[0],
@@ -1062,8 +1077,8 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 74,
-  headSha256: "da57d8ddad552e2d0ce5ebc7f990aa6d90c722f8af1ae3a31f4247d11a43e308",
+  sequence: 75,
+  headSha256: "ed7eea304b03e07112fbeb0b27fd6df82d83d229033c5c3794d0054cc9df2ea1",
   frozenArtifactCount: 59,
   currentReaderCount: 118,
   liveVerification: "PASS",
@@ -1286,6 +1301,22 @@ async function readRegularAuthority(workspaceRoot, relativePath, maximumBytes, b
     .bytes;
 }
 
+// Like the live selector's import-time source epoch, these receipts bind later fresh captures
+// to the code loaded for this invocation. They are byte identities, never cached test success.
+const ADDITIONAL_RUNNER_IMPORT_RECEIPTS = Object.freeze(
+  await Promise.all(
+    ADDITIONAL_RUNNER_SOURCE_PATHS.map(async (sourcePath) => {
+      const capture = await readRegularAuthorityCapture(WORKSPACE_ROOT, sourcePath, 512 * 1024);
+      return Object.freeze({
+        path: sourcePath,
+        mode: capture.mode,
+        byteLength: capture.bytes.byteLength,
+        byteSha256: sha256(capture.bytes),
+      });
+    }),
+  ),
+);
+
 function comparisonAuthoritySha256(sources) {
   return sha256(
     JSON.stringify({
@@ -1304,7 +1335,10 @@ async function captureCurrentComparisonAuthority(
   const sources = [];
   // Read in the declared authority order. Each path is opened exactly once, and the captured
   // bytes—not a later pathname read—own both its serialized receipt and every semantic check.
-  for (const sourcePath of SHADOW_AFFECTED_COMPARISON_AUTHORITY_PATHS) {
+  for (const sourcePath of [
+    ...SHADOW_AFFECTED_COMPARISON_AUTHORITY_PATHS,
+    ...ADDITIONAL_RUNNER_SOURCE_PATHS,
+  ]) {
     const maximumBytes = [
       SELECTOR_SOURCE_PATH,
       "scripts/ci/affected-workload-ownership.mjs",
@@ -1318,12 +1352,14 @@ async function captureCurrentComparisonAuthority(
       beforeSourceOpen,
     );
     captures.set(sourcePath, capture);
-    sources.push({
-      path: sourcePath,
-      mode: capture.mode,
-      byteLength: capture.bytes.byteLength,
-      byteSha256: sha256(capture.bytes),
-    });
+    if (!ADDITIONAL_RUNNER_SOURCE_PATHS.includes(sourcePath)) {
+      sources.push({
+        path: sourcePath,
+        mode: capture.mode,
+        byteLength: capture.bytes.byteLength,
+        byteSha256: sha256(capture.bytes),
+      });
+    }
   }
   return { captures, sources };
 }
@@ -1654,10 +1690,21 @@ function calculateRunnerAuthoritySha256(value) {
 
 async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuthority = undefined) {
   const authority = currentAuthority ?? (await captureCurrentComparisonAuthority(workspaceRoot));
-  const sourceReceiptsByPath = new Map(
-    authority.sources.map((sourceReceipt) => [sourceReceipt.path, sourceReceipt]),
-  );
-  const sources = RUNNER_SOURCE_PATHS.map((sourcePath) => sourceReceiptsByPath.get(sourcePath));
+  const sources = RUNNER_SOURCE_PATHS.map((sourcePath) => {
+    const bytes = capturedSourceBytes(authority, sourcePath);
+    return {
+      path: sourcePath,
+      mode: authority.captures.get(sourcePath).mode,
+      byteLength: bytes.byteLength,
+      byteSha256: sha256(bytes),
+    };
+  });
+  if (!isDeepStrictEqual(sources.slice(5), ADDITIONAL_RUNNER_IMPORT_RECEIPTS)) {
+    fail(
+      "AFFECTED_PROMOTION_RUNNER_AUTHORITY_DRIFT",
+      "Distributed runner sources changed from this invocation's safely captured source epoch.",
+    );
+  }
   if (
     !isDeepStrictEqual(
       sources.map(({ path: sourcePath }) => sourcePath),
@@ -1700,14 +1747,28 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "node --test tests/desen-app-failure-fixture.test.mjs",
     "node scripts/verify-desen-app-success-host-operation.mjs",
     "node --test tests/desen-app-success-host-operation.test.mjs",
+    "node scripts/ci/run-required-affected-quality-gate.mjs --route",
+    "needs: [quality-route, proof-a, proof-b, proof-c]",
+    "${{ always() && (github.event_name != 'workflow_dispatch' || inputs.mode == 'required') }}",
+    "DESEN_REQUIRED_SHARD_JOIN_NEEDS: ${{ toJSON(needs) }}",
+    "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-a",
+    "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-b",
+    "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-c",
+    "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs join",
+    "node --test scripts/ci/test/sharded-quality-gate.test.mjs",
   ];
+  const repeatedWorkflowFragments = new Map([
+    ["fetch-depth: 0", 5],
+    ["DESEN_REQUIRED_BASE_REVISION: ${{ github.event.pull_request.base.sha || '' }}", 2],
+    ["DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}", 5],
+    ["github.event.pull_request.head.repo.full_name == github.repository", 8],
+    ["github.event_name != 'workflow_dispatch' || inputs.mode == 'required'", 3],
+  ]);
   if (
-    workflowFragments.some((fragment) =>
-      fragment === "github.event.pull_request.head.repo.full_name == github.repository"
-        ? exactOccurrence(workflowSource, fragment) !== 3
-        : fragment === "github.event_name != 'workflow_dispatch' || inputs.mode == 'required'"
-          ? exactOccurrence(workflowSource, fragment) !== 2
-          : exactOccurrence(workflowSource, fragment) !== 1,
+    workflowFragments.some(
+      (fragment) =>
+        exactOccurrence(workflowSource, fragment) !==
+        (repeatedWorkflowFragments.get(fragment) ?? 1),
     ) ||
     workflowSource.includes("run-shadow-affected-quality-gate.mjs") ||
     !workflowSource.includes(
