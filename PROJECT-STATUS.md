@@ -2,11 +2,41 @@
 
 Last updated: 2026-09-08
 
-## Current work — M10-T06, followed by the remaining M10 closure
+## Current work — M10-T07 last-known-good recovery closure
 
-The user explicitly authorized completing M10 without skipping tasks or verification. M10-T06
-is the sole active implementation task: reject invalid prop/event/slot publication with
-node-linked diagnostics through the real product. M10-T05 is complete. CI-04 and SEC-02 are also
+T07's implementation and focused local evidence pass; its task-board `DONE` row is a conditional
+closure candidate, not hosted completion. It remains the only active work until the exact-head
+Quality gate and Browser E2E, merge, and fresh main checks pass. The real Chromium journey keeps
+C / previous-good A / generation 1 through corrupt revision and Catalog mismatch, complete service
+exits, new PIDs, and fresh browser contexts, then activates valid D at generation 2 on the same
+independent host build. The verifier and nine root cases pass; T05/T06 verifiers and expanded roots
+pass 20/20 with their artifacts unchanged. Fresh in-memory emission matches 96 public modules and
+reauthenticates 442 compiler inputs; browser execution remains separate evidence.
+
+The bounded six-command baseline passes, including 871-module / 3,745-edge boundaries and 38
+fixtures. Checkpoint 77 preserves all 76 predecessors and 60 artifacts, authenticating 61 artifacts /
+122 readers at `sha256:4bed8aba3916c066c689dd99ea4a3820e0b7b1a05d3780688e51b70ec9b97ece`.
+The new 304,094-byte artifact is
+`sha256:5e589bc8022de3ccf3add7a9ebab78006ecca6e72628e165f54eef4fd8b90b68`.
+CI retains every existing workload and adds the T07 pair/eighth browser journey: 224 logical /
+107 proof pairs, 241 physical workloads, unchanged two-worker shards and eleven barriers.
+All 491 CI/retained-runner contracts pass, including 110 checkpoint cases; the real T07 verifier
+and nine root cases pass under exact CI permissions without changing build outputs.
+Candidate progress is 119/148 (80%), M10 10/12 (83%); P-12 awaits hosted closure and G10 remains
+open. [Full T07 evidence](docs/proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md).
+
+The user explicitly authorized completing M10 without skipping tasks or verification. M10-T07
+is the sole active implementation task: preserve the last authenticated revision across corrupt
+revision and Catalog-mismatch candidates, including a real product-process restart. T06 closed in
+[PR #81](https://github.com/desenlab/desen-app/pull/81): exact head
+`926f94c75525025a3946869c45798fde25f62e3f` passed
+[PR CI](https://github.com/desenlab/desen-app/actions/runs/34208718701), merged as
+`c2e2164957632a363af678a6208e0196acc4cc7b`, and passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34209981353), including all
+three exhaustive shards, the joined Quality gate, and seven Chromium journeys. The
+[closure receipt](https://github.com/desenlab/desen-app/pull/81#issuecomment-5582874519) preserves
+the earlier failed unmerged candidate as a failure. T08, T09, and G10 have not started.
+M10-T05 is complete. CI-04 and SEC-02 are also
 closed: [PR #80](https://github.com/desenlab/desen-app/pull/80) merged as
 `991b711d1eb74b0239b7e959671671eb51654085`, and
 [fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34066622578) passed on attempt 1
@@ -14,9 +44,8 @@ in 12m23s with all 220 logical workloads, 105 proof pairs, 430 CI contract tests
 journeys retained. The [closure receipt](https://github.com/desenlab/desen-app/pull/80#issuecomment-5563055711)
 satisfies the conditional records below; their earlier failures remain historical failures.
 
-T06 implementation and local verification are ready. The task-board `DONE` row is a conditional
-closure candidate: exact final PR Quality gate and Browser E2E, merge, and a fresh passing main
-run are still required before advancing. The optional detached Source workflow passes 21 new
+T06 implementation, local verification, and hosted closure are complete. The optional detached
+Source workflow passes 21 new
 product tests and a real Chromium invalid-prop/event/slot rejection-and-repair journey. T06 and
 T05 pass their exact guarded verifier/root checks; historical T01C/T04 roots pass 20/20. All 483
 CI/retained-runner contracts and the exact bounded local baseline pass. The T06 artifact is
@@ -25,9 +54,9 @@ Checkpoint 76 preserves the full prefix and authenticates 60 artifacts / 120 rea
 `sha256:b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6`.
 CI keeps every prior workload and adds two: 222 logical workloads / 106 proof pairs, seven browser
 journeys, 239 physical workloads, unchanged two-worker shards and eleven exclusive barriers.
-Candidate progress is 118/148 (80%), M10 9/12 (75%); G10 remains open.
+Progress is 118/148 (80%), M10 9/12 (75%); G10 remains open.
 
-After T06 closes, execute T07 last-known-good recovery, T08 reproducible seed/reset and demo
+Execute T07 last-known-good recovery, T08 reproducible seed/reset and demo
 runbook, T09 committed Runtime Core tree baseline, and G10's complete evidence audit in order.
 Every task retains its bounded local baseline, focused positive/negative evidence, exact-head PR
 checks, merge, and fresh main validation. G10 additionally requires the exhaustive local gate.

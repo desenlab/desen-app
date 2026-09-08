@@ -3201,8 +3201,14 @@ This file records implementation discoveries without changing the frozen DESEN 0
   through a fixed same-origin endpoint and independently mounts it with the static reference
   Catalog and adapter registry. Invalid, stale, malformed, oversized, failed, or late candidates
   preserve the current server delivery and browser surface.
-- Future action: M10-T07 must prove the same last-known-good property through the Desen App product
-  restart path before P-12 can become `PROVEN`. M12-T05 must measure the complete cross-system
+- M10-T07 evidence: the normal product visibly publishes A then C. Corrupt-revision and
+  self-consistent Catalog-mismatch candidates remain selected in the channel while the entire
+  local service process exits and restarts with a different PID and fresh browser contexts. The
+  unchanged independent host recovers C / previous-good A / generation 1, then accepts a visibly
+  authored valid D at generation 2. A separate sockets-free matrix reruns public recovery and
+  rejects cloned, missing, and swapped durable-role authorities. See
+  `docs/proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md` for exact evidence and hosted closure conditions.
+- Future action: M12-T05 must measure the complete cross-system
   limits before N-041 can leave `PLANNED`. A later protocol revision should standardize channel
   notification and host-delivery interoperability only if independent implementations need a
   shared transport contract beyond the observable activation invariants.
@@ -3943,9 +3949,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
   outside DESEN semantics. The proof browser uses a temporary instance of that same production
   composition; the ordinary developer launcher uses ignored durable `.desen` state.
 
+- M10-T07 evidence: the Account project's exact saved Source survives complete local service
+  restarts and reopens through the normal product. Launcher-owned App connection configuration is
+  rebuilt in the same output directory for the activation bridge's fresh OS-selected port; the
+  App source and independent host build do not change. Invalid channel candidates cannot replace
+  the authenticated durable winner. This bounded profile does not establish a general project store.
 - Future action: General multi-project, renaming, deletion, hosted tenancy, collaboration, and sync
-  need a separate authenticated project-store contract and atomicity decision. Browser restart
-  last-known-good activation remains M10-T07; PF-090 stays `OPEN` until a general product project
+  need a separate authenticated project-store contract and atomicity decision. PF-090 stays `OPEN` until a general product project
   model is either standardized or deliberately documented as application-specific.
 
 - M10-T04 additive profile: a finite authenticated workspace chooser installs the existing Account

@@ -75,10 +75,13 @@ const neutralProductionSourcePath =
   "^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core)/src/";
 const desenAppBrowserProductProofServerPath =
   "^apps/desen-app-browser-e2e/product-proof-server\\.mjs$";
-const desenAppBrowserPublishedHostProofServerPath =
-  "^apps/desen-app-browser-e2e/published-host-proof-server\\.mjs$";
+const desenAppBrowserRecoveryProofServerPath =
+  "^apps/desen-app-browser-e2e/restart-recovery-proof-server\\.mjs$";
+const desenAppBrowserPublicationServerPaths =
+  "^apps/desen-app-browser-e2e/(?:published-host-proof-server|restart-recovery-proof-server)\\.mjs$";
 const desenAppBrowserServerPaths =
-  "^apps/desen-app-browser-e2e/(?:product-proof-server|published-host-proof-server)\\.mjs$";
+  "^apps/desen-app-browser-e2e/(?:product-proof-server|published-host-proof-server|restart-recovery-proof-server)\\.mjs$";
+const protocolPublicBuildEntryPath = "^packages/protocol/dist/index\\.(?:d\\.ts|js)$";
 const controlPlanePublicBuildEntryPath = "^apps/control-plane-api/dist/index\\.(?:d\\.ts|js)$";
 const desenAppLocalOperationHostPath = "^apps/desen-app/dev/local-operation-host\\.mjs$";
 const desenAppLocalPublicationHostPath = "^apps/desen-app/dev/local-publication-host\\.mjs$";
@@ -121,7 +124,12 @@ const applicationAllowlistRules = Object.entries(allowedApplicationDependencies)
     name: `application-${applicationName}-allowed-dependencies`,
     severity: "error",
     comment: `${applicationName} may import only the packages assigned to its responsibility.`,
-    from: { path: `^apps/${applicationName}/` },
+    from: {
+      path: `^apps/${applicationName}/`,
+      ...(applicationName === "desen-app-browser-e2e"
+        ? { pathNot: desenAppBrowserRecoveryProofServerPath }
+        : {}),
+    },
     to: {
       path: "^packages/",
       pathNot: packagePath(allowedDependencies),
@@ -162,6 +170,14 @@ module.exports = {
     ...packageAllowlistRules,
     ...applicationAllowlistRules,
     {
+      name: "desen-app-browser-e2e-recovery-server-protocol-public-root-only",
+      severity: "error",
+      comment:
+        "Only the exact recovery proof server may create adversarial Bundle bytes with the public protocol digest API; private protocol modules and every other package remain forbidden.",
+      from: { path: desenAppBrowserRecoveryProofServerPath },
+      to: { path: "^packages/", pathNot: protocolPublicBuildEntryPath },
+    },
+    {
       name: "desen-app-browser-e2e-reviewed-app-source-only",
       severity: "error",
       comment:
@@ -192,7 +208,7 @@ module.exports = {
       severity: "error",
       comment:
         "The published-host proof server may compose only the built public reference-host server entry, never its source tree or a deep/private build module.",
-      from: { path: desenAppBrowserPublishedHostProofServerPath },
+      from: { path: desenAppBrowserPublicationServerPaths },
       to: {
         path: "^apps/reference-host-web-server/",
         pathNot: referenceHostServerPublicBuildEntryPath,
@@ -214,7 +230,7 @@ module.exports = {
       severity: "error",
       comment:
         "Only the reviewed published-host proof server may combine the exact local activation bridge with public control-plane and reference-host entries; every other application edge remains forbidden.",
-      from: { path: desenAppBrowserPublishedHostProofServerPath },
+      from: { path: desenAppBrowserPublicationServerPaths },
       to: {
         path: "^apps/(?!desen-app-browser-e2e/|control-plane-api/|reference-host-web-server/)",
         pathNot: desenAppLocalPublicationHostPath,

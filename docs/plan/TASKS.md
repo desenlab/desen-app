@@ -2150,7 +2150,7 @@ and move to M10-T01.
 | M10-T04  | DONE        | M10-T02                   | Success fixture, navigation, and real host-operation binding test             |
 | M10-T05  | DONE        | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
 | M10-T06  | DONE        | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
-| M10-T07  | NOT_STARTED | M10-T05, G07              | Corrupt revision and catalog mismatch preserve last-known-good                |
+| M10-T07  | DONE        | M10-T05, G07              | Corrupt revision and catalog mismatch preserve last-known-good                |
 | M10-T08  | NOT_STARTED | M10-T01B–M10-T07          | One-command seed/reset and repeatable sign-in demo runbook                    |
 | M10-T09  | NOT_STARTED | M10-T08                   | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
 | G10      | NOT_STARTED | M10-T01C, M10-T02–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
@@ -2519,7 +2519,20 @@ closure candidate until fresh hosted `Quality gate` and `Browser E2E` pass for t
 head; local evidence never authorizes merge. ADR 0020 and
 `docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md` record the decision and exact proof.
 
-### M10-T06 local completion candidate — exact-head hosted closure required
+### M10-T06 completed — exact-head PR and fresh main closure passed
+
+[PR #81](https://github.com/desenlab/desen-app/pull/81) closed on exact final head
+`926f94c75525025a3946869c45798fde25f62e3f` with
+[passing PR CI](https://github.com/desenlab/desen-app/actions/runs/34208718701). Its squash merge
+`c2e2164957632a363af678a6208e0196acc4cc7b` passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34209981353): all three fresh
+exhaustive shards, joined Quality gate, and seven Chromium journeys. This satisfies the local
+checkpoint's conditional closure below without changing its artifact or checkpoint 76. The earlier
+unmerged candidate browser-observer failure remains a failure in the technical record.
+
+M10-T07 is now the sole active task. Its required proof is a real complete-product process restart
+under both corrupt-revision and Catalog-mismatch channel candidates, preserving the authenticated
+active/previous-good/generation record and independent host build. T08, T09, and G10 remain pending.
 
 M10-T06 adds the optional detached Advanced Source workflow beside ordinary Source persistence
 and publication. Real public Publisher and continuous validator calls reject invalid prop, event,
@@ -2546,12 +2559,52 @@ predecessors and 59 artifacts, adds T06, and seals 60 artifacts / 120 readers at
 The raw ledger capacity now derives from exact code-owned history plus one review candidate;
 canonical encoding, finite ceilings, fresh reads, and refusal to promote an unreviewed head remain.
 
-The `DONE` row is a closure candidate only until the exact final PR head passes hosted Quality
-gate and Browser E2E, merges, and fresh main passes. Local evidence never authorizes merge.
-Candidate progress is 118/148 (80%), M10 9/12 (75%); proof gates remain 11/13. T07 recovery,
+The local checkpoint's conditional closure was satisfied by the exact final PR and fresh main
+receipts above. Local evidence alone never authorizes merge.
+Progress is 118/148 (80%), M10 9/12 (75%); proof gates remain 11/13. T07 recovery,
 T08 repeatable seed/reset, T09 committed Runtime Core baseline, P-12, N-036, and G10 remain open.
 See [ADR 0021](../adr/0021-invalid-source-draft-publication-boundary.md) and the
 [T06 proof](../proof/DESEN-APP-INVALID-PUBLICATION.md).
+
+### M10-T07 implementation checkpoint — hosted closure still required
+
+T07 is the sole active closure candidate. Its `DONE` row is conditional on this exact final head's
+hosted Quality gate and Browser E2E, merge, and fresh main checks. T08, T09, and G10 remain
+`NOT_STARTED`; no next-task implementation begins before those checks pass.
+
+The normal product visibly authors and publishes A then C. Both corrupt-revision and
+self-consistent Catalog-mismatch channel candidates reject before activation. After complete
+service exit and cold startup with a different PID and fresh browser contexts, the unchanged
+independent host recovers C / previous-good A / generation 1 while the invalid candidate remains
+selected. A later visibly authored D activates at generation 2 / previous-good C. App source and
+saved Source remain unchanged across restart; only launcher-owned connection configuration is
+rebuilt in the same owned output directory for the bridge's new OS-selected port.
+
+The exact final Chromium journey passes 1/1 and the final lifecycle passes two further fresh
+repetitions. The sockets-free verifier and nine root cases independently pass public rejection,
+durable role authentication, post-execution input freshness, unsafe file and atomic-writer tests.
+It compares 96 emitted public modules against fresh in-memory TypeScript output and reauthenticates
+442 compiler inputs; it does not claim typechecking or browser execution. T05/T06 compatibility
+verifiers and expanded roots pass 20/20 with both frozen artifacts unchanged.
+
+The exact six-command bounded baseline passes; boundaries cover 871 modules / 3,745 edges and
+38 positive/negative fixtures. Checkpoint 77 preserves its entire 76-entry prefix and 60 previous
+artifacts, reseals only the four T05/T06 readers, and appends T07 at
+`sha256:4bed8aba3916c066c689dd99ea4a3820e0b7b1a05d3780688e51b70ec9b97ece`, with 61 artifacts /
+122 current readers. The new artifact is 304,094 bytes at
+`sha256:5e589bc8022de3ccf3add7a9ebab78006ecca6e72628e165f54eef4fd8b90b68`.
+All prior CI workloads remain: T07 adds its verifier/root pair and eighth Chromium journey,
+yielding 224 logical workloads / 107 proof pairs and 241 physical workloads, unchanged two-worker
+shards and eleven exclusive barriers.
+All 491 CI/retained-runner contracts pass with zero skips, including 110 checkpoint cases. The
+real T07 verifier and nine root cases also pass under the authenticated default CI runner's
+exact permissions without changing build outputs.
+
+Progress is 119/148 (80%), M10 10/12 (83%), and proof gates remain 11/13. P-12 remains
+`NOT_PROVEN` until hosted closure; PF-077/PF-090 remain `OPEN` for their broader composition
+questions. T08 seed/reset, T09 committed Runtime Core baseline, N-036, and G10 remain separate
+owners. No product API, Runtime Core, frozen protocol, or previous proof artifact changed.
+See [the complete recovery evidence](../proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md).
 
 ## M11 — Capability extensibility proof
 

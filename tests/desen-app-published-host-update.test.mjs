@@ -859,6 +859,89 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
   );
   const browserPackagePath = "apps/desen-app-browser-e2e/package.json";
   const browserPackage = await readFile(path.join(ROOT, browserPackagePath), "utf8");
+  const parsedBrowserPackage = JSON.parse(browserPackage);
+  const finalCommand = "playwright test --config restart-recovery-playwright.config.ts";
+  const suite = parsedBrowserPackage.scripts["test:e2e"];
+  assert.equal(suite.endsWith(` && ${finalCommand}`), true);
+  const invalidPackages = [
+    { command: suite.replace(` && ${finalCommand}`, ""), code: "SOURCE_POLICY_VIOLATION" },
+    {
+      command: `${finalCommand} && ${suite.replace(` && ${finalCommand}`, "")}`,
+      code: "SOURCE_POLICY_VIOLATION",
+    },
+    { command: `${suite} && ${finalCommand}`, code: "SOURCE_POLICY_VIOLATION" },
+  ];
+  for (const { command, code } of invalidPackages) {
+    const changed = structuredClone(parsedBrowserPackage);
+    changed.scripts["test:e2e"] = command;
+    await assert.rejects(
+      buildDesenAppPublishedHostUpdateEvidence({
+        fileOverrides: new Map([[browserPackagePath, Buffer.from(JSON.stringify(changed))]]),
+      }),
+      expectedError(code),
+    );
+  }
+  const noProtocol = structuredClone(parsedBrowserPackage);
+  delete noProtocol.devDependencies["@desen/protocol"];
+  await assert.rejects(
+    buildDesenAppPublishedHostUpdateEvidence({
+      fileOverrides: new Map([[browserPackagePath, Buffer.from(JSON.stringify(noProtocol))]]),
+    }),
+    expectedError("SOURCE_POLICY_VIOLATION"),
+  );
+  const changedMetadata = structuredClone(parsedBrowserPackage);
+  changedMetadata.description += " unreviewed";
+  await assert.rejects(
+    buildDesenAppPublishedHostUpdateEvidence({
+      fileOverrides: new Map([[browserPackagePath, Buffer.from(JSON.stringify(changedMetadata))]]),
+    }),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  const unchangedOverrides = new Map();
+  for (const relativePath of built.liveSuccessorAuthority.compositionSuccessor
+    .reviewedChangedInputs) {
+    unchangedOverrides.set(relativePath, await readFile(path.join(ROOT, relativePath)));
+  }
+  const unchanged = await buildDesenAppPublishedHostUpdateEvidence({
+    fileOverrides: unchangedOverrides,
+  });
+  assert.deepEqual(unchanged.artifactBytes, artifactBytes);
+  assert.equal(unchanged.liveSuccessorAuthority.compositionSuccessor.task, "M10-T07");
+  assert.equal(unchanged.liveSuccessorAuthority.compositionSuccessor.productSourceUnchanged, true);
+  // Substitute only bytes returned by an owned read, not repository files. Both initial admission
+  // and post-build reauthentication must reject; an already captured successor cannot cache trust.
+  const t07Path = "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json";
+  for (const [relativePath, changedRead] of [
+    [t07Path, 1],
+    [t07Path, 2],
+    [browserPackagePath, 2],
+  ]) {
+    const originalOpen = filesystem.open;
+    let reads = 0;
+    try {
+      filesystem.open = async (...args) => {
+        const handle = await Reflect.apply(originalOpen, filesystem, args);
+        if (String(args[0]) === path.join(ROOT, relativePath)) {
+          reads += 1;
+          if (reads === changedRead) {
+            const originalReadFile = handle.readFile.bind(handle);
+            handle.readFile = async (...readArgs) =>
+              changedByte(await originalReadFile(...readArgs));
+          }
+        }
+        return handle;
+      };
+      syncBuiltinESMExports();
+      await assert.rejects(
+        buildDesenAppPublishedHostUpdateEvidence(),
+        expectedError("SUCCESSOR_POLICY_VIOLATION"),
+      );
+      assert.equal(reads, changedRead, relativePath);
+    } finally {
+      filesystem.open = originalOpen;
+      syncBuiltinESMExports();
+    }
+  }
   await assert.rejects(
     buildDesenAppPublishedHostUpdateEvidence({
       fileOverrides: new Map([
@@ -910,7 +993,12 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
   const compatibility = built.dependencySecurityCompatibility;
   assert.equal(compatibility.authority, "SEC-02");
   assert.equal(compatibility.currentBytes, liveLockfile.byteLength);
-  assert.equal(compatibility.currentBytes, 132_006);
+  assert.equal(compatibility.currentBytes, 132_108);
+  assert.equal(compatibility.compositionSuccessor.task, "M10-T07");
+  assert.deepEqual(compatibility.securityTaskLockfile, {
+    bytes: 132_006,
+    sha256: "0f968b0c6622f6bfe732d5ec9a2b6a49268e171a64fae6caf9501f6d25f8f074",
+  });
   assert.equal(compatibility.historicalBytes, 132_012);
   assert.deepEqual(compatibility.predecessor, {
     authority: "SEC-01",
@@ -944,6 +1032,22 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
   let priorLockfileText = liveLockfile.toString("utf8");
+  const importerStart = priorLockfileText.indexOf("  apps/desen-app-browser-e2e:\n");
+  const importerEnd = priorLockfileText.indexOf("\n  apps/", importerStart + 1);
+  const importer = priorLockfileText.slice(importerStart, importerEnd);
+  const protocolLink =
+    "      '@desen/protocol':\n        specifier: workspace:*\n        version: link:../../packages/protocol\n";
+  assert.ok(importerStart >= 0 && importerEnd > importerStart);
+  priorLockfileText =
+    priorLockfileText.slice(0, importerStart) +
+    replaceOnce(importer, protocolLink, "") +
+    priorLockfileText.slice(importerEnd);
+  const securityTaskLockfile = Buffer.from(priorLockfileText);
+  assert.equal(securityTaskLockfile.byteLength, 132_006);
+  assert.equal(
+    createHash("sha256").update(securityTaskLockfile).digest("hex"),
+    "0f968b0c6622f6bfe732d5ec9a2b6a49268e171a64fae6caf9501f6d25f8f074",
+  );
   for (const [
     name,
     priorVersion,
@@ -972,6 +1076,7 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     "49f1d521ebd2e097508d22f8235e111bfb7e6bdc26a039b517a4a19aba7b2735",
   );
   for (const rejectedLockfile of [
+    securityTaskLockfile,
     priorLockfile,
     changedByte(liveLockfile),
     Buffer.from(liveLockfile.toString("utf8").replaceAll("picocolors: 1.1.1", "picocolors: 1.1.2")),

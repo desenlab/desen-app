@@ -247,12 +247,21 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
         "publisher-invalid-source-matrix",
       ],
     ],
+    [
+      "desen-app-last-known-good-recovery",
+      [
+        "desen-app-published-host-update",
+        "desen-app-invalid-publication",
+        "control-plane-runtime-recovery",
+        "reference-host-web-channel-consumption",
+      ],
+    ],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "df54141109ffa92d8eab4386f2e56203f32a4fc4564af229f0a73919ef78746e";
+  "9faff4a9d9ba00fbbfd5f20b70bb9c6e0b2004b185b37e55b54d4b920dece1e0";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

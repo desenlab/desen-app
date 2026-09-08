@@ -164,6 +164,7 @@ export const PROOF_IDS = Object.freeze([
   "historical-archive-redaction",
   "desen-app-published-host-update",
   "desen-app-invalid-publication",
+  "desen-app-last-known-good-recovery",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -201,6 +202,7 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "desen-app-real-adapter-canvas",
   "desen-app-published-host-update",
   "desen-app-invalid-publication",
+  "desen-app-last-known-good-recovery",
 ]);
 
 /** Exact verifier proof ids that write only inside runner-owned OS temp without spawning children. */
@@ -222,7 +224,7 @@ export const LOOPBACK_CHILD_LISTENER_VERIFIER_STEP_IDS = Object.freeze([
   LOOPBACK_CHILD_LISTENER_STEP_ID,
 ]);
 
-/** Exact proof ids whose verifier loads one reviewed native addon. */
+/** Exact proof ids whose authenticated verifier loads its reviewed native dependencies. */
 export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
   "reference-host-web-source-audit",
   "control-plane-local-api",
@@ -235,6 +237,7 @@ export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
   "desen-app-real-adapter-canvas",
   "desen-app-published-host-update",
   "desen-app-invalid-publication",
+  "desen-app-last-known-good-recovery",
 ]);
 
 /** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
@@ -248,6 +251,7 @@ export const NATIVE_ADDON_ROOT_STEP_IDS = Object.freeze([
   "test-desen-app-real-adapter-canvas",
   "test-desen-app-published-host-update",
   "test-desen-app-invalid-publication",
+  "test-desen-app-last-known-good-recovery",
 ]);
 
 /** Exact root-test steps that need bounded Node-permission API compatibility. */
@@ -377,6 +381,7 @@ const NATIVE_ADDON_POLICIES = Object.freeze({
   DESEN_APP_REAL_ADAPTER_CANVAS_VITE: "DESEN_APP_REAL_ADAPTER_CANVAS_VITE",
   DESEN_APP_PUBLISHED_HOST_UPDATE_VITE: "DESEN_APP_PUBLISHED_HOST_UPDATE_VITE",
   DESEN_APP_INVALID_PUBLICATION_VITE: "DESEN_APP_INVALID_PUBLICATION_VITE",
+  DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE: "DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE",
   NONE: "NONE",
   PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -397,6 +402,8 @@ const NATIVE_ADDON_POLICY_BY_PROOF_ID = Object.freeze({
   "desen-app-real-adapter-canvas": NATIVE_ADDON_POLICIES.DESEN_APP_REAL_ADAPTER_CANVAS_VITE,
   "desen-app-published-host-update": NATIVE_ADDON_POLICIES.DESEN_APP_PUBLISHED_HOST_UPDATE_VITE,
   "desen-app-invalid-publication": NATIVE_ADDON_POLICIES.DESEN_APP_INVALID_PUBLICATION_VITE,
+  "desen-app-last-known-good-recovery":
+    NATIVE_ADDON_POLICIES.DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE,
 });
 
 const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
@@ -414,6 +421,8 @@ const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
   "test-desen-app-published-host-update":
     NATIVE_ADDON_POLICIES.DESEN_APP_PUBLISHED_HOST_UPDATE_VITE,
   "test-desen-app-invalid-publication": NATIVE_ADDON_POLICIES.DESEN_APP_INVALID_PUBLICATION_VITE,
+  "test-desen-app-last-known-good-recovery":
+    NATIVE_ADDON_POLICIES.DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE,
 });
 
 /** Stable failure raised when shared-state authority cannot be established safely. */
@@ -590,8 +599,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 222) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 222 steps.", {
+if (METADATA_BY_STEP_ID.size !== 224) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 224 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

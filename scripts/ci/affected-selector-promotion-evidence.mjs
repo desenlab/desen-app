@@ -192,6 +192,34 @@ const PROMOTION_REMOVED_TRACKED_PATHS = Object.freeze([
   "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
 ]);
 const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/restart-recovery-playwright.config.ts",
+  "apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "apps/desen-app-browser-e2e/restart-recovery.pw.ts",
+  "docs/proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md",
+  "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json",
+  "scripts/generate-desen-app-last-known-good-recovery-proof.mjs",
+  "scripts/lib/desen-app-last-known-good-recovery-proof.mjs",
+  "scripts/verify-desen-app-last-known-good-recovery.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-recovery-server-reviewed-roots/apps/control-plane-api/dist/index.js",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-recovery-server-reviewed-roots/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-recovery-server-reviewed-roots/apps/desen-app/dev/local-publication-host.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-recovery-server-reviewed-roots/apps/reference-host-web-server/dist/index.js",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-recovery-server-reviewed-roots/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-recovery-server-imports-protocol/apps/desen-app-browser-e2e/proof-application.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-recovery-server-imports-protocol/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-app-source/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-app-source/apps/desen-app/src/application.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-control-plane-private/apps/control-plane-api/dist/runtime-activation-sqlite-internal.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-control-plane-private/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-protocol-private/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-protocol-private/packages/protocol/dist/private.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-publisher/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-publisher/packages/publisher/src/index.ts",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-reference-host-private/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-reference-host-private/apps/reference-host-web-server/dist/private.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-unreviewed-dev-module/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-unreviewed-dev-module/apps/desen-app/dev/local-publication-private.mjs",
+  "tests/desen-app-last-known-good-recovery.test.mjs",
   "apps/desen-app/src/authoring-source-draft.ts",
   "apps/desen-app/src/source-draft-controls.tsx",
   "apps/desen-app/test/authoring-source-draft.test.ts",
@@ -679,13 +707,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 212,
+    PROOF_UNIT: 214,
     CI_POLICY: 48,
     DEPENDENCY_POLICY: 32,
-    FROZEN_INPUT: 155,
-    PACKAGE_OR_APPLICATION: 562,
-    SHARED_PROOF_INFRASTRUCTURE: 294,
-    PROJECT_DOCUMENTATION: 151,
+    FROZEN_INPUT: 156,
+    PACKAGE_OR_APPLICATION: 565,
+    SHARED_PROOF_INFRASTRUCTURE: 315,
+    PROJECT_DOCUMENTATION: 152,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -1090,10 +1118,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 76,
-  headSha256: "b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6",
-  frozenArtifactCount: 60,
-  currentReaderCount: 120,
+  sequence: 77,
+  headSha256: "4bed8aba3916c066c689dd99ea4a3820e0b7b1a05d3780688e51b70ec9b97ece",
+  frozenArtifactCount: 61,
+  currentReaderCount: 122,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -2610,8 +2638,8 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 222 ||
-    currentInventory.proofUnitCount !== 106
+    currentInventory.workloadCount !== 224 ||
+    currentInventory.proofUnitCount !== 107
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
@@ -2625,10 +2653,10 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 95 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 96 || currentProofPairClasses.barrier !== 11) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current T06 proof-pair authority is not exactly 95 ordinary and 11 barrier pairs.",
+      "The current T07 proof-pair authority is not exactly 96 ordinary and 11 barrier pairs.",
     );
   }
   const archiveRedactionClosure = createAffectedImpactClosure(["historical-archive-redaction"]);
@@ -2636,14 +2664,14 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     !isDeepStrictEqual(archiveRedactionClosure.ownerProofUnitIds, [
       "historical-archive-redaction",
     ]) ||
-    archiveRedactionClosure.proofUnitCount !== 74 ||
-    archiveRedactionClosure.workloadCount !== 158 ||
+    archiveRedactionClosure.proofUnitCount !== 75 ||
+    archiveRedactionClosure.workloadCount !== 160 ||
     archiveRedactionClosure.impactSha256 !==
-      "00fe16df88d85ab3f1fa918ee806ed4ef4f60769260fc799326ae7dba7200628"
+      "cbc3dcf7c943e130cba691b75f30f23cb0380efb00e3a274de6c3793cfc514aa"
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current T06 successor closure from AR-01 is not exactly 74 proof units and 158 workloads.",
+      "The current T07 successor closure from AR-01 is not exactly 75 proof units and 160 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);

@@ -10,9 +10,14 @@ M09-T13 parent: `sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef8
 
 Final artifact: `sha256:1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a`
 
-The task-time artifact is a local completion candidate. Merge and final closure remain conditional
-on the exact current pull-request head and fresh merged-main hosted quality and browser runs;
-this header does not claim that those runs have already passed.
+The task-time artifact was a local completion candidate. Its hosted closure is now complete:
+exact PR head `926f94c75525025a3946869c45798fde25f62e3f` passed
+[PR CI](https://github.com/desenlab/desen-app/actions/runs/34208718701), and
+[PR #81](https://github.com/desenlab/desen-app/pull/81) merged as
+`c2e2164957632a363af678a6208e0196acc4cc7b`. That exact revision passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34209981353), including all three
+exhaustive shards, the joined Quality gate, and seven Chromium journeys. The artifact and
+checkpoint 76 remain frozen; the failed unmerged candidate below remains a failed run.
 
 ## Product boundary
 
@@ -63,8 +68,8 @@ changing canonical history, or granting live authority to the review candidate.
 This proof covers the Web–React local product composition with the existing fixed publication and
 activation destination. It does not claim corrupt revision recovery, Catalog mismatch recovery,
 remote deployment, signing, native parity, P-12, N-036, or G10 closure. M10-T07 through T09 and the
-full G10 audit remain separate requirements. Hosted exact-head PR and fresh main closure receipts
-will be recorded only after their runs pass.
+full G10 audit remain separate requirements. The hosted receipts above authorize this exact T06
+closure, not the remaining tasks.
 
 ## Unmerged candidate browser correction
 

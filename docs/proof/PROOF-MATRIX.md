@@ -3376,3 +3376,49 @@ P-12, N-036, and G10 remain open. The T05 `DONE` entry is a closure candidate un
 `Quality gate` and `Browser E2E` pass for the exact final PR head; local evidence does not authorize
 merge. ADR 0020 and `docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md` record the complete decision and
 bounded evidence.
+
+## M10-T06 — Invalid publication rejected without replacing the valid design
+
+The optional detached Advanced Source workflow rejects invalid props, events, and slots through
+the real public Publisher with exact diagnostics and links to current layers. It neither replaces
+the valid Source/canvas nor writes Source, Bundle, channel, or activation state. Repair uses the
+normal Save → Publish path. The task adds 21 product tests and one real Chromium rejection/repair
+journey; its verifier and ten root cases pass. The immutable 193,291-byte artifact is
+`artifacts/desen-app-0.1.0-invalid-publication.json` at
+`sha256:1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a`.
+Checkpoint 76 preserves earlier artifacts and records 60 artifacts / 120 readers.
+
+[PR #81](https://github.com/desenlab/desen-app/pull/81) passed exact-head checks, merged as
+`c2e2164957632a363af678a6208e0196acc4cc7b`, and passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34209981353), including all
+three exhaustive shards and seven Chromium journeys. Its earlier unmerged browser-observer
+failure remains a failure. The [invalid-publication report](DESEN-APP-INVALID-PUBLICATION.md)
+records the bounded evidence; T07 restart and G10 are not implied by T06.
+
+## M10-T07 — Product-process last-known-good recovery
+
+The normal product's visible authoring and publication path passes a separate Chromium journey
+through A → C → corrupt revision → cold restart → Catalog mismatch → cold restart → valid D.
+Both invalid candidates remain selected in the channel but never become active authority. Each
+complete child exit is followed by a different PID and fresh browser context; the independent host
+recovers C / previous-good A / generation 1 without a host rebuild. D subsequently activates at
+generation 2 / previous-good C. Saved Source and App source fingerprints remain unchanged across
+restart. Only launcher-owned App connection configuration is rebuilt for the public bridge's new
+OS-selected port, in the same owned output directory.
+
+The final dedicated Chromium journey passes 1/1; its final lifecycle also passes two fresh
+repetitions. The separate sockets-free proof verifier and nine root cases pass. That reader freshly
+executes the public rejection/recovery matrix and compares all 96 emitted modules across six public
+roots with current in-memory TypeScript output, reauthenticating 442 compiler inputs before closure.
+Service reopening is not represented as product-process restart, and browser declarations are not
+represented as executed Chromium results. Expanded T05 and T06 compatibility readers pass 20/20
+while preserving their immutable artifacts. No product API or Runtime Core implementation changes.
+
+The new 304,094-byte artifact is
+`artifacts/desen-app-0.1.0-last-known-good-recovery.json` at
+`sha256:5e589bc8022de3ccf3add7a9ebab78006ecca6e72628e165f54eef4fd8b90b68`.
+It records 41 current tracked receipts and fresh unprojected App/host graphs. P-12 remains
+`NOT_PROVEN` pending this candidate's bounded baseline, exact-head hosted checks, merge, and fresh
+main closure. PF-077/PF-090 stay `OPEN` for their general transport/project-model questions;
+automatic rollback, hostile-admin resistance, remote/multi-tenant deployment, N-036, T08, T09,
+and G10 are not claimed. See [the recovery report](DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md).

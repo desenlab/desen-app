@@ -173,6 +173,9 @@ importers:
       '@desen/control-plane-api':
         specifier: workspace:*
         version: link:../control-plane-api
+      '@desen/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
       '@desen/reference-host-web-server':
         specifier: workspace:*
         version: link:../reference-host-web-server

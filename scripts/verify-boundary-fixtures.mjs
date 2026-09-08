@@ -9,6 +9,35 @@ const executable = path.join(workspaceRoot, "node_modules", ".bin", "depcruise")
 const configuration = path.join(workspaceRoot, "dependency-cruiser.config.cjs");
 
 const cases = [
+  { name: "allowed-desen-app-browser-e2e-recovery-server-reviewed-roots", expectedRule: null },
+  {
+    name: "desen-app-browser-e2e-recovery-server-imports-control-plane-private",
+    expectedRule: "desen-app-browser-e2e-product-server-control-plane-public-root-only",
+  },
+  {
+    name: "desen-app-browser-e2e-recovery-server-imports-reference-host-private",
+    expectedRule: "desen-app-browser-e2e-published-server-reference-host-public-root-only",
+  },
+  {
+    name: "desen-app-browser-e2e-recovery-server-imports-unreviewed-dev-module",
+    expectedRule: "desen-app-browser-e2e-published-server-has-no-other-application-dependencies",
+  },
+  {
+    name: "desen-app-browser-e2e-recovery-server-imports-app-source",
+    expectedRule: "desen-app-browser-e2e-published-server-has-no-other-application-dependencies",
+  },
+  {
+    name: "desen-app-browser-e2e-recovery-server-imports-protocol-private",
+    expectedRule: "desen-app-browser-e2e-recovery-server-protocol-public-root-only",
+  },
+  {
+    name: "desen-app-browser-e2e-recovery-server-imports-publisher",
+    expectedRule: "desen-app-browser-e2e-recovery-server-protocol-public-root-only",
+  },
+  {
+    name: "desen-app-browser-e2e-non-recovery-server-imports-protocol",
+    expectedRule: "application-desen-app-browser-e2e-allowed-dependencies",
+  },
   { name: "allowed-validator-protocol", expectedRule: null },
   { name: "allowed-runtime-react-validator", expectedRule: null },
   { name: "allowed-reference-host-server-control-plane-root", expectedRule: null },
