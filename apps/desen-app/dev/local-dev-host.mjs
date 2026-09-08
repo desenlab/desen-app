@@ -1,12 +1,16 @@
 import { randomBytes } from "node:crypto";
 import { chmod, lstat, mkdir, realpath } from "node:fs/promises";
+import { createServer as createHttpServer } from "node:http";
 import { dirname, isAbsolute, join, relative, sep } from "node:path";
 
 import { openLocalControlPlane } from "@desen/control-plane-api";
 import { openReferenceHostWebServer } from "@desen/reference-host-web-server";
 import { build as buildViteApplication, createServer as createViteServer } from "vite";
 
-import { openDesenAppLocalOperationHost } from "./local-operation-host.mjs";
+import {
+  executeDesenAppLocalSignIn,
+  openDesenAppLocalOperationHost,
+} from "./local-operation-host.mjs";
 import { openDesenAppLocalPublicationHost } from "./local-publication-host.mjs";
 
 /** Exact browser origin owned by the normal Desen App local development profile. */
@@ -34,6 +38,94 @@ const LOCAL_RUNTIME_TOKEN_BYTES = 32;
 const LOOPBACK_ORIGIN_PATTERN = /^http:\/\/127\.0\.0\.1:([1-9][0-9]{0,4})$/u;
 const VISIBLE_ASCII_PATTERN = /^[\x21-\x7e]+$/u;
 const LOCAL_IDENTIFIER_PATTERN = /^[a-z][a-z0-9-]{0,63}$/u;
+const LOCAL_HTTP_LIFECYCLE_TIMEOUT_MS = 5_000;
+
+/**
+ * Owns the HTTP/HMR transport without delegating process lifetime to Vite. Middleware mode
+ * deliberately leaves SIGTERM and stdin-end handling to the composed launcher, so Vite cannot
+ * exit before operation, publication, SQLite and the demo lease have been revoked.
+ *
+ * @param {typeof createHttpServer} makeServer Trusted Node factory, injectable by focused tests.
+ */
+function createLocalAppTransport(makeServer) {
+  const server = makeServer({ requestTimeout: 30_000, headersTimeout: 10_000 });
+  const listenerAbort = new AbortController();
+  /** @type {Set<import("node:net").Socket>} */
+  const sockets = new Set();
+  server.on("connection", (socket) => {
+    sockets.add(socket);
+    socket.once("close", () => sockets.delete(socket));
+    if (closing) socket.destroy();
+  });
+  let closing = false;
+  /** @type {Promise<void> | undefined} */
+  let closePromise;
+  const close = () => {
+    closePromise ??= new Promise((resolve, reject) => {
+      closing = true;
+      const timeout = setTimeout(
+        () => reject(new Error("Local HTTP close timed out.")),
+        LOCAL_HTTP_LIFECYCLE_TIMEOUT_MS,
+      );
+      const finish = (/** @type {Error | undefined} */ error) => {
+        clearTimeout(timeout);
+        if (error !== undefined && nodeErrorCode(error) !== "ERR_SERVER_NOT_RUNNING") reject(error);
+        else resolve();
+      };
+      try {
+        // closeAllConnections excludes upgraded HMR sockets; track and revoke those as well.
+        server.close(finish);
+        listenerAbort.abort();
+        for (const socket of sockets) socket.destroy();
+      } catch (error) {
+        clearTimeout(timeout);
+        reject(error);
+      }
+    });
+    return closePromise;
+  };
+  return {
+    server,
+    close,
+    /** @returns {Promise<void>} */
+    listen() {
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          server.off("listening", onListening);
+          listenerAbort.abort();
+          reject(new Error("Local HTTP listen timed out."));
+        }, LOCAL_HTTP_LIFECYCLE_TIMEOUT_MS);
+        const onError = (/** @type {Error} */ error) => {
+          clearTimeout(timeout);
+          server.off("listening", onListening);
+          reject(error);
+        };
+        const onListening = () => {
+          clearTimeout(timeout);
+          server.off("error", onError);
+          if (closing) reject(new Error("Local HTTP transport is closed."));
+          else resolve();
+        };
+        server.once("error", onError);
+        server.once("listening", onListening);
+        try {
+          // Node has no port fallback: EADDRINUSE must fail the complete composition.
+          server.listen({
+            host: "127.0.0.1",
+            port: 5173,
+            exclusive: true,
+            signal: listenerAbort.signal,
+          });
+        } catch (error) {
+          clearTimeout(timeout);
+          server.off("error", onError);
+          server.off("listening", onListening);
+          reject(error);
+        }
+      });
+    },
+  };
+}
 
 /** Vite's pinned default secret-file denies plus the app-owned local state namespace. */
 export const DESEN_APP_LOCAL_VITE_FS_DENY = Object.freeze([
@@ -46,12 +138,13 @@ export const DESEN_APP_LOCAL_VITE_FS_DENY = Object.freeze([
   "**/.desen/**",
 ]);
 
-/** @typedef {"INVALID_APP_DIRECTORY" | "INVALID_RUNTIME_CONFIG" | "INVALID_STATE_DIRECTORY" | "LOCAL_START_FAILED" | "LOCAL_STOP_FAILED" | "STATE_ROOT_UNAVAILABLE" | "UNSAFE_STATE_ROOT"} DesenAppLocalDevHostErrorCode */
+/** @typedef {"INVALID_APP_DIRECTORY" | "INVALID_RUNTIME_CONFIG" | "INVALID_STATE_DIRECTORY" | "LOCAL_START_CLEANUP_FAILED" | "LOCAL_START_FAILED" | "LOCAL_STOP_FAILED" | "STATE_ROOT_UNAVAILABLE" | "UNSAFE_STATE_ROOT"} DesenAppLocalDevHostErrorCode */
 
 const ERROR_MESSAGES = Object.freeze({
   INVALID_APP_DIRECTORY: "The Desen App local development directory is invalid.",
   INVALID_RUNTIME_CONFIG: "The Desen App local runtime configuration is invalid.",
   INVALID_STATE_DIRECTORY: "The Desen App local state directory is invalid.",
+  LOCAL_START_CLEANUP_FAILED: "The Desen App local runtime startup cleanup could not complete.",
   LOCAL_START_FAILED: "The Desen App local runtime could not start.",
   LOCAL_STOP_FAILED: "The Desen App local runtime could not stop cleanly.",
   STATE_ROOT_UNAVAILABLE: "The Desen App local state directory is unavailable.",
@@ -370,6 +463,7 @@ export function createDesenAppLocalPublicationDefine(
  *   appDirectory: string;
  *   stateDirectory: string;
  *   createViteServer?: typeof createViteServer;
+ *   createHttpServer?: typeof createHttpServer;
  *   buildReferenceHost?: typeof buildViteApplication;
  *   entropy?: (size: number) => Uint8Array;
  *   openControlPlane?: typeof openLocalControlPlane;
@@ -393,6 +487,7 @@ export async function startDesenAppLocalDev(options) {
   const openReferenceHost = options.openReferenceHost ?? openReferenceHostWebServer;
   const buildReferenceHost = options.buildReferenceHost ?? buildViteApplication;
   const makeViteServer = options.createViteServer ?? createViteServer;
+  const makeHttpServer = options.createHttpServer ?? createHttpServer;
   const canonicalAppDirectory = await captureCanonicalAppDirectory(options.appDirectory);
   const apiToken = createDesenAppLocalApiToken(options.entropy);
   const operationApiToken = createDesenAppLocalApiToken(options.entropy);
@@ -423,6 +518,8 @@ export async function startDesenAppLocalDev(options) {
   let referenceHost;
   let referenceHostOrigin = null;
   let viteServer;
+  /** @type {ReturnType<typeof createLocalAppTransport> | undefined} */
+  let appTransport;
   try {
     controlPlane = await openControlPlane({
       rootDirectory,
@@ -486,6 +583,7 @@ export async function startDesenAppLocalDev(options) {
         controlPlaneOrigin: listener.origin,
         controlPlaneApiToken: apiToken,
         channelName: publication.channelName,
+        signIn: executeDesenAppLocalSignIn,
       });
       referenceHost = activeReferenceHost;
       const referenceHostListener = await activeReferenceHost.listen(0);
@@ -512,6 +610,7 @@ export async function startDesenAppLocalDev(options) {
         publication.hostId,
       );
     }
+    appTransport = createLocalAppTransport(makeHttpServer);
     viteServer = await makeViteServer({
       root: canonicalAppDirectory,
       appType: "spa",
@@ -525,6 +624,8 @@ export async function startDesenAppLocalDev(options) {
       },
       plugins: [createDesenAppLocalStateDenyPlugin()],
       server: {
+        middlewareMode: { server: appTransport.server },
+        ws: { server: appTransport.server },
         host: "127.0.0.1",
         port: 5173,
         strictPort: true,
@@ -536,12 +637,22 @@ export async function startDesenAppLocalDev(options) {
         },
       },
     });
-    await viteServer.listen();
+    appTransport.server.on("request", viteServer.middlewares);
+    await appTransport.listen();
   } catch {
+    let cleanupFailed = false;
+    if (appTransport !== undefined) {
+      try {
+        await appTransport.close();
+      } catch {
+        cleanupFailed = true;
+      }
+    }
     if (viteServer !== undefined) {
       try {
         await viteServer.close();
       } catch {
+        cleanupFailed = true;
         // Startup already failed; continue revoking every downstream authority.
       }
     }
@@ -549,6 +660,7 @@ export async function startDesenAppLocalDev(options) {
       try {
         await publicationHost.close();
       } catch {
+        cleanupFailed = true;
         // A failed startup still revokes the independent browser activation edge.
       }
     }
@@ -556,6 +668,7 @@ export async function startDesenAppLocalDev(options) {
       try {
         await referenceHost.close();
       } catch {
+        cleanupFailed = true;
         // Static-host and durable activation authority are revoked before failure escapes.
       }
     }
@@ -563,6 +676,7 @@ export async function startDesenAppLocalDev(options) {
       try {
         await operationHost.close();
       } catch {
+        cleanupFailed = true;
         // A failed listener cannot leave the independently authorized operation service live.
       }
     }
@@ -570,16 +684,25 @@ export async function startDesenAppLocalDev(options) {
       try {
         await controlPlane.close();
       } catch {
+        cleanupFailed = true;
         // The public failure remains fixed and redacted across cleanup outcomes.
       }
     }
-    throw new DesenAppLocalDevHostError("LOCAL_START_FAILED");
+    // A lease owner may release its lease only after every opened authority definitely closed.
+    throw new DesenAppLocalDevHostError(
+      cleanupFailed ? "LOCAL_START_CLEANUP_FAILED" : "LOCAL_START_FAILED",
+    );
   }
 
   let closePromise;
   const close = () => {
     closePromise ??= (async () => {
       let failed = false;
+      try {
+        await appTransport.close();
+      } catch {
+        failed = true;
+      }
       try {
         await viteServer.close();
       } catch {

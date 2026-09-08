@@ -8,7 +8,7 @@ The original T01 harness imports the production `DesenAppApplication`, its style
 empty reference project directly from `@desen/app-web` source. The later journeys use the ordinary
 product entry with temporary instances of its local persistence service. Its package-level
 `test:e2e` command first builds the complete product dependency closure and the independent
-reference host, then typechecks and builds the harness before running all eight Chromium journeys.
+reference host, then typechecks and builds the harness before running all nine Chromium journeys.
 The original in-memory compare-and-set
 adapter is test-only and is never imported by the product entry.
 
@@ -36,7 +36,7 @@ Playwright writes retained failure traces, screenshots, and video under `test-re
 HTML report under `playwright-report/`. Both directories and the production proof bundle in
 `dist/` are generated outputs and must not be committed.
 
-The eight independently configured journeys cover:
+The nine independently configured journeys cover:
 
 - M10-T01: empty-project visual authoring, authenticated native drag, canonical persistence,
   structural re-admission, and exact Design/Run static parity.
@@ -64,6 +64,13 @@ The eight independently configured journeys cover:
   PID, while the bad candidate remains on the channel. Fresh browser contexts reopen the saved
   project and recovered host; a final visible valid publication D activates without changing App
   source or rebuilding the host.
+- M10-T08: two complete normal demo resets, each starting from empty product inventory and visibly
+  authoring the same Flow with native insertion/reordering, connected inputs, an explicitly named
+  operation, failed-operation visibility, and success navigation. Each cycle exercises Synthetic
+  pending/failure/success and explicit Integration 401/200, then publishes to the independent host,
+  interacts with it, and visibly edits the title and Stack gap before republishing. Actual canonical
+  Source and Bundle bytes for both publications must be identical across resets, without ID or
+  timestamp normalization.
 
 The T04 server uses `product-proof-server.mjs --with-operations` on port 4176. It starts the same
 bounded loopback operation service used by the normal developer launcher, with fresh credentials
@@ -125,3 +132,34 @@ This proves rejection of a bad channel candidate while the durable active/previo
 and installed package remain intact. It does not prove automatic rollback after corruption of
 those durable good Bundles, hostile-administrator tamper resistance, production identity,
 remote deployment, N-036, or G10 closure.
+
+T08 uses `repeatable-demo-proof-server.mjs` only as an IPC-owned wrapper around the same
+`startDesenAppLocalDemo` lifecycle used by `pnpm demo:reset`. It owns no alternative product entry,
+Source seed, privileged HTTP reset endpoint, or control-plane mutation path. It uses the normal
+port 5173 and fixed `.desen/m10-demo/current` namespace; reset retains the previous dataset in
+`.desen/m10-demo/previous`. Each browser context closes before the normal host is fully closed and
+the next reset begins. An occupied port or active demo lease fails explicitly, without killing an
+unrelated server. Stop an existing developer session before running this suite.
+
+The two publication pairs compare the actual captured request bytes as canonical JSON, not a
+normalized reconstruction. Synthetic input and response state never becomes saved Source. The
+independent host's HTML and assets remain identical between A and B within each cycle. Normal
+startup may rebuild the host between cycles, so the suite makes no cross-start build-identity
+claim. The nondefault operation alias is authored through the product; the same-origin local
+test-account binding is trusted launcher configuration, not an endpoint chosen by Source.
+
+T08 retains the same secret-conscious trace controls as T07: action timelines and screenshots,
+but no network snapshots, source files, or attachments in traces. Failure receipts contain only
+hashes, finite stage names, and non-secret lifecycle observations. Captured Source/Bundle bytes,
+ephemeral credentials, headers, and generated configuration are never attached. The public local
+test-account instructions remain visible in the product Run controls.
+
+Run only the repeatable demo after building the ordinary dependency closure:
+
+```bash
+pnpm --filter @desen/app-browser-e2e exec playwright test --config repeatable-demo-playwright.config.ts
+```
+
+The human walkthrough uses those same normal controls and reset command in
+[`DEMO-RUNBOOK.md`](../../docs/plan/DEMO-RUNBOOK.md). This is repeatable local test-account evidence,
+not production authentication, deployment, or a claim that the static proof reader runs Chromium.

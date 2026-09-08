@@ -34,4 +34,6 @@ export type {
   ReferenceHostPublishedRevisionActivationSettlement,
   ReferenceHostWebServer,
   ReferenceHostWebServerListenResult,
+  ReferenceHostSignInHandler,
+  ReferenceHostSignInInput,
 } from "./server.js";

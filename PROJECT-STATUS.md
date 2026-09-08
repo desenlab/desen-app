@@ -2,7 +2,51 @@
 
 Last updated: 2026-09-08
 
-## Current work — M10-T07 last-known-good recovery closure
+## Current work — M10-T08 implementation complete; hosted closure pending
+
+M10-T07 is fully closed. [PR #82](https://github.com/desenlab/desen-app/pull/82) passed
+[exact-head PR CI](https://github.com/desenlab/desen-app/actions/runs/34215082332) at
+`786b2ebbf8facee5128559373ff4a23c225b8623`, merged as
+`6cd7c8454f780d59ba88180a7556a1e063716597`, and passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34216545093).
+The identical merged tree passed all eight Chromium journeys, three exhaustive shards and the
+joined Quality gate. [Closure receipt](https://github.com/desenlab/desen-app/pull/82#issuecomment-5584075076).
+P-12 is `PROVEN` for the bounded authenticated recovery profile; N-041 remains later work.
+
+T08 remains the only active work until exact-head PR checks, merge and fresh main pass. Its task
+board `DONE` is a conditional closure candidate, not hosted completion. `pnpm demo:reset` starts
+empty product storage in the same checkout on 5173; `pnpm demo` resumes it. Only the dedicated
+`.desen/m10-demo` data rotates, with one prior generation; ordinary projects remain unchanged.
+The visible Flow journey authors two surfaces, tests Synthetic and real Integration, publishes
+the same design to the independent host, then changes label/layout and republishes.
+
+[The first PR #83 run](https://github.com/desenlab/desen-app/actions/runs/34225396795) failed:
+host admission incorrectly required an unused destination, and an older live proof reader rejected
+the completed P-12 successor. Both are corrected without changing the retained browser scenarios or
+older artifacts. That failed commit and run remain failures; their passing shards do not approve
+this corrected candidate.
+
+All nine complete Chromium journeys now pass, including the previously failing single-surface
+publication and T08's two reset/authoring cycles. Full host/server suites pass 53/53 and 38/38.
+The corrected T08 verifier and ten roots, T05/T06/T07 verifiers and 29 retained roots, M05's 35 roots,
+and M07 host's 13 roots / 60 runtime tests pass. Exact guarded M07 activation / T08 verifier-root
+checks pass; all 498 CI contracts pass in 28.125 seconds with zero skips or cancellations.
+The bounded baseline passes. Initial composition 61/61, demo lifecycle 21/21, and two real terminal
+start/Ctrl+C/restart receipts remain recorded separately. Exact-head hosted closure remains pending.
+
+The new artifact is 319,719 bytes at
+`sha256:048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5`.
+Checkpoint 78 preserves all 77 predecessors and 61 earlier artifacts, authenticating 62 artifacts /
+124 readers at `sha256:926ed1fd07b6f41d93b88c9bd6fbe582555001b5edca5f9d37cd96472aa6bd0e`;
+all 111 checkpoint contracts pass. CI retains 226 logical workloads / 108 proof pairs, 243 physical
+workloads and nine browser journeys, with unchanged two-worker shards and eleven barriers.
+[Full T08 evidence](docs/proof/DESEN-APP-REPEATABLE-DEMO.md).
+
+Candidate progress is 120/148 (81%), M10 11/12 (92%); gates remain 11/13. T09 and G10 have not
+started. G10 additionally requires the full local exhaustive gate. No Runtime Core or frozen
+protocol bytes changed, and no M11 work or external release is authorized.
+
+## M10-T07 implementation checkpoint — closure subsequently satisfied above
 
 T07's implementation and focused local evidence pass; its task-board `DONE` row is a conditional
 closure candidate, not hosted completion. It remains the only active work until the exact-head

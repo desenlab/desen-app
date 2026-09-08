@@ -48,6 +48,13 @@ const ROOT_TEST = "tests/control-plane-runtime-activation.test.mjs";
 const BUNDLE_FIXTURE = "examples/sign-in/official-derived.bundle.desen.json";
 const CATALOG_FIXTURE = "packages/reference-catalog-web/catalog.json";
 const CATALOG_DISTRIBUTION = "packages/reference-catalog-web/dist";
+const P12_SUCCESSOR_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json";
+const P12_SUCCESSOR_REPORT = "docs/proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md";
+const P12_SUCCESSOR_ARTIFACT_SHA256 =
+  "5e589bc8022de3ccf3add7a9ebab78006ecca6e72628e165f54eef4fd8b90b68";
+const P12_SUCCESSOR_REPORT_SHA256 =
+  "dda85b2fc69b1dad26ce487cfce2429a7ff128137d368a3be8fbb60ecc2e5a2f";
+const P12_SUCCESSOR_ROW_SHA256 = "06dc0d1d142a1cf6e7f35aeac84d4677572169a29eb491f431b54e11ebe31f24";
 
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
@@ -847,6 +854,35 @@ function findingStatus(source, id) {
   return { status: statuses[0], section };
 }
 
+async function assertReviewedP12Successor(row, overrides) {
+  // M07's artifact remains a task-time NOT_PROVEN claim. The later bounded P-12 promotion must
+  // independently identify its exact reviewed evidence and closure report; accepting either
+  // status or a loose text fragment would let arbitrary future claims inherit that promotion.
+  const cells = row
+    .split("|")
+    .slice(1, -1)
+    .map((cell) => cell.trim());
+  if (sha256(JSON.stringify(cells)) !== P12_SUCCESSOR_ROW_SHA256) {
+    fail("COVERAGE_DRIFT", "The reviewed bounded P-12 successor claim drifted.");
+  }
+  const [frozen, artifactBytes, reportBytes] = await Promise.all([
+    readCheckpointedFrozenArtifact("M10-T07"),
+    authorityBytes(P12_SUCCESSOR_ARTIFACT, overrides),
+    authorityBytes(P12_SUCCESSOR_REPORT, overrides),
+  ]);
+  if (
+    frozen.path !== P12_SUCCESSOR_ARTIFACT ||
+    frozen.byteLength !== 304_094 ||
+    frozen.sha256 !== P12_SUCCESSOR_ARTIFACT_SHA256 ||
+    artifactBytes.byteLength !== frozen.byteLength ||
+    !byteEqual(artifactBytes, frozen.bytes) ||
+    reportBytes.byteLength !== 6_476 ||
+    sha256(reportBytes) !== P12_SUCCESSOR_REPORT_SHA256
+  ) {
+    fail("COVERAGE_DRIFT", "The reviewed P-12 successor evidence or closure report drifted.");
+  }
+}
+
 async function coverageProjection(overrides) {
   const [normative, matrix, findings] = await Promise.all(
     [NORMATIVE_COVERAGE, PROOF_MATRIX, FINDINGS].map(async (relativePath) =>
@@ -863,7 +899,6 @@ async function coverageProjection(overrides) {
     !/\| (?:PLANNED|TESTED)\s+\|/u.test(n004) ||
     !/\| (?:PLANNED|TESTED)\s+\|/u.test(n038) ||
     !/\| PLANNED\s+\|/u.test(n041) ||
-    !/\| NOT_PROVEN\s+\|/u.test(p12) ||
     pf075.status !== "OPEN" ||
     pf076.status !== "OPEN" ||
     !pf075.section.includes("one-shot") ||
@@ -873,6 +908,7 @@ async function coverageProjection(overrides) {
   ) {
     fail("COVERAGE_DRIFT", "The exact M07-T07 coverage truth drifted.");
   }
+  await assertReviewedP12Successor(p12, overrides);
   return deepFreeze({
     proofMatrixP12: "NOT_PROVEN",
     normativeN004: "PLANNED",
@@ -1931,6 +1967,8 @@ export async function buildControlPlaneRuntimeActivationEvidence(options) {
     NORMATIVE_COVERAGE,
     PROOF_MATRIX,
     FINDINGS,
+    P12_SUCCESSOR_ARTIFACT,
+    P12_SUCCESSOR_REPORT,
   ];
   const trackedFileBytes = captureByteOverrides(
     captured.trackedFileBytes,

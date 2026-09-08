@@ -108,7 +108,8 @@ type AttemptResult =
 
 function exactOwnDataRecord(
   value: unknown,
-  keys: readonly string[],
+  requiredKeys: readonly string[],
+  optionalKeys: readonly string[] = [],
 ): Readonly<Record<string, unknown>> | undefined {
   try {
     if (value === null || typeof value !== "object" || Array.isArray(value)) return undefined;
@@ -116,13 +117,17 @@ function exactOwnDataRecord(
     if (prototype !== Object.prototype && prototype !== null) return undefined;
     const ownKeys = Reflect.ownKeys(value);
     if (
-      ownKeys.length !== keys.length ||
-      ownKeys.some((key) => typeof key !== "string" || !keys.includes(key))
+      requiredKeys.some((key) => !ownKeys.includes(key)) ||
+      ownKeys.some(
+        (key) =>
+          typeof key !== "string" || (!requiredKeys.includes(key) && !optionalKeys.includes(key)),
+      )
     ) {
       return undefined;
     }
     const captured: Record<string, unknown> = Object.create(null);
-    for (const key of keys) {
+    for (const key of ownKeys) {
+      if (typeof key !== "string") return undefined;
       const descriptor = Object.getOwnPropertyDescriptor(value, key);
       if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
         return undefined;
@@ -189,6 +194,22 @@ async function verifiedCandidateFor(
     { status: "not-available" },
   );
   if (integrity.status !== "verified") return undefined;
+  // Identity selects only one of two installed data policies, never an endpoint or handler.
+  // Apply the same policy during candidate activation and both durable recovery roles.
+  const bundle = integrity.authority.bundle;
+  const entry =
+    bundle.id === "com.example.account-app"
+      ? "sign-in"
+      : bundle.id === "com.example.flow-app"
+        ? "start"
+        : undefined;
+  const destination = entry === "sign-in" ? "home" : "result";
+  if (
+    entry === undefined ||
+    bundle.entry !== entry ||
+    exactOwnDataRecord(bundle.surfaces, [entry], [destination]) === undefined
+  )
+    return undefined;
   const packages = preflightBundlePackages(integrity.authority, [inventory]);
   if (packages.status !== "preflighted") return undefined;
   return Object.freeze({

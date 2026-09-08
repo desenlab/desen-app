@@ -1819,3 +1819,29 @@ pre-parse and filesystem size rejection, exact live-head admission, and fresh re
 The candidate remains `REVIEW_REQUIRED`, never live authority. No transport compression or test
 omission is introduced. All 483 CI and retained-runner contract tests pass locally, including
 109 checkpoint tests. Exact-head hosted checks and fresh main remain required for task closure.
+
+## M10-T08 repeatable-demo successor
+
+The successor registers one new verifier/root pair, `desen-app-repeatable-demo`, without removing
+or suppressing a previous workload. The exhaustive inventory has 226 logical workloads and 108
+proof pairs. The unchanged three-shard scheme now partitions those pairs as 53/24/31; replicated
+prefixes and the fresh join build execute 243 physical workloads. The normal browser lane retains
+its eight preceding journeys and appends the ninth, repeatable-demo journey exactly once.
+
+Both new proof steps use `DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE`: Vite/compiler and SQLite loads,
+bounded child probes, and runner-owned OS temporary files. They receive no listener, workspace
+write, tracked alias, or filesystem-compatibility authority. The reset matrix operates the same
+public normal demo lifecycle against its own temporary namespace; it cannot invoke a second
+editor, seed an authored Source, or reset the user's active design. Native-addon tests load the
+real Vite and SQLite implementations under both T07 and T08 isolation and retain denial for an
+unrelated proof. The actual interactive reset journey remains in the separate browser lane.
+
+The exact semantic parents are last-known-good recovery, success/host operation, and the
+independent host source audit. The connected affected closure contains 76 proof units and 162
+workloads. Only the exact verifier and root-test paths can select that closure; changes to the
+normal launcher, browser journey, artifact, and reader library force exhaustive review. The
+inventory test independently preserves the exact preceding 224-node T07 command projection.
+
+These registrations establish workload authority, not a successful hosted run or task closure.
+The new frozen artifact, append-only reader checkpoint, complete local contracts, exact-head CI,
+and fresh main verification remain separate required evidence.

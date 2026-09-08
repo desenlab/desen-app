@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   DesenAppLocalOperationHostError,
+  executeDesenAppLocalSignIn,
   openDesenAppLocalOperationHost,
 } from "./local-operation-host.mjs";
 
@@ -37,6 +38,73 @@ function post(origin, body = JSON.stringify(INPUT), headers = {}) {
 afterEach(async () => {
   vi.restoreAllMocks();
   await Promise.all(hosts.splice(0).map((host) => host.close()));
+});
+
+describe("shared local test-account decision", () => {
+  it("returns the same frozen non-Catalog settlement without retaining the input", async () => {
+    const input = { ...INPUT };
+    const result = await executeDesenAppLocalSignIn(input, new AbortController().signal);
+    expect(result).toEqual({ status: "succeeded", output: { userId: "local-host-user" } });
+    expect(Object.isFrozen(result)).toBe(true);
+    expect(Object.isFrozen(result.output)).toBe(true);
+    input.password = "changed-after-invocation";
+    expect(JSON.stringify(result)).not.toContain(INPUT.email);
+    expect(JSON.stringify(result)).not.toContain(INPUT.password);
+    expect(await executeDesenAppLocalSignIn(input)).toEqual({
+      status: "failed",
+      code: "invalidCredentials",
+    });
+  });
+
+  it("refuses aborted or forged lifetime authority before evaluating caller input", async () => {
+    const aborted = new AbortController();
+    aborted.abort();
+    for (const signal of [aborted.signal, {}, { aborted: false }]) {
+      await expect(executeDesenAppLocalSignIn(INPUT, signal)).resolves.toEqual({
+        status: "failed",
+        code: "unavailable",
+      });
+    }
+  });
+
+  it("rejects malformed, oversized and nonclosed values without guessing credentials", async () => {
+    for (const input of [
+      null,
+      [],
+      {},
+      { ...INPUT, endpoint: "https://foreign.example" },
+      { email: INPUT.email, password: "" },
+      { email: INPUT.email, password: 42 },
+      { email: "a".repeat(4_097), password: INPUT.password },
+      { email: INPUT.email, password: "a".repeat(4_097) },
+      Object.create(INPUT),
+    ]) {
+      await expect(executeDesenAppLocalSignIn(input)).resolves.toEqual({
+        status: "failed",
+        code: "unavailable",
+      });
+    }
+    await expect(executeDesenAppLocalSignIn({ email: "", password: "wrong" })).resolves.toEqual({
+      status: "failed",
+      code: "invalidCredentials",
+    });
+  });
+
+  it("does not invoke credential accessors or proxy reflection hooks", async () => {
+    const getter = vi.fn(() => INPUT.email);
+    const trap = vi.fn(() => Object.prototype);
+    const accessor = { password: INPUT.password };
+    Object.defineProperty(accessor, "email", { enumerable: true, get: getter });
+    const proxy = new Proxy({ ...INPUT }, { getPrototypeOf: trap });
+    for (const input of [accessor, proxy]) {
+      await expect(executeDesenAppLocalSignIn(input)).resolves.toEqual({
+        status: "failed",
+        code: "unavailable",
+      });
+    }
+    expect(getter).not.toHaveBeenCalled();
+    expect(trap).not.toHaveBeenCalled();
+  });
 });
 
 describe("local reference operation HTTP host", () => {

@@ -1032,19 +1032,49 @@ test("authenticates the exact dependency-cruiser rule and rejects removal or dri
     name: "application-reference-host-web-allowed-dependencies",
     severity: "error",
     comment: "reference-host-web may import only the packages assigned to its responsibility.",
-    from: { path: "^apps/reference-host-web/" },
+    from: {
+      path: "^apps/reference-host-web/",
+      pathNot: "^apps/reference-host-web/test/official-sign-in\\.test\\.tsx$",
+    },
     to: {
       path: "^packages/",
       pathNot: "^packages/(?:runtime-core|runtime-react|runtime-web|reference-catalog-web)/",
     },
   };
-  const configuration = { forbidden: [expectedRule], options: {} };
+  const expectedTestRule = {
+    name: "reference-host-sign-in-test-reviewed-packages-only",
+    severity: "error",
+    comment:
+      "The exact official host sign-in test retains the host's existing package edges and may additionally recompute Bundle revisions using only the public Protocol entry; private Protocol and every other package remain forbidden.",
+    from: { path: "^apps/reference-host-web/test/official-sign-in\\.test\\.tsx$" },
+    to: {
+      path: "^packages/",
+      pathNot:
+        "(?:^packages/protocol/dist/index\\.(?:d\\.ts|js)$|^packages/(?:runtime-core|runtime-react|runtime-web|reference-catalog-web)/)",
+    },
+  };
+  const configuration = { forbidden: [expectedRule, expectedTestRule], options: {} };
   assert.equal(
     verifyReferenceHostWebDependencyBoundaryConfiguration(configuration).rule.name,
     expectedRule.name,
   );
   for (const mutation of [
     { forbidden: [], options: {} },
+    { forbidden: [expectedRule], options: {} },
+    {
+      forbidden: [
+        expectedRule,
+        { ...expectedTestRule, from: { path: "^apps/reference-host-web/" } },
+      ],
+      options: {},
+    },
+    {
+      forbidden: [
+        expectedRule,
+        { ...expectedTestRule, to: { path: "^packages/", pathNot: "^packages/protocol/" } },
+      ],
+      options: {},
+    },
     {
       forbidden: [{ ...structuredClone(expectedRule), severity: "warn" }],
       options: {},
@@ -1059,6 +1089,50 @@ test("authenticates the exact dependency-cruiser rule and rejects removal or dri
       hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_BOUNDARY_DRIFT"),
     );
   }
+});
+
+test("admits only finite profile surface-key checks and rejects alias or managed-content authority changes", async () => {
+  for (const [before, after] of [
+    ['documentId === "com.example.flow-app"', 'documentId !== "com.example.account-app"'],
+    ["request.capabilityId !== operationId", "false"],
+    ["request.effect !== SIGN_IN_EFFECT", "false"],
+    [
+      'typeof request.invocationAlias !== "string" || request.invocationAlias.length === 0',
+      'request.invocationAlias !== "signIn"',
+    ],
+    ["captured.targetSurfaceId !== identity.destination", "false"],
+    ["APPLICATION_PROFILES.has(value as ReferenceHostApplicationProfiles)", "true"],
+    [
+      "ownDataRecord(capturedBundle.surfaces, [entry], [destination])",
+      "ownDataRecord(capturedBundle.surfaces, [entry, destination])",
+    ],
+    [
+      "ownDataRecord(capturedBundle.surfaces, [entry], [destination])",
+      "ownDataRecord(capturedBundle.surfaces, [], [entry, destination])",
+    ],
+    [
+      "ownDataRecord(capturedBundle.surfaces, [entry], [destination])",
+      'ownDataRecord(capturedBundle.surfaces, [entry], [destination, "unknown"])',
+    ],
+  ]) {
+    await rejectMutation(
+      OFFICIAL_SOURCE,
+      (text) => {
+        assert.ok(text.includes(before));
+        return text.replace(before, after);
+      },
+      /semantic fingerprint|closed executable|finite profile|surfaces-shaped escape/u,
+    );
+  }
+  await rejectMutation(
+    OFFICIAL_SOURCE,
+    (text) =>
+      text.replace(
+        "const flow = applications",
+        "const managed = capturedBundle.surfaces; void managed;\n    const flow = applications",
+      ),
+    /surfaces-shaped escape/u,
+  );
 });
 
 test("derives every default evidence path from one custom workspace authority", async () => {

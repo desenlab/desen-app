@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act } from "react";
-import { screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import { EMPTY_REFERENCE_PROJECT_DOCUMENT } from "../src/reference-empty-project.js";
@@ -130,6 +130,84 @@ it(
     ).toBe(false);
     expect(createPublication).toHaveBeenCalledTimes(1);
     expect(document.body.textContent).not.toContain("private-publication-configuration-detail");
+  },
+  PRODUCTION_ENTRY_TEST_TIMEOUT_MS,
+);
+
+it.each([
+  { channelName: "preview", hostId: "reference-host-web", ready: true },
+  { channelName: "another-channel", hostId: "reference-host-web", ready: false },
+  { channelName: "preview", hostId: "another-host", ready: false },
+])(
+  "passes only the profile-matched publication authority to the normal Flow workspace ($channelName/$hostId)",
+  async ({ channelName, hostId, ready }) => {
+    const { REFERENCE_FLOW_WORKSPACE_PROFILE } =
+      await import("../src/reference-flow-workspace-profile.js");
+    const { readProjectWorkspaceProfileAuthority } =
+      await import("../src/project-workspace-profile.js");
+    const { createFixedDestinationAuthoringPublicationPort } =
+      await import("../src/authoring-publication.js");
+    const authority = readProjectWorkspaceProfileAuthority(REFERENCE_FLOW_WORKSPACE_PROFILE);
+    if (authority.status !== "read") throw new Error("Expected the installed Flow authority.");
+    const savedSource = authority.profile.initialDocument;
+    const openSource = vi.fn(async () =>
+      Object.freeze({ status: "opened" as const, generation: 4, document: savedSource }),
+    );
+    injectPersistencePort(persistencePort(openSource));
+    const publish = vi.fn(async () =>
+      Object.freeze({
+        status: "failed" as const,
+        phase: "request" as const,
+        reason: "storage-unavailable" as const,
+      }),
+    );
+    const activate = vi.fn(async () => Object.freeze({ status: "unavailable" as const }));
+    injectPublicationPort(() =>
+      createFixedDestinationAuthoringPublicationPort({
+        channelName,
+        hostId,
+        publishBundleToChannel: publish,
+        activatePublishedRevision: activate,
+      }),
+    );
+    window.history.replaceState(null, "", "/projects/flow-app/surfaces/start");
+
+    await act(async () => {
+      await import("../src/main.js");
+      await Promise.resolve();
+    });
+
+    if (ready) {
+      expect(await screen.findByRole("heading", { level: 2, name: "Start" })).toBeTruthy();
+      expect(openSource).toHaveBeenCalledWith("flow-app-source");
+      fireEvent.click(screen.getByText("Source & release", { exact: true }));
+      const release = screen.getByRole("region", { name: "Publish saved Source" });
+      expect(
+        (within(release).getByRole("button", { name: "Publish" }) as HTMLButtonElement).disabled,
+      ).toBe(false);
+      expect(within(release).getByRole("status").textContent).toContain(
+        "Saved generation 4 is ready to publish.",
+      );
+      await act(async () => {
+        fireEvent.click(within(release).getByRole("button", { name: "Publish" }));
+      });
+      expect(publish).toHaveBeenCalledTimes(1);
+      expect(publish).toHaveBeenCalledWith({
+        bundleBytes: expect.any(Uint8Array),
+        revision: expect.stringMatching(/^sha256:[a-f0-9]{64}$/u),
+      });
+    } else {
+      expect(
+        await screen.findByRole("heading", {
+          name: "The project composition was not authenticated.",
+        }),
+      ).toBeTruthy();
+      expect(screen.queryByRole("region", { name: "Publish saved Source" })).toBeNull();
+      expect(screen.queryByRole("group", { name: /^Managed / })).toBeNull();
+      expect(publish).not.toHaveBeenCalled();
+    }
+    expect(activate).not.toHaveBeenCalled();
+    expect(authority.profile.initialDocument).toBe(savedSource);
   },
   PRODUCTION_ENTRY_TEST_TIMEOUT_MS,
 );

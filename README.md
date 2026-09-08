@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████████░░░░░` **119 / 148 tasks complete (80%)**
+**Overall:** `████████████████████░░░░░` **120 / 148 tasks complete (81%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -26,20 +26,26 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `██████████░░` **10 / 12 tasks complete (83%)**
+**M10:** `███████████░` **11 / 12 tasks complete (92%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **AR-01:** `DONE` · **M10-T05:** `DONE` · **M10-T06:** `DONE` ([fresh main PASS](https://github.com/desenlab/desen-app/actions/runs/34209981353)) · **P-07:** `PROVEN` · **PF-059:** `CLOSED` · **Current product task:** `M10-T07` (`IN_PROGRESS`)
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **AR-01:** `DONE` · **M10-T07:** `DONE` ([fresh main PASS](https://github.com/desenlab/desen-app/actions/runs/34216545093)) · **P-07 / P-12:** `PROVEN` · **PF-059:** `CLOSED` · **Current product task:** `M10-T08` (local evidence passed; hosted closure pending)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
 <!-- task-progress:end -->
 
+**M10-T08:** the [repeatable demo](docs/proof/DESEN-APP-REPEATABLE-DEMO.md) starts the normal
+editor on 5173 with empty, safely resettable storage. A designer visibly authors a two-surface
+Flow, tests it and publishes that same design to the independent host. Two reset cycles produce
+identical canonical publications; label/layout edits change the published output without changing
+host assets. Local evidence passes; the task-board `DONE` is conditional on exact-head PR and
+fresh main closure. T09 and G10 remain separate.
+
 **M10-T07:** the [recovery proof](docs/proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md) preserves the
 last authenticated host revision through corrupt candidates and full process restarts, then accepts
 a later valid publication without rebuilding the independent host. Local Chromium, public recovery,
-historical compatibility, and the bounded baseline pass. The task count includes the conditional
-`DONE` candidate: exact-head Quality gate, Browser E2E, merge, and fresh main remain required.
-T06 is already fully closed; T08, T09, and G10 have not started.
+historical compatibility, the bounded baseline, exact-head PR checks and fresh main all passed.
+T08 now joins the repeatable normal-product demo and safe local seed/reset; T09 and G10 have not started.
 
 **CI-04 and SEC-02:** `DONE`; [PR #80](https://github.com/desenlab/desen-app/pull/80) and
 [fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34066622578) passed, preserving all
@@ -222,8 +228,8 @@ mutation classes, and two browser type-test files. Its 39,307-byte artifact is
 `sha256:48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0`. This local Web proof does
 not claim remote or native deployment,
 real-browser performance, product-level restart, hostile-admin concurrent-root mutation
-resistance, or an external anti-rollback anchor. P-12 remains `NOT_PROVEN` until M10-T07 and N-041
-remains `PLANNED` until M12-T05.
+resistance, or an external anti-rollback anchor. The later M10-T07 proof closes P-12 for bounded
+local Web product-process recovery; N-041 remains `PLANNED` until M12-T05.
 
 **I07-02 infrastructure checkpoint:** the cutover froze and proved the code-owned 130-workload,
 61-proof-pair plan as `REQUIRED + EXHAUSTIVE`. The historical M07-T09 successor contained 146

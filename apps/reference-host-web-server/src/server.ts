@@ -22,6 +22,16 @@ import type {
 const LOOPBACK_ADDRESS = "127.0.0.1" as const;
 const REFRESH_PATH = "/__desen/runtime/refresh";
 const HOME_PATH = "/home";
+const SIGN_IN_PATH = "/api/sign-in";
+const MAX_SIGN_IN_BYTES = 16_384;
+const MAX_SIGN_IN_CHUNKS = 1_024;
+const SIGN_IN_TIMEOUT_MS = 10_000;
+const MAX_SIGN_IN_REQUESTS = 16;
+const JSON_STRING = '"(?:[^"\\\\\\u0000-\\u001f]|\\\\(?:["\\\\/bfnrt]|u[0-9a-fA-F]{4}))*"';
+const CREDENTIALS_BODY = new RegExp(
+  `^\\s*\\{\\s*"(email|password)"\\s*:\\s*(${JSON_STRING})\\s*,\\s*"(email|password)"\\s*:\\s*(${JSON_STRING})\\s*\\}\\s*$`,
+  "u",
+);
 const JSON_MEDIA_TYPE = "application/json";
 const MAX_STATIC_FILE_BYTES = 16 * 1_024 * 1_024;
 const MAX_STATIC_FILES = 256;
@@ -51,8 +61,25 @@ interface StaticFile {
   readonly immutable: boolean;
 }
 
+/** Closed credentials captured only for the lifetime of one fixed host-owned operation. */
+export interface ReferenceHostSignInInput {
+  /** Bounded inert email input; never persisted or logged by the reference server. */
+  readonly email: string;
+  /** Bounded nonempty credential input; never persisted or logged by the reference server. */
+  readonly password: string;
+}
+
+/** Trusted opt-in callback whose unknown result is independently captured before HTTP delivery. */
+export type ReferenceHostSignInHandler = (
+  this: void,
+  input: ReferenceHostSignInInput,
+  signal: AbortSignal,
+) => unknown;
+
 /** Trusted configuration for the independently built Web reference-host server. */
 export interface OpenReferenceHostWebServerOptions {
+  /** Optional fixed application backend. Absence keeps POST /api/sign-in disabled. */
+  readonly signIn?: ReferenceHostSignInHandler;
   /** Absolute application-owned local-control-plane and activation root. */
   readonly rootDirectory: string;
   /** Absolute application-owned installed Web–React package root. */
@@ -115,6 +142,7 @@ export interface ReferenceHostWebServer {
 function exactOwnDataRecord(
   value: unknown,
   keys: readonly string[],
+  optionalKeys: readonly string[] = [],
 ): Readonly<Record<string, unknown>> | undefined {
   try {
     if (value === null || typeof value !== "object" || Array.isArray(value)) return undefined;
@@ -122,13 +150,16 @@ function exactOwnDataRecord(
     if (prototype !== Object.prototype && prototype !== null) return undefined;
     const ownKeys = Reflect.ownKeys(value);
     if (
-      ownKeys.length !== keys.length ||
-      ownKeys.some((key) => typeof key !== "string" || !keys.includes(key))
+      keys.some((key) => !ownKeys.includes(key)) ||
+      ownKeys.some(
+        (key) => typeof key !== "string" || (!keys.includes(key) && !optionalKeys.includes(key)),
+      )
     ) {
       return undefined;
     }
     const captured: Record<string, unknown> = Object.create(null);
-    for (const key of keys) {
+    for (const key of ownKeys) {
+      if (typeof key !== "string") return undefined;
       const descriptor = Object.getOwnPropertyDescriptor(value, key);
       if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
         return undefined;
@@ -352,6 +383,7 @@ async function loadStaticFiles(
   }
   files.set("/", index);
   files.set(HOME_PATH, index);
+  files.set("/result", index);
   return files;
 }
 
@@ -440,26 +472,175 @@ function staticResponse(response: ServerResponse, method: string, file: StaticFi
   response.end(method === "HEAD" ? undefined : file.bytes);
 }
 
+function readSignInBody(
+  request: IncomingMessage,
+  signal: AbortSignal,
+): Promise<ReferenceHostSignInInput | undefined> {
+  const names = new Set<string>();
+  for (let index = 0; index < request.rawHeaders.length; index += 2) {
+    const name = request.rawHeaders[index]?.toLowerCase();
+    if (name === undefined || names.has(name) || names.size >= 64)
+      return Promise.resolve(undefined);
+    names.add(name);
+  }
+  const declared = singleHeader(request, "content-length");
+  if (
+    signal.aborted ||
+    singleHeader(request, "content-type") !== JSON_MEDIA_TYPE ||
+    hasHeader(request, "content-encoding") ||
+    hasHeader(request, "transfer-encoding") ||
+    declared === undefined ||
+    !/^[1-9][0-9]{0,4}$/u.test(declared) ||
+    Number(declared) > MAX_SIGN_IN_BYTES
+  ) {
+    return Promise.resolve(undefined);
+  }
+  return new Promise((resolve) => {
+    const chunks: Buffer[] = [];
+    let length = 0;
+    let settled = false;
+    const finish = (value: ReferenceHostSignInInput | undefined) => {
+      if (settled) return;
+      settled = true;
+      signal.removeEventListener("abort", abort);
+      request.off("data", data);
+      request.off("end", end);
+      request.off("error", abort);
+      request.off("aborted", abort);
+      chunks.length = 0;
+      resolve(value);
+    };
+    const abort = () => finish(undefined);
+    const data = (chunk: unknown) => {
+      if (
+        !Buffer.isBuffer(chunk) ||
+        chunks.length >= MAX_SIGN_IN_CHUNKS ||
+        length + chunk.byteLength > Number(declared)
+      ) {
+        finish(undefined);
+        request.resume();
+        return;
+      }
+      length += chunk.byteLength;
+      chunks.push(Buffer.from(chunk));
+    };
+    const end = () => {
+      if (length !== Number(declared)) {
+        finish(undefined);
+        return;
+      }
+      try {
+        const body = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+          Buffer.concat(chunks, length),
+        );
+        const match = CREDENTIALS_BODY.exec(body);
+        const record = exactOwnDataRecord(JSON.parse(body), ["email", "password"]);
+        if (
+          match === null ||
+          match[1] === match[3] ||
+          record === undefined ||
+          typeof record.email !== "string" ||
+          record.email.length > 4_096 ||
+          typeof record.password !== "string" ||
+          record.password.length === 0 ||
+          record.password.length > 4_096
+        ) {
+          finish(undefined);
+          return;
+        }
+        finish(Object.freeze({ email: record.email, password: record.password }));
+      } catch {
+        finish(undefined);
+      }
+    };
+    signal.addEventListener("abort", abort, { once: true });
+    request.on("data", data);
+    request.once("end", end);
+    request.once("error", abort);
+    request.once("aborted", abort);
+  });
+}
+
+function invokeSignIn(
+  handler: ReferenceHostSignInHandler,
+  input: ReferenceHostSignInInput,
+  signal: AbortSignal,
+): Promise<unknown> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value: unknown) => {
+      if (settled) return;
+      settled = true;
+      signal.removeEventListener("abort", abort);
+      resolve(value);
+    };
+    const abort = () => finish(undefined);
+    if (signal.aborted) {
+      finish(undefined);
+      return;
+    }
+    signal.addEventListener("abort", abort, { once: true });
+    try {
+      Promise.resolve(Reflect.apply(handler, undefined, [input, signal])).then(finish, abort);
+    } catch {
+      finish(undefined);
+    }
+  });
+}
+
+function captureSignInResult(
+  value: unknown,
+): Readonly<{ status: number; body: unknown }> | undefined {
+  const success = exactOwnDataRecord(value, ["status", "output"]);
+  if (success?.status === "succeeded") {
+    const output = exactOwnDataRecord(success.output, ["userId"]);
+    if (
+      typeof output?.userId === "string" &&
+      output.userId.length > 0 &&
+      output.userId.length <= 4_096
+    ) {
+      return Object.freeze({ status: 200, body: Object.freeze({ userId: output.userId }) });
+    }
+    return undefined;
+  }
+  const failure = exactOwnDataRecord(value, ["status", "code"]);
+  if (failure?.status === "failed" && failure.code === "invalidCredentials") {
+    return Object.freeze({
+      status: 401,
+      body: Object.freeze({ error: Object.freeze({ code: "invalidCredentials" }) }),
+    });
+  }
+  return undefined;
+}
+
 function captureOptions(value: unknown): OpenReferenceHostWebServerOptions | undefined {
-  const captured = exactOwnDataRecord(value, [
-    "rootDirectory",
-    "installedPackageDirectory",
-    "clientBuildDirectory",
-    "controlPlaneOrigin",
-    "controlPlaneApiToken",
-    "channelName",
-  ]);
+  const captured = exactOwnDataRecord(
+    value,
+    [
+      "rootDirectory",
+      "installedPackageDirectory",
+      "clientBuildDirectory",
+      "controlPlaneOrigin",
+      "controlPlaneApiToken",
+      "channelName",
+    ],
+    ["signIn"],
+  );
   if (
     typeof captured?.rootDirectory !== "string" ||
     typeof captured.installedPackageDirectory !== "string" ||
     typeof captured.clientBuildDirectory !== "string" ||
     typeof captured.controlPlaneOrigin !== "string" ||
     typeof captured.controlPlaneApiToken !== "string" ||
-    typeof captured.channelName !== "string"
+    typeof captured.channelName !== "string" ||
+    (Object.hasOwn(captured, "signIn") && typeof captured.signIn !== "function")
   ) {
     return undefined;
   }
   return Object.freeze({
+    ...(captured.signIn === undefined
+      ? {}
+      : { signIn: captured.signIn as ReferenceHostSignInHandler }),
     rootDirectory: captured.rootDirectory,
     installedPackageDirectory: captured.installedPackageDirectory,
     clientBuildDirectory: captured.clientBuildDirectory,
@@ -510,7 +691,9 @@ export async function openReferenceHostWebServer(
   let listening: ReferenceHostWebServerListenResult | undefined;
   let listenInFlight: Promise<ReferenceHostWebServerListenResult> | undefined;
   let closeInFlight: Promise<void> | undefined;
-  const httpServer = createServer((request, response) => {
+  const signInRequests = new Set<AbortController>();
+  const httpServer = createServer({ maxHeaderSize: 8_192 }, (request, response) => {
+    request.on("error", () => undefined);
     void (async () => {
       secureHeaders(response);
       const activeController = controller;
@@ -568,6 +751,59 @@ export async function openReferenceHostWebServer(
         response.end(delivery.bytes);
         return;
       }
+      if (target === SIGN_IN_PATH && captured.signIn !== undefined) {
+        if (request.method !== "POST") {
+          response.setHeader("allow", "POST");
+          empty(response, 405);
+          return;
+        }
+        if (
+          singleHeader(request, "origin") !== listener.origin ||
+          !requestFetchSiteIsOneOf(request, ["same-origin"]) ||
+          hasHeader(request, "cookie") ||
+          hasHeader(request, "authorization")
+        ) {
+          empty(response, 403);
+          return;
+        }
+        if (signInRequests.size >= MAX_SIGN_IN_REQUESTS) {
+          empty(response, 503);
+          return;
+        }
+        const abort = new AbortController();
+        signInRequests.add(abort);
+        const disconnect = () => abort.abort();
+        response.once("close", disconnect);
+        const timer = setTimeout(disconnect, SIGN_IN_TIMEOUT_MS);
+        timer.unref();
+        try {
+          const input = await readSignInBody(request, abort.signal);
+          if (input === undefined || abort.signal.aborted || closed) {
+            empty(response, abort.signal.aborted || closed ? 503 : 400);
+            return;
+          }
+          const candidate = await invokeSignIn(captured.signIn, input, abort.signal);
+          if (abort.signal.aborted || closed || controller !== activeController) {
+            if (!response.destroyed) empty(response, 503);
+            return;
+          }
+          const result = captureSignInResult(candidate);
+          if (result === undefined) {
+            empty(response, 503);
+            return;
+          }
+          const body = Buffer.from(JSON.stringify(result.body), "utf8");
+          response.statusCode = result.status;
+          response.setHeader("content-type", JSON_MEDIA_TYPE);
+          response.setHeader("content-length", String(body.byteLength));
+          response.end(body);
+        } finally {
+          clearTimeout(timer);
+          response.off("close", disconnect);
+          signInRequests.delete(abort);
+        }
+        return;
+      }
       if (!requestFetchSiteIsOneOf(request, ["same-origin", "none"])) {
         empty(response, 403);
         return;
@@ -598,6 +834,7 @@ export async function openReferenceHostWebServer(
     });
   });
   httpServer.requestTimeout = 15_000;
+  httpServer.maxConnections = 32;
   httpServer.headersTimeout = 10_000;
   httpServer.keepAliveTimeout = 5_000;
   httpServer.on("clientError", (_error, socket) => socket.destroy());
@@ -725,6 +962,7 @@ export async function openReferenceHostWebServer(
     close(): Promise<void> {
       if (closeInFlight !== undefined) return closeInFlight;
       closed = true;
+      for (const abort of signInRequests) abort.abort();
       controller?.close();
       controller = undefined;
       listening = undefined;

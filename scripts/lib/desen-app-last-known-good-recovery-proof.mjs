@@ -48,6 +48,26 @@ const BROWSER_COMMAND =
   "pnpm --filter @desen/app-browser-e2e exec playwright test --config restart-recovery-playwright.config.ts";
 const BROWSER_SUITE_COMMAND =
   "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts";
+const T08_SUCCESSOR_PIN = Object.freeze({
+  path: "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json",
+  bytes: 319_719,
+  sha256: "048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5",
+});
+const T08_CHANGED_TRACKED_PATHS = Object.freeze([
+  BROWSER_PACKAGE_PATH,
+  "pnpm-lock.yaml",
+  "dependency-cruiser.config.cjs",
+  "scripts/verify-boundary-fixtures.mjs",
+]);
+const T08_CHANGED_COMPILER_INPUTS = Object.freeze([
+  "apps/reference-host-web-server/src/channel-activation-controller.ts",
+  "apps/reference-host-web-server/src/index.ts",
+  "apps/reference-host-web-server/src/server.ts",
+]);
+const T08_CHANGED_COMPILED_MODULES = Object.freeze([
+  "apps/reference-host-web-server/dist/channel-activation-controller.js",
+  "apps/reference-host-web-server/dist/server.js",
+]);
 const COMPILED_ROOTS = Object.freeze([
   "packages/protocol",
   "packages/publisher",
@@ -1238,32 +1258,151 @@ function verifyPackageWiring(files) {
   const browser = parseJson(files.get(BROWSER_PACKAGE_PATH), BROWSER_PACKAGE_PATH);
   if (
     browser.name !== "@desen/app-browser-e2e" ||
-    browser.scripts?.["test:e2e"] !== BROWSER_SUITE_COMMAND ||
+    browser.scripts?.["test:e2e"] !==
+      `${BROWSER_SUITE_COMMAND} && playwright test --config repeatable-demo-playwright.config.ts` ||
     browser.devDependencies?.["@desen/protocol"] !== "workspace:*"
   )
     fail(
       "TEST_AUTHORITY_DRIFT",
-      "The exact eighth browser command or public Protocol dependency changed.",
+      "The exact ninth browser command or public Protocol dependency changed.",
     );
   return {
-    browserCommands: 8,
+    browserCommands: 9,
     exactPublicProtocolDevDependency: true,
     browserExecutedByVerifier: false,
   };
 }
 
-/** Builds current graphs and a fresh sockets-free API matrix without rehydrating any parent PASS. */
-export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = undefined) {
-  const options = captureBuildOptions(rawOptions);
-  const workspaceRoot = await realpath(options.workspaceRoot).catch(() =>
-    fail("AUTHORITY_UNSAFE", "The proof workspace is unavailable."),
+async function readT08Successor(workspaceRoot) {
+  const bytes = await readRegularAuthority(
+    path.join(workspaceRoot, T08_SUCCESSOR_PIN.path),
+    T08_SUCCESSOR_PIN.path,
   );
-  const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
-  authenticateParents(files);
-  const browser = verifyDesenAppLastKnownGoodRecoveryBrowserPolicy(
-    Object.fromEntries(Object.entries(BROWSER_PATHS).map(([key, name]) => [key, files.get(name)])),
+  if (
+    T08_SUCCESSOR_PIN.bytes <= 0 ||
+    bytes.byteLength !== T08_SUCCESSOR_PIN.bytes ||
+    sha256(bytes) !== T08_SUCCESSOR_PIN.sha256
+  )
+    fail("SUCCESSOR_DRIFT", "The exact reviewed T08 successor artifact changed.");
+  const successor = parseJson(bytes, T08_SUCCESSOR_PIN.path, "SUCCESSOR_DRIFT");
+  if (
+    successor.task !== "M10-T08" ||
+    successor.proofId !== "desen-app-repeatable-demo" ||
+    successor.profile !== "desen.app.repeatable-demo-proof.v1" ||
+    successor.result !== "PASS"
+  )
+    fail("SUCCESSOR_DRIFT", "The reviewed T08 successor identity changed.");
+  return successor;
+}
+
+function assertSuccessorReceipt(receipt, candidates) {
+  const matches = candidates?.filter((candidate) => candidate.path === receipt.path);
+  if (matches?.length !== 1 || !isDeepStrictEqual(receipt, matches[0]))
+    fail("SUCCESSOR_DRIFT", "A current input differs from its exact reviewed T08 receipt.", {
+      path: receipt.path,
+    });
+}
+
+function assertReviewedReceiptChanges(current, historical, successor, changedPaths) {
+  if (
+    !isDeepStrictEqual(
+      current.map(({ path: name }) => name),
+      historical.map(({ path: name }) => name),
+    )
+  )
+    fail("SUCCESSOR_DRIFT", "An unreviewed current receipt inventory change cannot be projected.");
+  for (let index = 0; index < current.length; index += 1) {
+    if (changedPaths.includes(current[index].path))
+      assertSuccessorReceipt(current[index], successor);
+    else if (!isDeepStrictEqual(current[index], historical[index]))
+      fail("SUCCESSOR_DRIFT", "A current receipt changed outside the exact T08 successor scope.", {
+        path: current[index].path,
+      });
+  }
+}
+
+async function projectT08Successor(workspaceRoot, current, successor) {
+  const historicalBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    ARTIFACT_PATH,
   );
-  const packageWiring = verifyPackageWiring(files);
+  const historical = authenticateArtifact(historicalBytes);
+  if (
+    !isDeepStrictEqual(
+      current.authority.currentGraphAudit,
+      successor.authority?.currentGraphAudit,
+    ) ||
+    !isDeepStrictEqual(current.authority.publicApiMatrix, successor.authority?.publicApiMatrix)
+  )
+    fail(
+      "SUCCESSOR_DRIFT",
+      "Fresh current graph or recovery execution differs from reviewed T08 authority.",
+    );
+  const matrix = current.authority.publicApiMatrix;
+  const previousMatrix = historical.authority.publicApiMatrix;
+  assertReviewedReceiptChanges(
+    current.boundary.trackedReceipts,
+    historical.boundary.trackedReceipts,
+    successor.boundary.trackedReceipts,
+    T08_CHANGED_TRACKED_PATHS,
+  );
+  assertReviewedReceiptChanges(
+    matrix.freshEmission.inputReceipts,
+    previousMatrix.freshEmission.inputReceipts,
+    successor.authority.publicApiMatrix.freshEmission.inputReceipts,
+    T08_CHANGED_COMPILER_INPUTS,
+  );
+  assertReviewedReceiptChanges(
+    matrix.compiledModuleReceipts,
+    previousMatrix.compiledModuleReceipts,
+    successor.authority.publicApiMatrix.compiledModuleReceipts,
+    T08_CHANGED_COMPILED_MODULES,
+  );
+  const artifact = {
+    ...current,
+    authority: {
+      ...current.authority,
+      currentGraphAudit: historical.authority.currentGraphAudit,
+      publicApiMatrix: {
+        ...matrix,
+        freshEmission: {
+          ...matrix.freshEmission,
+          inputReceipts: previousMatrix.freshEmission.inputReceipts,
+        },
+        compiledModuleReceipts: previousMatrix.compiledModuleReceipts,
+      },
+      packageWiring: { ...current.authority.packageWiring, browserCommands: 8 },
+    },
+    boundary: { ...current.boundary, trackedReceipts: historical.boundary.trackedReceipts },
+  };
+  // Outcomes, all counts, browser declarations and every other field remain exact task history.
+  // In particular, receipt projection cannot turn a changed recovery result into historical PASS.
+  if (!isDeepStrictEqual(artifact, historical))
+    fail(
+      "SUCCESSOR_DRIFT",
+      "A non-metadata recovery outcome or unreviewed historical field changed.",
+    );
+  return deepFreeze({
+    artifact,
+    liveSuccessorAuthority: {
+      task: "M10-T08",
+      artifact: T08_SUCCESSOR_PIN,
+      publicApiMatrix: matrix,
+      currentGraphAudit: current.authority.currentGraphAudit,
+      currentTrackedReceipts: current.boundary.trackedReceipts,
+      projectedHistoricalFields: [
+        "authority.currentGraphAudit",
+        "authority.publicApiMatrix.freshEmission.inputReceipts",
+        "authority.publicApiMatrix.compiledModuleReceipts",
+        "authority.packageWiring.browserCommands",
+        "boundary.trackedReceipts",
+      ],
+      currentObservationsAreNotHistoricalResults: true,
+    },
+  });
+}
+
+async function buildCurrentRecoveryObservation(workspaceRoot, files) {
   const { result: publicApiMatrix, reauthenticate: reauthenticateMatrix } = await runPublicMatrix(
     workspaceRoot,
     parseJson(files.get(SOURCE_PATH), SOURCE_PATH),
@@ -1287,8 +1426,72 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
       "CURRENT_GRAPH_AUDIT_FAILED",
       "The current graph authority lost its independent unprojected builds.",
     );
+  return Object.freeze({
+    observation: deepFreeze({ publicApiMatrix, currentGraphAudit }),
+    reauthenticate: reauthenticateMatrix,
+  });
+}
+
+/**
+ * Freshly executes the sockets-free recovery matrix and complete live App/host graph audit.
+ *
+ * @remarks This acyclic observation accepts only a workspace root: no artifact, PASS receipt,
+ * browser declaration, caller projection, or source override can supply current authority.
+ * All compiler inputs and outputs are reauthenticated after the graph work, and both inert
+ * matrix inputs are freshly re-read before return. It neither runs Chromium nor claims a
+ * product-process restart.
+ */
+export async function buildCurrentDesenAppLastKnownGoodRecoveryObservation(rawOptions = undefined) {
+  const options = exactOptions(rawOptions, ["workspaceRoot"], "current observation options");
+  const requestedRoot = capturePath(options.workspaceRoot ?? WORKSPACE_ROOT, "workspaceRoot");
+  const workspaceRoot = await realpath(requestedRoot).catch(() =>
+    fail("AUTHORITY_UNSAFE", "The proof workspace is unavailable."),
+  );
+  const files = new Map();
+  for (const name of [SOURCE_PATH, CATALOG_PATH]) {
+    files.set(name, await readRegularAuthority(path.join(workspaceRoot, name), name));
+  }
+  const { observation, reauthenticate } = await buildCurrentRecoveryObservation(
+    workspaceRoot,
+    files,
+  );
+  for (const [name, before] of files) {
+    const after = await readRegularAuthority(path.join(workspaceRoot, name), name);
+    if (!Buffer.from(before).equals(after))
+      fail(
+        "SOURCE_SNAPSHOT_DRIFT",
+        "A current recovery matrix input changed across graph execution.",
+      );
+  }
+  await reauthenticate();
+  return observation;
+}
+
+/** Builds current graphs and a fresh sockets-free API matrix without rehydrating any parent PASS. */
+export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = undefined) {
+  const options = captureBuildOptions(rawOptions);
+  const workspaceRoot = await realpath(options.workspaceRoot).catch(() =>
+    fail("AUTHORITY_UNSAFE", "The proof workspace is unavailable."),
+  );
+  const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  authenticateParents(files);
+  const browser = verifyDesenAppLastKnownGoodRecoveryBrowserPolicy(
+    Object.fromEntries(Object.entries(BROWSER_PATHS).map(([key, name]) => [key, files.get(name)])),
+  );
+  const packageWiring = verifyPackageWiring(files);
+  const successor = await readT08Successor(workspaceRoot);
+  for (const name of T08_CHANGED_TRACKED_PATHS)
+    assertSuccessorReceipt(
+      { path: name, bytes: files.get(name).byteLength, sha256: sha256(files.get(name)) },
+      successor.boundary.trackedReceipts,
+    );
+  const { observation, reauthenticate } = await buildCurrentRecoveryObservation(
+    workspaceRoot,
+    files,
+  );
+  const { publicApiMatrix, currentGraphAudit } = observation;
   const after = await readTrackedFiles(workspaceRoot, options.fileOverrides);
-  await reauthenticateMatrix();
+  await reauthenticate();
   if (!isDeepStrictEqual(receipts(files), receipts(after)))
     fail("SOURCE_SNAPSHOT_DRIFT", "A tracked T07 authority changed across fresh execution.");
   for (const { path: name, bytes, sha256: digest } of publicApiMatrix.freshEmission.inputReceipts) {
@@ -1296,7 +1499,7 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
     if (captured !== undefined && (captured.byteLength !== bytes || sha256(captured) !== digest))
       fail("SOURCE_SNAPSHOT_DRIFT", "The compiler and captured input authority disagree.");
   }
-  const artifact = deepFreeze({
+  const currentArtifact = deepFreeze({
     schemaVersion: 1,
     task: "M10-T07",
     gate: null,
@@ -1353,10 +1556,28 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
       "Local evidence does not authorize hosted completion until the exact current head passes the independent required checks.",
     ],
   });
+  await readT08Successor(workspaceRoot);
+  for (const name of T08_CHANGED_TRACKED_PATHS) {
+    const bytes = await readRegularAuthority(path.join(workspaceRoot, name), name);
+    assertSuccessorReceipt(
+      { path: name, bytes: bytes.byteLength, sha256: sha256(bytes) },
+      successor.boundary.trackedReceipts,
+    );
+  }
+  const { artifact, liveSuccessorAuthority } = await projectT08Successor(
+    workspaceRoot,
+    currentArtifact,
+    successor,
+  );
   const artifactBytes = Buffer.from(
     await format(JSON.stringify(artifact), { parser: "json", printWidth: 100, endOfLine: "lf" }),
   );
-  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  return deepFreeze({
+    artifact,
+    artifactBytes,
+    artifactSha256: sha256(artifactBytes),
+    liveSuccessorAuthority,
+  });
 }
 
 function authenticateArtifact(bytes) {

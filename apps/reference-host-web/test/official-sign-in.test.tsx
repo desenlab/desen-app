@@ -4,10 +4,15 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { bindReferenceSignInHostOperation } from "@desen/reference-catalog-web/host-operations";
+import { calculateDesenBundleRevision } from "@desen/protocol";
+import type { DesenBundle } from "@desen/protocol";
 
 import officialDerivedSignInBundle from "../../../examples/sign-in/official-derived.bundle.desen.json";
 import {
   activateReferenceHostDeliveredSignIn,
+  activateReferenceHostDeliveredApplication,
+  createReferenceHostApplicationProfiles,
+  isReferenceHostApplicationProfiles,
   activateReferenceHostOfficialSignIn,
   REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID,
   REFERENCE_HOST_OFFICIAL_SIGN_IN_REVISION,
@@ -107,6 +112,199 @@ describe("official-derived sign-in in the independent reference host", () => {
     });
     cleanup();
     container.remove();
+  });
+
+  it("runs an authored nondefault Flow alias through pending, failure, retry and managed Result navigation", async () => {
+    const bundle = JSON.parse(
+      JSON.stringify(officialDerivedSignInBundle)
+        .replaceAll('"com.example.account-app"', '"com.example.flow-app"')
+        .replaceAll('"sign-in"', '"start"')
+        .replaceAll('"home"', '"result"')
+        .replaceAll('"signIn"', '"submitCredentials"')
+        .replaceAll("operation.signIn.", "operation.submitCredentials."),
+    ) as DesenBundle;
+    const delivered = { ...bundle, revision: calculateDesenBundleRevision(bundle) };
+    const attempts: Deferred<unknown>[] = [];
+    const calls: unknown[] = [];
+    const diagnostics: ReferenceHostOfficialSignInDiagnostic[] = [];
+    act(() => {
+      expect(
+        activateReferenceHostDeliveredApplication(root, {
+          browser: window,
+          bundle: delivered,
+          applications: createReferenceHostApplicationProfiles(),
+          reportDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+          signIn: bindReferenceSignInHostOperation((input) => {
+            calls.push(input);
+            const attempt = deferred<unknown>();
+            attempts.push(attempt);
+            return attempt.promise;
+          }),
+        }),
+      ).toEqual({ status: "activated", relationship: "initial" });
+    });
+    await changeField("Email", "designer@example.test");
+    await changeField("Password", "incorrect");
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Sign in" }).getAttribute("aria-busy")).toBe(
+        "true",
+      ),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+    expect(calls).toEqual([{ email: "designer@example.test", password: "incorrect" }]);
+    const first = attempts[0];
+    if (first === undefined) throw new Error("The first Flow operation did not start.");
+    await settle(first, { status: "failed", errorCode: "invalidCredentials" });
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    await changeField("Password", "local-demo-pass");
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+    await waitFor(() => expect(attempts).toHaveLength(2));
+    const second = attempts[1];
+    if (second === undefined) throw new Error("The repaired Flow operation did not start.");
+    await settle(second, { status: "succeeded", value: { userId: "local-host-user" } });
+    expect(await screen.findByRole("heading", { name: "Welcome" })).toBeTruthy();
+    expect(screen.queryByLabelText("Password")).toBeNull();
+    expect(window.location.pathname).toBe("/result");
+    expect(diagnostics).toEqual([]);
+  });
+
+  it("requires authentic finite profile authority and preserves Account on unsupported identity or routes", async () => {
+    const applications = createReferenceHostApplicationProfiles();
+    const signIn = bindReferenceSignInHostOperation(vi.fn());
+    const input = {
+      browser: window,
+      signIn,
+      reportDiagnostic: () => undefined,
+      bundle: officialDerivedSignInBundle,
+      applications,
+    };
+    act(() =>
+      expect(activateReferenceHostDeliveredApplication(root, input)).toEqual({
+        status: "activated",
+        relationship: "initial",
+      }),
+    );
+    await changeField("Email", "preserved@example.test");
+    expect(isReferenceHostApplicationProfiles({ ...applications })).toBe(false);
+    let reads = 0;
+    for (const bad of [
+      { ...input, applications: {} },
+      { ...input, bundle: { ...officialDerivedSignInBundle, id: "com.example.uninstalled" } },
+      { ...input, bundle: { ...officialDerivedSignInBundle, entry: "home" } },
+      {
+        ...input,
+        bundle: {
+          ...officialDerivedSignInBundle,
+          surfaces: {
+            ...officialDerivedSignInBundle.surfaces,
+            extra: officialDerivedSignInBundle.surfaces.home,
+          },
+        },
+      },
+      Object.defineProperty({ ...input }, "applications", {
+        enumerable: true,
+        get() {
+          reads += 1;
+          return applications;
+        },
+      }),
+    ]) {
+      act(() =>
+        expect(activateReferenceHostDeliveredApplication(root, bad as typeof input).status).toBe(
+          "rejected",
+        ),
+      );
+      expect(screen.getByLabelText("Email")).toHaveProperty("value", "preserved@example.test");
+    }
+    expect(reads).toBe(0);
+    expect(signIn.invoke).not.toHaveBeenCalled();
+  });
+
+  it("accepts entry-only Account and Flow Bundles and preserves them on missing-entry or dangling-navigation candidates", async () => {
+    const title = officialDerivedSignInBundle.surfaces["sign-in"].root.slots.default[0];
+    if (title === undefined) throw new Error("The official entry title is missing.");
+    const account = {
+      ...officialDerivedSignInBundle,
+      surfaces: {
+        "sign-in": {
+          ...officialDerivedSignInBundle.surfaces["sign-in"],
+          root: {
+            ...officialDerivedSignInBundle.surfaces["sign-in"].root,
+            slots: { default: [title] },
+          },
+        },
+      },
+    };
+    const revise = (bundle: DesenBundle): DesenBundle => ({
+      ...bundle,
+      revision: calculateDesenBundleRevision(bundle),
+    });
+    const handler = vi.fn();
+    const applications = createReferenceHostApplicationProfiles();
+    const input = {
+      browser: window,
+      signIn: bindReferenceSignInHostOperation(handler),
+      reportDiagnostic: () => undefined,
+      applications,
+    };
+    for (const flow of [false, true]) {
+      const profile = (bundle: unknown): DesenBundle =>
+        JSON.parse(
+          flow
+            ? JSON.stringify(bundle)
+                .replaceAll('"com.example.account-app"', '"com.example.flow-app"')
+                .replaceAll('"sign-in"', '"start"')
+                .replaceAll('"home"', '"result"')
+            : JSON.stringify(bundle),
+        ) as DesenBundle;
+      const entryOnly = revise(profile(account));
+      const complete = profile(officialDerivedSignInBundle);
+      const destination = flow ? "result" : "home";
+      act(() =>
+        expect(
+          activateReferenceHostDeliveredApplication(root, { ...input, bundle: entryOnly }),
+        ).toEqual({ status: "activated", relationship: flow ? "replaced" : "initial" }),
+      );
+      const heading = await screen.findByRole("heading", { name: "Sign in" });
+      const preserved = readReferenceHostRoot(root);
+      const candidates = [
+        {
+          bundle: revise({
+            ...complete,
+            surfaces: { [destination]: complete.surfaces[destination] },
+          } as DesenBundle),
+          reason: "bundle-policy-rejected",
+        },
+        {
+          bundle: revise({
+            ...complete,
+            surfaces: { [complete.entry]: complete.surfaces[complete.entry] },
+          } as DesenBundle),
+          reason: "session-mount-failed",
+        },
+        {
+          bundle: revise({
+            ...entryOnly,
+            surfaces: { ...entryOnly.surfaces, foreign: complete.surfaces[destination] },
+          } as DesenBundle),
+          reason: "bundle-policy-rejected",
+        },
+      ];
+      for (const candidate of candidates) {
+        act(() =>
+          expect(
+            activateReferenceHostDeliveredApplication(root, {
+              ...input,
+              bundle: candidate.bundle,
+            }),
+          ).toEqual({ status: "rejected", reason: candidate.reason }),
+        );
+        expect(readReferenceHostRoot(root)).toEqual(preserved);
+        expect(screen.getByRole("heading", { name: "Sign in" })).toBe(heading);
+      }
+    }
+    expect(handler).not.toHaveBeenCalled();
   });
 
   it("runs pending, declared failure, edited retry, success, and navigation through real adapters", async () => {

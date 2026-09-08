@@ -35,11 +35,11 @@ const CI_04_CATEGORY_COUNTS = Object.freeze({
 });
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   ...CI_04_CATEGORY_COUNTS,
-  PROOF_UNIT: 214,
-  FROZEN_INPUT: 156,
-  PACKAGE_OR_APPLICATION: 565,
-  SHARED_PROOF_INFRASTRUCTURE: 315,
-  PROJECT_DOCUMENTATION: 152,
+  PROOF_UNIT: 216,
+  FROZEN_INPUT: 157,
+  PACKAGE_OR_APPLICATION: 572,
+  SHARED_PROOF_INFRASTRUCTURE: 345,
+  PROJECT_DOCUMENTATION: 154,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
@@ -98,6 +98,51 @@ const T07_SUCCESSOR_PATHS = Object.freeze([
   "tests/desen-app-last-known-good-recovery.test.mjs",
 ]);
 
+const T08_SUCCESSOR_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/repeatable-demo-authoring.ts",
+  "apps/desen-app-browser-e2e/repeatable-demo-playwright.config.ts",
+  "apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "apps/desen-app-browser-e2e/repeatable-demo.pw.ts",
+  "apps/desen-app/dev/local-demo-host.mjs",
+  "apps/desen-app/dev/local-demo-host.test.mjs",
+  "apps/desen-app/dev/local-demo.mjs",
+  "docs/adr/0022-repeatable-local-demo-composition.md",
+  "docs/proof/DESEN-APP-REPEATABLE-DEMO.md",
+  "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json",
+  "scripts/generate-desen-app-repeatable-demo-proof.mjs",
+  "scripts/lib/desen-app-repeatable-demo-proof.mjs",
+  "scripts/verify-desen-app-repeatable-demo.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-repeatable-demo-normal-launcher/apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-repeatable-demo-normal-launcher/apps/desen-app/dev/local-demo-host.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-repeatable-authoring-protocol-root/apps/desen-app-browser-e2e/repeatable-demo-authoring.ts",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-repeatable-authoring-protocol-root/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/allowed-reference-host-sign-in-test-protocol-root/apps/reference-host-web/test/official-sign-in.test.tsx",
+  "tests/boundaries/fixtures/allowed-reference-host-sign-in-test-protocol-root/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-repeatable-demo-imports-normal-launcher/apps/desen-app-browser-e2e/ordinary-proof.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-repeatable-demo-imports-normal-launcher/apps/desen-app/dev/local-demo-host.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-app-source/apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-app-source/apps/desen-app/src/application.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-control-plane-root/apps/control-plane-api/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-control-plane-root/apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-editor-core/apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-editor-core/packages/editor-core/src/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-unreviewed-dev-module/apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-unreviewed-dev-module/apps/desen-app/dev/local-dev-host.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-non-repeatable-authoring-imports-protocol/apps/desen-app-browser-e2e/another-authoring.ts",
+  "tests/boundaries/fixtures/desen-app-browser-non-repeatable-authoring-imports-protocol/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-repeatable-authoring-imports-editor-core/apps/desen-app-browser-e2e/repeatable-demo-authoring.ts",
+  "tests/boundaries/fixtures/desen-app-browser-repeatable-authoring-imports-editor-core/packages/editor-core/src/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-repeatable-authoring-imports-protocol-private/apps/desen-app-browser-e2e/repeatable-demo-authoring.ts",
+  "tests/boundaries/fixtures/desen-app-browser-repeatable-authoring-imports-protocol-private/packages/protocol/dist/private.js",
+  "tests/boundaries/fixtures/reference-host-other-test-imports-protocol/apps/reference-host-web/test/another.test.tsx",
+  "tests/boundaries/fixtures/reference-host-other-test-imports-protocol/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/reference-host-sign-in-test-imports-protocol-private/apps/reference-host-web/test/official-sign-in.test.tsx",
+  "tests/boundaries/fixtures/reference-host-sign-in-test-imports-protocol-private/packages/protocol/dist/private.js",
+  "tests/boundaries/fixtures/reference-host-sign-in-test-imports-publisher/apps/reference-host-web/test/official-sign-in.test.tsx",
+  "tests/boundaries/fixtures/reference-host-sign-in-test-imports-publisher/packages/publisher/src/index.js",
+  "tests/desen-app-repeatable-demo.test.mjs",
+]);
+
 async function currentTrackedPaths() {
   const { stdout } = await EXEC_FILE("git", ["ls-files", "-z"], {
     cwd: WORKSPACE_ROOT,
@@ -127,7 +172,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1493 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1535 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -149,12 +194,50 @@ test("freezes exact-one ownership for all 1493 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1493);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1535);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
   );
   assertDeepFrozen(authority);
+});
+
+test("the T08 repeatable-demo successor preserves every T07 owner and adds only its exact proof pair", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  assert.equal(T08_SUCCESSOR_PATHS.length, 42);
+  for (const relativePath of T08_SUCCESSOR_PATHS) {
+    const owner = resolveAffectedWorkloadOwner(authority, relativePath);
+    const proofInput =
+      relativePath === "scripts/verify-desen-app-repeatable-demo.mjs" ||
+      relativePath === "tests/desen-app-repeatable-demo.test.mjs";
+    assert.equal(owner.disposition, proofInput ? "SELECT_PROOF_UNIT" : "FORCE_EXHAUSTIVE");
+    assert.equal(owner.proofUnitId, proofInput ? "desen-app-repeatable-demo" : null);
+    assert.throws(
+      () =>
+        createAffectedWorkloadOwnership(paths.filter((candidate) => candidate !== relativePath)),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+  assert.deepEqual(
+    calculateAffectedWorkloadOwnershipReview(
+      paths.filter((candidate) => !T08_SUCCESSOR_PATHS.includes(candidate)),
+    ),
+    {
+      trackedPathCount: 1493,
+      trackedPathSetSha256: "813e4547408e5515b576265eec70d4ee5f38d156d56ee3184ec763bf1ce587aa",
+      proofOwnedPathCount: 214,
+      categoryCounts: {
+        ...CI_04_CATEGORY_COUNTS,
+        PROOF_UNIT: 214,
+        FROZEN_INPUT: 156,
+        PACKAGE_OR_APPLICATION: 565,
+        SHARED_PROOF_INFRASTRUCTURE: 315,
+        PROJECT_DOCUMENTATION: 152,
+      },
+      ownershipSha256: "eefd587e1882c30c4f7afcab190ba80f29dac50df5c38d2cde14e8f9be62ad82",
+    },
+  );
 });
 
 test("the T07 recovery successor preserves T06 ownership and narrowly registers its exact pair", async () => {
@@ -175,7 +258,10 @@ test("the T07 recovery successor preserves T06 ownership and narrowly registers 
   }
   assert.deepEqual(
     calculateAffectedWorkloadOwnershipReview(
-      paths.filter((candidate) => !T07_SUCCESSOR_PATHS.includes(candidate)),
+      paths.filter(
+        (candidate) =>
+          !T07_SUCCESSOR_PATHS.includes(candidate) && !T08_SUCCESSOR_PATHS.includes(candidate),
+      ),
     ),
     {
       trackedPathCount: 1465,
@@ -219,7 +305,9 @@ test("the T06 publication successor preserves every CI-04 owner and registers on
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
-          !T06_SUCCESSOR_PATHS.includes(candidate) && !T07_SUCCESSOR_PATHS.includes(candidate),
+          !T06_SUCCESSOR_PATHS.includes(candidate) &&
+          !T07_SUCCESSOR_PATHS.includes(candidate) &&
+          !T08_SUCCESSOR_PATHS.includes(candidate),
       ),
     ),
     {
@@ -252,7 +340,8 @@ test("the CI-04 execution sources retain every SEC-02 owner and force exhaustive
         (candidate) =>
           !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
           !T06_SUCCESSOR_PATHS.includes(candidate) &&
-          !T07_SUCCESSOR_PATHS.includes(candidate),
+          !T07_SUCCESSOR_PATHS.includes(candidate) &&
+          !T08_SUCCESSOR_PATHS.includes(candidate),
       ),
     ),
     {
@@ -281,7 +370,8 @@ test("the SEC-02 documentation successor preserves the exact SEC-01 ownership au
       candidate !== SEC_02_SUCCESSOR_PATH &&
       !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
       !T06_SUCCESSOR_PATHS.includes(candidate) &&
-      !T07_SUCCESSOR_PATHS.includes(candidate),
+      !T07_SUCCESSOR_PATHS.includes(candidate) &&
+      !T08_SUCCESSOR_PATHS.includes(candidate),
   );
   assert.throws(
     () => createAffectedWorkloadOwnership(previousPaths),
@@ -323,7 +413,8 @@ test("the exact SEC-01 successor preserves the reviewed T05 ownership authority"
       candidate !== SEC_02_SUCCESSOR_PATH &&
       !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
       !T06_SUCCESSOR_PATHS.includes(candidate) &&
-      !T07_SUCCESSOR_PATHS.includes(candidate),
+      !T07_SUCCESSOR_PATHS.includes(candidate) &&
+      !T08_SUCCESSOR_PATHS.includes(candidate),
   );
   assert.deepEqual(calculateAffectedWorkloadOwnershipReview(predecessorPaths), {
     trackedPathCount: 1446,
@@ -351,7 +442,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 214);
+  assert.equal(proofEntries.length, 216);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -1100,7 +1191,8 @@ test("the reviewed AR-01 successor preserves the historical I07-04 ownership pro
       candidate !== SEC_02_SUCCESSOR_PATH &&
       !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
       !T06_SUCCESSOR_PATHS.includes(candidate) &&
-      !T07_SUCCESSOR_PATHS.includes(candidate),
+      !T07_SUCCESSOR_PATHS.includes(candidate) &&
+      !T08_SUCCESSOR_PATHS.includes(candidate),
   );
   historicalPaths.push(
     "scripts/ci/run-shadow-affected-quality-gate.mjs",

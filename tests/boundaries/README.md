@@ -27,7 +27,21 @@ Control Plane and reference-host server roots, and the existing local publicatio
 positive fixture covers those four edges. Negative fixtures reject private Control Plane,
 reference-host and Protocol modules, Publisher, other App source/dev modules, and public Protocol
 access from an ordinary browser-proof file. This does not give browser code publication or
-storage authority. All 38 cases run against the real root configuration.
+storage authority.
+
+The repeatable-demo proof has one separate exact edge: `repeatable-demo-proof-server.mjs`
+may invoke `apps/desen-app/dev/local-demo-host.mjs`, the same seed/reset lifecycle as the
+human CLI. It cannot compose another App dev module, the App source tree, even the public
+Control Plane root, or any workspace package. An ordinary browser proof cannot import the
+launcher. One positive and five negative cases exercise that narrow exception.
+
+Two exact non-production observers (`reference-host-web/test/official-sign-in.test.tsx` and
+`desen-app-browser-e2e/repeatable-demo-authoring.ts`) may use the built public Protocol entry to
+authenticate actual canonical bytes and recompute revisions. The host test retains its preexisting
+host-package allowlist. Private Protocol imports, other unreviewed workspace package edges, and
+Protocol access from neighboring observers remain forbidden.
+Two positives and six negatives preserve that boundary; all 52 cases run against the real root
+configuration. No production host dependency allowlist is expanded.
 
 Run them after installing workspace dependencies:
 

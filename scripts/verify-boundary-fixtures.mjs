@@ -9,6 +9,39 @@ const executable = path.join(workspaceRoot, "node_modules", ".bin", "depcruise")
 const configuration = path.join(workspaceRoot, "dependency-cruiser.config.cjs");
 
 const cases = [
+  { name: "allowed-reference-host-sign-in-test-protocol-root", expectedRule: null },
+  { name: "allowed-desen-app-browser-repeatable-authoring-protocol-root", expectedRule: null },
+  ...[
+    "reference-host-sign-in-test-imports-protocol-private",
+    "reference-host-sign-in-test-imports-publisher",
+  ].map((name) => ({
+    name,
+    expectedRule: "reference-host-sign-in-test-reviewed-packages-only",
+  })),
+  ...[
+    "desen-app-browser-repeatable-authoring-imports-protocol-private",
+    "desen-app-browser-repeatable-authoring-imports-editor-core",
+  ].map((name) => ({
+    name,
+    expectedRule: "reviewed-canonical-proof-protocol-public-root-only",
+  })),
+  {
+    name: "reference-host-other-test-imports-protocol",
+    expectedRule: "application-reference-host-web-allowed-dependencies",
+  },
+  {
+    name: "desen-app-browser-non-repeatable-authoring-imports-protocol",
+    expectedRule: "application-desen-app-browser-e2e-allowed-dependencies",
+  },
+  { name: "allowed-desen-app-browser-e2e-repeatable-demo-normal-launcher", expectedRule: null },
+  {
+    name: "desen-app-browser-e2e-non-repeatable-demo-imports-normal-launcher",
+    expectedRule: "desen-app-browser-e2e-reviewed-app-source-only",
+  },
+  ...["unreviewed-dev-module", "app-source", "control-plane-root", "editor-core"].map((target) => ({
+    name: `desen-app-browser-e2e-repeatable-demo-imports-${target}`,
+    expectedRule: "desen-app-browser-e2e-repeatable-demo-server-normal-launcher-only",
+  })),
   { name: "allowed-desen-app-browser-e2e-recovery-server-reviewed-roots", expectedRule: null },
   {
     name: "desen-app-browser-e2e-recovery-server-imports-control-plane-private",

@@ -6,6 +6,7 @@ import {
   refreshReferenceHostChannel,
 } from "./channel-delivery.js";
 import { createReferenceHostRoot, disposeReferenceHostRoot } from "./root.js";
+import { createReferenceHostApplicationProfiles } from "./official-sign-in.js";
 import { createReferenceHostSignInHttpBinding } from "./sign-in-http-handler.js";
 
 const container = document.getElementById("desen-reference-host-root");
@@ -22,6 +23,7 @@ const signIn = createReferenceHostSignInHttpBinding((resource, init) =>
   window.fetch(resource, init),
 );
 const channelDelivery = createReferenceHostChannelDelivery({
+  applications: createReferenceHostApplicationProfiles(),
   browser: window,
   fetch: (resource, init) => window.fetch(resource, init),
   root: referenceHostRoot,

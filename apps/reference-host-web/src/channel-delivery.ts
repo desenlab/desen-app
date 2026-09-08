@@ -1,11 +1,16 @@
 /* eslint-disable @typescript-eslint/no-invalid-void-type -- The injected fetch and diagnostic
  * boundaries are deliberately receiver-independent. */
-import { activateReferenceHostDeliveredSignIn } from "./official-sign-in.js";
+import {
+  activateReferenceHostDeliveredSignIn,
+  activateReferenceHostDeliveredApplication,
+  isReferenceHostApplicationProfiles,
+} from "./official-sign-in.js";
 
 import type { SignInHostOperationBinding } from "@desen/reference-catalog-web/host-operations";
 import type {
   ReferenceHostOfficialSignInDiagnosticReporter,
   ReferenceHostOfficialSignInActivationResult,
+  ReferenceHostApplicationProfiles,
 } from "./official-sign-in.js";
 import type { ReferenceHostRootHandle } from "./root.js";
 
@@ -56,6 +61,8 @@ export type ReferenceHostChannelDeliveryFetch = (
 
 /** Closed construction input for browser-side delivery and independently validated activation. */
 export interface ReferenceHostChannelDeliveryCreateInput {
+  /** Optional trusted finite application inventory; omission preserves the Account-only API. */
+  readonly applications?: ReferenceHostApplicationProfiles;
   /** Browser platform used only by the fixed runtime host policy. */
   readonly browser: Window;
   /** Receiver-independent fetch implementation used for the one fixed endpoint. */
@@ -91,6 +98,7 @@ export type ReferenceHostChannelRefreshResult =
     }>;
 
 interface CapturedDeliveryInput {
+  readonly applications?: ReferenceHostApplicationProfiles;
   readonly browser: Window;
   readonly fetch: ReferenceHostChannelDeliveryFetch;
   readonly reportDiagnostic: ReferenceHostOfficialSignInDiagnosticReporter;
@@ -195,11 +203,17 @@ function ownDataRecord(
 }
 
 function captureCreateInput(input: unknown): CapturedDeliveryInput | undefined {
-  const captured = ownDataRecord(input, ["browser", "fetch", "reportDiagnostic", "root", "signIn"]);
+  const captured = ownDataRecord(
+    input,
+    ["browser", "fetch", "reportDiagnostic", "root", "signIn"],
+    ["applications"],
+  );
   if (
     captured === undefined ||
     typeof captured.fetch !== "function" ||
-    typeof captured.reportDiagnostic !== "function"
+    typeof captured.reportDiagnostic !== "function" ||
+    (Object.hasOwn(captured, "applications") &&
+      !isReferenceHostApplicationProfiles(captured.applications))
   ) {
     return undefined;
   }
@@ -212,6 +226,9 @@ function captureCreateInput(input: unknown): CapturedDeliveryInput | undefined {
     return undefined;
   }
   return Object.freeze({
+    ...(captured.applications === undefined
+      ? {}
+      : { applications: captured.applications as ReferenceHostApplicationProfiles }),
     browser: captured.browser as Window,
     fetch: captured.fetch as ReferenceHostChannelDeliveryFetch,
     reportDiagnostic: captured.reportDiagnostic as ReferenceHostOfficialSignInDiagnosticReporter,
@@ -647,12 +664,19 @@ async function performRefresh(
 
   let activation: ReferenceHostOfficialSignInActivationResult;
   try {
-    activation = activateReferenceHostDeliveredSignIn(state.input.root, {
+    const input = {
       browser: state.input.browser,
       signIn: state.input.signIn,
       reportDiagnostic: state.input.reportDiagnostic,
       bundle: delivery.bundle,
-    });
+    };
+    activation =
+      state.input.applications === undefined
+        ? activateReferenceHostDeliveredSignIn(state.input.root, input)
+        : activateReferenceHostDeliveredApplication(state.input.root, {
+            ...input,
+            applications: state.input.applications,
+          });
   } catch {
     return Object.freeze({ status: "preserved", reason: "activation-rejected" });
   }

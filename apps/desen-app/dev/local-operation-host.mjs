@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { createServer } from "node:http";
+import { types as utilTypes } from "node:util";
 
 const LOOPBACK = "127.0.0.1";
 const LOOPBACK_ORIGIN = /^http:\/\/127\.0\.0\.1:([1-9][0-9]{0,4})$/u;
@@ -13,6 +14,62 @@ const CREDENTIALS_BODY = new RegExp(
   "u",
 );
 const PRIVATE_FAILURE = Object.freeze({ error: { code: "LOCAL_OPERATION_UNAVAILABLE" } });
+const LOCAL_ACCOUNT_SUCCESS = Object.freeze({
+  status: "succeeded",
+  output: Object.freeze({ userId: "local-host-user" }),
+});
+const LOCAL_ACCOUNT_MISMATCH = Object.freeze({ status: "failed", code: "invalidCredentials" });
+const LOCAL_ACCOUNT_UNAVAILABLE = Object.freeze({ status: "failed", code: "unavailable" });
+
+/**
+ * Executes the single explicit local test-account decision shared by both trusted HTTP hosts.
+ *
+ * @remarks This is not a production identity provider. The launcher chooses this implementation;
+ * Source and Catalog data cannot install it or supply its endpoint. Only the documented synthetic
+ * account is accepted, and the detached result contains no input, credential, or ambient authority.
+ * Both HTTP boundaries retain their independent origin, body, lifetime, and response admission.
+ *
+ * @param {unknown} input Closed two-string credentials captured by the calling HTTP boundary.
+ * @param {AbortSignal} [signal] Calling host lifetime; an aborted invocation cannot succeed.
+ * @returns {Promise<Readonly<{status: "succeeded"; output: Readonly<{userId: string}>}> | Readonly<{status: "failed"; code: "invalidCredentials" | "unavailable"}>>} Bounded public local-account settlement.
+ */
+export async function executeDesenAppLocalSignIn(input, signal) {
+  try {
+    if (
+      (signal !== undefined && (!(signal instanceof AbortSignal) || signal.aborted)) ||
+      input === null ||
+      typeof input !== "object" ||
+      utilTypes.isProxy(input) ||
+      Object.getPrototypeOf(input) !== Object.prototype
+    ) {
+      return LOCAL_ACCOUNT_UNAVAILABLE;
+    }
+    const keys = Reflect.ownKeys(input);
+    if (keys.length !== 2 || !keys.includes("email") || !keys.includes("password")) {
+      return LOCAL_ACCOUNT_UNAVAILABLE;
+    }
+    const email = Object.getOwnPropertyDescriptor(input, "email");
+    const password = Object.getOwnPropertyDescriptor(input, "password");
+    if (
+      email?.enumerable !== true ||
+      !("value" in email) ||
+      password?.enumerable !== true ||
+      !("value" in password) ||
+      typeof email.value !== "string" ||
+      email.value.length > 4_096 ||
+      typeof password.value !== "string" ||
+      password.value.length === 0 ||
+      password.value.length > 4_096
+    ) {
+      return LOCAL_ACCOUNT_UNAVAILABLE;
+    }
+    return email.value === "designer@example.test" && password.value === "local-demo-pass"
+      ? LOCAL_ACCOUNT_SUCCESS
+      : LOCAL_ACCOUNT_MISMATCH;
+  } catch {
+    return LOCAL_ACCOUNT_UNAVAILABLE;
+  }
+}
 
 /** A controlled local-service error without listener, token, request or underlying error data. */
 export class DesenAppLocalOperationHostError extends Error {
@@ -309,11 +366,17 @@ export async function openDesenAppLocalOperationHost(options) {
           respond(400);
           return;
         }
-        if (input.email !== "designer@example.test" || input.password !== "local-demo-pass") {
+        const settlement = await executeDesenAppLocalSignIn(input);
+        if (closed || response.destroyed) return;
+        if (settlement.status === "failed" && settlement.code === "invalidCredentials") {
           respond(401, { error: { code: "invalidCredentials" } });
           return;
         }
-        respond(200, { userId: "local-host-user" });
+        if (settlement.status !== "succeeded") {
+          respond(503);
+          return;
+        }
+        respond(200, settlement.output);
       };
       void handle().catch(() => respond(503));
     },

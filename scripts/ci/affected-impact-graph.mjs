@@ -256,12 +256,20 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
         "reference-host-web-channel-consumption",
       ],
     ],
+    [
+      "desen-app-repeatable-demo",
+      [
+        "desen-app-last-known-good-recovery",
+        "desen-app-success-host-operation",
+        "reference-host-web-source-audit",
+      ],
+    ],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "9faff4a9d9ba00fbbfd5f20b70bb9c6e0b2004b185b37e55b54d4b920dece1e0";
+  "981aa1bf286fcb808b7b2c9a8b6b64d8eff6ea7fa2818d8285f2173463a1ab18";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {
