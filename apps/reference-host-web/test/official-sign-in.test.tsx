@@ -221,6 +221,92 @@ describe("official-derived sign-in in the independent reference host", () => {
     expect(signIn.invoke).not.toHaveBeenCalled();
   });
 
+  it("accepts entry-only Account and Flow Bundles and preserves them on missing-entry or dangling-navigation candidates", async () => {
+    const title = officialDerivedSignInBundle.surfaces["sign-in"].root.slots.default[0];
+    if (title === undefined) throw new Error("The official entry title is missing.");
+    const account = {
+      ...officialDerivedSignInBundle,
+      surfaces: {
+        "sign-in": {
+          ...officialDerivedSignInBundle.surfaces["sign-in"],
+          root: {
+            ...officialDerivedSignInBundle.surfaces["sign-in"].root,
+            slots: { default: [title] },
+          },
+        },
+      },
+    };
+    const revise = (bundle: DesenBundle): DesenBundle => ({
+      ...bundle,
+      revision: calculateDesenBundleRevision(bundle),
+    });
+    const handler = vi.fn();
+    const applications = createReferenceHostApplicationProfiles();
+    const input = {
+      browser: window,
+      signIn: bindReferenceSignInHostOperation(handler),
+      reportDiagnostic: () => undefined,
+      applications,
+    };
+    for (const flow of [false, true]) {
+      const profile = (bundle: unknown): DesenBundle =>
+        JSON.parse(
+          flow
+            ? JSON.stringify(bundle)
+                .replaceAll('"com.example.account-app"', '"com.example.flow-app"')
+                .replaceAll('"sign-in"', '"start"')
+                .replaceAll('"home"', '"result"')
+            : JSON.stringify(bundle),
+        ) as DesenBundle;
+      const entryOnly = revise(profile(account));
+      const complete = profile(officialDerivedSignInBundle);
+      const destination = flow ? "result" : "home";
+      act(() =>
+        expect(
+          activateReferenceHostDeliveredApplication(root, { ...input, bundle: entryOnly }),
+        ).toEqual({ status: "activated", relationship: flow ? "replaced" : "initial" }),
+      );
+      const heading = await screen.findByRole("heading", { name: "Sign in" });
+      const preserved = readReferenceHostRoot(root);
+      const candidates = [
+        {
+          bundle: revise({
+            ...complete,
+            surfaces: { [destination]: complete.surfaces[destination] },
+          } as DesenBundle),
+          reason: "bundle-policy-rejected",
+        },
+        {
+          bundle: revise({
+            ...complete,
+            surfaces: { [complete.entry]: complete.surfaces[complete.entry] },
+          } as DesenBundle),
+          reason: "session-mount-failed",
+        },
+        {
+          bundle: revise({
+            ...entryOnly,
+            surfaces: { ...entryOnly.surfaces, foreign: complete.surfaces[destination] },
+          } as DesenBundle),
+          reason: "bundle-policy-rejected",
+        },
+      ];
+      for (const candidate of candidates) {
+        act(() =>
+          expect(
+            activateReferenceHostDeliveredApplication(root, {
+              ...input,
+              bundle: candidate.bundle,
+            }),
+          ).toEqual({ status: "rejected", reason: candidate.reason }),
+        );
+        expect(readReferenceHostRoot(root)).toEqual(preserved);
+        expect(screen.getByRole("heading", { name: "Sign in" })).toBe(heading);
+      }
+    }
+    expect(handler).not.toHaveBeenCalled();
+  });
+
   it("runs pending, declared failure, edited retry, success, and navigation through real adapters", async () => {
     const calls: Readonly<{ email: string; password: string }>[] = [];
     const attempts: Deferred<unknown>[] = [];

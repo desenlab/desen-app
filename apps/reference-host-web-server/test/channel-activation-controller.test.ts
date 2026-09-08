@@ -241,6 +241,83 @@ describe("reference host channel activation controller", () => {
     });
   });
 
+  it("activates and recovers entry-only Account and Flow while rejecting missing entries and dangling destinations", async () => {
+    const official = await officialFixture();
+    const entryOnlyAccount = variantFixture(official.bundle, (bundle) => {
+      const surfaces = bundle.surfaces as Record<string, Record<string, unknown>>;
+      const entry = surfaces["sign-in"];
+      if (entry === undefined) throw new Error("The official entry surface is missing.");
+      const root = entry.root as Record<string, unknown>;
+      const children = (root.slots as Record<string, unknown>).default as unknown[];
+      root.slots = { default: children.slice(0, 1) };
+      bundle.surfaces = { "sign-in": entry };
+    });
+    const toFlow = (bundle: DesenBundle): DesenBundle =>
+      JSON.parse(
+        JSON.stringify(bundle)
+          .replaceAll('"com.example.account-app"', '"com.example.flow-app"')
+          .replaceAll('"sign-in"', '"start"')
+          .replaceAll('"home"', '"result"'),
+      ) as DesenBundle;
+    const entryOnlyFlow = variantFixture(toFlow(entryOnlyAccount.bundle), () => undefined);
+    const rejected = [official.bundle, toFlow(official.bundle)].flatMap((source) => {
+      const entry = source.entry;
+      const destination = entry === "sign-in" ? "home" : "result";
+      return [
+        variantFixture(source, (bundle) => {
+          const surfaces = bundle.surfaces as Record<string, unknown>;
+          bundle.surfaces = { [destination]: surfaces[destination] };
+        }),
+        variantFixture(source, (bundle) => {
+          const surfaces = bundle.surfaces as Record<string, unknown>;
+          bundle.surfaces = { [entry]: surfaces[entry] };
+        }),
+        variantFixture(source, (bundle) => {
+          const surfaces = bundle.surfaces as Record<string, unknown>;
+          surfaces.foreign = { ...(surfaces[destination] as object), id: "foreign" };
+        }),
+      ];
+    });
+    const environment = await setup(
+      [entryOnlyAccount, entryOnlyFlow, ...rejected],
+      entryOnlyAccount.revision,
+    );
+    const controller = await openController(environment);
+    expect(await controller.refresh()).toMatchObject({
+      status: "available",
+      relationship: "activated",
+      delivery: { activation: { generation: 0, revision: entryOnlyAccount.revision } },
+    });
+    const before = readReferenceHostDeliveryBytes(controller);
+    expect(before).toBeDefined();
+    let generation = 1;
+    for (const candidate of rejected) {
+      generation = await putChannel(environment.api, candidate.revision, generation);
+      expect(await controller.refresh()).toMatchObject({
+        status: "available",
+        relationship: "preserved",
+        delivery: { activation: { generation: 0, revision: entryOnlyAccount.revision } },
+      });
+      expect(readReferenceHostDeliveryBytes(controller)).toEqual(before);
+    }
+    await putChannel(environment.api, entryOnlyFlow.revision, generation);
+    expect(await controller.refresh()).toMatchObject({
+      status: "available",
+      relationship: "activated",
+      delivery: { activation: { generation: 1, revision: entryOnlyFlow.revision } },
+    });
+    const flowDelivery = readReferenceHostDeliveryBytes(controller);
+    controller.close();
+    const restarted = await openController(environment);
+    expect(restarted.readDelivery()).toBeUndefined();
+    expect(await restarted.refresh()).toMatchObject({
+      status: "available",
+      relationship: "recovered",
+      delivery: { activation: { generation: 1, revision: entryOnlyFlow.revision } },
+    });
+    expect(readReferenceHostDeliveryBytes(restarted)).toEqual(flowDelivery);
+  });
+
   it("[valid-a-activation-delivery] activates and exposes the first valid candidate", async () => {
     const a = await officialFixture();
     const environment = await setup([a], a.revision);

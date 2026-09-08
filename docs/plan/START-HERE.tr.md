@@ -35,6 +35,11 @@ normal projeler korunur, yalnızca özel demo verisi sıfırlanır ve son kopyas
 Yeni mühür önceki 77 kaydı ve 61 kanıt dosyasını değiştirmeden korur; 111 mühür testi geçti.
 [T08 kanıtı](../proof/DESEN-APP-REPEATABLE-DEMO.md). T09 ve G10 henüz başlamadı.
 
+İlk T08 PR koşusu, tek sayfalı projeyi gereksiz yere reddeden host kuralını ve eski bir kanıt
+okuyucusunun tamamlanan P-12 durumuyla çeliştiğini gösterdi. İkisi de düzeltildi; önceki testler ve
+kanıt dosyaları değiştirilmedi. Düzeltilen adayın dokuz tarayıcı akışı ve 498 CI sözleşmesi geçti.
+İlk başarısız koşu başarı sayılmaz; güncel PR ve taze main sonucu hâlâ gereklidir.
+
 **T07 uygulama kontrol noktası — aşağıdaki kapanış koşulları sonradan sağlandı.**
 Kullanıcı M10'un hiçbir görev atlanmadan tamamlanmasını onayladı.
 T07'nin gerçek Chromium yeniden başlatma akışı, bağımsız kurtarma doğrulayıcısı, dokuz kök testi,

@@ -2623,17 +2623,21 @@ The visible runbook authors two Flow surfaces, input/operation connections, fail
 success navigation, then exercises Synthetic, real Integration and the independently published
 host. A second visible label/layout publication keeps that host's HTML/assets unchanged.
 
-Four passing Chromium tests execute eight complete reset/authoring cycles; the final run passes
-in 43.6 seconds. Two real terminal start/stop/restart checks also pass. Focused composition and
-demo tests pass 61/61 and 21/21. T08's verifier and ten root contracts pass; T05/T06/T07 verifiers
-and all 29 retained root cases pass with immutable artifacts unchanged. The bounded baseline
-passes. All 498 CI/retained-runner contracts pass with zero skips or cancellations, as do the
-exact guarded T07/T08 verifier/root pairs. Exact-head hosted checks and fresh main remain separate.
+The first PR #83 candidate failed its single-surface publication and obsolete P-12 live-coverage
+guard. The corrected candidate permits an unused registered destination to be absent, still rejects
+dangling navigation, and authenticates the exact completed P-12 successor without rewriting history.
+All nine Chromium journeys now pass, including both T08 reset/authoring cycles. Full host/server
+suites pass 53/53 and 38/38. T08's verifier and ten roots, T05/T06/T07 verifiers and 29 roots,
+M05's 35 roots, and M07 host's 13 roots / 60 runtime tests pass. The bounded baseline passes.
+All 498 CI/retained-runner contracts pass in 28.125 seconds with zero skips or cancellations,
+as do the exact guarded M07 activation / T08 verifier-root checks. Initial composition 61/61,
+demo lifecycle 21/21 and two terminal restart receipts remain separately documented. The first
+hosted failure remains a failure; exact-current-head hosted checks and fresh main remain required.
 
 The 319,719-byte artifact is
-`sha256:d91085d6cdc3533466375a77141b6394f0e76f2a8b29a41e8887b5d64e287f47`.
+`sha256:048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5`.
 Checkpoint 78 preserves all 77 preceding entries and 61 earlier artifacts at
-`sha256:f72920eb56529b40c6ba2726c62ce4db1dc14479d38b788577064eeea3da2feb`, with 62 artifacts /
+`sha256:926ed1fd07b6f41d93b88c9bd6fbe582555001b5edca5f9d37cd96472aa6bd0e`, with 62 artifacts /
 124 current readers; all 111 checkpoint contracts pass. No previous workload is removed:
 226 logical workloads / 108 proof pairs, 243 physical workloads, nine Chromium journeys,
 unchanged two-worker shards and eleven barriers. Candidate progress is 120/148 (81%), M10 11/12

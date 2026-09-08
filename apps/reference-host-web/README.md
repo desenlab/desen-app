@@ -50,7 +50,9 @@ demonstration, not production authentication.
 The production browser installs a factory-authenticated finite inventory for Account
 (`com.example.account-app`, `sign-in` → `home`) and Flow (`com.example.flow-app`, `start` →
 `result`). A Bundle identity selects only those preinstalled data policies; it cannot select an
-endpoint, module, callback or renderer. Both use the same installed sign-in capability. Authored
+endpoint, module, callback or renderer. Each requires its entry surface and permits its known
+destination only when present; an entry-only project remains valid. Full Runtime validation still
+rejects navigation to an absent destination. Both use the same installed sign-in capability. Authored
 operation aliases remain result names, while capability, effect and current document/revision/
 surface context authorize calls. The original Account-only activation entrypoints remain
 available for compatibility. Managed destination content is still mounted by Runtime Core and

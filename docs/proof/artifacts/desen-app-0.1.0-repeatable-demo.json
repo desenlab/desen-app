@@ -427,8 +427,8 @@
           },
           {
             "path": "apps/reference-host-web-server/src/channel-activation-controller.ts",
-            "bytes": 19825,
-            "sha256": "ea51bf55e05d778b613394fa7bf152af8ce986aec7cfced4fb1d611cad533483"
+            "bytes": 20019,
+            "sha256": "4a9642dc3ae20eb7f826b84d587f32c5c107c9d77577fba1239db412f6e20994"
           },
           {
             "path": "apps/reference-host-web-server/src/control-plane-client.ts",
@@ -2545,8 +2545,8 @@
         },
         {
           "path": "apps/reference-host-web-server/dist/channel-activation-controller.js",
-          "bytes": 16504,
-          "sha256": "1bd686c64f2fa1523d039cb295ec2b570d32e876a561f987749ac8c2a21da8db"
+          "bytes": 16672,
+          "sha256": "f0614285de1c12bf352fdd05fbaba21b5fb517d734cef391eb308edef0ed7633"
         },
         {
           "path": "apps/reference-host-web-server/dist/control-plane-client.js",
@@ -3219,7 +3219,7 @@
           {
             "path": "apps/reference-host-web/src/official-sign-in.ts",
             "name": "captureBundlePolicy",
-            "sha256": "sha256:22d5dbda1b1d116a29cc5c65611b7478347d665c5bd6b1f9d07a6142f7b83e96",
+            "sha256": "sha256:d87974711c5d80eaaec0bdd893f6b76d68d28411171417b4cdb397df56c062ee",
             "normalization": "TypeScript Printer(removeComments=true, LF)"
           },
           {
@@ -3279,7 +3279,7 @@
         ],
         "executableAuthoritySurface": {
           "descriptors": 659,
-          "sha256": "sha256:f5f1eb3d05bd7d9f6b1999fdfcfd6c0025356b58b8e5bef216b69957fcc40efb",
+          "sha256": "sha256:3a68df05aaeb97d28a3a5248360bdcd104f6f1d385750a3ade12db0c4a2ee356",
           "normalization": "TypeScript checker origins + Printer(removeComments=true, LF) call/construct/write descriptors"
         },
         "publicAdapterRegistryCalls": 1,
@@ -3314,9 +3314,9 @@
           "staticEdges": 300,
           "dynamicEdges": 0,
           "unresolvedEdges": 0,
-          "graphSha256": "sha256:03fd3742f5b0de2d6dc3f8f2461e374fa9ebb11c5c652386cb2c84f0ef2f3ab1",
+          "graphSha256": "sha256:55c4f4c9c05a2441202c960f2c22bd850f84d743780d003ab3b35460fc04d03f",
           "backingFiles": 103,
-          "backingSnapshotSha256": "sha256:24d2bac0b4f01f861140ec700e2c4264fb6bb00a38f4bb2d0f15353e3c356bd7"
+          "backingSnapshotSha256": "sha256:85fc83038cf60f70d10b97b1d410ccb2c8a115cb1ad718573e01eeef4d1598cf"
         },
         "packageBoundary": {
           "tool": "dependency-cruiser@18.1.0",
@@ -3378,8 +3378,8 @@
           },
           {
             "path": "apps/reference-host-web/src/official-sign-in.ts",
-            "bytes": 22664,
-            "sha256": "sha256:a92fc6b2b65e0b9697d4c8c499affbc4ab2e4a51d4a16a78242276546b336862"
+            "bytes": 22666,
+            "sha256": "sha256:1527b1a77321ecd85a58a3cb05c589435986011176feff71f632f9bfaf67deec"
           },
           {
             "path": "apps/reference-host-web/src/recovery-authority.ts",
@@ -3430,7 +3430,7 @@
           "dynamicEdges": 0,
           "unresolvedEdges": 0,
           "reachableProductionSourceFiles": 13,
-          "graphSha256": "sha256:03fd3742f5b0de2d6dc3f8f2461e374fa9ebb11c5c652386cb2c84f0ef2f3ab1"
+          "graphSha256": "sha256:55c4f4c9c05a2441202c960f2c22bd850f84d743780d003ab3b35460fc04d03f"
         },
         "appModules": [
           {
@@ -5278,8 +5278,8 @@
               "packages/runtime-web/dist/index.js"
             ],
             "dynamicImports": [],
-            "codeBytes": 15584,
-            "codeSha256": "sha256:9f6f40a2660815020fe773f0fcdd5d0326de1c8846b1766fcb0fcf44b1cd939d"
+            "codeBytes": 15586,
+            "codeSha256": "sha256:dbe527ecdf9829c2591ca710265da247792f184b19074ae858bb168c503aa408"
           },
           {
             "id": "apps/reference-host-web/src/recovery-authority.ts",
@@ -6408,6 +6408,13 @@
           "files": 3,
           "outputs": [
             {
+              "fileName": "assets/index-B3gxd8TW.js",
+              "type": "chunk",
+              "isEntry": true,
+              "bytes": 1059904,
+              "sha256": "sha256:094a5edd6429ebe1a8e1cff52f33b061baf60c57560ebdefd5274f42ea9bba11"
+            },
+            {
               "fileName": "assets/index-ClMarVVR.css",
               "type": "asset",
               "isEntry": null,
@@ -6415,25 +6422,18 @@
               "sha256": "sha256:bbfe758b463bca14d58440da1cd0b7c60b3ac4f427ba4c8b41ac7744e2cd1672"
             },
             {
-              "fileName": "assets/index-qLF28ux6.js",
-              "type": "chunk",
-              "isEntry": true,
-              "bytes": 1059902,
-              "sha256": "sha256:27703726b339db55e93ff1f74eae8c28f87fbd0e19b63a2a7fc8836969bc82f1"
-            },
-            {
               "fileName": "index.html",
               "type": "asset",
               "isEntry": null,
               "bytes": 480,
-              "sha256": "sha256:d2a194fe6618220c74f94f3086dfb259c531f51b9d4488e4805dd5e1da469bbd"
+              "sha256": "sha256:7568bd8c60fafe44311c3492fac8b68a091cf6b0f2b949fcabc418e505c3d83d"
             }
           ],
-          "identitySha256": "sha256:c12c2e2044425c4578eeeca99c1b4a0133d081ebf66b4e2d5032ae18642a500b"
+          "identitySha256": "sha256:7b6514e2fd29a745e11de6e58c3c3adedf06c8a8619161a8ca43e03b26c0090f"
         },
         "hostOutputIdentityAEqualsB": true,
         "backingFiles": 187,
-        "backingSnapshotSha256": "sha256:e9487950153ddcbeb435af5396a84670f2fd23126b08c3b7c253acf4359fca4c",
+        "backingSnapshotSha256": "sha256:1eaeeb160cca678ad35bda5a60a58730e0f4f6bfead3ae39c29a52bd240d0427",
         "backingModulesStableAcrossObservations": true
       }
     },
@@ -6691,8 +6691,8 @@
       },
       {
         "path": "apps/reference-host-web-server/src/channel-activation-controller.ts",
-        "bytes": 19825,
-        "sha256": "ea51bf55e05d778b613394fa7bf152af8ce986aec7cfced4fb1d611cad533483"
+        "bytes": 20019,
+        "sha256": "4a9642dc3ae20eb7f826b84d587f32c5c107c9d77577fba1239db412f6e20994"
       },
       {
         "path": "apps/reference-host-web-server/src/index.ts",
@@ -6706,8 +6706,8 @@
       },
       {
         "path": "apps/reference-host-web-server/test/channel-activation-controller.test.ts",
-        "bytes": 16550,
-        "sha256": "6dd2aa1264c8ccc3a246e7511993dc3a9cfd67f4f8d6ea45ca0533ea0390ea73"
+        "bytes": 20200,
+        "sha256": "b0f5f03e0383adce41ca7f110be06855d6691ad30c453ba459e48663e18aecf3"
       },
       {
         "path": "apps/reference-host-web-server/test/server.test.ts",
@@ -6731,13 +6731,13 @@
       },
       {
         "path": "apps/reference-host-web/src/official-sign-in.ts",
-        "bytes": 22664,
-        "sha256": "a92fc6b2b65e0b9697d4c8c499affbc4ab2e4a51d4a16a78242276546b336862"
+        "bytes": 22666,
+        "sha256": "1527b1a77321ecd85a58a3cb05c589435986011176feff71f632f9bfaf67deec"
       },
       {
         "path": "apps/reference-host-web/test/official-sign-in.test.tsx",
-        "bytes": 22831,
-        "sha256": "9204341705a227f9251a3ae9a0ffbe2638a1fd64dac72b3480c514943370c312"
+        "bytes": 26036,
+        "sha256": "449018f805a9d780793315e863733aa5e6de32f755d1e8b94073be2a92a438c9"
       },
       {
         "path": "dependency-cruiser.config.cjs",
@@ -6746,8 +6746,8 @@
       },
       {
         "path": "docs/adr/0022-repeatable-local-demo-composition.md",
-        "bytes": 5543,
-        "sha256": "6afe3a73d4bb0879196bddae994b58e899df9c90a5852d31f6cb5b08bd072828"
+        "bytes": 6046,
+        "sha256": "7c7fd1c591e286e1bdd52964fe902b592f5090c6813ecaf07cbf98ead1ca6aa4"
       },
       {
         "path": "docs/plan/DEMO-RUNBOOK.md",

@@ -20,7 +20,7 @@ M10-T06 parent: `sha256:1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b853001
 
 M10-T07 parent: `sha256:5e589bc8022de3ccf3add7a9ebab78006ecca6e72628e165f54eef4fd8b90b68`
 
-Final artifact: `sha256:d91085d6cdc3533466375a77141b6394f0e76f2a8b29a41e8887b5d64e287f47`
+Final artifact: `sha256:048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5`
 
 Implementation evidence is a closure candidate. Exact-head hosted checks, merge and fresh main
 closure remain required before this task is reported complete.
@@ -68,6 +68,63 @@ differences are normalized away. Normal startup builds the host afresh; T07 sepa
 stricter no-host-rebuild cold-recovery evidence.
 
 ## Evidence and compatibility
+
+### First hosted candidate — failed, not a completed task
+
+[PR #83's first run](https://github.com/desenlab/desen-app/actions/runs/34225396795) at
+`2c465f29836c7d2660917af44ea3b4736ebd012b` passed its first five browser journeys but failed the
+retained T05 journey on its first publication. The normal blank Account Source and its Bundle
+contain only `sign-in`; the new host policy incorrectly required an unused `home` surface too.
+The channel update succeeded, while activation correctly reported unavailable under that faulty
+admission policy. This is a product regression, not a timeout or test synchronization failure.
+
+The correction requires the installed entry and permits its registered destination optionally,
+while rejecting foreign routes, missing entries and dangling navigation. Both server activation /
+recovery and browser admission retain full package, reference and Runtime validation. The retained
+T05 scenario is unchanged; it must pass along with all other eight browser journeys. The failed
+commit and run remain visible. Only this unmerged T08 candidate's evidence is refreshed; all 77
+merged checkpoint predecessors and 61 older artifacts remain unchanged.
+
+That same run's exhaustive A and C shards passed in 8m33s and 12m50s. Shard B failed at the
+M07-T07 activation verifier because its live coverage guard still required P-12 `NOT_PROVEN`.
+The T07 artifact and hosted closure now justify the bounded `PROVEN` row. The corrected reader
+authenticates that exact successor row, checkpoint-owned artifact and closure report, while
+preserving the frozen M07 task-time `NOT_PROVEN` output. It does not accept arbitrary status
+promotion or alter the older artifact. The joined Quality gate correctly failed the candidate.
+
+### Corrected candidate — local browser and product results
+
+The unmodified complete nine-journey browser command now passes, including its build/typecheck
+prefix. Individual suite times are 15.2, 12.4, 11.4, 9.9, 14.8, 6.4, 8.1, 12.3 and 40.4 seconds.
+The sixth, retained T05 journey passes its previously failing baseline publication without a
+fixture workaround. The ninth executes both complete reset/authoring cycles. Full host and server
+suites pass 53/53 and 38/38; the two added regression tests exercise both installed profiles,
+entry-only activation, missing-entry/dangling/foreign rejection, unchanged prior delivery and
+close/reopen recovery. Exact-head hosted verification remains pending for this correction.
+
+The corrected T08 direct verifier and 10/10 root cases pass (52.35 seconds). T05/T06/T07 direct
+verifiers and all 29 retained roots pass, respectively 27.112, 28.157 and 61.484 seconds. The M05
+source audit verifier and 35 roots pass (49.90 seconds); the M07 host verifier freshly executes
+its exact seven-file, 60-test runtime inventory and all 13 roots pass (3.97 seconds). No historical
+root or browser scenario is removed. Runtime Core and frozen protocol bytes are unchanged.
+
+The default CI runner executes the actual M07 activation verifier / 18 roots and T08 verifier /
+10 roots successfully under its exact restrictions (78.35 seconds combined). Its complete build
+snapshot remains unchanged: 37 roots, 2,281 files, 45,994,516 bytes,
+`sha256:fde48edd4e523e911f5f1f866f32cc93591c7d9e9c47ddf15ddfaf1bb297ab67`.
+The final bounded baseline passes, including all 52 fixtures and 879 modules / 3,787 edges.
+
+The corrected unmerged checkpoint 78 first validates against the immutable 77-entry main anchor
+as review-required and is refused as live authority. Its final reviewed head is
+`sha256:926ed1fd07b6f41d93b88c9bd6fbe582555001b5edca5f9d37cd96472aa6bd0e`.
+It preserves all 77 merged entries / 61 earlier artifacts, reseals exactly prior-reader indexes
+`[0, 1, 30, 31, 38, 39, 116, 117, 118, 119, 120, 121]`, and adds only the T08 pair. The live check
+and all 111 checkpoint contracts pass. The complete CI/retained-runner batch passes 498/498 in
+28.125 seconds with zero failures, skips, cancellations or todo cases. No previously merged
+checkpoint is replaced; the failed PR candidate remains visible in Git history and hosted results.
+Every hosted selected workload still runs fresh for the corrected head.
+
+### Initial local evidence
 
 The initial completed browser implementation passes 1/1, and two further complete repetitions
 pass 2/2. The final middleware-lifecycle implementation passes another 1/1 in 43.6 seconds.

@@ -122,6 +122,7 @@ const RUNTIME_TEST_TITLES_BY_FILE = Object.freeze({
   ]),
   [`${SERVER_DIRECTORY}/test/channel-activation-controller.test.ts`]: Object.freeze([
     "admits only installed Account and Flow identities before activation and recovers both durable roles",
+    "activates and recovers entry-only Account and Flow while rejecting missing entries and dangling destinations",
     "[valid-a-activation-delivery] activates and exposes the first valid candidate",
     "[invalid-b-preserves-a] retains the authenticated A delivery",
     "[valid-c-replaces-a] commits C with A as previous-good",
@@ -166,6 +167,7 @@ const RUNTIME_TEST_TITLES_BY_FILE = Object.freeze({
   [`${CLIENT_DIRECTORY}/test/official-sign-in.test.tsx`]: Object.freeze([
     "runs an authored nondefault Flow alias through pending, failure, retry and managed Result navigation",
     "requires authentic finite profile authority and preserves Account on unsupported identity or routes",
+    "accepts entry-only Account and Flow Bundles and preserves them on missing-entry or dangling-navigation candidates",
     "runs pending, declared failure, edited retry, success, and navigation through real adapters",
     "runs the production HTTP binding through runtime, real adapters, retry, and navigation",
     "denies an empty-password contract input before I/O and keeps service failure generic",
@@ -971,7 +973,7 @@ function auditServerSources(tracked) {
       [
         [
           "verifiedCandidateFor",
-          "a0ab2f4ff05b8fc3ef26be741c182d198887b2caf2656d41f0f511ea6fa6a615",
+          "4625ebfdb53d362554efc4fb4b5446e7c44179769cc650e600bb7713ea632823",
         ],
       ],
     ],

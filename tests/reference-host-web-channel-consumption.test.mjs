@@ -144,8 +144,8 @@ test("[authority] builds the exact M07-T11 separately built channel-consumption 
   assert.equal(built.artifact.claims.traceRows[0].id, "PIPE-009");
   assert.equal(built.artifact.tests.runtimeCaseCount, 9);
   assert.equal(built.artifact.tests.runtimeTestCount, 46);
-  assert.equal(built.currentCompatibility.tests.runtimeTestCount, 58);
-  assert.equal(built.currentCompatibility.runtimeSuiteReceipt.testCount, 58);
+  assert.equal(built.currentCompatibility.tests.runtimeTestCount, 60);
+  assert.equal(built.currentCompatibility.runtimeSuiteReceipt.testCount, 60);
   assert.deepEqual(
     built.currentCompatibility.tests.runtimeTestsByFile[SERVER_TEST].filter((title) =>
       PUBLICATION_ACTIVATION_TEST_TITLES.includes(title),

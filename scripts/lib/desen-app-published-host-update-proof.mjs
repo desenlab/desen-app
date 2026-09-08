@@ -32,7 +32,7 @@ const T06_SUCCESSOR_PIN = Object.freeze({
 const T08_SUCCESSOR_PATH = "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json";
 const T08_SUCCESSOR_PIN = Object.freeze({
   bytes: 319_719,
-  sha256: "d91085d6cdc3533466375a77141b6394f0e76f2a8b29a41e8887b5d64e287f47",
+  sha256: "048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5",
 });
 const T08_REVIEWED_CHANGED_PATHS = Object.freeze([
   "apps/desen-app-browser-e2e/package.json",

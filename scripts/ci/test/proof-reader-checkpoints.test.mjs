@@ -65,7 +65,7 @@ const SECOND_FRESH_PROOF_PERFORMANCE_RESEALED_READER_INDEXES = Object.freeze([11
 const INVALID_PUBLICATION_RESEALED_READER_INDEXES = Object.freeze([106, 107, 116, 117]);
 const LAST_KNOWN_GOOD_RECOVERY_RESEALED_READER_INDEXES = Object.freeze([116, 117, 118, 119]);
 const REPEATABLE_DEMO_RESEALED_READER_INDEXES = Object.freeze([
-  0, 1, 38, 39, 116, 117, 118, 119, 120, 121,
+  0, 1, 30, 31, 38, 39, 116, 117, 118, 119, 120, 121,
 ]);
 
 async function assertHistoricalReaderMatchesCurrentWorkspace(reader, index) {
@@ -6589,7 +6589,7 @@ test("sequence seventy-eight retains all prior artifacts and reseals only the re
     task: "M10-T08",
     path: "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json",
     bytes: 319719,
-    sha256: "d91085d6cdc3533466375a77141b6394f0e76f2a8b29a41e8887b5d64e287f47",
+    sha256: "048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5",
   });
   assert.equal(
     current.artifacts.at(-1).path,

@@ -20,17 +20,24 @@ empty product storage in the same checkout on 5173; `pnpm demo` resumes it. Only
 The visible Flow journey authors two surfaces, tests Synthetic and real Integration, publishes
 the same design to the independent host, then changes label/layout and republishes.
 
-Four passing Chromium tests executed eight complete reset/authoring cycles; the final middleware
-lifecycle passes in 43.6 seconds. Two real terminal start/Ctrl+C/restart checks also pass with no
-stale lease. Focused composition and demo tests pass 61/61 and 21/21. The T08 verifier and ten
-root contracts pass; T05/T06/T07 verifiers and 29 retained roots pass without changing their
-artifacts. The bounded baseline and all 498 CI/retained-runner contracts pass with zero skips or
-cancellations. Exact guarded T07/T08 verifier/root execution also passes; hosted closure remains.
+[The first PR #83 run](https://github.com/desenlab/desen-app/actions/runs/34225396795) failed:
+host admission incorrectly required an unused destination, and an older live proof reader rejected
+the completed P-12 successor. Both are corrected without changing the retained browser scenarios or
+older artifacts. That failed commit and run remain failures; their passing shards do not approve
+this corrected candidate.
+
+All nine complete Chromium journeys now pass, including the previously failing single-surface
+publication and T08's two reset/authoring cycles. Full host/server suites pass 53/53 and 38/38.
+The corrected T08 verifier and ten roots, T05/T06/T07 verifiers and 29 retained roots, M05's 35 roots,
+and M07 host's 13 roots / 60 runtime tests pass. Exact guarded M07 activation / T08 verifier-root
+checks pass; all 498 CI contracts pass in 28.125 seconds with zero skips or cancellations.
+The bounded baseline passes. Initial composition 61/61, demo lifecycle 21/21, and two real terminal
+start/Ctrl+C/restart receipts remain recorded separately. Exact-head hosted closure remains pending.
 
 The new artifact is 319,719 bytes at
-`sha256:d91085d6cdc3533466375a77141b6394f0e76f2a8b29a41e8887b5d64e287f47`.
+`sha256:048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5`.
 Checkpoint 78 preserves all 77 predecessors and 61 earlier artifacts, authenticating 62 artifacts /
-124 readers at `sha256:f72920eb56529b40c6ba2726c62ce4db1dc14479d38b788577064eeea3da2feb`;
+124 readers at `sha256:926ed1fd07b6f41d93b88c9bd6fbe582555001b5edca5f9d37cd96472aa6bd0e`;
 all 111 checkpoint contracts pass. CI retains 226 logical workloads / 108 proof pairs, 243 physical
 workloads and nine browser journeys, with unchanged two-worker shards and eleven barriers.
 [Full T08 evidence](docs/proof/DESEN-APP-REPEATABLE-DEMO.md).

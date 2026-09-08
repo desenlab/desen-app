@@ -3440,7 +3440,7 @@ Source/Bundle bytes, and later label/layout publications preserve host HTML/asse
 Four passing Chromium tests execute eight complete reset/authoring cycles; the final product
 passes in 43.6 seconds. Real terminal start/stop/restart checks, the fresh deterministic verifier,
 ten root contracts, and the exact guarded CI verifier/root pair pass. The artifact remains
-319,719 bytes at `sha256:d91085d6cdc3533466375a77141b6394f0e76f2a8b29a41e8887b5d64e287f47`.
+319,719 bytes at `sha256:048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5`.
 All 498 CI/retained-runner contracts pass without skips; prior artifacts and workloads remain.
 This is a local reference composition, not production authentication or remote/multi-tenant
 deployment. T06/T07 keep their distinct negative/recovery lifetimes; T09 and G10 retain separate

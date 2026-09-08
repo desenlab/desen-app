@@ -51,6 +51,13 @@ credential, callback or dynamically constructed profile. Server admission and br
 agree before an Active receipt can be reported. The single `preview` channel displays the latest
 valid publication, not multiple simultaneous tenants.
 
+Profile admission requires the entry surface and permits the known destination optionally. A
+designer need not create an unused second page. Full reference validation still rejects authored
+navigation to a missing destination, and neither profile can introduce foreign routes. The initial
+T08 candidate incorrectly required both surfaces; the retained T05 browser journey exposed that
+regression before merge. Positive entry-only Account/Flow and rejection/recovery tests guard the
+corrected contract.
+
 Operation authority remains bound to the exact active document, revision, surface, capability,
 effect and valid authored result alias. The Flow example does not require a literal `signIn` alias.
 Each profile admits only its own registered destination routes. Runtime Core still executes the

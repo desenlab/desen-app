@@ -55,7 +55,8 @@ attributes receive `style-src-attr 'unsafe-inline'`; inline scripts, inline styl
 evaluation, data scripts, and remote code origins remain forbidden.
 
 Before either candidate activation or recovery, the server admits only the same finite Account
-and Flow document/entry/surface identities installed in the browser. Unsupported documents or
+and Flow document/entry/surface identities installed in the browser. The entry is required; the
+registered destination is optional unless the authored document references it. Unsupported documents or
 routes preserve the authenticated delivery and cannot be reported Active for the rejected
 revision. The fixed Catalog and full public integrity/package/reference/staging/recovery chain
 remain mandatory.

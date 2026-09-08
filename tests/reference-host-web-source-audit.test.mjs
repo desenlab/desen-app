@@ -1102,6 +1102,18 @@ test("admits only finite profile surface-key checks and rejects alias or managed
     ],
     ["captured.targetSurfaceId !== identity.destination", "false"],
     ["APPLICATION_PROFILES.has(value as ReferenceHostApplicationProfiles)", "true"],
+    [
+      "ownDataRecord(capturedBundle.surfaces, [entry], [destination])",
+      "ownDataRecord(capturedBundle.surfaces, [entry, destination])",
+    ],
+    [
+      "ownDataRecord(capturedBundle.surfaces, [entry], [destination])",
+      "ownDataRecord(capturedBundle.surfaces, [], [entry, destination])",
+    ],
+    [
+      "ownDataRecord(capturedBundle.surfaces, [entry], [destination])",
+      'ownDataRecord(capturedBundle.surfaces, [entry], [destination, "unknown"])',
+    ],
   ]) {
     await rejectMutation(
       OFFICIAL_SOURCE,
@@ -1109,7 +1121,7 @@ test("admits only finite profile surface-key checks and rejects alias or managed
         assert.ok(text.includes(before));
         return text.replace(before, after);
       },
-      /semantic fingerprint|closed executable|finite profile/u,
+      /semantic fingerprint|closed executable|finite profile|surfaces-shaped escape/u,
     );
   }
   await rejectMutation(

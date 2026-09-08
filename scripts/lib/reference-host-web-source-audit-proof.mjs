@@ -310,7 +310,7 @@ const EXPECTED_REFERENCE_HOST_BOUNDARY_RULE = Object.freeze({
   }),
 });
 const EXPECTED_EXECUTABLE_SURFACE_SHA256 =
-  "f5f1eb3d05bd7d9f6b1999fdfcfd6c0025356b58b8e5bef216b69957fcc40efb";
+  "3a68df05aaeb97d28a3a5248360bdcd104f6f1d385750a3ade12db0c4a2ee356";
 const HISTORICAL_REFERENCE_HOST_BOUNDARY_RULE = Object.freeze({
   ...EXPECTED_REFERENCE_HOST_BOUNDARY_RULE,
   from: Object.freeze({ path: "^apps/reference-host-web/" }),
@@ -387,7 +387,7 @@ const EXPECTED_COMPOSITION_FUNCTIONS = Object.freeze([
       "isReferenceHostApplicationProfiles",
       "0651549eefa9387afe52894cf21b271d57cf9483cdea87630511f3866de9dd13",
     ],
-    ["captureBundlePolicy", "22d5dbda1b1d116a29cc5c65611b7478347d665c5bd6b1f9d07a6142f7b83e96"],
+    ["captureBundlePolicy", "d87974711c5d80eaaec0bdd893f6b76d68d28411171417b4cdb397df56c062ee"],
     ["captureSignInRequest", "f76a038bb058f4c0050878b4f2fdcee80853fe11f6fef097e71781999a2718bd"],
     ["createNavigationPort", "c0c64b2679786b2d2d8c7094decf7aa605218ab6befab884d7c62aa46572c732"],
     [
@@ -2052,14 +2052,16 @@ function auditDangerousSyntax(sourceFile, relativePath, bindings, checker, count
         ts.isCallExpression(call) &&
         ts.isIdentifier(call.expression) &&
         call.expression.text === "ownDataRecord" &&
-        call.arguments.length === 2 &&
+        call.arguments.length === 3 &&
         call.arguments[0] === node &&
         ts.isArrayLiteralExpression(call.arguments[1]) &&
-        call.arguments[1].elements.length === 2 &&
-        call.arguments[1].elements.every(
-          (element, index) =>
-            ts.isIdentifier(element) && element.text === ["entry", "destination"][index],
-        ) &&
+        call.arguments[1].elements.length === 1 &&
+        ts.isIdentifier(call.arguments[1].elements[0]) &&
+        call.arguments[1].elements[0].text === "entry" &&
+        ts.isArrayLiteralExpression(call.arguments[2]) &&
+        call.arguments[2].elements.length === 1 &&
+        ts.isIdentifier(call.arguments[2].elements[0]) &&
+        call.arguments[2].elements[0].text === "destination" &&
         ts.isBinaryExpression(comparison) &&
         comparison.left === call &&
         comparison.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken &&

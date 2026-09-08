@@ -128,7 +128,7 @@ export const DESEN_APP_REPEATABLE_DEMO_PARENT_PINS = Object.freeze(
 /** Write-once artifact identity; assigned only after all independent T08 inputs freeze. */
 export const DESEN_APP_REPEATABLE_DEMO_ARTIFACT_PIN = Object.freeze({
   bytes: 319719,
-  sha256: "d91085d6cdc3533466375a77141b6394f0e76f2a8b29a41e8887b5d64e287f47",
+  sha256: "048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5",
 });
 /** Reviewed write-once T08 artifact destination. */
 export const DEFAULT_DESEN_APP_REPEATABLE_DEMO_ARTIFACT_PATH = path.join(

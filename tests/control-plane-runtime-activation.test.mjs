@@ -27,6 +27,8 @@ const ARTIFACT = "docs/proof/artifacts/control-plane-api-0.1.0-runtime-activatio
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const NORMATIVE_COVERAGE = "docs/proof/NORMATIVE-COVERAGE.md";
 const PROOF_MATRIX = "docs/proof/PROOF-MATRIX.md";
+const P12_SUCCESSOR_ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json";
+const P12_SUCCESSOR_REPORT = "docs/proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md";
 const FINDINGS = "docs/plan/PROTOCOL-FINDINGS.md";
 const APP_PACKAGE = "apps/control-plane-api/package.json";
 const APP_INDEX = "apps/control-plane-api/src/index.ts";
@@ -461,6 +463,23 @@ test("[traceability] rejects exact activation trace-owner drift", async () => {
 });
 
 test("[coverage] rejects P-12, N-004/N-038/N-041, or PF-075/PF-076 truth drift", async () => {
+  const matrix = (await workspaceBytes(PROOF_MATRIX)).toString("utf8");
+  const p12 = matrix.split("\n").find((line) => line.startsWith("| P-12 |"));
+  assert.match(p12, /\| PROVEN\s+\|/u);
+  const successor = await buildControlPlaneRuntimeActivationEvidence({
+    trackedFileBytes: {
+      [PROOF_MATRIX]: Buffer.from(matrix),
+      [P12_SUCCESSOR_ARTIFACT]: await workspaceBytes(P12_SUCCESSOR_ARTIFACT),
+      [P12_SUCCESSOR_REPORT]: await workspaceBytes(P12_SUCCESSOR_REPORT),
+    },
+    runtimeReceipt: built.runtimeReceipt,
+  });
+  assert.deepEqual(successor.artifactBytes, built.artifactBytes);
+  assert.equal(successor.artifact.claims.coverageTransitions.proofMatrixP12, "NOT_PROVEN");
+  assert.equal(
+    successor.currentCompatibility.claims.coverageTransitions.proofMatrixP12,
+    "NOT_PROVEN",
+  );
   const mutations = [
     [
       NORMATIVE_COVERAGE,
@@ -476,7 +495,25 @@ test("[coverage] rejects P-12, N-004/N-038/N-041, or PF-075/PF-076 truth drift",
     ],
     [
       PROOF_MATRIX,
-      (source) => source.replace(/^(\| P-12 \|.*)\| NOT_PROVEN\s+\|/mu, "$1| PROVEN |"),
+      (source) => source.replace(p12, p12.replace(/\| PROVEN\s+\|/u, "| NOT_PROVEN |")),
+    ],
+    [
+      PROOF_MATRIX,
+      (source) => source.replace(p12, p12.replace("No hostile-admin", "Includes hostile-admin")),
+    ],
+    [PROOF_MATRIX, (source) => source.replace(p12, `${p12}\n${p12}`)],
+    [PROOF_MATRIX, (source) => source.replace(p12, "")],
+    [
+      PROOF_MATRIX,
+      (source) => source.replace(p12, p12.replace("sha256:5e589bc8", "sha256:0e589bc8")),
+    ],
+    [P12_SUCCESSOR_ARTIFACT, () => ""],
+    [P12_SUCCESSOR_ARTIFACT, (source) => source.replace('"result": "PASS"', '"result": "FAIL"')],
+    [P12_SUCCESSOR_REPORT, () => ""],
+    [P12_SUCCESSOR_REPORT, (source) => source.replace("sha256:5e589bc8", "sha256:0e589bc8")],
+    [
+      P12_SUCCESSOR_REPORT,
+      (source) => source.replace("Hosted closure is complete:", "Hosted closure is not complete:"),
     ],
     [
       FINDINGS,

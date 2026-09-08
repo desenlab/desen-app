@@ -239,7 +239,7 @@ function captureBundlePolicy(
     }
     if (
       applications &&
-      ownDataRecord(capturedBundle.surfaces, [entry, destination]) === undefined
+      ownDataRecord(capturedBundle.surfaces, [entry], [destination]) === undefined
     ) {
       return undefined;
     }
