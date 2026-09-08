@@ -22,8 +22,15 @@ M10-T07 parent: `sha256:5e589bc8022de3ccf3add7a9ebab78006ecca6e72628e165f54eef4f
 
 Final artifact: `sha256:048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5`
 
-Implementation evidence is a closure candidate. Exact-head hosted checks, merge and fresh main
-closure remain required before this task is reported complete.
+Hosted closure is complete: [PR #83](https://github.com/desenlab/desen-app/pull/83) passed
+[exact-head CI](https://github.com/desenlab/desen-app/actions/runs/34228639827) at
+`545c38827e6ad1d0d3b0d30feac4c34c6271d0e1` and merged as
+`61bfda591a25558193c94e1d0d6a9bb95af6d00d`. The identical merged tree passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34230382825), including all nine
+Chromium journeys, three exhaustive shards and the joined Quality gate.
+[Closure receipt](https://github.com/desenlab/desen-app/pull/83#issuecomment-5585877291).
+The earlier failed candidate and run remain failures. Conditional statements in the dated local
+evidence below describe those earlier checkpoints; they do not reopen the completed task.
 
 ## One normal visible product
 

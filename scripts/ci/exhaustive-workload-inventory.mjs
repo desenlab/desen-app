@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "a9355b3b5c7afa29a4c428aaebc86b67f7af0111a28e5f1dbc58a10deaf0860c";
+  "fea23ce692f37919fa0f5e57626096d2c191dc20fbcc2165c9354018b5d2ad14";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "d50b85da853858906570748ca196316c93d986059d28159153d5405b298dff83";
+  "4ade43044cd4fa490956838d4d789ae61e51e7508df8f3a5d4440adbcc2bd00c";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "d3f7760d69363e9ee32713a51cc6eadba14e848ad0d336d3ec21ad0036bb2e94";
+  "0caaa88ca1914e9b17e6c3e9deade8ce54f8d30e6fd67ef7c89200e93bd9cc7e";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "73b68c61533e2947169ba3e2298a9f13ec261ae00c32184773402bf03fcce715";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -708,6 +708,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "desen-app-repeatable-demo",
     "scripts/verify-desen-app-repeatable-demo.mjs",
     "tests/desen-app-repeatable-demo.test.mjs",
+  ],
+  [
+    "runtime-core-baseline",
+    "scripts/verify-runtime-core-baseline.mjs",
+    "tests/runtime-core-baseline.test.mjs",
   ],
 ]);
 
@@ -1420,9 +1425,11 @@ function buildCanonicalInventory() {
             : "package-tests",
       ],
       "CONCURRENT_PROOF",
-      PROCESS_ISOLATED_VERIFIER_PROOF_IDS.includes(id)
-        ? PROCESS_ISOLATED_NO_BUILD
-        : SHARED_BUILD_READER,
+      id === "runtime-core-baseline"
+        ? NO_SHARED_MUTATION
+        : PROCESS_ISOLATED_VERIFIER_PROOF_IDS.includes(id)
+          ? PROCESS_ISOLATED_NO_BUILD
+          : SHARED_BUILD_READER,
     ),
   );
   const rootTests = PROOF_UNIT_TUPLES.map(([id, , rootTestFile]) =>
@@ -1433,7 +1440,11 @@ function buildCanonicalInventory() {
       ["--test", "--test-concurrency=1", rootTestFile],
       ["verify-" + id],
       "CONCURRENT_PROOF",
-      PASSIVE_ROOT_TEST_PROOF_IDS.includes(id) ? NO_SHARED_MUTATION : SHARED_BUILD_READER,
+      id === "runtime-core-baseline"
+        ? PROCESS_ISOLATED_NO_BUILD
+        : PASSIVE_ROOT_TEST_PROOF_IDS.includes(id)
+          ? NO_SHARED_MUTATION
+          : SHARED_BUILD_READER,
     ),
   );
   const suffix = [
@@ -1719,7 +1730,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "738fc25f927f4be27fffb297b3d9d926a837e2cf4ea937fa747a2bb031695e0b";
+  "9a78a075617c5be7cefb8a080aca2e668e91f914c45ef2986c25e78bef76a706";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

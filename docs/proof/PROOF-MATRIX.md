@@ -3444,4 +3444,22 @@ ten root contracts, and the exact guarded CI verifier/root pair pass. The artifa
 All 498 CI/retained-runner contracts pass without skips; prior artifacts and workloads remain.
 This is a local reference composition, not production authentication or remote/multi-tenant
 deployment. T06/T07 keep their distinct negative/recovery lifetimes; T09 and G10 retain separate
-ownership. Exact-head hosted checks, merge and fresh main are still required for T08 closure.
+ownership. These initial local receipts were followed by the corrected nine-journey browser pass,
+53/53 host and 38/38 server tests, the retained compatibility checks, and 498/498 CI contracts.
+[PR #83](https://github.com/desenlab/desen-app/pull/83) closed at exact head
+`545c38827e6ad1d0d3b0d30feac4c34c6271d0e1` with
+[passing PR CI](https://github.com/desenlab/desen-app/actions/runs/34228639827), merged as
+`61bfda591a25558193c94e1d0d6a9bb95af6d00d`, and passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34230382825).
+All nine Chromium journeys, three exhaustive shards and the joined Quality gate passed on the
+identical merged tree. The earlier failed candidate remains a failure; no older artifact changed.
+
+## M10-T09 committed Runtime Core baseline
+
+The [baseline evidence](RUNTIME-CORE-BASELINE.md) records the entire committed Core Git tree
+`3fa3613a3be63c749f40b6a0b55af5b40c675773` for later M11 comparison, without changing Core.
+The write-once 271-byte artifact is identity evidence, not cached execution success. Twelve direct
+and exact guarded real-Git groups, 507 CI contracts, 113 checkpoint contracts and the bounded
+baseline pass. Checkpoint 79 preserves all merged history and adds only the new artifact/reader
+pair. Exact-head hosted checks, merge and fresh main still condition T09 closure. G10 remains
+open; the user requested a pause before its full local audit. No M11 extensibility claim advances.

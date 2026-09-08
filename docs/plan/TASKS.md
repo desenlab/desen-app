@@ -2152,7 +2152,7 @@ and move to M10-T01.
 | M10-T06  | DONE        | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
 | M10-T07  | DONE        | M10-T05, G07              | Corrupt revision and catalog mismatch preserve last-known-good                |
 | M10-T08  | DONE        | M10-T01B–M10-T07          | One-command seed/reset and repeatable sign-in demo runbook                    |
-| M10-T09  | NOT_STARTED | M10-T08                   | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
+| M10-T09  | DONE        | M10-T08                   | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
 | G10      | NOT_STARTED | M10-T01C, M10-T02–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
 
 M10-T01 is `DONE`. The dedicated `@desen/app-browser-e2e` workspace owns Playwright, Vite,
@@ -2611,7 +2611,18 @@ questions. T08 seed/reset, T09 committed Runtime Core baseline, N-036, and G10 r
 owners. No product API, Runtime Core, frozen protocol, or previous proof artifact changed.
 See [the complete recovery evidence](../proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md).
 
-### M10-T08 implementation checkpoint — hosted closure pending
+### M10-T08 closure — exact PR and fresh main passed
+
+[PR #83](https://github.com/desenlab/desen-app/pull/83) closed at exact head
+`545c38827e6ad1d0d3b0d30feac4c34c6271d0e1` with
+[passing PR CI](https://github.com/desenlab/desen-app/actions/runs/34228639827), merged as
+`61bfda591a25558193c94e1d0d6a9bb95af6d00d`, and passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34230382825).
+All nine Chromium journeys, three exhaustive shards and Quality gate passed on the identical
+merged tree. The initial failed candidate remains a failure. T09 is now the only active task;
+G10 remains `NOT_STARTED`.
+
+### M10-T08 implementation checkpoint — closure subsequently satisfied above
 
 The task-board `DONE` is a conditional closure candidate. T08 remains the only active work until
 exact-head PR checks, merge, and fresh main pass. T09 and G10 remain `NOT_STARTED`.
@@ -2644,6 +2655,27 @@ unchanged two-worker shards and eleven barriers. Candidate progress is 120/148 (
 (92%); gates remain 11/13. Runtime Core and frozen protocol bytes are unchanged.
 See [the complete demo evidence](../proof/DESEN-APP-REPEATABLE-DEMO.md) and
 [ADR 0022](../adr/0022-repeatable-local-demo-composition.md).
+
+### M10-T09 implementation checkpoint — hosted closure pending
+
+The `DONE` row is a conditional closure candidate. T09 remains the only active task until
+exact-head PR checks, merge and fresh main pass. The user requested a pause immediately afterward;
+G10 and its long local run must not start without a new instruction.
+
+The complete unchanged Runtime Core tree is
+`3fa3613a3be63c749f40b6a0b55af5b40c675773`, captured from the completed T08 main revision.
+The canonical 271-byte identity artifact is
+`sha256:fbda58d72ccff36d530368422dd7fd82c73dcca359c29e3a6667e8ae4b9b424b`.
+Twelve real-Git groups pass directly and under exact CI permissions; hidden changes, object loss,
+shallow history, races and immutable-write negatives remain covered. The first guarded attempt's
+pre-spawn environment-ownership failure was corrected without widening permissions or reducing
+tests. The bounded baseline and all 507 CI/retained-runner contracts pass with zero skips.
+Checkpoint 79 preserves its 78 merged predecessors and 62 earlier artifacts at
+`sha256:06fa67b106c1a8056e5c26cfcc1a78e29a00cc1b793217b1c48c60fbec9bce8e`, authenticating
+63 artifacts / 126 readers; all 113 checkpoint cases pass. No preceding workload is removed:
+228 logical workloads / 109 proof pairs, 245 physical workloads, nine Chromium journeys,
+unchanged two-worker shards and eleven barriers. Candidate progress is 121/148 (82%), M10 12/12;
+gates remain 11/13. [Full baseline evidence](../proof/RUNTIME-CORE-BASELINE.md).
 
 ## M11 — Capability extensibility proof
 
