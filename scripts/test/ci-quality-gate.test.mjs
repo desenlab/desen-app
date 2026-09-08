@@ -843,7 +843,7 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 228);
+  assert.equal(steps.length, 230);
   assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 110);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
@@ -1347,8 +1347,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 228,
-    planSha256: "dbc220edb2dbfd9eeb986330b96f37fbf5bc0c8c08b59633b3def3f2f0fd79d4",
+    stepCount: 230,
+    planSha256: "f8a63dd74709c8492135785402caaed0592e6deb36b3ad0ef1ed0f592889cf7c",
   });
 
   const missingTypecheck = clone(steps);
