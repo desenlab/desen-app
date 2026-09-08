@@ -265,12 +265,26 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
       ],
     ],
     ["runtime-core-baseline", ["desen-app-repeatable-demo"]],
+    [
+      "m10-gate",
+      [
+        "desen-app-evergreen-product-composition",
+        "desen-app-input-pending-fixture",
+        "desen-app-failure-fixture",
+        "desen-app-success-host-operation",
+        "desen-app-published-host-update",
+        "desen-app-invalid-publication",
+        "desen-app-last-known-good-recovery",
+        "desen-app-repeatable-demo",
+        "runtime-core-baseline",
+      ],
+    ],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "38c0e3f76d79d0ab05b40e25f9e4db5ff910ad8f93087d42a1532ae6608c8b84";
+  "72a9470b72bbcd833371c649984e9878e0af00e5b8d163dfb15aa967b3c6690b";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

@@ -26,19 +26,20 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10 tasks:** `████████████` **12 / 12 tasks complete (100%; T09 hosted closure pending)**
+**M10 complete:** `████████████` **12 / 12 tasks complete (100%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **AR-01:** `DONE` · **M10-T08:** `DONE` ([fresh main PASS](https://github.com/desenlab/desen-app/actions/runs/34230382825)) · **P-07 / P-12:** `PROVEN` · **PF-059:** `CLOSED` · **Current task:** `M10-T09` (conditional closure candidate; pause before G10)
+**Proof gates:** **12 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **G10:** `DONE` (conditional closure candidate) · **AR-01:** `DONE` · **P-07 / P-12:** `PROVEN` · **PF-059:** `CLOSED` · **Current task:** `G10` exact-head hosted closure
 
 [View the detailed task board](docs/plan/TASKS.md)
 
 <!-- task-progress:end -->
 
-**M10-T09:** the [committed Core baseline](docs/proof/RUNTIME-CORE-BASELINE.md) records the entire
-unchanged Runtime Core tree for M11 comparison. Twelve real-Git groups pass directly and under
-exact CI permissions; all 507 CI contracts and the bounded baseline pass. Exact-head PR checks,
-merge and fresh main remain required. After T09 closes, work pauses at the user's request;
-G10 and its full local run will not start without a new instruction.
+**G10:** the [terminal M10 gate](docs/proof/DESEN-APP-M10-GATE.md) joins all nine independent
+Chromium journeys, the exhaustive root proof graph, the current independent-host source audit,
+and the [committed Runtime Core baseline](docs/proof/RUNTIME-CORE-BASELINE.md). Root
+`pnpm test:e2e` and `pnpm proof` are real coordinators, not stubs. The `DONE` record remains a
+conditional closure candidate until the unchanged head passes required hosted checks, merges, and
+the resulting fresh `main` run passes. M11 has not started.
 
 **M10-T08:** the [repeatable demo](docs/proof/DESEN-APP-REPEATABLE-DEMO.md) starts the normal
 editor on 5173 with empty, safely resettable storage. A designer visibly authors a two-surface

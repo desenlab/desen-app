@@ -174,10 +174,18 @@ The package's complete browser command retains all earlier journeys and adds thi
 pnpm --filter @desen/app-browser-e2e test:e2e
 ```
 
-The T08 proof report owns the final immutable artifact and local/hosted receipts. A seal checks
-identity, never cached test success. T09 separately freezes the committed Runtime Core tree.
-Until G10 implements and verifies the complete coordinator, root `pnpm proof` and `pnpm test:e2e`
-remain explicitly unimplemented; do not treat an early stub or a single browser pass as M10 closure.
+The T08 proof report owns its immutable artifact and local/hosted receipts. A seal checks identity,
+never cached test success. T09 separately freezes the committed Runtime Core tree. G10 completes
+the root coordinators:
+
+```bash
+pnpm test:e2e
+pnpm proof
+```
+
+The first command runs every package-owned Chromium journey; the second runs the exhaustive root
+quality graph. Both are required. The deterministic G10 seal verifies composition and wiring but
+does not claim that Chromium or the exhaustive graph ran by itself.
 
 ## Later milestones — not part of this M10 demo
 

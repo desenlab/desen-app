@@ -2139,21 +2139,21 @@ and move to M10-T01.
 
 ## M10 — First end-to-end proof
 
-| ID       | Status      | Depends on                | Deliverable / evidence                                                        |
-| -------- | ----------- | ------------------------- | ----------------------------------------------------------------------------- |
-| M10-T01  | DONE        | G09                       | Empty-project-to-sign-in browser E2E                                          |
-| M10-T01A | DONE        | M10-T01                   | User-created blank project and durable normal-App authoring                   |
-| M10-T01B | DONE        | M10-T01A                  | Visual behavior authoring and Catalog-derived Run controls                    |
-| M10-T01C | DONE        | M10-T01B                  | Evergreen product composition through an authenticated workspace profile      |
-| M10-T02  | DONE        | M10-T01C                  | Input and pending fixture test                                                |
-| M10-T03  | DONE        | M10-T02                   | Failure fixture and visible failure-state test                                |
-| M10-T04  | DONE        | M10-T02                   | Success fixture, navigation, and real host-operation binding test             |
-| M10-T05  | DONE        | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
-| M10-T06  | DONE        | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
-| M10-T07  | DONE        | M10-T05, G07              | Corrupt revision and catalog mismatch preserve last-known-good                |
-| M10-T08  | DONE        | M10-T01B–M10-T07          | One-command seed/reset and repeatable sign-in demo runbook                    |
-| M10-T09  | DONE        | M10-T08                   | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
-| G10      | NOT_STARTED | M10-T01C, M10-T02–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
+| ID       | Status | Depends on                | Deliverable / evidence                                                        |
+| -------- | ------ | ------------------------- | ----------------------------------------------------------------------------- |
+| M10-T01  | DONE   | G09                       | Empty-project-to-sign-in browser E2E                                          |
+| M10-T01A | DONE   | M10-T01                   | User-created blank project and durable normal-App authoring                   |
+| M10-T01B | DONE   | M10-T01A                  | Visual behavior authoring and Catalog-derived Run controls                    |
+| M10-T01C | DONE   | M10-T01B                  | Evergreen product composition through an authenticated workspace profile      |
+| M10-T02  | DONE   | M10-T01C                  | Input and pending fixture test                                                |
+| M10-T03  | DONE   | M10-T02                   | Failure fixture and visible failure-state test                                |
+| M10-T04  | DONE   | M10-T02                   | Success fixture, navigation, and real host-operation binding test             |
+| M10-T05  | DONE   | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
+| M10-T06  | DONE   | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
+| M10-T07  | DONE   | M10-T05, G07              | Corrupt revision and catalog mismatch preserve last-known-good                |
+| M10-T08  | DONE   | M10-T01B–M10-T07          | One-command seed/reset and repeatable sign-in demo runbook                    |
+| M10-T09  | DONE   | M10-T08                   | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
+| G10      | DONE   | M10-T01C, M10-T02–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
 
 M10-T01 is `DONE`. The dedicated `@desen/app-browser-e2e` workspace owns Playwright, Vite,
 Chromium, and failure artifacts while the root and product App manifests retain no M10 browser-E2E
@@ -2678,6 +2678,23 @@ unchanged two-worker shards and eleven barriers. Candidate progress is 121/148 (
 gates remain 11/13. [Full baseline evidence](../proof/RUNTIME-CORE-BASELINE.md).
 
 ## M11 — Capability extensibility proof
+
+### G10 terminal M10 gate — hosted closure pending
+
+The `DONE` row is a conditional closure candidate until exact-head hosted checks, merge, and fresh
+`main` pass. Root `pnpm test:e2e` now runs the package-owned nine-journey Chromium suite, while root
+`pnpm proof` runs the complete exhaustive `pnpm check` authority. Neither command is a stub and the
+deterministic G10 verifier does not reuse or impersonate live execution.
+
+Fresh source inspection finds 104 modules in the independently built host graph, 22 shared managed
+modules, and zero dynamic or unresolved edges. The complete Runtime Core tree still equals the T09
+baseline `3fa3613a3be63c749f40b6a0b55af5b40c675773`; staged, unstaged, untracked-Core, object-loss,
+and identity drift fail closed. Checkpoint 80 authenticates 64 artifacts / 128 readers at
+`sha256:49e9354e03e31d9e8767aac82832759f1d32397434b0952392b6d2f6218d24fe` and preserves all
+79 predecessors. CI expands to 230 logical workloads / 110 proof pairs and 247 physical shard
+workloads without removing any prior test. Proof gates advance to 12/13; task progress remains
+121/148 (82%) because gates are excluded. M11 must not begin before G10's hosted closure.
+[Full G10 evidence](../proof/DESEN-APP-M10-GATE.md).
 
 Map and Sortable branches may proceed independently after G10. Each branch compares against the
 exact runtime-core tree hash captured by M10-T09.

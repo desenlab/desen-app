@@ -1,8 +1,29 @@
 # Project Status
 
-Last updated: 2026-09-08
+Last updated: 2026-09-09
 
-## Current work — M10-T09 committed Runtime Core baseline
+## Current work — G10 terminal M10 gate
+
+All twelve M10 tasks are complete. G10 now joins their exact evidence into one terminal authority:
+root `pnpm test:e2e` executes all nine independent Chromium journeys and root `pnpm proof` executes
+the complete exhaustive `pnpm check` graph. A fresh Vite graph audit proves that the independent
+host resolves the public Catalog/runtime path with no handwritten managed component tree. The
+current complete Runtime Core tree still equals the frozen T09 baseline
+`3fa3613a3be63c749f40b6a0b55af5b40c675773` and rejects staged, unstaged, untracked, missing-object,
+and identity drift.
+
+Checkpoint 80 preserves all 79 predecessors and authenticates 64 artifacts / 128 readers at
+`sha256:49e9354e03e31d9e8767aac82832759f1d32397434b0952392b6d2f6218d24fe`. CI contains 230
+logical workloads / 110 proof pairs and 247 physical shard workloads; no preceding workload or
+browser journey is removed. The G10 artifact is 6,904 bytes at
+`sha256:7005292247b0e4965eaf0bca12d3b1204be9d821f7ba2339257b6bc586ec3ca3`.
+
+Candidate progress remains 121/148 (82%), M10 is 12/12, and proof gates advance to 12/13. G10 is
+`DONE` as a conditional closure candidate until the unchanged pull-request head passes all hosted
+checks, merges, and the resulting fresh `main` run passes. Stop after that closure; do not start M11.
+[G10 evidence](docs/proof/DESEN-APP-M10-GATE.md).
+
+## M10-T09 committed Runtime Core baseline — closure subsequently satisfied
 
 M10-T08 is fully closed. [PR #83](https://github.com/desenlab/desen-app/pull/83) passed
 [exact-head PR CI](https://github.com/desenlab/desen-app/actions/runs/34228639827) at
@@ -28,9 +49,9 @@ merged predecessor and earlier artifact/reader. CI keeps all prior coverage and 
 shards and eleven barriers. Candidate progress is 121/148 (82%), M10 12/12; gates stay 11/13.
 G10 remains unstarted and owns the full local gate. [T09 evidence](docs/proof/RUNTIME-CORE-BASELINE.md).
 
-The user requested a pause after T09's complete hosted closure. Finish T09's exact-head PR,
-merge and fresh main checks, then stop. Do not start G10, its long local run, or M11 without a
-new user instruction. Continue using the existing checkout; no development worktree is needed.
+T09 subsequently passed exact-head hosted checks, merged, and passed fresh main verification. Its
+baseline is the unchanged G10 comparison authority. The historical pause ended when the user
+explicitly authorized G10; M11 remains outside the active scope.
 
 ## M10-T08 implementation checkpoint — closure subsequently satisfied above
 

@@ -3463,3 +3463,21 @@ and exact guarded real-Git groups, 507 CI contracts, 113 checkpoint contracts an
 baseline pass. Checkpoint 79 preserves all merged history and adds only the new artifact/reader
 pair. Exact-head hosted checks, merge and fresh main still condition T09 closure. G10 remains
 open; the user requested a pause before its full local audit. No M11 extensibility claim advances.
+
+## G10 terminal M10 gate
+
+The [G10 evidence](DESEN-APP-M10-GATE.md) joins the exact T01C–T09 parent artifacts without
+substitution. Root `pnpm test:e2e` delegates to all nine package-owned Chromium configurations;
+root `pnpm proof` delegates to the exhaustive `pnpm check` graph. Fresh source/Vite inspection
+finds 104 independent-host modules, 22 shared managed modules, and no dynamic or unresolved edge.
+The complete current Runtime Core tree equals the frozen T09 baseline
+`3fa3613a3be63c749f40b6a0b55af5b40c675773`.
+
+Ten root groups reject parent, journey, hosted-command, artifact, checkpoint, report, host-graph,
+and Core-baseline drift. Checkpoint 80 preserves every predecessor and authenticates 64 artifacts /
+128 readers. CI retains every earlier workload and expands to 230 logical workloads / 110 proof
+pairs and 247 physical shard workloads. The 6,904-byte artifact is
+`sha256:7005292247b0e4965eaf0bca12d3b1204be9d821f7ba2339257b6bc586ec3ca3`. Proof gates advance
+to 12/13. The `DONE` record remains conditional on unchanged exact-head hosted checks, merge, and a
+fresh passing `main` run; it does not claim remote/multi-user deployment, production authentication,
+native targets, Map, Sortable, domains, package publication, or release.
