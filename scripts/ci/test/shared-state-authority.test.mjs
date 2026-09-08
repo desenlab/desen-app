@@ -36,6 +36,7 @@ import {
   OS_TEMP_ONLY_VERIFIER_PROOF_IDS,
   OS_TEMP_ROOT_PROOF_IDS,
   PROOF_IDS,
+  READ_ONLY_GIT_VERIFIER_PROOF_IDS,
   READ_ONLY_ROOT_PROOF_IDS,
   SharedStateAuthorityError,
   WORKSPACE_TEMP_ROOT_PROOF_IDS,
@@ -108,20 +109,20 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 226 steps across the seven reviewed execution classes", () => {
+test("owns exactly 228 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 226);
-  assert.equal(new Set(ALL_STEP_IDS).size, 226);
+  assert.equal(ALL_STEP_IDS.length, 228);
+  assert.equal(new Set(ALL_STEP_IDS).size, 228);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 3,
     PACKAGE_TEST_EXCLUSIVE: 1,
-    PROOF_READ_ONLY: 92,
-    PROOF_OS_TEMP_ISOLATED: 113,
+    PROOF_READ_ONLY: 93,
+    PROOF_OS_TEMP_ISOLATED: 114,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
@@ -156,10 +157,10 @@ test("owns exactly 226 steps across the seven reviewed execution classes", () =>
 });
 
 test("pins the exact eleven read-only and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 108);
-  assert.equal(new Set(PROOF_IDS).size, 108);
+  assert.equal(PROOF_IDS.length, 109);
+  assert.equal(new Set(PROOF_IDS).size, 109);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
-  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 97);
+  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 98);
   assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 11);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
@@ -175,7 +176,7 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
     "desen-app-published-host-update",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 96);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 97);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -1320,7 +1321,7 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    108,
+    109,
   );
 });
 
@@ -1687,6 +1688,97 @@ test("the editor verifier receives only its runner-owned temp-write authority", 
     isolation.env,
   );
   assert.notEqual(workspaceWrite.code, 0);
+});
+
+test("T09 alone receives the read-only Git verifier policy without write or native authority", () => {
+  assert.deepEqual(READ_ONLY_GIT_VERIFIER_PROOF_IDS, ["runtime-core-baseline"]);
+  const pair = classifyProofPairState("runtime-core-baseline");
+  assert.equal(pair.barrier, false);
+  assert.equal(pair.verifier.executionClass, "PROOF_READ_ONLY");
+  assert.equal(pair.verifier.childProcessPolicy, "VERIFIER_GIT_READ_ONLY");
+  assert.equal(pair.verifier.tempPolicy, "NONE");
+  assert.equal(pair.verifier.tempKey, null);
+  assert.equal(pair.rootTest.executionClass, "PROOF_OS_TEMP_ISOLATED");
+  assert.equal(pair.rootTest.childProcessPolicy, "NODE_TEST_HARNESS");
+  assert.equal(pair.rootTest.tempPolicy, "RUNNER_SCOPED_OS");
+  for (const metadata of [pair.verifier, pair.rootTest]) {
+    assert.deepEqual(metadata.workspaceWrites, []);
+    assert.deepEqual(metadata.ports, []);
+    assert.equal(metadata.nativeAddonPolicy, "NONE");
+    assert.equal(metadata.filesystemCompatibilityPolicy, "NONE");
+  }
+  assert.equal(CHILD_PROCESS_VERIFIER_PROOF_IDS.includes("runtime-core-baseline"), false);
+  for (const stepId of ["verify-protocol-snapshot", "verify-desen-app-repeatable-demo"]) {
+    const forged = mutableMetadata(stepId);
+    forged.childProcessPolicy = "VERIFIER_GIT_READ_ONLY";
+    assert.throws(
+      () => validateWorkloadStateMetadata(stepId, forged),
+      (error) => error.code === "SHARED_STATE_METADATA_DRIFT",
+    );
+  }
+});
+
+test("T09 verifier can observe native Git but cannot write even its allocated temporary directory", async (context) => {
+  const workspaceRoot = await temporaryDirectory("desen-shared-state-core-baseline-");
+  context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
+  const isolation = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "verify-runtime-core-baseline",
+    baseEnvironment: { PATH: process.env.PATH },
+  });
+  context.after(() => isolation.dispose());
+  assert.match(isolation.env.NODE_OPTIONS, /(?:^| )--allow-child-process(?: |$)/u);
+  assert.doesNotMatch(isolation.env.NODE_OPTIONS, /--allow-fs-write=|--allow-addons/u);
+  // Node grants process creation, not a native executable sandbox. The proof reader separately
+  // authenticates its closed read-only Git argv; this checks the runner's exact minimal grant.
+  const git = await runNode(
+    'process.stdout.write(require("node:child_process").execFileSync("git", ["--version"], {encoding:"utf8"}))',
+    isolation.env,
+  );
+  assert.equal(git.code, 0, git.stderr);
+  assert.match(git.stdout, /^git version /u);
+  for (const destination of [workspaceRoot, isolation.tempRoot]) {
+    const result = await runNode(
+      `require("node:fs").writeFileSync(${JSON.stringify(path.join(destination, "denied"))}, "no")`,
+      isolation.env,
+    );
+    assert.notEqual(result.code, 0);
+    assert.match(result.stderr, /ERR_ACCESS_DENIED/u);
+  }
+});
+
+test("T09 root Git fixtures retain only runner-owned temporary writes and deny listeners", async (context) => {
+  const workspaceRoot = await temporaryDirectory("desen-shared-state-core-root-");
+  context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
+  for (const workload of ["verify-runtime-core-baseline", "test-runtime-core-baseline"]) {
+    const isolation = await createProofStepIsolationContext({
+      workspaceRoot,
+      workload,
+      baseEnvironment: {},
+    });
+    context.after(() => isolation.dispose());
+    const listener = await runNode(
+      'require("node:net").createServer().listen(0,"127.0.0.1")',
+      isolation.env,
+    );
+    assert.notEqual(listener.code, 0);
+    assert.match(listener.stderr, /DESEN_CI_LISTENER_FORBIDDEN/u);
+    if (workload.startsWith("test-")) {
+      const ownPath = path.join(isolation.tempRoot, "fixture");
+      const ownWrite = await runNode(
+        `require("node:fs").writeFileSync(${JSON.stringify(ownPath)}, "fixture")`,
+        isolation.env,
+      );
+      assert.equal(ownWrite.code, 0, ownWrite.stderr);
+      assert.equal(await readFile(ownPath, "utf8"), "fixture");
+      const workspaceWrite = await runNode(
+        `require("node:fs").writeFileSync(${JSON.stringify(path.join(workspaceRoot, "denied"))}, "no")`,
+        isolation.env,
+      );
+      assert.notEqual(workspaceWrite.code, 0);
+      assert.match(workspaceWrite.stderr, /ERR_ACCESS_DENIED/u);
+    }
+  }
 });
 
 test("only exact runtime-probe verifiers receive child-process authority", async (context) => {
@@ -2242,7 +2334,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 208,
+    NONE: 210,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,

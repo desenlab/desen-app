@@ -166,6 +166,7 @@ export const PROOF_IDS = Object.freeze([
   "desen-app-invalid-publication",
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
+  "runtime-core-baseline",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -206,6 +207,9 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
 ]);
+
+/** Exact verifier whose fixed native Git observations require no temporary or workspace writes. */
+export const READ_ONLY_GIT_VERIFIER_PROOF_IDS = Object.freeze(["runtime-core-baseline"]);
 
 /** Exact verifier proof ids that write only inside runner-owned OS temp without spawning children. */
 export const OS_TEMP_ONLY_VERIFIER_PROOF_IDS = Object.freeze([
@@ -293,6 +297,7 @@ if (FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS.length !== 10) {
 const READ_ONLY_ROOT_PROOF_ID_SET = new Set(READ_ONLY_ROOT_PROOF_IDS);
 const WORKSPACE_TEMP_ROOT_PROOF_ID_SET = new Set(WORKSPACE_TEMP_ROOT_PROOF_IDS);
 const CHILD_PROCESS_VERIFIER_PROOF_ID_SET = new Set(CHILD_PROCESS_VERIFIER_PROOF_IDS);
+const READ_ONLY_GIT_VERIFIER_PROOF_ID_SET = new Set(READ_ONLY_GIT_VERIFIER_PROOF_IDS);
 const OS_TEMP_ONLY_VERIFIER_PROOF_ID_SET = new Set(OS_TEMP_ONLY_VERIFIER_PROOF_IDS);
 const FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_ID_SET = new Set(
   FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS,
@@ -370,6 +375,7 @@ const TEMP_POLICIES = Object.freeze({
 const CHILD_PROCESS_POLICIES = Object.freeze({
   NONE: "NONE",
   VERIFIER_RUNTIME_PROBE: "VERIFIER_RUNTIME_PROBE",
+  VERIFIER_GIT_READ_ONLY: "VERIFIER_GIT_READ_ONLY",
   NODE_TEST_HARNESS: "NODE_TEST_HARNESS",
   NODE_TEST_HARNESS_AND_MKFIFO: "NODE_TEST_HARNESS_AND_MKFIFO",
   TOOLCHAIN_EXCLUSIVE: "TOOLCHAIN_EXCLUSIVE",
@@ -548,7 +554,9 @@ for (const proofId of PROOF_IDS) {
       tempKey: verifierUsesOsTemp ? verifierStepId : null,
       childProcessPolicy: verifierUsesRuntimeProbe
         ? CHILD_PROCESS_POLICIES.VERIFIER_RUNTIME_PROBE
-        : CHILD_PROCESS_POLICIES.NONE,
+        : READ_ONLY_GIT_VERIFIER_PROOF_ID_SET.has(proofId)
+          ? CHILD_PROCESS_POLICIES.VERIFIER_GIT_READ_ONLY
+          : CHILD_PROCESS_POLICIES.NONE,
       nativeAddonPolicy: NATIVE_ADDON_POLICY_BY_PROOF_ID[proofId] ?? NATIVE_ADDON_POLICIES.NONE,
     }),
   );
@@ -606,8 +614,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 226) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 226 steps.", {
+if (METADATA_BY_STEP_ID.size !== 228) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 228 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

@@ -264,12 +264,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
         "reference-host-web-source-audit",
       ],
     ],
+    ["runtime-core-baseline", ["desen-app-repeatable-demo"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "981aa1bf286fcb808b7b2c9a8b6b64d8eff6ea7fa2818d8285f2173463a1ab18";
+  "38c0e3f76d79d0ab05b40e25f9e4db5ff910ad8f93087d42a1532ae6608c8b84";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

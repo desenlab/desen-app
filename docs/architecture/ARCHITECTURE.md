@@ -2061,6 +2061,16 @@ stricter unchanged-build boundary. See [ADR 0022](../adr/0022-repeatable-local-d
 and the [runbook](../plan/DEMO-RUNBOOK.md). T09/G10, remote services, arbitrary profile installation,
 multi-tenant deployment and native targets remain separately owned.
 
+## M10-T09 committed Core comparison boundary
+
+The M11 branches compare the entire committed `packages/runtime-core` Git tree with the frozen
+T09 baseline, including tests, README and configuration. The capture commit is provenance, not
+a requirement to fetch old history in a shallow checkout. Verification compares the current HEAD,
+index and fresh working bytes while permitting ordinary ignored build outputs. Source changes
+hidden by index flags or ignore rules do not satisfy the comparison. The baseline proves identity,
+not successful capability integration or cached test execution; M11 retains those obligations.
+See [the baseline evidence](../proof/RUNTIME-CORE-BASELINE.md).
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific

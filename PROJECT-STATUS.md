@@ -2,7 +2,37 @@
 
 Last updated: 2026-09-08
 
-## Current work — M10-T08 implementation complete; hosted closure pending
+## Current work — M10-T09 committed Runtime Core baseline
+
+M10-T08 is fully closed. [PR #83](https://github.com/desenlab/desen-app/pull/83) passed
+[exact-head PR CI](https://github.com/desenlab/desen-app/actions/runs/34228639827) at
+`545c38827e6ad1d0d3b0d30feac4c34c6271d0e1`, merged as
+`61bfda591a25558193c94e1d0d6a9bb95af6d00d`, and passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34230382825).
+The tested and merged trees are identical. Every required check and all nine Chromium journeys
+passed; the earlier failed candidate remains a failure.
+
+T09's implementation and local evidence pass; the task-board `DONE` is a conditional closure
+candidate, not hosted completion. It remains the only active task until exact-head PR checks,
+merge and fresh main pass. The complete committed `packages/runtime-core` tree is frozen as
+`3fa3613a3be63c749f40b6a0b55af5b40c675773` for M11 comparison, with no Core file changed.
+Fresh identity/dirty-state checks reject staged, unstaged and hidden source changes while allowing
+ordinary ignored build output and unrelated workspace changes. Later shallow checkouts need no
+historical fetch. All twelve direct and exact guarded root groups, 507 CI contracts, 113 checkpoint
+contracts and the bounded six-command baseline pass. The guarded run's initial pre-spawn frozen
+environment failure was corrected at the private copy boundary without expanding permissions.
+Checkpoint 79 authenticates 63 artifacts / 126 readers at
+`sha256:06fa67b106c1a8056e5c26cfcc1a78e29a00cc1b793217b1c48c60fbec9bce8e`, preserving every
+merged predecessor and earlier artifact/reader. CI keeps all prior coverage and adds T09's pair:
+228 logical / 109 proof pairs, 245 physical workloads, nine browser journeys, unchanged two-worker
+shards and eleven barriers. Candidate progress is 121/148 (82%), M10 12/12; gates stay 11/13.
+G10 remains unstarted and owns the full local gate. [T09 evidence](docs/proof/RUNTIME-CORE-BASELINE.md).
+
+The user requested a pause after T09's complete hosted closure. Finish T09's exact-head PR,
+merge and fresh main checks, then stop. Do not start G10, its long local run, or M11 without a
+new user instruction. Continue using the existing checkout; no development worktree is needed.
+
+## M10-T08 implementation checkpoint — closure subsequently satisfied above
 
 M10-T07 is fully closed. [PR #82](https://github.com/desenlab/desen-app/pull/82) passed
 [exact-head PR CI](https://github.com/desenlab/desen-app/actions/runs/34215082332) at

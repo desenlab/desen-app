@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "task": "M10-T09",
+  "profile": "desen.runtime-core-baseline.v1",
+  "path": "packages/runtime-core",
+  "objectFormat": "sha1",
+  "captureCommit": "61bfda591a25558193c94e1d0d6a9bb95af6d00d",
+  "tree": "3fa3613a3be63c749f40b6a0b55af5b40c675773"
+}

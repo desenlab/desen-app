@@ -1845,3 +1845,33 @@ inventory test independently preserves the exact preceding 224-node T07 command 
 These registrations establish workload authority, not a successful hosted run or task closure.
 The new frozen artifact, append-only reader checkpoint, complete local contracts, exact-head CI,
 and fresh main verification remain separate required evidence.
+
+## M10-T09 committed Runtime Core baseline successor
+
+The `runtime-core-baseline` verifier/root pair appends two workloads without changing the
+existing `pnpm check` expansion or enabling the reserved `proof` / `test:e2e` entry points.
+The current exhaustive authority contains 228 logical workloads and 109 complete proof pairs
+(98 ordinary, eleven barrier pairs). The unchanged three-shard arrangement is 53/24/32 pairs,
+with 245 physical workloads after replicated preparation and the fresh join build. All nine
+existing browser journeys remain in their separate required lane.
+
+The verifier alone receives `VERIFIER_GIT_READ_ONLY`: bounded native Git child processes, no
+Node filesystem-write grant, no native addons, and no listeners. This is process-creation
+authority, not a sandbox for arbitrary native Git commands; the authenticated proof reader
+owns fixed read-only argv, repository identity, environment isolation, and before/after Core
+observations. Its root fixtures retain the existing Node-test harness and runner-owned OS
+temporary-write policy. They gain no workspace writes, aliases, listener or native-addon
+exceptions. Both steps assert unchanged compiled outputs after execution.
+
+The exact semantic parent is the completed repeatable demo. The connected affected closure
+now contains 77 proof units and 164 workloads. Only the two exact proof entry files can select
+that closure. Changes to the committed Core tree, generator, reader, artifact or report require
+exhaustive review. Exact ownership covers 1,541 tracked paths and 218 proof-owned paths, and
+successor tests reproduce the prior 1,535-path / 226-workload T08 projections unchanged.
+Recursive command parity retains all prior invocations plus the two new direct leaves:
+4,547 leaf invocations, 337 distinct workloads and 735 prerequisite segments.
+
+Checkpoint 79 appends the T09 artifact and reader pair only; all 78 earlier checkpoints,
+62 prior artifacts and 124 prior reader receipts remain unchanged. Candidate review is not
+live authority. Successful local contracts, the exact guarded pair, exact-head hosted checks
+and fresh main remain independent closure requirements; no historical PASS is reused.

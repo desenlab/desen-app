@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████████░░░░░` **120 / 148 tasks complete (81%)**
+**Overall:** `████████████████████░░░░░` **121 / 148 tasks complete (82%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -26,26 +26,34 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `███████████░` **11 / 12 tasks complete (92%)**
+**M10 tasks:** `████████████` **12 / 12 tasks complete (100%; T09 hosted closure pending)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **AR-01:** `DONE` · **M10-T07:** `DONE` ([fresh main PASS](https://github.com/desenlab/desen-app/actions/runs/34216545093)) · **P-07 / P-12:** `PROVEN` · **PF-059:** `CLOSED` · **Current product task:** `M10-T08` (local evidence passed; hosted closure pending)
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **AR-01:** `DONE` · **M10-T08:** `DONE` ([fresh main PASS](https://github.com/desenlab/desen-app/actions/runs/34230382825)) · **P-07 / P-12:** `PROVEN` · **PF-059:** `CLOSED` · **Current task:** `M10-T09` (conditional closure candidate; pause before G10)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
 <!-- task-progress:end -->
 
+**M10-T09:** the [committed Core baseline](docs/proof/RUNTIME-CORE-BASELINE.md) records the entire
+unchanged Runtime Core tree for M11 comparison. Twelve real-Git groups pass directly and under
+exact CI permissions; all 507 CI contracts and the bounded baseline pass. Exact-head PR checks,
+merge and fresh main remain required. After T09 closes, work pauses at the user's request;
+G10 and its full local run will not start without a new instruction.
+
 **M10-T08:** the [repeatable demo](docs/proof/DESEN-APP-REPEATABLE-DEMO.md) starts the normal
 editor on 5173 with empty, safely resettable storage. A designer visibly authors a two-surface
 Flow, tests it and publishes that same design to the independent host. Two reset cycles produce
 identical canonical publications; label/layout edits change the published output without changing
-host assets. Local evidence passes; the task-board `DONE` is conditional on exact-head PR and
-fresh main closure. T09 and G10 remain separate.
+host assets. Local evidence, exact-head PR checks and fresh main all pass in
+[PR #83](https://github.com/desenlab/desen-app/pull/83). T09 now records the committed Core baseline;
+G10 remains separate and unstarted.
 
 **M10-T07:** the [recovery proof](docs/proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md) preserves the
 last authenticated host revision through corrupt candidates and full process restarts, then accepts
 a later valid publication without rebuilding the independent host. Local Chromium, public recovery,
 historical compatibility, the bounded baseline, exact-head PR checks and fresh main all passed.
-T08 now joins the repeatable normal-product demo and safe local seed/reset; T09 and G10 have not started.
+T08 subsequently joined the repeatable normal-product demo and safe local seed/reset; T09 is active
+and G10 has not started.
 
 **CI-04 and SEC-02:** `DONE`; [PR #80](https://github.com/desenlab/desen-app/pull/80) and
 [fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34066622578) passed, preserving all
