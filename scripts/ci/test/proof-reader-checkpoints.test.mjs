@@ -6458,7 +6458,7 @@ test("sequence seventy-six preserves the full prefix and adds only the reviewed 
     task: "M10-T06",
     path: "docs/proof/artifacts/desen-app-0.1.0-invalid-publication.json",
     bytes: 193291,
-    sha256: "a28bf2b6eec77002a1018bbf872bf9e497d41e78c5de2d912dc873548d63a58d",
+    sha256: "1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a",
   });
   assert.deepEqual(
     current.readers
@@ -6486,7 +6486,7 @@ test("sequence seventy-six preserves the full prefix and adds only the reviewed 
   );
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "fc5bf1a8e02760b2cd02a9f8e781f28818a48f1492ebffc5741f5eb895ddf480",
+    "b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6",
   );
 });
 

@@ -4055,8 +4055,8 @@
       },
       {
         "path": "apps/desen-app-browser-e2e/invalid-publication.pw.ts",
-        "bytes": 13888,
-        "sha256": "653565d40052c65d7abbc70aeac7809acb7e07d86eb87fb2e8da4b039144857b"
+        "bytes": 15068,
+        "sha256": "12e6c30efe4b95eec558a5ce50b9a8514d73dc4685608884b22636598e1af5f4"
       },
       {
         "path": "apps/desen-app-browser-e2e/package.json",

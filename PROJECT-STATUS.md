@@ -20,9 +20,9 @@ run are still required before advancing. The optional detached Source workflow p
 product tests and a real Chromium invalid-prop/event/slot rejection-and-repair journey. T06 and
 T05 pass their exact guarded verifier/root checks; historical T01C/T04 roots pass 20/20. All 483
 CI/retained-runner contracts and the exact bounded local baseline pass. The T06 artifact is
-193,291 bytes at `sha256:a28bf2b6eec77002a1018bbf872bf9e497d41e78c5de2d912dc873548d63a58d`.
+193,291 bytes at `sha256:1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a`.
 Checkpoint 76 preserves the full prefix and authenticates 60 artifacts / 120 readers at
-`sha256:fc5bf1a8e02760b2cd02a9f8e781f28818a48f1492ebffc5741f5eb895ddf480`.
+`sha256:b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6`.
 CI keeps every prior workload and adds two: 222 logical workloads / 106 proof pairs, seven browser
 journeys, 239 physical workloads, unchanged two-worker shards and eleven exclusive barriers.
 Candidate progress is 118/148 (80%), M10 9/12 (75%); G10 remains open.

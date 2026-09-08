@@ -122,18 +122,37 @@ async function publish(page: Page, channelGeneration: number): Promise<string> {
 }
 
 async function reloadHost(host: Page, label: string): Promise<unknown> {
-  const delivered = host.waitForResponse(
-    (response) =>
-      response.request().method() === "POST" &&
-      new URL(response.url()).pathname === "/__desen/runtime/refresh",
-  );
-  await host.reload();
-  const response = await delivered;
-  expect(response.ok()).toBe(true);
-  const body = record((await response.json()) as unknown);
+  // Frame identity survives reloads, so bind the Request started by the newly committed document.
+  // Read the real delivery identity from its strong ETag; the fresh rendered surface proves that
+  // the production host consumed the bounded body and matched that ETag before activating it.
+  const committed = host.waitForEvent("framenavigated", {
+    predicate: (frame) => frame === host.mainFrame(),
+  });
+  const delivered = committed.then(async () => {
+    const hostRequest = await host.waitForRequest(
+      (candidate) =>
+        candidate.frame() === host.mainFrame() &&
+        candidate.method() === "POST" &&
+        candidate.url() === `${HOST_ORIGIN}/__desen/runtime/refresh`,
+    );
+    const response = await hostRequest.response();
+    if (response === null)
+      throw new TypeError("The fresh host request did not receive a response.");
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toBe("application/json");
+    const identity = /^"desen-active:g:(0|[1-9][0-9]*):(sha256:[0-9a-f]{64})"$/u.exec(
+      response.headers().etag ?? "",
+    );
+    if (identity === null) throw new TypeError("The host delivery has no exact activation ETag.");
+    const generation = Number(identity[1]);
+    expect(Number.isSafeInteger(generation)).toBe(true);
+    return Object.freeze({ generation, revision: identity[2] });
+  });
+  const [, identity] = await Promise.all([host.reload(), delivered]);
+  await expect(host.locator('[data-desen-host-state="surface"]')).toBeVisible();
   await expect(host.getByText(label, { exact: true })).toBeVisible();
   await expect(host.getByText(STABLE_LABEL, { exact: true })).toBeVisible();
-  return body.activation;
+  return identity;
 }
 
 async function hostBuildFingerprint(request: APIRequestContext): Promise<string> {

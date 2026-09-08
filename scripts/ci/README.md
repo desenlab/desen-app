@@ -1808,7 +1808,7 @@ required-plan identity is
 Checkpoint 76 preserves all 75 historical entries and all 59 predecessor artifacts, adds the
 193,291-byte T06 artifact, reseals only current readers `[106, 107, 116, 117]`, and appends the
 T06 proof/root readers `[118, 119]`. Its 60 artifacts / 120 readers authenticate at
-`sha256:fc5bf1a8e02760b2cd02a9f8e781f28818a48f1492ebffc5741f5eb895ddf480`.
+`sha256:b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6`.
 
 The ledger's former fixed 2 MiB envelope could not admit sequence 76's required next-candidate
 test. Raw capacity now derives from the exact code-owned reviewed task generations plus one

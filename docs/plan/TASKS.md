@@ -2533,7 +2533,7 @@ The dedicated Chromium journey passes 1/1. New product tests pass 21/21; the bro
 regression run passes 141/141. The fresh T06 verifier and ten root cases pass, including the exact
 CI permission envelope. T01C/T04 compatibility roots pass 20/20 and final guarded T05 roots pass
 10/10 without rewriting frozen artifacts. The new 193,291-byte artifact is
-`sha256:a28bf2b6eec77002a1018bbf872bf9e497d41e78c5de2d912dc873548d63a58d`;
+`sha256:1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a`;
 fresh current graphs contain 170 App / 104 host modules and 22 shared managed modules. The public
 matrix makes ten Publisher calls for a baseline, three invalid categories, and deterministic repairs.
 
@@ -2542,7 +2542,7 @@ bounded local baseline passes; dependency boundaries cover 868 modules / 3,724 e
 all previous workloads and adds the T06 pair: 222 logical workloads / 106 pairs, 239 physical
 workloads across unchanged two-worker shards and eleven barriers. Checkpoint 76 preserves all 75
 predecessors and 59 artifacts, adds T06, and seals 60 artifacts / 120 readers at
-`sha256:fc5bf1a8e02760b2cd02a9f8e781f28818a48f1492ebffc5741f5eb895ddf480`.
+`sha256:b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6`.
 The raw ledger capacity now derives from exact code-owned history plus one review candidate;
 canonical encoding, finite ceilings, fresh reads, and refusal to promote an unreviewed head remain.
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "fc5bf1a8e02760b2cd02a9f8e781f28818a48f1492ebffc5741f5eb895ddf480",
+  "headSha256": "b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6",
   "checkpoints": [
     {
       "sequence": 1,
@@ -52185,7 +52185,7 @@
           "task": "M10-T06",
           "path": "docs/proof/artifacts/desen-app-0.1.0-invalid-publication.json",
           "bytes": 193291,
-          "sha256": "a28bf2b6eec77002a1018bbf872bf9e497d41e78c5de2d912dc873548d63a58d"
+          "sha256": "1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a"
         }
       ],
       "readers": [
@@ -53006,7 +53006,7 @@
           "role": "proof-library",
           "path": "scripts/lib/desen-app-published-host-update-proof.mjs",
           "bytes": 141972,
-          "sha256": "d99534f69d2bd5a7b1be13c7070195089b7a070db8be65d5c66929391a7c4dd6"
+          "sha256": "d3da5fac014ffe20f3e43690e6485738c878548154dba63090e0f8c819a4a224"
         },
         {
           "task": "M10-T05",
@@ -53020,7 +53020,7 @@
           "role": "proof-library",
           "path": "scripts/lib/desen-app-invalid-publication-proof.mjs",
           "bytes": 56969,
-          "sha256": "700dd6dd4076268a2bcd61f54b5f8f003348bbe42f63ed9d5dbbf88487ef5f0a"
+          "sha256": "8cb14bfe9e9cc5d8523b21ca4f9c0a42041f1cd45c4aa215f11a95747930dc68"
         },
         {
           "task": "M10-T06",

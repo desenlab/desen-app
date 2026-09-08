@@ -27,7 +27,7 @@ const T04_HISTORICAL_READER_BRIDGE_PATH =
 const T06_SUCCESSOR_PATH = "docs/proof/artifacts/desen-app-0.1.0-invalid-publication.json";
 const T06_SUCCESSOR_PIN = Object.freeze({
   bytes: 193_291,
-  sha256: "a28bf2b6eec77002a1018bbf872bf9e497d41e78c5de2d912dc873548d63a58d",
+  sha256: "1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a",
 });
 const T06_ADDED_APP_PATHS = Object.freeze([
   "apps/desen-app/src/authoring-source-draft.ts",

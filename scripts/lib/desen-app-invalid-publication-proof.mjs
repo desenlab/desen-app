@@ -105,7 +105,7 @@ const TRACKED_PATHS = Object.freeze(
 /** Immutable task artifact identity; initialized only when the first evidence is sealed. */
 export const DESEN_APP_INVALID_PUBLICATION_ARTIFACT_PIN = Object.freeze({
   bytes: 193_291,
-  sha256: "a28bf2b6eec77002a1018bbf872bf9e497d41e78c5de2d912dc873548d63a58d",
+  sha256: "1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a",
 });
 
 /** Default write-once M10-T06 evidence destination. */

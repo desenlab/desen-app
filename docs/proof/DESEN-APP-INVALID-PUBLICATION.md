@@ -8,7 +8,7 @@ M10-T05 parent: `sha256:80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da
 
 M09-T13 parent: `sha256:8ac4d81d9097e188860757c637673ff406ba9f82b8cd8f379f184ef85138e972`
 
-Final artifact: `sha256:a28bf2b6eec77002a1018bbf872bf9e497d41e78c5de2d912dc873548d63a58d`
+Final artifact: `sha256:1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a`
 
 The task-time artifact is a local completion candidate. Merge and final closure remain conditional
 on the exact current pull-request head and fresh merged-main hosted quality and browser runs;
@@ -53,7 +53,7 @@ The exact six-command bounded local baseline passes. No exhaustive local gate is
 G10's required later full audit, and none of these local results implies a hosted pass.
 
 Checkpoint 76 retains all 75 prior entries and adds T06 without changing a frozen artifact. The
-current head is `sha256:fc5bf1a8e02760b2cd02a9f8e781f28818a48f1492ebffc5741f5eb895ddf480`.
+current head is `sha256:b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6`.
 The raw checkpoint envelope derives from code-owned task generations plus exactly one candidate,
 with separate finite ceilings. This repairs required append-test headroom without skipping tests,
 changing canonical history, or granting live authority to the review candidate.
@@ -65,3 +65,19 @@ activation destination. It does not claim corrupt revision recovery, Catalog mis
 remote deployment, signing, native parity, P-12, N-036, or G10 closure. M10-T07 through T09 and the
 full G10 audit remain separate requirements. Hosted exact-head PR and fresh main closure receipts
 will be recorded only after their runs pass.
+
+## Unmerged candidate browser correction
+
+The first PR candidate (`79b7e2b2108daecab93632a023648b93fbc2bdef`,
+[run 34206132801](https://github.com/desenlab/desen-app/actions/runs/34206132801)) passed the
+Quality gate but failed Browser E2E while Playwright copied a reload response body. A local repeat
+also stalled in the browser-protocol completion observer even though the fresh host had mounted
+the correct surface. Temporary observation confirmed complete native body reads and EOF without
+cancellation for every successful delivery; that instrumentation is not part of the final test.
+
+The corrected test binds the request started after the new document commits, checks the exact
+successful JSON response and strong activation ETag, and requires the newly mounted host surface
+and both exact labels. Production mounting already requires the complete bounded body and its
+matching ETag. No retry, delay, product bypass, or skipped negative case is introduced. Only the
+unmerged T06 artifact candidate and checkpoint 76 are corrected; the 75 completed checkpoints and
+59 completed artifact identities remain unchanged. The failed candidate is not a completion receipt.
