@@ -54,7 +54,9 @@ const T01A_ANCESTOR_APP_PACKAGE_RECEIPT = Object.freeze({
   bytes: 4_122,
   sha256: "7038647aa1809f07ee5131d0df8d0bee75bf1f2cdf0358be738b2c3603b64577",
 });
-const T05_PREDECESSOR_GAP_RECEIPTS = Object.freeze([
+// Exact historical bytes supplied by the authenticated T05/T06 successor contract. Inspector
+// remained unchanged through T05, so its first T06 edit has no earlier archived file entry.
+const T05_T06_HISTORICAL_GAP_RECEIPTS = Object.freeze([
   Object.freeze({
     path: "apps/desen-app/dev/local-dev.mjs",
     bytes: 1_313,
@@ -64,6 +66,11 @@ const T05_PREDECESSOR_GAP_RECEIPTS = Object.freeze([
     path: "pnpm-lock.yaml",
     bytes: 131_888,
     sha256: "23632d4c1d8bc8832a31db328fa36c7f1523aeb7c52f034ddbb3f8edecc4c002",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/inspector-panel.tsx",
+    bytes: 32_591,
+    sha256: "ad2543377377e8d5ae99fbd110a0cf1c63710620e972db388feca95ef7ae7d26",
   }),
 ]);
 const T01C_SUCCESSOR_ADDED_PATHS = Object.freeze([
@@ -386,12 +393,12 @@ async function authenticatePublishedHostHistoricalAuthority(workspaceRoot) {
     }
     const successor = await authenticate({ workspaceRoot });
     const files = new Map();
-    for (const receipt of T05_PREDECESSOR_GAP_RECEIPTS) {
+    for (const receipt of T05_T06_HISTORICAL_GAP_RECEIPTS) {
       const bytes = readTaskTimeFile(successor, receipt.path);
       if (bytes.byteLength !== receipt.bytes || sha256(bytes) !== receipt.sha256) {
         fail(
           "SUCCESSOR_POLICY_VIOLATION",
-          `The exact M10-T04 predecessor gap drifted: ${receipt.path}.`,
+          `The exact T05/T06 historical predecessor gap drifted: ${receipt.path}.`,
         );
       }
       files.set(receipt.path, bytes);

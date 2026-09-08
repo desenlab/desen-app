@@ -116,15 +116,17 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "27166d8cca9e4ce8eadde335306070b404e1e8f28de3e36dd391430a7884d825",
   "da57d8ddad552e2d0ce5ebc7f990aa6d90c722f8af1ae3a31f4247d11a43e308",
   "ed7eea304b03e07112fbeb0b27fd6df82d83d229033c5c3794d0054cc9df2ea1",
+  "fc5bf1a8e02760b2cd02a9f8e781f28818a48f1492ebffc5741f5eb895ddf480",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
   25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
   46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57, 58, 59, 59,
-  59, 59,
+  59, 59, 60,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
-const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
+const MAX_CHECKPOINT_COUNT = 1_024;
+const MAX_CHECKPOINT_CAPACITY_BYTES = 16 * 1024 * 1024;
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
@@ -751,6 +753,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     "scripts/lib/desen-app-published-host-update-proof.mjs",
     "tests/desen-app-published-host-update.test.mjs",
   ),
+  freezeTaskAuthority(
+    "M10-T06",
+    {
+      path: "docs/proof/artifacts/desen-app-0.1.0-invalid-publication.json",
+      bytes: 193_291,
+      sha256: "a28bf2b6eec77002a1018bbf872bf9e497d41e78c5de2d912dc873548d63a58d",
+    },
+    "scripts/lib/desen-app-invalid-publication-proof.mjs",
+    "tests/desen-app-invalid-publication.test.mjs",
+  ),
 ]);
 
 function taskAuthorityForCheckpointSequence(sequence) {
@@ -793,6 +805,90 @@ export class ProofReaderCheckpointError extends Error {
 function fail(code, message, details = {}) {
   throw new ProofReaderCheckpointError(code, message, details);
 }
+
+function calculateCheckpointByteCapacity() {
+  const reviewedCount = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length;
+  if (
+    reviewedCount === 0 ||
+    reviewedCount + 1 > MAX_CHECKPOINT_COUNT ||
+    PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS.length !== reviewedCount
+  ) {
+    fail(
+      "PROOF_READER_CHECKPOINT_CAPACITY_INVALID",
+      "Code-owned checkpoint capacity must include its reviewed generations and one candidate.",
+    );
+  }
+
+  // This is a size model, not a validated checkpoint or a cached verification result. Every
+  // string and artifact receipt comes from code-owned authority; only reader byte counts vary,
+  // and their largest allowed decimal representation is MAX_AUTHORITY_BYTES. SHA-256 strings
+  // always occupy 64 ASCII characters. Keep this record shape identical to canonical output.
+  const checkpoints = [];
+  let sequence = 1;
+  while (sequence <= reviewedCount + 1) {
+    const authority = taskAuthorityForCheckpointSequence(sequence);
+    const artifacts = [];
+    const readers = [];
+    let taskIndex = 0;
+    while (taskIndex < authority.length) {
+      const task = authority[taskIndex];
+      artifacts[taskIndex] = {
+        task: task.task,
+        path: task.artifact.path,
+        bytes: task.artifact.bytes,
+        sha256: task.artifact.sha256,
+      };
+      let roleIndex = 0;
+      while (roleIndex < 2) {
+        const reader = task.readers[roleIndex];
+        readers[taskIndex * 2 + roleIndex] = {
+          task: task.task,
+          role: reader.role,
+          path: reader.path,
+          bytes: MAX_AUTHORITY_BYTES,
+          sha256: GENESIS_PREDECESSOR_SHA256,
+        };
+        roleIndex += 1;
+      }
+      taskIndex += 1;
+    }
+    checkpoints[sequence - 1] = {
+      sequence,
+      predecessorSha256: GENESIS_PREDECESSOR_SHA256,
+      artifacts,
+      readers,
+    };
+    sequence += 1;
+  }
+  const envelope = {
+    schemaVersion: 1,
+    profile: PROFILE,
+    headSha256: GENESIS_PREDECESSOR_SHA256,
+    checkpoints,
+  };
+  const capacity = SAFE_BUFFER_FROM(
+    `${SAFE_JSON_STRINGIFY(envelope, null, 2)}\n`,
+    "utf8",
+  ).byteLength;
+  if (!SAFE_NUMBER_IS_SAFE_INTEGER(capacity) || capacity > MAX_CHECKPOINT_CAPACITY_BYTES) {
+    fail(
+      "PROOF_READER_CHECKPOINT_CAPACITY_INVALID",
+      "Code-owned checkpoint capacity exceeds its separately reviewed finite ceiling.",
+    );
+  }
+  return capacity;
+}
+
+/**
+ * Maximum raw canonical bytes for code-owned reviewed task generations plus exactly one candidate.
+ *
+ * This finite admission envelope is computed only from immutable module authority, never input
+ * bytes, filesystem state, or a prior successful validation. It does not authorize an appended
+ * checkpoint: live verification still requires the exact reviewed chain, and candidate validation
+ * still returns only REVIEW_REQUIRED. Growth beyond 1,024 generations or 16 MiB requires a separate
+ * code-reviewed capacity change; canonical JSON, historical digests, and fresh reads are unchanged.
+ */
+export const PROOF_READER_CHECKPOINT_MAX_BYTES = calculateCheckpointByteCapacity();
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
@@ -1233,7 +1329,11 @@ function normalizeManifest(rawManifest) {
       "Every reviewed checkpoint digest must pin one immutable task-generation size.",
     );
   }
-  const rawCheckpoints = exactDenseArray(manifest.checkpoints, "manifest checkpoints", 1_024);
+  const rawCheckpoints = exactDenseArray(
+    manifest.checkpoints,
+    "manifest checkpoints",
+    MAX_CHECKPOINT_COUNT,
+  );
   if (rawCheckpoints.length === 0) {
     fail(
       "PROOF_READER_CHECKPOINT_SCHEMA_INVALID",
@@ -1363,7 +1463,7 @@ function strictUtf8(bytes) {
 }
 
 function normalizeCanonicalCheckpointBytes(rawBytes) {
-  const bytes = captureInertBytes(rawBytes, "checkpoint", MAX_CHECKPOINT_BYTES);
+  const bytes = captureInertBytes(rawBytes, "checkpoint", PROOF_READER_CHECKPOINT_MAX_BYTES);
   const text = strictUtf8(bytes);
   let parsed;
   try {
@@ -1498,7 +1598,7 @@ function captureOptions(rawOptions) {
     captured.checkpointBytes = captureInertBytes(
       captured.checkpointBytes,
       "checkpoint",
-      MAX_CHECKPOINT_BYTES,
+      PROOF_READER_CHECKPOINT_MAX_BYTES,
     );
   }
   if (
@@ -1759,7 +1859,7 @@ export async function verifyProofReaderCheckpoints(rawOptions = undefined) {
     (await readRegularAuthority(
       workspaceRoot,
       CHECKPOINT_RELATIVE_PATH,
-      MAX_CHECKPOINT_BYTES,
+      PROOF_READER_CHECKPOINT_MAX_BYTES,
       options.beforeAuthorityOpen,
     ));
   const manifest = validateProofReaderCheckpointBytes(checkpointBytes);
@@ -1816,7 +1916,7 @@ export async function readCheckpointedFrozenArtifact(task, rawOptions = undefine
     (await readRegularAuthority(
       workspaceRoot,
       CHECKPOINT_RELATIVE_PATH,
-      MAX_CHECKPOINT_BYTES,
+      PROOF_READER_CHECKPOINT_MAX_BYTES,
       options.beforeAuthorityOpen,
     ));
   const manifest = validateProofReaderCheckpointBytes(checkpointBytes);

@@ -8,7 +8,7 @@ The original T01 harness imports the production `DesenAppApplication`, its style
 empty reference project directly from `@desen/app-web` source. The later journeys use the ordinary
 product entry with temporary instances of its local persistence service. Its package-level
 `test:e2e` command first builds the complete product dependency closure and the independent
-reference host, then typechecks and builds the harness before running all six Chromium journeys.
+reference host, then typechecks and builds the harness before running all seven Chromium journeys.
 The original in-memory compare-and-set
 adapter is test-only and is never imported by the product entry.
 
@@ -36,7 +36,7 @@ Playwright writes retained failure traces, screenshots, and video under `test-re
 HTML report under `playwright-report/`. Both directories and the production proof bundle in
 `dist/` are generated outputs and must not be committed.
 
-The six independently configured journeys cover:
+The seven independently configured journeys cover:
 
 - M10-T01: empty-project visual authoring, authenticated native drag, canonical persistence,
   structural re-admission, and exact Design/Run static parity.
@@ -51,6 +51,12 @@ The six independently configured journeys cover:
   and reload of a separately built reference host. The managed Text label, Stack gap, and Bundle
   revision change from A to B while a digest of the host HTML and assets remains identical; a
   second reload preserves B.
+- M10-T06: a visually authored and published baseline followed by explicitly advanced Source
+  negative-input cases. Invalid component prop, undeclared event, and undeclared slot candidates
+  are entered in the normal product's visible Advanced Source editor. Fresh validation rejects
+  each candidate with a diagnostic linked to its exact node, while the committed canvas, saved
+  Source, channel, and active host remain unchanged. Each repaired candidate is applied, saved,
+  and published through the ordinary controls before the independently built host reloads it.
 
 The T04 server uses `product-proof-server.mjs --with-operations` on port 4176. It starts the same
 bounded loopback operation service used by the normal developer launcher, with fresh credentials
@@ -65,5 +71,20 @@ with a fresh local publication profile, while the independently built reference 
 port 4178. The browser does not inject Source, fulfill requests, select an endpoint, or mutate the
 host. The proof server owns temporary storage and deletes it on shutdown.
 
-Invalid-publication diagnostics (T06), last-known-good corruption recovery (T07), production
-identity, remote deployment, and G10 closure remain outside these browser journeys.
+T06 reuses that unchanged isolated server in a separate sequential Playwright configuration.
+Its negative fixtures deliberately exercise the optional Advanced Source editor; they are not
+presented as invalid values authored through ordinary constrained Inspector controls. The browser
+never injects an editor document, intercepts or fulfills a request, mutates the host, or reads a
+hidden test API. It observes outgoing Source, Bundle, channel, and activation requests, and the
+actual host refresh response's active generation/revision. Rejected candidates emit none of those
+writes. The previous host's HTML and asset digest remains identical across every rejection and
+valid repair. Discarding an unapplied draft also preserves the saved Source and active host.
+
+Run only this slice after building its ordinary product dependency closure:
+
+```bash
+pnpm --filter @desen/app-browser-e2e exec playwright test --config invalid-publication-playwright.config.ts
+```
+
+Last-known-good corruption recovery (T07), production identity, remote deployment, and G10 closure
+remain outside these browser journeys.

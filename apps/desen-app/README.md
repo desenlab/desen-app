@@ -1,5 +1,19 @@
 # Desen App
 
+## M10-T06: reject invalid advanced Source without losing the valid design
+
+Normal authoring stays visual. For an existing valid project, **Source & release → Advanced Source**
+opens an optional detached JSON draft for advanced users. **Validate and apply Source** runs the
+real Publisher and continuous validator. Invalid properties, events, and slots appear in the right
+Inspector's **Validation** section; choose a linked issue to select its genuine existing layer.
+The valid canvas stays unchanged. A foreign workspace or stale draft cannot borrow its identities.
+
+While the draft is open, Save, Publish, Run, and visual edits pause. **Discard Source draft** returns
+to the unchanged valid Source. Repair and apply updates only the local document; use the ordinary
+**Save source → Publish** flow to update the host. Rejection never writes Source or Bundle data,
+changes the channel, or requests activation. See [ADR 0021](../../docs/adr/0021-invalid-source-draft-publication-boundary.md)
+and the [T06 proof](../../docs/proof/DESEN-APP-INVALID-PUBLICATION.md) for the exact boundary.
+
 ## M10-T05: publish visible edits to an unchanged host
 
 The normal local launcher now composes the Account app's existing Save and Publish controls with

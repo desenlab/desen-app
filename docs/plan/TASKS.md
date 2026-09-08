@@ -2149,7 +2149,7 @@ and move to M10-T01.
 | M10-T03  | DONE        | M10-T02                   | Failure fixture and visible failure-state test                                |
 | M10-T04  | DONE        | M10-T02                   | Success fixture, navigation, and real host-operation binding test             |
 | M10-T05  | DONE        | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
-| M10-T06  | NOT_STARTED | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
+| M10-T06  | DONE        | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
 | M10-T07  | NOT_STARTED | M10-T05, G07              | Corrupt revision and catalog mismatch preserve last-known-good                |
 | M10-T08  | NOT_STARTED | M10-T01B–M10-T07          | One-command seed/reset and repeatable sign-in demo runbook                    |
 | M10-T09  | NOT_STARTED | M10-T08                   | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
@@ -2518,6 +2518,40 @@ multi-user deployment, native targets, P-12, N-036, and G10 remain open. M10-T05
 closure candidate until fresh hosted `Quality gate` and `Browser E2E` pass for the exact final PR
 head; local evidence never authorizes merge. ADR 0020 and
 `docs/proof/DESEN-APP-PUBLISHED-HOST-UPDATE.md` record the decision and exact proof.
+
+### M10-T06 local completion candidate — exact-head hosted closure required
+
+M10-T06 adds the optional detached Advanced Source workflow beside ordinary Source persistence
+and publication. Real public Publisher and continuous validator calls reject invalid prop, event,
+and slot candidates with exact codes/pointers and genuine current-layer links. Rejection retains
+the valid Source/canvas and makes no Source, Bundle, channel, or activation writes. Exact workspace
+identity, stale-baseline checks, bounded inert input, pending-operation guards, and draft-time edit
+locks prevent bypasses. Repairs still require the existing Save source → Publish workflow; normal
+designer authoring remains visual and is not replaced by JSON.
+
+The dedicated Chromium journey passes 1/1. New product tests pass 21/21; the broader related App
+regression run passes 141/141. The fresh T06 verifier and ten root cases pass, including the exact
+CI permission envelope. T01C/T04 compatibility roots pass 20/20 and final guarded T05 roots pass
+10/10 without rewriting frozen artifacts. The new 193,291-byte artifact is
+`sha256:a28bf2b6eec77002a1018bbf872bf9e497d41e78c5de2d912dc873548d63a58d`;
+fresh current graphs contain 170 App / 104 host modules and 22 shared managed modules. The public
+matrix makes ten Publisher calls for a baseline, three invalid categories, and deterministic repairs.
+
+All 483 CI/retained-runner contract tests pass, including 109 checkpoint tests. The exact six-command
+bounded local baseline passes; dependency boundaries cover 868 modules / 3,724 edges. CI retains
+all previous workloads and adds the T06 pair: 222 logical workloads / 106 pairs, 239 physical
+workloads across unchanged two-worker shards and eleven barriers. Checkpoint 76 preserves all 75
+predecessors and 59 artifacts, adds T06, and seals 60 artifacts / 120 readers at
+`sha256:fc5bf1a8e02760b2cd02a9f8e781f28818a48f1492ebffc5741f5eb895ddf480`.
+The raw ledger capacity now derives from exact code-owned history plus one review candidate;
+canonical encoding, finite ceilings, fresh reads, and refusal to promote an unreviewed head remain.
+
+The `DONE` row is a closure candidate only until the exact final PR head passes hosted Quality
+gate and Browser E2E, merges, and fresh main passes. Local evidence never authorizes merge.
+Candidate progress is 118/148 (80%), M10 9/12 (75%); proof gates remain 11/13. T07 recovery,
+T08 repeatable seed/reset, T09 committed Runtime Core baseline, P-12, N-036, and G10 remain open.
+See [ADR 0021](../adr/0021-invalid-source-draft-publication-boundary.md) and the
+[T06 proof](../proof/DESEN-APP-INVALID-PUBLICATION.md).
 
 ## M11 — Capability extensibility proof
 

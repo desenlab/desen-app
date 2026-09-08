@@ -24,6 +24,28 @@ const HOST_AUDIT_ARTIFACT_PATH = "docs/proof/artifacts/reference-host-web-0.1.0-
 const APP_CANVAS_ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-real-adapter-canvas.json";
 const T04_HISTORICAL_READER_BRIDGE_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-t04-historical-reader-bridge.json.gz";
+const T06_SUCCESSOR_PATH = "docs/proof/artifacts/desen-app-0.1.0-invalid-publication.json";
+const T06_SUCCESSOR_PIN = Object.freeze({
+  bytes: 193_291,
+  sha256: "a28bf2b6eec77002a1018bbf872bf9e497d41e78c5de2d912dc873548d63a58d",
+});
+const T06_ADDED_APP_PATHS = Object.freeze([
+  "apps/desen-app/src/authoring-source-draft.ts",
+  "apps/desen-app/src/source-draft-controls.tsx",
+]);
+const T06_REVIEWED_CHANGED_PATHS = Object.freeze([
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app-browser-e2e/package.json",
+  ...T06_ADDED_APP_PATHS,
+]);
+const T06_INSPECTOR_PATH = "apps/desen-app/src/inspector-panel.tsx";
+const T06_INSPECTOR_ADDITIONS = Object.freeze([
+  "  /** New rejected snapshots reveal Inspector without moving keyboard focus. */\n  readonly diagnosticsRevealKey?: string | undefined;\n",
+  "  diagnosticsRevealKey,\n",
+  '  useEffect(() => {\n    if (diagnosticsRevealKey !== undefined) setActiveTab("inspector");\n  }, [diagnosticsRevealKey]);\n',
+]);
 const MAX_AUTHORITY_BYTES = 24 * 1_024 * 1_024;
 const MAX_OVERRIDE_BYTES = 64 * 1_024 * 1_024;
 const MAX_HISTORICAL_BRIDGE_BYTES = 4 * 1_024 * 1_024;
@@ -62,6 +84,7 @@ const APP_SOURCE_PATHS = Object.freeze(
     "apps/desen-app/src/authoring-scenarios.ts",
     "apps/desen-app/src/authoring-selection.ts",
     "apps/desen-app/src/authoring-slots.ts",
+    "apps/desen-app/src/authoring-source-draft.ts",
     "apps/desen-app/src/authoring-state.ts",
     "apps/desen-app/src/behavior-controls.tsx",
     "apps/desen-app/src/diagnostics-panel.tsx",
@@ -87,6 +110,7 @@ const APP_SOURCE_PATHS = Object.freeze(
     "apps/desen-app/src/reference-flow-workspace-profile.ts",
     "apps/desen-app/src/reference-project-fixtures.ts",
     "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+    "apps/desen-app/src/source-draft-controls.tsx",
     "apps/desen-app/src/state-panel.tsx",
     "apps/desen-app/src/structured-json.ts",
     "apps/desen-app/src/styles.css",
@@ -2658,7 +2682,8 @@ function verifyPackageAuthority(files) {
     app.scripts?.["test:product-bootstrap"] !==
       "vitest run test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx" ||
     browser?.name !== "@desen/app-browser-e2e" ||
-    browser.scripts?.["test:e2e"] !== BROWSER_E2E_SCRIPT ||
+    browser.scripts?.["test:e2e"] !==
+      `${BROWSER_E2E_SCRIPT} && playwright test --config invalid-publication-playwright.config.ts` ||
     host?.name !== "@desen/reference-host-web" ||
     host.scripts?.build !== "vite build" ||
     server?.name !== "@desen/reference-host-web-server" ||
@@ -2683,6 +2708,58 @@ function verifyPackageAuthority(files) {
 
 async function canonicalArtifactBytes(artifact) {
   return Buffer.from(await format(JSON.stringify(artifact), { parser: "json" }));
+}
+
+/**
+ * Observes the complete current App and independent host without projecting a historical proof.
+ * Successor proofs share the fresh build policy, not the predecessor's recorded build results.
+ * No caller-supplied source overrides or graph receipts can authorize this observation.
+ */
+export async function buildCurrentDesenAppPublishedHostUpdateGraphAudit(rawOptions = undefined) {
+  const options = exactOwnDataOptions(rawOptions, ["workspaceRoot"], "current graph options");
+  const workspaceRoot = captureAbsolutePath(
+    options.workspaceRoot ?? WORKSPACE_ROOT,
+    "workspaceRoot",
+  );
+  const acquired = await acquireFiles({ workspaceRoot, fileOverrides: new Map() });
+  const appSourceReceipts = sourceReceipts(acquired.files, APP_SOURCE_PATHS);
+  const hostSourceReceipts = sourceReceipts(acquired.files, HOST_SOURCE_PATHS);
+  const referenceHostSourceAudit = await buildFreshHostAudit(workspaceRoot, acquired.files);
+  const runtimeResolution = await buildDualViteAudit(workspaceRoot);
+  const [appAfter, hostAfter, appInventoryAfter, hostInventoryAfter, serverInventoryAfter] =
+    await Promise.all([
+      snapshotBackingFiles(workspaceRoot, APP_SOURCE_PATHS),
+      snapshotBackingFiles(workspaceRoot, HOST_SOURCE_PATHS),
+      inventoryDirectory(workspaceRoot, "apps/desen-app/src"),
+      inventoryDirectory(workspaceRoot, "apps/reference-host-web/src"),
+      inventoryDirectory(workspaceRoot, "apps/reference-host-web-server/src"),
+    ]);
+  if (
+    !isDeepStrictEqual(appSourceReceipts, appAfter) ||
+    !isDeepStrictEqual(hostSourceReceipts, hostAfter) ||
+    !isDeepStrictEqual(acquired.appInventory, appInventoryAfter) ||
+    !isDeepStrictEqual(acquired.hostInventory, hostInventoryAfter) ||
+    !isDeepStrictEqual(acquired.hostServerInventory, serverInventoryAfter)
+  ) {
+    fail(
+      "SOURCE_SNAPSHOT_DRIFT",
+      "Current App or host authority changed across graph observation.",
+    );
+  }
+  return deepFreeze({
+    appSourceAudit: {
+      inventory: acquired.appInventory,
+      completeSourceFiles: APP_SOURCE_PATHS.length,
+      productionGraphSourceFiles: APP_GRAPH_SOURCE_PATHS.length,
+      fixtureOnlySourceFiles: APP_FIXTURE_ONLY_SOURCE_PATHS,
+      sourceReceipts: appSourceReceipts,
+      everyProductionSourceFileReachable: true,
+      fixtureOnlyModulesExcludedFromProductionGraph: true,
+      importsResolvedByFreshViteBuild: true,
+    },
+    referenceHostSourceAudit,
+    runtimeResolution,
+  });
 }
 
 /** Builds fresh M10-T05 evidence without starting Chromium, a listener, or writing Vite output. */
@@ -2753,7 +2830,7 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       return Object.freeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) });
     }),
   );
-  const artifact = deepFreeze({
+  const currentArtifact = deepFreeze({
     schemaVersion: 1,
     proofId: "desen-app-published-host-update",
     profile: "desen.app.published-host-update-proof.v1",
@@ -2860,11 +2937,17 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       "Local evidence does not imply hosted exact-head Quality gate or Browser E2E success until those workloads pass for the unchanged revision.",
     ],
   });
+  const successorProjection = await projectT06HistoricalPredecessor(
+    options.workspaceRoot,
+    currentArtifact,
+  );
+  const artifact = successorProjection.artifact;
   const artifactBytes = await canonicalArtifactBytes(artifact);
   return deepFreeze({
     artifact,
     artifactBytes,
     artifactSha256: sha256(artifactBytes),
+    liveSuccessorAuthority: successorProjection.liveSuccessorAuthority,
     dependencySecurityCompatibility: {
       authority: "SEC-02",
       path: dependencyPin.path,
@@ -2884,6 +2967,110 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       },
       projectedReceipts: 1,
       immutableArtifactPreserved: true,
+    },
+  });
+}
+
+async function readT06SuccessorArtifact(workspaceRoot) {
+  const bytes = await readRegularAuthority(
+    path.join(workspaceRoot, T06_SUCCESSOR_PATH),
+    T06_SUCCESSOR_PATH,
+  );
+  if (
+    T06_SUCCESSOR_PIN.bytes <= 0 ||
+    bytes.byteLength !== T06_SUCCESSOR_PIN.bytes ||
+    sha256(bytes) !== T06_SUCCESSOR_PIN.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact reviewed T06 successor artifact is required.");
+  }
+  const artifact = parseJson(bytes, T06_SUCCESSOR_PATH, "SUCCESSOR_POLICY_VIOLATION");
+  if (artifact.task !== "M10-T06" || artifact.result !== "PASS") {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The T06 successor identity drifted.");
+  }
+  return deepFreeze(artifact);
+}
+
+async function projectT06HistoricalPredecessor(workspaceRoot, currentArtifact) {
+  const successor = await readT06SuccessorArtifact(workspaceRoot);
+  const historical = authenticatePublishedHostUpdateArtifact(
+    await readRegularAuthority(
+      path.join(workspaceRoot, ARTIFACT_RELATIVE_PATH),
+      ARTIFACT_RELATIVE_PATH,
+    ),
+  );
+  const currentGraphAudit = {
+    appSourceAudit: currentArtifact.authority.appSourceAudit,
+    referenceHostSourceAudit: currentArtifact.authority.referenceHostSourceAudit,
+    runtimeResolution: currentArtifact.authority.runtimeResolution,
+  };
+  if (!isDeepStrictEqual(currentGraphAudit, successor.authority?.currentGraphAudit)) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "Fresh current App/host observations differ from the reviewed T06 authority.",
+    );
+  }
+  const currentReceipts = currentArtifact.boundary.trackedReceipts;
+  const historicalReceipts = new Map(
+    historical.boundary.trackedReceipts.map((receipt) => [receipt.path, receipt]),
+  );
+  const successorReceipts = new Map(
+    successor.boundary.trackedReceipts.map((receipt) => [receipt.path, receipt]),
+  );
+  for (const receipt of currentReceipts) {
+    const expected = T06_REVIEWED_CHANGED_PATHS.includes(receipt.path)
+      ? successorReceipts.get(receipt.path)
+      : historicalReceipts.get(receipt.path);
+    if (!isDeepStrictEqual(receipt, expected)) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "A current T05 input is outside its exact reviewed T06 successor.",
+        { path: receipt.path },
+      );
+    }
+  }
+  if (
+    !isDeepStrictEqual(
+      currentReceipts.map(({ path: filePath }) => filePath),
+      [...historicalReceipts.keys(), ...T06_ADDED_APP_PATHS].sort((left, right) =>
+        left.localeCompare(right, "en-US"),
+      ),
+    )
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The predecessor/successor path relation drifted.");
+  }
+  // Only these explicit historical fields may differ. Every other claim and observation is
+  // compared in full; the fresh current graph remains separately exposed, never relabeled.
+  const artifact = deepFreeze({
+    ...currentArtifact,
+    authority: {
+      ...currentArtifact.authority,
+      appSourceAudit: historical.authority.appSourceAudit,
+      runtimeResolution: historical.authority.runtimeResolution,
+    },
+    boundary: {
+      ...currentArtifact.boundary,
+      trackedFiles: historical.boundary.trackedFiles,
+      trackedReceipts: historical.boundary.trackedReceipts,
+      completeAppSourceFiles: historical.boundary.completeAppSourceFiles,
+    },
+  });
+  if (!isDeepStrictEqual(artifact, historical)) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "An unreviewed historical T05 field would be projected.");
+  }
+  return deepFreeze({
+    artifact,
+    liveSuccessorAuthority: {
+      task: "M10-T06",
+      artifact: { path: T06_SUCCESSOR_PATH, ...T06_SUCCESSOR_PIN },
+      currentGraphAudit,
+      projectedHistoricalFields: [
+        "authority.appSourceAudit",
+        "authority.runtimeResolution",
+        "boundary.trackedFiles",
+        "boundary.trackedReceipts",
+        "boundary.completeAppSourceFiles",
+      ],
+      currentObservationsAreNotHistoricalResults: true,
     },
   });
 }
@@ -3019,6 +3206,19 @@ export async function verifyDesenAppPublishedHostUpdateEvidence(rawOptions = und
     appGraphModules: artifact.authority.runtimeResolution.app.moduleCount,
     hostGraphModules: artifact.authority.runtimeResolution.host.moduleCount,
     sharedManagedModules: artifact.authority.runtimeResolution.sharedManagedModuleCount,
+    graphCountsDescribe: "immutable M10-T05 task-time evidence",
+    currentSuccessor: {
+      task: built.liveSuccessorAuthority.task,
+      artifact: built.liveSuccessorAuthority.artifact,
+      appGraphModules:
+        built.liveSuccessorAuthority.currentGraphAudit.runtimeResolution.app.moduleCount,
+      hostGraphModules:
+        built.liveSuccessorAuthority.currentGraphAudit.runtimeResolution.host.moduleCount,
+      sharedManagedModules:
+        built.liveSuccessorAuthority.currentGraphAudit.runtimeResolution.sharedManagedModuleCount,
+      observationsAreFresh: true,
+      observationsAreNotHistoricalResults: true,
+    },
     p07Status: artifact.claim.p07Status,
     m10T05Closed: artifact.claim.m10T05Closed,
     browserExecutedByVerifier: false,
@@ -3090,7 +3290,62 @@ export async function authenticateDesenAppPublishedHostUpdateSuccessor(rawOption
     p07Status: artifact.claim.p07Status,
     m10T05Closed: artifact.claim.m10T05Closed,
   });
-  SUCCESSOR_AUTHORITIES.set(successor, bridge);
+  const currentSuccessor = await readT06SuccessorArtifact(workspaceRoot);
+  const currentReceipts = new Map(
+    currentSuccessor.boundary.trackedReceipts.map((receipt) => [receipt.path, receipt]),
+  );
+  for (const relativePath of T06_ADDED_APP_PATHS) {
+    const bytes = await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath);
+    const receipt = currentReceipts.get(relativePath);
+    if (receipt?.bytes !== bytes.byteLength || receipt.sha256 !== sha256(bytes)) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "A reviewed T06-added App source changed.", {
+        relativePath,
+      });
+    }
+  }
+  const currentInspector = await readRegularAuthority(
+    path.join(workspaceRoot, T06_INSPECTOR_PATH),
+    T06_INSPECTOR_PATH,
+  );
+  const currentInspectorReceipt = currentReceipts.get(T06_INSPECTOR_PATH);
+  if (
+    currentInspectorReceipt?.bytes !== currentInspector.byteLength ||
+    currentInspectorReceipt.sha256 !== sha256(currentInspector)
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The current T06 Inspector source changed.");
+  }
+  // This file had not changed since T01B and therefore has no older retained bridge entry.
+  // Admit both endpoints: exact current T06 bytes and the exact frozen T05 receipt. Only the
+  // three reviewed additive fragments may be reversed; this never supplies current build data.
+  let historicalInspectorText = decodeUtf8(
+    currentInspector,
+    T06_INSPECTOR_PATH,
+    "SUCCESSOR_POLICY_VIOLATION",
+  );
+  for (const addition of T06_INSPECTOR_ADDITIONS) {
+    if (occurrenceCount(historicalInspectorText, addition) !== 1) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The reviewed T06 Inspector inverse patch is not exact.");
+    }
+    historicalInspectorText = historicalInspectorText.replace(addition, "");
+  }
+  const historicalInspector = Buffer.from(historicalInspectorText);
+  const historicalInspectorReceipt = artifact.boundary.trackedReceipts.find(
+    (receipt) => receipt.path === T06_INSPECTOR_PATH,
+  );
+  if (
+    historicalInspectorReceipt?.bytes !== historicalInspector.byteLength ||
+    historicalInspectorReceipt.sha256 !== sha256(historicalInspector)
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The historical Inspector projection changed its frozen receipt.",
+    );
+  }
+  SUCCESSOR_AUTHORITIES.set(successor, {
+    ...bridge,
+    files: new Map([...bridge.files, [T06_INSPECTOR_PATH, historicalInspector]]),
+    successorAddedPaths: new Set([...bridge.successorAddedPaths, ...T06_ADDED_APP_PATHS]),
+  });
   return successor;
 }
 
@@ -3158,7 +3413,7 @@ export function readDesenAppT01aHistoricalReaderGapFile(successor, relativePath)
   return Buffer.from(bytes);
 }
 
-/** Removes only exact authenticated T05-added paths from a historical T04 inventory. */
+/** Removes only exact authenticated T05/T06-added paths from a historical T04 inventory. */
 export function projectDesenAppT04HistoricalReaderPathInventory(successor, currentPaths) {
   const authority = successorAuthority(successor);
   const captured = captureDenseStringArray(currentPaths, "historical path inventory", 4_096);

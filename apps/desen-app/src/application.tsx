@@ -43,6 +43,10 @@ import {
   readAuthoringPublicationPortDestination,
 } from "./authoring-publication.js";
 import { DiagnosticsPanel } from "./diagnostics-panel.js";
+import { reviewAuthoringSourceDraft } from "./authoring-source-draft.js";
+import type { AuthoringSourceDraftFailure } from "./authoring-source-draft.js";
+import { SourceDraftControls } from "./source-draft-controls.js";
+import { formatStructuredJson } from "./structured-json.js";
 import {
   applyAuthoringInspectorBindingEdit,
   applyAuthoringInspectorEdit,
@@ -754,6 +758,12 @@ interface AuthoringDiagnosticSelection {
 interface AuthoringEditDiagnosticResult {
   readonly ok: boolean;
   readonly validationReport?: DesenEditorContinuousValidationReport;
+}
+
+interface AdvancedSourceDraft {
+  readonly text: string;
+  readonly baselineFingerprint: string;
+  readonly failure: AuthoringSourceDraftFailure | null;
 }
 
 const LAYER_DROP_MIDPOINT_HYSTERESIS_PX = 4;
@@ -2427,6 +2437,9 @@ function SurfaceEditor({
   const [diagnosticSelection, setDiagnosticSelection] =
     useState<AuthoringDiagnosticSelection | null>(null);
   const diagnosticFocusRequest = useRef(0);
+  const [sourceDraft, setSourceDraft] = useState<AdvancedSourceDraft | null>(null);
+  const sourceDraftRef = useRef<AdvancedSourceDraft | null>(null);
+  const [sourceDraftNotice, setSourceDraftNotice] = useState("");
   // A surface session owns one Source baseline. A parent must remount the keyed editor to open a
   // different Source; prop identity changes cannot replace only persistence/publication authority.
   const [mountedInitialDocument] = useState(() => initialDocument);
@@ -2926,6 +2939,7 @@ function SurfaceEditor({
   useEffect(() => {
     if (
       !publicationPending &&
+      sourceDraft === null &&
       persistenceController !== null &&
       (persistenceState === null || persistenceState.disposed || !persistenceState.dirty)
     ) {
@@ -2933,6 +2947,7 @@ function SurfaceEditor({
     }
 
     const hasCurrentUnsavedSource = () => {
+      if (sourceDraftRef.current !== null) return true;
       if (persistenceController === null) return inMemoryDraftDirty.current;
       if (persistenceControllerLifetime.current !== persistenceController) return null;
       const current = persistenceController.read();
@@ -2995,6 +3010,7 @@ function SurfaceEditor({
     persistenceState,
     publicationController,
     publicationPending,
+    sourceDraft,
   ]);
 
   useEffect(() => {
@@ -3013,8 +3029,9 @@ function SurfaceEditor({
     publicationController.replaceSnapshot(readCurrentPublicationSnapshot());
   }, [persistenceState, preview, publicationController, readCurrentPublicationSnapshot]);
 
-  function isDesignMode(): boolean {
+  function isDesignMode(allowSourceDraft = false): boolean {
     if (modeRef.current !== "design") return false;
+    if (!allowSourceDraft && sourceDraftRef.current !== null) return false;
     if (publicationController === null) return true;
     if (publicationControllerLifetime.current !== publicationController) return false;
     const current = publicationController.read();
@@ -3055,7 +3072,7 @@ function SurfaceEditor({
   }
 
   function selectDiagnostic(selectionKey: string): void {
-    if (!isDesignMode() || diagnosticsProjection?.status !== "ready") return;
+    if (!isDesignMode(true) || diagnosticsProjection?.status !== "ready") return;
     const occurrence = diagnosticsProjection.model.diagnostics
       .flatMap((diagnostic) => diagnostic.occurrences)
       .find((candidate) => candidate.selectionKey === selectionKey);
@@ -3064,6 +3081,94 @@ function SurfaceEditor({
     setDiagnosticSelection(
       Object.freeze({ selectionKey, focusRequestId: diagnosticFocusRequest.current }),
     );
+    if (occurrence.kind === "node" && preparedModel.ok) {
+      const pending = preparedModel.model.surfaces.flatMap((surface) =>
+        surface.id === route.surfaceId ? [surface.root] : [],
+      );
+      while (pending.length > 0) {
+        const node = pending.pop();
+        if (node === undefined) break;
+        if (node.id === occurrence.subjectId) {
+          setSelection(
+            createAuthoringComponentSelection({
+              projectId: route.projectId,
+              surfaceId: route.surfaceId,
+              sourceNodeId: node.id,
+              capabilityId: node.capabilityId,
+              displayName: node.displayName,
+              conditional: node.conditional,
+            }),
+          );
+          break;
+        }
+        pending.push(
+          ...node.slots.flatMap(({ children }) => children),
+          ...node.behaviors.flatMap(({ slots }) => slots.flatMap(({ children }) => children)),
+        );
+      }
+    }
+  }
+
+  function replaceSourceDraft(next: AdvancedSourceDraft | null): void {
+    sourceDraftRef.current = next;
+    setSourceDraft(next);
+  }
+
+  function sourceDraftReviewAvailable(): boolean {
+    if (!isDesignMode(true)) return false;
+    if (persistenceController === null) return true;
+    if (persistenceControllerLifetime.current !== persistenceController) return false;
+    const current = persistenceController.read();
+    return !current.disposed && current.pending === null;
+  }
+
+  function openSourceDraft(): void {
+    if (sourceDraftRef.current !== null || !sourceDraftReviewAvailable()) return;
+    replaceSourceDraft(
+      Object.freeze({
+        text: formatStructuredJson(document),
+        baselineFingerprint: committedDocumentFingerprint,
+        failure: null,
+      }),
+    );
+    setSourceDraftNotice("Edit this detached Source draft, then validate and apply it.");
+  }
+
+  function changeSourceDraft(text: string): void {
+    const current = sourceDraftRef.current;
+    if (!sourceDraftReviewAvailable() || current === null) return;
+    replaceSourceDraft(Object.freeze({ ...current, text, failure: null }));
+    clearTransientDiagnostics();
+    setSourceDraftNotice("Unvalidated draft. Save and Publish remain paused.");
+  }
+
+  function discardSourceDraft(): void {
+    if (!sourceDraftReviewAvailable()) return;
+    replaceSourceDraft(null);
+    clearTransientDiagnostics();
+    setSourceDraftNotice("Source draft discarded. The current valid Source is unchanged.");
+  }
+
+  function applySourceDraft(): void {
+    const current = sourceDraftRef.current;
+    if (!sourceDraftReviewAvailable() || current === null) return;
+    const result = reviewAuthoringSourceDraft(
+      current.text,
+      workspaceProfile,
+      document,
+      route,
+      current.baselineFingerprint,
+    );
+    captureEditDiagnostics(result);
+    if (!result.ok) {
+      replaceSourceDraft(Object.freeze({ ...current, failure: result }));
+      return;
+    }
+    replaceSourceDraft(null);
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: result.preview }));
+    setSelection(null);
+    setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
+    setSourceDraftNotice("Source applied locally. Save source, then Publish to update the host.");
   }
 
   function commitAuthoringSession(
@@ -3079,7 +3184,12 @@ function SurfaceEditor({
   }
 
   function chooseMode(nextMode: SurfaceEditorMode): void {
-    if (persistenceState?.pending === "opening" || publicationPending) return;
+    if (
+      sourceDraftRef.current !== null ||
+      persistenceState?.pending === "opening" ||
+      publicationPending
+    )
+      return;
     if (nextMode === "design") {
       integrationController?.deactivate();
       setExecutionContext("synthetic");
@@ -3455,7 +3565,11 @@ function SurfaceEditor({
             <button
               aria-describedby={modeStatusId}
               aria-pressed={mode === "design"}
-              disabled={persistenceState?.pending === "opening" || publicationPending}
+              disabled={
+                sourceDraft !== null ||
+                persistenceState?.pending === "opening" ||
+                publicationPending
+              }
               onClick={() => chooseMode("design")}
               ref={designModeButton}
               type="button"
@@ -3465,7 +3579,11 @@ function SurfaceEditor({
             <button
               aria-describedby={modeStatusId}
               aria-pressed={mode === "run"}
-              disabled={persistenceState?.pending === "opening" || publicationPending}
+              disabled={
+                sourceDraft !== null ||
+                persistenceState?.pending === "opening" ||
+                publicationPending
+              }
               onClick={() => chooseMode("run")}
               ref={runModeButton}
               type="button"
@@ -3484,6 +3602,7 @@ function SurfaceEditor({
             <div className={styles.workspaceLifecycleBody}>
               <PersistenceControls
                 busy={
+                  sourceDraft !== null ||
                   publicationPending ||
                   persistenceState?.pending === "opening" ||
                   persistenceState?.pending === "saving"
@@ -3499,11 +3618,28 @@ function SurfaceEditor({
 
               <PublicationControls
                 busy={
-                  persistenceState?.pending === "opening" || persistenceState?.pending === "saving"
+                  sourceDraft !== null ||
+                  persistenceState?.pending === "opening" ||
+                  persistenceState?.pending === "saving"
                 }
                 designMode={mode === "design"}
                 onPublish={publishSavedSource}
                 projection={publicationProjection}
+              />
+              <SourceDraftControls
+                disabled={
+                  mode !== "design" ||
+                  publicationPending ||
+                  persistenceState?.pending === "opening" ||
+                  persistenceState?.pending === "saving"
+                }
+                text={sourceDraft?.text ?? null}
+                failure={sourceDraft?.failure ?? null}
+                notice={sourceDraftNotice}
+                onOpen={openSourceDraft}
+                onChange={changeSourceDraft}
+                onApply={applySourceDraft}
+                onDiscard={discardSourceDraft}
               />
             </div>
           </details>
@@ -3545,7 +3681,7 @@ function SurfaceEditor({
 
       <AuthoringPanel
         hidden={mode === "run"}
-        interactive={mode === "design" && !publicationPending}
+        interactive={mode === "design" && !publicationPending && sourceDraft === null}
         model={model}
         onDeleteSelection={deleteSelectedLayer}
         onSlotEdit={editNamedSlot}
@@ -3622,6 +3758,7 @@ function SurfaceEditor({
       </section>
 
       <InspectorPanel
+        diagnosticsRevealKey={activeTransientDiagnostics?.snapshot.documentFingerprint}
         behaviorControls={
           inspector.status === "ready" && behaviorProjection.status === "ready" ? (
             <div className={styles.behaviorControls}>
