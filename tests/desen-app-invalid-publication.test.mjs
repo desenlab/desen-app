@@ -288,13 +288,14 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[3], () => {
 });
 
 test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[4], () => {
-  const current = built.artifact.authority.currentGraphAudit;
-  assert.equal(built.liveSuccessorAuthority.task, "M10-T07");
+  const current = built.liveSuccessorAuthority.currentGraphAudit;
+  assert.equal(built.liveSuccessorAuthority.task, "M10-T08");
   assert.equal(built.liveSuccessorAuthority.parentArtifactUnchanged, true);
   assert.deepEqual(built.liveSuccessorAuthority.historicalProjectionPaths, [
     "apps/desen-app-browser-e2e/package.json",
+    "authority.currentGraphAudit",
   ]);
-  assert.deepEqual(built.liveSuccessorAuthority.currentGraphAudit, current);
+  assert.notDeepEqual(built.artifact.authority.currentGraphAudit, current);
   const historicalPackage = built.artifact.boundary.trackedReceipts.find(
     ({ path: name }) => name === "apps/desen-app-browser-e2e/package.json",
   );
@@ -451,9 +452,7 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[6], async () => {
     assert.ok(opens.get(path.join(ROOT, SOURCE_PATHS.application)) >= 2);
     assert.ok(opens.get(path.join(ROOT, DESEN_APP_INVALID_PUBLICATION_PARENT_PINS[0].path)) >= 2);
     assert.ok(
-      opens.get(
-        path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json"),
-      ) >= 2,
+      opens.get(path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json")) >= 2,
     );
     return result;
   });
@@ -461,6 +460,12 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[6], async () => {
   assert.deepEqual(again.artifactBytes, built.artifactBytes);
   assert.deepEqual(again.liveSuccessorAuthority, built.liveSuccessorAuthority);
   for (const mutate of [
+    (value) => {
+      value.scripts["test:e2e"] = value.scripts["test:e2e"].replace(
+        " && playwright test --config repeatable-demo-playwright.config.ts",
+        "",
+      );
+    },
     (value) => {
       value.scripts["test:e2e"] = value.scripts["test:e2e"].replace(
         " && playwright test --config restart-recovery-playwright.config.ts",

@@ -26,7 +26,17 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
-**Güncel görev: M10-T07.** Kullanıcı M10'un hiçbir görev atlanmadan tamamlanmasını onayladı.
+**Güncel görev: M10-T08.** T07, [PR #82](https://github.com/desenlab/desen-app/pull/82) ve
+[başarılı taze main koşusuyla](https://github.com/desenlab/desen-app/actions/runs/34216545093)
+tamamen kapandı. T08'in boş proje ile başlayıp bağımsız host'a kadar ilerleyen iki yüzeyli demosu,
+güvenli sıfırlaması, gerçek tarayıcı akışı ve yerel kontrolleri geçti. Aynı depo ve 5173 kullanılır;
+normal projeler korunur, yalnızca özel demo verisi sıfırlanır ve son kopyası tutulur. Görev tablosundaki
+`DONE` koşullu kapanış adayıdır: tam güncel PR, merge ve taze main geçmeden T09'a başlanmaz.
+Yeni mühür önceki 77 kaydı ve 61 kanıt dosyasını değiştirmeden korur; 111 mühür testi geçti.
+[T08 kanıtı](../proof/DESEN-APP-REPEATABLE-DEMO.md). T09 ve G10 henüz başlamadı.
+
+**T07 uygulama kontrol noktası — aşağıdaki kapanış koşulları sonradan sağlandı.**
+Kullanıcı M10'un hiçbir görev atlanmadan tamamlanmasını onayladı.
 T07'nin gerçek Chromium yeniden başlatma akışı, bağımsız kurtarma doğrulayıcısı, dokuz kök testi,
 önceki görevlerin 20 uyumluluk testi ve sınırlı yerel temel kontrolleri geçti. Görev tablosundaki
 `DONE` henüz koşullu kapanış adayıdır: tam güncel PR kontrolleri, merge ve taze main koşusu

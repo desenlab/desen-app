@@ -89,6 +89,7 @@ root.render(
             <DesenAppProduct
               integrationBinding={flowIntegration}
               persistencePort={persistencePort}
+              publicationPort={publicationPort}
               workspaceProfile={REFERENCE_FLOW_WORKSPACE_PROFILE}
             />
           ),

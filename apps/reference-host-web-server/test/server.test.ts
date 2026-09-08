@@ -7,13 +7,13 @@ import {
   openLocalControlPlane,
 } from "@desen/control-plane-api";
 import { calculateDesenBundleRevision } from "@desen/protocol";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { REFERENCE_HOST_MAX_DELIVERY_BYTES, openReferenceHostWebServer } from "../src/index.js";
 
 import type { LocalControlPlane } from "@desen/control-plane-api";
 import type { DesenBundle } from "@desen/protocol";
-import type { ReferenceHostWebServer } from "../src/index.js";
+import type { ReferenceHostWebServer, ReferenceHostSignInHandler } from "../src/index.js";
 
 const API_TOKEN = "m07-t11-reference-host-token-32-bytes";
 const CHANNEL_NAME = "preview";
@@ -85,6 +85,7 @@ async function environment(): Promise<
 }
 
 afterEach(async () => {
+  vi.useRealTimers();
   await Promise.all(servers.splice(0).map(async (server) => server.close()));
   await Promise.all(apis.splice(0).map(async (api) => api.close()));
   await Promise.all(
@@ -93,6 +94,187 @@ afterEach(async () => {
 });
 
 describe("reference host loopback Web server", () => {
+  async function operationEnvironment(signIn: ReferenceHostSignInHandler) {
+    const fixture = await environment();
+    const server = await openReferenceHostWebServer({
+      rootDirectory: fixture.root,
+      installedPackageDirectory: INSTALLED_PACKAGE_DIRECTORY,
+      clientBuildDirectory: CLIENT_BUILD_DIRECTORY,
+      controlPlaneOrigin: fixture.origin,
+      controlPlaneApiToken: API_TOKEN,
+      channelName: CHANNEL_NAME,
+      signIn,
+    });
+    servers.push(server);
+    const { origin } = await server.listen(0);
+    const headers = { origin, "content-type": "application/json" };
+    const body = JSON.stringify({ email: "designer@example.test", password: "local-demo-pass" });
+    return { server, origin, headers, body };
+  }
+
+  it("serves only the opt-in fixed same-origin operation with closed success and declared failure results", async () => {
+    const handler = vi.fn<ReferenceHostSignInHandler>(() => ({
+      status: "succeeded",
+      output: { userId: "local-host-user" },
+    }));
+    const fixture = await operationEnvironment(handler);
+    const post = () =>
+      fetch(`${fixture.origin}/api/sign-in`, {
+        method: "POST",
+        headers: fixture.headers,
+        body: fixture.body,
+      });
+    const success = await post();
+    expect(success.status).toBe(200);
+    expect(success.headers.get("content-type")).toBe("application/json");
+    expect(success.headers.get("cache-control")).toBe("no-store");
+    expect(await success.json()).toEqual({ userId: "local-host-user" });
+    expect(handler.mock.calls[0]?.[0]).toEqual({
+      email: "designer@example.test",
+      password: "local-demo-pass",
+    });
+    expect(Object.isFrozen(handler.mock.calls[0]?.[0])).toBe(true);
+    expect(handler.mock.calls[0]?.[1].aborted).toBe(false);
+    handler.mockReturnValue({ status: "failed", code: "invalidCredentials" });
+    const failure = await post();
+    expect(failure.status).toBe(401);
+    expect(await failure.json()).toEqual({ error: { code: "invalidCredentials" } });
+    let reads = 0;
+    for (const value of [
+      { status: "failed", code: "unavailable" },
+      { status: "succeeded", output: { userId: "secret", password: "must-not-leak" } },
+      { status: "succeeded", output: { userId: "" } },
+      { status: "succeeded", output: { userId: "x".repeat(4_097) } },
+      Object.defineProperty({ status: "succeeded" }, "output", {
+        enumerable: true,
+        get() {
+          reads += 1;
+          return { userId: "secret" };
+        },
+      }),
+    ]) {
+      handler.mockReturnValue(value);
+      const response = await post();
+      expect(response.status).toBe(503);
+      expect(await response.text()).toBe("");
+    }
+    expect(reads).toBe(0);
+    const resultRoute = await fetch(`${fixture.origin}/result`);
+    expect(resultRoute.status).toBe(200);
+    expect(resultRoute.headers.get("content-type")).toBe("text/html; charset=utf-8");
+  });
+
+  it("rejects ambient authority, malformed framing and oversized operation inputs before calling the handler", async () => {
+    const handler = vi.fn();
+    const fixture = await operationEnvironment(handler);
+    const cases: RequestInit[] = [
+      { headers: { "content-type": "application/json" } },
+      { headers: { ...fixture.headers, origin: "http://127.0.0.1:1" } },
+      { headers: { ...fixture.headers, cookie: "session=ambient" } },
+      { headers: { ...fixture.headers, authorization: "Bearer ambient" } },
+      { headers: { ...fixture.headers, "sec-fetch-site": "cross-site" } },
+      { headers: { ...fixture.headers, "content-type": "text/plain" } },
+      { headers: { ...fixture.headers, "content-encoding": "gzip" } },
+      { body: '{"email":"first","email":"second","password":"secret"}' },
+      { body: '{"email":"x","password":"secret","endpoint":"https://example.test"}' },
+      { body: '{"email":"x","password":""}' },
+      { body: '\uFEFF{"email":"x","password":"secret"}' },
+      { body: JSON.stringify({ email: "x".repeat(4_097), password: "secret" }) },
+      { body: "x".repeat(16_385) },
+      { body: new Uint8Array([0xff]) },
+    ];
+    for (const candidate of cases) {
+      const response = await fetch(`${fixture.origin}/api/sign-in`, {
+        method: "POST",
+        headers: fixture.headers,
+        body: fixture.body,
+        ...candidate,
+      });
+      expect([400, 403]).toContain(response.status);
+      expect(await response.text()).toBe("");
+    }
+    for (const path of ["/api/sign-in?selector=other", "/api/%73ign-in", "/api/sign-in/other"]) {
+      const response = await fetch(`${fixture.origin}${path}`, {
+        method: "POST",
+        headers: fixture.headers,
+        body: fixture.body,
+      });
+      expect(response.status).not.toBe(200);
+      await response.text();
+    }
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it("aborts pending host operations on close and never publishes their late success", async () => {
+    let resolve!: (value: unknown) => void;
+    let started!: (signal: AbortSignal) => void;
+    const observed = new Promise<AbortSignal>((done) => {
+      started = done;
+    });
+    const fixture = await operationEnvironment((_input, signal) => {
+      started(signal);
+      return new Promise((done) => {
+        resolve = done;
+      });
+    });
+    const response = fetch(`${fixture.origin}/api/sign-in`, {
+      method: "POST",
+      headers: fixture.headers,
+      body: fixture.body,
+    }).then(
+      (value) => value.status,
+      () => "disconnected",
+    );
+    const signal = await observed;
+    await fixture.server.close();
+    expect(signal.aborted).toBe(true);
+    resolve({ status: "succeeded", output: { userId: "late-must-not-publish" } });
+    expect(await response).not.toBe(200);
+  });
+
+  it("aborts pending host operations when their browser disconnects", async () => {
+    let started!: (signal: AbortSignal) => void;
+    const observed = new Promise<AbortSignal>((done) => {
+      started = done;
+    });
+    const fixture = await operationEnvironment((_input, signal) => {
+      started(signal);
+      return new Promise(() => undefined);
+    });
+    const abort = new AbortController();
+    const response = fetch(`${fixture.origin}/api/sign-in`, {
+      method: "POST",
+      headers: fixture.headers,
+      body: fixture.body,
+      signal: abort.signal,
+    }).catch(() => undefined);
+    const signal = await observed;
+    abort.abort();
+    await response;
+    await vi.waitFor(() => expect(signal.aborted).toBe(true));
+  });
+
+  it("fences a handler that ignores the fixed operation deadline", async () => {
+    let started!: () => void;
+    const observed = new Promise<void>((done) => {
+      started = done;
+    });
+    const fixture = await operationEnvironment(() => {
+      started();
+      return new Promise(() => undefined);
+    });
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const response = fetch(`${fixture.origin}/api/sign-in`, {
+      method: "POST",
+      headers: fixture.headers,
+      body: fixture.body,
+    });
+    await observed;
+    await vi.advanceTimersByTimeAsync(10_000);
+    vi.useRealTimers();
+    expect((await response).status).toBe(503);
+  });
+
   it("activates one exact published channel identity through the server's single controller", async () => {
     const fixture = await environment();
     const server = await openReferenceHostWebServer({

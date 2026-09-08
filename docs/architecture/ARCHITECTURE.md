@@ -2034,6 +2034,33 @@ activated host, while deterministic public-API and fresh build-graph evidence re
 Historical evidence is retained exactly and distinguished from current observations. See
 [ADR 0021](../adr/0021-invalid-source-draft-publication-boundary.md).
 
+## M10-T08 repeatable normal-product composition
+
+The trusted normal product root grants the existing fixed publication port to both installed
+Account and Flow profiles. Each retains its own Source, surface and persistence identities.
+Independent server and browser admission use the same finite profile inventory; document data
+cannot add executable modules or destinations. Runtime still owns authored operation settlement
+and navigation. Result aliases are validated authored references, not a hardcoded sign-in key.
+
+The independent host exposes its fixed local operation route only when trusted startup provides
+the optional callback. Normal demo startup installs the same bounded test-account decision used
+by App Integration. The route remains same-origin, bounded, cancellation-aware and redacted;
+standalone startup without this capability keeps it disabled. It is not production identity.
+
+One reusable `.desen/m10-demo/current` generation backs the ordinary App, Publisher and host.
+Reset starts with empty durable storage and retains one prior generation, without importing a
+prepared Source or touching ordinary projects. A private ownership marker and exclusive lease
+fence startup/reset; uncertain cleanup keeps the lease fail-closed. The launcher owns HTTP/HMR
+on 5173 through Vite middleware mode so the complete composition closes before lease release.
+
+Two visible reset/authoring cycles must produce identical canonical Source and Bundle bytes.
+The same authored Flow is exercised synthetically, through explicit Integration, and in the
+independent published host. Republished label/layout changes preserve host HTML/assets within
+that startup. Startup itself rebuilds the host; T07's separate cold-recovery proof retains its
+stricter unchanged-build boundary. See [ADR 0022](../adr/0022-repeatable-local-demo-composition.md)
+and the [runbook](../plan/DEMO-RUNBOOK.md). T09/G10, remote services, arbitrary profile installation,
+multi-tenant deployment and native targets remain separately owned.
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific

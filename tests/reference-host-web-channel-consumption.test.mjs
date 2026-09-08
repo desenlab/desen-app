@@ -144,10 +144,12 @@ test("[authority] builds the exact M07-T11 separately built channel-consumption 
   assert.equal(built.artifact.claims.traceRows[0].id, "PIPE-009");
   assert.equal(built.artifact.tests.runtimeCaseCount, 9);
   assert.equal(built.artifact.tests.runtimeTestCount, 46);
-  assert.equal(built.currentCompatibility.tests.runtimeTestCount, 50);
-  assert.equal(built.currentCompatibility.runtimeSuiteReceipt.testCount, 50);
+  assert.equal(built.currentCompatibility.tests.runtimeTestCount, 58);
+  assert.equal(built.currentCompatibility.runtimeSuiteReceipt.testCount, 58);
   assert.deepEqual(
-    built.currentCompatibility.tests.runtimeTestsByFile[SERVER_TEST].slice(0, 4),
+    built.currentCompatibility.tests.runtimeTestsByFile[SERVER_TEST].filter((title) =>
+      PUBLICATION_ACTIVATION_TEST_TITLES.includes(title),
+    ),
     PUBLICATION_ACTIVATION_TEST_TITLES,
   );
   for (const title of PUBLICATION_ACTIVATION_TEST_TITLES) {
@@ -159,6 +161,11 @@ test("[authority] builds the exact M07-T11 separately built channel-consumption 
     assert.equal(built.artifact.runtimeSuiteReceipt.testTitles.includes(title), false);
   }
   assert.ok(built.artifact.nonclaims.some((claim) => claim.includes("POST /api/sign-in backend")));
+  assert.ok(
+    built.currentCompatibility.nonclaims.some((claim) =>
+      claim.includes("disabled unless trusted server composition"),
+    ),
+  );
   assert.equal(built.artifact.tests.rootMutationCaseCount, 13);
   assert.match(built.artifactSha256, /^[0-9a-f]{64}$/u);
 });
@@ -320,6 +327,33 @@ test("[server-boundary] rejects private imports and weakened static or CSP guard
   }
 
   const server = (await workspaceBytes(SERVER_HTTP)).toString("utf8");
+  for (const [file, source, marker, replacement] of [
+    [
+      SERVER_CONTROLLER,
+      controller.toString("utf8"),
+      'bundle.id === "com.example.flow-app"',
+      'bundle.id !== "com.example.account-app"',
+    ],
+    [SERVER_HTTP, server, 'singleHeader(request, "origin") !== listener.origin', "false"],
+    [SERVER_HTTP, server, "signInRequests.size >= MAX_SIGN_IN_REQUESTS", "false"],
+    [
+      SERVER_HTTP,
+      server,
+      "abort.signal.aborted || closed || controller !== activeController",
+      "false",
+    ],
+    [SERVER_HTTP, server, "output.userId.length <= 4_096", "true"],
+    [SERVER_HTTP, server, "const MAX_SIGN_IN_BYTES = 16_384;", "const MAX_SIGN_IN_BYTES = 16_385;"],
+  ]) {
+    assert.ok(source.includes(marker));
+    await assert.rejects(
+      buildReferenceHostWebChannelConsumptionEvidence({
+        runtimeSuiteReceipt: suiteReceipt(),
+        trackedFileBytes: { [file]: Buffer.from(source.replace(marker, replacement)) },
+      }),
+      expectedError("SERVER_BOUNDARY_DRIFT"),
+    );
+  }
   for (const signal of [
     "MAX_STATIC_DIRECTORIES",
     "MAX_STATIC_ENTRIES",

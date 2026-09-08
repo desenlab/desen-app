@@ -218,6 +218,9 @@ importers:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
     devDependencies:
+      '@desen/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
       '@testing-library/dom':
         specifier: 10.4.1
         version: 10.4.1

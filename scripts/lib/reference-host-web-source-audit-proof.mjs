@@ -298,7 +298,10 @@ const EXPECTED_INDEX_HTML = `<!doctype html>
 `;
 const EXPECTED_REFERENCE_HOST_BOUNDARY_RULE = Object.freeze({
   comment: "reference-host-web may import only the packages assigned to its responsibility.",
-  from: Object.freeze({ path: "^apps/reference-host-web/" }),
+  from: Object.freeze({
+    path: "^apps/reference-host-web/",
+    pathNot: "^apps/reference-host-web/test/official-sign-in\\.test\\.tsx$",
+  }),
   name: "application-reference-host-web-allowed-dependencies",
   severity: "error",
   to: Object.freeze({
@@ -307,7 +310,23 @@ const EXPECTED_REFERENCE_HOST_BOUNDARY_RULE = Object.freeze({
   }),
 });
 const EXPECTED_EXECUTABLE_SURFACE_SHA256 =
-  "aeb0b94d79d096c170cbe903daaea033a89b5889f4675fa3a91ed004446fc88a";
+  "f5f1eb3d05bd7d9f6b1999fdfcfd6c0025356b58b8e5bef216b69957fcc40efb";
+const HISTORICAL_REFERENCE_HOST_BOUNDARY_RULE = Object.freeze({
+  ...EXPECTED_REFERENCE_HOST_BOUNDARY_RULE,
+  from: Object.freeze({ path: "^apps/reference-host-web/" }),
+});
+const EXPECTED_REFERENCE_HOST_TEST_BOUNDARY_RULE = Object.freeze({
+  name: "reference-host-sign-in-test-reviewed-packages-only",
+  severity: "error",
+  comment:
+    "The exact official host sign-in test retains the host's existing package edges and may additionally recompute Bundle revisions using only the public Protocol entry; private Protocol and every other package remain forbidden.",
+  from: Object.freeze({ path: "^apps/reference-host-web/test/official-sign-in\\.test\\.tsx$" }),
+  to: Object.freeze({
+    path: "^packages/",
+    pathNot:
+      "(?:^packages/protocol/dist/index\\.(?:d\\.ts|js)$|^packages/(?:runtime-core|runtime-react|runtime-web|reference-catalog-web)/)",
+  }),
+});
 const EXPECTED_INFRASTRUCTURE_CSS_SHA256 =
   "6d82529e07969d9033232aaa72924ec57eae0dd86736ebecdf700680046a7738";
 const ALLOWED_DATA_IMPORTS = Object.freeze([
@@ -359,6 +378,29 @@ const EXPECTED_JSX = Object.freeze({
   ]),
 });
 const EXPECTED_COMPOSITION_FUNCTIONS = Object.freeze([
+  ...[
+    [
+      "createReferenceHostApplicationProfiles",
+      "116d0d64733005e3d01af78538bd252ebe1377c08fdea7bbb4cf32dfbc52e007",
+    ],
+    [
+      "isReferenceHostApplicationProfiles",
+      "0651549eefa9387afe52894cf21b271d57cf9483cdea87630511f3866de9dd13",
+    ],
+    ["captureBundlePolicy", "22d5dbda1b1d116a29cc5c65611b7478347d665c5bd6b1f9d07a6142f7b83e96"],
+    ["captureSignInRequest", "f76a038bb058f4c0050878b4f2fdcee80853fe11f6fef097e71781999a2718bd"],
+    ["createNavigationPort", "c0c64b2679786b2d2d8c7094decf7aa605218ab6befab884d7c62aa46572c732"],
+    [
+      "activateReferenceHostDeliveredApplication",
+      "2793271e23ca075e9b42f61d9a130a9a13833b3ee8c3e67710fca237e981477c",
+    ],
+    [
+      "activateDeliveredApplication",
+      "57302edf16bf1bca33d6f4856cff1c4e52c8ac8cb73f4328cb3c8a91d8e16526",
+    ],
+  ].map(([name, sha256]) =>
+    Object.freeze({ path: "apps/reference-host-web/src/official-sign-in.ts", name, sha256 }),
+  ),
   Object.freeze({
     path: "apps/reference-host-web/src/application.tsx",
     name: "HostNotice",
@@ -1447,6 +1489,7 @@ function auditDangerousSyntax(sourceFile, relativePath, bindings, checker, count
   let mountCalls = 0;
   let managedHookCalls = 0;
   let reactRootCalls = 0;
+  let profileSurfaceKeyChecks = 0;
   function visit(node) {
     const staticValue = staticStringValue(node);
     if (
@@ -1999,8 +2042,32 @@ function auditDangerousSyntax(sourceFile, relativePath, bindings, checker, count
       );
     }
     if (ts.isPropertyAccessExpression(node) && node.name.text === "surfaces") {
+      const call = node.parent;
+      const comparison = call.parent;
+      const profileKeyCheck =
+        relativePath === "apps/reference-host-web/src/official-sign-in.ts" &&
+        nearestFunctionOwner(node) === "captureBundlePolicy" &&
+        ts.isIdentifier(node.expression) &&
+        node.expression.text === "capturedBundle" &&
+        ts.isCallExpression(call) &&
+        ts.isIdentifier(call.expression) &&
+        call.expression.text === "ownDataRecord" &&
+        call.arguments.length === 2 &&
+        call.arguments[0] === node &&
+        ts.isArrayLiteralExpression(call.arguments[1]) &&
+        call.arguments[1].elements.length === 2 &&
+        call.arguments[1].elements.every(
+          (element, index) =>
+            ts.isIdentifier(element) && element.text === ["entry", "destination"][index],
+        ) &&
+        ts.isBinaryExpression(comparison) &&
+        comparison.left === call &&
+        comparison.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken &&
+        ts.isIdentifier(comparison.right) &&
+        comparison.right.text === "undefined";
+      if (profileKeyCheck) profileSurfaceKeyChecks += 1;
       assertion(
-        false,
+        profileKeyCheck,
         `${relativePath} reaches Bundle.surfaces or a surfaces-shaped escape directly.`,
         counter,
       );
@@ -2087,6 +2154,12 @@ function auditDangerousSyntax(sourceFile, relativePath, bindings, checker, count
     ts.forEachChild(node, visit);
   }
   visit(sourceFile);
+  assertion(
+    profileSurfaceKeyChecks ===
+      (relativePath === "apps/reference-host-web/src/official-sign-in.ts" ? 1 : 0),
+    "The finite profile may check surface keys only once without consuming managed contents.",
+    counter,
+  );
   if (relativePath === "apps/reference-host-web/src/root.tsx") {
     assertion(
       directRenderCalls === 1,
@@ -3298,7 +3371,7 @@ function assertReferenceHostBoundaryConfiguration(configuration) {
   );
   const from = captureBoundaryRuleRecord(
     rule.from,
-    ["path"],
+    ["path", "pathNot"],
     "Reference-host dependency boundary from-clause",
   );
   const to = captureBoundaryRuleRecord(
@@ -3308,7 +3381,7 @@ function assertReferenceHostBoundaryConfiguration(configuration) {
   );
   const normalized = {
     comment: rule.comment,
-    from: { path: from.path },
+    from: { path: from.path, pathNot: from.pathNot },
     name: rule.name,
     severity: rule.severity,
     to: { path: to.path, pathNot: to.pathNot },
@@ -3318,6 +3391,34 @@ function assertReferenceHostBoundaryConfiguration(configuration) {
       expected: EXPECTED_REFERENCE_HOST_BOUNDARY_RULE,
       actual: normalized,
     });
+  }
+  const testMatches = forbidden.filter(
+    ({ name }) => name === EXPECTED_REFERENCE_HOST_TEST_BOUNDARY_RULE.name,
+  );
+  if (testMatches.length !== 1)
+    boundaryDrift("The exact test-only public Protocol exception is missing or duplicated.");
+  const testRule = captureBoundaryRuleRecord(
+    testMatches[0].rule,
+    ["comment", "from", "name", "severity", "to"],
+    "Test-only reference-host rule",
+  );
+  const testFrom = captureBoundaryRuleRecord(
+    testRule.from,
+    ["path"],
+    "Test-only reference-host from-clause",
+  );
+  const testTo = captureBoundaryRuleRecord(
+    testRule.to,
+    ["path", "pathNot"],
+    "Test-only reference-host to-clause",
+  );
+  if (
+    !isDeepStrictEqual(
+      { ...testRule, from: { ...testFrom }, to: { ...testTo } },
+      EXPECTED_REFERENCE_HOST_TEST_BOUNDARY_RULE,
+    )
+  ) {
+    boundaryDrift("The public Protocol exception escaped its exact test-only boundary.");
   }
   return Object.freeze(normalized);
 }
@@ -4456,7 +4557,7 @@ function inspectHistoricalArtifact(rawBytes) {
     artifact.packageBoundary.rule !== "application-reference-host-web-allowed-dependencies" ||
     !isDeepStrictEqual(
       artifact.packageBoundary.ruleSchema,
-      EXPECTED_REFERENCE_HOST_BOUNDARY_RULE,
+      HISTORICAL_REFERENCE_HOST_BOUNDARY_RULE,
     ) ||
     artifact.packageBoundary.modules !== 19 ||
     artifact.packageBoundary.dependencies !== 27 ||

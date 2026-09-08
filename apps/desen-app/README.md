@@ -1,5 +1,23 @@
 # Desen App
 
+## M10-T08: repeatable visual demo
+
+From the repository root, `pnpm demo:reset` starts the normal editor on **127.0.0.1:5173** with
+empty demo storage. Choose **Flow app → New project** and follow the
+[demo runbook](../../docs/plan/DEMO-RUNBOOK.md) to author two surfaces, connect inputs and an
+operation, test Synthetic and Integration outcomes, and publish to the independent host printed
+by the launcher. Both installed Account and Flow workspaces can use the fixed preview channel.
+The host admits only these reviewed profiles; documents cannot choose executable code or endpoints.
+
+`pnpm demo` resumes the same `.desen/m10-demo/current` store. Reset retains exactly one previous
+generation at `.desen/m10-demo/previous`; ordinary `.desen/desen-app` projects are not changed.
+Stop with Ctrl+C before restarting. Concurrent starts, unsafe filesystem entries, and uncertain
+shutdown fail closed. This uses one existing checkout and editor port, not a separate demo app.
+
+The published host's optional local test-account endpoint uses the same decision as App Integration;
+it is disabled unless trusted startup configuration supplies it. This is a local reference service,
+not production authentication. See [ADR 0022](../../docs/adr/0022-repeatable-local-demo-composition.md).
+
 ## M10-T06: reject invalid advanced Source without losing the valid design
 
 Normal authoring stays visual. For an existing valid project, **Source & release → Advanced Source**
@@ -59,7 +77,8 @@ authored navigation. The connection is a test account, **not production authenti
 authoring surface. Run inputs, responses, context and navigation never change saved Source bytes.
 The unrelated Account app workspace is never migrated or overwritten. Production, arbitrary
 workspace creation, and remote hosts remain separate work. M10-T05 adds the fixed local
-publish/activate composition for that Account workspace without granting it to Flow.
+publish/activate composition for that Account workspace. M10-T08 extends the same trusted
+composition to the installed Flow workspace.
 
 See [ADR 0017](../../docs/adr/0017-desen-app-explicit-integration-and-run-navigation.md) and the
 [M10-T04 evidence](../../docs/proof/DESEN-APP-SUCCESS-HOST-OPERATION.md).

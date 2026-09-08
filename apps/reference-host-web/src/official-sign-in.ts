@@ -52,6 +52,29 @@ const EMPTY_OBJECT = Object.freeze({}) as RuntimeJsonObject;
 const ARRAY_PROTOTYPE = Object.getPrototypeOf([]) as object;
 const NOOP = () => undefined;
 
+declare const APPLICATION_PROFILES_TYPE_BRAND: unique symbol;
+
+/** Opaque trusted admission for the two installed application identities, never Bundle data. */
+export interface ReferenceHostApplicationProfiles {
+  readonly [APPLICATION_PROFILES_TYPE_BRAND]: true;
+}
+
+const APPLICATION_PROFILES = new WeakSet<ReferenceHostApplicationProfiles>();
+
+/** Installs the finite Account and Flow data policies without accepting callbacks or selectors. */
+export function createReferenceHostApplicationProfiles(): ReferenceHostApplicationProfiles {
+  const profiles = Object.freeze(Object.create(null)) as ReferenceHostApplicationProfiles;
+  APPLICATION_PROFILES.add(profiles);
+  return profiles;
+}
+
+/** Tests factory provenance without inspecting caller-controlled members. */
+export function isReferenceHostApplicationProfiles(
+  value: unknown,
+): value is ReferenceHostApplicationProfiles {
+  return APPLICATION_PROFILES.has(value as ReferenceHostApplicationProfiles);
+}
+
 /** Redacted application-level projection of one runtime diagnostic. */
 export interface ReferenceHostOfficialSignInDiagnostic {
   /** Stable runtime diagnostic code, or a fixed fallback when the value is not safely readable. */
@@ -78,6 +101,12 @@ export interface ReferenceHostOfficialSignInActivationInput {
 export interface ReferenceHostDeliveredSignInActivationInput extends ReferenceHostOfficialSignInActivationInput {
   /** Untrusted Bundle data delivered only after the server's durable activation boundary. */
   readonly bundle: unknown;
+}
+
+/** Delivered data plus an independently installed finite application-policy authority. */
+export interface ReferenceHostDeliveredApplicationActivationInput extends ReferenceHostDeliveredSignInActivationInput {
+  /** Authentic factory handle; documents cannot construct or extend this inventory. */
+  readonly applications: ReferenceHostApplicationProfiles;
 }
 
 /** Controlled activation outcome without session, registry, Catalog, port, or callback authority. */
@@ -107,8 +136,12 @@ interface CapturedActivationInput {
 
 interface CapturedBundlePolicy {
   readonly bundle: unknown;
-  readonly documentId: typeof REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID;
+  readonly documentId: string;
   readonly revision: string;
+  readonly entry: string;
+  readonly destination: string;
+  readonly destinationPath: string;
+  readonly legacyAlias: boolean;
 }
 
 interface CapturedSignInInput {
@@ -171,7 +204,10 @@ function captureActivationInput(input: unknown): CapturedActivationInput | undef
   });
 }
 
-function captureBundlePolicy(bundle: unknown): CapturedBundlePolicy | undefined {
+function captureBundlePolicy(
+  bundle: unknown,
+  applications = false,
+): CapturedBundlePolicy | undefined {
   try {
     const capturedBundle = ownDataRecord(
       bundle,
@@ -184,17 +220,26 @@ function captureBundlePolicy(bundle: unknown): CapturedBundlePolicy | undefined 
     const sourceDigest = capturedBundle.sourceDigest;
     const requires = ownDataRecord(capturedBundle.requires, ["catalogs"]);
     const catalogs = requires?.catalogs;
+    const flow = applications && documentId === "com.example.flow-app";
+    const entry = flow ? "start" : SIGN_IN_SURFACE_ID;
+    const destination = flow ? "result" : HOME_SURFACE_ID;
     if (
       capturedBundle.kind !== "desen.bundle" ||
       capturedBundle.desen !== "0.1.0" ||
-      documentId !== REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID ||
+      (documentId !== REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID && !flow) ||
       typeof revision !== "string" ||
       !/^sha256:[0-9a-f]{64}$/u.test(revision) ||
       typeof sourceDigest !== "string" ||
       !/^sha256:[0-9a-f]{64}$/u.test(sourceDigest) ||
-      capturedBundle.entry !== SIGN_IN_SURFACE_ID ||
+      capturedBundle.entry !== entry ||
       !Array.isArray(catalogs) ||
       Object.getPrototypeOf(catalogs) !== ARRAY_PROTOTYPE
+    ) {
+      return undefined;
+    }
+    if (
+      applications &&
+      ownDataRecord(capturedBundle.surfaces, [entry, destination]) === undefined
     ) {
       return undefined;
     }
@@ -229,7 +274,15 @@ function captureBundlePolicy(bundle: unknown): CapturedBundlePolicy | undefined 
     ) {
       return undefined;
     }
-    return Object.freeze({ bundle, documentId, revision });
+    return Object.freeze({
+      bundle,
+      documentId: documentId as string,
+      revision,
+      entry,
+      destination,
+      destinationPath: flow ? "/result" : HOME_PATH,
+      legacyAlias: !applications,
+    });
   } catch {
     return undefined;
   }
@@ -279,9 +332,11 @@ function captureSignInRequest(
   ]);
   if (
     request === undefined ||
-    !captureRequestContext(request.context, SIGN_IN_SURFACE_ID, identity) ||
+    !captureRequestContext(request.context, identity.entry, identity) ||
     request.capabilityId !== operationId ||
-    request.invocationAlias !== SIGN_IN_INVOCATION_ALIAS ||
+    (identity.legacyAlias
+      ? request.invocationAlias !== SIGN_IN_INVOCATION_ALIAS
+      : typeof request.invocationAlias !== "string" || request.invocationAlias.length === 0) ||
     request.effect !== SIGN_IN_EFFECT
   ) {
     return undefined;
@@ -318,14 +373,14 @@ function createNavigationPort(
       const captured = ownDataRecord(request, ["context", "targetSurfaceId", "params"]);
       if (
         captured === undefined ||
-        !captureRequestContext(captured.context, SIGN_IN_SURFACE_ID, identity) ||
-        captured.targetSurfaceId !== HOME_SURFACE_ID ||
+        !captureRequestContext(captured.context, identity.entry, identity) ||
+        captured.targetSurfaceId !== identity.destination ||
         !isEmptyParams(captured.params)
       ) {
         return DENIED_NAVIGATION;
       }
       try {
-        browser.history.pushState(null, "", HOME_PATH);
+        browser.history.pushState(null, "", identity.destinationPath);
         return SUCCEEDED_NAVIGATION;
       } catch {
         return DENIED_NAVIGATION;
@@ -426,6 +481,41 @@ export function activateReferenceHostDeliveredSignIn(
   root: ReferenceHostRootHandle,
   input: ReferenceHostDeliveredSignInActivationInput,
 ): ReferenceHostOfficialSignInActivationResult {
+  return activateDeliveredApplication(root, input, false);
+}
+
+/** Activates one admitted Account or Flow Bundle with the same installed capability binding. */
+export function activateReferenceHostDeliveredApplication(
+  root: ReferenceHostRootHandle,
+  input: ReferenceHostDeliveredApplicationActivationInput,
+): ReferenceHostOfficialSignInActivationResult {
+  const captured = ownDataRecord(input, [
+    "browser",
+    "signIn",
+    "reportDiagnostic",
+    "bundle",
+    "applications",
+  ]);
+  if (captured === undefined || !isReferenceHostApplicationProfiles(captured.applications)) {
+    return Object.freeze({ status: "rejected", reason: "malformed-input" });
+  }
+  return activateDeliveredApplication(
+    root,
+    {
+      browser: captured.browser as Window,
+      signIn: captured.signIn as SignInHostOperationBinding,
+      reportDiagnostic: captured.reportDiagnostic as ReferenceHostOfficialSignInDiagnosticReporter,
+      bundle: captured.bundle,
+    },
+    true,
+  );
+}
+
+function activateDeliveredApplication(
+  root: ReferenceHostRootHandle,
+  input: ReferenceHostDeliveredSignInActivationInput,
+  applications: boolean,
+): ReferenceHostOfficialSignInActivationResult {
   const capturedRecord = ownDataRecord(input, ["browser", "signIn", "reportDiagnostic", "bundle"]);
   if (capturedRecord === undefined) {
     return Object.freeze({ status: "rejected", reason: "malformed-input" });
@@ -438,7 +528,7 @@ export function activateReferenceHostDeliveredSignIn(
   if (captured === undefined) {
     return Object.freeze({ status: "rejected", reason: "malformed-input" });
   }
-  const bundlePolicy = captureBundlePolicy(capturedRecord.bundle);
+  const bundlePolicy = captureBundlePolicy(capturedRecord.bundle, applications);
   if (bundlePolicy === undefined) {
     return Object.freeze({ status: "rejected", reason: "bundle-policy-rejected" });
   }

@@ -9,9 +9,14 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import { createServer as createHttpServer } from "node:http";
+import { connect } from "node:net";
+import { once } from "node:events";
 import { join } from "node:path";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { executeDesenAppLocalSignIn } from "./local-operation-host.mjs";
 
 import {
   DESEN_APP_LOCAL_DEV_ORIGIN,
@@ -160,6 +165,7 @@ describe("Desen App local development host", () => {
     });
     const viteServer = {
       listen: vi.fn(async () => undefined),
+      middlewares: vi.fn((_request, response) => response.end("test middleware")),
       close: vi.fn(async () => undefined),
     };
     let viteConfig;
@@ -193,6 +199,8 @@ describe("Desen App local development host", () => {
         strictPort: true,
         open: false,
         origin: DESEN_APP_LOCAL_DEV_ORIGIN,
+        middlewareMode: { server: expect.any(Object) },
+        ws: { server: expect.any(Object) },
         fs: {
           strict: true,
           deny: DESEN_APP_LOCAL_VITE_FS_DENY,
@@ -213,7 +221,13 @@ describe("Desen App local development host", () => {
     expect(operationOptions.allowedOrigin).toBe(DESEN_APP_LOCAL_DEV_ORIGIN);
     expect(operationOptions.apiToken).not.toBe(controlPlaneOptions.apiToken);
     expect(operationHost.listen).toHaveBeenCalledExactlyOnceWith(0);
-    expect(viteServer.listen).toHaveBeenCalledTimes(1);
+    expect(viteServer.listen).not.toHaveBeenCalled();
+    expect(viteConfig.server.middlewareMode.server).toBe(viteConfig.server.ws.server);
+    expect(viteConfig.server.ws.server.address()).toMatchObject({
+      address: "127.0.0.1",
+      port: 5173,
+    });
+    expect(await (await fetch(host.appOrigin)).text()).toBe("test middleware");
 
     await host.close();
     await host.close();
@@ -279,6 +293,7 @@ describe("Desen App local development host", () => {
     const buildReferenceHost = vi.fn(async () => undefined);
     const viteServer = {
       listen: vi.fn(async () => undefined),
+      middlewares: vi.fn((_request, response) => response.end()),
       close: vi.fn(async () => undefined),
     };
     let viteConfig;
@@ -321,7 +336,22 @@ describe("Desen App local development host", () => {
       installedPackageDirectory,
       clientBuildDirectory: join(stateDirectory, "desen-app", "reference-host-web-dist"),
       channelName: "preview",
+      signIn: executeDesenAppLocalSignIn,
     });
+    const operationLifetime = new AbortController();
+    await expect(
+      referenceOptions.signIn(
+        { email: "designer@example.test", password: "local-demo-pass" },
+        operationLifetime.signal,
+      ),
+    ).resolves.toEqual({ status: "succeeded", output: { userId: "local-host-user" } });
+    operationLifetime.abort();
+    await expect(
+      referenceOptions.signIn(
+        { email: "designer@example.test", password: "local-demo-pass" },
+        operationLifetime.signal,
+      ),
+    ).resolves.toEqual({ status: "failed", code: "unavailable" });
     expect(publicationOptions).toMatchObject({
       allowedOrigin: DESEN_APP_LOCAL_DEV_ORIGIN,
       channelName: "preview",
@@ -434,120 +464,164 @@ describe("Desen App local development host", () => {
     expect(operationHost.close).toHaveBeenCalledTimes(1);
   });
 
-  it("revokes a partially opened publication composition from the edge inward", async () => {
-    const appDirectory = await temporaryAppDirectory();
-    const clientRootDirectory = await temporaryAppDirectory();
-    const installedPackageDirectory = await temporaryAppDirectory();
-    const stateDirectory = await stateDirectoryFor(appDirectory);
-    const controlPlane = {
-      listen: vi.fn(async () => ({
-        address: "127.0.0.1",
-        port: 43127,
-        origin: "http://127.0.0.1:43127",
-      })),
-      close: vi.fn(async () => undefined),
-    };
-    const operationHost = {
-      listen: vi.fn(async () => ({
-        address: "127.0.0.1",
-        port: 43128,
-        origin: "http://127.0.0.1:43128",
-      })),
-      close: vi.fn(async () => undefined),
-    };
-    const referenceHost = {
-      listen: vi.fn(async () => ({
-        address: "127.0.0.1",
-        port: 43129,
-        origin: "http://127.0.0.1:43129",
-      })),
-      activatePublishedRevision: vi.fn(),
-      close: vi.fn(async () => undefined),
-    };
-    const publicationHost = {
-      listen: vi.fn(async () => {
-        throw new Error("private-publication-listener-detail");
-      }),
-      close: vi.fn(async () => undefined),
-    };
-    const createViteServer = vi.fn();
+  it.each(["none", "publication", "reference"])(
+    "revokes a partially opened publication composition from the edge inward (%s cleanup failure)",
+    async (failedCleanup) => {
+      const appDirectory = await temporaryAppDirectory();
+      const clientRootDirectory = await temporaryAppDirectory();
+      const installedPackageDirectory = await temporaryAppDirectory();
+      const stateDirectory = await stateDirectoryFor(appDirectory);
+      const controlPlane = {
+        listen: vi.fn(async () => ({
+          address: "127.0.0.1",
+          port: 43127,
+          origin: "http://127.0.0.1:43127",
+        })),
+        close: vi.fn(async () => undefined),
+      };
+      const operationHost = {
+        listen: vi.fn(async () => ({
+          address: "127.0.0.1",
+          port: 43128,
+          origin: "http://127.0.0.1:43128",
+        })),
+        close: vi.fn(async () => undefined),
+      };
+      const referenceHost = {
+        listen: vi.fn(async () => ({
+          address: "127.0.0.1",
+          port: 43129,
+          origin: "http://127.0.0.1:43129",
+        })),
+        activatePublishedRevision: vi.fn(),
+        close: vi.fn(async () => undefined),
+      };
+      const publicationHost = {
+        listen: vi.fn(async () => {
+          throw new Error("private-publication-listener-detail");
+        }),
+        close: vi.fn(async () => undefined),
+      };
+      if (failedCleanup === "publication") {
+        publicationHost.close.mockRejectedValue(new Error("private-publication-cleanup-detail"));
+      }
+      if (failedCleanup === "reference") {
+        referenceHost.close.mockRejectedValue(new Error("private-reference-cleanup-detail"));
+      }
+      const createViteServer = vi.fn();
 
-    await expect(
-      startDesenAppLocalDev({
-        appDirectory,
-        stateDirectory,
-        openControlPlane: async () => controlPlane,
-        openOperationHost: async () => operationHost,
-        openReferenceHost: async () => referenceHost,
-        openPublicationHost: async () => publicationHost,
-        buildReferenceHost: async () => undefined,
-        createViteServer,
-        entropy: deterministicIndependentEntropy(31),
-        publication: {
-          channelName: "preview",
-          clientRootDirectory,
-          hostId: "reference-host-web",
-          installedPackageDirectory,
-        },
-      }),
-    ).rejects.toEqual(new DesenAppLocalDevHostError("LOCAL_START_FAILED"));
+      await expect(
+        startDesenAppLocalDev({
+          appDirectory,
+          stateDirectory,
+          openControlPlane: async () => controlPlane,
+          openOperationHost: async () => operationHost,
+          openReferenceHost: async () => referenceHost,
+          openPublicationHost: async () => publicationHost,
+          buildReferenceHost: async () => undefined,
+          createViteServer,
+          entropy: deterministicIndependentEntropy(31),
+          publication: {
+            channelName: "preview",
+            clientRootDirectory,
+            hostId: "reference-host-web",
+            installedPackageDirectory,
+          },
+        }),
+      ).rejects.toEqual(
+        new DesenAppLocalDevHostError(
+          failedCleanup === "none" ? "LOCAL_START_FAILED" : "LOCAL_START_CLEANUP_FAILED",
+        ),
+      );
 
-    expect(publicationHost.close).toHaveBeenCalledTimes(1);
-    expect(referenceHost.close).toHaveBeenCalledTimes(1);
-    expect(operationHost.close).toHaveBeenCalledTimes(1);
-    expect(controlPlane.close).toHaveBeenCalledTimes(1);
-    expect(createViteServer).not.toHaveBeenCalled();
-    expect(publicationHost.close.mock.invocationCallOrder[0]).toBeLessThan(
-      referenceHost.close.mock.invocationCallOrder[0],
-    );
-    expect(referenceHost.close.mock.invocationCallOrder[0]).toBeLessThan(
-      operationHost.close.mock.invocationCallOrder[0],
-    );
-    expect(operationHost.close.mock.invocationCallOrder[0]).toBeLessThan(
-      controlPlane.close.mock.invocationCallOrder[0],
-    );
-  });
+      expect(publicationHost.close).toHaveBeenCalledTimes(1);
+      expect(referenceHost.close).toHaveBeenCalledTimes(1);
+      expect(operationHost.close).toHaveBeenCalledTimes(1);
+      expect(controlPlane.close).toHaveBeenCalledTimes(1);
+      expect(createViteServer).not.toHaveBeenCalled();
+      expect(publicationHost.close.mock.invocationCallOrder[0]).toBeLessThan(
+        referenceHost.close.mock.invocationCallOrder[0],
+      );
+      expect(referenceHost.close.mock.invocationCallOrder[0]).toBeLessThan(
+        operationHost.close.mock.invocationCallOrder[0],
+      );
+      expect(operationHost.close.mock.invocationCallOrder[0]).toBeLessThan(
+        controlPlane.close.mock.invocationCallOrder[0],
+      );
+    },
+  );
 
-  it("closes an opened control plane when Vite startup fails", async () => {
-    const appDirectory = await temporaryAppDirectory();
-    const stateDirectory = await stateDirectoryFor(appDirectory);
-    const controlPlane = {
-      listen: vi.fn(async () => ({
-        address: "127.0.0.1",
-        port: 43127,
-        origin: "http://127.0.0.1:43127",
-      })),
-      close: vi.fn(async () => undefined),
-    };
-    const viteServer = {
-      listen: vi.fn(async () => {
+  it.each(["none", "http", "vite", "operation", "control-plane"])(
+    "closes every opened authority when the app transport fails (%s cleanup failure)",
+    async (failedCleanup) => {
+      const appDirectory = await temporaryAppDirectory();
+      const stateDirectory = await stateDirectoryFor(appDirectory);
+      const controlPlane = {
+        listen: vi.fn(async () => ({
+          address: "127.0.0.1",
+          port: 43127,
+          origin: "http://127.0.0.1:43127",
+        })),
+        close: vi.fn(async () => undefined),
+      };
+      const viteServer = {
+        middlewares: vi.fn(),
+        close: vi.fn(async () => undefined),
+      };
+      const httpServer = createHttpServer();
+      vi.spyOn(httpServer, "listen").mockImplementation(() => {
         throw new Error("address detail that must not escape");
-      }),
-      close: vi.fn(async () => undefined),
-    };
-    const operationHost = {
-      listen: vi.fn(async () => ({
-        address: "127.0.0.1",
-        port: 43128,
-        origin: "http://127.0.0.1:43128",
-      })),
-      close: vi.fn(async () => undefined),
-    };
+      });
+      if (failedCleanup === "http") {
+        vi.spyOn(httpServer, "close").mockImplementation((callback) => {
+          callback(new Error("private-http-cleanup-detail"));
+          return httpServer;
+        });
+      }
+      const operationHost = {
+        listen: vi.fn(async () => ({
+          address: "127.0.0.1",
+          port: 43128,
+          origin: "http://127.0.0.1:43128",
+        })),
+        close: vi.fn(async () => undefined),
+      };
+      if (failedCleanup === "vite") {
+        viteServer.close.mockRejectedValue(new Error("private-vite-cleanup-detail"));
+      }
+      if (failedCleanup === "operation") {
+        operationHost.close.mockRejectedValue(new Error("private-operation-cleanup-detail"));
+      }
+      if (failedCleanup === "control-plane") {
+        controlPlane.close.mockRejectedValue(new Error("private-control-plane-cleanup-detail"));
+      }
 
-    await expect(
-      startDesenAppLocalDev({
-        appDirectory,
-        stateDirectory,
-        openControlPlane: async () => controlPlane,
-        openOperationHost: async () => operationHost,
-        createViteServer: async () => viteServer,
-        entropy: deterministicIndependentEntropy(9),
-      }),
-    ).rejects.toEqual(new DesenAppLocalDevHostError("LOCAL_START_FAILED"));
-    expect(viteServer.close).toHaveBeenCalledTimes(1);
-    expect(controlPlane.close).toHaveBeenCalledTimes(1);
-    expect(operationHost.close).toHaveBeenCalledTimes(1);
-  });
+      await expect(
+        startDesenAppLocalDev({
+          appDirectory,
+          stateDirectory,
+          openControlPlane: async () => controlPlane,
+          openOperationHost: async () => operationHost,
+          createViteServer: async () => viteServer,
+          createHttpServer: () => httpServer,
+          entropy: deterministicIndependentEntropy(9),
+        }),
+      ).rejects.toEqual(
+        new DesenAppLocalDevHostError(
+          failedCleanup === "none" ? "LOCAL_START_FAILED" : "LOCAL_START_CLEANUP_FAILED",
+        ),
+      );
+      expect(viteServer.close).toHaveBeenCalledTimes(1);
+      expect(controlPlane.close).toHaveBeenCalledTimes(1);
+      expect(operationHost.close).toHaveBeenCalledTimes(1);
+      expect(viteServer.close.mock.invocationCallOrder[0]).toBeLessThan(
+        operationHost.close.mock.invocationCallOrder[0],
+      );
+      expect(operationHost.close.mock.invocationCallOrder[0]).toBeLessThan(
+        controlPlane.close.mock.invocationCallOrder[0],
+      );
+    },
+  );
 
   it("returns an exact denial instead of serving local state or the SPA fallback", async () => {
     const appDirectory = await temporaryAppDirectory();
@@ -599,6 +673,95 @@ describe("Desen App local development host", () => {
       }
     } finally {
       await host.close();
+    }
+  });
+
+  it("owns real Vite HTTP and HMR lifetime without adding process exit listeners and restarts on the same port", async () => {
+    const appDirectory = await temporaryAppDirectory();
+    const stateDirectory = await stateDirectoryFor(appDirectory);
+    await writeFile(
+      join(appDirectory, "index.html"),
+      "<!doctype html><title>Owned middleware lifecycle</title>",
+    );
+    const signalListeners = process.rawListeners("SIGTERM");
+    const stdinListeners = process.stdin.rawListeners("end");
+    for (let cycle = 0; cycle < 2; cycle += 1) {
+      const controlPlane = {
+        listen: vi.fn(async () => ({ origin: "http://127.0.0.1:43127" })),
+        close: vi.fn(async () => undefined),
+      };
+      const host = await startDesenAppLocalDev({
+        appDirectory,
+        stateDirectory,
+        openControlPlane: async () => controlPlane,
+        entropy: deterministicIndependentEntropy(30 + cycle * 2),
+      });
+      let pendingSocket;
+      try {
+        expect(process.rawListeners("SIGTERM")).toEqual(signalListeners);
+        expect(process.stdin.rawListeners("end")).toEqual(stdinListeners);
+        const page = await fetch(`${host.appOrigin}/projects/flow-app/surfaces/start`);
+        expect(page.status).toBe(200);
+        expect(await page.text()).toContain("Owned middleware lifecycle");
+        const client = await fetch(`${host.appOrigin}/@vite/client`);
+        expect(client.status).toBe(200);
+        const clientText = await client.text();
+        expect(clientText).toContain("127.0.0.1:5173");
+        expect(clientText).not.toContain("const hmrPort = 24678");
+        // An incomplete request cannot retain the app port or delay downstream authority close.
+        pendingSocket = connect({ host: "127.0.0.1", port: 5173 });
+        await once(pendingSocket, "connect");
+        const socketErrors = [];
+        pendingSocket.on("error", (error) => socketErrors.push(error.code));
+        pendingSocket.write("GET / HTTP/1.1\r\nHost: 127.0.0.1:5173\r\n");
+        const disconnected = new Promise((resolve) => pendingSocket.once("close", resolve));
+        pendingSocket.resume();
+        await Promise.all([host.close(), disconnected]);
+        expect(socketErrors.every((code) => code === "ECONNRESET")).toBe(true);
+        expect(controlPlane.close).toHaveBeenCalledTimes(1);
+      } finally {
+        pendingSocket?.destroy();
+        await host.close();
+      }
+      expect(process.rawListeners("SIGTERM")).toEqual(signalListeners);
+      expect(process.stdin.rawListeners("end")).toEqual(stdinListeners);
+    }
+  });
+
+  it("fails on an occupied 5173 without changing ports or closing the unrelated listener", async () => {
+    const appDirectory = await temporaryAppDirectory();
+    const stateDirectory = await stateDirectoryFor(appDirectory);
+    const occupied = createHttpServer((_request, response) => response.end("existing owner"));
+    occupied.listen({ host: "127.0.0.1", port: 5173 });
+    await once(occupied, "listening");
+    const controlPlane = {
+      listen: vi.fn(async () => ({ origin: "http://127.0.0.1:43127" })),
+      close: vi.fn(async () => undefined),
+    };
+    const operationHost = {
+      listen: vi.fn(async () => ({ origin: "http://127.0.0.1:43128" })),
+      close: vi.fn(async () => undefined),
+    };
+    const viteServer = { middlewares: vi.fn(), close: vi.fn(async () => undefined) };
+    try {
+      await expect(
+        startDesenAppLocalDev({
+          appDirectory,
+          stateDirectory,
+          openControlPlane: async () => controlPlane,
+          openOperationHost: async () => operationHost,
+          createViteServer: async () => viteServer,
+          entropy: deterministicIndependentEntropy(40),
+        }),
+      ).rejects.toEqual(new DesenAppLocalDevHostError("LOCAL_START_FAILED"));
+      expect(viteServer.close).toHaveBeenCalledTimes(1);
+      expect(operationHost.close).toHaveBeenCalledTimes(1);
+      expect(controlPlane.close).toHaveBeenCalledTimes(1);
+      expect(await (await fetch(DESEN_APP_LOCAL_DEV_ORIGIN)).text()).toBe("existing owner");
+    } finally {
+      await new Promise((resolve, reject) =>
+        occupied.close((error) => (error ? reject(error) : resolve())),
+      );
     }
   });
 

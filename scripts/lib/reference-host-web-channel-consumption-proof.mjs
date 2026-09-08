@@ -69,8 +69,6 @@ const LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS = Object.freeze({
   token: "DESEN_CI_LOOPBACK_CHILD_LISTENER_TOKEN",
 });
 const LOOPBACK_CHILD_LISTENER_TOKEN_PATTERN = /^[0-9a-f]{64}$/u;
-const VITEST_CONFIG_SOURCE =
-  "export default { test: { cache: false, fileParallelism: false, maxWorkers: 1 } };\n";
 
 const SERVER_SOURCE_FILES = Object.freeze([
   `${SERVER_DIRECTORY}/src/index.ts`,
@@ -101,6 +99,10 @@ const CLIENT_TYPE_TEST_FILES = Object.freeze([
   `${CLIENT_DIRECTORY}/test/official-sign-in.types.ts`,
 ]);
 const RUNTIME_TEST_FILES = Object.freeze([...SERVER_TEST_FILES, ...CLIENT_TEST_FILES]);
+// CLI filename filters are substrings and also match mirrored dependency-boundary fixtures.
+// The code-owned exact include inventory keeps every actual suite while granting no fixture
+// source test-execution authority merely because its path ends with the same filename.
+const VITEST_CONFIG_SOURCE = `export default { test: { include: ${JSON.stringify(RUNTIME_TEST_FILES)}, cache: false, fileParallelism: false, maxWorkers: 1 } };\n`;
 const RUNTIME_TEST_TITLES_BY_FILE = Object.freeze({
   [`${SERVER_DIRECTORY}/test/control-plane-client.test.ts`]: Object.freeze([
     "[loopback-bearer-enforced] authenticates both fixed T05 reads",
@@ -119,6 +121,7 @@ const RUNTIME_TEST_TITLES_BY_FILE = Object.freeze({
     "rejects an immediate installed-package directory fan-out at its entry ceiling",
   ]),
   [`${SERVER_DIRECTORY}/test/channel-activation-controller.test.ts`]: Object.freeze([
+    "admits only installed Account and Flow identities before activation and recovers both durable roles",
     "[valid-a-activation-delivery] activates and exposes the first valid candidate",
     "[invalid-b-preserves-a] retains the authenticated A delivery",
     "[valid-c-replaces-a] commits C with A as previous-good",
@@ -128,6 +131,11 @@ const RUNTIME_TEST_TITLES_BY_FILE = Object.freeze({
     "exercises A-B-C preservation and restart recovery without socket authority",
   ]),
   [`${SERVER_DIRECTORY}/test/server.test.ts`]: Object.freeze([
+    "serves only the opt-in fixed same-origin operation with closed success and declared failure results",
+    "rejects ambient authority, malformed framing and oversized operation inputs before calling the handler",
+    "aborts pending host operations on close and never publishes their late success",
+    "aborts pending host operations when their browser disconnects",
+    "fences a handler that ignores the fixed operation deadline",
     "activates one exact published channel identity through the server's single controller",
     "rejects malformed or mismatched publication identities without activating a candidate",
     "never reports Active when the host preserves a different last-known-good revision",
@@ -156,6 +164,8 @@ const RUNTIME_TEST_TITLES_BY_FILE = Object.freeze({
     "keeps the host boot surface instead of falling back to the historical static Bundle",
   ]),
   [`${CLIENT_DIRECTORY}/test/official-sign-in.test.tsx`]: Object.freeze([
+    "runs an authored nondefault Flow alias through pending, failure, retry and managed Result navigation",
+    "requires authentic finite profile authority and preserves Account on unsupported identity or routes",
     "runs pending, declared failure, edited retry, success, and navigation through real adapters",
     "runs the production HTTP binding through runtime, real adapters, retry, and navigation",
     "denies an empty-password contract input before I/O and keeps service failure generic",
@@ -941,6 +951,54 @@ function auditPackageManifests(tracked) {
 }
 
 function auditServerSources(tracked) {
+  const printer = ts.createPrinter({ removeComments: true, newLine: ts.NewLineKind.LineFeed });
+  for (const [relativePath, expectedFunctions] of [
+    [
+      `${SERVER_DIRECTORY}/src/server.ts`,
+      [
+        ["readSignInBody", "0fed4214815070fd2d2bc0c05c86c76d4c42c6c0ef168d3786f23bfe599e6a54"],
+        ["invokeSignIn", "b0e7b808d4903b87fa5025bc5926ee8d6fe97048344d82334c26f71386d2a8f4"],
+        ["captureSignInResult", "3e4dfab8d422aba36fe60b5f80076694cc053a492c2037c17902bdd81f73b891"],
+        ["captureOptions", "f105da12c8ce50a7e51a827a78bf8305c8ebeebeeecb25e197b0606c7a703b92"],
+        [
+          "openReferenceHostWebServer",
+          "f3bad5db602378a7820588e202001d489ddb0fc3ae3a3a49021cf3c096dd0040",
+        ],
+      ],
+    ],
+    [
+      `${SERVER_DIRECTORY}/src/channel-activation-controller.ts`,
+      [
+        [
+          "verifiedCandidateFor",
+          "a0ab2f4ff05b8fc3ef26be741c182d198887b2caf2656d41f0f511ea6fa6a615",
+        ],
+      ],
+    ],
+  ]) {
+    const source = ts.createSourceFile(
+      relativePath,
+      tracked.get(relativePath).toString("utf8"),
+      ts.ScriptTarget.Latest,
+      true,
+    );
+    for (const [name, expected] of expectedFunctions) {
+      const matches = source.statements.filter(
+        (node) => ts.isFunctionDeclaration(node) && node.name?.text === name,
+      );
+      if (
+        matches.length !== 1 ||
+        sha256(Buffer.from(printer.printNode(ts.EmitHint.Unspecified, matches[0], source))) !==
+          expected
+      ) {
+        fail(
+          "SERVER_BOUNDARY_DRIFT",
+          "The reviewed finite application/operation authority syntax drifted.",
+          { relativePath, name },
+        );
+      }
+    }
+  }
   const imports = [];
   for (const relativePath of SERVER_SOURCE_FILES) {
     const source = tracked.get(relativePath);
@@ -1021,6 +1079,11 @@ function auditServerSources(tracked) {
   }
   const serverSource = tracked.get(`${SERVER_DIRECTORY}/src/server.ts`).toString("utf8");
   const requiredServerSignals = [
+    /const SIGN_IN_PATH = "\/api\/sign-in";/u,
+    /const MAX_SIGN_IN_BYTES = 16_384;/u,
+    /const MAX_SIGN_IN_CHUNKS = 1_024;/u,
+    /const SIGN_IN_TIMEOUT_MS = 10_000;/u,
+    /const MAX_SIGN_IN_REQUESTS = 16;/u,
     /const MAX_STATIC_DIRECTORIES = 256;/u,
     /const MAX_STATIC_ENTRIES = 384;/u,
     /opendir\(directory, \{ bufferSize: 32 \}\)/u,
@@ -1828,7 +1891,7 @@ export async function buildReferenceHostWebChannelConsumptionEvidence(options) {
       "This proof does not establish remote, multi-tenant, TLS, bearer-credential lifecycle, or Internet-facing service security.",
       "This proof does not establish Bundle signing, hostile-administrator tamper resistance, independently anchored anti-rollback, or automatic rollback.",
       "This proof admits one fixed application-installed Web–React package; it does not prove arbitrary package discovery, installation, or execution.",
-      "This reference server does not implement or proxy the application POST /api/sign-in backend; deployment authentication remains outside M07-T11 and fails closed as unavailable.",
+      "POST /api/sign-in remains disabled unless trusted server composition installs the fixed callback. The opt-in local Account/Flow demonstration is not production authentication; current tests separately exercise closed inputs, outputs and lifecycle fences.",
       "The browser case runs through the DOM test host; it is not a real-browser interoperability or performance claim.",
       "P-12 remains NOT_PROVEN until M10-T07 proves product-level restart preservation in Desen App.",
       "N-041 remains PLANNED until M12-T05 closes the measured whole-system finite-limit profile.",

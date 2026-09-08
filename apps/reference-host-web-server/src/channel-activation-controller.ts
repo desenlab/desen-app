@@ -189,6 +189,22 @@ async function verifiedCandidateFor(
     { status: "not-available" },
   );
   if (integrity.status !== "verified") return undefined;
+  // Identity selects only one of two installed data policies, never an endpoint or handler.
+  // Apply the same policy during candidate activation and both durable recovery roles.
+  const bundle = integrity.authority.bundle;
+  const entry =
+    bundle.id === "com.example.account-app"
+      ? "sign-in"
+      : bundle.id === "com.example.flow-app"
+        ? "start"
+        : undefined;
+  const destination = entry === "sign-in" ? "home" : "result";
+  if (
+    entry === undefined ||
+    bundle.entry !== entry ||
+    exactOwnDataRecord(bundle.surfaces, [entry, destination]) === undefined
+  )
+    return undefined;
   const packages = preflightBundlePackages(integrity.authority, [inventory]);
   if (packages.status !== "preflighted") return undefined;
   return Object.freeze({

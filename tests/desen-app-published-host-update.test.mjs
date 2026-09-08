@@ -338,6 +338,14 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[0], async () => {
   for (const relativePath of [t06ArtifactPath, ...currentT06Paths]) {
     lightweightAuthorities.set(relativePath, await readFile(path.join(ROOT, relativePath)));
   }
+  for (const relativePath of [
+    "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json",
+    "apps/desen-app/dev/local-demo-host.mjs",
+    "apps/desen-app/dev/local-demo-host.test.mjs",
+    "apps/desen-app/dev/local-demo.mjs",
+  ]) {
+    lightweightAuthorities.set(relativePath, await readFile(path.join(ROOT, relativePath)));
+  }
   for (const [relativePath, bytes] of lightweightAuthorities) {
     const absolutePath = path.join(lightweightWorkspace, relativePath);
     await mkdir(path.dirname(absolutePath), { recursive: true });
@@ -411,7 +419,7 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[1], () => {
     boundedBrowserTransport: true,
     exactActivationRevisionRequired: true,
     normalProductBootstrapReceivesOptionalPort: true,
-    flowWorkspaceCannotReceivePublicationPort: true,
+    flowWorkspaceCannotReceivePublicationPort: false,
     serverOwnsChannelRereadAndActivation: true,
     activationBridgeStrictAndLoopbackOnly: true,
     callbackSettlementClosedAndRedacted: true,
@@ -429,14 +437,23 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[1], () => {
     expectedError("SOURCE_POLICY_VIOLATION"),
   );
   const branchSwappedMain = replaceOnce(
-    replaceOnce(sourcePolicyInput.main, "              publicationPort={publicationPort}\n", ""),
-    "              integrationBinding={flowIntegration}\n",
-    [
-      "              integrationBinding={flowIntegration}",
-      "              publicationPort={publicationPort}",
-      "",
-    ].join("\n"),
+    sourcePolicyInput.main,
+    "workspaceProfile={REFERENCE_SIGN_IN_WORKSPACE_PROFILE}",
+    "workspaceProfile={REFERENCE_FLOW_WORKSPACE_PROFILE}",
   );
+  for (const invalidMain of [
+    sourcePolicyInput.main.replace("publicationPort={publicationPort}", "publicationPort={null}"),
+    sourcePolicyInput.main.replaceAll(
+      "publicationPort={publicationPort}",
+      "publicationPort={untrustedPort}",
+    ),
+  ]) {
+    assert.throws(
+      () =>
+        verifyDesenAppPublishedHostUpdateSourcePolicy({ ...sourcePolicyInput, main: invalidMain }),
+      expectedError("SOURCE_POLICY_VIOLATION"),
+    );
+  }
   for (const runtimePublication of [
     replaceOnce(
       sourcePolicyInput.runtimePublication,
@@ -860,7 +877,8 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
   const browserPackagePath = "apps/desen-app-browser-e2e/package.json";
   const browserPackage = await readFile(path.join(ROOT, browserPackagePath), "utf8");
   const parsedBrowserPackage = JSON.parse(browserPackage);
-  const finalCommand = "playwright test --config restart-recovery-playwright.config.ts";
+  const finalCommand = "playwright test --config repeatable-demo-playwright.config.ts";
+  const recoveryCommand = "playwright test --config restart-recovery-playwright.config.ts";
   const suite = parsedBrowserPackage.scripts["test:e2e"];
   assert.equal(suite.endsWith(` && ${finalCommand}`), true);
   const invalidPackages = [
@@ -870,6 +888,12 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
       code: "SOURCE_POLICY_VIOLATION",
     },
     { command: `${suite} && ${finalCommand}`, code: "SOURCE_POLICY_VIOLATION" },
+    { command: suite.replace(` && ${recoveryCommand}`, ""), code: "SOURCE_POLICY_VIOLATION" },
+    {
+      command: `${recoveryCommand} && ${suite.replace(` && ${recoveryCommand}`, "")}`,
+      code: "SOURCE_POLICY_VIOLATION",
+    },
+    { command: `${suite} && ${recoveryCommand}`, code: "SOURCE_POLICY_VIOLATION" },
   ];
   for (const { command, code } of invalidPackages) {
     const changed = structuredClone(parsedBrowserPackage);
@@ -906,14 +930,19 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
     fileOverrides: unchangedOverrides,
   });
   assert.deepEqual(unchanged.artifactBytes, artifactBytes);
-  assert.equal(unchanged.liveSuccessorAuthority.compositionSuccessor.task, "M10-T07");
-  assert.equal(unchanged.liveSuccessorAuthority.compositionSuccessor.productSourceUnchanged, true);
+  assert.equal(unchanged.liveSuccessorAuthority.compositionSuccessor.task, "M10-T08");
+  assert.equal(unchanged.liveSuccessorAuthority.compositionSuccessor.productSourceUnchanged, false);
+  assert.equal(
+    unchanged.liveSuccessorAuthority.currentSourcePolicy.flowWorkspaceCannotReceivePublicationPort,
+    false,
+  );
+  assert.equal(unchanged.artifact.authority.source.flowWorkspaceCannotReceivePublicationPort, true);
   // Substitute only bytes returned by an owned read, not repository files. Both initial admission
   // and post-build reauthentication must reject; an already captured successor cannot cache trust.
-  const t07Path = "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json";
+  const t08Path = "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json";
   for (const [relativePath, changedRead] of [
-    [t07Path, 1],
-    [t07Path, 2],
+    [t08Path, 1],
+    [t08Path, 2],
     [browserPackagePath, 2],
   ]) {
     const originalOpen = filesystem.open;
@@ -993,8 +1022,8 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
   const compatibility = built.dependencySecurityCompatibility;
   assert.equal(compatibility.authority, "SEC-02");
   assert.equal(compatibility.currentBytes, liveLockfile.byteLength);
-  assert.equal(compatibility.currentBytes, 132_108);
-  assert.equal(compatibility.compositionSuccessor.task, "M10-T07");
+  assert.equal(compatibility.currentBytes, 132_210);
+  assert.equal(compatibility.compositionSuccessor.task, "M10-T08");
   assert.deepEqual(compatibility.securityTaskLockfile, {
     bytes: 132_006,
     sha256: "0f968b0c6622f6bfe732d5ec9a2b6a49268e171a64fae6caf9501f6d25f8f074",
@@ -1032,16 +1061,18 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
   let priorLockfileText = liveLockfile.toString("utf8");
-  const importerStart = priorLockfileText.indexOf("  apps/desen-app-browser-e2e:\n");
-  const importerEnd = priorLockfileText.indexOf("\n  apps/", importerStart + 1);
-  const importer = priorLockfileText.slice(importerStart, importerEnd);
   const protocolLink =
     "      '@desen/protocol':\n        specifier: workspace:*\n        version: link:../../packages/protocol\n";
-  assert.ok(importerStart >= 0 && importerEnd > importerStart);
-  priorLockfileText =
-    priorLockfileText.slice(0, importerStart) +
-    replaceOnce(importer, protocolLink, "") +
-    priorLockfileText.slice(importerEnd);
+  for (const importerName of ["apps/desen-app-browser-e2e", "apps/reference-host-web"]) {
+    const importerStart = priorLockfileText.indexOf(`  ${importerName}:\n`);
+    const importerEnd = priorLockfileText.indexOf("\n  apps/", importerStart + 1);
+    const importer = priorLockfileText.slice(importerStart, importerEnd);
+    assert.ok(importerStart >= 0 && importerEnd > importerStart);
+    priorLockfileText =
+      priorLockfileText.slice(0, importerStart) +
+      replaceOnce(importer, protocolLink, "") +
+      priorLockfileText.slice(importerEnd);
+  }
   const securityTaskLockfile = Buffer.from(priorLockfileText);
   assert.equal(securityTaskLockfile.byteLength, 132_006);
   assert.equal(

@@ -192,6 +192,48 @@ const PROMOTION_REMOVED_TRACKED_PATHS = Object.freeze([
   "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
 ]);
 const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/repeatable-demo-authoring.ts",
+  "apps/desen-app-browser-e2e/repeatable-demo-playwright.config.ts",
+  "apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "apps/desen-app-browser-e2e/repeatable-demo.pw.ts",
+  "apps/desen-app/dev/local-demo-host.mjs",
+  "apps/desen-app/dev/local-demo-host.test.mjs",
+  "apps/desen-app/dev/local-demo.mjs",
+  "docs/adr/0022-repeatable-local-demo-composition.md",
+  "docs/proof/DESEN-APP-REPEATABLE-DEMO.md",
+  "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json",
+  "scripts/generate-desen-app-repeatable-demo-proof.mjs",
+  "scripts/lib/desen-app-repeatable-demo-proof.mjs",
+  "scripts/verify-desen-app-repeatable-demo.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-repeatable-demo-normal-launcher/apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-repeatable-demo-normal-launcher/apps/desen-app/dev/local-demo-host.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-repeatable-authoring-protocol-root/apps/desen-app-browser-e2e/repeatable-demo-authoring.ts",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-repeatable-authoring-protocol-root/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/allowed-reference-host-sign-in-test-protocol-root/apps/reference-host-web/test/official-sign-in.test.tsx",
+  "tests/boundaries/fixtures/allowed-reference-host-sign-in-test-protocol-root/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-repeatable-demo-imports-normal-launcher/apps/desen-app-browser-e2e/ordinary-proof.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-repeatable-demo-imports-normal-launcher/apps/desen-app/dev/local-demo-host.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-app-source/apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-app-source/apps/desen-app/src/application.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-control-plane-root/apps/control-plane-api/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-control-plane-root/apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-editor-core/apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-editor-core/packages/editor-core/src/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-unreviewed-dev-module/apps/desen-app-browser-e2e/repeatable-demo-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-repeatable-demo-imports-unreviewed-dev-module/apps/desen-app/dev/local-dev-host.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-non-repeatable-authoring-imports-protocol/apps/desen-app-browser-e2e/another-authoring.ts",
+  "tests/boundaries/fixtures/desen-app-browser-non-repeatable-authoring-imports-protocol/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-repeatable-authoring-imports-editor-core/apps/desen-app-browser-e2e/repeatable-demo-authoring.ts",
+  "tests/boundaries/fixtures/desen-app-browser-repeatable-authoring-imports-editor-core/packages/editor-core/src/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-repeatable-authoring-imports-protocol-private/apps/desen-app-browser-e2e/repeatable-demo-authoring.ts",
+  "tests/boundaries/fixtures/desen-app-browser-repeatable-authoring-imports-protocol-private/packages/protocol/dist/private.js",
+  "tests/boundaries/fixtures/reference-host-other-test-imports-protocol/apps/reference-host-web/test/another.test.tsx",
+  "tests/boundaries/fixtures/reference-host-other-test-imports-protocol/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/reference-host-sign-in-test-imports-protocol-private/apps/reference-host-web/test/official-sign-in.test.tsx",
+  "tests/boundaries/fixtures/reference-host-sign-in-test-imports-protocol-private/packages/protocol/dist/private.js",
+  "tests/boundaries/fixtures/reference-host-sign-in-test-imports-publisher/apps/reference-host-web/test/official-sign-in.test.tsx",
+  "tests/boundaries/fixtures/reference-host-sign-in-test-imports-publisher/packages/publisher/src/index.js",
+  "tests/desen-app-repeatable-demo.test.mjs",
   "apps/desen-app-browser-e2e/restart-recovery-playwright.config.ts",
   "apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
   "apps/desen-app-browser-e2e/restart-recovery.pw.ts",
@@ -707,13 +749,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 214,
+    PROOF_UNIT: 216,
     CI_POLICY: 48,
     DEPENDENCY_POLICY: 32,
-    FROZEN_INPUT: 156,
-    PACKAGE_OR_APPLICATION: 565,
-    SHARED_PROOF_INFRASTRUCTURE: 315,
-    PROJECT_DOCUMENTATION: 152,
+    FROZEN_INPUT: 157,
+    PACKAGE_OR_APPLICATION: 572,
+    SHARED_PROOF_INFRASTRUCTURE: 345,
+    PROJECT_DOCUMENTATION: 154,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -1118,10 +1160,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 77,
-  headSha256: "4bed8aba3916c066c689dd99ea4a3820e0b7b1a05d3780688e51b70ec9b97ece",
-  frozenArtifactCount: 61,
-  currentReaderCount: 122,
+  sequence: 78,
+  headSha256: "f72920eb56529b40c6ba2726c62ce4db1dc14479d38b788577064eeea3da2feb",
+  frozenArtifactCount: 62,
+  currentReaderCount: 124,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -2638,8 +2680,8 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 224 ||
-    currentInventory.proofUnitCount !== 107
+    currentInventory.workloadCount !== 226 ||
+    currentInventory.proofUnitCount !== 108
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
@@ -2653,10 +2695,10 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 96 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 97 || currentProofPairClasses.barrier !== 11) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current T07 proof-pair authority is not exactly 96 ordinary and 11 barrier pairs.",
+      "The current T08 proof-pair authority is not exactly 97 ordinary and 11 barrier pairs.",
     );
   }
   const archiveRedactionClosure = createAffectedImpactClosure(["historical-archive-redaction"]);
@@ -2664,14 +2706,14 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     !isDeepStrictEqual(archiveRedactionClosure.ownerProofUnitIds, [
       "historical-archive-redaction",
     ]) ||
-    archiveRedactionClosure.proofUnitCount !== 75 ||
-    archiveRedactionClosure.workloadCount !== 160 ||
+    archiveRedactionClosure.proofUnitCount !== 76 ||
+    archiveRedactionClosure.workloadCount !== 162 ||
     archiveRedactionClosure.impactSha256 !==
-      "cbc3dcf7c943e130cba691b75f30f23cb0380efb00e3a274de6c3793cfc514aa"
+      "11e88a4b10182ffb252806995269ff98f7919a73a534d2319b8b2190f51c00c8"
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current T07 successor closure from AR-01 is not exactly 75 proof units and 160 workloads.",
+      "The current T08 successor closure from AR-01 is not exactly 76 proof units and 162 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);

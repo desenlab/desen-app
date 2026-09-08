@@ -2151,7 +2151,7 @@ and move to M10-T01.
 | M10-T05  | DONE        | M10-T03–M10-T04           | Label/layout change published and activated without host source change        |
 | M10-T06  | DONE        | M10-T05                   | Invalid prop/event/slot publication rejected with node-linked diagnostics     |
 | M10-T07  | DONE        | M10-T05, G07              | Corrupt revision and catalog mismatch preserve last-known-good                |
-| M10-T08  | NOT_STARTED | M10-T01B–M10-T07          | One-command seed/reset and repeatable sign-in demo runbook                    |
+| M10-T08  | DONE        | M10-T01B–M10-T07          | One-command seed/reset and repeatable sign-in demo runbook                    |
 | M10-T09  | NOT_STARTED | M10-T08                   | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
 | G10      | NOT_STARTED | M10-T01C, M10-T02–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
 
@@ -2566,11 +2566,16 @@ T08 repeatable seed/reset, T09 committed Runtime Core baseline, P-12, N-036, and
 See [ADR 0021](../adr/0021-invalid-source-draft-publication-boundary.md) and the
 [T06 proof](../proof/DESEN-APP-INVALID-PUBLICATION.md).
 
-### M10-T07 implementation checkpoint — hosted closure still required
+### M10-T07 closure — exact PR and fresh main passed
 
-T07 is the sole active closure candidate. Its `DONE` row is conditional on this exact final head's
-hosted Quality gate and Browser E2E, merge, and fresh main checks. T08, T09, and G10 remain
-`NOT_STARTED`; no next-task implementation begins before those checks pass.
+T07 closed in [PR #82](https://github.com/desenlab/desen-app/pull/82). Exact head
+`786b2ebbf8facee5128559373ff4a23c225b8623` passed
+[PR CI](https://github.com/desenlab/desen-app/actions/runs/34215082332), merged as
+`6cd7c8454f780d59ba88180a7556a1e063716597`, and passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34216545093).
+All three exhaustive shards, the joined Quality gate, and eight Chromium journeys passed;
+the merged tree is identical to the tested PR tree. T08 is now the sole active task.
+T09 and G10 remain `NOT_STARTED`.
 
 The normal product visibly authors and publishes A then C. Both corrupt-revision and
 self-consistent Catalog-mismatch channel candidates reject before activation. After complete
@@ -2600,11 +2605,41 @@ All 491 CI/retained-runner contracts pass with zero skips, including 110 checkpo
 real T07 verifier and nine root cases also pass under the authenticated default CI runner's
 exact permissions without changing build outputs.
 
-Progress is 119/148 (80%), M10 10/12 (83%), and proof gates remain 11/13. P-12 remains
-`NOT_PROVEN` until hosted closure; PF-077/PF-090 remain `OPEN` for their broader composition
+Progress is 119/148 (80%), M10 10/12 (83%), and proof gates remain 11/13. P-12 is now
+`PROVEN` for this bounded product recovery profile; PF-077/PF-090 remain `OPEN` for their broader composition
 questions. T08 seed/reset, T09 committed Runtime Core baseline, N-036, and G10 remain separate
 owners. No product API, Runtime Core, frozen protocol, or previous proof artifact changed.
 See [the complete recovery evidence](../proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md).
+
+### M10-T08 implementation checkpoint — hosted closure pending
+
+The task-board `DONE` is a conditional closure candidate. T08 remains the only active work until
+exact-head PR checks, merge, and fresh main pass. T09 and G10 remain `NOT_STARTED`.
+
+`pnpm demo:reset` starts the ordinary product on 5173 with empty, exclusively owned demo storage;
+`pnpm demo` resumes the same generation. One previous generation is retained, ordinary projects
+are untouched, and normal Ctrl+C fully drains the composed services before releasing the lease.
+The visible runbook authors two Flow surfaces, input/operation connections, failure visibility and
+success navigation, then exercises Synthetic, real Integration and the independently published
+host. A second visible label/layout publication keeps that host's HTML/assets unchanged.
+
+Four passing Chromium tests execute eight complete reset/authoring cycles; the final run passes
+in 43.6 seconds. Two real terminal start/stop/restart checks also pass. Focused composition and
+demo tests pass 61/61 and 21/21. T08's verifier and ten root contracts pass; T05/T06/T07 verifiers
+and all 29 retained root cases pass with immutable artifacts unchanged. The bounded baseline
+passes. All 498 CI/retained-runner contracts pass with zero skips or cancellations, as do the
+exact guarded T07/T08 verifier/root pairs. Exact-head hosted checks and fresh main remain separate.
+
+The 319,719-byte artifact is
+`sha256:d91085d6cdc3533466375a77141b6394f0e76f2a8b29a41e8887b5d64e287f47`.
+Checkpoint 78 preserves all 77 preceding entries and 61 earlier artifacts at
+`sha256:f72920eb56529b40c6ba2726c62ce4db1dc14479d38b788577064eeea3da2feb`, with 62 artifacts /
+124 current readers; all 111 checkpoint contracts pass. No previous workload is removed:
+226 logical workloads / 108 proof pairs, 243 physical workloads, nine Chromium journeys,
+unchanged two-worker shards and eleven barriers. Candidate progress is 120/148 (81%), M10 11/12
+(92%); gates remain 11/13. Runtime Core and frozen protocol bytes are unchanged.
+See [the complete demo evidence](../proof/DESEN-APP-REPEATABLE-DEMO.md) and
+[ADR 0022](../adr/0022-repeatable-local-demo-composition.md).
 
 ## M11 — Capability extensibility proof
 

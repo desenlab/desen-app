@@ -42,10 +42,19 @@ through a 64 KiB and 1,024-non-empty-chunk ceiling before JSON parsing. The bind
 credentials beyond the request lifetime, or forward raw failures. Successful bounded JSON still
 passes through runtime-core's exact operation output-schema validation.
 
-The M07-T11 standalone reference server deliberately does not supply or proxy this
-application-level authentication backend. It proves channel consumption and mounted-surface
-delivery; until a later deployment composition supplies `POST /api/sign-in`, submissions fail
-closed as `unavailable`.
+The standalone reference server keeps this backend disabled by default. M10-T08 adds an opt-in
+trusted callback used by the normal local launcher; the callback shares the existing explicit
+local test-account decision with the editor's Integration service. This is a repeatable local
+demonstration, not production authentication.
+
+The production browser installs a factory-authenticated finite inventory for Account
+(`com.example.account-app`, `sign-in` → `home`) and Flow (`com.example.flow-app`, `start` →
+`result`). A Bundle identity selects only those preinstalled data policies; it cannot select an
+endpoint, module, callback or renderer. Both use the same installed sign-in capability. Authored
+operation aliases remain result names, while capability, effect and current document/revision/
+surface context authorize calls. The original Account-only activation entrypoints remain
+available for compatibility. Managed destination content is still mounted by Runtime Core and
+the public generic renderer, never a handwritten host tree.
 
 Tests exercise user-visible pending, declared failure, edited retry, success, and navigation
 through the real `TextField`, `Button`, `Alert`, `Stack`, and `Text` adapters. The loading

@@ -185,6 +185,62 @@ afterEach(async () => {
 });
 
 describe("reference host channel activation controller", () => {
+  it("admits only installed Account and Flow identities before activation and recovers both durable roles", async () => {
+    const a = await officialFixture();
+    const flow = variantFixture(
+      JSON.parse(
+        JSON.stringify(a.bundle)
+          .replaceAll('"com.example.account-app"', '"com.example.flow-app"')
+          .replaceAll('"sign-in"', '"start"')
+          .replaceAll('"home"', '"result"')
+          .replaceAll('"signIn"', '"submitCredentials"')
+          .replaceAll("operation.signIn.", "operation.submitCredentials."),
+      ) as DesenBundle,
+      () => undefined,
+    );
+    const unsupported = variantFixture(a.bundle, (bundle) => {
+      bundle.id = "com.example.uninstalled";
+    });
+    const wrongEntry = variantFixture(a.bundle, (bundle) => {
+      bundle.entry = "home";
+    });
+    const extraSurface = variantFixture(a.bundle, (bundle) => {
+      const surfaces = bundle.surfaces as Record<string, unknown>;
+      surfaces.extra = { ...(surfaces.home as object), id: "extra" };
+    });
+    const environment = await setup([a, flow, unsupported, wrongEntry, extraSurface], a.revision);
+    const controller = await openController(environment);
+    expect(await controller.refresh()).toMatchObject({
+      status: "available",
+      delivery: { activation: { generation: 0, revision: a.revision } },
+    });
+    const before = readReferenceHostDeliveryBytes(controller);
+    let generation = 1;
+    for (const rejected of [unsupported, wrongEntry, extraSurface]) {
+      generation = await putChannel(environment.api, rejected.revision, generation);
+      expect(await controller.refresh()).toMatchObject({
+        status: "available",
+        relationship: "preserved",
+        delivery: { activation: { generation: 0, revision: a.revision } },
+      });
+      expect(readReferenceHostDeliveryBytes(controller)).toEqual(before);
+    }
+    await putChannel(environment.api, flow.revision, generation);
+    expect(await controller.refresh()).toMatchObject({
+      status: "available",
+      relationship: "activated",
+      delivery: { activation: { generation: 1, revision: flow.revision } },
+    });
+    controller.close();
+    const restarted = await openController(environment);
+    expect(restarted.readDelivery()).toBeUndefined();
+    expect(await restarted.refresh()).toMatchObject({
+      status: "available",
+      relationship: "recovered",
+      delivery: { activation: { generation: 1, revision: flow.revision } },
+    });
+  });
+
   it("[valid-a-activation-delivery] activates and exposes the first valid candidate", async () => {
     const a = await officialFixture();
     const environment = await setup([a], a.revision);

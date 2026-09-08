@@ -9,6 +9,8 @@
     "dev/local-dev-host.mjs",
     "dev/local-operation-host.mjs",
     "dev/local-publication-host.mjs",
-    "dev/local-dev.mjs"
+    "dev/local-dev.mjs",
+    "dev/local-demo-host.mjs",
+    "dev/local-demo.mjs"
   ]
 }

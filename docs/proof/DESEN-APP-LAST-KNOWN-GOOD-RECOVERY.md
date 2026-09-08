@@ -14,9 +14,13 @@ M07-T11 parent: `sha256:48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15
 
 Final artifact: `sha256:5e589bc8022de3ccf3add7a9ebab78006ecca6e72628e165f54eef4fd8b90b68`
 
-This is the implementation closure candidate, not hosted completion. The task remains active
-until the bounded baseline, exact-head hosted Quality gate and Browser E2E, merge, and fresh main
-checks pass. A pinned artifact authenticates evidence identity; it never substitutes for execution.
+Hosted closure is complete: [PR #82](https://github.com/desenlab/desen-app/pull/82), exact head
+`786b2ebbf8facee5128559373ff4a23c225b8623`, passed
+[PR CI](https://github.com/desenlab/desen-app/actions/runs/34215082332). The identical tree merged as
+`6cd7c8454f780d59ba88180a7556a1e063716597` and passed
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34216545093), including all
+eight Chromium journeys and three exhaustive shards. A pinned artifact authenticates evidence
+identity; it never substitutes for execution.
 
 ## Scope and authority
 
@@ -89,6 +93,7 @@ anti-rollback, remote, multi-tenant, production-authentication, or native-platfo
 Ephemeral loopback credentials are excluded from retained network snapshots and sanitized proof
 receipts; this does not close the repository-wide N-036 secret audit.
 
-P-12 remains `NOT_PROVEN` until the fresh service matrix, actual new-process Chromium journey,
-bounded local baseline, exact-head hosted checks, merge, and fresh main closure pass. T08 seed/reset,
-T09 committed core baseline, and G10's consolidated milestone audit remain separate tasks.
+P-12 is `PROVEN` for this bounded local Web recovery contract after the fresh service matrix,
+actual new-process Chromium journey, bounded baseline, exact-head hosted checks, merge, and fresh
+main closure above. T08 seed/reset, T09 committed core baseline, and G10's consolidated milestone
+audit remain separate tasks; this does not broaden the limits of the recovery claim.

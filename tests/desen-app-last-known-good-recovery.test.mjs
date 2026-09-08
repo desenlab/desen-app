@@ -13,6 +13,7 @@ import {
   DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_ROOT_TEST_NAMES as NAMES,
   DesenAppLastKnownGoodRecoveryProofError,
   buildDesenAppLastKnownGoodRecoveryEvidence as build,
+  buildCurrentDesenAppLastKnownGoodRecoveryObservation as observe,
   runDesenAppLastKnownGoodRecoveryPublicMatrix as matrix,
   verifyDesenAppLastKnownGoodRecoveryBrowserPolicy as browserPolicy,
   verifyDesenAppLastKnownGoodRecoveryEvidence as verify,
@@ -23,6 +24,7 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json";
 const REPORT = "docs/proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md";
 const SOURCE = "examples/sign-in/official-derived.source.desen.json";
+const SUCCESSOR = "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json";
 const temporaries = [];
 let artifactBytes;
 let proofDocument;
@@ -124,7 +126,18 @@ test(NAMES[0], async () => {
 });
 
 test(NAMES[1], () => {
-  const matrix = built.artifact.authority.publicApiMatrix;
+  const matrix = built.liveSuccessorAuthority.publicApiMatrix;
+  assert.equal(built.liveSuccessorAuthority.task, "M10-T08");
+  assert.equal(built.liveSuccessorAuthority.currentObservationsAreNotHistoricalResults, true);
+  const historical = built.artifact.authority.publicApiMatrix;
+  assert.deepEqual(
+    {
+      ...matrix,
+      freshEmission: historical.freshEmission,
+      compiledModuleReceipts: historical.compiledModuleReceipts,
+    },
+    historical,
+  );
   assert.equal(matrix.result, "PASS");
   assert.deepEqual(
     matrix.invalidCandidates.map(({ id, stage, diagnostics }) => ({ id, stage, diagnostics })),
@@ -237,9 +250,19 @@ test(NAMES[2], () => {
 });
 
 test(NAMES[3], async () => {
-  const graph = built.artifact.authority.currentGraphAudit;
+  const graph = built.liveSuccessorAuthority.currentGraphAudit;
   const predecessor = JSON.parse(await readFile(path.join(ROOT, PARENTS[1].path), "utf8"));
-  assert.deepEqual(graph, predecessor.authority.currentGraphAudit);
+  const successor = JSON.parse(await readFile(path.join(ROOT, SUCCESSOR), "utf8"));
+  assert.deepEqual(
+    built.artifact.authority.currentGraphAudit,
+    predecessor.authority.currentGraphAudit,
+  );
+  assert.notDeepEqual(graph, predecessor.authority.currentGraphAudit);
+  assert.deepEqual(graph, successor.authority.currentGraphAudit);
+  assert.deepEqual(await observe(), {
+    publicApiMatrix: built.liveSuccessorAuthority.publicApiMatrix,
+    currentGraphAudit: graph,
+  });
   assert.equal(graph.runtimeResolution.write, false);
   assert.equal(graph.runtimeResolution.independentBuildsPerApplication, 2);
   assert.equal(graph.runtimeResolution.noHandwrittenHostManagedTreePreservedByFreshHostAudit, true);
@@ -278,7 +301,7 @@ test(NAMES[4], async () => {
     { [Symbol("hidden")]: true },
   ];
   for (const value of hostile)
-    for (const method of [build, matrix, verify, write])
+    for (const method of [build, matrix, observe, verify, write])
       await assert.rejects(method(value), errorCode("OPTIONS_INVALID"));
   for (const value of [
     null,
@@ -303,6 +326,12 @@ test(NAMES[4], async () => {
     errorCode("OPTIONS_INVALID"),
   );
   assert.equal(called, 0);
+  for (const value of [
+    { fileOverrides: new Map() },
+    { artifactBytes },
+    { currentGraphAudit: built.liveSuccessorAuthority.currentGraphAudit },
+  ])
+    await assert.rejects(observe(value), errorCode("OPTIONS_INVALID"));
 });
 
 test(NAMES[5], async () => {
@@ -322,6 +351,42 @@ test(NAMES[5], async () => {
   );
   await substituteRead("packages/protocol/dist/index.js", finalCompiledReadOrdinal, () =>
     assert.rejects(build(), errorCode("PUBLIC_API_DRIFT")),
+  );
+  for (const ordinal of [1, 2]) {
+    await substituteRead(SUCCESSOR, ordinal, () =>
+      assert.rejects(build(), errorCode("SUCCESSOR_DRIFT")),
+    );
+  }
+  const packagePath = "apps/desen-app-browser-e2e/package.json";
+  const packageBytes = await readFile(path.join(ROOT, packagePath));
+  const packageJson = JSON.parse(packageBytes);
+  for (const script of [
+    packageJson.scripts["test:e2e"].replace(
+      " && playwright test --config repeatable-demo-playwright.config.ts",
+      "",
+    ),
+    packageJson.scripts["test:e2e"] + " && true",
+  ]) {
+    await assert.rejects(
+      build({
+        fileOverrides: new Map([
+          [
+            packagePath,
+            Buffer.from(
+              JSON.stringify({
+                ...packageJson,
+                scripts: { ...packageJson.scripts, "test:e2e": script },
+              }),
+            ),
+          ],
+        ]),
+      }),
+      errorCode("TEST_AUTHORITY_DRIFT"),
+    );
+  }
+  await assert.rejects(
+    build({ fileOverrides: new Map([["pnpm-lock.yaml", Buffer.from("forged current lock")]]) }),
+    errorCode("SUCCESSOR_DRIFT"),
   );
 });
 
@@ -393,7 +458,8 @@ test(NAMES[8], async () => {
         ]),
       },
     }),
-    errorCode("ARTIFACT_WRITE_UNSAFE"),
+    // Current successor admission rejects an unreviewed historical input before any write.
+    errorCode("SUCCESSOR_DRIFT"),
   );
   assert.deepEqual(await readFile(path.join(ROOT, ARTIFACT)), artifactBytes);
 });

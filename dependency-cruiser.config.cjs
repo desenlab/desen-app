@@ -77,6 +77,11 @@ const desenAppBrowserProductProofServerPath =
   "^apps/desen-app-browser-e2e/product-proof-server\\.mjs$";
 const desenAppBrowserRecoveryProofServerPath =
   "^apps/desen-app-browser-e2e/restart-recovery-proof-server\\.mjs$";
+const desenAppBrowserRepeatableDemoProofServerPath =
+  "^apps/desen-app-browser-e2e/repeatable-demo-proof-server\\.mjs$";
+const desenAppBrowserRepeatableDemoAuthoringPath =
+  "^apps/desen-app-browser-e2e/repeatable-demo-authoring\\.ts$";
+const referenceHostSignInTestPath = "^apps/reference-host-web/test/official-sign-in\\.test\\.tsx$";
 const desenAppBrowserPublicationServerPaths =
   "^apps/desen-app-browser-e2e/(?:published-host-proof-server|restart-recovery-proof-server)\\.mjs$";
 const desenAppBrowserServerPaths =
@@ -85,6 +90,7 @@ const protocolPublicBuildEntryPath = "^packages/protocol/dist/index\\.(?:d\\.ts|
 const controlPlanePublicBuildEntryPath = "^apps/control-plane-api/dist/index\\.(?:d\\.ts|js)$";
 const desenAppLocalOperationHostPath = "^apps/desen-app/dev/local-operation-host\\.mjs$";
 const desenAppLocalPublicationHostPath = "^apps/desen-app/dev/local-publication-host\\.mjs$";
+const desenAppLocalDemoHostPath = "^apps/desen-app/dev/local-demo-host\\.mjs$";
 const referenceHostServerPublicBuildEntryPath =
   "^apps/reference-host-web-server/dist/index\\.(?:d\\.ts|js)$";
 
@@ -127,8 +133,12 @@ const applicationAllowlistRules = Object.entries(allowedApplicationDependencies)
     from: {
       path: `^apps/${applicationName}/`,
       ...(applicationName === "desen-app-browser-e2e"
-        ? { pathNot: desenAppBrowserRecoveryProofServerPath }
-        : {}),
+        ? {
+            pathNot: `(?:${desenAppBrowserRecoveryProofServerPath}|${desenAppBrowserRepeatableDemoAuthoringPath})`,
+          }
+        : applicationName === "reference-host-web"
+          ? { pathNot: referenceHostSignInTestPath }
+          : {}),
     },
     to: {
       path: "^packages/",
@@ -170,6 +180,25 @@ module.exports = {
     ...packageAllowlistRules,
     ...applicationAllowlistRules,
     {
+      name: "reviewed-canonical-proof-protocol-public-root-only",
+      severity: "error",
+      comment:
+        "Only the exact repeatable-demo authoring observer may authenticate canonical bytes using the public Protocol entry; private Protocol modules and other package edges remain forbidden.",
+      from: { path: desenAppBrowserRepeatableDemoAuthoringPath },
+      to: { path: "^packages/", pathNot: protocolPublicBuildEntryPath },
+    },
+    {
+      name: "reference-host-sign-in-test-reviewed-packages-only",
+      severity: "error",
+      comment:
+        "The exact official host sign-in test retains the host's existing package edges and may additionally recompute Bundle revisions using only the public Protocol entry; private Protocol and every other package remain forbidden.",
+      from: { path: referenceHostSignInTestPath },
+      to: {
+        path: "^packages/",
+        pathNot: `(?:${protocolPublicBuildEntryPath}|${packagePath(allowedApplicationDependencies["reference-host-web"])})`,
+      },
+    },
+    {
       name: "desen-app-browser-e2e-recovery-server-protocol-public-root-only",
       severity: "error",
       comment:
@@ -184,12 +213,23 @@ module.exports = {
         "The isolated browser proof may compose only the reviewed Desen App application, empty-project bootstrap, explicit reference workspace profile, and stylesheet entries.",
       from: {
         path: "^apps/desen-app-browser-e2e/",
-        pathNot: desenAppBrowserServerPaths,
+        pathNot: `(?:${desenAppBrowserServerPaths}|${desenAppBrowserRepeatableDemoProofServerPath})`,
       },
       to: {
         path: "^apps/(?!desen-app-browser-e2e/)",
         pathNot:
           "^apps/desen-app/src/(?:application\\.tsx|reference-empty-project\\.ts|reference-sign-in-workspace-profile\\.ts|styles\\.css)$",
+      },
+    },
+    {
+      name: "desen-app-browser-e2e-repeatable-demo-server-normal-launcher-only",
+      severity: "error",
+      comment:
+        "Only the exact repeatable-demo proof server may invoke the normal local demo lifecycle; direct package, storage, activation, and other application composition imports remain forbidden.",
+      from: { path: desenAppBrowserRepeatableDemoProofServerPath },
+      to: {
+        path: "^(?:apps/(?!desen-app-browser-e2e/)|packages/)",
+        pathNot: desenAppLocalDemoHostPath,
       },
     },
     {

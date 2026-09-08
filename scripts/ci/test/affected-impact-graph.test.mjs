@@ -84,6 +84,7 @@ const DESEN_APP_CONNECTED_PROOF_UNITS = Object.freeze([
   "desen-app-published-host-update",
   "desen-app-invalid-publication",
   "desen-app-last-known-good-recovery",
+  "desen-app-repeatable-demo",
 ]);
 
 function clone(value) {
@@ -92,8 +93,8 @@ function clone(value) {
 
 test("the reviewed impact graph owns every proof unit exactly once", () => {
   const graph = createAffectedImpactGraph();
-  assert.equal(graph.proofUnitCount, 107);
-  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 107);
+  assert.equal(graph.proofUnitCount, 108);
+  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 108);
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "control-plane-runtime-transition-races")?.prerequisites,
     ["control-plane-runtime-fault-injection"],
@@ -320,10 +321,10 @@ test("invalid publication has exactly the publication, diagnostics, and public i
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(
     closure.impactSha256,
-    "664d02cfd6f4bf03e19cdb7cda5de722490bbc925b05862a763f97cf5b333b58",
+    "8a9889204386d6e20ba28e4ac01aee8caeb6184a7d8e96cbfb3dd06af5174646",
   );
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   for (const id of parents) {
     assert.equal(closure.nodeIds.includes(`verify-${id}`), true);
     assert.equal(closure.nodeIds.includes(`test-${id}`), true);
@@ -355,11 +356,11 @@ test("last-known-good recovery has exactly its four reviewed product and durable
   const closure = createAffectedImpactClosure(["desen-app-last-known-good-recovery"]);
   assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-last-known-good-recovery"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.impactSha256,
-    "babdfe9f4798473a636001bba41d8452b4c3ba57a4faec114034c0f592a5bf1c",
+    "2301d33429ee0ec698dddf10a465f80d510e53c2f1903e82f88f4cf1d380b0d4",
   );
   for (const parent of parents) {
     assert.equal(
@@ -378,6 +379,43 @@ test("last-known-good recovery has exactly its four reviewed product and durable
     .find(({ id }) => id === "desen-app-published-host-update")
     .prerequisites.push("desen-app-last-known-good-recovery");
   assert.throws(() => validateAffectedImpactGraph(circular), AffectedImpactGraphError);
+});
+
+test("repeatable demo includes its exact recovery, Integration, and independent-host parents", () => {
+  const graph = createAffectedImpactGraph();
+  const parents = [
+    "desen-app-last-known-good-recovery",
+    "desen-app-success-host-operation",
+    "reference-host-web-source-audit",
+  ];
+  assert.deepEqual(
+    graph.entries.find(({ id }) => id === "desen-app-repeatable-demo")?.prerequisites,
+    parents,
+  );
+  const closure = createAffectedImpactClosure(["desen-app-repeatable-demo"]);
+  assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-repeatable-demo"]);
+  assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
+  assert.equal(
+    closure.impactSha256,
+    "b56afb58921dc32deb54b327d4735e029941117d97287cc070b58c719ffc786c",
+  );
+  for (const parent of parents) {
+    assert.equal(
+      createAffectedImpactClosure([parent]).proofUnitIds.includes("desen-app-repeatable-demo"),
+      true,
+    );
+    const omitted = clone(graph);
+    omitted.entries.find(({ id }) => id === "desen-app-repeatable-demo").prerequisites =
+      parents.filter((id) => id !== parent);
+    assert.throws(() => validateAffectedImpactGraph(omitted), AffectedImpactGraphError);
+  }
+  const cycle = clone(graph);
+  cycle.entries
+    .find(({ id }) => id === "desen-app-last-known-good-recovery")
+    .prerequisites.push("desen-app-repeatable-demo");
+  assert.throws(() => validateAffectedImpactGraph(cycle), AffectedImpactGraphError);
 });
 
 test("impact closure includes prerequisites, dependents, and exact global barriers", () => {
@@ -411,50 +449,50 @@ test("independent proof units remain a strict subset", () => {
 test("the editor stable-ID insert closes over its Source predecessor and structural successor", () => {
   const closure = createAffectedImpactClosure(["editor-core-stable-id-insert"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
 });
 
 test("the editor structural edits close over stable insertion and Source admission", () => {
   const closure = createAffectedImpactClosure(["editor-core-structural-edits"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
 });
 
 test("editor content edits close over both immutable T02 and T03 prerequisites", () => {
   const closure = createAffectedImpactClosure(["editor-core-content-edits"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
 });
 
 test("editor state/binding edits close over the formal T02 and current T04 graph", () => {
   const closure = createAffectedImpactClosure(["editor-core-state-binding-edits"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
 });
 
 test("editor event/action edits close over the formal state/binding predecessor", () => {
   const closure = createAffectedImpactClosure(["editor-core-event-action-edits"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
 });
 
 test("editor authoring round-trip closes over the formal event/action predecessor", () => {
   const closure = createAffectedImpactClosure(["editor-core-authoring-round-trip"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
 });
 
 test("editor persistence closes over the complete neutral authoring predecessor", () => {
   const closure = createAffectedImpactClosure(["editor-core-persistence"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(closure.nodeIds.includes("editor-web-public-package-contract"), true);
 });
 
 test("continuous validation closes over T03-T07 without making persistence a formal parent", () => {
   const closure = createAffectedImpactClosure(["editor-core-continuous-validation"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     createAffectedImpactGraph()
       .entries.find(({ id }) => id === "editor-core-continuous-validation")
@@ -463,18 +501,18 @@ test("continuous validation closes over T03-T07 without making persistence a for
   );
   assert.equal(
     closure.impactSha256,
-    "1ce1157c6d639208e84499c69b5bc0d82bbcdd0b5e549fdf5e648d708b9bae37",
+    "65e64ceabe34114c3525fdbef7c33889a6b189c92bef41f020c77c099fc5e6f7",
   );
 });
 
 test("terminal integration closes over all M08 predecessors and the frozen P-18 runtime proofs", () => {
   const closure = createAffectedImpactClosure(["editor-core-terminal-integration"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(closure.nodeIds.includes("editor-web-public-package-contract"), true);
   assert.equal(
     closure.impactSha256,
-    "81403a95e7a9d2f2e512e2cdf603b5a26f90059012115fd71118386af7324e00",
+    "b6e3095a1427777adc355ff09e2ac373e2410c02981a16def9119215df812d10",
   );
 });
 
@@ -482,149 +520,149 @@ test("Desen App shell navigation closes over its terminal parent and catalog-pan
   const closure = createAffectedImpactClosure(["desen-app-shell-navigation"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(closure.proofUnitIds.includes("editor-core-terminal-integration"), true);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.impactSha256,
-    "390fa6f53efc4ff44849945cc160a71729ba08948571f8e0db99573eaa5339a3",
+    "f2752bfea0382967dc13f0e0e46580f1b7e9e717b42dd688995814baf9ba4ce3",
   );
 });
 
 test("Desen App catalog panel closes over exact shell and Catalog parents", () => {
   const closure = createAffectedImpactClosure(["desen-app-catalog-panel-layer-tree"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.impactSha256,
-    "bff22789f4e77f32ab28af8d37c291197e759cc6125397fac639a80d537be27e",
+    "c4b84ddd012f3b02b31bfadfc26305b151d5abe570c594e2f8c5b6482e566364",
   );
 });
 
 test("Desen App adapter canvas closes over exact shell and source-audit parents", () => {
   const closure = createAffectedImpactClosure(["desen-app-real-adapter-canvas"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.impactSha256,
-    "523f4550e1fcf5e2d6de5da20b40538ffaf2ae47f67c4fbe3c66a667795795d1",
+    "1fddcada4226bf69e16bd6aaa1bd68903d422d6fa250f736280e462ff4d58944",
   );
 });
 
 test("Desen App selection overlay closes over its exact adapter-canvas parent", () => {
   const closure = createAffectedImpactClosure(["desen-app-selection-overlay"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.impactSha256,
-    "28f5dac261a0f3c9b173fb8dd933a928f29cb850d62ec22414184ca8a7427717",
+    "f3b73d1b315905b833356e248a3c9a8257990a8a7461990a223441f326b0debf",
   );
 });
 
 test("Desen App schema inspector closes over exact Catalog, selection, and Publisher parents", () => {
   const closure = createAffectedImpactClosure(["desen-app-schema-inspector"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.match(closure.impactSha256, /^[0-9a-f]{64}$/u);
 });
 
 test("Desen App structured inspector closes over its exact schema-inspector parent", () => {
   const closure = createAffectedImpactClosure(["desen-app-structured-inspector"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.match(closure.impactSha256, /^[0-9a-f]{64}$/u);
 });
 
 test("Desen App named-slot authoring closes over its exact structured-inspector parent", () => {
   const closure = createAffectedImpactClosure(["desen-app-named-slot-authoring"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.impactSha256,
-    "ee01a50c2737efcc54e4b59409181d0d07c9ff5dd75c66e5c151e502e09d59df",
+    "c97be4f58610f9514b1f1a114ee655e73c19c09e223e25bdd06052c96101491b",
   );
 });
 
 test("Desen App state-binding editor closes over exact App, Editor Core, and graph parents", () => {
   const closure = createAffectedImpactClosure(["desen-app-state-binding-editor"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.impactSha256,
-    "c7a5debae75ff732155980c3eeb972f12ebe13c9ad1e4489e757220f990c6dae",
+    "8ddcd6a8610b8f1900198c45e6dbc1e314e3740a87e8c099afebaf552cdb9363",
   );
 });
 
 test("Desen App event/action editor closes over exact App and Editor Core parents", () => {
   const closure = createAffectedImpactClosure(["desen-app-event-action-editor"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.impactSha256,
-    "92251d98a9b908e360bc4926e2cc0d80ddb121758de71a05eb9894f7666adafe",
+    "d7777b855dac67c5253229f766cf9d4920c8897242fccbbd787ce9066c010773",
   );
 });
 
 test("Desen App Design/Run closes over the exact canvas, state, and action parents", () => {
   const closure = createAffectedImpactClosure(["desen-app-design-run-modes"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.impactSha256,
-    "fcb12d06924c50b9f28ba1f9bca8eb512b5a7c158f9e97c398f251f9400d8b2d",
+    "ad15f2417de9a8d42247a9ccad976c7fe9c1f48efbd140870c48bfeec2f96067",
   );
 });
 
 test("Desen App fixtures/scenarios closes over exact Design/Run, fixture, and parity parents", () => {
   const closure = createAffectedImpactClosure(["desen-app-fixtures-scenarios-fidelity"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.impactSha256,
-    "1569bd98b508d3ed3e892c11f383c00e380714589f803317c8ae9efcaaf1f1db",
+    "6689d50d608bdc5c439edd94f71fb64688575c24dae6c55a9e5f33aa3243f5d7",
   );
 });
 
 test("Desen App persistence closes over exact shell, Editor Core, and T11 parents", () => {
   const closure = createAffectedImpactClosure(["desen-app-source-persistence"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(closure.nodeIds.includes("verify-desen-app-shell-navigation"), true);
   assert.equal(closure.nodeIds.includes("verify-editor-core-persistence"), true);
   assert.equal(closure.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(
     closure.impactSha256,
-    "3cc861c18ff7a75b3b846afbe20f8563843c738dde9a0e880eaf7b2ab74b38ff",
+    "c5e7351763f1aefa0d2e4ad1eebcbfb0ef5f03ed8efe4fb8495004a8d0505d9a",
   );
 });
 
 test("Desen App diagnostics closes over exact Runtime, Editor Core, and App authoring parents", () => {
   const closure = createAffectedImpactClosure(["desen-app-node-linked-diagnostics"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(closure.nodeIds.includes("verify-runtime-react-reconciliation-diagnostics"), true);
   assert.equal(closure.nodeIds.includes("verify-editor-core-continuous-validation"), true);
   assert.equal(closure.nodeIds.includes("verify-desen-app-source-persistence"), true);
   assert.equal(
     closure.impactSha256,
-    "ba0571555dde0cd1b307ec8ad63bfd042cbe2ec991166f9c1850be3eac4575d5",
+    "9afa39dc9a0f40baf05313a1b5684f7e47491a08efdd0e7da60be2cac91bc1af",
   );
 });
 
 test("Desen App publication closes over exact App, Publisher, control-plane, and host parents", () => {
   const closure = createAffectedImpactClosure(["desen-app-publish-activation"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   for (const proofId of [
     "desen-app-design-run-modes",
     "desen-app-fixtures-scenarios-fidelity",
@@ -639,7 +677,7 @@ test("Desen App publication closes over exact App, Publisher, control-plane, and
   }
   assert.equal(
     closure.impactSha256,
-    "e9225822c86b55bc9815f00fcdea0e71c76a5745c7640f22324ffb4c1e8ed5b1",
+    "8b3d7972fbad7c8ecb5c68d82530f662cdaa2fdb06ce6d1de77b98fd405514c8",
   );
 });
 
@@ -647,12 +685,12 @@ test("Desen App empty-project browser E2E closes over the published authoring su
   const closure = createAffectedImpactClosure(["desen-app-empty-project-browser-e2e"]);
   assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-empty-project-browser-e2e"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(closure.nodeIds.includes("verify-desen-app-publish-activation"), true);
   assert.equal(
     closure.impactSha256,
-    "689f1f3de515c481b05685051b0a59038818261cd8fa373143ad738b06916379",
+    "3f511e3199a6f7ad2b5df1858ab6c65cdfc41238b946f6030025dcf7b55403a1",
   );
 });
 
@@ -660,12 +698,12 @@ test("Desen App Browser E2E workspace compatibility closes over the historical b
   const closure = createAffectedImpactClosure(["desen-app-browser-e2e-workspace-compatibility"]);
   assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-browser-e2e-workspace-compatibility"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(closure.nodeIds.includes("verify-desen-app-empty-project-browser-e2e"), true);
   assert.equal(
     closure.impactSha256,
-    "a749651f6f7e30673116faa1dc5531d7a2681a03c0161576391fa176d9daaba1",
+    "cd15114855d539e0d86f1f5346853964c0998c6cd82bb01c3fc4e2bbef7584d4",
   );
 });
 
@@ -673,15 +711,15 @@ test("Desen App user-created blank project closes over the immutable Browser E2E
   const closure = createAffectedImpactClosure(["desen-app-user-created-blank-project"]);
   assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-user-created-blank-project"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(
     closure.nodeIds.includes("verify-desen-app-browser-e2e-workspace-compatibility"),
     true,
   );
   assert.equal(
     closure.impactSha256,
-    "f73ac2c9637656ee47c5a62e0ece01269f43406fba3af92fbf45e71d173a6c46",
+    "0a146c661ebe98eb34dac4166b26fbce56f5c47bcfeb6e0ab9e77418c5b27292",
   );
 });
 
@@ -689,12 +727,12 @@ test("Desen App visual behavior authoring closes over the blank-project predeces
   const closure = createAffectedImpactClosure(["desen-app-visual-behavior-authoring"]);
   assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-visual-behavior-authoring"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(closure.nodeIds.includes("verify-desen-app-user-created-blank-project"), true);
   assert.equal(
     closure.impactSha256,
-    "870f1a4fb84c8d7a600535712b5417a3a2eb8fcf9483dfd4ba9260e6892e9ea0",
+    "64f55de7acecdfc3465806f078b98b38c8feda31dff440a8d434c13f95b34973",
   );
 });
 
@@ -702,12 +740,12 @@ test("Desen App evergreen composition closes over the visual-behavior predecesso
   const closure = createAffectedImpactClosure(["desen-app-evergreen-product-composition"]);
   assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-evergreen-product-composition"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(closure.nodeIds.includes("verify-desen-app-visual-behavior-authoring"), true);
   assert.equal(
     closure.impactSha256,
-    "d310a771a7f01f454d73ee14af1b13aac43bbfd0d733f6baaac759dcffaf83a4",
+    "5e0608d4dd641713dcab8bae97ef27032c37094cb110c829ad9a28d0136d2bd2",
   );
 });
 
@@ -715,12 +753,12 @@ test("Desen App input/pending fixture closes over the evergreen composition pred
   const closure = createAffectedImpactClosure(["desen-app-input-pending-fixture"]);
   assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-input-pending-fixture"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(closure.nodeIds.includes("verify-desen-app-evergreen-product-composition"), true);
   assert.equal(
     closure.impactSha256,
-    "42513cf8b92085275e5b3e9a0c1ce49f83c2fc3c4df8382836b7cd8f557b38fa",
+    "0c78cc751b5711f6ff1419fd6a580c75e4cd11b1c976f3fa24ac515da778682f",
   );
 });
 
@@ -728,12 +766,12 @@ test("Desen App failure fixture closes over the input/pending predecessor", () =
   const closure = createAffectedImpactClosure(["desen-app-failure-fixture"]);
   assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-failure-fixture"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   assert.equal(closure.nodeIds.includes("verify-desen-app-input-pending-fixture"), true);
   assert.equal(
     closure.impactSha256,
-    "0c1e29057c8a53063b86c1130dc712cff3d70eae45e02d03270d184c8d19c6d1",
+    "f6616aff91197f8ef870c9e9a2f8ac085e1b360347d1ee0cb40f0bcb233aa08b",
   );
 });
 
@@ -741,15 +779,15 @@ test("Desen App success and real-host operation closes over both historical and 
   const closure = createAffectedImpactClosure(["desen-app-success-host-operation"]);
   assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-success-host-operation"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   for (const id of ["desen-app-failure-fixture", "reference-sign-in-fixtures-and-host-binding"]) {
     assert.equal(closure.nodeIds.includes(`verify-${id}`), true);
     assert.equal(closure.nodeIds.includes(`test-${id}`), true);
   }
   assert.equal(
     closure.impactSha256,
-    "aabf08e4aa24ad53f3b14ffe2c84035a01bf5a61c3883682b627f15e130e63c1",
+    "60c880fe50e6bf6ce193bcfaa85c1b609c6269c52e03535aad09b5ebefdea29a",
   );
   const missingBinding = clone(createAffectedImpactGraph());
   missingBinding.entries
@@ -762,8 +800,8 @@ test("Desen App published-host update closes over exact T04, publication, host, 
   const closure = createAffectedImpactClosure(["desen-app-published-host-update"]);
   assert.deepEqual(closure.ownerProofUnitIds, ["desen-app-published-host-update"]);
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
-  assert.equal(closure.proofUnitCount, 75);
-  assert.equal(closure.workloadCount, 160);
+  assert.equal(closure.proofUnitCount, 76);
+  assert.equal(closure.workloadCount, 162);
   for (const id of [
     "desen-app-success-host-operation",
     "desen-app-publish-activation",
@@ -775,7 +813,7 @@ test("Desen App published-host update closes over exact T04, publication, host, 
   }
   assert.equal(
     closure.impactSha256,
-    "38a8769f622116fb890d6fac317c7312962ae6efbf683fefd8d8ae4b2f945041",
+    "2db7c1dc15fda2390e96d323c6e1c14fe00b731db9c29a7aa88d3ea4f80d4066",
   );
 });
 
