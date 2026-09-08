@@ -26,13 +26,19 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
-**Güncel görev: M10-T09.** T08, [PR #83](https://github.com/desenlab/desen-app/pull/83) ve
+**Güncel görev: G10 terminal M10 kapısı.** On iki M10 görevi tamamlandı. Kök `pnpm test:e2e`
+dokuz bağımsız Chromium yolculuğunu, kök `pnpm proof` ise eksiksiz `pnpm check` grafını çalıştıran
+gerçek koordinatörlerdir. G10 kaydı, değişmemiş PR başı tüm barındırılan kontrollerden geçip
+birleştirilene ve yeni `main` koşusu başarılı olana kadar koşullu kapanış adayıdır. M11 başlamadı.
+[G10 kanıtı](../proof/DESEN-APP-M10-GATE.md).
+
+T08, [PR #83](https://github.com/desenlab/desen-app/pull/83) ve
 [başarılı taze main koşusuyla](https://github.com/desenlab/desen-app/actions/runs/34230382825)
 tamamen kapandı. T09, Runtime Core'u değiştirmeden Git'teki tam ağaç kimliğini M11 karşılaştırması
 için kaydetti. On iki doğrudan/kısıtlı ortam test grubu, 507 CI sözleşmesi ve sınırlı temel kontroller
 geçti. Görev tablosundaki `DONE` koşullu kapanış adayıdır; güncel PR, merge ve taze main sonucu
 gereklidir. **Kullanıcının isteğiyle T09 tamamen kapanınca mola verilecek.** Yeni talimat olmadan
-G10'a veya uzun yerel koşusuna başlanmayacak.
+Bu tarihsel bekleme talimatı, kullanıcının G10'a devam etme talimatıyla sona erdi.
 
 **T08 uygulama kontrol noktası — kapanış sonradan sağlandı.** T07, [PR #82](https://github.com/desenlab/desen-app/pull/82) ve
 [başarılı taze main koşusuyla](https://github.com/desenlab/desen-app/actions/runs/34216545093)

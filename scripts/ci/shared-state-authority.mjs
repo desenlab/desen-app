@@ -167,6 +167,7 @@ export const PROOF_IDS = Object.freeze([
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
   "runtime-core-baseline",
+  "m10-gate",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -206,6 +207,7 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "desen-app-invalid-publication",
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
+  "m10-gate",
 ]);
 
 /** Exact verifier whose fixed native Git observations require no temporary or workspace writes. */
@@ -245,6 +247,7 @@ export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
   "desen-app-invalid-publication",
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
+  "m10-gate",
 ]);
 
 /** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
@@ -260,6 +263,7 @@ export const NATIVE_ADDON_ROOT_STEP_IDS = Object.freeze([
   "test-desen-app-invalid-publication",
   "test-desen-app-last-known-good-recovery",
   "test-desen-app-repeatable-demo",
+  "test-m10-gate",
 ]);
 
 /** Exact root-test steps that need bounded Node-permission API compatibility. */
@@ -393,6 +397,7 @@ const NATIVE_ADDON_POLICIES = Object.freeze({
   DESEN_APP_INVALID_PUBLICATION_VITE: "DESEN_APP_INVALID_PUBLICATION_VITE",
   DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE: "DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE",
   DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE: "DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE",
+  DESEN_APP_M10_GATE_VITE: "DESEN_APP_M10_GATE_VITE",
   NONE: "NONE",
   PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -416,6 +421,7 @@ const NATIVE_ADDON_POLICY_BY_PROOF_ID = Object.freeze({
   "desen-app-last-known-good-recovery":
     NATIVE_ADDON_POLICIES.DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE,
   "desen-app-repeatable-demo": NATIVE_ADDON_POLICIES.DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE,
+  "m10-gate": NATIVE_ADDON_POLICIES.DESEN_APP_M10_GATE_VITE,
 });
 
 const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
@@ -436,6 +442,7 @@ const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
   "test-desen-app-last-known-good-recovery":
     NATIVE_ADDON_POLICIES.DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE,
   "test-desen-app-repeatable-demo": NATIVE_ADDON_POLICIES.DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE,
+  "test-m10-gate": NATIVE_ADDON_POLICIES.DESEN_APP_M10_GATE_VITE,
 });
 
 /** Stable failure raised when shared-state authority cannot be established safely. */
@@ -614,8 +621,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 228) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 228 steps.", {
+if (METADATA_BY_STEP_ID.size !== 230) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 230 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

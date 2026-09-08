@@ -1875,3 +1875,26 @@ Checkpoint 79 appends the T09 artifact and reader pair only; all 78 earlier chec
 62 prior artifacts and 124 prior reader receipts remain unchanged. Candidate review is not
 live authority. Successful local contracts, the exact guarded pair, exact-head hosted checks
 and fresh main remain independent closure requirements; no historical PASS is reused.
+
+## G10 terminal M10 gate successor
+
+The `desen-app-m10-gate` verifier/root pair is appended without removing any predecessor. The
+exhaustive authority now contains 230 logical workloads and 110 proof pairs (99 ordinary and eleven
+barriers). The unchanged three-shard scheme partitions the pairs 53/24/33 and executes 247 physical
+workloads after replicated preparation and the fresh join build. The separate Browser E2E lane
+retains all nine Playwright configurations; root `pnpm test:e2e` delegates to that exact suite and
+root `pnpm proof` delegates to the exhaustive `pnpm check` graph.
+
+The current exhaustive inventory is
+`sha256:215ae4b3930c9c78dd70947aa315314e26f2c2d5d3259f0f9905a97f33eefe1c`; required-plan
+identity is `sha256:0af182af803f81a8cae7a512fbc7e33a60c372cffe398881ee8677eeca3fb501` and sharded-plan
+identity is `sha256:f0a7af1ca1936f24290cbb18dc8205e66f05be88fbfe85c8162a435704cb4f8e`.
+Exact-one ownership covers 1,547 tracked paths / 220 proof-owned paths. G10's connected closure
+contains 78 proof units / 166 workloads.
+
+Both new proof steps use the reviewed native-Vite policy because fresh host-graph inspection invokes
+the real compiler. The verifier additionally receives the bounded Runtime Core Git probe; the root
+receives the existing Node-test harness. Neither receives listeners, workspace writes, tracked
+aliases, or general native execution. Checkpoint 80 appends only the G10 artifact and two reader
+receipts, preserves all 79 predecessors, and authenticates 64 artifacts / 128 readers at
+`sha256:49e9354e03e31d9e8767aac82832759f1d32397434b0952392b6d2f6218d24fe`.

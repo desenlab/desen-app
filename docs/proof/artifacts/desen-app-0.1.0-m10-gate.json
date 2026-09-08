@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "gate": "G10",
+  "proofId": "m10-gate",
+  "profile": "desen.app.m10-gate-proof.v1",
+  "result": "PASS",
+  "parents": [
+    {
+      "task": "M10-T01C",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-evergreen-product-composition.json",
+      "bytes": 19299,
+      "sha256": "779434ca834b8d770c726d905408f0a3d0a7145abbc6eaf2b81f1e77466b46ac"
+    },
+    {
+      "task": "M10-T02",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-input-pending-fixture.json",
+      "bytes": 14261,
+      "sha256": "161202698b013775cbc89625ecea1f6894e9abcd927fb2eb660dff71652ba43d"
+    },
+    {
+      "task": "M10-T03",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-failure-fixture.json",
+      "bytes": 16868,
+      "sha256": "bde909f8dbc4837c70627bab454d3dc5a936bd0abb6d70ec22b9cffbdb0e6a20"
+    },
+    {
+      "task": "M10-T04",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-success-host-operation.json",
+      "bytes": 22456,
+      "sha256": "d9d841af06ec9efc51c3f1c74079f0aa4d5e1c7e996f3b97df7e277e4b1f8423"
+    },
+    {
+      "task": "M10-T05",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-published-host-update.json",
+      "bytes": 189123,
+      "sha256": "80c0b815a813ef462233b48a7fffe7c4d0bbf391aefc68eb9a6174da6bd84bd3"
+    },
+    {
+      "task": "M10-T06",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-invalid-publication.json",
+      "bytes": 193291,
+      "sha256": "1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a"
+    },
+    {
+      "task": "M10-T07",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json",
+      "bytes": 304094,
+      "sha256": "5e589bc8022de3ccf3add7a9ebab78006ecca6e72628e165f54eef4fd8b90b68"
+    },
+    {
+      "task": "M10-T08",
+      "path": "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json",
+      "bytes": 319719,
+      "sha256": "048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5"
+    },
+    {
+      "task": "M10-T09",
+      "path": "docs/proof/artifacts/runtime-core-baseline.json",
+      "bytes": 271,
+      "sha256": "fbda58d72ccff36d530368422dd7fd82c73dcca359c29e3a6667e8ae4b9b424b"
+    }
+  ],
+  "claim": {
+    "gateStatus": "DONE",
+    "noHandwrittenHostManagedTree": true,
+    "managedSurfaceChangesWithoutHostSourceChange": true,
+    "visibleNoCodeAuthoringAndPublication": true,
+    "typedPendingFailureSuccessAndNavigation": true,
+    "realHostOperationOutsideDocument": true,
+    "invalidPublicationRejected": true,
+    "lastKnownGoodPreservedAcrossRestart": true,
+    "repeatableTwoCycleDemo": true,
+    "runtimeCoreBaselineFrozen": true
+  },
+  "authority": {
+    "wiring": {
+      "rootScripts": {
+        "proof": "pnpm check",
+        "test:e2e": "pnpm --filter @desen/app-browser-e2e test:e2e",
+        "generate:m10-gate": "node scripts/generate-m10-gate-proof.mjs",
+        "verify:m10-gate": "node scripts/verify-m10-gate.mjs",
+        "test:m10-gate": "node --test tests/m10-gate.test.mjs"
+      },
+      "exhaustiveCommand": "pnpm check",
+      "proofCommand": "pnpm proof",
+      "browserCommand": "pnpm test:e2e",
+      "packageBrowserCommand": "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts && playwright test --config repeatable-demo-playwright.config.ts",
+      "browserConfigurations": [
+        "playwright.config.ts",
+        "product-playwright.config.ts",
+        "input-pending-playwright.config.ts",
+        "failure-playwright.config.ts",
+        "success-host-playwright.config.ts",
+        "published-host-playwright.config.ts",
+        "invalid-publication-playwright.config.ts",
+        "restart-recovery-playwright.config.ts",
+        "repeatable-demo-playwright.config.ts"
+      ],
+      "browserConfigurationCount": 9,
+      "hostedBrowserUsesCompletePackageCommand": true
+    },
+    "hostAudit": {
+      "appSourceFiles": 54,
+      "hostSourceFiles": 13,
+      "hostJsxElements": 18,
+      "appModules": 170,
+      "hostModules": 104,
+      "sharedManagedModules": 22,
+      "dynamicEdges": 0,
+      "unresolvedEdges": 0,
+      "appGraphSha256": "sha256:fa8f18c9510575a8c5719e19bfb5aaf42468a167c475879778554d0a3950bebf",
+      "hostGraphSha256": "sha256:55c4f4c9c05a2441202c960f2c22bd850f84d743780d003ab3b35460fc04d03f",
+      "appOutputIdentity": "sha256:ba0b863a2133c99fd90a834fd892660b1e70198b377ae714ab7e8c31af2656a7",
+      "hostOutputIdentity": "sha256:7b6514e2fd29a745e11de6e58c3c3adedf06c8a8619161a8ca43e03b26c0090f",
+      "backingSnapshotSha256": "sha256:1eaeeb160cca678ad35bda5a60a58730e0f4f6bfead3ae39c29a52bd240d0427",
+      "publicRegistryAndRuntimeOnly": true,
+      "noHandwrittenHostManagedTree": true,
+      "independentBuildsPerApplication": 2
+    },
+    "runtimeCore": {
+      "path": "packages/runtime-core",
+      "objectFormat": "sha1",
+      "captureCommit": "61bfda591a25558193c94e1d0d6a9bb95af6d00d",
+      "tree": "3fa3613a3be63c749f40b6a0b55af5b40c675773",
+      "trackedFiles": 61,
+      "freshComparison": true
+    }
+  },
+  "tests": {
+    "rootTestNames": [
+      "G10 authenticates every exact completed M10 parent",
+      "G10 exposes real exhaustive and nine-journey root commands",
+      "G10 freshly audits the independent host and frozen Runtime Core",
+      "G10 rejects every parent artifact mutation",
+      "G10 rejects root coordinator substitution omission and recursion",
+      "G10 rejects browser journey omission duplication and reordering",
+      "G10 rejects hosted browser command bypass",
+      "G10 builds deterministic immutable evidence",
+      "G10 rejects unsafe options overrides and artifact destinations",
+      "G10 verifies its checkpointed artifact and visible report"
+    ],
+    "deterministicReaderRunsBrowser": false,
+    "browserExecutionIsSeparateAndRequired": true,
+    "hostedExactHeadRequired": true
+  },
+  "nonClaims": [
+    "G10 proves the reviewed local Web reference composition, not remote or multi-user deployment.",
+    "G10 does not claim production authentication, native targets, Map, Sortable, domains, or package publication.",
+    "The artifact records identity and fresh source/Core observations; it never substitutes for the required live Chromium and exhaustive executions.",
+    "Local success alone does not authorize completion before exact-head pull-request CI and fresh main CI pass."
+  ]
+}

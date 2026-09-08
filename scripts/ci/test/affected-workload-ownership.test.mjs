@@ -35,11 +35,11 @@ const CI_04_CATEGORY_COUNTS = Object.freeze({
 });
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   ...CI_04_CATEGORY_COUNTS,
-  PROOF_UNIT: 218,
-  FROZEN_INPUT: 158,
+  PROOF_UNIT: 220,
+  FROZEN_INPUT: 159,
   PACKAGE_OR_APPLICATION: 572,
-  SHARED_PROOF_INFRASTRUCTURE: 347,
-  PROJECT_DOCUMENTATION: 155,
+  SHARED_PROOF_INFRASTRUCTURE: 349,
+  PROJECT_DOCUMENTATION: 156,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
@@ -105,6 +105,15 @@ const T09_SUCCESSOR_PATHS = Object.freeze([
   "tests/runtime-core-baseline.test.mjs",
   "docs/proof/artifacts/runtime-core-baseline.json",
   "docs/proof/RUNTIME-CORE-BASELINE.md",
+]);
+
+const G10_SUCCESSOR_PATHS = Object.freeze([
+  "docs/proof/DESEN-APP-M10-GATE.md",
+  "docs/proof/artifacts/desen-app-0.1.0-m10-gate.json",
+  "scripts/generate-m10-gate-proof.mjs",
+  "scripts/lib/m10-gate-proof.mjs",
+  "scripts/verify-m10-gate.mjs",
+  "tests/m10-gate.test.mjs",
 ]);
 
 const T08_SUCCESSOR_PATHS = Object.freeze([
@@ -181,7 +190,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1541 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1547 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -203,12 +212,49 @@ test("freezes exact-one ownership for all 1541 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1541);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1547);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
   );
   assertDeepFrozen(authority);
+});
+
+test("the G10 successor preserves every T09 owner and adds exactly six reviewed paths", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  assert.equal(G10_SUCCESSOR_PATHS.length, 6);
+  for (const relativePath of G10_SUCCESSOR_PATHS) {
+    const owner = resolveAffectedWorkloadOwner(authority, relativePath);
+    const proofInput =
+      relativePath === "scripts/verify-m10-gate.mjs" || relativePath === "tests/m10-gate.test.mjs";
+    assert.equal(owner.disposition, proofInput ? "SELECT_PROOF_UNIT" : "FORCE_EXHAUSTIVE");
+    assert.equal(owner.proofUnitId, proofInput ? "m10-gate" : null);
+    assert.throws(
+      () =>
+        createAffectedWorkloadOwnership(paths.filter((candidate) => candidate !== relativePath)),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+  assert.deepEqual(
+    calculateAffectedWorkloadOwnershipReview(
+      paths.filter((candidate) => !G10_SUCCESSOR_PATHS.includes(candidate)),
+    ),
+    {
+      trackedPathCount: 1541,
+      trackedPathSetSha256: "1436f95e25ad4ee78790a8048e595e1c1f4f069d30b4235b1fa3e4a80e4534e6",
+      proofOwnedPathCount: 218,
+      categoryCounts: {
+        ...CI_04_CATEGORY_COUNTS,
+        PROOF_UNIT: 218,
+        FROZEN_INPUT: 158,
+        PACKAGE_OR_APPLICATION: 572,
+        SHARED_PROOF_INFRASTRUCTURE: 347,
+        PROJECT_DOCUMENTATION: 155,
+      },
+      ownershipSha256: "690f26d609effff38c790890c00779291e50e120183fe67cf1b8c2c617eb0d5c",
+    },
+  );
 });
 
 test("the T09 baseline successor preserves every T08 owner and adds exactly six reviewed paths", async () => {
@@ -230,7 +276,10 @@ test("the T09 baseline successor preserves every T08 owner and adds exactly six 
   }
   assert.deepEqual(
     calculateAffectedWorkloadOwnershipReview(
-      paths.filter((candidate) => !T09_SUCCESSOR_PATHS.includes(candidate)),
+      paths.filter(
+        (candidate) =>
+          !T09_SUCCESSOR_PATHS.includes(candidate) && !G10_SUCCESSOR_PATHS.includes(candidate),
+      ),
     ),
     {
       trackedPathCount: 1535,
@@ -270,7 +319,9 @@ test("the T08 repeatable-demo successor preserves every T07 owner and adds only 
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
-          !T08_SUCCESSOR_PATHS.includes(candidate) && !T09_SUCCESSOR_PATHS.includes(candidate),
+          !T08_SUCCESSOR_PATHS.includes(candidate) &&
+          !T09_SUCCESSOR_PATHS.includes(candidate) &&
+          !G10_SUCCESSOR_PATHS.includes(candidate),
       ),
     ),
     {
@@ -312,7 +363,8 @@ test("the T07 recovery successor preserves T06 ownership and narrowly registers 
         (candidate) =>
           !T07_SUCCESSOR_PATHS.includes(candidate) &&
           !T08_SUCCESSOR_PATHS.includes(candidate) &&
-          !T09_SUCCESSOR_PATHS.includes(candidate),
+          !T09_SUCCESSOR_PATHS.includes(candidate) &&
+          !G10_SUCCESSOR_PATHS.includes(candidate),
       ),
     ),
     {
@@ -360,7 +412,8 @@ test("the T06 publication successor preserves every CI-04 owner and registers on
           !T06_SUCCESSOR_PATHS.includes(candidate) &&
           !T07_SUCCESSOR_PATHS.includes(candidate) &&
           !T08_SUCCESSOR_PATHS.includes(candidate) &&
-          !T09_SUCCESSOR_PATHS.includes(candidate),
+          !T09_SUCCESSOR_PATHS.includes(candidate) &&
+          !G10_SUCCESSOR_PATHS.includes(candidate),
       ),
     ),
     {
@@ -395,7 +448,8 @@ test("the CI-04 execution sources retain every SEC-02 owner and force exhaustive
           !T06_SUCCESSOR_PATHS.includes(candidate) &&
           !T07_SUCCESSOR_PATHS.includes(candidate) &&
           !T08_SUCCESSOR_PATHS.includes(candidate) &&
-          !T09_SUCCESSOR_PATHS.includes(candidate),
+          !T09_SUCCESSOR_PATHS.includes(candidate) &&
+          !G10_SUCCESSOR_PATHS.includes(candidate),
       ),
     ),
     {
@@ -426,7 +480,8 @@ test("the SEC-02 documentation successor preserves the exact SEC-01 ownership au
       !T06_SUCCESSOR_PATHS.includes(candidate) &&
       !T07_SUCCESSOR_PATHS.includes(candidate) &&
       !T08_SUCCESSOR_PATHS.includes(candidate) &&
-      !T09_SUCCESSOR_PATHS.includes(candidate),
+      !T09_SUCCESSOR_PATHS.includes(candidate) &&
+      !G10_SUCCESSOR_PATHS.includes(candidate),
   );
   assert.throws(
     () => createAffectedWorkloadOwnership(previousPaths),
@@ -470,7 +525,8 @@ test("the exact SEC-01 successor preserves the reviewed T05 ownership authority"
       !T06_SUCCESSOR_PATHS.includes(candidate) &&
       !T07_SUCCESSOR_PATHS.includes(candidate) &&
       !T08_SUCCESSOR_PATHS.includes(candidate) &&
-      !T09_SUCCESSOR_PATHS.includes(candidate),
+      !T09_SUCCESSOR_PATHS.includes(candidate) &&
+      !G10_SUCCESSOR_PATHS.includes(candidate),
   );
   assert.deepEqual(calculateAffectedWorkloadOwnershipReview(predecessorPaths), {
     trackedPathCount: 1446,
@@ -498,7 +554,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 218);
+  assert.equal(proofEntries.length, 220);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -1249,7 +1305,8 @@ test("the reviewed AR-01 successor preserves the historical I07-04 ownership pro
       !T06_SUCCESSOR_PATHS.includes(candidate) &&
       !T07_SUCCESSOR_PATHS.includes(candidate) &&
       !T08_SUCCESSOR_PATHS.includes(candidate) &&
-      !T09_SUCCESSOR_PATHS.includes(candidate),
+      !T09_SUCCESSOR_PATHS.includes(candidate) &&
+      !G10_SUCCESSOR_PATHS.includes(candidate),
   );
   historicalPaths.push(
     "scripts/ci/run-shadow-affected-quality-gate.mjs",

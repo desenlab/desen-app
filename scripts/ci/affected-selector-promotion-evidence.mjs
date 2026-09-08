@@ -192,6 +192,12 @@ const PROMOTION_REMOVED_TRACKED_PATHS = Object.freeze([
   "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
 ]);
 const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "docs/proof/DESEN-APP-M10-GATE.md",
+  "docs/proof/artifacts/desen-app-0.1.0-m10-gate.json",
+  "scripts/generate-m10-gate-proof.mjs",
+  "scripts/lib/m10-gate-proof.mjs",
+  "scripts/verify-m10-gate.mjs",
+  "tests/m10-gate.test.mjs",
   "scripts/lib/runtime-core-baseline-proof.mjs",
   "scripts/generate-runtime-core-baseline.mjs",
   "scripts/verify-runtime-core-baseline.mjs",
@@ -755,13 +761,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 218,
+    PROOF_UNIT: 220,
     CI_POLICY: 48,
     DEPENDENCY_POLICY: 32,
-    FROZEN_INPUT: 158,
+    FROZEN_INPUT: 159,
     PACKAGE_OR_APPLICATION: 572,
-    SHARED_PROOF_INFRASTRUCTURE: 347,
-    PROJECT_DOCUMENTATION: 155,
+    SHARED_PROOF_INFRASTRUCTURE: 349,
+    PROJECT_DOCUMENTATION: 156,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -1166,10 +1172,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 79,
-  headSha256: "06fa67b106c1a8056e5c26cfcc1a78e29a00cc1b793217b1c48c60fbec9bce8e",
-  frozenArtifactCount: 63,
-  currentReaderCount: 126,
+  sequence: 80,
+  headSha256: "49e9354e03e31d9e8767aac82832759f1d32397434b0952392b6d2f6218d24fe",
+  frozenArtifactCount: 64,
+  currentReaderCount: 128,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -2686,8 +2692,8 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 228 ||
-    currentInventory.proofUnitCount !== 109
+    currentInventory.workloadCount !== 230 ||
+    currentInventory.proofUnitCount !== 110
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
@@ -2701,10 +2707,10 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 98 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 99 || currentProofPairClasses.barrier !== 11) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current T09 proof-pair authority is not exactly 98 ordinary and 11 barrier pairs.",
+      "The current G10 proof-pair authority is not exactly 99 ordinary and 11 barrier pairs.",
     );
   }
   const archiveRedactionClosure = createAffectedImpactClosure(["historical-archive-redaction"]);
@@ -2712,14 +2718,14 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     !isDeepStrictEqual(archiveRedactionClosure.ownerProofUnitIds, [
       "historical-archive-redaction",
     ]) ||
-    archiveRedactionClosure.proofUnitCount !== 77 ||
-    archiveRedactionClosure.workloadCount !== 164 ||
+    archiveRedactionClosure.proofUnitCount !== 78 ||
+    archiveRedactionClosure.workloadCount !== 166 ||
     archiveRedactionClosure.impactSha256 !==
-      "c6690d3e6e37c877636c430c1e4b0dfab97613aadc625597db1fec3b91eef70c"
+      "866d85b34479494cd3920b200d687ef8c6b9235ff5b3feae71333087e17134cf"
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current T08 successor closure from AR-01 is not exactly 76 proof units and 162 workloads.",
+      "The current G10 successor closure from AR-01 is not exactly 78 proof units and 166 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);
