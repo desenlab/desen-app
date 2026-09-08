@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "668610a1d8048640f0ea58ec19eb31ab298dd2059eed11ec773b2bc4f7e64fef";
+  "e305451e35c707544081e252b6798b83f0deed5c0b51b5bf19ce78fd73d81bd3";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "d184b6753d9dadf09304e1442fb6dc4da03cc4e90e59aafdfb40769f189e1046";
+  "c170dce2c99984da1c8470553bf647b3d508c8665f95c88440fcca825031773c";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "5f240fa0e04ac1680ae3eb9b2838280ed5eb0c0f10907536f6ff15a1b49351e7";
+  "212b2c7e48dd7862ef0e2dd627cdb94362db98702290fb221a3d827075d55db7";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "73b68c61533e2947169ba3e2298a9f13ec261ae00c32184773402bf03fcce715";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -168,7 +168,7 @@ const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
     [
       "test:e2e",
-      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts",
+      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts",
     ],
   ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
 );
@@ -699,11 +699,17 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "scripts/verify-desen-app-invalid-publication.mjs",
     "tests/desen-app-invalid-publication.test.mjs",
   ],
+  [
+    "desen-app-last-known-good-recovery",
+    "scripts/verify-desen-app-last-known-good-recovery.mjs",
+    "tests/desen-app-last-known-good-recovery.test.mjs",
+  ],
 ]);
 
 const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
   "desen-app-published-host-update",
   "desen-app-invalid-publication",
+  "desen-app-last-known-good-recovery",
 ]);
 const PASSIVE_ROOT_TEST_PROOF_IDS = SAFE_OBJECT_FREEZE(["desen-app-published-host-update"]);
 
@@ -1707,7 +1713,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "c018c14a8307915f11d9a735680b531e95b6e537be13ae0e87d20174f01e34fc";
+  "4a3b04876c947457df01bb3704122bb0865c1dca3e0c08de8346b46d2f06cdd1";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

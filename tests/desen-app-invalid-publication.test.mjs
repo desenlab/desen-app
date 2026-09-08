@@ -289,6 +289,16 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[3], () => {
 
 test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[4], () => {
   const current = built.artifact.authority.currentGraphAudit;
+  assert.equal(built.liveSuccessorAuthority.task, "M10-T07");
+  assert.equal(built.liveSuccessorAuthority.parentArtifactUnchanged, true);
+  assert.deepEqual(built.liveSuccessorAuthority.historicalProjectionPaths, [
+    "apps/desen-app-browser-e2e/package.json",
+  ]);
+  assert.deepEqual(built.liveSuccessorAuthority.currentGraphAudit, current);
+  const historicalPackage = built.artifact.boundary.trackedReceipts.find(
+    ({ path: name }) => name === "apps/desen-app-browser-e2e/package.json",
+  );
+  assert.notDeepEqual(built.liveSuccessorAuthority.currentBrowserPackageReceipt, historicalPackage);
   assert.equal(
     current.referenceHostSourceAudit.directOrHiddenHandwrittenManagedTreesRejected,
     true,
@@ -426,7 +436,12 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[5], async () => {
 
 test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[6], async () => {
   const callerBytes = Buffer.from(sourceInput.draft);
-  const callerMap = new Map([[SOURCE_PATHS.draft, callerBytes]]);
+  const packagePath = "apps/desen-app-browser-e2e/package.json";
+  const packageBytes = await readFile(path.join(ROOT, packagePath));
+  const callerMap = new Map([
+    [SOURCE_PATHS.draft, callerBytes],
+    [packagePath, packageBytes],
+  ]);
   const again = await observeOpens(async (opens) => {
     const pending = buildDesenAppInvalidPublicationEvidence({ fileOverrides: callerMap });
     callerBytes.fill(0);
@@ -435,10 +450,44 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[6], async () => {
     assert.ok(opens.get(path.join(ROOT, "packages/publisher/dist/index.js")) >= 2);
     assert.ok(opens.get(path.join(ROOT, SOURCE_PATHS.application)) >= 2);
     assert.ok(opens.get(path.join(ROOT, DESEN_APP_INVALID_PUBLICATION_PARENT_PINS[0].path)) >= 2);
+    assert.ok(
+      opens.get(
+        path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json"),
+      ) >= 2,
+    );
     return result;
   });
   assert.deepEqual(again.artifact, built.artifact);
   assert.deepEqual(again.artifactBytes, built.artifactBytes);
+  assert.deepEqual(again.liveSuccessorAuthority, built.liveSuccessorAuthority);
+  for (const mutate of [
+    (value) => {
+      value.scripts["test:e2e"] = value.scripts["test:e2e"].replace(
+        " && playwright test --config restart-recovery-playwright.config.ts",
+        "",
+      );
+    },
+    (value) => {
+      delete value.devDependencies["@desen/protocol"];
+    },
+  ]) {
+    const value = JSON.parse(packageBytes);
+    mutate(value);
+    await assert.rejects(
+      buildDesenAppInvalidPublicationEvidence({
+        fileOverrides: new Map([[packagePath, JSON.stringify(value)]]),
+      }),
+      expectedError("TEST_AUTHORITY_DRIFT"),
+    );
+  }
+  const metadataChange = JSON.parse(packageBytes);
+  metadataChange.description += " unreviewed metadata";
+  await assert.rejects(
+    buildDesenAppInvalidPublicationEvidence({
+      fileOverrides: new Map([[packagePath, JSON.stringify(metadataChange)]]),
+    }),
+    expectedError("SUCCESSOR_DRIFT"),
+  );
   assert.notEqual(again.artifact, built.artifact);
   assert.notEqual(
     again.artifact.authority.publicApiMatrix,

@@ -65,6 +65,38 @@ const BROWSER_COMMAND =
   "pnpm --filter @desen/app-browser-e2e exec playwright test --config invalid-publication-playwright.config.ts";
 const FOCUSED_COMMAND =
   "pnpm --filter @desen/app-web exec vitest run test/authoring-source-draft.test.ts test/source-draft-application.test.tsx test/authoring-diagnostics.test.ts test/authoring-publication.test.ts";
+const T07_SUCCESSOR_PIN = Object.freeze({
+  path: "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json",
+  bytes: 304094,
+  sha256: "5e589bc8022de3ccf3add7a9ebab78006ecca6e72628e165f54eef4fd8b90b68",
+});
+const T07_BROWSER_SUITE_COMMAND =
+  "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts";
+
+async function authenticateT07Successor(workspaceRoot, files) {
+  const bytes = await readRegularAuthority(
+    path.join(workspaceRoot, T07_SUCCESSOR_PIN.path),
+    T07_SUCCESSOR_PIN.path,
+  );
+  if (bytes.byteLength !== T07_SUCCESSOR_PIN.bytes || sha256(bytes) !== T07_SUCCESSOR_PIN.sha256)
+    fail("SUCCESSOR_DRIFT", "The exact completed T07 composition authority changed.");
+  const successor = parseJson(bytes, T07_SUCCESSOR_PIN.path, "SUCCESSOR_DRIFT");
+  if (
+    successor.task !== "M10-T07" ||
+    successor.proofId !== "desen-app-last-known-good-recovery" ||
+    successor.profile !== "desen.app.last-known-good-recovery-proof.v1" ||
+    successor.result !== "PASS"
+  )
+    fail("SUCCESSOR_DRIFT", "The T07 composition authority lost its exact identity.");
+  const packagePath = "apps/desen-app-browser-e2e/package.json";
+  const receipt = successor.boundary?.trackedReceipts?.find(
+    ({ path: name }) => name === packagePath,
+  );
+  const current = files.get(packagePath);
+  if (!receipt || receipt.bytes !== current.byteLength || receipt.sha256 !== sha256(current))
+    fail("SUCCESSOR_DRIFT", "Caller package authority is not the exact reviewed T07 successor.");
+  return successor;
+}
 
 /** Exact frozen product-publication and node-linked-diagnostic prerequisites. */
 export const DESEN_APP_INVALID_PUBLICATION_PARENT_PINS = Object.freeze([
@@ -1144,12 +1176,8 @@ function verifyPackageWiring(files) {
     app.name !== "@desen/app-web" ||
     app.scripts.test !== "vitest run" ||
     browser.name !== "@desen/app-browser-e2e" ||
-    !browser.scripts?.["test:e2e"]?.endsWith(
-      " && playwright test --config invalid-publication-playwright.config.ts",
-    ) ||
-    !browser.scripts["test:e2e"].includes(
-      "playwright test --config published-host-playwright.config.ts",
-    )
+    browser.scripts?.["test:e2e"] !== T07_BROWSER_SUITE_COMMAND ||
+    browser.devDependencies?.["@desen/protocol"] !== "workspace:*"
   )
     fail(
       "TEST_AUTHORITY_DRIFT",
@@ -1178,6 +1206,7 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
   const focusedTests = verifyFocusedTests(files);
   const browser = verifyDesenAppInvalidPublicationBrowserPolicy(policyInput(files, BROWSER_PATHS));
   const packageWiring = verifyPackageWiring(files);
+  const successor = await authenticateT07Successor(workspaceRoot, files);
   const publicApiMatrix = await runPublicMatrix(workspaceRoot, files);
   let currentGraphAudit;
   try {
@@ -1217,7 +1246,7 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
       });
     }
   }
-  const artifact = deepFreeze({
+  const currentArtifact = deepFreeze({
     schemaVersion: 1,
     task: "M10-T06",
     gate: null,
@@ -1280,10 +1309,49 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
       "Local deterministic evidence does not authorize hosted completion until the exact current head passes the independent required checks.",
     ],
   });
+  const recheckedSuccessor = await authenticateT07Successor(workspaceRoot, after);
+  if (
+    !isDeepStrictEqual(successor, recheckedSuccessor) ||
+    !isDeepStrictEqual(currentGraphAudit, successor.authority.currentGraphAudit)
+  )
+    fail(
+      "SUCCESSOR_DRIFT",
+      "The live T07 graph or composition authority changed across execution.",
+    );
+  const historical = authenticateArtifact(
+    await readRegularAuthority(path.join(workspaceRoot, ARTIFACT_PATH), ARTIFACT_PATH),
+  );
+  const packagePath = "apps/desen-app-browser-e2e/package.json";
+  const artifact = structuredClone(currentArtifact);
+  const index = artifact.boundary.trackedReceipts.findIndex(
+    ({ path: name }) => name === packagePath,
+  );
+  const previous = historical.boundary.trackedReceipts.find(
+    ({ path: name }) => name === packagePath,
+  );
+  if (index < 0 || !previous)
+    fail("SUCCESSOR_DRIFT", "The exact historical package receipt is missing.");
+  artifact.boundary.trackedReceipts[index] = structuredClone(previous);
+  if (!isDeepStrictEqual(artifact, historical))
+    fail("SUCCESSOR_DRIFT", "T07 may project only its one authenticated browser package receipt.");
   const artifactBytes = Buffer.from(
     await format(JSON.stringify(artifact), { parser: "json", printWidth: 100, endOfLine: "lf" }),
   );
-  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  return deepFreeze({
+    artifact,
+    artifactBytes,
+    artifactSha256: sha256(artifactBytes),
+    liveSuccessorAuthority: {
+      task: "M10-T07",
+      path: T07_SUCCESSOR_PIN.path,
+      bytes: T07_SUCCESSOR_PIN.bytes,
+      sha256: T07_SUCCESSOR_PIN.sha256,
+      currentGraphAudit,
+      currentBrowserPackageReceipt: currentArtifact.boundary.trackedReceipts[index],
+      historicalProjectionPaths: [packagePath],
+      parentArtifactUnchanged: true,
+    },
+  });
 }
 
 function authenticateArtifact(bytes) {

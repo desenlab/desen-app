@@ -108,20 +108,20 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 222 steps across the seven reviewed execution classes", () => {
+test("owns exactly 224 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 222);
-  assert.equal(new Set(ALL_STEP_IDS).size, 222);
+  assert.equal(ALL_STEP_IDS.length, 224);
+  assert.equal(new Set(ALL_STEP_IDS).size, 224);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 3,
     PACKAGE_TEST_EXCLUSIVE: 1,
     PROOF_READ_ONLY: 92,
-    PROOF_OS_TEMP_ISOLATED: 109,
+    PROOF_OS_TEMP_ISOLATED: 111,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
@@ -156,10 +156,10 @@ test("owns exactly 222 steps across the seven reviewed execution classes", () =>
 });
 
 test("pins the exact eleven read-only and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 106);
-  assert.equal(new Set(PROOF_IDS).size, 106);
+  assert.equal(PROOF_IDS.length, 107);
+  assert.equal(new Set(PROOF_IDS).size, 107);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
-  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 95);
+  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 96);
   assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 11);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
@@ -175,7 +175,7 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
     "desen-app-published-host-update",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 94);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 95);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -480,8 +480,9 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
     "desen-app-real-adapter-canvas",
     "desen-app-published-host-update",
     "desen-app-invalid-publication",
+    "desen-app-last-known-good-recovery",
   ]);
-  assert.equal(CHILD_PROCESS_VERIFIER_PROOF_IDS.length, 15);
+  assert.equal(CHILD_PROCESS_VERIFIER_PROOF_IDS.length, 16);
   for (const proofId of CHILD_PROCESS_VERIFIER_PROOF_IDS) {
     assert.deepEqual(classifyWorkloadStateMetadata(`verify-${proofId}`), {
       schemaVersion: 2,
@@ -512,7 +513,9 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
                         ? "DESEN_APP_PUBLISHED_HOST_UPDATE_VITE"
                         : proofId === "desen-app-invalid-publication"
                           ? "DESEN_APP_INVALID_PUBLICATION_VITE"
-                          : "NONE",
+                          : proofId === "desen-app-last-known-good-recovery"
+                            ? "DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE"
+                            : "NONE",
       filesystemCompatibilityPolicy: "NONE",
       barrier: false,
     });
@@ -1195,8 +1198,9 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
     "desen-app-real-adapter-canvas",
     "desen-app-published-host-update",
     "desen-app-invalid-publication",
+    "desen-app-last-known-good-recovery",
   ]);
-  assert.equal(NATIVE_ADDON_PROOF_IDS.length, 11);
+  assert.equal(NATIVE_ADDON_PROOF_IDS.length, 12);
   assert.deepEqual(NATIVE_ADDON_ROOT_STEP_IDS, [
     "test-publisher-invalid-source-matrix",
     "test-control-plane-local-api",
@@ -1207,6 +1211,7 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
     "test-desen-app-real-adapter-canvas",
     "test-desen-app-published-host-update",
     "test-desen-app-invalid-publication",
+    "test-desen-app-last-known-good-recovery",
   ]);
   assert.equal(
     new Set([
@@ -1216,7 +1221,7 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
       ]),
       ...NATIVE_ADDON_ROOT_STEP_IDS,
     ]).size,
-    21,
+    23,
   );
   assert.equal(
     classifyWorkloadStateMetadata("verify-reference-host-web-source-audit").nativeAddonPolicy,
@@ -1310,7 +1315,7 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    106,
+    107,
   );
 });
 
@@ -1362,6 +1367,74 @@ test("T06 live Vite and Publisher probes inherit bounded temp authority without 
     assert.deepEqual(step.ports, []);
     assert.deepEqual(step.workspaceWrites, []);
     assert.equal(step.filesystemCompatibilityPolicy, "NONE");
+  }
+});
+
+test("T07 recovery probes receive only Vite/SQLite native and process-local temp authority", () => {
+  const pair = classifyProofPairState("desen-app-last-known-good-recovery");
+  assert.equal(pair.barrier, false);
+  assert.equal(pair.verifier.childProcessPolicy, "VERIFIER_RUNTIME_PROBE");
+  assert.equal(pair.rootTest.childProcessPolicy, "NODE_TEST_HARNESS");
+  for (const step of [pair.verifier, pair.rootTest]) {
+    assert.equal(step.executionClass, "PROOF_OS_TEMP_ISOLATED");
+    assert.equal(step.tempPolicy, "RUNNER_SCOPED_OS");
+    assert.equal(step.nativeAddonPolicy, "DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE");
+    assert.deepEqual(step.ports, []);
+    assert.deepEqual(step.workspaceWrites, []);
+    assert.equal(step.filesystemCompatibilityPolicy, "NONE");
+    assert.equal(LOOPBACK_CHILD_LISTENER_VERIFIER_STEP_IDS.includes(step.stepId), false);
+  }
+});
+
+test("T07 verifier and root load real Vite/SQLite while unrelated proof steps deny both", async (context) => {
+  const steps = await Promise.all(
+    ["verify-desen-app-last-known-good-recovery", "test-desen-app-last-known-good-recovery"].map(
+      (workload) => createProofStepIsolationContext({ workspaceRoot: REPOSITORY_ROOT, workload }),
+    ),
+  );
+  const ordinary = await createProofStepIsolationContext({
+    workspaceRoot: REPOSITORY_ROOT,
+    workload: "test-desen-app-success-host-operation",
+  });
+  context.after(async () => {
+    await Promise.all([...steps, ordinary].map((step) => step.dispose()));
+  });
+  const viteUrl = pathToFileURL(
+    path.join(REPOSITORY_ROOT, "apps/desen-app/node_modules/vite/dist/node/index.js"),
+  ).href;
+  const sqliteUrl = pathToFileURL(
+    path.join(REPOSITORY_ROOT, "apps/control-plane-api/node_modules/better-sqlite3/lib/index.js"),
+  ).href;
+  const viteProbe = `import(${JSON.stringify(viteUrl)}).then(({ build, version }) => {
+    if (typeof build !== "function" || version !== "8.1.5") throw new Error("Vite contract drifted");
+    process.stdout.write("vite");
+  });`;
+  const sqliteProbe = `import(${JSON.stringify(sqliteUrl)}).then(({ default: Database }) => {
+    const database = new Database(require("node:path").join(process.env.TMPDIR, "recovery.sqlite3"));
+    try {
+      database.exec("CREATE TABLE recovery (revision TEXT NOT NULL)");
+      database.prepare("INSERT INTO recovery VALUES (?)").run("known-good");
+      if (database.prepare("SELECT revision FROM recovery").get().revision !== "known-good") {
+        throw new Error("SQLite contract drifted");
+      }
+      process.stdout.write("sqlite");
+    } finally { database.close(); }
+  });`;
+  for (const [probe, marker] of [
+    [viteProbe, "vite"],
+    [sqliteProbe, "sqlite"],
+  ]) {
+    for (const step of steps) {
+      const allowed = await runNode(probe, step.env);
+      assert.equal(allowed.code, 0, allowed.stderr);
+      assert.equal(allowed.stdout, marker);
+    }
+    const denied = await runNode(probe, ordinary.env);
+    assert.notEqual(denied.code, 0);
+    assert.match(
+      denied.stderr,
+      /Cannot find native binding|Cannot load native addon|ERR_DLOPEN_DISABLED/u,
+    );
   }
 });
 
@@ -1924,7 +1997,7 @@ test(
   },
 );
 
-test("only the twenty-one exact reviewed steps receive native-addon authority", async (context) => {
+test("only the twenty-three exact reviewed steps receive native-addon authority", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-native-addon-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const verifier = await createProofStepIsolationContext({
@@ -2143,7 +2216,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 204,
+    NONE: 206,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,

@@ -26,10 +26,18 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
-**Güncel görev: M10-T06.** Kullanıcı M10'un hiçbir görev atlanmadan tamamlanmasını onayladı.
-Önce hatalı özellik/olay/slot kullanımının yayınlanmasını engelleyip doğru bileşene yönlendiren
-tanıları gerçek ürün akışında doğruluyoruz. Ardından T07, T08, T09 ve G10 kendi kanıtlarıyla
-kapatılacak. CI-04 ve SEC-02, [PR #80](https://github.com/desenlab/desen-app/pull/80) ve
+**Güncel görev: M10-T07.** Kullanıcı M10'un hiçbir görev atlanmadan tamamlanmasını onayladı.
+T07'nin gerçek Chromium yeniden başlatma akışı, bağımsız kurtarma doğrulayıcısı, dokuz kök testi,
+önceki görevlerin 20 uyumluluk testi ve sınırlı yerel temel kontrolleri geçti. Görev tablosundaki
+`DONE` henüz koşullu kapanış adayıdır: tam güncel PR kontrolleri, merge ve taze main koşusu
+geçmeden T08 başlamaz. Yeni mühür önceki 76 kaydı ve 60 kanıt dosyasını değiştirmeden korur;
+hiçbir test azaltılmaz. [T07 kanıtı](../proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md).
+T06, [PR #81](https://github.com/desenlab/desen-app/pull/81) ve
+[başarılı taze main koşusuyla](https://github.com/desenlab/desen-app/actions/runs/34209981353)
+tamamen kapandı. Şimdi bozuk revizyon ve uyumsuz Catalog adayları karşısında son doğrulanmış
+ekranı, servisleri gerçekten kapatıp yeni süreçte açtıktan sonra da koruduğumuzu doğruluyoruz.
+Ardından T08, T09 ve G10 kendi kanıtlarıyla kapatılacak. CI-04 ve SEC-02,
+[PR #80](https://github.com/desenlab/desen-app/pull/80) ve
 [12 dakika 23 saniyede geçen taze main koşusuyla](https://github.com/desenlab/desen-app/actions/runs/34066622578)
 tamamlandı. Aşağıdaki koşullu ifadeler önceki uygulama kontrol noktasını anlatır; eski durma
 talimatı yeni M10 yetkisiyle aşılmıştır. T06'nın zorunlu sonraki-mühür testinde ortaya çıkan dosya

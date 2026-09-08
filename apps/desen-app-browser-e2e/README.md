@@ -8,7 +8,7 @@ The original T01 harness imports the production `DesenAppApplication`, its style
 empty reference project directly from `@desen/app-web` source. The later journeys use the ordinary
 product entry with temporary instances of its local persistence service. Its package-level
 `test:e2e` command first builds the complete product dependency closure and the independent
-reference host, then typechecks and builds the harness before running all seven Chromium journeys.
+reference host, then typechecks and builds the harness before running all eight Chromium journeys.
 The original in-memory compare-and-set
 adapter is test-only and is never imported by the product entry.
 
@@ -36,7 +36,7 @@ Playwright writes retained failure traces, screenshots, and video under `test-re
 HTML report under `playwright-report/`. Both directories and the production proof bundle in
 `dist/` are generated outputs and must not be committed.
 
-The seven independently configured journeys cover:
+The eight independently configured journeys cover:
 
 - M10-T01: empty-project visual authoring, authenticated native drag, canonical persistence,
   structural re-admission, and exact Design/Run static parity.
@@ -57,6 +57,13 @@ The seven independently configured journeys cover:
   each candidate with a diagnostic linked to its exact node, while the committed canvas, saved
   Source, channel, and active host remain unchanged. Each repaired candidate is applied, saved,
   and published through the ordinary controls before the independently built host reloads it.
+- M10-T07: visibly published A then C establish active C and previous-good A. Explicitly isolated
+  transport-negative fixtures place a corrupt-revision Bundle and a self-consistent Bundle with a
+  mismatched Catalog digest on the real channel using authenticated public PUT/CAS. For each,
+  the ordinary host preserves C before and after complete service-process termination and a new
+  PID, while the bad candidate remains on the channel. Fresh browser contexts reopen the saved
+  project and recovered host; a final visible valid publication D activates without changing App
+  source or rebuilding the host.
 
 The T04 server uses `product-proof-server.mjs --with-operations` on port 4176. It starts the same
 bounded loopback operation service used by the normal developer launcher, with fresh credentials
@@ -86,5 +93,35 @@ Run only this slice after building its ordinary product dependency closure:
 pnpm --filter @desen/app-browser-e2e exec playwright test --config invalid-publication-playwright.config.ts
 ```
 
-Last-known-good corruption recovery (T07), production identity, remote deployment, and G10 closure
-remain outside these browser journeys.
+T07 uses `restart-recovery-proof-server.mjs`, supervised through a closed Node IPC protocol by
+`restart-recovery.pw.ts`, on isolated ports 4179/4180. It starts the normal App entry, public local
+control plane, exact App activation bridge, and independently built reference host. Each restart
+awaits complete process exit and starts a new child against the same private durable root,
+unchanged host build, and supervisor-owned ephemeral loopback credentials. The existing activation
+bridge intentionally allocates a fresh port on every start. Only the normal App is rebuilt in the
+same private output directory to capture that fresh trusted origin; its source-byte fingerprint
+must remain unchanged and each process's App build is recorded separately. No
+runtime handle, browser context, editable Source injection, private SQL access, or privileged
+HTTP test endpoint crosses the restart. The sole negative writes are explicitly named Bundle
+transport fixtures; they are not claimed as normal designer authoring. Public verification
+independently identifies `REVISION_MISMATCH` and `CATALOG_DIGEST_MISMATCH`; real Chromium still
+must show the preserved/recovered product output. Durable active/previous-good identities,
+activation generation, saved Source bytes, App source, and served host fingerprints are checked separately
+from the bad channel pointer. Cleanup deletes only the owned temporary root after the child exits.
+
+For this suite, Playwright trace snapshots/network recording, source inclusion, and trace
+attachments are disabled. Action timelines and screenshot frames remain, and failed runs retain
+videos plus sanitized JSON receipts. Credentials are neither fixture documents nor evidence;
+raw IPC boot messages, HTTP headers, response bodies, and generated App configuration are never
+attached or logged. Previous suites' trace settings are unchanged.
+
+Run only the cold-restart slice after building the ordinary dependency closure:
+
+```bash
+pnpm --filter @desen/app-browser-e2e exec playwright test --config restart-recovery-playwright.config.ts
+```
+
+This proves rejection of a bad channel candidate while the durable active/previous-good Bundles
+and installed package remain intact. It does not prove automatic rollback after corruption of
+those durable good Bundles, hostile-administrator tamper resistance, production identity,
+remote deployment, N-036, or G10 closure.

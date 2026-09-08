@@ -19,8 +19,15 @@ developer launcher. Reusing that listener keeps the real-host browser proof from
 own substitute implementation. Negative fixtures reject both edges from other proof files,
 deep/private Control Plane modules, neighboring unreviewed App dev modules, and
 every other application root from the product server.
-The exception grants no access to the App source tree or the rest of its dev directory. All 26
-cases run against the real root configuration.
+The exception grants no access to the App source tree or the rest of its dev directory.
+
+The restart-recovery proof has a separate exact server entry. Only
+`restart-recovery-proof-server.mjs` may combine the public built Protocol digest API, public
+Control Plane and reference-host server roots, and the existing local publication bridge. Its
+positive fixture covers those four edges. Negative fixtures reject private Control Plane,
+reference-host and Protocol modules, Publisher, other App source/dev modules, and public Protocol
+access from an ordinary browser-proof file. This does not give browser code publication or
+storage authority. All 38 cases run against the real root configuration.
 
 Run them after installing workspace dependencies:
 

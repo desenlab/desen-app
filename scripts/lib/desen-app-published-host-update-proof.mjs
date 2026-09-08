@@ -29,6 +29,18 @@ const T06_SUCCESSOR_PIN = Object.freeze({
   bytes: 193_291,
   sha256: "1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a",
 });
+const T07_SUCCESSOR_PATH = "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json";
+const T07_SUCCESSOR_PIN = Object.freeze({
+  bytes: 304_094,
+  sha256: "5e589bc8022de3ccf3add7a9ebab78006ecca6e72628e165f54eef4fd8b90b68",
+});
+const T07_REVIEWED_CHANGED_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/package.json",
+  "dependency-cruiser.config.cjs",
+  "scripts/verify-boundary-fixtures.mjs",
+]);
+const T07_PROTOCOL_LOCKFILE_ADDITION =
+  "      '@desen/protocol':\n        specifier: workspace:*\n        version: link:../../packages/protocol\n";
 const T06_ADDED_APP_PATHS = Object.freeze([
   "apps/desen-app/src/authoring-source-draft.ts",
   "apps/desen-app/src/source-draft-controls.tsx",
@@ -1846,7 +1858,8 @@ function verifyBoundaryAuthority(files) {
     configuration,
     [
       'const desenAppLocalPublicationHostPath = "^apps/desen-app/dev/local-publication-host\\\\.mjs$";',
-      'const desenAppBrowserPublishedHostProofServerPath =\n  "^apps/desen-app-browser-e2e/published-host-proof-server\\\\.mjs$";',
+      'const desenAppBrowserPublicationServerPaths =\n  "^apps/desen-app-browser-e2e/(?:published-host-proof-server|restart-recovery-proof-server)\\\\.mjs$";',
+      'const desenAppBrowserRecoveryProofServerPath =\n  "^apps/desen-app-browser-e2e/restart-recovery-proof-server\\\\.mjs$";',
       'const referenceHostServerPublicBuildEntryPath =\n  "^apps/reference-host-web-server/dist/index\\\\.(?:d\\\\.ts|js)$";',
       'name: "desen-app-browser-e2e-published-server-reference-host-public-root-only"',
       'name: "desen-app-browser-e2e-published-server-has-no-other-application-dependencies"',
@@ -2683,7 +2696,8 @@ function verifyPackageAuthority(files) {
       "vitest run test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx" ||
     browser?.name !== "@desen/app-browser-e2e" ||
     browser.scripts?.["test:e2e"] !==
-      `${BROWSER_E2E_SCRIPT} && playwright test --config invalid-publication-playwright.config.ts` ||
+      `${BROWSER_E2E_SCRIPT} && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts` ||
+    browser.devDependencies?.["@desen/protocol"] !== "workspace:*" ||
     host?.name !== "@desen/reference-host-web" ||
     host.scripts?.build !== "vite build" ||
     server?.name !== "@desen/reference-host-web-server" ||
@@ -2767,13 +2781,46 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   const options = captureBuildOptions(rawOptions);
   const acquired = await acquireFiles(options);
   const files = acquired.files;
+  const recoverySuccessor = await readT07SuccessorArtifact(options.workspaceRoot);
   const dependencyPin = DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS;
   const dependencyBytes = files.get(dependencyPin.path);
+  assertT07Receipt(
+    recoverySuccessor,
+    dependencyPin.path,
+    dependencyBytes,
+    "DEPENDENCY_SUCCESSOR_DRIFT",
+  );
+  const lockfileText = decodeUtf8(
+    dependencyBytes,
+    dependencyPin.path,
+    "DEPENDENCY_SUCCESSOR_DRIFT",
+  );
+  const browserImporterStart = lockfileText.indexOf("  apps/desen-app-browser-e2e:\n");
+  const browserImporterEnd = lockfileText.indexOf("\n  apps/", browserImporterStart + 1);
+  const browserImporter = lockfileText.slice(browserImporterStart, browserImporterEnd);
   if (
-    dependencyBytes.byteLength !== dependencyPin.currentBytes ||
-    sha256(dependencyBytes) !== dependencyPin.currentSha256
+    browserImporterStart < 0 ||
+    browserImporterEnd < 0 ||
+    occurrenceCount(browserImporter, T07_PROTOCOL_LOCKFILE_ADDITION) !== 1
   ) {
-    fail("DEPENDENCY_SUCCESSOR_DRIFT", "The exact SEC-02 security lockfile successor drifted.");
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "The reviewed T07 protocol workspace link must occur once in the browser importer.",
+    );
+  }
+  const securityLockfile = Buffer.from(
+    lockfileText.slice(0, browserImporterStart) +
+      browserImporter.replace(T07_PROTOCOL_LOCKFILE_ADDITION, "") +
+      lockfileText.slice(browserImporterEnd),
+  );
+  if (
+    securityLockfile.byteLength !== dependencyPin.currentBytes ||
+    sha256(securityLockfile) !== dependencyPin.currentSha256
+  ) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "Removing only T07's reviewed workspace link must reproduce the exact SEC-02 security lockfile.",
+    );
   }
   const parents = authenticateParents(files);
   const bridge = authenticateHistoricalReaderBridge(
@@ -2797,6 +2844,9 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   const dependencyBoundary = verifyBoundaryAuthority(files);
   const bridgeReproduction = verifyBridgeReproductionAuthority(files);
   const packageAuthority = verifyPackageAuthority(files);
+  for (const relativePath of T07_REVIEWED_CHANGED_PATHS) {
+    assertT07Receipt(recoverySuccessor, relativePath, files.get(relativePath));
+  }
   const acquiredAppSourceReceipts = sourceReceipts(files, APP_SOURCE_PATHS);
   const acquiredHostSourceReceipts = sourceReceipts(files, HOST_SOURCE_PATHS);
   const freshHostAudit = await buildFreshHostAudit(options.workspaceRoot, files);
@@ -2940,7 +2990,18 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   const successorProjection = await projectT06HistoricalPredecessor(
     options.workspaceRoot,
     currentArtifact,
+    recoverySuccessor,
   );
+  // Reacquire successor identity and every admitted wiring input after the fresh graph work.
+  // Caller overrides are checked before projection; they never replace this filesystem fence.
+  await readT07SuccessorArtifact(options.workspaceRoot);
+  for (const relativePath of [...T07_REVIEWED_CHANGED_PATHS, dependencyPin.path]) {
+    assertT07Receipt(
+      recoverySuccessor,
+      relativePath,
+      await readRegularAuthority(path.join(options.workspaceRoot, relativePath), relativePath),
+    );
+  }
   const artifact = successorProjection.artifact;
   const artifactBytes = await canonicalArtifactBytes(artifact);
   return deepFreeze({
@@ -2951,9 +3012,17 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
     dependencySecurityCompatibility: {
       authority: "SEC-02",
       path: dependencyPin.path,
-      currentBytes: dependencyPin.currentBytes,
+      currentBytes: dependencyBytes.byteLength,
       historicalBytes: dependencyPin.historicalBytes,
-      currentSha256: dependencyPin.currentSha256,
+      currentSha256: sha256(dependencyBytes),
+      compositionSuccessor: {
+        task: "M10-T07",
+        artifact: { path: T07_SUCCESSOR_PATH, ...T07_SUCCESSOR_PIN },
+      },
+      securityTaskLockfile: {
+        bytes: dependencyPin.currentBytes,
+        sha256: dependencyPin.currentSha256,
+      },
       historicalSha256: dependencyPin.historicalSha256,
       predecessor: dependencyPin.predecessor,
       fastify: "5.12.2",
@@ -2990,7 +3059,37 @@ async function readT06SuccessorArtifact(workspaceRoot) {
   return deepFreeze(artifact);
 }
 
-async function projectT06HistoricalPredecessor(workspaceRoot, currentArtifact) {
+async function readT07SuccessorArtifact(workspaceRoot) {
+  const bytes = await readRegularAuthority(
+    path.join(workspaceRoot, T07_SUCCESSOR_PATH),
+    T07_SUCCESSOR_PATH,
+  );
+  if (bytes.byteLength !== T07_SUCCESSOR_PIN.bytes || sha256(bytes) !== T07_SUCCESSOR_PIN.sha256) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact reviewed T07 composition artifact is required.");
+  }
+  const artifact = parseJson(bytes, T07_SUCCESSOR_PATH, "SUCCESSOR_POLICY_VIOLATION");
+  if (
+    artifact.task !== "M10-T07" ||
+    artifact.profile !== "desen.app.last-known-good-recovery-proof.v1" ||
+    artifact.result !== "PASS"
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The T07 composition successor identity drifted.");
+  }
+  return deepFreeze(artifact);
+}
+
+function assertT07Receipt(successor, relativePath, bytes, code = "SUCCESSOR_POLICY_VIOLATION") {
+  const receipt = successor.boundary.trackedReceipts.find(
+    ({ path: receiptPath }) => receiptPath === relativePath,
+  );
+  if (receipt?.bytes !== bytes.byteLength || receipt.sha256 !== sha256(bytes)) {
+    fail(code, "A current wiring input differs from its exact reviewed T07 receipt.", {
+      path: relativePath,
+    });
+  }
+}
+
+async function projectT06HistoricalPredecessor(workspaceRoot, currentArtifact, recoverySuccessor) {
   const successor = await readT06SuccessorArtifact(workspaceRoot);
   const historical = authenticatePublishedHostUpdateArtifact(
     await readRegularAuthority(
@@ -3003,7 +3102,10 @@ async function projectT06HistoricalPredecessor(workspaceRoot, currentArtifact) {
     referenceHostSourceAudit: currentArtifact.authority.referenceHostSourceAudit,
     runtimeResolution: currentArtifact.authority.runtimeResolution,
   };
-  if (!isDeepStrictEqual(currentGraphAudit, successor.authority?.currentGraphAudit)) {
+  if (
+    !isDeepStrictEqual(currentGraphAudit, successor.authority?.currentGraphAudit) ||
+    !isDeepStrictEqual(currentGraphAudit, recoverySuccessor.authority?.currentGraphAudit)
+  ) {
     fail(
       "SUCCESSOR_POLICY_VIOLATION",
       "Fresh current App/host observations differ from the reviewed T06 authority.",
@@ -3016,10 +3118,15 @@ async function projectT06HistoricalPredecessor(workspaceRoot, currentArtifact) {
   const successorReceipts = new Map(
     successor.boundary.trackedReceipts.map((receipt) => [receipt.path, receipt]),
   );
+  const recoveryReceipts = new Map(
+    recoverySuccessor.boundary.trackedReceipts.map((receipt) => [receipt.path, receipt]),
+  );
   for (const receipt of currentReceipts) {
-    const expected = T06_REVIEWED_CHANGED_PATHS.includes(receipt.path)
-      ? successorReceipts.get(receipt.path)
-      : historicalReceipts.get(receipt.path);
+    const expected = T07_REVIEWED_CHANGED_PATHS.includes(receipt.path)
+      ? recoveryReceipts.get(receipt.path)
+      : T06_REVIEWED_CHANGED_PATHS.includes(receipt.path)
+        ? successorReceipts.get(receipt.path)
+        : historicalReceipts.get(receipt.path);
     if (!isDeepStrictEqual(receipt, expected)) {
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
@@ -3062,6 +3169,12 @@ async function projectT06HistoricalPredecessor(workspaceRoot, currentArtifact) {
     liveSuccessorAuthority: {
       task: "M10-T06",
       artifact: { path: T06_SUCCESSOR_PATH, ...T06_SUCCESSOR_PIN },
+      compositionSuccessor: {
+        task: "M10-T07",
+        artifact: { path: T07_SUCCESSOR_PATH, ...T07_SUCCESSOR_PIN },
+        reviewedChangedInputs: [...T07_REVIEWED_CHANGED_PATHS, "pnpm-lock.yaml"],
+        productSourceUnchanged: true,
+      },
       currentGraphAudit,
       projectedHistoricalFields: [
         "authority.appSourceAudit",

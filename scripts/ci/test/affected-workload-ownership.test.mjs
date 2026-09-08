@@ -35,11 +35,11 @@ const CI_04_CATEGORY_COUNTS = Object.freeze({
 });
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   ...CI_04_CATEGORY_COUNTS,
-  PROOF_UNIT: 212,
-  FROZEN_INPUT: 155,
-  PACKAGE_OR_APPLICATION: 562,
-  SHARED_PROOF_INFRASTRUCTURE: 294,
-  PROJECT_DOCUMENTATION: 151,
+  PROOF_UNIT: 214,
+  FROZEN_INPUT: 156,
+  PACKAGE_OR_APPLICATION: 565,
+  SHARED_PROOF_INFRASTRUCTURE: 315,
+  PROJECT_DOCUMENTATION: 152,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
@@ -65,6 +65,37 @@ const T06_SUCCESSOR_PATHS = Object.freeze([
   "scripts/lib/desen-app-invalid-publication-proof.mjs",
   "scripts/verify-desen-app-invalid-publication.mjs",
   "tests/desen-app-invalid-publication.test.mjs",
+]);
+
+const T07_SUCCESSOR_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/restart-recovery-playwright.config.ts",
+  "apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "apps/desen-app-browser-e2e/restart-recovery.pw.ts",
+  "docs/proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md",
+  "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json",
+  "scripts/generate-desen-app-last-known-good-recovery-proof.mjs",
+  "scripts/lib/desen-app-last-known-good-recovery-proof.mjs",
+  "scripts/verify-desen-app-last-known-good-recovery.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-recovery-server-reviewed-roots/apps/control-plane-api/dist/index.js",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-recovery-server-reviewed-roots/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-recovery-server-reviewed-roots/apps/desen-app/dev/local-publication-host.mjs",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-recovery-server-reviewed-roots/apps/reference-host-web-server/dist/index.js",
+  "tests/boundaries/fixtures/allowed-desen-app-browser-e2e-recovery-server-reviewed-roots/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-recovery-server-imports-protocol/apps/desen-app-browser-e2e/proof-application.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-non-recovery-server-imports-protocol/packages/protocol/dist/index.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-app-source/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-app-source/apps/desen-app/src/application.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-control-plane-private/apps/control-plane-api/dist/runtime-activation-sqlite-internal.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-control-plane-private/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-protocol-private/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-protocol-private/packages/protocol/dist/private.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-publisher/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-publisher/packages/publisher/src/index.ts",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-reference-host-private/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-reference-host-private/apps/reference-host-web-server/dist/private.js",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-unreviewed-dev-module/apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+  "tests/boundaries/fixtures/desen-app-browser-e2e-recovery-server-imports-unreviewed-dev-module/apps/desen-app/dev/local-publication-private.mjs",
+  "tests/desen-app-last-known-good-recovery.test.mjs",
 ]);
 
 async function currentTrackedPaths() {
@@ -96,7 +127,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1465 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1493 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -118,12 +149,49 @@ test("freezes exact-one ownership for all 1465 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1465);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1493);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
   );
   assertDeepFrozen(authority);
+});
+
+test("the T07 recovery successor preserves T06 ownership and narrowly registers its exact pair", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  for (const relativePath of T07_SUCCESSOR_PATHS) {
+    const owner = resolveAffectedWorkloadOwner(authority, relativePath);
+    const proofInput =
+      relativePath === "scripts/verify-desen-app-last-known-good-recovery.mjs" ||
+      relativePath === "tests/desen-app-last-known-good-recovery.test.mjs";
+    assert.equal(owner.disposition, proofInput ? "SELECT_PROOF_UNIT" : "FORCE_EXHAUSTIVE");
+    assert.equal(owner.proofUnitId, proofInput ? "desen-app-last-known-good-recovery" : null);
+    assert.throws(
+      () =>
+        createAffectedWorkloadOwnership(paths.filter((candidate) => candidate !== relativePath)),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+  assert.deepEqual(
+    calculateAffectedWorkloadOwnershipReview(
+      paths.filter((candidate) => !T07_SUCCESSOR_PATHS.includes(candidate)),
+    ),
+    {
+      trackedPathCount: 1465,
+      trackedPathSetSha256: "ef74c63d58eac2795aece54f442aa5d894c6215f1de37366fc22bae698c08328",
+      proofOwnedPathCount: 212,
+      categoryCounts: {
+        ...CI_04_CATEGORY_COUNTS,
+        PROOF_UNIT: 212,
+        FROZEN_INPUT: 155,
+        PACKAGE_OR_APPLICATION: 562,
+        SHARED_PROOF_INFRASTRUCTURE: 294,
+        PROJECT_DOCUMENTATION: 151,
+      },
+      ownershipSha256: "7a7d55ff9cd399fbb80e67d7e8ec6d48709e04ecd7237cde8ed1ace4bbd58f80",
+    },
+  );
 });
 
 test("the T06 publication successor preserves every CI-04 owner and registers only its exact proof pair", async () => {
@@ -149,7 +217,10 @@ test("the T06 publication successor preserves every CI-04 owner and registers on
   }
   assert.deepEqual(
     calculateAffectedWorkloadOwnershipReview(
-      paths.filter((candidate) => !T06_SUCCESSOR_PATHS.includes(candidate)),
+      paths.filter(
+        (candidate) =>
+          !T06_SUCCESSOR_PATHS.includes(candidate) && !T07_SUCCESSOR_PATHS.includes(candidate),
+      ),
     ),
     {
       trackedPathCount: 1452,
@@ -179,7 +250,9 @@ test("the CI-04 execution sources retain every SEC-02 owner and force exhaustive
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
-          !CI_04_SUCCESSOR_PATHS.includes(candidate) && !T06_SUCCESSOR_PATHS.includes(candidate),
+          !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
+          !T06_SUCCESSOR_PATHS.includes(candidate) &&
+          !T07_SUCCESSOR_PATHS.includes(candidate),
       ),
     ),
     {
@@ -207,7 +280,8 @@ test("the SEC-02 documentation successor preserves the exact SEC-01 ownership au
     (candidate) =>
       candidate !== SEC_02_SUCCESSOR_PATH &&
       !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
-      !T06_SUCCESSOR_PATHS.includes(candidate),
+      !T06_SUCCESSOR_PATHS.includes(candidate) &&
+      !T07_SUCCESSOR_PATHS.includes(candidate),
   );
   assert.throws(
     () => createAffectedWorkloadOwnership(previousPaths),
@@ -248,7 +322,8 @@ test("the exact SEC-01 successor preserves the reviewed T05 ownership authority"
       !SEC_01_SUCCESSOR_PATHS.includes(candidate) &&
       candidate !== SEC_02_SUCCESSOR_PATH &&
       !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
-      !T06_SUCCESSOR_PATHS.includes(candidate),
+      !T06_SUCCESSOR_PATHS.includes(candidate) &&
+      !T07_SUCCESSOR_PATHS.includes(candidate),
   );
   assert.deepEqual(calculateAffectedWorkloadOwnershipReview(predecessorPaths), {
     trackedPathCount: 1446,
@@ -276,7 +351,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 212);
+  assert.equal(proofEntries.length, 214);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -1024,7 +1099,8 @@ test("the reviewed AR-01 successor preserves the historical I07-04 ownership pro
       !SEC_01_SUCCESSOR_PATHS.includes(candidate) &&
       candidate !== SEC_02_SUCCESSOR_PATH &&
       !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
-      !T06_SUCCESSOR_PATHS.includes(candidate),
+      !T06_SUCCESSOR_PATHS.includes(candidate) &&
+      !T07_SUCCESSOR_PATHS.includes(candidate),
   );
   historicalPaths.push(
     "scripts/ci/run-shadow-affected-quality-gate.mjs",

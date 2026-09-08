@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████████░░░░░` **118 / 148 tasks complete (80%)**
+**Overall:** `████████████████████░░░░░` **119 / 148 tasks complete (80%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -26,18 +26,20 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `█████████░░░` **9 / 12 tasks complete (75%)**
+**M10:** `██████████░░` **10 / 12 tasks complete (83%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **AR-01:** `DONE` · **M10-T05:** `DONE` · **M10-T06:** `DONE` closure candidate pending exact-head hosted checks and fresh main · **P-07:** `PROVEN` · **PF-059:** `CLOSED` · **Next product task:** `M10-T07` (after T06 closure)
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **AR-01:** `DONE` · **M10-T05:** `DONE` · **M10-T06:** `DONE` ([fresh main PASS](https://github.com/desenlab/desen-app/actions/runs/34209981353)) · **P-07:** `PROVEN` · **PF-059:** `CLOSED` · **Current product task:** `M10-T07` (`IN_PROGRESS`)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
 <!-- task-progress:end -->
 
-**M10-T06:** the [invalid-publication proof](docs/proof/DESEN-APP-INVALID-PUBLICATION.md) rejects
-invalid advanced Source without changing the valid design or active host. Local product, Chromium,
-proof, historical compatibility, and 483 CI contract tests pass. The candidate above is not hosted
-completion; exact-head Quality gate, Browser E2E, merge, and fresh main remain required.
+**M10-T07:** the [recovery proof](docs/proof/DESEN-APP-LAST-KNOWN-GOOD-RECOVERY.md) preserves the
+last authenticated host revision through corrupt candidates and full process restarts, then accepts
+a later valid publication without rebuilding the independent host. Local Chromium, public recovery,
+historical compatibility, and the bounded baseline pass. The task count includes the conditional
+`DONE` candidate: exact-head Quality gate, Browser E2E, merge, and fresh main remain required.
+T06 is already fully closed; T08, T09, and G10 have not started.
 
 **CI-04 and SEC-02:** `DONE`; [PR #80](https://github.com/desenlab/desen-app/pull/80) and
 [fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34066622578) passed, preserving all
