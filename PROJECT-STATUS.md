@@ -1,8 +1,48 @@
 # Project Status
 
-Last updated: 2026-09-07
+Last updated: 2026-09-08
 
-## CI-04 local evidence complete — conditional hosted closure, before M10-T06
+## Current work — M10-T06, followed by the remaining M10 closure
+
+The user explicitly authorized completing M10 without skipping tasks or verification. M10-T06
+is the sole active implementation task: reject invalid prop/event/slot publication with
+node-linked diagnostics through the real product. M10-T05 is complete. CI-04 and SEC-02 are also
+closed: [PR #80](https://github.com/desenlab/desen-app/pull/80) merged as
+`991b711d1eb74b0239b7e959671671eb51654085`, and
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34066622578) passed on attempt 1
+in 12m23s with all 220 logical workloads, 105 proof pairs, 430 CI contract tests, and six Chromium
+journeys retained. The [closure receipt](https://github.com/desenlab/desen-app/pull/80#issuecomment-5563055711)
+satisfies the conditional records below; their earlier failures remain historical failures.
+
+T06 implementation and local verification are ready. The task-board `DONE` row is a conditional
+closure candidate: exact final PR Quality gate and Browser E2E, merge, and a fresh passing main
+run are still required before advancing. The optional detached Source workflow passes 21 new
+product tests and a real Chromium invalid-prop/event/slot rejection-and-repair journey. T06 and
+T05 pass their exact guarded verifier/root checks; historical T01C/T04 roots pass 20/20. All 483
+CI/retained-runner contracts and the exact bounded local baseline pass. The T06 artifact is
+193,291 bytes at `sha256:1eb4260306d20fc87558edc4da4027c96bbb84598b758b242b8530010fe6071a`.
+Checkpoint 76 preserves the full prefix and authenticates 60 artifacts / 120 readers at
+`sha256:b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6`.
+CI keeps every prior workload and adds two: 222 logical workloads / 106 proof pairs, seven browser
+journeys, 239 physical workloads, unchanged two-worker shards and eleven exclusive barriers.
+Candidate progress is 118/148 (80%), M10 9/12 (75%); G10 remains open.
+
+After T06 closes, execute T07 last-known-good recovery, T08 reproducible seed/reset and demo
+runbook, T09 committed Runtime Core tree baseline, and G10's complete evidence audit in order.
+Every task retains its bounded local baseline, focused positive/negative evidence, exact-head PR
+checks, merge, and fresh main validation. G10 additionally requires the exhaustive local gate.
+Independent work within the active task may run in parallel; later tasks are not silently skipped
+or declared complete by earlier tests. No M11 implementation or external release is authorized.
+
+T06's required append-candidate tests exposed the checkpoint ledger's fixed 2 MiB capacity limit:
+sequence 76 fits, but its next review candidate does not. The necessary capacity prerequisite is
+handled with T06: derive a finite raw-byte envelope from the code-owned reviewed task generations
+plus exactly one candidate, with a separate 16 MiB hard ceiling. Canonical encoding, every historical
+digest, exact live-head admission, and fresh artifact/reader checks remain unchanged. A size envelope
+does not approve a candidate or cache test success. No compression or unchecked limit expansion is
+introduced; positive and oversized-input regressions remain mandatory.
+
+## CI-04 implementation checkpoint — closure subsequently satisfied above
 
 CI-04 is the explicitly authorized performance interlude after SEC-02's merged revision exceeded
 the unchanged 18m30s exhaustive deadline twice. It depends on completed CI-03 and M10-T05;

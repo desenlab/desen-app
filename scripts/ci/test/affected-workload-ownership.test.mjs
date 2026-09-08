@@ -23,7 +23,7 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
-const EXPECTED_CATEGORY_COUNTS = Object.freeze({
+const CI_04_CATEGORY_COUNTS = Object.freeze({
   PROOF_UNIT: 210,
   CI_POLICY: 48,
   DEPENDENCY_POLICY: 32,
@@ -32,6 +32,14 @@ const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   SHARED_PROOF_INFRASTRUCTURE: 292,
   PROJECT_DOCUMENTATION: 149,
   REPOSITORY_POLICY: 11,
+});
+const EXPECTED_CATEGORY_COUNTS = Object.freeze({
+  ...CI_04_CATEGORY_COUNTS,
+  PROOF_UNIT: 212,
+  FROZEN_INPUT: 155,
+  PACKAGE_OR_APPLICATION: 562,
+  SHARED_PROOF_INFRASTRUCTURE: 294,
+  PROJECT_DOCUMENTATION: 151,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
@@ -42,6 +50,21 @@ const CI_04_SUCCESSOR_PATHS = Object.freeze([
   "scripts/ci/run-required-sharded-quality-gate.mjs",
   "scripts/ci/sharded-quality-gate-authority.mjs",
   "scripts/ci/test/sharded-quality-gate.test.mjs",
+]);
+const T06_SUCCESSOR_PATHS = Object.freeze([
+  "apps/desen-app-browser-e2e/invalid-publication-playwright.config.ts",
+  "apps/desen-app-browser-e2e/invalid-publication.pw.ts",
+  "apps/desen-app/src/authoring-source-draft.ts",
+  "apps/desen-app/src/source-draft-controls.tsx",
+  "apps/desen-app/test/authoring-source-draft.test.ts",
+  "apps/desen-app/test/source-draft-application.test.tsx",
+  "docs/adr/0021-invalid-source-draft-publication-boundary.md",
+  "docs/proof/DESEN-APP-INVALID-PUBLICATION.md",
+  "docs/proof/artifacts/desen-app-0.1.0-invalid-publication.json",
+  "scripts/generate-desen-app-invalid-publication-proof.mjs",
+  "scripts/lib/desen-app-invalid-publication-proof.mjs",
+  "scripts/verify-desen-app-invalid-publication.mjs",
+  "tests/desen-app-invalid-publication.test.mjs",
 ]);
 
 async function currentTrackedPaths() {
@@ -73,7 +96,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1452 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1465 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -95,12 +118,47 @@ test("freezes exact-one ownership for all 1452 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1452);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1465);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
   );
   assertDeepFrozen(authority);
+});
+
+test("the T06 publication successor preserves every CI-04 owner and registers only its exact proof pair", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  for (const relativePath of T06_SUCCESSOR_PATHS) {
+    const owner = resolveAffectedWorkloadOwner(authority, relativePath);
+    const proofInput =
+      relativePath === "scripts/verify-desen-app-invalid-publication.mjs" ||
+      relativePath === "tests/desen-app-invalid-publication.test.mjs";
+    assert.equal(
+      owner.disposition,
+      proofInput
+        ? AFFECTED_OWNERSHIP_DISPOSITIONS.SELECT_PROOF_UNIT
+        : AFFECTED_OWNERSHIP_DISPOSITIONS.FORCE_EXHAUSTIVE,
+    );
+    assert.equal(owner.proofUnitId, proofInput ? "desen-app-invalid-publication" : null);
+    assert.throws(
+      () =>
+        createAffectedWorkloadOwnership(paths.filter((candidate) => candidate !== relativePath)),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+  assert.deepEqual(
+    calculateAffectedWorkloadOwnershipReview(
+      paths.filter((candidate) => !T06_SUCCESSOR_PATHS.includes(candidate)),
+    ),
+    {
+      trackedPathCount: 1452,
+      trackedPathSetSha256: "b65cb7ec03e4c4c242220d411846faf96d5e2d29a6396004ddc546386d353590",
+      proofOwnedPathCount: 210,
+      categoryCounts: CI_04_CATEGORY_COUNTS,
+      ownershipSha256: "7ebb6e9d5d01e0753844138d520b0b898fc63dfb20074d086861213ab070d799",
+    },
+  );
 });
 
 test("the CI-04 execution sources retain every SEC-02 owner and force exhaustive review", async () => {
@@ -119,13 +177,16 @@ test("the CI-04 execution sources retain every SEC-02 owner and force exhaustive
   }
   assert.deepEqual(
     calculateAffectedWorkloadOwnershipReview(
-      paths.filter((candidate) => !CI_04_SUCCESSOR_PATHS.includes(candidate)),
+      paths.filter(
+        (candidate) =>
+          !CI_04_SUCCESSOR_PATHS.includes(candidate) && !T06_SUCCESSOR_PATHS.includes(candidate),
+      ),
     ),
     {
       trackedPathCount: 1449,
       trackedPathSetSha256: "6fc4ae57156724abb4b42d88fb84e00d70ce15e2c6787e5850b079492d8bd828",
       proofOwnedPathCount: 210,
-      categoryCounts: { ...EXPECTED_CATEGORY_COUNTS, CI_POLICY: 45 },
+      categoryCounts: { ...CI_04_CATEGORY_COUNTS, CI_POLICY: 45 },
       ownershipSha256: "c8836a58038204386135eadc7cba83453f95c03dde11ea98b70fba516360afce",
     },
   );
@@ -144,7 +205,9 @@ test("the SEC-02 documentation successor preserves the exact SEC-01 ownership au
   });
   const previousPaths = paths.filter(
     (candidate) =>
-      candidate !== SEC_02_SUCCESSOR_PATH && !CI_04_SUCCESSOR_PATHS.includes(candidate),
+      candidate !== SEC_02_SUCCESSOR_PATH &&
+      !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
+      !T06_SUCCESSOR_PATHS.includes(candidate),
   );
   assert.throws(
     () => createAffectedWorkloadOwnership(previousPaths),
@@ -154,7 +217,7 @@ test("the SEC-02 documentation successor preserves the exact SEC-01 ownership au
     trackedPathCount: 1448,
     trackedPathSetSha256: "c47ca4048c8cd04a2d1f70facffc9dcb20027fb846284774e991ae23fc578f95",
     proofOwnedPathCount: 210,
-    categoryCounts: { ...EXPECTED_CATEGORY_COUNTS, CI_POLICY: 45, PROJECT_DOCUMENTATION: 148 },
+    categoryCounts: { ...CI_04_CATEGORY_COUNTS, CI_POLICY: 45, PROJECT_DOCUMENTATION: 148 },
     ownershipSha256: "5e9bfed553437553ea36157baef70439ed50c712eeb318f28e14f2c522228c60",
   });
 });
@@ -184,7 +247,8 @@ test("the exact SEC-01 successor preserves the reviewed T05 ownership authority"
     (candidate) =>
       !SEC_01_SUCCESSOR_PATHS.includes(candidate) &&
       candidate !== SEC_02_SUCCESSOR_PATH &&
-      !CI_04_SUCCESSOR_PATHS.includes(candidate),
+      !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
+      !T06_SUCCESSOR_PATHS.includes(candidate),
   );
   assert.deepEqual(calculateAffectedWorkloadOwnershipReview(predecessorPaths), {
     trackedPathCount: 1446,
@@ -212,7 +276,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 210);
+  assert.equal(proofEntries.length, 212);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -959,7 +1023,8 @@ test("the reviewed AR-01 successor preserves the historical I07-04 ownership pro
       !successorPaths.includes(candidate) &&
       !SEC_01_SUCCESSOR_PATHS.includes(candidate) &&
       candidate !== SEC_02_SUCCESSOR_PATH &&
-      !CI_04_SUCCESSOR_PATHS.includes(candidate),
+      !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
+      !T06_SUCCESSOR_PATHS.includes(candidate),
   );
   historicalPaths.push(
     "scripts/ci/run-shadow-affected-quality-gate.mjs",

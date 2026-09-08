@@ -26,6 +26,7 @@ import {
   DESEN_APP_T04_HISTORICAL_READER_BRIDGE_PIN,
   DesenAppPublishedHostUpdateProofError,
   authenticateDesenAppPublishedHostUpdateSuccessor,
+  buildCurrentDesenAppPublishedHostUpdateGraphAudit,
   buildDesenAppPublishedHostUpdateEvidence,
   materializeDesenAppT04HistoricalReaderFileOverrides,
   projectDesenAppT04HistoricalReaderPathInventory,
@@ -139,15 +140,16 @@ function changedByte(bytes) {
 }
 
 function graphPolicyInput() {
-  const runtime = built.artifact.authority.runtimeResolution;
+  const current = built.liveSuccessorAuthority.currentGraphAudit;
+  const runtime = current.runtimeResolution;
   const fixtureOnly = new Set(runtime.appFixtureOnlySourceFiles);
   return {
     appGraph: runtime.appModules,
-    appSourcePaths: built.artifact.authority.appSourceAudit.sourceReceipts
+    appSourcePaths: current.appSourceAudit.sourceReceipts
       .map(({ path: relativePath }) => relativePath)
       .filter((relativePath) => !fixtureOnly.has(relativePath)),
     hostGraph: runtime.hostModules,
-    hostSourcePaths: built.artifact.authority.referenceHostSourceAudit.sourceReceipts.map(
+    hostSourcePaths: current.referenceHostSourceAudit.sourceReceipts.map(
       ({ path: relativePath }) => relativePath,
     ),
   };
@@ -208,7 +210,8 @@ before(async () => {
   verified = await observeProofFilesystem(async (observations) => {
     const result = await verifyDesenAppPublishedHostUpdateEvidence();
     assert.ok(observations.buildInventories > 0);
-    assert.equal(observations.opens.get(path.join(ROOT, ARTIFACT_PATH)), 2);
+    // The fresh build additionally authenticates the historical projection target.
+    assert.equal(observations.opens.get(path.join(ROOT, ARTIFACT_PATH)), 3);
     assert.equal(observations.opens.get(path.join(ROOT, REPORT_PATH)), 2);
     return result;
   });
@@ -241,7 +244,13 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[0], async () => {
   assert.equal(successor.artifact.sha256, DESEN_APP_PUBLISHED_HOST_UPDATE_ARTIFACT_PIN.sha256);
 
   const historical = materializeDesenAppT04HistoricalReaderFileOverrides(successor, new Map());
-  assert.equal(historical.size, 53);
+  assert.equal(historical.size, 54);
+  const historicalInspector = historical.get("apps/desen-app/src/inspector-panel.tsx");
+  assert.equal(historicalInspector.byteLength, 32_591);
+  assert.equal(
+    createHash("sha256").update(historicalInspector).digest("hex"),
+    "ad2543377377e8d5ae99fbd110a0cf1c63710620e972db388feca95ef7ae7d26",
+  );
   const t04AppPackage = historical.get(T01A_APP_PACKAGE_PATH);
   assert.equal(t04AppPackage.byteLength, T04_APP_PACKAGE_RECEIPT.bytes);
   assert.equal(
@@ -289,7 +298,15 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[0], async () => {
   const secondCopy = readDesenAppT04HistoricalReaderTaskTimeFile(successor, taskTimePath);
   firstCopy[0] ^= 1;
   assert.notDeepEqual(firstCopy, secondCopy);
-  const inventory = [...Object.keys(bridgeManifest.files), ...bridgeManifest.successorAddedPaths];
+  const addedT06Paths = [
+    "apps/desen-app/src/authoring-source-draft.ts",
+    "apps/desen-app/src/source-draft-controls.tsx",
+  ];
+  const inventory = [
+    ...Object.keys(bridgeManifest.files),
+    ...bridgeManifest.successorAddedPaths,
+    ...addedT06Paths,
+  ];
   assert.deepEqual(
     projectDesenAppT04HistoricalReaderPathInventory(successor, inventory),
     Object.keys(bridgeManifest.files),
@@ -316,6 +333,11 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[0], async () => {
     [DESEN_APP_PUBLISHED_HOST_UPDATE_T04_PIN.path, parent],
     [DESEN_APP_T04_HISTORICAL_READER_BRIDGE_PIN.path, bridge],
   ]);
+  const t06ArtifactPath = "docs/proof/artifacts/desen-app-0.1.0-invalid-publication.json";
+  const currentT06Paths = [...addedT06Paths, "apps/desen-app/src/inspector-panel.tsx"];
+  for (const relativePath of [t06ArtifactPath, ...currentT06Paths]) {
+    lightweightAuthorities.set(relativePath, await readFile(path.join(ROOT, relativePath)));
+  }
   for (const [relativePath, bytes] of lightweightAuthorities) {
     const absolutePath = path.join(lightweightWorkspace, relativePath);
     await mkdir(path.dirname(absolutePath), { recursive: true });
@@ -333,6 +355,16 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[0], async () => {
     readDesenAppT01aHistoricalReaderGapFile(lightweightSuccessor, T01A_APP_PACKAGE_PATH),
     secondT01aAppPackage,
   );
+  for (const relativePath of [t06ArtifactPath, ...currentT06Paths]) {
+    const absolutePath = path.join(lightweightWorkspace, relativePath);
+    const original = lightweightAuthorities.get(relativePath);
+    await writeFile(absolutePath, changedByte(original));
+    await assert.rejects(
+      authenticateDesenAppPublishedHostUpdateSuccessor({ workspaceRoot: lightweightWorkspace }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+    await writeFile(absolutePath, original);
+  }
 
   const artifactPath = path.join(lightweightWorkspace, ARTIFACT_PATH);
   await writeFile(artifactPath, changedByte(artifactBytes));
@@ -520,7 +552,7 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[3], () => {
   assert.equal(host.runtimeResolution.unresolvedEdges, 0);
 });
 
-test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], () => {
+test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], async () => {
   const runtime = built.artifact.authority.runtimeResolution;
   assert.equal(runtime.tool, "vite@8.1.5");
   assert.equal(runtime.write, false);
@@ -530,11 +562,30 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], () => {
   assert.equal(runtime.host.moduleCount, 104);
   assert.equal(runtime.host.staticEdges, 299);
   assert.equal(runtime.sharedManagedModuleCount, 22);
+  const current = built.liveSuccessorAuthority.currentGraphAudit;
+  assert.equal(built.liveSuccessorAuthority.currentObservationsAreNotHistoricalResults, true);
+  for (const addedPath of [
+    "apps/desen-app/src/authoring-source-draft.ts",
+    "apps/desen-app/src/source-draft-controls.tsx",
+  ]) {
+    assert.ok(current.appSourceAudit.inventory.includes(addedPath));
+    assert.ok(!built.artifact.authority.appSourceAudit.inventory.includes(addedPath));
+  }
+  for (const options of [
+    { fileOverrides: new Map() },
+    { currentGraphAudit: current },
+    { workspaceRoot: 1 },
+  ]) {
+    await assert.rejects(
+      buildCurrentDesenAppPublishedHostUpdateGraphAudit(options),
+      expectedError("OPTIONS_INVALID"),
+    );
+  }
   const graph = verifyDesenAppPublishedHostUpdateGraphPolicy(graphPolicyInput());
-  assert.deepEqual(graph.app, runtime.app);
-  assert.deepEqual(graph.host, runtime.host);
-  assert.equal(graph.sharedManagedModuleCount, runtime.sharedManagedModuleCount);
-  assert.deepEqual(graph.sharedManagedIdentity, runtime.sharedManagedIdentity);
+  assert.deepEqual(graph.app, current.runtimeResolution.app);
+  assert.deepEqual(graph.host, current.runtimeResolution.host);
+  assert.equal(graph.sharedManagedModuleCount, current.runtimeResolution.sharedManagedModuleCount);
+  assert.deepEqual(graph.sharedManagedIdentity, current.runtimeResolution.sharedManagedIdentity);
 
   let accessorReads = 0;
   const accessorGraph = structuredClone(graphPolicyInput());

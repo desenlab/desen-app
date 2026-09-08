@@ -1787,3 +1787,35 @@ and required-affected runner authority at
 `sha256:add4dbf618e7f019a76831799df3184e1ee0ca6638f1fa1ee2ac58c86a0f6eba`.
 No workload, barrier, timeout, isolation rule, closing guard, or fresh hosted execution requirement
 is removed. These local identity receipts do not claim an exact-head hosted result or close G10.
+
+## M10-T06 invalid-publication successor
+
+The new invalid-publication verifier/root pair preserves all 220 previous ordered workloads and
+adds two fresh workloads: 222 logical workloads / 106 proof pairs. The CI-04 shards retain two
+workers and eleven exclusive barriers; their proof-pair split becomes 53 / 24 / 29. Repeated fresh
+prefixes and the required join make 239 physical workloads. Neither the browser nor the proof
+reader is a cached-success shortcut. The new ordinary pair uses read-only workspace authority,
+runner-scoped OS temporary files, reviewed native Vite/compiler children, and no listeners.
+
+Exact-one ownership covers 1,465 paths / 212 proof-owned paths. T06 has three semantic parents:
+published-host update, node-linked diagnostics, and the Publisher invalid-source matrix. Its
+connected affected closure contains 74 proof units / 158 workloads; product, browser, artifact,
+and shared-reader changes conservatively select exhaustive verification. Inventory identity is
+`sha256:c018c14a8307915f11d9a735680b531e95b6e537be13ae0e87d20174f01e34fc`;
+required-plan identity is
+`sha256:3bbe72c6021e6bd912a7bd8e9cc8a6ebcd0b4cadb93779fa2761bd7744476d3d`.
+
+Checkpoint 76 preserves all 75 historical entries and all 59 predecessor artifacts, adds the
+193,291-byte T06 artifact, reseals only current readers `[106, 107, 116, 117]`, and appends the
+T06 proof/root readers `[118, 119]`. Its 60 artifacts / 120 readers authenticate at
+`sha256:b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6`.
+
+The ledger's former fixed 2 MiB envelope could not admit sequence 76's required next-candidate
+test. Raw capacity now derives from the exact code-owned reviewed task generations plus one
+candidate, fixed paths and hash widths, and the maximum allowed reader byte-count width.
+For this authority it is 2,121,612 bytes; the actual ledger is 2,058,591 bytes. A separate 16 MiB
+ceiling and 1,024-generation limit remain fail-closed. Canonical JSON, historical digests,
+pre-parse and filesystem size rejection, exact live-head admission, and fresh reads are unchanged.
+The candidate remains `REVIEW_REQUIRED`, never live authority. No transport compression or test
+omission is introduced. All 483 CI and retained-runner contract tests pass locally, including
+109 checkpoint tests. Exact-head hosted checks and fresh main remain required for task closure.

@@ -26,7 +26,18 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
-**CI-04 — Taze doğrulama süresinin iyileştirilmesi**, yerel kanıtları geçen kapanış adayıdır. SEC-02
+**Güncel görev: M10-T06.** Kullanıcı M10'un hiçbir görev atlanmadan tamamlanmasını onayladı.
+Önce hatalı özellik/olay/slot kullanımının yayınlanmasını engelleyip doğru bileşene yönlendiren
+tanıları gerçek ürün akışında doğruluyoruz. Ardından T07, T08, T09 ve G10 kendi kanıtlarıyla
+kapatılacak. CI-04 ve SEC-02, [PR #80](https://github.com/desenlab/desen-app/pull/80) ve
+[12 dakika 23 saniyede geçen taze main koşusuyla](https://github.com/desenlab/desen-app/actions/runs/34066622578)
+tamamlandı. Aşağıdaki koşullu ifadeler önceki uygulama kontrol noktasını anlatır; eski durma
+talimatı yeni M10 yetkisiyle aşılmıştır. T06'nın zorunlu sonraki-mühür testinde ortaya çıkan dosya
+boyutu sınırı da bu görevde ele alınıyor: yalnızca kodda onaylı tarihçe ve bir inceleme adayından
+hesaplanan sonlu kapasite kullanılıyor. Tarihçe, güncel mühür kontrolü ve taze test zorunluluğu
+korunuyor; bu düzenleme yeni adayın otomatik onayı anlamına gelmiyor.
+
+**CI-04 uygulama kontrol noktası — kapanış sonradan sağlandı.** SEC-02
 yamaları main'e alınmış ve sekiz güvenlik uyarısı kapanmış olsa da main kalite kontrolü iki kez
 süre sınırına takılmıştır. CI-04 ve SEC-02'nin `DONE` satırları koşulludur: tam güncel PR kontrolleri
 ve onu izleyen taze main koşusu geçmeden tamamlandı sayılmazlar. Eski başarısız koşular değişmez. Açık kullanıcı

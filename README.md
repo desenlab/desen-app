@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████████░░░░░` **117 / 148 tasks complete (79%)**
+**Overall:** `████████████████████░░░░░` **118 / 148 tasks complete (80%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -26,22 +26,25 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M09 complete:** `██████████████` **14 / 14 tasks complete (100%)**
 
-**M10:** `████████░░░░` **8 / 12 tasks complete (67%)**
+**M10:** `█████████░░░` **9 / 12 tasks complete (75%)**
 
-**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **AR-01:** `DONE` (PR #76 and main CI passed) · **M10-T05:** `DONE` closure candidate pending exact-head hosted checks · **P-07:** `PROVEN` · **PF-059:** `CLOSED` · **Next product task:** `M10-T06` (not started)
+**Proof gates:** **11 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G09:** `DONE` · **AR-01:** `DONE` · **M10-T05:** `DONE` · **M10-T06:** `DONE` closure candidate pending exact-head hosted checks and fresh main · **P-07:** `PROVEN` · **PF-059:** `CLOSED` · **Next product task:** `M10-T07` (after T06 closure)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
 <!-- task-progress:end -->
 
-**CI-04:** `DONE` conditional closure candidate — [fresh-verification performance](docs/proof/CI-FRESH-PROOF-PERFORMANCE.md) retains all tests and 220 logical workloads across three isolated workspaces. Local evidence passes; closure requires exact-final-head PR checks and fresh main CI. M10-T06 is not started and implementation/gate counts are unchanged.
+**M10-T06:** the [invalid-publication proof](docs/proof/DESEN-APP-INVALID-PUBLICATION.md) rejects
+invalid advanced Source without changing the valid design or active host. Local product, Chromium,
+proof, historical compatibility, and 483 CI contract tests pass. The candidate above is not hosted
+completion; exact-head Quality gate, Browser E2E, merge, and fresh main remain required.
 
-**SEC-02:** patches [merged in PR #79](https://github.com/desenlab/desen-app/pull/79); its `DONE` closure candidate depends on successful CI-04 successor main validation after two main Quality timeouts. This
-[development dependency security](docs/proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md) task
-addresses the remaining Undici/PostCSS and related toolchain findings after
-[SEC-01 merged in PR #78](https://github.com/desenlab/desen-app/pull/78). It does not advance the
-implementation totals or start M10-T06. Local full and production audits report zero findings on
-2026-09-06; the exact-head hosted checks and fresh main CI remain completion authority.
+**CI-04 and SEC-02:** `DONE`; [PR #80](https://github.com/desenlab/desen-app/pull/80) and
+[fresh main CI](https://github.com/desenlab/desen-app/actions/runs/34066622578) passed, preserving all
+220 prior logical workloads. The successful 12m23s main run closes the security successor validation
+after the two earlier timeouts, which remain failures. T06 adds its own two fresh workloads without
+removing tests. See [fresh-verification performance](docs/proof/CI-FRESH-PROOF-PERFORMANCE.md) and
+[development dependency security](docs/proof/SEC-02-DEVELOPMENT-DEPENDENCY-SECURITY.md).
 
 [AR-01](docs/proof/HISTORICAL-ARCHIVE-REDACTION.md) closed in
 [PR #76](https://github.com/desenlab/desen-app/pull/76). Its exact head

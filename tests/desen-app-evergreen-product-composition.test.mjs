@@ -427,6 +427,31 @@ test(DESEN_APP_EVERGREEN_PRODUCT_COMPOSITION_ROOT_TEST_NAMES[9], async () => {
   callerMutation[0] ^= 1;
   assert.notDeepEqual(materialized.get(taskTimePath), callerMutation);
 
+  const inspectorPath = "apps/desen-app/src/inspector-panel.tsx";
+  const historicalInspector = readDesenAppHistoricalReaderTaskTimeFile(successor, inspectorPath);
+  assert.equal(historicalInspector.byteLength, 32_591);
+  assert.equal(
+    createHash("sha256").update(historicalInspector).digest("hex"),
+    "ad2543377377e8d5ae99fbd110a0cf1c63710620e972db388feca95ef7ae7d26",
+  );
+  assert.deepEqual(
+    materializeDesenAppT01aHistoricalReaderFileOverrides(successor, new Map()).get(inspectorPath),
+    historicalInspector,
+  );
+  const callerInspector = changedByte(historicalInspector);
+  const inspectorOverrides = materializeDesenAppT01aHistoricalReaderFileOverrides(
+    successor,
+    new Map([[inspectorPath, callerInspector]]),
+  );
+  assert.deepEqual(inspectorOverrides.get(inspectorPath), callerInspector);
+  callerInspector[0] ^= 1;
+  assert.notDeepEqual(inspectorOverrides.get(inspectorPath), callerInspector);
+  historicalInspector[0] ^= 1;
+  assert.notDeepEqual(
+    readDesenAppHistoricalReaderTaskTimeFile(successor, inspectorPath),
+    historicalInspector,
+  );
+
   const appPackagePath = "apps/desen-app/package.json";
   const successorAppPackage = materializeDesenAppHistoricalReaderFileOverrides(
     successor,

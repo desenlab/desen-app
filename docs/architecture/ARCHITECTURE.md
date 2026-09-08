@@ -2018,6 +2018,22 @@ Catalog-mismatched last-known-good recovery, arbitrary destinations, remote depl
 production identity, native targets, and G10 remain separately owned. See
 [ADR 0020](../adr/0020-desen-app-fixed-destination-publication-and-host-activation.md).
 
+## M10-T06 detached invalid-Source publication boundary
+
+The optional Advanced Source control lives beside Source persistence and publication, outside the
+managed canvas. It retains untrusted text separately from the valid authoring session. The bounded
+inert parser, real public Publisher, continuous validator, exact workspace identity, and baseline
+fingerprint all precede a local replacement. An invalid candidate supplies diagnostics only; it
+cannot supply an applicable Source or a publishable Bundle. Node links require explicit validator
+invalid subjects and genuine existing layer identities. Foreign documents cannot borrow them.
+
+Draft review locks visual editing, Run, persistence, and publication. Discard retains the existing
+valid session; repair still requires ordinary Save source and Publish. No new network or activation
+authority is introduced. Independent Chromium verifies rejection and repair against an already
+activated host, while deterministic public-API and fresh build-graph evidence remain separate.
+Historical evidence is retained exactly and distinguished from current observations. See
+[ADR 0021](../adr/0021-invalid-source-draft-publication-boundary.md).
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific

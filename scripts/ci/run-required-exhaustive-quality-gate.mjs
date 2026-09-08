@@ -72,8 +72,8 @@ const REGION_EXECUTION_OPTION_KEYS = Object.freeze([
   "printCommandFunction",
 ]);
 const EXPECTED_PLAN_SHA256_BY_AUTHORITY = Object.freeze({
-  REQUIRED: "30799382d92edf70455a42bc01e13973324bf1a916b5b925ad86c429b926fb2a",
-  SHADOW: "0cb43b3c983e0e7ef6fb7536e08a90a9ce21a811eff22aab5767367c76b12641",
+  REQUIRED: "3bbe72c6021e6bd912a7bd8e9cc8a6ebcd0b4cadb93779fa2761bd7744476d3d",
+  SHADOW: "d0de011431b4b27396e4cc64ea2c4e0f7648283138ace7a25723b928d3ff8be1",
 });
 const PROOF_PAIR_CONCURRENCY = 2;
 const EARLY_ORDINARY_PROOF_PAIR_IDS = Object.freeze([
@@ -444,7 +444,7 @@ function deriveExecutionRegions(inventory) {
   ) {
     fail(
       "REQUIRED_EXHAUSTIVE_REGION_INVALID",
-      "The derived execution regions do not own all 220 workloads exactly once.",
+      "The derived execution regions do not own all 222 workloads exactly once.",
     );
   }
 
@@ -471,7 +471,7 @@ function rememberValidatedNode(workload) {
 }
 
 /**
- * Builds the single code-owned exhaustive plan from the authenticated 220-node dependency graph.
+ * Builds the single code-owned exhaustive plan from the authenticated 222-node dependency graph.
  *
  * `REQUIRED` is the default authority. `SHADOW` must be explicitly requested, while scope is
  * permanently fixed to `EXHAUSTIVE`.
@@ -671,7 +671,7 @@ function validatePlanForExecution(candidate, expectedAuthority) {
       );
     }
   }
-  if (candidate.concurrency !== PROOF_PAIR_CONCURRENCY || candidate.stepCount !== 220) {
+  if (candidate.concurrency !== PROOF_PAIR_CONCURRENCY || candidate.stepCount !== 222) {
     fail(
       "REQUIRED_EXHAUSTIVE_PLAN_DRIFT",
       "The exhaustive plan widened concurrency or omitted workloads.",
@@ -1909,7 +1909,7 @@ function attachExecutionReceipt(error, receipt) {
  * Executes one authenticated plan: dependency-derived prefix, at most two proof pairs, then suffix.
  *
  * Every supplied runner result must contain an exact successful `close` observation. The returned
- * receipt remains in the stable 220-node inventory order even though proof pairs may overlap.
+ * receipt remains in the stable 222-node inventory order even though proof pairs may overlap.
  */
 export async function runRequiredExhaustivePlan(plan, options = {}) {
   return runExhaustiveRegions(plan, options);
@@ -2428,8 +2428,8 @@ function printableReceipt(boundaryReceipt, error) {
     inventorySha256: execution?.inventorySha256,
     concurrency: execution?.concurrency,
     observedClosedCount: execution?.observedClosedCount ?? 0,
-    stepCount: execution?.stepCount ?? 220,
-    proofPairCount: execution?.proofPairCount ?? 105,
+    stepCount: execution?.stepCount ?? 222,
+    proofPairCount: execution?.proofPairCount ?? 106,
     repository: repository
       ? {
           proofCount: repository.proofCount,

@@ -60,3 +60,21 @@ This proof covers the local fixed-destination reference composition only. It doe
 production deployment, production credentials, multi-user persistence, invalid-publication
 rejection, last-known-good recovery, or production operations. M10-T06, M10-T07, M10-T08, M10-T09,
 N-036, P-12, and G10 remain open under their later owners.
+
+## Current T06 compatibility
+
+The immutable task-time artifact above remains 189,123 bytes with its original digest. The T06
+successor adds an optional detached Source draft and therefore advances the current App graph to
+170 modules; the host remains 104 modules with 22 shared managed modules. The current verifier
+freshly builds both graphs and authenticates them against the exact T06 artifact. Its receipt labels
+the original graph counts as historical and reports current successor counts separately.
+
+Only the reviewed three changed App files, two added App files, and browser package wiring may
+advance their current source receipts. All other tracked identities must still match T05. The
+complete projected historical artifact must equal the frozen original; it is not a new test result.
+Older readers omit only authenticated successor-added paths. The Inspector's three additive T06
+fragments are reversed only after authenticating current T06 bytes, and the resulting historical
+file must reproduce its exact frozen T05 receipt. Caller-owned mutation overrides remain last.
+
+The [T06 proof](DESEN-APP-INVALID-PUBLICATION.md) owns current invalid-publication behavior. T05
+continues to own its original publication/host-update claim; neither artifact alone closes G10.

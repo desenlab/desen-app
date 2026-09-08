@@ -20,6 +20,8 @@ interface InspectorPanelProps {
   /** Atomic no-code input and visibility controls for the selected Source layer. */
   readonly behaviorControls?: ReactNode;
   readonly diagnosticsControls?: ReactNode;
+  /** New rejected snapshots reveal Inspector without moving keyboard focus. */
+  readonly diagnosticsRevealKey?: string | undefined;
   /** App-owned event and action controls retained in the right-sidebar Actions view. */
   readonly eventActionControls?: ReactNode;
   readonly hidden?: boolean | undefined;
@@ -760,6 +762,7 @@ function InspectorField(props: Readonly<InspectorFieldProps>) {
 export function InspectorPanel({
   behaviorControls,
   diagnosticsControls,
+  diagnosticsRevealKey,
   eventActionControls,
   hidden = false,
   inspector,
@@ -774,6 +777,9 @@ export function InspectorPanel({
   const inspectorTab = useRef<HTMLButtonElement>(null);
   const stateTab = useRef<HTMLButtonElement>(null);
   const actionsTab = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (diagnosticsRevealKey !== undefined) setActiveTab("inspector");
+  }, [diagnosticsRevealKey]);
   const applyBindingEdit =
     onBindingEdit ??
     (() => Object.freeze({ ok: false as const, reason: "control-unavailable" as const }));

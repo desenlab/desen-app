@@ -192,6 +192,19 @@ const PROMOTION_REMOVED_TRACKED_PATHS = Object.freeze([
   "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
 ]);
 const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "apps/desen-app/src/authoring-source-draft.ts",
+  "apps/desen-app/src/source-draft-controls.tsx",
+  "apps/desen-app/test/authoring-source-draft.test.ts",
+  "apps/desen-app/test/source-draft-application.test.tsx",
+  "apps/desen-app-browser-e2e/invalid-publication-playwright.config.ts",
+  "apps/desen-app-browser-e2e/invalid-publication.pw.ts",
+  "docs/adr/0021-invalid-source-draft-publication-boundary.md",
+  "docs/proof/DESEN-APP-INVALID-PUBLICATION.md",
+  "docs/proof/artifacts/desen-app-0.1.0-invalid-publication.json",
+  "scripts/generate-desen-app-invalid-publication-proof.mjs",
+  "scripts/lib/desen-app-invalid-publication-proof.mjs",
+  "scripts/verify-desen-app-invalid-publication.mjs",
+  "tests/desen-app-invalid-publication.test.mjs",
   "scripts/ci/run-required-sharded-quality-gate.mjs",
   "scripts/ci/sharded-quality-gate-authority.mjs",
   "scripts/ci/test/sharded-quality-gate.test.mjs",
@@ -666,13 +679,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 210,
+    PROOF_UNIT: 212,
     CI_POLICY: 48,
     DEPENDENCY_POLICY: 32,
-    FROZEN_INPUT: 154,
-    PACKAGE_OR_APPLICATION: 556,
-    SHARED_PROOF_INFRASTRUCTURE: 292,
-    PROJECT_DOCUMENTATION: 149,
+    FROZEN_INPUT: 155,
+    PACKAGE_OR_APPLICATION: 562,
+    SHARED_PROOF_INFRASTRUCTURE: 294,
+    PROJECT_DOCUMENTATION: 151,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -1077,10 +1090,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 75,
-  headSha256: "ed7eea304b03e07112fbeb0b27fd6df82d83d229033c5c3794d0054cc9df2ea1",
-  frozenArtifactCount: 59,
-  currentReaderCount: 118,
+  sequence: 76,
+  headSha256: "b1c5b66e60373470f0509760e621d73342dd20530386f28672190841f0b1deb6",
+  frozenArtifactCount: 60,
+  currentReaderCount: 120,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -2597,8 +2610,8 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 220 ||
-    currentInventory.proofUnitCount !== 105
+    currentInventory.workloadCount !== 222 ||
+    currentInventory.proofUnitCount !== 106
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
@@ -2612,10 +2625,10 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 94 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 95 || currentProofPairClasses.barrier !== 11) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current T05 proof-pair authority is not exactly 94 ordinary and 11 barrier pairs.",
+      "The current T06 proof-pair authority is not exactly 95 ordinary and 11 barrier pairs.",
     );
   }
   const archiveRedactionClosure = createAffectedImpactClosure(["historical-archive-redaction"]);
@@ -2623,14 +2636,14 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     !isDeepStrictEqual(archiveRedactionClosure.ownerProofUnitIds, [
       "historical-archive-redaction",
     ]) ||
-    archiveRedactionClosure.proofUnitCount !== 73 ||
-    archiveRedactionClosure.workloadCount !== 156 ||
+    archiveRedactionClosure.proofUnitCount !== 74 ||
+    archiveRedactionClosure.workloadCount !== 158 ||
     archiveRedactionClosure.impactSha256 !==
-      "da91cb0ad627b1259b8a325f706adb387ac9b7c07a22f35c7068ed9075507c38"
+      "00fe16df88d85ab3f1fa918ee806ed4ef4f60769260fc799326ae7dba7200628"
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current T05 successor closure from AR-01 is not exactly 73 proof units and 156 workloads.",
+      "The current T06 successor closure from AR-01 is not exactly 74 proof units and 158 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);
