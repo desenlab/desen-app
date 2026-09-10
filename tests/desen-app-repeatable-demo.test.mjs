@@ -19,6 +19,7 @@ import {
   verifyDesenAppRepeatableDemoEvidence as verify,
   writeDesenAppRepeatableDemoEvidence as write,
 } from "../scripts/lib/desen-app-repeatable-demo-proof.mjs";
+import { projectM10AT01CurrentGraphAudit } from "../scripts/lib/desen-app-published-host-update-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json";
@@ -32,6 +33,7 @@ let browser;
 let built;
 let finalCompiledReadOrdinal = 0;
 let finalModuleReadOrdinal = 0;
+let m10aSuccessorReads = 0;
 function errorCode(code) {
   return (error) => {
     assert.ok(error instanceof DesenAppRepeatableDemoProofError);
@@ -97,6 +99,9 @@ before(async () => {
   filesystem.open = async (...args) => {
     if (args[0] === path.join(ROOT, COMPILED)) finalCompiledReadOrdinal++;
     if (args[0] === path.join(ROOT, MODULE)) finalModuleReadOrdinal++;
+    if (args[0] === path.join(ROOT, "docs/proof/artifacts/m10a-t01.json")) {
+      m10aSuccessorReads++;
+    }
     return Reflect.apply(original, filesystem, args);
   };
   syncBuiltinESMExports();
@@ -108,6 +113,7 @@ before(async () => {
   }
   assert.ok(finalCompiledReadOrdinal >= 3);
   assert.ok(finalModuleReadOrdinal >= 3);
+  assert.ok(m10aSuccessorReads >= 2);
 });
 after(async () => {
   for (const root of temporaries) await rm(root, { recursive: true, force: true });
@@ -310,7 +316,13 @@ test(NAMES[2], () => {
   );
 });
 test(NAMES[3], () => {
-  const { publicApiMatrix: matrix, currentGraphAudit: graph } = built.artifact.authority;
+  const { publicApiMatrix: matrix, currentGraphAudit: historicalGraph } = built.artifact.authority;
+  const graph = built.liveSuccessorAuthority.currentGraphAudit;
+  assert.equal(built.liveSuccessorAuthority.task, "M10A-T01");
+  assert.equal(built.liveSuccessorAuthority.predecessorTask, "M10-T08");
+  assert.equal(built.liveSuccessorAuthority.currentObservationsAreNotHistoricalResults, true);
+  assert.notDeepEqual(graph, historicalGraph);
+  assert.deepEqual(projectM10AT01CurrentGraphAudit(graph, historicalGraph), historicalGraph);
   assert.equal(matrix.result, "PASS");
   assert.equal(matrix.listenerStarted, false);
   assert.equal(matrix.browserExecuted, false);
@@ -413,6 +425,22 @@ test(NAMES[5], async () => {
   await substituteRead(COMPILED, finalCompiledReadOrdinal, () =>
     assert.rejects(build(), errorCode("CURRENT_OBSERVATION_FAILED")),
   );
+  for (const ordinal of [1, 2]) {
+    await substituteRead("docs/proof/artifacts/m10a-t01.json", ordinal, () =>
+      assert.rejects(build(), errorCode("SUCCESSOR_DRIFT")),
+    );
+  }
+  for (const name of [
+    "pnpm-lock.yaml",
+    "dependency-cruiser.config.cjs",
+    "scripts/verify-boundary-fixtures.mjs",
+    "docs/plan/DEMO-RUNBOOK.md",
+  ]) {
+    await assert.rejects(
+      build({ fileOverrides: new Map([[name, Buffer.from("forged M10A-T01 successor")]]) }),
+      errorCode("SUCCESSOR_DRIFT"),
+    );
+  }
 });
 test(NAMES[6], async () => {
   assert.equal(artifactBytes.length, PIN.bytes);
@@ -473,10 +501,9 @@ test(NAMES[8], async () => {
   assert.equal(result.artifactSha256, PIN.sha256);
   assert.deepEqual(await readFile(destination), artifactBytes);
   // A different byte at the already-frozen target cannot be replaced; this is a read-only
-  // substitution and never corrupts the actual tracked artifact to test write-once behavior.
-  await substituteRead(ARTIFACT, 1, () =>
-    assert.rejects(write(), errorCode("ARTIFACT_WRITE_UNSAFE")),
-  );
+  // substitution and never corrupts the actual tracked artifact. The historical authority
+  // authentication now rejects it before the writer can reach its destination comparison.
+  await substituteRead(ARTIFACT, 1, () => assert.rejects(write(), errorCode("ARTIFACT_DRIFT")));
   assert.deepEqual(await readFile(path.join(ROOT, ARTIFACT)), artifactBytes);
 });
 test(NAMES[9], async () => {

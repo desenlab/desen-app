@@ -321,8 +321,8 @@ test("[authority] authenticates the exact M08-T05 prerequisite and isolated runt
     publicRuntimeCasesAdded: 0,
     publicCompilerNegativeAssertionsAdded: 0,
   });
-  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
-  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 36);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 92);
   assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
   assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
   assert.equal(built.currentCompatibility.testAuthority.terminalIntegrationRuntimeCases, 4);
@@ -330,7 +330,7 @@ test("[authority] authenticates the exact M08-T05 prerequisite and isolated runt
     path: "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
     bytes: 31_310,
     sha256: "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7",
-    retainedTaskTimeReceipts: 71,
+    retainedTaskTimeReceipts: 66,
   });
   const currentReceipts = new Set(
     built.currentCompatibility.trackedBoundary.receipts.map(({ path: receiptPath }) => receiptPath),

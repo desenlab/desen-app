@@ -60,7 +60,7 @@ cancellation, hosted, and zero-reference checks pass.
 - 232 logical workloads
 - 111 proof pairs: 99 ordinary and 12 exclusive barriers
 - 249 hosted physical shard workloads
-- proof-reader checkpoint sequence 81
+- proof-reader checkpoint sequence 82
 - 65 immutable artifacts and 130 current readers
 - nine M10 Chromium journeys in the separate Browser E2E job; three T01 cases in its proof barrier
 

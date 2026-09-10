@@ -348,6 +348,7 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     "insertDesenEditorEventHandler",
     "insertDesenEditorNode",
     "insertDesenEditorStateDeclaration",
+    "insertDesenEditorSubtree",
     "insertDesenEditorVariant",
     "moveDesenEditorNode",
     "reorderDesenEditorAction",
@@ -443,8 +444,8 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     tsdocDeclarations: 7,
   });
   assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 6);
-  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 35);
-  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 88);
+  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 36);
+  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 92);
   assert.equal(built.currentCompatibility.evidence.tests.persistenceRuntimeCases, 10);
   assert.equal(built.currentCompatibility.evidence.tests.persistenceCompilerNegativeCases, 21);
   assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 43);

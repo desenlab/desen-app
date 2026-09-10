@@ -136,8 +136,8 @@ test("[authority] authenticates exact M08-T03 through T07 artifacts and an isola
     publicRuntimeCasesAdded: 0,
     publicCompilerNegativeAssertionsAdded: 0,
   });
-  assert.equal(built.currentCompatibility.publicApi.runtimeExports.length, 35);
-  assert.equal(built.currentCompatibility.publicApi.typeExports.length, 88);
+  assert.equal(built.currentCompatibility.publicApi.runtimeExports.length, 36);
+  assert.equal(built.currentCompatibility.publicApi.typeExports.length, 92);
   assert.equal(built.currentCompatibility.packageBoundary.currentEmittedFiles, 36);
   assert.equal(built.currentCompatibility.packageBoundary.staticEsmEdges, 24);
   assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
@@ -195,7 +195,7 @@ test("[authority] authenticates exact M08-T03 through T07 artifacts and an isola
     path: "docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json",
     bytes: 40_099,
     sha256: "7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a",
-    retainedTaskTimeReceipts: 94,
+    retainedTaskTimeReceipts: 84,
     formalPrerequisiteTasks: ["M08-T03", "M08-T04", "M08-T05", "M08-T06", "M08-T07"],
   });
   assert.deepEqual(built.currentCompatibility.behavior, built.artifact.behavior);

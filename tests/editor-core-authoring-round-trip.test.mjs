@@ -261,8 +261,8 @@ test("[authority] authenticates exact M08-T01 through T06 artifacts, frozen prot
     "createDesenEditorPersistencePort",
   ]);
   assert.equal(built.currentCompatibility.publicApi.additiveTypeExports.length, 19);
-  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
-  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 36);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 92);
   assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 31);
   assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 10);
   assert.equal(built.currentCompatibility.packageBoundary.currentEmittedFiles, 36);
@@ -275,7 +275,7 @@ test("[authority] authenticates exact M08-T01 through T06 artifacts, frozen prot
     path: "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json",
     bytes: 62_304,
     sha256: "33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db",
-    retainedTaskTimeReceipts: 84,
+    retainedTaskTimeReceipts: 79,
   });
   const currentReceipts = new Set(
     built.currentCompatibility.trackedBoundary.receipts.map(({ path: receiptPath }) => receiptPath),

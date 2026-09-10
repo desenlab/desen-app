@@ -13,6 +13,11 @@ import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 import { buildCurrentDesenAppLastKnownGoodRecoveryObservation } from "./desen-app-last-known-good-recovery-proof.mjs";
+import {
+  authenticateM10AT01LockfileSuccessor,
+  projectM10AT01CurrentGraphAudit,
+  projectM10AT01T08Input,
+} from "./desen-app-published-host-update-proof.mjs";
 
 const WORKSPACE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json";
@@ -55,6 +60,29 @@ const ENTRYPOINT_PATHS = Object.freeze([
   "scripts/generate-desen-app-repeatable-demo-proof.mjs",
   "scripts/verify-desen-app-repeatable-demo.mjs",
 ]);
+const M10A_T01_SUCCESSOR_PIN = Object.freeze({
+  task: "M10A-T01",
+  path: "docs/proof/artifacts/m10a-t01.json",
+  bytes: 13_910,
+  sha256: "711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74",
+});
+const M10A_T01_CHANGED_T08_INPUTS = Object.freeze([
+  "pnpm-lock.yaml",
+  "dependency-cruiser.config.cjs",
+  "scripts/verify-boundary-fixtures.mjs",
+  "docs/plan/DEMO-RUNBOOK.md",
+]);
+const M10A_T01_DEMO_RUNBOOK_SUCCESSOR = Object.freeze({
+  path: "docs/plan/DEMO-RUNBOOK.md",
+  bytes: 12_186,
+  sha256: "63af52a55a8bea5cbccf875f01de9f2a6295332c13204b68497da59c7ba34302",
+  predecessor: Object.freeze({
+    bytes: 11_894,
+    sha256: "10ae68297182eed5c5d6fb63e4b64ef1410c7e00eb064e4fcec95be57f396541",
+  }),
+  addition:
+    "The [M10A plan](M10A-IMPLEMENTATION-PLAN.md) now precedes M11: ready styled components, theme and\ncomponent authoring, separate Connections and a built-in design-system/visual-review workbench.\nThose are planned product capabilities, not features demonstrated by this unchanged M10 runbook.\n\n",
+});
 
 /** Exact completed visible-behavior, evergreen, runtime, publication and recovery prerequisites. */
 export const DESEN_APP_REPEATABLE_DEMO_PARENT_PINS = Object.freeze(
@@ -857,6 +885,67 @@ function verifyPackageWiring(files) {
   };
 }
 
+function projectM10AT01Input(relativePath, bytes) {
+  try {
+    if (relativePath === M10A_T01_DEMO_RUNBOOK_SUCCESSOR.path) {
+      const successor = M10A_T01_DEMO_RUNBOOK_SUCCESSOR;
+      if (bytes.byteLength !== successor.bytes || sha256(bytes) !== successor.sha256) {
+        throw new Error("runbook successor receipt");
+      }
+      const source = decodeUtf8(bytes, relativePath);
+      if (source.split(successor.addition).length !== 2) {
+        throw new Error("runbook successor addition");
+      }
+      const predecessor = Buffer.from(source.replace(successor.addition, ""));
+      if (
+        predecessor.byteLength !== successor.predecessor.bytes ||
+        sha256(predecessor) !== successor.predecessor.sha256
+      ) {
+        throw new Error("runbook predecessor receipt");
+      }
+      return predecessor;
+    }
+    return relativePath === "pnpm-lock.yaml"
+      ? authenticateM10AT01LockfileSuccessor(bytes).predecessorBytes
+      : projectM10AT01T08Input(relativePath, bytes);
+  } catch {
+    fail("SUCCESSOR_DRIFT", "A live M10A-T01 input is not the exact reviewed T08 successor.", {
+      path: relativePath,
+    });
+  }
+}
+
+function projectM10AT01Graph(currentGraphAudit, t08GraphAudit) {
+  try {
+    return projectM10AT01CurrentGraphAudit(currentGraphAudit, t08GraphAudit);
+  } catch {
+    fail(
+      "SUCCESSOR_DRIFT",
+      "The live App/host graph is not the exact reviewed M10A-T01 successor of T08.",
+    );
+  }
+}
+
+async function authenticateM10AT01Successor(workspaceRoot) {
+  const pin = M10A_T01_SUCCESSOR_PIN;
+  const bytes = await readRegularAuthority(path.join(workspaceRoot, pin.path), pin.path);
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("SUCCESSOR_DRIFT", "The exact reviewed M10A-T01 successor artifact changed.");
+  }
+  const successor = parseJson(bytes, pin.path, "SUCCESSOR_DRIFT");
+  if (
+    successor.schemaVersion !== 1 ||
+    successor.task !== pin.task ||
+    successor.profile !== "desen.m10a-t01.base-ui-adapter-boundary.v1" ||
+    successor.result !== "PASS" ||
+    successor.package?.name !== "@desen/starter-catalog-web" ||
+    successor.claims?.runtimeCoreChanged !== false
+  ) {
+    fail("SUCCESSOR_DRIFT", "The M10A-T01 successor lost its reviewed identity.");
+  }
+  return successor;
+}
+
 /** Builds fresh normal reset observations and unprojected current public API/App/host evidence. */
 export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
@@ -866,7 +955,17 @@ export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined
   if (workspaceRoot !== options.workspaceRoot)
     fail("AUTHORITY_UNSAFE", "The proof workspace must be canonical.");
   const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const historicalBytes = await readRegularAuthority(
+    path.join(workspaceRoot, ARTIFACT_PATH),
+    ARTIFACT_PATH,
+  );
+  const historical = authenticateArtifact(historicalBytes);
+  const m10aT01Successor = await authenticateM10AT01Successor(workspaceRoot);
   authenticateParents(files);
+  const t08Files = new Map(files);
+  for (const name of M10A_T01_CHANGED_T08_INPUTS) {
+    t08Files.set(name, projectM10AT01Input(name, files.get(name)));
+  }
   const browser = verifyDesenAppRepeatableDemoBrowserPolicy(
     Object.fromEntries(Object.entries(BROWSER_PATHS).map(([key, name]) => [key, files.get(name)])),
   );
@@ -879,6 +978,13 @@ export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined
         "The fresh public API or App/host graph observation failed.",
       ),
     );
+  if (!isDeepStrictEqual(publicApiMatrix, historical.authority.publicApiMatrix)) {
+    fail("SUCCESSOR_DRIFT", "The live recovery matrix differs from its exact T08 authority.");
+  }
+  const t08GraphAudit = projectM10AT01Graph(
+    currentGraphAudit,
+    historical.authority.currentGraphAudit,
+  );
   // Overrides may test declaration policy, but can never replace the bytes executed by the
   // normal reset child or current compiler. Re-read real bytes after both fresh observations.
   const after = await readTrackedFiles(workspaceRoot, new Map());
@@ -908,7 +1014,13 @@ export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined
       productionAuthentication: false,
       g10Closed: false,
     },
-    authority: { publicApiMatrix, currentGraphAudit, normalResetMatrix, browser, packageWiring },
+    authority: {
+      publicApiMatrix,
+      currentGraphAudit: t08GraphAudit,
+      normalResetMatrix,
+      browser,
+      packageWiring,
+    },
     tests: {
       browserCommand: BROWSER_COMMAND,
       verifierCommand: "node scripts/verify-desen-app-repeatable-demo.mjs",
@@ -926,7 +1038,7 @@ export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined
     },
     boundary: {
       trackedFiles: files.size - 1,
-      trackedReceipts: receipts(files).filter((receipt) => receipt.path !== "package.json"),
+      trackedReceipts: receipts(t08Files).filter((receipt) => receipt.path !== "package.json"),
       semanticAuthorityPaths: ["package.json"],
       immutableInputs: true,
       parentArtifacts: 8,
@@ -958,7 +1070,30 @@ export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined
   const artifactBytes = Buffer.from(
     await format(JSON.stringify(artifact), { parser: "json", printWidth: 100, endOfLine: "lf" }),
   );
-  return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
+  if (
+    !(await readRegularAuthority(path.join(workspaceRoot, ARTIFACT_PATH), ARTIFACT_PATH)).equals(
+      historicalBytes,
+    )
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen T08 authority changed across fresh execution.");
+  }
+  const recheckedM10AT01Successor = await authenticateM10AT01Successor(workspaceRoot);
+  if (!isDeepStrictEqual(m10aT01Successor, recheckedM10AT01Successor)) {
+    fail("SUCCESSOR_DRIFT", "The M10A-T01 successor changed across fresh execution.");
+  }
+  return deepFreeze({
+    artifact,
+    artifactBytes,
+    artifactSha256: sha256(artifactBytes),
+    liveSuccessorAuthority: {
+      task: "M10A-T01",
+      predecessorTask: "M10-T08",
+      artifact: M10A_T01_SUCCESSOR_PIN,
+      currentGraphAudit,
+      currentTrackedReceipts: receipts(files).filter((receipt) => receipt.path !== "package.json"),
+      currentObservationsAreNotHistoricalResults: true,
+    },
+  });
 }
 function authenticateArtifact(bytes) {
   const pin = DESEN_APP_REPEATABLE_DEMO_ARTIFACT_PIN;
