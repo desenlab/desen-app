@@ -1,0 +1,34 @@
+{
+  "name": "@desen/starter-catalog-web-proof",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bounded two-graph browser proof for the DESEN Neutral Web starter catalog.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run build:authoring && pnpm run build:host",
+    "build:authoring": "vite build --mode proof-authoring",
+    "build:host": "vite build --mode proof-host",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:e2e": "pnpm run typecheck && pnpm run build && pnpm run test:e2e:built",
+    "test:e2e:built": "playwright test --config playwright.config.ts"
+  },
+  "dependencies": {
+    "@desen/editor-core": "workspace:*",
+    "@desen/protocol": "workspace:*",
+    "@desen/publisher": "workspace:*",
+    "@desen/runtime-core": "workspace:*",
+    "@desen/runtime-react": "workspace:*",
+    "@desen/starter-catalog-web": "workspace:*",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "vite": "8.1.5"
+  }
+}

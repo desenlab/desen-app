@@ -550,6 +550,7 @@ const PROOF_ENTRIES = Object.freeze(
       "tests/runtime-core-baseline.test.mjs",
     ],
     ["m10-gate", "scripts/verify-m10-gate.mjs", "tests/m10-gate.test.mjs"],
+    ["m10a-t01", "scripts/verify-m10a-t01.mjs", "tests/m10a-t01.test.mjs"],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -640,14 +641,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "d5c5b2d2b82fe15af293459b8c2c63a163f1340e191fd5fa6ff4767ebd8fddea";
+  "3d890406ade04b14dcac9fcb39ce4900304d570b33de03af3811d4e80b547a62";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "62dedd5a67a1832462724423afea6c75de824a5c08f07cd5978fad634bc61a66";
+  "db047394d958dad89d07c1fb299e68069892976920d0d56bc2a7685e7792f3d0";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "329381d62a686d7c24995d3ed0ce5da17d189c6652e5f7d79a4f955478a6fe10";
+  "dde55d32faf7fcffa87875505d6d955703a57f1a0530069129c3d3ca4990d0ef";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "f8a63dd74709c8492135785402caaed0592e6deb36b3ad0ef1ed0f592889cf7c";
+const QUALITY_GATE_PLAN_SHA256 = "d6dc66b2c5c3845638f8be1d03fde5bfd688cec26315b223812c244c42eae772";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -655,7 +656,7 @@ const QUALITY_GATE_PLAN_SHA256 = "f8a63dd74709c8492135785402caaed0592e6deb36b3ad
 // Historical M06-T10 plan pin retained for its frozen compatibility reader:
 // ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
-  "73b68c61533e2947169ba3e2298a9f13ec261ae00c32184773402bf03fcce715";
+  "f25499af8cd7f541d55f3a8c5e631ecf39034908a5897cb567cab49a816e8f8c";
 const WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);
@@ -675,6 +676,17 @@ const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = Object.freeze(
       "test:e2e",
       "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts && playwright test --config repeatable-demo-playwright.config.ts",
     ],
+  ].map(([name, command]) => Object.freeze({ name, command })),
+);
+const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = Object.freeze(
+  [
+    ["build", "pnpm run build:authoring && pnpm run build:host"],
+    ["build:authoring", "vite build --mode proof-authoring"],
+    ["build:host", "vite build --mode proof-host"],
+    ["lint", "eslint . --max-warnings=0"],
+    ["typecheck", "tsc -p tsconfig.json --noEmit"],
+    ["test:e2e", "pnpm run typecheck && pnpm run build && pnpm run test:e2e:built"],
+    ["test:e2e:built", "playwright test --config playwright.config.ts"],
   ].map(([name, command]) => Object.freeze({ name, command })),
 );
 const FORBIDDEN_COMMAND_PATTERN =
@@ -1061,7 +1073,7 @@ export function validateProofInventory({
   }
   assertExactArray(
     [...testConfigurationFiles].sort(),
-    ["apps/desen-app-browser-e2e/vite.config.ts"],
+    ["apps/desen-app-browser-e2e/vite.config.ts", "apps/starter-catalog-web-proof/vite.config.ts"],
     "The root and workspace test-configuration file set",
   );
   if (Object.hasOwn(packageJson, "vitest")) {
@@ -1116,6 +1128,28 @@ export function validateProofInventory({
         expected: command,
         actual: browserE2ePackage.scripts[name],
       });
+    }
+  }
+
+  const starterProofPackage = workspacePackageMap.get("@desen/starter-catalog-web-proof");
+  if (!starterProofPackage) {
+    throw new QualityGateError("The reviewed starter browser proof workspace package is missing.");
+  }
+  assertExactArray(
+    Object.keys(starterProofPackage.scripts ?? {}).sort(),
+    EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS.map(({ name }) => name).sort(),
+    "The starter browser proof workspace package script set",
+  );
+  for (const { name, command } of EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS) {
+    if (starterProofPackage.scripts[name] !== command) {
+      throw new QualityGateError(
+        "The starter browser proof workspace package script drifted from review.",
+        {
+          script: name,
+          expected: command,
+          actual: starterProofPackage.scripts[name],
+        },
+      );
     }
   }
 

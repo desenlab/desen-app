@@ -1,0 +1,376 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.m10a-t01.base-ui-adapter-boundary.v1",
+  "task": "M10A-T01",
+  "result": "PASS",
+  "package": {
+    "name": "@desen/starter-catalog-web",
+    "catalog": {
+      "id": "run.desen.starter.web",
+      "version": "0.1.0",
+      "target": "web-react",
+      "sha256": "0641d4baea6967f57700363a4cdf47ada8118cf39fd7f3bc8a5ec46709402134",
+      "bytes": 40745
+    },
+    "packageDigest": "sha256:4a9c4029bade26ab398a47823cc8bec27c92c356dc77a73e1e902867f9051659",
+    "digestProfile": "desen.web-react.package-digest",
+    "digestEntries": [
+      {
+        "path": "catalog.json",
+        "byteLength": 20028,
+        "contentDigest": "sha256:88c8de3cd15956265dc836f25d362b77e46ff1623088fe8af255d15e9eb9523c"
+      },
+      {
+        "path": "metadata/base-ui-lock-admission.json",
+        "byteLength": 3474,
+        "contentDigest": "sha256:a019dbdfc2b87bf880cb00d2c0fdfaf2301ca1248b32190d41f63cba4a62764c"
+      },
+      {
+        "path": "package.json",
+        "byteLength": 1417,
+        "contentDigest": "sha256:9ef4e15ff302f7e2029cadba7bebbc82416caa98b89afd49651a015f0a5fe05b"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/contracts.d.ts",
+        "byteLength": 171658,
+        "contentDigest": "sha256:3fea34f24081c55e1f6950a31127ad4540aea94896a35d07f03b419594f9f522"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/contracts.d.ts.map",
+        "byteLength": 4443,
+        "contentDigest": "sha256:b54b37cea29f1b6b36f745ed99722931d48f636bf87d516511c7fcf0dff0f1b8"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/contracts.js",
+        "byteLength": 15340,
+        "contentDigest": "sha256:1660cb28a28574f3806bff2f9a635a657bc9a3d0ab9e66dc2d4a778b535c91c2"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/contracts.js.map",
+        "byteLength": 7893,
+        "contentDigest": "sha256:7e43a49f532b0faf36b12e436d67736fb07886f96e01cc6fe3f7949b19571c08"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/index.d.ts",
+        "byteLength": 1034,
+        "contentDigest": "sha256:415f3523c5104addf8b100975733c31aae5b118fb0050771424e92c0d3b4e937"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/index.d.ts.map",
+        "byteLength": 546,
+        "contentDigest": "sha256:b9f9d983a096ddc11b07247b9215834def5ac65c41eea10468e53975192de42a"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/index.js",
+        "byteLength": 793,
+        "contentDigest": "sha256:af3d2c83ea7873ddebfd4347566f6fdb5113c283ae5809697b746615dd587ef5"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/index.js.map",
+        "byteLength": 387,
+        "contentDigest": "sha256:6fd6612cc1c89bb50d755eb3fd3f73447dc09057e306cd68b15c087355e56cb1"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/neutral.module.css",
+        "byteLength": 2774,
+        "contentDigest": "sha256:856f05a413ceb829f41c2f456c0268291fdc4ebf5d31f1ecbc3a803e22c8fb06"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/react-adapters.d.ts",
+        "byteLength": 2052,
+        "contentDigest": "sha256:5c34cc0e205e7676e65264771a8bfd0a38ad5e3e1f6f46452c90c046c6987350"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/react-adapters.d.ts.map",
+        "byteLength": 574,
+        "contentDigest": "sha256:fd158eab86b07744d2aab4b1ca3612d84256ba4f8d714879db6f3e4e7e53cd39"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/react-adapters.js",
+        "byteLength": 14137,
+        "contentDigest": "sha256:4a5a38b0747de8de87563d26a34f16ab184f5f3a161c88191ff31d905178b9c3"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/react-adapters.js.map",
+        "byteLength": 12929,
+        "contentDigest": "sha256:5fa08c43dd3d18d936e01c8b4769ade8fce102e26306695b9d639ff8183ac7a3"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/templates.d.ts",
+        "byteLength": 2203,
+        "contentDigest": "sha256:3718442a009bdb1c1dd8e8a711083b303896013a0ef56ffd348adf85b0cea679"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/templates.d.ts.map",
+        "byteLength": 801,
+        "contentDigest": "sha256:389f783c03926d3e067f2f85377bda46a9c1f9349c5904b95c5c89460dfc9266"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/templates.js",
+        "byteLength": 8638,
+        "contentDigest": "sha256:9b76b17751e9433ff5ecb14a5543281f03bf0def52585343de569100f2eb4a28"
+      },
+      {
+        "path": "packages/starter-catalog-web/dist/templates.js.map",
+        "byteLength": 6494,
+        "contentDigest": "sha256:f129ff4a3c5eee5ffda7fe4d69e076754212bdea26ce0281b00d3001a2b0aed4"
+      },
+      {
+        "path": "src/neutral.module.css",
+        "byteLength": 2774,
+        "contentDigest": "sha256:856f05a413ceb829f41c2f456c0268291fdc4ebf5d31f1ecbc3a803e22c8fb06"
+      },
+      {
+        "path": "third-party/base-ui-react-license.txt",
+        "byteLength": 1072,
+        "contentDigest": "sha256:07fc1b39d69d14bc7d40482a628f47226258eb01265db68ae684944b916beb2a"
+      },
+      {
+        "path": "third-party/base-ui-react-package.json",
+        "byteLength": 35937,
+        "contentDigest": "sha256:55a5f26f3fdf0acdd844ddf73412e2d22d99f0e1bc6c294ad2662d1460d08786"
+      }
+    ],
+    "distFiles": 17,
+    "distBytes": 252696
+  },
+  "dependencyAdmission": {
+    "baseUi": {
+      "version": "1.8.0",
+      "integrity": "sha512-P0/1sxo6SBVZOklKMIedvTWqw2s2IQzi9x5bIVsXu980cuSOD4NeuRSs+/L7LZQfDkZP/uRZyGPyfFl/B1oH+Q==",
+      "license": "MIT",
+      "licenseBytes": 1072,
+      "licenseSha256": "07fc1b39d69d14bc7d40482a628f47226258eb01265db68ae684944b916beb2a",
+      "peerDependencies": {
+        "@date-fns/tz": "^1.2.0",
+        "@types/react": "^17 || ^18 || ^19",
+        "date-fns": "^4.0.0",
+        "react": "^17 || ^18 || ^19",
+        "react-dom": "^17 || ^18 || ^19"
+      },
+      "directDependencies": {
+        "@babel/runtime": "^7.29.7",
+        "@base-ui/utils": "0.4.0",
+        "@floating-ui/react-dom": "^2.1.9",
+        "@floating-ui/utils": "^0.2.12",
+        "use-sync-external-store": "^1.6.0"
+      }
+    },
+    "lock": {
+      "lockfileVersion": "9.0",
+      "importer": {
+        "specifier": "1.8.0",
+        "resolution": "1.8.0(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)"
+      },
+      "nodes": [
+        {
+          "key": "@base-ui/react@1.8.0",
+          "integrity": "sha512-P0/1sxo6SBVZOklKMIedvTWqw2s2IQzi9x5bIVsXu980cuSOD4NeuRSs+/L7LZQfDkZP/uRZyGPyfFl/B1oH+Q=="
+        },
+        {
+          "key": "@babel/runtime@7.29.7",
+          "integrity": "sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw=="
+        },
+        {
+          "key": "@base-ui/utils@0.4.0",
+          "integrity": "sha512-bO9fz25kKtPf+aZVyfQrC0PDmJdmVni31W2hCS5/Owb+inwdIL3XU26pCPRPlt4LSxZrBgLwubXQXQlKaFEZzw=="
+        },
+        {
+          "key": "@floating-ui/core@1.8.0",
+          "integrity": "sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ=="
+        },
+        {
+          "key": "@floating-ui/dom@1.8.0",
+          "integrity": "sha512-yXSrzeHZBTZadLOlfyhCkJHNeLJnHRnRInwdZ40L7ZiaAtrBwoYlsDrX3v5zB1Utk7CLfzcOVnVVWoXEky7Ceg=="
+        },
+        {
+          "key": "@floating-ui/react-dom@2.1.9",
+          "integrity": "sha512-JDjEFGCpImxDCA7JJKviA0M9+RtmJdj0m/NVU5IMgBK+AmZouAQQ7/+2GLH0GXXY0YMw9oXPB8hKdbPYg5QLYg=="
+        },
+        {
+          "key": "@floating-ui/utils@0.2.12",
+          "integrity": "sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww=="
+        },
+        {
+          "key": "reselect@5.3.0",
+          "integrity": "sha512-XGoLeRAVzUTcJ1qkxPQhDJyIZ5d6zzZD9nT7AEZOaaU9UbWclhycElmhO+VD5bFeLuzhPBaOV2oXC8uG35ZSpg=="
+        },
+        {
+          "key": "use-sync-external-store@1.6.0",
+          "integrity": "sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w=="
+        }
+      ],
+      "transitiveNodeCount": 8,
+      "baseUiSnapshotDependencies": {
+        "@babel/runtime": "7.29.7",
+        "@base-ui/utils": "0.4.0(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)",
+        "@floating-ui/react-dom": "2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)",
+        "@floating-ui/utils": "0.2.12",
+        "react": "19.2.8",
+        "react-dom": "19.2.8(react@19.2.8)",
+        "use-sync-external-store": "1.6.0(react@19.2.8)"
+      },
+      "snapshotClosure": [
+        {
+          "key": "@base-ui/react@1.8.0(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)",
+          "dependencies": {
+            "@babel/runtime": "7.29.7",
+            "@base-ui/utils": "0.4.0(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)",
+            "@floating-ui/react-dom": "2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)",
+            "@floating-ui/utils": "0.2.12",
+            "react": "19.2.8",
+            "react-dom": "19.2.8(react@19.2.8)",
+            "use-sync-external-store": "1.6.0(react@19.2.8)"
+          },
+          "optionalDependencies": {
+            "@types/react": "19.2.17"
+          }
+        },
+        {
+          "key": "@babel/runtime@7.29.7",
+          "dependencies": {},
+          "optionalDependencies": {}
+        },
+        {
+          "key": "@base-ui/utils@0.4.0(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)",
+          "dependencies": {
+            "@babel/runtime": "7.29.7",
+            "@floating-ui/utils": "0.2.12",
+            "react": "19.2.8",
+            "react-dom": "19.2.8(react@19.2.8)",
+            "reselect": "5.3.0",
+            "use-sync-external-store": "1.6.0(react@19.2.8)"
+          },
+          "optionalDependencies": {
+            "@types/react": "19.2.17"
+          }
+        },
+        {
+          "key": "@floating-ui/core@1.8.0",
+          "dependencies": {
+            "@floating-ui/utils": "0.2.12"
+          },
+          "optionalDependencies": {}
+        },
+        {
+          "key": "@floating-ui/dom@1.8.0",
+          "dependencies": {
+            "@floating-ui/core": "1.8.0",
+            "@floating-ui/utils": "0.2.12"
+          },
+          "optionalDependencies": {}
+        },
+        {
+          "key": "@floating-ui/react-dom@2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)",
+          "dependencies": {
+            "@floating-ui/dom": "1.8.0",
+            "react": "19.2.8",
+            "react-dom": "19.2.8(react@19.2.8)"
+          },
+          "optionalDependencies": {}
+        },
+        {
+          "key": "@floating-ui/utils@0.2.12",
+          "dependencies": {},
+          "optionalDependencies": {}
+        },
+        {
+          "key": "reselect@5.3.0",
+          "dependencies": {},
+          "optionalDependencies": {}
+        },
+        {
+          "key": "use-sync-external-store@1.6.0(react@19.2.8)",
+          "dependencies": {
+            "react": "19.2.8"
+          },
+          "optionalDependencies": {}
+        }
+      ]
+    }
+  },
+  "browser": {
+    "assertions": {
+      "atomicRequiredSlotInsertion": true,
+      "publisherDerivedAuthoring": true,
+      "independentHostGraph": true,
+      "sameStaticAdapterRegistry": true,
+      "keyboardSelect": true,
+      "escapeFocusReturn": true,
+      "focusTrap": true,
+      "portalContainment": true,
+      "nestedPortalContainment": true,
+      "disabledAndLoadingButton": true,
+      "strictModeUnmountRemount": true,
+      "compatiblePublicationIdentity": true,
+      "compatibleLiveRerenderIdentity": true,
+      "wrongEventPayloadRejected": true,
+      "unknownCapabilityRejected": true,
+      "unknownStylePartRejected": true
+    },
+    "graphReceipts": [
+      "authoring",
+      "host"
+    ],
+    "profile": "desen.m10a-t01.browser-proof.v1",
+    "result": "PASS",
+    "tests": [
+      {
+        "title": "keeps Select and Dialog interactions inside the approved boundary",
+        "result": "PASS"
+      },
+      {
+        "title": "preserves protocol identity with session isolation, survives StrictMode remount, and isolates the host graph",
+        "result": "PASS"
+      },
+      {
+        "title": "publishes three Source surfaces and rejects undeclared capability data",
+        "result": "PASS"
+      }
+    ]
+  },
+  "security": {
+    "productionAudit": {
+      "command": "pnpm audit --prod --json",
+      "result": "PASS",
+      "vulnerabilities": 0,
+      "observation": "separate-local-admission-2026-09-10",
+      "rerunByVerifier": false
+    },
+    "allDependencyAuditClaimedClean": false,
+    "knownDevelopmentOnlyFinding": {
+      "packages": [
+        "@vitest/mocker",
+        "vitest"
+      ],
+      "vulnerabilities": 2,
+      "severity": "moderate",
+      "advisory": "GHSA-82fw-gwwq-j7x9"
+    }
+  },
+  "claims": {
+    "boundedCapabilities": [
+      "Button",
+      "Select",
+      "Dialog"
+    ],
+    "catalogExecutionValidated": true,
+    "sameStaticAdaptersInCanvasAndHost": true,
+    "browserExecutedByVerifier": true,
+    "historicalArtifactsRewritten": false,
+    "runtimeCoreChanged": false
+  },
+  "tests": {
+    "packageCommand": "pnpm --filter @desen/starter-catalog-web test",
+    "browserCommand": "pnpm --filter @desen/starter-catalog-web-proof run test:e2e:built",
+    "rootTestNames": [
+      "M10A-T01 constructs one valid self-digested starter Catalog",
+      "M10A-T01 binds exact Base UI integrity license peers and dependency closure",
+      "M10A-T01 binds every emitted starter package byte deterministically",
+      "M10A-T01 rejects manifest lock license and emitted-byte drift",
+      "M10A-T01 rejects missing failed or widened browser observations",
+      "M10A-T01 rejects unsafe options and output destinations",
+      "M10A-T01 authenticates its checkpointed artifact without duplicating Chromium"
+    ]
+  }
+}

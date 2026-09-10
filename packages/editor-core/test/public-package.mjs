@@ -383,6 +383,7 @@ test("the package manifest keeps one exact root export and the declared runtime 
       "test:state-binding-edits": "vitest run test/state-binding-edits.test.ts",
       "test:source-document": "vitest run test/source-document.test.ts",
       "test:stable-id-insert": "vitest run test/stable-id-insert.test.ts",
+      "test:subtree-insert": "vitest run test/subtree-insert.test.ts",
       "test:structural-edits": "vitest run test/structural-edits.test.ts",
       "test:terminal-integration": "vitest run test/terminal-integration.test.ts",
       "test:coverage": "vitest run --coverage",
@@ -469,7 +470,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
   );
   assert.match(
     emittedModules[0].source,
-    /export\s*\{\s*insertDesenEditorNode\s*\}\s*from\s*["']\.\/stable-id-insert\.js["']/,
+    /export\s*\{\s*insertDesenEditorNode,\s*insertDesenEditorSubtree\s*\}\s*from\s*["']\.\/stable-id-insert\.js["']/,
   );
   assert.match(
     emittedModules[0].source,
@@ -532,6 +533,7 @@ test("the built public package resolves through its export map and exposes the r
     "insertDesenEditorEventHandler",
     "insertDesenEditorNode",
     "insertDesenEditorStateDeclaration",
+    "insertDesenEditorSubtree",
     "insertDesenEditorVariant",
     "moveDesenEditorNode",
     "reorderDesenEditorAction",

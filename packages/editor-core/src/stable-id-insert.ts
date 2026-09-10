@@ -21,7 +21,17 @@ const COMMAND_KEYS = Object.freeze([
   "surfaceId",
   "use",
 ] as const);
+const SUBTREE_COMMAND_KEYS = Object.freeze([
+  "index",
+  "parentId",
+  "slot",
+  "subtree",
+  "surfaceId",
+] as const);
 const INSERT_PROFILE = Object.freeze({
+  maxCapturedJsonDepth: 256,
+  maxCapturedJsonOccurrences: 250_000,
+  maxCapturedStringCodeUnits: 8_388_608,
   maxCapabilityIdCodeUnits: 4_096,
   maxDocumentCanonicalBytes: 8_388_608,
   maxIdentityOccurrencesPerSurface: 25_000,
@@ -54,6 +64,32 @@ interface CapturedInsertCommand {
   readonly use: string;
 }
 
+interface CapturedSubtreeInsertCommand {
+  readonly index: number;
+  readonly parentId: string;
+  readonly slot: string;
+  readonly subtree: EditorNode;
+  readonly surfaceId: string;
+}
+
+type CapturedJson = null | boolean | number | string | CapturedJson[] | CapturedJsonObject;
+
+interface CapturedJsonObject {
+  [key: string]: CapturedJson;
+}
+
+type JsonCaptureWork =
+  | Readonly<{
+      assign: (value: CapturedJson) => void;
+      depth: number;
+      kind: "visit";
+      source: unknown;
+    }>
+  | Readonly<{
+      kind: "leave";
+      source: object;
+    }>;
+
 type OwnerMatch =
   | Readonly<{
       depth: number;
@@ -82,9 +118,25 @@ interface SurfaceInspectionLimit {
   readonly status: "limit-exceeded";
 }
 
+type SubtreeInspection =
+  | Readonly<{
+      identityOccurrences: number;
+      status: "inspected";
+    }>
+  | Readonly<{
+      identity: string;
+      pointer: JsonPointer;
+      status: "identity-collision";
+    }>
+  | Readonly<{
+      pointer: JsonPointer;
+      status: "limit-exceeded";
+    }>;
+
 /** Stable editor-specific diagnostic codes emitted by the M08-T02 insert boundary. */
 export type DesenEditorInsertDiagnosticCode =
   | "run.desen.editor/INSERT_COMMAND_INVALID"
+  | "run.desen.editor/INSERT_IDENTITY_COLLISION"
   | "run.desen.editor/INSERT_LIMIT_EXCEEDED"
   | "run.desen.editor/INSERT_POSITION_INVALID"
   | "run.desen.editor/INSERT_TARGET_AMBIGUOUS"
@@ -118,6 +170,20 @@ export interface DesenEditorNodeInsertCommand {
   readonly use: string;
 }
 
+/** Complete deterministic command for inserting one already-identified Source subtree. */
+export interface DesenEditorSubtreeInsertCommand {
+  /** Selected Source surface map key. */
+  readonly surfaceId: string;
+  /** Stable node or behavior identity whose named slot receives the subtree root. */
+  readonly parentId: string;
+  /** Exact named slot; an absent slot is created only when `index` is zero. */
+  readonly slot: string;
+  /** Zero-based insertion boundary in the existing ordered slot array. */
+  readonly index: number;
+  /** Complete inert Source-node subtree whose existing identities are preserved exactly. */
+  readonly subtree: DesenEditorDocument["surfaces"][string]["root"];
+}
+
 /** Successful insertion with one fresh direct immutable Source snapshot. */
 export interface DesenEditorNodeInsertSuccess {
   /** Confirms that the complete insertion was applied. */
@@ -149,6 +215,25 @@ export interface DesenEditorNodeInsertFailure {
 /** Complete result of one deterministic stable-ID insert command. */
 export type DesenEditorNodeInsertResult =
   DesenEditorNodeInsertFailure | DesenEditorNodeInsertSuccess;
+
+/** Successful atomic subtree insertion with the exact supplied root identity. */
+export interface DesenEditorSubtreeInsertSuccess {
+  /** Confirms that the complete subtree was applied. */
+  readonly ok: true;
+  /** New direct Source document; the previous document and command remain untouched. */
+  readonly document: DesenEditorDocument;
+  /** Exact unchanged identity of the inserted subtree root. */
+  readonly insertedNodeId: string;
+  /** Always empty after a structurally valid insertion. */
+  readonly diagnostics: readonly [];
+}
+
+/** Rejected subtree insertion with no partial document or rewritten identity. */
+export type DesenEditorSubtreeInsertFailure = DesenEditorNodeInsertFailure;
+
+/** Complete result of one exact-ID atomic subtree insert command. */
+export type DesenEditorSubtreeInsertResult =
+  DesenEditorSubtreeInsertFailure | DesenEditorSubtreeInsertSuccess;
 
 function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -256,6 +341,193 @@ function captureInsertCommand(
       slot,
       surfaceId,
       use,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+function captureBoundedJson(input: unknown): CapturedJson | undefined {
+  const root: { value?: CapturedJson } = {};
+  const activeContainers = new WeakSet<object>();
+  const pending: JsonCaptureWork[] = [
+    {
+      kind: "visit",
+      source: input,
+      depth: 0,
+      assign(value) {
+        root.value = value;
+      },
+    },
+  ];
+  let discoveredOccurrences = 1;
+  let stringCodeUnits = 0;
+
+  try {
+    while (pending.length > 0) {
+      const work = pending.pop() as JsonCaptureWork;
+      if (work.kind === "leave") {
+        activeContainers.delete(work.source);
+        continue;
+      }
+      if (work.depth > INSERT_PROFILE.maxCapturedJsonDepth) return undefined;
+
+      const { source } = work;
+      if (source === null || typeof source === "boolean") {
+        work.assign(source);
+        continue;
+      }
+      if (typeof source === "number") {
+        if (!Number.isFinite(source)) return undefined;
+        work.assign(source);
+        continue;
+      }
+      if (typeof source === "string") {
+        stringCodeUnits += source.length;
+        if (stringCodeUnits > INSERT_PROFILE.maxCapturedStringCodeUnits) return undefined;
+        work.assign(source);
+        continue;
+      }
+      if (typeof source !== "object" || activeContainers.has(source)) return undefined;
+
+      activeContainers.add(source);
+      pending.push({ kind: "leave", source });
+      if (Array.isArray(source)) {
+        if (Object.getPrototypeOf(source) !== Array.prototype) return undefined;
+        const lengthDescriptor = Object.getOwnPropertyDescriptor(source, "length");
+        if (
+          lengthDescriptor === undefined ||
+          !("value" in lengthDescriptor) ||
+          typeof lengthDescriptor.value !== "number" ||
+          !Number.isSafeInteger(lengthDescriptor.value) ||
+          lengthDescriptor.value < 0 ||
+          lengthDescriptor.value >
+            INSERT_PROFILE.maxCapturedJsonOccurrences - discoveredOccurrences ||
+          (lengthDescriptor.value > 0 && work.depth >= INSERT_PROFILE.maxCapturedJsonDepth)
+        ) {
+          return undefined;
+        }
+        const length = lengthDescriptor.value;
+        const ownKeys = Reflect.ownKeys(source);
+        if (
+          ownKeys.length !== length + 1 ||
+          ownKeys.some((key) => typeof key === "symbol") ||
+          !ownKeys.includes("length")
+        ) {
+          return undefined;
+        }
+
+        discoveredOccurrences += length;
+        const destination: CapturedJson[] = new Array<CapturedJson>(length);
+        work.assign(destination);
+        for (let index = length - 1; index >= 0; index -= 1) {
+          const descriptor = Object.getOwnPropertyDescriptor(source, String(index));
+          if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
+            return undefined;
+          }
+          pending.push({
+            kind: "visit",
+            source: descriptor.value,
+            depth: work.depth + 1,
+            assign(value) {
+              destination[index] = value;
+            },
+          });
+        }
+        continue;
+      }
+
+      const prototype = Object.getPrototypeOf(source);
+      if (prototype !== null && prototype !== Object.prototype) return undefined;
+      const ownKeys = Reflect.ownKeys(source);
+      if (
+        ownKeys.length > INSERT_PROFILE.maxCapturedJsonOccurrences - discoveredOccurrences ||
+        (ownKeys.length > 0 && work.depth >= INSERT_PROFILE.maxCapturedJsonDepth) ||
+        ownKeys.some((key) => typeof key === "symbol")
+      ) {
+        return undefined;
+      }
+
+      const keys = (ownKeys as string[]).sort(compareText);
+      discoveredOccurrences += keys.length;
+      const destination: CapturedJsonObject = Object.create(null) as CapturedJsonObject;
+      work.assign(destination);
+      for (let index = keys.length - 1; index >= 0; index -= 1) {
+        const key = keys[index] as string;
+        stringCodeUnits += key.length;
+        if (stringCodeUnits > INSERT_PROFILE.maxCapturedStringCodeUnits) return undefined;
+        const descriptor = Object.getOwnPropertyDescriptor(source, key);
+        if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
+          return undefined;
+        }
+        pending.push({
+          kind: "visit",
+          source: descriptor.value,
+          depth: work.depth + 1,
+          assign(value) {
+            destination[key] = value;
+          },
+        });
+      }
+    }
+
+    if (root.value === undefined) return undefined;
+    if (canonicalizeJsonBytes(root.value).byteLength > INSERT_PROFILE.maxDocumentCanonicalBytes) {
+      return undefined;
+    }
+    return JSON.parse(canonicalizeJson(root.value)) as CapturedJson;
+  } catch {
+    return undefined;
+  }
+}
+
+function captureSubtreeInsertCommand(
+  input: DesenEditorSubtreeInsertCommand,
+): CapturedSubtreeInsertCommand | undefined {
+  try {
+    if (typeof input !== "object" || input === null || Array.isArray(input)) return undefined;
+    const prototype = Object.getPrototypeOf(input);
+    if (prototype !== null && prototype !== Object.prototype) return undefined;
+
+    const keys = Reflect.ownKeys(input);
+    if (
+      keys.length !== SUBTREE_COMMAND_KEYS.length ||
+      keys.some((key) => typeof key !== "string") ||
+      !(keys as string[])
+        .slice()
+        .sort(compareText)
+        .every((key, index) => key === SUBTREE_COMMAND_KEYS[index])
+    ) {
+      return undefined;
+    }
+
+    const index = ownEnumerableDataValue(input, "index");
+    const parentId = ownEnumerableDataValue(input, "parentId");
+    const slot = ownEnumerableDataValue(input, "slot");
+    const subtreeValue = ownEnumerableDataValue(input, "subtree");
+    const surfaceId = ownEnumerableDataValue(input, "surfaceId");
+    if (
+      !Number.isSafeInteger(index) ||
+      (index as number) < 0 ||
+      typeof parentId !== "string" ||
+      !LOCAL_IDENTIFIER_PATTERN.test(parentId) ||
+      typeof slot !== "string" ||
+      !LOCAL_IDENTIFIER_PATTERN.test(slot) ||
+      typeof surfaceId !== "string" ||
+      !LOCAL_IDENTIFIER_PATTERN.test(surfaceId)
+    ) {
+      return undefined;
+    }
+
+    const subtree = captureBoundedJson(subtreeValue);
+    if (typeof subtree !== "object" || subtree === null || Array.isArray(subtree)) return undefined;
+
+    return Object.freeze({
+      index: index as number,
+      parentId,
+      slot,
+      subtree: subtree as unknown as EditorNode,
+      surfaceId,
     });
   } catch {
     return undefined;
@@ -401,6 +673,65 @@ function inspectSurface(
     matches: Object.freeze(matches),
     reservedIds,
   });
+}
+
+function inspectInsertedSubtree(
+  root: EditorNode,
+  rootPointer: JsonPointer,
+  initialDepth: number,
+  existingIds: ReadonlySet<string>,
+  existingIdentityOccurrences: number,
+): SubtreeInspection {
+  const pending: OwnerWork[] = [
+    { kind: "node", owner: root, depth: initialDepth, pointer: rootPointer },
+  ];
+  const subtreeIds = new Set<string>();
+  let identityOccurrences = 0;
+
+  while (pending.length > 0) {
+    const work = pending.pop();
+    if (work === undefined) continue;
+    identityOccurrences += 1;
+    if (
+      existingIdentityOccurrences + identityOccurrences >
+        INSERT_PROFILE.maxIdentityOccurrencesPerSurface ||
+      work.depth > INSERT_PROFILE.maxSourceTreeDepth ||
+      !isCapabilityId(work.owner.use)
+    ) {
+      return Object.freeze({
+        status: "limit-exceeded",
+        pointer: !isCapabilityId(work.owner.use)
+          ? appendJsonPointer(work.pointer, "use")
+          : work.pointer,
+      });
+    }
+    if (existingIds.has(work.owner.id) || subtreeIds.has(work.owner.id)) {
+      return Object.freeze({
+        status: "identity-collision",
+        identity: work.owner.id,
+        pointer: appendJsonPointer(work.pointer, "id"),
+      });
+    }
+    subtreeIds.add(work.owner.id);
+
+    scheduleSlotChildren(pending, work.owner, work.pointer, work.depth);
+    if (work.kind === "node") {
+      const behaviors = work.owner.behaviors ?? [];
+      const behaviorsPointer = appendJsonPointer(work.pointer, "behaviors");
+      for (let index = behaviors.length - 1; index >= 0; index -= 1) {
+        const behavior = behaviors[index];
+        if (behavior === undefined) continue;
+        pending.push({
+          kind: "behavior",
+          owner: behavior,
+          depth: work.depth,
+          pointer: appendJsonPointer(behaviorsPointer, index),
+        });
+      }
+    }
+  }
+
+  return Object.freeze({ status: "inspected", identityOccurrences });
 }
 
 function allocateNodeId(idBase: string, reservedIds: ReadonlySet<string>): string | undefined {
@@ -644,6 +975,232 @@ export function insertDesenEditorNode(
     ok: true,
     document: result.document,
     insertedNodeId,
+    diagnostics: EMPTY_DIAGNOSTICS,
+  });
+}
+
+/**
+ * Inserts one complete inert Source-node subtree without remapping any supplied identity.
+ *
+ * @remarks The command and subtree are captured as detached JSON before the current direct Source
+ * is re-admitted. Every node and behavior identity in the subtree must be unique both internally
+ * and against the selected surface's shared namespace. The operation preserves nested references
+ * by rejecting collisions instead of rewriting ids. It uses the same atomicity, slot-boundary,
+ * 8 MiB document, 25,000 surface identity, depth-64, and 4,096-code-unit capability limits as the
+ * minimal stable-ID insertion boundary. Before canonical serialization, descriptor capture is
+ * capped at 250,000 JSON occurrences, depth 256, and 8,388,608 aggregate string code units, so an
+ * arbitrary command cannot force an unbounded pre-admission walk. Catalog completeness remains
+ * continuous-validation work; this function grants no adapter, publisher, or runtime authority.
+ *
+ * @returns A frozen success containing a new complete document and unchanged subtree-root id, or
+ * a frozen failure containing no partial document or rewritten identity.
+ */
+export function insertDesenEditorSubtree(
+  document: DesenEditorDocument,
+  command: DesenEditorSubtreeInsertCommand,
+): DesenEditorSubtreeInsertResult {
+  const captured = captureSubtreeInsertCommand(command);
+  if (captured === undefined) {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_COMMAND_INVALID",
+        "Subtree insert command must contain exact inert surface, parent, slot, index, and subtree fields.",
+      ),
+    );
+  }
+
+  const admitted = createDesenEditorDocument(document);
+  if (!admitted.ok) return structuralFailure(admitted.diagnostics);
+  if (
+    canonicalizeJsonBytes(admitted.document).byteLength > INSERT_PROFILE.maxDocumentCanonicalBytes
+  ) {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_LIMIT_EXCEEDED",
+        "The editor document exceeds the finite insert profile.",
+        createJsonPointer(),
+        Object.freeze({ documentId: admitted.document.id }),
+      ),
+    );
+  }
+
+  const surfacePointer = createJsonPointer(["surfaces", captured.surfaceId]);
+  if (!Object.hasOwn(admitted.document.surfaces, captured.surfaceId)) {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_TARGET_NOT_FOUND",
+        "The subtree insert command targets a surface that does not exist.",
+        surfacePointer,
+        frozenContext(admitted.document, captured.surfaceId),
+      ),
+    );
+  }
+  const surface = admitted.document.surfaces[captured.surfaceId];
+  if (surface === undefined) {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_TARGET_NOT_FOUND",
+        "The subtree insert command targets a surface that does not exist.",
+        surfacePointer,
+        frozenContext(admitted.document, captured.surfaceId),
+      ),
+    );
+  }
+
+  const rootPointer = appendJsonPointer(surfacePointer, "root");
+  const inspection = inspectSurface(surface.root, rootPointer, captured.parentId);
+  if (inspection.status === "limit-exceeded") {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_LIMIT_EXCEEDED",
+        "The target surface exceeds the finite insert profile.",
+        inspection.pointer,
+        frozenContext(admitted.document, captured.surfaceId),
+      ),
+    );
+  }
+  if (inspection.matches.length === 0) {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_TARGET_NOT_FOUND",
+        "The subtree insert parent identity does not exist in the target surface.",
+        surfacePointer,
+        frozenContext(admitted.document, captured.surfaceId),
+      ),
+    );
+  }
+  if (inspection.matches.length !== 1) {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_TARGET_AMBIGUOUS",
+        "The subtree insert parent identity is ambiguous in the target surface.",
+        surfacePointer,
+        frozenContext(admitted.document, captured.surfaceId),
+      ),
+    );
+  }
+
+  const parent = inspection.matches[0] as OwnerMatch;
+  const existingSlot = namedSlotChildren(parent.owner, captured.slot);
+  const existingLength = existingSlot?.length ?? 0;
+  const insertionPointer = appendJsonPointer(
+    appendJsonPointer(appendJsonPointer(parent.pointer, "slots"), captured.slot),
+    captured.index,
+  );
+  if (captured.index > existingLength || (existingSlot === undefined && captured.index !== 0)) {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_POSITION_INVALID",
+        "The subtree insert index must address an existing named-slot boundary.",
+        appendJsonPointer(appendJsonPointer(parent.pointer, "slots"), captured.slot),
+        frozenContext(admitted.document, captured.surfaceId, parent),
+      ),
+    );
+  }
+
+  const candidate = mutableDocument(admitted.document);
+  const candidateSurface = candidate.surfaces[captured.surfaceId];
+  if (candidateSurface === undefined) {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_TARGET_NOT_FOUND",
+        "The subtree insert target disappeared while preparing the immutable result.",
+        surfacePointer,
+        frozenContext(admitted.document, captured.surfaceId),
+      ),
+    );
+  }
+  const candidateInspection = inspectSurface(
+    candidateSurface.root as EditorNode,
+    rootPointer,
+    captured.parentId,
+  );
+  if (candidateInspection.status === "limit-exceeded") {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_LIMIT_EXCEEDED",
+        "The detached subtree insertion candidate exceeds the finite target-surface profile.",
+        candidateInspection.pointer,
+        frozenContext(admitted.document, captured.surfaceId),
+      ),
+    );
+  }
+  if (candidateInspection.matches.length !== 1) {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_TARGET_AMBIGUOUS",
+        "The subtree insert target could not be reproduced in the detached result candidate.",
+        surfacePointer,
+        frozenContext(admitted.document, captured.surfaceId),
+      ),
+    );
+  }
+
+  const candidateParent = mutableOwner(candidateInspection.matches[0]?.owner as EditorOwner);
+  const ownSlots = slotChildren(candidateParent as EditorOwner);
+  const slots =
+    ownSlots === undefined ? {} : (ownSlots as NonNullable<MutableEditorOwner["slots"]>);
+  const children = Object.hasOwn(slots, captured.slot) ? (slots[captured.slot] ?? []) : [];
+  children.splice(captured.index, 0, captured.subtree as MutableEditorNode);
+  Object.defineProperty(slots, captured.slot, {
+    configurable: true,
+    enumerable: true,
+    value: children,
+    writable: true,
+  });
+  Object.defineProperty(candidateParent, "slots", {
+    configurable: true,
+    enumerable: true,
+    value: slots,
+    writable: true,
+  });
+
+  if (canonicalizeJsonBytes(candidate).byteLength > INSERT_PROFILE.maxDocumentCanonicalBytes) {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_LIMIT_EXCEEDED",
+        "The subtree insertion would exceed the finite editor-document profile.",
+        parent.pointer,
+        frozenContext(admitted.document, captured.surfaceId, parent),
+      ),
+    );
+  }
+
+  const result = createDesenEditorDocument(candidate);
+  if (!result.ok) return structuralFailure(result.diagnostics);
+
+  const subtreeInspection = inspectInsertedSubtree(
+    captured.subtree,
+    insertionPointer,
+    parent.depth + 1,
+    inspection.reservedIds,
+    inspection.identityOccurrences,
+  );
+  if (subtreeInspection.status === "limit-exceeded") {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_LIMIT_EXCEEDED",
+        "The subtree insertion would exceed the finite target-surface profile.",
+        subtreeInspection.pointer,
+        frozenContext(admitted.document, captured.surfaceId, parent),
+      ),
+    );
+  }
+  if (subtreeInspection.status === "identity-collision") {
+    return insertFailure(
+      insertDiagnostic(
+        "run.desen.editor/INSERT_IDENTITY_COLLISION",
+        `The subtree identity ${JSON.stringify(subtreeInspection.identity)} is not unique in the target surface.`,
+        subtreeInspection.pointer,
+        frozenContext(admitted.document, captured.surfaceId, parent),
+      ),
+    );
+  }
+
+  return Object.freeze({
+    ok: true,
+    document: result.document,
+    insertedNodeId: captured.subtree.id,
     diagnostics: EMPTY_DIAGNOSTICS,
   });
 }

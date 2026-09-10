@@ -52,6 +52,7 @@ export const EXECUTION_CLASSES = Object.freeze({
   PACKAGE_TEST_EXCLUSIVE: "PACKAGE_TEST_EXCLUSIVE",
   PROOF_READ_ONLY: "PROOF_READ_ONLY",
   PROOF_OS_TEMP_ISOLATED: "PROOF_OS_TEMP_ISOLATED",
+  PROOF_BROWSER_EXCLUSIVE: "PROOF_BROWSER_EXCLUSIVE",
   PROOF_TRACKED_ALIAS_EXCLUSIVE: "PROOF_TRACKED_ALIAS_EXCLUSIVE",
   PROOF_WORKSPACE_TEMP_EXCLUSIVE: "PROOF_WORKSPACE_TEMP_EXCLUSIVE",
 });
@@ -168,6 +169,7 @@ export const PROOF_IDS = Object.freeze([
   "desen-app-repeatable-demo",
   "runtime-core-baseline",
   "m10-gate",
+  "m10a-t01",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -209,6 +211,12 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "desen-app-repeatable-demo",
   "m10-gate",
 ]);
+
+/** Sole verifier allowed to execute the task-owned fixed-port browser toolchain. */
+export const BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS = Object.freeze(["verify-m10a-t01"]);
+if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 1) {
+  throw new Error("The reviewed browser-exclusive verifier set drifted.");
+}
 
 /** Exact verifier whose fixed native Git observations require no temporary or workspace writes. */
 export const READ_ONLY_GIT_VERIFIER_PROOF_IDS = Object.freeze(["runtime-core-baseline"]);
@@ -338,6 +346,8 @@ export const BUILD_OUTPUT_ROOTS = Object.freeze([
   "apps/desen-app/.turbo",
   "apps/desen-app-browser-e2e/dist",
   "apps/desen-app-browser-e2e/.turbo",
+  "apps/starter-catalog-web-proof/dist",
+  "apps/starter-catalog-web-proof/.turbo",
   "apps/desen-run/dist",
   "apps/desen-run/.turbo",
   "apps/reference-host-web/dist",
@@ -364,6 +374,8 @@ export const BUILD_OUTPUT_ROOTS = Object.freeze([
   "packages/runtime-react/.turbo",
   "packages/runtime-web/dist",
   "packages/runtime-web/.turbo",
+  "packages/starter-catalog-web/dist",
+  "packages/starter-catalog-web/.turbo",
   "packages/testkit/dist",
   "packages/testkit/.turbo",
   "packages/validator/dist",
@@ -547,6 +559,7 @@ for (const stepId of PACKAGE_TEST_EXCLUSIVE_STEP_IDS) {
 
 for (const proofId of PROOF_IDS) {
   const verifierStepId = `verify-${proofId}`;
+  const browserExclusive = BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.includes(verifierStepId);
   const verifierUsesRuntimeProbe = CHILD_PROCESS_VERIFIER_PROOF_ID_SET.has(proofId);
   const verifierUsesOsTemp =
     verifierUsesRuntimeProbe || OS_TEMP_ONLY_VERIFIER_PROOF_ID_SET.has(proofId);
@@ -554,17 +567,26 @@ for (const proofId of PROOF_IDS) {
     verifierStepId,
     createMetadata({
       stepId: verifierStepId,
-      executionClass: verifierUsesOsTemp
-        ? EXECUTION_CLASSES.PROOF_OS_TEMP_ISOLATED
-        : EXECUTION_CLASSES.PROOF_READ_ONLY,
-      tempPolicy: verifierUsesOsTemp ? TEMP_POLICIES.RUNNER_SCOPED_OS : TEMP_POLICIES.NONE,
-      tempKey: verifierUsesOsTemp ? verifierStepId : null,
-      childProcessPolicy: verifierUsesRuntimeProbe
-        ? CHILD_PROCESS_POLICIES.VERIFIER_RUNTIME_PROBE
-        : READ_ONLY_GIT_VERIFIER_PROOF_ID_SET.has(proofId)
-          ? CHILD_PROCESS_POLICIES.VERIFIER_GIT_READ_ONLY
-          : CHILD_PROCESS_POLICIES.NONE,
+      executionClass: browserExclusive
+        ? EXECUTION_CLASSES.PROOF_BROWSER_EXCLUSIVE
+        : verifierUsesOsTemp
+          ? EXECUTION_CLASSES.PROOF_OS_TEMP_ISOLATED
+          : EXECUTION_CLASSES.PROOF_READ_ONLY,
+      tempPolicy:
+        browserExclusive || verifierUsesOsTemp
+          ? TEMP_POLICIES.RUNNER_SCOPED_OS
+          : TEMP_POLICIES.NONE,
+      tempKey: browserExclusive || verifierUsesOsTemp ? verifierStepId : null,
+      ports: browserExclusive ? [4_187] : [],
+      childProcessPolicy: browserExclusive
+        ? CHILD_PROCESS_POLICIES.TOOLCHAIN_EXCLUSIVE
+        : verifierUsesRuntimeProbe
+          ? CHILD_PROCESS_POLICIES.VERIFIER_RUNTIME_PROBE
+          : READ_ONLY_GIT_VERIFIER_PROOF_ID_SET.has(proofId)
+            ? CHILD_PROCESS_POLICIES.VERIFIER_GIT_READ_ONLY
+            : CHILD_PROCESS_POLICIES.NONE,
       nativeAddonPolicy: NATIVE_ADDON_POLICY_BY_PROOF_ID[proofId] ?? NATIVE_ADDON_POLICIES.NONE,
+      barrier: browserExclusive,
     }),
   );
 
@@ -621,8 +643,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 230) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 230 steps.", {
+if (METADATA_BY_STEP_ID.size !== 232) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 232 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }
@@ -931,7 +953,7 @@ export function classifyProofPairState(proofId) {
   const rootTest = classifyWorkloadStateMetadata(`test-${proofId}`);
   return Object.freeze({
     proofId,
-    barrier: rootTest.barrier,
+    barrier: verifier.barrier || rootTest.barrier,
     verifier,
     rootTest,
   });
@@ -1166,48 +1188,71 @@ export async function createProofStepIsolationContext({
       loopbackChildListenerAuthority.token;
   }
 
-  const nodeOptions = [
-    "--permission",
-    ...workspace.permissionPaths.map((allowedPath) => `--allow-fs-read=${allowedPath}`),
-    ...temp.permissionPaths.map((allowedPath) => `--allow-fs-read=${allowedPath}`),
-    `--allow-fs-read=${LISTENER_GUARD_PATH}`,
-    `--require=${LISTENER_GUARD_PATH}`,
-  ];
-  if (metadata.filesystemCompatibilityPolicy !== FILESYSTEM_COMPATIBILITY_POLICIES.NONE) {
-    environment.DESEN_CI_FILESYSTEM_COMPATIBILITY = metadata.filesystemCompatibilityPolicy;
-    environment.DESEN_CI_WORKSPACE_ROOT = workspace.path;
-    nodeOptions.push(
-      `--allow-fs-read=${filesystemCompatibilityPath}`,
-      `--require=${filesystemCompatibilityPath}`,
-    );
-  } else {
+  const browserExclusive = metadata.executionClass === EXECUTION_CLASSES.PROOF_BROWSER_EXCLUSIVE;
+  if (browserExclusive) {
+    if (
+      metadata.stepId !== "verify-m10a-t01" ||
+      metadata.tempPolicy !== TEMP_POLICIES.RUNNER_SCOPED_OS ||
+      metadata.tempKey !== metadata.stepId ||
+      metadata.childProcessPolicy !== CHILD_PROCESS_POLICIES.TOOLCHAIN_EXCLUSIVE ||
+      !isDeepStrictEqual(metadata.ports, [4_187]) ||
+      metadata.barrier !== true
+    ) {
+      fail(
+        "SHARED_STATE_BROWSER_AUTHORITY_INVALID",
+        "The browser proof requires its exact fixed-port exclusive authority.",
+      );
+    }
+    delete environment.NODE_OPTIONS;
     delete environment.DESEN_CI_FILESYSTEM_COMPATIBILITY;
     delete environment.DESEN_CI_WORKSPACE_ROOT;
+    delete environment.DESEN_CI_WORKSPACE_TEMP_ROOT;
+    environment.DESEN_M10A_T01_PROOF_TEMP = temp.path;
+  } else {
+    delete environment.DESEN_M10A_T01_PROOF_TEMP;
+    const nodeOptions = [
+      "--permission",
+      ...workspace.permissionPaths.map((allowedPath) => `--allow-fs-read=${allowedPath}`),
+      ...temp.permissionPaths.map((allowedPath) => `--allow-fs-read=${allowedPath}`),
+      `--allow-fs-read=${LISTENER_GUARD_PATH}`,
+      `--require=${LISTENER_GUARD_PATH}`,
+    ];
+    if (metadata.filesystemCompatibilityPolicy !== FILESYSTEM_COMPATIBILITY_POLICIES.NONE) {
+      environment.DESEN_CI_FILESYSTEM_COMPATIBILITY = metadata.filesystemCompatibilityPolicy;
+      environment.DESEN_CI_WORKSPACE_ROOT = workspace.path;
+      nodeOptions.push(
+        `--allow-fs-read=${filesystemCompatibilityPath}`,
+        `--require=${filesystemCompatibilityPath}`,
+      );
+    } else {
+      delete environment.DESEN_CI_FILESYSTEM_COMPATIBILITY;
+      delete environment.DESEN_CI_WORKSPACE_ROOT;
+    }
+    if (metadata.tempPolicy !== TEMP_POLICIES.NONE) {
+      nodeOptions.push(
+        ...temp.permissionPaths.map((allowedPath) => `--allow-fs-write=${allowedPath}`),
+      );
+    }
+    let suppressSecurityWarning = false;
+    if (metadata.childProcessPolicy !== CHILD_PROCESS_POLICIES.NONE) {
+      nodeOptions.push("--allow-child-process");
+      suppressSecurityWarning = true;
+    }
+    if (metadata.nativeAddonPolicy !== NATIVE_ADDON_POLICIES.NONE) {
+      nodeOptions.push("--allow-addons");
+      suppressSecurityWarning = true;
+    }
+    if (suppressSecurityWarning) {
+      nodeOptions.push("--disable-warning=SecurityWarning");
+    }
+    if (metadata.executionClass === EXECUTION_CLASSES.PROOF_WORKSPACE_TEMP_EXCLUSIVE) {
+      nodeOptions.push(
+        ...workspace.permissionPaths.map((allowedPath) => `--allow-fs-write=${allowedPath}`),
+      );
+      environment.DESEN_CI_WORKSPACE_TEMP_ROOT = workspace.path;
+    }
+    environment.NODE_OPTIONS = nodeOptions.map(quoteNodeOption).join(" ");
   }
-  if (metadata.tempPolicy !== TEMP_POLICIES.NONE) {
-    nodeOptions.push(
-      ...temp.permissionPaths.map((allowedPath) => `--allow-fs-write=${allowedPath}`),
-    );
-  }
-  let suppressSecurityWarning = false;
-  if (metadata.childProcessPolicy !== CHILD_PROCESS_POLICIES.NONE) {
-    nodeOptions.push("--allow-child-process");
-    suppressSecurityWarning = true;
-  }
-  if (metadata.nativeAddonPolicy !== NATIVE_ADDON_POLICIES.NONE) {
-    nodeOptions.push("--allow-addons");
-    suppressSecurityWarning = true;
-  }
-  if (suppressSecurityWarning) {
-    nodeOptions.push("--disable-warning=SecurityWarning");
-  }
-  if (metadata.executionClass === EXECUTION_CLASSES.PROOF_WORKSPACE_TEMP_EXCLUSIVE) {
-    nodeOptions.push(
-      ...workspace.permissionPaths.map((allowedPath) => `--allow-fs-write=${allowedPath}`),
-    );
-    environment.DESEN_CI_WORKSPACE_TEMP_ROOT = workspace.path;
-  }
-  environment.NODE_OPTIONS = nodeOptions.map(quoteNodeOption).join(" ");
 
   const workloadRecord = typeof workload === "string" ? undefined : workload;
   const originalCommand = workloadRecord?.command;

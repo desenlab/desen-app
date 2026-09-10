@@ -3485,3 +3485,24 @@ at 11/13. [PR #85](https://github.com/desenlab/desen-app/pull/85) passed exact-h
 and the resulting [fresh `main` run](https://github.com/desenlab/desen-app/actions/runs/34287634835)
 passed. Those receipts finalize G10; they do not claim remote/multi-user deployment, production
 authentication, native targets, Map, Sortable, domains, package publication, or release.
+
+## M10A-T01 Base UI adapter boundary (local, hosted closure pending)
+
+The [M10A-T01 evidence](M10A-T01.md) introduces the private
+`@desen/starter-catalog-web` package with exactly Button, Select, and Dialog registrations, neutral
+CSS, Base UI React adapters, a self-digested execution-valid Catalog, and atomic required-slot
+subtree insertion. Separate authoring and host graphs consume the same static adapters; only the
+authoring graph includes Publisher and Editor Core.
+
+The 13,910-byte artifact is
+`sha256:711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74`.
+Fresh local checks pass 30 starter tests, 152 Editor Core tests, 10 reference-adapter regressions,
+3 Chromium cases with 16 exact assertions, a real SIGTERM/process-group/port-release lifecycle
+probe, and 49 CI orchestration contracts. Reader checkpoint sequence 81 preserves sequences 1–80
+and authenticates 65 artifacts plus 130 current readers at
+`sha256:3c2a3290df150df591fa2149174a3514aa1c9e48644a2df49d148b55c1c478c2`. The package digest binds
+17 compiled files, exact lock admission, the installed Base UI manifest, and its MIT license.
+Production audit was a separate zero-vulnerability observation; the existing development-only
+Vitest advisory remains disclosed. M10A-T01 remains `IN_PROGRESS` pending exact-head hosted CI and
+does not advance M10A-T02/G10A, migrate the existing App, change Runtime Core, or claim a complete
+component library.

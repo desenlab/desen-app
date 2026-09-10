@@ -224,6 +224,9 @@ jobs:
       - name: Install exact dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install starter proof Chromium runtime
+        run: pnpm --filter @desen/starter-catalog-web-proof exec playwright install --with-deps chromium
+
       - name: Run fresh exhaustive shard
         id: execute
         run: timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-c
@@ -298,6 +301,10 @@ jobs:
 
       - name: Install exact dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install starter proof Chromium runtime
+        if: ${{ needs.quality-route.outputs.mode == 'AFFECTED' }}
+        run: pnpm --filter @desen/starter-catalog-web-proof exec playwright install --with-deps chromium
 
       - name: Verify required-exhaustive contracts
         run: |
@@ -458,6 +465,9 @@ jobs:
 
       - name: Install exact dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install starter proof Chromium runtime
+        run: pnpm --filter @desen/starter-catalog-web-proof exec playwright install --with-deps chromium
 
       - name: Run retained legacy rollback
         run: node scripts/run-ci-quality-gate.mjs

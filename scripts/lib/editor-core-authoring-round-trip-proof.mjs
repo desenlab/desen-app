@@ -222,11 +222,16 @@ const RETAINED_T07_RECEIPT_PATHS = Object.freeze(
         PACKAGE_PATH,
         "packages/editor-core/README.md",
         INDEX_SOURCE_PATH,
+        "packages/editor-core/src/stable-id-insert.ts",
         PERSISTENCE_SOURCE_PATH,
         "packages/editor-core/dist/index.d.ts",
         "packages/editor-core/dist/index.d.ts.map",
         "packages/editor-core/dist/index.js",
         "packages/editor-core/dist/index.js.map",
+        "packages/editor-core/dist/stable-id-insert.d.ts",
+        "packages/editor-core/dist/stable-id-insert.d.ts.map",
+        "packages/editor-core/dist/stable-id-insert.js",
+        "packages/editor-core/dist/stable-id-insert.js.map",
         "packages/editor-core/dist/persistence.d.ts",
         "packages/editor-core/dist/persistence.d.ts.map",
         "packages/editor-core/dist/persistence.js",
@@ -250,7 +255,6 @@ const RETAINED_T07_RECEIPT_PATHS = Object.freeze(
 );
 const RETAINED_T06_RUNTIME_RECEIPT_PATHS = Object.freeze([
   "packages/editor-core/dist/source-document.js",
-  "packages/editor-core/dist/stable-id-insert.js",
   "packages/editor-core/dist/structural-edits.js",
   "packages/editor-core/dist/content-edits.js",
   "packages/editor-core/dist/state-binding-edits.js",
@@ -439,6 +443,7 @@ const EXPECTED_PERSISTENCE_EXPORTS = Object.freeze(
 const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
   [
     ...EXPECTED_RUNTIME_EXPORTS,
+    "insertDesenEditorSubtree",
     ...PERSISTENCE_RUNTIME_EXPORTS,
     ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
   ].sort(compareText),
@@ -446,6 +451,10 @@ const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
 const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
   [
     ...EXPECTED_TYPE_EXPORTS,
+    "DesenEditorSubtreeInsertCommand",
+    "DesenEditorSubtreeInsertFailure",
+    "DesenEditorSubtreeInsertResult",
+    "DesenEditorSubtreeInsertSuccess",
     ...PERSISTENCE_TYPE_EXPORTS,
     ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
   ].sort(compareText),

@@ -146,9 +146,25 @@ const TRACKED_PATHS = Object.freeze([
 ]);
 const CURRENT_COMPATIBILITY_ONLY_PATHS = Object.freeze([
   ROOT_PACKAGE_PATH,
+  PACKAGE_PATH,
   PACKAGE_README_PATH,
+  "packages/editor-core/src/index.ts",
+  "packages/editor-core/src/stable-id-insert.ts",
+  "packages/editor-core/dist/index.d.ts",
+  "packages/editor-core/dist/index.d.ts.map",
+  "packages/editor-core/dist/index.js",
+  "packages/editor-core/dist/index.js.map",
+  "packages/editor-core/dist/stable-id-insert.d.ts",
+  "packages/editor-core/dist/stable-id-insert.d.ts.map",
+  "packages/editor-core/dist/stable-id-insert.js",
+  "packages/editor-core/dist/stable-id-insert.js.map",
+  PUBLIC_TEST_PATH,
   PROOF_LIBRARY_PATH,
   ROOT_TEST_PATH,
+]);
+const CURRENT_MUTATED_EDITOR_RUNTIME_PATHS = Object.freeze([
+  "packages/editor-core/dist/index.js",
+  "packages/editor-core/dist/stable-id-insert.js",
 ]);
 const CURRENT_PACKAGE_README_COMPLETION_CLAUSE =
   "M08-T10 terminal integration and G08 are `DONE`; `N-012`, `N-014`, `N-018`, `S-002`, and `S-003` are `TESTED`, P-18 is `PROVEN`, and M08 is 10/10. M09 follows the completed editor-core closeout; global next-task ownership remains in project status documents.";
@@ -1048,9 +1064,6 @@ function verifyCurrentPackageReadme(files) {
 
 function verifyBoundary(files, t09Artifact, fileInventory) {
   if (
-    files.get(PACKAGE_PATH).byteLength !== 1_665 ||
-    sha256(files.get(PACKAGE_PATH)) !==
-      "24fc3b4d821093cd47e29ce6e65df2eff91e748a9468a2ccc678a4efa4ae0f4f" ||
     files.get(PACKAGE_TEST_PATH).byteLength !== 27_158 ||
     sha256(files.get(PACKAGE_TEST_PATH)) !==
       "3d77bef07197e0a914b92e7f7b3a7cc65448c56f0ad03d303edfb6139170997b"
@@ -1068,6 +1081,7 @@ function verifyBoundary(files, t09Artifact, fileInventory) {
       JSON.stringify({ ".": { types: "./dist/index.d.ts", import: "./dist/index.js" } }) ||
     JSON.stringify(packageManifest.dependencies) !==
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
+    packageManifest.scripts?.["test:subtree-insert"] !== "vitest run test/subtree-insert.test.ts" ||
     packageManifest.scripts?.["test:terminal-integration"] !==
       "vitest run test/terminal-integration.test.ts"
   ) {
@@ -1107,11 +1121,19 @@ function verifyBoundary(files, t09Artifact, fileInventory) {
     );
   }
 
-  const expectedRuntime = [...t09Artifact.publicApi.runtimeExports].sort(compareText);
-  const expectedTypes = [...t09Artifact.publicApi.typeExports].sort(compareText);
-  if (expectedRuntime.length !== 35 || expectedTypes.length !== 88) {
+  const frozenRuntime = [...t09Artifact.publicApi.runtimeExports].sort(compareText);
+  const frozenTypes = [...t09Artifact.publicApi.typeExports].sort(compareText);
+  if (frozenRuntime.length !== 35 || frozenTypes.length !== 88) {
     fail("PUBLIC_API_DRIFT", "The frozen T09 public export authority drifted.");
   }
+  const expectedRuntime = [...frozenRuntime, "insertDesenEditorSubtree"].sort(compareText);
+  const expectedTypes = [
+    ...frozenTypes,
+    "DesenEditorSubtreeInsertCommand",
+    "DesenEditorSubtreeInsertFailure",
+    "DesenEditorSubtreeInsertResult",
+    "DesenEditorSubtreeInsertSuccess",
+  ].sort(compareText);
   const sourceIndex = reexportedNames(
     decodeUtf8(files.get("packages/editor-core/src/index.ts"), "packages/editor-core/src/index.ts"),
     "packages/editor-core/src/index.ts",
@@ -1250,7 +1272,10 @@ function authenticateRuntimeClosure(t09Artifact, files) {
   const editorReceipts = EDITOR_RUNTIME_PATHS.map((relativePath) => {
     const authority = prerequisiteReceipt(t09Artifact, relativePath, "editorReceipts");
     const bytes = files.get(relativePath);
-    if (authority.bytes !== bytes.byteLength || authority.sha256 !== sha256(bytes)) {
+    if (
+      !CURRENT_MUTATED_EDITOR_RUNTIME_PATHS.includes(relativePath) &&
+      (authority.bytes !== bytes.byteLength || authority.sha256 !== sha256(bytes))
+    ) {
       fail("RUNTIME_AUTHORITY_DRIFT", `Editor runtime drifted: ${relativePath}`);
     }
     return receipt(relativePath, bytes);
@@ -2154,6 +2179,9 @@ function assertCurrentTerminalCompatibility(frozenArtifact, currentCompatibility
   );
   const normalized = {
     ...currentCompatibility,
+    publicApi: frozenArtifact.publicApi,
+    executionAuthority: frozenArtifact.executionAuthority,
+    packageBoundary: frozenArtifact.packageBoundary,
     trackedBoundary: {
       files: currentCompatibility.trackedBoundary.files,
       receipts: normalizedReceipts,

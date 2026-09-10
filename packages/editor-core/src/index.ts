@@ -5,7 +5,7 @@
  */
 
 export { createDesenEditorDocument } from "./source-document.js";
-export { insertDesenEditorNode } from "./stable-id-insert.js";
+export { insertDesenEditorNode, insertDesenEditorSubtree } from "./stable-id-insert.js";
 export {
   deleteDesenEditorNode,
   moveDesenEditorNode,
@@ -62,6 +62,10 @@ export type {
   DesenEditorNodeInsertFailure,
   DesenEditorNodeInsertResult,
   DesenEditorNodeInsertSuccess,
+  DesenEditorSubtreeInsertCommand,
+  DesenEditorSubtreeInsertFailure,
+  DesenEditorSubtreeInsertResult,
+  DesenEditorSubtreeInsertSuccess,
 } from "./stable-id-insert.js";
 
 export type {

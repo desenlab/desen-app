@@ -48,6 +48,16 @@ an 8 MiB canonical editor document. `PF-079` records the editor-specific allocat
 atomicity, limit, and
 diagnostic choices that DESEN 0.1.0 leaves open.
 
+`insertDesenEditorSubtree(document, command)` is the additive exact-ID companion for a complete
+inert Source-node subtree. It captures the subtree as detached JSON, inserts it atomically at the
+same named-slot boundary, and preserves every supplied node and behavior ID without allocation or
+rewriting. Any identity repeated inside the subtree or already present in the selected surface is
+rejected. The command reuses the same document-size, surface-identity, component-depth, capability,
+target, position, and immutable-result limits. Its descriptor-first command capture additionally
+stops at 250,000 JSON occurrences, depth 256, or 8,388,608 aggregate string code units before
+canonical serialization. It admits structurally valid unresolved Catalog semantics for continuous
+validation; it neither expands a runtime macro nor grants adapter or publication authority.
+
 ## Structural edits
 
 `deleteDesenEditorNode(document, command)` removes the addressed non-root node and its complete

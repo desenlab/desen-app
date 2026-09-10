@@ -99,7 +99,6 @@ const CURRENT_EDITOR_RUNTIME_PATHS = Object.freeze([
 const RETAINED_T07_EDITOR_RUNTIME_PATHS = Object.freeze(
   [
     "source-document",
-    "stable-id-insert",
     "structural-edits",
     "content-edits",
     "state-binding-edits",
@@ -161,6 +160,16 @@ const RETAINED_T09_RECEIPT_PATHS = Object.freeze(
       ![
         PACKAGE_PATH,
         PACKAGE_README_PATH,
+        INDEX_SOURCE_PATH,
+        "packages/editor-core/src/stable-id-insert.ts",
+        "packages/editor-core/dist/index.d.ts",
+        "packages/editor-core/dist/index.d.ts.map",
+        "packages/editor-core/dist/index.js",
+        "packages/editor-core/dist/index.js.map",
+        "packages/editor-core/dist/stable-id-insert.d.ts",
+        "packages/editor-core/dist/stable-id-insert.d.ts.map",
+        "packages/editor-core/dist/stable-id-insert.js",
+        "packages/editor-core/dist/stable-id-insert.js.map",
         PUBLIC_TEST_PATH,
         TERMINAL_INTEGRATION_TEST_PATH,
         PROOF_LIBRARY_PATH,
@@ -738,16 +747,21 @@ function verifyBoundary(files, t07Artifact) {
     ...predecessorRuntime,
     ...PERSISTENCE_RUNTIME_EXPORTS,
     ...NEW_RUNTIME_EXPORTS,
+    "insertDesenEditorSubtree",
   ].sort(compareText);
   const expectedTypes = [
     ...predecessorTypes,
     ...PERSISTENCE_TYPE_EXPORTS,
     ...NEW_TYPE_EXPORTS,
+    "DesenEditorSubtreeInsertCommand",
+    "DesenEditorSubtreeInsertFailure",
+    "DesenEditorSubtreeInsertResult",
+    "DesenEditorSubtreeInsertSuccess",
   ].sort(compareText);
-  if (expectedRuntime.length !== 35 || expectedTypes.length !== 88) {
+  if (expectedRuntime.length !== 36 || expectedTypes.length !== 92) {
     fail(
       "PUBLIC_API_DRIFT",
-      "The current T08 plus T09 package must expose exactly thirty-five runtime and eighty-eight type exports.",
+      "The current package must expose the frozen T08/T09 API plus the additive subtree API.",
     );
   }
 

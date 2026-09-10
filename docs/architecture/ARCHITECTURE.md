@@ -56,6 +56,7 @@ authority for this table.
 | `editor-core`           | `protocol`, `validator`                                                                |
 | `editor-web`            | `protocol`, `validator`, `catalog-sdk`, `editor-core`, `runtime-core`, `runtime-react` |
 | `reference-catalog-web` | `protocol`, `catalog-sdk`, `runtime-react`                                             |
+| `starter-catalog-web`   | `protocol`, `catalog-sdk`, `runtime-react`                                             |
 | `testkit`               | implementation package public APIs, except the `desen` facade                          |
 | `desen`                 | protocol, validation, publication, runtime, catalog, and dedicated test APIs           |
 
@@ -211,9 +212,76 @@ The complete committed `packages/runtime-core` tree is frozen as
 `3fa3613a3be63c749f40b6a0b55af5b40c675773`. This is an identity baseline for M11, not cached test
 success.
 
+## Planned M10A design-first workbench
+
+M10A inserts 28 tasks and the G10A gate before M11. Only T01's bounded starter adapter slice is
+in progress; later workbench features remain planned. No publication or production authority
+follows from this architecture text. [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the
+decision, while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
+[task contracts](../plan/M10A-TASK-CONTRACTS.md), and
+[Workbench contract](../plan/DESIGN-SYSTEM-WORKBENCH.md) own execution detail.
+
+The package boundary is additive; only the starter slice is being implemented in T01:
+
+- `@desen/starter-catalog-web` supplies target-specific DESEN capabilities through trusted,
+  statically registered production and authoring adapters built on pinned Base UI and the DESEN
+  Neutral theme;
+- `@desen/design-system-core` owns only finite platform-neutral project, DTCG release, recipe-graph,
+  stable-identity, and materialization data contracts; it cannot import React, DOM, CSS, Base UI,
+  browser APIs, App code, or host bindings, and may depend internally only on `protocol`,
+  `validator`, and `editor-core`;
+- `@desen/starter-catalog-web` follows the existing target-package edges to `protocol`,
+  `catalog-sdk`, and `runtime-react`, plus its pinned external Base UI dependency; and
+- Desen App composes those packages with existing Editor, Validator, Publisher, and Runtime public
+  APIs. Neither new package becomes a hidden Runtime Core or protocol owner. Publisher and Runtime
+  packages do not depend on `design-system-core` or interpret its recipe graph.
+
+An App-owned versioned editable-project record is the durable authoring aggregate. It atomically
+stores one exact canonical Source, editable DTCG data, immutable design-system release references,
+the bounded master/instance/override graph, and inert connection and Workbench drafts under
+generation compare-and-set. It is not a DESEN protocol document. Every open verifies the complete
+record and every save advances one complete generation; partial or inconsistent state exposes no
+authority, and the exact preceding generation remains recoverable without guessing or repair.
+
+Canonical Source remains the production composition and behavior authority. A master or instance
+is local App metadata that must materialize, with stable ordinary node ids and exact Catalog `use`
+values, into the same valid canonical Source before persistence or Publisher preflight. There is no
+runtime `instanceOf`, import, symbol, or Publisher-side recipe expansion. Incomplete Connections
+forms persist only as inert project drafts until one complete declared binding can be applied
+atomically.
+
+Token drafts are also non-production. A production-affecting DTCG document becomes an immutable,
+content-addressed design-system release. The project binds the canonical Source fingerprint and
+production Source digest to that release, and the application publication/activation receipt binds
+Source digest, Bundle revision, exact capability packages, and token release without changing the
+frozen Bundle schema. The host token provider is constructed from the authenticated release;
+activation and last-known-good recovery treat Bundle and token release as one deployment tuple.
+The trusted host profile selects that release and supplies only its validated finite value map
+through the existing token-provider port; documents cannot select a loader, module, or destination.
+
+The App separates Design, Connections, Run, and Design-System Workbench. Static Source with exact
+components and a validated token snapshot may Run without live bindings; Publish additionally
+requires an immutable design-system release. Synthetic Run requires declared fixtures; Integration requires explicit
+non-production authorization; production activation additionally requires exact host bindings and
+deployment preflight. An empty Connections panel is not an error when Source references no external
+effect, while incomplete binding drafts never weaken Source, Publisher, or Runtime validation.
+
+For DESEN-managed Web content, the Workbench owns bounded component-workshop needs: capability
+inventory, declared states and scenarios, token/theme and instance matrices, accessibility review,
+deterministic screenshots, and visual regression. It does not run arbitrary story code, inspect
+private DOM, host unrelated application components, or claim a public review service. Styling may
+be broad only through declared props, style parts, states, tokens, and frozen Source variants;
+unsupported control is explicit and cannot fall back to arbitrary CSS or selectors.
+
+The existing M10 catalog, workspace profiles, fixtures, artifacts, host path, and browser journeys
+remain regression authorities. M10A may add packages, profiles, App services, and host bindings but
+must preserve the frozen Runtime Core baseline above. G10A proves project recovery, token-release
+rollback, recipe materialization, disconnected static publication, adapter trust, and the complete
+M10 regression set before either M11 branch may begin.
+
 ## M11 extension contract
 
-After SC-02 authorizes continuation, the Map and Sortable branches may add target capability
+After the recorded SC-02 adaptation and G10A closure, Map and Sortable may add target capability
 packages, adapters, resource/operation bindings, fixtures, and authored surfaces. They must not
 modify Runtime Core. Each branch independently proves its capability boundary before both join in
 the second surface. See the [task board](../plan/TASKS.md).

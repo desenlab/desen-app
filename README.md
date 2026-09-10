@@ -4,15 +4,15 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10 and the terminal G10 gate are complete. SC-02 is the next decision checkpoint; M11 has not
-> started. This is a working-draft reference implementation, not a production certification.
+> M10/G10 are complete. SC-02 concluded `adapt`; the M10A design-first product plan is ready.
+> M10A-T01 is in progress; M11 has not started. This is not a production certification.
 
 ## Implementation progress
 
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████████░░░░░` **121 / 148 tasks complete (82%)**
+**Overall:** `█████████████████░░░░░░░░` **121 / 176 tasks complete (69%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -32,8 +32,10 @@ bounded, reproducible claims about both.
 
 **M10 complete:** `████████████` **12 / 12 tasks complete (100%)**
 
-**Proof gates:** **11 / 13 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Next decision:** `SC-02` · **M11:** `NOT_STARTED`
+**M10A:** **0 / 28 tasks complete (0%)** · 28 newly planned product tasks; no completed work removed.
+
+**Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
+**Active task:** `M10A-T01` · **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
 
@@ -94,6 +96,7 @@ DOM, CSS, and browser concerns enter only through target-specific adapters and a
 apps/
   desen-app/                   Visual authoring and publishing product
   desen-app-browser-e2e/       Independent Chromium product journeys
+  starter-catalog-web-proof/   Isolated starter authoring/host adapter proof
   reference-host-web/          Separately built proof host
   reference-host-web-server/   Local host/control-plane bridge
   control-plane-api/           Local Source, Bundle, channel, and activation service
@@ -109,6 +112,7 @@ packages/
   editor-core/            Framework-neutral authoring commands
   editor-web/             Web canvas and inspector integration
   reference-catalog-web/  Reference components and adapters
+  starter-catalog-web/    Base UI-backed DESEN Neutral starter capabilities
   testkit/                Fixtures and conformance helpers
   desen/                   Future public facade and CLI
 ```
@@ -155,12 +159,17 @@ node scripts/ci/verify-proof-reader-checkpoints.mjs
 Run `pnpm check` for an exhaustive local audit or gate closure. Run `pnpm test:e2e` for the complete
 nine-journey Chromium suite. Hosted completion still requires the task's exact-head CI contract.
 
-## Next decision
+## Next implementation
 
-Before either M11 branch starts, [SC-02](docs/plan/STRATEGIC-VALIDATION.md) requires real workflow
-interviews and at least two credible bounded pilot commitments. If that checkpoint authorizes
-continuation, Map (`M11-T01`) and Sortable (`M11-T08`) may begin independently while preserving the
-frozen Runtime Core tree.
+[M10A](docs/plan/M10A-IMPLEMENTATION-PLAN.md) adds a Base UI-backed starter library with DESEN
+Neutral styling, editable themes, reusable components, design-first authoring, separate behavior
+connections, and built-in design-system documentation/visual review. These are planned features,
+not capabilities of the current five-component demo. The active `M10A-T01` installs Base UI 1.8.0
+and proves three adapters in isolated authoring/host harnesses; ordinary App integration comes later.
+
+[SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
+validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and
+Sortable (`M11-T08`) wait for G10A and preserve the frozen Runtime Core tree.
 
 ## Historical record
 

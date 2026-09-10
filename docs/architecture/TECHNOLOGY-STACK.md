@@ -52,6 +52,22 @@ fresh compatibility checks.
 Map provider, drag-and-drop adapter, router, query cache, and UI component dependencies are chosen
 only by their owning tasks and require an ADR when they affect public capability contracts.
 
+## M10A product foundation — T01 in progress
+
+The M10A planning decision selects `@base-ui/react` **1.8.0** behind a new private
+`@desen/starter-catalog-web` Catalog/adapter package, with DESEN-owned Neutral styles implemented
+using CSS Modules and token-backed CSS variables. npm metadata checked 2026-09-10 reports MIT
+licensing and a React/React DOM 19-compatible peer range; that is compatibility input, not a
+completed security or adapter proof. M10A-T01 pins the dependency and lockfile, checks exact
+integrity/peers, and records production versus development audit findings separately.
+
+`@desen/design-system-core` is the planned platform-neutral data/token/recipe/release layer.
+The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
+capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
+and hermetic capture configuration. No Storybook, Chromatic, Tailwind or second primitive library
+is introduced by this decision. See [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md)
+and the [selection rationale](../plan/M10A-IMPLEMENTATION-PLAN.md#selected-component-foundation).
+
 ## Desen App M09-T01 profile
 
 The first Desen App slice uses React's external-store contract over an application-owned History

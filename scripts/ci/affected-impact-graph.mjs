@@ -279,12 +279,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
         "runtime-core-baseline",
       ],
     ],
+    ["m10a-t01", ["m10-gate"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "72a9470b72bbcd833371c649984e9878e0af00e5b8d163dfb15aa967b3c6690b";
+  "11a5dd0f1aadaf4636fb4eb617811afe9d2d7a7fb02fa939dd6af217801f40dc";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

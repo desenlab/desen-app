@@ -7,10 +7,12 @@ import {
   M10_GATE_ARTIFACT_PATH as ARTIFACT,
   M10_GATE_BROWSER_COMMAND as BROWSER_COMMAND,
   M10_GATE_BROWSER_CONFIGS as BROWSER_CONFIGS,
+  M10_GATE_M10A_T01_CURRENT_HOST_AUDIT as CURRENT_HOST_AUDIT,
   M10_GATE_PARENT_PINS as PARENTS,
   M10_GATE_ROOT_TEST_NAMES as NAMES,
   M10GateProofError,
   buildM10GateEvidence as build,
+  projectM10GateHistoricalHostAudit as projectHistoricalHostAudit,
   verifyM10GateEvidence as verify,
   writeM10GateEvidence as write,
 } from "../scripts/lib/m10-gate-proof.mjs";
@@ -58,6 +60,32 @@ test(NAMES[2], async () => {
   assert.equal(artifact.authority.hostAudit.unresolvedEdges, 0);
   assert.equal(artifact.authority.runtimeCore.freshComparison, true);
   assert.equal(artifact.authority.runtimeCore.tree, "3fa3613a3be63c749f40b6a0b55af5b40c675773");
+});
+
+test("G10 current reader admits only the exact M10A-T01 graph successor", () => {
+  const current = structuredClone(CURRENT_HOST_AUDIT);
+  const historical = projectHistoricalHostAudit(current);
+  assert.deepEqual(historical, {
+    ...CURRENT_HOST_AUDIT,
+    appGraphSha256: "sha256:fa8f18c9510575a8c5719e19bfb5aaf42468a167c475879778554d0a3950bebf",
+    appOutputIdentity: "sha256:ba0b863a2133c99fd90a834fd892660b1e70198b377ae714ab7e8c31af2656a7",
+    backingSnapshotSha256:
+      "sha256:1eaeeb160cca678ad35bda5a60a58730e0f4f6bfead3ae39c29a52bd240d0427",
+  });
+  assert.deepEqual(current, CURRENT_HOST_AUDIT);
+  assert.equal(Object.isFrozen(historical), true);
+
+  for (const key of [
+    "appGraphSha256",
+    "hostGraphSha256",
+    "appOutputIdentity",
+    "hostOutputIdentity",
+    "backingSnapshotSha256",
+  ]) {
+    const changed = structuredClone(CURRENT_HOST_AUDIT);
+    changed[key] = `sha256:${"0".repeat(64)}`;
+    assert.throws(() => projectHistoricalHostAudit(changed), code("HOST_AUDIT_FAILED"), key);
+  }
 });
 
 test(NAMES[3], async () => {

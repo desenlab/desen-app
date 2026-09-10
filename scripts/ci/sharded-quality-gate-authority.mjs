@@ -11,12 +11,12 @@ import { classifyProofPairState } from "./shared-state-authority.mjs";
 export const SHARD_IDS = Object.freeze(["proof-a", "proof-b", "proof-c"]);
 /** Reviewed identity of the logical coverage, replicated prerequisites, and static assignment. */
 export const SHARDED_QUALITY_GATE_PLAN_SHA256 =
-  "f0a7af1ca1936f24290cbb18dc8205e66f05be88fbfe85c8162a435704cb4f8e";
+  "171036922eb55ad25fb0a26282f8b02c3efa537e5b938d6ec642db7ee5abfde5";
 /** Distinct distributed-plan profile; the historical monolithic authority remains unchanged. */
 export const SHARDED_QUALITY_GATE_PROFILE = "desen.ci.sharded-quality-gate-plan.v1";
 /** Public summary schema, which by itself grants neither hosted nor local-close authority. */
 export const REQUIRED_PROOF_SHARD_SUMMARY_PROFILE = "desen.ci.required-proof-shard-summary.v1";
-const PARENT_PLAN_SHA256 = "0af182af803f81a8cae7a512fbc7e33a60c372cffe398881ee8677eeca3fb501";
+const PARENT_PLAN_SHA256 = "6619c9dd41f7b43ff47b85925400a63afe024ce7d50d542449e59ce09acdf7d7";
 const PREFIX_IDS = Object.freeze([
   "orchestrator-contracts",
   "format",
@@ -137,8 +137,8 @@ function assertIdsEqual(actual, expected, label) {
 }
 
 /**
- * Builds the fixed 53/24/33 proof-pair partition from the authenticated 230-node inventory.
- * Its logical coverage remains 230; three prefixes and the join's fresh build execute 247
+ * Builds the fixed 53/24/34 proof-pair partition from the authenticated 232-node inventory.
+ * Its logical coverage remains 232; three prefixes and the join's fresh build execute 249
  * physical workloads. No duplicate preparation is represented as a skipped successful close.
  */
 export function createShardedQualityGatePlan(rawOptions = undefined) {
@@ -159,7 +159,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     SUFFIX_IDS,
     "The suffix",
   );
-  if (inventory.workloadCount !== 230 || inventory.proofUnitCount !== 110) {
+  if (inventory.workloadCount !== 232 || inventory.proofUnitCount !== 111) {
     fail("SHARDED_QUALITY_GATE_PLAN_DRIFT", "The exhaustive workload universe changed.");
   }
   const completedPrefix = new Set();
@@ -189,9 +189,9 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     "The partition",
   );
   if (
-    new Set(shardProjections.flatMap(({ proofPairIds }) => proofPairIds)).size !== 110 ||
+    new Set(shardProjections.flatMap(({ proofPairIds }) => proofPairIds)).size !== 111 ||
     shardProjections.some(
-      ({ barrierPairIds }, index) => barrierPairIds.length !== [11, 0, 0][index],
+      ({ barrierPairIds }, index) => barrierPairIds.length !== [11, 0, 1][index],
     )
   ) {
     fail(
@@ -207,8 +207,8 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     parentPlanSha256: PARENT_PLAN_SHA256,
     inventorySha256: inventory.inventorySha256,
     concurrencyPerShard: 2,
-    logicalWorkloadCount: 230,
-    proofPairCount: 110,
+    logicalWorkloadCount: 232,
+    proofPairCount: 111,
     prefixIds: PREFIX_IDS,
     joinPreparationIds: JOIN_PREPARATION_IDS,
     suffixIds: SUFFIX_IDS,
@@ -239,7 +239,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
   });
   const logicalNodeIds = inventory.nodes.map(({ id }) => id);
   const covered = new Set([...shards.flatMap(({ nodeIds }) => nodeIds), ...SUFFIX_IDS]);
-  if (covered.size !== 230 || logicalNodeIds.some((id) => !covered.has(id))) {
+  if (covered.size !== 232 || logicalNodeIds.some((id) => !covered.has(id))) {
     fail("SHARDED_QUALITY_GATE_PLAN_DRIFT", "Distributed coverage is not exactly exhaustive.");
   }
   const plan = deepFreeze({
@@ -249,8 +249,8 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     logicalNodeIds,
     completedBeforeJoinNodeIds: logicalNodeIds.filter((id) => !SUFFIX_IDS.includes(id)),
     joinNodeIds: [...JOIN_PREPARATION_IDS, ...SUFFIX_IDS],
-    stepCount: 230,
-    physicalWorkloadCount: 247,
+    stepCount: 232,
+    physicalWorkloadCount: 249,
     repeatedPrefixWorkloadCount: 16,
     additionalJoinPreparationCount: 1,
   });

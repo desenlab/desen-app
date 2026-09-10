@@ -24,6 +24,7 @@ import {
   validateQualityGatePlan,
 } from "../run-ci-quality-gate.mjs";
 import { RUNTIME_CORE_BASELINE_CAPTURE } from "../lib/runtime-core-baseline-proof.mjs";
+import { validateRepositoryWorkloadInputs } from "../ci/exhaustive-workload-inventory.mjs";
 
 const WORKSPACE_ROOT = resolve(import.meta.dirname, "../..");
 const CI_02_LOCAL_BASELINE = Object.freeze([
@@ -198,6 +199,7 @@ const TASK_MILESTONE_COUNTS = Object.freeze({
   M08: 10,
   M09: 14,
   M10: 12,
+  M10A: 28,
   M11: 14,
   M12: 13,
 });
@@ -208,6 +210,39 @@ const M10_TASK_IDS = Object.freeze([
   "M10-T01C",
   ...Array.from({ length: 8 }, (_, index) => `M10-T${String(index + 2).padStart(2, "0")}`),
 ]);
+const M10A_TASK_IDS = Object.freeze(
+  Array.from({ length: 28 }, (_, index) => `M10A-T${String(index + 1).padStart(2, "0")}`),
+);
+const M10A_TASK_DEPENDENCIES = Object.freeze({
+  "M10A-T01": "G10",
+  "M10A-T02": "M10A-T01",
+  "M10A-T03": "M10A-T02",
+  "M10A-T04": "M10A-T02",
+  "M10A-T05": "M10A-T01, M10A-T02",
+  "M10A-T06": "M10A-T05",
+  "M10A-T07": "M10A-T06",
+  "M10A-T08": "M10A-T07",
+  "M10A-T09": "M10A-T05, M10A-T08",
+  "M10A-T10": "M10A-T02, M10A-T04, M10A-T09",
+  "M10A-T11": "M10A-T10",
+  "M10A-T12": "M10A-T03, M10A-T11",
+  "M10A-T13": "M10A-T04, M10A-T12",
+  "M10A-T14": "M10A-T10, M10A-T11",
+  "M10A-T15": "M10A-T09, M10A-T13, M10A-T14",
+  "M10A-T16": "M10A-T12, M10A-T15",
+  "M10A-T17": "M10A-T03, M10A-T16",
+  "M10A-T18": "M10A-T04, M10A-T17",
+  "M10A-T19": "M10A-T10, M10A-T14",
+  "M10A-T20": "M10A-T16, M10A-T19",
+  "M10A-T21": "M10A-T20",
+  "M10A-T22": "M10A-T04, M10A-T18, M10A-T21",
+  "M10A-T23": "M10A-T08, M10A-T16, M10A-T17, M10A-T22",
+  "M10A-T24": "M10A-T13, M10A-T23",
+  "M10A-T25": "M10A-T18, M10A-T24, M10A-T26",
+  "M10A-T26": "M10A-T12, M10A-T22, M10A-T23",
+  "M10A-T27": "M10A-T14, M10A-T16, M10A-T22, M10A-T25, M10A-T26",
+  "M10A-T28": "M10A-T01–M10A-T27",
+});
 const EXPECTED_IMPLEMENTATION_TASK_IDS = Object.freeze(
   Object.entries(TASK_MILESTONE_COUNTS).flatMap(([milestone, count]) =>
     milestone === "M10"
@@ -218,9 +253,12 @@ const EXPECTED_IMPLEMENTATION_TASK_IDS = Object.freeze(
         ),
   ),
 );
-const EXPECTED_GATE_IDS = Object.freeze(
-  Array.from({ length: 13 }, (_, index) => `G${String(index).padStart(2, "0")}`),
-);
+const EXPECTED_GATE_IDS = Object.freeze([
+  ...Array.from({ length: 11 }, (_, index) => `G${String(index).padStart(2, "0")}`),
+  "G10A",
+  "G11",
+  "G12",
+]);
 const EXPECTED_OPERATIONAL_IDS = Object.freeze([
   "CI-01",
   "CI-02",
@@ -246,6 +284,9 @@ const M11_TASK_IDS = Object.freeze(
 );
 const FIVE_COLUMN_TASK_BOARD_SECTIONS = Object.freeze(["M00", "M01", "operational"]);
 const TASK_BOARD_STATUSES = Object.freeze(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]);
+const EXPECTED_COMPLETED_IMPLEMENTATION_TASKS = 121;
+const EXPECTED_COMPLETED_GATES = 11;
+const SC_02_COMPLETE_ADAPT_MARKER = "**Status:** Complete on 2026-09-10. Decision: **`adapt`**.";
 
 async function currentCi02ContractDocuments() {
   return Object.fromEntries(
@@ -301,11 +342,11 @@ function parseLivingDocumentStandards(source) {
 }
 
 function taskBoardSectionForId(id) {
-  const task = id.match(/^(M\d{2})-T\d{2}[A-Z]?$/u);
+  const task = id.match(/^(M\d{2}[A-Z]?)-T\d{2}[A-Z]?$/u);
   if (task !== null) {
     return task[1];
   }
-  const gate = id.match(/^G(\d{2})$/u);
+  const gate = id.match(/^G(\d{2}[A-Z]?)$/u);
   return gate === null ? "operational" : `M${gate[1]}`;
 }
 
@@ -342,8 +383,121 @@ function taskBoardHeaders(section) {
     : ["ID", "Status", "Depends on", "Deliverable / evidence"];
 }
 
-function taskBoardContentProjection(rows) {
-  return rows.map(({ section, cells }) => [section, cells[0], ...cells.slice(2)]);
+function historicalTaskBoardContentProjection(rows, normalizeAuthorizedDependencies = false) {
+  const newPlanningIds = new Set([...M10A_TASK_IDS, "G10A"]);
+  return rows
+    .filter(({ cells }) => !newPlanningIds.has(cells[0]))
+    .map(({ section, cells }) => {
+      const projectedCells = [...cells];
+      if (
+        normalizeAuthorizedDependencies &&
+        (projectedCells[0] === "M11-T01" || projectedCells[0] === "M11-T08")
+      ) {
+        projectedCells[2] = "G10";
+      }
+      return [section, projectedCells[0], ...projectedCells.slice(2)];
+    });
+}
+
+function m10aDependencies(id, dependencyCell) {
+  if (dependencyCell === "M10A-T01–M10A-T27") return M10A_TASK_IDS.slice(0, 27);
+  if (dependencyCell === "M10A-T01–M10A-T28") return M10A_TASK_IDS;
+  assert.doesNotMatch(dependencyCell, /–/u, `${id} has an unsupported dependency range`);
+  return dependencyCell.split(", ");
+}
+
+function assertM10APlanningDag(rows) {
+  const planningIds = new Set([...M10A_TASK_IDS, "G10A"]);
+  const dependencies = new Map();
+  for (const { cells } of rows.filter(({ section }) => section === "M10A")) {
+    const [id, , dependencyCell] = cells;
+    const expanded = m10aDependencies(id, dependencyCell);
+    assert.equal(new Set(expanded).size, expanded.length, `${id} repeats a dependency`);
+    for (const dependency of expanded) {
+      assert.ok(
+        dependency === "G10" || planningIds.has(dependency),
+        `${id} has unknown dependency ${dependency}`,
+      );
+      assert.notEqual(dependency, id, `${id} cannot depend on itself`);
+    }
+    dependencies.set(
+      id,
+      expanded.filter((dependency) => planningIds.has(dependency)),
+    );
+  }
+
+  const visited = new Set();
+  const visiting = new Set();
+  function visit(id) {
+    if (visited.has(id)) return;
+    assert.ok(!visiting.has(id), `M10A dependency cycle reaches ${id}`);
+    visiting.add(id);
+    for (const dependency of dependencies.get(id) ?? []) visit(dependency);
+    visiting.delete(id);
+    visited.add(id);
+  }
+  for (const id of planningIds) visit(id);
+}
+
+function assertPreM11PlanningInventory({ rows, statuses }) {
+  const m10aRows = rows.filter(({ section }) => section === "M10A");
+  assert.deepEqual(
+    m10aRows.map(({ cells }) => cells[0]),
+    [...M10A_TASK_IDS, "G10A"],
+    "M10A task or gate inventory drifted",
+  );
+  for (const taskId of M10A_TASK_IDS) {
+    const row = m10aRows.find(({ cells }) => cells[0] === taskId);
+    assert.ok(row !== undefined, `missing ${taskId}`);
+    const expectedStatus = taskId === "M10A-T01" ? "IN_PROGRESS" : "NOT_STARTED";
+    assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
+    assert.equal(
+      row.cells[2],
+      M10A_TASK_DEPENDENCIES[taskId],
+      `${taskId} dependency contract drifted`,
+    );
+  }
+  const gateRow = m10aRows.find(({ cells }) => cells[0] === "G10A");
+  assert.ok(gateRow !== undefined, "missing G10A");
+  assert.equal(gateRow.cells[1], "NOT_STARTED", "G10A cannot pass while M10A-T01 is active");
+  assert.equal(gateRow.cells[2], "M10A-T01–M10A-T28", "G10A dependency contract drifted");
+  assertM10APlanningDag(rows);
+
+  for (const taskId of ["M11-T01", "M11-T08"]) {
+    const row = rows.find(({ cells }) => cells[0] === taskId);
+    assert.ok(row !== undefined, `missing ${taskId}`);
+    assert.equal(row.cells[2], "G10, G10A", `${taskId} must wait for both pre-M11 gates`);
+  }
+  assert.ok(
+    M10_TASK_IDS.every((id) => statuses.get(id) === "DONE"),
+    "historical M10 task completion drifted",
+  );
+  assert.equal(statuses.get("G10"), "DONE", "historical G10 completion drifted");
+}
+
+function replaceTaskBoardCell(source, id, cellIndex, replacement) {
+  let matches = 0;
+  const result = source
+    .split(/\r?\n/u)
+    .map((line) => {
+      if (!line.startsWith("|")) return line;
+      const cells = splitMarkdownTableRow(line);
+      if (cells[0] !== id) return line;
+      matches += 1;
+      cells[cellIndex] = replacement;
+      return `| ${cells.join(" | ")} |`;
+    })
+    .join("\n");
+  assert.equal(matches, 1, `expected one task-board row for ${id}`);
+  return result;
+}
+
+function taskBoardRowLine(source, id) {
+  const rows = source
+    .split(/\r?\n/u)
+    .filter((line) => line.startsWith("|") && splitMarkdownTableRow(line)[0] === id);
+  assert.equal(rows.length, 1, `expected one task-board row for ${id}`);
+  return rows[0];
 }
 
 function markdownH2Section(source, heading) {
@@ -366,7 +520,7 @@ function parseTaskBoard(source) {
   for (const line of source.split(/\r?\n/u)) {
     if (line.startsWith("## ")) {
       currentSection = null;
-      const milestoneHeading = line.match(/^## (M\d{2})\s+—\s+.+$/u);
+      const milestoneHeading = line.match(/^## (M\d{2}[A-Z]?)\s+—\s+.+$/u);
       if (milestoneHeading !== null) {
         currentSection = milestoneHeading[1];
       } else if (
@@ -413,7 +567,10 @@ function parseTaskBoard(source) {
     } else {
       assert.equal(cells.length, expectedHeaders.length, `invalid row width for ${currentSection}`);
       const [id, status] = cells;
-      assert.match(id, /^(?:M\d{2}-T\d{2}[A-Z]?|G\d{2}|(?:CI|SEC|AR)-\d{2}|I\d{2}-\d{2})$/u);
+      assert.match(
+        id,
+        /^(?:M\d{2}[A-Z]?-T\d{2}[A-Z]?|G\d{2}[A-Z]?|(?:CI|SEC|AR)-\d{2}|I\d{2}-\d{2})$/u,
+      );
       assert.ok(TASK_BOARD_STATUSES.includes(status), `invalid status ${status} for ${id}`);
       assert.ok(
         cells.every((cell) => cell.length > 0),
@@ -609,20 +766,20 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 110,
-    verifierCount: 110,
-    rootTestCount: 110,
+    proofCount: 111,
+    verifierCount: 111,
+    rootTestCount: 111,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
-    legacyPrerequisiteCount: 735,
-    legacyPrerequisiteSha256: "d5c5b2d2b82fe15af293459b8c2c63a163f1340e191fd5fa6ff4767ebd8fddea",
-    legacyLeafInvocationCount: 4549,
-    legacyLeafInvocationSha256: "62dedd5a67a1832462724423afea6c75de824a5c08f07cd5978fad634bc61a66",
-    distinctLeafWorkloadCount: 339,
-    distinctLeafWorkloadSha256: "329381d62a686d7c24995d3ed0ce5da17d189c6652e5f7d79a4f955478a6fe10",
-    testConfigurationFileCount: 1,
-    workspaceTestScriptCount: 16,
-    workspaceTestScriptSha256: "73b68c61533e2947169ba3e2298a9f13ec261ae00c32184773402bf03fcce715",
+    legacyPrerequisiteCount: 746,
+    legacyPrerequisiteSha256: "3d890406ade04b14dcac9fcb39ce4900304d570b33de03af3811d4e80b547a62",
+    legacyLeafInvocationCount: 4562,
+    legacyLeafInvocationSha256: "db047394d958dad89d07c1fb299e68069892976920d0d56bc2a7685e7792f3d0",
+    distinctLeafWorkloadCount: 346,
+    distinctLeafWorkloadSha256: "dde55d32faf7fcffa87875505d6d955703a57f1a0530069129c3d3ca4990d0ef",
+    testConfigurationFileCount: 2,
+    workspaceTestScriptCount: 17,
+    workspaceTestScriptSha256: "f25499af8cd7f541d55f3a8c5e631ecf39034908a5897cb567cab49a816e8f8c",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
     workspacePackageGlobs: ["apps/*", "packages/*"],
   });
@@ -735,13 +892,14 @@ test("task board retains its canonical inventory without narrative appendices", 
   assert.deepEqual(implementationIds.sort(), [...EXPECTED_IMPLEMENTATION_TASK_IDS].sort());
   assert.deepEqual(gateIds.sort(), [...EXPECTED_GATE_IDS].sort());
   assert.deepEqual(operationalIds.sort(), [...EXPECTED_OPERATIONAL_IDS].sort());
-  assert.equal(statuses.size, 173);
+  assert.equal(statuses.size, 202);
   assert.equal(tableLineCount, statuses.size + EXPECTED_TASK_BOARD_SECTIONS.length * 2);
   assert.deepEqual(sectionOrder, EXPECTED_TASK_BOARD_SECTIONS);
+  assertPreM11PlanningInventory({ rows, statuses });
   assert.deepEqual(
-    taskBoardContentProjection(rows),
-    taskBoardContentProjection(archivedTaskBoard.rows),
-    "task dependencies, deliverables, evidence, or row order drifted from the M10 snapshot",
+    historicalTaskBoardContentProjection(rows, true),
+    historicalTaskBoardContentProjection(archivedTaskBoard.rows),
+    "historical task dependencies, deliverables, evidence, or row order drifted from the M10 snapshot beyond the two authorized G10A dependency additions",
   );
   assert.deepEqual(
     splitMarkdownTableRow("| ID | Status | Depends on | Deliverable \\| evidence |"),
@@ -802,7 +960,7 @@ test("task board retains its canonical inventory without narrative appendices", 
   }
   assert.doesNotMatch(
     taskBoard,
-    /^#{2,6}\s+(?:M\d{2}-T\d{2}[A-Z]?|G\d{2}|(?:CI|SEC|AR)-\d{2}|I\d{2}-\d{2})(?:\s|$)/mu,
+    /^#{2,6}\s+(?:M\d{2}[A-Z]?-T\d{2}[A-Z]?|G\d{2}[A-Z]?|(?:CI|SEC|AR)-\d{2}|I\d{2}-\d{2})(?:\s|$)/mu,
   );
 
   const completedTasks = EXPECTED_IMPLEMENTATION_TASK_IDS.filter(
@@ -813,6 +971,9 @@ test("task board retains its canonical inventory without narrative appendices", 
   const completionPercent = Math.round(
     (completedTasks / EXPECTED_IMPLEMENTATION_TASK_IDS.length) * 100,
   );
+  assert.equal(completedTasks, EXPECTED_COMPLETED_IMPLEMENTATION_TASKS);
+  assert.equal(completedGates, EXPECTED_COMPLETED_GATES);
+  assert.equal(completionPercent, 69);
 
   const readme = await readFile(resolve(WORKSPACE_ROOT, "README.md"), "utf8");
   const projectStatus = await readFile(resolve(WORKSPACE_ROOT, "PROJECT-STATUS.md"), "utf8");
@@ -869,11 +1030,91 @@ test("task board retains its canonical inventory without narrative appendices", 
   );
   assert.equal(statuses.get("G11"), "NOT_STARTED");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
+  assert.ok(normalizedReadme.includes("**Active task:** `M10A-T01`"));
+  assert.ok(normalizedProjectStatus.includes("**M10A-T01 is IN_PROGRESS**"));
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
   assert.ok(normalizedStartHere.includes("M11 başlamadı."));
-  assert.ok(normalizedSc02.includes("**Status:** `NOT_STARTED`."));
-  assert.doesNotMatch(readme, /^\*\*M\d{2}-T\d{2}/gmu);
-  assert.doesNotMatch(projectStatus, /^## M\d{2}-T\d{2}/gmu);
+  assert.equal(
+    normalizedSc02.split(SC_02_COMPLETE_ADAPT_MARKER).length - 1,
+    1,
+    "SC-02 must record the exact complete/adapt decision once",
+  );
+  assert.doesNotMatch(readme, /^\*\*M\d{2}[A-Z]?-T\d{2}/gmu);
+  assert.doesNotMatch(projectStatus, /^## M\d{2}[A-Z]?-T\d{2}/gmu);
+});
+
+test("pre-M11 planning inventory rejects row, dependency, count, or gate-status drift", async () => {
+  const taskBoard = await readFile(resolve(WORKSPACE_ROOT, "docs/plan/TASKS.md"), "utf8");
+
+  const removedRow = taskBoard.replace(`${taskBoardRowLine(taskBoard, "M10A-T14")}\n`, "");
+  assert.throws(
+    () => assertPreM11PlanningInventory(parseTaskBoard(removedRow)),
+    /M10A task or gate inventory drifted/u,
+  );
+
+  const duplicateRow = taskBoard.replace(
+    taskBoardRowLine(taskBoard, "M10A-T02"),
+    `${taskBoardRowLine(taskBoard, "M10A-T02")}\n${taskBoardRowLine(taskBoard, "M10A-T02")}`,
+  );
+  assert.throws(() => parseTaskBoard(duplicateRow), /duplicate task-board ID M10A-T02/u);
+
+  const unknownRow = taskBoard.replace(
+    taskBoardRowLine(taskBoard, "G10A"),
+    `| M10A-T29 | NOT_STARTED | M10A-T28 | Unreviewed planning row |\n${taskBoardRowLine(taskBoard, "G10A")}`,
+  );
+  assert.throws(
+    () => assertPreM11PlanningInventory(parseTaskBoard(unknownRow)),
+    /M10A task or gate inventory drifted/u,
+  );
+
+  const wrongDependency = replaceTaskBoardCell(taskBoard, "M10A-T22", 2, "M10A-T21");
+  assert.throws(
+    () => assertPreM11PlanningInventory(parseTaskBoard(wrongDependency)),
+    /M10A-T22 dependency contract drifted/u,
+  );
+
+  const unknownDependency = replaceTaskBoardCell(taskBoard, "M10A-T02", 2, "M10A-T99");
+  assert.throws(
+    () => assertM10APlanningDag(parseTaskBoard(unknownDependency).rows),
+    /M10A-T02 has unknown dependency M10A-T99/u,
+  );
+
+  const selfDependency = replaceTaskBoardCell(taskBoard, "M10A-T02", 2, "M10A-T02");
+  assert.throws(
+    () => assertM10APlanningDag(parseTaskBoard(selfDependency).rows),
+    /M10A-T02 cannot depend on itself/u,
+  );
+
+  const unsupportedRange = replaceTaskBoardCell(taskBoard, "M10A-T02", 2, "M10A-T01–M10A-T99");
+  assert.throws(
+    () => assertM10APlanningDag(parseTaskBoard(unsupportedRange).rows),
+    /M10A-T02 has an unsupported dependency range/u,
+  );
+
+  const cyclicDependencies = replaceTaskBoardCell(taskBoard, "M10A-T02", 2, "M10A-T03");
+  assert.throws(
+    () => assertM10APlanningDag(parseTaskBoard(cyclicDependencies).rows),
+    /M10A dependency cycle reaches M10A-T02/u,
+  );
+
+  const falseGatePass = replaceTaskBoardCell(taskBoard, "G10A", 1, "DONE");
+  assert.throws(
+    () => assertPreM11PlanningInventory(parseTaskBoard(falseGatePass)),
+    /G10A cannot pass while M10A-T01 is active/u,
+  );
+
+  for (const status of ["DONE", "NOT_STARTED"]) {
+    const falseTaskStatus = replaceTaskBoardCell(taskBoard, "M10A-T01", 1, status);
+    assert.throws(
+      () => assertPreM11PlanningInventory(parseTaskBoard(falseTaskStatus)),
+      /M10A-T01 must remain IN_PROGRESS/u,
+    );
+  }
+  const jumpedAhead = replaceTaskBoardCell(taskBoard, "M10A-T02", 1, "IN_PROGRESS");
+  assert.throws(
+    () => assertPreM11PlanningInventory(parseTaskBoard(jumpedAhead)),
+    /M10A-T02 must remain NOT_STARTED/u,
+  );
 });
 
 test("M11 guidance pins the complete Runtime Core baseline authority", async () => {
@@ -1267,6 +1508,110 @@ test("inventory validation rejects hidden test configuration and manifest overri
   assert.throws(() => validateProofInventory(packageFieldInventory), QualityGateError);
 });
 
+test("both inventories require exact starter browser scripts and the two reviewed Vite configs", async () => {
+  const baseline = await currentInventory();
+  const starter = baseline.workspacePackages.find(
+    ({ name }) => name === "@desen/starter-catalog-web-proof",
+  );
+  assert.ok(starter);
+  for (const validate of [validateProofInventory, validateRepositoryWorkloadInputs]) {
+    assert.equal(validate(baseline).proofCount, 111);
+    for (const script of Object.keys(starter.scripts)) {
+      const substituted = clone(baseline);
+      substituted.workspacePackages.find(
+        ({ name }) => name === "@desen/starter-catalog-web-proof",
+      ).scripts[script] = "echo skipped";
+      assert.throws(
+        () => validate(substituted),
+        /starter browser proof workspace package script drifted/u,
+      );
+    }
+    const widened = clone(baseline);
+    widened.workspacePackages.find(
+      ({ name }) => name === "@desen/starter-catalog-web-proof",
+    ).scripts["test:e2e:skip"] = "echo skipped";
+    assert.throws(() => validate(widened), /starter browser proof workspace package script set/u);
+
+    const missing = clone(baseline);
+    missing.testConfigurationFiles = missing.testConfigurationFiles.filter(
+      (file) => file !== "apps/starter-catalog-web-proof/vite.config.ts",
+    );
+    assert.throws(() => validate(missing), /test-configuration file set/u);
+    const foreign = clone(baseline);
+    foreign.testConfigurationFiles.push("packages/starter-catalog-web/vitest.config.ts");
+    assert.throws(() => validate(foreign), /test-configuration file set/u);
+  }
+});
+
+test("every hosted route that can execute T01 installs its exact Chromium runtime first", async () => {
+  const source = await readFile(resolve(WORKSPACE_ROOT, ".github/workflows/ci.yml"), "utf8");
+  runToolchainSecurityProbe(
+    ["json-schema-to-typescript", "js-yaml"],
+    ({ assert, dependency: yaml, parameters }) => {
+      const load = yaml.DEFAULT_SAFE_SCHEMA ? yaml.safeLoad : yaml.load;
+      const workflow = load(parameters.source);
+      const command =
+        "pnpm --filter @desen/starter-catalog-web-proof exec playwright install --with-deps chromium";
+      const routes = [
+        ["proof-c", "Run fresh exhaustive shard"],
+        ["quality", "Run required quality gate"],
+        ["legacy-rollback", "Run retained legacy rollback"],
+      ];
+      const validate = (candidate) => {
+        for (const [jobId, executionName] of routes) {
+          const steps = candidate.jobs[jobId].steps;
+          const installs = steps.filter(
+            ({ name }) => name === "Install starter proof Chromium runtime",
+          );
+          assert.equal(installs.length, 1, `${jobId} must install Chromium exactly once`);
+          assert.equal(installs[0].run, command);
+          assert.equal(
+            installs[0].if,
+            jobId === "quality"
+              ? "${{ needs.quality-route.outputs.mode == 'AFFECTED' }}"
+              : undefined,
+          );
+          const installIndex = steps.indexOf(installs[0]);
+          assert.ok(
+            installIndex > steps.findIndex(({ name }) => name === "Install exact dependencies"),
+          );
+          assert.ok(installIndex < steps.findIndex(({ name }) => name === executionName));
+        }
+        const existingBrowserInstall = candidate.jobs["browser-e2e"].steps.filter(
+          ({ name }) => name === "Install Chromium runtime",
+        );
+        assert.equal(existingBrowserInstall.length, 1);
+        assert.equal(
+          existingBrowserInstall[0].run,
+          "pnpm --filter @desen/app-browser-e2e exec playwright install --with-deps chromium",
+        );
+      };
+      validate(workflow);
+      for (const [jobId] of routes) {
+        for (const mutate of [
+          (steps, index) => steps.splice(index, 1),
+          (steps, index) => {
+            steps[index].run = "echo skipped";
+          },
+          (steps, index) => {
+            steps[index].if = "false";
+          },
+          (steps, index) => steps.push(...steps.splice(index, 1)),
+        ]) {
+          const candidate = structuredClone(workflow);
+          const steps = candidate.jobs[jobId].steps;
+          mutate(
+            steps,
+            steps.findIndex(({ name }) => name === "Install starter proof Chromium runtime"),
+          );
+          assert.throws(() => validate(candidate));
+        }
+      }
+    },
+    { source },
+  );
+});
+
 test("inventory validation pins every workspace package test command", async () => {
   const inventory = await currentInventory();
   inventory.workspacePackages = clone(inventory.workspacePackages);
@@ -1367,8 +1712,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 230);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 110);
+  assert.equal(steps.length, 232);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 111);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -1871,8 +2216,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 230,
-    planSha256: "f8a63dd74709c8492135785402caaed0592e6deb36b3ad0ef1ed0f592889cf7c",
+    stepCount: 232,
+    planSha256: "d6dc66b2c5c3845638f8be1d03fde5bfd688cec26315b223812c244c42eae772",
   });
 
   const missingTypecheck = clone(steps);

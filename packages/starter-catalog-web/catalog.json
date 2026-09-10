@@ -1,0 +1,1293 @@
+{
+  "behaviors": {},
+  "components": {
+    "run.desen.starter/Button": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Actions",
+        "defaultProps": {
+          "disabled": false,
+          "label": "Button",
+          "loading": false
+        },
+        "displayName": "Button",
+        "icon": "button",
+        "resize": {
+          "horizontal": "hug",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "disabled": false,
+              "label": "Continue",
+              "loading": false
+            }
+          },
+          "disabled": {
+            "props": {
+              "disabled": true,
+              "label": "Continue",
+              "loading": false
+            }
+          },
+          "loading": {
+            "props": {
+              "disabled": false,
+              "label": "Continue",
+              "loading": true
+            }
+          }
+        }
+      },
+      "category": "action",
+      "description": "DESEN Neutral action button.",
+      "events": {
+        "press": {
+          "description": "Emitted after an admitted user activation.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "label": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "loading": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "label": {
+          "description": "Visible button label.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable outer action surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "hover",
+        "focus",
+        "pressed",
+        "disabled",
+        "loading"
+      ]
+    },
+    "run.desen.starter/Dialog": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Overlays",
+        "defaultProps": {
+          "closeLabel": "Close dialog",
+          "description": "Dialog description",
+          "disabled": false,
+          "title": "Dialog title",
+          "triggerLabel": "Open dialog"
+        },
+        "displayName": "Dialog",
+        "icon": "dialog",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "closeLabel": "Close dialog",
+              "description": "Dialog description",
+              "disabled": false,
+              "title": "Dialog title",
+              "triggerLabel": "Open dialog"
+            }
+          },
+          "disabled": {
+            "props": {
+              "closeLabel": "Close dialog",
+              "description": "Dialog description",
+              "disabled": true,
+              "title": "Dialog title",
+              "triggerLabel": "Open dialog"
+            }
+          }
+        }
+      },
+      "category": "overlay",
+      "description": "DESEN Neutral modal dialog.",
+      "events": {
+        "openChange": {
+          "description": "Emitted whenever the trusted dialog open state changes.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "open": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "open"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "closeLabel": {
+            "default": "Close dialog",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "default": "Dialog description",
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "title": {
+            "default": "Dialog title",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "triggerLabel": {
+            "default": "Open dialog",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "slots": {
+        "content": {
+          "accepts": [
+            "run.desen.starter/Button",
+            "run.desen.starter/Select",
+            "run.desen.starter/Dialog"
+          ],
+          "description": "Managed dialog body content.",
+          "maxItems": 16,
+          "minItems": 1,
+          "required": true
+        }
+      },
+      "styleParts": {
+        "backdrop": {
+          "description": "Modal backdrop.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "close": {
+          "description": "Internal close control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "description": {
+          "description": "Dialog descriptive text.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "popup": {
+          "description": "Portaled dialog surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable dialog boundary.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "title": {
+          "description": "Dialog heading.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "trigger": {
+          "description": "Internal dialog trigger.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "focus",
+        "open",
+        "disabled"
+      ]
+    },
+    "run.desen.starter/Select": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Inputs",
+        "defaultProps": {
+          "defaultValue": "option-1",
+          "disabled": false,
+          "label": "Select",
+          "options": [
+            {
+              "disabled": false,
+              "label": "Option 1",
+              "value": "option-1"
+            }
+          ]
+        },
+        "displayName": "Select",
+        "icon": "select",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "defaultValue": "first",
+              "disabled": false,
+              "label": "Select an option",
+              "options": [
+                {
+                  "disabled": false,
+                  "label": "First",
+                  "value": "first"
+                },
+                {
+                  "disabled": false,
+                  "label": "Second",
+                  "value": "second"
+                }
+              ]
+            }
+          },
+          "disabled": {
+            "props": {
+              "defaultValue": "first",
+              "disabled": true,
+              "label": "Select an option",
+              "options": [
+                {
+                  "disabled": false,
+                  "label": "First",
+                  "value": "first"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "category": "input",
+      "description": "DESEN Neutral single-value select.",
+      "events": {
+        "change": {
+          "description": "Emitted with the newly selected inert option value.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "defaultValue": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "label": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "disabled": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "label": {
+                  "maxLength": 256,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "value": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value",
+                "label"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "label",
+          "options"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "item": {
+          "description": "One selectable option.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "label": {
+          "description": "Visible select label.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "popup": {
+          "description": "Portaled options popup.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable outer select surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "trigger": {
+          "description": "Interactive select trigger.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal border color."
+              },
+              "borderRadius": {
+                "description": "Corner radius in CSS pixels.",
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit hexadecimal foreground color."
+              },
+              "fontSize": {
+                "description": "Font size in CSS pixels.",
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "padding": {
+                "description": "Uniform padding in CSS pixels.",
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "hover",
+        "focus",
+        "open",
+        "selected",
+        "highlighted",
+        "disabled"
+      ]
+    }
+  },
+  "description": "DESEN Neutral Web–React starter capability contracts.",
+  "desen": "0.1.0",
+  "id": "run.desen.starter.web",
+  "kind": "desen.catalog",
+  "operations": {},
+  "packageDigest": "sha256:4a9c4029bade26ab398a47823cc8bec27c92c356dc77a73e1e902867f9051659",
+  "resources": {},
+  "target": "web-react",
+  "version": "0.1.0"
+}

@@ -95,7 +95,6 @@ const CURRENT_EDITOR_RUNTIME_PATHS = Object.freeze([
 ]);
 const RETAINED_EDITOR_RUNTIME_PATHS = Object.freeze([
   "packages/editor-core/dist/source-document.js",
-  "packages/editor-core/dist/stable-id-insert.js",
   "packages/editor-core/dist/structural-edits.js",
 ]);
 const ISOLATED_RUNTIME_PATHS = Object.freeze([
@@ -168,6 +167,7 @@ const RETAINED_T04_RECEIPT_PATHS = Object.freeze(
       ![
         PACKAGE_PATH,
         INDEX_SOURCE_PATH,
+        "packages/editor-core/src/stable-id-insert.ts",
         STATE_BINDING_EDITS_SOURCE_PATH,
         EVENT_ACTION_EDITS_SOURCE_PATH,
         PERSISTENCE_SOURCE_PATH,
@@ -176,6 +176,10 @@ const RETAINED_T04_RECEIPT_PATHS = Object.freeze(
         "packages/editor-core/dist/index.d.ts.map",
         "packages/editor-core/dist/index.js",
         "packages/editor-core/dist/index.js.map",
+        "packages/editor-core/dist/stable-id-insert.d.ts",
+        "packages/editor-core/dist/stable-id-insert.d.ts.map",
+        "packages/editor-core/dist/stable-id-insert.js",
+        "packages/editor-core/dist/stable-id-insert.js.map",
         "packages/editor-core/dist/state-binding-edits.d.ts",
         "packages/editor-core/dist/state-binding-edits.d.ts.map",
         "packages/editor-core/dist/state-binding-edits.js",
@@ -213,16 +217,11 @@ const RETAINED_T03_RECEIPT_PATHS = Object.freeze([
   "packages/editor-core/tsconfig.build.json",
   "packages/editor-core/tsconfig.public-package.json",
   "packages/editor-core/src/source-document.ts",
-  "packages/editor-core/src/stable-id-insert.ts",
   "packages/editor-core/src/structural-edits.ts",
   "packages/editor-core/dist/source-document.d.ts",
   "packages/editor-core/dist/source-document.d.ts.map",
   "packages/editor-core/dist/source-document.js",
   "packages/editor-core/dist/source-document.js.map",
-  "packages/editor-core/dist/stable-id-insert.d.ts",
-  "packages/editor-core/dist/stable-id-insert.d.ts.map",
-  "packages/editor-core/dist/stable-id-insert.js",
-  "packages/editor-core/dist/stable-id-insert.js.map",
   "packages/editor-core/dist/structural-edits.d.ts",
   "packages/editor-core/dist/structural-edits.d.ts.map",
   "packages/editor-core/dist/structural-edits.js",
@@ -438,6 +437,7 @@ const CONTINUOUS_VALIDATION_TYPE_EXPORTS = Object.freeze(
 const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
   [
     ...EXPECTED_RUNTIME_EXPORTS,
+    "insertDesenEditorSubtree",
     ...STATE_BINDING_RUNTIME_EXPORTS,
     ...EVENT_ACTION_RUNTIME_EXPORTS,
     ...PERSISTENCE_RUNTIME_EXPORTS,
@@ -447,6 +447,10 @@ const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
 const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
   [
     ...EXPECTED_TYPE_EXPORTS,
+    "DesenEditorSubtreeInsertCommand",
+    "DesenEditorSubtreeInsertFailure",
+    "DesenEditorSubtreeInsertResult",
+    "DesenEditorSubtreeInsertSuccess",
     ...STATE_BINDING_TYPE_EXPORTS,
     ...EVENT_ACTION_TYPE_EXPORTS,
     ...PERSISTENCE_TYPE_EXPORTS,

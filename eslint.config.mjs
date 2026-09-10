@@ -14,6 +14,7 @@ const neutralFiles = [
 
 const browserFiles = [
   "apps/desen-app/**/*.{ts,tsx}",
+  "apps/starter-catalog-web-proof/src/**/*.{ts,tsx}",
   "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
   "apps/desen-app-browser-e2e/proof-application.tsx",
   "apps/desen-run/**/*.{ts,tsx}",
@@ -21,6 +22,7 @@ const browserFiles = [
   "packages/runtime-web/**/*.{ts,tsx}",
   "packages/editor-web/**/*.{ts,tsx}",
   "packages/reference-catalog-web/**/*.{ts,tsx}",
+  "packages/starter-catalog-web/**/*.{ts,tsx}",
 ];
 
 const nodeFiles = [
@@ -28,7 +30,12 @@ const nodeFiles = [
   "apps/desen-app/dev/**/*.{js,mjs,ts}",
   "apps/desen-app-browser-e2e/*.config.ts",
   "apps/desen-app-browser-e2e/*.pw.ts",
+  "apps/starter-catalog-web-proof/*.config.ts",
+  "apps/starter-catalog-web-proof/*.pw.ts",
+  "apps/starter-catalog-web-proof/*.mjs",
+  "apps/starter-catalog-web-proof/scripts/*.mjs",
   "scripts/**/*.{js,cjs,mjs,ts}",
+  "packages/starter-catalog-web/scripts/*.mjs",
   "tests/**/*.{js,cjs,mjs,ts}",
   "*.config.{js,cjs,mjs,ts}",
 ];
