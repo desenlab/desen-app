@@ -1,5 +1,7 @@
 # DESEN 0.1.0 Reference Implementation Master Plan
 
+Last reviewed: 2026-09-10
+
 ## Objective
 
 Produce evidence that DESEN 0.1.0 can author, validate, publish, activate, and execute a managed

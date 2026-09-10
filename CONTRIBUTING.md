@@ -32,6 +32,8 @@ A task is complete only when:
 - Architectural changes require an ADR.
 - Protocol ambiguities require an entry in `docs/plan/PROTOCOL-FINDINGS.md`.
 - Public API changes require a changeset once package publishing is enabled.
+- Keep living entry documents within the roles and budgets in
+  `docs/standards/DOCUMENTATION-STANDARDS.md`; task-level receipts belong in their proof document.
 
 ## Validation
 

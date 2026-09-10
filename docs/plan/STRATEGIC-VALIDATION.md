@@ -1,6 +1,6 @@
 # Strategic Validation Checkpoints
 
-Last reviewed: 2026-09-04
+Last reviewed: 2026-09-10
 
 ## Purpose
 
@@ -128,6 +128,9 @@ Selected primary references:
 ## SC-02 — Problem and pilot validation
 
 **When:** After `G10` and before `M11-T01` or `M11-T08`.
+
+**Status:** `NOT_STARTED`. G10 is complete; repository/documentation consolidation does not satisfy
+this product-validation checkpoint and does not authorize M11.
 
 **Why then:** `G10` produces a repeatable demonstration of the actual claim instead of asking
 teams to react to a protocol document or mockup. `M11` would otherwise expand the capability
