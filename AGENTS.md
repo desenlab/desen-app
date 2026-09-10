@@ -32,6 +32,18 @@
   the same commit.
 - Do not include AI or tool co-author trailers in commits.
 
+## Documentation lifecycle
+
+- Keep `README.md` as the stable product/repository entry point; do not append task receipts.
+- Keep `PROJECT-STATUS.md` limited to the current transition, verified closure, and next authority.
+- Keep `docs/plan/START-HERE.tr.md` as onboarding and `docs/plan/TASKS.md` as the canonical row-based
+  task board.
+- Put implementation detail, hashes, hosted receipts, and limitations in the owning proof document;
+  put decisions in ADRs, protocol ambiguity in `docs/plan/PROTOCOL-FINDINGS.md`, and cleanup
+  obligations in `docs/plan/DEBT-REGISTER.md`.
+- Follow the living-document budgets and historical-preservation rules in
+  `docs/standards/DOCUMENTATION-STANDARDS.md`. Do not increase a budget as part of an ordinary task.
+
 ## Per-task quality contract (CI-02)
 
 For an ordinary `T` task, run this exact bounded local baseline:

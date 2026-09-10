@@ -23,6 +23,7 @@ import {
   validateProofInventory,
   validateQualityGatePlan,
 } from "../run-ci-quality-gate.mjs";
+import { RUNTIME_CORE_BASELINE_CAPTURE } from "../lib/runtime-core-baseline-proof.mjs";
 
 const WORKSPACE_ROOT = resolve(import.meta.dirname, "../..");
 const CI_02_LOCAL_BASELINE = Object.freeze([
@@ -134,6 +135,117 @@ const CI_02_DOCUMENT_MARKERS = Object.freeze({
     "and leaves I07-05 plus the manual legacy",
   ]),
 });
+const PRE_CONSOLIDATION_DOCUMENTATION_SNAPSHOT = "70ac046c693b91fabba4c67cdaca6c5e33330d6a";
+const LIVING_DOCUMENT_CONTRACTS = Object.freeze([
+  Object.freeze({
+    path: "README.md",
+    maximumLines: 220,
+    purpose: "Product/repository introduction and first successful use",
+  }),
+  Object.freeze({
+    path: "PROJECT-STATUS.md",
+    maximumLines: 160,
+    purpose: "Current transition, verified closure, and next authority",
+  }),
+  Object.freeze({
+    path: "docs/plan/START-HERE.tr.md",
+    maximumLines: 180,
+    purpose: "Turkish contributor onboarding and working order",
+  }),
+  Object.freeze({
+    path: "docs/plan/TASKS.md",
+    maximumLines: 340,
+    purpose: "Canonical task status, dependencies, deliverables, evidence",
+  }),
+  Object.freeze({
+    path: "docs/architecture/ARCHITECTURE.md",
+    maximumLines: 320,
+    purpose: "Living system boundaries and dependency direction",
+  }),
+  Object.freeze({
+    path: "docs/standards/TESTING-STRATEGY.md",
+    maximumLines: 260,
+    purpose: "Test layers, evidence policy, and current browser profile",
+  }),
+  Object.freeze({
+    path: "docs/standards/CI-QUALITY-GATE.md",
+    maximumLines: 260,
+    purpose: "Current local/hosted quality-gate contract",
+  }),
+  Object.freeze({
+    path: "scripts/ci/README.md",
+    maximumLines: 260,
+    purpose: "CI operator map and safe-update workflow",
+  }),
+]);
+const DOCUMENTATION_STANDARDS_PATH = "docs/standards/DOCUMENTATION-STANDARDS.md";
+const RUNTIME_CORE_BASELINE_TREE = RUNTIME_CORE_BASELINE_CAPTURE.tree;
+const RUNTIME_CORE_BASELINE_DOCUMENTS = Object.freeze([
+  "PROJECT-STATUS.md",
+  "docs/plan/START-HERE.tr.md",
+  "docs/architecture/ARCHITECTURE.md",
+  "docs/standards/TESTING-STRATEGY.md",
+]);
+const TASK_MILESTONE_COUNTS = Object.freeze({
+  M00: 6,
+  M01: 8,
+  M02: 13,
+  M03: 10,
+  M04: 17,
+  M05: 9,
+  M06: 11,
+  M07: 11,
+  M08: 10,
+  M09: 14,
+  M10: 12,
+  M11: 14,
+  M12: 13,
+});
+const M10_TASK_IDS = Object.freeze([
+  "M10-T01",
+  "M10-T01A",
+  "M10-T01B",
+  "M10-T01C",
+  ...Array.from({ length: 8 }, (_, index) => `M10-T${String(index + 2).padStart(2, "0")}`),
+]);
+const EXPECTED_IMPLEMENTATION_TASK_IDS = Object.freeze(
+  Object.entries(TASK_MILESTONE_COUNTS).flatMap(([milestone, count]) =>
+    milestone === "M10"
+      ? M10_TASK_IDS
+      : Array.from(
+          { length: count },
+          (_, index) => `${milestone}-T${String(index + 1).padStart(2, "0")}`,
+        ),
+  ),
+);
+const EXPECTED_GATE_IDS = Object.freeze(
+  Array.from({ length: 13 }, (_, index) => `G${String(index).padStart(2, "0")}`),
+);
+const EXPECTED_OPERATIONAL_IDS = Object.freeze([
+  "CI-01",
+  "CI-02",
+  "CI-03",
+  "CI-04",
+  "AR-01",
+  "SEC-01",
+  "SEC-02",
+  "I07-01",
+  "I07-02",
+  "I07-03",
+  "I07-04",
+  "I07-05",
+]);
+const EXPECTED_TASK_BOARD_SECTIONS = Object.freeze([
+  "M00",
+  "M01",
+  "operational",
+  ...Object.keys(TASK_MILESTONE_COUNTS).slice(2),
+]);
+const M11_TASK_IDS = Object.freeze(
+  EXPECTED_IMPLEMENTATION_TASK_IDS.filter((id) => id.startsWith("M11-")),
+);
+const FIVE_COLUMN_TASK_BOARD_SECTIONS = Object.freeze(["M00", "M01", "operational"]);
+const TASK_BOARD_STATUSES = Object.freeze(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]);
 
 async function currentCi02ContractDocuments() {
   return Object.fromEntries(
@@ -152,6 +264,170 @@ function ci02ContractFailure(message) {
 
 function normalizeWhitespace(value) {
   return value.replace(/\s+/gu, " ").trim();
+}
+
+function countOccurrences(source, marker) {
+  return source.split(marker).length - 1;
+}
+
+function countTextLines(source) {
+  return source.split(/\r?\n/u).length - (source.endsWith("\n") ? 1 : 0);
+}
+
+function formatInteger(value) {
+  return String(value).replace(/\B(?=(\d{3})+(?!\d))/gu, ",");
+}
+
+function requiredMutation(source, search, replacement, label) {
+  const mutated = source.replace(search, replacement);
+  assert.notEqual(mutated, source, `mutation fixture did not match: ${label}`);
+  return mutated;
+}
+
+function parseLivingDocumentStandards(source) {
+  const contracts = new Map();
+  for (const line of source.split(/\r?\n/u)) {
+    const match = line.match(/^\|\s+`([^`]+)`\s+\|\s+(.+?)\s+\|\s+(\d+)\s+\|$/u);
+    if (match === null) {
+      continue;
+    }
+    assert.ok(!contracts.has(match[1]), `duplicate documentation contract for ${match[1]}`);
+    contracts.set(match[1], {
+      purpose: match[2],
+      maximumLines: Number(match[3]),
+    });
+  }
+  return contracts;
+}
+
+function taskBoardSectionForId(id) {
+  const task = id.match(/^(M\d{2})-T\d{2}[A-Z]?$/u);
+  if (task !== null) {
+    return task[1];
+  }
+  const gate = id.match(/^G(\d{2})$/u);
+  return gate === null ? "operational" : `M${gate[1]}`;
+}
+
+function splitMarkdownTableRow(line) {
+  assert.match(line, /^\|.*\|$/u, `malformed Markdown table row: ${line}`);
+  const cells = [];
+  let cell = "";
+  const body = line.slice(1, -1);
+
+  for (let index = 0; index < body.length; index += 1) {
+    const character = body[index];
+    if (character !== "|") {
+      cell += character;
+      continue;
+    }
+    let precedingBackslashes = 0;
+    for (let cursor = index - 1; cursor >= 0 && body[cursor] === "\\"; cursor -= 1) {
+      precedingBackslashes += 1;
+    }
+    if (precedingBackslashes % 2 === 1) {
+      cell += character;
+      continue;
+    }
+    cells.push(cell.trim());
+    cell = "";
+  }
+  cells.push(cell.trim());
+  return cells;
+}
+
+function taskBoardHeaders(section) {
+  return FIVE_COLUMN_TASK_BOARD_SECTIONS.includes(section)
+    ? ["ID", "Status", "Depends on", "Deliverable", "Evidence"]
+    : ["ID", "Status", "Depends on", "Deliverable / evidence"];
+}
+
+function taskBoardContentProjection(rows) {
+  return rows.map(({ section, cells }) => [section, cells[0], ...cells.slice(2)]);
+}
+
+function markdownH2Section(source, heading) {
+  const headingMarker = `## ${heading}`;
+  const start = source.indexOf(`${headingMarker}\n`);
+  assert.notEqual(start, -1, `missing Markdown section ${headingMarker}`);
+  const contentStart = start + headingMarker.length + 1;
+  const end = source.indexOf("\n## ", contentStart);
+  return source.slice(contentStart, end === -1 ? source.length : end);
+}
+
+function parseTaskBoard(source) {
+  const statuses = new Map();
+  const sectionStats = new Map();
+  const sectionOrder = [];
+  const rows = [];
+  let currentSection = null;
+  let tableLineCount = 0;
+
+  for (const line of source.split(/\r?\n/u)) {
+    if (line.startsWith("## ")) {
+      currentSection = null;
+      const milestoneHeading = line.match(/^## (M\d{2})\s+—\s+.+$/u);
+      if (milestoneHeading !== null) {
+        currentSection = milestoneHeading[1];
+      } else if (
+        line ===
+        "## Operational and infrastructure work — excluded from the implementation-task count"
+      ) {
+        currentSection = "operational";
+      }
+      if (currentSection !== null) {
+        assert.ok(
+          !sectionStats.has(currentSection),
+          `duplicate task-board section ${currentSection}`,
+        );
+        sectionStats.set(currentSection, { headers: 0, separators: 0, data: 0 });
+        sectionOrder.push(currentSection);
+      }
+      continue;
+    }
+    if (!line.startsWith("|")) {
+      continue;
+    }
+
+    assert.ok(currentSection !== null, "task-board table appears outside a governed section");
+    tableLineCount += 1;
+    const cells = splitMarkdownTableRow(line);
+    const expectedHeaders = taskBoardHeaders(currentSection);
+    const stats = sectionStats.get(currentSection);
+    assert.ok(stats !== undefined, `missing task-board section state for ${currentSection}`);
+
+    if (stats.headers === 0) {
+      assert.deepEqual(cells, expectedHeaders, `invalid task-board header for ${currentSection}`);
+      stats.headers += 1;
+    } else if (stats.separators === 0) {
+      assert.equal(
+        cells.length,
+        expectedHeaders.length,
+        `invalid separator width for ${currentSection}`,
+      );
+      assert.ok(
+        cells.every((cellValue) => /^:?-{3,}:?$/u.test(cellValue)),
+        `invalid task-board separator for ${currentSection}`,
+      );
+      stats.separators += 1;
+    } else {
+      assert.equal(cells.length, expectedHeaders.length, `invalid row width for ${currentSection}`);
+      const [id, status] = cells;
+      assert.match(id, /^(?:M\d{2}-T\d{2}[A-Z]?|G\d{2}|(?:CI|SEC|AR)-\d{2}|I\d{2}-\d{2})$/u);
+      assert.ok(TASK_BOARD_STATUSES.includes(status), `invalid status ${status} for ${id}`);
+      assert.ok(
+        cells.every((cell) => cell.length > 0),
+        `empty task-board cell for ${id}`,
+      );
+      assert.equal(taskBoardSectionForId(id), currentSection, `${id} is in the wrong section`);
+      assert.ok(!statuses.has(id), `duplicate task-board ID ${id}`);
+      statuses.set(id, status);
+      rows.push({ section: currentSection, cells });
+      stats.data += 1;
+    }
+  }
+
+  return { statuses, sectionStats, sectionOrder, rows, tableLineCount };
 }
 
 function assertNormalizedMarkerExactlyOnce(relativePath, source, marker, failureKind) {
@@ -361,6 +637,254 @@ test("CI-02 pins the bounded baseline, first hosted receipt, and conditional clo
     hostedReceiptDocumentCount: 3,
     conditionalClosureStatusDocumentCount: 4,
   });
+});
+
+test("living documentation stays within its reviewed role and line budget", async () => {
+  const standards = await readFile(resolve(WORKSPACE_ROOT, DOCUMENTATION_STANDARDS_PATH), "utf8");
+  const documentedContracts = parseLivingDocumentStandards(standards);
+  assert.equal(documentedContracts.size, LIVING_DOCUMENT_CONTRACTS.length);
+  assert.equal(countOccurrences(standards, PRE_CONSOLIDATION_DOCUMENTATION_SNAPSHOT), 1);
+
+  const commitExists = spawnSync(
+    "git",
+    ["cat-file", "-e", `${PRE_CONSOLIDATION_DOCUMENTATION_SNAPSHOT}^{commit}`],
+    { cwd: WORKSPACE_ROOT, encoding: "utf8" },
+  );
+  assert.equal(commitExists.status, 0, commitExists.stderr);
+  const isAncestor = spawnSync(
+    "git",
+    ["merge-base", "--is-ancestor", PRE_CONSOLIDATION_DOCUMENTATION_SNAPSHOT, "HEAD"],
+    { cwd: WORKSPACE_ROOT, encoding: "utf8" },
+  );
+  assert.equal(isAncestor.status, 0, isAncestor.stderr);
+
+  let archivedLineCount = 0;
+  let currentLineCount = 0;
+  let projectStatusSource = "";
+
+  for (const contract of LIVING_DOCUMENT_CONTRACTS) {
+    const source = await readFile(resolve(WORKSPACE_ROOT, contract.path), "utf8");
+    const lineCount = countTextLines(source);
+    assert.ok(
+      lineCount <= contract.maximumLines,
+      `${contract.path} has ${lineCount} lines; budget is ${contract.maximumLines}`,
+    );
+    assert.equal(
+      countOccurrences(source, PRE_CONSOLIDATION_DOCUMENTATION_SNAPSHOT),
+      0,
+      `${contract.path} duplicates the canonical archive hash`,
+    );
+    assert.equal(
+      (
+        source.match(/\]\([^)]*DOCUMENTATION-STANDARDS\.md#document-lifecycle-and-ownership\)/gu) ??
+        []
+      ).length,
+      1,
+      `${contract.path} must link to the canonical archive owner exactly once`,
+    );
+    assert.deepEqual(
+      documentedContracts.get(contract.path),
+      { purpose: contract.purpose, maximumLines: contract.maximumLines },
+      `${contract.path} lifecycle contract drifted from documentation standards`,
+    );
+    const archivedDocument = spawnSync(
+      "git",
+      ["show", `${PRE_CONSOLIDATION_DOCUMENTATION_SNAPSHOT}:${contract.path}`],
+      { cwd: WORKSPACE_ROOT, encoding: "utf8" },
+    );
+    assert.equal(
+      archivedDocument.status,
+      0,
+      `${contract.path} is not recoverable from the documented archive: ${archivedDocument.stderr}`,
+    );
+    archivedLineCount += countTextLines(archivedDocument.stdout);
+    currentLineCount += lineCount;
+    if (contract.path === "PROJECT-STATUS.md") {
+      projectStatusSource = source;
+    }
+  }
+
+  const reductionPercent = (
+    ((archivedLineCount - currentLineCount) / archivedLineCount) *
+    100
+  ).toFixed(1);
+  assert.ok(
+    normalizeWhitespace(projectStatusSource).includes(
+      `reduced from ${formatInteger(archivedLineCount)} to ${formatInteger(currentLineCount)} lines (${reductionPercent}%)`,
+    ),
+    "PROJECT-STATUS.md consolidation totals drifted from the recoverable documents",
+  );
+});
+
+test("task board retains its canonical inventory without narrative appendices", async () => {
+  const taskBoard = await readFile(resolve(WORKSPACE_ROOT, "docs/plan/TASKS.md"), "utf8");
+  const archivedTaskBoardResult = spawnSync(
+    "git",
+    ["show", `${PRE_CONSOLIDATION_DOCUMENTATION_SNAPSHOT}:docs/plan/TASKS.md`],
+    { cwd: WORKSPACE_ROOT, encoding: "utf8" },
+  );
+  assert.equal(archivedTaskBoardResult.status, 0, archivedTaskBoardResult.stderr);
+  const { statuses, sectionStats, sectionOrder, rows, tableLineCount } = parseTaskBoard(taskBoard);
+  const archivedTaskBoard = parseTaskBoard(archivedTaskBoardResult.stdout);
+  const implementationIds = [...statuses.keys()].filter((id) => id.startsWith("M"));
+  const gateIds = [...statuses.keys()].filter((id) => id.startsWith("G"));
+  const operationalIds = [...statuses.keys()].filter(
+    (id) => !id.startsWith("M") && !id.startsWith("G"),
+  );
+
+  assert.deepEqual(implementationIds.sort(), [...EXPECTED_IMPLEMENTATION_TASK_IDS].sort());
+  assert.deepEqual(gateIds.sort(), [...EXPECTED_GATE_IDS].sort());
+  assert.deepEqual(operationalIds.sort(), [...EXPECTED_OPERATIONAL_IDS].sort());
+  assert.equal(statuses.size, 173);
+  assert.equal(tableLineCount, statuses.size + EXPECTED_TASK_BOARD_SECTIONS.length * 2);
+  assert.deepEqual(sectionOrder, EXPECTED_TASK_BOARD_SECTIONS);
+  assert.deepEqual(
+    taskBoardContentProjection(rows),
+    taskBoardContentProjection(archivedTaskBoard.rows),
+    "task dependencies, deliverables, evidence, or row order drifted from the M10 snapshot",
+  );
+  assert.deepEqual(
+    splitMarkdownTableRow("| ID | Status | Depends on | Deliverable \\| evidence |"),
+    ["ID", "Status", "Depends on", "Deliverable \\| evidence"],
+  );
+  assert.throws(
+    () =>
+      parseTaskBoard(
+        requiredMutation(
+          taskBoard,
+          /^(\| ID\s+\|) Status(\s+\| Depends on\s+\| Deliverable \/ evidence\s+\|)$/mu,
+          "$1 State$2",
+          "task-board header",
+        ),
+      ),
+    /invalid task-board header/u,
+  );
+  assert.throws(
+    () =>
+      parseTaskBoard(
+        requiredMutation(
+          taskBoard,
+          /^(\| :?-{3,}:?\s+\|) :?-{3,}:?/mu,
+          "$1 invalid",
+          "task-board separator",
+        ),
+      ),
+    /invalid task-board separator/u,
+  );
+  assert.throws(
+    () =>
+      parseTaskBoard(
+        requiredMutation(
+          taskBoard,
+          /^(\| M02-T01 .*)\|$/mu,
+          "$1| forged |",
+          "task-board row width",
+        ),
+      ),
+    /invalid row width/u,
+  );
+  assert.throws(
+    () =>
+      parseTaskBoard(
+        requiredMutation(
+          taskBoard,
+          "## M10 — First end-to-end proof",
+          "## M10-T01 — narrative appendix",
+          "task-detail level-two heading",
+        ),
+      ),
+    /task-board table appears outside a governed section/u,
+  );
+  for (const [section, stats] of sectionStats) {
+    assert.equal(stats.headers, 1, `${section} must have one table header`);
+    assert.equal(stats.separators, 1, `${section} must have one table separator`);
+    assert.ok(stats.data > 0, `${section} must have canonical rows`);
+  }
+  assert.doesNotMatch(
+    taskBoard,
+    /^#{2,6}\s+(?:M\d{2}-T\d{2}[A-Z]?|G\d{2}|(?:CI|SEC|AR)-\d{2}|I\d{2}-\d{2})(?:\s|$)/mu,
+  );
+
+  const completedTasks = EXPECTED_IMPLEMENTATION_TASK_IDS.filter(
+    (id) => statuses.get(id) === "DONE",
+  ).length;
+  const completedGates = EXPECTED_GATE_IDS.filter((id) => statuses.get(id) === "DONE").length;
+  const completedM10Tasks = M10_TASK_IDS.filter((id) => statuses.get(id) === "DONE").length;
+  const completionPercent = Math.round(
+    (completedTasks / EXPECTED_IMPLEMENTATION_TASK_IDS.length) * 100,
+  );
+
+  const readme = await readFile(resolve(WORKSPACE_ROOT, "README.md"), "utf8");
+  const projectStatus = await readFile(resolve(WORKSPACE_ROOT, "PROJECT-STATUS.md"), "utf8");
+  const startHere = await readFile(resolve(WORKSPACE_ROOT, "docs/plan/START-HERE.tr.md"), "utf8");
+  const strategicValidation = await readFile(
+    resolve(WORKSPACE_ROOT, "docs/plan/STRATEGIC-VALIDATION.md"),
+    "utf8",
+  );
+  const normalizedReadme = normalizeWhitespace(
+    markdownH2Section(readme, "Implementation progress"),
+  );
+  const normalizedProjectStatus = normalizeWhitespace(
+    markdownH2Section(projectStatus, "Current state"),
+  );
+  const normalizedStartHere = normalizeWhitespace(markdownH2Section(startHere, "Bugünkü konum"));
+  const normalizedSc02 = normalizeWhitespace(
+    markdownH2Section(strategicValidation, "SC-02 — Problem and pilot validation"),
+  );
+  assert.ok(
+    normalizedReadme.includes(
+      `**${completedTasks} / ${EXPECTED_IMPLEMENTATION_TASK_IDS.length} tasks complete (${completionPercent}%)**`,
+    ),
+  );
+  assert.ok(
+    normalizedReadme.includes(
+      `**Proof gates:** **${completedGates} / ${EXPECTED_GATE_IDS.length} complete**`,
+    ),
+  );
+  assert.ok(
+    normalizedProjectStatus.includes(
+      `**${completedTasks}/${EXPECTED_IMPLEMENTATION_TASK_IDS.length} tasks (${completionPercent}%)**`,
+    ),
+  );
+  assert.ok(
+    normalizedProjectStatus.includes(`M10 is **${completedM10Tasks}/${M10_TASK_IDS.length}**`),
+  );
+  assert.ok(
+    normalizedProjectStatus.includes(
+      `proof gates are **${completedGates}/${EXPECTED_GATE_IDS.length}**`,
+    ),
+  );
+  assert.ok(
+    normalizedStartHere.includes(
+      `Uygulama ilerlemesi ${completedTasks}/${EXPECTED_IMPLEMENTATION_TASK_IDS.length} (%${completionPercent})`,
+    ),
+  );
+  assert.ok(normalizedStartHere.includes(`M10 ${completedM10Tasks}/${M10_TASK_IDS.length}`));
+  assert.ok(
+    normalizedStartHere.includes(`kanıt kapıları ${completedGates}/${EXPECTED_GATE_IDS.length}`),
+  );
+  assert.ok(
+    M11_TASK_IDS.every((id) => statuses.get(id) === "NOT_STARTED"),
+    "M11 guidance says not started while an M11 task has a different status",
+  );
+  assert.equal(statuses.get("G11"), "NOT_STARTED");
+  assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
+  assert.ok(normalizedProjectStatus.includes("M11 has not started."));
+  assert.ok(normalizedStartHere.includes("M11 başlamadı."));
+  assert.ok(normalizedSc02.includes("**Status:** `NOT_STARTED`."));
+  assert.doesNotMatch(readme, /^\*\*M\d{2}-T\d{2}/gmu);
+  assert.doesNotMatch(projectStatus, /^## M\d{2}-T\d{2}/gmu);
+});
+
+test("M11 guidance pins the complete Runtime Core baseline authority", async () => {
+  for (const relativePath of RUNTIME_CORE_BASELINE_DOCUMENTS) {
+    const source = await readFile(resolve(WORKSPACE_ROOT, relativePath), "utf8");
+    assert.equal(
+      countOccurrences(source, RUNTIME_CORE_BASELINE_TREE),
+      1,
+      `${relativePath} must contain the exact Runtime Core baseline once`,
+    );
+  }
 });
 
 test("CI-02 rejects baseline, evidence, completion, freshness, or rollback wording drift", async () => {

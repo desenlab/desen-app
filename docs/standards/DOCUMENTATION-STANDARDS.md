@@ -43,6 +43,48 @@ Each proof claim records:
 
 Screenshots and videos are explanatory artifacts, never the sole proof.
 
+## Document lifecycle and ownership
+
+Living documents are intentionally focused and have one owner responsibility:
+
+| Document                             | Responsibility                                              | Line budget |
+| ------------------------------------ | ----------------------------------------------------------- | ----------- |
+| `README.md`                          | Product/repository introduction and first successful use    | 220         |
+| `PROJECT-STATUS.md`                  | Current transition, verified closure, and next authority    | 160         |
+| `docs/plan/START-HERE.tr.md`         | Turkish contributor onboarding and working order            | 180         |
+| `docs/plan/TASKS.md`                 | Canonical task status, dependencies, deliverables, evidence | 340         |
+| `docs/architecture/ARCHITECTURE.md`  | Living system boundaries and dependency direction           | 320         |
+| `docs/standards/TESTING-STRATEGY.md` | Test layers, evidence policy, and current browser profile   | 260         |
+| `docs/standards/CI-QUALITY-GATE.md`  | Current local/hosted quality-gate contract                  | 260         |
+| `scripts/ci/README.md`               | CI operator map and safe-update workflow                    | 260         |
+
+The CI documentation contract enforces these budgets. A budget increase requires an explicit
+documentation-architecture decision; ordinary task completion is not a reason to raise it.
+
+Detailed task receipts have exactly one durable owner:
+
+- executable results and limitations belong in the task's `docs/proof/**` document;
+- architectural choices and consequences belong in `docs/adr/**`;
+- frozen-protocol ambiguities belong in `docs/plan/PROTOCOL-FINDINGS.md`;
+- temporary compatibility work and removal triggers belong in `docs/plan/DEBT-REGISTER.md`; and
+- current task state belongs in `docs/plan/TASKS.md` and the short current-status summary.
+
+Do not append a completed task's full implementation narrative to README, Project Status, Start
+Here, or the task board. Link to the owning proof instead. Do not duplicate hashes, run receipts,
+limitations, or architectural explanations across living documents unless a proof reader requires
+one compact compatibility pin.
+
+Proof Matrix, Protocol Findings, the debt register, ADRs, and task-owned proof reports are evidence
+or decision records rather than onboarding documents. Their size is governed by exact ownership,
+stable headings, and focused scope instead of the living-document budgets above. Split one only
+when the resulting files retain an unambiguous index and machine-reader authority.
+
+Git history is the chronological archive. This document is the single owner of the immutable
+pre-consolidation M01–M10 pointer: commit `70ac046c693b91fabba4c67cdaca6c5e33330d6a`. Use
+`git show 70ac046:<path>` to recover any earlier living document. Other living documents link to
+this section instead of repeating the hash or copying the historical narrative. No history is
+rewritten.
+
 ## Private build-log review
 
 Implementation-task completion may include channel-specific build-log drafts in the private user
