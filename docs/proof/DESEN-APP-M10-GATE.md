@@ -1,10 +1,22 @@
 # Desen App M10 Gate Evidence
 
 Gate: G10
-Status: DONE (conditional closure candidate until exact-head hosted checks and fresh `main` pass)
+Status: DONE
 Date: 2026-09-08
 
 Final artifact: `sha256:7005292247b0e4965eaf0bca12d3b1204be9d821f7ba2339257b6bc586ec3ca3`
+
+## Hosted closure authority
+
+[PR #85](https://github.com/desenlab/desen-app/pull/85) passed the exact-head hosted checks at
+`7820fbe9bc1045a25d0eafe669d3d4752edbfb69`, including the joined Quality gate and Browser E2E.
+That unchanged head merged as
+[`70ac046c693b91fabba4c67cdaca6c5e33330d6a`](https://github.com/desenlab/desen-app/commit/70ac046c693b91fabba4c67cdaca6c5e33330d6a).
+The [exact-head PR run](https://github.com/desenlab/desen-app/actions/runs/34286064936) and the
+resulting [fresh `main` run](https://github.com/desenlab/desen-app/actions/runs/34287634835) both
+passed the required exhaustive proof shards, joined Quality gate, and all nine Chromium journeys.
+These hosted receipts finalize the local gate artifact above and are the canonical G10 closure
+authority.
 
 ## Proven scope
 
@@ -45,6 +57,6 @@ all 79 predecessors; it authenticates 64 artifacts and 128 current readers at
 This evidence proves the reviewed local Web–React reference composition. It does not claim remote
 or multi-user deployment, production authentication, native targets, Map, Sortable, domains,
 package publication, or release. The seal proves exact identity and fresh source/Core observations;
-it never substitutes for live Chromium or exhaustive execution. G10 becomes fully closed only when
-the unchanged pull-request head passes every required hosted check, merges, and the resulting fresh
-`main` run also passes.
+it never substitutes for live Chromium or exhaustive execution. G10 required the unchanged
+pull-request head to pass every required hosted check, merge, and then pass a fresh `main` run. The
+hosted closure authority above records that all three conditions were satisfied.

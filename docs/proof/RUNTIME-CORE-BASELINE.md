@@ -2,7 +2,7 @@
 
 Task: M10-T09
 
-Status: DONE (conditional closure candidate; exact-head hosted checks remain required)
+Status: DONE
 
 ## Scope
 
@@ -76,12 +76,13 @@ CI preserves all preceding work and adds two logical workloads: 228 workloads / 
 two workers per shard, and hosted deadlines remain unchanged. This task does not replace the
 full G10 run with a seal check.
 
-Exact-head PR checks, merge and fresh main are required for task completion. M11 capability
-extensibility is not yet proven; G10 remains open and separately requires the complete local
-quality gate. No protocol or runtime semantics change.
+The required exact-head PR checks, merge, and fresh `main` validation subsequently passed as part of
+the [final G10 closure](DESEN-APP-M10-GATE.md). M10-T09 and G10 are closed; the current Runtime Core
+tree remains identical to this committed baseline. M11 capability extensibility is not yet proven,
+and no protocol or runtime semantics changed.
 
-The task remains active until that hosted closure succeeds. The user requested a pause immediately
-after T09 closes: do not start G10 or its long local run without a new instruction.
+The requested pause after the task-time T09 candidate was honored. G10 later ran under a separate
+instruction and supplied the hosted successor receipts that finalized this baseline's closure.
 
 The T09 root-command additions and T08 closure documentation passed all four existing direct
 T05/T06/T07/T08 verifiers without changing any of their readers or frozen artifacts. Those fresh

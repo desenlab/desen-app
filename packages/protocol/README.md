@@ -12,12 +12,16 @@ tests.
 
 ## Explicit non-responsibilities
 
-No editor, runtime, React, DOM, network, application behavior, or executable adapter code belongs
-here. The generated TypeScript structures are not runtime validators: untrusted JSON must remain
-`unknown` until the future validator package accepts it. The digest helpers do not validate DESEN
-document structure or compare stored digests. The diagnostic primitives define data and location
-contracts but do not detect or emit validation, runtime, publication, or activation failures. This
-package also does not define capability-package archive hashing.
+No editor, validator, runtime, React, DOM, network, application behavior, or executable adapter code
+belongs here. The generated TypeScript structures are compile-time projections, not runtime
+validators: untrusted DESEN data must remain `unknown` until the appropriate `@desen/validator`
+boundary accepts it. The digest helpers do not validate DESEN document structure or compare stored
+digests. The diagnostic primitives define the shared registry, data contracts, JSON Pointer
+locations, and a factory that validates and freezes caller-supplied diagnostic data; they do not
+inspect a document, decide that a failure occurred, attach package-local stage or severity, or
+report to an observation sink. Validation, publication, runtime, and activation layers own those
+boundary-specific responsibilities. This package also does not define capability-package archive
+hashing.
 
 ## Status
 
@@ -25,8 +29,12 @@ The exact upstream snapshot, integrity gate, complete protocol traceability inve
 schema-derived TypeScript root types are implemented. RFC 8785 canonical JSON, platform-neutral
 SHA-256, DESEN digest formatting, Source projection, and Bundle revision projection are also
 implemented. All 36 Appendix B diagnostic definitions, shared JSON-serializable diagnostic data,
-and RFC 6901 JSON Pointer construction and parsing are implemented. Runtime validation and actual
-diagnostic emission remain assigned to later tasks.
+and RFC 6901 JSON Pointer construction and parsing are implemented. Run-time validation is
+intentionally outside this package: `@desen/validator` implements the frozen structural boundary
+and the cumulative semantic-foundation, component, interaction, binding, and execution-contract
+layers for DESEN 0.1.0. Validator and Publisher APIs return diagnostics in controlled result values;
+runtime diagnostic observation is delivered through host-injected ports, while activation and host
+layers own their boundary-specific results and reporting adapters.
 
 ## Public entry point
 
