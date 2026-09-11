@@ -1,16 +1,15 @@
 # Project Status
 
-Last updated: 2026-09-11
+Last updated: 2026-09-12
 
 ## Current state
 
-M10 and its terminal `G10` gate remain complete. Implementation progress is **123/176 tasks (70%)**:
-M10 is **12/12**, M10A is **2/28 (7%)**, and proof gates are **11/14**. Gates are excluded from the
+M10 and its terminal `G10` gate remain complete. Implementation progress is **124/176 tasks (70%)**:
+M10 is **12/12**, M10A is **3/28 (11%)**, and proof gates are **11/14**. Gates are excluded from the
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01 and M10A-T02 are DONE**. M10A-T03 is `IN_PROGRESS`: its local implementation/evidence
-is a candidate and exact-head hosted checks are pending. M11 has not started. The frozen protocol,
+**M10A-T01, M10A-T02, and M10A-T03 are DONE**. M11 has not started. The frozen protocol,
 Runtime Core, SC-01 profile, and completed T02 authority are unchanged.
 
 ## Current closure
@@ -27,7 +26,7 @@ at that merge also passed [Quality
 [Browser 103247681073](https://github.com/desenlab/desen-app/actions/runs/34594715063/job/103247681073).
 The [M10A-T01 proof](docs/proof/M10A-T01.md) retains its own exact-head, merge, and fresh-`main`
 receipts. These authorities close only the bounded T01 and T02 scopes; earlier failed candidates
-remain failures.
+remain failures. The task-owned [M10A-T03 proof](docs/proof/M10A-T03.md) records exact-head [run 34649929494](https://github.com/desenlab/desen-app/actions/runs/34649929494), squash-merge [`13652bbf`](https://github.com/desenlab/desen-app/commit/13652bbf4ec78e2b7dc4e6d3cbd62cfe488c0b34), and passing fresh-`main` [run 34651553760](https://github.com/desenlab/desen-app/actions/runs/34651553760).
 
 ## M10 closure
 
@@ -66,7 +65,7 @@ No Git history is rewritten.
 
 ## Documentation verification
 
-The eight governed entry and standards documents are reduced from 18,467 to 1,693 lines (90.8%)
+The eight governed entry and standards documents are reduced from 18,467 to 1,692 lines (90.8%)
 while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
 through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
 link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
@@ -78,14 +77,14 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T03 is the active `IN_PROGRESS` task.** The
+**M10A-T03 is `DONE`; M10A-T04 is the next dependency-ready but `NOT_STARTED` task.** The
 [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md) and
 [T03 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t03--theme-and-token-authoring) own the
-bounded scope. The local candidate provides structured theme/mode/token/whole-alias editing,
+bounded scope. The completed implementation provides structured theme/mode/token/whole-alias editing,
 exact sRGB and px/rem handling, deterministic transfer, and atomic undo/redo/import in a
 platform-neutral package; an isolated workbench exercises preview without entering the normal App.
 Frozen SC-01's 16 valid fixtures split into three T02-supported normal edit/preview paths and 13 preserved/disclosed unsupported paths; affected-overlay partial preview is blocked and seven invalid fixtures reject atomically.
-A separate closed T02-recognized unsupported matrix preserves/discloses six valid fixtures and atomically rejects six malformed fixtures.
+A separate closed T02-recognized unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed fixtures.
 Unreviewed or invalid forms fail closed without silent loss.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen

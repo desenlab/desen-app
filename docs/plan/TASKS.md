@@ -1,6 +1,6 @@
 # Implementation Task Board
 
-Last updated: 2026-09-11
+Last updated: 2026-09-12
 
 Status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 
@@ -251,21 +251,20 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 ## M10A — Design-first product foundation
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
-M10A-T01 and M10A-T02 are `DONE`; overall progress is 123/176 (70%), M10A is 2/28 (7%), and 11/14
-proof gates are closed. M10A-T03 is `IN_PROGRESS`: local implementation/evidence is a candidate and
-exact-head hosted checks remain pending. Frozen SC-01 covers 16 valid fixtures: three T02-supported
+M10A-T01, M10A-T02, and M10A-T03 are `DONE`; overall progress is 124/176 (70%), M10A is 3/28 (11%),
+and 11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported
 normal edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
-unsupported matrix preserves/discloses six valid fixtures and atomically rejects six malformed
+unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed
 fixtures; unreviewed or invalid forms fail closed.
-M10A-T04 is dependency-ready but stays `NOT_STARTED` and unselected while T03 is active. The [plan](M10A-IMPLEMENTATION-PLAN.md) and
+M10A-T04 is dependency-ready but stays `NOT_STARTED` and unselected. The [plan](M10A-IMPLEMENTATION-PLAN.md) and
 [task contracts](M10A-TASK-CONTRACTS.md) own scope, negative tests and evidence paths.
 
 | ID       | Status      | Depends on                                       | Deliverable / evidence                                                                 |
 | -------- | ----------- | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | M10A-T01 | DONE        | G10                                              | [Base UI adapter boundary proof](../proof/M10A-T01.md)                                 |
 | M10A-T02 | DONE        | M10A-T01                                         | [Versioned project design-system model and typed token resolver](../proof/M10A-T02.md) |
-| M10A-T03 | IN_PROGRESS | M10A-T02                                         | Theme/token editor, modes, aliases and loss-aware import/export                        |
+| M10A-T03 | DONE        | M10A-T02                                         | Theme/token editor, modes, aliases and loss-aware import/export                        |
 | M10A-T04 | NOT_STARTED | M10A-T02                                         | Immutable design-system releases and host snapshot identity                            |
 | M10A-T05 | NOT_STARTED | M10A-T01, M10A-T02                               | Layout, typography and content starter capabilities                                    |
 | M10A-T06 | NOT_STARTED | M10A-T05                                         | Form-control starter capabilities and accessible field compositions                    |

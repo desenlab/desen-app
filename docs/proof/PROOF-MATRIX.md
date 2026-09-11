@@ -3580,7 +3580,7 @@ historical 31,286-byte SC-01 DTCG artifact stays byte-identical at
 asset loading, recipe materialization, executable connections, immutable releases, Runtime or
 Publisher authority, package publication, production deployment, G10A, or M11 work.
 
-## M10A-T03 theme and token authoring (local closure candidate)
+## M10A-T03 theme and token authoring (`DONE`)
 
 The [M10A-T03 evidence](M10A-T03.md) adds private, platform-neutral
 `@desen/design-system-authoring` above only the frozen public Design System Core and Protocol APIs.
@@ -3607,9 +3607,15 @@ and appends the T03 artifact and reader pair, authenticating 67 artifacts / 134 
 checkpoint suite passes 120/120. The neutral CI successor contains 238 logical workloads / 113
 proof pairs (100 ordinary and 13 exclusive barriers) / 259 hosted physical shard workloads.
 
-M10A-T03 remains `IN_PROGRESS`: exact-head hosted Quality gate and Browser E2E, merge identity, and
-a fresh `main` run are still pending. Therefore progress remains 123/176 (70%), M10A remains 2/28
-(7%), and proof gates remain 11/14. M10A-T04 is dependency-ready but remains `NOT_STARTED` and is
-not selected or authorized while T03 is active. T03 does not integrate the normal App, persist a
+M10A-T03 is `DONE`: exact-head hosted Quality gate and Browser E2E, squash-merge identity, and a
+fresh `main` run at the exact merge SHA all passed. [PR #95](https://github.com/desenlab/desen-app/pull/95)
+passed [run 34649929494](https://github.com/desenlab/desen-app/actions/runs/34649929494) at
+`7d21d5b17886fef366a9be16f43ec5b24588fb0e` with Browser job
+`103429453686` and Quality gate job `103433844282`, then merged as
+[`13652bbf4ec78`](https://github.com/desenlab/desen-app/commit/13652bbf4ec78e2b7dc4e6d3cbd62cfe488c0b34).
+Fresh `main` [run 34651553760](https://github.com/desenlab/desen-app/actions/runs/34651553760) at that
+merge passed with Browser job `103434637969` and Quality gate job `103438879697`. Progress is now
+124/176 (70%), M10A is 3/28 (11%), and proof gates remain 11/14. M10A-T04 is dependency-ready but
+remains `NOT_STARTED` and unselected. T03 does not integrate the normal App, persist a
 project, create a design-system release, materialize recipes or assets, publish or activate token
 data, change Runtime or Publisher behavior, publish a package, advance G10A, or start M11.
