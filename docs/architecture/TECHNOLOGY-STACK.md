@@ -52,7 +52,7 @@ fresh compatibility checks.
 Map provider, drag-and-drop adapter, router, query cache, and UI component dependencies are chosen
 only by their owning tasks and require an ADR when they affect public capability contracts.
 
-## M10A product foundation — T01 complete, T02 candidate
+## M10A product foundation — T01 and T02 complete, T03 next
 
 M10A-T01 pins `@base-ui/react` **1.8.0** behind the private
 `@desen/starter-catalog-web` Catalog/adapter package, with DESEN-owned Neutral styles implemented
@@ -62,12 +62,13 @@ production versus development audit findings separately. It proves only the boun
 Select, and Dialog slice; it is not a complete component library, App migration, package release,
 or production deployment.
 
-M10A-T02 is `IN_PROGRESS`: its locally passing `@desen/design-system-core` candidate admits the
-App-owned v1 envelope and resolves the bounded DTCG 2025.10 profile with deterministic external
-source overlays, whole-token aliases, and final literal overrides. It imports only `@desen/protocol`
-and `@desen/editor-core`; hosted exact-head closure is pending. T03 UI, persistence, releases, App
-integration, materialization, Publisher, and Runtime authority remain later work. See the
-[T02 proof](../proof/M10A-T02.md).
+M10A-T02 is `DONE`: `@desen/design-system-core` admits the App-owned v1 envelope and resolves the
+bounded DTCG 2025.10 profile with deterministic external source overlays, whole-token aliases, and
+final literal overrides. It imports only `@desen/protocol` and `@desen/editor-core`; the
+[T02 proof](../proof/M10A-T02.md) owns its closure evidence. M10A-T03 is selected next and ready but
+remains `NOT_STARTED`, with no active implementation task. Its theme/token editor may build on this
+profile; persistence, immutable releases, normal App integration, materialization, Publisher,
+Runtime, T04 and later tasks, and M11 remain outside T03.
 The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
 capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
 and hermetic capture configuration. No Storybook, Chromatic, Tailwind or second primitive library

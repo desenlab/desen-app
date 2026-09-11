@@ -51,28 +51,17 @@ const DONE_RECEIPT = Object.freeze({
 
 function exactDoneProofDocument(artifactSha256, overrides = {}) {
   const receipt = { ...DONE_RECEIPT, ...overrides };
-  const pending = exactProofDocument(artifactSha256).toString("utf8").slice(0, -1).split("\n\n");
+  const canonical = exactProofDocument(artifactSha256).toString("utf8").slice(0, -1).split("\n\n");
+  const hostedClosureIndex = canonical.indexOf("## Hosted closure");
+  const nonClaimsIndex = canonical.indexOf("## Non-claims");
+  assert.ok(hostedClosureIndex > 0);
+  assert.equal(nonClaimsIndex, hostedClosureIndex + 4);
   const pullRunUrlId = receipt.pullRunUrlId ?? receipt.pullRunId;
   const freshRunUrlId = receipt.freshRunUrlId ?? receipt.freshRunId;
   const freshSha = receipt.freshSha ?? receipt.mergeSha;
   return Buffer.from(
     `${[
-      ...pending.slice(0, 2),
-      [
-        "**Status:** `DONE`. Exact-head pull-request checks, squash merge, and fresh-main checks pass. This",
-        "report does not start M10A-T03, add normal App integration, or advance G10A.",
-      ].join("\n"),
-      ...pending.slice(3, 12),
-      [
-        "- Package build, typecheck, and tests: 52/52 pass; the public-package contract passes 3/3.",
-        "- Root proof mutation matrix: 8/8 non-checkpoint cases pass; final checkpoint authentication is",
-        "  sealed with the repository proof-reader append.",
-        "- Dependency boundaries and exhaustive repository checks: pass.",
-        "- Exact-head pull-request and fresh-main Quality gate and Browser E2E checks: pass; exact receipts",
-        "  are recorded below.",
-      ].join("\n"),
-      pending[13],
-      "## Hosted closure",
+      ...canonical.slice(0, hostedClosureIndex + 1),
       [
         `[PR #${receipt.prNumber}](https://github.com/desenlab/desen-app/pull/${receipt.prUrlNumber ?? receipt.prNumber}) at exact head`,
         `\`${receipt.headSha}\` passed`,
@@ -91,7 +80,7 @@ function exactDoneProofDocument(artifactSha256, overrides = {}) {
         "both completed successfully.",
       ].join("\n"),
       "M10A-T03 is ready but remains `NOT_STARTED`.",
-      ...pending.slice(14),
+      ...canonical.slice(nonClaimsIndex),
     ].join("\n\n")}\n`,
   );
 }

@@ -5,17 +5,24 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 122/176 (%69), M10 12/12 ve
-kanıt kapıları 11/14 düzeyindedir. M10A-T01'in exact-head PR kontrolleri, merge'i ve taze `main`
-koşusu da geçti; ayrıntı [Project Status](../../PROJECT-STATUS.md), [T01 kanıtı](../proof/M10A-T01.md)
-ve [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 123/176 (%70), M10 12/12,
+M10A 2/28 (%7) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01 ile M10A-T02'nin exact-head PR
+kontrolleri, merge'leri ve taze `main` koşuları geçti; ayrıntı [Project Status](../../PROJECT-STATUS.md),
+[T01 kanıtı](../proof/M10A-T01.md), [T02 kanıtı](../proof/M10A-T02.md) ve
+[G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış görev sayısı 122 ve M10A sayacı 1/28 olarak kalır. `M10A-T01` `DONE`: Base UI
-1.8.0 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` `IN_PROGRESS`: platformdan
-bağımsız yerel uygulama ve kanıt adayı geçiyor, exact-head hosted Quality kapanışı bekleniyor.
-`M10A-T03` henüz `NOT_STARTED` durumundadır ve başlamaya uygun değildir.
+ekler; tamamlanmış görev sayısı 123 ve M10A sayacı 2/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
+ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
+sürümlü project design-system modeli ve typed token resolver kanıtlandı. Aktif görev yoktur.
+Sıradaki tek hazır görev `M10A-T03`'tür; halen `NOT_STARTED` durumundadır.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
+
+T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i
+`d3563f84dd1fa634e4a7a794dc920bc28dd1af61` için
+[run 34593058216](https://github.com/desenlab/desen-app/actions/runs/34593058216) ile doğrulandı;
+değişmez aday `194b6eb36312f850d8f91ae1bbbf141408195dcd` olarak merge edildi ve aynı merge SHA'sı
+[taze `main` run 34594715063](https://github.com/desenlab/desen-app/actions/runs/34594715063) ile geçti.
 
 ## Üç ayrı kimlik
 

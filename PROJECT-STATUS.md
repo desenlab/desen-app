@@ -4,21 +4,29 @@ Last updated: 2026-09-11
 
 ## Current state
 
-M10 and its terminal `G10` gate remain complete. Implementation progress is **122/176 tasks (69%)**:
-M10 is **12/12**, M10A is **1/28 (4%)**, and proof gates are **11/14**. Gates are excluded from the
+M10 and its terminal `G10` gate remain complete. Implementation progress is **123/176 tasks (70%)**:
+M10 is **12/12**, M10A is **2/28 (7%)**, and proof gates are **11/14**. Gates are excluded from the
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01 is DONE**. **M10A-T02 is IN_PROGRESS**: its platform-neutral package and task evidence
-pass locally, while exact-head hosted closure is pending. M11 has not started. The completed count
-therefore remains 122 and M10A remains 1/28; the frozen protocol, Runtime Core, and SC-01 profile are
-unchanged.
+**M10A-T01 and M10A-T02 are DONE**. No task is active. M10A-T03 is ready but remains NOT_STARTED;
+M11 has not started. The frozen protocol, Runtime Core, and SC-01 profile are unchanged.
 
 ## Current closure
 
-The task-owned [M10A-T01 proof](docs/proof/M10A-T01.md) records the exact pull-request head, merge,
-and fresh-`main` receipts. Both hosted paths passed their required exhaustive and browser checks.
-That evidence closes only the bounded T01 scope; earlier failed candidates remain failures.
+The task-owned [M10A-T02 proof](docs/proof/M10A-T02.md) records the full receipt. [PR
+#92](https://github.com/desenlab/desen-app/pull/92) exact head `d3563f84` passed [run
+34593058216](https://github.com/desenlab/desen-app/actions/runs/34593058216), including [Quality
+103246842519](https://github.com/desenlab/desen-app/actions/runs/34593058216/job/103246842519) and
+[Browser 103242508169](https://github.com/desenlab/desen-app/actions/runs/34593058216/job/103242508169),
+then squash-merged as [`194b6eb`](https://github.com/desenlab/desen-app/commit/194b6eb36312f850d8f91ae1bbbf141408195dcd).
+The [fresh-`main` run 34594715063](https://github.com/desenlab/desen-app/actions/runs/34594715063)
+at that merge also passed [Quality
+103251786647](https://github.com/desenlab/desen-app/actions/runs/34594715063/job/103251786647) and
+[Browser 103247681073](https://github.com/desenlab/desen-app/actions/runs/34594715063/job/103247681073).
+The [M10A-T01 proof](docs/proof/M10A-T01.md) retains its own exact-head, merge, and fresh-`main`
+receipts. These authorities close only the bounded T01 and T02 scopes; earlier failed candidates
+remain failures.
 
 ## M10 closure
 
@@ -57,7 +65,7 @@ No Git history is rewritten.
 
 ## Documentation verification
 
-The eight governed entry and standards documents are reduced from 18,467 to 1,638 lines (91.1%)
+The eight governed entry and standards documents are reduced from 18,467 to 1,655 lines (91.0%)
 while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
 through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
 link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
@@ -69,14 +77,13 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-The active task is **M10A-T02 — Project design-system model and token resolver**. Its local candidate
-adds an App-owned v1 envelope, canonical admitted Source, inert authoring metadata, and bounded DTCG
-resolution in `@desen/design-system-core`. The
-[product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md),
-[T02 contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t02--project-design-system-model-and-token-resolver),
-and [ADR 0023](docs/adr/0023-design-first-authoring-and-design-system-workbench.md) define its scope;
-the [T02 proof](docs/proof/M10A-T02.md) owns implementation detail. Only the current PR head's hosted
-Quality gate can close it. M10A-T03 remains `NOT_STARTED` and is not yet eligible.
+No task is active. **M10A-T03 is next and dependency-ready, but remains `NOT_STARTED`**. The
+[product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md) and
+[T03 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t03--theme-and-token-authoring) own the
+next bounded scope; readiness does not authorize implementation by itself. The completed T02 adds
+only an App-owned v1 envelope, canonical admitted Source, inert authoring metadata, and bounded DTCG
+resolution in `@desen/design-system-core`; its [proof](docs/proof/M10A-T02.md) owns implementation
+detail and receipts.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
 Runtime Core tree and fresh proof requirements. T02 authorizes no publication, persistence,
@@ -100,8 +107,7 @@ unproven.
 3. Implement exactly one task, with positive and relevant negative tests.
 4. Run the bounded local baseline and the task-specific verifier.
 5. Use `pnpm check` for a gate closure, explicit exhaustive audit, or explicit request.
-6. Update living status only after evidence passes; place detailed receipts in the owning proof
-   document rather than appending another chronological block here.
+6. Update living status only after evidence passes; keep detailed receipts in the owning proof.
 
 ## Historical CI-02 compatibility pin
 
@@ -148,5 +154,4 @@ M05-T09 evidence:
 - `NOT_STARTED`: no implementation work has begun.
 - `IN_PROGRESS`: exactly one authorized task or non-counted interlude is active.
 - `BLOCKED`: an explicit dependency or external authority prevents progress.
-- `DONE`: implementation and required evidence have passed; hosted closure is included when the
-  task contract requires it.
+- `DONE`: implementation and required local/hosted evidence have passed.

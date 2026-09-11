@@ -4,16 +4,16 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01 are complete. SC-02 concluded `adapt`; M10A-T02 is `IN_PROGRESS`.
-> Its local implementation candidate awaits exact-head hosted closure; M11 has not started. This is
-> not a production certification.
+> M10/G10 and M10A-T01/T02 are complete. SC-02 concluded `adapt`; no task is active.
+> M10A-T03 is next and ready but remains `NOT_STARTED`; M11 has not started. This is not a
+> production certification.
 
 ## Implementation progress
 
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████████░░░░░░░░` **122 / 176 tasks complete (69%)**
+**Overall:** `██████████████████░░░░░░░` **123 / 176 tasks complete (70%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -33,10 +33,10 @@ bounded, reproducible claims about both.
 
 **M10 complete:** `████████████` **12 / 12 tasks complete (100%)**
 
-**M10A:** **1 / 28 tasks complete (4%)** · 28 newly planned product tasks; no completed work removed.
+**M10A:** **2 / 28 tasks complete (7%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Active task:** `M10A-T02` (`IN_PROGRESS`) · **M11:** `NOT_STARTED`
+**Active task:** none · **Next ready:** `M10A-T03` (`NOT_STARTED`) · **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
 
@@ -167,10 +167,10 @@ nine-journey Chromium suite. Hosted completion still requires the task's exact-h
 Neutral styling, editable themes, reusable components, design-first authoring, separate behavior
 connections, and built-in design-system documentation/visual review. These are planned features,
 not capabilities of the current five-component demo. The completed `M10A-T01` installed Base UI
-1.8.0 and proved three adapters in isolated authoring/host harnesses. The active `M10A-T02` local
-candidate adds the platform-neutral App project envelope and bounded DTCG token resolver; it remains
-`IN_PROGRESS` until its exact-head hosted Quality gate passes. T03 and ordinary App integration have
-not started.
+1.8.0 and proved three adapters in isolated authoring/host harnesses. The completed `M10A-T02` adds
+the platform-neutral App project envelope and bounded DTCG token resolver; its exact-head and
+fresh-`main` hosted Quality and Browser E2E gates passed. `M10A-T03` is next and ready but remains
+`NOT_STARTED`; ordinary App integration has not started.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and

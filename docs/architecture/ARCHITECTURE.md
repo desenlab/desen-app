@@ -1,6 +1,6 @@
 # Architecture
 
-Last reviewed: 2026-09-10
+Last reviewed: 2026-09-11
 
 ## Purpose
 
@@ -214,17 +214,17 @@ success.
 
 ## M10A design-first workbench
 
-M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice is complete;
-T02 has a locally passing implementation candidate and remains `IN_PROGRESS` until exact-head
-hosted closure. Later workbench features remain planned; no publication or production authority
-follows from this architecture text.
+M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice and T02's
+platform-neutral project/token foundation are `DONE`; the other 26 tasks remain `NOT_STARTED`.
+T03 is selected next and its dependency is complete, but no implementation task is active. Later
+workbench features remain planned; no publication or production authority follows from this text.
 [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the decision,
 while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
 [task contracts](../plan/M10A-TASK-CONTRACTS.md), and
 [Workbench contract](../plan/DESIGN-SYSTEM-WORKBENCH.md) own execution detail.
 
 The package boundary is additive. T01 delivers the starter package and its dependency direction;
-the T02 candidate adds `@desen/design-system-core`, while normal App composition remains later work:
+T02 adds `@desen/design-system-core`, while normal App composition remains later work:
 
 - `@desen/starter-catalog-web` supplies target-specific DESEN capabilities through trusted,
   statically registered production and authoring adapters built on pinned Base UI and the DESEN
@@ -238,6 +238,11 @@ the T02 candidate adds `@desen/design-system-core`, while normal App composition
 - Desen App will compose those packages with existing Editor, Validator, Publisher, and Runtime
   public APIs. Neither new package becomes a hidden Runtime Core or protocol owner. Publisher and
   Runtime packages do not depend on `design-system-core` or interpret its recipe graph.
+
+T03 may now begin the theme/token editor, mode and alias authoring, loss-aware import/export,
+preview, undo, and round-trip proof against T02's finite profile. T03 remains `NOT_STARTED`; it does
+not authorize T04 or later work, normal App integration, persistence, design-system releases,
+Publisher or Runtime changes, or M11.
 
 Across later M10A tasks, an App-owned versioned editable-project record becomes the durable
 authoring aggregate. It atomically

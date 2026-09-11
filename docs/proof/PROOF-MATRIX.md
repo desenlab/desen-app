@@ -3523,7 +3523,7 @@ not migrate the normal App, change Runtime Core, publish a package or release, a
 claim the complete starter library, theme/token layer, design-system management, or production
 deployment.
 
-## M10A-T02 project and token core (local implementation evidence)
+## M10A-T02 project and token core (hosted closure)
 
 The [M10A-T02 evidence](M10A-T02.md) adds private, platform-neutral
 `@desen/design-system-core`. Its finite version-1 App project envelope retains one structurally
@@ -3544,22 +3544,37 @@ The 11,513-byte artifact is
 its canonical project digest is
 `sha256:99c458aad4f1e6ca19f21690a5dd42d7281a1fed8142c87ab1a2e835d5eb3c20`.
 Package tests pass 52/52, the built public-package contract passes 3/3, and the root proof passes
-9/9. Reader checkpoint sequence 84 preserves sequences 1–83 and authenticates 66 artifacts plus
-132 current readers at
-`sha256:c7ba51e79472cce640629e6856e9240ddf859f1351213b7fe8f8f91e81e353fc`.
+9/9. Reader checkpoint sequence 84 first authenticates the T02 artifact; closure successor 85
+preserves all 66 artifacts and 131 peer readers while resealing only the T02 root reader. Its 132
+current readers authenticate at
+`sha256:818d9532d16e19f90ecb82a7a2fc7bd8194f6285c3b1940ca83926e149e58265`.
 The expanded CI authority contains 235 logical workloads / 112 proof pairs (100 ordinary and 12
 exclusive barriers) and 254 hosted physical shard workloads.
 
-The final local compatibility seal passes the exact T02 verifier together with all 525 CI
+The final local compatibility seal passes the exact T02 verifier together with all 526 CI
 orchestration contracts. The published-host, last-known-good, and repeatable-demo readers now
 authenticate an explicit T02 → T01 → T08 projection for the lockfile and two boundary-policy
 inputs; stale, missing, extra, reordered, and byte-tampered successors fail closed. The frozen
 published-host, recovery, and repeatable-demo artifacts remain byte-identical at their reviewed
 receipts.
 
-This is local implementation evidence, not task closure: exact-head hosted Quality and fresh-main
-receipts are still pending, so M10A-T02 remains `IN_PROGRESS`, progress remains 122/176 (69%), and
-M10A remains 1/28 (4%). The historical 31,286-byte SC-01 DTCG artifact stays byte-identical at
+[PR #92](https://github.com/desenlab/desen-app/pull/92) passed exact-head hosted
+[run 34593058216](https://github.com/desenlab/desen-app/actions/runs/34593058216) at
+`d3563f84dd1fa634e4a7a794dc920bc28dd1af61`, including
+[Quality gate job 103246842519](https://github.com/desenlab/desen-app/actions/runs/34593058216/job/103246842519)
+and
+[Browser E2E job 103242508169](https://github.com/desenlab/desen-app/actions/runs/34593058216/job/103242508169).
+It was squash-merged as
+[`194b6eb36312f850d8f91ae1bbbf141408195dcd`](https://github.com/desenlab/desen-app/commit/194b6eb36312f850d8f91ae1bbbf141408195dcd).
+The resulting fresh [`main` run 34594715063](https://github.com/desenlab/desen-app/actions/runs/34594715063)
+passed at that exact merge commit, including
+[Quality gate job 103251786647](https://github.com/desenlab/desen-app/actions/runs/34594715063/job/103251786647)
+and
+[Browser E2E job 103247681073](https://github.com/desenlab/desen-app/actions/runs/34594715063/job/103247681073).
+
+Those receipts make M10A-T02 `DONE`, advancing implementation progress to 123/176 (70%) and M10A
+to 2/28 (7%) while proof gates remain 11/14. M10A-T03 is ready but remains `NOT_STARTED`. The
+historical 31,286-byte SC-01 DTCG artifact stays byte-identical at
 `sha256:1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6` with its closed
 26-leaf color/dimension profile. T02 does not add App integration, a theme editor, persistence,
 asset loading, recipe materialization, executable connections, immutable releases, Runtime or
