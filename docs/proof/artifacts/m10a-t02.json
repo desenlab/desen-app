@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T02",
+  "proofId": "m10a-t02",
+  "profile": "desen.design-system-core.proof.v1",
+  "result": "PASS",
+  "claim": {
+    "implementationEvidence": "PASS",
+    "taskCompletionRequiresHostedExactHead": true,
+    "platformNeutralCore": true,
+    "projectEnvelopeVersioned": true,
+    "projectRoundTripLossAware": true,
+    "tokenResolutionDeterministic": true,
+    "historicalSc01Unchanged": true
+  },
+  "publicPackage": {
+    "name": "@desen/design-system-core",
+    "private": true,
+    "type": "module",
+    "sideEffects": false,
+    "exportRoot": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "productionDependencies": ["@desen/editor-core", "@desen/protocol"],
+    "onlyReviewedInternalDependencies": true,
+    "requiredRuntimeExports": [
+      "DESIGN_TOKEN_PROFILE",
+      "EDITABLE_PROJECT_KIND",
+      "EDITABLE_PROJECT_LIMITS",
+      "EDITABLE_PROJECT_SCHEMA_VERSION",
+      "SUPPORTED_EDITABLE_PROJECT_SCHEMA_VERSIONS",
+      "admitDtcgTokenDocument",
+      "admitEditableProjectRecord",
+      "getDesignTokenValueFamily",
+      "getDtcgAliasTarget",
+      "isDtcgTokenAlias",
+      "migrateEditableProjectRecord",
+      "resolveDesignTokens"
+    ],
+    "exercisedBuiltPublicRoot": true,
+    "sourceAuthority": {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    "files": [
+      {
+        "path": "packages/design-system-core/package.json",
+        "bytes": 1072,
+        "sha256": "dcda60f86096ba59c5d56d2c44abd088acdabca4526e40184ccd51ace0e24db9"
+      },
+      {
+        "path": "packages/design-system-core/README.md",
+        "bytes": 3601,
+        "sha256": "86b77f40feeaf1953fe8f6234435a5508062aac8d922698ace08b9c7a82f481a"
+      },
+      {
+        "path": "packages/design-system-core/src/diagnostics.ts",
+        "bytes": 908,
+        "sha256": "8e191679ab29f682b4c55591922c040d11e5587ed1fc02771eaf3acf6e97186f"
+      },
+      {
+        "path": "packages/design-system-core/src/index.ts",
+        "bytes": 2606,
+        "sha256": "5a379f493f625942a2886d1fdaf9ac0132833d94f273559dde10e6f7cac0fac8"
+      },
+      {
+        "path": "packages/design-system-core/src/inert-json.ts",
+        "bytes": 9086,
+        "sha256": "ac6169a5b222f5a4b8cd7dd74b6f601daedc855e674578fb2ddd508de92b1477"
+      },
+      {
+        "path": "packages/design-system-core/src/project-migrations.ts",
+        "bytes": 3074,
+        "sha256": "0a2a7ce3f3c1df8cd98d388d6d3736506a531b99f4cd9816dd7a27bc0baaecf4"
+      },
+      {
+        "path": "packages/design-system-core/src/project-record.ts",
+        "bytes": 15345,
+        "sha256": "bb4f94698830580b8f694ddecafd53350cd98cc30b3f6f3d91021e57728e0ed0"
+      },
+      {
+        "path": "packages/design-system-core/src/token-document.ts",
+        "bytes": 46377,
+        "sha256": "9ad722dd314d85d0a8283b2d120de740ac54b072be1f033accf19fa9a84dabdb"
+      },
+      {
+        "path": "packages/design-system-core/src/token-resolver.ts",
+        "bytes": 26077,
+        "sha256": "7d8666e7581a8fa1675012bc49e289f371ed2c6251c9ad8bf86b717369f2cdac"
+      },
+      {
+        "path": "packages/design-system-core/src/token-types.ts",
+        "bytes": 9220,
+        "sha256": "99519daaf832ea141c3b141191f8e47b2fab130296ed6e1a43f4b8bbaf60a78f"
+      },
+      {
+        "path": "packages/design-system-core/test/project-migrations.test.ts",
+        "bytes": 3511,
+        "sha256": "b3878ea7bcf1d99bec6c1b7ab136cb1dcdf7e8b2479e911338872831de32ee8c"
+      },
+      {
+        "path": "packages/design-system-core/test/project-migrations.types.ts",
+        "bytes": 582,
+        "sha256": "4fc13fbd38496b641e8070f558b5cf430b6864330e917618f0349ff1c8c962ff"
+      },
+      {
+        "path": "packages/design-system-core/test/project-record.test.ts",
+        "bytes": 8820,
+        "sha256": "b25a50089ec106a25fb5d6d1d902ed39951f5523b681972f4fbcf7adc4d2f9af"
+      },
+      {
+        "path": "packages/design-system-core/test/project-record.types.ts",
+        "bytes": 1133,
+        "sha256": "4ac076d42df8f5b786cd28adff9d50fc45b39b53acdd4be4b3176fb646cef423"
+      },
+      {
+        "path": "packages/design-system-core/test/public-package.mjs",
+        "bytes": 5013,
+        "sha256": "3319952820ef2fb50bc4a52a13c3d9e8c1ffd446f3d32eaa7c711e32592e0987"
+      },
+      {
+        "path": "packages/design-system-core/test/public-package.types.mts",
+        "bytes": 1608,
+        "sha256": "2a49285c3f246c2aa1e391fc76a101a0d7ff20936202fdf5de10d82bb28b022a"
+      },
+      {
+        "path": "packages/design-system-core/test/token-document.test.ts",
+        "bytes": 12537,
+        "sha256": "62b971b4acccfe12c5ac3a1b263fb48898e320bd7c98ee2cc37305fa4ca00161"
+      },
+      {
+        "path": "packages/design-system-core/test/token-document.types.ts",
+        "bytes": 1829,
+        "sha256": "561161745aee0773abc3ea55d3f49d7c3fc1558bc7327fdb763dba1ce5af2366"
+      },
+      {
+        "path": "packages/design-system-core/test/token-resolver.test.ts",
+        "bytes": 14389,
+        "sha256": "6808856d00b2273bd17b311230a802cf9d360b52b73c4c67b16121fd8830fdaf"
+      },
+      {
+        "path": "packages/design-system-core/test/token-resolver.types.ts",
+        "bytes": 1894,
+        "sha256": "a43bd63b0fb750d2416feb39e3ae968c248eb8877be7062e0eaf3fc126889793"
+      },
+      {
+        "path": "packages/design-system-core/tsconfig.build.json",
+        "bytes": 277,
+        "sha256": "3d39769f9789283f9d25088104a34c3c1cd1473e1f98b09b31655245d229d685"
+      },
+      {
+        "path": "packages/design-system-core/tsconfig.json",
+        "bytes": 134,
+        "sha256": "a7967241666f36269ac166dfd698809c982381c0a42f0b9825041f1340517d65"
+      },
+      {
+        "path": "packages/design-system-core/tsconfig.public-package.json",
+        "bytes": 147,
+        "sha256": "01366a6ddba0a147aabc93fbaff75481dfaf644f628cde2cd584e0f44b7d493c"
+      }
+    ]
+  },
+  "project": {
+    "kind": "desen.editable-project",
+    "schemaVersions": [1],
+    "sourceKind": "desen.source",
+    "sourcePreservedExactly": true,
+    "canonicalBytes": 4211,
+    "digest": "sha256:99c458aad4f1e6ca19f21690a5dd42d7281a1fed8142c87ab1a2e835d5eb3c20",
+    "deterministicAcrossKeyOrder": true,
+    "reimportByteIdentical": true,
+    "reimportRecordIdentical": true,
+    "changes": 0,
+    "losses": 0,
+    "retained": {
+      "tokenSources": 1,
+      "recipes": 1,
+      "assets": 1,
+      "connectionIntents": 1,
+      "projectExtensions": true,
+      "tokenExtensions": true
+    },
+    "connectionIntentAuthority": "INERT_DRAFT_ONLY",
+    "executableIntentRejected": true
+  },
+  "tokens": {
+    "standard": "DTCG 2025.10",
+    "supportedTypes": [
+      "border",
+      "color",
+      "cubicBezier",
+      "dimension",
+      "duration",
+      "number",
+      "shadow",
+      "transition",
+      "typography"
+    ],
+    "supportedTypeCount": 9,
+    "supportedFamilies": [
+      "border",
+      "color",
+      "dimension",
+      "motion",
+      "number",
+      "shadow",
+      "typography"
+    ],
+    "supportedFamilyCount": 7,
+    "motionTypes": ["duration", "cubicBezier", "transition"],
+    "profile": {
+      "wholeTokenAliasesOnly": true,
+      "colorSpaces": ["srgb"],
+      "dimensionUnits": ["px", "rem"],
+      "durationUnits": ["ms", "s"],
+      "limits": {
+        "maxAliasDepth": 64,
+        "maxArrayItems": 4096,
+        "maxDocumentCharacters": 4194304,
+        "maxJsonDepth": 64,
+        "maxJsonNodes": 50000,
+        "maxModesAsSources": 16,
+        "maxResolutionSteps": 250000,
+        "maxShadowLayers": 16,
+        "maxSources": 17,
+        "maxStringLength": 65536,
+        "maxTokenCount": 4096,
+        "maxTokenPathLength": 1024,
+        "maxTokenPathSegments": 32
+      }
+    },
+    "admittedTokenCount": 10,
+    "resolvedTokenPaths": [
+      "border.focus",
+      "color.action",
+      "color.brand",
+      "motion.duration.fast",
+      "motion.easing.standard",
+      "motion.transition.enter",
+      "number.opacity",
+      "shadow.raised",
+      "space.md",
+      "type.body"
+    ],
+    "deterministicOrder": true,
+    "orderedSourceIds": ["neutral.base", "mode.dark"],
+    "laterSourceWins": true,
+    "aliasResolvedAfterOverlay": true,
+    "crossSourceUntypedAliasTargetIntroducedLater": true,
+    "literalOverrideWinsLast": true,
+    "aliasesObserveLiteralOverride": true,
+    "outputRecursivelyImmutable": true,
+    "observations": {
+      "overlayBrand": {
+        "alpha": 1,
+        "colorSpace": "srgb",
+        "components": [0.8, 0.85, 0.9]
+      },
+      "overlayAlias": {
+        "alpha": 1,
+        "colorSpace": "srgb",
+        "components": [0.8, 0.85, 0.9]
+      },
+      "literalBrand": {
+        "alpha": 1,
+        "colorSpace": "srgb",
+        "components": [0.3, 0.9, 0.4]
+      },
+      "literalAlias": {
+        "alpha": 1,
+        "colorSpace": "srgb",
+        "components": [0.3, 0.9, 0.4]
+      }
+    },
+    "negativeMatrix": [
+      { "id": "alias-cycle", "code": "ALIAS_CYCLE", "partialResult": false },
+      {
+        "id": "alias-missing-target",
+        "code": "ALIAS_TARGET_MISSING",
+        "partialResult": false
+      },
+      {
+        "id": "alias-type-mismatch",
+        "code": "ALIAS_TYPE_MISMATCH",
+        "partialResult": false
+      },
+      {
+        "id": "numeric-overflow",
+        "code": "LIMIT_EXCEEDED",
+        "partialResult": false
+      },
+      {
+        "id": "unsafe-accessor",
+        "code": "UNSAFE_DTCG_VALUE",
+        "partialResult": false
+      }
+    ]
+  },
+  "historicalSc01": {
+    "task": "SC-01",
+    "path": "docs/proof/artifacts/sc-01-dtcg-compatibility.json",
+    "bytes": 31286,
+    "sha256": "1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6",
+    "classification": "DTCG_2025_10_COMPATIBLE_CLOSED_REFERENCE_PROFILE",
+    "leaves": 26,
+    "effectiveTypes": ["color", "dimension"],
+    "typeCounts": { "color": 20, "dimension": 6 },
+    "aliases": 3,
+    "fullResolverClaim": false,
+    "relationship": "UNCHANGED_HISTORICAL_CLOSED_REFERENCE_PROFILE"
+  },
+  "tests": {
+    "rootTestNames": [
+      "M10A-T02 builds deterministic evidence through the built public package",
+      "M10A-T02 proves a lossless immutable project export and reimport",
+      "M10A-T02 proves nine DTCG types seven families and deterministic precedence",
+      "M10A-T02 rejects alias cycle missing target type mismatch overflow and unsafe data",
+      "M10A-T02 preserves the exact historical 26-leaf SC-01 artifact",
+      "M10A-T02 rejects public-runtime package and historical-authority mutations",
+      "M10A-T02 verifier rejects artifact and visible-report drift",
+      "M10A-T02 writer is atomic and rejects unsafe destinations",
+      "M10A-T02 authenticates its checkpointed artifact without external execution"
+    ],
+    "packageBehaviorRunsSeparately": true,
+    "verifierWritesWorkspace": false,
+    "verifierUsesNetwork": false,
+    "verifierSpawnsChildren": false,
+    "hostedExactHeadRequired": true
+  },
+  "nonClaims": [
+    "T02 does not add the T03 theme editor or any normal App integration.",
+    "T02 does not create immutable releases, recipe materialization, asset loading, executable connections, or runtime semantics.",
+    "The broader T02 DTCG project profile is a successor and does not rewrite SC-01's historical closed reference profile.",
+    "Local deterministic evidence does not substitute for exact-head hosted Quality gate and fresh-main closure."
+  ]
+}

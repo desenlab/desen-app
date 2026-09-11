@@ -8,6 +8,7 @@ const allowedPackageDependencies = {
   "runtime-react": ["protocol", "validator", "runtime-core"],
   "runtime-web": ["protocol", "validator", "runtime-core"],
   "editor-core": ["protocol", "validator"],
+  "design-system-core": ["protocol", "editor-core"],
   "editor-web": [
     "protocol",
     "validator",
@@ -81,7 +82,7 @@ const allowedApplicationDependencies = {
 };
 
 const neutralProductionSourcePath =
-  "^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core)/src/";
+  "^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core|design-system-core)/src/";
 const desenAppBrowserProductProofServerPath =
   "^apps/desen-app-browser-e2e/product-proof-server\\.mjs$";
 const desenAppBrowserRecoveryProofServerPath =

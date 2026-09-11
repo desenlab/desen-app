@@ -9,9 +9,10 @@ M10 is **12/12**, M10A is **1/28 (4%)**, and proof gates are **11/14**. Gates ar
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01 is DONE**. No M10A task is active; **M10A-T02 is ready and remains NOT_STARTED**. M11
-has not started. Base UI 1.8.0 and the bounded starter adapter slice are proven; the frozen protocol
-and Runtime Core are unchanged.
+**M10A-T01 is DONE**. **M10A-T02 is IN_PROGRESS**: its platform-neutral package and task evidence
+pass locally, while exact-head hosted closure is pending. M11 has not started. The completed count
+therefore remains 122 and M10A remains 1/28; the frozen protocol, Runtime Core, and SC-01 profile are
+unchanged.
 
 ## Current closure
 
@@ -56,7 +57,7 @@ No Git history is rewritten.
 
 ## Documentation verification
 
-The eight governed entry and standards documents are reduced from 18,467 to 1,626 lines (91.2%)
+The eight governed entry and standards documents are reduced from 18,467 to 1,638 lines (91.1%)
 while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
 through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
 link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
@@ -68,17 +69,20 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-No M10A task is active. The next eligible task is **M10A-T02 — Project design-system model and
-token resolver**. It remains `NOT_STARTED` until explicitly begun. The
+The active task is **M10A-T02 — Project design-system model and token resolver**. Its local candidate
+adds an App-owned v1 envelope, canonical admitted Source, inert authoring metadata, and bounded DTCG
+resolution in `@desen/design-system-core`. The
 [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md),
 [T02 contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t02--project-design-system-model-and-token-resolver),
-and [ADR 0023](docs/adr/0023-design-first-authoring-and-design-system-workbench.md) define its scope.
-The completed [T01 proof](docs/proof/M10A-T01.md) supplies its dependency authority. No further
-external user/team recruitment is required; pilot demand remains unproven.
+and [ADR 0023](docs/adr/0023-design-first-authoring-and-design-system-workbench.md) define its scope;
+the [T02 proof](docs/proof/M10A-T02.md) owns implementation detail. Only the current PR head's hosted
+Quality gate can close it. M10A-T03 remains `NOT_STARTED` and is not yet eligible.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
-Runtime Core tree and fresh proof requirements. T02 readiness authorizes no publication, release,
-deployment, normal App integration, theme editor, or immutable design-system release.
+Runtime Core tree and fresh proof requirements. T02 authorizes no publication, persistence,
+deployment, normal App integration, theme editor, immutable design-system release, Runtime, or
+Publisher authority. No further external user/team recruitment is required; pilot demand remains
+unproven.
 
 ## Frozen G10 transition authorities
 

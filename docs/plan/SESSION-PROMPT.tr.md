@@ -10,12 +10,12 @@ Yeni bir geliştirme oturumunda aşağıdaki metni görev kimliğiyle birlikte k
 > Tam güncel PR head'inin hosted Quality gate sonucu geçmeden görevi DONE yapma. `pnpm check`
 > kapsamlı denetim ve kapı kapanışı içindir. Sonunda neyin kanıtlandığını ve sıradaki tek görevi açıkla.
 
-Sıradaki başlamaya hazır M10A görevi için:
+Aktif M10A görevinin kapanışını sürdürmek için:
 
-> Yukarıdaki kurallarla yalnız `M10A-T02` görevini uygula. Önce M10A-IMPLEMENTATION-PLAN,
-> M10A-TASK-CONTRACTS ve ADR 0023'ü oku. Platformdan bağımsız `@desen/design-system-core`
-> paketinde sürümlü editable-project zarfını, tipli token profillerini ve deterministik alias/mode
-> çözümünü kanıtla; cycle, eksik veya tip uyuşmaz alias, overflow ve güvensiz değerleri reddet.
-> Donmuş protokolü, Runtime Core'u ve tarihsel SC-01 profilini değiştirme. T03 tema editörünü,
-> T04 release katmanını, normal App entegrasyonunu, starter genişlemesini veya M11'i bu göreve dahil
-> etme. Commit/push ve dış yayın için mevcut yetkiyi doğrula.
+> Yukarıdaki kurallarla yalnız `M10A-T02` yerel adayını doğrula ve kapanışını sürdür. Önce
+> M10A-IMPLEMENTATION-PLAN, M10A-TASK-CONTRACTS, ADR 0023 ve T02 kanıtını oku. Mevcut
+> `@desen/design-system-core` sınırını görev testleriyle ve CI-02 yerel temeliyle doğrula; kapsamı
+> genişletme. Donmuş protokolü, Runtime Core'u ve tarihsel SC-01 profilini değiştirme. T03 tema
+> editörünü, T04 release katmanını, persistence veya normal App entegrasyonunu, starter genişlemesini,
+> Publisher/Runtime yetkisini ya da M11'i dahil etme. Tam güncel PR head'inin hosted Quality gate'i
+> geçmeden görevi `DONE` yapma; T03 bu kapanıştan önce başlamaya uygun değildir.

@@ -124,12 +124,13 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "3c2a3290df150df591fa2149174a3514aa1c9e48644a2df49d148b55c1c478c2",
   "67a72d107af76982c0aa5bab6907f0634de3f9754b46dd2799891d9f5169f53e",
   "9c479b3f3feaa3081fe255063462b9736f959e1fa19931df6ced310112bed7a9",
+  "c7ba51e79472cce640629e6856e9240ddf859f1351213b7fe8f8f91e81e353fc",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
   25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
   46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57, 58, 59, 59,
-  59, 59, 60, 61, 62, 63, 64, 65, 65, 65,
+  59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_COUNT = 1_024;
@@ -819,6 +820,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/m10a-t01-proof.mjs",
     "tests/m10a-t01.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M10A-T02",
+    {
+      path: "docs/proof/artifacts/m10a-t02.json",
+      bytes: 11_513,
+      sha256: "135dffbab6bc2c0d73e93caf2da6edbbeb7cec2653555fc5c128e1de0f5936c2",
+    },
+    "scripts/lib/m10a-t02-proof.mjs",
+    "tests/m10a-t02.test.mjs",
   ),
 ]);
 

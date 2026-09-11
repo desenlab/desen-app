@@ -280,12 +280,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
       ],
     ],
     ["m10a-t01", ["m10-gate"]],
+    ["m10a-t02", ["m10a-t01"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "11a5dd0f1aadaf4636fb4eb617811afe9d2d7a7fb02fa939dd6af217801f40dc";
+  "0542c63ffac9bde36b975eab208098a597204d4bfb959c1df20434ef16116e48";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {
@@ -530,9 +531,13 @@ export function createAffectedImpactClosure(ownerProofUnitIds) {
   }
   const inventory = createExhaustiveWorkloadInventory();
   const proofUnitIds = graph.entries.map(({ id }) => id).filter((id) => affected.has(id));
-  const conditionalPrefixNodeIds = proofUnitIds.includes("editor-core-persistence")
-    ? ["editor-web-public-package-contract"]
-    : [];
+  const conditionalPrefixNodeIds = [];
+  if (proofUnitIds.includes("editor-core-persistence")) {
+    conditionalPrefixNodeIds.push("editor-web-public-package-contract");
+  }
+  if (proofUnitIds.includes("m10a-t02")) {
+    conditionalPrefixNodeIds.push("design-system-core-public-package-contract");
+  }
   const selected = new Set([
     ...PREFIX_NODE_IDS,
     ...conditionalPrefixNodeIds,

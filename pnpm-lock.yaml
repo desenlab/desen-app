@@ -311,6 +311,19 @@ importers:
 
   packages/desen: {}
 
+  packages/design-system-core:
+    dependencies:
+      '@desen/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@desen/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+    devDependencies:
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)
+
   packages/editor-core:
     dependencies:
       '@desen/protocol':

@@ -194,7 +194,8 @@ the subsequent planned M11 extension proof. Internal automated acceptance replac
 evidence: demand, adoption and broad Storybook/Chromatic/Figma equivalence remain unproven.
 
 M10A-T01 is now `DONE` as the bounded Button, Select, and Dialog adapter foundation. M10A-T02 is
-ready as the next implementation task but remains `NOT_STARTED`. This does not establish the full
-starter library, design-system management, normal App integration, package release, market demand,
-or production readiness. G10A must pass before M11-T01 or M11-T08; the SC-02 decision itself
-authorizes no external publication or deployment.
+`IN_PROGRESS`: its bounded local package and evidence candidate await exact-head hosted closure.
+This does not establish the full starter library, design-system management UI, persistence, normal
+App integration, package release, market demand, or production readiness. M10A-T03 is not yet
+eligible. G10A must pass before M11-T01 or M11-T08; the SC-02 decision itself authorizes no external
+publication or deployment.

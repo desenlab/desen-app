@@ -11,9 +11,10 @@ koşusu da geçti; ayrıntı [Project Status](../../PROJECT-STATUS.md), [T01 kan
 ve [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış görev sayısı 122'ye çıktı. `M10A-T01` `DONE`: Base UI 1.8.0 ile
-Button/Select/Dialog adaptör sınırı kanıtlandı. Aktif M10A görevi yoktur; `M10A-T02`
-`NOT_STARTED` durumundadır ve başlamaya hazır sıradaki görevdir.
+ekler; tamamlanmış görev sayısı 122 ve M10A sayacı 1/28 olarak kalır. `M10A-T01` `DONE`: Base UI
+1.8.0 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` `IN_PROGRESS`: platformdan
+bağımsız yerel uygulama ve kanıt adayı geçiyor, exact-head hosted Quality kapanışı bekleniyor.
+`M10A-T03` henüz `NOT_STARTED` durumundadır ve başlamaya uygun değildir.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 ## Üç ayrı kimlik

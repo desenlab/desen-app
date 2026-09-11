@@ -1,6 +1,6 @@
 # ADR 0023: Design-first authoring and design-system workbench
 
-- Status: Accepted; M10A-T01 complete, M10A-T02 ready and not started
+- Status: Accepted; M10A-T01 complete, M10A-T02 candidate pending exact-head hosted closure
 - Date: 2026-09-10
 - Decision owner: user-authorized M10A planning / SC-02 adaptation, closed by G10A
 
@@ -18,9 +18,9 @@ weaken DESEN 0.1.0. Source and Bundle remain data-only, capability surfaces rema
 authoring adapters remain honest, and unknown runtime semantics still fail closed.
 
 This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 is `DONE`; the
-other 27 tasks remain `NOT_STARTED`, with M10A-T02 ready as the next implementation authority. ADR
-acceptance alone is not implementation evidence or a release/production-readiness claim. The
-canonical implementation sequence is in
+M10A-T02 local candidate is `IN_PROGRESS`, and the other 26 tasks remain `NOT_STARTED`. No successor
+is eligible until T02 closes. ADR acceptance alone is not implementation evidence or a
+release/production-readiness claim. The canonical implementation sequence is in
 [M10A Implementation Plan](../plan/M10A-IMPLEMENTATION-PLAN.md), with detailed acceptance contracts
 in [M10A Task Contracts](../plan/M10A-TASK-CONTRACTS.md) and product behavior in the
 [Design-System Workbench](../plan/DESIGN-SYSTEM-WORKBENCH.md).
@@ -45,15 +45,16 @@ declaration and cannot inherit the exact-preview claim.
 Native event objects, refs, internal state, and unreviewed prop spreading do not cross the adapter
 boundary.
 
-Reusable design-system data that is independent of React belongs in a planned
-`@desen/design-system-core` package, not in `editor-core` or `runtime-core`. It may own bounded
-App-project schemas, DTCG validation and canonicalization, recipe-graph validation, stable identity
-plans, and deterministic materialization. It remains platform-neutral and cannot import Base UI,
-React, DOM, CSS, browser APIs, the App, or executable host bindings. Desen App remains the
-composition root. Its only planned internal dependencies are `protocol`, `validator`, and
-`editor-core`; `@desen/starter-catalog-web` follows the existing target-package direction to
-`protocol`, `catalog-sdk`, and `runtime-react`, plus the pinned external Base UI dependency.
-Publisher and Runtime packages do not depend on `design-system-core` and gain no recipe semantics.
+Reusable design-system data that is independent of React belongs in
+`@desen/design-system-core`, not in `editor-core` or `runtime-core`. The T02 candidate admits a finite
+App-owned v1 project envelope, canonical Source, inert authoring metadata, and the bounded DTCG
+profile. Later tasks may add recipe-graph, stable-identity, materialization, and release contracts.
+The package remains platform-neutral and cannot import Base UI, React, DOM, CSS, browser APIs, the
+App, or executable host bindings; its current internal dependencies are `protocol` and `editor-core`.
+Desen App remains the composition root. `@desen/starter-catalog-web` follows the existing
+target-package direction to `protocol`, `catalog-sdk`, and `runtime-react`, plus the pinned external
+Base UI dependency. Publisher and Runtime packages do not depend on `design-system-core` and gain no
+recipe semantics.
 
 ### Make the durable editable project the authoring aggregate
 

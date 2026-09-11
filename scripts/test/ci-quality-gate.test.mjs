@@ -449,7 +449,8 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
   for (const taskId of M10A_TASK_IDS) {
     const row = m10aRows.find(({ cells }) => cells[0] === taskId);
     assert.ok(row !== undefined, `missing ${taskId}`);
-    const expectedStatus = taskId === "M10A-T01" ? "DONE" : "NOT_STARTED";
+    const expectedStatus =
+      taskId === "M10A-T01" ? "DONE" : taskId === "M10A-T02" ? "IN_PROGRESS" : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
     assert.equal(
       row.cells[2],
@@ -770,20 +771,20 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 111,
-    verifierCount: 111,
-    rootTestCount: 111,
+    proofCount: 112,
+    verifierCount: 112,
+    rootTestCount: 112,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
-    legacyPrerequisiteCount: 746,
-    legacyPrerequisiteSha256: "3d890406ade04b14dcac9fcb39ce4900304d570b33de03af3811d4e80b547a62",
-    legacyLeafInvocationCount: 4562,
-    legacyLeafInvocationSha256: "db047394d958dad89d07c1fb299e68069892976920d0d56bc2a7685e7792f3d0",
-    distinctLeafWorkloadCount: 346,
-    distinctLeafWorkloadSha256: "dde55d32faf7fcffa87875505d6d955703a57f1a0530069129c3d3ca4990d0ef",
+    legacyPrerequisiteCount: 754,
+    legacyPrerequisiteSha256: "91f6fa67b6df6145678038387acb76e8f2c4f70b17b73c868efd9b24616c5b81",
+    legacyLeafInvocationCount: 4578,
+    legacyLeafInvocationSha256: "2a084ec479b4d819fbfcd733dfc0364a5430c875abf185d0c9e8a681d90f82bc",
+    distinctLeafWorkloadCount: 351,
+    distinctLeafWorkloadSha256: "d0677ebcea01b65ab1ddeb2c2fdba42861d85b89b8cdda8decf8461ec11af1cf",
     testConfigurationFileCount: 2,
-    workspaceTestScriptCount: 17,
-    workspaceTestScriptSha256: "f25499af8cd7f541d55f3a8c5e631ecf39034908a5897cb567cab49a816e8f8c",
+    workspaceTestScriptCount: 18,
+    workspaceTestScriptSha256: "00d77ebce7d64619055a6fc0754b27e70a775fde668c32540bfbbfb93cee0619",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
     workspacePackageGlobs: ["apps/*", "packages/*"],
   });
@@ -1043,9 +1044,9 @@ test("task board retains its canonical inventory without narrative appendices", 
   );
   assert.equal(statuses.get("G11"), "NOT_STARTED");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
-  assert.ok(normalizedReadme.includes("**Next ready:** `M10A-T02` (`NOT_STARTED`)"));
+  assert.ok(normalizedReadme.includes("**Active task:** `M10A-T02` (`IN_PROGRESS`)"));
   assert.ok(normalizedProjectStatus.includes("**M10A-T01 is DONE**"));
-  assert.ok(normalizedProjectStatus.includes("**M10A-T02 is ready and remains NOT_STARTED**"));
+  assert.ok(normalizedProjectStatus.includes("**M10A-T02 is IN_PROGRESS**"));
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
   assert.ok(normalizedStartHere.includes("M11 başlamadı."));
   assert.equal(
@@ -1124,10 +1125,17 @@ test("pre-M11 planning inventory rejects row, dependency, count, or gate-status 
       /M10A-T01 must remain DONE/u,
     );
   }
-  const jumpedAhead = replaceTaskBoardCell(taskBoard, "M10A-T02", 1, "IN_PROGRESS");
+  for (const status of ["DONE", "NOT_STARTED"]) {
+    const falseTaskStatus = replaceTaskBoardCell(taskBoard, "M10A-T02", 1, status);
+    assert.throws(
+      () => assertPreM11PlanningInventory(parseTaskBoard(falseTaskStatus)),
+      /M10A-T02 must remain IN_PROGRESS/u,
+    );
+  }
+  const jumpedAhead = replaceTaskBoardCell(taskBoard, "M10A-T03", 1, "IN_PROGRESS");
   assert.throws(
     () => assertPreM11PlanningInventory(parseTaskBoard(jumpedAhead)),
-    /M10A-T02 must remain NOT_STARTED/u,
+    /M10A-T03 must remain NOT_STARTED/u,
   );
 });
 
@@ -1529,7 +1537,7 @@ test("both inventories require exact starter browser scripts and the two reviewe
   );
   assert.ok(starter);
   for (const validate of [validateProofInventory, validateRepositoryWorkloadInputs]) {
-    assert.equal(validate(baseline).proofCount, 111);
+    assert.equal(validate(baseline).proofCount, 112);
     for (const script of Object.keys(starter.scripts)) {
       const substituted = clone(baseline);
       substituted.workspacePackages.find(
@@ -1726,8 +1734,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 232);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 111);
+  assert.equal(steps.length, 235);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 112);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -1753,6 +1761,24 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
   assert.equal(
     steps.findIndex(({ id }) => id === "editor-web-public-package-contract"),
     steps.findIndex(({ id }) => id === "editor-core-public-package-contract") + 1,
+  );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "design-system-core-public-package-contract"),
+    {
+      id: "design-system-core-public-package-contract",
+      label: "Design System Core public-package contract",
+      command: "pnpm",
+      args: ["--filter", "@desen/design-system-core", "test:public-package"],
+    },
+  );
+  assert.equal(
+    steps.findIndex(({ id }) => id === "design-system-core-public-package-contract"),
+    steps.findIndex(({ id }) => id === "editor-web-public-package-contract") + 1,
+  );
+  assert.equal(
+    steps.findIndex(({ id }) => id === "design-system-core-public-package-contract") <
+      steps.findIndex(({ id }) => id === "verify-m10a-t02"),
+    true,
   );
   assert.deepEqual(
     steps.find(({ id }) => id === "verify-editor-core-continuous-validation"),
@@ -2230,8 +2256,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 232,
-    planSha256: "d6dc66b2c5c3845638f8be1d03fde5bfd688cec26315b223812c244c42eae772",
+    stepCount: 235,
+    planSha256: "158033c4f6cdc36907c2c31555d26f4cd54d2103b93eddd56815cfc18e0faa85",
   });
 
   const missingTypecheck = clone(steps);

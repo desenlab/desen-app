@@ -1,6 +1,6 @@
 # Proof infrastructure
 
-Last reviewed: 2026-09-10
+Last reviewed: 2026-09-11
 
 ## Purpose
 
@@ -57,11 +57,12 @@ cancellation, hosted, and zero-reference checks pass.
 
 ## Current authority
 
-- 232 logical workloads
-- 111 proof pairs: 99 ordinary and 12 exclusive barriers
-- 249 hosted physical shard workloads
-- proof-reader checkpoint sequence 83
-- 65 immutable artifacts and 130 current readers
+- 235 logical workloads, including separate Editor Core, Editor Web, and Design System Core
+  public-package contracts
+- 112 proof pairs: 100 ordinary and 12 exclusive barriers
+- 254 hosted physical shard workloads
+- proof-reader checkpoint sequence 84
+- 66 immutable artifacts and 132 current readers
 - nine M10 Chromium journeys in the separate Browser E2E job; three T01 cases in its proof barrier
 
 Exact counts are reviewed invariants, not targets to reduce. A performance change may redistribute

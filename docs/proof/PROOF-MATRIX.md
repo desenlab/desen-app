@@ -3522,3 +3522,45 @@ to 1/28 (4%) while proof gates remain 11/14. M10A-T02 is ready but remains `NOT_
 not migrate the normal App, change Runtime Core, publish a package or release, advance G10A, or
 claim the complete starter library, theme/token layer, design-system management, or production
 deployment.
+
+## M10A-T02 project and token core (local implementation evidence)
+
+The [M10A-T02 evidence](M10A-T02.md) adds private, platform-neutral
+`@desen/design-system-core`. Its finite version-1 App project envelope retains one structurally
+admitted canonical Source, ordered inert DTCG documents, recipe and asset metadata, and draft
+connection-intent notes. The closed migration registry currently has only a deterministic,
+lossless version-1 identity path; unknown versions fail explicitly.
+
+The DTCG 2025.10 profile resolves nine exact value types across color, dimension, number,
+typography, border, shadow, and motion families. Modes are ordered external token sources rather
+than an invented DTCG member. Later sources win, whole-token aliases resolve after overlay, and
+typed literal overrides apply last. The public-package proof covers deterministic provenance,
+loss-aware project round trips and recursive immutability; negative cases reject cycles, missing or
+type-changing aliases, overflow, unsafe input, and executable connection state without exposing a
+partial result.
+
+The 11,513-byte artifact is
+`sha256:135dffbab6bc2c0d73e93caf2da6edbbeb7cec2653555fc5c128e1de0f5936c2`;
+its canonical project digest is
+`sha256:99c458aad4f1e6ca19f21690a5dd42d7281a1fed8142c87ab1a2e835d5eb3c20`.
+Package tests pass 52/52, the built public-package contract passes 3/3, and the root proof passes
+9/9. Reader checkpoint sequence 84 preserves sequences 1–83 and authenticates 66 artifacts plus
+132 current readers at
+`sha256:c7ba51e79472cce640629e6856e9240ddf859f1351213b7fe8f8f91e81e353fc`.
+The expanded CI authority contains 235 logical workloads / 112 proof pairs (100 ordinary and 12
+exclusive barriers) and 254 hosted physical shard workloads.
+
+The final local compatibility seal passes the exact T02 verifier together with all 525 CI
+orchestration contracts. The published-host, last-known-good, and repeatable-demo readers now
+authenticate an explicit T02 → T01 → T08 projection for the lockfile and two boundary-policy
+inputs; stale, missing, extra, reordered, and byte-tampered successors fail closed. The frozen
+published-host, recovery, and repeatable-demo artifacts remain byte-identical at their reviewed
+receipts.
+
+This is local implementation evidence, not task closure: exact-head hosted Quality and fresh-main
+receipts are still pending, so M10A-T02 remains `IN_PROGRESS`, progress remains 122/176 (69%), and
+M10A remains 1/28 (4%). The historical 31,286-byte SC-01 DTCG artifact stays byte-identical at
+`sha256:1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6` with its closed
+26-leaf color/dimension profile. T02 does not add App integration, a theme editor, persistence,
+asset loading, recipe materialization, executable connections, immutable releases, Runtime or
+Publisher authority, package publication, production deployment, G10A, or M11 work.

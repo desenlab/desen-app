@@ -1,7 +1,7 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 is `DONE`, and M10A-T02 is the next
-eligible task but remains `NOT_STARTED`.
+Decision date: 2026-09-10. Planning is complete; M10A-T01 is `DONE`, and M10A-T02 is `IN_PROGRESS`
+with a locally passing implementation candidate awaiting exact-head hosted closure.
 The canonical statuses and dependencies are in [TASKS.md](TASKS.md).
 
 ## Product promise
@@ -143,15 +143,13 @@ updates, history and persistence. Source remains independently exportable and ca
 published with its exact Catalogs and authenticated design-system release. Production executes the
 derived Bundle, not the editable Source or project record.
 
-Planned `@desen/design-system-core` owns finite data validation, token/theme resolution, recipe
-updates and release identities; it is platform-neutral and imports no React, DOM or CSS types.
-Web adapters project these data into styles. No production token/asset dependency is kept only in
-stripped `authoring`. The host activation profile pins the immutable design-system release beside
-the Bundle and exact Catalogs; restart and rollback restore a compatible complete set.
-Recipe/master links are editor relationships. Accepted updates materialize valid ordinary Source
-with stable IDs before publication; Publisher does not expand macros or rewrite node identities.
-Arbitrary code, private selectors, endpoint/credential selection and remote package loading remain
-outside design documents. Runtime Core and the frozen protocol remain byte-identical.
+The active T02 candidate establishes platform-neutral `@desen/design-system-core` with finite v1
+project admission and deterministic DTCG token resolution. It retains canonical Source plus inert
+token, recipe, asset, and connection metadata without granting persistence, materialization,
+release, App, Publisher, or Runtime authority. Later tasks own those capabilities. Web adapters may
+eventually project admitted data into styles, but React, DOM, CSS, arbitrary code, private selectors,
+endpoint/credential selection, and remote package loading stay outside this package. Runtime Core
+and the frozen protocol remain byte-identical.
 
 ## Design-system workbench and visual review
 
@@ -183,18 +181,18 @@ alone and not another external user recruitment round:
 - Existing M10 browser/proof coverage remains fresh and passing; Runtime Core and upstream identity
   checks pass. All new claims name their browser, viewport, fixture and resource-limit scope.
 
-## Ready-to-start task
+## Active task
 
-Start only **M10A-T02 — Project design-system model and token resolver** when implementation is
-requested. Dependency: M10A-T01 is `DONE`. Read the
-[T02 contract](M10A-TASK-CONTRACTS.md#m10a-t02--project-design-system-model-and-token-resolver) and
-ADR 0023 first. Implement the platform-neutral `@desen/design-system-core`, a finite versioned
-editable-project envelope, and typed color, dimension, number, typography, border, shadow, and
-motion-value profiles. Prove deterministic literal, alias, and mode resolution plus loss-aware round
-trips; reject cycles, missing or type-mismatched aliases, overflow, and unsafe values. The package
-may depend internally only on `protocol`, `validator`, and `editor-core`. Do not add the T03 theme
-editor, T04 immutable releases, normal App integration, starter-library expansion, Core/protocol
-changes, or M11 work in this task.
+**M10A-T02 — Project design-system model and token resolver** is `IN_PROGRESS`. Its local candidate
+adds `@desen/design-system-core`, an App-owned v1 envelope with one canonical admitted Source and
+inert authoring metadata, and a closed v1 identity migration. The DTCG 2025.10 resolver supports nine
+types across seven families: ordered external sources model modes, whole-token aliases resolve after
+the overlay, and literal overrides apply last. See the
+[T02 proof](../proof/M10A-T02.md) for the finite profile and rejection matrix.
+
+The task remains open until the current PR head's hosted Quality gate passes. M10A-T03 is not yet
+eligible. Do not add its theme UI, T04 releases, persistence, normal App integration, recipe or asset
+execution, starter-library expansion, Publisher/Runtime authority, Core/protocol changes, or M11.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.

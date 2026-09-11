@@ -56,3 +56,7 @@ node scripts/verify-boundary-fixtures.mjs
 ```
 
 Adding or changing a boundary rule requires one fixture that would fail if that rule disappeared.
+
+M10A-T02 adds five design-system-core fixtures. They admit the documented neutral dependency on
+Editor Core, reject Design System Core dependencies on Validator, Runtime Core, or Node built-ins,
+and reject the inverse Runtime Core dependency so draft project data cannot become runtime authority.

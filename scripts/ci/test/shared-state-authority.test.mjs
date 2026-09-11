@@ -104,26 +104,27 @@ const ALL_STEP_IDS = Object.freeze([
   "package-tests",
   "editor-core-public-package-contract",
   "editor-web-public-package-contract",
+  "design-system-core-public-package-contract",
   ...PROOF_IDS.map((id) => `verify-${id}`),
   ...PROOF_IDS.map((id) => `test-${id}`),
   "dependency-boundaries",
   "boundary-fixtures",
 ]);
 
-test("owns exactly 232 steps across the eight reviewed execution classes", () => {
+test("owns exactly 235 steps across the eight reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 232);
-  assert.equal(new Set(ALL_STEP_IDS).size, 232);
+  assert.equal(ALL_STEP_IDS.length, 235);
+  assert.equal(new Set(ALL_STEP_IDS).size, 235);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
-    WORKSPACE_OUTPUT_EXCLUSIVE: 3,
+    WORKSPACE_OUTPUT_EXCLUSIVE: 4,
     PACKAGE_TEST_EXCLUSIVE: 1,
-    PROOF_READ_ONLY: 93,
-    PROOF_OS_TEMP_ISOLATED: 117,
+    PROOF_READ_ONLY: 94,
+    PROOF_OS_TEMP_ISOLATED: 118,
     PROOF_BROWSER_EXCLUSIVE: 1,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
@@ -156,13 +157,27 @@ test("owns exactly 232 steps across the eight reviewed execution classes", () =>
     filesystemCompatibilityPolicy: "NONE",
     barrier: true,
   });
+  assert.deepEqual(classifyWorkloadStateMetadata("design-system-core-public-package-contract"), {
+    schemaVersion: 2,
+    stepId: "design-system-core-public-package-contract",
+    executionClass: "WORKSPACE_OUTPUT_EXCLUSIVE",
+    workspaceReads: ["."],
+    workspaceWrites: ["."],
+    tempPolicy: "NONE",
+    tempKey: null,
+    ports: [],
+    childProcessPolicy: "TOOLCHAIN_EXCLUSIVE",
+    nativeAddonPolicy: "NONE",
+    filesystemCompatibilityPolicy: "NONE",
+    barrier: true,
+  });
 });
 
 test("pins the exact eleven read-only, one browser, and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 111);
-  assert.equal(new Set(PROOF_IDS).size, 111);
+  assert.equal(PROOF_IDS.length, 112);
+  assert.equal(new Set(PROOF_IDS).size, 112);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
-  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 99);
+  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 100);
   assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 12);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
@@ -178,7 +193,7 @@ test("pins the exact eleven read-only, one browser, and sole workspace-temp proo
     "desen-app-published-host-update",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 99);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 100);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -1328,7 +1343,7 @@ test("pins the exact eleven read-only, one browser, and sole workspace-temp proo
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    111,
+    112,
   );
 });
 
@@ -2407,7 +2422,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 214,
+    NONE: 217,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,
@@ -2984,12 +2999,13 @@ test("runner temp cleanup removes files and is idempotent", async (context) => {
 });
 
 test("build-output seals cover every exact app/package dist and Turbo root", async (context) => {
-  assert.equal(BUILD_OUTPUT_ROOTS.length, 41);
-  assert.equal(new Set(BUILD_OUTPUT_ROOTS).size, 41);
+  assert.equal(BUILD_OUTPUT_ROOTS.length, 43);
+  assert.equal(new Set(BUILD_OUTPUT_ROOTS).size, 43);
   assert.equal(BUILD_OUTPUT_ROOTS.includes(".turbo"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/reference-host-web/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/desen-app-browser-e2e/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/starter-catalog-web-proof/dist"), true);
+  assert.equal(BUILD_OUTPUT_ROOTS.includes("packages/design-system-core/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("packages/starter-catalog-web/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("packages/validator/.turbo"), true);
 

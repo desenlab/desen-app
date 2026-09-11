@@ -191,8 +191,8 @@ const PROMOTION_REMOVED_TRACKED_PATHS = Object.freeze([
   "scripts/ci/run-shadow-affected-quality-gate.mjs",
   "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
 ]);
-const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
-  // M10A-T01 app/package/proof and its accepted planning baseline are exact new tracked inputs.
+const M10A_T01_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  // The complete accepted successor from I07-04 through M10A-T01 remains independently reversible.
   "apps/starter-catalog-web-proof/README.md",
   "apps/starter-catalog-web-proof/authoring.html",
   "apps/starter-catalog-web-proof/host.html",
@@ -776,6 +776,46 @@ const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "tests/desen-app-published-host-update.test.mjs",
   "tests/desen-app-t04-historical-reader-fixture.mjs",
 ]);
+const M10A_T02_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "docs/proof/M10A-T02.md",
+  "docs/proof/artifacts/m10a-t02.json",
+  "packages/design-system-core/README.md",
+  "packages/design-system-core/package.json",
+  "packages/design-system-core/src/diagnostics.ts",
+  "packages/design-system-core/src/index.ts",
+  "packages/design-system-core/src/inert-json.ts",
+  "packages/design-system-core/src/project-migrations.ts",
+  "packages/design-system-core/src/project-record.ts",
+  "packages/design-system-core/src/token-document.ts",
+  "packages/design-system-core/src/token-resolver.ts",
+  "packages/design-system-core/src/token-types.ts",
+  "packages/design-system-core/test/project-migrations.test.ts",
+  "packages/design-system-core/test/project-migrations.types.ts",
+  "packages/design-system-core/test/project-record.test.ts",
+  "packages/design-system-core/test/project-record.types.ts",
+  "packages/design-system-core/test/public-package.mjs",
+  "packages/design-system-core/test/public-package.types.mts",
+  "packages/design-system-core/test/token-document.test.ts",
+  "packages/design-system-core/test/token-document.types.ts",
+  "packages/design-system-core/test/token-resolver.test.ts",
+  "packages/design-system-core/test/token-resolver.types.ts",
+  "packages/design-system-core/tsconfig.build.json",
+  "packages/design-system-core/tsconfig.json",
+  "packages/design-system-core/tsconfig.public-package.json",
+  "scripts/generate-m10a-t02-proof.mjs",
+  "scripts/lib/m10a-t02-proof.mjs",
+  "scripts/verify-m10a-t02.mjs",
+  "tests/boundaries/fixtures/allowed-design-system-editor-core/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/allowed-design-system-editor-core/packages/editor-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-imports-node/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-imports-runtime-core/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-imports-runtime-core/packages/runtime-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-imports-validator/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-imports-validator/packages/validator/src/index.ts",
+  "tests/boundaries/fixtures/runtime-core-imports-design-system/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/runtime-core-imports-design-system/packages/runtime-core/src/index.ts",
+  "tests/m10a-t02.test.mjs",
+]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
   ownershipSha256: "8a9904c93964f6b5e979bb1369e58bb84abaa110137e47b9b839222d8e82d7d8",
@@ -815,10 +855,10 @@ const PROMOTED_OWNERSHIP_REVIEW = Object.freeze({
   }),
   ownershipSha256: I07_04_PROMOTED_AUTHORITIES.ownershipSha256,
 });
-const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
-  trackedPathCount: EXPECTED_AFFECTED_TRACKED_PATH_COUNT,
-  trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
-  proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
+const M10A_T01_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
+  trackedPathCount: 1605,
+  trackedPathSetSha256: "d1397218dc5f5e1554b163c27f4098014a8953fbb4ccad046d5382b8c4d29167",
+  proofOwnedPathCount: 222,
   categoryCounts: Object.freeze({
     PROOF_UNIT: 222,
     CI_POLICY: 48,
@@ -827,6 +867,22 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     PACKAGE_OR_APPLICATION: 606,
     SHARED_PROOF_INFRASTRUCTURE: 363,
     PROJECT_DOCUMENTATION: 161,
+    REPOSITORY_POLICY: 11,
+  }),
+  ownershipSha256: "b51940f4dadabc2bda7b45b22b0101dbd3faf285dfe1e6bf07335ce2d6d69d1c",
+});
+const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
+  trackedPathCount: EXPECTED_AFFECTED_TRACKED_PATH_COUNT,
+  trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
+  proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
+  categoryCounts: Object.freeze({
+    PROOF_UNIT: 224,
+    CI_POLICY: 48,
+    DEPENDENCY_POLICY: 35,
+    FROZEN_INPUT: 161,
+    PACKAGE_OR_APPLICATION: 628,
+    SHARED_PROOF_INFRASTRUCTURE: 374,
+    PROJECT_DOCUMENTATION: 162,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -1231,10 +1287,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 83,
-  headSha256: "9c479b3f3feaa3081fe255063462b9736f959e1fa19931df6ced310112bed7a9",
-  frozenArtifactCount: 65,
-  currentReaderCount: 130,
+  sequence: 84,
+  headSha256: "c7ba51e79472cce640629e6856e9240ddf859f1351213b7fe8f8f91e81e353fc",
+  frozenArtifactCount: 66,
+  currentReaderCount: 132,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -1640,17 +1696,45 @@ function createBoundaryOwnershipDelta(rawBoundary) {
     );
   }
   const successorPaths = successorAuthority.entries.map(({ path: trackedPath }) => trackedPath);
-  for (const trackedPath of CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS) {
+  if (
+    M10A_T02_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 38 ||
+    new Set(M10A_T02_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 38
+  ) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "The reviewed M10A-T02 successor path append is not exactly 38 unique paths.",
+    );
+  }
+  for (const trackedPath of M10A_T02_SUCCESSOR_ADDED_TRACKED_PATHS) {
     if (!successorPaths.includes(trackedPath)) {
       fail(
         "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
-        "The authenticated boundary omitted one exact current successor path.",
+        "The authenticated boundary omitted one exact M10A-T02 successor path.",
         { path: trackedPath },
       );
     }
   }
-  const promotedPaths = successorPaths.filter(
-    (trackedPath) => !CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
+  const m10aT01SuccessorPaths = successorPaths.filter(
+    (trackedPath) => !M10A_T02_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
+  );
+  const m10aT01SuccessorReview = calculateAffectedWorkloadOwnershipReview(m10aT01SuccessorPaths);
+  if (!isDeepStrictEqual(m10aT01SuccessorReview, M10A_T01_SUCCESSOR_OWNERSHIP_REVIEW)) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "Removing the exact M10A-T02 append does not reproduce the reviewed M10A-T01 successor.",
+    );
+  }
+  for (const trackedPath of M10A_T01_SUCCESSOR_ADDED_TRACKED_PATHS) {
+    if (!m10aT01SuccessorPaths.includes(trackedPath)) {
+      fail(
+        "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+        "The authenticated boundary omitted one exact pre-T02 successor path.",
+        { path: trackedPath },
+      );
+    }
+  }
+  const promotedPaths = m10aT01SuccessorPaths.filter(
+    (trackedPath) => !M10A_T01_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
   );
   const promotedReview = calculateAffectedWorkloadOwnershipReview(promotedPaths);
   if (!isDeepStrictEqual(promotedReview, PROMOTED_OWNERSHIP_REVIEW)) {
@@ -2756,12 +2840,12 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 232 ||
-    currentInventory.proofUnitCount !== 111
+    currentInventory.workloadCount !== 235 ||
+    currentInventory.proofUnitCount !== 112
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current workload graph is not the exact reviewed AR-01 append-only successor.",
+      "The current workload graph is not the exact reviewed M10A-T02 append-only successor.",
     );
   }
   const currentProofPairClasses = currentInventory.proofUnits.reduce(
@@ -2771,10 +2855,10 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 99 || currentProofPairClasses.barrier !== 12) {
+  if (currentProofPairClasses.ordinary !== 100 || currentProofPairClasses.barrier !== 12) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M10A-T01 proof-pair authority is not exactly 99 ordinary and 12 barrier pairs.",
+      "The current M10A-T02 proof-pair authority is not exactly 100 ordinary and 12 barrier pairs.",
     );
   }
   const archiveRedactionClosure = createAffectedImpactClosure(["historical-archive-redaction"]);
@@ -2782,14 +2866,14 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     !isDeepStrictEqual(archiveRedactionClosure.ownerProofUnitIds, [
       "historical-archive-redaction",
     ]) ||
-    archiveRedactionClosure.proofUnitCount !== 79 ||
-    archiveRedactionClosure.workloadCount !== 168 ||
+    archiveRedactionClosure.proofUnitCount !== 80 ||
+    archiveRedactionClosure.workloadCount !== 171 ||
     archiveRedactionClosure.impactSha256 !==
-      "6d46c34156db550b4e358f0073f7cf69d05b3d3be1970fc00d53b116ccc910bd"
+      "a6b74a3a0e481849136b96e02f5bdcae81bf5d1ef8054adabaf0acb1a7e0b974"
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M10A-T01 successor closure from AR-01 is not exactly 79 proof units and 168 workloads.",
+      "The current M10A-T02 successor closure from AR-01 is not exactly 80 proof units and 171 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);
