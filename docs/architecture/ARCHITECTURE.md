@@ -215,30 +215,32 @@ success.
 ## M10A design-first workbench
 
 M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice is complete;
-T02 is ready but remains `NOT_STARTED`, and later workbench features remain planned. No publication
-or production authority follows from this architecture text.
+T02 has a locally passing implementation candidate and remains `IN_PROGRESS` until exact-head
+hosted closure. Later workbench features remain planned; no publication or production authority
+follows from this architecture text.
 [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the decision,
 while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
 [task contracts](../plan/M10A-TASK-CONTRACTS.md), and
 [Workbench contract](../plan/DESIGN-SYSTEM-WORKBENCH.md) own execution detail.
 
 The package boundary is additive. T01 delivers the starter package and its dependency direction;
-`@desen/design-system-core` remains planned for T02, while normal App composition remains later work:
+the T02 candidate adds `@desen/design-system-core`, while normal App composition remains later work:
 
 - `@desen/starter-catalog-web` supplies target-specific DESEN capabilities through trusted,
   statically registered production and authoring adapters built on pinned Base UI and the DESEN
   Neutral theme;
-- the planned `@desen/design-system-core` will own only finite platform-neutral project, DTCG
-  release, recipe-graph, stable-identity, and materialization data contracts; it cannot import
-  React, DOM, CSS, Base UI, browser APIs, App code, or host bindings, and may depend internally only
-  on `protocol`, `validator`, and `editor-core`;
+- `@desen/design-system-core` admits the App-owned v1 envelope, canonical Source, inert token,
+  recipe, asset, and connection metadata, and a bounded deterministic DTCG resolver. It imports only
+  `protocol` and `editor-core`; it cannot import React, DOM, CSS, Base UI, browser APIs, App code, or
+  host bindings, and owns no persistence, release, materialization, Publisher, or Runtime authority;
 - `@desen/starter-catalog-web` follows the existing target-package edges to `protocol`,
   `catalog-sdk`, and `runtime-react`, plus its pinned external Base UI dependency; and
 - Desen App will compose those packages with existing Editor, Validator, Publisher, and Runtime
   public APIs. Neither new package becomes a hidden Runtime Core or protocol owner. Publisher and
   Runtime packages do not depend on `design-system-core` or interpret its recipe graph.
 
-An App-owned versioned editable-project record is the durable authoring aggregate. It atomically
+Across later M10A tasks, an App-owned versioned editable-project record becomes the durable
+authoring aggregate. It atomically
 stores one exact canonical Source, editable DTCG data, immutable design-system release references,
 the bounded master/instance/override graph, and inert connection and Workbench drafts under
 generation compare-and-set. It is not a DESEN protocol document. Every open verifies the complete

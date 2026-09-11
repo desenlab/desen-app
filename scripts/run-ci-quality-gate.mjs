@@ -551,6 +551,7 @@ const PROOF_ENTRIES = Object.freeze(
     ],
     ["m10-gate", "scripts/verify-m10-gate.mjs", "tests/m10-gate.test.mjs"],
     ["m10a-t01", "scripts/verify-m10a-t01.mjs", "tests/m10a-t01.test.mjs"],
+    ["m10a-t02", "scripts/verify-m10a-t02.mjs", "tests/m10a-t02.test.mjs"],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -641,14 +642,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "3d890406ade04b14dcac9fcb39ce4900304d570b33de03af3811d4e80b547a62";
+  "f2c2cab2a7b5166d7722cc413c1079dd7c0b9b4011c6d6049d30dba6c10d3402";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "db047394d958dad89d07c1fb299e68069892976920d0d56bc2a7685e7792f3d0";
+  "6ad759ada99e7b601d05dcb64cb7c3f3a2f96c6de6ff1112721e7aee7be4cddc";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "dde55d32faf7fcffa87875505d6d955703a57f1a0530069129c3d3ca4990d0ef";
+  "d0677ebcea01b65ab1ddeb2c2fdba42861d85b89b8cdda8decf8461ec11af1cf";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "d6dc66b2c5c3845638f8be1d03fde5bfd688cec26315b223812c244c42eae772";
+const QUALITY_GATE_PLAN_SHA256 = "158033c4f6cdc36907c2c31555d26f4cd54d2103b93eddd56815cfc18e0faa85";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -656,7 +657,7 @@ const QUALITY_GATE_PLAN_SHA256 = "d6dc66b2c5c3845638f8be1d03fde5bfd688cec26315b2
 // Historical M06-T10 plan pin retained for its frozen compatibility reader:
 // ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
-  "f25499af8cd7f541d55f3a8c5e631ecf39034908a5897cb567cab49a816e8f8c";
+  "00d77ebce7d64619055a6fc0754b27e70a775fde668c32540bfbbfb93cee0619";
 const WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);
@@ -999,12 +1000,14 @@ function classifyLegacyPrerequisite({
       "editor-core-continuous-validation",
       "editor-core-terminal-integration",
       "desen-app-publish-activation",
+      "m10a-t02",
     ].includes(currentProofId);
     const reviewedPackage =
       (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
       ((currentProofId === "editor-core-persistence" ||
         currentProofId === "desen-app-publish-activation") &&
-        packageName === "@desen/editor-web");
+        packageName === "@desen/editor-web") ||
+      (currentProofId === "m10a-t02" && packageName === "@desen/design-system-core");
     if (!reviewedProof || !reviewedPackage || packageManifest.scripts?.[task] !== expectedScript) {
       throw new QualityGateError(
         `${currentProofId} uses an unreviewed public-package contract test.`,
@@ -1382,6 +1385,12 @@ export function createQualityGateSteps() {
       "Editor Web public-package contract",
       "pnpm",
       ["--filter", "@desen/editor-web", "test:public-package"],
+    ),
+    commandStep(
+      "design-system-core-public-package-contract",
+      "Design System Core public-package contract",
+      "pnpm",
+      ["--filter", "@desen/design-system-core", "test:public-package"],
     ),
     ...PROOF_ENTRIES.map(({ id, verifierFile }) =>
       commandStep(`verify-${id}`, `Proof verifier: ${id}`, "node", [verifierFile]),

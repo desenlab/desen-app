@@ -10,6 +10,7 @@ const neutralFiles = [
   "packages/catalog-sdk/**/*.{ts,tsx}",
   "packages/runtime-core/**/*.{ts,tsx}",
   "packages/editor-core/**/*.{ts,tsx}",
+  "packages/design-system-core/**/*.{ts,tsx}",
 ];
 
 const browserFiles = [

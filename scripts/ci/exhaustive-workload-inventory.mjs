@@ -144,13 +144,13 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "3d890406ade04b14dcac9fcb39ce4900304d570b33de03af3811d4e80b547a62";
+  "f2c2cab2a7b5166d7722cc413c1079dd7c0b9b4011c6d6049d30dba6c10d3402";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "db047394d958dad89d07c1fb299e68069892976920d0d56bc2a7685e7792f3d0";
+  "6ad759ada99e7b601d05dcb64cb7c3f3a2f96c6de6ff1112721e7aee7be4cddc";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "dde55d32faf7fcffa87875505d6d955703a57f1a0530069129c3d3ca4990d0ef";
+  "d0677ebcea01b65ab1ddeb2c2fdba42861d85b89b8cdda8decf8461ec11af1cf";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
-  "f25499af8cd7f541d55f3a8c5e631ecf39034908a5897cb567cab49a816e8f8c";
+  "00d77ebce7d64619055a6fc0754b27e70a775fde668c32540bfbbfb93cee0619";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = SAFE_OBJECT_FREEZE(["apps/*", "packages/*"]);
@@ -727,6 +727,7 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
   ],
   ["m10-gate", "scripts/verify-m10-gate.mjs", "tests/m10-gate.test.mjs"],
   ["m10a-t01", "scripts/verify-m10a-t01.mjs", "tests/m10a-t01.test.mjs"],
+  ["m10a-t02", "scripts/verify-m10a-t02.mjs", "tests/m10a-t02.test.mjs"],
 ]);
 
 const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
@@ -1133,12 +1134,14 @@ function classifyPrerequisite({
       "editor-core-continuous-validation",
       "editor-core-terminal-integration",
       "desen-app-publish-activation",
+      "m10a-t02",
     ].includes(currentProofId);
     const reviewedPackage =
       (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
       ((currentProofId === "editor-core-persistence" ||
         currentProofId === "desen-app-publish-activation") &&
-        packageName === "@desen/editor-web");
+        packageName === "@desen/editor-web") ||
+      (currentProofId === "m10a-t02" && packageName === "@desen/design-system-core");
     if (
       !reviewedPublicPackageProof ||
       !reviewedPackage ||
@@ -1416,6 +1419,15 @@ function buildCanonicalInventory() {
       "SERIAL_BUILD_WRITER",
       SHARED_BUILD_WRITER,
     ),
+    node(
+      "design-system-core-public-package-contract",
+      "Design System Core public-package contract",
+      "pnpm",
+      ["--filter", "@desen/design-system-core", "test:public-package"],
+      ["editor-core-public-package-contract"],
+      "SERIAL_BUILD_WRITER",
+      SHARED_BUILD_WRITER,
+    ),
   ];
   const verifiers = PROOF_UNIT_TUPLES.map(([id, verifierFile]) =>
     node(
@@ -1436,7 +1448,9 @@ function buildCanonicalInventory() {
           ? "editor-core-public-package-contract"
           : id === "editor-core-persistence"
             ? "editor-web-public-package-contract"
-            : "package-tests",
+            : id === "m10a-t02"
+              ? "design-system-core-public-package-contract"
+              : "package-tests",
       ],
       "CONCURRENT_PROOF",
       id === "runtime-core-baseline"
@@ -1763,7 +1777,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "4b72192cec774852b2002ae8de24c06319310ff97095153a5a78713f6921f356";
+  "4594873ca29aa8a5a5f0aa6be139f50507d0be9d247ac0e1e04e98628c20404a";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

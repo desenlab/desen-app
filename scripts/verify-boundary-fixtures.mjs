@@ -9,6 +9,23 @@ const executable = path.join(workspaceRoot, "node_modules", ".bin", "depcruise")
 const configuration = path.join(workspaceRoot, "dependency-cruiser.config.cjs");
 
 const cases = [
+  { name: "allowed-design-system-editor-core", expectedRule: null },
+  {
+    name: "design-system-imports-runtime-core",
+    expectedRule: "package-design-system-core-allowed-dependencies",
+  },
+  {
+    name: "design-system-imports-validator",
+    expectedRule: "package-design-system-core-allowed-dependencies",
+  },
+  {
+    name: "runtime-core-imports-design-system",
+    expectedRule: "package-runtime-core-allowed-dependencies",
+  },
+  {
+    name: "design-system-imports-node",
+    expectedRule: "neutral-packages-no-node-builtins",
+  },
   { name: "allowed-starter-runtime-react", expectedRule: null },
   {
     name: "starter-imports-editor-core",

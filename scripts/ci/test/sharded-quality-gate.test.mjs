@@ -91,19 +91,19 @@ function runShadow(plan, options = {}) {
   });
 }
 
-test("CI-04 three fixed shards preserve all 232 workloads and 111 complete proof pairs", () => {
+test("CI-04 three fixed shards preserve all 235 workloads and 112 complete proof pairs", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const full = createRequiredExhaustivePlan();
   const shards = SHARD_IDS.map((id) => createRequiredExhaustiveProofShardPlan(id));
-  assert.equal(inventory.workloadCount, 232);
-  assert.equal(inventory.proofUnitCount, 111);
+  assert.equal(inventory.workloadCount, 235);
+  assert.equal(inventory.proofUnitCount, 112);
   assert.deepEqual(
     shards.map(({ proofPairCount }) => proofPairCount),
-    [53, 24, 34],
+    [53, 24, 35],
   );
   const pairIds = shards.flatMap(({ proofPairs }) => proofPairs.map(({ id }) => id));
-  assert.equal(pairIds.length, 111);
-  assert.equal(new Set(pairIds).size, 111);
+  assert.equal(pairIds.length, 112);
+  assert.equal(new Set(pairIds).size, 112);
   assert.deepEqual(
     pairIds,
     full.proofPairs.map(({ id }) => id),
@@ -113,10 +113,10 @@ test("CI-04 three fixed shards preserve all 232 workloads and 111 complete proof
     assert.equal(shard.scope, "EXHAUSTIVE_SHARD");
     assert.equal(shard.authority, "REQUIRED");
     assert.equal(shard.concurrency, 2);
-    assert.equal(shard.prefix.length, 8);
+    assert.equal(shard.prefix.length, 9);
     assert.deepEqual(shard.prefix, full.prefix);
     assert.deepEqual(shard.suffix, []);
-    assert.equal(shard.stepCount, 8 + shard.proofPairCount * 2);
+    assert.equal(shard.stepCount, 9 + shard.proofPairCount * 2);
     assert.equal(shard.nodes.length, shard.stepCount);
     assert.equal(new Set(shard.nodes.map(({ id }) => id)).size, shard.stepCount);
     for (const pair of shard.proofPairs) {
@@ -136,9 +136,9 @@ test("CI-04 three fixed shards preserve all 232 workloads and 111 complete proof
 test("CI-04 static shard membership agrees with executable membership and stays immutable", () => {
   const partition = createShardedQualityGatePlan();
   assert.equal(Object.isFrozen(partition), true);
-  assert.equal(partition.logicalWorkloadCount, 232);
-  assert.equal(partition.physicalWorkloadCount, 249);
-  assert.equal(partition.repeatedPrefixWorkloadCount, 16);
+  assert.equal(partition.logicalWorkloadCount, 235);
+  assert.equal(partition.physicalWorkloadCount, 254);
+  assert.equal(partition.repeatedPrefixWorkloadCount, 18);
   assert.equal(partition.additionalJoinPreparationCount, 1);
   for (const shardId of SHARD_IDS) {
     const shard = getRequiredProofShard(shardId);

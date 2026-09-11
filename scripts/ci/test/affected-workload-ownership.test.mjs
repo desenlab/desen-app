@@ -35,12 +35,12 @@ const CI_04_CATEGORY_COUNTS = Object.freeze({
 });
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   ...CI_04_CATEGORY_COUNTS,
-  PROOF_UNIT: 222,
-  DEPENDENCY_POLICY: 34,
-  FROZEN_INPUT: 160,
-  PACKAGE_OR_APPLICATION: 606,
-  SHARED_PROOF_INFRASTRUCTURE: 363,
-  PROJECT_DOCUMENTATION: 161,
+  PROOF_UNIT: 224,
+  DEPENDENCY_POLICY: 35,
+  FROZEN_INPUT: 161,
+  PACKAGE_OR_APPLICATION: 628,
+  SHARED_PROOF_INFRASTRUCTURE: 374,
+  PROJECT_DOCUMENTATION: 162,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
@@ -178,6 +178,47 @@ const M10A_T01_SUCCESSOR_PATHS = Object.freeze([
   "tests/m10a-t01.test.mjs",
 ]);
 
+const M10A_T02_SUCCESSOR_PATHS = Object.freeze([
+  "docs/proof/M10A-T02.md",
+  "docs/proof/artifacts/m10a-t02.json",
+  "packages/design-system-core/README.md",
+  "packages/design-system-core/package.json",
+  "packages/design-system-core/src/diagnostics.ts",
+  "packages/design-system-core/src/index.ts",
+  "packages/design-system-core/src/inert-json.ts",
+  "packages/design-system-core/src/project-migrations.ts",
+  "packages/design-system-core/src/project-record.ts",
+  "packages/design-system-core/src/token-document.ts",
+  "packages/design-system-core/src/token-resolver.ts",
+  "packages/design-system-core/src/token-types.ts",
+  "packages/design-system-core/test/project-migrations.test.ts",
+  "packages/design-system-core/test/project-migrations.types.ts",
+  "packages/design-system-core/test/project-record.test.ts",
+  "packages/design-system-core/test/project-record.types.ts",
+  "packages/design-system-core/test/public-package.mjs",
+  "packages/design-system-core/test/public-package.types.mts",
+  "packages/design-system-core/test/token-document.test.ts",
+  "packages/design-system-core/test/token-document.types.ts",
+  "packages/design-system-core/test/token-resolver.test.ts",
+  "packages/design-system-core/test/token-resolver.types.ts",
+  "packages/design-system-core/tsconfig.build.json",
+  "packages/design-system-core/tsconfig.json",
+  "packages/design-system-core/tsconfig.public-package.json",
+  "scripts/generate-m10a-t02-proof.mjs",
+  "scripts/lib/m10a-t02-proof.mjs",
+  "scripts/verify-m10a-t02.mjs",
+  "tests/boundaries/fixtures/allowed-design-system-editor-core/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/allowed-design-system-editor-core/packages/editor-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-imports-node/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-imports-runtime-core/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-imports-runtime-core/packages/runtime-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-imports-validator/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-imports-validator/packages/validator/src/index.ts",
+  "tests/boundaries/fixtures/runtime-core-imports-design-system/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/runtime-core-imports-design-system/packages/runtime-core/src/index.ts",
+  "tests/m10a-t02.test.mjs",
+]);
+
 const T08_SUCCESSOR_PATHS = Object.freeze([
   "apps/desen-app-browser-e2e/repeatable-demo-authoring.ts",
   "apps/desen-app-browser-e2e/repeatable-demo-playwright.config.ts",
@@ -252,7 +293,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1605 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1643 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -274,12 +315,50 @@ test("freezes exact-one ownership for all 1605 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1605);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1643);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
   );
   assertDeepFrozen(authority);
+});
+
+test("the M10A-T02 successor preserves T01 ownership and adds exactly 38 reviewed paths", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  assert.equal(M10A_T02_SUCCESSOR_PATHS.length, 38);
+  for (const relativePath of M10A_T02_SUCCESSOR_PATHS) {
+    const owner = resolveAffectedWorkloadOwner(authority, relativePath);
+    const proofInput =
+      relativePath === "scripts/verify-m10a-t02.mjs" || relativePath === "tests/m10a-t02.test.mjs";
+    assert.equal(owner.disposition, proofInput ? "SELECT_PROOF_UNIT" : "FORCE_EXHAUSTIVE");
+    assert.equal(owner.proofUnitId, proofInput ? "m10a-t02" : null);
+    assert.throws(
+      () =>
+        createAffectedWorkloadOwnership(paths.filter((candidate) => candidate !== relativePath)),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+  assert.deepEqual(
+    calculateAffectedWorkloadOwnershipReview(
+      paths.filter((candidate) => !M10A_T02_SUCCESSOR_PATHS.includes(candidate)),
+    ),
+    {
+      trackedPathCount: 1605,
+      trackedPathSetSha256: "d1397218dc5f5e1554b163c27f4098014a8953fbb4ccad046d5382b8c4d29167",
+      proofOwnedPathCount: 222,
+      categoryCounts: {
+        ...CI_04_CATEGORY_COUNTS,
+        PROOF_UNIT: 222,
+        DEPENDENCY_POLICY: 34,
+        FROZEN_INPUT: 160,
+        PACKAGE_OR_APPLICATION: 606,
+        SHARED_PROOF_INFRASTRUCTURE: 363,
+        PROJECT_DOCUMENTATION: 161,
+      },
+      ownershipSha256: "b51940f4dadabc2bda7b45b22b0101dbd3faf285dfe1e6bf07335ce2d6d69d1c",
+    },
+  );
 });
 
 test("the M10A-T01 successor preserves G10 ownership and adds exactly 58 reviewed paths", async () => {
@@ -300,7 +379,11 @@ test("the M10A-T01 successor preserves G10 ownership and adds exactly 58 reviewe
   }
   assert.deepEqual(
     calculateAffectedWorkloadOwnershipReview(
-      paths.filter((candidate) => !M10A_T01_SUCCESSOR_PATHS.includes(candidate)),
+      paths.filter(
+        (candidate) =>
+          !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
+          !M10A_T01_SUCCESSOR_PATHS.includes(candidate),
+      ),
     ),
     {
       trackedPathCount: 1547,
@@ -339,7 +422,9 @@ test("the G10 successor preserves every T09 owner and adds exactly six reviewed 
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
-          !M10A_T01_SUCCESSOR_PATHS.includes(candidate) && !G10_SUCCESSOR_PATHS.includes(candidate),
+          !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
+          !M10A_T01_SUCCESSOR_PATHS.includes(candidate) &&
+          !G10_SUCCESSOR_PATHS.includes(candidate),
       ),
     ),
     {
@@ -380,6 +465,7 @@ test("the T09 baseline successor preserves every T08 owner and adds exactly six 
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !T09_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T01_SUCCESSOR_PATHS.includes(candidate) &&
           !G10_SUCCESSOR_PATHS.includes(candidate),
@@ -423,6 +509,7 @@ test("the T08 repeatable-demo successor preserves every T07 owner and adds only 
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !T08_SUCCESSOR_PATHS.includes(candidate) &&
           !T09_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T01_SUCCESSOR_PATHS.includes(candidate) &&
@@ -466,6 +553,7 @@ test("the T07 recovery successor preserves T06 ownership and narrowly registers 
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !T07_SUCCESSOR_PATHS.includes(candidate) &&
           !T08_SUCCESSOR_PATHS.includes(candidate) &&
           !T09_SUCCESSOR_PATHS.includes(candidate) &&
@@ -515,6 +603,7 @@ test("the T06 publication successor preserves every CI-04 owner and registers on
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !T06_SUCCESSOR_PATHS.includes(candidate) &&
           !T07_SUCCESSOR_PATHS.includes(candidate) &&
           !T08_SUCCESSOR_PATHS.includes(candidate) &&
@@ -551,6 +640,7 @@ test("the CI-04 execution sources retain every SEC-02 owner and force exhaustive
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
           !T06_SUCCESSOR_PATHS.includes(candidate) &&
           !T07_SUCCESSOR_PATHS.includes(candidate) &&
@@ -583,6 +673,7 @@ test("the SEC-02 documentation successor preserves the exact SEC-01 ownership au
   });
   const previousPaths = paths.filter(
     (candidate) =>
+      !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
       candidate !== SEC_02_SUCCESSOR_PATH &&
       !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
       !T06_SUCCESSOR_PATHS.includes(candidate) &&
@@ -628,6 +719,7 @@ test("the exact SEC-01 successor preserves the reviewed T05 ownership authority"
 
   const predecessorPaths = paths.filter(
     (candidate) =>
+      !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
       !SEC_01_SUCCESSOR_PATHS.includes(candidate) &&
       candidate !== SEC_02_SUCCESSOR_PATH &&
       !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
@@ -664,7 +756,13 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 222);
+  assert.equal(proofEntries.length, 224);
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "m10a-t02")
+      .map(({ path: trackedPath }) => trackedPath),
+    ["scripts/verify-m10a-t02.mjs", "tests/m10a-t02.test.mjs"],
+  );
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "m10a-t01")
@@ -1413,6 +1511,7 @@ test("the reviewed AR-01 successor preserves the historical I07-04 ownership pro
 
   const historicalPaths = currentPaths.filter(
     (candidate) =>
+      !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
       !promotedPaths.includes(candidate) &&
       !successorPaths.includes(candidate) &&
       !SEC_01_SUCCESSOR_PATHS.includes(candidate) &&

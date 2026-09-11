@@ -150,8 +150,8 @@ Coverage percentages are diagnostic, not a substitute for claim ownership. New c
 the owning package's thresholds and cover meaningful branches. Security, authority, serialization,
 and failure-state code requires explicit adversarial cases even when line coverage is already high.
 
-The authoritative inventory contains 232 logical workloads and 111 proof pairs; the hosted
-exhaustive topology expands to 249 physical shard workloads. Twelve exclusive barriers protect
+The authoritative inventory contains 235 logical workloads and 112 proof pairs; the hosted
+exhaustive topology expands to 254 physical shard workloads. Twelve exclusive barriers protect
 shared state, including T01's three Chromium cases on isolated port 4187; the nine M10 journeys remain.
 
 ## Historical archive privacy

@@ -67,8 +67,8 @@ cancellation, hosted, and zero-reference gates pass.
 
 ## Hosted topology
 
-The current exhaustive graph contains 232 logical workloads and 111 proof pairs. Hosted execution
-uses three isolated exhaustive proof shards plus a fresh joining Quality gate, producing 249
+The current exhaustive graph contains 235 logical workloads and 112 proof pairs. Hosted execution
+uses three isolated exhaustive proof shards plus a fresh joining Quality gate, producing 254
 physical shard workloads. Each workspace builds and tests from current inputs; shards do not share
 mutable build output or test success.
 

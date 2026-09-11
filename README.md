@@ -4,8 +4,9 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01 are complete. SC-02 concluded `adapt`; M10A-T02 is ready to start.
-> M10A-T02 remains `NOT_STARTED`; M11 has not started. This is not a production certification.
+> M10/G10 and M10A-T01 are complete. SC-02 concluded `adapt`; M10A-T02 is `IN_PROGRESS`.
+> Its local implementation candidate awaits exact-head hosted closure; M11 has not started. This is
+> not a production certification.
 
 ## Implementation progress
 
@@ -35,7 +36,7 @@ bounded, reproducible claims about both.
 **M10A:** **1 / 28 tasks complete (4%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Next ready:** `M10A-T02` (`NOT_STARTED`) · **M11:** `NOT_STARTED`
+**Active task:** `M10A-T02` (`IN_PROGRESS`) · **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
 
@@ -110,6 +111,7 @@ packages/
   runtime-web/            Browser host ports and recovery storage
   catalog-sdk/            Capability registration and manifest tooling
   editor-core/            Framework-neutral authoring commands
+  design-system-core/     App-owned project data and deterministic token resolution
   editor-web/             Web canvas and inspector integration
   reference-catalog-web/  Reference components and adapters
   starter-catalog-web/    Base UI-backed DESEN Neutral starter capabilities
@@ -165,9 +167,10 @@ nine-journey Chromium suite. Hosted completion still requires the task's exact-h
 Neutral styling, editable themes, reusable components, design-first authoring, separate behavior
 connections, and built-in design-system documentation/visual review. These are planned features,
 not capabilities of the current five-component demo. The completed `M10A-T01` installed Base UI
-1.8.0 and proved three adapters in isolated authoring/host harnesses. `M10A-T02` is ready to start
-but remains `NOT_STARTED`; it owns the platform-neutral project design-system model and typed token
-resolver. Ordinary App integration comes later.
+1.8.0 and proved three adapters in isolated authoring/host harnesses. The active `M10A-T02` local
+candidate adds the platform-neutral App project envelope and bounded DTCG token resolver; it remains
+`IN_PROGRESS` until its exact-head hosted Quality gate passes. T03 and ordinary App integration have
+not started.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and

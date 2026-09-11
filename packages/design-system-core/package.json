@@ -1,0 +1,34 @@
+{
+  "name": "@desen/design-system-core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Platform-neutral editable project and design-token model for DESEN authoring.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint src test --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:project-record": "vitest run test/project-record.test.ts test/project-migrations.test.ts",
+    "test:token-resolution": "vitest run test/token-document.test.ts test/token-resolver.test.ts",
+    "test:public-package": "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs"
+  },
+  "dependencies": {
+    "@desen/editor-core": "workspace:*",
+    "@desen/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "4.1.10"
+  }
+}

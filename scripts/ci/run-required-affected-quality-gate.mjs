@@ -352,9 +352,13 @@ function selectedRegions(selection, nodeById) {
       "The selector referenced an unknown exhaustive workload.",
     );
   }
-  const conditionalPrefixIds = selection.affectedProofUnitIds.includes("editor-core-persistence")
-    ? ["editor-web-public-package-contract"]
-    : [];
+  const conditionalPrefixIds = [];
+  if (selection.affectedProofUnitIds.includes("editor-core-persistence")) {
+    conditionalPrefixIds.push("editor-web-public-package-contract");
+  }
+  if (selection.affectedProofUnitIds.includes("m10a-t02")) {
+    conditionalPrefixIds.push("design-system-core-public-package-contract");
+  }
   const expectedPrefixIds = [...PREFIX_IDS, ...conditionalPrefixIds];
   const prefix = nodes.slice(0, expectedPrefixIds.length);
   const suffix = nodes.slice(-SUFFIX_IDS.length);
@@ -392,7 +396,9 @@ function selectedRegions(selection, nodeById) {
         ? "editor-core-public-package-contract"
         : proofId === "editor-core-persistence"
           ? "editor-web-public-package-contract"
-          : "package-tests";
+          : proofId === "m10a-t02"
+            ? "design-system-core-public-package-contract"
+            : "package-tests";
     if (
       verifier === undefined ||
       rootTest === undefined ||
@@ -423,7 +429,7 @@ function selectedRegions(selection, nodeById) {
   const dependencyBoundary = suffix[0];
   const boundaryFixtures = suffix[1];
   if (
-    exhaustiveRootIds.length !== 111 ||
+    exhaustiveRootIds.length !== 112 ||
     dependencyBoundary.dependencies.length !== exhaustiveRootIds.length ||
     dependencyBoundary.dependencies.some(
       (dependency, index) => dependency !== exhaustiveRootIds[index],
