@@ -440,14 +440,20 @@ function captureOverrides(rawOverrides) {
   return captured;
 }
 
-async function readStableRegularFile(filePath, label, maximumBytes = MAX_FILE_BYTES) {
+async function readStableRegularFile(
+  filePath,
+  label,
+  maximumBytes = MAX_FILE_BYTES,
+  { allowHardLinks = false } = {},
+) {
   let handle;
   try {
     const before = await lstat(filePath, { bigint: true });
     if (
       !before.isFile() ||
       before.isSymbolicLink() ||
-      before.nlink !== 1n ||
+      before.nlink < 1n ||
+      (!allowHardLinks && before.nlink !== 1n) ||
       before.size < 1n ||
       before.size > BigInt(maximumBytes) ||
       (await realpath(filePath)) !== filePath
@@ -456,7 +462,12 @@ async function readStableRegularFile(filePath, label, maximumBytes = MAX_FILE_BY
     }
     handle = await open(filePath, READ_FLAGS);
     const opened = await handle.stat({ bigint: true });
-    if (opened.dev !== before.dev || opened.ino !== before.ino || opened.size !== before.size) {
+    if (
+      opened.dev !== before.dev ||
+      opened.ino !== before.ino ||
+      opened.size !== before.size ||
+      opened.nlink !== before.nlink
+    ) {
       throw new Error("identity changed");
     }
     const bytes = await handle.readFile();
@@ -466,6 +477,7 @@ async function readStableRegularFile(filePath, label, maximumBytes = MAX_FILE_BY
       after.dev !== before.dev ||
       after.ino !== before.ino ||
       after.size !== before.size ||
+      after.nlink !== before.nlink ||
       after.mtimeNs !== before.mtimeNs ||
       after.ctimeNs !== before.ctimeNs
     ) {
@@ -729,12 +741,14 @@ async function readBaseUiAdmission(workspaceRoot, overrides) {
         path.join(packageRoot, BASE_UI_MANIFEST_NAME),
         "Base UI manifest",
         128_000,
+        { allowHardLinks: true },
       ),
     overrides.get(BASE_UI_LICENSE_OVERRIDE_PATH) ??
       readStableRegularFile(
         path.join(packageRoot, BASE_UI_LICENSE_NAME),
         "Base UI license",
         16_384,
+        { allowHardLinks: true },
       ),
   ]);
   const manifest = parseJson(manifestBytes, "Base UI manifest");

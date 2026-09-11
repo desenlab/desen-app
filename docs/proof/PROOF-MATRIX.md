@@ -3498,9 +3498,9 @@ The 13,910-byte artifact is
 `sha256:711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74`.
 Fresh local checks pass 30 starter tests, 152 Editor Core tests, 10 reference-adapter regressions,
 3 Chromium cases with 16 exact assertions, a real SIGTERM/process-group/port-release lifecycle
-probe, and 49 CI orchestration contracts. Reader checkpoint sequence 82 preserves sequences 1–81
+probe, and 49 CI orchestration contracts. Reader checkpoint sequence 83 preserves sequences 1–82
 and authenticates 65 artifacts plus 130 current readers at
-`sha256:67a72d107af76982c0aa5bab6907f0634de3f9754b46dd2799891d9f5169f53e`. The package digest binds
+`sha256:9c479b3f3feaa3081fe255063462b9736f959e1fa19931df6ced310112bed7a9`. The package digest binds
 17 compiled files, exact lock admission, the installed Base UI manifest, and its MIT license.
 Production audit was a separate zero-vulnerability observation; the existing development-only
 Vitest advisory remains disclosed. M10A-T01 remains `IN_PROGRESS` pending exact-head hosted CI and

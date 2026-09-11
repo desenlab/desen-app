@@ -1,5 +1,16 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import {
+  copyFile,
+  link,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -106,7 +117,7 @@ test(NAMES[0], async () => {
   assert.deepEqual(first.packageIdentity.entries, second.packageIdentity.entries);
 });
 
-test(NAMES[1], async () => {
+test(NAMES[1], async (context) => {
   const { admission } = await buildM10AT01PackageIdentity();
   assert.equal(admission.baseUi.version, "1.8.0");
   assert.equal(
@@ -146,6 +157,70 @@ test(NAMES[1], async () => {
     react: "^17 || ^18 || ^19",
     "react-dom": "^17 || ^18 || ^19",
   });
+
+  // pnpm may materialize its content-addressed store with hard links on Linux and with
+  // copy-on-write clones on macOS. Both are valid installations. The authenticated store files
+  // may therefore have multiple names, while tracked workspace authorities must remain single-link.
+  const fixtureRoot = await realpath(
+    await mkdtemp(path.join(os.tmpdir(), "desen-m10a-t01-hardlink-test-")),
+  );
+  context.after(() => rm(fixtureRoot, { recursive: true, force: true }));
+  const starterRoot = path.join(fixtureRoot, "packages/starter-catalog-web");
+  const sourceStarterRoot = path.join(ROOT, "packages/starter-catalog-web");
+  const sourceBaseUiRoot = await realpath(
+    path.join(sourceStarterRoot, "node_modules/@base-ui/react"),
+  );
+  const baseUiStorePath = path.relative(ROOT, sourceBaseUiRoot);
+  assert.equal(baseUiStorePath.startsWith(path.join("node_modules", ".pnpm") + path.sep), true);
+  const fixtureBaseUiRoot = path.join(fixtureRoot, baseUiStorePath);
+  const fixtureBaseUiLink = path.join(starterRoot, "node_modules/@base-ui/react");
+  const sourceDistRoot = path.join(sourceStarterRoot, "dist");
+  const fixtureDistRoot = path.join(starterRoot, "dist");
+  const distEntries = await readdir(sourceDistRoot, { withFileTypes: true });
+  assert.equal(
+    distEntries.every((entry) => entry.isFile() && !entry.isSymbolicLink()),
+    true,
+  );
+  await mkdir(path.join(starterRoot, "src"), { recursive: true });
+  await mkdir(path.dirname(fixtureBaseUiLink), { recursive: true });
+  await mkdir(fixtureBaseUiRoot, { recursive: true });
+  await mkdir(fixtureDistRoot, { recursive: true });
+  await Promise.all([
+    copyFile(path.join(ROOT, "pnpm-lock.yaml"), path.join(fixtureRoot, "pnpm-lock.yaml")),
+    copyFile(path.join(sourceStarterRoot, "package.json"), path.join(starterRoot, "package.json")),
+    copyFile(
+      path.join(sourceStarterRoot, "src/neutral.module.css"),
+      path.join(starterRoot, "src/neutral.module.css"),
+    ),
+    copyFile(
+      path.join(sourceBaseUiRoot, "package.json"),
+      path.join(fixtureBaseUiRoot, "package.json"),
+    ),
+    copyFile(path.join(sourceBaseUiRoot, "LICENSE"), path.join(fixtureBaseUiRoot, "LICENSE")),
+    ...distEntries.map((entry) =>
+      copyFile(path.join(sourceDistRoot, entry.name), path.join(fixtureDistRoot, entry.name)),
+    ),
+  ]);
+  await symlink(fixtureBaseUiRoot, fixtureBaseUiLink, "dir");
+
+  const baseUiManifestAlias = path.join(fixtureRoot, "base-ui-package.json");
+  const baseUiLicenseAlias = path.join(fixtureRoot, "base-ui-license.txt");
+  await link(path.join(fixtureBaseUiRoot, "package.json"), baseUiManifestAlias);
+  await link(path.join(fixtureBaseUiRoot, "LICENSE"), baseUiLicenseAlias);
+  assert.equal(
+    (await buildM10AT01PackageIdentity({ workspaceRoot: fixtureRoot })).admission.baseUi.version,
+    "1.8.0",
+  );
+  await rm(baseUiManifestAlias);
+  await rm(baseUiLicenseAlias);
+
+  const starterManifestAlias = path.join(fixtureRoot, "starter-package.json");
+  await link(path.join(starterRoot, "package.json"), starterManifestAlias);
+  await assert.rejects(
+    buildM10AT01PackageIdentity({ workspaceRoot: fixtureRoot }),
+    code("AUTHORITY_UNSAFE"),
+  );
+  await rm(starterManifestAlias);
 });
 
 test(NAMES[2], async () => {
