@@ -1,17 +1,18 @@
 import { Buffer } from "node:buffer";
-import { execFile } from "node:child_process";
+import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { constants as fileConstants } from "node:fs";
 import { lstat, open, opendir, realpath } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
-import { isDeepStrictEqual, promisify, types as utilTypes } from "node:util";
+import { fileURLToPath } from "node:url";
+import { isDeepStrictEqual, types as utilTypes } from "node:util";
 
 import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 import { buildCurrentDesenAppPublishedHostUpdateGraphAudit } from "./desen-app-published-host-update-proof.mjs";
+import { M10_GATE_M10A_T01_CURRENT_HOST_AUDIT } from "./m10-gate-proof.mjs";
 
 const WORKSPACE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-invalid-publication.json";
@@ -22,12 +23,16 @@ const MAX_AUTHORITY_BYTES = 2 * 1_024 * 1_024;
 const MAX_OVERRIDE_BYTES = 12 * 1_024 * 1_024;
 const MAX_COMPILED_FILES = 512;
 const MAX_COMPILED_BYTES = 12 * 1_024 * 1_024;
+const MAX_SUCCESSOR_NODES = 32_768;
+const MAX_SUCCESSOR_STRING_BYTES = 4 * 1_024 * 1_024;
+const MAX_SUCCESSOR_DEPTH = 32;
+const MAX_PUBLIC_MATRIX_INPUT_BYTES = 20 * 1_024 * 1_024;
+const MAX_PUBLIC_MATRIX_OUTPUT_BYTES = 64 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
 const BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "byteLength").get;
 const BUFFER_GETTER = Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "buffer").get;
-const execFileAsync = promisify(execFile);
 const COMPILED_PACKAGES = Object.freeze(["editor-core", "protocol", "publisher", "validator"]);
 
 const SOURCE_PATHS = Object.freeze({
@@ -70,6 +75,61 @@ const T08_SUCCESSOR_PIN = Object.freeze({
   bytes: 319_719,
   sha256: "048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5",
 });
+const M10A_T01_SUCCESSOR_PIN = Object.freeze({
+  path: "docs/proof/artifacts/m10a-t01.json",
+  bytes: 13_910,
+  sha256: "711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74",
+});
+const M10A_T01_EDITOR_CORE_SUCCESSORS = Object.freeze([
+  Object.freeze({
+    path: "packages/editor-core/dist/index.js",
+    historicalBytes: 1_510,
+    historicalSha256: "5b946f9cd8da3c142a4f3b010f39d9bac57a39d8af083578898c93f51d41bbb9",
+    currentBytes: 1_536,
+    currentSha256: "46793348193ec7cc51915c6a83813654d32810b93a10e1efe953c9c895f8ac51",
+  }),
+  Object.freeze({
+    path: "packages/editor-core/dist/stable-id-insert.js",
+    historicalBytes: 16_696,
+    historicalSha256: "82b7f43bb4446daac16ad80a8aea896d75abe1094dbc58aa321797ae421bf339",
+    currentBytes: 34_011,
+    currentSha256: "7e7c3cb82f589eb73dc31076e6b8909c9ede3d2a92d8fc2b22b644f767c9e726",
+  }),
+]);
+const M10A_T01_PUBLIC_MATRIX_SNAPSHOT = Object.freeze({
+  historical: "sha256:7ced5faec0006e1e5e5807d7d51c5911ed594b73e383d658ca997af1932196b0",
+  current: "sha256:f3d5e053e7a1905ba80680299a71d98e0ee4eb12315ea1f8d944fb86d6f63be1",
+});
+const T08_HISTORICAL_GRAPH_AUDIT_PIN = Object.freeze({
+  bytes: 115_904,
+  sha256: "b4d64538959da4a55478e125973b95d12a2c8ef8707c8440fa3cac26c0389767",
+});
+const T06_HISTORICAL_PUBLIC_MATRIX_PIN = Object.freeze({
+  bytes: 10_503,
+  sha256: "6f42adcaeda75189626d39ed8104b7a7dd2b296faeefdcd67f5be7085d928b2e",
+});
+const M10A_T01_EDITOR_CORE_MANIFEST_SUCCESSOR = Object.freeze({
+  path: "packages/editor-core/package.json",
+  historicalBytes: 1_665,
+  historicalSha256: "24fc3b4d821093cd47e29ce6e65df2eff91e748a9468a2ccc678a4efa4ae0f4f",
+  currentBytes: 1_734,
+  currentSha256: "127a0cf9635366fb6e68de2c8e12dc165fae600b084dde0f3d6602d03e2af112",
+  addition: '    "test:subtree-insert": "vitest run test/subtree-insert.test.ts",\n',
+});
+const M10A_T01_APP_OUTPUT_SUCCESSOR = Object.freeze({
+  historicalEntry: Object.freeze({
+    fileName: "assets/index-DZxQFEd7.js",
+    bytes: 1_539_756,
+    sha256: "sha256:68021e88cef9e1c05c7626f333e96aebced9efce6fa6d0fa67bae3ab394609f7",
+  }),
+  currentEntry: Object.freeze({
+    fileName: "assets/index-z0KPy9Yo.js",
+    bytes: 1_539_917,
+    sha256: "sha256:178e53f57447e8e8d4a1dd5728c2deb0645e90f65c58962b098cc9750609475e",
+  }),
+  historicalHtmlSha256: "sha256:3e4ef9ed068db7c69bb550a214078c64b3e62406b96c199233f43cf415ee48f0",
+  currentHtmlSha256: "sha256:f543302dc9ad6b267f5e6e1df5a05a65352f15e959d7d2ca9d3a9673288278f7",
+});
 const T08_BROWSER_SUITE_COMMAND =
   "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts && playwright test --config repeatable-demo-playwright.config.ts";
 
@@ -99,6 +159,68 @@ async function authenticateT08Successor(workspaceRoot, files) {
   if (receipt.bytes !== backing.byteLength || receipt.sha256 !== sha256(backing))
     fail("SUCCESSOR_DRIFT", "Current package bytes differ from their reviewed T08 receipt.");
   return successor;
+}
+
+async function authenticateM10AT01Successor(workspaceRoot) {
+  const pin = M10A_T01_SUCCESSOR_PIN;
+  const bytes = await readRegularAuthority(path.join(workspaceRoot, pin.path), pin.path);
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("SUCCESSOR_DRIFT", "The exact reviewed M10A-T01 successor artifact changed.");
+  }
+  const successor = parseJson(bytes, pin.path, "SUCCESSOR_DRIFT");
+  if (
+    successor.schemaVersion !== 1 ||
+    successor.task !== "M10A-T01" ||
+    successor.profile !== "desen.m10a-t01.base-ui-adapter-boundary.v1" ||
+    successor.result !== "PASS" ||
+    successor.package?.name !== "@desen/starter-catalog-web" ||
+    successor.claims?.runtimeCoreChanged !== false
+  ) {
+    fail("SUCCESSOR_DRIFT", "The M10A-T01 successor lost its reviewed identity.");
+  }
+  return successor;
+}
+
+function authenticateM10AT01EditorCoreManifest(files) {
+  const successor = M10A_T01_EDITOR_CORE_MANIFEST_SUCCESSOR;
+  const bytes = files.get(successor.path);
+  if (
+    !Buffer.isBuffer(bytes) ||
+    bytes?.byteLength !== successor.currentBytes ||
+    sha256(bytes) !== successor.currentSha256
+  ) {
+    fail("SUCCESSOR_DRIFT", "The exact M10A-T01 Editor Core manifest successor changed.");
+  }
+  const source = decodeUtf8(bytes, successor.path);
+  if (source.split(successor.addition).length !== 2) {
+    fail("SUCCESSOR_DRIFT", "The Editor Core manifest is not the reviewed additive successor.");
+  }
+  const historical = Buffer.from(source.replace(successor.addition, ""), "utf8");
+  if (
+    historical.byteLength !== successor.historicalBytes ||
+    sha256(historical) !== successor.historicalSha256
+  ) {
+    fail(
+      "SUCCESSOR_DRIFT",
+      "The Editor Core manifest does not reconstruct its frozen predecessor.",
+    );
+  }
+  const manifest = parseJson(bytes, successor.path, "SUCCESSOR_DRIFT");
+  if (
+    manifest.name !== "@desen/editor-core" ||
+    manifest.scripts?.["test:subtree-insert"] !== "vitest run test/subtree-insert.test.ts"
+  ) {
+    fail("SUCCESSOR_DRIFT", "The Editor Core manifest lost the reviewed subtree test authority.");
+  }
+  return Object.freeze({
+    path: successor.path,
+    bytes: successor.currentBytes,
+    sha256: successor.currentSha256,
+    additivePredecessor: Object.freeze({
+      bytes: successor.historicalBytes,
+      sha256: successor.historicalSha256,
+    }),
+  });
 }
 
 /** Exact frozen product-publication and node-linked-diagnostic prerequisites. */
@@ -188,6 +310,313 @@ function deepFreeze(value) {
     Object.freeze(value);
   }
   return value;
+}
+
+function captureSuccessorJson(value, label, state = { nodes: 0, stringBytes: 0 }, depth = 0) {
+  state.nodes += 1;
+  if (state.nodes > MAX_SUCCESSOR_NODES || depth > MAX_SUCCESSOR_DEPTH) {
+    fail("SUCCESSOR_DRIFT", `${label} exceeds the reviewed structural envelope.`);
+  }
+  if (value === null || typeof value === "boolean") return value;
+  if (typeof value === "number") {
+    if (!Number.isSafeInteger(value)) {
+      fail("SUCCESSOR_DRIFT", `${label} contains a non-finite or fractional number.`);
+    }
+    return value;
+  }
+  if (typeof value === "string") {
+    state.stringBytes += Buffer.byteLength(value);
+    if (state.stringBytes > MAX_SUCCESSOR_STRING_BYTES) {
+      fail("SUCCESSOR_DRIFT", `${label} exceeds the reviewed string envelope.`);
+    }
+    return value;
+  }
+  if (typeof value !== "object" || utilTypes.isProxy(value)) {
+    fail("SUCCESSOR_DRIFT", `${label} must contain only inert JSON data.`);
+  }
+  if (Array.isArray(value)) {
+    if (Object.getPrototypeOf(value) !== Array.prototype) {
+      fail("SUCCESSOR_DRIFT", `${label} contains an unreviewed array prototype.`);
+    }
+    const keys = Reflect.ownKeys(value);
+    if (
+      keys.length !== value.length + 1 ||
+      keys.at(-1) !== "length" ||
+      keys.slice(0, -1).some((key, index) => key !== String(index))
+    ) {
+      fail("SUCCESSOR_DRIFT", `${label} contains a sparse or extended array.`);
+    }
+    return value.map((entry, index) =>
+      captureSuccessorJson(entry, `${label}[${index}]`, state, depth + 1),
+    );
+  }
+  if (Object.getPrototypeOf(value) !== Object.prototype) {
+    fail("SUCCESSOR_DRIFT", `${label} contains an unreviewed object prototype.`);
+  }
+  const copy = {};
+  for (const key of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (typeof key !== "string" || !descriptor?.enumerable || !("value" in descriptor)) {
+      fail("SUCCESSOR_DRIFT", `${label} contains a symbol, hidden field, or accessor.`);
+    }
+    copy[key] = captureSuccessorJson(descriptor.value, `${label}.${key}`, state, depth + 1);
+  }
+  return copy;
+}
+
+function exactEntry(entries, predicate, label) {
+  if (!Array.isArray(entries)) fail("SUCCESSOR_DRIFT", `${label} is not an exact receipt array.`);
+  const indexes = [];
+  for (const [index, entry] of entries.entries()) {
+    if (predicate(entry)) indexes.push(index);
+  }
+  if (indexes.length !== 1) fail("SUCCESSOR_DRIFT", `${label} is missing or duplicated.`);
+  return Object.freeze({ entry: entries[indexes[0]], index: indexes[0] });
+}
+
+function requireExactFields(value, expected, label) {
+  for (const [key, expectedValue] of Object.entries(expected)) {
+    if (value?.[key] !== expectedValue) {
+      fail("SUCCESSOR_DRIFT", `${label} does not match the reviewed identity.`);
+    }
+  }
+}
+
+function authenticateExactJson(value, pin, label) {
+  const bytes = Buffer.from(JSON.stringify(value), "utf8");
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("SUCCESSOR_DRIFT", `${label} is not the independently pinned historical authority.`);
+  }
+}
+
+function currentGraphSummary(graph) {
+  const runtime = graph.runtimeResolution;
+  return {
+    appSourceFiles: graph.appSourceAudit?.completeSourceFiles,
+    hostSourceFiles: graph.referenceHostSourceAudit?.sourceFiles,
+    hostJsxElements: graph.referenceHostSourceAudit?.jsxElements,
+    appModules: runtime?.app?.moduleCount,
+    hostModules: runtime?.host?.moduleCount,
+    sharedManagedModules: runtime?.sharedManagedModuleCount,
+    dynamicEdges:
+      (runtime?.app?.dynamicEdges ?? Number.NaN) + (runtime?.host?.dynamicEdges ?? Number.NaN),
+    unresolvedEdges:
+      (runtime?.app?.unresolvedEdges ?? Number.NaN) +
+      (runtime?.host?.unresolvedEdges ?? Number.NaN),
+    appGraphSha256: runtime?.app?.graphSha256,
+    hostGraphSha256: runtime?.host?.graphSha256,
+    appOutputIdentity: runtime?.appOutput?.identitySha256,
+    hostOutputIdentity: runtime?.hostOutput?.identitySha256,
+    backingSnapshotSha256: runtime?.backingSnapshotSha256,
+    publicRegistryAndRuntimeOnly: runtime?.publicRegistryAndRuntimeOnly,
+    noHandwrittenHostManagedTree: runtime?.noHandwrittenHostManagedTreePreservedByFreshHostAudit,
+    independentBuildsPerApplication: runtime?.independentBuildsPerApplication,
+  };
+}
+
+function projectEditorCoreReceipts(currentReceipts, historicalReceipts, graphReceipts) {
+  for (const identity of M10A_T01_EDITOR_CORE_SUCCESSORS) {
+    const current = exactEntry(
+      currentReceipts,
+      ({ path: relativePath, id }) => (relativePath ?? id) === identity.path,
+      `current ${identity.path}`,
+    );
+    const historical = exactEntry(
+      historicalReceipts,
+      ({ path: relativePath, id }) => (relativePath ?? id) === identity.path,
+      `historical ${identity.path}`,
+    );
+    const shaField = graphReceipts ? "codeSha256" : "sha256";
+    const bytesField = graphReceipts ? "codeBytes" : "bytes";
+    requireExactFields(
+      current.entry,
+      {
+        [bytesField]: identity.currentBytes,
+        [shaField]: graphReceipts ? `sha256:${identity.currentSha256}` : identity.currentSha256,
+      },
+      `current ${identity.path}`,
+    );
+    requireExactFields(
+      historical.entry,
+      {
+        [bytesField]: identity.historicalBytes,
+        [shaField]: graphReceipts
+          ? `sha256:${identity.historicalSha256}`
+          : identity.historicalSha256,
+      },
+      `historical ${identity.path}`,
+    );
+    current.entry[bytesField] = historical.entry[bytesField];
+    current.entry[shaField] = historical.entry[shaField];
+  }
+}
+
+/**
+ * Admits only the exact additive M10A-T01 Editor Core successor and projects its reviewed identity
+ * changes back to the immutable T06/T08 representation.
+ */
+export function projectDesenAppInvalidPublicationHistoricalAuthorities(rawAuthorities) {
+  if (
+    rawAuthorities === null ||
+    typeof rawAuthorities !== "object" ||
+    utilTypes.isProxy(rawAuthorities) ||
+    Object.getPrototypeOf(rawAuthorities) !== Object.prototype
+  ) {
+    fail("SUCCESSOR_DRIFT", "Historical compatibility requires one inert authority record.");
+  }
+  const keys = Reflect.ownKeys(rawAuthorities);
+  const expectedKeys = [
+    "currentGraphAudit",
+    "currentPublicApiMatrix",
+    "historicalGraphAudit",
+    "historicalPublicApiMatrix",
+  ];
+  if (
+    keys.some((key) => typeof key !== "string") ||
+    !isDeepStrictEqual(keys.sort(), [...expectedKeys].sort())
+  ) {
+    fail("SUCCESSOR_DRIFT", "Historical compatibility received an unknown authority field.");
+  }
+  const captured = {};
+  for (const key of expectedKeys) {
+    const descriptor = Object.getOwnPropertyDescriptor(rawAuthorities, key);
+    if (!descriptor?.enumerable || !("value" in descriptor)) {
+      fail("SUCCESSOR_DRIFT", "Historical compatibility received a hidden authority field.");
+    }
+    captured[key] = captureSuccessorJson(descriptor.value, key);
+  }
+  const currentGraph = captured.currentGraphAudit;
+  const historicalGraph = captured.historicalGraphAudit;
+  authenticateExactJson(historicalGraph, T08_HISTORICAL_GRAPH_AUDIT_PIN, "T08 historical graph");
+  authenticateExactJson(
+    captured.historicalPublicApiMatrix,
+    T06_HISTORICAL_PUBLIC_MATRIX_PIN,
+    "T06 historical public matrix",
+  );
+  if (!isDeepStrictEqual(currentGraphSummary(currentGraph), M10_GATE_M10A_T01_CURRENT_HOST_AUDIT)) {
+    fail("SUCCESSOR_DRIFT", "The fresh graph is not the exact M10A-T01 successor.");
+  }
+
+  requireExactFields(
+    currentGraph.runtimeResolution?.app,
+    { graphSha256: M10_GATE_M10A_T01_CURRENT_HOST_AUDIT.appGraphSha256 },
+    "current App graph",
+  );
+  requireExactFields(
+    historicalGraph.runtimeResolution?.app,
+    { graphSha256: "sha256:fa8f18c9510575a8c5719e19bfb5aaf42468a167c475879778554d0a3950bebf" },
+    "historical App graph",
+  );
+  currentGraph.runtimeResolution.app.graphSha256 =
+    historicalGraph.runtimeResolution.app.graphSha256;
+  projectEditorCoreReceipts(
+    currentGraph.runtimeResolution?.appModules,
+    historicalGraph.runtimeResolution?.appModules,
+    true,
+  );
+
+  requireExactFields(
+    currentGraph.runtimeResolution?.appOutput,
+    { identitySha256: M10_GATE_M10A_T01_CURRENT_HOST_AUDIT.appOutputIdentity },
+    "current App output",
+  );
+  requireExactFields(
+    historicalGraph.runtimeResolution?.appOutput,
+    { identitySha256: "sha256:ba0b863a2133c99fd90a834fd892660b1e70198b377ae714ab7e8c31af2656a7" },
+    "historical App output",
+  );
+  currentGraph.runtimeResolution.appOutput.identitySha256 =
+    historicalGraph.runtimeResolution.appOutput.identitySha256;
+  const currentEntry = exactEntry(
+    currentGraph.runtimeResolution.appOutput.outputs,
+    ({ type, isEntry }) => type === "chunk" && isEntry === true,
+    "current App entry output",
+  );
+  const historicalEntry = exactEntry(
+    historicalGraph.runtimeResolution.appOutput.outputs,
+    ({ type, isEntry }) => type === "chunk" && isEntry === true,
+    "historical App entry output",
+  );
+  requireExactFields(
+    currentEntry.entry,
+    M10A_T01_APP_OUTPUT_SUCCESSOR.currentEntry,
+    "current App entry output",
+  );
+  requireExactFields(
+    historicalEntry.entry,
+    M10A_T01_APP_OUTPUT_SUCCESSOR.historicalEntry,
+    "historical App entry output",
+  );
+  for (const key of ["fileName", "bytes", "sha256"]) {
+    currentEntry.entry[key] = historicalEntry.entry[key];
+  }
+  const currentHtml = exactEntry(
+    currentGraph.runtimeResolution.appOutput.outputs,
+    ({ fileName }) => fileName === "index.html",
+    "current App HTML output",
+  );
+  const historicalHtml = exactEntry(
+    historicalGraph.runtimeResolution.appOutput.outputs,
+    ({ fileName }) => fileName === "index.html",
+    "historical App HTML output",
+  );
+  requireExactFields(
+    currentHtml.entry,
+    { sha256: M10A_T01_APP_OUTPUT_SUCCESSOR.currentHtmlSha256 },
+    "current App HTML output",
+  );
+  requireExactFields(
+    historicalHtml.entry,
+    { sha256: M10A_T01_APP_OUTPUT_SUCCESSOR.historicalHtmlSha256 },
+    "historical App HTML output",
+  );
+  currentHtml.entry.sha256 = historicalHtml.entry.sha256;
+
+  requireExactFields(
+    currentGraph.runtimeResolution,
+    { backingSnapshotSha256: M10_GATE_M10A_T01_CURRENT_HOST_AUDIT.backingSnapshotSha256 },
+    "current backing snapshot",
+  );
+  requireExactFields(
+    historicalGraph.runtimeResolution,
+    {
+      backingSnapshotSha256:
+        "sha256:1eaeeb160cca678ad35bda5a60a58730e0f4f6bfead3ae39c29a52bd240d0427",
+    },
+    "historical backing snapshot",
+  );
+  currentGraph.runtimeResolution.backingSnapshotSha256 =
+    historicalGraph.runtimeResolution.backingSnapshotSha256;
+  if (!isDeepStrictEqual(currentGraph, historicalGraph)) {
+    fail("SUCCESSOR_DRIFT", "The current graph contains an unreviewed change.");
+  }
+
+  const currentMatrix = captured.currentPublicApiMatrix;
+  const historicalMatrix = captured.historicalPublicApiMatrix;
+  projectEditorCoreReceipts(
+    currentMatrix.compiledReceipts,
+    historicalMatrix.compiledReceipts,
+    false,
+  );
+  requireExactFields(
+    currentMatrix,
+    { compiledSnapshotSha256: M10A_T01_PUBLIC_MATRIX_SNAPSHOT.current },
+    "current public matrix snapshot",
+  );
+  requireExactFields(
+    historicalMatrix,
+    { compiledSnapshotSha256: M10A_T01_PUBLIC_MATRIX_SNAPSHOT.historical },
+    "historical public matrix snapshot",
+  );
+  currentMatrix.compiledSnapshotSha256 = historicalMatrix.compiledSnapshotSha256;
+  if (!isDeepStrictEqual(currentMatrix, historicalMatrix)) {
+    fail("SUCCESSOR_DRIFT", "The current public matrix contains an unreviewed change.");
+  }
+
+  return deepFreeze({
+    currentGraphAudit: currentGraph,
+    currentPublicApiMatrix: currentMatrix,
+  });
 }
 
 function exactOptions(value, allowedKeys, label) {
@@ -347,15 +776,19 @@ async function readRegularAuthority(absolutePath, label) {
 
 async function readTrackedFiles(workspaceRoot, overrides) {
   const files = new Map();
+  const backingFiles = new Map();
   for (const relativePath of TRACKED_PATHS) {
+    const backing = await readRegularAuthority(
+      path.join(workspaceRoot, relativePath),
+      relativePath,
+    );
+    backingFiles.set(relativePath, backing);
     files.set(
       relativePath,
-      overrides.has(relativePath)
-        ? Buffer.from(overrides.get(relativePath))
-        : await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath),
+      overrides.has(relativePath) ? Buffer.from(overrides.get(relativePath)) : backing,
     );
   }
-  return files;
+  return { backingFiles, files };
 }
 
 function receipts(files) {
@@ -364,6 +797,25 @@ function receipts(files) {
     bytes: bytes.byteLength,
     sha256: sha256(bytes),
   }));
+}
+
+function authenticateOverrideBackings(overrides, files, backingFiles) {
+  for (const relativePath of overrides.keys()) {
+    const supplied = files.get(relativePath);
+    const backing = backingFiles.get(relativePath);
+    if (
+      !Buffer.isBuffer(supplied) ||
+      !Buffer.isBuffer(backing) ||
+      supplied.byteLength !== backing.byteLength ||
+      sha256(supplied) !== sha256(backing)
+    ) {
+      fail(
+        "SOURCE_SNAPSHOT_DRIFT",
+        "A hostile override disagrees with its independently acquired backing authority.",
+        { path: relativePath },
+      );
+    }
+  }
 }
 
 function decodeUtf8(bytes, label) {
@@ -400,20 +852,39 @@ function authenticateParents(files) {
   }
 }
 
-async function compiledSnapshot(workspaceRoot) {
+async function compiledSnapshot(workspaceRoot, initialBackingFiles) {
   const files = new Map();
+  const manifestFiles = new Map();
+  const manifestReceipts = [];
   let totalBytes = 0;
   let directories = 0;
   let entries = 0;
   for (const name of COMPILED_PACKAGES) {
     const packageRoot = path.join(workspaceRoot, "packages", name);
-    const manifest = parseJson(
-      await readRegularAuthority(
-        path.join(packageRoot, "package.json"),
-        `packages/${name}/package.json`,
-      ),
-      `packages/${name}/package.json`,
+    const manifestPath = `packages/${name}/package.json`;
+    const manifestBytes = await readRegularAuthority(
+      path.join(packageRoot, "package.json"),
+      manifestPath,
     );
+    const initialManifestBytes = initialBackingFiles.get(manifestPath);
+    if (
+      !Buffer.isBuffer(initialManifestBytes) ||
+      manifestBytes.byteLength !== initialManifestBytes.byteLength ||
+      sha256(manifestBytes) !== sha256(initialManifestBytes)
+    ) {
+      fail(
+        "SOURCE_SNAPSHOT_DRIFT",
+        "A public matrix manifest disagrees with its initial backing authority.",
+        { path: manifestPath },
+      );
+    }
+    manifestReceipts.push({
+      path: manifestPath,
+      bytes: manifestBytes.byteLength,
+      sha256: sha256(manifestBytes),
+    });
+    manifestFiles.set(manifestPath, manifestBytes);
+    const manifest = parseJson(manifestBytes, manifestPath);
     if (
       manifest.name !== `@desen/${name}` ||
       manifest.type !== "module" ||
@@ -477,21 +948,91 @@ async function compiledSnapshot(workspaceRoot) {
       fail("PUBLIC_API_DRIFT", "The emitted public package root is missing.");
     }
   }
-  return receipts(
-    new Map([...files].sort(([left], [right]) => left.localeCompare(right, "en-US"))),
+  const compiledFiles = new Map(
+    [...files].sort(([left], [right]) => left.localeCompare(right, "en-US")),
   );
+  return {
+    compiledFiles,
+    compiledReceipts: receipts(compiledFiles),
+    manifestFiles,
+    manifestReceipts,
+  };
 }
 
-// This program runs in a new process on every build. It accepts only private captured JSON,
-// never callbacks, publication ports, test fixtures with executable hooks, or cached results.
+function verifyCompiledModuleClosure(compiledFiles) {
+  const allowedPackages = new Set(COMPILED_PACKAGES.map((name) => `@desen/${name}`));
+  for (const [relativePath, bytes] of compiledFiles) {
+    const sourceFile = parseCode(decodeUtf8(bytes, relativePath), relativePath, "PUBLIC_API_DRIFT");
+    const specifiers = [];
+    function visit(node) {
+      if (
+        (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
+        node.moduleSpecifier !== undefined
+      ) {
+        if (!ts.isStringLiteralLike(node.moduleSpecifier)) {
+          fail("PUBLIC_API_DRIFT", "A compiled module contains a non-literal module edge.");
+        }
+        specifiers.push(node.moduleSpecifier.text);
+      }
+      if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+        if (node.arguments.length !== 1 || !ts.isStringLiteralLike(node.arguments[0])) {
+          fail("PUBLIC_API_DRIFT", "A compiled module contains a dynamic module edge.");
+        }
+        specifiers.push(node.arguments[0].text);
+      }
+      ts.forEachChild(node, visit);
+    }
+    visit(sourceFile);
+    const packageName = relativePath.split("/")[1];
+    const packageRoot = `packages/${packageName}/dist/`;
+    for (const specifier of specifiers) {
+      if (allowedPackages.has(specifier)) continue;
+      if (
+        (!specifier.startsWith("./") && !specifier.startsWith("../")) ||
+        specifier.includes("?") ||
+        specifier.includes("#") ||
+        specifier.includes("\\")
+      ) {
+        fail("PUBLIC_API_DRIFT", "A compiled module edge escapes the closed package set.", {
+          path: relativePath,
+          specifier,
+        });
+      }
+      const resolved = path.posix.normalize(
+        path.posix.join(path.posix.dirname(relativePath), specifier),
+      );
+      if (!resolved.startsWith(packageRoot) || !compiledFiles.has(resolved)) {
+        fail("PUBLIC_API_DRIFT", "A relative compiled module edge escapes its captured package.", {
+          path: relativePath,
+          specifier,
+        });
+      }
+    }
+  }
+}
+
+// This fixed assertion program runs in the child VM after its captured module graph is linked. It
+// receives only runner-owned assertions, captured JSON, and captured module namespaces; never
+// publication ports, user callbacks, test fixtures with executable hooks, or cached results.
 async function publicMatrixProgram(input) {
-  const { default: assert } = await import("node:assert/strict");
-  const { publishDesenSource } = await import(input.publisherUrl);
-  const { createDesenEditorDocument, createDesenEditorContinuousValidator } = await import(
-    input.editorUrl
-  );
-  const { canonicalizeJson, canonicalizeJsonBytes } = await import(input.protocolUrl);
-  const { catalog, source } = input;
+  const { catalog, editor, protocol, publisher, source } = input;
+  const assertionFailure = (operator) => {
+    throw new Error(`public matrix assertion failed: ${operator}`);
+  };
+  const assert = Object.freeze({
+    equal(actual, expected) {
+      if (!Object.is(actual, expected)) assertionFailure("equal");
+    },
+    notEqual(actual, expected) {
+      if (Object.is(actual, expected)) assertionFailure("notEqual");
+    },
+    deepEqual(actual, expected) {
+      if (JSON.stringify(actual) !== JSON.stringify(expected)) assertionFailure("deepEqual");
+    },
+  });
+  const { publishDesenSource } = publisher;
+  const { createDesenEditorDocument, createDesenEditorContinuousValidator } = editor;
+  const { canonicalizeJson, canonicalizeJsonBytes } = protocol;
   const packages = [
     {
       id: catalog.id,
@@ -618,63 +1159,368 @@ async function publicMatrixProgram(input) {
     });
   }
   assert.equal(new Set(rows.map((row) => row.repaired.revision)).size, 3);
-  process.stdout.write(
-    canonicalizeJson({
-      publicRoots: ["@desen/publisher", "@desen/editor-core", "@desen/protocol"],
-      baselineRevision: baseline.bundle.revision,
-      catalogSetFingerprint: validator.validator.catalogSetFingerprint,
-      cases: rows,
-      invalidCases: 3,
-      repairedCases: 3,
-      publicPublisherCalls: 10,
-      listenerStarted: false,
-      publicationPortsSupplied: false,
-      browserExecuted: false,
-    }),
-  );
+  return canonicalizeJson({
+    publicRoots: ["@desen/publisher", "@desen/editor-core", "@desen/protocol"],
+    baselineRevision: baseline.bundle.revision,
+    catalogSetFingerprint: validator.validator.catalogSetFingerprint,
+    cases: rows,
+    invalidCases: 3,
+    repairedCases: 3,
+    publicPublisherCalls: 10,
+    listenerStarted: false,
+    publicationPortsSupplied: false,
+    browserExecuted: false,
+  });
 }
 
-async function runPublicMatrix(workspaceRoot, files) {
-  const before = await compiledSnapshot(workspaceRoot);
-  const input = {
-    publisherUrl: pathToFileURL(path.join(workspaceRoot, "packages/publisher/dist/index.js")).href,
-    editorUrl: pathToFileURL(path.join(workspaceRoot, "packages/editor-core/dist/index.js")).href,
-    protocolUrl: pathToFileURL(path.join(workspaceRoot, "packages/protocol/dist/index.js")).href,
-    catalog: parseJson(files.get(CATALOG_PATH), CATALOG_PATH),
-    source: parseJson(files.get(SOURCE_FIXTURE_PATH), SOURCE_FIXTURE_PATH),
+async function publicMatrixVmRunner(matrixProgram) {
+  const { createHash } = await import("node:crypto");
+  const path = await import("node:path");
+  const vm = await import("node:vm");
+  const maxInputBytes = 20 * 1_024 * 1_024;
+  const maxOutputBytes = 64 * 1_024;
+  const chunks = [];
+  let inputBytes = 0;
+  for await (const chunk of process.stdin) {
+    inputBytes += chunk.byteLength;
+    if (inputBytes > maxInputBytes) throw new Error("matrix input exceeds its byte envelope");
+    chunks.push(chunk);
+  }
+  const bytes = Buffer.concat(chunks);
+  const expectedPayloadSha256 = process.argv[1];
+  const digest = (value) => createHash("sha256").update(value).digest("hex");
+  if (
+    !/^[0-9a-f]{64}$/u.test(expectedPayloadSha256 ?? "") ||
+    digest(bytes) !== expectedPayloadSha256
+  ) {
+    throw new Error("matrix input lost its parent-authenticated pipe seal");
+  }
+  const source = bytes.toString("utf8");
+  if (!Buffer.from(source, "utf8").equals(bytes)) throw new Error("matrix input is not UTF-8");
+  const payload = JSON.parse(source);
+  const exactKeys = (value, keys) =>
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.getPrototypeOf(value) === Object.prototype &&
+    JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
+  if (
+    !exactKeys(payload, [
+      "catalogJson",
+      "compiledSnapshotSha256",
+      "modules",
+      "schemaVersion",
+      "sourceJson",
+    ]) ||
+    payload.schemaVersion !== 1 ||
+    !Array.isArray(payload.modules) ||
+    payload.modules.length === 0 ||
+    payload.modules.length > 512 ||
+    typeof payload.catalogJson !== "string" ||
+    typeof payload.sourceJson !== "string"
+  ) {
+    throw new Error("matrix input has an invalid envelope");
+  }
+  const modulePattern =
+    /^packages\/(editor-core|protocol|publisher|validator)\/dist\/(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._-]+\.js$/u;
+  const modulesById = new Map();
+  const receipts = [];
+  let moduleBytes = 0;
+  let previousId;
+  for (const entry of payload.modules) {
+    if (
+      !exactKeys(entry, ["bytes", "id", "sha256", "source"]) ||
+      typeof entry.id !== "string" ||
+      !modulePattern.test(entry.id) ||
+      typeof entry.source !== "string" ||
+      !Number.isSafeInteger(entry.bytes) ||
+      entry.bytes < 0 ||
+      !/^[0-9a-f]{64}$/u.test(entry.sha256 ?? "") ||
+      modulesById.has(entry.id) ||
+      (previousId !== undefined && previousId >= entry.id)
+    ) {
+      throw new Error("matrix module inventory is invalid");
+    }
+    const moduleSource = Buffer.from(entry.source, "utf8");
+    moduleBytes += moduleSource.byteLength;
+    if (
+      moduleBytes > 12 * 1_024 * 1_024 ||
+      moduleSource.byteLength !== entry.bytes ||
+      digest(moduleSource) !== entry.sha256
+    ) {
+      throw new Error("matrix module receipt mismatch");
+    }
+    modulesById.set(entry.id, entry.source);
+    receipts.push({ path: entry.id, bytes: entry.bytes, sha256: entry.sha256 });
+    previousId = entry.id;
+  }
+  const compiledSnapshotSha256 = `sha256:${digest(Buffer.from(JSON.stringify(receipts)))}`;
+  if (payload.compiledSnapshotSha256 !== compiledSnapshotSha256) {
+    throw new Error("matrix snapshot seal mismatch");
+  }
+  JSON.parse(payload.catalogJson);
+  JSON.parse(payload.sourceJson);
+
+  const context = vm.createContext(Object.create(null), {
+    codeGeneration: { strings: false, wasm: false },
+    name: "desen-captured-public-matrix",
+  });
+  vm.runInContext(
+    "Object.defineProperty(globalThis, 'structuredClone', { configurable: false, enumerable: false, value: (value) => JSON.parse(JSON.stringify(value)), writable: false });",
+    context,
+    { timeout: 1_000 },
+  );
+  const vmModules = new Map();
+  const rejectDynamicImport = () => {
+    throw new Error("dynamic import is outside the captured matrix closure");
   };
-  const program = `await (${publicMatrixProgram.toString()})(${JSON.stringify(input)});`;
+  for (const [id, moduleSource] of modulesById) {
+    vmModules.set(
+      id,
+      new vm.SourceTextModule(moduleSource, {
+        context,
+        identifier: id,
+        importModuleDynamically: rejectDynamicImport,
+        initializeImportMeta(meta) {
+          meta.url = `desen-memory:///${id}`;
+          Object.freeze(meta);
+        },
+      }),
+    );
+  }
+  const packageRoots = new Map([
+    ["@desen/editor-core", "packages/editor-core/dist/index.js"],
+    ["@desen/protocol", "packages/protocol/dist/index.js"],
+    ["@desen/publisher", "packages/publisher/dist/index.js"],
+    ["@desen/validator", "packages/validator/dist/index.js"],
+  ]);
+  const resolveModule = (specifier, referencingModule) => {
+    const packageRoot = packageRoots.get(specifier);
+    if (packageRoot !== undefined) return packageRoot;
+    if (
+      typeof specifier !== "string" ||
+      (!specifier.startsWith("./") && !specifier.startsWith("../")) ||
+      specifier.includes("?") ||
+      specifier.includes("#") ||
+      specifier.includes("\\")
+    ) {
+      throw new Error("matrix module edge escapes its captured closure");
+    }
+    const owner = referencingModule.identifier.split("/")[1];
+    const resolved = path.posix.normalize(
+      path.posix.join(path.posix.dirname(referencingModule.identifier), specifier),
+    );
+    if (!resolved.startsWith(`packages/${owner}/dist/`)) {
+      throw new Error("matrix relative edge escapes its captured package");
+    }
+    return resolved;
+  };
+  const linker = (specifier, referencingModule) => {
+    const resolved = resolveModule(specifier, referencingModule);
+    const linked = vmModules.get(resolved);
+    if (linked === undefined) throw new Error("matrix module edge has no captured target");
+    return linked;
+  };
+  const entryIds = [
+    "packages/publisher/dist/index.js",
+    "packages/editor-core/dist/index.js",
+    "packages/protocol/dist/index.js",
+  ];
+  const entries = entryIds.map((id) => {
+    const entry = vmModules.get(id);
+    if (entry === undefined) throw new Error("matrix entrypoint is absent");
+    return entry;
+  });
+  for (const entry of entries) {
+    if (entry.status === "unlinked") await entry.link(linker);
+  }
+  for (const entry of entries) {
+    if (entry.status === "linked") await entry.evaluate({ timeout: 15_000 });
+    if (entry.status !== "evaluated") throw new Error("matrix entrypoint did not evaluate");
+  }
+  context.__desenCatalogJson = payload.catalogJson;
+  context.__desenSourceJson = payload.sourceJson;
+  context.__desenEditorNamespace = entries[1].namespace;
+  context.__desenProtocolNamespace = entries[2].namespace;
+  context.__desenPublisherNamespace = entries[0].namespace;
+  const output = await vm.runInContext(
+    `(${matrixProgram.toString()})({
+      catalog: JSON.parse(globalThis.__desenCatalogJson),
+      editor: globalThis.__desenEditorNamespace,
+      protocol: globalThis.__desenProtocolNamespace,
+      publisher: globalThis.__desenPublisherNamespace,
+      source: JSON.parse(globalThis.__desenSourceJson)
+    })`,
+    context,
+    { timeout: 15_000 },
+  );
+  if (typeof output !== "string" || Buffer.byteLength(output) > maxOutputBytes) {
+    throw new Error("matrix output exceeds its exact envelope");
+  }
+  process.stdout.write(output);
+}
+
+const PUBLIC_MATRIX_VM_RUNNER_SOURCE = `await (${publicMatrixVmRunner.toString()})(${publicMatrixProgram.toString()});`;
+
+function publicMatrixPipePayload(snapshot, files) {
+  verifyCompiledModuleClosure(snapshot.compiledFiles);
+  const modules = [...snapshot.compiledFiles].map(([id, bytes]) => ({
+    id,
+    source: decodeUtf8(bytes, id),
+    bytes: bytes.byteLength,
+    sha256: sha256(bytes),
+  }));
+  const payload = Buffer.from(
+    JSON.stringify({
+      schemaVersion: 1,
+      compiledSnapshotSha256: `sha256:${sha256(
+        Buffer.from(JSON.stringify(snapshot.compiledReceipts)),
+      )}`,
+      modules,
+      catalogJson: decodeUtf8(files.get(CATALOG_PATH), CATALOG_PATH),
+      sourceJson: decodeUtf8(files.get(SOURCE_FIXTURE_PATH), SOURCE_FIXTURE_PATH),
+    }),
+    "utf8",
+  );
+  if (payload.byteLength > MAX_PUBLIC_MATRIX_INPUT_BYTES) {
+    fail("PUBLIC_MATRIX_FAILED", "The captured public-matrix pipe input exceeds its byte budget.");
+  }
+  return { bytes: payload, sha256: sha256(payload) };
+}
+
+async function executeCapturedPublicMatrix(workspaceRoot, payload) {
+  try {
+    return await new Promise((resolve, reject) => {
+      let child;
+      try {
+        child = spawn(
+          process.execPath,
+          [
+            "--experimental-vm-modules",
+            "--no-warnings",
+            "--input-type=module",
+            "-e",
+            PUBLIC_MATRIX_VM_RUNNER_SOURCE,
+            payload.sha256,
+          ],
+          {
+            cwd: path.parse(workspaceRoot).root,
+            env: {},
+            stdio: ["pipe", "pipe", "pipe"],
+            windowsHide: true,
+          },
+        );
+      } catch (error) {
+        reject(error);
+        return;
+      }
+      const stdout = [];
+      let stdoutBytes = 0;
+      let failure;
+      let timedOut = false;
+      const stop = (error) => {
+        failure ??= error;
+        child.kill("SIGKILL");
+      };
+      const timer = setTimeout(() => {
+        timedOut = true;
+        stop(new Error("matrix child timed out"));
+      }, 20_000);
+      child.on("error", stop);
+      child.stdin.on("error", stop);
+      child.stdout.on("error", stop);
+      child.stderr.on("error", stop);
+      child.stdout.on("data", (chunk) => {
+        stdoutBytes += chunk.byteLength;
+        if (stdoutBytes > MAX_PUBLIC_MATRIX_OUTPUT_BYTES) {
+          stop(new Error("matrix stdout exceeded its byte budget"));
+          return;
+        }
+        stdout.push(chunk);
+      });
+      child.stderr.on("data", (chunk) => {
+        stop(new Error(`matrix child wrote ${chunk.byteLength} stderr bytes`));
+      });
+      child.on("close", (code, signal) => {
+        clearTimeout(timer);
+        if (
+          failure !== undefined ||
+          timedOut ||
+          code !== 0 ||
+          signal !== null ||
+          stdoutBytes === 0
+        ) {
+          reject(failure ?? new Error("matrix child closed unsuccessfully"));
+          return;
+        }
+        resolve(Buffer.concat(stdout, stdoutBytes).toString("utf8"));
+      });
+      child.stdin.end(payload.bytes, (error) => {
+        if (error) stop(error);
+      });
+    });
+  } catch {
+    fail("PUBLIC_MATRIX_FAILED", "A fresh in-memory public-API matrix assertion failed.");
+  }
+}
+
+async function runPublicMatrix(workspaceRoot, files, initialBackingFiles) {
+  const before = await compiledSnapshot(workspaceRoot, initialBackingFiles);
+  const beforeSnapshotSha256 = `sha256:${sha256(
+    Buffer.from(JSON.stringify(before.compiledReceipts)),
+  )}`;
+  if (beforeSnapshotSha256 !== M10A_T01_PUBLIC_MATRIX_SNAPSHOT.current) {
+    fail("PUBLIC_API_DRIFT", "The executable public matrix is not the exact reviewed successor.");
+  }
+  const payload = publicMatrixPipePayload(before, files);
   let observed;
   try {
-    const { stdout, stderr } = await execFileAsync(
-      process.execPath,
-      ["--input-type=module", "-e", program],
-      {
-        cwd: workspaceRoot,
-        encoding: "utf8",
-        maxBuffer: 64 * 1_024,
-        timeout: 20_000,
-        killSignal: "SIGKILL",
-        windowsHide: true,
-      },
-    );
-    if (stderr !== "") throw new Error("unexpected matrix stderr");
-    observed = JSON.parse(stdout);
-  } catch {
-    fail("PUBLIC_MATRIX_FAILED", "A fresh isolated public-API rejection/repair assertion failed.");
+    observed = JSON.parse(await executeCapturedPublicMatrix(workspaceRoot, payload));
+  } catch (error) {
+    if (error instanceof DesenAppInvalidPublicationProofError) throw error;
+    fail("PUBLIC_MATRIX_FAILED", "The in-memory public matrix returned invalid JSON.");
   }
-  const after = await compiledSnapshot(workspaceRoot);
+  const after = await compiledSnapshot(workspaceRoot, initialBackingFiles);
   if (!isDeepStrictEqual(before, after)) {
     fail("PUBLIC_API_DRIFT", "The public matrix implementation changed across its execution.");
   }
+  const compiledReceipts = before.compiledReceipts;
   return deepFreeze({
     ...observed,
     execution: "fresh bounded isolated Node process; public emitted package roots only",
     processTimeoutMilliseconds: 20_000,
-    compiledFiles: before.length,
-    compiledReceipts: before,
-    compiledSnapshotSha256: `sha256:${sha256(Buffer.from(JSON.stringify(before)))}`,
+    compiledFiles: compiledReceipts.length,
+    compiledReceipts,
+    compiledSnapshotSha256: `sha256:${sha256(Buffer.from(JSON.stringify(compiledReceipts)))}`,
   });
+}
+
+/** Executes only the closed public matrix from a fresh workspace snapshot. */
+export async function buildDesenAppInvalidPublicationPublicMatrixEvidence(rawOptions = undefined) {
+  const options = exactOptions(rawOptions, ["workspaceRoot"], "public matrix build options");
+  const requestedRoot = capturePath(options.workspaceRoot ?? WORKSPACE_ROOT, "workspaceRoot");
+  let workspaceRoot;
+  try {
+    workspaceRoot = await realpath(requestedRoot);
+  } catch {
+    fail("AUTHORITY_UNSAFE", "The public matrix workspace root is unavailable.");
+  }
+  const initialBackingFiles = new Map();
+  for (const name of COMPILED_PACKAGES) {
+    const relativePath = `packages/${name}/package.json`;
+    initialBackingFiles.set(
+      relativePath,
+      await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath),
+    );
+  }
+  const files = new Map();
+  for (const relativePath of [CATALOG_PATH, SOURCE_FIXTURE_PATH]) {
+    files.set(
+      relativePath,
+      await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath),
+    );
+  }
+  return runPublicMatrix(workspaceRoot, files, initialBackingFiles);
 }
 
 function parseCode(source, relativePath, code) {
@@ -1201,8 +2047,10 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
   } catch {
     fail("AUTHORITY_UNSAFE", "The proof workspace root is unavailable.");
   }
-  const files = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const initialSnapshot = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const { backingFiles, files } = initialSnapshot;
   authenticateParents(files);
+  const editorCoreManifestSuccessor = authenticateM10AT01EditorCoreManifest(files);
   const sourcePolicy = verifyDesenAppInvalidPublicationSourcePolicy(
     policyInput(files, SOURCE_PATHS),
   );
@@ -1210,7 +2058,9 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
   const browser = verifyDesenAppInvalidPublicationBrowserPolicy(policyInput(files, BROWSER_PATHS));
   const packageWiring = verifyPackageWiring(files);
   const successor = await authenticateT08Successor(workspaceRoot, files);
-  const publicApiMatrix = await runPublicMatrix(workspaceRoot, files);
+  const m10aT01Successor = await authenticateM10AT01Successor(workspaceRoot);
+  authenticateOverrideBackings(options.fileOverrides, files, backingFiles);
+  const publicApiMatrix = await runPublicMatrix(workspaceRoot, files, backingFiles);
   let currentGraphAudit;
   try {
     currentGraphAudit = await buildCurrentDesenAppPublishedHostUpdateGraphAudit({ workspaceRoot });
@@ -1233,9 +2083,18 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
       "CURRENT_GRAPH_AUDIT_FAILED",
       "The current graph audit lost its unprojected complete-source authority.",
     );
-  const after = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const finalSnapshot = await readTrackedFiles(workspaceRoot, options.fileOverrides);
+  const { backingFiles: finalBackingFiles, files: after } = finalSnapshot;
   if (!isDeepStrictEqual(receipts(files), receipts(after))) {
     fail("SOURCE_SNAPSHOT_DRIFT", "A tracked T06 authority changed across fresh execution.");
+  }
+  if (!isDeepStrictEqual(receipts(backingFiles), receipts(finalBackingFiles))) {
+    fail("SOURCE_SNAPSHOT_DRIFT", "A tracked backing authority changed across fresh execution.");
+  }
+  authenticateOverrideBackings(options.fileOverrides, after, finalBackingFiles);
+  const recheckedEditorCoreManifestSuccessor = authenticateM10AT01EditorCoreManifest(after);
+  if (!isDeepStrictEqual(editorCoreManifestSuccessor, recheckedEditorCoreManifestSuccessor)) {
+    fail("SUCCESSOR_DRIFT", "The Editor Core manifest successor changed across execution.");
   }
   // Overrides are hostile-test inputs, not a way to claim that a different App was compiled.
   for (const receipt of currentGraphAudit.appSourceAudit.sourceReceipts) {
@@ -1313,34 +2172,69 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
     ],
   });
   const recheckedSuccessor = await authenticateT08Successor(workspaceRoot, after);
+  const recheckedM10AT01Successor = await authenticateM10AT01Successor(workspaceRoot);
   if (
     !isDeepStrictEqual(successor, recheckedSuccessor) ||
-    !isDeepStrictEqual(currentGraphAudit, successor.authority.currentGraphAudit)
+    !isDeepStrictEqual(m10aT01Successor, recheckedM10AT01Successor)
   )
-    fail(
-      "SUCCESSOR_DRIFT",
-      "The live T08 graph or composition authority changed across execution.",
-    );
+    fail("SUCCESSOR_DRIFT", "A live T08 or M10A-T01 successor authority changed across execution.");
   const historical = authenticateArtifact(
     await readRegularAuthority(path.join(workspaceRoot, ARTIFACT_PATH), ARTIFACT_PATH),
   );
+  const projected = projectDesenAppInvalidPublicationHistoricalAuthorities({
+    currentGraphAudit,
+    currentPublicApiMatrix: publicApiMatrix,
+    historicalGraphAudit: successor.authority.currentGraphAudit,
+    historicalPublicApiMatrix: historical.authority.publicApiMatrix,
+  });
   const packagePath = "apps/desen-app-browser-e2e/package.json";
   const artifact = structuredClone(currentArtifact);
-  const index = artifact.boundary.trackedReceipts.findIndex(
+  const browserPackageIndex = artifact.boundary.trackedReceipts.findIndex(
     ({ path: name }) => name === packagePath,
   );
-  const previous = historical.boundary.trackedReceipts.find(
+  const previousBrowserPackage = historical.boundary.trackedReceipts.find(
     ({ path: name }) => name === packagePath,
   );
-  if (index < 0 || !previous)
+  const editorCoreManifestIndex = artifact.boundary.trackedReceipts.findIndex(
+    ({ path: name }) => name === M10A_T01_EDITOR_CORE_MANIFEST_SUCCESSOR.path,
+  );
+  const previousEditorCoreManifest = historical.boundary.trackedReceipts.find(
+    ({ path: name }) => name === M10A_T01_EDITOR_CORE_MANIFEST_SUCCESSOR.path,
+  );
+  if (
+    browserPackageIndex < 0 ||
+    !previousBrowserPackage ||
+    editorCoreManifestIndex < 0 ||
+    !previousEditorCoreManifest
+  )
     fail("SUCCESSOR_DRIFT", "The exact historical package receipt is missing.");
-  artifact.boundary.trackedReceipts[index] = structuredClone(previous);
+  requireExactFields(
+    previousEditorCoreManifest,
+    {
+      bytes: M10A_T01_EDITOR_CORE_MANIFEST_SUCCESSOR.historicalBytes,
+      sha256: M10A_T01_EDITOR_CORE_MANIFEST_SUCCESSOR.historicalSha256,
+    },
+    "historical Editor Core manifest receipt",
+  );
+  artifact.boundary.trackedReceipts[browserPackageIndex] = structuredClone(previousBrowserPackage);
+  artifact.boundary.trackedReceipts[editorCoreManifestIndex] = structuredClone(
+    previousEditorCoreManifest,
+  );
+  artifact.authority.publicApiMatrix = structuredClone(projected.currentPublicApiMatrix);
   artifact.authority.currentGraphAudit = structuredClone(historical.authority.currentGraphAudit);
-  if (!isDeepStrictEqual(artifact, historical))
+  if (!isDeepStrictEqual(artifact, historical)) {
+    const changedTopLevel = Object.keys(artifact).filter(
+      (key) => !isDeepStrictEqual(artifact[key], historical[key]),
+    );
+    const changedAuthority = Object.keys(artifact.authority).filter(
+      (key) => !isDeepStrictEqual(artifact.authority[key], historical.authority[key]),
+    );
     fail(
       "SUCCESSOR_DRIFT",
-      "T08 may project only the exact browser package receipt and authenticated historical graph.",
+      "Only exact reviewed T08/M10A-T01 successor identities may project into frozen T06 evidence.",
+      { changedTopLevel, changedAuthority },
     );
+  }
   const artifactBytes = Buffer.from(
     await format(JSON.stringify(artifact), { parser: "json", printWidth: 100, endOfLine: "lf" }),
   );
@@ -1353,9 +2247,34 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
       path: T08_SUCCESSOR_PIN.path,
       bytes: T08_SUCCESSOR_PIN.bytes,
       sha256: T08_SUCCESSOR_PIN.sha256,
+      m10aT01: {
+        task: "M10A-T01",
+        path: M10A_T01_SUCCESSOR_PIN.path,
+        bytes: M10A_T01_SUCCESSOR_PIN.bytes,
+        sha256: M10A_T01_SUCCESSOR_PIN.sha256,
+      },
+      t08HistoricalGraphAudit: successor.authority.currentGraphAudit,
       currentGraphAudit,
-      currentBrowserPackageReceipt: currentArtifact.boundary.trackedReceipts[index],
-      historicalProjectionPaths: [packagePath, "authority.currentGraphAudit"],
+      currentPublicApiMatrix: publicApiMatrix,
+      currentBrowserPackageReceipt: currentArtifact.boundary.trackedReceipts[browserPackageIndex],
+      currentEditorCoreManifestReceipt:
+        currentArtifact.boundary.trackedReceipts[editorCoreManifestIndex],
+      editorCoreManifestSuccessor,
+      historicalProjectionPaths: [
+        packagePath,
+        M10A_T01_EDITOR_CORE_MANIFEST_SUCCESSOR.path,
+        "authority.currentGraphAudit",
+        "authority.publicApiMatrix.compiledReceipts[packages/editor-core/dist/index.js]",
+        "authority.publicApiMatrix.compiledReceipts[packages/editor-core/dist/stable-id-insert.js]",
+        "authority.publicApiMatrix.compiledSnapshotSha256",
+        "authority.currentGraphAudit.runtimeResolution.app.graphSha256",
+        "authority.currentGraphAudit.runtimeResolution.appModules[packages/editor-core/dist/index.js]",
+        "authority.currentGraphAudit.runtimeResolution.appModules[packages/editor-core/dist/stable-id-insert.js]",
+        "authority.currentGraphAudit.runtimeResolution.appOutput.identitySha256",
+        "authority.currentGraphAudit.runtimeResolution.appOutput.outputs[entry-chunk]",
+        "authority.currentGraphAudit.runtimeResolution.appOutput.outputs[index.html].sha256",
+        "authority.currentGraphAudit.runtimeResolution.backingSnapshotSha256",
+      ],
       parentArtifactUnchanged: true,
     },
   });

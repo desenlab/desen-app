@@ -5,12 +5,12 @@ Last updated: 2026-09-10
 ## Current state
 
 M10 and its terminal `G10` gate are complete. PR #85 merged the M10 closure as `70ac046` and its
-fresh `main` validation passed. Implementation progress remains **121/148 tasks (82%)**, M10 is
-**12/12**, and proof gates are **11/13**. Gates are excluded from the task count.
+fresh `main` validation passed. Implementation progress is **121/176 tasks (69%)**, M10 is
+**12/12**, and proof gates are **11/14**. Gates are excluded from the task count.
 
-The requested M10-to-M11 repository and documentation consolidation is complete. It changed no
-protocol, runtime, publisher, editor, application behavior, frozen proof artifact, workflow,
-lockfile, or Runtime Core byte. M11 has not started.
+SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
+All 121 completed tasks remain complete. **M10A-T01 is IN_PROGRESS**; M11 has not started.
+Base UI 1.8.0 is installed in the starter package; frozen protocol and Runtime Core are unchanged.
 
 ## M10 closure
 
@@ -47,31 +47,32 @@ immutable pre-consolidation pointer and retrieval command have one canonical own
 [documentation standard](docs/standards/DOCUMENTATION-STANDARDS.md#document-lifecycle-and-ownership).
 No Git history is rewritten.
 
-## Consolidation verification
+## Documentation verification
 
-The eight governed entry and standards documents were reduced from 18,467 to 1,477 lines (92.0%)
-while retaining every canonical task row, immutable proof-reader pin, and historical snapshot
-through its explicit owner. The documentation contract passes 46/46 tests, all 61 local links in
-the changed documents resolve, and the proof-reader checkpoint remains 64 artifacts / 128 readers.
+The eight governed entry and standards documents are reduced from 18,467 to 1,612 lines (91.3%)
+while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
+through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
+link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
 
-All exhaustive proof stages, including the M10 gate, passed. On this host the default-parallel
+At the earlier consolidation, exhaustive proof stages including M10 passed. The default-parallel
 package aggregation hit Vitest's five-second timeout under saturation; every timed-out package
 passed independently, and the complete executable graph passed in a serialized Turbo run. The
 dependency boundary audit reports no violation across 879 modules and 3,787 dependencies.
 
 ## Next authority
 
-`SC-02` is `NOT_STARTED` and remains the decision checkpoint after G10 and before either M11
-branch. It requires observed workflow evidence and at least two credible bounded pilot commitments;
-repository activity, test volume, or social interest do not satisfy it. See
-[Strategic Validation](docs/plan/STRATEGIC-VALIDATION.md).
+The active implementation task is **M10A-T01 — [Base UI adapter boundary proof](docs/proof/M10A-T01.md)**.
+The [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md),
+[task contracts](docs/plan/M10A-TASK-CONTRACTS.md) and
+[ADR 0023](docs/adr/0023-design-first-authoring-and-design-system-workbench.md) define its scope.
+G10 and the recorded [SC-02 adaptation](docs/plan/STRATEGIC-VALIDATION.md) supply its entry authority.
+No further external user/team recruitment is required; pilot demand remains unproven.
 
-If SC-02 authorizes continuation, `M11-T01` (Map) and `M11-T08` (Sortable) are the two permitted
-parallel branch starts. Every M11 task must compare the complete `packages/runtime-core` tree with
-the frozen M10 baseline. No M11 implementation, package publication, release, or deployment is
-authorized by this cleanup.
+G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
+Runtime Core tree and fresh proof requirements. T01 remains active until its exact-head hosted
+Quality gate passes; this local implementation authorizes no publication, release or deployment.
 
-## Frozen transition authorities
+## Frozen G10 transition authorities
 
 - Runtime Core tree: `3fa3613a3be63c749f40b6a0b55af5b40c675773`
 - G10 artifact: `sha256:7005292247b0e4965eaf0bca12d3b1204be9d821f7ba2339257b6bc586ec3ca3`

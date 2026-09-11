@@ -124,8 +124,8 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
       "test:editor-core-terminal-integration",
     ],
   );
-  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
-  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 36);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 92);
   assert.deepEqual(built.currentCompatibility.publicApi.compatibilityOnlySuccessor, {
     task: "M08-T09",
     authority: "COMPATIBILITY_ONLY_NOT_M08_T08_CLAIM_AUTHORITY",

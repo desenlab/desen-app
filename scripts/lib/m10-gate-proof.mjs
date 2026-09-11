@@ -95,6 +95,32 @@ export const M10_GATE_BROWSER_CONFIGS = Object.freeze([
   "repeatable-demo-playwright.config.ts",
 ]);
 
+/** Exact fresh host-audit projection admitted by the M10A-T01 current reader. */
+export const M10_GATE_M10A_T01_CURRENT_HOST_AUDIT = Object.freeze({
+  appSourceFiles: 54,
+  hostSourceFiles: 13,
+  hostJsxElements: 18,
+  appModules: 170,
+  hostModules: 104,
+  sharedManagedModules: 22,
+  dynamicEdges: 0,
+  unresolvedEdges: 0,
+  appGraphSha256: "sha256:df612d09ef98ae388987343948b76e2d4b2ba76c283e840a1266dc6105211e2e",
+  hostGraphSha256: "sha256:55c4f4c9c05a2441202c960f2c22bd850f84d743780d003ab3b35460fc04d03f",
+  appOutputIdentity: "sha256:b1e80809142c6d7941e221e517e67720bd1b5f46fae7a05f2430ed93b61a6475",
+  hostOutputIdentity: "sha256:7b6514e2fd29a745e11de6e58c3c3adedf06c8a8619161a8ca43e03b26c0090f",
+  backingSnapshotSha256: "sha256:9fb4dc9cd9443fbda9b2d840b3cc4052fde0f63ce24f328f835381c6ded9540b",
+  publicRegistryAndRuntimeOnly: true,
+  noHandwrittenHostManagedTree: true,
+  independentBuildsPerApplication: 2,
+});
+
+const M10_GATE_FROZEN_HOST_AUDIT_IDENTITIES = Object.freeze({
+  appGraphSha256: "sha256:fa8f18c9510575a8c5719e19bfb5aaf42468a167c475879778554d0a3950bebf",
+  appOutputIdentity: "sha256:ba0b863a2133c99fd90a834fd892660b1e70198b377ae714ab7e8c31af2656a7",
+  backingSnapshotSha256: "sha256:1eaeeb160cca678ad35bda5a60a58730e0f4f6bfead3ae39c29a52bd240d0427",
+});
+
 /** Stable G10 root-test declarations used by the deterministic evidence contract. */
 export const M10_GATE_ROOT_TEST_NAMES = Object.freeze([
   "G10 authenticates every exact completed M10 parent",
@@ -355,6 +381,36 @@ function projectGraphAudit(graph) {
   });
 }
 
+/**
+ * Authenticates the exact M10A-T01 successor graph, then projects the three historical identities
+ * retained by the immutable G10 artifact.
+ */
+export function projectM10GateHistoricalHostAudit(rawHostAudit) {
+  if (
+    rawHostAudit === null ||
+    typeof rawHostAudit !== "object" ||
+    Array.isArray(rawHostAudit) ||
+    utilTypes.isProxy(rawHostAudit) ||
+    Object.getPrototypeOf(rawHostAudit) !== Object.prototype
+  )
+    fail("HOST_AUDIT_FAILED", "Fresh host audit is not one inert current-reader projection.");
+
+  const expectedEntries = Object.entries(M10_GATE_M10A_T01_CURRENT_HOST_AUDIT);
+  const keys = Reflect.ownKeys(rawHostAudit);
+  if (keys.length !== expectedEntries.length)
+    fail("HOST_AUDIT_FAILED", "Fresh host audit is not the reviewed M10A-T01 successor.");
+  for (const [key, expected] of expectedEntries) {
+    const descriptor = Object.getOwnPropertyDescriptor(rawHostAudit, key);
+    if (!descriptor?.enumerable || !("value" in descriptor) || descriptor.value !== expected)
+      fail("HOST_AUDIT_FAILED", "Fresh host audit is not the reviewed M10A-T01 successor.");
+  }
+
+  return Object.freeze({
+    ...M10_GATE_M10A_T01_CURRENT_HOST_AUDIT,
+    ...M10_GATE_FROZEN_HOST_AUDIT_IDENTITIES,
+  });
+}
+
 function serializeArtifact(artifact) {
   return Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`, "utf8");
 }
@@ -387,7 +443,7 @@ export async function buildM10GateEvidence(rawOptions = undefined) {
     files.get(BROWSER_PACKAGE_PATH),
     files.get(WORKFLOW_PATH),
   );
-  const hostAudit = projectGraphAudit(graph);
+  const hostAudit = projectM10GateHistoricalHostAudit(projectGraphAudit(graph));
   if (
     core.status !== "PASS" ||
     core.baseline.tree !== "3fa3613a3be63c749f40b6a0b55af5b40c675773" ||

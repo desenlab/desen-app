@@ -20,7 +20,12 @@ import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
-import { buildCurrentDesenAppPublishedHostUpdateGraphAudit } from "./desen-app-published-host-update-proof.mjs";
+import {
+  authenticateM10AT01LockfileSuccessor,
+  buildCurrentDesenAppPublishedHostUpdateGraphAudit,
+  projectM10AT01CurrentGraphAudit,
+  projectM10AT01T08Input,
+} from "./desen-app-published-host-update-proof.mjs";
 
 const WORKSPACE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json";
@@ -53,8 +58,19 @@ const T08_SUCCESSOR_PIN = Object.freeze({
   bytes: 319_719,
   sha256: "048041735b406dab4eefa6b0d02e2c039d3b3c3629d4dfc0cd7489a3c9f286f5",
 });
+const M10A_T01_SUCCESSOR_PIN = Object.freeze({
+  task: "M10A-T01",
+  path: "docs/proof/artifacts/m10a-t01.json",
+  bytes: 13_910,
+  sha256: "711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74",
+});
 const T08_CHANGED_TRACKED_PATHS = Object.freeze([
   BROWSER_PACKAGE_PATH,
+  "pnpm-lock.yaml",
+  "dependency-cruiser.config.cjs",
+  "scripts/verify-boundary-fixtures.mjs",
+]);
+const M10A_T01_CHANGED_T08_INPUTS = Object.freeze([
   "pnpm-lock.yaml",
   "dependency-cruiser.config.cjs",
   "scripts/verify-boundary-fixtures.mjs",
@@ -1295,12 +1311,55 @@ async function readT08Successor(workspaceRoot) {
   return successor;
 }
 
+async function authenticateM10AT01Successor(workspaceRoot) {
+  const pin = M10A_T01_SUCCESSOR_PIN;
+  const bytes = await readRegularAuthority(path.join(workspaceRoot, pin.path), pin.path);
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail("SUCCESSOR_DRIFT", "The exact reviewed M10A-T01 successor artifact changed.");
+  }
+  const successor = parseJson(bytes, pin.path, "SUCCESSOR_DRIFT");
+  if (
+    successor.schemaVersion !== 1 ||
+    successor.task !== "M10A-T01" ||
+    successor.profile !== "desen.m10a-t01.base-ui-adapter-boundary.v1" ||
+    successor.result !== "PASS" ||
+    successor.package?.name !== "@desen/starter-catalog-web" ||
+    successor.claims?.runtimeCoreChanged !== false
+  ) {
+    fail("SUCCESSOR_DRIFT", "The M10A-T01 successor lost its reviewed identity.");
+  }
+  return successor;
+}
+
 function assertSuccessorReceipt(receipt, candidates) {
   const matches = candidates?.filter((candidate) => candidate.path === receipt.path);
   if (matches?.length !== 1 || !isDeepStrictEqual(receipt, matches[0]))
     fail("SUCCESSOR_DRIFT", "A current input differs from its exact reviewed T08 receipt.", {
       path: receipt.path,
     });
+}
+
+function projectM10AT01Input(relativePath, bytes) {
+  try {
+    return relativePath === "pnpm-lock.yaml"
+      ? authenticateM10AT01LockfileSuccessor(bytes).predecessorBytes
+      : projectM10AT01T08Input(relativePath, bytes);
+  } catch {
+    fail("SUCCESSOR_DRIFT", "A live M10A-T01 input is not the exact reviewed T08 successor.", {
+      path: relativePath,
+    });
+  }
+}
+
+function projectM10AT01Graph(currentGraphAudit, t08GraphAudit) {
+  try {
+    return projectM10AT01CurrentGraphAudit(currentGraphAudit, t08GraphAudit);
+  } catch {
+    fail(
+      "SUCCESSOR_DRIFT",
+      "The live App/host graph is not the exact reviewed M10A-T01 successor of T08.",
+    );
+  }
 }
 
 function assertReviewedReceiptChanges(current, historical, successor, changedPaths) {
@@ -1321,19 +1380,16 @@ function assertReviewedReceiptChanges(current, historical, successor, changedPat
   }
 }
 
-async function projectT08Successor(workspaceRoot, current, successor) {
+async function projectT08Successor(workspaceRoot, current, successor, currentTrackedReceipts) {
   const historicalBytes = await readRegularAuthority(
     path.join(workspaceRoot, ARTIFACT_PATH),
     ARTIFACT_PATH,
   );
   const historical = authenticateArtifact(historicalBytes);
-  if (
-    !isDeepStrictEqual(
-      current.authority.currentGraphAudit,
-      successor.authority?.currentGraphAudit,
-    ) ||
-    !isDeepStrictEqual(current.authority.publicApiMatrix, successor.authority?.publicApiMatrix)
-  )
+  const currentGraphAudit = current.authority.currentGraphAudit;
+  const t08GraphAudit = successor.authority?.currentGraphAudit;
+  projectM10AT01Graph(currentGraphAudit, t08GraphAudit);
+  if (!isDeepStrictEqual(current.authority.publicApiMatrix, successor.authority?.publicApiMatrix))
     fail(
       "SUCCESSOR_DRIFT",
       "Fresh current graph or recovery execution differs from reviewed T08 authority.",
@@ -1386,10 +1442,13 @@ async function projectT08Successor(workspaceRoot, current, successor) {
     artifact,
     liveSuccessorAuthority: {
       task: "M10-T08",
-      artifact: T08_SUCCESSOR_PIN,
+      path: T08_SUCCESSOR_PIN.path,
+      bytes: T08_SUCCESSOR_PIN.bytes,
+      sha256: T08_SUCCESSOR_PIN.sha256,
+      m10aT01: M10A_T01_SUCCESSOR_PIN,
       publicApiMatrix: matrix,
-      currentGraphAudit: current.authority.currentGraphAudit,
-      currentTrackedReceipts: current.boundary.trackedReceipts,
+      currentGraphAudit,
+      currentTrackedReceipts,
       projectedHistoricalFields: [
         "authority.currentGraphAudit",
         "authority.publicApiMatrix.freshEmission.inputReceipts",
@@ -1480,9 +1539,14 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
   );
   const packageWiring = verifyPackageWiring(files);
   const successor = await readT08Successor(workspaceRoot);
+  const m10aT01Successor = await authenticateM10AT01Successor(workspaceRoot);
+  const t08Files = new Map(files);
+  for (const name of M10A_T01_CHANGED_T08_INPUTS) {
+    t08Files.set(name, projectM10AT01Input(name, files.get(name)));
+  }
   for (const name of T08_CHANGED_TRACKED_PATHS)
     assertSuccessorReceipt(
-      { path: name, bytes: files.get(name).byteLength, sha256: sha256(files.get(name)) },
+      { path: name, bytes: t08Files.get(name).byteLength, sha256: sha256(t08Files.get(name)) },
       successor.boundary.trackedReceipts,
     );
   const { observation, reauthenticate } = await buildCurrentRecoveryObservation(
@@ -1532,7 +1596,7 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
     },
     boundary: {
       trackedFiles: files.size,
-      trackedReceipts: receipts(files),
+      trackedReceipts: receipts(t08Files),
       immutableInputs: true,
       parentArtifacts: 4,
       currentGraphHasNoHistoricalProjection: true,
@@ -1557,8 +1621,15 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
     ],
   });
   await readT08Successor(workspaceRoot);
+  const recheckedM10AT01Successor = await authenticateM10AT01Successor(workspaceRoot);
+  if (!isDeepStrictEqual(m10aT01Successor, recheckedM10AT01Successor)) {
+    fail("SUCCESSOR_DRIFT", "The M10A-T01 successor changed across fresh execution.");
+  }
   for (const name of T08_CHANGED_TRACKED_PATHS) {
-    const bytes = await readRegularAuthority(path.join(workspaceRoot, name), name);
+    const currentBytes = await readRegularAuthority(path.join(workspaceRoot, name), name);
+    const bytes = M10A_T01_CHANGED_T08_INPUTS.includes(name)
+      ? projectM10AT01Input(name, currentBytes)
+      : currentBytes;
     assertSuccessorReceipt(
       { path: name, bytes: bytes.byteLength, sha256: sha256(bytes) },
       successor.boundary.trackedReceipts,
@@ -1568,6 +1639,7 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
     workspaceRoot,
     currentArtifact,
     successor,
+    receipts(files),
   );
   const artifactBytes = Buffer.from(
     await format(JSON.stringify(artifact), { parser: "json", printWidth: 100, endOfLine: "lf" }),

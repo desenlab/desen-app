@@ -192,6 +192,65 @@ const PROMOTION_REMOVED_TRACKED_PATHS = Object.freeze([
   "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
 ]);
 const CURRENT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  // M10A-T01 app/package/proof and its accepted planning baseline are exact new tracked inputs.
+  "apps/starter-catalog-web-proof/README.md",
+  "apps/starter-catalog-web-proof/authoring.html",
+  "apps/starter-catalog-web-proof/host.html",
+  "apps/starter-catalog-web-proof/package.json",
+  "apps/starter-catalog-web-proof/playwright.config.ts",
+  "apps/starter-catalog-web-proof/proof-contract.ts",
+  "apps/starter-catalog-web-proof/proof-reporter.ts",
+  "apps/starter-catalog-web-proof/scripts/serve-proof.mjs",
+  "apps/starter-catalog-web-proof/src/application.css",
+  "apps/starter-catalog-web-proof/src/authoring/index.tsx",
+  "apps/starter-catalog-web-proof/src/authoring/publications.ts",
+  "apps/starter-catalog-web-proof/src/authoring/source-fixtures.ts",
+  "apps/starter-catalog-web-proof/src/host/index.tsx",
+  "apps/starter-catalog-web-proof/src/shared/proof-channel.ts",
+  "apps/starter-catalog-web-proof/src/shared/runtime-surface.tsx",
+  "apps/starter-catalog-web-proof/starter-catalog-web.pw.ts",
+  "apps/starter-catalog-web-proof/tsconfig.json",
+  "apps/starter-catalog-web-proof/vite.config.ts",
+  "docs/adr/0023-design-first-authoring-and-design-system-workbench.md",
+  "docs/plan/DESIGN-SYSTEM-WORKBENCH.md",
+  "docs/plan/M10A-IMPLEMENTATION-PLAN.md",
+  "docs/plan/M10A-TASK-CONTRACTS.md",
+  "packages/editor-core/test/subtree-insert.test.ts",
+  "packages/editor-core/test/subtree-insert.types.ts",
+  "packages/starter-catalog-web/README.md",
+  "packages/starter-catalog-web/catalog.json",
+  "packages/starter-catalog-web/package.json",
+  "packages/starter-catalog-web/scripts/copy-styles.mjs",
+  "packages/starter-catalog-web/src/contracts.ts",
+  "packages/starter-catalog-web/src/index.ts",
+  "packages/starter-catalog-web/src/neutral.module.css",
+  "packages/starter-catalog-web/src/react-adapters.tsx",
+  "packages/starter-catalog-web/src/styles.d.ts",
+  "packages/starter-catalog-web/src/templates.ts",
+  "packages/starter-catalog-web/test/contracts.test.ts",
+  "packages/starter-catalog-web/test/contracts.types.ts",
+  "packages/starter-catalog-web/test/public-api.types.ts",
+  "packages/starter-catalog-web/test/react-adapters.test.tsx",
+  "packages/starter-catalog-web/tsconfig.build.json",
+  "packages/starter-catalog-web/tsconfig.json",
+  "scripts/generate-m10a-t01-proof.mjs",
+  "scripts/lib/m10a-t01-proof.mjs",
+  "scripts/verify-m10a-t01.mjs",
+  "tests/boundaries/fixtures/allowed-starter-runtime-react/packages/runtime-react/src/index.ts",
+  "tests/boundaries/fixtures/allowed-starter-runtime-react/packages/starter-catalog-web/src/index.ts",
+  "tests/boundaries/fixtures/neutral-imports-starter/packages/editor-core/src/index.ts",
+  "tests/boundaries/fixtures/neutral-imports-starter/packages/starter-catalog-web/src/index.ts",
+  "tests/boundaries/fixtures/starter-imports-app/apps/desen-app/src/index.ts",
+  "tests/boundaries/fixtures/starter-imports-app/packages/starter-catalog-web/src/index.ts",
+  "tests/boundaries/fixtures/starter-imports-editor-core/packages/editor-core/src/index.ts",
+  "tests/boundaries/fixtures/starter-imports-editor-core/packages/starter-catalog-web/src/index.ts",
+  "tests/boundaries/fixtures/starter-proof-host-imports-publisher/apps/starter-catalog-web-proof/src/host/index.ts",
+  "tests/boundaries/fixtures/starter-proof-host-imports-publisher/packages/publisher/src/index.ts",
+  "tests/boundaries/fixtures/starter-proof-imports-app/apps/desen-app/src/index.ts",
+  "tests/boundaries/fixtures/starter-proof-imports-app/apps/starter-catalog-web-proof/src/authoring/index.ts",
+  "tests/m10a-t01.test.mjs",
+  "docs/proof/M10A-T01.md",
+  "docs/proof/artifacts/m10a-t01.json",
   "docs/proof/DESEN-APP-M10-GATE.md",
   "docs/proof/artifacts/desen-app-0.1.0-m10-gate.json",
   "scripts/generate-m10-gate-proof.mjs",
@@ -761,13 +820,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 220,
+    PROOF_UNIT: 222,
     CI_POLICY: 48,
-    DEPENDENCY_POLICY: 32,
-    FROZEN_INPUT: 159,
-    PACKAGE_OR_APPLICATION: 572,
-    SHARED_PROOF_INFRASTRUCTURE: 349,
-    PROJECT_DOCUMENTATION: 156,
+    DEPENDENCY_POLICY: 34,
+    FROZEN_INPUT: 160,
+    PACKAGE_OR_APPLICATION: 606,
+    SHARED_PROOF_INFRASTRUCTURE: 363,
+    PROJECT_DOCUMENTATION: 161,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -1172,10 +1231,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 80,
-  headSha256: "49e9354e03e31d9e8767aac82832759f1d32397434b0952392b6d2f6218d24fe",
-  frozenArtifactCount: 64,
-  currentReaderCount: 128,
+  sequence: 83,
+  headSha256: "9c479b3f3feaa3081fe255063462b9736f959e1fa19931df6ced310112bed7a9",
+  frozenArtifactCount: 65,
+  currentReaderCount: 130,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -1827,6 +1886,7 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "name: Browser E2E",
     "ref: ${{ github.event.pull_request.head.sha || github.sha }}",
     "pnpm --filter @desen/app-browser-e2e exec playwright install --with-deps chromium",
+    "pnpm --filter @desen/starter-catalog-web-proof exec playwright install --with-deps chromium",
     "pnpm --filter @desen/app-browser-e2e test:e2e",
     "node scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs",
     "node --test tests/desen-app-browser-e2e-workspace-compatibility.test.mjs",
@@ -1853,6 +1913,10 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "node --test scripts/ci/test/sharded-quality-gate.test.mjs",
   ];
   const repeatedWorkflowFragments = new Map([
+    [
+      "pnpm --filter @desen/starter-catalog-web-proof exec playwright install --with-deps chromium",
+      3,
+    ],
     ["fetch-depth: 0", 5],
     ["DESEN_REQUIRED_BASE_REVISION: ${{ github.event.pull_request.base.sha || '' }}", 2],
     ["DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}", 5],
@@ -2692,8 +2756,8 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 230 ||
-    currentInventory.proofUnitCount !== 110
+    currentInventory.workloadCount !== 232 ||
+    currentInventory.proofUnitCount !== 111
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
@@ -2707,10 +2771,10 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 99 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 99 || currentProofPairClasses.barrier !== 12) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current G10 proof-pair authority is not exactly 99 ordinary and 11 barrier pairs.",
+      "The current M10A-T01 proof-pair authority is not exactly 99 ordinary and 12 barrier pairs.",
     );
   }
   const archiveRedactionClosure = createAffectedImpactClosure(["historical-archive-redaction"]);
@@ -2718,14 +2782,14 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     !isDeepStrictEqual(archiveRedactionClosure.ownerProofUnitIds, [
       "historical-archive-redaction",
     ]) ||
-    archiveRedactionClosure.proofUnitCount !== 78 ||
-    archiveRedactionClosure.workloadCount !== 166 ||
+    archiveRedactionClosure.proofUnitCount !== 79 ||
+    archiveRedactionClosure.workloadCount !== 168 ||
     archiveRedactionClosure.impactSha256 !==
-      "866d85b34479494cd3920b200d687ef8c6b9235ff5b3feae71333087e17134cf"
+      "6d46c34156db550b4e358f0073f7cf69d05b3d3be1970fc00d53b116ccc910bd"
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current G10 successor closure from AR-01 is not exactly 78 proof units and 166 workloads.",
+      "The current M10A-T01 successor closure from AR-01 is not exactly 79 proof units and 168 workloads.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);

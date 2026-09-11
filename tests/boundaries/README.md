@@ -43,6 +43,12 @@ Protocol access from neighboring observers remain forbidden.
 Two positives and six negatives preserve that boundary; all 52 cases run against the real root
 configuration. No production host dependency allowlist is expanded.
 
+M10A-T01 adds four starter-boundary fixtures: its reviewed Runtime React edge succeeds; imports
+from starter into Editor Core or an application fail; a neutral package cannot import starter.
+These extend the historical 52-case set without changing its existing expected rules.
+Two additional fixtures reject Publisher in the independent starter host and another App in the
+starter proof harness; both browser entry graphs retain explicit dependency boundaries.
+
 Run them after installing workspace dependencies:
 
 ```bash

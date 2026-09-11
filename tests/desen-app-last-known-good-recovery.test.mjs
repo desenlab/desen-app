@@ -19,6 +19,7 @@ import {
   verifyDesenAppLastKnownGoodRecoveryEvidence as verify,
   writeDesenAppLastKnownGoodRecoveryEvidence as write,
 } from "../scripts/lib/desen-app-last-known-good-recovery-proof.mjs";
+import { projectM10AT01CurrentGraphAudit } from "../scripts/lib/desen-app-published-host-update-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json";
@@ -31,6 +32,7 @@ let proofDocument;
 let browser;
 let built;
 let finalCompiledReadOrdinal = 0;
+let m10aSuccessorReads = 0;
 
 function errorCode(code) {
   return (error) => {
@@ -96,6 +98,9 @@ before(async () => {
   const original = filesystem.open;
   filesystem.open = async (...args) => {
     if (args[0] === path.join(ROOT, "packages/protocol/dist/index.js")) finalCompiledReadOrdinal++;
+    if (args[0] === path.join(ROOT, "docs/proof/artifacts/m10a-t01.json")) {
+      m10aSuccessorReads++;
+    }
     return Reflect.apply(original, filesystem, args);
   };
   syncBuiltinESMExports();
@@ -106,6 +111,7 @@ before(async () => {
     syncBuiltinESMExports();
   }
   assert.ok(finalCompiledReadOrdinal >= 3);
+  assert.ok(m10aSuccessorReads >= 2);
 });
 after(async () => {
   for (const root of temporaries) await rm(root, { recursive: true, force: true });
@@ -128,6 +134,12 @@ test(NAMES[0], async () => {
 test(NAMES[1], () => {
   const matrix = built.liveSuccessorAuthority.publicApiMatrix;
   assert.equal(built.liveSuccessorAuthority.task, "M10-T08");
+  assert.deepEqual(built.liveSuccessorAuthority.m10aT01, {
+    task: "M10A-T01",
+    path: "docs/proof/artifacts/m10a-t01.json",
+    bytes: 13_910,
+    sha256: "711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74",
+  });
   assert.equal(built.liveSuccessorAuthority.currentObservationsAreNotHistoricalResults, true);
   const historical = built.artifact.authority.publicApiMatrix;
   assert.deepEqual(
@@ -258,7 +270,16 @@ test(NAMES[3], async () => {
     predecessor.authority.currentGraphAudit,
   );
   assert.notDeepEqual(graph, predecessor.authority.currentGraphAudit);
-  assert.deepEqual(graph, successor.authority.currentGraphAudit);
+  assert.notDeepEqual(graph, successor.authority.currentGraphAudit);
+  assert.deepEqual(
+    projectM10AT01CurrentGraphAudit(graph, successor.authority.currentGraphAudit),
+    successor.authority.currentGraphAudit,
+  );
+  const unrelatedGraphDrift = structuredClone(graph);
+  unrelatedGraphDrift.runtimeResolution.host.moduleCount += 1;
+  assert.throws(() =>
+    projectM10AT01CurrentGraphAudit(unrelatedGraphDrift, successor.authority.currentGraphAudit),
+  );
   assert.deepEqual(await observe(), {
     publicApiMatrix: built.liveSuccessorAuthority.publicApiMatrix,
     currentGraphAudit: graph,
@@ -357,6 +378,11 @@ test(NAMES[5], async () => {
       assert.rejects(build(), errorCode("SUCCESSOR_DRIFT")),
     );
   }
+  for (const ordinal of [1, 2]) {
+    await substituteRead("docs/proof/artifacts/m10a-t01.json", ordinal, () =>
+      assert.rejects(build(), errorCode("SUCCESSOR_DRIFT")),
+    );
+  }
   const packagePath = "apps/desen-app-browser-e2e/package.json";
   const packageBytes = await readFile(path.join(ROOT, packagePath));
   const packageJson = JSON.parse(packageBytes);
@@ -384,10 +410,16 @@ test(NAMES[5], async () => {
       errorCode("TEST_AUTHORITY_DRIFT"),
     );
   }
-  await assert.rejects(
-    build({ fileOverrides: new Map([["pnpm-lock.yaml", Buffer.from("forged current lock")]]) }),
-    errorCode("SUCCESSOR_DRIFT"),
-  );
+  for (const name of [
+    "pnpm-lock.yaml",
+    "dependency-cruiser.config.cjs",
+    "scripts/verify-boundary-fixtures.mjs",
+  ]) {
+    await assert.rejects(
+      build({ fileOverrides: new Map([[name, Buffer.from("forged M10A-T01 successor")]]) }),
+      errorCode("SUCCESSOR_DRIFT"),
+    );
+  }
 });
 
 test(NAMES[6], async () => {

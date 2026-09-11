@@ -95,6 +95,69 @@ const SEC_02_LOCKFILE_PACKAGE_UPDATES = Object.freeze([
     "sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==",
   ],
 ]);
+const M10A_T01_LOCKFILE_RECEIPT = Object.freeze({
+  bytes: 138_171,
+  sha256: "2d7d284b3f32e1dedc94161aef6f012f7e86913c9f50437edb64630ba14bc31f",
+});
+const M10_T08_LOCKFILE_RECEIPT = Object.freeze({
+  bytes: 132_210,
+  sha256: "f2ba3d3f38b1cee1ef369f8ea138f476bbf4574931262563b9f550937c9cae6c",
+});
+const M10A_T01_T08_INPUT_RECEIPTS = Object.freeze([
+  Object.freeze({
+    path: "dependency-cruiser.config.cjs",
+    bytes: 16_189,
+    sha256: "e78d9f77c35eae01ea145944fc17f4f416aed89505ffdc96836d5fc6457cf069",
+    predecessor: Object.freeze({
+      bytes: 15_181,
+      sha256: "9d1b7d5f78fd4e0d356183b21f237b8e4e98b8df9d5ad625fdd73fe4f357cb60",
+    }),
+  }),
+  Object.freeze({
+    path: "scripts/verify-boundary-fixtures.mjs",
+    bytes: 9_606,
+    sha256: "b80b30a52db67ba93c9d705566e3c7db453c98bc42e6cc7b0e7a68bb8efaee62",
+    predecessor: Object.freeze({
+      bytes: 9_049,
+      sha256: "03b0c558fc9803726c09b03ca3c31b4df0f2f44acf3f9f18b8c64dc2d8f3856d",
+    }),
+  }),
+]);
+const M10A_T01_LOCKFILE_ADDED_ENTRIES = Object.freeze([
+  Object.freeze({
+    section: "importers",
+    headers: Object.freeze([
+      "  apps/starter-catalog-web-proof:\n",
+      "  packages/starter-catalog-web:\n",
+    ]),
+  }),
+  Object.freeze({
+    section: "packages",
+    headers: Object.freeze([
+      "  '@base-ui/react@1.8.0':\n",
+      "  '@base-ui/utils@0.4.0':\n",
+      "  '@floating-ui/core@1.8.0':\n",
+      "  '@floating-ui/dom@1.8.0':\n",
+      "  '@floating-ui/react-dom@2.1.9':\n",
+      "  '@floating-ui/utils@0.2.12':\n",
+      "  reselect@5.3.0:\n",
+      "  use-sync-external-store@1.6.0:\n",
+    ]),
+  }),
+  Object.freeze({
+    section: "snapshots",
+    headers: Object.freeze([
+      "  '@base-ui/react@1.8.0(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':\n",
+      "  '@base-ui/utils@0.4.0(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':\n",
+      "  '@floating-ui/core@1.8.0':\n",
+      "  '@floating-ui/dom@1.8.0':\n",
+      "  '@floating-ui/react-dom@2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':\n",
+      "  '@floating-ui/utils@0.2.12': {}\n",
+      "  reselect@5.3.0: {}\n",
+      "  use-sync-external-store@1.6.0(react@19.2.8):\n",
+    ]),
+  }),
+]);
 const SOURCE_PATHS = Object.freeze({
   runtimePublication: "apps/desen-app/src/local-runtime-publication.ts",
   main: "apps/desen-app/src/main.tsx",
@@ -131,6 +194,37 @@ function replaceOnce(source, marker, replacement) {
   const index = source.indexOf(marker);
   assert.notEqual(index, -1, `Missing mutation marker ${marker}`);
   return `${source.slice(0, index)}${replacement}${source.slice(index + marker.length)}`;
+}
+
+function occurrenceCount(source, fragment) {
+  return source.split(fragment).length - 1;
+}
+
+function removeLockfileEntry(source, section, header) {
+  const sectionMarker = `\n${section}:\n`;
+  assert.equal(occurrenceCount(source, sectionMarker), 1);
+  const sectionStart = source.indexOf(sectionMarker) + sectionMarker.length;
+  const nextSectionPattern = /^\S[^\r\n]*:\r?$/gmu;
+  nextSectionPattern.lastIndex = sectionStart;
+  const nextSection = nextSectionPattern.exec(source);
+  const sectionEnd = nextSection?.index ?? source.length;
+  const sectionText = source.slice(sectionStart, sectionEnd);
+  assert.equal(occurrenceCount(sectionText, header), 1);
+  const entryStart = sectionStart + sectionText.indexOf(header);
+  const nextEntryPattern = /^ {2}\S[^\r\n]*$/gmu;
+  nextEntryPattern.lastIndex = entryStart + header.length;
+  const nextEntry = nextEntryPattern.exec(source);
+  const entryEnd =
+    nextEntry !== null && nextEntry.index < sectionEnd ? nextEntry.index : sectionEnd;
+  return source.slice(0, entryStart) + source.slice(entryEnd);
+}
+
+function projectM10T08Lockfile(liveLockfile) {
+  let projected = liveLockfile.toString("utf8");
+  for (const { section, headers } of M10A_T01_LOCKFILE_ADDED_ENTRIES) {
+    for (const header of headers) projected = removeLockfileEntry(projected, section, header);
+  }
+  return Buffer.from(projected);
 }
 
 function changedByte(bytes) {
@@ -177,6 +271,41 @@ async function observeProofFilesystem(operation, beforeBuild) {
   } finally {
     filesystem.open = originalOpen;
     filesystem.opendir = originalOpendir;
+    syncBuiltinESMExports();
+  }
+}
+
+async function expectExactOverrideCannotMaskBacking(relativePath, mode) {
+  const absolutePath = path.join(ROOT, relativePath);
+  const exactBytes = await readFile(absolutePath);
+  const originalOpen = filesystem.open;
+  let intercepted = 0;
+  try {
+    filesystem.open = async (...args) => {
+      if (String(args[0]) !== absolutePath) {
+        return Reflect.apply(originalOpen, filesystem, args);
+      }
+      intercepted += 1;
+      if (mode === "missing") {
+        const error = new Error("simulated missing backing authority");
+        error.code = "ENOENT";
+        throw error;
+      }
+      const handle = await Reflect.apply(originalOpen, filesystem, args);
+      const originalReadFile = handle.readFile.bind(handle);
+      handle.readFile = async (...readArgs) => changedByte(await originalReadFile(...readArgs));
+      return handle;
+    };
+    syncBuiltinESMExports();
+    await assert.rejects(
+      buildDesenAppPublishedHostUpdateEvidence({
+        fileOverrides: new Map([[relativePath, exactBytes]]),
+      }),
+      expectedError(mode === "missing" ? "AUTHORITY_UNSAFE" : "SOURCE_SNAPSHOT_DRIFT"),
+    );
+    assert.ok(intercepted >= (mode === "missing" ? 1 : 2), `${mode}: ${relativePath}`);
+  } finally {
+    filesystem.open = originalOpen;
     syncBuiltinESMExports();
   }
 }
@@ -872,7 +1001,7 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
         ],
       ]),
     }),
-    expectedError("BOUNDARY_POLICY_VIOLATION"),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
   const browserPackagePath = "apps/desen-app-browser-e2e/package.json";
   const browserPackage = await readFile(path.join(ROOT, browserPackagePath), "utf8");
@@ -1022,8 +1151,21 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
   const compatibility = built.dependencySecurityCompatibility;
   assert.equal(compatibility.authority, "SEC-02");
   assert.equal(compatibility.currentBytes, liveLockfile.byteLength);
-  assert.equal(compatibility.currentBytes, 132_210);
+  assert.equal(compatibility.currentBytes, M10A_T01_LOCKFILE_RECEIPT.bytes);
+  assert.equal(compatibility.currentSha256, M10A_T01_LOCKFILE_RECEIPT.sha256);
+  assert.deepEqual(compatibility.lockfileSuccessor, {
+    task: "M10A-T01",
+    ...M10A_T01_LOCKFILE_RECEIPT,
+    additivePredecessor: {
+      authority: "M10-T08",
+      ...M10_T08_LOCKFILE_RECEIPT,
+    },
+  });
   assert.equal(compatibility.compositionSuccessor.task, "M10-T08");
+  assert.deepEqual(compatibility.compositionLockfile, {
+    authority: "M10-T08",
+    ...M10_T08_LOCKFILE_RECEIPT,
+  });
   assert.deepEqual(compatibility.securityTaskLockfile, {
     bytes: 132_006,
     sha256: "0f968b0c6622f6bfe732d5ec9a2b6a49268e171a64fae6caf9501f6d25f8f074",
@@ -1060,7 +1202,19 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
 
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
-  let priorLockfileText = liveLockfile.toString("utf8");
+  const liveLockfileText = liveLockfile.toString("utf8");
+  assert.equal(liveLockfile.byteLength, M10A_T01_LOCKFILE_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(liveLockfile).digest("hex"),
+    M10A_T01_LOCKFILE_RECEIPT.sha256,
+  );
+  const compositionLockfile = projectM10T08Lockfile(liveLockfile);
+  assert.equal(compositionLockfile.byteLength, M10_T08_LOCKFILE_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(compositionLockfile).digest("hex"),
+    M10_T08_LOCKFILE_RECEIPT.sha256,
+  );
+  let priorLockfileText = compositionLockfile.toString("utf8");
   const protocolLink =
     "      '@desen/protocol':\n        specifier: workspace:*\n        version: link:../../packages/protocol\n";
   for (const importerName of ["apps/desen-app-browser-e2e", "apps/reference-host-web"]) {
@@ -1107,20 +1261,27 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     "49f1d521ebd2e097508d22f8235e111bfb7e6bdc26a039b517a4a19aba7b2735",
   );
   for (const rejectedLockfile of [
+    compositionLockfile,
     securityTaskLockfile,
     priorLockfile,
     changedByte(liveLockfile),
-    Buffer.from(liveLockfile.toString("utf8").replaceAll("picocolors: 1.1.1", "picocolors: 1.1.2")),
-    ...SEC_02_LOCKFILE_PACKAGE_UPDATES.map(([name, priorVersion, currentVersion]) =>
-      Buffer.from(
-        liveLockfile
-          .toString("utf8")
-          .replaceAll(`${name}@${currentVersion}:`, `${name}@${priorVersion}:`),
+    Buffer.from(replaceOnce(liveLockfileText, "specifier: 1.8.0", "specifier: ^1.8.0")),
+    Buffer.from(
+      replaceOnce(
+        liveLockfileText,
+        "  packages/starter-catalog-web:\n    dependencies:\n",
+        "  packages/starter-catalog-web:\n    dependencies:\n      unreviewed-package:\n        specifier: 1.0.0\n        version: 1.0.0\n",
       ),
     ),
-    Buffer.from(liveLockfile.toString("utf8").replaceAll("fastify@5.12.2", "fastify@5.11.2")),
-    Buffer.from(liveLockfile.toString("utf8").replaceAll("fast-uri@3.1.7", "fast-uri@3.1.5")),
-    Buffer.from(liveLockfile.toString("utf8").replaceAll("fast-uri@4.1.4", "fast-uri@4.1.2")),
+    Buffer.from(liveLockfileText.replaceAll("picocolors: 1.1.1", "picocolors: 1.1.2")),
+    ...SEC_02_LOCKFILE_PACKAGE_UPDATES.map(([name, priorVersion, currentVersion]) =>
+      Buffer.from(
+        liveLockfileText.replaceAll(`${name}@${currentVersion}:`, `${name}@${priorVersion}:`),
+      ),
+    ),
+    Buffer.from(liveLockfileText.replaceAll("fastify@5.12.2", "fastify@5.11.2")),
+    Buffer.from(liveLockfileText.replaceAll("fast-uri@3.1.7", "fast-uri@3.1.5")),
+    Buffer.from(liveLockfileText.replaceAll("fast-uri@4.1.4", "fast-uri@4.1.2")),
   ]) {
     assert.notDeepEqual(rejectedLockfile, liveLockfile);
     await assert.rejects(
@@ -1128,6 +1289,83 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
         fileOverrides: new Map([["pnpm-lock.yaml", rejectedLockfile]]),
       }),
       expectedError("DEPENDENCY_SUCCESSOR_DRIFT"),
+    );
+  }
+  const t08Artifact = JSON.parse(
+    await readFile(path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json")),
+  );
+  const currentT08Inputs = new Map();
+  for (const receipt of M10A_T01_T08_INPUT_RECEIPTS) {
+    const bytes = await readFile(path.join(ROOT, receipt.path));
+    currentT08Inputs.set(receipt.path, bytes);
+    assert.equal(bytes.byteLength, receipt.bytes);
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), receipt.sha256);
+    assert.deepEqual(
+      t08Artifact.boundary.trackedReceipts.find(
+        ({ path: receiptPath }) => receiptPath === receipt.path,
+      ),
+      { path: receipt.path, ...receipt.predecessor },
+    );
+  }
+  const dependencyPolicy = currentT08Inputs.get("dependency-cruiser.config.cjs").toString("utf8");
+  const fixturePolicy = currentT08Inputs
+    .get("scripts/verify-boundary-fixtures.mjs")
+    .toString("utf8");
+  for (const [relativePath, rejectedBytes] of [
+    [
+      "dependency-cruiser.config.cjs",
+      changedByte(currentT08Inputs.get("dependency-cruiser.config.cjs")),
+    ],
+    [
+      "dependency-cruiser.config.cjs",
+      Buffer.from(
+        replaceOnce(
+          dependencyPolicy,
+          '  "starter-catalog-web": ["protocol", "catalog-sdk", "runtime-react"],',
+          '  "starter-catalog-web-unreviewed": ["protocol", "catalog-sdk", "runtime-react"],',
+        ),
+      ),
+    ],
+    [
+      "dependency-cruiser.config.cjs",
+      Buffer.from(
+        replaceOnce(
+          dependencyPolicy,
+          '  "starter-catalog-web": ["protocol", "catalog-sdk", "runtime-react"],',
+          '  "starter-catalog-web": ["protocol", "catalog-sdk", "runtime-react", "editor-core"],',
+        ),
+      ),
+    ],
+    [
+      "scripts/verify-boundary-fixtures.mjs",
+      changedByte(currentT08Inputs.get("scripts/verify-boundary-fixtures.mjs")),
+    ],
+    [
+      "scripts/verify-boundary-fixtures.mjs",
+      Buffer.from(
+        replaceOnce(
+          fixturePolicy,
+          '  { name: "allowed-starter-runtime-react", expectedRule: null },\n',
+          "",
+        ),
+      ),
+    ],
+    [
+      "scripts/verify-boundary-fixtures.mjs",
+      Buffer.from(
+        replaceOnce(
+          fixturePolicy,
+          '  { name: "starter-imports-app", expectedRule: "packages-never-import-apps" },',
+          '  { name: "starter-imports-app", expectedRule: null },',
+        ),
+      ),
+    ],
+  ]) {
+    await assert.rejects(
+      buildDesenAppPublishedHostUpdateEvidence({
+        fileOverrides: new Map([[relativePath, rejectedBytes]]),
+      }),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
     );
   }
   const parentBytes = await readFile(path.join(ROOT, DESEN_APP_PUBLISHED_HOST_UPDATE_T04_PIN.path));
@@ -1150,6 +1388,18 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     }),
     expectedError("HISTORICAL_BRIDGE_DRIFT"),
   );
+  const backingFenceRepresentatives = [
+    DESEN_APP_PUBLISHED_HOST_UPDATE_T04_PIN.path,
+    "docs/adr/0020-desen-app-fixed-destination-publication-and-host-activation.md",
+    BROWSER_PATHS.spec,
+    BROWSER_PATHS.config,
+    DESEN_APP_T04_HISTORICAL_READER_BRIDGE_PIN.path,
+    "tests/boundaries/fixtures/desen-app-browser-e2e-non-published-server-imports-local-publication-host/apps/desen-app-browser-e2e/proof-application.mjs",
+  ];
+  for (const relativePath of backingFenceRepresentatives) {
+    await expectExactOverrideCannotMaskBacking(relativePath, "same-byte-mutation");
+    await expectExactOverrideCannotMaskBacking(relativePath, "missing");
+  }
   await assert.rejects(
     verifyDesenAppPublishedHostUpdateEvidence({ artifactBytes: changedByte(artifactBytes) }),
     expectedError("ARTIFACT_DRIFT"),

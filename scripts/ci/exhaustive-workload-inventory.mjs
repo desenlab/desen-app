@@ -144,13 +144,13 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "d5c5b2d2b82fe15af293459b8c2c63a163f1340e191fd5fa6ff4767ebd8fddea";
+  "3d890406ade04b14dcac9fcb39ce4900304d570b33de03af3811d4e80b547a62";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "62dedd5a67a1832462724423afea6c75de824a5c08f07cd5978fad634bc61a66";
+  "db047394d958dad89d07c1fb299e68069892976920d0d56bc2a7685e7792f3d0";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "329381d62a686d7c24995d3ed0ce5da17d189c6652e5f7d79a4f955478a6fe10";
+  "dde55d32faf7fcffa87875505d6d955703a57f1a0530069129c3d3ca4990d0ef";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
-  "73b68c61533e2947169ba3e2298a9f13ec261ae00c32184773402bf03fcce715";
+  "f25499af8cd7f541d55f3a8c5e631ecf39034908a5897cb567cab49a816e8f8c";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = SAFE_OBJECT_FREEZE(["apps/*", "packages/*"]);
@@ -170,6 +170,17 @@ const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
       "test:e2e",
       "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts && playwright test --config repeatable-demo-playwright.config.ts",
     ],
+  ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
+);
+const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
+  [
+    ["build", "pnpm run build:authoring && pnpm run build:host"],
+    ["build:authoring", "vite build --mode proof-authoring"],
+    ["build:host", "vite build --mode proof-host"],
+    ["lint", "eslint . --max-warnings=0"],
+    ["typecheck", "tsc -p tsconfig.json --noEmit"],
+    ["test:e2e", "pnpm run typecheck && pnpm run build && pnpm run test:e2e:built"],
+    ["test:e2e:built", "playwright test --config playwright.config.ts"],
   ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
 );
 const FORBIDDEN_COMMAND_PATTERN =
@@ -715,6 +726,7 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "tests/runtime-core-baseline.test.mjs",
   ],
   ["m10-gate", "scripts/verify-m10-gate.mjs", "tests/m10-gate.test.mjs"],
+  ["m10a-t01", "scripts/verify-m10a-t01.mjs", "tests/m10a-t01.test.mjs"],
 ]);
 
 const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
@@ -722,6 +734,7 @@ const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
   "desen-app-invalid-publication",
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
+  "m10a-t01",
 ]);
 const PASSIVE_ROOT_TEST_PROOF_IDS = SAFE_OBJECT_FREEZE(["desen-app-published-host-update"]);
 
@@ -1553,7 +1566,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
   );
   assertExactArray(
     [...testConfigurationFiles].sort(),
-    ["apps/desen-app-browser-e2e/vite.config.ts"],
+    ["apps/desen-app-browser-e2e/vite.config.ts", "apps/starter-catalog-web-proof/vite.config.ts"],
     "The root and workspace test-configuration file set",
   );
   if (SAFE_OBJECT_HAS_OWN(packageJson, "vitest")) {
@@ -1601,6 +1614,25 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
         script: name,
         expected: command,
         actual: browserE2ePackage.scripts[name],
+      });
+    }
+  }
+
+  const starterProofPackage = workspacePackageMap.get("@desen/starter-catalog-web-proof");
+  if (!starterProofPackage) {
+    fail("The reviewed starter browser proof workspace package is missing.");
+  }
+  assertExactArray(
+    SAFE_REFLECT_OWN_KEYS(starterProofPackage.scripts).sort(),
+    EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS.map(({ name }) => name).sort(),
+    "The starter browser proof workspace package script set",
+  );
+  for (const { name, command } of EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS) {
+    if (starterProofPackage.scripts[name] !== command) {
+      fail("The starter browser proof workspace package script drifted from review.", {
+        script: name,
+        expected: command,
+        actual: starterProofPackage.scripts[name],
       });
     }
   }
@@ -1731,7 +1763,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "215ae4b3930c9c78dd70947aa315314e26f2c2d5d3259f0f9905a97f33eefe1c";
+  "4b72192cec774852b2002ae8de24c06319310ff97095153a5a78713f6921f356";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

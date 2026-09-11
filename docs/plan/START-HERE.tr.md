@@ -5,14 +5,15 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 121/148 (%82), M10 12/12 ve
-kanıt kapıları 11/13 düzeyindedir. M10 kapanışının exact-head PR kontrolleri, merge'i ve taze `main`
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 121/176 (%69), M10 12/12 ve
+kanıt kapıları 11/14 düzeyindedir. M10 kapanışının exact-head PR kontrolleri, merge'i ve taze `main`
 koşusu geçti; ayrıntı [Project Status](../../PROJECT-STATUS.md) ve
 [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
-M10→M11 repo ve dokümantasyon toparlaması tamamlandı; M11 başlamadı. Bir sonraki karar otoritesi
-`SC-02`'dir. Gerçek iş akışı görüşmeleri ve en az iki inandırıcı sınırlı pilot taahhüdü olmadan
-`M11-T01` veya `M11-T08` başlamaz.
+SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
+ekler; tamamlanmış 121 görev korunur. Aktif görev `M10A-T01` (`IN_PROGRESS`):
+Base UI adaptör sınırını Button/Select/Dialog ile kanıtlamak. Base UI 1.8.0 starter paketine kuruldu.
+Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 ## Üç ayrı kimlik
 
@@ -85,7 +86,10 @@ işler taze çalışır.
 
 - [Master Plan](MASTER-PLAN.md): milestone amacı ve gate sırası
 - [Task Board](TASKS.md): kanonik görev durumu, bağımlılık ve teslimat
-- [Strategic Validation](STRATEGIC-VALIDATION.md): M11 öncesi `SC-02` kararı
+- [Strategic Validation](STRATEGIC-VALIDATION.md): tamamlanan `SC-02 / adapt` kararı
+- [M10A Product Plan](M10A-IMPLEMENTATION-PLAN.md): tasarım öncelikli ürün, kapsam ve ilk görev
+- [M10A Task Contracts](M10A-TASK-CONTRACTS.md): görevlerin kabul ve olumsuz test koşulları
+- [Design System Workbench](DESIGN-SYSTEM-WORKBENCH.md): katalog, dokümantasyon ve görsel onay
 - [Architecture](../architecture/ARCHITECTURE.md): sistem ve bağımlılık sınırları
 - [Proof Matrix](../proof/PROOF-MATRIX.md): iddia → kanıt eşlemesi
 - [Protocol Findings](PROTOCOL-FINDINGS.md): donmuş protokol belirsizlikleri
@@ -96,7 +100,7 @@ işler taze çalışır.
 
 ## M11'e geçiş
 
-`SC-02` devam kararı verirse Map kolu `M11-T01`, Sortable kolu `M11-T08` ile bağımsız başlayabilir.
+Önce M10A ve G10A tamamlanır. Sonra Map kolu `M11-T01`, Sortable kolu `M11-T08` ile başlayabilir.
 Her iki kol da `packages/runtime-core` ağacını M10'da dondurulan
 `3fa3613a3be63c749f40b6a0b55af5b40c675773` kimliğiyle karşılaştırır. İki kol ancak kendi bağımlılıkları
 tamamlandıktan sonra `M11-T13` üzerinde birleşir.
@@ -123,7 +127,7 @@ vermez. Tam güncel PR head'indeki hosted `Quality gate` geçene kadar kanonik C
 
 ## Şimdilik yapılmayacaklar
 
-- SC-02 kararı olmadan M11 capability genişlemesi
+- G10A geçmeden M11 capability genişlemesi
 - iOS, Android, React Native, SwiftUI veya Compose runtime'ları
 - production auth, organization/role/permission ve multiplayer özellikleri
 - genel kaynak-kod round trip veya keyfi CSS/DOM inspection

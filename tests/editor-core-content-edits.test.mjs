@@ -258,12 +258,12 @@ test("[authority] authenticates exact frozen M08-T02/T03 artifacts and the isola
     publicRuntimeCasesAdded: 0,
     publicCompilerNegativeAssertionsAdded: 0,
   });
-  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
-  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 36);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 92);
   assert.equal(built.currentCompatibility.testAuthority.terminalIntegrationRuntimeCases, 4);
   assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
   assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
-  assert.equal(built.currentCompatibility.frozenAuthority.retainedTaskTimeReceipts, 57);
+  assert.equal(built.currentCompatibility.frozenAuthority.retainedTaskTimeReceipts, 52);
   const currentReceipts = new Set(
     built.currentCompatibility.trackedBoundary.receipts.map(({ path: receiptPath }) => receiptPath),
   );

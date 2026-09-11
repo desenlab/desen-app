@@ -24,6 +24,7 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 import { createReferenceHostWebChannelConsumptionRuntimeEnvironment } from "../../lib/reference-host-web-channel-consumption-proof.mjs";
 import {
   BUILD_OUTPUT_ROOTS,
+  BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS,
   CHILD_PROCESS_VERIFIER_PROOF_IDS,
   EXECUTION_CLASSES,
   FILESYSTEM_COMPATIBILITY_ROOT_STEP_IDS,
@@ -109,20 +110,21 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 230 steps across the seven reviewed execution classes", () => {
+test("owns exactly 232 steps across the eight reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 230);
-  assert.equal(new Set(ALL_STEP_IDS).size, 230);
+  assert.equal(ALL_STEP_IDS.length, 232);
+  assert.equal(new Set(ALL_STEP_IDS).size, 232);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 3,
     PACKAGE_TEST_EXCLUSIVE: 1,
     PROOF_READ_ONLY: 93,
-    PROOF_OS_TEMP_ISOLATED: 116,
+    PROOF_OS_TEMP_ISOLATED: 117,
+    PROOF_BROWSER_EXCLUSIVE: 1,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
@@ -156,12 +158,12 @@ test("owns exactly 230 steps across the seven reviewed execution classes", () =>
   });
 });
 
-test("pins the exact eleven read-only and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 110);
-  assert.equal(new Set(PROOF_IDS).size, 110);
+test("pins the exact eleven read-only, one browser, and sole workspace-temp proof ids", () => {
+  assert.equal(PROOF_IDS.length, 111);
+  assert.equal(new Set(PROOF_IDS).size, 111);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
   assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 99);
-  assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 11);
+  assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 12);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
     "protocol-traceability",
@@ -176,7 +178,7 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
     "desen-app-published-host-update",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 98);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 99);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -1326,7 +1328,7 @@ test("pins the exact eleven read-only and sole workspace-temp proof ids", () => 
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    110,
+    111,
   );
 });
 
@@ -1345,6 +1347,72 @@ test("T04 real-host evidence readers remain passive and acquire no listener auth
     assert.equal(step.nativeAddonPolicy, "NONE");
     assert.equal(step.filesystemCompatibilityPolicy, "NONE");
   }
+});
+
+test("M10A-T01 alone owns the fixed-port browser-exclusive verifier authority", async (context) => {
+  assert.deepEqual(BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS, ["verify-m10a-t01"]);
+  const pair = classifyProofPairState("m10a-t01");
+  assert.equal(pair.barrier, true);
+  assert.deepEqual(pair.verifier, {
+    schemaVersion: 2,
+    stepId: "verify-m10a-t01",
+    executionClass: "PROOF_BROWSER_EXCLUSIVE",
+    workspaceReads: ["."],
+    workspaceWrites: [],
+    tempPolicy: "RUNNER_SCOPED_OS",
+    tempKey: "verify-m10a-t01",
+    ports: [4_187],
+    childProcessPolicy: "TOOLCHAIN_EXCLUSIVE",
+    nativeAddonPolicy: "NONE",
+    filesystemCompatibilityPolicy: "NONE",
+    barrier: true,
+  });
+  assert.equal(pair.rootTest.executionClass, "PROOF_OS_TEMP_ISOLATED");
+  assert.equal(pair.rootTest.barrier, false);
+
+  assert.throws(
+    () => classifyWorkloadStateMetadata("verify-m10a-t01-copy"),
+    (error) => error.code === "SHARED_STATE_WORKLOAD_UNKNOWN",
+  );
+  for (const mutate of [
+    (metadata) => (metadata.ports = [4_188]),
+    (metadata) => (metadata.ports = []),
+    (metadata) => (metadata.barrier = false),
+  ]) {
+    const forged = mutableMetadata("verify-m10a-t01");
+    mutate(forged);
+    assert.throws(
+      () => validateWorkloadStateMetadata("verify-m10a-t01", forged),
+      (error) => error.code === "SHARED_STATE_METADATA_DRIFT",
+    );
+  }
+
+  const workspaceRoot = await temporaryDirectory("desen-shared-state-m10a-browser-");
+  context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
+  const isolation = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "verify-m10a-t01",
+    baseEnvironment: {
+      PATH: process.env.PATH,
+      NODE_OPTIONS: "   ",
+      DESEN_M10A_T01_PROOF_TEMP: "/tmp/forged",
+      DESEN_CI_WORKSPACE_ROOT: "/tmp/forged",
+    },
+  });
+  context.after(() => isolation.dispose());
+  assert.equal(isolation.env.DESEN_M10A_T01_PROOF_TEMP, isolation.tempRoot);
+  assert.equal("NODE_OPTIONS" in isolation.env, false);
+  assert.equal("DESEN_CI_WORKSPACE_ROOT" in isolation.env, false);
+  assert.equal(isolation.env.DESEN_CI_STEP_ID, "verify-m10a-t01");
+
+  await assert.rejects(
+    createProofStepIsolationContext({
+      workspaceRoot,
+      workload: "verify-m10a-t01",
+      baseEnvironment: { NODE_OPTIONS: "--require=unreviewed.cjs" },
+    }),
+    (error) => error.code === "SHARED_STATE_ENVIRONMENT_INVALID",
+  );
 });
 
 test("T05 live Vite verifier and read-only root reader retain the same native build authority", () => {
@@ -2339,7 +2407,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 212,
+    NONE: 214,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,
@@ -2916,11 +2984,13 @@ test("runner temp cleanup removes files and is idempotent", async (context) => {
 });
 
 test("build-output seals cover every exact app/package dist and Turbo root", async (context) => {
-  assert.equal(BUILD_OUTPUT_ROOTS.length, 37);
-  assert.equal(new Set(BUILD_OUTPUT_ROOTS).size, 37);
+  assert.equal(BUILD_OUTPUT_ROOTS.length, 41);
+  assert.equal(new Set(BUILD_OUTPUT_ROOTS).size, 41);
   assert.equal(BUILD_OUTPUT_ROOTS.includes(".turbo"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/reference-host-web/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/desen-app-browser-e2e/dist"), true);
+  assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/starter-catalog-web-proof/dist"), true);
+  assert.equal(BUILD_OUTPUT_ROOTS.includes("packages/starter-catalog-web/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("packages/validator/.turbo"), true);
 
   const workspaceRoot = await temporaryDirectory("desen-shared-state-build-seal-");

@@ -1,0 +1,54 @@
+{
+  "name": "@desen/starter-catalog-web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "DESEN Neutral Web–React starter capabilities with static Base UI adapters.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "catalog.json",
+    "dist",
+    "src/neutral.module.css"
+  ],
+  "exports": {
+    "./catalog.json": "./catalog.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react-adapters": {
+      "types": "./dist/react-adapters.d.ts",
+      "import": "./dist/react-adapters.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-styles.mjs",
+    "lint": "eslint src test scripts --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:adapters": "vitest run"
+  },
+  "dependencies": {
+    "@base-ui/react": "1.8.0",
+    "@desen/catalog-sdk": "workspace:*",
+    "@desen/protocol": "workspace:*",
+    "@desen/runtime-react": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0 <20.0.0",
+    "react-dom": ">=19.0.0 <20.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.2",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "jsdom": "29.1.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "vitest": "4.1.10"
+  }
+}

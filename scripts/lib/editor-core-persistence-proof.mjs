@@ -633,11 +633,13 @@ function verifyEditorCoreCompatibility(files, t07Artifact) {
       ...t07Artifact.publicApi.runtimeExports,
       ...PERSISTENCE_RUNTIME_EXPORTS,
       ...CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+      "insertDesenEditorSubtree",
     ],
     [
       ...t07Artifact.publicApi.runtimeExports,
       ...PERSISTENCE_RUNTIME_EXPORTS,
       ...CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+      "insertDesenEditorSubtree",
     ],
     "PUBLIC_SURFACE_DRIFT",
     "Expected current runtime export inventory",
@@ -647,17 +649,28 @@ function verifyEditorCoreCompatibility(files, t07Artifact) {
       ...t07Artifact.publicApi.typeExports,
       ...PERSISTENCE_TYPE_EXPORTS,
       ...CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+      "DesenEditorSubtreeInsertCommand",
+      "DesenEditorSubtreeInsertFailure",
+      "DesenEditorSubtreeInsertResult",
+      "DesenEditorSubtreeInsertSuccess",
     ],
     [
       ...t07Artifact.publicApi.typeExports,
       ...PERSISTENCE_TYPE_EXPORTS,
       ...CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+      "DesenEditorSubtreeInsertCommand",
+      "DesenEditorSubtreeInsertFailure",
+      "DesenEditorSubtreeInsertResult",
+      "DesenEditorSubtreeInsertSuccess",
     ],
     "PUBLIC_SURFACE_DRIFT",
     "Expected current type export inventory",
   );
-  if (expectedRuntime.length !== 35 || expectedTypes.length !== 88) {
-    fail("PUBLIC_SURFACE_DRIFT", "The retained T07 plus T08 and T09 inventories drifted.");
+  if (expectedRuntime.length !== 36 || expectedTypes.length !== 92) {
+    fail(
+      "PUBLIC_SURFACE_DRIFT",
+      "The retained T07 through T09 inventories plus the current additive subtree API drifted.",
+    );
   }
   const sourceIndex = reexportedNames(
     files.get(EDITOR_CORE_INDEX_SOURCE),

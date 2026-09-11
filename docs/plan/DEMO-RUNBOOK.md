@@ -181,6 +181,10 @@ remain explicitly unimplemented; do not treat an early stub or a single browser 
 
 ## Later milestones — not part of this M10 demo
 
+The [M10A plan](M10A-IMPLEMENTATION-PLAN.md) now precedes M11: ready styled components, theme and
+component authoring, separate Connections and a built-in design-system/visual-review workbench.
+Those are planned product capabilities, not features demonstrated by this unchanged M10 runbook.
+
 Store Map and Sortable Priority surfaces belong to M11. Their unchanged Runtime Core comparisons
 use the T09 baseline. M12 owns final conformance reporting and public-alpha preparation. No map,
 sortable, native target, domain deployment, production identity or package publication is implied

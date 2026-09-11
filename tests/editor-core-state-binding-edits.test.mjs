@@ -329,12 +329,12 @@ test("[authority] authenticates exact M08-T02 prerequisite, M08-T04 graph compat
     publicRuntimeCasesAdded: 0,
     publicCompilerNegativeAssertionsAdded: 0,
   });
-  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
-  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 36);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 92);
   assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
   assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
   assert.equal(built.currentCompatibility.testAuthority.terminalIntegrationRuntimeCases, 4);
-  assert.equal(built.currentCompatibility.frozenAuthority.retainedTaskTimeReceipts, 64);
+  assert.equal(built.currentCompatibility.frozenAuthority.retainedTaskTimeReceipts, 59);
   const currentReceipts = new Set(
     built.currentCompatibility.trackedBoundary.receipts.map(({ path: receiptPath }) => receiptPath),
   );

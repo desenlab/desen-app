@@ -32,6 +32,8 @@ const CONTINUOUS_VALIDATION_SOURCE_PATH = "packages/editor-core/src/continuous-v
 const PACKAGE_PATH = "packages/editor-core/package.json";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/stable-id-insert.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/stable-id-insert.types.ts";
+const SUBTREE_INSERT_TEST_PATH = "packages/editor-core/test/subtree-insert.test.ts";
+const SUBTREE_INSERT_TYPES_PATH = "packages/editor-core/test/subtree-insert.types.ts";
 const AUTHORING_ROUND_TRIP_TEST_PATH = "packages/editor-core/test/authoring-round-trip.test.ts";
 const AUTHORING_ROUND_TRIP_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
@@ -51,9 +53,12 @@ const FROZEN_ARTIFACT_PIN = Object.freeze({
   bytes: 19_561,
   sha256: "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547",
 });
-const RETAINED_EDITOR_RUNTIME_PATHS = Object.freeze([
+const CURRENT_EDITOR_RUNTIME_PATHS = Object.freeze([
   "packages/editor-core/dist/source-document.js",
   "packages/editor-core/dist/stable-id-insert.js",
+]);
+const RETAINED_EDITOR_RUNTIME_PATHS = Object.freeze([
+  "packages/editor-core/dist/source-document.js",
 ]);
 const STRUCTURAL_EDITS_DIST_PATHS = Object.freeze([
   "packages/editor-core/dist/structural-edits.d.ts",
@@ -111,7 +116,7 @@ const DEPENDENCY_RUNTIME_PATHS = Object.freeze([
   ...VALIDATOR_RUNTIME_PATHS,
 ]);
 const ISOLATED_RUNTIME_PATHS = Object.freeze([
-  ...RETAINED_EDITOR_RUNTIME_PATHS,
+  ...CURRENT_EDITOR_RUNTIME_PATHS,
   ...DEPENDENCY_RUNTIME_PATHS,
 ]);
 
@@ -170,7 +175,12 @@ const EXPECTED_INSERT_EXPORTS = Object.freeze([
   "DesenEditorNodeInsertFailure",
   "DesenEditorNodeInsertResult",
   "DesenEditorNodeInsertSuccess",
+  "DesenEditorSubtreeInsertCommand",
+  "DesenEditorSubtreeInsertFailure",
+  "DesenEditorSubtreeInsertResult",
+  "DesenEditorSubtreeInsertSuccess",
   "insertDesenEditorNode",
+  "insertDesenEditorSubtree",
 ]);
 const EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS = Object.freeze([
   "deleteDesenEditorNode",
@@ -326,6 +336,7 @@ const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
     "createDesenEditorDocument",
     "deleteDesenEditorNode",
     "insertDesenEditorNode",
+    "insertDesenEditorSubtree",
     "moveDesenEditorNode",
     "reorderDesenEditorNode",
     ...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS,
@@ -339,6 +350,10 @@ const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
   [
     ...EXPECTED_TYPE_EXPORTS,
     ...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS,
+    "DesenEditorSubtreeInsertCommand",
+    "DesenEditorSubtreeInsertFailure",
+    "DesenEditorSubtreeInsertResult",
+    "DesenEditorSubtreeInsertSuccess",
     ...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS,
     ...EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS,
     ...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS,
@@ -352,6 +367,10 @@ const EXPECTED_DIAGNOSTIC_CODES = Object.freeze([
   "run.desen.editor/INSERT_POSITION_INVALID",
   "run.desen.editor/INSERT_TARGET_AMBIGUOUS",
   "run.desen.editor/INSERT_TARGET_NOT_FOUND",
+]);
+const EXPECTED_CURRENT_DIAGNOSTIC_CODES = Object.freeze([
+  ...EXPECTED_DIAGNOSTIC_CODES,
+  "run.desen.editor/INSERT_IDENTITY_COLLISION",
 ]);
 const EXPECTED_PACKAGE_TEST_NAMES = Object.freeze([
   "inserts one minimal leaf at the exact ordered boundary and preserves every prior identity",
@@ -370,6 +389,16 @@ const EXPECTED_PACKAGE_TEST_NAMES = Object.freeze([
   "accepts source depth 64 and rejects an insertion that would create depth 65",
   "admits exactly 25,000 surface identities and rejects the next one",
   "admits an exact 8 MiB post-insert document and rejects a one-byte crossing",
+]);
+const EXPECTED_SUBTREE_INSERT_TEST_NAMES = Object.freeze([
+  "atomically inserts one complete exact-ID subtree at the requested ordered boundary",
+  "rejects collisions with existing node or behavior identities without remapping",
+  "rejects identities repeated within the supplied subtree",
+  "retains target and slot-boundary failure semantics",
+  "rejects extra, inherited, symbol, and accessor command authority without invoking getters",
+  "rejects active or cyclic nested subtree data without invoking accessors",
+  "bounds hostile sparse width and generic JSON depth before canonical serialization",
+  "enforces nested capability and resulting Source-tree limits",
 ]);
 const RETAINED_T02_PUBLIC_TEST_NAMES = Object.freeze([
   "the package manifest keeps one exact root export and the declared runtime dependencies",
@@ -453,9 +482,9 @@ const EXPECTED_T08_AUTHORITY_SHA256 = Object.freeze({
     "8f3e4e5dc850a9f938062e4b0dd605fdd70af3ed598bd6fb348d4cd3ba721b3f",
   [PERSISTENCE_TEST_PATH]: "17d86804a38c243cbd75a97649b3e9f6716ea57206453851bd98216937b5bc54",
   [PERSISTENCE_TYPES_PATH]: "da5114ec835c91e02df73ef58fd3f2a3f8a85508eb0e939d1c1c845bcfbd87f2",
-  [PUBLIC_TEST_PATH]: "ec488542950775d642116d082eb80f4b883cc87050ca0876a1a65c8e4c91dfd1",
+  [PUBLIC_TEST_PATH]: "edf5807107239279998c128303190bc7db4485b6ee44d4b9a95eef5508e94b93",
   [PUBLIC_TYPES_PATH]: "04a7b314398424563b765f1de60105c775aa13485c4b8913250edd21bd0f632a",
-  [ROOT_TEST_PATH]: "600df03328e1f55930030eb61802aa288caf99a5404b6a0c815a89f17e3d084e",
+  [ROOT_TEST_PATH]: "e0ae531a660681dd7942f7d9d10ae3e57bc6b5cff2b1037d19ab67a2f63c36a3",
   [TERMINAL_INTEGRATION_TEST_PATH]:
     "3d77bef07197e0a914b92e7f7b3a7cc65448c56f0ad03d303edfb6139170997b",
 });
@@ -518,6 +547,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   CONTINUOUS_VALIDATION_TEST_PATH,
   CONTINUOUS_VALIDATION_TYPES_PATH,
   TERMINAL_INTEGRATION_TEST_PATH,
+  SUBTREE_INSERT_TEST_PATH,
+  SUBTREE_INSERT_TYPES_PATH,
 ]);
 const TRACKED_PATH_SET = new Set(CURRENT_COMPATIBILITY_PATHS);
 const RETAINED_T02_RECEIPT_PATHS = Object.freeze(
@@ -525,7 +556,12 @@ const RETAINED_T02_RECEIPT_PATHS = Object.freeze(
     (relativePath) =>
       ![
         PACKAGE_PATH,
+        INSERT_SOURCE_PATH,
         INDEX_SOURCE_PATH,
+        "packages/editor-core/dist/stable-id-insert.d.ts",
+        "packages/editor-core/dist/stable-id-insert.d.ts.map",
+        "packages/editor-core/dist/stable-id-insert.js",
+        "packages/editor-core/dist/stable-id-insert.js.map",
         "packages/editor-core/dist/index.d.ts",
         "packages/editor-core/dist/index.d.ts.map",
         "packages/editor-core/dist/index.js",
@@ -877,6 +913,7 @@ function verifyBoundary(files) {
     JSON.stringify(manifest.dependencies) !==
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
     manifest.scripts?.["test:stable-id-insert"] !== "vitest run test/stable-id-insert.test.ts" ||
+    manifest.scripts?.["test:subtree-insert"] !== "vitest run test/subtree-insert.test.ts" ||
     manifest.scripts?.["test:structural-edits"] !== "vitest run test/structural-edits.test.ts" ||
     manifest.scripts?.["test:content-edits"] !== "vitest run test/content-edits.test.ts" ||
     manifest.scripts?.["test:state-binding-edits"] !==
@@ -908,7 +945,7 @@ function verifyBoundary(files) {
   for (const literal of ["4_096", "8_388_608", "25_000", "maxSourceTreeDepth: 64"]) {
     if (!insertSource.includes(literal)) fail("LIMIT_DRIFT", `Missing fixed limit: ${literal}`);
   }
-  for (const code of EXPECTED_DIAGNOSTIC_CODES) {
+  for (const code of EXPECTED_CURRENT_DIAGNOSTIC_CODES) {
     if (!insertSource.includes(`"${code}"`)) fail("DIAGNOSTIC_DRIFT", `Missing code: ${code}`);
   }
 
@@ -1340,6 +1377,22 @@ function verifyBoundary(files) {
   if (countTypeAssertions(packageTypes) !== 8) {
     fail("TEST_INVENTORY_DRIFT", "Focused compiler-negative inventory must remain eight.");
   }
+  exactArray(
+    testNames(decodeUtf8(files.get(SUBTREE_INSERT_TEST_PATH), SUBTREE_INSERT_TEST_PATH)),
+    EXPECTED_SUBTREE_INSERT_TEST_NAMES,
+    "TEST_INVENTORY_DRIFT",
+    "Additive subtree behavior inventory",
+  );
+  if (
+    countTypeAssertions(
+      decodeUtf8(files.get(SUBTREE_INSERT_TYPES_PATH), SUBTREE_INSERT_TYPES_PATH),
+    ) !== 4
+  ) {
+    fail(
+      "TEST_INVENTORY_DRIFT",
+      "The additive subtree compiler-negative inventory must remain four.",
+    );
+  }
   const rootTest = decodeUtf8(files.get(ROOT_TEST_PATH), ROOT_TEST_PATH);
   exactArray(
     testNames(rootTest),
@@ -1561,7 +1614,7 @@ function authenticateRuntimeClosure(prerequisiteArtifact, files) {
     }
     return receipt(relativePath, bytes);
   }).sort((left, right) => compareText(left.path, right.path));
-  const editorReceipts = RETAINED_EDITOR_RUNTIME_PATHS.map((relativePath) =>
+  const editorReceipts = CURRENT_EDITOR_RUNTIME_PATHS.map((relativePath) =>
     receipt(relativePath, files.get(relativePath)),
   ).sort((left, right) => compareText(left.path, right.path));
 

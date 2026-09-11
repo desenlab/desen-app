@@ -333,8 +333,8 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
     publicCompilerNegativeAssertionsAdded: 0,
   });
   assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 6);
-  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 35);
-  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 88);
+  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 36);
+  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 92);
   assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 23);
   assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 2);
   assert.equal(built.currentCompatibility.executionAuthority.dependencyFiles, 21);
@@ -345,7 +345,7 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
     path: "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
     bytes: 19_561,
     sha256: "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547",
-    retainedTaskTimeReceipts: 43,
+    retainedTaskTimeReceipts: 38,
   });
 });
 

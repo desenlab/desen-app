@@ -17,6 +17,7 @@ const allowedPackageDependencies = {
     "runtime-react",
   ],
   "reference-catalog-web": ["protocol", "catalog-sdk", "runtime-react"],
+  "starter-catalog-web": ["protocol", "catalog-sdk", "runtime-react"],
   testkit: [
     "protocol",
     "validator",
@@ -52,6 +53,14 @@ const allowedApplicationDependencies = {
     "testkit",
   ],
   "desen-app-browser-e2e": ["editor-core"],
+  "starter-catalog-web-proof": [
+    "protocol",
+    "editor-core",
+    "publisher",
+    "runtime-core",
+    "runtime-react",
+    "starter-catalog-web",
+  ],
   "desen-app": [
     "protocol",
     "validator",
@@ -180,6 +189,23 @@ module.exports = {
     ...packageAllowlistRules,
     ...applicationAllowlistRules,
     {
+      name: "starter-proof-host-has-no-authoring",
+      severity: "error",
+      comment:
+        "The independent starter browser host and shared runtime consume Bundles, never authoring, publishing or App code.",
+      from: { path: "^apps/starter-catalog-web-proof/src/(?:host|shared)/" },
+      to: {
+        path: "^(?:packages/(?:editor-core|editor-web|publisher|testkit|desen)/|apps/)",
+        pathNot: "^apps/starter-catalog-web-proof/src/(?:(?:host|shared)/|application\\.css$)",
+      },
+    },
+    {
+      name: "starter-proof-has-no-other-apps",
+      severity: "error",
+      from: { path: "^apps/starter-catalog-web-proof/" },
+      to: { path: "^apps/(?!starter-catalog-web-proof/)" },
+    },
+    {
       name: "reviewed-canonical-proof-protocol-public-root-only",
       severity: "error",
       comment:
@@ -296,7 +322,8 @@ module.exports = {
           "^@react-native(?:/|$)",
           "(?:^|/)node_modules/(?:react|react-dom|react-native|expo|next)(?:/|$)",
           "(?:^|/)node_modules/@react-native(?:/|$)",
-          "^packages/(?:runtime-react|runtime-web|editor-web|reference-catalog-web)/",
+          "^packages/(?:runtime-react|runtime-web|editor-web|reference-catalog-web|starter-catalog-web)/",
+          "(?:^|/)node_modules/@base-ui/",
         ],
       },
     },

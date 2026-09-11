@@ -72,8 +72,8 @@ const REGION_EXECUTION_OPTION_KEYS = Object.freeze([
   "printCommandFunction",
 ]);
 const EXPECTED_PLAN_SHA256_BY_AUTHORITY = Object.freeze({
-  REQUIRED: "0af182af803f81a8cae7a512fbc7e33a60c372cffe398881ee8677eeca3fb501",
-  SHADOW: "2a5172ffb4d8eeeff49c5b710d58b9689a21a63e97f94bd028159839f72f717a",
+  REQUIRED: "6619c9dd41f7b43ff47b85925400a63afe024ce7d50d542449e59ce09acdf7d7",
+  SHADOW: "f656504b91ac11ddb9e5e1b165a6fa2d0cf4b4932b8d918fbba77e7512b02348",
 });
 const PROOF_PAIR_CONCURRENCY = 2;
 const EARLY_ORDINARY_PROOF_PAIR_IDS = Object.freeze([
@@ -444,7 +444,7 @@ function deriveExecutionRegions(inventory) {
   ) {
     fail(
       "REQUIRED_EXHAUSTIVE_REGION_INVALID",
-      "The derived execution regions do not own all 230 workloads exactly once.",
+      "The derived execution regions do not own all 232 workloads exactly once.",
     );
   }
 
@@ -471,7 +471,7 @@ function rememberValidatedNode(workload) {
 }
 
 /**
- * Builds the single code-owned exhaustive plan from the authenticated 230-node dependency graph.
+ * Builds the single code-owned exhaustive plan from the authenticated 232-node dependency graph.
  *
  * `REQUIRED` is the default authority. `SHADOW` must be explicitly requested, while scope is
  * permanently fixed to `EXHAUSTIVE`.
@@ -671,7 +671,7 @@ function validatePlanForExecution(candidate, expectedAuthority) {
       );
     }
   }
-  if (candidate.concurrency !== PROOF_PAIR_CONCURRENCY || candidate.stepCount !== 230) {
+  if (candidate.concurrency !== PROOF_PAIR_CONCURRENCY || candidate.stepCount !== 232) {
     fail(
       "REQUIRED_EXHAUSTIVE_PLAN_DRIFT",
       "The exhaustive plan widened concurrency or omitted workloads.",
@@ -1727,7 +1727,7 @@ async function runProofPairRegion(
     }
   }
   flushOrdinarySegment();
-  const expectedBarrierCount = plan.barrierCount ?? 11;
+  const expectedBarrierCount = plan.barrierCount ?? 12;
   if (barrierCount !== expectedBarrierCount) {
     fail(
       "REQUIRED_EXHAUSTIVE_CLASS_DRIFT",
@@ -1909,7 +1909,7 @@ function attachExecutionReceipt(error, receipt) {
  * Executes one authenticated plan: dependency-derived prefix, at most two proof pairs, then suffix.
  *
  * Every supplied runner result must contain an exact successful `close` observation. The returned
- * receipt remains in the stable 230-node inventory order even though proof pairs may overlap.
+ * receipt remains in the stable 232-node inventory order even though proof pairs may overlap.
  */
 export async function runRequiredExhaustivePlan(plan, options = {}) {
   return runExhaustiveRegions(plan, options);
@@ -2428,8 +2428,8 @@ function printableReceipt(boundaryReceipt, error) {
     inventorySha256: execution?.inventorySha256,
     concurrency: execution?.concurrency,
     observedClosedCount: execution?.observedClosedCount ?? 0,
-    stepCount: execution?.stepCount ?? 230,
-    proofPairCount: execution?.proofPairCount ?? 110,
+    stepCount: execution?.stepCount ?? 232,
+    proofPairCount: execution?.proofPairCount ?? 111,
     repository: repository
       ? {
           proofCount: repository.proofCount,

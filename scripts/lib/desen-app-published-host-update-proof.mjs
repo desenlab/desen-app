@@ -320,6 +320,122 @@ const DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS = Object.freeze({
   }),
 });
 
+const M10A_T01_LOCKFILE_SUCCESSOR_RECEIPT = Object.freeze({
+  authority: "M10A-T01",
+  bytes: 138_171,
+  sha256: "2d7d284b3f32e1dedc94161aef6f012f7e86913c9f50437edb64630ba14bc31f",
+  predecessor: Object.freeze({
+    authority: "M10-T08",
+    bytes: 132_210,
+    sha256: "f2ba3d3f38b1cee1ef369f8ea138f476bbf4574931262563b9f550937c9cae6c",
+  }),
+});
+
+const M10A_T01_LOCKFILE_ADDED_ENTRIES = Object.freeze([
+  Object.freeze({
+    section: "importers",
+    headers: Object.freeze([
+      "  apps/starter-catalog-web-proof:\n",
+      "  packages/starter-catalog-web:\n",
+    ]),
+  }),
+  Object.freeze({
+    section: "packages",
+    headers: Object.freeze([
+      "  '@base-ui/react@1.8.0':\n",
+      "  '@base-ui/utils@0.4.0':\n",
+      "  '@floating-ui/core@1.8.0':\n",
+      "  '@floating-ui/dom@1.8.0':\n",
+      "  '@floating-ui/react-dom@2.1.9':\n",
+      "  '@floating-ui/utils@0.2.12':\n",
+      "  reselect@5.3.0:\n",
+      "  use-sync-external-store@1.6.0:\n",
+    ]),
+  }),
+  Object.freeze({
+    section: "snapshots",
+    headers: Object.freeze([
+      "  '@base-ui/react@1.8.0(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':\n",
+      "  '@base-ui/utils@0.4.0(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':\n",
+      "  '@floating-ui/core@1.8.0':\n",
+      "  '@floating-ui/dom@1.8.0':\n",
+      "  '@floating-ui/react-dom@2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':\n",
+      "  '@floating-ui/utils@0.2.12': {}\n",
+      "  reselect@5.3.0: {}\n",
+      "  use-sync-external-store@1.6.0(react@19.2.8):\n",
+    ]),
+  }),
+]);
+
+const M10A_T01_T08_INPUT_SUCCESSORS = Object.freeze([
+  Object.freeze({
+    path: "dependency-cruiser.config.cjs",
+    bytes: 16_189,
+    sha256: "e78d9f77c35eae01ea145944fc17f4f416aed89505ffdc96836d5fc6457cf069",
+    predecessor: Object.freeze({
+      bytes: 15_181,
+      sha256: "9d1b7d5f78fd4e0d356183b21f237b8e4e98b8df9d5ad625fdd73fe4f357cb60",
+    }),
+    inverseChanges: Object.freeze([
+      Object.freeze([
+        '  "starter-catalog-web": ["protocol", "catalog-sdk", "runtime-react"],\n',
+        "",
+      ]),
+      Object.freeze([
+        '  "starter-catalog-web-proof": [\n    "protocol",\n    "editor-core",\n    "publisher",\n    "runtime-core",\n    "runtime-react",\n    "starter-catalog-web",\n  ],\n',
+        "",
+      ]),
+      Object.freeze([
+        '    {\n      name: "starter-proof-host-has-no-authoring",\n      severity: "error",\n      comment:\n        "The independent starter browser host and shared runtime consume Bundles, never authoring, publishing or App code.",\n      from: { path: "^apps/starter-catalog-web-proof/src/(?:host|shared)/" },\n      to: {\n        path: "^(?:packages/(?:editor-core|editor-web|publisher|testkit|desen)/|apps/)",\n        pathNot: "^apps/starter-catalog-web-proof/src/(?:(?:host|shared)/|application\\\\.css$)",\n      },\n    },\n    {\n      name: "starter-proof-has-no-other-apps",\n      severity: "error",\n      from: { path: "^apps/starter-catalog-web-proof/" },\n      to: { path: "^apps/(?!starter-catalog-web-proof/)" },\n    },\n',
+        "",
+      ]),
+      Object.freeze([
+        '          "^packages/(?:runtime-react|runtime-web|editor-web|reference-catalog-web|starter-catalog-web)/",\n          "(?:^|/)node_modules/@base-ui/",\n',
+        '          "^packages/(?:runtime-react|runtime-web|editor-web|reference-catalog-web)/",\n',
+      ]),
+    ]),
+  }),
+  Object.freeze({
+    path: "scripts/verify-boundary-fixtures.mjs",
+    bytes: 9_606,
+    sha256: "b80b30a52db67ba93c9d705566e3c7db453c98bc42e6cc7b0e7a68bb8efaee62",
+    predecessor: Object.freeze({
+      bytes: 9_049,
+      sha256: "03b0c558fc9803726c09b03ca3c31b4df0f2f44acf3f9f18b8c64dc2d8f3856d",
+    }),
+    inverseChanges: Object.freeze([
+      Object.freeze([
+        '  { name: "allowed-starter-runtime-react", expectedRule: null },\n  {\n    name: "starter-imports-editor-core",\n    expectedRule: "package-starter-catalog-web-allowed-dependencies",\n  },\n  { name: "starter-imports-app", expectedRule: "packages-never-import-apps" },\n  { name: "neutral-imports-starter", expectedRule: "neutral-packages-no-frameworks" },\n  {\n    name: "starter-proof-host-imports-publisher",\n    expectedRule: "starter-proof-host-has-no-authoring",\n  },\n  { name: "starter-proof-imports-app", expectedRule: "starter-proof-has-no-other-apps" },\n',
+        "",
+      ]),
+    ]),
+  }),
+]);
+
+const M10A_T01_APP_GRAPH_SUCCESSOR = Object.freeze({
+  graphSha256: "sha256:df612d09ef98ae388987343948b76e2d4b2ba76c283e840a1266dc6105211e2e",
+  modules: Object.freeze([
+    Object.freeze({
+      id: "packages/editor-core/dist/index.js",
+      codeBytes: 1_536,
+      codeSha256: "sha256:46793348193ec7cc51915c6a83813654d32810b93a10e1efe953c9c895f8ac51",
+    }),
+    Object.freeze({
+      id: "packages/editor-core/dist/stable-id-insert.js",
+      codeBytes: 34_011,
+      codeSha256: "sha256:7e7c3cb82f589eb73dc31076e6b8909c9ede3d2a92d8fc2b22b644f767c9e726",
+    }),
+  ]),
+  entryOutput: Object.freeze({
+    fileName: "assets/index-z0KPy9Yo.js",
+    bytes: 1_539_917,
+    sha256: "sha256:178e53f57447e8e8d4a1dd5728c2deb0645e90f65c58962b098cc9750609475e",
+  }),
+  htmlSha256: "sha256:f543302dc9ad6b267f5e6e1df5a05a65352f15e959d7d2ca9d3a9673288278f7",
+  outputIdentitySha256: "sha256:b1e80809142c6d7941e221e517e67720bd1b5f46fae7a05f2430ed93b61a6475",
+  backingSnapshotSha256: "sha256:9fb4dc9cd9443fbda9b2d840b3cc4052fde0f63ce24f328f835381c6ded9540b",
+});
+
 const FOCUSED_TEST_COMMANDS = Object.freeze([
   "pnpm --filter @desen/app-web exec vitest run test/local-runtime-publication.test.ts test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx dev/local-publication-host.test.mjs dev/local-dev-host.test.mjs",
   "pnpm --filter @desen/reference-host-web-server exec vitest run test/server.test.ts",
@@ -636,6 +752,18 @@ function captureBuildOptions(rawOptions) {
   });
 }
 
+function sameAuthorityStat(left, right) {
+  return (
+    left.isFile() &&
+    right.isFile() &&
+    left.dev === right.dev &&
+    left.ino === right.ino &&
+    left.size === right.size &&
+    left.mtimeMs === right.mtimeMs &&
+    left.ctimeMs === right.ctimeMs
+  );
+}
+
 async function readRegularAuthority(absolutePath, relativePath) {
   let handle;
   try {
@@ -649,10 +777,19 @@ async function readRegularAuthority(absolutePath, relativePath) {
     }
     handle = await open(absolutePath, READ_FLAGS);
     const opened = await handle.stat();
-    if (!opened.isFile() || opened.size !== metadata.size || opened.size > MAX_AUTHORITY_BYTES) {
+    if (!sameAuthorityStat(metadata, opened) || opened.size > MAX_AUTHORITY_BYTES) {
       fail("AUTHORITY_UNSAFE", `Authority changed during acquisition: ${relativePath}.`);
     }
-    return await handle.readFile();
+    const bytes = await handle.readFile();
+    const [after, named] = await Promise.all([handle.stat(), lstat(absolutePath)]);
+    if (
+      bytes.byteLength !== opened.size ||
+      !sameAuthorityStat(opened, after) ||
+      !sameAuthorityStat(after, named)
+    ) {
+      fail("AUTHORITY_UNSAFE", `Authority changed during acquisition: ${relativePath}.`);
+    }
+    return bytes;
   } catch (error) {
     if (error instanceof DesenAppPublishedHostUpdateProofError) throw error;
     fail("AUTHORITY_UNSAFE", `Could not read evidence authority: ${relativePath}.`, {
@@ -660,6 +797,40 @@ async function readRegularAuthority(absolutePath, relativePath) {
     });
   } finally {
     await handle?.close();
+  }
+}
+
+async function snapshotTrackedBackingFiles(workspaceRoot) {
+  const files = new Map();
+  for (const relativePath of TRACKED_PATHS) {
+    files.set(
+      relativePath,
+      await readRegularAuthority(path.join(workspaceRoot, relativePath), relativePath),
+    );
+  }
+  return files;
+}
+
+async function verifyTrackedBackingFence(workspaceRoot, acquired) {
+  const finalBackingFiles = await snapshotTrackedBackingFiles(workspaceRoot);
+  for (const relativePath of TRACKED_PATHS) {
+    const initialBacking = acquired.backingFiles.get(relativePath);
+    const finalBacking = finalBackingFiles.get(relativePath);
+    const admitted = acquired.files.get(relativePath);
+    if (!initialBacking.equals(finalBacking)) {
+      fail("SOURCE_SNAPSHOT_DRIFT", "A tracked backing authority changed across execution.", {
+        path: relativePath,
+      });
+    }
+    if (!admitted.equals(initialBacking)) {
+      fail(
+        "SOURCE_SNAPSHOT_DRIFT",
+        "A hostile override differs from its tracked backing authority.",
+        {
+          path: relativePath,
+        },
+      );
+    }
   }
 }
 
@@ -718,15 +889,21 @@ async function acquireFiles(options) {
       hostServerInventory,
     });
   }
+  const backingFiles = await snapshotTrackedBackingFiles(canonicalRoot);
   const files = new Map();
   for (const relativePath of TRACKED_PATHS) {
     files.set(
       relativePath,
-      options.fileOverrides.get(relativePath) ??
-        (await readRegularAuthority(path.join(canonicalRoot, relativePath), relativePath)),
+      options.fileOverrides.get(relativePath) ?? backingFiles.get(relativePath),
     );
   }
-  return Object.freeze({ files, appInventory, hostInventory, hostServerInventory });
+  return Object.freeze({
+    files,
+    backingFiles,
+    appInventory,
+    hostInventory,
+    hostServerInventory,
+  });
 }
 
 function decodeUtf8(bytes, relativePath, code = "SOURCE_POLICY_VIOLATION") {
@@ -769,6 +946,200 @@ function exactJsonKeys(value, expectedKeys) {
 
 function occurrenceCount(source, fragment) {
   return source.split(fragment).length - 1;
+}
+
+function removeExactLockfileEntry(source, section, header) {
+  const sectionMarker = `\n${section}:\n`;
+  if (occurrenceCount(source, sectionMarker) !== 1) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "The M10A-T01 lockfile successor lost one exact reviewed section.",
+      { section },
+    );
+  }
+  const sectionStart = source.indexOf(sectionMarker) + sectionMarker.length;
+  const nextSectionPattern = /^\S[^\r\n]*:\r?$/gmu;
+  nextSectionPattern.lastIndex = sectionStart;
+  const nextSection = nextSectionPattern.exec(source);
+  const sectionEnd = nextSection?.index ?? source.length;
+  const sectionText = source.slice(sectionStart, sectionEnd);
+  if (occurrenceCount(sectionText, header) !== 1) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "The M10A-T01 lockfile successor lost one exact additive entry.",
+      { section, header: header.trimEnd() },
+    );
+  }
+  const entryStart = sectionStart + sectionText.indexOf(header);
+  const nextEntryPattern = /^ {2}\S[^\r\n]*$/gmu;
+  nextEntryPattern.lastIndex = entryStart + header.length;
+  const nextEntry = nextEntryPattern.exec(source);
+  const entryEnd =
+    nextEntry !== null && nextEntry.index < sectionEnd ? nextEntry.index : sectionEnd;
+  if (entryEnd <= entryStart) {
+    fail("DEPENDENCY_SUCCESSOR_DRIFT", "The M10A-T01 lockfile entry boundary drifted.", {
+      section,
+      header: header.trimEnd(),
+    });
+  }
+  return source.slice(0, entryStart) + source.slice(entryEnd);
+}
+
+/**
+ * Authenticates the exact additive M10A-T01 lockfile and returns its reviewed M10-T08
+ * predecessor bytes for frozen historical-reader projection.
+ */
+export function authenticateM10AT01LockfileSuccessor(bytes) {
+  const successor = M10A_T01_LOCKFILE_SUCCESSOR_RECEIPT;
+  if (bytes.byteLength !== successor.bytes || sha256(bytes) !== successor.sha256) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "The live lockfile is not the exact reviewed M10A-T01 additive successor.",
+    );
+  }
+  let predecessorText = decodeUtf8(
+    bytes,
+    DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS.path,
+    "DEPENDENCY_SUCCESSOR_DRIFT",
+  );
+  for (const { section, headers } of M10A_T01_LOCKFILE_ADDED_ENTRIES) {
+    for (const header of headers) {
+      predecessorText = removeExactLockfileEntry(predecessorText, section, header);
+    }
+  }
+  const predecessorBytes = Buffer.from(predecessorText);
+  if (
+    predecessorBytes.byteLength !== successor.predecessor.bytes ||
+    sha256(predecessorBytes) !== successor.predecessor.sha256
+  ) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "Removing only the reviewed M10A-T01 additions must reproduce the exact M10-T08 lockfile.",
+    );
+  }
+  return Object.freeze({ predecessorBytes, predecessorText });
+}
+
+/** Projects one exact M10A-T01 policy input back to its reviewed M10-T08 predecessor. */
+export function projectM10AT01T08Input(relativePath, bytes) {
+  const successor = M10A_T01_T08_INPUT_SUCCESSORS.find(
+    ({ path: successorPath }) => successorPath === relativePath,
+  );
+  if (successor === undefined) return bytes;
+  if (bytes.byteLength !== successor.bytes || sha256(bytes) !== successor.sha256) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "A reviewed T08 input is not the exact M10A-T01 additive successor.",
+      { path: relativePath },
+    );
+  }
+  let predecessorText = decodeUtf8(bytes, relativePath, "SUCCESSOR_POLICY_VIOLATION");
+  for (const [currentFragment, predecessorFragment] of successor.inverseChanges) {
+    if (occurrenceCount(predecessorText, currentFragment) !== 1) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "An M10A-T01 successor input lost one exact reviewed policy addition.",
+        { path: relativePath },
+      );
+    }
+    predecessorText = predecessorText.replace(currentFragment, predecessorFragment);
+  }
+  const predecessorBytes = Buffer.from(predecessorText);
+  if (
+    predecessorBytes.byteLength !== successor.predecessor.bytes ||
+    sha256(predecessorBytes) !== successor.predecessor.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "Removing only M10A-T01 policy additions must reproduce the exact T08 receipt.",
+      { path: relativePath },
+    );
+  }
+  return predecessorBytes;
+}
+
+/** Authenticates the exact M10A-T01 App-graph successor and returns the frozen T08 graph. */
+export function projectM10AT01CurrentGraphAudit(currentGraphAudit, t08GraphAudit) {
+  if (
+    currentGraphAudit === null ||
+    typeof currentGraphAudit !== "object" ||
+    t08GraphAudit === null ||
+    typeof t08GraphAudit !== "object"
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The T08/M10A graph authority is missing.");
+  }
+  const moduleSuccessors = new Map(
+    M10A_T01_APP_GRAPH_SUCCESSOR.modules.map((module) => [module.id, module]),
+  );
+  const observedModuleIds = t08GraphAudit.runtimeResolution?.appModules
+    ?.filter(({ id }) => moduleSuccessors.has(id))
+    .map(({ id }) => id);
+  if (
+    !isDeepStrictEqual(
+      observedModuleIds,
+      M10A_T01_APP_GRAPH_SUCCESSOR.modules.map(({ id }) => id),
+    )
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The T08 graph lost one exact Editor Core predecessor module.",
+    );
+  }
+  let entryOutputs = 0;
+  let htmlOutputs = 0;
+  const expectedOutputs = t08GraphAudit.runtimeResolution.appOutput.outputs.map((output) => {
+    if (output.type === "chunk" && output.isEntry === true) {
+      entryOutputs += 1;
+      return {
+        ...output,
+        ...M10A_T01_APP_GRAPH_SUCCESSOR.entryOutput,
+      };
+    }
+    if (output.fileName === "index.html" && output.type === "asset") {
+      htmlOutputs += 1;
+      return {
+        ...output,
+        sha256: M10A_T01_APP_GRAPH_SUCCESSOR.htmlSha256,
+      };
+    }
+    return output;
+  });
+  if (entryOutputs !== 1 || htmlOutputs !== 1) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The T08 graph lost its exact App entry or HTML output.");
+  }
+  const expectedSuccessor = {
+    ...t08GraphAudit,
+    runtimeResolution: {
+      ...t08GraphAudit.runtimeResolution,
+      app: {
+        ...t08GraphAudit.runtimeResolution.app,
+        graphSha256: M10A_T01_APP_GRAPH_SUCCESSOR.graphSha256,
+      },
+      appModules: t08GraphAudit.runtimeResolution.appModules.map((module) => {
+        const successor = moduleSuccessors.get(module.id);
+        return successor === undefined
+          ? module
+          : {
+              ...module,
+              codeBytes: successor.codeBytes,
+              codeSha256: successor.codeSha256,
+            };
+      }),
+      appOutput: {
+        ...t08GraphAudit.runtimeResolution.appOutput,
+        outputs: expectedOutputs,
+        identitySha256: M10A_T01_APP_GRAPH_SUCCESSOR.outputIdentitySha256,
+      },
+      backingSnapshotSha256: M10A_T01_APP_GRAPH_SUCCESSOR.backingSnapshotSha256,
+    },
+  };
+  if (!isDeepStrictEqual(currentGraphAudit, expectedSuccessor)) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The fresh App/host graph is not the exact reviewed M10A-T01 successor of T08.",
+    );
+  }
+  return t08GraphAudit;
 }
 
 function requireFragments(source, fragments, label, code = "SOURCE_POLICY_VIOLATION") {
@@ -2803,18 +3174,20 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   const recoverySuccessor = await readT08SuccessorArtifact(options.workspaceRoot);
   const dependencyPin = DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS;
   const dependencyBytes = files.get(dependencyPin.path);
+  const lockfileSuccessor = authenticateM10AT01LockfileSuccessor(dependencyBytes);
   assertT08Receipt(
     recoverySuccessor,
     dependencyPin.path,
-    dependencyBytes,
+    lockfileSuccessor.predecessorBytes,
     "DEPENDENCY_SUCCESSOR_DRIFT",
   );
-  const lockfileText = decodeUtf8(
-    dependencyBytes,
-    dependencyPin.path,
-    "DEPENDENCY_SUCCESSOR_DRIFT",
+  const t08ProjectedInputs = new Map(
+    M10A_T01_T08_INPUT_SUCCESSORS.map(({ path: relativePath }) => [
+      relativePath,
+      projectM10AT01T08Input(relativePath, files.get(relativePath)),
+    ]),
   );
-  let securityLockfileText = lockfileText;
+  let securityLockfileText = lockfileSuccessor.predecessorText;
   for (const importer of ["apps/desen-app-browser-e2e", "apps/reference-host-web"]) {
     const start = securityLockfileText.indexOf(`  ${importer}:\n`);
     const end = securityLockfileText.indexOf("\n  apps/", start + 1);
@@ -2863,7 +3236,11 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   const bridgeReproduction = verifyBridgeReproductionAuthority(files);
   const packageAuthority = verifyPackageAuthority(files);
   for (const relativePath of T08_REVIEWED_CHANGED_PATHS) {
-    assertT08Receipt(recoverySuccessor, relativePath, files.get(relativePath));
+    assertT08Receipt(
+      recoverySuccessor,
+      relativePath,
+      t08ProjectedInputs.get(relativePath) ?? files.get(relativePath),
+    );
   }
   const acquiredAppSourceReceipts = sourceReceipts(files, APP_SOURCE_PATHS);
   const acquiredHostSourceReceipts = sourceReceipts(files, HOST_SOURCE_PATHS);
@@ -2894,7 +3271,7 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
           sha256: dependencyPin.historicalSha256,
         });
       }
-      const bytes = files.get(relativePath);
+      const bytes = t08ProjectedInputs.get(relativePath) ?? files.get(relativePath);
       return Object.freeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) });
     }),
   );
@@ -3014,13 +3391,29 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   // Caller overrides are checked before projection; they never replace this filesystem fence.
   await readT08SuccessorArtifact(options.workspaceRoot);
   await readT06SuccessorArtifact(options.workspaceRoot);
-  for (const relativePath of [...T08_REVIEWED_CHANGED_PATHS, dependencyPin.path]) {
+  for (const relativePath of T08_REVIEWED_CHANGED_PATHS) {
+    const currentBytes = await readRegularAuthority(
+      path.join(options.workspaceRoot, relativePath),
+      relativePath,
+    );
     assertT08Receipt(
       recoverySuccessor,
       relativePath,
-      await readRegularAuthority(path.join(options.workspaceRoot, relativePath), relativePath),
+      projectM10AT01T08Input(relativePath, currentBytes),
     );
   }
+  const finalDependencyBytes = await readRegularAuthority(
+    path.join(options.workspaceRoot, dependencyPin.path),
+    dependencyPin.path,
+  );
+  const finalLockfileSuccessor = authenticateM10AT01LockfileSuccessor(finalDependencyBytes);
+  assertT08Receipt(
+    recoverySuccessor,
+    dependencyPin.path,
+    finalLockfileSuccessor.predecessorBytes,
+    "DEPENDENCY_SUCCESSOR_DRIFT",
+  );
+  await verifyTrackedBackingFence(options.workspaceRoot, acquired);
   const artifact = successorProjection.artifact;
   const artifactBytes = await canonicalArtifactBytes(artifact);
   return deepFreeze({
@@ -3034,10 +3427,17 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       currentBytes: dependencyBytes.byteLength,
       historicalBytes: dependencyPin.historicalBytes,
       currentSha256: sha256(dependencyBytes),
+      lockfileSuccessor: {
+        task: M10A_T01_LOCKFILE_SUCCESSOR_RECEIPT.authority,
+        bytes: M10A_T01_LOCKFILE_SUCCESSOR_RECEIPT.bytes,
+        sha256: M10A_T01_LOCKFILE_SUCCESSOR_RECEIPT.sha256,
+        additivePredecessor: M10A_T01_LOCKFILE_SUCCESSOR_RECEIPT.predecessor,
+      },
       compositionSuccessor: {
         task: "M10-T08",
         artifact: { path: T08_SUCCESSOR_PATH, ...T08_SUCCESSOR_PIN },
       },
+      compositionLockfile: M10A_T01_LOCKFILE_SUCCESSOR_RECEIPT.predecessor,
       securityTaskLockfile: {
         bytes: dependencyPin.currentBytes,
         sha256: dependencyPin.currentSha256,
@@ -3122,12 +3522,10 @@ async function projectT06HistoricalPredecessor(workspaceRoot, currentArtifact, r
     referenceHostSourceAudit: currentArtifact.authority.referenceHostSourceAudit,
     runtimeResolution: currentArtifact.authority.runtimeResolution,
   };
-  if (!isDeepStrictEqual(currentGraphAudit, recoverySuccessor.authority?.currentGraphAudit)) {
-    fail(
-      "SUCCESSOR_POLICY_VIOLATION",
-      "Fresh current App/host observations differ from the reviewed T08 authority.",
-    );
-  }
+  projectM10AT01CurrentGraphAudit(
+    currentGraphAudit,
+    recoverySuccessor.authority?.currentGraphAudit,
+  );
   const currentReceipts = currentArtifact.boundary.trackedReceipts;
   const historicalReceipts = new Map(
     historical.boundary.trackedReceipts.map((receipt) => [receipt.path, receipt]),

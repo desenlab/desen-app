@@ -57,12 +57,12 @@ cancellation, hosted, and zero-reference checks pass.
 
 ## Current authority
 
-- 230 logical workloads
-- 110 proof pairs: 99 ordinary and 11 exclusive barriers
-- 247 hosted physical shard workloads
-- proof-reader checkpoint sequence 80
-- 64 immutable artifacts and 128 current readers
-- nine independent Chromium journeys in the separate Browser E2E job
+- 232 logical workloads
+- 111 proof pairs: 99 ordinary and 12 exclusive barriers
+- 249 hosted physical shard workloads
+- proof-reader checkpoint sequence 83
+- 65 immutable artifacts and 130 current readers
+- nine M10 Chromium journeys in the separate Browser E2E job; three T01 cases in its proof barrier
 
 Exact counts are reviewed invariants, not targets to reduce. A performance change may redistribute
 fresh work but cannot omit a workload, cache proof success, increase the deadline silently, or

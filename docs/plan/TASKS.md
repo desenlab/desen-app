@@ -15,8 +15,9 @@ pointer in the
 
 Every task inherits the definition of done in [CONTRIBUTING.md](../../CONTRIBUTING.md). A task may
 be closed only when its named evidence exists and its dependencies are `DONE`. Gates are excluded
-from the 148-task progress denominator. Milestones execute in order; only the two explicit M11
-branches may progress independently after `SC-02` authorizes continuation.
+from the 176-task progress denominator. SC-02's recorded adaptation adds M10A before M11:
+28 new tasks and G10A, without renumbering historical work. Only the two explicit M11 branches
+may progress independently, after G10A passes.
 
 ## M00 — Frozen protocol and proof contract
 
@@ -49,7 +50,7 @@ immutable pre-consolidation Git snapshot linked above. This board keeps only can
 
 ## Operational and infrastructure work — excluded from the implementation-task count
 
-These rows do not change the 148-task implementation denominator. `I07-05` remains deferred
+These rows do not change the 176-task implementation denominator. `I07-05` remains deferred
 until its G12 retirement contract is satisfied.
 
 `CI-02` is a separate explicitly authorized operational task. It keeps the bounded local
@@ -247,23 +248,60 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 | M10-T09  | DONE   | M10-T08                   | Record committed `packages/runtime-core` tree hash as M11 comparison baseline |
 | G10      | DONE   | M10-T01C, M10-T02–M10-T09 | Complete no-manual-reimplementation proof passes and core baseline is frozen  |
 
+## M10A — Design-first product foundation
+
+SC-02 concluded `adapt`; no further external research is required for this product investment.
+M10A-T01 alone is IN_PROGRESS; [plan](M10A-IMPLEMENTATION-PLAN.md) and
+[task contracts](M10A-TASK-CONTRACTS.md) own scope, negative tests and planned evidence paths.
+
+| ID       | Status      | Depends on                                       | Deliverable / evidence                                              |
+| -------- | ----------- | ------------------------------------------------ | ------------------------------------------------------------------- |
+| M10A-T01 | IN_PROGRESS | G10                                              | [Base UI adapter boundary proof](../proof/M10A-T01.md)              |
+| M10A-T02 | NOT_STARTED | M10A-T01                                         | Versioned project design-system model and typed token resolver      |
+| M10A-T03 | NOT_STARTED | M10A-T02                                         | Theme/token editor, modes, aliases and loss-aware import/export     |
+| M10A-T04 | NOT_STARTED | M10A-T02                                         | Immutable design-system releases and host snapshot identity         |
+| M10A-T05 | NOT_STARTED | M10A-T01, M10A-T02                               | Layout, typography and content starter capabilities                 |
+| M10A-T06 | NOT_STARTED | M10A-T05                                         | Form-control starter capabilities and accessible field compositions |
+| M10A-T07 | NOT_STARTED | M10A-T06                                         | Selection, tabs and numeric-control capabilities                    |
+| M10A-T08 | NOT_STARTED | M10A-T07                                         | Overlay, menu and disclosure capabilities                           |
+| M10A-T09 | NOT_STARTED | M10A-T05, M10A-T08                               | Data-display and feedback capabilities                              |
+| M10A-T10 | NOT_STARTED | M10A-T02, M10A-T04, M10A-T09                     | Project/surface lifecycle and atomic authoring persistence          |
+| M10A-T11 | NOT_STARTED | M10A-T10                                         | Direct-manipulation canvas and accessible layer operations          |
+| M10A-T12 | NOT_STARTED | M10A-T03, M10A-T11                               | Rich visual inspector and responsive layout authoring               |
+| M10A-T13 | NOT_STARTED | M10A-T04, M10A-T12                               | Safe image/icon/font assets and content styling                     |
+| M10A-T14 | NOT_STARTED | M10A-T10, M10A-T11                               | Undo/redo, duplication and identity-safe copy/paste                 |
+| M10A-T15 | NOT_STARTED | M10A-T09, M10A-T13, M10A-T14                     | Reusable masters, instances, overrides and detach                   |
+| M10A-T16 | NOT_STARTED | M10A-T12, M10A-T15                               | Component variants and visual-state authoring                       |
+| M10A-T17 | NOT_STARTED | M10A-T03, M10A-T16                               | Built-in design-system explorer, documentation and controls         |
+| M10A-T18 | NOT_STARTED | M10A-T04, M10A-T17                               | Library versions, usage, deprecation and impact review              |
+| M10A-T19 | NOT_STARTED | M10A-T10, M10A-T14                               | Separate Connections workspace and durable inert drafts             |
+| M10A-T20 | NOT_STARTED | M10A-T16, M10A-T19                               | Visual typed state, event, action and navigation wiring             |
+| M10A-T21 | NOT_STARTED | M10A-T20                                         | Resource/operation connections and explicit host readiness          |
+| M10A-T22 | NOT_STARTED | M10A-T04, M10A-T18, M10A-T21                     | Unified Run/release lifecycle with pinned design-system state       |
+| M10A-T23 | NOT_STARTED | M10A-T08, M10A-T16, M10A-T17, M10A-T22           | Deterministic component/theme/state/viewport scenario matrix        |
+| M10A-T24 | NOT_STARTED | M10A-T13, M10A-T23                               | Hermetic visual capture and reproducible difference engine          |
+| M10A-T25 | NOT_STARTED | M10A-T18, M10A-T24, M10A-T26                     | Exact-candidate baseline review and fail-closed release checks      |
+| M10A-T26 | NOT_STARTED | M10A-T12, M10A-T22, M10A-T23                     | Accessibility, responsive and bounded-performance acceptance        |
+| M10A-T27 | NOT_STARTED | M10A-T14, M10A-T16, M10A-T22, M10A-T25, M10A-T26 | Three design-first product journeys and later functionalization     |
+| M10A-T28 | NOT_STARTED | M10A-T01–M10A-T27                                | Regression closure, evidence inventory and repeatable handoff       |
+| G10A     | NOT_STARTED | M10A-T01–M10A-T28                                | Complete design-first/workbench proof with unchanged Runtime Core   |
+
 ## M11 — Capability extensibility proof
 
-M11 has not started. The non-counted `SC-02` decision checkpoint in
-[STRATEGIC-VALIDATION.md](STRATEGIC-VALIDATION.md) must authorize continuation first. After that
-decision, Map (`M11-T01`) and Sortable (`M11-T08`) may proceed independently; both retain the
-M10 Runtime Core tree baseline.
+M11 has not started. [SC-02](STRATEGIC-VALIDATION.md) records adaptation, not pilot validation.
+After G10A passes, Map (`M11-T01`) and Sortable (`M11-T08`) may proceed independently;
+both retain the M10 Runtime Core tree baseline and use the M10A product/workbench.
 
 | ID      | Status      | Depends on       | Deliverable / evidence                                        |
 | ------- | ----------- | ---------------- | ------------------------------------------------------------- |
-| M11-T01 | NOT_STARTED | G10              | Map capability contract in a separate package                 |
+| M11-T01 | NOT_STARTED | G10, G10A        | Map capability contract in a separate package                 |
 | M11-T02 | NOT_STARTED | M11-T01          | Real map provider behind adapter boundary                     |
 | M11-T03 | NOT_STARTED | M11-T01–M11-T02  | Store resource and schema-bound marker data                   |
 | M11-T04 | NOT_STARTED | M11-T02–M11-T03  | `fitBounds` command bridge                                    |
 | M11-T05 | NOT_STARTED | M11-T03–M11-T04  | Map fixtures, slots, visual states, and style parts           |
 | M11-T06 | NOT_STARTED | M11-T05          | Map integration core-tree hash equals M10-T09 baseline        |
 | M11-T07 | NOT_STARTED | M11-T06          | Map surface authored and published in Desen App               |
-| M11-T08 | NOT_STARTED | G10              | Sortable behavior contract in a separate package              |
+| M11-T08 | NOT_STARTED | G10, G10A        | Sortable behavior contract in a separate package              |
 | M11-T09 | NOT_STARTED | M11-T08          | Real drag-and-drop adapter behind behavior boundary           |
 | M11-T10 | NOT_STARTED | M11-T08–M11-T09  | Task resource and repeated task presentation                  |
 | M11-T11 | NOT_STARTED | M11-T09–M11-T10  | Reorder event payload and host operation                      |

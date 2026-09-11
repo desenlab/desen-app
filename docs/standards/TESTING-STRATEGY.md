@@ -102,8 +102,20 @@ bytes with that authority. Staged, unstaged, untracked-Core, hidden-index, missi
 identity drift fail closed. Ignored build output and unrelated workspace changes do not create a
 false Core change.
 
-The baseline proves byte identity only. Every M11 branch still runs fresh capability, integration,
-negative, and browser tests.
+The baseline proves byte identity only. M10A also preserves this authority; every M10A task and
+M11 branch still runs fresh capability, integration, negative, and browser tests.
+
+## Planned M10A product acceptance
+
+M10A coverage is not part of the nine completed M10 journeys yet. The
+[task contracts](../plan/M10A-TASK-CONTRACTS.md) assign new tests and artifacts to each owner.
+G10A joins three blank-project design-first journeys, master/instance and theme persistence,
+separate connection drafts, later same-Source execution, and complete design-system release rollback.
+The [workbench](../plan/DESIGN-SYSTEM-WORKBENCH.md) adds deterministic scenario capture and explicit
+baseline review; a screenshot approval cannot suppress structural, behavior or accessibility failures.
+Fresh browser/environment/source/catalog/theme/font/asset identities must accompany visual results.
+No new external interview or pilot recruitment is required to execute these engineering checks.
+Adding tasks never reclassifies old failing evidence as success or removes existing M10 tests.
 
 ## Local commands
 
@@ -138,9 +150,9 @@ Coverage percentages are diagnostic, not a substitute for claim ownership. New c
 the owning package's thresholds and cover meaningful branches. Security, authority, serialization,
 and failure-state code requires explicit adversarial cases even when line coverage is already high.
 
-The authoritative inventory currently contains 230 logical workloads and 110 proof pairs; the
-hosted exhaustive topology expands to 247 physical shard workloads. Eleven exclusive barriers
-protect shared-state boundaries.
+The authoritative inventory contains 232 logical workloads and 111 proof pairs; the hosted
+exhaustive topology expands to 249 physical shard workloads. Twelve exclusive barriers protect
+shared state, including T01's three Chromium cases on isolated port 4187; the nine M10 journeys remain.
 
 ## Historical archive privacy
 

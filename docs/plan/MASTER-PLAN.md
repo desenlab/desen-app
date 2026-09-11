@@ -10,9 +10,13 @@ Web–React surface without a developer manually recreating its component tree.
 This project proves a reference implementation and its declared conformance coverage. It does not
 claim universal interoperability, production security certification, or mobile support.
 
+Desen App must also make interface design useful before behavior wiring: ready real components,
+an editable design language, reusable component sets and an integrated design-system workbench.
+The [M10A product plan](M10A-IMPLEMENTATION-PLAN.md) owns this additional product acceptance scope.
+
 ## Delivery rules
 
-- Milestones run in order. A gate must pass before work starts on the next milestone.
+- Milestones run in order: M00–M10, M10A, M11, M12. Each preceding gate must pass.
 - Only one task may be `IN_PROGRESS`.
 - Every proof claim requires an automated test, reproducible artifact, or source audit.
 - Screenshots and videos may explain evidence but cannot be the only evidence.
@@ -22,7 +26,8 @@ claim universal interoperability, production security certification, or mobile s
 Product and interoperability assumptions are checked through the non-counted
 [Strategic Validation Checkpoints](STRATEGIC-VALIDATION.md). `SC-01` runs after `G03` and before
 `M04`; `SC-02` runs after `G10` and before `M11`. These checkpoints do not change task numbering or
-the README progress denominator.
+the README progress denominator. SC-02 concluded `adapt`; M10A adds 28 real implementation tasks
+and G10A, making the explicit plan total 176 tasks and 14 gates. Existing completed work is retained.
 
 ## Milestones and gates
 
@@ -121,10 +126,25 @@ the host without changing host source code.
 
 No Map, Sortable, domain deployment, or npm publication may start before `G10`.
 
+### M10A — Design-first product foundation
+
+Build the selected Base UI-backed Web starter Catalog with DESEN Neutral styling, theme/token
+management, rich layout/style authoring, reusable masters/instances/variants, separate Connections
+and Run workspaces, and built-in component documentation/scenarios/visual review. Designers can
+create and save complete visual designs before a frontend developer or designer wires behavior.
+The workbench removes the need for separate Storybook/Chromatic workflows for the declared DESEN
+surface set; it does not claim a replacement for arbitrary framework stories or hosted team services.
+
+**Gate G10A:** Three ordinary-product design-first journeys, design-system management, reproducible
+visual review and later same-Source functionalization pass; existing M10 proofs and the complete
+frozen Runtime Core identity remain intact. See the [task contracts](M10A-TASK-CONTRACTS.md).
+No further external user recruitment is required for this founder-directed product investment.
+
 ### M11 — Capability extensibility proof
 
 Integrate a real Map component and Sortable behavior as capability packages without modifying
-runtime-core. Use them to author a second store-operations surface.
+runtime-core. After G10A, use them through the M10A authoring and workbench model to author a
+second store-operations surface.
 
 **Gate G11:** Complex capabilities are integrated once by a developer and then reused by Desen
 App without new screen implementation code.
@@ -137,6 +157,11 @@ package audits, release runbook, and an honest implementation report.
 **Gate G12:** The Web–React reference implementation is repeatable by another developer and ready
 for an explicitly labeled public alpha.
 
+M10A is local product groundwork toward the first beta, not an external beta release. A beta label
+requires the M10A acceptance scope, M11/G11 and M12/G12 evidence plus an explicit release decision.
+Hosted multi-user beta requires its own security/identity/operations scope; npm prerelease policy
+remains [ADR 0005](../adr/0005-npm-distribution.md). No existing alpha gate is silently renamed.
+
 ## Product demonstration
 
 The final demonstration contains three managed surfaces in one coherent Store Operations product:
@@ -144,6 +169,9 @@ The final demonstration contains three managed surfaces in one coherent Store Op
 1. Sign-in: local state, validation, operation pending/failure/success, and navigation.
 2. Store map: resource data, marker composition, popup slot, visual states, and component command.
 3. Priority list: repeat scope, sortable behavior, reorder event, and host operation.
+
+Before this extension demo, G10A also proves blank-to-settings, list/detail and dashboard design
+journeys with custom themes/components, built-in documentation and visual review, then later wiring.
 
 ## Mobile readiness contract
 

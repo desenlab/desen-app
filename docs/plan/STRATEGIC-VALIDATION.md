@@ -6,7 +6,7 @@ Last reviewed: 2026-09-10
 
 This document records product and interoperability decisions that must be tested at the point when
 the implementation can answer them with evidence. It is not a second implementation task board:
-the 148 tasks and 13 proof gates in `TASKS.md` remain the only items counted by the README progress
+the 176 tasks and 14 proof gates in `TASKS.md` remain the only items counted by the README progress
 bar.
 
 The working position is:
@@ -14,9 +14,11 @@ The working position is:
 > Figma brings code onto the design canvas. A2UI lets agents communicate user interfaces. DESEN
 > safely publishes and activates human-authored interface revisions as verified bundles.
 
-DESEN should not compete as another general-purpose visual canvas or claim that declarative JSON
-UI is unique. Its proposed value is the complete human-authoring, deterministic publication,
-conformance, exact-package resolution, atomic activation, rollback, and traceability lifecycle.
+DESEN does not claim that declarative JSON UI is unique. Its proposed value is the complete
+human-authoring, deterministic publication, conformance, exact-package resolution, atomic activation,
+rollback, and traceability lifecycle. Following SC-02, Desen App explicitly invests in design-first
+interface authoring and a built-in design-system workbench; generic vector drawing remains outside
+the declared protocol profile.
 
 ## Existing proof commitments
 
@@ -129,14 +131,16 @@ Selected primary references:
 
 **When:** After `G10` and before `M11-T01` or `M11-T08`.
 
-**Status:** `NOT_STARTED`. G10 is complete; repository/documentation consolidation does not satisfy
-this product-validation checkpoint and does not authorize M11.
+**Status:** Complete on 2026-09-10. Decision: **`adapt`**.
+This closes the research/decision activity, not pilot validation or implementation. The user chose
+the bounded [M10A product foundation](M10A-IMPLEMENTATION-PLAN.md) before M11, without further
+external interviews or team trials. M11 remains NOT_STARTED and depends on G10A.
 
-**Why then:** `G10` produces a repeatable demonstration of the actual claim instead of asking
-teams to react to a protocol document or mockup. `M11` would otherwise expand the capability
-surface before product demand is known.
+**Original rationale:** G10 provides a repeatable lifecycle demonstration. The review distinguished
+that technical proof from a mature daily design experience: the five-component reference demo does
+not establish the usability or adoption of the intended complete authoring product.
 
-### Required validation
+### Original validation plan
 
 - Interview at least 10 people responsible for design systems, frontend platforms, or product UI
   infrastructure across multiple organizations.
@@ -148,7 +152,7 @@ surface before product demand is known.
 - Seek at least two concrete pilot commitments in which a team is willing to map its own
   components and evaluate the workflow in a non-production environment.
 
-### Go/no-go rule
+### Original go/no-go rule
 
 - **Continue:** at least two credible pilot teams confirm the production-surface ownership and
   controlled-deployment problem and agree to a bounded evaluation.
@@ -161,3 +165,32 @@ surface before product demand is known.
 GitHub interest, npm downloads, social engagement, task completion, and test volume are useful
 signals but do not satisfy this gate. Only observed workflow evidence and real pilot willingness
 count as product validation.
+
+### Recorded evidence and provenance correction
+
+The private collection contains ten interview records and two team-session records. The user
+confirmed that both the interviews and the team sessions were real; the team records' simulated
+wording was an anonymization choice. The earlier simulated-session classification is withdrawn.
+Team participation is not itself a pilot commitment. The two recorded pilot candidates still had
+joint-decision confirmation pending; this decision does not claim two confirmed pilots.
+
+Raw notes, participant codes, quotes, identifying details and unapproved records are not copied
+into the public repository. The collection and the user's provenance correction remain private.
+The decision does not require proving participant identities or recruiting replacements.
+
+### Adaptation and next authority
+
+Workflow friction and ownership concerns inform the decision: useful design should precede
+behavior/data wiring; designers need ready, customizable components and design-system management.
+The founder judged the reference demo insufficiently representative of that vision and authorized
+M10A planning and a Base UI-backed starter system. Demo incompleteness is a product hypothesis,
+not proof that all objections would disappear after implementation.
+
+[ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) records this
+owner-directed product-development path. The original Continue threshold remains unmet; Adapt is
+not a fabricated Continue result. Additional external research is not a prerequisite for M10A or
+the subsequent planned M11 extension proof. Internal automated acceptance replaces no market
+evidence: demand, adoption and broad Storybook/Chromatic/Figma equivalence remain unproven.
+
+The next implementation task is M10A-T01, when requested. G10A must pass before M11-T01 or M11-T08.
+No code, package installation, external publication or deployment is completed by this decision.
