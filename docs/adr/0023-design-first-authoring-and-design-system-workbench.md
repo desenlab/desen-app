@@ -1,6 +1,6 @@
 # ADR 0023: Design-first authoring and design-system workbench
 
-- Status: Accepted; M10A-T01 implementation in progress
+- Status: Accepted; M10A-T01 complete, M10A-T02 ready and not started
 - Date: 2026-09-10
 - Decision owner: user-authorized M10A planning / SC-02 adaptation, closed by G10A
 
@@ -17,9 +17,10 @@ static experience before a frontend engineer supplies application behavior. That
 weaken DESEN 0.1.0. Source and Bundle remain data-only, capability surfaces remain explicit,
 authoring adapters remain honest, and unknown runtime semantics still fail closed.
 
-This decision creates the M10A prerequisite milestone and its G10A gate. Only M10A-T01 is active;
-the other 27 tasks remain `NOT_STARTED`. ADR acceptance alone is not implementation evidence or a
-release/production-readiness claim. The canonical implementation sequence is in
+This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 is `DONE`; the
+other 27 tasks remain `NOT_STARTED`, with M10A-T02 ready as the next implementation authority. ADR
+acceptance alone is not implementation evidence or a release/production-readiness claim. The
+canonical implementation sequence is in
 [M10A Implementation Plan](../plan/M10A-IMPLEMENTATION-PLAN.md), with detailed acceptance contracts
 in [M10A Task Contracts](../plan/M10A-TASK-CONTRACTS.md) and product behavior in the
 [Design-System Workbench](../plan/DESIGN-SYSTEM-WORKBENCH.md).
@@ -28,11 +29,12 @@ in [M10A Task Contracts](../plan/M10A-TASK-CONTRACTS.md) and product behavior in
 
 ### Add a target-specific starter capability family
 
-M10A will add `@desen/starter-catalog-web` rather than expand or replace the M10 reference
-catalog. Its initial implementation foundation is the pinned `@base-ui/react@1.8.0` headless React
-library with an authored **DESEN Neutral** design language. “Starter” means a broad, ready default
-for the declared `web-react` target; it does not create a lowest-common-denominator protocol widget
-set or promise identical components on other targets.
+M10A uses `@desen/starter-catalog-web` rather than expanding or replacing the M10 reference
+catalog. M10A-T01 establishes its bounded initial foundation on pinned `@base-ui/react@1.8.0` with
+an authored **DESEN Neutral** design language. That completed slice contains Button, Select, and
+Dialog only. “Starter” names the intended broad, ready default for the declared `web-react` target;
+T01 does not claim that full library, create a lowest-common-denominator protocol widget set, or
+promise identical components on other targets.
 
 Base UI is trusted package implementation code. A Source may select only a DESEN capability id,
 never a Base UI module, callback, DOM selector, class name, or arbitrary prop. Each admitted

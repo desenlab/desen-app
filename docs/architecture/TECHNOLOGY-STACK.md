@@ -52,16 +52,18 @@ fresh compatibility checks.
 Map provider, drag-and-drop adapter, router, query cache, and UI component dependencies are chosen
 only by their owning tasks and require an ADR when they affect public capability contracts.
 
-## M10A product foundation — T01 in progress
+## M10A product foundation — T01 complete
 
-The M10A planning decision selects `@base-ui/react` **1.8.0** behind a new private
+M10A-T01 pins `@base-ui/react` **1.8.0** behind the private
 `@desen/starter-catalog-web` Catalog/adapter package, with DESEN-owned Neutral styles implemented
-using CSS Modules and token-backed CSS variables. npm metadata checked 2026-09-10 reports MIT
-licensing and a React/React DOM 19-compatible peer range; that is compatibility input, not a
-completed security or adapter proof. M10A-T01 pins the dependency and lockfile, checks exact
-integrity/peers, and records production versus development audit findings separately.
+using CSS Modules and token-backed CSS variables. The completed boundary authenticates the exact
+dependency, lockfile integrity, peer range, installed manifest and MIT license, and records
+production versus development audit findings separately. It proves only the bounded Button,
+Select, and Dialog slice; it is not a complete component library, App migration, package release,
+or production deployment.
 
-`@desen/design-system-core` is the planned platform-neutral data/token/recipe/release layer.
+M10A-T02 is ready but remains `NOT_STARTED`. Its planned `@desen/design-system-core` is the
+platform-neutral data/token/recipe/release layer.
 The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
 capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
 and hermetic capture configuration. No Storybook, Chromatic, Tailwind or second primitive library

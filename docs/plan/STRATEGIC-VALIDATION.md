@@ -132,9 +132,10 @@ Selected primary references:
 **When:** After `G10` and before `M11-T01` or `M11-T08`.
 
 **Status:** Complete on 2026-09-10. Decision: **`adapt`**.
-This closes the research/decision activity, not pilot validation or implementation. The user chose
-the bounded [M10A product foundation](M10A-IMPLEMENTATION-PLAN.md) before M11, without further
-external interviews or team trials. M11 remains NOT_STARTED and depends on G10A.
+This closes the research/decision activity, not pilot validation or implementation evidence by
+itself. The user chose the bounded [M10A product foundation](M10A-IMPLEMENTATION-PLAN.md) before
+M11, without further external interviews or team trials. M11 remains NOT_STARTED and depends on
+G10A.
 
 **Original rationale:** G10 provides a repeatable lifecycle demonstration. The review distinguished
 that technical proof from a mature daily design experience: the five-component reference demo does
@@ -192,5 +193,8 @@ not a fabricated Continue result. Additional external research is not a prerequi
 the subsequent planned M11 extension proof. Internal automated acceptance replaces no market
 evidence: demand, adoption and broad Storybook/Chromatic/Figma equivalence remain unproven.
 
-The next implementation task is M10A-T01, when requested. G10A must pass before M11-T01 or M11-T08.
-No code, package installation, external publication or deployment is completed by this decision.
+M10A-T01 is now `DONE` as the bounded Button, Select, and Dialog adapter foundation. M10A-T02 is
+ready as the next implementation task but remains `NOT_STARTED`. This does not establish the full
+starter library, design-system management, normal App integration, package release, market demand,
+or production readiness. G10A must pass before M11-T01 or M11-T08; the SC-02 decision itself
+authorizes no external publication or deployment.
