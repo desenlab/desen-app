@@ -5,18 +5,18 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 123/176 (%70), M10 12/12,
-M10A 2/28 (%7) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01 ile M10A-T02'nin exact-head PR
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 124/176 (%70), M10 12/12,
+M10A 3/28 (%11) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01, M10A-T02 ve M10A-T03'ün exact-head PR
 kontrolleri, merge'leri ve taze `main` koşuları geçti; ayrıntı [Project Status](../../PROJECT-STATUS.md),
 [T01 kanıtı](../proof/M10A-T01.md), [T02 kanıtı](../proof/M10A-T02.md) ve
 [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış görev sayısı 123 ve M10A sayacı 2/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
+ekler; tamamlanmış görev sayısı 124 ve M10A sayacı 3/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
-sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` aktif
-`IN_PROGRESS` görevdir: yerel uygulama/kanıt adayı hazırdır, exact-head hosted kapanış beklenir.
-`M10A-T04` bağımlılık açısından hazırdır; T03 aktifken seçili değildir ve `NOT_STARTED` kalır.
+sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` `DONE`: tema/token
+authoring, modlar, alias'lar, kayıp-farkındalıklı aktarım ve izole workbench kanıtlandı.
+`M10A-T04` bağımlılık açısından hazırdır; seçili değildir ve `NOT_STARTED` kalır.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i

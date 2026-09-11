@@ -284,7 +284,7 @@ const M11_TASK_IDS = Object.freeze(
 );
 const FIVE_COLUMN_TASK_BOARD_SECTIONS = Object.freeze(["M00", "M01", "operational"]);
 const TASK_BOARD_STATUSES = Object.freeze(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]);
-const EXPECTED_COMPLETED_IMPLEMENTATION_TASKS = 123;
+const EXPECTED_COMPLETED_IMPLEMENTATION_TASKS = 124;
 const EXPECTED_COMPLETED_GATES = 11;
 const SC_02_COMPLETE_ADAPT_MARKER = "**Status:** Complete on 2026-09-10. Decision: **`adapt`**.";
 
@@ -450,11 +450,9 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
     const row = m10aRows.find(({ cells }) => cells[0] === taskId);
     assert.ok(row !== undefined, `missing ${taskId}`);
     const expectedStatus =
-      taskId === "M10A-T01" || taskId === "M10A-T02"
+      taskId === "M10A-T01" || taskId === "M10A-T02" || taskId === "M10A-T03"
         ? "DONE"
-        : taskId === "M10A-T03"
-          ? "IN_PROGRESS"
-          : "NOT_STARTED";
+        : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
     assert.equal(
       row.cells[2],
@@ -984,9 +982,9 @@ test("task board retains its canonical inventory without narrative appendices", 
   const m10aCompletionPercent = Math.round((completedM10ATasks / M10A_TASK_IDS.length) * 100);
   assert.equal(completedTasks, EXPECTED_COMPLETED_IMPLEMENTATION_TASKS);
   assert.equal(completedGates, EXPECTED_COMPLETED_GATES);
-  assert.equal(completedM10ATasks, 2);
+  assert.equal(completedM10ATasks, 3);
   assert.equal(completionPercent, 70);
-  assert.equal(m10aCompletionPercent, 7);
+  assert.equal(m10aCompletionPercent, 11);
 
   const readme = await readFile(resolve(WORKSPACE_ROOT, "README.md"), "utf8");
   const projectStatus = await readFile(resolve(WORKSPACE_ROOT, "PROJECT-STATUS.md"), "utf8");
@@ -1048,10 +1046,9 @@ test("task board retains its canonical inventory without narrative appendices", 
   );
   assert.equal(statuses.get("G11"), "NOT_STARTED");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
-  assert.ok(normalizedReadme.includes("**Active task:** `M10A-T03` (`IN_PROGRESS`)"));
+  assert.ok(normalizedReadme.includes("**Active task:** none"));
   assert.ok(normalizedReadme.includes("**Next:** `M10A-T04` (dependency-ready but `NOT_STARTED`"));
-  assert.ok(normalizedProjectStatus.includes("**M10A-T01 and M10A-T02 are DONE**"));
-  assert.ok(normalizedProjectStatus.includes("M10A-T03 is `IN_PROGRESS`"));
+  assert.ok(normalizedProjectStatus.includes("**M10A-T01, M10A-T02, and M10A-T03 are DONE**"));
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
   assert.ok(normalizedStartHere.includes("M11 başlamadı."));
   assert.equal(
@@ -1137,11 +1134,11 @@ test("pre-M11 planning inventory rejects row, dependency, count, or gate-status 
       /M10A-T02 must remain DONE/u,
     );
   }
-  for (const status of ["DONE", "NOT_STARTED", "BLOCKED"]) {
+  for (const status of ["IN_PROGRESS", "NOT_STARTED", "BLOCKED"]) {
     const falseTaskStatus = replaceTaskBoardCell(taskBoard, "M10A-T03", 1, status);
     assert.throws(
       () => assertPreM11PlanningInventory(parseTaskBoard(falseTaskStatus)),
-      /M10A-T03 must remain IN_PROGRESS/u,
+      /M10A-T03 must remain DONE/u,
     );
   }
 });

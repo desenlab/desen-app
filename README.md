@@ -4,16 +4,16 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01/T02 are complete. SC-02 concluded `adapt`. M10A-T03 is `IN_PROGRESS`:
-> its local implementation/evidence is a candidate whose exact-head hosted checks are pending.
-> M11 has not started. This is not a production certification.
+> M10/G10 and M10A-T01/T02/T03 are complete. SC-02 concluded `adapt`; T03 closes the
+> platform-neutral theme/token authoring foundation and isolated workbench proof. M10A-T04 is
+> dependency-ready but `NOT_STARTED`. M11 has not started. This is not a production certification.
 
 ## Implementation progress
 
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████████░░░░░░░` **123 / 176 tasks complete (70%)**
+**Overall:** `██████████████████░░░░░░░` **124 / 176 tasks complete (70%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -33,11 +33,11 @@ bounded, reproducible claims about both.
 
 **M10 complete:** `████████████` **12 / 12 tasks complete (100%)**
 
-**M10A:** **2 / 28 tasks complete (7%)** · 28 newly planned product tasks; no completed work removed.
+**M10A:** **3 / 28 tasks complete (11%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Active task:** `M10A-T03` (`IN_PROGRESS`) · **Next:** `M10A-T04` (dependency-ready but
-`NOT_STARTED` and unselected while T03 is active) · **M11:** `NOT_STARTED`
+**Active task:** none · **Next:** `M10A-T04` (dependency-ready but `NOT_STARTED`, unselected) ·
+**M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
 
@@ -172,17 +172,18 @@ connections, and built-in design-system documentation/visual review. These are p
 not capabilities of the current five-component demo. The completed `M10A-T01` installed Base UI
 1.8.0 and proved three adapters in isolated authoring/host harnesses. The completed `M10A-T02` adds
 the platform-neutral App project envelope and bounded DTCG token resolver; its exact-head and
-fresh-`main` hosted Quality and Browser E2E gates passed. `M10A-T03` is now `IN_PROGRESS`: its local
-candidate adds platform-neutral `@desen/design-system-authoring` plus an isolated workbench with
+fresh-`main` hosted Quality and Browser E2E gates passed. `M10A-T03` is `DONE`: its
+platform-neutral `@desen/design-system-authoring` plus isolated workbench provide
 structured theme, mode, token, and whole-token-alias controls; exact sRGB and px/rem handling;
 atomic history and import; and bounded loss-aware transfer. The frozen SC-01 inventory's 16 valid
 fixtures split into three T02-supported normal edit/preview paths and 13 losslessly preserved,
 disclosed unsupported paths that block partial preview only for their selected overlay; seven SC-01
 invalid fixtures reject atomically. A separate closed T02-recognized unsupported matrix preserves
-and discloses six valid fixtures and atomically rejects six malformed fixtures. Unreviewed or
-invalid forms fail closed without silent loss. Exact-head hosted checks are still
-pending. It adds no normal App integration, persistence, immutable release, Publisher, Runtime, or
-protocol authority. T04 is dependency-ready but remains `NOT_STARTED` and unselected while T03 is active.
+and discloses six valid fixtures and atomically rejects ten malformed fixtures. Unreviewed or
+invalid forms fail closed without silent loss. Exact-head PR and fresh-`main` hosted Quality and
+Browser E2E gates passed (see the [T03 proof](docs/proof/M10A-T03.md)). It adds no normal App
+integration, persistence, immutable release, Publisher, Runtime, or protocol authority. T04 is
+dependency-ready but remains `NOT_STARTED` and unselected; M11 remains gated by G10A.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and
