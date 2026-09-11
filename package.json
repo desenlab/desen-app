@@ -343,7 +343,7 @@
     "verify:m10a-t01": "pnpm verify:m10-gate && pnpm --filter @desen/reference-catalog-web build && pnpm --filter @desen/validator build && pnpm --filter @desen/starter-catalog-web-proof... build && pnpm --filter @desen/starter-catalog-web test && pnpm --filter @desen/editor-core test:subtree-insert && node scripts/verify-m10a-t01.mjs",
     "test:m10a-t01": "pnpm --filter @desen/reference-catalog-web build && pnpm --filter @desen/validator build && pnpm --filter @desen/starter-catalog-web-proof... build && pnpm --filter @desen/starter-catalog-web test && pnpm --filter @desen/editor-core test:subtree-insert && node --test tests/m10a-t01.test.mjs",
     "generate:m10a-t02": "pnpm --filter @desen/design-system-core... build && node scripts/generate-m10a-t02-proof.mjs",
-    "verify:m10a-t02": "pnpm verify:m10a-t01 && pnpm --filter @desen/design-system-core... build && pnpm --filter @desen/design-system-core test && pnpm --filter @desen/design-system-core test:public-package && node scripts/verify-m10a-t02.mjs",
+    "verify:m10a-t02": "pnpm verify:m10a-t01 && pnpm verify:desen-app-published-host-update && pnpm --filter @desen/design-system-core... build && pnpm --filter @desen/design-system-core test && pnpm --filter @desen/design-system-core test:public-package && node scripts/verify-m10a-t02.mjs",
     "test:m10a-t02": "pnpm --filter @desen/design-system-core... build && pnpm --filter @desen/design-system-core test && pnpm --filter @desen/design-system-core test:public-package && node --test tests/m10a-t02.test.mjs",
     "boundaries": "depcruise --config dependency-cruiser.config.cjs apps packages && node scripts/verify-boundary-fixtures.mjs",
     "format": "prettier . --write",

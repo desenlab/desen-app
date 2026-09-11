@@ -25,11 +25,14 @@ import {
   DESEN_APP_PUBLISHED_HOST_UPDATE_T14_PIN,
   DESEN_APP_T04_HISTORICAL_READER_BRIDGE_PIN,
   DesenAppPublishedHostUpdateProofError,
+  authenticateM10AT01LockfileSuccessor,
+  authenticateM10AT02LockfileSuccessor,
   authenticateDesenAppPublishedHostUpdateSuccessor,
   buildCurrentDesenAppPublishedHostUpdateGraphAudit,
   buildDesenAppPublishedHostUpdateEvidence,
   materializeDesenAppT04HistoricalReaderFileOverrides,
   projectDesenAppT04HistoricalReaderPathInventory,
+  projectM10AT02T01Input,
   readDesenAppT01aHistoricalReaderGapFile,
   readDesenAppT04HistoricalReaderTaskTimeFile,
   verifyDesenAppPublishedHostUpdateBrowserPolicy,
@@ -99,6 +102,10 @@ const M10A_T01_LOCKFILE_RECEIPT = Object.freeze({
   bytes: 138_171,
   sha256: "2d7d284b3f32e1dedc94161aef6f012f7e86913c9f50437edb64630ba14bc31f",
 });
+const M10A_T02_LOCKFILE_RECEIPT = Object.freeze({
+  bytes: 138_555,
+  sha256: "686319cce7bafbfcb62750dbc02abcc23ce95b13a760cb496974a5f129690b76",
+});
 const M10_T08_LOCKFILE_RECEIPT = Object.freeze({
   bytes: 132_210,
   sha256: "f2ba3d3f38b1cee1ef369f8ea138f476bbf4574931262563b9f550937c9cae6c",
@@ -121,6 +128,18 @@ const M10A_T01_T08_INPUT_RECEIPTS = Object.freeze([
       bytes: 9_049,
       sha256: "03b0c558fc9803726c09b03ca3c31b4df0f2f44acf3f9f18b8c64dc2d8f3856d",
     }),
+  }),
+]);
+const M10A_T02_T01_INPUT_RECEIPTS = Object.freeze([
+  Object.freeze({
+    path: "dependency-cruiser.config.cjs",
+    bytes: 16_261,
+    sha256: "4c70efb8588360fd51722e0ea0dc507ae006d2628daccbd26277785b2f91c3ec",
+  }),
+  Object.freeze({
+    path: "scripts/verify-boundary-fixtures.mjs",
+    bytes: 10_148,
+    sha256: "9a6b89593d2d215bb2bc2fb835400497f156fa9a29858a87af312c920410d0a8",
   }),
 ]);
 const M10A_T01_LOCKFILE_ADDED_ENTRIES = Object.freeze([
@@ -156,6 +175,12 @@ const M10A_T01_LOCKFILE_ADDED_ENTRIES = Object.freeze([
       "  reselect@5.3.0: {}\n",
       "  use-sync-external-store@1.6.0(react@19.2.8):\n",
     ]),
+  }),
+]);
+const M10A_T02_LOCKFILE_ADDED_ENTRIES = Object.freeze([
+  Object.freeze({
+    section: "importers",
+    headers: Object.freeze(["  packages/design-system-core:\n"]),
   }),
 ]);
 const SOURCE_PATHS = Object.freeze({
@@ -219,8 +244,20 @@ function removeLockfileEntry(source, section, header) {
   return source.slice(0, entryStart) + source.slice(entryEnd);
 }
 
-function projectM10T08Lockfile(liveLockfile) {
-  let projected = liveLockfile.toString("utf8");
+function projectLockfileEntries(lockfile, additions) {
+  let projected = lockfile.toString("utf8");
+  for (const { section, headers } of additions) {
+    for (const header of headers) projected = removeLockfileEntry(projected, section, header);
+  }
+  return Buffer.from(projected);
+}
+
+function projectM10AT01Lockfile(liveLockfile) {
+  return projectLockfileEntries(liveLockfile, M10A_T02_LOCKFILE_ADDED_ENTRIES);
+}
+
+function projectM10T08Lockfile(m10aT01Lockfile) {
+  let projected = m10aT01Lockfile.toString("utf8");
   for (const { section, headers } of M10A_T01_LOCKFILE_ADDED_ENTRIES) {
     for (const header of headers) projected = removeLockfileEntry(projected, section, header);
   }
@@ -1151,8 +1188,16 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
   const compatibility = built.dependencySecurityCompatibility;
   assert.equal(compatibility.authority, "SEC-02");
   assert.equal(compatibility.currentBytes, liveLockfile.byteLength);
-  assert.equal(compatibility.currentBytes, M10A_T01_LOCKFILE_RECEIPT.bytes);
-  assert.equal(compatibility.currentSha256, M10A_T01_LOCKFILE_RECEIPT.sha256);
+  assert.equal(compatibility.currentBytes, M10A_T02_LOCKFILE_RECEIPT.bytes);
+  assert.equal(compatibility.currentSha256, M10A_T02_LOCKFILE_RECEIPT.sha256);
+  assert.deepEqual(compatibility.t02LockfileSuccessor, {
+    task: "M10A-T02",
+    ...M10A_T02_LOCKFILE_RECEIPT,
+    additivePredecessor: {
+      authority: "M10A-T01",
+      ...M10A_T01_LOCKFILE_RECEIPT,
+    },
+  });
   assert.deepEqual(compatibility.lockfileSuccessor, {
     task: "M10A-T01",
     ...M10A_T01_LOCKFILE_RECEIPT,
@@ -1185,7 +1230,7 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
     "brace-expansion": "5.0.9",
     nanoid: "3.3.18",
   });
-  assert.equal(compatibility.projectedReceipts, 1);
+  assert.equal(compatibility.projectedReceipts, 2);
   assert.equal(compatibility.immutableArtifactPreserved, true);
   assert.equal(
     createHash("sha256").update(liveLockfile).digest("hex"),
@@ -1203,16 +1248,40 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
   const liveLockfileText = liveLockfile.toString("utf8");
-  assert.equal(liveLockfile.byteLength, M10A_T01_LOCKFILE_RECEIPT.bytes);
+  assert.equal(liveLockfile.byteLength, M10A_T02_LOCKFILE_RECEIPT.bytes);
   assert.equal(
     createHash("sha256").update(liveLockfile).digest("hex"),
+    M10A_T02_LOCKFILE_RECEIPT.sha256,
+  );
+  const m10aT01Lockfile = projectM10AT01Lockfile(liveLockfile);
+  assert.equal(m10aT01Lockfile.byteLength, M10A_T01_LOCKFILE_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(m10aT01Lockfile).digest("hex"),
     M10A_T01_LOCKFILE_RECEIPT.sha256,
   );
-  const compositionLockfile = projectM10T08Lockfile(liveLockfile);
+  assert.deepEqual(
+    authenticateM10AT02LockfileSuccessor(liveLockfile).predecessorBytes,
+    m10aT01Lockfile,
+  );
+  const compositionLockfile = projectM10T08Lockfile(m10aT01Lockfile);
   assert.equal(compositionLockfile.byteLength, M10_T08_LOCKFILE_RECEIPT.bytes);
   assert.equal(
     createHash("sha256").update(compositionLockfile).digest("hex"),
     M10_T08_LOCKFILE_RECEIPT.sha256,
+  );
+  assert.deepEqual(
+    authenticateM10AT01LockfileSuccessor(
+      authenticateM10AT02LockfileSuccessor(liveLockfile).predecessorBytes,
+    ).predecessorBytes,
+    compositionLockfile,
+  );
+  assert.deepEqual(
+    authenticateM10AT01LockfileSuccessor(m10aT01Lockfile).predecessorBytes,
+    compositionLockfile,
+  );
+  assert.throws(
+    () => authenticateM10AT01LockfileSuccessor(liveLockfile),
+    expectedError("DEPENDENCY_SUCCESSOR_DRIFT"),
   );
   let priorLockfileText = compositionLockfile.toString("utf8");
   const protocolLink =
@@ -1260,11 +1329,48 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     createHash("sha256").update(priorLockfile).digest("hex"),
     "49f1d521ebd2e097508d22f8235e111bfb7e6bdc26a039b517a4a19aba7b2735",
   );
+  const t02DependencyOrder = [
+    "      '@desen/editor-core':\n        specifier: workspace:*\n        version: link:../editor-core\n",
+    "      '@desen/protocol':\n        specifier: workspace:*\n        version: link:../protocol\n",
+  ];
+  const t02SuccessorMutations = Object.freeze([
+    Object.freeze(["tampered", changedByte(liveLockfile)]),
+    Object.freeze([
+      "extra",
+      Buffer.from(
+        replaceOnce(
+          liveLockfileText,
+          "  packages/design-system-core:\n    dependencies:\n",
+          "  packages/design-system-core:\n    dependencies:\n      unreviewed-package:\n        specifier: 1.0.0\n        version: 1.0.0\n",
+        ),
+      ),
+    ]),
+    Object.freeze(["missing", m10aT01Lockfile]),
+    Object.freeze([
+      "reordered",
+      Buffer.from(
+        replaceOnce(
+          liveLockfileText,
+          t02DependencyOrder.join(""),
+          [...t02DependencyOrder].reverse().join(""),
+        ),
+      ),
+    ]),
+  ]);
+  for (const [mutation, rejectedLockfile] of t02SuccessorMutations) {
+    assert.notDeepEqual(rejectedLockfile, liveLockfile, mutation);
+    await assert.rejects(
+      buildDesenAppPublishedHostUpdateEvidence({
+        fileOverrides: new Map([["pnpm-lock.yaml", rejectedLockfile]]),
+      }),
+      expectedError("DEPENDENCY_SUCCESSOR_DRIFT"),
+      mutation,
+    );
+  }
   for (const rejectedLockfile of [
     compositionLockfile,
     securityTaskLockfile,
     priorLockfile,
-    changedByte(liveLockfile),
     Buffer.from(replaceOnce(liveLockfileText, "specifier: 1.8.0", "specifier: ^1.8.0")),
     Buffer.from(
       replaceOnce(
@@ -1295,16 +1401,27 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     await readFile(path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json")),
   );
   const currentT08Inputs = new Map();
-  for (const receipt of M10A_T01_T08_INPUT_RECEIPTS) {
-    const bytes = await readFile(path.join(ROOT, receipt.path));
-    currentT08Inputs.set(receipt.path, bytes);
-    assert.equal(bytes.byteLength, receipt.bytes);
-    assert.equal(createHash("sha256").update(bytes).digest("hex"), receipt.sha256);
+  for (const currentReceipt of M10A_T02_T01_INPUT_RECEIPTS) {
+    const bytes = await readFile(path.join(ROOT, currentReceipt.path));
+    currentT08Inputs.set(currentReceipt.path, bytes);
+    assert.equal(bytes.byteLength, currentReceipt.bytes);
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), currentReceipt.sha256);
+    const receipt = M10A_T01_T08_INPUT_RECEIPTS.find(
+      ({ path: receiptPath }) => receiptPath === currentReceipt.path,
+    );
+    assert.ok(receipt);
+    const m10aT01Bytes = projectM10AT02T01Input(currentReceipt.path, bytes);
+    assert.equal(m10aT01Bytes.byteLength, receipt.bytes);
+    assert.equal(createHash("sha256").update(m10aT01Bytes).digest("hex"), receipt.sha256);
+    assert.throws(
+      () => projectM10AT02T01Input(currentReceipt.path, m10aT01Bytes),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
     assert.deepEqual(
       t08Artifact.boundary.trackedReceipts.find(
-        ({ path: receiptPath }) => receiptPath === receipt.path,
+        ({ path: receiptPath }) => receiptPath === currentReceipt.path,
       ),
-      { path: receipt.path, ...receipt.predecessor },
+      { path: currentReceipt.path, ...receipt.predecessor },
     );
   }
   const dependencyPolicy = currentT08Inputs.get("dependency-cruiser.config.cjs").toString("utf8");

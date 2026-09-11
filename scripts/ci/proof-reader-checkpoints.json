@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "6774d004d0b688a8e0a0ebe37c9e17e336247be1f26012dc573d8196140e61f2",
+  "headSha256": "c7ba51e79472cce640629e6856e9240ddf859f1351213b7fe8f8f91e81e353fc",
   "checkpoints": [
     {
       "sequence": 1,
@@ -63205,15 +63205,15 @@
           "task": "M10-T05",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-published-host-update-proof.mjs",
-          "bytes": 164497,
-          "sha256": "56b6ee596cdc6b22688372c956df81f207296ab279efa3fd7b7c3f6b03d4072e"
+          "bytes": 169620,
+          "sha256": "aaf75582087e498ff925fc92ea57e2948b77ce8ff5ef07fc5a327fb68af9d8a5"
         },
         {
           "task": "M10-T05",
           "role": "root-test",
           "path": "tests/desen-app-published-host-update.test.mjs",
-          "bytes": 69127,
-          "sha256": "5155cd3f88b13adfd247145847611d4776bbfd7b694a328849afc29d66ab9679"
+          "bytes": 73322,
+          "sha256": "26cf6d87aafd11949cb8af4eaa4adc43ce55f670373646398fb842cefa1a2b57"
         },
         {
           "task": "M10-T06",
@@ -63233,8 +63233,8 @@
           "task": "M10-T07",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-last-known-good-recovery-proof.mjs",
-          "bytes": 76966,
-          "sha256": "273b726c97cd9f1267005c17b0a2978b25c5c92d2377105872040fdb23e4ba6b"
+          "bytes": 77146,
+          "sha256": "297a33d744bce565dac68114a37bd20a580c6c637a61087c1939159b7fc4ca76"
         },
         {
           "task": "M10-T07",
@@ -63247,8 +63247,8 @@
           "task": "M10-T08",
           "role": "proof-library",
           "path": "scripts/lib/desen-app-repeatable-demo-proof.mjs",
-          "bytes": 56327,
-          "sha256": "a18794862cb321dc127720ca3284425b1133efc2de65b640a521ec643b8c8192"
+          "bytes": 56507,
+          "sha256": "be301223cdeea8b76086c87f2894e1fe554b73f4cd06d220453b8b11d0695b56"
         },
         {
           "task": "M10-T08",

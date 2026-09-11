@@ -74,33 +74,36 @@ const M10A_T01_HISTORICAL_COMPATIBILITY_RESEALED_READER_INDEXES = Object.freeze(
   50, 51, 52, 53, 54, 55, 57, 59, 61, 63, 65, 67, 69, 116, 117, 118, 119, 120, 121, 122, 123,
 ]);
 const M10A_T01_LINUX_PNPM_RESEALED_READER_INDEXES = Object.freeze([128, 129]);
+const M10A_T02_HOSTED_COMPATIBILITY_RESEALED_READER_INDEXES = Object.freeze([116, 117, 120, 122]);
 
 async function assertHistoricalReaderMatchesCurrentWorkspace(reader, index) {
   // Historical generations retain their exact reviewed digests. Only explicitly enumerated
   // successors supply current bytes; no path prefix can exempt a reader.
-  const current = M10A_T01_LINUX_PNPM_RESEALED_READER_INDEXES.includes(index)
-    ? baselineManifest.checkpoints[82].readers[index]
-    : M10A_T01_HISTORICAL_COMPATIBILITY_RESEALED_READER_INDEXES.includes(index)
-      ? baselineManifest.checkpoints[81].readers[index]
-      : M10A_T01_RESEALED_READER_INDEXES.includes(index)
-        ? baselineManifest.checkpoints[80].readers[index]
-        : REPEATABLE_DEMO_RESEALED_READER_INDEXES.includes(index)
-          ? baselineManifest.checkpoints[77].readers[index]
-          : LAST_KNOWN_GOOD_RECOVERY_RESEALED_READER_INDEXES.includes(index)
-            ? baselineManifest.checkpoints[76].readers[index]
-            : INVALID_PUBLICATION_RESEALED_READER_INDEXES.includes(index)
-              ? baselineManifest.checkpoints[75].readers[index]
-              : SECOND_FRESH_PROOF_PERFORMANCE_RESEALED_READER_INDEXES.includes(index)
-                ? baselineManifest.checkpoints[74].readers[index]
-                : DEPENDENCY_SECURITY_RESEALED_READER_INDEXES.includes(index)
-                  ? baselineManifest.checkpoints[72].readers[index]
-                  : PUBLISHED_HOST_UPDATE_RESEALED_READER_INDEXES.includes(index)
-                    ? baselineManifest.checkpoints[71].readers[index]
-                    : ARCHIVE_REDACTION_RESEALED_READER_INDEXES.includes(index)
-                      ? baselineManifest.checkpoints[70].readers[index]
-                      : FRESH_PROOF_PERFORMANCE_RESEALED_READER_INDEXES.includes(index)
-                        ? baselineManifest.checkpoints[69].readers[index]
-                        : reader;
+  const current = M10A_T02_HOSTED_COMPATIBILITY_RESEALED_READER_INDEXES.includes(index)
+    ? baselineManifest.checkpoints[83].readers[index]
+    : M10A_T01_LINUX_PNPM_RESEALED_READER_INDEXES.includes(index)
+      ? baselineManifest.checkpoints[82].readers[index]
+      : M10A_T01_HISTORICAL_COMPATIBILITY_RESEALED_READER_INDEXES.includes(index)
+        ? baselineManifest.checkpoints[81].readers[index]
+        : M10A_T01_RESEALED_READER_INDEXES.includes(index)
+          ? baselineManifest.checkpoints[80].readers[index]
+          : REPEATABLE_DEMO_RESEALED_READER_INDEXES.includes(index)
+            ? baselineManifest.checkpoints[77].readers[index]
+            : LAST_KNOWN_GOOD_RECOVERY_RESEALED_READER_INDEXES.includes(index)
+              ? baselineManifest.checkpoints[76].readers[index]
+              : INVALID_PUBLICATION_RESEALED_READER_INDEXES.includes(index)
+                ? baselineManifest.checkpoints[75].readers[index]
+                : SECOND_FRESH_PROOF_PERFORMANCE_RESEALED_READER_INDEXES.includes(index)
+                  ? baselineManifest.checkpoints[74].readers[index]
+                  : DEPENDENCY_SECURITY_RESEALED_READER_INDEXES.includes(index)
+                    ? baselineManifest.checkpoints[72].readers[index]
+                    : PUBLISHED_HOST_UPDATE_RESEALED_READER_INDEXES.includes(index)
+                      ? baselineManifest.checkpoints[71].readers[index]
+                      : ARCHIVE_REDACTION_RESEALED_READER_INDEXES.includes(index)
+                        ? baselineManifest.checkpoints[70].readers[index]
+                        : FRESH_PROOF_PERFORMANCE_RESEALED_READER_INDEXES.includes(index)
+                          ? baselineManifest.checkpoints[69].readers[index]
+                          : reader;
   const identity = ({ task, role, path: readerPath }) => ({ task, role, path: readerPath });
   assert.deepEqual(identity(current), identity(reader));
   const bytes = await readFile(path.join(WORKSPACE_ROOT, current.path));
@@ -7168,7 +7171,7 @@ test("sequence eighty-three reseals only the M10A Linux pnpm readers", async () 
   assert.equal(frozen.checkpointHeadSha256, baselineManifest.headSha256);
 });
 
-test("sequence eighty-four appends M10A-T02 without rewriting predecessor authority", async () => {
+test("sequence eighty-four appends M10A-T02 and reseals exact hosted compatibility readers", async () => {
   const previous = baselineManifest.checkpoints[82];
   const current = baselineManifest.checkpoints[83];
   const identity = ({ task, role, path: readerPath }) => ({ task, role, path: readerPath });
@@ -7186,7 +7189,61 @@ test("sequence eighty-four appends M10A-T02 without rewriting predecessor author
     sha256: "135dffbab6bc2c0d73e93caf2da6edbbeb7cec2653555fc5c128e1de0f5936c2",
   });
   assert.deepEqual(current.readers.slice(0, 130).map(identity), previous.readers.map(identity));
-  assert.deepEqual(current.readers.slice(0, 130), previous.readers);
+  for (const [index, reader] of current.readers.slice(0, 130).entries()) {
+    if (M10A_T02_HOSTED_COMPATIBILITY_RESEALED_READER_INDEXES.includes(index)) {
+      assert.notDeepEqual(reader, previous.readers[index]);
+    } else {
+      assert.deepEqual(reader, previous.readers[index]);
+    }
+  }
+  assert.deepEqual(
+    M10A_T02_HOSTED_COMPATIBILITY_RESEALED_READER_INDEXES.map((index) => [
+      index,
+      current.readers[index],
+    ]),
+    [
+      [
+        116,
+        {
+          task: "M10-T05",
+          role: "proof-library",
+          path: "scripts/lib/desen-app-published-host-update-proof.mjs",
+          bytes: 169620,
+          sha256: "aaf75582087e498ff925fc92ea57e2948b77ce8ff5ef07fc5a327fb68af9d8a5",
+        },
+      ],
+      [
+        117,
+        {
+          task: "M10-T05",
+          role: "root-test",
+          path: "tests/desen-app-published-host-update.test.mjs",
+          bytes: 73322,
+          sha256: "26cf6d87aafd11949cb8af4eaa4adc43ce55f670373646398fb842cefa1a2b57",
+        },
+      ],
+      [
+        120,
+        {
+          task: "M10-T07",
+          role: "proof-library",
+          path: "scripts/lib/desen-app-last-known-good-recovery-proof.mjs",
+          bytes: 77146,
+          sha256: "297a33d744bce565dac68114a37bd20a580c6c637a61087c1939159b7fc4ca76",
+        },
+      ],
+      [
+        122,
+        {
+          task: "M10-T08",
+          role: "proof-library",
+          path: "scripts/lib/desen-app-repeatable-demo-proof.mjs",
+          bytes: 56507,
+          sha256: "be301223cdeea8b76086c87f2894e1fe554b73f4cd06d220453b8b11d0695b56",
+        },
+      ],
+    ],
+  );
   assert.deepEqual(current.readers.slice(130), [
     {
       task: "M10A-T02",
@@ -7209,7 +7266,7 @@ test("sequence eighty-four appends M10A-T02 without rewriting predecessor author
   );
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "6774d004d0b688a8e0a0ebe37c9e17e336247be1f26012dc573d8196140e61f2",
+    "c7ba51e79472cce640629e6856e9240ddf859f1351213b7fe8f8f91e81e353fc",
   );
   for (const receipt of current.artifacts) {
     const bytes = await readFile(path.join(WORKSPACE_ROOT, receipt.path));

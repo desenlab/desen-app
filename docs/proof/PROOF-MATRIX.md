@@ -3546,9 +3546,16 @@ its canonical project digest is
 Package tests pass 52/52, the built public-package contract passes 3/3, and the root proof passes
 9/9. Reader checkpoint sequence 84 preserves sequences 1–83 and authenticates 66 artifacts plus
 132 current readers at
-`sha256:6774d004d0b688a8e0a0ebe37c9e17e336247be1f26012dc573d8196140e61f2`.
+`sha256:c7ba51e79472cce640629e6856e9240ddf859f1351213b7fe8f8f91e81e353fc`.
 The expanded CI authority contains 235 logical workloads / 112 proof pairs (100 ordinary and 12
 exclusive barriers) and 254 hosted physical shard workloads.
+
+The final local compatibility seal passes the exact T02 verifier together with all 525 CI
+orchestration contracts. The published-host, last-known-good, and repeatable-demo readers now
+authenticate an explicit T02 → T01 → T08 projection for the lockfile and two boundary-policy
+inputs; stale, missing, extra, reordered, and byte-tampered successors fail closed. The frozen
+published-host, recovery, and repeatable-demo artifacts remain byte-identical at their reviewed
+receipts.
 
 This is local implementation evidence, not task closure: exact-head hosted Quality and fresh-main
 receipts are still pending, so M10A-T02 remains `IN_PROGRESS`, progress remains 122/176 (69%), and
