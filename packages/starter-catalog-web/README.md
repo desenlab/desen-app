@@ -96,7 +96,8 @@ pnpm verify:m10a-t01
 
 See [the T01 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t01--base-ui-adapter-boundary-proof)
 and [ADR 0023](../../docs/adr/0023-design-first-authoring-and-design-system-workbench.md). M10A-T01
-is `DONE` after exact-head and fresh-main hosted verification. M10A-T02 is `IN_PROGRESS`; its local
-design-system-core candidate does not change this package. This package still makes no claim for
-the later complete library, theme editor, design-system releases, normal App integration, package
-publication, or production deployment.
+and M10A-T02 are `DONE` after exact-head and fresh-main hosted verification. T02's
+design-system-core result does not change this package. No task is active; M10A-T03 is next and
+ready but remains `NOT_STARTED`. This package still makes no claim for the later complete library,
+theme editor, design-system releases, normal App integration, package publication, or production
+deployment.

@@ -1,6 +1,6 @@
 # ADR 0023: Design-first authoring and design-system workbench
 
-- Status: Accepted; M10A-T01 complete, M10A-T02 candidate pending exact-head hosted closure
+- Status: Accepted; M10A-T01 and M10A-T02 `DONE`, M10A-T03 ready but `NOT_STARTED`
 - Date: 2026-09-10
 - Decision owner: user-authorized M10A planning / SC-02 adaptation, closed by G10A
 
@@ -17,10 +17,10 @@ static experience before a frontend engineer supplies application behavior. That
 weaken DESEN 0.1.0. Source and Bundle remain data-only, capability surfaces remain explicit,
 authoring adapters remain honest, and unknown runtime semantics still fail closed.
 
-This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 is `DONE`; the
-M10A-T02 local candidate is `IN_PROGRESS`, and the other 26 tasks remain `NOT_STARTED`. No successor
-is eligible until T02 closes. ADR acceptance alone is not implementation evidence or a
-release/production-readiness claim. The canonical implementation sequence is in
+This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 and M10A-T02 are
+`DONE`; the other 26 tasks remain `NOT_STARTED`. M10A-T03's dependency is complete and it is the
+selected next task, but no implementation task is active. ADR acceptance alone is not
+implementation evidence or a release/production-readiness claim. The canonical sequence is in
 [M10A Implementation Plan](../plan/M10A-IMPLEMENTATION-PLAN.md), with detailed acceptance contracts
 in [M10A Task Contracts](../plan/M10A-TASK-CONTRACTS.md) and product behavior in the
 [Design-System Workbench](../plan/DESIGN-SYSTEM-WORKBENCH.md).
@@ -46,9 +46,9 @@ Native event objects, refs, internal state, and unreviewed prop spreading do not
 boundary.
 
 Reusable design-system data that is independent of React belongs in
-`@desen/design-system-core`, not in `editor-core` or `runtime-core`. The T02 candidate admits a finite
-App-owned v1 project envelope, canonical Source, inert authoring metadata, and the bounded DTCG
-profile. Later tasks may add recipe-graph, stable-identity, materialization, and release contracts.
+`@desen/design-system-core`, not in `editor-core` or `runtime-core`. The completed T02 slice admits a
+finite App-owned v1 project envelope, canonical Source, inert authoring metadata, and the bounded
+DTCG profile. Later tasks may add recipe-graph, stable-identity, materialization, and release contracts.
 The package remains platform-neutral and cannot import Base UI, React, DOM, CSS, browser APIs, the
 App, or executable host bindings; its current internal dependencies are `protocol` and `editor-core`.
 Desen App remains the composition root. `@desen/starter-catalog-web` follows the existing

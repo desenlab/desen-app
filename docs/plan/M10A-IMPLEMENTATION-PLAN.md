@@ -1,8 +1,8 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 is `DONE`, and M10A-T02 is `IN_PROGRESS`
-with a locally passing implementation candidate awaiting exact-head hosted closure.
-The canonical statuses and dependencies are in [TASKS.md](TASKS.md).
+Decision date: 2026-09-10. Planning is complete; M10A-T01 and M10A-T02 are `DONE`. M10A-T03 is the
+selected next task and its dependency is complete, but it remains `NOT_STARTED`; no implementation
+task is active. The canonical statuses and dependencies are in [TASKS.md](TASKS.md).
 
 ## Product promise
 
@@ -19,8 +19,9 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 ## Delivery sequence and accounting
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
-and one gate; the total becomes 176 tasks and 14 gates. The 122 completed tasks and 11 completed
-gates remain completed. Nothing is renumbered, erased, or counted as implemented by this plan.
+and one gate; the total becomes 176 tasks and 14 gates. The 123 completed tasks and 11 completed
+gates remain completed. T01 and T02 are the two completed M10A tasks; the other 26 remain
+`NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
 Dependencies, not numeric order, select the next eligible task: T26 acceptance precedes T25's
@@ -143,13 +144,14 @@ updates, history and persistence. Source remains independently exportable and ca
 published with its exact Catalogs and authenticated design-system release. Production executes the
 derived Bundle, not the editable Source or project record.
 
-The active T02 candidate establishes platform-neutral `@desen/design-system-core` with finite v1
+The completed T02 slice establishes platform-neutral `@desen/design-system-core` with finite v1
 project admission and deterministic DTCG token resolution. It retains canonical Source plus inert
 token, recipe, asset, and connection metadata without granting persistence, materialization,
 release, App, Publisher, or Runtime authority. Later tasks own those capabilities. Web adapters may
 eventually project admitted data into styles, but React, DOM, CSS, arbitrary code, private selectors,
 endpoint/credential selection, and remote package loading stay outside this package. Runtime Core
-and the frozen protocol remain byte-identical.
+and the frozen protocol remain byte-identical. The [T02 proof](../proof/M10A-T02.md) owns the finite
+profile, rejection matrix, and hosted closure receipts.
 
 ## Design-system workbench and visual review
 
@@ -181,18 +183,20 @@ alone and not another external user recruitment round:
 - Existing M10 browser/proof coverage remains fresh and passing; Runtime Core and upstream identity
   checks pass. All new claims name their browser, viewport, fixture and resource-limit scope.
 
-## Active task
+## Ready-to-start task
 
-**M10A-T02 — Project design-system model and token resolver** is `IN_PROGRESS`. Its local candidate
-adds `@desen/design-system-core`, an App-owned v1 envelope with one canonical admitted Source and
-inert authoring metadata, and a closed v1 identity migration. The DTCG 2025.10 resolver supports nine
-types across seven families: ordered external sources model modes, whole-token aliases resolve after
-the overlay, and literal overrides apply last. See the
-[T02 proof](../proof/M10A-T02.md) for the finite profile and rejection matrix.
+**M10A-T03 — Theme and token authoring** is the selected next task. Its T02 dependency is `DONE`, but
+T03 remains `NOT_STARTED` and no implementation task is active. T03 owns the foundation/theme editor,
+color and typography controls, mode switching, token references, alias editing, and validated
+loss-aware import/export against T02's declared DTCG profile. It must deliver editable DESEN Neutral
+light/dark themes and arbitrary valid custom values without a forced palette, raw-JSON requirement
+for ordinary edits, or a token-only restriction on capability-supported literals.
 
-The task remains open until the current PR head's hosted Quality gate passes. M10A-T03 is not yet
-eligible. Do not add its theme UI, T04 releases, persistence, normal App integration, recipe or asset
-execution, starter-library expansion, Publisher/Runtime authority, Core/protocol changes, or M11.
+T03 evidence must cover live preview, undoable edits, and deterministic export/reimport round trips.
+Unsupported standard features must be disclosed and preserved in the editable document, and an
+invalid import must never overwrite working data. T03 does not authorize T04 or later tasks,
+immutable releases, normal App integration, persistence, recipe or asset execution,
+starter-library expansion, Publisher or Runtime authority, Core/protocol changes, or M11.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.
