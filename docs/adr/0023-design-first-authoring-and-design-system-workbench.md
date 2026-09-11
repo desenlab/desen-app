@@ -1,6 +1,6 @@
 # ADR 0023: Design-first authoring and design-system workbench
 
-- Status: Accepted; M10A-T01 and M10A-T02 `DONE`, M10A-T03 ready but `NOT_STARTED`
+- Status: Accepted; M10A-T01 and M10A-T02 `DONE`, M10A-T03 candidate `IN_PROGRESS`
 - Date: 2026-09-10
 - Decision owner: user-authorized M10A planning / SC-02 adaptation, closed by G10A
 
@@ -18,9 +18,9 @@ weaken DESEN 0.1.0. Source and Bundle remain data-only, capability surfaces rema
 authoring adapters remain honest, and unknown runtime semantics still fail closed.
 
 This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 and M10A-T02 are
-`DONE`; the other 26 tasks remain `NOT_STARTED`. M10A-T03's dependency is complete and it is the
-selected next task, but no implementation task is active. ADR acceptance alone is not
-implementation evidence or a release/production-readiness claim. The canonical sequence is in
+`DONE`; M10A-T03 is `IN_PROGRESS` with a local implementation/evidence candidate, and the other 25
+tasks remain `NOT_STARTED`. Exact-head hosted checks are still pending. ADR acceptance and local
+candidate evidence are not release or production-readiness claims. The canonical sequence is in
 [M10A Implementation Plan](../plan/M10A-IMPLEMENTATION-PLAN.md), with detailed acceptance contracts
 in [M10A Task Contracts](../plan/M10A-TASK-CONTRACTS.md) and product behavior in the
 [Design-System Workbench](../plan/DESIGN-SYSTEM-WORKBENCH.md).
@@ -55,6 +55,17 @@ Desen App remains the composition root. `@desen/starter-catalog-web` follows the
 target-package direction to `protocol`, `catalog-sdk`, and `runtime-react`, plus the pinned external
 Base UI dependency. Publisher and Runtime packages do not depend on `design-system-core` and gain no
 recipe semantics.
+
+The T03 candidate adds platform-neutral `@desen/design-system-authoring` plus an isolated browser
+workbench. It exposes structured theme, mode, token, and whole-alias controls with exact sRGB and
+px/rem handling, atomic history/import, and bounded loss-aware transfer. The frozen SC-01 inventory's
+16 valid fixtures split into three T02-supported normal edit/preview paths and 13 losslessly
+preserved, disclosed unsupported paths that block partial preview only for their selected overlay;
+seven invalid fixtures reject atomically. A separate closed T02-recognized unsupported matrix
+preserves/discloses six valid fixtures and atomically rejects six malformed fixtures. Unreviewed or
+invalid forms fail closed without silent loss. This bounded slice
+does not enter the normal App or add persistence, release, materialization, Publisher, Runtime, or
+protocol authority. T04 is dependency-ready but remains `NOT_STARTED` and unselected while T03 is active.
 
 ### Make the durable editable project the authoring aggregate
 

@@ -14,8 +14,9 @@ kontrolleri, merge'leri ve taze `main` koşuları geçti; ayrıntı [Project Sta
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
 ekler; tamamlanmış görev sayısı 123 ve M10A sayacı 2/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
-sürümlü project design-system modeli ve typed token resolver kanıtlandı. Aktif görev yoktur.
-Sıradaki tek hazır görev `M10A-T03`'tür; halen `NOT_STARTED` durumundadır.
+sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` aktif
+`IN_PROGRESS` görevdir: yerel uygulama/kanıt adayı hazırdır, exact-head hosted kapanış beklenir.
+`M10A-T04` bağımlılık açısından hazırdır; T03 aktifken seçili değildir ve `NOT_STARTED` kalır.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i
@@ -79,6 +80,15 @@ güvenilmeyen sınırlar taze kapsamlı çalışma yürütür.
 
 Mühür/checkpoint yalnızca kimlik ve etki otoritesidir; başarıyı önbelleklemez ve seçilen hosted
 işler taze çalışır.
+
+T03 adayı platformdan bağımsız `@desen/design-system-authoring` ile izole workbench'i sınırlar.
+Yapılandırılmış tema/mode/token/alias kontrolleri, sRGB ve px/rem değerleri, atomik geçmiş/import ve
+deterministik aktarım kapsamdadır. Donmuş SC-01'in 16 geçerli fixture'ı üç T02-destekli normal
+edit/preview yolu ve 13 kayıpsız korunup açıklanan desteklenmeyen yol olarak kapsanır; yalnız ilgili
+seçili overlay'de kısmi preview engellenir ve yedi geçersiz fixture atomik reddedilir. Ayrı kapalı
+T02-tanınan desteklenmeyen matriste altı geçerli fixture korunup açıklanır, altı bozuk fixture atomik
+reddedilir. İncelenmemiş veya geçersiz biçimler sessiz kayıp olmadan fail closed reddedilir. Normal App, persistence, release, Publisher, Runtime ve protokol
+değişikliği kapsam dışıdır.
 
 ## Değişmez sınırlar
 

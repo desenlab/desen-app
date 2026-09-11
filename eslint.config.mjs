@@ -11,11 +11,13 @@ const neutralFiles = [
   "packages/runtime-core/**/*.{ts,tsx}",
   "packages/editor-core/**/*.{ts,tsx}",
   "packages/design-system-core/**/*.{ts,tsx}",
+  "packages/design-system-authoring/**/*.{ts,tsx}",
 ];
 
 const browserFiles = [
   "apps/desen-app/**/*.{ts,tsx}",
   "apps/starter-catalog-web-proof/src/**/*.{ts,tsx}",
+  "apps/design-system-workbench-proof/src/**/*.{ts,tsx}",
   "apps/desen-app-browser-e2e/empty-project-to-sign-in.pw.ts",
   "apps/desen-app-browser-e2e/proof-application.tsx",
   "apps/desen-run/**/*.{ts,tsx}",
@@ -35,6 +37,9 @@ const nodeFiles = [
   "apps/starter-catalog-web-proof/*.pw.ts",
   "apps/starter-catalog-web-proof/*.mjs",
   "apps/starter-catalog-web-proof/scripts/*.mjs",
+  "apps/design-system-workbench-proof/*.config.ts",
+  "apps/design-system-workbench-proof/*.pw.ts",
+  "apps/design-system-workbench-proof/*.mjs",
   "scripts/**/*.{js,cjs,mjs,ts}",
   "packages/starter-catalog-web/scripts/*.mjs",
   "tests/**/*.{js,cjs,mjs,ts}",

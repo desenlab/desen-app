@@ -171,6 +171,7 @@ export const PROOF_IDS = Object.freeze([
   "m10-gate",
   "m10a-t01",
   "m10a-t02",
+  "m10a-t03",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -213,11 +214,25 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "m10-gate",
 ]);
 
-/** Sole verifier allowed to execute the task-owned fixed-port browser toolchain. */
-export const BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS = Object.freeze(["verify-m10a-t01"]);
-if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 1) {
+/** Exact verifiers allowed to execute their task-owned fixed-port browser toolchains. */
+export const BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS = Object.freeze([
+  "verify-m10a-t01",
+  "verify-m10a-t03",
+]);
+if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 2) {
   throw new Error("The reviewed browser-exclusive verifier set drifted.");
 }
+
+const BROWSER_AUTHORITY_BY_STEP_ID = Object.freeze({
+  "verify-m10a-t01": Object.freeze({
+    port: 4_187,
+    tempEnvironmentKey: "DESEN_M10A_T01_PROOF_TEMP",
+  }),
+  "verify-m10a-t03": Object.freeze({
+    port: 4_188,
+    tempEnvironmentKey: "DESEN_M10A_T03_PROOF_TEMP",
+  }),
+});
 
 /** Exact verifier whose fixed native Git observations require no temporary or workspace writes. */
 export const READ_ONLY_GIT_VERIFIER_PROOF_IDS = Object.freeze(["runtime-core-baseline"]);
@@ -336,6 +351,7 @@ const WORKSPACE_OUTPUT_EXCLUSIVE_STEP_IDS = Object.freeze([
   "editor-core-public-package-contract",
   "editor-web-public-package-contract",
   "design-system-core-public-package-contract",
+  "design-system-authoring-public-package-contract",
 ]);
 const PACKAGE_TEST_EXCLUSIVE_STEP_IDS = Object.freeze(["package-tests"]);
 
@@ -350,6 +366,8 @@ export const BUILD_OUTPUT_ROOTS = Object.freeze([
   "apps/desen-app-browser-e2e/.turbo",
   "apps/starter-catalog-web-proof/dist",
   "apps/starter-catalog-web-proof/.turbo",
+  "apps/design-system-workbench-proof/dist",
+  "apps/design-system-workbench-proof/.turbo",
   "apps/desen-run/dist",
   "apps/desen-run/.turbo",
   "apps/reference-host-web/dist",
@@ -364,6 +382,8 @@ export const BUILD_OUTPUT_ROOTS = Object.freeze([
   "packages/editor-core/.turbo",
   "packages/design-system-core/dist",
   "packages/design-system-core/.turbo",
+  "packages/design-system-authoring/dist",
+  "packages/design-system-authoring/.turbo",
   "packages/editor-web/dist",
   "packages/editor-web/.turbo",
   "packages/protocol/dist",
@@ -564,6 +584,7 @@ for (const stepId of PACKAGE_TEST_EXCLUSIVE_STEP_IDS) {
 for (const proofId of PROOF_IDS) {
   const verifierStepId = `verify-${proofId}`;
   const browserExclusive = BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.includes(verifierStepId);
+  const browserAuthority = BROWSER_AUTHORITY_BY_STEP_ID[verifierStepId];
   const verifierUsesRuntimeProbe = CHILD_PROCESS_VERIFIER_PROOF_ID_SET.has(proofId);
   const verifierUsesOsTemp =
     verifierUsesRuntimeProbe || OS_TEMP_ONLY_VERIFIER_PROOF_ID_SET.has(proofId);
@@ -581,7 +602,7 @@ for (const proofId of PROOF_IDS) {
           ? TEMP_POLICIES.RUNNER_SCOPED_OS
           : TEMP_POLICIES.NONE,
       tempKey: browserExclusive || verifierUsesOsTemp ? verifierStepId : null,
-      ports: browserExclusive ? [4_187] : [],
+      ports: browserExclusive ? [browserAuthority.port] : [],
       childProcessPolicy: browserExclusive
         ? CHILD_PROCESS_POLICIES.TOOLCHAIN_EXCLUSIVE
         : verifierUsesRuntimeProbe
@@ -647,8 +668,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 235) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 235 steps.", {
+if (METADATA_BY_STEP_ID.size !== 238) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 238 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }
@@ -1194,12 +1215,13 @@ export async function createProofStepIsolationContext({
 
   const browserExclusive = metadata.executionClass === EXECUTION_CLASSES.PROOF_BROWSER_EXCLUSIVE;
   if (browserExclusive) {
+    const browserAuthority = BROWSER_AUTHORITY_BY_STEP_ID[metadata.stepId];
     if (
-      metadata.stepId !== "verify-m10a-t01" ||
+      browserAuthority === undefined ||
       metadata.tempPolicy !== TEMP_POLICIES.RUNNER_SCOPED_OS ||
       metadata.tempKey !== metadata.stepId ||
       metadata.childProcessPolicy !== CHILD_PROCESS_POLICIES.TOOLCHAIN_EXCLUSIVE ||
-      !isDeepStrictEqual(metadata.ports, [4_187]) ||
+      !isDeepStrictEqual(metadata.ports, [browserAuthority.port]) ||
       metadata.barrier !== true
     ) {
       fail(
@@ -1211,9 +1233,12 @@ export async function createProofStepIsolationContext({
     delete environment.DESEN_CI_FILESYSTEM_COMPATIBILITY;
     delete environment.DESEN_CI_WORKSPACE_ROOT;
     delete environment.DESEN_CI_WORKSPACE_TEMP_ROOT;
-    environment.DESEN_M10A_T01_PROOF_TEMP = temp.path;
+    delete environment.DESEN_M10A_T01_PROOF_TEMP;
+    delete environment.DESEN_M10A_T03_PROOF_TEMP;
+    environment[browserAuthority.tempEnvironmentKey] = temp.path;
   } else {
     delete environment.DESEN_M10A_T01_PROOF_TEMP;
+    delete environment.DESEN_M10A_T03_PROOF_TEMP;
     const nodeOptions = [
       "--permission",
       ...workspace.permissionPaths.map((allowedPath) => `--allow-fs-read=${allowedPath}`),

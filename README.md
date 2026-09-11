@@ -4,9 +4,9 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01/T02 are complete. SC-02 concluded `adapt`; no task is active.
-> M10A-T03 is next and ready but remains `NOT_STARTED`; M11 has not started. This is not a
-> production certification.
+> M10/G10 and M10A-T01/T02 are complete. SC-02 concluded `adapt`. M10A-T03 is `IN_PROGRESS`:
+> its local implementation/evidence is a candidate whose exact-head hosted checks are pending.
+> M11 has not started. This is not a production certification.
 
 ## Implementation progress
 
@@ -36,7 +36,8 @@ bounded, reproducible claims about both.
 **M10A:** **2 / 28 tasks complete (7%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Active task:** none · **Next ready:** `M10A-T03` (`NOT_STARTED`) · **M11:** `NOT_STARTED`
+**Active task:** `M10A-T03` (`IN_PROGRESS`) · **Next:** `M10A-T04` (dependency-ready but
+`NOT_STARTED` and unselected while T03 is active) · **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
 
@@ -97,6 +98,7 @@ DOM, CSS, and browser concerns enter only through target-specific adapters and a
 apps/
   desen-app/                   Visual authoring and publishing product
   desen-app-browser-e2e/       Independent Chromium product journeys
+  design-system-workbench-proof/ Isolated T03 theme/token browser proof
   starter-catalog-web-proof/   Isolated starter authoring/host adapter proof
   reference-host-web/          Separately built proof host
   reference-host-web-server/   Local host/control-plane bridge
@@ -112,6 +114,7 @@ packages/
   catalog-sdk/            Capability registration and manifest tooling
   editor-core/            Framework-neutral authoring commands
   design-system-core/     App-owned project data and deterministic token resolution
+  design-system-authoring/ Platform-neutral theme/token editing and transfer
   editor-web/             Web canvas and inspector integration
   reference-catalog-web/  Reference components and adapters
   starter-catalog-web/    Base UI-backed DESEN Neutral starter capabilities
@@ -169,8 +172,17 @@ connections, and built-in design-system documentation/visual review. These are p
 not capabilities of the current five-component demo. The completed `M10A-T01` installed Base UI
 1.8.0 and proved three adapters in isolated authoring/host harnesses. The completed `M10A-T02` adds
 the platform-neutral App project envelope and bounded DTCG token resolver; its exact-head and
-fresh-`main` hosted Quality and Browser E2E gates passed. `M10A-T03` is next and ready but remains
-`NOT_STARTED`; ordinary App integration has not started.
+fresh-`main` hosted Quality and Browser E2E gates passed. `M10A-T03` is now `IN_PROGRESS`: its local
+candidate adds platform-neutral `@desen/design-system-authoring` plus an isolated workbench with
+structured theme, mode, token, and whole-token-alias controls; exact sRGB and px/rem handling;
+atomic history and import; and bounded loss-aware transfer. The frozen SC-01 inventory's 16 valid
+fixtures split into three T02-supported normal edit/preview paths and 13 losslessly preserved,
+disclosed unsupported paths that block partial preview only for their selected overlay; seven SC-01
+invalid fixtures reject atomically. A separate closed T02-recognized unsupported matrix preserves
+and discloses six valid fixtures and atomically rejects six malformed fixtures. Unreviewed or
+invalid forms fail closed without silent loss. Exact-head hosted checks are still
+pending. It adds no normal App integration, persistence, immutable release, Publisher, Runtime, or
+protocol authority. T04 is dependency-ready but remains `NOT_STARTED` and unselected while T03 is active.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and

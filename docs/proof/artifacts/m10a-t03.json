@@ -1,0 +1,1871 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T03",
+  "proofId": "m10a-t03",
+  "profile": "desen.theme-token-authoring.proof.v1",
+  "result": "PASS",
+  "claim": {
+    "implementationEvidence": "PASS",
+    "taskCompletionRequiresHostedExactHead": true,
+    "platformNeutralAuthoring": true,
+    "editableNeutralLightDark": true,
+    "arbitraryProfileValidColorAndTypographyValues": true,
+    "aliasAndModeAuthoring": true,
+    "boundedUndoRedo": true,
+    "livePreviewProjection": true,
+    "neutralContrastAndFocus": true,
+    "structuredThemeModeCrud": true,
+    "literalAndAliasCreation": true,
+    "lossAwareTransfer": true,
+    "invalidImportAtomicity": true,
+    "sc01CompatibilityPreservation": true,
+    "t02RecognizedUnsupportedPreservation": true,
+    "unsupportedSelectedModePreviewBlocked": true,
+    "partialPreviewAuthority": false,
+    "isolatedWorkbenchProof": true
+  },
+  "publicPackage": {
+    "name": "@desen/design-system-authoring",
+    "private": true,
+    "type": "module",
+    "sideEffects": false,
+    "exportRoot": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "productionDependencies": ["@desen/design-system-core", "@desen/protocol"],
+    "onlyReviewedInternalDependencies": true,
+    "requiredRuntimeExports": [
+      "DESEN_NEUTRAL_THEME_DOCUMENT",
+      "THEME_AUTHORING_KIND",
+      "THEME_AUTHORING_LIMITS",
+      "THEME_AUTHORING_SCHEMA_VERSION",
+      "admitThemeAuthoringDocument",
+      "applyThemeAuthoringEdit",
+      "createThemeAuthoringSession",
+      "exportThemeAuthoringDocument",
+      "importThemeAuthoringDocument",
+      "redoThemeAuthoringEdit",
+      "selectThemeAuthoringMode",
+      "undoThemeAuthoringEdit"
+    ],
+    "exercisedBuiltPublicRoot": true,
+    "files": [
+      {
+        "path": "packages/design-system-authoring/package.json",
+        "bytes": 876,
+        "sha256": "4051ff794bdd74833aa972626de173d049678c144e530437ec0d5c515365311f"
+      },
+      {
+        "path": "packages/design-system-authoring/README.md",
+        "bytes": 4963,
+        "sha256": "d28651f6911a201920d57a8d4767568d10c06fb83e38312b3e43eda0f25e0667"
+      },
+      {
+        "path": "packages/design-system-authoring/src/index.ts",
+        "bytes": 1862,
+        "sha256": "65baa3fd3cc459d72c393cedb5baae4dd80862a101067f1c0d89a7a7bf394641"
+      },
+      {
+        "path": "packages/design-system-authoring/src/inert-json.ts",
+        "bytes": 15017,
+        "sha256": "cd84c687217963e9598aa59476865eeff328c1fa9d346044cf08b3b0c24433bd"
+      },
+      {
+        "path": "packages/design-system-authoring/src/neutral-theme.ts",
+        "bytes": 11431,
+        "sha256": "f6b57ddb059cf62d2be051e20e4007f5c34acb138a5596a4f838ef8eb0522295"
+      },
+      {
+        "path": "packages/design-system-authoring/src/reviewed-dtcg-compatibility.ts",
+        "bytes": 60316,
+        "sha256": "c18cda491f5eb9a400595240fde23b058fceb40801257800674611a246e87f5e"
+      },
+      {
+        "path": "packages/design-system-authoring/src/theme-authoring.ts",
+        "bytes": 85941,
+        "sha256": "c5368b525be36ce1779c47e857dfd91f7c25a24b529e4aef6d2633023d4df65b"
+      },
+      {
+        "path": "packages/design-system-authoring/test/public-package.mjs",
+        "bytes": 6599,
+        "sha256": "78099aa42a437c14fd06fdc049f4d828c0b7f9f4a18ceecb2b911335a61da55a"
+      },
+      {
+        "path": "packages/design-system-authoring/test/public-package.types.mts",
+        "bytes": 1408,
+        "sha256": "406fe963f2eceb1e7b23b9e89cad560317a35a6ac228c7b919923a02205bbebf"
+      },
+      {
+        "path": "packages/design-system-authoring/test/theme-authoring.test.ts",
+        "bytes": 103166,
+        "sha256": "3a18b73edb36358c47c150ffd47d343e9fbe939dad0b05928800e98d70bd2ff6"
+      },
+      {
+        "path": "packages/design-system-authoring/tsconfig.build.json",
+        "bytes": 277,
+        "sha256": "3d39769f9789283f9d25088104a34c3c1cd1473e1f98b09b31655245d229d685"
+      },
+      {
+        "path": "packages/design-system-authoring/tsconfig.json",
+        "bytes": 151,
+        "sha256": "86b4d7bb6eec2189ba90d151dc60b25d886d85c04da5bcc79e61e387d58418f4"
+      },
+      {
+        "path": "packages/design-system-authoring/tsconfig.public-package.json",
+        "bytes": 147,
+        "sha256": "01366a6ddba0a147aabc93fbaff75481dfaf644f628cde2cd584e0f44b7d493c"
+      }
+    ],
+    "authorityAggregateSha256": "5d34423adf9d5e0b02208d0191ad3ff5aec9954174a338a341559d89ab7d2f95"
+  },
+  "authoring": {
+    "kind": "desen.theme-authoring",
+    "schemaVersion": 1,
+    "limits": {
+      "maxHistoryEntries": 100,
+      "maxIdentifierCodeUnits": 128,
+      "maxImportBytes": 8388608,
+      "maxLabelCodeUnits": 512,
+      "maxModesPerTheme": 16,
+      "maxThemes": 16,
+      "maxUnsupportedFeaturesPerOverlay": 64
+    },
+    "neutral": {
+      "id": "desen-neutral",
+      "name": "DESEN Neutral",
+      "baseSourceId": "neutral.base",
+      "modes": [
+        { "id": "light", "name": "Light", "sourceId": "neutral.light" },
+        { "id": "dark", "name": "Dark", "sourceId": "neutral.dark" }
+      ],
+      "canonicalBytes": 5710,
+      "tokenCount": 45,
+      "tokenPaths": [
+        "color.action",
+        "color.border",
+        "color.canvas",
+        "color.caution",
+        "color.danger",
+        "color.disabled",
+        "color.elevated",
+        "color.focus",
+        "color.foreground",
+        "color.muted",
+        "color.onAction",
+        "color.positive",
+        "color.surface",
+        "elevation.card",
+        "opacity.disabled",
+        "palette.action",
+        "palette.border",
+        "palette.canvas",
+        "palette.caution",
+        "palette.danger",
+        "palette.disabled",
+        "palette.elevated",
+        "palette.focus",
+        "palette.foreground",
+        "palette.muted",
+        "palette.onAction",
+        "palette.positive",
+        "palette.surface",
+        "radius.large",
+        "radius.medium",
+        "radius.small",
+        "space.1",
+        "space.12",
+        "space.2",
+        "space.3",
+        "space.4",
+        "space.6",
+        "space.8",
+        "stroke.default",
+        "stroke.focus",
+        "typography.body",
+        "typography.display",
+        "typography.label",
+        "typography.subtitle",
+        "typography.title"
+      ],
+      "defaultSelection": { "modeId": "light", "themeId": "desen-neutral" },
+      "lightSourceIds": ["neutral.base", "neutral.light"],
+      "darkSourceIds": ["neutral.base", "neutral.dark"],
+      "lightCanvas": {
+        "colorSpace": "srgb",
+        "components": [0.9803921569, 0.9803921569, 0.9803921569]
+      },
+      "darkCanvas": {
+        "colorSpace": "srgb",
+        "components": [0.0392156863, 0.0392156863, 0.0392156863]
+      },
+      "recursivelyImmutable": true,
+      "accessibility": {
+        "modes": [
+          {
+            "modeId": "light",
+            "contrast": {
+              "foregroundCanvas": 17.176123408289424,
+              "mutedSurface": 7.813883035756274,
+              "actionOnAction": 17.927840254387664,
+              "focusCanvas": 4.9518373034762435
+            },
+            "stroke": {
+              "default": { "unit": "px", "value": 1 },
+              "focus": { "unit": "px", "value": 2 }
+            },
+            "thresholds": {
+              "foregroundCanvas": 7,
+              "mutedSurface": 4.5,
+              "actionOnAction": 7,
+              "focusCanvas": 3
+            },
+            "passed": true
+          },
+          {
+            "modeId": "dark",
+            "contrast": {
+              "foregroundCanvas": 18.96800669469345,
+              "mutedSurface": 7.107152418998905,
+              "actionOnAction": 18.96800669469345,
+              "focusCanvas": 7.787118113528667
+            },
+            "stroke": {
+              "default": { "unit": "px", "value": 1 },
+              "focus": { "unit": "px", "value": 2 }
+            },
+            "thresholds": {
+              "foregroundCanvas": 7,
+              "mutedSurface": 4.5,
+              "actionOnAction": 7,
+              "focusCanvas": 3
+            },
+            "passed": true
+          }
+        ],
+        "browserVisibleFocusOutlinePx": 2,
+        "everyModePassed": true
+      }
+    },
+    "editing": {
+      "arbitraryColor": {
+        "alpha": 0.75,
+        "colorSpace": "srgb",
+        "components": [0.125, 0.625, 0.875]
+      },
+      "aliasAwareLivePreview": true,
+      "compositeTypography": {
+        "fontFamily": ["Avenir Next", "ui-sans-serif"],
+        "fontSize": { "unit": "px", "value": 19 },
+        "fontWeight": 575,
+        "letterSpacing": { "unit": "px", "value": 0.25 },
+        "lineHeight": 1.45
+      },
+      "wholeTokenAliasTarget": "palette.focus",
+      "revisionAfterEdits": 5,
+      "undoRestoresExactDocument": true,
+      "redoRestoresExactDocument": true,
+      "historyLimit": 100,
+      "structuredAuthoring": {
+        "createdLiteralPath": "palette.brand",
+        "createdAliasPath": "color.brand",
+        "deletedTokenPath": "color.brand",
+        "duplicatedModeSelection": { "modeId": "contrast", "themeId": "desen-neutral" },
+        "modeUndoSelection": { "modeId": "light", "themeId": "desen-neutral" },
+        "modeRedoSelection": { "modeId": "contrast", "themeId": "desen-neutral" },
+        "renamedMode": "Accessible contrast",
+        "modeDeleteSelection": { "modeId": "light", "themeId": "desen-neutral" },
+        "duplicatedThemeSelection": { "modeId": "light", "themeId": "brand" },
+        "themeUndoSelection": { "modeId": "light", "themeId": "desen-neutral" },
+        "themeRedoSelection": { "modeId": "light", "themeId": "brand" },
+        "renamedTheme": "Brand foundations",
+        "themeDeleteSelection": { "modeId": "light", "themeId": "brand" },
+        "modeUndoRestoresExactDocument": true,
+        "modeRedoRestoresExactDocument": true,
+        "themeUndoRestoresExactDocument": true,
+        "themeRedoRestoresExactDocument": true,
+        "finalRevision": 13
+      }
+    },
+    "transfer": {
+      "canonicalBytes": 5747,
+      "canonicalSha256": "e962ddaf354c290a4ec107a1e2c155e4450fc8dbdd4335179f58b0cbd7330903",
+      "canonicalTerminalNewline": false,
+      "deterministicReimport": true,
+      "losses": 0,
+      "reviewedUnsupportedMatrix": {
+        "representativeModeOverlay": {
+          "wideGamutColor": {
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "code": "UNSUPPORTED_COLOR_SPACE",
+            "preserved": true,
+            "partialPreviewAuthority": false
+          },
+          "wideGamutNoneColor": {
+            "preservedFeatureCodes": [
+              "UNSUPPORTED_COLOR_SPACE",
+              "UNSUPPORTED_DTCG_MEMBER",
+              "UNSUPPORTED_DTCG_MEMBER"
+            ],
+            "preservedFeaturePointers": [
+              "/wideWithNone/$value/colorSpace",
+              "/wideWithNone/$value/components/0",
+              "/wideWithNone/$value/components/2"
+            ],
+            "exactReimport": true,
+            "partialPreviewAuthority": false
+          },
+          "officialRoot": {
+            "preservedFeatureCode": "UNSUPPORTED_DTCG_MEMBER",
+            "pointer": "/futureGroup/$root",
+            "tokenPath": "futureGroup.$root",
+            "aliasTarget": "futureGroup.$root",
+            "exactReimport": true,
+            "partialPreviewAuthority": false
+          }
+        },
+        "frozenSc01": {
+          "featureFamilies": 14,
+          "validFixtures": 16,
+          "historicalFeaturesSupportedByT02": 7,
+          "historicalFeaturesStillUnsupported": 9,
+          "previewReadyUnderT02": 3,
+          "preservedUnsupported": 13,
+          "invalidFixtures": 7,
+          "fixtures": [
+            {
+              "id": "root-token-curly-alias",
+              "historicalFeatureId": "ROOT_TOKEN_CURLY_ALIAS",
+              "historicalFeatureStatus": "SUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 154,
+              "fixtureCanonicalSha256": "620619cc3d2b721277d3ceadd50089d93ddc0688083115b8dd953aa6c2696f82",
+              "disclosures": [
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/primary/$value/hex",
+                  "tokenPath": "primary",
+                  "sourceId": "compatibility.00.base",
+                  "themeId": "compatibility-00",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 465,
+              "canonicalExportSha256": "8d1e2aedd771ebf2f748fd00e90dd73fac1074311498fe75abc77883e6b9eab3",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "alias-infers-target-type",
+              "historicalFeatureId": "ALIAS_TARGET_TYPE_INFERENCE",
+              "historicalFeatureStatus": "SUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 158,
+              "fixtureCanonicalSha256": "dff294153c8c235e5f4f9f36ca6056e363dee735e999bec2e2fa90cf5a057734",
+              "disclosures": [
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/palette/primary/$value/hex",
+                  "tokenPath": "palette.primary",
+                  "sourceId": "compatibility.01.base",
+                  "themeId": "compatibility-01",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 469,
+              "canonicalExportSha256": "819d42fad8e9f1fed31aa828e50c6ecb5a823069662b7b3e641b874be17583ad",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "whole-token-json-pointer",
+              "historicalFeatureId": "JSON_POINTER_REF",
+              "historicalFeatureStatus": "STILL_UNSUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 159,
+              "fixtureCanonicalSha256": "8c494f5c62580a1bdcd174190cbabce7d539083a09017ca217cf5edf3cc4c0e2",
+              "disclosures": [
+                {
+                  "featureId": "JSON_POINTER_REF",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/alias/$ref",
+                  "tokenPath": "alias",
+                  "sourceId": "compatibility.02.base",
+                  "themeId": "compatibility-02",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/primary/$value/hex",
+                  "tokenPath": "primary",
+                  "sourceId": "compatibility.02.base",
+                  "themeId": "compatibility-02",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 470,
+              "canonicalExportSha256": "e0fa1d7f4afbc123f9b88935957a97ecc56d8092ddec518e60ec29ccf40db3b9",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "color-component-json-pointer",
+              "historicalFeatureId": "PROPERTY_LEVEL_REF",
+              "historicalFeatureStatus": "STILL_UNSUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 246,
+              "fixtureCanonicalSha256": "0b759e0947a0a8d7b9262cdbfebfd9e8dd366cff83a518e9975e3fbd7e50fa25",
+              "disclosures": [
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/base/$value/hex",
+                  "tokenPath": "base",
+                  "sourceId": "compatibility.03.base",
+                  "themeId": "compatibility-03",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/derived/$value/hex",
+                  "tokenPath": "derived",
+                  "sourceId": "compatibility.03.base",
+                  "themeId": "compatibility-03",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "PROPERTY_LEVEL_REF",
+                  "code": "UNSUPPORTED_PROPERTY_ALIAS",
+                  "pointer": "/derived/$value/components/0/$ref",
+                  "tokenPath": "derived",
+                  "sourceId": "compatibility.03.base",
+                  "themeId": "compatibility-03",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 557,
+              "canonicalExportSha256": "8377d9ad1234f63eda46567d37ddda9fb1fe1ec95647ec03c36d7b949ce087d9",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "group-root-token",
+              "historicalFeatureId": "ROOT_GROUP_TOKEN",
+              "historicalFeatureStatus": "STILL_UNSUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 207,
+              "fixtureCanonicalSha256": "6f4ffb091f0aa9f4e8aa502149aca502fa30e61b6a8ff96ec72d1e4c4d4e1d3b",
+              "disclosures": [
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/semantic/$root/$value/hex",
+                  "tokenPath": "semantic.$root",
+                  "sourceId": "compatibility.04.base",
+                  "themeId": "compatibility-04",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/semantic/accent/$value/hex",
+                  "tokenPath": "semantic.accent",
+                  "sourceId": "compatibility.04.base",
+                  "themeId": "compatibility-04",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "ROOT_GROUP_TOKEN",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/semantic/$root",
+                  "tokenPath": "semantic.$root",
+                  "sourceId": "compatibility.04.base",
+                  "themeId": "compatibility-04",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 518,
+              "canonicalExportSha256": "8575b0bb8798d82d20bf470e166f2e3dd07b922367c2dc8c1d67f5149b458944",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "group-extends",
+              "historicalFeatureId": "GROUP_EXTENDS",
+              "historicalFeatureStatus": "STILL_UNSUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 252,
+              "fixtureCanonicalSha256": "1b1cd03e686158f51b14bfd8fd9e8c84e46431f8bac07283233627dd525819ea",
+              "disclosures": [
+                {
+                  "featureId": "GROUP_EXTENDS",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/derived/$extends",
+                  "tokenPath": "derived",
+                  "sourceId": "compatibility.05.base",
+                  "themeId": "compatibility-05",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/base/accent/$value/hex",
+                  "tokenPath": "base.accent",
+                  "sourceId": "compatibility.05.base",
+                  "themeId": "compatibility-05",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/derived/accent/$value/hex",
+                  "tokenPath": "derived.accent",
+                  "sourceId": "compatibility.05.base",
+                  "themeId": "compatibility-05",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 563,
+              "canonicalExportSha256": "00d05471ab95c62b6cad3a3406dc56ab24a05618ece8ce4197223b2da2e12745",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "empty-described-group",
+              "historicalFeatureId": "EMPTY_GROUP",
+              "historicalFeatureStatus": "STILL_UNSUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 54,
+              "fixtureCanonicalSha256": "8ad173592614a57db712e7e8a92af69a207af24a1789bccfdfbcdfde85198987",
+              "disclosures": [
+                {
+                  "featureId": "EMPTY_GROUP",
+                  "code": "EMPTY_DTCG_GROUP",
+                  "pointer": "/empty",
+                  "tokenPath": "empty",
+                  "sourceId": "compatibility.06.base",
+                  "themeId": "compatibility-06",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 365,
+              "canonicalExportSha256": "83d0b44d7130e180f8197c214fab6df703918c40bae353ac132e7b7073ce2c6f",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "token-vendor-extension",
+              "historicalFeatureId": "EXTENSIONS",
+              "historicalFeatureStatus": "SUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 158,
+              "fixtureCanonicalSha256": "79a517e5b70e2be9f31d962620674dd1bf96759a90bc4cf458ad4314f18295bd",
+              "disclosures": [
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/primary/$value/hex",
+                  "tokenPath": "primary",
+                  "sourceId": "compatibility.07.base",
+                  "themeId": "compatibility-07",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 469,
+              "canonicalExportSha256": "a144d3ec1bfa4b054f4ce0a2892c51fa91f8ccb33c8fa07d7dd70b6369363641",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "deprecated-token",
+              "historicalFeatureId": "DEPRECATED",
+              "historicalFeatureStatus": "SUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 135,
+              "fixtureCanonicalSha256": "a3cdaaff4a5fed73c3d0057b980c8c8b490d15d79754408a2b51de8260abdfc9",
+              "disclosures": [
+                {
+                  "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/legacy/$value/hex",
+                  "tokenPath": "legacy",
+                  "sourceId": "compatibility.08.base",
+                  "themeId": "compatibility-08",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 446,
+              "canonicalExportSha256": "b1503cf9d8c3d8473b2667136ea8bbaf82d0825dcdbf3b73a668e4ec3cbcff50",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "number-token",
+              "historicalFeatureId": "ADDITIONAL_TOKEN_TYPES",
+              "historicalFeatureStatus": "SUPPORTED_BY_T02",
+              "currentAuthoringStatus": "T02_PREVIEW_READY",
+              "previewStatus": "READY",
+              "fixtureCanonicalBytes": 43,
+              "fixtureCanonicalSha256": "35f0d4ceb59ffebf87bac26a6d2ae1c2d604c2f79b8124f4362f90ee2986dfcb",
+              "disclosures": [],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 355,
+              "canonicalExportSha256": "6461e1ed3ca4d84d73a28ceb6f5174d0c6989e0504a004a9487b78b61fa670a5",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "typography-token",
+              "historicalFeatureId": "ADDITIONAL_TOKEN_TYPES",
+              "historicalFeatureStatus": "SUPPORTED_BY_T02",
+              "currentAuthoringStatus": "T02_PREVIEW_READY",
+              "previewStatus": "READY",
+              "fixtureCanonicalBytes": 173,
+              "fixtureCanonicalSha256": "49d3771aadf5d1f9a0610525f21b5f13b51a92444df24dc10f52874f7cb8b229",
+              "disclosures": [],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 485,
+              "canonicalExportSha256": "403ffa56ef4009a357a24a8e853647456b190e42473062bf336127c2dd400bf1",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "display-p3-color",
+              "historicalFeatureId": "ADDITIONAL_COLOR_SPACES",
+              "historicalFeatureStatus": "STILL_UNSUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 102,
+              "fixtureCanonicalSha256": "089fbddb9e8b8cd51dd9630e0b2087c59ae8af1c323479d5542c05b13e12d822",
+              "disclosures": [
+                {
+                  "featureId": "ADDITIONAL_COLOR_SPACES",
+                  "code": "UNSUPPORTED_COLOR_SPACE",
+                  "pointer": "/accent/$value/colorSpace",
+                  "tokenPath": "accent",
+                  "sourceId": "compatibility.11.base",
+                  "themeId": "compatibility-11",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 414,
+              "canonicalExportSha256": "5c4b125c3be10d83362f35d0a5d560e437c8edeadc1d01b802854f50af77195d",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "oklch-color",
+              "historicalFeatureId": "ADDITIONAL_COLOR_SPACES",
+              "historicalFeatureStatus": "STILL_UNSUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 97,
+              "fixtureCanonicalSha256": "b7e2d72fb2b3fa91e80a8b0b023b201f6b86781ba3a6323cc75ee9ddba193752",
+              "disclosures": [
+                {
+                  "featureId": "ADDITIONAL_COLOR_SPACES",
+                  "code": "UNSUPPORTED_COLOR_SPACE",
+                  "pointer": "/accent/$value/colorSpace",
+                  "tokenPath": "accent",
+                  "sourceId": "compatibility.12.base",
+                  "themeId": "compatibility-12",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 409,
+              "canonicalExportSha256": "6eeb63d9da5225f37e5a71ded79373b4a447a4db8bbb90f3cf439d3b53e01d3e",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "srgb-none-component",
+              "historicalFeatureId": "NONE_COLOR_COMPONENTS",
+              "historicalFeatureStatus": "STILL_UNSUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 99,
+              "fixtureCanonicalSha256": "474dc656110a766da2a45325a8fded84dc0ac93856b9490230f8a4686d8a75a5",
+              "disclosures": [
+                {
+                  "featureId": "NONE_COLOR_COMPONENTS",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "/accent/$value/components/0",
+                  "tokenPath": "accent",
+                  "sourceId": "compatibility.13.base",
+                  "themeId": "compatibility-13",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 411,
+              "canonicalExportSha256": "530a217cf4bef4581f3c7f1da5a71a4389c13246d2c92ab2ce766c409232725d",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "color-without-local-alpha-and-hex",
+              "historicalFeatureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+              "historicalFeatureStatus": "SUPPORTED_BY_T02",
+              "currentAuthoringStatus": "T02_PREVIEW_READY",
+              "previewStatus": "READY",
+              "fixtureCanonicalBytes": 86,
+              "fixtureCanonicalSha256": "052a4d184f64b795ff347bacf9af8f8051292b208fdaf6f99cb1694d538bf752",
+              "disclosures": [],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 398,
+              "canonicalExportSha256": "7137993fda8b10368348d5902a83855309499455844eef61df9c00678ddf2304",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "resolver-theme-modifier",
+              "historicalFeatureId": "RESOLVER_THEMES_AND_MODES",
+              "historicalFeatureStatus": "STILL_UNSUPPORTED_BY_T02",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 389,
+              "fixtureCanonicalSha256": "0797e53296453c1d461f30e046027eae488884f66e1178b120443c76c962aa7b",
+              "disclosures": [
+                {
+                  "featureId": "RESOLVER_THEMES_AND_MODES",
+                  "code": "UNSUPPORTED_DTCG_MEMBER",
+                  "pointer": "",
+                  "tokenPath": null,
+                  "sourceId": "compatibility.15.base",
+                  "themeId": "compatibility-15",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 701,
+              "canonicalExportSha256": "ee2b8e5dc6ee129bf6e866354135d43bce179540661ea9c46c31837d3eb81e35",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            }
+          ],
+          "invalid": [
+            {
+              "id": "name-containing-dot",
+              "fixtureCanonicalBytes": 108,
+              "fixtureCanonicalSha256": "036b6a16ba8cd33ebc667a4800cf16ed5fa6b8a5b77ef47a72efa5b5dfde693e",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_NAME",
+              "causePointer": "/bad.name",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "malformed-dimension-value",
+              "fixtureCanonicalBytes": 74,
+              "fixtureCanonicalSha256": "2cca2b284f5bc95ab9571ef778788ae0d949e4bb5181bade612b4e962dd59299",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/space/sm/$value/value",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "alias-cycle",
+              "fixtureCanonicalBytes": 81,
+              "fixtureCanonicalSha256": "b093cf7ba216554225e9e580072d8bfb01d8f57a0ba3c5f913afc2e96bd464a9",
+              "code": "DTCG_REJECTED",
+              "cause": "ALIAS_CYCLE",
+              "causePointer": "/color/a/$value",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "malformed-json-pointer",
+              "fixtureCanonicalBytes": 157,
+              "fixtureCanonicalSha256": "8f2b279ca7aa439bec451a52f68e1ef2515a9dd2ce9bcdb274f506897f2f2808",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_STRUCTURE",
+              "causePointer": "/alias/$ref",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "missing-json-pointer-target",
+              "fixtureCanonicalBytes": 53,
+              "fixtureCanonicalSha256": "951c8a5b912007e41e49138043a18b54b29eff2415c863fe11f54fcc420405ff",
+              "code": "DTCG_REJECTED",
+              "cause": "ALIAS_TARGET_MISSING",
+              "causePointer": "/alias/$ref",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "misplaced-json-pointer-under-value",
+              "fixtureCanonicalBytes": 170,
+              "fixtureCanonicalSha256": "2b996cce79c3b94db3e2ad6e34c1552f636cfec9676c551df37e998455d377cb",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/alias/$value",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "malformed-resolver-required-fields",
+              "fixtureCanonicalBytes": 65,
+              "fixtureCanonicalSha256": "1b3af90d2188dc5a32ec1e0654b092b1e60b0521da4959fffc68b6eec974ddef",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_STRUCTURE",
+              "causePointer": "",
+              "retainedExactSession": true,
+              "partialResult": false
+            }
+          ],
+          "everyFixtureSurvivedSupportedEditUndoRedoAndReimport": true,
+          "everyUnsupportedRemainderDisclosed": true,
+          "everyInvalidAndMaskingImportRetainedExactSession": true
+        },
+        "t02RecognizedUnsupported": {
+          "validFixtures": 6,
+          "malformedFixtures": 10,
+          "fixtures": [
+            {
+              "id": "complex-border-stroke-style",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 217,
+              "fixtureCanonicalSha256": "0e74a30632c86d23479f30439e6ff949a663908b5320c071ead1ef36427d097a",
+              "disclosures": [
+                {
+                  "featureId": "ADDITIONAL_TOKEN_TYPES",
+                  "code": "UNSUPPORTED_STROKE_STYLE",
+                  "pointer": "/border/$value/style",
+                  "tokenPath": "border",
+                  "sourceId": "compatibility.16.base",
+                  "themeId": "compatibility-16",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 529,
+              "canonicalExportSha256": "b6fb27432fb07619ecfbb559544094ff862446a831eeea22307709b5d04fb921",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "typography-composite-token-reference",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 231,
+              "fixtureCanonicalSha256": "22a6078fa40f2a98081c10113a3db59a0d1b7ff8b219ade603dc2a443dbba4fd",
+              "disclosures": [
+                {
+                  "featureId": "ADDITIONAL_TOKEN_TYPES",
+                  "code": "UNSUPPORTED_DTCG_TYPE",
+                  "pointer": "/family/$type",
+                  "tokenPath": "family",
+                  "sourceId": "compatibility.17.base",
+                  "themeId": "compatibility-17",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "PROPERTY_LEVEL_REF",
+                  "code": "UNSUPPORTED_PROPERTY_ALIAS",
+                  "pointer": "/typography/$value/fontFamily",
+                  "tokenPath": "typography",
+                  "sourceId": "compatibility.17.base",
+                  "themeId": "compatibility-17",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 543,
+              "canonicalExportSha256": "f4de1a667c533dc02619b05ddf73eb212b1d12696f4023fe74e462439fa1a001",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "font-family-token",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 65,
+              "fixtureCanonicalSha256": "e1a69d7d1cac0174d5ba92d3810d828b72306a6ac51452ed9f05b2f28d2df8de",
+              "disclosures": [
+                {
+                  "featureId": "ADDITIONAL_TOKEN_TYPES",
+                  "code": "UNSUPPORTED_DTCG_TYPE",
+                  "pointer": "/family/$type",
+                  "tokenPath": "family",
+                  "sourceId": "compatibility.18.base",
+                  "themeId": "compatibility-18",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 377,
+              "canonicalExportSha256": "02c336e95ce45aaa3f598ef2705119d4eb41aca8a36fcad66674f49d56b19caa",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "font-weight-token",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 48,
+              "fixtureCanonicalSha256": "4602bd11d78c55d15ad2968ec9f5b292257a97d2db2e4dabb24cc42bc98d857a",
+              "disclosures": [
+                {
+                  "featureId": "ADDITIONAL_TOKEN_TYPES",
+                  "code": "UNSUPPORTED_DTCG_TYPE",
+                  "pointer": "/weight/$type",
+                  "tokenPath": "weight",
+                  "sourceId": "compatibility.19.base",
+                  "themeId": "compatibility-19",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 360,
+              "canonicalExportSha256": "a3cece2fd4df63b8880e1567490c8d0dffb9c9ad7989ff6e47eb4614ee34795d",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "gradient-token-with-references",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 321,
+              "fixtureCanonicalSha256": "f33b8fcbb15878e617ac8d788f7d48c1ac06a3145838ff5eecb610d82821362e",
+              "disclosures": [
+                {
+                  "featureId": "ADDITIONAL_TOKEN_TYPES",
+                  "code": "UNSUPPORTED_DTCG_TYPE",
+                  "pointer": "/gradient/$type",
+                  "tokenPath": "gradient",
+                  "sourceId": "compatibility.20.base",
+                  "themeId": "compatibility-20",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "ADDITIONAL_TOKEN_TYPES",
+                  "code": "UNSUPPORTED_DTCG_TYPE",
+                  "pointer": "/singleton/$type",
+                  "tokenPath": "singleton",
+                  "sourceId": "compatibility.20.base",
+                  "themeId": "compatibility-20",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "PROPERTY_LEVEL_REF",
+                  "code": "UNSUPPORTED_PROPERTY_ALIAS",
+                  "pointer": "/gradient/$value/0",
+                  "tokenPath": "gradient",
+                  "sourceId": "compatibility.20.base",
+                  "themeId": "compatibility-20",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "PROPERTY_LEVEL_REF",
+                  "code": "UNSUPPORTED_PROPERTY_ALIAS",
+                  "pointer": "/gradient/$value/1/color",
+                  "tokenPath": "gradient",
+                  "sourceId": "compatibility.20.base",
+                  "themeId": "compatibility-20",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "PROPERTY_LEVEL_REF",
+                  "code": "UNSUPPORTED_PROPERTY_ALIAS",
+                  "pointer": "/gradient/$value/1/position",
+                  "tokenPath": "gradient",
+                  "sourceId": "compatibility.20.base",
+                  "themeId": "compatibility-20",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 633,
+              "canonicalExportSha256": "e204c03061caa9a55674b085b8cab9297b7935d1ae4dae46ebf85f59e63ad850",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            },
+            {
+              "id": "stroke-style-token-with-reference",
+              "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+              "previewStatus": "BLOCKED",
+              "fixtureCanonicalBytes": 172,
+              "fixtureCanonicalSha256": "3b2c07e0c85378e6172bec6b79613c2014d528751e2de33a481d24558f3e838a",
+              "disclosures": [
+                {
+                  "featureId": "ADDITIONAL_TOKEN_TYPES",
+                  "code": "UNSUPPORTED_DTCG_TYPE",
+                  "pointer": "/style/$type",
+                  "tokenPath": "style",
+                  "sourceId": "compatibility.21.base",
+                  "themeId": "compatibility-21",
+                  "modeId": "default",
+                  "preserved": true
+                },
+                {
+                  "featureId": "PROPERTY_LEVEL_REF",
+                  "code": "UNSUPPORTED_PROPERTY_ALIAS",
+                  "pointer": "/style/$value/dashArray/0",
+                  "tokenPath": "style",
+                  "sourceId": "compatibility.21.base",
+                  "themeId": "compatibility-21",
+                  "modeId": "default",
+                  "preserved": true
+                }
+              ],
+              "supportedSiblingEdit": true,
+              "undoRestoredExactDocumentAndSelection": true,
+              "redoRestoredExactDocumentAndSelection": true,
+              "exactSubtreeAfterEditUndoRedo": true,
+              "exactSubtreeAfterExportReimport": true,
+              "canonicalExportBytes": 484,
+              "canonicalExportSha256": "ee6ba03d7a50b017faf1383dbec678b2f7585a2fb0d61808001c1ef4d46c6e61",
+              "exactExportReimport": true,
+              "losses": 0,
+              "partialPreviewAuthority": false,
+              "invalidMaskingRejectedAtomically": true
+            }
+          ],
+          "malformed": [
+            {
+              "id": "complex-border-line-cap",
+              "fixtureCanonicalBytes": 191,
+              "fixtureCanonicalSha256": "db35906d3d1d1721e375702ee5b3fa09cf06e736ade1403b1814568eaae6f2d5",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/border/$value/style",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "typography-reference-type",
+              "fixtureCanonicalBytes": 253,
+              "fixtureCanonicalSha256": "067d635a9fc58ed3b0474d6b5e08d4c2cb4c907648099af9568944f43792acbe",
+              "code": "DTCG_REJECTED",
+              "cause": "ALIAS_TYPE_MISMATCH",
+              "causePointer": "/typography/$value/fontFamily",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "font-family-value",
+              "fixtureCanonicalBytes": 45,
+              "fixtureCanonicalSha256": "3ff1cf95e2a00a6e92ffad85968aaca92046fc0abfffd7065e674e3fb292ed89",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/family/$value",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "font-weight-value",
+              "fixtureCanonicalBytes": 47,
+              "fixtureCanonicalSha256": "ab94efe6c373368a5efb68e08fe6a76fb699771afd0329c5447f272595ae3a36",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/weight/$value",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "gradient-stop-value",
+              "fixtureCanonicalBytes": 97,
+              "fixtureCanonicalSha256": "add18c810c105e401666c2599c6277b703f59d29d67c4bc391026ec40fcb7975",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/gradient/$value/0",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "empty-gradient-value",
+              "fixtureCanonicalBytes": 45,
+              "fixtureCanonicalSha256": "4055f98b85af2bb9426f7cfa05f984cec6dfa79033757d4bc88436ce0f40c984",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/gradient/$value",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "stroke-style-value",
+              "fixtureCanonicalBytes": 100,
+              "fixtureCanonicalSha256": "8aadb125601531175275acad69ddfd67a5bd9f9cc595f1d26d4485c9c6fc160b",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/style/$value",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "empty-stroke-dash-array",
+              "fixtureCanonicalBytes": 77,
+              "fixtureCanonicalSha256": "05532fd8ba602cc5e0dc61f69520ddcd590a0d84c476f71735703449abbfc7f2",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/style/$value",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "gradient-array-ref-wrong-shape",
+              "fixtureCanonicalBytes": 262,
+              "fixtureCanonicalSha256": "7218974eee8008a464e3f229aed032391bf59795f3cf60c82ce428b27471fd4b",
+              "code": "DTCG_REJECTED",
+              "cause": "ALIAS_TYPE_MISMATCH",
+              "causePointer": "/gradient/$value/0/$ref",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "shadow-array-ref-wrong-shape",
+              "fixtureCanonicalBytes": 258,
+              "fixtureCanonicalSha256": "cef2b8b73caa3c1d22dc5b13e07f6c410f6af93f18b0ae1cd27aad1eb327ee10",
+              "code": "DTCG_REJECTED",
+              "cause": "ALIAS_TYPE_MISMATCH",
+              "causePointer": "/shadow/$value/0/$ref",
+              "retainedExactSession": true,
+              "partialResult": false
+            }
+          ],
+          "everyFixtureSurvivedSupportedEditUndoRedoAndReimport": true,
+          "everyFeatureWasDisclosedAndPreviewBlocked": true,
+          "everyMalformedAndMaskingImportRetainedExactSession": true
+        },
+        "resolverMalformed": {
+          "malformedFixtures": 8,
+          "malformed": [
+            {
+              "id": "empty-resolver-resolution-order",
+              "fixtureCanonicalBytes": 201,
+              "fixtureCanonicalSha256": "a0868c64b05a6effeb63aaed2e69a0db2ee170e69f7d1a813f15e753de38e3e7",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_STRUCTURE",
+              "causePointer": "",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "resolver-source-ref-space",
+              "fixtureCanonicalBytes": 127,
+              "fixtureCanonicalSha256": "5ed365cf727e41083ff3a0d2f1e0e85c8817e6fd3e6e4d366efda4043afd5e47",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_STRUCTURE",
+              "causePointer": "/sets/base/sources/0/$ref",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "resolver-source-ref-bad-percent",
+              "fixtureCanonicalBytes": 115,
+              "fixtureCanonicalSha256": "caac32be5793e1e0afceb169a6f007012519efd1d104027d78cd285eb7cbee54",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_STRUCTURE",
+              "causePointer": "/sets/base/sources/0/$ref",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "resolver-source-ref-non-pointer-fragment",
+              "fixtureCanonicalBytes": 128,
+              "fixtureCanonicalSha256": "2dab07d3f3d76a0c57b0bf7a715f78aad07ebbd2145ae47f58d16eb5ae7ebd8d",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_STRUCTURE",
+              "causePointer": "/sets/base/sources/0/$ref",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "resolver-sets-wrong-type",
+              "fixtureCanonicalBytes": 239,
+              "fixtureCanonicalSha256": "95529aa938cf734fa978f4c96a1c6953b7b8e2d73432d35f5d02e1b440627d62",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_STRUCTURE",
+              "causePointer": "",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "resolver-modifiers-wrong-type",
+              "fixtureCanonicalBytes": 156,
+              "fixtureCanonicalSha256": "ff5c76573758e0bc28b89f0828566e5ae1ac28928bfc7aa429919a48e1f5e243",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_STRUCTURE",
+              "causePointer": "",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "resolver-modifier-single-context",
+              "fixtureCanonicalBytes": 179,
+              "fixtureCanonicalSha256": "c4a9c30c276b2cbf92e44309deeef8c406e0b8695880f4d4c49d9b09a66699a3",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_STRUCTURE",
+              "causePointer": "/modifiers/theme",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "nested-resolver-inline-source",
+              "fixtureCanonicalBytes": 327,
+              "fixtureCanonicalSha256": "597faa20f9bc542813e6460c274332b3342c3bd1c67a65e0fe6c935eb6e8d771",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_STRUCTURE",
+              "causePointer": "/sets/base/sources/0",
+              "retainedExactSession": true,
+              "partialResult": false
+            }
+          ],
+          "everyImportRetainedExactSession": true
+        },
+        "shadowInset": {
+          "validFixtures": 1,
+          "malformedFixtures": 3,
+          "fixture": {
+            "id": "shadow-inset-preservation",
+            "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+            "previewStatus": "BLOCKED",
+            "fixtureCanonicalBytes": 920,
+            "fixtureCanonicalSha256": "25861af53fb5d4a5f19abbeac0f4c9e741acc85a362cda991b6d06753b878d23",
+            "disclosures": [
+              {
+                "featureId": "PROPERTY_LEVEL_REF",
+                "code": "UNSUPPORTED_PROPERTY_ALIAS",
+                "pointer": "/derived/$value/inset/$ref",
+                "tokenPath": "derived",
+                "sourceId": "compatibility.23.base",
+                "themeId": "compatibility-23",
+                "modeId": "default",
+                "preserved": true
+              },
+              {
+                "featureId": "SHADOW_INSET",
+                "code": "UNSUPPORTED_DTCG_MEMBER",
+                "pointer": "/base/$value/inset",
+                "tokenPath": "base",
+                "sourceId": "compatibility.23.base",
+                "themeId": "compatibility-23",
+                "modeId": "default",
+                "preserved": true
+              },
+              {
+                "featureId": "SHADOW_INSET",
+                "code": "UNSUPPORTED_DTCG_MEMBER",
+                "pointer": "/derived/$value/inset",
+                "tokenPath": "derived",
+                "sourceId": "compatibility.23.base",
+                "themeId": "compatibility-23",
+                "modeId": "default",
+                "preserved": true
+              },
+              {
+                "featureId": "SHADOW_INSET",
+                "code": "UNSUPPORTED_DTCG_MEMBER",
+                "pointer": "/layered/$value/0/inset",
+                "tokenPath": "layered",
+                "sourceId": "compatibility.23.base",
+                "themeId": "compatibility-23",
+                "modeId": "default",
+                "preserved": true
+              }
+            ],
+            "supportedSiblingEdit": true,
+            "undoRestoredExactDocumentAndSelection": true,
+            "redoRestoredExactDocumentAndSelection": true,
+            "exactSubtreeAfterEditUndoRedo": true,
+            "exactSubtreeAfterExportReimport": true,
+            "canonicalExportBytes": 1232,
+            "canonicalExportSha256": "499720f9c2bc1f407c17b8e10b8cfe4e54787199b68b406a987857f2cd74ba84",
+            "exactExportReimport": true,
+            "losses": 0,
+            "partialPreviewAuthority": false,
+            "invalidMaskingRejectedAtomically": true
+          },
+          "malformed": [
+            {
+              "id": "shadow-inset-non-boolean",
+              "fixtureCanonicalBytes": 276,
+              "fixtureCanonicalSha256": "56fa0aeda6c31f0fd94d682dfbc57fb5cf18320282527a6ce61c3368932436ca",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/shadow/$value/inset",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "shadow-inset-ref-wrong-shape",
+              "fixtureCanonicalBytes": 297,
+              "fixtureCanonicalSha256": "83709b2d5cca9410f9ffc441e47d1299e74e07051b05fc4487e388c7302dc4c5",
+              "code": "DTCG_REJECTED",
+              "cause": "INVALID_DTCG_VALUE",
+              "causePointer": "/shadow/$value/inset",
+              "retainedExactSession": true,
+              "partialResult": false
+            },
+            {
+              "id": "empty-shadow-array",
+              "fixtureCanonicalBytes": 41,
+              "fixtureCanonicalSha256": "d3b0a2ce5a0f7b66ced0247e92efc78d5951909d3bb486c1ecf6032de33e6b7a",
+              "code": "DTCG_REJECTED",
+              "cause": "LIMIT_EXCEEDED",
+              "causePointer": "/shadow/$value",
+              "retainedExactSession": true,
+              "partialResult": false
+            }
+          ],
+          "survivedSupportedEditUndoRedoAndReimport": true,
+          "everyMalformedImportRetainedExactSession": true
+        },
+        "prototypeSafeGroupInheritance": {
+          "id": "prototype-safe-group-extends",
+          "currentAuthoringStatus": "PRESERVED_UNSUPPORTED",
+          "previewStatus": "BLOCKED",
+          "fixtureCanonicalBytes": 126,
+          "fixtureCanonicalSha256": "f9222342bd9022f7d6e32998d67c7a7c34da55d6b4fc360b1a190e7c03a0234d",
+          "disclosures": [
+            {
+              "featureId": "GROUP_EXTENDS",
+              "code": "UNSUPPORTED_DTCG_MEMBER",
+              "pointer": "/derived/$extends",
+              "tokenPath": "derived",
+              "sourceId": "compatibility.22.base",
+              "themeId": "compatibility-22",
+              "modeId": "default",
+              "preserved": true
+            }
+          ],
+          "supportedSiblingEdit": true,
+          "undoRestoredExactDocumentAndSelection": true,
+          "redoRestoredExactDocumentAndSelection": true,
+          "exactSubtreeAfterEditUndoRedo": true,
+          "exactSubtreeAfterExportReimport": true,
+          "canonicalExportBytes": 438,
+          "canonicalExportSha256": "edf81a354350d429631fa89de86fe587186ced421aab4eedb68a70ae85575c98",
+          "exactExportReimport": true,
+          "losses": 0,
+          "partialPreviewAuthority": false,
+          "invalidMaskingRejectedAtomically": true,
+          "ownPrototypeTokenKey": "__proto__",
+          "ownTokenPreserved": true,
+          "ordinaryObjectPrototypeUnchanged": true,
+          "admissionDidNotThrow": true
+        }
+      },
+      "invalidMatrix": [
+        { "id": "malformed-json", "code": "IMPORT_JSON_INVALID", "retainedExactSession": true },
+        { "id": "duplicate-key-json", "code": "IMPORT_JSON_INVALID", "retainedExactSession": true },
+        {
+          "id": "missing-alias-import",
+          "code": "DTCG_REJECTED",
+          "cause": "ALIAS_TARGET_MISSING",
+          "retainedExactSession": true
+        },
+        {
+          "id": "missing-alias-edit",
+          "code": "TOKEN_EDIT_REJECTED",
+          "cause": "ALIAS_TARGET_MISSING",
+          "retainedExactSession": true
+        },
+        {
+          "id": "hidden-mode-missing-alias-edit",
+          "code": "TOKEN_EDIT_REJECTED",
+          "cause": "ALIAS_TARGET_MISSING",
+          "retainedExactSession": true,
+          "allModesChecked": true
+        },
+        {
+          "id": "unsafe-accessor",
+          "code": "UNSAFE_THEME_VALUE",
+          "getterInvoked": false,
+          "partialResult": false
+        },
+        {
+          "id": "unsupported-does-not-mask-invalid",
+          "code": "DTCG_REJECTED",
+          "cause": "ALIAS_TARGET_MISSING",
+          "partialResult": false,
+          "unsupportedMaskedInvalid": false
+        }
+      ]
+    }
+  },
+  "workbench": {
+    "name": "@desen/design-system-workbench-proof",
+    "private": true,
+    "type": "module",
+    "productionDependencies": ["@desen/design-system-authoring", "react", "react-dom"],
+    "browserDependency": "@playwright/test@1.62.1",
+    "files": [
+      {
+        "path": "apps/design-system-workbench-proof/package.json",
+        "bytes": 884,
+        "sha256": "d67e41db944b4d4fa065411d84b7675719dfd673c92075be329eeeaca197beb4"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/README.md",
+        "bytes": 1256,
+        "sha256": "de5d2ab7e737f97208a5d460fe90eda4ad2c88549cac35956388832b3ac5a926"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/design-system-workbench.pw.ts",
+        "bytes": 12561,
+        "sha256": "ff787ab13ed1496e2e621f3a3347f96cab4afb03541bcc57a80a7bb3e15c5bd4"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/index.html",
+        "bytes": 362,
+        "sha256": "5141d68b637c4db20ffa519b8b99fc2aa935ed7caa4b4d6efd407c0b4458dff2"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/playwright.config.ts",
+        "bytes": 1739,
+        "sha256": "7c0e50f2a62c04412a2b37451bdd7fdd575582fbc126cf5b75564023b786f866"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/proof-contract.ts",
+        "bytes": 1982,
+        "sha256": "c0a55a6da3577809440be38beb4d0d2aa2e1e1dd0901045f392b51c57fc3a047"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/proof-reporter.ts",
+        "bytes": 2934,
+        "sha256": "ad8d4ded7f3d77d637bf7210ef01134b7835cc910e597cfd1415dd648dc4aa08"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/src/main.tsx",
+        "bytes": 422,
+        "sha256": "35bd37cc068b95ab325711591ea01413dd5766e536c6e17492935e902cfbdbbb"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/src/workbench-application.tsx",
+        "bytes": 48401,
+        "sha256": "8a59dd1d759e72216e6debb016c6828f856e320de81bd251a7498bf02b771645"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/src/workbench.css",
+        "bytes": 12789,
+        "sha256": "15be1543338a51233dd3c21c76c7f82bb471350f0c8ab693defafac7e6312c78"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/tsconfig.json",
+        "bytes": 192,
+        "sha256": "36cb488de2aaa26689b71186eefc513e851526a201a239aacc3d361cecdb1a32"
+      },
+      {
+        "path": "apps/design-system-workbench-proof/vite.config.ts",
+        "bytes": 2819,
+        "sha256": "b8cf381915284f5ce62509c1152ec35bb1dfccb4e8d78271f650da1094fbadde"
+      }
+    ],
+    "authorityAggregateSha256": "3de750ed185dfa5f65b7e61ffddf8c65fe3359e7eec618430622f49d44f67e10",
+    "browser": {
+      "profile": "desen.m10a-t03.browser-proof.v1",
+      "result": "PASS",
+      "tests": [
+        {
+          "title": "applies a color literal to live preview and supports undo and redo",
+          "result": "PASS"
+        },
+        {
+          "title": "edits typography atomically and redirects a whole-token alias",
+          "result": "PASS"
+        },
+        {
+          "title": "round-trips deterministic export and retains working data after invalid import",
+          "result": "PASS"
+        },
+        {
+          "title": "shows the editable Neutral foundation and switches light and dark modes",
+          "result": "PASS"
+        }
+      ],
+      "graphReceipts": ["theme-workbench"],
+      "assertions": {
+        "visibleNeutralFoundation": true,
+        "lightDarkModeSelection": true,
+        "literalColorAuthoring": true,
+        "exactColorAlpha": true,
+        "livePreview": true,
+        "atomicTypographyComposite": true,
+        "unitAwareTypography": true,
+        "wholeTokenAliasAuthoring": true,
+        "tokenCreation": true,
+        "structuredThemeModeAuthoring": true,
+        "undoRedoInteraction": true,
+        "deterministicExportReimport": true,
+        "invalidImportRetention": true,
+        "unsupportedModePreviewBlocked": true,
+        "isolatedProofGraph": true
+      }
+    },
+    "browserJourneyCoverage": {
+      "exactSrgbAlphaAuthoring": true,
+      "browserObservedActionColorCss": {
+        "before": "color(srgb 0.0901961 0.0901961 0.0901961)",
+        "after": "color(srgb 0.427451 0.156863 0.85098 / 0.42)"
+      },
+      "pxAndRemTypography": true,
+      "numericAndNamedFontWeights": true,
+      "browserObservedNamedFontWeightCss": { "name": "semi-bold", "computed": 600 },
+      "undoRedoInteraction": true,
+      "literalAndAliasCreation": true,
+      "structuredThemeModeDuplicateRename": true,
+      "unsupportedSelectedModePreviewBlocked": true,
+      "partialPreviewAuthority": false,
+      "visibleFocusOutlinePx": 2
+    },
+    "graph": {
+      "schemaVersion": 1,
+      "graph": "theme-workbench",
+      "entry": "index.html",
+      "result": "PASS",
+      "assertions": {
+        "designSystemAuthoringPresent": true,
+        "isolatedProofGraph": true,
+        "forbiddenAuthorities": {
+          "desenApp": false,
+          "editor": false,
+          "publisher": false,
+          "runtime": false,
+          "starterCatalog": false
+        }
+      },
+      "modules": [
+        "apps/design-system-workbench-proof/\u0000rolldown/runtime.js",
+        "apps/design-system-workbench-proof/\u0000vite/modulepreload-polyfill.js",
+        "apps/design-system-workbench-proof/index.html",
+        "apps/design-system-workbench-proof/src/main.tsx",
+        "apps/design-system-workbench-proof/src/workbench-application.tsx",
+        "apps/design-system-workbench-proof/src/workbench.css",
+        "node_modules/.pnpm/react-dom@19.2.8_react@19.2.8/node_modules/react-dom/cjs/react-dom-client.production.js",
+        "node_modules/.pnpm/react-dom@19.2.8_react@19.2.8/node_modules/react-dom/cjs/react-dom.production.js",
+        "node_modules/.pnpm/react-dom@19.2.8_react@19.2.8/node_modules/react-dom/client.js",
+        "node_modules/.pnpm/react-dom@19.2.8_react@19.2.8/node_modules/react-dom/index.js",
+        "node_modules/.pnpm/react@19.2.8/node_modules/react/cjs/react-jsx-runtime.production.js",
+        "node_modules/.pnpm/react@19.2.8/node_modules/react/cjs/react.production.js",
+        "node_modules/.pnpm/react@19.2.8/node_modules/react/index.js",
+        "node_modules/.pnpm/react@19.2.8/node_modules/react/jsx-runtime.js",
+        "node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/cjs/scheduler.production.js",
+        "node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/index.js",
+        "packages/design-system-authoring/dist/inert-json.js",
+        "packages/design-system-authoring/dist/neutral-theme.js",
+        "packages/design-system-authoring/dist/reviewed-dtcg-compatibility.js",
+        "packages/design-system-authoring/dist/theme-authoring.js",
+        "packages/design-system-core/dist/token-document.js",
+        "packages/design-system-core/dist/token-resolver.js",
+        "packages/design-system-core/dist/token-types.js",
+        "packages/protocol/dist/canonicalization.js"
+      ]
+    },
+    "exactBrowserCases": 4,
+    "exactBrowserAssertions": 15,
+    "graphModuleCount": 24,
+    "normalDesenAppIntegrated": false
+  },
+  "frozenAuthorities": {
+    "t02": {
+      "artifact": {
+        "path": "docs/proof/artifacts/m10a-t02.json",
+        "bytes": 11513,
+        "sha256": "135dffbab6bc2c0d73e93caf2da6edbbeb7cec2653555fc5c128e1de0f5936c2"
+      },
+      "profile": "desen.design-system-core.proof.v1",
+      "result": "PASS",
+      "publicRuntimeExports": [
+        "DESIGN_TOKEN_PROFILE",
+        "EDITABLE_PROJECT_KIND",
+        "EDITABLE_PROJECT_LIMITS",
+        "EDITABLE_PROJECT_SCHEMA_VERSION",
+        "SUPPORTED_EDITABLE_PROJECT_SCHEMA_VERSIONS",
+        "admitDtcgTokenDocument",
+        "admitEditableProjectRecord",
+        "getDesignTokenValueFamily",
+        "getDtcgAliasTarget",
+        "isDtcgTokenAlias",
+        "migrateEditableProjectRecord",
+        "resolveDesignTokens"
+      ],
+      "authorityFiles": 23,
+      "authorityBytes": 169240,
+      "authorityAggregateSha256": "6a5f57ae8face6679d421a695dc0cf225ed84703af5622bf293324bc21768fb4",
+      "unchanged": true
+    },
+    "sc01": {
+      "artifact": {
+        "path": "docs/proof/artifacts/sc-01-dtcg-compatibility.json",
+        "bytes": 31286,
+        "sha256": "1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6"
+      },
+      "classification": "DTCG_2025_10_COMPATIBLE_CLOSED_REFERENCE_PROFILE",
+      "featureFamilies": [
+        "ROOT_TOKEN_CURLY_ALIAS",
+        "ALIAS_TARGET_TYPE_INFERENCE",
+        "JSON_POINTER_REF",
+        "PROPERTY_LEVEL_REF",
+        "ROOT_GROUP_TOKEN",
+        "GROUP_EXTENDS",
+        "EMPTY_GROUP",
+        "EXTENSIONS",
+        "DEPRECATED",
+        "ADDITIONAL_TOKEN_TYPES",
+        "ADDITIONAL_COLOR_SPACES",
+        "NONE_COLOR_COMPONENTS",
+        "OPTIONAL_COLOR_ALPHA_AND_HEX",
+        "RESOLVER_THEMES_AND_MODES"
+      ],
+      "validButUnsupportedFixtures": [
+        "root-token-curly-alias",
+        "alias-infers-target-type",
+        "whole-token-json-pointer",
+        "color-component-json-pointer",
+        "group-root-token",
+        "group-extends",
+        "empty-described-group",
+        "token-vendor-extension",
+        "deprecated-token",
+        "number-token",
+        "typography-token",
+        "display-p3-color",
+        "oklch-color",
+        "srgb-none-component",
+        "color-without-local-alpha-and-hex",
+        "resolver-theme-modifier"
+      ],
+      "invalidFixtures": [
+        "name-containing-dot",
+        "malformed-dimension-value",
+        "alias-cycle",
+        "malformed-json-pointer",
+        "missing-json-pointer-target",
+        "misplaced-json-pointer-under-value",
+        "malformed-resolver-required-fields"
+      ],
+      "unchanged": true
+    },
+    "protocol": {
+      "protocol": "0.1.0",
+      "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+      "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8",
+      "manifestSha256": "92e1c817d75ddc71e993de0dcf42ad7003738b6a59dc57905b879f872828c2cd",
+      "aggregateSha256": "afe8fc359465ce891f4325fcdeca4b2f12bca48f1aa54a34c4f3a97985f7e060",
+      "snapshotFiles": 31,
+      "manifestEntries": 30,
+      "totalBytes": 306604,
+      "unchanged": true
+    },
+    "runtimeCore": {
+      "artifact": {
+        "path": "docs/proof/artifacts/runtime-core-baseline.json",
+        "bytes": 271,
+        "sha256": "fbda58d72ccff36d530368422dd7fd82c73dcca359c29e3a6667e8ae4b9b424b"
+      },
+      "profile": "desen.runtime-core-baseline.v1",
+      "objectFormat": "sha1",
+      "tree": "3fa3613a3be63c749f40b6a0b55af5b40c675773",
+      "trackedFiles": 61,
+      "clean": true,
+      "unchanged": true
+    }
+  },
+  "tests": {
+    "rootTestNames": [
+      "M10A-T03 builds deterministic evidence through the built public package",
+      "M10A-T03 proves editable Neutral modes arbitrary values and live preview",
+      "M10A-T03 proves atomic typography alias edits and bounded undo redo",
+      "M10A-T03 preserves the exact SC-01 compatibility matrix and rejects invalid imports atomically",
+      "M10A-T03 preserves T02 Protocol and Runtime Core authorities exactly",
+      "M10A-T03 rejects public API package application and browser observation mutations",
+      "M10A-T03 verifier rejects artifact and visible-report drift",
+      "M10A-T03 writer is atomic and rejects unsafe destinations"
+    ],
+    "packageBehaviorRunsSeparately": true,
+    "publicPackageRunsSeparately": true,
+    "browserExecutedByVerifier": true,
+    "verifierUsesNetwork": false,
+    "verifierSpawnsBoundedLocalChildren": true,
+    "hostedExactHeadRequired": true
+  },
+  "nonClaims": [
+    "T03 does not integrate the theme workbench into the normal Desen App.",
+    "T03 does not persist projects, create immutable releases, publish or activate token data, or change Runtime semantics.",
+    "The isolated browser workbench is implementation evidence, not a production application or visual-regression system.",
+    "The frozen SC-01 matrix bounds the standards claim to 14 reviewed feature families, 16 exact valid-but-unsupported fixtures, and seven exact invalid fixtures; it is not a general DTCG parser, resolver, or arbitrary-input conformance verdict.",
+    "All 16 historical SC-01 fixtures are preserved without silent loss. The three complete documents now fully supported by T02 are preview-ready and emit no false disclosure; the 13 documents with a remaining unsupported member are disclosed, inert, and preview-blocked without partial or production authority.",
+    "Local deterministic evidence does not substitute for exact-head hosted Quality gate and fresh-main closure."
+  ]
+}

@@ -144,13 +144,13 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "91f6fa67b6df6145678038387acb76e8f2c4f70b17b73c868efd9b24616c5b81";
+  "a9b7b963ac77d33f6faca4bd352546736061955cdcd6525cde94a06bf4f318f5";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "2a084ec479b4d819fbfcd733dfc0364a5430c875abf185d0c9e8a681d90f82bc";
+  "c9eb237799a16582aea375c9ca3bb906c2f330913230682f97951e8a2f21277d";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "d0677ebcea01b65ab1ddeb2c2fdba42861d85b89b8cdda8decf8461ec11af1cf";
+  "6940ed2d22342db1d7f8ca536c4ebf08260de69d7014fef0973d9c07e31a560e";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
-  "00d77ebce7d64619055a6fc0754b27e70a775fde668c32540bfbbfb93cee0619";
+  "4c2cd7854e3ed795fe38357166e12e5f199c73217a7c10b89505df24e5de6743";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = SAFE_OBJECT_FREEZE(["apps/*", "packages/*"]);
@@ -177,6 +177,16 @@ const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
     ["build", "pnpm run build:authoring && pnpm run build:host"],
     ["build:authoring", "vite build --mode proof-authoring"],
     ["build:host", "vite build --mode proof-host"],
+    ["lint", "eslint . --max-warnings=0"],
+    ["typecheck", "tsc -p tsconfig.json --noEmit"],
+    ["test:e2e", "pnpm run typecheck && pnpm run build && pnpm run test:e2e:built"],
+    ["test:e2e:built", "playwright test --config playwright.config.ts"],
+  ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
+);
+const EXPECTED_DESIGN_SYSTEM_WORKBENCH_PROOF_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
+  [
+    ["build", "vite build"],
+    ["dev", "vite --host 127.0.0.1 --port 4188 --strictPort"],
     ["lint", "eslint . --max-warnings=0"],
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
     ["test:e2e", "pnpm run typecheck && pnpm run build && pnpm run test:e2e:built"],
@@ -728,6 +738,7 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
   ["m10-gate", "scripts/verify-m10-gate.mjs", "tests/m10-gate.test.mjs"],
   ["m10a-t01", "scripts/verify-m10a-t01.mjs", "tests/m10a-t01.test.mjs"],
   ["m10a-t02", "scripts/verify-m10a-t02.mjs", "tests/m10a-t02.test.mjs"],
+  ["m10a-t03", "scripts/verify-m10a-t03.mjs", "tests/m10a-t03.test.mjs"],
 ]);
 
 const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
@@ -1135,6 +1146,7 @@ function classifyPrerequisite({
       "editor-core-terminal-integration",
       "desen-app-publish-activation",
       "m10a-t02",
+      "m10a-t03",
     ].includes(currentProofId);
     const reviewedPackage =
       (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
@@ -1142,9 +1154,11 @@ function classifyPrerequisite({
         currentProofId === "desen-app-publish-activation") &&
         packageName === "@desen/editor-web") ||
       (currentProofId === "m10a-t02" && packageName === "@desen/design-system-core");
+    const reviewedAuthoringPackage =
+      currentProofId === "m10a-t03" && packageName === "@desen/design-system-authoring";
     if (
       !reviewedPublicPackageProof ||
-      !reviewedPackage ||
+      (!reviewedPackage && !reviewedAuthoringPackage) ||
       packageScripts[task] !== expectedScript
     ) {
       fail(currentProofId + " uses an unreviewed public-package contract test.", {
@@ -1153,6 +1167,16 @@ function classifyPrerequisite({
       });
     }
     return "public-package-contract-test";
+  }
+  if (task === "test:e2e") {
+    if (currentProofId !== "m10a-t03" || packageName !== "@desen/design-system-workbench-proof") {
+      fail(currentProofId + " uses an unreviewed browser-proof package test.", {
+        command,
+        packageName,
+        task,
+      });
+    }
+    return "browser-proof-test";
   }
   if (task.startsWith("test:")) {
     assertFocusedTestCovered(packageManifest, task);
@@ -1428,6 +1452,15 @@ function buildCanonicalInventory() {
       "SERIAL_BUILD_WRITER",
       SHARED_BUILD_WRITER,
     ),
+    node(
+      "design-system-authoring-public-package-contract",
+      "Design System Authoring public-package contract",
+      "pnpm",
+      ["--filter", "@desen/design-system-authoring", "test:public-package"],
+      ["design-system-core-public-package-contract"],
+      "SERIAL_BUILD_WRITER",
+      SHARED_BUILD_WRITER,
+    ),
   ];
   const verifiers = PROOF_UNIT_TUPLES.map(([id, verifierFile]) =>
     node(
@@ -1450,7 +1483,9 @@ function buildCanonicalInventory() {
             ? "editor-web-public-package-contract"
             : id === "m10a-t02"
               ? "design-system-core-public-package-contract"
-              : "package-tests",
+              : id === "m10a-t03"
+                ? "design-system-authoring-public-package-contract"
+                : "package-tests",
       ],
       "CONCURRENT_PROOF",
       id === "runtime-core-baseline"
@@ -1580,7 +1615,11 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
   );
   assertExactArray(
     [...testConfigurationFiles].sort(),
-    ["apps/desen-app-browser-e2e/vite.config.ts", "apps/starter-catalog-web-proof/vite.config.ts"],
+    [
+      "apps/desen-app-browser-e2e/vite.config.ts",
+      "apps/design-system-workbench-proof/vite.config.ts",
+      "apps/starter-catalog-web-proof/vite.config.ts",
+    ],
     "The root and workspace test-configuration file set",
   );
   if (SAFE_OBJECT_HAS_OWN(packageJson, "vitest")) {
@@ -1647,6 +1686,25 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
         script: name,
         expected: command,
         actual: starterProofPackage.scripts[name],
+      });
+    }
+  }
+
+  const workbenchProofPackage = workspacePackageMap.get("@desen/design-system-workbench-proof");
+  if (!workbenchProofPackage) {
+    fail("The reviewed design-system workbench proof workspace package is missing.");
+  }
+  assertExactArray(
+    SAFE_REFLECT_OWN_KEYS(workbenchProofPackage.scripts).sort(),
+    EXPECTED_DESIGN_SYSTEM_WORKBENCH_PROOF_PACKAGE_SCRIPTS.map(({ name }) => name).sort(),
+    "The design-system workbench proof workspace package script set",
+  );
+  for (const { name, command } of EXPECTED_DESIGN_SYSTEM_WORKBENCH_PROOF_PACKAGE_SCRIPTS) {
+    if (workbenchProofPackage.scripts[name] !== command) {
+      fail("The design-system workbench proof workspace package script drifted from review.", {
+        script: name,
+        expected: command,
+        actual: workbenchProofPackage.scripts[name],
       });
     }
   }
@@ -1777,7 +1835,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "4594873ca29aa8a5a5f0aa6be139f50507d0be9d247ac0e1e04e98628c20404a";
+  "6854945b1ae3bb7c71e212a6ced7a96bdbd2b16e3da399ed36b539dbc5619577";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

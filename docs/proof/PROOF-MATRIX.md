@@ -3579,3 +3579,37 @@ historical 31,286-byte SC-01 DTCG artifact stays byte-identical at
 26-leaf color/dimension profile. T02 does not add App integration, a theme editor, persistence,
 asset loading, recipe materialization, executable connections, immutable releases, Runtime or
 Publisher authority, package publication, production deployment, G10A, or M11 work.
+
+## M10A-T03 theme and token authoring (local closure candidate)
+
+The [M10A-T03 evidence](M10A-T03.md) adds private, platform-neutral
+`@desen/design-system-authoring` above only the frozen public Design System Core and Protocol APIs.
+It supplies an editable Neutral light/dark foundation, structured theme and mode operations,
+literal and whole-token alias creation/editing, exact sRGB alpha and px/rem handling, and bounded
+immutable undo/redo. Export/import and every compound edit are atomic: a rejected operation returns
+the preceding session without exposing a partial result.
+
+The separate `@desen/design-system-workbench-proof` is an isolated browser harness, not the normal
+Desen App. Its four Chromium journeys exercise visible authoring and preview through the built
+public package. Frozen SC-01's 16 valid fixtures split into three T02-supported normal edit/preview
+paths and 13 losslessly preserved/disclosed unsupported paths that block partial preview only for
+their selected overlay; seven reviewed invalid fixtures reject atomically. A separate closed
+T02-recognized unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten
+malformed fixtures. Unreviewed or invalid forms reject explicitly; none gains partial preview,
+publication, or production authority.
+
+Package tests pass 32/32, the built public-package contract passes 5/5, the isolated browser suite
+passes 4/4, and the root proof passes 8/8. The deterministic 80,054-byte artifact is
+`sha256:530efe5d80d78a722c1832ad5b95086c2fd97bc2f1a4bd275b9a1924394b1e2b`.
+Reader checkpoint sequence 86 preserves sequences 1–85, reseals the changed predecessor readers,
+and appends the T03 artifact and reader pair, authenticating 67 artifacts / 134 current readers at
+`sha256:b0fc419c9026e9e8584c22b377ca5ca10dc848244c9f1a7a17da1ee85a80aff2`; the dedicated
+checkpoint suite passes 120/120. The neutral CI successor contains 238 logical workloads / 113
+proof pairs (100 ordinary and 13 exclusive barriers) / 259 hosted physical shard workloads.
+
+M10A-T03 remains `IN_PROGRESS`: exact-head hosted Quality gate and Browser E2E, merge identity, and
+a fresh `main` run are still pending. Therefore progress remains 123/176 (70%), M10A remains 2/28
+(7%), and proof gates remain 11/14. M10A-T04 is dependency-ready but remains `NOT_STARTED` and is
+not selected or authorized while T03 is active. T03 does not integrate the normal App, persist a
+project, create a design-system release, materialize recipes or assets, publish or activate token
+data, change Runtime or Publisher behavior, publish a package, advance G10A, or start M11.

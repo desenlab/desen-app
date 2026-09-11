@@ -552,6 +552,7 @@ const PROOF_ENTRIES = Object.freeze(
     ["m10-gate", "scripts/verify-m10-gate.mjs", "tests/m10-gate.test.mjs"],
     ["m10a-t01", "scripts/verify-m10a-t01.mjs", "tests/m10a-t01.test.mjs"],
     ["m10a-t02", "scripts/verify-m10a-t02.mjs", "tests/m10a-t02.test.mjs"],
+    ["m10a-t03", "scripts/verify-m10a-t03.mjs", "tests/m10a-t03.test.mjs"],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -642,14 +643,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "91f6fa67b6df6145678038387acb76e8f2c4f70b17b73c868efd9b24616c5b81";
+  "a9b7b963ac77d33f6faca4bd352546736061955cdcd6525cde94a06bf4f318f5";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "2a084ec479b4d819fbfcd733dfc0364a5430c875abf185d0c9e8a681d90f82bc";
+  "c9eb237799a16582aea375c9ca3bb906c2f330913230682f97951e8a2f21277d";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "d0677ebcea01b65ab1ddeb2c2fdba42861d85b89b8cdda8decf8461ec11af1cf";
+  "6940ed2d22342db1d7f8ca536c4ebf08260de69d7014fef0973d9c07e31a560e";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "158033c4f6cdc36907c2c31555d26f4cd54d2103b93eddd56815cfc18e0faa85";
+const QUALITY_GATE_PLAN_SHA256 = "257667fcdec26d3654d1434c392bfaf7aec7e8f2a684311912c02255fd1d3176";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -657,7 +658,7 @@ const QUALITY_GATE_PLAN_SHA256 = "158033c4f6cdc36907c2c31555d26f4cd54d2103b93edd
 // Historical M06-T10 plan pin retained for its frozen compatibility reader:
 // ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
-  "00d77ebce7d64619055a6fc0754b27e70a775fde668c32540bfbbfb93cee0619";
+  "4c2cd7854e3ed795fe38357166e12e5f199c73217a7c10b89505df24e5de6743";
 const WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);
@@ -684,6 +685,16 @@ const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = Object.freeze(
     ["build", "pnpm run build:authoring && pnpm run build:host"],
     ["build:authoring", "vite build --mode proof-authoring"],
     ["build:host", "vite build --mode proof-host"],
+    ["lint", "eslint . --max-warnings=0"],
+    ["typecheck", "tsc -p tsconfig.json --noEmit"],
+    ["test:e2e", "pnpm run typecheck && pnpm run build && pnpm run test:e2e:built"],
+    ["test:e2e:built", "playwright test --config playwright.config.ts"],
+  ].map(([name, command]) => Object.freeze({ name, command })),
+);
+const EXPECTED_DESIGN_SYSTEM_WORKBENCH_PROOF_PACKAGE_SCRIPTS = Object.freeze(
+  [
+    ["build", "vite build"],
+    ["dev", "vite --host 127.0.0.1 --port 4188 --strictPort"],
     ["lint", "eslint . --max-warnings=0"],
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
     ["test:e2e", "pnpm run typecheck && pnpm run build && pnpm run test:e2e:built"],
@@ -1001,13 +1012,15 @@ function classifyLegacyPrerequisite({
       "editor-core-terminal-integration",
       "desen-app-publish-activation",
       "m10a-t02",
+      "m10a-t03",
     ].includes(currentProofId);
     const reviewedPackage =
       (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
       ((currentProofId === "editor-core-persistence" ||
         currentProofId === "desen-app-publish-activation") &&
         packageName === "@desen/editor-web") ||
-      (currentProofId === "m10a-t02" && packageName === "@desen/design-system-core");
+      (currentProofId === "m10a-t02" && packageName === "@desen/design-system-core") ||
+      (currentProofId === "m10a-t03" && packageName === "@desen/design-system-authoring");
     if (!reviewedProof || !reviewedPackage || packageManifest.scripts?.[task] !== expectedScript) {
       throw new QualityGateError(
         `${currentProofId} uses an unreviewed public-package contract test.`,
@@ -1015,6 +1028,16 @@ function classifyLegacyPrerequisite({
       );
     }
     return "public-package-contract-test";
+  }
+
+  if (task === "test:e2e") {
+    if (currentProofId !== "m10a-t03" || packageName !== "@desen/design-system-workbench-proof") {
+      throw new QualityGateError(
+        `${currentProofId} uses an unreviewed browser-proof package test.`,
+        { command, packageName, task },
+      );
+    }
+    return "browser-proof-test";
   }
 
   if (task.startsWith("test:")) {
@@ -1076,7 +1099,11 @@ export function validateProofInventory({
   }
   assertExactArray(
     [...testConfigurationFiles].sort(),
-    ["apps/desen-app-browser-e2e/vite.config.ts", "apps/starter-catalog-web-proof/vite.config.ts"],
+    [
+      "apps/desen-app-browser-e2e/vite.config.ts",
+      "apps/design-system-workbench-proof/vite.config.ts",
+      "apps/starter-catalog-web-proof/vite.config.ts",
+    ],
     "The root and workspace test-configuration file set",
   );
   if (Object.hasOwn(packageJson, "vitest")) {
@@ -1151,6 +1178,30 @@ export function validateProofInventory({
           script: name,
           expected: command,
           actual: starterProofPackage.scripts[name],
+        },
+      );
+    }
+  }
+
+  const workbenchProofPackage = workspacePackageMap.get("@desen/design-system-workbench-proof");
+  if (!workbenchProofPackage) {
+    throw new QualityGateError(
+      "The reviewed design-system workbench proof workspace package is missing.",
+    );
+  }
+  assertExactArray(
+    Object.keys(workbenchProofPackage.scripts ?? {}).sort(),
+    EXPECTED_DESIGN_SYSTEM_WORKBENCH_PROOF_PACKAGE_SCRIPTS.map(({ name }) => name).sort(),
+    "The design-system workbench proof workspace package script set",
+  );
+  for (const { name, command } of EXPECTED_DESIGN_SYSTEM_WORKBENCH_PROOF_PACKAGE_SCRIPTS) {
+    if (workbenchProofPackage.scripts[name] !== command) {
+      throw new QualityGateError(
+        "The design-system workbench proof workspace package script drifted from review.",
+        {
+          script: name,
+          expected: command,
+          actual: workbenchProofPackage.scripts[name],
         },
       );
     }
@@ -1391,6 +1442,12 @@ export function createQualityGateSteps() {
       "Design System Core public-package contract",
       "pnpm",
       ["--filter", "@desen/design-system-core", "test:public-package"],
+    ),
+    commandStep(
+      "design-system-authoring-public-package-contract",
+      "Design System Authoring public-package contract",
+      "pnpm",
+      ["--filter", "@desen/design-system-authoring", "test:public-package"],
     ),
     ...PROOF_ENTRIES.map(({ id, verifierFile }) =>
       commandStep(`verify-${id}`, `Proof verifier: ${id}`, "node", [verifierFile]),

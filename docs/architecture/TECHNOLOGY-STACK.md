@@ -17,8 +17,8 @@ every dependency to have a documented responsibility.
   host's programmatic resolved-module-graph audit
 - Testing Library React 16.3.2 and jsdom 29.1.1 for user-observable adapter, host, and Desen App
   shell semantics
-- Playwright 1.62.1 with its package-pinned Chromium runtime for the isolated Desen App browser
-  proof; the browser job executes in parallel with the repository quality gate
+- Playwright 1.62.1 with its package-pinned Chromium runtime for the isolated Desen App and T03
+  design-system workbench browser proofs; the browser job runs beside the repository quality gate
 - Fastify 5.12.2 for the fixed-loopback, bearer-authenticated local control-plane transport;
   SEC-01 also pins transitive fast-uri 3.1.7 and 4.1.4 in the workspace lockfile
 - better-sqlite3 13.0.3 behind the local Source-generation and channel-pointer repositories; its
@@ -52,7 +52,7 @@ fresh compatibility checks.
 Map provider, drag-and-drop adapter, router, query cache, and UI component dependencies are chosen
 only by their owning tasks and require an ADR when they affect public capability contracts.
 
-## M10A product foundation — T01 and T02 complete, T03 next
+## M10A product foundation — T01 and T02 complete, T03 candidate active
 
 M10A-T01 pins `@base-ui/react` **1.8.0** behind the private
 `@desen/starter-catalog-web` Catalog/adapter package, with DESEN-owned Neutral styles implemented
@@ -65,10 +65,18 @@ or production deployment.
 M10A-T02 is `DONE`: `@desen/design-system-core` admits the App-owned v1 envelope and resolves the
 bounded DTCG 2025.10 profile with deterministic external source overlays, whole-token aliases, and
 final literal overrides. It imports only `@desen/protocol` and `@desen/editor-core`; the
-[T02 proof](../proof/M10A-T02.md) owns its closure evidence. M10A-T03 is selected next and ready but
-remains `NOT_STARTED`, with no active implementation task. Its theme/token editor may build on this
-profile; persistence, immutable releases, normal App integration, materialization, Publisher,
-Runtime, T04 and later tasks, and M11 remain outside T03.
+[T02 proof](../proof/M10A-T02.md) owns its closure evidence. M10A-T03 is `IN_PROGRESS`: its local
+candidate adds platform-neutral `@desen/design-system-authoring` and an isolated workbench with
+structured theme/mode/token/whole-alias controls, exact sRGB and px/rem handling, atomic
+history/import, and bounded loss-aware export. Frozen SC-01 covers 16 valid fixtures: three
+T02-supported normal edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with
+partial preview blocked only for their selected overlay; seven invalid fixtures reject atomically.
+A separate closed T02-recognized unsupported matrix preserves/discloses six valid fixtures and
+atomically rejects six malformed fixtures. Unreviewed or invalid forms fail closed without silent
+loss. Exact-head hosted checks are pending; T03 adds no normal App
+integration, persistence, immutable release, materialization, Publisher, Runtime, or protocol
+authority. T04 is dependency-ready but remains `NOT_STARTED` and unselected while T03 is active;
+M11 has not started.
 The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
 capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
 and hermetic capture configuration. No Storybook, Chromatic, Tailwind or second primitive library
