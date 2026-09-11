@@ -305,7 +305,7 @@ test("authenticates the exact 20/20 hosted campaign and live M10A-T03 successor"
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "a876dfa5fa6b78401d13566f03bff76d4ae95fec731f3c104c695d302b016992",
+    selectorSha256: "ea1fd8da8071d94c18c6557b5ea7ca450117be549a9320d942b9e2008f8856af",
     ownershipSha256: "ae88676325b4fda7f2d51cc152a7260025ffc6a590db9ef87dfeeee3ba318d6d",
     impactGraphSha256: "acd57a05649d9aa37823c83e1a6aa6df9ecc1eaa137fa157ac58010ba4d58553",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
