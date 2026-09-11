@@ -9,6 +9,7 @@ const allowedPackageDependencies = {
   "runtime-web": ["protocol", "validator", "runtime-core"],
   "editor-core": ["protocol", "validator"],
   "design-system-core": ["protocol", "editor-core"],
+  "design-system-authoring": ["protocol", "design-system-core"],
   "editor-web": [
     "protocol",
     "validator",
@@ -62,6 +63,7 @@ const allowedApplicationDependencies = {
     "runtime-react",
     "starter-catalog-web",
   ],
+  "design-system-workbench-proof": ["design-system-authoring"],
   "desen-app": [
     "protocol",
     "validator",
@@ -82,7 +84,7 @@ const allowedApplicationDependencies = {
 };
 
 const neutralProductionSourcePath =
-  "^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core|design-system-core)/src/";
+  "^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core|design-system-core|design-system-authoring)/src/";
 const desenAppBrowserProductProofServerPath =
   "^apps/desen-app-browser-e2e/product-proof-server\\.mjs$";
 const desenAppBrowserRecoveryProofServerPath =
@@ -205,6 +207,14 @@ module.exports = {
       severity: "error",
       from: { path: "^apps/starter-catalog-web-proof/" },
       to: { path: "^apps/(?!starter-catalog-web-proof/)" },
+    },
+    {
+      name: "design-system-workbench-proof-has-no-other-apps",
+      severity: "error",
+      comment:
+        "The isolated design-system workbench proof cannot acquire Desen App or another application composition root.",
+      from: { path: "^apps/design-system-workbench-proof/" },
+      to: { path: "^apps/(?!design-system-workbench-proof/)" },
     },
     {
       name: "reviewed-canonical-proof-protocol-public-root-only",

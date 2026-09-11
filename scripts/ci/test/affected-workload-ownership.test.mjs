@@ -35,12 +35,12 @@ const CI_04_CATEGORY_COUNTS = Object.freeze({
 });
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   ...CI_04_CATEGORY_COUNTS,
-  PROOF_UNIT: 224,
-  DEPENDENCY_POLICY: 35,
-  FROZEN_INPUT: 161,
-  PACKAGE_OR_APPLICATION: 628,
-  SHARED_PROOF_INFRASTRUCTURE: 374,
-  PROJECT_DOCUMENTATION: 162,
+  PROOF_UNIT: 226,
+  DEPENDENCY_POLICY: 37,
+  FROZEN_INPUT: 162,
+  PACKAGE_OR_APPLICATION: 651,
+  SHARED_PROOF_INFRASTRUCTURE: 388,
+  PROJECT_DOCUMENTATION: 163,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
@@ -219,6 +219,52 @@ const M10A_T02_SUCCESSOR_PATHS = Object.freeze([
   "tests/m10a-t02.test.mjs",
 ]);
 
+const M10A_T03_SUCCESSOR_PATHS = Object.freeze([
+  "apps/design-system-workbench-proof/README.md",
+  "apps/design-system-workbench-proof/design-system-workbench.pw.ts",
+  "apps/design-system-workbench-proof/index.html",
+  "apps/design-system-workbench-proof/package.json",
+  "apps/design-system-workbench-proof/playwright.config.ts",
+  "apps/design-system-workbench-proof/proof-contract.ts",
+  "apps/design-system-workbench-proof/proof-reporter.ts",
+  "apps/design-system-workbench-proof/src/main.tsx",
+  "apps/design-system-workbench-proof/src/workbench-application.tsx",
+  "apps/design-system-workbench-proof/src/workbench.css",
+  "apps/design-system-workbench-proof/tsconfig.json",
+  "apps/design-system-workbench-proof/vite.config.ts",
+  "docs/proof/M10A-T03.md",
+  "docs/proof/artifacts/m10a-t03.json",
+  "packages/design-system-authoring/README.md",
+  "packages/design-system-authoring/package.json",
+  "packages/design-system-authoring/src/reviewed-dtcg-compatibility.ts",
+  "packages/design-system-authoring/src/index.ts",
+  "packages/design-system-authoring/src/inert-json.ts",
+  "packages/design-system-authoring/src/neutral-theme.ts",
+  "packages/design-system-authoring/src/theme-authoring.ts",
+  "packages/design-system-authoring/test/public-package.mjs",
+  "packages/design-system-authoring/test/public-package.types.mts",
+  "packages/design-system-authoring/test/theme-authoring.test.ts",
+  "packages/design-system-authoring/tsconfig.build.json",
+  "packages/design-system-authoring/tsconfig.json",
+  "packages/design-system-authoring/tsconfig.public-package.json",
+  "scripts/generate-m10a-t03-proof.mjs",
+  "scripts/lib/m10a-t03-proof.mjs",
+  "scripts/verify-m10a-t03.mjs",
+  "tests/boundaries/fixtures/allowed-design-system-authoring-foundations/packages/design-system-authoring/src/index.ts",
+  "tests/boundaries/fixtures/allowed-design-system-authoring-foundations/packages/design-system-core/src/index.ts",
+  "tests/boundaries/fixtures/allowed-design-system-authoring-foundations/packages/protocol/src/index.ts",
+  "tests/boundaries/fixtures/allowed-design-system-workbench-authoring/apps/design-system-workbench-proof/src/index.ts",
+  "tests/boundaries/fixtures/allowed-design-system-workbench-authoring/packages/design-system-authoring/src/index.ts",
+  "tests/boundaries/fixtures/design-system-authoring-imports-node/packages/design-system-authoring/src/index.ts",
+  "tests/boundaries/fixtures/design-system-authoring-imports-runtime-core/packages/design-system-authoring/src/index.ts",
+  "tests/boundaries/fixtures/design-system-authoring-imports-runtime-core/packages/runtime-core/src/index.ts",
+  "tests/boundaries/fixtures/design-system-workbench-imports-app/apps/desen-app/src/index.ts",
+  "tests/boundaries/fixtures/design-system-workbench-imports-app/apps/design-system-workbench-proof/src/index.ts",
+  "tests/boundaries/fixtures/design-system-workbench-imports-core/apps/design-system-workbench-proof/src/index.ts",
+  "tests/boundaries/fixtures/design-system-workbench-imports-core/packages/design-system-core/src/index.ts",
+  "tests/m10a-t03.test.mjs",
+]);
+
 const T08_SUCCESSOR_PATHS = Object.freeze([
   "apps/desen-app-browser-e2e/repeatable-demo-authoring.ts",
   "apps/desen-app-browser-e2e/repeatable-demo-playwright.config.ts",
@@ -265,13 +311,21 @@ const T08_SUCCESSOR_PATHS = Object.freeze([
 ]);
 
 async function currentTrackedPaths() {
-  const { stdout } = await EXEC_FILE("git", ["ls-files", "-z"], {
-    cwd: WORKSPACE_ROOT,
-    encoding: "buffer",
-    maxBuffer: 16 * 1024 * 1024,
-    windowsHide: true,
-  });
-  return stdout.toString("utf8").split("\0").filter(Boolean);
+  const { stdout } = await EXEC_FILE(
+    "git",
+    ["ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+    {
+      cwd: WORKSPACE_ROOT,
+      encoding: "buffer",
+      maxBuffer: 16 * 1024 * 1024,
+      windowsHide: true,
+    },
+  );
+  return stdout
+    .toString("utf8")
+    .split("\0")
+    .filter(Boolean)
+    .sort((left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right)));
 }
 
 async function currentAuthority() {
@@ -293,7 +347,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1643 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1686 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -315,12 +369,50 @@ test("freezes exact-one ownership for all 1643 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1643);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1686);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
   );
   assertDeepFrozen(authority);
+});
+
+test("the M10A-T03 successor preserves T02 ownership and adds exactly 43 reviewed paths", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  assert.equal(M10A_T03_SUCCESSOR_PATHS.length, 43);
+  for (const relativePath of M10A_T03_SUCCESSOR_PATHS) {
+    const owner = resolveAffectedWorkloadOwner(authority, relativePath);
+    const proofInput =
+      relativePath === "scripts/verify-m10a-t03.mjs" || relativePath === "tests/m10a-t03.test.mjs";
+    assert.equal(owner.disposition, proofInput ? "SELECT_PROOF_UNIT" : "FORCE_EXHAUSTIVE");
+    assert.equal(owner.proofUnitId, proofInput ? "m10a-t03" : null);
+    assert.throws(
+      () =>
+        createAffectedWorkloadOwnership(paths.filter((candidate) => candidate !== relativePath)),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+  assert.deepEqual(
+    calculateAffectedWorkloadOwnershipReview(
+      paths.filter((candidate) => !M10A_T03_SUCCESSOR_PATHS.includes(candidate)),
+    ),
+    {
+      trackedPathCount: 1643,
+      trackedPathSetSha256: "ee83c9d63a5b71e3097dab67a757ea4df5fe892ffbc4a7a9320a94d3adb1ab5d",
+      proofOwnedPathCount: 224,
+      categoryCounts: {
+        ...CI_04_CATEGORY_COUNTS,
+        PROOF_UNIT: 224,
+        DEPENDENCY_POLICY: 35,
+        FROZEN_INPUT: 161,
+        PACKAGE_OR_APPLICATION: 628,
+        SHARED_PROOF_INFRASTRUCTURE: 374,
+        PROJECT_DOCUMENTATION: 162,
+      },
+      ownershipSha256: "bd1811900519d9cd02ebaa2ea6caab38ccd24c66b5729bb1449a0898d6c8abd8",
+    },
+  );
 });
 
 test("the M10A-T02 successor preserves T01 ownership and adds exactly 38 reviewed paths", async () => {
@@ -341,7 +433,11 @@ test("the M10A-T02 successor preserves T01 ownership and adds exactly 38 reviewe
   }
   assert.deepEqual(
     calculateAffectedWorkloadOwnershipReview(
-      paths.filter((candidate) => !M10A_T02_SUCCESSOR_PATHS.includes(candidate)),
+      paths.filter(
+        (candidate) =>
+          !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
+          !M10A_T02_SUCCESSOR_PATHS.includes(candidate),
+      ),
     ),
     {
       trackedPathCount: 1605,
@@ -381,6 +477,7 @@ test("the M10A-T01 successor preserves G10 ownership and adds exactly 58 reviewe
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T01_SUCCESSOR_PATHS.includes(candidate),
       ),
@@ -422,6 +519,7 @@ test("the G10 successor preserves every T09 owner and adds exactly six reviewed 
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T01_SUCCESSOR_PATHS.includes(candidate) &&
           !G10_SUCCESSOR_PATHS.includes(candidate),
@@ -465,6 +563,7 @@ test("the T09 baseline successor preserves every T08 owner and adds exactly six 
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !T09_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T01_SUCCESSOR_PATHS.includes(candidate) &&
@@ -509,6 +608,7 @@ test("the T08 repeatable-demo successor preserves every T07 owner and adds only 
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !T08_SUCCESSOR_PATHS.includes(candidate) &&
           !T09_SUCCESSOR_PATHS.includes(candidate) &&
@@ -553,6 +653,7 @@ test("the T07 recovery successor preserves T06 ownership and narrowly registers 
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !T07_SUCCESSOR_PATHS.includes(candidate) &&
           !T08_SUCCESSOR_PATHS.includes(candidate) &&
@@ -603,6 +704,7 @@ test("the T06 publication successor preserves every CI-04 owner and registers on
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !T06_SUCCESSOR_PATHS.includes(candidate) &&
           !T07_SUCCESSOR_PATHS.includes(candidate) &&
@@ -640,6 +742,7 @@ test("the CI-04 execution sources retain every SEC-02 owner and force exhaustive
     calculateAffectedWorkloadOwnershipReview(
       paths.filter(
         (candidate) =>
+          !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
           !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
           !T06_SUCCESSOR_PATHS.includes(candidate) &&
@@ -673,6 +776,7 @@ test("the SEC-02 documentation successor preserves the exact SEC-01 ownership au
   });
   const previousPaths = paths.filter(
     (candidate) =>
+      !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
       !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
       candidate !== SEC_02_SUCCESSOR_PATH &&
       !CI_04_SUCCESSOR_PATHS.includes(candidate) &&
@@ -719,6 +823,7 @@ test("the exact SEC-01 successor preserves the reviewed T05 ownership authority"
 
   const predecessorPaths = paths.filter(
     (candidate) =>
+      !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
       !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
       !SEC_01_SUCCESSOR_PATHS.includes(candidate) &&
       candidate !== SEC_02_SUCCESSOR_PATH &&
@@ -756,7 +861,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 224);
+  assert.equal(proofEntries.length, 226);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "m10a-t02")
@@ -1511,6 +1616,7 @@ test("the reviewed AR-01 successor preserves the historical I07-04 ownership pro
 
   const historicalPaths = currentPaths.filter(
     (candidate) =>
+      !M10A_T03_SUCCESSOR_PATHS.includes(candidate) &&
       !M10A_T02_SUCCESSOR_PATHS.includes(candidate) &&
       !promotedPaths.includes(candidate) &&
       !successorPaths.includes(candidate) &&

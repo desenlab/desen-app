@@ -23,10 +23,12 @@ import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 import {
   authenticateM10AT01LockfileSuccessor,
   authenticateM10AT02LockfileSuccessor,
+  authenticateM10AT03LockfileSuccessor,
   buildCurrentDesenAppPublishedHostUpdateGraphAudit,
   projectM10AT01CurrentGraphAudit,
   projectM10AT01T08Input,
   projectM10AT02T01Input,
+  projectM10AT03T02Input,
 } from "./desen-app-published-host-update-proof.mjs";
 
 const WORKSPACE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -1345,9 +1347,14 @@ function projectM10AT01Input(relativePath, bytes) {
   try {
     return relativePath === "pnpm-lock.yaml"
       ? authenticateM10AT01LockfileSuccessor(
-          authenticateM10AT02LockfileSuccessor(bytes).predecessorBytes,
+          authenticateM10AT02LockfileSuccessor(
+            authenticateM10AT03LockfileSuccessor(bytes).predecessorBytes,
+          ).predecessorBytes,
         ).predecessorBytes
-      : projectM10AT01T08Input(relativePath, projectM10AT02T01Input(relativePath, bytes));
+      : projectM10AT01T08Input(
+          relativePath,
+          projectM10AT02T01Input(relativePath, projectM10AT03T02Input(relativePath, bytes)),
+        );
   } catch {
     fail("SUCCESSOR_DRIFT", "A live M10A-T01 input is not the exact reviewed T08 successor.", {
       path: relativePath,

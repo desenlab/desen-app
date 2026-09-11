@@ -45,6 +45,10 @@ configuration. No production host dependency allowlist is expanded.
 
 M10A-T01 adds four starter-boundary fixtures: its reviewed Runtime React edge succeeds; imports
 from starter into Editor Core or an application fail; a neutral package cannot import starter.
+
+M10A-T03 adds six workbench-boundary fixtures: the platform-neutral authoring layer may consume
+only Protocol and Design System Core, the isolated browser workbench may consume only that
+authoring layer, and direct Runtime, Node, Design System Core, or another application edge fails.
 These extend the historical 52-case set without changing its existing expected rules.
 Two additional fixtures reject Publisher in the independent starter host and another App in the
 starter proof harness; both browser entry graphs retain explicit dependency boundaries.

@@ -105,27 +105,28 @@ const ALL_STEP_IDS = Object.freeze([
   "editor-core-public-package-contract",
   "editor-web-public-package-contract",
   "design-system-core-public-package-contract",
+  "design-system-authoring-public-package-contract",
   ...PROOF_IDS.map((id) => `verify-${id}`),
   ...PROOF_IDS.map((id) => `test-${id}`),
   "dependency-boundaries",
   "boundary-fixtures",
 ]);
 
-test("owns exactly 235 steps across the eight reviewed execution classes", () => {
+test("owns exactly 238 steps across the eight reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 235);
-  assert.equal(new Set(ALL_STEP_IDS).size, 235);
+  assert.equal(ALL_STEP_IDS.length, 238);
+  assert.equal(new Set(ALL_STEP_IDS).size, 238);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
-    WORKSPACE_OUTPUT_EXCLUSIVE: 4,
+    WORKSPACE_OUTPUT_EXCLUSIVE: 5,
     PACKAGE_TEST_EXCLUSIVE: 1,
     PROOF_READ_ONLY: 94,
-    PROOF_OS_TEMP_ISOLATED: 118,
-    PROOF_BROWSER_EXCLUSIVE: 1,
+    PROOF_OS_TEMP_ISOLATED: 119,
+    PROOF_BROWSER_EXCLUSIVE: 2,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
@@ -171,14 +172,31 @@ test("owns exactly 235 steps across the eight reviewed execution classes", () =>
     filesystemCompatibilityPolicy: "NONE",
     barrier: true,
   });
+  assert.deepEqual(
+    classifyWorkloadStateMetadata("design-system-authoring-public-package-contract"),
+    {
+      schemaVersion: 2,
+      stepId: "design-system-authoring-public-package-contract",
+      executionClass: "WORKSPACE_OUTPUT_EXCLUSIVE",
+      workspaceReads: ["."],
+      workspaceWrites: ["."],
+      tempPolicy: "NONE",
+      tempKey: null,
+      ports: [],
+      childProcessPolicy: "TOOLCHAIN_EXCLUSIVE",
+      nativeAddonPolicy: "NONE",
+      filesystemCompatibilityPolicy: "NONE",
+      barrier: true,
+    },
+  );
 });
 
-test("pins the exact eleven read-only, one browser, and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 112);
-  assert.equal(new Set(PROOF_IDS).size, 112);
+test("pins the exact eleven read-only, two browser, and sole workspace-temp proof ids", () => {
+  assert.equal(PROOF_IDS.length, 113);
+  assert.equal(new Set(PROOF_IDS).size, 113);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
   assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 100);
-  assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 12);
+  assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 13);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
     "protocol-traceability",
@@ -193,7 +211,7 @@ test("pins the exact eleven read-only, one browser, and sole workspace-temp proo
     "desen-app-published-host-update",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 100);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 101);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -1343,7 +1361,7 @@ test("pins the exact eleven read-only, one browser, and sole workspace-temp proo
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    112,
+    113,
   );
 });
 
@@ -1364,26 +1382,42 @@ test("T04 real-host evidence readers remain passive and acquire no listener auth
   }
 });
 
-test("M10A-T01 alone owns the fixed-port browser-exclusive verifier authority", async (context) => {
-  assert.deepEqual(BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS, ["verify-m10a-t01"]);
-  const pair = classifyProofPairState("m10a-t01");
-  assert.equal(pair.barrier, true);
-  assert.deepEqual(pair.verifier, {
-    schemaVersion: 2,
-    stepId: "verify-m10a-t01",
-    executionClass: "PROOF_BROWSER_EXCLUSIVE",
-    workspaceReads: ["."],
-    workspaceWrites: [],
-    tempPolicy: "RUNNER_SCOPED_OS",
-    tempKey: "verify-m10a-t01",
-    ports: [4_187],
-    childProcessPolicy: "TOOLCHAIN_EXCLUSIVE",
-    nativeAddonPolicy: "NONE",
-    filesystemCompatibilityPolicy: "NONE",
-    barrier: true,
-  });
-  assert.equal(pair.rootTest.executionClass, "PROOF_OS_TEMP_ISOLATED");
-  assert.equal(pair.rootTest.barrier, false);
+test("M10A browser proofs own distinct fixed-port exclusive verifier authorities", async (context) => {
+  assert.deepEqual(BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS, ["verify-m10a-t01", "verify-m10a-t03"]);
+  const cases = [
+    {
+      proofId: "m10a-t01",
+      stepId: "verify-m10a-t01",
+      port: 4_187,
+      envKey: "DESEN_M10A_T01_PROOF_TEMP",
+    },
+    {
+      proofId: "m10a-t03",
+      stepId: "verify-m10a-t03",
+      port: 4_188,
+      envKey: "DESEN_M10A_T03_PROOF_TEMP",
+    },
+  ];
+  for (const browserCase of cases) {
+    const pair = classifyProofPairState(browserCase.proofId);
+    assert.equal(pair.barrier, true);
+    assert.deepEqual(pair.verifier, {
+      schemaVersion: 2,
+      stepId: browserCase.stepId,
+      executionClass: "PROOF_BROWSER_EXCLUSIVE",
+      workspaceReads: ["."],
+      workspaceWrites: [],
+      tempPolicy: "RUNNER_SCOPED_OS",
+      tempKey: browserCase.stepId,
+      ports: [browserCase.port],
+      childProcessPolicy: "TOOLCHAIN_EXCLUSIVE",
+      nativeAddonPolicy: "NONE",
+      filesystemCompatibilityPolicy: "NONE",
+      barrier: true,
+    });
+    assert.equal(pair.rootTest.executionClass, "PROOF_OS_TEMP_ISOLATED");
+    assert.equal(pair.rootTest.barrier, false);
+  }
 
   assert.throws(
     () => classifyWorkloadStateMetadata("verify-m10a-t01-copy"),
@@ -1419,6 +1453,20 @@ test("M10A-T01 alone owns the fixed-port browser-exclusive verifier authority", 
   assert.equal("NODE_OPTIONS" in isolation.env, false);
   assert.equal("DESEN_CI_WORKSPACE_ROOT" in isolation.env, false);
   assert.equal(isolation.env.DESEN_CI_STEP_ID, "verify-m10a-t01");
+
+  const t03Isolation = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "verify-m10a-t03",
+    baseEnvironment: {
+      PATH: process.env.PATH,
+      DESEN_M10A_T01_PROOF_TEMP: "/tmp/forged-t01",
+      DESEN_M10A_T03_PROOF_TEMP: "/tmp/forged-t03",
+    },
+  });
+  context.after(() => t03Isolation.dispose());
+  assert.equal(t03Isolation.env.DESEN_M10A_T03_PROOF_TEMP, t03Isolation.tempRoot);
+  assert.equal("DESEN_M10A_T01_PROOF_TEMP" in t03Isolation.env, false);
+  assert.equal(t03Isolation.env.DESEN_CI_STEP_ID, "verify-m10a-t03");
 
   await assert.rejects(
     createProofStepIsolationContext({
@@ -2422,7 +2470,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 217,
+    NONE: 220,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,
@@ -2999,13 +3047,15 @@ test("runner temp cleanup removes files and is idempotent", async (context) => {
 });
 
 test("build-output seals cover every exact app/package dist and Turbo root", async (context) => {
-  assert.equal(BUILD_OUTPUT_ROOTS.length, 43);
-  assert.equal(new Set(BUILD_OUTPUT_ROOTS).size, 43);
+  assert.equal(BUILD_OUTPUT_ROOTS.length, 47);
+  assert.equal(new Set(BUILD_OUTPUT_ROOTS).size, 47);
   assert.equal(BUILD_OUTPUT_ROOTS.includes(".turbo"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/reference-host-web/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/desen-app-browser-e2e/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/starter-catalog-web-proof/dist"), true);
+  assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/design-system-workbench-proof/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("packages/design-system-core/dist"), true);
+  assert.equal(BUILD_OUTPUT_ROOTS.includes("packages/design-system-authoring/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("packages/starter-catalog-web/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("packages/validator/.turbo"), true);
 

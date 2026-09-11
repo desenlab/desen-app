@@ -195,8 +195,14 @@ evidence: demand, adoption and broad Storybook/Chromatic/Figma equivalence remai
 
 M10A-T01 and M10A-T02 are now `DONE`: the bounded Button, Select, and Dialog adapter foundation is
 followed by the platform-neutral versioned project model and typed token resolver. Overall progress
-is 123/176 (70%), M10A is 2/28 (7%), and 11/14 proof gates are closed. No task is active. M10A-T03
-is the next ready task but remains `NOT_STARTED`. This does not establish the full starter library,
-design-system management UI, persistence, normal App integration, package release, market demand,
-or production readiness. G10A must pass before M11-T01 or M11-T08; the SC-02 decision itself
-authorizes no external publication or deployment.
+is 123/176 (70%), M10A is 2/28 (7%), and 11/14 proof gates are closed. M10A-T03 is `IN_PROGRESS`:
+its platform-neutral authoring package and isolated workbench have local candidate evidence, while
+exact-head hosted closure remains pending. Frozen SC-01 covers 16 valid fixtures: three T02-supported
+normal edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with partial
+preview blocked only for their selected overlay; seven invalid fixtures reject atomically. A
+separate closed T02-recognized unsupported matrix preserves/discloses six valid fixtures and
+atomically rejects six malformed fixtures. Unreviewed or invalid forms fail closed without silent
+loss. This does not establish the full starter library, normal
+App integration, persistence, immutable release, market demand, or production readiness. T04 is
+dependency-ready but remains `NOT_STARTED` and unselected while T03 is active; G10A must pass before
+M11-T01 or M11-T08, and SC-02 authorizes no external publication or deployment.

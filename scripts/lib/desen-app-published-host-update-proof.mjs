@@ -385,6 +385,27 @@ const M10A_T02_LOCKFILE_ADDED_ENTRIES = Object.freeze([
   }),
 ]);
 
+const M10A_T03_LOCKFILE_SUCCESSOR_RECEIPT = Object.freeze({
+  authority: "M10A-T03",
+  bytes: 139_714,
+  sha256: "073a9dc3f6ce05d8e7672a74eea9296b4fee7ed8db9858cdd90731beed7ec74a",
+  predecessor: Object.freeze({
+    authority: M10A_T02_LOCKFILE_SUCCESSOR_RECEIPT.authority,
+    bytes: M10A_T02_LOCKFILE_SUCCESSOR_RECEIPT.bytes,
+    sha256: M10A_T02_LOCKFILE_SUCCESSOR_RECEIPT.sha256,
+  }),
+});
+
+const M10A_T03_LOCKFILE_ADDED_ENTRIES = Object.freeze([
+  Object.freeze({
+    section: "importers",
+    headers: Object.freeze([
+      "  apps/design-system-workbench-proof:\n",
+      "  packages/design-system-authoring:\n",
+    ]),
+  }),
+]);
+
 const M10A_T01_T08_INPUT_SUCCESSORS = Object.freeze([
   Object.freeze({
     path: "dependency-cruiser.config.cjs",
@@ -458,6 +479,45 @@ const M10A_T02_T01_INPUT_SUCCESSORS = Object.freeze([
     inverseChanges: Object.freeze([
       Object.freeze([
         '  { name: "allowed-design-system-editor-core", expectedRule: null },\n  {\n    name: "design-system-imports-runtime-core",\n    expectedRule: "package-design-system-core-allowed-dependencies",\n  },\n  {\n    name: "design-system-imports-validator",\n    expectedRule: "package-design-system-core-allowed-dependencies",\n  },\n  {\n    name: "runtime-core-imports-design-system",\n    expectedRule: "package-runtime-core-allowed-dependencies",\n  },\n  {\n    name: "design-system-imports-node",\n    expectedRule: "neutral-packages-no-node-builtins",\n  },\n',
+        "",
+      ]),
+    ]),
+  }),
+]);
+
+const M10A_T03_T02_INPUT_SUCCESSORS = Object.freeze([
+  Object.freeze({
+    path: "dependency-cruiser.config.cjs",
+    bytes: 16_776,
+    sha256: "344d1dfda896882d8b4a49a71a34e698a5a2d69bd0a0830d42fb8ccfc8e827ff",
+    predecessor: Object.freeze({
+      bytes: 16_261,
+      sha256: "4c70efb8588360fd51722e0ea0dc507ae006d2628daccbd26277785b2f91c3ec",
+    }),
+    inverseChanges: Object.freeze([
+      Object.freeze(['  "design-system-authoring": ["protocol", "design-system-core"],\n', ""]),
+      Object.freeze(['  "design-system-workbench-proof": ["design-system-authoring"],\n', ""]),
+      Object.freeze([
+        '"^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core|design-system-core|design-system-authoring)/src/";',
+        '"^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core|design-system-core)/src/";',
+      ]),
+      Object.freeze([
+        '    {\n      name: "design-system-workbench-proof-has-no-other-apps",\n      severity: "error",\n      comment:\n        "The isolated design-system workbench proof cannot acquire Desen App or another application composition root.",\n      from: { path: "^apps/design-system-workbench-proof/" },\n      to: { path: "^apps/(?!design-system-workbench-proof/)" },\n    },\n',
+        "",
+      ]),
+    ]),
+  }),
+  Object.freeze({
+    path: "scripts/verify-boundary-fixtures.mjs",
+    bytes: 10_829,
+    sha256: "32c7c5d55a329858f2be8c8973bd1e36b47e20647a24b9afef00e6f582a6f7bd",
+    predecessor: Object.freeze({
+      bytes: 10_148,
+      sha256: "9a6b89593d2d215bb2bc2fb835400497f156fa9a29858a87af312c920410d0a8",
+    }),
+    inverseChanges: Object.freeze([
+      Object.freeze([
+        '  { name: "allowed-design-system-authoring-foundations", expectedRule: null },\n  { name: "allowed-design-system-workbench-authoring", expectedRule: null },\n  {\n    name: "design-system-authoring-imports-runtime-core",\n    expectedRule: "package-design-system-authoring-allowed-dependencies",\n  },\n  {\n    name: "design-system-authoring-imports-node",\n    expectedRule: "neutral-packages-no-node-builtins",\n  },\n  {\n    name: "design-system-workbench-imports-core",\n    expectedRule: "application-design-system-workbench-proof-allowed-dependencies",\n  },\n  {\n    name: "design-system-workbench-imports-app",\n    expectedRule: "design-system-workbench-proof-has-no-other-apps",\n  },\n',
         "",
       ]),
     ]),
@@ -1095,6 +1155,56 @@ export function authenticateM10AT02LockfileSuccessor(bytes) {
     M10A_T02_LOCKFILE_SUCCESSOR_RECEIPT,
     M10A_T02_LOCKFILE_ADDED_ENTRIES,
   );
+}
+
+/**
+ * Authenticates the exact additive M10A-T03 lockfile and returns its reviewed M10A-T02
+ * predecessor bytes without weakening either historical successor check.
+ */
+export function authenticateM10AT03LockfileSuccessor(bytes) {
+  return authenticateAdditiveLockfileSuccessor(
+    bytes,
+    M10A_T03_LOCKFILE_SUCCESSOR_RECEIPT,
+    M10A_T03_LOCKFILE_ADDED_ENTRIES,
+  );
+}
+
+/** Projects one exact live M10A-T03 policy input back to its reviewed M10A-T02 predecessor. */
+export function projectM10AT03T02Input(relativePath, bytes) {
+  const successor = M10A_T03_T02_INPUT_SUCCESSORS.find(
+    ({ path: successorPath }) => successorPath === relativePath,
+  );
+  if (successor === undefined) return bytes;
+  if (bytes.byteLength !== successor.bytes || sha256(bytes) !== successor.sha256) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "A reviewed M10A-T02 input is not the exact M10A-T03 additive successor.",
+      { path: relativePath },
+    );
+  }
+  let predecessorText = decodeUtf8(bytes, relativePath, "SUCCESSOR_POLICY_VIOLATION");
+  for (const [currentFragment, predecessorFragment] of successor.inverseChanges) {
+    if (occurrenceCount(predecessorText, currentFragment) !== 1) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "An M10A-T03 successor input lost one exact reviewed policy addition.",
+        { path: relativePath },
+      );
+    }
+    predecessorText = predecessorText.replace(currentFragment, predecessorFragment);
+  }
+  const predecessorBytes = Buffer.from(predecessorText);
+  if (
+    predecessorBytes.byteLength !== successor.predecessor.bytes ||
+    sha256(predecessorBytes) !== successor.predecessor.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "Removing only M10A-T03 policy additions must reproduce the exact M10A-T02 receipt.",
+      { path: relativePath },
+    );
+  }
+  return predecessorBytes;
 }
 
 /** Projects one exact live M10A-T02 policy input back to its reviewed M10A-T01 predecessor. */
@@ -3289,7 +3399,10 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   const recoverySuccessor = await readT08SuccessorArtifact(options.workspaceRoot);
   const dependencyPin = DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS;
   const dependencyBytes = files.get(dependencyPin.path);
-  const t02LockfileSuccessor = authenticateM10AT02LockfileSuccessor(dependencyBytes);
+  const t03LockfileSuccessor = authenticateM10AT03LockfileSuccessor(dependencyBytes);
+  const t02LockfileSuccessor = authenticateM10AT02LockfileSuccessor(
+    t03LockfileSuccessor.predecessorBytes,
+  );
   const lockfileSuccessor = authenticateM10AT01LockfileSuccessor(
     t02LockfileSuccessor.predecessorBytes,
   );
@@ -3304,7 +3417,10 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       relativePath,
       projectM10AT01T08Input(
         relativePath,
-        projectM10AT02T01Input(relativePath, files.get(relativePath)),
+        projectM10AT02T01Input(
+          relativePath,
+          projectM10AT03T02Input(relativePath, files.get(relativePath)),
+        ),
       ),
     ]),
   );
@@ -3520,14 +3636,20 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
     assertT08Receipt(
       recoverySuccessor,
       relativePath,
-      projectM10AT01T08Input(relativePath, projectM10AT02T01Input(relativePath, currentBytes)),
+      projectM10AT01T08Input(
+        relativePath,
+        projectM10AT02T01Input(relativePath, projectM10AT03T02Input(relativePath, currentBytes)),
+      ),
     );
   }
   const finalDependencyBytes = await readRegularAuthority(
     path.join(options.workspaceRoot, dependencyPin.path),
     dependencyPin.path,
   );
-  const finalT02LockfileSuccessor = authenticateM10AT02LockfileSuccessor(finalDependencyBytes);
+  const finalT03LockfileSuccessor = authenticateM10AT03LockfileSuccessor(finalDependencyBytes);
+  const finalT02LockfileSuccessor = authenticateM10AT02LockfileSuccessor(
+    finalT03LockfileSuccessor.predecessorBytes,
+  );
   const finalLockfileSuccessor = authenticateM10AT01LockfileSuccessor(
     finalT02LockfileSuccessor.predecessorBytes,
   );
@@ -3551,6 +3673,12 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       currentBytes: dependencyBytes.byteLength,
       historicalBytes: dependencyPin.historicalBytes,
       currentSha256: sha256(dependencyBytes),
+      t03LockfileSuccessor: {
+        task: M10A_T03_LOCKFILE_SUCCESSOR_RECEIPT.authority,
+        bytes: M10A_T03_LOCKFILE_SUCCESSOR_RECEIPT.bytes,
+        sha256: M10A_T03_LOCKFILE_SUCCESSOR_RECEIPT.sha256,
+        additivePredecessor: M10A_T03_LOCKFILE_SUCCESSOR_RECEIPT.predecessor,
+      },
       t02LockfileSuccessor: {
         task: M10A_T02_LOCKFILE_SUCCESSOR_RECEIPT.authority,
         bytes: M10A_T02_LOCKFILE_SUCCESSOR_RECEIPT.bytes,

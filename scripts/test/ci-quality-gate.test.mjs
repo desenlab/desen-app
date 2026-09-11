@@ -449,7 +449,12 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
   for (const taskId of M10A_TASK_IDS) {
     const row = m10aRows.find(({ cells }) => cells[0] === taskId);
     assert.ok(row !== undefined, `missing ${taskId}`);
-    const expectedStatus = taskId === "M10A-T01" || taskId === "M10A-T02" ? "DONE" : "NOT_STARTED";
+    const expectedStatus =
+      taskId === "M10A-T01" || taskId === "M10A-T02"
+        ? "DONE"
+        : taskId === "M10A-T03"
+          ? "IN_PROGRESS"
+          : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
     assert.equal(
       row.cells[2],
@@ -770,20 +775,20 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 112,
-    verifierCount: 112,
-    rootTestCount: 112,
+    proofCount: 113,
+    verifierCount: 113,
+    rootTestCount: 113,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
-    legacyPrerequisiteCount: 754,
-    legacyPrerequisiteSha256: "91f6fa67b6df6145678038387acb76e8f2c4f70b17b73c868efd9b24616c5b81",
-    legacyLeafInvocationCount: 4578,
-    legacyLeafInvocationSha256: "2a084ec479b4d819fbfcd733dfc0364a5430c875abf185d0c9e8a681d90f82bc",
-    distinctLeafWorkloadCount: 351,
-    distinctLeafWorkloadSha256: "d0677ebcea01b65ab1ddeb2c2fdba42861d85b89b8cdda8decf8461ec11af1cf",
-    testConfigurationFileCount: 2,
-    workspaceTestScriptCount: 18,
-    workspaceTestScriptSha256: "00d77ebce7d64619055a6fc0754b27e70a775fde668c32540bfbbfb93cee0619",
+    legacyPrerequisiteCount: 763,
+    legacyPrerequisiteSha256: "a9b7b963ac77d33f6faca4bd352546736061955cdcd6525cde94a06bf4f318f5",
+    legacyLeafInvocationCount: 4600,
+    legacyLeafInvocationSha256: "c9eb237799a16582aea375c9ca3bb906c2f330913230682f97951e8a2f21277d",
+    distinctLeafWorkloadCount: 358,
+    distinctLeafWorkloadSha256: "6940ed2d22342db1d7f8ca536c4ebf08260de69d7014fef0973d9c07e31a560e",
+    testConfigurationFileCount: 3,
+    workspaceTestScriptCount: 19,
+    workspaceTestScriptSha256: "4c2cd7854e3ed795fe38357166e12e5f199c73217a7c10b89505df24e5de6743",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
     workspacePackageGlobs: ["apps/*", "packages/*"],
   });
@@ -1043,9 +1048,10 @@ test("task board retains its canonical inventory without narrative appendices", 
   );
   assert.equal(statuses.get("G11"), "NOT_STARTED");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
-  assert.ok(normalizedReadme.includes("**Next ready:** `M10A-T03` (`NOT_STARTED`)"));
+  assert.ok(normalizedReadme.includes("**Active task:** `M10A-T03` (`IN_PROGRESS`)"));
+  assert.ok(normalizedReadme.includes("**Next:** `M10A-T04` (dependency-ready but `NOT_STARTED`"));
   assert.ok(normalizedProjectStatus.includes("**M10A-T01 and M10A-T02 are DONE**"));
-  assert.ok(normalizedProjectStatus.includes("M10A-T03 is ready but remains NOT_STARTED"));
+  assert.ok(normalizedProjectStatus.includes("M10A-T03 is `IN_PROGRESS`"));
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
   assert.ok(normalizedStartHere.includes("M11 başlamadı."));
   assert.equal(
@@ -1131,11 +1137,13 @@ test("pre-M11 planning inventory rejects row, dependency, count, or gate-status 
       /M10A-T02 must remain DONE/u,
     );
   }
-  const jumpedAhead = replaceTaskBoardCell(taskBoard, "M10A-T03", 1, "IN_PROGRESS");
-  assert.throws(
-    () => assertPreM11PlanningInventory(parseTaskBoard(jumpedAhead)),
-    /M10A-T03 must remain NOT_STARTED/u,
-  );
+  for (const status of ["DONE", "NOT_STARTED", "BLOCKED"]) {
+    const falseTaskStatus = replaceTaskBoardCell(taskBoard, "M10A-T03", 1, status);
+    assert.throws(
+      () => assertPreM11PlanningInventory(parseTaskBoard(falseTaskStatus)),
+      /M10A-T03 must remain IN_PROGRESS/u,
+    );
+  }
 });
 
 test("M11 guidance pins the complete Runtime Core baseline authority", async () => {
@@ -1529,14 +1537,26 @@ test("inventory validation rejects hidden test configuration and manifest overri
   assert.throws(() => validateProofInventory(packageFieldInventory), QualityGateError);
 });
 
-test("both inventories require exact starter browser scripts and the two reviewed Vite configs", async () => {
+test("both inventories require exact browser-proof scripts and the three reviewed Vite configs", async () => {
   const baseline = await currentInventory();
   const starter = baseline.workspacePackages.find(
     ({ name }) => name === "@desen/starter-catalog-web-proof",
   );
+  const workbench = baseline.workspacePackages.find(
+    ({ name }) => name === "@desen/design-system-workbench-proof",
+  );
   assert.ok(starter);
+  assert.ok(workbench);
   for (const validate of [validateProofInventory, validateRepositoryWorkloadInputs]) {
-    assert.equal(validate(baseline).proofCount, 112);
+    assert.equal(validate(baseline).proofCount, 113);
+    const missingWorkbenchPackage = clone(baseline);
+    missingWorkbenchPackage.workspacePackages = missingWorkbenchPackage.workspacePackages.filter(
+      ({ name }) => name !== "@desen/design-system-workbench-proof",
+    );
+    assert.throws(
+      () => validate(missingWorkbenchPackage),
+      /workspace package test-script inventory drifted|design-system workbench proof workspace package is missing/u,
+    );
     for (const script of Object.keys(starter.scripts)) {
       const substituted = clone(baseline);
       substituted.workspacePackages.find(
@@ -1553,18 +1573,42 @@ test("both inventories require exact starter browser scripts and the two reviewe
     ).scripts["test:e2e:skip"] = "echo skipped";
     assert.throws(() => validate(widened), /starter browser proof workspace package script set/u);
 
+    for (const script of Object.keys(workbench.scripts)) {
+      const substituted = clone(baseline);
+      substituted.workspacePackages.find(
+        ({ name }) => name === "@desen/design-system-workbench-proof",
+      ).scripts[script] = "echo skipped";
+      assert.throws(
+        () => validate(substituted),
+        /design-system workbench proof workspace package script drifted/u,
+      );
+    }
+    const widenedWorkbench = clone(baseline);
+    widenedWorkbench.workspacePackages.find(
+      ({ name }) => name === "@desen/design-system-workbench-proof",
+    ).scripts["test:e2e:skip"] = "echo skipped";
+    assert.throws(
+      () => validate(widenedWorkbench),
+      /design-system workbench proof workspace package script set/u,
+    );
+
     const missing = clone(baseline);
     missing.testConfigurationFiles = missing.testConfigurationFiles.filter(
       (file) => file !== "apps/starter-catalog-web-proof/vite.config.ts",
     );
     assert.throws(() => validate(missing), /test-configuration file set/u);
+    const missingWorkbench = clone(baseline);
+    missingWorkbench.testConfigurationFiles = missingWorkbench.testConfigurationFiles.filter(
+      (file) => file !== "apps/design-system-workbench-proof/vite.config.ts",
+    );
+    assert.throws(() => validate(missingWorkbench), /test-configuration file set/u);
     const foreign = clone(baseline);
     foreign.testConfigurationFiles.push("packages/starter-catalog-web/vitest.config.ts");
     assert.throws(() => validate(foreign), /test-configuration file set/u);
   }
 });
 
-test("every hosted route that can execute T01 installs its exact Chromium runtime first", async () => {
+test("every hosted route that can execute T01 or T03 installs its exact Chromium runtime first", async () => {
   const source = await readFile(resolve(WORKSPACE_ROOT, ".github/workflows/ci.yml"), "utf8");
   runToolchainSecurityProbe(
     ["json-schema-to-typescript", "js-yaml"],
@@ -1713,6 +1757,32 @@ test("inventory validation pins every workspace package test command", async () 
       error instanceof QualityGateError &&
       /unreviewed public-package contract test/u.test(error.message),
   );
+
+  const substitutedAuthoringPublicPackage = await currentInventory();
+  substitutedAuthoringPublicPackage.packageJson.scripts["verify:m10a-t03"] =
+    substitutedAuthoringPublicPackage.packageJson.scripts["verify:m10a-t03"].replace(
+      "pnpm --filter @desen/design-system-authoring test:public-package",
+      "pnpm --filter @desen/design-system-core test:public-package",
+    );
+  assert.throws(
+    () => validateProofInventory(substitutedAuthoringPublicPackage),
+    (error) =>
+      error instanceof QualityGateError &&
+      /unreviewed public-package contract test/u.test(error.message),
+  );
+
+  const substitutedWorkbench = await currentInventory();
+  substitutedWorkbench.packageJson.scripts["verify:m10a-t03"] =
+    substitutedWorkbench.packageJson.scripts["verify:m10a-t03"].replace(
+      "pnpm --filter @desen/design-system-workbench-proof test:e2e",
+      "pnpm --filter @desen/starter-catalog-web-proof test:e2e",
+    );
+  assert.throws(
+    () => validateProofInventory(substitutedWorkbench),
+    (error) =>
+      error instanceof QualityGateError &&
+      /unreviewed browser-proof package test/u.test(error.message),
+  );
 });
 
 test("inventory validation pins the exact pnpm workspace manifest and package globs", async () => {
@@ -1733,8 +1803,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 235);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 112);
+  assert.equal(steps.length, 238);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 113);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -1777,6 +1847,24 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
   assert.equal(
     steps.findIndex(({ id }) => id === "design-system-core-public-package-contract") <
       steps.findIndex(({ id }) => id === "verify-m10a-t02"),
+    true,
+  );
+  assert.deepEqual(
+    steps.find(({ id }) => id === "design-system-authoring-public-package-contract"),
+    {
+      id: "design-system-authoring-public-package-contract",
+      label: "Design System Authoring public-package contract",
+      command: "pnpm",
+      args: ["--filter", "@desen/design-system-authoring", "test:public-package"],
+    },
+  );
+  assert.equal(
+    steps.findIndex(({ id }) => id === "design-system-authoring-public-package-contract"),
+    steps.findIndex(({ id }) => id === "design-system-core-public-package-contract") + 1,
+  );
+  assert.equal(
+    steps.findIndex(({ id }) => id === "design-system-authoring-public-package-contract") <
+      steps.findIndex(({ id }) => id === "verify-m10a-t03"),
     true,
   );
   assert.deepEqual(
@@ -2255,8 +2343,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 235,
-    planSha256: "158033c4f6cdc36907c2c31555d26f4cd54d2103b93eddd56815cfc18e0faa85",
+    stepCount: 238,
+    planSha256: "257667fcdec26d3654d1434c392bfaf7aec7e8f2a684311912c02255fd1d3176",
   });
 
   const missingTypecheck = clone(steps);
