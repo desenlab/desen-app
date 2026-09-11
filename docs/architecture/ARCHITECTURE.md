@@ -212,29 +212,31 @@ The complete committed `packages/runtime-core` tree is frozen as
 `3fa3613a3be63c749f40b6a0b55af5b40c675773`. This is an identity baseline for M11, not cached test
 success.
 
-## Planned M10A design-first workbench
+## M10A design-first workbench
 
-M10A inserts 28 tasks and the G10A gate before M11. Only T01's bounded starter adapter slice is
-in progress; later workbench features remain planned. No publication or production authority
-follows from this architecture text. [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the
-decision, while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
+M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice is complete;
+T02 is ready but remains `NOT_STARTED`, and later workbench features remain planned. No publication
+or production authority follows from this architecture text.
+[ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the decision,
+while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
 [task contracts](../plan/M10A-TASK-CONTRACTS.md), and
 [Workbench contract](../plan/DESIGN-SYSTEM-WORKBENCH.md) own execution detail.
 
-The package boundary is additive; only the starter slice is being implemented in T01:
+The package boundary is additive. T01 delivers the starter package and its dependency direction;
+`@desen/design-system-core` remains planned for T02, while normal App composition remains later work:
 
 - `@desen/starter-catalog-web` supplies target-specific DESEN capabilities through trusted,
   statically registered production and authoring adapters built on pinned Base UI and the DESEN
   Neutral theme;
-- `@desen/design-system-core` owns only finite platform-neutral project, DTCG release, recipe-graph,
-  stable-identity, and materialization data contracts; it cannot import React, DOM, CSS, Base UI,
-  browser APIs, App code, or host bindings, and may depend internally only on `protocol`,
-  `validator`, and `editor-core`;
+- the planned `@desen/design-system-core` will own only finite platform-neutral project, DTCG
+  release, recipe-graph, stable-identity, and materialization data contracts; it cannot import
+  React, DOM, CSS, Base UI, browser APIs, App code, or host bindings, and may depend internally only
+  on `protocol`, `validator`, and `editor-core`;
 - `@desen/starter-catalog-web` follows the existing target-package edges to `protocol`,
   `catalog-sdk`, and `runtime-react`, plus its pinned external Base UI dependency; and
-- Desen App composes those packages with existing Editor, Validator, Publisher, and Runtime public
-  APIs. Neither new package becomes a hidden Runtime Core or protocol owner. Publisher and Runtime
-  packages do not depend on `design-system-core` or interpret its recipe graph.
+- Desen App will compose those packages with existing Editor, Validator, Publisher, and Runtime
+  public APIs. Neither new package becomes a hidden Runtime Core or protocol owner. Publisher and
+  Runtime packages do not depend on `design-system-core` or interpret its recipe graph.
 
 An App-owned versioned editable-project record is the durable authoring aggregate. It atomically
 stores one exact canonical Source, editable DTCG data, immutable design-system release references,

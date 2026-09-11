@@ -5,14 +5,15 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 121/176 (%69), M10 12/12 ve
-kanıt kapıları 11/14 düzeyindedir. M10 kapanışının exact-head PR kontrolleri, merge'i ve taze `main`
-koşusu geçti; ayrıntı [Project Status](../../PROJECT-STATUS.md) ve
-[G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 122/176 (%69), M10 12/12 ve
+kanıt kapıları 11/14 düzeyindedir. M10A-T01'in exact-head PR kontrolleri, merge'i ve taze `main`
+koşusu da geçti; ayrıntı [Project Status](../../PROJECT-STATUS.md), [T01 kanıtı](../proof/M10A-T01.md)
+ve [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış 121 görev korunur. Aktif görev `M10A-T01` (`IN_PROGRESS`):
-Base UI adaptör sınırını Button/Select/Dialog ile kanıtlamak. Base UI 1.8.0 starter paketine kuruldu.
+ekler; tamamlanmış görev sayısı 122'ye çıktı. `M10A-T01` `DONE`: Base UI 1.8.0 ile
+Button/Select/Dialog adaptör sınırı kanıtlandı. Aktif M10A görevi yoktur; `M10A-T02`
+`NOT_STARTED` durumundadır ve başlamaya hazır sıradaki görevdir.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 ## Üç ayrı kimlik
@@ -87,7 +88,7 @@ işler taze çalışır.
 - [Master Plan](MASTER-PLAN.md): milestone amacı ve gate sırası
 - [Task Board](TASKS.md): kanonik görev durumu, bağımlılık ve teslimat
 - [Strategic Validation](STRATEGIC-VALIDATION.md): tamamlanan `SC-02 / adapt` kararı
-- [M10A Product Plan](M10A-IMPLEMENTATION-PLAN.md): tasarım öncelikli ürün, kapsam ve ilk görev
+- [M10A Product Plan](M10A-IMPLEMENTATION-PLAN.md): tasarım öncelikli ürün, kapsam ve sıradaki görev
 - [M10A Task Contracts](M10A-TASK-CONTRACTS.md): görevlerin kabul ve olumsuz test koşulları
 - [Design System Workbench](DESIGN-SYSTEM-WORKBENCH.md): katalog, dokümantasyon ve görsel onay
 - [Architecture](../architecture/ARCHITECTURE.md): sistem ve bağımlılık sınırları

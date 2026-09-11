@@ -4,15 +4,15 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 are complete. SC-02 concluded `adapt`; the M10A design-first product plan is ready.
-> M10A-T01 is in progress; M11 has not started. This is not a production certification.
+> M10/G10 and M10A-T01 are complete. SC-02 concluded `adapt`; M10A-T02 is ready to start.
+> M10A-T02 remains `NOT_STARTED`; M11 has not started. This is not a production certification.
 
 ## Implementation progress
 
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████████░░░░░░░░` **121 / 176 tasks complete (69%)**
+**Overall:** `█████████████████░░░░░░░░` **122 / 176 tasks complete (69%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -32,10 +32,10 @@ bounded, reproducible claims about both.
 
 **M10 complete:** `████████████` **12 / 12 tasks complete (100%)**
 
-**M10A:** **0 / 28 tasks complete (0%)** · 28 newly planned product tasks; no completed work removed.
+**M10A:** **1 / 28 tasks complete (4%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Active task:** `M10A-T01` · **M11:** `NOT_STARTED`
+**Next ready:** `M10A-T02` (`NOT_STARTED`) · **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
 
@@ -164,8 +164,10 @@ nine-journey Chromium suite. Hosted completion still requires the task's exact-h
 [M10A](docs/plan/M10A-IMPLEMENTATION-PLAN.md) adds a Base UI-backed starter library with DESEN
 Neutral styling, editable themes, reusable components, design-first authoring, separate behavior
 connections, and built-in design-system documentation/visual review. These are planned features,
-not capabilities of the current five-component demo. The active `M10A-T01` installs Base UI 1.8.0
-and proves three adapters in isolated authoring/host harnesses; ordinary App integration comes later.
+not capabilities of the current five-component demo. The completed `M10A-T01` installed Base UI
+1.8.0 and proved three adapters in isolated authoring/host harnesses. `M10A-T02` is ready to start
+but remains `NOT_STARTED`; it owns the platform-neutral project design-system model and typed token
+resolver. Ordinary App integration comes later.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and

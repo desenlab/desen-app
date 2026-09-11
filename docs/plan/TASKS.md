@@ -1,6 +1,6 @@
 # Implementation Task Board
 
-Last updated: 2026-09-10
+Last updated: 2026-09-11
 
 Status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 
@@ -251,12 +251,13 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 ## M10A — Design-first product foundation
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
-M10A-T01 alone is IN_PROGRESS; [plan](M10A-IMPLEMENTATION-PLAN.md) and
-[task contracts](M10A-TASK-CONTRACTS.md) own scope, negative tests and planned evidence paths.
+M10A-T01 is `DONE`. No M10A task is active; M10A-T02 is the next eligible task and remains
+`NOT_STARTED`. The [plan](M10A-IMPLEMENTATION-PLAN.md) and [task contracts](M10A-TASK-CONTRACTS.md)
+own scope, negative tests and planned evidence paths.
 
 | ID       | Status      | Depends on                                       | Deliverable / evidence                                              |
 | -------- | ----------- | ------------------------------------------------ | ------------------------------------------------------------------- |
-| M10A-T01 | IN_PROGRESS | G10                                              | [Base UI adapter boundary proof](../proof/M10A-T01.md)              |
+| M10A-T01 | DONE        | G10                                              | [Base UI adapter boundary proof](../proof/M10A-T01.md)              |
 | M10A-T02 | NOT_STARTED | M10A-T01                                         | Versioned project design-system model and typed token resolver      |
 | M10A-T03 | NOT_STARTED | M10A-T02                                         | Theme/token editor, modes, aliases and loss-aware import/export     |
 | M10A-T04 | NOT_STARTED | M10A-T02                                         | Immutable design-system releases and host snapshot identity         |

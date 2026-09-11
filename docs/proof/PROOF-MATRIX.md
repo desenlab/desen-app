@@ -3486,7 +3486,7 @@ and the resulting [fresh `main` run](https://github.com/desenlab/desen-app/actio
 passed. Those receipts finalize G10; they do not claim remote/multi-user deployment, production
 authentication, native targets, Map, Sortable, domains, package publication, or release.
 
-## M10A-T01 Base UI adapter boundary (local, hosted closure pending)
+## M10A-T01 Base UI adapter boundary (hosted closure)
 
 The [M10A-T01 evidence](M10A-T01.md) introduces the private
 `@desen/starter-catalog-web` package with exactly Button, Select, and Dialog registrations, neutral
@@ -3503,6 +3503,22 @@ and authenticates 65 artifacts plus 130 current readers at
 `sha256:9c479b3f3feaa3081fe255063462b9736f959e1fa19931df6ced310112bed7a9`. The package digest binds
 17 compiled files, exact lock admission, the installed Base UI manifest, and its MIT license.
 Production audit was a separate zero-vulnerability observation; the existing development-only
-Vitest advisory remains disclosed. M10A-T01 remains `IN_PROGRESS` pending exact-head hosted CI and
-does not advance M10A-T02/G10A, migrate the existing App, change Runtime Core, or claim a complete
-component library.
+Vitest advisory remains disclosed.
+
+[PR #89](https://github.com/desenlab/desen-app/pull/89) passed exact-head hosted
+[run 34545402544](https://github.com/desenlab/desen-app/actions/runs/34545402544) at
+`6c5ebf2ef3174dc4a189a07c3917dde819a95d37`: its
+[Quality gate job 103099811728](https://github.com/desenlab/desen-app/actions/runs/34545402544/job/103099811728)
+and [Browser E2E job 103096809937](https://github.com/desenlab/desen-app/actions/runs/34545402544/job/103096809937)
+both passed. It was squash-merged as
+[`5f2421d174f8c3bd4381b410dcf2e4b845d3bf26`](https://github.com/desenlab/desen-app/commit/5f2421d174f8c3bd4381b410dcf2e4b845d3bf26).
+The resulting fresh [`main` run 34546576028](https://github.com/desenlab/desen-app/actions/runs/34546576028)
+passed at that exact merge commit, including its
+[Quality gate job 103104000425](https://github.com/desenlab/desen-app/actions/runs/34546576028/job/103104000425)
+and [Browser E2E job 103100399000](https://github.com/desenlab/desen-app/actions/runs/34546576028/job/103100399000).
+
+Those receipts make M10A-T01 `DONE`, advancing implementation progress to 122/176 (69%) and M10A
+to 1/28 (4%) while proof gates remain 11/14. M10A-T02 is ready but remains `NOT_STARTED`. T01 does
+not migrate the normal App, change Runtime Core, publish a package or release, advance G10A, or
+claim the complete starter library, theme/token layer, design-system management, or production
+deployment.
