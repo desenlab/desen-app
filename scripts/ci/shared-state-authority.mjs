@@ -172,6 +172,7 @@ export const PROOF_IDS = Object.freeze([
   "m10a-t01",
   "m10a-t02",
   "m10a-t03",
+  "m10a-t04",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -352,6 +353,7 @@ const WORKSPACE_OUTPUT_EXCLUSIVE_STEP_IDS = Object.freeze([
   "editor-web-public-package-contract",
   "design-system-core-public-package-contract",
   "design-system-authoring-public-package-contract",
+  "design-system-release-public-package-contract",
 ]);
 const PACKAGE_TEST_EXCLUSIVE_STEP_IDS = Object.freeze(["package-tests"]);
 
@@ -384,6 +386,8 @@ export const BUILD_OUTPUT_ROOTS = Object.freeze([
   "packages/design-system-core/.turbo",
   "packages/design-system-authoring/dist",
   "packages/design-system-authoring/.turbo",
+  "packages/design-system-release/dist",
+  "packages/design-system-release/.turbo",
   "packages/editor-web/dist",
   "packages/editor-web/.turbo",
   "packages/protocol/dist",
@@ -668,8 +672,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 238) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 238 steps.", {
+if (METADATA_BY_STEP_ID.size !== 241) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 241 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

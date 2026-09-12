@@ -9,8 +9,9 @@ M10 is **12/12**, M10A is **3/28 (11%)**, and proof gates are **11/14**. Gates a
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01, M10A-T02, and M10A-T03 are DONE**. M11 has not started. The frozen protocol,
-Runtime Core, SC-01 profile, and completed T02 authority are unchanged.
+**M10A-T01, M10A-T02, and M10A-T03 are DONE**. **M10A-T04 is `IN_PROGRESS`** with a local
+implementation/evidence candidate; its exact-head hosted closure is pending. M11 has not started.
+The frozen protocol, Runtime Core, SC-01 profile, and completed T02 authority are unchanged.
 
 ## Current closure
 
@@ -65,7 +66,7 @@ No Git history is rewritten.
 
 ## Documentation verification
 
-The eight governed entry and standards documents are reduced from 18,467 to 1,692 lines (90.8%)
+The eight governed entry and standards documents are reduced from 18,467 to 1,711 lines (90.7%)
 while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
 through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
 link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
@@ -77,21 +78,21 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T03 is `DONE`; M10A-T04 is the next dependency-ready but `NOT_STARTED` task.** The
-[product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md) and
-[T03 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t03--theme-and-token-authoring) own the
-bounded scope. The completed implementation provides structured theme/mode/token/whole-alias editing,
-exact sRGB and px/rem handling, deterministic transfer, and atomic undo/redo/import in a
-platform-neutral package; an isolated workbench exercises preview without entering the normal App.
-Frozen SC-01's 16 valid fixtures split into three T02-supported normal edit/preview paths and 13 preserved/disclosed unsupported paths; affected-overlay partial preview is blocked and seven invalid fixtures reject atomically.
-A separate closed T02-recognized unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed fixtures.
-Unreviewed or invalid forms fail closed without silent loss.
+**M10A-T04 — Immutable design-system release identity — is `IN_PROGRESS`.** Its local candidate
+adds platform-neutral `@desen/design-system-release`: a finite content-addressed token, asset, and
+inert-recipe manifest; detached immutable snapshots; exact host-profile release references; and an
+atomic exact-digest store port with no mutable `latest` lookup. The
+[product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md),
+[T04 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t04--immutable-design-system-release-identity),
+and [task-owned proof](docs/proof/M10A-T04.md) define the bounded evidence. Exact-head hosted
+Quality-gate closure is pending. T04 grants no Runtime or normal-App activation, persistent
+production storage, Publisher authority, or protocol change.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
-Runtime Core tree and fresh proof requirements. T03 authorizes no publication, persistence,
-deployment, normal App integration, immutable design-system release, Runtime, Publisher, or
-protocol change. M10A-T04 is dependency-ready but remains `NOT_STARTED` and unselected while T03 is
-active. No further external user/team recruitment is required; pilot demand remains unproven.
+Runtime Core tree and fresh proof requirements. T04 authorizes no activation, deployment, normal
+App integration, durable production database, Runtime, Publisher, or protocol change. M10A-T05
+remains unselected until T04's exact-head hosted closure. No further external user/team recruitment
+is required; pilot demand remains unproven.
 
 ## Frozen G10 transition authorities
 
@@ -99,7 +100,7 @@ active. No further external user/team recruitment is required; pilot demand rema
 - G10 artifact: `sha256:7005292247b0e4965eaf0bca12d3b1204be9d821f7ba2339257b6bc586ec3ca3`
 - Proof-reader checkpoint 80: 64 artifacts / 128 readers at
   `sha256:49e9354e03e31d9e8767aac82832759f1d32397434b0952392b6d2f6218d24fe`
-- CI candidate inventory: 238 logical workloads / 113 proof pairs / 259 physical shard workloads
+- CI candidate inventory: 241 logical workloads / 114 proof pairs / 264 physical shard workloads
 - Browser authority: nine independent Chromium journeys
 
 ## Working order

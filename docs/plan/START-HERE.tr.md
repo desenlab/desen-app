@@ -7,7 +7,8 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 124/176 (%70), M10 12/12,
 M10A 3/28 (%11) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01, M10A-T02 ve M10A-T03'ün exact-head PR
-kontrolleri, merge'leri ve taze `main` koşuları geçti; ayrıntı [Project Status](../../PROJECT-STATUS.md),
+kontrolleri, merge'leri ve taze `main` koşuları geçti; M10A-T04'ün yerel kanıt adayı hosted kapanışı
+bekliyor. Ayrıntı [Project Status](../../PROJECT-STATUS.md),
 [T01 kanıtı](../proof/M10A-T01.md), [T02 kanıtı](../proof/M10A-T02.md) ve
 [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
@@ -16,7 +17,9 @@ ekler; tamamlanmış görev sayısı 124 ve M10A sayacı 3/28'dir. `M10A-T01` `D
 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
 sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` `DONE`: tema/token
 authoring, modlar, alias'lar, kayıp-farkındalıklı aktarım ve izole workbench kanıtlandı.
-`M10A-T04` bağımlılık açısından hazırdır; seçili değildir ve `NOT_STARTED` kalır.
+`M10A-T04` `IN_PROGRESS` durumundadır: platformdan bağımsız immutable release kimliği, exact-digest
+store portu ve host-profile release referansı için yerel kanıt adayı tamamlandı; exact-head hosted
+Quality gate kapanışı bekleniyor.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i
@@ -81,14 +84,16 @@ güvenilmeyen sınırlar taze kapsamlı çalışma yürütür.
 Mühür/checkpoint yalnızca kimlik ve etki otoritesidir; başarıyı önbelleklemez ve seçilen hosted
 işler taze çalışır.
 
-T03 adayı platformdan bağımsız `@desen/design-system-authoring` ile izole workbench'i sınırlar.
+Tamamlanan T03, platformdan bağımsız `@desen/design-system-authoring` ile izole workbench'i sınırlar.
 Yapılandırılmış tema/mode/token/alias kontrolleri, sRGB ve px/rem değerleri, atomik geçmiş/import ve
 deterministik aktarım kapsamdadır. Donmuş SC-01'in 16 geçerli fixture'ı üç T02-destekli normal
 edit/preview yolu ve 13 kayıpsız korunup açıklanan desteklenmeyen yol olarak kapsanır; yalnız ilgili
 seçili overlay'de kısmi preview engellenir ve yedi geçersiz fixture atomik reddedilir. Ayrı kapalı
 T02-tanınan desteklenmeyen matriste altı geçerli fixture korunup açıklanır, altı bozuk fixture atomik
 reddedilir. İncelenmemiş veya geçersiz biçimler sessiz kayıp olmadan fail closed reddedilir. Normal App, persistence, release, Publisher, Runtime ve protokol
-değişikliği kapsam dışıdır.
+değişikliği kapsam dışıdır. T04 yerel adayında token/asset/recipe snapshot'ları content-addressed
+immutable release olarak ayrıştırılır; runtime activation, persistent production store ve normal App
+entegrasyonu kapsam dışıdır.
 
 ## Değişmez sınırlar
 

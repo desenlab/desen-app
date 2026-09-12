@@ -67,8 +67,8 @@ cancellation, hosted, and zero-reference gates pass.
 
 ## Hosted topology
 
-The current exhaustive graph contains 235 logical workloads and 112 proof pairs. Hosted execution
-uses three isolated exhaustive proof shards plus a fresh joining Quality gate, producing 254
+The current exhaustive graph contains 241 logical workloads and 114 proof pairs. Hosted execution
+uses three isolated exhaustive proof shards plus a fresh joining Quality gate, producing 264
 physical shard workloads. Each workspace builds and tests from current inputs; shards do not share
 mutable build output or test success.
 
@@ -110,12 +110,13 @@ Generators and writers are never selected as proof success. Frozen artifacts are
 commands. A verifier may authenticate an artifact only under its code-owned task, path, byte, and
 digest authority.
 
-Twelve barrier units retain exclusive execution where filesystem, Git, ports, generated output, or
+Thirteen barrier units retain exclusive execution where filesystem, Git, ports, generated output, or
 other shared state cannot be safely parallelized. Ordinary units may run concurrently only inside
 their explicit isolated workspace and resource budget.
 
-M10A-T01's barrier executes three real Chromium cases on its own port 4187 and runner-owned temp.
-It does not replace the separate Browser E2E job's nine M10 journeys or weaken ordinary isolation.
+M10A-T01's barrier executes three real Chromium cases on its own port 4187 and runner-owned temp;
+M10A-T03's barrier executes four workbench cases on its own port 4188. Neither replaces the separate
+Browser E2E job's nine M10 journeys or weakens ordinary isolation.
 
 ## Tracked-workspace integrity
 
@@ -130,8 +131,8 @@ execution authority; checkpoints do not restore or rewrite it.
 ## Proof-reader checkpoints
 
 The append-only checkpoint ledger authenticates immutable artifacts and their current proof-library
-and root-test readers. The current reviewed head is sequence 83 with 65 artifacts and 130 readers at
-`sha256:9c479b3f3feaa3081fe255063462b9736f959e1fa19931df6ced310112bed7a9`.
+and root-test readers. The current reviewed head is sequence 87 with 68 artifacts and 136 readers at
+`sha256:4e269345921d1f14496151c88a522cd36be6f11f138bcbb2aaef65610f2fe28f`.
 
 A successor must preserve the full reviewed prefix and add exactly one reviewed generation. Reader
 reseals acknowledge current code changes; they never mutate historical artifacts or cache passing

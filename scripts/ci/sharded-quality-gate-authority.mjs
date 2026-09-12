@@ -11,12 +11,12 @@ import { classifyProofPairState } from "./shared-state-authority.mjs";
 export const SHARD_IDS = Object.freeze(["proof-a", "proof-b", "proof-c"]);
 /** Reviewed identity of the logical coverage, replicated prerequisites, and static assignment. */
 export const SHARDED_QUALITY_GATE_PLAN_SHA256 =
-  "1ed477f2802c8cdb37d98ad756190c6181b8aa60c7974e83e5c558f139811055";
+  "d8e7667892204225f08083f2dafcf729e99271ceee9593d0c05053482def8660";
 /** Distinct distributed-plan profile; the historical monolithic authority remains unchanged. */
 export const SHARDED_QUALITY_GATE_PROFILE = "desen.ci.sharded-quality-gate-plan.v1";
 /** Public summary schema, which by itself grants neither hosted nor local-close authority. */
 export const REQUIRED_PROOF_SHARD_SUMMARY_PROFILE = "desen.ci.required-proof-shard-summary.v1";
-const PARENT_PLAN_SHA256 = "2931d6ea2fca0887708decc0973dcb4b6ae66820204b1b7e2d83756a2638fc96";
+const PARENT_PLAN_SHA256 = "950b6444d03cad22e3852be2f6302546c25ef0bc641cec60e8aa75271e639ef0";
 const PREFIX_IDS = Object.freeze([
   "orchestrator-contracts",
   "format",
@@ -28,6 +28,7 @@ const PREFIX_IDS = Object.freeze([
   "editor-web-public-package-contract",
   "design-system-core-public-package-contract",
   "design-system-authoring-public-package-contract",
+  "design-system-release-public-package-contract",
 ]);
 const JOIN_PREPARATION_IDS = Object.freeze(["workspace-graph"]);
 const SUFFIX_IDS = Object.freeze(["dependency-boundaries", "boundary-fixtures"]);
@@ -139,8 +140,8 @@ function assertIdsEqual(actual, expected, label) {
 }
 
 /**
- * Builds the fixed 53/24/36 proof-pair partition from the authenticated 238-node inventory.
- * Its logical coverage remains 238; three prefixes and the join's fresh build execute 259
+ * Builds the fixed 53/24/37 proof-pair partition from the authenticated 241-node inventory.
+ * Its logical coverage remains 241; three prefixes and the join's fresh build execute 264
  * physical workloads. No duplicate preparation is represented as a skipped successful close.
  */
 export function createShardedQualityGatePlan(rawOptions = undefined) {
@@ -152,7 +153,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
   const nodeById = new Map(inventory.nodes.map((node) => [node.id, node]));
   const prefixSet = new Set(PREFIX_IDS);
   assertIdsEqual(
-    inventory.nodes.slice(0, 10).map(({ id }) => id),
+    inventory.nodes.slice(0, PREFIX_IDS.length).map(({ id }) => id),
     PREFIX_IDS,
     "The prefix",
   );
@@ -161,7 +162,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     SUFFIX_IDS,
     "The suffix",
   );
-  if (inventory.workloadCount !== 238 || inventory.proofUnitCount !== 113) {
+  if (inventory.workloadCount !== 241 || inventory.proofUnitCount !== 114) {
     fail("SHARDED_QUALITY_GATE_PLAN_DRIFT", "The exhaustive workload universe changed.");
   }
   const completedPrefix = new Set();
@@ -191,7 +192,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     "The partition",
   );
   if (
-    new Set(shardProjections.flatMap(({ proofPairIds }) => proofPairIds)).size !== 113 ||
+    new Set(shardProjections.flatMap(({ proofPairIds }) => proofPairIds)).size !== 114 ||
     shardProjections.some(
       ({ barrierPairIds }, index) => barrierPairIds.length !== [11, 0, 2][index],
     )
@@ -209,8 +210,8 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     parentPlanSha256: PARENT_PLAN_SHA256,
     inventorySha256: inventory.inventorySha256,
     concurrencyPerShard: 2,
-    logicalWorkloadCount: 238,
-    proofPairCount: 113,
+    logicalWorkloadCount: 241,
+    proofPairCount: 114,
     prefixIds: PREFIX_IDS,
     joinPreparationIds: JOIN_PREPARATION_IDS,
     suffixIds: SUFFIX_IDS,
@@ -241,7 +242,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
   });
   const logicalNodeIds = inventory.nodes.map(({ id }) => id);
   const covered = new Set([...shards.flatMap(({ nodeIds }) => nodeIds), ...SUFFIX_IDS]);
-  if (covered.size !== 238 || logicalNodeIds.some((id) => !covered.has(id))) {
+  if (covered.size !== 241 || logicalNodeIds.some((id) => !covered.has(id))) {
     fail("SHARDED_QUALITY_GATE_PLAN_DRIFT", "Distributed coverage is not exactly exhaustive.");
   }
   const plan = deepFreeze({
@@ -251,9 +252,9 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     logicalNodeIds,
     completedBeforeJoinNodeIds: logicalNodeIds.filter((id) => !SUFFIX_IDS.includes(id)),
     joinNodeIds: [...JOIN_PREPARATION_IDS, ...SUFFIX_IDS],
-    stepCount: 238,
-    physicalWorkloadCount: 259,
-    repeatedPrefixWorkloadCount: 20,
+    stepCount: 241,
+    physicalWorkloadCount: 264,
+    repeatedPrefixWorkloadCount: 22,
     additionalJoinPreparationCount: 1,
   });
   AUTHENTIC_PLANS.add(plan);

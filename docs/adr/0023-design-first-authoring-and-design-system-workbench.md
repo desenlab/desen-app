@@ -1,6 +1,6 @@
 # ADR 0023: Design-first authoring and design-system workbench
 
-- Status: Accepted; M10A-T01 and M10A-T02 `DONE`, M10A-T03 candidate `IN_PROGRESS`
+- Status: Accepted; M10A-T01 through M10A-T03 `DONE`, M10A-T04 candidate `IN_PROGRESS`
 - Date: 2026-09-10
 - Decision owner: user-authorized M10A planning / SC-02 adaptation, closed by G10A
 
@@ -17,10 +17,10 @@ static experience before a frontend engineer supplies application behavior. That
 weaken DESEN 0.1.0. Source and Bundle remain data-only, capability surfaces remain explicit,
 authoring adapters remain honest, and unknown runtime semantics still fail closed.
 
-This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 and M10A-T02 are
-`DONE`; M10A-T03 is `IN_PROGRESS` with a local implementation/evidence candidate, and the other 25
-tasks remain `NOT_STARTED`. Exact-head hosted checks are still pending. ADR acceptance and local
-candidate evidence are not release or production-readiness claims. The canonical sequence is in
+This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 through M10A-T03
+are `DONE`; M10A-T04 is `IN_PROGRESS` with a local implementation/evidence candidate, and the other
+24 tasks remain `NOT_STARTED`. T04 exact-head hosted checks are still pending. ADR acceptance and
+local candidate evidence are not release or production-readiness claims. The canonical sequence is in
 [M10A Implementation Plan](../plan/M10A-IMPLEMENTATION-PLAN.md), with detailed acceptance contracts
 in [M10A Task Contracts](../plan/M10A-TASK-CONTRACTS.md) and product behavior in the
 [Design-System Workbench](../plan/DESIGN-SYSTEM-WORKBENCH.md).
@@ -56,16 +56,21 @@ target-package direction to `protocol`, `catalog-sdk`, and `runtime-react`, plus
 Base UI dependency. Publisher and Runtime packages do not depend on `design-system-core` and gain no
 recipe semantics.
 
-The T03 candidate adds platform-neutral `@desen/design-system-authoring` plus an isolated browser
+The completed T03 adds platform-neutral `@desen/design-system-authoring` plus an isolated browser
 workbench. It exposes structured theme, mode, token, and whole-alias controls with exact sRGB and
 px/rem handling, atomic history/import, and bounded loss-aware transfer. The frozen SC-01 inventory's
 16 valid fixtures split into three T02-supported normal edit/preview paths and 13 losslessly
 preserved, disclosed unsupported paths that block partial preview only for their selected overlay;
 seven invalid fixtures reject atomically. A separate closed T02-recognized unsupported matrix
-preserves/discloses six valid fixtures and atomically rejects six malformed fixtures. Unreviewed or
-invalid forms fail closed without silent loss. This bounded slice
-does not enter the normal App or add persistence, release, materialization, Publisher, Runtime, or
-protocol authority. T04 is dependency-ready but remains `NOT_STARTED` and unselected while T03 is active.
+preserves/discloses six valid fixtures and atomically rejects ten malformed fixtures. Unreviewed or
+invalid forms fail closed without silent loss. T03 does not enter the normal App or add persistence,
+release, materialization, Publisher, Runtime, or protocol authority.
+
+The T04 local candidate adds platform-neutral `@desen/design-system-release`: finite
+content-addressed token, asset, and inert-recipe snapshots; exact host-profile release references;
+and an atomic exact-digest store port with no mutable `latest` lookup. It remains bounded until its
+exact-head hosted closure: it grants no Runtime activation, normal App integration, durable
+production storage, Publisher authority, or protocol change.
 
 ### Make the durable editable project the authoring aggregate
 

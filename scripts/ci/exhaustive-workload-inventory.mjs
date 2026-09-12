@@ -144,13 +144,13 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "a9b7b963ac77d33f6faca4bd352546736061955cdcd6525cde94a06bf4f318f5";
+  "11a817bd8ad38c5d1d1a9d6d3bbeaccffddfd37e76829597413ac5dab90a93f9";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "c9eb237799a16582aea375c9ca3bb906c2f330913230682f97951e8a2f21277d";
+  "6357a78589739a18a4a41423376840ea87e741023df865a4d052e2dbdb72d368";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "6940ed2d22342db1d7f8ca536c4ebf08260de69d7014fef0973d9c07e31a560e";
+  "00897321e95c1c32308c2bad6f32de1c1ee18159786aabfab17a22105974488f";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
-  "4c2cd7854e3ed795fe38357166e12e5f199c73217a7c10b89505df24e5de6743";
+  "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = SAFE_OBJECT_FREEZE(["apps/*", "packages/*"]);
@@ -739,6 +739,7 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
   ["m10a-t01", "scripts/verify-m10a-t01.mjs", "tests/m10a-t01.test.mjs"],
   ["m10a-t02", "scripts/verify-m10a-t02.mjs", "tests/m10a-t02.test.mjs"],
   ["m10a-t03", "scripts/verify-m10a-t03.mjs", "tests/m10a-t03.test.mjs"],
+  ["m10a-t04", "scripts/verify-m10a-t04.mjs", "tests/m10a-t04.test.mjs"],
 ]);
 
 const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
@@ -1147,6 +1148,7 @@ function classifyPrerequisite({
       "desen-app-publish-activation",
       "m10a-t02",
       "m10a-t03",
+      "m10a-t04",
     ].includes(currentProofId);
     const reviewedPackage =
       (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
@@ -1156,9 +1158,11 @@ function classifyPrerequisite({
       (currentProofId === "m10a-t02" && packageName === "@desen/design-system-core");
     const reviewedAuthoringPackage =
       currentProofId === "m10a-t03" && packageName === "@desen/design-system-authoring";
+    const reviewedReleasePackage =
+      currentProofId === "m10a-t04" && packageName === "@desen/design-system-release";
     if (
       !reviewedPublicPackageProof ||
-      (!reviewedPackage && !reviewedAuthoringPackage) ||
+      (!reviewedPackage && !reviewedAuthoringPackage && !reviewedReleasePackage) ||
       packageScripts[task] !== expectedScript
     ) {
       fail(currentProofId + " uses an unreviewed public-package contract test.", {
@@ -1461,6 +1465,15 @@ function buildCanonicalInventory() {
       "SERIAL_BUILD_WRITER",
       SHARED_BUILD_WRITER,
     ),
+    node(
+      "design-system-release-public-package-contract",
+      "Design System Release public-package contract",
+      "pnpm",
+      ["--filter", "@desen/design-system-release", "test:public-package"],
+      ["design-system-authoring-public-package-contract"],
+      "SERIAL_BUILD_WRITER",
+      SHARED_BUILD_WRITER,
+    ),
   ];
   const verifiers = PROOF_UNIT_TUPLES.map(([id, verifierFile]) =>
     node(
@@ -1485,7 +1498,9 @@ function buildCanonicalInventory() {
               ? "design-system-core-public-package-contract"
               : id === "m10a-t03"
                 ? "design-system-authoring-public-package-contract"
-                : "package-tests",
+                : id === "m10a-t04"
+                  ? "design-system-release-public-package-contract"
+                  : "package-tests",
       ],
       "CONCURRENT_PROOF",
       id === "runtime-core-baseline"
@@ -1835,7 +1850,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "6854945b1ae3bb7c71e212a6ced7a96bdbd2b16e3da399ed36b539dbc5619577";
+  "3607817284ab3a40736153ddd02534ec0422acdd28c10ee7c1f39d077cb0c659";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {
