@@ -1,8 +1,8 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 and M10A-T02 are `DONE`. M10A-T03 is
-`IN_PROGRESS`: local implementation/evidence is a candidate and exact-head hosted checks are
-pending. The canonical statuses and dependencies are in [TASKS.md](TASKS.md).
+Decision date: 2026-09-10. Planning is complete; M10A-T01, M10A-T02, and M10A-T03 are `DONE`.
+M10A-T04 is `IN_PROGRESS`: local implementation/evidence is a candidate and exact-head hosted
+checks are pending. The canonical statuses and dependencies are in [TASKS.md](TASKS.md).
 
 ## Product promise
 
@@ -19,9 +19,10 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 ## Delivery sequence and accounting
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
-and one gate; the total becomes 176 tasks and 14 gates. The 123 completed tasks and 11 completed
-gates remain completed. T01 and T02 are the two completed M10A tasks, T03 is `IN_PROGRESS`, and the
-other 25 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
+and one gate; the total becomes 176 tasks and 14 gates. The 124 completed tasks and 11 completed
+gates remain completed. T01, T02, and T03 are the three completed M10A tasks, T04 is
+`IN_PROGRESS`, and the other 24 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as
+implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
 Dependencies, not numeric order, select the next eligible task: T26 acceptance precedes T25's
@@ -185,23 +186,15 @@ alone and not another external user recruitment round:
 
 ## Active task candidate
 
-**M10A-T03 — Theme and token authoring** is `IN_PROGRESS`. The local candidate adds platform-neutral
-`@desen/design-system-authoring` and an isolated workbench: structured theme, mode, token, and
-whole-alias controls; exact sRGB and px/rem handling; atomic history/import; and validated,
-loss-aware transfer against T02's declared DTCG profile. It supports editable DESEN Neutral
-light/dark themes and arbitrary valid custom values without a forced palette or raw JSON for
-ordinary edits. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal edit/preview paths
-and 13 losslessly preserved/disclosed unsupported paths with partial preview blocked only for their
-selected overlay; seven invalid fixtures reject atomically. A separate closed T02-recognized
-unsupported matrix preserves/discloses six valid fixtures and atomically rejects six malformed
-fixtures. Unreviewed or invalid forms fail closed without silent loss.
+**M10A-T04 — Immutable design-system release identity** is `IN_PROGRESS`. The local candidate adds
+platform-neutral `@desen/design-system-release`: finite token, asset, and inert-recipe snapshots;
+a deterministic content-addressed dependency manifest; detached immutable releases; exact
+host-profile references; and an atomic exact-digest store port with no mutable `latest` lookup.
 
-T03 evidence must cover live preview, undoable edits, and deterministic export/reimport round trips.
-An invalid import must never overwrite working data. T03 remains open until exact-head hosted
-checks pass and does not authorize T04 or later tasks, immutable releases, normal App integration,
-persistence, recipe or asset execution, starter-library expansion, Publisher or Runtime authority,
-Core/protocol changes, or M11. T04 is dependency-ready but remains `NOT_STARTED` and unselected
-while T03 is active.
+T04 evidence must prove equal input/equal digest, changed production dependency/new identity,
+missing or tampered dependency rejection, and interrupted-write recovery. It remains open until
+exact-head hosted checks pass and does not authorize T05 or later tasks, Runtime activation, normal
+App integration, durable production storage, Publisher authority, Core/protocol changes, or M11.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.

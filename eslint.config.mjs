@@ -12,6 +12,7 @@ const neutralFiles = [
   "packages/editor-core/**/*.{ts,tsx}",
   "packages/design-system-core/**/*.{ts,tsx}",
   "packages/design-system-authoring/**/*.{ts,tsx}",
+  "packages/design-system-release/**/*.{ts,tsx}",
 ];
 
 const browserFiles = [

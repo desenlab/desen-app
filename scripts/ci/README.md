@@ -57,14 +57,15 @@ cancellation, hosted, and zero-reference checks pass.
 
 ## Current authority
 
-- 238 logical workloads, including separate Editor Core, Editor Web, Design System Core, and Design System Authoring public-package contracts
-- 113 proof pairs: 100 ordinary and 13 exclusive barriers
-- 259 hosted physical shard workloads
-- proof-reader checkpoint sequence 86 at
-  `sha256:b0fc419c9026e9e8584c22b377ca5ca10dc848244c9f1a7a17da1ee85a80aff2`, authenticating 67 artifacts and 134 current readers
-- nine M10 Chromium journeys in the separate Browser E2E job; three T01 and four T03 cases in
-  distinct fixed-port proof barriers; T03 covers SC-01's 3 supported / 13 preserved-unsupported / 7
-  invalid fixtures plus a closed 6 valid / 6 malformed T02-recognized unsupported matrix
+- 241 logical workloads, including separate Editor Core, Editor Web, Design System Core, Design System Authoring, and Design System Release public-package contracts
+- 114 proof pairs: 101 ordinary and 13 exclusive barriers
+- 264 hosted physical shard workloads
+- proof-reader checkpoint sequence 89 at
+  `sha256:bf1cb0a2b79f0a5a8d9228f2ea3fc0209f1558d2d6f6e8e03b11f19bf50c6a50`, authenticating 68 artifacts and 136 current readers
+- nine M10 Chromium journeys in the separate Browser E2E job; three T01 cases on port 4187 and four
+  T03 workbench cases on port 4188 in distinct fixed-port proof barriers; T03 covers SC-01's 3
+  supported / 13 preserved-unsupported / 7 invalid fixtures plus a closed 6 valid / 10 malformed
+  T02-recognized unsupported matrix
 
 Exact counts are reviewed invariants, not targets to reduce. A performance change may redistribute
 fresh work but cannot omit a workload, cache proof success, increase the deadline silently, or

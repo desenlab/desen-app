@@ -553,6 +553,7 @@ const PROOF_ENTRIES = Object.freeze(
     ["m10a-t01", "scripts/verify-m10a-t01.mjs", "tests/m10a-t01.test.mjs"],
     ["m10a-t02", "scripts/verify-m10a-t02.mjs", "tests/m10a-t02.test.mjs"],
     ["m10a-t03", "scripts/verify-m10a-t03.mjs", "tests/m10a-t03.test.mjs"],
+    ["m10a-t04", "scripts/verify-m10a-t04.mjs", "tests/m10a-t04.test.mjs"],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -643,14 +644,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "a9b7b963ac77d33f6faca4bd352546736061955cdcd6525cde94a06bf4f318f5";
+  "11a817bd8ad38c5d1d1a9d6d3bbeaccffddfd37e76829597413ac5dab90a93f9";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "c9eb237799a16582aea375c9ca3bb906c2f330913230682f97951e8a2f21277d";
+  "6357a78589739a18a4a41423376840ea87e741023df865a4d052e2dbdb72d368";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "6940ed2d22342db1d7f8ca536c4ebf08260de69d7014fef0973d9c07e31a560e";
+  "00897321e95c1c32308c2bad6f32de1c1ee18159786aabfab17a22105974488f";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "257667fcdec26d3654d1434c392bfaf7aec7e8f2a684311912c02255fd1d3176";
+const QUALITY_GATE_PLAN_SHA256 = "38e2ef1bcdacbf2ef48d44217dbbd0dc85d4bad849b1372f3491ec384db233e7";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -658,7 +659,7 @@ const QUALITY_GATE_PLAN_SHA256 = "257667fcdec26d3654d1434c392bfaf7aec7e8f2a68431
 // Historical M06-T10 plan pin retained for its frozen compatibility reader:
 // ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
-  "4c2cd7854e3ed795fe38357166e12e5f199c73217a7c10b89505df24e5de6743";
+  "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88";
 const WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);
@@ -1013,6 +1014,7 @@ function classifyLegacyPrerequisite({
       "desen-app-publish-activation",
       "m10a-t02",
       "m10a-t03",
+      "m10a-t04",
     ].includes(currentProofId);
     const reviewedPackage =
       (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
@@ -1020,7 +1022,8 @@ function classifyLegacyPrerequisite({
         currentProofId === "desen-app-publish-activation") &&
         packageName === "@desen/editor-web") ||
       (currentProofId === "m10a-t02" && packageName === "@desen/design-system-core") ||
-      (currentProofId === "m10a-t03" && packageName === "@desen/design-system-authoring");
+      (currentProofId === "m10a-t03" && packageName === "@desen/design-system-authoring") ||
+      (currentProofId === "m10a-t04" && packageName === "@desen/design-system-release");
     if (!reviewedProof || !reviewedPackage || packageManifest.scripts?.[task] !== expectedScript) {
       throw new QualityGateError(
         `${currentProofId} uses an unreviewed public-package contract test.`,
@@ -1448,6 +1451,12 @@ export function createQualityGateSteps() {
       "Design System Authoring public-package contract",
       "pnpm",
       ["--filter", "@desen/design-system-authoring", "test:public-package"],
+    ),
+    commandStep(
+      "design-system-release-public-package-contract",
+      "Design System Release public-package contract",
+      "pnpm",
+      ["--filter", "@desen/design-system-release", "test:public-package"],
     ),
     ...PROOF_ENTRIES.map(({ id, verifierFile }) =>
       commandStep(`verify-${id}`, `Proof verifier: ${id}`, "node", [verifierFile]),

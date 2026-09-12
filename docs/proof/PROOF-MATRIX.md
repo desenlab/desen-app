@@ -3619,3 +3619,26 @@ merge passed with Browser job `103434637969` and Quality gate job `103438879697`
 remains `NOT_STARTED` and unselected. T03 does not integrate the normal App, persist a
 project, create a design-system release, materialize recipes or assets, publish or activate token
 data, change Runtime or Publisher behavior, publish a package, advance G10A, or start M11.
+
+## M10A-T04 immutable release identity (`IN_PROGRESS`, local candidate)
+
+The [M10A-T04 evidence](M10A-T04.md) adds private, platform-neutral
+`@desen/design-system-release`. It admits finite token, font/icon/image, and inert recipe inputs
+into a detached immutable release with one content-addressed manifest; it exposes only exact
+host-profile references and an atomic exact-digest store port with no mutable `latest` lookup.
+Malformed, reordered, incomplete, metadata-bearing, non-asset-media, oversized, or authority-
+bearing inputs fail closed, including normalized authority keys nested in admitted token-extension
+metadata. T04 neither activates a release nor changes Runtime, Publisher, the
+normal App, durable production storage, package publication, protocol authority, G10A, or M11.
+
+The deterministic local artifact is 2,519 bytes at
+`sha256:a922534f6d6570c01d049f1a056588b56116fa0bbe02ed41e0ac0aea613c4ee0`.
+Package behavior tests pass 10/10, the built public-package contract passes 1/1, and the root
+proof mutation matrix passes 11/11. Reader checkpoint sequence 89 preserves sequences 1–88 and
+authenticates 68 artifacts / 136 current readers at
+`sha256:bf1cb0a2b79f0a5a8d9228f2ea3fc0209f1558d2d6f6e8e03b11f19bf50c6a50`; its dedicated suite
+passes 123/123. The current CI candidate inventory is 241 logical workloads / 114 proof pairs
+(101 ordinary and 13 exclusive barriers) / 264 hosted physical shard workloads.
+
+This is local implementation evidence only. Exact-head hosted Quality and Browser E2E results,
+squash-merge identity, and fresh-`main` validation remain required before T04 can become `DONE`.

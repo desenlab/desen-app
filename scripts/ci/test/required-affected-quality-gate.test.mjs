@@ -400,15 +400,15 @@ test("runs canonical multi-proof selections without inventing dependency complet
   assert.deepEqual(selection.nodeIds.slice(-2), ["dependency-boundaries", "boundary-fixtures"]);
 });
 
-test("runs the persistence closure behind all four public-package contracts", async () => {
+test("runs the persistence closure behind all five public-package contracts", async () => {
   const selection = createRequiredAffectedSelection(
     await boundary("scripts/verify-editor-core-persistence.mjs"),
   );
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
-  assert.deepEqual(selection.nodeIds.slice(0, 10), [
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
+  assert.deepEqual(selection.nodeIds.slice(0, 11), [
     "orchestrator-contracts",
     "format",
     "lint",
@@ -419,6 +419,7 @@ test("runs the persistence closure behind all four public-package contracts", as
     "editor-web-public-package-contract",
     "design-system-core-public-package-contract",
     "design-system-authoring-public-package-contract",
+    "design-system-release-public-package-contract",
   ]);
   assert.equal(selection.nodeIds.includes("verify-editor-core-persistence"), true);
   assert.equal(selection.nodeIds.includes("verify-editor-core-continuous-validation"), true);
@@ -435,7 +436,7 @@ test("runs the persistence closure behind all four public-package contracts", as
   assert.equal(selection.nodeIds.includes("verify-desen-app-design-run-modes"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs continuous validation after the editor-core contract with the connected T03-T07 closure", async () => {
@@ -444,8 +445,8 @@ test("runs continuous validation after the editor-core contract with the connect
   );
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("editor-web-public-package-contract"), true);
   assert.equal(selection.nodeIds.includes("verify-editor-core-continuous-validation"), true);
   assert.equal(selection.nodeIds.includes("test-editor-core-continuous-validation"), true);
@@ -462,15 +463,15 @@ test("runs continuous validation after the editor-core contract with the connect
   assert.equal(selection.nodeIds.includes("verify-desen-app-design-run-modes"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("routes M10A-T03 behind the authoring public-package contract", async () => {
   const selection = createRequiredAffectedSelection(await boundary("scripts/verify-m10a-t03.mjs"));
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   const publicContractIndex = selection.nodeIds.indexOf(
     "design-system-authoring-public-package-contract",
   );
@@ -479,7 +480,24 @@ test("routes M10A-T03 behind the authoring public-package contract", async () =>
   assert.ok(verifierIndex > publicContractIndex);
   assert.equal(selection.nodeIds.includes("test-m10a-t03"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
+});
+
+test("routes M10A-T04 behind the release public-package contract", async () => {
+  const selection = createRequiredAffectedSelection(await boundary("scripts/verify-m10a-t04.mjs"));
+  const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
+
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
+  const publicContractIndex = selection.nodeIds.indexOf(
+    "design-system-release-public-package-contract",
+  );
+  const verifierIndex = selection.nodeIds.indexOf("verify-m10a-t04");
+  assert.ok(publicContractIndex >= 0);
+  assert.ok(verifierIndex > publicContractIndex);
+  assert.equal(selection.nodeIds.includes("test-m10a-t04"), true);
+  assert.equal(receipt.status, "PASS");
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs terminal integration with every M08 parent and the frozen P-18 runtime proofs", async () => {
@@ -489,8 +507,8 @@ test("runs terminal integration with every M08 parent and the frozen P-18 runtim
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["editor-core-terminal-integration"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-runtime-core-headless-sign-in"), true);
   assert.equal(selection.nodeIds.includes("verify-runtime-core-audit-hardening"), true);
   assert.equal(selection.nodeIds.includes("verify-editor-core-persistence"), true);
@@ -508,7 +526,7 @@ test("runs terminal integration with every M08 parent and the frozen P-18 runtim
   assert.equal(selection.nodeIds.includes("verify-desen-app-design-run-modes"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs the catalog panel closure behind exact shell and Catalog parents", async () => {
@@ -518,8 +536,8 @@ test("runs the catalog panel closure behind exact shell and Catalog parents", as
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-catalog-panel-layer-tree"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(
     selection.nodeIds.includes("verify-reference-catalog-web-capability-artifact"),
     true,
@@ -537,7 +555,7 @@ test("runs the catalog panel closure behind exact shell and Catalog parents", as
   assert.equal(selection.nodeIds.includes("verify-desen-app-design-run-modes"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs the adapter canvas closure behind exact shell and source-audit parents", async () => {
@@ -547,8 +565,8 @@ test("runs the adapter canvas closure behind exact shell and source-audit parent
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-real-adapter-canvas"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-reference-host-web-source-audit"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-shell-navigation"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
@@ -563,7 +581,7 @@ test("runs the adapter canvas closure behind exact shell and source-audit parent
   assert.equal(selection.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-selection-overlay"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs named-slot authoring behind the exact structured-inspector parent", async () => {
@@ -573,8 +591,8 @@ test("runs named-slot authoring behind the exact structured-inspector parent", a
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-named-slot-authoring"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-desen-app-structured-inspector"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-structured-inspector"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-named-slot-authoring"), true);
@@ -588,7 +606,7 @@ test("runs named-slot authoring behind the exact structured-inspector parent", a
   assert.equal(selection.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs event/action authoring behind exact App and Editor Core parents", async () => {
@@ -598,8 +616,8 @@ test("runs event/action authoring behind exact App and Editor Core parents", asy
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-event-action-editor"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-editor-core-event-action-edits"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-state-binding-editor"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-event-action-editor"), true);
@@ -609,7 +627,7 @@ test("runs event/action authoring behind exact App and Editor Core parents", asy
   assert.equal(selection.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs Design/Run modes behind exact canvas, state, and action parents", async () => {
@@ -619,8 +637,8 @@ test("runs Design/Run modes behind exact canvas, state, and action parents", asy
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-design-run-modes"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-state-binding-editor"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-event-action-editor"), true);
@@ -629,7 +647,7 @@ test("runs Design/Run modes behind exact canvas, state, and action parents", asy
   assert.equal(selection.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs fixtures/scenarios fidelity behind exact Design/Run, fixture, and parity parents", async () => {
@@ -639,8 +657,8 @@ test("runs fixtures/scenarios fidelity behind exact Design/Run, fixture, and par
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-fixtures-scenarios-fidelity"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(
     selection.nodeIds.includes("verify-reference-sign-in-fixtures-and-host-binding"),
     true,
@@ -650,7 +668,7 @@ test("runs fixtures/scenarios fidelity behind exact Design/Run, fixture, and par
   assert.equal(selection.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs source persistence behind exact shell, Editor Core, and T11 parents", async () => {
@@ -660,15 +678,15 @@ test("runs source persistence behind exact shell, Editor Core, and T11 parents",
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-source-persistence"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-editor-core-persistence"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-shell-navigation"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-source-persistence"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-source-persistence"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs node-linked diagnostics behind exact Runtime, Editor Core, and App parents", async () => {
@@ -678,15 +696,15 @@ test("runs node-linked diagnostics behind exact Runtime, Editor Core, and App pa
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-node-linked-diagnostics"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-runtime-react-reconciliation-diagnostics"), true);
   assert.equal(selection.nodeIds.includes("verify-editor-core-continuous-validation"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-source-persistence"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-node-linked-diagnostics"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-node-linked-diagnostics"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs publication behind exact App, Publisher, control-plane, and host parents", async () => {
@@ -696,8 +714,8 @@ test("runs publication behind exact App, Publisher, control-plane, and host pare
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-publish-activation"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   for (const proofId of [
     "desen-app-design-run-modes",
     "desen-app-fixtures-scenarios-fidelity",
@@ -713,7 +731,7 @@ test("runs publication behind exact App, Publisher, control-plane, and host pare
   }
   assert.equal(selection.nodeIds.includes("test-desen-app-publish-activation"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs empty-project browser E2E behind the exact publication parent", async () => {
@@ -723,14 +741,14 @@ test("runs empty-project browser E2E behind the exact publication parent", async
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-empty-project-browser-e2e"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-desen-app-publish-activation"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-publish-activation"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-empty-project-browser-e2e"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-empty-project-browser-e2e"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs Browser E2E workspace compatibility behind the historical browser proof", async () => {
@@ -740,8 +758,8 @@ test("runs Browser E2E workspace compatibility behind the historical browser pro
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-browser-e2e-workspace-compatibility"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-desen-app-empty-project-browser-e2e"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-empty-project-browser-e2e"), true);
   assert.equal(
@@ -753,7 +771,7 @@ test("runs Browser E2E workspace compatibility behind the historical browser pro
     true,
   );
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs visual behavior authoring behind the blank-project predecessor", async () => {
@@ -786,13 +804,13 @@ test("runs visual behavior authoring behind the blank-project predecessor", asyn
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-visual-behavior-authoring"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-desen-app-user-created-blank-project"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-visual-behavior-authoring"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-visual-behavior-authoring"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs evergreen product composition behind the visual-behavior predecessor", async () => {
@@ -814,8 +832,8 @@ test("runs evergreen product composition behind the visual-behavior predecessor"
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-evergreen-product-composition"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-desen-app-visual-behavior-authoring"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-evergreen-product-composition"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-evergreen-product-composition"), true);
@@ -824,7 +842,7 @@ test("runs evergreen product composition behind the visual-behavior predecessor"
   assert.equal(selection.nodeIds.includes("verify-desen-app-failure-fixture"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-failure-fixture"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs input/pending fixture behind the evergreen composition predecessor", async () => {
@@ -846,15 +864,15 @@ test("runs input/pending fixture behind the evergreen composition predecessor", 
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-input-pending-fixture"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-desen-app-evergreen-product-composition"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-input-pending-fixture"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-input-pending-fixture"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-failure-fixture"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-failure-fixture"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs the failure fixture behind the input/pending predecessor", async () => {
@@ -876,13 +894,13 @@ test("runs the failure fixture behind the input/pending predecessor", async () =
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-failure-fixture"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   assert.equal(selection.nodeIds.includes("verify-desen-app-input-pending-fixture"), true);
   assert.equal(selection.nodeIds.includes("verify-desen-app-failure-fixture"), true);
   assert.equal(selection.nodeIds.includes("test-desen-app-failure-fixture"), true);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs success and real-host evidence behind both exact T04 parents", async () => {
@@ -903,8 +921,8 @@ test("runs success and real-host evidence behind both exact T04 parents", async 
   );
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-success-host-operation"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   for (const id of [
     "desen-app-failure-fixture",
     "reference-sign-in-fixtures-and-host-binding",
@@ -914,7 +932,7 @@ test("runs success and real-host evidence behind both exact T04 parents", async 
     assert.equal(selection.nodeIds.includes(`test-${id}`), true);
   }
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs published-host update behind all four exact M10-T05 parents", async () => {
@@ -935,8 +953,8 @@ test("runs published-host update behind all four exact M10-T05 parents", async (
   );
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-published-host-update"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   for (const id of [
     "desen-app-success-host-operation",
     "desen-app-publish-activation",
@@ -948,7 +966,7 @@ test("runs published-host update behind all four exact M10-T05 parents", async (
     assert.equal(selection.nodeIds.includes(`test-${id}`), true);
   }
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs invalid publication behind its three exact parents with fresh required completion", async () => {
@@ -969,8 +987,8 @@ test("runs invalid publication behind its three exact parents with fresh require
   );
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-invalid-publication"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   for (const id of [
     "desen-app-published-host-update",
     "desen-app-node-linked-diagnostics",
@@ -985,7 +1003,7 @@ test("runs invalid publication behind its three exact parents with fresh require
     selection.nodeIds,
   );
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("runs recovery behind all four reviewed parents with fresh required completion", async () => {
@@ -1003,8 +1021,8 @@ test("runs recovery behind all four reviewed parents with fresh required complet
   );
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-last-known-good-recovery"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   for (const id of [
     "desen-app-published-host-update",
     "desen-app-invalid-publication",
@@ -1020,7 +1038,7 @@ test("runs recovery behind all four reviewed parents with fresh required complet
     selection.nodeIds,
   );
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("exhaustive fallback executes no duplicate required workload", async () => {
@@ -1052,8 +1070,8 @@ test("runs repeatable demo behind its three direct parents with every selected c
   );
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
   assert.deepEqual(selection.ownerProofUnitIds, ["desen-app-repeatable-demo"]);
-  assert.equal(selection.proofUnitCount, 81);
-  assert.equal(selection.workloadCount, 174);
+  assert.equal(selection.proofUnitCount, 82);
+  assert.equal(selection.workloadCount, 177);
   for (const id of [
     "desen-app-last-known-good-recovery",
     "desen-app-success-host-operation",
@@ -1068,7 +1086,7 @@ test("runs repeatable demo behind its three direct parents with every selected c
     selection.nodeIds,
   );
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 174);
+  assert.equal(receipt.observedClosedCount, 177);
 });
 
 test("a selected failure stops later work and cannot authorize a pass", async () => {
@@ -1312,8 +1330,8 @@ test("required exhaustive invariants remain exact after required execution is im
   const required = createRequiredExhaustivePlan();
   assert.equal(required.authority, "REQUIRED");
   assert.equal(required.scope, "EXHAUSTIVE");
-  assert.equal(required.stepCount, 238);
-  assert.equal(required.proofPairCount, 113);
+  assert.equal(required.stepCount, 241);
+  assert.equal(required.proofPairCount, 114);
 });
 
 test("only pull requests may attempt affected execution and every ineligible plan falls back", () => {

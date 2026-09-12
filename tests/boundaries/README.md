@@ -64,3 +64,7 @@ Adding or changing a boundary rule requires one fixture that would fail if that 
 M10A-T02 adds five design-system-core fixtures. They admit the documented neutral dependency on
 Editor Core, reject Design System Core dependencies on Validator, Runtime Core, or Node built-ins,
 and reject the inverse Runtime Core dependency so draft project data cannot become runtime authority.
+
+M10A-T04 adds three design-system-release fixtures. They admit only its documented Protocol and
+Design System Core foundations, reject a Runtime Core edge, and reject Node built-ins so detached
+release identity cannot become a hidden Runtime or host authority.

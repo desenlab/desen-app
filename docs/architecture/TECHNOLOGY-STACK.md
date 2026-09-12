@@ -52,7 +52,7 @@ fresh compatibility checks.
 Map provider, drag-and-drop adapter, router, query cache, and UI component dependencies are chosen
 only by their owning tasks and require an ADR when they affect public capability contracts.
 
-## M10A product foundation — T01 and T02 complete, T03 candidate active
+## M10A product foundation — T01 through T03 complete, T04 candidate active
 
 M10A-T01 pins `@base-ui/react` **1.8.0** behind the private
 `@desen/starter-catalog-web` Catalog/adapter package, with DESEN-owned Neutral styles implemented
@@ -65,18 +65,20 @@ or production deployment.
 M10A-T02 is `DONE`: `@desen/design-system-core` admits the App-owned v1 envelope and resolves the
 bounded DTCG 2025.10 profile with deterministic external source overlays, whole-token aliases, and
 final literal overrides. It imports only `@desen/protocol` and `@desen/editor-core`; the
-[T02 proof](../proof/M10A-T02.md) owns its closure evidence. M10A-T03 is `IN_PROGRESS`: its local
-candidate adds platform-neutral `@desen/design-system-authoring` and an isolated workbench with
+[T02 proof](../proof/M10A-T02.md) owns its closure evidence. M10A-T03 is `DONE`: its
+platform-neutral `@desen/design-system-authoring` and isolated workbench provide
 structured theme/mode/token/whole-alias controls, exact sRGB and px/rem handling, atomic
 history/import, and bounded loss-aware export. Frozen SC-01 covers 16 valid fixtures: three
 T02-supported normal edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with
 partial preview blocked only for their selected overlay; seven invalid fixtures reject atomically.
 A separate closed T02-recognized unsupported matrix preserves/discloses six valid fixtures and
-atomically rejects six malformed fixtures. Unreviewed or invalid forms fail closed without silent
-loss. Exact-head hosted checks are pending; T03 adds no normal App
-integration, persistence, immutable release, materialization, Publisher, Runtime, or protocol
-authority. T04 is dependency-ready but remains `NOT_STARTED` and unselected while T03 is active;
-M11 has not started.
+atomically rejects ten malformed fixtures. Unreviewed or invalid forms fail closed without silent
+loss. T03 adds no normal App integration, persistence, immutable release, materialization,
+Publisher, Runtime, or protocol authority. M10A-T04 is `IN_PROGRESS`: its local candidate adds
+platform-neutral `@desen/design-system-release`, finite content-addressed token/asset/inert-recipe
+snapshots, exact host-profile references, and a no-`latest` exact-digest store port. Its exact-head
+hosted closure is pending; it adds no Runtime activation, normal App integration, durable production
+storage, Publisher, or protocol authority. M11 has not started.
 The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
 capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
 and hermetic capture configuration. No Storybook, Chromatic, Tailwind or second primitive library

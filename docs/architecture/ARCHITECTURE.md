@@ -214,9 +214,10 @@ success.
 
 ## M10A design-first workbench
 
-M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice and T02's
-platform-neutral project/token foundation are `DONE`; T03 is `IN_PROGRESS` with local candidate
-evidence and exact-head hosted checks pending, while the other 25 tasks remain `NOT_STARTED`.
+M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice,
+T02's platform-neutral project/token foundation, and T03's authoring/workbench slice are `DONE`;
+T04 is `IN_PROGRESS` with local candidate evidence and exact-head hosted checks pending, while the
+other 24 tasks remain `NOT_STARTED`.
 Later workbench features remain planned; no publication or production authority follows from this text.
 [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the decision,
 while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
@@ -235,21 +236,24 @@ T02 adds `@desen/design-system-core`, while normal App composition remains later
   host bindings, and owns no persistence, release, materialization, Publisher, or Runtime authority;
 - `@desen/design-system-authoring` provides platform-neutral structured theme, mode, token, and
   whole-alias edits, exact sRGB and px/rem handling, and atomic history/import over T02 data;
+- `@desen/design-system-release` provides detached immutable token, asset, and inert-recipe
+  snapshots, a finite content-addressed dependency manifest, exact host-profile references, and an
+  exact-digest store port with no mutable `latest` lookup;
 - the isolated workbench covers frozen SC-01's 16 valid fixtures (three T02-supported normal
   edit/preview, 13 losslessly preserved/disclosed unsupported with affected-overlay preview blocked)
   and seven atomic invalid rejections; its separate closed T02-recognized unsupported matrix
-  preserves/discloses six valid fixtures and atomically rejects six malformed fixtures, while
+  preserves/discloses six valid fixtures and atomically rejects ten malformed fixtures, while
   unreviewed or invalid forms fail closed and the workbench remains outside normal App persistence;
 - `@desen/starter-catalog-web` follows the existing target-package edges to `protocol`,
   `catalog-sdk`, and `runtime-react`, plus its pinned external Base UI dependency; and
 - Desen App will compose those packages with existing Editor, Validator, Publisher, and Runtime
-  public APIs. Neither new package becomes a hidden Runtime Core or protocol owner. Publisher and
+  public APIs. None of these packages becomes a hidden Runtime Core or protocol owner. Publisher and
   Runtime packages do not depend on `design-system-core` or interpret its recipe graph.
 
-T03's local implementation/evidence is a candidate until exact-head hosted checks pass. It does not
-authorize later work, normal App integration, persistence, design-system releases, materialization,
-Publisher or Runtime changes, protocol changes, or M11. T04 is dependency-ready but remains
-`NOT_STARTED` and unselected while T03 is active.
+T04's local implementation/evidence is a candidate until exact-head hosted checks pass. It does not
+authorize later work, Runtime activation, normal App integration, durable production storage,
+materialization, Publisher or Runtime changes, protocol changes, or M11. T05 remains unselected
+while T04 is active.
 
 Across later M10A tasks, an App-owned versioned editable-project record becomes the durable
 authoring aggregate. It atomically

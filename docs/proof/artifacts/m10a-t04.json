@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T04",
+  "proofId": "m10a-t04",
+  "profile": "desen.design-system-release.proof.v1",
+  "result": "PASS",
+  "claim": {
+    "detachedImmutableSnapshot": true,
+    "contentAddressedDigest": true,
+    "exactSnapshotProjection": true,
+    "hiddenMetadataRejected": true,
+    "boundedInertRecipes": true,
+    "exactHostProfileReference": true,
+    "atomicStorePort": true,
+    "storeDetachedSnapshots": true,
+    "noMutableLatestFallback": true,
+    "runtimeActivationDeferredToT22": true
+  },
+  "release": {
+    "digest": "sha256:134b3840747825af13e95cd62788c7b6efbedb34f3d39a39949d7f0b0d5ff1d5",
+    "changedDependencyDigest": "sha256:cd5396df20b606bf2966e92894af5f369acf65421638d41f3ebade7e6a4f616b",
+    "dependencyCount": 3,
+    "dependencyBytes": 143,
+    "tokenSourceCount": 1,
+    "assetCount": 1,
+    "recipeCount": 1,
+    "immutable": true,
+    "exactReferenceHostProfileId": "web-react",
+    "storeStatuses": ["stored", "unchanged", "unchanged"],
+    "interruptedWriteRecovered": true
+  },
+  "tests": {
+    "rootTestNames": [
+      "M10A-T04 builds a deterministic detached release through the built public package",
+      "M10A-T04 captures immutable token asset and recipe snapshots",
+      "M10A-T04 changes release identity when a production dependency changes",
+      "M10A-T04 rejects missing tampered and invalid dependencies",
+      "M10A-T04 resolves only an exact host-profile release reference",
+      "M10A-T04 recovers an interrupted atomic store write without latest fallback",
+      "M10A-T04 rejects reordered, incomplete, and metadata-bearing snapshots",
+      "M10A-T04 admits only bounded inert recipe data and detached store snapshots",
+      "M10A-T04 verifier rejects artifact and visible-report drift",
+      "M10A-T04 writer is atomic and rejects unsafe destinations",
+      "M10A-T04 authenticates its checkpointed artifact without external execution"
+    ],
+    "packageBehaviorRunsSeparately": true,
+    "verifierWritesWorkspace": false,
+    "verifierUsesNetwork": false,
+    "verifierSpawnsChildren": false,
+    "hostedExactHeadRequired": true
+  },
+  "nonClaims": [
+    "T04 does not activate releases in Runtime Core or the normal App; T22 owns runtime activation.",
+    "T04 does not publish packages or replace a draft library/version workflow.",
+    "The local in-memory store is a port test double, not a durable production database.",
+    "Local evidence does not substitute for exact-head hosted Quality gate and fresh-main closure."
+  ]
+}

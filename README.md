@@ -4,9 +4,9 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01/T02/T03 are complete. SC-02 concluded `adapt`; T03 closes the
-> platform-neutral theme/token authoring foundation and isolated workbench proof. M10A-T04 is
-> dependency-ready but `NOT_STARTED`. M11 has not started. This is not a production certification.
+> M10/G10 and M10A-T01/T02/T03 are complete. SC-02 concluded `adapt`; T04 is the active local
+> evidence candidate for platform-neutral immutable design-system release identity, with exact-head
+> hosted closure still pending. M11 has not started. This is not a production certification.
 
 ## Implementation progress
 
@@ -36,7 +36,8 @@ bounded, reproducible claims about both.
 **M10A:** **3 / 28 tasks complete (11%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Active task:** none · **Next:** `M10A-T04` (dependency-ready but `NOT_STARTED`, unselected) ·
+**Active task:** `M10A-T04` (local evidence candidate; hosted closure pending) · **Next:** `M10A-T05`
+(after T04 closure) ·
 **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
@@ -115,6 +116,7 @@ packages/
   editor-core/            Framework-neutral authoring commands
   design-system-core/     App-owned project data and deterministic token resolution
   design-system-authoring/ Platform-neutral theme/token editing and transfer
+  design-system-release/  Platform-neutral immutable release identity and exact-digest store port
   editor-web/             Web canvas and inspector integration
   reference-catalog-web/  Reference components and adapters
   starter-catalog-web/    Base UI-backed DESEN Neutral starter capabilities
@@ -182,8 +184,11 @@ invalid fixtures reject atomically. A separate closed T02-recognized unsupported
 and discloses six valid fixtures and atomically rejects ten malformed fixtures. Unreviewed or
 invalid forms fail closed without silent loss. Exact-head PR and fresh-`main` hosted Quality and
 Browser E2E gates passed (see the [T03 proof](docs/proof/M10A-T03.md)). It adds no normal App
-integration, persistence, immutable release, Publisher, Runtime, or protocol authority. T04 is
-dependency-ready but remains `NOT_STARTED` and unselected; M11 remains gated by G10A.
+integration, persistence, Publisher, Runtime, or protocol authority. `M10A-T04` is now
+`IN_PROGRESS`: its local candidate adds `@desen/design-system-release`, a finite
+content-addressed token/asset/recipe manifest, exact host-profile references, and a no-`latest`
+release-store port. Exact-head hosted closure remains pending; it adds no runtime activation,
+normal-App integration, or persistent production store. M11 remains gated by G10A.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and
