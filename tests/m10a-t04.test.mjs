@@ -95,8 +95,8 @@ test(M10A_T04_ROOT_TEST_NAMES[8], async () => {
   const falseClosure = Buffer.from(proofDocument)
     .toString("utf8")
     .replace(
-      "**Status:** implementation evidence passes locally; exact-head hosted closure is pending. This\nreport does not start M10A-T05, add runtime activation, or advance G10A.",
       "**Status:** DONE. Exact-head hosted Quality gate and fresh-main closure are recorded below.",
+      "**Status:** implementation evidence passes locally; exact-head hosted closure is pending. This\nreport does not start M10A-T05, add runtime activation, or advance G10A.",
     );
   await assert.rejects(
     verifyM10AT04Evidence({

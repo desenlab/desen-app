@@ -4,30 +4,23 @@ Last updated: 2026-09-12
 
 ## Current state
 
-M10 and its terminal `G10` gate remain complete. Implementation progress is **124/176 tasks (70%)**:
-M10 is **12/12**, M10A is **3/28 (11%)**, and proof gates are **11/14**. Gates are excluded from the
+M10 and its terminal `G10` gate remain complete. Implementation progress is **125/176 tasks (71%)**:
+M10 is **12/12**, M10A is **4/28 (14%)**, and proof gates are **11/14**. Gates are excluded from the
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01, M10A-T02, and M10A-T03 are DONE**. **M10A-T04 is `IN_PROGRESS`** with a local
-implementation/evidence candidate; its exact-head hosted closure is pending. M11 has not started.
-The frozen protocol, Runtime Core, SC-01 profile, and completed T02 authority are unchanged.
+**M10A-T01, M10A-T02, M10A-T03, and M10A-T04 are DONE**. M10A-T05 is dependency-ready but
+`NOT_STARTED`; M11 has not started. The frozen protocol, Runtime Core, SC-01 profile, and completed
+T02 authority are unchanged.
 
 ## Current closure
 
-The task-owned [M10A-T02 proof](docs/proof/M10A-T02.md) records the full receipt. [PR
-#92](https://github.com/desenlab/desen-app/pull/92) exact head `d3563f84` passed [run
-34593058216](https://github.com/desenlab/desen-app/actions/runs/34593058216), including [Quality
-103246842519](https://github.com/desenlab/desen-app/actions/runs/34593058216/job/103246842519) and
-[Browser 103242508169](https://github.com/desenlab/desen-app/actions/runs/34593058216/job/103242508169),
-then squash-merged as [`194b6eb`](https://github.com/desenlab/desen-app/commit/194b6eb36312f850d8f91ae1bbbf141408195dcd).
-The [fresh-`main` run 34594715063](https://github.com/desenlab/desen-app/actions/runs/34594715063)
-at that merge also passed [Quality
-103251786647](https://github.com/desenlab/desen-app/actions/runs/34594715063/job/103251786647) and
-[Browser 103247681073](https://github.com/desenlab/desen-app/actions/runs/34594715063/job/103247681073).
-The [M10A-T01 proof](docs/proof/M10A-T01.md) retains its own exact-head, merge, and fresh-`main`
-receipts. These authorities close only the bounded T01 and T02 scopes; earlier failed candidates
-remain failures. The task-owned [M10A-T03 proof](docs/proof/M10A-T03.md) records exact-head [run 34649929494](https://github.com/desenlab/desen-app/actions/runs/34649929494), squash-merge [`13652bbf`](https://github.com/desenlab/desen-app/commit/13652bbf4ec78e2b7dc4e6d3cbd62cfe488c0b34), and passing fresh-`main` [run 34651553760](https://github.com/desenlab/desen-app/actions/runs/34651553760).
+Each completed task retains its own exact-head, merge, and fresh-`main` receipt. The
+[M10A-T01 proof](docs/proof/M10A-T01.md), [M10A-T02 proof](docs/proof/M10A-T02.md),
+[M10A-T03 proof](docs/proof/M10A-T03.md), and [M10A-T04 proof](docs/proof/M10A-T04.md) are the
+canonical closure authorities; earlier failed candidates remain failures. T04's hosted receipt is
+bounded to immutable release identity and grants no Runtime, normal-App, production-storage,
+Publisher, or protocol authority.
 
 ## M10 closure
 
@@ -66,7 +59,7 @@ No Git history is rewritten.
 
 ## Documentation verification
 
-The eight governed entry and standards documents are reduced from 18,467 to 1,711 lines (90.7%)
+The eight governed entry and standards documents are reduced from 18,467 to 1,696 lines (90.8%)
 while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
 through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
 link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
@@ -78,21 +71,16 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T04 — Immutable design-system release identity — is `IN_PROGRESS`.** Its local candidate
-adds platform-neutral `@desen/design-system-release`: a finite content-addressed token, asset, and
-inert-recipe manifest; detached immutable snapshots; exact host-profile release references; and an
-atomic exact-digest store port with no mutable `latest` lookup. The
-[product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md),
-[T04 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t04--immutable-design-system-release-identity),
-and [task-owned proof](docs/proof/M10A-T04.md) define the bounded evidence. Exact-head hosted
-Quality-gate closure is pending. T04 grants no Runtime or normal-App activation, persistent
-production storage, Publisher authority, or protocol change.
+**No M10A task is active.** **M10A-T05 — layout, typography, and content starter capabilities — is
+`NOT_STARTED` and dependency-ready**; it becomes active only through an explicit next assignment.
+The [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md),
+[T05 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t05--layout-and-content-capabilities),
+and T04's [task-owned proof](docs/proof/M10A-T04.md) define the boundary. T04 provides no Runtime
+or normal-App activation, persistent production storage, Publisher authority, or protocol change.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
-Runtime Core tree and fresh proof requirements. T04 authorizes no activation, deployment, normal
-App integration, durable production database, Runtime, Publisher, or protocol change. M10A-T05
-remains unselected until T04's exact-head hosted closure. No further external user/team recruitment
-is required; pilot demand remains unproven.
+Runtime Core tree and fresh proof requirements. No further external user/team recruitment is
+required; pilot demand remains unproven.
 
 ## Frozen G10 transition authorities
 

@@ -3620,7 +3620,7 @@ remains `NOT_STARTED` and unselected. T03 does not integrate the normal App, per
 project, create a design-system release, materialize recipes or assets, publish or activate token
 data, change Runtime or Publisher behavior, publish a package, advance G10A, or start M11.
 
-## M10A-T04 immutable release identity (`IN_PROGRESS`, local candidate)
+## M10A-T04 immutable release identity (`DONE`)
 
 The [M10A-T04 evidence](M10A-T04.md) adds private, platform-neutral
 `@desen/design-system-release`. It admits finite token, font/icon/image, and inert recipe inputs
@@ -3634,11 +3634,17 @@ normal App, durable production storage, package publication, protocol authority,
 The deterministic local artifact is 2,519 bytes at
 `sha256:a922534f6d6570c01d049f1a056588b56116fa0bbe02ed41e0ac0aea613c4ee0`.
 Package behavior tests pass 10/10, the built public-package contract passes 1/1, and the root
-proof mutation matrix passes 11/11. Reader checkpoint sequence 89 preserves sequences 1–88 and
+proof mutation matrix passes 11/11. Reader checkpoint sequence 90 preserves sequences 1–89 and
 authenticates 68 artifacts / 136 current readers at
-`sha256:bf1cb0a2b79f0a5a8d9228f2ea3fc0209f1558d2d6f6e8e03b11f19bf50c6a50`; its dedicated suite
-passes 123/123. The current CI candidate inventory is 241 logical workloads / 114 proof pairs
+`sha256:0c7c6442c7b06dd2bf9d729d6a93ba5821fd54e7898f55274e76020959563ee6`; its dedicated suite
+passes 124/124. The current CI candidate inventory is 241 logical workloads / 114 proof pairs
 (101 ordinary and 13 exclusive barriers) / 264 hosted physical shard workloads.
 
-This is local implementation evidence only. Exact-head hosted Quality and Browser E2E results,
-squash-merge identity, and fresh-`main` validation remain required before T04 can become `DONE`.
+M10A-T04 is `DONE`: [PR #98](https://github.com/desenlab/desen-app/pull/98) at exact head
+`8aa6a185475f3216974e3cd55f0108addfd140f7` passed its Quality gate and Browser E2E, then
+squash-merged as [`9379c9d6bd08614df69c8712bf92888359de0237`](https://github.com/desenlab/desen-app/commit/9379c9d6bd08614df69c8712bf92888359de0237).
+The resulting [fresh-`main` run 34697014606](https://github.com/desenlab/desen-app/actions/runs/34697014606)
+passed both jobs. Overall progress is 125/176 (71%), M10A is 4/28 (14%), and proof gates remain
+11/14. M10A-T05 is dependency-ready but `NOT_STARTED`. T04 does not activate a release or change
+Runtime, Publisher, the normal App, durable production storage, package publication, protocol
+authority, G10A, or M11.
