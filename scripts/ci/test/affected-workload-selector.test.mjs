@@ -454,7 +454,7 @@ test("Design/Run modes select their exact canvas, state, and action closure", as
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, 82);
   assert.equal(plan.workloadCount, 177);
-  assert.equal(plan.planSha256, "4a0a3975e650e9b3f09445d6d6aba050451af9025b7a4840e0f25115549024db");
+  assert.equal(plan.planSha256, "77c29e239befdbfab32e1f8bcc47e0e93a8b848b4d7ee15dce22b856034aaa35");
   assert.equal(plan.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-state-binding-editor"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-event-action-editor"), true);
@@ -616,7 +616,7 @@ test("evergreen product composition selects its exact M10-T01C successor closure
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, 82);
   assert.equal(plan.workloadCount, 177);
-  assert.equal(plan.planSha256, "f7115e4112ac3fece129223938c3f1472074a3822f1c4a5f9fd3618bd5cf7556");
+  assert.equal(plan.planSha256, "ab319a2a79697e9ae193900dc0debd0f0736b5dfba29894324018db3feb4f83f");
   assert.equal(plan.nodeIds.includes("verify-desen-app-visual-behavior-authoring"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-evergreen-product-composition"), true);
   assert.equal(plan.nodeIds.includes("test-desen-app-evergreen-product-composition"), true);

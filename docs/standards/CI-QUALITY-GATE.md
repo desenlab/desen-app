@@ -131,8 +131,8 @@ execution authority; checkpoints do not restore or rewrite it.
 ## Proof-reader checkpoints
 
 The append-only checkpoint ledger authenticates immutable artifacts and their current proof-library
-and root-test readers. The current reviewed head is sequence 87 with 68 artifacts and 136 readers at
-`sha256:4e269345921d1f14496151c88a522cd36be6f11f138bcbb2aaef65610f2fe28f`.
+and root-test readers. The current reviewed head is sequence 88 with 68 artifacts and 136 readers at
+`sha256:7709fb58241f035c3ce81de7998173529f030fc57c6099b330defbd994a8e758`.
 
 A successor must preserve the full reviewed prefix and add exactly one reviewed generation. Reader
 reseals acknowledge current code changes; they never mutate historical artifacts or cache passing

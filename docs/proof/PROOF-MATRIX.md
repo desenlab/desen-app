@@ -3634,10 +3634,10 @@ normal App, durable production storage, package publication, protocol authority,
 The deterministic local artifact is 2,519 bytes at
 `sha256:a922534f6d6570c01d049f1a056588b56116fa0bbe02ed41e0ac0aea613c4ee0`.
 Package behavior tests pass 10/10, the built public-package contract passes 1/1, and the root
-proof mutation matrix passes 11/11. Reader checkpoint sequence 87 preserves sequences 1–86 and
+proof mutation matrix passes 11/11. Reader checkpoint sequence 88 preserves sequences 1–87 and
 authenticates 68 artifacts / 136 current readers at
-`sha256:4e269345921d1f14496151c88a522cd36be6f11f138bcbb2aaef65610f2fe28f`; its dedicated suite
-passes 121/121. The current CI candidate inventory is 241 logical workloads / 114 proof pairs
+`sha256:7709fb58241f035c3ce81de7998173529f030fc57c6099b330defbd994a8e758`; its dedicated suite
+passes 122/122. The current CI candidate inventory is 241 logical workloads / 114 proof pairs
 (101 ordinary and 13 exclusive barriers) / 264 hosted physical shard workloads.
 
 This is local implementation evidence only. Exact-head hosted Quality and Browser E2E results,
