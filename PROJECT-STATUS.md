@@ -4,23 +4,23 @@ Last updated: 2026-09-12
 
 ## Current state
 
-M10 and its terminal `G10` gate remain complete. Implementation progress is **125/176 tasks (71%)**:
-M10 is **12/12**, M10A is **4/28 (14%)**, and proof gates are **11/14**. Gates are excluded from the
+M10 and its terminal `G10` gate remain complete. Implementation progress is **126/176 tasks (72%)**:
+M10 is **12/12**, M10A is **5/28 (18%)**, and proof gates are **11/14**. Gates are excluded from the
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01, M10A-T02, M10A-T03, and M10A-T04 are DONE**. **M10A-T05 is `IN_PROGRESS`** for
-bounded layout/content starter capabilities; M11 has not started. The frozen protocol, Runtime Core,
+**M10A-T01 through M10A-T05 are DONE**. **No M10A task is active.** M10A-T06 is dependency-ready but
+`NOT_STARTED` pending explicit assignment. M11 has not started. The frozen protocol, Runtime Core,
 SC-01 profile, and completed T02 authority are unchanged.
 
 ## Current closure
 
 Each completed task retains its own exact-head, merge, and fresh-`main` receipt. The
 [M10A-T01 proof](docs/proof/M10A-T01.md), [M10A-T02 proof](docs/proof/M10A-T02.md),
-[M10A-T03 proof](docs/proof/M10A-T03.md), and [M10A-T04 proof](docs/proof/M10A-T04.md) are the
-canonical closure authorities; earlier failed candidates remain failures. T04's hosted receipt is
-bounded to immutable release identity and grants no Runtime, normal-App, production-storage,
-Publisher, or protocol authority.
+[M10A-T03 proof](docs/proof/M10A-T03.md), [M10A-T04 proof](docs/proof/M10A-T04.md), and
+[M10A-T05 proof](docs/proof/M10A-T05.md) are the canonical closure authorities; earlier failed
+candidates remain failures. T05 proves only its private starter Catalog and isolated harness, not
+normal-App integration, persistence, Runtime, Publisher, or protocol authority.
 
 ## M10 closure
 
@@ -59,7 +59,7 @@ No Git history is rewritten.
 
 ## Documentation verification
 
-The eight governed entry and standards documents are reduced from 18,467 to 1,696 lines (90.8%)
+The eight governed entry and standards documents are reduced from 18,467 to 1,704 lines (90.8%)
 while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
 through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
 link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
@@ -69,14 +69,15 @@ package aggregation hit Vitest's five-second timeout under saturation; every tim
 passed independently, and the complete executable graph passed in a serialized Turbo run. The
 dependency boundary audit reports no violation across 879 modules and 3,787 dependencies.
 
-## Active authority
+## Next authority
 
-**M10A-T05 — layout, typography, and content starter capabilities — is `IN_PROGRESS`.** The
-[product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md) and
-[T05 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t05--layout-and-content-capabilities)
-define its boundary; T04's [task-owned proof](docs/proof/M10A-T04.md) remains a frozen predecessor
-boundary. T05 does not authorize Runtime activation, normal-App integration or persistence,
-Publisher authority, Core/protocol changes, G10A, or M11.
+**No M10A task is active.** **M10A-T06 — form-control starter capabilities and accessible field
+compositions — is dependency-ready but `NOT_STARTED`; it needs an explicit assignment.** The
+[product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md),
+[T06 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t06--form-controls), and
+T05's [task-owned proof](docs/proof/M10A-T05.md) define the boundary. T06 must not retrospectively
+expand T05 or authorize Runtime activation, normal-App integration/persistence, Publisher authority,
+Core/protocol changes, G10A, or M11.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
 Runtime Core tree and fresh proof requirements. No further external user/team recruitment is

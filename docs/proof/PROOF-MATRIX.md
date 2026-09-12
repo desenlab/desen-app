@@ -3649,25 +3649,26 @@ passed both jobs. Overall progress is 125/176 (71%), M10A is 4/28 (14%), and pro
 Runtime, Publisher, the normal App, durable production storage, package publication, protocol
 authority, G10A, or M11.
 
-## M10A-T05 layout and content capabilities (`IN_PROGRESS`, local evidence)
+## M10A-T05 layout and content capabilities (`DONE`)
 
-The [M10A-T05 report](M10A-T05.md) records the in-progress extension of the private
-`@desen/starter-catalog-web` Catalog with Box, Stack, Grid, Text, Heading, Image, Icon, and
-Separator. The slice uses closed layout/content schemas, declared managed slots, logical RTL
-properties, semantic Web output where Base UI is unnecessary, and only named in-package image and
-icon choices. It rejects unknown style properties, invalid dimensions, executable content, private
-selectors, and remote media rather than accepting a partial rendering.
+The [M10A-T05 report](M10A-T05.md) records the completed extension of private
+`@desen/starter-catalog-web` with Box, Stack, Grid, Text, Heading, Image, Icon, and Separator. Its
+sealed artifact is 5,295 bytes at
+`sha256:3c78a9a6b61081a57e9c48b44dc74aa2d12e457679f383ffbd85224372d92ab7`; checkpoint 92 preserves
+sequences 1–91 and authenticates 69 artifacts / 138 readers at
+`sha256:72a4342315c2e011281965a0248a6b0a23f0d22fd4ce9d2b58ae5b7338894b40`. Four fixed Source
+surfaces pass through Publisher and render in independently built authoring and host graphs using
+the same static registry; Chromium proves nested logical layout, semantic content, trusted local
+media, visible vertical separation, and the retained bounded Select/Dialog behavior.
 
-The local candidate proof publishes four fixed Source surfaces through Publisher and renders them
-in independently built authoring and host graphs using the same static adapter registry. Its
-Chromium receipt checks nested logical layout, semantic content, trusted local media, and the
-existing bounded Select/Dialog interaction and isolation behavior. The candidate artifact is
-[`artifacts/m10a-t05.json`](artifacts/m10a-t05.json), but it is not final checkpointed or hosted
-closure evidence.
+The implementation [PR #101](https://github.com/desenlab/desen-app/pull/101) at exact head
+`77b6ec07f91ab306ce7c29f68331ccc4be843e4c` passed its Quality gate and Browser E2E, then
+squash-merged as [`347aebe73b6d7bbcacdfe9aa0a34c3fd6cd12598`](https://github.com/desenlab/desen-app/commit/347aebe73b6d7bbcacdfe9aa0a34c3fd6cd12598).
+The resulting [fresh-`main` run 34714020064](https://github.com/desenlab/desen-app/actions/runs/34714020064)
+passed the joined Quality gate, Browser E2E, and all three exhaustive proof shards. The preceding
+T04 statement retains its historical closure-time `T05 NOT_STARTED` observation; T01's artifact
+also remains historical and is not rewritten or promoted as T05 evidence.
 
-This entry is `PARTIAL` only in the matrix sense: T05 is active and local evidence may inform the
-implementation, but no claim becomes `PROVEN` and no project/gate progress changes here. The
-preceding T04 statement preserves its historical closure-time status; current T05 status is
-`IN_PROGRESS`. T01's immutable artifact remains historical and is not rewritten or promoted as
-fresh T05 evidence. T05 makes no normal-App, asset/font admission, freeform CSS, runtime
-activation, package-publication, release, or M11 claim.
+T05 is `PROVEN` only for this bounded private starter Catalog and isolated proof harness. It makes
+no normal-App design editing, persistence, asset/font admission, freeform CSS, runtime activation,
+package-publication, release, G10A, or M11 claim.

@@ -2,7 +2,7 @@
 
 ## Purpose and status
 
-This private app is the isolated browser harness for the in-progress M10A-T05 starter-catalog
+This private app is the isolated browser harness for the completed M10A-T05 starter-catalog
 extension. It is not Desen App product UI and is not a general design canvas. Its authoring graph
 turns four fixed Source fixtures into Bundles through `@desen/publisher`; its separately built host
 graph accepts only those serialized Bundles and mounts them through the same static starter adapter
@@ -13,8 +13,8 @@ Box/Stack/Grid layout surface containing Heading, Text, Image, Icon, and Separat
 deterministic proof data, not Catalog discovery, application state, business content, package
 delivery, activation, or a replacement for the normal DESEN App flow.
 
-**T05 is `IN_PROGRESS`; this harness produces local candidate evidence only.** It makes no
-exact-head hosted, fresh-`main`, merge, release, or product-readiness claim.
+**T05 is `DONE`; this harness supplies the isolated browser evidence recorded in its task-owned
+proof.** It makes no normal-App integration, release, or product-readiness claim.
 
 ## What the browser proof checks
 
@@ -60,9 +60,9 @@ run without the variable, the normal package build uses `dist` and Playwright cr
 operating-system temporary report directory.
 
 Use `pnpm generate:m10a-t05`, `pnpm verify:m10a-t05`, and `pnpm test:m10a-t05` for the task-owned
-local evidence path. The candidate artifact is
-[`docs/proof/artifacts/m10a-t05.json`](../../docs/proof/artifacts/m10a-t05.json); it is not a
-hosted-closure receipt while T05 remains in progress.
+local evidence path. The sealed artifact is
+[`docs/proof/artifacts/m10a-t05.json`](../../docs/proof/artifacts/m10a-t05.json); its exact-head
+hosted and fresh-`main` closure receipts live in [the T05 proof](../../docs/proof/M10A-T05.md).
 
 ## Historical boundary
 
