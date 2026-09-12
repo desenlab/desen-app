@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T05",
+  "proofId": "m10a-t05",
+  "profile": "desen.m10a-t05.layout-content.v1",
+  "result": "PASS",
+  "package": {
+    "name": "@desen/starter-catalog-web",
+    "catalog": {
+      "id": "run.desen.starter.web",
+      "version": "0.2.0",
+      "target": "web-react",
+      "sha256": "8772b5e3fe8bc3d4251e3fd7e6231b475affc74d930aaf531c03062e666e8541",
+      "bytes": 89863
+    },
+    "packageDigest": "sha256:ac99bdb31d76bef5ee42310ed342da187c3fa925d2f0fbbbf67ff11c491ef3e9",
+    "digestProfile": "desen.web-react.package-digest",
+    "distFiles": 21,
+    "distBytes": 557455
+  },
+  "capabilities": {
+    "ids": [
+      "run.desen.starter/Box",
+      "run.desen.starter/Button",
+      "run.desen.starter/Dialog",
+      "run.desen.starter/Grid",
+      "run.desen.starter/Heading",
+      "run.desen.starter/Icon",
+      "run.desen.starter/Image",
+      "run.desen.starter/Select",
+      "run.desen.starter/Separator",
+      "run.desen.starter/Stack",
+      "run.desen.starter/Text"
+    ],
+    "layout": [
+      "Box",
+      "Stack",
+      "Grid"
+    ],
+    "content": [
+      "Text",
+      "Heading",
+      "Image",
+      "Icon",
+      "Separator"
+    ],
+    "logicalProperties": [
+      "paddingInline",
+      "marginInline",
+      "textAlign",
+      "fill",
+      "hug"
+    ],
+    "trustedImageSources": [
+      "neutral-horizon",
+      "neutral-grid"
+    ]
+  },
+  "browser": {
+    "assertions": {
+      "atomicRequiredSlotInsertion": true,
+      "publisherDerivedAuthoring": true,
+      "independentHostGraph": true,
+      "sameStaticAdapterRegistry": true,
+      "keyboardSelect": true,
+      "escapeFocusReturn": true,
+      "focusTrap": true,
+      "portalContainment": true,
+      "nestedPortalContainment": true,
+      "disabledAndLoadingButton": true,
+      "strictModeUnmountRemount": true,
+      "compatiblePublicationIdentity": true,
+      "compatibleLiveRerenderIdentity": true,
+      "wrongEventPayloadRejected": true,
+      "unknownCapabilityRejected": true,
+      "unknownStylePartRejected": true,
+      "logicalRtlAlignment": true,
+      "visibleBorderProjection": true,
+      "nestedLayoutSlots": true,
+      "semanticContent": true,
+      "trustedLocalMedia": true,
+      "unsupportedImageColorRejected": true,
+      "invalidDimensionsRejected": true,
+      "privateSelectorsRejected": true,
+      "visibleVerticalSeparator": true
+    },
+    "graphReceipts": [
+      "authoring",
+      "host"
+    ],
+    "profile": "desen.m10a-t05.browser-proof.v1",
+    "result": "PASS",
+    "tests": [
+      {
+        "title": "keeps Select and Dialog interactions inside the approved boundary",
+        "result": "PASS"
+      },
+      {
+        "title": "preserves protocol identity with session isolation, survives StrictMode remount, and isolates the host graph",
+        "result": "PASS"
+      },
+      {
+        "title": "publishes four Source surfaces and rejects undeclared capability data",
+        "result": "PASS"
+      },
+      {
+        "title": "renders nested logical layout and safe semantic content in authoring and independent host graphs",
+        "result": "PASS"
+      }
+    ]
+  },
+  "historical": {
+    "m10aT01ArtifactSha256": "711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74",
+    "m10aT01CatalogSha256": "0641d4baea6967f57700363a4cdf47ada8118cf39fd7f3bc8a5ec46709402134"
+  },
+  "claims": {
+    "layoutAndContentCapabilities": true,
+    "semanticHtmlWhereBaseUiIsUnnecessary": true,
+    "logicalRtlAlignment": true,
+    "nestedLayoutSlots": true,
+    "trustedBuiltInMediaOnly": true,
+    "unknownStylePropertiesRejected": true,
+    "invalidDimensionsRejected": true,
+    "unsupportedImageColorRejected": true,
+    "visibleVerticalSeparator": true,
+    "executableContentRejected": true,
+    "privateSelectorsRejected": true,
+    "sameStaticAdaptersInCanvasAndHost": true,
+    "historicalArtifactsRewritten": false,
+    "runtimeCoreChanged": false
+  },
+  "tests": {
+    "rootTestNames": [
+      "M10A-T05 builds the exact expanded starter Catalog deterministically",
+      "M10A-T05 admits only the declared layout and semantic-content capability contracts",
+      "M10A-T05 authenticates all-positive authoring and independent-host browser observations",
+      "M10A-T05 rejects invalid dimensions, executable content, remote media, and private selectors",
+      "M10A-T05 keeps T01 historical evidence immutable while the starter Catalog evolves",
+      "M10A-T05 rejects artifact, catalog, and browser-receipt drift",
+      "M10A-T05 writer is atomic, leaves the Catalog read-only, and runs the browser in owned temporary authority"
+    ],
+    "packageCommand": "pnpm --filter @desen/starter-catalog-web test",
+    "browserCommand": "pnpm --filter @desen/starter-catalog-web-proof run test:e2e",
+    "browserExecutedByVerifier": true
+  },
+  "nonClaims": [
+    "T05 does not add arbitrary user asset import, local asset storage, or font admission; T13 owns those boundaries.",
+    "T05 does not add normal-App design editing, draft-library persistence, Publisher authority, or Runtime activation.",
+    "T05 does not add freeform CSS selectors, executable markup, private DOM access, or remote media URLs.",
+    "Local evidence does not substitute for exact-head hosted Quality gate and fresh-main closure."
+  ]
+}

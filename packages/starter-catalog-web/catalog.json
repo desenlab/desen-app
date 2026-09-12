@@ -1,6 +1,253 @@
 {
   "behaviors": {},
   "components": {
+    "run.desen.starter/Box": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Layout",
+        "defaultProps": {
+          "dir": "ltr"
+        },
+        "displayName": "Box",
+        "icon": "box",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "dir": "ltr"
+            }
+          }
+        }
+      },
+      "category": "layout",
+      "description": "Neutral semantic grouping container with one managed content slot.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "dir": {
+            "default": "ltr",
+            "enum": [
+              "ltr",
+              "rtl"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "slots": {
+        "default": {
+          "acceptsCategories": [
+            "layout",
+            "content",
+            "input",
+            "action",
+            "overlay",
+            "feedback",
+            "complex"
+          ],
+          "description": "Ordered managed content within the semantic grouping container.",
+          "maxItems": 100,
+          "minItems": 1,
+          "required": true
+        }
+      },
+      "styleParts": {
+        "root": {
+          "description": "Box container surface and logical layout properties.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "alignItems": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end",
+                  "stretch"
+                ],
+                "type": "string"
+              },
+              "alignSelf": {
+                "enum": [
+                  "auto",
+                  "start",
+                  "center",
+                  "end",
+                  "stretch"
+                ],
+                "type": "string"
+              },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved foreground color."
+              },
+              "gap": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "height": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              },
+              "justifyContent": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end",
+                  "between",
+                  "around",
+                  "evenly"
+                ],
+                "type": "string"
+              },
+              "marginBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "overflow": {
+                "enum": [
+                  "visible",
+                  "hidden",
+                  "auto"
+                ],
+                "type": "string"
+              },
+              "paddingBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "textAlign": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end"
+                ],
+                "type": "string"
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
+    },
     "run.desen.starter/Button": {
       "authoring": {
         "adapterFidelity": "same",
@@ -802,6 +1049,892 @@
         "disabled"
       ]
     },
+    "run.desen.starter/Grid": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Layout",
+        "defaultProps": {
+          "columns": 2,
+          "dir": "ltr",
+          "flow": "row"
+        },
+        "displayName": "Grid",
+        "icon": "grid",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "rtl": {
+            "props": {
+              "columns": 3,
+              "dir": "rtl",
+              "flow": "row"
+            }
+          },
+          "twoColumns": {
+            "props": {
+              "columns": 2,
+              "dir": "ltr",
+              "flow": "row"
+            }
+          }
+        }
+      },
+      "category": "layout",
+      "description": "Neutral finite-column CSS grid with ordered managed content.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "columns": {
+            "default": 2,
+            "maximum": 12,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "dir": {
+            "default": "ltr",
+            "enum": [
+              "ltr",
+              "rtl"
+            ],
+            "type": "string"
+          },
+          "flow": {
+            "default": "row",
+            "enum": [
+              "row",
+              "column"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "slots": {
+        "default": {
+          "acceptsCategories": [
+            "layout",
+            "content",
+            "input",
+            "action",
+            "overlay",
+            "feedback",
+            "complex"
+          ],
+          "description": "Ordered grid cells; placement remains the browser's safe normal flow.",
+          "maxItems": 100,
+          "minItems": 1,
+          "required": true
+        }
+      },
+      "styleParts": {
+        "root": {
+          "description": "Grid surface and finite sizing/alignment properties.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "alignItems": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end",
+                  "stretch"
+                ],
+                "type": "string"
+              },
+              "alignSelf": {
+                "enum": [
+                  "auto",
+                  "start",
+                  "center",
+                  "end",
+                  "stretch"
+                ],
+                "type": "string"
+              },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved foreground color."
+              },
+              "gap": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "height": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              },
+              "justifyContent": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end",
+                  "between",
+                  "around",
+                  "evenly"
+                ],
+                "type": "string"
+              },
+              "marginBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "overflow": {
+                "enum": [
+                  "visible",
+                  "hidden",
+                  "auto"
+                ],
+                "type": "string"
+              },
+              "paddingBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "textAlign": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end"
+                ],
+                "type": "string"
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
+    },
+    "run.desen.starter/Heading": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Content",
+        "defaultProps": {
+          "level": 2,
+          "text": "Heading"
+        },
+        "displayName": "Heading",
+        "icon": "heading",
+        "resize": {
+          "horizontal": "hug",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "h1": {
+            "props": {
+              "level": 1,
+              "text": "Page title"
+            }
+          },
+          "h2": {
+            "props": {
+              "level": 2,
+              "text": "Section title"
+            }
+          }
+        }
+      },
+      "category": "content",
+      "description": "Neutral semantic HTML heading with a bounded level.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "level": {
+            "default": 2,
+            "maximum": 6,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "text": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "root": {
+          "description": "Heading typography and safe box appearance.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "textAlign": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end"
+                ],
+                "type": "string"
+              },
+              "textDecoration": {
+                "enum": [
+                  "none",
+                  "underline",
+                  "line-through"
+                ],
+                "type": "string"
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
+    },
+    "run.desen.starter/Icon": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Content",
+        "defaultProps": {
+          "decorative": false,
+          "label": "Information",
+          "name": "info"
+        },
+        "displayName": "Icon",
+        "icon": "icon",
+        "resize": {
+          "horizontal": "hug",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "decorative": {
+            "props": {
+              "decorative": true,
+              "label": "Completed",
+              "name": "check"
+            }
+          },
+          "labelled": {
+            "props": {
+              "decorative": false,
+              "label": "Information",
+              "name": "info"
+            }
+          }
+        }
+      },
+      "category": "content",
+      "description": "Neutral trusted vector icon with an explicit accessible name or decorative state.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "decorative": {
+            "default": false,
+            "type": "boolean"
+          },
+          "label": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "enum": [
+              "arrow-right",
+              "check",
+              "close",
+              "info",
+              "menu",
+              "plus",
+              "search"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "label"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "root": {
+          "description": "Icon size, color, and safe box appearance.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved icon foreground color."
+              },
+              "height": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              },
+              "marginBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
+    },
+    "run.desen.starter/Image": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Content",
+        "defaultProps": {
+          "alt": "Neutral landscape",
+          "fit": "cover",
+          "source": "neutral-horizon"
+        },
+        "displayName": "Image",
+        "icon": "image",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "resizable"
+        },
+        "scenarios": {
+          "contain": {
+            "props": {
+              "alt": "Neutral grid",
+              "fit": "contain",
+              "source": "neutral-grid"
+            }
+          },
+          "cover": {
+            "props": {
+              "alt": "Neutral landscape",
+              "fit": "cover",
+              "source": "neutral-horizon"
+            }
+          }
+        }
+      },
+      "category": "content",
+      "description": "Neutral built-in image rendered from a closed trusted in-package source set.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "alt": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "fit": {
+            "default": "cover",
+            "enum": [
+              "cover",
+              "contain"
+            ],
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "neutral-horizon",
+              "neutral-grid"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "alt"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "root": {
+          "description": "Image frame, dimensions, and safe visual appearance; foreground color is unsupported.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "height": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              },
+              "marginBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
+    },
     "run.desen.starter/Select": {
       "authoring": {
         "adapterFidelity": "same",
@@ -1279,6 +2412,619 @@
         "highlighted",
         "disabled"
       ]
+    },
+    "run.desen.starter/Separator": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Content",
+        "defaultProps": {
+          "orientation": "horizontal"
+        },
+        "displayName": "Separator",
+        "icon": "separator",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "horizontal": {
+            "props": {
+              "orientation": "horizontal"
+            }
+          },
+          "vertical": {
+            "props": {
+              "orientation": "vertical"
+            }
+          }
+        }
+      },
+      "category": "content",
+      "description": "Neutral semantic horizontal or vertical content separator.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "orientation": {
+            "default": "horizontal",
+            "enum": [
+              "horizontal",
+              "vertical"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "styleParts": {
+        "root": {
+          "description": "Visible separator color, dimensions, and safe logical spacing.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved visible separator color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "height": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              },
+              "marginBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
+    },
+    "run.desen.starter/Stack": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Layout",
+        "defaultProps": {
+          "dir": "ltr",
+          "direction": "vertical",
+          "wrap": false
+        },
+        "displayName": "Stack",
+        "icon": "stack",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "horizontal": {
+            "props": {
+              "dir": "ltr",
+              "direction": "horizontal",
+              "wrap": true
+            }
+          },
+          "vertical": {
+            "props": {
+              "dir": "ltr",
+              "direction": "vertical",
+              "wrap": false
+            }
+          }
+        }
+      },
+      "category": "layout",
+      "description": "Neutral logical flex layout with ordered managed content.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "dir": {
+            "default": "ltr",
+            "enum": [
+              "ltr",
+              "rtl"
+            ],
+            "type": "string"
+          },
+          "direction": {
+            "default": "vertical",
+            "enum": [
+              "vertical",
+              "horizontal"
+            ],
+            "type": "string"
+          },
+          "wrap": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "slots": {
+        "default": {
+          "acceptsCategories": [
+            "layout",
+            "content",
+            "input",
+            "action",
+            "overlay",
+            "feedback",
+            "complex"
+          ],
+          "description": "Ordered children arranged by the declared logical flex direction.",
+          "maxItems": 100,
+          "minItems": 1,
+          "required": true
+        }
+      },
+      "styleParts": {
+        "root": {
+          "description": "Stack flex surface and logical layout properties.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "alignItems": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end",
+                  "stretch"
+                ],
+                "type": "string"
+              },
+              "alignSelf": {
+                "enum": [
+                  "auto",
+                  "start",
+                  "center",
+                  "end",
+                  "stretch"
+                ],
+                "type": "string"
+              },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved foreground color."
+              },
+              "gap": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "height": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              },
+              "justifyContent": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end",
+                  "between",
+                  "around",
+                  "evenly"
+                ],
+                "type": "string"
+              },
+              "marginBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "overflow": {
+                "enum": [
+                  "visible",
+                  "hidden",
+                  "auto"
+                ],
+                "type": "string"
+              },
+              "paddingBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "textAlign": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end"
+                ],
+                "type": "string"
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
+    },
+    "run.desen.starter/Text": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Content",
+        "defaultProps": {
+          "text": "Text"
+        },
+        "displayName": "Text",
+        "icon": "text",
+        "resize": {
+          "horizontal": "hug",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "text": "A clear, readable paragraph."
+            }
+          }
+        }
+      },
+      "category": "content",
+      "description": "Neutral inert paragraph text rendered without HTML parsing.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "root": {
+          "description": "Paragraph typography and safe box appearance.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 512,
+                "minimum": 0,
+                "type": "number"
+              },
+              "textAlign": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end"
+                ],
+                "type": "string"
+              },
+              "textDecoration": {
+                "enum": [
+                  "none",
+                  "underline",
+                  "line-through"
+                ],
+                "type": "string"
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "maximum": 4096,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "enum": [
+                      "fill",
+                      "hug"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode."
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
     }
   },
   "description": "DESEN Neutral Web–React starter capability contracts.",
@@ -1286,8 +3032,8 @@
   "id": "run.desen.starter.web",
   "kind": "desen.catalog",
   "operations": {},
-  "packageDigest": "sha256:4a9c4029bade26ab398a47823cc8bec27c92c356dc77a73e1e902867f9051659",
+  "packageDigest": "sha256:ac99bdb31d76bef5ee42310ed342da187c3fa925d2f0fbbbf67ff11c491ef3e9",
   "resources": {},
   "target": "web-react",
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

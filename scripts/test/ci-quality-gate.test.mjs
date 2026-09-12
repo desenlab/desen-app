@@ -455,7 +455,9 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
       taskId === "M10A-T03" ||
       taskId === "M10A-T04"
         ? "DONE"
-        : "NOT_STARTED";
+        : taskId === "M10A-T05"
+          ? "IN_PROGRESS"
+          : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
     assert.equal(
       row.cells[2],
@@ -776,17 +778,17 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 114,
-    verifierCount: 114,
-    rootTestCount: 114,
+    proofCount: 115,
+    verifierCount: 115,
+    rootTestCount: 115,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
-    legacyPrerequisiteCount: 770,
-    legacyPrerequisiteSha256: "11a817bd8ad38c5d1d1a9d6d3bbeaccffddfd37e76829597413ac5dab90a93f9",
-    legacyLeafInvocationCount: 4620,
-    legacyLeafInvocationSha256: "6357a78589739a18a4a41423376840ea87e741023df865a4d052e2dbdb72d368",
-    distinctLeafWorkloadCount: 363,
-    distinctLeafWorkloadSha256: "00897321e95c1c32308c2bad6f32de1c1ee18159786aabfab17a22105974488f",
+    legacyPrerequisiteCount: 779,
+    legacyPrerequisiteSha256: "a4ce74ffe3d0cc75003ac6715f32da71e6114d5dd1fb507d913726dfd604a50d",
+    legacyLeafInvocationCount: 4642,
+    legacyLeafInvocationSha256: "348be3b945b9c0a755a11eb4fd6e87ab39fcdfd75fda1cce4f78a01556911049",
+    distinctLeafWorkloadCount: 368,
+    distinctLeafWorkloadSha256: "4a816717536a8d7daa8d2b34cc739e461f9622866002c92d16668c2b2a454bd6",
     testConfigurationFileCount: 3,
     workspaceTestScriptCount: 20,
     workspaceTestScriptSha256: "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88",
@@ -1048,17 +1050,17 @@ test("task board retains its canonical inventory without narrative appendices", 
     "M11 guidance says not started while an M11 task has a different status",
   );
   assert.equal(statuses.get("G11"), "NOT_STARTED");
+  assert.equal(statuses.get("M10A-T05"), "IN_PROGRESS");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
-  assert.ok(normalizedReadme.includes("**Active task:** none"));
   assert.ok(
-    normalizedReadme.includes(
-      "**Next eligible:** `M10A-T05` (`NOT_STARTED`; dependencies complete)",
-    ),
+    normalizedReadme.includes("**Active task:** `M10A-T05` (`IN_PROGRESS`; dependencies complete)"),
   );
+  assert.ok(normalizedProjectStatus.includes("**M10A-T05 is `IN_PROGRESS`**"));
   assert.ok(
     normalizedProjectStatus.includes("**M10A-T01, M10A-T02, M10A-T03, and M10A-T04 are DONE**"),
   );
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
+  assert.ok(normalizedStartHere.includes("M10A-T05 yetkilendirilmiş `IN_PROGRESS` görevidir."));
   assert.ok(normalizedStartHere.includes("M11 başlamadı."));
   assert.equal(
     normalizedSc02.split(SC_02_COMPLETE_ADAPT_MARKER).length - 1,
@@ -1155,6 +1157,13 @@ test("pre-M11 planning inventory rejects row, dependency, count, or gate-status 
     assert.throws(
       () => assertPreM11PlanningInventory(parseTaskBoard(falseTaskStatus)),
       /M10A-T04 must remain DONE/u,
+    );
+  }
+  for (const status of ["DONE", "NOT_STARTED", "BLOCKED"]) {
+    const falseTaskStatus = replaceTaskBoardCell(taskBoard, "M10A-T05", 1, status);
+    assert.throws(
+      () => assertPreM11PlanningInventory(parseTaskBoard(falseTaskStatus)),
+      /M10A-T05 must remain IN_PROGRESS/u,
     );
   }
 });
@@ -1561,7 +1570,7 @@ test("both inventories require exact browser-proof scripts and the three reviewe
   assert.ok(starter);
   assert.ok(workbench);
   for (const validate of [validateProofInventory, validateRepositoryWorkloadInputs]) {
-    assert.equal(validate(baseline).proofCount, 114);
+    assert.equal(validate(baseline).proofCount, 115);
     const missingWorkbenchPackage = clone(baseline);
     missingWorkbenchPackage.workspacePackages = missingWorkbenchPackage.workspacePackages.filter(
       ({ name }) => name !== "@desen/design-system-workbench-proof",
@@ -1816,8 +1825,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 241);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 114);
+  assert.equal(steps.length, 244);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 115);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -2374,8 +2383,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 241,
-    planSha256: "38e2ef1bcdacbf2ef48d44217dbbd0dc85d4bad849b1372f3491ec384db233e7",
+    stepCount: 244,
+    planSha256: "3e8b238ed081b5e2d94a3fa03302a39dea69a1c5a1f124a8121af7c210bdab9e",
   });
 
   const missingTypecheck = clone(steps);

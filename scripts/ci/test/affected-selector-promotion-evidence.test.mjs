@@ -277,7 +277,7 @@ async function rejectsCompletedCutover(mutate, code = "AFFECTED_PROMOTION_CUTOVE
   await rejects(code, (value) => mutate(completeHostedCutover(value), value));
 }
 
-test("authenticates the exact 20/20 hosted campaign and live M10A-T04 successor", async () => {
+test("authenticates the exact 20/20 hosted campaign and live M10A-T05 successor", async () => {
   const historicalEvidence = await evidence();
   assert.equal(
     historicalEvidence.runnerAuthority.workflowContract.processTimeout,
@@ -305,13 +305,13 @@ test("authenticates the exact 20/20 hosted campaign and live M10A-T04 successor"
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "90b4387f8e0515859dda828cda9661193c9d713a414e943c67d7a49661f07091",
-    ownershipSha256: "266601f9d7744dc95bfd686093c7fa2baf3f113df57400c3b100482c7211f5b9",
-    impactGraphSha256: "342c4d931ad59329140d730c01779a98dbdc2475c8bdf43814b3730c56dbfe8e",
+    selectorSha256: "4f0503eb70827c672c11f20bccdb505c65ae971acb4d2f4ae4d5635938b1ad92",
+    ownershipSha256: "65154c422e54b8557699885f505c0ed00a9e3b24fa99390788e412c9e7c71e7f",
+    impactGraphSha256: "07ae29b068958cb897ce8c6f67734fce10463071853842e618877b044e44c9b5",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
-    inventorySha256: "3607817284ab3a40736153ddd02534ec0422acdd28c10ee7c1f39d077cb0c659",
+    inventorySha256: "f2e861cce08dca611a307762564519b7b519e302cbacf2dac9281daf73d6def1",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "109e95f669c5fdf282c137b2977b598b19ef256ebb28ec2a5205174e41237732",
+    runnerAuthoritySha256: "7c3340753f1974b4cd5b8f1b9268ca8ffcee53491a40d885673beb592ddbe9b1",
   });
 });
 
@@ -375,10 +375,10 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "21523a2f644fd8570909215f146c0ea1aac13d2080ce5b0b53846b8e6857922b",
-    checkpoints: 91,
-    frozenArtifacts: 68,
-    currentReaders: 136,
+    headSha256: "72a4342315c2e011281965a0248a6b0a23f0d22fd4ce9d2b58ae5b7338894b40",
+    checkpoints: 92,
+    frozenArtifacts: 69,
+    currentReaders: 138,
   };
   assert.equal(validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt), liveReceipt);
   assert.throws(

@@ -36,6 +36,7 @@ const mounted = Object.freeze({
   buttonCompatible: mountStarterProofSurface(envelope.bundles.button.compatible, starterCatalog),
   select: mountStarterProofSurface(envelope.bundles.select, starterCatalog),
   dialog: mountStarterProofSurface(envelope.bundles.dialog, starterCatalog),
+  layout: mountStarterProofSurface(envelope.bundles.layout, starterCatalog),
 });
 
 function HostProof() {
@@ -44,7 +45,7 @@ function HostProof() {
     <div className="proof-shell" data-proof-ready="host">
       <header className="proof-header">
         <div>
-          <p className="proof-eyebrow">M10A-T01 · independent host graph</p>
+          <p className="proof-eyebrow">M10A-T05 · independent host graph</p>
           <h1>Bundle → Runtime</h1>
           <p className="proof-lede">
             This separately built graph consumes only serialized Publisher output and the same exact
@@ -83,6 +84,14 @@ function HostProof() {
             mounted={mounted.dialog}
             rootNodeId={envelope.roots.dialog}
             surfaceName="dialog"
+          />
+        </article>
+        <article className="proof-card proof-card-wide">
+          <h2>Nested layout and content Bundle</h2>
+          <StarterProofSurface
+            mounted={mounted.layout}
+            rootNodeId={envelope.roots.layout}
+            surfaceName="layout"
           />
         </article>
       </div>

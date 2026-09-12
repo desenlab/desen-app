@@ -1,4 +1,4 @@
-import { relative, resolve } from "node:path";
+import { isAbsolute, relative, resolve } from "node:path";
 
 import { defineConfig } from "vite";
 
@@ -8,6 +8,15 @@ type ProofGraph = "authoring" | "host";
 
 const PACKAGE_ROOT = import.meta.dirname;
 const WORKSPACE_ROOT = resolve(PACKAGE_ROOT, "../..");
+
+function outputRoot(): string {
+  const proofTemp = process.env.DESEN_M10A_T05_PROOF_TEMP;
+  if (proofTemp === undefined) return resolve(PACKAGE_ROOT, "dist");
+  if (!isAbsolute(proofTemp) || resolve(proofTemp) !== proofTemp || proofTemp.includes("\0")) {
+    throw new TypeError("DESEN_M10A_T05_PROOF_TEMP must be a canonical absolute directory.");
+  }
+  return resolve(proofTemp, "dist");
+}
 
 function graphForMode(mode: string): ProofGraph {
   if (mode === "proof-authoring") return "authoring";
@@ -77,7 +86,7 @@ export default defineConfig(({ mode }) => {
     build: {
       assetsDir: `${graph}-assets`,
       emptyOutDir: true,
-      outDir: resolve(PACKAGE_ROOT, "dist", graph),
+      outDir: resolve(outputRoot(), graph),
       rollupOptions: { input: resolve(PACKAGE_ROOT, `${graph}.html`) },
     },
   };

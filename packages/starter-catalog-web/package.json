@@ -29,7 +29,8 @@
     "lint": "eslint src test scripts --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:adapters": "vitest run"
+    "test:adapters": "vitest run",
+    "test:public-package": "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.8.0",

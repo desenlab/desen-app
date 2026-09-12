@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 
 import {
   STARTER_BROWSER_PROOF_ASSERTION_NAMES,
+  STARTER_BROWSER_PROOF_ASSERTION_OWNERS,
   STARTER_BROWSER_PROOF_TEST_TITLES,
 } from "./proof-contract.js";
 
@@ -44,10 +45,13 @@ export default class StarterProofReporter implements Reporter {
       exactInventory &&
       expectedTitles.every((title) => this.#results.get(title) === "PASS");
     const assertions = Object.fromEntries(
-      STARTER_BROWSER_PROOF_ASSERTION_NAMES.map((name) => [name, passed]),
+      STARTER_BROWSER_PROOF_ASSERTION_NAMES.map((name) => [
+        name,
+        this.#results.get(STARTER_BROWSER_PROOF_ASSERTION_OWNERS[name]) === "PASS",
+      ]),
     );
     const receipt = Object.freeze({
-      profile: "desen.m10a-t01.browser-proof.v1",
+      profile: "desen.m10a-t05.browser-proof.v1",
       result: passed ? "PASS" : "FAIL",
       tests: expectedTitles.map((title) =>
         Object.freeze({ title, result: this.#results.get(title) ?? "MISSING" }),

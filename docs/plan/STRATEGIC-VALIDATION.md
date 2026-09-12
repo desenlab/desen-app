@@ -203,5 +203,6 @@ preserves/discloses six valid fixtures and atomically rejects ten malformed fixt
 invalid forms fail closed without silent loss. T04's hosted closure covers only finite immutable
 design-system release identity and an exact-digest store port. This does not establish the full
 starter library, normal App integration, durable production storage, Runtime activation, market
-demand, or production readiness. M10A-T05 is dependency-ready but `NOT_STARTED`; G10A must pass
-before M11-T01 or M11-T08, and SC-02 authorizes no external publication or deployment.
+demand, or production readiness. M10A-T05 is `IN_PROGRESS` for bounded layout/content starter
+capability work; G10A must pass before M11-T01 or M11-T08, and SC-02 authorizes no external
+publication or deployment.

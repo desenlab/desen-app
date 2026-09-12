@@ -42,6 +42,10 @@ export function prepareStarterProofPublications(): Readonly<{
   negative: {
     readonly unknownCapability: ReturnType<typeof negativePublication>;
     readonly unknownPart: ReturnType<typeof negativePublication>;
+    readonly invalidDimension: ReturnType<typeof negativePublication>;
+    readonly unsupportedImageColor: ReturnType<typeof negativePublication>;
+    readonly unsafeImageSource: ReturnType<typeof negativePublication>;
+    readonly privateSelector: ReturnType<typeof negativePublication>;
   };
 }> {
   const sources = createStarterProofSources();
@@ -54,6 +58,38 @@ export function prepareStarterProofPublications(): Readonly<{
   if (unknownPartSurface === undefined) throw new TypeError("Missing Button proof surface.");
   unknownPartSurface.root.style = {
     base: { unknownPart: { color: "#111111" } },
+  };
+  const invalidDimension = clone(sources.layout);
+  const invalidDimensionSurface = invalidDimension.surfaces.layout;
+  if (invalidDimensionSurface === undefined) throw new TypeError("Missing layout proof surface.");
+  invalidDimensionSurface.root.style = { base: { root: { width: -1 } } };
+  const unsafeImageSource = clone(sources.layout);
+  const unsafeImageSurface = unsafeImageSource.surfaces.layout;
+  if (unsafeImageSurface === undefined) throw new TypeError("Missing layout proof surface.");
+  const unsafeStack = unsafeImageSurface.root.slots?.default?.[0];
+  const unsafeImage = unsafeStack?.slots?.default?.find((node) => node.id === "layout.image");
+  if (unsafeImage === undefined) throw new TypeError("Missing layout image proof node.");
+  unsafeImage.props = {
+    source: "https://untrusted.invalid/image.png",
+    alt: "Unsafe remote image",
+    fit: "cover",
+  };
+  const unsupportedImageColor = clone(sources.layout);
+  const unsupportedImageColorSurface = unsupportedImageColor.surfaces.layout;
+  if (unsupportedImageColorSurface === undefined)
+    throw new TypeError("Missing layout proof surface.");
+  const unsupportedImageColorStack = unsupportedImageColorSurface.root.slots?.default?.[0];
+  const unsupportedImageColorNode = unsupportedImageColorStack?.slots?.default?.find(
+    (node) => node.id === "layout.image",
+  );
+  if (unsupportedImageColorNode === undefined)
+    throw new TypeError("Missing layout image proof node.");
+  unsupportedImageColorNode.style = { base: { root: { color: "#112233" } } };
+  const privateSelector = clone(sources.layout);
+  const privateSelectorSurface = privateSelector.surfaces.layout;
+  if (privateSelectorSurface === undefined) throw new TypeError("Missing layout proof surface.");
+  privateSelectorSurface.root.style = {
+    base: { root: { selector: ".private [data-state]" } },
   };
   const envelope: StarterProofEnvelope = Object.freeze({
     schemaVersion: 1,
@@ -70,6 +106,7 @@ export function prepareStarterProofPublications(): Readonly<{
       }),
       select: publish(sources.select),
       dialog: publish(sources.dialog),
+      layout: publish(sources.layout),
     }),
     roots: PROOF_ROOT_IDS,
   });
@@ -78,6 +115,10 @@ export function prepareStarterProofPublications(): Readonly<{
     negative: Object.freeze({
       unknownCapability: negativePublication(unknownCapability),
       unknownPart: negativePublication(unknownPart),
+      invalidDimension: negativePublication(invalidDimension),
+      unsupportedImageColor: negativePublication(unsupportedImageColor),
+      unsafeImageSource: negativePublication(unsafeImageSource),
+      privateSelector: negativePublication(privateSelector),
     }),
   });
 }

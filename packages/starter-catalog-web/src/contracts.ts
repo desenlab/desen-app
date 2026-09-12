@@ -1,14 +1,25 @@
 import { registerComponent } from "@desen/catalog-sdk";
 
+import {
+  starterBoxComponentRegistration,
+  starterGridComponentRegistration,
+  starterHeadingComponentRegistration,
+  starterIconComponentRegistration,
+  starterImageComponentRegistration,
+  starterSeparatorComponentRegistration,
+  starterStackComponentRegistration,
+  starterTextComponentRegistration,
+} from "./layout-content-contracts.js";
+
 import type { ComponentPropsOf } from "@desen/catalog-sdk";
 
 /** Exact Catalog identity reserved for the DESEN Neutral Web starter package. */
 export const STARTER_CATALOG_ID = "run.desen.starter.web";
 
-/** Initial Catalog contract version for the bounded M10A-T01 starter slice. */
-export const STARTER_CATALOG_VERSION = "0.1.0";
+/** Current additive Catalog contract version for the bounded M10A-T05 starter slice. */
+export const STARTER_CATALOG_VERSION = "0.2.0";
 
-/** Target implemented by the initial DESEN Neutral starter package. */
+/** Target implemented by the current DESEN Neutral starter package. */
 export const STARTER_CATALOG_TARGET = "web-react";
 
 /** Exact capability identifier for the starter Button. */
@@ -437,6 +448,14 @@ export const STARTER_COMPONENT_REGISTRATIONS = Object.freeze([
   starterButtonComponentRegistration,
   starterSelectComponentRegistration,
   starterDialogComponentRegistration,
+  starterBoxComponentRegistration,
+  starterStackComponentRegistration,
+  starterGridComponentRegistration,
+  starterTextComponentRegistration,
+  starterHeadingComponentRegistration,
+  starterImageComponentRegistration,
+  starterIconComponentRegistration,
+  starterSeparatorComponentRegistration,
 ] as const);
 
 /**
@@ -453,3 +472,33 @@ export const STARTER_CATALOG_TEMPLATE = Object.freeze({
   description: "DESEN Neutral Web–React starter capability contracts.",
   components: STARTER_COMPONENT_REGISTRATIONS,
 });
+
+export {
+  STARTER_BOX_CAPABILITY_ID,
+  STARTER_GRID_CAPABILITY_ID,
+  STARTER_HEADING_CAPABILITY_ID,
+  STARTER_ICON_CAPABILITY_ID,
+  STARTER_IMAGE_CAPABILITY_ID,
+  STARTER_LAYOUT_CONTENT_MAX_ITEMS,
+  STARTER_SEPARATOR_CAPABILITY_ID,
+  STARTER_STACK_CAPABILITY_ID,
+  STARTER_TEXT_CAPABILITY_ID,
+  starterBoxComponentRegistration,
+  starterGridComponentRegistration,
+  starterHeadingComponentRegistration,
+  starterIconComponentRegistration,
+  starterImageComponentRegistration,
+  starterSeparatorComponentRegistration,
+  starterStackComponentRegistration,
+  starterTextComponentRegistration,
+} from "./layout-content-contracts.js";
+export type {
+  StarterBoxProps,
+  StarterGridProps,
+  StarterHeadingProps,
+  StarterIconProps,
+  StarterImageProps,
+  StarterSeparatorProps,
+  StarterStackProps,
+  StarterTextProps,
+} from "./layout-content-contracts.js";

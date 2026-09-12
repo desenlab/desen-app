@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "11a817bd8ad38c5d1d1a9d6d3bbeaccffddfd37e76829597413ac5dab90a93f9";
+  "a4ce74ffe3d0cc75003ac6715f32da71e6114d5dd1fb507d913726dfd604a50d";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "6357a78589739a18a4a41423376840ea87e741023df865a4d052e2dbdb72d368";
+  "348be3b945b9c0a755a11eb4fd6e87ab39fcdfd75fda1cce4f78a01556911049";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "00897321e95c1c32308c2bad6f32de1c1ee18159786aabfab17a22105974488f";
+  "4a816717536a8d7daa8d2b34cc739e461f9622866002c92d16668c2b2a454bd6";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -740,6 +740,7 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
   ["m10a-t02", "scripts/verify-m10a-t02.mjs", "tests/m10a-t02.test.mjs"],
   ["m10a-t03", "scripts/verify-m10a-t03.mjs", "tests/m10a-t03.test.mjs"],
   ["m10a-t04", "scripts/verify-m10a-t04.mjs", "tests/m10a-t04.test.mjs"],
+  ["m10a-t05", "scripts/verify-m10a-t05.mjs", "tests/m10a-t05.test.mjs"],
 ]);
 
 const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
@@ -747,7 +748,7 @@ const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
   "desen-app-invalid-publication",
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
-  "m10a-t01",
+  "m10a-t05",
 ]);
 const PASSIVE_ROOT_TEST_PROOF_IDS = SAFE_OBJECT_FREEZE(["desen-app-published-host-update"]);
 
@@ -1149,6 +1150,7 @@ function classifyPrerequisite({
       "m10a-t02",
       "m10a-t03",
       "m10a-t04",
+      "m10a-t05",
     ].includes(currentProofId);
     const reviewedPackage =
       (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
@@ -1160,9 +1162,14 @@ function classifyPrerequisite({
       currentProofId === "m10a-t03" && packageName === "@desen/design-system-authoring";
     const reviewedReleasePackage =
       currentProofId === "m10a-t04" && packageName === "@desen/design-system-release";
+    const reviewedStarterPackage =
+      currentProofId === "m10a-t05" && packageName === "@desen/starter-catalog-web";
     if (
       !reviewedPublicPackageProof ||
-      (!reviewedPackage && !reviewedAuthoringPackage && !reviewedReleasePackage) ||
+      (!reviewedPackage &&
+        !reviewedAuthoringPackage &&
+        !reviewedReleasePackage &&
+        !reviewedStarterPackage) ||
       packageScripts[task] !== expectedScript
     ) {
       fail(currentProofId + " uses an unreviewed public-package contract test.", {
@@ -1173,7 +1180,11 @@ function classifyPrerequisite({
     return "public-package-contract-test";
   }
   if (task === "test:e2e") {
-    if (currentProofId !== "m10a-t03" || packageName !== "@desen/design-system-workbench-proof") {
+    const reviewedWorkbenchProof =
+      currentProofId === "m10a-t03" && packageName === "@desen/design-system-workbench-proof";
+    const reviewedStarterProof =
+      currentProofId === "m10a-t05" && packageName === "@desen/starter-catalog-web-proof";
+    if (!reviewedWorkbenchProof && !reviewedStarterProof) {
       fail(currentProofId + " uses an unreviewed browser-proof package test.", {
         command,
         packageName,
@@ -1474,6 +1485,15 @@ function buildCanonicalInventory() {
       "SERIAL_BUILD_WRITER",
       SHARED_BUILD_WRITER,
     ),
+    node(
+      "starter-catalog-web-public-package-contract",
+      "Starter Catalog Web public-package contract",
+      "pnpm",
+      ["--filter", "@desen/starter-catalog-web", "test:public-package"],
+      ["design-system-release-public-package-contract"],
+      "SERIAL_BUILD_WRITER",
+      SHARED_BUILD_WRITER,
+    ),
   ];
   const verifiers = PROOF_UNIT_TUPLES.map(([id, verifierFile]) =>
     node(
@@ -1500,7 +1520,9 @@ function buildCanonicalInventory() {
                 ? "design-system-authoring-public-package-contract"
                 : id === "m10a-t04"
                   ? "design-system-release-public-package-contract"
-                  : "package-tests",
+                  : id === "m10a-t05"
+                    ? "starter-catalog-web-public-package-contract"
+                    : "package-tests",
       ],
       "CONCURRENT_PROOF",
       id === "runtime-core-baseline"
@@ -1850,7 +1872,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "3607817284ab3a40736153ddd02534ec0422acdd28c10ee7c1f39d077cb0c659";
+  "f2e861cce08dca611a307762564519b7b519e302cbacf2dac9281daf73d6def1";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

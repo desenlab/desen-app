@@ -554,6 +554,7 @@ const PROOF_ENTRIES = Object.freeze(
     ["m10a-t02", "scripts/verify-m10a-t02.mjs", "tests/m10a-t02.test.mjs"],
     ["m10a-t03", "scripts/verify-m10a-t03.mjs", "tests/m10a-t03.test.mjs"],
     ["m10a-t04", "scripts/verify-m10a-t04.mjs", "tests/m10a-t04.test.mjs"],
+    ["m10a-t05", "scripts/verify-m10a-t05.mjs", "tests/m10a-t05.test.mjs"],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -644,14 +645,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "11a817bd8ad38c5d1d1a9d6d3bbeaccffddfd37e76829597413ac5dab90a93f9";
+  "a4ce74ffe3d0cc75003ac6715f32da71e6114d5dd1fb507d913726dfd604a50d";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "6357a78589739a18a4a41423376840ea87e741023df865a4d052e2dbdb72d368";
+  "348be3b945b9c0a755a11eb4fd6e87ab39fcdfd75fda1cce4f78a01556911049";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "00897321e95c1c32308c2bad6f32de1c1ee18159786aabfab17a22105974488f";
+  "4a816717536a8d7daa8d2b34cc739e461f9622866002c92d16668c2b2a454bd6";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "38e2ef1bcdacbf2ef48d44217dbbd0dc85d4bad849b1372f3491ec384db233e7";
+const QUALITY_GATE_PLAN_SHA256 = "3e8b238ed081b5e2d94a3fa03302a39dea69a1c5a1f124a8121af7c210bdab9e";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -1015,6 +1016,7 @@ function classifyLegacyPrerequisite({
       "m10a-t02",
       "m10a-t03",
       "m10a-t04",
+      "m10a-t05",
     ].includes(currentProofId);
     const reviewedPackage =
       (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
@@ -1023,7 +1025,8 @@ function classifyLegacyPrerequisite({
         packageName === "@desen/editor-web") ||
       (currentProofId === "m10a-t02" && packageName === "@desen/design-system-core") ||
       (currentProofId === "m10a-t03" && packageName === "@desen/design-system-authoring") ||
-      (currentProofId === "m10a-t04" && packageName === "@desen/design-system-release");
+      (currentProofId === "m10a-t04" && packageName === "@desen/design-system-release") ||
+      (currentProofId === "m10a-t05" && packageName === "@desen/starter-catalog-web");
     if (!reviewedProof || !reviewedPackage || packageManifest.scripts?.[task] !== expectedScript) {
       throw new QualityGateError(
         `${currentProofId} uses an unreviewed public-package contract test.`,
@@ -1034,7 +1037,11 @@ function classifyLegacyPrerequisite({
   }
 
   if (task === "test:e2e") {
-    if (currentProofId !== "m10a-t03" || packageName !== "@desen/design-system-workbench-proof") {
+    const reviewedWorkbenchProof =
+      currentProofId === "m10a-t03" && packageName === "@desen/design-system-workbench-proof";
+    const reviewedStarterProof =
+      currentProofId === "m10a-t05" && packageName === "@desen/starter-catalog-web-proof";
+    if (!reviewedWorkbenchProof && !reviewedStarterProof) {
       throw new QualityGateError(
         `${currentProofId} uses an unreviewed browser-proof package test.`,
         { command, packageName, task },
@@ -1457,6 +1464,12 @@ export function createQualityGateSteps() {
       "Design System Release public-package contract",
       "pnpm",
       ["--filter", "@desen/design-system-release", "test:public-package"],
+    ),
+    commandStep(
+      "starter-catalog-web-public-package-contract",
+      "Starter Catalog Web public-package contract",
+      "pnpm",
+      ["--filter", "@desen/starter-catalog-web", "test:public-package"],
     ),
     ...PROOF_ENTRIES.map(({ id, verifierFile }) =>
       commandStep(`verify-${id}`, `Proof verifier: ${id}`, "node", [verifierFile]),

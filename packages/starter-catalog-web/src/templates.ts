@@ -2,11 +2,27 @@ import { canonicalizeJson } from "@desen/protocol";
 
 import {
   STARTER_BUTTON_CAPABILITY_ID,
+  STARTER_BOX_CAPABILITY_ID,
   STARTER_DIALOG_CAPABILITY_ID,
+  STARTER_GRID_CAPABILITY_ID,
+  STARTER_HEADING_CAPABILITY_ID,
+  STARTER_ICON_CAPABILITY_ID,
+  STARTER_IMAGE_CAPABILITY_ID,
+  STARTER_SEPARATOR_CAPABILITY_ID,
   STARTER_SELECT_CAPABILITY_ID,
+  STARTER_STACK_CAPABILITY_ID,
+  STARTER_TEXT_CAPABILITY_ID,
   starterButtonComponentRegistration,
+  starterBoxComponentRegistration,
   starterDialogComponentRegistration,
+  starterGridComponentRegistration,
+  starterHeadingComponentRegistration,
+  starterIconComponentRegistration,
+  starterImageComponentRegistration,
   starterSelectComponentRegistration,
+  starterSeparatorComponentRegistration,
+  starterStackComponentRegistration,
+  starterTextComponentRegistration,
 } from "./contracts.js";
 
 import type { DesenSource } from "@desen/protocol";
@@ -23,8 +39,16 @@ const TEMPLATE_INPUT_KEYS = Object.freeze(["capabilityId", "idPrefix", "reserved
 /** Exact capability ids with an inert starter node template. */
 export type StarterTemplateCapabilityId =
   | typeof STARTER_BUTTON_CAPABILITY_ID
+  | typeof STARTER_BOX_CAPABILITY_ID
   | typeof STARTER_SELECT_CAPABILITY_ID
-  | typeof STARTER_DIALOG_CAPABILITY_ID;
+  | typeof STARTER_DIALOG_CAPABILITY_ID
+  | typeof STARTER_GRID_CAPABILITY_ID
+  | typeof STARTER_HEADING_CAPABILITY_ID
+  | typeof STARTER_ICON_CAPABILITY_ID
+  | typeof STARTER_IMAGE_CAPABILITY_ID
+  | typeof STARTER_SEPARATOR_CAPABILITY_ID
+  | typeof STARTER_STACK_CAPABILITY_ID
+  | typeof STARTER_TEXT_CAPABILITY_ID;
 
 /** One ordinary DESEN 0.1.0 Source node returned by the starter template boundary. */
 export type StarterSourceNode = DesenSource["surfaces"][string]["root"];
@@ -98,8 +122,16 @@ function captureTemplateInput(input: unknown): CapturedTemplateInput {
     const capabilityId = ownEnumerableDataValue(input, "capabilityId");
     if (
       capabilityId !== STARTER_BUTTON_CAPABILITY_ID &&
+      capabilityId !== STARTER_BOX_CAPABILITY_ID &&
       capabilityId !== STARTER_SELECT_CAPABILITY_ID &&
-      capabilityId !== STARTER_DIALOG_CAPABILITY_ID
+      capabilityId !== STARTER_DIALOG_CAPABILITY_ID &&
+      capabilityId !== STARTER_GRID_CAPABILITY_ID &&
+      capabilityId !== STARTER_HEADING_CAPABILITY_ID &&
+      capabilityId !== STARTER_ICON_CAPABILITY_ID &&
+      capabilityId !== STARTER_IMAGE_CAPABILITY_ID &&
+      capabilityId !== STARTER_SEPARATOR_CAPABILITY_ID &&
+      capabilityId !== STARTER_STACK_CAPABILITY_ID &&
+      capabilityId !== STARTER_TEXT_CAPABILITY_ID
     ) {
       fail("/capabilityId", "unknown starter capability");
     }
@@ -180,10 +212,17 @@ function assertAvailableNodeIds(
   capabilityId: StarterTemplateCapabilityId,
   input: CapturedTemplateInput,
 ) {
-  const generatedIds =
-    capabilityId === STARTER_DIALOG_CAPABILITY_ID
-      ? [input.idPrefix, `${input.idPrefix}.content`]
-      : [input.idPrefix];
+  const generatedIds = [
+    input.idPrefix,
+    ...(capabilityId === STARTER_DIALOG_CAPABILITY_ID ||
+    capabilityId === STARTER_BOX_CAPABILITY_ID ||
+    capabilityId === STARTER_STACK_CAPABILITY_ID
+      ? [`${input.idPrefix}.content`]
+      : []),
+    ...(capabilityId === STARTER_GRID_CAPABILITY_ID
+      ? [`${input.idPrefix}.first`, `${input.idPrefix}.second`]
+      : []),
+  ];
   const reserved = new Set(input.reservedIds);
   for (const id of generatedIds) {
     if (!LOCAL_ID_PATTERN.test(id)) fail("/idPrefix", "produced an invalid child identifier");
@@ -195,10 +234,11 @@ function assertAvailableNodeIds(
 /**
  * Creates one detached, recursively frozen Source-node template for a registered starter component.
  *
- * @remarks Button and Select yield one leaf. Dialog includes one Button in its required `content`
- * slot, so the returned subtree is already Catalog-complete. The function never edits a Source,
- * allocates around collisions, imports Editor Core, or grants publication authority. A receiving
- * editor must insert the complete subtree atomically after checking the live surface namespace.
+ * @remarks Leaf content capabilities yield one node. Every T05 layout primitive and Dialog include
+ * a bounded default-slot subtree, so palette insertion never produces a node that needs a later
+ * required-child repair. The function never edits a Source, allocates around collisions, imports
+ * Editor Core, or grants publication authority. A receiving editor must insert the complete
+ * subtree atomically after checking the live surface namespace.
  *
  * @throws TypeError when input is not exact inert JSON, the capability or prefix is unsupported,
  * the reserved identity inventory exceeds its bound, or any generated identity collides.
@@ -216,6 +256,22 @@ export function createStarterNodeTemplate(
         id: captured.idPrefix,
         use: STARTER_BUTTON_CAPABILITY_ID,
         props: starterButtonComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_BOX_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_BOX_CAPABILITY_ID,
+        props: starterBoxComponentRegistration.manifest.authoring.defaultProps,
+        slots: {
+          default: [
+            {
+              id: `${captured.idPrefix}.content`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Box content" },
+            },
+          ],
+        },
       };
       break;
     case STARTER_SELECT_CAPABILITY_ID:
@@ -247,6 +303,78 @@ export function createStarterNodeTemplate(
             },
           ],
         },
+      };
+      break;
+    case STARTER_STACK_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_STACK_CAPABILITY_ID,
+        props: starterStackComponentRegistration.manifest.authoring.defaultProps,
+        slots: {
+          default: [
+            {
+              id: `${captured.idPrefix}.content`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Stack item" },
+            },
+          ],
+        },
+      };
+      break;
+    case STARTER_GRID_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_GRID_CAPABILITY_ID,
+        props: starterGridComponentRegistration.manifest.authoring.defaultProps,
+        slots: {
+          default: [
+            {
+              id: `${captured.idPrefix}.first`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Grid item one" },
+            },
+            {
+              id: `${captured.idPrefix}.second`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Grid item two" },
+            },
+          ],
+        },
+      };
+      break;
+    case STARTER_TEXT_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_TEXT_CAPABILITY_ID,
+        props: starterTextComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_HEADING_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_HEADING_CAPABILITY_ID,
+        props: starterHeadingComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_IMAGE_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_IMAGE_CAPABILITY_ID,
+        props: starterImageComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_ICON_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_ICON_CAPABILITY_ID,
+        props: starterIconComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_SEPARATOR_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_SEPARATOR_CAPABILITY_ID,
+        props: starterSeparatorComponentRegistration.manifest.authoring.defaultProps,
       };
       break;
   }

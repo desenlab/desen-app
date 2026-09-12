@@ -55,6 +55,18 @@ const BROWSER_ENVIRONMENT_LIMITS = Object.freeze({
   valueBytes: 65_536,
   totalBytes: 262_144,
 });
+const HISTORICAL_CAPABILITIES = Object.freeze(["Button", "Select", "Dialog"]);
+const HISTORICAL_CATALOG_RECEIPT = Object.freeze({
+  id: "run.desen.starter.web",
+  version: "0.1.0",
+  target: "web-react",
+  sha256: "0641d4baea6967f57700363a4cdf47ada8118cf39fd7f3bc8a5ec46709402134",
+  bytes: 40_745,
+});
+const HISTORICAL_PACKAGE_DIGEST =
+  "sha256:4a9c4029bade26ab398a47823cc8bec27c92c356dc77a73e1e902867f9051659";
+const HISTORICAL_ARTIFACT_SHA256 =
+  "711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74";
 
 function code(expected) {
   return (error) => {
@@ -101,20 +113,27 @@ async function bytes(relativePath) {
   return readFile(path.join(ROOT, relativePath));
 }
 
-test(NAMES[0], async () => {
-  const first = await buildM10AT01PackageIdentity();
-  const second = await buildM10AT01PackageIdentity();
-  assert.equal(first.catalog.id, "run.desen.starter.web");
-  assert.equal(first.catalog.target, "web-react");
-  assert.deepEqual(Object.keys(first.catalog.components).sort(), [
-    "run.desen.starter/Button",
-    "run.desen.starter/Dialog",
-    "run.desen.starter/Select",
-  ]);
-  assert.match(first.packageIdentity.packageDigest, /^sha256:[0-9a-f]{64}$/u);
-  assert.equal(first.catalog.packageDigest, first.packageIdentity.packageDigest);
-  assert.equal(first.catalogBytes.equals(second.catalogBytes), true);
-  assert.deepEqual(first.packageIdentity.entries, second.packageIdentity.entries);
+test("M10A-T01 authenticates its frozen three-capability receipt, not the successor Catalog", async () => {
+  const artifact = JSON.parse(await bytes("docs/proof/artifacts/m10a-t01.json"));
+  assert.equal(artifact.task, "M10A-T01");
+  assert.equal(artifact.profile, "desen.m10a-t01.base-ui-adapter-boundary.v1");
+  assert.deepEqual(artifact.claims.boundedCapabilities, HISTORICAL_CAPABILITIES);
+  assert.deepEqual(artifact.package.catalog, HISTORICAL_CATALOG_RECEIPT);
+  assert.equal(artifact.package.packageDigest, HISTORICAL_PACKAGE_DIGEST);
+  assert.equal(artifact.claims.historicalArtifactsRewritten, false);
+  assert.equal(artifact.claims.runtimeCoreChanged, false);
+
+  const receipt = await verifyM10AT01RecordedEvidence();
+  assert.equal(receipt.status, "PASS");
+  assert.equal(receipt.task, "M10A-T01");
+  assert.equal(receipt.packageDigest, HISTORICAL_PACKAGE_DIGEST);
+  assert.equal(receipt.catalogSha256, HISTORICAL_CATALOG_RECEIPT.sha256);
+  assert.equal(receipt.artifactSha256, HISTORICAL_ARTIFACT_SHA256);
+  assert.equal(receipt.browserExecutedByVerifier, false);
+  assert.deepEqual(
+    receipt.browserTests.map(({ title }) => title),
+    BROWSER_TEST_TITLES,
+  );
 });
 
 test(NAMES[1], async (context) => {

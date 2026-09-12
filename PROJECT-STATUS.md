@@ -9,9 +9,9 @@ M10 is **12/12**, M10A is **4/28 (14%)**, and proof gates are **11/14**. Gates a
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01, M10A-T02, M10A-T03, and M10A-T04 are DONE**. M10A-T05 is dependency-ready but
-`NOT_STARTED`; M11 has not started. The frozen protocol, Runtime Core, SC-01 profile, and completed
-T02 authority are unchanged.
+**M10A-T01, M10A-T02, M10A-T03, and M10A-T04 are DONE**. **M10A-T05 is `IN_PROGRESS`** for
+bounded layout/content starter capabilities; M11 has not started. The frozen protocol, Runtime Core,
+SC-01 profile, and completed T02 authority are unchanged.
 
 ## Current closure
 
@@ -69,14 +69,14 @@ package aggregation hit Vitest's five-second timeout under saturation; every tim
 passed independently, and the complete executable graph passed in a serialized Turbo run. The
 dependency boundary audit reports no violation across 879 modules and 3,787 dependencies.
 
-## Next authority
+## Active authority
 
-**No M10A task is active.** **M10A-T05 — layout, typography, and content starter capabilities — is
-`NOT_STARTED` and dependency-ready**; it becomes active only through an explicit next assignment.
-The [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md),
-[T05 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t05--layout-and-content-capabilities),
-and T04's [task-owned proof](docs/proof/M10A-T04.md) define the boundary. T04 provides no Runtime
-or normal-App activation, persistent production storage, Publisher authority, or protocol change.
+**M10A-T05 — layout, typography, and content starter capabilities — is `IN_PROGRESS`.** The
+[product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md) and
+[T05 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t05--layout-and-content-capabilities)
+define its boundary; T04's [task-owned proof](docs/proof/M10A-T04.md) remains a frozen predecessor
+boundary. T05 does not authorize Runtime activation, normal-App integration or persistence,
+Publisher authority, Core/protocol changes, G10A, or M11.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
 Runtime Core tree and fresh proof requirements. No further external user/team recruitment is

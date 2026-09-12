@@ -15,7 +15,7 @@ import {
 } from "../exhaustive-workload-inventory.mjs";
 
 const WORKSPACE_ROOT = resolve(import.meta.dirname, "../../..");
-const COMPATIBILITY_PROJECTION_SHA256 =
+const T05_PREDECESSOR_PROJECTION_SHA256 =
   "38e2ef1bcdacbf2ef48d44217dbbd0dc85d4bad849b1372f3491ec384db233e7";
 
 function cloneInventory() {
@@ -84,23 +84,26 @@ async function currentRepositoryInputs() {
   };
 }
 
-test("the neutral inventory preserves the exact 241-workload successor projection", () => {
+test("the neutral inventory preserves the exact 244-workload T05 successor projection", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const projection = inventory.nodes.map(({ id, command, args }) => ({ id, command, args }));
   const projectionSha256 = createHash("sha256").update(JSON.stringify(projection)).digest("hex");
 
   assert.equal(inventory.schemaVersion, 1);
   assert.equal(inventory.profile, "desen.ci.exhaustive-workload-inventory.v1");
-  assert.equal(inventory.workloadCount, 241);
-  assert.equal(inventory.proofUnitCount, 114);
+  assert.equal(inventory.workloadCount, 244);
+  assert.equal(inventory.proofUnitCount, 115);
   assert.equal(inventory.inventorySha256, EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256);
   assert.equal(
     EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    "3607817284ab3a40736153ddd02534ec0422acdd28c10ee7c1f39d077cb0c659",
+    "f2e861cce08dca611a307762564519b7b519e302cbacf2dac9281daf73d6def1",
   );
-  assert.equal(projectionSha256, COMPATIBILITY_PROJECTION_SHA256);
+  assert.equal(
+    projectionSha256,
+    "3e8b238ed081b5e2d94a3fa03302a39dea69a1c5a1f124a8121af7c210bdab9e",
+  );
   assert.deepEqual(
-    inventory.nodes.slice(0, 11).map(({ id }) => id),
+    inventory.nodes.slice(0, 12).map(({ id }) => id),
     [
       "orchestrator-contracts",
       "format",
@@ -113,14 +116,15 @@ test("the neutral inventory preserves the exact 241-workload successor projectio
       "design-system-core-public-package-contract",
       "design-system-authoring-public-package-contract",
       "design-system-release-public-package-contract",
+      "starter-catalog-web-public-package-contract",
     ],
   );
   assert.equal(
-    inventory.nodes.slice(11, 125).every(({ id }) => id.startsWith("verify-")),
+    inventory.nodes.slice(12, 127).every(({ id }) => id.startsWith("verify-")),
     true,
   );
   assert.equal(
-    inventory.nodes.slice(125, 239).every(({ id }) => id.startsWith("test-")),
+    inventory.nodes.slice(127, 242).every(({ id }) => id.startsWith("test-")),
     true,
   );
   assert.deepEqual(
@@ -141,6 +145,7 @@ test("the neutral inventory preserves the exact 241-workload successor projectio
     "m10a-t02",
     "m10a-t03",
     "m10a-t04",
+    "m10a-t05",
   ];
   assert.deepEqual(
     inventory.proofUnits.slice(-exactTailProofIds.length).map(({ id }) => id),
@@ -152,7 +157,15 @@ test("the neutral inventory preserves the exact 241-workload successor projectio
       { id, verifierNodeId: `verify-${id}`, rootTestNodeId: `test-${id}` },
     );
   }
-  const t04Predecessor = projection.filter(
+  const t05Predecessor = projection.filter(
+    ({ id }) => id !== "starter-catalog-web-public-package-contract" && !id.endsWith("m10a-t05"),
+  );
+  assert.equal(t05Predecessor.length, 241);
+  assert.equal(
+    createHash("sha256").update(JSON.stringify(t05Predecessor)).digest("hex"),
+    T05_PREDECESSOR_PROJECTION_SHA256,
+  );
+  const t04Predecessor = t05Predecessor.filter(
     ({ id }) => id !== "design-system-release-public-package-contract" && !id.endsWith("m10a-t04"),
   );
   assert.equal(t04Predecessor.length, 238);
@@ -227,17 +240,17 @@ test("repository manifests and discovered proof files retain the reviewed parity
   const receipt = validateRepositoryWorkloadInputs(inputs);
 
   assert.deepEqual(receipt, {
-    proofCount: 114,
-    verifierCount: 114,
-    rootTestCount: 114,
+    proofCount: 115,
+    verifierCount: 115,
+    rootTestCount: 115,
     ciContractScriptCount: 5,
     ciContractScriptSha256: EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
-    legacyPrerequisiteCount: 770,
-    legacyPrerequisiteSha256: "11a817bd8ad38c5d1d1a9d6d3bbeaccffddfd37e76829597413ac5dab90a93f9",
-    legacyLeafInvocationCount: 4620,
-    legacyLeafInvocationSha256: "6357a78589739a18a4a41423376840ea87e741023df865a4d052e2dbdb72d368",
-    distinctLeafWorkloadCount: 363,
-    distinctLeafWorkloadSha256: "00897321e95c1c32308c2bad6f32de1c1ee18159786aabfab17a22105974488f",
+    legacyPrerequisiteCount: 779,
+    legacyPrerequisiteSha256: "a4ce74ffe3d0cc75003ac6715f32da71e6114d5dd1fb507d913726dfd604a50d",
+    legacyLeafInvocationCount: 4642,
+    legacyLeafInvocationSha256: "348be3b945b9c0a755a11eb4fd6e87ab39fcdfd75fda1cce4f78a01556911049",
+    distinctLeafWorkloadCount: 368,
+    distinctLeafWorkloadSha256: "4a816717536a8d7daa8d2b34cc739e461f9622866002c92d16668c2b2a454bd6",
     testConfigurationFileCount: 3,
     workspaceTestScriptCount: 20,
     workspaceTestScriptSha256: "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88",
@@ -443,6 +456,9 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
   const designSystemReleasePublicPackageContract = nodeById.get(
     "design-system-release-public-package-contract",
   );
+  const starterCatalogWebPublicPackageContract = nodeById.get(
+    "starter-catalog-web-public-package-contract",
+  );
   const boundaries = nodeById.get("dependency-boundaries");
 
   assert.deepEqual(workspaceGraph.dependencies, ["structural-validator-artifacts"]);
@@ -524,7 +540,21 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
       ports: "NONE",
     },
   });
-  assert.equal(boundaries.dependencies.length, 114);
+  assert.deepEqual(starterCatalogWebPublicPackageContract, {
+    id: "starter-catalog-web-public-package-contract",
+    label: "Starter Catalog Web public-package contract",
+    command: "pnpm",
+    args: ["--filter", "@desen/starter-catalog-web", "test:public-package"],
+    dependencies: ["design-system-release-public-package-contract"],
+    executionClass: "SERIAL_BUILD_WRITER",
+    sharedState: {
+      trackedWorkspace: "READ_ONLY_GUARDED",
+      buildOutputs: "SHARED_WRITE_SERIALIZED",
+      temporaryPaths: "TOOL_SCOPED",
+      ports: "NONE",
+    },
+  });
+  assert.equal(boundaries.dependencies.length, 115);
 
   for (const unit of inventory.proofUnits) {
     const verifier = nodeById.get(unit.verifierNodeId);
@@ -532,25 +562,27 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
     assert.equal(verifier.executionClass, "CONCURRENT_PROOF");
     assert.equal(rootTest.executionClass, "CONCURRENT_PROOF");
     assert.deepEqual(verifier.dependencies, [
-      unit.id === "m10a-t04"
-        ? "design-system-release-public-package-contract"
-        : unit.id === "m10a-t03"
-          ? "design-system-authoring-public-package-contract"
-          : unit.id === "m10a-t02"
-            ? "design-system-core-public-package-contract"
-            : unit.id === "editor-core-persistence"
-              ? "editor-web-public-package-contract"
-              : unit.id === "editor-core-source-document" ||
-                  unit.id === "editor-core-stable-id-insert" ||
-                  unit.id === "editor-core-structural-edits" ||
-                  unit.id === "editor-core-content-edits" ||
-                  unit.id === "editor-core-state-binding-edits" ||
-                  unit.id === "editor-core-event-action-edits" ||
-                  unit.id === "editor-core-authoring-round-trip" ||
-                  unit.id === "editor-core-continuous-validation" ||
-                  unit.id === "editor-core-terminal-integration"
-                ? "editor-core-public-package-contract"
-                : "package-tests",
+      unit.id === "m10a-t05"
+        ? "starter-catalog-web-public-package-contract"
+        : unit.id === "m10a-t04"
+          ? "design-system-release-public-package-contract"
+          : unit.id === "m10a-t03"
+            ? "design-system-authoring-public-package-contract"
+            : unit.id === "m10a-t02"
+              ? "design-system-core-public-package-contract"
+              : unit.id === "editor-core-persistence"
+                ? "editor-web-public-package-contract"
+                : unit.id === "editor-core-source-document" ||
+                    unit.id === "editor-core-stable-id-insert" ||
+                    unit.id === "editor-core-structural-edits" ||
+                    unit.id === "editor-core-content-edits" ||
+                    unit.id === "editor-core-state-binding-edits" ||
+                    unit.id === "editor-core-event-action-edits" ||
+                    unit.id === "editor-core-authoring-round-trip" ||
+                    unit.id === "editor-core-continuous-validation" ||
+                    unit.id === "editor-core-terminal-integration"
+                  ? "editor-core-public-package-contract"
+                  : "package-tests",
     ]);
     assert.deepEqual(rootTest.dependencies, [verifier.id]);
     assert.equal(
@@ -561,7 +593,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
         "desen-app-last-known-good-recovery",
         "desen-app-repeatable-demo",
         "runtime-core-baseline",
-        "m10a-t01",
+        "m10a-t05",
       ].includes(unit.id)
         ? "NONE"
         : "SHARED_READ_AFTER_PREFIX",
