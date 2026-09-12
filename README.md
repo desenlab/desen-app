@@ -4,16 +4,17 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01/T02/T03/T04 are complete. SC-02 concluded `adapt`; T05 is the active,
-> bounded layout/content capability task. M11 has not started. T05 is not a production certification,
-> runtime activation, normal-App persistence, or protocol change.
+> M10/G10 and M10A-T01/T02/T03/T04/T05 are complete. SC-02 concluded `adapt`; no M10A task is
+> active. T06 is next eligible but needs explicit assignment. M11 has not started. T05 is an isolated
+> starter-catalog proof, not normal-App integration, production certification, runtime activation,
+> persistence, or a protocol change.
 
 ## Implementation progress
 
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████████░░░░░░░` **125 / 176 tasks complete (71%)**
+**Overall:** `██████████████████░░░░░░░` **126 / 176 tasks complete (72%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -33,10 +34,11 @@ bounded, reproducible claims about both.
 
 **M10 complete:** `████████████` **12 / 12 tasks complete (100%)**
 
-**M10A:** **4 / 28 tasks complete (14%)** · 28 newly planned product tasks; no completed work removed.
+**M10A:** **5 / 28 tasks complete (18%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Active task:** `M10A-T05` (`IN_PROGRESS`; dependencies complete) · **M11:** `NOT_STARTED`
+**Active task:** none · **Next eligible:** `M10A-T06` (`NOT_STARTED`; dependencies complete) ·
+**M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
 
@@ -186,8 +188,10 @@ integration, persistence, Publisher, Runtime, or protocol authority. `M10A-T04` 
 platform-neutral `@desen/design-system-release` adds a finite content-addressed token/asset/recipe
 manifest, exact host-profile references, and a no-`latest` release-store port. Its exact-head and
 fresh-`main` closure is recorded in the [T04 proof](docs/proof/M10A-T04.md); it adds no runtime
-activation, normal-App integration, or persistent production store. `M10A-T05` is `IN_PROGRESS`
-for bounded layout/content starter capabilities; M11 remains gated by G10A.
+activation, normal-App integration, or persistent production store. `M10A-T05` is `DONE` for its
+bounded private layout/content starter Catalog and isolated proof harness, not normal-App integration;
+`M10A-T06` is next eligible but remains `NOT_STARTED` pending explicit assignment. M11 remains gated
+by G10A.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and

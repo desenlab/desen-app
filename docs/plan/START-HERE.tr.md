@@ -5,20 +5,22 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 125/176 (%71), M10 12/12,
-M10A 4/28 (%14) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T04'ün exact-head PR kontrolleri,
-merge'leri ve taze `main` koşuları geçti; M10A-T05 yetkilendirilmiş `IN_PROGRESS` görevidir.
-Ayrıntı [Project Status](../../PROJECT-STATUS.md), [T03 kanıtı](../proof/M10A-T03.md),
-[T04 kanıtı](../proof/M10A-T04.md) ve [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 126/176 (%72), M10 12/12,
+M10A 5/28 (%18) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T05'ün exact-head PR kontrolleri,
+merge'leri ve taze `main` koşuları geçti; M10A-T06 bağımlılıkları tamam ancak `NOT_STARTED` durumunda.
+Ayrıntı [Project Status](../../PROJECT-STATUS.md), [T04 kanıtı](../proof/M10A-T04.md),
+[T05 kanıtı](../proof/M10A-T05.md) ve [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış görev sayısı 125 ve M10A sayacı 4/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
+ekler; tamamlanmış görev sayısı 126 ve M10A sayacı 5/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
 sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` `DONE`: tema/token
 authoring, modlar, alias'lar, kayıp-farkındalıklı aktarım ve izole workbench kanıtlandı.
 `M10A-T04` `DONE`: platformdan bağımsız immutable release kimliği, exact-digest store portu ve
-host-profile release referansı için hosted kapanış kaydı vardır. `M10A-T05` `IN_PROGRESS`: Box,
-Stack, Grid, Text/Heading, Image, Icon ve Separator başlangıç yetenekleri için çalışma aktiftir.
+host-profile release referansı için hosted kapanış kaydı vardır. `M10A-T05` `DONE`: Box, Stack,
+Grid, Text/Heading, Image, Icon ve Separator için private Catalog ve izole kanıt harness'i kapandı;
+bu normal Desen App entegrasyonu değildir. `M10A-T06` sonraki uygun görevdir, fakat açık görev
+ataması olmadan `NOT_STARTED` kalır.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i

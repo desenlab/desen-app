@@ -1,6 +1,6 @@
 # ADR 0023: Design-first authoring and design-system workbench
 
-- Status: Accepted; M10A-T01 through M10A-T04 `DONE`, M10A-T05 `IN_PROGRESS`
+- Status: Accepted; M10A-T01 through M10A-T05 `DONE`, M10A-T06 dependency-ready `NOT_STARTED`
 - Date: 2026-09-10
 - Decision owner: user-authorized M10A planning / SC-02 adaptation, closed by G10A
 
@@ -17,10 +17,9 @@ static experience before a frontend engineer supplies application behavior. That
 weaken DESEN 0.1.0. Source and Bundle remain data-only, capability surfaces remain explicit,
 authoring adapters remain honest, and unknown runtime semantics still fail closed.
 
-This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 through M10A-T04
-are `DONE`; T05 is `IN_PROGRESS`; the other 23 tasks remain `NOT_STARTED`. T04's exact-head and
-fresh-`main` closure is task-owned; acceptance is not a release or production-readiness claim. The
-canonical sequence is in
+This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 through M10A-T05
+are `DONE`; the other 23 tasks remain `NOT_STARTED`. T05's exact-head and fresh-`main` closure is
+task-owned; acceptance is not a release or production-readiness claim. The canonical sequence is in
 [M10A Implementation Plan](../plan/M10A-IMPLEMENTATION-PLAN.md), with detailed acceptance contracts
 in [M10A Task Contracts](../plan/M10A-TASK-CONTRACTS.md) and product behavior in the
 [Design-System Workbench](../plan/DESIGN-SYSTEM-WORKBENCH.md).

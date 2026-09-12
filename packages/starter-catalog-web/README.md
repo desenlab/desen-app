@@ -8,10 +8,10 @@ Source-node templates, and one explicit React-adapter subpath. Base UI remains a
 implementation detail of the existing Button, Select, and Dialog adapters; layout and semantic
 content use ordinary Web semantics where a Base UI primitive is unnecessary.
 
-**M10A-T05 is `IN_PROGRESS`.** The package now has an in-progress layout/content extension, but
-that work has local evidence only. It is not a normal Desen App integration, a complete component
-library, a design-system explorer, a persisted project, a publish/activation path, or a hosted
-closure claim.
+**M10A-T05 is `DONE`.** Its expanded layout/content Catalog and isolated browser harness have
+exact-head and fresh-`main` closure receipts in the [task-owned proof](../../docs/proof/M10A-T05.md).
+It is not a normal Desen App integration, a complete component library, a design-system explorer,
+a persisted project, or a publish/activation path.
 
 The M10A-T01 receipt at
 [`docs/proof/artifacts/m10a-t01.json`](../../docs/proof/artifacts/m10a-t01.json) remains immutable
@@ -46,7 +46,7 @@ internals or make them selectable from authored data.
 
 ## Capability inventory
 
-T01 retains Button, Select, and Dialog. The in-progress T05 slice adds the following bounded
+T01 retains Button, Select, and Dialog. The completed T05 slice adds the following bounded
 capabilities:
 
 | Group            | Capabilities             | Admitted boundary                                                                                                                     |
@@ -103,10 +103,10 @@ management UI, custom variants, raw CSS, remote requests, package publication, o
 deployment. Those boundaries remain with their designated later tasks, including T13 for assets
 and fonts and T17 for the integrated explorer/documentation surface.
 
-## Local verification
+## Verification
 
-The following are local candidate checks while T05 is in progress; successful local execution is
-not exact-head hosted or fresh-`main` closure evidence.
+The following commands reproduce the sealed task evidence; their passing result does not replace
+the exact-head hosted and fresh-`main` closure receipts in the task-owned proof.
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck
@@ -120,4 +120,4 @@ pnpm test:m10a-t05
 
 See [the T05 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t05--layout-and-content-capabilities),
 [the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), and the
-[in-progress T05 proof report](../../docs/proof/M10A-T05.md).
+[T05 proof report](../../docs/proof/M10A-T05.md).
