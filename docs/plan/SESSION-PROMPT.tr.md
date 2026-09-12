@@ -10,18 +10,14 @@ Yeni bir geliştirme oturumunda aşağıdaki metni görev kimliğiyle birlikte k
 > Tam güncel PR head'inin hosted Quality gate sonucu geçmeden görevi DONE yapma. `pnpm check`
 > kapsamlı denetim ve kapı kapanışı içindir. Sonunda neyin kanıtlandığını ve sıradaki tek görevi açıkla.
 
-Aktif M10A görevini sürdürmek için:
+Sıradaki uygun M10A görevini başlatmak için:
 
-> Yukarıdaki kurallarla yalnız `M10A-T04` görevini sürdür ve kapatmaya hazırla. Önce
-> M10A-IMPLEMENTATION-PLAN, M10A-TASK-CONTRACTS, ADR 0023 ile tamamlanmış T01–T03 kanıtlarını oku.
-> T02'nin sürümlü editable-project ve typed token-resolver sonucunu ile T03'ün authoring/workbench
-> sonucunu donmuş predecessor olarak tüket; platformdan bağımsız immutable release kimliği, sonlu
-> token/asset/inert-recipe snapshot'ları, content-addressed dependency manifesti, exact host-profile
-> release referansı ve mutable `latest` olmadan atomic exact-digest store portu kapsamını aşma. Eşit
-> girdinin eşit digest verdiğini, değişen production dependency'nin yeni kimlik ürettiğini, eksik ya
-> da kurcalanmış dependency'nin reddedildiğini ve kesintili write sonrasında doğru recovery'yi kanıtla.
-> Donmuş DESEN 0.1.0 protokolünü, Runtime Core'u ve tarihsel SC-01 profilini değiştirme. Runtime
-> activation, normal App entegrasyonu, durable production storage, Publisher/Core/protokol değişikliği
-> veya M11'i dahil etme. T04 yerel uygulama/kanıt adayıyla `IN_PROGRESS` durumundadır; tam güncel PR
-> head'inin hosted Quality gate'i geçmeden görevi `DONE` yapma. T05 ve sonrasını T04 aktifken seçme
-> veya başlatma.
+> Yukarıdaki kurallarla yalnız `M10A-T05` görevini uygula. Önce M10A-IMPLEMENTATION-PLAN,
+> M10A-TASK-CONTRACTS, ADR 0023 ve tamamlanmış T01–T04 kanıtlarını oku. T01'in Base UI adaptör
+> sınırını, T02'nin sürümlü editable-project/token resolver sonucunu, T03'ün authoring/workbench
+> sonucunu ve T04'ün immutable release kimliğini donmuş predecessor olarak tüket. Box, Stack, Grid,
+> Text/Heading, Image, Icon ve Separator için yalnız T05 kapsamını uygula; T06 ve sonraki görevleri,
+> Runtime activation'ı, normal App persistence'ını, Publisher/Core/protokol değişikliğini veya M11'i
+> dahil etme. T05 şu anda dependency-ready `NOT_STARTED` durumundadır; işe başlatan açık görev ataması
+> olmadan durumunu değiştirme. Başlatıldığında tam güncel PR head'inin hosted Quality gate'i geçmeden
+> görevi `DONE` yapma.

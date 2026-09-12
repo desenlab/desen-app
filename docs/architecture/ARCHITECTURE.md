@@ -215,9 +215,8 @@ success.
 ## M10A design-first workbench
 
 M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice,
-T02's platform-neutral project/token foundation, and T03's authoring/workbench slice are `DONE`;
-T04 is `IN_PROGRESS` with local candidate evidence and exact-head hosted checks pending, while the
-other 24 tasks remain `NOT_STARTED`.
+T02's platform-neutral project/token foundation, T03's authoring/workbench slice, and T04's
+immutable release identity are `DONE`, while the other 24 tasks remain `NOT_STARTED`.
 Later workbench features remain planned; no publication or production authority follows from this text.
 [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the decision,
 while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
@@ -250,10 +249,10 @@ T02 adds `@desen/design-system-core`, while normal App composition remains later
   public APIs. None of these packages becomes a hidden Runtime Core or protocol owner. Publisher and
   Runtime packages do not depend on `design-system-core` or interpret its recipe graph.
 
-T04's local implementation/evidence is a candidate until exact-head hosted checks pass. It does not
-authorize later work, Runtime activation, normal App integration, durable production storage,
-materialization, Publisher or Runtime changes, protocol changes, or M11. T05 remains unselected
-while T04 is active.
+T04's task-owned proof records its exact-head and fresh-`main` closure. It does not authorize
+Runtime activation, normal App integration, durable production storage, materialization, Publisher
+or Runtime changes, protocol changes, or M11. T05 is dependency-ready but remains `NOT_STARTED`
+until explicitly selected.
 
 Across later M10A tasks, an App-owned versioned editable-project record becomes the durable
 authoring aggregate. It atomically

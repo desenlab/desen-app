@@ -1,8 +1,8 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01, M10A-T02, and M10A-T03 are `DONE`.
-M10A-T04 is `IN_PROGRESS`: local implementation/evidence is a candidate and exact-head hosted
-checks are pending. The canonical statuses and dependencies are in [TASKS.md](TASKS.md).
+Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T04 are `DONE`.
+M10A-T05 is dependency-ready but `NOT_STARTED`. The canonical statuses and dependencies are in
+[TASKS.md](TASKS.md).
 
 ## Product promise
 
@@ -19,9 +19,9 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 ## Delivery sequence and accounting
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
-and one gate; the total becomes 176 tasks and 14 gates. The 124 completed tasks and 11 completed
-gates remain completed. T01, T02, and T03 are the three completed M10A tasks, T04 is
-`IN_PROGRESS`, and the other 24 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as
+and one gate; the total becomes 176 tasks and 14 gates. The 125 completed tasks and 11 completed
+gates remain completed. T01 through T04 are the four completed M10A tasks, and the other 24 remain
+`NOT_STARTED`. Nothing is renumbered, erased, or counted as
 implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
@@ -184,17 +184,20 @@ alone and not another external user recruitment round:
 - Existing M10 browser/proof coverage remains fresh and passing; Runtime Core and upstream identity
   checks pass. All new claims name their browser, viewport, fixture and resource-limit scope.
 
-## Active task candidate
+## Completed boundary and next eligible task
 
-**M10A-T04 — Immutable design-system release identity** is `IN_PROGRESS`. The local candidate adds
-platform-neutral `@desen/design-system-release`: finite token, asset, and inert-recipe snapshots;
-a deterministic content-addressed dependency manifest; detached immutable releases; exact
-host-profile references; and an atomic exact-digest store port with no mutable `latest` lookup.
+**M10A-T04 — Immutable design-system release identity** is `DONE`. It adds platform-neutral
+`@desen/design-system-release`: finite token, asset, and inert-recipe snapshots; a deterministic
+content-addressed dependency manifest; detached immutable releases; exact host-profile references;
+and an atomic exact-digest store port with no mutable `latest` lookup.
 
-T04 evidence must prove equal input/equal digest, changed production dependency/new identity,
-missing or tampered dependency rejection, and interrupted-write recovery. It remains open until
-exact-head hosted checks pass and does not authorize T05 or later tasks, Runtime activation, normal
-App integration, durable production storage, Publisher authority, Core/protocol changes, or M11.
+T04's exact-head and fresh-`main` hosted closure is recorded in its task-owned proof. It does not
+authorize Runtime activation, normal App integration, durable production storage, Publisher
+authority, Core/protocol changes, or M11.
+
+**M10A-T05 — Layout and content capabilities** is dependency-ready but `NOT_STARTED`; it becomes
+active only through an explicit next assignment. It owns Box, Stack, Grid, Text/Heading, Image, Icon,
+and Separator capability work, not a retrospective expansion of T04.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.

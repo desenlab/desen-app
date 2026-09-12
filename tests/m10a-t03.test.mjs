@@ -471,7 +471,10 @@ function exactDoneProofDocument(artifactSha256, overrides = {}) {
   const hostedClosureIndex = canonical.indexOf("## Hosted closure");
   const nonClaimsIndex = canonical.indexOf("## Non-claims");
   assert.ok(hostedClosureIndex > 0);
-  assert.equal(nonClaimsIndex, hostedClosureIndex + 3);
+  assert.ok(
+    nonClaimsIndex === hostedClosureIndex + 3 || nonClaimsIndex === hostedClosureIndex + 4,
+    "proof template must contain either the pending or closed hosted-closure inventory",
+  );
   const pullRunUrlId = receipt.pullRunUrlId ?? receipt.pullRunId;
   const freshRunUrlId = receipt.freshRunUrlId ?? receipt.freshRunId;
   const freshSha = receipt.freshSha ?? receipt.mergeSha;

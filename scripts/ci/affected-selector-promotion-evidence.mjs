@@ -1388,8 +1388,8 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 89,
-  headSha256: "bf1cb0a2b79f0a5a8d9228f2ea3fc0209f1558d2d6f6e8e03b11f19bf50c6a50",
+  sequence: 91,
+  headSha256: "21523a2f644fd8570909215f146c0ea1aac13d2080ce5b0b53846b8e6857922b",
   frozenArtifactCount: 68,
   currentReaderCount: 136,
   liveVerification: "PASS",

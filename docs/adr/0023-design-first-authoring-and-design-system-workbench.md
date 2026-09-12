@@ -1,6 +1,6 @@
 # ADR 0023: Design-first authoring and design-system workbench
 
-- Status: Accepted; M10A-T01 through M10A-T03 `DONE`, M10A-T04 candidate `IN_PROGRESS`
+- Status: Accepted; M10A-T01 through M10A-T04 `DONE`, M10A-T05 dependency-ready `NOT_STARTED`
 - Date: 2026-09-10
 - Decision owner: user-authorized M10A planning / SC-02 adaptation, closed by G10A
 
@@ -17,10 +17,9 @@ static experience before a frontend engineer supplies application behavior. That
 weaken DESEN 0.1.0. Source and Bundle remain data-only, capability surfaces remain explicit,
 authoring adapters remain honest, and unknown runtime semantics still fail closed.
 
-This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 through M10A-T03
-are `DONE`; M10A-T04 is `IN_PROGRESS` with a local implementation/evidence candidate, and the other
-24 tasks remain `NOT_STARTED`. T04 exact-head hosted checks are still pending. ADR acceptance and
-local candidate evidence are not release or production-readiness claims. The canonical sequence is in
+This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 through M10A-T04
+are `DONE`, and the other 24 tasks remain `NOT_STARTED`. T04's exact-head and fresh-`main` closure is
+task-owned; acceptance is not a release or production-readiness claim. The canonical sequence is in
 [M10A Implementation Plan](../plan/M10A-IMPLEMENTATION-PLAN.md), with detailed acceptance contracts
 in [M10A Task Contracts](../plan/M10A-TASK-CONTRACTS.md) and product behavior in the
 [Design-System Workbench](../plan/DESIGN-SYSTEM-WORKBENCH.md).
@@ -66,11 +65,10 @@ preserves/discloses six valid fixtures and atomically rejects ten malformed fixt
 invalid forms fail closed without silent loss. T03 does not enter the normal App or add persistence,
 release, materialization, Publisher, Runtime, or protocol authority.
 
-The T04 local candidate adds platform-neutral `@desen/design-system-release`: finite
-content-addressed token, asset, and inert-recipe snapshots; exact host-profile release references;
-and an atomic exact-digest store port with no mutable `latest` lookup. It remains bounded until its
-exact-head hosted closure: it grants no Runtime activation, normal App integration, durable
-production storage, Publisher authority, or protocol change.
+The completed T04 adds platform-neutral `@desen/design-system-release`: finite content-addressed
+token, asset, and inert-recipe snapshots; exact host-profile release references; and an atomic
+exact-digest store port with no mutable `latest` lookup. It grants no Runtime activation, normal App
+integration, durable production storage, Publisher authority, or protocol change.
 
 ### Make the durable editable project the authoring aggregate
 

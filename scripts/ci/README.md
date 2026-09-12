@@ -60,8 +60,8 @@ cancellation, hosted, and zero-reference checks pass.
 - 241 logical workloads, including separate Editor Core, Editor Web, Design System Core, Design System Authoring, and Design System Release public-package contracts
 - 114 proof pairs: 101 ordinary and 13 exclusive barriers
 - 264 hosted physical shard workloads
-- proof-reader checkpoint sequence 89 at
-  `sha256:bf1cb0a2b79f0a5a8d9228f2ea3fc0209f1558d2d6f6e8e03b11f19bf50c6a50`, authenticating 68 artifacts and 136 current readers
+- proof-reader checkpoint sequence 91 at
+  `sha256:21523a2f644fd8570909215f146c0ea1aac13d2080ce5b0b53846b8e6857922b`, authenticating 68 artifacts and 136 current readers
 - nine M10 Chromium journeys in the separate Browser E2E job; three T01 cases on port 4187 and four
   T03 workbench cases on port 4188 in distinct fixed-port proof barriers; T03 covers SC-01's 3
   supported / 13 preserved-unsupported / 7 invalid fixtures plus a closed 6 valid / 10 malformed
