@@ -1,19 +1,32 @@
 # @desen/starter-catalog-web
 
-## Responsibility
+## Scope and current status
 
-Private, target-specific DESEN Neutral capabilities backed by pinned `@base-ui/react@1.8.0`.
-M10A-T01 implements a bounded Button, Select and Dialog adapter slice. The full starter library,
-theme editor, design-system releases, master/instance model and normal App integration belong to
-later M10A tasks. This package does not replace the M10 reference catalog or migrate workspaces.
+`@desen/starter-catalog-web` is the private, target-specific DESEN Neutral capability package for
+`web-react`. It provides inert Catalog registrations, schema-derived prop types, deterministic
+Source-node templates, and one explicit React-adapter subpath. Base UI remains an internal
+implementation detail of the existing Button, Select, and Dialog adapters; layout and semantic
+content use ordinary Web semantics where a Base UI primitive is unnecessary.
+
+**M10A-T05 is `IN_PROGRESS`.** The package now has an in-progress layout/content extension, but
+that work has local evidence only. It is not a normal Desen App integration, a complete component
+library, a design-system explorer, a persisted project, a publish/activation path, or a hosted
+closure claim.
+
+The M10A-T01 receipt at
+[`docs/proof/artifacts/m10a-t01.json`](../../docs/proof/artifacts/m10a-t01.json) remains immutable
+historical evidence for its original three-capability slice. T05 owns evidence for the expanded
+starter Catalog; it must not rewrite the T01 artifact or present it as fresh T05 evidence.
+The current additive Catalog is `run.desen.starter.web@0.2.0#web-react`; T01's original
+`0.1.0` Catalog remains a historical receipt.
 
 ## Public boundary
 
-The root entry exports inert Catalog registrations, schema-derived prop types and deterministic
-complete Source-node templates. `./react-adapters` exports the exact static
-`STARTER_WEB_REACT_ADAPTER_REGISTRY_INPUT`, its three adapters and `StarterSurfaceBoundary`.
-The proof authoring surface and independent host harness use those same adapters, not duplicate
-screen JSX. This task does not integrate them into the normal Desen App canvas.
+The root entry is inert: it exports Catalog registrations, contract-derived types, capability IDs,
+and complete deterministic templates. Executable React adapters are available only through the
+explicit `@desen/starter-catalog-web/react-adapters` subpath. Both proof renderers use the same
+static registry input and `StarterSurfaceBoundary`; neither may select an adapter, callback,
+selector, DOM target, or arbitrary React prop from Source data.
 
 ```tsx
 import { createRuntimeReactAdapterRegistry } from "@desen/runtime-react";
@@ -23,81 +36,88 @@ import {
 } from "@desen/starter-catalog-web/react-adapters";
 
 const registry = createRuntimeReactAdapterRegistry(STARTER_WEB_REACT_ADAPTER_REGISTRY_INPUT);
-// Mount an authenticated Runtime React surface with this registry, then wrap its managed element:
+// A trusted host still admits a Bundle and mounts its managed surface:
 // <StarterSurfaceBoundary>{surface.element}</StarterSurfaceBoundary>
 ```
 
-Registry creation alone grants no runtime authority. A real managed surface still requires an
-admitted Bundle, its exact Catalog set and a live headless session. Documents can select only
-`run.desen.starter/Button`, `run.desen.starter/Select` or `run.desen.starter/Dialog`; they cannot
-name a Base UI import, callback, DOM target, render function, class name or arbitrary React prop.
-The pre-release Catalog template is not an authenticated package identity. The task proof's build
-step seals the actual implementation artifacts before constructing its exact fixture Catalog.
+Registry creation grants no runtime authority. A managed surface still needs an admitted Bundle,
+its exact Catalog requirement, and a live headless session. The package does not export Base UI
+internals or make them selectable from authored data.
 
-| Capability | Contract                                                                                                       | Local behavior                                                       |
-| ---------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Button     | `label`, optional `disabled`/`loading`; `press: {}`                                                            | Native button; loading remains focusable and suppresses activation   |
-| Select     | `label`, finite inert `options`, optional `defaultValue`/`disabled`; `change: {value}`                         | Single local selection; keyboard, disabled items and contained popup |
-| Dialog     | Named trigger/title/description/close text, optional `disabled`; required `content` slot; `openChange: {open}` | Internal trigger/close, focus trap, Escape and focus return          |
+## Capability inventory
 
-An unconnected Select is explicitly local component interaction, not saved business state or a
-simulated backend. Option/default-value changes are trusted remount-sensitive props. Compatible
-label/style edits preserve the component instance and local selection. Later connection tasks own
-controlled application state; T01 makes no live backend claim. Dialog children are real rendered
-Source nodes in its Catalog-declared content slot. Insertion supplies the complete child subtree
-in one editor transition; no intermediate missing-required-slot state is committed.
+T01 retains Button, Select, and Dialog. The in-progress T05 slice adds the following bounded
+capabilities:
 
-## Styling and overlays
+| Group            | Capabilities             | Admitted boundary                                                                                                                     |
+| ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Layout           | Box, Stack, Grid         | One required, ordered managed slot (1–100 children); finite Stack direction/wrap and Grid columns (1–12); logical LTR/RTL properties. |
+| Semantic content | Text, Heading, Separator | Inert text only; bounded heading level; semantic output without HTML parsing or executable markup.                                    |
+| Trusted media    | Image, Icon              | Closed image-source and icon-name sets; required accessible text where applicable; no caller-supplied URL, SVG, font, or renderer.    |
 
-The package ships a CSS Module with DESEN Neutral light defaults: off-white canvas, white surfaces,
-near-black actions/text, quiet borders, modest radii, system typography and visible keyboard focus.
-No remote font or stylesheet is fetched. The theme is not a new protocol requirement or a claim of
-the later freeform theme editor.
+Each registration has a closed root style-part schema. Layout/style inputs permit only bounded,
+typed values such as six/eight-digit hex colors, finite spacing and box dimensions, finite
+alignment/distribution values, `fill`/`hug` where declared, and explicit typography or media
+properties. Unknown style properties, private selectors, invalid/negative dimensions, executable
+content, and remote media values are rejected before rendering.
 
-Only declared public part/state maps can modify appearance. T01 admits bounded numeric
-`borderRadius`, `padding` and `fontSize`, plus six/eight-digit hex `color`, `backgroundColor` and
-`borderColor`. The adapter projects these field by field. Source cannot replace focus outlines,
-position overlays, inject URLs or acquire a private DOM selector. Runtime React validates the exact
-Catalog receiving schema; a defensive adapter check also rejects unknown props, parts and states.
+When a layout, typography, or media component admits `borderColor` or `borderWidth`, the adapter
+also projects a visible solid border. Separator is deliberately narrower: its visible line uses
+`backgroundColor`, finite dimensions, radii, margins, and opacity rather than ineffective border
+controls. A vertical Separator has a visible 24px minimum default height in ordinary root and
+vertical-Stack contexts, while a finite explicit dimension can still be supplied. Image deliberately
+does not admit a foreground `color`, because its trusted data-URI source is a replaced image and
+would otherwise silently ignore it; Icon retains its finite foreground color control through
+trusted inline SVG. Column-flow Grid calculates its explicit row count from the declared managed children,
+so it keeps the declared 1–12 column bound instead of creating implicit overflow columns.
 
-`StarterSurfaceBoundary` owns both its root and portal container. It accepts children, never a DOM
-target. A missing boundary or a target found outside its root during render fails explicitly; an uncommitted
-target produces no portal rather than falling back to `body`. The boundary clips overlays to its
-surface. Nested content gets a popup-local portal scope so selection controls remain within the
-dialog's focus region. Dialog uses Base UI's `trap-focus` mode: it traps keyboard focus without
-locking the entire authoring page's scroll. This bounded host policy is identical in both harness
-roles, not a general fullscreen/window manager. The backdrop, close control and Escape dismiss it.
+`start`/`end`, `paddingInline`, `marginInline`, and text alignment remain logical rather than
+physical properties. Layout children stay managed Source nodes: adapters render them but do not
+inspect, rewrite, or create unadmitted child structure.
 
-State precedence is base → interaction → disabled → loading for Button, base → interaction → open
-→ disabled for Select, and base → focus → open → disabled for Dialog. Select item states use base
-→ selected → highlighted → disabled. Actual native interaction activates states; arbitrary forced
-state preview belongs to later workbench tasks. Semantic roles/names and focus remain host-owned.
+## Styling, portals, and accessibility
 
-## Dependencies and limits
+The package ships DESEN Neutral CSS Module defaults: off-white canvas, white surfaces, near-black
+text/actions, quiet borders, visible focus, system typography, and modest radii. It fetches no
+remote stylesheet or font. Neutral is a default appearance, not the later freeform theme editor
+or complete styling system.
 
-Production internal edges are only Protocol, Catalog SDK and Runtime React. Base UI and CSS remain
-inside this Web package; neutral packages cannot import it. It does not import Editor Core, App,
-Publisher, Runtime Core internals, testkit or the reference capability package. React and React DOM
-19 are peers. No package publication, remote loading or external service is configured.
+`StarterSurfaceBoundary` owns its root and portal container. It never accepts an authored DOM
+target; a missing or escaping target fails rather than falling back to `body`. The existing Select
+and Dialog adapters therefore retain their bounded overlay, focus, Escape, and focus-return
+behavior, while the T05 semantic content adapters add no overlay authority.
 
-Catalog schemas bound strings, option count and slot cardinality; templates bound IDs and reject
-unknown capabilities/collisions. Runtime React's existing finite data and receiving limits still
-apply. Template and package metadata are JSON-only, while executable registration is an explicit
-trusted import. The frozen DESEN 0.1.0 snapshot and Runtime Core remain unchanged.
+Text is rendered as text, Heading is bounded to a semantic level, Image uses a closed trusted
+in-package source set with an alternative text requirement, Icon has a closed name set and
+label/decorative boundary, and Separator has a finite orientation. These are component contracts,
+not an arbitrary HTML, asset, or icon-import facility.
 
-## Verification and status
+## Dependencies and non-claims
+
+Production edges remain Protocol, Catalog SDK, Runtime React, and the package-local Base UI/CSS
+implementation. The package does not import Editor Core, Desen App, Publisher, Runtime Core
+internals, testkit, or the reference capability package. React and React DOM 19 are peers.
+
+T05 does not introduce arbitrary asset import, local asset storage, font admission, a library
+management UI, custom variants, raw CSS, remote requests, package publication, or production
+deployment. Those boundaries remain with their designated later tasks, including T13 for assets
+and fonts and T17 for the integrated explorer/documentation surface.
+
+## Local verification
+
+The following are local candidate checks while T05 is in progress; successful local execution is
+not exact-head hosted or fresh-`main` closure evidence.
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck
-pnpm --filter @desen/starter-catalog-web test:adapters
+pnpm --filter @desen/starter-catalog-web test
+pnpm --filter @desen/starter-catalog-web test:public-package
 pnpm --filter @desen/starter-catalog-web-proof test:e2e
-pnpm verify:m10a-t01
+pnpm generate:m10a-t05
+pnpm verify:m10a-t05
+pnpm test:m10a-t05
 ```
 
-See [the T01 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t01--base-ui-adapter-boundary-proof)
-and [ADR 0023](../../docs/adr/0023-design-first-authoring-and-design-system-workbench.md). M10A-T01
-and M10A-T02 are `DONE` after exact-head and fresh-main hosted verification. T02's
-design-system-core result does not change this package. No task is active; M10A-T03 is next and
-ready but remains `NOT_STARTED`. This package still makes no claim for the later complete library,
-theme editor, design-system releases, normal App integration, package publication, or production
-deployment.
+See [the T05 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t05--layout-and-content-capabilities),
+[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), and the
+[in-progress T05 proof report](../../docs/proof/M10A-T05.md).

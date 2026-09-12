@@ -28,3 +28,5 @@ docs/proof/artifacts/desen-app-0.1.0-published-host-update.json
 # Canonical M10A-T01 Catalog and evidence are byte- and SHA-pinned by their verifier.
 packages/starter-catalog-web/catalog.json
 docs/proof/artifacts/m10a-t01.json
+# Canonical M10A-T05 evidence is byte- and SHA-pinned by its verifier.
+docs/proof/artifacts/m10a-t05.json

@@ -1,8 +1,7 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { constants as fileConstants } from "node:fs";
-import { lstat, mkdtemp, open, readdir, readFile, realpath, rm } from "node:fs/promises";
-import { createServer } from "node:net";
+import { lstat, mkdtemp, open, readdir, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -47,49 +46,41 @@ const BROWSER_ENVIRONMENT_MAX_FIELDS = 4_096;
 const BROWSER_ENVIRONMENT_MAX_KEY_BYTES = 1_024;
 const BROWSER_ENVIRONMENT_MAX_VALUE_BYTES = 65_536;
 const BROWSER_ENVIRONMENT_MAX_TOTAL_BYTES = 262_144;
-const LIFECYCLE_PROBE_PORT = 4_187;
-const LIFECYCLE_PROBE_TIMEOUT_MS = 5_000;
-const LIFECYCLE_PROBE_TERMINATION_GRACE_MS = 250;
-const LIFECYCLE_PROBE_READY = "M10A_T01_LIFECYCLE_READY\n";
-const LIFECYCLE_PROBE_DESCENDANT_CODE = [
-  'const { createServer } = require("node:net");',
-  'process.on("SIGTERM", () => undefined);',
-  "const server = createServer();",
-  'server.once("error", (error) => { process.stderr.write(`${error.code ?? "ERROR"}\\n`); process.exit(1); });',
-  `server.listen(${LIFECYCLE_PROBE_PORT}, "127.0.0.1", () => process.stdout.write("DESCENDANT_READY\\n"));`,
-].join("");
-const LIFECYCLE_PROBE_PARENT_CODE = [
-  'const { spawn } = require("node:child_process");',
-  'const code = Buffer.from(process.argv[1], "base64").toString("utf8");',
-  'const child = spawn(process.execPath, ["-e", code], { detached: false, env: {}, stdio: ["ignore", "pipe", "inherit"] });',
-  "let ready = false;",
-  'child.stdout.on("data", (chunk) => { if (!ready && chunk.toString("utf8").includes("DESCENDANT_READY\\n")) { ready = true; process.stdout.write("M10A_T01_LIFECYCLE_READY\\n"); } });',
-  'child.once("error", (error) => { process.stderr.write(`${error.code ?? "ERROR"}\\n`); process.exit(1); });',
-  'child.once("exit", () => { if (!ready) process.exit(1); });',
-  "setInterval(() => undefined, 1_000);",
-].join("");
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 
-/** Exact task-owned browser command executed by the M10A-T01 verifier. */
+/**
+ * Historical T01 browser command preserved in the frozen receipt.
+ *
+ * @remarks The T01 verifier no longer launches this command. M10A-T05 owns current starter
+ * browser execution.
+ */
 export const M10A_T01_BROWSER_COMMAND = Object.freeze({
   command: "pnpm",
   args: Object.freeze(["--filter", "@desen/starter-catalog-web-proof", "run", "test:e2e:built"]),
 });
 
-/** Full local capture command, which rebuilds both graphs after the Catalog is written. */
+/** Historical local-capture command retained only to authenticate the frozen T01 receipt. */
 export const M10A_T01_BROWSER_CAPTURE_COMMAND = Object.freeze({
   command: "pnpm",
   args: Object.freeze(["--filter", "@desen/starter-catalog-web-proof", "run", "test:e2e"]),
 });
 
-/** Exact deterministic Catalog fixture written for both T01 browser graphs. */
+/**
+ * Current starter Catalog destination retained for the T05 successor's shared package helper.
+ *
+ * @remarks This does not rewrite the frozen T01 Catalog receipt.
+ */
 export const M10A_T01_CATALOG_PATH = path.join(WORKSPACE_ROOT, STARTER_CATALOG_PATH);
 
 /** Exact deterministic machine-evidence destination for M10A-T01. */
 export const M10A_T01_ARTIFACT_PATH = path.join(WORKSPACE_ROOT, ARTIFACT_RELATIVE_PATH);
 
-/** Stable root mutation-test declarations embedded in the evidence artifact. */
+/**
+ * Stable task-time test declarations serialized in the frozen T01 receipt.
+ *
+ * @remarks These are historical receipt fields, not the current starter-Catalog test plan.
+ */
 export const M10A_T01_ROOT_TEST_NAMES = Object.freeze([
   "M10A-T01 constructs one valid self-digested starter Catalog",
   "M10A-T01 binds exact Base UI integrity license peers and dependency closure",
@@ -817,11 +808,12 @@ function packageArtifacts({
 }
 
 /**
- * Builds the exact M10A-T01 Catalog and package identity from current compiled public outputs.
+ * Builds the current starter Catalog and package identity from compiled public outputs.
  *
- * @remarks This function performs no write and launches no browser. It admits the exact package,
- * lock, installed Base UI manifest/license, compiled dist, and published CSS before constructing
- * the self-digested Catalog used by both browser graphs.
+ * @remarks This shared helper performs no write and launches no browser. T05 uses it to capture
+ * the evolved starter Catalog; it never authenticates or rewrites T01 historical evidence. The
+ * exported T01-prefixed name is retained so the successor can consume the audited helper without
+ * duplicating its package-admission boundary.
  */
 export async function buildM10AT01PackageIdentity(rawOptions = undefined) {
   const options = captureOptions(
@@ -890,7 +882,11 @@ export async function buildM10AT01PackageIdentity(rawOptions = undefined) {
   });
 }
 
-/** Writes only the new exact starter Catalog fixture through the repository's atomic writer. */
+/**
+ * Writes the current starter Catalog for the successor capture through the atomic writer.
+ *
+ * @remarks This shared helper never writes the frozen T01 evidence artifact.
+ */
 export async function writeM10AT01Catalog(rawOptions = undefined) {
   const options = captureOptions(
     rawOptions,
@@ -1122,91 +1118,6 @@ function runChild(command, args, options, control = undefined) {
   });
 }
 
-async function rebindLifecycleProbePort() {
-  await new Promise((resolvePromise, rejectPromise) => {
-    const server = createServer();
-    let settled = false;
-    const timer = setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      server.close(() => rejectPromise(new Error("Lifecycle probe rebind timed out.")));
-    }, LIFECYCLE_PROBE_TIMEOUT_MS);
-    const finish = (callback) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      callback();
-    };
-    server.once("error", (error) => finish(() => rejectPromise(error)));
-    server.listen(LIFECYCLE_PROBE_PORT, "127.0.0.1", () => {
-      server.close((error) =>
-        finish(() => (error ? rejectPromise(error) : resolvePromise(undefined))),
-      );
-    });
-  });
-}
-
-async function verifyBrowserProcessLifecycle() {
-  if (process.platform === "win32") {
-    fail("BROWSER_LIFECYCLE_UNSUPPORTED", "The browser lifecycle proof requires POSIX groups.");
-  }
-  try {
-    await rebindLifecycleProbePort();
-  } catch (error) {
-    fail(
-      "BROWSER_LIFECYCLE_INVALID",
-      "The fixed browser port was unavailable before the cancellation probe.",
-      typeof error?.code === "string" ? error.code : undefined,
-    );
-  }
-  const result = await runChild(
-    process.execPath,
-    [
-      "-e",
-      LIFECYCLE_PROBE_PARENT_CODE,
-      Buffer.from(LIFECYCLE_PROBE_DESCENDANT_CODE).toString("base64"),
-    ],
-    { cwd: WORKSPACE_ROOT, env: {}, stdio: ["ignore", "pipe", "pipe"] },
-    {
-      timeoutMs: LIFECYCLE_PROBE_TIMEOUT_MS,
-      terminationGraceMs: LIFECYCLE_PROBE_TERMINATION_GRACE_MS,
-      outputLimitBytes: 16_384,
-      trigger: { marker: Buffer.from(LIFECYCLE_PROBE_READY), signal: "SIGTERM" },
-    },
-  );
-  if (
-    result.code !== null ||
-    result.signal !== "SIGTERM" ||
-    result.parentSignal !== "SIGTERM" ||
-    result.timedOut !== false ||
-    result.outputExceeded !== false ||
-    result.processGroupReleased !== true ||
-    result.unexpectedSurvivors !== false ||
-    !result.stdout.includes(Buffer.from(LIFECYCLE_PROBE_READY))
-  ) {
-    fail(
-      "BROWSER_LIFECYCLE_INVALID",
-      "The browser process-group cancellation probe did not close its full descendant tree.",
-      boundedBrowserDiagnostic(result, WORKSPACE_ROOT, tmpdir()),
-    );
-  }
-  try {
-    await rebindLifecycleProbePort();
-  } catch (error) {
-    fail(
-      "BROWSER_LIFECYCLE_INVALID",
-      "The browser process-group cancellation probe did not release its fixed port.",
-      typeof error?.code === "string" ? error.code : undefined,
-    );
-  }
-  return deepFreeze({
-    parentSignal: "SIGTERM",
-    processGroupReleased: true,
-    portAvailableBefore: true,
-    portReleasedAfter: true,
-  });
-}
-
 function boundedBrowserDiagnostic(result, workspaceRoot, tempRoot) {
   if (result?.outputExceeded === true) return "Browser output exceeded the 256 KiB proof budget.";
   const bytes =
@@ -1431,84 +1342,146 @@ export async function executeM10AT01Evidence(rawOptions = undefined) {
   return buildM10AT01Evidence({ browserObservation });
 }
 
-/** Writes only the new M10A-T01 Catalog and proof artifact after executing the real browser. */
+/**
+ * Retires the former T01 capture path without permitting a historical artifact rewrite.
+ *
+ * @remarks M10A-T05 is the current owner of the expanded starter catalog and its browser proof.
+ * The T01 receipt is an immutable task-time record, so its generator deliberately refuses to
+ * overwrite either the old Catalog receipt or the frozen artifact.
+ */
 export async function writeM10AT01Evidence(rawOptions = undefined) {
   if (rawOptions !== undefined) {
     exactRecord(rawOptions, [], "M10A-T01 writer options");
   }
-  const identity = await buildM10AT01PackageIdentity();
-  await writeAtomicProofArtifact({
-    artifactPath: M10A_T01_CATALOG_PATH,
-    artifactBytes: identity.catalogBytes,
-  });
-  const browserObservation = await executeM10AT01BrowserProof({ command: "capture" });
-  const artifact = buildEvidenceArtifact(identity, browserObservation);
-  const artifactBytes = prettyBytes(artifact);
-  await writeAtomicProofArtifact({
-    artifactPath: M10A_T01_ARTIFACT_PATH,
-    artifactBytes,
-  });
-  return deepFreeze({
-    artifactPath: M10A_T01_ARTIFACT_PATH,
-    artifactBytes: artifactBytes.byteLength,
-    artifactSha256: sha256(artifactBytes),
-    catalogPath: M10A_T01_CATALOG_PATH,
-    catalogSha256: sha256(identity.catalogBytes),
-    packageDigest: identity.packageIdentity.packageDigest,
-  });
+  fail(
+    "HISTORICAL_CAPTURE_RETIRED",
+    "M10A-T01 evidence is checkpointed history; M10A-T05 owns current starter capture.",
+  );
 }
 
-/** Re-executes package and browser claims and authenticates exact checkpointed task evidence. */
+function authenticateHistoricalT01Artifact(rawBytes) {
+  const artifact = exactRecord(
+    parseJson(rawBytes, "Checkpointed M10A-T01 evidence"),
+    [
+      "browser",
+      "claims",
+      "dependencyAdmission",
+      "package",
+      "profile",
+      "result",
+      "schemaVersion",
+      "security",
+      "task",
+      "tests",
+    ],
+    "Checkpointed M10A-T01 evidence",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.profile !== "desen.m10a-t01.base-ui-adapter-boundary.v1" ||
+    artifact.task !== "M10A-T01" ||
+    artifact.result !== "PASS"
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T01 evidence identity drifted.");
+  }
+  const packageRecord = exactRecord(
+    artifact.package,
+    [
+      "catalog",
+      "digestEntries",
+      "digestProfile",
+      "distBytes",
+      "distFiles",
+      "name",
+      "packageDigest",
+    ],
+    "Checkpointed M10A-T01 package",
+  );
+  const catalog = exactRecord(
+    packageRecord.catalog,
+    ["bytes", "id", "sha256", "target", "version"],
+    "Checkpointed M10A-T01 catalog",
+  );
+  if (
+    packageRecord.name !== "@desen/starter-catalog-web" ||
+    packageRecord.digestProfile !== "desen.web-react.package-digest" ||
+    typeof packageRecord.packageDigest !== "string" ||
+    !/^sha256:[0-9a-f]{64}$/u.test(packageRecord.packageDigest) ||
+    catalog.id !== "run.desen.starter.web" ||
+    catalog.version !== "0.1.0" ||
+    catalog.target !== "web-react" ||
+    !Number.isSafeInteger(catalog.bytes) ||
+    catalog.bytes <= 0 ||
+    typeof catalog.sha256 !== "string" ||
+    !/^[0-9a-f]{64}$/u.test(catalog.sha256)
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T01 package receipt drifted.");
+  }
+  const claims = exactRecord(
+    artifact.claims,
+    [
+      "boundedCapabilities",
+      "browserExecutedByVerifier",
+      "catalogExecutionValidated",
+      "historicalArtifactsRewritten",
+      "runtimeCoreChanged",
+      "sameStaticAdaptersInCanvasAndHost",
+    ],
+    "Checkpointed M10A-T01 claims",
+  );
+  if (
+    JSON.stringify(claims.boundedCapabilities) !== JSON.stringify(["Button", "Select", "Dialog"]) ||
+    claims.browserExecutedByVerifier !== true ||
+    claims.catalogExecutionValidated !== true ||
+    claims.historicalArtifactsRewritten !== false ||
+    claims.runtimeCoreChanged !== false ||
+    claims.sameStaticAdaptersInCanvasAndHost !== true
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T01 historical claims drifted.");
+  }
+  const tests = exactRecord(
+    artifact.tests,
+    ["browserCommand", "packageCommand", "rootTestNames"],
+    "Checkpointed M10A-T01 tests",
+  );
+  if (
+    tests.packageCommand !== "pnpm --filter @desen/starter-catalog-web test" ||
+    tests.browserCommand !== "pnpm --filter @desen/starter-catalog-web-proof run test:e2e:built" ||
+    JSON.stringify(tests.rootTestNames) !== JSON.stringify(M10A_T01_ROOT_TEST_NAMES)
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T01 test receipt drifted.");
+  }
+  const browser = captureBrowserObservation(artifact.browser);
+  return deepFreeze({ artifact, browser, packageRecord, catalog });
+}
+
+/**
+ * Authenticates exact historical M10A-T01 evidence without rebuilding the evolved starter package.
+ *
+ * @remarks The original three-capability Catalog and Chromium execution are preserved as an
+ * immutable receipt. Current starter changes are authenticated by the successor T05 proof.
+ */
 export async function verifyM10AT01Evidence(rawOptions = undefined) {
   if (rawOptions !== undefined) {
     exactRecord(rawOptions, [], "M10A-T01 verifier options");
   }
-  const current = await executeM10AT01Evidence();
-  const lifecycle = await verifyBrowserProcessLifecycle();
-  const catalogBytes = await readFile(M10A_T01_CATALOG_PATH);
-  if (!catalogBytes.equals(current.identity.catalogBytes)) {
-    fail("CATALOG_DRIFT", "The tracked starter Catalog differs from the current package identity.");
-  }
   const frozen = await readCheckpointedFrozenArtifact("M10A-T01");
-  if (!Buffer.from(frozen.bytes).equals(current.artifactBytes)) {
-    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T01 evidence differs from fresh execution.");
-  }
+  if (frozen.path !== ARTIFACT_RELATIVE_PATH)
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T01 artifact path drifted.");
+  const historical = authenticateHistoricalT01Artifact(Buffer.from(frozen.bytes));
   return deepFreeze({
     status: "PASS",
     task: "M10A-T01",
-    packageDigest: current.identity.packageIdentity.packageDigest,
-    catalogSha256: sha256(current.identity.catalogBytes),
-    artifactSha256: sha256(current.artifactBytes),
-    browserExecutedByVerifier: true,
-    browserProcessLifecycle: lifecycle,
-    browserTests: current.artifact.browser.tests,
+    packageDigest: historical.packageRecord.packageDigest,
+    catalogSha256: historical.catalog.sha256,
+    artifactSha256: frozen.sha256,
+    browserExecutedByVerifier: false,
+    browserTests: historical.browser.tests,
+    checkpointHeadSha256: frozen.checkpointHeadSha256,
   });
 }
 
-/** Authenticates recorded task evidence without duplicating the verifier's browser execution. */
+/** Alias retained for task-chain callers that request recorded historical T01 evidence. */
 export async function verifyM10AT01RecordedEvidence(rawOptions = undefined) {
-  if (rawOptions !== undefined) {
-    exactRecord(rawOptions, [], "M10A-T01 recorded-evidence options");
-  }
-  const identity = await buildM10AT01PackageIdentity();
-  const catalogBytes = await readFile(M10A_T01_CATALOG_PATH);
-  if (!catalogBytes.equals(identity.catalogBytes)) {
-    fail("CATALOG_DRIFT", "The tracked starter Catalog differs from the current package identity.");
-  }
-  const frozen = await readCheckpointedFrozenArtifact("M10A-T01");
-  const artifact = parseJson(Buffer.from(frozen.bytes), "Checkpointed M10A-T01 evidence");
-  const browserObservation = captureBrowserObservation(artifact.browser);
-  const expectedBytes = prettyBytes(buildEvidenceArtifact(identity, browserObservation));
-  if (!Buffer.from(frozen.bytes).equals(expectedBytes)) {
-    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T01 evidence differs from current authorities.");
-  }
-  return deepFreeze({
-    status: "PASS",
-    task: "M10A-T01",
-    packageDigest: identity.packageIdentity.packageDigest,
-    catalogSha256: sha256(identity.catalogBytes),
-    artifactSha256: sha256(expectedBytes),
-    browserExecutedByVerifier: false,
-    browserTests: browserObservation.tests,
-  });
+  return verifyM10AT01Evidence(rawOptions);
 }

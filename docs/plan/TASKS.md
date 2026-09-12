@@ -257,7 +257,7 @@ normal edit/preview paths and 13 losslessly preserved/disclosed unsupported path
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
 unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed
 fixtures; unreviewed or invalid forms fail closed.
-M10A-T05 is dependency-ready but `NOT_STARTED`. The [plan](M10A-IMPLEMENTATION-PLAN.md) and
+M10A-T05 is `IN_PROGRESS`. The [plan](M10A-IMPLEMENTATION-PLAN.md) and
 [task contracts](M10A-TASK-CONTRACTS.md) own scope, negative tests and evidence paths.
 
 | ID       | Status      | Depends on                                       | Deliverable / evidence                                                                 |
@@ -266,7 +266,7 @@ M10A-T05 is dependency-ready but `NOT_STARTED`. The [plan](M10A-IMPLEMENTATION-P
 | M10A-T02 | DONE        | M10A-T01                                         | [Versioned project design-system model and typed token resolver](../proof/M10A-T02.md) |
 | M10A-T03 | DONE        | M10A-T02                                         | Theme/token editor, modes, aliases and loss-aware import/export                        |
 | M10A-T04 | DONE        | M10A-T02                                         | Immutable design-system releases and host snapshot identity                            |
-| M10A-T05 | NOT_STARTED | M10A-T01, M10A-T02                               | Layout, typography and content starter capabilities                                    |
+| M10A-T05 | IN_PROGRESS | M10A-T01, M10A-T02                               | Layout, typography and content starter capabilities                                    |
 | M10A-T06 | NOT_STARTED | M10A-T05                                         | Form-control starter capabilities and accessible field compositions                    |
 | M10A-T07 | NOT_STARTED | M10A-T06                                         | Selection, tabs and numeric-control capabilities                                       |
 | M10A-T08 | NOT_STARTED | M10A-T07                                         | Overlay, menu and disclosure capabilities                                              |

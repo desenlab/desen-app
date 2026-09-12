@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   STARTER_BUTTON_CAPABILITY_ID,
+  STARTER_BOX_CAPABILITY_ID,
   STARTER_CATALOG_ID,
   STARTER_CATALOG_TARGET,
   STARTER_CATALOG_TEMPLATE,
@@ -10,11 +11,27 @@ import {
   STARTER_COMPONENT_REGISTRATIONS,
   STARTER_DIALOG_CAPABILITY_ID,
   STARTER_DIALOG_CONTENT_MAX_ITEMS,
+  STARTER_GRID_CAPABILITY_ID,
+  STARTER_HEADING_CAPABILITY_ID,
+  STARTER_ICON_CAPABILITY_ID,
+  STARTER_IMAGE_CAPABILITY_ID,
+  STARTER_LAYOUT_CONTENT_MAX_ITEMS,
   STARTER_SELECT_CAPABILITY_ID,
+  STARTER_SEPARATOR_CAPABILITY_ID,
+  STARTER_STACK_CAPABILITY_ID,
+  STARTER_TEXT_CAPABILITY_ID,
   STARTER_SELECT_MAX_OPTIONS,
   starterButtonComponentRegistration,
+  starterBoxComponentRegistration,
   starterDialogComponentRegistration,
+  starterGridComponentRegistration,
+  starterHeadingComponentRegistration,
+  starterIconComponentRegistration,
+  starterImageComponentRegistration,
   starterSelectComponentRegistration,
+  starterSeparatorComponentRegistration,
+  starterStackComponentRegistration,
+  starterTextComponentRegistration,
 } from "../src/contracts.js";
 import {
   STARTER_TEMPLATE_ID_PREFIX_MAX_LENGTH,
@@ -34,6 +51,14 @@ describe("starter component contracts", () => {
       STARTER_BUTTON_CAPABILITY_ID,
       STARTER_SELECT_CAPABILITY_ID,
       STARTER_DIALOG_CAPABILITY_ID,
+      STARTER_BOX_CAPABILITY_ID,
+      STARTER_STACK_CAPABILITY_ID,
+      STARTER_GRID_CAPABILITY_ID,
+      STARTER_TEXT_CAPABILITY_ID,
+      STARTER_HEADING_CAPABILITY_ID,
+      STARTER_IMAGE_CAPABILITY_ID,
+      STARTER_ICON_CAPABILITY_ID,
+      STARTER_SEPARATOR_CAPABILITY_ID,
     ]);
     expect(STARTER_CATALOG_TEMPLATE).toMatchObject({
       id: STARTER_CATALOG_ID,
@@ -121,14 +146,18 @@ describe("starter component contracts", () => {
     });
   });
 
-  it("uses one finite closed neutral property schema on every declared style part", () => {
+  it("preserves the original finite neutral property schema on the three T01 controls", () => {
     const hexColor = {
       anyOf: [
         { type: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
         { type: "string", pattern: "^#[0-9A-Fa-f]{8}$" },
       ],
     };
-    const registrations = STARTER_COMPONENT_REGISTRATIONS;
+    const registrations = [
+      starterButtonComponentRegistration,
+      starterSelectComponentRegistration,
+      starterDialogComponentRegistration,
+    ];
     for (const registration of registrations) {
       for (const stylePart of Object.values(registration.manifest.styleParts)) {
         expect(stylePart.propertiesSchema).toMatchObject({
@@ -146,6 +175,91 @@ describe("starter component contracts", () => {
       }
       expectDeeplyFrozen(registration);
     }
+  });
+
+  it("admits finite logical layout, typography, and closed content contracts", () => {
+    const layouts = [
+      starterBoxComponentRegistration,
+      starterStackComponentRegistration,
+      starterGridComponentRegistration,
+    ];
+    for (const registration of layouts) {
+      expect(registration.manifest.category).toBe("layout");
+      expect(registration.manifest.slots.default).toMatchObject({
+        required: true,
+        minItems: 1,
+        maxItems: STARTER_LAYOUT_CONTENT_MAX_ITEMS,
+        acceptsCategories: [
+          "layout",
+          "content",
+          "input",
+          "action",
+          "overlay",
+          "feedback",
+          "complex",
+        ],
+      });
+      expect(registration.manifest.styleParts.root.propertiesSchema).toMatchObject({
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          paddingBlock: { type: "number", minimum: 0, maximum: 512 },
+          paddingInline: { type: "number", minimum: 0, maximum: 512 },
+          width: { anyOf: [{ type: "number" }, { type: "string", enum: ["fill", "hug"] }] },
+          overflow: { type: "string", enum: ["visible", "hidden", "auto"] },
+          justifyContent: {
+            type: "string",
+            enum: ["start", "center", "end", "between", "around", "evenly"],
+          },
+        },
+      });
+      expectDeeplyFrozen(registration);
+    }
+    expect(starterStackComponentRegistration.manifest.propsSchema.properties.direction).toEqual({
+      type: "string",
+      enum: ["vertical", "horizontal"],
+      default: "vertical",
+    });
+    expect(starterGridComponentRegistration.manifest.propsSchema.properties.columns).toEqual({
+      type: "integer",
+      minimum: 1,
+      maximum: 12,
+      default: 2,
+    });
+    expect(starterTextComponentRegistration.manifest.propsSchema.required).toEqual(["text"]);
+    expect(starterHeadingComponentRegistration.manifest.propsSchema.properties.level).toEqual({
+      type: "integer",
+      minimum: 1,
+      maximum: 6,
+      default: 2,
+    });
+    expect(starterImageComponentRegistration.manifest.propsSchema.properties.source).toEqual({
+      type: "string",
+      enum: ["neutral-horizon", "neutral-grid"],
+    });
+    expect(
+      Object.hasOwn(
+        starterImageComponentRegistration.manifest.styleParts.root.propertiesSchema.properties,
+        "color",
+      ),
+    ).toBe(false);
+    expect(
+      Object.hasOwn(
+        starterIconComponentRegistration.manifest.styleParts.root.propertiesSchema.properties,
+        "color",
+      ),
+    ).toBe(true);
+    expect(starterIconComponentRegistration.manifest.propsSchema.properties.name).toEqual({
+      type: "string",
+      enum: ["arrow-right", "check", "close", "info", "menu", "plus", "search"],
+    });
+    expect(
+      starterSeparatorComponentRegistration.manifest.propsSchema.properties.orientation,
+    ).toEqual({
+      type: "string",
+      enum: ["horizontal", "vertical"],
+      default: "horizontal",
+    });
   });
 });
 
@@ -209,6 +323,51 @@ describe("starter node templates", () => {
     });
     expectDeeplyFrozen(dialog);
     expect(JSON.stringify(dialog)).not.toContain("instanceOf");
+  });
+
+  it("creates complete nested layout templates and inert content leaves", () => {
+    const box = createStarterNodeTemplate({
+      capabilityId: STARTER_BOX_CAPABILITY_ID,
+      idPrefix: "surface.box",
+    });
+    const grid = createStarterNodeTemplate({
+      capabilityId: STARTER_GRID_CAPABILITY_ID,
+      idPrefix: "surface.grid",
+    });
+    const image = createStarterNodeTemplate({
+      capabilityId: STARTER_IMAGE_CAPABILITY_ID,
+      idPrefix: "surface.image",
+    });
+    expect(box).toMatchObject({
+      id: "surface.box",
+      use: STARTER_BOX_CAPABILITY_ID,
+      slots: { default: [{ id: "surface.box.content", use: STARTER_TEXT_CAPABILITY_ID }] },
+    });
+    expect(grid).toMatchObject({
+      id: "surface.grid",
+      use: STARTER_GRID_CAPABILITY_ID,
+      slots: {
+        default: [
+          { id: "surface.grid.first", use: STARTER_TEXT_CAPABILITY_ID },
+          { id: "surface.grid.second", use: STARTER_TEXT_CAPABILITY_ID },
+        ],
+      },
+    });
+    expect(image).toEqual({
+      id: "surface.image",
+      use: STARTER_IMAGE_CAPABILITY_ID,
+      props: { alt: "Neutral landscape", fit: "cover", source: "neutral-horizon" },
+    });
+    expectDeeplyFrozen(box);
+    expectDeeplyFrozen(grid);
+    expectDeeplyFrozen(image);
+    expect(() =>
+      createStarterNodeTemplate({
+        capabilityId: STARTER_GRID_CAPABILITY_ID,
+        idPrefix: "surface.grid",
+        reservedIds: ["surface.grid.second"],
+      }),
+    ).toThrow(/identity collision/u);
   });
 
   it("rejects unknown capabilities, invalid prefixes, excess inventory, and all collisions", () => {

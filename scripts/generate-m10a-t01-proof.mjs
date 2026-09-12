@@ -1,8 +1,8 @@
-import { M10AT01ProofError, writeM10AT01Evidence } from "./lib/m10a-t01-proof.mjs";
+import { M10AT01ProofError, verifyM10AT01Evidence } from "./lib/m10a-t01-proof.mjs";
 
 try {
   process.stdout.write(
-    `${JSON.stringify({ status: "CAPTURED", ...(await writeM10AT01Evidence()) }, null, 2)}\n`,
+    `${JSON.stringify({ status: "HISTORICAL", ...(await verifyM10AT01Evidence()) }, null, 2)}\n`,
   );
 } catch (error) {
   process.stderr.write(

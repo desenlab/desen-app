@@ -1,7 +1,7 @@
 import { canonicalizeJson } from "@desen/protocol";
 
 /** Exact browser-local handoff used only between the two bounded proof entry graphs. */
-export const STARTER_PROOF_CHANNEL_KEY = "run.desen.proof/m10a-t01-starter-bundles";
+export const STARTER_PROOF_CHANNEL_KEY = "run.desen.proof/m10a-t05-starter-bundles";
 
 const MAX_ENVELOPE_CODE_UNITS = 8_388_608;
 const LOCAL_ID_PATTERN = /^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u;
@@ -24,11 +24,13 @@ export interface StarterProofEnvelope {
     };
     readonly select: unknown;
     readonly dialog: unknown;
+    readonly layout: unknown;
   };
   readonly roots: {
     readonly button: string;
     readonly select: string;
     readonly dialog: string;
+    readonly layout: string;
   };
 }
 
@@ -80,14 +82,17 @@ export function readStarterProofEnvelope(storage: Storage): StarterProofEnvelope
     !exactKeys(parsed.catalog, ["id", "version", "target", "packageDigest"])
   )
     return undefined;
-  if (!isRecord(parsed.bundles) || !exactKeys(parsed.bundles, ["button", "select", "dialog"]))
+  if (
+    !isRecord(parsed.bundles) ||
+    !exactKeys(parsed.bundles, ["button", "select", "dialog", "layout"])
+  )
     return undefined;
   if (
     !isRecord(parsed.bundles.button) ||
     !exactKeys(parsed.bundles.button, ["initial", "compatible"])
   )
     return undefined;
-  if (!isRecord(parsed.roots) || !exactKeys(parsed.roots, ["button", "select", "dialog"]))
+  if (!isRecord(parsed.roots) || !exactKeys(parsed.roots, ["button", "select", "dialog", "layout"]))
     return undefined;
   const id = readText(parsed.catalog, "id");
   const version = readText(parsed.catalog, "version");
@@ -96,8 +101,9 @@ export function readStarterProofEnvelope(storage: Storage): StarterProofEnvelope
   const button = readText(parsed.roots, "button");
   const select = readText(parsed.roots, "select");
   const dialog = readText(parsed.roots, "dialog");
+  const layout = readText(parsed.roots, "layout");
   if (
-    [id, version, target, packageDigest, button, select, dialog].some(
+    [id, version, target, packageDigest, button, select, dialog, layout].some(
       (value) => value === undefined,
     )
   )
@@ -109,7 +115,8 @@ export function readStarterProofEnvelope(storage: Storage): StarterProofEnvelope
     !SHA256_PATTERN.test(packageDigest as string) ||
     !LOCAL_ID_PATTERN.test(button as string) ||
     !LOCAL_ID_PATTERN.test(select as string) ||
-    !LOCAL_ID_PATTERN.test(dialog as string)
+    !LOCAL_ID_PATTERN.test(dialog as string) ||
+    !LOCAL_ID_PATTERN.test(layout as string)
   )
     return undefined;
   return parsed as unknown as StarterProofEnvelope;

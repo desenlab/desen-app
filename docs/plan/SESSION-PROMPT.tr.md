@@ -10,7 +10,7 @@ Yeni bir geliştirme oturumunda aşağıdaki metni görev kimliğiyle birlikte k
 > Tam güncel PR head'inin hosted Quality gate sonucu geçmeden görevi DONE yapma. `pnpm check`
 > kapsamlı denetim ve kapı kapanışı içindir. Sonunda neyin kanıtlandığını ve sıradaki tek görevi açıkla.
 
-Sıradaki uygun M10A görevini başlatmak için:
+Aktif M10A görevini sürdürmek için:
 
 > Yukarıdaki kurallarla yalnız `M10A-T05` görevini uygula. Önce M10A-IMPLEMENTATION-PLAN,
 > M10A-TASK-CONTRACTS, ADR 0023 ve tamamlanmış T01–T04 kanıtlarını oku. T01'in Base UI adaptör
@@ -18,6 +18,5 @@ Sıradaki uygun M10A görevini başlatmak için:
 > sonucunu ve T04'ün immutable release kimliğini donmuş predecessor olarak tüket. Box, Stack, Grid,
 > Text/Heading, Image, Icon ve Separator için yalnız T05 kapsamını uygula; T06 ve sonraki görevleri,
 > Runtime activation'ı, normal App persistence'ını, Publisher/Core/protokol değişikliğini veya M11'i
-> dahil etme. T05 şu anda dependency-ready `NOT_STARTED` durumundadır; işe başlatan açık görev ataması
-> olmadan durumunu değiştirme. Başlatıldığında tam güncel PR head'inin hosted Quality gate'i geçmeden
-> görevi `DONE` yapma.
+> dahil etme. T05 şu anda tek yetkili `IN_PROGRESS` görevdir. Tam güncel PR head'inin hosted Quality
+> gate'i geçmeden görevi `DONE` yapma.

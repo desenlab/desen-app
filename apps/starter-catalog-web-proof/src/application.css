@@ -86,6 +86,10 @@ h1 {
   font-size: 16px;
 }
 
+.proof-card-wide {
+  grid-column: 1 / -1;
+}
+
 .proof-metadata {
   margin-top: 24px;
   border-top: 1px solid #d7d7d2;

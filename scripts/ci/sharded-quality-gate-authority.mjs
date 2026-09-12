@@ -11,12 +11,12 @@ import { classifyProofPairState } from "./shared-state-authority.mjs";
 export const SHARD_IDS = Object.freeze(["proof-a", "proof-b", "proof-c"]);
 /** Reviewed identity of the logical coverage, replicated prerequisites, and static assignment. */
 export const SHARDED_QUALITY_GATE_PLAN_SHA256 =
-  "d8e7667892204225f08083f2dafcf729e99271ceee9593d0c05053482def8660";
+  "8898a2c0bbf1ea648c0380ebc32b9686bb92a3e752abc730da59d22b0cc06a20";
 /** Distinct distributed-plan profile; the historical monolithic authority remains unchanged. */
 export const SHARDED_QUALITY_GATE_PROFILE = "desen.ci.sharded-quality-gate-plan.v1";
 /** Public summary schema, which by itself grants neither hosted nor local-close authority. */
 export const REQUIRED_PROOF_SHARD_SUMMARY_PROFILE = "desen.ci.required-proof-shard-summary.v1";
-const PARENT_PLAN_SHA256 = "950b6444d03cad22e3852be2f6302546c25ef0bc641cec60e8aa75271e639ef0";
+const PARENT_PLAN_SHA256 = "112fa865ea09637ee00ef9a38b7e9cede77bb491220ef657a7c5c373a8ac2496";
 const PREFIX_IDS = Object.freeze([
   "orchestrator-contracts",
   "format",
@@ -29,6 +29,7 @@ const PREFIX_IDS = Object.freeze([
   "design-system-core-public-package-contract",
   "design-system-authoring-public-package-contract",
   "design-system-release-public-package-contract",
+  "starter-catalog-web-public-package-contract",
 ]);
 const JOIN_PREPARATION_IDS = Object.freeze(["workspace-graph"]);
 const SUFFIX_IDS = Object.freeze(["dependency-boundaries", "boundary-fixtures"]);
@@ -140,8 +141,8 @@ function assertIdsEqual(actual, expected, label) {
 }
 
 /**
- * Builds the fixed 53/24/37 proof-pair partition from the authenticated 241-node inventory.
- * Its logical coverage remains 241; three prefixes and the join's fresh build execute 264
+ * Builds the fixed 53/24/38 proof-pair partition from the authenticated 244-node inventory.
+ * Its logical coverage remains 244; three prefixes and the join's fresh build execute 269
  * physical workloads. No duplicate preparation is represented as a skipped successful close.
  */
 export function createShardedQualityGatePlan(rawOptions = undefined) {
@@ -162,7 +163,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     SUFFIX_IDS,
     "The suffix",
   );
-  if (inventory.workloadCount !== 241 || inventory.proofUnitCount !== 114) {
+  if (inventory.workloadCount !== 244 || inventory.proofUnitCount !== 115) {
     fail("SHARDED_QUALITY_GATE_PLAN_DRIFT", "The exhaustive workload universe changed.");
   }
   const completedPrefix = new Set();
@@ -192,7 +193,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     "The partition",
   );
   if (
-    new Set(shardProjections.flatMap(({ proofPairIds }) => proofPairIds)).size !== 114 ||
+    new Set(shardProjections.flatMap(({ proofPairIds }) => proofPairIds)).size !== 115 ||
     shardProjections.some(
       ({ barrierPairIds }, index) => barrierPairIds.length !== [11, 0, 2][index],
     )
@@ -210,8 +211,8 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     parentPlanSha256: PARENT_PLAN_SHA256,
     inventorySha256: inventory.inventorySha256,
     concurrencyPerShard: 2,
-    logicalWorkloadCount: 241,
-    proofPairCount: 114,
+    logicalWorkloadCount: 244,
+    proofPairCount: 115,
     prefixIds: PREFIX_IDS,
     joinPreparationIds: JOIN_PREPARATION_IDS,
     suffixIds: SUFFIX_IDS,
@@ -242,7 +243,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
   });
   const logicalNodeIds = inventory.nodes.map(({ id }) => id);
   const covered = new Set([...shards.flatMap(({ nodeIds }) => nodeIds), ...SUFFIX_IDS]);
-  if (covered.size !== 241 || logicalNodeIds.some((id) => !covered.has(id))) {
+  if (covered.size !== 244 || logicalNodeIds.some((id) => !covered.has(id))) {
     fail("SHARDED_QUALITY_GATE_PLAN_DRIFT", "Distributed coverage is not exactly exhaustive.");
   }
   const plan = deepFreeze({
@@ -252,9 +253,9 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     logicalNodeIds,
     completedBeforeJoinNodeIds: logicalNodeIds.filter((id) => !SUFFIX_IDS.includes(id)),
     joinNodeIds: [...JOIN_PREPARATION_IDS, ...SUFFIX_IDS],
-    stepCount: 241,
-    physicalWorkloadCount: 264,
-    repeatedPrefixWorkloadCount: 22,
+    stepCount: 244,
+    physicalWorkloadCount: 269,
+    repeatedPrefixWorkloadCount: 24,
     additionalJoinPreparationCount: 1,
   });
   AUTHENTIC_PLANS.add(plan);

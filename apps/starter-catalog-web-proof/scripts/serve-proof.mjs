@@ -1,13 +1,26 @@
 import { createReadStream } from "node:fs";
 import { lstat, realpath } from "node:fs/promises";
 import { createServer } from "node:http";
-import { extname, join, normalize, resolve, sep } from "node:path";
+import { extname, isAbsolute, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const PORT = 4187;
 const ORIGIN = `http://127.0.0.1:${PORT}`;
 const PACKAGE_ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
-const DIST_ROOT = await realpath(join(PACKAGE_ROOT, "dist"));
+const configuredProofTemp = process.env.DESEN_M10A_T05_PROOF_TEMP;
+if (
+  configuredProofTemp !== undefined &&
+  (!isAbsolute(configuredProofTemp) ||
+    resolve(configuredProofTemp) !== configuredProofTemp ||
+    configuredProofTemp.includes("\0"))
+) {
+  throw new TypeError("DESEN_M10A_T05_PROOF_TEMP must be a canonical absolute directory.");
+}
+const DIST_ROOT = await realpath(
+  configuredProofTemp === undefined
+    ? join(PACKAGE_ROOT, "dist")
+    : resolve(configuredProofTemp, "dist"),
+);
 
 const CONTENT_TYPES = new Map([
   [".css", "text/css; charset=utf-8"],

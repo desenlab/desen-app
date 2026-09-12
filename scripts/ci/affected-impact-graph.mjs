@@ -283,12 +283,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
     ["m10a-t02", ["m10a-t01"]],
     ["m10a-t03", ["m10a-t02"]],
     ["m10a-t04", ["m10a-t02"]],
+    ["m10a-t05", ["m10a-t01", "m10a-t02"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "342c4d931ad59329140d730c01779a98dbdc2475c8bdf43814b3730c56dbfe8e";
+  "07ae29b068958cb897ce8c6f67734fce10463071853842e618877b044e44c9b5";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {
@@ -545,6 +546,9 @@ export function createAffectedImpactClosure(ownerProofUnitIds) {
   }
   if (proofUnitIds.includes("m10a-t04")) {
     conditionalPrefixNodeIds.push("design-system-release-public-package-contract");
+  }
+  if (proofUnitIds.includes("m10a-t05")) {
+    conditionalPrefixNodeIds.push("starter-catalog-web-public-package-contract");
   }
   const selected = new Set([
     ...PREFIX_NODE_IDS,

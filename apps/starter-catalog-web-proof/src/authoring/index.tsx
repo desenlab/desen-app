@@ -17,6 +17,7 @@ const mounted = Object.freeze({
   button: mountStarterProofSurface(prepared.envelope.bundles.button.initial, starterProofCatalog),
   select: mountStarterProofSurface(prepared.envelope.bundles.select, starterProofCatalog),
   dialog: mountStarterProofSurface(prepared.envelope.bundles.dialog, starterProofCatalog),
+  layout: mountStarterProofSurface(prepared.envelope.bundles.layout, starterProofCatalog),
 });
 
 function revision(bundle: unknown): string {
@@ -30,10 +31,10 @@ function AuthoringProof() {
     <div className="proof-shell" data-proof-ready="authoring">
       <header className="proof-header">
         <div>
-          <p className="proof-eyebrow">M10A-T01 · bounded authoring graph</p>
+          <p className="proof-eyebrow">M10A-T05 · bounded authoring graph</p>
           <h1>Source → Publisher → Runtime</h1>
           <p className="proof-lede">
-            Three fixed Source surfaces are published and materialized through the reviewed Neutral
+            Four fixed Source surfaces are published and materialized through the reviewed Neutral
             starter registry. This harness is not normal DESEN App UI.
           </p>
         </div>
@@ -66,6 +67,14 @@ function AuthoringProof() {
             surfaceName="dialog"
           />
         </article>
+        <article className="proof-card proof-card-wide">
+          <h2>Nested layout and content Source</h2>
+          <StarterProofSurface
+            mounted={mounted.layout}
+            rootNodeId={prepared.envelope.roots.layout}
+            surfaceName="layout"
+          />
+        </article>
       </div>
       <div
         className="proof-metadata"
@@ -74,6 +83,18 @@ function AuthoringProof() {
         }
         data-negative-unknown-part={
           prepared.negative.unknownPart.rejected ? "rejected" : "accepted"
+        }
+        data-negative-invalid-dimension={
+          prepared.negative.invalidDimension.rejected ? "rejected" : "accepted"
+        }
+        data-negative-unsupported-image-color={
+          prepared.negative.unsupportedImageColor.rejected ? "rejected" : "accepted"
+        }
+        data-negative-unsafe-image-source={
+          prepared.negative.unsafeImageSource.rejected ? "rejected" : "accepted"
+        }
+        data-negative-private-selector={
+          prepared.negative.privateSelector.rejected ? "rejected" : "accepted"
         }
       >
         Exact Catalog: {prepared.envelope.catalog.id}@{prepared.envelope.catalog.version} · Button

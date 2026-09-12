@@ -216,7 +216,7 @@ success.
 
 M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice,
 T02's platform-neutral project/token foundation, T03's authoring/workbench slice, and T04's
-immutable release identity are `DONE`, while the other 24 tasks remain `NOT_STARTED`.
+immutable release identity are `DONE`; T05 is `IN_PROGRESS`, while the other 23 tasks remain `NOT_STARTED`.
 Later workbench features remain planned; no publication or production authority follows from this text.
 [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the decision,
 while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
@@ -251,8 +251,9 @@ T02 adds `@desen/design-system-core`, while normal App composition remains later
 
 T04's task-owned proof records its exact-head and fresh-`main` closure. It does not authorize
 Runtime activation, normal App integration, durable production storage, materialization, Publisher
-or Runtime changes, protocol changes, or M11. T05 is dependency-ready but remains `NOT_STARTED`
-until explicitly selected.
+or Runtime changes, protocol changes, or M11. T05 is `IN_PROGRESS` only for bounded layout/content
+starter capabilities; it does not authorize T06+, Runtime activation, normal-App integration or
+persistence, Publisher/Core/protocol changes, G10A, or M11.
 
 Across later M10A tasks, an App-owned versioned editable-project record becomes the durable
 authoring aggregate. It atomically

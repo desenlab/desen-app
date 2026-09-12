@@ -3648,3 +3648,26 @@ passed both jobs. Overall progress is 125/176 (71%), M10A is 4/28 (14%), and pro
 11/14. M10A-T05 is dependency-ready but `NOT_STARTED`. T04 does not activate a release or change
 Runtime, Publisher, the normal App, durable production storage, package publication, protocol
 authority, G10A, or M11.
+
+## M10A-T05 layout and content capabilities (`IN_PROGRESS`, local evidence)
+
+The [M10A-T05 report](M10A-T05.md) records the in-progress extension of the private
+`@desen/starter-catalog-web` Catalog with Box, Stack, Grid, Text, Heading, Image, Icon, and
+Separator. The slice uses closed layout/content schemas, declared managed slots, logical RTL
+properties, semantic Web output where Base UI is unnecessary, and only named in-package image and
+icon choices. It rejects unknown style properties, invalid dimensions, executable content, private
+selectors, and remote media rather than accepting a partial rendering.
+
+The local candidate proof publishes four fixed Source surfaces through Publisher and renders them
+in independently built authoring and host graphs using the same static adapter registry. Its
+Chromium receipt checks nested logical layout, semantic content, trusted local media, and the
+existing bounded Select/Dialog interaction and isolation behavior. The candidate artifact is
+[`artifacts/m10a-t05.json`](artifacts/m10a-t05.json), but it is not final checkpointed or hosted
+closure evidence.
+
+This entry is `PARTIAL` only in the matrix sense: T05 is active and local evidence may inform the
+implementation, but no claim becomes `PROVEN` and no project/gate progress changes here. The
+preceding T04 statement preserves its historical closure-time status; current T05 status is
+`IN_PROGRESS`. T01's immutable artifact remains historical and is not rewritten or promoted as
+fresh T05 evidence. T05 makes no normal-App, asset/font admission, freeform CSS, runtime
+activation, package-publication, release, or M11 claim.

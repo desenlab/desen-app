@@ -70,7 +70,8 @@ destructive import. No hidden CSS, arbitrary code, remote module selection or cr
 
 - Owns: Box/Stack/Grid, Text/Heading, Image/Icon and Separator contracts plus Web adapters.
 - Deliver: typed public layout/appearance parts, sensible Neutral defaults, accessible semantics and
-  slot/category schemas. Use semantic HTML where a Base UI primitive is unnecessary.
+  slot/category schemas. The additive current Catalog line is `0.2.0`; T01's original `0.1.0`
+  artifact remains historical. Use semantic HTML where a Base UI primitive is unnecessary.
 - Prove: all plan-listed layouts/styles in both renderers, logical RTL alignment and nested slots.
   Reject unknown style properties, invalid dimensions, executable content and private selectors.
 

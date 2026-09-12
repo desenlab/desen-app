@@ -6,11 +6,11 @@ import { defineConfig, devices } from "@playwright/test";
 
 const APP_ORIGIN = "http://127.0.0.1:4187";
 const PACKAGE_ROOT = import.meta.dirname;
-const configuredProofTemp = process.env.DESEN_M10A_T01_PROOF_TEMP;
-const proofTemp = configuredProofTemp ?? mkdtempSync(join(tmpdir(), "desen-m10a-t01-"));
+const configuredProofTemp = process.env.DESEN_M10A_T05_PROOF_TEMP;
+const proofTemp = configuredProofTemp ?? mkdtempSync(join(tmpdir(), "desen-m10a-t05-"));
 
 if (!isAbsolute(proofTemp) || resolve(proofTemp) !== proofTemp) {
-  throw new TypeError("DESEN_M10A_T01_PROOF_TEMP must be an absolute runner-owned temp directory.");
+  throw new TypeError("DESEN_M10A_T05_PROOF_TEMP must be an absolute runner-owned temp directory.");
 }
 const browserProofPath = resolve(proofTemp, "browser-proof.json");
 rmSync(browserProofPath, { force: true });

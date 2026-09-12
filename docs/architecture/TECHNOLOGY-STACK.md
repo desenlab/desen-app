@@ -52,7 +52,7 @@ fresh compatibility checks.
 Map provider, drag-and-drop adapter, router, query cache, and UI component dependencies are chosen
 only by their owning tasks and require an ADR when they affect public capability contracts.
 
-## M10A product foundation — T01 through T04 complete
+## M10A product foundation — T01 through T04 complete; T05 active
 
 M10A-T01 pins `@base-ui/react` **1.8.0** behind the private
 `@desen/starter-catalog-web` Catalog/adapter package, with DESEN-owned Neutral styles implemented
@@ -78,7 +78,7 @@ Publisher, Runtime, or protocol authority. M10A-T04 is `DONE`: it adds platform-
 `@desen/design-system-release`, finite content-addressed token/asset/inert-recipe snapshots, exact
 host-profile references, and a no-`latest` exact-digest store port. It adds no Runtime activation,
 normal App integration, durable production storage, Publisher, or protocol authority. M10A-T05 is
-dependency-ready but `NOT_STARTED`; M11 has not started.
+`IN_PROGRESS` for bounded layout/content starter capabilities; M11 has not started.
 The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
 capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
 and hermetic capture configuration. No Storybook, Chromatic, Tailwind or second primitive library

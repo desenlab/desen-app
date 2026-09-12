@@ -26,7 +26,7 @@ test(STARTER_BROWSER_PROOF_TEST_TITLES.publication, async ({ page, request }) =>
   await page.goto("/authoring.html");
   await expect(page.locator("[data-proof-ready='authoring']")).toBeVisible();
 
-  await expect(page.locator("[data-proof-surface]")).toHaveCount(3);
+  await expect(page.locator("[data-proof-surface]")).toHaveCount(4);
   await expect(page.locator("[data-negative-unknown-capability='rejected']")).toHaveCount(1);
   await expect(page.locator("[data-negative-unknown-part='rejected']")).toHaveCount(1);
   await expect(
@@ -37,6 +37,11 @@ test(STARTER_BROWSER_PROOF_TEST_TITLES.publication, async ({ page, request }) =>
       .locator("[data-proof-surface='select']")
       .getByRole("combobox", { name: "Release channel" }),
   ).toBeVisible();
+  await expect(page.locator("[data-proof-surface='layout']")).toBeVisible();
+  await expect(page.locator("[data-negative-invalid-dimension='rejected']")).toHaveCount(1);
+  await expect(page.locator("[data-negative-unsupported-image-color='rejected']")).toHaveCount(1);
+  await expect(page.locator("[data-negative-unsafe-image-source='rejected']")).toHaveCount(1);
+  await expect(page.locator("[data-negative-private-selector='rejected']")).toHaveCount(1);
   await expect(
     page
       .locator("[data-proof-surface='dialog']")
@@ -56,6 +61,93 @@ test(STARTER_BROWSER_PROOF_TEST_TITLES.publication, async ({ page, request }) =>
     result: "PASS",
     assertions: { publisherPresent: true, exactStarterRegistryPresent: true },
   });
+});
+
+test(STARTER_BROWSER_PROOF_TEST_TITLES.layoutContent, async ({ page }) => {
+  async function expectLayoutSurface(surfaceName: "authoring" | "host"): Promise<void> {
+    const surface = page.locator("[data-proof-surface='layout']");
+    await expect(surface).toBeVisible();
+    const root = surface.locator("[dir='rtl']").first();
+    await expect(root).toHaveAttribute("dir", "rtl");
+    expect(
+      await root.evaluate((element) => {
+        const html = element as HTMLElement;
+        const computed = getComputedStyle(html);
+        return {
+          borderTopColor: computed.borderTopColor,
+          borderTopStyle: computed.borderTopStyle,
+          borderTopWidth: computed.borderTopWidth,
+          marginInline: html.style.marginInline,
+          paddingInline: html.style.paddingInline,
+          textAlign: html.style.textAlign,
+          width: html.style.width,
+        };
+      }),
+    ).toEqual({
+      borderTopColor: "rgb(229, 229, 229)",
+      borderTopStyle: "solid",
+      borderTopWidth: "1px",
+      marginInline: "",
+      paddingInline: "24px",
+      textAlign: "start",
+      width: "100%",
+    });
+    await expect(
+      surface.getByRole("heading", { name: "Neutral layout system", level: 2 }),
+    ).toBeVisible();
+    await expect(
+      surface.getByText("Semantic content is composed through declared, nested slots."),
+    ).toHaveCount(1);
+    const image = surface.getByRole("img", { name: "Neutral horizon" });
+    await expect(image).toBeVisible();
+    expect(await image.getAttribute("src")).toMatch(/^data:image\/svg\+xml,/u);
+    await expect(surface.getByRole("img", { name: "Information" })).toBeVisible();
+    await expect(surface.getByText("First logical grid item")).toBeVisible();
+    const grid = surface.getByText("First logical grid item").locator("..");
+    const gridStyle = await grid.evaluate((element) => {
+      const html = element as HTMLElement;
+      return {
+        display: html.style.display,
+        gridAutoFlow: html.style.gridAutoFlow,
+        gridTemplateColumns: html.style.gridTemplateColumns,
+        gridTemplateRows: html.style.gridTemplateRows,
+        overflow: html.style.overflow,
+      };
+    });
+    expect(gridStyle.display).toBe("grid");
+    expect(gridStyle.gridAutoFlow).toBe("column");
+    expect(gridStyle.gridTemplateColumns).toMatch(/^repeat\(2, minmax\(0(?:px)?, 1fr\)\)$/u);
+    expect(gridStyle.gridTemplateRows).toMatch(/^repeat\(4, minmax\(0(?:px)?, auto\)\)$/u);
+    expect(gridStyle.overflow).toBe("auto");
+    await expect(surface.locator("hr")).toHaveCount(1);
+    const verticalSeparator = surface.locator("[role='separator'][aria-orientation='vertical']");
+    await expect(verticalSeparator).toBeVisible();
+    const verticalSeparatorGeometry = await verticalSeparator.evaluate((element) => {
+      const html = element as HTMLElement;
+      const bounds = html.getBoundingClientRect();
+      return {
+        backgroundColor: getComputedStyle(html).backgroundColor,
+        height: bounds.height,
+        minHeight: getComputedStyle(html).minHeight,
+        width: bounds.width,
+      };
+    });
+    expect(verticalSeparatorGeometry.backgroundColor).toBe("rgb(229, 229, 229)");
+    expect(verticalSeparatorGeometry.minHeight).toBe("24px");
+    expect(verticalSeparatorGeometry.height).toBeGreaterThanOrEqual(24);
+    expect(verticalSeparatorGeometry.width).toBeGreaterThanOrEqual(1);
+    await expect(surface.locator("script")).toHaveCount(0);
+    await expect(surface.locator("[style*='left']")).toHaveCount(0);
+    await expect(surface).toHaveAttribute("data-proof-surface", "layout");
+    void surfaceName;
+  }
+
+  await page.goto("/authoring.html");
+  await expect(page.locator("[data-proof-ready='authoring']")).toBeVisible();
+  await expectLayoutSurface("authoring");
+  await page.goto("/host.html");
+  await expect(page.locator("[data-proof-ready='host']")).toBeVisible();
+  await expectLayoutSurface("host");
 });
 
 test(STARTER_BROWSER_PROOF_TEST_TITLES.interactions, async ({ page }) => {
