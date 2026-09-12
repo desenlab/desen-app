@@ -305,13 +305,13 @@ test("authenticates the exact 20/20 hosted campaign and live M10A-T04 successor"
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "eebe3e34a54d781b13aa1129e12d3c7e83cf6ee26bcd47391a92dbe2c327ca68",
+    selectorSha256: "9495085e9a7054c472027755633332c01cc7f2ee871cd356f85436e92a1ba02f",
     ownershipSha256: "266601f9d7744dc95bfd686093c7fa2baf3f113df57400c3b100482c7211f5b9",
     impactGraphSha256: "342c4d931ad59329140d730c01779a98dbdc2475c8bdf43814b3730c56dbfe8e",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "3607817284ab3a40736153ddd02534ec0422acdd28c10ee7c1f39d077cb0c659",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "e985e0499eb4885470dfed7ea57def543b80b4747a94b6997b6b07481e1bba72",
+    runnerAuthoritySha256: "c780475fd17bb5c3d292427f5b5633cfda8bfe735e2413ad68263a7f541a8aba",
   });
 });
 
@@ -375,8 +375,8 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "7709fb58241f035c3ce81de7998173529f030fc57c6099b330defbd994a8e758",
-    checkpoints: 88,
+    headSha256: "bf1cb0a2b79f0a5a8d9228f2ea3fc0209f1558d2d6f6e8e03b11f19bf50c6a50",
+    checkpoints: 89,
     frozenArtifacts: 68,
     currentReaders: 136,
   };
