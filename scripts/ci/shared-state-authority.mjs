@@ -174,6 +174,7 @@ export const PROOF_IDS = Object.freeze([
   "m10a-t03",
   "m10a-t04",
   "m10a-t05",
+  "m10a-t06",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -189,6 +190,7 @@ export const READ_ONLY_ROOT_PROOF_IDS = Object.freeze([
   "runtime-core-resource-lifecycle",
   "runtime-core-state-navigation-actions",
   "desen-app-published-host-update",
+  "m10a-t05",
 ]);
 
 /** The sole proof id whose root test currently requires workspace-scoped temporary writes. */
@@ -218,7 +220,7 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
 
 /** Exact verifiers allowed to execute their task-owned fixed-port browser toolchains. */
 export const BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS = Object.freeze([
-  "verify-m10a-t05",
+  "verify-m10a-t06",
   "verify-m10a-t03",
 ]);
 if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 2) {
@@ -226,9 +228,9 @@ if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 2) {
 }
 
 const BROWSER_AUTHORITY_BY_STEP_ID = Object.freeze({
-  "verify-m10a-t05": Object.freeze({
-    port: 4_187,
-    tempEnvironmentKey: "DESEN_M10A_T05_PROOF_TEMP",
+  "verify-m10a-t06": Object.freeze({
+    port: 4_189,
+    tempEnvironmentKey: "DESEN_M10A_T06_PROOF_TEMP",
   }),
   "verify-m10a-t03": Object.freeze({
     port: 4_188,
@@ -325,6 +327,17 @@ if (FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS.length !== 10) {
 }
 
 const READ_ONLY_ROOT_PROOF_ID_SET = new Set(READ_ONLY_ROOT_PROOF_IDS);
+// The frozen T05 receipt reader is a Node test with no temporary-write requirement. Other
+// read-only roots retain their existing runner-temp authority until their own proof contracts are
+// separately narrowed.
+const STRICT_READ_ONLY_ROOT_PROOF_ID_SET = new Set(["m10a-t05"]);
+if (
+  [...STRICT_READ_ONLY_ROOT_PROOF_ID_SET].some(
+    (proofId) => !READ_ONLY_ROOT_PROOF_ID_SET.has(proofId),
+  )
+) {
+  throw new Error("A strict read-only root must remain inside the reviewed read-only root set.");
+}
 const WORKSPACE_TEMP_ROOT_PROOF_ID_SET = new Set(WORKSPACE_TEMP_ROOT_PROOF_IDS);
 const CHILD_PROCESS_VERIFIER_PROOF_ID_SET = new Set(CHILD_PROCESS_VERIFIER_PROOF_IDS);
 const READ_ONLY_GIT_VERIFIER_PROOF_ID_SET = new Set(READ_ONLY_GIT_VERIFIER_PROOF_IDS);
@@ -638,6 +651,7 @@ for (const proofId of PROOF_IDS) {
     );
   } else {
     const readOnly = READ_ONLY_ROOT_PROOF_ID_SET.has(proofId);
+    const strictReadOnly = STRICT_READ_ONLY_ROOT_PROOF_ID_SET.has(proofId);
     const trackedAliasExclusive =
       FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_ID_SET.has(testStepId);
     const trackedAliasWorkspaceWrites = trackedAliasExclusive
@@ -662,8 +676,8 @@ for (const proofId of PROOF_IDS) {
             ? EXECUTION_CLASSES.PROOF_TRACKED_ALIAS_EXCLUSIVE
             : EXECUTION_CLASSES.PROOF_OS_TEMP_ISOLATED,
         workspaceWrites: trackedAliasWorkspaceWrites,
-        tempPolicy: TEMP_POLICIES.RUNNER_SCOPED_OS,
-        tempKey: testStepId,
+        tempPolicy: strictReadOnly ? TEMP_POLICIES.NONE : TEMP_POLICIES.RUNNER_SCOPED_OS,
+        tempKey: strictReadOnly ? null : testStepId,
         childProcessPolicy: CHILD_PROCESS_POLICIES.NODE_TEST_HARNESS,
         nativeAddonPolicy:
           NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID[testStepId] ?? NATIVE_ADDON_POLICIES.NONE,
@@ -674,8 +688,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 244) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 244 steps.", {
+if (METADATA_BY_STEP_ID.size !== 246) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 246 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }
@@ -1242,11 +1256,13 @@ export async function createProofStepIsolationContext({
     delete environment.DESEN_M10A_T01_PROOF_TEMP;
     delete environment.DESEN_M10A_T05_PROOF_TEMP;
     delete environment.DESEN_M10A_T03_PROOF_TEMP;
+    delete environment.DESEN_M10A_T06_PROOF_TEMP;
     environment[browserAuthority.tempEnvironmentKey] = temp.path;
   } else {
     delete environment.DESEN_M10A_T01_PROOF_TEMP;
     delete environment.DESEN_M10A_T05_PROOF_TEMP;
     delete environment.DESEN_M10A_T03_PROOF_TEMP;
+    delete environment.DESEN_M10A_T06_PROOF_TEMP;
     const nodeOptions = [
       "--permission",
       ...workspace.permissionPaths.map((allowedPath) => `--allow-fs-read=${allowedPath}`),

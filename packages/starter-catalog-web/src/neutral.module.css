@@ -216,3 +216,176 @@
   min-height: 24px;
   align-self: stretch;
 }
+
+.formField {
+  display: grid;
+  width: min(100%, 420px);
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.formLabel,
+.formLegend,
+.radioLabel {
+  color: var(--desen-neutral-text, #171717);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.formLegend {
+  padding: 0;
+}
+
+.formRequired {
+  color: var(--desen-neutral-text, #171717);
+}
+
+.formHelp,
+.formError {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.formHelp {
+  color: var(--desen-neutral-muted, #525252);
+}
+
+.formError {
+  color: #a82626;
+}
+
+.formTextControl,
+.formTextArea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  color: var(--desen-neutral-text, #171717);
+  border: 1px solid var(--desen-neutral-border, #d4d4d0);
+  border-radius: var(--desen-neutral-radius, 8px);
+  outline: 0;
+  background: var(--desen-neutral-surface, #ffffff);
+  font: inherit;
+  line-height: 1.45;
+}
+
+.formTextArea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.formTextControl::placeholder,
+.formTextArea::placeholder {
+  color: #737373;
+  opacity: 1;
+}
+
+.formTextControl:disabled,
+.formTextArea:disabled,
+.checkboxControl[data-disabled],
+.radioControl[data-disabled],
+.switchControl[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.formChoice,
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.formChoice > .formLabel,
+.radioOption > .radioLabel {
+  cursor: pointer;
+}
+
+.formChoice > .checkboxControl[data-disabled] ~ .formLabel,
+.formChoice > .switchControl[data-disabled] ~ .formLabel,
+.radioOption > .radioControl[data-disabled] ~ .radioLabel {
+  cursor: not-allowed;
+}
+
+.checkboxControl,
+.radioControl,
+.switchControl {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--desen-neutral-surface, #ffffff);
+  border: 1px solid var(--desen-neutral-text, #171717);
+  background: var(--desen-neutral-surface, #ffffff);
+  cursor: pointer;
+}
+
+.checkboxControl,
+.radioControl {
+  width: 20px;
+  height: 20px;
+}
+
+.checkboxControl {
+  border-radius: 5px;
+}
+
+.checkboxControl[data-checked] {
+  background: var(--desen-neutral-text, #171717);
+}
+
+.checkboxIndicator {
+  color: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.radioGroup {
+  display: grid;
+  gap: 10px;
+}
+
+.radioControl {
+  border-radius: 50%;
+}
+
+.radioControl[data-checked] {
+  border-width: 6px;
+}
+
+.radioIndicator {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--desen-neutral-text, #171717);
+}
+
+.switchControl {
+  width: 40px;
+  height: 24px;
+  padding: 2px;
+  border-radius: 999px;
+}
+
+.switchControl[data-checked] {
+  background: var(--desen-neutral-text, #171717);
+}
+
+.switchThumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--desen-neutral-text, #171717);
+  transition: transform 120ms ease;
+}
+
+.switchControl[data-checked] .switchThumb {
+  transform: translateX(16px);
+  background: var(--desen-neutral-surface, #ffffff);
+}

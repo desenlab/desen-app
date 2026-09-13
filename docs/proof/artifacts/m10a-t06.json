@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T06",
+  "proofId": "m10a-t06",
+  "profile": "desen.m10a-t06.form-controls.v1",
+  "result": "PASS",
+  "package": {
+    "name": "@desen/starter-catalog-web",
+    "catalog": {
+      "id": "run.desen.starter.web",
+      "version": "0.3.0",
+      "target": "web-react",
+      "sha256": "e131b8b02be9e4b50d38bf6b0e454ebbd79da8e134ca1d6bd90b943b05beddd5",
+      "bytes": 237432
+    },
+    "packageDigest": "sha256:1b112e64456c2b706336b1be4ae3983e5fbfc21b9d5469df141561ba446da957",
+    "digestProfile": "desen.web-react.package-digest",
+    "distFiles": 25,
+    "distBytes": 1307199
+  },
+  "capabilities": {
+    "ids": [
+      "run.desen.starter/Box",
+      "run.desen.starter/Button",
+      "run.desen.starter/Checkbox",
+      "run.desen.starter/Dialog",
+      "run.desen.starter/Grid",
+      "run.desen.starter/Heading",
+      "run.desen.starter/Icon",
+      "run.desen.starter/Image",
+      "run.desen.starter/RadioGroup",
+      "run.desen.starter/Select",
+      "run.desen.starter/Separator",
+      "run.desen.starter/Stack",
+      "run.desen.starter/Switch",
+      "run.desen.starter/Text",
+      "run.desen.starter/TextArea",
+      "run.desen.starter/TextField"
+    ],
+    "formControls": [
+      "run.desen.starter/Checkbox",
+      "run.desen.starter/RadioGroup",
+      "run.desen.starter/Switch",
+      "run.desen.starter/TextArea",
+      "run.desen.starter/TextField"
+    ],
+    "controlledEventPayloads": [
+      "TextField.change:{value:string}",
+      "TextArea.change:{value:string}",
+      "Checkbox.change:{checked:boolean}",
+      "RadioGroup.change:{value:string}",
+      "Switch.change:{checked:boolean}"
+    ],
+    "accessibleParts": ["label", "help", "error"]
+  },
+  "browser": {
+    "assertions": {
+      "publisherDerivedAuthoring": true,
+      "independentHostGraph": true,
+      "sameStaticAdapterRegistry": true,
+      "allFormCapabilitiesPublished": true,
+      "invalidFormValueRejected": true,
+      "nativeLabelAssociation": true,
+      "helpAndErrorAssociation": true,
+      "safeStyleProjectionRetainsSemantics": true,
+      "keyboardFocus": true,
+      "controlledTextFieldChange": true,
+      "controlledTextAreaChange": true,
+      "controlledCheckboxChange": true,
+      "controlledRadioGroupChange": true,
+      "controlledSwitchChange": true,
+      "disabledAndLoadingButton": true,
+      "malformedFormPayloadRejected": true
+    },
+    "graphReceipts": ["authoring", "host"],
+    "profile": "desen.m10a-t06.browser-proof.v1",
+    "result": "PASS",
+    "tests": [
+      {
+        "title": "preserves native labels and described messages in authoring and independent host graphs",
+        "result": "PASS"
+      },
+      {
+        "title": "projects controlled form changes through the Runtime event boundary",
+        "result": "PASS"
+      },
+      {
+        "title": "publishes the T06 form surfaces through the reviewed starter Catalog",
+        "result": "PASS"
+      },
+      {
+        "title": "retains Button disabled/loading behavior and rejects malformed form payloads",
+        "result": "PASS"
+      }
+    ]
+  },
+  "historical": {
+    "m10aT05ArtifactSha256": "3c78a9a6b61081a57e9c48b44dc74aa2d12e457679f383ffbd85224372d92ab7",
+    "m10aT05CatalogSha256": "8772b5e3fe8bc3d4251e3fd7e6231b475affc74d930aaf531c03062e666e8541"
+  },
+  "claims": {
+    "boundedFormCapabilities": true,
+    "controlledEventPayloadsOnly": true,
+    "nativeLabelHelpErrorComposition": true,
+    "styleProjectionRetainsSemantics": true,
+    "keyboardFocusValidated": true,
+    "buttonDisabledLoadingRetained": true,
+    "malformedFormPayloadRejected": true,
+    "sameStaticAdaptersInCanvasAndHost": true,
+    "historicalArtifactsRewritten": false,
+    "runtimeCoreChanged": false
+  },
+  "tests": {
+    "rootTestNames": [
+      "M10A-T06 builds the exact 0.3.0 starter Catalog deterministically",
+      "M10A-T06 admits only the declared form-control contracts and controlled event payloads",
+      "M10A-T06 authenticates all-positive authoring and independent-host form browser observations",
+      "M10A-T06 rejects malformed form observations, artifact drift, and unsafe injected data",
+      "M10A-T06 preserves the checkpointed T05 receipt while the starter Catalog evolves",
+      "M10A-T06 writer is atomic, leaves the Catalog read-only, and runs Chromium in owned temporary authority"
+    ],
+    "packageCommand": "pnpm --filter @desen/starter-catalog-web test",
+    "browserCommand": "pnpm --filter @desen/starter-catalog-web-proof run test:m10a-t06",
+    "browserExecutedByVerifier": true
+  },
+  "nonClaims": [
+    "T06 does not add normal-App design editing, draft-library persistence, Publisher authority, or Runtime activation.",
+    "T06 does not add arbitrary CSS selectors, executable markup, private DOM access, or remote media URLs.",
+    "T06 does not create business actions or application state beyond bounded controlled form event payloads.",
+    "Local evidence does not substitute for exact-head hosted Quality gate and fresh-main closure."
+  ]
+}

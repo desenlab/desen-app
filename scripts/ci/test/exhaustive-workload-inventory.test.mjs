@@ -40,7 +40,8 @@ async function currentRepositoryInputs() {
     resolve(WORKSPACE_ROOT, "pnpm-workspace.yaml"),
     "utf8",
   );
-  const configurationPattern = /^(?:vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
+  const configurationPattern =
+    /^(?:(?:t06-)?vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
   const testConfigurationFiles = (await readdir(WORKSPACE_ROOT))
     .filter((file) => configurationPattern.test(file))
     .map((file) => file);
@@ -84,23 +85,23 @@ async function currentRepositoryInputs() {
   };
 }
 
-test("the neutral inventory preserves the exact 244-workload T05 successor projection", () => {
+test("the neutral inventory preserves the exact 246-workload T06 successor projection", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const projection = inventory.nodes.map(({ id, command, args }) => ({ id, command, args }));
   const projectionSha256 = createHash("sha256").update(JSON.stringify(projection)).digest("hex");
 
   assert.equal(inventory.schemaVersion, 1);
   assert.equal(inventory.profile, "desen.ci.exhaustive-workload-inventory.v1");
-  assert.equal(inventory.workloadCount, 244);
-  assert.equal(inventory.proofUnitCount, 115);
+  assert.equal(inventory.workloadCount, 246);
+  assert.equal(inventory.proofUnitCount, 116);
   assert.equal(inventory.inventorySha256, EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256);
   assert.equal(
     EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    "f2e861cce08dca611a307762564519b7b519e302cbacf2dac9281daf73d6def1",
+    "bc94faa639c65d9b8c6e374fa9cbd34b426655347a68fe9d760f89fc0ad2b6ed",
   );
   assert.equal(
     projectionSha256,
-    "3e8b238ed081b5e2d94a3fa03302a39dea69a1c5a1f124a8121af7c210bdab9e",
+    "cd903720e85cbb68390ca020976673fddea0e85d33f17ce860bf6d4338a04334",
   );
   assert.deepEqual(
     inventory.nodes.slice(0, 12).map(({ id }) => id),
@@ -120,11 +121,11 @@ test("the neutral inventory preserves the exact 244-workload T05 successor proje
     ],
   );
   assert.equal(
-    inventory.nodes.slice(12, 127).every(({ id }) => id.startsWith("verify-")),
+    inventory.nodes.slice(12, 128).every(({ id }) => id.startsWith("verify-")),
     true,
   );
   assert.equal(
-    inventory.nodes.slice(127, 242).every(({ id }) => id.startsWith("test-")),
+    inventory.nodes.slice(128, 244).every(({ id }) => id.startsWith("test-")),
     true,
   );
   assert.deepEqual(
@@ -146,6 +147,7 @@ test("the neutral inventory preserves the exact 244-workload T05 successor proje
     "m10a-t03",
     "m10a-t04",
     "m10a-t05",
+    "m10a-t06",
   ];
   assert.deepEqual(
     inventory.proofUnits.slice(-exactTailProofIds.length).map(({ id }) => id),
@@ -157,7 +159,13 @@ test("the neutral inventory preserves the exact 244-workload T05 successor proje
       { id, verifierNodeId: `verify-${id}`, rootTestNodeId: `test-${id}` },
     );
   }
-  const t05Predecessor = projection.filter(
+  const t06SuccessorPredecessor = projection.filter(({ id }) => !id.endsWith("m10a-t06"));
+  assert.equal(t06SuccessorPredecessor.length, 244);
+  assert.equal(
+    createHash("sha256").update(JSON.stringify(t06SuccessorPredecessor)).digest("hex"),
+    "3e8b238ed081b5e2d94a3fa03302a39dea69a1c5a1f124a8121af7c210bdab9e",
+  );
+  const t05Predecessor = t06SuccessorPredecessor.filter(
     ({ id }) => id !== "starter-catalog-web-public-package-contract" && !id.endsWith("m10a-t05"),
   );
   assert.equal(t05Predecessor.length, 241);
@@ -240,18 +248,18 @@ test("repository manifests and discovered proof files retain the reviewed parity
   const receipt = validateRepositoryWorkloadInputs(inputs);
 
   assert.deepEqual(receipt, {
-    proofCount: 115,
-    verifierCount: 115,
-    rootTestCount: 115,
+    proofCount: 116,
+    verifierCount: 116,
+    rootTestCount: 116,
     ciContractScriptCount: 5,
     ciContractScriptSha256: EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
     legacyPrerequisiteCount: 779,
-    legacyPrerequisiteSha256: "a4ce74ffe3d0cc75003ac6715f32da71e6114d5dd1fb507d913726dfd604a50d",
-    legacyLeafInvocationCount: 4642,
-    legacyLeafInvocationSha256: "348be3b945b9c0a755a11eb4fd6e87ab39fcdfd75fda1cce4f78a01556911049",
-    distinctLeafWorkloadCount: 368,
-    distinctLeafWorkloadSha256: "4a816717536a8d7daa8d2b34cc739e461f9622866002c92d16668c2b2a454bd6",
-    testConfigurationFileCount: 3,
+    legacyPrerequisiteSha256: "d68c04577b68b9702a22d3088620c8488ad83c60b4001992d0bc1db144c1f210",
+    legacyLeafInvocationCount: 4633,
+    legacyLeafInvocationSha256: "e0b1c37bf562b51bd725a0128fdca226448b1cf9d0f6d19a43ece2e0e0792bf9",
+    distinctLeafWorkloadCount: 370,
+    distinctLeafWorkloadSha256: "d9ebf188f1302a45bea67a7cdaec7f86ea26ae073463a7f34b6407a60fe3753c",
+    testConfigurationFileCount: 4,
     workspaceTestScriptCount: 20,
     workspaceTestScriptSha256: "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
@@ -372,6 +380,18 @@ test("repository input drift fails closed before it can authorize a workload", a
     );
   assert.throws(
     () => validateRepositoryWorkloadInputs(substitutedAuthoringPublicPackage),
+    (error) =>
+      error instanceof ExhaustiveWorkloadInventoryError &&
+      /unreviewed public-package contract test/u.test(error.message),
+  );
+
+  const staleT05PublicPackage = await currentRepositoryInputs();
+  staleT05PublicPackage.packageJson = structuredClone(staleT05PublicPackage.packageJson);
+  staleT05PublicPackage.packageJson.scripts["verify:m10a-t05"] =
+    "pnpm --filter @desen/starter-catalog-web test:public-package && " +
+    staleT05PublicPackage.packageJson.scripts["verify:m10a-t05"];
+  assert.throws(
+    () => validateRepositoryWorkloadInputs(staleT05PublicPackage),
     (error) =>
       error instanceof ExhaustiveWorkloadInventoryError &&
       /unreviewed public-package contract test/u.test(error.message),
@@ -554,7 +574,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
       ports: "NONE",
     },
   });
-  assert.equal(boundaries.dependencies.length, 115);
+  assert.equal(boundaries.dependencies.length, 116);
 
   for (const unit of inventory.proofUnits) {
     const verifier = nodeById.get(unit.verifierNodeId);
@@ -562,7 +582,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
     assert.equal(verifier.executionClass, "CONCURRENT_PROOF");
     assert.equal(rootTest.executionClass, "CONCURRENT_PROOF");
     assert.deepEqual(verifier.dependencies, [
-      unit.id === "m10a-t05"
+      unit.id === "m10a-t06"
         ? "starter-catalog-web-public-package-contract"
         : unit.id === "m10a-t04"
           ? "design-system-release-public-package-contract"
@@ -594,16 +614,43 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
         "desen-app-repeatable-demo",
         "runtime-core-baseline",
         "m10a-t05",
+        "m10a-t06",
       ].includes(unit.id)
         ? "NONE"
         : "SHARED_READ_AFTER_PREFIX",
     );
     assert.equal(
       rootTest.sharedState.temporaryPaths,
-      unit.id === "desen-app-published-host-update" ? "NONE" : "PROCESS_ISOLATED",
+      ["desen-app-published-host-update", "m10a-t05"].includes(unit.id)
+        ? "NONE"
+        : "PROCESS_ISOLATED",
     );
     assert.equal(verifier.sharedState.ports, "NONE");
   }
+});
+
+test("M10A-T05 is a historical read-only proof pair while T06 retains current proof isolation", () => {
+  const nodeById = new Map(
+    createExhaustiveWorkloadInventory().nodes.map((workload) => [workload.id, workload]),
+  );
+  assert.deepEqual(nodeById.get("verify-m10a-t05")?.sharedState, {
+    trackedWorkspace: "READ_ONLY_GUARDED",
+    buildOutputs: "NONE",
+    temporaryPaths: "NONE",
+    ports: "NONE",
+  });
+  assert.deepEqual(nodeById.get("test-m10a-t05")?.sharedState, {
+    trackedWorkspace: "READ_ONLY_GUARDED",
+    buildOutputs: "NONE",
+    temporaryPaths: "NONE",
+    ports: "NONE",
+  });
+  assert.deepEqual(nodeById.get("verify-m10a-t06")?.sharedState, {
+    trackedWorkspace: "READ_ONLY_GUARDED",
+    buildOutputs: "NONE",
+    temporaryPaths: "PROCESS_ISOLATED",
+    ports: "NONE",
+  });
 });
 
 test("the canonical result is deterministic and deeply frozen", () => {

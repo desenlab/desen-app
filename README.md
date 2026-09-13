@@ -4,10 +4,10 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01/T02/T03/T04/T05 are complete. SC-02 concluded `adapt`; no M10A task is
-> active. T06 is next eligible but needs explicit assignment. M11 has not started. T05 is an isolated
-> starter-catalog proof, not normal-App integration, production certification, runtime activation,
-> persistence, or a protocol change.
+> M10/G10 and M10A-T01/T02/T03/T04/T05 are complete. M10A-T06 is `IN_PROGRESS`: local form-control
+> evidence has passed, while exact-head hosted and fresh-`main` closure remain pending. M11 has not
+> started. T06 remains an isolated starter-catalog proof, not normal-App integration, production
+> certification, runtime activation, persistence, or a protocol change.
 
 ## Implementation progress
 
@@ -37,7 +37,7 @@ bounded, reproducible claims about both.
 **M10A:** **5 / 28 tasks complete (18%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Active task:** none · **Next eligible:** `M10A-T06` (`NOT_STARTED`; dependencies complete) ·
+**Active task:** `M10A-T06` (`IN_PROGRESS`; local evidence recorded, hosted closure pending) ·
 **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
@@ -189,9 +189,10 @@ platform-neutral `@desen/design-system-release` adds a finite content-addressed 
 manifest, exact host-profile references, and a no-`latest` release-store port. Its exact-head and
 fresh-`main` closure is recorded in the [T04 proof](docs/proof/M10A-T04.md); it adds no runtime
 activation, normal-App integration, or persistent production store. `M10A-T05` is `DONE` for its
-bounded private layout/content starter Catalog and isolated proof harness, not normal-App integration;
-`M10A-T06` is next eligible but remains `NOT_STARTED` pending explicit assignment. M11 remains gated
-by G10A.
+bounded private layout/content starter Catalog and isolated proof harness, not normal-App integration.
+`M10A-T06` is `IN_PROGRESS`: its local evidence covers the 0.3.0 form-control Catalog, accessible
+field composition, and bounded controlled events in isolated authoring/host graphs; exact-head hosted
+and fresh-`main` closure are still pending. M11 remains gated by G10A.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and

@@ -1,0 +1,2 @@
+# Legacy local T06 output must never become a proof artifact or source input.
+dist-m10a-t06/

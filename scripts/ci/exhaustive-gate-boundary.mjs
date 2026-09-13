@@ -21,7 +21,7 @@ const MAX_SYMLINK_BYTES = 64 * 1024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 const TEST_CONFIGURATION_FILE_PATTERN =
-  /^(?:vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
+  /^(?:(?:t06-)?vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
 const REVISION_PATTERN = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
 const INDEX_RECORD_PATTERN =

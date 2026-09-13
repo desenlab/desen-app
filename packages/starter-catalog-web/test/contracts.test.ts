@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   STARTER_BUTTON_CAPABILITY_ID,
   STARTER_BOX_CAPABILITY_ID,
+  STARTER_CHECKBOX_CAPABILITY_ID,
   STARTER_CATALOG_ID,
   STARTER_CATALOG_TARGET,
   STARTER_CATALOG_TEMPLATE,
@@ -16,22 +17,32 @@ import {
   STARTER_ICON_CAPABILITY_ID,
   STARTER_IMAGE_CAPABILITY_ID,
   STARTER_LAYOUT_CONTENT_MAX_ITEMS,
+  STARTER_RADIO_GROUP_CAPABILITY_ID,
+  STARTER_RADIO_GROUP_MAX_OPTIONS,
   STARTER_SELECT_CAPABILITY_ID,
   STARTER_SEPARATOR_CAPABILITY_ID,
   STARTER_STACK_CAPABILITY_ID,
+  STARTER_SWITCH_CAPABILITY_ID,
+  STARTER_TEXT_AREA_CAPABILITY_ID,
   STARTER_TEXT_CAPABILITY_ID,
+  STARTER_TEXT_FIELD_CAPABILITY_ID,
   STARTER_SELECT_MAX_OPTIONS,
   starterButtonComponentRegistration,
   starterBoxComponentRegistration,
+  starterCheckboxComponentRegistration,
   starterDialogComponentRegistration,
   starterGridComponentRegistration,
   starterHeadingComponentRegistration,
   starterIconComponentRegistration,
   starterImageComponentRegistration,
+  starterRadioGroupComponentRegistration,
   starterSelectComponentRegistration,
   starterSeparatorComponentRegistration,
   starterStackComponentRegistration,
+  starterSwitchComponentRegistration,
+  starterTextAreaComponentRegistration,
   starterTextComponentRegistration,
+  starterTextFieldComponentRegistration,
 } from "../src/contracts.js";
 import {
   STARTER_TEMPLATE_ID_PREFIX_MAX_LENGTH,
@@ -59,6 +70,11 @@ describe("starter component contracts", () => {
       STARTER_IMAGE_CAPABILITY_ID,
       STARTER_ICON_CAPABILITY_ID,
       STARTER_SEPARATOR_CAPABILITY_ID,
+      STARTER_TEXT_FIELD_CAPABILITY_ID,
+      STARTER_TEXT_AREA_CAPABILITY_ID,
+      STARTER_CHECKBOX_CAPABILITY_ID,
+      STARTER_RADIO_GROUP_CAPABILITY_ID,
+      STARTER_SWITCH_CAPABILITY_ID,
     ]);
     expect(STARTER_CATALOG_TEMPLATE).toMatchObject({
       id: STARTER_CATALOG_ID,
@@ -261,6 +277,75 @@ describe("starter component contracts", () => {
       default: "horizontal",
     });
   });
+
+  it("keeps the T06 form controls finite, labelled, styleable, and event-closed", () => {
+    const textControls = [
+      starterTextFieldComponentRegistration,
+      starterTextAreaComponentRegistration,
+    ];
+    for (const registration of textControls) {
+      expect(registration.manifest.category).toBe("input");
+      expect(registration.manifest.propsSchema.required).toEqual(["label"]);
+      expect(registration.manifest.events.change.payloadSchema).toMatchObject({
+        type: "object",
+        additionalProperties: false,
+        required: ["value"],
+        properties: { value: { type: "string" } },
+      });
+      expect(Object.keys(registration.manifest.styleParts)).toEqual([
+        "control",
+        "error",
+        "help",
+        "label",
+        "root",
+      ]);
+      expectDeeplyFrozen(registration);
+    }
+    expect(starterTextAreaComponentRegistration.manifest.propsSchema.properties.rows).toEqual({
+      type: "integer",
+      minimum: 2,
+      maximum: 12,
+      default: 4,
+    });
+    for (const registration of [
+      starterCheckboxComponentRegistration,
+      starterSwitchComponentRegistration,
+    ]) {
+      expect(registration.manifest.propsSchema.required).toEqual(["label"]);
+      expect(registration.manifest.events.change.payloadSchema).toMatchObject({
+        type: "object",
+        additionalProperties: false,
+        required: ["checked"],
+        properties: { checked: { type: "boolean" } },
+      });
+      expectDeeplyFrozen(registration);
+    }
+    const options = starterRadioGroupComponentRegistration.manifest.propsSchema.properties.options;
+    expect(starterRadioGroupComponentRegistration.manifest.propsSchema.required).toEqual([
+      "label",
+      "options",
+    ]);
+    expect(options).toMatchObject({
+      type: "array",
+      minItems: 1,
+      maxItems: STARTER_RADIO_GROUP_MAX_OPTIONS,
+      uniqueItems: true,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["value", "label"],
+      },
+    });
+    expect(
+      starterRadioGroupComponentRegistration.manifest.events.change.payloadSchema,
+    ).toMatchObject({
+      type: "object",
+      additionalProperties: false,
+      required: ["value"],
+      properties: { value: { type: "string", maxLength: 128 } },
+    });
+    expectDeeplyFrozen(starterRadioGroupComponentRegistration);
+  });
 });
 
 describe("starter node templates", () => {
@@ -299,6 +384,46 @@ describe("starter node templates", () => {
         }),
       ),
     ).toBe(canonicalizeJson(button));
+  });
+
+  it("creates deterministic frozen leaves for every T06 form control", () => {
+    const field = createStarterNodeTemplate({
+      capabilityId: STARTER_TEXT_FIELD_CAPABILITY_ID,
+      idPrefix: "surface.field",
+    });
+    const textarea = createStarterNodeTemplate({
+      capabilityId: STARTER_TEXT_AREA_CAPABILITY_ID,
+      idPrefix: "surface.textarea",
+    });
+    const checkbox = createStarterNodeTemplate({
+      capabilityId: STARTER_CHECKBOX_CAPABILITY_ID,
+      idPrefix: "surface.checkbox",
+    });
+    const radio = createStarterNodeTemplate({
+      capabilityId: STARTER_RADIO_GROUP_CAPABILITY_ID,
+      idPrefix: "surface.radio",
+    });
+    const toggle = createStarterNodeTemplate({
+      capabilityId: STARTER_SWITCH_CAPABILITY_ID,
+      idPrefix: "surface.switch",
+    });
+    expect(field).toMatchObject({ use: STARTER_TEXT_FIELD_CAPABILITY_ID, id: "surface.field" });
+    expect(textarea).toMatchObject({
+      use: STARTER_TEXT_AREA_CAPABILITY_ID,
+      id: "surface.textarea",
+    });
+    expect(checkbox).toMatchObject({ use: STARTER_CHECKBOX_CAPABILITY_ID, id: "surface.checkbox" });
+    expect(radio).toMatchObject({ use: STARTER_RADIO_GROUP_CAPABILITY_ID, id: "surface.radio" });
+    if (radio.props === undefined || !Array.isArray(radio.props.options))
+      throw new Error("Expected RadioGroup template options");
+    expect(radio.props.options).toHaveLength(2);
+    expect(radio.props.options[0]).toEqual({
+      disabled: false,
+      label: "Option 1",
+      value: "option-1",
+    });
+    expect(toggle).toMatchObject({ use: STARTER_SWITCH_CAPABILITY_ID, id: "surface.switch" });
+    for (const node of [field, textarea, checkbox, radio, toggle]) expectDeeplyFrozen(node);
   });
 
   it("creates a complete Dialog subtree with one required managed child", () => {

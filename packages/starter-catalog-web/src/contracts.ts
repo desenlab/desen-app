@@ -10,14 +10,21 @@ import {
   starterStackComponentRegistration,
   starterTextComponentRegistration,
 } from "./layout-content-contracts.js";
+import {
+  starterCheckboxComponentRegistration,
+  starterRadioGroupComponentRegistration,
+  starterSwitchComponentRegistration,
+  starterTextAreaComponentRegistration,
+  starterTextFieldComponentRegistration,
+} from "./form-control-contracts.js";
 
 import type { ComponentPropsOf } from "@desen/catalog-sdk";
 
 /** Exact Catalog identity reserved for the DESEN Neutral Web starter package. */
 export const STARTER_CATALOG_ID = "run.desen.starter.web";
 
-/** Current additive Catalog contract version for the bounded M10A-T05 starter slice. */
-export const STARTER_CATALOG_VERSION = "0.2.0";
+/** Current additive Catalog contract version for the bounded M10A-T06 starter slice. */
+export const STARTER_CATALOG_VERSION = "0.3.0";
 
 /** Target implemented by the current DESEN Neutral starter package. */
 export const STARTER_CATALOG_TARGET = "web-react";
@@ -439,10 +446,11 @@ export type StarterSelectOption = StarterSelectProps["options"][number];
 export type StarterDialogProps = ComponentPropsOf<typeof starterDialogComponentRegistration>;
 
 /**
- * Deterministically ordered, recursively frozen M10A-T01 component inventory.
+ * Deterministically ordered, recursively frozen starter component inventory.
  *
- * @remarks Inventory order is Button, Select, Dialog. It is data for later Catalog composition and
- * grants no adapter or package trust by itself.
+ * @remarks T01's Button/Select/Dialog and T05's layout/content capabilities retain their original
+ * order. T06 appends its finite form controls without creating a second Button capability. This is
+ * data for later Catalog composition and grants no adapter or package trust by itself.
  */
 export const STARTER_COMPONENT_REGISTRATIONS = Object.freeze([
   starterButtonComponentRegistration,
@@ -456,6 +464,11 @@ export const STARTER_COMPONENT_REGISTRATIONS = Object.freeze([
   starterImageComponentRegistration,
   starterIconComponentRegistration,
   starterSeparatorComponentRegistration,
+  starterTextFieldComponentRegistration,
+  starterTextAreaComponentRegistration,
+  starterCheckboxComponentRegistration,
+  starterRadioGroupComponentRegistration,
+  starterSwitchComponentRegistration,
 ] as const);
 
 /**
@@ -502,3 +515,24 @@ export type {
   StarterStackProps,
   StarterTextProps,
 } from "./layout-content-contracts.js";
+export {
+  STARTER_CHECKBOX_CAPABILITY_ID,
+  STARTER_RADIO_GROUP_CAPABILITY_ID,
+  STARTER_RADIO_GROUP_MAX_OPTIONS,
+  STARTER_SWITCH_CAPABILITY_ID,
+  STARTER_TEXT_AREA_CAPABILITY_ID,
+  STARTER_TEXT_FIELD_CAPABILITY_ID,
+  starterCheckboxComponentRegistration,
+  starterRadioGroupComponentRegistration,
+  starterSwitchComponentRegistration,
+  starterTextAreaComponentRegistration,
+  starterTextFieldComponentRegistration,
+} from "./form-control-contracts.js";
+export type {
+  StarterCheckboxProps,
+  StarterRadioGroupOption,
+  StarterRadioGroupProps,
+  StarterSwitchProps,
+  StarterTextAreaProps,
+  StarterTextFieldProps,
+} from "./form-control-contracts.js";

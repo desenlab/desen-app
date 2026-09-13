@@ -1,11 +1,8 @@
-import { M10AT05ProofError, writeM10AT05Evidence } from "./lib/m10a-t05-proof.mjs";
-import { writeM10AT01Catalog } from "./lib/m10a-t01-proof.mjs";
+import { M10AT05ProofError, verifyM10AT05Evidence } from "./lib/m10a-t05-proof.mjs";
 
 try {
-  const catalog = await writeM10AT01Catalog();
-  const evidence = await writeM10AT05Evidence();
   process.stdout.write(
-    `${JSON.stringify({ status: "CAPTURED", task: "M10A-T05", catalog, ...evidence }, null, 2)}\n`,
+    `${JSON.stringify({ status: "HISTORICAL", ...(await verifyM10AT05Evidence()) }, null, 2)}\n`,
   );
 } catch (error) {
   process.stderr.write(
