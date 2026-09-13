@@ -456,7 +456,9 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
       taskId === "M10A-T04" ||
       taskId === "M10A-T05"
         ? "DONE"
-        : "NOT_STARTED";
+        : taskId === "M10A-T06"
+          ? "IN_PROGRESS"
+          : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
     assert.equal(
       row.cells[2],
@@ -714,7 +716,8 @@ async function currentInventory() {
     "utf8",
   );
   const workspacePackages = [];
-  const configurationPattern = /^(?:vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
+  const configurationPattern =
+    /^(?:(?:t06-)?vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
   const testConfigurationFiles = (await readdir(WORKSPACE_ROOT))
     .filter((file) => configurationPattern.test(file))
     .map((file) => file);
@@ -777,18 +780,18 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 115,
-    verifierCount: 115,
-    rootTestCount: 115,
+    proofCount: 116,
+    verifierCount: 116,
+    rootTestCount: 116,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
     legacyPrerequisiteCount: 779,
-    legacyPrerequisiteSha256: "a4ce74ffe3d0cc75003ac6715f32da71e6114d5dd1fb507d913726dfd604a50d",
-    legacyLeafInvocationCount: 4642,
-    legacyLeafInvocationSha256: "348be3b945b9c0a755a11eb4fd6e87ab39fcdfd75fda1cce4f78a01556911049",
-    distinctLeafWorkloadCount: 368,
-    distinctLeafWorkloadSha256: "4a816717536a8d7daa8d2b34cc739e461f9622866002c92d16668c2b2a454bd6",
-    testConfigurationFileCount: 3,
+    legacyPrerequisiteSha256: "d68c04577b68b9702a22d3088620c8488ad83c60b4001992d0bc1db144c1f210",
+    legacyLeafInvocationCount: 4633,
+    legacyLeafInvocationSha256: "e0b1c37bf562b51bd725a0128fdca226448b1cf9d0f6d19a43ece2e0e0792bf9",
+    distinctLeafWorkloadCount: 370,
+    distinctLeafWorkloadSha256: "d9ebf188f1302a45bea67a7cdaec7f86ea26ae073463a7f34b6407a60fe3753c",
+    testConfigurationFileCount: 4,
     workspaceTestScriptCount: 20,
     workspaceTestScriptSha256: "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
@@ -1050,18 +1053,18 @@ test("task board retains its canonical inventory without narrative appendices", 
   );
   assert.equal(statuses.get("G11"), "NOT_STARTED");
   assert.equal(statuses.get("M10A-T05"), "DONE");
-  assert.equal(statuses.get("M10A-T06"), "NOT_STARTED");
+  assert.equal(statuses.get("M10A-T06"), "IN_PROGRESS");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
   assert.ok(
     normalizedReadme.includes(
-      "**Active task:** none · **Next eligible:** `M10A-T06` (`NOT_STARTED`; dependencies complete)",
+      "**Active task:** `M10A-T06` (`IN_PROGRESS`; local evidence recorded, hosted closure pending)",
     ),
   );
-  assert.ok(normalizedProjectStatus.includes("**No M10A task is active.**"));
+  assert.ok(normalizedProjectStatus.includes("**M10A-T06 is `IN_PROGRESS`.**"));
   assert.ok(normalizedProjectStatus.includes("**M10A-T01 through M10A-T05 are DONE**"));
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
   assert.ok(
-    normalizedStartHere.includes("M10A-T06 bağımlılıkları tamam ancak `NOT_STARTED` durumunda."),
+    normalizedStartHere.includes("M10A-T06 `IN_PROGRESS`: yerel form-control kanıtı geçti"),
   );
   assert.ok(normalizedStartHere.includes("M11 başlamadı."));
   assert.equal(
@@ -1561,7 +1564,7 @@ test("inventory validation rejects hidden test configuration and manifest overri
   assert.throws(() => validateProofInventory(packageFieldInventory), QualityGateError);
 });
 
-test("both inventories require exact browser-proof scripts and the three reviewed Vite configs", async () => {
+test("both inventories require exact browser-proof scripts and reviewed Vite configs", async () => {
   const baseline = await currentInventory();
   const starter = baseline.workspacePackages.find(
     ({ name }) => name === "@desen/starter-catalog-web-proof",
@@ -1572,7 +1575,7 @@ test("both inventories require exact browser-proof scripts and the three reviewe
   assert.ok(starter);
   assert.ok(workbench);
   for (const validate of [validateProofInventory, validateRepositoryWorkloadInputs]) {
-    assert.equal(validate(baseline).proofCount, 115);
+    assert.equal(validate(baseline).proofCount, 116);
     const missingWorkbenchPackage = clone(baseline);
     missingWorkbenchPackage.workspacePackages = missingWorkbenchPackage.workspacePackages.filter(
       ({ name }) => name !== "@desen/design-system-workbench-proof",
@@ -1621,6 +1624,11 @@ test("both inventories require exact browser-proof scripts and the three reviewe
       (file) => file !== "apps/starter-catalog-web-proof/vite.config.ts",
     );
     assert.throws(() => validate(missing), /test-configuration file set/u);
+    const missingT06 = clone(baseline);
+    missingT06.testConfigurationFiles = missingT06.testConfigurationFiles.filter(
+      (file) => file !== "apps/starter-catalog-web-proof/t06-vite.config.ts",
+    );
+    assert.throws(() => validate(missingT06), /test-configuration file set/u);
     const missingWorkbench = clone(baseline);
     missingWorkbench.testConfigurationFiles = missingWorkbench.testConfigurationFiles.filter(
       (file) => file !== "apps/design-system-workbench-proof/vite.config.ts",
@@ -1795,6 +1803,18 @@ test("inventory validation pins every workspace package test command", async () 
       /unreviewed public-package contract test/u.test(error.message),
   );
 
+  const staleT05PublicPackage = await currentInventory();
+  staleT05PublicPackage.packageJson = clone(staleT05PublicPackage.packageJson);
+  staleT05PublicPackage.packageJson.scripts["verify:m10a-t05"] =
+    "pnpm --filter @desen/starter-catalog-web test:public-package && " +
+    staleT05PublicPackage.packageJson.scripts["verify:m10a-t05"];
+  assert.throws(
+    () => validateProofInventory(staleT05PublicPackage),
+    (error) =>
+      error instanceof QualityGateError &&
+      /unreviewed public-package contract test/u.test(error.message),
+  );
+
   const substitutedWorkbench = await currentInventory();
   substitutedWorkbench.packageJson.scripts["verify:m10a-t03"] =
     substitutedWorkbench.packageJson.scripts["verify:m10a-t03"].replace(
@@ -1827,8 +1847,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 244);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 115);
+  assert.equal(steps.length, 246);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 116);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -2385,8 +2405,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 244,
-    planSha256: "3e8b238ed081b5e2d94a3fa03302a39dea69a1c5a1f124a8121af7c210bdab9e",
+    stepCount: 246,
+    planSha256: "cd903720e85cbb68390ca020976673fddea0e85d33f17ce860bf6d4338a04334",
   });
 
   const missingTypecheck = clone(steps);

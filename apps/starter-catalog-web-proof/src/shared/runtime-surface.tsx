@@ -103,6 +103,7 @@ export function dispatchMalformedStarterEvent(
   surface: MountedStarterProofSurface,
   sourceNodeId: string,
   eventName: string,
+  payload: unknown = { value: 7 },
 ): "rejected" | "unexpected" {
   const read = readRuntimeHeadlessSession(surface.session);
   if (read.status !== "read") return "unexpected";
@@ -114,7 +115,7 @@ export function dispatchMalformedStarterEvent(
     snapshot: read.snapshot,
     runtimeInstanceId: binding.runtimeInstanceId,
     eventName,
-    payload: { value: 7 },
+    payload,
   });
   return result.status === "rejected" ? "rejected" : "unexpected";
 }

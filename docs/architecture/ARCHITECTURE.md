@@ -1,6 +1,6 @@
 # Architecture
 
-Last reviewed: 2026-09-11
+Last reviewed: 2026-09-13
 
 ## Purpose
 
@@ -216,7 +216,8 @@ success.
 
 M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice,
 T02's platform-neutral project/token foundation, T03's authoring/workbench slice, T04's immutable
-release identity, and T05's private layout/content Catalog slice are `DONE`; the other 23 tasks remain `NOT_STARTED`.
+release identity, and T05's private layout/content Catalog slice are `DONE`; T06 is `IN_PROGRESS`
+with passing local form-control evidence, and the other 22 tasks remain `NOT_STARTED`.
 Later workbench features remain planned; no publication or production authority follows from this text.
 [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the decision,
 while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
@@ -251,12 +252,12 @@ T02 adds `@desen/design-system-core`, while normal App composition remains later
 
 T04 and T05 task-owned proofs record their exact-head and fresh-`main` closures. They do not authorize
 Runtime activation, normal App integration, durable production storage, materialization, Publisher
-or Runtime changes, protocol changes, or M11. T06 is dependency-ready but `NOT_STARTED` until
-explicitly selected; it does not authorize T07+, Runtime activation, normal-App integration or
-persistence, Publisher/Core/protocol changes, G10A, or M11.
+or Runtime changes, protocol changes, or M11. T06 is `IN_PROGRESS` with passing local form-control
+evidence; its exact-head hosted and fresh-`main` closure remain pending. It does not authorize T07+,
+Runtime activation, normal-App integration or persistence, Publisher/Core/protocol changes, G10A,
+or M11.
 
-Across later M10A tasks, an App-owned versioned editable-project record becomes the durable
-authoring aggregate. It atomically
+Across later M10A tasks, an App-owned versioned editable-project record becomes the durable authoring aggregate. It atomically
 stores one exact canonical Source, editable DTCG data, immutable design-system release references,
 the bounded master/instance/override graph, and inert connection and Workbench drafts under
 generation compare-and-set. It is not a DESEN protocol document. Every open verifies the complete

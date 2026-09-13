@@ -3,26 +3,36 @@ import { canonicalizeJson } from "@desen/protocol";
 import {
   STARTER_BUTTON_CAPABILITY_ID,
   STARTER_BOX_CAPABILITY_ID,
+  STARTER_CHECKBOX_CAPABILITY_ID,
   STARTER_DIALOG_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
   STARTER_HEADING_CAPABILITY_ID,
   STARTER_ICON_CAPABILITY_ID,
   STARTER_IMAGE_CAPABILITY_ID,
+  STARTER_RADIO_GROUP_CAPABILITY_ID,
   STARTER_SEPARATOR_CAPABILITY_ID,
   STARTER_SELECT_CAPABILITY_ID,
   STARTER_STACK_CAPABILITY_ID,
+  STARTER_SWITCH_CAPABILITY_ID,
+  STARTER_TEXT_AREA_CAPABILITY_ID,
   STARTER_TEXT_CAPABILITY_ID,
+  STARTER_TEXT_FIELD_CAPABILITY_ID,
   starterButtonComponentRegistration,
   starterBoxComponentRegistration,
+  starterCheckboxComponentRegistration,
   starterDialogComponentRegistration,
   starterGridComponentRegistration,
   starterHeadingComponentRegistration,
   starterIconComponentRegistration,
   starterImageComponentRegistration,
+  starterRadioGroupComponentRegistration,
   starterSelectComponentRegistration,
   starterSeparatorComponentRegistration,
   starterStackComponentRegistration,
+  starterSwitchComponentRegistration,
+  starterTextAreaComponentRegistration,
   starterTextComponentRegistration,
+  starterTextFieldComponentRegistration,
 } from "./contracts.js";
 
 import type { DesenSource } from "@desen/protocol";
@@ -40,15 +50,20 @@ const TEMPLATE_INPUT_KEYS = Object.freeze(["capabilityId", "idPrefix", "reserved
 export type StarterTemplateCapabilityId =
   | typeof STARTER_BUTTON_CAPABILITY_ID
   | typeof STARTER_BOX_CAPABILITY_ID
+  | typeof STARTER_CHECKBOX_CAPABILITY_ID
   | typeof STARTER_SELECT_CAPABILITY_ID
   | typeof STARTER_DIALOG_CAPABILITY_ID
   | typeof STARTER_GRID_CAPABILITY_ID
   | typeof STARTER_HEADING_CAPABILITY_ID
   | typeof STARTER_ICON_CAPABILITY_ID
   | typeof STARTER_IMAGE_CAPABILITY_ID
+  | typeof STARTER_RADIO_GROUP_CAPABILITY_ID
   | typeof STARTER_SEPARATOR_CAPABILITY_ID
   | typeof STARTER_STACK_CAPABILITY_ID
-  | typeof STARTER_TEXT_CAPABILITY_ID;
+  | typeof STARTER_SWITCH_CAPABILITY_ID
+  | typeof STARTER_TEXT_AREA_CAPABILITY_ID
+  | typeof STARTER_TEXT_CAPABILITY_ID
+  | typeof STARTER_TEXT_FIELD_CAPABILITY_ID;
 
 /** One ordinary DESEN 0.1.0 Source node returned by the starter template boundary. */
 export type StarterSourceNode = DesenSource["surfaces"][string]["root"];
@@ -123,15 +138,20 @@ function captureTemplateInput(input: unknown): CapturedTemplateInput {
     if (
       capabilityId !== STARTER_BUTTON_CAPABILITY_ID &&
       capabilityId !== STARTER_BOX_CAPABILITY_ID &&
+      capabilityId !== STARTER_CHECKBOX_CAPABILITY_ID &&
       capabilityId !== STARTER_SELECT_CAPABILITY_ID &&
       capabilityId !== STARTER_DIALOG_CAPABILITY_ID &&
       capabilityId !== STARTER_GRID_CAPABILITY_ID &&
       capabilityId !== STARTER_HEADING_CAPABILITY_ID &&
       capabilityId !== STARTER_ICON_CAPABILITY_ID &&
       capabilityId !== STARTER_IMAGE_CAPABILITY_ID &&
+      capabilityId !== STARTER_RADIO_GROUP_CAPABILITY_ID &&
       capabilityId !== STARTER_SEPARATOR_CAPABILITY_ID &&
       capabilityId !== STARTER_STACK_CAPABILITY_ID &&
-      capabilityId !== STARTER_TEXT_CAPABILITY_ID
+      capabilityId !== STARTER_SWITCH_CAPABILITY_ID &&
+      capabilityId !== STARTER_TEXT_AREA_CAPABILITY_ID &&
+      capabilityId !== STARTER_TEXT_CAPABILITY_ID &&
+      capabilityId !== STARTER_TEXT_FIELD_CAPABILITY_ID
     ) {
       fail("/capabilityId", "unknown starter capability");
     }
@@ -272,6 +292,47 @@ export function createStarterNodeTemplate(
             },
           ],
         },
+      };
+      break;
+    case STARTER_TEXT_FIELD_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_TEXT_FIELD_CAPABILITY_ID,
+        props: starterTextFieldComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_TEXT_AREA_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_TEXT_AREA_CAPABILITY_ID,
+        props: starterTextAreaComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_CHECKBOX_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_CHECKBOX_CAPABILITY_ID,
+        props: starterCheckboxComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_RADIO_GROUP_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_RADIO_GROUP_CAPABILITY_ID,
+        props: {
+          ...starterRadioGroupComponentRegistration.manifest.authoring.defaultProps,
+          options:
+            starterRadioGroupComponentRegistration.manifest.authoring.defaultProps.options.map(
+              (option) => ({ ...option }),
+            ),
+        },
+      };
+      break;
+    case STARTER_SWITCH_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_SWITCH_CAPABILITY_ID,
+        props: starterSwitchComponentRegistration.manifest.authoring.defaultProps,
       };
       break;
     case STARTER_SELECT_CAPABILITY_ID:

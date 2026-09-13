@@ -11,6 +11,7 @@ assert.deepEqual(Object.keys(packageRoot).sort(), [
   "STARTER_CATALOG_TARGET",
   "STARTER_CATALOG_TEMPLATE",
   "STARTER_CATALOG_VERSION",
+  "STARTER_CHECKBOX_CAPABILITY_ID",
   "STARTER_COMPONENT_REGISTRATIONS",
   "STARTER_DIALOG_CAPABILITY_ID",
   "STARTER_DIALOG_CONTENT_MAX_ITEMS",
@@ -19,25 +20,35 @@ assert.deepEqual(Object.keys(packageRoot).sort(), [
   "STARTER_ICON_CAPABILITY_ID",
   "STARTER_IMAGE_CAPABILITY_ID",
   "STARTER_LAYOUT_CONTENT_MAX_ITEMS",
+  "STARTER_RADIO_GROUP_CAPABILITY_ID",
+  "STARTER_RADIO_GROUP_MAX_OPTIONS",
   "STARTER_SELECT_CAPABILITY_ID",
   "STARTER_SELECT_MAX_OPTIONS",
   "STARTER_SEPARATOR_CAPABILITY_ID",
   "STARTER_STACK_CAPABILITY_ID",
+  "STARTER_SWITCH_CAPABILITY_ID",
   "STARTER_TEMPLATE_ID_PREFIX_MAX_LENGTH",
   "STARTER_TEMPLATE_MAX_RESERVED_IDS",
+  "STARTER_TEXT_AREA_CAPABILITY_ID",
   "STARTER_TEXT_CAPABILITY_ID",
+  "STARTER_TEXT_FIELD_CAPABILITY_ID",
   "createStarterNodeTemplate",
   "starterBoxComponentRegistration",
   "starterButtonComponentRegistration",
+  "starterCheckboxComponentRegistration",
   "starterDialogComponentRegistration",
   "starterGridComponentRegistration",
   "starterHeadingComponentRegistration",
   "starterIconComponentRegistration",
   "starterImageComponentRegistration",
+  "starterRadioGroupComponentRegistration",
   "starterSelectComponentRegistration",
   "starterSeparatorComponentRegistration",
   "starterStackComponentRegistration",
+  "starterSwitchComponentRegistration",
+  "starterTextAreaComponentRegistration",
   "starterTextComponentRegistration",
+  "starterTextFieldComponentRegistration",
 ]);
 
 const template = packageRoot.createStarterNodeTemplate({
@@ -47,4 +58,4 @@ const template = packageRoot.createStarterNodeTemplate({
 assert.equal(template.use, packageRoot.STARTER_GRID_CAPABILITY_ID);
 assert.equal(template.slots.default.length, 2);
 assert.equal(Object.isFrozen(template), true);
-console.log("✔ built starter catalog public package exports 33 reviewed members");
+console.log("✔ built starter catalog public package exports 44 reviewed members");

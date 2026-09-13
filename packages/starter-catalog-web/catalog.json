@@ -466,6 +466,974 @@
         "loading"
       ]
     },
+    "run.desen.starter/Checkbox": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Inputs",
+        "defaultProps": {
+          "checked": false,
+          "disabled": false,
+          "helpText": "You can review these terms before continuing.",
+          "label": "Accept terms",
+          "required": false
+        },
+        "displayName": "Checkbox",
+        "icon": "checkbox",
+        "resize": {
+          "horizontal": "hug",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "checked": {
+            "props": {
+              "checked": true,
+              "disabled": false,
+              "label": "Accept terms",
+              "required": true
+            }
+          },
+          "disabled": {
+            "props": {
+              "checked": true,
+              "disabled": true,
+              "label": "Accept terms",
+              "required": false
+            }
+          },
+          "invalid": {
+            "props": {
+              "checked": false,
+              "disabled": false,
+              "error": "You must accept the terms to continue.",
+              "label": "Accept terms",
+              "required": true
+            }
+          },
+          "unchecked": {
+            "props": {
+              "checked": false,
+              "disabled": false,
+              "helpText": "You can review these terms before continuing.",
+              "label": "Accept terms",
+              "required": true
+            }
+          }
+        }
+      },
+      "category": "input",
+      "description": "DESEN Neutral checkbox with label, help, and error composition.",
+      "events": {
+        "change": {
+          "description": "Emitted with the controlled checked state after an admitted native change.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "checked": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "checked"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "checked": {
+            "default": false,
+            "type": "boolean"
+          },
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "error": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "helpText": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "required": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "control": {
+          "description": "Native control surface without exposing private adapter structure.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "error": {
+          "description": "Validation message associated with the semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "help": {
+          "description": "Supplementary help text associated with the semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "indicator": {
+          "description": "Visible checked indicator without exposing native internals.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "label": {
+          "description": "Visible label that remains associated with its semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable outer field composition and safe layout surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "hover",
+        "focus",
+        "checked",
+        "disabled",
+        "required",
+        "invalid"
+      ]
+    },
     "run.desen.starter/Dialog": {
       "authoring": {
         "adapterFidelity": "same",
@@ -1935,6 +2903,1324 @@
         }
       }
     },
+    "run.desen.starter/RadioGroup": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Inputs",
+        "defaultProps": {
+          "disabled": false,
+          "helpText": "Choose the option that works best for you.",
+          "label": "Choose an option",
+          "options": [
+            {
+              "disabled": false,
+              "label": "Option 1",
+              "value": "option-1"
+            },
+            {
+              "disabled": false,
+              "label": "Option 2",
+              "value": "option-2"
+            }
+          ],
+          "required": false,
+          "value": "option-1"
+        },
+        "displayName": "Radio group",
+        "icon": "radio-group",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "disabled": false,
+              "helpText": "You can change this later.",
+              "label": "Plan",
+              "options": [
+                {
+                  "disabled": false,
+                  "label": "Starter",
+                  "value": "starter"
+                },
+                {
+                  "disabled": false,
+                  "label": "Team",
+                  "value": "team"
+                }
+              ],
+              "required": true,
+              "value": "starter"
+            }
+          },
+          "disabled": {
+            "props": {
+              "disabled": true,
+              "label": "Plan",
+              "options": [
+                {
+                  "disabled": false,
+                  "label": "Starter",
+                  "value": "starter"
+                }
+              ],
+              "required": false,
+              "value": "starter"
+            }
+          },
+          "invalid": {
+            "props": {
+              "disabled": false,
+              "error": "Choose a plan to continue.",
+              "label": "Plan",
+              "options": [
+                {
+                  "disabled": false,
+                  "label": "Starter",
+                  "value": "starter"
+                },
+                {
+                  "disabled": false,
+                  "label": "Team",
+                  "value": "team"
+                }
+              ],
+              "required": true,
+              "value": ""
+            }
+          }
+        }
+      },
+      "category": "input",
+      "description": "DESEN Neutral single-choice radio group with accessible option composition.",
+      "events": {
+        "change": {
+          "description": "Emitted with the newly selected inert option value.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "maxLength": 128,
+                "type": "string"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "error": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "helpText": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "disabled": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "label": {
+                  "maxLength": 256,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "value": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value",
+                "label"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "required": {
+            "default": false,
+            "type": "boolean"
+          },
+          "value": {
+            "default": "",
+            "maxLength": 128,
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "options"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "control": {
+          "description": "Native control surface without exposing private adapter structure.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "error": {
+          "description": "Validation message associated with the semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "help": {
+          "description": "Supplementary help text associated with the semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "indicator": {
+          "description": "Visible selected-state indicator without private DOM access.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "label": {
+          "description": "Visible label that remains associated with its semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "option": {
+          "description": "One visible radio option and its safe spacing surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "optionLabel": {
+          "description": "Visible label text associated with one radio control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable outer field composition and safe layout surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "hover",
+        "focus",
+        "selected",
+        "disabled",
+        "required",
+        "invalid"
+      ]
+    },
     "run.desen.starter/Select": {
       "authoring": {
         "adapterFidelity": "same",
@@ -2826,6 +5112,1106 @@
         }
       }
     },
+    "run.desen.starter/Switch": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Inputs",
+        "defaultProps": {
+          "checked": false,
+          "disabled": false,
+          "helpText": "Receive updates about important account activity.",
+          "label": "Enable notifications",
+          "required": false
+        },
+        "displayName": "Switch",
+        "icon": "switch",
+        "resize": {
+          "horizontal": "hug",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "checked": {
+            "props": {
+              "checked": true,
+              "disabled": false,
+              "label": "Enable notifications",
+              "required": false
+            }
+          },
+          "disabled": {
+            "props": {
+              "checked": true,
+              "disabled": true,
+              "label": "Enable notifications",
+              "required": false
+            }
+          },
+          "unchecked": {
+            "props": {
+              "checked": false,
+              "disabled": false,
+              "helpText": "Receive updates about important account activity.",
+              "label": "Enable notifications",
+              "required": false
+            }
+          }
+        }
+      },
+      "category": "input",
+      "description": "DESEN Neutral switch with label, help, and error composition.",
+      "events": {
+        "change": {
+          "description": "Emitted with the controlled checked state after an admitted native change.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "checked": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "checked"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "checked": {
+            "default": false,
+            "type": "boolean"
+          },
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "error": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "helpText": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "required": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "control": {
+          "description": "Native control surface without exposing private adapter structure.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "error": {
+          "description": "Validation message associated with the semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "help": {
+          "description": "Supplementary help text associated with the semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "label": {
+          "description": "Visible label that remains associated with its semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable outer field composition and safe layout surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "thumb": {
+          "description": "Visible switch thumb without exposing private adapter structure.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "track": {
+          "description": "Visible switch track without exposing private adapter structure.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "hover",
+        "focus",
+        "checked",
+        "disabled",
+        "required",
+        "invalid"
+      ]
+    },
     "run.desen.starter/Text": {
       "authoring": {
         "adapterFidelity": "same",
@@ -3025,6 +6411,1670 @@
           }
         }
       }
+    },
+    "run.desen.starter/TextArea": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Inputs",
+        "defaultProps": {
+          "disabled": false,
+          "helpText": "Use a few clear sentences.",
+          "label": "Description",
+          "placeholder": "Describe your work",
+          "required": false,
+          "rows": 4,
+          "value": ""
+        },
+        "displayName": "Text area",
+        "icon": "text-area",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "resizable"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "disabled": false,
+              "helpText": "This appears in the project overview.",
+              "label": "Project description",
+              "placeholder": "Describe the project",
+              "required": true,
+              "rows": 4,
+              "value": ""
+            }
+          },
+          "disabled": {
+            "props": {
+              "disabled": true,
+              "label": "Project description",
+              "required": false,
+              "rows": 4,
+              "value": "This field is currently unavailable."
+            }
+          },
+          "invalid": {
+            "props": {
+              "disabled": false,
+              "error": "Add a project description.",
+              "label": "Project description",
+              "required": true,
+              "rows": 4,
+              "value": ""
+            }
+          }
+        }
+      },
+      "category": "input",
+      "description": "DESEN Neutral multi-line text field with bounded rows and accessible composition.",
+      "events": {
+        "change": {
+          "description": "Emitted with the controlled multi-line value after an admitted native change.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "maxLength": 4096,
+                "type": "string"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "error": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "helpText": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "placeholder": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "required": {
+            "default": false,
+            "type": "boolean"
+          },
+          "rows": {
+            "default": 4,
+            "maximum": 12,
+            "minimum": 2,
+            "type": "integer"
+          },
+          "value": {
+            "default": "",
+            "maxLength": 4096,
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "control": {
+          "description": "Native control surface without exposing private adapter structure.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "error": {
+          "description": "Validation message associated with the semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "help": {
+          "description": "Supplementary help text associated with the semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "label": {
+          "description": "Visible label that remains associated with its semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable outer field composition and safe layout surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "hover",
+        "focus",
+        "disabled",
+        "required",
+        "invalid"
+      ]
+    },
+    "run.desen.starter/TextField": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Inputs",
+        "defaultProps": {
+          "disabled": false,
+          "helpText": "Helpful supporting text.",
+          "label": "Label",
+          "placeholder": "Enter text",
+          "required": false,
+          "value": ""
+        },
+        "displayName": "Text field",
+        "icon": "text-field",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "disabled": false,
+              "helpText": "We will use this for account notifications.",
+              "label": "Email address",
+              "placeholder": "name@example.com",
+              "required": true,
+              "value": ""
+            }
+          },
+          "disabled": {
+            "props": {
+              "disabled": true,
+              "label": "Email address",
+              "required": false,
+              "value": "name@example.com"
+            }
+          },
+          "invalid": {
+            "props": {
+              "disabled": false,
+              "error": "Enter a valid email address.",
+              "label": "Email address",
+              "required": true,
+              "value": "invalid"
+            }
+          }
+        }
+      },
+      "category": "input",
+      "description": "DESEN Neutral single-line text field with label, help, and error composition.",
+      "events": {
+        "change": {
+          "description": "Emitted with the controlled text value after an admitted native input change.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "maxLength": 4096,
+                "type": "string"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "error": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "helpText": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "placeholder": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "required": {
+            "default": false,
+            "type": "boolean"
+          },
+          "value": {
+            "default": "",
+            "maxLength": 4096,
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "control": {
+          "description": "Native control surface without exposing private adapter structure.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "error": {
+          "description": "Validation message associated with the semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "help": {
+          "description": "Supplementary help text associated with the semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "label": {
+          "description": "Visible label that remains associated with its semantic control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable outer field composition and safe layout surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit solid background color."
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved border color."
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ],
+                "description": "Resolved six- or eight-digit foreground color."
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "hover",
+        "focus",
+        "disabled",
+        "required",
+        "invalid"
+      ]
     }
   },
   "description": "DESEN Neutral Web–React starter capability contracts.",
@@ -3032,8 +8082,8 @@
   "id": "run.desen.starter.web",
   "kind": "desen.catalog",
   "operations": {},
-  "packageDigest": "sha256:ac99bdb31d76bef5ee42310ed342da187c3fa925d2f0fbbbf67ff11c491ef3e9",
+  "packageDigest": "sha256:1b112e64456c2b706336b1be4ae3983e5fbfc21b9d5469df141561ba446da957",
   "resources": {},
   "target": "web-react",
-  "version": "0.2.0"
+  "version": "0.3.0"
 }

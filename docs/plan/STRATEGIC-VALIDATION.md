@@ -1,6 +1,6 @@
 # Strategic Validation Checkpoints
 
-Last reviewed: 2026-09-10
+Last reviewed: 2026-09-13
 
 ## Purpose
 
@@ -204,5 +204,6 @@ invalid forms fail closed without silent loss. T04's hosted closure covers only 
 design-system release identity and an exact-digest store port. This does not establish the full
 starter library, normal App integration, durable production storage, Runtime activation, market
 demand, or production readiness. T05's hosted closure covers only its private Catalog and isolated
-browser harness. M10A-T06 is dependency-ready but `NOT_STARTED`; G10A must pass before M11-T01 or
-M11-T08, and SC-02 authorizes no external publication or deployment.
+browser harness. M10A-T06 is `IN_PROGRESS` with passing local form-control evidence, but its
+exact-head hosted and fresh-`main` closure remain pending. G10A must pass before M11-T01 or M11-T08,
+and SC-02 authorizes no external publication or deployment.

@@ -5,20 +5,19 @@
 `@desen/starter-catalog-web` is the private, target-specific DESEN Neutral capability package for
 `web-react`. It provides inert Catalog registrations, schema-derived prop types, deterministic
 Source-node templates, and one explicit React-adapter subpath. Base UI remains an internal
-implementation detail of the existing Button, Select, and Dialog adapters; layout and semantic
+implementation detail of the Button, Select, Dialog, and form-control adapters; layout and semantic
 content use ordinary Web semantics where a Base UI primitive is unnecessary.
 
-**M10A-T05 is `DONE`.** Its expanded layout/content Catalog and isolated browser harness have
-exact-head and fresh-`main` closure receipts in the [task-owned proof](../../docs/proof/M10A-T05.md).
-It is not a normal Desen App integration, a complete component library, a design-system explorer,
-a persisted project, or a publish/activation path.
+**M10A-T06 is `IN_PROGRESS`.** Its [task-owned proof](../../docs/proof/M10A-T06.md) records passing
+local evidence for the form-control slice; exact-head hosted and fresh-`main` closure are still
+required before `DONE`. It is not a normal Desen App integration, a complete component library, a
+design-system explorer, a persisted project, or a publish/activation path.
 
 The M10A-T01 receipt at
 [`docs/proof/artifacts/m10a-t01.json`](../../docs/proof/artifacts/m10a-t01.json) remains immutable
-historical evidence for its original three-capability slice. T05 owns evidence for the expanded
-starter Catalog; it must not rewrite the T01 artifact or present it as fresh T05 evidence.
-The current additive Catalog is `run.desen.starter.web@0.2.0#web-react`; T01's original
-`0.1.0` Catalog remains a historical receipt.
+historical evidence for its original three-capability slice. T05's sealed `0.2.0` receipt remains
+historical; T06 owns the current `run.desen.starter.web@0.3.0#web-react` Catalog and must not
+rewrite the T01 or T05 artifacts or present either as fresh T06 evidence.
 
 ## Public boundary
 
@@ -46,14 +45,27 @@ internals or make them selectable from authored data.
 
 ## Capability inventory
 
-T01 retains Button, Select, and Dialog. The completed T05 slice adds the following bounded
-capabilities:
+T01 retains Button, Select, and Dialog. The completed historical T05 slice adds the following
+bounded capabilities:
 
 | Group            | Capabilities             | Admitted boundary                                                                                                                     |
 | ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
 | Layout           | Box, Stack, Grid         | One required, ordered managed slot (1–100 children); finite Stack direction/wrap and Grid columns (1–12); logical LTR/RTL properties. |
 | Semantic content | Text, Heading, Separator | Inert text only; bounded heading level; semantic output without HTML parsing or executable markup.                                    |
 | Trusted media    | Image, Icon              | Closed image-source and icon-name sets; required accessible text where applicable; no caller-supplied URL, SVG, font, or renderer.    |
+
+The active T06 slice retains and reviews the existing Button, including its disabled/loading
+behavior, and adds the following bounded form controls:
+
+| Group        | Capabilities                 | Admitted boundary                                                                                                             |
+| ------------ | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Text input   | TextField, TextArea          | Native field semantics with required label and optional help/error composition; `change:{value:string}` only.                 |
+| Choice input | Checkbox, RadioGroup, Switch | Native/ARIA choice semantics with label/help/error composition; closed checked/value declarations and controlled events only. |
+
+All field controls preserve their native or ARIA label and described-message relationships. Invalid
+form values and malformed event payloads reject before rendering or dispatch; styles remain
+presentation only and cannot substitute private selectors, callbacks, arbitrary DOM props, or
+executable markup.
 
 Each registration has a closed root style-part schema. Layout/style inputs permit only bounded,
 typed values such as six/eight-digit hex colors, finite spacing and box dimensions, finite
@@ -92,32 +104,39 @@ in-package source set with an alternative text requirement, Icon has a closed na
 label/decorative boundary, and Separator has a finite orientation. These are component contracts,
 not an arbitrary HTML, asset, or icon-import facility.
 
+T06 field composition keeps label, help, and error relationships attached to the rendered control
+in both isolated authoring and independent-host graphs. Keyboard focus and controlled form changes
+remain adapter behavior; Source data cannot select an event handler, DOM target, or private Base UI
+part.
+
 ## Dependencies and non-claims
 
 Production edges remain Protocol, Catalog SDK, Runtime React, and the package-local Base UI/CSS
 implementation. The package does not import Editor Core, Desen App, Publisher, Runtime Core
 internals, testkit, or the reference capability package. React and React DOM 19 are peers.
 
-T05 does not introduce arbitrary asset import, local asset storage, font admission, a library
-management UI, custom variants, raw CSS, remote requests, package publication, or production
-deployment. Those boundaries remain with their designated later tasks, including T13 for assets
-and fonts and T17 for the integrated explorer/documentation surface.
+T05/T06 do not introduce arbitrary asset import, local asset storage, font admission, a library
+management UI, custom variants, raw CSS, remote requests, package publication, production
+deployment, business actions, or application-state wiring. Those boundaries remain with their
+designated later tasks, including T13 for assets/fonts and T17 for the integrated
+explorer/documentation surface.
 
 ## Verification
 
-The following commands reproduce the sealed task evidence; their passing result does not replace
-the exact-head hosted and fresh-`main` closure receipts in the task-owned proof.
+The following commands validate the active local T06 boundary. Their passing result does not replace
+its exact-head hosted and fresh-`main` closure requirements in the task-owned proof.
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck
 pnpm --filter @desen/starter-catalog-web test
 pnpm --filter @desen/starter-catalog-web test:public-package
-pnpm --filter @desen/starter-catalog-web-proof test:e2e
-pnpm generate:m10a-t05
-pnpm verify:m10a-t05
-pnpm test:m10a-t05
+pnpm --filter @desen/starter-catalog-web-proof test:m10a-t06
+pnpm generate:m10a-t06
+pnpm verify:m10a-t06
+pnpm test:m10a-t06
 ```
 
-See [the T05 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t05--layout-and-content-capabilities),
-[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), and the
-[T05 proof report](../../docs/proof/M10A-T05.md).
+Authenticate the historical T05 closure without recapturing it with `pnpm verify:m10a-t05` and
+`pnpm test:m10a-t05`. See [the T06 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t06--form-controls),
+[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T06 proof report](../../docs/proof/M10A-T06.md),
+and the [historical T05 proof](../../docs/proof/M10A-T05.md).

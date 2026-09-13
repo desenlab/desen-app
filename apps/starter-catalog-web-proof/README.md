@@ -16,6 +16,22 @@ delivery, activation, or a replacement for the normal DESEN App flow.
 **T05 is `DONE`; this harness supplies the isolated browser evidence recorded in its task-owned
 proof.** It makes no normal-App integration, release, or product-readiness claim.
 
+## M10A-T06 form-control proof
+
+T06 is `IN_PROGRESS`. Its separate authoring and host graphs exercise the private
+`@desen/starter-catalog-web` `run.desen.starter.web@0.3.0#web-react` Catalog with Button, TextField,
+TextArea, Checkbox, RadioGroup, and Switch. Its four Chromium cases prove bounded controlled events,
+native label/help/error relationships, disabled behavior, and independent host-graph rendering. They
+do not authorize normal-App integration, persistence, Publisher or Runtime authority, protocol
+changes, G10A, or M11.
+
+Use `pnpm generate:m10a-t06`, `pnpm verify:m10a-t06`, and `pnpm test:m10a-t06` for the task-owned
+local evidence path. The T06 runner builds the starter package and Catalog afresh, owns localhost
+port `4189`, and writes its disposable outputs only under a runner-owned temporary directory. Its
+local artifact is [`docs/proof/artifacts/m10a-t06.json`](../../docs/proof/artifacts/m10a-t06.json);
+the exact-head hosted and fresh-`main` closure are still pending in
+[the T06 proof](../../docs/proof/M10A-T06.md).
+
 ## What the browser proof checks
 
 The exact Playwright inventory contains four cases:

@@ -1,29 +1,44 @@
 import { createContext, useContext, useId, useMemo, useState } from "react";
 import { Button } from "@base-ui/react/button";
+import { Checkbox } from "@base-ui/react/checkbox";
 import { Select } from "@base-ui/react/select";
 import { Dialog } from "@base-ui/react/dialog";
+import { Input } from "@base-ui/react/input";
+import { Radio } from "@base-ui/react/radio";
+import { RadioGroup } from "@base-ui/react/radio-group";
+import { Switch } from "@base-ui/react/switch";
 import { canonicalizeJson } from "@desen/protocol";
 
 import {
   STARTER_BOX_CAPABILITY_ID,
+  STARTER_CHECKBOX_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
   STARTER_HEADING_CAPABILITY_ID,
   STARTER_ICON_CAPABILITY_ID,
   STARTER_IMAGE_CAPABILITY_ID,
+  STARTER_RADIO_GROUP_CAPABILITY_ID,
   STARTER_SEPARATOR_CAPABILITY_ID,
   STARTER_STACK_CAPABILITY_ID,
+  STARTER_SWITCH_CAPABILITY_ID,
+  STARTER_TEXT_AREA_CAPABILITY_ID,
   STARTER_TEXT_CAPABILITY_ID,
+  STARTER_TEXT_FIELD_CAPABILITY_ID,
   starterButtonComponentRegistration,
   starterBoxComponentRegistration,
+  starterCheckboxComponentRegistration,
   starterSelectComponentRegistration,
   starterDialogComponentRegistration,
   starterGridComponentRegistration,
   starterHeadingComponentRegistration,
   starterIconComponentRegistration,
   starterImageComponentRegistration,
+  starterRadioGroupComponentRegistration,
   starterSeparatorComponentRegistration,
   starterStackComponentRegistration,
+  starterSwitchComponentRegistration,
+  starterTextAreaComponentRegistration,
   starterTextComponentRegistration,
+  starterTextFieldComponentRegistration,
 } from "./contracts.js";
 import styles from "./neutral.module.css";
 
@@ -36,15 +51,20 @@ import type {
 import type {
   StarterBoxProps,
   StarterButtonProps,
+  StarterCheckboxProps,
   StarterDialogProps,
   StarterGridProps,
   StarterHeadingProps,
   StarterIconProps,
   StarterImageProps,
+  StarterRadioGroupProps,
   StarterSelectProps,
   StarterSeparatorProps,
   StarterStackProps,
+  StarterSwitchProps,
+  StarterTextAreaProps,
   StarterTextProps,
+  StarterTextFieldProps,
 } from "./contracts.js";
 
 interface PortalBoundary {
@@ -91,6 +111,11 @@ type Registration =
   | typeof starterSelectComponentRegistration
   | typeof starterDialogComponentRegistration
   | typeof starterBoxComponentRegistration
+  | typeof starterTextFieldComponentRegistration
+  | typeof starterTextAreaComponentRegistration
+  | typeof starterCheckboxComponentRegistration
+  | typeof starterRadioGroupComponentRegistration
+  | typeof starterSwitchComponentRegistration
   | typeof starterStackComponentRegistration
   | typeof starterGridComponentRegistration
   | typeof starterTextComponentRegistration
@@ -100,6 +125,7 @@ type Registration =
   | typeof starterSeparatorComponentRegistration;
 
 type T05StyleProjection = "image" | "layout" | "typography" | "media" | "separator";
+type StarterStyleProjection = T05StyleProjection | "form";
 
 const T01_STYLE_PROPERTIES = Object.freeze([
   "color",
@@ -189,8 +215,30 @@ const SEPARATOR_STYLE_PROPERTIES = Object.freeze([
   "maxHeight",
   "opacity",
 ] as const);
+const FORM_STYLE_PROPERTIES = Object.freeze([
+  "color",
+  "backgroundColor",
+  "borderColor",
+  "borderRadius",
+  "borderWidth",
+  "paddingBlock",
+  "paddingInline",
+  "marginBlock",
+  "marginInline",
+  "fontFamily",
+  "fontSize",
+  "fontWeight",
+  "lineHeight",
+  "letterSpacing",
+  "width",
+  "minWidth",
+  "maxWidth",
+  "minHeight",
+  "maxHeight",
+  "opacity",
+] as const);
 
-function t05StyleProjection(registration: Registration): T05StyleProjection | undefined {
+function styleProjection(registration: Registration): StarterStyleProjection | undefined {
   if (
     registration.id === STARTER_BOX_CAPABILITY_ID ||
     registration.id === STARTER_STACK_CAPABILITY_ID ||
@@ -207,6 +255,15 @@ function t05StyleProjection(registration: Registration): T05StyleProjection | un
   if (registration.id === STARTER_IMAGE_CAPABILITY_ID) return "image";
   if (registration.id === STARTER_ICON_CAPABILITY_ID) return "media";
   if (registration.id === STARTER_SEPARATOR_CAPABILITY_ID) return "separator";
+  if (
+    registration.id === STARTER_TEXT_FIELD_CAPABILITY_ID ||
+    registration.id === STARTER_TEXT_AREA_CAPABILITY_ID ||
+    registration.id === STARTER_CHECKBOX_CAPABILITY_ID ||
+    registration.id === STARTER_RADIO_GROUP_CAPABILITY_ID ||
+    registration.id === STARTER_SWITCH_CAPABILITY_ID
+  ) {
+    return "form";
+  }
   return undefined;
 }
 
@@ -258,12 +315,30 @@ function isT05StyleValueValid(
   return false;
 }
 
-function stylePropertyNames(projection: T05StyleProjection | undefined): readonly string[] {
+function isFormStyleValueValid(property: string, value: unknown): boolean {
+  if (["color", "backgroundColor", "borderColor"].includes(property)) return isHexColor(value);
+  if (property === "borderRadius") return isFiniteNumber(value, 0, 64);
+  if (property === "borderWidth") return isFiniteNumber(value, 0, 16);
+  if (["paddingBlock", "paddingInline", "marginBlock", "marginInline"].includes(property))
+    return isFiniteNumber(value, 0, 128);
+  if (["width", "minWidth", "maxWidth", "minHeight", "maxHeight"].includes(property))
+    return isFiniteNumber(value, 0, 4_096);
+  if (property === "opacity") return isFiniteNumber(value, 0, 1);
+  if (property === "fontSize") return isFiniteNumber(value, 8, 96);
+  if (property === "fontWeight") return [400, 500, 600, 700].includes(value as number);
+  if (property === "lineHeight") return isFiniteNumber(value, 1, 3);
+  if (property === "letterSpacing") return isFiniteNumber(value, -4, 16);
+  if (property === "fontFamily") return ["system", "serif", "mono"].includes(value as string);
+  return false;
+}
+
+function stylePropertyNames(projection: StarterStyleProjection | undefined): readonly string[] {
   if (projection === "layout") return LAYOUT_STYLE_PROPERTIES;
   if (projection === "typography") return TYPOGRAPHY_STYLE_PROPERTIES;
   if (projection === "image") return IMAGE_STYLE_PROPERTIES;
   if (projection === "media") return MEDIA_STYLE_PROPERTIES;
   if (projection === "separator") return SEPARATOR_STYLE_PROPERTIES;
+  if (projection === "form") return FORM_STYLE_PROPERTIES;
   return T01_STYLE_PROPERTIES;
 }
 
@@ -272,7 +347,7 @@ function validateT05Props(
   registration: Registration,
 ): void {
   const props = input.props as Readonly<Record<string, unknown>>;
-  const invalid = () => {
+  const invalid = (): never => {
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   };
   const hasOnly = (keys: readonly string[]) =>
@@ -369,6 +444,107 @@ function validateT05Props(
   }
 }
 
+function isBoundedString(value: unknown, minimum: number, maximum: number): value is string {
+  return typeof value === "string" && value.length >= minimum && value.length <= maximum;
+}
+
+function isOptionalBoolean(value: unknown): boolean {
+  return value === undefined || typeof value === "boolean";
+}
+
+function validateFormProps(
+  input: RuntimeReactComponentAdapterProps,
+  registration: Registration,
+): void {
+  const props = input.props as Readonly<Record<string, unknown>>;
+  const invalid = (): never => {
+    throw new Error("STARTER_ADAPTER_INPUT_INVALID");
+  };
+  const hasOnly = (keys: readonly string[]) =>
+    Object.keys(props).every((key) => keys.includes(key));
+  const validCommon =
+    isBoundedString(props.label, 1, 256) &&
+    isOptionalBoolean(props.disabled) &&
+    isOptionalBoolean(props.required) &&
+    (props.helpText === undefined || isBoundedString(props.helpText, 1, 512)) &&
+    (props.error === undefined || isBoundedString(props.error, 1, 512));
+
+  if (registration.id === STARTER_TEXT_FIELD_CAPABILITY_ID) {
+    if (
+      !hasOnly(["label", "value", "placeholder", "helpText", "error", "disabled", "required"]) ||
+      !validCommon ||
+      (props.value !== undefined && !isBoundedString(props.value, 0, 4_096)) ||
+      (props.placeholder !== undefined && !isBoundedString(props.placeholder, 1, 256))
+    )
+      invalid();
+    return;
+  }
+  if (registration.id === STARTER_TEXT_AREA_CAPABILITY_ID) {
+    if (
+      !hasOnly([
+        "label",
+        "value",
+        "placeholder",
+        "helpText",
+        "error",
+        "disabled",
+        "required",
+        "rows",
+      ]) ||
+      !validCommon ||
+      (props.value !== undefined && !isBoundedString(props.value, 0, 4_096)) ||
+      (props.placeholder !== undefined && !isBoundedString(props.placeholder, 1, 256)) ||
+      (props.rows !== undefined &&
+        (!Number.isInteger(props.rows) || !isFiniteNumber(props.rows, 2, 12)))
+    )
+      invalid();
+    return;
+  }
+  if (
+    registration.id === STARTER_CHECKBOX_CAPABILITY_ID ||
+    registration.id === STARTER_SWITCH_CAPABILITY_ID
+  ) {
+    if (
+      !hasOnly(["label", "checked", "helpText", "error", "disabled", "required"]) ||
+      !validCommon ||
+      !isOptionalBoolean(props.checked)
+    )
+      invalid();
+    return;
+  }
+  if (registration.id !== STARTER_RADIO_GROUP_CAPABILITY_ID) return;
+  const options: readonly unknown[] = Array.isArray(props.options) ? props.options : invalid();
+  if (
+    !hasOnly(["label", "options", "value", "helpText", "error", "disabled", "required"]) ||
+    !validCommon ||
+    options.length < 1 ||
+    options.length > 100 ||
+    (props.value !== undefined && !isBoundedString(props.value, 0, 128))
+  )
+    invalid();
+  const values = new Set<string>();
+  for (const option of options) {
+    if (
+      typeof option !== "object" ||
+      option === null ||
+      Array.isArray(option) ||
+      (Object.getPrototypeOf(option) !== Object.prototype && Object.getPrototypeOf(option) !== null)
+    )
+      invalid();
+    const record = option as Readonly<Record<string, unknown>>;
+    const optionValue = record.value;
+    if (Object.keys(record).some((key) => !["value", "label", "disabled"].includes(key))) invalid();
+    if (!isBoundedString(optionValue, 1, 128)) invalid();
+    if (!isBoundedString(record.label, 1, 256)) invalid();
+    if (!isOptionalBoolean(record.disabled)) invalid();
+    const value = optionValue as string;
+    if (values.has(value)) invalid();
+    values.add(value);
+  }
+  if (props.value !== undefined && props.value !== "" && !values.has(props.value as string))
+    invalid();
+}
+
 function guardInput(input: RuntimeReactComponentAdapterProps, registration: Registration): void {
   // Runtime React is the schema-admission authority. This defensive check prevents direct trusted
   // misuse from widening the bridge to callbacks, JSX, unknown parts or arbitrary Base UI props.
@@ -379,13 +555,15 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
   } catch {
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   }
+  if (typeof input.props !== "object" || input.props === null || Array.isArray(input.props))
+    throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   const allowedProps = Object.keys(registration.manifest.propsSchema.properties);
   if (Object.keys(input.props).some((key) => !allowedProps.includes(key)))
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   const allowedSlots =
     registration.id === starterDialogComponentRegistration.id
       ? ["content"]
-      : t05StyleProjection(registration) === "layout"
+      : styleProjection(registration) === "layout"
         ? ["default"]
         : [];
   if (Object.keys(input.slots).some((key) => !allowedSlots.includes(key)))
@@ -398,7 +576,7 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
   )
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   if (
-    t05StyleProjection(registration) === "layout" &&
+    styleProjection(registration) === "layout" &&
     (input.slots.default === undefined ||
       input.slots.default.length < 1 ||
       input.slots.default.length > 100)
@@ -406,10 +584,11 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   }
   validateT05Props(input, registration);
+  validateFormProps(input, registration);
   const parts = Object.keys(registration.manifest.styleParts);
   const states: readonly string[] =
     "visualStates" in registration.manifest ? registration.manifest.visualStates : [];
-  const projection = t05StyleProjection(registration);
+  const projection = styleProjection(registration);
   const propertyNames = stylePropertyNames(projection);
   for (const [state, stateParts] of Object.entries(input.style)) {
     if (state !== "base" && !states.includes(state))
@@ -427,7 +606,9 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
                 ((property === "borderRadius" && value >= 0 && value <= 64) ||
                   (property === "padding" && value >= 0 && value <= 128) ||
                   (property === "fontSize" && value >= 8 && value <= 96))
-            : isT05StyleValueValid(projection, property, value));
+            : projection === "form"
+              ? isFormStyleValueValid(property, value)
+              : isT05StyleValueValid(projection, property, value));
         if (!valid) throw new Error("STARTER_ADAPTER_INPUT_INVALID");
       }
     }
@@ -438,7 +619,7 @@ function partStyle(
   style: RuntimeReactSemanticStyle,
   part: string,
   states: readonly string[] = [],
-  projection: T05StyleProjection | undefined = undefined,
+  projection: StarterStyleProjection | undefined = undefined,
 ): CSSProperties {
   const result: CSSProperties = {};
   for (const state of ["base", ...states]) {
@@ -500,7 +681,7 @@ function partStyle(
     }
     if (values.textAlign === "start" || values.textAlign === "center" || values.textAlign === "end")
       result.textAlign = values.textAlign;
-    if (projection === "typography") {
+    if (projection === "typography" || projection === "form") {
       if (values.fontFamily === "system") result.fontFamily = "system-ui, sans-serif";
       if (values.fontFamily === "serif") result.fontFamily = "ui-serif, Georgia, serif";
       if (values.fontFamily === "mono") result.fontFamily = "ui-monospace, monospace";
@@ -600,6 +781,485 @@ export function StarterButtonReactAdapter(input: RuntimeReactComponentAdapterPro
         {props.label}
       </span>
     </Button>
+  );
+}
+
+function formStates(
+  interactionStates: readonly string[],
+  options: Readonly<{ disabled: boolean; required: boolean; invalid: boolean; checked?: boolean }>,
+): readonly string[] {
+  return [
+    ...interactionStates.filter((state) => state !== "pressed"),
+    ...(options.checked === true ? ["checked"] : []),
+    ...(options.disabled ? ["disabled"] : []),
+    ...(options.required ? ["required"] : []),
+    ...(options.invalid ? ["invalid"] : []),
+  ];
+}
+
+function describedBy(helpId: string | undefined, errorId: string | undefined): string | undefined {
+  return [helpId, errorId].filter((id): id is string => id !== undefined).join(" ") || undefined;
+}
+
+function FormMessages(
+  props: Readonly<{
+    helpText: string | undefined;
+    error: string | undefined;
+    helpId: string;
+    errorId: string;
+    style: RuntimeReactSemanticStyle;
+    states: readonly string[];
+  }>,
+) {
+  return (
+    <>
+      {props.helpText !== undefined && (
+        <p
+          id={props.helpId}
+          className={styles.formHelp}
+          style={partStyle(props.style, "help", props.states, "form")}
+        >
+          {props.helpText}
+        </p>
+      )}
+      {props.error !== undefined && (
+        <p
+          id={props.errorId}
+          className={styles.formError}
+          role="alert"
+          style={partStyle(props.style, "error", props.states, "form")}
+        >
+          {props.error}
+        </p>
+      )}
+    </>
+  );
+}
+
+function FormLabel(
+  props: Readonly<{
+    id: string;
+    controlId: string;
+    label: string;
+    required: boolean;
+    style: RuntimeReactSemanticStyle;
+    states: readonly string[];
+  }>,
+) {
+  return (
+    <label
+      id={props.id}
+      htmlFor={props.controlId}
+      className={styles.formLabel}
+      style={partStyle(props.style, "label", props.states, "form")}
+    >
+      {props.label}
+      {props.required && (
+        <span className={styles.formRequired} aria-hidden="true">
+          {" *"}
+        </span>
+      )}
+    </label>
+  );
+}
+
+/**
+ * Names a Base UI control through its documented native and ARIA relationships.
+ *
+ * @remarks Base UI applies `id` to the generated hidden native input for Checkbox and Switch.
+ * The visible name therefore remains a real public `<label>` for pointer and assistive interaction,
+ * while the trusted composite root explicitly references that same label through `aria-labelledby`.
+ * This keeps the styled root and its native form control aligned without exposing either private
+ * structure to authored data.
+ */
+function FormChoiceLabel(
+  props: Readonly<{
+    id: string;
+    controlId: string;
+    label: string;
+    required: boolean;
+    style: RuntimeReactSemanticStyle;
+    states: readonly string[];
+  }>,
+) {
+  return (
+    <label
+      id={props.id}
+      htmlFor={props.controlId}
+      className={styles.formLabel}
+      style={partStyle(props.style, "label", props.states, "form")}
+    >
+      {props.label}
+      {props.required && (
+        <span className={styles.formRequired} aria-hidden="true">
+          {" *"}
+        </span>
+      )}
+    </label>
+  );
+}
+
+/** Maps one controlled JSON text value to a semantic native input and its immutable form composition. */
+export function StarterTextFieldReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterTextFieldComponentRegistration);
+  const props = input.props as unknown as StarterTextFieldProps;
+  const disabled = props.disabled === true;
+  const required = props.required === true;
+  const invalid = props.error !== undefined;
+  const interaction = useInteractionStates(disabled);
+  const states = formStates(interaction.states, { disabled, required, invalid });
+  const identity = useId();
+  const controlId = `${identity}-control`;
+  const labelId = `${identity}-label`;
+  const helpId = props.helpText === undefined ? undefined : `${identity}-help`;
+  const errorId = props.error === undefined ? undefined : `${identity}-error`;
+  return (
+    <div className={styles.formField} style={partStyle(input.style, "root", states, "form")}>
+      <FormLabel
+        id={labelId}
+        controlId={controlId}
+        label={props.label}
+        required={required}
+        style={input.style}
+        states={states}
+      />
+      <Input
+        id={controlId}
+        type="text"
+        className={styles.formTextControl}
+        style={partStyle(input.style, "control", states, "form")}
+        value={props.value ?? ""}
+        placeholder={props.placeholder}
+        disabled={disabled}
+        required={required}
+        maxLength={4_096}
+        aria-labelledby={labelId}
+        aria-describedby={describedBy(helpId, errorId)}
+        aria-errormessage={errorId}
+        aria-invalid={invalid || undefined}
+        {...interaction.handlers}
+        onValueChange={(value) => {
+          if (!disabled && value.length <= 4_096)
+            input.interactions.dispatchEvent("change", Object.freeze({ value }));
+        }}
+      />
+      <FormMessages
+        helpText={props.helpText}
+        error={props.error}
+        helpId={helpId ?? ""}
+        errorId={errorId ?? ""}
+        style={input.style}
+        states={states}
+      />
+    </div>
+  );
+}
+
+/** Maps one controlled JSON text value to a semantic native textarea with a bounded visual height. */
+export function StarterTextAreaReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterTextAreaComponentRegistration);
+  const props = input.props as unknown as StarterTextAreaProps;
+  const disabled = props.disabled === true;
+  const required = props.required === true;
+  const invalid = props.error !== undefined;
+  const interaction = useInteractionStates(disabled);
+  const states = formStates(interaction.states, { disabled, required, invalid });
+  const identity = useId();
+  const controlId = `${identity}-control`;
+  const labelId = `${identity}-label`;
+  const helpId = props.helpText === undefined ? undefined : `${identity}-help`;
+  const errorId = props.error === undefined ? undefined : `${identity}-error`;
+  return (
+    <div className={styles.formField} style={partStyle(input.style, "root", states, "form")}>
+      <FormLabel
+        id={labelId}
+        controlId={controlId}
+        label={props.label}
+        required={required}
+        style={input.style}
+        states={states}
+      />
+      <textarea
+        id={controlId}
+        className={styles.formTextArea}
+        style={partStyle(input.style, "control", states, "form")}
+        value={props.value ?? ""}
+        placeholder={props.placeholder}
+        rows={props.rows ?? 4}
+        disabled={disabled}
+        required={required}
+        maxLength={4_096}
+        aria-labelledby={labelId}
+        aria-describedby={describedBy(helpId, errorId)}
+        aria-errormessage={errorId}
+        aria-invalid={invalid || undefined}
+        {...interaction.handlers}
+        onChange={(event) => {
+          const value = event.currentTarget.value;
+          if (!disabled && value.length <= 4_096)
+            input.interactions.dispatchEvent("change", Object.freeze({ value }));
+        }}
+      />
+      <FormMessages
+        helpText={props.helpText}
+        error={props.error}
+        helpId={helpId ?? ""}
+        errorId={errorId ?? ""}
+        style={input.style}
+        states={states}
+      />
+    </div>
+  );
+}
+
+/** Maps one controlled JSON boolean to Base UI's accessible checkbox without exposing native events. */
+export function StarterCheckboxReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterCheckboxComponentRegistration);
+  const props = input.props as unknown as StarterCheckboxProps;
+  const disabled = props.disabled === true;
+  const required = props.required === true;
+  const checked = props.checked === true;
+  const invalid = props.error !== undefined;
+  const interaction = useInteractionStates(disabled);
+  const states = formStates(interaction.states, { checked, disabled, required, invalid });
+  const identity = useId();
+  const controlId = `${identity}-control`;
+  const labelId = `${identity}-label`;
+  const helpId = props.helpText === undefined ? undefined : `${identity}-help`;
+  const errorId = props.error === undefined ? undefined : `${identity}-error`;
+  return (
+    <div className={styles.formField} style={partStyle(input.style, "root", states, "form")}>
+      <div className={styles.formChoice}>
+        <Checkbox.Root
+          id={controlId}
+          checked={checked}
+          disabled={disabled}
+          required={required}
+          className={styles.checkboxControl}
+          style={partStyle(input.style, "control", states, "form")}
+          aria-labelledby={labelId}
+          aria-describedby={describedBy(helpId, errorId)}
+          aria-errormessage={errorId}
+          aria-invalid={invalid || undefined}
+          {...interaction.handlers}
+          onCheckedChange={(nextChecked) => {
+            if (!disabled)
+              input.interactions.dispatchEvent("change", Object.freeze({ checked: nextChecked }));
+          }}
+        >
+          <Checkbox.Indicator
+            className={styles.checkboxIndicator}
+            style={partStyle(input.style, "indicator", states, "form")}
+          >
+            ✓
+          </Checkbox.Indicator>
+        </Checkbox.Root>
+        <FormChoiceLabel
+          id={labelId}
+          controlId={controlId}
+          label={props.label}
+          required={required}
+          style={input.style}
+          states={states}
+        />
+      </div>
+      <FormMessages
+        helpText={props.helpText}
+        error={props.error}
+        helpId={helpId ?? ""}
+        errorId={errorId ?? ""}
+        style={input.style}
+        states={states}
+      />
+    </div>
+  );
+}
+
+/** Maps a finite controlled JSON option list to Base UI radio controls with semantic group labels. */
+export function StarterRadioGroupReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterRadioGroupComponentRegistration);
+  const props = input.props as unknown as StarterRadioGroupProps;
+  const disabled = props.disabled === true;
+  const required = props.required === true;
+  const invalid = props.error !== undefined;
+  const interaction = useInteractionStates(disabled);
+  const identity = useId();
+  const groupId = `${identity}-group`;
+  const labelId = `${identity}-label`;
+  const helpId = props.helpText === undefined ? undefined : `${identity}-help`;
+  const errorId = props.error === undefined ? undefined : `${identity}-error`;
+  const value = props.value ?? "";
+  const [hoveredOptionValue, setHoveredOptionValue] = useState<string | undefined>(undefined);
+  const [focusedOptionValue, setFocusedOptionValue] = useState<string | undefined>(undefined);
+  const groupStates = formStates(interaction.states, { disabled, required, invalid });
+  // A group-level selected state means the group currently has an admitted selected option. Each
+  // option below keeps its own selected, hover, and focus states so a public option part never
+  // receives a sibling's visual treatment.
+  const states = [...groupStates, ...(value !== "" ? ["selected"] : [])];
+  return (
+    <fieldset className={styles.formField} style={partStyle(input.style, "root", states, "form")}>
+      <legend
+        id={labelId}
+        className={styles.formLegend}
+        style={partStyle(input.style, "label", states, "form")}
+      >
+        {props.label}
+        {required && (
+          <span className={styles.formRequired} aria-hidden="true">
+            {" *"}
+          </span>
+        )}
+      </legend>
+      <RadioGroup<string>
+        id={groupId}
+        value={value}
+        disabled={disabled}
+        required={required}
+        className={styles.radioGroup}
+        style={partStyle(input.style, "control", states, "form")}
+        aria-labelledby={labelId}
+        aria-describedby={describedBy(helpId, errorId)}
+        aria-errormessage={errorId}
+        aria-invalid={invalid || undefined}
+        {...interaction.handlers}
+        onValueChange={(nextValue) => {
+          if (
+            !disabled &&
+            nextValue.length <= 128 &&
+            props.options.some((option) => option.value === nextValue && option.disabled !== true)
+          )
+            input.interactions.dispatchEvent("change", Object.freeze({ value: nextValue }));
+        }}
+      >
+        {props.options.map((option, index) => {
+          const optionDisabled = disabled || option.disabled === true;
+          const selected = option.value === value;
+          const optionStates = [
+            ...(hoveredOptionValue === option.value ? ["hover"] : []),
+            ...(focusedOptionValue === option.value ? ["focus"] : []),
+            ...(selected ? ["selected"] : []),
+            ...(optionDisabled ? ["disabled"] : []),
+            ...(required ? ["required"] : []),
+            ...(invalid ? ["invalid"] : []),
+          ];
+          const optionId = `${identity}-option-${index}`;
+          const optionLabelId = `${identity}-option-label-${index}`;
+          return (
+            <div key={option.value} className={styles.radioOption}>
+              <Radio.Root<string>
+                id={optionId}
+                value={option.value}
+                disabled={optionDisabled}
+                className={styles.radioControl}
+                style={partStyle(input.style, "option", optionStates, "form")}
+                aria-labelledby={optionLabelId}
+                onPointerEnter={() => {
+                  if (!optionDisabled) setHoveredOptionValue(option.value);
+                }}
+                onPointerLeave={() => {
+                  setHoveredOptionValue((current) =>
+                    current === option.value ? undefined : current,
+                  );
+                }}
+                onFocus={() => {
+                  if (!optionDisabled) setFocusedOptionValue(option.value);
+                }}
+                onBlur={() => {
+                  setFocusedOptionValue((current) =>
+                    current === option.value ? undefined : current,
+                  );
+                }}
+              >
+                <Radio.Indicator
+                  className={styles.radioIndicator}
+                  style={partStyle(input.style, "indicator", optionStates, "form")}
+                />
+              </Radio.Root>
+              <label
+                id={optionLabelId}
+                htmlFor={optionId}
+                className={styles.radioLabel}
+                style={partStyle(input.style, "optionLabel", optionStates, "form")}
+              >
+                {option.label}
+              </label>
+            </div>
+          );
+        })}
+      </RadioGroup>
+      <FormMessages
+        helpText={props.helpText}
+        error={props.error}
+        helpId={helpId ?? ""}
+        errorId={errorId ?? ""}
+        style={input.style}
+        states={states}
+      />
+    </fieldset>
+  );
+}
+
+/** Maps one controlled JSON boolean to Base UI's accessible switch without exposing native events. */
+export function StarterSwitchReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterSwitchComponentRegistration);
+  const props = input.props as unknown as StarterSwitchProps;
+  const disabled = props.disabled === true;
+  const required = props.required === true;
+  const checked = props.checked === true;
+  const invalid = props.error !== undefined;
+  const interaction = useInteractionStates(disabled);
+  const states = formStates(interaction.states, { checked, disabled, required, invalid });
+  const identity = useId();
+  const controlId = `${identity}-control`;
+  const labelId = `${identity}-label`;
+  const helpId = props.helpText === undefined ? undefined : `${identity}-help`;
+  const errorId = props.error === undefined ? undefined : `${identity}-error`;
+  return (
+    <div className={styles.formField} style={partStyle(input.style, "root", states, "form")}>
+      <div className={styles.formChoice}>
+        <Switch.Root
+          id={controlId}
+          checked={checked}
+          disabled={disabled}
+          required={required}
+          className={styles.switchControl}
+          style={{
+            ...partStyle(input.style, "control", states, "form"),
+            ...partStyle(input.style, "track", states, "form"),
+          }}
+          aria-labelledby={labelId}
+          aria-describedby={describedBy(helpId, errorId)}
+          aria-errormessage={errorId}
+          aria-invalid={invalid || undefined}
+          {...interaction.handlers}
+          onCheckedChange={(nextChecked) => {
+            if (!disabled)
+              input.interactions.dispatchEvent("change", Object.freeze({ checked: nextChecked }));
+          }}
+        >
+          <Switch.Thumb
+            className={styles.switchThumb}
+            style={partStyle(input.style, "thumb", states, "form")}
+          />
+        </Switch.Root>
+        <FormChoiceLabel
+          id={labelId}
+          controlId={controlId}
+          label={props.label}
+          required={required}
+          style={input.style}
+          states={states}
+        />
+      </div>
+      <FormMessages
+        helpText={props.helpText}
+        error={props.error}
+        helpId={helpId ?? ""}
+        errorId={errorId ?? ""}
+        style={input.style}
+        states={states}
+      />
+    </div>
   );
 }
 
@@ -943,7 +1603,8 @@ export function StarterSeparatorReactAdapter(input: RuntimeReactComponentAdapter
 
 /**
  * Exact static production/authoring adapter inventory. Select option/default edits intentionally
- * remount its local native selection; ordinary label/style changes preserve instance identity.
+ * remount its local native selection; controlled T06 form values preserve their adapter identity
+ * and project only their declared change payloads.
  */
 export const STARTER_WEB_REACT_ADAPTER_REGISTRY_INPUT = Object.freeze({
   components: Object.freeze([
@@ -959,6 +1620,26 @@ export const STARTER_WEB_REACT_ADAPTER_REGISTRY_INPUT = Object.freeze({
     Object.freeze({
       capabilityId: starterDialogComponentRegistration.id,
       component: StarterDialogReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterTextFieldComponentRegistration.id,
+      component: StarterTextFieldReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterTextAreaComponentRegistration.id,
+      component: StarterTextAreaReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterCheckboxComponentRegistration.id,
+      component: StarterCheckboxReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterRadioGroupComponentRegistration.id,
+      component: StarterRadioGroupReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterSwitchComponentRegistration.id,
+      component: StarterSwitchReactAdapter,
     }),
     Object.freeze({
       capabilityId: starterBoxComponentRegistration.id,

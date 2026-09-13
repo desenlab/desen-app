@@ -1,8 +1,8 @@
 # M10A — Design-first product foundation
 
 Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T05 are `DONE`.
-M10A-T06 is dependency-ready but `NOT_STARTED` pending explicit assignment. The canonical statuses
-and dependencies are in [TASKS.md](TASKS.md).
+M10A-T06 is `IN_PROGRESS` with passing local evidence; exact-head hosted and fresh-`main` closure
+remain pending. The canonical statuses and dependencies are in [TASKS.md](TASKS.md).
 
 ## Product promise
 
@@ -20,9 +20,8 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
 and one gate; the total becomes 176 tasks and 14 gates. The 126 completed tasks and 11 completed
-gates remain completed. T01 through T05 are the five completed M10A tasks, and the other 23 remain
-`NOT_STARTED`. Nothing is renumbered, erased, or counted as
-implemented by this plan.
+gates remain completed. T01 through T05 are the five completed M10A tasks; T06 is active, and the
+other 22 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
 Dependencies, not numeric order, select the next eligible task: T26 acceptance precedes T25's
@@ -184,7 +183,7 @@ alone and not another external user recruitment round:
 - Existing M10 browser/proof coverage remains fresh and passing; Runtime Core and upstream identity
   checks pass. All new claims name their browser, viewport, fixture and resource-limit scope.
 
-## Completed boundary and next eligible task
+## Completed boundary and active task
 
 **M10A-T04 — Immutable design-system release identity** is `DONE`. It adds platform-neutral
 `@desen/design-system-release`: finite token, asset, and inert-recipe snapshots; a deterministic
@@ -201,9 +200,14 @@ Grid, Text/Heading, Image, Icon, and Separator Catalog slice and isolated proof 
 authorize normal App integration, durable production storage, Publisher authority, Core/protocol
 changes, G10A, or M11.
 
-**M10A-T06 — Form-control capabilities** is dependency-ready but `NOT_STARTED`; it becomes active
-only through an explicit assignment. It owns Button, TextField, TextArea, Checkbox, RadioGroup, and
-Switch accessibility/composition work, not a retrospective expansion of T05.
+**M10A-T06 — Form-control capabilities** is `IN_PROGRESS`. Its local evidence extends the private
+starter Catalog to 0.3.0 with TextField, TextArea, Checkbox, RadioGroup, and Switch; it retains and
+reviews the existing Button rather than duplicating it. It proves accessible label/help/error
+composition, keyboard/focus behavior, bounded controlled event payloads, and invalid value/payload
+rejection in isolated authoring and independent-host graphs. Its [task-owned proof](../proof/M10A-T06.md)
+records the local artifact; exact-head hosted and fresh-`main` closure remain required before `DONE`.
+T06 does not retrospectively expand T05 or authorize normal-App integration, persistence, Publisher
+authority, Runtime activation, Core/protocol changes, G10A, or M11.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.

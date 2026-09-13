@@ -1,6 +1,6 @@
 # Implementation Task Board
 
-Last updated: 2026-09-12
+Last updated: 2026-09-13
 
 Status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 
@@ -252,12 +252,12 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
 M10A-T01 through M10A-T05 are `DONE`; overall progress is 126/176 (72%), M10A is 5/28 (18%), and
-11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported
-normal edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
+11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
+edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
 unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed
-fixtures; unreviewed or invalid forms fail closed.
-M10A-T06 is dependency-ready but `NOT_STARTED` pending explicit assignment. The
+fixtures; unreviewed or invalid forms fail closed. M10A-T06 is `IN_PROGRESS` with task-owned local
+evidence; its exact-head hosted and fresh-`main` closure remain pending. The
 [plan](M10A-IMPLEMENTATION-PLAN.md) and [task contracts](M10A-TASK-CONTRACTS.md) own scope,
 negative tests and evidence paths.
 
@@ -268,7 +268,7 @@ negative tests and evidence paths.
 | M10A-T03 | DONE        | M10A-T02                                         | Theme/token editor, modes, aliases and loss-aware import/export                        |
 | M10A-T04 | DONE        | M10A-T02                                         | Immutable design-system releases and host snapshot identity                            |
 | M10A-T05 | DONE        | M10A-T01, M10A-T02                               | Layout, typography and content starter capabilities                                    |
-| M10A-T06 | NOT_STARTED | M10A-T05                                         | Form-control starter capabilities and accessible field compositions                    |
+| M10A-T06 | IN_PROGRESS | M10A-T05                                         | [Local form-control evidence](../proof/M10A-T06.md); hosted closure pending            |
 | M10A-T07 | NOT_STARTED | M10A-T06                                         | Selection, tabs and numeric-control capabilities                                       |
 | M10A-T08 | NOT_STARTED | M10A-T07                                         | Overlay, menu and disclosure capabilities                                              |
 | M10A-T09 | NOT_STARTED | M10A-T05, M10A-T08                               | Data-display and feedback capabilities                                                 |
