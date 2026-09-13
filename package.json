@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
+    "dev": "turbo run dev --parallel --concurrency=100%",
     "demo": "node apps/desen-app/dev/local-demo.mjs",
     "demo:reset": "node apps/desen-app/dev/local-demo.mjs --reset",
     "lint": "eslint . --max-warnings=0 && turbo run lint",
