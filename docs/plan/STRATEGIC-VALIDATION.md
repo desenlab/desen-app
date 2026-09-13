@@ -193,10 +193,10 @@ not a fabricated Continue result. Additional external research is not a prerequi
 the subsequent planned M11 extension proof. Internal automated acceptance replaces no market
 evidence: demand, adoption and broad Storybook/Chromatic/Figma equivalence remain unproven.
 
-M10A-T01 through M10A-T05 are now `DONE`: the bounded Button, Select, and Dialog adapter foundation
+M10A-T01 through M10A-T06 are now `DONE`: the bounded Button, Select, and Dialog adapter foundation
 is followed by the platform-neutral versioned project/token model, theme/token authoring workbench,
-immutable release identity, and private layout/content starter Catalog. Overall progress is 126/176
-(72%), M10A is 5/28 (18%), and 11/14 proof gates are closed. The completed T03 covers frozen SC-01's 16 valid fixtures: three T02-supported normal edit/preview paths and 13
+immutable release identity, private layout/content starter Catalog, and form-control Catalog. Overall
+progress is 127/176 (72%), M10A is 6/28 (21%), and 11/14 proof gates are closed. The completed T03 covers frozen SC-01's 16 valid fixtures: three T02-supported normal edit/preview paths and 13
 losslessly preserved/disclosed unsupported paths with partial preview blocked only for their selected
 overlay; seven invalid fixtures reject atomically. A separate closed T02-recognized unsupported matrix
 preserves/discloses six valid fixtures and atomically rejects ten malformed fixtures. Unreviewed or
@@ -204,6 +204,6 @@ invalid forms fail closed without silent loss. T04's hosted closure covers only 
 design-system release identity and an exact-digest store port. This does not establish the full
 starter library, normal App integration, durable production storage, Runtime activation, market
 demand, or production readiness. T05's hosted closure covers only its private Catalog and isolated
-browser harness. M10A-T06 is `IN_PROGRESS` with passing local form-control evidence, but its
-exact-head hosted and fresh-`main` closure remain pending. G10A must pass before M11-T01 or M11-T08,
-and SC-02 authorizes no external publication or deployment.
+browser harness. T06's form-control closure is likewise limited to its private Catalog and isolated
+proof; M10A-T07 is dependency-ready but `NOT_STARTED`. G10A must pass before M11-T01 or M11-T08, and
+SC-02 authorizes no external publication or deployment.

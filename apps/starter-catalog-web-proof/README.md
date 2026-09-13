@@ -18,7 +18,7 @@ proof.** It makes no normal-App integration, release, or product-readiness claim
 
 ## M10A-T06 form-control proof
 
-T06 is `IN_PROGRESS`. Its separate authoring and host graphs exercise the private
+T06 is `DONE`. Its separate authoring and host graphs exercise the private
 `@desen/starter-catalog-web` `run.desen.starter.web@0.3.0#web-react` Catalog with Button, TextField,
 TextArea, Checkbox, RadioGroup, and Switch. Its four Chromium cases prove bounded controlled events,
 native label/help/error relationships, disabled behavior, and independent host-graph rendering. They
@@ -29,7 +29,7 @@ Use `pnpm generate:m10a-t06`, `pnpm verify:m10a-t06`, and `pnpm test:m10a-t06` f
 local evidence path. The T06 runner builds the starter package and Catalog afresh, owns localhost
 port `4189`, and writes its disposable outputs only under a runner-owned temporary directory. Its
 local artifact is [`docs/proof/artifacts/m10a-t06.json`](../../docs/proof/artifacts/m10a-t06.json);
-the exact-head hosted and fresh-`main` closure are still pending in
+the exact-head hosted and fresh-`main` closure are recorded in
 [the T06 proof](../../docs/proof/M10A-T06.md).
 
 ## What the browser proof checks

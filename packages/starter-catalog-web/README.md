@@ -8,10 +8,10 @@ Source-node templates, and one explicit React-adapter subpath. Base UI remains a
 implementation detail of the Button, Select, Dialog, and form-control adapters; layout and semantic
 content use ordinary Web semantics where a Base UI primitive is unnecessary.
 
-**M10A-T06 is `IN_PROGRESS`.** Its [task-owned proof](../../docs/proof/M10A-T06.md) records passing
-local evidence for the form-control slice; exact-head hosted and fresh-`main` closure are still
-required before `DONE`. It is not a normal Desen App integration, a complete component library, a
-design-system explorer, a persisted project, or a publish/activation path.
+**M10A-T06 is `DONE`.** Its [task-owned proof](../../docs/proof/M10A-T06.md) records the local
+form-control evidence and exact-head hosted/fresh-`main` closure. It is not a normal Desen App
+integration, a complete component library, a design-system explorer, a persisted project, or a
+publish/activation path.
 
 The M10A-T01 receipt at
 [`docs/proof/artifacts/m10a-t01.json`](../../docs/proof/artifacts/m10a-t01.json) remains immutable
@@ -123,8 +123,8 @@ explorer/documentation surface.
 
 ## Verification
 
-The following commands validate the active local T06 boundary. Their passing result does not replace
-its exact-head hosted and fresh-`main` closure requirements in the task-owned proof.
+The following commands authenticate the completed local T06 boundary; the task-owned proof records
+the separate exact-head hosted and fresh-`main` closure receipts.
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck
