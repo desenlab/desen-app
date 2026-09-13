@@ -3672,3 +3672,23 @@ also remains historical and is not rewritten or promoted as T05 evidence.
 T05 is `PROVEN` only for this bounded private starter Catalog and isolated proof harness. It makes
 no normal-App design editing, persistence, asset/font admission, freeform CSS, runtime activation,
 package-publication, release, G10A, or M11 claim.
+
+## M10A-T06 form-control starter capabilities (`DONE`)
+
+The [M10A-T06 report](M10A-T06.md) records the bounded 0.3.0 private
+`@desen/starter-catalog-web` extension: retained Button plus TextField, TextArea, Checkbox,
+RadioGroup, and Switch with accessible label/help/error composition and controlled form events.
+Its 5,024-byte artifact is
+`sha256:21ad7b4dc09acc8813d67684fabb52f5ae6aaad5f0979b0ac050cfacbf957127`; checkpoint 93
+authenticates 70 artifacts / 140 readers at
+`sha256:9f570e4d4f1e1a1342c61a2b7dbdd1b8680c0a701e5d2fd5b775822ca4247554`.
+
+[PR #106](https://github.com/desenlab/desen-app/pull/106) at exact head
+`cb8dcdd0d52b058715c96377256bffe6dca9394b` passed the hosted Quality routing, Browser E2E,
+exhaustive A/B/C, and joined Quality gate, then squash-merged as
+[`e0238d2bc8f7274e971e4f363cdc44ea172a9d78`](https://github.com/desenlab/desen-app/commit/e0238d2bc8f7274e971e4f363cdc44ea172a9d78).
+The resulting [fresh-`main` run 34771050037](https://github.com/desenlab/desen-app/actions/runs/34771050037)
+passed the same required closure graph at that exact merge SHA. Progress is 127/176 (72%), M10A
+is 6/28 (21%), and proof gates remain 11/14. M10A-T07 is dependency-ready but `NOT_STARTED`.
+T06 does not add normal-App integration, persistence, Publisher/Runtime/Core/protocol authority,
+G10A, or M11.
