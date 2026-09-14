@@ -17,14 +17,21 @@ import {
   starterTextAreaComponentRegistration,
   starterTextFieldComponentRegistration,
 } from "./form-control-contracts.js";
+import {
+  starterComboboxComponentRegistration,
+  starterNumberFieldComponentRegistration,
+  starterSelectT07ComponentRegistration,
+  starterSliderComponentRegistration,
+  starterTabsComponentRegistration,
+} from "./selection-numeric-contracts.js";
 
 import type { ComponentPropsOf } from "@desen/catalog-sdk";
 
 /** Exact Catalog identity reserved for the DESEN Neutral Web starter package. */
 export const STARTER_CATALOG_ID = "run.desen.starter.web";
 
-/** Current additive Catalog contract version for the bounded M10A-T06 starter slice. */
-export const STARTER_CATALOG_VERSION = "0.3.0";
+/** Current additive Catalog contract version for the bounded M10A-T07 starter slice. */
+export const STARTER_CATALOG_VERSION = "0.4.0";
 
 /** Target implemented by the current DESEN Neutral starter package. */
 export const STARTER_CATALOG_TARGET = "web-react";
@@ -185,128 +192,8 @@ export const starterButtonComponentRegistration = registerComponent({
   },
 });
 
-/**
- * Immutable Catalog registration for the DESEN Neutral Select capability.
- *
- * @remarks Options are bounded inert records. Their values must be unique at the trusted adapter
- * boundary because JSON Schema cannot express uniqueness of one object member across an array.
- */
-export const starterSelectComponentRegistration = registerComponent({
-  id: STARTER_SELECT_CAPABILITY_ID,
-  manifest: {
-    description: "DESEN Neutral single-value select.",
-    category: "input",
-    propsSchema: {
-      $schema: JSON_SCHEMA_DIALECT,
-      type: "object",
-      additionalProperties: false,
-      required: ["label", "options"],
-      properties: {
-        label: {
-          type: "string",
-          minLength: 1,
-          maxLength: 256,
-        },
-        options: {
-          type: "array",
-          maxItems: STARTER_SELECT_MAX_OPTIONS,
-          uniqueItems: true,
-          items: {
-            type: "object",
-            additionalProperties: false,
-            required: ["value", "label"],
-            properties: {
-              value: {
-                type: "string",
-                minLength: 1,
-                maxLength: 128,
-              },
-              label: {
-                type: "string",
-                minLength: 1,
-                maxLength: 256,
-              },
-              disabled: {
-                type: "boolean",
-                default: false,
-              },
-            },
-          },
-        },
-        defaultValue: {
-          type: "string",
-          minLength: 1,
-          maxLength: 128,
-        },
-        disabled: {
-          type: "boolean",
-          default: false,
-        },
-      },
-    },
-    events: {
-      change: {
-        description: "Emitted with the newly selected inert option value.",
-        payloadSchema: {
-          $schema: JSON_SCHEMA_DIALECT,
-          type: "object",
-          additionalProperties: false,
-          required: ["value"],
-          properties: {
-            value: {
-              type: "string",
-            },
-          },
-        },
-      },
-    },
-    styleParts: {
-      root: neutralStylePart("Stable outer select surface."),
-      label: neutralStylePart("Visible select label."),
-      trigger: neutralStylePart("Interactive select trigger."),
-      popup: neutralStylePart("Portaled options popup."),
-      item: neutralStylePart("One selectable option."),
-    },
-    visualStates: ["hover", "focus", "open", "selected", "highlighted", "disabled"],
-    authoring: {
-      displayName: "Select",
-      category: "Inputs",
-      icon: "select",
-      defaultProps: {
-        label: "Select",
-        options: [{ value: "option-1", label: "Option 1", disabled: false }],
-        defaultValue: "option-1",
-        disabled: false,
-      },
-      scenarios: {
-        default: {
-          props: {
-            label: "Select an option",
-            options: [
-              { value: "first", label: "First", disabled: false },
-              { value: "second", label: "Second", disabled: false },
-            ],
-            defaultValue: "first",
-            disabled: false,
-          },
-        },
-        disabled: {
-          props: {
-            label: "Select an option",
-            options: [{ value: "first", label: "First", disabled: false }],
-            defaultValue: "first",
-            disabled: true,
-          },
-        },
-      },
-      resize: {
-        horizontal: "resizable",
-        vertical: "hug",
-      },
-      adapterFidelity: "same",
-    },
-  },
-});
+/** Current T07 extension of the original Select capability under its unchanged capability id. */
+export const starterSelectComponentRegistration = starterSelectT07ComponentRegistration;
 
 /**
  * Immutable Catalog registration for the DESEN Neutral Dialog capability.
@@ -436,11 +323,24 @@ export const starterDialogComponentRegistration = registerComponent({
 /** Resolved JSON-only props admitted by the starter Button contract. */
 export type StarterButtonProps = ComponentPropsOf<typeof starterButtonComponentRegistration>;
 
-/** Resolved JSON-only props admitted by the starter Select contract. */
-export type StarterSelectProps = ComponentPropsOf<typeof starterSelectComponentRegistration>;
+/** One inert option admitted by the upgraded Select contract. */
+export type StarterSelectOption =
+  | Readonly<{ id: string; label: string; disabled?: boolean; value?: never }>
+  | Readonly<{ value: string; label: string; disabled?: boolean; id?: never }>;
 
-/** One inert option admitted by the starter Select contract. */
-export type StarterSelectOption = StarterSelectProps["options"][number];
+/**
+ * Public JSON-only props for the upgraded Select contract.
+ *
+ * @remarks This explicit type retains the exact legacy-or-id option union. The generic schema
+ * helper cannot express `anyOf` without widening a property to `unknown` at the TypeScript edge.
+ */
+export interface StarterSelectProps {
+  readonly label: string;
+  readonly options: readonly StarterSelectOption[];
+  readonly value?: string;
+  readonly defaultValue?: string;
+  readonly disabled?: boolean;
+}
 
 /** Resolved JSON-only props admitted by the starter Dialog contract. */
 export type StarterDialogProps = ComponentPropsOf<typeof starterDialogComponentRegistration>;
@@ -469,6 +369,10 @@ export const STARTER_COMPONENT_REGISTRATIONS = Object.freeze([
   starterCheckboxComponentRegistration,
   starterRadioGroupComponentRegistration,
   starterSwitchComponentRegistration,
+  starterComboboxComponentRegistration,
+  starterTabsComponentRegistration,
+  starterSliderComponentRegistration,
+  starterNumberFieldComponentRegistration,
 ] as const);
 
 /**
@@ -528,6 +432,31 @@ export {
   starterTextAreaComponentRegistration,
   starterTextFieldComponentRegistration,
 } from "./form-control-contracts.js";
+export {
+  STARTER_COMBOBOX_CAPABILITY_ID,
+  STARTER_NUMBER_FIELD_CAPABILITY_ID,
+  STARTER_NUMERIC_MAX_STEP,
+  STARTER_NUMERIC_MAXIMUM,
+  STARTER_NUMERIC_MINIMUM,
+  STARTER_SELECTION_MAX_OPTIONS,
+  STARTER_SLIDER_CAPABILITY_ID,
+  STARTER_TABS_CAPABILITY_ID,
+  STARTER_TABS_MAX_ITEMS,
+  starterComboboxComponentRegistration,
+  starterNumberFieldComponentRegistration,
+  starterSliderComponentRegistration,
+  starterTabsComponentRegistration,
+} from "./selection-numeric-contracts.js";
+export type {
+  StarterComboboxOption,
+  StarterComboboxProps,
+  StarterNumberFieldProps,
+  StarterSliderProps,
+  StarterTab,
+  StarterTabsProps,
+  StarterT07SelectOption,
+  StarterT07SelectProps,
+} from "./selection-numeric-contracts.js";
 export type {
   StarterCheckboxProps,
   StarterRadioGroupOption,

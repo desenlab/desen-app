@@ -4,10 +4,10 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01/T02/T03/T04/T05/T06 are complete. T06's exact-head hosted and fresh-`main`
-> closure passed. M10A-T07 is `NOT_STARTED` but dependency-ready; M11 has not started. T06 remains
-> an isolated starter-catalog proof, not normal-App integration, production certification, runtime
-> activation, persistence, or a protocol change.
+> M10/G10 and M10A-T01/T02/T03/T04/T05/T06 are complete. M10A-T07 is `IN_PROGRESS` with local
+> 0.4.0 selection/numeric-control evidence; exact-head hosted and fresh-`main` closure remains
+> required. It remains an isolated starter-catalog proof, not normal-App integration, production
+> certification, runtime activation, persistence, or a protocol change. M11 has not started.
 
 ## Implementation progress
 
@@ -37,7 +37,7 @@ bounded, reproducible claims about both.
 **M10A:** **6 / 28 tasks complete (21%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Next eligible task:** `M10A-T07` (`NOT_STARTED`; dependency-ready) ·
+**Active task:** `M10A-T07` (`IN_PROGRESS`; local evidence recorded; hosted closure pending) ·
 **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
@@ -190,9 +190,10 @@ manifest, exact host-profile references, and a no-`latest` release-store port. I
 fresh-`main` closure is recorded in the [T04 proof](docs/proof/M10A-T04.md); it adds no runtime
 activation, normal-App integration, or persistent production store. `M10A-T05` is `DONE` for its
 bounded private layout/content starter Catalog and isolated proof harness, not normal-App integration.
-`M10A-T06` is `DONE`: its 0.3.0 form-control Catalog, accessible field composition, and bounded
-controlled events passed exact-head and fresh-`main` closure ([T06 proof](docs/proof/M10A-T06.md)); it
-remains isolated, not normal-App integration, persistence, Publisher, Runtime, or protocol authority. T07 is dependency-ready `NOT_STARTED`; M11 remains gated by G10A.
+`M10A-T06` is `DONE` with isolated 0.3.0 form-control evidence and hosted closure
+([T06 proof](docs/proof/M10A-T06.md)). `M10A-T07` is `IN_PROGRESS` with a local 0.4.0
+selection/numeric Catalog [proof](docs/proof/M10A-T07.md); hosted closure is still required. Both
+remain isolated from normal-App integration, persistence, Publisher, Runtime, and protocol authority; M11 remains gated by G10A.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and

@@ -4,16 +4,20 @@ import {
   STARTER_BUTTON_CAPABILITY_ID,
   STARTER_BOX_CAPABILITY_ID,
   STARTER_CHECKBOX_CAPABILITY_ID,
+  STARTER_COMBOBOX_CAPABILITY_ID,
   STARTER_DIALOG_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
   STARTER_HEADING_CAPABILITY_ID,
   STARTER_ICON_CAPABILITY_ID,
   STARTER_IMAGE_CAPABILITY_ID,
+  STARTER_NUMBER_FIELD_CAPABILITY_ID,
   STARTER_RADIO_GROUP_CAPABILITY_ID,
   STARTER_SEPARATOR_CAPABILITY_ID,
+  STARTER_SLIDER_CAPABILITY_ID,
   STARTER_SELECT_CAPABILITY_ID,
   STARTER_STACK_CAPABILITY_ID,
   STARTER_SWITCH_CAPABILITY_ID,
+  STARTER_TABS_CAPABILITY_ID,
   STARTER_TEXT_AREA_CAPABILITY_ID,
   STARTER_TEXT_CAPABILITY_ID,
   STARTER_TEXT_FIELD_CAPABILITY_ID,
@@ -25,11 +29,15 @@ import {
   starterHeadingComponentRegistration,
   starterIconComponentRegistration,
   starterImageComponentRegistration,
+  starterNumberFieldComponentRegistration,
   starterRadioGroupComponentRegistration,
   starterSelectComponentRegistration,
   starterSeparatorComponentRegistration,
+  starterSliderComponentRegistration,
   starterStackComponentRegistration,
   starterSwitchComponentRegistration,
+  starterTabsComponentRegistration,
+  starterComboboxComponentRegistration,
   starterTextAreaComponentRegistration,
   starterTextComponentRegistration,
   starterTextFieldComponentRegistration,
@@ -51,16 +59,20 @@ export type StarterTemplateCapabilityId =
   | typeof STARTER_BUTTON_CAPABILITY_ID
   | typeof STARTER_BOX_CAPABILITY_ID
   | typeof STARTER_CHECKBOX_CAPABILITY_ID
+  | typeof STARTER_COMBOBOX_CAPABILITY_ID
   | typeof STARTER_SELECT_CAPABILITY_ID
   | typeof STARTER_DIALOG_CAPABILITY_ID
   | typeof STARTER_GRID_CAPABILITY_ID
   | typeof STARTER_HEADING_CAPABILITY_ID
   | typeof STARTER_ICON_CAPABILITY_ID
   | typeof STARTER_IMAGE_CAPABILITY_ID
+  | typeof STARTER_NUMBER_FIELD_CAPABILITY_ID
   | typeof STARTER_RADIO_GROUP_CAPABILITY_ID
   | typeof STARTER_SEPARATOR_CAPABILITY_ID
+  | typeof STARTER_SLIDER_CAPABILITY_ID
   | typeof STARTER_STACK_CAPABILITY_ID
   | typeof STARTER_SWITCH_CAPABILITY_ID
+  | typeof STARTER_TABS_CAPABILITY_ID
   | typeof STARTER_TEXT_AREA_CAPABILITY_ID
   | typeof STARTER_TEXT_CAPABILITY_ID
   | typeof STARTER_TEXT_FIELD_CAPABILITY_ID;
@@ -139,16 +151,20 @@ function captureTemplateInput(input: unknown): CapturedTemplateInput {
       capabilityId !== STARTER_BUTTON_CAPABILITY_ID &&
       capabilityId !== STARTER_BOX_CAPABILITY_ID &&
       capabilityId !== STARTER_CHECKBOX_CAPABILITY_ID &&
+      capabilityId !== STARTER_COMBOBOX_CAPABILITY_ID &&
       capabilityId !== STARTER_SELECT_CAPABILITY_ID &&
       capabilityId !== STARTER_DIALOG_CAPABILITY_ID &&
       capabilityId !== STARTER_GRID_CAPABILITY_ID &&
       capabilityId !== STARTER_HEADING_CAPABILITY_ID &&
       capabilityId !== STARTER_ICON_CAPABILITY_ID &&
       capabilityId !== STARTER_IMAGE_CAPABILITY_ID &&
+      capabilityId !== STARTER_NUMBER_FIELD_CAPABILITY_ID &&
       capabilityId !== STARTER_RADIO_GROUP_CAPABILITY_ID &&
       capabilityId !== STARTER_SEPARATOR_CAPABILITY_ID &&
+      capabilityId !== STARTER_SLIDER_CAPABILITY_ID &&
       capabilityId !== STARTER_STACK_CAPABILITY_ID &&
       capabilityId !== STARTER_SWITCH_CAPABILITY_ID &&
+      capabilityId !== STARTER_TABS_CAPABILITY_ID &&
       capabilityId !== STARTER_TEXT_AREA_CAPABILITY_ID &&
       capabilityId !== STARTER_TEXT_CAPABILITY_ID &&
       capabilityId !== STARTER_TEXT_FIELD_CAPABILITY_ID
@@ -242,6 +258,9 @@ function assertAvailableNodeIds(
     ...(capabilityId === STARTER_GRID_CAPABILITY_ID
       ? [`${input.idPrefix}.first`, `${input.idPrefix}.second`]
       : []),
+    ...(capabilityId === STARTER_TABS_CAPABILITY_ID
+      ? [`${input.idPrefix}.first`, `${input.idPrefix}.second`]
+      : []),
   ];
   const reserved = new Set(input.reservedIds);
   for (const id of generatedIds) {
@@ -315,6 +334,18 @@ export function createStarterNodeTemplate(
         props: starterCheckboxComponentRegistration.manifest.authoring.defaultProps,
       };
       break;
+    case STARTER_COMBOBOX_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_COMBOBOX_CAPABILITY_ID,
+        props: {
+          ...starterComboboxComponentRegistration.manifest.authoring.defaultProps,
+          options: starterComboboxComponentRegistration.manifest.authoring.defaultProps.options.map(
+            (option) => ({ ...option }),
+          ),
+        },
+      };
+      break;
     case STARTER_RADIO_GROUP_CAPABILITY_ID:
       node = {
         id: captured.idPrefix,
@@ -333,6 +364,46 @@ export function createStarterNodeTemplate(
         id: captured.idPrefix,
         use: STARTER_SWITCH_CAPABILITY_ID,
         props: starterSwitchComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_SLIDER_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_SLIDER_CAPABILITY_ID,
+        props: starterSliderComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_NUMBER_FIELD_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_NUMBER_FIELD_CAPABILITY_ID,
+        props: starterNumberFieldComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_TABS_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_TABS_CAPABILITY_ID,
+        props: {
+          ...starterTabsComponentRegistration.manifest.authoring.defaultProps,
+          tabs: starterTabsComponentRegistration.manifest.authoring.defaultProps.tabs.map(
+            (tab) => ({ ...tab }),
+          ),
+        },
+        slots: {
+          panels: [
+            {
+              id: `${captured.idPrefix}.first`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "First tab panel" },
+            },
+            {
+              id: `${captured.idPrefix}.second`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Second tab panel" },
+            },
+          ],
+        },
       };
       break;
     case STARTER_SELECT_CAPABILITY_ID:

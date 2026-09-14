@@ -2,11 +2,11 @@
 
 ## Purpose and status
 
-This private app is the isolated browser harness for the completed M10A-T05 starter-catalog
-extension. It is not Desen App product UI and is not a general design canvas. Its authoring graph
-turns four fixed Source fixtures into Bundles through `@desen/publisher`; its separately built host
-graph accepts only those serialized Bundles and mounts them through the same static starter adapter
-registry. The host graph contains no Editor or Publisher authority.
+This private app is the isolated browser harness for the M10A starter-catalog extensions. It is not
+Desen App product UI and is not a general design canvas. Each task-owned authoring graph turns fixed
+Source fixtures into Bundles through `@desen/publisher`; its separately built host graph accepts only
+those serialized Bundles and mounts them through the same static starter adapter registry. The host
+graph contains no Editor or Publisher authority.
 
 The four fixtures cover the existing Button, Select, and Dialog surfaces plus one nested
 Box/Stack/Grid layout surface containing Heading, Text, Image, Icon, and Separator. They are
@@ -32,7 +32,26 @@ local artifact is [`docs/proof/artifacts/m10a-t06.json`](../../docs/proof/artifa
 the exact-head hosted and fresh-`main` closure are recorded in
 [the T06 proof](../../docs/proof/M10A-T06.md).
 
-## What the browser proof checks
+## M10A-T07 selection and numeric-control proof
+
+T07 is `IN_PROGRESS`. Its separate authoring and host graphs exercise the private
+`@desen/starter-catalog-web` `run.desen.starter.web@0.4.0#web-react` Catalog, extending Select and
+adding Combobox, Tabs, Slider, and NumberField. Its four Chromium cases cover data-only stable
+selection identities, bounded `contains`/`startsWith` Combobox filtering, an ordered public Tabs
+panel slot, keyboard typeahead/tab selection, finite numeric bounds, empty/disabled states, and
+rejection of duplicate IDs, non-finite values, malformed event payloads, and function-based filters
+or renderers.
+
+The proof uses a Publisher-derived isolated authoring graph and an independent host graph with the
+same static adapter registry; it does not authorize normal-App integration, persistence, Publisher
+authority, Runtime activation, Core/protocol changes, G10A, or M11. Use
+`pnpm generate:m10a-t07`, `pnpm verify:m10a-t07`, and `pnpm test:m10a-t07` for the task-owned local
+evidence path. The T07 runner builds the starter package and Catalog afresh, owns localhost port
+`4190`, and writes disposable outputs only under a runner-owned temporary directory. Its local
+artifact is [`docs/proof/artifacts/m10a-t07.json`](../../docs/proof/artifacts/m10a-t07.json); no
+exact-head hosted or fresh-`main` closure is claimed yet.
+
+## M10A-T05 browser proof (historical)
 
 The exact Playwright inventory contains four cases:
 
@@ -82,6 +101,6 @@ hosted and fresh-`main` closure receipts live in [the T05 proof](../../docs/proo
 
 ## Historical boundary
 
-M10A-T01's original artifact remains an immutable historical receipt. This harness now belongs to
-T05's expanded browser observation and must not regenerate, overwrite, or relabel the historical
-T01 artifact as current evidence.
+M10A-T01's original artifact remains an immutable historical receipt. T05 and T06 retain their
+sealed task-owned evidence, while T07 owns its separate 0.4.0 local capture. No harness route may
+regenerate, overwrite, or relabel a historical artifact as current evidence.

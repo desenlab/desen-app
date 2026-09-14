@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T07",
+  "proofId": "m10a-t07",
+  "profile": "desen.m10a-t07.selection-numeric-controls.v1",
+  "result": "PASS",
+  "package": {
+    "name": "@desen/starter-catalog-web",
+    "catalog": {
+      "id": "run.desen.starter.web",
+      "version": "0.4.0",
+      "target": "web-react",
+      "sha256": "d600387a45a351ae30a867e1b907b6d4bea218e08e74261d4a8796f895b5d3dc",
+      "bytes": 401609
+    },
+    "packageDigest": "sha256:c87ff63756db10c6f3d9d29e8a0ba66f026d2a26f48f9c41cff85ddbf871e544",
+    "digestProfile": "desen.web-react.package-digest",
+    "distFiles": 29,
+    "distBytes": 2176637
+  },
+  "capabilities": {
+    "ids": [
+      "run.desen.starter/Box",
+      "run.desen.starter/Button",
+      "run.desen.starter/Checkbox",
+      "run.desen.starter/Combobox",
+      "run.desen.starter/Dialog",
+      "run.desen.starter/Grid",
+      "run.desen.starter/Heading",
+      "run.desen.starter/Icon",
+      "run.desen.starter/Image",
+      "run.desen.starter/NumberField",
+      "run.desen.starter/RadioGroup",
+      "run.desen.starter/Select",
+      "run.desen.starter/Separator",
+      "run.desen.starter/Slider",
+      "run.desen.starter/Stack",
+      "run.desen.starter/Switch",
+      "run.desen.starter/Tabs",
+      "run.desen.starter/Text",
+      "run.desen.starter/TextArea",
+      "run.desen.starter/TextField"
+    ],
+    "added": [
+      "run.desen.starter/Combobox",
+      "run.desen.starter/NumberField",
+      "run.desen.starter/Slider",
+      "run.desen.starter/Tabs"
+    ],
+    "selectCompatibility": "id-or-legacy-value-normalized-to-stable-id",
+    "comboboxFilterModes": ["contains", "startsWith"],
+    "tabsSlot": "panels",
+    "numericBounds": {
+      "minimum": -100000,
+      "maximum": 100000,
+      "positiveStepRequired": true
+    }
+  },
+  "browser": {
+    "profile": "desen.m10a-t07.browser-proof.v1",
+    "result": "PASS",
+    "graphReceipts": ["authoring", "host"],
+    "tests": [
+      {
+        "title": "projects keyboard typeahead, tab selection, and numeric changes through Runtime events",
+        "result": "PASS"
+      },
+      {
+        "title": "publishes the T07 selection and numeric surfaces through the reviewed starter Catalog",
+        "result": "PASS"
+      },
+      {
+        "title": "renders selection, tab panels, and numeric bounds in authoring and independent host graphs",
+        "result": "PASS"
+      },
+      {
+        "title": "retains empty and disabled states and rejects malformed selection and numeric data",
+        "result": "PASS"
+      }
+    ],
+    "assertions": {
+      "allSelectionNumericCapabilitiesPublished": true,
+      "dataOnlyBoundedFiltering": true,
+      "duplicateOptionIdRejected": true,
+      "emptyAndDisabledControls": true,
+      "functionRendererAndFilterRejected": true,
+      "independentHostGraph": true,
+      "keyboardComboboxFiltering": true,
+      "keyboardSelectTypeahead": true,
+      "keyboardTabSelection": true,
+      "malformedRuntimeEventRejected": true,
+      "nonFiniteValueRejected": true,
+      "numericBounds": true,
+      "publicOrderedTabPanels": true,
+      "publisherDerivedAuthoring": true,
+      "sameStaticAdapterRegistry": true,
+      "stableSelectedIdentities": true
+    }
+  },
+  "historical": {
+    "m10aT06ArtifactSha256": "21ad7b4dc09acc8813d67684fabb52f5ae6aaad5f0979b0ac050cfacbf957127",
+    "m10aT06CatalogSha256": "e131b8b02be9e4b50d38bf6b0e454ebbd79da8e134ca1d6bd90b943b05beddd5"
+  },
+  "claims": {
+    "boundedDataOnlyControls": true,
+    "stableSelectedIdentities": true,
+    "publicOrderedTabPanels": true,
+    "keyboardAndNumericBoundsValidated": true,
+    "malformedDataRejected": true,
+    "sameStaticAdaptersInCanvasAndHost": true,
+    "historicalArtifactsRewritten": false,
+    "runtimeCoreChanged": false
+  },
+  "tests": {
+    "rootTestNames": [
+      "M10A-T07 builds the exact 0.4.0 selection and numeric Catalog deterministically",
+      "M10A-T07 admits only bounded data, stable identities, ordered public panels, and finite numeric values",
+      "M10A-T07 authenticates all-positive authoring and independent-host browser observations",
+      "M10A-T07 rejects malformed browser observations, artifact drift, and unsafe evidence options",
+      "M10A-T07 preserves the checkpointed T06 historical receipt while the starter Catalog evolves",
+      "M10A-T07 writer is atomic and leaves the current artifact bytes deterministic"
+    ],
+    "packageCommand": "pnpm --filter @desen/starter-catalog-web test",
+    "browserCommand": "pnpm --filter @desen/starter-catalog-web-proof run test:m10a-t07",
+    "browserExecutedByVerifier": true
+  },
+  "nonClaims": [
+    "T07 does not add normal-App design editing, draft-library persistence, Publisher authority, or Runtime activation.",
+    "T07 does not admit arbitrary callbacks, renderer functions, CSS selectors, executable markup, private DOM access, or remote media URLs.",
+    "T07 does not turn design controls into business actions beyond declared bounded Runtime event payloads.",
+    "Local evidence does not substitute for exact-head hosted Quality gate and fresh-main closure."
+  ]
+}

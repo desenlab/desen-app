@@ -1,10 +1,14 @@
 import type {
   StarterButtonProps,
   StarterCheckboxProps,
+  StarterComboboxProps,
   StarterDialogProps,
+  StarterNumberFieldProps,
   StarterRadioGroupProps,
   StarterSelectProps,
+  StarterSliderProps,
   StarterSwitchProps,
+  StarterTabsProps,
   StarterTextAreaProps,
   StarterTextFieldProps,
 } from "../src/index.js";
@@ -25,7 +29,42 @@ const radioGroup: StarterRadioGroupProps = {
   value: "starter",
 };
 const toggle: StarterSwitchProps = { label: "Enable notifications", checked: true };
-void [button, select, dialog, textField, textArea, checkbox, radioGroup, toggle];
+const combobox: StarterComboboxProps = {
+  label: "Find a region",
+  options: [{ id: "north", label: "Northern region" }],
+  value: "north",
+  filterMode: "startsWith",
+};
+const tabs: StarterTabsProps = {
+  label: "Sections",
+  tabs: [
+    { id: "overview", label: "Overview" },
+    { id: "details", label: "Details" },
+  ],
+  value: "overview",
+};
+const slider: StarterSliderProps = { label: "Opacity", value: 50, min: 0, max: 100, step: 1 };
+const numberField: StarterNumberFieldProps = {
+  label: "Columns",
+  value: 2,
+  min: 1,
+  max: 12,
+  step: 1,
+};
+void [
+  button,
+  select,
+  dialog,
+  textField,
+  textArea,
+  checkbox,
+  radioGroup,
+  toggle,
+  combobox,
+  tabs,
+  slider,
+  numberField,
+];
 
 // @ts-expect-error A native callback is not a Catalog prop.
 const callback: StarterButtonProps = { label: "Continue", onClick: () => undefined };
@@ -44,7 +83,45 @@ const item: StarterSelectProps = {
   // @ts-expect-error Select items are inert labelled string values, not executable children.
   options: [{ value: "one", label: () => null }],
 };
-void [callback, render, target, formCallback, invalidChecked, invalidOption, item];
+const unsafeComboboxFilter: StarterComboboxProps = {
+  label: "Find a region",
+  options: [{ id: "north", label: "Northern region" }],
+  // @ts-expect-error A user function cannot define Catalog filtering.
+  filterMode: () => true,
+};
+const unsafeComboboxRenderer: StarterComboboxProps = {
+  label: "Find a region",
+  options: [{ id: "north", label: "Northern region" }],
+  // @ts-expect-error Rendering remains inside the trusted adapter.
+  renderItem: () => null,
+};
+const unsafeTabs: StarterTabsProps = {
+  label: "Sections",
+  // @ts-expect-error Tabs require an inert stable id alongside every label.
+  tabs: [{ label: "Overview" }],
+  value: "overview",
+};
+const unsafeNumeric: StarterNumberFieldProps = {
+  label: "Columns",
+  // @ts-expect-error Numeric values cannot carry executable data.
+  value: () => 2,
+  min: 1,
+  max: 12,
+  step: 1,
+};
+void [
+  callback,
+  render,
+  target,
+  formCallback,
+  invalidChecked,
+  invalidOption,
+  item,
+  unsafeComboboxFilter,
+  unsafeComboboxRenderer,
+  unsafeTabs,
+  unsafeNumeric,
+];
 
 // @ts-expect-error No arbitrary capability or module selector can request a starter template.
 createStarterNodeTemplate({ capabilityId: "@base-ui/react/dialog", idPrefix: "dialog" });
