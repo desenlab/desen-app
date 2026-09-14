@@ -1,8 +1,7 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T06 are `DONE`.
-M10A-T07 is `IN_PROGRESS` with local evidence in its [task-owned proof](../proof/M10A-T07.md);
-exact-head hosted and fresh-`main` closure remain required. The canonical statuses and dependencies
+Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T07 are `DONE`.
+T07's hosted evidence is in its [task-owned proof](../proof/M10A-T07.md). The canonical statuses and dependencies
 are in [TASKS.md](TASKS.md).
 
 ## Product promise
@@ -20,8 +19,8 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 ## Delivery sequence and accounting
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
-and one gate; the total becomes 176 tasks and 14 gates. The 127 completed tasks and 11 completed
-gates remain completed. T01 through T06 are the six completed M10A tasks; T07 is active, and the
+and one gate; the total becomes 176 tasks and 14 gates. The 128 completed tasks and 11 completed
+gates remain completed. T01 through T07 are the seven completed M10A tasks, and the
 other 21 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
@@ -209,10 +208,10 @@ independent-host graphs. Its [task-owned proof](../proof/M10A-T06.md) records th
 exact-head hosted and fresh-`main` closure. T06 does not retrospectively expand T05 or authorize normal-App
 integration, persistence, Publisher authority, Runtime activation, Core/protocol changes, G10A, or M11.
 
-**M10A-T07 — Selection and numeric controls** is `IN_PROGRESS`. It extends Select and adds data-only
-Combobox, Tabs, Slider, and NumberField contracts with local isolated authoring/host evidence in its
-[task-owned proof](../proof/M10A-T07.md). Exact-head hosted Quality and fresh-`main` closure remain
-required; it does not authorize normal-App integration, persistence, Publisher, Runtime, Core/protocol,
+**M10A-T07 — Selection and numeric controls** is `DONE`. It extends Select and adds data-only
+Combobox, Tabs, Slider, and NumberField contracts with isolated authoring/host evidence in its
+[task-owned proof](../proof/M10A-T07.md), including exact-head hosted Quality and fresh-`main` closure.
+It does not authorize normal-App integration, persistence, Publisher, Runtime, Core/protocol,
 G10A, or M11.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive

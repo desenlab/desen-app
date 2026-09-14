@@ -34,7 +34,7 @@ the exact-head hosted and fresh-`main` closure are recorded in
 
 ## M10A-T07 selection and numeric-control proof
 
-T07 is `IN_PROGRESS`. Its separate authoring and host graphs exercise the private
+T07 is `DONE`. Its separate authoring and host graphs exercise the private
 `@desen/starter-catalog-web` `run.desen.starter.web@0.4.0#web-react` Catalog, extending Select and
 adding Combobox, Tabs, Slider, and NumberField. Its four Chromium cases cover data-only stable
 selection identities, bounded `contains`/`startsWith` Combobox filtering, an ordered public Tabs
@@ -43,13 +43,14 @@ rejection of duplicate IDs, non-finite values, malformed event payloads, and fun
 or renderers.
 
 The proof uses a Publisher-derived isolated authoring graph and an independent host graph with the
-same static adapter registry; it does not authorize normal-App integration, persistence, Publisher
-authority, Runtime activation, Core/protocol changes, G10A, or M11. Use
+same static adapter registry; its exact-head hosted and fresh-`main` closure is recorded in the
+[T07 report](../../docs/proof/M10A-T07.md). It does not authorize normal-App integration, persistence,
+Publisher authority, Runtime activation, Core/protocol changes, G10A, or M11. Use
 `pnpm generate:m10a-t07`, `pnpm verify:m10a-t07`, and `pnpm test:m10a-t07` for the task-owned local
 evidence path. The T07 runner builds the starter package and Catalog afresh, owns localhost port
 `4190`, and writes disposable outputs only under a runner-owned temporary directory. Its local
-artifact is [`docs/proof/artifacts/m10a-t07.json`](../../docs/proof/artifacts/m10a-t07.json); no
-exact-head hosted or fresh-`main` closure is claimed yet.
+artifact is [`docs/proof/artifacts/m10a-t07.json`](../../docs/proof/artifacts/m10a-t07.json); exact-head
+hosted and fresh-`main` closure are recorded in the [T07 report](../../docs/proof/M10A-T07.md).
 
 ## M10A-T05 browser proof (historical)
 

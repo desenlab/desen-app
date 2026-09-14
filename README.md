@@ -4,17 +4,17 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01/T02/T03/T04/T05/T06 are complete. M10A-T07 is `IN_PROGRESS` with local
-> 0.4.0 selection/numeric-control evidence; exact-head hosted and fresh-`main` closure remains
-> required. It remains an isolated starter-catalog proof, not normal-App integration, production
-> certification, runtime activation, persistence, or a protocol change. M11 has not started.
+> M10/G10 and M10A-T01/T02/T03/T04/T05/T06/T07 are complete. T07's 0.4.0 selection/numeric
+> starter-catalog proof passed exact-head hosted and fresh-`main` closure. It remains an isolated
+> starter-catalog proof, not normal-App integration, production certification, runtime activation,
+> persistence, or a protocol change. M11 has not started.
 
 ## Implementation progress
 
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████████░░░░░░░` **127 / 176 tasks complete (72%)**
+**Overall:** `██████████████████░░░░░░░` **128 / 176 tasks complete (73%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -34,10 +34,10 @@ bounded, reproducible claims about both.
 
 **M10 complete:** `████████████` **12 / 12 tasks complete (100%)**
 
-**M10A:** **6 / 28 tasks complete (21%)** · 28 newly planned product tasks; no completed work removed.
+**M10A:** **7 / 28 tasks complete (25%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Active task:** `M10A-T07` (`IN_PROGRESS`; local evidence recorded; hosted closure pending) ·
+**Next task:** `M10A-T08` (`NOT_STARTED`; T07 complete) ·
 **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
@@ -191,9 +191,9 @@ fresh-`main` closure is recorded in the [T04 proof](docs/proof/M10A-T04.md); it 
 activation, normal-App integration, or persistent production store. `M10A-T05` is `DONE` for its
 bounded private layout/content starter Catalog and isolated proof harness, not normal-App integration.
 `M10A-T06` is `DONE` with isolated 0.3.0 form-control evidence and hosted closure
-([T06 proof](docs/proof/M10A-T06.md)). `M10A-T07` is `IN_PROGRESS` with a local 0.4.0
-selection/numeric Catalog [proof](docs/proof/M10A-T07.md); hosted closure is still required. Both
-remain isolated from normal-App integration, persistence, Publisher, Runtime, and protocol authority; M11 remains gated by G10A.
+([T06 proof](docs/proof/M10A-T06.md)). `M10A-T07` is `DONE` with its hosted 0.4.0
+selection/numeric Catalog [proof](docs/proof/M10A-T07.md). Both remain isolated from normal-App
+integration, persistence, Publisher, Runtime, and protocol authority; M11 remains gated by G10A.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and
