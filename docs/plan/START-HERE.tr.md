@@ -5,15 +5,15 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 127/176 (%72), M10 12/12,
-M10A 6/28 (%21) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T06'nın exact-head PR kontrolleri,
-merge'leri ve taze `main` koşuları geçti. M10A-T06 `DONE`: exact-head PR, merge ve taze `main` kapanışı geçti.
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 128/176 (%73), M10 12/12,
+M10A 7/28 (%25) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T07'nın exact-head PR kontrolleri,
+merge'leri ve taze `main` koşuları geçti. M10A-T07 `DONE`: exact-head PR, merge ve taze `main` kapanışı geçti.
 Ayrıntı [Project Status](../../PROJECT-STATUS.md),
-[T05 kanıtı](../proof/M10A-T05.md), [T06 kanıtı](../proof/M10A-T06.md) ve
+[T05 kanıtı](../proof/M10A-T05.md), [T06 kanıtı](../proof/M10A-T06.md), [T07 kanıtı](../proof/M10A-T07.md) ve
 [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış görev sayısı 127 ve M10A sayacı 6/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
+ekler; tamamlanmış görev sayısı 128 ve M10A sayacı 7/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
 sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` `DONE`: tema/token
 authoring, modlar, alias'lar, kayıp-farkındalıklı aktarım ve izole workbench kanıtlandı.
@@ -22,8 +22,8 @@ host-profile release referansı için hosted kapanış kaydı vardır. `M10A-T05
 Grid, Text/Heading, Image, Icon ve Separator için private Catalog ve izole kanıt harness'i kapandı;
 bu normal Desen App entegrasyonu değildir. `M10A-T06` `DONE`: TextField, TextArea, Checkbox,
 RadioGroup ve Switch için erişilebilir alan bileşimi ve kontrollü event kanıtı hosted kapanışla geçti.
-`M10A-T07` `IN_PROGRESS`: Select, Combobox, Tabs, Slider ve NumberField için yerel 0.4.0 kanıtı
-kaydedildi; exact-head hosted ve taze `main` kapanışı hâlâ gereklidir.
+`M10A-T07` `DONE`: Select, Combobox, Tabs, Slider ve NumberField için hosted kapanış
+kaydedildi; exact-head hosted ve taze `main` kapanışı geçti.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i

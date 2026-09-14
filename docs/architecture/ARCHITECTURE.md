@@ -217,7 +217,7 @@ success.
 M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice,
 T02's platform-neutral project/token foundation, T03's authoring/workbench slice, T04's immutable
 release identity, T05's private layout/content Catalog slice, and T06's form-control slice are `DONE`;
-T07 is `IN_PROGRESS` with a local isolated selection/numeric Catalog proof, and the other 21 tasks remain `NOT_STARTED`.
+T07 is `DONE` with exact-head hosted and fresh-`main` isolated selection/numeric Catalog proof, and the other 21 tasks remain `NOT_STARTED`.
 Later workbench features remain planned; no publication or production authority follows from this text.
 [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the decision,
 while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),

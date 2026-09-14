@@ -3688,15 +3688,15 @@ authenticates 70 artifacts / 140 readers at
 exhaustive A/B/C, and joined Quality gate, then squash-merged as
 [`e0238d2bc8f7274e971e4f363cdc44ea172a9d78`](https://github.com/desenlab/desen-app/commit/e0238d2bc8f7274e971e4f363cdc44ea172a9d78).
 The resulting [fresh-`main` run 34771050037](https://github.com/desenlab/desen-app/actions/runs/34771050037)
-passed the same required closure graph at that exact merge SHA. Progress is 127/176 (72%), M10A
-is 6/28 (21%), and proof gates remain 11/14. At T06 closure, M10A-T07 was dependency-ready but
+passed the same required closure graph at that exact merge SHA. Progress is 128/176 (73%), M10A
+is 7/28 (25%), and proof gates remain 11/14. At T06 closure, M10A-T07 was dependency-ready but
 `NOT_STARTED`; its current state is recorded separately in the T07 section below.
 T06 does not add normal-App integration, persistence, Publisher/Runtime/Core/protocol authority,
 G10A, or M11.
 
-## M10A-T07 selection and numeric-control starter capabilities (`IN_PROGRESS`)
+## M10A-T07 selection and numeric-control starter capabilities (`DONE`)
 
-The [M10A-T07 report](M10A-T07.md) records the current private 0.4.0
+The [M10A-T07 report](M10A-T07.md) records the private 0.4.0
 `@desen/starter-catalog-web` extension: an upgraded Select plus data-only Combobox, Tabs, Slider,
 and NumberField controls. Its 5,107-byte artifact is
 `sha256:1587114174bd30fa91c44bc8e236e5ae57f80c81a0dfe6980a73a2f40c9fced4`; checkpoint 95
@@ -3704,6 +3704,6 @@ authenticates 71 artifacts / 142 readers at
 `sha256:62aa992cfeff45f8f84b1ecdba21ecb2805893ac7ff3b70549b616d331d86b72`.
 
 The isolated authoring/host Chromium receipt covers bounded data-only selection, public ordered
-tab panels, keyboard interactions, numeric limits, and malformed-data rejection. It is local
-evidence only: exact-head hosted Quality and fresh-`main` closure are still required. T07 does not
+tab panels, keyboard interactions, numeric limits, and malformed-data rejection. Exact-head hosted
+Quality and fresh-`main` closure are recorded in the task report. T07 does not
 add normal-App integration, persistence, Publisher/Runtime/Core/protocol authority, G10A, or M11.

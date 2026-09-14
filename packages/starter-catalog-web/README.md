@@ -8,9 +8,8 @@ Source-node templates, and one explicit React-adapter subpath. Base UI remains a
 implementation detail of the interactive adapters; layout and semantic content use ordinary Web
 semantics where a Base UI primitive is unnecessary.
 
-**M10A-T07 is `IN_PROGRESS`.** Its [task-owned proof](../../docs/proof/M10A-T07.md) records the
-current local selection/numeric-control evidence; exact-head hosted and fresh-`main` closure remain
-required. T06 is `DONE`; its [task-owned proof](../../docs/proof/M10A-T06.md) records the completed
+**M10A-T07 is `DONE`.** Its [task-owned proof](../../docs/proof/M10A-T07.md) records the
+selection/numeric-control evidence and exact-head hosted/fresh-`main` closure. T06 is `DONE`; its [task-owned proof](../../docs/proof/M10A-T06.md) records the completed
 local and hosted form-control closure. This package is not a normal Desen App integration, a complete
 component library, a design-system explorer, a persisted project, or a publish/activation path.
 
@@ -137,7 +136,8 @@ T17 for the integrated explorer/documentation surface.
 
 ## Verification
 
-The following commands authenticate the active T07 local boundary; hosted closure is not yet claimed.
+The following commands authenticate the active T07 local boundary; its hosted closure is recorded in
+[the T07 proof](../../docs/proof/M10A-T07.md).
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck
