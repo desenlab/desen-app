@@ -22,7 +22,8 @@ host-profile release referansı için hosted kapanış kaydı vardır. `M10A-T05
 Grid, Text/Heading, Image, Icon ve Separator için private Catalog ve izole kanıt harness'i kapandı;
 bu normal Desen App entegrasyonu değildir. `M10A-T06` `DONE`: TextField, TextArea, Checkbox,
 RadioGroup ve Switch için erişilebilir alan bileşimi ve kontrollü event kanıtı hosted kapanışla geçti.
-`M10A-T07` bağımlılığa hazır ancak `NOT_STARTED` ve seçilmedi.
+`M10A-T07` `IN_PROGRESS`: Select, Combobox, Tabs, Slider ve NumberField için yerel 0.4.0 kanıtı
+kaydedildi; exact-head hosted ve taze `main` kapanışı hâlâ gereklidir.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i

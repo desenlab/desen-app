@@ -48,9 +48,9 @@ const OID_BEFORE = "e".repeat(40);
 const OID_AFTER = "f".repeat(40);
 const TRACKED_OBJECT = "1".repeat(40);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
-const CONNECTED_PROOF_UNIT_COUNT = 84;
-const CONNECTED_WORKLOAD_COUNT = 182;
-const EXHAUSTIVE_WORKLOAD_COUNT = 246;
+const CONNECTED_PROOF_UNIT_COUNT = 85;
+const CONNECTED_WORKLOAD_COUNT = 184;
+const EXHAUSTIVE_WORKLOAD_COUNT = 248;
 
 function paths() {
   return execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], {
@@ -505,12 +505,13 @@ test("routes M10A-T04 behind the release public-package contract", async () => {
   assert.equal(receipt.observedClosedCount, CONNECTED_WORKLOAD_COUNT);
 });
 
-test("keeps M10A-T05 historical while routing current starter-package work through T06", async () => {
+test("keeps M10A-T05 and T06 historical while routing current starter-package work through T07", async () => {
   const nodeById = new Map(
     createExhaustiveWorkloadInventory().nodes.map((workload) => [workload.id, workload]),
   );
   assert.deepEqual(nodeById.get("verify-m10a-t05")?.dependencies, ["package-tests"]);
-  assert.deepEqual(nodeById.get("verify-m10a-t06")?.dependencies, [
+  assert.deepEqual(nodeById.get("verify-m10a-t06")?.dependencies, ["package-tests"]);
+  assert.deepEqual(nodeById.get("verify-m10a-t07")?.dependencies, [
     "starter-catalog-web-public-package-contract",
   ]);
 
@@ -525,22 +526,33 @@ test("keeps M10A-T05 historical while routing current starter-package work throu
   assert.equal(historicalSelection.nodeIds.includes("test-m10a-t05"), true);
   assert.equal(historicalReceipt.status, "PASS");
 
-  const currentSelection = createRequiredAffectedSelection(
+  const t06HistoricalSelection = createRequiredAffectedSelection(
     await boundary("scripts/verify-m10a-t06.mjs"),
+  );
+  const t06HistoricalReceipt = await runRequiredAffectedQualityGate(t06HistoricalSelection, {
+    runStep: runner(),
+  });
+  assert.deepEqual(t06HistoricalSelection.ownerProofUnitIds, ["m10a-t06"]);
+  assert.equal(t06HistoricalSelection.nodeIds.includes("verify-m10a-t06"), true);
+  assert.equal(t06HistoricalSelection.nodeIds.includes("test-m10a-t06"), true);
+  assert.equal(t06HistoricalReceipt.status, "PASS");
+
+  const currentSelection = createRequiredAffectedSelection(
+    await boundary("scripts/verify-m10a-t07.mjs"),
   );
   const currentReceipt = await runRequiredAffectedQualityGate(currentSelection, {
     runStep: runner(),
   });
   assert.equal(currentSelection.proofUnitCount, CONNECTED_PROOF_UNIT_COUNT);
   assert.equal(currentSelection.workloadCount, CONNECTED_WORKLOAD_COUNT);
-  assert.deepEqual(currentSelection.ownerProofUnitIds, ["m10a-t06"]);
+  assert.deepEqual(currentSelection.ownerProofUnitIds, ["m10a-t07"]);
   const publicContractIndex = currentSelection.nodeIds.indexOf(
     "starter-catalog-web-public-package-contract",
   );
-  const verifierIndex = currentSelection.nodeIds.indexOf("verify-m10a-t06");
+  const verifierIndex = currentSelection.nodeIds.indexOf("verify-m10a-t07");
   assert.ok(publicContractIndex >= 0);
   assert.ok(verifierIndex > publicContractIndex);
-  assert.equal(currentSelection.nodeIds.includes("test-m10a-t06"), true);
+  assert.equal(currentSelection.nodeIds.includes("test-m10a-t07"), true);
   assert.equal(currentReceipt.status, "PASS");
   assert.equal(currentReceipt.observedClosedCount, CONNECTED_WORKLOAD_COUNT);
 });
@@ -1376,7 +1388,7 @@ test("required exhaustive invariants remain exact after required execution is im
   assert.equal(required.authority, "REQUIRED");
   assert.equal(required.scope, "EXHAUSTIVE");
   assert.equal(required.stepCount, EXHAUSTIVE_WORKLOAD_COUNT);
-  assert.equal(required.proofPairCount, 116);
+  assert.equal(required.proofPairCount, 117);
 });
 
 test("only pull requests may attempt affected execution and every ineligible plan falls back", () => {

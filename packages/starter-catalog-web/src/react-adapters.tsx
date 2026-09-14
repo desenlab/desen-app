@@ -1,41 +1,54 @@
 import { createContext, useContext, useId, useMemo, useState } from "react";
 import { Button } from "@base-ui/react/button";
 import { Checkbox } from "@base-ui/react/checkbox";
+import { Combobox } from "@base-ui/react/combobox";
 import { Select } from "@base-ui/react/select";
 import { Dialog } from "@base-ui/react/dialog";
 import { Input } from "@base-ui/react/input";
+import { NumberField } from "@base-ui/react/number-field";
 import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
+import { Slider } from "@base-ui/react/slider";
 import { Switch } from "@base-ui/react/switch";
+import { Tabs } from "@base-ui/react/tabs";
 import { canonicalizeJson } from "@desen/protocol";
 
 import {
   STARTER_BOX_CAPABILITY_ID,
   STARTER_CHECKBOX_CAPABILITY_ID,
+  STARTER_COMBOBOX_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
   STARTER_HEADING_CAPABILITY_ID,
   STARTER_ICON_CAPABILITY_ID,
   STARTER_IMAGE_CAPABILITY_ID,
+  STARTER_NUMBER_FIELD_CAPABILITY_ID,
   STARTER_RADIO_GROUP_CAPABILITY_ID,
+  STARTER_SELECT_CAPABILITY_ID,
   STARTER_SEPARATOR_CAPABILITY_ID,
+  STARTER_SLIDER_CAPABILITY_ID,
   STARTER_STACK_CAPABILITY_ID,
   STARTER_SWITCH_CAPABILITY_ID,
+  STARTER_TABS_CAPABILITY_ID,
   STARTER_TEXT_AREA_CAPABILITY_ID,
   STARTER_TEXT_CAPABILITY_ID,
   STARTER_TEXT_FIELD_CAPABILITY_ID,
   starterButtonComponentRegistration,
   starterBoxComponentRegistration,
   starterCheckboxComponentRegistration,
+  starterComboboxComponentRegistration,
   starterSelectComponentRegistration,
   starterDialogComponentRegistration,
   starterGridComponentRegistration,
   starterHeadingComponentRegistration,
   starterIconComponentRegistration,
   starterImageComponentRegistration,
+  starterNumberFieldComponentRegistration,
   starterRadioGroupComponentRegistration,
   starterSeparatorComponentRegistration,
+  starterSliderComponentRegistration,
   starterStackComponentRegistration,
   starterSwitchComponentRegistration,
+  starterTabsComponentRegistration,
   starterTextAreaComponentRegistration,
   starterTextComponentRegistration,
   starterTextFieldComponentRegistration,
@@ -52,16 +65,20 @@ import type {
   StarterBoxProps,
   StarterButtonProps,
   StarterCheckboxProps,
+  StarterComboboxProps,
   StarterDialogProps,
   StarterGridProps,
   StarterHeadingProps,
   StarterIconProps,
   StarterImageProps,
+  StarterNumberFieldProps,
   StarterRadioGroupProps,
   StarterSelectProps,
   StarterSeparatorProps,
+  StarterSliderProps,
   StarterStackProps,
   StarterSwitchProps,
+  StarterTabsProps,
   StarterTextAreaProps,
   StarterTextProps,
   StarterTextFieldProps,
@@ -114,8 +131,12 @@ type Registration =
   | typeof starterTextFieldComponentRegistration
   | typeof starterTextAreaComponentRegistration
   | typeof starterCheckboxComponentRegistration
+  | typeof starterComboboxComponentRegistration
   | typeof starterRadioGroupComponentRegistration
   | typeof starterSwitchComponentRegistration
+  | typeof starterTabsComponentRegistration
+  | typeof starterSliderComponentRegistration
+  | typeof starterNumberFieldComponentRegistration
   | typeof starterStackComponentRegistration
   | typeof starterGridComponentRegistration
   | typeof starterTextComponentRegistration
@@ -125,7 +146,7 @@ type Registration =
   | typeof starterSeparatorComponentRegistration;
 
 type T05StyleProjection = "image" | "layout" | "typography" | "media" | "separator";
-type StarterStyleProjection = T05StyleProjection | "form";
+type StarterStyleProjection = T05StyleProjection | "form" | "selection";
 
 const T01_STYLE_PROPERTIES = Object.freeze([
   "color",
@@ -237,6 +258,9 @@ const FORM_STYLE_PROPERTIES = Object.freeze([
   "maxHeight",
   "opacity",
 ] as const);
+// Select predates the logical padding axes above. Keep the former public uniform-padding
+// property on the selection projection only, so T06 form controls do not gain a new surface.
+const SELECTION_STYLE_PROPERTIES = Object.freeze([...FORM_STYLE_PROPERTIES, "padding"] as const);
 
 function styleProjection(registration: Registration): StarterStyleProjection | undefined {
   if (
@@ -263,6 +287,15 @@ function styleProjection(registration: Registration): StarterStyleProjection | u
     registration.id === STARTER_SWITCH_CAPABILITY_ID
   ) {
     return "form";
+  }
+  if (
+    registration.id === STARTER_SELECT_CAPABILITY_ID ||
+    registration.id === STARTER_COMBOBOX_CAPABILITY_ID ||
+    registration.id === STARTER_TABS_CAPABILITY_ID ||
+    registration.id === STARTER_SLIDER_CAPABILITY_ID ||
+    registration.id === STARTER_NUMBER_FIELD_CAPABILITY_ID
+  ) {
+    return "selection";
   }
   return undefined;
 }
@@ -319,7 +352,9 @@ function isFormStyleValueValid(property: string, value: unknown): boolean {
   if (["color", "backgroundColor", "borderColor"].includes(property)) return isHexColor(value);
   if (property === "borderRadius") return isFiniteNumber(value, 0, 64);
   if (property === "borderWidth") return isFiniteNumber(value, 0, 16);
-  if (["paddingBlock", "paddingInline", "marginBlock", "marginInline"].includes(property))
+  if (
+    ["padding", "paddingBlock", "paddingInline", "marginBlock", "marginInline"].includes(property)
+  )
     return isFiniteNumber(value, 0, 128);
   if (["width", "minWidth", "maxWidth", "minHeight", "maxHeight"].includes(property))
     return isFiniteNumber(value, 0, 4_096);
@@ -339,6 +374,7 @@ function stylePropertyNames(projection: StarterStyleProjection | undefined): rea
   if (projection === "media") return MEDIA_STYLE_PROPERTIES;
   if (projection === "separator") return SEPARATOR_STYLE_PROPERTIES;
   if (projection === "form") return FORM_STYLE_PROPERTIES;
+  if (projection === "selection") return SELECTION_STYLE_PROPERTIES;
   return T01_STYLE_PROPERTIES;
 }
 
@@ -545,6 +581,186 @@ function validateFormProps(
     invalid();
 }
 
+interface StableSelectionOption {
+  readonly id: string;
+  readonly label: string;
+  readonly disabled: boolean;
+}
+
+function invalidSelectionInput(): never {
+  throw new Error("STARTER_ADAPTER_INPUT_INVALID");
+}
+
+/**
+ * Captures one data-only option list into stable identities.
+ *
+ * @remarks Select keeps the prior `value` spelling as a read-only migration bridge. New T07
+ * controls require `id`, and every route rejects duplicate normalized identities before Base UI
+ * observes the collection. This keeps object identity, label text, and selection value separate.
+ */
+function normalizedSelectionOptions(
+  rawOptions: unknown,
+  options: Readonly<{ allowLegacyValue: boolean; minimum: number; maximum: number }>,
+): readonly StableSelectionOption[] {
+  if (
+    !Array.isArray(rawOptions) ||
+    rawOptions.length < options.minimum ||
+    rawOptions.length > options.maximum
+  )
+    invalidSelectionInput();
+  const ids = new Set<string>();
+  const captured: StableSelectionOption[] = [];
+  for (const option of rawOptions) {
+    if (
+      typeof option !== "object" ||
+      option === null ||
+      Array.isArray(option) ||
+      (Object.getPrototypeOf(option) !== Object.prototype && Object.getPrototypeOf(option) !== null)
+    ) {
+      invalidSelectionInput();
+    }
+    const record = option as Readonly<Record<string, unknown>>;
+    if (Object.keys(record).some((key) => !["id", "value", "label", "disabled"].includes(key)))
+      invalidSelectionInput();
+    const id = record.id;
+    const legacyValue = record.value;
+    if (
+      (id !== undefined && legacyValue !== undefined) ||
+      (!options.allowLegacyValue && id === undefined) ||
+      (id === undefined && legacyValue === undefined)
+    ) {
+      invalidSelectionInput();
+    }
+    const stableId = id ?? legacyValue;
+    if (
+      !isBoundedString(stableId, 1, 128) ||
+      !isBoundedString(record.label, 1, 256) ||
+      !isOptionalBoolean(record.disabled) ||
+      ids.has(stableId)
+    ) {
+      invalidSelectionInput();
+    }
+    ids.add(stableId);
+    captured.push(
+      Object.freeze({ id: stableId, label: record.label, disabled: record.disabled === true }),
+    );
+  }
+  return Object.freeze(captured);
+}
+
+function isStepAligned(value: number, min: number, step: number): boolean {
+  const multiple = (value - min) / step;
+  return Math.abs(multiple - Math.round(multiple)) <= 1e-8;
+}
+
+function validateSelectionProps(
+  input: RuntimeReactComponentAdapterProps,
+  registration: Registration,
+): void {
+  const props = input.props as Readonly<Record<string, unknown>>;
+  const invalid = (): never => invalidSelectionInput();
+  const hasOnly = (keys: readonly string[]) =>
+    Object.keys(props).every((key) => keys.includes(key));
+
+  if (registration.id === STARTER_SELECT_CAPABILITY_ID) {
+    if (
+      !hasOnly(["label", "options", "value", "defaultValue", "disabled"]) ||
+      !isBoundedString(props.label, 1, 256) ||
+      !isOptionalBoolean(props.disabled) ||
+      (props.value !== undefined && !isBoundedString(props.value, 0, 128)) ||
+      (props.defaultValue !== undefined && !isBoundedString(props.defaultValue, 1, 128)) ||
+      (props.value !== undefined && props.defaultValue !== undefined)
+    ) {
+      invalid();
+    }
+    const options = normalizedSelectionOptions(props.options, {
+      allowLegacyValue: true,
+      minimum: 0,
+      maximum: 100,
+    });
+    const selected =
+      typeof props.value === "string" && props.value !== ""
+        ? props.value
+        : (props.defaultValue ?? "");
+    // T01 permitted a disabled item as the initial/default selection. Preserve that readable
+    // document shape; disabled items are still excluded from user-originated change dispatch.
+    if (selected !== "" && !options.some((option) => option.id === selected)) {
+      invalid();
+    }
+    return;
+  }
+
+  if (registration.id === STARTER_COMBOBOX_CAPABILITY_ID) {
+    if (
+      !hasOnly(["label", "options", "value", "placeholder", "filterMode", "disabled"]) ||
+      !isBoundedString(props.label, 1, 256) ||
+      !isOptionalBoolean(props.disabled) ||
+      (props.value !== undefined && !isBoundedString(props.value, 0, 128)) ||
+      (props.placeholder !== undefined && !isBoundedString(props.placeholder, 1, 256)) ||
+      (props.filterMode !== undefined &&
+        !["contains", "startsWith"].includes(props.filterMode as string))
+    ) {
+      invalid();
+    }
+    const options = normalizedSelectionOptions(props.options, {
+      allowLegacyValue: false,
+      minimum: 0,
+      maximum: 100,
+    });
+    if (
+      props.value !== undefined &&
+      props.value !== "" &&
+      !options.some((option) => option.id === props.value && option.disabled === false)
+    ) {
+      invalid();
+    }
+    return;
+  }
+
+  if (registration.id === STARTER_TABS_CAPABILITY_ID) {
+    if (
+      !hasOnly(["label", "tabs", "value", "disabled", "orientation"]) ||
+      !isBoundedString(props.label, 1, 256) ||
+      !isBoundedString(props.value, 1, 128) ||
+      !isOptionalBoolean(props.disabled) ||
+      (props.orientation !== undefined &&
+        !["horizontal", "vertical"].includes(props.orientation as string))
+    ) {
+      invalid();
+    }
+    const tabs = normalizedSelectionOptions(props.tabs, {
+      allowLegacyValue: false,
+      minimum: 1,
+      maximum: 12,
+    });
+    if (!tabs.some((tab) => tab.id === props.value && tab.disabled === false)) invalid();
+    return;
+  }
+
+  if (
+    registration.id !== STARTER_SLIDER_CAPABILITY_ID &&
+    registration.id !== STARTER_NUMBER_FIELD_CAPABILITY_ID
+  ) {
+    return;
+  }
+  if (
+    !hasOnly(["label", "value", "min", "max", "step", "helpText", "disabled"]) ||
+    !isBoundedString(props.label, 1, 256) ||
+    !isOptionalBoolean(props.disabled) ||
+    (props.helpText !== undefined && !isBoundedString(props.helpText, 1, 512)) ||
+    !isFiniteNumber(props.min, -100_000, 100_000) ||
+    !isFiniteNumber(props.max, -100_000, 100_000) ||
+    !isFiniteNumber(props.value, -100_000, 100_000) ||
+    !isFiniteNumber(props.step, Number.MIN_VALUE, 100_000) ||
+    props.min >= props.max ||
+    props.value < props.min ||
+    props.value > props.max ||
+    !isStepAligned(props.value, props.min, props.step)
+  ) {
+    invalid();
+  }
+}
+
 function guardInput(input: RuntimeReactComponentAdapterProps, registration: Registration): void {
   // Runtime React is the schema-admission authority. This defensive check prevents direct trusted
   // misuse from widening the bridge to callbacks, JSX, unknown parts or arbitrary Base UI props.
@@ -563,9 +779,11 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
   const allowedSlots =
     registration.id === starterDialogComponentRegistration.id
       ? ["content"]
-      : styleProjection(registration) === "layout"
-        ? ["default"]
-        : [];
+      : registration.id === starterTabsComponentRegistration.id
+        ? ["panels"]
+        : styleProjection(registration) === "layout"
+          ? ["default"]
+          : [];
   if (Object.keys(input.slots).some((key) => !allowedSlots.includes(key)))
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   if (
@@ -583,8 +801,20 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
   ) {
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   }
+  const tabsProp = (input.props as Readonly<Record<string, unknown>>).tabs;
+  if (
+    registration.id === starterTabsComponentRegistration.id &&
+    (input.slots.panels === undefined ||
+      input.slots.panels.length < 1 ||
+      input.slots.panels.length > 12 ||
+      !Array.isArray(tabsProp) ||
+      input.slots.panels.length !== tabsProp.length)
+  ) {
+    throw new Error("STARTER_ADAPTER_INPUT_INVALID");
+  }
   validateT05Props(input, registration);
   validateFormProps(input, registration);
+  validateSelectionProps(input, registration);
   const parts = Object.keys(registration.manifest.styleParts);
   const states: readonly string[] =
     "visualStates" in registration.manifest ? registration.manifest.visualStates : [];
@@ -606,7 +836,7 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
                 ((property === "borderRadius" && value >= 0 && value <= 64) ||
                   (property === "padding" && value >= 0 && value <= 128) ||
                   (property === "fontSize" && value >= 8 && value <= 96))
-            : projection === "form"
+            : projection === "form" || projection === "selection"
               ? isFormStyleValueValid(property, value)
               : isT05StyleValueValid(projection, property, value));
         if (!valid) throw new Error("STARTER_ADAPTER_INPUT_INVALID");
@@ -681,7 +911,7 @@ function partStyle(
     }
     if (values.textAlign === "start" || values.textAlign === "center" || values.textAlign === "end")
       result.textAlign = values.textAlign;
-    if (projection === "typography" || projection === "form") {
+    if (projection === "typography" || projection === "form" || projection === "selection") {
       if (values.fontFamily === "system") result.fontFamily = "system-ui, sans-serif";
       if (values.fontFamily === "serif") result.fontFamily = "ui-serif, Georgia, serif";
       if (values.fontFamily === "mono") result.fontFamily = "ui-monospace, monospace";
@@ -1263,7 +1493,7 @@ export function StarterSwitchReactAdapter(input: RuntimeReactComponentAdapterPro
   );
 }
 
-/** Maps a finite inert option list to the real Base UI Select and a contained portal. */
+/** Maps a finite data-only option list to the real Base UI Select and a contained portal. */
 export function StarterSelectReactAdapter(input: RuntimeReactComponentAdapterProps) {
   guardInput(input, starterSelectComponentRegistration);
   const props = input.props as unknown as StarterSelectProps;
@@ -1271,70 +1501,79 @@ export function StarterSelectReactAdapter(input: RuntimeReactComponentAdapterPro
   const [open, setOpen] = useState(false);
   const disabled = props.disabled === true;
   const interaction = useInteractionStates(disabled);
+  const options = normalizedSelectionOptions(props.options, {
+    allowLegacyValue: true,
+    minimum: 0,
+    maximum: 100,
+  });
+  const hasControlledValue = props.value !== undefined;
+  const selectedValue = hasControlledValue ? (props.value ?? null) : undefined;
   const states = [
     ...interaction.states.filter((state) => state !== "pressed"),
     ...(open ? ["open"] : []),
     ...(disabled ? ["disabled"] : []),
+    ...(options.length === 0 ? ["empty"] : []),
   ];
-  const optionValues = props.options.map((item) => item.value);
-  if (
-    new Set(optionValues).size !== optionValues.length ||
-    (props.defaultValue !== undefined && !optionValues.includes(props.defaultValue))
-  )
-    throw new Error("STARTER_SELECT_OPTIONS_INVALID");
   return (
-    <div className={styles.field} style={partStyle(input.style, "root", states)}>
+    <div className={styles.field} style={partStyle(input.style, "root", states, "selection")}>
       <Select.Root<string>
         defaultValue={props.defaultValue ?? null}
+        value={selectedValue}
         disabled={disabled}
         modal={false}
-        items={props.options}
         onOpenChange={setOpen}
         onValueChange={(value) => {
           if (
             value !== null &&
             !disabled &&
-            props.options.some((option) => option.value === value && option.disabled !== true)
+            options.some((option) => option.id === value && option.disabled === false)
           )
             input.interactions.dispatchEvent("change", Object.freeze({ value }));
         }}
       >
-        <Select.Label className={styles.label} style={partStyle(input.style, "label", states)}>
+        <Select.Label
+          className={styles.label}
+          style={partStyle(input.style, "label", states, "selection")}
+        >
           {props.label}
         </Select.Label>
         <Select.Trigger
           className={styles.trigger}
-          style={partStyle(input.style, "trigger", states)}
+          style={partStyle(input.style, "trigger", states, "selection")}
           {...interaction.handlers}
         >
-          <Select.Value placeholder="Select an option" />
+          <Select.Value placeholder={options.length === 0 ? "No options" : "Select an option"} />
           <Select.Icon aria-hidden="true">⌄</Select.Icon>
         </Select.Trigger>
         {boundary.container !== null && boundary.root !== null && (
           <Select.Portal container={boundary.container}>
             <Select.Positioner
-              alignItemWithTrigger={false}
               positionMethod="absolute"
               collisionBoundary={boundary.root}
               sideOffset={8}
             >
               <Select.Popup
                 className={styles.popup}
-                style={partStyle(input.style, "popup", states)}
+                style={partStyle(input.style, "popup", states, "selection")}
               >
                 <Select.List>
-                  {props.options.map((option) => (
+                  {options.map((option) => (
                     <Select.Item
-                      key={option.value}
-                      value={option.value}
-                      disabled={option.disabled === true}
+                      key={option.id}
+                      value={option.id}
+                      disabled={option.disabled}
                       className={styles.item}
                       style={(state) =>
-                        partStyle(input.style, "item", [
-                          ...(state.selected ? ["selected"] : []),
-                          ...(state.highlighted ? ["highlighted"] : []),
-                          ...(state.disabled ? ["disabled"] : []),
-                        ])
+                        partStyle(
+                          input.style,
+                          "item",
+                          [
+                            ...(state.selected ? ["selected"] : []),
+                            ...(state.highlighted ? ["highlighted"] : []),
+                            ...(state.disabled ? ["disabled"] : []),
+                          ],
+                          "selection",
+                        )
                       }
                     >
                       <Select.ItemText>{option.label}</Select.ItemText>
@@ -1347,6 +1586,383 @@ export function StarterSelectReactAdapter(input: RuntimeReactComponentAdapterPro
         )}
       </Select.Root>
     </div>
+  );
+}
+
+function optionMatchesQuery(
+  option: StableSelectionOption,
+  query: string,
+  filterMode: "contains" | "startsWith",
+): boolean {
+  const normalizedQuery = query.toLowerCase();
+  const normalizedLabel = option.label.toLowerCase();
+  return filterMode === "startsWith"
+    ? normalizedLabel.startsWith(normalizedQuery)
+    : normalizedLabel.includes(normalizedQuery);
+}
+
+/**
+ * Maps one finite data-only collection to the real Base UI Combobox.
+ *
+ * @remarks The trusted adapter owns its bounded string filter and item JSX. Source only selects a
+ * two-value filter mode; it cannot supply a function, renderer, DOM selector, or custom matching
+ * algorithm. Selected values remain the stable option ids, never object references.
+ */
+export function StarterComboboxReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterComboboxComponentRegistration);
+  const props = input.props as unknown as StarterComboboxProps;
+  const boundary = usePortalBoundary();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const disabled = props.disabled === true;
+  const interaction = useInteractionStates(disabled);
+  const options = normalizedSelectionOptions(props.options, {
+    allowLegacyValue: false,
+    minimum: 0,
+    maximum: 100,
+  });
+  const filterMode = props.filterMode ?? "contains";
+  const visibleOptions = options.filter((option) => optionMatchesQuery(option, query, filterMode));
+  const states = [
+    ...interaction.states.filter((state) => state !== "pressed"),
+    ...(open ? ["open"] : []),
+    ...(disabled ? ["disabled"] : []),
+    ...(visibleOptions.length === 0 ? ["empty"] : []),
+  ];
+  return (
+    <div className={styles.field} style={partStyle(input.style, "root", states, "selection")}>
+      <Combobox.Root<string>
+        value={props.value ?? null}
+        disabled={disabled}
+        onOpenChange={setOpen}
+        onInputValueChange={(nextQuery) => {
+          if (!disabled) setQuery(nextQuery.slice(0, 128));
+        }}
+        onValueChange={(value) => {
+          if (
+            value !== null &&
+            !disabled &&
+            options.some((option) => option.id === value && option.disabled === false)
+          ) {
+            input.interactions.dispatchEvent("change", Object.freeze({ value }));
+          }
+        }}
+      >
+        <Combobox.Label
+          className={styles.label}
+          style={partStyle(input.style, "label", states, "selection")}
+        >
+          {props.label}
+        </Combobox.Label>
+        <Combobox.InputGroup className={styles.comboboxInputGroup}>
+          <Combobox.Input
+            className={styles.comboboxInput}
+            style={partStyle(input.style, "input", states, "selection")}
+            placeholder={props.placeholder ?? "Search options"}
+            maxLength={128}
+            {...interaction.handlers}
+          />
+          <Combobox.Trigger
+            className={styles.comboboxTrigger}
+            style={partStyle(input.style, "trigger", states, "selection")}
+            aria-label={`Open ${props.label}`}
+          >
+            ⌄
+          </Combobox.Trigger>
+        </Combobox.InputGroup>
+        {boundary.container !== null && boundary.root !== null && (
+          <Combobox.Portal container={boundary.container}>
+            <Combobox.Positioner
+              positionMethod="absolute"
+              collisionBoundary={boundary.root}
+              sideOffset={8}
+            >
+              <Combobox.Popup
+                className={styles.popup}
+                style={partStyle(input.style, "popup", states, "selection")}
+              >
+                <Combobox.Empty
+                  className={styles.comboboxEmpty}
+                  style={partStyle(input.style, "empty", states, "selection")}
+                >
+                  No matching options.
+                </Combobox.Empty>
+                <Combobox.List>
+                  {visibleOptions.map((option) => (
+                    <Combobox.Item
+                      key={option.id}
+                      value={option.id}
+                      disabled={option.disabled}
+                      className={styles.item}
+                      style={(state) =>
+                        partStyle(
+                          input.style,
+                          "item",
+                          [
+                            ...(state.selected ? ["selected"] : []),
+                            ...(state.highlighted ? ["highlighted"] : []),
+                            ...(state.disabled ? ["disabled"] : []),
+                          ],
+                          "selection",
+                        )
+                      }
+                    >
+                      {option.label}
+                    </Combobox.Item>
+                  ))}
+                </Combobox.List>
+              </Combobox.Popup>
+            </Combobox.Positioner>
+          </Combobox.Portal>
+        )}
+      </Combobox.Root>
+    </div>
+  );
+}
+
+/** Maps an ordered public panel slot to Base UI Tabs without exposing render functions to Source. */
+export function StarterTabsReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterTabsComponentRegistration);
+  const props = input.props as unknown as StarterTabsProps;
+  const disabled = props.disabled === true;
+  const tabs = normalizedSelectionOptions(props.tabs, {
+    allowLegacyValue: false,
+    minimum: 1,
+    maximum: 12,
+  });
+  const panels = input.slots.panels;
+  if (panels === undefined || panels.length !== tabs.length)
+    throw new Error("STARTER_ADAPTER_INPUT_INVALID");
+  const interaction = useInteractionStates(disabled);
+  const states = [
+    ...interaction.states.filter((state) => state !== "pressed"),
+    ...(disabled ? ["disabled"] : []),
+  ];
+  return (
+    <Tabs.Root
+      className={styles.tabsRoot}
+      value={props.value}
+      orientation={props.orientation ?? "horizontal"}
+      aria-label={props.label}
+      style={partStyle(input.style, "root", states, "selection")}
+      onValueChange={(value) => {
+        if (
+          typeof value === "string" &&
+          !disabled &&
+          tabs.some((tab) => tab.id === value && tab.disabled === false)
+        ) {
+          input.interactions.dispatchEvent("change", Object.freeze({ value }));
+        }
+      }}
+    >
+      <p className={styles.tabsLabel} style={partStyle(input.style, "label", states, "selection")}>
+        {props.label}
+      </p>
+      <Tabs.List
+        className={styles.tabsList}
+        activateOnFocus
+        style={partStyle(input.style, "list", states, "selection")}
+        {...interaction.handlers}
+      >
+        {tabs.map((tab) => (
+          <Tabs.Tab
+            key={tab.id}
+            value={tab.id}
+            disabled={disabled || tab.disabled}
+            className={styles.tabsTab}
+            style={(state) =>
+              partStyle(
+                input.style,
+                "tab",
+                [...(state.active ? ["selected"] : []), ...(state.disabled ? ["disabled"] : [])],
+                "selection",
+              )
+            }
+          >
+            {tab.label}
+          </Tabs.Tab>
+        ))}
+        <Tabs.Indicator
+          className={styles.tabsIndicator}
+          style={partStyle(input.style, "indicator", states, "selection")}
+        />
+      </Tabs.List>
+      <div className={styles.tabsPanels}>
+        {tabs.map((tab, index) => (
+          <Tabs.Panel
+            key={tab.id}
+            value={tab.id}
+            className={styles.tabsPanel}
+            style={partStyle(input.style, "panel", states, "selection")}
+          >
+            {panels[index]}
+          </Tabs.Panel>
+        ))}
+      </div>
+    </Tabs.Root>
+  );
+}
+
+function isAdmittedNumericValue(
+  value: unknown,
+  min: number,
+  max: number,
+  step: number,
+): value is number {
+  return (
+    isFiniteNumber(value, min, max) &&
+    Number.isFinite(step) &&
+    step > 0 &&
+    isStepAligned(value, min, step)
+  );
+}
+
+/** Maps a finite controlled number to Base UI Slider and dispatches only admitted numeric values. */
+export function StarterSliderReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterSliderComponentRegistration);
+  const props = input.props as unknown as StarterSliderProps;
+  const disabled = props.disabled === true;
+  const interaction = useInteractionStates(disabled);
+  const states = [
+    ...interaction.states.filter((state) => state !== "pressed"),
+    ...(disabled ? ["disabled"] : []),
+  ];
+  return (
+    <div
+      className={styles.numericField}
+      style={partStyle(input.style, "root", states, "selection")}
+    >
+      <Slider.Root
+        value={props.value}
+        min={props.min}
+        max={props.max}
+        step={props.step}
+        largeStep={Math.min(props.step * 10, props.max - props.min)}
+        disabled={disabled}
+        onValueChange={(value) => {
+          if (!disabled && isAdmittedNumericValue(value, props.min, props.max, props.step)) {
+            input.interactions.dispatchEvent("change", Object.freeze({ value }));
+          }
+        }}
+      >
+        <Slider.Label
+          className={styles.numericLabel}
+          style={partStyle(input.style, "label", states, "selection")}
+        >
+          {props.label}
+        </Slider.Label>
+        <Slider.Value
+          className={styles.numericValue}
+          style={partStyle(input.style, "value", states, "selection")}
+        />
+        <Slider.Control
+          className={styles.sliderControl}
+          style={partStyle(input.style, "control", states, "selection")}
+          {...interaction.handlers}
+        >
+          <Slider.Track
+            className={styles.sliderTrack}
+            style={partStyle(input.style, "track", states, "selection")}
+          >
+            <Slider.Indicator
+              className={styles.sliderIndicator}
+              style={partStyle(input.style, "indicator", states, "selection")}
+            />
+            <Slider.Thumb
+              className={styles.sliderThumb}
+              style={partStyle(input.style, "thumb", states, "selection")}
+            />
+          </Slider.Track>
+        </Slider.Control>
+      </Slider.Root>
+      {props.helpText !== undefined && (
+        <p className={styles.formHelp} style={partStyle(input.style, "help", states, "selection")}>
+          {props.helpText}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Maps a finite controlled number to Base UI NumberField and filters null/out-of-bound transient input. */
+export function StarterNumberFieldReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterNumberFieldComponentRegistration);
+  const props = input.props as unknown as StarterNumberFieldProps;
+  const disabled = props.disabled === true;
+  const interaction = useInteractionStates(disabled);
+  const states = [
+    ...interaction.states.filter((state) => state !== "pressed"),
+    ...(disabled ? ["disabled"] : []),
+  ];
+  const identity = useId();
+  const controlId = `${identity}-control`;
+  const labelId = `${identity}-label`;
+  const helpId = props.helpText === undefined ? undefined : `${identity}-help`;
+  return (
+    <NumberField.Root
+      id={controlId}
+      className={styles.numericField}
+      value={props.value}
+      min={props.min}
+      max={props.max}
+      step={props.step}
+      smallStep={props.step}
+      largeStep={Math.min(props.step * 10, props.max - props.min)}
+      snapOnStep
+      allowOutOfRange={false}
+      disabled={disabled}
+      aria-labelledby={labelId}
+      style={partStyle(input.style, "root", states, "selection")}
+      onValueChange={(value) => {
+        if (!disabled && isAdmittedNumericValue(value, props.min, props.max, props.step)) {
+          input.interactions.dispatchEvent("change", Object.freeze({ value }));
+        }
+      }}
+    >
+      <label
+        id={labelId}
+        htmlFor={controlId}
+        className={styles.numericLabel}
+        style={partStyle(input.style, "label", states, "selection")}
+      >
+        {props.label}
+      </label>
+      <NumberField.Group
+        className={styles.numberFieldGroup}
+        style={partStyle(input.style, "control", states, "selection")}
+      >
+        <NumberField.Decrement
+          className={styles.numberFieldStep}
+          style={partStyle(input.style, "decrement", states, "selection")}
+          aria-label={`Decrease ${props.label}`}
+        >
+          −
+        </NumberField.Decrement>
+        <NumberField.Input
+          className={styles.numberFieldInput}
+          style={partStyle(input.style, "input", states, "selection")}
+          aria-labelledby={labelId}
+          aria-describedby={helpId}
+          {...interaction.handlers}
+        />
+        <NumberField.Increment
+          className={styles.numberFieldStep}
+          style={partStyle(input.style, "increment", states, "selection")}
+          aria-label={`Increase ${props.label}`}
+        >
+          +
+        </NumberField.Increment>
+      </NumberField.Group>
+      {props.helpText !== undefined && (
+        <p
+          id={helpId}
+          className={styles.formHelp}
+          style={partStyle(input.style, "help", states, "selection")}
+        >
+          {props.helpText}
+        </p>
+      )}
+    </NumberField.Root>
   );
 }
 
@@ -1616,6 +2232,22 @@ export const STARTER_WEB_REACT_ADAPTER_REGISTRY_INPUT = Object.freeze({
       capabilityId: starterSelectComponentRegistration.id,
       component: StarterSelectReactAdapter,
       remountOnProps: Object.freeze(["options", "defaultValue"]),
+    }),
+    Object.freeze({
+      capabilityId: starterComboboxComponentRegistration.id,
+      component: StarterComboboxReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterTabsComponentRegistration.id,
+      component: StarterTabsReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterSliderComponentRegistration.id,
+      component: StarterSliderReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterNumberFieldComponentRegistration.id,
+      component: StarterNumberFieldReactAdapter,
     }),
     Object.freeze({
       capabilityId: starterDialogComponentRegistration.id,

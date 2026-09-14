@@ -1,23 +1,31 @@
 import {
   STARTER_BOX_CAPABILITY_ID,
+  STARTER_COMBOBOX_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
   STARTER_HEADING_CAPABILITY_ID,
   STARTER_ICON_CAPABILITY_ID,
   STARTER_IMAGE_CAPABILITY_ID,
+  STARTER_NUMBER_FIELD_CAPABILITY_ID,
   STARTER_SEPARATOR_CAPABILITY_ID,
+  STARTER_SLIDER_CAPABILITY_ID,
   STARTER_STACK_CAPABILITY_ID,
+  STARTER_TABS_CAPABILITY_ID,
   STARTER_TEXT_CAPABILITY_ID,
   createStarterNodeTemplate,
 } from "@desen/starter-catalog-web";
 
 import type {
   StarterBoxProps,
+  StarterComboboxProps,
   StarterGridProps,
   StarterHeadingProps,
   StarterIconProps,
   StarterImageProps,
+  StarterNumberFieldProps,
   StarterSeparatorProps,
+  StarterSliderProps,
   StarterStackProps,
+  StarterTabsProps,
   StarterTextProps,
 } from "@desen/starter-catalog-web";
 
@@ -33,7 +41,24 @@ const image: StarterImageProps = {
 };
 const icon: StarterIconProps = { name: "info", label: "Information", decorative: false };
 const separator: StarterSeparatorProps = { orientation: "horizontal" };
-void [box, stack, grid, text, heading, image, icon, separator];
+const combobox: StarterComboboxProps = {
+  label: "Find a region",
+  options: [{ id: "north", label: "Northern region" }],
+};
+const tabs: StarterTabsProps = {
+  label: "Sections",
+  tabs: [{ id: "overview", label: "Overview" }],
+  value: "overview",
+};
+const slider: StarterSliderProps = { label: "Opacity", value: 50, min: 0, max: 100, step: 1 };
+const numberField: StarterNumberFieldProps = {
+  label: "Columns",
+  value: 2,
+  min: 1,
+  max: 12,
+  step: 1,
+};
+void [box, stack, grid, text, heading, image, icon, separator, combobox, tabs, slider, numberField];
 
 createStarterNodeTemplate({ capabilityId: STARTER_BOX_CAPABILITY_ID, idPrefix: "public.box" });
 createStarterNodeTemplate({ capabilityId: STARTER_STACK_CAPABILITY_ID, idPrefix: "public.stack" });
@@ -49,6 +74,19 @@ createStarterNodeTemplate({
   capabilityId: STARTER_SEPARATOR_CAPABILITY_ID,
   idPrefix: "public.separator",
 });
+createStarterNodeTemplate({
+  capabilityId: STARTER_COMBOBOX_CAPABILITY_ID,
+  idPrefix: "public.combobox",
+});
+createStarterNodeTemplate({ capabilityId: STARTER_TABS_CAPABILITY_ID, idPrefix: "public.tabs" });
+createStarterNodeTemplate({
+  capabilityId: STARTER_SLIDER_CAPABILITY_ID,
+  idPrefix: "public.slider",
+});
+createStarterNodeTemplate({
+  capabilityId: STARTER_NUMBER_FIELD_CAPABILITY_ID,
+  idPrefix: "public.number-field",
+});
 
 // @ts-expect-error A physical CSS side cannot be introduced through logical starter props.
 const unsafeBox: StarterBoxProps = { marginLeft: 12 };
@@ -59,4 +97,18 @@ const unsafeImage: StarterImageProps = {
 };
 // @ts-expect-error Executable markup cannot become inert Text data.
 const unsafeText: StarterTextProps = { text: () => null };
-void [unsafeBox, unsafeImage, unsafeText];
+const unsafeCombobox: StarterComboboxProps = {
+  label: "Find a region",
+  options: [{ id: "north", label: "Northern region" }],
+  // @ts-expect-error A renderer function cannot cross the public Catalog surface.
+  renderItem: () => null,
+};
+const unsafeSlider: StarterSliderProps = {
+  label: "Opacity",
+  // @ts-expect-error Numeric data cannot be substituted with a callback.
+  value: () => 50,
+  min: 0,
+  max: 100,
+  step: 1,
+};
+void [unsafeBox, unsafeImage, unsafeText, unsafeCombobox, unsafeSlider];

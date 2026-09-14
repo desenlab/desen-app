@@ -136,10 +136,11 @@ const DESEN_APP_CONNECTED_PROOF_UNITS = Object.freeze([
   "m10a-t04",
   "m10a-t05",
   "m10a-t06",
+  "m10a-t07",
 ]);
 const DESEN_APP_CONNECTED_PROOF_UNIT_COUNT = DESEN_APP_CONNECTED_PROOF_UNITS.length;
-const DESEN_APP_CONNECTED_WORKLOAD_COUNT = 182;
-const EXHAUSTIVE_WORKLOAD_COUNT = 246;
+const DESEN_APP_CONNECTED_WORKLOAD_COUNT = 184;
+const EXHAUSTIVE_WORKLOAD_COUNT = 248;
 
 function sha256(value) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -460,7 +461,7 @@ test("Design/Run modes select their exact canvas, state, and action closure", as
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, DESEN_APP_CONNECTED_PROOF_UNIT_COUNT);
   assert.equal(plan.workloadCount, DESEN_APP_CONNECTED_WORKLOAD_COUNT);
-  assert.equal(plan.planSha256, "3b09b169589e56e854a2177f183b1040e87c2e0ab4d77118472242bc685515ef");
+  assert.equal(plan.planSha256, "bfe88be0cd7d7ff74e3262532e6f6d853ce63de8e697ba084a080df404d64cef");
   assert.equal(plan.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-state-binding-editor"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-event-action-editor"), true);
@@ -622,7 +623,7 @@ test("evergreen product composition selects its exact M10-T01C successor closure
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, DESEN_APP_CONNECTED_PROOF_UNIT_COUNT);
   assert.equal(plan.workloadCount, DESEN_APP_CONNECTED_WORKLOAD_COUNT);
-  assert.equal(plan.planSha256, "0c8842ab0516e8356a554e15de78c5423fd83030ff5ff6c83991b0853453c21e");
+  assert.equal(plan.planSha256, "8e3900cb4154e12d0dcb1ac3347926b15b5b61bd46926d10e42cd7ff847ec8ac");
   assert.equal(plan.nodeIds.includes("verify-desen-app-visual-behavior-authoring"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-evergreen-product-composition"), true);
   assert.equal(plan.nodeIds.includes("test-desen-app-evergreen-product-composition"), true);
@@ -872,6 +873,8 @@ test("M10 and M10A proof inputs select the complete successor closure", async ()
     ["tests/m10a-t05.test.mjs", "m10a-t05"],
     ["scripts/verify-m10a-t06.mjs", "m10a-t06"],
     ["tests/m10a-t06.test.mjs", "m10a-t06"],
+    ["scripts/verify-m10a-t07.mjs", "m10a-t07"],
+    ["tests/m10a-t07.test.mjs", "m10a-t07"],
   ]) {
     const plan = createShadowAffectedSelection(
       await affectedBoundary(currentPaths(), [changedPath]),
@@ -894,6 +897,7 @@ test("M10 and M10A proof inputs select the complete successor closure", async ()
       "m10a-t04",
       "m10a-t05",
       "m10a-t06",
+      "m10a-t07",
     ]) {
       assert.equal(plan.nodeIds.includes(`verify-${id}`), true);
       assert.equal(plan.nodeIds.includes(`test-${id}`), true);
@@ -902,12 +906,13 @@ test("M10 and M10A proof inputs select the complete successor closure", async ()
   }
 });
 
-test("M10A-T05 remains historical while T06 owns the current starter public-package prerequisite", async () => {
+test("M10A-T05 and T06 remain historical while T07 owns the current starter public-package prerequisite", async () => {
   const nodeById = new Map(
     createExhaustiveWorkloadInventory().nodes.map((workload) => [workload.id, workload]),
   );
   assert.deepEqual(nodeById.get("verify-m10a-t05")?.dependencies, ["package-tests"]);
-  assert.deepEqual(nodeById.get("verify-m10a-t06")?.dependencies, [
+  assert.deepEqual(nodeById.get("verify-m10a-t06")?.dependencies, ["package-tests"]);
+  assert.deepEqual(nodeById.get("verify-m10a-t07")?.dependencies, [
     "starter-catalog-web-public-package-contract",
   ]);
 
@@ -930,13 +935,25 @@ test("M10A-T05 remains historical while T06 owns the current starter public-pack
     assert.equal(plan.effectiveScope, "AFFECTED");
     assert.equal(plan.strictSubset, true);
     assert.deepEqual(plan.ownerProofUnitIds, ["m10a-t06"]);
+    assert.equal(plan.nodeIds.includes("verify-m10a-t06"), true);
+    assert.equal(plan.nodeIds.includes("test-m10a-t06"), true);
+    assert.equal(validateShadowAffectedSelection(plan), plan);
+  }
+
+  for (const changedPath of ["scripts/verify-m10a-t07.mjs", "tests/m10a-t07.test.mjs"]) {
+    const plan = createShadowAffectedSelection(
+      await affectedBoundary(currentPaths(), [changedPath]),
+    );
+    assert.equal(plan.effectiveScope, "AFFECTED");
+    assert.equal(plan.strictSubset, true);
+    assert.deepEqual(plan.ownerProofUnitIds, ["m10a-t07"]);
     assert.equal(plan.nodeIds.includes("starter-catalog-web-public-package-contract"), true);
     assert.ok(
       plan.nodeIds.indexOf("starter-catalog-web-public-package-contract") <
-        plan.nodeIds.indexOf("verify-m10a-t06"),
+        plan.nodeIds.indexOf("verify-m10a-t07"),
     );
-    assert.equal(plan.nodeIds.includes("verify-m10a-t06"), true);
-    assert.equal(plan.nodeIds.includes("test-m10a-t06"), true);
+    assert.equal(plan.nodeIds.includes("verify-m10a-t07"), true);
+    assert.equal(plan.nodeIds.includes("test-m10a-t07"), true);
     assert.equal(validateShadowAffectedSelection(plan), plan);
   }
 });
@@ -974,6 +991,13 @@ test("M10A product, Catalog, documentation, proof artifact, and shared reader in
     "docs/proof/artifacts/m10a-t06.json",
     "scripts/generate-m10a-t06-proof.mjs",
     "scripts/lib/m10a-t06-proof.mjs",
+    "apps/starter-catalog-web-proof/src/t07-host/index.tsx",
+    "packages/starter-catalog-web/src/selection-numeric-contracts.ts",
+    "packages/starter-catalog-web/test/selection-numeric-adapters.test.tsx",
+    "docs/proof/M10A-T07.md",
+    "docs/proof/artifacts/m10a-t07.json",
+    "scripts/generate-m10a-t07-proof.mjs",
+    "scripts/lib/m10a-t07-proof.mjs",
   ]) {
     const plan = createShadowAffectedSelection(
       await affectedBoundary(currentPaths(), [changedPath]),

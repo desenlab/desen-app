@@ -134,12 +134,14 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "21523a2f644fd8570909215f146c0ea1aac13d2080ce5b0b53846b8e6857922b",
   "72a4342315c2e011281965a0248a6b0a23f0d22fd4ce9d2b58ae5b7338894b40",
   "9f570e4d4f1e1a1342c61a2b7dbdd1b8680c0a701e5d2fd5b775822ca4247554",
+  "17dd463c0d9a192a4698bc93c4d8dab6a2645b31b4a6f192c6fc8631a141a8a7",
+  "62aa992cfeff45f8f84b1ecdba21ecb2805893ac7ff3b70549b616d331d86b72",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
   25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
   46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57, 58, 59, 59,
-  59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70,
+  59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70, 71, 71,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_COUNT = 1_024;
@@ -880,7 +882,45 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     "scripts/lib/m10a-t06-proof.mjs",
     "tests/m10a-t06.test.mjs",
   ),
+  freezeTaskAuthority(
+    "M10A-T07",
+    {
+      path: "docs/proof/artifacts/m10a-t07.json",
+      bytes: 5_107,
+      sha256: "7aa2d5d91453b2d8d91cd95931cdc4c3b4a4702651b1742966a774990d01e95a",
+    },
+    "scripts/lib/m10a-t07-proof.mjs",
+    "tests/m10a-t07.test.mjs",
+  ),
 ]);
+
+// Frozen artifacts normally retain one task-owned receipt. This narrow reviewed transition keeps
+// the sequence-94 T07 receipt historical while making the audit-corrected receipt live only from
+// its explicit successor; neither checkpoint JSON nor callers can select an alternate artifact.
+const PROOF_READER_CHECKPOINT_ARTIFACT_RECEIPT_TRANSITIONS = SAFE_OBJECT_FREEZE([
+  SAFE_OBJECT_FREEZE({
+    firstSequence: 95,
+    task: "M10A-T07",
+    artifact: SAFE_OBJECT_FREEZE({
+      path: "docs/proof/artifacts/m10a-t07.json",
+      bytes: 5_107,
+      sha256: "1587114174bd30fa91c44bc8e236e5ae57f80c81a0dfe6980a73a2f40c9fced4",
+    }),
+  }),
+]);
+
+function artifactAuthorityForCheckpointSequence(taskAuthority, sequence) {
+  let artifact = taskAuthority.artifact;
+  let transitionIndex = 0;
+  while (transitionIndex < PROOF_READER_CHECKPOINT_ARTIFACT_RECEIPT_TRANSITIONS.length) {
+    const transition = PROOF_READER_CHECKPOINT_ARTIFACT_RECEIPT_TRANSITIONS[transitionIndex];
+    if (transition.task === taskAuthority.task && sequence >= transition.firstSequence) {
+      artifact = transition.artifact;
+    }
+    transitionIndex += 1;
+  }
+  return artifact;
+}
 
 function taskAuthorityForCheckpointSequence(sequence) {
   const reviewedTaskCount = PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS[sequence - 1];
@@ -899,7 +939,16 @@ function taskAuthorityForCheckpointSequence(sequence) {
   const authority = [];
   let index = 0;
   while (index < taskCount) {
-    authority[index] = PROOF_READER_CHECKPOINT_TASK_AUTHORITY[index];
+    const taskAuthority = PROOF_READER_CHECKPOINT_TASK_AUTHORITY[index];
+    const artifact = artifactAuthorityForCheckpointSequence(taskAuthority, sequence);
+    authority[index] =
+      artifact === taskAuthority.artifact
+        ? taskAuthority
+        : SAFE_OBJECT_FREEZE({
+            task: taskAuthority.task,
+            artifact,
+            readers: taskAuthority.readers,
+          });
     index += 1;
   }
   return SAFE_OBJECT_FREEZE(authority);

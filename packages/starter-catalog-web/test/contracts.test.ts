@@ -5,6 +5,7 @@ import {
   STARTER_BUTTON_CAPABILITY_ID,
   STARTER_BOX_CAPABILITY_ID,
   STARTER_CHECKBOX_CAPABILITY_ID,
+  STARTER_COMBOBOX_CAPABILITY_ID,
   STARTER_CATALOG_ID,
   STARTER_CATALOG_TARGET,
   STARTER_CATALOG_TEMPLATE,
@@ -17,12 +18,20 @@ import {
   STARTER_ICON_CAPABILITY_ID,
   STARTER_IMAGE_CAPABILITY_ID,
   STARTER_LAYOUT_CONTENT_MAX_ITEMS,
+  STARTER_NUMBER_FIELD_CAPABILITY_ID,
+  STARTER_NUMERIC_MAX_STEP,
+  STARTER_NUMERIC_MAXIMUM,
+  STARTER_NUMERIC_MINIMUM,
   STARTER_RADIO_GROUP_CAPABILITY_ID,
   STARTER_RADIO_GROUP_MAX_OPTIONS,
   STARTER_SELECT_CAPABILITY_ID,
+  STARTER_SELECTION_MAX_OPTIONS,
   STARTER_SEPARATOR_CAPABILITY_ID,
+  STARTER_SLIDER_CAPABILITY_ID,
   STARTER_STACK_CAPABILITY_ID,
   STARTER_SWITCH_CAPABILITY_ID,
+  STARTER_TABS_CAPABILITY_ID,
+  STARTER_TABS_MAX_ITEMS,
   STARTER_TEXT_AREA_CAPABILITY_ID,
   STARTER_TEXT_CAPABILITY_ID,
   STARTER_TEXT_FIELD_CAPABILITY_ID,
@@ -30,16 +39,20 @@ import {
   starterButtonComponentRegistration,
   starterBoxComponentRegistration,
   starterCheckboxComponentRegistration,
+  starterComboboxComponentRegistration,
   starterDialogComponentRegistration,
   starterGridComponentRegistration,
   starterHeadingComponentRegistration,
   starterIconComponentRegistration,
   starterImageComponentRegistration,
+  starterNumberFieldComponentRegistration,
   starterRadioGroupComponentRegistration,
   starterSelectComponentRegistration,
   starterSeparatorComponentRegistration,
+  starterSliderComponentRegistration,
   starterStackComponentRegistration,
   starterSwitchComponentRegistration,
+  starterTabsComponentRegistration,
   starterTextAreaComponentRegistration,
   starterTextComponentRegistration,
   starterTextFieldComponentRegistration,
@@ -75,6 +88,10 @@ describe("starter component contracts", () => {
       STARTER_CHECKBOX_CAPABILITY_ID,
       STARTER_RADIO_GROUP_CAPABILITY_ID,
       STARTER_SWITCH_CAPABILITY_ID,
+      STARTER_COMBOBOX_CAPABILITY_ID,
+      STARTER_TABS_CAPABILITY_ID,
+      STARTER_SLIDER_CAPABILITY_ID,
+      STARTER_NUMBER_FIELD_CAPABILITY_ID,
     ]);
     expect(STARTER_CATALOG_TEMPLATE).toMatchObject({
       id: STARTER_CATALOG_ID,
@@ -112,32 +129,48 @@ describe("starter component contracts", () => {
     );
   });
 
-  it("bounds Select options and exposes only the declared JSON change payload", () => {
+  it("upgrades Select in place with stable data-only identities and a legacy migration spelling", () => {
     const optionsSchema =
       starterSelectComponentRegistration.manifest.propsSchema.properties.options;
     expect(optionsSchema).toMatchObject({
       type: "array",
-      maxItems: STARTER_SELECT_MAX_OPTIONS,
+      maxItems: STARTER_SELECTION_MAX_OPTIONS,
       uniqueItems: true,
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["value", "label"],
+        required: ["label"],
+        oneOf: [{ required: ["id"] }, { required: ["value"] }],
       },
     });
+    expect(STARTER_SELECT_MAX_OPTIONS).toBe(STARTER_SELECTION_MAX_OPTIONS);
     expect(starterSelectComponentRegistration.manifest.propsSchema.required).toEqual([
       "label",
       "options",
     ]);
+    expect(starterSelectComponentRegistration.manifest.propsSchema.not).toEqual({
+      required: ["value", "defaultValue"],
+    });
+    expect(
+      starterSelectComponentRegistration.manifest.propsSchema.properties.defaultValue,
+    ).toMatchObject({ type: "string", minLength: 1, maxLength: 128 });
+    expect(
+      starterSelectComponentRegistration.manifest.styleParts.root.propertiesSchema.properties
+        .padding,
+    ).toMatchObject({ type: "number", minimum: 0, maximum: 128 });
     expect(starterSelectComponentRegistration.manifest.events.change.payloadSchema).toMatchObject({
       type: "object",
       additionalProperties: false,
       required: ["value"],
       properties: { value: { type: "string" } },
     });
-    expect(Object.keys(starterSelectComponentRegistration.manifest.propsSchema.properties)).toEqual(
-      ["defaultValue", "disabled", "label", "options"],
-    );
+    expect(
+      Object.keys(starterSelectComponentRegistration.manifest.propsSchema.properties).sort(),
+    ).toEqual(["defaultValue", "disabled", "label", "options", "value"]);
+    expect(starterSelectComponentRegistration.manifest.authoring.defaultProps).toMatchObject({
+      options: [{ id: "option-1", label: "Option 1", disabled: false }],
+      defaultValue: "option-1",
+    });
   });
 
   it("requires bounded Dialog content from only the exact starter inventory", () => {
@@ -162,18 +195,14 @@ describe("starter component contracts", () => {
     });
   });
 
-  it("preserves the original finite neutral property schema on the three T01 controls", () => {
+  it("preserves the original finite neutral property schema on the Button and Dialog controls", () => {
     const hexColor = {
       anyOf: [
         { type: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
         { type: "string", pattern: "^#[0-9A-Fa-f]{8}$" },
       ],
     };
-    const registrations = [
-      starterButtonComponentRegistration,
-      starterSelectComponentRegistration,
-      starterDialogComponentRegistration,
-    ];
+    const registrations = [starterButtonComponentRegistration, starterDialogComponentRegistration];
     for (const registration of registrations) {
       for (const stylePart of Object.values(registration.manifest.styleParts)) {
         expect(stylePart.propertiesSchema).toMatchObject({
@@ -346,6 +375,115 @@ describe("starter component contracts", () => {
     });
     expectDeeplyFrozen(starterRadioGroupComponentRegistration);
   });
+
+  it("keeps the T07 selection, tab, and numeric controls closed, bounded, and data-only", () => {
+    const selectOptions =
+      starterSelectComponentRegistration.manifest.propsSchema.properties.options;
+    expect(selectOptions).toMatchObject({
+      type: "array",
+      maxItems: STARTER_SELECTION_MAX_OPTIONS,
+      uniqueItems: true,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["label"],
+        oneOf: [{ required: ["id"] }, { required: ["value"] }],
+      },
+    });
+    const comboboxOptions =
+      starterComboboxComponentRegistration.manifest.propsSchema.properties.options;
+    expect(comboboxOptions).toMatchObject({
+      type: "array",
+      maxItems: STARTER_SELECTION_MAX_OPTIONS,
+      uniqueItems: true,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["id", "label"],
+      },
+    });
+    expect(Object.keys(comboboxOptions.items.properties)).not.toContain("value");
+    for (const registration of [
+      starterSelectComponentRegistration,
+      starterComboboxComponentRegistration,
+    ]) {
+      expect(registration.manifest.events.change.payloadSchema).toMatchObject({
+        type: "object",
+        additionalProperties: false,
+        required: ["value"],
+        properties: { value: { type: "string", minLength: 1, maxLength: 128 } },
+      });
+      expectDeeplyFrozen(registration);
+    }
+    expect(starterComboboxComponentRegistration.manifest.propsSchema.properties.filterMode).toEqual(
+      { type: "string", enum: ["contains", "startsWith"], default: "contains" },
+    );
+    expect(
+      Object.keys(starterComboboxComponentRegistration.manifest.propsSchema.properties).sort(),
+    ).not.toContain("filter");
+    expect(
+      Object.keys(starterComboboxComponentRegistration.manifest.propsSchema.properties).sort(),
+    ).not.toContain("renderItem");
+
+    expect(starterTabsComponentRegistration.manifest.propsSchema.properties.tabs).toMatchObject({
+      type: "array",
+      minItems: 1,
+      maxItems: STARTER_TABS_MAX_ITEMS,
+      uniqueItems: true,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["id", "label"],
+      },
+    });
+    expect(starterTabsComponentRegistration.manifest.slots.panels).toMatchObject({
+      required: true,
+      minItems: 1,
+      maxItems: STARTER_TABS_MAX_ITEMS,
+      acceptsCategories: ["layout", "content", "input", "action", "overlay", "feedback", "complex"],
+    });
+    expect(starterTabsComponentRegistration.manifest.events.change.payloadSchema).toMatchObject({
+      required: ["value"],
+      properties: { value: { type: "string", minLength: 1, maxLength: 128 } },
+    });
+    expectDeeplyFrozen(starterTabsComponentRegistration);
+
+    for (const registration of [
+      starterSliderComponentRegistration,
+      starterNumberFieldComponentRegistration,
+    ]) {
+      expect(registration.manifest.propsSchema.required).toEqual([
+        "label",
+        "value",
+        "min",
+        "max",
+        "step",
+      ]);
+      expect(registration.manifest.propsSchema.properties).toMatchObject({
+        value: {
+          type: "number",
+          minimum: STARTER_NUMERIC_MINIMUM,
+          maximum: STARTER_NUMERIC_MAXIMUM,
+        },
+        min: { type: "number", minimum: STARTER_NUMERIC_MINIMUM, maximum: STARTER_NUMERIC_MAXIMUM },
+        max: { type: "number", minimum: STARTER_NUMERIC_MINIMUM, maximum: STARTER_NUMERIC_MAXIMUM },
+        step: { type: "number", exclusiveMinimum: 0, maximum: STARTER_NUMERIC_MAX_STEP },
+      });
+      expect(registration.manifest.events.change.payloadSchema).toMatchObject({
+        type: "object",
+        additionalProperties: false,
+        required: ["value"],
+        properties: {
+          value: {
+            type: "number",
+            minimum: STARTER_NUMERIC_MINIMUM,
+            maximum: STARTER_NUMERIC_MAXIMUM,
+          },
+        },
+      });
+      expectDeeplyFrozen(registration);
+    }
+  });
 });
 
 describe("starter node templates", () => {
@@ -371,7 +509,7 @@ describe("starter node templates", () => {
         defaultValue: "option-1",
         disabled: false,
         label: "Select",
-        options: [{ disabled: false, label: "Option 1", value: "option-1" }],
+        options: [{ disabled: false, id: "option-1", label: "Option 1" }],
       },
     });
     expectDeeplyFrozen(button);
@@ -424,6 +562,72 @@ describe("starter node templates", () => {
     });
     expect(toggle).toMatchObject({ use: STARTER_SWITCH_CAPABILITY_ID, id: "surface.switch" });
     for (const node of [field, textarea, checkbox, radio, toggle]) expectDeeplyFrozen(node);
+  });
+
+  it("creates deterministic complete T07 selection, tabs, and numeric templates", () => {
+    const combobox = createStarterNodeTemplate({
+      capabilityId: STARTER_COMBOBOX_CAPABILITY_ID,
+      idPrefix: "surface.combobox",
+    });
+    const tabs = createStarterNodeTemplate({
+      capabilityId: STARTER_TABS_CAPABILITY_ID,
+      idPrefix: "surface.tabs",
+    });
+    const slider = createStarterNodeTemplate({
+      capabilityId: STARTER_SLIDER_CAPABILITY_ID,
+      idPrefix: "surface.slider",
+    });
+    const numberField = createStarterNodeTemplate({
+      capabilityId: STARTER_NUMBER_FIELD_CAPABILITY_ID,
+      idPrefix: "surface.number-field",
+    });
+
+    expect(combobox).toMatchObject({
+      id: "surface.combobox",
+      use: STARTER_COMBOBOX_CAPABILITY_ID,
+      props: {
+        options: [
+          { id: "option-1", label: "Option 1", disabled: false },
+          { id: "option-2", label: "Option 2", disabled: false },
+        ],
+        filterMode: "contains",
+      },
+    });
+    expect(tabs).toMatchObject({
+      id: "surface.tabs",
+      use: STARTER_TABS_CAPABILITY_ID,
+      props: {
+        tabs: [
+          { id: "first", label: "First", disabled: false },
+          { id: "second", label: "Second", disabled: false },
+        ],
+        value: "first",
+      },
+      slots: {
+        panels: [
+          { id: "surface.tabs.first", use: STARTER_TEXT_CAPABILITY_ID },
+          { id: "surface.tabs.second", use: STARTER_TEXT_CAPABILITY_ID },
+        ],
+      },
+    });
+    expect(slider).toMatchObject({
+      id: "surface.slider",
+      use: STARTER_SLIDER_CAPABILITY_ID,
+      props: { min: 0, max: 100, step: 1, value: 50 },
+    });
+    expect(numberField).toMatchObject({
+      id: "surface.number-field",
+      use: STARTER_NUMBER_FIELD_CAPABILITY_ID,
+      props: { min: 1, max: 12, step: 1, value: 2 },
+    });
+    for (const node of [combobox, tabs, slider, numberField]) expectDeeplyFrozen(node);
+    expect(() =>
+      createStarterNodeTemplate({
+        capabilityId: STARTER_TABS_CAPABILITY_ID,
+        idPrefix: "surface.tabs",
+        reservedIds: ["surface.tabs.second"],
+      }),
+    ).toThrow(/identity collision/u);
   });
 
   it("creates a complete Dialog subtree with one required managed child", () => {

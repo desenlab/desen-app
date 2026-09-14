@@ -326,7 +326,7 @@ describe("M10A-T01 static starter adapter boundary", () => {
             <StarterSelectReactAdapter {...input} />
           </StarterSurfaceBoundary>,
         ),
-      ).toThrow("STARTER_SELECT_OPTIONS_INVALID");
+      ).toThrow("STARTER_ADAPTER_INPUT_INVALID");
     }
   });
 });

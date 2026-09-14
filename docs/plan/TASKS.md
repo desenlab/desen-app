@@ -251,13 +251,13 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 ## M10A — Design-first product foundation
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
-M10A-T01 through M10A-T06 are `DONE`; overall progress is 127/176 (72%), M10A is 6/28 (21%), and
+M10A-T01 through M10A-T06 are `DONE`; M10A-T07 is `IN_PROGRESS`; overall progress is 127/176 (72%), M10A is 6/28 (21%), and
 11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
 edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
 unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed
 fixtures; unreviewed or invalid forms fail closed. The [T06 proof](../proof/M10A-T06.md) records
-its exact-head hosted and fresh-`main` closure; T07 is dependency-ready but `NOT_STARTED`. The
+its exact-head hosted and fresh-`main` closure; [T07 local proof](../proof/M10A-T07.md) awaits hosted closure. The
 [plan](M10A-IMPLEMENTATION-PLAN.md) and [task contracts](M10A-TASK-CONTRACTS.md) own scope,
 negative tests and evidence paths.
 
@@ -269,7 +269,7 @@ negative tests and evidence paths.
 | M10A-T04 | DONE        | M10A-T02                                         | Immutable design-system releases and host snapshot identity                            |
 | M10A-T05 | DONE        | M10A-T01, M10A-T02                               | Layout, typography and content starter capabilities                                    |
 | M10A-T06 | DONE        | M10A-T05                                         | [Hosted form-control closure](../proof/M10A-T06.md)                                    |
-| M10A-T07 | NOT_STARTED | M10A-T06                                         | Selection, tabs and numeric-control capabilities                                       |
+| M10A-T07 | IN_PROGRESS | M10A-T06                                         | [Local selection/numeric proof; hosted closure pending](../proof/M10A-T07.md)          |
 | M10A-T08 | NOT_STARTED | M10A-T07                                         | Overlay, menu and disclosure capabilities                                              |
 | M10A-T09 | NOT_STARTED | M10A-T05, M10A-T08                               | Data-display and feedback capabilities                                                 |
 | M10A-T10 | NOT_STARTED | M10A-T02, M10A-T04, M10A-T09                     | Project/surface lifecycle and atomic authoring persistence                             |

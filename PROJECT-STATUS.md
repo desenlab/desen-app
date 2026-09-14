@@ -9,9 +9,10 @@ M10 is **12/12**, M10A is **6/28 (21%)**, and proof gates are **11/14**. Gates a
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01 through M10A-T06 are DONE**. The private form-control Catalog, package, and isolated browser evidence is recorded
-in its task-owned proof; its exact-head hosted and fresh-`main` closure passed. **M10A-T07 is `NOT_STARTED` but dependency-ready.**
-M11 has not started. The frozen protocol, Runtime Core, SC-01 profile, and completed T02 authority are unchanged.
+**M10A-T01 through M10A-T06 are DONE. M10A-T07 is `IN_PROGRESS`** with local 0.4.0
+selection/numeric-control evidence in its [task-owned proof](docs/proof/M10A-T07.md); exact-head
+hosted and fresh-`main` closure remain required. M11 has not started. The frozen protocol, Runtime
+Core, SC-01 profile, and completed T02 authority are unchanged.
 
 ## Current closure
 
@@ -22,8 +23,8 @@ Each completed task retains its own exact-head, merge, and fresh-`main` receipt.
 are canonical closure authorities; earlier failed candidates remain failures. T05 proves only its
 private starter Catalog and isolated harness, not normal-App integration, persistence, Runtime,
 Publisher, or protocol authority. T06 proves only the private 0.3.0 form-control Catalog and
-isolated harness; it adds no normal-App integration, persistence, Publisher, Runtime, or protocol
-authority.
+isolated harness. T07's local 0.4.0 proof covers bounded selection/numeric controls only; it adds
+no normal-App integration, persistence, Publisher, Runtime, Core/protocol, G10A, or M11 authority.
 
 ## M10 closure
 
@@ -62,7 +63,7 @@ No Git history is rewritten.
 
 ## Documentation verification
 
-The eight governed entry and standards documents are reduced from 18,467 to 1,711 lines (90.7%)
+The eight governed entry and standards documents are reduced from 18,467 to 1,713 lines (90.7%)
 while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
 through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
 link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
@@ -74,13 +75,12 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T07 — selection and numeric-control starter capabilities — is `NOT_STARTED` and
-dependency-ready.** The [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md),
-[T07 task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t07--selection-and-numeric-controls), and
-[T06 hosted closure](docs/proof/M10A-T06.md) define its predecessor and scope. T07 may extend the
-existing Select implementation with bounded selection, tab, and numeric controls; it must not
-retrospectively expand T06 or authorize Runtime activation, normal-App integration/persistence,
-Publisher authority, Core/protocol changes, G10A, or M11.
+**M10A-T07 — selection and numeric-control starter capabilities — is `IN_PROGRESS`.** Its
+[local proof](docs/proof/M10A-T07.md), [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), and
+[task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t07--selection-and-numeric-controls) define
+the boundary. Exact-head hosted Quality and fresh-`main` closure are still required; T08 is not
+eligible until then. T07 must not retrospectively expand T06 or authorize Runtime activation,
+normal-App integration/persistence, Publisher authority, Core/protocol changes, G10A, or M11.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
 Runtime Core tree and fresh proof requirements. No further external user/team recruitment is

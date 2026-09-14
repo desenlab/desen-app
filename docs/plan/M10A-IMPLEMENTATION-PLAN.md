@@ -1,8 +1,9 @@
 # M10A — Design-first product foundation
 
 Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T06 are `DONE`.
-M10A-T07 is `NOT_STARTED` but dependency-ready; T06's exact-head and fresh-`main` closure is in its
-[task-owned proof](../proof/M10A-T06.md). The canonical statuses and dependencies are in [TASKS.md](TASKS.md).
+M10A-T07 is `IN_PROGRESS` with local evidence in its [task-owned proof](../proof/M10A-T07.md);
+exact-head hosted and fresh-`main` closure remain required. The canonical statuses and dependencies
+are in [TASKS.md](TASKS.md).
 
 ## Product promise
 
@@ -20,8 +21,8 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
 and one gate; the total becomes 176 tasks and 14 gates. The 127 completed tasks and 11 completed
-gates remain completed. T01 through T06 are the six completed M10A tasks; T07 is dependency-ready,
-and the other 21 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
+gates remain completed. T01 through T06 are the six completed M10A tasks; T07 is active, and the
+other 21 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
 Dependencies, not numeric order, select the next eligible task: T26 acceptance precedes T25's
@@ -183,7 +184,7 @@ alone and not another external user recruitment round:
 - Existing M10 browser/proof coverage remains fresh and passing; Runtime Core and upstream identity
   checks pass. All new claims name their browser, viewport, fixture and resource-limit scope.
 
-## Completed boundaries and next eligible task
+## Completed and active boundaries
 
 **M10A-T04 — Immutable design-system release identity** is `DONE`. It adds platform-neutral
 `@desen/design-system-release`: finite token, asset, and inert-recipe snapshots; a deterministic
@@ -207,6 +208,12 @@ bounded controlled event payloads, and invalid value/payload rejection in isolat
 independent-host graphs. Its [task-owned proof](../proof/M10A-T06.md) records the local artifact plus
 exact-head hosted and fresh-`main` closure. T06 does not retrospectively expand T05 or authorize normal-App
 integration, persistence, Publisher authority, Runtime activation, Core/protocol changes, G10A, or M11.
+
+**M10A-T07 — Selection and numeric controls** is `IN_PROGRESS`. It extends Select and adds data-only
+Combobox, Tabs, Slider, and NumberField contracts with local isolated authoring/host evidence in its
+[task-owned proof](../proof/M10A-T07.md). Exact-head hosted Quality and fresh-`main` closure remain
+required; it does not authorize normal-App integration, persistence, Publisher, Runtime, Core/protocol,
+G10A, or M11.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.

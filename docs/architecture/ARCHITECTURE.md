@@ -217,7 +217,7 @@ success.
 M10A inserts 28 tasks and the G10A gate before M11. T01's bounded starter adapter slice,
 T02's platform-neutral project/token foundation, T03's authoring/workbench slice, T04's immutable
 release identity, T05's private layout/content Catalog slice, and T06's form-control slice are `DONE`;
-T07 is dependency-ready but `NOT_STARTED`, and the other 21 tasks remain `NOT_STARTED`.
+T07 is `IN_PROGRESS` with a local isolated selection/numeric Catalog proof, and the other 21 tasks remain `NOT_STARTED`.
 Later workbench features remain planned; no publication or production authority follows from this text.
 [ADR 0023](../adr/0023-design-first-authoring-and-design-system-workbench.md) owns the decision,
 while the [implementation plan](../plan/M10A-IMPLEMENTATION-PLAN.md),
@@ -253,9 +253,9 @@ T02 adds `@desen/design-system-core`, while normal App composition remains later
 T04, T05, and T06 task-owned proofs record their exact-head and fresh-`main` closures. They do not
 authorize Runtime activation, normal App integration, durable production storage, materialization,
 Publisher or Runtime changes, protocol changes, or M11. T06's `DONE` closure remains limited to its
-private form-control Catalog and isolated harness; T07 is dependency-ready but `NOT_STARTED`. It does
-not authorize T07+, Runtime activation, normal-App integration or persistence, Publisher/Core/protocol
-changes, G10A, or M11.
+private form-control Catalog and isolated harness. T07's local proof remains bounded to its private
+selection/numeric Catalog and does not authorize T07+, Runtime activation, normal-App integration or persistence,
+Publisher/Core/protocol changes, G10A, or M11.
 
 Across later M10A tasks, an App-owned versioned editable-project record becomes the durable authoring aggregate. It atomically
 stores one exact canonical Source, editable DTCG data, immutable design-system release references,

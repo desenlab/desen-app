@@ -5,19 +5,20 @@
 `@desen/starter-catalog-web` is the private, target-specific DESEN Neutral capability package for
 `web-react`. It provides inert Catalog registrations, schema-derived prop types, deterministic
 Source-node templates, and one explicit React-adapter subpath. Base UI remains an internal
-implementation detail of the Button, Select, Dialog, and form-control adapters; layout and semantic
-content use ordinary Web semantics where a Base UI primitive is unnecessary.
+implementation detail of the interactive adapters; layout and semantic content use ordinary Web
+semantics where a Base UI primitive is unnecessary.
 
-**M10A-T06 is `DONE`.** Its [task-owned proof](../../docs/proof/M10A-T06.md) records the local
-form-control evidence and exact-head hosted/fresh-`main` closure. It is not a normal Desen App
-integration, a complete component library, a design-system explorer, a persisted project, or a
-publish/activation path.
+**M10A-T07 is `IN_PROGRESS`.** Its [task-owned proof](../../docs/proof/M10A-T07.md) records the
+current local selection/numeric-control evidence; exact-head hosted and fresh-`main` closure remain
+required. T06 is `DONE`; its [task-owned proof](../../docs/proof/M10A-T06.md) records the completed
+local and hosted form-control closure. This package is not a normal Desen App integration, a complete
+component library, a design-system explorer, a persisted project, or a publish/activation path.
 
 The M10A-T01 receipt at
 [`docs/proof/artifacts/m10a-t01.json`](../../docs/proof/artifacts/m10a-t01.json) remains immutable
-historical evidence for its original three-capability slice. T05's sealed `0.2.0` receipt remains
-historical; T06 owns the current `run.desen.starter.web@0.3.0#web-react` Catalog and must not
-rewrite the T01 or T05 artifacts or present either as fresh T06 evidence.
+historical evidence for its original three-capability slice. T05's sealed `0.2.0` and T06's completed
+`0.3.0` receipts remain historical; T07 owns the current
+`run.desen.starter.web@0.4.0#web-react` Catalog and must not rewrite or relabel earlier evidence.
 
 ## Public boundary
 
@@ -66,6 +67,18 @@ All field controls preserve their native or ARIA label and described-message rel
 form values and malformed event payloads reject before rendering or dispatch; styles remain
 presentation only and cannot substitute private selectors, callbacks, arbitrary DOM props, or
 executable markup.
+
+The active T07 slice extends Select and adds the following bounded selection and numeric controls:
+
+| Group     | Capabilities           | Admitted boundary                                                                                                     |
+| --------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Selection | Select, Combobox, Tabs | Data-only options with stable identities; finite `contains`/`startsWith` filtering; one ordered public `panels` slot. |
+| Numeric   | Slider, NumberField    | Finite values from -100000 to 100000 and a positive finite step; declared controlled event payloads only.             |
+
+Select accepts its retained legacy `value` spelling or `id`, then normalizes to a stable selected
+identity. Combobox admits no custom filter or renderer; duplicate IDs, function values, and malformed
+selection/numeric data reject before rendering or dispatch. Tabs preserves public ordered panel
+content rather than accepting an adapter-private tree.
 
 Each registration has a closed root style-part schema. Layout/style inputs permit only bounded,
 typed values such as six/eight-digit hex colors, finite spacing and box dimensions, finite
@@ -117,26 +130,27 @@ internals, testkit, or the reference capability package. React and React DOM 19 
 
 T05/T06 do not introduce arbitrary asset import, local asset storage, font admission, a library
 management UI, custom variants, raw CSS, remote requests, package publication, production
-deployment, business actions, or application-state wiring. Those boundaries remain with their
-designated later tasks, including T13 for assets/fonts and T17 for the integrated
-explorer/documentation surface.
+deployment, business actions, or application-state wiring. T07 also does not add normal-App
+integration/persistence, Publisher authority, Runtime activation, Core/protocol changes, G10A, or
+M11. Those boundaries remain with their designated later tasks, including T13 for assets/fonts and
+T17 for the integrated explorer/documentation surface.
 
 ## Verification
 
-The following commands authenticate the completed local T06 boundary; the task-owned proof records
-the separate exact-head hosted and fresh-`main` closure receipts.
+The following commands authenticate the active T07 local boundary; hosted closure is not yet claimed.
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck
 pnpm --filter @desen/starter-catalog-web test
 pnpm --filter @desen/starter-catalog-web test:public-package
-pnpm --filter @desen/starter-catalog-web-proof test:m10a-t06
-pnpm generate:m10a-t06
-pnpm verify:m10a-t06
-pnpm test:m10a-t06
+pnpm --filter @desen/starter-catalog-web-proof test:m10a-t07
+pnpm generate:m10a-t07
+pnpm verify:m10a-t07
+pnpm test:m10a-t07
 ```
 
 Authenticate the historical T05 closure without recapturing it with `pnpm verify:m10a-t05` and
-`pnpm test:m10a-t05`. See [the T06 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t06--form-controls),
-[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T06 proof report](../../docs/proof/M10A-T06.md),
-and the [historical T05 proof](../../docs/proof/M10A-T05.md).
+`pnpm test:m10a-t05`; T06 remains independently verifiable with `pnpm verify:m10a-t06` and
+`pnpm test:m10a-t06`. See [the T07 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t07--selection-and-numeric-controls),
+[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T07 proof report](../../docs/proof/M10A-T07.md),
+[the T06 proof report](../../docs/proof/M10A-T06.md), and the [historical T05 proof](../../docs/proof/M10A-T05.md).

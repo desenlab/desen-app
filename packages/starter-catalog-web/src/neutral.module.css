@@ -389,3 +389,192 @@
   transform: translateX(16px);
   background: var(--desen-neutral-surface, #ffffff);
 }
+
+.comboboxInputGroup,
+.numberFieldGroup {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 40px;
+  overflow: hidden;
+  color: var(--desen-neutral-text, #171717);
+  border: 1px solid var(--desen-neutral-border, #d4d4d0);
+  border-radius: var(--desen-neutral-radius, 8px);
+  background: var(--desen-neutral-surface, #ffffff);
+}
+
+.comboboxInput,
+.numberFieldInput {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+}
+
+.comboboxInput {
+  padding: 8px 12px;
+}
+
+.comboboxTrigger,
+.numberFieldStep {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  padding: 0 10px;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.comboboxTrigger {
+  border-inline-start: 1px solid var(--desen-neutral-border, #d4d4d0);
+}
+
+.comboboxEmpty {
+  padding: 10px 12px;
+  color: var(--desen-neutral-muted, #525252);
+  font-size: 13px;
+}
+
+.tabsRoot {
+  display: grid;
+  width: min(100%, 560px);
+  gap: 8px;
+}
+
+.tabsLabel,
+.numericLabel {
+  margin: 0;
+  color: var(--desen-neutral-text, #171717);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.tabsList {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--desen-neutral-border, #d4d4d0);
+}
+
+.tabsTab {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 0;
+  color: var(--desen-neutral-muted, #525252);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.tabsTab[data-active] {
+  color: var(--desen-neutral-text, #171717);
+  font-weight: 600;
+}
+
+.tabsTab[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.tabsIndicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: var(--active-tab-width);
+  height: 2px;
+  transform: translateX(var(--active-tab-left));
+  background: var(--desen-neutral-text, #171717);
+  transition:
+    transform 120ms ease,
+    width 120ms ease;
+}
+
+.tabsPanels {
+  display: grid;
+  min-height: 88px;
+  border: 1px solid var(--desen-neutral-border, #d4d4d0);
+  border-radius: var(--desen-neutral-radius, 8px);
+  background: var(--desen-neutral-surface, #ffffff);
+}
+
+.tabsPanel {
+  grid-column: 1;
+  grid-row: 1;
+  padding: 16px;
+}
+
+.tabsPanel[hidden] {
+  display: none;
+}
+
+.numericField {
+  display: grid;
+  width: min(100%, 360px);
+  gap: 8px;
+}
+
+.numericValue {
+  color: var(--desen-neutral-muted, #525252);
+  font-variant-numeric: tabular-nums;
+}
+
+.sliderControl {
+  display: flex;
+  width: 100%;
+  padding: 10px 0;
+  touch-action: none;
+}
+
+.sliderTrack {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--desen-neutral-border, #d4d4d0);
+}
+
+.sliderIndicator {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--desen-neutral-text, #171717);
+}
+
+.sliderThumb {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--desen-neutral-text, #171717);
+  border-radius: 50%;
+  background: var(--desen-neutral-surface, #ffffff);
+}
+
+.numberFieldInput {
+  min-width: 6ch;
+  padding: 8px 10px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.numberFieldStep:first-child {
+  border-inline-end: 1px solid var(--desen-neutral-border, #d4d4d0);
+}
+
+.numberFieldStep:last-child {
+  border-inline-start: 1px solid var(--desen-neutral-border, #d4d4d0);
+}
+
+.comboboxInput:disabled,
+.comboboxTrigger[data-disabled],
+.numberFieldStep[data-disabled],
+.numberFieldInput:disabled,
+.sliderControl[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
