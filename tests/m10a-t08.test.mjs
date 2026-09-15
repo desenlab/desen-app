@@ -111,10 +111,7 @@ test("M10A-T08 writer is atomic and leaves current artifact bytes deterministic"
       browserObservation: browserObservation(),
     });
     assert.equal(result.artifactSha256, built.artifactSha256);
-    assert.equal(
-      (await readFile(artifactPath)).length,
-      result.artifactBytes,
-    );
+    assert.equal((await readFile(artifactPath)).length, result.artifactBytes);
   } finally {
     await rm(temporaryRoot, { recursive: true, force: true });
   }
