@@ -23,7 +23,7 @@ Grid, Text/Heading, Image, Icon ve Separator için private Catalog ve izole kan�
 bu normal Desen App entegrasyonu değildir. `M10A-T06` `DONE`: TextField, TextArea, Checkbox,
 RadioGroup ve Switch için erişilebilir alan bileşimi ve kontrollü event kanıtı hosted kapanışla geçti.
 `M10A-T07` `DONE`: Select, Combobox, Tabs, Slider ve NumberField için hosted kapanış
-kaydedildi; exact-head hosted ve taze `main` kapanışı geçti.
+kaydedildi; exact-head hosted ve taze `main` kapanışı geçti. `M10A-T08` `IN_PROGRESS`: overlay, menu ve disclosure bileşenlerinin yerel kanıtı tamamlandı; hosted exact-head kapanışı bekleniyor.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i

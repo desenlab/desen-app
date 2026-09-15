@@ -251,10 +251,8 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 ## M10A — Design-first product foundation
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
-M10A-T01 through M10A-T07 are `DONE`; M10A-T08 is `IN_PROGRESS` with its local implementation
-and proof complete while exact-head hosted closure remains outstanding. Overall progress is
-128/176 (73%), M10A is 7/28 (25%), and
-11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
+M10A-T01 through M10A-T07 are `DONE`; M10A-T08 is `IN_PROGRESS` with local proof complete and hosted closure outstanding. Overall progress is 128/176 (73%), M10A is 7/28 (25%), and 11/14
+proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
 edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
 unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed

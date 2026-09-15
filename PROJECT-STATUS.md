@@ -9,8 +9,8 @@ M10 is **12/12**, M10A is **7/28 (25%)**, and proof gates are **11/14**. Gates a
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01 through M10A-T07 are DONE.** T07's hosted 0.4.0
-selection/numeric-control evidence is in its [task-owned proof](docs/proof/M10A-T07.md). M11 has not started. The frozen protocol, Runtime
+**M10A-T01 through M10A-T07 are DONE; M10A-T08 is IN_PROGRESS.** T07's hosted 0.4.0
+selection/numeric-control evidence is in its [task-owned proof](docs/proof/M10A-T07.md); T08's local overlay/disclosure proof is complete and hosted closure is pending. M11 has not started. The frozen protocol, Runtime
 Core, SC-01 profile, and completed T02 authority are unchanged.
 
 ## Current closure
@@ -74,10 +74,10 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T08 — overlay, menu, and disclosure capabilities — is `NOT_STARTED`.** T07's
+**M10A-T08 — overlay, menu, and disclosure capabilities — is `IN_PROGRESS`.** T07's
 [hosted proof](docs/proof/M10A-T07.md), [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), and
 [task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t07--selection-and-numeric-controls) define
-the completed preceding boundary. T08 is the next eligible task; it must not retrospectively expand
+the completed preceding boundary. T08's local proof is complete; its hosted exact-head closure is pending. It must not retrospectively expand
 T07 or authorize Runtime activation,
 normal-App integration/persistence, Publisher authority, Core/protocol changes, G10A, or M11.
 
