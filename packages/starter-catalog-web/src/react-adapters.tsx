@@ -11,6 +11,10 @@ import { RadioGroup } from "@base-ui/react/radio-group";
 import { Slider } from "@base-ui/react/slider";
 import { Switch } from "@base-ui/react/switch";
 import { Tabs } from "@base-ui/react/tabs";
+import { Accordion } from "@base-ui/react/accordion";
+import { Menu } from "@base-ui/react/menu";
+import { Popover } from "@base-ui/react/popover";
+import { Tooltip } from "@base-ui/react/tooltip";
 import { canonicalizeJson } from "@desen/protocol";
 
 import {
@@ -18,6 +22,7 @@ import {
   STARTER_CHECKBOX_CAPABILITY_ID,
   STARTER_COMBOBOX_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
+  STARTER_DIALOG_CAPABILITY_ID,
   STARTER_HEADING_CAPABILITY_ID,
   STARTER_ICON_CAPABILITY_ID,
   STARTER_IMAGE_CAPABILITY_ID,
@@ -29,6 +34,10 @@ import {
   STARTER_STACK_CAPABILITY_ID,
   STARTER_SWITCH_CAPABILITY_ID,
   STARTER_TABS_CAPABILITY_ID,
+  STARTER_ACCORDION_CAPABILITY_ID,
+  STARTER_MENU_CAPABILITY_ID,
+  STARTER_POPOVER_CAPABILITY_ID,
+  STARTER_TOOLTIP_CAPABILITY_ID,
   STARTER_TEXT_AREA_CAPABILITY_ID,
   STARTER_TEXT_CAPABILITY_ID,
   STARTER_TEXT_FIELD_CAPABILITY_ID,
@@ -52,6 +61,10 @@ import {
   starterTextAreaComponentRegistration,
   starterTextComponentRegistration,
   starterTextFieldComponentRegistration,
+  starterAccordionComponentRegistration,
+  starterMenuComponentRegistration,
+  starterPopoverComponentRegistration,
+  starterTooltipComponentRegistration,
 } from "./contracts.js";
 import styles from "./neutral.module.css";
 
@@ -82,6 +95,10 @@ import type {
   StarterTextAreaProps,
   StarterTextProps,
   StarterTextFieldProps,
+  StarterAccordionProps,
+  StarterMenuProps,
+  StarterPopoverProps,
+  StarterTooltipProps,
 } from "./contracts.js";
 
 interface PortalBoundary {
@@ -143,10 +160,14 @@ type Registration =
   | typeof starterHeadingComponentRegistration
   | typeof starterImageComponentRegistration
   | typeof starterIconComponentRegistration
-  | typeof starterSeparatorComponentRegistration;
+  | typeof starterSeparatorComponentRegistration
+  | typeof starterPopoverComponentRegistration
+  | typeof starterTooltipComponentRegistration
+  | typeof starterMenuComponentRegistration
+  | typeof starterAccordionComponentRegistration;
 
 type T05StyleProjection = "image" | "layout" | "typography" | "media" | "separator";
-type StarterStyleProjection = T05StyleProjection | "form" | "selection";
+type StarterStyleProjection = T05StyleProjection | "form" | "selection" | "overlay";
 
 const T01_STYLE_PROPERTIES = Object.freeze([
   "color",
@@ -297,6 +318,15 @@ function styleProjection(registration: Registration): StarterStyleProjection | u
   ) {
     return "selection";
   }
+  if (
+    registration.id === STARTER_DIALOG_CAPABILITY_ID ||
+    registration.id === STARTER_POPOVER_CAPABILITY_ID ||
+    registration.id === STARTER_TOOLTIP_CAPABILITY_ID ||
+    registration.id === STARTER_MENU_CAPABILITY_ID ||
+    registration.id === STARTER_ACCORDION_CAPABILITY_ID
+  ) {
+    return "overlay";
+  }
   return undefined;
 }
 
@@ -375,6 +405,7 @@ function stylePropertyNames(projection: StarterStyleProjection | undefined): rea
   if (projection === "separator") return SEPARATOR_STYLE_PROPERTIES;
   if (projection === "form") return FORM_STYLE_PROPERTIES;
   if (projection === "selection") return SELECTION_STYLE_PROPERTIES;
+  if (projection === "overlay") return SELECTION_STYLE_PROPERTIES;
   return T01_STYLE_PROPERTIES;
 }
 
@@ -761,6 +792,96 @@ function validateSelectionProps(
   }
 }
 
+function validateT08Props(
+  input: RuntimeReactComponentAdapterProps,
+  registration: Registration,
+): void {
+  if (
+    registration.id !== STARTER_POPOVER_CAPABILITY_ID &&
+    registration.id !== STARTER_TOOLTIP_CAPABILITY_ID &&
+    registration.id !== STARTER_MENU_CAPABILITY_ID &&
+    registration.id !== STARTER_ACCORDION_CAPABILITY_ID
+  ) {
+    return;
+  }
+  const props = input.props as Readonly<Record<string, unknown>>;
+  const invalid = (): never => invalidSelectionInput();
+  const hasOnly = (keys: readonly string[]) =>
+    Object.keys(props).every((key) => keys.includes(key));
+  const validItems = (value: unknown): value is readonly Record<string, unknown>[] => {
+    if (!Array.isArray(value) || value.length < 1 || value.length > 12) return false;
+    const ids = new Set<string>();
+    return value.every((item) => {
+      if (
+        typeof item !== "object" ||
+        item === null ||
+        Array.isArray(item) ||
+        (Object.getPrototypeOf(item) !== Object.prototype && Object.getPrototypeOf(item) !== null)
+      ) {
+        return false;
+      }
+      const record = item as Readonly<Record<string, unknown>>;
+      if (Object.keys(record).some((key) => !["id", "label", "disabled"].includes(key)))
+        return false;
+      if (!isBoundedString(record.id, 1, 128) || !isBoundedString(record.label, 1, 256))
+        return false;
+      if (!isOptionalBoolean(record.disabled) || ids.has(record.id)) return false;
+      ids.add(record.id);
+      return true;
+    });
+  };
+
+  if (registration.id === STARTER_POPOVER_CAPABILITY_ID) {
+    if (
+      !hasOnly(["triggerLabel", "title", "description", "closeLabel", "disabled"]) ||
+      (props.triggerLabel !== undefined && !isBoundedString(props.triggerLabel, 1, 256)) ||
+      (props.title !== undefined && !isBoundedString(props.title, 1, 256)) ||
+      (props.description !== undefined && !isBoundedString(props.description, 1, 1_024)) ||
+      (props.closeLabel !== undefined && !isBoundedString(props.closeLabel, 1, 256)) ||
+      !isOptionalBoolean(props.disabled)
+    )
+      invalid();
+    return;
+  }
+  if (registration.id === STARTER_TOOLTIP_CAPABILITY_ID) {
+    if (
+      !hasOnly(["label", "content", "disabled"]) ||
+      !isBoundedString(props.label, 1, 256) ||
+      !isBoundedString(props.content, 1, 1_024) ||
+      !isOptionalBoolean(props.disabled)
+    )
+      invalid();
+    return;
+  }
+  if (registration.id === STARTER_MENU_CAPABILITY_ID) {
+    if (
+      !hasOnly(["triggerLabel", "items", "disabled"]) ||
+      !isBoundedString(props.triggerLabel, 1, 256) ||
+      !validItems(props.items) ||
+      !isOptionalBoolean(props.disabled)
+    )
+      invalid();
+    return;
+  }
+  if (
+    !hasOnly(["items", "defaultValue", "multiple", "disabled"]) ||
+    !validItems(props.items) ||
+    !isOptionalBoolean(props.multiple) ||
+    !isOptionalBoolean(props.disabled)
+  )
+    invalid();
+  if (props.defaultValue !== undefined) {
+    if (!Array.isArray(props.defaultValue) || props.defaultValue.length > 12) invalid();
+    const ids = new Set((props.items as readonly Record<string, unknown>[]).map((item) => item.id));
+    if (
+      (props.defaultValue as readonly unknown[]).some(
+        (value) => !isBoundedString(value, 1, 128) || !ids.has(value),
+      )
+    )
+      invalid();
+  }
+}
+
 function guardInput(input: RuntimeReactComponentAdapterProps, registration: Registration): void {
   // Runtime React is the schema-admission authority. This defensive check prevents direct trusted
   // misuse from widening the bridge to callbacks, JSX, unknown parts or arbitrary Base UI props.
@@ -777,17 +898,21 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
   if (Object.keys(input.props).some((key) => !allowedProps.includes(key)))
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   const allowedSlots =
-    registration.id === starterDialogComponentRegistration.id
+    registration.id === starterDialogComponentRegistration.id ||
+    registration.id === starterPopoverComponentRegistration.id
       ? ["content"]
       : registration.id === starterTabsComponentRegistration.id
         ? ["panels"]
-        : styleProjection(registration) === "layout"
-          ? ["default"]
-          : [];
+        : registration.id === starterAccordionComponentRegistration.id
+          ? ["panels"]
+          : styleProjection(registration) === "layout"
+            ? ["default"]
+            : [];
   if (Object.keys(input.slots).some((key) => !allowedSlots.includes(key)))
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   if (
-    registration.id === starterDialogComponentRegistration.id &&
+    (registration.id === starterDialogComponentRegistration.id ||
+      registration.id === starterPopoverComponentRegistration.id) &&
     (input.slots.content === undefined ||
       input.slots.content.length < 1 ||
       input.slots.content.length > 16)
@@ -798,6 +923,17 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
     (input.slots.default === undefined ||
       input.slots.default.length < 1 ||
       input.slots.default.length > 100)
+  ) {
+    throw new Error("STARTER_ADAPTER_INPUT_INVALID");
+  }
+  if (
+    registration.id === starterAccordionComponentRegistration.id &&
+    (input.slots.panels === undefined ||
+      input.slots.panels.length < 1 ||
+      input.slots.panels.length > 12 ||
+      !Array.isArray((input.props as Readonly<Record<string, unknown>>).items) ||
+      input.slots.panels.length !==
+        ((input.props as Readonly<Record<string, unknown>>).items as readonly unknown[]).length)
   ) {
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   }
@@ -815,6 +951,7 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
   validateT05Props(input, registration);
   validateFormProps(input, registration);
   validateSelectionProps(input, registration);
+  validateT08Props(input, registration);
   const parts = Object.keys(registration.manifest.styleParts);
   const states: readonly string[] =
     "visualStates" in registration.manifest ? registration.manifest.visualStates : [];
@@ -836,7 +973,7 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
                 ((property === "borderRadius" && value >= 0 && value <= 64) ||
                   (property === "padding" && value >= 0 && value <= 128) ||
                   (property === "fontSize" && value >= 8 && value <= 96))
-            : projection === "form" || projection === "selection"
+            : projection === "form" || projection === "selection" || projection === "overlay"
               ? isFormStyleValueValid(property, value)
               : isT05StyleValueValid(projection, property, value));
         if (!valid) throw new Error("STARTER_ADAPTER_INPUT_INVALID");
@@ -911,7 +1048,12 @@ function partStyle(
     }
     if (values.textAlign === "start" || values.textAlign === "center" || values.textAlign === "end")
       result.textAlign = values.textAlign;
-    if (projection === "typography" || projection === "form" || projection === "selection") {
+    if (
+      projection === "typography" ||
+      projection === "form" ||
+      projection === "selection" ||
+      projection === "overlay"
+    ) {
       if (values.fontFamily === "system") result.fontFamily = "system-ui, sans-serif";
       if (values.fontFamily === "serif") result.fontFamily = "ui-serif, Georgia, serif";
       if (values.fontFamily === "mono") result.fontFamily = "ui-monospace, monospace";
@@ -1549,7 +1691,7 @@ export function StarterSelectReactAdapter(input: RuntimeReactComponentAdapterPro
           <Select.Portal container={boundary.container}>
             <Select.Positioner
               positionMethod="absolute"
-              collisionBoundary={boundary.root}
+              collisionBoundary={boundary.root ?? undefined}
               sideOffset={8}
             >
               <Select.Popup
@@ -1966,6 +2108,281 @@ export function StarterNumberFieldReactAdapter(input: RuntimeReactComponentAdapt
   );
 }
 
+/** Maps a bounded Popover to Base UI while keeping every portal inside the host boundary. */
+export function StarterPopoverReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterPopoverComponentRegistration);
+  const props = input.props as unknown as StarterPopoverProps;
+  const boundary = usePortalBoundary();
+  const [open, setOpen] = useState(false);
+  const [popup, setPopup] = useState<HTMLDivElement | null>(null);
+  const [nestedContainer, setNestedContainer] = useState<HTMLDivElement | null>(null);
+  const nestedBoundary = useMemo(
+    () => ({ root: popup, container: nestedContainer }),
+    [popup, nestedContainer],
+  );
+  const disabled = props.disabled === true;
+  const interaction = useInteractionStates(disabled);
+  const states = [
+    ...interaction.states.filter((state) => state === "focus"),
+    ...(open ? ["open"] : []),
+    ...(disabled ? ["disabled"] : []),
+  ];
+  return (
+    <div className={styles.popoverRoot} style={partStyle(input.style, "root", states, "overlay")}>
+      <Popover.Root
+        open={open}
+        modal="trap-focus"
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          input.interactions.dispatchEvent("openChange", Object.freeze({ open: nextOpen }));
+        }}
+      >
+        <Popover.Trigger
+          disabled={disabled}
+          className={styles.button}
+          style={partStyle(input.style, "trigger", states, "overlay")}
+          {...interaction.handlers}
+        >
+          {props.triggerLabel ?? "Open popover"}
+        </Popover.Trigger>
+        {boundary.container !== null && (
+          <Popover.Portal container={boundary.container}>
+            <Popover.Positioner
+              className={styles.popoverPositioner}
+              collisionBoundary={boundary.root ?? undefined}
+            >
+              <Popover.Popup
+                ref={setPopup}
+                className={styles.popover}
+                style={partStyle(input.style, "popup", states, "overlay")}
+              >
+                <Popover.Title
+                  className={styles.title}
+                  style={partStyle(input.style, "title", states, "overlay")}
+                >
+                  {props.title ?? "Popover title"}
+                </Popover.Title>
+                <Popover.Description
+                  className={styles.description}
+                  style={partStyle(input.style, "description", states, "overlay")}
+                >
+                  {props.description ?? "Popover description"}
+                </Popover.Description>
+                <div
+                  className={styles.content}
+                  style={partStyle(input.style, "content", states, "overlay")}
+                >
+                  <PortalContext.Provider value={nestedBoundary}>
+                    {input.slots.content}
+                  </PortalContext.Provider>
+                </div>
+                <Popover.Close
+                  className={styles.close}
+                  style={partStyle(input.style, "close", states, "overlay")}
+                >
+                  {props.closeLabel ?? "Close popover"}
+                </Popover.Close>
+                <div
+                  ref={setNestedContainer}
+                  className={styles.portals}
+                  data-desen-starter-portals=""
+                />
+              </Popover.Popup>
+            </Popover.Positioner>
+          </Popover.Portal>
+        )}
+      </Popover.Root>
+    </div>
+  );
+}
+
+/** Maps a Tooltip to Base UI with hover/focus parity and a contained portal root. */
+export function StarterTooltipReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterTooltipComponentRegistration);
+  const props = input.props as unknown as StarterTooltipProps;
+  const boundary = usePortalBoundary();
+  const [open, setOpen] = useState(false);
+  const disabled = props.disabled === true;
+  const interaction = useInteractionStates(disabled);
+  const states = [
+    ...interaction.states.filter((state) => state === "focus"),
+    ...(open ? ["open"] : []),
+    ...(disabled ? ["disabled"] : []),
+  ];
+  return (
+    <div className={styles.tooltipRoot} style={partStyle(input.style, "root", states, "overlay")}>
+      <Tooltip.Provider>
+        <Tooltip.Root
+          disabled={disabled}
+          onOpenChange={(nextOpen) => {
+            setOpen(nextOpen);
+            input.interactions.dispatchEvent("openChange", Object.freeze({ open: nextOpen }));
+          }}
+        >
+          <Tooltip.Trigger
+            className={styles.button}
+            disabled={disabled}
+            style={partStyle(input.style, "trigger", states, "overlay")}
+            {...interaction.handlers}
+            onFocus={() => {
+              if (!disabled) setOpen(true);
+            }}
+            onBlur={() => {
+              if (!disabled) setOpen(false);
+            }}
+            onPointerEnter={() => {
+              if (!disabled) setOpen(true);
+            }}
+            onPointerLeave={() => {
+              if (!disabled) setOpen(false);
+            }}
+          >
+            {props.label}
+          </Tooltip.Trigger>
+          {boundary.container !== null && (
+            <Tooltip.Portal container={boundary.container}>
+              <Tooltip.Positioner
+                className={styles.tooltipPositioner}
+                collisionBoundary={boundary.root ?? undefined}
+              >
+                <Tooltip.Popup
+                  className={styles.tooltip}
+                  style={partStyle(input.style, "popup", states, "overlay")}
+                >
+                  {props.content}
+                  <Tooltip.Arrow
+                    className={styles.tooltipArrow}
+                    style={partStyle(input.style, "arrow", states, "overlay")}
+                  />
+                </Tooltip.Popup>
+              </Tooltip.Positioner>
+              {open && (
+                <div className={styles.tooltip} role="tooltip" data-desen-starter-tooltip="">
+                  {props.content}
+                </div>
+              )}
+            </Tooltip.Portal>
+          )}
+        </Tooltip.Root>
+      </Tooltip.Provider>
+    </div>
+  );
+}
+
+/** Maps a bounded Menu to Base UI, retaining stable item ids in its select event payload. */
+export function StarterMenuReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterMenuComponentRegistration);
+  const props = input.props as unknown as StarterMenuProps;
+  const boundary = usePortalBoundary();
+  const [open, setOpen] = useState(false);
+  const disabled = props.disabled === true;
+  const interaction = useInteractionStates(disabled);
+  const states = [
+    ...interaction.states.filter((state) => state === "focus"),
+    ...(open ? ["open"] : []),
+    ...(disabled ? ["disabled"] : []),
+  ];
+  return (
+    <div className={styles.menuRoot} style={partStyle(input.style, "root", states, "overlay")}>
+      <Menu.Root
+        open={open}
+        disabled={disabled}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          input.interactions.dispatchEvent("openChange", Object.freeze({ open: nextOpen }));
+        }}
+      >
+        <Menu.Trigger
+          className={styles.button}
+          disabled={disabled}
+          style={partStyle(input.style, "trigger", states, "overlay")}
+          {...interaction.handlers}
+        >
+          {props.triggerLabel}
+        </Menu.Trigger>
+        {boundary.container !== null && (
+          <Menu.Portal container={boundary.container}>
+            <Menu.Positioner
+              className={styles.menuPositioner}
+              collisionBoundary={boundary.root ?? undefined}
+            >
+              <Menu.Popup
+                className={styles.menu}
+                style={partStyle(input.style, "popup", states, "overlay")}
+              >
+                {props.items.map((item) => (
+                  <Menu.Item
+                    key={item.id}
+                    disabled={item.disabled === true}
+                    className={styles.menuItem}
+                    style={partStyle(input.style, "item", states, "overlay")}
+                    onClick={() =>
+                      input.interactions.dispatchEvent("select", Object.freeze({ id: item.id }))
+                    }
+                  >
+                    {item.label}
+                  </Menu.Item>
+                ))}
+              </Menu.Popup>
+            </Menu.Positioner>
+          </Menu.Portal>
+        )}
+      </Menu.Root>
+    </div>
+  );
+}
+
+/** Maps ordered panel slots to Base UI Accordion without exposing callbacks in Source props. */
+export function StarterAccordionReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterAccordionComponentRegistration);
+  const props = input.props as unknown as StarterAccordionProps;
+  const items = props.items as readonly { id: string; label: string; disabled?: boolean }[];
+  const disabled = props.disabled === true;
+  const interaction = useInteractionStates(disabled);
+  const defaultValue = (props.defaultValue ?? []) as readonly string[];
+  return (
+    <Accordion.Root
+      className={styles.accordion}
+      style={partStyle(input.style, "root", [], "overlay")}
+      multiple={props.multiple === true}
+      disabled={disabled}
+      defaultValue={[...defaultValue]}
+      onValueChange={(value) =>
+        input.interactions.dispatchEvent(
+          "valueChange",
+          Object.freeze({ value: Object.freeze(value.map(String)) }),
+        )
+      }
+    >
+      {items.map((item, index) => (
+        <Accordion.Item
+          key={item.id}
+          value={item.id}
+          disabled={item.disabled === true}
+          className={styles.accordionItem}
+          style={partStyle(input.style, "item", [], "overlay")}
+        >
+          <Accordion.Header className={styles.accordionHeader}>
+            <Accordion.Trigger
+              className={styles.accordionTrigger}
+              style={partStyle(input.style, "trigger", [], "overlay")}
+              {...interaction.handlers}
+            >
+              {item.label}
+            </Accordion.Trigger>
+          </Accordion.Header>
+          <Accordion.Panel
+            className={styles.accordionPanel}
+            style={partStyle(input.style, "panel", [], "overlay")}
+          >
+            {input.slots.panels?.[index]}
+          </Accordion.Panel>
+        </Accordion.Item>
+      ))}
+    </Accordion.Root>
+  );
+}
+
 /** Maps the declared Dialog parts and required content slot to a bounded, focus-trapping overlay. */
 export function StarterDialogReactAdapter(input: RuntimeReactComponentAdapterProps) {
   guardInput(input, starterDialogComponentRegistration);
@@ -2252,6 +2669,22 @@ export const STARTER_WEB_REACT_ADAPTER_REGISTRY_INPUT = Object.freeze({
     Object.freeze({
       capabilityId: starterDialogComponentRegistration.id,
       component: StarterDialogReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterPopoverComponentRegistration.id,
+      component: StarterPopoverReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterTooltipComponentRegistration.id,
+      component: StarterTooltipReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterMenuComponentRegistration.id,
+      component: StarterMenuReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterAccordionComponentRegistration.id,
+      component: StarterAccordionReactAdapter,
     }),
     Object.freeze({
       capabilityId: starterTextFieldComponentRegistration.id,

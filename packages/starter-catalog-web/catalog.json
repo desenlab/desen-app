@@ -1,6 +1,732 @@
 {
   "behaviors": {},
   "components": {
+    "run.desen.starter/Accordion": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Disclosures",
+        "defaultProps": {
+          "defaultValue": [],
+          "disabled": false,
+          "items": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "details",
+              "label": "Details"
+            }
+          ],
+          "multiple": false
+        },
+        "displayName": "Accordion",
+        "icon": "accordion",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "defaultValue": [],
+              "disabled": false,
+              "items": [
+                {
+                  "id": "overview",
+                  "label": "Overview"
+                },
+                {
+                  "id": "details",
+                  "label": "Details"
+                }
+              ],
+              "multiple": false
+            }
+          }
+        }
+      },
+      "category": "overlay",
+      "description": "DESEN Neutral disclosure list with ordered public panel slots.",
+      "events": {
+        "valueChange": {
+          "description": "Emitted with the ordered expanded item identities.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "items": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 12,
+                "type": "array",
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "defaultValue": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 12,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "disabled": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "label": {
+                  "maxLength": 256,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "label"
+              ],
+              "type": "object"
+            },
+            "maxItems": 12,
+            "minItems": 1,
+            "type": "array"
+          },
+          "multiple": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "slots": {
+        "panels": {
+          "acceptsCategories": [
+            "layout",
+            "content",
+            "input",
+            "action",
+            "overlay",
+            "feedback",
+            "complex"
+          ],
+          "description": "Ordered panel content; one node per item.",
+          "maxItems": 12,
+          "minItems": 1,
+          "required": true
+        }
+      },
+      "styleParts": {
+        "item": {
+          "description": "Accordion item surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "panel": {
+          "description": "Accordion panel surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable accordion boundary.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "trigger": {
+          "description": "Accordion disclosure trigger.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "focus",
+        "open",
+        "disabled"
+      ]
+    },
     "run.desen.starter/Box": {
       "authoring": {
         "adapterFidelity": "same",
@@ -4251,6 +4977,717 @@
         }
       }
     },
+    "run.desen.starter/Menu": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Actions",
+        "defaultProps": {
+          "disabled": false,
+          "items": [
+            {
+              "id": "first",
+              "label": "First action"
+            },
+            {
+              "id": "second",
+              "label": "Second action"
+            }
+          ],
+          "triggerLabel": "Open menu"
+        },
+        "displayName": "Menu",
+        "icon": "menu",
+        "resize": {
+          "horizontal": "hug",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "disabled": false,
+              "items": [
+                {
+                  "id": "first",
+                  "label": "First action"
+                },
+                {
+                  "id": "second",
+                  "label": "Second action"
+                }
+              ],
+              "triggerLabel": "Open menu"
+            }
+          }
+        }
+      },
+      "category": "action",
+      "description": "DESEN Neutral menu with bounded data-only item identities.",
+      "events": {
+        "openChange": {
+          "description": "Emitted whenever the trusted open state changes.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "open": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "open"
+            ],
+            "type": "object"
+          }
+        },
+        "select": {
+          "description": "Emitted with the selected stable item identity.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "disabled": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "label": {
+                  "maxLength": 256,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "label"
+              ],
+              "type": "object"
+            },
+            "maxItems": 12,
+            "minItems": 1,
+            "type": "array"
+          },
+          "triggerLabel": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "triggerLabel",
+          "items"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "item": {
+          "description": "Menu item surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "popup": {
+          "description": "Contained menu surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable menu boundary.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "trigger": {
+          "description": "Menu trigger control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "focus",
+        "open",
+        "disabled",
+        "highlighted"
+      ]
+    },
     "run.desen.starter/NumberField": {
       "authoring": {
         "adapterFidelity": "same",
@@ -5536,6 +6973,1116 @@
       "visualStates": [
         "hover",
         "focus",
+        "disabled"
+      ]
+    },
+    "run.desen.starter/Popover": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Overlays",
+        "defaultProps": {
+          "closeLabel": "Close popover",
+          "description": "Popover description",
+          "disabled": false,
+          "title": "Popover title",
+          "triggerLabel": "Open popover"
+        },
+        "displayName": "Popover",
+        "icon": "popover",
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "closeLabel": "Close popover",
+              "description": "Popover description",
+              "disabled": false,
+              "title": "Popover title",
+              "triggerLabel": "Open popover"
+            }
+          }
+        }
+      },
+      "category": "overlay",
+      "description": "DESEN Neutral anchored popover with a contained preview portal.",
+      "events": {
+        "openChange": {
+          "description": "Emitted whenever the trusted open state changes.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "open": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "open"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "closeLabel": {
+            "default": "Close popover",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "default": "Popover description",
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "title": {
+            "default": "Popover title",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "triggerLabel": {
+            "default": "Open popover",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "slots": {
+        "content": {
+          "acceptsCategories": [
+            "layout",
+            "content",
+            "input",
+            "action",
+            "overlay",
+            "feedback",
+            "complex"
+          ],
+          "description": "Managed popover body content.",
+          "maxItems": 16,
+          "minItems": 1,
+          "required": true
+        }
+      },
+      "styleParts": {
+        "close": {
+          "description": "Popover close control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "content": {
+          "description": "Popover body content.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "description": {
+          "description": "Popover descriptive text.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "popup": {
+          "description": "Contained popover surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable popover boundary.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "title": {
+          "description": "Popover heading.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "trigger": {
+          "description": "Popover trigger control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "focus",
+        "open",
         "disabled"
       ]
     },
@@ -13784,6 +16331,656 @@
         "required",
         "invalid"
       ]
+    },
+    "run.desen.starter/Tooltip": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Feedback",
+        "defaultProps": {
+          "content": "Helpful context",
+          "disabled": false,
+          "label": "Help"
+        },
+        "displayName": "Tooltip",
+        "icon": "tooltip",
+        "resize": {
+          "horizontal": "hug",
+          "vertical": "hug"
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "content": "Helpful context",
+              "disabled": false,
+              "label": "Help"
+            }
+          }
+        }
+      },
+      "category": "feedback",
+      "description": "DESEN Neutral accessible tooltip with a contained preview portal.",
+      "events": {
+        "openChange": {
+          "description": "Emitted whenever the trusted open state changes.",
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "open": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "open"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "label": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "content"
+        ],
+        "type": "object"
+      },
+      "styleParts": {
+        "arrow": {
+          "description": "Tooltip directional arrow.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "popup": {
+          "description": "Contained tooltip surface.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "root": {
+          "description": "Stable tooltip boundary.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "trigger": {
+          "description": "Tooltip trigger control.",
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderColor": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "borderRadius": {
+                "maximum": 64,
+                "minimum": 0,
+                "type": "number"
+              },
+              "borderWidth": {
+                "maximum": 16,
+                "minimum": 0,
+                "type": "number"
+              },
+              "color": {
+                "anyOf": [
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{6}$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^#[0-9A-Fa-f]{8}$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fontFamily": {
+                "enum": [
+                  "system",
+                  "serif",
+                  "mono"
+                ],
+                "type": "string"
+              },
+              "fontSize": {
+                "maximum": 96,
+                "minimum": 8,
+                "type": "number"
+              },
+              "fontWeight": {
+                "enum": [
+                  400,
+                  500,
+                  600,
+                  700
+                ],
+                "type": "number"
+              },
+              "letterSpacing": {
+                "maximum": 16,
+                "minimum": -4,
+                "type": "number"
+              },
+              "lineHeight": {
+                "maximum": 3,
+                "minimum": 1,
+                "type": "number"
+              },
+              "marginBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "marginInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "maxWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minHeight": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "minWidth": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              },
+              "opacity": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "padding": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingBlock": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "paddingInline": {
+                "maximum": 128,
+                "minimum": 0,
+                "type": "number"
+              },
+              "width": {
+                "maximum": 4096,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "focus",
+        "open",
+        "disabled"
+      ]
     }
   },
   "description": "DESEN Neutral Web–React starter capability contracts.",
@@ -13791,8 +16988,8 @@
   "id": "run.desen.starter.web",
   "kind": "desen.catalog",
   "operations": {},
-  "packageDigest": "sha256:c87ff63756db10c6f3d9d29e8a0ba66f026d2a26f48f9c41cff85ddbf871e544",
+  "packageDigest": "sha256:cd301ac17c55761180642647ead2db1075fa304fc88874aa3ca8d577c20a65a0",
   "resources": {},
   "target": "web-react",
-  "version": "0.4.0"
+  "version": "0.5.0"
 }

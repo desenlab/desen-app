@@ -6,6 +6,10 @@ import {
   STARTER_CHECKBOX_CAPABILITY_ID,
   STARTER_COMBOBOX_CAPABILITY_ID,
   STARTER_DIALOG_CAPABILITY_ID,
+  STARTER_POPOVER_CAPABILITY_ID,
+  STARTER_TOOLTIP_CAPABILITY_ID,
+  STARTER_MENU_CAPABILITY_ID,
+  STARTER_ACCORDION_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
   STARTER_HEADING_CAPABILITY_ID,
   STARTER_ICON_CAPABILITY_ID,
@@ -25,6 +29,10 @@ import {
   starterBoxComponentRegistration,
   starterCheckboxComponentRegistration,
   starterDialogComponentRegistration,
+  starterPopoverComponentRegistration,
+  starterTooltipComponentRegistration,
+  starterMenuComponentRegistration,
+  starterAccordionComponentRegistration,
   starterGridComponentRegistration,
   starterHeadingComponentRegistration,
   starterIconComponentRegistration,
@@ -62,6 +70,10 @@ export type StarterTemplateCapabilityId =
   | typeof STARTER_COMBOBOX_CAPABILITY_ID
   | typeof STARTER_SELECT_CAPABILITY_ID
   | typeof STARTER_DIALOG_CAPABILITY_ID
+  | typeof STARTER_POPOVER_CAPABILITY_ID
+  | typeof STARTER_TOOLTIP_CAPABILITY_ID
+  | typeof STARTER_MENU_CAPABILITY_ID
+  | typeof STARTER_ACCORDION_CAPABILITY_ID
   | typeof STARTER_GRID_CAPABILITY_ID
   | typeof STARTER_HEADING_CAPABILITY_ID
   | typeof STARTER_ICON_CAPABILITY_ID
@@ -154,6 +166,10 @@ function captureTemplateInput(input: unknown): CapturedTemplateInput {
       capabilityId !== STARTER_COMBOBOX_CAPABILITY_ID &&
       capabilityId !== STARTER_SELECT_CAPABILITY_ID &&
       capabilityId !== STARTER_DIALOG_CAPABILITY_ID &&
+      capabilityId !== STARTER_POPOVER_CAPABILITY_ID &&
+      capabilityId !== STARTER_TOOLTIP_CAPABILITY_ID &&
+      capabilityId !== STARTER_MENU_CAPABILITY_ID &&
+      capabilityId !== STARTER_ACCORDION_CAPABILITY_ID &&
       capabilityId !== STARTER_GRID_CAPABILITY_ID &&
       capabilityId !== STARTER_HEADING_CAPABILITY_ID &&
       capabilityId !== STARTER_ICON_CAPABILITY_ID &&
@@ -251,6 +267,7 @@ function assertAvailableNodeIds(
   const generatedIds = [
     input.idPrefix,
     ...(capabilityId === STARTER_DIALOG_CAPABILITY_ID ||
+    capabilityId === STARTER_POPOVER_CAPABILITY_ID ||
     capabilityId === STARTER_BOX_CAPABILITY_ID ||
     capabilityId === STARTER_STACK_CAPABILITY_ID
       ? [`${input.idPrefix}.content`]
@@ -259,6 +276,9 @@ function assertAvailableNodeIds(
       ? [`${input.idPrefix}.first`, `${input.idPrefix}.second`]
       : []),
     ...(capabilityId === STARTER_TABS_CAPABILITY_ID
+      ? [`${input.idPrefix}.first`, `${input.idPrefix}.second`]
+      : []),
+    ...(capabilityId === STARTER_ACCORDION_CAPABILITY_ID
       ? [`${input.idPrefix}.first`, `${input.idPrefix}.second`]
       : []),
   ];
@@ -432,6 +452,68 @@ export function createStarterNodeTemplate(
                 ...starterButtonComponentRegistration.manifest.authoring.defaultProps,
                 label: "Continue",
               },
+            },
+          ],
+        },
+      };
+      break;
+    case STARTER_POPOVER_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_POPOVER_CAPABILITY_ID,
+        props: starterPopoverComponentRegistration.manifest.authoring.defaultProps,
+        slots: {
+          content: [
+            {
+              id: `${captured.idPrefix}.content`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Popover content" },
+            },
+          ],
+        },
+      };
+      break;
+    case STARTER_TOOLTIP_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_TOOLTIP_CAPABILITY_ID,
+        props: starterTooltipComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_MENU_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_MENU_CAPABILITY_ID,
+        props: {
+          ...starterMenuComponentRegistration.manifest.authoring.defaultProps,
+          items: starterMenuComponentRegistration.manifest.authoring.defaultProps.items.map(
+            (item) => ({ ...item }),
+          ),
+        },
+      };
+      break;
+    case STARTER_ACCORDION_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_ACCORDION_CAPABILITY_ID,
+        props: {
+          ...starterAccordionComponentRegistration.manifest.authoring.defaultProps,
+          items: starterAccordionComponentRegistration.manifest.authoring.defaultProps.items.map(
+            (item) => ({ ...item }),
+          ),
+          defaultValue: [],
+        },
+        slots: {
+          panels: [
+            {
+              id: `${captured.idPrefix}.first`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Overview panel" },
+            },
+            {
+              id: `${captured.idPrefix}.second`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Details panel" },
             },
           ],
         },

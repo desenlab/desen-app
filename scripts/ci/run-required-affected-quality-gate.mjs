@@ -365,7 +365,10 @@ function selectedRegions(selection, nodeById) {
   if (selection.affectedProofUnitIds.includes("m10a-t04")) {
     conditionalPrefixIds.push("design-system-release-public-package-contract");
   }
-  if (selection.affectedProofUnitIds.includes("m10a-t07")) {
+  if (
+    selection.affectedProofUnitIds.includes("m10a-t07") ||
+    selection.affectedProofUnitIds.includes("m10a-t08")
+  ) {
     conditionalPrefixIds.push("starter-catalog-web-public-package-contract");
   }
   const expectedPrefixIds = [...PREFIX_IDS, ...conditionalPrefixIds];
@@ -411,7 +414,7 @@ function selectedRegions(selection, nodeById) {
               ? "design-system-authoring-public-package-contract"
               : proofId === "m10a-t04"
                 ? "design-system-release-public-package-contract"
-                : proofId === "m10a-t07"
+                : proofId === "m10a-t07" || proofId === "m10a-t08"
                   ? "starter-catalog-web-public-package-contract"
                   : "package-tests";
     if (
@@ -444,7 +447,7 @@ function selectedRegions(selection, nodeById) {
   const dependencyBoundary = suffix[0];
   const boundaryFixtures = suffix[1];
   if (
-    exhaustiveRootIds.length !== 117 ||
+    exhaustiveRootIds.length !== 118 ||
     dependencyBoundary.dependencies.length !== exhaustiveRootIds.length ||
     dependencyBoundary.dependencies.some(
       (dependency, index) => dependency !== exhaustiveRootIds[index],

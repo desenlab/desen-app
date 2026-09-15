@@ -205,5 +205,6 @@ design-system release identity and an exact-digest store port. This does not est
 starter library, normal App integration, durable production storage, Runtime activation, market
 demand, or production readiness. T05's hosted closure covers only its private Catalog and isolated
 browser harness. T06's form-control closure is likewise limited to its private Catalog and isolated
-proof; M10A-T07 is `DONE` with exact-head hosted and fresh-`main` evidence. G10A must pass before M11-T01 or M11-T08, and
+proof; M10A-T07 is `DONE` with exact-head hosted and fresh-`main` evidence. M10A-T08 is in progress
+with local evidence complete; its hosted closure is still required. G10A must pass before M11-T01 or M11-T08, and
 SC-02 authorizes no external publication or deployment.

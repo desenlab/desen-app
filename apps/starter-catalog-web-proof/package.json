@@ -15,16 +15,22 @@
     "build:m10a-t07": "pnpm run prepare:m10a-t07-package && pnpm run build:m10a-t07:authoring && pnpm run build:m10a-t07:host",
     "build:m10a-t07:authoring": "vite build --config t07-vite.config.ts --mode t07-proof-authoring",
     "build:m10a-t07:host": "vite build --config t07-vite.config.ts --mode t07-proof-host",
+    "build:m10a-t08": "pnpm run prepare:m10a-t08-package && pnpm run build:m10a-t08:authoring && pnpm run build:m10a-t08:host",
+    "build:m10a-t08:authoring": "vite build --config t08-vite.config.ts --mode t08-proof-authoring",
+    "build:m10a-t08:host": "vite build --config t08-vite.config.ts --mode t08-proof-host",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:e2e": "pnpm run typecheck && pnpm run build && pnpm run test:e2e:built",
     "test:e2e:built": "playwright test --config playwright.config.ts",
     "prepare:m10a-t06-package": "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",
     "prepare:m10a-t07-package": "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",
+    "prepare:m10a-t08-package": "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",
     "test:m10a-t06": "pnpm run typecheck && pnpm run build:m10a-t06 && pnpm run test:m10a-t06:built",
     "test:m10a-t06:built": "playwright test --config t06-playwright.config.ts",
     "test:m10a-t07": "pnpm run typecheck && pnpm run build:m10a-t07 && pnpm run test:m10a-t07:built",
-    "test:m10a-t07:built": "playwright test --config t07-playwright.config.ts"
+    "test:m10a-t07:built": "playwright test --config t07-playwright.config.ts",
+    "test:m10a-t08": "pnpm run typecheck && pnpm run build:m10a-t08 && pnpm run test:m10a-t08:built",
+    "test:m10a-t08:built": "playwright test --config t08-playwright.config.ts"
   },
   "dependencies": {
     "@desen/editor-core": "workspace:*",

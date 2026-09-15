@@ -578,3 +578,115 @@
   cursor: not-allowed;
   opacity: 0.55;
 }
+
+.popoverRoot,
+.tooltipRoot,
+.menuRoot {
+  position: relative;
+  display: inline-flex;
+}
+
+.popoverPositioner,
+.tooltipPositioner,
+.menuPositioner {
+  z-index: 20;
+}
+
+.popover,
+.menu,
+.tooltip {
+  position: relative;
+  border: 1px solid var(--desen-neutral-border, #d4d4d0);
+  border-radius: var(--desen-neutral-radius, 8px);
+  background: var(--desen-neutral-surface, #ffffff);
+  color: var(--desen-neutral-text, #171717);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 12%);
+}
+
+.popover {
+  display: grid;
+  width: min(320px, calc(100vw - 32px));
+  gap: 8px;
+  padding: 16px;
+}
+
+.menu {
+  display: grid;
+  min-width: 180px;
+  gap: 2px;
+  padding: 6px;
+}
+
+.menuItem {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  font: inherit;
+}
+
+.menuItem[data-highlighted] {
+  background: var(--desen-neutral-accent, #e6e6e2);
+}
+
+.menuItem[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.tooltip {
+  max-width: 280px;
+  padding: 8px 10px;
+  font-size: 0.875rem;
+}
+
+.tooltipArrow {
+  fill: var(--desen-neutral-surface, #ffffff);
+}
+
+.accordion {
+  display: grid;
+  width: min(100%, 560px);
+  border: 1px solid var(--desen-neutral-border, #d4d4d0);
+  border-radius: var(--desen-neutral-radius, 8px);
+  overflow: hidden;
+}
+
+.accordionItem + .accordionItem {
+  border-top: 1px solid var(--desen-neutral-border, #d4d4d0);
+}
+
+.accordionHeader {
+  margin: 0;
+}
+
+.accordionTrigger {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border: 0;
+  background: var(--desen-neutral-surface, #ffffff);
+  color: var(--desen-neutral-text, #171717);
+  text-align: start;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+.accordionTrigger[data-panel-open] {
+  background: var(--desen-neutral-accent, #f2f2ef);
+}
+
+.accordionTrigger[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.accordionPanel {
+  padding: 12px 14px 16px;
+}

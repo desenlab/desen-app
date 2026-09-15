@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 const packageRoot = await import("../dist/index.js");
 
 assert.deepEqual(Object.keys(packageRoot).sort(), [
+  "STARTER_ACCORDION_CAPABILITY_ID",
   "STARTER_BOX_CAPABILITY_ID",
   "STARTER_BUTTON_CAPABILITY_ID",
   "STARTER_CATALOG_ID",
@@ -16,15 +17,19 @@ assert.deepEqual(Object.keys(packageRoot).sort(), [
   "STARTER_COMPONENT_REGISTRATIONS",
   "STARTER_DIALOG_CAPABILITY_ID",
   "STARTER_DIALOG_CONTENT_MAX_ITEMS",
+  "STARTER_DISCLOSURE_MAX_ITEMS",
   "STARTER_GRID_CAPABILITY_ID",
   "STARTER_HEADING_CAPABILITY_ID",
   "STARTER_ICON_CAPABILITY_ID",
   "STARTER_IMAGE_CAPABILITY_ID",
   "STARTER_LAYOUT_CONTENT_MAX_ITEMS",
+  "STARTER_MENU_CAPABILITY_ID",
   "STARTER_NUMBER_FIELD_CAPABILITY_ID",
   "STARTER_NUMERIC_MAXIMUM",
   "STARTER_NUMERIC_MAX_STEP",
   "STARTER_NUMERIC_MINIMUM",
+  "STARTER_OVERLAY_CONTENT_MAX_ITEMS",
+  "STARTER_POPOVER_CAPABILITY_ID",
   "STARTER_RADIO_GROUP_CAPABILITY_ID",
   "STARTER_RADIO_GROUP_MAX_OPTIONS",
   "STARTER_SELECTION_MAX_OPTIONS",
@@ -41,7 +46,9 @@ assert.deepEqual(Object.keys(packageRoot).sort(), [
   "STARTER_TEXT_AREA_CAPABILITY_ID",
   "STARTER_TEXT_CAPABILITY_ID",
   "STARTER_TEXT_FIELD_CAPABILITY_ID",
+  "STARTER_TOOLTIP_CAPABILITY_ID",
   "createStarterNodeTemplate",
+  "starterAccordionComponentRegistration",
   "starterBoxComponentRegistration",
   "starterButtonComponentRegistration",
   "starterCheckboxComponentRegistration",
@@ -51,7 +58,9 @@ assert.deepEqual(Object.keys(packageRoot).sort(), [
   "starterHeadingComponentRegistration",
   "starterIconComponentRegistration",
   "starterImageComponentRegistration",
+  "starterMenuComponentRegistration",
   "starterNumberFieldComponentRegistration",
+  "starterPopoverComponentRegistration",
   "starterRadioGroupComponentRegistration",
   "starterSelectComponentRegistration",
   "starterSeparatorComponentRegistration",
@@ -62,6 +71,7 @@ assert.deepEqual(Object.keys(packageRoot).sort(), [
   "starterTextAreaComponentRegistration",
   "starterTextComponentRegistration",
   "starterTextFieldComponentRegistration",
+  "starterTooltipComponentRegistration",
 ]);
 
 const template = packageRoot.createStarterNodeTemplate({
@@ -71,4 +81,4 @@ const template = packageRoot.createStarterNodeTemplate({
 assert.equal(template.use, packageRoot.STARTER_GRID_CAPABILITY_ID);
 assert.equal(template.slots.default.length, 2);
 assert.equal(Object.isFrozen(template), true);
-console.log("✔ built starter catalog public package exports 56 reviewed members");
+console.log("✔ built starter catalog public package exports reviewed members");
