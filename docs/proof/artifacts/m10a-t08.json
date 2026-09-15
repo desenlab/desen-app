@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T08",
+  "proofId": "m10a-t08",
+  "profile": "desen.m10a-t08.overlays-disclosures.v1",
+  "result": "PASS",
+  "package": {
+    "name": "@desen/starter-catalog-web",
+    "catalog": {
+      "id": "run.desen.starter.web",
+      "version": "0.5.0",
+      "target": "web-react",
+      "sha256": "d125bc3a7a83c0cedb56c4202585d3110849b71eb33043896d57973e2b08045e",
+      "bytes": 491104
+    },
+    "packageDigest": "sha256:cd301ac17c55761180642647ead2db1075fa304fc88874aa3ca8d577c20a65a0",
+    "digestProfile": "desen.web-react.package-digest",
+    "distFiles": 33,
+    "distBytes": 2643717
+  },
+  "capabilities": {
+    "ids": [
+      "run.desen.starter/Accordion",
+      "run.desen.starter/Box",
+      "run.desen.starter/Button",
+      "run.desen.starter/Checkbox",
+      "run.desen.starter/Combobox",
+      "run.desen.starter/Dialog",
+      "run.desen.starter/Grid",
+      "run.desen.starter/Heading",
+      "run.desen.starter/Icon",
+      "run.desen.starter/Image",
+      "run.desen.starter/Menu",
+      "run.desen.starter/NumberField",
+      "run.desen.starter/Popover",
+      "run.desen.starter/RadioGroup",
+      "run.desen.starter/Select",
+      "run.desen.starter/Separator",
+      "run.desen.starter/Slider",
+      "run.desen.starter/Stack",
+      "run.desen.starter/Switch",
+      "run.desen.starter/Tabs",
+      "run.desen.starter/Text",
+      "run.desen.starter/TextArea",
+      "run.desen.starter/TextField",
+      "run.desen.starter/Tooltip"
+    ],
+    "added": [
+      "run.desen.starter/Accordion",
+      "run.desen.starter/Menu",
+      "run.desen.starter/Popover",
+      "run.desen.starter/Tooltip"
+    ],
+    "dialogExtension": "contained-focus-return-and-nested-portal-boundary",
+    "requiredSlots": [
+      "Dialog.content",
+      "Popover.content",
+      "Accordion.panels"
+    ],
+    "menuIdentity": "stable-id"
+  },
+  "browser": {
+    "profile": "desen.m10a-t08.browser-proof.v1",
+    "result": "PASS",
+    "graphReceipts": [
+      "authoring",
+      "host"
+    ],
+    "tests": [
+      {
+        "title": "projects pointer and keyboard open close parity with focus return through Runtime events",
+        "result": "PASS"
+      },
+      {
+        "title": "publishes the T08 overlay and disclosure inventory through the reviewed starter Catalog",
+        "result": "PASS"
+      },
+      {
+        "title": "renders Dialog, Popover, Tooltip, Menu, and Accordion with contained preview portals",
+        "result": "PASS"
+      },
+      {
+        "title": "retains disabled and ordered slot states while rejecting forged portal and stale inputs",
+        "result": "PASS"
+      }
+    ],
+    "assertions": {
+      "accordionOrderedPanels": true,
+      "allOverlayDisclosureCapabilitiesPublished": true,
+      "authoringGraphPresent": true,
+      "containedPortalRoots": true,
+      "dialogOpenClose": true,
+      "disabledControls": true,
+      "focusReturnAfterClose": true,
+      "forgedPortalAuthorityRejected": true,
+      "independentHostGraph": true,
+      "menuKeyboardSelection": true,
+      "missingRequiredSlotsRejected": true,
+      "pointerKeyboardParity": true,
+      "popoverOpenClose": true,
+      "sameStaticAdapterRegistry": true,
+      "staleInteractionRejected": true,
+      "tooltipHoverAndFocus": true
+    }
+  },
+  "historical": {
+    "m10aT07ArtifactSha256": "1587114174bd30fa91c44bc8e236e5ae57f80c81a0dfe6980a73a2f40c9fced4",
+    "m10aT07CatalogSha256": "d600387a45a351ae30a867e1b907b6d4bea218e08e74261d4a8796f895b5d3dc"
+  },
+  "claims": {
+    "boundedOverlayDisclosureData": true,
+    "containedPortalRoots": true,
+    "keyboardPointerParity": true,
+    "focusReturnAfterClose": true,
+    "malformedDataRejected": true,
+    "sameStaticAdaptersInAuthoringAndHost": true,
+    "historicalArtifactsRewritten": false,
+    "runtimeCoreChanged": false
+  },
+  "tests": {
+    "rootTestNames": [
+      "M10A-T08 builds the exact 0.5.0 overlay and disclosure Catalog deterministically",
+      "M10A-T08 admits bounded overlay props, required slots, and stable item identities",
+      "M10A-T08 authenticates authoring and independent-host browser observations",
+      "M10A-T08 rejects malformed browser observations, artifact drift, and unsafe evidence options",
+      "M10A-T08 preserves the checkpointed T07 historical receipt while the starter Catalog evolves",
+      "M10A-T08 writer is atomic and leaves the current artifact bytes deterministic"
+    ],
+    "packageCommand": "pnpm --filter @desen/starter-catalog-web test",
+    "browserCommand": "pnpm --filter @desen/starter-catalog-web-proof run test:m10a-t08",
+    "browserExecutedByVerifier": true
+  },
+  "nonClaims": [
+    "T08 does not add normal-App persistence, Publisher authority, Runtime activation, or M11 behavior.",
+    "T08 does not admit callbacks, renderers, selectors, external portal roots, executable markup, or remote media URLs.",
+    "Local evidence does not substitute for exact-head hosted Quality gate and fresh-main closure."
+  ]
+}

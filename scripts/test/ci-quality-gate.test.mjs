@@ -458,7 +458,9 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
       taskId === "M10A-T06" ||
       taskId === "M10A-T07"
         ? "DONE"
-        : "NOT_STARTED";
+        : taskId === "M10A-T08"
+          ? "IN_PROGRESS"
+          : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
     assert.equal(
       row.cells[2],
@@ -717,7 +719,7 @@ async function currentInventory() {
   );
   const workspacePackages = [];
   const configurationPattern =
-    /^(?:(?:t0[67]-)?vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
+    /^(?:(?:t0[678]-)?vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
   const testConfigurationFiles = (await readdir(WORKSPACE_ROOT))
     .filter((file) => configurationPattern.test(file))
     .map((file) => file);
@@ -780,18 +782,18 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 117,
-    verifierCount: 117,
-    rootTestCount: 117,
+    proofCount: 118,
+    verifierCount: 118,
+    rootTestCount: 118,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
-    legacyPrerequisiteCount: 780,
-    legacyPrerequisiteSha256: "d759b4aa716f84fe4e1b37d18799f7a7c2d83fd74b1e9c0b906b2dd0d6d4216f",
-    legacyLeafInvocationCount: 4637,
-    legacyLeafInvocationSha256: "3d3604db98aa9edc7e965a49ee5266742dcbeb7aef18fdc73943527198f76173",
-    distinctLeafWorkloadCount: 372,
-    distinctLeafWorkloadSha256: "51f153b14156ce69d51840b1374fd1ec198a18aae6db65e2d09e758bbf407436",
-    testConfigurationFileCount: 5,
+    legacyPrerequisiteCount: 789,
+    legacyPrerequisiteSha256: "91128d6285154edd813c9371bab9a10a6951af996d8c5159f9faca37fd5dfb3f",
+    legacyLeafInvocationCount: 4654,
+    legacyLeafInvocationSha256: "9a7babf1192e65f9de345cee22f65e76717a80d2d6c1b2c47b44fbe718fc8703",
+    distinctLeafWorkloadCount: 375,
+    distinctLeafWorkloadSha256: "65fe0b826ecca643e52115f7e54faf4e4ea00dd888da2f25f1373128dd0b6fd1",
+    testConfigurationFileCount: 6,
     workspaceTestScriptCount: 20,
     workspaceTestScriptSha256: "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
@@ -1056,7 +1058,11 @@ test("task board retains its canonical inventory without narrative appendices", 
   assert.equal(statuses.get("M10A-T06"), "DONE");
   assert.equal(statuses.get("M10A-T07"), "DONE");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
-  assert.ok(normalizedReadme.includes("**Next task:** `M10A-T08` (`NOT_STARTED`; T07 complete)"));
+  assert.ok(
+    normalizedReadme.includes(
+      "**Next task:** `M10A-T08` (`IN_PROGRESS`; local proof complete, hosted closure pending)",
+    ),
+  );
   assert.ok(normalizedProjectStatus.includes("M10A-T01 through M10A-T07 are DONE"));
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
   assert.ok(
@@ -1573,7 +1579,7 @@ test("both inventories require exact browser-proof scripts and reviewed Vite con
   assert.ok(starter);
   assert.ok(workbench);
   for (const validate of [validateProofInventory, validateRepositoryWorkloadInputs]) {
-    assert.equal(validate(baseline).proofCount, 117);
+    assert.equal(validate(baseline).proofCount, 118);
     const missingWorkbenchPackage = clone(baseline);
     missingWorkbenchPackage.workspacePackages = missingWorkbenchPackage.workspacePackages.filter(
       ({ name }) => name !== "@desen/design-system-workbench-proof",
@@ -1850,8 +1856,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 248);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 117);
+  assert.equal(steps.length, 250);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 118);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -2408,8 +2414,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 248,
-    planSha256: "669766e527aa7ff4c82c6f79b672ad8480f3426d66fb857ae3b66a3a09f1dc4a",
+    stepCount: 250,
+    planSha256: "49a997c292d32641c4f3530c19d7863f6ef80d16a337b8e5fa22566b6dfbd7af",
   });
 
   const missingTypecheck = clone(steps);

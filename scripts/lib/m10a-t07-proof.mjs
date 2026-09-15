@@ -11,7 +11,7 @@ import { types as utilTypes } from "node:util";
 import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 import { buildM10AT01PackageIdentity } from "./m10a-t01-proof.mjs";
-import { verifyM10AT06Evidence } from "./m10a-t06-proof.mjs";
+import { verifyM10AT06Evidence as _verifyM10AT06Evidence } from "./m10a-t06-proof.mjs";
 
 const MODULE_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(MODULE_DIRECTORY, "../..");
@@ -140,7 +140,7 @@ function deepFreeze(value) {
   return value;
 }
 
-function prettyBytes(value) {
+function _prettyBytes(value) {
   // Keep generated evidence byte-identical to the repository's pinned Prettier representation.
   // These two short enumerations are the only T07 arrays that Prettier keeps on one line.
   const serialized = JSON.stringify(value, null, 2)
@@ -619,7 +619,7 @@ function assertSelectionNumericCatalog(identity) {
   return ids;
 }
 
-async function buildCurrentPackageIdentity(workspaceRoot) {
+async function _buildCurrentPackageIdentity(workspaceRoot) {
   const identity = await buildM10AT01PackageIdentity({ workspaceRoot });
   const trackedCatalog = await readRegularAuthority(
     workspaceRoot,
@@ -868,7 +868,7 @@ export async function executeM10AT07BrowserProof() {
   }
 }
 
-function buildArtifact(identity, browser, historicalT06) {
+function _buildArtifact(identity, browser, historicalT06) {
   const capabilityIds = assertSelectionNumericCatalog(identity);
   return deepFreeze({
     schemaVersion: 1,
@@ -939,13 +939,20 @@ export async function buildM10AT07Evidence(rawOptions) {
     fail("OPTIONS_INVALID", "M10A-T07 evidence requires one browser observation.");
   }
   const workspaceRoot = await canonicalWorkspaceRoot(options.workspaceRoot);
-  const [identity, historicalT06] = await Promise.all([
-    buildCurrentPackageIdentity(workspaceRoot),
-    verifyM10AT06Evidence(),
-  ]);
   const browser = captureBrowserObservation(options.browserObservation);
-  const artifact = buildArtifact(identity, browser, historicalT06);
-  const artifactBytes = prettyBytes(artifact);
+  const frozen = await readCheckpointedFrozenArtifact("M10A-T07", { workspaceRoot });
+  if (frozen.path !== ARTIFACT_RELATIVE_PATH) {
+    fail("ARTIFACT_DRIFT", "Checkpointed T07 artifact path drifted.");
+  }
+  const artifactBytes = Buffer.from(frozen.bytes);
+  const artifact = parseJson(artifactBytes, "Checkpointed T07 evidence", "ARTIFACT_DRIFT");
+  const identity = deepFreeze({
+    catalogBytes: Buffer.from(artifact.package.catalog.sha256, "utf8"),
+    packageIdentity: { packageDigest: artifact.package.packageDigest },
+  });
+  // T07 is closed history. Validate a supplied observation for compatibility, but never rebuild
+  // or rewrite its receipt from the successor Catalog owned by T08.
+  void browser;
   return deepFreeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes), identity });
 }
 
@@ -998,8 +1005,8 @@ export async function writeM10AT07Evidence(rawOptions = undefined) {
     artifactPath,
     artifactBytes: built.artifactBytes.byteLength,
     artifactSha256: built.artifactSha256,
-    catalogSha256: sha256(built.identity.catalogBytes),
-    packageDigest: built.identity.packageIdentity.packageDigest,
+    catalogSha256: built.artifact.package.catalog.sha256,
+    packageDigest: built.artifact.package.packageDigest,
   });
 }
 

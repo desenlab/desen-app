@@ -136,12 +136,17 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "9f570e4d4f1e1a1342c61a2b7dbdd1b8680c0a701e5d2fd5b775822ca4247554",
   "17dd463c0d9a192a4698bc93c4d8dab6a2645b31b4a6f192c6fc8631a141a8a7",
   "62aa992cfeff45f8f84b1ecdba21ecb2805893ac7ff3b70549b616d331d86b72",
+  "331e62ae6cb70e6c614ce49dfae942f2c3513bfcf9b2707de22f0efbc8acbfc4",
+  "bcf9624e67233a1e25f4e51af3491b236dec367a286abd1575d8181954e4c13c",
+  "c618802ec08dc7518dbbbfcfaba61279aebf545f7ab0c1aa8255e432028384c2",
+  "99ae1de66ca5bf736551f543d31e19a293e997f8c9834782dfabbf8261d50a4c",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
   25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
   46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57, 58, 59, 59,
-  59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70, 71, 71,
+  59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70, 71, 71, 72, 72,
+  72, 72,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_COUNT = 1_024;
@@ -892,6 +897,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     "scripts/lib/m10a-t07-proof.mjs",
     "tests/m10a-t07.test.mjs",
   ),
+  freezeTaskAuthority(
+    "M10A-T08",
+    {
+      path: "docs/proof/artifacts/m10a-t08.json",
+      bytes: 4_979,
+      sha256: "37bfd7458fac6001b396632dc167a155aca56c3d5a62b93c1df144284428a729",
+    },
+    "scripts/lib/m10a-t08-proof.mjs",
+    "tests/m10a-t08.test.mjs",
+  ),
 ]);
 
 // Frozen artifacts normally retain one task-owned receipt. This narrow reviewed transition keeps
@@ -900,6 +915,15 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
 const PROOF_READER_CHECKPOINT_ARTIFACT_RECEIPT_TRANSITIONS = SAFE_OBJECT_FREEZE([
   SAFE_OBJECT_FREEZE({
     firstSequence: 95,
+    task: "M10A-T07",
+    artifact: SAFE_OBJECT_FREEZE({
+      path: "docs/proof/artifacts/m10a-t07.json",
+      bytes: 5_107,
+      sha256: "1587114174bd30fa91c44bc8e236e5ae57f80c81a0dfe6980a73a2f40c9fced4",
+    }),
+  }),
+  SAFE_OBJECT_FREEZE({
+    firstSequence: 96,
     task: "M10A-T07",
     artifact: SAFE_OBJECT_FREEZE({
       path: "docs/proof/artifacts/m10a-t07.json",

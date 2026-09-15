@@ -41,7 +41,7 @@ async function currentRepositoryInputs() {
     "utf8",
   );
   const configurationPattern =
-    /^(?:(?:t0[67]-)?vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
+    /^(?:(?:t0[678]-)?vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
   const testConfigurationFiles = (await readdir(WORKSPACE_ROOT))
     .filter((file) => configurationPattern.test(file))
     .map((file) => file);
@@ -85,23 +85,23 @@ async function currentRepositoryInputs() {
   };
 }
 
-test("the neutral inventory preserves the exact 248-workload T07 successor projection", () => {
+test("the neutral inventory preserves the exact 250-workload T08 successor projection", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const projection = inventory.nodes.map(({ id, command, args }) => ({ id, command, args }));
   const projectionSha256 = createHash("sha256").update(JSON.stringify(projection)).digest("hex");
 
   assert.equal(inventory.schemaVersion, 1);
   assert.equal(inventory.profile, "desen.ci.exhaustive-workload-inventory.v1");
-  assert.equal(inventory.workloadCount, 248);
-  assert.equal(inventory.proofUnitCount, 117);
+  assert.equal(inventory.workloadCount, 250);
+  assert.equal(inventory.proofUnitCount, 118);
   assert.equal(inventory.inventorySha256, EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256);
   assert.equal(
     EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    "88468c6b0ea29fcc19cc88963575db6850692c57ab5f31f4a2955664d1e99d44",
+    "181b1e34aebc7fc7013716ac008d0f455b1e9fbe4ba77460ce9cba8c58c570a5",
   );
   assert.equal(
     projectionSha256,
-    "669766e527aa7ff4c82c6f79b672ad8480f3426d66fb857ae3b66a3a09f1dc4a",
+    "49a997c292d32641c4f3530c19d7863f6ef80d16a337b8e5fa22566b6dfbd7af",
   );
   assert.deepEqual(
     inventory.nodes.slice(0, 12).map(({ id }) => id),
@@ -121,11 +121,11 @@ test("the neutral inventory preserves the exact 248-workload T07 successor proje
     ],
   );
   assert.equal(
-    inventory.nodes.slice(12, 129).every(({ id }) => id.startsWith("verify-")),
+    inventory.nodes.slice(12, 130).every(({ id }) => id.startsWith("verify-")),
     true,
   );
   assert.equal(
-    inventory.nodes.slice(129, 246).every(({ id }) => id.startsWith("test-")),
+    inventory.nodes.slice(130, 248).every(({ id }) => id.startsWith("test-")),
     true,
   );
   assert.deepEqual(
@@ -149,6 +149,7 @@ test("the neutral inventory preserves the exact 248-workload T07 successor proje
     "m10a-t05",
     "m10a-t06",
     "m10a-t07",
+    "m10a-t08",
   ];
   assert.deepEqual(
     inventory.proofUnits.slice(-exactTailProofIds.length).map(({ id }) => id),
@@ -160,7 +161,15 @@ test("the neutral inventory preserves the exact 248-workload T07 successor proje
       { id, verifierNodeId: `verify-${id}`, rootTestNodeId: `test-${id}` },
     );
   }
-  const t07SuccessorPredecessor = projection.filter(({ id }) => !id.endsWith("m10a-t07"));
+  const t08SuccessorPredecessor = projection.filter(({ id }) => !id.endsWith("m10a-t08"));
+  assert.equal(t08SuccessorPredecessor.length, 248);
+  assert.equal(
+    createHash("sha256").update(JSON.stringify(t08SuccessorPredecessor)).digest("hex"),
+    "669766e527aa7ff4c82c6f79b672ad8480f3426d66fb857ae3b66a3a09f1dc4a",
+  );
+  const t07SuccessorPredecessor = t08SuccessorPredecessor.filter(
+    ({ id }) => !id.endsWith("m10a-t07"),
+  );
   assert.equal(t07SuccessorPredecessor.length, 246);
   assert.equal(
     createHash("sha256").update(JSON.stringify(t07SuccessorPredecessor)).digest("hex"),
@@ -257,18 +266,18 @@ test("repository manifests and discovered proof files retain the reviewed parity
   const receipt = validateRepositoryWorkloadInputs(inputs);
 
   assert.deepEqual(receipt, {
-    proofCount: 117,
-    verifierCount: 117,
-    rootTestCount: 117,
+    proofCount: 118,
+    verifierCount: 118,
+    rootTestCount: 118,
     ciContractScriptCount: 5,
     ciContractScriptSha256: EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
-    legacyPrerequisiteCount: 780,
-    legacyPrerequisiteSha256: "d759b4aa716f84fe4e1b37d18799f7a7c2d83fd74b1e9c0b906b2dd0d6d4216f",
-    legacyLeafInvocationCount: 4637,
-    legacyLeafInvocationSha256: "3d3604db98aa9edc7e965a49ee5266742dcbeb7aef18fdc73943527198f76173",
-    distinctLeafWorkloadCount: 372,
-    distinctLeafWorkloadSha256: "51f153b14156ce69d51840b1374fd1ec198a18aae6db65e2d09e758bbf407436",
-    testConfigurationFileCount: 5,
+    legacyPrerequisiteCount: 789,
+    legacyPrerequisiteSha256: "91128d6285154edd813c9371bab9a10a6951af996d8c5159f9faca37fd5dfb3f",
+    legacyLeafInvocationCount: 4654,
+    legacyLeafInvocationSha256: "9a7babf1192e65f9de345cee22f65e76717a80d2d6c1b2c47b44fbe718fc8703",
+    distinctLeafWorkloadCount: 375,
+    distinctLeafWorkloadSha256: "65fe0b826ecca643e52115f7e54faf4e4ea00dd888da2f25f1373128dd0b6fd1",
+    testConfigurationFileCount: 6,
     workspaceTestScriptCount: 20,
     workspaceTestScriptSha256: "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
@@ -583,7 +592,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
       ports: "NONE",
     },
   });
-  assert.equal(boundaries.dependencies.length, 117);
+  assert.equal(boundaries.dependencies.length, 118);
 
   for (const unit of inventory.proofUnits) {
     const verifier = nodeById.get(unit.verifierNodeId);
@@ -591,7 +600,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
     assert.equal(verifier.executionClass, "CONCURRENT_PROOF");
     assert.equal(rootTest.executionClass, "CONCURRENT_PROOF");
     assert.deepEqual(verifier.dependencies, [
-      unit.id === "m10a-t07"
+      unit.id === "m10a-t07" || unit.id === "m10a-t08"
         ? "starter-catalog-web-public-package-contract"
         : unit.id === "m10a-t04"
           ? "design-system-release-public-package-contract"
@@ -625,6 +634,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
         "m10a-t05",
         "m10a-t06",
         "m10a-t07",
+        "m10a-t08",
       ].includes(unit.id)
         ? "NONE"
         : "SHARED_READ_AFTER_PREFIX",

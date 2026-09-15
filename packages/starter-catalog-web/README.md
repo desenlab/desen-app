@@ -8,7 +8,9 @@ Source-node templates, and one explicit React-adapter subpath. Base UI remains a
 implementation detail of the interactive adapters; layout and semantic content use ordinary Web
 semantics where a Base UI primitive is unnecessary.
 
-**M10A-T07 is `DONE`.** Its [task-owned proof](../../docs/proof/M10A-T07.md) records the
+**M10A-T08 is `IN_PROGRESS`; T07 is `DONE`.** T08 adds bounded Popover, Tooltip, Menu, and
+Accordion adapters on the same contained portal boundary; its [task-owned proof](../../docs/proof/M10A-T08.md)
+will record browser and contract evidence before closure. T07's [task-owned proof](../../docs/proof/M10A-T07.md) records the
 selection/numeric-control evidence and exact-head hosted/fresh-`main` closure. T06 is `DONE`; its [task-owned proof](../../docs/proof/M10A-T06.md) records the completed
 local and hosted form-control closure. This package is not a normal Desen App integration, a complete
 component library, a design-system explorer, a persisted project, or a publish/activation path.
@@ -78,6 +80,13 @@ Select accepts its retained legacy `value` spelling or `id`, then normalizes to 
 identity. Combobox admits no custom filter or renderer; duplicate IDs, function values, and malformed
 selection/numeric data reject before rendering or dispatch. Tabs preserves public ordered panel
 content rather than accepting an adapter-private tree.
+
+The active T08 slice extends Dialog's contained overlay boundary with Popover, Tooltip, Menu, and
+Accordion. Overlay portals are owned by `StarterSurfaceBoundary`; no Source prop can provide a
+selector, DOM node, callback, renderer, or external portal authority. Dialog and Popover require a
+bounded content slot, Accordion requires ordered panel slots, and Menu/Accordion identities are
+validated before Base UI receives them. Escape, pointer/keyboard parity, focus return, and
+unmount-safe interactions are covered by the task proof.
 
 Each registration has a closed root style-part schema. Layout/style inputs permit only bounded,
 typed values such as six/eight-digit hex colors, finite spacing and box dimensions, finite

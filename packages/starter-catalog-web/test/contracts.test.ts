@@ -13,6 +13,10 @@ import {
   STARTER_COMPONENT_REGISTRATIONS,
   STARTER_DIALOG_CAPABILITY_ID,
   STARTER_DIALOG_CONTENT_MAX_ITEMS,
+  STARTER_POPOVER_CAPABILITY_ID,
+  STARTER_TOOLTIP_CAPABILITY_ID,
+  STARTER_MENU_CAPABILITY_ID,
+  STARTER_ACCORDION_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
   STARTER_HEADING_CAPABILITY_ID,
   STARTER_ICON_CAPABILITY_ID,
@@ -41,6 +45,10 @@ import {
   starterCheckboxComponentRegistration,
   starterComboboxComponentRegistration,
   starterDialogComponentRegistration,
+  starterPopoverComponentRegistration,
+  starterTooltipComponentRegistration,
+  starterMenuComponentRegistration,
+  starterAccordionComponentRegistration,
   starterGridComponentRegistration,
   starterHeadingComponentRegistration,
   starterIconComponentRegistration,
@@ -75,6 +83,10 @@ describe("starter component contracts", () => {
       STARTER_BUTTON_CAPABILITY_ID,
       STARTER_SELECT_CAPABILITY_ID,
       STARTER_DIALOG_CAPABILITY_ID,
+      STARTER_POPOVER_CAPABILITY_ID,
+      STARTER_TOOLTIP_CAPABILITY_ID,
+      STARTER_MENU_CAPABILITY_ID,
+      STARTER_ACCORDION_CAPABILITY_ID,
       STARTER_BOX_CAPABILITY_ID,
       STARTER_STACK_CAPABILITY_ID,
       STARTER_GRID_CAPABILITY_ID,
@@ -102,6 +114,15 @@ describe("starter component contracts", () => {
     expect(Object.hasOwn(STARTER_CATALOG_TEMPLATE, "packageDigest")).toBe(false);
     expect(Object.hasOwn(STARTER_CATALOG_TEMPLATE, "kind")).toBe(false);
     expectDeeplyFrozen(STARTER_CATALOG_TEMPLATE);
+    for (const registration of [
+      starterPopoverComponentRegistration,
+      starterTooltipComponentRegistration,
+      starterMenuComponentRegistration,
+      starterAccordionComponentRegistration,
+    ]) {
+      expect(STARTER_COMPONENT_REGISTRATIONS).toContain(registration);
+      expectDeeplyFrozen(registration);
+    }
   });
 
   it("keeps Button props and press payload closed and inert", () => {

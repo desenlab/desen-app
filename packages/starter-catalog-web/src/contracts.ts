@@ -24,14 +24,20 @@ import {
   starterSliderComponentRegistration,
   starterTabsComponentRegistration,
 } from "./selection-numeric-contracts.js";
+import {
+  starterAccordionComponentRegistration,
+  starterMenuComponentRegistration,
+  starterPopoverComponentRegistration,
+  starterTooltipComponentRegistration,
+} from "./overlay-disclosure-contracts.js";
 
 import type { ComponentPropsOf } from "@desen/catalog-sdk";
 
 /** Exact Catalog identity reserved for the DESEN Neutral Web starter package. */
 export const STARTER_CATALOG_ID = "run.desen.starter.web";
 
-/** Current additive Catalog contract version for the bounded M10A-T07 starter slice. */
-export const STARTER_CATALOG_VERSION = "0.4.0";
+/** Current additive Catalog contract version for the bounded M10A-T08 starter slice. */
+export const STARTER_CATALOG_VERSION = "0.5.0";
 
 /** Target implemented by the current DESEN Neutral starter package. */
 export const STARTER_CATALOG_TARGET = "web-react";
@@ -356,6 +362,10 @@ export const STARTER_COMPONENT_REGISTRATIONS = Object.freeze([
   starterButtonComponentRegistration,
   starterSelectComponentRegistration,
   starterDialogComponentRegistration,
+  starterPopoverComponentRegistration,
+  starterTooltipComponentRegistration,
+  starterMenuComponentRegistration,
+  starterAccordionComponentRegistration,
   starterBoxComponentRegistration,
   starterStackComponentRegistration,
   starterGridComponentRegistration,
@@ -432,6 +442,25 @@ export {
   starterTextAreaComponentRegistration,
   starterTextFieldComponentRegistration,
 } from "./form-control-contracts.js";
+export {
+  STARTER_ACCORDION_CAPABILITY_ID,
+  STARTER_DISCLOSURE_MAX_ITEMS,
+  STARTER_MENU_CAPABILITY_ID,
+  STARTER_OVERLAY_CONTENT_MAX_ITEMS,
+  STARTER_POPOVER_CAPABILITY_ID,
+  STARTER_TOOLTIP_CAPABILITY_ID,
+  starterAccordionComponentRegistration,
+  starterMenuComponentRegistration,
+  starterPopoverComponentRegistration,
+  starterTooltipComponentRegistration,
+} from "./overlay-disclosure-contracts.js";
+export type {
+  StarterAccordionProps,
+  StarterDisclosureItem,
+  StarterMenuProps,
+  StarterPopoverProps,
+  StarterTooltipProps,
+} from "./overlay-disclosure-contracts.js";
 export {
   STARTER_COMBOBOX_CAPABILITY_ID,
   STARTER_NUMBER_FIELD_CAPABILITY_ID,

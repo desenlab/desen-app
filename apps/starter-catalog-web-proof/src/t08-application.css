@@ -1,0 +1,57 @@
+:root {
+  color: #171717;
+  background: #f5f5f2;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+.t08-proof-shell {
+  display: grid;
+  max-width: 1080px;
+  margin: 0 auto;
+  gap: 24px;
+  padding: 48px 24px;
+}
+
+.t08-proof-header {
+  display: grid;
+  gap: 8px;
+}
+
+.t08-proof-header h1,
+.t08-proof-header p {
+  margin: 0;
+}
+
+.t08-proof-eyebrow,
+.t08-proof-label {
+  color: #5f5f5a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.t08-proof-surface {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid #d4d4d0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.t08-proof-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 12px;
+}
+
+[data-proof-events="t08"] {
+  color: #5f5f5a;
+  font-size: 0.875rem;
+}
