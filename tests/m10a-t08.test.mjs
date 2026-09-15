@@ -106,10 +106,13 @@ test("M10A-T08 writer is atomic and leaves current artifact bytes deterministic"
     assert.equal(first.artifactPath, path.resolve(artifactPath));
     assert.equal((await readFile(artifactPath)).length, first.artifactBytes);
     const built = await buildM10AT08Evidence({ browserObservation: browserObservation() });
-    const result = await writeM10AT08Evidence({ browserObservation: browserObservation() });
+    const result = await writeM10AT08Evidence({
+      artifactPath: path.resolve(artifactPath),
+      browserObservation: browserObservation(),
+    });
     assert.equal(result.artifactSha256, built.artifactSha256);
     assert.equal(
-      (await readFile(path.join(process.cwd(), "docs/proof/artifacts/m10a-t08.json"))).length,
+      (await readFile(artifactPath)).length,
       result.artifactBytes,
     );
   } finally {
