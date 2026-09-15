@@ -558,6 +558,7 @@ const PROOF_ENTRIES = Object.freeze(
     ["m10a-t06", "scripts/verify-m10a-t06.mjs", "tests/m10a-t06.test.mjs"],
     ["m10a-t07", "scripts/verify-m10a-t07.mjs", "tests/m10a-t07.test.mjs"],
     ["m10a-t08", "scripts/verify-m10a-t08.mjs", "tests/m10a-t08.test.mjs"],
+    ["m10a-t09", "scripts/verify-m10a-t09.mjs", "tests/m10a-t09.test.mjs"],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -648,14 +649,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "91128d6285154edd813c9371bab9a10a6951af996d8c5159f9faca37fd5dfb3f";
+  "bf6d11e6ffd01427d7ecd58432a62a02e23d840a6c9a2a8c8f313418dca6288e";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "9a7babf1192e65f9de345cee22f65e76717a80d2d6c1b2c47b44fbe718fc8703";
+  "8651b8f7520a4f0ff90b62ce33d676e8481e8b1304dc1f944e7af361efa37f7a";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "65fe0b826ecca643e52115f7e54faf4e4ea00dd888da2f25f1373128dd0b6fd1";
+  "c7a2eff3253fcea24bbfebf5522e7cb1d5c7f7993f976d0d0cd6570ad60c4527";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "49a997c292d32641c4f3530c19d7863f6ef80d16a337b8e5fa22566b6dfbd7af";
+const QUALITY_GATE_PLAN_SHA256 = "ce98905d47e8a0bc8c8bfcc3a36bb6f218922082cd05412f9b1c89c9d3eb56c3";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -717,6 +718,15 @@ const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = Object.freeze(
       "vite build --config t08-vite.config.ts --mode t08-proof-authoring",
     ],
     ["build:m10a-t08:host", "vite build --config t08-vite.config.ts --mode t08-proof-host"],
+    [
+      "build:m10a-t09",
+      "pnpm run prepare:m10a-t09-package && pnpm run build:m10a-t09:authoring && pnpm run build:m10a-t09:host",
+    ],
+    [
+      "build:m10a-t09:authoring",
+      "vite build --config t09-vite.config.ts --mode t09-proof-authoring",
+    ],
+    ["build:m10a-t09:host", "vite build --config t09-vite.config.ts --mode t09-proof-host"],
     ["lint", "eslint . --max-warnings=0"],
     [
       "prepare:m10a-t06-package",
@@ -728,6 +738,10 @@ const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = Object.freeze(
     ],
     [
       "prepare:m10a-t08-package",
+      "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",
+    ],
+    [
+      "prepare:m10a-t09-package",
       "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",
     ],
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
@@ -748,6 +762,11 @@ const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = Object.freeze(
       "pnpm run typecheck && pnpm run build:m10a-t08 && pnpm run test:m10a-t08:built",
     ],
     ["test:m10a-t08:built", "playwright test --config t08-playwright.config.ts"],
+    [
+      "test:m10a-t09",
+      "pnpm run typecheck && pnpm run build:m10a-t09 && pnpm run test:m10a-t09:built",
+    ],
+    ["test:m10a-t09:built", "playwright test --config t09-playwright.config.ts"],
   ].map(([name, command]) => Object.freeze({ name, command })),
 );
 const EXPECTED_DESIGN_SYSTEM_WORKBENCH_PROOF_PACKAGE_SCRIPTS = Object.freeze(
@@ -764,7 +783,7 @@ const FORBIDDEN_COMMAND_PATTERN =
   /generate|writ(?:e|er)|--affected\b|--since\b|changed-files?|git-diff/i;
 const SHELL_METACHARACTER_PATTERN = /[\n\r;&|><`$()*?{}!]|\[|\]/;
 const TEST_CONFIGURATION_FILE_PATTERN =
-  /^(?:(?:t0[678]-)?vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
+  /^(?:(?:t0[6789]-)?vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
 
 class QualityGateError extends Error {
   constructor(message, details = {}) {
@@ -1075,6 +1094,7 @@ function classifyLegacyPrerequisite({
       "m10a-t04",
       "m10a-t07",
       "m10a-t08",
+      "m10a-t09",
     ].includes(currentProofId);
     const reviewedPackage =
       (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
@@ -1084,7 +1104,9 @@ function classifyLegacyPrerequisite({
       (currentProofId === "m10a-t02" && packageName === "@desen/design-system-core") ||
       (currentProofId === "m10a-t03" && packageName === "@desen/design-system-authoring") ||
       (currentProofId === "m10a-t04" && packageName === "@desen/design-system-release") ||
-      ((currentProofId === "m10a-t07" || currentProofId === "m10a-t08") &&
+      ((currentProofId === "m10a-t07" ||
+        currentProofId === "m10a-t08" ||
+        currentProofId === "m10a-t09") &&
         packageName === "@desen/starter-catalog-web");
     if (!reviewedProof || !reviewedPackage || packageManifest.scripts?.[task] !== expectedScript) {
       throw new QualityGateError(
@@ -1095,16 +1117,24 @@ function classifyLegacyPrerequisite({
     return "public-package-contract-test";
   }
 
-  if (task === "test:e2e" || task === "test:m10a-t07" || task === "test:m10a-t08") {
+  if (
+    task === "test:e2e" ||
+    task === "test:m10a-t07" ||
+    task === "test:m10a-t08" ||
+    task === "test:m10a-t09"
+  ) {
     const reviewedWorkbenchProof =
       currentProofId === "m10a-t03" && packageName === "@desen/design-system-workbench-proof";
     const reviewedStarterProof =
-      (currentProofId === "m10a-t07" || currentProofId === "m10a-t08") &&
+      (currentProofId === "m10a-t07" ||
+        currentProofId === "m10a-t08" ||
+        currentProofId === "m10a-t09") &&
       packageName === "@desen/starter-catalog-web-proof" &&
-      (task === "test:m10a-t07" || task === "test:m10a-t08");
+      (task === "test:m10a-t07" || task === "test:m10a-t08" || task === "test:m10a-t09");
     if (
       (task === "test:e2e" && !reviewedWorkbenchProof) ||
-      ((task === "test:m10a-t07" || task === "test:m10a-t08") && !reviewedStarterProof)
+      ((task === "test:m10a-t07" || task === "test:m10a-t08" || task === "test:m10a-t09") &&
+        !reviewedStarterProof)
     ) {
       throw new QualityGateError(
         `${currentProofId} uses an unreviewed browser-proof package test.`,
@@ -1179,6 +1209,7 @@ export function validateProofInventory({
       "apps/starter-catalog-web-proof/t06-vite.config.ts",
       "apps/starter-catalog-web-proof/t07-vite.config.ts",
       "apps/starter-catalog-web-proof/t08-vite.config.ts",
+      "apps/starter-catalog-web-proof/t09-vite.config.ts",
       "apps/starter-catalog-web-proof/vite.config.ts",
     ],
     "The root and workspace test-configuration file set",

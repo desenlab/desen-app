@@ -37,7 +37,7 @@ bounded, reproducible claims about both.
 **M10A:** **8 / 28 tasks complete (29%)** · 28 newly planned product tasks; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Next task:** `M10A-T09` (`NOT_STARTED`; T08 complete) ·
+**Current task:** `M10A-T09` (`IN_PROGRESS`; local evidence captured, hosted closure pending) ·
 **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)

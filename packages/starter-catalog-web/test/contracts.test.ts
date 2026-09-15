@@ -3,6 +3,16 @@ import { describe, expect, it } from "vitest";
 
 import {
   STARTER_BUTTON_CAPABILITY_ID,
+  STARTER_CARD_CAPABILITY_ID,
+  STARTER_BADGE_CAPABILITY_ID,
+  STARTER_AVATAR_CAPABILITY_ID,
+  STARTER_ALERT_CAPABILITY_ID,
+  STARTER_LIST_CAPABILITY_ID,
+  STARTER_TABLE_CAPABILITY_ID,
+  STARTER_SKELETON_CAPABILITY_ID,
+  STARTER_PROGRESS_CAPABILITY_ID,
+  STARTER_DATA_DISPLAY_MAX_ITEMS,
+  STARTER_TABLE_MAX_COLUMNS,
   STARTER_BOX_CAPABILITY_ID,
   STARTER_CHECKBOX_CAPABILITY_ID,
   STARTER_COMBOBOX_CAPABILITY_ID,
@@ -41,6 +51,14 @@ import {
   STARTER_TEXT_FIELD_CAPABILITY_ID,
   STARTER_SELECT_MAX_OPTIONS,
   starterButtonComponentRegistration,
+  starterCardComponentRegistration,
+  starterBadgeComponentRegistration,
+  starterAvatarComponentRegistration,
+  starterAlertComponentRegistration,
+  starterListComponentRegistration,
+  starterTableComponentRegistration,
+  starterSkeletonComponentRegistration,
+  starterProgressComponentRegistration,
   starterBoxComponentRegistration,
   starterCheckboxComponentRegistration,
   starterComboboxComponentRegistration,
@@ -104,6 +122,14 @@ describe("starter component contracts", () => {
       STARTER_TABS_CAPABILITY_ID,
       STARTER_SLIDER_CAPABILITY_ID,
       STARTER_NUMBER_FIELD_CAPABILITY_ID,
+      STARTER_CARD_CAPABILITY_ID,
+      STARTER_BADGE_CAPABILITY_ID,
+      STARTER_AVATAR_CAPABILITY_ID,
+      STARTER_ALERT_CAPABILITY_ID,
+      STARTER_LIST_CAPABILITY_ID,
+      STARTER_TABLE_CAPABILITY_ID,
+      STARTER_SKELETON_CAPABILITY_ID,
+      STARTER_PROGRESS_CAPABILITY_ID,
     ]);
     expect(STARTER_CATALOG_TEMPLATE).toMatchObject({
       id: STARTER_CATALOG_ID,
@@ -119,10 +145,72 @@ describe("starter component contracts", () => {
       starterTooltipComponentRegistration,
       starterMenuComponentRegistration,
       starterAccordionComponentRegistration,
+      starterCardComponentRegistration,
+      starterBadgeComponentRegistration,
+      starterAvatarComponentRegistration,
+      starterAlertComponentRegistration,
+      starterListComponentRegistration,
+      starterTableComponentRegistration,
+      starterSkeletonComponentRegistration,
+      starterProgressComponentRegistration,
     ]) {
       expect(STARTER_COMPONENT_REGISTRATIONS).toContain(registration);
       expectDeeplyFrozen(registration);
     }
+  });
+
+  it("keeps T09 data-display and feedback contracts finite, text-only, and identity-safe", () => {
+    expect(starterCardComponentRegistration.manifest.slots.content).toMatchObject({
+      required: true,
+      minItems: 1,
+      maxItems: STARTER_DATA_DISPLAY_MAX_ITEMS,
+    });
+    expect(starterListComponentRegistration.manifest.slots.items).toMatchObject({
+      required: true,
+      minItems: 0,
+      maxItems: STARTER_DATA_DISPLAY_MAX_ITEMS,
+    });
+    expect(starterListComponentRegistration.manifest.propsSchema.properties.itemIds).toMatchObject({
+      type: "array",
+      maxItems: STARTER_DATA_DISPLAY_MAX_ITEMS,
+      uniqueItems: true,
+    });
+    expect(starterTableComponentRegistration.manifest.propsSchema.properties.columns).toMatchObject(
+      {
+        type: "array",
+        minItems: 1,
+        maxItems: STARTER_TABLE_MAX_COLUMNS,
+      },
+    );
+    expect(starterTableComponentRegistration.manifest.propsSchema.properties.rows).toMatchObject({
+      type: "array",
+      maxItems: STARTER_DATA_DISPLAY_MAX_ITEMS,
+      items: {
+        required: ["id", "cells"],
+        additionalProperties: false,
+      },
+    });
+    for (const registration of [
+      starterBadgeComponentRegistration,
+      starterAvatarComponentRegistration,
+      starterAlertComponentRegistration,
+      starterSkeletonComponentRegistration,
+      starterProgressComponentRegistration,
+    ]) {
+      expectDeeplyFrozen(registration);
+      expect(registration.manifest.events).toBeUndefined();
+    }
+    expect(starterAvatarComponentRegistration.manifest.propsSchema.required).toEqual([
+      "label",
+      "initials",
+    ]);
+    expect(
+      starterProgressComponentRegistration.manifest.propsSchema.properties.value,
+    ).toMatchObject({
+      type: "number",
+      minimum: 0,
+      maximum: 100,
+    });
   });
 
   it("keeps Button props and press payload closed and inert", () => {
@@ -647,6 +735,76 @@ describe("starter node templates", () => {
         capabilityId: STARTER_TABS_CAPABILITY_ID,
         idPrefix: "surface.tabs",
         reservedIds: ["surface.tabs.second"],
+      }),
+    ).toThrow(/identity collision/u);
+  });
+
+  it("creates complete T09 data-display and feedback templates without a connection or operation", () => {
+    const card = createStarterNodeTemplate({
+      capabilityId: STARTER_CARD_CAPABILITY_ID,
+      idPrefix: "surface.card",
+    });
+    const list = createStarterNodeTemplate({
+      capabilityId: STARTER_LIST_CAPABILITY_ID,
+      idPrefix: "surface.list",
+    });
+    const table = createStarterNodeTemplate({
+      capabilityId: STARTER_TABLE_CAPABILITY_ID,
+      idPrefix: "surface.table",
+    });
+    const leaves = [
+      createStarterNodeTemplate({
+        capabilityId: STARTER_BADGE_CAPABILITY_ID,
+        idPrefix: "surface.badge",
+      }),
+      createStarterNodeTemplate({
+        capabilityId: STARTER_AVATAR_CAPABILITY_ID,
+        idPrefix: "surface.avatar",
+      }),
+      createStarterNodeTemplate({
+        capabilityId: STARTER_ALERT_CAPABILITY_ID,
+        idPrefix: "surface.alert",
+      }),
+      createStarterNodeTemplate({
+        capabilityId: STARTER_SKELETON_CAPABILITY_ID,
+        idPrefix: "surface.skeleton",
+      }),
+      createStarterNodeTemplate({
+        capabilityId: STARTER_PROGRESS_CAPABILITY_ID,
+        idPrefix: "surface.progress",
+      }),
+    ];
+    expect(card).toMatchObject({
+      id: "surface.card",
+      use: STARTER_CARD_CAPABILITY_ID,
+      slots: { content: [{ id: "surface.card.content", use: STARTER_TEXT_CAPABILITY_ID }] },
+    });
+    expect(list).toMatchObject({
+      id: "surface.list",
+      use: STARTER_LIST_CAPABILITY_ID,
+      props: { itemIds: ["research", "prototype"] },
+      slots: {
+        items: [
+          { id: "surface.list.first", use: STARTER_TEXT_CAPABILITY_ID },
+          { id: "surface.list.second", use: STARTER_TEXT_CAPABILITY_ID },
+        ],
+      },
+    });
+    expect(table).toMatchObject({
+      id: "surface.table",
+      use: STARTER_TABLE_CAPABILITY_ID,
+      props: {
+        caption: "Project status",
+        columns: [{ id: "name" }, { id: "status" }],
+        rows: [{ id: "research" }, { id: "prototype" }],
+      },
+    });
+    for (const node of [card, list, table, ...leaves]) expectDeeplyFrozen(node);
+    expect(() =>
+      createStarterNodeTemplate({
+        capabilityId: STARTER_LIST_CAPABILITY_ID,
+        idPrefix: "surface.list",
+        reservedIds: ["surface.list.second"],
       }),
     ).toThrow(/identity collision/u);
   });

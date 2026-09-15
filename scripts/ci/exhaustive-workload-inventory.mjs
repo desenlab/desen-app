@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "91128d6285154edd813c9371bab9a10a6951af996d8c5159f9faca37fd5dfb3f";
+  "bf6d11e6ffd01427d7ecd58432a62a02e23d840a6c9a2a8c8f313418dca6288e";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "9a7babf1192e65f9de345cee22f65e76717a80d2d6c1b2c47b44fbe718fc8703";
+  "8651b8f7520a4f0ff90b62ce33d676e8481e8b1304dc1f944e7af361efa37f7a";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "65fe0b826ecca643e52115f7e54faf4e4ea00dd888da2f25f1373128dd0b6fd1";
+  "c7a2eff3253fcea24bbfebf5522e7cb1d5c7f7993f976d0d0cd6570ad60c4527";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -204,6 +204,15 @@ const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
       "vite build --config t08-vite.config.ts --mode t08-proof-authoring",
     ],
     ["build:m10a-t08:host", "vite build --config t08-vite.config.ts --mode t08-proof-host"],
+    [
+      "build:m10a-t09",
+      "pnpm run prepare:m10a-t09-package && pnpm run build:m10a-t09:authoring && pnpm run build:m10a-t09:host",
+    ],
+    [
+      "build:m10a-t09:authoring",
+      "vite build --config t09-vite.config.ts --mode t09-proof-authoring",
+    ],
+    ["build:m10a-t09:host", "vite build --config t09-vite.config.ts --mode t09-proof-host"],
     ["lint", "eslint . --max-warnings=0"],
     [
       "prepare:m10a-t06-package",
@@ -215,6 +224,10 @@ const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
     ],
     [
       "prepare:m10a-t08-package",
+      "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",
+    ],
+    [
+      "prepare:m10a-t09-package",
       "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",
     ],
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
@@ -235,6 +248,11 @@ const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
       "pnpm run typecheck && pnpm run build:m10a-t08 && pnpm run test:m10a-t08:built",
     ],
     ["test:m10a-t08:built", "playwright test --config t08-playwright.config.ts"],
+    [
+      "test:m10a-t09",
+      "pnpm run typecheck && pnpm run build:m10a-t09 && pnpm run test:m10a-t09:built",
+    ],
+    ["test:m10a-t09:built", "playwright test --config t09-playwright.config.ts"],
   ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
 );
 const EXPECTED_DESIGN_SYSTEM_WORKBENCH_PROOF_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
@@ -798,6 +816,7 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
   ["m10a-t06", "scripts/verify-m10a-t06.mjs", "tests/m10a-t06.test.mjs"],
   ["m10a-t07", "scripts/verify-m10a-t07.mjs", "tests/m10a-t07.test.mjs"],
   ["m10a-t08", "scripts/verify-m10a-t08.mjs", "tests/m10a-t08.test.mjs"],
+  ["m10a-t09", "scripts/verify-m10a-t09.mjs", "tests/m10a-t09.test.mjs"],
 ]);
 
 const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
@@ -807,6 +826,7 @@ const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
   "desen-app-repeatable-demo",
   "m10a-t07",
   "m10a-t08",
+  "m10a-t09",
 ]);
 const READ_ONLY_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
   "runtime-core-baseline",
@@ -1219,6 +1239,7 @@ function classifyPrerequisite({
       "m10a-t04",
       "m10a-t07",
       "m10a-t08",
+      "m10a-t09",
     ].includes(currentProofId);
     const reviewedPackage =
       (packageName === "@desen/editor-core" && currentProofId !== "desen-app-publish-activation") ||
@@ -1231,7 +1252,9 @@ function classifyPrerequisite({
     const reviewedReleasePackage =
       currentProofId === "m10a-t04" && packageName === "@desen/design-system-release";
     const reviewedStarterPackage =
-      (currentProofId === "m10a-t07" || currentProofId === "m10a-t08") &&
+      (currentProofId === "m10a-t07" ||
+        currentProofId === "m10a-t08" ||
+        currentProofId === "m10a-t09") &&
       packageName === "@desen/starter-catalog-web";
     if (
       !reviewedPublicPackageProof ||
@@ -1248,16 +1271,24 @@ function classifyPrerequisite({
     }
     return "public-package-contract-test";
   }
-  if (task === "test:e2e" || task === "test:m10a-t07" || task === "test:m10a-t08") {
+  if (
+    task === "test:e2e" ||
+    task === "test:m10a-t07" ||
+    task === "test:m10a-t08" ||
+    task === "test:m10a-t09"
+  ) {
     const reviewedWorkbenchProof =
       currentProofId === "m10a-t03" && packageName === "@desen/design-system-workbench-proof";
     const reviewedStarterProof =
-      (currentProofId === "m10a-t07" || currentProofId === "m10a-t08") &&
+      (currentProofId === "m10a-t07" ||
+        currentProofId === "m10a-t08" ||
+        currentProofId === "m10a-t09") &&
       packageName === "@desen/starter-catalog-web-proof" &&
-      (task === "test:m10a-t07" || task === "test:m10a-t08");
+      (task === "test:m10a-t07" || task === "test:m10a-t08" || task === "test:m10a-t09");
     if (
       (task === "test:e2e" && !reviewedWorkbenchProof) ||
-      ((task === "test:m10a-t07" || task === "test:m10a-t08") && !reviewedStarterProof)
+      ((task === "test:m10a-t07" || task === "test:m10a-t08" || task === "test:m10a-t09") &&
+        !reviewedStarterProof)
     ) {
       fail(currentProofId + " uses an unreviewed browser-proof package test.", {
         command,
@@ -1594,7 +1625,7 @@ function buildCanonicalInventory() {
                 ? "design-system-authoring-public-package-contract"
                 : id === "m10a-t04"
                   ? "design-system-release-public-package-contract"
-                  : id === "m10a-t07" || id === "m10a-t08"
+                  : id === "m10a-t07" || id === "m10a-t08" || id === "m10a-t09"
                     ? "starter-catalog-web-public-package-contract"
                     : "package-tests",
       ],
@@ -1732,6 +1763,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
       "apps/starter-catalog-web-proof/t06-vite.config.ts",
       "apps/starter-catalog-web-proof/t07-vite.config.ts",
       "apps/starter-catalog-web-proof/t08-vite.config.ts",
+      "apps/starter-catalog-web-proof/t09-vite.config.ts",
       "apps/starter-catalog-web-proof/vite.config.ts",
     ],
     "The root and workspace test-configuration file set",
@@ -1949,7 +1981,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "181b1e34aebc7fc7013716ac008d0f455b1e9fbe4ba77460ce9cba8c58c570a5";
+  "ff1f997a12ac43f096d94c63e98efbaf271ea4ed6fcf12c4b4634c7acde057a1";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

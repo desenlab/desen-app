@@ -2,6 +2,14 @@ import { canonicalizeJson } from "@desen/protocol";
 
 import {
   STARTER_BUTTON_CAPABILITY_ID,
+  STARTER_CARD_CAPABILITY_ID,
+  STARTER_BADGE_CAPABILITY_ID,
+  STARTER_AVATAR_CAPABILITY_ID,
+  STARTER_ALERT_CAPABILITY_ID,
+  STARTER_LIST_CAPABILITY_ID,
+  STARTER_TABLE_CAPABILITY_ID,
+  STARTER_SKELETON_CAPABILITY_ID,
+  STARTER_PROGRESS_CAPABILITY_ID,
   STARTER_BOX_CAPABILITY_ID,
   STARTER_CHECKBOX_CAPABILITY_ID,
   STARTER_COMBOBOX_CAPABILITY_ID,
@@ -26,6 +34,12 @@ import {
   STARTER_TEXT_CAPABILITY_ID,
   STARTER_TEXT_FIELD_CAPABILITY_ID,
   starterButtonComponentRegistration,
+  starterCardComponentRegistration,
+  starterBadgeComponentRegistration,
+  starterAvatarComponentRegistration,
+  starterAlertComponentRegistration,
+  starterSkeletonComponentRegistration,
+  starterProgressComponentRegistration,
   starterBoxComponentRegistration,
   starterCheckboxComponentRegistration,
   starterDialogComponentRegistration,
@@ -65,6 +79,14 @@ const TEMPLATE_INPUT_KEYS = Object.freeze(["capabilityId", "idPrefix", "reserved
 /** Exact capability ids with an inert starter node template. */
 export type StarterTemplateCapabilityId =
   | typeof STARTER_BUTTON_CAPABILITY_ID
+  | typeof STARTER_CARD_CAPABILITY_ID
+  | typeof STARTER_BADGE_CAPABILITY_ID
+  | typeof STARTER_AVATAR_CAPABILITY_ID
+  | typeof STARTER_ALERT_CAPABILITY_ID
+  | typeof STARTER_LIST_CAPABILITY_ID
+  | typeof STARTER_TABLE_CAPABILITY_ID
+  | typeof STARTER_SKELETON_CAPABILITY_ID
+  | typeof STARTER_PROGRESS_CAPABILITY_ID
   | typeof STARTER_BOX_CAPABILITY_ID
   | typeof STARTER_CHECKBOX_CAPABILITY_ID
   | typeof STARTER_COMBOBOX_CAPABILITY_ID
@@ -161,6 +183,14 @@ function captureTemplateInput(input: unknown): CapturedTemplateInput {
     const capabilityId = ownEnumerableDataValue(input, "capabilityId");
     if (
       capabilityId !== STARTER_BUTTON_CAPABILITY_ID &&
+      capabilityId !== STARTER_CARD_CAPABILITY_ID &&
+      capabilityId !== STARTER_BADGE_CAPABILITY_ID &&
+      capabilityId !== STARTER_AVATAR_CAPABILITY_ID &&
+      capabilityId !== STARTER_ALERT_CAPABILITY_ID &&
+      capabilityId !== STARTER_LIST_CAPABILITY_ID &&
+      capabilityId !== STARTER_TABLE_CAPABILITY_ID &&
+      capabilityId !== STARTER_SKELETON_CAPABILITY_ID &&
+      capabilityId !== STARTER_PROGRESS_CAPABILITY_ID &&
       capabilityId !== STARTER_BOX_CAPABILITY_ID &&
       capabilityId !== STARTER_CHECKBOX_CAPABILITY_ID &&
       capabilityId !== STARTER_COMBOBOX_CAPABILITY_ID &&
@@ -269,8 +299,12 @@ function assertAvailableNodeIds(
     ...(capabilityId === STARTER_DIALOG_CAPABILITY_ID ||
     capabilityId === STARTER_POPOVER_CAPABILITY_ID ||
     capabilityId === STARTER_BOX_CAPABILITY_ID ||
-    capabilityId === STARTER_STACK_CAPABILITY_ID
+    capabilityId === STARTER_STACK_CAPABILITY_ID ||
+    capabilityId === STARTER_CARD_CAPABILITY_ID
       ? [`${input.idPrefix}.content`]
+      : []),
+    ...(capabilityId === STARTER_LIST_CAPABILITY_ID
+      ? [`${input.idPrefix}.first`, `${input.idPrefix}.second`]
       : []),
     ...(capabilityId === STARTER_GRID_CAPABILITY_ID
       ? [`${input.idPrefix}.first`, `${input.idPrefix}.second`]
@@ -315,6 +349,99 @@ export function createStarterNodeTemplate(
         id: captured.idPrefix,
         use: STARTER_BUTTON_CAPABILITY_ID,
         props: starterButtonComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_CARD_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_CARD_CAPABILITY_ID,
+        props: starterCardComponentRegistration.manifest.authoring.defaultProps,
+        slots: {
+          content: [
+            {
+              id: `${captured.idPrefix}.content`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Card content" },
+            },
+          ],
+        },
+      };
+      break;
+    case STARTER_BADGE_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_BADGE_CAPABILITY_ID,
+        props: starterBadgeComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_AVATAR_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_AVATAR_CAPABILITY_ID,
+        props: starterAvatarComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_ALERT_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_ALERT_CAPABILITY_ID,
+        props: starterAlertComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_LIST_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_LIST_CAPABILITY_ID,
+        props: {
+          label: "Project tasks",
+          itemIds: ["research", "prototype"],
+          ordered: false,
+        },
+        slots: {
+          items: [
+            {
+              id: `${captured.idPrefix}.first`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Research" },
+            },
+            {
+              id: `${captured.idPrefix}.second`,
+              use: STARTER_TEXT_CAPABILITY_ID,
+              props: { text: "Prototype" },
+            },
+          ],
+        },
+      };
+      break;
+    case STARTER_TABLE_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_TABLE_CAPABILITY_ID,
+        props: {
+          caption: "Project status",
+          columns: [
+            { id: "name", label: "Name" },
+            { id: "status", label: "Status" },
+          ],
+          rows: [
+            { id: "research", cells: { name: "Research", status: "Ready" } },
+            { id: "prototype", cells: { name: "Prototype", status: "In progress" } },
+          ],
+        },
+      };
+      break;
+    case STARTER_SKELETON_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_SKELETON_CAPABILITY_ID,
+        props: starterSkeletonComponentRegistration.manifest.authoring.defaultProps,
+      };
+      break;
+    case STARTER_PROGRESS_CAPABILITY_ID:
+      node = {
+        id: captured.idPrefix,
+        use: STARTER_PROGRESS_CAPABILITY_ID,
+        props: starterProgressComponentRegistration.manifest.authoring.defaultProps,
       };
       break;
     case STARTER_BOX_CAPABILITY_ID:

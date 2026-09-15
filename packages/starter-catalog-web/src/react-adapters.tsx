@@ -19,6 +19,14 @@ import { canonicalizeJson } from "@desen/protocol";
 
 import {
   STARTER_BOX_CAPABILITY_ID,
+  STARTER_CARD_CAPABILITY_ID,
+  STARTER_BADGE_CAPABILITY_ID,
+  STARTER_AVATAR_CAPABILITY_ID,
+  STARTER_ALERT_CAPABILITY_ID,
+  STARTER_LIST_CAPABILITY_ID,
+  STARTER_TABLE_CAPABILITY_ID,
+  STARTER_SKELETON_CAPABILITY_ID,
+  STARTER_PROGRESS_CAPABILITY_ID,
   STARTER_CHECKBOX_CAPABILITY_ID,
   STARTER_COMBOBOX_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
@@ -42,6 +50,14 @@ import {
   STARTER_TEXT_CAPABILITY_ID,
   STARTER_TEXT_FIELD_CAPABILITY_ID,
   starterButtonComponentRegistration,
+  starterCardComponentRegistration,
+  starterBadgeComponentRegistration,
+  starterAvatarComponentRegistration,
+  starterAlertComponentRegistration,
+  starterListComponentRegistration,
+  starterTableComponentRegistration,
+  starterSkeletonComponentRegistration,
+  starterProgressComponentRegistration,
   starterBoxComponentRegistration,
   starterCheckboxComponentRegistration,
   starterComboboxComponentRegistration,
@@ -76,6 +92,14 @@ import type {
 } from "@desen/runtime-react";
 import type {
   StarterBoxProps,
+  StarterCardProps,
+  StarterBadgeProps,
+  StarterAvatarProps,
+  StarterAlertProps,
+  StarterListProps,
+  StarterTableProps,
+  StarterSkeletonProps,
+  StarterProgressProps,
   StarterButtonProps,
   StarterCheckboxProps,
   StarterComboboxProps,
@@ -164,10 +188,18 @@ type Registration =
   | typeof starterPopoverComponentRegistration
   | typeof starterTooltipComponentRegistration
   | typeof starterMenuComponentRegistration
-  | typeof starterAccordionComponentRegistration;
+  | typeof starterAccordionComponentRegistration
+  | typeof starterCardComponentRegistration
+  | typeof starterBadgeComponentRegistration
+  | typeof starterAvatarComponentRegistration
+  | typeof starterAlertComponentRegistration
+  | typeof starterListComponentRegistration
+  | typeof starterTableComponentRegistration
+  | typeof starterSkeletonComponentRegistration
+  | typeof starterProgressComponentRegistration;
 
 type T05StyleProjection = "image" | "layout" | "typography" | "media" | "separator";
-type StarterStyleProjection = T05StyleProjection | "form" | "selection" | "overlay";
+type StarterStyleProjection = T05StyleProjection | "form" | "selection" | "overlay" | "display";
 
 const T01_STYLE_PROPERTIES = Object.freeze([
   "color",
@@ -327,6 +359,18 @@ function styleProjection(registration: Registration): StarterStyleProjection | u
   ) {
     return "overlay";
   }
+  if (
+    registration.id === STARTER_CARD_CAPABILITY_ID ||
+    registration.id === STARTER_BADGE_CAPABILITY_ID ||
+    registration.id === STARTER_AVATAR_CAPABILITY_ID ||
+    registration.id === STARTER_ALERT_CAPABILITY_ID ||
+    registration.id === STARTER_LIST_CAPABILITY_ID ||
+    registration.id === STARTER_TABLE_CAPABILITY_ID ||
+    registration.id === STARTER_SKELETON_CAPABILITY_ID ||
+    registration.id === STARTER_PROGRESS_CAPABILITY_ID
+  ) {
+    return "display";
+  }
   return undefined;
 }
 
@@ -406,6 +450,7 @@ function stylePropertyNames(projection: StarterStyleProjection | undefined): rea
   if (projection === "form") return FORM_STYLE_PROPERTIES;
   if (projection === "selection") return SELECTION_STYLE_PROPERTIES;
   if (projection === "overlay") return SELECTION_STYLE_PROPERTIES;
+  if (projection === "display") return FORM_STYLE_PROPERTIES;
   return T01_STYLE_PROPERTIES;
 }
 
@@ -882,6 +927,165 @@ function validateT08Props(
   }
 }
 
+function validateT09Props(
+  input: RuntimeReactComponentAdapterProps,
+  registration: Registration,
+): void {
+  if (
+    registration.id !== STARTER_CARD_CAPABILITY_ID &&
+    registration.id !== STARTER_BADGE_CAPABILITY_ID &&
+    registration.id !== STARTER_AVATAR_CAPABILITY_ID &&
+    registration.id !== STARTER_ALERT_CAPABILITY_ID &&
+    registration.id !== STARTER_LIST_CAPABILITY_ID &&
+    registration.id !== STARTER_TABLE_CAPABILITY_ID &&
+    registration.id !== STARTER_SKELETON_CAPABILITY_ID &&
+    registration.id !== STARTER_PROGRESS_CAPABILITY_ID
+  ) {
+    return;
+  }
+  const props = input.props as Readonly<Record<string, unknown>>;
+  const invalid = (): never => invalidSelectionInput();
+  const hasOnly = (keys: readonly string[]) =>
+    Object.keys(props).every((key) => keys.includes(key));
+  const isTone = (value: unknown) =>
+    ["neutral", "info", "success", "warning", "error"].includes(value as string);
+  const isStableId = (value: unknown): value is string => isBoundedString(value, 1, 128);
+
+  if (registration.id === STARTER_CARD_CAPABILITY_ID) {
+    if (!hasOnly(["label"]) || !isBoundedString(props.label, 1, 256)) invalid();
+    return;
+  }
+  if (registration.id === STARTER_BADGE_CAPABILITY_ID) {
+    if (
+      !hasOnly(["label", "tone"]) ||
+      !isBoundedString(props.label, 1, 256) ||
+      (props.tone !== undefined && !isTone(props.tone))
+    )
+      invalid();
+    return;
+  }
+  if (registration.id === STARTER_AVATAR_CAPABILITY_ID) {
+    if (
+      !hasOnly(["label", "initials"]) ||
+      !isBoundedString(props.label, 1, 256) ||
+      !isBoundedString(props.initials, 1, 4)
+    )
+      invalid();
+    return;
+  }
+  if (registration.id === STARTER_ALERT_CAPABILITY_ID) {
+    if (
+      !hasOnly(["title", "description", "tone"]) ||
+      !isBoundedString(props.title, 1, 256) ||
+      !isBoundedString(props.description, 1, 1_024) ||
+      !isTone(props.tone)
+    )
+      invalid();
+    return;
+  }
+  if (registration.id === STARTER_LIST_CAPABILITY_ID) {
+    const itemIds = Array.isArray(props.itemIds) ? props.itemIds : invalid();
+    if (
+      !hasOnly(["label", "itemIds", "ordered", "emptyText"]) ||
+      !isBoundedString(props.label, 1, 256) ||
+      !isOptionalBoolean(props.ordered) ||
+      (props.emptyText !== undefined && !isBoundedString(props.emptyText, 1, 1_024)) ||
+      itemIds.length > 100
+    )
+      invalid();
+    const ids = new Set<string>();
+    for (const id of itemIds) {
+      if (!isStableId(id) || ids.has(id)) invalid();
+      ids.add(id);
+    }
+    return;
+  }
+  if (registration.id === STARTER_TABLE_CAPABILITY_ID) {
+    const columns = Array.isArray(props.columns) ? props.columns : invalid();
+    const rows = Array.isArray(props.rows) ? props.rows : invalid();
+    if (
+      !hasOnly(["caption", "columns", "rows", "emptyText"]) ||
+      !isBoundedString(props.caption, 1, 256) ||
+      (props.emptyText !== undefined && !isBoundedString(props.emptyText, 1, 1_024)) ||
+      columns.length < 1 ||
+      columns.length > 12 ||
+      rows.length > 100
+    )
+      invalid();
+    const columnIds = new Set<string>();
+    for (const column of columns) {
+      if (
+        typeof column !== "object" ||
+        column === null ||
+        Array.isArray(column) ||
+        (Object.getPrototypeOf(column) !== Object.prototype &&
+          Object.getPrototypeOf(column) !== null)
+      )
+        invalid();
+      const record = column as Readonly<Record<string, unknown>>;
+      const columnId = isStableId(record.id) ? record.id : invalid();
+      if (
+        Object.keys(record).some((key) => !["id", "label"].includes(key)) ||
+        !isBoundedString(record.label, 1, 256) ||
+        columnIds.has(columnId)
+      )
+        invalid();
+      columnIds.add(columnId);
+    }
+    const rowIds = new Set<string>();
+    for (const row of rows) {
+      if (
+        typeof row !== "object" ||
+        row === null ||
+        Array.isArray(row) ||
+        (Object.getPrototypeOf(row) !== Object.prototype && Object.getPrototypeOf(row) !== null)
+      )
+        invalid();
+      const record = row as Readonly<Record<string, unknown>>;
+      const rowId = isStableId(record.id) ? record.id : invalid();
+      if (
+        Object.keys(record).some((key) => !["id", "cells"].includes(key)) ||
+        rowIds.has(rowId) ||
+        typeof record.cells !== "object" ||
+        record.cells === null ||
+        Array.isArray(record.cells) ||
+        (Object.getPrototypeOf(record.cells) !== Object.prototype &&
+          Object.getPrototypeOf(record.cells) !== null)
+      )
+        invalid();
+      const cells = record.cells as Readonly<Record<string, unknown>>;
+      if (
+        Object.keys(cells).length !== columnIds.size ||
+        Object.keys(cells).some(
+          (key) => !columnIds.has(key) || !isBoundedString(cells[key], 0, 2_048),
+        )
+      )
+        invalid();
+      rowIds.add(rowId);
+    }
+    return;
+  }
+  if (registration.id === STARTER_SKELETON_CAPABILITY_ID) {
+    if (
+      !hasOnly(["label", "shape", "width", "height"]) ||
+      !isBoundedString(props.label, 1, 256) ||
+      (props.shape !== undefined &&
+        !["line", "circle", "rectangle"].includes(props.shape as string)) ||
+      (props.width !== undefined && !isFiniteNumber(props.width, 8, 4_096)) ||
+      (props.height !== undefined && !isFiniteNumber(props.height, 8, 4_096))
+    )
+      invalid();
+    return;
+  }
+  if (
+    !hasOnly(["label", "value", "showValue"]) ||
+    !isBoundedString(props.label, 1, 256) ||
+    !isFiniteNumber(props.value, 0, 100) ||
+    !isOptionalBoolean(props.showValue)
+  )
+    invalid();
+}
+
 function guardInput(input: RuntimeReactComponentAdapterProps, registration: Registration): void {
   // Runtime React is the schema-admission authority. This defensive check prevents direct trusted
   // misuse from widening the bridge to callbacks, JSX, unknown parts or arbitrary Base UI props.
@@ -899,15 +1103,18 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   const allowedSlots =
     registration.id === starterDialogComponentRegistration.id ||
-    registration.id === starterPopoverComponentRegistration.id
+    registration.id === starterPopoverComponentRegistration.id ||
+    registration.id === starterCardComponentRegistration.id
       ? ["content"]
       : registration.id === starterTabsComponentRegistration.id
         ? ["panels"]
-        : registration.id === starterAccordionComponentRegistration.id
-          ? ["panels"]
-          : styleProjection(registration) === "layout"
-            ? ["default"]
-            : [];
+        : registration.id === starterListComponentRegistration.id
+          ? ["items"]
+          : registration.id === starterAccordionComponentRegistration.id
+            ? ["panels"]
+            : styleProjection(registration) === "layout"
+              ? ["default"]
+              : [];
   if (Object.keys(input.slots).some((key) => !allowedSlots.includes(key)))
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   if (
@@ -919,10 +1126,27 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
   )
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   if (
+    registration.id === starterCardComponentRegistration.id &&
+    (input.slots.content === undefined ||
+      input.slots.content.length < 1 ||
+      input.slots.content.length > 100)
+  )
+    throw new Error("STARTER_ADAPTER_INPUT_INVALID");
+  if (
     styleProjection(registration) === "layout" &&
     (input.slots.default === undefined ||
       input.slots.default.length < 1 ||
       input.slots.default.length > 100)
+  ) {
+    throw new Error("STARTER_ADAPTER_INPUT_INVALID");
+  }
+  const listItemIds = (input.props as Readonly<Record<string, unknown>>).itemIds;
+  if (
+    registration.id === starterListComponentRegistration.id &&
+    (input.slots.items === undefined ||
+      input.slots.items.length > 100 ||
+      !Array.isArray(listItemIds) ||
+      input.slots.items.length !== listItemIds.length)
   ) {
     throw new Error("STARTER_ADAPTER_INPUT_INVALID");
   }
@@ -952,6 +1176,7 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
   validateFormProps(input, registration);
   validateSelectionProps(input, registration);
   validateT08Props(input, registration);
+  validateT09Props(input, registration);
   const parts = Object.keys(registration.manifest.styleParts);
   const states: readonly string[] =
     "visualStates" in registration.manifest ? registration.manifest.visualStates : [];
@@ -973,7 +1198,10 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
                 ((property === "borderRadius" && value >= 0 && value <= 64) ||
                   (property === "padding" && value >= 0 && value <= 128) ||
                   (property === "fontSize" && value >= 8 && value <= 96))
-            : projection === "form" || projection === "selection" || projection === "overlay"
+            : projection === "form" ||
+                projection === "selection" ||
+                projection === "overlay" ||
+                projection === "display"
               ? isFormStyleValueValid(property, value)
               : isT05StyleValueValid(projection, property, value));
         if (!valid) throw new Error("STARTER_ADAPTER_INPUT_INVALID");
@@ -1052,7 +1280,8 @@ function partStyle(
       projection === "typography" ||
       projection === "form" ||
       projection === "selection" ||
-      projection === "overlay"
+      projection === "overlay" ||
+      projection === "display"
     ) {
       if (values.fontFamily === "system") result.fontFamily = "system-ui, sans-serif";
       if (values.fontFamily === "serif") result.fontFamily = "ui-serif, Georgia, serif";
@@ -2634,6 +2863,226 @@ export function StarterSeparatorReactAdapter(input: RuntimeReactComponentAdapter
   return <hr className={styles.separator} style={style} />;
 }
 
+/** Renders a semantic Card while preserving its explicit managed content slot. */
+export function StarterCardReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterCardComponentRegistration);
+  const props = input.props as unknown as StarterCardProps;
+  return (
+    <article
+      className={styles.card}
+      aria-label={props.label}
+      style={partStyle(input.style, "root", [], "display")}
+    >
+      <div className={styles.cardContent} style={partStyle(input.style, "content", [], "display")}>
+        {input.slots.content}
+      </div>
+    </article>
+  );
+}
+
+/** Renders a concise textual Badge whose visible label carries the status meaning. */
+export function StarterBadgeReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterBadgeComponentRegistration);
+  const props = input.props as unknown as StarterBadgeProps;
+  const tone = props.tone ?? "neutral";
+  return (
+    <span
+      className={styles.badge}
+      data-tone={tone}
+      style={partStyle(input.style, "root", tone === "neutral" ? [] : [tone], "display")}
+    >
+      {props.label}
+    </span>
+  );
+}
+
+/** Renders initials as an accessible Avatar without admitting a caller-controlled image source. */
+export function StarterAvatarReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterAvatarComponentRegistration);
+  const props = input.props as unknown as StarterAvatarProps;
+  return (
+    <span
+      className={styles.avatar}
+      role="img"
+      aria-label={props.label}
+      style={partStyle(input.style, "root", [], "display")}
+    >
+      {props.initials}
+    </span>
+  );
+}
+
+/** Renders textual status feedback with a live role only where the declared severity requires it. */
+export function StarterAlertReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterAlertComponentRegistration);
+  const props = input.props as unknown as StarterAlertProps;
+  const tone = props.tone;
+  return (
+    <section
+      className={styles.alert}
+      data-tone={tone}
+      role={tone === "error" ? "alert" : "status"}
+      style={partStyle(input.style, "root", [tone], "display")}
+    >
+      <strong
+        className={styles.alertTitle}
+        style={partStyle(input.style, "title", [tone], "display")}
+      >
+        {props.title}
+      </strong>
+      <p
+        className={styles.alertDescription}
+        style={partStyle(input.style, "description", [tone], "display")}
+      >
+        {props.description}
+      </p>
+    </section>
+  );
+}
+
+/** Renders one explicit managed item slot per declared stable list identity. */
+export function StarterListReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterListComponentRegistration);
+  const props = input.props as unknown as StarterListProps;
+  const items = input.slots.items ?? [];
+  if (props.itemIds.length === 0) {
+    return (
+      <p
+        className={styles.emptyState}
+        role="status"
+        aria-label={props.label}
+        style={partStyle(input.style, "empty", [], "display")}
+      >
+        {props.emptyText ?? "No items yet."}
+      </p>
+    );
+  }
+  const Element = props.ordered === true ? "ol" : "ul";
+  return (
+    <Element
+      className={styles.list}
+      aria-label={props.label}
+      style={partStyle(input.style, "root", [], "display")}
+    >
+      {items.map((item, index) => (
+        <li
+          key={props.itemIds[index]}
+          className={styles.listItem}
+          data-desen-item-id={props.itemIds[index]}
+          style={partStyle(input.style, "item", [], "display")}
+        >
+          {item}
+        </li>
+      ))}
+    </Element>
+  );
+}
+
+/** Renders a bounded native Table with explicit headers, captions, cells, and stable row identity. */
+export function StarterTableReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterTableComponentRegistration);
+  const props = input.props as unknown as StarterTableProps;
+  return (
+    <table className={styles.table} style={partStyle(input.style, "root", [], "display")}>
+      <caption
+        className={styles.tableCaption}
+        style={partStyle(input.style, "caption", [], "display")}
+      >
+        {props.caption}
+      </caption>
+      <thead>
+        <tr>
+          {props.columns.map((column) => (
+            <th key={column.id} scope="col" style={partStyle(input.style, "header", [], "display")}>
+              {column.label}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {props.rows.length === 0 ? (
+          <tr>
+            <td
+              className={styles.tableEmpty}
+              colSpan={props.columns.length}
+              style={partStyle(input.style, "empty", [], "display")}
+            >
+              {props.emptyText ?? "No rows yet."}
+            </td>
+          </tr>
+        ) : (
+          props.rows.map((row) => (
+            <tr key={row.id} data-desen-row-id={row.id}>
+              {props.columns.map((column) => (
+                <td key={column.id} style={partStyle(input.style, "cell", [], "display")}>
+                  {row.cells[column.id]}
+                </td>
+              ))}
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  );
+}
+
+/** Renders a labelled loading placeholder whose visible shape contains no business content. */
+export function StarterSkeletonReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterSkeletonComponentRegistration);
+  const props = input.props as unknown as StarterSkeletonProps;
+  const shape = props.shape ?? "line";
+  return (
+    <span className={styles.skeletonStatus} role="status" aria-label={props.label}>
+      <span
+        className={styles.skeleton}
+        data-shape={shape}
+        aria-hidden="true"
+        style={{
+          width: props.width ?? 160,
+          height: props.height ?? 16,
+          ...partStyle(input.style, "root", ["loading"], "display"),
+        }}
+      />
+    </span>
+  );
+}
+
+/** Renders a finite native Progress indicator with visible value text when requested. */
+export function StarterProgressReactAdapter(input: RuntimeReactComponentAdapterProps) {
+  guardInput(input, starterProgressComponentRegistration);
+  const props = input.props as unknown as StarterProgressProps;
+  const states = [props.value === 100 ? "complete" : "loading"];
+  return (
+    <div className={styles.progress} style={partStyle(input.style, "root", states, "display")}>
+      <div
+        className={styles.progressLabel}
+        style={partStyle(input.style, "label", states, "display")}
+      >
+        <span>{props.label}</span>
+        {props.showValue !== false && <span>{`${props.value}%`}</span>}
+      </div>
+      <div
+        className={styles.progressTrack}
+        role="progressbar"
+        aria-label={props.label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={props.value}
+        style={partStyle(input.style, "track", states, "display")}
+      >
+        <span
+          className={styles.progressIndicator}
+          aria-hidden="true"
+          style={{
+            width: `${props.value}%`,
+            ...partStyle(input.style, "indicator", states, "display"),
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 /**
  * Exact static production/authoring adapter inventory. Select option/default edits intentionally
  * remount its local native selection; controlled T06 form values preserve their adapter identity
@@ -2737,6 +3186,38 @@ export const STARTER_WEB_REACT_ADAPTER_REGISTRY_INPUT = Object.freeze({
     Object.freeze({
       capabilityId: starterSeparatorComponentRegistration.id,
       component: StarterSeparatorReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterCardComponentRegistration.id,
+      component: StarterCardReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterBadgeComponentRegistration.id,
+      component: StarterBadgeReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterAvatarComponentRegistration.id,
+      component: StarterAvatarReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterAlertComponentRegistration.id,
+      component: StarterAlertReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterListComponentRegistration.id,
+      component: StarterListReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterTableComponentRegistration.id,
+      component: StarterTableReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterSkeletonComponentRegistration.id,
+      component: StarterSkeletonReactAdapter,
+    }),
+    Object.freeze({
+      capabilityId: starterProgressComponentRegistration.id,
+      component: StarterProgressReactAdapter,
     }),
   ]),
 } satisfies RuntimeReactAdapterRegistryCreateInput);

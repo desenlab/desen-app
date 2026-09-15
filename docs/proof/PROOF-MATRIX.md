@@ -3723,3 +3723,19 @@ return, Tooltip hover/focus, Menu pointer/keyboard selection, Accordion panel or
 malformed or stale-input rejection. PR #110's exact-head hosted Quality and fresh-`main` closure
 are recorded in the task report. T08 does not add normal-App integration, persistence,
 Publisher/Runtime/Core/protocol authority, G10A, or M11.
+
+## M10A-T09 data-display and feedback starter capabilities (`IN_PROGRESS`)
+
+The [M10A-T09 report](M10A-T09.md) records local evidence for the private 0.6.0
+`@desen/starter-catalog-web` extension: Card, Badge, Avatar, Alert, List, basic Table, Skeleton,
+and Progress. Its 5,584-byte artifact is
+`sha256:7d29912421a11b09cbc9583c721d45c96af48f7a90e602091d36538581be7877`; checkpoint 100
+authenticates 73 artifacts / 146 readers at
+`sha256:9287d495a5e8ec7fef5ebd0c0507667b165d729ab53d34e846f0a324f0f1b2ff`.
+
+The isolated authoring/host Chromium receipt covers text alternatives, empty/loading/error/ready
+states, bounded inert sample data, explicit List slots, stable Table row identity, and native
+Table semantics. The local receipt deliberately excludes enterprise grids, charts, server
+pagination, sorting, operation binding, normal-App integration, persistence,
+Publisher/Runtime/Core/protocol authority, G10A, and M11. Hosted exact-head and fresh-`main`
+closure are still required; this task is not `DONE`.

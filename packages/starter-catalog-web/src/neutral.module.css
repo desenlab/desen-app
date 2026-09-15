@@ -690,3 +690,208 @@
 .accordionPanel {
   padding: 12px 14px 16px;
 }
+
+.card {
+  display: block;
+  width: min(100%, 560px);
+  border: 1px solid var(--desen-neutral-border, #d4d4d0);
+  border-radius: var(--desen-neutral-radius, 8px);
+  background: var(--desen-neutral-surface, #ffffff);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 5%);
+}
+
+.cardContent {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  background: var(--desen-neutral-accent, #f2f2ef);
+  color: var(--desen-neutral-text, #171717);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.badge[data-tone="info"],
+.alert[data-tone="info"] {
+  background: #e8f1ff;
+  color: #164f96;
+}
+
+.badge[data-tone="success"],
+.alert[data-tone="success"] {
+  background: #e8f7ed;
+  color: #17663c;
+}
+
+.badge[data-tone="warning"],
+.alert[data-tone="warning"] {
+  background: #fff5dc;
+  color: #805900;
+}
+
+.badge[data-tone="error"],
+.alert[data-tone="error"] {
+  background: #ffebeb;
+  color: #a82626;
+}
+
+.avatar {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--desen-neutral-border, #d4d4d0);
+  border-radius: 50%;
+  background: var(--desen-neutral-accent, #e6e6e2);
+  color: var(--desen-neutral-text, #171717);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.alert {
+  display: grid;
+  width: min(100%, 560px);
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid currentcolor;
+  border-radius: var(--desen-neutral-radius, 8px);
+  background: var(--desen-neutral-accent, #f2f2ef);
+  color: var(--desen-neutral-text, #171717);
+}
+
+.alertTitle {
+  font-weight: 700;
+}
+
+.alertDescription,
+.emptyState {
+  margin: 0;
+}
+
+.list {
+  display: grid;
+  width: min(100%, 560px);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--desen-neutral-border, #d4d4d0);
+  border-radius: var(--desen-neutral-radius, 8px);
+  background: var(--desen-neutral-surface, #ffffff);
+  list-style-position: inside;
+}
+
+.listItem {
+  min-width: 0;
+  padding: 12px 14px;
+}
+
+.listItem + .listItem {
+  border-top: 1px solid var(--desen-neutral-border, #e5e5e5);
+}
+
+.emptyState {
+  width: min(100%, 560px);
+  padding: 16px;
+  border: 1px dashed var(--desen-neutral-border, #d4d4d0);
+  border-radius: var(--desen-neutral-radius, 8px);
+  color: var(--desen-neutral-muted, #525252);
+}
+
+.table {
+  width: min(100%, 720px);
+  border-spacing: 0;
+  border-collapse: separate;
+  overflow: hidden;
+  border: 1px solid var(--desen-neutral-border, #d4d4d0);
+  border-radius: var(--desen-neutral-radius, 8px);
+  background: var(--desen-neutral-surface, #ffffff);
+  text-align: start;
+}
+
+.tableCaption {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--desen-neutral-border, #d4d4d0);
+  color: var(--desen-neutral-text, #171717);
+  font-weight: 600;
+  text-align: start;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--desen-neutral-border, #e5e5e5);
+  text-align: start;
+}
+
+.table th {
+  background: var(--desen-neutral-accent, #f2f2ef);
+  font-weight: 600;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tableEmpty {
+  color: var(--desen-neutral-muted, #525252);
+}
+
+.skeletonStatus {
+  display: inline-flex;
+}
+
+.skeleton {
+  display: block;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e5e5e5 0%, #f5f5f4 45%, #e5e5e5 100%);
+}
+
+.skeleton[data-shape="circle"] {
+  border-radius: 50%;
+}
+
+.skeleton[data-shape="rectangle"] {
+  border-radius: var(--desen-neutral-radius, 8px);
+}
+
+.progress {
+  display: grid;
+  width: min(100%, 420px);
+  gap: 8px;
+}
+
+.progressLabel {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--desen-neutral-text, #171717);
+  font-weight: 500;
+}
+
+.progressTrack {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--desen-neutral-accent, #e6e6e2);
+}
+
+.progressIndicator {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--desen-neutral-text, #171717);
+}
