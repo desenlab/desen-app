@@ -348,8 +348,9 @@ export async function writeM10AT08Evidence(rawOptions = undefined) {
       artifactBytes: built.artifactBytes,
       beforeAtomicRename: options.beforeAtomicRename,
     });
-  } catch {
-    fail("ARTIFACT_WRITE_UNSAFE", "Atomic T08 evidence write failed.");
+  } catch (error) {
+    const detail = error instanceof Error ? `: ${error.message}` : `: ${String(error)}`;
+    fail("ARTIFACT_WRITE_UNSAFE", `Atomic T08 evidence write failed${detail}`);
   }
   return Object.freeze({
     artifactPath,
