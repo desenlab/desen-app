@@ -1,8 +1,8 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T07 are `DONE`, and
-M10A-T08 is `IN_PROGRESS` with local evidence complete. T07's hosted evidence is in its
-[task-owned proof](../proof/M10A-T07.md); T08's hosted closure remains pending. The canonical statuses and dependencies
+Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T08 are `DONE`. T07's
+hosted evidence is in its [task-owned proof](../proof/M10A-T07.md), and T08's hosted evidence is in
+its [task-owned proof](../proof/M10A-T08.md). The canonical statuses and dependencies
 are in [TASKS.md](TASKS.md).
 
 ## Product promise
@@ -20,10 +20,9 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 ## Delivery sequence and accounting
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
-and one gate; the total becomes 176 tasks and 14 gates. The 128 completed tasks and 11 completed
-gates remain completed. T01 through T07 are the seven completed M10A tasks; T08 is the active
-local implementation, and the other 20 remain `NOT_STARTED`. Nothing is renumbered, erased, or
-counted as hosted-complete by this plan.
+and one gate; the total becomes 176 tasks and 14 gates. The 129 completed tasks and 11 completed
+gates remain completed. T01 through T08 are the eight completed M10A tasks, and the other 19
+remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
 Dependencies, not numeric order, select the next eligible task: T26 acceptance precedes T25's
@@ -40,8 +39,8 @@ Existing npm version/dist-tag and external-release approval rules remain unchang
 ## Selected component foundation
 
 Use **Base UI, `@base-ui/react` 1.8.0**, wrapped by a new private `@desen/starter-catalog-web`
-capability package. T01 installed and proved this baseline; T08 now extends the local starter
-surface with overlays and disclosures, while later component families remain unimplemented.
+capability package. T01 installed and proved this baseline; T08 extends the starter surface with
+overlays and disclosures, while later component families remain unimplemented.
 M10A-T01 authenticated the exact package integrity, license, peer compatibility,
 dependency audit, and committed lockfile. A material incompatibility requires an explicit ADR amendment,
 not silently switching libraries or widening DESEN semantics.
@@ -216,6 +215,12 @@ Combobox, Tabs, Slider, and NumberField contracts with isolated authoring/host e
 [task-owned proof](../proof/M10A-T07.md), including exact-head hosted Quality and fresh-`main` closure.
 It does not authorize normal-App integration, persistence, Publisher, Runtime, Core/protocol,
 G10A, or M11.
+
+**M10A-T08 — Overlay and disclosure capabilities** is `DONE`. It extends the private starter Catalog
+to 0.5.0 with bounded Popover, Tooltip, Menu, and Accordion adapters on a contained portal boundary.
+Its isolated authoring/host evidence, exact-head hosted Quality closure, and fresh-`main` closure are
+recorded in the [task-owned proof](../proof/M10A-T08.md). It does not authorize normal-App
+integration, persistence, Publisher, Runtime, Core/protocol, G10A, or M11.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.

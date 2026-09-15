@@ -8,9 +8,9 @@ Source-node templates, and one explicit React-adapter subpath. Base UI remains a
 implementation detail of the interactive adapters; layout and semantic content use ordinary Web
 semantics where a Base UI primitive is unnecessary.
 
-**M10A-T08 is `IN_PROGRESS`; T07 is `DONE`.** T08 adds bounded Popover, Tooltip, Menu, and
-Accordion adapters on the same contained portal boundary; its [task-owned proof](../../docs/proof/M10A-T08.md)
-will record browser and contract evidence before closure. T07's [task-owned proof](../../docs/proof/M10A-T07.md) records the
+**M10A-T08 is `DONE`; T07 is `DONE`.** T08 adds bounded Popover, Tooltip, Menu, and Accordion
+adapters on the same contained portal boundary; its [task-owned proof](../../docs/proof/M10A-T08.md)
+records browser and contract evidence plus exact-head hosted/fresh-`main` closure. T07's [task-owned proof](../../docs/proof/M10A-T07.md) records the
 selection/numeric-control evidence and exact-head hosted/fresh-`main` closure. T06 is `DONE`; its [task-owned proof](../../docs/proof/M10A-T06.md) records the completed
 local and hosted form-control closure. This package is not a normal Desen App integration, a complete
 component library, a design-system explorer, a persisted project, or a publish/activation path.
@@ -81,7 +81,7 @@ identity. Combobox admits no custom filter or renderer; duplicate IDs, function 
 selection/numeric data reject before rendering or dispatch. Tabs preserves public ordered panel
 content rather than accepting an adapter-private tree.
 
-The active T08 slice extends Dialog's contained overlay boundary with Popover, Tooltip, Menu, and
+The T08 slice extends Dialog's contained overlay boundary with Popover, Tooltip, Menu, and
 Accordion. Overlay portals are owned by `StarterSurfaceBoundary`; no Source prop can provide a
 selector, DOM node, callback, renderer, or external portal authority. Dialog and Popover require a
 bounded content slot, Accordion requires ordered panel slots, and Menu/Accordion identities are
@@ -145,21 +145,21 @@ T17 for the integrated explorer/documentation surface.
 
 ## Verification
 
-The following commands authenticate the active T07 local boundary; its hosted closure is recorded in
-[the T07 proof](../../docs/proof/M10A-T07.md).
+The following commands authenticate the T08 boundary; its hosted closure is recorded in
+[the T08 proof](../../docs/proof/M10A-T08.md).
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck
 pnpm --filter @desen/starter-catalog-web test
 pnpm --filter @desen/starter-catalog-web test:public-package
-pnpm --filter @desen/starter-catalog-web-proof test:m10a-t07
-pnpm generate:m10a-t07
-pnpm verify:m10a-t07
-pnpm test:m10a-t07
+pnpm --filter @desen/starter-catalog-web-proof test:m10a-t08
+pnpm generate:m10a-t08
+pnpm verify:m10a-t08
+pnpm test:m10a-t08
 ```
 
 Authenticate the historical T05 closure without recapturing it with `pnpm verify:m10a-t05` and
 `pnpm test:m10a-t05`; T06 remains independently verifiable with `pnpm verify:m10a-t06` and
-`pnpm test:m10a-t06`. See [the T07 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t07--selection-and-numeric-controls),
-[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T07 proof report](../../docs/proof/M10A-T07.md),
+`pnpm test:m10a-t06`. See [the T08 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t08--overlays-and-disclosures),
+[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T08 proof report](../../docs/proof/M10A-T08.md),
 [the T06 proof report](../../docs/proof/M10A-T06.md), and the [historical T05 proof](../../docs/proof/M10A-T05.md).

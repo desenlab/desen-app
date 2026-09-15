@@ -1,6 +1,6 @@
 # ADR 0023: Design-first authoring and design-system workbench
 
-- Status: Accepted; M10A-T01 through M10A-T07 `DONE` with exact-head hosted and fresh-`main` closure
+- Status: Accepted; M10A-T01 through M10A-T08 `DONE` with exact-head hosted and fresh-`main` closure
 - Date: 2026-09-10
 - Decision owner: user-authorized M10A planning / SC-02 adaptation, closed by G10A
 
@@ -17,8 +17,8 @@ static experience before a frontend engineer supplies application behavior. That
 weaken DESEN 0.1.0. Source and Bundle remain data-only, capability surfaces remain explicit,
 authoring adapters remain honest, and unknown runtime semantics still fail closed.
 
-This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 through M10A-T06
-are `DONE`; T07 has exact-head hosted and fresh-`main` evidence while the other 21 tasks remain `NOT_STARTED`. T06's hosted
+This decision creates the M10A prerequisite milestone and its G10A gate. M10A-T01 through M10A-T08
+are `DONE` with exact-head hosted and fresh-`main` evidence while the other 19 tasks remain `NOT_STARTED`. T06's hosted
 closure is task-owned. Neither acceptance is a release or production-readiness claim. The canonical sequence is in
 [M10A Implementation Plan](../plan/M10A-IMPLEMENTATION-PLAN.md), with detailed acceptance contracts
 in [M10A Task Contracts](../plan/M10A-TASK-CONTRACTS.md) and product behavior in the
