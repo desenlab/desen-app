@@ -251,15 +251,15 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 ## M10A — Design-first product foundation
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
-M10A-T01 through M10A-T07 are `DONE`; M10A-T08 is `IN_PROGRESS` with local proof complete and hosted closure outstanding. Overall progress is 128/176 (73%), M10A is 7/28 (25%), and 11/14
+M10A-T01 through M10A-T08 are `DONE`; overall progress is 129/176 (73%), M10A is 8/28 (29%), and 11/14
 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
 edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
 unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed
 fixtures; unreviewed or invalid forms fail closed. The [T06 proof](../proof/M10A-T06.md) records
-its exact-head hosted and fresh-`main` closure; [T07 proof](../proof/M10A-T07.md) records the hosted closure. The
-[plan](M10A-IMPLEMENTATION-PLAN.md) and [task contracts](M10A-TASK-CONTRACTS.md) own scope,
-negative tests and evidence paths.
+its exact-head hosted and fresh-`main` closure; T07 and T08 retain their own hosted exact-head and
+fresh-`main` closures. The [plan](M10A-IMPLEMENTATION-PLAN.md) and [task contracts](M10A-TASK-CONTRACTS.md)
+own scope, negative tests and evidence paths.
 
 | ID       | Status      | Depends on                                       | Deliverable / evidence                                                                 |
 | -------- | ----------- | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
@@ -270,7 +270,7 @@ negative tests and evidence paths.
 | M10A-T05 | DONE        | M10A-T01, M10A-T02                               | Layout, typography and content starter capabilities                                    |
 | M10A-T06 | DONE        | M10A-T05                                         | [Hosted form-control closure](../proof/M10A-T06.md)                                    |
 | M10A-T07 | DONE        | M10A-T06                                         | [Hosted selection/numeric closure](../proof/M10A-T07.md)                               |
-| M10A-T08 | IN_PROGRESS | M10A-T07                                         | Overlay, menu and disclosure capabilities                                              |
+| M10A-T08 | DONE        | M10A-T07                                         | [Hosted overlay, menu and disclosure closure](../proof/M10A-T08.md)                    |
 | M10A-T09 | NOT_STARTED | M10A-T05, M10A-T08                               | Data-display and feedback capabilities                                                 |
 | M10A-T10 | NOT_STARTED | M10A-T02, M10A-T04, M10A-T09                     | Project/surface lifecycle and atomic authoring persistence                             |
 | M10A-T11 | NOT_STARTED | M10A-T10                                         | Direct-manipulation canvas and accessible layer operations                             |

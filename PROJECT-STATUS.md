@@ -1,16 +1,17 @@
 # Project Status
 
-Last updated: 2026-09-14
+Last updated: 2026-09-15
 
 ## Current state
 
-M10 and its terminal `G10` gate remain complete. Implementation progress is **128/176 tasks (73%)**:
-M10 is **12/12**, M10A is **7/28 (25%)**, and proof gates are **11/14**. Gates are excluded from the
+M10 and its terminal `G10` gate remain complete. Implementation progress is **129/176 tasks (73%)**:
+M10 is **12/12**, M10A is **8/28 (29%)**, and proof gates are **11/14**. Gates are excluded from the
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01 through M10A-T07 are DONE; M10A-T08 is IN_PROGRESS.** T07's hosted 0.4.0
-selection/numeric-control evidence is in its [task-owned proof](docs/proof/M10A-T07.md); T08's local overlay/disclosure proof is complete and hosted closure is pending. M11 has not started. The frozen protocol, Runtime
+**M10A-T01 through M10A-T08 are DONE.** T07's hosted 0.4.0 selection/numeric-control evidence and
+T08's hosted 0.5.0 overlay/disclosure evidence are in their [task-owned proofs](docs/proof/M10A-T07.md)
+and [T08 proof](docs/proof/M10A-T08.md). M11 has not started. The frozen protocol, Runtime
 Core, SC-01 profile, and completed T02 authority are unchanged.
 
 ## Current closure
@@ -18,12 +19,14 @@ Core, SC-01 profile, and completed T02 authority are unchanged.
 Each completed task retains its own exact-head, merge, and fresh-`main` receipt. The
 [M10A-T01 proof](docs/proof/M10A-T01.md), [M10A-T02 proof](docs/proof/M10A-T02.md),
 [M10A-T03 proof](docs/proof/M10A-T03.md), [M10A-T04 proof](docs/proof/M10A-T04.md),
-[M10A-T05 proof](docs/proof/M10A-T05.md), and [M10A-T06 proof](docs/proof/M10A-T06.md)
-and [M10A-T07 proof](docs/proof/M10A-T07.md) are canonical closure authorities; earlier failed candidates remain failures. T05 proves only its
+[M10A-T05 proof](docs/proof/M10A-T05.md), [M10A-T06 proof](docs/proof/M10A-T06.md),
+[M10A-T07 proof](docs/proof/M10A-T07.md), and [M10A-T08 proof](docs/proof/M10A-T08.md) are canonical
+closure authorities; earlier failed candidates remain failures. T05 proves only its
 private starter Catalog and isolated harness, not normal-App integration, persistence, Runtime,
 Publisher, or protocol authority. T06 proves only the private 0.3.0 form-control Catalog and
-isolated harness. T07's hosted 0.4.0 proof covers bounded selection/numeric controls only; it adds
-no normal-App integration, persistence, Publisher, Runtime, Core/protocol, G10A, or M11 authority.
+isolated harness. T07's hosted 0.4.0 proof covers bounded selection/numeric controls only. T08's
+hosted 0.5.0 proof covers bounded overlay, menu, and disclosure capabilities only; neither adds
+normal-App integration, persistence, Publisher, Runtime, Core/protocol, G10A, or M11 authority.
 
 ## M10 closure
 
@@ -62,7 +65,7 @@ No Git history is rewritten.
 
 ## Documentation verification
 
-The eight governed entry and standards documents are reduced from 18,467 to 1,712 lines (90.7%)
+The eight governed entry and standards documents are reduced from 18,467 to 1,717 lines (90.7%)
 while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
 through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
 link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
@@ -74,11 +77,10 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T08 — overlay, menu, and disclosure capabilities — is `IN_PROGRESS`.** T07's
-[hosted proof](docs/proof/M10A-T07.md), [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), and
-[task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t07--selection-and-numeric-controls) define
-the completed preceding boundary. T08's local proof is complete; its hosted exact-head closure is pending. It must not retrospectively expand
-T07 or authorize Runtime activation,
+**M10A-T09 — data-display and feedback capabilities — is `NOT_STARTED`.** T08's
+[hosted proof](docs/proof/M10A-T08.md), [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), and
+[task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t08--overlays-and-disclosures) define
+the completed preceding boundary. T09 must not retrospectively expand T08 or authorize Runtime activation,
 normal-App integration/persistence, Publisher authority, Core/protocol changes, G10A, or M11.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen

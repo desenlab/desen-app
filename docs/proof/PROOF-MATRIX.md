@@ -3707,3 +3707,19 @@ The isolated authoring/host Chromium receipt covers bounded data-only selection,
 tab panels, keyboard interactions, numeric limits, and malformed-data rejection. Exact-head hosted
 Quality and fresh-`main` closure are recorded in the task report. T07 does not
 add normal-App integration, persistence, Publisher/Runtime/Core/protocol authority, G10A, or M11.
+
+## M10A-T08 overlay and disclosure starter capabilities (`DONE`)
+
+The [M10A-T08 report](M10A-T08.md) records the private 0.5.0
+`@desen/starter-catalog-web` extension: bounded Popover, Tooltip, Menu, and Accordion adapters with
+contained portals, stable identities, keyboard/pointer parity, focus return, and ordered disclosure
+slots. Its 4,979-byte artifact is
+`sha256:37bfd7458fac6001b396632dc167a155aca56c3d5a62b93c1df144284428a729`; checkpoint 99
+authenticates 72 artifacts / 144 readers at
+`sha256:99ae1de66ca5bf736551f543d31e19a293e997f8c9834782dfabbf8261d50a4c`.
+
+The isolated authoring/host Chromium receipt covers overlay containment, Dialog/Popover focus
+return, Tooltip hover/focus, Menu pointer/keyboard selection, Accordion panel ordering, and
+malformed or stale-input rejection. PR #110's exact-head hosted Quality and fresh-`main` closure
+are recorded in the task report. T08 does not add normal-App integration, persistence,
+Publisher/Runtime/Core/protocol authority, G10A, or M11.

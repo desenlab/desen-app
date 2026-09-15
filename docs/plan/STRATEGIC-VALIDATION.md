@@ -193,10 +193,11 @@ not a fabricated Continue result. Additional external research is not a prerequi
 the subsequent planned M11 extension proof. Internal automated acceptance replaces no market
 evidence: demand, adoption and broad Storybook/Chromatic/Figma equivalence remain unproven.
 
-M10A-T01 through M10A-T07 are now `DONE`: the bounded Button, Select, and Dialog adapter foundation
+M10A-T01 through M10A-T08 are now `DONE`: the bounded Button, Select, and Dialog adapter foundation
 is followed by the platform-neutral versioned project/token model, theme/token authoring workbench,
-immutable release identity, private layout/content starter Catalog, and form-control Catalog. Overall
-progress is 128/176 (73%), M10A is 7/28 (25%), and 11/14 proof gates are closed. The completed T03 covers frozen SC-01's 16 valid fixtures: three T02-supported normal edit/preview paths and 13
+immutable release identity, private layout/content starter Catalog, form-control Catalog, and bounded
+overlay/disclosure Catalog. Overall progress is 129/176 (73%), M10A is 8/28 (29%), and 11/14 proof
+gates are closed. The completed T03 covers frozen SC-01's 16 valid fixtures: three T02-supported normal edit/preview paths and 13
 losslessly preserved/disclosed unsupported paths with partial preview blocked only for their selected
 overlay; seven invalid fixtures reject atomically. A separate closed T02-recognized unsupported matrix
 preserves/discloses six valid fixtures and atomically rejects ten malformed fixtures. Unreviewed or
@@ -205,6 +206,6 @@ design-system release identity and an exact-digest store port. This does not est
 starter library, normal App integration, durable production storage, Runtime activation, market
 demand, or production readiness. T05's hosted closure covers only its private Catalog and isolated
 browser harness. T06's form-control closure is likewise limited to its private Catalog and isolated
-proof; M10A-T07 is `DONE` with exact-head hosted and fresh-`main` evidence. M10A-T08 is in progress
-with local evidence complete; its hosted closure is still required. G10A must pass before M11-T01 or M11-T08, and
+proof; M10A-T07 is `DONE` with exact-head hosted and fresh-`main` evidence. M10A-T08 is `DONE`
+with exact-head hosted and fresh-`main` evidence for its bounded overlay/disclosure Catalog. G10A must pass before M11-T01 or M11-T08, and
 SC-02 authorizes no external publication or deployment.
