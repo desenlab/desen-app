@@ -198,7 +198,7 @@ describe("starter component contracts", () => {
       starterProgressComponentRegistration,
     ]) {
       expectDeeplyFrozen(registration);
-      expect(registration.manifest.events).toBeUndefined();
+      expect(Object.hasOwn(registration.manifest, "events")).toBe(false);
     }
     expect(starterAvatarComponentRegistration.manifest.propsSchema.required).toEqual([
       "label",

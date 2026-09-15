@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "9287d495a5e8ec7fef5ebd0c0507667b165d729ab53d34e846f0a324f0f1b2ff",
+  "headSha256": "76591ae46cf96d4800ca664b1669d942f64f92e32a642a9796d6f86a7a1f771a",
   "checkpoints": [
     {
       "sequence": 1,
@@ -84715,7 +84715,7 @@
           "task": "M10A-T09",
           "path": "docs/proof/artifacts/m10a-t09.json",
           "bytes": 5584,
-          "sha256": "7d29912421a11b09cbc9583c721d45c96af48f7a90e602091d36538581be7877"
+          "sha256": "7fecf6a1b5eebb4a132f55e9641b6137b772bd1bb0df7fb380ef9c1f68289d09"
         }
       ],
       "readers": [

@@ -140,7 +140,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "bcf9624e67233a1e25f4e51af3491b236dec367a286abd1575d8181954e4c13c",
   "c618802ec08dc7518dbbbfcfaba61279aebf545f7ab0c1aa8255e432028384c2",
   "99ae1de66ca5bf736551f543d31e19a293e997f8c9834782dfabbf8261d50a4c",
-  "9287d495a5e8ec7fef5ebd0c0507667b165d729ab53d34e846f0a324f0f1b2ff",
+  "76591ae46cf96d4800ca664b1669d942f64f92e32a642a9796d6f86a7a1f771a",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
@@ -913,7 +913,7 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     {
       path: "docs/proof/artifacts/m10a-t09.json",
       bytes: 5_584,
-      sha256: "7d29912421a11b09cbc9583c721d45c96af48f7a90e602091d36538581be7877",
+      sha256: "7fecf6a1b5eebb4a132f55e9641b6137b772bd1bb0df7fb380ef9c1f68289d09",
     },
     "scripts/lib/m10a-t09-proof.mjs",
     "tests/m10a-t09.test.mjs",

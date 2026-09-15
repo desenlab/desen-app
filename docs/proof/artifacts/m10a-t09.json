@@ -10,13 +10,13 @@
       "id": "run.desen.starter.web",
       "version": "0.6.0",
       "target": "web-react",
-      "sha256": "f6fd21a8ae4ef18947dd8fcd5bf88b5d917dd19340a19d8cd7b41962b511dfab",
+      "sha256": "4e59de0135e7d445bc8c6e029506369bf8b38e40d5df5a57a39f81a799a42a69",
       "bytes": 585861
     },
-    "packageDigest": "sha256:7efb7ec20c766425b61b4225b7ad263aa17d852dae32f425e884193340ef71e8",
+    "packageDigest": "sha256:88a1fac65d43d166cbc31dceb890468950f677395ab93a62a382955e16b0c709",
     "digestProfile": "desen.web-react.package-digest",
     "distFiles": 37,
-    "distBytes": 3155464
+    "distBytes": 3155509
   },
   "capabilities": {
     "ids": [

@@ -3729,9 +3729,9 @@ Publisher/Runtime/Core/protocol authority, G10A, or M11.
 The [M10A-T09 report](M10A-T09.md) records local evidence for the private 0.6.0
 `@desen/starter-catalog-web` extension: Card, Badge, Avatar, Alert, List, basic Table, Skeleton,
 and Progress. Its 5,584-byte artifact is
-`sha256:7d29912421a11b09cbc9583c721d45c96af48f7a90e602091d36538581be7877`; checkpoint 100
+`sha256:7fecf6a1b5eebb4a132f55e9641b6137b772bd1bb0df7fb380ef9c1f68289d09`; checkpoint 100
 authenticates 73 artifacts / 146 readers at
-`sha256:9287d495a5e8ec7fef5ebd0c0507667b165d729ab53d34e846f0a324f0f1b2ff`.
+`sha256:76591ae46cf96d4800ca664b1669d942f64f92e32a642a9796d6f86a7a1f771a`.
 
 The isolated authoring/host Chromium receipt covers text alternatives, empty/loading/error/ready
 states, bounded inert sample data, explicit List slots, stable Table row identity, and native
