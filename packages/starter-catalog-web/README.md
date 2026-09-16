@@ -8,9 +8,9 @@ Source-node templates, and one explicit React-adapter subpath. Base UI remains a
 implementation detail of the interactive adapters; layout and semantic content use ordinary Web
 semantics where a Base UI primitive is unnecessary.
 
-**M10A-T09 is `IN_PROGRESS`; T08, T07, and T06 are `DONE`.** T09 adds bounded data-display and
-feedback adapters on the current Catalog boundary; its [task-owned proof](../../docs/proof/M10A-T09.md)
-records the local browser and contract evidence and awaits exact-head hosted/fresh-`main` closure.
+**M10A-T09, T08, T07, and T06 are `DONE`.** T09 adds bounded data-display and feedback adapters on
+the current Catalog boundary; its [task-owned proof](../../docs/proof/M10A-T09.md) records local
+browser/contract evidence plus exact-head hosted/fresh-`main` closure.
 T08 adds bounded Popover, Tooltip, Menu, and Accordion adapters on the same contained portal
 boundary; its [task-owned proof](../../docs/proof/M10A-T08.md) records completed hosted closure.
 T07's [task-owned proof](../../docs/proof/M10A-T07.md) records completed selection/numeric-control
@@ -91,7 +91,7 @@ bounded content slot, Accordion requires ordered panel slots, and Menu/Accordion
 validated before Base UI receives them. Escape, pointer/keyboard parity, focus return, and
 unmount-safe interactions are covered by the task proof.
 
-The in-progress T09 slice adds bounded data-display and feedback capabilities:
+The T09 slice adds bounded data-display and feedback capabilities:
 
 | Group                | Capabilities                     | Admitted boundary                                                                                                     |
 | -------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -161,8 +161,8 @@ explorer/documentation surface.
 
 ## Verification
 
-The following commands authenticate the current T09 boundary. T09's local evidence is recorded in
-[the T09 proof](../../docs/proof/M10A-T09.md); its hosted closure remains pending.
+The following commands authenticate the T09 boundary; its hosted closure is recorded in
+[the T09 proof](../../docs/proof/M10A-T09.md).
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck

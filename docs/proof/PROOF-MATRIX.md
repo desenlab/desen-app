@@ -3724,7 +3724,7 @@ malformed or stale-input rejection. PR #110's exact-head hosted Quality and fres
 are recorded in the task report. T08 does not add normal-App integration, persistence,
 Publisher/Runtime/Core/protocol authority, G10A, or M11.
 
-## M10A-T09 data-display and feedback starter capabilities (`IN_PROGRESS`)
+## M10A-T09 data-display and feedback starter capabilities (`DONE`)
 
 The [M10A-T09 report](M10A-T09.md) records local evidence for the private 0.6.0
 `@desen/starter-catalog-web` extension: Card, Badge, Avatar, Alert, List, basic Table, Skeleton,
@@ -3737,5 +3737,5 @@ The isolated authoring/host Chromium receipt covers text alternatives, empty/loa
 states, bounded inert sample data, explicit List slots, stable Table row identity, and native
 Table semantics. The local receipt deliberately excludes enterprise grids, charts, server
 pagination, sorting, operation binding, normal-App integration, persistence,
-Publisher/Runtime/Core/protocol authority, G10A, and M11. Hosted exact-head and fresh-`main`
-closure are still required; this task is not `DONE`.
+Publisher/Runtime/Core/protocol authority, G10A, and M11. PR #112's exact-head hosted Quality and
+fresh-`main` closure are recorded in the task report.

@@ -5,15 +5,15 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 129/176 (%73), M10 12/12,
-M10A 8/28 (%29) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T08'nın exact-head PR kontrolleri,
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 130/176 (%74), M10 12/12,
+M10A 9/28 (%32) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T09'nın exact-head PR kontrolleri,
 merge'leri ve taze `main` koşuları geçti. M10A-T07 `DONE`: exact-head PR, merge ve taze `main` kapanışı geçti.
 Ayrıntı [Project Status](../../PROJECT-STATUS.md),
 [T05 kanıtı](../proof/M10A-T05.md), [T06 kanıtı](../proof/M10A-T06.md), [T07 kanıtı](../proof/M10A-T07.md) ve
 [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış görev sayısı 129 ve M10A sayacı 8/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
+ekler; tamamlanmış görev sayısı 130 ve M10A sayacı 9/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
 sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` `DONE`: tema/token
 authoring, modlar, alias'lar, kayıp-farkındalıklı aktarım ve izole workbench kanıtlandı.
@@ -25,7 +25,8 @@ RadioGroup ve Switch için erişilebilir alan bileşimi ve kontrollü event kan�
 `M10A-T07` `DONE`: Select, Combobox, Tabs, Slider ve NumberField için hosted kapanış
 kaydedildi; exact-head hosted ve taze `main` kapanışı geçti. `M10A-T08` `DONE`: overlay, menu ve
 disclosure bileşenlerinin hosted exact-head ve taze `main` kapanışı [kanıt belgesine](../proof/M10A-T08.md)
-kaydedildi.
+kaydedildi. `M10A-T09` `DONE`: Card, Badge, Avatar, Alert, List, basic Table, Skeleton ve Progress
+için hosted exact-head ve taze `main` kapanışı [kanıt belgesine](../proof/M10A-T09.md) kaydedildi.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i
