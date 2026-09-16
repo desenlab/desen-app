@@ -258,4 +258,16 @@ describe("ordinary project and surface lifecycle", () => {
     expect(controller.read().dirty).toBe(true);
     expect(controller.read().workspace.projects[0]?.id).toBe("workspace-one");
   });
+
+  it("can restore the last good registry before a navigation guard accepts discard", async () => {
+    const storagePort = memoryPort();
+    const controller = requireController(storagePort);
+    expect(controller.createProject(project(), "Workspace One", names())).toBeNull();
+    expect(await controller.save()).toEqual({ status: "created", generation: 1 });
+    expect(controller.renameProject("workspace-one", "Changed name")).toBeNull();
+    expect(controller.read().dirty).toBe(true);
+    expect(controller.discardChanges()).toBeNull();
+    expect(controller.read().dirty).toBe(false);
+    expect(controller.read().workspace.projects[0]?.name).toBe("Workspace One");
+  });
 });

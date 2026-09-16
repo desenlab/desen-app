@@ -250,6 +250,8 @@ export interface ProjectLifecycleController {
   readonly recoverProject: (this: void, projectId: string) => ProjectLifecycleResult | null;
   /** Returns canonical, deterministic export bytes for one admitted editable project. */
   readonly exportProject: (this: void, projectId: string) => string | null;
+  /** Restores the last good registry, or the initial empty registry before the first save. */
+  readonly discardChanges: (this: void) => ProjectLifecycleResult | null;
   /** Stops notifications and rejects future lifecycle work. */
   readonly dispose: (this: void) => void;
 }
@@ -983,6 +985,19 @@ export function createProjectLifecycleController(
     exportProject: (projectId: string) => {
       const project = state.workspace.projects.find((candidate) => candidate.id === projectId);
       return project === undefined ? null : canonicalizeJson(project.record);
+    },
+    discardChanges: () => {
+      if (state.disposed) return resultFailure("disposed");
+      if (state.pending !== null) return resultFailure("operation-in-progress");
+      const workspace = state.savedWorkspace ?? initialWorkspace;
+      replace({
+        ...state,
+        workspace,
+        dirty: false,
+        reopenRequired: false,
+        result: null,
+      });
+      return null;
     },
     dispose: () => {
       if (!state.disposed) {
