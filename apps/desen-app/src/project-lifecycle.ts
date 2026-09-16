@@ -152,6 +152,8 @@ export interface ProjectLifecycleState {
   readonly pending: "opening" | "saving" | null;
   /** Last controlled lifecycle settlement. */
   readonly result: ProjectLifecycleResult | null;
+  /** The save origin shown to users after the most recent save attempt. */
+  readonly lastSaveMode: "autosave" | "explicit" | null;
   /** True after disposal; all future mutations fail closed. */
   readonly disposed: boolean;
 }
@@ -184,6 +186,8 @@ export interface ProjectLifecycleController {
   readonly open: (this: void) => Promise<ProjectLifecycleResult>;
   /** Saves the complete registry with an explicit generation fence. */
   readonly save: (this: void) => Promise<ProjectLifecycleResult>;
+  /** Performs a caller-scheduled automatic save through the identical generation fence. */
+  readonly autosave: (this: void) => Promise<ProjectLifecycleResult>;
   /** Adds an already admitted project to the visible registry. */
   readonly createProject: (
     this: void,
@@ -571,8 +575,10 @@ export function createProjectLifecycleController(
     reopenRequired: false,
     pending: null,
     result: null,
+    lastSaveMode: null,
     disposed: false,
   });
+  let requestedSaveMode: "autosave" | "explicit" | null = null;
   const replace = (
     next: Omit<ProjectLifecycleState, "disposed"> & { readonly disposed?: boolean },
   ): void => {
@@ -634,6 +640,7 @@ export function createProjectLifecycleController(
         reopenRequired: false,
         pending: null,
         result,
+        lastSaveMode: state.lastSaveMode,
       });
       return result;
     },
@@ -641,7 +648,9 @@ export function createProjectLifecycleController(
       if (state.disposed) return resultFailure("disposed");
       if (state.pending !== null) return resultFailure("operation-in-progress");
       if (state.reopenRequired) return resultFailure("reopen-required");
-      replace({ ...state, pending: "saving", result: null });
+      const lastSaveMode = requestedSaveMode ?? "explicit";
+      requestedSaveMode = null;
+      replace({ ...state, pending: "saving", result: null, lastSaveMode });
       let outcome: ProjectWorkspaceSaveResult;
       try {
         outcome = captureSaveResult(
@@ -691,6 +700,13 @@ export function createProjectLifecycleController(
       const result = resultFailure("storage-failed");
       replace({ ...state, pending: null, result });
       return result;
+    },
+    autosave: async () => {
+      if (state.disposed) return resultFailure("disposed");
+      if (state.pending !== null) return resultFailure("operation-in-progress");
+      if (state.reopenRequired) return resultFailure("reopen-required");
+      requestedSaveMode = "autosave";
+      return controller.save();
     },
     createProject: (
       candidate: unknown,

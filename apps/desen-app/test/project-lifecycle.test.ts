@@ -270,4 +270,14 @@ describe("ordinary project and surface lifecycle", () => {
     expect(controller.read().dirty).toBe(false);
     expect(controller.read().workspace.projects[0]?.name).toBe("Workspace One");
   });
+
+  it("reports automatic and explicit save origins while preserving the same CAS boundary", async () => {
+    const controller = requireController(memoryPort());
+    expect(controller.createProject(project(), "Workspace One", names())).toBeNull();
+    expect(await controller.autosave()).toEqual({ status: "created", generation: 1 });
+    expect(controller.read().lastSaveMode).toBe("autosave");
+    expect(controller.renameProject("workspace-one", "Renamed")).toBeNull();
+    expect(await controller.save()).toEqual({ status: "updated", generation: 2 });
+    expect(controller.read().lastSaveMode).toBe("explicit");
+  });
 });
