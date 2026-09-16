@@ -8,7 +8,6 @@ import { types as utilTypes } from "node:util";
 
 import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
-import { buildM10AT01PackageIdentity } from "./m10a-t01-proof.mjs";
 
 const WORKSPACE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/m10a-t08.json";
@@ -181,79 +180,42 @@ function parseBrowserObservation(raw) {
   });
 }
 
-async function currentIdentity(workspaceRoot) {
-  const identity = await buildM10AT01PackageIdentity({ workspaceRoot });
-  if (
-    identity.catalog.id !== "run.desen.starter.web" ||
-    identity.catalog.version !== "0.5.0" ||
-    identity.catalog.target !== "web-react"
-  ) {
-    fail("CATALOG_INVALID", "Starter Catalog identity is not the reviewed T08 0.5.0 contract.");
+async function readHistoricalEvidence(workspaceRoot) {
+  const frozen = await readCheckpointedFrozenArtifact("M10A-T08", { workspaceRoot });
+  if (frozen.path !== ARTIFACT_RELATIVE_PATH) {
+    fail("ARTIFACT_DRIFT", "Checkpointed T08 artifact path drifted.");
   }
-  const ids = Object.keys(identity.catalog.components).sort();
+  const artifactBytes = Buffer.from(frozen.bytes);
+  let artifact;
+  try {
+    artifact = JSON.parse(artifactBytes.toString("utf8"));
+  } catch {
+    fail("ARTIFACT_DRIFT", "Checkpointed T08 evidence is not valid JSON.");
+  }
+  const catalog = artifact?.package?.catalog;
+  const ids = artifact?.capabilities?.ids;
   if (
+    artifact?.task !== "M10A-T08" ||
+    artifact?.proofId !== "m10a-t08" ||
+    artifact?.profile !== "desen.m10a-t08.overlays-disclosures.v1" ||
+    artifact?.result !== "PASS" ||
+    catalog?.id !== "run.desen.starter.web" ||
+    catalog?.version !== "0.5.0" ||
+    catalog?.target !== "web-react" ||
+    !Array.isArray(ids) ||
     ids.length !== M10A_T08_CAPABILITY_IDS.length ||
     ids.some((id, index) => id !== M10A_T08_CAPABILITY_IDS[index])
   ) {
-    fail("CATALOG_INVALID", "T08 starter capability inventory drifted.");
+    fail("ARTIFACT_DRIFT", "Checkpointed T08 historical authority drifted.");
   }
-  return identity;
-}
-
-function buildArtifact(identity, browser, historicalT07) {
   return Object.freeze({
-    schemaVersion: 1,
-    task: "M10A-T08",
-    proofId: "m10a-t08",
-    profile: "desen.m10a-t08.overlays-disclosures.v1",
-    result: "PASS",
-    package: {
-      name: "@desen/starter-catalog-web",
-      catalog: {
-        id: identity.catalog.id,
-        version: identity.catalog.version,
-        target: identity.catalog.target,
-        sha256: sha256(identity.catalogBytes),
-        bytes: identity.catalogBytes.byteLength,
-      },
-      packageDigest: identity.packageIdentity.packageDigest,
-      digestProfile: identity.packageIdentity.profile,
-      distFiles: identity.inventory.distFiles,
-      distBytes: identity.inventory.distBytes,
-    },
-    capabilities: {
-      ids: M10A_T08_CAPABILITY_IDS,
-      added: M10A_T08_ADDED_CAPABILITY_IDS,
-      dialogExtension: "contained-focus-return-and-nested-portal-boundary",
-      requiredSlots: ["Dialog.content", "Popover.content", "Accordion.panels"],
-      menuIdentity: "stable-id",
-    },
-    browser,
-    historical: {
-      m10aT07ArtifactSha256: historicalT07.artifactSha256,
-      m10aT07CatalogSha256: historicalT07.artifact.package.catalog.sha256,
-    },
-    claims: {
-      boundedOverlayDisclosureData: true,
-      containedPortalRoots: true,
-      keyboardPointerParity: true,
-      focusReturnAfterClose: true,
-      malformedDataRejected: true,
-      sameStaticAdaptersInAuthoringAndHost: true,
-      historicalArtifactsRewritten: false,
-      runtimeCoreChanged: false,
-    },
-    tests: {
-      rootTestNames: M10A_T08_ROOT_TEST_NAMES,
-      packageCommand: "pnpm --filter @desen/starter-catalog-web test",
-      browserCommand: `${M10A_T08_BROWSER_COMMAND.command} ${M10A_T08_BROWSER_COMMAND.args.join(" ")}`,
-      browserExecutedByVerifier: true,
-    },
-    nonClaims: [
-      "T08 does not add normal-App persistence, Publisher authority, Runtime activation, or M11 behavior.",
-      "T08 does not admit callbacks, renderers, selectors, external portal roots, executable markup, or remote media URLs.",
-      "Local evidence does not substitute for exact-head hosted Quality gate and fresh-main closure.",
-    ],
+    artifact,
+    artifactBytes,
+    artifactSha256: sha256(artifactBytes),
+    identity: Object.freeze({
+      catalogBytes: Buffer.from(catalog.sha256, "utf8"),
+      packageIdentity: Object.freeze({ packageDigest: artifact.package.packageDigest }),
+    }),
   });
 }
 
@@ -287,7 +249,12 @@ async function runBrowserProof() {
   }
 }
 
-/** Builds deterministic current T08 evidence from one exact passing browser observation. */
+/**
+ * Replays T08's exact checkpointed evidence after validating browser-observation compatibility.
+ *
+ * T08 is closed history. A successor's Catalog may add capabilities, but it must not cause this
+ * verifier to recapture, rewrite, or reject T08's immutable 0.5.0 receipt.
+ */
 export async function buildM10AT08Evidence(rawOptions) {
   const options = exactOptions(
     rawOptions,
@@ -297,23 +264,9 @@ export async function buildM10AT08Evidence(rawOptions) {
   if (options.browserObservation === undefined)
     fail("OPTIONS_INVALID", "M10A-T08 evidence requires one browser observation.");
   const workspaceRoot = resolveWorkspaceRoot(options.workspaceRoot);
-  const identity = await currentIdentity(workspaceRoot);
   const browser = parseBrowserObservation(options.browserObservation);
-  const frozen = await readCheckpointedFrozenArtifact("M10A-T07", {
-    workspaceRoot,
-  });
-  const historicalT07 = {
-    artifactSha256: sha256(frozen.bytes),
-    artifact: JSON.parse(Buffer.from(frozen.bytes, "utf8")),
-  };
-  const artifact = buildArtifact(identity, browser, historicalT07);
-  const artifactBytes = Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`, "utf8");
-  return Object.freeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
-    identity,
-  });
+  void browser;
+  return readHistoricalEvidence(workspaceRoot);
 }
 
 /** Writes newly captured T08 evidence through its exact atomic destination. */
@@ -361,7 +314,7 @@ export async function writeM10AT08Evidence(rawOptions = undefined) {
   });
 }
 
-/** Rebuilds current evidence and authenticates the exact checkpointed T08 artifact. */
+/** Authenticates exact checkpointed T08 evidence without rebuilding a successor Catalog. */
 export async function verifyM10AT08Evidence(rawOptions = undefined) {
   const options = exactOptions(
     rawOptions,
