@@ -115,6 +115,16 @@ export const M10_GATE_M10A_T01_CURRENT_HOST_AUDIT = Object.freeze({
   independentBuildsPerApplication: 2,
 });
 
+/**
+ * T10 adds three lifecycle modules to the complete source inventory without adding an edge to
+ * the frozen M10 production graph. The lower-level published-host reader authenticates the
+ * exact paths; this summary keeps the terminal gate's historical projection equally narrow.
+ */
+export const M10_GATE_M10A_T10_CURRENT_HOST_AUDIT = Object.freeze({
+  ...M10_GATE_M10A_T01_CURRENT_HOST_AUDIT,
+  appSourceFiles: 57,
+});
+
 const M10_GATE_FROZEN_HOST_AUDIT_IDENTITIES = Object.freeze({
   appGraphSha256: "sha256:fa8f18c9510575a8c5719e19bfb5aaf42468a167c475879778554d0a3950bebf",
   appOutputIdentity: "sha256:ba0b863a2133c99fd90a834fd892660b1e70198b377ae714ab7e8c31af2656a7",
@@ -382,8 +392,8 @@ function projectGraphAudit(graph) {
 }
 
 /**
- * Authenticates the exact M10A-T01 successor graph, then projects the three historical identities
- * retained by the immutable G10 artifact.
+ * Authenticates the exact M10A-T01 or isolated-source M10A-T10 successor graph, then projects
+ * the three historical identities retained by the immutable G10 artifact.
  */
 export function projectM10GateHistoricalHostAudit(rawHostAudit) {
   if (
@@ -395,14 +405,31 @@ export function projectM10GateHistoricalHostAudit(rawHostAudit) {
   )
     fail("HOST_AUDIT_FAILED", "Fresh host audit is not one inert current-reader projection.");
 
-  const expectedEntries = Object.entries(M10_GATE_M10A_T01_CURRENT_HOST_AUDIT);
+  const acceptedCurrentAudit = [
+    M10_GATE_M10A_T01_CURRENT_HOST_AUDIT,
+    M10_GATE_M10A_T10_CURRENT_HOST_AUDIT,
+  ].find((candidate) => {
+    const expectedEntries = Object.entries(candidate);
+    const keys = Reflect.ownKeys(rawHostAudit);
+    return (
+      keys.length === expectedEntries.length &&
+      expectedEntries.every(([key, expected]) => {
+        const descriptor = Object.getOwnPropertyDescriptor(rawHostAudit, key);
+        return descriptor?.enumerable && "value" in descriptor && descriptor.value === expected;
+      })
+    );
+  });
+  if (acceptedCurrentAudit === undefined)
+    fail("HOST_AUDIT_FAILED", "Fresh host audit is not the reviewed M10A successor.");
+
+  const expectedEntries = Object.entries(acceptedCurrentAudit);
   const keys = Reflect.ownKeys(rawHostAudit);
   if (keys.length !== expectedEntries.length)
-    fail("HOST_AUDIT_FAILED", "Fresh host audit is not the reviewed M10A-T01 successor.");
+    fail("HOST_AUDIT_FAILED", "Fresh host audit is not the reviewed M10A successor.");
   for (const [key, expected] of expectedEntries) {
     const descriptor = Object.getOwnPropertyDescriptor(rawHostAudit, key);
     if (!descriptor?.enumerable || !("value" in descriptor) || descriptor.value !== expected)
-      fail("HOST_AUDIT_FAILED", "Fresh host audit is not the reviewed M10A-T01 successor.");
+      fail("HOST_AUDIT_FAILED", "Fresh host audit is not the reviewed M10A successor.");
   }
 
   return Object.freeze({

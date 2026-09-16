@@ -500,7 +500,10 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[4], () => {
   assert.deepEqual(built.liveSuccessorAuthority.historicalProjectionPaths, [
     "apps/desen-app-browser-e2e/package.json",
     "packages/editor-core/package.json",
+    "apps/desen-app/package.json",
     "authority.currentGraphAudit",
+    "authority.currentGraphAudit.appSourceAudit.inventory[M10A-T10-isolated-lifecycle]",
+    "authority.currentGraphAudit.appSourceAudit.completeSourceFiles",
     "authority.publicApiMatrix.compiledReceipts[packages/editor-core/dist/index.js]",
     "authority.publicApiMatrix.compiledReceipts[packages/editor-core/dist/stable-id-insert.js]",
     "authority.publicApiMatrix.compiledSnapshotSha256",
@@ -566,6 +569,16 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[4], () => {
   assert.equal(Object.isFrozen(projected.currentPublicApiMatrix), true);
 
   for (const [label, mutate] of [
+    [
+      "isolated lifecycle inventory",
+      (input) => {
+        input.currentGraphAudit.appSourceAudit.inventory =
+          input.currentGraphAudit.appSourceAudit.inventory.filter(
+            (relativePath) => relativePath !== "apps/desen-app/src/project-lifecycle.ts",
+          );
+        input.currentGraphAudit.appSourceAudit.completeSourceFiles -= 1;
+      },
+    ],
     [
       "module receipt",
       (input) => {
