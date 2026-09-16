@@ -3739,3 +3739,14 @@ Table semantics. The local receipt deliberately excludes enterprise grids, chart
 pagination, sorting, operation binding, normal-App integration, persistence,
 Publisher/Runtime/Core/protocol authority, G10A, and M11. PR #112's exact-head hosted Quality and
 fresh-`main` closure are recorded in the task report.
+
+## M10A-T10 project and surface lifecycle (`DONE`)
+
+The [M10A-T10 report](M10A-T10.md) records the application-owned project workspace registry:
+admitted blank projects, ordered/named Source surfaces, recoverable project deletion, generation-fenced
+automatic and explicit saves, and dirty-navigation recovery. It is tested as a normal Desen App
+boundary, not a new Catalog or protocol artifact.
+
+PR #114's exact-head hosted Quality and fresh-`main` closure verify its six owned application source/test
+paths under the reviewed exhaustive-fallback ownership boundary. T10 does not add Runtime, Publisher,
+Core/protocol, G10A, or M11 authority.

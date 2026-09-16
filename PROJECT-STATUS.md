@@ -4,14 +4,14 @@ Last updated: 2026-09-16
 
 ## Current state
 
-M10 and its terminal `G10` gate remain complete. Implementation progress is **130/176 tasks (74%)**:
-M10 is **12/12**, M10A is **9/28 (32%)**, and proof gates are **11/14**. Gates are excluded from the
+M10 and its terminal `G10` gate remain complete. Implementation progress is **131/176 tasks (74%)**:
+M10 is **12/12**, M10A is **10/28 (36%)**, and proof gates are **11/14**. Gates are excluded from the
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01 through M10A-T09 are DONE.** T08's hosted 0.5.0 overlay/disclosure evidence and T09's
-hosted 0.6.0 data-display/feedback evidence are in their [task-owned proofs](docs/proof/M10A-T08.md)
-and [T09 proof](docs/proof/M10A-T09.md). M11 has not started. The frozen protocol, Runtime Core,
+**M10A-T01 through M10A-T10 are DONE.** T10 owns application-local project/surface lifecycle and
+generation-fenced persistence of the T02 envelope; its [task-owned proof](docs/proof/M10A-T10.md)
+records exact-head and fresh-`main` closure. M11 has not started. The frozen protocol, Runtime Core,
 SC-01 profile, and completed T02 authority are unchanged.
 
 ## Current closure
@@ -20,15 +20,15 @@ Each completed task retains its own exact-head, merge, and fresh-`main` receipt.
 [M10A-T01 proof](docs/proof/M10A-T01.md), [M10A-T02 proof](docs/proof/M10A-T02.md),
 [M10A-T03 proof](docs/proof/M10A-T03.md), [M10A-T04 proof](docs/proof/M10A-T04.md),
 [M10A-T05 proof](docs/proof/M10A-T05.md), [M10A-T06 proof](docs/proof/M10A-T06.md),
-[M10A-T07 proof](docs/proof/M10A-T07.md), [M10A-T08 proof](docs/proof/M10A-T08.md), and
-[M10A-T09 proof](docs/proof/M10A-T09.md) are canonical closure authorities; earlier failed
+[M10A-T07 proof](docs/proof/M10A-T07.md), [M10A-T08 proof](docs/proof/M10A-T08.md), [M10A-T09 proof](docs/proof/M10A-T09.md), and
+[M10A-T10 proof](docs/proof/M10A-T10.md) are canonical closure authorities; earlier failed
 candidates remain failures. T05 proves only its
 private starter Catalog and isolated harness, not normal-App integration, persistence, Runtime,
 Publisher, or protocol authority. T06 proves only the private 0.3.0 form-control Catalog and
 isolated harness. T07's hosted 0.4.0 proof covers bounded selection/numeric controls only. T08's
 hosted 0.5.0 proof covers bounded overlay, menu, and disclosure capabilities only. T09's hosted
-0.6.0 proof covers bounded data-display and feedback capabilities only; neither adds normal-App
-integration, persistence, Publisher, Runtime, Core/protocol, G10A, or M11 authority.
+0.6.0 proof covers bounded data-display and feedback capabilities only. T10 adds only its application-owned
+project/surface registry and generation-fenced storage boundary; it does not add Publisher, Runtime, Core/protocol, G10A, or M11 authority.
 
 ## M10 closure
 
@@ -79,12 +79,11 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T10 — project and surface lifecycle — is `NOT_STARTED`.** T09's
-[hosted proof](docs/proof/M10A-T09.md), [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), and
-[task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t10--project-and-surface-lifecycle) define
-the completed predecessor and next scope boundary. T10 must not retrospectively expand T09 or authorize Runtime
-activation, normal-App integration/persistence, Publisher authority, Core/protocol changes, G10A,
-or M11.
+**M10A-T11 — direct-manipulation canvas — is `NOT_STARTED`.** T10's
+[hosted proof](docs/proof/M10A-T10.md), [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), and
+[task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t11--direct-manipulation-canvas) define the
+completed predecessor and next scope boundary. T11 must not authorize Runtime activation, Publisher
+authority, Core/protocol changes, G10A, or M11.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
 Runtime Core tree and fresh proof requirements. No further external user/team recruitment is

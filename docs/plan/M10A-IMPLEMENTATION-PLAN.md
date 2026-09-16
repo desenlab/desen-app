@@ -1,8 +1,8 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T09 are `DONE`. T08's
-hosted evidence is in its [task-owned proof](../proof/M10A-T08.md), and T09's hosted evidence is in
-its [task-owned proof](../proof/M10A-T09.md). The canonical statuses and dependencies are in
+Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T10 are `DONE`. T10's
+application-local lifecycle closure is in its [task-owned proof](../proof/M10A-T10.md). The canonical
+statuses and dependencies are in
 [TASKS.md](TASKS.md).
 
 ## Product promise
@@ -20,8 +20,8 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 ## Delivery sequence and accounting
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
-and one gate; the total becomes 176 tasks and 14 gates. The 130 completed tasks and 11 completed
-gates remain completed. T01 through T09 are the nine completed M10A tasks, and the other 18
+and one gate; the total becomes 176 tasks and 14 gates. The 131 completed tasks and 11 completed
+gates remain completed. T01 through T10 are the ten completed M10A tasks, and the other 18
 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
