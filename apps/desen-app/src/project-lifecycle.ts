@@ -493,6 +493,42 @@ function capturePort(value: unknown): ProjectWorkspaceStoragePort | undefined {
     : undefined;
 }
 
+function captureOpenResult(value: unknown): ProjectWorkspaceOpenResult {
+  const basic = ownRecord(value, ["status"]);
+  if (basic?.status === "missing" || basic?.status === "failed") {
+    return Object.freeze({ status: basic.status });
+  }
+  const opened = ownRecord(value, ["status", "generation", "workspace"]);
+  return opened?.status === "opened"
+    ? Object.freeze({
+        status: "opened",
+        generation: opened.generation as number,
+        workspace: opened.workspace,
+      })
+    : Object.freeze({ status: "failed" });
+}
+
+function captureSaveResult(value: unknown): ProjectWorkspaceSaveResult {
+  const basic = ownRecord(value, ["status"]);
+  if (basic?.status === "failed" || basic?.status === "indeterminate") {
+    return Object.freeze({ status: basic.status });
+  }
+  const written = ownRecord(value, ["status", "generation"]);
+  if (
+    written !== undefined &&
+    (written.status === "created" || written.status === "updated" || written.status === "unchanged")
+  ) {
+    return Object.freeze({ status: written.status, generation: written.generation as number });
+  }
+  const conflict = ownRecord(value, ["status", "currentGeneration"]);
+  return conflict?.status === "conflict"
+    ? Object.freeze({
+        status: "conflict",
+        currentGeneration: conflict.currentGeneration as number | null,
+      })
+    : Object.freeze({ status: "failed" });
+}
+
 function captureInitial(value: unknown): ProjectWorkspaceRecord | undefined {
   const admitted = admitProjectWorkspaceRecord(value);
   return admitted.ok ? admitted.workspace : undefined;
@@ -518,9 +554,12 @@ function sourceSetsEqual(first: EditableProjectRecord, second: EditableProjectRe
 export function createProjectLifecycleController(
   options: ProjectLifecycleControllerOptions,
 ): ProjectLifecycleController | null {
-  const initialWorkspace = captureInitial(options?.initialWorkspace);
-  const storagePort = capturePort(options?.storagePort);
+  const capturedOptions = ownRecord(options, ["initialWorkspace", "storagePort"]);
+  const initialWorkspace = captureInitial(capturedOptions?.initialWorkspace);
+  const storagePort = capturePort(capturedOptions?.storagePort);
   if (initialWorkspace === undefined || storagePort === undefined) return null;
+  const openWorkspace = storagePort.openWorkspace;
+  const saveWorkspace = storagePort.saveWorkspace;
   const listeners = new Set<() => void>();
   let state: ProjectLifecycleState = Object.freeze({
     workspace: initialWorkspace,
@@ -564,7 +603,7 @@ export function createProjectLifecycleController(
       replace({ ...state, pending: "opening", result: null });
       let outcome: ProjectWorkspaceOpenResult;
       try {
-        outcome = await storagePort.openWorkspace();
+        outcome = captureOpenResult(await openWorkspace());
       } catch {
         outcome = { status: "failed" };
       }
@@ -603,8 +642,10 @@ export function createProjectLifecycleController(
       replace({ ...state, pending: "saving", result: null });
       let outcome: ProjectWorkspaceSaveResult;
       try {
-        outcome = await storagePort.saveWorkspace(
-          Object.freeze({ expectedGeneration: state.generation, workspace: state.workspace }),
+        outcome = captureSaveResult(
+          await saveWorkspace(
+            Object.freeze({ expectedGeneration: state.generation, workspace: state.workspace }),
+          ),
         );
       } catch {
         outcome = { status: "failed" };

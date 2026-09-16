@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-invalid-void-type -- The port contract deliberately proves
+ * receiver-independent callbacks at its capability boundary. */
 import { describe, expect, it } from "vitest";
 
 import {
@@ -78,6 +80,32 @@ function memoryPort(): ProjectWorkspaceStoragePort {
 }
 
 describe("ordinary project and surface lifecycle", () => {
+  it("captures options and host settlements without invoking accessors or binding a receiver", async () => {
+    let accessorCalls = 0;
+    const hostileOptions = Object.defineProperty({}, "initialWorkspace", {
+      enumerable: true,
+      get() {
+        accessorCalls += 1;
+        return createEmptyProjectWorkspace();
+      },
+    });
+    expect(createProjectLifecycleController(hostileOptions as never)).toBeNull();
+    expect(accessorCalls).toBe(0);
+
+    const port = Object.freeze({
+      openWorkspace: async function (this: void) {
+        expect(this).toBeUndefined();
+        return { status: "missing" as const };
+      },
+      saveWorkspace: async function (this: void) {
+        expect(this).toBeUndefined();
+        return { status: "failed" as const };
+      },
+    });
+    const controller = requireController(port);
+    expect(await controller.open()).toEqual({ status: "missing" });
+  });
+
   it("round-trips the complete T02 envelope, labels, ordering and recoverable project deletion", async () => {
     const storagePort = memoryPort();
     const controller = requireController(storagePort);
