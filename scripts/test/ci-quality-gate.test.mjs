@@ -284,7 +284,7 @@ const M11_TASK_IDS = Object.freeze(
 );
 const FIVE_COLUMN_TASK_BOARD_SECTIONS = Object.freeze(["M00", "M01", "operational"]);
 const TASK_BOARD_STATUSES = Object.freeze(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]);
-const EXPECTED_COMPLETED_IMPLEMENTATION_TASKS = 129;
+const EXPECTED_COMPLETED_IMPLEMENTATION_TASKS = 130;
 const EXPECTED_COMPLETED_GATES = 11;
 const SC_02_COMPLETE_ADAPT_MARKER = "**Status:** Complete on 2026-09-10. Decision: **`adapt`**.";
 
@@ -457,11 +457,10 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
       taskId === "M10A-T05" ||
       taskId === "M10A-T06" ||
       taskId === "M10A-T07" ||
-      taskId === "M10A-T08"
+      taskId === "M10A-T08" ||
+      taskId === "M10A-T09"
         ? "DONE"
-        : taskId === "M10A-T09"
-          ? "IN_PROGRESS"
-          : "NOT_STARTED";
+        : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
     assert.equal(
       row.cells[2],
@@ -992,9 +991,9 @@ test("task board retains its canonical inventory without narrative appendices", 
   const m10aCompletionPercent = Math.round((completedM10ATasks / M10A_TASK_IDS.length) * 100);
   assert.equal(completedTasks, EXPECTED_COMPLETED_IMPLEMENTATION_TASKS);
   assert.equal(completedGates, EXPECTED_COMPLETED_GATES);
-  assert.equal(completedM10ATasks, 8);
-  assert.equal(completionPercent, 73);
-  assert.equal(m10aCompletionPercent, 29);
+  assert.equal(completedM10ATasks, 9);
+  assert.equal(completionPercent, 74);
+  assert.equal(m10aCompletionPercent, 32);
 
   const readme = await readFile(resolve(WORKSPACE_ROOT, "README.md"), "utf8");
   const projectStatus = await readFile(resolve(WORKSPACE_ROOT, "PROJECT-STATUS.md"), "utf8");
@@ -1059,13 +1058,10 @@ test("task board retains its canonical inventory without narrative appendices", 
   assert.equal(statuses.get("M10A-T06"), "DONE");
   assert.equal(statuses.get("M10A-T07"), "DONE");
   assert.equal(statuses.get("M10A-T08"), "DONE");
+  assert.equal(statuses.get("M10A-T09"), "DONE");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
-  assert.ok(
-    normalizedReadme.includes(
-      "**Current task:** `M10A-T09` (`IN_PROGRESS`; local evidence captured, hosted closure pending)",
-    ),
-  );
-  assert.ok(normalizedProjectStatus.includes("M10A-T01 through M10A-T08 are DONE"));
+  assert.ok(normalizedReadme.includes("**Next task:** `M10A-T10` (`NOT_STARTED`; T09 complete)"));
+  assert.ok(normalizedProjectStatus.includes("M10A-T01 through M10A-T09 are DONE"));
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
   assert.ok(
     normalizedStartHere.includes(
@@ -1075,6 +1071,11 @@ test("task board retains its canonical inventory without narrative appendices", 
   assert.ok(
     normalizedStartHere.includes(
       "`M10A-T08` `DONE`: overlay, menu ve disclosure bileşenlerinin hosted exact-head ve taze `main` kapanışı",
+    ),
+  );
+  assert.ok(
+    normalizedStartHere.includes(
+      "`M10A-T09` `DONE`: Card, Badge, Avatar, Alert, List, basic Table, Skeleton ve Progress",
     ),
   );
   assert.ok(normalizedStartHere.includes("M11 başlamadı."));
