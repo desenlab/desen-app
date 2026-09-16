@@ -14,6 +14,7 @@ import {
   DesenAppLastKnownGoodRecoveryProofError,
   buildDesenAppLastKnownGoodRecoveryEvidence as build,
   buildCurrentDesenAppLastKnownGoodRecoveryObservation as observe,
+  projectM10AT10CurrentGraphAudit,
   runDesenAppLastKnownGoodRecoveryPublicMatrix as matrix,
   verifyDesenAppLastKnownGoodRecoveryBrowserPolicy as browserPolicy,
   verifyDesenAppLastKnownGoodRecoveryEvidence as verify,
@@ -272,13 +273,19 @@ test(NAMES[3], async () => {
   assert.notDeepEqual(graph, predecessor.authority.currentGraphAudit);
   assert.notDeepEqual(graph, successor.authority.currentGraphAudit);
   assert.deepEqual(
-    projectM10AT01CurrentGraphAudit(graph, successor.authority.currentGraphAudit),
+    projectM10AT01CurrentGraphAudit(
+      projectM10AT10CurrentGraphAudit(graph, successor.authority.currentGraphAudit),
+      successor.authority.currentGraphAudit,
+    ),
     successor.authority.currentGraphAudit,
   );
   const unrelatedGraphDrift = structuredClone(graph);
   unrelatedGraphDrift.runtimeResolution.host.moduleCount += 1;
   assert.throws(() =>
-    projectM10AT01CurrentGraphAudit(unrelatedGraphDrift, successor.authority.currentGraphAudit),
+    projectM10AT01CurrentGraphAudit(
+      projectM10AT10CurrentGraphAudit(unrelatedGraphDrift, successor.authority.currentGraphAudit),
+      successor.authority.currentGraphAudit,
+    ),
   );
   assert.deepEqual(await observe(), {
     publicApiMatrix: built.liveSuccessorAuthority.publicApiMatrix,
@@ -294,6 +301,7 @@ test(NAMES[3], async () => {
   assert.ok(
     graph.appSourceAudit.inventory.includes("apps/desen-app/src/source-draft-controls.tsx"),
   );
+  assert.ok(graph.appSourceAudit.inventory.includes("apps/desen-app/src/project-lifecycle.ts"));
 });
 
 test(NAMES[4], async () => {

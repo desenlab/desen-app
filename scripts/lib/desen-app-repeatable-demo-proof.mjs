@@ -18,11 +18,14 @@ import {
   authenticateM10AT02LockfileSuccessor,
   authenticateM10AT03LockfileSuccessor,
   authenticateM10AT04LockfileSuccessor,
+  authenticateM10AT10LockfileSuccessor,
   projectM10AT01CurrentGraphAudit,
   projectM10AT01T08Input,
   projectM10AT02T01Input,
   projectM10AT03T02Input,
   projectM10AT04T03Input,
+  projectM10AT10HistoricalInput,
+  projectM10AT10T04Input,
 } from "./desen-app-published-host-update-proof.mjs";
 
 const WORKSPACE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -73,10 +76,19 @@ const M10A_T01_SUCCESSOR_PIN = Object.freeze({
   sha256: "711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74",
 });
 const M10A_T01_CHANGED_T08_INPUTS = Object.freeze([
+  "apps/desen-app/package.json",
   "pnpm-lock.yaml",
   "dependency-cruiser.config.cjs",
   "scripts/verify-boundary-fixtures.mjs",
   "docs/plan/DEMO-RUNBOOK.md",
+]);
+// T10 adds lifecycle-authoring modules to the complete App source inventory, but must not add an
+// edge to the frozen M10 production graph. Project only this exact additive inventory before the
+// T08 graph comparison.
+const M10A_T10_ISOLATED_APP_SOURCE_PATHS = Object.freeze([
+  "apps/desen-app/src/project-lifecycle-navigation.ts",
+  "apps/desen-app/src/project-lifecycle.ts",
+  "apps/desen-app/src/starter-project.ts",
 ]);
 const M10A_T01_DEMO_RUNBOOK_SUCCESSOR = Object.freeze({
   path: "docs/plan/DEMO-RUNBOOK.md",
@@ -915,7 +927,9 @@ function projectM10AT01Input(relativePath, bytes) {
       ? authenticateM10AT01LockfileSuccessor(
           authenticateM10AT02LockfileSuccessor(
             authenticateM10AT03LockfileSuccessor(
-              authenticateM10AT04LockfileSuccessor(bytes).predecessorBytes,
+              authenticateM10AT04LockfileSuccessor(
+                authenticateM10AT10LockfileSuccessor(bytes).predecessorBytes,
+              ).predecessorBytes,
             ).predecessorBytes,
           ).predecessorBytes,
         ).predecessorBytes
@@ -923,7 +937,16 @@ function projectM10AT01Input(relativePath, bytes) {
           relativePath,
           projectM10AT02T01Input(
             relativePath,
-            projectM10AT03T02Input(relativePath, projectM10AT04T03Input(relativePath, bytes)),
+            projectM10AT03T02Input(
+              relativePath,
+              projectM10AT04T03Input(
+                relativePath,
+                projectM10AT10T04Input(
+                  relativePath,
+                  projectM10AT10HistoricalInput(relativePath, bytes),
+                ),
+              ),
+            ),
           ),
         );
   } catch {
@@ -933,9 +956,50 @@ function projectM10AT01Input(relativePath, bytes) {
   }
 }
 
+/** Projects only T10's exact non-production lifecycle inventory back to the M10A-T04 graph. */
+export function projectM10AT10CurrentGraphAudit(currentGraphAudit, t08GraphAudit) {
+  const sourceAudit = currentGraphAudit?.appSourceAudit;
+  const inventory = sourceAudit?.inventory;
+  const sourceReceipts = sourceAudit?.sourceReceipts;
+  const historicalInventory = t08GraphAudit?.appSourceAudit?.inventory;
+  if (
+    !Array.isArray(inventory) ||
+    !Array.isArray(sourceReceipts) ||
+    !Array.isArray(historicalInventory) ||
+    sourceAudit.completeSourceFiles !== inventory.length ||
+    inventory.length !== historicalInventory.length + M10A_T10_ISOLATED_APP_SOURCE_PATHS.length
+  ) {
+    fail("SUCCESSOR_DRIFT", "The complete App source inventory is not the reviewed T10 successor.");
+  }
+  for (const relativePath of M10A_T10_ISOLATED_APP_SOURCE_PATHS) {
+    if (
+      inventory.filter((entry) => entry === relativePath).length !== 1 ||
+      sourceReceipts.some((receipt) => receipt?.path === relativePath)
+    ) {
+      fail("SUCCESSOR_DRIFT", "The isolated T10 source inventory is not exact.");
+    }
+  }
+  return {
+    ...currentGraphAudit,
+    appSourceAudit: {
+      ...sourceAudit,
+      inventory: inventory.filter(
+        (relativePath) => !M10A_T10_ISOLATED_APP_SOURCE_PATHS.includes(relativePath),
+      ),
+      completeSourceFiles: historicalInventory.length,
+      sourceReceipts: sourceReceipts.filter(
+        ({ path: relativePath }) => !M10A_T10_ISOLATED_APP_SOURCE_PATHS.includes(relativePath),
+      ),
+    },
+  };
+}
+
 function projectM10AT01Graph(currentGraphAudit, t08GraphAudit) {
   try {
-    return projectM10AT01CurrentGraphAudit(currentGraphAudit, t08GraphAudit);
+    return projectM10AT01CurrentGraphAudit(
+      projectM10AT10CurrentGraphAudit(currentGraphAudit, t08GraphAudit),
+      t08GraphAudit,
+    );
   } catch {
     fail(
       "SUCCESSOR_DRIFT",

@@ -90,6 +90,9 @@ importers:
       '@desen/catalog-sdk':
         specifier: workspace:*
         version: link:../../packages/catalog-sdk
+      '@desen/design-system-core':
+        specifier: workspace:*
+        version: link:../../packages/design-system-core
       '@desen/editor-core':
         specifier: workspace:*
         version: link:../../packages/editor-core
@@ -111,6 +114,9 @@ importers:
       '@desen/runtime-react':
         specifier: workspace:*
         version: link:../../packages/runtime-react
+      '@desen/starter-catalog-web':
+        specifier: workspace:*
+        version: link:../../packages/starter-catalog-web
       '@desen/testkit':
         specifier: workspace:*
         version: link:../../packages/testkit

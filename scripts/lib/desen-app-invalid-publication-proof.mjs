@@ -100,6 +100,21 @@ const M10A_T01_PUBLIC_MATRIX_SNAPSHOT = Object.freeze({
   historical: "sha256:7ced5faec0006e1e5e5807d7d51c5911ed594b73e383d658ca997af1932196b0",
   current: "sha256:f3d5e053e7a1905ba80680299a71d98e0ee4eb12315ea1f8d944fb86d6f63be1",
 });
+// T10 may add only these inert lifecycle modules before it wires them into the normal App.
+// They are excluded from the frozen M10 graph and must be removed as one exact inventory
+// successor before the T06/T08 historical comparison can run.
+const M10A_T10_ISOLATED_APP_SOURCE_PATHS = Object.freeze([
+  "apps/desen-app/src/project-lifecycle-navigation.ts",
+  "apps/desen-app/src/project-lifecycle.ts",
+  "apps/desen-app/src/starter-project.ts",
+]);
+const M10A_T10_APP_PACKAGE_SUCCESSOR = Object.freeze({
+  path: "apps/desen-app/package.json",
+  currentBytes: 4_864,
+  currentSha256: "8b8cedadbd884e6f337f6c9460d7db95cfd77c446fcf72ba2a0ddcc917a6846f",
+  historicalBytes: 4_621,
+  historicalSha256: "133b549eca53d3f4438259bf020f13ec6e14597e9b05edfa74440191cd67cd1c",
+});
 const T08_HISTORICAL_GRAPH_AUDIT_PIN = Object.freeze({
   bytes: 115_904,
   sha256: "b4d64538959da4a55478e125973b95d12a2c8ef8707c8440fa3cac26c0389767",
@@ -414,6 +429,55 @@ function currentGraphSummary(graph) {
   };
 }
 
+function projectM10AT10IsolatedSourceInventory(currentGraph) {
+  const sourceAudit = currentGraph.appSourceAudit;
+  const inventory = sourceAudit?.inventory;
+  if (
+    !Array.isArray(inventory) ||
+    sourceAudit.completeSourceFiles !== inventory.length ||
+    inventory.length !==
+      M10_GATE_M10A_T01_CURRENT_HOST_AUDIT.appSourceFiles +
+        M10A_T10_ISOLATED_APP_SOURCE_PATHS.length
+  ) {
+    fail("SUCCESSOR_DRIFT", "The complete App source inventory is not the reviewed T10 successor.");
+  }
+  for (const relativePath of M10A_T10_ISOLATED_APP_SOURCE_PATHS) {
+    if (inventory.filter((entry) => entry === relativePath).length !== 1) {
+      fail("SUCCESSOR_DRIFT", "The isolated T10 source inventory is not exact.");
+    }
+  }
+  sourceAudit.inventory = inventory.filter(
+    (relativePath) => !M10A_T10_ISOLATED_APP_SOURCE_PATHS.includes(relativePath),
+  );
+  sourceAudit.completeSourceFiles = sourceAudit.inventory.length;
+}
+
+function projectM10AT10AppPackageReceipt(currentReceipts, historicalReceipts) {
+  const successor = M10A_T10_APP_PACKAGE_SUCCESSOR;
+  const current = exactEntry(
+    currentReceipts,
+    ({ path: relativePath }) => relativePath === successor.path,
+    "current T10 App package receipt",
+  );
+  const historical = exactEntry(
+    historicalReceipts,
+    ({ path: relativePath }) => relativePath === successor.path,
+    "historical T10 App package receipt",
+  );
+  requireExactFields(
+    current.entry,
+    { bytes: successor.currentBytes, sha256: successor.currentSha256 },
+    "current T10 App package receipt",
+  );
+  requireExactFields(
+    historical.entry,
+    { bytes: successor.historicalBytes, sha256: successor.historicalSha256 },
+    "historical T10 App package receipt",
+  );
+  current.entry.bytes = historical.entry.bytes;
+  current.entry.sha256 = historical.entry.sha256;
+}
+
 function projectEditorCoreReceipts(currentReceipts, historicalReceipts, graphReceipts) {
   for (const identity of M10A_T01_EDITOR_CORE_SUCCESSORS) {
     const current = exactEntry(
@@ -452,8 +516,8 @@ function projectEditorCoreReceipts(currentReceipts, historicalReceipts, graphRec
 }
 
 /**
- * Admits only the exact additive M10A-T01 Editor Core successor and projects its reviewed identity
- * changes back to the immutable T06/T08 representation.
+ * Admits the exact additive M10A-T01 Editor Core and isolated M10A-T10 inventory successors,
+ * then projects their reviewed identity changes back to the immutable T06/T08 representation.
  */
 export function projectDesenAppInvalidPublicationHistoricalAuthorities(rawAuthorities) {
   if (
@@ -493,6 +557,7 @@ export function projectDesenAppInvalidPublicationHistoricalAuthorities(rawAuthor
     T06_HISTORICAL_PUBLIC_MATRIX_PIN,
     "T06 historical public matrix",
   );
+  projectM10AT10IsolatedSourceInventory(currentGraph);
   if (!isDeepStrictEqual(currentGraphSummary(currentGraph), M10_GATE_M10A_T01_CURRENT_HOST_AUDIT)) {
     fail("SUCCESSOR_DRIFT", "The fresh graph is not the exact M10A-T01 successor.");
   }
@@ -2220,6 +2285,10 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
   artifact.boundary.trackedReceipts[editorCoreManifestIndex] = structuredClone(
     previousEditorCoreManifest,
   );
+  projectM10AT10AppPackageReceipt(
+    artifact.boundary.trackedReceipts,
+    historical.boundary.trackedReceipts,
+  );
   artifact.authority.publicApiMatrix = structuredClone(projected.currentPublicApiMatrix);
   artifact.authority.currentGraphAudit = structuredClone(historical.authority.currentGraphAudit);
   if (!isDeepStrictEqual(artifact, historical)) {
@@ -2231,7 +2300,7 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
     );
     fail(
       "SUCCESSOR_DRIFT",
-      "Only exact reviewed T08/M10A-T01 successor identities may project into frozen T06 evidence.",
+      "Only exact reviewed T08/M10A-T01/M10A-T10 successor identities may project into frozen T06 evidence.",
       { changedTopLevel, changedAuthority },
     );
   }
@@ -2263,7 +2332,10 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
       historicalProjectionPaths: [
         packagePath,
         M10A_T01_EDITOR_CORE_MANIFEST_SUCCESSOR.path,
+        M10A_T10_APP_PACKAGE_SUCCESSOR.path,
         "authority.currentGraphAudit",
+        "authority.currentGraphAudit.appSourceAudit.inventory[M10A-T10-isolated-lifecycle]",
+        "authority.currentGraphAudit.appSourceAudit.completeSourceFiles",
         "authority.publicApiMatrix.compiledReceipts[packages/editor-core/dist/index.js]",
         "authority.publicApiMatrix.compiledReceipts[packages/editor-core/dist/stable-id-insert.js]",
         "authority.publicApiMatrix.compiledSnapshotSha256",

@@ -147,6 +147,23 @@ const APP_SOURCE_PATHS = Object.freeze(
   ].sort((left, right) => left.localeCompare(right, "en-US")),
 );
 
+// T10 can add inert authoring-lifecycle modules before it wires them into the normal App.
+// This bounded inventory admission keeps the M10 receipt set immutable while the M10 graph audit
+// still rejects any edge from the frozen product path into these successor-owned modules.
+const M10A_T10_ISOLATED_APP_SOURCE_PATHS = Object.freeze(
+  [
+    "apps/desen-app/src/project-lifecycle-navigation.ts",
+    "apps/desen-app/src/project-lifecycle.ts",
+    "apps/desen-app/src/starter-project.ts",
+  ].sort((left, right) => left.localeCompare(right, "en-US")),
+);
+
+const CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
+  [...APP_SOURCE_PATHS, ...M10A_T10_ISOLATED_APP_SOURCE_PATHS].sort((left, right) =>
+    left.localeCompare(right, "en-US"),
+  ),
+);
+
 const APP_FIXTURE_ONLY_SOURCE_PATHS = Object.freeze([
   "apps/desen-app/src/reference-authoring-profile.ts",
   "apps/desen-app/src/reference-project-fixtures.ts",
@@ -421,6 +438,64 @@ const M10A_T04_LOCKFILE_ADDED_ENTRIES = Object.freeze([
   Object.freeze({
     section: "importers",
     headers: Object.freeze(["  packages/design-system-release:\n"]),
+  }),
+]);
+
+const M10A_T10_LOCKFILE_SUCCESSOR_RECEIPT = Object.freeze({
+  authority: "M10A-T10",
+  bytes: 140_361,
+  sha256: "c233c161fe79c5931576d4ce079ebb65f8295ed49903a4617f9166902dac4fe1",
+  predecessor: Object.freeze({
+    authority: M10A_T04_LOCKFILE_SUCCESSOR_RECEIPT.authority,
+    bytes: M10A_T04_LOCKFILE_SUCCESSOR_RECEIPT.bytes,
+    sha256: M10A_T04_LOCKFILE_SUCCESSOR_RECEIPT.sha256,
+  }),
+});
+
+const M10A_T10_LOCKFILE_ADDED_FRAGMENTS = Object.freeze([
+  "      '@desen/design-system-core':\n        specifier: workspace:*\n        version: link:../../packages/design-system-core\n",
+  "      '@desen/starter-catalog-web':\n        specifier: workspace:*\n        version: link:../../packages/starter-catalog-web\n",
+]);
+
+const M10A_T10_APP_PACKAGE_SUCCESSOR = Object.freeze({
+  path: "apps/desen-app/package.json",
+  bytes: 4_864,
+  sha256: "8b8cedadbd884e6f337f6c9460d7db95cfd77c446fcf72ba2a0ddcc917a6846f",
+  predecessor: Object.freeze({
+    bytes: 4_621,
+    sha256: "133b549eca53d3f4438259bf020f13ec6e14597e9b05edfa74440191cd67cd1c",
+  }),
+  inverseChanges: Object.freeze([
+    '    "test:project-lifecycle": "vitest run test/project-lifecycle.test.ts test/project-lifecycle-navigation.test.ts test/starter-project.test.ts",\n',
+    '    "@desen/design-system-core": "workspace:*",\n',
+    '    "@desen/starter-catalog-web": "workspace:*",\n',
+  ]),
+});
+
+/**
+ * M10A-T10 admits only the two already-declared design-system dependencies at the
+ * Desen App composition boundary. This successor must project back to the exact
+ * M10A-T04 policy before the frozen M10 reader evaluates its historical chain.
+ */
+const M10A_T10_T04_INPUT_SUCCESSORS = Object.freeze([
+  Object.freeze({
+    path: "dependency-cruiser.config.cjs",
+    bytes: 16_914,
+    sha256: "aac2ce1bfcaa2e81b488f688d1a4f9a0e02ac97958f1eb90a95f16c0d112fa4c",
+    predecessor: Object.freeze({
+      bytes: 16_861,
+      sha256: "db92e8d8d3596a9c6484a58df61ecc090c4e83164fee523ae3eca64cf9e8bac5",
+    }),
+    inverseChanges: Object.freeze([
+      Object.freeze([
+        '    "editor-web",\n    "design-system-core",\n    "reference-catalog-web",\n',
+        '    "editor-web",\n    "reference-catalog-web",\n',
+      ]),
+      Object.freeze([
+        '    "reference-catalog-web",\n    "starter-catalog-web",\n    "testkit",\n',
+        '    "reference-catalog-web",\n    "testkit",\n',
+      ]),
+    ]),
   }),
 ]);
 
@@ -1049,7 +1124,7 @@ async function acquireFiles(options) {
     inventoryDirectory(canonicalRoot, "apps/reference-host-web-server/src"),
   ]);
   if (
-    !isDeepStrictEqual(appInventory, APP_SOURCE_PATHS) ||
+    !isDeepStrictEqual(appInventory, CURRENT_APP_SOURCE_INVENTORY_PATHS) ||
     !isDeepStrictEqual(hostInventory, HOST_SOURCE_PATHS) ||
     !isDeepStrictEqual(hostServerInventory, HOST_SERVER_SOURCE_PATHS)
   ) {
@@ -1191,6 +1266,32 @@ function authenticateAdditiveLockfileSuccessor(bytes, successor, additions) {
   return Object.freeze({ predecessorBytes, predecessorText });
 }
 
+function removeExactImporterDependencyFragment(source, importer, fragment, authority) {
+  const importerMarker = `  ${importer}:\n`;
+  if (occurrenceCount(source, importerMarker) !== 1) {
+    fail("DEPENDENCY_SUCCESSOR_DRIFT", `The ${authority} importer boundary drifted.`, {
+      authority,
+      importer,
+    });
+  }
+  const importerStart = source.indexOf(importerMarker);
+  const nextImporterPattern = /\n {2}\S[^\r\n]*:\r?\n/gmu;
+  nextImporterPattern.lastIndex = importerStart + importerMarker.length;
+  const nextImporter = nextImporterPattern.exec(source);
+  const importerEnd = nextImporter?.index ?? source.length;
+  const importerText = source.slice(importerStart, importerEnd);
+  if (occurrenceCount(importerText, fragment) !== 1) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      `The ${authority} lockfile successor lost one exact additive dependency fragment.`,
+      { authority, importer, fragment },
+    );
+  }
+  return (
+    source.slice(0, importerStart) + importerText.replace(fragment, "") + source.slice(importerEnd)
+  );
+}
+
 /**
  * Authenticates the exact additive M10A-T01 lockfile and returns its reviewed M10-T08
  * predecessor bytes for frozen historical-reader projection.
@@ -1234,6 +1335,126 @@ export function authenticateM10AT04LockfileSuccessor(bytes) {
     M10A_T04_LOCKFILE_SUCCESSOR_RECEIPT,
     M10A_T04_LOCKFILE_ADDED_ENTRIES,
   );
+}
+
+/**
+ * Authenticates the exact M10A-T10 App dependency additions and returns the reviewed T04
+ * predecessor without allowing those dependencies to alter historical M10 receipts.
+ */
+export function authenticateM10AT10LockfileSuccessor(bytes) {
+  if (
+    bytes.byteLength !== M10A_T10_LOCKFILE_SUCCESSOR_RECEIPT.bytes ||
+    sha256(bytes) !== M10A_T10_LOCKFILE_SUCCESSOR_RECEIPT.sha256
+  ) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "The live lockfile is not the exact reviewed M10A-T10 additive successor.",
+    );
+  }
+  let predecessorText = decodeUtf8(
+    bytes,
+    DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS.path,
+    "DEPENDENCY_SUCCESSOR_DRIFT",
+  );
+  for (const fragment of M10A_T10_LOCKFILE_ADDED_FRAGMENTS) {
+    predecessorText = removeExactImporterDependencyFragment(
+      predecessorText,
+      "apps/desen-app",
+      fragment,
+      M10A_T10_LOCKFILE_SUCCESSOR_RECEIPT.authority,
+    );
+  }
+  const predecessorBytes = Buffer.from(predecessorText);
+  if (
+    predecessorBytes.byteLength !== M10A_T10_LOCKFILE_SUCCESSOR_RECEIPT.predecessor.bytes ||
+    sha256(predecessorBytes) !== M10A_T10_LOCKFILE_SUCCESSOR_RECEIPT.predecessor.sha256
+  ) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "Removing only the reviewed M10A-T10 dependencies must reproduce the exact M10A-T04 lockfile.",
+    );
+  }
+  return Object.freeze({ predecessorBytes, predecessorText });
+}
+
+/**
+ * Projects the exact additive T10 App manifest back to its pre-T10 historical
+ * receipt. Readers of frozen M10 evidence may use this only before their own
+ * independently reviewed successor projections.
+ */
+export function projectM10AT10HistoricalInput(relativePath, bytes) {
+  if (relativePath !== M10A_T10_APP_PACKAGE_SUCCESSOR.path) return bytes;
+  if (
+    bytes.byteLength !== M10A_T10_APP_PACKAGE_SUCCESSOR.bytes ||
+    sha256(bytes) !== M10A_T10_APP_PACKAGE_SUCCESSOR.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The current T10 App package input is outside its exact reviewed successor receipt.",
+      { path: relativePath },
+    );
+  }
+  let predecessorText = decodeUtf8(bytes, relativePath, "SUCCESSOR_POLICY_VIOLATION");
+  for (const fragment of M10A_T10_APP_PACKAGE_SUCCESSOR.inverseChanges) {
+    if (occurrenceCount(predecessorText, fragment) !== 1) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "The T10 App package successor lost one exact additive declaration.",
+        { path: relativePath, fragment },
+      );
+    }
+    predecessorText = predecessorText.replace(fragment, "");
+  }
+  const predecessorBytes = Buffer.from(predecessorText);
+  if (
+    predecessorBytes.byteLength !== M10A_T10_APP_PACKAGE_SUCCESSOR.predecessor.bytes ||
+    sha256(predecessorBytes) !== M10A_T10_APP_PACKAGE_SUCCESSOR.predecessor.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "Removing only reviewed T10 package additions must reproduce the exact M10A-T09 package.",
+      { path: relativePath },
+    );
+  }
+  return predecessorBytes;
+}
+
+/** Projects one exact T10 policy input back to the M10A-T04 policy boundary. */
+export function projectM10AT10T04Input(relativePath, bytes) {
+  const successor = M10A_T10_T04_INPUT_SUCCESSORS.find(
+    ({ path: successorPath }) => successorPath === relativePath,
+  );
+  if (successor === undefined) return bytes;
+  if (bytes.byteLength !== successor.bytes || sha256(bytes) !== successor.sha256) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "A reviewed M10A-T04 input is not the exact M10A-T10 additive successor.",
+      { path: relativePath },
+    );
+  }
+  let predecessorText = decodeUtf8(bytes, relativePath, "SUCCESSOR_POLICY_VIOLATION");
+  for (const [currentFragment, predecessorFragment] of successor.inverseChanges) {
+    if (occurrenceCount(predecessorText, currentFragment) !== 1) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "An M10A-T10 successor input lost one exact reviewed policy addition.",
+        { path: relativePath },
+      );
+    }
+    predecessorText = predecessorText.replace(currentFragment, predecessorFragment);
+  }
+  const predecessorBytes = Buffer.from(predecessorText);
+  if (
+    predecessorBytes.byteLength !== successor.predecessor.bytes ||
+    sha256(predecessorBytes) !== successor.predecessor.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "Removing only M10A-T10 policy additions must reproduce the exact M10A-T04 receipt.",
+      { path: relativePath },
+    );
+  }
+  return predecessorBytes;
 }
 
 /** Projects one exact live M10A-T03 policy input back to its reviewed M10A-T02 predecessor. */
@@ -3483,7 +3704,7 @@ export async function buildCurrentDesenAppPublishedHostUpdateGraphAudit(rawOptio
   return deepFreeze({
     appSourceAudit: {
       inventory: acquired.appInventory,
-      completeSourceFiles: APP_SOURCE_PATHS.length,
+      completeSourceFiles: CURRENT_APP_SOURCE_INVENTORY_PATHS.length,
       productionGraphSourceFiles: APP_GRAPH_SOURCE_PATHS.length,
       fixtureOnlySourceFiles: APP_FIXTURE_ONLY_SOURCE_PATHS,
       sourceReceipts: appSourceReceipts,
@@ -3504,7 +3725,10 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   const recoverySuccessor = await readT08SuccessorArtifact(options.workspaceRoot);
   const dependencyPin = DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS;
   const dependencyBytes = files.get(dependencyPin.path);
-  const t04LockfileSuccessor = authenticateM10AT04LockfileSuccessor(dependencyBytes);
+  const t10LockfileSuccessor = authenticateM10AT10LockfileSuccessor(dependencyBytes);
+  const t04LockfileSuccessor = authenticateM10AT04LockfileSuccessor(
+    t10LockfileSuccessor.predecessorBytes,
+  );
   const t03LockfileSuccessor = authenticateM10AT03LockfileSuccessor(
     t04LockfileSuccessor.predecessorBytes,
   );
@@ -3529,12 +3753,24 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
           relativePath,
           projectM10AT03T02Input(
             relativePath,
-            projectM10AT04T03Input(relativePath, files.get(relativePath)),
+            projectM10AT04T03Input(
+              relativePath,
+              projectM10AT10T04Input(relativePath, files.get(relativePath)),
+            ),
           ),
         ),
       ),
     ]),
   );
+  const t10ProjectedInputs = new Map([
+    [
+      M10A_T10_APP_PACKAGE_SUCCESSOR.path,
+      projectM10AT10HistoricalInput(
+        M10A_T10_APP_PACKAGE_SUCCESSOR.path,
+        files.get(M10A_T10_APP_PACKAGE_SUCCESSOR.path),
+      ),
+    ],
+  ]);
   let securityLockfileText = lockfileSuccessor.predecessorText;
   for (const importer of ["apps/desen-app-browser-e2e", "apps/reference-host-web"]) {
     const start = securityLockfileText.indexOf(`  ${importer}:\n`);
@@ -3619,7 +3855,10 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
           sha256: dependencyPin.historicalSha256,
         });
       }
-      const bytes = t08ProjectedInputs.get(relativePath) ?? files.get(relativePath);
+      const bytes =
+        t08ProjectedInputs.get(relativePath) ??
+        t10ProjectedInputs.get(relativePath) ??
+        files.get(relativePath);
       return Object.freeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) });
     }),
   );
@@ -3671,7 +3910,9 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       focusedTests,
       browser,
       appSourceAudit: {
-        inventory: acquired.appInventory,
+        // M10's graph receipt remains exact. acquireFiles() separately admits only the named
+        // T10 inventory additions, and auditOneGraph() rejects them if M10 ever reaches one.
+        inventory: APP_SOURCE_PATHS,
         completeSourceFiles: APP_SOURCE_PATHS.length,
         productionGraphSourceFiles: APP_GRAPH_SOURCE_PATHS.length,
         fixtureOnlySourceFiles: APP_FIXTURE_ONLY_SOURCE_PATHS,
@@ -3751,7 +3992,13 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
         relativePath,
         projectM10AT02T01Input(
           relativePath,
-          projectM10AT03T02Input(relativePath, projectM10AT04T03Input(relativePath, currentBytes)),
+          projectM10AT03T02Input(
+            relativePath,
+            projectM10AT04T03Input(
+              relativePath,
+              projectM10AT10T04Input(relativePath, currentBytes),
+            ),
+          ),
         ),
       ),
     );
@@ -3760,7 +4007,10 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
     path.join(options.workspaceRoot, dependencyPin.path),
     dependencyPin.path,
   );
-  const finalT04LockfileSuccessor = authenticateM10AT04LockfileSuccessor(finalDependencyBytes);
+  const finalT10LockfileSuccessor = authenticateM10AT10LockfileSuccessor(finalDependencyBytes);
+  const finalT04LockfileSuccessor = authenticateM10AT04LockfileSuccessor(
+    finalT10LockfileSuccessor.predecessorBytes,
+  );
   const finalT03LockfileSuccessor = authenticateM10AT03LockfileSuccessor(
     finalT04LockfileSuccessor.predecessorBytes,
   );
@@ -3790,6 +4040,12 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       currentBytes: dependencyBytes.byteLength,
       historicalBytes: dependencyPin.historicalBytes,
       currentSha256: sha256(dependencyBytes),
+      t10LockfileSuccessor: {
+        task: M10A_T10_LOCKFILE_SUCCESSOR_RECEIPT.authority,
+        bytes: M10A_T10_LOCKFILE_SUCCESSOR_RECEIPT.bytes,
+        sha256: M10A_T10_LOCKFILE_SUCCESSOR_RECEIPT.sha256,
+        additivePredecessor: M10A_T10_LOCKFILE_SUCCESSOR_RECEIPT.predecessor,
+      },
       t04LockfileSuccessor: {
         task: M10A_T04_LOCKFILE_SUCCESSOR_RECEIPT.authority,
         bytes: M10A_T04_LOCKFILE_SUCCESSOR_RECEIPT.bytes,
@@ -3985,6 +4241,7 @@ async function projectT06HistoricalPredecessor(workspaceRoot, currentArtifact, r
       currentGraphAudit,
       currentSourcePolicy: currentArtifact.authority.source,
       currentFocusedTestDeclarations: currentArtifact.authority.focusedTests,
+      m10aIsolatedAppSourceInventory: M10A_T10_ISOLATED_APP_SOURCE_PATHS,
       projectedHistoricalFields: [
         "authority.source.flowWorkspaceCannotReceivePublicationPort",
         "authority.focusedTests.declarationSites",
