@@ -40,7 +40,7 @@ const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   FROZEN_INPUT: 168,
   PACKAGE_OR_APPLICATION: 732,
   SHARED_PROOF_INFRASTRUCTURE: 407,
-  PROJECT_DOCUMENTATION: 169,
+  PROJECT_DOCUMENTATION: 170,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
@@ -447,6 +447,7 @@ const M10A_T10_SUCCESSOR_PATHS = Object.freeze([
   "apps/desen-app/test/project-lifecycle-navigation.test.ts",
   "apps/desen-app/test/project-lifecycle.test.ts",
   "apps/desen-app/test/starter-project.test.ts",
+  "docs/proof/M10A-T10.md",
 ]);
 
 async function currentTrackedPaths() {
@@ -500,7 +501,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1811 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1812 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -522,7 +523,7 @@ test("freezes exact-one ownership for all 1811 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1811);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1812);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -530,14 +531,19 @@ test("freezes exact-one ownership for all 1811 reviewed tracked paths", async ()
   assertDeepFrozen(authority);
 });
 
-test("the M10A-T10 successor preserves M10A-T09 ownership and adds six conservative lifecycle paths", async () => {
+test("the M10A-T10 successor preserves M10A-T09 ownership and adds six lifecycle paths plus its closure record", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
-  assert.equal(M10A_T10_SUCCESSOR_PATHS.length, 6);
-  assert.equal(new Set(M10A_T10_SUCCESSOR_PATHS).size, 6);
+  assert.equal(M10A_T10_SUCCESSOR_PATHS.length, 7);
+  assert.equal(new Set(M10A_T10_SUCCESSOR_PATHS).size, 7);
   for (const relativePath of M10A_T10_SUCCESSOR_PATHS) {
     const owner = resolveAffectedWorkloadOwner(authority, relativePath);
-    assert.equal(owner.category, AFFECTED_OWNERSHIP_CATEGORIES.PACKAGE_OR_APPLICATION);
+    assert.equal(
+      owner.category,
+      relativePath === "docs/proof/M10A-T10.md"
+        ? AFFECTED_OWNERSHIP_CATEGORIES.PROJECT_DOCUMENTATION
+        : AFFECTED_OWNERSHIP_CATEGORIES.PACKAGE_OR_APPLICATION,
+    );
     assert.equal(owner.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.FORCE_EXHAUSTIVE);
     assert.equal(owner.proofUnitId, null);
   }
