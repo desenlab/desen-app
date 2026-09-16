@@ -953,7 +953,17 @@ const CURRENT_APP_SOURCE_PATHS = Object.freeze(
     "apps/desen-app/src/publication-controls.tsx",
   ].sort(),
 );
-const CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze([...CURRENT_APP_SOURCE_PATHS].sort());
+// T10 adds these lifecycle modules to the complete source inventory before they are connected to
+// the frozen M10 product graph. Keep the graph receipt below exact and admit only this inventory
+// successor to historical-reader mutation tests.
+const M10A_T10_ISOLATED_APP_SOURCE_PATHS = Object.freeze([
+  "apps/desen-app/src/project-lifecycle-navigation.ts",
+  "apps/desen-app/src/project-lifecycle.ts",
+  "apps/desen-app/src/starter-project.ts",
+]);
+const CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
+  [...CURRENT_APP_SOURCE_PATHS, ...M10A_T10_ISOLATED_APP_SOURCE_PATHS].sort(),
+);
 const CURRENT_APP_TYPESCRIPT_SOURCE_PATHS = Object.freeze(
   CURRENT_APP_SOURCE_PATHS.filter(
     (relativePath) =>
