@@ -996,6 +996,7 @@ const M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "apps/desen-app/test/project-lifecycle-navigation.test.ts",
   "apps/desen-app/test/project-lifecycle.test.ts",
   "apps/desen-app/test/starter-project.test.ts",
+  "docs/proof/M10A-T10.md",
 ]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
@@ -1181,8 +1182,8 @@ const M10A_T09_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   ownershipSha256: "910c68f82a8084ef909e3c4bc1304ae7b748d4ba9b4cefed2902b978080fd10e",
 });
 const M10A_T10_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
-  trackedPathCount: 1811,
-  trackedPathSetSha256: "0c513b33f0ffbcec9bf20707acc78c79f946ef815c0d430a60e9aec1a6450e54",
+  trackedPathCount: 1812,
+  trackedPathSetSha256: "83a48d64619ec98d32302e73adb2efec027236923fe77a7080f85867c287b7ac",
   proofOwnedPathCount: 238,
   categoryCounts: Object.freeze({
     PROOF_UNIT: 238,
@@ -1191,10 +1192,10 @@ const M10A_T10_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     FROZEN_INPUT: 168,
     PACKAGE_OR_APPLICATION: 732,
     SHARED_PROOF_INFRASTRUCTURE: 407,
-    PROJECT_DOCUMENTATION: 169,
+    PROJECT_DOCUMENTATION: 170,
     REPOSITORY_POLICY: 11,
   }),
-  ownershipSha256: "e2b20f429291fd29b9afca11974cabd786aae5e319b433afdabd3bc33064cb64",
+  ownershipSha256: "6cb2badc702a8b2f5760b442dd680f6c081aebb8b58518d6ad29e20e6b18d752",
 });
 const VERIFIED_PROMOTION_RECEIPTS = new WeakMap();
 const VERIFIED_PROMOTION_BOUNDARIES = new WeakMap();
@@ -2006,12 +2007,12 @@ function createBoundaryOwnershipDelta(rawBoundary) {
   }
   const successorPaths = successorAuthority.entries.map(({ path: trackedPath }) => trackedPath);
   if (
-    M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 6 ||
-    new Set(M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 6
+    M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 7 ||
+    new Set(M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 7
   ) {
     fail(
       "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
-      "The reviewed M10A-T10 successor path append is not exactly six unique paths.",
+      "The reviewed M10A-T10 successor path append is not exactly seven unique paths.",
     );
   }
   for (const trackedPath of M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS) {
