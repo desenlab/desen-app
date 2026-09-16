@@ -39,6 +39,7 @@
     "@desen/reference-catalog-web": "workspace:*",
     "@desen/runtime-core": "workspace:*",
     "@desen/runtime-react": "workspace:*",
+    "@desen/starter-catalog-web": "workspace:*",
     "@desen/testkit": "workspace:*",
     "@desen/validator": "workspace:*",
     "react": "19.2.8",

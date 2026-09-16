@@ -114,6 +114,9 @@ importers:
       '@desen/runtime-react':
         specifier: workspace:*
         version: link:../../packages/runtime-react
+      '@desen/starter-catalog-web':
+        specifier: workspace:*
+        version: link:../../packages/starter-catalog-web
       '@desen/testkit':
         specifier: workspace:*
         version: link:../../packages/testkit
