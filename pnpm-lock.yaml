@@ -90,6 +90,9 @@ importers:
       '@desen/catalog-sdk':
         specifier: workspace:*
         version: link:../../packages/catalog-sdk
+      '@desen/design-system-core':
+        specifier: workspace:*
+        version: link:../../packages/design-system-core
       '@desen/editor-core':
         specifier: workspace:*
         version: link:../../packages/editor-core
