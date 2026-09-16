@@ -14,6 +14,7 @@ import {
   DESEN_APP_REPEATABLE_DEMO_ROOT_TEST_NAMES as NAMES,
   DesenAppRepeatableDemoProofError,
   buildDesenAppRepeatableDemoEvidence as build,
+  projectM10AT10CurrentGraphAudit,
   verifyDesenAppRepeatableDemoBrowserPolicy as browserPolicy,
   verifyDesenAppRepeatableDemoRootWiring as rootWiring,
   verifyDesenAppRepeatableDemoEvidence as verify,
@@ -322,7 +323,14 @@ test(NAMES[3], () => {
   assert.equal(built.liveSuccessorAuthority.predecessorTask, "M10-T08");
   assert.equal(built.liveSuccessorAuthority.currentObservationsAreNotHistoricalResults, true);
   assert.notDeepEqual(graph, historicalGraph);
-  assert.deepEqual(projectM10AT01CurrentGraphAudit(graph, historicalGraph), historicalGraph);
+  assert.deepEqual(
+    projectM10AT01CurrentGraphAudit(
+      projectM10AT10CurrentGraphAudit(graph, historicalGraph),
+      historicalGraph,
+    ),
+    historicalGraph,
+  );
+  assert.ok(graph.appSourceAudit.inventory.includes("apps/desen-app/src/project-lifecycle.ts"));
   assert.equal(matrix.result, "PASS");
   assert.equal(matrix.listenerStarted, false);
   assert.equal(matrix.browserExecuted, false);
@@ -431,6 +439,7 @@ test(NAMES[5], async () => {
     );
   }
   for (const name of [
+    "apps/desen-app/package.json",
     "pnpm-lock.yaml",
     "dependency-cruiser.config.cjs",
     "scripts/verify-boundary-fixtures.mjs",

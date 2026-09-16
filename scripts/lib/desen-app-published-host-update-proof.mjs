@@ -1377,7 +1377,12 @@ export function authenticateM10AT10LockfileSuccessor(bytes) {
   return Object.freeze({ predecessorBytes, predecessorText });
 }
 
-function projectM10AT10HistoricalInput(relativePath, bytes) {
+/**
+ * Projects the exact additive T10 App manifest back to its pre-T10 historical
+ * receipt. Readers of frozen M10 evidence may use this only before their own
+ * independently reviewed successor projections.
+ */
+export function projectM10AT10HistoricalInput(relativePath, bytes) {
   if (relativePath !== M10A_T10_APP_PACKAGE_SUCCESSOR.path) return bytes;
   if (
     bytes.byteLength !== M10A_T10_APP_PACKAGE_SUCCESSOR.bytes ||
