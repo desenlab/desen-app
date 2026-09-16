@@ -1,5 +1,9 @@
 import {
   STARTER_BOX_CAPABILITY_ID,
+  STARTER_CARD_CAPABILITY_ID,
+  STARTER_LIST_CAPABILITY_ID,
+  STARTER_TABLE_CAPABILITY_ID,
+  STARTER_PROGRESS_CAPABILITY_ID,
   STARTER_COMBOBOX_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
   STARTER_HEADING_CAPABILITY_ID,
@@ -16,6 +20,10 @@ import {
 
 import type {
   StarterBoxProps,
+  StarterCardProps,
+  StarterListProps,
+  StarterTableProps,
+  StarterProgressProps,
   StarterComboboxProps,
   StarterGridProps,
   StarterHeadingProps,
@@ -30,6 +38,14 @@ import type {
 } from "@desen/starter-catalog-web";
 
 const box: StarterBoxProps = { dir: "rtl" };
+const card: StarterCardProps = { label: "Project summary" };
+const list: StarterListProps = { label: "Project tasks", itemIds: ["research", "prototype"] };
+const table: StarterTableProps = {
+  caption: "Project status",
+  columns: [{ id: "name", label: "Name" }],
+  rows: [{ id: "research", cells: { name: "Research" } }],
+};
+const progress: StarterProgressProps = { label: "Uploading", value: 45 };
 const stack: StarterStackProps = { direction: "horizontal", wrap: true, dir: "ltr" };
 const grid: StarterGridProps = { columns: 3, flow: "row", dir: "rtl" };
 const text: StarterTextProps = { text: "Inert content" };
@@ -58,9 +74,33 @@ const numberField: StarterNumberFieldProps = {
   max: 12,
   step: 1,
 };
-void [box, stack, grid, text, heading, image, icon, separator, combobox, tabs, slider, numberField];
+void [
+  box,
+  card,
+  list,
+  table,
+  progress,
+  stack,
+  grid,
+  text,
+  heading,
+  image,
+  icon,
+  separator,
+  combobox,
+  tabs,
+  slider,
+  numberField,
+];
 
 createStarterNodeTemplate({ capabilityId: STARTER_BOX_CAPABILITY_ID, idPrefix: "public.box" });
+createStarterNodeTemplate({ capabilityId: STARTER_CARD_CAPABILITY_ID, idPrefix: "public.card" });
+createStarterNodeTemplate({ capabilityId: STARTER_LIST_CAPABILITY_ID, idPrefix: "public.list" });
+createStarterNodeTemplate({ capabilityId: STARTER_TABLE_CAPABILITY_ID, idPrefix: "public.table" });
+createStarterNodeTemplate({
+  capabilityId: STARTER_PROGRESS_CAPABILITY_ID,
+  idPrefix: "public.progress",
+});
 createStarterNodeTemplate({ capabilityId: STARTER_STACK_CAPABILITY_ID, idPrefix: "public.stack" });
 createStarterNodeTemplate({ capabilityId: STARTER_GRID_CAPABILITY_ID, idPrefix: "public.grid" });
 createStarterNodeTemplate({ capabilityId: STARTER_TEXT_CAPABILITY_ID, idPrefix: "public.text" });
@@ -111,4 +151,10 @@ const unsafeSlider: StarterSliderProps = {
   max: 100,
   step: 1,
 };
-void [unsafeBox, unsafeImage, unsafeText, unsafeCombobox, unsafeSlider];
+const unsafeTable: StarterTableProps = {
+  caption: "Project status",
+  columns: [{ id: "name", label: "Name" }],
+  // @ts-expect-error Table cells are inert text, never executable renderers.
+  rows: [{ id: "research", cells: { name: () => null } }],
+};
+void [unsafeBox, unsafeImage, unsafeText, unsafeCombobox, unsafeSlider, unsafeTable];

@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T09",
+  "proofId": "m10a-t09",
+  "profile": "desen.m10a-t09.data-display-feedback.v1",
+  "result": "PASS",
+  "package": {
+    "name": "@desen/starter-catalog-web",
+    "catalog": {
+      "id": "run.desen.starter.web",
+      "version": "0.6.0",
+      "target": "web-react",
+      "sha256": "4e59de0135e7d445bc8c6e029506369bf8b38e40d5df5a57a39f81a799a42a69",
+      "bytes": 585861
+    },
+    "packageDigest": "sha256:88a1fac65d43d166cbc31dceb890468950f677395ab93a62a382955e16b0c709",
+    "digestProfile": "desen.web-react.package-digest",
+    "distFiles": 37,
+    "distBytes": 3155509
+  },
+  "capabilities": {
+    "ids": [
+      "run.desen.starter/Accordion",
+      "run.desen.starter/Alert",
+      "run.desen.starter/Avatar",
+      "run.desen.starter/Badge",
+      "run.desen.starter/Box",
+      "run.desen.starter/Button",
+      "run.desen.starter/Card",
+      "run.desen.starter/Checkbox",
+      "run.desen.starter/Combobox",
+      "run.desen.starter/Dialog",
+      "run.desen.starter/Grid",
+      "run.desen.starter/Heading",
+      "run.desen.starter/Icon",
+      "run.desen.starter/Image",
+      "run.desen.starter/List",
+      "run.desen.starter/Menu",
+      "run.desen.starter/NumberField",
+      "run.desen.starter/Popover",
+      "run.desen.starter/Progress",
+      "run.desen.starter/RadioGroup",
+      "run.desen.starter/Select",
+      "run.desen.starter/Separator",
+      "run.desen.starter/Skeleton",
+      "run.desen.starter/Slider",
+      "run.desen.starter/Stack",
+      "run.desen.starter/Switch",
+      "run.desen.starter/Table",
+      "run.desen.starter/Tabs",
+      "run.desen.starter/Text",
+      "run.desen.starter/TextArea",
+      "run.desen.starter/TextField",
+      "run.desen.starter/Tooltip"
+    ],
+    "added": [
+      "run.desen.starter/Alert",
+      "run.desen.starter/Avatar",
+      "run.desen.starter/Badge",
+      "run.desen.starter/Card",
+      "run.desen.starter/List",
+      "run.desen.starter/Progress",
+      "run.desen.starter/Skeleton",
+      "run.desen.starter/Table"
+    ],
+    "requiredSlots": [
+      "Card.content",
+      "List.items"
+    ],
+    "listIdentity": "stable-id",
+    "table": "native-caption-header-cell-semantics",
+    "tableRowIdentity": "stable-id",
+    "repeatLimit": 100
+  },
+  "browser": {
+    "profile": "desen.m10a-t09.browser-proof.v1",
+    "result": "PASS",
+    "graphReceipts": [
+      "authoring",
+      "host"
+    ],
+    "tests": [
+      {
+        "title": "publishes the T09 data-display and feedback inventory through the reviewed starter Catalog",
+        "result": "PASS"
+      },
+      {
+        "title": "renders empty loading error and ready examples with text alternatives and table semantics",
+        "result": "PASS"
+      },
+      {
+        "title": "renders the same sample-data scenarios in the independent host graph without an operation",
+        "result": "PASS"
+      },
+      {
+        "title": "retains bounded repeats and row identities while rejecting grid and malformed-data authority",
+        "result": "PASS"
+      }
+    ],
+    "assertions": {
+      "allDataDisplayFeedbackCapabilitiesPublished": true,
+      "authoringGraphPresent": true,
+      "avatarTextAlternative": true,
+      "emptyExample": true,
+      "enterpriseGridNotAdmitted": true,
+      "errorExample": true,
+      "explicitListItemSlots": true,
+      "independentHostGraph": true,
+      "loadingExample": true,
+      "readyExample": true,
+      "repeatBoundEnforced": true,
+      "sameStaticAdapterRegistry": true,
+      "sampleDataWithoutOperation": true,
+      "stableRowIdentity": true,
+      "tableSemantics": true
+    }
+  },
+  "historical": {
+    "m10aT08ArtifactSha256": "37bfd7458fac6001b396632dc167a155aca56c3d5a62b93c1df144284428a729",
+    "m10aT08CatalogSha256": "d125bc3a7a83c0cedb56c4202585d3110849b71eb33043896d57973e2b08045e"
+  },
+  "claims": {
+    "boundedSampleData": true,
+    "explicitItemSlots": true,
+    "nativeTableSemantics": true,
+    "stableRowIdentity": true,
+    "textAlternatives": true,
+    "emptyLoadingErrorReadyExamples": true,
+    "sampleDataWithoutOperation": true,
+    "enterpriseGridNotAdmitted": true,
+    "sameStaticAdaptersInAuthoringAndHost": true,
+    "historicalArtifactsRewritten": false,
+    "runtimeCoreChanged": false
+  },
+  "tests": {
+    "rootTestNames": [
+      "M10A-T09 builds the exact 0.6.0 data-display and feedback Catalog deterministically",
+      "M10A-T09 admits bounded sample data, explicit item slots, and stable table row identities",
+      "M10A-T09 authenticates authoring and independent-host browser observations",
+      "M10A-T09 rejects malformed browser observations, artifact drift, and unsafe evidence options",
+      "M10A-T09 preserves the checkpointed T08 historical receipt while the starter Catalog evolves",
+      "M10A-T09 writer is atomic and leaves current artifact bytes deterministic"
+    ],
+    "packageCommand": "pnpm --filter @desen/starter-catalog-web test",
+    "browserCommand": "pnpm --filter @desen/starter-catalog-web-proof run test:m10a-t09",
+    "browserExecutedByVerifier": true
+  },
+  "nonClaims": [
+    "T09 does not add normal-App persistence, Publisher authority, Runtime activation, or M11 behavior.",
+    "T09 does not admit enterprise-grid features, charts, server pagination, sorting, callbacks, renderers, selectors, executable markup, or remote media URLs.",
+    "T09 sample-data contracts do not bind operations; later data resolution remains outside this task boundary.",
+    "Local evidence does not substitute for exact-head hosted Quality gate and fresh-main closure."
+  ]
+}

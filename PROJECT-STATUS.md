@@ -65,7 +65,7 @@ No Git history is rewritten.
 
 ## Documentation verification
 
-The eight governed entry and standards documents are reduced from 18,467 to 1,717 lines (90.7%)
+The eight governed entry and standards documents are reduced from 18,467 to 1,720 lines (90.7%)
 while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
 through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
 link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
@@ -77,11 +77,14 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T09 — data-display and feedback capabilities — is `NOT_STARTED`.** T08's
-[hosted proof](docs/proof/M10A-T08.md), [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), and
-[task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t08--overlays-and-disclosures) define
-the completed preceding boundary. T09 must not retrospectively expand T08 or authorize Runtime activation,
-normal-App integration/persistence, Publisher authority, Core/protocol changes, G10A, or M11.
+**M10A-T09 — data-display and feedback capabilities — is `IN_PROGRESS`.** Its
+[local evidence](docs/proof/M10A-T09.md) covers the private 0.6.0 starter Catalog, but no hosted
+exact-head or fresh-`main` closure is claimed. T08's [hosted proof](docs/proof/M10A-T08.md),
+[product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), and
+[task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t09--data-display-and-feedback) define the
+predecessor and scope boundary. T09 must not retrospectively expand T08 or authorize Runtime
+activation, normal-App integration/persistence, Publisher authority, Core/protocol changes, G10A,
+or M11.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
 Runtime Core tree and fresh proof requirements. No further external user/team recruitment is

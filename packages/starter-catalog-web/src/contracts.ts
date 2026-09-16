@@ -30,14 +30,24 @@ import {
   starterPopoverComponentRegistration,
   starterTooltipComponentRegistration,
 } from "./overlay-disclosure-contracts.js";
+import {
+  starterAlertComponentRegistration,
+  starterAvatarComponentRegistration,
+  starterBadgeComponentRegistration,
+  starterCardComponentRegistration,
+  starterListComponentRegistration,
+  starterProgressComponentRegistration,
+  starterSkeletonComponentRegistration,
+  starterTableComponentRegistration,
+} from "./data-display-feedback-contracts.js";
 
 import type { ComponentPropsOf } from "@desen/catalog-sdk";
 
 /** Exact Catalog identity reserved for the DESEN Neutral Web starter package. */
 export const STARTER_CATALOG_ID = "run.desen.starter.web";
 
-/** Current additive Catalog contract version for the bounded M10A-T08 starter slice. */
-export const STARTER_CATALOG_VERSION = "0.5.0";
+/** Current additive Catalog contract version for the bounded M10A-T09 starter slice. */
+export const STARTER_CATALOG_VERSION = "0.6.0";
 
 /** Target implemented by the current DESEN Neutral starter package. */
 export const STARTER_CATALOG_TARGET = "web-react";
@@ -383,6 +393,14 @@ export const STARTER_COMPONENT_REGISTRATIONS = Object.freeze([
   starterTabsComponentRegistration,
   starterSliderComponentRegistration,
   starterNumberFieldComponentRegistration,
+  starterCardComponentRegistration,
+  starterBadgeComponentRegistration,
+  starterAvatarComponentRegistration,
+  starterAlertComponentRegistration,
+  starterListComponentRegistration,
+  starterTableComponentRegistration,
+  starterSkeletonComponentRegistration,
+  starterProgressComponentRegistration,
 ] as const);
 
 /**
@@ -494,3 +512,35 @@ export type {
   StarterTextAreaProps,
   StarterTextFieldProps,
 } from "./form-control-contracts.js";
+export {
+  STARTER_ALERT_CAPABILITY_ID,
+  STARTER_AVATAR_CAPABILITY_ID,
+  STARTER_BADGE_CAPABILITY_ID,
+  STARTER_CARD_CAPABILITY_ID,
+  STARTER_DATA_DISPLAY_MAX_ITEMS,
+  STARTER_LIST_CAPABILITY_ID,
+  STARTER_PROGRESS_CAPABILITY_ID,
+  STARTER_SKELETON_CAPABILITY_ID,
+  STARTER_TABLE_CAPABILITY_ID,
+  STARTER_TABLE_MAX_COLUMNS,
+  starterAlertComponentRegistration,
+  starterAvatarComponentRegistration,
+  starterBadgeComponentRegistration,
+  starterCardComponentRegistration,
+  starterListComponentRegistration,
+  starterProgressComponentRegistration,
+  starterSkeletonComponentRegistration,
+  starterTableComponentRegistration,
+} from "./data-display-feedback-contracts.js";
+export type {
+  StarterAlertProps,
+  StarterAvatarProps,
+  StarterBadgeProps,
+  StarterCardProps,
+  StarterListProps,
+  StarterProgressProps,
+  StarterSkeletonProps,
+  StarterTableColumn,
+  StarterTableProps,
+  StarterTableRow,
+} from "./data-display-feedback-contracts.js";

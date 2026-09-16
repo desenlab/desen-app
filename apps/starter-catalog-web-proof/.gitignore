@@ -1,2 +1,4 @@
 # Legacy local T06 output must never become a proof artifact or source input.
 dist-m10a-t06/
+# T09 browser proof uses an OS temporary directory; ignore a legacy local fallback if present.
+.t09-proof-temp/

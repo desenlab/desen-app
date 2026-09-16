@@ -32,3 +32,7 @@ docs/proof/artifacts/m10a-t01.json
 docs/proof/artifacts/m10a-t05.json
 # Canonical M10A-T08 evidence is byte- and SHA-pinned by its verifier.
 docs/proof/artifacts/m10a-t08.json
+# Canonical M10A-T09 evidence is byte- and SHA-pinned by its verifier.
+docs/proof/artifacts/m10a-t09.json
+# Browser proof output is transient and never source authority.
+apps/starter-catalog-web-proof/.t09-proof-temp/

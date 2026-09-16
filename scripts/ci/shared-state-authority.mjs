@@ -177,6 +177,7 @@ export const PROOF_IDS = Object.freeze([
   "m10a-t06",
   "m10a-t07",
   "m10a-t08",
+  "m10a-t09",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -225,9 +226,10 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
 export const BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS = Object.freeze([
   "verify-m10a-t07",
   "verify-m10a-t08",
+  "verify-m10a-t09",
   "verify-m10a-t03",
 ]);
-if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 3) {
+if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 4) {
   throw new Error("The reviewed browser-exclusive verifier set drifted.");
 }
 
@@ -239,6 +241,10 @@ const BROWSER_AUTHORITY_BY_STEP_ID = Object.freeze({
   "verify-m10a-t08": Object.freeze({
     port: 4_191,
     tempEnvironmentKey: "DESEN_M10A_T08_PROOF_TEMP",
+  }),
+  "verify-m10a-t09": Object.freeze({
+    port: 4_192,
+    tempEnvironmentKey: "DESEN_M10A_T09_PROOF_TEMP",
   }),
   "verify-m10a-t03": Object.freeze({
     port: 4_188,
@@ -696,8 +702,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 250) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 250 steps.", {
+if (METADATA_BY_STEP_ID.size !== 252) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 252 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

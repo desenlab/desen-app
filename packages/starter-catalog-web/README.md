@@ -8,18 +8,21 @@ Source-node templates, and one explicit React-adapter subpath. Base UI remains a
 implementation detail of the interactive adapters; layout and semantic content use ordinary Web
 semantics where a Base UI primitive is unnecessary.
 
-**M10A-T08 is `DONE`; T07 is `DONE`.** T08 adds bounded Popover, Tooltip, Menu, and Accordion
-adapters on the same contained portal boundary; its [task-owned proof](../../docs/proof/M10A-T08.md)
-records browser and contract evidence plus exact-head hosted/fresh-`main` closure. T07's [task-owned proof](../../docs/proof/M10A-T07.md) records the
-selection/numeric-control evidence and exact-head hosted/fresh-`main` closure. T06 is `DONE`; its [task-owned proof](../../docs/proof/M10A-T06.md) records the completed
-local and hosted form-control closure. This package is not a normal Desen App integration, a complete
-component library, a design-system explorer, a persisted project, or a publish/activation path.
+**M10A-T09 is `IN_PROGRESS`; T08, T07, and T06 are `DONE`.** T09 adds bounded data-display and
+feedback adapters on the current Catalog boundary; its [task-owned proof](../../docs/proof/M10A-T09.md)
+records the local browser and contract evidence and awaits exact-head hosted/fresh-`main` closure.
+T08 adds bounded Popover, Tooltip, Menu, and Accordion adapters on the same contained portal
+boundary; its [task-owned proof](../../docs/proof/M10A-T08.md) records completed hosted closure.
+T07's [task-owned proof](../../docs/proof/M10A-T07.md) records completed selection/numeric-control
+closure. This package is not a normal Desen App integration, a complete component library, a
+design-system explorer, a persisted project, or a publish/activation path.
 
 The M10A-T01 receipt at
 [`docs/proof/artifacts/m10a-t01.json`](../../docs/proof/artifacts/m10a-t01.json) remains immutable
-historical evidence for its original three-capability slice. T05's sealed `0.2.0` and T06's completed
-`0.3.0` receipts remain historical; T07 owns the current
-`run.desen.starter.web@0.4.0#web-react` Catalog and must not rewrite or relabel earlier evidence.
+historical evidence for its original three-capability slice. T05's sealed `0.2.0`, T06's completed
+`0.3.0`, T07's completed `0.4.0`, and T08's completed `0.5.0` receipts remain historical. T09 owns
+the current `run.desen.starter.web@0.6.0#web-react` Catalog and must not rewrite or relabel earlier
+evidence.
 
 ## Public boundary
 
@@ -88,6 +91,19 @@ bounded content slot, Accordion requires ordered panel slots, and Menu/Accordion
 validated before Base UI receives them. Escape, pointer/keyboard parity, focus return, and
 unmount-safe interactions are covered by the task proof.
 
+The in-progress T09 slice adds bounded data-display and feedback capabilities:
+
+| Group                | Capabilities                     | Admitted boundary                                                                                                     |
+| -------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Data display         | Card, Badge, Avatar, List, Table | Ordered managed `List.items`/`Table.rows` slots, stable row identities, semantic native table output, no data source. |
+| Feedback and loading | Alert, Skeleton, Progress        | Finite role/status, inert text, bounded geometry, and finite determinate progress; no callbacks or timers.            |
+
+Avatar uses a closed trusted source set and required text alternative; Card and Alert retain bounded
+managed content slots. Table is deliberately basic: it admits declared columns and public rows but
+no query, sort, filter, virtualizer, renderer, or arbitrary cell markup. Skeleton and Progress make
+loading state visible without introducing asynchronous authority. The T09 proof covers empty,
+loading, error, and ready states in both isolated authoring and independent-host graphs.
+
 Each registration has a closed root style-part schema. Layout/style inputs permit only bounded,
 typed values such as six/eight-digit hex colors, finite spacing and box dimensions, finite
 alignment/distribution values, `fill`/`hug` where declared, and explicit typography or media
@@ -136,30 +152,29 @@ Production edges remain Protocol, Catalog SDK, Runtime React, and the package-lo
 implementation. The package does not import Editor Core, Desen App, Publisher, Runtime Core
 internals, testkit, or the reference capability package. React and React DOM 19 are peers.
 
-T05/T06 do not introduce arbitrary asset import, local asset storage, font admission, a library
+T05–T09 do not introduce arbitrary asset import, local asset storage, font admission, a library
 management UI, custom variants, raw CSS, remote requests, package publication, production
-deployment, business actions, or application-state wiring. T07 also does not add normal-App
-integration/persistence, Publisher authority, Runtime activation, Core/protocol changes, G10A, or
-M11. Those boundaries remain with their designated later tasks, including T13 for assets/fonts and
-T17 for the integrated explorer/documentation surface.
+deployment, business actions, application-state wiring, normal-App integration/persistence,
+Publisher authority, Runtime activation, Core/protocol changes, G10A, or M11. Those boundaries
+remain with their designated later tasks, including T13 for assets/fonts and T17 for the integrated
+explorer/documentation surface.
 
 ## Verification
 
-The following commands authenticate the T08 boundary; its hosted closure is recorded in
-[the T08 proof](../../docs/proof/M10A-T08.md).
+The following commands authenticate the current T09 boundary. T09's local evidence is recorded in
+[the T09 proof](../../docs/proof/M10A-T09.md); its hosted closure remains pending.
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck
 pnpm --filter @desen/starter-catalog-web test
 pnpm --filter @desen/starter-catalog-web test:public-package
-pnpm --filter @desen/starter-catalog-web-proof test:m10a-t08
-pnpm generate:m10a-t08
-pnpm verify:m10a-t08
-pnpm test:m10a-t08
+pnpm --filter @desen/starter-catalog-web-proof test:m10a-t09
+pnpm generate:m10a-t09
+pnpm verify:m10a-t09
+pnpm test:m10a-t09
 ```
 
-Authenticate the historical T05 closure without recapturing it with `pnpm verify:m10a-t05` and
-`pnpm test:m10a-t05`; T06 remains independently verifiable with `pnpm verify:m10a-t06` and
-`pnpm test:m10a-t06`. See [the T08 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t08--overlays-and-disclosures),
-[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T08 proof report](../../docs/proof/M10A-T08.md),
-[the T06 proof report](../../docs/proof/M10A-T06.md), and the [historical T05 proof](../../docs/proof/M10A-T05.md).
+Authenticate historical closure without recapturing it with `pnpm verify:m10a-t05` through
+`pnpm verify:m10a-t08` and their matching `test:m10a-tNN` commands. See [the T09 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t09--data-display-and-feedback),
+[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T09 proof report](../../docs/proof/M10A-T09.md),
+and the [historical T08 proof](../../docs/proof/M10A-T08.md).

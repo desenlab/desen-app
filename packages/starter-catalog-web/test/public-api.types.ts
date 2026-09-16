@@ -1,5 +1,9 @@
 import type {
   StarterButtonProps,
+  StarterCardProps,
+  StarterListProps,
+  StarterTableProps,
+  StarterProgressProps,
   StarterCheckboxProps,
   StarterComboboxProps,
   StarterDialogProps,
@@ -15,6 +19,14 @@ import type {
 import { createStarterNodeTemplate } from "../src/index.js";
 
 const button: StarterButtonProps = { label: "Continue", disabled: false };
+const card: StarterCardProps = { label: "Project summary" };
+const list: StarterListProps = { label: "Project tasks", itemIds: ["research"] };
+const table: StarterTableProps = {
+  caption: "Project status",
+  columns: [{ id: "name", label: "Name" }],
+  rows: [{ id: "research", cells: { name: "Research" } }],
+};
+const progress: StarterProgressProps = { label: "Uploading", value: 45 };
 const select: StarterSelectProps = {
   label: "Typeface",
   options: [{ value: "sans", label: "Sans" }],
@@ -53,6 +65,10 @@ const numberField: StarterNumberFieldProps = {
 };
 void [
   button,
+  card,
+  list,
+  table,
+  progress,
   select,
   dialog,
   textField,
@@ -109,6 +125,12 @@ const unsafeNumeric: StarterNumberFieldProps = {
   max: 12,
   step: 1,
 };
+const unsafeTable: StarterTableProps = {
+  caption: "Project status",
+  columns: [{ id: "name", label: "Name" }],
+  // @ts-expect-error Table cells are inert text, never executable renderers.
+  rows: [{ id: "research", cells: { name: () => null } }],
+};
 void [
   callback,
   render,
@@ -121,6 +143,7 @@ void [
   unsafeComboboxRenderer,
   unsafeTabs,
   unsafeNumeric,
+  unsafeTable,
 ];
 
 // @ts-expect-error No arbitrary capability or module selector can request a starter template.
