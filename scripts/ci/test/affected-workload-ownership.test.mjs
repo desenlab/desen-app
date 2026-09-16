@@ -591,7 +591,7 @@ test("the M10A-T07 successor preserves historical T06 ownership and adds exactly
       paths.filter(
         (candidate) =>
           !M10A_T10_SUCCESSOR_PATHS.includes(candidate) &&
-        !M10A_T09_SUCCESSOR_PATHS.includes(candidate) &&
+          !M10A_T09_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T08_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T07_SUCCESSOR_PATHS.includes(candidate),
       ),
@@ -641,7 +641,7 @@ test("the M10A-T06 successor preserves historical T05 ownership and adds exactly
       paths.filter(
         (candidate) =>
           !M10A_T10_SUCCESSOR_PATHS.includes(candidate) &&
-        !M10A_T09_SUCCESSOR_PATHS.includes(candidate) &&
+          !M10A_T09_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T08_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T07_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T06_SUCCESSOR_PATHS.includes(candidate),
@@ -692,7 +692,7 @@ test("the M10A-T05 successor preserves T04 ownership and adds exactly 11 reviewe
       paths.filter(
         (candidate) =>
           !M10A_T10_SUCCESSOR_PATHS.includes(candidate) &&
-        !M10A_T09_SUCCESSOR_PATHS.includes(candidate) &&
+          !M10A_T09_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T08_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T06_SUCCESSOR_PATHS.includes(candidate) &&
           !M10A_T07_SUCCESSOR_PATHS.includes(candidate) &&
