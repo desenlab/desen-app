@@ -230,6 +230,14 @@ const M10_VISUAL_BEHAVIOR_AUTHORING_HOSTED_BROWSER_COMPATIBILITY_RECEIPT = Objec
   bytes: 15_143,
   sha256: "5fcdc7f312bb2ef45e747499e50bf31f2dfae8e1c1b82963176d99eb8bb8395b",
 });
+// M10A-T11 changed this one source that the historical T01C bridge does not materialize. The
+// M09 task-time receipt remains valid; a current reader may instead admit only these exact
+// reviewed bytes, so unrelated current source edits cannot enter a frozen M09 projection.
+const M10A_T11_AUTHORING_SLOTS_SUCCESSOR_RECEIPT = Object.freeze({
+  path: "apps/desen-app/src/authoring-slots.ts",
+  bytes: 59_517,
+  sha256: "6530c05bfbbcac49137a3759ce81471204d957b5932c267148820f044c10a8ed",
+});
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const PUBLISH_ACTIVATION_ARTIFACT_PATH =
   "docs/proof/artifacts/desen-app-0.1.0-publish-activation.json";
@@ -508,7 +516,7 @@ const M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS = Object.freeze({
   }),
 });
 
-function reviewedSuccessorReceiptMap(receipts) {
+function reviewedSuccessorReceiptMap(receipts, files) {
   const receiptMap = new Map(receipts.map((candidate) => [candidate?.path, candidate]));
   for (const receipt of Object.values(M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS)) {
     receiptMap.set(receipt.path, receipt);
@@ -518,6 +526,16 @@ function reviewedSuccessorReceiptMap(receipts) {
   }
   for (const receipt of Object.values(M10_USER_CREATED_BLANK_PROJECT_SUCCESSOR_RECEIPTS)) {
     receiptMap.set(receipt.path, receipt);
+  }
+  const currentAuthoringSlots = files.get(M10A_T11_AUTHORING_SLOTS_SUCCESSOR_RECEIPT.path);
+  if (
+    currentAuthoringSlots?.byteLength === M10A_T11_AUTHORING_SLOTS_SUCCESSOR_RECEIPT.bytes &&
+    sha256(currentAuthoringSlots) === M10A_T11_AUTHORING_SLOTS_SUCCESSOR_RECEIPT.sha256
+  ) {
+    receiptMap.set(
+      M10A_T11_AUTHORING_SLOTS_SUCCESSOR_RECEIPT.path,
+      M10A_T11_AUTHORING_SLOTS_SUCCESSOR_RECEIPT,
+    );
   }
   return receiptMap;
 }
@@ -2087,7 +2105,7 @@ async function authenticateFrozenArtifact(workspaceRoot) {
 }
 
 function assertRetainedHistoricalReceipts(frozenArtifact, files) {
-  const receiptMap = reviewedSuccessorReceiptMap(frozenArtifact.boundary.trackedReceipts);
+  const receiptMap = reviewedSuccessorReceiptMap(frozenArtifact.boundary.trackedReceipts, files);
   for (const relativePath of RETAINED_HISTORICAL_PATHS) {
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
@@ -2224,7 +2242,7 @@ function authenticatePublishActivationSuccessor(files) {
       "The M09-T14/G09 publish-activation identity or claims drifted.",
     );
   }
-  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts);
+  const receiptMap = reviewedSuccessorReceiptMap(trackedReceipts, files);
   for (const relativePath of T14_SUCCESSOR_RECEIPT_PATHS) {
     if (M10_USER_CREATED_BLANK_PROJECT_CURRENT_PATHS.includes(relativePath)) continue;
     const receipt = receiptMap.get(relativePath);
