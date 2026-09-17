@@ -4,16 +4,16 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01 through T10 are complete. M10A-T11's local direct-manipulation canvas
-> implementation and bounded verification are integration-ready; it remains `IN_PROGRESS` pending
-> exact-head hosted and fresh-`main` closure. It adds no Runtime, Publisher, Core/protocol, G10A, or M11 authority.
+> M10/G10 and M10A-T01 through T11 are complete. T11's direct-manipulation canvas passed exact-head
+> hosted and fresh-`main` closure; it adds no Runtime, Publisher, Core/protocol, G10A, or M11
+> authority.
 
 ## Implementation progress
 
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████████░░░░░░` **131 / 176 tasks complete (74%)**
+**Overall:** `███████████████████░░░░░░` **132 / 176 tasks complete (75%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -33,10 +33,10 @@ bounded, reproducible claims about both.
 
 **M10 complete:** `████████████` **12 / 12 tasks complete (100%)**
 
-**M10A:** **10 / 28 tasks complete (36%)** · T11 is integration-ready locally; no completed work removed.
+**M10A:** **11 / 28 tasks complete (39%)** · T11 hosted closure is recorded; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Current task:** `M10A-T11` (`IN_PROGRESS`; local verification passed; hosted closure pending) ·
+**Next task:** `M10A-T12` (`NOT_STARTED`; T03 and T11 complete) ·
 **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
@@ -193,8 +193,8 @@ bounded private layout/content starter Catalog and isolated proof harness, not n
 ([T06 proof](docs/proof/M10A-T06.md)). `M10A-T07` is `DONE` with its hosted 0.4.0
 selection/numeric Catalog [proof](docs/proof/M10A-T07.md). `M10A-T08` is `DONE` with its hosted
 0.5.0 overlay/disclosure [proof](docs/proof/M10A-T08.md); `M10A-T09` is `DONE` with its hosted
-0.6.0 data-display/feedback [proof](docs/proof/M10A-T09.md). `M10A-T11` is `IN_PROGRESS`: its local direct-manipulation
-canvas adds App-owned viewport/frame chrome, bounded multi-selection, and atomic slot-aware group placement; hosted closure remains pending. M11 remains gated by G10A.
+0.6.0 data-display/feedback [proof](docs/proof/M10A-T09.md). `M10A-T11` is `DONE` with its [hosted closure](docs/proof/M10A-T11.md):
+its App-owned viewport/frame chrome, bounded multi-selection, and atomic slot-aware placement; M11 remains gated by G10A.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and

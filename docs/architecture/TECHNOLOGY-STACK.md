@@ -52,7 +52,7 @@ fresh compatibility checks.
 Map provider, drag-and-drop adapter, router, query cache, and UI component dependencies are chosen
 only by their owning tasks and require an ADR when they affect public capability contracts.
 
-## M10A product foundation — T01 through T10 complete; T11 integration-ready
+## M10A product foundation — T01 through T11 complete; T12 next
 
 M10A-T01 pins `@base-ui/react` **1.8.0** behind the private
 `@desen/starter-catalog-web` Catalog/adapter package, with DESEN-owned Neutral styles implemented
@@ -83,9 +83,8 @@ normal App integration, durable production storage, Publisher, or protocol autho
 exact-head hosted and fresh-`main` 0.4.0 selection/numeric evidence; M10A-T08 is `DONE` with
 exact-head hosted and fresh-`main` 0.5.0 overlay/disclosure evidence; M10A-T09 is `DONE` with
 exact-head hosted and fresh-`main` 0.6.0 data-display/feedback evidence. M10A-T10 is `DONE` with
-application-owned project/surface lifecycle and generation-fenced storage only. M10A-T11 is
-`IN_PROGRESS`: its local App boundary adds bounded direct manipulation, accessible canvas chrome,
-and atomic slot-aware group placement; hosted closure remains required. Neither task adds Runtime,
+application-owned project/surface lifecycle and generation-fenced storage only. M10A-T11 is `DONE`
+with exact-head hosted and fresh-`main` direct-manipulation closure. Neither task adds Runtime,
 Publisher, Core/protocol, G10A, or M11 authority. M11 has not started.
 The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
 capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
