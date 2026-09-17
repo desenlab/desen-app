@@ -277,7 +277,7 @@ async function rejectsCompletedCutover(mutate, code = "AFFECTED_PROMOTION_CUTOVE
   await rejects(code, (value) => mutate(completeHostedCutover(value), value));
 }
 
-test("authenticates the exact 20/20 hosted campaign and live M10A-T10 successor", async () => {
+test("authenticates the exact 20/20 hosted campaign and live M10A-T11 successor", async () => {
   const historicalEvidence = await evidence();
   assert.equal(
     historicalEvidence.runnerAuthority.workflowContract.processTimeout,
@@ -321,13 +321,13 @@ test("authenticates the exact 20/20 hosted campaign and live M10A-T10 successor"
     },
   );
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "4ed33ecc9ded6de91f46c392839706290e4563fec104251c1c0e266efd7984e4",
-    ownershipSha256: "6cb2badc702a8b2f5760b442dd680f6c081aebb8b58518d6ad29e20e6b18d752",
+    selectorSha256: "d8d7bddf77a6ed87bdc80c7b68b2500f422ea4ce26c7ef1a3313754910603fa3",
+    ownershipSha256: "a6f13b4582b3ef9f3e5b83497c43f04a7906332509e30df3c0340b37cd1041f4",
     impactGraphSha256: "4c9bf0772ea60e6aa791dd30f62e56422e534b3e3d6355b9e2263773bac0bf72",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "ff1f997a12ac43f096d94c63e98efbaf271ea4ed6fcf12c4b4634c7acde057a1",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "d274bf3470ea831ad9596d207dccfa3fd80cfd78d0b74e4629f81ae90d2c7899",
+    runnerAuthoritySha256: "e7f4e054be236b1733d9afadc8deb0e710ddac77534323e77c21ffad6931fc22",
   });
 });
 
@@ -391,8 +391,8 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "7ff2dd3136ceb521cd4b828d9a5db3a0fdc6bd3c6eed43466cfa03b560a6c109",
-    checkpoints: 106,
+    headSha256: "48833d6a8a8b2e2104481bdd735e7579004418fbb70b64637d1a78df091e9733",
+    checkpoints: 110,
     frozenArtifacts: 73,
     currentReaders: 146,
   };

@@ -16,6 +16,7 @@ import { prepareCatalogAuthoringModel, projectAuthoringCanvasFrame } from "./aut
 import { projectAuthoringBehaviorControls } from "./authoring-behavior-projection.js";
 import { projectAuthoringDiagnostics } from "./authoring-diagnostics.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
+import { CanvasManipulationControls } from "./canvas-manipulation-controls.js";
 import { applyAuthoringConditionEdit } from "./authoring-conditions.js";
 import {
   applyAuthoringInputConnection,
@@ -59,9 +60,11 @@ import {
 } from "./authoring-event-actions.js";
 import { applyAuthoringStateEdit, prepareAuthoringStateModel } from "./authoring-state.js";
 import {
+  applyAuthoringSlotBatchPlacement,
   applyAuthoringNodeDelete,
   applyAuthoringSlotEdit,
   createAuthoringSlotSelection,
+  evaluateAuthoringSlotBatchPlacement,
   evaluateAuthoringNodeDeletion,
   evaluateAuthoringSlotInsertion,
   evaluateAuthoringSlotPlacement,
@@ -72,6 +75,15 @@ import {
   createAuthoringComponentSelection,
   isSameAuthoringComponentSelection,
 } from "./authoring-selection.js";
+import {
+  createAuthoringCanvasPreviewFrame,
+  createAuthoringCanvasViewport,
+  panAuthoringCanvasViewport,
+  projectAuthoringDirectManipulationSelection,
+  resizeAuthoringCanvasPreviewFrame,
+  toggleAuthoringDirectManipulationSelection,
+  zoomAuthoringCanvasViewport,
+} from "./authoring-direct-manipulation.js";
 import { InspectorPanel } from "./inspector-panel.js";
 import {
   InputConnectionControl,
@@ -180,6 +192,7 @@ import type {
 } from "./authoring-connections.js";
 import type { AuthoringScenarioValue } from "./authoring-scenarios.js";
 import type {
+  AuthoringSlotBatchPlacementResult,
   AuthoringSlotEdit,
   AuthoringSlotEditResult,
   AuthoringSlotProjection,
@@ -766,6 +779,19 @@ interface AdvancedSourceDraft {
   readonly failure: AuthoringSourceDraftFailure | null;
 }
 
+/** Ephemeral canvas chrome belongs to one currently previewed Source surface, never to Source. */
+interface CanvasSurfacePresentation {
+  readonly previewFrame: ReturnType<typeof createAuthoringCanvasPreviewFrame> | null;
+  readonly viewport: ReturnType<typeof createAuthoringCanvasViewport>;
+}
+
+function createCanvasSurfacePresentation(): CanvasSurfacePresentation {
+  return Object.freeze({
+    previewFrame: null,
+    viewport: createAuthoringCanvasViewport(),
+  });
+}
+
 const LAYER_DROP_MIDPOINT_HYSTERESIS_PX = 4;
 const WORKSPACE_PROFILE_MOUNT_IDENTITIES = new WeakMap<ProjectWorkspaceProfileHandle, string>();
 let nextWorkspaceProfileMountIdentity = 1;
@@ -800,7 +826,11 @@ export function createAuthoringFixtureHostPorts(
 
 type AuthoringDragIntent =
   | Readonly<{ readonly kind: "component"; readonly componentId: string }>
-  | Readonly<{ readonly kind: "node"; readonly nodeId: string }>;
+  | Readonly<{
+      readonly kind: "node";
+      readonly nodeId: string;
+      readonly nodeIds: readonly string[];
+    }>;
 
 interface AuthoringDropProjection {
   readonly index: number;
@@ -852,10 +882,11 @@ interface LayerSelectionProps {
   readonly onClearDrag: () => void;
   readonly onProjectDrop: (projection: AuthoringDropProjection | null) => void;
   readonly onStartDrag: (intent: AuthoringDragIntent) => void;
-  readonly onToggleSelection: (node: AuthoringLayerNode) => void;
+  readonly onToggleSelection: (node: AuthoringLayerNode, extend: boolean) => void;
   readonly route: AuthoringSlotRoute;
   readonly rootNodeId: string;
   readonly selectedSourceNodeId: string | null;
+  readonly selectedSourceNodeIds: readonly string[];
 }
 
 function declaredSlotStates(
@@ -934,11 +965,11 @@ function evaluateDragIntent(
   dragIntent: AuthoringDragIntent,
 ): AuthoringDropAdmission {
   if (dragIntent.kind === "node") {
-    const compatibility = evaluateAuthoringSlotPlacement(
+    const compatibility = evaluateAuthoringSlotBatchPlacement(
       route,
       authoringModel,
       target,
-      dragIntent.nodeId,
+      dragIntent.nodeIds,
       index,
     );
     if (!compatibility.accepted) return Object.freeze({ status: "rejected" });
@@ -1003,8 +1034,7 @@ function SlotBoundary({
   dragIntent,
   onApplyIntent,
   route,
-  rootNodeId,
-  selectedSourceNodeId,
+  selectedSourceNodeIds,
   onBoundaryDragEnter,
   onBoundaryDragOver,
   onBoundaryDrop,
@@ -1016,8 +1046,7 @@ function SlotBoundary({
     | "dragIntent"
     | "onApplyIntent"
     | "route"
-    | "rootNodeId"
-    | "selectedSourceNodeId"
+    | "selectedSourceNodeIds"
   > & {
     readonly index: number;
     readonly owner: AuthoringBehaviorLayer | AuthoringLayerNode;
@@ -1029,10 +1058,24 @@ function SlotBoundary({
   }
 >) {
   const target = slotTarget(route, owner, slot);
+  // Preserve the complete selected group for preflight. In particular, a selected surface root
+  // must reject the entire operation rather than being silently dropped while its siblings move.
+  const selectedNodeIds = selectedSourceNodeIds;
+  const singleSelectedPlacement =
+    selectedNodeIds.length === 1
+      ? evaluateAuthoringSlotPlacement(
+          route,
+          authoringModel,
+          target,
+          selectedNodeIds[0] ?? "",
+          index,
+        )
+      : null;
   const selectedPlacement =
-    selectedSourceNodeId === null || selectedSourceNodeId === rootNodeId
-      ? null
-      : evaluateAuthoringSlotPlacement(route, authoringModel, target, selectedSourceNodeId, index);
+    singleSelectedPlacement ??
+    (selectedNodeIds.length > 1
+      ? evaluateAuthoringSlotBatchPlacement(route, authoringModel, target, selectedNodeIds, index)
+      : null);
   const selectedMovable =
     selectedPlacement?.accepted === true && selectedPlacement.changesSource === true;
   const dragAdmission =
@@ -1043,12 +1086,21 @@ function SlotBoundary({
 
   const active = activeSlot !== null && isSameAuthoringSlotSelection(activeSlot, target);
   const position = index + 1;
-  const selectedPosition =
-    selectedPlacement?.accepted === true ? selectedPlacement.finalIndex + 1 : position;
   const placementLabel =
-    selectedPlacement?.accepted === true && !selectedPlacement.changesSource
-      ? `Keep ${selectedSourceNodeId ?? "selected layer"} at its current position ${selectedPosition} in ${owner.displayName} ${owner.id} ${slot.name} slot`
-      : `Move ${selectedSourceNodeId ?? "selected layer"} to ${owner.displayName} ${owner.id} ${slot.name} slot at position ${selectedPosition}`;
+    selectedNodeIds.length <= 1
+      ? (() => {
+          const selectedNodeId = selectedNodeIds[0] ?? "selected layer";
+          const selectedPosition =
+            singleSelectedPlacement?.accepted === true
+              ? singleSelectedPlacement.finalIndex + 1
+              : position;
+          return selectedPlacement?.accepted === true && !selectedPlacement.changesSource
+            ? `Keep ${selectedNodeId} at its current position ${selectedPosition} in ${owner.displayName} ${owner.id} ${slot.name} slot`
+            : `Move ${selectedNodeId} to ${owner.displayName} ${owner.id} ${slot.name} slot at position ${selectedPosition}`;
+        })()
+      : selectedPlacement?.accepted === true && !selectedPlacement.changesSource
+        ? `Keep ${selectedNodeIds.length} selected layers at their current position in ${owner.displayName} ${owner.id} ${slot.name} slot`
+        : `Move ${selectedNodeIds.length} selected layers to ${owner.displayName} ${owner.id} ${slot.name} slot at position ${position}`;
 
   return (
     <li
@@ -1077,8 +1129,13 @@ function SlotBoundary({
         aria-label={placementLabel}
         disabled={!selectedMovable}
         onClick={() => {
-          if (selectedSourceNodeId === null) return;
-          onApplyIntent(target, index, { kind: "node", nodeId: selectedSourceNodeId });
+          const nodeId = selectedNodeIds[0];
+          if (nodeId === undefined) return;
+          onApplyIntent(
+            target,
+            index,
+            Object.freeze({ kind: "node", nodeId, nodeIds: Object.freeze([...selectedNodeIds]) }),
+          );
         }}
         type="button"
       >
@@ -1431,13 +1488,14 @@ function LayerNode({
   route,
   rootNodeId,
   selectedSourceNodeId,
+  selectedSourceNodeIds,
 }: Readonly<
   LayerSelectionProps & {
     readonly movable?: boolean;
     readonly node: AuthoringLayerNode;
   }
 >) {
-  const selected = selectedSourceNodeId === node.id;
+  const selected = selectedSourceNodeIds.includes(node.id);
   const interaction = {
     activeDropProjection,
     activeSlot,
@@ -1453,6 +1511,7 @@ function LayerNode({
     route,
     rootNodeId,
     selectedSourceNodeId,
+    selectedSourceNodeIds,
   } satisfies LayerSelectionProps;
 
   return (
@@ -1460,7 +1519,7 @@ function LayerNode({
       <div
         className={styles.layerRow}
         data-category={node.capabilityId.split("/").at(-1)}
-        data-dragging={dragIntent?.kind === "node" && dragIntent.nodeId === node.id}
+        data-dragging={dragIntent?.kind === "node" && dragIntent.nodeIds.includes(node.id)}
         data-layer-drop-row-node-id={node.id}
         data-selected={selected}
       >
@@ -1473,7 +1532,9 @@ function LayerNode({
             onDragEnd={onClearDrag}
             onDragStart={(event) => {
               prepareNativeDrag(event, "move");
-              onStartDrag(Object.freeze({ kind: "node", nodeId: node.id }));
+              onStartDrag(
+                Object.freeze({ kind: "node", nodeId: node.id, nodeIds: Object.freeze([node.id]) }),
+              );
             }}
             title={`Drag ${node.displayName} layer`}
           />
@@ -1483,7 +1544,9 @@ function LayerNode({
           aria-pressed={selected}
           className={styles.layerSelectAction}
           data-layer-source-node-id={node.id}
-          onClick={() => onToggleSelection(node)}
+          onClick={(event) =>
+            onToggleSelection(node, event.shiftKey || event.metaKey || event.ctrlKey)
+          }
           type="button"
         >
           <span aria-hidden="true" className={styles.layerGlyph} />
@@ -1524,6 +1587,7 @@ function BehaviorNode({
   route,
   rootNodeId,
   selectedSourceNodeId,
+  selectedSourceNodeIds,
 }: Readonly<LayerSelectionProps & { readonly behavior: AuthoringBehaviorLayer }>) {
   const interaction = {
     activeDropProjection,
@@ -1540,6 +1604,7 @@ function BehaviorNode({
     route,
     rootNodeId,
     selectedSourceNodeId,
+    selectedSourceNodeIds,
   } satisfies LayerSelectionProps;
   return (
     <li className={styles.behaviorNode}>
@@ -1616,7 +1681,9 @@ function LayerTree({
         data-active={interaction.dragIntent?.kind === "node"}
       >
         {interaction.dragIntent?.kind === "node"
-          ? `Moving ${interaction.dragIntent.nodeId} · release when the wide highlighted gap locks in.`
+          ? interaction.dragIntent.nodeIds.length === 1
+            ? `Moving ${interaction.dragIntent.nodeId} · release when the wide highlighted gap locks in.`
+            : `Moving ${interaction.dragIntent.nodeIds.length} selected layers · release when the wide highlighted gap locks in.`
           : "Drag the dotted grip; each row snaps to the gap above or below it. Place also works."}
       </p>
       <section
@@ -2017,26 +2084,34 @@ function AuthoringPanel({
   hidden,
   interactive,
   model,
+  onBatchSlotPlacement,
   onDeleteSelection,
   onSlotEdit,
   onToggleSelection,
   route,
   selection,
   selectedSourceNodeId,
+  selectedSourceNodeIds,
   selectedSurface,
 }: Readonly<{
   readonly hidden: boolean;
   readonly interactive: boolean;
   readonly model: CatalogAuthoringModel;
+  readonly onBatchSlotPlacement: (
+    target: AuthoringSlotSelection,
+    index: number,
+    nodeIds: readonly string[],
+  ) => AuthoringSlotBatchPlacementResult;
   readonly onDeleteSelection: () => AuthoringSlotEditResult;
   readonly onSlotEdit: (
     target: AuthoringSlotSelection,
     edit: AuthoringSlotEdit,
   ) => AuthoringSlotEditResult;
-  readonly onToggleSelection: (node: AuthoringLayerNode) => void;
+  readonly onToggleSelection: (node: AuthoringLayerNode, extend: boolean) => void;
   readonly route: AuthoringSlotRoute;
   readonly selection: AuthoringComponentSelection | null;
   readonly selectedSourceNodeId: string | null;
+  readonly selectedSourceNodeIds: readonly string[];
   readonly selectedSurface: DesenAppSurfaceSummary;
 }>) {
   const [activeSlot, setActiveSlot] = useState<AuthoringSlotSelection | null>(null);
@@ -2132,11 +2207,11 @@ function AuthoringPanel({
     setNotice(`Choose a Catalog component for ${target.ownerId} · ${target.slot}.`);
   }
 
-  function toggleLayer(node: AuthoringLayerNode): void {
+  function toggleLayer(node: AuthoringLayerNode, extend: boolean): void {
     if (!interactive) return;
     setDragNotice("");
     setNotice("");
-    onToggleSelection(node);
+    onToggleSelection(node, extend);
   }
 
   function applyIntent(
@@ -2146,12 +2221,12 @@ function AuthoringPanel({
   ): void {
     if (!interactive) return;
     const targetProjection = projectAuthoringSlotSelection(target, route, model);
-    const result = onSlotEdit(
-      target,
+    const result =
       intent.kind === "component"
-        ? { kind: "insert", componentId: intent.componentId, index }
-        : { kind: "place", nodeId: intent.nodeId, index },
-    );
+        ? onSlotEdit(target, { kind: "insert", componentId: intent.componentId, index })
+        : intent.nodeIds.length > 1
+          ? onBatchSlotPlacement(target, index, intent.nodeIds)
+          : onSlotEdit(target, { kind: "place", nodeId: intent.nodeId, index });
     resetDragSession();
     setActiveDropProjection(null);
     setDragIntent(null);
@@ -2166,19 +2241,25 @@ function AuthoringPanel({
               ? "The Catalog defaults cannot create a valid component here."
               : result.reason === "preview-unavailable"
                 ? "The working preview could not accept this Source change."
-                : result.reason === "target-invalid"
-                  ? "The selected node or slot is no longer current."
-                  : "The slot change was rejected safely.";
+                : result.reason === "cycle-rejected"
+                  ? "A selected layer cannot move into its own subtree."
+                  : result.reason === "target-invalid"
+                    ? "The selected node or slot is no longer current."
+                    : "The slot change was rejected safely.";
       setNotice(message);
       return;
     }
-    pendingLayerFocus.current = result.nodeId;
+    const changedNodeIds = "nodeIds" in result ? result.nodeIds : Object.freeze([result.nodeId]);
+    const changedNodeId = changedNodeIds.at(-1) ?? "selected layer";
+    pendingLayerFocus.current = changedNodeIds.at(-1) ?? null;
     setNotice(
       result.operation === "insert"
-        ? `Inserted ${model.components.find(({ id }) => id === (intent.kind === "component" ? intent.componentId : ""))?.displayName ?? result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot at position ${index + 1}` : "the selected slot"}. Selected in Layers · use Remove layer above or press Delete/Backspace.`
-        : result.operation === "move"
-          ? `Moved ${result.nodeId} to ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`
-          : `Reordered ${result.nodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`,
+        ? `Inserted ${model.components.find(({ id }) => id === (intent.kind === "component" ? intent.componentId : ""))?.displayName ?? changedNodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot at position ${index + 1}` : "the selected slot"}. Selected in Layers · use Remove layer above or press Delete/Backspace.`
+        : "nodeIds" in result && result.nodeIds.length > 1
+          ? `Moved ${result.nodeIds.length} selected layers together to ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`
+          : result.operation === "move"
+            ? `Moved ${changedNodeId} to ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`
+            : `Reordered ${changedNodeId} in ${targetProjection.status === "ready" ? `${targetProjection.owner.displayName} ${targetProjection.slot.name} slot` : "the selected slot"}.`,
     );
   }
 
@@ -2193,11 +2274,21 @@ function AuthoringPanel({
     if (!interactive) return;
     resetDragSession();
     setActiveDropProjection(null);
-    setDragIntent(intent);
+    const resolvedIntent =
+      intent.kind === "node" && selectedSourceNodeIds.includes(intent.nodeId)
+        ? Object.freeze({
+            kind: "node" as const,
+            nodeId: intent.nodeId,
+            nodeIds: Object.freeze([...selectedSourceNodeIds]),
+          })
+        : intent;
+    setDragIntent(resolvedIntent);
     setDragNotice(
-      intent.kind === "component"
-        ? `Dragging ${model.components.find(({ id }) => id === intent.componentId)?.displayName ?? "component"} · release on the highlighted drop target in Components.`
-        : "Release when the wide highlighted Layers gap locks in.",
+      resolvedIntent.kind === "component"
+        ? `Dragging ${model.components.find(({ id }) => id === resolvedIntent.componentId)?.displayName ?? "component"} · release on the highlighted drop target in Components.`
+        : resolvedIntent.nodeIds.length === 1
+          ? "Release when the wide highlighted Layers gap locks in."
+          : `Dragging ${resolvedIntent.nodeIds.length} selected layers together · release when the wide highlighted Layers gap locks in.`,
     );
   }
 
@@ -2377,6 +2468,7 @@ function AuthoringPanel({
             }
             route={route}
             selectedSourceNodeId={selectedSourceNodeId}
+            selectedSourceNodeIds={selectedSourceNodeIds}
             selectedSurface={selectedSurface}
           />
         </div>
@@ -2432,6 +2524,31 @@ function SurfaceEditor({
   const previewSurface =
     project.surfaces.find(({ sourceId }) => sourceId === previewSurfaceId) ?? selectedSurface;
   const [selection, setSelection] = useState<AuthoringComponentSelection | null>(null);
+  const [directSelections, setDirectSelections] = useState<readonly AuthoringComponentSelection[]>(
+    Object.freeze([]),
+  );
+  const [canvasPresentations, setCanvasPresentations] = useState<
+    Readonly<Record<string, CanvasSurfacePresentation>>
+  >(() => Object.freeze({}));
+  const canvasPresentation =
+    canvasPresentations[previewSurfaceId] ?? createCanvasSurfacePresentation();
+  const canvasPreviewFrame = canvasPresentation.previewFrame;
+  const canvasViewport = canvasPresentation.viewport;
+
+  function updateCanvasPresentation(
+    update: (current: CanvasSurfacePresentation) => CanvasSurfacePresentation,
+  ): void {
+    setCanvasPresentations((current) => {
+      const surfacePresentation = current[previewSurfaceId] ?? createCanvasSurfacePresentation();
+      const nextPresentation = update(surfacePresentation);
+      return Object.freeze({ ...current, [previewSurfaceId]: nextPresentation });
+    });
+  }
+
+  function selectOne(next: AuthoringComponentSelection | null): void {
+    setSelection(next);
+    setDirectSelections(next === null ? Object.freeze([]) : Object.freeze([next]));
+  }
   const [transientDiagnostics, setTransientDiagnostics] =
     useState<TransientAuthoringDiagnostics | null>(null);
   const [diagnosticSelection, setDiagnosticSelection] =
@@ -2605,6 +2722,13 @@ function SurfaceEditor({
         : canvasFrame.frame.height < canvasFrame.frame.width
           ? "Landscape"
           : "Square";
+  const effectiveCanvasFrame =
+    canvasFrame.status === "ready" ? (canvasPreviewFrame ?? canvasFrame.frame) : null;
+  const previewFrameIsResized =
+    canvasFrame.status === "ready" &&
+    canvasPreviewFrame !== null &&
+    (canvasPreviewFrame.width !== canvasFrame.frame.width ||
+      canvasPreviewFrame.height !== canvasFrame.frame.height);
   const committedDocumentFingerprint = useMemo(() => digestCanonicalJson(document), [document]);
   const diagnosticsValidator = useMemo(
     () =>
@@ -3089,7 +3213,7 @@ function SurfaceEditor({
         const node = pending.pop();
         if (node === undefined) break;
         if (node.id === occurrence.subjectId) {
-          setSelection(
+          selectOne(
             createAuthoringComponentSelection({
               projectId: route.projectId,
               surfaceId: route.surfaceId,
@@ -3166,7 +3290,7 @@ function SurfaceEditor({
     }
     replaceSourceDraft(null);
     commitAuthoringSession(Object.freeze({ document: result.document, preview: result.preview }));
-    setSelection(null);
+    selectOne(null);
     setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
     setSourceDraftNotice("Source applied locally. Save source, then Publish to update the host.");
   }
@@ -3235,7 +3359,7 @@ function SurfaceEditor({
       return;
     }
     commitAuthoringSession(result.session, true);
-    setSelection(null);
+    selectOne(null);
     setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
   }
 
@@ -3258,7 +3382,7 @@ function SurfaceEditor({
     void publicationController.publish();
   }
 
-  function toggleSelection(node: AuthoringLayerNode): void {
+  function toggleSelection(node: AuthoringLayerNode, extend = false): void {
     if (!isDesignMode()) return;
     const candidate = createAuthoringComponentSelection({
       projectId: project.id,
@@ -3268,9 +3392,19 @@ function SurfaceEditor({
       displayName: node.displayName,
       conditional: node.conditional,
     });
-    setSelection((current) =>
-      isSameAuthoringComponentSelection(current, candidate) ? null : candidate,
-    );
+    const current =
+      directSelections.length > 0
+        ? directSelections
+        : selection === null
+          ? Object.freeze([])
+          : Object.freeze([selection]);
+    const next = extend
+      ? toggleAuthoringDirectManipulationSelection(current, candidate, true)
+      : isSameAuthoringComponentSelection(selection, candidate)
+        ? Object.freeze([])
+        : toggleAuthoringDirectManipulationSelection(current, candidate, false);
+    setDirectSelections(next);
+    setSelection(next.at(-1) ?? null);
   }
 
   function editSelectedProperty(edit: AuthoringInspectorEdit): AuthoringInspectorEditResult {
@@ -3388,7 +3522,7 @@ function SurfaceEditor({
     );
     if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
     commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
-    setSelection(
+    selectOne(
       createAuthoringComponentSelection({
         projectId: selection.projectId,
         surfaceId: selection.surfaceId,
@@ -3467,7 +3601,7 @@ function SurfaceEditor({
     if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok) {
       const component = preparedModel.model.components.find(({ id }) => id === edit.componentId);
       if (component !== undefined) {
-        setSelection(
+        selectOne(
           createAuthoringComponentSelection({
             projectId: project.id,
             surfaceId: selectedSurface.sourceId,
@@ -3479,6 +3613,33 @@ function SurfaceEditor({
         );
       }
     }
+    return result;
+  }
+
+  function placeSelectedLayers(
+    target: AuthoringSlotSelection,
+    index: number,
+    nodeIds: readonly string[],
+  ): AuthoringSlotBatchPlacementResult {
+    if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" });
+    const result = applyAuthoringSlotBatchPlacement(
+      document,
+      workspaceSnapshot.catalogs,
+      route,
+      target,
+      nodeIds,
+      index,
+    );
+    captureEditDiagnostics(result);
+    if (!result.ok || result.operation === "noop") return result;
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
+    if (!nextPreview.ok) {
+      return Object.freeze({ ok: false, reason: "preview-unavailable" });
+    }
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
     return result;
   }
 
@@ -3496,7 +3657,7 @@ function SurfaceEditor({
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
     commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
-    setSelection(null);
+    selectOne(null);
     return result;
   }
 
@@ -3515,6 +3676,24 @@ function SurfaceEditor({
   }
 
   const model = preparedModel.model;
+  const directManipulationSelection = projectAuthoringDirectManipulationSelection(
+    directSelections,
+    route,
+    model,
+  );
+  const selectedSourceNodeIds =
+    directManipulationSelection.status === "ready"
+      ? directManipulationSelection.selection.sourceNodeIds
+      : selection === null
+        ? Object.freeze([])
+        : Object.freeze([selection.sourceNodeId]);
+  // A Run navigation may preview another Source surface while the authoring selection remains
+  // route-bound to its Design surface. Canvas chrome must never present that stale selection as
+  // belonging to the destination surface.
+  const canvasSelectedSourceNodeIds =
+    mode === "design" && previewSurfaceId === selectedSurface.sourceId
+      ? selectedSourceNodeIds
+      : Object.freeze([]);
 
   return (
     <section aria-labelledby="workspace-title" className={styles.surfaceEditor} data-mode={mode}>
@@ -3683,12 +3862,14 @@ function SurfaceEditor({
         hidden={mode === "run"}
         interactive={mode === "design" && !publicationPending && sourceDraft === null}
         model={model}
+        onBatchSlotPlacement={placeSelectedLayers}
         onDeleteSelection={deleteSelectedLayer}
         onSlotEdit={editNamedSlot}
         onToggleSelection={toggleSelection}
         route={route}
         selection={selection}
         selectedSourceNodeId={selection?.sourceNodeId ?? null}
+        selectedSourceNodeIds={selectedSourceNodeIds}
         selectedSurface={selectedSurface}
       />
 
@@ -3705,20 +3886,68 @@ function SurfaceEditor({
           style={
             canvasFrame.status === "ready"
               ? ({
-                  "--desen-canvas-frame-height": `${canvasFrame.frame.height}px`,
-                  "--desen-canvas-frame-width": `${canvasFrame.frame.width}px`,
+                  "--desen-canvas-frame-height": `${effectiveCanvasFrame?.height ?? canvasFrame.frame.height}px`,
+                  "--desen-canvas-frame-width": `${effectiveCanvasFrame?.width ?? canvasFrame.frame.width}px`,
                 } as CSSProperties)
               : undefined
           }
         >
+          <CanvasManipulationControls
+            disabled={mode !== "design" || publicationPending || sourceDraft !== null}
+            frame={effectiveCanvasFrame}
+            onPan={(delta) => {
+              if (!isDesignMode()) return;
+              updateCanvasPresentation((current) =>
+                Object.freeze({
+                  ...current,
+                  viewport: panAuthoringCanvasViewport(current.viewport, delta),
+                }),
+              );
+            }}
+            onReset={() => {
+              if (!isDesignMode()) return;
+              updateCanvasPresentation(() => createCanvasSurfacePresentation());
+            }}
+            onResize={(delta) => {
+              if (!isDesignMode() || canvasFrame.status !== "ready") return;
+              updateCanvasPresentation((current) =>
+                Object.freeze({
+                  ...current,
+                  previewFrame: resizeAuthoringCanvasPreviewFrame(
+                    current.previewFrame ?? createAuthoringCanvasPreviewFrame(canvasFrame.frame),
+                    delta,
+                  ),
+                }),
+              );
+            }}
+            onZoom={(direction) => {
+              if (!isDesignMode()) return;
+              updateCanvasPresentation((current) =>
+                Object.freeze({
+                  ...current,
+                  viewport: zoomAuthoringCanvasViewport(current.viewport, direction),
+                }),
+              );
+            }}
+            selectedSourceNodeIds={canvasSelectedSourceNodeIds}
+            viewport={canvasViewport}
+          />
           <div className={styles.canvasPlane} data-canvas-plane="true">
             {canvasFrame.status === "ready" ? (
               <section
-                aria-label={`${canvasFrameOrientation?.toLowerCase() ?? "declared"} page frame · ${canvasFrame.frame.label}`}
+                aria-label={`${canvasFrameOrientation?.toLowerCase() ?? "declared"} page frame · ${effectiveCanvasFrame?.width ?? canvasFrame.frame.width} × ${effectiveCanvasFrame?.height ?? canvasFrame.frame.height} px${previewFrameIsResized ? " · preview only" : ""}`}
                 className={styles.canvasFrame}
                 data-canvas-frame={canvasFrameOrientation?.toLowerCase() ?? "declared"}
-                data-canvas-frame-height={canvasFrame.frame.height}
-                data-canvas-frame-width={canvasFrame.frame.width}
+                data-canvas-frame-height={effectiveCanvasFrame?.height ?? canvasFrame.frame.height}
+                data-canvas-frame-width={effectiveCanvasFrame?.width ?? canvasFrame.frame.width}
+                data-canvas-preview-resized={previewFrameIsResized ? "true" : "false"}
+                style={
+                  {
+                    "--desen-canvas-viewport-pan-x": `${canvasViewport.panX}px`,
+                    "--desen-canvas-viewport-pan-y": `${canvasViewport.panY}px`,
+                    "--desen-canvas-viewport-zoom": canvasViewport.zoom,
+                  } as CSSProperties
+                }
               >
                 <DesenAdapterCanvas
                   authoringModel={model}

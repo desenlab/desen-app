@@ -39,6 +39,8 @@ import {
   projectM10AT03T02Input,
   projectM10AT04T03Input,
   projectM10AT10T04Input,
+  projectM10AT11CurrentGraphAudit,
+  projectM10AT11HistoricalInput,
   readDesenAppT01aHistoricalReaderGapFile,
   readDesenAppT04HistoricalReaderTaskTimeFile,
   verifyDesenAppPublishedHostUpdateBrowserPolicy,
@@ -852,9 +854,48 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], async () => {
     "apps/desen-app/src/starter-project.ts",
   ]) {
     assert.ok(built.liveSuccessorAuthority.m10aIsolatedAppSourceInventory.includes(addedPath));
-    assert.ok(!current.appSourceAudit.inventory.includes(addedPath));
+    assert.ok(current.appSourceAudit.inventory.includes(addedPath));
+    assert.ok(
+      !current.appSourceAudit.sourceReceipts.some(
+        ({ path: relativePath }) => relativePath === addedPath,
+      ),
+    );
     assert.ok(!built.artifact.authority.appSourceAudit.inventory.includes(addedPath));
   }
+  for (const addedPath of [
+    "apps/desen-app/src/authoring-direct-manipulation.ts",
+    "apps/desen-app/src/canvas-manipulation-controls.tsx",
+  ]) {
+    assert.ok(built.liveSuccessorAuthority.m10aReachableAppSourcePaths.includes(addedPath));
+    assert.ok(current.appSourceAudit.inventory.includes(addedPath));
+    assert.ok(
+      current.appSourceAudit.sourceReceipts.some(
+        ({ path: relativePath }) => relativePath === addedPath,
+      ),
+    );
+    assert.ok(current.runtimeResolution.appModules.some(({ id }) => id === addedPath));
+    assert.ok(!built.artifact.authority.appSourceAudit.inventory.includes(addedPath));
+  }
+  const t08Artifact = JSON.parse(
+    await readFile(path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json")),
+  );
+  assert.throws(
+    () =>
+      projectM10AT11CurrentGraphAudit(
+        {
+          ...current,
+          runtimeResolution: {
+            ...current.runtimeResolution,
+            app: {
+              ...current.runtimeResolution.app,
+              moduleCount: current.runtimeResolution.app.moduleCount + 1,
+            },
+          },
+        },
+        t08Artifact.authority.currentGraphAudit,
+      ),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
   for (const options of [
     { fileOverrides: new Map() },
     { currentGraphAudit: current },
@@ -1391,6 +1432,17 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
 });
 
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
+  const livePackage = await readFile(path.join(ROOT, "apps/desen-app/package.json"));
+  const t10Package = projectM10AT11HistoricalInput("apps/desen-app/package.json", livePackage);
+  assert.equal(t10Package.byteLength, 4_864);
+  assert.equal(
+    createHash("sha256").update(t10Package).digest("hex"),
+    "8b8cedadbd884e6f337f6c9460d7db95cfd77c446fcf72ba2a0ddcc917a6846f",
+  );
+  assert.throws(
+    () => projectM10AT11HistoricalInput("apps/desen-app/package.json", t10Package),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
   const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
   const liveLockfileText = liveLockfile.toString("utf8");
   assert.equal(liveLockfile.byteLength, M10A_T10_LOCKFILE_RECEIPT.bytes);

@@ -468,6 +468,14 @@ function reviewedSuccessorReceiptMap(receipts, files) {
     M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT.path,
     M10_USER_CREATED_BLANK_PROJECT_REVIEWED_README_RECEIPT,
   );
+  // A T11 receipt is admitted only when the observed live bytes are exact. Historical override
+  // fixtures retain their own pre-T11 receipts and therefore do not acquire this successor.
+  for (const receipt of M10A_T11_CURRENT_RECEIPTS) {
+    const bytes = files.get(receipt.path);
+    if (bytes?.byteLength === receipt.bytes && sha256(bytes) === receipt.sha256) {
+      receiptMap.set(receipt.path, receipt);
+    }
+  }
   return receiptMap;
 }
 
@@ -961,8 +969,143 @@ const M10A_T10_ISOLATED_APP_SOURCE_PATHS = Object.freeze([
   "apps/desen-app/src/project-lifecycle.ts",
   "apps/desen-app/src/starter-project.ts",
 ]);
+// These modules were added after the retained M09 graph projection. They are retained in that
+// reader's source-inventory projection, but only M10A-T11's separate live profile may claim
+// that they are reachable from the product entrypoint.
+const M10A_T11_REACHABLE_APP_SOURCE_PATHS = Object.freeze([
+  "apps/desen-app/src/authoring-direct-manipulation.ts",
+  "apps/desen-app/src/canvas-manipulation-controls.tsx",
+]);
+// T11 joins the live runtime graph rather than extending T10's inventory-only exception. Existing
+// frozen M09 successor readers admit its exact replacement receipts only when the live bytes
+// match this reviewed set.
+const M10A_T11_CURRENT_RECEIPTS = Object.freeze([
+  Object.freeze({
+    path: "apps/desen-app/package.json",
+    bytes: 5_080,
+    sha256: "503de2c93b32aa51b38870a746bbee68fbafa00e1d38b9cf7909625f9056bb92",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/application.module.css",
+    bytes: 122_621,
+    sha256: "08e85c9b6793d54d265e7512a27a735b5b14977eb97c810da8ccf01ef2b7d410",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/application.tsx",
+    bytes: 168_750,
+    sha256: "6480a98ce6597ddb5d4cbb2abce100719fa88a5907731458800d9d829c33a827",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/authoring-slots.ts",
+    bytes: 59_517,
+    sha256: "6530c05bfbbcac49137a3759ce81471204d957b5932c267148820f044c10a8ed",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/authoring-direct-manipulation.ts",
+    bytes: 11_671,
+    sha256: "05d24fc35b2e57ea30d85ab2cbcd875ec5952dfed8828ce6dadbf07cd7c5f20c",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/canvas-manipulation-controls.tsx",
+    bytes: 4_262,
+    sha256: "fd3213e4c3901542dd959e09936be99402fcdc9e55b13383ec72ead75ab0dbf0",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/test/application.test.tsx",
+    bytes: 125_284,
+    sha256: "6c769b1124fc7a0f90a2c01ade6b84a8c776363617966e4c4f76d509541d23ac",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/test/authoring-slots.test.ts",
+    bytes: 60_703,
+    sha256: "1662db250e8a5fd925bd4cb67a776f5db3877e0dc79f5e8393195de4a7a2fa33",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/test/authoring-direct-manipulation.test.ts",
+    bytes: 5_942,
+    sha256: "2bc634713b3fba618b1067c040cad09f91260bc753cbb85c5635c405cbdb1268",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/test/canvas-manipulation-controls.test.tsx",
+    bytes: 1_711,
+    sha256: "9b5735b3e05addbcdc08b6045e5527023b30ea54a9a01ed2f7318335812de33a",
+  }),
+]);
 const CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
-  [...CURRENT_APP_SOURCE_PATHS, ...M10A_T10_ISOLATED_APP_SOURCE_PATHS].sort(),
+  [
+    ...CURRENT_APP_SOURCE_PATHS,
+    ...M10A_T10_ISOLATED_APP_SOURCE_PATHS,
+    ...M10A_T11_REACHABLE_APP_SOURCE_PATHS,
+  ].sort(),
+);
+// The live T11 product has a broader composition than the historical M09 reader. Keep the
+// complete source inventory and the entrypoint-reachable subset separate: the five excluded
+// sources are intentional, non-runtime authoring factories, not invisible graph omissions.
+const M10A_T11_CURRENT_APP_GRAPH_SOURCE_PATHS = Object.freeze([
+  "apps/desen-app/src/adapter-canvas.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/application.tsx",
+  "apps/desen-app/src/assets/breadcrumb-separator.svg",
+  "apps/desen-app/src/assets/desen-logo.svg",
+  "apps/desen-app/src/assets/plus.svg",
+  "apps/desen-app/src/assets/settings.svg",
+  "apps/desen-app/src/assets/theme.svg",
+  "apps/desen-app/src/authoring-behavior-projection.ts",
+  "apps/desen-app/src/authoring-conditions.ts",
+  "apps/desen-app/src/authoring-connections.ts",
+  "apps/desen-app/src/authoring-data.ts",
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  "apps/desen-app/src/authoring-direct-manipulation.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-fixtures.ts",
+  "apps/desen-app/src/authoring-inspector.ts",
+  "apps/desen-app/src/authoring-integration.ts",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/authoring-preview.ts",
+  "apps/desen-app/src/authoring-publication.ts",
+  "apps/desen-app/src/authoring-run-navigation.ts",
+  "apps/desen-app/src/authoring-scenarios.ts",
+  "apps/desen-app/src/authoring-selection.ts",
+  "apps/desen-app/src/authoring-slots.ts",
+  "apps/desen-app/src/authoring-source-draft.ts",
+  "apps/desen-app/src/authoring-state.ts",
+  "apps/desen-app/src/behavior-controls.tsx",
+  "apps/desen-app/src/canvas-manipulation-controls.tsx",
+  "apps/desen-app/src/diagnostics-panel.tsx",
+  "apps/desen-app/src/event-action-panel.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/local-operation-binding.ts",
+  "apps/desen-app/src/local-runtime-persistence.ts",
+  "apps/desen-app/src/local-runtime-publication.ts",
+  "apps/desen-app/src/local-workspaces.module.css",
+  "apps/desen-app/src/local-workspaces.tsx",
+  "apps/desen-app/src/main.tsx",
+  "apps/desen-app/src/persistence-controls.tsx",
+  "apps/desen-app/src/preview-controls.tsx",
+  "apps/desen-app/src/preview-fidelity.ts",
+  "apps/desen-app/src/product-bootstrap.tsx",
+  "apps/desen-app/src/project-data.ts",
+  "apps/desen-app/src/project-inventory-fixture.ts",
+  "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/project-workspace-profile.ts",
+  "apps/desen-app/src/publication-controls.tsx",
+  "apps/desen-app/src/reference-empty-project.ts",
+  "apps/desen-app/src/reference-flow-workspace-profile.ts",
+  "apps/desen-app/src/reference-sign-in-workspace-profile.ts",
+  "apps/desen-app/src/source-draft-controls.tsx",
+  "apps/desen-app/src/state-panel.tsx",
+  "apps/desen-app/src/structured-json.ts",
+  "apps/desen-app/src/styles.css",
+]);
+const M10A_T11_CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
+  [
+    ...M10A_T11_CURRENT_APP_GRAPH_SOURCE_PATHS,
+    "apps/desen-app/src/project-lifecycle-navigation.ts",
+    "apps/desen-app/src/project-lifecycle.ts",
+    "apps/desen-app/src/reference-authoring-profile.ts",
+    "apps/desen-app/src/reference-project-fixtures.ts",
+    "apps/desen-app/src/starter-project.ts",
+  ].sort(),
 );
 const CURRENT_APP_TYPESCRIPT_SOURCE_PATHS = Object.freeze(
   CURRENT_APP_SOURCE_PATHS.filter(
@@ -1118,6 +1261,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     AUTHORING_EVENT_ACTION_SOURCE_PATH,
     AUTHORING_FIXTURES_SOURCE_PATH,
     AUTHORING_SCENARIOS_SOURCE_PATH,
+    "apps/desen-app/src/authoring-direct-manipulation.ts",
+    "apps/desen-app/src/canvas-manipulation-controls.tsx",
     EVENT_ACTION_PANEL_SOURCE_PATH,
     INSPECTOR_PANEL_SOURCE_PATH,
     PREVIEW_CONTROLS_SOURCE_PATH,
@@ -1132,6 +1277,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
     EVENT_ACTION_PANEL_TEST_PATH,
     AUTHORING_FIXTURES_TEST_PATH,
     AUTHORING_SCENARIOS_TEST_PATH,
+    "apps/desen-app/test/authoring-direct-manipulation.test.ts",
+    "apps/desen-app/test/canvas-manipulation-controls.test.tsx",
     INSPECTOR_PANEL_TEST_PATH,
     PREVIEW_CONTROLS_TEST_PATH,
     PREVIEW_FIDELITY_TEST_PATH,
@@ -1472,7 +1619,7 @@ const REQUIRED_COMPONENT_MODULES = Object.freeze([
   "packages/reference-catalog-web/dist/components/text-field.js",
 ]);
 
-const EXPECTED_GRAPH_DATA_MODULES = Object.freeze([
+const HISTORICAL_SUCCESSOR_GRAPH_DATA_MODULES = Object.freeze([
   "apps/desen-app/src/application.module.css",
   "apps/desen-app/src/styles.css",
   "examples/sign-in/official-derived.bundle.desen.json",
@@ -1480,7 +1627,7 @@ const EXPECTED_GRAPH_DATA_MODULES = Object.freeze([
   "packages/reference-catalog-web/catalog.json",
 ]);
 
-const EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS = Object.freeze([
+const HISTORICAL_SUCCESSOR_APPLICATION_GRAPH_IMPORTS = Object.freeze([
   "apps/desen-app/src/adapter-canvas.tsx",
   "apps/desen-app/src/application.module.css",
   "apps/desen-app/src/assets/breadcrumb-separator.svg",
@@ -1521,8 +1668,118 @@ const EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS = Object.freeze([
   "packages/reference-catalog-web/catalog.json",
   "packages/runtime-core/dist/index.js",
 ]);
-const EXPECTED_CURRENT_VITE_GRAPH_SHA256 =
-  "sha256:75a2860f9e97fe63406c0b2508a11a359107d2ec391c48ac8b157c1792d77420";
+const HISTORICAL_SUCCESSOR_CANVAS_GRAPH_IMPORTS = Object.freeze([
+  "apps/desen-app/src/application.module.css",
+  AUTHORING_DATA_SOURCE_PATH,
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  AUTHORING_SELECTION_SOURCE_PATH,
+  BUNDLE_PATH,
+  "node_modules/react/index.js",
+  "node_modules/react/jsx-runtime.js",
+  CATALOG_PATH,
+  "packages/reference-catalog-web/dist/react-adapters/index.js",
+  "packages/reference-catalog-web/dist/tokens/index.js",
+  "packages/runtime-core/dist/index.js",
+  "packages/runtime-react/dist/index.js",
+]);
+
+const M10A_T11_GRAPH_DATA_MODULES = Object.freeze([
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/local-workspaces.module.css",
+  "apps/desen-app/src/styles.css",
+  "packages/reference-catalog-web/catalog.json",
+]);
+const M10A_T11_APPLICATION_GRAPH_IMPORTS = Object.freeze([
+  "apps/desen-app/src/adapter-canvas.tsx",
+  "apps/desen-app/src/application.module.css",
+  "apps/desen-app/src/assets/breadcrumb-separator.svg",
+  "apps/desen-app/src/assets/desen-logo.svg",
+  "apps/desen-app/src/assets/plus.svg",
+  "apps/desen-app/src/assets/settings.svg",
+  "apps/desen-app/src/assets/theme.svg",
+  "apps/desen-app/src/authoring-behavior-projection.ts",
+  "apps/desen-app/src/authoring-conditions.ts",
+  "apps/desen-app/src/authoring-connections.ts",
+  "apps/desen-app/src/authoring-data.ts",
+  "apps/desen-app/src/authoring-diagnostics.ts",
+  "apps/desen-app/src/authoring-direct-manipulation.ts",
+  "apps/desen-app/src/authoring-event-actions.ts",
+  "apps/desen-app/src/authoring-fixtures.ts",
+  "apps/desen-app/src/authoring-inspector.ts",
+  "apps/desen-app/src/authoring-integration.ts",
+  "apps/desen-app/src/authoring-persistence.ts",
+  "apps/desen-app/src/authoring-preview.ts",
+  "apps/desen-app/src/authoring-publication.ts",
+  "apps/desen-app/src/authoring-run-navigation.ts",
+  "apps/desen-app/src/authoring-scenarios.ts",
+  "apps/desen-app/src/authoring-selection.ts",
+  "apps/desen-app/src/authoring-slots.ts",
+  "apps/desen-app/src/authoring-source-draft.ts",
+  "apps/desen-app/src/authoring-state.ts",
+  "apps/desen-app/src/behavior-controls.tsx",
+  "apps/desen-app/src/canvas-manipulation-controls.tsx",
+  "apps/desen-app/src/diagnostics-panel.tsx",
+  "apps/desen-app/src/event-action-panel.tsx",
+  "apps/desen-app/src/inspector-panel.tsx",
+  "apps/desen-app/src/persistence-controls.tsx",
+  "apps/desen-app/src/preview-controls.tsx",
+  "apps/desen-app/src/preview-fidelity.ts",
+  "apps/desen-app/src/project-data.ts",
+  "apps/desen-app/src/project-inventory-fixture.ts",
+  "apps/desen-app/src/project-navigation.ts",
+  "apps/desen-app/src/project-workspace-profile.ts",
+  "apps/desen-app/src/publication-controls.tsx",
+  "apps/desen-app/src/source-draft-controls.tsx",
+  "apps/desen-app/src/state-panel.tsx",
+  "apps/desen-app/src/structured-json.ts",
+  "node_modules/react/index.js",
+  "node_modules/react/jsx-runtime.js",
+  "packages/editor-core/dist/index.js",
+  "packages/protocol/dist/index.js",
+]);
+const M10A_T11_CANVAS_GRAPH_IMPORTS = Object.freeze([
+  "apps/desen-app/src/application.module.css",
+  "node_modules/react/jsx-runtime.js",
+]);
+
+const HISTORICAL_SUCCESSOR_GRAPH_PROFILE = Object.freeze({
+  id: "m09-successor-projection",
+  moduleCount: 156,
+  staticEdges: 474,
+  graphSha256: "sha256:75a2860f9e97fe63406c0b2508a11a359107d2ec391c48ac8b157c1792d77420",
+  sourcePaths: CURRENT_APP_SOURCE_PATHS,
+  dataModules: HISTORICAL_SUCCESSOR_GRAPH_DATA_MODULES,
+  applicationImports: HISTORICAL_SUCCESSOR_APPLICATION_GRAPH_IMPORTS,
+  canvasImports: HISTORICAL_SUCCESSOR_CANVAS_GRAPH_IMPORTS,
+  directManipulation: null,
+  canvasManipulationControls: null,
+});
+const M10A_T11_GRAPH_PROFILE = Object.freeze({
+  id: "m10a-t11-live-product",
+  moduleCount: 172,
+  staticEdges: 525,
+  graphSha256: "sha256:b811e2c3101e62f480917a027bcc0d7fdf8754ff8fbb66f09e4e0bab0880779f",
+  sourcePaths: M10A_T11_CURRENT_APP_GRAPH_SOURCE_PATHS,
+  dataModules: M10A_T11_GRAPH_DATA_MODULES,
+  applicationImports: M10A_T11_APPLICATION_GRAPH_IMPORTS,
+  canvasImports: Object.freeze([
+    "apps/desen-app/src/application.module.css",
+    "apps/desen-app/src/authoring-diagnostics.ts",
+    AUTHORING_SELECTION_SOURCE_PATH,
+    "node_modules/react/index.js",
+    "node_modules/react/jsx-runtime.js",
+    "packages/runtime-core/dist/index.js",
+    "packages/runtime-react/dist/index.js",
+  ]),
+  directManipulation: Object.freeze({
+    id: "apps/desen-app/src/authoring-direct-manipulation.ts",
+    imports: Object.freeze([]),
+  }),
+  canvasManipulationControls: Object.freeze({
+    id: "apps/desen-app/src/canvas-manipulation-controls.tsx",
+    imports: M10A_T11_CANVAS_GRAPH_IMPORTS,
+  }),
+});
 
 const ALLOWED_RUNTIME_PACKAGE_EDGES = Object.freeze({
   "catalog-sdk": Object.freeze(["catalog-sdk", "protocol"]),
@@ -3276,15 +3533,19 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
   }
   const graphIds = graph.map(({ id }) => id);
   const graphIdSet = new Set(graphIds);
-  if (graph.length !== 156 || graphIdSet.size !== graph.length) {
-    fail("VITE_GRAPH_DRIFT", "The exact normalized App graph module inventory drifted.", {
-      modules: graph.length,
-    });
-  }
   const staticEdges = graph.reduce((total, module) => total + module.imports.length, 0);
   const dynamicEdges = graph.reduce((total, module) => total + module.dynamicImports.length, 0);
-  if (staticEdges !== 474 || dynamicEdges !== 0) {
+  const graphProfile =
+    graph.length === HISTORICAL_SUCCESSOR_GRAPH_PROFILE.moduleCount &&
+    staticEdges === HISTORICAL_SUCCESSOR_GRAPH_PROFILE.staticEdges
+      ? HISTORICAL_SUCCESSOR_GRAPH_PROFILE
+      : graph.length === M10A_T11_GRAPH_PROFILE.moduleCount &&
+          staticEdges === M10A_T11_GRAPH_PROFILE.staticEdges
+        ? M10A_T11_GRAPH_PROFILE
+        : undefined;
+  if (graphProfile === undefined || graphIdSet.size !== graph.length || dynamicEdges !== 0) {
     fail("VITE_GRAPH_DRIFT", "The exact static/dynamic Vite edge profile drifted.", {
+      modules: graph.length,
       staticEdges,
       dynamicEdges,
     });
@@ -3331,13 +3592,14 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     }
   }
   const sourceIds = graphIds.filter((id) => id.startsWith("apps/desen-app/src/")).sort();
-  if (!isDeepStrictEqual(sourceIds, CURRENT_APP_SOURCE_PATHS)) {
+  if (!isDeepStrictEqual(sourceIds, graphProfile.sourcePaths)) {
     fail("VITE_GRAPH_DRIFT", "The App graph has an orphan, missing, or extra production source.", {
+      profile: graphProfile.id,
       sourceIds,
     });
   }
   const dataModules = graphIds.filter((id) => /\.(?:css|json)(?:\?|$)/u.test(id)).sort();
-  if (!isDeepStrictEqual(dataModules, EXPECTED_GRAPH_DATA_MODULES)) {
+  if (!isDeepStrictEqual(dataModules, graphProfile.dataModules)) {
     fail("VITE_GRAPH_DRIFT", "The exact App data-module inventory drifted.", { dataModules });
   }
   const entry = findGraphModule(graph, APP_INDEX_PATH);
@@ -3349,21 +3611,26 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     reachable.add(id);
     for (const imported of findGraphModule(graph, id)?.imports ?? []) pending.push(imported);
   }
-  if (CURRENT_APP_SOURCE_PATHS.some((relativePath) => !reachable.has(relativePath))) {
+  if (graphProfile.sourcePaths.some((relativePath) => !reachable.has(relativePath))) {
     fail("VITE_GRAPH_DRIFT", "Every App production source must be reachable from index.html.");
   }
   const application = findGraphModule(graph, APPLICATION_SOURCE_PATH);
   if (
     application?.imports.includes(ADAPTER_CANVAS_SOURCE_PATH) !== true ||
     application.imports.includes(AUTHORING_SELECTION_SOURCE_PATH) !== true ||
-    application.imports.includes(AUTHORING_SLOT_SOURCE_PATH) !== true
+    application.imports.includes(AUTHORING_SLOT_SOURCE_PATH) !== true ||
+    (graphProfile === M10A_T11_GRAPH_PROFILE &&
+      (application.imports.includes("apps/desen-app/src/authoring-direct-manipulation.ts") !==
+        true ||
+        application.imports.includes("apps/desen-app/src/canvas-manipulation-controls.tsx") !==
+          true))
   ) {
     fail(
       "VITE_GRAPH_DRIFT",
       "The App application lost its adapter-canvas, Source-selection, or named-slot module edge.",
     );
   }
-  if (!isDeepStrictEqual(application.imports, EXPECTED_CURRENT_APPLICATION_GRAPH_IMPORTS)) {
+  if (!isDeepStrictEqual(application.imports, graphProfile.applicationImports)) {
     fail(
       "VITE_GRAPH_DRIFT",
       "The current application import graph drifted or regained a direct ReactDOM scheduling edge.",
@@ -3371,24 +3638,26 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     );
   }
   const canvas = findGraphModule(graph, ADAPTER_CANVAS_SOURCE_PATH);
-  const expectedCanvasEdges = [
-    "apps/desen-app/src/application.module.css",
-    AUTHORING_DATA_SOURCE_PATH,
-    "apps/desen-app/src/authoring-diagnostics.ts",
-    AUTHORING_SELECTION_SOURCE_PATH,
-    BUNDLE_PATH,
-    "node_modules/react/index.js",
-    "node_modules/react/jsx-runtime.js",
-    CATALOG_PATH,
-    "packages/reference-catalog-web/dist/react-adapters/index.js",
-    "packages/reference-catalog-web/dist/tokens/index.js",
-    "packages/runtime-core/dist/index.js",
-    "packages/runtime-react/dist/index.js",
-  ];
-  if (!isDeepStrictEqual(canvas?.imports, expectedCanvasEdges)) {
+  if (!isDeepStrictEqual(canvas?.imports, graphProfile.canvasImports)) {
     fail("VITE_GRAPH_DRIFT", "The canvas runtime import graph is not the exact public path.", {
       actual: canvas?.imports,
     });
+  }
+  for (const moduleReceipt of [
+    graphProfile.directManipulation,
+    graphProfile.canvasManipulationControls,
+  ]) {
+    if (moduleReceipt === null) continue;
+    const module = findGraphModule(graph, moduleReceipt.id);
+    if (
+      !isDeepStrictEqual(module?.imports, moduleReceipt.imports) ||
+      module?.dynamicImports.length !== 0
+    ) {
+      fail("VITE_GRAPH_DRIFT", "The T11 direct-manipulation module edge profile drifted.", {
+        module: moduleReceipt.id,
+        actual: module,
+      });
+    }
   }
   const selection = findGraphModule(graph, AUTHORING_SELECTION_SOURCE_PATH);
   if (
@@ -3467,7 +3736,7 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     );
   }
   const graphSha256 = `sha256:${sha256(Buffer.from(JSON.stringify(graph)))}`;
-  if (graphSha256 !== EXPECTED_CURRENT_VITE_GRAPH_SHA256) {
+  if (graphSha256 !== graphProfile.graphSha256) {
     fail("VITE_GRAPH_DRIFT", "The exact current successor Vite graph identity drifted.", {
       actual: graphSha256,
     });
@@ -3477,11 +3746,12 @@ export function verifyDesenAppRealAdapterCanvasGraphPolicy(rawGraph, rawHostArti
     authority: "programmatic build({ write: false }) Plugin.moduleParsed",
     observer: "moduleParsed",
     write: false,
+    profile: graphProfile.id,
     moduleCount: graph.length,
     staticEdges,
     dynamicEdges,
     unresolvedEdges: 0,
-    reachableProductionSourceFiles: CURRENT_APP_SOURCE_PATHS.length,
+    reachableProductionSourceFiles: graphProfile.sourcePaths.length,
     dataModules,
     graphSha256,
     modules: graph,
@@ -3520,6 +3790,97 @@ async function buildRuntimeGraphEvidence(workspaceRoot, hostArtifact) {
     backingSnapshotSha256: `sha256:${sha256(Buffer.from(JSON.stringify(firstBacking)))}`,
     backingModulesStableAcrossObservations: true,
     finalBackingReauthenticated: true,
+  });
+}
+
+async function readM10AT11CurrentReceipts(workspaceRoot) {
+  const entries = await Promise.all(
+    M10A_T11_CURRENT_RECEIPTS.map(async (receipt) => [
+      receipt.path,
+      await readRegularAuthority(path.join(workspaceRoot, receipt.path), receipt.path),
+    ]),
+  );
+  return new Map(entries);
+}
+
+function authenticateM10AT11CurrentReceipts(files) {
+  const authenticated = [];
+  for (const receipt of M10A_T11_CURRENT_RECEIPTS) {
+    const bytes = files.get(receipt.path);
+    if (
+      bytes === undefined ||
+      bytes.byteLength !== receipt.bytes ||
+      sha256(bytes) !== receipt.sha256
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", `The exact M10A-T11 receipt drifted: ${receipt.path}.`);
+    }
+    authenticated.push(
+      deepFreeze({ path: receipt.path, bytes: receipt.bytes, sha256: `sha256:${receipt.sha256}` }),
+    );
+  }
+  return deepFreeze(authenticated);
+}
+
+/**
+ * Re-observes the live M10A-T11 App graph without rewriting M09's frozen reader projection.
+ *
+ * @remarks The historical M09 artifact remains byte-identical. This successor audit instead
+ * records the exact live graph that makes direct layer manipulation and App-owned canvas controls
+ * reachable from the current product entrypoint.
+ */
+export async function buildDesenAppRealAdapterCanvasM10AT11SuccessorEvidence(
+  rawOptions = undefined,
+) {
+  const options = exactOwnDataOptions(rawOptions, ["workspaceRoot"], "M10A-T11 audit options");
+  const workspaceRoot = await realpath(
+    capturePath(options.workspaceRoot, "workspaceRoot", WORKSPACE_ROOT),
+  );
+  const [sourcePaths, receiptFiles, hostArtifactBytes] = await Promise.all([
+    discoverRegularPaths(path.join(workspaceRoot, "apps/desen-app/src"), workspaceRoot),
+    readM10AT11CurrentReceipts(workspaceRoot),
+    readRegularAuthority(
+      path.join(workspaceRoot, HOST_SOURCE_AUDIT_ARTIFACT_PATH),
+      HOST_SOURCE_AUDIT_ARTIFACT_PATH,
+    ),
+  ]);
+  if (!isDeepStrictEqual(sourcePaths, M10A_T11_CURRENT_APP_SOURCE_INVENTORY_PATHS)) {
+    fail("SOURCE_INVENTORY_DRIFT", "The live M10A-T11 source inventory drifted.", {
+      actual: sourcePaths,
+    });
+  }
+  const hostSourceAudit = authenticateHostSourceAuditArtifact(hostArtifactBytes);
+  const [receipts, runtimeResolution] = await Promise.all([
+    Promise.resolve(authenticateM10AT11CurrentReceipts(receiptFiles)),
+    buildRuntimeGraphEvidence(workspaceRoot, hostSourceAudit.artifact),
+  ]);
+  if (runtimeResolution.profile !== M10A_T11_GRAPH_PROFILE.id) {
+    fail("VITE_GRAPH_DRIFT", "The live M10A-T11 graph was projected as historical evidence.");
+  }
+  return deepFreeze({
+    schemaVersion: 1,
+    profile: "desen.app.real-adapter-canvas-m10a-t11-successor.v1",
+    task: "M10A-T11",
+    result: "PASS",
+    historicalM09ProjectionPreserved: true,
+    sourceInventory: {
+      sourceFiles: sourcePaths.length,
+      reachableProductionSourceFiles: M10A_T11_CURRENT_APP_GRAPH_SOURCE_PATHS.length,
+      intentionallyUnreachableSourceFiles:
+        M10A_T11_CURRENT_APP_SOURCE_INVENTORY_PATHS.length -
+        M10A_T11_CURRENT_APP_GRAPH_SOURCE_PATHS.length,
+    },
+    directManipulation: {
+      sourcePath: "apps/desen-app/src/authoring-direct-manipulation.ts",
+      maxSelectionSize: 256,
+      runtimeImports: 0,
+    },
+    canvasManipulationControls: {
+      sourcePath: "apps/desen-app/src/canvas-manipulation-controls.tsx",
+      adapterManagedSubtreeAuthority: false,
+      runtimeImports: M10A_T11_CANVAS_GRAPH_IMPORTS.length,
+    },
+    receipts,
+    runtimeResolution,
   });
 }
 
@@ -4732,6 +5093,7 @@ export async function verifyDesenAppRealAdapterCanvasEvidence(rawOptions = undef
         )
       : captureBytes(options.proofDocument, "proofDocument");
   verifyProofDocument(proofDocument, built.artifactSha256);
+  const m10aT11Successor = await buildDesenAppRealAdapterCanvasM10AT11SuccessorEvidence();
   return deepFreeze({
     task: built.artifact.task,
     result: built.artifact.result,
@@ -4740,6 +5102,9 @@ export async function verifyDesenAppRealAdapterCanvasEvidence(rawOptions = undef
     prerequisites: built.artifact.prerequisites.length,
     graphModules: built.artifact.authority.runtimeResolution.moduleCount,
     currentGraphModules: built.currentCompatibility.authority.runtimeResolution.moduleCount,
+    m10aT11GraphModules: m10aT11Successor.runtimeResolution.moduleCount,
+    m10aT11GraphProfile: m10aT11Successor.runtimeResolution.profile,
+    m10aT11HistoricalM09ProjectionPreserved: m10aT11Successor.historicalM09ProjectionPreserved,
     sharedRuntimeModules: built.artifact.authority.runtimeResolution.sharedRuntimeModuleCount,
     realComponentModules: built.artifact.authority.runtimeResolution.realComponentModuleCount,
     trackedFiles: built.artifact.boundary.trackedFiles,

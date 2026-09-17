@@ -629,6 +629,33 @@ test("[M10 successor] authenticates immutable browser evidence and rejects curre
   }
 });
 
+test("[M10A-T11 successor] admits only the exact direct-manipulation authoring-slots receipt", async () => {
+  const relativePath = SOURCE_PATHS.authoringSlots;
+  const currentBytes = await readLiveFile(path.join(ROOT, relativePath));
+  assert.equal(currentBytes.byteLength, 59_517);
+
+  const current = await buildDesenAppNodeLinkedDiagnosticsEvidence({
+    fileOverrides: new Map([[relativePath, currentBytes]]),
+  });
+  assert.deepEqual(
+    current.currentCompatibility.boundary.currentPathReceipts.find(
+      ({ path: receiptPath }) => receiptPath === relativePath,
+    ),
+    {
+      path: relativePath,
+      bytes: 59_517,
+      sha256: "6530c05bfbbcac49137a3759ce81471204d957b5932c267148820f044c10a8ed",
+    },
+  );
+
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([[relativePath, Buffer.concat([currentBytes, Buffer.from("\n")])]]),
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+});
+
 test("[M10-T01A successor] authenticates the exact product-created blank-project closure", async () => {
   const successor = built.currentCompatibility.userCreatedBlankProjectSuccessor;
   assert.deepEqual(

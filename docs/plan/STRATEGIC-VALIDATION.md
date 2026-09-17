@@ -197,8 +197,9 @@ M10A-T01 through M10A-T10 are now `DONE`: the bounded Button, Select, and Dialog
 is followed by the platform-neutral versioned project/token model, theme/token authoring workbench,
 immutable release identity, private layout/content starter Catalog, form-control Catalog, and bounded
 overlay/disclosure Catalog plus bounded data-display/feedback Catalog and an application-owned
-project/surface lifecycle with generation-fenced persistence. Overall progress is 131/176 (74%),
-M10A is 10/28 (36%), and 11/14 proof gates are closed. The completed T03 covers frozen SC-01's
+project/surface lifecycle with generation-fenced persistence. M10A-T11 is `IN_PROGRESS` with a local,
+integration-ready direct-manipulation boundary. Overall progress is 131/176 (74%), M10A is 10/28
+(36%), and 11/14 proof gates are closed. The completed T03 covers frozen SC-01's
 16 valid fixtures: three T02-supported normal edit/preview paths and 13
 losslessly preserved/disclosed unsupported paths with partial preview blocked only for their selected
 overlay; seven invalid fixtures reject atomically. A separate closed T02-recognized unsupported matrix
@@ -212,6 +213,6 @@ proof; M10A-T07 is `DONE` with exact-head hosted and fresh-`main` evidence. M10A
 with exact-head hosted and fresh-`main` evidence for its bounded overlay/disclosure Catalog.
 M10A-T09 is `DONE` with exact-head hosted and fresh-`main` evidence for its bounded
 data-display/feedback Catalog. M10A-T10 is `DONE` with that same closure for application-local
-project/surface lifecycle only; it does not add Runtime, Publisher, Core/protocol, G10A, or M11
-authority. G10A must pass before M11-T01 or M11-T08, and SC-02 authorizes no
+project/surface lifecycle only. T11's local evidence is not a hosted closure and does not add Runtime,
+Publisher, Core/protocol, G10A, or M11 authority. G10A must pass before M11-T01 or M11-T08, and SC-02 authorizes no
 external publication or deployment.

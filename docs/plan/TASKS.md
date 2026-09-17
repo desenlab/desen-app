@@ -251,7 +251,7 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 ## M10A — Design-first product foundation
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
-M10A-T01 through M10A-T10 are `DONE`; overall progress is 131/176 (74%), M10A is 10/28 (36%), and 11/14
+M10A-T01 through M10A-T10 are `DONE`; M10A-T11 is `IN_PROGRESS` with an integration-ready local direct-manipulation boundary; overall progress is 131/176 (74%), M10A is 10/28 (36%), and 11/14
 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
 edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
@@ -273,7 +273,7 @@ and fresh-`main` closures. The [plan](M10A-IMPLEMENTATION-PLAN.md) and
 | M10A-T08 | DONE        | M10A-T07                                         | [Hosted overlay, menu and disclosure closure](../proof/M10A-T08.md)                    |
 | M10A-T09 | DONE        | M10A-T05, M10A-T08                               | [Hosted data-display and feedback closure](../proof/M10A-T09.md)                       |
 | M10A-T10 | DONE        | M10A-T02, M10A-T04, M10A-T09                     | [Hosted project/surface lifecycle closure](../proof/M10A-T10.md)                       |
-| M10A-T11 | NOT_STARTED | M10A-T10                                         | Direct-manipulation canvas and accessible layer operations                             |
+| M10A-T11 | IN_PROGRESS | M10A-T10                                         | [Local T11 proof](../proof/M10A-T11.md); hosted closure pending                        |
 | M10A-T12 | NOT_STARTED | M10A-T03, M10A-T11                               | Rich visual inspector and responsive layout authoring                                  |
 | M10A-T13 | NOT_STARTED | M10A-T04, M10A-T12                               | Safe image/icon/font assets and content styling                                        |
 | M10A-T14 | NOT_STARTED | M10A-T10, M10A-T11                               | Undo/redo, duplication and identity-safe copy/paste                                    |

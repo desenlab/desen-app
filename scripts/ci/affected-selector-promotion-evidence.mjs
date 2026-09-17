@@ -998,6 +998,13 @@ const M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "apps/desen-app/test/starter-project.test.ts",
   "docs/proof/M10A-T10.md",
 ]);
+const M10A_T11_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "apps/desen-app/src/authoring-direct-manipulation.ts",
+  "apps/desen-app/src/canvas-manipulation-controls.tsx",
+  "apps/desen-app/test/authoring-direct-manipulation.test.ts",
+  "apps/desen-app/test/canvas-manipulation-controls.test.tsx",
+  "docs/proof/M10A-T11.md",
+]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
   ownershipSha256: "8a9904c93964f6b5e979bb1369e58bb84abaa110137e47b9b839222d8e82d7d8",
@@ -1196,6 +1203,22 @@ const M10A_T10_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: "6cb2badc702a8b2f5760b442dd680f6c081aebb8b58518d6ad29e20e6b18d752",
+});
+const M10A_T11_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
+  trackedPathCount: 1817,
+  trackedPathSetSha256: "593589457710d124f0dd9a34517ceec6888912e1627320b58c5bfcc25604f378",
+  proofOwnedPathCount: 238,
+  categoryCounts: Object.freeze({
+    PROOF_UNIT: 238,
+    CI_POLICY: 48,
+    DEPENDENCY_POLICY: 38,
+    FROZEN_INPUT: 168,
+    PACKAGE_OR_APPLICATION: 736,
+    SHARED_PROOF_INFRASTRUCTURE: 407,
+    PROJECT_DOCUMENTATION: 171,
+    REPOSITORY_POLICY: 11,
+  }),
+  ownershipSha256: "a6f13b4582b3ef9f3e5b83497c43f04a7906332509e30df3c0340b37cd1041f4",
 });
 const VERIFIED_PROMOTION_RECEIPTS = new WeakMap();
 const VERIFIED_PROMOTION_BOUNDARIES = new WeakMap();
@@ -1597,8 +1620,8 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 106,
-  headSha256: "7ff2dd3136ceb521cd4b828d9a5db3a0fdc6bd3c6eed43466cfa03b560a6c109",
+  sequence: 110,
+  headSha256: "48833d6a8a8b2e2104481bdd735e7579004418fbb70b64637d1a78df091e9733",
   frozenArtifactCount: 73,
   currentReaderCount: 146,
   liveVerification: "PASS",
@@ -1999,13 +2022,41 @@ function createBoundaryOwnershipDelta(rawBoundary) {
   }
   const successorAuthority = createAffectedWorkloadOwnership(boundary.trackedPaths);
   const successorReview = ownershipReviewProjection(successorAuthority);
-  if (!isDeepStrictEqual(successorReview, M10A_T10_SUCCESSOR_OWNERSHIP_REVIEW)) {
+  if (!isDeepStrictEqual(successorReview, M10A_T11_SUCCESSOR_OWNERSHIP_REVIEW)) {
     fail(
       "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
       "The authenticated boundary does not reproduce the reviewed current ownership successor.",
     );
   }
   const successorPaths = successorAuthority.entries.map(({ path: trackedPath }) => trackedPath);
+  if (
+    M10A_T11_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 5 ||
+    new Set(M10A_T11_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 5
+  ) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "The reviewed M10A-T11 successor path append is not exactly five unique paths.",
+    );
+  }
+  for (const trackedPath of M10A_T11_SUCCESSOR_ADDED_TRACKED_PATHS) {
+    if (!successorPaths.includes(trackedPath)) {
+      fail(
+        "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+        "The authenticated boundary omitted one exact M10A-T11 successor path.",
+        { path: trackedPath },
+      );
+    }
+  }
+  const m10aT10SuccessorPaths = successorPaths.filter(
+    (trackedPath) => !M10A_T11_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
+  );
+  const m10aT10SuccessorReview = calculateAffectedWorkloadOwnershipReview(m10aT10SuccessorPaths);
+  if (!isDeepStrictEqual(m10aT10SuccessorReview, M10A_T10_SUCCESSOR_OWNERSHIP_REVIEW)) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "Removing the exact M10A-T11 append does not reproduce the reviewed M10A-T10 successor.",
+    );
+  }
   if (
     M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 7 ||
     new Set(M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 7
@@ -2016,7 +2067,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
     );
   }
   for (const trackedPath of M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS) {
-    if (!successorPaths.includes(trackedPath)) {
+    if (!m10aT10SuccessorPaths.includes(trackedPath)) {
       fail(
         "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
         "The authenticated boundary omitted one exact M10A-T10 successor path.",
@@ -2024,7 +2075,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
       );
     }
   }
-  const m10aT09SuccessorPaths = successorPaths.filter(
+  const m10aT09SuccessorPaths = m10aT10SuccessorPaths.filter(
     (trackedPath) => !M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
   );
   const m10aT09SuccessorReview = calculateAffectedWorkloadOwnershipReview(m10aT09SuccessorPaths);
