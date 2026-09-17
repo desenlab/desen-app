@@ -130,9 +130,9 @@ export const M10_GATE_M10A_T11_CURRENT_HOST_AUDIT = Object.freeze({
   ...M10_GATE_M10A_T01_CURRENT_HOST_AUDIT,
   appSourceFiles: 59,
   appModules: 172,
-  appGraphSha256: "sha256:bdaba7ad56b7c1855ff966c6ba61bc8e86c5e79575fad6dca228d86ccc3f6514",
-  appOutputIdentity: "sha256:96d82a27280fa6f0fbce21e463b0ba0c3ba195c5c934a0502ba3ba2f019b1ce0",
-  backingSnapshotSha256: "sha256:16de958a323b0af50d92aed7b467bffbf8892f80fce3af66b2b0a53e14f6f26a",
+  appGraphSha256: "sha256:b811e2c3101e62f480917a027bcc0d7fdf8754ff8fbb66f09e4e0bab0880779f",
+  appOutputIdentity: "sha256:7bdb556fb86a782566d14e1a59fb6c56eec2db0f9a7508be407fa44589d1827d",
+  backingSnapshotSha256: "sha256:a4c75360c41618aafbdb2846dddc719ac8a4e0f34366e778a9871263255c23d7",
 });
 
 const M10_GATE_FROZEN_HOST_AUDIT_IDENTITIES = Object.freeze({

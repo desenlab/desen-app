@@ -915,37 +915,53 @@ function buildAuthoringSlotBatchCandidate(
   plan: AuthoringSlotBatchPlacementPlan,
 ): AuthoringSlotBatchCandidateResult {
   let candidate = model.validationDocument;
-  let targetLength = plan.target.slot.children.length;
-  for (const entry of plan.entries) {
-    const changed = entry.sameTarget
-      ? reorderDesenEditorNode(candidate, {
-          surfaceId: route.surfaceId,
-          parentId: selection.ownerId,
-          slot: selection.slot,
-          nodeId: entry.nodeId,
-          index: targetLength - 1,
-        })
-      : moveDesenEditorNode(candidate, {
-          surfaceId: route.surfaceId,
-          parentId: selection.ownerId,
-          slot: selection.slot,
-          nodeId: entry.nodeId,
-          index: targetLength,
-        });
-    if (!changed.ok) return Object.freeze({ ok: false, reason: "command-rejected" });
-    candidate = changed.document;
-    if (!entry.sameTarget) targetLength += 1;
-  }
-  for (const [offset, nodeId] of plan.nodeIds.entries()) {
-    const changed = reorderDesenEditorNode(candidate, {
-      surfaceId: route.surfaceId,
-      parentId: selection.ownerId,
-      slot: selection.slot,
-      nodeId,
-      index: plan.insertionIndex + offset,
-    });
-    if (!changed.ok) return Object.freeze({ ok: false, reason: "command-rejected" });
-    candidate = changed.document;
+  if (plan.entries.every(({ sameTarget }) => !sameTarget)) {
+    // A reverse sequence of moves at the same boundary produces source order directly. This
+    // avoids a second full reorder pass through the bounded 256-node cross-target group.
+    for (const nodeId of [...plan.nodeIds].reverse()) {
+      const changed = moveDesenEditorNode(candidate, {
+        surfaceId: route.surfaceId,
+        parentId: selection.ownerId,
+        slot: selection.slot,
+        nodeId,
+        index: plan.insertionIndex,
+      });
+      if (!changed.ok) return Object.freeze({ ok: false, reason: "command-rejected" });
+      candidate = changed.document;
+    }
+  } else {
+    let targetLength = plan.target.slot.children.length;
+    for (const entry of plan.entries) {
+      const changed = entry.sameTarget
+        ? reorderDesenEditorNode(candidate, {
+            surfaceId: route.surfaceId,
+            parentId: selection.ownerId,
+            slot: selection.slot,
+            nodeId: entry.nodeId,
+            index: targetLength - 1,
+          })
+        : moveDesenEditorNode(candidate, {
+            surfaceId: route.surfaceId,
+            parentId: selection.ownerId,
+            slot: selection.slot,
+            nodeId: entry.nodeId,
+            index: targetLength,
+          });
+      if (!changed.ok) return Object.freeze({ ok: false, reason: "command-rejected" });
+      candidate = changed.document;
+      if (!entry.sameTarget) targetLength += 1;
+    }
+    for (const [offset, nodeId] of plan.nodeIds.entries()) {
+      const changed = reorderDesenEditorNode(candidate, {
+        surfaceId: route.surfaceId,
+        parentId: selection.ownerId,
+        slot: selection.slot,
+        nodeId,
+        index: plan.insertionIndex + offset,
+      });
+      if (!changed.ok) return Object.freeze({ ok: false, reason: "command-rejected" });
+      candidate = changed.document;
+    }
   }
   const validationReport = validationReportForCandidate(model, candidate);
   return validationReport?.valid === true
@@ -1332,10 +1348,10 @@ export function evaluateAuthoringSlotBatchPlacement(
 /**
  * Applies one preflighted multi-layer placement through public Editor Core structural commands.
  *
- * @remarks The intermediate detached candidates are private to this function. It first moves every
- * selected node to the target tail in selection order, then reorders that complete tail into the
- * requested boundary. This preserves the group's order while avoiding index drift from siblings
- * that are themselves selected. The final validator result is the sole commit candidate; any
+ * @remarks The intermediate detached candidates are private to this function. Cross-target groups
+ * insert directly at one boundary in reverse source order. Groups containing target siblings first
+ * normalize at the tail, then reorder to avoid selected-sibling index drift. Both preserve source
+ * order. The final validator result is the sole commit candidate; any
  * rejected command or validation result returns no document, allocation, or partial source.
  */
 export function applyAuthoringSlotBatchPlacement(

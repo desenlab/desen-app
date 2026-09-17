@@ -997,8 +997,8 @@ const M10A_T11_CURRENT_RECEIPTS = Object.freeze([
   }),
   Object.freeze({
     path: "apps/desen-app/src/authoring-slots.ts",
-    bytes: 58_808,
-    sha256: "d0f71e98572af61225eacdaea5670df613dafb5259c2463c62591a2fedf1a63a",
+    bytes: 59_517,
+    sha256: "6530c05bfbbcac49137a3759ce81471204d957b5932c267148820f044c10a8ed",
   }),
   Object.freeze({
     path: "apps/desen-app/src/authoring-direct-manipulation.ts",
@@ -1758,7 +1758,7 @@ const M10A_T11_GRAPH_PROFILE = Object.freeze({
   id: "m10a-t11-live-product",
   moduleCount: 172,
   staticEdges: 525,
-  graphSha256: "sha256:bdaba7ad56b7c1855ff966c6ba61bc8e86c5e79575fad6dca228d86ccc3f6514",
+  graphSha256: "sha256:b811e2c3101e62f480917a027bcc0d7fdf8754ff8fbb66f09e4e0bab0880779f",
   sourcePaths: M10A_T11_CURRENT_APP_GRAPH_SOURCE_PATHS,
   dataModules: M10A_T11_GRAPH_DATA_MODULES,
   applicationImports: M10A_T11_APPLICATION_GRAPH_IMPORTS,

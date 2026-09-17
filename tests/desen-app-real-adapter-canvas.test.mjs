@@ -317,7 +317,7 @@ test("[M10A-T11 successor] keeps the frozen M09 projection while proving live di
   assert.equal(m10aT11Successor.runtimeResolution.dynamicEdges, 0);
   assert.equal(
     m10aT11Successor.runtimeResolution.graphSha256,
-    "sha256:bdaba7ad56b7c1855ff966c6ba61bc8e86c5e79575fad6dca228d86ccc3f6514",
+    "sha256:b811e2c3101e62f480917a027bcc0d7fdf8754ff8fbb66f09e4e0bab0880779f",
   );
   assert.deepEqual(
     graphModule(

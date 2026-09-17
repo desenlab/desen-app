@@ -728,8 +728,8 @@ const M10A_T11_APP_SOURCE_SUCCESSORS = Object.freeze([
   }),
   Object.freeze({
     path: "apps/desen-app/src/authoring-slots.ts",
-    bytes: 58_808,
-    sha256: "sha256:d0f71e98572af61225eacdaea5670df613dafb5259c2463c62591a2fedf1a63a",
+    bytes: 59_517,
+    sha256: "sha256:6530c05bfbbcac49137a3759ce81471204d957b5932c267148820f044c10a8ed",
   }),
   Object.freeze({
     path: "apps/desen-app/src/canvas-manipulation-controls.tsx",
@@ -745,7 +745,7 @@ const M10A_T11_APP_GRAPH_SUCCESSOR = Object.freeze({
     dynamicEdges: 0,
     unresolvedEdges: 0,
     reachableProductionSourceFiles: 54,
-    graphSha256: "sha256:bdaba7ad56b7c1855ff966c6ba61bc8e86c5e79575fad6dca228d86ccc3f6514",
+    graphSha256: "sha256:b811e2c3101e62f480917a027bcc0d7fdf8754ff8fbb66f09e4e0bab0880779f",
   }),
   completeAppSourceFiles: 56,
   transformedModules: Object.freeze([
@@ -761,8 +761,8 @@ const M10A_T11_APP_GRAPH_SUCCESSOR = Object.freeze({
     }),
     Object.freeze({
       id: "apps/desen-app/src/authoring-slots.ts",
-      codeBytes: 43_067,
-      codeSha256: "sha256:144b010b428abb439cde2caef337d8f135a366a51f9963cb26b9834977d1ed34",
+      codeBytes: 43_536,
+      codeSha256: "sha256:ab13318be6f94257c9ef4bb74621f4c5e3c8d6fe925fa6b4a225e6aba0533471",
     }),
   ]),
   addedModules: Object.freeze([
@@ -788,13 +788,6 @@ const M10A_T11_APP_GRAPH_SUCCESSOR = Object.freeze({
     files: 3,
     outputs: Object.freeze([
       Object.freeze({
-        fileName: "assets/index-BfNy4OKH.js",
-        type: "chunk",
-        isEntry: true,
-        bytes: 1_554_155,
-        sha256: "sha256:1f5811b94e804ca40494dc421f37101a955b20b6071bfabe10317b9fd4177863",
-      }),
-      Object.freeze({
         fileName: "assets/index-DXWMEQ_S.css",
         type: "asset",
         isEntry: null,
@@ -802,17 +795,24 @@ const M10A_T11_APP_GRAPH_SUCCESSOR = Object.freeze({
         sha256: "sha256:d87798f6630cdaab71b4ec856d7398d95d2062b1883cc7a37d57ce150b734be9",
       }),
       Object.freeze({
+        fileName: "assets/index-EeQmysjL.js",
+        type: "chunk",
+        isEntry: true,
+        bytes: 1_554_421,
+        sha256: "sha256:c468b47003b4485c529c15e1dc3e6ae65540b3dc89bb7a8198691e135c15c140",
+      }),
+      Object.freeze({
         fileName: "index.html",
         type: "asset",
         isEntry: null,
         bytes: 511,
-        sha256: "sha256:4a4c972dde3d5fc19348ed22c902cf22edced346aa9fa9ae2c5df351773b2328",
+        sha256: "sha256:d6c78cbdc37cf709f0c97d23b20d8b953c07be7d244ebc81fb0b202b428715b2",
       }),
     ]),
-    identitySha256: "sha256:96d82a27280fa6f0fbce21e463b0ba0c3ba195c5c934a0502ba3ba2f019b1ce0",
+    identitySha256: "sha256:7bdb556fb86a782566d14e1a59fb6c56eec2db0f9a7508be407fa44589d1827d",
   }),
   backingFiles: 189,
-  backingSnapshotSha256: "sha256:16de958a323b0af50d92aed7b467bffbf8892f80fce3af66b2b0a53e14f6f26a",
+  backingSnapshotSha256: "sha256:a4c75360c41618aafbdb2846dddc719ac8a4e0f34366e778a9871263255c23d7",
 });
 
 const FOCUSED_TEST_COMMANDS = Object.freeze([
