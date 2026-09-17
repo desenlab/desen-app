@@ -5,14 +5,14 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 131/176 (%74), M10 12/12, M10A 10/28 (%36) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T10'nın exact-head PR kontrolleri,
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 132/176 (%75), M10 12/12, M10A 11/28 (%39) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T11'nın exact-head PR kontrolleri,
 merge'leri ve taze `main` koşuları geçti.
 Ayrıntı [Project Status](../../PROJECT-STATUS.md),
 [T05 kanıtı](../proof/M10A-T05.md), [T06 kanıtı](../proof/M10A-T06.md), [T07 kanıtı](../proof/M10A-T07.md) ve
 [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış görev sayısı 131 ve M10A sayacı 10/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
+ekler; tamamlanmış görev sayısı 132 ve M10A sayacı 11/28'dir. `M10A-T01` `DONE`: Base UI 1.8.0
 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
 sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` `DONE`: tema/token
 authoring, modlar, alias'lar, kayıp-farkındalıklı aktarım ve izole workbench kanıtlandı.
@@ -28,8 +28,8 @@ kaydedildi. `M10A-T09` `DONE`: Card, Badge, Avatar, Alert, List, basic Table, Sk
 için hosted exact-head ve taze `main` kapanışı [kanıt belgesine](../proof/M10A-T09.md) kaydedildi.
 `M10A-T10` `DONE`: project/surface yaşam döngüsü, T02 zarfını generation-fenced saklama, taslak geri alma ve
 kaydetme durumu [kanıt belgesinde](../proof/M10A-T10.md) exact-head ve taze `main` kapanışıyla kayıtlıdır.
-`M10A-T11` `IN_PROGRESS`: çoklu seçim, slot-farkındalıklı atomik katman taşıma ve erişilebilir canvas
-kontrollerinin yerel uygulaması/odaklı doğrulaması entegrasyona hazırdır; hosted kapanış henüz bekler.
+`M10A-T11` `DONE`: çoklu seçim, slot-farkındalıklı atomik katman taşıma ve erişilebilir canvas
+kontrolleri [kanıt belgesinde](../proof/M10A-T11.md) exact-head ve taze `main` kapanışıyla kayıtlıdır.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i

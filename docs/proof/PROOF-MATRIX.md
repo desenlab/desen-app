@@ -3751,13 +3751,13 @@ PR #114's exact-head hosted Quality and fresh-`main` closure verify its six owne
 paths under the reviewed exhaustive-fallback ownership boundary. T10 does not add Runtime, Publisher,
 Core/protocol, G10A, or M11 authority.
 
-## M10A-T11 direct-manipulation canvas (`IN_PROGRESS`)
+## M10A-T11 direct-manipulation canvas (`DONE`)
 
-The [M10A-T11 report](M10A-T11.md) records an integration-ready local Desen App boundary: bounded
+The [M10A-T11 report](M10A-T11.md) records the closed Desen App boundary: bounded
 Source-re-authorized multi-selection, stable-order atomic slot-aware group placement, and accessible
 App-owned canvas pan/zoom/preview-frame controls outside adapter-managed capability DOM. Its focused
 verification rejects stale, forged, duplicate, over-limit, cyclic, minimum/maximum-cardinality, and
 unaccepted slot operations without partial Source mutation.
 
-This is not a hosted closure. Exact-head Quality, merge, and fresh-`main` evidence remain required
-before T11 becomes `DONE`; it grants no Runtime, Publisher, Core/protocol, G10A, or M11 authority.
+PR #116's exact-head hosted and fresh-`main` closure are recorded in the task report; it grants no
+Runtime, Publisher, Core/protocol, G10A, or M11 authority.
