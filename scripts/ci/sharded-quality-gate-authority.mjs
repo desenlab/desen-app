@@ -11,7 +11,7 @@ import { classifyProofPairState } from "./shared-state-authority.mjs";
 export const SHARD_IDS = Object.freeze(["proof-a", "proof-b", "proof-c"]);
 /** Reviewed identity of the logical coverage, replicated prerequisites, and static assignment. */
 export const SHARDED_QUALITY_GATE_PLAN_SHA256 =
-  "67366a68cdece8977b3d90ed0a570781f5d5537f6e44938dc7f4dbc384bcfd77";
+  "17422be0bd6dda295f4f2f567d5d96be7b772a8e6892dc62e064e5c00ecc74c0";
 /** Distinct distributed-plan profile; the historical monolithic authority remains unchanged. */
 export const SHARDED_QUALITY_GATE_PROFILE = "desen.ci.sharded-quality-gate-plan.v1";
 /** Public summary schema, which by itself grants neither hosted nor local-close authority. */
@@ -141,7 +141,7 @@ function assertIdsEqual(actual, expected, label) {
 }
 
 /**
- * Builds the fixed 53/24/42 proof-pair partition from the authenticated 252-node inventory.
+ * Builds the fixed 53/32/34 proof-pair partition from the authenticated 252-node inventory.
  * Its logical coverage remains 252; three prefixes and the join's fresh build execute 277
  * physical workloads. No duplicate preparation is represented as a skipped successful close.
  */
@@ -181,7 +181,7 @@ export function createShardedQualityGatePlan(rawOptions = undefined) {
     }
     assertIdsEqual(rootTest.dependencies, [verifierNodeId], "The verifier/root dependency");
   }
-  const ranges = [proofIds.slice(0, 53), proofIds.slice(53, 77), proofIds.slice(77)];
+  const ranges = [proofIds.slice(0, 53), proofIds.slice(53, 85), proofIds.slice(85)];
   const shardProjections = ranges.map((proofPairIds, index) => ({
     id: SHARD_IDS[index],
     proofPairIds,
