@@ -327,7 +327,7 @@ test("authenticates the exact 20/20 hosted campaign and live M10A-T11 successor"
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "ff1f997a12ac43f096d94c63e98efbaf271ea4ed6fcf12c4b4634c7acde057a1",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "e7f4e054be236b1733d9afadc8deb0e710ddac77534323e77c21ffad6931fc22",
+    runnerAuthoritySha256: "6b0c518819c191d709363992a279a87d8c17dd3530e319b0ff8538d9323fc3d9",
   });
 });
 

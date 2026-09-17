@@ -99,7 +99,7 @@ test("CI-04 three fixed shards preserve all 252 workloads and 119 complete proof
   assert.equal(inventory.proofUnitCount, 119);
   assert.deepEqual(
     shards.map(({ proofPairCount }) => proofPairCount),
-    [53, 24, 42],
+    [53, 32, 34],
   );
   const pairIds = shards.flatMap(({ proofPairs }) => proofPairs.map(({ id }) => id));
   assert.equal(pairIds.length, 119);
@@ -130,6 +130,32 @@ test("CI-04 three fixed shards preserve all 252 workloads and 119 complete proof
       ({ proofPairs }) => proofPairs.filter(({ id }) => classifyProofPairState(id).barrier).length,
     ),
     [11, 0, 4],
+  );
+  assert.deepEqual(
+    shards[1].proofPairs.slice(-8).map(({ id }) => id),
+    [
+      "editor-core-authoring-round-trip",
+      "editor-core-persistence",
+      "editor-core-continuous-validation",
+      "editor-core-terminal-integration",
+      "desen-app-shell-navigation",
+      "desen-app-catalog-panel-layer-tree",
+      "desen-app-real-adapter-canvas",
+      "desen-app-selection-overlay",
+    ],
+  );
+  assert.deepEqual(
+    shards[2].proofPairs.slice(0, 8).map(({ id }) => id),
+    [
+      "desen-app-schema-inspector",
+      "desen-app-structured-inspector",
+      "desen-app-named-slot-authoring",
+      "desen-app-state-binding-editor",
+      "desen-app-event-action-editor",
+      "desen-app-design-run-modes",
+      "desen-app-fixtures-scenarios-fidelity",
+      "desen-app-source-persistence",
+    ],
   );
   assert.deepEqual(
     shards[2].proofPairs.slice(-6).map(({ id }) => id),
