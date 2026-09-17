@@ -2075,7 +2075,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
       );
     }
   }
-  const m10aT09SuccessorPaths = successorPaths.filter(
+  const m10aT09SuccessorPaths = m10aT10SuccessorPaths.filter(
     (trackedPath) => !M10A_T10_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
   );
   const m10aT09SuccessorReview = calculateAffectedWorkloadOwnershipReview(m10aT09SuccessorPaths);

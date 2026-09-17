@@ -321,13 +321,13 @@ test("authenticates the exact 20/20 hosted campaign and live M10A-T11 successor"
     },
   );
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "00794f947f8ec51832c9219118d0294af68cc6097ec91e601dc621c143d2c16d",
+    selectorSha256: "d8d7bddf77a6ed87bdc80c7b68b2500f422ea4ce26c7ef1a3313754910603fa3",
     ownershipSha256: "a6f13b4582b3ef9f3e5b83497c43f04a7906332509e30df3c0340b37cd1041f4",
     impactGraphSha256: "4c9bf0772ea60e6aa791dd30f62e56422e534b3e3d6355b9e2263773bac0bf72",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "ff1f997a12ac43f096d94c63e98efbaf271ea4ed6fcf12c4b4634c7acde057a1",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "dc5c7631fb4bf9e94059f170c0b25e4cfd8504e30fdd483885daf350743f861a",
+    runnerAuthoritySha256: "e7f4e054be236b1733d9afadc8deb0e710ddac77534323e77c21ffad6931fc22",
   });
 });
 

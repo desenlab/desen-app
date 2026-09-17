@@ -212,6 +212,12 @@ test("promotion applicability binds one verified receipt to the exact authentica
   const substituted = await boundary("tests/protocol-canonicalization.test.mjs");
   assert.equal(validateAffectedSelectorPromotionBoundary(promotion, admitted), admitted);
   assert.equal(validateAffectedSelectorPromotedBoundary(admitted, promotion), admitted);
+  const selection = validateAffectedSelectorPromotedSelection(
+    admitted,
+    promotion,
+    createRequiredAffectedSelection(validateAffectedSelectorPromotedBoundary(admitted, promotion)),
+  );
+  assert.equal(selection.effectiveScope, "AFFECTED");
   assert.throws(
     () => validateAffectedSelectorPromotedBoundary(substituted, promotion),
     /unbound or substituted affected boundary/u,
