@@ -512,6 +512,45 @@ describe("Desen App application shell", () => {
     expect(screen.queryByRole("status", { name: "Selected layer preview" })).toBeNull();
   });
 
+  it("extends selection with a modifier while keeping canvas controls outside managed capability DOM", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
+
+    const email = screen.getByRole("button", {
+      name: "Select Text field layer · sign-in.email",
+    });
+    const password = screen.getByRole("button", {
+      name: "Select Text field layer · sign-in.password",
+    });
+    fireEvent.click(email);
+    fireEvent.click(password, { shiftKey: true });
+
+    expect(email.getAttribute("aria-pressed")).toBe("true");
+    expect(password.getAttribute("aria-pressed")).toBe("true");
+    const canvasControls = screen.getByRole("region", { name: "Canvas controls" });
+    expect(canvasControls.textContent).toContain("2 layers selected");
+    const managedCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
+    expect(managedCanvas.contains(canvasControls)).toBe(false);
+    const frame = screen.getByLabelText(/page frame/u);
+    fireEvent.click(screen.getByRole("button", { name: "Zoom in canvas" }));
+    fireEvent.click(screen.getByRole("button", { name: "Pan canvas down" }));
+    fireEvent.click(screen.getByRole("button", { name: "Make preview frame wider" }));
+    expect(frame.style.getPropertyValue("--desen-canvas-viewport-zoom")).toBe("1.25");
+    expect(frame.style.getPropertyValue("--desen-canvas-viewport-pan-y")).toBe("48px");
+    expect(frame.getAttribute("data-canvas-frame-width")).toBe("500");
+    expect(frame.getAttribute("data-canvas-preview-resized")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Reset canvas view" }));
+    expect(frame.style.getPropertyValue("--desen-canvas-viewport-zoom")).toBe("1");
+    expect(frame.style.getPropertyValue("--desen-canvas-viewport-pan-y")).toBe("0px");
+    expect(frame.getAttribute("data-canvas-frame-width")).toBe("420");
+    expect(frame.getAttribute("data-canvas-preview-resized")).toBe("false");
+
+    fireEvent.click(password, { shiftKey: true });
+    expect(email.getAttribute("aria-pressed")).toBe("true");
+    expect(password.getAttribute("aria-pressed")).toBe("false");
+    expect(canvasControls.textContent).toContain("Selected · sign-in.email");
+  });
+
   it("chooses an exact named-slot target and inserts Catalog defaults into Source and preview", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();

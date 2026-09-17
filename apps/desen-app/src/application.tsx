@@ -16,6 +16,7 @@ import { prepareCatalogAuthoringModel, projectAuthoringCanvasFrame } from "./aut
 import { projectAuthoringBehaviorControls } from "./authoring-behavior-projection.js";
 import { projectAuthoringDiagnostics } from "./authoring-diagnostics.js";
 import { DesenAdapterCanvas } from "./adapter-canvas.js";
+import { CanvasManipulationControls } from "./canvas-manipulation-controls.js";
 import { applyAuthoringConditionEdit } from "./authoring-conditions.js";
 import {
   applyAuthoringInputConnection,
@@ -72,6 +73,16 @@ import {
   createAuthoringComponentSelection,
   isSameAuthoringComponentSelection,
 } from "./authoring-selection.js";
+import {
+  createAuthoringCanvasPreviewFrame,
+  createAuthoringCanvasViewport,
+  panAuthoringCanvasViewport,
+  projectAuthoringDirectManipulationSelection,
+  resizeAuthoringCanvasPreviewFrame,
+  resetAuthoringCanvasViewport,
+  toggleAuthoringDirectManipulationSelection,
+  zoomAuthoringCanvasViewport,
+} from "./authoring-direct-manipulation.js";
 import { InspectorPanel } from "./inspector-panel.js";
 import {
   InputConnectionControl,
@@ -852,10 +863,11 @@ interface LayerSelectionProps {
   readonly onClearDrag: () => void;
   readonly onProjectDrop: (projection: AuthoringDropProjection | null) => void;
   readonly onStartDrag: (intent: AuthoringDragIntent) => void;
-  readonly onToggleSelection: (node: AuthoringLayerNode) => void;
+  readonly onToggleSelection: (node: AuthoringLayerNode, extend: boolean) => void;
   readonly route: AuthoringSlotRoute;
   readonly rootNodeId: string;
   readonly selectedSourceNodeId: string | null;
+  readonly selectedSourceNodeIds: readonly string[];
 }
 
 function declaredSlotStates(
@@ -1431,13 +1443,14 @@ function LayerNode({
   route,
   rootNodeId,
   selectedSourceNodeId,
+  selectedSourceNodeIds,
 }: Readonly<
   LayerSelectionProps & {
     readonly movable?: boolean;
     readonly node: AuthoringLayerNode;
   }
 >) {
-  const selected = selectedSourceNodeId === node.id;
+  const selected = selectedSourceNodeIds.includes(node.id);
   const interaction = {
     activeDropProjection,
     activeSlot,
@@ -1453,6 +1466,7 @@ function LayerNode({
     route,
     rootNodeId,
     selectedSourceNodeId,
+    selectedSourceNodeIds,
   } satisfies LayerSelectionProps;
 
   return (
@@ -1483,7 +1497,9 @@ function LayerNode({
           aria-pressed={selected}
           className={styles.layerSelectAction}
           data-layer-source-node-id={node.id}
-          onClick={() => onToggleSelection(node)}
+          onClick={(event) =>
+            onToggleSelection(node, event.shiftKey || event.metaKey || event.ctrlKey)
+          }
           type="button"
         >
           <span aria-hidden="true" className={styles.layerGlyph} />
@@ -1524,6 +1540,7 @@ function BehaviorNode({
   route,
   rootNodeId,
   selectedSourceNodeId,
+  selectedSourceNodeIds,
 }: Readonly<LayerSelectionProps & { readonly behavior: AuthoringBehaviorLayer }>) {
   const interaction = {
     activeDropProjection,
@@ -1540,6 +1557,7 @@ function BehaviorNode({
     route,
     rootNodeId,
     selectedSourceNodeId,
+    selectedSourceNodeIds,
   } satisfies LayerSelectionProps;
   return (
     <li className={styles.behaviorNode}>
@@ -2023,6 +2041,7 @@ function AuthoringPanel({
   route,
   selection,
   selectedSourceNodeId,
+  selectedSourceNodeIds,
   selectedSurface,
 }: Readonly<{
   readonly hidden: boolean;
@@ -2033,10 +2052,11 @@ function AuthoringPanel({
     target: AuthoringSlotSelection,
     edit: AuthoringSlotEdit,
   ) => AuthoringSlotEditResult;
-  readonly onToggleSelection: (node: AuthoringLayerNode) => void;
+  readonly onToggleSelection: (node: AuthoringLayerNode, extend: boolean) => void;
   readonly route: AuthoringSlotRoute;
   readonly selection: AuthoringComponentSelection | null;
   readonly selectedSourceNodeId: string | null;
+  readonly selectedSourceNodeIds: readonly string[];
   readonly selectedSurface: DesenAppSurfaceSummary;
 }>) {
   const [activeSlot, setActiveSlot] = useState<AuthoringSlotSelection | null>(null);
@@ -2132,11 +2152,11 @@ function AuthoringPanel({
     setNotice(`Choose a Catalog component for ${target.ownerId} · ${target.slot}.`);
   }
 
-  function toggleLayer(node: AuthoringLayerNode): void {
+  function toggleLayer(node: AuthoringLayerNode, extend: boolean): void {
     if (!interactive) return;
     setDragNotice("");
     setNotice("");
-    onToggleSelection(node);
+    onToggleSelection(node, extend);
   }
 
   function applyIntent(
@@ -2377,6 +2397,7 @@ function AuthoringPanel({
             }
             route={route}
             selectedSourceNodeId={selectedSourceNodeId}
+            selectedSourceNodeIds={selectedSourceNodeIds}
             selectedSurface={selectedSurface}
           />
         </div>
@@ -2432,6 +2453,18 @@ function SurfaceEditor({
   const previewSurface =
     project.surfaces.find(({ sourceId }) => sourceId === previewSurfaceId) ?? selectedSurface;
   const [selection, setSelection] = useState<AuthoringComponentSelection | null>(null);
+  const [directSelections, setDirectSelections] = useState<readonly AuthoringComponentSelection[]>(
+    Object.freeze([]),
+  );
+  const [canvasPreviewFrame, setCanvasPreviewFrame] = useState<ReturnType<
+    typeof createAuthoringCanvasPreviewFrame
+  > | null>(null);
+  const [canvasViewport, setCanvasViewport] = useState(() => createAuthoringCanvasViewport());
+
+  function selectOne(next: AuthoringComponentSelection | null): void {
+    setSelection(next);
+    setDirectSelections(next === null ? Object.freeze([]) : Object.freeze([next]));
+  }
   const [transientDiagnostics, setTransientDiagnostics] =
     useState<TransientAuthoringDiagnostics | null>(null);
   const [diagnosticSelection, setDiagnosticSelection] =
@@ -2605,6 +2638,13 @@ function SurfaceEditor({
         : canvasFrame.frame.height < canvasFrame.frame.width
           ? "Landscape"
           : "Square";
+  const effectiveCanvasFrame =
+    canvasFrame.status === "ready" ? (canvasPreviewFrame ?? canvasFrame.frame) : null;
+  const previewFrameIsResized =
+    canvasFrame.status === "ready" &&
+    canvasPreviewFrame !== null &&
+    (canvasPreviewFrame.width !== canvasFrame.frame.width ||
+      canvasPreviewFrame.height !== canvasFrame.frame.height);
   const committedDocumentFingerprint = useMemo(() => digestCanonicalJson(document), [document]);
   const diagnosticsValidator = useMemo(
     () =>
@@ -3089,7 +3129,7 @@ function SurfaceEditor({
         const node = pending.pop();
         if (node === undefined) break;
         if (node.id === occurrence.subjectId) {
-          setSelection(
+          selectOne(
             createAuthoringComponentSelection({
               projectId: route.projectId,
               surfaceId: route.surfaceId,
@@ -3166,7 +3206,7 @@ function SurfaceEditor({
     }
     replaceSourceDraft(null);
     commitAuthoringSession(Object.freeze({ document: result.document, preview: result.preview }));
-    setSelection(null);
+    selectOne(null);
     setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
     setSourceDraftNotice("Source applied locally. Save source, then Publish to update the host.");
   }
@@ -3235,7 +3275,7 @@ function SurfaceEditor({
       return;
     }
     commitAuthoringSession(result.session, true);
-    setSelection(null);
+    selectOne(null);
     setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
   }
 
@@ -3258,7 +3298,7 @@ function SurfaceEditor({
     void publicationController.publish();
   }
 
-  function toggleSelection(node: AuthoringLayerNode): void {
+  function toggleSelection(node: AuthoringLayerNode, extend = false): void {
     if (!isDesignMode()) return;
     const candidate = createAuthoringComponentSelection({
       projectId: project.id,
@@ -3268,9 +3308,19 @@ function SurfaceEditor({
       displayName: node.displayName,
       conditional: node.conditional,
     });
-    setSelection((current) =>
-      isSameAuthoringComponentSelection(current, candidate) ? null : candidate,
-    );
+    const current =
+      directSelections.length > 0
+        ? directSelections
+        : selection === null
+          ? Object.freeze([])
+          : Object.freeze([selection]);
+    const next = extend
+      ? toggleAuthoringDirectManipulationSelection(current, candidate, true)
+      : isSameAuthoringComponentSelection(selection, candidate)
+        ? Object.freeze([])
+        : toggleAuthoringDirectManipulationSelection(current, candidate, false);
+    setDirectSelections(next);
+    setSelection(next.at(-1) ?? null);
   }
 
   function editSelectedProperty(edit: AuthoringInspectorEdit): AuthoringInspectorEditResult {
@@ -3388,7 +3438,7 @@ function SurfaceEditor({
     );
     if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" });
     commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
-    setSelection(
+    selectOne(
       createAuthoringComponentSelection({
         projectId: selection.projectId,
         surfaceId: selection.surfaceId,
@@ -3467,7 +3517,7 @@ function SurfaceEditor({
     if (result.operation === "insert" && edit.kind === "insert" && preparedModel.ok) {
       const component = preparedModel.model.components.find(({ id }) => id === edit.componentId);
       if (component !== undefined) {
-        setSelection(
+        selectOne(
           createAuthoringComponentSelection({
             projectId: project.id,
             surfaceId: selectedSurface.sourceId,
@@ -3496,7 +3546,7 @@ function SurfaceEditor({
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
     }
     commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
-    setSelection(null);
+    selectOne(null);
     return result;
   }
 
@@ -3515,6 +3565,17 @@ function SurfaceEditor({
   }
 
   const model = preparedModel.model;
+  const directManipulationSelection = projectAuthoringDirectManipulationSelection(
+    directSelections,
+    route,
+    model,
+  );
+  const selectedSourceNodeIds =
+    directManipulationSelection.status === "ready"
+      ? directManipulationSelection.selection.sourceNodeIds
+      : selection === null
+        ? Object.freeze([])
+        : Object.freeze([selection.sourceNodeId]);
 
   return (
     <section aria-labelledby="workspace-title" className={styles.surfaceEditor} data-mode={mode}>
@@ -3689,6 +3750,7 @@ function SurfaceEditor({
         route={route}
         selection={selection}
         selectedSourceNodeId={selection?.sourceNodeId ?? null}
+        selectedSourceNodeIds={selectedSourceNodeIds}
         selectedSurface={selectedSurface}
       />
 
@@ -3705,20 +3767,56 @@ function SurfaceEditor({
           style={
             canvasFrame.status === "ready"
               ? ({
-                  "--desen-canvas-frame-height": `${canvasFrame.frame.height}px`,
-                  "--desen-canvas-frame-width": `${canvasFrame.frame.width}px`,
+                  "--desen-canvas-frame-height": `${effectiveCanvasFrame?.height ?? canvasFrame.frame.height}px`,
+                  "--desen-canvas-frame-width": `${effectiveCanvasFrame?.width ?? canvasFrame.frame.width}px`,
                 } as CSSProperties)
               : undefined
           }
         >
+          <CanvasManipulationControls
+            disabled={mode !== "design" || publicationPending || sourceDraft !== null}
+            frame={effectiveCanvasFrame}
+            onPan={(delta) => {
+              if (!isDesignMode()) return;
+              setCanvasViewport((current) => panAuthoringCanvasViewport(current, delta));
+            }}
+            onReset={() => {
+              if (!isDesignMode()) return;
+              setCanvasViewport(resetAuthoringCanvasViewport());
+              setCanvasPreviewFrame(null);
+            }}
+            onResize={(delta) => {
+              if (!isDesignMode() || canvasFrame.status !== "ready") return;
+              setCanvasPreviewFrame((current) =>
+                resizeAuthoringCanvasPreviewFrame(
+                  current ?? createAuthoringCanvasPreviewFrame(canvasFrame.frame),
+                  delta,
+                ),
+              );
+            }}
+            onZoom={(direction) => {
+              if (!isDesignMode()) return;
+              setCanvasViewport((current) => zoomAuthoringCanvasViewport(current, direction));
+            }}
+            selectedSourceNodeIds={selectedSourceNodeIds}
+            viewport={canvasViewport}
+          />
           <div className={styles.canvasPlane} data-canvas-plane="true">
             {canvasFrame.status === "ready" ? (
               <section
-                aria-label={`${canvasFrameOrientation?.toLowerCase() ?? "declared"} page frame · ${canvasFrame.frame.label}`}
+                aria-label={`${canvasFrameOrientation?.toLowerCase() ?? "declared"} page frame · ${effectiveCanvasFrame?.width ?? canvasFrame.frame.width} × ${effectiveCanvasFrame?.height ?? canvasFrame.frame.height} px${previewFrameIsResized ? " · preview only" : ""}`}
                 className={styles.canvasFrame}
                 data-canvas-frame={canvasFrameOrientation?.toLowerCase() ?? "declared"}
-                data-canvas-frame-height={canvasFrame.frame.height}
-                data-canvas-frame-width={canvasFrame.frame.width}
+                data-canvas-frame-height={effectiveCanvasFrame?.height ?? canvasFrame.frame.height}
+                data-canvas-frame-width={effectiveCanvasFrame?.width ?? canvasFrame.frame.width}
+                data-canvas-preview-resized={previewFrameIsResized ? "true" : "false"}
+                style={
+                  {
+                    "--desen-canvas-viewport-pan-x": `${canvasViewport.panX}px`,
+                    "--desen-canvas-viewport-pan-y": `${canvasViewport.panY}px`,
+                    "--desen-canvas-viewport-zoom": canvasViewport.zoom,
+                  } as CSSProperties
+                }
               >
                 <DesenAdapterCanvas
                   authoringModel={model}
