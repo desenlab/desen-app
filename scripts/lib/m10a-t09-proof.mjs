@@ -1,30 +1,41 @@
-import { spawn } from "node:child_process";
-import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { types as utilTypes } from "node:util";
 
 import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
-import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
-import { buildM10AT01PackageIdentity } from "./m10a-t01-proof.mjs";
 
-const WORKSPACE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const MODULE_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
+const WORKSPACE_ROOT = path.resolve(MODULE_DIRECTORY, "../..");
 const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/m10a-t09.json";
-const ARTIFACT_PATH = path.join(WORKSPACE_ROOT, ARTIFACT_RELATIVE_PATH);
-const REPORT_LIMIT = 256 * 1024;
+const T08_ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/m10a-t08.json";
 
-/** Exact real-browser command that owns the isolated M10A-T09 capture. */
+const HISTORICAL_T09_ARTIFACT_SHA256 =
+  "7fecf6a1b5eebb4a132f55e9641b6137b772bd1bb0df7fb380ef9c1f68289d09";
+const HISTORICAL_T09_ARTIFACT_BYTES = 5_584;
+const HISTORICAL_T08_ARTIFACT_SHA256 =
+  "37bfd7458fac6001b396632dc167a155aca56c3d5a62b93c1df144284428a729";
+const HISTORICAL_T08_CATALOG_SHA256 =
+  "d125bc3a7a83c0cedb56c4202585d3110849b71eb33043896d57973e2b08045e";
+const HISTORICAL_CATALOG = Object.freeze({
+  id: "run.desen.starter.web",
+  version: "0.6.0",
+  target: "web-react",
+  sha256: "4e59de0135e7d445bc8c6e029506369bf8b38e40d5df5a57a39f81a799a42a69",
+  bytes: 585_861,
+});
+const HISTORICAL_PACKAGE_DIGEST =
+  "sha256:88a1fac65d43d166cbc31dceb890468950f677395ab93a62a382955e16b0c709";
+
+/** Historical browser command preserved in the frozen T09 receipt. */
 export const M10A_T09_BROWSER_COMMAND = Object.freeze({
   command: "pnpm",
   args: Object.freeze(["--filter", "@desen/starter-catalog-web-proof", "run", "test:m10a-t09"]),
 });
 
-/** Exact task-owned M10A-T09 proof-artifact destination. */
-export const M10A_T09_ARTIFACT_PATH = ARTIFACT_PATH;
+/** Exact historical M10A-T09 artifact destination; capture is retired. */
+export const M10A_T09_ARTIFACT_PATH = path.join(WORKSPACE_ROOT, ARTIFACT_RELATIVE_PATH);
 
-/** Exact current starter inventory after the additive T09 extension. */
+/** Exact capability inventory admitted by the historical T09 extension. */
 export const M10A_T09_CAPABILITY_IDS = Object.freeze([
   "run.desen.starter/Accordion",
   "run.desen.starter/Alert",
@@ -60,7 +71,7 @@ export const M10A_T09_CAPABILITY_IDS = Object.freeze([
   "run.desen.starter/Tooltip",
 ]);
 
-/** Capability ids introduced by T09. */
+/** Exact data-display and feedback additions recorded by historical T09. */
 export const M10A_T09_ADDED_CAPABILITY_IDS = Object.freeze([
   "run.desen.starter/Alert",
   "run.desen.starter/Avatar",
@@ -72,7 +83,7 @@ export const M10A_T09_ADDED_CAPABILITY_IDS = Object.freeze([
   "run.desen.starter/Table",
 ]);
 
-/** Exact isolated-browser cases required for the T09 task receipt. */
+/** Exact browser cases captured in the historical isolated T09 proof. */
 export const M10A_T09_BROWSER_TEST_TITLES = Object.freeze(
   [
     "publishes the T09 data-display and feedback inventory through the reviewed starter Catalog",
@@ -82,7 +93,7 @@ export const M10A_T09_BROWSER_TEST_TITLES = Object.freeze(
   ].sort(),
 );
 
-/** Every assertion that the T09 custom browser reporter must explicitly attest. */
+/** Exact all-true browser assertions captured in the historical T09 receipt. */
 export const M10A_T09_BROWSER_ASSERTION_NAMES = Object.freeze(
   [
     "allDataDisplayFeedbackCapabilitiesPublished",
@@ -103,7 +114,7 @@ export const M10A_T09_BROWSER_ASSERTION_NAMES = Object.freeze(
   ].sort(),
 );
 
-/** Stable root mutation-test declarations embedded in current T09 evidence. */
+/** Stable task-time test declarations serialized in the historical T09 receipt. */
 export const M10A_T09_ROOT_TEST_NAMES = Object.freeze([
   "M10A-T09 builds the exact 0.6.0 data-display and feedback Catalog deterministically",
   "M10A-T09 admits bounded sample data, explicit item slots, and stable table row identities",
@@ -113,7 +124,28 @@ export const M10A_T09_ROOT_TEST_NAMES = Object.freeze([
   "M10A-T09 writer is atomic and leaves current artifact bytes deterministic",
 ]);
 
-/** Stable error class raised at the bounded M10A-T09 proof boundary. */
+const HISTORICAL_CLAIMS = Object.freeze({
+  boundedSampleData: true,
+  explicitItemSlots: true,
+  nativeTableSemantics: true,
+  stableRowIdentity: true,
+  textAlternatives: true,
+  emptyLoadingErrorReadyExamples: true,
+  sampleDataWithoutOperation: true,
+  enterpriseGridNotAdmitted: true,
+  sameStaticAdaptersInAuthoringAndHost: true,
+  historicalArtifactsRewritten: false,
+  runtimeCoreChanged: false,
+});
+
+const HISTORICAL_NON_CLAIMS = Object.freeze([
+  "T09 does not add normal-App persistence, Publisher authority, Runtime activation, or M11 behavior.",
+  "T09 does not admit enterprise-grid features, charts, server pagination, sorting, callbacks, renderers, selectors, executable markup, or remote media URLs.",
+  "T09 sample-data contracts do not bind operations; later data resolution remains outside this task boundary.",
+  "Local evidence does not substitute for exact-head hosted Quality gate and fresh-main closure.",
+]);
+
+/** Stable error class raised at the historical M10A-T09 proof boundary. */
 export class M10AT09ProofError extends Error {
   constructor(code, message) {
     super(message);
@@ -126,291 +158,360 @@ function fail(code, message) {
   throw new M10AT09ProofError(code, message);
 }
 
-function sha256(bytes) {
-  return createHash("sha256").update(bytes).digest("hex");
+function deepFreeze(value) {
+  if (
+    value !== null &&
+    typeof value === "object" &&
+    !ArrayBuffer.isView(value) &&
+    !Object.isFrozen(value)
+  ) {
+    for (const child of Object.values(value)) deepFreeze(child);
+    Object.freeze(value);
+  }
+  return value;
 }
 
-function exactOptions(raw, allowed, label) {
-  if (raw === undefined) return {};
-  if (raw === null || typeof raw !== "object" || Array.isArray(raw))
-    fail("OPTIONS_INVALID", `${label} must be one inert object.`);
-  const keys = Object.keys(raw);
-  if (keys.some((key) => !allowed.includes(key)))
-    fail("OPTIONS_INVALID", `${label} contains an unknown option.`);
-  return Object.fromEntries(keys.map((key) => [key, raw[key]]));
-}
-
-function resolveWorkspaceRoot(rawWorkspaceRoot) {
-  const workspaceRoot = rawWorkspaceRoot ?? WORKSPACE_ROOT;
+function exactRecord(value, expectedKeys, label, failureCode) {
   if (
-    typeof workspaceRoot !== "string" ||
-    workspaceRoot.length === 0 ||
-    workspaceRoot.includes("\0") ||
-    !path.isAbsolute(workspaceRoot) ||
-    path.resolve(workspaceRoot) !== workspaceRoot ||
-    utilTypes.isProxy(workspaceRoot)
+    value === null ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    utilTypes.isProxy(value) ||
+    Object.getPrototypeOf(value) !== Object.prototype
   ) {
-    fail("OPTIONS_INVALID", "workspaceRoot must be one canonical absolute path.");
+    fail(failureCode, `${label} must be one inert plain record.`);
   }
-  return workspaceRoot;
-}
-
-function parseBrowserObservation(raw) {
-  if (raw?.profile !== "desen.m10a-t09.browser-proof.v1" || raw?.result !== "PASS") {
-    fail("BROWSER_OBSERVATION_INVALID", "T09 browser receipt identity drifted.");
-  }
+  const keys = Reflect.ownKeys(value);
   if (
-    !Array.isArray(raw.graphReceipts) ||
-    raw.graphReceipts.length !== 2 ||
-    raw.graphReceipts[0] !== "authoring" ||
-    raw.graphReceipts[1] !== "host"
+    keys.length !== expectedKeys.length ||
+    keys.some((key) => typeof key !== "string" || !expectedKeys.includes(key))
   ) {
-    fail("BROWSER_OBSERVATION_INVALID", "T09 graph receipts drifted.");
+    fail(failureCode, `${label} fields drifted.`);
   }
-  const titles = Array.isArray(raw.tests) ? raw.tests.map((test) => test?.title).sort() : [];
-  if (
-    titles.length !== M10A_T09_BROWSER_TEST_TITLES.length ||
-    titles.some((title, index) => title !== M10A_T09_BROWSER_TEST_TITLES[index]) ||
-    raw.tests.some((test) => test?.result !== "PASS")
-  ) {
-    fail("BROWSER_OBSERVATION_INVALID", "T09 browser test inventory drifted.");
-  }
-  if (
-    raw.assertions === null ||
-    typeof raw.assertions !== "object" ||
-    M10A_T09_BROWSER_ASSERTION_NAMES.some((name) => raw.assertions[name] !== true)
-  ) {
-    fail("BROWSER_OBSERVATION_INVALID", "T09 browser assertions drifted.");
-  }
-  return Object.freeze({
-    profile: "desen.m10a-t09.browser-proof.v1",
-    result: "PASS",
-    graphReceipts: Object.freeze(["authoring", "host"]),
-    tests: Object.freeze(
-      M10A_T09_BROWSER_TEST_TITLES.map((title) => Object.freeze({ title, result: "PASS" })),
-    ),
-    assertions: Object.freeze(
-      Object.fromEntries(M10A_T09_BROWSER_ASSERTION_NAMES.map((name) => [name, true])),
-    ),
-  });
-}
-
-async function currentIdentity(workspaceRoot) {
-  const identity = await buildM10AT01PackageIdentity({ workspaceRoot });
-  if (
-    identity.catalog.id !== "run.desen.starter.web" ||
-    identity.catalog.version !== "0.6.0" ||
-    identity.catalog.target !== "web-react"
-  ) {
-    fail("CATALOG_INVALID", "Starter Catalog identity is not the reviewed T09 0.6.0 contract.");
-  }
-  const ids = Object.keys(identity.catalog.components).sort();
-  if (
-    ids.length !== M10A_T09_CAPABILITY_IDS.length ||
-    ids.some((id, index) => id !== M10A_T09_CAPABILITY_IDS[index])
-  ) {
-    fail("CATALOG_INVALID", "T09 starter capability inventory drifted.");
-  }
-  return identity;
-}
-
-function buildArtifact(identity, browser, historicalT08) {
-  return Object.freeze({
-    schemaVersion: 1,
-    task: "M10A-T09",
-    proofId: "m10a-t09",
-    profile: "desen.m10a-t09.data-display-feedback.v1",
-    result: "PASS",
-    package: {
-      name: "@desen/starter-catalog-web",
-      catalog: {
-        id: identity.catalog.id,
-        version: identity.catalog.version,
-        target: identity.catalog.target,
-        sha256: sha256(identity.catalogBytes),
-        bytes: identity.catalogBytes.byteLength,
-      },
-      packageDigest: identity.packageIdentity.packageDigest,
-      digestProfile: identity.packageIdentity.profile,
-      distFiles: identity.inventory.distFiles,
-      distBytes: identity.inventory.distBytes,
-    },
-    capabilities: {
-      ids: M10A_T09_CAPABILITY_IDS,
-      added: M10A_T09_ADDED_CAPABILITY_IDS,
-      requiredSlots: ["Card.content", "List.items"],
-      listIdentity: "stable-id",
-      table: "native-caption-header-cell-semantics",
-      tableRowIdentity: "stable-id",
-      repeatLimit: 100,
-    },
-    browser,
-    historical: {
-      m10aT08ArtifactSha256: historicalT08.artifactSha256,
-      m10aT08CatalogSha256: historicalT08.artifact.package.catalog.sha256,
-    },
-    claims: {
-      boundedSampleData: true,
-      explicitItemSlots: true,
-      nativeTableSemantics: true,
-      stableRowIdentity: true,
-      textAlternatives: true,
-      emptyLoadingErrorReadyExamples: true,
-      sampleDataWithoutOperation: true,
-      enterpriseGridNotAdmitted: true,
-      sameStaticAdaptersInAuthoringAndHost: true,
-      historicalArtifactsRewritten: false,
-      runtimeCoreChanged: false,
-    },
-    tests: {
-      rootTestNames: M10A_T09_ROOT_TEST_NAMES,
-      packageCommand: "pnpm --filter @desen/starter-catalog-web test",
-      browserCommand: `${M10A_T09_BROWSER_COMMAND.command} ${M10A_T09_BROWSER_COMMAND.args.join(" ")}`,
-      browserExecutedByVerifier: true,
-    },
-    nonClaims: [
-      "T09 does not add normal-App persistence, Publisher authority, Runtime activation, or M11 behavior.",
-      "T09 does not admit enterprise-grid features, charts, server pagination, sorting, callbacks, renderers, selectors, executable markup, or remote media URLs.",
-      "T09 sample-data contracts do not bind operations; later data resolution remains outside this task boundary.",
-      "Local evidence does not substitute for exact-head hosted Quality gate and fresh-main closure.",
-    ],
-  });
-}
-
-async function runBrowserProof() {
-  const temporaryRoot = await mkdtemp(path.join(tmpdir(), "desen-m10a-t09-proof-"));
-  try {
-    const result = await new Promise((resolvePromise) => {
-      const child = spawn(M10A_T09_BROWSER_COMMAND.command, M10A_T09_BROWSER_COMMAND.args, {
-        cwd: WORKSPACE_ROOT,
-        env: { ...process.env, DESEN_M10A_T09_PROOF_TEMP: temporaryRoot },
-        detached: process.platform !== "win32",
-        stdio: ["ignore", "pipe", "pipe"],
-      });
-      const output = [];
-      child.stdout.on("data", (chunk) => output.push(chunk));
-      child.stderr.on("data", (chunk) => output.push(chunk));
-      child.on("close", (code, signal) =>
-        resolvePromise({ code, signal, output: Buffer.concat(output) }),
-      );
-    });
-    if (result.code !== 0) {
-      fail(
-        "BROWSER_EXECUTION_FAILED",
-        `T09 browser proof failed: ${result.output.toString("utf8").slice(-REPORT_LIMIT)}`,
-      );
+  const captured = {};
+  for (const key of expectedKeys) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor?.enumerable || !("value" in descriptor)) {
+      fail(failureCode, `${label}.${key} must be inert own data.`);
     }
-    return parseBrowserObservation(
-      JSON.parse(await readFile(path.join(temporaryRoot, "browser-proof.json"), "utf8")),
-    );
-  } finally {
-    await rm(temporaryRoot, { recursive: true, force: true });
+    captured[key] = descriptor.value;
+  }
+  return captured;
+}
+
+function assertExactArray(value, expected, label) {
+  if (
+    !Array.isArray(value) ||
+    value.length !== expected.length ||
+    value.some((item, index) => item !== expected[index])
+  ) {
+    fail("ARTIFACT_DRIFT", `${label} drifted.`);
   }
 }
 
-/** Builds deterministic current T09 evidence from one exact passing browser observation. */
-export async function buildM10AT09Evidence(rawOptions) {
-  const options = exactOptions(
-    rawOptions,
-    ["browserObservation", "workspaceRoot"],
-    "M10A-T09 evidence options",
-  );
-  if (options.browserObservation === undefined) {
-    fail("OPTIONS_INVALID", "M10A-T09 evidence requires one browser observation.");
-  }
-  const workspaceRoot = resolveWorkspaceRoot(options.workspaceRoot);
-  const identity = await currentIdentity(workspaceRoot);
-  const browser = parseBrowserObservation(options.browserObservation);
-  const frozen = await readCheckpointedFrozenArtifact("M10A-T08", { workspaceRoot });
-  const historicalT08 = {
-    artifactSha256: sha256(frozen.bytes),
-    artifact: JSON.parse(Buffer.from(frozen.bytes, "utf8")),
-  };
-  const artifact = buildArtifact(identity, browser, historicalT08);
-  const artifactBytes = Buffer.from(`${JSON.stringify(artifact, null, 2)}\n`, "utf8");
-  return Object.freeze({
-    artifact,
-    artifactBytes,
-    artifactSha256: sha256(artifactBytes),
-    identity,
-  });
-}
-
-/** Writes newly captured T09 evidence through its exact atomic destination. */
-export async function writeM10AT09Evidence(rawOptions = undefined) {
-  const options = exactOptions(
-    rawOptions,
-    ["artifactPath", "beforeAtomicRename", "browserObservation", "workspaceRoot"],
-    "M10A-T09 writer options",
-  );
-  const workspaceRoot = resolveWorkspaceRoot(options.workspaceRoot);
-  if (
-    options.beforeAtomicRename !== undefined &&
-    (typeof options.beforeAtomicRename !== "function" ||
-      utilTypes.isProxy(options.beforeAtomicRename))
-  ) {
-    fail("OPTIONS_INVALID", "beforeAtomicRename must be one non-Proxy function.");
-  }
-  const artifactPath = options.artifactPath ?? path.join(workspaceRoot, ARTIFACT_RELATIVE_PATH);
-  if (
-    typeof artifactPath !== "string" ||
-    !path.isAbsolute(artifactPath) ||
-    path.resolve(artifactPath) !== artifactPath ||
-    artifactPath.includes("\0")
-  ) {
-    fail("OPTIONS_INVALID", "artifactPath must be one canonical absolute path.");
-  }
-  const browser = options.browserObservation ?? (await runBrowserProof());
-  const built = await buildM10AT09Evidence({ workspaceRoot, browserObservation: browser });
+function parseHistoricalArtifact(rawBytes, label) {
   try {
-    await writeAtomicProofArtifact({
-      artifactPath,
-      artifactBytes: built.artifactBytes,
-      beforeAtomicRename: options.beforeAtomicRename,
-    });
-  } catch (error) {
-    const detail = error instanceof Error ? `: ${error.message}` : `: ${String(error)}`;
-    fail("ARTIFACT_WRITE_UNSAFE", `Atomic T09 evidence write failed${detail}`);
+    return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(rawBytes));
+  } catch {
+    fail("ARTIFACT_DRIFT", `${label} must be valid UTF-8 JSON.`);
   }
-  return Object.freeze({
-    artifactPath,
-    artifactBytes: built.artifactBytes.byteLength,
-    artifactSha256: built.artifactSha256,
-    catalogSha256: built.artifact.package.catalog.sha256,
-    packageDigest: built.artifact.package.packageDigest,
+}
+
+function captureHistoricalBrowser(rawBrowser) {
+  const browser = exactRecord(
+    rawBrowser,
+    ["assertions", "graphReceipts", "profile", "result", "tests"],
+    "Checkpointed M10A-T09 browser",
+    "ARTIFACT_DRIFT",
+  );
+  if (
+    browser.profile !== "desen.m10a-t09.browser-proof.v1" ||
+    browser.result !== "PASS" ||
+    !Array.isArray(browser.graphReceipts) ||
+    !Array.isArray(browser.tests)
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T09 browser identity drifted.");
+  }
+  assertExactArray(
+    browser.graphReceipts,
+    ["authoring", "host"],
+    "Checkpointed M10A-T09 graph receipt",
+  );
+  const titles = browser.tests.map((candidate, index) => {
+    const item = exactRecord(
+      candidate,
+      ["result", "title"],
+      `Checkpointed M10A-T09 browser test ${index}`,
+      "ARTIFACT_DRIFT",
+    );
+    if (item.result !== "PASS" || typeof item.title !== "string") {
+      fail("ARTIFACT_DRIFT", "Checkpointed M10A-T09 browser test contains a non-passing case.");
+    }
+    return item.title;
+  });
+  assertExactArray(titles, M10A_T09_BROWSER_TEST_TITLES, "Checkpointed M10A-T09 browser tests");
+
+  const assertions = exactRecord(
+    browser.assertions,
+    M10A_T09_BROWSER_ASSERTION_NAMES,
+    "Checkpointed M10A-T09 browser assertions",
+    "ARTIFACT_DRIFT",
+  );
+  if (M10A_T09_BROWSER_ASSERTION_NAMES.some((name) => assertions[name] !== true)) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T09 browser assertions drifted.");
+  }
+  return deepFreeze(structuredClone(browser));
+}
+
+function authenticateHistoricalT08Link(rawBytes) {
+  const artifact = exactRecord(
+    parseHistoricalArtifact(rawBytes, "Checkpointed M10A-T08 evidence"),
+    [
+      "browser",
+      "capabilities",
+      "claims",
+      "historical",
+      "nonClaims",
+      "package",
+      "profile",
+      "proofId",
+      "result",
+      "schemaVersion",
+      "task",
+      "tests",
+    ],
+    "Checkpointed M10A-T08 evidence",
+    "ARTIFACT_DRIFT",
+  );
+  const packageRecord = exactRecord(
+    artifact.package,
+    ["catalog", "digestProfile", "distBytes", "distFiles", "name", "packageDigest"],
+    "Checkpointed M10A-T08 package",
+    "ARTIFACT_DRIFT",
+  );
+  const catalog = exactRecord(
+    packageRecord.catalog,
+    ["bytes", "id", "sha256", "target", "version"],
+    "Checkpointed M10A-T08 catalog",
+    "ARTIFACT_DRIFT",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M10A-T08" ||
+    artifact.proofId !== "m10a-t08" ||
+    artifact.profile !== "desen.m10a-t08.overlays-disclosures.v1" ||
+    artifact.result !== "PASS" ||
+    catalog.id !== "run.desen.starter.web" ||
+    catalog.version !== "0.5.0" ||
+    catalog.target !== "web-react" ||
+    catalog.sha256 !== HISTORICAL_T08_CATALOG_SHA256
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T08 linkage authority drifted.");
+  }
+  return catalog.sha256;
+}
+
+function authenticateHistoricalT09Artifact(rawBytes, t08) {
+  const artifact = exactRecord(
+    parseHistoricalArtifact(rawBytes, "Checkpointed M10A-T09 evidence"),
+    [
+      "browser",
+      "capabilities",
+      "claims",
+      "historical",
+      "nonClaims",
+      "package",
+      "profile",
+      "proofId",
+      "result",
+      "schemaVersion",
+      "task",
+      "tests",
+    ],
+    "Checkpointed M10A-T09 evidence",
+    "ARTIFACT_DRIFT",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M10A-T09" ||
+    artifact.proofId !== "m10a-t09" ||
+    artifact.profile !== "desen.m10a-t09.data-display-feedback.v1" ||
+    artifact.result !== "PASS"
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T09 evidence identity drifted.");
+  }
+
+  const packageRecord = exactRecord(
+    artifact.package,
+    ["catalog", "digestProfile", "distBytes", "distFiles", "name", "packageDigest"],
+    "Checkpointed M10A-T09 package",
+    "ARTIFACT_DRIFT",
+  );
+  const catalog = exactRecord(
+    packageRecord.catalog,
+    ["bytes", "id", "sha256", "target", "version"],
+    "Checkpointed M10A-T09 catalog",
+    "ARTIFACT_DRIFT",
+  );
+  if (
+    packageRecord.name !== "@desen/starter-catalog-web" ||
+    packageRecord.digestProfile !== "desen.web-react.package-digest" ||
+    packageRecord.packageDigest !== HISTORICAL_PACKAGE_DIGEST ||
+    catalog.id !== HISTORICAL_CATALOG.id ||
+    catalog.version !== HISTORICAL_CATALOG.version ||
+    catalog.target !== HISTORICAL_CATALOG.target ||
+    catalog.sha256 !== HISTORICAL_CATALOG.sha256 ||
+    catalog.bytes !== HISTORICAL_CATALOG.bytes ||
+    packageRecord.distFiles !== 37 ||
+    packageRecord.distBytes !== 3_155_509
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T09 package receipt drifted.");
+  }
+
+  const capabilities = exactRecord(
+    artifact.capabilities,
+    ["added", "ids", "listIdentity", "repeatLimit", "requiredSlots", "table", "tableRowIdentity"],
+    "Checkpointed M10A-T09 capabilities",
+    "ARTIFACT_DRIFT",
+  );
+  assertExactArray(capabilities.ids, M10A_T09_CAPABILITY_IDS, "Checkpointed M10A-T09 capabilities");
+  assertExactArray(
+    capabilities.added,
+    M10A_T09_ADDED_CAPABILITY_IDS,
+    "Checkpointed M10A-T09 added capabilities",
+  );
+  assertExactArray(
+    capabilities.requiredSlots,
+    ["Card.content", "List.items"],
+    "Checkpointed M10A-T09 required slots",
+  );
+  if (
+    capabilities.listIdentity !== "stable-id" ||
+    capabilities.table !== "native-caption-header-cell-semantics" ||
+    capabilities.tableRowIdentity !== "stable-id" ||
+    capabilities.repeatLimit !== 100
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T09 capability detail drifted.");
+  }
+
+  const historical = exactRecord(
+    artifact.historical,
+    ["m10aT08ArtifactSha256", "m10aT08CatalogSha256"],
+    "Checkpointed M10A-T09 historical chain",
+    "ARTIFACT_DRIFT",
+  );
+  if (
+    historical.m10aT08ArtifactSha256 !== HISTORICAL_T08_ARTIFACT_SHA256 ||
+    historical.m10aT08ArtifactSha256 !== t08.artifactSha256 ||
+    historical.m10aT08CatalogSha256 !== HISTORICAL_T08_CATALOG_SHA256 ||
+    historical.m10aT08CatalogSha256 !== t08.catalogSha256
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T09 T08 linkage drifted.");
+  }
+
+  const claims = exactRecord(
+    artifact.claims,
+    Object.keys(HISTORICAL_CLAIMS),
+    "Checkpointed M10A-T09 claims",
+    "ARTIFACT_DRIFT",
+  );
+  for (const [name, expected] of Object.entries(HISTORICAL_CLAIMS)) {
+    if (claims[name] !== expected) {
+      fail("ARTIFACT_DRIFT", `Checkpointed M10A-T09 claim drifted: ${name}.`);
+    }
+  }
+
+  const tests = exactRecord(
+    artifact.tests,
+    ["browserCommand", "browserExecutedByVerifier", "packageCommand", "rootTestNames"],
+    "Checkpointed M10A-T09 tests",
+    "ARTIFACT_DRIFT",
+  );
+  if (
+    tests.packageCommand !== "pnpm --filter @desen/starter-catalog-web test" ||
+    tests.browserCommand !== "pnpm --filter @desen/starter-catalog-web-proof run test:m10a-t09" ||
+    tests.browserExecutedByVerifier !== true
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T09 test receipt drifted.");
+  }
+  assertExactArray(
+    tests.rootTestNames,
+    M10A_T09_ROOT_TEST_NAMES,
+    "Checkpointed M10A-T09 root tests",
+  );
+  assertExactArray(artifact.nonClaims, HISTORICAL_NON_CLAIMS, "Checkpointed M10A-T09 non-claims");
+
+  return deepFreeze({
+    browser: captureHistoricalBrowser(artifact.browser),
+    catalog,
+    packageRecord,
   });
 }
 
-/** Rebuilds current evidence and authenticates the exact checkpointed T09 artifact. */
-export async function verifyM10AT09Evidence(rawOptions = undefined) {
-  const options = exactOptions(
-    rawOptions,
-    ["artifactBytes", "browserObservation"],
-    "M10A-T09 verifier options",
+function rejectHistoricalCapture(rawOptions, label) {
+  if (rawOptions !== undefined) exactRecord(rawOptions, [], label, "OPTIONS_INVALID");
+  fail(
+    "HISTORICAL_CAPTURE_RETIRED",
+    "M10A-T09 evidence is checkpointed history; successor Catalog tasks own current capture.",
   );
-  const browser = options.browserObservation ?? (await runBrowserProof());
-  const built = await buildM10AT09Evidence({ browserObservation: browser });
-  let artifactBytes = options.artifactBytes;
-  let checkpointHeadSha256 = "TEST_OVERRIDE";
-  if (artifactBytes === undefined) {
-    const frozen = await readCheckpointedFrozenArtifact("M10A-T09", {
-      workspaceRoot: WORKSPACE_ROOT,
-    });
-    artifactBytes = Buffer.from(frozen.bytes);
-    checkpointHeadSha256 = frozen.checkpointHeadSha256;
+}
+
+/** Retires the former T09 browser capture path without re-running a successor Catalog. */
+export async function executeM10AT09BrowserProof(rawOptions = undefined) {
+  return rejectHistoricalCapture(rawOptions, "M10A-T09 browser-proof options");
+}
+
+/** Retires T09 artifact construction so current Catalog bytes cannot rewrite its receipt. */
+export async function buildM10AT09Evidence(rawOptions = undefined) {
+  return rejectHistoricalCapture(rawOptions, "M10A-T09 builder options");
+}
+
+/** Retires the former T09 capture writer without permitting a receipt redirect or rewrite. */
+export async function writeM10AT09Evidence(rawOptions = undefined) {
+  return rejectHistoricalCapture(rawOptions, "M10A-T09 writer options");
+}
+
+/** Authenticates exact historical T09 evidence and its checkpointed T08 predecessor. */
+export async function verifyM10AT09Evidence(rawOptions = undefined) {
+  if (rawOptions !== undefined) {
+    exactRecord(rawOptions, [], "M10A-T09 verifier options", "OPTIONS_INVALID");
   }
-  if (!Buffer.isBuffer(artifactBytes) || !artifactBytes.equals(built.artifactBytes)) {
-    fail("ARTIFACT_DRIFT", "Checkpointed T09 evidence differs from current authorities.");
+  const [frozenT09, frozenT08] = await Promise.all([
+    readCheckpointedFrozenArtifact("M10A-T09"),
+    readCheckpointedFrozenArtifact("M10A-T08"),
+  ]);
+  if (
+    frozenT09.path !== ARTIFACT_RELATIVE_PATH ||
+    frozenT09.byteLength !== HISTORICAL_T09_ARTIFACT_BYTES ||
+    frozenT09.sha256 !== HISTORICAL_T09_ARTIFACT_SHA256
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T09 artifact receipt drifted.");
   }
-  return Object.freeze({
+  if (
+    frozenT08.path !== T08_ARTIFACT_RELATIVE_PATH ||
+    frozenT08.sha256 !== HISTORICAL_T08_ARTIFACT_SHA256
+  ) {
+    fail("ARTIFACT_DRIFT", "Checkpointed M10A-T08 predecessor receipt drifted.");
+  }
+  const t08CatalogSha256 = authenticateHistoricalT08Link(Buffer.from(frozenT08.bytes));
+  const historical = authenticateHistoricalT09Artifact(Buffer.from(frozenT09.bytes), {
+    artifactSha256: frozenT08.sha256,
+    catalogSha256: t08CatalogSha256,
+  });
+  return deepFreeze({
     status: "PASS",
     task: "M10A-T09",
-    artifactBytes: built.artifactBytes.byteLength,
-    artifactSha256: built.artifactSha256,
-    catalogSha256: built.artifact.package.catalog.sha256,
-    packageDigest: built.artifact.package.packageDigest,
-    browserTests: built.artifact.browser.tests,
-    checkpointHeadSha256,
-    browserExecutedByVerifier: options.browserObservation === undefined,
+    artifactBytes: frozenT09.byteLength,
+    artifactSha256: frozenT09.sha256,
+    catalogSha256: historical.catalog.sha256,
+    packageDigest: historical.packageRecord.packageDigest,
+    browserTests: historical.browser.tests,
+    browserExecutedByVerifier: false,
+    checkpointHeadSha256: frozenT09.checkpointHeadSha256,
   });
+}
+
+/** Alias retained for callers that request recorded historical T09 evidence. */
+export async function verifyM10AT09RecordedEvidence(rawOptions = undefined) {
+  return verifyM10AT09Evidence(rawOptions);
 }

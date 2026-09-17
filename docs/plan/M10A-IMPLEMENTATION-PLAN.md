@@ -1,9 +1,8 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T11 are `DONE`. T11's
-[hosted closure](../proof/M10A-T11.md) records exact-head and fresh-`main` evidence; the canonical
-statuses and dependencies are in
-[TASKS.md](TASKS.md).
+Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T11 are `DONE` and
+M10A-T12 is `IN_PROGRESS` with [local evidence](../proof/M10A-T12.md). Exact-head hosted and
+fresh-`main` closure are still required; canonical statuses and dependencies are in [TASKS.md](TASKS.md).
 
 ## Product promise
 
@@ -21,8 +20,8 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
 and one gate; the total becomes 176 tasks and 14 gates. The 132 completed tasks and 11 completed
-gates remain completed. T01 through T11 are the eleven completed M10A tasks; the
-other 17 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
+gates remain completed. T01 through T11 are the eleven completed M10A tasks; T12 is the one active
+task and the other 16 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
 Dependencies, not numeric order, select the next eligible task: T26 acceptance precedes T25's
@@ -38,9 +37,9 @@ Existing npm version/dist-tag and external-release approval rules remain unchang
 
 ## Selected component foundation
 
-Use **Base UI, `@base-ui/react` 1.8.0**, wrapped by a new private `@desen/starter-catalog-web`
-capability package. T01 installed and proved this baseline; T08 extends the starter surface with
-overlays and disclosures, while later component families remain unimplemented.
+Use **Base UI, `@base-ui/react` 1.8.0**, wrapped by a private `@desen/starter-catalog-web`
+capability package. T01 installed and proved this baseline; T05–T09 extended declared starter
+families, and T12 owns the current 0.7.0 Catalog only for bounded normal-App visual authoring.
 M10A-T01 authenticated the exact package integrity, license, peer compatibility,
 dependency audit, and committed lockfile. A material incompatibility requires an explicit ADR amendment,
 not silently switching libraries or widening DESEN semantics.
@@ -216,17 +215,16 @@ Combobox, Tabs, Slider, and NumberField contracts with isolated authoring/host e
 It does not authorize normal-App integration, persistence, Publisher, Runtime, Core/protocol,
 G10A, or M11.
 
-**M10A-T08 — Overlay and disclosure capabilities** is `DONE`. It extends the private starter Catalog
-to 0.5.0 with bounded Popover, Tooltip, Menu, and Accordion adapters on a contained portal boundary.
-Its isolated authoring/host evidence, exact-head hosted Quality closure, and fresh-`main` closure are
-recorded in the [task-owned proof](../proof/M10A-T08.md). It does not authorize normal-App
-integration, persistence, Publisher, Runtime, Core/protocol, G10A, or M11.
+**M10A-T08 — Overlay and disclosure capabilities** is `DONE`. Its 0.5.0 Popover, Tooltip, Menu,
+and Accordion artifact is an immutable historical receipt; T12 owns the current 0.7.0 Catalog capture.
+T08's [task-owned proof](../proof/M10A-T08.md) records its completed isolated closure and grants no
+normal-App integration, persistence, Publisher, Runtime, Core/protocol, G10A, or M11 authority.
 
-**M10A-T09 — Data-display and feedback capabilities** is `DONE`. It extends the private starter
-Catalog to 0.6.0 with bounded Card, Badge, Avatar, Alert, List, basic Table, Skeleton, and Progress
-adapters. Its isolated authoring/host evidence, exact-head hosted Quality closure, and fresh-`main`
-closure are recorded in the [task-owned proof](../proof/M10A-T09.md). It does not authorize
-normal-App integration, persistence, Publisher, Runtime, Core/protocol, G10A, or M11.
+**M10A-T09 — Data-display and feedback capabilities** is `DONE`. Its 0.6.0 Card, Badge, Avatar,
+Alert, List, basic Table, Skeleton, and Progress artifact is an immutable historical receipt; T12
+owns the current 0.7.0 Catalog capture. Its [task-owned proof](../proof/M10A-T09.md) records its
+completed isolated closure and grants no normal-App integration, persistence, Publisher, Runtime,
+Core/protocol, G10A, or M11 authority.
 
 **M10A-T11 — Direct-manipulation canvas** is `DONE`. Its App-owned local boundary
 re-authorizes bounded multi-selection from current Source, applies stable-order slot-aware group
@@ -234,6 +232,14 @@ placement atomically, and keeps accessible pan/zoom/preview-frame controls outsi
 DOM. Its [task report](../proof/M10A-T11.md) records exact-head hosted and fresh-`main`
 closure. T11 does not authorize Runtime, Publisher,
 Core/protocol, G10A, M11, responsive styling (T12), or undo/redo/copy authority (T14).
+
+**M10A-T12 — Rich styling and responsive authoring** is `IN_PROGRESS`. Its local normal-product
+boundary owns the 0.7.0 Catalog capture, lazy typed Inspector controls, compatible token/literal/reset
+editing, bounded desktop/tablet/mobile frames, ordered responsive overrides, and generation-fenced
+aggregate persistence. The [local report](../proof/M10A-T12.md) records the 11,804-byte evidence
+artifact and frozen T03/T09 predecessor handling. It does not claim named-theme CRUD or switching,
+arbitrary CSS/JSX/JSON, Runtime, Publisher, Core/protocol, G10A, or M11; exact-head hosted and
+fresh-`main` closure remain required before `DONE`.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.

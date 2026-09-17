@@ -1,4 +1,5 @@
 import { admitEditableProjectRecord } from "@desen/design-system-core";
+import { DESEN_NEUTRAL_THEME_DOCUMENT } from "@desen/design-system-authoring";
 import {
   createStarterNodeTemplate,
   STARTER_CATALOG_ID,
@@ -12,6 +13,37 @@ import type { ProjectWorkspaceSurfaceName } from "./project-lifecycle.js";
 
 const PROJECT_ID = /^[A-Za-z0-9](?:[A-Za-z0-9._:-]{0,127})$/u;
 const STARTER_SURFACE_ID = "home";
+
+const neutralTheme = DESEN_NEUTRAL_THEME_DOCUMENT.themes.find(
+  (theme) => theme.id === "desen-neutral",
+);
+const neutralLightMode = neutralTheme?.modes.find((mode) => mode.id === "light");
+if (neutralTheme === undefined || neutralLightMode === undefined) {
+  throw new TypeError("The installed DESEN Neutral light token foundation is unavailable.");
+}
+
+const STARTER_NEUTRAL_TOKEN_SOURCES = Object.freeze([
+  Object.freeze({
+    id: neutralTheme.base.id,
+    document: neutralTheme.base.document,
+    ...(neutralTheme.base.description === undefined
+      ? {}
+      : { description: neutralTheme.base.description }),
+    ...(neutralTheme.base.extensions === undefined
+      ? {}
+      : { extensions: neutralTheme.base.extensions }),
+  }),
+  Object.freeze({
+    id: neutralLightMode.source.id,
+    document: neutralLightMode.source.document,
+    ...(neutralLightMode.source.description === undefined
+      ? {}
+      : { description: neutralLightMode.source.description }),
+    ...(neutralLightMode.source.extensions === undefined
+      ? {}
+      : { extensions: neutralLightMode.source.extensions }),
+  }),
+]);
 
 /** An admitted blank project and the complete labels needed to place it in a T10 workspace. */
 export interface StarterProject {
@@ -66,7 +98,7 @@ export function createStarterProject(projectId: string): StarterProject {
       },
       extensions: {},
     },
-    designSystem: { tokenSources: [], recipes: [], assets: [] },
+    designSystem: { tokenSources: STARTER_NEUTRAL_TOKEN_SOURCES, recipes: [], assets: [] },
     connectionIntents: [],
   });
   if (!admission.ok) {

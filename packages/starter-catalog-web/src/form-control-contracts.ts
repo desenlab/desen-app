@@ -1,5 +1,7 @@
 import { registerComponent } from "@desen/catalog-sdk";
 
+import { starterVisualStylePropertiesSchema } from "./visual-style-profile.js";
+
 import type { ComponentPropsOf } from "@desen/catalog-sdk";
 
 /** Exact capability identifier for the starter TextField. */
@@ -28,13 +30,6 @@ const OPTION_VALUE_MAX_LENGTH = 128;
 const TEXT_AREA_MIN_ROWS = 2;
 const TEXT_AREA_MAX_ROWS = 12;
 
-const HEX_COLOR_SCHEMA = Object.freeze({
-  anyOf: [
-    { type: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
-    { type: "string", pattern: "^#[0-9A-Fa-f]{8}$" },
-  ],
-} as const);
-
 /**
  * The bounded styling vocabulary deliberately shared by every public form part.
  *
@@ -42,36 +37,7 @@ const HEX_COLOR_SCHEMA = Object.freeze({
  * arbitrary CSS while still exposing the neutral surface, typography, border, and spacing values
  * needed to compose an accessible field.
  */
-const neutralFormStylePropertiesSchema = Object.freeze({
-  $schema: JSON_SCHEMA_DIALECT,
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    color: { ...HEX_COLOR_SCHEMA, description: "Resolved six- or eight-digit foreground color." },
-    backgroundColor: {
-      ...HEX_COLOR_SCHEMA,
-      description: "Resolved six- or eight-digit solid background color.",
-    },
-    borderColor: { ...HEX_COLOR_SCHEMA, description: "Resolved border color." },
-    borderRadius: { type: "number", minimum: 0, maximum: 64 },
-    borderWidth: { type: "number", minimum: 0, maximum: 16 },
-    paddingBlock: { type: "number", minimum: 0, maximum: 128 },
-    paddingInline: { type: "number", minimum: 0, maximum: 128 },
-    marginBlock: { type: "number", minimum: 0, maximum: 128 },
-    marginInline: { type: "number", minimum: 0, maximum: 128 },
-    fontFamily: { type: "string", enum: ["system", "serif", "mono"] },
-    fontSize: { type: "number", minimum: 8, maximum: 96 },
-    fontWeight: { type: "number", enum: [400, 500, 600, 700] },
-    lineHeight: { type: "number", minimum: 1, maximum: 3 },
-    letterSpacing: { type: "number", minimum: -4, maximum: 16 },
-    width: { type: "number", minimum: 0, maximum: 4_096 },
-    minWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    maxWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    minHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    maxHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    opacity: { type: "number", minimum: 0, maximum: 1 },
-  },
-} as const);
+const neutralFormStylePropertiesSchema = starterVisualStylePropertiesSchema("control");
 
 const textChangePayloadSchema = Object.freeze({
   $schema: JSON_SCHEMA_DIALECT,

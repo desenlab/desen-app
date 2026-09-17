@@ -34,6 +34,12 @@ import {
   createAuthoringRunHostPorts,
   createAuthoringRunNavigationController,
 } from "./authoring-run-navigation.js";
+import { resolveAuthoringDesignTokens } from "./authoring-design-tokens.js";
+import {
+  AUTHORING_STYLE_PREVIEW_VIEWPORTS,
+  createAuthoringStylePreviewHostPorts,
+} from "./authoring-style-preview-runtime.js";
+import { applyAuthoringStyleEdit, prepareAuthoringStyleModel } from "./authoring-styles.js";
 import {
   authenticateAuthoringPersistenceControllerProfile,
   createAuthoringPersistenceController,
@@ -136,14 +142,17 @@ import themeUrl from "./assets/theme.svg";
 import styles from "./application.module.css";
 
 import type { CSSProperties, DragEvent, MouseEvent, ReactNode } from "react";
+import type { EditableProjectRecord } from "@desen/design-system-core";
 import type {
   DesenEditorDocument,
   DesenEditorContinuousValidationReport,
   DesenEditorPersistencePort,
 } from "@desen/editor-core";
-import type { RuntimeHostPorts, RuntimeOperationPort } from "@desen/runtime-core";
+import type { RuntimeHostPorts, RuntimeOperationPort, RuntimeTokenPort } from "@desen/runtime-core";
 import type { AuthoringIntegrationBindingHandle } from "./authoring-integration.js";
 import type { AuthoringRunDestination } from "./authoring-run-navigation.js";
+import type { AuthoringStyleEdit, AuthoringStyleTarget } from "./authoring-styles.js";
+import type { AuthoringStylePreviewViewportId } from "./authoring-style-preview-runtime.js";
 import type {
   AuthoringBehaviorLayer,
   AuthoringLayerNode,
@@ -441,6 +450,10 @@ function projectPublicationControls(
 }
 
 const UNAVAILABLE_PREVIEW_REVISION = `sha256:${"0".repeat(64)}`;
+const AUTHORING_STYLE_BASE_TARGET: AuthoringStyleTarget = Object.freeze({ kind: "base" });
+const EMPTY_STYLE_TOKEN_OPTIONS = Object.freeze([]);
+const resolveMissingAuthoringToken: RuntimeTokenPort["resolve"] = () =>
+  Object.freeze({ status: "missing" as const });
 
 interface AppLinkProps {
   readonly href: string;
@@ -2494,6 +2507,7 @@ function AuthoringPanel({
 }
 
 function SurfaceEditor({
+  authoringProjectRecord,
   initialDocument,
   integrationBinding,
   preparedPersistenceController,
@@ -2504,6 +2518,8 @@ function SurfaceEditor({
   workspaceProfile,
   workspaceSnapshot,
 }: Readonly<{
+  /** The current aggregate T02 record when this normal workspace persists one. */
+  readonly authoringProjectRecord: EditableProjectRecord | null;
   readonly initialDocument: DesenEditorDocument;
   readonly integrationBinding: AuthoringIntegrationBindingHandle | null;
   readonly preparedPersistenceController: AuthoringPersistenceController | null | undefined;
@@ -2524,6 +2540,10 @@ function SurfaceEditor({
   const previewSurface =
     project.surfaces.find(({ sourceId }) => sourceId === previewSurfaceId) ?? selectedSurface;
   const [selection, setSelection] = useState<AuthoringComponentSelection | null>(null);
+  const [styleTarget, setStyleTarget] = useState<AuthoringStyleTarget>(AUTHORING_STYLE_BASE_TARGET);
+  const stylePreviewViewportId: AuthoringStylePreviewViewportId =
+    styleTarget.kind === "base" ? "desktop" : styleTarget.breakpoint;
+  const stylePreviewViewport = AUTHORING_STYLE_PREVIEW_VIEWPORTS[stylePreviewViewportId];
   const [directSelections, setDirectSelections] = useState<readonly AuthoringComponentSelection[]>(
     Object.freeze([]),
   );
@@ -2710,6 +2730,26 @@ function SurfaceEditor({
     () => prepareCatalogAuthoringModel(workspaceSnapshot.catalogs, document),
     [document, workspaceSnapshot.catalogs],
   );
+  const designTokenResolution = useMemo(
+    () =>
+      authoringProjectRecord === null ? null : resolveAuthoringDesignTokens(authoringProjectRecord),
+    [authoringProjectRecord],
+  );
+  const styleTokenOptions =
+    designTokenResolution?.status === "resolved"
+      ? designTokenResolution.styleTokens
+      : EMPTY_STYLE_TOKEN_OPTIONS;
+  const resolveStyleToken: RuntimeTokenPort["resolve"] =
+    designTokenResolution?.status === "resolved"
+      ? (request) => designTokenResolution.resolveRuntimeToken(request.token)
+      : resolveMissingAuthoringToken;
+  const styleModel = useMemo(
+    () =>
+      preparedModel.ok
+        ? prepareAuthoringStyleModel(preparedModel.model, route, selection, styleTokenOptions)
+        : Object.freeze({ status: "rejected" as const }),
+    [preparedModel, route, selection, styleTokenOptions],
+  );
   const canvasFrame = useMemo(
     () => projectAuthoringCanvasFrame(document, previewSurfaceId, workspaceSnapshot.catalogs),
     [document, previewSurfaceId, workspaceSnapshot.catalogs],
@@ -2723,12 +2763,20 @@ function SurfaceEditor({
           ? "Landscape"
           : "Square";
   const effectiveCanvasFrame =
-    canvasFrame.status === "ready" ? (canvasPreviewFrame ?? canvasFrame.frame) : null;
+    canvasFrame.status !== "ready"
+      ? null
+      : styleTarget.kind === "base"
+        ? (canvasPreviewFrame ?? canvasFrame.frame)
+        : Object.freeze({
+            height: stylePreviewViewport.height as number,
+            width: stylePreviewViewport.width as number,
+          });
   const previewFrameIsResized =
     canvasFrame.status === "ready" &&
-    canvasPreviewFrame !== null &&
-    (canvasPreviewFrame.width !== canvasFrame.frame.width ||
-      canvasPreviewFrame.height !== canvasFrame.frame.height);
+    (styleTarget.kind !== "base" ||
+      (canvasPreviewFrame !== null &&
+        (canvasPreviewFrame.width !== canvasFrame.frame.width ||
+          canvasPreviewFrame.height !== canvasFrame.frame.height)));
   const committedDocumentFingerprint = useMemo(() => digestCanonicalJson(document), [document]);
   const diagnosticsValidator = useMemo(
     () =>
@@ -2940,21 +2988,39 @@ function SurfaceEditor({
   );
   const runHostPorts = useMemo(
     () =>
-      createAuthoringRunHostPorts(
-        executionContext === "integration"
-          ? (integrationController?.operationPort ?? {
-              invoke: () => Object.freeze({ status: "denied" }),
-            })
-          : fixtureController.operationPort,
-        navigationController.navigationPort,
-        runDestination?.params,
-      ),
+      authoringProjectRecord === null
+        ? createAuthoringRunHostPorts(
+            executionContext === "integration"
+              ? (integrationController?.operationPort ?? {
+                  invoke: () => Object.freeze({ status: "denied" }),
+                })
+              : fixtureController.operationPort,
+            navigationController.navigationPort,
+            runDestination?.params,
+          )
+        : createAuthoringStylePreviewHostPorts(
+            executionContext === "integration"
+              ? (integrationController?.operationPort ?? {
+                  invoke: () => Object.freeze({ status: "denied" }),
+                })
+              : fixtureController.operationPort,
+            navigationController.navigationPort,
+            runDestination?.params,
+            resolveStyleToken,
+            stylePreviewViewportId,
+            styleTarget.kind === "base" ? (effectiveCanvasFrame ?? undefined) : undefined,
+          ),
     [
+      authoringProjectRecord,
       executionContext,
       fixtureController,
       integrationController,
       navigationController,
+      resolveStyleToken,
       runDestination?.params,
+      effectiveCanvasFrame,
+      stylePreviewViewportId,
+      styleTarget.kind,
     ],
   );
   const navigationLifetime = useRef<typeof navigationController | null>(null);
@@ -3427,6 +3493,34 @@ function SurfaceEditor({
     );
     if (!nextPreview.ok) {
       return Object.freeze({ ok: false, reason: "preview-unavailable" });
+    }
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
+    return result;
+  }
+
+  function editSelectedStyle(edit: AuthoringStyleEdit) {
+    if (!isDesignMode()) {
+      return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
+    }
+    if (selection === null) {
+      return Object.freeze({ ok: false as const, reason: "selection-invalid" as const });
+    }
+    const result = applyAuthoringStyleEdit(
+      document,
+      workspaceSnapshot.catalogs,
+      route,
+      selection,
+      styleTokenOptions,
+      edit,
+    );
+    captureEditDiagnostics(result);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
+    if (!nextPreview.ok) {
+      return Object.freeze({ ok: false as const, reason: "source-invalid" as const });
     }
     commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }));
     return result;
@@ -3909,7 +4003,8 @@ function SurfaceEditor({
               updateCanvasPresentation(() => createCanvasSurfacePresentation());
             }}
             onResize={(delta) => {
-              if (!isDesignMode() || canvasFrame.status !== "ready") return;
+              if (!isDesignMode() || canvasFrame.status !== "ready" || styleTarget.kind !== "base")
+                return;
               updateCanvasPresentation((current) =>
                 Object.freeze({
                   ...current,
@@ -3941,6 +4036,7 @@ function SurfaceEditor({
                 data-canvas-frame-height={effectiveCanvasFrame?.height ?? canvasFrame.frame.height}
                 data-canvas-frame-width={effectiveCanvasFrame?.width ?? canvasFrame.frame.width}
                 data-canvas-preview-resized={previewFrameIsResized ? "true" : "false"}
+                data-style-preview-viewport={stylePreviewViewportId}
                 style={
                   {
                     "--desen-canvas-viewport-pan-x": `${canvasViewport.panX}px`,
@@ -4033,6 +4129,8 @@ function SurfaceEditor({
         inspector={inspector}
         onBindingEdit={editSelectedBinding}
         onEdit={editSelectedProperty}
+        onStyleEdit={editSelectedStyle}
+        onStyleTargetChange={setStyleTarget}
         previewControls={
           <>
             <ScenarioPreviewControl
@@ -4050,6 +4148,9 @@ function SurfaceEditor({
             surfaceName={selectedSurface.name}
           />
         }
+        styleModel={styleModel}
+        styleTarget={styleTarget}
+        styleTokenOptions={styleTokenOptions}
       />
 
       {mode === "run" ? (
@@ -4074,6 +4175,7 @@ function SurfaceEditor({
 }
 
 function ProjectShell({
+  authoringProjectRecord,
   fixtures,
   initialDocument,
   integrationBinding,
@@ -4085,6 +4187,7 @@ function ProjectShell({
   workspaceProfile,
   workspaceSnapshot,
 }: Readonly<{
+  readonly authoringProjectRecord: EditableProjectRecord | null;
   readonly fixtures: boolean;
   readonly initialDocument: DesenEditorDocument;
   readonly integrationBinding: AuthoringIntegrationBindingHandle | null;
@@ -4159,6 +4262,7 @@ function ProjectShell({
 
   return (
     <SurfaceEditor
+      authoringProjectRecord={authoringProjectRecord}
       key={`${workspaceProfileMountIdentity(workspaceProfile)}:${project.id}:${selectedSurface.id}`}
       initialDocument={initialDocument}
       integrationBinding={integrationBinding}
@@ -4217,6 +4321,7 @@ function hasResolvedSurfaceEditor(
 }
 
 function RouteView({
+  authoringProjectRecord,
   fixtures,
   initialDocument,
   integrationBinding,
@@ -4229,6 +4334,7 @@ function RouteView({
   workspaceProfile,
   workspaceSnapshot,
 }: Readonly<{
+  readonly authoringProjectRecord: EditableProjectRecord | null;
   readonly fixtures: boolean;
   readonly initialDocument: DesenEditorDocument;
   readonly integrationBinding: AuthoringIntegrationBindingHandle | null;
@@ -4263,6 +4369,7 @@ function RouteView({
   if (route.surfaceId === undefined)
     return (
       <ProjectShell
+        authoringProjectRecord={authoringProjectRecord}
         fixtures={fixtures}
         initialDocument={initialDocument}
         integrationBinding={integrationBinding}
@@ -4308,6 +4415,7 @@ function RouteView({
   }
   return (
     <ProjectShell
+      authoringProjectRecord={authoringProjectRecord}
       fixtures={fixtures}
       initialDocument={initialDocument}
       integrationBinding={integrationBinding}
@@ -4324,6 +4432,8 @@ function RouteView({
 
 /** Trusted host-owned capabilities injected into the App shell. */
 export interface DesenAppApplicationProps {
+  /** Current aggregate T02 project record for persisted-token style authoring, if installed. */
+  readonly authoringProjectRecord?: EditableProjectRecord | null;
   /** Initial validated Source captured when a surface editor session mounts. */
   readonly initialDocument?: DesenEditorDocument;
   /** Optional, exact-profile-authenticated host operations; never inferred from Source or URL. */
@@ -4354,6 +4464,7 @@ interface AuthenticatedDesenAppApplicationProps extends DesenAppApplicationProps
 }
 
 function AuthenticatedDesenAppApplication({
+  authoringProjectRecord = null,
   fixtures,
   initialDocument,
   integrationBinding = null,
@@ -4401,6 +4512,7 @@ function AuthenticatedDesenAppApplication({
         tabIndex={-1}
       >
         <RouteView
+          authoringProjectRecord={authoringProjectRecord}
           fixtures={fixtures}
           initialDocument={initialDocument}
           integrationBinding={integrationBinding}
@@ -4435,12 +4547,26 @@ function UnavailableWorkspace({ message }: Readonly<{ readonly message: string }
 /** M09+ Desen App shell with exact routes and profile-authenticated composition authority. */
 export function DesenAppApplication(props: DesenAppApplicationProps) {
   const authority = readProjectWorkspaceProfileAuthority(props.workspaceProfile);
-  if (authority.status !== "read") {
+  const workspaceSnapshot = authority.status === "read" ? authority.profile : null;
+  // The profile admission walks the complete Catalog contract set. A lifecycle-only outer
+  // rerender (for example, the aggregate record changing from missing to created) must not
+  // re-admit the same immutable Source before the creation continuation can navigate. Keep the
+  // admission tied to the actual authority and Source identities; a new opened Source still
+  // receives the full boundary check.
+  const documentCandidate = props.initialDocument ?? workspaceSnapshot?.initialDocument ?? null;
+  const documentAdmission = useMemo(
+    () =>
+      workspaceSnapshot === null || documentCandidate === null
+        ? null
+        : admitProjectWorkspaceDocument(props.workspaceProfile, documentCandidate),
+    [documentCandidate, props.workspaceProfile, workspaceSnapshot],
+  );
+
+  if (workspaceSnapshot === null) {
     return (
       <UnavailableWorkspace message="DESEN did not infer a Source, Catalog, runtime adapter, or host authority." />
     );
   }
-  const workspaceSnapshot = authority.profile;
   if (
     props.integrationBinding !== undefined &&
     props.integrationBinding !== null &&
@@ -4463,11 +4589,7 @@ export function DesenAppApplication(props: DesenAppApplicationProps) {
       );
     }
   }
-  const documentAdmission = admitProjectWorkspaceDocument(
-    props.workspaceProfile,
-    props.initialDocument ?? workspaceSnapshot.initialDocument,
-  );
-  if (documentAdmission.status !== "admitted") {
+  if (documentAdmission?.status !== "admitted") {
     return (
       <UnavailableWorkspace message="The current Source does not match this profile's document, entry, surface, or Catalog authority." />
     );
@@ -4487,6 +4609,7 @@ export function DesenAppApplication(props: DesenAppApplicationProps) {
       );
     }
     if (
+      props.authoringProjectRecord !== undefined ||
       props.initialDocument !== undefined ||
       props.preparedPersistenceController !== undefined ||
       props.persistencePort !== undefined ||

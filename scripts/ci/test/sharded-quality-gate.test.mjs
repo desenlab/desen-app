@@ -91,19 +91,19 @@ function runShadow(plan, options = {}) {
   });
 }
 
-test("CI-04 three fixed shards preserve all 252 workloads and 119 complete proof pairs", () => {
+test("CI-04 three fixed shards preserve all 254 workloads and 120 complete proof pairs", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const full = createRequiredExhaustivePlan();
   const shards = SHARD_IDS.map((id) => createRequiredExhaustiveProofShardPlan(id));
-  assert.equal(inventory.workloadCount, 252);
-  assert.equal(inventory.proofUnitCount, 119);
+  assert.equal(inventory.workloadCount, 254);
+  assert.equal(inventory.proofUnitCount, 120);
   assert.deepEqual(
     shards.map(({ proofPairCount }) => proofPairCount),
-    [53, 32, 34],
+    [53, 32, 35],
   );
   const pairIds = shards.flatMap(({ proofPairs }) => proofPairs.map(({ id }) => id));
-  assert.equal(pairIds.length, 119);
-  assert.equal(new Set(pairIds).size, 119);
+  assert.equal(pairIds.length, 120);
+  assert.equal(new Set(pairIds).size, 120);
   assert.deepEqual(
     pairIds,
     full.proofPairs.map(({ id }) => id),
@@ -129,7 +129,7 @@ test("CI-04 three fixed shards preserve all 252 workloads and 119 complete proof
     shards.map(
       ({ proofPairs }) => proofPairs.filter(({ id }) => classifyProofPairState(id).barrier).length,
     ),
-    [11, 0, 4],
+    [11, 0, 5],
   );
   assert.deepEqual(
     shards[1].proofPairs.slice(-8).map(({ id }) => id),
@@ -158,8 +158,8 @@ test("CI-04 three fixed shards preserve all 252 workloads and 119 complete proof
     ],
   );
   assert.deepEqual(
-    shards[2].proofPairs.slice(-6).map(({ id }) => id),
-    ["m10a-t04", "m10a-t05", "m10a-t06", "m10a-t07", "m10a-t08", "m10a-t09"],
+    shards[2].proofPairs.slice(-7).map(({ id }) => id),
+    ["m10a-t04", "m10a-t05", "m10a-t06", "m10a-t07", "m10a-t08", "m10a-t09", "m10a-t12"],
   );
   assert.equal(classifyProofPairState("m10a-t01").barrier, false);
   assert.equal(classifyProofPairState("m10a-t03").barrier, true);
@@ -168,13 +168,23 @@ test("CI-04 three fixed shards preserve all 252 workloads and 119 complete proof
   assert.equal(classifyProofPairState("m10a-t07").barrier, true);
   assert.equal(classifyProofPairState("m10a-t08").barrier, true);
   assert.equal(classifyProofPairState("m10a-t09").barrier, true);
+  assert.equal(classifyProofPairState("m10a-t12").barrier, true);
 });
 
 test("CI-04 static shard membership agrees with executable membership and stays immutable", () => {
   const partition = createShardedQualityGatePlan();
   assert.equal(Object.isFrozen(partition), true);
-  assert.equal(partition.logicalWorkloadCount, 252);
-  assert.equal(partition.physicalWorkloadCount, 277);
+  assert.equal(
+    partition.planSha256,
+    "0205e35924e66ae6154fad959fc121160a2787fd1f8789aa1f935b4e194d1378",
+  );
+  assert.equal(
+    partition.parentPlanSha256,
+    "3528a260b6365f9ab61b4886f489079ccd2767ac84b173f8f5c8c357f3011299",
+  );
+  assert.equal(partition.logicalWorkloadCount, 254);
+  assert.equal(partition.proofPairCount, 120);
+  assert.equal(partition.physicalWorkloadCount, 279);
   assert.equal(partition.repeatedPrefixWorkloadCount, 24);
   assert.equal(partition.additionalJoinPreparationCount, 1);
   for (const shardId of SHARD_IDS) {
@@ -193,6 +203,8 @@ test("CI-04 static shard membership agrees with executable membership and stays 
     );
     assert.equal(shard.stepCount, executable.stepCount);
     assert.equal(shard.proofPairCount, executable.proofPairCount);
+    assert.equal(shard.planSha256, partition.planSha256);
+    assert.equal(shard.parentPlanSha256, partition.parentPlanSha256);
     assert.equal(shard.inventorySha256, executable.inventorySha256);
   }
 });

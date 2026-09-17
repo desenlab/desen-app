@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import styles from "./application.module.css";
+import { StylePanel } from "./style-panel.js";
 import { formatStructuredJson, parseStructuredJsonText } from "./structured-json.js";
 import { isAuthoringInspectorStateCompatible } from "./authoring-inspector.js";
 
@@ -14,6 +15,13 @@ import type {
   AuthoringInspectorModelResult,
   AuthoringInspectorStateOption,
 } from "./authoring-inspector.js";
+import type {
+  AuthoringResolvedStyleToken,
+  AuthoringStyleEdit,
+  AuthoringStyleEditResult,
+  AuthoringStyleModelResult,
+  AuthoringStyleTarget,
+} from "./authoring-styles.js";
 import type { StructuredJsonParseFailureReason } from "./structured-json.js";
 
 interface InspectorPanelProps {
@@ -30,11 +38,23 @@ interface InspectorPanelProps {
   readonly onBindingEdit?:
     ((edit: AuthoringInspectorBindingEdit) => AuthoringInspectorEditResult) | undefined;
   readonly previewControls?: ReactNode;
+  /** Closed style model for the current Source selection; absent models intentionally stay idle. */
+  readonly styleModel?: AuthoringStyleModelResult | undefined;
+  /** Explicit resolved token choices presented only inside the Style view. */
+  readonly styleTokenOptions?: readonly AuthoringResolvedStyleToken[] | undefined;
+  /** App-owned Desktop, Tablet, or Mobile style layer selection. */
+  readonly styleTarget?: AuthoringStyleTarget | undefined;
+  /** Applies a sealed visual-style leaf edit from the Style view. */
+  readonly onStyleEdit?: ((edit: AuthoringStyleEdit) => AuthoringStyleEditResult) | undefined;
+  /** Switches the app-owned visual style layer without exposing raw variant predicates. */
+  readonly onStyleTargetChange?: ((target: AuthoringStyleTarget) => void) | undefined;
   /** App-owned local-state controls retained in the right-sidebar State view. */
   readonly stateControls?: ReactNode;
 }
 
-type InspectorTab = "inspector" | "state" | "actions";
+type InspectorTab = "inspector" | "style" | "state" | "actions";
+
+const IDLE_STYLE_MODEL: AuthoringStyleModelResult = Object.freeze({ status: "idle" });
 
 function primitiveText(value: JsonPrimitive): string {
   if (value === null) return "Null";
@@ -768,13 +788,19 @@ export function InspectorPanel({
   inspector,
   onBindingEdit,
   onEdit,
+  onStyleEdit,
+  onStyleTargetChange,
   previewControls,
   stateControls,
+  styleModel = IDLE_STYLE_MODEL,
+  styleTarget,
+  styleTokenOptions,
 }: Readonly<InspectorPanelProps>) {
   const [activeTab, setActiveTab] = useState<InspectorTab>("inspector");
   const [notice, setNotice] = useState("");
   const panelId = useId();
   const inspectorTab = useRef<HTMLButtonElement>(null);
+  const styleTab = useRef<HTMLButtonElement>(null);
   const stateTab = useRef<HTMLButtonElement>(null);
   const actionsTab = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -792,16 +818,18 @@ export function InspectorPanel({
     setActiveTab(nextTab);
     (nextTab === "inspector"
       ? inspectorTab
-      : nextTab === "state"
-        ? stateTab
-        : actionsTab
+      : nextTab === "style"
+        ? styleTab
+        : nextTab === "state"
+          ? stateTab
+          : actionsTab
     ).current?.focus();
   }
 
   function selectAdjacentTab(event: KeyboardEvent<HTMLButtonElement>): void {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const tabs: readonly InspectorTab[] = ["inspector", "state", "actions"];
+    const tabs: readonly InspectorTab[] = ["inspector", "style", "state", "actions"];
     const currentIndex = tabs.indexOf(activeTab);
     const nextTab =
       event.key === "Home"
@@ -842,6 +870,19 @@ export function InspectorPanel({
           type="button"
         >
           Inspector
+        </button>
+        <button
+          aria-controls={`${panelId}-style-panel`}
+          aria-selected={activeTab === "style"}
+          id={`${panelId}-style-tab`}
+          onClick={() => selectTab("style")}
+          onKeyDown={selectAdjacentTab}
+          ref={styleTab}
+          role="tab"
+          tabIndex={activeTab === "style" ? 0 : -1}
+          type="button"
+        >
+          Style
         </button>
         <button
           aria-controls={`${panelId}-state-panel`}
@@ -934,6 +975,22 @@ export function InspectorPanel({
         <p aria-live="polite" className={styles.inspectorNotice} role="status">
           {notice || "Edits remain local until Save source succeeds."}
         </p>
+      </div>
+      <div
+        aria-labelledby={`${panelId}-style-tab`}
+        className={styles.inspectorTabPanel}
+        hidden={activeTab !== "style"}
+        id={`${panelId}-style-panel`}
+        role="tabpanel"
+        tabIndex={activeTab === "style" ? 0 : -1}
+      >
+        <StylePanel
+          model={styleModel}
+          onEdit={onStyleEdit}
+          onTargetChange={onStyleTargetChange}
+          target={styleTarget}
+          tokenOptions={styleTokenOptions}
+        />
       </div>
       <div
         aria-labelledby={`${panelId}-state-tab`}

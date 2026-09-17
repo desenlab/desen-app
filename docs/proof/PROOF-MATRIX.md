@@ -3724,6 +3724,9 @@ malformed or stale-input rejection. PR #110's exact-head hosted Quality and fres
 are recorded in the task report. T08 does not add normal-App integration, persistence,
 Publisher/Runtime/Core/protocol authority, G10A, or M11.
 
+Its 0.5.0 artifact remains an immutable historical receipt; it is not regenerated against successor
+Catalog bytes. T12 owns the current 0.7.0 Catalog capture.
+
 ## M10A-T09 data-display and feedback starter capabilities (`DONE`)
 
 The [M10A-T09 report](M10A-T09.md) records local evidence for the private 0.6.0
@@ -3739,6 +3742,9 @@ Table semantics. The local receipt deliberately excludes enterprise grids, chart
 pagination, sorting, operation binding, normal-App integration, persistence,
 Publisher/Runtime/Core/protocol authority, G10A, and M11. PR #112's exact-head hosted Quality and
 fresh-`main` closure are recorded in the task report.
+
+Its 0.6.0 artifact remains an immutable historical receipt; it is not regenerated against successor
+Catalog bytes. T12 owns the current 0.7.0 Catalog capture.
 
 ## M10A-T10 project and surface lifecycle (`DONE`)
 
@@ -3761,3 +3767,24 @@ unaccepted slot operations without partial Source mutation.
 
 PR #116's exact-head hosted and fresh-`main` closure are recorded in the task report; it grants no
 Runtime, Publisher, Core/protocol, G10A, or M11 authority.
+
+## M10A-T12 rich styling and responsive authoring (`IN_PROGRESS`)
+
+The [M10A-T12 report](M10A-T12.md) records local evidence for the normal DESEN Neutral product
+boundary. Its 11,804-byte `m10a-t12.json` artifact at
+`sha256:31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b` binds the private
+32-component `run.desen.starter.web@0.7.0#web-react` Catalog, the lazy Catalog-derived Inspector,
+typed compatible token/literal/reset controls, bounded desktop/tablet/mobile preview frames,
+ordered responsive overrides, generation-fenced aggregate persistence, and two component-level
+visual presentations observed through the normal product without raw CSS/JSX/JSON authoring.
+
+The local browser observation proves a literal Stack presentation and a token-backed Button
+presentation together, responsive precedence across desktop/tablet/mobile, reset/inheritance, and
+aggregate reload. It rejects unsupported or unsafe values rather than silently dropping them. T03's
+theme/token and T09's 0.6.0 artifacts are read as frozen predecessor receipts; T08's 0.5.0 and T09's
+0.6.0 artifacts remain immutable while T12 alone owns the current 0.7.0 Catalog capture.
+
+T12 does not claim named-theme CRUD, switching, or persistence management; arbitrary CSS/JSX/JSON,
+private capability DOM inspection, Runtime activation, Publisher authority, Core/protocol changes,
+G10A, and M11 remain outside its scope. Hosted exact-head Quality and Browser E2E, merge, and
+fresh-`main` closure are pending, so T12 remains `IN_PROGRESS` and T13 is not enabled.

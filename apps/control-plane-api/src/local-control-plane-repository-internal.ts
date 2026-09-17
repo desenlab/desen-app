@@ -3,7 +3,7 @@
 
 /**
  * Package-private repository contracts and deterministic in-memory adapters for editable Source
- * bytes and mutable channel pointers.
+ * bytes, application project-workspace JSON, and mutable channel pointers.
  *
  * @remarks Immutable Bundle persistence deliberately remains in the separate M07-T01
  * `BundleStore`. These repositories grant no publication, staging, activation, or recovery
@@ -15,6 +15,7 @@
 const LOCAL_METADATA_KEY_PATTERN = /^[a-z][a-z0-9-]{0,63}$/u;
 const BUNDLE_REVISION_PATTERN = /^sha256:[0-9a-f]{64}$/u;
 const MAX_SOURCE_BYTES = 8 * 1024 * 1024;
+const MAX_PROJECT_WORKSPACE_BYTES = 8 * 1024 * 1024;
 const MAX_GENERATION = Number.MAX_SAFE_INTEGER;
 
 const typedArrayPrototype = Object.getPrototypeOf(Uint8Array.prototype) as object;
@@ -40,6 +41,8 @@ export type LocalControlPlaneRepositoryErrorCode =
   | "INVALID_CHANNEL_REVISION"
   | "INVALID_GENERATION"
   | "INVALID_INITIAL_RECORDS"
+  | "INVALID_PROJECT_WORKSPACE_BYTES"
+  | "INVALID_PROJECT_WORKSPACE_KEY"
   | "INVALID_SOURCE_BYTES"
   | "INVALID_SOURCE_KEY";
 
@@ -50,6 +53,8 @@ const ERROR_MESSAGES: Readonly<Record<LocalControlPlaneRepositoryErrorCode, stri
     INVALID_CHANNEL_REVISION: "The channel revision is invalid.",
     INVALID_GENERATION: "The repository generation is invalid.",
     INVALID_INITIAL_RECORDS: "The initial repository records are invalid.",
+    INVALID_PROJECT_WORKSPACE_BYTES: "The application project-workspace byte snapshot is invalid.",
+    INVALID_PROJECT_WORKSPACE_KEY: "The application project-workspace key is invalid.",
     INVALID_SOURCE_BYTES: "The Source byte snapshot is invalid.",
     INVALID_SOURCE_KEY: "The Source key is invalid.",
   });
@@ -74,6 +79,16 @@ export interface SourceRecord {
   /** Positive safe compare-and-set generation. */
   readonly generation: number;
   /** Exact stored Source bytes returned as a fresh defensive copy. */
+  readonly bytes: Readonly<Uint8Array>;
+}
+
+/** Exact application project-workspace JSON snapshot stored under one local key and generation. @internal */
+export interface ProjectWorkspaceRecord {
+  /** Local lowercase storage identity; it need not equal an embedded project id. */
+  readonly workspaceKey: string;
+  /** Positive safe compare-and-set generation. */
+  readonly generation: number;
+  /** Exact strict-JSON workspace bytes returned as a fresh defensive copy. */
   readonly bytes: Readonly<Uint8Array>;
 }
 
@@ -127,6 +142,33 @@ export interface SourceRepository {
   ) => RepositoryWriteResult<SourceRecord>;
 }
 
+/**
+ * Package-private persistence port for complete application project-workspace JSON snapshots.
+ *
+ * @remarks The record is deliberately opaque to this repository. App-owned T02 admission happens
+ * outside the control plane, before a browser writes and after it reads this exact-byte record.
+ * It cannot write a Source or a Source extension.
+ *
+ * @internal
+ */
+export interface ProjectWorkspaceRepository {
+  /** Reads one application workspace key without returning repository-owned memory. */
+  readonly get: (this: void, workspaceKey: string) => RepositoryReadResult<ProjectWorkspaceRecord>;
+  /** Creates generation one only when the application workspace key is absent. */
+  readonly create: (
+    this: void,
+    workspaceKey: string,
+    bytes: Readonly<Uint8Array>,
+  ) => RepositoryWriteResult<ProjectWorkspaceRecord>;
+  /** Replaces exact bytes only when `expectedGeneration` equals the current generation. */
+  readonly update: (
+    this: void,
+    workspaceKey: string,
+    expectedGeneration: number,
+    bytes: Readonly<Uint8Array>,
+  ) => RepositoryWriteResult<ProjectWorkspaceRecord>;
+}
+
 /** Package-private persistence port for mutable channel-to-revision pointers. @internal */
 export interface ChannelRepository {
   /** Reads one channel without granting Bundle, staging, or activation authority. */
@@ -152,6 +194,12 @@ export interface InMemorySourceRepositoryOptions {
   readonly initialRecords?: readonly SourceRecord[];
 }
 
+/** Deterministic initial state accepted only by the package-private memory workspace adapter. @internal */
+export interface InMemoryProjectWorkspaceRepositoryOptions {
+  /** Detached initial records; primarily used to exercise finite-generation boundaries. */
+  readonly initialRecords?: readonly ProjectWorkspaceRecord[];
+}
+
 /** Deterministic initial state accepted only by the package-private memory channel adapter. @internal */
 export interface InMemoryChannelRepositoryOptions {
   /** Detached initial records; primarily used to exercise finite-generation boundaries. */
@@ -160,6 +208,12 @@ export interface InMemoryChannelRepositoryOptions {
 
 interface StoredSourceRecord {
   readonly sourceKey: string;
+  readonly generation: number;
+  readonly bytes: Uint8Array;
+}
+
+interface StoredProjectWorkspaceRecord {
+  readonly workspaceKey: string;
   readonly generation: number;
   readonly bytes: Uint8Array;
 }
@@ -174,7 +228,7 @@ const MISSING_RESULT: RepositoryReadResult<never> = Object.freeze({ status: "mis
 
 function assertLocalKey(
   value: unknown,
-  code: "INVALID_CHANNEL_NAME" | "INVALID_SOURCE_KEY",
+  code: "INVALID_CHANNEL_NAME" | "INVALID_PROJECT_WORKSPACE_KEY" | "INVALID_SOURCE_KEY",
 ): asserts value is string {
   if (typeof value !== "string" || !LOCAL_METADATA_KEY_PATTERN.test(value)) {
     throw new LocalControlPlaneRepositoryError(code);
@@ -225,6 +279,41 @@ function captureSourceBytes(value: unknown): Uint8Array {
   } catch (error) {
     if (error instanceof LocalControlPlaneRepositoryError) throw error;
     throw new LocalControlPlaneRepositoryError("INVALID_SOURCE_BYTES");
+  }
+}
+
+function captureProjectWorkspaceBytes(value: unknown): Uint8Array {
+  try {
+    if (typedArrayBufferGetter === undefined || typedArrayByteLengthGetter === undefined) {
+      throw new LocalControlPlaneRepositoryError("INVALID_PROJECT_WORKSPACE_BYTES");
+    }
+    if (typedArrayByteOffsetGetter === undefined || typedArrayTagGetter === undefined) {
+      throw new LocalControlPlaneRepositoryError("INVALID_PROJECT_WORKSPACE_BYTES");
+    }
+    const buffer = Reflect.apply(typedArrayBufferGetter, value, []) as unknown;
+    const byteLength = Reflect.apply(typedArrayByteLengthGetter, value, []) as unknown;
+    const byteOffset = Reflect.apply(typedArrayByteOffsetGetter, value, []) as unknown;
+    const tag = Reflect.apply(typedArrayTagGetter, value, []) as unknown;
+    if (
+      tag !== "Uint8Array" ||
+      !(buffer instanceof ArrayBuffer) ||
+      typeof byteLength !== "number" ||
+      typeof byteOffset !== "number" ||
+      !Number.isSafeInteger(byteLength) ||
+      !Number.isSafeInteger(byteOffset) ||
+      byteLength <= 0 ||
+      byteLength > MAX_PROJECT_WORKSPACE_BYTES ||
+      byteOffset < 0
+    ) {
+      throw new LocalControlPlaneRepositoryError("INVALID_PROJECT_WORKSPACE_BYTES");
+    }
+    const exactView = new Uint8Array(buffer, byteOffset, byteLength);
+    const copy = new Uint8Array(byteLength);
+    Reflect.apply(uint8ArraySet, copy, [exactView]);
+    return copy;
+  } catch (error) {
+    if (error instanceof LocalControlPlaneRepositoryError) throw error;
+    throw new LocalControlPlaneRepositoryError("INVALID_PROJECT_WORKSPACE_BYTES");
   }
 }
 
@@ -316,6 +405,16 @@ function publicSourceRecord(record: StoredSourceRecord): SourceRecord {
   });
 }
 
+function publicProjectWorkspaceRecord(
+  record: StoredProjectWorkspaceRecord,
+): ProjectWorkspaceRecord {
+  return Object.freeze({
+    workspaceKey: record.workspaceKey,
+    generation: record.generation,
+    bytes: new Uint8Array(record.bytes),
+  });
+}
+
 function publicChannelRecord(record: StoredChannelRecord): ChannelRecord {
   return Object.freeze({
     channelName: record.channelName,
@@ -367,6 +466,29 @@ function captureInitialSourceRecords(
         sourceKey: captured.sourceKey,
         generation: captured.generation,
         bytes: captureSourceBytes(captured.bytes),
+      }),
+    );
+  }
+  return records;
+}
+
+function captureInitialProjectWorkspaceRecords(
+  options: InMemoryProjectWorkspaceRepositoryOptions | undefined,
+): Map<string, StoredProjectWorkspaceRecord> {
+  const records = new Map<string, StoredProjectWorkspaceRecord>();
+  for (const candidate of initialRecordCandidates(options)) {
+    const captured = exactOwnDataValues(candidate, ["workspaceKey", "generation", "bytes"]);
+    assertLocalKey(captured.workspaceKey, "INVALID_PROJECT_WORKSPACE_KEY");
+    assertGeneration(captured.generation);
+    if (records.has(captured.workspaceKey)) {
+      throw new LocalControlPlaneRepositoryError("DUPLICATE_INITIAL_RECORD");
+    }
+    records.set(
+      captured.workspaceKey,
+      Object.freeze({
+        workspaceKey: captured.workspaceKey,
+        generation: captured.generation,
+        bytes: captureProjectWorkspaceBytes(captured.bytes),
       }),
     );
   }
@@ -451,6 +573,69 @@ export function createInMemorySourceRepository(
     });
     records.set(sourceKey, next);
     return updated(publicSourceRecord(next));
+  };
+
+  return Object.freeze({ get, create, update });
+}
+
+/**
+ * Creates one deterministic, synchronous in-memory application project-workspace repository.
+ *
+ * @remarks This adapter stores only exact workspace JSON bytes under its own identity namespace.
+ * It has no Source, Bundle, channel, token-provider, or runtime-host authority.
+ *
+ * @internal
+ */
+export function createInMemoryProjectWorkspaceRepository(
+  options?: InMemoryProjectWorkspaceRepositoryOptions,
+): ProjectWorkspaceRepository {
+  const records = captureInitialProjectWorkspaceRecords(options);
+
+  const get: ProjectWorkspaceRepository["get"] = (workspaceKey) => {
+    assertLocalKey(workspaceKey, "INVALID_PROJECT_WORKSPACE_KEY");
+    const current = records.get(workspaceKey);
+    return current === undefined ? MISSING_RESULT : found(publicProjectWorkspaceRecord(current));
+  };
+
+  const create: ProjectWorkspaceRepository["create"] = (workspaceKey, bytes) => {
+    assertLocalKey(workspaceKey, "INVALID_PROJECT_WORKSPACE_KEY");
+    const current = records.get(workspaceKey);
+    if (current !== undefined) return preconditionFailed(publicProjectWorkspaceRecord(current));
+    const next = Object.freeze({
+      workspaceKey,
+      generation: 1,
+      bytes: captureProjectWorkspaceBytes(bytes),
+    });
+    records.set(workspaceKey, next);
+    return created(publicProjectWorkspaceRecord(next));
+  };
+
+  const update: ProjectWorkspaceRepository["update"] = (
+    workspaceKey,
+    expectedGeneration,
+    bytes,
+  ) => {
+    assertLocalKey(workspaceKey, "INVALID_PROJECT_WORKSPACE_KEY");
+    assertGeneration(expectedGeneration);
+    const current = records.get(workspaceKey);
+    if (current === undefined) return preconditionFailed<ProjectWorkspaceRecord>(null);
+    if (current.generation !== expectedGeneration) {
+      return preconditionFailed(publicProjectWorkspaceRecord(current));
+    }
+    const candidateBytes = captureProjectWorkspaceBytes(bytes);
+    if (sourceBytesEqual(current.bytes, candidateBytes)) {
+      return unchanged(publicProjectWorkspaceRecord(current));
+    }
+    if (current.generation === MAX_GENERATION) {
+      return generationExhausted(publicProjectWorkspaceRecord(current));
+    }
+    const next = Object.freeze({
+      workspaceKey,
+      generation: current.generation + 1,
+      bytes: candidateBytes,
+    });
+    records.set(workspaceKey, next);
+    return updated(publicProjectWorkspaceRecord(next));
   };
 
   return Object.freeze({ get, create, update });

@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "bf6d11e6ffd01427d7ecd58432a62a02e23d840a6c9a2a8c8f313418dca6288e";
+  "bcb7436d0c39a0192bdb197a151c81f49df1f34d7ab6e1772c796366addf9583";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "8651b8f7520a4f0ff90b62ce33d676e8481e8b1304dc1f944e7af361efa37f7a";
+  "bf35708668ae3739034e7ba196e6e5ae6766ebb26010aa1a3bfc22d67e6ca5ea";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "c7a2eff3253fcea24bbfebf5522e7cb1d5c7f7993f976d0d0cd6570ad60c4527";
+  "0411e4d9b681ced3d38b29b59b1ed25ca4d3ba1434428f1b685b4d01e1785198";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -165,10 +165,14 @@ const EXPECTED_BROWSER_E2E_PACKAGE_SCRIPTS = SAFE_OBJECT_FREEZE(
   [
     ["build", "vite build"],
     ["lint", "eslint . --max-warnings=0"],
+    [
+      "test:m10a-t12",
+      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/control-plane-api build && pnpm run typecheck && pnpm run build && playwright test --config t12-playwright.config.ts",
+    ],
     ["typecheck", "tsc -p tsconfig.json --noEmit"],
     [
       "test:e2e",
-      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts && playwright test --config repeatable-demo-playwright.config.ts",
+      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm run typecheck && pnpm run build && playwright test --config playwright.config.ts && playwright test --config product-playwright.config.ts && playwright test --config input-pending-playwright.config.ts && playwright test --config failure-playwright.config.ts && playwright test --config success-host-playwright.config.ts && playwright test --config published-host-playwright.config.ts && playwright test --config invalid-publication-playwright.config.ts && playwright test --config restart-recovery-playwright.config.ts && playwright test --config repeatable-demo-playwright.config.ts && playwright test --config t12-playwright.config.ts",
     ],
   ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
 );
@@ -817,6 +821,7 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
   ["m10a-t07", "scripts/verify-m10a-t07.mjs", "tests/m10a-t07.test.mjs"],
   ["m10a-t08", "scripts/verify-m10a-t08.mjs", "tests/m10a-t08.test.mjs"],
   ["m10a-t09", "scripts/verify-m10a-t09.mjs", "tests/m10a-t09.test.mjs"],
+  ["m10a-t12", "scripts/verify-m10a-t12.mjs", "tests/m10a-t12.test.mjs"],
 ]);
 
 const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
@@ -827,6 +832,7 @@ const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
   "m10a-t07",
   "m10a-t08",
   "m10a-t09",
+  "m10a-t12",
 ]);
 const READ_ONLY_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
   "runtime-core-baseline",
@@ -1981,7 +1987,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "ff1f997a12ac43f096d94c63e98efbaf271ea4ed6fcf12c4b4634c7acde057a1";
+  "42ea99fdf6b24c4a4e5c5f9a0750925b0619e10ff2abeb10762e658105e049b4";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

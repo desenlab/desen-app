@@ -90,6 +90,9 @@ importers:
       '@desen/catalog-sdk':
         specifier: workspace:*
         version: link:../../packages/catalog-sdk
+      '@desen/design-system-authoring':
+        specifier: workspace:*
+        version: link:../../packages/design-system-authoring
       '@desen/design-system-core':
         specifier: workspace:*
         version: link:../../packages/design-system-core

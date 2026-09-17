@@ -10,6 +10,7 @@ import styles from "./application.module.css";
 import type { FormEvent } from "react";
 import type { AuthoringIntegrationBindingHandle } from "./authoring-integration.js";
 import type { DesenEditorDocument, DesenEditorPersistencePort } from "@desen/editor-core";
+import type { EditableProjectRecord } from "@desen/design-system-core";
 import type {
   AuthoringPersistenceController,
   AuthoringPersistenceSaveResult,
@@ -260,6 +261,8 @@ function ProductStartup({
 
 /** Trusted product composition that opens or creates the exact durable local blank project. */
 export interface DesenAppProductProps {
+  /** Optional aggregate T02 project record that owns the normal Style token selection. */
+  readonly authoringProjectRecord?: EditableProjectRecord | null;
   /** Host-provided Source persistence; `null` fails closed without mounting fixture content. */
   readonly persistencePort: DesenEditorPersistencePort | null;
   /** Factory-authenticated project, Catalog, runtime and publication composition. */
@@ -272,6 +275,7 @@ export interface DesenAppProductProps {
 
 /** Normal Desen App entry with visible blank-project creation and durable Source reopening. */
 export function DesenAppProduct({
+  authoringProjectRecord = null,
   persistencePort,
   workspaceProfile,
   integrationBinding = null,
@@ -411,6 +415,7 @@ export function DesenAppProduct({
   return (
     <>
       <DesenAppApplication
+        authoringProjectRecord={authoringProjectRecord}
         initialDocument={currentDocument}
         integrationBinding={integrationBinding}
         onRequestProjectCreation={

@@ -139,10 +139,11 @@ const DESEN_APP_CONNECTED_PROOF_UNITS = Object.freeze([
   "m10a-t07",
   "m10a-t08",
   "m10a-t09",
+  "m10a-t12",
 ]);
 const DESEN_APP_CONNECTED_PROOF_UNIT_COUNT = DESEN_APP_CONNECTED_PROOF_UNITS.length;
-const DESEN_APP_CONNECTED_WORKLOAD_COUNT = 188;
-const EXHAUSTIVE_WORKLOAD_COUNT = 252;
+const DESEN_APP_CONNECTED_WORKLOAD_COUNT = 190;
+const EXHAUSTIVE_WORKLOAD_COUNT = 254;
 
 function sha256(value) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -463,7 +464,7 @@ test("Design/Run modes select their exact canvas, state, and action closure", as
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, DESEN_APP_CONNECTED_PROOF_UNIT_COUNT);
   assert.equal(plan.workloadCount, DESEN_APP_CONNECTED_WORKLOAD_COUNT);
-  assert.equal(plan.planSha256, "d71290911a79e2a0a7acafead92b211d72c68cece34c313b8338dca4fc6b9e81");
+  assert.equal(plan.planSha256, "99e8e378108e3e7909fbfe506766e2a04984431ccd1ad5422ecb96458fd81750");
   assert.equal(plan.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-state-binding-editor"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-event-action-editor"), true);
@@ -625,7 +626,7 @@ test("evergreen product composition selects its exact M10-T01C successor closure
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, DESEN_APP_CONNECTED_PROOF_UNIT_COUNT);
   assert.equal(plan.workloadCount, DESEN_APP_CONNECTED_WORKLOAD_COUNT);
-  assert.equal(plan.planSha256, "4a5d3949725e8e9eceedcdb47628d5df5916c1aa27e6c3c5f9861e40a34e6f97");
+  assert.equal(plan.planSha256, "769dfd456438dcbfdd42ddb578e52c11e4edd42e881a0d0d5e30784c210fdb0e");
   assert.equal(plan.nodeIds.includes("verify-desen-app-visual-behavior-authoring"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-evergreen-product-composition"), true);
   assert.equal(plan.nodeIds.includes("test-desen-app-evergreen-product-composition"), true);
@@ -881,6 +882,8 @@ test("M10 and M10A proof inputs select the complete successor closure", async ()
     ["tests/m10a-t08.test.mjs", "m10a-t08"],
     ["scripts/verify-m10a-t09.mjs", "m10a-t09"],
     ["tests/m10a-t09.test.mjs", "m10a-t09"],
+    ["scripts/verify-m10a-t12.mjs", "m10a-t12"],
+    ["tests/m10a-t12.test.mjs", "m10a-t12"],
   ]) {
     const plan = createShadowAffectedSelection(
       await affectedBoundary(currentPaths(), [changedPath]),
@@ -906,6 +909,7 @@ test("M10 and M10A proof inputs select the complete successor closure", async ()
       "m10a-t07",
       "m10a-t08",
       "m10a-t09",
+      "m10a-t12",
     ]) {
       assert.equal(plan.nodeIds.includes(`verify-${id}`), true);
       assert.equal(plan.nodeIds.includes(`test-${id}`), true);
@@ -914,7 +918,7 @@ test("M10 and M10A proof inputs select the complete successor closure", async ()
   }
 });
 
-test("M10A-T05 and T06 remain historical while T07 through T09 retain the starter public-package prerequisite", async () => {
+test("M10A-T05 and T06 remain historical while T07 through T09 retain the starter public-package prerequisite and T12 retains package tests", async () => {
   const nodeById = new Map(
     createExhaustiveWorkloadInventory().nodes.map((workload) => [workload.id, workload]),
   );
@@ -929,6 +933,7 @@ test("M10A-T05 and T06 remain historical while T07 through T09 retain the starte
   assert.deepEqual(nodeById.get("verify-m10a-t09")?.dependencies, [
     "starter-catalog-web-public-package-contract",
   ]);
+  assert.deepEqual(nodeById.get("verify-m10a-t12")?.dependencies, ["package-tests"]);
 
   for (const changedPath of ["scripts/verify-m10a-t05.mjs", "tests/m10a-t05.test.mjs"]) {
     const plan = createShadowAffectedSelection(
@@ -1004,6 +1009,20 @@ test("M10A-T05 and T06 remain historical while T07 through T09 retain the starte
     assert.equal(plan.nodeIds.includes("test-m10a-t09"), true);
     assert.equal(validateShadowAffectedSelection(plan), plan);
   }
+
+  for (const changedPath of ["scripts/verify-m10a-t12.mjs", "tests/m10a-t12.test.mjs"]) {
+    const plan = createShadowAffectedSelection(
+      await affectedBoundary(currentPaths(), [changedPath]),
+    );
+    assert.equal(plan.effectiveScope, "AFFECTED");
+    assert.equal(plan.strictSubset, true);
+    assert.deepEqual(plan.ownerProofUnitIds, ["m10a-t12"]);
+    assert.equal(plan.nodeIds.includes("package-tests"), true);
+    assert.ok(plan.nodeIds.indexOf("package-tests") < plan.nodeIds.indexOf("verify-m10a-t12"));
+    assert.equal(plan.nodeIds.includes("verify-m10a-t12"), true);
+    assert.equal(plan.nodeIds.includes("test-m10a-t12"), true);
+    assert.equal(validateShadowAffectedSelection(plan), plan);
+  }
 });
 
 test("M10A product, Catalog, documentation, proof artifact, and shared reader inputs remain exhaustive", async () => {
@@ -1060,6 +1079,28 @@ test("M10A product, Catalog, documentation, proof artifact, and shared reader in
     "docs/proof/artifacts/m10a-t09.json",
     "scripts/generate-m10a-t09-proof.mjs",
     "scripts/lib/m10a-t09-proof.mjs",
+    "apps/desen-app-browser-e2e/t12-playwright.config.ts",
+    "apps/desen-app-browser-e2e/t12-rich-styling.pw.ts",
+    "apps/desen-app/src/authoring-design-tokens.ts",
+    "apps/desen-app/src/authoring-style-preview-runtime.ts",
+    "apps/desen-app/src/authoring-styles.ts",
+    "apps/desen-app/src/local-project-workspace-persistence.ts",
+    "apps/desen-app/src/project-workspace-authoring-persistence.ts",
+    "apps/desen-app/src/starter-neutral-workspace-profile.ts",
+    "apps/desen-app/src/starter-workspace-product.tsx",
+    "apps/desen-app/src/style-panel.tsx",
+    "apps/desen-app/test/authoring-design-tokens.test.ts",
+    "apps/desen-app/test/authoring-style-preview-runtime.test.ts",
+    "apps/desen-app/test/authoring-styles.test.ts",
+    "apps/desen-app/test/local-project-workspace-persistence.test.ts",
+    "apps/desen-app/test/project-workspace-authoring-persistence.test.ts",
+    "apps/desen-app/test/starter-neutral-workspace-profile.test.ts",
+    "apps/desen-app/test/style-panel.test.tsx",
+    "docs/proof/M10A-T12.md",
+    "docs/proof/artifacts/m10a-t12.json",
+    "packages/starter-catalog-web/src/visual-style-profile.ts",
+    "scripts/generate-m10a-t12-proof.mjs",
+    "scripts/lib/m10a-t12-proof.mjs",
   ]) {
     const plan = createShadowAffectedSelection(
       await affectedBoundary(currentPaths(), [changedPath]),

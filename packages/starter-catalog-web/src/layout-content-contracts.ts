@@ -1,14 +1,10 @@
 import { registerComponent } from "@desen/catalog-sdk";
 
+import { starterVisualStylePropertiesSchema } from "./visual-style-profile.js";
+
 import type { ComponentPropsOf } from "@desen/catalog-sdk";
 
 const JSON_SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema";
-const HEX_COLOR_SCHEMA = Object.freeze({
-  anyOf: [
-    { type: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
-    { type: "string", pattern: "^#[0-9A-Fa-f]{8}$" },
-  ],
-} as const);
 const CONTENT_SLOT_ACCEPTS_CATEGORIES = Object.freeze([
   "layout",
   "content",
@@ -19,140 +15,11 @@ const CONTENT_SLOT_ACCEPTS_CATEGORIES = Object.freeze([
   "complex",
 ] as const);
 
-const layoutDimensionSchema = Object.freeze({
-  anyOf: [
-    { type: "number", minimum: 0, maximum: 4_096 },
-    { type: "string", enum: ["fill", "hug"] },
-  ],
-  description: "A fixed CSS-pixel dimension, or the finite fill/hug sizing mode.",
-} as const);
-
-const layoutStylePropertiesSchema = Object.freeze({
-  $schema: JSON_SCHEMA_DIALECT,
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    color: { ...HEX_COLOR_SCHEMA, description: "Resolved foreground color." },
-    backgroundColor: { ...HEX_COLOR_SCHEMA, description: "Resolved solid background color." },
-    borderColor: { ...HEX_COLOR_SCHEMA, description: "Resolved border color." },
-    borderRadius: { type: "number", minimum: 0, maximum: 64 },
-    borderWidth: { type: "number", minimum: 0, maximum: 16 },
-    paddingBlock: { type: "number", minimum: 0, maximum: 512 },
-    paddingInline: { type: "number", minimum: 0, maximum: 512 },
-    marginBlock: { type: "number", minimum: 0, maximum: 512 },
-    marginInline: { type: "number", minimum: 0, maximum: 512 },
-    gap: { type: "number", minimum: 0, maximum: 512 },
-    width: layoutDimensionSchema,
-    height: layoutDimensionSchema,
-    minWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    maxWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    minHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    maxHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    overflow: { type: "string", enum: ["visible", "hidden", "auto"] },
-    alignItems: { type: "string", enum: ["start", "center", "end", "stretch"] },
-    alignSelf: { type: "string", enum: ["auto", "start", "center", "end", "stretch"] },
-    justifyContent: {
-      type: "string",
-      enum: ["start", "center", "end", "between", "around", "evenly"],
-    },
-    textAlign: { type: "string", enum: ["start", "center", "end"] },
-    opacity: { type: "number", minimum: 0, maximum: 1 },
-  },
-} as const);
-
-const typographyStylePropertiesSchema = Object.freeze({
-  $schema: JSON_SCHEMA_DIALECT,
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    color: { ...HEX_COLOR_SCHEMA, description: "Resolved foreground color." },
-    backgroundColor: { ...HEX_COLOR_SCHEMA, description: "Resolved solid background color." },
-    borderColor: { ...HEX_COLOR_SCHEMA, description: "Resolved border color." },
-    borderRadius: { type: "number", minimum: 0, maximum: 64 },
-    borderWidth: { type: "number", minimum: 0, maximum: 16 },
-    paddingBlock: { type: "number", minimum: 0, maximum: 512 },
-    paddingInline: { type: "number", minimum: 0, maximum: 512 },
-    marginBlock: { type: "number", minimum: 0, maximum: 512 },
-    marginInline: { type: "number", minimum: 0, maximum: 512 },
-    width: layoutDimensionSchema,
-    minWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    maxWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    fontFamily: { type: "string", enum: ["system", "serif", "mono"] },
-    fontSize: { type: "number", minimum: 8, maximum: 96 },
-    fontWeight: { type: "number", enum: [400, 500, 600, 700] },
-    lineHeight: { type: "number", minimum: 1, maximum: 3 },
-    letterSpacing: { type: "number", minimum: -4, maximum: 16 },
-    textAlign: { type: "string", enum: ["start", "center", "end"] },
-    textDecoration: { type: "string", enum: ["none", "underline", "line-through"] },
-    opacity: { type: "number", minimum: 0, maximum: 1 },
-  },
-} as const);
-
-const imageStylePropertiesSchema = Object.freeze({
-  $schema: JSON_SCHEMA_DIALECT,
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    backgroundColor: { ...HEX_COLOR_SCHEMA, description: "Resolved solid background color." },
-    borderColor: { ...HEX_COLOR_SCHEMA, description: "Resolved border color." },
-    borderRadius: { type: "number", minimum: 0, maximum: 64 },
-    borderWidth: { type: "number", minimum: 0, maximum: 16 },
-    paddingBlock: { type: "number", minimum: 0, maximum: 512 },
-    paddingInline: { type: "number", minimum: 0, maximum: 512 },
-    marginBlock: { type: "number", minimum: 0, maximum: 512 },
-    marginInline: { type: "number", minimum: 0, maximum: 512 },
-    width: layoutDimensionSchema,
-    height: layoutDimensionSchema,
-    minWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    maxWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    minHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    maxHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    opacity: { type: "number", minimum: 0, maximum: 1 },
-  },
-} as const);
-
-const iconStylePropertiesSchema = Object.freeze({
-  $schema: JSON_SCHEMA_DIALECT,
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    color: { ...HEX_COLOR_SCHEMA, description: "Resolved icon foreground color." },
-    backgroundColor: { ...HEX_COLOR_SCHEMA, description: "Resolved solid background color." },
-    borderColor: { ...HEX_COLOR_SCHEMA, description: "Resolved border color." },
-    borderRadius: { type: "number", minimum: 0, maximum: 64 },
-    borderWidth: { type: "number", minimum: 0, maximum: 16 },
-    paddingBlock: { type: "number", minimum: 0, maximum: 512 },
-    paddingInline: { type: "number", minimum: 0, maximum: 512 },
-    marginBlock: { type: "number", minimum: 0, maximum: 512 },
-    marginInline: { type: "number", minimum: 0, maximum: 512 },
-    width: layoutDimensionSchema,
-    height: layoutDimensionSchema,
-    minWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    maxWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    minHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    maxHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    opacity: { type: "number", minimum: 0, maximum: 1 },
-  },
-} as const);
-
-const separatorStylePropertiesSchema = Object.freeze({
-  $schema: JSON_SCHEMA_DIALECT,
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    backgroundColor: { ...HEX_COLOR_SCHEMA, description: "Resolved visible separator color." },
-    borderRadius: { type: "number", minimum: 0, maximum: 64 },
-    marginBlock: { type: "number", minimum: 0, maximum: 512 },
-    marginInline: { type: "number", minimum: 0, maximum: 512 },
-    width: layoutDimensionSchema,
-    height: layoutDimensionSchema,
-    minWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    maxWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    minHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    maxHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    opacity: { type: "number", minimum: 0, maximum: 1 },
-  },
-} as const);
+const layoutStylePropertiesSchema = starterVisualStylePropertiesSchema("layout");
+const typographyStylePropertiesSchema = starterVisualStylePropertiesSchema("typography");
+const imageStylePropertiesSchema = starterVisualStylePropertiesSchema("image");
+const iconStylePropertiesSchema = starterVisualStylePropertiesSchema("media");
+const separatorStylePropertiesSchema = starterVisualStylePropertiesSchema("separator");
 
 function layoutStylePart(description: string) {
   return { description, propertiesSchema: layoutStylePropertiesSchema } as const;

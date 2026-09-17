@@ -132,8 +132,8 @@ function readEntry(model: CatalogAuthoringModel, capabilityId: string): PreviewF
     typeof component?.displayName === "string" && component.displayName.length > 0
       ? component.displayName
       : capabilityId;
-  const authoring = component?.inspector.authoring;
-  if (!isRecord(authoring)) {
+  const previewAdapter = component?.previewAdapter;
+  if (!isRecord(previewAdapter)) {
     return Object.freeze({
       capabilityId,
       displayName,
@@ -142,8 +142,8 @@ function readEntry(model: CatalogAuthoringModel, capabilityId: string): PreviewF
     });
   }
 
-  const fidelityProperty = ownDataValue(authoring, "adapterFidelity");
-  const differencesProperty = ownDataValue(authoring, "differences");
+  const fidelityProperty = ownDataValue(previewAdapter, "fidelity");
+  const differencesProperty = ownDataValue(previewAdapter, "differences");
   const fidelity = fidelityProperty?.present === true ? fidelityProperty.value : undefined;
   const validFidelity =
     fidelity === "same" || fidelity === "equivalent" || fidelity === "approximate";

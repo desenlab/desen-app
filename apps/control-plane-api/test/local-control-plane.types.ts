@@ -6,6 +6,7 @@ import type {
   LocalControlPlaneChannelRecord,
   LocalControlPlaneInjectResponse,
   LocalControlPlaneListenResult,
+  LocalControlPlaneProjectWorkspaceRecord,
   LocalControlPlaneSourceRecord,
   OpenLocalControlPlaneOptions,
 } from "../src/index.js";
@@ -33,6 +34,7 @@ const closed: Promise<void> = controlPlane.close();
 const loopback: "127.0.0.1" = LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS;
 
 declare const sourceRecord: LocalControlPlaneSourceRecord;
+declare const projectWorkspaceRecord: LocalControlPlaneProjectWorkspaceRecord;
 declare const bundleRecord: LocalControlPlaneBundleRecord;
 declare const channelRecord: LocalControlPlaneChannelRecord;
 declare const response: LocalControlPlaneInjectResponse;
@@ -40,6 +42,7 @@ declare const listenResult: LocalControlPlaneListenResult;
 declare const configuredOptions: OpenLocalControlPlaneOptions;
 
 const sourceBytes: Readonly<Uint8Array> = sourceRecord.bytes;
+const projectWorkspaceBytes: Readonly<Uint8Array> = projectWorkspaceRecord.bytes;
 const bundleBytes: Readonly<Uint8Array> = bundleRecord.bytes;
 const channelRevision: string = channelRecord.revision;
 const responseBytes: Readonly<Uint8Array> = response.body;
@@ -71,6 +74,8 @@ void controlPlane.list();
 configuredOptions.apiToken = "fedcba9876543210fedcba9876543210";
 // @ts-expect-error Source metadata fields are immutable at the contract boundary.
 sourceRecord.generation = 2;
+// @ts-expect-error Project-workspace metadata fields are immutable at the contract boundary.
+projectWorkspaceRecord.generation = 2;
 // @ts-expect-error Exact Source byte-view properties cannot be replaced.
 sourceRecord.bytes = new Uint8Array();
 // @ts-expect-error Immutable Bundle record fields cannot be replaced.
@@ -88,6 +93,7 @@ void listened;
 void closed;
 void loopback;
 void sourceBytes;
+void projectWorkspaceBytes;
 void bundleBytes;
 void channelRevision;
 void responseBytes;

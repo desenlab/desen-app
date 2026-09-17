@@ -88,6 +88,10 @@ import {
   STARTER_TEMPLATE_MAX_RESERVED_IDS,
   createStarterNodeTemplate,
 } from "../src/templates.js";
+import {
+  isStarterCapabilityVisualStyleValue,
+  starterVisualStyleProfileForCapability,
+} from "../src/visual-style-profile.js";
 
 function expectDeeplyFrozen(value: unknown): void {
   if (value === null || typeof value !== "object") return;
@@ -95,7 +99,90 @@ function expectDeeplyFrozen(value: unknown): void {
   for (const nested of Object.values(value)) expectDeeplyFrozen(nested);
 }
 
+function visualStyleSchemaProperties(schema: unknown): Readonly<Record<string, unknown>> {
+  return (schema as Readonly<{ readonly properties: Readonly<Record<string, unknown>> }>)
+    .properties;
+}
+
+function visualStyleSchemaProperty(
+  schema: unknown,
+  property: string,
+): Readonly<Record<string, unknown>> {
+  const record = schema as Readonly<{
+    readonly $defs: Readonly<Record<string, unknown>>;
+    readonly properties: Readonly<Record<string, Readonly<{ readonly $ref: string }>>>;
+  }>;
+  const reference = record.properties[property];
+  expect(reference?.$ref).toMatch(/^#\/\$defs\//u);
+  if (reference === undefined) throw new TypeError(`Missing visual style property: ${property}`);
+  return visualStyleSchemaDefinition(schema, reference.$ref.slice("#/$defs/".length));
+}
+
+function visualStyleSchemaDefinition(
+  schema: unknown,
+  definitionName: string,
+): Readonly<Record<string, unknown>> {
+  const record = schema as Readonly<{
+    readonly $defs: Readonly<Record<string, unknown>>;
+  }>;
+  const definition = record.$defs[definitionName];
+  expect(definition).toBeDefined();
+  return definition as Readonly<Record<string, unknown>>;
+}
+
 describe("starter component contracts", () => {
+  it("keeps every published capability on one exact adapter visual profile", () => {
+    expect(
+      STARTER_COMPONENT_REGISTRATIONS.map(({ id }) => starterVisualStyleProfileForCapability(id)),
+    ).toEqual([
+      "neutral",
+      "control",
+      "neutral",
+      "control",
+      "control",
+      "control",
+      "control",
+      "layout",
+      "layout",
+      "layout",
+      "typography",
+      "typography",
+      "image",
+      "media",
+      "separator",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+      "control",
+    ]);
+    expect(
+      isStarterCapabilityVisualStyleValue("run.desen.starter/Stack", "borderRadius", {
+        value: 9,
+        unit: "rem",
+      }),
+    ).toBe(false);
+    expect(
+      isStarterCapabilityVisualStyleValue("run.desen.starter/Stack", "width", {
+        value: 9,
+        unit: "rem",
+      }),
+    ).toBe(true);
+    expect(isStarterCapabilityVisualStyleValue("com.example/Foreign", "width", 12)).toBeUndefined();
+  });
+
   it("registers the exact ordered capability inventory without fabricating a package digest", () => {
     expect(STARTER_COMPONENT_REGISTRATIONS.map(({ id }) => id)).toEqual([
       STARTER_BUTTON_CAPABILITY_ID,
@@ -263,10 +350,20 @@ describe("starter component contracts", () => {
     expect(
       starterSelectComponentRegistration.manifest.propsSchema.properties.defaultValue,
     ).toMatchObject({ type: "string", minLength: 1, maxLength: 128 });
+    const paddingSchema = visualStyleSchemaProperty(
+      starterSelectComponentRegistration.manifest.styleParts.root.propertiesSchema,
+      "padding",
+    ) as Readonly<{
+      readonly anyOf: readonly unknown[];
+    }>;
+    expect(paddingSchema.anyOf).toContainEqual({ type: "number", minimum: 0, maximum: 512 });
+    expect(paddingSchema.anyOf).toContainEqual({ $ref: "#/$defs/positiveSpacingDimension" });
     expect(
-      starterSelectComponentRegistration.manifest.styleParts.root.propertiesSchema.properties
-        .padding,
-    ).toMatchObject({ type: "number", minimum: 0, maximum: 128 });
+      visualStyleSchemaDefinition(
+        starterSelectComponentRegistration.manifest.styleParts.root.propertiesSchema,
+        "positiveSpacingDimension",
+      ),
+    ).toMatchObject({ oneOf: expect.any(Array) });
     expect(starterSelectComponentRegistration.manifest.events.change.payloadSchema).toMatchObject({
       type: "object",
       additionalProperties: false,
@@ -304,27 +401,61 @@ describe("starter component contracts", () => {
     });
   });
 
-  it("preserves the original finite neutral property schema on the Button and Dialog controls", () => {
-    const hexColor = {
-      anyOf: [
-        { type: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
-        { type: "string", pattern: "^#[0-9A-Fa-f]{8}$" },
-      ],
-    };
+  it("adds the finite T12 visual profile to Button and Dialog controls", () => {
     const registrations = [starterButtonComponentRegistration, starterDialogComponentRegistration];
     for (const registration of registrations) {
       for (const stylePart of Object.values(registration.manifest.styleParts)) {
-        expect(stylePart.propertiesSchema).toMatchObject({
+        const schema = stylePart.propertiesSchema;
+        const properties = visualStyleSchemaProperties(schema);
+        expect((schema as Readonly<{ readonly type: unknown }>).type).toBe("object");
+        expect(
+          (schema as Readonly<{ readonly additionalProperties: unknown }>).additionalProperties,
+        ).toBe(false);
+        expect(Object.keys(properties)).toEqual(
+          expect.arrayContaining([
+            "color",
+            "backgroundColor",
+            "borderColor",
+            "backgroundGradient",
+            "border",
+            "borderTopLeftRadius",
+            "boxShadow",
+            "opacity",
+            "typography",
+            "fontSize",
+            "padding",
+            "layoutMode",
+            "position",
+            "translateX",
+          ]),
+        );
+        const colorSchema = visualStyleSchemaProperty(schema, "color") as Readonly<{
+          readonly anyOf: readonly unknown[];
+        }>;
+        expect(colorSchema.anyOf).toContainEqual({ $ref: "#/$defs/dtcgColor" });
+        expect(visualStyleSchemaDefinition(schema, "dtcgColor")).toMatchObject({
           type: "object",
           additionalProperties: false,
-          properties: {
-            color: hexColor,
-            backgroundColor: hexColor,
-            borderColor: hexColor,
-            borderRadius: { type: "number", minimum: 0, maximum: 64 },
-            padding: { type: "number", minimum: 0, maximum: 128 },
-            fontSize: { type: "number", minimum: 8, maximum: 96 },
-          },
+        });
+        const radiusSchema = visualStyleSchemaProperty(schema, "borderRadius") as Readonly<{
+          readonly anyOf: readonly unknown[];
+        }>;
+        expect(radiusSchema.anyOf).toContainEqual({ type: "number", minimum: 0, maximum: 128 });
+        const typographySchema = visualStyleSchemaProperty(schema, "typography");
+        expect(typographySchema).toMatchObject({
+          type: "object",
+          additionalProperties: false,
+          required: ["fontFamily", "fontSize", "fontWeight", "letterSpacing", "lineHeight"],
+        });
+        const borderSchema = visualStyleSchemaProperty(schema, "border");
+        expect(borderSchema).toMatchObject({
+          type: "object",
+          additionalProperties: false,
+          required: ["color", "style", "width"],
+        });
+        expect(visualStyleSchemaProperty(schema, "position")).toEqual({
+          type: "string",
+          enum: ["static", "relative", "absolute"],
         });
       }
       expectDeeplyFrozen(registration);
@@ -353,19 +484,33 @@ describe("starter component contracts", () => {
           "complex",
         ],
       });
-      expect(registration.manifest.styleParts.root.propertiesSchema).toMatchObject({
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          paddingBlock: { type: "number", minimum: 0, maximum: 512 },
-          paddingInline: { type: "number", minimum: 0, maximum: 512 },
-          width: { anyOf: [{ type: "number" }, { type: "string", enum: ["fill", "hug"] }] },
-          overflow: { type: "string", enum: ["visible", "hidden", "auto"] },
-          justifyContent: {
-            type: "string",
-            enum: ["start", "center", "end", "between", "around", "evenly"],
-          },
-        },
+      const styleSchema = registration.manifest.styleParts.root.propertiesSchema;
+      expect((styleSchema as Readonly<{ readonly type: unknown }>).type).toBe("object");
+      expect(
+        (styleSchema as Readonly<{ readonly additionalProperties: unknown }>).additionalProperties,
+      ).toBe(false);
+      const paddingBlockSchema = visualStyleSchemaProperty(
+        styleSchema,
+        "paddingBlock",
+      ) as Readonly<{
+        readonly anyOf: readonly unknown[];
+      }>;
+      expect(paddingBlockSchema.anyOf).toContainEqual({ type: "number", minimum: 0, maximum: 512 });
+      const widthSchema = visualStyleSchemaProperty(styleSchema, "width") as Readonly<{
+        readonly anyOf: readonly unknown[];
+      }>;
+      expect(widthSchema.anyOf).toContainEqual({ type: "string", enum: ["fill", "hug"] });
+      expect(widthSchema.anyOf).toContainEqual({ $ref: "#/$defs/size" });
+      expect(visualStyleSchemaDefinition(styleSchema, "size")).toMatchObject({
+        anyOf: expect.any(Array),
+      });
+      expect(visualStyleSchemaProperty(styleSchema, "overflow")).toEqual({
+        type: "string",
+        enum: ["visible", "hidden", "auto", "scroll"],
+      });
+      expect(visualStyleSchemaProperty(styleSchema, "justifyContent")).toEqual({
+        type: "string",
+        enum: ["start", "center", "end", "between", "around", "evenly"],
       });
       expectDeeplyFrozen(registration);
     }
@@ -393,13 +538,17 @@ describe("starter component contracts", () => {
     });
     expect(
       Object.hasOwn(
-        starterImageComponentRegistration.manifest.styleParts.root.propertiesSchema.properties,
+        visualStyleSchemaProperties(
+          starterImageComponentRegistration.manifest.styleParts.root.propertiesSchema,
+        ),
         "color",
       ),
     ).toBe(false);
     expect(
       Object.hasOwn(
-        starterIconComponentRegistration.manifest.styleParts.root.propertiesSchema.properties,
+        visualStyleSchemaProperties(
+          starterIconComponentRegistration.manifest.styleParts.root.propertiesSchema,
+        ),
         "color",
       ),
     ).toBe(true);

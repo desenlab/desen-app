@@ -8,7 +8,7 @@ The original T01 harness imports the production `DesenAppApplication`, its style
 empty reference project directly from `@desen/app-web` source. The later journeys use the ordinary
 product entry with temporary instances of its local persistence service. Its package-level
 `test:e2e` command first builds the complete product dependency closure and the independent
-reference host, then typechecks and builds the harness before running all nine Chromium journeys.
+reference host, then typechecks and builds the harness before running all ten Chromium journeys.
 The original in-memory compare-and-set
 adapter is test-only and is never imported by the product entry.
 
@@ -36,7 +36,7 @@ Playwright writes retained failure traces, screenshots, and video under `test-re
 HTML report under `playwright-report/`. Both directories and the production proof bundle in
 `dist/` are generated outputs and must not be committed.
 
-The nine independently configured journeys cover:
+The ten independently configured journeys cover:
 
 - M10-T01: empty-project visual authoring, authenticated native drag, canonical persistence,
   structural re-admission, and exact Design/Run static parity.
@@ -71,6 +71,11 @@ The nine independently configured journeys cover:
   interacts with it, and visibly edits the title and Stack gap before republishing. Actual canonical
   Source and Bundle bytes for both publications must be identical across resets, without ID or
   timestamp normalization.
+- M10A-T12: a normal DESEN Neutral project is created through the visible product UI, then uses
+  closed Style controls to persist a literal component-level presentation and a resolved T02 token
+  presentation. It proves fixed Desktop, Tablet, and Mobile preview frames, narrower responsive
+  override precedence, reset inheritance, and aggregate-workspace persistence after reload. It
+  does not claim named-theme CRUD or a generic CSS, JSX, or JSON authoring escape hatch.
 
 The T04 server uses `product-proof-server.mjs --with-operations` on port 4176. It starts the same
 bounded loopback operation service used by the normal developer launcher, with fresh credentials

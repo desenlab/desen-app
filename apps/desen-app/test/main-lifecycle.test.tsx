@@ -51,13 +51,29 @@ function injectPublicationPort(
   return createInjectedDesenAppLocalPublicationPort;
 }
 
+function injectProjectWorkspacePort(port: unknown = null) {
+  const createInjectedDesenAppLocalProjectWorkspaceStoragePort = vi.fn(
+    (browserFetchValue: unknown, optionsValue: unknown) => {
+      void browserFetchValue;
+      void optionsValue;
+      return port;
+    },
+  );
+  vi.doMock("../src/local-project-workspace-persistence.js", () => ({
+    createInjectedDesenAppLocalProjectWorkspaceStoragePort,
+  }));
+  return createInjectedDesenAppLocalProjectWorkspaceStoragePort;
+}
+
 beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
   document.body.innerHTML = '<div id="desen-app-root"></div>';
   window.history.replaceState(null, "", "/");
   vi.resetModules();
   vi.doUnmock("../src/local-runtime-persistence.js");
+  vi.doUnmock("../src/local-project-workspace-persistence.js");
   vi.doUnmock("../src/local-runtime-publication.js");
+  injectProjectWorkspacePort();
 });
 
 afterEach(() => {
