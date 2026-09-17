@@ -9,6 +9,7 @@ import {
   M10_GATE_BROWSER_CONFIGS as BROWSER_CONFIGS,
   M10_GATE_M10A_T01_CURRENT_HOST_AUDIT as CURRENT_HOST_AUDIT,
   M10_GATE_M10A_T10_CURRENT_HOST_AUDIT as T10_CURRENT_HOST_AUDIT,
+  M10_GATE_M10A_T11_CURRENT_HOST_AUDIT as T11_CURRENT_HOST_AUDIT,
   M10_GATE_PARENT_PINS as PARENTS,
   M10_GATE_ROOT_TEST_NAMES as NAMES,
   M10GateProofError,
@@ -63,7 +64,7 @@ test(NAMES[2], async () => {
   assert.equal(artifact.authority.runtimeCore.tree, "3fa3613a3be63c749f40b6a0b55af5b40c675773");
 });
 
-test("G10 current reader admits only the exact M10A-T01 or isolated M10A-T10 graph successor", () => {
+test("G10 current reader admits only the exact M10A-T01, isolated M10A-T10, or reachable M10A-T11 graph successor", () => {
   const current = structuredClone(CURRENT_HOST_AUDIT);
   const historical = projectHistoricalHostAudit(current);
   assert.deepEqual(historical, {
@@ -79,6 +80,10 @@ test("G10 current reader admits only the exact M10A-T01 or isolated M10A-T10 gra
   const t10Current = structuredClone(T10_CURRENT_HOST_AUDIT);
   assert.deepEqual(projectHistoricalHostAudit(t10Current), historical);
   assert.deepEqual(t10Current, T10_CURRENT_HOST_AUDIT);
+
+  const t11Current = structuredClone(T11_CURRENT_HOST_AUDIT);
+  assert.deepEqual(projectHistoricalHostAudit(t11Current), historical);
+  assert.deepEqual(t11Current, T11_CURRENT_HOST_AUDIT);
 
   for (const key of [
     "appGraphSha256",
@@ -98,6 +103,14 @@ test("G10 current reader admits only the exact M10A-T01 or isolated M10A-T10 gra
     () => projectHistoricalHostAudit(unreviewedInventory),
     code("HOST_AUDIT_FAILED"),
     "unreviewed source inventory",
+  );
+
+  const unreviewedReachableGraph = structuredClone(T11_CURRENT_HOST_AUDIT);
+  unreviewedReachableGraph.appModules += 1;
+  assert.throws(
+    () => projectHistoricalHostAudit(unreviewedReachableGraph),
+    code("HOST_AUDIT_FAILED"),
+    "unreviewed reachable graph",
   );
 });
 

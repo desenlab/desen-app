@@ -61,6 +61,11 @@ const PLACEMENT_ADMISSION_BY_MODEL = new WeakMap<
   CatalogAuthoringModel,
   Map<string, PlacementAdmissionCacheEntry>
 >();
+const BATCH_PLACEMENT_ADMISSION_BY_MODEL = new WeakMap<
+  CatalogAuthoringModel,
+  Map<string, Readonly<{ readonly accepted: boolean }>>
+>();
+const BATCH_PLACEMENT_ADMISSION_CACHE_LIMIT = 256;
 
 /** Exact App route that may authorize named-slot manipulation. */
 export interface AuthoringSlotRoute {
@@ -84,6 +89,9 @@ export type AuthoringSlotEdit =
   | Readonly<{ readonly kind: "insert"; readonly componentId: string; readonly index: number }>
   | Readonly<{ readonly kind: "place"; readonly nodeId: string; readonly index: number }>;
 
+/** Maximum number of independently re-authorized nodes in one direct-manipulation transaction. */
+export const AUTHORING_SLOT_BATCH_PLACEMENT_MAX_NODES = 256;
+
 /** Stable operation selected after current Source placement is re-derived. */
 export type AuthoringSlotOperation = "delete" | "insert" | "move" | "reorder";
 
@@ -100,6 +108,7 @@ export type AuthoringSlotEditFailureReason =
   | "acceptance-rejected"
   | "cardinality-rejected"
   | "catalog-invalid"
+  | "cycle-rejected"
   | "defaults-invalid"
   | "edit-rejected"
   | "preview-unavailable"
@@ -116,6 +125,31 @@ export interface AuthoringSlotEditFailure {
 
 /** Complete result of one App-owned named-slot edit. */
 export type AuthoringSlotEditResult = AuthoringSlotEditFailure | AuthoringSlotEditSuccess;
+
+/** Honest dry-run result for an atomic selected-layer placement. */
+export type AuthoringSlotBatchPlacementCompatibility =
+  | Readonly<{
+      readonly accepted: true;
+      readonly changesSource: boolean;
+      readonly operation: "mixed" | "move" | "noop" | "reorder";
+    }>
+  | Readonly<{
+      readonly accepted: false;
+      readonly reason:
+        "acceptance-rejected" | "cardinality-rejected" | "cycle-rejected" | "target-invalid";
+    }>;
+
+/** Successful atomic placement of one or more already-existing Source nodes. */
+export interface AuthoringSlotBatchPlacementSuccess {
+  readonly ok: true;
+  readonly document: DesenEditorDocument;
+  readonly nodeIds: readonly string[];
+  readonly operation: "mixed" | "move" | "noop" | "reorder";
+}
+
+/** Complete result of an App-owned multi-layer placement. */
+export type AuthoringSlotBatchPlacementResult =
+  AuthoringSlotEditFailure | AuthoringSlotBatchPlacementSuccess;
 
 /** One route-valid slot joined to its exact current Source owner. */
 export type AuthoringSlotProjection =
@@ -558,6 +592,260 @@ function nodeContainsOwner(root: AuthoringLayerNode, selection: AuthoringSlotSel
   return false;
 }
 
+function captureBatchNodeIds(nodeIds: readonly string[]): readonly string[] | undefined {
+  if (
+    !Array.isArray(nodeIds) ||
+    nodeIds.length === 0 ||
+    nodeIds.length > AUTHORING_SLOT_BATCH_PLACEMENT_MAX_NODES
+  ) {
+    return undefined;
+  }
+  const captured: string[] = [];
+  const seen = new Set<string>();
+  for (const nodeId of nodeIds) {
+    if (!isNonEmptyString(nodeId) || seen.has(nodeId)) return undefined;
+    seen.add(nodeId);
+    captured.push(nodeId);
+  }
+  return Object.freeze(captured);
+}
+
+function sameSlotPlacement(placement: NodePlacement, selection: AuthoringSlotSelection): boolean {
+  return (
+    placement.owner.kind === selection.ownerKind &&
+    placement.owner.id === selection.ownerId &&
+    placement.slot.name === selection.slot
+  );
+}
+
+function nodeContainsSelectedDescendant(
+  root: AuthoringLayerNode,
+  selectedNodeIds: ReadonlySet<string>,
+): boolean {
+  const pending: AuthoringLayerNode[] = [];
+  for (const slot of root.slots) {
+    for (const child of slot.children) pending.push(child);
+  }
+  for (const behavior of root.behaviors) {
+    for (const slot of behavior.slots) {
+      for (const child of slot.children) pending.push(child);
+    }
+  }
+  while (pending.length > 0) {
+    const node = pending.pop();
+    if (node === undefined) continue;
+    if (selectedNodeIds.has(node.id)) return true;
+    for (const slot of node.slots) {
+      for (const child of slot.children) pending.push(child);
+    }
+    for (const behavior of node.behaviors) {
+      for (const slot of behavior.slots) {
+        for (const child of slot.children) pending.push(child);
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Re-establishes the one stable tree order used by direct selection, regardless of click or
+ * caller order. Structural placement must never make a drag outcome depend on event ordering.
+ */
+function sourceOrderedBatchNodeIds(
+  model: CatalogAuthoringModel,
+  surfaceId: string,
+  selectedNodeIds: ReadonlySet<string>,
+): readonly string[] | undefined {
+  const surface = model.surfaces.find((candidate) => candidate.id === surfaceId);
+  if (surface === undefined) return undefined;
+  const ordered: string[] = [];
+  const pending: AuthoringLayerNode[] = [surface.root];
+  while (pending.length > 0) {
+    const node = pending.pop();
+    if (node === undefined) continue;
+    if (selectedNodeIds.has(node.id)) ordered.push(node.id);
+    for (const slot of [...node.slots].reverse()) {
+      for (const child of [...slot.children].reverse()) pending.push(child);
+    }
+    for (const behavior of [...node.behaviors].reverse()) {
+      for (const slot of [...behavior.slots].reverse()) {
+        for (const child of [...slot.children].reverse()) pending.push(child);
+      }
+    }
+  }
+  return ordered.length === selectedNodeIds.size ? Object.freeze(ordered) : undefined;
+}
+
+function sourceSlotKey(placement: NodePlacement): string {
+  return JSON.stringify([placement.owner.kind, placement.owner.id, placement.slot.name]);
+}
+
+type ReadyAuthoringSlotProjection = Extract<AuthoringSlotProjection, { readonly status: "ready" }>;
+
+interface AuthoringSlotBatchPlacementPlan {
+  readonly changesSource: boolean;
+  readonly entries: readonly Readonly<{
+    readonly nodeId: string;
+    readonly placement: NodePlacement;
+    readonly sameTarget: boolean;
+  }>[];
+  readonly insertionIndex: number;
+  readonly nodeIds: readonly string[];
+  readonly operation: "mixed" | "move" | "noop" | "reorder";
+  readonly target: ReadyAuthoringSlotProjection;
+}
+
+type AuthoringSlotBatchPlacementAnalysis =
+  | Readonly<{
+      readonly accepted: false;
+      readonly reason: Extract<
+        AuthoringSlotBatchPlacementCompatibility,
+        { readonly accepted: false }
+      >["reason"];
+    }>
+  | Readonly<{
+      readonly accepted: true;
+      readonly plan: AuthoringSlotBatchPlacementPlan;
+    }>;
+
+function batchPlacementFailure(
+  reason: Extract<AuthoringSlotBatchPlacementCompatibility, { readonly accepted: false }>["reason"],
+): AuthoringSlotBatchPlacementAnalysis {
+  return Object.freeze({ accepted: false, reason });
+}
+
+function arraysEqual(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+/**
+ * Builds one closed, Source-derived plan for a group placement before any candidate is changed.
+ * The plan rejects a partial group rather than trying to salvage the valid members.
+ */
+function analyzeAuthoringSlotBatchPlacement(
+  route: AuthoringSlotRoute,
+  model: CatalogAuthoringModel,
+  selection: AuthoringSlotSelection,
+  nodeIds: readonly string[],
+  index: number,
+): AuthoringSlotBatchPlacementAnalysis {
+  const capturedRoute = captureRoute(route);
+  const capturedSelection = captureSelection(selection);
+  const capturedNodeIds = captureBatchNodeIds(nodeIds);
+  if (
+    capturedRoute === undefined ||
+    capturedSelection === undefined ||
+    capturedNodeIds === undefined ||
+    capturedSelection.projectId !== capturedRoute.projectId ||
+    capturedSelection.surfaceId !== capturedRoute.surfaceId ||
+    !Number.isSafeInteger(index) ||
+    index < 0
+  ) {
+    return batchPlacementFailure("target-invalid");
+  }
+  const target = findSlotProjection(model, capturedSelection);
+  if (target.status !== "ready" || index > target.slot.children.length) {
+    return batchPlacementFailure("target-invalid");
+  }
+
+  const selectedNodeIds = new Set(capturedNodeIds);
+  const sourceOrderedNodeIds = sourceOrderedBatchNodeIds(
+    model,
+    capturedRoute.surfaceId,
+    selectedNodeIds,
+  );
+  if (sourceOrderedNodeIds === undefined) return batchPlacementFailure("target-invalid");
+  const entries: Readonly<{
+    readonly nodeId: string;
+    readonly placement: NodePlacement;
+    readonly sameTarget: boolean;
+  }>[] = [];
+  const removalsBySourceSlot = new Map<
+    string,
+    Readonly<{ readonly count: number; readonly placement: NodePlacement }>
+  >();
+  let incomingCount = 0;
+
+  for (const nodeId of sourceOrderedNodeIds) {
+    const placement = findNodePlacement(model, capturedRoute.surfaceId, nodeId);
+    if (placement === undefined || placement === null)
+      return batchPlacementFailure("target-invalid");
+    const component = model.components.find(({ id }) => id === placement.node.capabilityId);
+    if (component === undefined || !acceptsComponent(target.slot, component)) {
+      return batchPlacementFailure("acceptance-rejected");
+    }
+    if (nodeContainsOwner(placement.node, capturedSelection)) {
+      return batchPlacementFailure("cycle-rejected");
+    }
+    const sameTarget = sameSlotPlacement(placement, capturedSelection);
+    entries.push(Object.freeze({ nodeId, placement, sameTarget }));
+    if (sameTarget) continue;
+    incomingCount += 1;
+    const key = sourceSlotKey(placement);
+    const existing = removalsBySourceSlot.get(key);
+    removalsBySourceSlot.set(key, Object.freeze({ count: (existing?.count ?? 0) + 1, placement }));
+  }
+
+  for (const entry of entries) {
+    if (nodeContainsSelectedDescendant(entry.placement.node, selectedNodeIds)) {
+      return batchPlacementFailure("cycle-rejected");
+    }
+  }
+  for (const { count, placement } of removalsBySourceSlot.values()) {
+    if (placement.slot.children.length - count < placement.slot.contract.minimum) {
+      return batchPlacementFailure("cardinality-rejected");
+    }
+  }
+  const finalTargetLength = target.slot.children.length + incomingCount;
+  if (
+    (target.slot.contract.maximum !== null && finalTargetLength > target.slot.contract.maximum) ||
+    (!target.slot.present && finalTargetLength < target.slot.contract.minimum)
+  ) {
+    return batchPlacementFailure("cardinality-rejected");
+  }
+
+  const selectedTargetBeforeBoundary = entries.filter(
+    ({ placement, sameTarget }) => sameTarget && placement.index < index,
+  ).length;
+  const insertionIndex = index - selectedTargetBeforeBoundary;
+  const selectedTargetIds = new Set(
+    entries.filter(({ sameTarget }) => sameTarget).map(({ nodeId }) => nodeId),
+  );
+  const remainingTargetIds = target.slot.children
+    .map(({ id }) => id)
+    .filter((nodeId) => !selectedTargetIds.has(nodeId));
+  const expectedTargetIds = [
+    ...remainingTargetIds.slice(0, insertionIndex),
+    ...sourceOrderedNodeIds,
+    ...remainingTargetIds.slice(insertionIndex),
+  ];
+  const changesSource =
+    incomingCount > 0 ||
+    !arraysEqual(
+      target.slot.children.map(({ id }) => id),
+      expectedTargetIds,
+    );
+  const sameTargetCount = entries.length - incomingCount;
+  const operation = !changesSource
+    ? "noop"
+    : incomingCount === 0
+      ? "reorder"
+      : sameTargetCount === 0
+        ? "move"
+        : "mixed";
+  return Object.freeze({
+    accepted: true,
+    plan: Object.freeze({
+      changesSource,
+      entries: Object.freeze(entries),
+      insertionIndex,
+      nodeIds: sourceOrderedNodeIds,
+      operation,
+      target,
+    }),
+  });
+}
+
 function acceptsComponent(slot: AuthoringSlotState, component: CatalogComponentSummary): boolean {
   if (!slot.contract.constrainsChildren) return true;
   return (
@@ -605,6 +893,106 @@ function validationReportForCandidate(
   }
   if (!prepared.ok) return undefined;
   return prepared.validator.validate(candidate);
+}
+
+type AuthoringSlotBatchCandidateResult =
+  | Readonly<{ readonly ok: true; readonly document: DesenEditorDocument }>
+  | Readonly<{
+      readonly ok: false;
+      readonly reason: "command-rejected" | "validation-rejected";
+      readonly validationReport?: DesenEditorContinuousValidationReport;
+    }>;
+
+/**
+ * Executes the already-authorized group plan against a detached Editor Core candidate only.
+ * No caller can observe an intermediate document: this is shared by dry-run admission and the
+ * final App mutation so their verdicts cannot drift at structural-depth or validation limits.
+ */
+function buildAuthoringSlotBatchCandidate(
+  model: CatalogAuthoringModel,
+  route: AuthoringSlotRoute,
+  selection: AuthoringSlotSelection,
+  plan: AuthoringSlotBatchPlacementPlan,
+): AuthoringSlotBatchCandidateResult {
+  let candidate = model.validationDocument;
+  let targetLength = plan.target.slot.children.length;
+  for (const entry of plan.entries) {
+    const changed = entry.sameTarget
+      ? reorderDesenEditorNode(candidate, {
+          surfaceId: route.surfaceId,
+          parentId: selection.ownerId,
+          slot: selection.slot,
+          nodeId: entry.nodeId,
+          index: targetLength - 1,
+        })
+      : moveDesenEditorNode(candidate, {
+          surfaceId: route.surfaceId,
+          parentId: selection.ownerId,
+          slot: selection.slot,
+          nodeId: entry.nodeId,
+          index: targetLength,
+        });
+    if (!changed.ok) return Object.freeze({ ok: false, reason: "command-rejected" });
+    candidate = changed.document;
+    if (!entry.sameTarget) targetLength += 1;
+  }
+  for (const [offset, nodeId] of plan.nodeIds.entries()) {
+    const changed = reorderDesenEditorNode(candidate, {
+      surfaceId: route.surfaceId,
+      parentId: selection.ownerId,
+      slot: selection.slot,
+      nodeId,
+      index: plan.insertionIndex + offset,
+    });
+    if (!changed.ok) return Object.freeze({ ok: false, reason: "command-rejected" });
+    candidate = changed.document;
+  }
+  const validationReport = validationReportForCandidate(model, candidate);
+  return validationReport?.valid === true
+    ? Object.freeze({ ok: true, document: candidate })
+    : Object.freeze({
+        ok: false,
+        reason: "validation-rejected" as const,
+        ...(validationReport === undefined ? {} : { validationReport }),
+      });
+}
+
+function batchPlacementAdmissionKey(plan: AuthoringSlotBatchPlacementPlan): string {
+  const selection = plan.target.selection;
+  return JSON.stringify([
+    selection.projectId,
+    selection.surfaceId,
+    selection.ownerKind,
+    selection.ownerId,
+    selection.ownerCapabilityId,
+    selection.slot,
+    plan.nodeIds,
+  ]);
+}
+
+/**
+ * Caches structural admission per immutable model, selected group, and target slot—not boundary.
+ * Reordering a preflighted group cannot affect the candidate's depth or Catalog validity, while
+ * avoiding one full detached-command sequence for every visual insertion boundary in a large tree.
+ */
+function batchPlacementCandidateIsAdmitted(
+  model: CatalogAuthoringModel,
+  route: AuthoringSlotRoute,
+  selection: AuthoringSlotSelection,
+  plan: AuthoringSlotBatchPlacementPlan,
+): boolean {
+  let admissions = BATCH_PLACEMENT_ADMISSION_BY_MODEL.get(model);
+  if (admissions === undefined) {
+    admissions = new Map();
+    BATCH_PLACEMENT_ADMISSION_BY_MODEL.set(model, admissions);
+  }
+  const key = batchPlacementAdmissionKey(plan);
+  const cached = admissions.get(key);
+  if (cached !== undefined) return cached.accepted;
+  const accepted = buildAuthoringSlotBatchCandidate(model, route, selection, plan).ok;
+  if (admissions.size >= BATCH_PLACEMENT_ADMISSION_CACHE_LIMIT) admissions.clear();
+  admissions.set(key, Object.freeze({ accepted }));
+  return accepted;
 }
 
 function withinDefaultProfile(
@@ -910,6 +1298,105 @@ export function evaluateAuthoringSlotPlacement(
   return remember(
     Object.freeze({ accepted: true, operation: "move", sourceIndex: placement.index }),
   );
+}
+
+/**
+ * Re-authorizes an entire selected group before enabling a direct canvas placement.
+ *
+ * @remarks All selected nodes are evaluated against one immutable Source snapshot. A rejected
+ * member rejects the whole group, so a native drag or keyboard "Place" action can never apply a
+ * prefix of the requested move.
+ */
+export function evaluateAuthoringSlotBatchPlacement(
+  route: AuthoringSlotRoute,
+  model: CatalogAuthoringModel,
+  selection: AuthoringSlotSelection,
+  nodeIds: readonly string[],
+  index: number,
+): AuthoringSlotBatchPlacementCompatibility {
+  const analysis = analyzeAuthoringSlotBatchPlacement(route, model, selection, nodeIds, index);
+  if (!analysis.accepted) return Object.freeze({ accepted: false, reason: analysis.reason });
+  if (
+    analysis.plan.changesSource &&
+    !batchPlacementCandidateIsAdmitted(model, route, selection, analysis.plan)
+  ) {
+    return Object.freeze({ accepted: false, reason: "target-invalid" });
+  }
+  return Object.freeze({
+    accepted: true,
+    changesSource: analysis.plan.changesSource,
+    operation: analysis.plan.operation,
+  });
+}
+
+/**
+ * Applies one preflighted multi-layer placement through public Editor Core structural commands.
+ *
+ * @remarks The intermediate detached candidates are private to this function. It first moves every
+ * selected node to the target tail in selection order, then reorders that complete tail into the
+ * requested boundary. This preserves the group's order while avoiding index drift from siblings
+ * that are themselves selected. The final validator result is the sole commit candidate; any
+ * rejected command or validation result returns no document, allocation, or partial source.
+ */
+export function applyAuthoringSlotBatchPlacement(
+  document: DesenEditorDocument,
+  catalogValue: unknown,
+  route: AuthoringSlotRoute,
+  selection: AuthoringSlotSelection,
+  nodeIds: readonly string[],
+  index: number,
+): AuthoringSlotBatchPlacementResult {
+  const capturedRoute = captureRoute(route);
+  const capturedSelection = captureSelection(selection);
+  const capturedNodeIds = captureBatchNodeIds(nodeIds);
+  if (
+    capturedRoute === undefined ||
+    capturedSelection === undefined ||
+    capturedNodeIds === undefined ||
+    capturedSelection.projectId !== capturedRoute.projectId ||
+    capturedSelection.surfaceId !== capturedRoute.surfaceId ||
+    !Number.isSafeInteger(index) ||
+    index < 0
+  ) {
+    return failure("edit-rejected");
+  }
+  const prepared = prepareCatalogAuthoringModel(catalogValue, document);
+  if (!prepared.ok) {
+    return failure(prepared.reason === "catalog-invalid" ? "catalog-invalid" : "source-invalid");
+  }
+  const analysis = analyzeAuthoringSlotBatchPlacement(
+    capturedRoute,
+    prepared.model,
+    capturedSelection,
+    capturedNodeIds,
+    index,
+  );
+  if (!analysis.accepted) return failure(analysis.reason);
+  const plan = analysis.plan;
+  if (!plan.changesSource) {
+    return Object.freeze({
+      ok: true,
+      document,
+      nodeIds: plan.nodeIds,
+      operation: "noop",
+    });
+  }
+  const candidate = buildAuthoringSlotBatchCandidate(
+    prepared.model,
+    capturedRoute,
+    capturedSelection,
+    plan,
+  );
+  return !candidate.ok
+    ? candidate.reason === "validation-rejected"
+      ? failure("source-invalid", candidate.validationReport)
+      : failure("edit-rejected")
+    : Object.freeze({
+        ok: true,
+        document: candidate.document,
+        nodeIds: plan.nodeIds,
+        operation: plan.operation,
+      });
 }
 
 /** Re-authorizes whether the exact current selection may be removed from its owning named slot. */

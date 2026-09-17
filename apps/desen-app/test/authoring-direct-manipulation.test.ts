@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   AUTHORING_CANVAS_MAX_ZOOM,
   AUTHORING_CANVAS_MIN_ZOOM,
+  AUTHORING_DIRECT_MANIPULATION_MAX_SELECTION_SIZE,
   createAuthoringCanvasPreviewFrame,
   createAuthoringCanvasViewport,
   panAuthoringCanvasViewport,
@@ -107,6 +108,42 @@ describe("Desen App direct-manipulation authority", () => {
       projectAuthoringDirectManipulationSelection(
         [email],
         { projectId: "other", surfaceId: "sign-in" },
+        REFERENCE_AUTHORING_MODEL,
+      ),
+    ).toEqual({ status: "rejected" });
+  });
+
+  it("caps modifier selection before an unseen layer can affect a later placement", () => {
+    const current = Object.freeze(
+      Array.from({ length: AUTHORING_DIRECT_MANIPULATION_MAX_SELECTION_SIZE }, (_, index) =>
+        createAuthoringComponentSelection({
+          projectId: ROUTE.projectId,
+          surfaceId: ROUTE.surfaceId,
+          sourceNodeId: `synthetic.${index}`,
+          capabilityId: "com.example.ui/TextField",
+          displayName: "Synthetic text field",
+          conditional: false,
+        }),
+      ),
+    );
+    const candidate = createAuthoringComponentSelection({
+      projectId: ROUTE.projectId,
+      surfaceId: ROUTE.surfaceId,
+      sourceNodeId: "synthetic.overflow",
+      capabilityId: "com.example.ui/TextField",
+      displayName: "Overflow text field",
+      conditional: false,
+    });
+
+    const retained = toggleAuthoringDirectManipulationSelection(current, candidate, true);
+    expect(retained).toHaveLength(AUTHORING_DIRECT_MANIPULATION_MAX_SELECTION_SIZE);
+    expect(retained.some(({ sourceNodeId }) => sourceNodeId === candidate.sourceNodeId)).toBe(
+      false,
+    );
+    expect(
+      projectAuthoringDirectManipulationSelection(
+        [...current, candidate],
+        ROUTE,
         REFERENCE_AUTHORING_MODEL,
       ),
     ).toEqual({ status: "rejected" });

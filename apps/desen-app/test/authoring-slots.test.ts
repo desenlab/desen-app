@@ -16,9 +16,12 @@ import {
   type AuthoringComponentSelection,
 } from "../src/authoring-selection.js";
 import {
+  AUTHORING_SLOT_BATCH_PLACEMENT_MAX_NODES,
+  applyAuthoringSlotBatchPlacement,
   applyAuthoringNodeDelete,
   applyAuthoringSlotEdit,
   createAuthoringSlotSelection,
+  evaluateAuthoringSlotBatchPlacement,
   evaluateAuthoringNodeDeletion,
   evaluateAuthoringSlotComponent,
   evaluateAuthoringSlotInsertion,
@@ -369,6 +372,30 @@ function createFixtureSource(movableWidth?: number): unknown {
       },
     },
   };
+}
+
+function createDepthLimitReferenceSource(): unknown {
+  const source = copyJson(officialSignInSource);
+  const surface = record(record(source, "source").surfaces, "surfaces")["sign-in"];
+  const root = record(record(surface, "sign-in surface").root, "sign-in root");
+  let nested: MutableJsonObject = {
+    id: "depth.64",
+    use: "com.example.ui/Stack",
+    slots: {},
+  };
+  for (let index = 63; index >= 1; index -= 1) {
+    nested = {
+      id: `depth.${index}`,
+      use: "com.example.ui/Stack",
+      slots: { default: [nested] },
+    };
+  }
+  const slots = record(root.slots, "sign-in root slots");
+  const defaultChildren = slots.default;
+  if (!Array.isArray(defaultChildren))
+    throw new TypeError("Expected sign-in Stack default children.");
+  defaultChildren.push(nested);
+  return source;
 }
 
 describe("named-slot authoring with the reference Catalog", () => {
@@ -921,6 +948,356 @@ describe("validator-admitted synthetic slot contracts", () => {
     expectDeeplyFrozen(result.document);
   });
 
+  it("moves a selected group as one ordered, stable-ID transaction", () => {
+    const catalog = createFixtureCatalog();
+    const document = requireDocument(createFixtureSource());
+    const model = requireModel(catalog, document);
+    const before = canonical(document);
+    const originalCategory = copyJson(findNode(document, "main", "move.category"));
+    const originalExact = copyJson(findNode(document, "main", "move.exact"));
+    const target = fixtureSelection("idOrCategory");
+
+    expect(
+      evaluateAuthoringSlotBatchPlacement(
+        FIXTURE_ROUTE,
+        model,
+        target,
+        ["move.category", "move.exact"],
+        0,
+      ),
+    ).toEqual({ accepted: true, changesSource: true, operation: "move" });
+    const result = applyAuthoringSlotBatchPlacement(
+      document,
+      catalog,
+      FIXTURE_ROUTE,
+      target,
+      ["move.category", "move.exact"],
+      0,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(`Expected batch move success: ${result.reason}`);
+    expect(result.operation).toBe("move");
+    expect(result.nodeIds).toEqual(["move.category", "move.exact"]);
+    expect(rootSlotIds(result.document, "main", "movable")).toEqual([]);
+    expect(rootSlotIds(result.document, "main", "idOrCategory")).toEqual([
+      "move.category",
+      "move.exact",
+    ]);
+    expect(findNode(result.document, "main", "move.category")).toEqual(originalCategory);
+    expect(findNode(result.document, "main", "move.exact")).toEqual(originalExact);
+    expect(canonical(document)).toBe(before);
+    expectDeeplyFrozen(result.document);
+  });
+
+  it("materializes an absent minItems:2 slot only through one complete group transaction", () => {
+    const catalog = createFixtureCatalog();
+    const document = requireDocument(createFixtureSource());
+    const model = requireModel(catalog, document);
+    const before = canonical(document);
+    const target = fixtureSelection("absent");
+
+    expect(
+      evaluateAuthoringSlotBatchPlacement(
+        FIXTURE_ROUTE,
+        model,
+        target,
+        ["move.category", "move.exact"],
+        0,
+      ),
+    ).toEqual({ accepted: true, changesSource: true, operation: "move" });
+    const result = applyAuthoringSlotBatchPlacement(
+      document,
+      catalog,
+      FIXTURE_ROUTE,
+      target,
+      ["move.category", "move.exact"],
+      0,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(`Expected minItems group move success: ${result.reason}`);
+    expect(rootSlotIds(result.document, "main", "absent")).toEqual(["move.category", "move.exact"]);
+    expect(rootSlotIds(result.document, "main", "movable")).toEqual([]);
+    expect(canonical(document)).toBe(before);
+  });
+
+  it("reorders a selected group at one boundary without sibling index drift", () => {
+    const catalog = createFixtureCatalog();
+    const document = requireDocument(createFixtureSource(8));
+    const model = requireModel(catalog, document);
+    const target = fixtureSelection("movable");
+    const group = ["wide.5", "wide.6", "wide.7"];
+
+    expect(evaluateAuthoringSlotBatchPlacement(FIXTURE_ROUTE, model, target, group, 1)).toEqual({
+      accepted: true,
+      changesSource: true,
+      operation: "reorder",
+    });
+    const result = applyAuthoringSlotBatchPlacement(
+      document,
+      catalog,
+      FIXTURE_ROUTE,
+      target,
+      group,
+      1,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(`Expected batch reorder success: ${result.reason}`);
+    expect(result.operation).toBe("reorder");
+    expect(rootSlotIds(result.document, "main", "movable")).toEqual([
+      "wide.0",
+      "wide.5",
+      "wide.6",
+      "wide.7",
+      "wide.1",
+      "wide.2",
+      "wide.3",
+      "wide.4",
+    ]);
+  });
+
+  it("rejects an invalid selected group atomically rather than moving a valid prefix", () => {
+    const catalog = createFixtureCatalog();
+    const document = requireDocument(createFixtureSource());
+    const model = requireModel(catalog, document);
+    const before = canonical(document);
+    const target = fixtureSelection("unrestricted");
+
+    expect(
+      evaluateAuthoringSlotBatchPlacement(
+        FIXTURE_ROUTE,
+        model,
+        target,
+        ["fixture.root", "move.category"],
+        0,
+      ),
+    ).toEqual({ accepted: false, reason: "target-invalid" });
+    expect(
+      applyAuthoringSlotBatchPlacement(
+        document,
+        catalog,
+        FIXTURE_ROUTE,
+        target,
+        ["fixture.root", "move.category"],
+        0,
+      ),
+    ).toEqual({ ok: false, reason: "target-invalid" });
+    expect(canonical(document)).toBe(before);
+  });
+
+  it("rejects a group that would violate a required source slot without changing any member", () => {
+    const catalog = createFixtureCatalog();
+    const document = requireDocument(createFixtureSource());
+    const model = requireModel(catalog, document);
+    const before = canonical(document);
+    const target = fixtureSelection("unrestricted");
+
+    expect(
+      evaluateAuthoringSlotBatchPlacement(
+        FIXTURE_ROUTE,
+        model,
+        target,
+        ["required.only", "move.category"],
+        0,
+      ),
+    ).toEqual({ accepted: false, reason: "cardinality-rejected" });
+    expect(
+      applyAuthoringSlotBatchPlacement(
+        document,
+        catalog,
+        FIXTURE_ROUTE,
+        target,
+        ["required.only", "move.category"],
+        0,
+      ),
+    ).toEqual({ ok: false, reason: "cardinality-rejected" });
+    expect(canonical(document)).toBe(before);
+  });
+
+  it("canonicalizes a selected group to source tree order instead of caller event order", () => {
+    const catalog = createFixtureCatalog();
+    const document = requireDocument(createFixtureSource(8));
+    const target = fixtureSelection("movable");
+
+    const result = applyAuthoringSlotBatchPlacement(
+      document,
+      catalog,
+      FIXTURE_ROUTE,
+      target,
+      ["wide.7", "wide.5", "wide.6"],
+      1,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(`Expected canonical batch reorder: ${result.reason}`);
+    expect(result.nodeIds).toEqual(["wide.5", "wide.6", "wide.7"]);
+    expect(rootSlotIds(result.document, "main", "movable")).toEqual([
+      "wide.0",
+      "wide.5",
+      "wide.6",
+      "wide.7",
+      "wide.1",
+      "wide.2",
+      "wide.3",
+      "wide.4",
+    ]);
+  });
+
+  it("rejects a group that would exceed the target maximum without moving a valid prefix", () => {
+    const catalog = createFixtureCatalog();
+    const document = requireDocument(createFixtureSource());
+    const model = requireModel(catalog, document);
+    const before = canonical(document);
+    const target = fixtureSelection("full");
+    const group = ["move.category", "move.exact"];
+
+    expect(evaluateAuthoringSlotBatchPlacement(FIXTURE_ROUTE, model, target, group, 0)).toEqual({
+      accepted: false,
+      reason: "cardinality-rejected",
+    });
+    expect(
+      applyAuthoringSlotBatchPlacement(document, catalog, FIXTURE_ROUTE, target, group, 0),
+    ).toEqual({ ok: false, reason: "cardinality-rejected" });
+    expect(canonical(document)).toBe(before);
+  });
+
+  it("rejects duplicate and over-limit selected groups before any candidate Source is created", () => {
+    const catalog = createFixtureCatalog();
+    const document = requireDocument(createFixtureSource());
+    const model = requireModel(catalog, document);
+    const before = canonical(document);
+    const target = fixtureSelection("unrestricted");
+
+    expect(
+      evaluateAuthoringSlotBatchPlacement(
+        FIXTURE_ROUTE,
+        model,
+        target,
+        ["move.category", "move.category"],
+        0,
+      ),
+    ).toEqual({ accepted: false, reason: "target-invalid" });
+    expect(
+      applyAuthoringSlotBatchPlacement(
+        document,
+        catalog,
+        FIXTURE_ROUTE,
+        target,
+        ["move.category", "move.category"],
+        0,
+      ),
+    ).toEqual({ ok: false, reason: "edit-rejected" });
+    expect(canonical(document)).toBe(before);
+
+    const overLimitDocument = requireDocument(
+      createFixtureSource(AUTHORING_SLOT_BATCH_PLACEMENT_MAX_NODES + 1),
+    );
+    const overLimitModel = requireModel(catalog, overLimitDocument);
+    const overLimitBefore = canonical(overLimitDocument);
+    const overLimitGroup = Array.from(
+      { length: AUTHORING_SLOT_BATCH_PLACEMENT_MAX_NODES + 1 },
+      (_, index) => `wide.${index}`,
+    );
+
+    expect(
+      evaluateAuthoringSlotBatchPlacement(FIXTURE_ROUTE, overLimitModel, target, overLimitGroup, 0),
+    ).toEqual({ accepted: false, reason: "target-invalid" });
+    expect(
+      applyAuthoringSlotBatchPlacement(
+        overLimitDocument,
+        catalog,
+        FIXTURE_ROUTE,
+        target,
+        overLimitGroup,
+        0,
+      ),
+    ).toEqual({ ok: false, reason: "edit-rejected" });
+    expect(canonical(overLimitDocument)).toBe(overLimitBefore);
+  });
+
+  it("rejects selected ancestors, descendants, and self-owned target slots atomically", () => {
+    const document = requireDocument(officialSignInSource);
+    const inserted = requireSuccess(
+      applyAuthoringSlotEdit(document, referenceCatalog, REFERENCE_ROUTE, referenceSelection(), {
+        kind: "insert",
+        componentId: "com.example.ui/Stack",
+        index: 5,
+      }),
+    );
+    const nestedTarget = createAuthoringSlotSelection({
+      projectId: REFERENCE_ROUTE.projectId,
+      surfaceId: REFERENCE_ROUTE.surfaceId,
+      ownerKind: "component",
+      ownerId: "node.stack",
+      ownerCapabilityId: "com.example.ui/Stack",
+      slot: "default",
+    });
+    const nested = requireSuccess(
+      applyAuthoringSlotEdit(inserted.document, referenceCatalog, REFERENCE_ROUTE, nestedTarget, {
+        kind: "place",
+        nodeId: "sign-in.email",
+        index: 0,
+      }),
+    );
+    const model = requireModel(referenceCatalog, nested.document);
+    const before = canonical(nested.document);
+
+    expect(
+      evaluateAuthoringSlotBatchPlacement(
+        REFERENCE_ROUTE,
+        model,
+        referenceSelection(),
+        ["sign-in.email", "node.stack"],
+        0,
+      ),
+    ).toEqual({ accepted: false, reason: "cycle-rejected" });
+    expect(
+      applyAuthoringSlotBatchPlacement(
+        nested.document,
+        referenceCatalog,
+        REFERENCE_ROUTE,
+        referenceSelection(),
+        ["sign-in.email", "node.stack"],
+        0,
+      ),
+    ).toEqual({ ok: false, reason: "cycle-rejected" });
+    expect(
+      evaluateAuthoringSlotBatchPlacement(REFERENCE_ROUTE, model, nestedTarget, ["node.stack"], 0),
+    ).toEqual({ accepted: false, reason: "cycle-rejected" });
+    expect(canonical(nested.document)).toBe(before);
+  });
+
+  it("keeps batch dry-run admission aligned with the structural depth profile", () => {
+    const document = requireDocument(createDepthLimitReferenceSource());
+    const model = requireModel(referenceCatalog, document);
+    const before = canonical(document);
+    const target = createAuthoringSlotSelection({
+      projectId: REFERENCE_ROUTE.projectId,
+      surfaceId: REFERENCE_ROUTE.surfaceId,
+      ownerKind: "component",
+      ownerId: "depth.64",
+      ownerCapabilityId: "com.example.ui/Stack",
+      slot: "default",
+    });
+
+    expect(
+      evaluateAuthoringSlotBatchPlacement(REFERENCE_ROUTE, model, target, ["sign-in.email"], 0),
+    ).toEqual({ accepted: false, reason: "target-invalid" });
+    expect(
+      applyAuthoringSlotBatchPlacement(
+        document,
+        referenceCatalog,
+        REFERENCE_ROUTE,
+        target,
+        ["sign-in.email"],
+        0,
+      ),
+    ).toEqual({ ok: false, reason: "edit-rejected" });
+    expect(canonical(document)).toBe(before);
+  });
+
   it("deletes from a behavior-owned slot and retains its own empty slot key", () => {
     const catalog = createFixtureCatalog();
     const document = requireDocument(createFixtureSource());
@@ -1155,6 +1532,42 @@ describe("validator-admitted synthetic slot contracts", () => {
       "wide.1023",
     ]);
   });
+
+  it("moves the full bounded multi-selection through a 1,024-layer tree in source order", () => {
+    const catalog = createFixtureCatalog();
+    const document = requireDocument(createFixtureSource(1_024));
+    const model = requireModel(catalog, document);
+    const target = fixtureSelection("unrestricted");
+    const reversedSelection = Array.from(
+      { length: AUTHORING_SLOT_BATCH_PLACEMENT_MAX_NODES },
+      (_, index) => `wide.${AUTHORING_SLOT_BATCH_PLACEMENT_MAX_NODES - 1 - index}`,
+    );
+    const sourceOrderedSelection = Array.from(
+      { length: AUTHORING_SLOT_BATCH_PLACEMENT_MAX_NODES },
+      (_, index) => `wide.${index}`,
+    );
+
+    expect(
+      evaluateAuthoringSlotBatchPlacement(FIXTURE_ROUTE, model, target, reversedSelection, 0),
+    ).toEqual({ accepted: true, changesSource: true, operation: "move" });
+    const result = applyAuthoringSlotBatchPlacement(
+      document,
+      catalog,
+      FIXTURE_ROUTE,
+      target,
+      reversedSelection,
+      0,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(`Expected large batch placement: ${result.reason}`);
+    expect(result.nodeIds).toEqual(sourceOrderedSelection);
+    expect(rootSlotIds(result.document, "main", "unrestricted")).toEqual(sourceOrderedSelection);
+    expect(rootSlotIds(result.document, "main", "movable")).toHaveLength(
+      1_024 - AUTHORING_SLOT_BATCH_PLACEMENT_MAX_NODES,
+    );
+    expect(rootSlotIds(result.document, "main", "movable")[0]).toBe("wide.256");
+  }, 30_000);
 
   it("deletes the final node from a 1,024-sibling slot within the bounded profile", () => {
     const catalog = createFixtureCatalog();

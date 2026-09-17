@@ -32,6 +32,7 @@ import {
   projectM10AT02T01Input,
   projectM10AT03T02Input,
   projectM10AT04T03Input,
+  projectM10AT11CurrentGraphAudit,
   projectM10AT10T04Input,
 } from "./desen-app-published-host-update-proof.mjs";
 
@@ -1425,7 +1426,10 @@ export function projectM10AT10CurrentGraphAudit(currentGraphAudit, t08GraphAudit
 function projectM10AT01Graph(currentGraphAudit, t08GraphAudit) {
   try {
     return projectM10AT01CurrentGraphAudit(
-      projectM10AT10CurrentGraphAudit(currentGraphAudit, t08GraphAudit),
+      projectM10AT10CurrentGraphAudit(
+        projectM10AT11CurrentGraphAudit(currentGraphAudit, t08GraphAudit),
+        t08GraphAudit,
+      ),
       t08GraphAudit,
     );
   } catch {

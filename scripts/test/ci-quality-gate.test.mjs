@@ -461,7 +461,9 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
       taskId === "M10A-T09" ||
       taskId === "M10A-T10"
         ? "DONE"
-        : "NOT_STARTED";
+        : taskId === "M10A-T11"
+          ? "IN_PROGRESS"
+          : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
     assert.equal(
       row.cells[2],
@@ -1061,8 +1063,13 @@ test("task board retains its canonical inventory without narrative appendices", 
   assert.equal(statuses.get("M10A-T08"), "DONE");
   assert.equal(statuses.get("M10A-T09"), "DONE");
   assert.equal(statuses.get("M10A-T10"), "DONE");
+  assert.equal(statuses.get("M10A-T11"), "IN_PROGRESS");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
-  assert.ok(normalizedReadme.includes("**Next task:** `M10A-T11` (`NOT_STARTED`; T10 complete)"));
+  assert.ok(
+    normalizedReadme.includes(
+      "**Current task:** `M10A-T11` (`IN_PROGRESS`; local verification passed; hosted closure pending)",
+    ),
+  );
   assert.ok(normalizedProjectStatus.includes("M10A-T01 through M10A-T10 are DONE"));
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
   assert.ok(

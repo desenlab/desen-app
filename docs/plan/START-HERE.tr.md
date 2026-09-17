@@ -28,6 +28,8 @@ kaydedildi. `M10A-T09` `DONE`: Card, Badge, Avatar, Alert, List, basic Table, Sk
 için hosted exact-head ve taze `main` kapanışı [kanıt belgesine](../proof/M10A-T09.md) kaydedildi.
 `M10A-T10` `DONE`: project/surface yaşam döngüsü, T02 zarfını generation-fenced saklama, taslak geri alma ve
 kaydetme durumu [kanıt belgesinde](../proof/M10A-T10.md) exact-head ve taze `main` kapanışıyla kayıtlıdır.
+`M10A-T11` `IN_PROGRESS`: çoklu seçim, slot-farkındalıklı atomik katman taşıma ve erişilebilir canvas
+kontrollerinin yerel uygulaması/odaklı doğrulaması entegrasyona hazırdır; hosted kapanış henüz bekler.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i

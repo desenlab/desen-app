@@ -1,8 +1,8 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T10 are `DONE`. T10's
-application-local lifecycle closure is in its [task-owned proof](../proof/M10A-T10.md). The canonical
-statuses and dependencies are in
+Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T10 are `DONE`. T11's
+local direct-manipulation boundary is integration-ready but remains `IN_PROGRESS` until hosted
+closure; the canonical statuses and dependencies are in
 [TASKS.md](TASKS.md).
 
 ## Product promise
@@ -21,8 +21,8 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
 and one gate; the total becomes 176 tasks and 14 gates. The 131 completed tasks and 11 completed
-gates remain completed. T01 through T10 are the ten completed M10A tasks, and the other 18
-remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
+gates remain completed. T01 through T10 are the ten completed M10A tasks; T11 is `IN_PROGRESS`, and
+the other 17 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
 Dependencies, not numeric order, select the next eligible task: T26 acceptance precedes T25's
@@ -227,6 +227,13 @@ Catalog to 0.6.0 with bounded Card, Badge, Avatar, Alert, List, basic Table, Ske
 adapters. Its isolated authoring/host evidence, exact-head hosted Quality closure, and fresh-`main`
 closure are recorded in the [task-owned proof](../proof/M10A-T09.md). It does not authorize
 normal-App integration, persistence, Publisher, Runtime, Core/protocol, G10A, or M11.
+
+**M10A-T11 — Direct-manipulation canvas** is `IN_PROGRESS`. Its integration-ready local App boundary
+re-authorizes bounded multi-selection from current Source, applies stable-order slot-aware group
+placement atomically, and keeps accessible pan/zoom/preview-frame controls outside managed capability
+DOM. Its [task report](../proof/M10A-T11.md) records the local proof scope; exact-head hosted and
+fresh-`main` closure remain required before `DONE`. T11 does not authorize Runtime, Publisher,
+Core/protocol, G10A, M11, responsive styling (T12), or undo/redo/copy authority (T14).
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.

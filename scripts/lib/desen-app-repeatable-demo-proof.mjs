@@ -24,6 +24,8 @@ import {
   projectM10AT02T01Input,
   projectM10AT03T02Input,
   projectM10AT04T03Input,
+  projectM10AT11CurrentGraphAudit,
+  projectM10AT11HistoricalInput,
   projectM10AT10HistoricalInput,
   projectM10AT10T04Input,
 } from "./desen-app-published-host-update-proof.mjs";
@@ -943,7 +945,10 @@ function projectM10AT01Input(relativePath, bytes) {
                 relativePath,
                 projectM10AT10T04Input(
                   relativePath,
-                  projectM10AT10HistoricalInput(relativePath, bytes),
+                  projectM10AT10HistoricalInput(
+                    relativePath,
+                    projectM10AT11HistoricalInput(relativePath, bytes),
+                  ),
                 ),
               ),
             ),
@@ -997,7 +1002,10 @@ export function projectM10AT10CurrentGraphAudit(currentGraphAudit, t08GraphAudit
 function projectM10AT01Graph(currentGraphAudit, t08GraphAudit) {
   try {
     return projectM10AT01CurrentGraphAudit(
-      projectM10AT10CurrentGraphAudit(currentGraphAudit, t08GraphAudit),
+      projectM10AT10CurrentGraphAudit(
+        projectM10AT11CurrentGraphAudit(currentGraphAudit, t08GraphAudit),
+        t08GraphAudit,
+      ),
       t08GraphAudit,
     );
   } catch {

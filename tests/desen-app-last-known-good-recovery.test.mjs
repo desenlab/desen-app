@@ -20,7 +20,10 @@ import {
   verifyDesenAppLastKnownGoodRecoveryEvidence as verify,
   writeDesenAppLastKnownGoodRecoveryEvidence as write,
 } from "../scripts/lib/desen-app-last-known-good-recovery-proof.mjs";
-import { projectM10AT01CurrentGraphAudit } from "../scripts/lib/desen-app-published-host-update-proof.mjs";
+import {
+  projectM10AT01CurrentGraphAudit,
+  projectM10AT11CurrentGraphAudit,
+} from "../scripts/lib/desen-app-published-host-update-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-last-known-good-recovery.json";
@@ -274,7 +277,10 @@ test(NAMES[3], async () => {
   assert.notDeepEqual(graph, successor.authority.currentGraphAudit);
   assert.deepEqual(
     projectM10AT01CurrentGraphAudit(
-      projectM10AT10CurrentGraphAudit(graph, successor.authority.currentGraphAudit),
+      projectM10AT10CurrentGraphAudit(
+        projectM10AT11CurrentGraphAudit(graph, successor.authority.currentGraphAudit),
+        successor.authority.currentGraphAudit,
+      ),
       successor.authority.currentGraphAudit,
     ),
     successor.authority.currentGraphAudit,
@@ -283,7 +289,10 @@ test(NAMES[3], async () => {
   unrelatedGraphDrift.runtimeResolution.host.moduleCount += 1;
   assert.throws(() =>
     projectM10AT01CurrentGraphAudit(
-      projectM10AT10CurrentGraphAudit(unrelatedGraphDrift, successor.authority.currentGraphAudit),
+      projectM10AT10CurrentGraphAudit(
+        projectM10AT11CurrentGraphAudit(unrelatedGraphDrift, successor.authority.currentGraphAudit),
+        successor.authority.currentGraphAudit,
+      ),
       successor.authority.currentGraphAudit,
     ),
   );
@@ -302,6 +311,12 @@ test(NAMES[3], async () => {
     graph.appSourceAudit.inventory.includes("apps/desen-app/src/source-draft-controls.tsx"),
   );
   assert.ok(graph.appSourceAudit.inventory.includes("apps/desen-app/src/project-lifecycle.ts"));
+  assert.ok(
+    graph.appSourceAudit.inventory.includes("apps/desen-app/src/authoring-direct-manipulation.ts"),
+  );
+  assert.ok(
+    graph.appSourceAudit.inventory.includes("apps/desen-app/src/canvas-manipulation-controls.tsx"),
+  );
 });
 
 test(NAMES[4], async () => {

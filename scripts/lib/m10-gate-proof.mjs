@@ -125,6 +125,16 @@ export const M10_GATE_M10A_T10_CURRENT_HOST_AUDIT = Object.freeze({
   appSourceFiles: 57,
 });
 
+/** Exact reachable direct-manipulation successor admitted only after the lower reader validates it. */
+export const M10_GATE_M10A_T11_CURRENT_HOST_AUDIT = Object.freeze({
+  ...M10_GATE_M10A_T01_CURRENT_HOST_AUDIT,
+  appSourceFiles: 59,
+  appModules: 172,
+  appGraphSha256: "sha256:bdaba7ad56b7c1855ff966c6ba61bc8e86c5e79575fad6dca228d86ccc3f6514",
+  appOutputIdentity: "sha256:96d82a27280fa6f0fbce21e463b0ba0c3ba195c5c934a0502ba3ba2f019b1ce0",
+  backingSnapshotSha256: "sha256:16de958a323b0af50d92aed7b467bffbf8892f80fce3af66b2b0a53e14f6f26a",
+});
+
 const M10_GATE_FROZEN_HOST_AUDIT_IDENTITIES = Object.freeze({
   appGraphSha256: "sha256:fa8f18c9510575a8c5719e19bfb5aaf42468a167c475879778554d0a3950bebf",
   appOutputIdentity: "sha256:ba0b863a2133c99fd90a834fd892660b1e70198b377ae714ab7e8c31af2656a7",
@@ -392,8 +402,8 @@ function projectGraphAudit(graph) {
 }
 
 /**
- * Authenticates the exact M10A-T01 or isolated-source M10A-T10 successor graph, then projects
- * the three historical identities retained by the immutable G10 artifact.
+ * Authenticates the exact M10A-T01, inventory-only T10, or reachable T11 successor graph, then
+ * projects the three historical identities retained by the immutable G10 artifact.
  */
 export function projectM10GateHistoricalHostAudit(rawHostAudit) {
   if (
@@ -408,6 +418,7 @@ export function projectM10GateHistoricalHostAudit(rawHostAudit) {
   const acceptedCurrentAudit = [
     M10_GATE_M10A_T01_CURRENT_HOST_AUDIT,
     M10_GATE_M10A_T10_CURRENT_HOST_AUDIT,
+    M10_GATE_M10A_T11_CURRENT_HOST_AUDIT,
   ].find((candidate) => {
     const expectedEntries = Object.entries(candidate);
     const keys = Reflect.ownKeys(rawHostAudit);

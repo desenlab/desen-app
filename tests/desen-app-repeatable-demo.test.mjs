@@ -20,7 +20,10 @@ import {
   verifyDesenAppRepeatableDemoEvidence as verify,
   writeDesenAppRepeatableDemoEvidence as write,
 } from "../scripts/lib/desen-app-repeatable-demo-proof.mjs";
-import { projectM10AT01CurrentGraphAudit } from "../scripts/lib/desen-app-published-host-update-proof.mjs";
+import {
+  projectM10AT01CurrentGraphAudit,
+  projectM10AT11CurrentGraphAudit,
+} from "../scripts/lib/desen-app-published-host-update-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json";
@@ -325,12 +328,21 @@ test(NAMES[3], () => {
   assert.notDeepEqual(graph, historicalGraph);
   assert.deepEqual(
     projectM10AT01CurrentGraphAudit(
-      projectM10AT10CurrentGraphAudit(graph, historicalGraph),
+      projectM10AT10CurrentGraphAudit(
+        projectM10AT11CurrentGraphAudit(graph, historicalGraph),
+        historicalGraph,
+      ),
       historicalGraph,
     ),
     historicalGraph,
   );
   assert.ok(graph.appSourceAudit.inventory.includes("apps/desen-app/src/project-lifecycle.ts"));
+  assert.ok(
+    graph.appSourceAudit.inventory.includes("apps/desen-app/src/authoring-direct-manipulation.ts"),
+  );
+  assert.ok(
+    graph.appSourceAudit.inventory.includes("apps/desen-app/src/canvas-manipulation-controls.tsx"),
+  );
   assert.equal(matrix.result, "PASS");
   assert.equal(matrix.listenerStarted, false);
   assert.equal(matrix.browserExecuted, false);

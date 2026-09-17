@@ -551,6 +551,175 @@ describe("Desen App application shell", () => {
     expect(canvasControls.textContent).toContain("Selected · sign-in.email");
   });
 
+  it("reorders a multi-selection through one App-owned native drag without reading platform payload", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
+
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    const email = within(hierarchy).getByRole("button", {
+      name: "Select Text field layer · sign-in.email",
+    });
+    const password = within(hierarchy).getByRole("button", {
+      name: "Select Text field layer · sign-in.password",
+    });
+    const target = within(hierarchy).getByLabelText(
+      "Stack sign-in.layout default slot insertion boundary at position 1",
+    );
+    const dataTransfer = {
+      dropEffect: "none",
+      effectAllowed: "none",
+      getData: vi.fn(),
+      setData: vi.fn(),
+    };
+
+    fireEvent.click(password);
+    fireEvent.click(email, { shiftKey: true });
+    fireEvent.dragStart(layerDragHandleFor(password), { dataTransfer });
+
+    expect(
+      screen.getByText(
+        "Moving 2 selected layers · release when the wide highlighted gap locks in.",
+      ),
+    ).toBeTruthy();
+    expect(
+      hierarchy
+        .querySelector("[data-layer-drop-row-node-id='sign-in.email']")
+        ?.getAttribute("data-dragging"),
+    ).toBe("true");
+    expect(
+      hierarchy
+        .querySelector("[data-layer-drop-row-node-id='sign-in.password']")
+        ?.getAttribute("data-dragging"),
+    ).toBe("true");
+
+    fireEvent.dragOver(target, { dataTransfer });
+    expect(target.getAttribute("data-drop-ready")).toBe("true");
+    expect(target.getAttribute("data-drop-hovered")).toBe("true");
+    fireEvent.drop(target, { dataTransfer });
+
+    expect(dataTransfer.getData).not.toHaveBeenCalled();
+    expect(authoringStatus().textContent).toBe(
+      "Moved 2 selected layers together to Stack default slot.",
+    );
+    expect(
+      Array.from(hierarchy.querySelectorAll<HTMLElement>("[data-layer-source-node-id]")).map(
+        ({ dataset }) => dataset.layerSourceNodeId,
+      ),
+    ).toEqual([
+      "sign-in.layout",
+      "sign-in.email",
+      "sign-in.password",
+      "sign-in.title",
+      "sign-in.error",
+      "sign-in.submit",
+    ]);
+  });
+
+  it("moves selected layers together into a nested slot through the keyboard Place control", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
+
+    const authoring = authoringPanel();
+    fireEvent.click(screen.getByRole("button", { name: stackSlotName(5) }));
+    fireEvent.click(
+      within(authoring).getByRole("button", {
+        name: "Insert Stack into Stack sign-in.layout default slot at position 6",
+      }),
+    );
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    fireEvent.click(
+      within(hierarchy).getByRole("button", {
+        name: "Select Text field layer · sign-in.email",
+      }),
+    );
+    fireEvent.click(
+      within(hierarchy).getByRole("button", {
+        name: "Select Text field layer · sign-in.password",
+      }),
+      { shiftKey: true },
+    );
+    const place = within(hierarchy).getByRole("button", {
+      name: "Move 2 selected layers to Stack node.stack default slot at position 1",
+    }) as HTMLButtonElement;
+
+    expect(place.disabled).toBe(false);
+    fireEvent.click(place);
+
+    expect(authoringStatus().textContent).toBe(
+      "Moved 2 selected layers together to Stack default slot.",
+    );
+    expect(
+      within(hierarchy).getByRole("button", { name: stackSlotName(2, "node.stack") }),
+    ).toBeTruthy();
+    expect(within(hierarchy).getByRole("button", { name: stackSlotName(4) })).toBeTruthy();
+    const nestedSlot = within(hierarchy).getByRole("button", {
+      name: stackSlotName(2, "node.stack"),
+    }).parentElement;
+    expect(
+      nestedSlot?.contains(
+        within(hierarchy).getByRole("button", {
+          name: "Deselect Text field layer · sign-in.email",
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      nestedSlot?.contains(
+        within(hierarchy).getByRole("button", {
+          name: "Deselect Text field layer · sign-in.password",
+        }),
+      ),
+    ).toBe(true);
+    const managedCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
+    expect(within(managedCanvas).getByLabelText("Email")).toBeTruthy();
+    expect(within(managedCanvas).getByLabelText("Password")).toBeTruthy();
+  });
+
+  it("rejects a root-containing multi-selection as one drag group", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeTruthy();
+
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    const root = within(hierarchy).getByRole("button", {
+      name: "Select Stack layer · sign-in.layout",
+    });
+    const email = within(hierarchy).getByRole("button", {
+      name: "Select Text field layer · sign-in.email",
+    });
+    const target = within(hierarchy).getByLabelText(
+      "Stack sign-in.layout default slot insertion boundary at position 1",
+    );
+    const dataTransfer = {
+      dropEffect: "none",
+      effectAllowed: "none",
+      getData: vi.fn(),
+      setData: vi.fn(),
+    };
+
+    fireEvent.click(root);
+    fireEvent.click(email, { shiftKey: true });
+    const place = within(hierarchy).getByRole("button", {
+      name: "Move 2 selected layers to Stack sign-in.layout default slot at position 1",
+    }) as HTMLButtonElement;
+    expect(place.disabled).toBe(true);
+
+    fireEvent.dragStart(layerDragHandleFor(email), { dataTransfer });
+    expect(target.getAttribute("data-drop-ready")).toBe("false");
+    fireEvent.drop(target, { dataTransfer });
+    expect(dataTransfer.getData).not.toHaveBeenCalled();
+    expect(
+      Array.from(hierarchy.querySelectorAll<HTMLElement>("[data-layer-source-node-id]")).map(
+        ({ dataset }) => dataset.layerSourceNodeId,
+      ),
+    ).toEqual([
+      "sign-in.layout",
+      "sign-in.title",
+      "sign-in.email",
+      "sign-in.password",
+      "sign-in.error",
+      "sign-in.submit",
+    ]);
+  });
+
   it("chooses an exact named-slot target and inserts Catalog defaults into Source and preview", async () => {
     renderApplication("/projects/account-app/surfaces/sign-in");
     expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
@@ -2393,6 +2562,88 @@ describe("Desen App application shell", () => {
       expect(canvas.isConnected).toBe(false);
       expect(window.location.pathname).toBe("/projects/account-app/surfaces/sign-in");
     });
+  });
+
+  it("keeps canvas viewport and preview-frame chrome scoped to the surfaced Run destination", async () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+    const signInFrame = screen.getByLabelText(/page frame/u);
+    fireEvent.click(screen.getByRole("button", { name: "Zoom in canvas" }));
+    fireEvent.click(screen.getByRole("button", { name: "Pan canvas down" }));
+    fireEvent.click(screen.getByRole("button", { name: "Make preview frame wider" }));
+    expect(signInFrame.style.getPropertyValue("--desen-canvas-viewport-zoom")).toBe("1.25");
+    expect(signInFrame.style.getPropertyValue("--desen-canvas-viewport-pan-y")).toBe("48px");
+    expect(signInFrame.getAttribute("data-canvas-frame-width")).toBe("500");
+
+    fireEvent.click(screen.getByRole("button", { name: "Run" }));
+    let controls = screen.getByRole("complementary", { name: "Run controls" });
+    const outcome = within(controls).getByRole("combobox", {
+      name: "Next outcome for signIn",
+    });
+    fireEvent.change(outcome, { target: { value: "success" } });
+    const signInCanvas = screen.getByRole("group", { name: "Managed sign-in canvas" });
+    await act(async () => {
+      fireEvent.change(within(signInCanvas).getByLabelText("Email"), {
+        target: { value: "canvas@example.com" },
+      });
+      await Promise.resolve();
+    });
+    await act(async () => {
+      fireEvent.change(within(signInCanvas).getByLabelText("Password"), {
+        target: { value: "fixture-only" },
+      });
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect((within(signInCanvas).getByLabelText("Email") as HTMLInputElement).value).toBe(
+        "canvas@example.com",
+      );
+      expect((within(signInCanvas).getByLabelText("Password") as HTMLInputElement).value).toBe(
+        "fixture-only",
+      );
+    });
+    fireEvent.click(within(signInCanvas).getByRole("button", { name: "Sign in" }));
+    await waitFor(() => {
+      controls = screen.getByRole("complementary", { name: "Run controls" });
+      expect(
+        (
+          within(controls).getByRole("button", {
+            name: "Complete signIn fixture",
+          }) as HTMLButtonElement
+        ).disabled,
+      ).toBe(false);
+    });
+    fireEvent.click(within(controls).getByRole("button", { name: "Complete signIn fixture" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("group", { name: "Managed home canvas" })).toBeTruthy();
+    });
+    const homeFrame = screen.getByLabelText(/page frame/u);
+    expect(homeFrame.style.getPropertyValue("--desen-canvas-viewport-zoom")).toBe("1");
+    expect(homeFrame.style.getPropertyValue("--desen-canvas-viewport-pan-y")).toBe("0px");
+    expect(homeFrame.getAttribute("data-canvas-frame-width")).toBe("420");
+    expect(homeFrame.getAttribute("data-canvas-preview-resized")).toBe("false");
+    expect(screen.getByRole("region", { name: "Canvas controls" }).textContent).toContain(
+      "No layer selected",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Design" }));
+    await waitFor(() => {
+      expect(screen.getByRole("group", { name: "Managed sign-in canvas" })).toBeTruthy();
+    });
+    const restoredSignInFrame = screen.getByLabelText(/page frame/u);
+    expect(restoredSignInFrame.style.getPropertyValue("--desen-canvas-viewport-zoom")).toBe("1.25");
+    expect(restoredSignInFrame.style.getPropertyValue("--desen-canvas-viewport-pan-y")).toBe(
+      "48px",
+    );
+    expect(restoredSignInFrame.getAttribute("data-canvas-frame-width")).toBe("500");
+    expect(screen.getByRole("region", { name: "Canvas controls" }).textContent).toContain(
+      "Selected · sign-in.email",
+    );
   });
 
   it("revokes the previous fixture authority synchronously when a scenario replaces its Bundle", async () => {

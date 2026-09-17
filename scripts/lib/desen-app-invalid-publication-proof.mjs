@@ -11,7 +11,10 @@ import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
-import { buildCurrentDesenAppPublishedHostUpdateGraphAudit } from "./desen-app-published-host-update-proof.mjs";
+import {
+  buildCurrentDesenAppPublishedHostUpdateGraphAudit,
+  projectM10AT11CurrentGraphAudit,
+} from "./desen-app-published-host-update-proof.mjs";
 import { M10_GATE_M10A_T01_CURRENT_HOST_AUDIT } from "./m10-gate-proof.mjs";
 
 const WORKSPACE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -115,6 +118,25 @@ const M10A_T10_APP_PACKAGE_SUCCESSOR = Object.freeze({
   historicalBytes: 4_621,
   historicalSha256: "133b549eca53d3f4438259bf020f13ec6e14597e9b05edfa74440191cd67cd1c",
 });
+const M10A_T11_APP_PACKAGE_SUCCESSOR = Object.freeze({
+  path: "apps/desen-app/package.json",
+  currentBytes: 5_080,
+  currentSha256: "503de2c93b32aa51b38870a746bbee68fbafa00e1d38b9cf7909625f9056bb92",
+  predecessorBytes: M10A_T10_APP_PACKAGE_SUCCESSOR.currentBytes,
+  predecessorSha256: M10A_T10_APP_PACKAGE_SUCCESSOR.currentSha256,
+});
+const M10A_T11_TRACKED_SOURCE_SUCCESSORS = Object.freeze([
+  Object.freeze({
+    path: "apps/desen-app/src/application.module.css",
+    currentBytes: 122_621,
+    currentSha256: "08e85c9b6793d54d265e7512a27a735b5b14977eb97c810da8ccf01ef2b7d410",
+  }),
+  Object.freeze({
+    path: "apps/desen-app/src/application.tsx",
+    currentBytes: 168_750,
+    currentSha256: "6480a98ce6597ddb5d4cbb2abce100719fa88a5907731458800d9d829c33a827",
+  }),
+]);
 const T08_HISTORICAL_GRAPH_AUDIT_PIN = Object.freeze({
   bytes: 115_904,
   sha256: "b4d64538959da4a55478e125973b95d12a2c8ef8707c8440fa3cac26c0389767",
@@ -478,6 +500,46 @@ function projectM10AT10AppPackageReceipt(currentReceipts, historicalReceipts) {
   current.entry.sha256 = historical.entry.sha256;
 }
 
+/** Removes only the reviewed T11 test declaration before the existing T10 package bridge. */
+function projectM10AT11AppPackageReceipt(currentReceipts) {
+  const successor = M10A_T11_APP_PACKAGE_SUCCESSOR;
+  const current = exactEntry(
+    currentReceipts,
+    ({ path: relativePath }) => relativePath === successor.path,
+    "current T11 App package receipt",
+  );
+  requireExactFields(
+    current.entry,
+    { bytes: successor.currentBytes, sha256: successor.currentSha256 },
+    "current T11 App package receipt",
+  );
+  current.entry.bytes = successor.predecessorBytes;
+  current.entry.sha256 = successor.predecessorSha256;
+}
+
+/** Projects the two tracked T11 source replacements after the complete graph authenticated them. */
+function projectM10AT11TrackedSourceReceipts(currentReceipts, historicalReceipts) {
+  for (const successor of M10A_T11_TRACKED_SOURCE_SUCCESSORS) {
+    const current = exactEntry(
+      currentReceipts,
+      ({ path: relativePath }) => relativePath === successor.path,
+      `current T11 ${successor.path} receipt`,
+    );
+    const historical = exactEntry(
+      historicalReceipts,
+      ({ path: relativePath }) => relativePath === successor.path,
+      `historical ${successor.path} receipt`,
+    );
+    requireExactFields(
+      current.entry,
+      { bytes: successor.currentBytes, sha256: successor.currentSha256 },
+      `current T11 ${successor.path} receipt`,
+    );
+    current.entry.bytes = historical.entry.bytes;
+    current.entry.sha256 = historical.entry.sha256;
+  }
+}
+
 function projectEditorCoreReceipts(currentReceipts, historicalReceipts, graphReceipts) {
   for (const identity of M10A_T01_EDITOR_CORE_SUCCESSORS) {
     const current = exactEntry(
@@ -549,7 +611,7 @@ export function projectDesenAppInvalidPublicationHistoricalAuthorities(rawAuthor
     }
     captured[key] = captureSuccessorJson(descriptor.value, key);
   }
-  const currentGraph = captured.currentGraphAudit;
+  let currentGraph = captured.currentGraphAudit;
   const historicalGraph = captured.historicalGraphAudit;
   authenticateExactJson(historicalGraph, T08_HISTORICAL_GRAPH_AUDIT_PIN, "T08 historical graph");
   authenticateExactJson(
@@ -557,6 +619,11 @@ export function projectDesenAppInvalidPublicationHistoricalAuthorities(rawAuthor
     T06_HISTORICAL_PUBLIC_MATRIX_PIN,
     "T06 historical public matrix",
   );
+  try {
+    currentGraph = structuredClone(projectM10AT11CurrentGraphAudit(currentGraph, historicalGraph));
+  } catch {
+    fail("SUCCESSOR_DRIFT", "The fresh graph is not the exact reviewed T11 successor.");
+  }
   projectM10AT10IsolatedSourceInventory(currentGraph);
   if (!isDeepStrictEqual(currentGraphSummary(currentGraph), M10_GATE_M10A_T01_CURRENT_HOST_AUDIT)) {
     fail("SUCCESSOR_DRIFT", "The fresh graph is not the exact M10A-T01 successor.");
@@ -2285,7 +2352,12 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
   artifact.boundary.trackedReceipts[editorCoreManifestIndex] = structuredClone(
     previousEditorCoreManifest,
   );
+  projectM10AT11AppPackageReceipt(artifact.boundary.trackedReceipts);
   projectM10AT10AppPackageReceipt(
+    artifact.boundary.trackedReceipts,
+    historical.boundary.trackedReceipts,
+  );
+  projectM10AT11TrackedSourceReceipts(
     artifact.boundary.trackedReceipts,
     historical.boundary.trackedReceipts,
   );
@@ -2332,8 +2404,11 @@ export async function buildDesenAppInvalidPublicationEvidence(rawOptions = undef
       historicalProjectionPaths: [
         packagePath,
         M10A_T01_EDITOR_CORE_MANIFEST_SUCCESSOR.path,
+        M10A_T11_APP_PACKAGE_SUCCESSOR.path,
         M10A_T10_APP_PACKAGE_SUCCESSOR.path,
+        ...M10A_T11_TRACKED_SOURCE_SUCCESSORS.map(({ path: sourcePath }) => sourcePath),
         "authority.currentGraphAudit",
+        "authority.currentGraphAudit[M10A-T11-reachable-direct-manipulation]",
         "authority.currentGraphAudit.appSourceAudit.inventory[M10A-T10-isolated-lifecycle]",
         "authority.currentGraphAudit.appSourceAudit.completeSourceFiles",
         "authority.publicApiMatrix.compiledReceipts[packages/editor-core/dist/index.js]",

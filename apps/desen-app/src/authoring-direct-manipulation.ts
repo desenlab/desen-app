@@ -43,7 +43,8 @@ export const AUTHORING_CANVAS_PREVIEW_FRAME_LIMITS = Object.freeze({
   minWidth: 1,
 });
 const ZOOM_STEPS = Object.freeze([0.5, 0.75, 1, 1.25, 1.5, 2]);
-const MAX_SELECTION_SIZE = 256;
+/** Largest deliberate layer group the App accepts for one direct manipulation. */
+export const AUTHORING_DIRECT_MANIPULATION_MAX_SELECTION_SIZE = 256;
 
 function validFinite(value: unknown, limit: number): value is number {
   return typeof value === "number" && Number.isFinite(value) && Math.abs(value) <= limit;
@@ -249,7 +250,10 @@ export function projectAuthoringDirectManipulationSelection(
   route: Readonly<{ readonly projectId: string; readonly surfaceId: string }>,
   model: CatalogAuthoringModel,
 ): AuthoringDirectManipulationSelectionProjection {
-  if (!Array.isArray(selections) || selections.length > MAX_SELECTION_SIZE) {
+  if (
+    !Array.isArray(selections) ||
+    selections.length > AUTHORING_DIRECT_MANIPULATION_MAX_SELECTION_SIZE
+  ) {
     return Object.freeze({ status: "rejected" });
   }
   if (selections.length === 0) return Object.freeze({ status: "idle" });
@@ -295,6 +299,13 @@ export function toggleAuthoringDirectManipulationSelection(
   const currentIndex = current.findIndex(
     ({ sourceNodeId }) => sourceNodeId === candidate.sourceNodeId,
   );
-  if (currentIndex < 0) return Object.freeze([...current, candidate]);
+  if (currentIndex < 0) {
+    // Enforce the same bound at admission time as at projection time. Keeping the prior exact
+    // selection is safer than allowing an invisible 257th layer to affect a later operation.
+    if (current.length >= AUTHORING_DIRECT_MANIPULATION_MAX_SELECTION_SIZE) {
+      return Object.freeze([...current]);
+    }
+    return Object.freeze([...current, candidate]);
+  }
   return Object.freeze(current.filter((_, index) => index !== currentIndex));
 }
