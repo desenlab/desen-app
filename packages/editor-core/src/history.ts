@@ -110,6 +110,22 @@ function diagnostic(
   });
 }
 
+function historyFailure(
+  history: DesenEditorHistory,
+  code: DesenEditorHistoryDiagnosticCode,
+  message: string,
+): Readonly<{
+  readonly ok: false;
+  readonly diagnostics: readonly [DesenEditorHistoryDiagnostic];
+  readonly history: DesenEditorHistory;
+}> {
+  return Object.freeze({
+    ok: false as const,
+    diagnostics: Object.freeze([{ code, message }] as [DesenEditorHistoryDiagnostic]),
+    history,
+  });
+}
+
 function validIdentifier(value: unknown): value is string {
   return typeof value === "string" && /^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u.test(value);
 }
@@ -301,10 +317,11 @@ export function recordDesenEditorHistory(
 export function undoDesenEditorHistory(history: DesenEditorHistory): DesenEditorHistoryResult {
   const entry = history.past.at(-1);
   if (entry === undefined)
-    return diagnostic(
+    return historyFailure(
+      history,
       "run.desen.editor/HISTORY_EMPTY",
       "No authored edit is available to undo.",
-    ) as never;
+    );
   return Object.freeze({
     ok: true as const,
     changed: true,
@@ -320,10 +337,11 @@ export function undoDesenEditorHistory(history: DesenEditorHistory): DesenEditor
 export function redoDesenEditorHistory(history: DesenEditorHistory): DesenEditorHistoryResult {
   const entry = history.future[0];
   if (entry === undefined)
-    return diagnostic(
+    return historyFailure(
+      history,
       "run.desen.editor/HISTORY_EMPTY",
       "No authored edit is available to redo.",
-    ) as never;
+    );
   return Object.freeze({
     ok: true as const,
     changed: true,

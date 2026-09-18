@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T14",
+  "proofId": "m10a-t14",
+  "profile": "desen.m10a-t14.history-identity-safe-reuse.v1",
+  "result": "PASS",
+  "source": [
+    {
+      "path": "apps/desen-app/src/application.tsx",
+      "bytes": 183780,
+      "sha256": "341e9075946cbedcd233579b87db71ccab700675ce89170fb16be6767120b818"
+    },
+    {
+      "path": "apps/desen-app/test/application.test.tsx",
+      "bytes": 126408,
+      "sha256": "91098c8240bf156c88e13c6448bd858a12155f015b45b98c1e3eb5866df76b85"
+    },
+    {
+      "path": "packages/editor-core/src/history.ts",
+      "bytes": 16843,
+      "sha256": "6db41da5818a0e1189e24dc719de124e4faa1bc0c476903598ae42e65218f1cf"
+    },
+    {
+      "path": "packages/editor-core/src/index.ts",
+      "bytes": 5906,
+      "sha256": "36df2da75ee72253416511cbe8b4b71d66af5f6fb8836b7a4d9611ea37487d04"
+    },
+    {
+      "path": "packages/editor-core/test/history.test.ts",
+      "bytes": 3428,
+      "sha256": "5cb7f6f347a0603bbce08ff40d823d9a5d379327d84304e0ac014a37a783def5"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 141822,
+      "sha256": "2973a4c7af7283756095e12ed8b4c39c456027987b7a8e3352d0b6680162feb8"
+    }
+  ],
+  "limits": {
+    "maxHistoryEntries": 100,
+    "maxClipboardNodes": 256,
+    "maxClipboardBytes": 8388608,
+    "maxSourceTreeDepth": 64
+  },
+  "claims": {
+    "boundedImmutableUndoRedo": true,
+    "redoClearedOnNewEdit": true,
+    "appOwnedClipboardProvenance": true,
+    "freshIdentityRemapping": true,
+    "nestedBindingReferenceRemapping": true,
+    "hostileClipboardRejectedAtomically": true,
+    "catalogValidationBeforeCommit": true,
+    "crashSafeSaveBoundaryPreserved": true,
+    "runtimePublisherProtocolUnchanged": true
+  },
+  "focusedCommands": [
+    "pnpm --filter @desen/editor-core build",
+    "pnpm --filter @desen/editor-core exec vitest run test/history.test.ts",
+    "pnpm --filter @desen/app-web typecheck",
+    "pnpm --filter @desen/app-web exec vitest run test/application.test.tsx"
+  ],
+  "nonClaims": [
+    "Clipboard transfer is intentionally App-owned and in-memory; foreign OS clipboard payloads are not admitted.",
+    "History changes authored Source only and does not grant Runtime, Publisher, protocol, or host authority.",
+    "Masters, instances, variants, visual capture, and G10A remain later tasks."
+  ]
+}

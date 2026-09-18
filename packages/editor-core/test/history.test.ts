@@ -29,6 +29,9 @@ describe("editor history and identity-safe clipboard", () => {
     if (!firstDocument.ok || !secondDocument.ok) throw new TypeError("Expected valid edits.");
     const initialHistory = createDesenEditorHistory(initial, 2);
     if (initialHistory === undefined) throw new TypeError("Expected a history.");
+    const emptyUndo = undoDesenEditorHistory(initialHistory);
+    expect(emptyUndo.ok).toBe(false);
+    if (!emptyUndo.ok) expect(emptyUndo.history).toBe(initialHistory);
     const committed = recordDesenEditorHistory(initialHistory, firstDocument.document);
     const undone = undoDesenEditorHistory(committed);
     expect(undone.ok).toBe(true);
