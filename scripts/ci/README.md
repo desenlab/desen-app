@@ -27,7 +27,6 @@ invent commands, choose executables, weaken prerequisites, or redirect evidence 
 | `required-exhaustive-equivalence.mjs`      | Modular/legacy logical equivalence                     |
 | `affected-selector-promotion-evidence.mjs` | Historical 20/20 promotion evidence and live successor |
 | `infrastructure-debt.mjs`                  | Cleanup owner, trigger, deadline, and closure checks   |
-| `local-preflight.mjs`                      | Safe local focused feedback with full-check fallback   |
 
 The root `.github/workflows/ci.yml` selects the hosted entry point. `package.json` exposes focused
 local verification commands.
@@ -36,17 +35,22 @@ local verification commands.
 
 ### Local developer feedback
 
-Run `node scripts/ci/local-preflight.mjs` between commits when you need a quick signal. The command
-uses a fresh `origin/main` comparison and runs `format:check`, fresh Turbo `lint/typecheck/build/test`
-tasks for modified package/application source, and `boundaries`. It admits only modified tracked
-source files under `apps/*/{src,test,test-d,dev}` or `packages/*/{src,test,test-d,dev}`. Metadata,
-policy/CI, dependency, deleted/renamed, untracked, or otherwise uncertain changes fail closed to
-the complete `pnpm check` compatibility audit. `--base <revision>` selects another already-present
-ancestor; `--dry-run` prints the plan without running it.
+For a quick, non-authoritative signal between commits, use the existing package tooling only when
+the diff is limited to modified tracked source under `apps/*/{src,test,test-d,dev}` or
+`packages/*/{src,test,test-d,dev}`:
 
-This is developer feedback, not passing authority. It never changes the hosted dispatcher, the
-affected selector, the exhaustive inventory, deadlines, or any required proof workload. Hosted CI
-still performs its exact fresh required route and remains the only merge authority.
+```bash
+pnpm format:check
+TURBO_FORCE=true pnpm exec turbo run lint typecheck build test \
+  '--filter=...[origin/main]' --force
+pnpm boundaries
+```
+
+Metadata, policy/CI, dependency, deleted/renamed, untracked, or otherwise uncertain changes must
+use the complete `pnpm check` compatibility audit. This is developer feedback, not passing
+authority: it never changes the hosted dispatcher, the affected selector, the exhaustive
+inventory, deadlines, or any required proof workload. Hosted CI still performs its exact fresh
+required route and remains the only merge authority.
 
 ### Pull requests
 
