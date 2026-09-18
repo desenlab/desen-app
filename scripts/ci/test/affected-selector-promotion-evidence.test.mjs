@@ -334,13 +334,13 @@ test("authenticates the exact 20/20 hosted campaign and live M10A-T13 successor"
     },
   );
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "3db9627bdfbcab57658b8ab9f4a7aca2375912c75770c5050ae5bccf44f44066",
+    selectorSha256: "023ec122a87f0ea6d4665f4f32e4fda13ce53317c173684dcbe9bf310b749f44",
     ownershipSha256: "463e3f2217766da38dac2a908c78508d7a6a7d7c84886378769904c91032157c",
     impactGraphSha256: "98b7c102727998744a86a74ac99005b8ce40f83c8a9c98f5223c71893249b1db",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "a647fd20787c7dd8515c7531ef8bdafc026acf05ce36aa6b4db1b5ec9c19bbf2",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "f5353de90965c64104ff32ff51d85ff22fc8eb286e8ea85b38d9ff6fdd9f916e",
+    runnerAuthoritySha256: "0933885adcd42c53e45d7eab8a081a5aca00bbadf96d94e07cb1dc82b5369ed4",
   });
 });
 
