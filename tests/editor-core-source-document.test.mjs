@@ -40,6 +40,32 @@ const PERSISTENCE_TYPES = "packages/editor-core/test/persistence.types.ts";
 const TERMINAL_INTEGRATION_TEST = "packages/editor-core/test/terminal-integration.test.ts";
 const PUBLIC_TEST = "packages/editor-core/test/public-package.mjs";
 const ROOT_TEST = "tests/editor-core-source-document.test.mjs";
+const HISTORY_SOURCE = "packages/editor-core/src/history.ts";
+const HISTORY_RUNTIME = "packages/editor-core/dist/history.js";
+const HISTORY_DECLARATION = "packages/editor-core/dist/history.d.ts";
+const HISTORY_TEST = "packages/editor-core/test/history.test.ts";
+const HISTORY_RUNTIME_EXPORTS = [
+  "captureDesenEditorClipboard",
+  "createDesenEditorHistory",
+  "pasteDesenEditorClipboard",
+  "readDesenEditorNodePlacement",
+  "recordDesenEditorHistory",
+  "redoDesenEditorHistory",
+  "undoDesenEditorHistory",
+];
+const HISTORY_TYPE_EXPORTS = [
+  "DesenEditorClipboardPayload",
+  "DesenEditorClipboardResult",
+  "DesenEditorHistory",
+  "DesenEditorHistoryDiagnostic",
+  "DesenEditorHistoryDiagnosticCode",
+  "DesenEditorHistoryEntry",
+  "DesenEditorHistoryResult",
+  "DesenEditorNodePlacement",
+  "DesenEditorPasteCommand",
+  "DesenEditorPasteResult",
+  "DesenEditorPasteSuccess",
+];
 const BASELINE_RUNTIME_PATHS = [
   "packages/validator/dist/component-contract-validation.js",
   "packages/validator/dist/embedded-schema-validation.js",
@@ -331,8 +357,10 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     "createDesenEditorDocument",
   ]);
   assert.deepEqual(built.currentCompatibility.boundary.additiveRuntimeExports, [
+    "captureDesenEditorClipboard",
     "clearDesenEditorNodeCondition",
     "createDesenEditorContinuousValidator",
+    "createDesenEditorHistory",
     "createDesenEditorPersistencePort",
     "deleteDesenEditorAction",
     "deleteDesenEditorEventHandler",
@@ -351,6 +379,10 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     "insertDesenEditorSubtree",
     "insertDesenEditorVariant",
     "moveDesenEditorNode",
+    "pasteDesenEditorClipboard",
+    "readDesenEditorNodePlacement",
+    "recordDesenEditorHistory",
+    "redoDesenEditorHistory",
     "reorderDesenEditorAction",
     "reorderDesenEditorNode",
     "reorderDesenEditorVariant",
@@ -366,6 +398,7 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     "setDesenEditorVariantCondition",
     "setDesenEditorVariantProp",
     "setDesenEditorVariantStyleProperty",
+    "undoDesenEditorHistory",
   ]);
   assert.equal(
     built.currentCompatibility.boundary.currentPackageTypeExports.includes(
@@ -427,31 +460,25 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     publicCompilerNegativeAssertionsAdded: 0,
   });
   assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessors.at(-1), {
-    task: "M08-T09",
-    sourcePath: "packages/editor-core/src/continuous-validation.ts",
-    runtimePath: "packages/editor-core/dist/continuous-validation.js",
-    declarationPath: "packages/editor-core/dist/continuous-validation.d.ts",
-    runtimeExports: ["createDesenEditorContinuousValidator"],
-    typeExports: [
-      "DesenEditorContinuousValidationReport",
-      "DesenEditorContinuousValidator",
-      "DesenEditorContinuousValidatorCreationFailure",
-      "DesenEditorContinuousValidatorCreationResult",
-      "DesenEditorContinuousValidatorCreationSuccess",
-      "DesenEditorInvalidSubjectMapping",
-    ],
-    publicDeclarations: 7,
-    tsdocDeclarations: 7,
+    task: "M10A-T14",
+    sourcePath: HISTORY_SOURCE,
+    runtimePath: HISTORY_RUNTIME,
+    declarationPath: HISTORY_DECLARATION,
+    focusedTestPath: HISTORY_TEST,
+    runtimeExports: HISTORY_RUNTIME_EXPORTS,
+    typeExports: HISTORY_TYPE_EXPORTS,
+    publicDeclarations: 18,
+    tsdocDeclarations: 18,
   });
-  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 6);
-  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 36);
-  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 92);
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 7);
+  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 43);
+  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 103);
   assert.equal(built.currentCompatibility.evidence.tests.persistenceRuntimeCases, 10);
   assert.equal(built.currentCompatibility.evidence.tests.persistenceCompilerNegativeCases, 21);
   assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 43);
   assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 102);
   assert.equal(built.currentCompatibility.evidence.tests.terminalIntegrationRuntimeCases, 4);
-  assert.equal(built.currentCompatibility.evidence.trackedFiles.length, 62);
+  assert.equal(built.currentCompatibility.evidence.trackedFiles.length, 66);
   assert.equal(
     built.currentCompatibility.boundary.packageScripts.includes("test:continuous-validation"),
     true,
