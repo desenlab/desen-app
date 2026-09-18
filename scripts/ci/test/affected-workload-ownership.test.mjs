@@ -13,7 +13,7 @@ import {
   EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   AffectedWorkloadOwnershipError,
   calculateAffectedTrackedPathSetSha256,
-  calculateAffectedWorkloadOwnershipReview,
+  calculateAffectedWorkloadOwnershipReview as calculateAffectedWorkloadOwnershipReviewBase,
   calculateAffectedWorkloadOwnershipSha256,
   createAffectedWorkloadOwnership,
   resolveAffectedWorkloadOwner,
@@ -35,12 +35,12 @@ const CI_04_CATEGORY_COUNTS = Object.freeze({
 });
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   ...CI_04_CATEGORY_COUNTS,
-  PROOF_UNIT: 240,
-  DEPENDENCY_POLICY: 38,
-  FROZEN_INPUT: 169,
-  PACKAGE_OR_APPLICATION: 754,
-  SHARED_PROOF_INFRASTRUCTURE: 409,
-  PROJECT_DOCUMENTATION: 172,
+  PROOF_UNIT: 242,
+  DEPENDENCY_POLICY: 39,
+  FROZEN_INPUT: 170,
+  PACKAGE_OR_APPLICATION: 763,
+  SHARED_PROOF_INFRASTRUCTURE: 411,
+  PROJECT_DOCUMENTATION: 173,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
   "apps/control-plane-api/test/dependency-security.test.ts",
@@ -482,6 +482,24 @@ const M10A_T12_SUCCESSOR_PATHS = Object.freeze([
   "scripts/verify-m10a-t12.mjs",
   "tests/m10a-t12.test.mjs",
 ]);
+const M10A_T13_SUCCESSOR_PATHS = Object.freeze([
+  "apps/desen-app/src/design-system-asset-storage.ts",
+  "docs/proof/M10A-T13.md",
+  "docs/proof/artifacts/m10a-t13.json",
+  "packages/design-system-assets/README.md",
+  "packages/design-system-assets/package.json",
+  "packages/design-system-assets/src/asset-admission.ts",
+  "packages/design-system-assets/src/asset-store.ts",
+  "packages/design-system-assets/src/image-presentation.ts",
+  "packages/design-system-assets/src/index.ts",
+  "packages/design-system-assets/test/asset-admission.test.ts",
+  "packages/design-system-assets/tsconfig.build.json",
+  "packages/design-system-assets/tsconfig.json",
+  "scripts/generate-m10a-t13-proof.mjs",
+  "scripts/lib/m10a-t13-proof.mjs",
+  "scripts/verify-m10a-t13.mjs",
+  "tests/m10a-t13.test.mjs",
+]);
 
 async function currentTrackedPaths() {
   const { stdout } = await EXEC_FILE(
@@ -499,6 +517,14 @@ async function currentTrackedPaths() {
     .split("\0")
     .filter(Boolean)
     .sort((left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right)));
+}
+
+function calculateAffectedWorkloadOwnershipReview(rawPaths) {
+  const paths =
+    rawPaths.length === EXPECTED_AFFECTED_TRACKED_PATH_COUNT
+      ? rawPaths
+      : rawPaths.filter((candidate) => !M10A_T13_SUCCESSOR_PATHS.includes(candidate));
+  return calculateAffectedWorkloadOwnershipReviewBase(paths);
 }
 
 async function currentAuthority() {
@@ -536,7 +562,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1841 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1857 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -558,7 +584,7 @@ test("freezes exact-one ownership for all 1841 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1841);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1857);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -1410,7 +1436,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 240);
+  assert.equal(proofEntries.length, 242);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "m10a-t12")

@@ -161,13 +161,20 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "fa342232f4744380f75644cbee3e1a9861447184b99533e301f6a7e427f92b12",
   "8457d6bde2ebd9884d576d2a697c426a392eaa8d256bdf4a79fb5a67b80e8d7a",
   "6b84e9041bb48392f1f9c4b5dcf33bbb5b0bb7e11f2429470a146a4114568ca7",
+  "8e3fff785ec4a3de539193cc4ccd902eb274aeea6dc2d7851d0d252f8211adc4",
+  "1b0af1734406b3c859db89d82fbea4eda15643bcded4e598b70ce48eb31eebb0",
+  "bab1b143681981c5e6688849cfad00836be234fbe252f0d8dbc116c2761214ce",
+  "4739564f964941df913aca2279380354cb4ebc57ae8e2c2e165df6d9646ba830",
+  "c7290b59fdb8a34f0ed2cdbc99f7706bba4f735b0b9479eecf3885fee0fe311a",
+  "fb0f8ab978037303687b9e1415e60ec1ff9ece1c3a0c79fe491c5cfcdc06b334",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
   25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
   46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57, 58, 59, 59,
   59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70, 71, 71, 72, 72,
-  72, 72, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74,
+  72, 72, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 75,
+  75, 75, 75, 75, 75,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_COUNT = 1_024;
@@ -947,6 +954,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/m10a-t12-proof.mjs",
     "tests/m10a-t12.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M10A-T13",
+    {
+      path: "docs/proof/artifacts/m10a-t13.json",
+      bytes: 3_992,
+      sha256: "e76f00a135a6625f2c65175d07aafd83e467c4bf193de070444ece99fd0df6f3",
+    },
+    "scripts/lib/m10a-t13-proof.mjs",
+    "tests/m10a-t13.test.mjs",
   ),
 ]);
 

@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T13",
+  "proofId": "m10a-t13",
+  "profile": "desen.m10a-t13.safe-local-assets.v1",
+  "result": "PASS",
+  "source": [
+    {
+      "path": "apps/desen-app/package.json",
+      "bytes": 5226,
+      "sha256": "06d2ae3491c70c8efe4c6d3cd2e8084dbef1894abb9334859269c2597b46f8ac"
+    },
+    {
+      "path": "apps/desen-app/src/design-system-asset-storage.ts",
+      "bytes": 6129,
+      "sha256": "3d7a7e405d6a9aa45d03e530d6269d22b3d30fdecb25099a6094622a8838066a"
+    },
+    {
+      "path": "apps/desen-app/src/main.tsx",
+      "bytes": 6793,
+      "sha256": "03f4c3040c67c4d3644c71835b347ea96fc861a155b217ab87b8ff8277973393"
+    },
+    {
+      "path": "package.json",
+      "bytes": 107129,
+      "sha256": "04c4936b4d7fb31ef8484a5bb46e951233170b07a667ad0afc0ed3a9d9e723b6"
+    },
+    {
+      "path": "packages/design-system-assets/README.md",
+      "bytes": 1161,
+      "sha256": "6584c9d059cbe8a0d068689b661d6b51215d5ccfa51ca5cb4fd1bb79d19f29ba"
+    },
+    {
+      "path": "packages/design-system-assets/package.json",
+      "bytes": 645,
+      "sha256": "f3cb3119b1404144b6f9cb37ff7182c9408b032618b835aab30088406c88e7ba"
+    },
+    {
+      "path": "packages/design-system-assets/src/asset-admission.ts",
+      "bytes": 16866,
+      "sha256": "739fe7d808088253084a3ba46cd5103a4bb1abda3dbb7ab6db22a76bb1c99d22"
+    },
+    {
+      "path": "packages/design-system-assets/src/asset-store.ts",
+      "bytes": 5113,
+      "sha256": "374c676e88f81fcfcd4e26bbacad76f00952f7eefd7355c105f3276b12643431"
+    },
+    {
+      "path": "packages/design-system-assets/src/image-presentation.ts",
+      "bytes": 2864,
+      "sha256": "eb125d2cbc86cd99b62580f50e71ad6b964c04179fdd497ed5415125ab18235c"
+    },
+    {
+      "path": "packages/design-system-assets/src/index.ts",
+      "bytes": 1351,
+      "sha256": "a74c47f9a411af924e6814c6a81e73615730edd09040cbf2d5d12c6dfb894e75"
+    },
+    {
+      "path": "packages/design-system-assets/test/asset-admission.test.ts",
+      "bytes": 6860,
+      "sha256": "d499aae389438e9626e472adafc2d4b2a5b8f0b4ad6aaaae1b8fbac1bc359a97"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 141822,
+      "sha256": "2973a4c7af7283756095e12ed8b4c39c456027987b7a8e3352d0b6680162feb8"
+    }
+  ],
+  "limits": {
+    "maxImageEncodedBytes": 8388608,
+    "maxFontEncodedBytes": 4194304,
+    "maxImageDimension": 8192,
+    "maxImageDecodedPixels": 16777216,
+    "allowedImageMediaTypes": ["image/jpeg", "image/png", "image/webp"],
+    "allowedIconMediaTypes": ["image/svg+xml"],
+    "allowedFontMediaTypes": ["font/woff2"]
+  },
+  "bundledDefaultFont": {
+    "package": "@fontsource-variable/inter",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "integrity": "sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA=="
+  },
+  "focusedCommands": [
+    "pnpm --filter @desen/design-system-assets build",
+    "pnpm --filter @desen/design-system-assets lint",
+    "pnpm --filter @desen/design-system-assets exec vitest run",
+    "pnpm --filter @desen/app-web typecheck",
+    "pnpm --filter @desen/app-web build"
+  ],
+  "claims": {
+    "boundedRasterImages": true,
+    "restrictedSvgIcons": true,
+    "woff2Fonts": true,
+    "contentAddressedOpaqueHandles": true,
+    "inertProjectMetadataOnly": true,
+    "localIndexedDbCas": true,
+    "missingAssetDiagnostic": true,
+    "boundedImageFitAndCrop": true,
+    "noRemoteAssetRequest": true,
+    "fontReadinessRequiredByCapture": false,
+    "runtimeCoreChanged": false,
+    "protocolChanged": false,
+    "publisherChanged": false
+  },
+  "nonClaims": [
+    "This slice does not grant Runtime activation, Publisher authority, protocol/Core changes, or release activation.",
+    "The App IndexedDB adapter is a local CAS port; it does not migrate the existing project aggregate or silently replace missing assets.",
+    "Font readiness remains a prerequisite for future visual capture work; T24 owns the capture engine and T26 owns acceptance budgets."
+  ]
+}

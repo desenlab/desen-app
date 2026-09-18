@@ -229,6 +229,19 @@ const M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
   ].sort((left, right) => left.localeCompare(right, "en-US")),
 );
 
+// T13 adds an App-local IndexedDB adapter. It is intentionally outside the frozen T12 graph
+// projection, but the live source inventory must admit the additive successor file so the older
+// browser proof can continue to authenticate its exact historical graph without treating T13 as
+// an unreviewed mutation.
+const M10A_T13_ADDED_APP_SOURCE_PATHS = Object.freeze([
+  "apps/desen-app/src/design-system-asset-storage.ts",
+]);
+const M10A_T12_LIVE_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
+  [...M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS, ...M10A_T13_ADDED_APP_SOURCE_PATHS].sort(
+    (left, right) => left.localeCompare(right, "en-US"),
+  ),
+);
+
 // Unlike the older T11 bridge, T12 reads a receipt for every current App source, including
 // inventory-only code, before it can project any historical graph.
 const M10A_T12_APP_SOURCE_RECEIPT_PATHS = M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS;
@@ -544,6 +557,56 @@ const M10A_T12_LOCKFILE_SUCCESSOR_RECEIPT = Object.freeze({
 
 const M10A_T12_LOCKFILE_ADDED_FRAGMENTS = Object.freeze([
   "      '@desen/design-system-authoring':\n        specifier: workspace:*\n        version: link:../../packages/design-system-authoring\n",
+]);
+
+// T13 adds the local asset package and bundled Inter font. pnpm also records the Vite peer
+// context introduced by the new package's Vitest test surface; the exact inverse below projects
+// the live T13 lockfile back to the frozen T12 receipt without accepting arbitrary edits.
+const M10A_T13_LOCKFILE_SUCCESSOR_RECEIPT = Object.freeze({
+  authority: "M10A-T13",
+  bytes: 141_822,
+  sha256: "2973a4c7af7283756095e12ed8b4c39c456027987b7a8e3352d0b6680162feb8",
+  predecessor: Object.freeze({
+    authority: M10A_T12_LOCKFILE_SUCCESSOR_RECEIPT.authority,
+    bytes: M10A_T12_LOCKFILE_SUCCESSOR_RECEIPT.bytes,
+    sha256: M10A_T12_LOCKFILE_SUCCESSOR_RECEIPT.sha256,
+  }),
+});
+
+const M10A_T13_LOCKFILE_INVERSE = Object.freeze([
+  Object.freeze({
+    current:
+      "      '@desen/design-system-assets':\n        specifier: workspace:*\n        version: link:../../packages/design-system-assets\n",
+    predecessor: "",
+  }),
+  Object.freeze({
+    current:
+      "      '@fontsource-variable/inter':\n        specifier: 5.3.0\n        version: 5.3.0\n",
+    predecessor: "",
+  }),
+  Object.freeze({
+    current:
+      "  packages/design-system-assets:\n    dependencies:\n      '@desen/protocol':\n        specifier: workspace:*\n        version: link:../protocol\n    devDependencies:\n      vitest:\n        specifier: 4.1.10\n        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@24.13.3))\n\n",
+    predecessor: "",
+  }),
+  Object.freeze({
+    current:
+      "  '@fontsource-variable/inter@5.3.0':\n    resolution: {integrity: sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA==}\n\n",
+    predecessor: "",
+  }),
+  Object.freeze({
+    current: "  '@fontsource-variable/inter@5.3.0': {}\n\n",
+    predecessor: "",
+  }),
+  Object.freeze({
+    current: "      jsdom: '*'\n      vite: ^6.0.0 || ^7.0.0 || ^8.0.0\n",
+    predecessor: "      jsdom: '*'\n",
+  }),
+  Object.freeze({
+    current: "      - msw\n",
+    predecessor:
+      "      - '@vitejs/devtools'\n      - esbuild\n      - jiti\n      - less\n      - msw\n      - sass\n      - sass-embedded\n      - stylus\n      - sugarss\n      - terser\n      - tsx\n      - yaml\n",
+  }),
 ]);
 
 const M10A_T10_APP_PACKAGE_SUCCESSOR = Object.freeze({
@@ -1308,6 +1371,35 @@ const M10A_T11_APP_PACKAGE_SUCCESSOR = Object.freeze({
   ]),
 });
 
+/** Exact additive T13 App manifest successor, projected before the frozen T12 receipt. */
+const M10A_T13_APP_PACKAGE_SUCCESSOR = Object.freeze({
+  path: "apps/desen-app/package.json",
+  bytes: 5_226,
+  sha256: "06d2ae3491c70c8efe4c6d3cd2e8084dbef1894abb9334859269c2597b46f8ac",
+  predecessor: Object.freeze({
+    bytes: 5_133,
+    sha256: "18d5b7479278b39e337027b0739e1f1b6055d0291b774ed761a7a6ecb4ad436e",
+  }),
+  inverseChanges: Object.freeze([
+    Object.freeze({
+      current: `  "dependencies": {\n    "@desen/catalog-sdk": "workspace:*",\n    "@desen/design-system-assets": "workspace:*",\n    "@desen/design-system-authoring": "workspace:*",\n    "@desen/design-system-core": "workspace:*",\n    "@desen/editor-core": "workspace:*",\n    "@desen/editor-web": "workspace:*",\n    "@desen/protocol": "workspace:*",\n    "@desen/publisher": "workspace:*",\n    "@desen/reference-catalog-web": "workspace:*",\n    "@desen/runtime-core": "workspace:*",\n    "@desen/runtime-react": "workspace:*",\n    "@desen/starter-catalog-web": "workspace:*",\n    "@desen/testkit": "workspace:*",\n    "@desen/validator": "workspace:*",\n    "@fontsource-variable/inter": "5.3.0",\n    "react": "19.2.8",\n    "react-dom": "19.2.8"\n  },\n`,
+      predecessor: `  "dependencies": {\n    "@desen/catalog-sdk": "workspace:*",\n    "@desen/design-system-authoring": "workspace:*",\n    "@desen/design-system-core": "workspace:*",\n    "@desen/editor-core": "workspace:*",\n    "@desen/editor-web": "workspace:*",\n    "@desen/publisher": "workspace:*",\n    "@desen/protocol": "workspace:*",\n    "@desen/reference-catalog-web": "workspace:*",\n    "@desen/runtime-core": "workspace:*",\n    "@desen/runtime-react": "workspace:*",\n    "@desen/starter-catalog-web": "workspace:*",\n    "@desen/testkit": "workspace:*",\n    "@desen/validator": "workspace:*",\n    "react": "19.2.8",\n    "react-dom": "19.2.8"\n  },\n`,
+    }),
+  ]),
+});
+
+/** Exact additive T13 dependency-boundary successor, projected before the frozen T12 receipt. */
+const M10A_T13_CONFIG_SUCCESSOR = Object.freeze({
+  path: "dependency-cruiser.config.cjs",
+  bytes: 16_973,
+  sha256: "9b59bdfdecad052ef32bbf0d44373679a72b08fc5ea2289fecd1bc3bee4c555e",
+  predecessor: Object.freeze({
+    bytes: 16_945,
+    sha256: "c8cb509ea87d9a25b49bb8ba389340d4304a1043b8fa2847d01331fdc78743d8",
+  }),
+  inverseChanges: Object.freeze([Object.freeze(['    "design-system-assets",\n', ""])]),
+});
+
 /** Exact T12 normal-App manifest addition, projected before the frozen T11 receipt. */
 const M10A_T12_APP_PACKAGE_SUCCESSOR = Object.freeze({
   path: "apps/desen-app/package.json",
@@ -1627,7 +1719,7 @@ async function acquireFiles(options) {
     inventoryDirectory(canonicalRoot, "apps/reference-host-web-server/src"),
   ]);
   if (
-    !isDeepStrictEqual(appInventory, M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS) ||
+    !isDeepStrictEqual(appInventory, M10A_T12_LIVE_APP_SOURCE_INVENTORY_PATHS) ||
     !isDeepStrictEqual(hostInventory, HOST_SOURCE_PATHS) ||
     !isDeepStrictEqual(hostServerInventory, HOST_SERVER_SOURCE_PATHS)
   ) {
@@ -1893,17 +1985,75 @@ export function authenticateM10AT10LockfileSuccessor(bytes) {
 }
 
 /**
- * Authenticates T12's one normal-App lockfile importer addition before the existing T10 → T04
- * predecessor chain. No caller may relabel an arbitrary current lockfile as the T10 receipt.
+ * Authenticates the live T13 lockfile successor and projects it to the frozen T12 receipt before
+ * the existing T10 → T04 predecessor chain. No caller may relabel an arbitrary current lockfile
+ * as the T10 receipt.
  */
 export function authenticateM10AT12LockfileSuccessor(bytes) {
+  if (
+    bytes.byteLength !== M10A_T13_LOCKFILE_SUCCESSOR_RECEIPT.bytes ||
+    sha256(bytes) !== M10A_T13_LOCKFILE_SUCCESSOR_RECEIPT.sha256
+  ) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "The live lockfile is not the exact reviewed M10A-T13 additive successor.",
+    );
+  }
+  let predecessorText = decodeUtf8(
+    bytes,
+    DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS.path,
+    "DEPENDENCY_SUCCESSOR_DRIFT",
+  );
+  const currentVitestContext =
+    "4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@24.13.3))";
+  const predecessorVitestContext =
+    "4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)";
+  if (occurrenceCount(predecessorText, currentVitestContext) !== 23) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "The live T13 lockfile does not contain the exact reviewed Vitest peer context count.",
+    );
+  }
+  for (const { current, predecessor } of M10A_T13_LOCKFILE_INVERSE) {
+    if (occurrenceCount(predecessorText, current) !== 1) {
+      fail(
+        "DEPENDENCY_SUCCESSOR_DRIFT",
+        "The live T13 lockfile does not contain one exact reviewed additive fragment.",
+        { fragment: current },
+      );
+    }
+    predecessorText = predecessorText.replace(current, predecessor);
+  }
+  if (occurrenceCount(predecessorText, currentVitestContext) !== 22) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "The reviewed T13 inverse did not leave the expected Vitest peer context count.",
+    );
+  }
+  predecessorText = predecessorText.replaceAll(currentVitestContext, predecessorVitestContext);
+  const predecessorBytes = Buffer.from(predecessorText);
+  if (
+    predecessorBytes.byteLength !== M10A_T13_LOCKFILE_SUCCESSOR_RECEIPT.predecessor.bytes ||
+    sha256(predecessorBytes) !== M10A_T13_LOCKFILE_SUCCESSOR_RECEIPT.predecessor.sha256
+  ) {
+    fail(
+      "DEPENDENCY_SUCCESSOR_DRIFT",
+      "Removing only the reviewed M10A-T13 additions must reproduce the exact M10A-T12 lockfile.",
+      { bytes: predecessorBytes.byteLength, sha256: sha256(predecessorBytes) },
+    );
+  }
+  return Object.freeze({ predecessorBytes, predecessorText });
+}
+
+/** Projects the exact frozen T12 lockfile receipt to its T10 predecessor. */
+function authenticateM10AT12HistoricalLockfileSuccessor(bytes) {
   if (
     bytes.byteLength !== M10A_T12_LOCKFILE_SUCCESSOR_RECEIPT.bytes ||
     sha256(bytes) !== M10A_T12_LOCKFILE_SUCCESSOR_RECEIPT.sha256
   ) {
     fail(
       "DEPENDENCY_SUCCESSOR_DRIFT",
-      "The live lockfile is not the exact reviewed M10A-T12 additive successor.",
+      "The projected lockfile is not the exact frozen M10A-T12 receipt.",
     );
   }
   let predecessorText = decodeUtf8(
@@ -2034,8 +2184,78 @@ const M10A_T12_BROWSER_PACKAGE_SUCCESSOR = Object.freeze({
  * reviewed predecessors. All other inputs pass through unchanged for narrower successor chains.
  */
 export function projectM10AT12HistoricalInput(relativePath, bytes) {
+  if (relativePath === M10A_T13_CONFIG_SUCCESSOR.path) {
+    if (
+      bytes.byteLength !== M10A_T13_CONFIG_SUCCESSOR.bytes ||
+      sha256(bytes) !== M10A_T13_CONFIG_SUCCESSOR.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "The current T13 dependency-boundary input is outside its exact reviewed successor receipt.",
+        { path: relativePath },
+      );
+    }
+    let predecessorText = decodeUtf8(bytes, relativePath, "SUCCESSOR_POLICY_VIOLATION");
+    for (const [currentFragment, predecessorFragment] of M10A_T13_CONFIG_SUCCESSOR.inverseChanges) {
+      if (occurrenceCount(predecessorText, currentFragment) !== 1) {
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          "The T13 dependency-boundary successor lost one exact additive declaration.",
+          { path: relativePath, currentFragment },
+        );
+      }
+      predecessorText = predecessorText.replace(currentFragment, predecessorFragment);
+    }
+    const predecessorBytes = Buffer.from(predecessorText);
+    if (
+      predecessorBytes.byteLength !== M10A_T13_CONFIG_SUCCESSOR.predecessor.bytes ||
+      sha256(predecessorBytes) !== M10A_T13_CONFIG_SUCCESSOR.predecessor.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "Removing only the reviewed T13 dependency-boundary addition must reproduce the exact T12 input.",
+        { path: relativePath },
+      );
+    }
+    bytes = predecessorBytes;
+  }
+  if (relativePath === M10A_T13_APP_PACKAGE_SUCCESSOR.path) {
+    if (
+      bytes.byteLength !== M10A_T13_APP_PACKAGE_SUCCESSOR.bytes ||
+      sha256(bytes) !== M10A_T13_APP_PACKAGE_SUCCESSOR.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "The current T13 App package input is outside its exact reviewed successor receipt.",
+        { path: relativePath },
+      );
+    }
+    let predecessorText = decodeUtf8(bytes, relativePath, "SUCCESSOR_POLICY_VIOLATION");
+    for (const { current, predecessor } of M10A_T13_APP_PACKAGE_SUCCESSOR.inverseChanges) {
+      if (occurrenceCount(predecessorText, current) !== 1) {
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          "The T13 App package successor lost one exact additive declaration.",
+          { path: relativePath, current },
+        );
+      }
+      predecessorText = predecessorText.replace(current, predecessor);
+    }
+    bytes = Buffer.from(predecessorText);
+    if (
+      bytes.byteLength !== M10A_T13_APP_PACKAGE_SUCCESSOR.predecessor.bytes ||
+      sha256(bytes) !== M10A_T13_APP_PACKAGE_SUCCESSOR.predecessor.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "Removing only reviewed T13 package additions must reproduce the exact T12 App package.",
+        { path: relativePath },
+      );
+    }
+  }
   if (relativePath === DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS.path) {
-    return authenticateM10AT12LockfileSuccessor(bytes).predecessorBytes;
+    const t13 = authenticateM10AT12LockfileSuccessor(bytes);
+    return authenticateM10AT12HistoricalLockfileSuccessor(t13.predecessorBytes).predecessorBytes;
   }
   const t08InputSuccessor = M10A_T12_T08_INPUT_SUCCESSORS.find(
     ({ path: successorPath }) => successorPath === relativePath,
@@ -4743,7 +4963,7 @@ export async function buildCurrentDesenAppPublishedHostUpdateGraphAudit(rawOptio
   }
   return deepFreeze({
     appSourceAudit: {
-      inventory: acquired.appInventory,
+      inventory: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS,
       completeSourceFiles: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS.length,
       productionGraphSourceFiles: M10A_T12_APP_GRAPH_SOURCE_PATHS.length,
       fixtureOnlySourceFiles: APP_FIXTURE_ONLY_SOURCE_PATHS,
@@ -4766,8 +4986,11 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
   const dependencyPin = DEPENDENCY_SECURITY_LOCKFILE_RECEIPTS;
   const dependencyBytes = files.get(dependencyPin.path);
   const t12LockfileSuccessor = authenticateM10AT12LockfileSuccessor(dependencyBytes);
-  const t10LockfileSuccessor = authenticateM10AT10LockfileSuccessor(
+  const t12HistoricalLockfileSuccessor = authenticateM10AT12HistoricalLockfileSuccessor(
     t12LockfileSuccessor.predecessorBytes,
+  );
+  const t10LockfileSuccessor = authenticateM10AT10LockfileSuccessor(
+    t12HistoricalLockfileSuccessor.predecessorBytes,
   );
   const t04LockfileSuccessor = authenticateM10AT04LockfileSuccessor(
     t10LockfileSuccessor.predecessorBytes,
@@ -4971,7 +5194,7 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       focusedTests,
       browser,
       appSourceAudit: {
-        inventory: acquired.appInventory,
+        inventory: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS,
         completeSourceFiles: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS.length,
         productionGraphSourceFiles: M10A_T12_APP_GRAPH_SOURCE_PATHS.length,
         fixtureOnlySourceFiles: APP_FIXTURE_ONLY_SOURCE_PATHS,
@@ -5071,8 +5294,11 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
     dependencyPin.path,
   );
   const finalT12LockfileSuccessor = authenticateM10AT12LockfileSuccessor(finalDependencyBytes);
-  const finalT10LockfileSuccessor = authenticateM10AT10LockfileSuccessor(
+  const finalT12HistoricalLockfileSuccessor = authenticateM10AT12HistoricalLockfileSuccessor(
     finalT12LockfileSuccessor.predecessorBytes,
+  );
+  const finalT10LockfileSuccessor = authenticateM10AT10LockfileSuccessor(
+    finalT12HistoricalLockfileSuccessor.predecessorBytes,
   );
   const finalT04LockfileSuccessor = authenticateM10AT04LockfileSuccessor(
     finalT10LockfileSuccessor.predecessorBytes,
@@ -5106,6 +5332,12 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       currentBytes: dependencyBytes.byteLength,
       historicalBytes: dependencyPin.historicalBytes,
       currentSha256: sha256(dependencyBytes),
+      t13LockfileSuccessor: {
+        task: M10A_T13_LOCKFILE_SUCCESSOR_RECEIPT.authority,
+        bytes: M10A_T13_LOCKFILE_SUCCESSOR_RECEIPT.bytes,
+        sha256: M10A_T13_LOCKFILE_SUCCESSOR_RECEIPT.sha256,
+        additivePredecessor: M10A_T13_LOCKFILE_SUCCESSOR_RECEIPT.predecessor,
+      },
       t12LockfileSuccessor: {
         task: M10A_T12_LOCKFILE_SUCCESSOR_RECEIPT.authority,
         bytes: M10A_T12_LOCKFILE_SUCCESSOR_RECEIPT.bytes,
