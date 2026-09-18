@@ -71,17 +71,9 @@
     "maxFontEncodedBytes": 4194304,
     "maxImageDimension": 8192,
     "maxImageDecodedPixels": 16777216,
-    "allowedImageMediaTypes": [
-      "image/jpeg",
-      "image/png",
-      "image/webp"
-    ],
-    "allowedIconMediaTypes": [
-      "image/svg+xml"
-    ],
-    "allowedFontMediaTypes": [
-      "font/woff2"
-    ]
+    "allowedImageMediaTypes": ["image/jpeg", "image/png", "image/webp"],
+    "allowedIconMediaTypes": ["image/svg+xml"],
+    "allowedFontMediaTypes": ["font/woff2"]
   },
   "bundledDefaultFont": {
     "package": "@fontsource-variable/inter",

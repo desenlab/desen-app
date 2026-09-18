@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import prettier from "prettier";
 
 const MODULE_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(MODULE_DIRECTORY, "../..");
@@ -50,8 +51,8 @@ async function currentSource() {
   return Promise.all(SOURCE_FILES.map((relativePath) => sourceReceipt(relativePath)));
 }
 
-function canonical(value) {
-  return `${JSON.stringify(value, null, 2)}\n`;
+async function canonical(value) {
+  return prettier.format(JSON.stringify(value, null, 2), { parser: "json" });
 }
 
 function expectedClaims() {
@@ -110,7 +111,7 @@ export async function captureM10AT13Evidence() {
 export async function writeM10AT13Evidence() {
   const evidence = await captureM10AT13Evidence();
   await mkdir(path.dirname(ARTIFACT_PATH), { recursive: true });
-  await writeFile(ARTIFACT_PATH, canonical(evidence));
+  await writeFile(ARTIFACT_PATH, await canonical(evidence));
   return evidence;
 }
 
@@ -125,7 +126,7 @@ export async function verifyM10AT13Evidence() {
       "T13 evidence is not valid JSON.",
     );
   }
-  if (bytes.toString("utf8") !== canonical(evidence)) {
+  if (bytes.toString("utf8") !== (await canonical(evidence))) {
     throw new M10AT13ProofError(
       "M10A_T13_ARTIFACT_FORMAT_INVALID",
       "T13 evidence is not canonical JSON.",
