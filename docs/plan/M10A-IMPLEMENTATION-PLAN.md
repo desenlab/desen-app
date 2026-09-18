@@ -1,8 +1,8 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T11 are `DONE` and
-M10A-T12 is `IN_PROGRESS` with [local evidence](../proof/M10A-T12.md). Exact-head hosted and
-fresh-`main` closure are still required; canonical statuses and dependencies are in [TASKS.md](TASKS.md).
+Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T12 are `DONE`, including
+T12's [exact-head hosted and fresh-`main` closure](../proof/M10A-T12.md). M10A-T13 is dependency-ready
+and `NOT_STARTED`; canonical statuses and dependencies are in [TASKS.md](TASKS.md).
 
 ## Product promise
 
@@ -19,9 +19,9 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 ## Delivery sequence and accounting
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
-and one gate; the total becomes 176 tasks and 14 gates. The 132 completed tasks and 11 completed
-gates remain completed. T01 through T11 are the eleven completed M10A tasks; T12 is the one active
-task and the other 16 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
+and one gate; the total becomes 176 tasks and 14 gates. The 133 completed tasks and 11 completed
+gates remain completed. T01 through T12 are the twelve completed M10A tasks; T13 is the next
+dependency-ready task and the other 16 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
 Dependencies, not numeric order, select the next eligible task: T26 acceptance precedes T25's
@@ -233,13 +233,13 @@ DOM. Its [task report](../proof/M10A-T11.md) records exact-head hosted and fresh
 closure. T11 does not authorize Runtime, Publisher,
 Core/protocol, G10A, M11, responsive styling (T12), or undo/redo/copy authority (T14).
 
-**M10A-T12 — Rich styling and responsive authoring** is `IN_PROGRESS`. Its local normal-product
+**M10A-T12 — Rich styling and responsive authoring** is `DONE`. Its normal-product
 boundary owns the 0.7.0 Catalog capture, lazy typed Inspector controls, compatible token/literal/reset
 editing, bounded desktop/tablet/mobile frames, ordered responsive overrides, and generation-fenced
-aggregate persistence. The [local report](../proof/M10A-T12.md) records the 11,804-byte evidence
-artifact and frozen T03/T09 predecessor handling. It does not claim named-theme CRUD or switching,
-arbitrary CSS/JSX/JSON, Runtime, Publisher, Core/protocol, G10A, or M11; exact-head hosted and
-fresh-`main` closure remain required before `DONE`.
+aggregate persistence. The [task report](../proof/M10A-T12.md) records the 11,804-byte evidence
+artifact, frozen T03/T09 predecessor handling, and exact-head hosted/fresh-`main` closure. It does
+not claim named-theme CRUD or switching, arbitrary CSS/JSX/JSON, Runtime, Publisher, Core/protocol,
+G10A, or M11; T13 remains a separate dependency-ready `NOT_STARTED` task.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.
