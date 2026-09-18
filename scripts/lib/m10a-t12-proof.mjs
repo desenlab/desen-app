@@ -56,6 +56,21 @@ export const M10A_T12_TIMEOUT_CONFIG_SUCCESSOR = Object.freeze({
   predecessorTimeoutBlock: "  workers: 1,\n  timeout: 90_000,\n  expect: { timeout: 10_000 },\n",
 });
 
+// M10A-T13 adds only its own root-level package scripts. Project the reviewed additive
+// package wiring back to the frozen T12 package receipt before hashing its authorities.
+export const M10A_T13_PACKAGE_JSON_SUCCESSOR = Object.freeze({
+  task: "M10A-T13",
+  path: "package.json",
+  current: Object.freeze({
+    bytes: 107_129,
+    sha256: "04c4936b4d7fb31ef8484a5bb46e951233170b07a667ad0afc0ed3a9d9e723b6",
+  }),
+  predecessor: Object.freeze({
+    bytes: 106_895,
+    sha256: "b2dc3856e3e88dcc4dc1a6e59c198a38e6521f41c25ba66e2b8a17db735f434c",
+  }),
+});
+
 const SOURCE_REQUIREMENTS = Object.freeze([
   Object.freeze({
     path: "package.json",
@@ -460,6 +475,43 @@ export function projectM10AT12TimeoutConfigSuccessor(bytes) {
   return projected;
 }
 
+/** Admits only the reviewed M10A-T13 package-script additions and restores T12 bytes. */
+export function projectM10AT13PackageJsonSuccessor(bytes) {
+  if (!Buffer.isBuffer(bytes)) {
+    fail("PACKAGE_SUCCESSOR_DRIFT", "The T13 package successor must receive exact file bytes.");
+  }
+  const successor = M10A_T13_PACKAGE_JSON_SUCCESSOR;
+  if (bytes.byteLength !== successor.current.bytes || sha256(bytes) !== successor.current.sha256) {
+    fail("PACKAGE_SUCCESSOR_DRIFT", "The reviewed M10A-T13 package successor drifted.");
+  }
+  let source = bytes.toString("utf8");
+  const replacements = [
+    ['    "generate:m10a-t13": "node scripts/generate-m10a-t13-proof.mjs",\n', ""],
+    ['    "verify:m10a-t13": "node scripts/verify-m10a-t13.mjs",\n', ""],
+    ['    "test:m10a-t13": "node --test tests/m10a-t13.test.mjs",\n', ""],
+    [" && pnpm test:m10a-t13", ""],
+    [" && pnpm verify:m10a-t13", ""],
+  ];
+  for (const [current, predecessor] of replacements) {
+    const offset = source.indexOf(current);
+    if (offset < 0 || offset !== source.lastIndexOf(current)) {
+      fail("PACKAGE_SUCCESSOR_DRIFT", "The T13 package successor has no exact inverse edit.");
+    }
+    source = `${source.slice(0, offset)}${predecessor}${source.slice(offset + current.length)}`;
+  }
+  const projected = Buffer.from(source, "utf8");
+  if (
+    projected.byteLength !== successor.predecessor.bytes ||
+    sha256(projected) !== successor.predecessor.sha256
+  ) {
+    fail(
+      "PACKAGE_SUCCESSOR_DRIFT",
+      "The T13 package successor did not restore its frozen receipt.",
+    );
+  }
+  return projected;
+}
+
 function exactOptions(raw, allowed, label) {
   if (raw === undefined) return {};
   if (
@@ -601,9 +653,12 @@ async function collectSourceAuthorities(workspaceRoot) {
   if (
     SOURCE_REQUIREMENTS.filter(
       ({ path: relativePath }) => relativePath === M10A_T12_TIMEOUT_CONFIG_SUCCESSOR.path,
+    ).length !== 1 ||
+    SOURCE_REQUIREMENTS.filter(
+      ({ path: relativePath }) => relativePath === M10A_T13_PACKAGE_JSON_SUCCESSOR.path,
     ).length !== 1
   ) {
-    fail("CONFIG_SUCCESSOR_DRIFT", "The T12 timeout successor authority inventory drifted.");
+    fail("CONFIG_SUCCESSOR_DRIFT", "The T12 successor authority inventory drifted.");
   }
   const files = [];
   for (const requirement of SOURCE_REQUIREMENTS) {
@@ -618,7 +673,9 @@ async function collectSourceAuthorities(workspaceRoot) {
     const artifactBytes =
       requirement.path === M10A_T12_TIMEOUT_CONFIG_SUCCESSOR.path
         ? projectM10AT12TimeoutConfigSuccessor(bytes)
-        : bytes;
+        : requirement.path === M10A_T13_PACKAGE_JSON_SUCCESSOR.path
+          ? projectM10AT13PackageJsonSuccessor(bytes)
+          : bytes;
     files.push(
       Object.freeze({
         path: requirement.path,
