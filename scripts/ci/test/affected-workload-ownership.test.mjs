@@ -35,11 +35,11 @@ const CI_04_CATEGORY_COUNTS = Object.freeze({
 });
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   ...CI_04_CATEGORY_COUNTS,
-  PROOF_UNIT: 242,
+  PROOF_UNIT: 244,
   DEPENDENCY_POLICY: 39,
-  FROZEN_INPUT: 170,
-  PACKAGE_OR_APPLICATION: 763,
-  SHARED_PROOF_INFRASTRUCTURE: 411,
+  FROZEN_INPUT: 171,
+  PACKAGE_OR_APPLICATION: 765,
+  SHARED_PROOF_INFRASTRUCTURE: 413,
   PROJECT_DOCUMENTATION: 173,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
@@ -500,6 +500,15 @@ const M10A_T13_SUCCESSOR_PATHS = Object.freeze([
   "scripts/verify-m10a-t13.mjs",
   "tests/m10a-t13.test.mjs",
 ]);
+const M10A_T14_SUCCESSOR_PATHS = Object.freeze([
+  "docs/proof/artifacts/m10a-t14.json",
+  "packages/editor-core/src/history.ts",
+  "packages/editor-core/test/history.test.ts",
+  "scripts/generate-m10a-t14-proof.mjs",
+  "scripts/lib/m10a-t14-proof.mjs",
+  "scripts/verify-m10a-t14.mjs",
+  "tests/m10a-t14.test.mjs",
+]);
 
 async function currentTrackedPaths() {
   const { stdout } = await EXEC_FILE(
@@ -523,7 +532,11 @@ function calculateAffectedWorkloadOwnershipReview(rawPaths) {
   const paths =
     rawPaths.length === EXPECTED_AFFECTED_TRACKED_PATH_COUNT
       ? rawPaths
-      : rawPaths.filter((candidate) => !M10A_T13_SUCCESSOR_PATHS.includes(candidate));
+      : rawPaths.filter(
+          (candidate) =>
+            !M10A_T14_SUCCESSOR_PATHS.includes(candidate) &&
+            !M10A_T13_SUCCESSOR_PATHS.includes(candidate),
+        );
   return calculateAffectedWorkloadOwnershipReviewBase(paths);
 }
 
@@ -584,7 +597,10 @@ test("freezes exact-one ownership for all 1857 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1857);
+  assert.equal(
+    new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size,
+    EXPECTED_AFFECTED_TRACKED_PATH_COUNT,
+  );
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -1436,7 +1452,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 242);
+  assert.equal(proofEntries.length, 244);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "m10a-t12")

@@ -146,6 +146,23 @@ export default tseslint.config(
     },
   },
   {
+    // This frozen T12 graph receipt is retained as historical authority and is
+    // intentionally consumed by the checkpoint chain rather than runtime code.
+    files: ["scripts/lib/desen-app-published-host-update-proof.mjs"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+          varsIgnorePattern: "^(?:_|M10A_T12_APP_GRAPH_SUCCESSOR$)",
+        },
+      ],
+    },
+  },
+  {
     files: browserFiles,
     languageOptions: {
       globals: globals.browser,

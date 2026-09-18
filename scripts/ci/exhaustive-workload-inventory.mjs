@@ -144,11 +144,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "e14ac458cd6e0aff4ea894e9faf65f9981224778f6394b02f2bba50573d2cab4";
+  "f116b90cb6a3deb37dac7fa2bd48503af966d0f9507ed49af7a139e0b328f273";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "4dc6ef205b56d615efe037f862989ba8f67302f96cad2e4ec78aa862d3616db6";
+  "448b472c80c78efbd41208f74a1b8c44e2edab0b2ad436da8f6e0095dd68d918";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "b78f2b3574b6d56dcc6dbff5c7a54c285d916bbf562161782deec17fe497ae1f";
+  "a0b983a1c9b24067601bfbc261b7e7d9aed4e6e6e0e50ba76d7ef774f22d67ef";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "7cc967537fd8b11e71c53f9d5542dfe33da25325cc2d7b8b60b7ae85eab1d312";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -817,6 +817,7 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
   ["m10a-t09", "scripts/verify-m10a-t09.mjs", "tests/m10a-t09.test.mjs"],
   ["m10a-t12", "scripts/verify-m10a-t12.mjs", "tests/m10a-t12.test.mjs"],
   ["m10a-t13", "scripts/verify-m10a-t13.mjs", "tests/m10a-t13.test.mjs"],
+  ["m10a-t14", "scripts/verify-m10a-t14.mjs", "tests/m10a-t14.test.mjs"],
 ]);
 
 const PROCESS_ISOLATED_VERIFIER_PROOF_IDS = SAFE_OBJECT_FREEZE([
@@ -1419,7 +1420,7 @@ function captureInventory(candidate) {
   if (
     !Number.isSafeInteger(root.workloadCount) ||
     root.workloadCount < 1 ||
-    root.workloadCount > 256
+    root.workloadCount > 258
   ) {
     fail("workloadCount is out of bounds.");
   }
@@ -1430,7 +1431,7 @@ function captureInventory(candidate) {
   ) {
     fail("proofUnitCount is out of bounds.");
   }
-  root.nodes = exactArray(root.nodes, "nodes", 256).map(validateNode);
+  root.nodes = exactArray(root.nodes, "nodes", 258).map(validateNode);
   root.proofUnits = exactArray(root.proofUnits, "proofUnits", 128).map(validateProofUnit);
   if (root.workloadCount !== root.nodes.length || root.proofUnitCount !== root.proofUnits.length) {
     fail("The declared workload or proof-unit count is inconsistent.", {
@@ -1702,8 +1703,8 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
   const inputs = exactRecord(rawInputs, REPOSITORY_INPUT_KEYS, "Repository workload inputs");
   const packageJson = inertRecord(inputs.packageJson, "Root package manifest");
   const scripts = inertRecord(packageJson.scripts, "Root package scripts", 1_024);
-  const verifierFiles = stringArray(inputs.verifierFiles, "verifierFiles", 256);
-  const rootTestFiles = stringArray(inputs.rootTestFiles, "rootTestFiles", 256);
+  const verifierFiles = stringArray(inputs.verifierFiles, "verifierFiles", 258);
+  const rootTestFiles = stringArray(inputs.rootTestFiles, "rootTestFiles", 258);
   const testConfigurationFiles = stringArray(
     inputs.testConfigurationFiles,
     "testConfigurationFiles",
@@ -1982,7 +1983,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "a647fd20787c7dd8515c7531ef8bdafc026acf05ce36aa6b4db1b5ec9c19bbf2";
+  "ceb96714c978e92084d8c7a0ce8de7c4655e681c2d16be9b1f1b30c28289118a";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

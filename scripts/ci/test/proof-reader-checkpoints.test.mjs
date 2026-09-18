@@ -226,75 +226,77 @@ async function assertHistoricalReaderMatchesCurrentWorkspace(reader, index) {
     ? baselineManifest.checkpoints[126].readers[index]
     : M10A_T13_ROOT_TEST_RESEALED_READER_INDEXES.includes(index)
       ? baselineManifest.checkpoints[125].readers[index]
-    : M10A_T13_CONFIG_FORMAT_RESEALED_READER_INDEXES.includes(index)
-      ? baselineManifest.checkpoints[124].readers[index]
-      : M10A_T13_CONFIG_RESEALED_READER_INDEXES.includes(index)
-        ? baselineManifest.checkpoints[123].readers[index]
-        : M10A_T13_T12_PROOF_LIBRARY_RESEALED_READER_INDEXES.includes(index)
-          ? baselineManifest.checkpoints[122].readers[index]
-          : M10A_T13_SOURCE_INVENTORY_RESEALED_READER_INDEXES.includes(index)
-            ? baselineManifest.checkpoints[121].readers[index]
-            : M10A_T13_RESEALED_READER_INDEXES.includes(index)
-              ? baselineManifest.checkpoints[120].readers[index]
-              : M10A_T12_NODE_LINKED_DIAGNOSTICS_BRIDGE_RESEALED_READER_INDEXES.includes(index)
-                ? baselineManifest.checkpoints[119].readers[index]
-                : M10A_T12_TIMEOUT_CONFIG_RESEALED_READER_INDEXES.includes(index)
-                  ? baselineManifest.checkpoints[118].readers[index]
-                  : M10A_T12_CI_REPAIR_RESEALED_READER_INDEXES.includes(index)
-                    ? baselineManifest.checkpoints[117].readers[index]
-                    : M10A_T12_CONTROL_PLANE_RECEIPT_RESEALED_READER_INDEXES.includes(index)
-                      ? baselineManifest.checkpoints[116].readers[index]
-                      : M10A_T12_CONTROL_PLANE_LINT_RESEALED_READER_INDEXES.includes(index)
-                        ? baselineManifest.checkpoints[115].readers[index]
-                        : M10A_T12_CONTROL_PLANE_SUCCESSOR_RESEALED_READER_INDEXES.includes(index)
-                          ? baselineManifest.checkpoints[114].readers[index]
-                          : M10A_T12_HISTORICAL_CONSUMERS_RESEALED_READER_INDEXES.includes(index)
-                            ? baselineManifest.checkpoints[113].readers[index]
-                            : M10A_T12_FINAL_ARTIFACT_RESEALED_READER_INDEXES.includes(index)
-                              ? baselineManifest.checkpoints[112].readers[index]
-                              : M10A_T12_FORMAT_RESEALED_READER_INDEXES.includes(index)
-                                ? baselineManifest.checkpoints[111].readers[index]
-                                : M10A_T12_T09_HISTORY_RESEALED_READER_INDEXES.includes(index)
-                                  ? baselineManifest.checkpoints[110].readers[index]
-                                  : M10A_T11_NODE_LINKED_DIAGNOSTICS_BRIDGE_RESEALED_READER_INDEXES.includes(
-                                        index,
-                                      )
-                                    ? baselineManifest.checkpoints[109].readers[index]
-                                    : M10A_T11_PERFORMANCE_RESEALED_READER_INDEXES.includes(index)
-                                      ? baselineManifest.checkpoints[108].readers[index]
-                                      : M10A_T11_CLEANUP_RESEALED_READER_INDEXES.includes(index)
-                                        ? baselineManifest.checkpoints[107].readers[index]
-                                        : M10A_T11_RESEALED_READER_INDEXES.includes(index)
-                                          ? baselineManifest.checkpoints[106].readers[index]
-                                          : M10A_T10_REPEATABLE_DEMO_RESEALED_READER_INDEXES.includes(
-                                                index,
-                                              )
-                                            ? baselineManifest.checkpoints[105].readers[index]
-                                            : M10A_T10_RECOVERY_RESEALED_READER_INDEXES.includes(
+      : M10A_T13_CONFIG_FORMAT_RESEALED_READER_INDEXES.includes(index)
+        ? baselineManifest.checkpoints[124].readers[index]
+        : M10A_T13_CONFIG_RESEALED_READER_INDEXES.includes(index)
+          ? baselineManifest.checkpoints[123].readers[index]
+          : M10A_T13_T12_PROOF_LIBRARY_RESEALED_READER_INDEXES.includes(index)
+            ? baselineManifest.checkpoints[122].readers[index]
+            : M10A_T13_SOURCE_INVENTORY_RESEALED_READER_INDEXES.includes(index)
+              ? baselineManifest.checkpoints[121].readers[index]
+              : M10A_T13_RESEALED_READER_INDEXES.includes(index)
+                ? baselineManifest.checkpoints[120].readers[index]
+                : M10A_T12_NODE_LINKED_DIAGNOSTICS_BRIDGE_RESEALED_READER_INDEXES.includes(index)
+                  ? baselineManifest.checkpoints[119].readers[index]
+                  : M10A_T12_TIMEOUT_CONFIG_RESEALED_READER_INDEXES.includes(index)
+                    ? baselineManifest.checkpoints[118].readers[index]
+                    : M10A_T12_CI_REPAIR_RESEALED_READER_INDEXES.includes(index)
+                      ? baselineManifest.checkpoints[117].readers[index]
+                      : M10A_T12_CONTROL_PLANE_RECEIPT_RESEALED_READER_INDEXES.includes(index)
+                        ? baselineManifest.checkpoints[116].readers[index]
+                        : M10A_T12_CONTROL_PLANE_LINT_RESEALED_READER_INDEXES.includes(index)
+                          ? baselineManifest.checkpoints[115].readers[index]
+                          : M10A_T12_CONTROL_PLANE_SUCCESSOR_RESEALED_READER_INDEXES.includes(index)
+                            ? baselineManifest.checkpoints[114].readers[index]
+                            : M10A_T12_HISTORICAL_CONSUMERS_RESEALED_READER_INDEXES.includes(index)
+                              ? baselineManifest.checkpoints[113].readers[index]
+                              : M10A_T12_FINAL_ARTIFACT_RESEALED_READER_INDEXES.includes(index)
+                                ? baselineManifest.checkpoints[112].readers[index]
+                                : M10A_T12_FORMAT_RESEALED_READER_INDEXES.includes(index)
+                                  ? baselineManifest.checkpoints[111].readers[index]
+                                  : M10A_T12_T09_HISTORY_RESEALED_READER_INDEXES.includes(index)
+                                    ? baselineManifest.checkpoints[110].readers[index]
+                                    : M10A_T11_NODE_LINKED_DIAGNOSTICS_BRIDGE_RESEALED_READER_INDEXES.includes(
+                                          index,
+                                        )
+                                      ? baselineManifest.checkpoints[109].readers[index]
+                                      : M10A_T11_PERFORMANCE_RESEALED_READER_INDEXES.includes(index)
+                                        ? baselineManifest.checkpoints[108].readers[index]
+                                        : M10A_T11_CLEANUP_RESEALED_READER_INDEXES.includes(index)
+                                          ? baselineManifest.checkpoints[107].readers[index]
+                                          : M10A_T11_RESEALED_READER_INDEXES.includes(index)
+                                            ? baselineManifest.checkpoints[106].readers[index]
+                                            : M10A_T10_REPEATABLE_DEMO_RESEALED_READER_INDEXES.includes(
                                                   index,
                                                 )
-                                              ? baselineManifest.checkpoints[104].readers[index]
-                                              : M10A_T10_REAL_ADAPTER_CANVAS_RESEALED_READER_INDEXES.includes(
+                                              ? baselineManifest.checkpoints[105].readers[index]
+                                              : M10A_T10_RECOVERY_RESEALED_READER_INDEXES.includes(
                                                     index,
                                                   )
-                                                ? baselineManifest.checkpoints[103].readers[index]
-                                                : M10A_T10_HISTORICAL_COMPATIBILITY_RESEALED_READER_INDEXES.includes(
+                                                ? baselineManifest.checkpoints[104].readers[index]
+                                                : M10A_T10_REAL_ADAPTER_CANVAS_RESEALED_READER_INDEXES.includes(
                                                       index,
                                                     )
-                                                  ? baselineManifest.checkpoints[102].readers[index]
-                                                  : M10A_T10_PUBLISHED_HOST_UPDATE_RESEALED_READER_INDEXES.includes(
+                                                  ? baselineManifest.checkpoints[103].readers[index]
+                                                  : M10A_T10_HISTORICAL_COMPATIBILITY_RESEALED_READER_INDEXES.includes(
                                                         index,
                                                       )
-                                                    ? baselineManifest.checkpoints[101].readers[
+                                                    ? baselineManifest.checkpoints[102].readers[
                                                         index
                                                       ]
-                                                    : M10A_T05_T06_T07_CURRENT_READER_INDEXES.includes(
+                                                    : M10A_T10_PUBLISHED_HOST_UPDATE_RESEALED_READER_INDEXES.includes(
                                                           index,
                                                         )
-                                                      ? baselineManifest.checkpoints[95].readers[
+                                                      ? baselineManifest.checkpoints[101].readers[
                                                           index
                                                         ]
-                                                      : current;
+                                                      : M10A_T05_T06_T07_CURRENT_READER_INDEXES.includes(
+                                                            index,
+                                                          )
+                                                        ? baselineManifest.checkpoints[95].readers[
+                                                            index
+                                                          ]
+                                                        : current;
   if (
     M10A_T10_RECOVERY_RESEALED_READER_INDEXES.includes(index) &&
     JSON.stringify(reader) === JSON.stringify(baselineManifest.checkpoints[103].readers[index])

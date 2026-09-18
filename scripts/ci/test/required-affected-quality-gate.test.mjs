@@ -50,7 +50,7 @@ const TRACKED_OBJECT = "1".repeat(40);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const CONNECTED_PROOF_UNIT_COUNT = 88;
 const CONNECTED_WORKLOAD_COUNT = 190;
-const EXHAUSTIVE_WORKLOAD_COUNT = 256;
+const EXHAUSTIVE_WORKLOAD_COUNT = 258;
 
 function paths() {
   return execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], {
@@ -1394,7 +1394,7 @@ test("required exhaustive invariants remain exact after required execution is im
   assert.equal(required.authority, "REQUIRED");
   assert.equal(required.scope, "EXHAUSTIVE");
   assert.equal(required.stepCount, EXHAUSTIVE_WORKLOAD_COUNT);
-  assert.equal(required.proofPairCount, 121);
+  assert.equal(required.proofPairCount, 122);
 });
 
 test("only pull requests may attempt affected execution and every ineligible plan falls back", () => {

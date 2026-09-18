@@ -290,12 +290,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
     ["m10a-t09", ["m10a-t05", "m10a-t08"]],
     ["m10a-t12", ["m10a-t03", "m10a-t09"]],
     ["m10a-t13", []],
+    ["m10a-t14", []],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "98b7c102727998744a86a74ac99005b8ce40f83c8a9c98f5223c71893249b1db";
+  "97297c21c1ffbc0270beaf15f732528928f216a869e39c6eee824b9b2874f1b0";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

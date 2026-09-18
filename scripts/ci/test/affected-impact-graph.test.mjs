@@ -105,8 +105,8 @@ function clone(value) {
 
 test("the reviewed impact graph owns every proof unit exactly once", () => {
   const graph = createAffectedImpactGraph();
-  assert.equal(graph.proofUnitCount, 121);
-  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 121);
+  assert.equal(graph.proofUnitCount, 122);
+  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 122);
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "control-plane-runtime-transition-races")?.prerequisites,
     ["control-plane-runtime-fault-injection"],
@@ -493,7 +493,7 @@ test("Runtime Core baseline has exactly its repeatable-demo predecessor and comp
   const graph = createAffectedImpactGraph();
   assert.equal(
     graph.impactGraphSha256,
-    "98b7c102727998744a86a74ac99005b8ce40f83c8a9c98f5223c71893249b1db",
+    "97297c21c1ffbc0270beaf15f732528928f216a869e39c6eee824b9b2874f1b0",
   );
   assert.deepEqual(graph.entries.find(({ id }) => id === "runtime-core-baseline")?.prerequisites, [
     "desen-app-repeatable-demo",
