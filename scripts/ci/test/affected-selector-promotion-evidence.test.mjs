@@ -334,7 +334,7 @@ test("authenticates the exact 20/20 hosted campaign and live M10A-T13 successor"
     },
   );
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "023ec122a87f0ea6d4665f4f32e4fda13ce53317c173684dcbe9bf310b749f44",
+    selectorSha256: "106cbca56241f218b5c8045a1ceba52bbf1238f47f3cfcee062ad52899ca5051",
     ownershipSha256: "463e3f2217766da38dac2a908c78508d7a6a7d7c84886378769904c91032157c",
     impactGraphSha256: "98b7c102727998744a86a74ac99005b8ce40f83c8a9c98f5223c71893249b1db",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
