@@ -10,12 +10,16 @@ import {
   M10A_T12_ARTIFACT_PATH,
   M10A_T12_FOCUSED_APP_TEST_FILES,
   M10A_T12_ROOT_TEST_NAMES,
+  M10A_T12_TIMEOUT_CONFIG_SUCCESSOR,
   M10AT12ProofError,
   buildM10AT12Evidence,
   parseM10AT12BrowserObservation,
+  projectM10AT12TimeoutConfigSuccessor,
   verifyM10AT12Evidence,
   writeM10AT12Evidence,
 } from "../scripts/lib/m10a-t12-proof.mjs";
+
+const WORKSPACE_ROOT = path.resolve(path.dirname(M10A_T12_ARTIFACT_PATH), "../../..");
 
 function browserObservation() {
   return {
@@ -107,7 +111,58 @@ test("M10A-T12 rejects missing source semantics, malformed observations, and art
     await rm(emptyWorkspace, { recursive: true, force: true });
   }
 
+  const timeoutSuccessor = M10A_T12_TIMEOUT_CONFIG_SUCCESSOR;
+  const liveTimeoutConfig = await readFile(path.join(WORKSPACE_ROOT, timeoutSuccessor.path));
+  const projectedTimeoutConfig = projectM10AT12TimeoutConfigSuccessor(liveTimeoutConfig);
+  assert.equal(projectedTimeoutConfig.byteLength, timeoutSuccessor.predecessor.bytes);
+  assert.equal(
+    projectedTimeoutConfig.equals(
+      Buffer.from(
+        liveTimeoutConfig
+          .toString("utf8")
+          .replace(timeoutSuccessor.currentTimeoutBlock, timeoutSuccessor.predecessorTimeoutBlock),
+        "utf8",
+      ),
+    ),
+    true,
+  );
+  const oneByteTimeoutDrift = Buffer.from(liveTimeoutConfig);
+  oneByteTimeoutDrift[0] ^= 1;
+  assert.throws(
+    () => projectM10AT12TimeoutConfigSuccessor(oneByteTimeoutDrift),
+    errorCode("CONFIG_SUCCESSOR_DRIFT"),
+  );
+  assert.throws(
+    () =>
+      projectM10AT12TimeoutConfigSuccessor(
+        Buffer.from(
+          liveTimeoutConfig
+            .toString("utf8")
+            .replace(
+              timeoutSuccessor.currentTimeoutBlock,
+              "  workers: 1,\n  timeout: 121_000,\n  expect: { timeout: 10_000 },\n",
+            ),
+          "utf8",
+        ),
+      ),
+    errorCode("CONFIG_SUCCESSOR_DRIFT"),
+  );
+  assert.throws(
+    () => projectM10AT12TimeoutConfigSuccessor(projectedTimeoutConfig),
+    errorCode("CONFIG_SUCCESSOR_DRIFT"),
+  );
+
   const built = await buildM10AT12Evidence({ browserObservation: browserObservation() });
+  assert.deepEqual(
+    built.artifact.source.files.find(
+      ({ path: relativePath }) => relativePath === timeoutSuccessor.path,
+    ),
+    {
+      path: timeoutSuccessor.path,
+      bytes: timeoutSuccessor.predecessor.bytes,
+      sha256: timeoutSuccessor.predecessor.sha256,
+    },
+  );
   const drifted = Buffer.from(built.artifactBytes);
   drifted[drifted.byteLength - 2] ^= 1;
   await assert.rejects(

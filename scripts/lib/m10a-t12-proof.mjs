@@ -31,6 +31,31 @@ const REQUIRED_STYLE_PROPERTIES = Object.freeze([
   "rotate",
 ]);
 
+// The frozen T12 evidence captured the browser journey with a 90-second total test budget.
+// The exact-head hosted run reached its final persisted-preview assertion at that ceiling, while
+// the same complete journey passed locally. The product successor may use only this exact 120s
+// budget; its source receipt is projected back to the frozen receipt so the completed evidence
+// stays immutable. This is a scheduling allowance, not new authoring or runtime authority.
+export const M10A_T12_TIMEOUT_CONFIG_SUCCESSOR = Object.freeze({
+  task: "M10A-T12",
+  artifact: Object.freeze({
+    path: ARTIFACT_RELATIVE_PATH,
+    bytes: 11_804,
+    sha256: "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b",
+  }),
+  path: "apps/desen-app-browser-e2e/t12-playwright.config.ts",
+  current: Object.freeze({
+    bytes: 1_500,
+    sha256: "0dbd8fd484720ef5841c1ea7723961a80c00ca7b3d4aaff23adb329e6af7caeb",
+  }),
+  predecessor: Object.freeze({
+    bytes: 1_499,
+    sha256: "005fbe57d80e14cd73361c97683d37b0751f66cb705136b6ab0ffc9263277124",
+  }),
+  currentTimeoutBlock: "  workers: 1,\n  timeout: 120_000,\n  expect: { timeout: 10_000 },\n",
+  predecessorTimeoutBlock: "  workers: 1,\n  timeout: 90_000,\n  expect: { timeout: 10_000 },\n",
+});
+
 const SOURCE_REQUIREMENTS = Object.freeze([
   Object.freeze({
     path: "package.json",
@@ -399,6 +424,42 @@ function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
+/**
+ * Admits only the reviewed hosted-CI timeout successor and returns the immutable T12 receipt
+ * represented by the frozen artifact. Callers never supply a path or receipt.
+ */
+export function projectM10AT12TimeoutConfigSuccessor(bytes) {
+  if (!Buffer.isBuffer(bytes)) {
+    fail("CONFIG_SUCCESSOR_DRIFT", "The T12 timeout successor must receive exact file bytes.");
+  }
+  const successor = M10A_T12_TIMEOUT_CONFIG_SUCCESSOR;
+  if (bytes.byteLength !== successor.current.bytes || sha256(bytes) !== successor.current.sha256) {
+    fail("CONFIG_SUCCESSOR_DRIFT", "The reviewed M10A-T12 browser timeout successor drifted.");
+  }
+  const source = bytes.toString("utf8");
+  const timeoutOffset = source.indexOf(successor.currentTimeoutBlock);
+  if (
+    timeoutOffset < 0 ||
+    timeoutOffset !== source.lastIndexOf(successor.currentTimeoutBlock) ||
+    source.includes(successor.predecessorTimeoutBlock)
+  ) {
+    fail("CONFIG_SUCCESSOR_DRIFT", "The T12 timeout successor has no one exact inverse edit.");
+  }
+  const projected = Buffer.from(
+    `${source.slice(0, timeoutOffset)}${successor.predecessorTimeoutBlock}${source.slice(
+      timeoutOffset + successor.currentTimeoutBlock.length,
+    )}`,
+    "utf8",
+  );
+  if (
+    projected.byteLength !== successor.predecessor.bytes ||
+    sha256(projected) !== successor.predecessor.sha256
+  ) {
+    fail("CONFIG_SUCCESSOR_DRIFT", "The T12 timeout successor did not restore its frozen receipt.");
+  }
+  return projected;
+}
+
 function exactOptions(raw, allowed, label) {
   if (raw === undefined) return {};
   if (
@@ -537,6 +598,13 @@ async function readWorkspaceFile(workspaceRoot, relativePath, missingCode = "SOU
 }
 
 async function collectSourceAuthorities(workspaceRoot) {
+  if (
+    SOURCE_REQUIREMENTS.filter(
+      ({ path: relativePath }) => relativePath === M10A_T12_TIMEOUT_CONFIG_SUCCESSOR.path,
+    ).length !== 1
+  ) {
+    fail("CONFIG_SUCCESSOR_DRIFT", "The T12 timeout successor authority inventory drifted.");
+  }
   const files = [];
   for (const requirement of SOURCE_REQUIREMENTS) {
     const bytes = await readWorkspaceFile(workspaceRoot, requirement.path);
@@ -547,11 +615,15 @@ async function collectSourceAuthorities(workspaceRoot) {
         `Required T12 source semantics drifted: ${requirement.path}`,
       );
     }
+    const artifactBytes =
+      requirement.path === M10A_T12_TIMEOUT_CONFIG_SUCCESSOR.path
+        ? projectM10AT12TimeoutConfigSuccessor(bytes)
+        : bytes;
     files.push(
       Object.freeze({
         path: requirement.path,
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
+        bytes: artifactBytes.byteLength,
+        sha256: sha256(artifactBytes),
       }),
     );
   }
