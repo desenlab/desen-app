@@ -48,9 +48,9 @@ const OID_BEFORE = "e".repeat(40);
 const OID_AFTER = "f".repeat(40);
 const TRACKED_OBJECT = "1".repeat(40);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
-const CONNECTED_PROOF_UNIT_COUNT = 87;
-const CONNECTED_WORKLOAD_COUNT = 188;
-const EXHAUSTIVE_WORKLOAD_COUNT = 252;
+const CONNECTED_PROOF_UNIT_COUNT = 88;
+const CONNECTED_WORKLOAD_COUNT = 190;
+const EXHAUSTIVE_WORKLOAD_COUNT = 254;
 
 function paths() {
   return execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], {
@@ -1394,7 +1394,7 @@ test("required exhaustive invariants remain exact after required execution is im
   assert.equal(required.authority, "REQUIRED");
   assert.equal(required.scope, "EXHAUSTIVE");
   assert.equal(required.stepCount, EXHAUSTIVE_WORKLOAD_COUNT);
-  assert.equal(required.proofPairCount, 119);
+  assert.equal(required.proofPairCount, 120);
 });
 
 test("only pull requests may attempt affected execution and every ineligible plan falls back", () => {

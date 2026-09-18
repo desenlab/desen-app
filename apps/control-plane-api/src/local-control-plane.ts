@@ -198,12 +198,13 @@ function fromBundleStoreError(error: BundleStoreError): LocalControlPlaneError {
 }
 
 /**
- * Opens one authenticated local Source, immutable Bundle, and mutable channel service.
+ * Opens one authenticated local Source, application-workspace, immutable Bundle, and channel service.
  *
  * @remarks The returned listener can bind only exact IPv4 loopback. SQLite stores editable Source
- * bytes and channel generations in a separate metadata file; immutable Bundle bytes continue to
- * use the M07-T01 content-addressed store. Opening this factory dynamically loads the pinned native
- * SQLite adapter. Merely importing the package root does not load a native addon.
+ * bytes, complete application project-workspace JSON, and channel generations in a separate
+ * metadata file; immutable Bundle bytes continue to use the M07-T01 content-addressed store.
+ * Opening this factory dynamically loads the pinned native SQLite adapter. Merely importing the
+ * package root does not load a native addon.
  */
 export async function openLocalControlPlane(
   options: OpenLocalControlPlaneOptions,
@@ -222,6 +223,7 @@ export async function openLocalControlPlane(
         allowedOrigins: captured.allowedOrigins,
         bundleStore,
         sourceRepository: metadata.sourceRepository,
+        projectWorkspaceRepository: metadata.projectWorkspaceRepository,
         channelRepository: metadata.channelRepository,
         closeMetadata: metadata.close,
       });

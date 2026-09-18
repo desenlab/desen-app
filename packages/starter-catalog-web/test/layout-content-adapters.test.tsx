@@ -109,6 +109,136 @@ describe("M10A-T05 layout and content Web adapters", () => {
     expect(view.getByText("Nested content").tagName).toBe("P");
   });
 
+  it("maps the bounded T12 visual profile and resolved DTCG composite literals explicitly", () => {
+    const stack = input(
+      STARTER_STACK_CAPABILITY_ID,
+      { direction: "vertical" },
+      { default: ["T12 visual profile"] },
+      {
+        base: {
+          root: {
+            backgroundColor: { colorSpace: "srgb", components: [0.1, 0.2, 0.3], alpha: 0.5 },
+            backgroundGradient: {
+              angle: 135,
+              stops: [
+                { color: "#112233", position: 0 },
+                { color: { colorSpace: "srgb", components: [0.8, 0.6, 0.4] }, position: 100 },
+              ],
+            },
+            border: {
+              color: { colorSpace: "srgb", components: [0.2, 0.3, 0.4] },
+              style: "dashed",
+              width: { value: 0.125, unit: "rem" },
+            },
+            borderTopColor: "#AABBCC",
+            borderRightWidth: 2,
+            borderTopLeftRadius: { value: 0.5, unit: "rem" },
+            borderTopRightRadius: 12,
+            borderBottomRightRadius: 10,
+            borderBottomLeftRadius: 8,
+            boxShadow: {
+              color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.25 },
+              offsetX: { value: 0, unit: "px" },
+              offsetY: { value: 0.5, unit: "rem" },
+              blur: { value: 1, unit: "rem" },
+              spread: 0,
+            },
+            opacity: 0.8,
+            typography: {
+              fontFamily: ["ui-sans-serif", "system-ui", "sans-serif"],
+              fontSize: { value: 1.25, unit: "rem" },
+              fontWeight: 650,
+              letterSpacing: { value: -0.1, unit: "rem" },
+              lineHeight: 1.3,
+            },
+            textAlign: "justify",
+            textDecoration: "overline",
+            fontStyle: "italic",
+            textTransform: "uppercase",
+            width: "fill",
+            minHeight: { value: 3, unit: "rem" },
+            paddingTop: { value: 1, unit: "rem" },
+            paddingRight: 12,
+            paddingBottom: 10,
+            paddingLeft: 8,
+            marginInline: { value: -0.5, unit: "rem" },
+            layoutMode: "flex",
+            flowDirection: "row",
+            flowWrap: "wrap",
+            flexGrow: 1,
+            flexShrink: 0,
+            gap: { value: 0.5, unit: "rem" },
+            rowGap: 6,
+            columnGap: 10,
+            overflowX: "auto",
+            overflowY: "hidden",
+            alignItems: "start",
+            alignSelf: "stretch",
+            justifyContent: "between",
+            position: "relative",
+            insetTop: { value: 0.25, unit: "rem" },
+            insetLeft: -4,
+            zIndex: 3,
+            translateX: { value: 1, unit: "rem" },
+            translateY: -4,
+            rotate: 30,
+            scaleX: 1.1,
+            scaleY: 0.9,
+            transformOrigin: "top-left",
+          },
+        },
+      },
+    );
+    const view = render(<StarterStackReactAdapter {...stack} />);
+    const element = view.container.firstElementChild as HTMLElement;
+    expect(element.style.backgroundImage).toContain("linear-gradient(135deg");
+    expect(element.style.backgroundImage).toContain("rgb(17, 34, 51) 0%");
+    expect(element.style.borderStyle).toBe("dashed");
+    expect(element.style.borderWidth).toContain("0.125rem");
+    expect(element.style.borderTopColor).toBe("rgb(170, 187, 204)");
+    expect(element.style.borderRightWidth).toBe("2px");
+    expect(element.style.borderTopLeftRadius).toBe("0.5rem");
+    expect(element.style.borderTopRightRadius).toBe("12px");
+    expect(element.style.borderBottomRightRadius).toBe("10px");
+    expect(element.style.borderBottomLeftRadius).toBe("8px");
+    expect(element.style.boxShadow).toContain("0px 0.5rem 1rem 0");
+    expect(element.style.opacity).toBe("0.8");
+    expect(element.style.fontFamily).toContain("ui-sans-serif");
+    expect(element.style.fontWeight).toBe("650");
+    expect(element.style.fontSize).toBe("1.25rem");
+    expect(element.style.letterSpacing).toBe("-0.1rem");
+    expect(element.style.lineHeight).toBe("1.3");
+    expect(element.style.textAlign).toBe("justify");
+    expect(element.style.textDecoration).toBe("overline");
+    expect(element.style.fontStyle).toBe("italic");
+    expect(element.style.textTransform).toBe("uppercase");
+    expect(element.style.width).toBe("100%");
+    expect(element.style.minHeight).toBe("3rem");
+    expect(element.style.paddingTop).toBe("1rem");
+    expect(element.style.paddingRight).toBe("12px");
+    expect(element.style.marginInline).toBe("-0.5rem");
+    expect(element.style.display).toBe("flex");
+    expect(element.style.flexDirection).toBe("row");
+    expect(element.style.flexWrap).toBe("wrap");
+    expect(element.style.flexGrow).toBe("1");
+    expect(element.style.gap).toBe("0.5rem");
+    expect(element.style.rowGap).toBe("6px");
+    expect(element.style.columnGap).toBe("10px");
+    expect(element.style.overflowX).toBe("auto");
+    expect(element.style.overflowY).toBe("hidden");
+    expect(element.style.alignItems).toBe("flex-start");
+    expect(element.style.alignSelf).toBe("stretch");
+    expect(element.style.justifyContent).toBe("space-between");
+    expect(element.style.position).toBe("relative");
+    expect(element.style.top).toBe("0.25rem");
+    expect(element.style.left).toBe("-4px");
+    expect(element.style.zIndex).toBe("3");
+    expect(element.style.transform).toContain("translate(1rem, -4px)");
+    expect(element.style.transform).toContain("rotate(30deg)");
+    expect(element.style.transform).toContain("scale(1.1, 0.9)");
+    expect(element.style.transformOrigin).toBe("top left");
+  });
+
   it("renders finite grid flow and all leaf semantic content without document-controlled markup", () => {
     const first = input(STARTER_TEXT_CAPABILITY_ID, { text: "First" });
     const second = input(STARTER_TEXT_CAPABILITY_ID, { text: "Second" });
@@ -246,7 +376,7 @@ describe("M10A-T05 layout and content Web adapters", () => {
         STARTER_SEPARATOR_CAPABILITY_ID,
         { orientation: "horizontal" },
         {},
-        { base: { root: { borderColor: "#E5E5E5" } } },
+        { base: { root: { color: "#E5E5E5" } } },
       ),
     ],
   ])(
@@ -259,9 +389,26 @@ describe("M10A-T05 layout and content Web adapters", () => {
   it.each([
     { base: { root: { width: -1 } } },
     { base: { root: { width: "calc(100% - 1px)" } } },
-    { base: { root: { marginLeft: 10 } } },
+    { base: { root: { marginLeft: "10px" } } },
     { base: { root: { selector: ".private [data-state]" } } },
     { base: { root: { backgroundColor: "url(https://untrusted.invalid)" } } },
+    { base: { root: { backgroundGradient: "linear-gradient(red, blue)" } } },
+    { base: { root: { borderRadius: { value: 9, unit: "rem" } } } },
+    {
+      base: {
+        root: {
+          typography: {
+            fontFamily: "Inter",
+            fontSize: { value: 16, unit: "px" },
+            fontWeight: 400,
+            letterSpacing: { value: 0, unit: "px" },
+            lineHeight: 1.5,
+          },
+        },
+      },
+    },
+    { base: { root: { gap: { value: 1, unit: "vh" } } } },
+    { base: { root: { transform: "rotate(90deg)" } } },
     { hover: { root: { gap: 8 } } },
   ])("rejects unknown style authority, private selectors, and invalid dimensions", (style) => {
     const stack = input(

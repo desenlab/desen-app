@@ -31,6 +31,8 @@ import type {
 import type {
   ChannelRecord,
   ChannelRepository,
+  ProjectWorkspaceRecord,
+  ProjectWorkspaceRepository,
   RepositoryReadResult,
   SourceRecord,
   SourceRepository,
@@ -48,6 +50,8 @@ export interface LocalControlPlaneApplicationOptions {
   readonly bundleStore: BundleStore;
   /** Editable Source metadata repository. */
   readonly sourceRepository: SourceRepository;
+  /** Complete application project-workspace metadata repository. */
+  readonly projectWorkspaceRepository: ProjectWorkspaceRepository;
   /** Mutable discovery-channel metadata repository. */
   readonly channelRepository: ChannelRepository;
   /** Closes the owned metadata repository after HTTP admission stops. */
@@ -57,6 +61,7 @@ export interface LocalControlPlaneApplicationOptions {
 interface CapturedLocalControlPlaneRuntime {
   readonly bundleStore: BundleStore;
   readonly sourceRepository: SourceRepository;
+  readonly projectWorkspaceRepository: ProjectWorkspaceRepository;
   readonly channelRepository: ChannelRepository;
   readonly closeMetadata: (this: void) => void | Promise<void>;
 }
@@ -73,6 +78,10 @@ interface ChannelParams {
   readonly channelName: string;
 }
 
+interface ProjectWorkspaceParams {
+  readonly workspaceKey: string;
+}
+
 interface BufferBodyRoute<Params> {
   readonly Params: Params;
   readonly Body: Buffer;
@@ -87,6 +96,12 @@ type MutablePrecondition =
   | Readonly<{ readonly mode: "update"; readonly generation: number }>;
 
 const SOURCE_JSON_LIMITS: StrictJsonLimits = Object.freeze({
+  maxDecodedStringCodeUnits: LOCAL_CONTROL_PLANE_LIMITS.maxDecodedStringCodeUnits,
+  maxDepth: LOCAL_CONTROL_PLANE_LIMITS.maxJsonDepth,
+  maxNumberTokenCodeUnits: LOCAL_CONTROL_PLANE_LIMITS.maxNumberTokenCodeUnits,
+  maxValueOccurrences: LOCAL_CONTROL_PLANE_LIMITS.maxJsonValueOccurrences,
+});
+const PROJECT_WORKSPACE_JSON_LIMITS: StrictJsonLimits = Object.freeze({
   maxDecodedStringCodeUnits: LOCAL_CONTROL_PLANE_LIMITS.maxDecodedStringCodeUnits,
   maxDepth: LOCAL_CONTROL_PLANE_LIMITS.maxJsonDepth,
   maxNumberTokenCodeUnits: LOCAL_CONTROL_PLANE_LIMITS.maxNumberTokenCodeUnits,
@@ -218,7 +233,7 @@ function mutablePrecondition(
 
 function preconditionStatus(
   precondition: MutablePrecondition,
-  current: RepositoryReadResult<SourceRecord | ChannelRecord>,
+  current: RepositoryReadResult<SourceRecord | ProjectWorkspaceRecord | ChannelRecord>,
 ):
   | Readonly<{ readonly valid: true }>
   | Readonly<{ readonly valid: false; readonly generation: number | null }> {
@@ -268,10 +283,13 @@ function publicFailure(error: unknown): LocalControlPlaneError {
         return new LocalControlPlaneError("INVALID_REVISION");
       case "INVALID_GENERATION":
         return new LocalControlPlaneError("INVALID_GENERATION");
+      case "INVALID_PROJECT_WORKSPACE_KEY":
+        return new LocalControlPlaneError("INVALID_PROJECT_WORKSPACE_KEY");
       case "INVALID_SOURCE_KEY":
         return new LocalControlPlaneError("INVALID_SOURCE_KEY");
       case "DUPLICATE_INITIAL_RECORD":
       case "INVALID_INITIAL_RECORDS":
+      case "INVALID_PROJECT_WORKSPACE_BYTES":
       case "INVALID_SOURCE_BYTES":
         return new LocalControlPlaneError("INTERNAL_FAILURE");
     }
@@ -308,6 +326,7 @@ function failureStatus(error: LocalControlPlaneError): LocalControlPlaneHttpStat
     case "HOST_NOT_ALLOWED":
       return 403;
     case "SOURCE_NOT_FOUND":
+    case "PROJECT_WORKSPACE_NOT_FOUND":
     case "BUNDLE_NOT_FOUND":
     case "CHANNEL_NOT_FOUND":
     case "ROUTE_NOT_FOUND":
@@ -321,6 +340,7 @@ function failureStatus(error: LocalControlPlaneError): LocalControlPlaneHttpStat
       return 412;
     case "BODY_LIMIT_EXCEEDED":
     case "SOURCE_MATERIAL_LIMIT_EXCEEDED":
+    case "PROJECT_WORKSPACE_MATERIAL_LIMIT_EXCEEDED":
       return 413;
     case "UNSUPPORTED_MEDIA_TYPE":
       return 415;
@@ -342,6 +362,7 @@ function failureStatus(error: LocalControlPlaneError): LocalControlPlaneHttpStat
     case "INVALID_CHANNEL_NAME":
     case "INVALID_GENERATION":
     case "INVALID_PORT":
+    case "INVALID_PROJECT_WORKSPACE_KEY":
     case "INVALID_REQUEST":
     case "INVALID_REVISION":
     case "INVALID_ROOT_DIRECTORY":
@@ -349,6 +370,8 @@ function failureStatus(error: LocalControlPlaneError): LocalControlPlaneHttpStat
     case "PRECONDITION_INVALID":
     case "SOURCE_JSON_INVALID":
     case "SOURCE_SCHEMA_INVALID":
+    case "PROJECT_WORKSPACE_JSON_INVALID":
+    case "PROJECT_WORKSPACE_SCHEMA_INVALID":
       return 400;
   }
 }
@@ -359,7 +382,7 @@ function sendPublicFailure(reply: FastifyReply, error: unknown): FastifyReply {
 }
 
 function requestPathIsResource(path: string): boolean {
-  return /^\/v1\/(?:sources|bundles|channels)\/[^/]+$/u.test(path);
+  return /^\/v1\/(?:sources|bundles|channels|project-workspaces)\/[^/]+$/u.test(path);
 }
 
 function requestedCorsHeaders(value: string | undefined): readonly string[] | undefined {
@@ -378,7 +401,11 @@ function requestedCorsHeaders(value: string | undefined): readonly string[] | un
 
 function registerPreflight(
   app: FastifyInstance,
-  path: "/v1/bundles/:revision" | "/v1/channels/:channelName" | "/v1/sources/:sourceKey",
+  path:
+    | "/v1/bundles/:revision"
+    | "/v1/channels/:channelName"
+    | "/v1/project-workspaces/:workspaceKey"
+    | "/v1/sources/:sourceKey",
 ): void {
   app.options(path, (request, reply) => {
     const origin = stringHeader(request, "origin");
@@ -394,6 +421,9 @@ function registerPreflight(
     if (path.startsWith("/v1/channels/") && !isLocalIdentifier(identity)) {
       return sendError(reply, 400, "INVALID_CHANNEL_NAME");
     }
+    if (path.startsWith("/v1/project-workspaces/") && !isLocalIdentifier(identity)) {
+      return sendError(reply, 400, "INVALID_PROJECT_WORKSPACE_KEY");
+    }
     if (path.startsWith("/v1/bundles/") && !isSha256Digest(identity)) {
       return sendError(reply, 400, "INVALID_REVISION");
     }
@@ -403,7 +433,10 @@ function registerPreflight(
     }
     const preconditionHeaders =
       Number(headers.includes("if-match")) + Number(headers.includes("if-none-match"));
-    const mutableRoute = path.startsWith("/v1/sources/") || path.startsWith("/v1/channels/");
+    const mutableRoute =
+      path.startsWith("/v1/sources/") ||
+      path.startsWith("/v1/channels/") ||
+      path.startsWith("/v1/project-workspaces/");
     const exactHeaders =
       requestedMethod === "GET"
         ? headers.length === 1
@@ -491,6 +524,107 @@ function registerSourceRoutes(app: FastifyInstance, repository: SourceRepository
         return sendJson(reply, result.status === "created" ? 201 : 200, {
           generation: result.record.generation,
           sourceKey,
+          status: result.status,
+        });
+      } catch (error) {
+        return sendPublicFailure(reply, error);
+      }
+    },
+  );
+}
+
+/**
+ * Registers the separate application-workspace transport.
+ *
+ * @remarks The control plane deliberately proves only bounded strict JSON with an object root.
+ * The Desen App owns `ProjectWorkspaceRecord` and T02 envelope admission before a write and after
+ * a read. This keeps project design-system data out of editable Source and its extensions.
+ */
+function registerProjectWorkspaceRoutes(
+  app: FastifyInstance,
+  repository: ProjectWorkspaceRepository,
+): void {
+  app.get<ParamsOnlyRoute<ProjectWorkspaceParams>>(
+    "/v1/project-workspaces/:workspaceKey",
+    async (request, reply) => {
+      const { workspaceKey } = request.params;
+      if (!isLocalIdentifier(workspaceKey)) {
+        return sendError(reply, 400, "INVALID_PROJECT_WORKSPACE_KEY");
+      }
+      try {
+        const result = repository.get(workspaceKey);
+        if (result.status === "missing") {
+          return sendError(reply, 404, "PROJECT_WORKSPACE_NOT_FOUND");
+        }
+        reply
+          .code(200)
+          .header("content-type", LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE)
+          .header("etag", generationEtag(result.record.generation))
+          .send(Buffer.from(result.record.bytes));
+      } catch (error) {
+        return sendPublicFailure(reply, error);
+      }
+    },
+  );
+
+  app.put<BufferBodyRoute<ProjectWorkspaceParams>>(
+    "/v1/project-workspaces/:workspaceKey",
+    { bodyLimit: LOCAL_CONTROL_PLANE_LIMITS.maxProjectWorkspaceUtf8Bytes },
+    async (request, reply) => {
+      const { workspaceKey } = request.params;
+      if (!isLocalIdentifier(workspaceKey)) {
+        return sendError(reply, 400, "INVALID_PROJECT_WORKSPACE_KEY");
+      }
+      const precondition = mutablePrecondition(request);
+      if (precondition instanceof LocalControlPlaneError) {
+        return sendPublicFailure(reply, precondition);
+      }
+      try {
+        const current = repository.get(workspaceKey);
+        const check = preconditionStatus(precondition, current);
+        if (!check.valid) return sendGenerationMismatch(reply, check.generation);
+
+        const parsed = parseStrictJsonBytes(request.body, PROJECT_WORKSPACE_JSON_LIMITS);
+        if (parsed.status === "rejected") {
+          return sendError(
+            reply,
+            parsed.issue.kind === "limit" ? 413 : 400,
+            parsed.issue.kind === "limit"
+              ? "PROJECT_WORKSPACE_MATERIAL_LIMIT_EXCEEDED"
+              : "PROJECT_WORKSPACE_JSON_INVALID",
+          );
+        }
+        if (
+          parsed.value === null ||
+          typeof parsed.value !== "object" ||
+          Array.isArray(parsed.value)
+        ) {
+          return sendError(reply, 400, "PROJECT_WORKSPACE_SCHEMA_INVALID");
+        }
+        if (
+          canonicalJsonByteLengthWithin(
+            parsed.value,
+            LOCAL_CONTROL_PLANE_LIMITS.maxProjectWorkspaceCanonicalUtf8Bytes,
+          ) === undefined
+        ) {
+          return sendError(reply, 413, "PROJECT_WORKSPACE_MATERIAL_LIMIT_EXCEEDED");
+        }
+
+        const result =
+          precondition.mode === "create"
+            ? repository.create(workspaceKey, request.body)
+            : repository.update(workspaceKey, precondition.generation, request.body);
+        if (result.status === "precondition-failed") {
+          return sendGenerationMismatch(reply, result.current?.generation ?? null);
+        }
+        if (result.status === "generation-exhausted") {
+          reply.header("etag", generationEtag(result.current.generation));
+          return sendError(reply, 409, "GENERATION_EXHAUSTED");
+        }
+        reply.header("etag", generationEtag(result.record.generation));
+        return sendJson(reply, result.status === "created" ? 201 : 200, {
+          generation: result.record.generation,
+          workspaceKey,
           status: result.status,
         });
       } catch (error) {
@@ -878,9 +1012,11 @@ function createFastifyApplication(
   });
 
   registerSourceRoutes(app, options.sourceRepository);
+  registerProjectWorkspaceRoutes(app, options.projectWorkspaceRepository);
   registerBundleRoutes(app, options.bundleStore);
   registerChannelRoutes(app, options.channelRepository, options.bundleStore);
   registerPreflight(app, "/v1/sources/:sourceKey");
+  registerPreflight(app, "/v1/project-workspaces/:workspaceKey");
   registerPreflight(app, "/v1/bundles/:revision");
   registerPreflight(app, "/v1/channels/:channelName");
 
@@ -1015,6 +1151,7 @@ export function createLocalControlPlaneApplication(
     Object.freeze({
       bundleStore: options.bundleStore,
       sourceRepository: options.sourceRepository,
+      projectWorkspaceRepository: options.projectWorkspaceRepository,
       channelRepository: options.channelRepository,
       closeMetadata: options.closeMetadata,
     }),

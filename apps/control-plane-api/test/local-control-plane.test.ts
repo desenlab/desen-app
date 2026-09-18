@@ -1,6 +1,9 @@
 import { connect } from "node:net";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+
+import Database from "better-sqlite3";
 
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
@@ -9,8 +12,10 @@ import {
   LOCAL_CONTROL_PLANE_LIMITS,
 } from "../src/local-control-plane-contract.js";
 import { createLocalControlPlaneApplication } from "../src/local-control-plane-internal.js";
+import { openLocalControlPlane } from "../src/local-control-plane.js";
 import {
   createInMemoryChannelRepository,
+  createInMemoryProjectWorkspaceRepository,
   createInMemorySourceRepository,
 } from "../src/local-control-plane-repository-internal.js";
 
@@ -26,6 +31,32 @@ const API_TOKEN = "m07-t05-local-api-token-32-bytes";
 const ALLOWED_ORIGIN = "https://desen.app";
 const REVISION_A = `sha256:${"a".repeat(64)}`;
 const REVISION_B = `sha256:${"b".repeat(64)}`;
+const LEGACY_SOURCE_TABLE_SQL = [
+  "CREATE TABLE sources (",
+  "source_key TEXT PRIMARY KEY NOT NULL",
+  "CHECK(length(source_key) BETWEEN 1 AND 64)",
+  "CHECK(substr(source_key, 1, 1) GLOB '[a-z]')",
+  "CHECK(source_key NOT GLOB '*[^a-z0-9-]*')",
+  ", source_bytes BLOB NOT NULL",
+  "CHECK(length(source_bytes) BETWEEN 1 AND 8388608)",
+  ", generation INTEGER NOT NULL",
+  `CHECK(generation BETWEEN 1 AND ${String(Number.MAX_SAFE_INTEGER)})`,
+  ") STRICT",
+].join(" ");
+const LEGACY_CHANNEL_TABLE_SQL = [
+  "CREATE TABLE channels (",
+  "channel_name TEXT PRIMARY KEY NOT NULL",
+  "CHECK(length(channel_name) BETWEEN 1 AND 64)",
+  "CHECK(substr(channel_name, 1, 1) GLOB '[a-z]')",
+  "CHECK(channel_name NOT GLOB '*[^a-z0-9-]*')",
+  ", revision TEXT NOT NULL",
+  "CHECK(length(revision) = 71)",
+  "CHECK(substr(revision, 1, 7) = 'sha256:')",
+  "CHECK(substr(revision, 8) NOT GLOB '*[^0-9a-f]*')",
+  ", generation INTEGER NOT NULL",
+  `CHECK(generation BETWEEN 1 AND ${String(Number.MAX_SAFE_INTEGER)})`,
+  ") STRICT",
+].join(" ");
 const OFFICIAL_SOURCE_PATH = resolve(
   import.meta.dirname,
   "../../../packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
@@ -88,6 +119,7 @@ function createApi(bundleStore: BundleStore = createMemoryBundleStore()): LocalC
     allowedOrigins: [ALLOWED_ORIGIN],
     bundleStore,
     channelRepository: createInMemoryChannelRepository(),
+    projectWorkspaceRepository: createInMemoryProjectWorkspaceRepository(),
     sourceRepository: createInMemorySourceRepository(),
     closeMetadata: () => undefined,
   });
@@ -234,6 +266,138 @@ describe("M07-T05 closed local control-plane HTTP profile", () => {
     expect(stale.headers.etag).toBe('"g:2"');
     expect(stale.headers["access-control-expose-headers"]).toBe("etag");
     expect(errorCode(stale)).toBe("GENERATION_MISMATCH");
+  });
+
+  it("stores a complete application project workspace through its own strict-JSON CAS route", async () => {
+    const api = createApi();
+    const workspace = new TextEncoder().encode(
+      JSON.stringify({
+        kind: "desen.app.project-workspace",
+        schemaVersion: 1,
+        projects: [],
+        deletedProjects: [],
+      }),
+    );
+    const revisedWorkspace = new TextEncoder().encode(
+      '{"kind":"desen.app.project-workspace","schemaVersion":1,"projects":[],"deletedProjects":[] }',
+    );
+
+    const created = await api.inject(
+      request("PUT", "/v1/project-workspaces/desen-neutral", {
+        body: workspace,
+        headers: { "if-none-match": "*", origin: ALLOWED_ORIGIN },
+      }),
+    );
+    expect(created.statusCode).toBe(201);
+    expect(created.headers.etag).toBe('"g:1"');
+    expect(json(created)).toMatchObject({
+      generation: 1,
+      workspaceKey: "desen-neutral",
+      status: "created",
+    });
+
+    const fetched = await api.inject(
+      request("GET", "/v1/project-workspaces/desen-neutral", {
+        headers: { origin: ALLOWED_ORIGIN },
+      }),
+    );
+    expect(fetched.statusCode).toBe(200);
+    expect(fetched.headers.etag).toBe('"g:1"');
+    expect(fetched.body).toEqual(workspace);
+
+    const unchanged = await api.inject(
+      request("PUT", "/v1/project-workspaces/desen-neutral", {
+        body: workspace,
+        headers: { "if-match": '"g:1"' },
+      }),
+    );
+    expect(json(unchanged)).toMatchObject({ generation: 1, status: "unchanged" });
+
+    const updated = await api.inject(
+      request("PUT", "/v1/project-workspaces/desen-neutral", {
+        body: revisedWorkspace,
+        headers: { "if-match": '"g:1"' },
+      }),
+    );
+    expect(json(updated)).toMatchObject({ generation: 2, status: "updated" });
+
+    const stale = await api.inject(
+      request("PUT", "/v1/project-workspaces/desen-neutral", {
+        body: workspace,
+        headers: { "if-match": '"g:1"' },
+      }),
+    );
+    expect(stale.statusCode).toBe(412);
+    expect(stale.headers.etag).toBe('"g:2"');
+    expect(errorCode(stale)).toBe("GENERATION_MISMATCH");
+
+    const malformed = await api.inject(
+      request("PUT", "/v1/project-workspaces/strict", {
+        body: new TextEncoder().encode('{"kind":"one","kind":"two"}'),
+        headers: { "if-none-match": "*" },
+      }),
+    );
+    const nonObject = await api.inject(
+      request("PUT", "/v1/project-workspaces/object", {
+        body: new TextEncoder().encode("[]"),
+        headers: { "if-none-match": "*" },
+      }),
+    );
+    expect(errorCode(malformed)).toBe("PROJECT_WORKSPACE_JSON_INVALID");
+    expect(errorCode(nonObject)).toBe("PROJECT_WORKSPACE_SCHEMA_INVALID");
+
+    const sourceMixup = await api.inject(
+      request("PUT", "/v1/sources/desen-neutral", {
+        body: workspace,
+        headers: { "if-none-match": "*" },
+      }),
+    );
+    expect(errorCode(sourceMixup)).toBe("SOURCE_SCHEMA_INVALID");
+  });
+
+  it("migrates a sealed v1 metadata database before persisting and reopening project workspaces", async () => {
+    const root = await mkdtemp(join(tmpdir(), "desen-project-workspace-migration-"));
+    const metadataPath = join(root, "control-plane.sqlite3");
+    const legacy = new Database(metadataPath);
+    legacy.exec(`${LEGACY_SOURCE_TABLE_SQL}; ${LEGACY_CHANNEL_TABLE_SQL}`);
+    legacy.pragma("user_version = 1");
+    legacy.close();
+
+    const workspace = new TextEncoder().encode(
+      JSON.stringify({
+        kind: "desen.app.project-workspace",
+        schemaVersion: 1,
+        projects: [],
+        deletedProjects: [],
+      }),
+    );
+    let first: LocalControlPlane | undefined;
+    let second: LocalControlPlane | undefined;
+    try {
+      first = await openLocalControlPlane({ rootDirectory: root, apiToken: API_TOKEN });
+      const created = await first.inject(
+        request("PUT", "/v1/project-workspaces/desen-neutral", {
+          body: workspace,
+          headers: { "if-none-match": "*" },
+        }),
+      );
+      expect(created.statusCode).toBe(201);
+      await first.close();
+      first = undefined;
+
+      second = await openLocalControlPlane({ rootDirectory: root, apiToken: API_TOKEN });
+      const reopened = await second.inject(request("GET", "/v1/project-workspaces/desen-neutral"));
+      expect(reopened.statusCode).toBe(200);
+      expect(reopened.headers.etag).toBe('"g:1"');
+      expect(reopened.body).toEqual(workspace);
+    } finally {
+      await Promise.all(
+        [first?.close(), second?.close()].filter(
+          (value): value is Promise<void> => value !== undefined,
+        ),
+      );
+      await rm(root, { force: true, recursive: true });
+    }
   });
 
   it("rejects missing, forged, aliased, and duplicate-key Source admission", async () => {
@@ -505,6 +669,7 @@ describe("M07-T05 closed local control-plane HTTP profile", () => {
       allowedOrigins: [],
       bundleStore,
       channelRepository: createInMemoryChannelRepository(),
+      projectWorkspaceRepository: createInMemoryProjectWorkspaceRepository(),
       sourceRepository: createInMemorySourceRepository(),
       closeMetadata: () => {
         metadataCloseCount += 1;

@@ -10,7 +10,10 @@ import {
   applyAuthoringInspectorEdit,
   prepareAuthoringInspectorModel,
 } from "../src/authoring-inspector.js";
-import { prepareCatalogAuthoringModel } from "../src/authoring-data.js";
+import {
+  prepareCatalogAuthoringModel,
+  resolveCatalogComponentInspector,
+} from "../src/authoring-data.js";
 import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
 import { REFERENCE_AUTHORING_MODEL } from "../src/reference-authoring-profile.js";
 
@@ -203,7 +206,9 @@ function childOrder(document: DesenEditorDocument): readonly string[] {
 function controlSignature(model: CatalogAuthoringModel, componentId: string) {
   const component = model.components.find(({ id }) => id === componentId);
   if (component === undefined) throw new Error(`Missing Catalog component ${componentId}.`);
-  return component.inspector.controls.map((control) => [
+  const inspector = resolveCatalogComponentInspector(model, component.id);
+  if (inspector === undefined) throw new Error(`Missing Inspector plan for ${componentId}.`);
+  return inspector.controls.map((control) => [
     control.property,
     control.kind,
     control.required,
@@ -342,9 +347,15 @@ describe("Desen App schema-driven authoring inspector", () => {
     expect(Object.isFrozen(REFERENCE_AUTHORING_MODEL)).toBe(true);
     expect(
       REFERENCE_AUTHORING_MODEL.components.every(
-        ({ inspector }) => Object.isFrozen(inspector) && Object.isFrozen(inspector.controls),
+        (component) => Object.hasOwn(component, "inspector") === false,
       ),
     ).toBe(true);
+    const inspector = resolveCatalogComponentInspector(
+      REFERENCE_AUTHORING_MODEL,
+      "com.example.ui/Text",
+    );
+    expect(Object.isFrozen(inspector)).toBe(true);
+    expect(Object.isFrozen(inspector?.controls)).toBe(true);
   });
 
   it("distinguishes literal, absent, and dynamic Source values without coercion", () => {

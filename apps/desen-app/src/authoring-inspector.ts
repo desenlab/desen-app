@@ -5,7 +5,10 @@ import {
 } from "@desen/editor-core";
 import { canonicalizeJson, canonicalizeJsonBytes, parseJsonPointer } from "@desen/protocol";
 
-import { prepareCatalogAuthoringModel } from "./authoring-data.js";
+import {
+  prepareCatalogAuthoringModel,
+  resolveCatalogComponentInspector,
+} from "./authoring-data.js";
 import { projectAuthoringSelection } from "./authoring-selection.js";
 
 import type { ComponentInspectorControl, JsonPrimitive, JsonValue } from "@desen/catalog-sdk";
@@ -856,15 +859,17 @@ export function prepareAuthoringInspectorModel(
   const node = findSelectedNode(model, selection);
   const component = model.components.find(({ id }) => id === selection.capabilityId);
   if (node === undefined || component === undefined) return Object.freeze({ status: "rejected" });
+  const inspector = resolveCatalogComponentInspector(model, component.id);
+  if (inspector === undefined) return Object.freeze({ status: "rejected" });
 
-  const propsSchema = component.inspector.propsSchema as JsonObject;
-  const fields = prepareInspectorFields(component.inspector.controls, node.props, propsSchema, []);
+  const propsSchema = inspector.propsSchema as JsonObject;
+  const fields = prepareInspectorFields(inspector.controls, node.props, propsSchema, []);
   const localStates = projectInspectorStateOptions(model.validationDocument, selection.surfaceId);
 
   return Object.freeze({
     status: "ready",
     component,
-    controlCount: countControls(component.inspector.controls),
+    controlCount: countControls(inspector.controls),
     fields: Object.freeze(fields),
     localStates,
     node,

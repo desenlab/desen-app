@@ -79,9 +79,34 @@ const APP_SQLITE_SOURCE_SHA256 = "cec7d1437d7e222facdc5681ae720ec6bc3b77fe3f9f5f
 const APP_TEST_SHA256 = "4263aa47e7f6d647fe9e08acd19dc305fd53f0acc06383c9b300381a27a008f2";
 const APP_TEST_SUPPORT_SHA256 = "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5";
 const APP_TYPE_TEST_SHA256 = "ddda51882a5783b9a3fe291da84fbddd7d7cb298a91c6f0a1ec4ae7515a8d0d8";
-const ROOT_TEST_SHA256 = "f45e786b394682f3a8be9688cc745fe8a940845ab74443fdbb1fa54115177f8a";
+const ROOT_TEST_SHA256 = "ae9a62cfcefbe228f823fab8344ca3776197a67f47cd039880972c4faa3da15e";
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
+const M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT = 108;
+const M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256 =
+  "fd264c81a5093aa4c0ca366ad2bec60ad3a4c0cfa0b87816c1050c20d3250580";
+// T12's three opaque project-workspace transport types are the sole allowed post-T10 source
+// successor. Their exact static export records are removed only for frozen T10 projection.
+const M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS = Object.freeze([
+  Object.freeze({
+    exported: "LocalControlPlaneProjectWorkspacePutResult",
+    imported: "LocalControlPlaneProjectWorkspacePutResult",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+  Object.freeze({
+    exported: "LocalControlPlaneProjectWorkspaceReadResult",
+    imported: "LocalControlPlaneProjectWorkspaceReadResult",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+  Object.freeze({
+    exported: "LocalControlPlaneProjectWorkspaceRecord",
+    imported: "LocalControlPlaneProjectWorkspaceRecord",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+]);
 
 const EXPECTED_TRANSITION_CASE_IDS = Object.freeze([
   "ordered-unsupported-protocol",
@@ -677,16 +702,48 @@ function publicExportInventory(source) {
     const byName = compareText(left.exported, right.exported);
     return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
   });
-  const inventorySha256 = sha256(Buffer.from(JSON.stringify(inventory), "utf8"));
-  if (inventory.length !== 105 || inventorySha256 !== EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256) {
+  const currentInventorySha256 = sha256(Buffer.from(JSON.stringify(inventory), "utf8"));
+  if (
+    inventory.length !== M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT ||
+    currentInventorySha256 !== M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256
+  ) {
+    fail("PUBLIC_EXPORT_DRIFT", "The exact M10A-T12 package-root inventory drifted.", {
+      expectedCount: M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT,
+      actualCount: inventory.length,
+      expectedSha256: M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256,
+      actualSha256: currentInventorySha256,
+    });
+  }
+  const t12ProjectWorkspaceExports = inventory.filter(({ exported }) =>
+    M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS.some((expected) => expected.exported === exported),
+  );
+  if (
+    JSON.stringify(t12ProjectWorkspaceExports) !==
+    JSON.stringify(M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS)
+  ) {
+    fail("PUBLIC_EXPORT_DRIFT", "The exact M10A-T12 package-root successor drifted.");
+  }
+  const frozenInventory = inventory.filter(
+    ({ exported }) =>
+      !M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS.some((expected) => expected.exported === exported),
+  );
+  const inventorySha256 = sha256(Buffer.from(JSON.stringify(frozenInventory), "utf8"));
+  if (
+    frozenInventory.length !== 105 ||
+    inventorySha256 !== EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256
+  ) {
     fail("PUBLIC_EXPORT_DRIFT", "The exact package-root public export inventory drifted.", {
       expectedCount: 105,
-      actualCount: inventory.length,
+      actualCount: frozenInventory.length,
       expectedSha256: EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256,
       actualSha256: inventorySha256,
     });
   }
-  return deepFreeze({ entries: inventory, count: inventory.length, sha256: inventorySha256 });
+  return deepFreeze({
+    entries: frozenInventory,
+    count: frozenInventory.length,
+    sha256: inventorySha256,
+  });
 }
 
 export const CONTROL_PLANE_RUNTIME_TRANSITION_RACES_EXPECTED_SUITE_RECEIPT = deepFreeze({

@@ -96,6 +96,7 @@ const DESEN_APP_CONNECTED_PROOF_UNITS = Object.freeze([
   "m10a-t07",
   "m10a-t08",
   "m10a-t09",
+  "m10a-t12",
 ]);
 
 function clone(value) {
@@ -104,8 +105,8 @@ function clone(value) {
 
 test("the reviewed impact graph owns every proof unit exactly once", () => {
   const graph = createAffectedImpactGraph();
-  assert.equal(graph.proofUnitCount, 119);
-  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 119);
+  assert.equal(graph.proofUnitCount, 120);
+  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 120);
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "control-plane-runtime-transition-races")?.prerequisites,
     ["control-plane-runtime-fault-injection"],
@@ -326,15 +327,19 @@ test("the reviewed impact graph owns every proof unit exactly once", () => {
     "m10a-t05",
     "m10a-t08",
   ]);
+  assert.deepEqual(graph.entries.find(({ id }) => id === "m10a-t12")?.prerequisites, [
+    "m10a-t03",
+    "m10a-t09",
+  ]);
   assert.equal(validateAffectedImpactGraph(graph), graph);
   assert.equal(Object.isFrozen(graph), true);
   assert.equal(Object.isFrozen(graph.entries), true);
 });
 
-test("M10A-T09 extends the closed M10A chain without weakening its historical closure", () => {
+test("M10A-T12 extends the closed M10A chain without weakening its historical closure", () => {
   const historical = createAffectedImpactClosure(["historical-archive-redaction"]);
-  assert.equal(historical.proofUnitCount, 87);
-  assert.equal(historical.workloadCount, 188);
+  assert.equal(historical.proofUnitCount, 88);
+  assert.equal(historical.workloadCount, 190);
   assert.equal(historical.proofUnitIds.includes("m10-gate"), true);
   assert.equal(historical.proofUnitIds.includes("m10a-t01"), true);
   assert.equal(historical.proofUnitIds.includes("m10a-t02"), true);
@@ -345,9 +350,10 @@ test("M10A-T09 extends the closed M10A chain without weakening its historical cl
   assert.equal(historical.proofUnitIds.includes("m10a-t07"), true);
   assert.equal(historical.proofUnitIds.includes("m10a-t08"), true);
   assert.equal(historical.proofUnitIds.includes("m10a-t09"), true);
+  assert.equal(historical.proofUnitIds.includes("m10a-t12"), true);
   assert.equal(
     historical.impactSha256,
-    "f4e66f0d58a092732aa86b34a958d42c614f7b8d23bcf279662b56bf5000803a",
+    "9f49a7f99fd05a289935c05289785faa45819a9647024272ae32a803c0c76aa2",
   );
 
   const successor = createAffectedImpactClosure(["m10a-t01"]);
@@ -363,9 +369,10 @@ test("M10A-T09 extends the closed M10A chain without weakening its historical cl
   assert.equal(successor.nodeIds.includes("verify-m10a-t07"), true);
   assert.equal(successor.nodeIds.includes("verify-m10a-t08"), true);
   assert.equal(successor.nodeIds.includes("verify-m10a-t09"), true);
+  assert.equal(successor.nodeIds.includes("verify-m10a-t12"), true);
   assert.equal(
     successor.impactSha256,
-    "48beaf3b836990635ee8a492ed6e0b8e5c3fb403f243e4a63a1fcaeef060c145",
+    "1305b9f4b6e72caaf96111714b18bc0269751c0dbf0348bcd16746e7f7347fdf",
   );
 });
 
@@ -385,7 +392,7 @@ test("invalid publication has exactly the publication, diagnostics, and public i
   assert.deepEqual(closure.proofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(
     closure.impactSha256,
-    "2ce94af07728b32ab1aeb7eb2c890d9a76c63c56ad45d220fe079a4c51d8761e",
+    "a6eb1b5575b14b469dd24b053df33a2f4438478eb9ae429cf961808bd004de39",
   );
   assert.equal(closure.proofUnitCount, DESEN_APP_CONNECTED_PROOF_UNITS.length);
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
@@ -424,7 +431,7 @@ test("last-known-good recovery has exactly its four reviewed product and durable
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "f973328d313bb72628c3ee0c5f9008f4b38fad81e06e8ff1061ef2da969e6f05",
+    "0a1ed50b364153cbac89678b4611fb16d30755cf253c496c2c364a1c751126ca",
   );
   for (const parent of parents) {
     assert.equal(
@@ -463,7 +470,7 @@ test("repeatable demo includes its exact recovery, Integration, and independent-
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "f997d7e132eccd36a70103c3c7c8bb9877e9e54f749843a7d400e019b313bfe1",
+    "84bf852ff279bcaaf8cf283441144e16cf7f592a4c077f52717a0c7d714105c5",
   );
   for (const parent of parents) {
     assert.equal(
@@ -486,7 +493,7 @@ test("Runtime Core baseline has exactly its repeatable-demo predecessor and comp
   const graph = createAffectedImpactGraph();
   assert.equal(
     graph.impactGraphSha256,
-    "4c9bf0772ea60e6aa791dd30f62e56422e534b3e3d6355b9e2263773bac0bf72",
+    "e63f9d4e1e0c84e4454c871fd81f41847d08458068fa29992eb1943de0c86d83",
   );
   assert.deepEqual(graph.entries.find(({ id }) => id === "runtime-core-baseline")?.prerequisites, [
     "desen-app-repeatable-demo",
@@ -498,7 +505,7 @@ test("Runtime Core baseline has exactly its repeatable-demo predecessor and comp
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "4142b7b66b2ee373ecad41a697d6c59aceea6e629cd8439152b582700da5d7bb",
+    "6f9807a46596fe5b297f4739bccc828c873ea46e8dbf711f186d538510e1ed6c",
   );
   assert.equal(closure.nodeIds.includes("verify-runtime-core-baseline"), true);
   assert.equal(closure.nodeIds.includes("test-runtime-core-baseline"), true);
@@ -603,7 +610,7 @@ test("continuous validation closes over T03-T07 without making persistence a for
   );
   assert.equal(
     closure.impactSha256,
-    "84dfe5ffe964e2409a79b5b98fcac7e3fa2a0da5955b4d8ff51c827ee3d6121d",
+    "b0a1b0bee6194dbe2b1b5b29840ddca1e5d3c58b5a8921f1b1a085b9c14ad37f",
   );
 });
 
@@ -614,7 +621,7 @@ test("terminal integration closes over all M08 predecessors and the frozen P-18 
   assert.equal(closure.nodeIds.includes("editor-web-public-package-contract"), true);
   assert.equal(
     closure.impactSha256,
-    "2cf6f21d109c3961684d1130d29802aaa59fcca96114997fd075efcce61ec3ab",
+    "5e825b69189b22cdf0d61f8cded22c93987fe04ee2e38d3e745f9eb04fd42cd6",
   );
 });
 
@@ -625,7 +632,7 @@ test("Desen App shell navigation closes over its terminal parent and catalog-pan
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "b6807eccc914f6909c463b627e26987b8dd40fc9170c28ecb6fd4dcf9e296f05",
+    "27bbc177a869fa2f7a305cb43ff80ea96e063cc9482cce69283eecad11ef5228",
   );
 });
 
@@ -635,7 +642,7 @@ test("Desen App catalog panel closes over exact shell and Catalog parents", () =
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "bc43f86b69f380af2ac7b05103e59c7d278e1b18ff3ac46bec9a0ff1e0660404",
+    "b294a10089a9252c1e9e779a058c473f25fd2483ffd645ab9030ab7e15e7fdc3",
   );
 });
 
@@ -646,7 +653,7 @@ test("Desen App adapter canvas closes over exact shell and source-audit parents"
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "49a0207b642a229673f2e1a4e4dd2f4fd505ff59017e5f87223c714107ec3370",
+    "b7364557931fe888890a3c5040abe92813abc6f52ef8a53c2249964ed10043fe",
   );
 });
 
@@ -657,7 +664,7 @@ test("Desen App selection overlay closes over its exact adapter-canvas parent", 
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "de6fa13262297af41306f5b9ac278fa3f523d141b5653d985d79d79469fb9946",
+    "6513d9ed3146c1bbfb1ddbdc3676581403cbf3b8ada7c5adcdf7867bb1ea6098",
   );
 });
 
@@ -684,7 +691,7 @@ test("Desen App named-slot authoring closes over its exact structured-inspector 
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "e03d003e8f778001e04773c10ff247f1007237fdfbaf18f845e8d51ab9485f0d",
+    "a3be5e515b44f888e89354709a4f9b9d7836bb22302c3f669b046f7e607df255",
   );
 });
 
@@ -695,7 +702,7 @@ test("Desen App state-binding editor closes over exact App, Editor Core, and gra
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "a87d63cb3676bb4c68e801d217a24716779dddbaf9dec5f049763a25b6034840",
+    "8c3cab21d2fcd8cb5fe2b080cc4da531826e9b8b6dedb656d72c6a9dde0478a3",
   );
 });
 
@@ -706,7 +713,7 @@ test("Desen App event/action editor closes over exact App and Editor Core parent
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "ce4da49cf260117b59b4088720ba867ee6336314a9326910bd9f20b435c14031",
+    "2b2e7568d66b8d7fe2944355faf8f107f3fa61ac97b87749f57fd855932fb08d",
   );
 });
 
@@ -717,7 +724,7 @@ test("Desen App Design/Run closes over the exact canvas, state, and action paren
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "9877e2a11c2c10b7c0d806b26905285e6d7244dcfaf0120da39c5541c22d4a67",
+    "3c8b5e42f025fdae7c72f40b0e2576786e3659885f4b55d2d403ba46c3287735",
   );
 });
 
@@ -728,7 +735,7 @@ test("Desen App fixtures/scenarios closes over exact Design/Run, fixture, and pa
   assert.equal(closure.workloadCount, 12 + DESEN_APP_CONNECTED_PROOF_UNITS.length * 2 + 2);
   assert.equal(
     closure.impactSha256,
-    "e02746e2cb62968ae15a1dfe995a18334afedc0fbb7e3c7b01119eefb2d031db",
+    "ca0b34d885be883a0ff864934d3a0e31d42c176eb669202e0d4dcbaa50dd415e",
   );
 });
 
@@ -742,7 +749,7 @@ test("Desen App persistence closes over exact shell, Editor Core, and T11 parent
   assert.equal(closure.nodeIds.includes("verify-desen-app-fixtures-scenarios-fidelity"), true);
   assert.equal(
     closure.impactSha256,
-    "fd3a05b9be57d6903de57f4ce2b38630c90a29f5bbe9ff6f0b685c3366909250",
+    "c71e0e8f6fe9f7e2aceed020c465ddf59fae219ce2beeb6f841aee3b8565c4dc",
   );
 });
 
@@ -756,7 +763,7 @@ test("Desen App diagnostics closes over exact Runtime, Editor Core, and App auth
   assert.equal(closure.nodeIds.includes("verify-desen-app-source-persistence"), true);
   assert.equal(
     closure.impactSha256,
-    "1d0595946486805d9591f0b76a0e2c49ece1e952dead8e0a196b34f716196de8",
+    "1f46a4605446a9d9aa6cdb60a144587eedf6af555a759cae93054d8b4d1d1255",
   );
 });
 
@@ -779,7 +786,7 @@ test("Desen App publication closes over exact App, Publisher, control-plane, and
   }
   assert.equal(
     closure.impactSha256,
-    "ebceafda10c9efe09a02761c8f651064fd502a6789a9624965cb7b32879bcd3d",
+    "be0152735a7c6f964c47150397c771db014d1cc21e272c039a7e4e3b776c4802",
   );
 });
 
@@ -792,7 +799,7 @@ test("Desen App empty-project browser E2E closes over the published authoring su
   assert.equal(closure.nodeIds.includes("verify-desen-app-publish-activation"), true);
   assert.equal(
     closure.impactSha256,
-    "913a76030725f16d755a4055fa63e02ecd8dbaa31cd330f45df19c9bfe22aa06",
+    "c14828dc1b1dc90026dda0f2c1b44693a758b2bc87cf4b37cd60b51272119f05",
   );
 });
 
@@ -805,7 +812,7 @@ test("Desen App Browser E2E workspace compatibility closes over the historical b
   assert.equal(closure.nodeIds.includes("verify-desen-app-empty-project-browser-e2e"), true);
   assert.equal(
     closure.impactSha256,
-    "07bf7826e155bde93d6c3e18968da5882c2d8a852a8694846c5d96cd0a5e3662",
+    "bfb395886fda17996b46f7995d108bd72375c6243ebe98b241f383497e6215db",
   );
 });
 
@@ -821,7 +828,7 @@ test("Desen App user-created blank project closes over the immutable Browser E2E
   );
   assert.equal(
     closure.impactSha256,
-    "ca517c5d63551f44893be4881001b37bb7bc30c1cdc70d41f52f68f217de6e0d",
+    "6b8005d09e289a165247afc1256619cd63ada4dacef1a5acc9a66655ee0247d3",
   );
 });
 
@@ -834,7 +841,7 @@ test("Desen App visual behavior authoring closes over the blank-project predeces
   assert.equal(closure.nodeIds.includes("verify-desen-app-user-created-blank-project"), true);
   assert.equal(
     closure.impactSha256,
-    "be3b0391915ef67e65ddbc78050508058df02b508d319a393464d343671c6555",
+    "6fd73745f958d323a3ac502cc1da2a05bcdeaadabd88a445c71fa6c8885e28dc",
   );
 });
 
@@ -847,7 +854,7 @@ test("Desen App evergreen composition closes over the visual-behavior predecesso
   assert.equal(closure.nodeIds.includes("verify-desen-app-visual-behavior-authoring"), true);
   assert.equal(
     closure.impactSha256,
-    "bb359eb2b8ad36f6d839b74c775907359cf636c2db02e680d0794204b4eade4a",
+    "8ebc63cd6ca555bcbe982f48b8746c396eb957af8c249d3ac6f31c9916ef9d08",
   );
 });
 
@@ -860,7 +867,7 @@ test("Desen App input/pending fixture closes over the evergreen composition pred
   assert.equal(closure.nodeIds.includes("verify-desen-app-evergreen-product-composition"), true);
   assert.equal(
     closure.impactSha256,
-    "3daa0d22db793dffe398df15952202b72c2d2b2a320f28005eb9da959d9d221e",
+    "1662c6e89bc17297a61b10afe5f29edbc674e4614561e48c33d86cf0d49702a1",
   );
 });
 
@@ -873,7 +880,7 @@ test("Desen App failure fixture closes over the input/pending predecessor", () =
   assert.equal(closure.nodeIds.includes("verify-desen-app-input-pending-fixture"), true);
   assert.equal(
     closure.impactSha256,
-    "1f8575d4c7d51239205cea41e8902975c99ae6ee0c93e275a4c2d0124dd947bb",
+    "815a59c0b7775e3ae92b062d7a83d2815f02d7cbc029c04d5bf64451bd05cad9",
   );
 });
 
@@ -889,7 +896,7 @@ test("Desen App success and real-host operation closes over both historical and 
   }
   assert.equal(
     closure.impactSha256,
-    "1e3d1e1a53e7ad4c28c5c3dc0bf35ad13c3dee8356e17b5683d18f1486c44d9e",
+    "c36aa370ddf611fbb9194e972cf7a3f13694d6269730f5a3e22a6f8116830afc",
   );
   const missingBinding = clone(createAffectedImpactGraph());
   missingBinding.entries
@@ -915,7 +922,7 @@ test("Desen App published-host update closes over exact T04, publication, host, 
   }
   assert.equal(
     closure.impactSha256,
-    "2afea4e489edde018c3bbf10a1148bd7d8e4099652b7846c3cdd18c8a40e784e",
+    "3172787d66aee447a2f9909df0cbc35f2dd2ede3a16709a53db39554ca6b7bec",
   );
 });
 

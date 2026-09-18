@@ -82,9 +82,34 @@ const APP_SUITE_NAME = "M07-T09 bounded activation fault matrix";
 const APP_TEST_SHA256 = "c654b23a18d1386b287073796d5f6a887dead9fd2c891efdd8aa2e3d47047f67";
 const APP_TEST_SUPPORT_SHA256 = "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5";
 const APP_TYPE_TEST_SHA256 = "70ba16f2896f97a8957d8e47ad07f76536e42dcacfe23d8afe34e05d2f726212";
-const ROOT_TEST_SHA256 = "9136dbe11747678bbda40ae63768f20daa7005f7db83f17fce03d40a3cef840b";
+const ROOT_TEST_SHA256 = "92b8e9210458f340b824a2a2511a222053d3c9ba0ededa6c9db297c737ca55c8";
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
+const M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT = 108;
+const M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256 =
+  "fd264c81a5093aa4c0ca366ad2bec60ad3a4c0cfa0b87816c1050c20d3250580";
+// T12's three opaque project-workspace transport types are the sole allowed post-T09 source
+// successor. Their exact static export records are removed only for frozen T09 projection.
+const M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS = Object.freeze([
+  Object.freeze({
+    exported: "LocalControlPlaneProjectWorkspacePutResult",
+    imported: "LocalControlPlaneProjectWorkspacePutResult",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+  Object.freeze({
+    exported: "LocalControlPlaneProjectWorkspaceReadResult",
+    imported: "LocalControlPlaneProjectWorkspaceReadResult",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+  Object.freeze({
+    exported: "LocalControlPlaneProjectWorkspaceRecord",
+    imported: "LocalControlPlaneProjectWorkspaceRecord",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+]);
 
 const EXPECTED_FAULT_CASE_IDS = Object.freeze([
   "channel-invalid-discovery",
@@ -766,16 +791,48 @@ function publicExportInventory(source) {
     const byName = compareText(left.exported, right.exported);
     return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
   });
-  const inventorySha256 = sha256(Buffer.from(JSON.stringify(inventory), "utf8"));
-  if (inventory.length !== 105 || inventorySha256 !== EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256) {
+  const currentInventorySha256 = sha256(Buffer.from(JSON.stringify(inventory), "utf8"));
+  if (
+    inventory.length !== M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT ||
+    currentInventorySha256 !== M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256
+  ) {
+    fail("PUBLIC_EXPORT_DRIFT", "The exact M10A-T12 package-root inventory drifted.", {
+      expectedCount: M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT,
+      actualCount: inventory.length,
+      expectedSha256: M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256,
+      actualSha256: currentInventorySha256,
+    });
+  }
+  const t12ProjectWorkspaceExports = inventory.filter(({ exported }) =>
+    M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS.some((expected) => expected.exported === exported),
+  );
+  if (
+    JSON.stringify(t12ProjectWorkspaceExports) !==
+    JSON.stringify(M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS)
+  ) {
+    fail("PUBLIC_EXPORT_DRIFT", "The exact M10A-T12 package-root successor drifted.");
+  }
+  const frozenInventory = inventory.filter(
+    ({ exported }) =>
+      !M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS.some((expected) => expected.exported === exported),
+  );
+  const inventorySha256 = sha256(Buffer.from(JSON.stringify(frozenInventory), "utf8"));
+  if (
+    frozenInventory.length !== 105 ||
+    inventorySha256 !== EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256
+  ) {
     fail("PUBLIC_EXPORT_DRIFT", "The exact package-root public export inventory drifted.", {
       expectedCount: 105,
-      actualCount: inventory.length,
+      actualCount: frozenInventory.length,
       expectedSha256: EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256,
       actualSha256: inventorySha256,
     });
   }
-  return deepFreeze({ entries: inventory, count: inventory.length, sha256: inventorySha256 });
+  return deepFreeze({
+    entries: frozenInventory,
+    count: frozenInventory.length,
+    sha256: inventorySha256,
+  });
 }
 
 export const CONTROL_PLANE_RUNTIME_FAULT_INJECTION_EXPECTED_SUITE_RECEIPT = deepFreeze({

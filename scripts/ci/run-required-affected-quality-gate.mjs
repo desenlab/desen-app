@@ -82,7 +82,7 @@ const FORBIDDEN_AUTHORITY_OPTION_KEYS = Object.freeze([
   "runStep",
 ]);
 const VALID_TERMINAL_EXIT_CODES = Object.freeze([130, 143]);
-/** Fixed soft deadline kept below the workflow's independent 19-minute hard timeout. */
+/** Fixed soft deadline kept below the workflow's independent 25-minute hard timeout. */
 export const REQUIRED_AFFECTED_GATE_TIMEOUT_MS = 17 * 60 * 1_000;
 
 function selectionProjection(selection) {
@@ -448,7 +448,7 @@ function selectedRegions(selection, nodeById) {
   const dependencyBoundary = suffix[0];
   const boundaryFixtures = suffix[1];
   if (
-    exhaustiveRootIds.length !== 119 ||
+    exhaustiveRootIds.length !== 120 ||
     dependencyBoundary.dependencies.length !== exhaustiveRootIds.length ||
     dependencyBoundary.dependencies.some(
       (dependency, index) => dependency !== exhaustiveRootIds[index],

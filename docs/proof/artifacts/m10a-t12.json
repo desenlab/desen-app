@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "task": "M10A-T12",
+  "proofId": "m10a-t12",
+  "profile": "desen.m10a-t12.rich-styling-responsive.v1",
+  "result": "PASS",
+  "source": {
+    "files": [
+      {
+        "path": "package.json",
+        "bytes": 106895,
+        "sha256": "b2dc3856e3e88dcc4dc1a6e59c198a38e6521f41c25ba66e2b8a17db735f434c"
+      },
+      {
+        "path": "scripts/lib/m10a-t09-proof.mjs",
+        "bytes": 17859,
+        "sha256": "272a75ce4aa793dbe25b4a0bdb9a9d4f33c1fe5c708f51d3488d052728bdb7bd"
+      },
+      {
+        "path": "tests/m10a-t09.test.mjs",
+        "bytes": 5219,
+        "sha256": "efde6073cef6941ece3951085ce5b0dc9d48b951dd90a0a1f3abe139184318ca"
+      },
+      {
+        "path": "apps/desen-app/src/starter-neutral-workspace-profile.ts",
+        "bytes": 3634,
+        "sha256": "5273a112ba2b39dcb01737c9786f6a2cb10f8f167b2abadcd353958a60e214fb"
+      },
+      {
+        "path": "apps/desen-app/src/starter-project.ts",
+        "bytes": 4000,
+        "sha256": "00c43f860cc94e5f8dd97b4de5b9a65e55ce6116bf881d31b670713b7a54afa5"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/contracts.ts",
+        "bytes": 15903,
+        "sha256": "c43294456adccafa4263bedb4ab7dbf8721470d4ebf942a715cb672f462e4f25"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/visual-style-profile.ts",
+        "bytes": 45117,
+        "sha256": "4e8fd510d26f9f7abbfea581df659a02cd1703cf54036c2d6ecfd0f7e5a2e117"
+      },
+      {
+        "path": "packages/starter-catalog-web/src/react-adapters.tsx",
+        "bytes": 122548,
+        "sha256": "2265e1283518bab08bce9a00209992431f315ff8d2235ba082d16190cb9b69f9"
+      },
+      {
+        "path": "packages/starter-catalog-web/package.json",
+        "bytes": 1561,
+        "sha256": "ada34ec4727fd14d890a8d4f0e9c2ba360f36d5c35259154710f439ffeb66522"
+      },
+      {
+        "path": "packages/starter-catalog-web/test/public-package.mjs",
+        "bytes": 3768,
+        "sha256": "475d1ebdcec1b9648a869f9720b9b2d9a5fc2f7b8be3197537195292c7877c86"
+      },
+      {
+        "path": "apps/desen-app/src/starter-workspace-product.tsx",
+        "bytes": 1774,
+        "sha256": "7cab34f631ba051ff04e5797a9c27367c5fb88b9a29be942852c59f908b1a587"
+      },
+      {
+        "path": "apps/desen-app/src/main.tsx",
+        "bytes": 6793,
+        "sha256": "03f4c3040c67c4d3644c71835b347ea96fc861a155b217ab87b8ff8277973393"
+      },
+      {
+        "path": "apps/desen-app/src/project-workspace-authoring-persistence.ts",
+        "bytes": 10796,
+        "sha256": "895ee4af157f7f8191a95376e98d8cb7756816c348649cf410071b44673df830"
+      },
+      {
+        "path": "apps/desen-app/src/local-project-workspace-persistence.ts",
+        "bytes": 13501,
+        "sha256": "7803a72208e6693440aecaea535faf5474a46fc1fc878b624eb16a9c45cb31c9"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-design-tokens.ts",
+        "bytes": 5150,
+        "sha256": "66f48f4f4f8ab89a18b6ea24a7b42c3dab171345ff1eecba6bf14c634bfe3833"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-styles.ts",
+        "bytes": 50494,
+        "sha256": "766adea2e706dd03fe443788bf0b76c070b90c8dfca358b0aad6537cf1a9d03e"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-data.ts",
+        "bytes": 33278,
+        "sha256": "b759d8b68e118e36dffdd8ac637251c048c6dfb75bcd7afcad173cd84d8a8b61"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-inspector.ts",
+        "bytes": 39061,
+        "sha256": "abbc6fb9d844c067f2fb9c8acea9617ca1e8e0a04354dd8d2fc47d61a6b87145"
+      },
+      {
+        "path": "apps/desen-app/src/preview-fidelity.ts",
+        "bytes": 7961,
+        "sha256": "a5015bf788238e0534da6129e92efe4a425e5580e8229f51f40805d8ffafccc4"
+      },
+      {
+        "path": "apps/desen-app/src/authoring-style-preview-runtime.ts",
+        "bytes": 5449,
+        "sha256": "7ab842b881d4ccfcc5f769dc80bd06f79d23b6e419848ce17ec179c3c142c8a5"
+      },
+      {
+        "path": "apps/desen-app/src/style-panel.tsx",
+        "bytes": 65544,
+        "sha256": "424abb192f510104aca344d6cdef48b466df4aae15bb9bdb9943638b5bc9f191"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-design-tokens.test.ts",
+        "bytes": 2842,
+        "sha256": "41783d71896976a1b1ce53493f7cc21cb54f486befe9271e002b6f06762778d0"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-data.test.ts",
+        "bytes": 18628,
+        "sha256": "a8ae04664ca651ad7efec5ecde4116c1fc00d3f69b262d47459de6326aae7aca"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-inspector.test.ts",
+        "bytes": 54451,
+        "sha256": "1adae75aefd721e8375afba744e0b0d37fc6ef2ce260054c981794f217e1c0f3"
+      },
+      {
+        "path": "apps/desen-app/test/preview-fidelity.test.ts",
+        "bytes": 9254,
+        "sha256": "535a836e655858d60d603898080bf0397b3785b9d2a8b378ac900a0a57398858"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-styles.test.ts",
+        "bytes": 22206,
+        "sha256": "0aea845ed9ecf4aa3cb58187e5bca74ab74c6600292c1868af16f83aa388b3c3"
+      },
+      {
+        "path": "apps/desen-app/test/authoring-style-preview-runtime.test.ts",
+        "bytes": 2800,
+        "sha256": "b8062587ed5793618aa787f93582764a9d28bda21b851032a838fc194e7cf1b6"
+      },
+      {
+        "path": "apps/desen-app/test/style-panel.test.tsx",
+        "bytes": 10820,
+        "sha256": "39ee7593005429cbaadf89b7b2b8ebd955feb1fbb06227a32be20fdb8c5bd29c"
+      },
+      {
+        "path": "apps/desen-app/test/starter-neutral-workspace-profile.test.ts",
+        "bytes": 1304,
+        "sha256": "a27817cb7f7e879c933ae0c15e55c224edfcb5a6cdfa2ba7cb07826fa92388d9"
+      },
+      {
+        "path": "apps/desen-app/test/project-workspace-authoring-persistence.test.ts",
+        "bytes": 7906,
+        "sha256": "dda245240f31f586a1f9a43ed95617c26f2304ffd6017f2db60bb1a1b42433bf"
+      },
+      {
+        "path": "apps/desen-app/test/local-project-workspace-persistence.test.ts",
+        "bytes": 6357,
+        "sha256": "bd7f8a31a769bd28b26ada13427b107ba7f0dd7929302d7bc7b7d046275e078b"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/t12-rich-styling.pw.ts",
+        "bytes": 12989,
+        "sha256": "6113247775600a9fb3347ccb30f5030712a9fffba6be7b4f6679cb6e16624c5f"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/t12-playwright.config.ts",
+        "bytes": 1499,
+        "sha256": "005fbe57d80e14cd73361c97683d37b0751f66cb705136b6ab0ffc9263277124"
+      },
+      {
+        "path": "apps/desen-app-browser-e2e/package.json",
+        "bytes": 1819,
+        "sha256": "a811cf3d7ec960796ab47baee69524888a59efc0ab26e81a7eeeaf1968547c66"
+      }
+    ],
+    "catalog": {
+      "id": "run.desen.starter.web",
+      "version": "0.7.0",
+      "target": "web-react",
+      "sha256": "aa8e9fb01fed930a7f56cd09cf7328e6a49ffa556c4fe80571b5454dd24f87b6",
+      "bytes": 4120610,
+      "componentCount": 32,
+      "stackRootProperties": [
+        "layoutMode",
+        "gap",
+        "width",
+        "backgroundColor",
+        "backgroundGradient",
+        "border",
+        "borderRadius",
+        "boxShadow",
+        "typography",
+        "position",
+        "rotate"
+      ]
+    },
+    "predecessors": {
+      "m10aT03": {
+        "artifact": {
+          "path": "docs/proof/artifacts/m10a-t03.json",
+          "bytes": 80054,
+          "sha256": "530efe5d80d78a722c1832ad5b95086c2fd97bc2f1a4bd275b9a1924394b1e2b"
+        },
+        "profile": "desen.theme-token-authoring.proof.v1",
+        "neutral": {
+          "id": "desen-neutral",
+          "baseSourceId": "neutral.base",
+          "lightSourceIds": [
+            "neutral.base",
+            "neutral.light"
+          ],
+          "defaultSelection": {
+            "themeId": "desen-neutral",
+            "modeId": "light"
+          }
+        }
+      },
+      "m10aT09": {
+        "artifact": {
+          "path": "docs/proof/artifacts/m10a-t09.json",
+          "bytes": 5584,
+          "sha256": "7fecf6a1b5eebb4a132f55e9641b6137b772bd1bb0df7fb380ef9c1f68289d09"
+        },
+        "profile": "desen.m10a-t09.data-display-feedback.v1",
+        "catalog": {
+          "id": "run.desen.starter.web",
+          "version": "0.6.0",
+          "target": "web-react",
+          "sha256": "4e59de0135e7d445bc8c6e029506369bf8b38e40d5df5a57a39f81a799a42a69",
+          "bytes": 585861,
+          "packageDigest": "sha256:88a1fac65d43d166cbc31dceb890468950f677395ab93a62a382955e16b0c709"
+        }
+      }
+    }
+  },
+  "browser": {
+    "profile": "desen.m10a-t12.browser-proof.v1",
+    "result": "PASS",
+    "tests": [
+      {
+        "title": "authors two component-level visual presentations and ordered responsive overrides through the normal DESEN Neutral product",
+        "result": "PASS"
+      }
+    ],
+    "assertions": {
+      "aggregateWorkspacePersistence": true,
+      "desktopPreview": true,
+      "distinctComponentBrandPresentations": true,
+      "literalBrandPresentation": true,
+      "mobilePreview": true,
+      "noJsxCssJsonAuthoring": true,
+      "normalStarterProfile": true,
+      "resetInheritance": true,
+      "resolvedTokenBrandPresentation": true,
+      "responsiveOverrideOrder": true,
+      "tabletPreview": true
+    }
+  },
+  "focusedTests": {
+    "appFiles": [
+      "apps/desen-app/test/authoring-data.test.ts",
+      "apps/desen-app/test/authoring-inspector.test.ts",
+      "apps/desen-app/test/preview-fidelity.test.ts",
+      "apps/desen-app/test/authoring-design-tokens.test.ts",
+      "apps/desen-app/test/authoring-styles.test.ts",
+      "apps/desen-app/test/authoring-style-preview-runtime.test.ts",
+      "apps/desen-app/test/style-panel.test.tsx",
+      "apps/desen-app/test/starter-neutral-workspace-profile.test.ts",
+      "apps/desen-app/test/project-workspace-authoring-persistence.test.ts",
+      "apps/desen-app/test/local-project-workspace-persistence.test.ts",
+      "apps/desen-app/test/main-lifecycle.test.tsx"
+    ],
+    "appCommand": "pnpm --filter @desen/app-web exec vitest run test/authoring-data.test.ts test/authoring-inspector.test.ts test/preview-fidelity.test.ts test/authoring-design-tokens.test.ts test/authoring-styles.test.ts test/authoring-style-preview-runtime.test.ts test/style-panel.test.tsx test/starter-neutral-workspace-profile.test.ts test/project-workspace-authoring-persistence.test.ts test/local-project-workspace-persistence.test.ts test/main-lifecycle.test.tsx",
+    "browserCommand": "pnpm --filter @desen/app-browser-e2e run test:m10a-t12",
+    "rootTestNames": [
+      "M10A-T12 binds the normal Starter profile, closed visual Catalog, and focused application authorities",
+      "M10A-T12 authenticates only a passed normal-product browser observation",
+      "M10A-T12 rejects missing source semantics, malformed observations, and artifact drift",
+      "M10A-T12 writer is atomic and does not invent named-theme management authority"
+    ]
+  },
+  "claims": {
+    "normalStarterProfile": true,
+    "closedVisualCatalog": true,
+    "typedTokenOrLiteralControls": true,
+    "resetAndInheritanceIndicators": true,
+    "boundedResponsivePreviews": true,
+    "orderedResponsiveOverrides": true,
+    "normalAggregatePersistence": true,
+    "twoComponentLevelVisualPresentations": true,
+    "noJsxCssJsonAuthoring": true,
+    "unsupportedUnsafeValuesRejected": true,
+    "namedThemeManagementClaimed": false,
+    "runtimeCoreChanged": false
+  },
+  "nonClaims": [
+    "T12 proves two component-level visual presentations, not named-theme CRUD, switching, or persistence management.",
+    "T12 does not add arbitrary CSS/JSX/JSON authoring, private capability DOM inspection, Runtime activation, Publisher authority, Core/protocol changes, G10A, or M11 behavior.",
+    "Local evidence does not substitute for exact-head hosted Quality gate and fresh-main closure."
+  ]
+}

@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@desen/catalog-sdk": "workspace:*",
+    "@desen/design-system-authoring": "workspace:*",
     "@desen/design-system-core": "workspace:*",
     "@desen/editor-core": "workspace:*",
     "@desen/editor-web": "workspace:*",

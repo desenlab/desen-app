@@ -91,6 +91,24 @@ async function workspaceBytes(relativePath) {
   return readFile(path.join(ROOT, relativePath));
 }
 
+function m10aT12ProjectWorkspaceSuccessorDriftTransforms() {
+  const exports = [
+    "LocalControlPlaneProjectWorkspacePutResult",
+    "LocalControlPlaneProjectWorkspaceReadResult",
+    "LocalControlPlaneProjectWorkspaceRecord",
+  ];
+  const block = exports.map((name) => `  ${name},`).join("\n");
+  return [
+    (source) => source.replace(`  ${exports[0]},\n`, ""),
+    (source) => source.replace(exports[1], "LocalControlPlaneProjectWorkspaceReadResponse"),
+    (source) =>
+      `${source.replace(block, "")}\nexport type {\n${block}\n} from "./runtime-activation-contract.js";\n`,
+    (source) =>
+      `${source.replace(block, "")}\nexport {\n${block}\n} from "./local-control-plane-contract.js";\n`,
+    (source) => source.replace(block, `${block}\n  LocalControlPlaneProjectWorkspaceUnexpected,`),
+  ];
+}
+
 async function makeTemporaryDirectory(prefix) {
   const directory = await realpath(await mkdtemp(path.join(os.tmpdir(), prefix)));
   temporaryDirectories.push(directory);
@@ -386,6 +404,11 @@ test("[implementation] rejects removal of the public recovery boundary", async (
         ),
       "REGISTRATION_DRIFT",
     ],
+    ...m10aT12ProjectWorkspaceSuccessorDriftTransforms().map((transform) => [
+      APP_INDEX,
+      transform,
+      "REGISTRATION_DRIFT",
+    ]),
     [
       APP_RECOVERY_TEST,
       () =>

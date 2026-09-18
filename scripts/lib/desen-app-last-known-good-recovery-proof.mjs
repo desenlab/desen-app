@@ -19,6 +19,7 @@ import { isDeepStrictEqual, promisify, types as utilTypes } from "node:util";
 import { format } from "prettier";
 import ts from "typescript";
 
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 import {
   authenticateM10AT01LockfileSuccessor,
@@ -32,6 +33,8 @@ import {
   projectM10AT02T01Input,
   projectM10AT03T02Input,
   projectM10AT04T03Input,
+  projectM10AT12CurrentGraphAudit,
+  projectM10AT12HistoricalInput,
   projectM10AT11CurrentGraphAudit,
   projectM10AT10T04Input,
 } from "./desen-app-published-host-update-proof.mjs";
@@ -73,6 +76,226 @@ const M10A_T01_SUCCESSOR_PIN = Object.freeze({
   bytes: 13_910,
   sha256: "711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74",
 });
+const M10A_T12_SUCCESSOR_PIN = Object.freeze({
+  task: "M10A-T12",
+  path: "docs/proof/artifacts/m10a-t12.json",
+  bytes: 11_804,
+  sha256: "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b",
+});
+const M10A_T12_CATALOG_SUCCESSOR = Object.freeze({
+  id: "run.desen.starter.web",
+  version: "0.7.0",
+  target: "web-react",
+  bytes: 4_120_610,
+  sha256: "aa8e9fb01fed930a7f56cd09cf7328e6a49ffa556c4fe80571b5454dd24f87b6",
+});
+// T12 adds a tenth browser journey while preserving the historical nine-journey command as the
+// exact predecessor. The T12 artifact records the full current package receipt; projection is
+// intentionally limited to these two textual additions before the frozen T07/T08 readers run.
+const M10A_T12_BROWSER_PACKAGE_SUCCESSOR = Object.freeze({
+  path: BROWSER_PACKAGE_PATH,
+  current: Object.freeze({
+    bytes: 1_819,
+    sha256: "a811cf3d7ec960796ab47baee69524888a59efc0ab26e81a7eeeaf1968547c66",
+  }),
+  predecessor: Object.freeze({
+    bytes: 1_563,
+    sha256: "16bdd23236597c1cb97c6d1246da5798b603ec7143e0b7b12cc8ed75d8eb4caf",
+  }),
+  addedScript:
+    '    "test:m10a-t12": "pnpm --filter @desen/app-web... build && pnpm --filter @desen/control-plane-api build && pnpm run typecheck && pnpm run build && playwright test --config t12-playwright.config.ts",\n',
+  suiteSuffix: " && playwright test --config t12-playwright.config.ts",
+});
+// The Catalog-derived production asset exceeds the historical generic API-body envelope. This
+// successor is deliberately code-owned: it has one exact T12 Catalog parent, keeps control-plane
+// reads at 2 MiB, and raises only static locally-built asset attestation to a bounded 8 MiB.
+const M10A_T12_RECOVERY_STATIC_SERVER_SUCCESSOR = Object.freeze({
+  path: BROWSER_PATHS.server,
+  current: Object.freeze({
+    bytes: 19_299,
+    sha256: "476d420a856cfb428a5be48e7aa1df589fe51e85130d431a30f0f47182427626",
+  }),
+  predecessor: Object.freeze({
+    bytes: 18_825,
+    sha256: "b88d8d9e5a682a009f28cbe7eae7138431ca2608129ec7cee94f4598d9944566",
+  }),
+  inverseChanges: Object.freeze([
+    Object.freeze([
+      "const MAX_CONTROL_PLANE_RESPONSE_BYTES = 2_097_152;\n// A Catalog-derived production asset can be larger than a control-plane body. This higher ceiling\n// is used only while attesting locally built static files and remains below buildFiles' file cap.\nconst MAX_SERVED_STATIC_BUILD_RESPONSE_BYTES = 8 * 1024 * 1024;",
+      "const MAX_RESPONSE_BYTES = 2_097_152;",
+    ]),
+    Object.freeze([
+      "async function responseBytes(response, maximumBytes = MAX_CONTROL_PLANE_RESPONSE_BYTES) {\n  requireInvariant(response.body !== null);\n  requireInvariant(\n    Number.isSafeInteger(maximumBytes) && maximumBytes > 0 && maximumBytes <= 16_777_216,\n  );",
+      "async function responseBytes(response) {\n  requireInvariant(response.body !== null);",
+    ]),
+    Object.freeze(["length <= maximumBytes", "length <= MAX_RESPONSE_BYTES"]),
+    Object.freeze([
+      "await responseBytes(response, MAX_SERVED_STATIC_BUILD_RESPONSE_BYTES)",
+      "await responseBytes(response)",
+    ]),
+  ]),
+});
+// T12's aggregate workspace persistence extends only the public control-plane implementation.
+// The fresh API matrix still executes the same recovery outcomes; these exact receipts are
+// projected to the completed T08 matrix only after current bytes are authenticated one-by-one.
+const M10A_T12_PUBLIC_MATRIX_FRESH_INPUT_SUCCESSORS = Object.freeze([
+  Object.freeze({
+    path: "apps/control-plane-api/dist/index.d.ts",
+    current: Object.freeze({
+      bytes: 4_860,
+      sha256: "b0f77ff0b3b10aaa2913b7d6bc8be45b518827f117a08fcc2691807e392e1260",
+    }),
+    predecessor: Object.freeze({
+      bytes: 4_730,
+      sha256: "81ced4650dcf6f1fb05980c00c610923083c4262c231d604cda504f569171d56",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/dist/local-control-plane-contract.d.ts",
+    current: Object.freeze({
+      bytes: 15_669,
+      sha256: "cbcad5620f0fe74a8e681c47d8f79fffaebf71881289b12b8cdda4de75b542b3",
+    }),
+    predecessor: Object.freeze({
+      bytes: 13_506,
+      sha256: "2aaca4994f6a3435a114f78efdee27bbb74f352b3840607abac51521f4612e78",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/dist/local-control-plane.d.ts",
+    current: Object.freeze({
+      bytes: 812,
+      sha256: "3809a0bca0880c4fa594180c116711447905af51946cb3b5e0653e50a496e488",
+    }),
+    predecessor: Object.freeze({
+      bytes: 748,
+      sha256: "39ebbee521ada1b11e4a72fb7a947a643e63108103543cccfb4b3235a8dd231f",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/src/index.ts",
+    current: Object.freeze({
+      bytes: 5_027,
+      sha256: "638682f6173288f977b1f6f3b69eb743eb576881c4606cd2c4d323b1b79728ca",
+    }),
+    predecessor: Object.freeze({
+      bytes: 4_891,
+      sha256: "1295547b6c281ea2678583298648a4ad8287205109d670fa422450146da5031e",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/src/local-control-plane-contract.ts",
+    current: Object.freeze({
+      bytes: 19_696,
+      sha256: "568b7be064fa8c0a810b1ac0d74c45896af804cbd1b73606f45c4436b54eadbf",
+    }),
+    predecessor: Object.freeze({
+      bytes: 16_959,
+      sha256: "d764ff037aacb422dbcbfd1c99ba768ec6f1ce9467ead3ded15b611b5a1e4b09",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/src/local-control-plane-internal.ts",
+    current: Object.freeze({
+      bytes: 43_366,
+      sha256: "478833d6c3da502e5ad268681e52c0ace77c8738f40c9f9bc610ccefbf971846",
+    }),
+    predecessor: Object.freeze({
+      bytes: 37_835,
+      sha256: "f723a1c78b3eada3c957b5243907880e7b7241de3ad07f8c9d838273561f66fc",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/src/local-control-plane-repository-internal.ts",
+    current: Object.freeze({
+      bytes: 27_190,
+      sha256: "d275c83e1612945f5112a7cce0c720fd07bea431a9280acc4f911dd3cb01adff",
+    }),
+    predecessor: Object.freeze({
+      bytes: 19_610,
+      sha256: "3da2371a0d54aa6be8816f9d44e8da059ddece6260dbde8db3439ce6eb61020c",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/src/local-control-plane-sqlite-internal.ts",
+    current: Object.freeze({
+      bytes: 35_785,
+      sha256: "af09ca21bc2b68decab8f458cea0341d5f0c3c46e314c82bad2bffd1b7a14f3d",
+    }),
+    predecessor: Object.freeze({
+      bytes: 28_313,
+      sha256: "e3315c14fdf65ca3d6b999d4a5b713657cbcd048fb55b88db14b35f39576546c",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/src/local-control-plane.ts",
+    current: Object.freeze({
+      bytes: 9_487,
+      sha256: "953a60350a593162c395484cfa5ea16a13527c821f403462c491d0a4ee51944d",
+    }),
+    predecessor: Object.freeze({
+      bytes: 9_350,
+      sha256: "469b3117c8ea4d71e3aa133e20dc3557d5e7448c4721d4a62c3d3ecd93fc22ba",
+    }),
+  }),
+]);
+const M10A_T12_PUBLIC_MATRIX_COMPILED_SUCCESSORS = Object.freeze([
+  Object.freeze({
+    path: "apps/control-plane-api/dist/local-control-plane-contract.js",
+    current: Object.freeze({
+      bytes: 5_748,
+      sha256: "d1141ede053ebca8633c9a3749f24187c38115cb89b8c675dce317bc7606b5a3",
+    }),
+    predecessor: Object.freeze({
+      bytes: 5_137,
+      sha256: "6b2823ca52d2857eac5f9a220ec78f4a494a061eaa2e9e24c97aeb4775be9d94",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/dist/local-control-plane-internal.js",
+    current: Object.freeze({
+      bytes: 41_360,
+      sha256: "ffb94bc0c833f2454e4b7e68fcf021daf8e6defdf374738c9c5c1bc7a85f975c",
+    }),
+    predecessor: Object.freeze({
+      bytes: 36_207,
+      sha256: "7699eff3acb401dcde53d06f717e1ccb0475f101d0f595cf34ece466bfd35a11",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/dist/local-control-plane-repository-internal.js",
+    current: Object.freeze({
+      bytes: 19_723,
+      sha256: "9774000ec2092c34690c82e95e78ea2672cb80df50aecc8e50cf2a71bb137b1d",
+    }),
+    predecessor: Object.freeze({
+      bytes: 14_421,
+      sha256: "c222aa4542a9b36358a1cd2ca88f58f27b44c08fae3d21dbe16a777ccec31efb",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/dist/local-control-plane-sqlite-internal.js",
+    current: Object.freeze({
+      bytes: 32_885,
+      sha256: "9caf42fd10f10b034d81579716ee82eb3da95abe5227a1dd93ed7ecfa225da08",
+    }),
+    predecessor: Object.freeze({
+      bytes: 26_095,
+      sha256: "e43c91fec171aa9ec47630ef08874c4f842a4fed507f99aa8de8c9ff41455259",
+    }),
+  }),
+  Object.freeze({
+    path: "apps/control-plane-api/dist/local-control-plane.js",
+    current: Object.freeze({
+      bytes: 9_875,
+      sha256: "f68c0208d2aaa8c7a893d1522890e652d2defbf2eeec9af1e1dbf3a55634d29b",
+    }),
+    predecessor: Object.freeze({
+      bytes: 9_730,
+      sha256: "298b69b12a50fcd29eaffaf30c16ef2a9388d5ff6d15509984f253ce872bbf0a",
+    }),
+  }),
+]);
 const T08_CHANGED_TRACKED_PATHS = Object.freeze([
   BROWSER_PACKAGE_PATH,
   "pnpm-lock.yaml",
@@ -1250,6 +1473,11 @@ export function verifyDesenAppLastKnownGoodRecoveryBrowserPolicy(rawInput) {
       "verifyBundleStoreEntry(",
       "preflightBundlePackages(",
       "calculateDesenBundleRevision(bundle)",
+      "const MAX_CONTROL_PLANE_RESPONSE_BYTES = 2097152",
+      "const MAX_SERVED_STATIC_BUILD_RESPONSE_BYTES = 8 * 1024 * 1024",
+      "async function responseBytes(response, maximumBytes = MAX_CONTROL_PLANE_RESPONSE_BYTES)",
+      "const body = await responseBytes(response)",
+      "const bytes = await responseBytes(response, MAX_SERVED_STATIC_BUILD_RESPONSE_BYTES)",
       '"REVISION_MISMATCH"',
       '"CATALOG_DIGEST_MISMATCH"',
       'controlPlaneRequest(`/v1/bundles/${bundle.revision}`, "PUT", bytes)',
@@ -1306,6 +1534,23 @@ function verifyPackageWiring(files) {
   };
 }
 
+/** Authenticates the current T12 browser command before projecting its historical nine-journey form. */
+function verifyM10AT12PackageWiring(files) {
+  const browser = parseJson(files.get(BROWSER_PACKAGE_PATH), BROWSER_PACKAGE_PATH);
+  if (
+    browser.name !== "@desen/app-browser-e2e" ||
+    browser.scripts?.["test:e2e"] !==
+      `${BROWSER_SUITE_COMMAND} && playwright test --config repeatable-demo-playwright.config.ts && playwright test --config t12-playwright.config.ts` ||
+    browser.scripts?.["test:m10a-t12"] !==
+      "pnpm --filter @desen/app-web... build && pnpm --filter @desen/control-plane-api build && pnpm run typecheck && pnpm run build && playwright test --config t12-playwright.config.ts" ||
+    browser.devDependencies?.["@desen/protocol"] !== "workspace:*"
+  )
+    fail(
+      "TEST_AUTHORITY_DRIFT",
+      "The exact current T12 browser command or public Protocol dependency changed.",
+    );
+}
+
 async function readT08Successor(workspaceRoot) {
   const bytes = await readRegularAuthority(
     path.join(workspaceRoot, T08_SUCCESSOR_PIN.path),
@@ -1348,12 +1593,251 @@ async function authenticateM10AT01Successor(workspaceRoot) {
   return successor;
 }
 
+/**
+ * Authenticates the closed T12 Catalog that explains the two bounded recovery-suite successors.
+ *
+ * The M10-T07 artifact itself remains frozen. T12's exact checkpointed artifact is the only
+ * authority permitted to project the browser package and static-build read envelope back to the
+ * T08/T07 input receipts.
+ */
+async function authenticateM10AT12Successor(workspaceRoot) {
+  const pin = M10A_T12_SUCCESSOR_PIN;
+  const checkpointed = await readCheckpointedFrozenArtifact(pin.task, { workspaceRoot });
+  if (
+    checkpointed.path !== pin.path ||
+    checkpointed.byteLength !== pin.bytes ||
+    checkpointed.sha256 !== pin.sha256 ||
+    checkpointed.bytes.byteLength !== pin.bytes ||
+    sha256(checkpointed.bytes) !== pin.sha256
+  ) {
+    fail("SUCCESSOR_DRIFT", "The exact reviewed M10A-T12 successor artifact changed.");
+  }
+  const successor = parseJson(Buffer.from(checkpointed.bytes), pin.path, "SUCCESSOR_DRIFT");
+  const catalog = successor.source?.catalog;
+  if (
+    successor.schemaVersion !== 1 ||
+    successor.task !== pin.task ||
+    successor.proofId !== "m10a-t12" ||
+    successor.profile !== "desen.m10a-t12.rich-styling-responsive.v1" ||
+    successor.result !== "PASS" ||
+    !isDeepStrictEqual(
+      {
+        id: catalog?.id,
+        version: catalog?.version,
+        target: catalog?.target,
+        bytes: catalog?.bytes,
+        sha256: catalog?.sha256,
+      },
+      M10A_T12_CATALOG_SUCCESSOR,
+    ) ||
+    successor.focusedTests?.browserCommand !==
+      "pnpm --filter @desen/app-browser-e2e run test:m10a-t12"
+  ) {
+    fail("SUCCESSOR_DRIFT", "The M10A-T12 successor lost its reviewed Catalog identity.");
+  }
+  const packageReceipts = successor.source?.files?.filter(
+    (receipt) => receipt?.path === M10A_T12_BROWSER_PACKAGE_SUCCESSOR.path,
+  );
+  if (
+    packageReceipts?.length !== 1 ||
+    !isDeepStrictEqual(packageReceipts[0], {
+      path: M10A_T12_BROWSER_PACKAGE_SUCCESSOR.path,
+      ...M10A_T12_BROWSER_PACKAGE_SUCCESSOR.current,
+    })
+  ) {
+    fail("SUCCESSOR_DRIFT", "The M10A-T12 browser package receipt changed.");
+  }
+  return deepFreeze({
+    task: pin.task,
+    path: pin.path,
+    bytes: pin.bytes,
+    sha256: pin.sha256,
+    catalog: M10A_T12_CATALOG_SUCCESSOR,
+    browserPackage: M10A_T12_BROWSER_PACKAGE_SUCCESSOR.current,
+  });
+}
+
+function replaceExactlyOnce(source, current, predecessor, label) {
+  const first = source.indexOf(current);
+  if (first < 0 || source.indexOf(current, first + current.length) >= 0) {
+    fail("SUCCESSOR_DRIFT", "A reviewed M10A-T12 successor transformation drifted.", {
+      path: label,
+    });
+  }
+  return source.slice(0, first) + predecessor + source.slice(first + current.length);
+}
+
+/**
+ * Projects T12's two exact recovery-suite additions to their reviewed T08/T07 predecessor input.
+ *
+ * No loosely matching content is admitted: raw T12 receipts must match first, each textual
+ * inverse must occur exactly once, and the result must equal the completed historical receipt.
+ */
+function projectM10AT12T07Input(relativePath, bytes, successor) {
+  if (
+    !isDeepStrictEqual(successor?.catalog, M10A_T12_CATALOG_SUCCESSOR) ||
+    !isDeepStrictEqual(successor?.browserPackage, M10A_T12_BROWSER_PACKAGE_SUCCESSOR.current)
+  ) {
+    fail("SUCCESSOR_DRIFT", "M10A-T12 projection requires its authenticated Catalog successor.");
+  }
+  const receipt = { path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) };
+  if (relativePath === M10A_T12_BROWSER_PACKAGE_SUCCESSOR.path) {
+    if (
+      !isDeepStrictEqual(receipt, {
+        path: relativePath,
+        ...M10A_T12_BROWSER_PACKAGE_SUCCESSOR.current,
+      })
+    ) {
+      fail(
+        "SUCCESSOR_DRIFT",
+        "The live browser package is not the exact reviewed M10A-T12 successor.",
+        {
+          path: relativePath,
+        },
+      );
+    }
+    let projected = decodeUtf8(bytes, relativePath);
+    projected = replaceExactlyOnce(
+      projected,
+      M10A_T12_BROWSER_PACKAGE_SUCCESSOR.addedScript,
+      "",
+      relativePath,
+    );
+    projected = replaceExactlyOnce(
+      projected,
+      M10A_T12_BROWSER_PACKAGE_SUCCESSOR.suiteSuffix,
+      "",
+      relativePath,
+    );
+    const predecessor = Buffer.from(projected);
+    if (
+      predecessor.byteLength !== M10A_T12_BROWSER_PACKAGE_SUCCESSOR.predecessor.bytes ||
+      sha256(predecessor) !== M10A_T12_BROWSER_PACKAGE_SUCCESSOR.predecessor.sha256
+    ) {
+      fail(
+        "SUCCESSOR_DRIFT",
+        "The T12 browser package does not project to its reviewed predecessor.",
+        {
+          path: relativePath,
+        },
+      );
+    }
+    return predecessor;
+  }
+  if (relativePath === M10A_T12_RECOVERY_STATIC_SERVER_SUCCESSOR.path) {
+    if (
+      !isDeepStrictEqual(receipt, {
+        path: relativePath,
+        ...M10A_T12_RECOVERY_STATIC_SERVER_SUCCESSOR.current,
+      })
+    ) {
+      fail(
+        "SUCCESSOR_DRIFT",
+        "The live recovery server is not the exact reviewed M10A-T12 successor.",
+        {
+          path: relativePath,
+        },
+      );
+    }
+    let projected = decodeUtf8(bytes, relativePath);
+    for (const [current, predecessor] of M10A_T12_RECOVERY_STATIC_SERVER_SUCCESSOR.inverseChanges)
+      projected = replaceExactlyOnce(projected, current, predecessor, relativePath);
+    const predecessor = Buffer.from(projected);
+    if (
+      predecessor.byteLength !== M10A_T12_RECOVERY_STATIC_SERVER_SUCCESSOR.predecessor.bytes ||
+      sha256(predecessor) !== M10A_T12_RECOVERY_STATIC_SERVER_SUCCESSOR.predecessor.sha256
+    ) {
+      fail(
+        "SUCCESSOR_DRIFT",
+        "The T12 recovery server does not project to its reviewed predecessor.",
+        {
+          path: relativePath,
+        },
+      );
+    }
+    return predecessor;
+  }
+  return bytes;
+}
+
+/** Keeps this reader's fail-closed public error boundary independent from its graph-reader parent. */
+function projectM10AT12RecoveryInput(relativePath, bytes) {
+  try {
+    return projectM10AT12HistoricalInput(relativePath, bytes);
+  } catch {
+    fail("SUCCESSOR_DRIFT", "A current recovery input is not the exact reviewed T12 successor.", {
+      path: relativePath,
+    });
+  }
+}
+
 function assertSuccessorReceipt(receipt, candidates) {
   const matches = candidates?.filter((candidate) => candidate.path === receipt.path);
   if (matches?.length !== 1 || !isDeepStrictEqual(receipt, matches[0]))
     fail("SUCCESSOR_DRIFT", "A current input differs from its exact reviewed T08 receipt.", {
       path: receipt.path,
     });
+}
+
+/**
+ * Projects only the independently reauthenticated T12 control-plane receipts to their T08
+ * predecessors. The public API matrix still runs against current sources and emitted modules;
+ * this is a receipt bridge for frozen M10 history, never a substitute for current execution.
+ */
+function projectM10AT12ReceiptList(receiptList, successors, label) {
+  if (!Array.isArray(receiptList))
+    fail("SUCCESSOR_DRIFT", "The public matrix receipt inventory is not projectable.", { label });
+  const successorByPath = new Map();
+  for (const successor of successors) {
+    if (successorByPath.has(successor.path))
+      fail("SUCCESSOR_DRIFT", "The reviewed T12 receipt projection is ambiguous.", {
+        label,
+        path: successor.path,
+      });
+    successorByPath.set(successor.path, successor);
+  }
+  for (const successor of successors) {
+    const matches = receiptList.filter((receipt) => receipt?.path === successor.path);
+    if (
+      matches.length !== 1 ||
+      !isDeepStrictEqual(matches[0], { path: successor.path, ...successor.current })
+    ) {
+      fail("SUCCESSOR_DRIFT", "A public matrix receipt is not the exact reviewed T12 successor.", {
+        label,
+        path: successor.path,
+      });
+    }
+  }
+  return receiptList.map((receipt) => {
+    const successor = successorByPath.get(receipt?.path);
+    return successor === undefined ? receipt : { path: successor.path, ...successor.predecessor };
+  });
+}
+
+/**
+ * Authenticates and projects only T12's additive public-control-plane receipt changes.
+ * Consumers comparing against frozen M10 matrices must retain the raw matrix separately for
+ * current-source snapshot checks; this return value is deliberately a historical receipt view.
+ */
+export function projectM10AT12PublicApiMatrix(matrix) {
+  if (!matrix || typeof matrix !== "object" || !matrix.freshEmission)
+    fail("SUCCESSOR_DRIFT", "The current public API matrix lost its reviewed T12 shape.");
+  return {
+    ...matrix,
+    freshEmission: {
+      ...matrix.freshEmission,
+      inputReceipts: projectM10AT12ReceiptList(
+        matrix.freshEmission.inputReceipts,
+        M10A_T12_PUBLIC_MATRIX_FRESH_INPUT_SUCCESSORS,
+        "fresh public API compiler inputs",
+      ),
+    },
+    compiledModuleReceipts: projectM10AT12ReceiptList(
+      matrix.compiledModuleReceipts,
+      M10A_T12_PUBLIC_MATRIX_COMPILED_SUCCESSORS,
+      "fresh public API compiled modules",
+    ),
+  };
 }
 
 function projectM10AT01Input(relativePath, bytes) {
@@ -1427,7 +1911,10 @@ function projectM10AT01Graph(currentGraphAudit, t08GraphAudit) {
   try {
     return projectM10AT01CurrentGraphAudit(
       projectM10AT10CurrentGraphAudit(
-        projectM10AT11CurrentGraphAudit(currentGraphAudit, t08GraphAudit),
+        projectM10AT11CurrentGraphAudit(
+          projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit),
+          t08GraphAudit,
+        ),
         t08GraphAudit,
       ),
       t08GraphAudit,
@@ -1458,7 +1945,13 @@ function assertReviewedReceiptChanges(current, historical, successor, changedPat
   }
 }
 
-async function projectT08Successor(workspaceRoot, current, successor, currentTrackedReceipts) {
+async function projectT08Successor(
+  workspaceRoot,
+  current,
+  successor,
+  currentTrackedReceipts,
+  m10aT12Successor,
+) {
   const historicalBytes = await readRegularAuthority(
     path.join(workspaceRoot, ARTIFACT_PATH),
     ARTIFACT_PATH,
@@ -1467,12 +1960,13 @@ async function projectT08Successor(workspaceRoot, current, successor, currentTra
   const currentGraphAudit = current.authority.currentGraphAudit;
   const t08GraphAudit = successor.authority?.currentGraphAudit;
   projectM10AT01Graph(currentGraphAudit, t08GraphAudit);
-  if (!isDeepStrictEqual(current.authority.publicApiMatrix, successor.authority?.publicApiMatrix))
+  const matrix = current.authority.publicApiMatrix;
+  const t12ProjectedMatrix = projectM10AT12PublicApiMatrix(matrix);
+  if (!isDeepStrictEqual(t12ProjectedMatrix, successor.authority?.publicApiMatrix))
     fail(
       "SUCCESSOR_DRIFT",
       "Fresh current graph or recovery execution differs from reviewed T08 authority.",
     );
-  const matrix = current.authority.publicApiMatrix;
   const previousMatrix = historical.authority.publicApiMatrix;
   assertReviewedReceiptChanges(
     current.boundary.trackedReceipts,
@@ -1481,13 +1975,13 @@ async function projectT08Successor(workspaceRoot, current, successor, currentTra
     T08_CHANGED_TRACKED_PATHS,
   );
   assertReviewedReceiptChanges(
-    matrix.freshEmission.inputReceipts,
+    t12ProjectedMatrix.freshEmission.inputReceipts,
     previousMatrix.freshEmission.inputReceipts,
     successor.authority.publicApiMatrix.freshEmission.inputReceipts,
     T08_CHANGED_COMPILER_INPUTS,
   );
   assertReviewedReceiptChanges(
-    matrix.compiledModuleReceipts,
+    t12ProjectedMatrix.compiledModuleReceipts,
     previousMatrix.compiledModuleReceipts,
     successor.authority.publicApiMatrix.compiledModuleReceipts,
     T08_CHANGED_COMPILED_MODULES,
@@ -1524,6 +2018,7 @@ async function projectT08Successor(workspaceRoot, current, successor, currentTra
       bytes: T08_SUCCESSOR_PIN.bytes,
       sha256: T08_SUCCESSOR_PIN.sha256,
       m10aT01: M10A_T01_SUCCESSOR_PIN,
+      m10aT12: m10aT12Successor,
       publicApiMatrix: matrix,
       currentGraphAudit,
       currentTrackedReceipts,
@@ -1615,12 +2110,41 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
   const browser = verifyDesenAppLastKnownGoodRecoveryBrowserPolicy(
     Object.fromEntries(Object.entries(BROWSER_PATHS).map(([key, name]) => [key, files.get(name)])),
   );
-  const packageWiring = verifyPackageWiring(files);
+  verifyM10AT12PackageWiring(files);
+  const m10aT12Successor = await authenticateM10AT12Successor(workspaceRoot);
+  const t12Files = new Map(files);
+  t12Files.set(
+    "dependency-cruiser.config.cjs",
+    projectM10AT12RecoveryInput(
+      "dependency-cruiser.config.cjs",
+      files.get("dependency-cruiser.config.cjs"),
+    ),
+  );
+  t12Files.set(
+    M10A_T12_BROWSER_PACKAGE_SUCCESSOR.path,
+    projectM10AT12RecoveryInput(
+      M10A_T12_BROWSER_PACKAGE_SUCCESSOR.path,
+      files.get(M10A_T12_BROWSER_PACKAGE_SUCCESSOR.path),
+    ),
+  );
+  t12Files.set(
+    "pnpm-lock.yaml",
+    projectM10AT12RecoveryInput("pnpm-lock.yaml", files.get("pnpm-lock.yaml")),
+  );
+  t12Files.set(
+    M10A_T12_RECOVERY_STATIC_SERVER_SUCCESSOR.path,
+    projectM10AT12T07Input(
+      M10A_T12_RECOVERY_STATIC_SERVER_SUCCESSOR.path,
+      files.get(M10A_T12_RECOVERY_STATIC_SERVER_SUCCESSOR.path),
+      m10aT12Successor,
+    ),
+  );
+  const packageWiring = verifyPackageWiring(t12Files);
   const successor = await readT08Successor(workspaceRoot);
   const m10aT01Successor = await authenticateM10AT01Successor(workspaceRoot);
-  const t08Files = new Map(files);
+  const t08Files = new Map(t12Files);
   for (const name of M10A_T01_CHANGED_T08_INPUTS) {
-    t08Files.set(name, projectM10AT01Input(name, files.get(name)));
+    t08Files.set(name, projectM10AT01Input(name, t12Files.get(name)));
   }
   for (const name of T08_CHANGED_TRACKED_PATHS)
     assertSuccessorReceipt(
@@ -1703,11 +2227,16 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
   if (!isDeepStrictEqual(m10aT01Successor, recheckedM10AT01Successor)) {
     fail("SUCCESSOR_DRIFT", "The M10A-T01 successor changed across fresh execution.");
   }
+  const recheckedM10AT12Successor = await authenticateM10AT12Successor(workspaceRoot);
+  if (!isDeepStrictEqual(m10aT12Successor, recheckedM10AT12Successor)) {
+    fail("SUCCESSOR_DRIFT", "The M10A-T12 successor changed across fresh execution.");
+  }
   for (const name of T08_CHANGED_TRACKED_PATHS) {
     const currentBytes = await readRegularAuthority(path.join(workspaceRoot, name), name);
+    const t12Bytes = projectM10AT12RecoveryInput(name, currentBytes);
     const bytes = M10A_T01_CHANGED_T08_INPUTS.includes(name)
-      ? projectM10AT01Input(name, currentBytes)
-      : currentBytes;
+      ? projectM10AT01Input(name, t12Bytes)
+      : t12Bytes;
     assertSuccessorReceipt(
       { path: name, bytes: bytes.byteLength, sha256: sha256(bytes) },
       successor.boundary.trackedReceipts,
@@ -1718,6 +2247,7 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
     currentArtifact,
     successor,
     receipts(files),
+    m10aT12Successor,
   );
   const artifactBytes = Buffer.from(
     await format(JSON.stringify(artifact), { parser: "json", printWidth: 100, endOfLine: "lf" }),

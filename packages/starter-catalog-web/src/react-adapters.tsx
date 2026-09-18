@@ -30,7 +30,6 @@ import {
   STARTER_CHECKBOX_CAPABILITY_ID,
   STARTER_COMBOBOX_CAPABILITY_ID,
   STARTER_GRID_CAPABILITY_ID,
-  STARTER_DIALOG_CAPABILITY_ID,
   STARTER_HEADING_CAPABILITY_ID,
   STARTER_ICON_CAPABILITY_ID,
   STARTER_IMAGE_CAPABILITY_ID,
@@ -82,6 +81,20 @@ import {
   starterPopoverComponentRegistration,
   starterTooltipComponentRegistration,
 } from "./contracts.js";
+import {
+  isStarterBorder,
+  isStarterBoxShadow,
+  isStarterTypography,
+  isStarterVisualColor,
+  isStarterVisualStyleValue,
+  starterBorderToCss,
+  starterBoxShadowToCss,
+  starterColorToCss,
+  starterDimensionToCss,
+  starterLinearGradientToCss,
+  starterTypographyToCss,
+  starterVisualStyleProfileForCapability,
+} from "./visual-style-profile.js";
 import styles from "./neutral.module.css";
 
 import type { CSSProperties, ReactNode } from "react";
@@ -124,6 +137,13 @@ import type {
   StarterPopoverProps,
   StarterTooltipProps,
 } from "./contracts.js";
+import type {
+  StarterBorder,
+  StarterBoxShadow,
+  StarterTypography,
+  StarterVisualDimension,
+  StarterVisualStyleProfile,
+} from "./visual-style-profile.js";
 
 interface PortalBoundary {
   readonly root: HTMLDivElement | null;
@@ -198,260 +218,32 @@ type Registration =
   | typeof starterSkeletonComponentRegistration
   | typeof starterProgressComponentRegistration;
 
-type T05StyleProjection = "image" | "layout" | "typography" | "media" | "separator";
-type StarterStyleProjection = T05StyleProjection | "form" | "selection" | "overlay" | "display";
+type StarterStyleProjection = StarterVisualStyleProfile;
+type LegacyPartStyleProjection = "form" | "selection" | "overlay" | "display";
+type PartStyleProjection = StarterStyleProjection | LegacyPartStyleProjection;
 
-const T01_STYLE_PROPERTIES = Object.freeze([
-  "color",
-  "backgroundColor",
-  "borderColor",
-  "borderRadius",
-  "padding",
-  "fontSize",
-] as const);
-const LAYOUT_STYLE_PROPERTIES = Object.freeze([
-  "color",
-  "backgroundColor",
-  "borderColor",
-  "borderRadius",
-  "borderWidth",
-  "paddingBlock",
-  "paddingInline",
-  "marginBlock",
-  "marginInline",
-  "gap",
-  "width",
-  "height",
-  "minWidth",
-  "maxWidth",
-  "minHeight",
-  "maxHeight",
-  "overflow",
-  "alignItems",
-  "alignSelf",
-  "justifyContent",
-  "textAlign",
-  "opacity",
-] as const);
-const TYPOGRAPHY_STYLE_PROPERTIES = Object.freeze([
-  "color",
-  "backgroundColor",
-  "borderColor",
-  "borderRadius",
-  "borderWidth",
-  "paddingBlock",
-  "paddingInline",
-  "marginBlock",
-  "marginInline",
-  "width",
-  "minWidth",
-  "maxWidth",
-  "fontFamily",
-  "fontSize",
-  "fontWeight",
-  "lineHeight",
-  "letterSpacing",
-  "textAlign",
-  "textDecoration",
-  "opacity",
-] as const);
-const MEDIA_STYLE_PROPERTIES = Object.freeze([
-  "color",
-  "backgroundColor",
-  "borderColor",
-  "borderRadius",
-  "borderWidth",
-  "paddingBlock",
-  "paddingInline",
-  "marginBlock",
-  "marginInline",
-  "width",
-  "height",
-  "minWidth",
-  "maxWidth",
-  "minHeight",
-  "maxHeight",
-  "opacity",
-] as const);
-const IMAGE_STYLE_PROPERTIES = Object.freeze(
-  MEDIA_STYLE_PROPERTIES.filter((property) => property !== "color"),
-);
-const SEPARATOR_STYLE_PROPERTIES = Object.freeze([
-  "backgroundColor",
-  "borderRadius",
-  "marginBlock",
-  "marginInline",
-  "width",
-  "height",
-  "minWidth",
-  "maxWidth",
-  "minHeight",
-  "maxHeight",
-  "opacity",
-] as const);
-const FORM_STYLE_PROPERTIES = Object.freeze([
-  "color",
-  "backgroundColor",
-  "borderColor",
-  "borderRadius",
-  "borderWidth",
-  "paddingBlock",
-  "paddingInline",
-  "marginBlock",
-  "marginInline",
-  "fontFamily",
-  "fontSize",
-  "fontWeight",
-  "lineHeight",
-  "letterSpacing",
-  "width",
-  "minWidth",
-  "maxWidth",
-  "minHeight",
-  "maxHeight",
-  "opacity",
-] as const);
-// Select predates the logical padding axes above. Keep the former public uniform-padding
-// property on the selection projection only, so T06 form controls do not gain a new surface.
-const SELECTION_STYLE_PROPERTIES = Object.freeze([...FORM_STYLE_PROPERTIES, "padding"] as const);
-
-function styleProjection(registration: Registration): StarterStyleProjection | undefined {
+function visualProfileForPart(projection: PartStyleProjection): StarterVisualStyleProfile {
   if (
-    registration.id === STARTER_BOX_CAPABILITY_ID ||
-    registration.id === STARTER_STACK_CAPABILITY_ID ||
-    registration.id === STARTER_GRID_CAPABILITY_ID
+    projection === "form" ||
+    projection === "selection" ||
+    projection === "overlay" ||
+    projection === "display"
   ) {
-    return "layout";
+    return "control";
   }
-  if (
-    registration.id === STARTER_TEXT_CAPABILITY_ID ||
-    registration.id === STARTER_HEADING_CAPABILITY_ID
-  ) {
-    return "typography";
-  }
-  if (registration.id === STARTER_IMAGE_CAPABILITY_ID) return "image";
-  if (registration.id === STARTER_ICON_CAPABILITY_ID) return "media";
-  if (registration.id === STARTER_SEPARATOR_CAPABILITY_ID) return "separator";
-  if (
-    registration.id === STARTER_TEXT_FIELD_CAPABILITY_ID ||
-    registration.id === STARTER_TEXT_AREA_CAPABILITY_ID ||
-    registration.id === STARTER_CHECKBOX_CAPABILITY_ID ||
-    registration.id === STARTER_RADIO_GROUP_CAPABILITY_ID ||
-    registration.id === STARTER_SWITCH_CAPABILITY_ID
-  ) {
-    return "form";
-  }
-  if (
-    registration.id === STARTER_SELECT_CAPABILITY_ID ||
-    registration.id === STARTER_COMBOBOX_CAPABILITY_ID ||
-    registration.id === STARTER_TABS_CAPABILITY_ID ||
-    registration.id === STARTER_SLIDER_CAPABILITY_ID ||
-    registration.id === STARTER_NUMBER_FIELD_CAPABILITY_ID
-  ) {
-    return "selection";
-  }
-  if (
-    registration.id === STARTER_DIALOG_CAPABILITY_ID ||
-    registration.id === STARTER_POPOVER_CAPABILITY_ID ||
-    registration.id === STARTER_TOOLTIP_CAPABILITY_ID ||
-    registration.id === STARTER_MENU_CAPABILITY_ID ||
-    registration.id === STARTER_ACCORDION_CAPABILITY_ID
-  ) {
-    return "overlay";
-  }
-  if (
-    registration.id === STARTER_CARD_CAPABILITY_ID ||
-    registration.id === STARTER_BADGE_CAPABILITY_ID ||
-    registration.id === STARTER_AVATAR_CAPABILITY_ID ||
-    registration.id === STARTER_ALERT_CAPABILITY_ID ||
-    registration.id === STARTER_LIST_CAPABILITY_ID ||
-    registration.id === STARTER_TABLE_CAPABILITY_ID ||
-    registration.id === STARTER_SKELETON_CAPABILITY_ID ||
-    registration.id === STARTER_PROGRESS_CAPABILITY_ID
-  ) {
-    return "display";
-  }
-  return undefined;
+  return projection;
 }
 
-function isHexColor(value: unknown): value is string {
-  return typeof value === "string" && /^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$/u.test(value);
+function styleProjection(registration: Registration): StarterStyleProjection {
+  const profile = starterVisualStyleProfileForCapability(registration.id);
+  if (profile === undefined) throw new Error("STARTER_ADAPTER_INPUT_INVALID");
+  return profile;
 }
 
 function isFiniteNumber(value: unknown, minimum: number, maximum: number): value is number {
   return (
     typeof value === "number" && Number.isFinite(value) && value >= minimum && value <= maximum
   );
-}
-
-function isLayoutDimension(value: unknown): boolean {
-  return isFiniteNumber(value, 0, 4_096) || value === "fill" || value === "hug";
-}
-
-function isT05StyleValueValid(
-  projection: T05StyleProjection,
-  property: string,
-  value: unknown,
-): boolean {
-  if (["color", "backgroundColor", "borderColor"].includes(property)) return isHexColor(value);
-  if (["borderRadius"].includes(property)) return isFiniteNumber(value, 0, 64);
-  if (["borderWidth"].includes(property)) return isFiniteNumber(value, 0, 16);
-  if (["paddingBlock", "paddingInline", "marginBlock", "marginInline", "gap"].includes(property)) {
-    return isFiniteNumber(value, 0, 512);
-  }
-  if (["width", "height"].includes(property)) return isLayoutDimension(value);
-  if (["minWidth", "maxWidth", "minHeight", "maxHeight"].includes(property))
-    return isFiniteNumber(value, 0, 4_096);
-  if (property === "opacity") return isFiniteNumber(value, 0, 1);
-  if (property === "fontSize") return isFiniteNumber(value, 8, 96);
-  if (property === "fontWeight") return [400, 500, 600, 700].includes(value as number);
-  if (property === "lineHeight") return isFiniteNumber(value, 1, 3);
-  if (property === "letterSpacing") return isFiniteNumber(value, -4, 16);
-  if (property === "fontFamily") return ["system", "serif", "mono"].includes(value as string);
-  if (property === "textDecoration")
-    return ["none", "underline", "line-through"].includes(value as string);
-  if (property === "textAlign") return ["start", "center", "end"].includes(value as string);
-  if (projection === "layout" && property === "overflow")
-    return ["visible", "hidden", "auto"].includes(value as string);
-  if (projection === "layout" && property === "alignItems")
-    return ["start", "center", "end", "stretch"].includes(value as string);
-  if (projection === "layout" && property === "alignSelf")
-    return ["auto", "start", "center", "end", "stretch"].includes(value as string);
-  if (projection === "layout" && property === "justifyContent")
-    return ["start", "center", "end", "between", "around", "evenly"].includes(value as string);
-  return false;
-}
-
-function isFormStyleValueValid(property: string, value: unknown): boolean {
-  if (["color", "backgroundColor", "borderColor"].includes(property)) return isHexColor(value);
-  if (property === "borderRadius") return isFiniteNumber(value, 0, 64);
-  if (property === "borderWidth") return isFiniteNumber(value, 0, 16);
-  if (
-    ["padding", "paddingBlock", "paddingInline", "marginBlock", "marginInline"].includes(property)
-  )
-    return isFiniteNumber(value, 0, 128);
-  if (["width", "minWidth", "maxWidth", "minHeight", "maxHeight"].includes(property))
-    return isFiniteNumber(value, 0, 4_096);
-  if (property === "opacity") return isFiniteNumber(value, 0, 1);
-  if (property === "fontSize") return isFiniteNumber(value, 8, 96);
-  if (property === "fontWeight") return [400, 500, 600, 700].includes(value as number);
-  if (property === "lineHeight") return isFiniteNumber(value, 1, 3);
-  if (property === "letterSpacing") return isFiniteNumber(value, -4, 16);
-  if (property === "fontFamily") return ["system", "serif", "mono"].includes(value as string);
-  return false;
-}
-
-function stylePropertyNames(projection: StarterStyleProjection | undefined): readonly string[] {
-  if (projection === "layout") return LAYOUT_STYLE_PROPERTIES;
-  if (projection === "typography") return TYPOGRAPHY_STYLE_PROPERTIES;
-  if (projection === "image") return IMAGE_STYLE_PROPERTIES;
-  if (projection === "media") return MEDIA_STYLE_PROPERTIES;
-  if (projection === "separator") return SEPARATOR_STYLE_PROPERTIES;
-  if (projection === "form") return FORM_STYLE_PROPERTIES;
-  if (projection === "selection") return SELECTION_STYLE_PROPERTIES;
-  if (projection === "overlay") return SELECTION_STYLE_PROPERTIES;
-  if (projection === "display") return FORM_STYLE_PROPERTIES;
-  return T01_STYLE_PROPERTIES;
 }
 
 function validateT05Props(
@@ -1181,128 +973,436 @@ function guardInput(input: RuntimeReactComponentAdapterProps, registration: Regi
   const states: readonly string[] =
     "visualStates" in registration.manifest ? registration.manifest.visualStates : [];
   const projection = styleProjection(registration);
-  const propertyNames = stylePropertyNames(projection);
   for (const [state, stateParts] of Object.entries(input.style)) {
     if (state !== "base" && !states.includes(state))
       throw new Error("STARTER_ADAPTER_INPUT_INVALID");
     for (const [part, values] of Object.entries(stateParts)) {
       if (!parts.includes(part)) throw new Error("STARTER_ADAPTER_INPUT_INVALID");
       for (const [property, value] of Object.entries(values)) {
-        const valid =
-          propertyNames.includes(property) &&
-          (projection === undefined
-            ? ["color", "backgroundColor", "borderColor"].includes(property)
-              ? isHexColor(value)
-              : typeof value === "number" &&
-                Number.isFinite(value) &&
-                ((property === "borderRadius" && value >= 0 && value <= 64) ||
-                  (property === "padding" && value >= 0 && value <= 128) ||
-                  (property === "fontSize" && value >= 8 && value <= 96))
-            : projection === "form" ||
-                projection === "selection" ||
-                projection === "overlay" ||
-                projection === "display"
-              ? isFormStyleValueValid(property, value)
-              : isT05StyleValueValid(projection, property, value));
-        if (!valid) throw new Error("STARTER_ADAPTER_INPUT_INVALID");
+        if (!isStarterVisualStyleValue(projection, property, value))
+          throw new Error("STARTER_ADAPTER_INPUT_INVALID");
       }
     }
   }
+}
+
+function admittedColor(
+  profile: StarterVisualStyleProfile,
+  property: string,
+  value: unknown,
+): string | undefined {
+  return isStarterVisualStyleValue(profile, property, value) && isStarterVisualColor(value)
+    ? starterColorToCss(value)
+    : undefined;
+}
+
+function admittedDimension(
+  profile: StarterVisualStyleProfile,
+  property: string,
+  value: unknown,
+): number | string | undefined {
+  return isStarterVisualStyleValue(profile, property, value)
+    ? starterDimensionToCss(value as StarterVisualDimension)
+    : undefined;
+}
+
+function admittedSize(
+  profile: StarterVisualStyleProfile,
+  property: "width" | "height",
+  value: unknown,
+): number | string | undefined {
+  if (!isStarterVisualStyleValue(profile, property, value)) return undefined;
+  if (value === "fill") return "100%";
+  if (value === "hug") return "fit-content";
+  return starterDimensionToCss(value as StarterVisualDimension);
+}
+
+function transformLength(value: number | string): string {
+  return typeof value === "number" ? `${value}px` : value;
 }
 
 function partStyle(
   style: RuntimeReactSemanticStyle,
   part: string,
   states: readonly string[] = [],
-  projection: StarterStyleProjection | undefined = undefined,
+  projection: PartStyleProjection = "neutral",
 ): CSSProperties {
+  const profile = visualProfileForPart(projection);
   const result: CSSProperties = {};
+  let translateX: number | string = 0;
+  let translateY: number | string = 0;
+  let rotate = 0;
+  let scaleX = 1;
+  let scaleY = 1;
+  let transformChanged = false;
+
   for (const state of ["base", ...states]) {
     const values = style[state]?.[part];
     if (values === undefined) continue;
-    // No property name supplied by a document becomes a CSS property through generic spreading.
-    if (projection !== "image" && typeof values.color === "string") result.color = values.color;
-    if (typeof values.backgroundColor === "string") result.backgroundColor = values.backgroundColor;
-    if (typeof values.borderColor === "string") result.borderColor = values.borderColor;
+
+    // Every property assignment below is named by the adapter. No authored property name, CSS
+    // string, selector, URL, or generic CSS object spread can cross this boundary.
+    const color = admittedColor(profile, "color", values.color);
+    if (color !== undefined) result.color = color;
+    const backgroundColor = admittedColor(profile, "backgroundColor", values.backgroundColor);
+    if (backgroundColor !== undefined) result.backgroundColor = backgroundColor;
+    if (isStarterVisualStyleValue(profile, "backgroundGradient", values.backgroundGradient)) {
+      result.backgroundImage = starterLinearGradientToCss(
+        values.backgroundGradient as Readonly<Record<string, unknown>>,
+      );
+    }
     if (
-      projection !== undefined &&
-      (typeof values.borderColor === "string" || typeof values.borderWidth === "number")
+      isStarterVisualStyleValue(profile, "boxShadow", values.boxShadow) &&
+      isStarterBoxShadow(values.boxShadow)
     ) {
+      result.boxShadow = starterBoxShadowToCss(values.boxShadow as StarterBoxShadow);
+    }
+
+    let hasBorderValue = false;
+    if (
+      isStarterVisualStyleValue(profile, "border", values.border) &&
+      isStarterBorder(values.border)
+    ) {
+      const border = starterBorderToCss(values.border as StarterBorder);
+      result.borderColor = border.borderColor;
+      result.borderWidth = border.borderWidth;
+      result.borderStyle = border.borderStyle;
+      hasBorderValue = true;
+    }
+    const borderColor = admittedColor(profile, "borderColor", values.borderColor);
+    if (borderColor !== undefined) {
+      result.borderColor = borderColor;
+      hasBorderValue = true;
+    }
+    const borderTopColor = admittedColor(profile, "borderTopColor", values.borderTopColor);
+    if (borderTopColor !== undefined) {
+      result.borderTopColor = borderTopColor;
+      hasBorderValue = true;
+    }
+    const borderRightColor = admittedColor(profile, "borderRightColor", values.borderRightColor);
+    if (borderRightColor !== undefined) {
+      result.borderRightColor = borderRightColor;
+      hasBorderValue = true;
+    }
+    const borderBottomColor = admittedColor(profile, "borderBottomColor", values.borderBottomColor);
+    if (borderBottomColor !== undefined) {
+      result.borderBottomColor = borderBottomColor;
+      hasBorderValue = true;
+    }
+    const borderLeftColor = admittedColor(profile, "borderLeftColor", values.borderLeftColor);
+    if (borderLeftColor !== undefined) {
+      result.borderLeftColor = borderLeftColor;
+      hasBorderValue = true;
+    }
+    const borderWidth = admittedDimension(profile, "borderWidth", values.borderWidth);
+    if (borderWidth !== undefined) {
+      result.borderWidth = borderWidth;
+      hasBorderValue = true;
+    }
+    const borderTopWidth = admittedDimension(profile, "borderTopWidth", values.borderTopWidth);
+    if (borderTopWidth !== undefined) {
+      result.borderTopWidth = borderTopWidth;
+      hasBorderValue = true;
+    }
+    const borderRightWidth = admittedDimension(
+      profile,
+      "borderRightWidth",
+      values.borderRightWidth,
+    );
+    if (borderRightWidth !== undefined) {
+      result.borderRightWidth = borderRightWidth;
+      hasBorderValue = true;
+    }
+    const borderBottomWidth = admittedDimension(
+      profile,
+      "borderBottomWidth",
+      values.borderBottomWidth,
+    );
+    if (borderBottomWidth !== undefined) {
+      result.borderBottomWidth = borderBottomWidth;
+      hasBorderValue = true;
+    }
+    const borderLeftWidth = admittedDimension(profile, "borderLeftWidth", values.borderLeftWidth);
+    if (borderLeftWidth !== undefined) {
+      result.borderLeftWidth = borderLeftWidth;
+      hasBorderValue = true;
+    }
+    if (
+      values.borderStyle === "solid" ||
+      values.borderStyle === "dashed" ||
+      values.borderStyle === "dotted" ||
+      values.borderStyle === "double" ||
+      values.borderStyle === "groove" ||
+      values.borderStyle === "inset" ||
+      values.borderStyle === "outset" ||
+      values.borderStyle === "ridge"
+    ) {
+      result.borderStyle = values.borderStyle;
+    } else if (hasBorderValue && result.borderStyle === undefined) {
       result.borderStyle = "solid";
     }
-    if (typeof values.borderRadius === "number") result.borderRadius = values.borderRadius;
-    if (typeof values.padding === "number") result.padding = values.padding;
-    if (typeof values.fontSize === "number") result.fontSize = values.fontSize;
-    if (projection === undefined) continue;
-    if (typeof values.borderWidth === "number") result.borderWidth = values.borderWidth;
-    if (typeof values.paddingBlock === "number") result.paddingBlock = values.paddingBlock;
-    if (typeof values.paddingInline === "number") result.paddingInline = values.paddingInline;
-    if (typeof values.marginBlock === "number") result.marginBlock = values.marginBlock;
-    if (typeof values.marginInline === "number") result.marginInline = values.marginInline;
-    if (typeof values.gap === "number") result.gap = values.gap;
-    if (typeof values.width === "number") result.width = values.width;
-    if (values.width === "fill") result.width = "100%";
-    if (values.width === "hug") result.width = "fit-content";
-    if (typeof values.height === "number") result.height = values.height;
-    if (values.height === "fill") result.height = "100%";
-    if (values.height === "hug") result.height = "fit-content";
-    if (typeof values.minWidth === "number") result.minWidth = values.minWidth;
-    if (typeof values.maxWidth === "number") result.maxWidth = values.maxWidth;
-    if (typeof values.minHeight === "number") result.minHeight = values.minHeight;
-    if (typeof values.maxHeight === "number") result.maxHeight = values.maxHeight;
-    if (typeof values.opacity === "number") result.opacity = values.opacity;
-    if (projection === "layout") {
-      if (
-        values.overflow === "visible" ||
-        values.overflow === "hidden" ||
-        values.overflow === "auto"
-      )
-        result.overflow = values.overflow;
-      if (values.alignItems === "start") result.alignItems = "flex-start";
-      if (values.alignItems === "center") result.alignItems = "center";
-      if (values.alignItems === "end") result.alignItems = "flex-end";
-      if (values.alignItems === "stretch") result.alignItems = "stretch";
-      if (values.alignSelf === "auto") result.alignSelf = "auto";
-      if (values.alignSelf === "start") result.alignSelf = "flex-start";
-      if (values.alignSelf === "center") result.alignSelf = "center";
-      if (values.alignSelf === "end") result.alignSelf = "flex-end";
-      if (values.alignSelf === "stretch") result.alignSelf = "stretch";
-      if (values.justifyContent === "start") result.justifyContent = "flex-start";
-      if (values.justifyContent === "center") result.justifyContent = "center";
-      if (values.justifyContent === "end") result.justifyContent = "flex-end";
-      if (values.justifyContent === "between") result.justifyContent = "space-between";
-      if (values.justifyContent === "around") result.justifyContent = "space-around";
-      if (values.justifyContent === "evenly") result.justifyContent = "space-evenly";
-    }
-    if (values.textAlign === "start" || values.textAlign === "center" || values.textAlign === "end")
-      result.textAlign = values.textAlign;
+    const borderRadius = admittedDimension(profile, "borderRadius", values.borderRadius);
+    if (borderRadius !== undefined) result.borderRadius = borderRadius;
+    const borderTopLeftRadius = admittedDimension(
+      profile,
+      "borderTopLeftRadius",
+      values.borderTopLeftRadius,
+    );
+    if (borderTopLeftRadius !== undefined) result.borderTopLeftRadius = borderTopLeftRadius;
+    const borderTopRightRadius = admittedDimension(
+      profile,
+      "borderTopRightRadius",
+      values.borderTopRightRadius,
+    );
+    if (borderTopRightRadius !== undefined) result.borderTopRightRadius = borderTopRightRadius;
+    const borderBottomRightRadius = admittedDimension(
+      profile,
+      "borderBottomRightRadius",
+      values.borderBottomRightRadius,
+    );
+    if (borderBottomRightRadius !== undefined)
+      result.borderBottomRightRadius = borderBottomRightRadius;
+    const borderBottomLeftRadius = admittedDimension(
+      profile,
+      "borderBottomLeftRadius",
+      values.borderBottomLeftRadius,
+    );
+    if (borderBottomLeftRadius !== undefined)
+      result.borderBottomLeftRadius = borderBottomLeftRadius;
     if (
-      projection === "typography" ||
-      projection === "form" ||
-      projection === "selection" ||
-      projection === "overlay" ||
-      projection === "display"
+      isStarterVisualStyleValue(profile, "opacity", values.opacity) &&
+      typeof values.opacity === "number"
     ) {
-      if (values.fontFamily === "system") result.fontFamily = "system-ui, sans-serif";
-      if (values.fontFamily === "serif") result.fontFamily = "ui-serif, Georgia, serif";
-      if (values.fontFamily === "mono") result.fontFamily = "ui-monospace, monospace";
-      if (
-        values.fontWeight === 400 ||
-        values.fontWeight === 500 ||
-        values.fontWeight === 600 ||
-        values.fontWeight === 700
-      )
-        result.fontWeight = values.fontWeight;
-      if (typeof values.lineHeight === "number") result.lineHeight = values.lineHeight;
-      if (typeof values.letterSpacing === "number") result.letterSpacing = values.letterSpacing;
-      if (
-        values.textDecoration === "none" ||
-        values.textDecoration === "underline" ||
-        values.textDecoration === "line-through"
-      ) {
-        result.textDecoration = values.textDecoration;
-      }
+      result.opacity = values.opacity;
     }
+
+    if (
+      isStarterVisualStyleValue(profile, "typography", values.typography) &&
+      isStarterTypography(values.typography)
+    ) {
+      const typography = starterTypographyToCss(values.typography as StarterTypography);
+      result.fontFamily = typography.fontFamily;
+      result.fontSize = typography.fontSize;
+      result.fontWeight = typography.fontWeight;
+      result.letterSpacing = typography.letterSpacing;
+      result.lineHeight = typography.lineHeight;
+    }
+    if (values.fontFamily === "system") result.fontFamily = "system-ui, sans-serif";
+    if (values.fontFamily === "serif") result.fontFamily = "ui-serif, Georgia, serif";
+    if (values.fontFamily === "mono") result.fontFamily = "ui-monospace, monospace";
+    if (
+      values.fontWeight === 100 ||
+      values.fontWeight === 200 ||
+      values.fontWeight === 300 ||
+      values.fontWeight === 400 ||
+      values.fontWeight === 500 ||
+      values.fontWeight === 600 ||
+      values.fontWeight === 700 ||
+      values.fontWeight === 800 ||
+      values.fontWeight === 900
+    ) {
+      result.fontWeight = values.fontWeight;
+    }
+    const fontSize = admittedDimension(profile, "fontSize", values.fontSize);
+    if (fontSize !== undefined) result.fontSize = fontSize;
+    if (
+      isStarterVisualStyleValue(profile, "lineHeight", values.lineHeight) &&
+      typeof values.lineHeight === "number"
+    ) {
+      result.lineHeight = values.lineHeight;
+    }
+    const letterSpacing = admittedDimension(profile, "letterSpacing", values.letterSpacing);
+    if (letterSpacing !== undefined) result.letterSpacing = letterSpacing;
+    if (
+      values.textAlign === "start" ||
+      values.textAlign === "center" ||
+      values.textAlign === "end" ||
+      values.textAlign === "justify"
+    ) {
+      result.textAlign = values.textAlign;
+    }
+    if (
+      values.textDecoration === "none" ||
+      values.textDecoration === "underline" ||
+      values.textDecoration === "line-through" ||
+      values.textDecoration === "overline"
+    ) {
+      result.textDecoration = values.textDecoration;
+    }
+    if (values.fontStyle === "normal" || values.fontStyle === "italic") {
+      result.fontStyle = values.fontStyle;
+    }
+    if (
+      values.textTransform === "none" ||
+      values.textTransform === "uppercase" ||
+      values.textTransform === "lowercase" ||
+      values.textTransform === "capitalize"
+    ) {
+      result.textTransform = values.textTransform;
+    }
+
+    const width = admittedSize(profile, "width", values.width);
+    if (width !== undefined) result.width = width;
+    const height = admittedSize(profile, "height", values.height);
+    if (height !== undefined) result.height = height;
+    const minWidth = admittedDimension(profile, "minWidth", values.minWidth);
+    if (minWidth !== undefined) result.minWidth = minWidth;
+    const maxWidth = admittedDimension(profile, "maxWidth", values.maxWidth);
+    if (maxWidth !== undefined) result.maxWidth = maxWidth;
+    const minHeight = admittedDimension(profile, "minHeight", values.minHeight);
+    if (minHeight !== undefined) result.minHeight = minHeight;
+    const maxHeight = admittedDimension(profile, "maxHeight", values.maxHeight);
+    if (maxHeight !== undefined) result.maxHeight = maxHeight;
+    const padding = admittedDimension(profile, "padding", values.padding);
+    if (padding !== undefined) result.padding = padding;
+    const paddingBlock = admittedDimension(profile, "paddingBlock", values.paddingBlock);
+    if (paddingBlock !== undefined) result.paddingBlock = paddingBlock;
+    const paddingInline = admittedDimension(profile, "paddingInline", values.paddingInline);
+    if (paddingInline !== undefined) result.paddingInline = paddingInline;
+    const paddingTop = admittedDimension(profile, "paddingTop", values.paddingTop);
+    if (paddingTop !== undefined) result.paddingTop = paddingTop;
+    const paddingRight = admittedDimension(profile, "paddingRight", values.paddingRight);
+    if (paddingRight !== undefined) result.paddingRight = paddingRight;
+    const paddingBottom = admittedDimension(profile, "paddingBottom", values.paddingBottom);
+    if (paddingBottom !== undefined) result.paddingBottom = paddingBottom;
+    const paddingLeft = admittedDimension(profile, "paddingLeft", values.paddingLeft);
+    if (paddingLeft !== undefined) result.paddingLeft = paddingLeft;
+    const margin = admittedDimension(profile, "margin", values.margin);
+    if (margin !== undefined) result.margin = margin;
+    const marginBlock = admittedDimension(profile, "marginBlock", values.marginBlock);
+    if (marginBlock !== undefined) result.marginBlock = marginBlock;
+    const marginInline = admittedDimension(profile, "marginInline", values.marginInline);
+    if (marginInline !== undefined) result.marginInline = marginInline;
+    const marginTop = admittedDimension(profile, "marginTop", values.marginTop);
+    if (marginTop !== undefined) result.marginTop = marginTop;
+    const marginRight = admittedDimension(profile, "marginRight", values.marginRight);
+    if (marginRight !== undefined) result.marginRight = marginRight;
+    const marginBottom = admittedDimension(profile, "marginBottom", values.marginBottom);
+    if (marginBottom !== undefined) result.marginBottom = marginBottom;
+    const marginLeft = admittedDimension(profile, "marginLeft", values.marginLeft);
+    if (marginLeft !== undefined) result.marginLeft = marginLeft;
+
+    if (
+      values.layoutMode === "block" ||
+      values.layoutMode === "flex" ||
+      values.layoutMode === "grid"
+    ) {
+      result.display = values.layoutMode;
+    }
+    if (values.flowDirection === "row" || values.flowDirection === "column") {
+      result.flexDirection = values.flowDirection;
+    }
+    if (values.flowWrap === "nowrap" || values.flowWrap === "wrap")
+      result.flexWrap = values.flowWrap;
+    if (values.gridAutoFlow === "row" || values.gridAutoFlow === "column") {
+      result.gridAutoFlow = values.gridAutoFlow;
+    }
+    if (isFiniteNumber(values.gridColumns, 1, 12) && Number.isInteger(values.gridColumns)) {
+      result.gridTemplateColumns = `repeat(${values.gridColumns}, minmax(0, 1fr))`;
+    }
+    if (isFiniteNumber(values.flexGrow, 0, 12)) result.flexGrow = values.flexGrow;
+    if (isFiniteNumber(values.flexShrink, 0, 12)) result.flexShrink = values.flexShrink;
+    const gap = admittedDimension(profile, "gap", values.gap);
+    if (gap !== undefined) result.gap = gap;
+    const rowGap = admittedDimension(profile, "rowGap", values.rowGap);
+    if (rowGap !== undefined) result.rowGap = rowGap;
+    const columnGap = admittedDimension(profile, "columnGap", values.columnGap);
+    if (columnGap !== undefined) result.columnGap = columnGap;
+    if (
+      values.overflow === "visible" ||
+      values.overflow === "hidden" ||
+      values.overflow === "auto" ||
+      values.overflow === "scroll"
+    ) {
+      result.overflow = values.overflow;
+    }
+    if (
+      values.overflowX === "visible" ||
+      values.overflowX === "hidden" ||
+      values.overflowX === "auto" ||
+      values.overflowX === "scroll"
+    ) {
+      result.overflowX = values.overflowX;
+    }
+    if (
+      values.overflowY === "visible" ||
+      values.overflowY === "hidden" ||
+      values.overflowY === "auto" ||
+      values.overflowY === "scroll"
+    ) {
+      result.overflowY = values.overflowY;
+    }
+    if (values.alignItems === "start") result.alignItems = "flex-start";
+    if (values.alignItems === "center") result.alignItems = "center";
+    if (values.alignItems === "end") result.alignItems = "flex-end";
+    if (values.alignItems === "stretch") result.alignItems = "stretch";
+    if (values.alignSelf === "auto") result.alignSelf = "auto";
+    if (values.alignSelf === "start") result.alignSelf = "flex-start";
+    if (values.alignSelf === "center") result.alignSelf = "center";
+    if (values.alignSelf === "end") result.alignSelf = "flex-end";
+    if (values.alignSelf === "stretch") result.alignSelf = "stretch";
+    if (values.justifyContent === "start") result.justifyContent = "flex-start";
+    if (values.justifyContent === "center") result.justifyContent = "center";
+    if (values.justifyContent === "end") result.justifyContent = "flex-end";
+    if (values.justifyContent === "between") result.justifyContent = "space-between";
+    if (values.justifyContent === "around") result.justifyContent = "space-around";
+    if (values.justifyContent === "evenly") result.justifyContent = "space-evenly";
+
+    if (
+      values.position === "static" ||
+      values.position === "relative" ||
+      values.position === "absolute"
+    ) {
+      result.position = values.position;
+    }
+    const insetTop = admittedDimension(profile, "insetTop", values.insetTop);
+    if (insetTop !== undefined) result.top = insetTop;
+    const insetRight = admittedDimension(profile, "insetRight", values.insetRight);
+    if (insetRight !== undefined) result.right = insetRight;
+    const insetBottom = admittedDimension(profile, "insetBottom", values.insetBottom);
+    if (insetBottom !== undefined) result.bottom = insetBottom;
+    const insetLeft = admittedDimension(profile, "insetLeft", values.insetLeft);
+    if (insetLeft !== undefined) result.left = insetLeft;
+    if (isFiniteNumber(values.zIndex, -100, 100) && Number.isInteger(values.zIndex)) {
+      result.zIndex = values.zIndex;
+    }
+    const nextTranslateX = admittedDimension(profile, "translateX", values.translateX);
+    if (nextTranslateX !== undefined) {
+      translateX = nextTranslateX;
+      transformChanged = true;
+    }
+    const nextTranslateY = admittedDimension(profile, "translateY", values.translateY);
+    if (nextTranslateY !== undefined) {
+      translateY = nextTranslateY;
+      transformChanged = true;
+    }
+    if (isFiniteNumber(values.rotate, -180, 180)) {
+      rotate = values.rotate;
+      transformChanged = true;
+    }
+    if (isFiniteNumber(values.scaleX, 0.1, 4)) {
+      scaleX = values.scaleX;
+      transformChanged = true;
+    }
+    if (isFiniteNumber(values.scaleY, 0.1, 4)) {
+      scaleY = values.scaleY;
+      transformChanged = true;
+    }
+    if (values.transformOrigin === "center") result.transformOrigin = "center";
+    if (values.transformOrigin === "top") result.transformOrigin = "top";
+    if (values.transformOrigin === "top-right") result.transformOrigin = "top right";
+    if (values.transformOrigin === "right") result.transformOrigin = "right";
+    if (values.transformOrigin === "bottom-right") result.transformOrigin = "bottom right";
+    if (values.transformOrigin === "bottom") result.transformOrigin = "bottom";
+    if (values.transformOrigin === "bottom-left") result.transformOrigin = "bottom left";
+    if (values.transformOrigin === "left") result.transformOrigin = "left";
+    if (values.transformOrigin === "top-left") result.transformOrigin = "top left";
+  }
+
+  if (transformChanged) {
+    result.transform = `translate(${transformLength(translateX)}, ${transformLength(
+      translateY,
+    )}) rotate(${rotate}deg) scale(${scaleX}, ${scaleY})`;
   }
   return result;
 }

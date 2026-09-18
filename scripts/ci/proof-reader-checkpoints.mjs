@@ -151,13 +151,23 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "85c83b51085a362df7b50bf8be231dfd3f257d43eada5fe155b03fc6656434ea",
   "b15ee8bbec31460158cb39d9f2bd25cac82bb2eb98cfddb13e2c85c12c8c9d21",
   "48833d6a8a8b2e2104481bdd735e7579004418fbb70b64637d1a78df091e9733",
+  "261c925d0ffe70ec4cd61f6ca9b488181f724034ebd4fae39264aade9ed6b015",
+  "d2afba69ceb81d58404adee7bc3fe58aac40b8b9b344057f295f5aaec76bc092",
+  "86a988e7a7c232ee9d5c7adb8d01fd0cadd5fef0c2d0e0941731f3c15c6d3713",
+  "e7e37d5c264f31c29cd3a3dbf39fa644f38b630a1d52654802a9cc484601eea7",
+  "14beba9b622ba833867c12f8b0b14c1a6e00a7e19f421137ffd99734fbe88d0e",
+  "d031cf24ec10e740afc4b9dfcf35a8f2b0fc66a94ed93c143777070d865f543b",
+  "38bdf003610dd2e6bd6055c0a88a1e4620278341f439b0504a038710c02324fd",
+  "fa342232f4744380f75644cbee3e1a9861447184b99533e301f6a7e427f92b12",
+  "8457d6bde2ebd9884d576d2a697c426a392eaa8d256bdf4a79fb5a67b80e8d7a",
+  "6b84e9041bb48392f1f9c4b5dcf33bbb5b0bb7e11f2429470a146a4114568ca7",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
   25, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
   46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57, 58, 59, 59,
   59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70, 71, 71, 72, 72,
-  72, 72, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73,
+  72, 72, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_COUNT = 1_024;
@@ -928,6 +938,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     "scripts/lib/m10a-t09-proof.mjs",
     "tests/m10a-t09.test.mjs",
   ),
+  freezeTaskAuthority(
+    "M10A-T12",
+    {
+      path: "docs/proof/artifacts/m10a-t12.json",
+      bytes: 11_804,
+      sha256: "ac32d2b0f1c80d5aed7ed65b4758f284f5b93cea4fb82eacd8556dd9891eb118",
+    },
+    "scripts/lib/m10a-t12-proof.mjs",
+    "tests/m10a-t12.test.mjs",
+  ),
 ]);
 
 // Frozen artifacts normally retain one task-owned receipt. This narrow reviewed transition keeps
@@ -950,6 +970,26 @@ const PROOF_READER_CHECKPOINT_ARTIFACT_RECEIPT_TRANSITIONS = SAFE_OBJECT_FREEZE(
       path: "docs/proof/artifacts/m10a-t07.json",
       bytes: 5_107,
       sha256: "1587114174bd30fa91c44bc8e236e5ae57f80c81a0dfe6980a73a2f40c9fced4",
+    }),
+  }),
+  SAFE_OBJECT_FREEZE({
+    firstSequence: 112,
+    task: "M10A-T12",
+    artifact: SAFE_OBJECT_FREEZE({
+      path: "docs/proof/artifacts/m10a-t12.json",
+      bytes: 11_804,
+      sha256: "6706523c4c5586f9453c0be9230a0b7bf86c9b7de89cbed9645e54d1a55c81d1",
+    }),
+  }),
+  // Sequence 113 retains the immutable T12 append and its first format reseal while advancing
+  // only the current task-owned artifact after the final source-format normalization.
+  SAFE_OBJECT_FREEZE({
+    firstSequence: 113,
+    task: "M10A-T12",
+    artifact: SAFE_OBJECT_FREEZE({
+      path: "docs/proof/artifacts/m10a-t12.json",
+      bytes: 11_804,
+      sha256: "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b",
     }),
   }),
 ]);

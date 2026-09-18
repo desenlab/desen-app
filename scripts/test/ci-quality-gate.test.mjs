@@ -462,7 +462,9 @@ function assertPreM11PlanningInventory({ rows, statuses }) {
       taskId === "M10A-T10" ||
       taskId === "M10A-T11"
         ? "DONE"
-        : "NOT_STARTED";
+        : taskId === "M10A-T12"
+          ? "IN_PROGRESS"
+          : "NOT_STARTED";
     assert.equal(row.cells[1], expectedStatus, `${taskId} must remain ${expectedStatus}`);
     assert.equal(
       row.cells[2],
@@ -784,17 +786,17 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the reviewed live proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 119,
-    verifierCount: 119,
-    rootTestCount: 119,
+    proofCount: 120,
+    verifierCount: 120,
+    rootTestCount: 120,
     ciContractScriptCount: 5,
     ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
-    legacyPrerequisiteCount: 798,
-    legacyPrerequisiteSha256: "bf6d11e6ffd01427d7ecd58432a62a02e23d840a6c9a2a8c8f313418dca6288e",
-    legacyLeafInvocationCount: 4676,
-    legacyLeafInvocationSha256: "8651b8f7520a4f0ff90b62ce33d676e8481e8b1304dc1f944e7af361efa37f7a",
-    distinctLeafWorkloadCount: 378,
-    distinctLeafWorkloadSha256: "c7a2eff3253fcea24bbfebf5522e7cb1d5c7f7993f976d0d0cd6570ad60c4527",
+    legacyPrerequisiteCount: 789,
+    legacyPrerequisiteSha256: "bcb7436d0c39a0192bdb197a151c81f49df1f34d7ab6e1772c796366addf9583",
+    legacyLeafInvocationCount: 4658,
+    legacyLeafInvocationSha256: "bf35708668ae3739034e7ba196e6e5ae6766ebb26010aa1a3bfc22d67e6ca5ea",
+    distinctLeafWorkloadCount: 379,
+    distinctLeafWorkloadSha256: "0411e4d9b681ced3d38b29b59b1ed25ca4d3ba1434428f1b685b4d01e1785198",
     testConfigurationFileCount: 7,
     workspaceTestScriptCount: 20,
     workspaceTestScriptSha256: "61c8e0b12ae0ad5b1cb85ad0a1832337b239305b7bf0005b6503bc3d844d5c88",
@@ -1063,11 +1065,15 @@ test("task board retains its canonical inventory without narrative appendices", 
   assert.equal(statuses.get("M10A-T09"), "DONE");
   assert.equal(statuses.get("M10A-T10"), "DONE");
   assert.equal(statuses.get("M10A-T11"), "DONE");
+  assert.equal(statuses.get("M10A-T12"), "IN_PROGRESS");
   assert.ok(normalizedReadme.includes("**M11:** `NOT_STARTED`"));
   assert.ok(
-    normalizedReadme.includes("**Next task:** `M10A-T12` (`NOT_STARTED`; T03 and T11 complete)"),
+    normalizedReadme.includes(
+      "**Current task:** `M10A-T12` (`IN_PROGRESS`; local verification passed; hosted closure pending)",
+    ),
   );
   assert.ok(normalizedProjectStatus.includes("M10A-T01 through M10A-T11 are DONE"));
+  assert.ok(normalizedProjectStatus.includes("M10A-T12 is `IN_PROGRESS`."));
   assert.ok(normalizedProjectStatus.includes("M11 has not started."));
   assert.ok(
     normalizedStartHere.includes(
@@ -1092,6 +1098,10 @@ test("task board retains its canonical inventory without narrative appendices", 
   assert.match(
     normalizedStartHere,
     /`M10A-T11` `DONE`: çoklu seçim, slot-farkındalıklı atomik katman taşıma ve erişilebilir canvas.*?exact-head ve taze `main` kapanışıyla kayıtlıdır\./u,
+  );
+  assert.match(
+    normalizedStartHere,
+    /`M10A-T12` `IN_PROGRESS`: normal DESEN Neutral ürününde lazy typed Inspector, token\/literal\/reset görsel kontrolleri, desktop\/tablet\/mobile preview, sıralı responsive override ve aggregate persistence için .*?exact-head hosted ve taze `main` kapanışı henüz gerekli olup T13 etkin değildir\./u,
   );
   assert.ok(normalizedStartHere.includes("M11 başlamadı."));
   assert.equal(
@@ -1196,6 +1206,13 @@ test("pre-M11 planning inventory rejects row, dependency, count, or gate-status 
     assert.throws(
       () => assertPreM11PlanningInventory(parseTaskBoard(falseTaskStatus)),
       /M10A-T05 must remain DONE/u,
+    );
+  }
+  for (const status of ["DONE", "NOT_STARTED", "BLOCKED"]) {
+    const falseTaskStatus = replaceTaskBoardCell(taskBoard, "M10A-T12", 1, status);
+    assert.throws(
+      () => assertPreM11PlanningInventory(parseTaskBoard(falseTaskStatus)),
+      /M10A-T12 must remain IN_PROGRESS/u,
     );
   }
 });
@@ -1602,7 +1619,7 @@ test("both inventories require exact browser-proof scripts and reviewed Vite con
   assert.ok(starter);
   assert.ok(workbench);
   for (const validate of [validateProofInventory, validateRepositoryWorkloadInputs]) {
-    assert.equal(validate(baseline).proofCount, 119);
+    assert.equal(validate(baseline).proofCount, 120);
     const missingWorkbenchPackage = clone(baseline);
     missingWorkbenchPackage.workspacePackages = missingWorkbenchPackage.workspacePackages.filter(
       ({ name }) => name !== "@desen/design-system-workbench-proof",
@@ -1879,8 +1896,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 252);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 119);
+  assert.equal(steps.length, 254);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 120);
   assert.deepEqual(
     steps.find(({ id }) => id === "editor-core-public-package-contract"),
     {
@@ -2437,8 +2454,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 252,
-    planSha256: "ce98905d47e8a0bc8c8bfcc3a36bb6f218922082cd05412f9b1c89c9d3eb56c3",
+    stepCount: 254,
+    planSha256: "af2a561225b7f4f1f84362123d6adf1d485aa4574449f6f350b41a3a1cfc0b69",
   });
 
   const missingTypecheck = clone(steps);

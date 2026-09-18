@@ -33,17 +33,16 @@ function componentSummary(
 ): CatalogComponentSummary {
   const template = REFERENCE_AUTHORING_MODEL.components[0];
   if (template === undefined) throw new Error("Expected a reference component template.");
-  const authoring: Record<string, unknown> = {};
-  if (adapterFidelity !== undefined) authoring.adapterFidelity = adapterFidelity;
-  if (differences !== undefined) authoring.differences = differences;
+  const previewAdapter: Record<string, unknown> = {};
+  if (adapterFidelity !== undefined) previewAdapter.fidelity = adapterFidelity;
+  if (differences !== undefined) previewAdapter.differences = differences;
   return {
     ...template,
     id,
     displayName: id,
-    inspector: {
-      ...template.inspector,
-      authoring,
-    },
+    previewAdapter: Object.freeze(
+      previewAdapter,
+    ) as unknown as CatalogComponentSummary["previewAdapter"],
   } as unknown as CatalogComponentSummary;
 }
 

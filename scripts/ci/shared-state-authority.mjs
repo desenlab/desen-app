@@ -178,6 +178,7 @@ export const PROOF_IDS = Object.freeze([
   "m10a-t07",
   "m10a-t08",
   "m10a-t09",
+  "m10a-t12",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -228,8 +229,9 @@ export const BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS = Object.freeze([
   "verify-m10a-t08",
   "verify-m10a-t09",
   "verify-m10a-t03",
+  "verify-m10a-t12",
 ]);
-if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 4) {
+if (BROWSER_EXCLUSIVE_VERIFIER_STEP_IDS.length !== 5) {
   throw new Error("The reviewed browser-exclusive verifier set drifted.");
 }
 
@@ -249,6 +251,10 @@ const BROWSER_AUTHORITY_BY_STEP_ID = Object.freeze({
   "verify-m10a-t03": Object.freeze({
     port: 4_188,
     tempEnvironmentKey: "DESEN_M10A_T03_PROOF_TEMP",
+  }),
+  "verify-m10a-t12": Object.freeze({
+    port: 4_175,
+    tempEnvironmentKey: "DESEN_M10A_T12_PROOF_TEMP",
   }),
 });
 
@@ -702,8 +708,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 252) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 252 steps.", {
+if (METADATA_BY_STEP_ID.size !== 254) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 254 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }
@@ -1273,6 +1279,8 @@ export async function createProofStepIsolationContext({
     delete environment.DESEN_M10A_T06_PROOF_TEMP;
     delete environment.DESEN_M10A_T07_PROOF_TEMP;
     delete environment.DESEN_M10A_T08_PROOF_TEMP;
+    delete environment.DESEN_M10A_T09_PROOF_TEMP;
+    delete environment.DESEN_M10A_T12_PROOF_TEMP;
     environment[browserAuthority.tempEnvironmentKey] = temp.path;
   } else {
     delete environment.DESEN_M10A_T01_PROOF_TEMP;
@@ -1281,6 +1289,8 @@ export async function createProofStepIsolationContext({
     delete environment.DESEN_M10A_T06_PROOF_TEMP;
     delete environment.DESEN_M10A_T07_PROOF_TEMP;
     delete environment.DESEN_M10A_T08_PROOF_TEMP;
+    delete environment.DESEN_M10A_T09_PROOF_TEMP;
+    delete environment.DESEN_M10A_T12_PROOF_TEMP;
     const nodeOptions = [
       "--permission",
       ...workspace.permissionPaths.map((allowedPath) => `--allow-fs-read=${allowedPath}`),

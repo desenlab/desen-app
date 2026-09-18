@@ -30,6 +30,7 @@ import {
   authenticateM10AT03LockfileSuccessor,
   authenticateM10AT04LockfileSuccessor,
   authenticateM10AT10LockfileSuccessor,
+  authenticateM10AT12LockfileSuccessor,
   authenticateDesenAppPublishedHostUpdateSuccessor,
   buildCurrentDesenAppPublishedHostUpdateGraphAudit,
   buildDesenAppPublishedHostUpdateEvidence,
@@ -41,6 +42,8 @@ import {
   projectM10AT10T04Input,
   projectM10AT11CurrentGraphAudit,
   projectM10AT11HistoricalInput,
+  projectM10AT12CurrentGraphAudit,
+  projectM10AT12HistoricalInput,
   readDesenAppT01aHistoricalReaderGapFile,
   readDesenAppT04HistoricalReaderTaskTimeFile,
   verifyDesenAppPublishedHostUpdateBrowserPolicy,
@@ -125,6 +128,46 @@ const M10A_T04_LOCKFILE_RECEIPT = Object.freeze({
 const M10A_T10_LOCKFILE_RECEIPT = Object.freeze({
   bytes: 140_361,
   sha256: "c233c161fe79c5931576d4ce079ebb65f8295ed49903a4617f9166902dac4fe1",
+});
+const M10A_T12_LOCKFILE_RECEIPT = Object.freeze({
+  bytes: 140_493,
+  sha256: "a207a5de2bc071f801ab3771ac7d5115c298149f97c92b0453654111a09c917a",
+});
+const M10A_T12_APP_PACKAGE_RECEIPT = Object.freeze({
+  bytes: 5_133,
+  sha256: "18d5b7479278b39e337027b0739e1f1b6055d0291b774ed761a7a6ecb4ad436e",
+});
+const M10A_T12_BROWSER_PACKAGE_RECEIPT = Object.freeze({
+  bytes: 1_819,
+  sha256: "a811cf3d7ec960796ab47baee69524888a59efc0ab26e81a7eeeaf1968547c66",
+});
+const M10A_T12_DEPENDENCY_CRUISER_RECEIPT = Object.freeze({
+  bytes: 16_945,
+  sha256: "c8cb509ea87d9a25b49bb8ba389340d4304a1043b8fa2847d01331fdc78743d8",
+});
+const M10A_T12_INSPECTOR_RECEIPT = Object.freeze({
+  bytes: 35_107,
+  sha256: "f5f63d93e0d4a5a73fa652d6b07b3b068fc3b0015aaec385f26085932a3d6bc8",
+});
+const M10A_T06_INSPECTOR_RECEIPT = Object.freeze({
+  bytes: 32_870,
+  sha256: "b3701cab338477495cd4530e98ab9fd1eb700a2edcd981d662b46556dad23a47",
+});
+const M10A_T12_BROWSER_README_RECEIPT = Object.freeze({
+  bytes: 11_437,
+  sha256: "590ad3afffb1fee95c80e104b710a027be0754e5b01aa9c26f84e39fbdb21cac",
+});
+const M10_T08_BROWSER_README_RECEIPT = Object.freeze({
+  bytes: 10_964,
+  sha256: "18f465f4221158401dc9c03a804b248db27ba761d156bac4112047d0ab6a6dff",
+});
+const M10A_T12_MAIN_LIFECYCLE_RECEIPT = Object.freeze({
+  bytes: 11_323,
+  sha256: "f6a2064bcf140e6531e2b708e5b3db31eaeb7df66b234412560825feae68c3f2",
+});
+const M10_T08_MAIN_LIFECYCLE_RECEIPT = Object.freeze({
+  bytes: 10_743,
+  sha256: "5ada9ae5cc3ea358986d666d8d40a414512dfb863fca4a959a60b331e48d636e",
 });
 const M10_T08_LOCKFILE_RECEIPT = Object.freeze({
   bytes: 132_210,
@@ -368,11 +411,12 @@ function graphPolicyInput() {
   const current = built.liveSuccessorAuthority.currentGraphAudit;
   const runtime = current.runtimeResolution;
   const fixtureOnly = new Set(runtime.appFixtureOnlySourceFiles);
+  const reachable = new Set(runtime.appModules.map(({ id }) => id));
   return {
     appGraph: runtime.appModules,
     appSourcePaths: current.appSourceAudit.sourceReceipts
       .map(({ path: relativePath }) => relativePath)
-      .filter((relativePath) => !fixtureOnly.has(relativePath)),
+      .filter((relativePath) => !fixtureOnly.has(relativePath) && reachable.has(relativePath)),
     hostGraph: runtime.hostModules,
     hostSourcePaths: current.referenceHostSourceAudit.sourceReceipts.map(
       ({ path: relativePath }) => relativePath,
@@ -856,11 +900,22 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], async () => {
     assert.ok(built.liveSuccessorAuthority.m10aIsolatedAppSourceInventory.includes(addedPath));
     assert.ok(current.appSourceAudit.inventory.includes(addedPath));
     assert.ok(
-      !current.appSourceAudit.sourceReceipts.some(
+      current.appSourceAudit.sourceReceipts.some(
         ({ path: relativePath }) => relativePath === addedPath,
       ),
     );
     assert.ok(!built.artifact.authority.appSourceAudit.inventory.includes(addedPath));
+  }
+  assert.ok(
+    !current.runtimeResolution.appModules.some(
+      ({ id }) => id === "apps/desen-app/src/project-lifecycle-navigation.ts",
+    ),
+  );
+  for (const reachablePath of [
+    "apps/desen-app/src/project-lifecycle.ts",
+    "apps/desen-app/src/starter-project.ts",
+  ]) {
+    assert.ok(current.runtimeResolution.appModules.some(({ id }) => id === reachablePath));
   }
   for (const addedPath of [
     "apps/desen-app/src/authoring-direct-manipulation.ts",
@@ -876,12 +931,53 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], async () => {
     assert.ok(current.runtimeResolution.appModules.some(({ id }) => id === addedPath));
     assert.ok(!built.artifact.authority.appSourceAudit.inventory.includes(addedPath));
   }
+  for (const addedPath of [
+    "apps/desen-app/src/authoring-design-tokens.ts",
+    "apps/desen-app/src/authoring-style-preview-runtime.ts",
+    "apps/desen-app/src/authoring-styles.ts",
+    "apps/desen-app/src/local-project-workspace-persistence.ts",
+    "apps/desen-app/src/project-workspace-authoring-persistence.ts",
+    "apps/desen-app/src/starter-neutral-workspace-profile.ts",
+    "apps/desen-app/src/starter-workspace-product.tsx",
+    "apps/desen-app/src/style-panel.tsx",
+  ]) {
+    assert.ok(current.appSourceAudit.inventory.includes(addedPath));
+    assert.ok(
+      current.appSourceAudit.sourceReceipts.some(
+        ({ path: relativePath }) => relativePath === addedPath,
+      ),
+    );
+    assert.ok(current.runtimeResolution.appModules.some(({ id }) => id === addedPath));
+    assert.ok(!built.artifact.authority.appSourceAudit.inventory.includes(addedPath));
+  }
+  assert.equal(current.appSourceAudit.completeSourceFiles, 67);
+  assert.equal(current.appSourceAudit.productionGraphSourceFiles, 64);
+  assert.equal(current.runtimeResolution.app.moduleCount, 689);
+  assert.equal(current.runtimeResolution.app.staticEdges, 2_970);
+  assert.equal(current.runtimeResolution.app.dynamicEdges, 0);
+  assert.equal(current.runtimeResolution.appOutput.outputs[0].bytes, 3_563_574);
   const t08Artifact = JSON.parse(
     await readFile(path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json")),
   );
+  const t11GraphAudit = projectM10AT12CurrentGraphAudit(
+    current,
+    t08Artifact.authority.currentGraphAudit,
+  );
+  assert.deepEqual(
+    projectM10AT11CurrentGraphAudit(t11GraphAudit, t08Artifact.authority.currentGraphAudit)
+      .appSourceAudit.inventory,
+    [
+      ...built.artifact.authority.appSourceAudit.inventory,
+      "apps/desen-app/src/authoring-source-draft.ts",
+      "apps/desen-app/src/source-draft-controls.tsx",
+      "apps/desen-app/src/project-lifecycle-navigation.ts",
+      "apps/desen-app/src/project-lifecycle.ts",
+      "apps/desen-app/src/starter-project.ts",
+    ].sort((left, right) => left.localeCompare(right, "en-US")),
+  );
   assert.throws(
     () =>
-      projectM10AT11CurrentGraphAudit(
+      projectM10AT12CurrentGraphAudit(
         {
           ...current,
           runtimeResolution: {
@@ -895,6 +991,28 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], async () => {
         t08Artifact.authority.currentGraphAudit,
       ),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  const mutatedT12SourceReceipt = structuredClone(current);
+  const styleReceipt = mutatedT12SourceReceipt.appSourceAudit.sourceReceipts.find(
+    ({ path: relativePath }) => relativePath === "apps/desen-app/src/authoring-styles.ts",
+  );
+  styleReceipt.bytes += 1;
+  assert.throws(
+    () =>
+      projectM10AT12CurrentGraphAudit(
+        mutatedT12SourceReceipt,
+        t08Artifact.authority.currentGraphAudit,
+      ),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  const dynamicT12Graph = structuredClone(current);
+  const styleModule = dynamicT12Graph.runtimeResolution.appModules.find(
+    ({ id }) => id === "apps/desen-app/src/style-panel.tsx",
+  );
+  styleModule.dynamicImports = ["apps/desen-app/src/authoring-styles.ts"];
+  assert.throws(
+    () => projectM10AT12CurrentGraphAudit(dynamicT12Graph, t08Artifact.authority.currentGraphAudit),
+    expectedError("VITE_GRAPH_DRIFT"),
   );
   for (const options of [
     { fileOverrides: new Map() },
@@ -1035,9 +1153,9 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], async () => {
     expectedError("VITE_GRAPH_DRIFT"),
   );
 
-  // T10 lifecycle code is inventory-admitted only. A frozen M10 entry path must never acquire it.
+  // T12 wires lifecycle itself, but its navigation helper remains inventory-admitted only.
   const lifecycleEdge = structuredClone(graphPolicyInput());
-  const lifecycleModuleId = "apps/desen-app/src/project-lifecycle.ts";
+  const lifecycleModuleId = "apps/desen-app/src/project-lifecycle-navigation.ts";
   const lifecycleMain = lifecycleEdge.appGraph.find(
     ({ id }) => id === "apps/desen-app/src/main.tsx",
   );
@@ -1207,21 +1325,28 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
   const parsedBrowserPackage = JSON.parse(browserPackage);
   const finalCommand = "playwright test --config repeatable-demo-playwright.config.ts";
   const recoveryCommand = "playwright test --config restart-recovery-playwright.config.ts";
+  const t12Command = "playwright test --config t12-playwright.config.ts";
   const suite = parsedBrowserPackage.scripts["test:e2e"];
-  assert.equal(suite.endsWith(` && ${finalCommand}`), true);
+  assert.equal(suite.endsWith(` && ${t12Command}`), true);
   const invalidPackages = [
-    { command: suite.replace(` && ${finalCommand}`, ""), code: "SOURCE_POLICY_VIOLATION" },
+    { command: suite.replace(` && ${finalCommand}`, ""), code: "SUCCESSOR_POLICY_VIOLATION" },
     {
       command: `${finalCommand} && ${suite.replace(` && ${finalCommand}`, "")}`,
-      code: "SOURCE_POLICY_VIOLATION",
+      code: "SUCCESSOR_POLICY_VIOLATION",
     },
-    { command: `${suite} && ${finalCommand}`, code: "SOURCE_POLICY_VIOLATION" },
-    { command: suite.replace(` && ${recoveryCommand}`, ""), code: "SOURCE_POLICY_VIOLATION" },
+    { command: `${suite} && ${finalCommand}`, code: "SUCCESSOR_POLICY_VIOLATION" },
+    { command: suite.replace(` && ${recoveryCommand}`, ""), code: "SUCCESSOR_POLICY_VIOLATION" },
     {
       command: `${recoveryCommand} && ${suite.replace(` && ${recoveryCommand}`, "")}`,
-      code: "SOURCE_POLICY_VIOLATION",
+      code: "SUCCESSOR_POLICY_VIOLATION",
     },
-    { command: `${suite} && ${recoveryCommand}`, code: "SOURCE_POLICY_VIOLATION" },
+    { command: `${suite} && ${recoveryCommand}`, code: "SUCCESSOR_POLICY_VIOLATION" },
+    { command: suite.replace(` && ${t12Command}`, ""), code: "SUCCESSOR_POLICY_VIOLATION" },
+    {
+      command: `${t12Command} && ${suite.replace(` && ${t12Command}`, "")}`,
+      code: "SUCCESSOR_POLICY_VIOLATION",
+    },
+    { command: `${suite} && ${t12Command}`, code: "SUCCESSOR_POLICY_VIOLATION" },
   ];
   for (const { command, code } of invalidPackages) {
     const changed = structuredClone(parsedBrowserPackage);
@@ -1239,7 +1364,7 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
     buildDesenAppPublishedHostUpdateEvidence({
       fileOverrides: new Map([[browserPackagePath, Buffer.from(JSON.stringify(noProtocol))]]),
     }),
-    expectedError("SOURCE_POLICY_VIOLATION"),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
   const changedMetadata = structuredClone(parsedBrowserPackage);
   changedMetadata.description += " unreviewed";
@@ -1314,7 +1439,7 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
         ],
       ]),
     }),
-    expectedError("SOURCE_POLICY_VIOLATION"),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
 });
 
@@ -1350,8 +1475,16 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
   const compatibility = built.dependencySecurityCompatibility;
   assert.equal(compatibility.authority, "SEC-02");
   assert.equal(compatibility.currentBytes, liveLockfile.byteLength);
-  assert.equal(compatibility.currentBytes, M10A_T10_LOCKFILE_RECEIPT.bytes);
-  assert.equal(compatibility.currentSha256, M10A_T10_LOCKFILE_RECEIPT.sha256);
+  assert.equal(compatibility.currentBytes, M10A_T12_LOCKFILE_RECEIPT.bytes);
+  assert.equal(compatibility.currentSha256, M10A_T12_LOCKFILE_RECEIPT.sha256);
+  assert.deepEqual(compatibility.t12LockfileSuccessor, {
+    task: "M10A-T12",
+    ...M10A_T12_LOCKFILE_RECEIPT,
+    additivePredecessor: {
+      authority: "M10A-T10",
+      ...M10A_T10_LOCKFILE_RECEIPT,
+    },
+  });
   assert.deepEqual(compatibility.t10LockfileSuccessor, {
     task: "M10A-T10",
     ...M10A_T10_LOCKFILE_RECEIPT,
@@ -1433,7 +1566,22 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
 
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   const livePackage = await readFile(path.join(ROOT, "apps/desen-app/package.json"));
-  const t10Package = projectM10AT11HistoricalInput("apps/desen-app/package.json", livePackage);
+  assert.equal(livePackage.byteLength, M10A_T12_APP_PACKAGE_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(livePackage).digest("hex"),
+    M10A_T12_APP_PACKAGE_RECEIPT.sha256,
+  );
+  const t11Package = projectM10AT12HistoricalInput("apps/desen-app/package.json", livePackage);
+  assert.equal(t11Package.byteLength, 5_080);
+  assert.equal(
+    createHash("sha256").update(t11Package).digest("hex"),
+    "503de2c93b32aa51b38870a746bbee68fbafa00e1d38b9cf7909625f9056bb92",
+  );
+  assert.throws(
+    () => projectM10AT12HistoricalInput("apps/desen-app/package.json", t11Package),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  const t10Package = projectM10AT11HistoricalInput("apps/desen-app/package.json", t11Package);
   assert.equal(t10Package.byteLength, 4_864);
   assert.equal(
     createHash("sha256").update(t10Package).digest("hex"),
@@ -1443,21 +1591,123 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     () => projectM10AT11HistoricalInput("apps/desen-app/package.json", t10Package),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
+  const liveBrowserPackage = await readFile(
+    path.join(ROOT, "apps/desen-app-browser-e2e/package.json"),
+  );
+  assert.equal(liveBrowserPackage.byteLength, M10A_T12_BROWSER_PACKAGE_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(liveBrowserPackage).digest("hex"),
+    M10A_T12_BROWSER_PACKAGE_RECEIPT.sha256,
+  );
+  const t11BrowserPackage = projectM10AT12HistoricalInput(
+    "apps/desen-app-browser-e2e/package.json",
+    liveBrowserPackage,
+  );
+  assert.equal(t11BrowserPackage.byteLength, 1_563);
+  assert.equal(
+    createHash("sha256").update(t11BrowserPackage).digest("hex"),
+    "16bdd23236597c1cb97c6d1246da5798b603ec7143e0b7b12cc8ed75d8eb4caf",
+  );
+  assert.throws(
+    () =>
+      projectM10AT12HistoricalInput("apps/desen-app-browser-e2e/package.json", t11BrowserPackage),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  const liveDependencyCruiser = await readFile(path.join(ROOT, "dependency-cruiser.config.cjs"));
+  assert.equal(liveDependencyCruiser.byteLength, M10A_T12_DEPENDENCY_CRUISER_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(liveDependencyCruiser).digest("hex"),
+    M10A_T12_DEPENDENCY_CRUISER_RECEIPT.sha256,
+  );
+  const t10DependencyCruiser = projectM10AT12HistoricalInput(
+    "dependency-cruiser.config.cjs",
+    liveDependencyCruiser,
+  );
+  assert.equal(t10DependencyCruiser.byteLength, M10A_T10_T04_INPUT_RECEIPTS[0].bytes);
+  assert.equal(
+    createHash("sha256").update(t10DependencyCruiser).digest("hex"),
+    M10A_T10_T04_INPUT_RECEIPTS[0].sha256,
+  );
+  assert.throws(
+    () => projectM10AT12HistoricalInput("dependency-cruiser.config.cjs", t10DependencyCruiser),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  const liveInspector = await readFile(path.join(ROOT, "apps/desen-app/src/inspector-panel.tsx"));
+  assert.equal(liveInspector.byteLength, M10A_T12_INSPECTOR_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(liveInspector).digest("hex"),
+    M10A_T12_INSPECTOR_RECEIPT.sha256,
+  );
+  const t06Inspector = projectM10AT12HistoricalInput(
+    "apps/desen-app/src/inspector-panel.tsx",
+    liveInspector,
+  );
+  assert.equal(t06Inspector.byteLength, M10A_T06_INSPECTOR_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(t06Inspector).digest("hex"),
+    M10A_T06_INSPECTOR_RECEIPT.sha256,
+  );
+  assert.throws(
+    () => projectM10AT12HistoricalInput("apps/desen-app/src/inspector-panel.tsx", t06Inspector),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
+  for (const { relativePath, currentReceipt, predecessorReceipt } of [
+    {
+      relativePath: "apps/desen-app-browser-e2e/README.md",
+      currentReceipt: M10A_T12_BROWSER_README_RECEIPT,
+      predecessorReceipt: M10_T08_BROWSER_README_RECEIPT,
+    },
+    {
+      relativePath: "apps/desen-app/test/main-lifecycle.test.tsx",
+      currentReceipt: M10A_T12_MAIN_LIFECYCLE_RECEIPT,
+      predecessorReceipt: M10_T08_MAIN_LIFECYCLE_RECEIPT,
+    },
+  ]) {
+    const currentBytes = await readFile(path.join(ROOT, relativePath));
+    assert.equal(currentBytes.byteLength, currentReceipt.bytes, relativePath);
+    assert.equal(
+      createHash("sha256").update(currentBytes).digest("hex"),
+      currentReceipt.sha256,
+      relativePath,
+    );
+    const predecessorBytes = projectM10AT12HistoricalInput(relativePath, currentBytes);
+    assert.equal(predecessorBytes.byteLength, predecessorReceipt.bytes, relativePath);
+    assert.equal(
+      createHash("sha256").update(predecessorBytes).digest("hex"),
+      predecessorReceipt.sha256,
+      relativePath,
+    );
+    assert.throws(
+      () => projectM10AT12HistoricalInput(relativePath, predecessorBytes),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+      relativePath,
+    );
+  }
   const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
   const liveLockfileText = liveLockfile.toString("utf8");
-  assert.equal(liveLockfile.byteLength, M10A_T10_LOCKFILE_RECEIPT.bytes);
+  assert.equal(liveLockfile.byteLength, M10A_T12_LOCKFILE_RECEIPT.bytes);
   assert.equal(
     createHash("sha256").update(liveLockfile).digest("hex"),
+    M10A_T12_LOCKFILE_RECEIPT.sha256,
+  );
+  const m10aT10Lockfile = projectM10AT12HistoricalInput("pnpm-lock.yaml", liveLockfile);
+  assert.equal(m10aT10Lockfile.byteLength, M10A_T10_LOCKFILE_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(m10aT10Lockfile).digest("hex"),
     M10A_T10_LOCKFILE_RECEIPT.sha256,
   );
-  const m10aT04Lockfile = projectM10AT04Lockfile(liveLockfile);
+  assert.deepEqual(
+    authenticateM10AT12LockfileSuccessor(liveLockfile).predecessorBytes,
+    m10aT10Lockfile,
+  );
+  const m10aT04Lockfile = projectM10AT04Lockfile(m10aT10Lockfile);
   assert.equal(m10aT04Lockfile.byteLength, M10A_T04_LOCKFILE_RECEIPT.bytes);
   assert.equal(
     createHash("sha256").update(m10aT04Lockfile).digest("hex"),
     M10A_T04_LOCKFILE_RECEIPT.sha256,
   );
   assert.deepEqual(
-    authenticateM10AT10LockfileSuccessor(liveLockfile).predecessorBytes,
+    authenticateM10AT10LockfileSuccessor(m10aT10Lockfile).predecessorBytes,
     m10aT04Lockfile,
   );
   const m10aT02Lockfile = projectM10AT02Lockfile(m10aT04Lockfile);
@@ -1510,9 +1760,17 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     () => authenticateM10AT04LockfileSuccessor(liveLockfile),
     expectedError("DEPENDENCY_SUCCESSOR_DRIFT"),
   );
+  assert.throws(
+    () => authenticateM10AT10LockfileSuccessor(liveLockfile),
+    expectedError("DEPENDENCY_SUCCESSOR_DRIFT"),
+  );
   assert.deepEqual(
-    authenticateM10AT10LockfileSuccessor(liveLockfile).predecessorBytes,
+    authenticateM10AT10LockfileSuccessor(m10aT10Lockfile).predecessorBytes,
     m10aT04Lockfile,
+  );
+  assert.throws(
+    () => authenticateM10AT12LockfileSuccessor(m10aT10Lockfile),
+    expectedError("DEPENDENCY_SUCCESSOR_DRIFT"),
   );
   let priorLockfileText = compositionLockfile.toString("utf8");
   const protocolLink =
@@ -1673,13 +1931,27 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   for (const t04Receipt of M10A_T04_T03_INPUT_RECEIPTS) {
     const bytes = await readFile(path.join(ROOT, t04Receipt.path));
     currentT08Inputs.set(t04Receipt.path, bytes);
+    const t12Receipt =
+      t04Receipt.path === "dependency-cruiser.config.cjs"
+        ? M10A_T12_DEPENDENCY_CRUISER_RECEIPT
+        : undefined;
     const currentReceipt = M10A_T10_T04_INPUT_RECEIPTS.find(
       ({ path: receiptPath }) => receiptPath === t04Receipt.path,
     );
-    const expectedCurrentReceipt = currentReceipt ?? t04Receipt;
+    const expectedCurrentReceipt = t12Receipt ?? currentReceipt ?? t04Receipt;
     assert.equal(bytes.byteLength, expectedCurrentReceipt.bytes);
     assert.equal(createHash("sha256").update(bytes).digest("hex"), expectedCurrentReceipt.sha256);
-    const m10aT04Bytes = projectM10AT10T04Input(t04Receipt.path, bytes);
+    const m10aT10Bytes =
+      t12Receipt === undefined ? bytes : projectM10AT12HistoricalInput(t04Receipt.path, bytes);
+    if (t12Receipt !== undefined) {
+      assert.equal(m10aT10Bytes.byteLength, currentReceipt.bytes);
+      assert.equal(createHash("sha256").update(m10aT10Bytes).digest("hex"), currentReceipt.sha256);
+      assert.throws(
+        () => projectM10AT12HistoricalInput(t04Receipt.path, m10aT10Bytes),
+        expectedError("SUCCESSOR_POLICY_VIOLATION"),
+      );
+    }
+    const m10aT04Bytes = projectM10AT10T04Input(t04Receipt.path, m10aT10Bytes);
     assert.equal(m10aT04Bytes.byteLength, t04Receipt.bytes);
     assert.equal(createHash("sha256").update(m10aT04Bytes).digest("hex"), t04Receipt.sha256);
     if (currentReceipt !== undefined) {

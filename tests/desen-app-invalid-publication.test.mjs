@@ -32,6 +32,7 @@ import {
 } from "../scripts/lib/desen-app-invalid-publication-proof.mjs";
 import {
   DesenAppPublishedHostUpdateProofError,
+  projectM10AT12CurrentGraphAudit,
   verifyDesenAppPublishedHostUpdateGraphPolicy,
 } from "../scripts/lib/desen-app-published-host-update-proof.mjs";
 
@@ -502,9 +503,11 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[4], () => {
     "packages/editor-core/package.json",
     "apps/desen-app/package.json",
     "apps/desen-app/package.json",
+    "apps/desen-app/src/inspector-panel.tsx",
     "apps/desen-app/src/application.module.css",
     "apps/desen-app/src/application.tsx",
     "authority.currentGraphAudit",
+    "authority.currentGraphAudit[M10A-T12-rich-styling-responsive]",
     "authority.currentGraphAudit[M10A-T11-reachable-direct-manipulation]",
     "authority.currentGraphAudit.appSourceAudit.inventory[M10A-T10-isolated-lifecycle]",
     "authority.currentGraphAudit.appSourceAudit.completeSourceFiles",
@@ -573,6 +576,14 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[4], () => {
   assert.equal(Object.isFrozen(projected.currentPublicApiMatrix), true);
 
   for (const [label, mutate] of [
+    [
+      "T12 source receipt",
+      (input) => {
+        input.currentGraphAudit.appSourceAudit.sourceReceipts.find(
+          ({ path: relativePath }) => relativePath === "apps/desen-app/src/authoring-styles.ts",
+        ).sha256 = `sha256:${"0".repeat(64)}`;
+      },
+    ],
     [
       "isolated lifecycle inventory",
       (input) => {
@@ -648,6 +659,15 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[4], () => {
       label,
     );
   }
+  const exactT12Graph = projectM10AT12CurrentGraphAudit(
+    current,
+    successorInput().historicalGraphAudit,
+  );
+  assert.ok(
+    exactT12Graph.appSourceAudit.inventory.includes(
+      "apps/desen-app/src/authoring-direct-manipulation.ts",
+    ),
+  );
   const coMutatedGraph = successorInput();
   for (const graph of [coMutatedGraph.currentGraphAudit, coMutatedGraph.historicalGraphAudit]) {
     graph.runtimeResolution.hostModules[0].dynamicImports.push("unreviewed-module");
@@ -668,11 +688,11 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[4], () => {
   );
   const graphInput = {
     appGraph: current.runtimeResolution.appModules,
-    appSourcePaths: current.appSourceAudit.sourceReceipts
-      .map((receipt) => receipt.path)
-      .filter(
-        (relativePath) => !current.appSourceAudit.fixtureOnlySourceFiles.includes(relativePath),
-      ),
+    // The complete source inventory deliberately retains T10's non-production lifecycle
+    // navigation file. The graph policy instead owns the exact reachable production set.
+    appSourcePaths: current.runtimeResolution.appModules
+      .map(({ id }) => id)
+      .filter((relativePath) => relativePath.startsWith("apps/desen-app/src/")),
     hostGraph: current.runtimeResolution.hostModules,
     hostSourcePaths: current.referenceHostSourceAudit.sourceReceipts.map((receipt) => receipt.path),
   };
@@ -848,7 +868,7 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[6], async () => {
       buildDesenAppInvalidPublicationEvidence({
         fileOverrides: new Map([[packagePath, JSON.stringify(value)]]),
       }),
-      expectedError("TEST_AUTHORITY_DRIFT"),
+      expectedError("SUCCESSOR_DRIFT"),
     );
   }
   const metadataChange = JSON.parse(packageBytes);
@@ -856,6 +876,19 @@ test(DESEN_APP_INVALID_PUBLICATION_ROOT_TEST_NAMES[6], async () => {
   await assert.rejects(
     buildDesenAppInvalidPublicationEvidence({
       fileOverrides: new Map([[packagePath, JSON.stringify(metadataChange)]]),
+    }),
+    expectedError("SUCCESSOR_DRIFT"),
+  );
+  const inspectorPath = "apps/desen-app/src/inspector-panel.tsx";
+  const inspectorBytes = await readFile(path.join(ROOT, inspectorPath));
+  await assert.rejects(
+    buildDesenAppInvalidPublicationEvidence({
+      fileOverrides: new Map([
+        [
+          inspectorPath,
+          Buffer.concat([inspectorBytes, Buffer.from("\n// unreviewed T12 drift\n")]),
+        ],
+      ]),
     }),
     expectedError("SUCCESSOR_DRIFT"),
   );

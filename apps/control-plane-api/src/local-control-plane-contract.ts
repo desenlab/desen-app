@@ -22,6 +22,10 @@ export interface LocalControlPlaneLimits {
   readonly maxSourceUtf8Bytes: number;
   /** Maximum RFC 8785 canonical UTF-8 bytes accepted for one editable Source. */
   readonly maxSourceCanonicalUtf8Bytes: number;
+  /** Maximum raw UTF-8 bytes accepted for one complete application project workspace. */
+  readonly maxProjectWorkspaceUtf8Bytes: number;
+  /** Maximum RFC 8785 canonical UTF-8 bytes accepted for one application project workspace. */
+  readonly maxProjectWorkspaceCanonicalUtf8Bytes: number;
   /** Maximum raw bytes accepted for one immutable Bundle transport request. */
   readonly maxBundleUtf8Bytes: number;
   /** Maximum raw UTF-8 bytes accepted for one closed channel request body. */
@@ -36,11 +40,11 @@ export interface LocalControlPlaneLimits {
   readonly maxAllowedOrigins: number;
   /** Maximum code units accepted in one configured browser origin. */
   readonly maxOriginCodeUnits: number;
-  /** Maximum object/array nesting depth accepted in Source and channel JSON. */
+  /** Maximum object/array nesting depth accepted in Source, project-workspace, and channel JSON. */
   readonly maxJsonDepth: number;
-  /** Maximum JSON value occurrences accepted in one Source document. */
+  /** Maximum JSON value occurrences accepted in one Source or project-workspace document. */
   readonly maxJsonValueOccurrences: number;
-  /** Maximum aggregate decoded UTF-16 code units accepted across Source keys and strings. */
+  /** Maximum aggregate decoded UTF-16 code units accepted across Source or project-workspace keys and strings. */
   readonly maxDecodedStringCodeUnits: number;
   /** Maximum code units accepted in one raw JSON number token. */
   readonly maxNumberTokenCodeUnits: number;
@@ -61,6 +65,8 @@ export const LOCAL_CONTROL_PLANE_LIMITS: Readonly<LocalControlPlaneLimits> = Obj
   keepAliveTimeoutMilliseconds: 5_000,
   maxSourceUtf8Bytes: 8_388_608,
   maxSourceCanonicalUtf8Bytes: 8_388_608,
+  maxProjectWorkspaceUtf8Bytes: 8_388_608,
+  maxProjectWorkspaceCanonicalUtf8Bytes: 8_388_608,
   maxBundleUtf8Bytes: 2_097_152,
   maxChannelBodyUtf8Bytes: 256,
   maxIdentifierCodeUnits: 64,
@@ -94,6 +100,7 @@ export type LocalControlPlaneErrorCode =
   | "INVALID_CHANNEL_NAME"
   | "INVALID_GENERATION"
   | "INVALID_PORT"
+  | "INVALID_PROJECT_WORKSPACE_KEY"
   | "INVALID_REQUEST"
   | "INVALID_REVISION"
   | "INVALID_ROOT_DIRECTORY"
@@ -104,6 +111,10 @@ export type LocalControlPlaneErrorCode =
   | "ORIGIN_NOT_ALLOWED"
   | "PRECONDITION_INVALID"
   | "PRECONDITION_REQUIRED"
+  | "PROJECT_WORKSPACE_JSON_INVALID"
+  | "PROJECT_WORKSPACE_MATERIAL_LIMIT_EXCEEDED"
+  | "PROJECT_WORKSPACE_NOT_FOUND"
+  | "PROJECT_WORKSPACE_SCHEMA_INVALID"
   | "ROUTE_NOT_FOUND"
   | "SERVER_STATE_INVALID"
   | "SOURCE_JSON_INVALID"
@@ -136,6 +147,7 @@ export const LOCAL_CONTROL_PLANE_ERROR_MESSAGES: Readonly<
   INVALID_CHANNEL_NAME: "The channel name is invalid.",
   INVALID_GENERATION: "The compare-and-set generation is invalid.",
   INVALID_PORT: "The requested loopback port is invalid.",
+  INVALID_PROJECT_WORKSPACE_KEY: "The application project-workspace key is invalid.",
   INVALID_REQUEST: "The local control-plane request is malformed.",
   INVALID_REVISION: "The Bundle revision is not an exact lowercase SHA-256 digest.",
   INVALID_ROOT_DIRECTORY: "The local control-plane root directory is invalid.",
@@ -146,6 +158,12 @@ export const LOCAL_CONTROL_PLANE_ERROR_MESSAGES: Readonly<
   ORIGIN_NOT_ALLOWED: "The browser origin is not allowed by the local profile.",
   PRECONDITION_INVALID: "The compare-and-set HTTP precondition is malformed.",
   PRECONDITION_REQUIRED: "An exact compare-and-set HTTP precondition is required.",
+  PROJECT_WORKSPACE_JSON_INVALID:
+    "The application project workspace is not strict interoperable JSON.",
+  PROJECT_WORKSPACE_MATERIAL_LIMIT_EXCEEDED:
+    "The application project workspace exceeds a fixed finite JSON limit.",
+  PROJECT_WORKSPACE_NOT_FOUND: "The requested application project workspace was not found.",
+  PROJECT_WORKSPACE_SCHEMA_INVALID: "The application project-workspace root must be a JSON object.",
   ROUTE_NOT_FOUND: "The local control-plane route was not found.",
   SERVER_STATE_INVALID:
     "The local control plane cannot perform this operation in its current state.",
@@ -283,6 +301,38 @@ export interface LocalControlPlaneSourceRecord {
   /** Exact persisted strict-JSON Source bytes returned through a fresh view. */
   readonly bytes: Readonly<Uint8Array>;
 }
+
+/**
+ * Exact application-owned project-workspace JSON stored under one local storage identity.
+ *
+ * @remarks This is deliberately an opaque, strict-JSON transport record. The Desen App owns
+ * admission of its T02 project envelopes after opening it; it is neither a DESEN Source nor a
+ * Source extension payload.
+ */
+export interface LocalControlPlaneProjectWorkspaceRecord {
+  /** Local storage identity, independent of every embedded editable-project identity. */
+  readonly workspaceKey: string;
+  /** Current positive safe-integer compare-and-set generation. */
+  readonly generation: number;
+  /** Exact persisted strict-JSON workspace bytes returned through a fresh view. */
+  readonly bytes: Readonly<Uint8Array>;
+}
+
+/** Controlled result of reading one application project-workspace record. */
+export type LocalControlPlaneProjectWorkspaceReadResult =
+  | Readonly<{ readonly status: "found"; readonly record: LocalControlPlaneProjectWorkspaceRecord }>
+  | Readonly<{ readonly status: "missing" }>;
+
+/** Controlled result of one compare-and-set application project-workspace replacement. */
+export type LocalControlPlaneProjectWorkspacePutResult =
+  | Readonly<{ readonly status: "created"; readonly generation: 1 }>
+  | Readonly<{ readonly status: "updated"; readonly generation: number }>
+  | Readonly<{ readonly status: "unchanged"; readonly generation: number }>
+  | Readonly<{
+      readonly status: "precondition-failed";
+      readonly currentGeneration: number | null;
+    }>
+  | Readonly<{ readonly status: "generation-exhausted"; readonly generation: number }>;
 
 /** Controlled result of reading one editable Source record. */
 export type LocalControlPlaneSourceReadResult =

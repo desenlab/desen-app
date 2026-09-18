@@ -76,6 +76,7 @@ const allowedApplicationDependencies = {
     "editor-core",
     "editor-web",
     "design-system-core",
+    "design-system-authoring",
     "reference-catalog-web",
     "starter-catalog-web",
     "testkit",

@@ -7,6 +7,7 @@ import { after, before, test } from "node:test";
 
 import * as editorCore from "../packages/editor-core/dist/index.js";
 import {
+  EDITOR_CORE_PERSISTENCE_M10A_T12_RETAINED_RECEIPT_SUCCESSOR,
   EDITOR_CORE_PERSISTENCE_PACKAGE_SCRIPTS,
   EDITOR_CORE_PERSISTENCE_PREREQUISITE_PINS,
   EDITOR_CORE_PERSISTENCE_ROOT_TEST_NAMES,
@@ -232,10 +233,23 @@ test("[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted 
   assert.equal(built.currentCompatibility.tests.editorWebPublicCompilerNegativeAssertions, 10);
   assert.deepEqual(built.currentCompatibility.receiptCompatibility, {
     retainedTaskTimeReceipts: 32,
-    currentExactRetainedReceipts: 25,
+    currentExactRetainedReceipts: 17,
     dependencySecurityProjectedReceipts: 1,
+    m10aT12RetainedReceiptSuccessors: 8,
     publishActivationHandoffReceipts: 6,
   });
+  assert.deepEqual(built.currentCompatibility.m10aT12RetainedReceiptSuccessor, {
+    task: "M10A-T12",
+    artifact: {
+      path: "docs/proof/artifacts/m10a-t12.json",
+      bytes: 11_804,
+      sha256: "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b",
+    },
+    receiptPaths: EDITOR_CORE_PERSISTENCE_M10A_T12_RETAINED_RECEIPT_SUCCESSOR.receipts.map(
+      ({ path: relativePath }) => relativePath,
+    ),
+  });
+  assert.equal(EDITOR_CORE_PERSISTENCE_M10A_T12_RETAINED_RECEIPT_SUCCESSOR.receipts.length, 8);
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-persistence.json",
     bytes: 49_785,
@@ -422,6 +436,17 @@ test("[mutation] rejects prerequisite, tracked-file, and runtime substitution", 
     }),
     expectedError("TRACKED_FILE_DRIFT"),
   );
+  for (const {
+    path: relativePath,
+  } of EDITOR_CORE_PERSISTENCE_M10A_T12_RETAINED_RECEIPT_SUCCESSOR.receipts) {
+    const controlPlaneAuthority = await readFile(path.join(ROOT, relativePath));
+    await assert.rejects(
+      buildEditorCorePersistenceEvidence({
+        fileOverrides: { [relativePath]: changedByte(controlPlaneAuthority) },
+      }),
+      expectedError("RETAINED_T08_AUTHORITY_DRIFT"),
+    );
+  }
   await assert.rejects(
     buildEditorCorePersistenceEvidence({ runtime: editorCore }),
     expectedError("RUNTIME_OVERRIDE_REJECTED"),

@@ -82,19 +82,19 @@ const CI_POLICY_EXACT_PATHS = new Set([
 ]);
 const PROJECT_DOCUMENTATION_ROOT_PATHS = new Set(["PROJECT-STATUS.md", "README.md"]);
 
-/** Reviewed count for the live M10A-T11 successor authority. */
-export const EXPECTED_AFFECTED_TRACKED_PATH_COUNT = 1817;
+/** Reviewed count for the live M10A-T12 successor authority. */
+export const EXPECTED_AFFECTED_TRACKED_PATH_COUNT = 1841;
 
 /** Reviewed SHA-256 of the ordered complete tracked-path set. */
 export const EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256 =
-  "593589457710d124f0dd9a34517ceec6888912e1627320b58c5bfcc25604f378";
+  "7f37cdbb1f281d239c936fb4451259a8c3a7ace3ff43a26f82eda6152f8640b9";
 
 /** Reviewed SHA-256 of every exact path, category, disposition, and proof owner. */
 export const EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256 =
-  "a6f13b4582b3ef9f3e5b83497c43f04a7906332509e30df3c0340b37cd1041f4";
+  "aca5fcc3dc5553b2124967e8832f2f58f577ef600d7f54a8c3c50182878ec7b2";
 
-/** Exact number of verifier/root-test inputs owned by the current 119 proof units. */
-export const EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT = 238;
+/** Exact number of verifier/root-test inputs owned by the current 120 proof units. */
+export const EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT = 240;
 
 /** Stable failure raised when path ownership is incomplete, ambiguous, or substituted. */
 export class AffectedWorkloadOwnershipError extends Error {

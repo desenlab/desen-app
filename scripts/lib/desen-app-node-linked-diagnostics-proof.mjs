@@ -14,6 +14,7 @@ import {
   materializeDesenAppHistoricalReaderFileOverrides,
   readDesenAppHistoricalReaderProjection,
 } from "./desen-app-evergreen-product-composition-proof.mjs";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
@@ -237,6 +238,16 @@ const M10A_T11_AUTHORING_SLOTS_SUCCESSOR_RECEIPT = Object.freeze({
   path: "apps/desen-app/src/authoring-slots.ts",
   bytes: 59_517,
   sha256: "6530c05bfbbcac49137a3759ce81471204d957b5932c267148820f044c10a8ed",
+});
+const M10A_T12_ARTIFACT_PATH = "docs/proof/artifacts/m10a-t12.json";
+const M10A_T12_ARTIFACT_PIN = Object.freeze({
+  bytes: 11_804,
+  sha256: "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b",
+});
+const M10A_T12_AUTHORING_INSPECTOR_SUCCESSOR_RECEIPT = Object.freeze({
+  path: "apps/desen-app/src/authoring-inspector.ts",
+  bytes: 39_061,
+  sha256: "abbc6fb9d844c067f2fb9c8acea9617ca1e8e0a04354dd8d2fc47d61a6b87145",
 });
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-node-linked-diagnostics.json";
 const PUBLISH_ACTIVATION_ARTIFACT_PATH =
@@ -516,7 +527,7 @@ const M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS = Object.freeze({
   }),
 });
 
-function reviewedSuccessorReceiptMap(receipts, files) {
+function reviewedSuccessorReceiptMap(receipts, files, m10aT12AuthoringInspectorSuccessor = null) {
   const receiptMap = new Map(receipts.map((candidate) => [candidate?.path, candidate]));
   for (const receipt of Object.values(M09_EDITOR_WORKPLANE_SUCCESSOR_RECEIPTS)) {
     receiptMap.set(receipt.path, receipt);
@@ -536,6 +547,15 @@ function reviewedSuccessorReceiptMap(receipts, files) {
       M10A_T11_AUTHORING_SLOTS_SUCCESSOR_RECEIPT.path,
       M10A_T11_AUTHORING_SLOTS_SUCCESSOR_RECEIPT,
     );
+  }
+  if (m10aT12AuthoringInspectorSuccessor !== null) {
+    const currentAuthoringInspector = files.get(m10aT12AuthoringInspectorSuccessor.path);
+    if (
+      currentAuthoringInspector?.byteLength === m10aT12AuthoringInspectorSuccessor.bytes &&
+      sha256(currentAuthoringInspector) === m10aT12AuthoringInspectorSuccessor.sha256
+    ) {
+      receiptMap.set(m10aT12AuthoringInspectorSuccessor.path, m10aT12AuthoringInspectorSuccessor);
+    }
   }
   return receiptMap;
 }
@@ -1309,6 +1329,52 @@ function parseJson(bytes, label, code = "SOURCE_POLICY_VIOLATION") {
   } catch (error) {
     fail(code, `${label} must be exact JSON.`, { cause: String(error) });
   }
+}
+
+async function authenticateM10AT12AuthoringInspectorSuccessor(workspaceRoot) {
+  let checkpointedArtifact;
+  try {
+    checkpointedArtifact = await readCheckpointedFrozenArtifact("M10A-T12", { workspaceRoot });
+  } catch (error) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact checkpointed M10A-T12 styling authority was not authenticated.",
+      { cause: String(error) },
+    );
+  }
+  if (
+    checkpointedArtifact.path !== M10A_T12_ARTIFACT_PATH ||
+    checkpointedArtifact.byteLength !== M10A_T12_ARTIFACT_PIN.bytes ||
+    checkpointedArtifact.sha256 !== M10A_T12_ARTIFACT_PIN.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The checkpointed M10A-T12 artifact identity drifted.");
+  }
+  const artifact = parseJson(
+    checkpointedArtifact.bytes,
+    M10A_T12_ARTIFACT_PATH,
+    "SUCCESSOR_POLICY_VIOLATION",
+  );
+  const sourceFiles = artifact?.source?.files;
+  const matchingReceipts = Array.isArray(sourceFiles)
+    ? sourceFiles.filter(
+        (candidate) => candidate?.path === M10A_T12_AUTHORING_INSPECTOR_SUCCESSOR_RECEIPT.path,
+      )
+    : [];
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact?.task !== "M10A-T12" ||
+    artifact?.proofId !== "m10a-t12" ||
+    artifact?.profile !== "desen.m10a-t12.rich-styling-responsive.v1" ||
+    artifact?.result !== "PASS" ||
+    matchingReceipts.length !== 1 ||
+    !isDeepStrictEqual(matchingReceipts[0], M10A_T12_AUTHORING_INSPECTOR_SUCCESSOR_RECEIPT)
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The exact M10A-T12 authoring-inspector successor receipt drifted.",
+    );
+  }
+  return M10A_T12_AUTHORING_INSPECTOR_SUCCESSOR_RECEIPT;
 }
 
 function assertIncludes(source, markers, label, code = "SOURCE_POLICY_VIOLATION") {
@@ -2104,8 +2170,16 @@ async function authenticateFrozenArtifact(workspaceRoot) {
   });
 }
 
-function assertRetainedHistoricalReceipts(frozenArtifact, files) {
-  const receiptMap = reviewedSuccessorReceiptMap(frozenArtifact.boundary.trackedReceipts, files);
+function assertRetainedHistoricalReceipts(
+  frozenArtifact,
+  files,
+  m10aT12AuthoringInspectorSuccessor,
+) {
+  const receiptMap = reviewedSuccessorReceiptMap(
+    frozenArtifact.boundary.trackedReceipts,
+    files,
+    m10aT12AuthoringInspectorSuccessor,
+  );
   for (const relativePath of RETAINED_HISTORICAL_PATHS) {
     const receipt = receiptMap.get(relativePath);
     const bytes = files.get(relativePath);
@@ -2328,6 +2402,8 @@ export async function buildDesenAppNodeLinkedDiagnosticsEvidence(rawOptions = un
       ),
     });
   }
+  const m10aT12AuthoringInspectorSuccessor =
+    await authenticateM10AT12AuthoringInspectorSuccessor(workspaceRoot);
   const parents = DESEN_APP_NODE_LINKED_DIAGNOSTICS_PARENT_PINS.map((pin) =>
     authenticateParent(files.get(pin.path), pin),
   );
@@ -2475,7 +2551,7 @@ export async function buildDesenAppNodeLinkedDiagnosticsEvidence(rawOptions = un
     ],
   });
   const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
-  assertRetainedHistoricalReceipts(frozen.artifact, files);
+  assertRetainedHistoricalReceipts(frozen.artifact, files, m10aT12AuthoringInspectorSuccessor);
   const emptyProjectBrowserE2eSuccessor = authenticateM10EmptyProjectBrowserE2eSuccessor(files);
   const userCreatedBlankProjectSuccessor = authenticateM10UserCreatedBlankProjectSuccessor(
     files,

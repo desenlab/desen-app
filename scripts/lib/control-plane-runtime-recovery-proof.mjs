@@ -79,6 +79,31 @@ const CI_TUPLE = Object.freeze([
 ]);
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
+const M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT = 108;
+const M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256 =
+  "fd264c81a5093aa4c0ca366ad2bec60ad3a4c0cfa0b87816c1050c20d3250580";
+// T12 adds these opaque application-workspace transport types after T08 closed. Verify this
+// bounded successor exactly, then retain the frozen T08 public package-root receipt.
+const M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS = Object.freeze([
+  Object.freeze({
+    exported: "LocalControlPlaneProjectWorkspacePutResult",
+    imported: "LocalControlPlaneProjectWorkspacePutResult",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+  Object.freeze({
+    exported: "LocalControlPlaneProjectWorkspaceReadResult",
+    imported: "LocalControlPlaneProjectWorkspaceReadResult",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+  Object.freeze({
+    exported: "LocalControlPlaneProjectWorkspaceRecord",
+    imported: "LocalControlPlaneProjectWorkspaceRecord",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+]);
 const EXPECTED_IMPLEMENTATION_SEMANTIC_SHA256 = Object.freeze({
   [APP_CONTRACT]: "00d813dac1aa9a45a6206be0f94684f623b6ce26d8ac27283586b6ca32ace21b",
   [APP_INTERNAL]: "503f441db6263b72de734860806fb5b3388cbe27e9cb14c94ea74598e11beef4",
@@ -1261,11 +1286,39 @@ function publicExportInventory(source) {
     const byName = compareText(left.exported, right.exported);
     return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
   });
-  const inventorySha256 = sha256(Buffer.from(JSON.stringify(inventory), "utf8"));
-  if (inventory.length !== 105 || inventorySha256 !== EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256) {
+  const currentInventorySha256 = sha256(Buffer.from(JSON.stringify(inventory), "utf8"));
+  if (
+    inventory.length !== M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT ||
+    currentInventorySha256 !== M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256
+  ) {
+    fail("REGISTRATION_DRIFT", "The exact M10A-T12 package-root inventory drifted.", {
+      expectedCount: M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT,
+      actualCount: inventory.length,
+      expectedSha256: M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256,
+      actualSha256: currentInventorySha256,
+    });
+  }
+  const t12ProjectWorkspaceExports = inventory.filter(({ exported }) =>
+    M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS.some((expected) => expected.exported === exported),
+  );
+  if (
+    JSON.stringify(t12ProjectWorkspaceExports) !==
+    JSON.stringify(M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS)
+  ) {
+    fail("REGISTRATION_DRIFT", "The exact M10A-T12 package-root successor drifted.");
+  }
+  const frozenInventory = inventory.filter(
+    ({ exported }) =>
+      !M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS.some((expected) => expected.exported === exported),
+  );
+  const inventorySha256 = sha256(Buffer.from(JSON.stringify(frozenInventory), "utf8"));
+  if (
+    frozenInventory.length !== 105 ||
+    inventorySha256 !== EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256
+  ) {
     fail("REGISTRATION_DRIFT", "The exact full package-root export inventory drifted.", {
       expectedCount: 105,
-      actualCount: inventory.length,
+      actualCount: frozenInventory.length,
       expectedSha256: EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256,
       actualSha256: inventorySha256,
     });
@@ -1278,10 +1331,14 @@ function publicExportInventory(source) {
     "recloseBundleRuntimeRecovery",
     "RuntimeActivationStorageError",
   ]);
-  if (inventory.some(({ exported }) => forbidden.has(exported))) {
+  if (frozenInventory.some(({ exported }) => forbidden.has(exported))) {
     fail("REGISTRATION_DRIFT", "A private recovery or storage symbol escaped the package root.");
   }
-  return deepFreeze({ entries: inventory, count: inventory.length, sha256: inventorySha256 });
+  return deepFreeze({
+    entries: frozenInventory,
+    count: frozenInventory.length,
+    sha256: inventorySha256,
+  });
 }
 
 function assertAdjacent(script, predecessor, current) {

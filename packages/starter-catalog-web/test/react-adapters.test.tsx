@@ -225,7 +225,7 @@ describe("M10A-T01 static starter adapter boundary", () => {
     { base: { privatePart: { color: "#ffffff" } } },
     { base: { root: { position: "fixed" } } },
     { base: { root: { backgroundColor: "url(https://untrusted.invalid)" } } },
-    { base: { root: { padding: 129 } } },
+    { base: { root: { padding: 513 } } },
     { unknownState: { root: { padding: 8 } } },
   ])("rejects unknown style authority and unsafe values", (style) => {
     const { input } = harness("Button", { label: "Bad" });

@@ -40,14 +40,15 @@ import {
   starterSkeletonComponentRegistration,
   starterTableComponentRegistration,
 } from "./data-display-feedback-contracts.js";
+import { starterVisualStylePropertiesSchema } from "./visual-style-profile.js";
 
 import type { ComponentPropsOf } from "@desen/catalog-sdk";
 
 /** Exact Catalog identity reserved for the DESEN Neutral Web starter package. */
 export const STARTER_CATALOG_ID = "run.desen.starter.web";
 
-/** Current additive Catalog contract version for the bounded M10A-T09 starter slice. */
-export const STARTER_CATALOG_VERSION = "0.6.0";
+/** Current additive Catalog contract version for the bounded M10A-T12 visual-authoring slice. */
+export const STARTER_CATALOG_VERSION = "0.7.0";
 
 /** Target implemented by the current DESEN Neutral starter package. */
 export const STARTER_CATALOG_TARGET = "web-react";
@@ -68,50 +69,7 @@ export const STARTER_SELECT_MAX_OPTIONS = 100;
 export const STARTER_DIALOG_CONTENT_MAX_ITEMS = 16;
 
 const JSON_SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema";
-const HEX_COLOR_SCHEMA = Object.freeze({
-  anyOf: [
-    { type: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
-    { type: "string", pattern: "^#[0-9A-Fa-f]{8}$" },
-  ],
-} as const);
-
-const neutralStylePropertiesSchema = Object.freeze({
-  $schema: JSON_SCHEMA_DIALECT,
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    color: {
-      ...HEX_COLOR_SCHEMA,
-      description: "Resolved six- or eight-digit hexadecimal foreground color.",
-    },
-    backgroundColor: {
-      ...HEX_COLOR_SCHEMA,
-      description: "Resolved six- or eight-digit hexadecimal background color.",
-    },
-    borderColor: {
-      ...HEX_COLOR_SCHEMA,
-      description: "Resolved six- or eight-digit hexadecimal border color.",
-    },
-    borderRadius: {
-      type: "number",
-      minimum: 0,
-      maximum: 64,
-      description: "Corner radius in CSS pixels.",
-    },
-    padding: {
-      type: "number",
-      minimum: 0,
-      maximum: 128,
-      description: "Uniform padding in CSS pixels.",
-    },
-    fontSize: {
-      type: "number",
-      minimum: 8,
-      maximum: 96,
-      description: "Font size in CSS pixels.",
-    },
-  },
-} as const);
+const neutralStylePropertiesSchema = starterVisualStylePropertiesSchema("neutral");
 
 function neutralStylePart(description: string) {
   return {

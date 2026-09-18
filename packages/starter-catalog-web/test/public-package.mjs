@@ -58,6 +58,8 @@ assert.deepEqual(Object.keys(packageRoot).sort(), [
   "STARTER_TEXT_FIELD_CAPABILITY_ID",
   "STARTER_TOOLTIP_CAPABILITY_ID",
   "createStarterNodeTemplate",
+  "isStarterCapabilityVisualStyleValue",
+  "isStarterVisualStyleValue",
   "starterAccordionComponentRegistration",
   "starterAlertComponentRegistration",
   "starterAvatarComponentRegistration",
@@ -90,6 +92,7 @@ assert.deepEqual(Object.keys(packageRoot).sort(), [
   "starterTextComponentRegistration",
   "starterTextFieldComponentRegistration",
   "starterTooltipComponentRegistration",
+  "starterVisualStyleProfileForCapability",
 ]);
 
 const template = packageRoot.createStarterNodeTemplate({

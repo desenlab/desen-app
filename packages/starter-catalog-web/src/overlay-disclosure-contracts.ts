@@ -1,16 +1,12 @@
 import { registerComponent } from "@desen/catalog-sdk";
 
+import { starterVisualStylePropertiesSchema } from "./visual-style-profile.js";
+
 import type { ComponentPropsOf } from "@desen/catalog-sdk";
 
 const JSON_SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema";
 const LABEL_MAX_LENGTH = 256;
 const CONTENT_MAX_LENGTH = 1_024;
-const HEX_COLOR_SCHEMA = Object.freeze({
-  anyOf: [
-    { type: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
-    { type: "string", pattern: "^#[0-9A-Fa-f]{8}$" },
-  ],
-} as const);
 
 /** Maximum number of inert child nodes admitted by T08 overlay content slots. */
 export const STARTER_OVERLAY_CONTENT_MAX_ITEMS = 16;
@@ -58,34 +54,7 @@ const valueSchema = Object.freeze({
   items: { type: "string", minLength: 1, maxLength: 128 },
 } as const);
 
-const stylePropertiesSchema = Object.freeze({
-  $schema: JSON_SCHEMA_DIALECT,
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    color: HEX_COLOR_SCHEMA,
-    backgroundColor: HEX_COLOR_SCHEMA,
-    borderColor: HEX_COLOR_SCHEMA,
-    borderRadius: { type: "number", minimum: 0, maximum: 64 },
-    borderWidth: { type: "number", minimum: 0, maximum: 16 },
-    padding: { type: "number", minimum: 0, maximum: 128 },
-    paddingBlock: { type: "number", minimum: 0, maximum: 128 },
-    paddingInline: { type: "number", minimum: 0, maximum: 128 },
-    marginBlock: { type: "number", minimum: 0, maximum: 128 },
-    marginInline: { type: "number", minimum: 0, maximum: 128 },
-    fontFamily: { type: "string", enum: ["system", "serif", "mono"] },
-    fontSize: { type: "number", minimum: 8, maximum: 96 },
-    fontWeight: { type: "number", enum: [400, 500, 600, 700] },
-    lineHeight: { type: "number", minimum: 1, maximum: 3 },
-    letterSpacing: { type: "number", minimum: -4, maximum: 16 },
-    width: { type: "number", minimum: 0, maximum: 4_096 },
-    minWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    maxWidth: { type: "number", minimum: 0, maximum: 4_096 },
-    minHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    maxHeight: { type: "number", minimum: 0, maximum: 4_096 },
-    opacity: { type: "number", minimum: 0, maximum: 1 },
-  },
-} as const);
+const stylePropertiesSchema = starterVisualStylePropertiesSchema("control");
 
 function stylePart(description: string) {
   return { description, propertiesSchema: stylePropertiesSchema } as const;

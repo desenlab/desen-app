@@ -1,4 +1,5 @@
 import { deriveComponentInspectorControls, registerComponent } from "@desen/catalog-sdk";
+import { canonicalizeJson } from "@desen/protocol";
 import {
   validateDesenInteractionCatalogSet,
   validateDesenSourceInteractionContracts,
@@ -231,6 +232,18 @@ export interface AuthoringSlotContract {
   readonly description: string | undefined;
 }
 
+/**
+ * One exact Catalog-declared semantic style part, retained as inert schema data for App-owned
+ * authoring controls. This is not a CSS escape hatch: callers must still address only a declared
+ * property through a separately validated authoring boundary.
+ */
+export interface AuthoringStylePartContract {
+  readonly name: string;
+  readonly description: string | undefined;
+  /** Detached, recursively frozen `propertiesSchema` for this exact declared part. */
+  readonly propertiesSchema: JsonObject;
+}
+
 /** Authoring-safe component metadata projected from one exact Catalog component contract. */
 export interface CatalogComponentSummary {
   readonly id: string;
@@ -242,8 +255,22 @@ export interface CatalogComponentSummary {
   readonly defaultProps: JsonObject;
   /** Complete Catalog-declared named-slot contracts in canonical name order. */
   readonly slotContracts: readonly AuthoringSlotContract[];
-  /** Schema-authoritative control plan derived from this exact validated component manifest. */
-  readonly inspector: ComponentInspectorControlPlan;
+  /** Complete Catalog-declared semantic style parts in canonical name order. */
+  readonly styleParts: readonly AuthoringStylePartContract[];
+  /** Exact declared visual-state names in Catalog declaration order; `base` remains implicit. */
+  readonly visualStates: readonly string[];
+  /**
+   * Exact Catalog-declared preview-adapter fidelity, if both the claim and its differences list
+   * are well-formed. This deliberately avoids constructing an Inspector plan merely to render
+   * the preview-fidelity disclosure.
+   */
+  readonly previewAdapter: CatalogPreviewAdapterDeclaration | undefined;
+}
+
+/** Cheap, inert preview-fidelity metadata projected without deriving Inspector controls. */
+export interface CatalogPreviewAdapterDeclaration {
+  readonly fidelity: "approximate" | "equivalent" | "same";
+  readonly differences: readonly string[];
 }
 
 /** One named Source slot with child order preserved exactly. */
@@ -322,6 +349,23 @@ const AUTHORING_READ_LIMITS = Object.freeze({
   maxSourceTreeDepth: 64,
 });
 
+/**
+ * Validator-admitted contracts are retained privately by the model identity, never surfaced as
+ * caller-editable App data. Inspector derivation is intentionally deferred until an Inspector
+ * selection asks for one exact component; normal canvas/library startup must not eagerly derive
+ * every Catalog component's full schema-control tree.
+ */
+interface AdmittedInspectorRegistration {
+  readonly id: string;
+  readonly manifest: ComponentManifest;
+}
+
+const INSPECTOR_REGISTRATIONS_BY_MODEL = new WeakMap<
+  CatalogAuthoringModel,
+  ReadonlyMap<string, AdmittedInspectorRegistration>
+>();
+const INSPECTOR_PLANS_BY_MANIFEST = new WeakMap<object, ComponentInspectorControlPlan>();
+
 function normalizeCatalogSetInput(catalogValueOrSet: unknown): readonly unknown[] {
   return Array.isArray(catalogValueOrSet) ? catalogValueOrSet : [catalogValueOrSet];
 }
@@ -361,6 +405,24 @@ function optionalObject(value: unknown): JsonObject | undefined {
   return typeof value === "object" && value !== null && !Array.isArray(value)
     ? (value as JsonObject)
     : undefined;
+}
+
+function deepFreezeJson(value: unknown): unknown {
+  if (typeof value !== "object" || value === null) return value;
+  if (Array.isArray(value)) {
+    for (const item of value) deepFreezeJson(item);
+  } else {
+    for (const key of Object.keys(value)) {
+      deepFreezeJson((value as Record<string, unknown>)[key]);
+    }
+  }
+  return Object.freeze(value);
+}
+
+/** Creates a detached immutable JSON-object snapshot after the Catalog validation boundary. */
+function snapshotJsonObject(value: unknown, path: string): JsonObject {
+  const snapshot = JSON.parse(canonicalizeJson(value)) as unknown;
+  return deepFreezeJson(readObject(snapshot, path)) as JsonObject;
 }
 
 function projectCatalogIdentity(catalog: JsonObject, path: string): CatalogAuthoringIdentity {
@@ -439,6 +501,59 @@ function projectSlotContracts(
   );
 }
 
+function projectStyleParts(
+  contract: JsonObject,
+  path: string,
+): readonly AuthoringStylePartContract[] {
+  const styleParts: JsonObject = Object.hasOwn(contract, "styleParts")
+    ? readObject(contract.styleParts, `${path}.styleParts`)
+    : Object.freeze({});
+  return Object.freeze(
+    Object.keys(styleParts)
+      .sort(compareText)
+      .map((partName) => {
+        const partPath = `${path}.styleParts[${JSON.stringify(partName)}]`;
+        const part = readObject(styleParts[partName], partPath);
+        return Object.freeze({
+          name: partName,
+          description: optionalString(part.description),
+          propertiesSchema: snapshotJsonObject(
+            part.propertiesSchema,
+            `${partPath}.propertiesSchema`,
+          ),
+        });
+      }),
+  );
+}
+
+function projectVisualStates(contract: JsonObject, path: string): readonly string[] {
+  if (!Object.hasOwn(contract, "visualStates")) return Object.freeze([]);
+  // Declaration order is observable authoring intent, unlike map-key order for named style parts.
+  return readStringArray(contract.visualStates, `${path}.visualStates`);
+}
+
+function projectPreviewAdapterDeclaration(
+  contract: JsonObject,
+): CatalogPreviewAdapterDeclaration | undefined {
+  const authoring = optionalObject(contract.authoring);
+  if (authoring === undefined || !Object.hasOwn(authoring, "adapterFidelity")) return undefined;
+  const fidelity = authoring.adapterFidelity;
+  if (fidelity !== "same" && fidelity !== "equivalent" && fidelity !== "approximate") {
+    return undefined;
+  }
+  const differences = Object.hasOwn(authoring, "differences") ? authoring.differences : [];
+  if (!Array.isArray(differences)) {
+    return undefined;
+  }
+  if (!differences.every((difference) => typeof difference === "string")) {
+    return undefined;
+  }
+  return Object.freeze({
+    fidelity,
+    differences: Object.freeze([...differences]),
+  });
+}
+
 function projectCapabilityMetadata(
   capabilityId: string,
   contractValue: unknown,
@@ -460,12 +575,6 @@ function projectComponent(
   const contract = readObject(contractValue, path);
   const authoring = optionalObject(contract.authoring);
   const semanticCategory = optionalString(contract.category);
-  const inspector = deriveComponentInspectorControls(
-    registerComponent({
-      id: componentId,
-      manifest: contract as ComponentManifest,
-    }),
-  );
   return Object.freeze({
     id: componentId,
     displayName: optionalString(authoring?.displayName) ?? componentId,
@@ -474,8 +583,43 @@ function projectComponent(
     description: optionalString(contract.description),
     defaultProps: optionalObject(authoring?.defaultProps) ?? Object.freeze({}),
     slotContracts: projectSlotContracts(contract, path),
-    inspector,
+    styleParts: projectStyleParts(contract, path),
+    visualStates: projectVisualStates(contract, path),
+    previewAdapter: projectPreviewAdapterDeclaration(contract),
   });
+}
+
+/**
+ * Derives the schema-authoritative Inspector plan only for one previously admitted component.
+ *
+ * @remarks The model must come directly from {@link prepareCatalogAuthoringModel}; forged or
+ * stale model-shaped values have no private registration binding and fail closed. The SDK remains
+ * the sole registration and control-derivation authority, while each immutable manifest has at
+ * most one cached plan for the lifetime of this module.
+ */
+export function resolveCatalogComponentInspector(
+  model: CatalogAuthoringModel,
+  componentId: string,
+): ComponentInspectorControlPlan | undefined {
+  const registrations = INSPECTOR_REGISTRATIONS_BY_MODEL.get(model);
+  const registration = registrations?.get(componentId);
+  if (registration === undefined) return undefined;
+
+  const cached = INSPECTOR_PLANS_BY_MANIFEST.get(registration.manifest);
+  if (cached !== undefined) return cached;
+
+  try {
+    const inspector = deriveComponentInspectorControls(
+      registerComponent({
+        id: registration.id,
+        manifest: registration.manifest,
+      }),
+    );
+    INSPECTOR_PLANS_BY_MANIFEST.set(registration.manifest, inspector);
+    return inspector;
+  } catch {
+    return undefined;
+  }
 }
 
 interface OwnerInspectionWork {
@@ -754,21 +898,28 @@ export function prepareCatalogAuthoringModel(
         });
       });
 
-    return Object.freeze({
-      ok: true,
-      model: Object.freeze({
-        catalog: projectCatalogIdentity(catalog, "catalogs[0]"),
-        catalogs: Object.freeze(
-          catalogs.map((catalogEntry, index) =>
-            projectCatalogIdentity(catalogEntry, `catalogs[${index}]`),
-          ),
+    const model: CatalogAuthoringModel = Object.freeze({
+      catalog: projectCatalogIdentity(catalog, "catalogs[0]"),
+      catalogs: Object.freeze(
+        catalogs.map((catalogEntry, index) =>
+          projectCatalogIdentity(catalogEntry, `catalogs[${index}]`),
         ),
-        components,
-        surfaces: Object.freeze(surfaces),
-        validationCatalogs: catalogSet.value,
-        validationDocument: sourceResult.value,
-      }),
+      ),
+      components,
+      surfaces: Object.freeze(surfaces),
+      validationCatalogs: catalogSet.value,
+      validationDocument: sourceResult.value,
     });
+    INSPECTOR_REGISTRATIONS_BY_MODEL.set(
+      model,
+      new Map(
+        componentEntries.map(({ capabilityId, contract }) => [
+          capabilityId,
+          Object.freeze({ id: capabilityId, manifest: contract as ComponentManifest }),
+        ]),
+      ),
+    );
+    return Object.freeze({ ok: true, model });
   } catch (error) {
     if (error instanceof AuthoringProjectionLimitError) {
       return Object.freeze({ ok: false, reason: "projection-limit" });

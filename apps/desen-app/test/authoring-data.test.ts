@@ -6,7 +6,9 @@ import {
   AUTHORING_CANVAS_FRAME_LIMITS,
   prepareCatalogAuthoringModel,
   projectAuthoringCanvasFrame,
+  resolveCatalogComponentInspector,
 } from "../src/authoring-data.js";
+import type { CatalogAuthoringModel } from "../src/authoring-data.js";
 import {
   REFERENCE_AUTHORING_CATALOGS,
   REFERENCE_AUTHORING_MODEL,
@@ -136,6 +138,31 @@ describe("Desen App catalog authoring read model", () => {
     expect(Object.isFrozen(signIn?.root.slots[0]?.children)).toBe(true);
   });
 
+  it("defers schema-inspector derivation to one exact validator-admitted component", () => {
+    const model = requirePrepared(
+      prepareCatalogAuthoringModel(referenceCatalog, officialSignInSource),
+    );
+    const text = model.components.find((component) => component.id === "com.example.ui/Text");
+    expect(text).toBeDefined();
+    expect(
+      model.components.every((component) => Object.hasOwn(component, "inspector") === false),
+    ).toBe(true);
+    expect(resolveCatalogComponentInspector(model, "com.example.ui/Unknown")).toBeUndefined();
+    expect(
+      resolveCatalogComponentInspector(
+        Object.freeze({ ...model }) as CatalogAuthoringModel,
+        "com.example.ui/Text",
+      ),
+    ).toBeUndefined();
+
+    const first = resolveCatalogComponentInspector(model, text?.id ?? "com.example.ui/Unknown");
+    const second = resolveCatalogComponentInspector(model, text?.id ?? "com.example.ui/Unknown");
+    expect(first).toBeDefined();
+    expect(second).toBe(first);
+    expect(Object.isFrozen(first)).toBe(true);
+    expect(Object.isFrozen(first?.controls)).toBe(true);
+  });
+
   it("merges capabilities from every Catalog required by a multi-Catalog Source", () => {
     const profile = createSplitCatalogProfile();
     const model = requirePrepared(prepareCatalogAuthoringModel(profile.catalogs, profile.source));
@@ -214,7 +241,9 @@ describe("Desen App catalog authoring read model", () => {
       id: "com.example.ui/Text",
       semanticCategory: "content",
     });
-    expect(text?.inspector.controls.map(({ kind, property }) => [property, kind])).toEqual([
+    const inspector =
+      text === undefined ? undefined : resolveCatalogComponentInspector(model, text.id);
+    expect(inspector?.controls.map(({ kind, property }) => [property, kind])).toEqual([
       ["role", "enum"],
       ["text", "string"],
     ]);

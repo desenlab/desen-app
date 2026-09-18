@@ -129,6 +129,12 @@ export type {
   StarterTextProps,
 } from "./contracts.js";
 export {
+  isStarterCapabilityVisualStyleValue,
+  isStarterVisualStyleValue,
+  starterVisualStyleProfileForCapability,
+} from "./visual-style-profile.js";
+export type { StarterVisualStyleProfile } from "./visual-style-profile.js";
+export {
   createStarterNodeTemplate,
   STARTER_TEMPLATE_ID_PREFIX_MAX_LENGTH,
   STARTER_TEMPLATE_MAX_RESERVED_IDS,

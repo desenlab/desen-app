@@ -8,6 +8,14 @@ type T07ProofGraph = "authoring" | "host";
 
 const PACKAGE_ROOT = import.meta.dirname;
 const WORKSPACE_ROOT = resolve(PACKAGE_ROOT, "../..");
+const STARTER_CATALOG_SPECIFIER = "@desen/starter-catalog-web/catalog.json";
+const VIRTUAL_STARTER_CATALOG_ID = "\u0000desen-m10a-t07-current-starter-catalog";
+
+interface CurrentStarterCatalogProofModule {
+  readonly buildM10AT01PackageIdentity: () => Promise<{
+    readonly catalogBytes: Uint8Array;
+  }>;
+}
 
 function outputRoot(): string {
   const proofTemp = process.env.DESEN_M10A_T07_PROOF_TEMP;
@@ -24,6 +32,35 @@ function graphForMode(mode: string): T07ProofGraph {
   throw new TypeError(`Unsupported M10A-T07 proof build mode: ${mode}`);
 }
 
+/**
+ * Binds this historical browser journey to the current compiled starter package without
+ * rewriting the task-owned Catalog source. The source import remains an ordinary JSON import for
+ * application code; only this isolated Vite capture receives the freshly derived bytes.
+ */
+async function currentStarterCatalogModule(): Promise<Plugin> {
+  const proofModuleUrl = new URL("../../scripts/lib/m10a-t01-proof.mjs", import.meta.url).href;
+  const proofModule = (await import(proofModuleUrl)) as CurrentStarterCatalogProofModule;
+  const identity = await proofModule.buildM10AT01PackageIdentity();
+  const catalogSource = new TextDecoder("utf-8", { fatal: true }).decode(identity.catalogBytes);
+  try {
+    JSON.parse(catalogSource);
+  } catch {
+    throw new TypeError("The current starter Catalog must remain valid UTF-8 JSON.");
+  }
+  return {
+    name: "desen-m10a-t07-current-starter-catalog",
+    enforce: "pre",
+    resolveId(source) {
+      return source === STARTER_CATALOG_SPECIFIER ? VIRTUAL_STARTER_CATALOG_ID : null;
+    },
+    load(id) {
+      return id === VIRTUAL_STARTER_CATALOG_ID
+        ? `export default JSON.parse(${JSON.stringify(catalogSource)});\n`
+        : null;
+    },
+  };
+}
+
 function proofGraphReceipt(graph: T07ProofGraph): Plugin {
   return {
     name: `desen-starter-t07-${graph}-graph-receipt`,
@@ -37,7 +74,10 @@ function proofGraphReceipt(graph: T07ProofGraph): Plugin {
           ),
         ),
       ].sort();
-      const modules = absoluteModules.map((id) => relative(WORKSPACE_ROOT, id));
+      const hasCurrentStarterCatalog = absoluteModules.includes(VIRTUAL_STARTER_CATALOG_ID);
+      const modules = absoluteModules
+        .filter((id) => id !== VIRTUAL_STARTER_CATALOG_ID)
+        .map((id) => relative(WORKSPACE_ROOT, id));
       const hasStarterAdapters = absoluteModules.some(
         (id) => id.includes("/packages/starter-catalog-web/") && id.includes("react-adapters"),
       );
@@ -45,8 +85,8 @@ function proofGraphReceipt(graph: T07ProofGraph): Plugin {
       const hasEditor = absoluteModules.some((id) => id.includes("/packages/editor-core/"));
       const hasT07Fixture = absoluteModules.some((id) => id.includes("/src/t07-authoring/"));
 
-      if (!hasStarterAdapters) {
-        this.error(`${graph} graph omitted the reviewed starter adapter registry.`);
+      if (!hasStarterAdapters || !hasCurrentStarterCatalog) {
+        this.error(`${graph} graph omitted the reviewed starter Catalog authority.`);
       }
       if (graph === "authoring" && (!hasPublisher || !hasT07Fixture)) {
         this.error("T07 authoring graph did not execute its Source-to-Publisher boundary.");
@@ -66,6 +106,7 @@ function proofGraphReceipt(graph: T07ProofGraph): Plugin {
             entry: `t07-${graph}.html`,
             result: "PASS",
             assertions: {
+              currentStarterCatalogPresent: hasCurrentStarterCatalog,
               exactStarterRegistryPresent: hasStarterAdapters,
               t07FixturePresent: graph === "authoring" ? hasT07Fixture : null,
               publisherPresent: hasPublisher,
@@ -82,11 +123,12 @@ function proofGraphReceipt(graph: T07ProofGraph): Plugin {
   };
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
   const graph = graphForMode(mode);
+  const currentCatalog = await currentStarterCatalogModule();
   return {
     root: PACKAGE_ROOT,
-    plugins: [proofGraphReceipt(graph)],
+    plugins: [currentCatalog, proofGraphReceipt(graph)],
     build: {
       assetsDir: `t07-${graph}-assets`,
       emptyOutDir: true,

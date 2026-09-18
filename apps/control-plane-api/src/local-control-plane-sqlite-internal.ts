@@ -20,13 +20,17 @@ import type {
   ChannelRepository,
   RepositoryReadResult,
   RepositoryWriteResult,
+  ProjectWorkspaceRecord,
+  ProjectWorkspaceRepository,
   SourceRecord,
   SourceRepository,
 } from "./local-control-plane-repository-internal.js";
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
+const PREVIOUS_SCHEMA_VERSION = 1;
 const BUSY_TIMEOUT_MILLISECONDS = 5_000;
 const MAX_SOURCE_BYTES = 8 * 1024 * 1024;
+const MAX_PROJECT_WORKSPACE_BYTES = 8 * 1024 * 1024;
 const MAX_GENERATION = Number.MAX_SAFE_INTEGER;
 const MAX_GENERATION_BIGINT = 9_007_199_254_740_991n;
 const LOCAL_METADATA_KEY_PATTERN = /^[a-z][a-z0-9-]{0,63}$/u;
@@ -61,9 +65,29 @@ const CHANNEL_TABLE_SQL = [
   ") STRICT",
 ].join(" ");
 
+const PROJECT_WORKSPACE_TABLE_SQL = [
+  "CREATE TABLE project_workspaces (",
+  "workspace_key TEXT PRIMARY KEY NOT NULL",
+  "CHECK(length(workspace_key) BETWEEN 1 AND 64)",
+  "CHECK(substr(workspace_key, 1, 1) GLOB '[a-z]')",
+  "CHECK(workspace_key NOT GLOB '*[^a-z0-9-]*')",
+  ", workspace_bytes BLOB NOT NULL",
+  `CHECK(length(workspace_bytes) BETWEEN 1 AND ${String(MAX_PROJECT_WORKSPACE_BYTES)})`,
+  ", generation INTEGER NOT NULL",
+  `CHECK(generation BETWEEN 1 AND ${String(MAX_GENERATION)})`,
+  ") STRICT",
+].join(" ");
+
+const EXPECTED_PREVIOUS_SCHEMA = Object.freeze(
+  new Map<string, string>([
+    ["channels", CHANNEL_TABLE_SQL],
+    ["sources", SOURCE_TABLE_SQL],
+  ]),
+);
 const EXPECTED_SCHEMA = Object.freeze(
   new Map<string, string>([
     ["channels", CHANNEL_TABLE_SQL],
+    ["project_workspaces", PROJECT_WORKSPACE_TABLE_SQL],
     ["sources", SOURCE_TABLE_SQL],
   ]),
 );
@@ -109,10 +133,12 @@ export class LocalControlPlaneMetadataError extends Error {
   }
 }
 
-/** One open SQLite composition over editable Source and mutable channel repositories. @internal */
+/** One open SQLite composition over Source, project-workspace, and channel repositories. @internal */
 export interface SqliteLocalControlPlaneRepositories {
   /** Exact-byte editable Source repository backed by the shared metadata database. */
   readonly sourceRepository: SourceRepository;
+  /** Exact-byte application project-workspace repository backed by the shared metadata database. */
+  readonly projectWorkspaceRepository: ProjectWorkspaceRepository;
   /** Mutable channel-pointer repository backed by the shared metadata database. */
   readonly channelRepository: ChannelRepository;
   /** Idempotently closes prepared statements and the owned SQLite connection. */
@@ -134,6 +160,12 @@ interface SchemaRow {
 interface SourceDatabaseRow {
   readonly sourceKey: unknown;
   readonly sourceBytes: unknown;
+  readonly generation: unknown;
+}
+
+interface ProjectWorkspaceDatabaseRow {
+  readonly workspaceKey: unknown;
+  readonly workspaceBytes: unknown;
   readonly generation: unknown;
 }
 
@@ -375,7 +407,7 @@ function assertStorageIdentity(metadataFilePath: string, identity: FileIdentity)
 
 function assertLocalKey(
   value: unknown,
-  code: "INVALID_CHANNEL_NAME" | "INVALID_SOURCE_KEY",
+  code: "INVALID_CHANNEL_NAME" | "INVALID_PROJECT_WORKSPACE_KEY" | "INVALID_SOURCE_KEY",
 ): asserts value is string {
   if (typeof value !== "string" || !LOCAL_METADATA_KEY_PATTERN.test(value)) {
     throw new LocalControlPlaneRepositoryError(code);
@@ -431,6 +463,43 @@ function captureSourceBytes(value: unknown): Uint8Array {
   }
 }
 
+function captureProjectWorkspaceBytes(value: unknown): Uint8Array {
+  try {
+    if (
+      typedArrayBufferGetter === undefined ||
+      typedArrayByteLengthGetter === undefined ||
+      typedArrayByteOffsetGetter === undefined ||
+      typedArrayTagGetter === undefined
+    ) {
+      throw new LocalControlPlaneRepositoryError("INVALID_PROJECT_WORKSPACE_BYTES");
+    }
+    const buffer = Reflect.apply(typedArrayBufferGetter, value, []) as unknown;
+    const byteLength = Reflect.apply(typedArrayByteLengthGetter, value, []) as unknown;
+    const byteOffset = Reflect.apply(typedArrayByteOffsetGetter, value, []) as unknown;
+    const tag = Reflect.apply(typedArrayTagGetter, value, []) as unknown;
+    if (
+      tag !== "Uint8Array" ||
+      !(buffer instanceof ArrayBuffer) ||
+      typeof byteLength !== "number" ||
+      typeof byteOffset !== "number" ||
+      !Number.isSafeInteger(byteLength) ||
+      !Number.isSafeInteger(byteOffset) ||
+      byteLength <= 0 ||
+      byteLength > MAX_PROJECT_WORKSPACE_BYTES ||
+      byteOffset < 0
+    ) {
+      throw new LocalControlPlaneRepositoryError("INVALID_PROJECT_WORKSPACE_BYTES");
+    }
+    const exactView = new Uint8Array(buffer, byteOffset, byteLength);
+    const copy = new Uint8Array(byteLength);
+    Reflect.apply(uint8ArraySet, copy, [exactView]);
+    return copy;
+  } catch (error) {
+    if (error instanceof LocalControlPlaneRepositoryError) throw error;
+    throw new LocalControlPlaneRepositoryError("INVALID_PROJECT_WORKSPACE_BYTES");
+  }
+}
+
 function sourceBytesEqual(left: Uint8Array, right: Uint8Array): boolean {
   if (left.byteLength !== right.byteLength) return false;
   for (let index = 0; index < left.byteLength; index += 1) {
@@ -460,6 +529,23 @@ function databaseSourceRecord(row: SourceDatabaseRow): SourceRecord {
     sourceKey: row.sourceKey,
     generation: databaseGeneration(row.generation),
     bytes: new Uint8Array(row.sourceBytes),
+  });
+}
+
+function databaseProjectWorkspaceRecord(row: ProjectWorkspaceDatabaseRow): ProjectWorkspaceRecord {
+  if (
+    typeof row.workspaceKey !== "string" ||
+    !LOCAL_METADATA_KEY_PATTERN.test(row.workspaceKey) ||
+    !Buffer.isBuffer(row.workspaceBytes) ||
+    row.workspaceBytes.byteLength <= 0 ||
+    row.workspaceBytes.byteLength > MAX_PROJECT_WORKSPACE_BYTES
+  ) {
+    throw new LocalControlPlaneMetadataError("METADATA_CORRUPT");
+  }
+  return Object.freeze({
+    workspaceKey: row.workspaceKey,
+    generation: databaseGeneration(row.generation),
+    bytes: new Uint8Array(row.workspaceBytes),
   });
 }
 
@@ -534,13 +620,16 @@ function readSchemaVersion(database: Database.Database): number {
   return version;
 }
 
-function assertExactSchema(database: Database.Database): void {
+function assertExactSchema(
+  database: Database.Database,
+  expectedSchema: ReadonlyMap<string, string>,
+): void {
   const rows = database
     .prepare<[], SchemaRow>(
       "SELECT type, name, tbl_name AS tableName, sql FROM sqlite_schema WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name",
     )
     .all();
-  if (rows.length !== EXPECTED_SCHEMA.size) {
+  if (rows.length !== expectedSchema.size) {
     throw new LocalControlPlaneMetadataError("METADATA_CORRUPT");
   }
   for (const row of rows) {
@@ -549,7 +638,7 @@ function assertExactSchema(database: Database.Database): void {
       typeof row.sql !== "string" ||
       row.type !== "table" ||
       row.tableName !== row.name ||
-      EXPECTED_SCHEMA.get(row.name) !== row.sql
+      expectedSchema.get(row.name) !== row.sql
     ) {
       throw new LocalControlPlaneMetadataError("METADATA_CORRUPT");
     }
@@ -568,12 +657,16 @@ function initializeSchema(database: Database.Database): void {
       if (existing?.count !== 0) {
         throw new LocalControlPlaneMetadataError("METADATA_CORRUPT");
       }
-      database.exec(`${SOURCE_TABLE_SQL}; ${CHANNEL_TABLE_SQL}`);
+      database.exec(`${SOURCE_TABLE_SQL}; ${CHANNEL_TABLE_SQL}; ${PROJECT_WORKSPACE_TABLE_SQL}`);
+      database.pragma(`user_version = ${String(SCHEMA_VERSION)}`);
+    } else if (version === PREVIOUS_SCHEMA_VERSION) {
+      assertExactSchema(database, EXPECTED_PREVIOUS_SCHEMA);
+      database.exec(PROJECT_WORKSPACE_TABLE_SQL);
       database.pragma(`user_version = ${String(SCHEMA_VERSION)}`);
     } else if (version !== SCHEMA_VERSION) {
       throw new LocalControlPlaneMetadataError("METADATA_CORRUPT");
     }
-    assertExactSchema(database);
+    assertExactSchema(database, EXPECTED_SCHEMA);
   });
   initialize.immediate();
   if (database.pragma("quick_check", { simple: true }) !== "ok") {
@@ -629,6 +722,17 @@ export function openLocalControlPlaneSqliteRepositories(
   );
   const updateSourceStatement = openDatabase.prepare<[Buffer, number, string, number]>(
     "UPDATE sources SET source_bytes = ?, generation = ? WHERE source_key = ? AND generation = ?",
+  );
+  const getProjectWorkspaceStatement = openDatabase
+    .prepare<[string], ProjectWorkspaceDatabaseRow>(
+      "SELECT workspace_key AS workspaceKey, workspace_bytes AS workspaceBytes, generation FROM project_workspaces WHERE workspace_key = ?",
+    )
+    .safeIntegers();
+  const insertProjectWorkspaceStatement = openDatabase.prepare<[string, Buffer]>(
+    "INSERT INTO project_workspaces (workspace_key, workspace_bytes, generation) VALUES (?, ?, 1)",
+  );
+  const updateProjectWorkspaceStatement = openDatabase.prepare<[Buffer, number, string, number]>(
+    "UPDATE project_workspaces SET workspace_bytes = ?, generation = ? WHERE workspace_key = ? AND generation = ?",
   );
   const getChannelStatement = openDatabase
     .prepare<[string], ChannelDatabaseRow>(
@@ -715,6 +819,74 @@ export function openLocalControlPlaneSqliteRepositories(
     return operate(() => sourceUpdateTransaction.immediate(sourceKey, expectedGeneration, bytes));
   };
 
+  const projectWorkspaceGet: ProjectWorkspaceRepository["get"] = (workspaceKey) => {
+    assertLocalKey(workspaceKey, "INVALID_PROJECT_WORKSPACE_KEY");
+    return operate(() => {
+      const row = getProjectWorkspaceStatement.get(workspaceKey);
+      return row === undefined
+        ? missing<ProjectWorkspaceRecord>()
+        : found(databaseProjectWorkspaceRecord(row));
+    });
+  };
+
+  const projectWorkspaceCreateTransaction = openDatabase.transaction(
+    (workspaceKey: string, proposedBytes: Readonly<Uint8Array>) => {
+      const currentRow = getProjectWorkspaceStatement.get(workspaceKey);
+      if (currentRow !== undefined) {
+        return preconditionFailed(databaseProjectWorkspaceRecord(currentRow));
+      }
+      const bytes = captureProjectWorkspaceBytes(proposedBytes);
+      if (insertProjectWorkspaceStatement.run(workspaceKey, Buffer.from(bytes)).changes !== 1) {
+        throw new LocalControlPlaneMetadataError("METADATA_CORRUPT");
+      }
+      return created<ProjectWorkspaceRecord>(
+        Object.freeze({ workspaceKey, generation: 1, bytes: new Uint8Array(bytes) }),
+      );
+    },
+  );
+
+  const projectWorkspaceCreate: ProjectWorkspaceRepository["create"] = (workspaceKey, bytes) => {
+    assertLocalKey(workspaceKey, "INVALID_PROJECT_WORKSPACE_KEY");
+    return operate(() => projectWorkspaceCreateTransaction.immediate(workspaceKey, bytes));
+  };
+
+  const projectWorkspaceUpdateTransaction = openDatabase.transaction(
+    (workspaceKey: string, expectedGeneration: number, proposedBytes: Readonly<Uint8Array>) => {
+      const currentRow = getProjectWorkspaceStatement.get(workspaceKey);
+      if (currentRow === undefined) return preconditionFailed<ProjectWorkspaceRecord>(null);
+      const current = databaseProjectWorkspaceRecord(currentRow);
+      if (current.generation !== expectedGeneration) return preconditionFailed(current);
+      const bytes = captureProjectWorkspaceBytes(proposedBytes);
+      if (sourceBytesEqual(current.bytes, bytes)) return unchanged(current);
+      if (current.generation === MAX_GENERATION) return generationExhausted(current);
+      const generation = current.generation + 1;
+      const result = updateProjectWorkspaceStatement.run(
+        Buffer.from(bytes),
+        generation,
+        workspaceKey,
+        expectedGeneration,
+      );
+      if (result.changes !== 1) {
+        throw new LocalControlPlaneMetadataError("METADATA_CORRUPT");
+      }
+      return updated<ProjectWorkspaceRecord>(
+        Object.freeze({ workspaceKey, generation, bytes: new Uint8Array(bytes) }),
+      );
+    },
+  );
+
+  const projectWorkspaceUpdate: ProjectWorkspaceRepository["update"] = (
+    workspaceKey,
+    expectedGeneration,
+    bytes,
+  ) => {
+    assertLocalKey(workspaceKey, "INVALID_PROJECT_WORKSPACE_KEY");
+    assertGeneration(expectedGeneration);
+    return operate(() =>
+      projectWorkspaceUpdateTransaction.immediate(workspaceKey, expectedGeneration, bytes),
+    );
+  };
+
   const channelGet: ChannelRepository["get"] = (channelName) => {
     assertLocalKey(channelName, "INVALID_CHANNEL_NAME");
     return operate(() => {
@@ -792,6 +964,11 @@ export function openLocalControlPlaneSqliteRepositories(
       get: sourceGet,
       create: sourceCreate,
       update: sourceUpdate,
+    }),
+    projectWorkspaceRepository: Object.freeze({
+      get: projectWorkspaceGet,
+      create: projectWorkspaceCreate,
+      update: projectWorkspaceUpdate,
     }),
     channelRepository: Object.freeze({
       get: channelGet,

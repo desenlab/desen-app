@@ -8,21 +8,23 @@ Source-node templates, and one explicit React-adapter subpath. Base UI remains a
 implementation detail of the interactive adapters; layout and semantic content use ordinary Web
 semantics where a Base UI primitive is unnecessary.
 
-**M10A-T09, T08, T07, and T06 are `DONE`.** T09 adds bounded data-display and feedback adapters on
-the current Catalog boundary; its [task-owned proof](../../docs/proof/M10A-T09.md) records local
-browser/contract evidence plus exact-head hosted/fresh-`main` closure.
+**M10A-T09, T08, T07, and T06 are `DONE`; M10A-T12 is `IN_PROGRESS`.** T09 adds bounded data-display
+and feedback adapters; its [task-owned proof](../../docs/proof/M10A-T09.md) records local
+browser/contract evidence plus exact-head hosted/fresh-`main` closure as a historical receipt.
 T08 adds bounded Popover, Tooltip, Menu, and Accordion adapters on the same contained portal
 boundary; its [task-owned proof](../../docs/proof/M10A-T08.md) records completed hosted closure.
 T07's [task-owned proof](../../docs/proof/M10A-T07.md) records completed selection/numeric-control
-closure. This package is not a normal Desen App integration, a complete component library, a
-design-system explorer, a persisted project, or a publish/activation path.
+closure. T12 owns the current 0.7.0 Catalog capture, closed visual style profiles, and normal-App
+typed visual-authoring integration; its [local proof](../../docs/proof/M10A-T12.md) is not a hosted
+closure. This package is not a complete component library, a design-system explorer, a persisted
+project model, or a publish/activation path.
 
 The M10A-T01 receipt at
 [`docs/proof/artifacts/m10a-t01.json`](../../docs/proof/artifacts/m10a-t01.json) remains immutable
 historical evidence for its original three-capability slice. T05's sealed `0.2.0`, T06's completed
-`0.3.0`, T07's completed `0.4.0`, and T08's completed `0.5.0` receipts remain historical. T09 owns
-the current `run.desen.starter.web@0.6.0#web-react` Catalog and must not rewrite or relabel earlier
-evidence.
+`0.3.0`, T07's completed `0.4.0`, T08's completed `0.5.0`, and T09's completed `0.6.0` receipts are
+immutable historical evidence. T12 owns the current `run.desen.starter.web@0.7.0#web-react` Catalog
+capture and must not rewrite or relabel the predecessor artifacts.
 
 ## Public boundary
 
@@ -161,20 +163,21 @@ explorer/documentation surface.
 
 ## Verification
 
-The following commands authenticate the T09 boundary; its hosted closure is recorded in
-[the T09 proof](../../docs/proof/M10A-T09.md).
+The following commands authenticate the T12 local boundary; exact-head hosted and fresh-`main`
+closure remain pending in [the T12 report](../../docs/proof/M10A-T12.md).
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck
 pnpm --filter @desen/starter-catalog-web test
 pnpm --filter @desen/starter-catalog-web test:public-package
-pnpm --filter @desen/starter-catalog-web-proof test:m10a-t09
-pnpm generate:m10a-t09
-pnpm verify:m10a-t09
-pnpm test:m10a-t09
+pnpm --filter @desen/app-web exec vitest run test/authoring-design-tokens.test.ts test/authoring-styles.test.ts test/authoring-style-preview-runtime.test.ts test/style-panel.test.tsx test/starter-neutral-workspace-profile.test.ts test/project-workspace-authoring-persistence.test.ts test/local-project-workspace-persistence.test.ts
+pnpm --filter @desen/app-browser-e2e run test:m10a-t12
+pnpm generate:m10a-t12
+pnpm verify:m10a-t12
+pnpm test:m10a-t12
 ```
 
 Authenticate historical closure without recapturing it with `pnpm verify:m10a-t05` through
-`pnpm verify:m10a-t08` and their matching `test:m10a-tNN` commands. See [the T09 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t09--data-display-and-feedback),
-[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T09 proof report](../../docs/proof/M10A-T09.md),
-and the [historical T08 proof](../../docs/proof/M10A-T08.md).
+`pnpm verify:m10a-t09` and their matching `test:m10a-tNN` commands. See [the T12 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t12--rich-styling-and-responsive-authoring),
+[the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T12 local report](../../docs/proof/M10A-T12.md),
+and the immutable [T09 proof](../../docs/proof/M10A-T09.md).

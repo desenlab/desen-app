@@ -28,7 +28,10 @@ const PACKAGE_ROOT = resolve(import.meta.dirname, "../../packages/reference-cata
 const CHANNEL_NAME = "preview";
 const HOST_ID = "reference-host-web";
 const SOURCE_KEY = "account-app-source";
-const MAX_RESPONSE_BYTES = 2_097_152;
+const MAX_CONTROL_PLANE_RESPONSE_BYTES = 2_097_152;
+// A Catalog-derived production asset can be larger than a control-plane body. This higher ceiling
+// is used only while attesting locally built static files and remains below buildFiles' file cap.
+const MAX_SERVED_STATIC_BUILD_RESPONSE_BYTES = 8 * 1024 * 1024;
 const DIGEST = /^sha256:[0-9a-f]{64}$/u;
 const COMMANDS = Object.freeze(["boot", "observe", "install-negative", "shutdown"]);
 const NEGATIVE_CASES = Object.freeze(["corrupt-revision", "catalog-mismatch"]);
@@ -111,8 +114,11 @@ for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {
   process.once(signal, () => void stopOnDisconnect());
 }
 
-async function responseBytes(response) {
+async function responseBytes(response, maximumBytes = MAX_CONTROL_PLANE_RESPONSE_BYTES) {
   requireInvariant(response.body !== null);
+  requireInvariant(
+    Number.isSafeInteger(maximumBytes) && maximumBytes > 0 && maximumBytes <= 16_777_216,
+  );
   const chunks = [];
   let length = 0;
   const reader = response.body.getReader();
@@ -121,7 +127,7 @@ async function responseBytes(response) {
       const next = await reader.read();
       if (next.done) break;
       length += next.value.byteLength;
-      requireInvariant(length <= MAX_RESPONSE_BYTES && chunks.length < 1_024);
+      requireInvariant(length <= maximumBytes && chunks.length < 1_024);
       chunks.push(Buffer.from(next.value));
     }
   } catch {
@@ -217,7 +223,7 @@ async function verifyServedBuild(directory, origin) {
       signal: globalThis.AbortSignal.timeout(10_000),
     });
     requireInvariant(response.status === 200);
-    const bytes = await responseBytes(response);
+    const bytes = await responseBytes(response, MAX_SERVED_STATIC_BUILD_RESPONSE_BYTES);
     requireInvariant(bytes.byteLength === entry.bytes && hash(bytes) === entry.sha256);
   }
   return hash(JSON.stringify(entries));

@@ -193,7 +193,8 @@ not a fabricated Continue result. Additional external research is not a prerequi
 the subsequent planned M11 extension proof. Internal automated acceptance replaces no market
 evidence: demand, adoption and broad Storybook/Chromatic/Figma equivalence remain unproven.
 
-M10A-T01 through M10A-T11 are now `DONE`: the bounded Button, Select, and Dialog adapter foundation
+M10A-T01 through M10A-T11 are now `DONE`, and M10A-T12 is `IN_PROGRESS` with local 0.7.0 Catalog
+evidence: the bounded Button, Select, and Dialog adapter foundation
 is followed by the platform-neutral versioned project/token model, theme/token authoring workbench,
 immutable release identity, private layout/content starter Catalog, form-control Catalog, and bounded
 overlay/disclosure Catalog plus bounded data-display/feedback Catalog, an application-owned
@@ -211,7 +212,10 @@ browser harness. T06's form-control closure is likewise limited to its private C
 proof; M10A-T07 is `DONE` with exact-head hosted and fresh-`main` evidence. M10A-T08 is `DONE`
 with exact-head hosted and fresh-`main` evidence for its bounded overlay/disclosure Catalog.
 M10A-T09 is `DONE` with exact-head hosted and fresh-`main` evidence for its bounded
-data-display/feedback Catalog. M10A-T10 is `DONE` with that same closure for application-local
-project/surface lifecycle only. T11 is `DONE` with exact-head hosted and fresh-`main` closure; it adds no Runtime,
-Publisher, Core/protocol, G10A, or M11 authority. G10A must pass before M11-T01 or M11-T08, and SC-02 authorizes no
-external publication or deployment.
+data-display/feedback Catalog. T08's 0.5.0 and T09's 0.6.0 artifacts are immutable historical
+receipts; T12 owns the current 0.7.0 capture, normal-app lazy typed visual controls, bounded
+responsive frames/ordered overrides, and aggregate persistence only. T10 is `DONE` with that same
+closure for application-local project/surface lifecycle only. T11 is `DONE` with exact-head hosted
+and fresh-`main` closure. T12 remains pending exact-head hosted/fresh-`main` closure and adds no Runtime,
+Publisher, Core/protocol, G10A, or M11 authority. G10A must pass before M11-T01 or M11-T08, and SC-02
+authorizes no external publication or deployment.

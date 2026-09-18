@@ -52,7 +52,7 @@ fresh compatibility checks.
 Map provider, drag-and-drop adapter, router, query cache, and UI component dependencies are chosen
 only by their owning tasks and require an ADR when they affect public capability contracts.
 
-## M10A product foundation — T01 through T11 complete; T12 next
+## M10A product foundation — T01 through T11 complete; T12 local evidence in progress
 
 M10A-T01 pins `@base-ui/react` **1.8.0** behind the private
 `@desen/starter-catalog-web` Catalog/adapter package, with DESEN-owned Neutral styles implemented
@@ -82,10 +82,13 @@ normal App integration, durable production storage, Publisher, or protocol autho
 `DONE` with exact-head hosted and fresh-`main` form-control closure. M10A-T07 is `DONE` with
 exact-head hosted and fresh-`main` 0.4.0 selection/numeric evidence; M10A-T08 is `DONE` with
 exact-head hosted and fresh-`main` 0.5.0 overlay/disclosure evidence; M10A-T09 is `DONE` with
-exact-head hosted and fresh-`main` 0.6.0 data-display/feedback evidence. M10A-T10 is `DONE` with
-application-owned project/surface lifecycle and generation-fenced storage only. M10A-T11 is `DONE`
-with exact-head hosted and fresh-`main` direct-manipulation closure. Neither task adds Runtime,
-Publisher, Core/protocol, G10A, or M11 authority. M11 has not started.
+exact-head hosted and fresh-`main` 0.6.0 data-display/feedback evidence. Those 0.5.0/0.6.0 artifacts
+are immutable historical receipts. M10A-T10 is `DONE` with application-owned project/surface lifecycle
+and generation-fenced storage only; M10A-T11 is `DONE` with exact-head hosted and fresh-`main`
+direct-manipulation closure. M10A-T12 is `IN_PROGRESS`: it owns the current 0.7.0 Catalog capture,
+lazy Catalog Inspector, typed visual controls, bounded responsive previews, and project-workspace
+aggregate persistence. It does not add named-theme management, Runtime, Publisher, Core/protocol,
+G10A, or M11 authority; hosted closure remains pending. M11 has not started.
 The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
 capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
 and hermetic capture configuration. No Storybook, Chromatic, Tailwind or second primitive library

@@ -18,7 +18,7 @@ import {
   DESEN_APP_REAL_ADAPTER_CANVAS_SHELL_PIN,
   DesenAppRealAdapterCanvasProofError,
   buildDesenAppRealAdapterCanvasEvidence,
-  buildDesenAppRealAdapterCanvasM10AT11SuccessorEvidence,
+  buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence,
   verifyDesenAppRealAdapterCanvasEvidence,
   verifyDesenAppRealAdapterCanvasGraphPolicy,
   verifyDesenAppRealAdapterCanvasSourcePolicy,
@@ -91,7 +91,7 @@ let adapterCanvasSource;
 let applicationSource;
 let authoringSelectionSource;
 let built;
-let m10aT11Successor;
+let m10aT12Successor;
 let hostSourceAuditArtifact;
 let hostSourceAuditArtifactBytes;
 let shellArtifactBytes;
@@ -140,7 +140,7 @@ before(async () => {
     applicationSource,
     authoringSelectionSource,
     built,
-    m10aT11Successor,
+    m10aT12Successor,
     hostSourceAuditArtifactBytes,
     shellArtifactBytes,
     fixturesScenariosArtifactBytes,
@@ -149,7 +149,7 @@ before(async () => {
     readFile(path.join(ROOT, APPLICATION), "utf8"),
     readFile(path.join(ROOT, AUTHORING_SELECTION), "utf8"),
     buildDesenAppRealAdapterCanvasEvidence(),
-    buildDesenAppRealAdapterCanvasM10AT11SuccessorEvidence(),
+    buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence(),
     readFile(path.join(ROOT, HOST_SOURCE_AUDIT_ARTIFACT)),
     readFile(path.join(ROOT, SHELL_ARTIFACT)),
     readFile(path.join(ROOT, FIXTURES_SCENARIOS_ARTIFACT)),
@@ -291,92 +291,65 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[2], async () => {
   assert.equal(Object.isFrozen(second.currentCompatibility), true);
 });
 
-test("[M10A-T11 successor] keeps the frozen M09 projection while proving live direct manipulation", () => {
-  assert.equal(m10aT11Successor.profile, "desen.app.real-adapter-canvas-m10a-t11-successor.v1");
-  assert.equal(m10aT11Successor.task, "M10A-T11");
-  assert.equal(m10aT11Successor.result, "PASS");
-  assert.equal(m10aT11Successor.historicalM09ProjectionPreserved, true);
-  assert.deepEqual(m10aT11Successor.sourceInventory, {
-    sourceFiles: 59,
-    reachableProductionSourceFiles: 54,
-    intentionallyUnreachableSourceFiles: 5,
+test("[M10A-T12 successor] keeps frozen M09 while authenticating current rich authoring", () => {
+  assert.equal(m10aT12Successor.profile, "desen.app.real-adapter-canvas-m10a-t12-successor.v1");
+  assert.equal(m10aT12Successor.task, "M10A-T12");
+  assert.equal(m10aT12Successor.result, "PASS");
+  assert.equal(m10aT12Successor.historicalM09ProjectionPreserved, true);
+  assert.deepEqual(m10aT12Successor.artifact, {
+    task: "M10A-T12",
+    path: "docs/proof/artifacts/m10a-t12.json",
+    bytes: 11804,
+    sha256: "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b",
   });
-  assert.deepEqual(m10aT11Successor.directManipulation, {
+  assert.deepEqual(m10aT12Successor.catalog, {
+    id: "run.desen.starter.web",
+    version: "0.7.0",
+    target: "web-react",
+    bytes: 4120610,
+    sha256: "aa8e9fb01fed930a7f56cd09cf7328e6a49ffa556c4fe80571b5454dd24f87b6",
+  });
+  assert.deepEqual(m10aT12Successor.sourceInventory, {
+    sourceFiles: 67,
+    reachableProductionSourceFiles: 64,
+    intentionallyUnreachableSourceFiles: 3,
+    exactReceiptCoverage: 67,
+  });
+  assert.deepEqual(m10aT12Successor.retainedDirectManipulation, {
     sourcePath: "apps/desen-app/src/authoring-direct-manipulation.ts",
-    maxSelectionSize: 256,
-    runtimeImports: 0,
+    canvasControlsPath: "apps/desen-app/src/canvas-manipulation-controls.tsx",
+    retained: true,
   });
-  assert.deepEqual(m10aT11Successor.canvasManipulationControls, {
-    sourcePath: "apps/desen-app/src/canvas-manipulation-controls.tsx",
-    adapterManagedSubtreeAuthority: false,
-    runtimeImports: 2,
+  assert.equal(m10aT12Successor.richStyleAuthoring.receiptCount, 8);
+  assert.equal(m10aT12Successor.richStyleAuthoring.catalogBound, true);
+  assert.deepEqual(m10aT12Successor.richStyleAuthoring.sourcePaths, [
+    "apps/desen-app/src/authoring-design-tokens.ts",
+    "apps/desen-app/src/authoring-style-preview-runtime.ts",
+    "apps/desen-app/src/authoring-styles.ts",
+    "apps/desen-app/src/local-project-workspace-persistence.ts",
+    "apps/desen-app/src/project-workspace-authoring-persistence.ts",
+    "apps/desen-app/src/starter-neutral-workspace-profile.ts",
+    "apps/desen-app/src/starter-workspace-product.tsx",
+    "apps/desen-app/src/style-panel.tsx",
+  ]);
+  assert.deepEqual(m10aT12Successor.runtimeResolution, {
+    profile: "m10a-t12-central-current-product",
+    moduleCount: 689,
+    staticEdges: 2970,
+    dynamicEdges: 0,
+    unresolvedEdges: 0,
+    graphSha256: "sha256:4d2a4a74154d5041380a79a726ea698d9197dace3f25391ca6614492108df823",
   });
-  assert.equal(m10aT11Successor.runtimeResolution.profile, "m10a-t11-live-product");
-  assert.equal(m10aT11Successor.runtimeResolution.moduleCount, 172);
-  assert.equal(m10aT11Successor.runtimeResolution.staticEdges, 525);
-  assert.equal(m10aT11Successor.runtimeResolution.dynamicEdges, 0);
-  assert.equal(
-    m10aT11Successor.runtimeResolution.graphSha256,
-    "sha256:b811e2c3101e62f480917a027bcc0d7fdf8754ff8fbb66f09e4e0bab0880779f",
-  );
-  assert.deepEqual(
-    graphModule(
-      m10aT11Successor.runtimeResolution.modules,
-      "apps/desen-app/src/authoring-direct-manipulation.ts",
-    ).imports,
-    [],
-  );
-  assert.deepEqual(
-    graphModule(
-      m10aT11Successor.runtimeResolution.modules,
-      "apps/desen-app/src/canvas-manipulation-controls.tsx",
-    ).imports,
-    ["apps/desen-app/src/application.module.css", "node_modules/react/jsx-runtime.js"],
-  );
-  assert.equal(
-    graphModule(m10aT11Successor.runtimeResolution.modules, APPLICATION).imports.includes(
-      "apps/desen-app/src/authoring-direct-manipulation.ts",
-    ),
-    true,
-  );
-  assert.equal(
-    graphModule(m10aT11Successor.runtimeResolution.modules, APPLICATION).imports.includes(
-      "apps/desen-app/src/canvas-manipulation-controls.tsx",
-    ),
-    true,
-  );
-  assert.equal(
-    m10aT11Successor.receipts.some(
-      ({ path: receiptPath, sha256 }) =>
-        receiptPath === "apps/desen-app/src/authoring-direct-manipulation.ts" &&
-        sha256 === "sha256:05d24fc35b2e57ea30d85ab2cbcd875ec5952dfed8828ce6dadbf07cd7c5f20c",
-    ),
-    true,
-  );
+});
 
-  const directIdentityMutation = structuredClone(m10aT11Successor.runtimeResolution.modules);
-  graphModule(
-    directIdentityMutation,
-    "apps/desen-app/src/authoring-direct-manipulation.ts",
-  ).codeSha256 = `sha256:${"0".repeat(64)}`;
-  assert.throws(
-    () =>
-      verifyDesenAppRealAdapterCanvasGraphPolicy(directIdentityMutation, hostSourceAuditArtifact),
-    expectedError("VITE_GRAPH_DRIFT"),
+test("[M10A-T12 successor] rejects caller-supplied graph or artifact authority", async () => {
+  await assert.rejects(
+    buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence({ unexpected: true }),
+    expectedError("OPTIONS_INVALID"),
   );
-
-  const controlEdgeMutation = structuredClone(m10aT11Successor.runtimeResolution.modules);
-  graphModule(
-    controlEdgeMutation,
-    "apps/desen-app/src/canvas-manipulation-controls.tsx",
-  ).imports.push("apps/desen-app/src/authoring-direct-manipulation.ts");
-  graphModule(
-    controlEdgeMutation,
-    "apps/desen-app/src/canvas-manipulation-controls.tsx",
-  ).imports.sort();
-  assert.throws(
-    () => verifyDesenAppRealAdapterCanvasGraphPolicy(controlEdgeMutation, hostSourceAuditArtifact),
-    expectedError("VITE_GRAPH_DRIFT"),
+  await assert.rejects(
+    buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence({ workspaceRoot: ROOT + "\0" }),
+    expectedError("OPTIONS_INVALID"),
   );
 });
 
@@ -943,9 +916,9 @@ test(DESEN_APP_REAL_ADAPTER_CANVAS_ROOT_TEST_NAMES[9], async () => {
   assert.equal(verified.result, "PASS");
   assert.equal(verified.graphModules, 102);
   assert.equal(verified.currentGraphModules, 156);
-  assert.equal(verified.m10aT11GraphModules, 172);
-  assert.equal(verified.m10aT11GraphProfile, "m10a-t11-live-product");
-  assert.equal(verified.m10aT11HistoricalM09ProjectionPreserved, true);
+  assert.equal(verified.m10aT12GraphModules, 689);
+  assert.equal(verified.m10aT12GraphProfile, "m10a-t12-central-current-product");
+  assert.equal(verified.m10aT12HistoricalM09ProjectionPreserved, true);
   assert.equal(verified.sharedRuntimeModules, 19);
   assert.equal(verified.realComponentModules, 5);
 

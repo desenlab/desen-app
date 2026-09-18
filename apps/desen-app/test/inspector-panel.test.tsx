@@ -10,7 +10,6 @@ import { REFERENCE_EDITOR_DOCUMENT } from "../src/reference-authoring-profile.js
 
 import type {
   ComponentInspectorControl,
-  ComponentInspectorControlPlan,
   ComponentInspectorFallbackReason,
   JsonValue,
 } from "@desen/catalog-sdk";
@@ -49,16 +48,6 @@ function readyModel(
   controlCount: number,
   localStates: readonly AuthoringInspectorStateOption[] = Object.freeze([]),
 ): AuthoringInspectorReadyModel {
-  const controls = Object.freeze(fields.map(({ control }) => control));
-  const inspector = Object.freeze({
-    propsSchema: Object.freeze({
-      additionalProperties: false,
-      properties: Object.freeze({}),
-      type: "object",
-    }),
-    controls,
-  }) satisfies ComponentInspectorControlPlan;
-
   return Object.freeze({
     component: Object.freeze({
       authoringCategory: "Test",
@@ -66,9 +55,11 @@ function readyModel(
       defaultProps: Object.freeze({}),
       displayName: "Test component",
       id: "com.example.test/Inspector",
-      inspector,
+      previewAdapter: undefined,
       semanticCategory: undefined,
       slotContracts: Object.freeze([]),
+      styleParts: Object.freeze([]),
+      visualStates: Object.freeze([]),
     }),
     controlCount,
     fields: Object.freeze([...fields]),
@@ -154,7 +145,7 @@ describe("Desen App nested and structured Inspector panel", () => {
     document.body.replaceChildren();
   });
 
-  it("keeps right-sidebar tab panels mounted while providing keyboard-accessible Inspector, State, and Actions views", () => {
+  it("keeps right-sidebar tab panels mounted while providing keyboard-accessible Inspector, Style, State, and Actions views", () => {
     render(
       <InspectorPanel
         eventActionControls={<DraftProbe label="Action draft" />}
@@ -167,9 +158,10 @@ describe("Desen App nested and structured Inspector panel", () => {
     const inspector = screen.getByRole("complementary", { name: "Inspector" });
     const tabs = within(inspector).getAllByRole("tab");
     expect(within(inspector).getByRole("tablist", { name: "Inspector views" })).toBeTruthy();
-    expect(tabs.map((tab) => tab.textContent)).toEqual(["Inspector", "State", "Actions"]);
+    expect(tabs.map((tab) => tab.textContent)).toEqual(["Inspector", "Style", "State", "Actions"]);
 
     const inspectorTab = within(inspector).getByRole("tab", { name: "Inspector" });
+    const styleTab = within(inspector).getByRole("tab", { name: "Style" });
     const stateTab = within(inspector).getByRole("tab", { name: "State" });
     const actionsTab = within(inspector).getByRole("tab", { name: "Actions" });
     const inspectorPanel = document.getElementById(
@@ -178,12 +170,16 @@ describe("Desen App nested and structured Inspector panel", () => {
     const statePanel = document.getElementById(
       stateTab.getAttribute("aria-controls") ?? "",
     ) as HTMLElement;
+    const stylePanel = document.getElementById(
+      styleTab.getAttribute("aria-controls") ?? "",
+    ) as HTMLElement;
     const actionsPanel = document.getElementById(
       actionsTab.getAttribute("aria-controls") ?? "",
     ) as HTMLElement;
 
     for (const [tab, panel] of [
       [inspectorTab, inspectorPanel],
+      [styleTab, stylePanel],
       [stateTab, statePanel],
       [actionsTab, actionsPanel],
     ] as const) {
@@ -192,10 +188,17 @@ describe("Desen App nested and structured Inspector panel", () => {
       expect(panel.getAttribute("aria-labelledby")).toBe(tab.id);
     }
     expect(inspectorTab.getAttribute("aria-selected")).toBe("true");
+    expect(stylePanel.hidden).toBe(true);
     expect(statePanel.hidden).toBe(true);
     expect(actionsPanel.hidden).toBe(true);
 
     fireEvent.keyDown(inspectorTab, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(styleTab);
+    expect(styleTab.getAttribute("aria-selected")).toBe("true");
+    expect(stylePanel.hidden).toBe(false);
+    expect(within(stylePanel).getByText("Select a layer for styles")).toBeTruthy();
+
+    fireEvent.keyDown(styleTab, { key: "ArrowRight" });
     expect(document.activeElement).toBe(stateTab);
     expect(stateTab.getAttribute("aria-selected")).toBe("true");
     expect(statePanel.hidden).toBe(false);

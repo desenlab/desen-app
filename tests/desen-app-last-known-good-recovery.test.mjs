@@ -22,6 +22,7 @@ import {
 } from "../scripts/lib/desen-app-last-known-good-recovery-proof.mjs";
 import {
   projectM10AT01CurrentGraphAudit,
+  projectM10AT12CurrentGraphAudit,
   projectM10AT11CurrentGraphAudit,
 } from "../scripts/lib/desen-app-published-host-update-proof.mjs";
 
@@ -37,6 +38,7 @@ let browser;
 let built;
 let finalCompiledReadOrdinal = 0;
 let m10aSuccessorReads = 0;
+let m10aT12SuccessorReads = 0;
 
 function errorCode(code) {
   return (error) => {
@@ -105,6 +107,9 @@ before(async () => {
     if (args[0] === path.join(ROOT, "docs/proof/artifacts/m10a-t01.json")) {
       m10aSuccessorReads++;
     }
+    if (args[0] === path.join(ROOT, "docs/proof/artifacts/m10a-t12.json")) {
+      m10aT12SuccessorReads++;
+    }
     return Reflect.apply(original, filesystem, args);
   };
   syncBuiltinESMExports();
@@ -116,6 +121,7 @@ before(async () => {
   }
   assert.ok(finalCompiledReadOrdinal >= 3);
   assert.ok(m10aSuccessorReads >= 2);
+  assert.ok(m10aT12SuccessorReads >= 2);
 });
 after(async () => {
   for (const root of temporaries) await rm(root, { recursive: true, force: true });
@@ -143,6 +149,23 @@ test(NAMES[1], () => {
     path: "docs/proof/artifacts/m10a-t01.json",
     bytes: 13_910,
     sha256: "711f74398fb1d250d392dd4ff1145527cdaa7ca8673e811c7f753d211554cc74",
+  });
+  assert.deepEqual(built.liveSuccessorAuthority.m10aT12, {
+    task: "M10A-T12",
+    path: "docs/proof/artifacts/m10a-t12.json",
+    bytes: 11804,
+    sha256: "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b",
+    catalog: {
+      id: "run.desen.starter.web",
+      version: "0.7.0",
+      target: "web-react",
+      bytes: 4120610,
+      sha256: "aa8e9fb01fed930a7f56cd09cf7328e6a49ffa556c4fe80571b5454dd24f87b6",
+    },
+    browserPackage: {
+      bytes: 1819,
+      sha256: "a811cf3d7ec960796ab47baee69524888a59efc0ab26e81a7eeeaf1968547c66",
+    },
   });
   assert.equal(built.liveSuccessorAuthority.currentObservationsAreNotHistoricalResults, true);
   const historical = built.artifact.authority.publicApiMatrix;
@@ -190,6 +213,26 @@ test(NAMES[1], () => {
   assert.equal(matrix.freshEmission.rootCount, 6);
   assert.equal(matrix.freshEmission.moduleCount, matrix.compiledModuleCount);
   assert.equal(matrix.freshEmission.sourceCount, matrix.compiledModuleCount);
+  assert.deepEqual(
+    matrix.freshEmission.inputReceipts.find(
+      (receipt) => receipt.path === "apps/control-plane-api/src/local-control-plane.ts",
+    ),
+    {
+      path: "apps/control-plane-api/src/local-control-plane.ts",
+      bytes: 9487,
+      sha256: "953a60350a593162c395484cfa5ea16a13527c821f403462c491d0a4ee51944d",
+    },
+  );
+  assert.deepEqual(
+    matrix.compiledModuleReceipts.find(
+      (receipt) => receipt.path === "apps/control-plane-api/dist/local-control-plane.js",
+    ),
+    {
+      path: "apps/control-plane-api/dist/local-control-plane.js",
+      bytes: 9875,
+      sha256: "f68c0208d2aaa8c7a893d1522890e652d2defbf2eeec9af1e1dbf3a55634d29b",
+    },
+  );
   for (const name of [
     "tsconfig.base.json",
     "tsconfig.node.json",
@@ -253,6 +296,21 @@ test(NAMES[2], () => {
     ["config", "workers: 1", "workers: 2"],
     ["server", 'from "@desen/protocol"', 'from "../../packages/protocol/src/revision.ts"'],
     ["server", "message.id === lastRequestId + 1", "message.id >= lastRequestId"],
+    [
+      "server",
+      "const MAX_CONTROL_PLANE_RESPONSE_BYTES = 2_097_152;",
+      "const MAX_CONTROL_PLANE_RESPONSE_BYTES = 8 * 1024 * 1024;",
+    ],
+    [
+      "server",
+      "const bytes = await responseBytes(response, MAX_SERVED_STATIC_BUILD_RESPONSE_BYTES);",
+      "const bytes = await responseBytes(response);",
+    ],
+    [
+      "server",
+      "const body = await responseBytes(response);",
+      "const body = await responseBytes(response, MAX_SERVED_STATIC_BUILD_RESPONSE_BYTES);",
+    ],
   ];
   for (const [key, marker, replacement] of mutations)
     assert.throws(
@@ -278,7 +336,10 @@ test(NAMES[3], async () => {
   assert.deepEqual(
     projectM10AT01CurrentGraphAudit(
       projectM10AT10CurrentGraphAudit(
-        projectM10AT11CurrentGraphAudit(graph, successor.authority.currentGraphAudit),
+        projectM10AT11CurrentGraphAudit(
+          projectM10AT12CurrentGraphAudit(graph, successor.authority.currentGraphAudit),
+          successor.authority.currentGraphAudit,
+        ),
         successor.authority.currentGraphAudit,
       ),
       successor.authority.currentGraphAudit,
@@ -290,7 +351,13 @@ test(NAMES[3], async () => {
   assert.throws(() =>
     projectM10AT01CurrentGraphAudit(
       projectM10AT10CurrentGraphAudit(
-        projectM10AT11CurrentGraphAudit(unrelatedGraphDrift, successor.authority.currentGraphAudit),
+        projectM10AT11CurrentGraphAudit(
+          projectM10AT12CurrentGraphAudit(
+            unrelatedGraphDrift,
+            successor.authority.currentGraphAudit,
+          ),
+          successor.authority.currentGraphAudit,
+        ),
         successor.authority.currentGraphAudit,
       ),
       successor.authority.currentGraphAudit,
@@ -433,6 +500,23 @@ test(NAMES[5], async () => {
       errorCode("TEST_AUTHORITY_DRIFT"),
     );
   }
+  await assert.rejects(
+    build({
+      fileOverrides: new Map([[packagePath, Buffer.concat([packageBytes, Buffer.from("\n")])]]),
+    }),
+    errorCode("SUCCESSOR_DRIFT"),
+  );
+  await assert.rejects(
+    build({
+      fileOverrides: new Map([
+        [
+          "apps/desen-app-browser-e2e/restart-recovery-proof-server.mjs",
+          Buffer.from(browser.server + "\n// unreviewed T12 recovery-server drift\n"),
+        ],
+      ]),
+    }),
+    errorCode("SUCCESSOR_DRIFT"),
+  );
   for (const name of [
     "pnpm-lock.yaml",
     "dependency-cruiser.config.cjs",

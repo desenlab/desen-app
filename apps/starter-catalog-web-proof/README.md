@@ -47,10 +47,12 @@ same static adapter registry; its exact-head hosted and fresh-`main` closure is 
 [T07 report](../../docs/proof/M10A-T07.md). It does not authorize normal-App integration, persistence,
 Publisher authority, Runtime activation, Core/protocol changes, G10A, or M11. Use
 `pnpm generate:m10a-t07`, `pnpm verify:m10a-t07`, and `pnpm test:m10a-t07` for the task-owned local
-evidence path. The T07 runner builds the starter package and Catalog afresh, owns localhost port
-`4190`, and writes disposable outputs only under a runner-owned temporary directory. Its local
-artifact is [`docs/proof/artifacts/m10a-t07.json`](../../docs/proof/artifacts/m10a-t07.json); exact-head
-hosted and fresh-`main` closure are recorded in the [T07 report](../../docs/proof/M10A-T07.md).
+evidence path. The T07 runner builds the starter package afresh and supplies its current Catalog as
+an in-memory Vite module, so historical browser verification never rewrites the tracked Catalog.
+It owns localhost port `4190` and writes disposable outputs only under a runner-owned temporary
+directory. Its local artifact is
+[`docs/proof/artifacts/m10a-t07.json`](../../docs/proof/artifacts/m10a-t07.json); exact-head hosted
+and fresh-`main` closure are recorded in the [T07 report](../../docs/proof/M10A-T07.md).
 
 ## M10A-T05 browser proof (historical)
 
