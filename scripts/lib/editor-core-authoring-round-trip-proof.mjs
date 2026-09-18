@@ -10,6 +10,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import { projectM10AT14HistoricalCompatibility } from "./editor-core-content-edits-proof.mjs";
 import {
   EXPECTED_PROTOCOL_SNAPSHOT,
   verifyProtocolSnapshot,
@@ -3289,6 +3290,7 @@ async function buildCapturedEvidence(options) {
   for (const relativePath of TRACKED_PATHS) {
     files.set(relativePath, await trackedBytes(relativePath, options));
   }
+  projectM10AT14HistoricalCompatibility(files);
   const boundary = verifyBoundary(files);
   assertRetainedT07Receipts(frozen.artifact, files);
   const predecessorExportInvariance = verifyPredecessorExportInvariance(

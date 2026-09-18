@@ -17,6 +17,7 @@ import {
 import { canonicalizeJsonBytes } from "../../packages/protocol/dist/index.js";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import { projectM10AT14HistoricalCompatibility } from "./editor-core-content-edits-proof.mjs";
 
 const { createDesenEditorDocument, createDesenEditorPersistencePort } = editorCoreRuntime;
 
@@ -133,6 +134,15 @@ const EDITOR_CORE_EMITTED_PATHS = Object.freeze(
     `packages/editor-core/dist/${name}.js`,
     `packages/editor-core/dist/${name}.js.map`,
   ]).sort(compareText),
+);
+const M10A_T14_CURRENT_EDITOR_CORE_EMITTED_PATHS = Object.freeze(
+  [
+    ...EDITOR_CORE_EMITTED_PATHS,
+    "packages/editor-core/dist/history.d.ts",
+    "packages/editor-core/dist/history.d.ts.map",
+    "packages/editor-core/dist/history.js",
+    "packages/editor-core/dist/history.js.map",
+  ].sort(compareText),
 );
 
 const PREREQUISITE_PINS = Object.freeze([
@@ -666,8 +676,8 @@ async function editorCoreEmittedPaths() {
     )
     .map((entry) => path.posix.join(relativeRoot, entry.name))
     .sort(compareText);
-  if (JSON.stringify(paths) !== JSON.stringify(EDITOR_CORE_EMITTED_PATHS)) {
-    fail("EMITTED_PACKAGE_DRIFT", "The current editor-core package must emit exactly 36 files.", {
+  if (JSON.stringify(paths) !== JSON.stringify(M10A_T14_CURRENT_EDITOR_CORE_EMITTED_PATHS)) {
+    fail("EMITTED_PACKAGE_DRIFT", "The current editor-core package must emit exactly 40 files.", {
       actual: paths,
     });
   }
@@ -842,7 +852,18 @@ function verifyEditorCoreCompatibility(files, t07Artifact) {
     "Emitted declaration type exports",
   );
   exactNames(
-    Object.keys(editorCoreRuntime),
+    Object.keys(editorCoreRuntime).filter(
+      (name) =>
+        ![
+          "captureDesenEditorClipboard",
+          "createDesenEditorHistory",
+          "pasteDesenEditorClipboard",
+          "readDesenEditorNodePlacement",
+          "recordDesenEditorHistory",
+          "redoDesenEditorHistory",
+          "undoDesenEditorHistory",
+        ].includes(name),
+    ),
     expectedRuntime,
     "PUBLIC_SURFACE_DRIFT",
     "Loaded public runtime exports",
@@ -1930,17 +1951,22 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
   const files = new Map();
   for (const relativePath of paths)
     files.set(relativePath, await trackedBytes(relativePath, options));
+  const historicalFiles = new Map(files);
+  projectM10AT14HistoricalCompatibility(historicalFiles);
   const validSource = parseJson(files.get(FIXTURE_PATH), FIXTURE_PATH);
   const integration = await runIntegration(validSource);
-  const tests = verifyTestAuthority(files);
-  const packageScripts = verifyPackageScriptAuthority(files);
+  const tests = verifyTestAuthority(historicalFiles);
+  const packageScripts = verifyPackageScriptAuthority(historicalFiles);
   const t07Artifact = parseJson(
-    files.get(PREREQUISITE_PINS[1].path),
+    historicalFiles.get(PREREQUISITE_PINS[1].path),
     "frozen M08-T07 prerequisite",
   );
-  const editorCoreCompatibility = verifyEditorCoreCompatibility(files, t07Artifact);
-  const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
-  const m10aT12RetainedReceiptSuccessor = await assertRetainedT08Receipts(frozen.artifact, files);
+  const editorCoreCompatibility = verifyEditorCoreCompatibility(historicalFiles, t07Artifact);
+  const publishActivationSuccessor = authenticatePublishActivationSuccessor(historicalFiles);
+  const m10aT12RetainedReceiptSuccessor = await assertRetainedT08Receipts(
+    frozen.artifact,
+    historicalFiles,
+  );
   if (options.fileOverrides.size !== 0) {
     fail("TRACKED_FILE_OVERRIDE_REJECTED", "Caller file overrides cannot issue M08-T08 PASS.");
   }
