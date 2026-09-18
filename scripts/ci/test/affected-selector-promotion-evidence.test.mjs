@@ -277,7 +277,7 @@ async function rejectsCompletedCutover(mutate, code = "AFFECTED_PROMOTION_CUTOVE
   await rejects(code, (value) => mutate(completeHostedCutover(value), value));
 }
 
-test("authenticates the exact 20/20 hosted campaign and live M10A-T12 successor", async () => {
+test("authenticates the exact 20/20 hosted campaign and live M10A-T13 successor", async () => {
   const historicalEvidence = await evidence();
   assert.equal(
     historicalEvidence.runnerAuthority.workflowContract.processTimeout,
@@ -334,13 +334,13 @@ test("authenticates the exact 20/20 hosted campaign and live M10A-T12 successor"
     },
   );
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "bd367355fb54138a34d46043bc55fd796c4a828f38d5f892a1cf0161e0fc41b2",
-    ownershipSha256: "aca5fcc3dc5553b2124967e8832f2f58f577ef600d7f54a8c3c50182878ec7b2",
-    impactGraphSha256: "e63f9d4e1e0c84e4454c871fd81f41847d08458068fa29992eb1943de0c86d83",
+    selectorSha256: "fe137b723155089b3c477450a3d1e5b2869187ca52419564580502b72a114fc4",
+    ownershipSha256: "463e3f2217766da38dac2a908c78508d7a6a7d7c84886378769904c91032157c",
+    impactGraphSha256: "98b7c102727998744a86a74ac99005b8ce40f83c8a9c98f5223c71893249b1db",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
-    inventorySha256: "42ea99fdf6b24c4a4e5c5f9a0750925b0619e10ff2abeb10762e658105e049b4",
+    inventorySha256: "a647fd20787c7dd8515c7531ef8bdafc026acf05ce36aa6b4db1b5ec9c19bbf2",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "224e0b5b9741502f6176bfbf1752f9d85a9d12cd04d8091f45117d5b78532ab3",
+    runnerAuthoritySha256: "fa2a3e8543bf9b001ac667dc6b8ba9b2a7bd12c088bb7ffde3da80efa423e24c",
   });
 });
 

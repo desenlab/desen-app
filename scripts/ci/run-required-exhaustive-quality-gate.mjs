@@ -72,8 +72,8 @@ const REGION_EXECUTION_OPTION_KEYS = Object.freeze([
   "printCommandFunction",
 ]);
 const EXPECTED_PLAN_SHA256_BY_AUTHORITY = Object.freeze({
-  REQUIRED: "3528a260b6365f9ab61b4886f489079ccd2767ac84b173f8f5c8c357f3011299",
-  SHADOW: "cda39b415bbc0d1cbe3a5652c15ab9b8442704d6e0314437f2aeeb158907f229",
+  REQUIRED: "4eb596fa3ec8ceec77466321e3ab408ecfaa184ef5b7c8dadc830c0c5f816546",
+  SHADOW: "7a56bfc28aeef70803884f3d7e6dfa10bf5b3d30329a61fe4c57f80d57f7c5d3",
 });
 const PROOF_PAIR_CONCURRENCY = 2;
 const EARLY_ORDINARY_PROOF_PAIR_IDS = Object.freeze([
@@ -671,7 +671,7 @@ function validatePlanForExecution(candidate, expectedAuthority) {
       );
     }
   }
-  if (candidate.concurrency !== PROOF_PAIR_CONCURRENCY || candidate.stepCount !== 254) {
+  if (candidate.concurrency !== PROOF_PAIR_CONCURRENCY || candidate.stepCount !== 256) {
     fail(
       "REQUIRED_EXHAUSTIVE_PLAN_DRIFT",
       "The exhaustive plan widened concurrency or omitted workloads.",
@@ -2428,8 +2428,8 @@ function printableReceipt(boundaryReceipt, error) {
     inventorySha256: execution?.inventorySha256,
     concurrency: execution?.concurrency,
     observedClosedCount: execution?.observedClosedCount ?? 0,
-    stepCount: execution?.stepCount ?? 254,
-    proofPairCount: execution?.proofPairCount ?? 120,
+    stepCount: execution?.stepCount ?? 256,
+    proofPairCount: execution?.proofPairCount ?? 121,
     repository: repository
       ? {
           proofCount: repository.proofCount,
