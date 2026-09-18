@@ -33,6 +33,25 @@ local verification commands.
 
 ## Execution modes
 
+### Local developer feedback
+
+For a quick, non-authoritative signal between commits, use the existing package tooling only when
+the diff is limited to modified tracked source under `apps/*/{src,test,test-d,dev}` or
+`packages/*/{src,test,test-d,dev}`:
+
+```bash
+pnpm format:check
+TURBO_FORCE=true pnpm exec turbo run lint typecheck build test \
+  '--filter=...[origin/main]' --force
+pnpm boundaries
+```
+
+Metadata, policy/CI, dependency, deleted/renamed, untracked, or otherwise uncertain changes must
+use the complete `pnpm check` compatibility audit. This is developer feedback, not passing
+authority: it never changes the hosted dispatcher, the affected selector, the exhaustive
+inventory, deadlines, or any required proof workload. Hosted CI still performs its exact fresh
+required route and remains the only merge authority.
+
 ### Pull requests
 
 An exact trusted diff enters `REQUIRED + AFFECTED`. Every changed path must resolve through the
