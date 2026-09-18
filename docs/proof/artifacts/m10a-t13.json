@@ -17,8 +17,8 @@
     },
     {
       "path": "apps/desen-app/src/main.tsx",
-      "bytes": 6840,
-      "sha256": "21cb3615a8814a2ac1a49d673c8be9e3b9c107c3c8b5f25387f2d6393ca79268"
+      "bytes": 6793,
+      "sha256": "03f4c3040c67c4d3644c71835b347ea96fc861a155b217ab87b8ff8277973393"
     },
     {
       "path": "package.json",

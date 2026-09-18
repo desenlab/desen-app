@@ -133,9 +133,13 @@ const M10A_T12_LOCKFILE_RECEIPT = Object.freeze({
   bytes: 140_493,
   sha256: "a207a5de2bc071f801ab3771ac7d5115c298149f97c92b0453654111a09c917a",
 });
+const M10A_T13_LOCKFILE_RECEIPT = Object.freeze({
+  bytes: 141_822,
+  sha256: "2973a4c7af7283756095e12ed8b4c39c456027987b7a8e3352d0b6680162feb8",
+});
 const M10A_T12_APP_PACKAGE_RECEIPT = Object.freeze({
-  bytes: 5_133,
-  sha256: "18d5b7479278b39e337027b0739e1f1b6055d0291b774ed761a7a6ecb4ad436e",
+  bytes: 5_226,
+  sha256: "06d2ae3491c70c8efe4c6d3cd2e8084dbef1894abb9334859269c2597b46f8ac",
 });
 const M10A_T12_BROWSER_PACKAGE_RECEIPT = Object.freeze({
   bytes: 1_819,
@@ -1475,8 +1479,16 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
   const compatibility = built.dependencySecurityCompatibility;
   assert.equal(compatibility.authority, "SEC-02");
   assert.equal(compatibility.currentBytes, liveLockfile.byteLength);
-  assert.equal(compatibility.currentBytes, M10A_T12_LOCKFILE_RECEIPT.bytes);
-  assert.equal(compatibility.currentSha256, M10A_T12_LOCKFILE_RECEIPT.sha256);
+  assert.equal(compatibility.currentBytes, M10A_T13_LOCKFILE_RECEIPT.bytes);
+  assert.equal(compatibility.currentSha256, M10A_T13_LOCKFILE_RECEIPT.sha256);
+  assert.deepEqual(compatibility.t13LockfileSuccessor, {
+    task: "M10A-T13",
+    ...M10A_T13_LOCKFILE_RECEIPT,
+    additivePredecessor: {
+      authority: "M10A-T12",
+      ...M10A_T12_LOCKFILE_RECEIPT,
+    },
+  });
   assert.deepEqual(compatibility.t12LockfileSuccessor, {
     task: "M10A-T12",
     ...M10A_T12_LOCKFILE_RECEIPT,
@@ -1685,10 +1697,16 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   }
   const liveLockfile = await readFile(path.join(ROOT, "pnpm-lock.yaml"));
   const liveLockfileText = liveLockfile.toString("utf8");
-  assert.equal(liveLockfile.byteLength, M10A_T12_LOCKFILE_RECEIPT.bytes);
+  assert.equal(liveLockfile.byteLength, M10A_T13_LOCKFILE_RECEIPT.bytes);
   assert.equal(
     createHash("sha256").update(liveLockfile).digest("hex"),
-    M10A_T12_LOCKFILE_RECEIPT.sha256,
+    M10A_T13_LOCKFILE_RECEIPT.sha256,
+  );
+  const m10aT12Lockfile = authenticateM10AT12LockfileSuccessor(liveLockfile).predecessorBytes;
+  assert.equal(m10aT12Lockfile.byteLength, 140_493);
+  assert.equal(
+    createHash("sha256").update(m10aT12Lockfile).digest("hex"),
+    "a207a5de2bc071f801ab3771ac7d5115c298149f97c92b0453654111a09c917a",
   );
   const m10aT10Lockfile = projectM10AT12HistoricalInput("pnpm-lock.yaml", liveLockfile);
   assert.equal(m10aT10Lockfile.byteLength, M10A_T10_LOCKFILE_RECEIPT.bytes);
@@ -1698,7 +1716,7 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   );
   assert.deepEqual(
     authenticateM10AT12LockfileSuccessor(liveLockfile).predecessorBytes,
-    m10aT10Lockfile,
+    m10aT12Lockfile,
   );
   const m10aT04Lockfile = projectM10AT04Lockfile(m10aT10Lockfile);
   assert.equal(m10aT04Lockfile.byteLength, M10A_T04_LOCKFILE_RECEIPT.bytes);

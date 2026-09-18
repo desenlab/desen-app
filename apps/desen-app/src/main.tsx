@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { SIGN_IN_OPERATION_ID } from "@desen/reference-catalog-web/operations";
-import "@fontsource-variable/inter/index.css";
 
 import { createAuthoringIntegrationBinding } from "./authoring-integration.js";
 import { createInjectedDesenAppLocalProjectWorkspaceStoragePort } from "./local-project-workspace-persistence.js";
