@@ -1698,10 +1698,10 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 126,
-  headSha256: "fb0f8ab978037303687b9e1415e60ec1ff9ece1c3a0c79fe491c5cfcdc06b334",
-  frozenArtifactCount: 75,
-  currentReaderCount: 150,
+  sequence: 127,
+  headSha256: "979f137621eb9317e50c8deabdcb8025a15fdbf96b85a51705958f7aad3a1578",
+  frozenArtifactCount: 76,
+  currentReaderCount: 152,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
