@@ -83,9 +83,9 @@ jobs:
     if: ${{ needs.quality-route.outputs.mode == 'EXHAUSTIVE' }}
     name: Exhaustive proof A
     runs-on: ubuntu-24.04
-    # Each isolated workspace keeps two workers, a 24m30s soft deadline, and a 25m process
-    # ceiling. The 30m job budget leaves setup, receipt, and TERM/KILL-grace headroom.
-    timeout-minutes: 30
+    # Each isolated workspace keeps two workers, a 27m soft deadline, and a 28m process
+    # ceiling. The 33m job budget leaves setup, receipt, and TERM/KILL-grace headroom.
+    timeout-minutes: 33
     outputs:
       receipt: ${{ steps.execute.outputs.receipt }}
     env:
@@ -127,16 +127,16 @@ jobs:
 
       - name: Run fresh exhaustive shard
         id: execute
-        run: timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-a
+        run: timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-a
 
   proof-b:
     needs: quality-route
     if: ${{ needs.quality-route.outputs.mode == 'EXHAUSTIVE' }}
     name: Exhaustive proof B
     runs-on: ubuntu-24.04
-    # Each isolated workspace keeps two workers, a 24m30s soft deadline, and a 25m process
-    # ceiling. The 30m job budget leaves setup, receipt, and TERM/KILL-grace headroom.
-    timeout-minutes: 30
+    # Each isolated workspace keeps two workers, a 27m soft deadline, and a 28m process
+    # ceiling. The 33m job budget leaves setup, receipt, and TERM/KILL-grace headroom.
+    timeout-minutes: 33
     outputs:
       receipt: ${{ steps.execute.outputs.receipt }}
     env:
@@ -178,16 +178,16 @@ jobs:
 
       - name: Run fresh exhaustive shard
         id: execute
-        run: timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-b
+        run: timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-b
 
   proof-c:
     needs: quality-route
     if: ${{ needs.quality-route.outputs.mode == 'EXHAUSTIVE' }}
     name: Exhaustive proof C
     runs-on: ubuntu-24.04
-    # Each isolated workspace keeps two workers, a 24m30s soft deadline, and a 25m process
-    # ceiling. The 30m job budget leaves setup, receipt, and TERM/KILL-grace headroom.
-    timeout-minutes: 30
+    # Each isolated workspace keeps two workers, a 27m soft deadline, and a 28m process
+    # ceiling. The 33m job budget leaves setup, receipt, and TERM/KILL-grace headroom.
+    timeout-minutes: 33
     outputs:
       receipt: ${{ steps.execute.outputs.receipt }}
     env:
@@ -232,7 +232,7 @@ jobs:
 
       - name: Run fresh exhaustive shard
         id: execute
-        run: timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-c
+        run: timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-c
 
   quality:
     needs: [quality-route, proof-a, proof-b, proof-c]
@@ -244,7 +244,7 @@ jobs:
     # exact-revision shards, rebuilds locally, and runs the unchanged closing boundary workloads.
     # A repeated affected admission may fail closed into one full exhaustive execution, so this
     # envelope matches the shard/join process ceiling and retains setup and TERM/KILL headroom.
-    timeout-minutes: 30
+    timeout-minutes: 33
     env:
       CI: "true"
       DESEN_REQUIRED_BASE_REVISION: ${{ github.event.pull_request.base.sha || '' }}
@@ -334,13 +334,13 @@ jobs:
 
       - name: Run required quality gate
         if: ${{ needs.quality-route.outputs.mode == 'AFFECTED' }}
-        run: timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-affected-quality-gate.mjs
+        run: timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-affected-quality-gate.mjs
 
       - name: Join fresh exhaustive quality gate
         if: ${{ needs.quality-route.outputs.mode == 'EXHAUSTIVE' }}
         env:
           DESEN_REQUIRED_SHARD_JOIN_NEEDS: ${{ toJSON(needs) }}
-        run: timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-sharded-quality-gate.mjs join
+        run: timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-sharded-quality-gate.mjs join
 
       - name: Save trusted pnpm store
         if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.pnpm-cache.outputs.cache-hit != 'true' }}

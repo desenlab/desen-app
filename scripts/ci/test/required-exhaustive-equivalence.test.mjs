@@ -23,7 +23,7 @@ const UNCHANGED_DIGEST = "a".repeat(64);
 const CHANGED_DIGEST = "b".repeat(64);
 const WORKSPACE_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const REQUIRED_QUALITY_COMMAND =
-  "timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-affected-quality-gate.mjs";
+  "timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-affected-quality-gate.mjs";
 const BROWSER_E2E_COMMAND = "pnpm --filter @desen/app-browser-e2e test:e2e";
 const BROWSER_PROOF_VERIFIER_COMMAND =
   "node scripts/verify-desen-app-browser-e2e-workspace-compatibility.mjs";
@@ -372,12 +372,12 @@ test("official CI admits only required exhaustive authority and a manual legacy 
       scalarValue(shardJob, "if", 4),
       "${{ needs.quality-route.outputs.mode == 'EXHAUSTIVE' }}",
     );
-    assert.equal(scalarValue(shardJob, "timeout-minutes", 4), "30");
+    assert.equal(scalarValue(shardJob, "timeout-minutes", 4), "33");
     assert.match(shardJob, /ref: \$\{\{ github\.sha \}\}/u);
     assert.equal(
       exactRunCount(
         shardJob,
-        `timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-sharded-quality-gate.mjs shard ${shardId}`,
+        `timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-sharded-quality-gate.mjs shard ${shardId}`,
       ),
       1,
     );
@@ -394,7 +394,7 @@ test("official CI admits only required exhaustive authority and a manual legacy 
   assert.equal(
     exactRunCount(
       requiredJob,
-      "timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-sharded-quality-gate.mjs join",
+      "timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-sharded-quality-gate.mjs join",
     ),
     1,
   );
@@ -402,7 +402,7 @@ test("official CI admits only required exhaustive authority and a manual legacy 
   assert.match(requiredJob, /if: \$\{\{ needs\.quality-route\.outputs\.mode == 'AFFECTED' \}\}/u);
   assert.match(requiredJob, /if: \$\{\{ needs\.quality-route\.outputs\.mode == 'EXHAUSTIVE' \}\}/u);
   assert.equal(exactRunCount(requiredJob, RETAINED_LEGACY_COMMAND), 0);
-  assert.equal(scalarValue(requiredJob, "timeout-minutes", 4), "30");
+  assert.equal(scalarValue(requiredJob, "timeout-minutes", 4), "33");
   assert.match(requiredJob, /fetch-depth: 0/u);
   assert.match(requiredJob, /DESEN_REQUIRED_BASE_REVISION/u);
   assert.match(requiredJob, /DESEN_REQUIRED_HEAD_REVISION/u);

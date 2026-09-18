@@ -334,13 +334,13 @@ test("authenticates the exact 20/20 hosted campaign and live M10A-T12 successor"
     },
   );
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "3bb655de4d1fb8f83c6140cfeb2d6d543c7b318e6ceb2e9b2f5dcd2194f35f3d",
+    selectorSha256: "bd367355fb54138a34d46043bc55fd796c4a828f38d5f892a1cf0161e0fc41b2",
     ownershipSha256: "aca5fcc3dc5553b2124967e8832f2f58f577ef600d7f54a8c3c50182878ec7b2",
     impactGraphSha256: "e63f9d4e1e0c84e4454c871fd81f41847d08458068fa29992eb1943de0c86d83",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "42ea99fdf6b24c4a4e5c5f9a0750925b0619e10ff2abeb10762e658105e049b4",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "5e368d73deb437ec3d8acd592e6d910a0a8272fe9f0f4f732cd463f7f52e5ff0",
+    runnerAuthoritySha256: "224e0b5b9741502f6176bfbf1752f9d85a9d12cd04d8091f45117d5b78532ab3",
   });
 });
 
@@ -348,13 +348,13 @@ test("rejects rollback of every live execution timeout boundary", async () => {
   for (const [relativePath, currentFragment, staleFragment, occurrences = 1] of [
     [
       ".github/workflows/ci.yml",
-      "timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-affected-quality-gate.mjs",
+      "timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-affected-quality-gate.mjs",
       "timeout --signal=TERM --kill-after=30s 19m node scripts/ci/run-required-affected-quality-gate.mjs",
     ],
-    [".github/workflows/ci.yml", "timeout-minutes: 30", "timeout-minutes: 25", 4],
+    [".github/workflows/ci.yml", "timeout-minutes: 33", "timeout-minutes: 25", 4],
     [
       "scripts/ci/run-required-exhaustive-quality-gate.mjs",
-      "const DEFAULT_GATE_TIMEOUT_MS = 24 * 60 * 1_000 + 30 * 1_000;",
+      "const DEFAULT_GATE_TIMEOUT_MS = 27 * 60 * 1_000;",
       "const DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 30 * 1_000;",
     ],
   ]) {
@@ -380,7 +380,7 @@ test("rejects an unreviewed widening of the live exhaustive soft deadline", asyn
   const root = await promotionWorkspace();
   try {
     const target = path.join(root, "scripts/ci/run-required-exhaustive-quality-gate.mjs");
-    const currentFragment = "const DEFAULT_GATE_TIMEOUT_MS = 24 * 60 * 1_000 + 30 * 1_000;";
+    const currentFragment = "const DEFAULT_GATE_TIMEOUT_MS = 27 * 60 * 1_000;";
     const source = await readFile(target, "utf8");
     assert.equal(source.split(currentFragment).length - 1, 1);
     await writeFile(

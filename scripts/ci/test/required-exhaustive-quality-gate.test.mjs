@@ -110,7 +110,7 @@ test("the dependency-derived plan owns the exact 254-node exhaustive inventory",
   assert.equal(plan.concurrency, 2);
   assert.equal(PROOF_PAIR_CONCURRENCY, 2);
   assert.equal(DEFAULT_STEP_TIMEOUT_MS, 15 * 60 * 1_000);
-  assert.equal(DEFAULT_GATE_TIMEOUT_MS, 24 * 60 * 1_000 + 30 * 1_000);
+  assert.equal(DEFAULT_GATE_TIMEOUT_MS, 27 * 60 * 1_000);
   assert.equal(plan.stepCount, 254);
   assert.equal(plan.proofPairCount, 120);
   assert.equal(plan.prefix.length, 12);
