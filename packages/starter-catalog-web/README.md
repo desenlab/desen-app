@@ -180,5 +180,6 @@ pnpm test:m10a-t12
 Authenticate historical closure without recapturing it with `pnpm verify:m10a-t05` through
 `pnpm verify:m10a-t09` and their matching `test:m10a-tNN` commands. See [the T12 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t12--rich-styling-and-responsive-authoring),
 [the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T12 local report](../../docs/proof/M10A-T12.md),
-and the immutable [T09 proof](../../docs/proof/M10A-T09.md). M10A-T13 remains the next
-dependency-ready `NOT_STARTED` task for assets and fonts.
+and the immutable [T09 proof](../../docs/proof/M10A-T09.md). M10A-T13 is now closed by its
+[hosted proof](../../docs/proof/M10A-T13.md); M10A-T14 is the next dependency-ready `NOT_STARTED`
+task for history and identity-safe reuse operations.

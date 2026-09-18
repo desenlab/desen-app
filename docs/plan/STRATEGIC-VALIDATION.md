@@ -193,13 +193,13 @@ not a fabricated Continue result. Additional external research is not a prerequi
 the subsequent planned M11 extension proof. Internal automated acceptance replaces no market
 evidence: demand, adoption and broad Storybook/Chromatic/Figma equivalence remain unproven.
 
-M10A-T01 through M10A-T12 are now `DONE`, including T12's exact-head hosted and fresh-`main`
-0.7.0 Catalog closure: the bounded Button, Select, and Dialog adapter foundation
+M10A-T01 through M10A-T13 are now `DONE`, including T12's exact-head hosted and fresh-`main`
+0.7.0 Catalog closure and T13's safe local asset closure: the bounded Button, Select, and Dialog adapter foundation
 is followed by the platform-neutral versioned project/token model, theme/token authoring workbench,
 immutable release identity, private layout/content starter Catalog, form-control Catalog, and bounded
 overlay/disclosure Catalog plus bounded data-display/feedback Catalog, an application-owned
-project/surface lifecycle with generation-fenced persistence, direct-manipulation canvas, and rich
-styling/responsive authoring. Overall progress is 133/176 (76%), M10A is 12/28 (43%), and 11/14 proof gates are closed. The completed T03 covers frozen SC-01's
+project/surface lifecycle with generation-fenced persistence, direct-manipulation canvas, rich
+styling/responsive authoring, and safe local image/icon/font assets. Overall progress is 134/176 (76%), M10A is 13/28 (46%), and 11/14 proof gates are closed. The completed T03 covers frozen SC-01's
 16 valid fixtures: three T02-supported normal edit/preview paths and 13
 losslessly preserved/disclosed unsupported paths with partial preview blocked only for their selected
 overlay; seven invalid fixtures reject atomically. A separate closed T02-recognized unsupported matrix
@@ -217,5 +217,5 @@ receipts; T12 owns the current 0.7.0 capture, normal-app lazy typed visual contr
 responsive frames/ordered overrides, and aggregate persistence only. T10 is `DONE` with that same
 closure for application-local project/surface lifecycle only. T11 is `DONE` with exact-head hosted
 and fresh-`main` closure. T12 is closed and adds no Runtime, Publisher, Core/protocol, G10A, or M11
-authority; M10A-T13 is dependency-ready and `NOT_STARTED`. G10A must pass before M11-T01 or M11-T08, and SC-02
+authority. T13 adds no Runtime, Publisher, Core/protocol, G10A, or M11 authority; M10A-T14 is dependency-ready and `NOT_STARTED`. G10A must pass before M11-T01 or M11-T08, and SC-02
 authorizes no external publication or deployment.

@@ -5,15 +5,15 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 133/176 (%76), M10 12/12, M10A 12/28 (%43) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T12'nın exact-head PR kontrolleri,
-merge'leri ve taze `main` koşuları geçti; M10A-T13 bağımlılık açısından hazır ve `NOT_STARTED`
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 134/176 (%76), M10 12/12, M10A 13/28 (%46) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T13'nın exact-head PR kontrolleri,
+merge'leri ve taze `main` koşuları geçti; sıradaki uygun görev `M10A-T14` ve `NOT_STARTED`
 durumundadır.
 Ayrıntı [Project Status](../../PROJECT-STATUS.md),
 [T05 kanıtı](../proof/M10A-T05.md), [T06 kanıtı](../proof/M10A-T06.md), [T07 kanıtı](../proof/M10A-T07.md) ve
 [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış görev sayısı 133 ve M10A sayacı 12/28'dir; sıradaki uygun görev `M10A-T13` ve
+ekler; tamamlanmış görev sayısı 134 ve M10A sayacı 13/28'dir; sıradaki uygun görev `M10A-T14` ve
 `NOT_STARTED` durumundadır. `M10A-T01` `DONE`: Base UI 1.8.0
 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
 sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` `DONE`: tema/token
@@ -36,7 +36,9 @@ T08'in 0.5.0 ve T09'un 0.6.0 artifact'leri değişmez tarihsel makbuzlardır; g�
 yakalama yetkisi T12'ye aittir. `M10A-T12` `DONE`: normal DESEN Neutral ürününde lazy typed
 Inspector, token/literal/reset görsel kontrolleri, desktop/tablet/mobile preview, sıralı responsive
 override ve aggregate persistence için [hosted exact-head ve taze `main` kapanışı](../proof/M10A-T12.md)
-geçti; T13 bağımlılık açısından hazır ve `NOT_STARTED` durumundadır.
+geçti. `M10A-T13` `DONE`: güvenli yerel image/icon/font varlıkları, content-addressed saklama ve
+missing/corrupt tanıları için [hosted exact-head ve taze `main` kapanışı](../proof/M10A-T13.md)
+geçti; sıradaki görev T14'tür.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i
