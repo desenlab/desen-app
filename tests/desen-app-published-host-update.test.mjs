@@ -141,6 +141,10 @@ const M10A_T12_BROWSER_PACKAGE_RECEIPT = Object.freeze({
   bytes: 1_819,
   sha256: "a811cf3d7ec960796ab47baee69524888a59efc0ab26e81a7eeeaf1968547c66",
 });
+const M10A_T12_DEPENDENCY_CRUISER_RECEIPT = Object.freeze({
+  bytes: 16_945,
+  sha256: "c8cb509ea87d9a25b49bb8ba389340d4304a1043b8fa2847d01331fdc78743d8",
+});
 const M10A_T12_INSPECTOR_RECEIPT = Object.freeze({
   bytes: 35_107,
   sha256: "f5f63d93e0d4a5a73fa652d6b07b3b068fc3b0015aaec385f26085932a3d6bc8",
@@ -1609,6 +1613,25 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
       projectM10AT12HistoricalInput("apps/desen-app-browser-e2e/package.json", t11BrowserPackage),
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
+  const liveDependencyCruiser = await readFile(path.join(ROOT, "dependency-cruiser.config.cjs"));
+  assert.equal(liveDependencyCruiser.byteLength, M10A_T12_DEPENDENCY_CRUISER_RECEIPT.bytes);
+  assert.equal(
+    createHash("sha256").update(liveDependencyCruiser).digest("hex"),
+    M10A_T12_DEPENDENCY_CRUISER_RECEIPT.sha256,
+  );
+  const t10DependencyCruiser = projectM10AT12HistoricalInput(
+    "dependency-cruiser.config.cjs",
+    liveDependencyCruiser,
+  );
+  assert.equal(t10DependencyCruiser.byteLength, M10A_T10_T04_INPUT_RECEIPTS[0].bytes);
+  assert.equal(
+    createHash("sha256").update(t10DependencyCruiser).digest("hex"),
+    M10A_T10_T04_INPUT_RECEIPTS[0].sha256,
+  );
+  assert.throws(
+    () => projectM10AT12HistoricalInput("dependency-cruiser.config.cjs", t10DependencyCruiser),
+    expectedError("SUCCESSOR_POLICY_VIOLATION"),
+  );
   const liveInspector = await readFile(path.join(ROOT, "apps/desen-app/src/inspector-panel.tsx"));
   assert.equal(liveInspector.byteLength, M10A_T12_INSPECTOR_RECEIPT.bytes);
   assert.equal(
@@ -1908,13 +1931,27 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   for (const t04Receipt of M10A_T04_T03_INPUT_RECEIPTS) {
     const bytes = await readFile(path.join(ROOT, t04Receipt.path));
     currentT08Inputs.set(t04Receipt.path, bytes);
+    const t12Receipt =
+      t04Receipt.path === "dependency-cruiser.config.cjs"
+        ? M10A_T12_DEPENDENCY_CRUISER_RECEIPT
+        : undefined;
     const currentReceipt = M10A_T10_T04_INPUT_RECEIPTS.find(
       ({ path: receiptPath }) => receiptPath === t04Receipt.path,
     );
-    const expectedCurrentReceipt = currentReceipt ?? t04Receipt;
+    const expectedCurrentReceipt = t12Receipt ?? currentReceipt ?? t04Receipt;
     assert.equal(bytes.byteLength, expectedCurrentReceipt.bytes);
     assert.equal(createHash("sha256").update(bytes).digest("hex"), expectedCurrentReceipt.sha256);
-    const m10aT04Bytes = projectM10AT10T04Input(t04Receipt.path, bytes);
+    const m10aT10Bytes =
+      t12Receipt === undefined ? bytes : projectM10AT12HistoricalInput(t04Receipt.path, bytes);
+    if (t12Receipt !== undefined) {
+      assert.equal(m10aT10Bytes.byteLength, currentReceipt.bytes);
+      assert.equal(createHash("sha256").update(m10aT10Bytes).digest("hex"), currentReceipt.sha256);
+      assert.throws(
+        () => projectM10AT12HistoricalInput(t04Receipt.path, m10aT10Bytes),
+        expectedError("SUCCESSOR_POLICY_VIOLATION"),
+      );
+    }
+    const m10aT04Bytes = projectM10AT10T04Input(t04Receipt.path, m10aT10Bytes);
     assert.equal(m10aT04Bytes.byteLength, t04Receipt.bytes);
     assert.equal(createHash("sha256").update(m10aT04Bytes).digest("hex"), t04Receipt.sha256);
     if (currentReceipt !== undefined) {

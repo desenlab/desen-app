@@ -96,6 +96,7 @@ const M10A_T12_CHANGED_T08_INPUTS = Object.freeze([
   BROWSER_PACKAGE_PATH,
   "apps/desen-app-browser-e2e/README.md",
   "apps/desen-app/test/main-lifecycle.test.tsx",
+  "dependency-cruiser.config.cjs",
   "pnpm-lock.yaml",
 ]);
 // T10 adds lifecycle-authoring modules to the complete App source inventory, but must not add an

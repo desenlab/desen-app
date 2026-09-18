@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 
 import { openLocalControlPlane } from "../../apps/control-plane-api/dist/index.js";
 import * as editorCoreRuntime from "../../packages/editor-core/dist/index.js";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import {
   createLocalDesenEditorPersistencePort,
   LocalDesenEditorPersistenceConfigurationError,
@@ -288,6 +289,132 @@ const DEPENDENCY_SECURITY_PACKAGE_RECEIPTS = Object.freeze({
   currentSha256: "1fb462974f97bf30df92ad63388871ded078bdbdb2260457293dd4806de86ebf",
   historicalSha256: "a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2",
 });
+const M10A_T12_RETAINED_T08_SUCCESSOR_PIN = Object.freeze({
+  task: "M10A-T12",
+  path: "docs/proof/artifacts/m10a-t12.json",
+  bytes: 11_804,
+  sha256: "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b",
+});
+// T12 adds aggregate-workspace persistence to the closed local control-plane boundary. The
+// completed M08-T08 artifact remains immutable: only these reviewed exact current receipts may
+// succeed its original task-time receipts, and only while the checkpointed T12 proof remains
+// authentic. There is deliberately no broad source or distribution glob here.
+const M10A_T12_RETAINED_T08_RECEIPT_SUCCESSORS = Object.freeze(
+  [
+    Object.freeze({
+      path: "apps/control-plane-api/dist/local-control-plane.js",
+      current: Object.freeze({
+        bytes: 9_875,
+        sha256: "f68c0208d2aaa8c7a893d1522890e652d2defbf2eeec9af1e1dbf3a55634d29b",
+      }),
+      predecessor: Object.freeze({
+        bytes: 9_730,
+        sha256: "298b69b12a50fcd29eaffaf30c16ef2a9388d5ff6d15509984f253ce872bbf0a",
+      }),
+    }),
+    Object.freeze({
+      path: "apps/control-plane-api/src/index.ts",
+      current: Object.freeze({
+        bytes: 5_027,
+        sha256: "638682f6173288f977b1f6f3b69eb743eb576881c4606cd2c4d323b1b79728ca",
+      }),
+      predecessor: Object.freeze({
+        bytes: 4_891,
+        sha256: "1295547b6c281ea2678583298648a4ad8287205109d670fa422450146da5031e",
+      }),
+    }),
+    Object.freeze({
+      path: "apps/control-plane-api/src/local-control-plane-contract.ts",
+      current: Object.freeze({
+        bytes: 19_696,
+        sha256: "568b7be064fa8c0a810b1ac0d74c45896af804cbd1b73606f45c4436b54eadbf",
+      }),
+      predecessor: Object.freeze({
+        bytes: 16_959,
+        sha256: "d764ff037aacb422dbcbfd1c99ba768ec6f1ce9467ead3ded15b611b5a1e4b09",
+      }),
+    }),
+    Object.freeze({
+      path: "apps/control-plane-api/src/local-control-plane-internal.ts",
+      current: Object.freeze({
+        bytes: 43_366,
+        sha256: "478833d6c3da502e5ad268681e52c0ace77c8738f40c9f9bc610ccefbf971846",
+      }),
+      predecessor: Object.freeze({
+        bytes: 37_835,
+        sha256: "f723a1c78b3eada3c957b5243907880e7b7241de3ad07f8c9d838273561f66fc",
+      }),
+    }),
+    Object.freeze({
+      path: "apps/control-plane-api/src/local-control-plane-repository-internal.ts",
+      current: Object.freeze({
+        bytes: 27_190,
+        sha256: "d275c83e1612945f5112a7cce0c720fd07bea431a9280acc4f911dd3cb01adff",
+      }),
+      predecessor: Object.freeze({
+        bytes: 19_610,
+        sha256: "3da2371a0d54aa6be8816f9d44e8da059ddece6260dbde8db3439ce6eb61020c",
+      }),
+    }),
+    Object.freeze({
+      path: "apps/control-plane-api/src/local-control-plane-sqlite-internal.ts",
+      current: Object.freeze({
+        bytes: 35_785,
+        sha256: "af09ca21bc2b68decab8f458cea0341d5f0c3c46e314c82bad2bffd1b7a14f3d",
+      }),
+      predecessor: Object.freeze({
+        bytes: 28_313,
+        sha256: "e3315c14fdf65ca3d6b999d4a5b713657cbcd048fb55b88db14b35f39576546c",
+      }),
+    }),
+    Object.freeze({
+      path: "apps/control-plane-api/test/local-control-plane.test.ts",
+      current: Object.freeze({
+        bytes: 28_360,
+        sha256: "76072e3a41b061dcf0527032ac1f9a8eab860030e7628acf299809b8bf35b733",
+      }),
+      predecessor: Object.freeze({
+        bytes: 22_299,
+        sha256: "e74655bf3a6f2c818fd289a61f1b6e0a5d5b56e4795ce71dc9bf281d8e097678",
+      }),
+    }),
+    Object.freeze({
+      path: "apps/control-plane-api/src/local-control-plane.ts",
+      current: Object.freeze({
+        bytes: 9_487,
+        sha256: "953a60350a593162c395484cfa5ea16a13527c821f403462c491d0a4ee51944d",
+      }),
+      predecessor: Object.freeze({
+        bytes: 9_350,
+        sha256: "469b3117c8ea4d71e3aa133e20dc3557d5e7448c4721d4a62c3d3ecd93fc22ba",
+      }),
+    }),
+  ].sort((left, right) => compareText(left.path, right.path)),
+);
+const M10A_T12_RETAINED_T08_RECEIPT_SUCCESSOR_PATHS = Object.freeze(
+  M10A_T12_RETAINED_T08_RECEIPT_SUCCESSORS.map(({ path: relativePath }) => relativePath),
+);
+export const EDITOR_CORE_PERSISTENCE_M10A_T12_RETAINED_RECEIPT_SUCCESSOR = Object.freeze({
+  task: M10A_T12_RETAINED_T08_SUCCESSOR_PIN.task,
+  artifact: Object.freeze({
+    path: M10A_T12_RETAINED_T08_SUCCESSOR_PIN.path,
+    bytes: M10A_T12_RETAINED_T08_SUCCESSOR_PIN.bytes,
+    sha256: M10A_T12_RETAINED_T08_SUCCESSOR_PIN.sha256,
+  }),
+  receipts: M10A_T12_RETAINED_T08_RECEIPT_SUCCESSORS,
+});
+const FILE_OVERRIDE_PATHS = Object.freeze(
+  [...new Set([...TRACKED_SOURCE_PATHS, ...M10A_T12_RETAINED_T08_RECEIPT_SUCCESSOR_PATHS])].sort(
+    compareText,
+  ),
+);
+const RETAINED_T08_CURRENT_EXACT_RECEIPT_PATHS = Object.freeze(
+  RETAINED_T08_EXACT_RECEIPT_PATHS.filter(
+    (relativePath) =>
+      relativePath !== DEPENDENCY_SECURITY_PACKAGE_PATH &&
+      !M10A_T12_RETAINED_T08_RECEIPT_SUCCESSOR_PATHS.includes(relativePath),
+  ),
+);
 
 const BUILD_OPTION_KEYS = Object.freeze([
   "fileOverrides",
@@ -416,7 +543,7 @@ function captureBytes(value, label) {
 
 function captureFileOverrides(value) {
   if (value === undefined) return new Map();
-  const captured = exactOwnData(value, TRACKED_SOURCE_PATHS, "fileOverrides");
+  const captured = exactOwnData(value, FILE_OVERRIDE_PATHS, "fileOverrides");
   return new Map(
     Object.entries(captured).map(([relativePath, bytes]) => [
       relativePath,
@@ -490,7 +617,12 @@ async function trackedBytes(relativePath, options) {
   const live = await readNoFollow(path.join(WORKSPACE_ROOT, relativePath), relativePath);
   const override = options.fileOverrides.get(relativePath);
   if (override !== undefined && !override.equals(live)) {
-    if (PUBLISH_ACTIVATION_AUTHORITY_PATHS.includes(relativePath)) return override;
+    if (
+      PUBLISH_ACTIVATION_AUTHORITY_PATHS.includes(relativePath) ||
+      M10A_T12_RETAINED_T08_RECEIPT_SUCCESSOR_PATHS.includes(relativePath)
+    ) {
+      return override;
+    }
     fail("TRACKED_FILE_DRIFT", `Tracked M08-T08 authority drifted: ${relativePath}.`);
   }
   return override ?? live;
@@ -971,30 +1103,117 @@ export function projectEditorCorePersistenceDependencySecurityManifest(rawBytes)
   return projected;
 }
 
-function assertRetainedT08Receipts(frozenArtifact, files) {
+async function authenticateM10AT12RetainedT08Successor() {
+  let checkpointed;
+  try {
+    checkpointed = await readCheckpointedFrozenArtifact(M10A_T12_RETAINED_T08_SUCCESSOR_PIN.task);
+  } catch {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The checkpointed M10A-T12 successor is unavailable.");
+  }
+  const pin = M10A_T12_RETAINED_T08_SUCCESSOR_PIN;
+  if (
+    checkpointed.task !== pin.task ||
+    checkpointed.path !== pin.path ||
+    checkpointed.byteLength !== pin.bytes ||
+    checkpointed.sha256 !== pin.sha256 ||
+    checkpointed.bytes.byteLength !== pin.bytes ||
+    sha256(checkpointed.bytes) !== pin.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The checkpointed M10A-T12 successor receipt drifted.");
+  }
+  const artifact = parseJson(checkpointed.bytes, pin.path);
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== "m10a-t12" ||
+    artifact.profile !== "desen.m10a-t12.rich-styling-responsive.v1" ||
+    artifact.result !== "PASS" ||
+    artifact.claims?.normalAggregatePersistence !== true ||
+    artifact.claims?.runtimeCoreChanged !== false
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The M10A-T12 successor identity drifted.");
+  }
+  return deepFreeze({
+    task: pin.task,
+    artifact: { path: pin.path, bytes: pin.bytes, sha256: pin.sha256 },
+    receiptPaths: M10A_T12_RETAINED_T08_RECEIPT_SUCCESSOR_PATHS,
+  });
+}
+
+async function assertRetainedT08Receipts(frozenArtifact, files) {
   if (
     RETAINED_T08_RECEIPT_PATHS.length !== 32 ||
     PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS.length !== 6 ||
     RETAINED_T08_EXACT_RECEIPT_PATHS.length !== 26 ||
+    RETAINED_T08_CURRENT_EXACT_RECEIPT_PATHS.length !== 17 ||
+    M10A_T12_RETAINED_T08_RECEIPT_SUCCESSORS.length !== 8 ||
+    new Set(M10A_T12_RETAINED_T08_RECEIPT_SUCCESSOR_PATHS).size !==
+      M10A_T12_RETAINED_T08_RECEIPT_SUCCESSORS.length ||
     PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS.some(
       (relativePath) => !RETAINED_T08_RECEIPT_PATHS.includes(relativePath),
+    ) ||
+    M10A_T12_RETAINED_T08_RECEIPT_SUCCESSORS.some(
+      ({ path: relativePath, current, predecessor }) =>
+        !RETAINED_T08_EXACT_RECEIPT_PATHS.includes(relativePath) ||
+        relativePath === DEPENDENCY_SECURITY_PACKAGE_PATH ||
+        PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS.includes(relativePath) ||
+        !Number.isSafeInteger(current.bytes) ||
+        !Number.isSafeInteger(predecessor.bytes) ||
+        current.bytes <= 0 ||
+        predecessor.bytes <= 0 ||
+        !/^[0-9a-f]{64}$/u.test(current.sha256) ||
+        !/^[0-9a-f]{64}$/u.test(predecessor.sha256),
     )
   ) {
-    fail("SUCCESSOR_POLICY_VIOLATION", "The retained M08-T08 to M09-T14 receipt handoff drifted.");
+    fail("SUCCESSOR_POLICY_VIOLATION", "The retained M08-T08 receipt-successor policy drifted.");
   }
+  const m10aT12Successor = await authenticateM10AT12RetainedT08Successor();
   const receiptByPath = new Map(
     frozenArtifact.trackedFiles.map((receipt) => [receipt.path, receipt]),
   );
-  for (const relativePath of RETAINED_T08_EXACT_RECEIPT_PATHS) {
+  for (const relativePath of RETAINED_T08_CURRENT_EXACT_RECEIPT_PATHS) {
     const receipt = receiptByPath.get(relativePath);
-    const bytes =
-      relativePath === DEPENDENCY_SECURITY_PACKAGE_PATH
-        ? projectEditorCorePersistenceDependencySecurityManifest(files.get(relativePath))
-        : files.get(relativePath);
+    const bytes = files.get(relativePath);
     if (receipt?.bytes !== bytes?.byteLength || receipt?.sha256 !== sha256(bytes)) {
       fail("RETAINED_T08_AUTHORITY_DRIFT", `Retained M08-T08 authority drifted: ${relativePath}.`);
     }
   }
+  const dependencySecurityReceipt = receiptByPath.get(DEPENDENCY_SECURITY_PACKAGE_PATH);
+  const dependencySecurityBytes = projectEditorCorePersistenceDependencySecurityManifest(
+    files.get(DEPENDENCY_SECURITY_PACKAGE_PATH),
+  );
+  if (
+    dependencySecurityReceipt?.bytes !== dependencySecurityBytes.byteLength ||
+    dependencySecurityReceipt?.sha256 !== sha256(dependencySecurityBytes)
+  ) {
+    fail(
+      "RETAINED_T08_AUTHORITY_DRIFT",
+      `Retained M08-T08 authority drifted: ${DEPENDENCY_SECURITY_PACKAGE_PATH}.`,
+    );
+  }
+  for (const successor of M10A_T12_RETAINED_T08_RECEIPT_SUCCESSORS) {
+    const frozenReceipt = receiptByPath.get(successor.path);
+    const bytes = files.get(successor.path);
+    if (
+      frozenReceipt?.bytes !== successor.predecessor.bytes ||
+      frozenReceipt?.sha256 !== successor.predecessor.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        `The retained M08-T08 predecessor receipt drifted: ${successor.path}.`,
+      );
+    }
+    if (
+      bytes?.byteLength !== successor.current.bytes ||
+      sha256(bytes) !== successor.current.sha256
+    ) {
+      fail(
+        "RETAINED_T08_AUTHORITY_DRIFT",
+        `Retained M10A-T12 authority drifted: ${successor.path}.`,
+      );
+    }
+  }
+  return m10aT12Successor;
 }
 
 async function authenticatePrerequisites(options) {
@@ -1721,10 +1940,10 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
   );
   const editorCoreCompatibility = verifyEditorCoreCompatibility(files, t07Artifact);
   const publishActivationSuccessor = authenticatePublishActivationSuccessor(files);
+  const m10aT12RetainedReceiptSuccessor = await assertRetainedT08Receipts(frozen.artifact, files);
   if (options.fileOverrides.size !== 0) {
     fail("TRACKED_FILE_OVERRIDE_REJECTED", "Caller file overrides cannot issue M08-T08 PASS.");
   }
-  assertRetainedT08Receipts(frozen.artifact, files);
   const trackedFiles = paths.map((relativePath) => {
     const bytes = files.get(relativePath);
     return Object.freeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) });
@@ -1779,10 +1998,12 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
     },
     receiptCompatibility: {
       retainedTaskTimeReceipts: RETAINED_T08_RECEIPT_PATHS.length,
-      currentExactRetainedReceipts: RETAINED_T08_EXACT_RECEIPT_PATHS.length - 1,
+      currentExactRetainedReceipts: RETAINED_T08_CURRENT_EXACT_RECEIPT_PATHS.length,
       dependencySecurityProjectedReceipts: 1,
+      m10aT12RetainedReceiptSuccessors: M10A_T12_RETAINED_T08_RECEIPT_SUCCESSORS.length,
       publishActivationHandoffReceipts: PUBLISH_ACTIVATION_RETAINED_T08_HANDOFF_PATHS.length,
     },
+    m10aT12RetainedReceiptSuccessor,
     publishActivationSuccessor,
     trackedFiles,
     nonclaims: [

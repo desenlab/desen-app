@@ -991,6 +991,21 @@ const M10A_T12_REPLACED_T08_INPUT_RECEIPTS = Object.freeze([
  */
 const M10A_T12_T08_INPUT_SUCCESSORS = Object.freeze([
   Object.freeze({
+    path: "dependency-cruiser.config.cjs",
+    bytes: 16_945,
+    sha256: "c8cb509ea87d9a25b49bb8ba389340d4304a1043b8fa2847d01331fdc78743d8",
+    predecessor: Object.freeze({
+      bytes: 16_914,
+      sha256: "aac2ce1bfcaa2e81b488f688d1a4f9a0e02ac97958f1eb90a95f16c0d112fa4c",
+    }),
+    inverseChanges: Object.freeze([
+      Object.freeze([
+        '    "design-system-core",\n    "design-system-authoring",\n    "reference-catalog-web",\n',
+        '    "design-system-core",\n    "reference-catalog-web",\n',
+      ]),
+    ]),
+  }),
+  Object.freeze({
     path: "apps/desen-app-browser-e2e/README.md",
     bytes: 11_437,
     sha256: "590ad3afffb1fee95c80e104b710a027be0754e5b01aa9c26f84e39fbdb21cac",
@@ -4783,7 +4798,10 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
             relativePath,
             projectM10AT04T03Input(
               relativePath,
-              projectM10AT10T04Input(relativePath, files.get(relativePath)),
+              projectM10AT10T04Input(
+                relativePath,
+                projectM10AT12HistoricalInput(relativePath, files.get(relativePath)),
+              ),
             ),
           ),
         ),

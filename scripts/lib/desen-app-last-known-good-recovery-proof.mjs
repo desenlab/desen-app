@@ -2114,6 +2114,13 @@ export async function buildDesenAppLastKnownGoodRecoveryEvidence(rawOptions = un
   const m10aT12Successor = await authenticateM10AT12Successor(workspaceRoot);
   const t12Files = new Map(files);
   t12Files.set(
+    "dependency-cruiser.config.cjs",
+    projectM10AT12RecoveryInput(
+      "dependency-cruiser.config.cjs",
+      files.get("dependency-cruiser.config.cjs"),
+    ),
+  );
+  t12Files.set(
     M10A_T12_BROWSER_PACKAGE_SUCCESSOR.path,
     projectM10AT12RecoveryInput(
       M10A_T12_BROWSER_PACKAGE_SUCCESSOR.path,
