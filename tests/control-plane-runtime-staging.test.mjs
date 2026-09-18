@@ -37,6 +37,7 @@ const ROOT_PACKAGE = "package.json";
 const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
 const CI_INVENTORY = "scripts/ci/exhaustive-workload-inventory.mjs";
 const ROOT_TEST = "tests/control-plane-runtime-staging.test.mjs";
+const FROZEN_ARTIFACT_SHA256 = "d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494";
 
 let built;
 let proofDocument;
@@ -81,6 +82,24 @@ async function trackedMutation(relativePath, transform) {
     trackedFileBytes: { [relativePath]: Buffer.from(transformed, "utf8") },
     runtimeReceipt: built.runtimeReceipt,
   };
+}
+
+function m10aT12ProjectWorkspaceSuccessorDriftTransforms() {
+  const exports = [
+    "LocalControlPlaneProjectWorkspacePutResult",
+    "LocalControlPlaneProjectWorkspaceReadResult",
+    "LocalControlPlaneProjectWorkspaceRecord",
+  ];
+  const block = exports.map((name) => `  ${name},`).join("\n");
+  return [
+    (source) => source.replace(`  ${exports[0]},\n`, ""),
+    (source) => source.replace(exports[1], "LocalControlPlaneProjectWorkspaceReadResponse"),
+    (source) =>
+      `${source.replace(block, "")}\nexport type {\n${block}\n} from "./runtime-staging-contract.js";\n`,
+    (source) =>
+      `${source.replace(block, "")}\nexport {\n${block}\n} from "./local-control-plane-contract.js";\n`,
+    (source) => source.replace(block, `${block}\n  LocalControlPlaneProjectWorkspaceUnexpected,`),
+  ];
 }
 
 function mutateTraceOwner(value, traceId) {
@@ -162,6 +181,7 @@ test("[authority] builds the exact versioned M07-T06 artifact and official stagi
     false,
   );
   assert.equal(built.artifact.claims.stagedPreparation.executableModuleLoaderPrepared, false);
+  assert.equal(built.artifactSha256, FROZEN_ARTIFACT_SHA256);
   assert.deepEqual(built.artifact.claims.coverageTransitions, {
     proofMatrixP12: "NOT_PROVEN",
     normativeN038: "PLANNED",
@@ -320,6 +340,7 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       (source) =>
         source.replace("export { stageBundleRuntime }", "export { stageBundleRuntime as stage }"),
     ],
+    ...m10aT12ProjectWorkspaceSuccessorDriftTransforms().map((transform) => [APP_INDEX, transform]),
     [
       ROOT_PACKAGE,
       (source) =>

@@ -22,6 +22,7 @@ import {
 } from "../scripts/lib/desen-app-repeatable-demo-proof.mjs";
 import {
   projectM10AT01CurrentGraphAudit,
+  projectM10AT12CurrentGraphAudit,
   projectM10AT11CurrentGraphAudit,
 } from "../scripts/lib/desen-app-published-host-update-proof.mjs";
 
@@ -325,11 +326,35 @@ test(NAMES[3], () => {
   assert.equal(built.liveSuccessorAuthority.task, "M10A-T01");
   assert.equal(built.liveSuccessorAuthority.predecessorTask, "M10-T08");
   assert.equal(built.liveSuccessorAuthority.currentObservationsAreNotHistoricalResults, true);
+  assert.notDeepEqual(built.liveSuccessorAuthority.currentPublicApiMatrix, matrix);
   assert.notDeepEqual(graph, historicalGraph);
+  const t11Graph = projectM10AT12CurrentGraphAudit(graph, historicalGraph);
+  const currentMain = graph.appSourceAudit.sourceReceipts.find(
+    ({ path: relativePath }) => relativePath === "apps/desen-app/src/main.tsx",
+  );
+  const historicalMain = historicalGraph.appSourceAudit.sourceReceipts.find(
+    ({ path: relativePath }) => relativePath === "apps/desen-app/src/main.tsx",
+  );
+  assert.notDeepEqual(currentMain, historicalMain);
+  assert.deepEqual(
+    t11Graph.appSourceAudit.sourceReceipts.find(
+      ({ path: relativePath }) => relativePath === "apps/desen-app/src/main.tsx",
+    ),
+    historicalMain,
+  );
+  assert.deepEqual(
+    built.artifact.boundary.trackedReceipts.find(
+      ({ path: relativePath }) => relativePath === "apps/desen-app/src/main.tsx",
+    ),
+    { ...historicalMain, sha256: historicalMain.sha256.slice("sha256:".length) },
+  );
   assert.deepEqual(
     projectM10AT01CurrentGraphAudit(
       projectM10AT10CurrentGraphAudit(
-        projectM10AT11CurrentGraphAudit(graph, historicalGraph),
+        projectM10AT11CurrentGraphAudit(
+          projectM10AT12CurrentGraphAudit(graph, historicalGraph),
+          historicalGraph,
+        ),
         historicalGraph,
       ),
       historicalGraph,
@@ -342,6 +367,16 @@ test(NAMES[3], () => {
   );
   assert.ok(
     graph.appSourceAudit.inventory.includes("apps/desen-app/src/canvas-manipulation-controls.tsx"),
+  );
+  assert.ok(graph.appSourceAudit.inventory.includes("apps/desen-app/src/authoring-styles.ts"));
+  const unrelatedT12Drift = structuredClone(graph);
+  unrelatedT12Drift.appSourceAudit.sourceReceipts.find(
+    ({ path: relativePath }) => relativePath === "apps/desen-app/src/authoring-styles.ts",
+  ).sha256 = `sha256:${"0".repeat(64)}`;
+  assert.throws(
+    () => projectM10AT12CurrentGraphAudit(unrelatedT12Drift, historicalGraph),
+    (error) => error?.code === "SUCCESSOR_POLICY_VIOLATION",
+    "an unrelated T12 source receipt cannot enter the historical graph chain",
   );
   assert.equal(matrix.result, "PASS");
   assert.equal(matrix.listenerStarted, false);
@@ -452,6 +487,9 @@ test(NAMES[5], async () => {
   }
   for (const name of [
     "apps/desen-app/package.json",
+    "apps/desen-app-browser-e2e/package.json",
+    "apps/desen-app-browser-e2e/README.md",
+    "apps/desen-app/test/main-lifecycle.test.tsx",
     "pnpm-lock.yaml",
     "dependency-cruiser.config.cjs",
     "scripts/verify-boundary-fixtures.mjs",
@@ -553,7 +591,7 @@ test(NAMES[9], async () => {
           ],
         ]),
       }),
-      errorCode("TEST_AUTHORITY_DRIFT"),
+      errorCode("SUCCESSOR_DRIFT"),
     );
   const rootPackage = JSON.parse(await readFile(path.join(ROOT, "package.json"), "utf8"));
   await assert.rejects(
@@ -571,6 +609,9 @@ test(NAMES[9], async () => {
     errorCode("TEST_AUTHORITY_DRIFT"),
   );
   for (const name of [
+    "apps/desen-app-browser-e2e/README.md",
+    "apps/desen-app/src/main.tsx",
+    "apps/desen-app/test/main-lifecycle.test.tsx",
     "pnpm-lock.yaml",
     "dependency-cruiser.config.cjs",
     "scripts/verify-boundary-fixtures.mjs",

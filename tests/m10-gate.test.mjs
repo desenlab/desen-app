@@ -14,10 +14,12 @@ import {
   M10_GATE_ROOT_TEST_NAMES as NAMES,
   M10GateProofError,
   buildM10GateEvidence as build,
+  projectM10GateCurrentHostAudit as projectCurrentHostAudit,
   projectM10GateHistoricalHostAudit as projectHistoricalHostAudit,
   verifyM10GateEvidence as verify,
   writeM10GateEvidence as write,
 } from "../scripts/lib/m10-gate-proof.mjs";
+import { buildCurrentDesenAppPublishedHostUpdateGraphAudit } from "../scripts/lib/desen-app-published-host-update-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 
@@ -111,6 +113,22 @@ test("G10 current reader admits only the exact M10A-T01, isolated M10A-T10, or r
     () => projectHistoricalHostAudit(unreviewedReachableGraph),
     code("HOST_AUDIT_FAILED"),
     "unreviewed reachable graph",
+  );
+});
+
+test("G10 admits the exact T12 graph only before reducing it to the reviewed T11 host summary", async () => {
+  const graph = await buildCurrentDesenAppPublishedHostUpdateGraphAudit({ workspaceRoot: ROOT });
+  const t08Path = PARENTS.find(({ task }) => task === "M10-T08").path;
+  const t08GraphAudit = JSON.parse(await bytes(t08Path)).authority.currentGraphAudit;
+  assert.deepEqual(projectCurrentHostAudit(graph, t08GraphAudit), T11_CURRENT_HOST_AUDIT);
+
+  const unrelatedT12Drift = structuredClone(graph);
+  unrelatedT12Drift.appSourceAudit.sourceReceipts.find(
+    ({ path: relativePath }) => relativePath === "apps/desen-app/src/authoring-styles.ts",
+  ).sha256 = `sha256:${"0".repeat(64)}`;
+  assert.throws(
+    () => projectCurrentHostAudit(unrelatedT12Drift, t08GraphAudit),
+    code("HOST_AUDIT_FAILED"),
   );
 });
 

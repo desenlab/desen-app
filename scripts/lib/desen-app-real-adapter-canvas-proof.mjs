@@ -7,7 +7,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import ts from "typescript";
 
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import { buildCurrentDesenAppPublishedHostUpdateGraphAudit } from "./desen-app-published-host-update-proof.mjs";
 import {
   authenticateDesenAppEvergreenProductCompositionSuccessor,
   materializeDesenAppHistoricalReaderFileOverrides,
@@ -976,6 +978,19 @@ const M10A_T11_REACHABLE_APP_SOURCE_PATHS = Object.freeze([
   "apps/desen-app/src/authoring-direct-manipulation.ts",
   "apps/desen-app/src/canvas-manipulation-controls.tsx",
 ]);
+// T12 adds rich visual-authoring modules to the live App. These remain outside frozen M09
+// receipts, but every non-empty compatibility build must inventory them before a targeted
+// successor mutation can be evaluated.
+const M10A_T12_RICH_STYLE_SOURCE_PATHS = Object.freeze([
+  "apps/desen-app/src/authoring-design-tokens.ts",
+  "apps/desen-app/src/authoring-style-preview-runtime.ts",
+  "apps/desen-app/src/authoring-styles.ts",
+  "apps/desen-app/src/local-project-workspace-persistence.ts",
+  "apps/desen-app/src/project-workspace-authoring-persistence.ts",
+  "apps/desen-app/src/starter-neutral-workspace-profile.ts",
+  "apps/desen-app/src/starter-workspace-product.tsx",
+  "apps/desen-app/src/style-panel.tsx",
+]);
 // T11 joins the live runtime graph rather than extending T10's inventory-only exception. Existing
 // frozen M09 successor readers admit its exact replacement receipts only when the live bytes
 // match this reviewed set.
@@ -1036,9 +1051,10 @@ const CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
     ...CURRENT_APP_SOURCE_PATHS,
     ...M10A_T10_ISOLATED_APP_SOURCE_PATHS,
     ...M10A_T11_REACHABLE_APP_SOURCE_PATHS,
+    ...M10A_T12_RICH_STYLE_SOURCE_PATHS,
   ].sort(),
 );
-// The live T11 product has a broader composition than the historical M09 reader. Keep the
+// The live T12 product has a broader composition than the historical M09 reader. Keep the
 // complete source inventory and the entrypoint-reachable subset separate: the five excluded
 // sources are intentional, non-runtime authoring factories, not invisible graph omissions.
 const M10A_T11_CURRENT_APP_GRAPH_SOURCE_PATHS = Object.freeze([
@@ -3884,6 +3900,187 @@ export async function buildDesenAppRealAdapterCanvasM10AT11SuccessorEvidence(
   });
 }
 
+const M10A_T12_SUCCESSOR_ARTIFACT_PIN = Object.freeze({
+  task: "M10A-T12",
+  path: "docs/proof/artifacts/m10a-t12.json",
+  bytes: 11_804,
+  sha256: "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b",
+});
+const M10A_T12_CATALOG = Object.freeze({
+  id: "run.desen.starter.web",
+  version: "0.7.0",
+  target: "web-react",
+  bytes: 4_120_610,
+  sha256: "aa8e9fb01fed930a7f56cd09cf7328e6a49ffa556c4fe80571b5454dd24f87b6",
+});
+const M10A_T12_STYLE_SOURCE_PATHS = M10A_T12_RICH_STYLE_SOURCE_PATHS;
+
+async function authenticateM10AT12CanvasSuccessor(workspaceRoot) {
+  const pin = M10A_T12_SUCCESSOR_ARTIFACT_PIN;
+  const checkpointed = await readCheckpointedFrozenArtifact(pin.task, { workspaceRoot });
+  if (
+    checkpointed.path !== pin.path ||
+    checkpointed.byteLength !== pin.bytes ||
+    checkpointed.sha256 !== pin.sha256 ||
+    checkpointed.bytes.byteLength !== pin.bytes ||
+    sha256(checkpointed.bytes) !== pin.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The exact M10A-T12 rich-authoring artifact changed.");
+  }
+  const artifact = parseJson(Buffer.from(checkpointed.bytes), pin.path);
+  const catalog = artifact.source?.catalog;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== pin.task ||
+    artifact.proofId !== "m10a-t12" ||
+    artifact.profile !== "desen.m10a-t12.rich-styling-responsive.v1" ||
+    artifact.result !== "PASS" ||
+    !isDeepStrictEqual(
+      {
+        id: catalog?.id,
+        version: catalog?.version,
+        target: catalog?.target,
+        bytes: catalog?.bytes,
+        sha256: catalog?.sha256,
+      },
+      M10A_T12_CATALOG,
+    ) ||
+    artifact.focusedTests?.browserCommand !==
+      "pnpm --filter @desen/app-browser-e2e run test:m10a-t12"
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The M10A-T12 artifact lost its reviewed identity.");
+  }
+  const sourceReceipts = artifact.source?.files;
+  if (!Array.isArray(sourceReceipts)) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The M10A-T12 artifact lost its closed source receipts.");
+  }
+  const styleReceipts = M10A_T12_STYLE_SOURCE_PATHS.map((sourcePath) => {
+    const matches = sourceReceipts.filter((receipt) => receipt?.path === sourcePath);
+    if (
+      matches.length !== 1 ||
+      !Number.isSafeInteger(matches[0].bytes) ||
+      typeof matches[0].sha256 !== "string"
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The M10A-T12 style source receipt is incomplete.", {
+        path: sourcePath,
+      });
+    }
+    return Object.freeze({ ...matches[0] });
+  });
+  return deepFreeze({
+    task: pin.task,
+    path: pin.path,
+    bytes: pin.bytes,
+    sha256: pin.sha256,
+    catalog: M10A_T12_CATALOG,
+    styleReceipts,
+  });
+}
+
+/**
+ * Re-observes T12's normal rich-authoring product without rewriting frozen M09 evidence.
+ *
+ * @remarks The current graph is owned by the T05 successor reader, which independently builds
+ * both applications and pins every App source receipt. This bridge additionally requires the
+ * checkpointed T12 artifact and maps every new style-authoring source receipt to that graph.
+ */
+export async function buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence(
+  rawOptions = undefined,
+) {
+  const options = exactOwnDataOptions(rawOptions, ["workspaceRoot"], "M10A-T12 audit options");
+  const workspaceRoot = await realpath(
+    capturePath(options.workspaceRoot, "workspaceRoot", WORKSPACE_ROOT),
+  );
+  const [successor, currentGraphAudit] = await Promise.all([
+    authenticateM10AT12CanvasSuccessor(workspaceRoot),
+    buildCurrentDesenAppPublishedHostUpdateGraphAudit({ workspaceRoot }),
+  ]);
+  const sourceAudit = currentGraphAudit.appSourceAudit;
+  const runtime = currentGraphAudit.runtimeResolution?.app;
+  if (
+    !Array.isArray(sourceAudit?.inventory) ||
+    !Array.isArray(sourceAudit?.sourceReceipts) ||
+    sourceAudit.completeSourceFiles !== sourceAudit.inventory.length ||
+    sourceAudit.sourceReceipts.length !== sourceAudit.inventory.length ||
+    sourceAudit.everyProductionSourceFileReachable !== true ||
+    sourceAudit.importsResolvedByFreshViteBuild !== true ||
+    runtime?.dynamicEdges !== 0 ||
+    runtime?.unresolvedEdges !== 0 ||
+    runtime?.reachableProductionSourceFiles !== sourceAudit.productionGraphSourceFiles
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The T12 normal-product graph lost its closed authority.");
+  }
+  const graphReceipts = new Map(
+    sourceAudit.sourceReceipts.map((receipt) => [receipt.path, receipt]),
+  );
+  for (const receipt of successor.styleReceipts) {
+    if (
+      !sourceAudit.inventory.includes(receipt.path) ||
+      graphReceipts.get(receipt.path)?.bytes !== receipt.bytes ||
+      graphReceipts.get(receipt.path)?.sha256 !== `sha256:${receipt.sha256}`
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "The current App graph differs from the checkpointed T12 style source receipt.",
+        { path: receipt.path },
+      );
+    }
+  }
+  for (const sourcePath of [
+    "apps/desen-app/src/authoring-direct-manipulation.ts",
+    "apps/desen-app/src/canvas-manipulation-controls.tsx",
+  ]) {
+    if (!sourceAudit.inventory.includes(sourcePath)) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "The retained direct-manipulation authority disappeared.",
+        {
+          path: sourcePath,
+        },
+      );
+    }
+  }
+  return deepFreeze({
+    schemaVersion: 1,
+    profile: "desen.app.real-adapter-canvas-m10a-t12-successor.v1",
+    task: "M10A-T12",
+    result: "PASS",
+    historicalM09ProjectionPreserved: true,
+    artifact: {
+      task: successor.task,
+      path: successor.path,
+      bytes: successor.bytes,
+      sha256: successor.sha256,
+    },
+    catalog: successor.catalog,
+    sourceInventory: {
+      sourceFiles: sourceAudit.inventory.length,
+      reachableProductionSourceFiles: runtime.reachableProductionSourceFiles,
+      intentionallyUnreachableSourceFiles:
+        sourceAudit.inventory.length - runtime.reachableProductionSourceFiles,
+      exactReceiptCoverage: sourceAudit.sourceReceipts.length,
+    },
+    retainedDirectManipulation: {
+      sourcePath: "apps/desen-app/src/authoring-direct-manipulation.ts",
+      canvasControlsPath: "apps/desen-app/src/canvas-manipulation-controls.tsx",
+      retained: true,
+    },
+    richStyleAuthoring: {
+      sourcePaths: M10A_T12_STYLE_SOURCE_PATHS,
+      receiptCount: successor.styleReceipts.length,
+      catalogBound: true,
+    },
+    runtimeResolution: {
+      profile: "m10a-t12-central-current-product",
+      moduleCount: runtime.moduleCount,
+      staticEdges: runtime.staticEdges,
+      dynamicEdges: runtime.dynamicEdges,
+      unresolvedEdges: runtime.unresolvedEdges,
+      graphSha256: runtime.graphSha256,
+    },
+  });
+}
+
 function inspectPackage(appBytes, rootBytes) {
   const manifest = parseJson(appBytes, APP_PACKAGE_PATH);
   const rootManifest = parseJson(rootBytes, ROOT_PACKAGE_PATH);
@@ -5093,7 +5290,7 @@ export async function verifyDesenAppRealAdapterCanvasEvidence(rawOptions = undef
         )
       : captureBytes(options.proofDocument, "proofDocument");
   verifyProofDocument(proofDocument, built.artifactSha256);
-  const m10aT11Successor = await buildDesenAppRealAdapterCanvasM10AT11SuccessorEvidence();
+  const m10aT12Successor = await buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence();
   return deepFreeze({
     task: built.artifact.task,
     result: built.artifact.result,
@@ -5102,9 +5299,9 @@ export async function verifyDesenAppRealAdapterCanvasEvidence(rawOptions = undef
     prerequisites: built.artifact.prerequisites.length,
     graphModules: built.artifact.authority.runtimeResolution.moduleCount,
     currentGraphModules: built.currentCompatibility.authority.runtimeResolution.moduleCount,
-    m10aT11GraphModules: m10aT11Successor.runtimeResolution.moduleCount,
-    m10aT11GraphProfile: m10aT11Successor.runtimeResolution.profile,
-    m10aT11HistoricalM09ProjectionPreserved: m10aT11Successor.historicalM09ProjectionPreserved,
+    m10aT12GraphModules: m10aT12Successor.runtimeResolution.moduleCount,
+    m10aT12GraphProfile: m10aT12Successor.runtimeResolution.profile,
+    m10aT12HistoricalM09ProjectionPreserved: m10aT12Successor.historicalM09ProjectionPreserved,
     sharedRuntimeModules: built.artifact.authority.runtimeResolution.sharedRuntimeModuleCount,
     realComponentModules: built.artifact.authority.runtimeResolution.realComponentModuleCount,
     trackedFiles: built.artifact.boundary.trackedFiles,

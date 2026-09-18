@@ -7,7 +7,11 @@ import { types as utilTypes } from "node:util";
 
 import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
-import { buildCurrentDesenAppPublishedHostUpdateGraphAudit } from "./desen-app-published-host-update-proof.mjs";
+import {
+  buildCurrentDesenAppPublishedHostUpdateGraphAudit,
+  projectM10AT12CurrentGraphAudit,
+  projectM10AT12HistoricalInput,
+} from "./desen-app-published-host-update-proof.mjs";
 import { verifyRuntimeCoreBaselineEvidence } from "./runtime-core-baseline-proof.mjs";
 
 const WORKSPACE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -402,6 +406,18 @@ function projectGraphAudit(graph) {
 }
 
 /**
+ * Admits the complete current T12 graph only through its exact successor projection before G10
+ * reduces it to the already-reviewed T11-shaped host-audit summary.
+ */
+export function projectM10GateCurrentHostAudit(currentGraphAudit, t08GraphAudit) {
+  try {
+    return projectGraphAudit(projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit));
+  } catch {
+    fail("HOST_AUDIT_FAILED", "Fresh App/host graph is outside the exact reviewed T12 successor.");
+  }
+}
+
+/**
  * Authenticates the exact M10A-T01, inventory-only T10, or reachable T11 successor graph, then
  * projects the three historical identities retained by the immutable G10 artifact.
  */
@@ -476,12 +492,31 @@ export async function buildM10GateEvidence(rawOptions = undefined) {
   ]);
   const files = new Map(entries);
   const parents = Object.freeze(authenticateParents(files));
+  let browserPackage;
+  try {
+    browserPackage = projectM10AT12HistoricalInput(
+      BROWSER_PACKAGE_PATH,
+      files.get(BROWSER_PACKAGE_PATH),
+    );
+  } catch {
+    fail(
+      "WIRING_DRIFT",
+      "The current browser package is outside the exact reviewed T12 successor.",
+    );
+  }
   const wiring = authenticateWiring(
     files.get(ROOT_PACKAGE_PATH),
-    files.get(BROWSER_PACKAGE_PATH),
+    browserPackage,
     files.get(WORKFLOW_PATH),
   );
-  const hostAudit = projectM10GateHistoricalHostAudit(projectGraphAudit(graph));
+  const t08Path = M10_GATE_PARENT_PINS.find(({ task }) => task === "M10-T08")?.path;
+  const t08GraphAudit =
+    t08Path === undefined
+      ? undefined
+      : parseJson(files.get(t08Path), "M10-T08").authority?.currentGraphAudit;
+  const hostAudit = projectM10GateHistoricalHostAudit(
+    projectM10GateCurrentHostAudit(graph, t08GraphAudit),
+  );
   if (
     core.status !== "PASS" ||
     core.baseline.tree !== "3fa3613a3be63c749f40b6a0b55af5b40c675773" ||

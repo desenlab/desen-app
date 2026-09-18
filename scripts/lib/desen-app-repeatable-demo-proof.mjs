@@ -12,7 +12,10 @@ import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
-import { buildCurrentDesenAppLastKnownGoodRecoveryObservation } from "./desen-app-last-known-good-recovery-proof.mjs";
+import {
+  buildCurrentDesenAppLastKnownGoodRecoveryObservation,
+  projectM10AT12PublicApiMatrix,
+} from "./desen-app-last-known-good-recovery-proof.mjs";
 import {
   authenticateM10AT01LockfileSuccessor,
   authenticateM10AT02LockfileSuccessor,
@@ -24,6 +27,8 @@ import {
   projectM10AT02T01Input,
   projectM10AT03T02Input,
   projectM10AT04T03Input,
+  projectM10AT12CurrentGraphAudit,
+  projectM10AT12HistoricalInput,
   projectM10AT11CurrentGraphAudit,
   projectM10AT11HistoricalInput,
   projectM10AT10HistoricalInput,
@@ -83,6 +88,15 @@ const M10A_T01_CHANGED_T08_INPUTS = Object.freeze([
   "dependency-cruiser.config.cjs",
   "scripts/verify-boundary-fixtures.mjs",
   "docs/plan/DEMO-RUNBOOK.md",
+]);
+// T12 changed these normal-App composition inputs after the historical T08 receipt. Project its
+// exact successor first; the existing T01 bridge then remains the sole owner of older receipts.
+const M10A_T12_CHANGED_T08_INPUTS = Object.freeze([
+  "apps/desen-app/package.json",
+  BROWSER_PACKAGE_PATH,
+  "apps/desen-app-browser-e2e/README.md",
+  "apps/desen-app/test/main-lifecycle.test.tsx",
+  "pnpm-lock.yaml",
 ]);
 // T10 adds lifecycle-authoring modules to the complete App source inventory, but must not add an
 // edge to the frozen M10 production graph. Project only this exact additive inventory before the
@@ -1003,7 +1017,10 @@ function projectM10AT01Graph(currentGraphAudit, t08GraphAudit) {
   try {
     return projectM10AT01CurrentGraphAudit(
       projectM10AT10CurrentGraphAudit(
-        projectM10AT11CurrentGraphAudit(currentGraphAudit, t08GraphAudit),
+        projectM10AT11CurrentGraphAudit(
+          projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit),
+          t08GraphAudit,
+        ),
         t08GraphAudit,
       ),
       t08GraphAudit,
@@ -1014,6 +1031,81 @@ function projectM10AT01Graph(currentGraphAudit, t08GraphAudit) {
       "The live App/host graph is not the exact reviewed M10A-T01 successor of T08.",
     );
   }
+}
+
+/** Projects only authenticated T12 composition inputs before the older T01/T08 bridge. */
+function projectM10AT12Inputs(files) {
+  const projected = new Map(files);
+  try {
+    for (const relativePath of M10A_T12_CHANGED_T08_INPUTS) {
+      projected.set(
+        relativePath,
+        projectM10AT12HistoricalInput(relativePath, files.get(relativePath)),
+      );
+    }
+  } catch {
+    fail("SUCCESSOR_DRIFT", "The live T12 composition inputs are not exact reviewed successors.");
+  }
+  return projected;
+}
+
+/** Returns one exact graph/source receipt without admitting duplicate or malformed identities. */
+function exactGraphReceipt(receipts, relativePath, label) {
+  if (!Array.isArray(receipts)) fail("SUCCESSOR_DRIFT", `${label} is not one receipt list.`);
+  const matches = receipts.filter(
+    (receipt) => receipt !== null && typeof receipt === "object" && receipt.path === relativePath,
+  );
+  if (
+    matches.length !== 1 ||
+    !Number.isSafeInteger(matches[0].bytes) ||
+    matches[0].bytes < 0 ||
+    typeof matches[0].sha256 !== "string"
+  ) {
+    fail("SUCCESSOR_DRIFT", `${label} lost its exact ${relativePath} receipt.`);
+  }
+  return matches[0];
+}
+
+/**
+ * The T12 main entrypoint is authenticated only by the complete current graph receipt. Its
+ * graph predecessor is the exact T11/T08 receipt, so retain that historical receipt rather
+ * than relabeling current T12 bytes as frozen T08 evidence.
+ */
+function projectM10AT12MainEntrypointReceipt(currentReceipts, currentGraphAudit, t08GraphAudit) {
+  const relativePath = "apps/desen-app/src/main.tsx";
+  let t11GraphAudit;
+  try {
+    t11GraphAudit = projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit);
+  } catch {
+    fail("SUCCESSOR_DRIFT", "The current T12 graph is not the exact reviewed successor.");
+  }
+  const current = exactGraphReceipt(currentReceipts, relativePath, "current tracked");
+  const raw = exactGraphReceipt(
+    currentGraphAudit?.appSourceAudit?.sourceReceipts,
+    relativePath,
+    "current T12 graph",
+  );
+  const projected = exactGraphReceipt(
+    t11GraphAudit.appSourceAudit?.sourceReceipts,
+    relativePath,
+    "projected T11 graph",
+  );
+  const historical = exactGraphReceipt(
+    t08GraphAudit?.appSourceAudit?.sourceReceipts,
+    relativePath,
+    "historical T08 graph",
+  );
+  if (
+    raw.sha256 !== `sha256:${current.sha256}` ||
+    raw.bytes !== current.bytes ||
+    projected.sha256 !== historical.sha256 ||
+    projected.bytes !== historical.bytes ||
+    !projected.sha256.startsWith("sha256:")
+  ) {
+    fail("SUCCESSOR_DRIFT", "The T12 main entrypoint receipt is outside its exact graph bridge.");
+  }
+  current.bytes = projected.bytes;
+  current.sha256 = projected.sha256.slice("sha256:".length);
 }
 
 async function authenticateM10AT01Successor(workspaceRoot) {
@@ -1052,22 +1144,29 @@ export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined
   const historical = authenticateArtifact(historicalBytes);
   const m10aT01Successor = await authenticateM10AT01Successor(workspaceRoot);
   authenticateParents(files);
-  const t08Files = new Map(files);
+  const t11Files = projectM10AT12Inputs(files);
+  const t08Files = new Map(t11Files);
   for (const name of M10A_T01_CHANGED_T08_INPUTS) {
-    t08Files.set(name, projectM10AT01Input(name, files.get(name)));
+    t08Files.set(name, projectM10AT01Input(name, t11Files.get(name)));
   }
   const browser = verifyDesenAppRepeatableDemoBrowserPolicy(
     Object.fromEntries(Object.entries(BROWSER_PATHS).map(([key, name]) => [key, files.get(name)])),
   );
-  const packageWiring = verifyPackageWiring(files);
+  const packageWiring = verifyPackageWiring(t11Files);
   const normalResetMatrix = await executeNormalResetMatrix(workspaceRoot, files);
-  const { publicApiMatrix, currentGraphAudit } =
+  const { publicApiMatrix: rawPublicApiMatrix, currentGraphAudit } =
     await buildCurrentDesenAppLastKnownGoodRecoveryObservation({ workspaceRoot }).catch(() =>
       fail(
         "CURRENT_OBSERVATION_FAILED",
         "The fresh public API or App/host graph observation failed.",
       ),
     );
+  let publicApiMatrix;
+  try {
+    publicApiMatrix = projectM10AT12PublicApiMatrix(rawPublicApiMatrix);
+  } catch {
+    fail("SUCCESSOR_DRIFT", "The live public API matrix is not the exact reviewed T12 successor.");
+  }
   if (!isDeepStrictEqual(publicApiMatrix, historical.authority.publicApiMatrix)) {
     fail("SUCCESSOR_DRIFT", "The live recovery matrix differs from its exact T08 authority.");
   }
@@ -1080,7 +1179,8 @@ export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined
   const after = await readTrackedFiles(workspaceRoot, new Map());
   if (!isDeepStrictEqual(receipts(files), receipts(after)))
     fail("SOURCE_SNAPSHOT_DRIFT", "A captured T08 authority differs after fresh execution.");
-  for (const { path: name, bytes, sha256: digest } of publicApiMatrix.freshEmission.inputReceipts) {
+  for (const { path: name, bytes, sha256: digest } of rawPublicApiMatrix.freshEmission
+    .inputReceipts) {
     const captured = files.get(name);
     if (captured !== undefined && (captured.byteLength !== bytes || sha256(captured) !== digest))
       fail(
@@ -1088,6 +1188,14 @@ export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined
         "The fresh compiler and captured T08 input authority disagree.",
       );
   }
+  const t08TrackedReceipts = receipts(t08Files).filter(
+    (receipt) => receipt.path !== "package.json",
+  );
+  projectM10AT12MainEntrypointReceipt(
+    t08TrackedReceipts,
+    currentGraphAudit,
+    historical.authority.currentGraphAudit,
+  );
   const artifact = deepFreeze({
     schemaVersion: 1,
     task: "M10-T08",
@@ -1128,7 +1236,7 @@ export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined
     },
     boundary: {
       trackedFiles: files.size - 1,
-      trackedReceipts: receipts(t08Files).filter((receipt) => receipt.path !== "package.json"),
+      trackedReceipts: t08TrackedReceipts,
       semanticAuthorityPaths: ["package.json"],
       immutableInputs: true,
       parentArtifacts: 8,
@@ -1180,6 +1288,7 @@ export async function buildDesenAppRepeatableDemoEvidence(rawOptions = undefined
       predecessorTask: "M10-T08",
       artifact: M10A_T01_SUCCESSOR_PIN,
       currentGraphAudit,
+      currentPublicApiMatrix: rawPublicApiMatrix,
       currentTrackedReceipts: receipts(files).filter((receipt) => receipt.path !== "package.json"),
       currentObservationsAreNotHistoricalResults: true,
     },

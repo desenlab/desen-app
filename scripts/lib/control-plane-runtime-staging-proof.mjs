@@ -68,6 +68,33 @@ const EXPECTED_ARTIFACT_COUNT = 80;
 const EXPECTED_DISTRIBUTION_BYTES = 243_740;
 const EXPECTED_PUBLIC_EXPORT_COUNT = 85;
 const EXPECTED_PUBLIC_RUNTIME_EXPORT_COUNT = 28;
+const M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT = 108;
+const M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256 =
+  "1f2d045ce8162fef25dde5d5d9b5ef47f3afda2fef74a2d304dde5faf6692573";
+// M10A-T12 adds one opaque, application-owned project-workspace transport record to the
+// local control plane. The M07 artifact remains frozen at its completed public surface, so
+// this is a deliberately closed successor projection: each added type-only export must be
+// exact before it is removed from the historical M07 inventory below.
+const M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS = Object.freeze([
+  Object.freeze({
+    imported: "LocalControlPlaneProjectWorkspacePutResult",
+    exported: "LocalControlPlaneProjectWorkspacePutResult",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+  Object.freeze({
+    imported: "LocalControlPlaneProjectWorkspaceReadResult",
+    exported: "LocalControlPlaneProjectWorkspaceReadResult",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+  Object.freeze({
+    imported: "LocalControlPlaneProjectWorkspaceRecord",
+    exported: "LocalControlPlaneProjectWorkspaceRecord",
+    module: "./local-control-plane-contract.js",
+    typeOnly: true,
+  }),
+]);
 const EXPECTED_TSDOC_EXPORT_COUNT = 13;
 const EXPECTED_PUBLIC_RUNTIME_KEYS = Object.freeze([
   "BUNDLE_INTEGRITY_LIMITS",
@@ -651,8 +678,36 @@ function publicExportInventory(source, relativePath) {
     const byName = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
     return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
   });
-  const frozenInventory = inventory.filter(
+  const currentInventorySha256 = sha256(Buffer.from(JSON.stringify(inventory), "utf8"));
+  if (
+    inventory.length !== M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT ||
+    currentInventorySha256 !== M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256
+  ) {
+    fail("REGISTRATION_DRIFT", "The exact M10A-T12 package-root inventory drifted.", {
+      expectedCount: M10A_T12_PUBLIC_EXPORT_INVENTORY_COUNT,
+      actualCount: inventory.length,
+      expectedSha256: M10A_T12_PUBLIC_EXPORT_INVENTORY_SHA256,
+      actualSha256: currentInventorySha256,
+    });
+  }
+  const nonActivationInventory = inventory.filter(
     ({ module }) => !module.startsWith("./runtime-activation"),
+  );
+  const t12ProjectWorkspaceExports = nonActivationInventory.filter(({ exported }) =>
+    M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS.some((expected) => expected.exported === exported),
+  );
+  if (
+    JSON.stringify(t12ProjectWorkspaceExports) !==
+    JSON.stringify(M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS)
+  ) {
+    fail(
+      "REGISTRATION_DRIFT",
+      "The exact M10A-T12 project-workspace package-root successor drifted.",
+    );
+  }
+  const frozenInventory = nonActivationInventory.filter(
+    ({ exported }) =>
+      !M10A_T12_PROJECT_WORKSPACE_TYPE_EXPORTS.some((expected) => expected.exported === exported),
   );
   const staging = frozenInventory.filter(({ module }) => module.startsWith("./runtime-staging"));
   const expectedStaging = [
