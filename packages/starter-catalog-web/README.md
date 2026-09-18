@@ -8,15 +8,15 @@ Source-node templates, and one explicit React-adapter subpath. Base UI remains a
 implementation detail of the interactive adapters; layout and semantic content use ordinary Web
 semantics where a Base UI primitive is unnecessary.
 
-**M10A-T09, T08, T07, and T06 are `DONE`; M10A-T12 is `IN_PROGRESS`.** T09 adds bounded data-display
+**M10A-T06 through T12 are `DONE`.** T09 adds bounded data-display
 and feedback adapters; its [task-owned proof](../../docs/proof/M10A-T09.md) records local
 browser/contract evidence plus exact-head hosted/fresh-`main` closure as a historical receipt.
 T08 adds bounded Popover, Tooltip, Menu, and Accordion adapters on the same contained portal
 boundary; its [task-owned proof](../../docs/proof/M10A-T08.md) records completed hosted closure.
 T07's [task-owned proof](../../docs/proof/M10A-T07.md) records completed selection/numeric-control
 closure. T12 owns the current 0.7.0 Catalog capture, closed visual style profiles, and normal-App
-typed visual-authoring integration; its [local proof](../../docs/proof/M10A-T12.md) is not a hosted
-closure. This package is not a complete component library, a design-system explorer, a persisted
+typed visual-authoring integration; its [hosted closure](../../docs/proof/M10A-T12.md) is recorded.
+This package is not a complete component library, a design-system explorer, a persisted
 project model, or a publish/activation path.
 
 The M10A-T01 receipt at
@@ -163,8 +163,8 @@ explorer/documentation surface.
 
 ## Verification
 
-The following commands authenticate the T12 local boundary; exact-head hosted and fresh-`main`
-closure remain pending in [the T12 report](../../docs/proof/M10A-T12.md).
+The following commands authenticate the T12 local boundary; its exact-head hosted and fresh-`main`
+closure is recorded in [the T12 report](../../docs/proof/M10A-T12.md).
 
 ```bash
 pnpm --filter @desen/starter-catalog-web typecheck
@@ -180,4 +180,5 @@ pnpm test:m10a-t12
 Authenticate historical closure without recapturing it with `pnpm verify:m10a-t05` through
 `pnpm verify:m10a-t09` and their matching `test:m10a-tNN` commands. See [the T12 contract](../../docs/plan/M10A-TASK-CONTRACTS.md#m10a-t12--rich-styling-and-responsive-authoring),
 [the implementation plan](../../docs/plan/M10A-IMPLEMENTATION-PLAN.md), [the T12 local report](../../docs/proof/M10A-T12.md),
-and the immutable [T09 proof](../../docs/proof/M10A-T09.md).
+and the immutable [T09 proof](../../docs/proof/M10A-T09.md). M10A-T13 remains the next
+dependency-ready `NOT_STARTED` task for assets and fonts.

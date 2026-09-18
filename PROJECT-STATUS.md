@@ -1,19 +1,19 @@
 # Project Status
 
-Last updated: 2026-09-17
+Last updated: 2026-09-18
 
 ## Current state
 
-M10 and its terminal `G10` gate remain complete. Implementation progress is **132/176 tasks (75%)**:
-M10 is **12/12**, M10A is **11/28 (39%)**, and proof gates are **11/14**. Gates are excluded from the
+M10 and its terminal `G10` gate remain complete. Implementation progress is **133/176 tasks (76%)**:
+M10 is **12/12**, M10A is **12/28 (43%)**, and proof gates are **11/14**. Gates are excluded from the
 task count.
 
 SC-02 concluded `adapt`; the user-authorized M10A product plan adds 28 tasks and G10A before M11.
-**M10A-T01 through M10A-T11 are DONE; M10A-T12 is `IN_PROGRESS`.** Its local 0.7.0 Catalog,
-lazy typed Inspector, responsive-preview, and aggregate-persistence evidence is integration-ready,
-but hosted exact-head and fresh-`main` closure remain required. It adds no Runtime, Publisher,
-Core/protocol, G10A, or M11 authority. M11 has not started. The frozen protocol, Runtime Core,
-SC-01 profile, and completed T02 authority are unchanged.
+**M10A-T01 through M10A-T12 are DONE.** T12's 0.7.0 Catalog, lazy typed Inspector,
+responsive-preview, and aggregate-persistence boundary passed exact-head hosted and fresh-`main`
+closure. It adds no Runtime, Publisher, Core/protocol, G10A, or M11 authority. T13 is the next
+dependency-ready task and remains `NOT_STARTED`; M11 has not started. The frozen protocol, Runtime
+Core, SC-01 profile, and completed T02 authority are unchanged.
 
 ## Current closure
 
@@ -21,10 +21,10 @@ Each completed task retains its own exact-head, merge, and fresh-`main` receipt.
 [M10A-T01 proof](docs/proof/M10A-T01.md), [M10A-T02 proof](docs/proof/M10A-T02.md),
 [M10A-T03 proof](docs/proof/M10A-T03.md), [M10A-T04 proof](docs/proof/M10A-T04.md),
 [M10A-T05 proof](docs/proof/M10A-T05.md), [M10A-T06 proof](docs/proof/M10A-T06.md),
-[M10A-T07 proof](docs/proof/M10A-T07.md), [M10A-T08 proof](docs/proof/M10A-T08.md), [M10A-T09 proof](docs/proof/M10A-T09.md), and
-[M10A-T10 proof](docs/proof/M10A-T10.md) and [M10A-T11 proof](docs/proof/M10A-T11.md) are canonical closure authorities; earlier
-candidates remain failures. The [M10A-T12 report](docs/proof/M10A-T12.md) records local evidence only,
-not hosted closure. T11 remains an App boundary, not Runtime, Publisher, Core/protocol, G10A, or M11
+[M10A-T07 proof](docs/proof/M10A-T07.md), [M10A-T08 proof](docs/proof/M10A-T08.md), [M10A-T09 proof](docs/proof/M10A-T09.md),
+[M10A-T10 proof](docs/proof/M10A-T10.md), [M10A-T11 proof](docs/proof/M10A-T11.md), and
+[M10A-T12 proof](docs/proof/M10A-T12.md) are canonical closure authorities; earlier candidates remain
+failures. T12 remains an App boundary, not Runtime, Publisher, Core/protocol, G10A, or M11
 authority. T05 proves only its private starter Catalog and isolated harness, not normal-App integration,
 persistence, Runtime, Publisher, or protocol authority. T06 proves only the private 0.3.0 form-control
 Catalog and isolated harness. T07's hosted 0.4.0 proof covers bounded selection/numeric controls only.
@@ -82,11 +82,10 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T12 — rich styling and responsive authoring — is `IN_PROGRESS` and locally integration-ready.** Its
-[local report](docs/proof/M10A-T12.md), [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), and
-[task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t12--rich-styling-and-responsive-authoring) define its
-bounded scope and remaining exact-head hosted/fresh-`main` closure. T12 must not authorize Runtime activation,
-Publisher authority, Core/protocol changes, G10A, or M11; T13 is not enabled until T12 closes.
+**M10A-T13 — safe image/icon/font assets and content styling — is dependency-ready and `NOT_STARTED`.** Its
+[product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), [task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t13--safe-image-icon-font-assets-and-content-styling), and
+the completed [T12 report](docs/proof/M10A-T12.md) define the next bounded boundary. T12 does not authorize
+Runtime activation, Publisher authority, Core/protocol changes, G10A, or M11.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
 Runtime Core tree and fresh proof requirements. No further external user/team recruitment is

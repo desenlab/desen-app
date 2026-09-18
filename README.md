@@ -4,16 +4,16 @@ DESEN is a data-only executable design protocol. This repository contains its We
 implementation, the Desen App visual authoring product, and the proof infrastructure used to make
 bounded, reproducible claims about both.
 
-> M10/G10 and M10A-T01 through T11 are complete. T12's local 0.7.0 Catalog, typed visual-authoring,
-> responsive-preview, and aggregate-persistence evidence is integration-ready; it remains `IN_PROGRESS`
-> pending exact-head hosted and fresh-`main` closure and adds no Runtime, Publisher, Core/protocol, G10A, or M11 authority.
+> M10/G10 and M10A-T01 through T12 are complete. T12's 0.7.0 Catalog, typed visual-authoring,
+> responsive-preview, and aggregate-persistence boundary has exact-head hosted and fresh-`main` closure;
+> it adds no Runtime, Publisher, Core/protocol, G10A, or M11 authority. T13 is next and `NOT_STARTED`.
 
 ## Implementation progress
 
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████████░░░░░░` **132 / 176 tasks complete (75%)**
+**Overall:** `███████████████████░░░░░░` **133 / 176 tasks complete (76%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -33,10 +33,10 @@ bounded, reproducible claims about both.
 
 **M10 complete:** `████████████` **12 / 12 tasks complete (100%)**
 
-**M10A:** **11 / 28 tasks complete (39%)** · T12 is integration-ready locally; no completed work removed.
+**M10A:** **12 / 28 tasks complete (43%)** · T12 is closed; no completed work removed.
 
 **Proof gates:** **11 / 14 complete** · **G10:** `DONE` · **Runtime Core baseline:** frozen ·
-**Current task:** `M10A-T12` (`IN_PROGRESS`; local verification passed; hosted closure pending) ·
+**Next task:** `M10A-T13` (`NOT_STARTED`; safe image/icon/font assets and content styling) ·
 **M11:** `NOT_STARTED`
 
 [View the canonical task board](docs/plan/TASKS.md)
@@ -194,7 +194,7 @@ bounded private layout/content starter Catalog and isolated proof harness, not n
 selection/numeric Catalog [proof](docs/proof/M10A-T07.md). `M10A-T08` is `DONE` with its hosted
 0.5.0 overlay/disclosure [proof](docs/proof/M10A-T08.md); `M10A-T09` is `DONE` with its hosted
 0.6.0 data-display/feedback [proof](docs/proof/M10A-T09.md). Those 0.5.0/0.6.0 receipts are immutable; `M10A-T12`
-owns the current 0.7.0 Catalog and is `IN_PROGRESS` with [local evidence](docs/proof/M10A-T12.md): lazy typed Inspector controls, token/literal/reset styles, responsive preview, and aggregate persistence. T11 remains closed; M11 remains gated by G10A.
+owns the current 0.7.0 Catalog and is `DONE` with [hosted closure](docs/proof/M10A-T12.md): lazy typed Inspector controls, token/literal/reset styles, responsive preview, and aggregate persistence. T13 is next; M11 remains gated by G10A.
 
 [SC-02](docs/plan/STRATEGIC-VALIDATION.md) records an owner-directed adaptation, not a two-pilot
 validation pass. No further external interviews are required for this plan. Map (`M11-T01`) and

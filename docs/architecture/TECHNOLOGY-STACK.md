@@ -85,10 +85,11 @@ exact-head hosted and fresh-`main` 0.5.0 overlay/disclosure evidence; M10A-T09 i
 exact-head hosted and fresh-`main` 0.6.0 data-display/feedback evidence. Those 0.5.0/0.6.0 artifacts
 are immutable historical receipts. M10A-T10 is `DONE` with application-owned project/surface lifecycle
 and generation-fenced storage only; M10A-T11 is `DONE` with exact-head hosted and fresh-`main`
-direct-manipulation closure. M10A-T12 is `IN_PROGRESS`: it owns the current 0.7.0 Catalog capture,
+direct-manipulation closure. M10A-T12 is `DONE`: it owns the current 0.7.0 Catalog capture,
 lazy Catalog Inspector, typed visual controls, bounded responsive previews, and project-workspace
 aggregate persistence. It does not add named-theme management, Runtime, Publisher, Core/protocol,
-G10A, or M11 authority; hosted closure remains pending. M11 has not started.
+G10A, or M11 authority; its exact-head hosted and fresh-`main` closure is recorded. M10A-T13 is
+dependency-ready and `NOT_STARTED`; M11 has not started.
 The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
 capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
 and hermetic capture configuration. No Storybook, Chromatic, Tailwind or second primitive library

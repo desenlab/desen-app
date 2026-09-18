@@ -5,15 +5,16 @@ Kanonik protokol ve API metinleri İngilizcedir; bu sayfa bilgilendirici Türkç
 
 ## Bugünkü konum
 
-M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 132/176 (%75), M10 12/12, M10A 11/28 (%39) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T11'nın exact-head PR kontrolleri,
-merge'leri ve taze `main` koşuları geçti; M10A-T12 yerel 0.7.0 Catalog kanıtıyla `IN_PROGRESS`
-durumunda ve hosted kapanışı bekliyor.
+M10 ve terminal `G10` kapısı tamamen kapandı. Uygulama ilerlemesi 133/176 (%76), M10 12/12, M10A 12/28 (%43) ve kanıt kapıları 11/14 düzeyindedir. M10A-T01–T12'nın exact-head PR kontrolleri,
+merge'leri ve taze `main` koşuları geçti; M10A-T13 bağımlılık açısından hazır ve `NOT_STARTED`
+durumundadır.
 Ayrıntı [Project Status](../../PROJECT-STATUS.md),
 [T05 kanıtı](../proof/M10A-T05.md), [T06 kanıtı](../proof/M10A-T06.md), [T07 kanıtı](../proof/M10A-T07.md) ve
 [G10 kanıtında](../proof/DESEN-APP-M10-GATE.md) bulunur.
 
 SC-02 `adapt` kararıyla tamamlandı; M11 başlamadı. Yeni M10A planı 28 geliştirme görevi ve G10A
-ekler; tamamlanmış görev sayısı 132 ve M10A sayacı 11/28'dir; tek aktif görev `M10A-T12`'dir. `M10A-T01` `DONE`: Base UI 1.8.0
+ekler; tamamlanmış görev sayısı 133 ve M10A sayacı 12/28'dir; sıradaki uygun görev `M10A-T13` ve
+`NOT_STARTED` durumundadır. `M10A-T01` `DONE`: Base UI 1.8.0
 ile Button/Select/Dialog adaptör sınırı kanıtlandı. `M10A-T02` de `DONE`: platformdan bağımsız,
 sürümlü project design-system modeli ve typed token resolver kanıtlandı. `M10A-T03` `DONE`: tema/token
 authoring, modlar, alias'lar, kayıp-farkındalıklı aktarım ve izole workbench kanıtlandı.
@@ -32,10 +33,10 @@ kaydetme durumu [kanıt belgesinde](../proof/M10A-T10.md) exact-head ve taze `ma
 `M10A-T11` `DONE`: çoklu seçim, slot-farkındalıklı atomik katman taşıma ve erişilebilir canvas
 kontrolleri [kanıt belgesinde](../proof/M10A-T11.md) exact-head ve taze `main` kapanışıyla kayıtlıdır.
 T08'in 0.5.0 ve T09'un 0.6.0 artifact'leri değişmez tarihsel makbuzlardır; güncel 0.7.0 Catalog
-yakalama yetkisi T12'ye aittir. `M10A-T12` `IN_PROGRESS`: normal DESEN Neutral ürününde lazy typed
+yakalama yetkisi T12'ye aittir. `M10A-T12` `DONE`: normal DESEN Neutral ürününde lazy typed
 Inspector, token/literal/reset görsel kontrolleri, desktop/tablet/mobile preview, sıralı responsive
-override ve aggregate persistence için [yerel kanıt](../proof/M10A-T12.md) geçti; exact-head hosted
-ve taze `main` kapanışı henüz gerekli olup T13 etkin değildir.
+override ve aggregate persistence için [hosted exact-head ve taze `main` kapanışı](../proof/M10A-T12.md)
+geçti; T13 bağımlılık açısından hazır ve `NOT_STARTED` durumundadır.
 Bu ürün geliştirme kararı için yeni görüşme/ekip testi gerekmiyor; pilot talebi doğrulanmış sayılmıyor.
 
 T02 kapanışı [PR #92](https://github.com/desenlab/desen-app/pull/92) exact head'i
