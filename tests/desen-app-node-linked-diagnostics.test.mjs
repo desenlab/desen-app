@@ -656,6 +656,39 @@ test("[M10A-T11 successor] admits only the exact direct-manipulation authoring-s
   );
 });
 
+test("[M10A-T12 successor] admits only the exact rich-styling authoring-inspector receipt", async () => {
+  const relativePath = SOURCE_PATHS.authoringInspector;
+  const currentBytes = await readLiveFile(path.join(ROOT, relativePath));
+  assert.equal(currentBytes.byteLength, 39_061);
+
+  const current = await buildDesenAppNodeLinkedDiagnosticsEvidence({
+    fileOverrides: new Map([[relativePath, currentBytes]]),
+  });
+  assert.deepEqual(
+    current.currentCompatibility.boundary.currentPathReceipts.find(
+      ({ path: receiptPath }) => receiptPath === relativePath,
+    ),
+    {
+      path: relativePath,
+      bytes: 39_061,
+      sha256: "abbc6fb9d844c067f2fb9c8acea9617ca1e8e0a04354dd8d2fc47d61a6b87145",
+    },
+  );
+
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([[relativePath, Buffer.alloc(0)]]),
+    }),
+    expectedError("SOURCE_POLICY_VIOLATION"),
+  );
+  await assert.rejects(
+    buildDesenAppNodeLinkedDiagnosticsEvidence({
+      fileOverrides: new Map([[relativePath, Buffer.concat([currentBytes, Buffer.from("\n")])]]),
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+});
+
 test("[M10-T01A successor] authenticates the exact product-created blank-project closure", async () => {
   const successor = built.currentCompatibility.userCreatedBlankProjectSuccessor;
   assert.deepEqual(

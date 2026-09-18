@@ -153,6 +153,9 @@ const M10A_T12_CI_REPAIR_RESEALED_READER_INDEXES = Object.freeze([64, 65, 116, 1
 // immutable task artifact remains at its 90-second configuration; its own proof pair owns the
 // narrow inverse projection and is the sole current-reader authority for that repair.
 const M10A_T12_TIMEOUT_CONFIG_RESEALED_READER_INDEXES = Object.freeze([146, 147]);
+// Sequence 120 admits the exact T12 rich-styling inspector source through the retained M09-T13
+// proof pair. The frozen M09 artifact remains unchanged and all other readers stay historical.
+const M10A_T12_NODE_LINKED_DIAGNOSTICS_BRIDGE_RESEALED_READER_INDEXES = Object.freeze([94, 95]);
 
 async function assertHistoricalReaderMatchesCurrentWorkspace(reader, index) {
   // Historical generations retain their exact reviewed digests. Only explicitly enumerated
@@ -200,53 +203,57 @@ async function assertHistoricalReaderMatchesCurrentWorkspace(reader, index) {
                                           )
                                         ? baselineManifest.checkpoints[69].readers[index]
                                         : reader;
-  const expectedCurrent = M10A_T12_TIMEOUT_CONFIG_RESEALED_READER_INDEXES.includes(index)
-    ? baselineManifest.checkpoints[118].readers[index]
-    : M10A_T12_CI_REPAIR_RESEALED_READER_INDEXES.includes(index)
-      ? baselineManifest.checkpoints[117].readers[index]
-      : M10A_T12_CONTROL_PLANE_RECEIPT_RESEALED_READER_INDEXES.includes(index)
-        ? baselineManifest.checkpoints[116].readers[index]
-        : M10A_T12_CONTROL_PLANE_LINT_RESEALED_READER_INDEXES.includes(index)
-          ? baselineManifest.checkpoints[115].readers[index]
-          : M10A_T12_CONTROL_PLANE_SUCCESSOR_RESEALED_READER_INDEXES.includes(index)
-            ? baselineManifest.checkpoints[114].readers[index]
-            : M10A_T12_HISTORICAL_CONSUMERS_RESEALED_READER_INDEXES.includes(index)
-              ? baselineManifest.checkpoints[113].readers[index]
-              : M10A_T12_FINAL_ARTIFACT_RESEALED_READER_INDEXES.includes(index)
-                ? baselineManifest.checkpoints[112].readers[index]
-                : M10A_T12_FORMAT_RESEALED_READER_INDEXES.includes(index)
-                  ? baselineManifest.checkpoints[111].readers[index]
-                  : M10A_T12_T09_HISTORY_RESEALED_READER_INDEXES.includes(index)
-                    ? baselineManifest.checkpoints[110].readers[index]
-                    : M10A_T11_NODE_LINKED_DIAGNOSTICS_BRIDGE_RESEALED_READER_INDEXES.includes(
-                          index,
-                        )
-                      ? baselineManifest.checkpoints[109].readers[index]
-                      : M10A_T11_PERFORMANCE_RESEALED_READER_INDEXES.includes(index)
-                        ? baselineManifest.checkpoints[108].readers[index]
-                        : M10A_T11_CLEANUP_RESEALED_READER_INDEXES.includes(index)
-                          ? baselineManifest.checkpoints[107].readers[index]
-                          : M10A_T11_RESEALED_READER_INDEXES.includes(index)
-                            ? baselineManifest.checkpoints[106].readers[index]
-                            : M10A_T10_REPEATABLE_DEMO_RESEALED_READER_INDEXES.includes(index)
-                              ? baselineManifest.checkpoints[105].readers[index]
-                              : M10A_T10_RECOVERY_RESEALED_READER_INDEXES.includes(index)
-                                ? baselineManifest.checkpoints[104].readers[index]
-                                : M10A_T10_REAL_ADAPTER_CANVAS_RESEALED_READER_INDEXES.includes(
-                                      index,
-                                    )
-                                  ? baselineManifest.checkpoints[103].readers[index]
-                                  : M10A_T10_HISTORICAL_COMPATIBILITY_RESEALED_READER_INDEXES.includes(
+  const expectedCurrent = M10A_T12_NODE_LINKED_DIAGNOSTICS_BRIDGE_RESEALED_READER_INDEXES.includes(
+    index,
+  )
+    ? baselineManifest.checkpoints[119].readers[index]
+    : M10A_T12_TIMEOUT_CONFIG_RESEALED_READER_INDEXES.includes(index)
+      ? baselineManifest.checkpoints[118].readers[index]
+      : M10A_T12_CI_REPAIR_RESEALED_READER_INDEXES.includes(index)
+        ? baselineManifest.checkpoints[117].readers[index]
+        : M10A_T12_CONTROL_PLANE_RECEIPT_RESEALED_READER_INDEXES.includes(index)
+          ? baselineManifest.checkpoints[116].readers[index]
+          : M10A_T12_CONTROL_PLANE_LINT_RESEALED_READER_INDEXES.includes(index)
+            ? baselineManifest.checkpoints[115].readers[index]
+            : M10A_T12_CONTROL_PLANE_SUCCESSOR_RESEALED_READER_INDEXES.includes(index)
+              ? baselineManifest.checkpoints[114].readers[index]
+              : M10A_T12_HISTORICAL_CONSUMERS_RESEALED_READER_INDEXES.includes(index)
+                ? baselineManifest.checkpoints[113].readers[index]
+                : M10A_T12_FINAL_ARTIFACT_RESEALED_READER_INDEXES.includes(index)
+                  ? baselineManifest.checkpoints[112].readers[index]
+                  : M10A_T12_FORMAT_RESEALED_READER_INDEXES.includes(index)
+                    ? baselineManifest.checkpoints[111].readers[index]
+                    : M10A_T12_T09_HISTORY_RESEALED_READER_INDEXES.includes(index)
+                      ? baselineManifest.checkpoints[110].readers[index]
+                      : M10A_T11_NODE_LINKED_DIAGNOSTICS_BRIDGE_RESEALED_READER_INDEXES.includes(
+                            index,
+                          )
+                        ? baselineManifest.checkpoints[109].readers[index]
+                        : M10A_T11_PERFORMANCE_RESEALED_READER_INDEXES.includes(index)
+                          ? baselineManifest.checkpoints[108].readers[index]
+                          : M10A_T11_CLEANUP_RESEALED_READER_INDEXES.includes(index)
+                            ? baselineManifest.checkpoints[107].readers[index]
+                            : M10A_T11_RESEALED_READER_INDEXES.includes(index)
+                              ? baselineManifest.checkpoints[106].readers[index]
+                              : M10A_T10_REPEATABLE_DEMO_RESEALED_READER_INDEXES.includes(index)
+                                ? baselineManifest.checkpoints[105].readers[index]
+                                : M10A_T10_RECOVERY_RESEALED_READER_INDEXES.includes(index)
+                                  ? baselineManifest.checkpoints[104].readers[index]
+                                  : M10A_T10_REAL_ADAPTER_CANVAS_RESEALED_READER_INDEXES.includes(
                                         index,
                                       )
-                                    ? baselineManifest.checkpoints[102].readers[index]
-                                    : M10A_T10_PUBLISHED_HOST_UPDATE_RESEALED_READER_INDEXES.includes(
+                                    ? baselineManifest.checkpoints[103].readers[index]
+                                    : M10A_T10_HISTORICAL_COMPATIBILITY_RESEALED_READER_INDEXES.includes(
                                           index,
                                         )
-                                      ? baselineManifest.checkpoints[101].readers[index]
-                                      : M10A_T05_T06_T07_CURRENT_READER_INDEXES.includes(index)
-                                        ? baselineManifest.checkpoints[95].readers[index]
-                                        : current;
+                                      ? baselineManifest.checkpoints[102].readers[index]
+                                      : M10A_T10_PUBLISHED_HOST_UPDATE_RESEALED_READER_INDEXES.includes(
+                                            index,
+                                          )
+                                        ? baselineManifest.checkpoints[101].readers[index]
+                                        : M10A_T05_T06_T07_CURRENT_READER_INDEXES.includes(index)
+                                          ? baselineManifest.checkpoints[95].readers[index]
+                                          : current;
   if (
     M10A_T10_RECOVERY_RESEALED_READER_INDEXES.includes(index) &&
     JSON.stringify(reader) === JSON.stringify(baselineManifest.checkpoints[103].readers[index])
@@ -334,7 +341,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   const result = await verifyProofReaderCheckpoints();
 
   assert.equal(manifest.schemaVersion, 1);
-  assert.equal(manifest.checkpoints.length, 119);
+  assert.equal(manifest.checkpoints.length, 120);
   assert.equal(manifest.checkpoints[0].sequence, 1);
   assert.equal(manifest.checkpoints[0].predecessorSha256, GENESIS_PREDECESSOR_SHA256);
   assert.equal(manifest.checkpoints[1].sequence, 2);
@@ -918,8 +925,8 @@ test("the reviewed chain authenticates its immutable genesis and current readers
     calculateProofReaderCheckpointSha256(manifest.checkpoints.at(-1)),
     manifest.headSha256,
   );
-  assert.equal(manifest.headSha256, PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[118]);
-  assert.equal(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length, 119);
+  assert.equal(manifest.headSha256, PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[119]);
+  assert.equal(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length, 120);
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[7],
     "f707fb4c3338aeda79eb6242b645b5e864ce54b1e3955373e8edebcd7e026b8a",
@@ -1242,7 +1249,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
       44, 45, 46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57,
       58, 59, 59, 59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70,
       71, 71, 72, 72, 72, 72, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 74, 74, 74, 74, 74, 74,
-      74, 74, 74,
+      74, 74, 74, 74,
     ],
   );
   assert.equal(Object.isFrozen(PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS), true);
@@ -1254,7 +1261,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
     headSha256: manifest.headSha256,
-    checkpoints: 119,
+    checkpoints: 120,
     frozenArtifacts: 74,
     currentReaders: 148,
   });
@@ -9779,6 +9786,66 @@ test("sequence one hundred nineteen reseals only the T12 timeout successor reade
     await assertHistoricalReaderMatchesCurrentWorkspace(reader, index);
 });
 
+test("sequence one hundred twenty reseals only the T12 node-linked diagnostics bridge readers", async () => {
+  const previous = baselineManifest.checkpoints[118];
+  const current = baselineManifest.checkpoints[119];
+  const identity = ({ task, role, path: readerPath }) => ({ task, role, path: readerPath });
+
+  assert.equal(current.sequence, 120);
+  assert.equal(
+    current.predecessorSha256,
+    "8457d6bde2ebd9884d576d2a697c426a392eaa8d256bdf4a79fb5a67b80e8d7a",
+  );
+  assert.equal(current.artifacts.length, 74);
+  assert.equal(current.readers.length, 148);
+  assert.deepEqual(current.artifacts, previous.artifacts);
+  assert.deepEqual(current.readers.map(identity), previous.readers.map(identity));
+  assert.deepEqual(
+    current.readers.flatMap((reader, index) =>
+      JSON.stringify(reader) === JSON.stringify(previous.readers[index]) ? [] : [index],
+    ),
+    M10A_T12_NODE_LINKED_DIAGNOSTICS_BRIDGE_RESEALED_READER_INDEXES,
+  );
+  assert.deepEqual(
+    M10A_T12_NODE_LINKED_DIAGNOSTICS_BRIDGE_RESEALED_READER_INDEXES.map((index) => [
+      index,
+      current.readers[index],
+    ]),
+    [
+      [
+        94,
+        {
+          task: "M09-T13",
+          role: "proof-library",
+          path: "scripts/lib/desen-app-node-linked-diagnostics-proof.mjs",
+          bytes: 111885,
+          sha256: "97e5f08a386ba6a5817f0ff5be2c2e0d24e711adeea2c320042adc66a8d026f1",
+        },
+      ],
+      [
+        95,
+        {
+          task: "M09-T13",
+          role: "root-test",
+          path: "tests/desen-app-node-linked-diagnostics.test.mjs",
+          bytes: 33588,
+          sha256: "083fdcdc17257b7da80afec3c5a451a8c123517230f0b964a0c1381d619b1e6a",
+        },
+      ],
+    ],
+  );
+  assert.deepEqual(
+    baselineManifest.checkpoints.slice(0, 119).map(calculateProofReaderCheckpointSha256),
+    PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 119),
+  );
+  assert.equal(
+    calculateProofReaderCheckpointSha256(current),
+    "6b84e9041bb48392f1f9c4b5dcf33bbb5b0bb7e11f2429470a146a4114568ca7",
+  );
+  for (const [index, reader] of current.readers.entries())
+    await assertHistoricalReaderMatchesCurrentWorkspace(reader, index);
+});
+
 test("reviewed task generations stay pinned while a candidate inherits current authority", () => {
   assert.deepEqual(
     baselineManifest.checkpoints.map(({ artifacts }) => artifacts.length),
@@ -10435,12 +10502,12 @@ test("one changed reader is a valid review candidate while one hundred forty-sev
   assert.deepEqual(candidate, {
     status: "REVIEW_REQUIRED",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    anchoredCheckpoints: 119,
-    candidateSequence: 120,
+    anchoredCheckpoints: 120,
+    candidateSequence: 121,
     predecessorSha256: baselineManifest.headSha256,
     candidateSha256: manifest.headSha256,
   });
-  assert.equal(successor.sequence, 120);
+  assert.equal(successor.sequence, 121);
   assert.equal(successor.predecessorSha256, baselineManifest.headSha256);
   assert.notDeepEqual(successor.readers[0], reviewedReaders[0]);
   assert.deepEqual(successor.readers.slice(1), reviewedReaders.slice(1));
