@@ -3787,5 +3787,17 @@ theme/token and T09's 0.6.0 artifacts are read as frozen predecessor receipts; T
 T12 does not claim named-theme CRUD, switching, or persistence management; arbitrary CSS/JSX/JSON,
 private capability DOM inspection, Runtime activation, Publisher authority, Core/protocol changes,
 G10A, and M11 remain outside its scope. PR #119's exact-head hosted Quality and Browser E2E,
-merge, and fresh-`main` closure are recorded in the task report; T13 is dependency-ready and
-`NOT_STARTED`.
+merge, and fresh-`main` closure are recorded in the task report.
+
+## M10A-T13 safe local image, icon and font assets (`DONE`)
+
+The [M10A-T13 report](M10A-T13.md) records the bounded safe asset boundary: PNG/JPEG/WebP images,
+inert SVG icons and WOFF2 fonts are admitted only after magic, size, dimension, digest and content
+checks; opaque content-addressed handles and inert project metadata are stored through a local CAS,
+with explicit missing/corrupt diagnostics and no remote fallback. The bundled DESEN Neutral font
+keeps ordinary local authoring independent of a network request. The artifact is
+`artifacts/m10a-t13.json`; its boundary does not change the frozen protocol, Runtime Core, Publisher,
+release activation, G10A or M11 authorities.
+
+PR #122's exact-head hosted and fresh-`main` closure are recorded in the task report. M10A-T14 is
+the next dependency-ready task.

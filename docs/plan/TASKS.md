@@ -251,8 +251,8 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 ## M10A — Design-first product foundation
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
-M10A-T01 through M10A-T12 are `DONE`; T12's 0.7.0 Catalog boundary has hosted exact-head and
-fresh-`main` closure. Overall progress is 133/176 (76%), M10A is 12/28 (43%), and 11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
+M10A-T01 through M10A-T13 are `DONE`; T12's 0.7.0 Catalog and T13's safe local asset boundaries
+have hosted exact-head and fresh-`main` closure. Overall progress is 134/176 (76%), M10A is 13/28 (46%), and 11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
 edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
 unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed
@@ -275,7 +275,7 @@ and fresh-`main` closures as immutable historical receipts while T12 owns the cu
 | M10A-T10 | DONE        | M10A-T02, M10A-T04, M10A-T09                     | [Hosted project/surface lifecycle closure](../proof/M10A-T10.md)                       |
 | M10A-T11 | DONE        | M10A-T10                                         | [Hosted direct-manipulation closure](../proof/M10A-T11.md)                             |
 | M10A-T12 | DONE        | M10A-T03, M10A-T11                               | [Hosted rich styling/responsive closure](../proof/M10A-T12.md)                         |
-| M10A-T13 | NOT_STARTED | M10A-T04, M10A-T12                               | Safe image/icon/font assets and content styling                                        |
+| M10A-T13 | DONE        | M10A-T04, M10A-T12                               | [Hosted safe image/icon/font asset closure](../proof/M10A-T13.md)                      |
 | M10A-T14 | NOT_STARTED | M10A-T10, M10A-T11                               | Undo/redo, duplication and identity-safe copy/paste                                    |
 | M10A-T15 | NOT_STARTED | M10A-T09, M10A-T13, M10A-T14                     | Reusable masters, instances, overrides and detach                                      |
 | M10A-T16 | NOT_STARTED | M10A-T12, M10A-T15                               | Component variants and visual-state authoring                                          |
