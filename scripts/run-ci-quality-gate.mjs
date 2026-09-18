@@ -737,14 +737,8 @@ const EXPECTED_STARTER_PROOF_PACKAGE_SCRIPTS = Object.freeze(
       "prepare:m10a-t06-package",
       "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",
     ],
-    [
-      "prepare:m10a-t07-package",
-      "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",
-    ],
-    [
-      "prepare:m10a-t08-package",
-      "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",
-    ],
+    ["prepare:m10a-t07-package", "pnpm --filter @desen/starter-catalog-web build"],
+    ["prepare:m10a-t08-package", "pnpm --filter @desen/starter-catalog-web build"],
     [
       "prepare:m10a-t09-package",
       "pnpm --filter @desen/starter-catalog-web build && node ../../scripts/write-starter-catalog.mjs",

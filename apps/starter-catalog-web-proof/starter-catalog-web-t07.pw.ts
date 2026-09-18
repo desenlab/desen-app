@@ -93,6 +93,7 @@ test(STARTER_T07_BROWSER_PROOF_TEST_TITLES.publication, async ({ page, request }
     readonly profile: string;
     readonly result: string;
     readonly assertions: {
+      readonly currentStarterCatalogPresent: boolean;
       readonly exactStarterRegistryPresent: boolean;
       readonly t07FixturePresent: boolean;
       readonly publisherPresent: boolean;
@@ -102,6 +103,7 @@ test(STARTER_T07_BROWSER_PROOF_TEST_TITLES.publication, async ({ page, request }
     profile: "desen.m10a-t07.graph-proof.v1",
     result: "PASS",
     assertions: {
+      currentStarterCatalogPresent: true,
       exactStarterRegistryPresent: true,
       t07FixturePresent: true,
       publisherPresent: true,
@@ -124,6 +126,7 @@ test(STARTER_T07_BROWSER_PROOF_TEST_TITLES.semantics, async ({ page, request }) 
     readonly profile: string;
     readonly result: string;
     readonly assertions: {
+      readonly currentStarterCatalogPresent: boolean;
       readonly exactStarterRegistryPresent: boolean;
       readonly publisherPresent: boolean;
       readonly editorPresent: boolean;
@@ -135,6 +138,7 @@ test(STARTER_T07_BROWSER_PROOF_TEST_TITLES.semantics, async ({ page, request }) 
     profile: "desen.m10a-t07.graph-proof.v1",
     result: "PASS",
     assertions: {
+      currentStarterCatalogPresent: true,
       exactStarterRegistryPresent: true,
       publisherPresent: false,
       editorPresent: false,
