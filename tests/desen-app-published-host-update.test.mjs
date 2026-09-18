@@ -145,10 +145,6 @@ const M10A_T12_BROWSER_PACKAGE_RECEIPT = Object.freeze({
   bytes: 1_819,
   sha256: "a811cf3d7ec960796ab47baee69524888a59efc0ab26e81a7eeeaf1968547c66",
 });
-const M10A_T12_DEPENDENCY_CRUISER_RECEIPT = Object.freeze({
-  bytes: 16_945,
-  sha256: "c8cb509ea87d9a25b49bb8ba389340d4304a1043b8fa2847d01331fdc78743d8",
-});
 const M10A_T13_DEPENDENCY_CRUISER_RECEIPT = Object.freeze({
   bytes: 16_973,
   sha256: "9b59bdfdecad052ef32bbf0d44373679a72b08fc5ea2289fecd1bc3bee4c555e",
