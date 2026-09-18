@@ -1388,6 +1388,20 @@ const M10A_T13_APP_PACKAGE_SUCCESSOR = Object.freeze({
   ]),
 });
 
+/** Exact additive T13 dependency-boundary successor, projected before the frozen T12 receipt. */
+const M10A_T13_CONFIG_SUCCESSOR = Object.freeze({
+  path: "dependency-cruiser.config.cjs",
+  bytes: 16_973,
+  sha256: "9b59bdfdecad052ef32bbf0d44373679a72b08fc5ea2289fecd1bc3bee4c555e",
+  predecessor: Object.freeze({
+    bytes: 16_945,
+    sha256: "c8cb509ea87d9a25b49bb8ba389340d4304a1043b8fa2847d01331fdc78743d8",
+  }),
+  inverseChanges: Object.freeze([
+    Object.freeze(['    "design-system-assets",\n', ""]),
+  ]),
+});
+
 /** Exact T12 normal-App manifest addition, projected before the frozen T11 receipt. */
 const M10A_T12_APP_PACKAGE_SUCCESSOR = Object.freeze({
   path: "apps/desen-app/package.json",
@@ -2172,6 +2186,41 @@ const M10A_T12_BROWSER_PACKAGE_SUCCESSOR = Object.freeze({
  * reviewed predecessors. All other inputs pass through unchanged for narrower successor chains.
  */
 export function projectM10AT12HistoricalInput(relativePath, bytes) {
+  if (relativePath === M10A_T13_CONFIG_SUCCESSOR.path) {
+    if (
+      bytes.byteLength !== M10A_T13_CONFIG_SUCCESSOR.bytes ||
+      sha256(bytes) !== M10A_T13_CONFIG_SUCCESSOR.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "The current T13 dependency-boundary input is outside its exact reviewed successor receipt.",
+        { path: relativePath },
+      );
+    }
+    let predecessorText = decodeUtf8(bytes, relativePath, "SUCCESSOR_POLICY_VIOLATION");
+    for (const [currentFragment, predecessorFragment] of M10A_T13_CONFIG_SUCCESSOR.inverseChanges) {
+      if (occurrenceCount(predecessorText, currentFragment) !== 1) {
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          "The T13 dependency-boundary successor lost one exact additive declaration.",
+          { path: relativePath, currentFragment },
+        );
+      }
+      predecessorText = predecessorText.replace(currentFragment, predecessorFragment);
+    }
+    const predecessorBytes = Buffer.from(predecessorText);
+    if (
+      predecessorBytes.byteLength !== M10A_T13_CONFIG_SUCCESSOR.predecessor.bytes ||
+      sha256(predecessorBytes) !== M10A_T13_CONFIG_SUCCESSOR.predecessor.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "Removing only the reviewed T13 dependency-boundary addition must reproduce the exact T12 input.",
+        { path: relativePath },
+      );
+    }
+    bytes = predecessorBytes;
+  }
   if (relativePath === M10A_T13_APP_PACKAGE_SUCCESSOR.path) {
     if (
       bytes.byteLength !== M10A_T13_APP_PACKAGE_SUCCESSOR.bytes ||

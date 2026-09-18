@@ -149,6 +149,10 @@ const M10A_T12_DEPENDENCY_CRUISER_RECEIPT = Object.freeze({
   bytes: 16_945,
   sha256: "c8cb509ea87d9a25b49bb8ba389340d4304a1043b8fa2847d01331fdc78743d8",
 });
+const M10A_T13_DEPENDENCY_CRUISER_RECEIPT = Object.freeze({
+  bytes: 16_973,
+  sha256: "9b59bdfdecad052ef32bbf0d44373679a72b08fc5ea2289fecd1bc3bee4c555e",
+});
 const M10A_T12_INSPECTOR_RECEIPT = Object.freeze({
   bytes: 35_107,
   sha256: "f5f63d93e0d4a5a73fa652d6b07b3b068fc3b0015aaec385f26085932a3d6bc8",
@@ -1626,10 +1630,10 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
   const liveDependencyCruiser = await readFile(path.join(ROOT, "dependency-cruiser.config.cjs"));
-  assert.equal(liveDependencyCruiser.byteLength, M10A_T12_DEPENDENCY_CRUISER_RECEIPT.bytes);
+  assert.equal(liveDependencyCruiser.byteLength, M10A_T13_DEPENDENCY_CRUISER_RECEIPT.bytes);
   assert.equal(
     createHash("sha256").update(liveDependencyCruiser).digest("hex"),
-    M10A_T12_DEPENDENCY_CRUISER_RECEIPT.sha256,
+    M10A_T13_DEPENDENCY_CRUISER_RECEIPT.sha256,
   );
   const t10DependencyCruiser = projectM10AT12HistoricalInput(
     "dependency-cruiser.config.cjs",
@@ -1951,7 +1955,7 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     currentT08Inputs.set(t04Receipt.path, bytes);
     const t12Receipt =
       t04Receipt.path === "dependency-cruiser.config.cjs"
-        ? M10A_T12_DEPENDENCY_CRUISER_RECEIPT
+        ? M10A_T13_DEPENDENCY_CRUISER_RECEIPT
         : undefined;
     const currentReceipt = M10A_T10_T04_INPUT_RECEIPTS.find(
       ({ path: receiptPath }) => receiptPath === t04Receipt.path,
