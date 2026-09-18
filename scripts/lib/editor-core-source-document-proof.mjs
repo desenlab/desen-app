@@ -29,6 +29,7 @@ const STATE_BINDING_EDITS_SOURCE_PATH = "packages/editor-core/src/state-binding-
 const EVENT_ACTION_EDITS_SOURCE_PATH = "packages/editor-core/src/event-action-edits.ts";
 const PERSISTENCE_SOURCE_PATH = "packages/editor-core/src/persistence.ts";
 const CONTINUOUS_VALIDATION_SOURCE_PATH = "packages/editor-core/src/continuous-validation.ts";
+const HISTORY_SOURCE_PATH = "packages/editor-core/src/history.ts";
 const DIST_SOURCE_PATH = "packages/editor-core/dist/source-document.js";
 const DIST_INDEX_PATH = "packages/editor-core/dist/index.js";
 const DIST_STRUCTURAL_EDITS_PATH = "packages/editor-core/dist/structural-edits.js";
@@ -48,6 +49,8 @@ const DIST_EVENT_ACTION_EDITS_DECLARATION_PATH =
 const DIST_PERSISTENCE_DECLARATION_PATH = "packages/editor-core/dist/persistence.d.ts";
 const DIST_CONTINUOUS_VALIDATION_DECLARATION_PATH =
   "packages/editor-core/dist/continuous-validation.d.ts";
+const DIST_HISTORY_PATH = "packages/editor-core/dist/history.js";
+const DIST_HISTORY_DECLARATION_PATH = "packages/editor-core/dist/history.d.ts";
 const DIST_PERSISTENCE_DECLARATION_MAP_PATH = "packages/editor-core/dist/persistence.d.ts.map";
 const DIST_PERSISTENCE_SOURCE_MAP_PATH = "packages/editor-core/dist/persistence.js.map";
 const VALIDATOR_PACKAGE_PATH = "packages/validator/package.json";
@@ -95,6 +98,7 @@ const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
 const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
 const CONTINUOUS_VALIDATION_TEST_PATH = "packages/editor-core/test/continuous-validation.test.ts";
 const CONTINUOUS_VALIDATION_TYPES_PATH = "packages/editor-core/test/continuous-validation.types.ts";
+const HISTORY_TEST_PATH = "packages/editor-core/test/history.test.ts";
 const TERMINAL_INTEGRATION_TEST_PATH = "packages/editor-core/test/terminal-integration.test.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
@@ -258,7 +262,7 @@ const EXPECTED_TEST_AUTHORITY_SHA256 = Object.freeze({
     "24c41948e51d59c31a342d391a84bd229d39123c8764c3385b2402e1535d0739",
   [PERSISTENCE_TEST_PATH]: "17d86804a38c243cbd75a97649b3e9f6716ea57206453851bd98216937b5bc54",
   [PERSISTENCE_TYPES_PATH]: "da5114ec835c91e02df73ef58fd3f2a3f8a85508eb0e939d1c1c845bcfbd87f2",
-  [PUBLIC_TEST_PATH]: "edf5807107239279998c128303190bc7db4485b6ee44d4b9a95eef5508e94b93",
+  [PUBLIC_TEST_PATH]: "b4e196be046ed34eed17d777192318beca19196fb3abdb9e9d9566fdd4312973",
   [PUBLIC_TYPES_PATH]: "04a7b314398424563b765f1de60105c775aa13485c4b8913250edd21bd0f632a",
   [ROOT_TEST_PATH]: "1ff9f10568924100a65e8fa76fdca547e52587881d4a907efaf9dc1a2541fde5",
   [TERMINAL_INTEGRATION_TEST_PATH]:
@@ -433,6 +437,32 @@ const EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS = Object.freeze(
     "DesenEditorInvalidSubjectMapping",
   ].sort(),
 );
+const EXPECTED_HISTORY_RUNTIME_EXPORTS = Object.freeze(
+  [
+    "captureDesenEditorClipboard",
+    "createDesenEditorHistory",
+    "pasteDesenEditorClipboard",
+    "readDesenEditorNodePlacement",
+    "recordDesenEditorHistory",
+    "redoDesenEditorHistory",
+    "undoDesenEditorHistory",
+  ].sort(),
+);
+const EXPECTED_HISTORY_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorClipboardPayload",
+    "DesenEditorClipboardResult",
+    "DesenEditorHistory",
+    "DesenEditorHistoryDiagnostic",
+    "DesenEditorHistoryDiagnosticCode",
+    "DesenEditorHistoryEntry",
+    "DesenEditorHistoryResult",
+    "DesenEditorNodePlacement",
+    "DesenEditorPasteCommand",
+    "DesenEditorPasteResult",
+    "DesenEditorPasteSuccess",
+  ].sort(),
+);
 const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
   [
     "createDesenEditorDocument",
@@ -446,6 +476,7 @@ const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
     ...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS,
     ...EXPECTED_PERSISTENCE_RUNTIME_EXPORTS,
     ...EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS,
+    ...EXPECTED_HISTORY_RUNTIME_EXPORTS,
   ].sort(),
 );
 const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
@@ -477,6 +508,7 @@ const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
     ...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS,
     ...EXPECTED_PERSISTENCE_TYPE_EXPORTS,
     ...EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS,
+    ...EXPECTED_HISTORY_TYPE_EXPORTS,
   ].sort(),
 );
 const EXPECTED_PACKAGE_SCRIPTS = Object.freeze({
@@ -596,6 +628,8 @@ const EXPECTED_TRACKED_PATHS = Object.freeze(
     CONTINUOUS_VALIDATION_SOURCE_PATH,
     CONTINUOUS_VALIDATION_TEST_PATH,
     CONTINUOUS_VALIDATION_TYPES_PATH,
+    HISTORY_SOURCE_PATH,
+    HISTORY_TEST_PATH,
     TERMINAL_INTEGRATION_TEST_PATH,
     PUBLIC_TEST_PATH,
     PUBLIC_TYPES_PATH,
@@ -618,6 +652,8 @@ const EXPECTED_TRACKED_PATHS = Object.freeze(
     DIST_PERSISTENCE_SOURCE_MAP_PATH,
     DIST_CONTINUOUS_VALIDATION_PATH,
     DIST_CONTINUOUS_VALIDATION_DECLARATION_PATH,
+    DIST_HISTORY_PATH,
+    DIST_HISTORY_DECLARATION_PATH,
     GENERATOR_PATH,
     VERIFIER_PATH,
     PROOF_LIBRARY_PATH,
@@ -2103,6 +2139,12 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     files[DIST_CONTINUOUS_VALIDATION_PATH],
     DIST_CONTINUOUS_VALIDATION_PATH,
   );
+  const historySource = declarationInventory(files[HISTORY_SOURCE_PATH], HISTORY_SOURCE_PATH);
+  const historyDeclaration = declarationInventory(
+    files[DIST_HISTORY_DECLARATION_PATH],
+    DIST_HISTORY_DECLARATION_PATH,
+  );
+  const historyRuntime = declarationInventory(files[DIST_HISTORY_PATH], DIST_HISTORY_PATH);
   const sourcePrivateStatements = source.sourceFile.statements.filter(
     (statement) =>
       !ts.isImportDeclaration(statement) &&
@@ -2126,6 +2168,28 @@ function verifySourceAndDistributionContract(files, packageManifest) {
       "EDITOR_SOURCE_DOCUMENT_SOURCE_CONTRACT_DRIFT",
       "The source document public declaration or TSDoc inventory drifted.",
       { runtime: source.runtime, types: source.types, missingTsdoc: source.missingTsdoc },
+    );
+  }
+  if (
+    !exactJson(historySource.runtime, EXPECTED_HISTORY_RUNTIME_EXPORTS) ||
+    !exactJson(historySource.types, EXPECTED_HISTORY_TYPE_EXPORTS) ||
+    historySource.missingTsdoc.length !== 0 ||
+    !exactJson(historyDeclaration.runtime, EXPECTED_HISTORY_RUNTIME_EXPORTS) ||
+    !exactJson(historyDeclaration.types, EXPECTED_HISTORY_TYPE_EXPORTS) ||
+    historyDeclaration.missingTsdoc.length !== 0 ||
+    !exactJson(historyRuntime.runtime, EXPECTED_HISTORY_RUNTIME_EXPORTS) ||
+    historyRuntime.types.length !== 0
+  ) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_PUBLIC_API_DRIFT",
+      "The additive M10A-T14 history module lost its reviewed declarations or TSDoc.",
+      {
+        sourceRuntime: historySource.runtime,
+        sourceTypes: historySource.types,
+        declarationRuntime: historyDeclaration.runtime,
+        declarationTypes: historyDeclaration.types,
+        emittedRuntime: historyRuntime.runtime,
+      },
     );
   }
   if (
@@ -2306,6 +2370,8 @@ function verifySourceAndDistributionContract(files, packageManifest) {
       "./continuous-validation.js",
       "./event-action-edits.js",
       "./event-action-edits.js",
+      "./history.js",
+      "./history.js",
       "./persistence.js",
       "./persistence.js",
       "./source-document.js",
@@ -2323,6 +2389,7 @@ function verifySourceAndDistributionContract(files, packageManifest) {
       "./content-edits.js",
       "./continuous-validation.js",
       "./event-action-edits.js",
+      "./history.js",
       "./persistence.js",
       "./source-document.js",
       "./stable-id-insert.js",
@@ -2338,6 +2405,8 @@ function verifySourceAndDistributionContract(files, packageManifest) {
       "./continuous-validation.js",
       "./event-action-edits.js",
       "./event-action-edits.js",
+      "./history.js",
+      "./history.js",
       "./persistence.js",
       "./persistence.js",
       "./source-document.js",
@@ -2650,6 +2719,19 @@ function verifySourceAndDistributionContract(files, packageManifest) {
         tsdocDeclarations:
           EXPECTED_CONTINUOUS_VALIDATION_RUNTIME_EXPORTS.length +
           EXPECTED_CONTINUOUS_VALIDATION_TYPE_EXPORTS.length,
+      }),
+      Object.freeze({
+        task: "M10A-T14",
+        sourcePath: HISTORY_SOURCE_PATH,
+        runtimePath: DIST_HISTORY_PATH,
+        declarationPath: DIST_HISTORY_DECLARATION_PATH,
+        focusedTestPath: HISTORY_TEST_PATH,
+        runtimeExports: EXPECTED_HISTORY_RUNTIME_EXPORTS,
+        typeExports: EXPECTED_HISTORY_TYPE_EXPORTS,
+        publicDeclarations:
+          EXPECTED_HISTORY_RUNTIME_EXPORTS.length + EXPECTED_HISTORY_TYPE_EXPORTS.length,
+        tsdocDeclarations:
+          EXPECTED_HISTORY_RUNTIME_EXPORTS.length + EXPECTED_HISTORY_TYPE_EXPORTS.length,
       }),
     ]),
     additiveSuccessor: Object.freeze({
@@ -3328,6 +3410,7 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     EVENT_ACTION_EDITS_SOURCE_PATH,
     PERSISTENCE_SOURCE_PATH,
     CONTINUOUS_VALIDATION_SOURCE_PATH,
+    HISTORY_SOURCE_PATH,
     DIST_SOURCE_PATH,
     DIST_INDEX_PATH,
     DIST_STRUCTURAL_EDITS_PATH,
@@ -3336,6 +3419,7 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     DIST_EVENT_ACTION_EDITS_PATH,
     DIST_PERSISTENCE_PATH,
     DIST_CONTINUOUS_VALIDATION_PATH,
+    DIST_HISTORY_PATH,
     DIST_SOURCE_DECLARATION_PATH,
     DIST_INDEX_DECLARATION_PATH,
     DIST_STRUCTURAL_EDITS_DECLARATION_PATH,
@@ -3344,6 +3428,7 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     DIST_EVENT_ACTION_EDITS_DECLARATION_PATH,
     DIST_PERSISTENCE_DECLARATION_PATH,
     DIST_CONTINUOUS_VALIDATION_DECLARATION_PATH,
+    DIST_HISTORY_DECLARATION_PATH,
     DIST_PERSISTENCE_DECLARATION_MAP_PATH,
     DIST_PERSISTENCE_SOURCE_MAP_PATH,
     PACKAGE_TEST_PATH,
@@ -3354,6 +3439,7 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     PERSISTENCE_TYPES_PATH,
     CONTINUOUS_VALIDATION_TEST_PATH,
     CONTINUOUS_VALIDATION_TYPES_PATH,
+    HISTORY_TEST_PATH,
     TERMINAL_INTEGRATION_TEST_PATH,
     PUBLIC_TEST_PATH,
     PUBLIC_TYPES_PATH,

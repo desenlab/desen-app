@@ -168,6 +168,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "c7290b59fdb8a34f0ed2cdbc99f7706bba4f735b0b9479eecf3885fee0fe311a",
   "fb0f8ab978037303687b9e1415e60ec1ff9ece1c3a0c79fe491c5cfcdc06b334",
   "979f137621eb9317e50c8deabdcb8025a15fdbf96b85a51705958f7aad3a1578",
+  "2f279e5d9b181b9cac1c5314748e4fa86a45d20f50115e582ab0383eb55ac7ab",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
@@ -175,7 +176,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57, 58, 59, 59,
   59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70, 71, 71, 72, 72,
   72, 72, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 75,
-  75, 75, 75, 75, 75, 76,
+  75, 75, 75, 75, 75, 76, 76,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_COUNT = 1_024;
@@ -1018,6 +1019,17 @@ const PROOF_READER_CHECKPOINT_ARTIFACT_RECEIPT_TRANSITIONS = SAFE_OBJECT_FREEZE(
       path: "docs/proof/artifacts/m10a-t12.json",
       bytes: 11_804,
       sha256: "31f48f192ea6ed4160576e898bc2a422483eaff3a0877f5d015b396630d6389b",
+    }),
+  }),
+  // Sequence 128 retains the original T14 artifact receipt historically and advances only the
+  // current task-owned artifact after the reviewed history public-package contract was recorded.
+  SAFE_OBJECT_FREEZE({
+    firstSequence: 128,
+    task: "M10A-T14",
+    artifact: SAFE_OBJECT_FREEZE({
+      path: "docs/proof/artifacts/m10a-t14.json",
+      bytes: 2_327,
+      sha256: "31b29c2554f686421e3e85fe6b775055fcd4fbc5a9a36a0f131e55f5a66d10a7",
     }),
   }),
 ]);

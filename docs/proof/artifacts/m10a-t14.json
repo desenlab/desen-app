@@ -17,8 +17,8 @@
     },
     {
       "path": "packages/editor-core/src/history.ts",
-      "bytes": 16843,
-      "sha256": "6db41da5818a0e1189e24dc719de124e4faa1bc0c476903598ae42e65218f1cf"
+      "bytes": 17999,
+      "sha256": "ec17ba9a405a0279ccc009541c2ef216a1eeba11323a8c121f9e292cb29e0d42"
     },
     {
       "path": "packages/editor-core/src/index.ts",

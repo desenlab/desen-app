@@ -23,6 +23,7 @@ type MutableJson<Value> = Value extends null | boolean | number | string
 
 type MutableNode = MutableJson<EditorNode>;
 
+/** Stable diagnostic codes emitted by bounded history and clipboard operations. */
 export type DesenEditorHistoryDiagnosticCode =
   | "run.desen.editor/HISTORY_EMPTY"
   | "run.desen.editor/HISTORY_LIMIT_INVALID"
@@ -33,15 +34,18 @@ export type DesenEditorHistoryDiagnosticCode =
   | "run.desen.editor/CLIPBOARD_IDENTITY_INVALID"
   | "run.desen.editor/CLIPBOARD_REFERENCE_INVALID";
 
+/** One immutable history/clipboard diagnostic. */
 export interface DesenEditorHistoryDiagnostic {
   readonly code: DesenEditorHistoryDiagnosticCode;
   readonly message: string;
 }
 
+/** One retained immutable document snapshot. */
 export interface DesenEditorHistoryEntry {
   readonly document: DesenEditorDocument;
 }
 
+/** Bounded immutable undo/redo state owned by the editor host. */
 export interface DesenEditorHistory {
   readonly document: DesenEditorDocument;
   readonly future: readonly DesenEditorHistoryEntry[];
@@ -49,6 +53,7 @@ export interface DesenEditorHistory {
   readonly past: readonly DesenEditorHistoryEntry[];
 }
 
+/** Result of an undo/redo transition, preserving the prior state on failure. */
 export type DesenEditorHistoryResult =
   | Readonly<{ readonly ok: true; readonly changed: boolean; readonly history: DesenEditorHistory }>
   | Readonly<{
@@ -57,6 +62,7 @@ export type DesenEditorHistoryResult =
       readonly history: DesenEditorHistory;
     }>;
 
+/** App-owned clipboard payload with provenance and bounded node contents. */
 export interface DesenEditorClipboardPayload {
   readonly kind: "desen.editor/clipboard";
   readonly version: 1;
@@ -64,16 +70,19 @@ export interface DesenEditorClipboardPayload {
   readonly nodes: readonly EditorNode[];
 }
 
+/** Current owning slot placement of a component node. */
 export interface DesenEditorNodePlacement {
   readonly parentId: string | null;
   readonly slot: string | null;
   readonly index: number | null;
 }
 
+/** Result of capturing a bounded clipboard payload. */
 export type DesenEditorClipboardResult =
   | Readonly<{ readonly ok: true; readonly payload: DesenEditorClipboardPayload }>
   | Readonly<{ readonly ok: false; readonly diagnostics: readonly [DesenEditorHistoryDiagnostic] }>;
 
+/** Target and payload for one identity-remapped paste operation. */
 export interface DesenEditorPasteCommand {
   readonly payload: DesenEditorClipboardPayload;
   readonly surfaceId: string;
@@ -82,12 +91,14 @@ export interface DesenEditorPasteCommand {
   readonly index: number;
 }
 
+/** Successful paste result containing the new document and identities. */
 export interface DesenEditorPasteSuccess {
   readonly ok: true;
   readonly document: DesenEditorDocument;
   readonly insertedNodeIds: readonly string[];
 }
 
+/** Result of a paste operation, with no partial document on failure. */
 export type DesenEditorPasteResult =
   | DesenEditorPasteSuccess
   | Readonly<{ readonly ok: false; readonly diagnostics: readonly [DesenEditorHistoryDiagnostic] }>;
@@ -291,6 +302,7 @@ function remapNode(
   return freezeDeep(mutable as unknown as EditorNode);
 }
 
+/** Creates bounded immutable history rooted at one admitted document. */
 export function createDesenEditorHistory(
   document: DesenEditorDocument,
   limit: number = DEFAULT_HISTORY_LIMIT,
@@ -299,6 +311,7 @@ export function createDesenEditorHistory(
   return Object.freeze({ document, future: EMPTY, limit, past: EMPTY });
 }
 
+/** Records one changed document and clears redo state. */
 export function recordDesenEditorHistory(
   history: DesenEditorHistory,
   document: DesenEditorDocument,
@@ -314,6 +327,7 @@ export function recordDesenEditorHistory(
   });
 }
 
+/** Moves one immutable snapshot from past to future. */
 export function undoDesenEditorHistory(history: DesenEditorHistory): DesenEditorHistoryResult {
   const entry = history.past.at(-1);
   if (entry === undefined)
@@ -334,6 +348,7 @@ export function undoDesenEditorHistory(history: DesenEditorHistory): DesenEditor
   });
 }
 
+/** Moves one immutable snapshot from future to past. */
 export function redoDesenEditorHistory(history: DesenEditorHistory): DesenEditorHistoryResult {
   const entry = history.future[0];
   if (entry === undefined)
@@ -354,6 +369,7 @@ export function redoDesenEditorHistory(history: DesenEditorHistory): DesenEditor
   });
 }
 
+/** Captures selected nodes into an App-owned, bounded clipboard payload. */
 export function captureDesenEditorClipboard(
   document: DesenEditorDocument,
   surfaceId: string,
@@ -436,6 +452,7 @@ export function readDesenEditorNodePlacement(
     : Object.freeze({ parentId: match.parentId, slot: match.slot, index: match.index });
 }
 
+/** Pastes a provenance-checked payload with fresh identities and rewritten references. */
 export function pasteDesenEditorClipboard(
   document: DesenEditorDocument,
   command: DesenEditorPasteCommand,
