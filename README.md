@@ -13,7 +13,7 @@ bounded, reproducible claims about both.
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████████░░░░░░` **133 / 176 tasks complete (76%)**
+**Overall:** `███████████████████░░░░░░` **134 / 176 tasks complete (76%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 

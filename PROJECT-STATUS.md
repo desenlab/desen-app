@@ -70,7 +70,7 @@ No Git history is rewritten.
 
 ## Documentation verification
 
-The eight governed entry and standards documents are reduced from 18,467 to 1,732 lines (90.6%)
+The eight governed entry and standards documents are reduced from 18,467 to 1,734 lines (90.6%)
 while retaining historical task rows, immutable proof-reader pins, and the historical snapshot
 through its explicit owner. The earlier consolidation passed 47/47 documentation tests and 96 local
 link checks, with checkpoint 80 at 64 artifacts / 128 readers; these are historical receipts.
