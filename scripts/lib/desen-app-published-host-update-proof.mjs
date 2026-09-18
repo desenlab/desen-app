@@ -1397,9 +1397,7 @@ const M10A_T13_CONFIG_SUCCESSOR = Object.freeze({
     bytes: 16_945,
     sha256: "c8cb509ea87d9a25b49bb8ba389340d4304a1043b8fa2847d01331fdc78743d8",
   }),
-  inverseChanges: Object.freeze([
-    Object.freeze(['    "design-system-assets",\n', ""]),
-  ]),
+  inverseChanges: Object.freeze([Object.freeze(['    "design-system-assets",\n', ""])]),
 });
 
 /** Exact T12 normal-App manifest addition, projected before the frozen T11 receipt. */
