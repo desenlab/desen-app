@@ -105,6 +105,27 @@ const M10A_T01_PUBLIC_MATRIX_SNAPSHOT = Object.freeze({
   historical: "sha256:7ced5faec0006e1e5e5807d7d51c5911ed594b73e383d658ca997af1932196b0",
   current: "sha256:f3d5e053e7a1905ba80680299a71d98e0ee4eb12315ea1f8d944fb86d6f63be1",
 });
+// T14 adds the reviewed history module and extends the Editor Core entrypoint. Keep that
+// additive public surface explicit: authenticate the complete fresh receipt, project the new
+// module away, and restore the exact pre-T14 entrypoint before the older T01 bridge runs.
+const M10A_T14_PUBLIC_MATRIX_SNAPSHOT = Object.freeze({
+  current: "sha256:cb277bac1e39a1e7ab4e4a1b40b909d9536f1367131f797acd27bf723f3594ff",
+  predecessor: M10A_T01_PUBLIC_MATRIX_SNAPSHOT.current,
+});
+const M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS = Object.freeze([
+  Object.freeze({
+    path: "packages/editor-core/dist/history.js",
+    currentBytes: 13_735,
+    currentSha256: "b528b204ef9fe172aca09f03cefd1a92c736cd62652e2cd95089d6aca7ec3074",
+  }),
+  Object.freeze({
+    path: "packages/editor-core/dist/index.js",
+    currentBytes: 1_754,
+    currentSha256: "93f366652b46a434c90e24c5d6fa74a2d1abda48d79c47b011cc98730c738174",
+    predecessorBytes: 1_536,
+    predecessorSha256: "46793348193ec7cc51915c6a83813654d32810b93a10e1efe953c9c895f8ac51",
+  }),
+]);
 // T10 may add only these inert lifecycle modules before it wires them into the normal App.
 // They are excluded from the frozen M10 graph and must be removed as one exact inventory
 // successor before the T06/T08 historical comparison can run.
@@ -590,6 +611,49 @@ function projectM10AT12TrackedSourceReceipts(currentReceipts, currentGraphAudit,
   }
 }
 
+function projectM10AT14PublicEditorCoreReceipts(currentReceipts, historicalReceipts) {
+  if (!Array.isArray(currentReceipts) || !Array.isArray(historicalReceipts)) {
+    fail("SUCCESSOR_DRIFT", "The public matrix lost its compiled receipt inventory.");
+  }
+  const history = exactEntry(
+    currentReceipts,
+    ({ path: relativePath }) => relativePath === M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS[0].path,
+    "current T14 history module",
+  );
+  requireExactFields(
+    history.entry,
+    {
+      bytes: M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS[0].currentBytes,
+      sha256: M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS[0].currentSha256,
+    },
+    "current T14 history module",
+  );
+  if (
+    historicalReceipts.some(
+      ({ path: relativePath }) => relativePath === M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS[0].path,
+    )
+  ) {
+    fail("SUCCESSOR_DRIFT", "The T14 history module was not additive to the frozen matrix.");
+  }
+  currentReceipts.splice(history.index, 1);
+
+  const index = exactEntry(
+    currentReceipts,
+    ({ path: relativePath }) => relativePath === M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS[1].path,
+    "current T14 Editor Core entrypoint",
+  );
+  requireExactFields(
+    index.entry,
+    {
+      bytes: M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS[1].currentBytes,
+      sha256: M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS[1].currentSha256,
+    },
+    "current T14 Editor Core entrypoint",
+  );
+  index.entry.bytes = M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS[1].predecessorBytes;
+  index.entry.sha256 = M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS[1].predecessorSha256;
+}
+
 function projectEditorCoreReceipts(currentReceipts, historicalReceipts, graphReceipts) {
   for (const identity of M10A_T01_EDITOR_CORE_SUCCESSORS) {
     const current = exactEntry(
@@ -780,6 +844,17 @@ export function projectDesenAppInvalidPublicationHistoricalAuthorities(rawAuthor
 
   const currentMatrix = captured.currentPublicApiMatrix;
   const historicalMatrix = captured.historicalPublicApiMatrix;
+  requireExactFields(
+    currentMatrix,
+    { compiledFiles: 44, compiledSnapshotSha256: M10A_T14_PUBLIC_MATRIX_SNAPSHOT.current },
+    "current T14 public matrix snapshot",
+  );
+  projectM10AT14PublicEditorCoreReceipts(
+    currentMatrix.compiledReceipts,
+    historicalMatrix.compiledReceipts,
+  );
+  currentMatrix.compiledFiles = currentMatrix.compiledReceipts.length;
+  currentMatrix.compiledSnapshotSha256 = M10A_T14_PUBLIC_MATRIX_SNAPSHOT.predecessor;
   projectEditorCoreReceipts(
     currentMatrix.compiledReceipts,
     historicalMatrix.compiledReceipts,
@@ -1656,7 +1731,7 @@ async function runPublicMatrix(workspaceRoot, files, initialBackingFiles) {
   const beforeSnapshotSha256 = `sha256:${sha256(
     Buffer.from(JSON.stringify(before.compiledReceipts)),
   )}`;
-  if (beforeSnapshotSha256 !== M10A_T01_PUBLIC_MATRIX_SNAPSHOT.current) {
+  if (beforeSnapshotSha256 !== M10A_T14_PUBLIC_MATRIX_SNAPSHOT.current) {
     fail("PUBLIC_API_DRIFT", "The executable public matrix is not the exact reviewed successor.");
   }
   const payload = publicMatrixPipePayload(before, files);
