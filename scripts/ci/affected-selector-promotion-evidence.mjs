@@ -1367,9 +1367,9 @@ const HISTORICAL_RUNNER_WORKFLOW_CONTRACT = Object.freeze({
 });
 const CURRENT_RUNNER_WORKFLOW_CONTRACT = Object.freeze({
   ...HISTORICAL_RUNNER_WORKFLOW_CONTRACT,
-  processTimeout: "25m_TERM_30s_KILL",
-  exhaustiveGateSoftDeadlineMilliseconds: 24 * 60 * 1_000 + 30 * 1_000,
-  requiredExecutionJobTimeoutMinutes: 30,
+  processTimeout: "28m_TERM_30s_KILL",
+  exhaustiveGateSoftDeadlineMilliseconds: 27 * 60 * 1_000,
+  requiredExecutionJobTimeoutMinutes: 33,
   exhaustiveSchedule: "THREE_ISOLATED_SHARDS_WITH_REQUIRED_JOIN",
   exhaustiveShardCount: 3,
   proofPairWorkersPerWorkspace: 2,
@@ -2621,7 +2621,7 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "DESEN_REQUIRED_BASE_REVISION: ${{ github.event.pull_request.base.sha || '' }}",
     "DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}",
     "github.event.pull_request.head.repo.full_name == github.repository",
-    "timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-affected-quality-gate.mjs",
+    "timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-affected-quality-gate.mjs",
     "github.event_name != 'workflow_dispatch' || inputs.mode == 'required'",
     "browser-e2e:",
     "name: Browser E2E",
@@ -2647,11 +2647,11 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "needs: [quality-route, proof-a, proof-b, proof-c]",
     "${{ always() && (github.event_name != 'workflow_dispatch' || inputs.mode == 'required') }}",
     "DESEN_REQUIRED_SHARD_JOIN_NEEDS: ${{ toJSON(needs) }}",
-    "timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-a",
-    "timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-b",
-    "timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-c",
-    "timeout --signal=TERM --kill-after=30s 25m node scripts/ci/run-required-sharded-quality-gate.mjs join",
-    "timeout-minutes: 30",
+    "timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-a",
+    "timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-b",
+    "timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-sharded-quality-gate.mjs shard proof-c",
+    "timeout --signal=TERM --kill-after=30s 28m node scripts/ci/run-required-sharded-quality-gate.mjs join",
+    "timeout-minutes: 33",
     "node --test scripts/ci/test/sharded-quality-gate.test.mjs",
   ];
   const repeatedWorkflowFragments = new Map([
@@ -2664,7 +2664,7 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     ["DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}", 5],
     ["github.event.pull_request.head.repo.full_name == github.repository", 8],
     ["github.event_name != 'workflow_dispatch' || inputs.mode == 'required'", 3],
-    ["timeout-minutes: 30", 4],
+    ["timeout-minutes: 33", 4],
   ]);
   if (
     workflowFragments.some(
@@ -2706,8 +2706,7 @@ async function createRunnerAuthority(workspaceRoot = WORKSPACE_ROOT, currentAuth
     "validateAffectedSelectorPromotedSelection(",
   ];
   if (
-    exactOccurrence(exhaustiveSource, "DEFAULT_GATE_TIMEOUT_MS = 24 * 60 * 1_000 + 30 * 1_000") !==
-      1 ||
+    exactOccurrence(exhaustiveSource, "DEFAULT_GATE_TIMEOUT_MS = 27 * 60 * 1_000") !== 1 ||
     exhaustiveSource.includes("DEFAULT_GATE_TIMEOUT_MS = 18 * 60 * 1_000 + 30 * 1_000") ||
     dispatcherFragments.some((fragment) => !dispatcherSource.includes(fragment))
   ) {
