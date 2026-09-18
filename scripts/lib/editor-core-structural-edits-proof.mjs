@@ -544,6 +544,93 @@ const EXPECTED_T08_AUTHORITY_SHA256 = Object.freeze({
   [PUBLIC_TYPES_PATH]: "04a7b314398424563b765f1de60105c775aa13485c4b8913250edd21bd0f632a",
   [ROOT_TEST_PATH]: "9e22db9682c7ba52434ef299d6ef13786258c08b77e63e9d010aa3f83849960a",
 });
+const M10A_T14_HISTORICAL_COMPATIBILITY = Object.freeze({
+  [INDEX_SOURCE_PATH]: Object.freeze({
+    current: Object.freeze({
+      bytes: 5_906,
+      sha256: "36df2da75ee72253416511cbe8b4b71d66af5f6fb8836b7a4d9611ea37487d04",
+    }),
+    predecessor: Object.freeze({
+      bytes: 5_322,
+      sha256: "4b4147f05e95cdd17c7518423df6e091d0310ccdd344983ba3cdcb170ab615f7",
+    }),
+    replacements: Object.freeze([
+      [
+        'export {\n  captureDesenEditorClipboard,\n  createDesenEditorHistory,\n  pasteDesenEditorClipboard,\n  readDesenEditorNodePlacement,\n  recordDesenEditorHistory,\n  redoDesenEditorHistory,\n  undoDesenEditorHistory,\n} from "./history.js";\n\n',
+        "\n",
+      ],
+      [
+        '\nexport type {\n  DesenEditorClipboardPayload,\n  DesenEditorClipboardResult,\n  DesenEditorHistory,\n  DesenEditorHistoryDiagnostic,\n  DesenEditorHistoryDiagnosticCode,\n  DesenEditorHistoryEntry,\n  DesenEditorHistoryResult,\n  DesenEditorNodePlacement,\n  DesenEditorPasteCommand,\n  DesenEditorPasteResult,\n  DesenEditorPasteSuccess,\n} from "./history.js";\n',
+        "",
+      ],
+    ]),
+  }),
+  "packages/editor-core/dist/index.js": Object.freeze({
+    current: Object.freeze({
+      bytes: 1_754,
+      sha256: "93f366652b46a434c90e24c5d6fa74a2d1abda48d79c47b011cc98730c738174",
+    }),
+    predecessor: Object.freeze({
+      bytes: 1_536,
+      sha256: "46793348193ec7cc51915c6a83813654d32810b93a10e1efe953c9c895f8ac51",
+    }),
+    replacements: Object.freeze([
+      [
+        'export { captureDesenEditorClipboard, createDesenEditorHistory, pasteDesenEditorClipboard, readDesenEditorNodePlacement, recordDesenEditorHistory, redoDesenEditorHistory, undoDesenEditorHistory, } from "./history.js";\n',
+        "",
+      ],
+    ]),
+  }),
+  "packages/editor-core/dist/index.d.ts": Object.freeze({
+    current: Object.freeze({
+      bytes: 5_649,
+      sha256: "15a865abd7b1e61be5433b9debd5bac6e49a02acff3cf584dabfbe226084636a",
+    }),
+    predecessor: Object.freeze({
+      bytes: 5_102,
+      sha256: "e16133f45bbb2ef47df034f8797caffbb338d507d5a14274c40c41546a54a799",
+    }),
+    replacements: Object.freeze([
+      [
+        'export { captureDesenEditorClipboard, createDesenEditorHistory, pasteDesenEditorClipboard, readDesenEditorNodePlacement, recordDesenEditorHistory, redoDesenEditorHistory, undoDesenEditorHistory, } from "./history.js";\n',
+        "",
+      ],
+      [
+        'export type { DesenEditorClipboardPayload, DesenEditorClipboardResult, DesenEditorHistory, DesenEditorHistoryDiagnostic, DesenEditorHistoryDiagnosticCode, DesenEditorHistoryEntry, DesenEditorHistoryResult, DesenEditorNodePlacement, DesenEditorPasteCommand, DesenEditorPasteResult, DesenEditorPasteSuccess, } from "./history.js";\n',
+        "",
+      ],
+    ]),
+  }),
+  [PUBLIC_TEST_PATH]: Object.freeze({
+    current: Object.freeze({
+      bytes: 136_052,
+      sha256: "b4e196be046ed34eed17d777192318beca19196fb3abdb9e9d9566fdd4312973",
+    }),
+    predecessor: Object.freeze({
+      bytes: 135_331,
+      sha256: "edf5807107239279998c128303190bc7db4485b6ee44d4b9a95eef5508e94b93",
+    }),
+    replacements: Object.freeze([
+      ['      "history.js",\n', ""],
+      ['          "./history.js",\n', ""],
+      [
+        '      {\n        file: "history.js",\n        specifiers: ["@desen/protocol", "./source-document.js", "./stable-id-insert.js"],\n      },\n',
+        "",
+      ],
+      [
+        "  assert.match(\n    emittedModules[0].source,\n    /export\\s*\\{\\s*captureDesenEditorClipboard,\\s*createDesenEditorHistory,\\s*pasteDesenEditorClipboard,\\s*readDesenEditorNodePlacement,\\s*recordDesenEditorHistory,\\s*redoDesenEditorHistory,\\s*undoDesenEditorHistory\\s*,?\\s*\\}\\s*from\\s*[\"']\\.\\/history\\.js[\"']/,\n  );\n",
+        "",
+      ],
+      ['    "captureDesenEditorClipboard",\n', ""],
+      ['    "createDesenEditorHistory",\n', ""],
+      ['    "pasteDesenEditorClipboard",\n', ""],
+      ['    "readDesenEditorNodePlacement",\n', ""],
+      ['    "recordDesenEditorHistory",\n', ""],
+      ['    "redoDesenEditorHistory",\n', ""],
+      ['    "undoDesenEditorHistory",\n', ""],
+    ]),
+  }),
+});
 const EXPECTED_T10_TEST_AUTHORITY_SHA256 =
   "3d77bef07197e0a914b92e7f7b3a7cc65448c56f0ad03d303edfb6139170997b";
 
@@ -866,6 +953,46 @@ function parseJson(bytes, label) {
   } catch (error) {
     if (error instanceof EditorCoreStructuralEditsProofError) throw error;
     fail("JSON_INVALID", `${label} is not valid JSON.`, String(error));
+  }
+}
+
+function projectM10AT14HistoricalCompatibility(files) {
+  for (const [relativePath, authority] of Object.entries(M10A_T14_HISTORICAL_COMPATIBILITY)) {
+    const bytes = files.get(relativePath);
+    if (bytes === undefined) {
+      fail(
+        "BOUNDARY_DRIFT",
+        `The T14 historical compatibility authority is missing: ${relativePath}.`,
+      );
+    }
+    if (
+      bytes.byteLength !== authority.current.bytes ||
+      sha256(bytes) !== authority.current.sha256
+    ) {
+      fail("BOUNDARY_DRIFT", `The reviewed M10A-T14 authority drifted: ${relativePath}.`);
+    }
+    let source = bytes.toString("utf8");
+    for (const [current, predecessor] of authority.replacements) {
+      const offset = source.indexOf(current);
+      if (offset < 0 || offset !== source.lastIndexOf(current)) {
+        fail(
+          "BOUNDARY_DRIFT",
+          `The T14 historical authority has no exact inverse edit: ${relativePath}.`,
+        );
+      }
+      source = `${source.slice(0, offset)}${predecessor}${source.slice(offset + current.length)}`;
+    }
+    const projected = Buffer.from(source, "utf8");
+    if (
+      projected.byteLength !== authority.predecessor.bytes ||
+      sha256(projected) !== authority.predecessor.sha256
+    ) {
+      fail(
+        "BOUNDARY_DRIFT",
+        `The T14 historical authority did not restore T13 bytes: ${relativePath}.`,
+      );
+    }
+    files.set(relativePath, projected);
   }
 }
 
@@ -2193,6 +2320,7 @@ async function buildCapturedEvidence(options) {
   for (const relativePath of TRACKED_PATHS) {
     files.set(relativePath, await trackedBytes(relativePath, options));
   }
+  projectM10AT14HistoricalCompatibility(files);
   const boundary = verifyBoundary(files);
   assertRetainedT02Receipts(authenticatedPrerequisite.artifact, files);
   assertRetainedT03Receipts(frozen.artifact, files);

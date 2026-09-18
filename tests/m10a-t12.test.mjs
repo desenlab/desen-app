@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -10,10 +11,12 @@ import {
   M10A_T12_ARTIFACT_PATH,
   M10A_T12_FOCUSED_APP_TEST_FILES,
   M10A_T12_ROOT_TEST_NAMES,
+  M10A_T14_PACKAGE_JSON_SUCCESSOR,
   M10A_T12_TIMEOUT_CONFIG_SUCCESSOR,
   M10AT12ProofError,
   buildM10AT12Evidence,
   parseM10AT12BrowserObservation,
+  projectM10AT14PackageJsonSuccessor,
   projectM10AT12TimeoutConfigSuccessor,
   verifyM10AT12Evidence,
   writeM10AT12Evidence,
@@ -190,6 +193,20 @@ test("M10A-T12 writer is atomic and does not invent named-theme management autho
   } finally {
     await rm(temporaryRoot, { recursive: true, force: true });
   }
+});
+
+test("M10A-T12 projects the exact M10A-T14 package successor before the frozen T13 receipt", async () => {
+  const livePackage = await readFile(path.join(WORKSPACE_ROOT, "package.json"));
+  const projected = projectM10AT14PackageJsonSuccessor(livePackage);
+  assert.equal(projected.byteLength, M10A_T14_PACKAGE_JSON_SUCCESSOR.predecessor.bytes);
+  assert.equal(
+    createHash("sha256").update(projected).digest("hex"),
+    M10A_T14_PACKAGE_JSON_SUCCESSOR.predecessor.sha256,
+  );
+  assert.throws(
+    () => projectM10AT14PackageJsonSuccessor(projected),
+    errorCode("PACKAGE_SUCCESSOR_DRIFT"),
+  );
 });
 
 test("M10A-T12 keeps its scoped root-test declaration inventory", () => {

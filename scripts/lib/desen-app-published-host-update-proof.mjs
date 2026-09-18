@@ -1036,6 +1036,51 @@ const M10A_T12_APP_SOURCE_SUCCESSORS = Object.freeze([
   }),
 ]);
 
+// T14 changes only the live App authoring surface. This additive receipt projects the current
+// history/reuse implementation back to the frozen T12 source.
+const M10A_T14_APP_SOURCE_SUCCESSOR = Object.freeze({
+  path: "apps/desen-app/src/application.tsx",
+  bytes: 183_780,
+  sha256: "sha256:341e9075946cbedcd233579b87db71ccab700675ce89170fb16be6767120b818",
+  predecessor: Object.freeze({
+    bytes: 174_486,
+    sha256: "sha256:5074eea22b007f680d2f6b14e3e66ab2fb4ebc146d33077e5bc623c77ffda151",
+  }),
+  inverseChanges: Object.freeze([
+    Object.freeze([
+      'import {\n  captureDesenEditorClipboard,\n  createDesenEditorContinuousValidator,\n  createDesenEditorHistory,\n  pasteDesenEditorClipboard,\n  readDesenEditorNodePlacement,\n  recordDesenEditorHistory,\n  redoDesenEditorHistory,\n  undoDesenEditorHistory,\n} from "@desen/editor-core";\n',
+      'import { createDesenEditorContinuousValidator } from "@desen/editor-core";\n',
+    ]),
+    Object.freeze(["  DesenEditorClipboardPayload,\n  DesenEditorHistory,\n", ""]),
+    Object.freeze([
+      '  const authoringHistory = useRef<DesenEditorHistory | null>(null);\n  if (authoringHistory.current === null) {\n    const createdHistory = createDesenEditorHistory(mountedInitialDocument);\n    if (createdHistory === undefined)\n      throw new TypeError("The bounded authoring history could not be created.");\n    authoringHistory.current = createdHistory;\n  }\n  const authoringClipboard = useRef<DesenEditorClipboardPayload | null>(null);\n  const [historyNotice, setHistoryNotice] = useState("");\n',
+      "",
+    ]),
+    Object.freeze(["    resetsHistory = false,\n", ""]),
+    Object.freeze([
+      '    const currentHistory = authoringHistory.current;\n    if (resetsHistory || currentHistory === null) {\n      const nextHistory = createDesenEditorHistory(nextSession.document);\n      if (nextHistory === undefined)\n        throw new TypeError("The bounded authoring history could not be reset.");\n      authoringHistory.current = nextHistory;\n    } else {\n      authoringHistory.current = recordDesenEditorHistory(currentHistory, nextSession.document);\n    }\n',
+      "",
+    ]),
+    Object.freeze(['    setHistoryNotice("");\n', ""]),
+    Object.freeze([
+      "    commitAuthoringSession(result.session, true, true);\n",
+      "    commitAuthoringSession(result.session, true);\n",
+    ]),
+    Object.freeze([
+      '  function selectedReuseNodeIds(): readonly string[] {\n    const ids =\n      directSelections.length > 0\n        ? directSelections.map(({ sourceNodeId }) => sourceNodeId)\n        : selection === null\n          ? []\n          : [selection.sourceNodeId];\n    return Object.freeze([...new Set(ids)]);\n  }\n\n  function validateReuseCandidate(\n    candidate: DesenEditorDocument,\n  ):\n    | Readonly<{ readonly ok: true; readonly preview: typeof preview }>\n    | Readonly<{ readonly ok: false }> {\n    if (!preparedModel.ok || diagnosticsValidator?.ok !== true) {\n      return Object.freeze({ ok: false as const });\n    }\n    const report = diagnosticsValidator.validator.validate(candidate);\n    if (!report.valid) {\n      captureEditDiagnostics(Object.freeze({ ok: false as const, validationReport: report }));\n      return Object.freeze({ ok: false as const });\n    }\n    const nextPreview = prepareAuthoringPreviewBundle(candidate, workspaceSnapshot.catalogPackages);\n    return nextPreview.ok\n      ? Object.freeze({ ok: true as const, preview: nextPreview })\n      : Object.freeze({ ok: false as const });\n  }\n\n  function copySelectedLayers(): void {\n    if (!isDesignMode()) return;\n    const nodeIds = selectedReuseNodeIds();\n    if (nodeIds.length === 0) {\n      setHistoryNotice("Select at least one layer before copying.");\n      return;\n    }\n    const result = captureDesenEditorClipboard(document, selectedSurface.sourceId, nodeIds);\n    if (!result.ok) {\n      setHistoryNotice("Copy was rejected safely: the selection is no longer current.");\n      return;\n    }\n    authoringClipboard.current = result.payload;\n    setHistoryNotice(\n      `Copied ${result.payload.nodes.length} layer${result.payload.nodes.length === 1 ? "" : "s"}.`,\n    );\n  }\n\n  function reuseTarget(): Readonly<{\n    readonly parentId: string;\n    readonly slot: string;\n    readonly index: number;\n  }> | null {\n    const nodeIds = selectedReuseNodeIds();\n    const anchorId = nodeIds.at(-1);\n    if (anchorId === undefined) return null;\n    const anchor = readDesenEditorNodePlacement(document, selectedSurface.sourceId, anchorId);\n    if (\n      anchor === null ||\n      anchor.parentId === null ||\n      anchor.slot === null ||\n      anchor.index === null\n    )\n      return null;\n    return Object.freeze({ parentId: anchor.parentId, slot: anchor.slot, index: anchor.index + 1 });\n  }\n\n  function pasteSelectedLayers(): void {\n    if (!isDesignMode()) return;\n    const payload = authoringClipboard.current;\n    const target = reuseTarget();\n    if (payload === null || target === null) {\n      setHistoryNotice("Choose a current layer and an App-captured clipboard selection first.");\n      return;\n    }\n    const result = pasteDesenEditorClipboard(document, {\n      payload,\n      surfaceId: selectedSurface.sourceId,\n      parentId: target.parentId,\n      slot: target.slot,\n      index: target.index,\n    });\n    if (!result.ok) {\n      setHistoryNotice("Paste was rejected safely; the authored Source is unchanged.");\n      return;\n    }\n    const admitted = validateReuseCandidate(result.document);\n    if (!admitted.ok) {\n      setHistoryNotice(\n        "Paste was rejected by the current Catalog contract; the Source is unchanged.",\n      );\n      return;\n    }\n    commitAuthoringSession(Object.freeze({ document: result.document, preview: admitted.preview }));\n    setHistoryNotice(\n      `Pasted ${result.insertedNodeIds.length} fresh layer${result.insertedNodeIds.length === 1 ? "" : "s"}.`,\n    );\n  }\n\n  function duplicateSelectedLayers(): void {\n    copySelectedLayers();\n    if (authoringClipboard.current === null) return;\n    pasteSelectedLayers();\n  }\n\n  function transitionHistory(direction: "undo" | "redo"): void {\n    if (!isDesignMode()) return;\n    const current = authoringHistory.current;\n    if (current === null) return;\n    const result =\n      direction === "undo" ? undoDesenEditorHistory(current) : redoDesenEditorHistory(current);\n    if (!result.ok) {\n      setHistoryNotice(direction === "undo" ? "Nothing to undo." : "Nothing to redo.");\n      return;\n    }\n    const nextPreview = prepareAuthoringPreviewBundle(\n      result.history.document,\n      workspaceSnapshot.catalogPackages,\n    );\n    if (!nextPreview.ok) {\n      setHistoryNotice(\n        "History transition was rejected because the preview boundary is unavailable.",\n      );\n      return;\n    }\n    authoringHistory.current = result.history;\n    inMemoryCurrentCanonical.current = canonicalizeJson(result.history.document);\n    updateInMemoryDirtyProjection();\n    clearTransientDiagnostics();\n    selectOne(null);\n    setAuthoringSession(Object.freeze({ document: result.history.document, preview: nextPreview }));\n    setHistoryNotice(direction === "undo" ? "Last edit undone." : "Edit restored.");\n  }\n\n  useEffect(() => {\n    function handleHistoryShortcut(event: globalThis.KeyboardEvent): void {\n      if (!(event.metaKey || event.ctrlKey) || event.altKey) return;\n      const target = event.target;\n      if (\n        target instanceof HTMLInputElement ||\n        target instanceof HTMLTextAreaElement ||\n        target instanceof HTMLSelectElement ||\n        (target instanceof HTMLElement &&\n          (target.isContentEditable || target.contentEditable === "true"))\n      )\n        return;\n      if (event.key.toLowerCase() === "z") {\n        event.preventDefault();\n        transitionHistory(event.shiftKey ? "redo" : "undo");\n      } else if (event.key.toLowerCase() === "y") {\n        event.preventDefault();\n        transitionHistory("redo");\n      }\n    }\n    globalThis.document.addEventListener("keydown", handleHistoryShortcut);\n    return () => globalThis.document.removeEventListener("keydown", handleHistoryShortcut);\n  });\n\n',
+      "",
+    ]),
+    Object.freeze([
+      '  const historyState = authoringHistory.current;\n  const canUndo = mode === "design" && historyState !== null && historyState.past.length > 0;\n  const canRedo = mode === "design" && historyState !== null && historyState.future.length > 0;\n  const canReuseSelection = mode === "design" && selectedSourceNodeIds.length > 0;\n  const canPaste = canReuseSelection && authoringClipboard.current !== null;\n',
+      "",
+    ]),
+    Object.freeze([
+      '          <div aria-label="Authoring history and reuse" className={styles.modeControl}>\n            <button\n              aria-label="Undo last authoring edit"\n              data-history-action="undo"\n              disabled={!canUndo || sourceDraft !== null || publicationPending}\n              onClick={() => transitionHistory("undo")}\n              type="button"\n            >\n              Undo\n            </button>\n            <button\n              aria-label="Redo authoring edit"\n              data-history-action="redo"\n              disabled={!canRedo || sourceDraft !== null || publicationPending}\n              onClick={() => transitionHistory("redo")}\n              type="button"\n            >\n              Redo\n            </button>\n            <button\n              aria-label="Copy selected layers"\n              data-history-action="copy"\n              disabled={!canReuseSelection || sourceDraft !== null || publicationPending}\n              onClick={copySelectedLayers}\n              type="button"\n            >\n              Copy\n            </button>\n            <button\n              aria-label="Paste copied layers"\n              data-history-action="paste"\n              disabled={!canPaste || sourceDraft !== null || publicationPending}\n              onClick={pasteSelectedLayers}\n              type="button"\n            >\n              Paste\n            </button>\n            <button\n              aria-label="Duplicate selected layers"\n              data-history-action="duplicate"\n              disabled={!canReuseSelection || sourceDraft !== null || publicationPending}\n              onClick={duplicateSelectedLayers}\n              type="button"\n            >\n              Duplicate\n            </button>\n          </div>\n          <span aria-live="polite" className={styles.visuallyHidden} data-history-notice>\n            {historyNotice}\n          </span>\n',
+      "",
+    ]),
+  ]),
+});
+
 /**
  * T12 also updates this pre-existing T08 wiring test to supply its new project-workspace port.
  * It is not a production graph source, so its exact successor receipt stays separately scoped.
@@ -1213,6 +1258,47 @@ const M10A_T12_APP_GRAPH_SUCCESSOR = Object.freeze({
   }),
   backingFiles: 706,
   backingSnapshotSha256: "sha256:de6e55faa898faf607179285fd79e139f2353a164aecaa6f98bf510550c68204",
+});
+
+// T14's fresh graph is authenticated separately, then projected to the immutable T12 graph.
+const M10A_T14_APP_GRAPH_SUCCESSOR = Object.freeze({
+  app: Object.freeze({
+    moduleCount: 690,
+    staticEdges: 2_974,
+    dynamicEdges: 0,
+    unresolvedEdges: 0,
+    reachableProductionSourceFiles: 64,
+    graphSha256: "sha256:ac5f9c5196356f51008d5644e0c802fad7399c38ba35e210b0f6073ce89eb86c",
+  }),
+  appOutput: Object.freeze({
+    files: 3,
+    outputs: Object.freeze([
+      Object.freeze({
+        fileName: "assets/index-DmzIefux.js",
+        type: "chunk",
+        isEntry: true,
+        bytes: 3_580_707,
+        sha256: "sha256:eeab8ab1d13b159b0069d2087aaad92e42a1a01fe4a0abcab8ff4b944c1058f3",
+      }),
+      Object.freeze({
+        fileName: "assets/index-YPwZ0Ugb.css",
+        type: "asset",
+        isEntry: null,
+        bytes: 142_543,
+        sha256: "sha256:7164c5cca45bfd234be1ef330db23dd27f2567f91959aa1e581f7b652f84469e",
+      }),
+      Object.freeze({
+        fileName: "index.html",
+        type: "asset",
+        isEntry: null,
+        bytes: 511,
+        sha256: "sha256:f59963659a5273e0cb1c1245f2ef2f9adb7ac03239450488fc3f2201e341f6eb",
+      }),
+    ]),
+    identitySha256: "sha256:edba2ec1e444adc51585fff3880cc71d79880e9d93e29870e1348263c2090f6f",
+  }),
+  backingFiles: 707,
+  backingSnapshotSha256: "sha256:55c149a0de11b511c61e0dd378abb8a76e32b9700af7b74a4ee53990dff4467a",
 });
 
 const FOCUSED_TEST_COMMANDS = Object.freeze([
@@ -2184,6 +2270,44 @@ const M10A_T12_BROWSER_PACKAGE_SUCCESSOR = Object.freeze({
  * reviewed predecessors. All other inputs pass through unchanged for narrower successor chains.
  */
 export function projectM10AT12HistoricalInput(relativePath, bytes) {
+  if (relativePath === M10A_T14_APP_SOURCE_SUCCESSOR.path) {
+    if (
+      bytes.byteLength !== M10A_T14_APP_SOURCE_SUCCESSOR.bytes ||
+      sha256(bytes) !== M10A_T14_APP_SOURCE_SUCCESSOR.sha256.slice("sha256:".length)
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "The current T14 App source is outside its exact reviewed successor receipt.",
+        { path: relativePath },
+      );
+    }
+    let predecessorText = decodeUtf8(bytes, relativePath, "SUCCESSOR_POLICY_VIOLATION");
+    for (const [
+      currentFragment,
+      predecessorFragment,
+    ] of M10A_T14_APP_SOURCE_SUCCESSOR.inverseChanges) {
+      if (occurrenceCount(predecessorText, currentFragment) !== 1) {
+        fail(
+          "SUCCESSOR_POLICY_VIOLATION",
+          "The T14 App source successor lost one exact reviewed change.",
+          { path: relativePath, currentFragment },
+        );
+      }
+      predecessorText = predecessorText.replace(currentFragment, predecessorFragment);
+    }
+    const predecessorBytes = Buffer.from(predecessorText);
+    if (
+      predecessorBytes.byteLength !== M10A_T14_APP_SOURCE_SUCCESSOR.predecessor.bytes ||
+      sha256(predecessorBytes) !== M10A_T14_APP_SOURCE_SUCCESSOR.predecessor.sha256
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "Removing only the reviewed T14 App source changes must reproduce the exact T12 receipt.",
+        { path: relativePath },
+      );
+    }
+    bytes = predecessorBytes;
+  }
   if (relativePath === M10A_T13_CONFIG_SUCCESSOR.path) {
     if (
       bytes.byteLength !== M10A_T13_CONFIG_SUCCESSOR.bytes ||
@@ -2814,6 +2938,7 @@ export function projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit
   const t12SourceSuccessors = new Map(
     M10A_T12_APP_SOURCE_SUCCESSORS.map((receipt) => [receipt.path, receipt]),
   );
+  t12SourceSuccessors.set(M10A_T14_APP_SOURCE_SUCCESSOR.path, M10A_T14_APP_SOURCE_SUCCESSOR);
   const retainedT10Receipts = new Map(
     M10A_T12_RETAINED_T10_APP_SOURCE_RECEIPTS.map((receipt) => [receipt.path, receipt]),
   );
@@ -2859,7 +2984,13 @@ export function projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit
   }
   const expectedSourceReceipts = M10A_T12_APP_SOURCE_RECEIPT_PATHS.map((relativePath) => {
     const successor = t12SourceSuccessors.get(relativePath);
-    if (successor !== undefined) return successor;
+    if (successor !== undefined) {
+      return Object.freeze({
+        path: successor.path,
+        bytes: successor.bytes,
+        sha256: successor.sha256,
+      });
+    }
     const retained = retainedT10Receipts.get(relativePath);
     if (retained !== undefined) return retained;
     const historical = t11SourceReceipts.get(relativePath);
@@ -2891,7 +3022,7 @@ export function projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit
     hostSourcePaths: HOST_SOURCE_PATHS,
   });
   if (
-    !isDeepStrictEqual(graphPolicy.app, M10A_T12_APP_GRAPH_SUCCESSOR.app) ||
+    !isDeepStrictEqual(graphPolicy.app, M10A_T14_APP_GRAPH_SUCCESSOR.app) ||
     !isDeepStrictEqual(graphPolicy.host, t11Runtime.host) ||
     !isDeepStrictEqual(graphPolicy.hostModules, t11Runtime.hostModules) ||
     !isDeepStrictEqual(graphPolicy.sharedManagedIdentity, t11Runtime.sharedManagedIdentity) ||
@@ -2906,11 +3037,11 @@ export function projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit
     ...graphPolicy,
     independentBuildsPerApplication: 2,
     deterministic: true,
-    appOutput: M10A_T12_APP_GRAPH_SUCCESSOR.appOutput,
+    appOutput: M10A_T14_APP_GRAPH_SUCCESSOR.appOutput,
     hostOutput: t11Runtime.hostOutput,
     hostOutputIdentityAEqualsB: true,
-    backingFiles: M10A_T12_APP_GRAPH_SUCCESSOR.backingFiles,
-    backingSnapshotSha256: M10A_T12_APP_GRAPH_SUCCESSOR.backingSnapshotSha256,
+    backingFiles: M10A_T14_APP_GRAPH_SUCCESSOR.backingFiles,
+    backingSnapshotSha256: M10A_T14_APP_GRAPH_SUCCESSOR.backingSnapshotSha256,
     backingModulesStableAcrossObservations: true,
   };
   const expectedCurrentGraphAudit = {
@@ -5456,9 +5587,11 @@ function assertT08Receipt(successor, relativePath, bytes, code = "SUCCESSOR_POLI
  * retain the frozen T08 receipt rather than relabeling a current input as historical evidence.
  */
 function assertM10AT12SourceSuccessorReceipt(relativePath, bytes) {
-  const receipt = [...M10A_T12_APP_SOURCE_SUCCESSORS, ...M10A_T12_REPLACED_T08_INPUT_RECEIPTS].find(
-    ({ path: receiptPath }) => receiptPath === relativePath,
-  );
+  const receipt = [
+    M10A_T14_APP_SOURCE_SUCCESSOR,
+    ...M10A_T12_APP_SOURCE_SUCCESSORS,
+    ...M10A_T12_REPLACED_T08_INPUT_RECEIPTS,
+  ].find(({ path: receiptPath }) => receiptPath === relativePath);
   if (receipt === undefined) return false;
   if (
     bytes.byteLength !== receipt.bytes ||
@@ -5517,6 +5650,7 @@ async function projectT06HistoricalPredecessor(workspaceRoot, currentArtifact, r
         APP_SOURCE_PATHS.includes(relativePath),
       ),
       ...M10A_T12_REPLACED_T08_INPUT_RECEIPTS,
+      M10A_T14_APP_SOURCE_SUCCESSOR,
     ].map((receipt) => [receipt.path, receipt]),
   );
   for (const receipt of currentReceipts) {

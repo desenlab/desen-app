@@ -29,6 +29,10 @@ const FONT = Object.freeze({
   integrity:
     "sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA==",
 });
+const M10A_T14_PACKAGE_SCRIPT_ADDITIONS = Object.freeze({
+  "verify:m10a-t14": "node scripts/verify-m10a-t14.mjs",
+  "test:m10a-t14": "node --test tests/m10a-t14.test.mjs",
+});
 
 export class M10AT13ProofError extends Error {
   constructor(code, message) {
@@ -49,6 +53,51 @@ async function sourceReceipt(relativePath) {
 
 async function currentSource() {
   return Promise.all(SOURCE_FILES.map((relativePath) => sourceReceipt(relativePath)));
+}
+
+/**
+ * T13 predates the reviewed T14 package-script registration. Keep T13's immutable package
+ * receipt authoritative by projecting only those exact, additive T14 entries out of the current
+ * package before comparing the historical reader. Any other package change remains drift.
+ */
+async function historicalSource() {
+  const receipts = await Promise.all(
+    SOURCE_FILES.map(async (relativePath) => {
+      if (relativePath !== "package.json") return sourceReceipt(relativePath);
+
+      const packageText = await readFile(path.join(WORKSPACE_ROOT, relativePath), "utf8");
+      const packageJson = JSON.parse(packageText);
+      const scripts = packageJson.scripts;
+      const hasT14Scripts =
+        scripts?.["verify:m10a-t14"] !== undefined || scripts?.["test:m10a-t14"] !== undefined;
+      if (!hasT14Scripts) return sourceReceipt(relativePath);
+      if (
+        scripts?.["verify:m10a-t14"] !== M10A_T14_PACKAGE_SCRIPT_ADDITIONS["verify:m10a-t14"] ||
+        scripts?.["test:m10a-t14"] !== M10A_T14_PACKAGE_SCRIPT_ADDITIONS["test:m10a-t14"]
+      ) {
+        return sourceReceipt(relativePath);
+      }
+
+      const projected = structuredClone(packageJson);
+      delete projected.scripts["verify:m10a-t14"];
+      delete projected.scripts["test:m10a-t14"];
+      for (const [scriptName, command] of [
+        ["test", "pnpm test:m10a-t14"],
+        ["check", "pnpm verify:m10a-t14"],
+      ]) {
+        const currentCommand = projected.scripts[scriptName];
+        const occurrences = currentCommand?.split(command).length - 1;
+        if (occurrences !== 1 || !currentCommand.includes(` && ${command}`)) {
+          return sourceReceipt(relativePath);
+        }
+        projected.scripts[scriptName] = currentCommand.replace(` && ${command}`, "");
+      }
+      const projectedText = await canonical(projected);
+      const bytes = Buffer.from(projectedText, "utf8");
+      return { path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) };
+    }),
+  );
+  return receipts;
 }
 
 async function canonical(value) {
@@ -144,7 +193,7 @@ export async function verifyM10AT13Evidence() {
       "T13 evidence identity or result drifted.",
     );
   }
-  const actualSource = await currentSource();
+  const actualSource = await historicalSource();
   if (JSON.stringify(evidence.source) !== JSON.stringify(actualSource)) {
     throw new M10AT13ProofError(
       "M10A_T13_ARTIFACT_SOURCE_DRIFT",

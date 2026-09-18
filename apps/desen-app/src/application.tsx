@@ -9,7 +9,16 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import { createDesenEditorContinuousValidator } from "@desen/editor-core";
+import {
+  captureDesenEditorClipboard,
+  createDesenEditorContinuousValidator,
+  createDesenEditorHistory,
+  pasteDesenEditorClipboard,
+  readDesenEditorNodePlacement,
+  recordDesenEditorHistory,
+  redoDesenEditorHistory,
+  undoDesenEditorHistory,
+} from "@desen/editor-core";
 import { canonicalizeJson, digestCanonicalJson } from "@desen/protocol";
 
 import { prepareCatalogAuthoringModel, projectAuthoringCanvasFrame } from "./authoring-data.js";
@@ -146,6 +155,8 @@ import type { EditableProjectRecord } from "@desen/design-system-core";
 import type {
   DesenEditorDocument,
   DesenEditorContinuousValidationReport,
+  DesenEditorClipboardPayload,
+  DesenEditorHistory,
   DesenEditorPersistencePort,
 } from "@desen/editor-core";
 import type { RuntimeHostPorts, RuntimeOperationPort, RuntimeTokenPort } from "@desen/runtime-core";
@@ -2590,6 +2601,15 @@ function SurfaceEditor({
       ),
     }),
   );
+  const authoringHistory = useRef<DesenEditorHistory | null>(null);
+  if (authoringHistory.current === null) {
+    const createdHistory = createDesenEditorHistory(mountedInitialDocument);
+    if (createdHistory === undefined)
+      throw new TypeError("The bounded authoring history could not be created.");
+    authoringHistory.current = createdHistory;
+  }
+  const authoringClipboard = useRef<DesenEditorClipboardPayload | null>(null);
+  const [historyNotice, setHistoryNotice] = useState("");
   const [scenarioChoice, setScenarioChoice] = useState<
     Readonly<{ readonly ownerKey: string | null; readonly value: AuthoringScenarioValue }>
   >(() => Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
@@ -3364,12 +3384,23 @@ function SurfaceEditor({
   function commitAuthoringSession(
     nextSession: typeof authoringSession,
     establishesBaseline = false,
+    resetsHistory = false,
   ): void {
     const canonicalDocument = canonicalizeJson(nextSession.document);
     inMemoryCurrentCanonical.current = canonicalDocument;
     if (establishesBaseline) inMemoryBaselineCanonical.current = canonicalDocument;
+    const currentHistory = authoringHistory.current;
+    if (resetsHistory || currentHistory === null) {
+      const nextHistory = createDesenEditorHistory(nextSession.document);
+      if (nextHistory === undefined)
+        throw new TypeError("The bounded authoring history could not be reset.");
+      authoringHistory.current = nextHistory;
+    } else {
+      authoringHistory.current = recordDesenEditorHistory(currentHistory, nextSession.document);
+    }
     updateInMemoryDirtyProjection();
     clearTransientDiagnostics();
+    setHistoryNotice("");
     setAuthoringSession(nextSession);
   }
 
@@ -3424,7 +3455,7 @@ function SurfaceEditor({
     ) {
       return;
     }
-    commitAuthoringSession(result.session, true);
+    commitAuthoringSession(result.session, true, true);
     selectOne(null);
     setScenarioChoice(Object.freeze({ ownerKey: null, value: AUTHORING_SOURCE_SCENARIO_VALUE }));
   }
@@ -3755,6 +3786,163 @@ function SurfaceEditor({
     return result;
   }
 
+  function selectedReuseNodeIds(): readonly string[] {
+    const ids =
+      directSelections.length > 0
+        ? directSelections.map(({ sourceNodeId }) => sourceNodeId)
+        : selection === null
+          ? []
+          : [selection.sourceNodeId];
+    return Object.freeze([...new Set(ids)]);
+  }
+
+  function validateReuseCandidate(
+    candidate: DesenEditorDocument,
+  ):
+    | Readonly<{ readonly ok: true; readonly preview: typeof preview }>
+    | Readonly<{ readonly ok: false }> {
+    if (!preparedModel.ok || diagnosticsValidator?.ok !== true) {
+      return Object.freeze({ ok: false as const });
+    }
+    const report = diagnosticsValidator.validator.validate(candidate);
+    if (!report.valid) {
+      captureEditDiagnostics(Object.freeze({ ok: false as const, validationReport: report }));
+      return Object.freeze({ ok: false as const });
+    }
+    const nextPreview = prepareAuthoringPreviewBundle(candidate, workspaceSnapshot.catalogPackages);
+    return nextPreview.ok
+      ? Object.freeze({ ok: true as const, preview: nextPreview })
+      : Object.freeze({ ok: false as const });
+  }
+
+  function copySelectedLayers(): void {
+    if (!isDesignMode()) return;
+    const nodeIds = selectedReuseNodeIds();
+    if (nodeIds.length === 0) {
+      setHistoryNotice("Select at least one layer before copying.");
+      return;
+    }
+    const result = captureDesenEditorClipboard(document, selectedSurface.sourceId, nodeIds);
+    if (!result.ok) {
+      setHistoryNotice("Copy was rejected safely: the selection is no longer current.");
+      return;
+    }
+    authoringClipboard.current = result.payload;
+    setHistoryNotice(
+      `Copied ${result.payload.nodes.length} layer${result.payload.nodes.length === 1 ? "" : "s"}.`,
+    );
+  }
+
+  function reuseTarget(): Readonly<{
+    readonly parentId: string;
+    readonly slot: string;
+    readonly index: number;
+  }> | null {
+    const nodeIds = selectedReuseNodeIds();
+    const anchorId = nodeIds.at(-1);
+    if (anchorId === undefined) return null;
+    const anchor = readDesenEditorNodePlacement(document, selectedSurface.sourceId, anchorId);
+    if (
+      anchor === null ||
+      anchor.parentId === null ||
+      anchor.slot === null ||
+      anchor.index === null
+    )
+      return null;
+    return Object.freeze({ parentId: anchor.parentId, slot: anchor.slot, index: anchor.index + 1 });
+  }
+
+  function pasteSelectedLayers(): void {
+    if (!isDesignMode()) return;
+    const payload = authoringClipboard.current;
+    const target = reuseTarget();
+    if (payload === null || target === null) {
+      setHistoryNotice("Choose a current layer and an App-captured clipboard selection first.");
+      return;
+    }
+    const result = pasteDesenEditorClipboard(document, {
+      payload,
+      surfaceId: selectedSurface.sourceId,
+      parentId: target.parentId,
+      slot: target.slot,
+      index: target.index,
+    });
+    if (!result.ok) {
+      setHistoryNotice("Paste was rejected safely; the authored Source is unchanged.");
+      return;
+    }
+    const admitted = validateReuseCandidate(result.document);
+    if (!admitted.ok) {
+      setHistoryNotice(
+        "Paste was rejected by the current Catalog contract; the Source is unchanged.",
+      );
+      return;
+    }
+    commitAuthoringSession(Object.freeze({ document: result.document, preview: admitted.preview }));
+    setHistoryNotice(
+      `Pasted ${result.insertedNodeIds.length} fresh layer${result.insertedNodeIds.length === 1 ? "" : "s"}.`,
+    );
+  }
+
+  function duplicateSelectedLayers(): void {
+    copySelectedLayers();
+    if (authoringClipboard.current === null) return;
+    pasteSelectedLayers();
+  }
+
+  function transitionHistory(direction: "undo" | "redo"): void {
+    if (!isDesignMode()) return;
+    const current = authoringHistory.current;
+    if (current === null) return;
+    const result =
+      direction === "undo" ? undoDesenEditorHistory(current) : redoDesenEditorHistory(current);
+    if (!result.ok) {
+      setHistoryNotice(direction === "undo" ? "Nothing to undo." : "Nothing to redo.");
+      return;
+    }
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.history.document,
+      workspaceSnapshot.catalogPackages,
+    );
+    if (!nextPreview.ok) {
+      setHistoryNotice(
+        "History transition was rejected because the preview boundary is unavailable.",
+      );
+      return;
+    }
+    authoringHistory.current = result.history;
+    inMemoryCurrentCanonical.current = canonicalizeJson(result.history.document);
+    updateInMemoryDirtyProjection();
+    clearTransientDiagnostics();
+    selectOne(null);
+    setAuthoringSession(Object.freeze({ document: result.history.document, preview: nextPreview }));
+    setHistoryNotice(direction === "undo" ? "Last edit undone." : "Edit restored.");
+  }
+
+  useEffect(() => {
+    function handleHistoryShortcut(event: globalThis.KeyboardEvent): void {
+      if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        (target instanceof HTMLElement &&
+          (target.isContentEditable || target.contentEditable === "true"))
+      )
+        return;
+      if (event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        transitionHistory(event.shiftKey ? "redo" : "undo");
+      } else if (event.key.toLowerCase() === "y") {
+        event.preventDefault();
+        transitionHistory("redo");
+      }
+    }
+    globalThis.document.addEventListener("keydown", handleHistoryShortcut);
+    return () => globalThis.document.removeEventListener("keydown", handleHistoryShortcut);
+  });
+
   if (!preparedModel.ok) {
     return (
       <section className={styles.surfaceEditor} aria-labelledby="workspace-title">
@@ -3788,6 +3976,11 @@ function SurfaceEditor({
     mode === "design" && previewSurfaceId === selectedSurface.sourceId
       ? selectedSourceNodeIds
       : Object.freeze([]);
+  const historyState = authoringHistory.current;
+  const canUndo = mode === "design" && historyState !== null && historyState.past.length > 0;
+  const canRedo = mode === "design" && historyState !== null && historyState.future.length > 0;
+  const canReuseSelection = mode === "design" && selectedSourceNodeIds.length > 0;
+  const canPaste = canReuseSelection && authoringClipboard.current !== null;
 
   return (
     <section aria-labelledby="workspace-title" className={styles.surfaceEditor} data-mode={mode}>
@@ -3864,6 +4057,56 @@ function SurfaceEditor({
               Run
             </button>
           </div>
+          <div aria-label="Authoring history and reuse" className={styles.modeControl}>
+            <button
+              aria-label="Undo last authoring edit"
+              data-history-action="undo"
+              disabled={!canUndo || sourceDraft !== null || publicationPending}
+              onClick={() => transitionHistory("undo")}
+              type="button"
+            >
+              Undo
+            </button>
+            <button
+              aria-label="Redo authoring edit"
+              data-history-action="redo"
+              disabled={!canRedo || sourceDraft !== null || publicationPending}
+              onClick={() => transitionHistory("redo")}
+              type="button"
+            >
+              Redo
+            </button>
+            <button
+              aria-label="Copy selected layers"
+              data-history-action="copy"
+              disabled={!canReuseSelection || sourceDraft !== null || publicationPending}
+              onClick={copySelectedLayers}
+              type="button"
+            >
+              Copy
+            </button>
+            <button
+              aria-label="Paste copied layers"
+              data-history-action="paste"
+              disabled={!canPaste || sourceDraft !== null || publicationPending}
+              onClick={pasteSelectedLayers}
+              type="button"
+            >
+              Paste
+            </button>
+            <button
+              aria-label="Duplicate selected layers"
+              data-history-action="duplicate"
+              disabled={!canReuseSelection || sourceDraft !== null || publicationPending}
+              onClick={duplicateSelectedLayers}
+              type="button"
+            >
+              Duplicate
+            </button>
+          </div>
+          <span aria-live="polite" className={styles.visuallyHidden} data-history-notice>
+            {historyNotice}
+          </span>
           <details className={styles.workspaceLifecycle}>
             <summary>
               <span>

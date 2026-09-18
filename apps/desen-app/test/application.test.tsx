@@ -388,6 +388,28 @@ describe("Desen App application shell", () => {
     expect(document.querySelector("canvas")).toBeNull();
   });
 
+  it("keeps duplicate and undo/redo operations atomic in the authored Source", () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    fireEvent.click(
+      within(hierarchy).getByRole("button", { name: "Select Text layer · sign-in.title" }),
+    );
+    const duplicate = screen.getByRole("button", { name: "Duplicate selected layers" });
+    expect((duplicate as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(duplicate);
+    expect(within(hierarchy).getByText("sign-in.title.copy")).toBeTruthy();
+
+    const undo = screen.getByRole("button", { name: "Undo last authoring edit" });
+    expect((undo as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(undo);
+    expect(within(hierarchy).queryByText("sign-in.title.copy")).toBeNull();
+
+    const redo = screen.getByRole("button", { name: "Redo authoring edit" });
+    expect((redo as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(redo);
+    expect(within(hierarchy).getByText("sign-in.title.copy")).toBeTruthy();
+  });
+
   it("admits an explicit empty-project bootstrap without substituting completed sign-in content", () => {
     window.history.replaceState(null, "", "/projects/account-app/surfaces/sign-in");
     render(

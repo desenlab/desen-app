@@ -71,6 +71,22 @@ export const M10A_T13_PACKAGE_JSON_SUCCESSOR = Object.freeze({
   }),
 });
 
+// M10A-T14 adds only its own root-level package scripts and test-chain hooks. Project
+// the reviewed additive package wiring back to the frozen T13 package receipt before
+// applying the existing T13 projection to the frozen T12 authority.
+export const M10A_T14_PACKAGE_JSON_SUCCESSOR = Object.freeze({
+  task: "M10A-T14",
+  path: "package.json",
+  current: Object.freeze({
+    bytes: 107_294,
+    sha256: "87a422b8a601c5c3553f03b7f390d9168a9ed7fe66a03b66087d037138c69aa2",
+  }),
+  predecessor: Object.freeze({
+    bytes: 107_129,
+    sha256: "04c4936b4d7fb31ef8484a5bb46e951233170b07a667ad0afc0ed3a9d9e723b6",
+  }),
+});
+
 const SOURCE_REQUIREMENTS = Object.freeze([
   Object.freeze({
     path: "package.json",
@@ -512,6 +528,42 @@ export function projectM10AT13PackageJsonSuccessor(bytes) {
   return projected;
 }
 
+/** Admits only the reviewed M10A-T14 package-script additions and restores T13 bytes. */
+export function projectM10AT14PackageJsonSuccessor(bytes) {
+  if (!Buffer.isBuffer(bytes)) {
+    fail("PACKAGE_SUCCESSOR_DRIFT", "The T14 package successor must receive exact file bytes.");
+  }
+  const successor = M10A_T14_PACKAGE_JSON_SUCCESSOR;
+  if (bytes.byteLength !== successor.current.bytes || sha256(bytes) !== successor.current.sha256) {
+    fail("PACKAGE_SUCCESSOR_DRIFT", "The reviewed M10A-T14 package successor drifted.");
+  }
+  let source = bytes.toString("utf8");
+  const replacements = [
+    ['    "verify:m10a-t14": "node scripts/verify-m10a-t14.mjs",\n', ""],
+    ['    "test:m10a-t14": "node --test tests/m10a-t14.test.mjs",\n', ""],
+    [" && pnpm test:m10a-t14", ""],
+    [" && pnpm verify:m10a-t14", ""],
+  ];
+  for (const [current, predecessor] of replacements) {
+    const offset = source.indexOf(current);
+    if (offset < 0 || offset !== source.lastIndexOf(current)) {
+      fail("PACKAGE_SUCCESSOR_DRIFT", "The T14 package successor has no exact inverse edit.");
+    }
+    source = `${source.slice(0, offset)}${predecessor}${source.slice(offset + current.length)}`;
+  }
+  const projected = Buffer.from(source, "utf8");
+  if (
+    projected.byteLength !== successor.predecessor.bytes ||
+    sha256(projected) !== successor.predecessor.sha256
+  ) {
+    fail(
+      "PACKAGE_SUCCESSOR_DRIFT",
+      "The T14 package successor did not restore the reviewed T13 receipt.",
+    );
+  }
+  return projected;
+}
+
 function exactOptions(raw, allowed, label) {
   if (raw === undefined) return {};
   if (
@@ -656,6 +708,9 @@ async function collectSourceAuthorities(workspaceRoot) {
     ).length !== 1 ||
     SOURCE_REQUIREMENTS.filter(
       ({ path: relativePath }) => relativePath === M10A_T13_PACKAGE_JSON_SUCCESSOR.path,
+    ).length !== 1 ||
+    SOURCE_REQUIREMENTS.filter(
+      ({ path: relativePath }) => relativePath === M10A_T14_PACKAGE_JSON_SUCCESSOR.path,
     ).length !== 1
   ) {
     fail("CONFIG_SUCCESSOR_DRIFT", "The T12 successor authority inventory drifted.");
@@ -670,12 +725,15 @@ async function collectSourceAuthorities(workspaceRoot) {
         `Required T12 source semantics drifted: ${requirement.path}`,
       );
     }
-    const artifactBytes =
-      requirement.path === M10A_T12_TIMEOUT_CONFIG_SUCCESSOR.path
-        ? projectM10AT12TimeoutConfigSuccessor(bytes)
-        : requirement.path === M10A_T13_PACKAGE_JSON_SUCCESSOR.path
-          ? projectM10AT13PackageJsonSuccessor(bytes)
-          : bytes;
+    let artifactBytes = bytes;
+    if (requirement.path === M10A_T12_TIMEOUT_CONFIG_SUCCESSOR.path) {
+      artifactBytes = projectM10AT12TimeoutConfigSuccessor(artifactBytes);
+    } else if (requirement.path === M10A_T14_PACKAGE_JSON_SUCCESSOR.path) {
+      artifactBytes = projectM10AT14PackageJsonSuccessor(artifactBytes);
+      artifactBytes = projectM10AT13PackageJsonSuccessor(artifactBytes);
+    } else if (requirement.path === M10A_T13_PACKAGE_JSON_SUCCESSOR.path) {
+      artifactBytes = projectM10AT13PackageJsonSuccessor(artifactBytes);
+    }
     files.push(
       Object.freeze({
         path: requirement.path,

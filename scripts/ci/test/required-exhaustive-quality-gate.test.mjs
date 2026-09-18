@@ -96,7 +96,7 @@ async function waitFor(predicate, message) {
   assert.fail(message);
 }
 
-test("the dependency-derived plan owns the exact 256-node exhaustive inventory", () => {
+test("the dependency-derived plan owns the exact 258-node exhaustive inventory", () => {
   const plan = createRequiredExhaustivePlan();
   const inventory = createExhaustiveWorkloadInventory();
   const ownedIds = [
@@ -111,16 +111,15 @@ test("the dependency-derived plan owns the exact 256-node exhaustive inventory",
   assert.equal(PROOF_PAIR_CONCURRENCY, 2);
   assert.equal(DEFAULT_STEP_TIMEOUT_MS, 15 * 60 * 1_000);
   assert.equal(DEFAULT_GATE_TIMEOUT_MS, 27 * 60 * 1_000);
-  assert.equal(plan.stepCount, 256);
-  assert.equal(plan.proofPairCount, 121);
+  assert.equal(plan.stepCount, 258);
+  assert.equal(plan.proofPairCount, 122);
   assert.equal(plan.prefix.length, 12);
   assert.equal(plan.suffix.length, 2);
-  assert.equal(plan.planSha256, "4eb596fa3ec8ceec77466321e3ab408ecfaa184ef5b7c8dadc830c0c5f816546");
-  assert.equal(ownedIds.length, 256);
-  assert.equal(new Set(ownedIds).size, 256);
+  assert.equal(plan.planSha256, "0b783ea5a4a674bdc72f3a2c585372aee3e6e91535cf850079acc4af00951023");
+  assert.equal(ownedIds.length, 258);
+  assert.equal(new Set(ownedIds).size, 258);
   assert.deepEqual([...ownedIds].sort(), inventory.nodes.map(({ id }) => id).sort());
   const exactTailProofIds = [
-    "desen-app-browser-e2e-workspace-compatibility",
     "desen-app-user-created-blank-project",
     "desen-app-visual-behavior-authoring",
     "desen-app-evergreen-product-composition",
@@ -145,6 +144,7 @@ test("the dependency-derived plan owns the exact 256-node exhaustive inventory",
     "m10a-t09",
     "m10a-t12",
     "m10a-t13",
+    "m10a-t14",
   ];
   assert.deepEqual(
     plan.proofPairs.slice(-exactTailProofIds.length).map(({ id }) => id),
@@ -181,7 +181,7 @@ test("authority defaults to REQUIRED, accepts only explicit SHADOW, and fixes EX
   assert.equal(observationPlan.scope, "EXHAUSTIVE");
   assert.equal(
     observationPlan.planSha256,
-    "7a56bfc28aeef70803884f3d7e6dfa10bf5b3d30329a61fe4c57f80d57f7c5d3",
+    "4140fd5933b19e71d4f7f70bb8c6731d11b11fd098810ef644159aabee3c473c",
   );
   assert.throws(
     () => createRequiredExhaustivePlan({ scope: "AFFECTED" }),
@@ -271,7 +271,7 @@ test("REQUIRED authority rejects injected success runners and repository seams",
   assert.equal(executionCount, 0);
 });
 
-test("all 256 successful closes produce stable inventory-ordered receipts", async () => {
+test("all 258 successful closes produce stable inventory-ordered receipts", async () => {
   const plan = createShadowPlan();
   const calls = [];
   const receipt = await runShadowPlan(plan, {
@@ -282,8 +282,8 @@ test("all 256 successful closes produce stable inventory-ordered receipts", asyn
     ...successfulGuardOptions(),
   });
 
-  assert.equal(calls.length, 256);
-  assert.equal(new Set(calls).size, 256);
+  assert.equal(calls.length, 258);
+  assert.equal(new Set(calls).size, 258);
   assert.equal(calls.filter((id) => id === "editor-core-public-package-contract").length, 1);
   assert.equal(calls.filter((id) => id === "design-system-core-public-package-contract").length, 1);
   assert.equal(
@@ -334,7 +334,7 @@ test("all 256 successful closes produce stable inventory-ordered receipts", asyn
     true,
   );
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 256);
+  assert.equal(receipt.observedClosedCount, 258);
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
     plan.nodes.map(({ id }) => id),
@@ -488,7 +488,7 @@ test("a held early published-host root overlaps its own segment and blocks the s
   }
   const receipt = await running;
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 256);
+  assert.equal(receipt.observedClosedCount, 258);
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
     plan.nodes.map(({ id }) => id),
@@ -672,7 +672,7 @@ test("a held early digest lets its original segment progress but cannot cross th
   }
   const receipt = await running;
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 256);
+  assert.equal(receipt.observedClosedCount, 258);
   assert.equal(
     started.indexOf(digestPair.rootTest.id) <
       started.indexOf(plan.proofPairs[firstBarrierIndex].verifier.id),
@@ -764,7 +764,7 @@ test("dynamic workers keep two safe ordinary pairs active and drain for all barr
   assert.equal(maximumActive, 2);
   assert.equal(thirdPairStartedWhileFirstHeld, true);
   assert.equal(barrierPairs.length, 16);
-  assert.equal(plan.proofPairs.length - barrierPairs.length, 105);
+  assert.equal(plan.proofPairs.length - barrierPairs.length, 106);
   assert.equal(exclusiveBarrierSteps.size, 32);
 });
 
@@ -1496,7 +1496,7 @@ test("build-output and untracked closing guards run after a primary proof failur
   assert.equal(untrackedSnapshots, 2);
 });
 
-test("untracked drift fails the gate even after all 256 steps close successfully", async () => {
+test("untracked drift fails the gate even after all 258 steps close successfully", async () => {
   const plan = createShadowPlan();
   const untrackedDrift = new Error("untracked drift");
   await assert.rejects(
@@ -1511,7 +1511,7 @@ test("untracked drift fails the gate even after all 256 steps close successfully
     (error) => {
       assert.equal(error, untrackedDrift);
       assert.equal(error.requiredExhaustiveReceipt.status, "FAIL");
-      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 256);
+      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 258);
       return true;
     },
   );
@@ -1540,7 +1540,7 @@ test("the full gate authenticates repository inputs and hosted revision without 
   assert.equal(receipt.inventory.authority, "SHADOW");
   assert.equal(receipt.inventory.scope, "EXHAUSTIVE");
   assert.equal(receipt.execution.status, "PASS");
-  assert.equal(receipt.execution.observedClosedCount, 256);
+  assert.equal(receipt.execution.observedClosedCount, 258);
   assert.equal(receipt.execution.cleanInput.revision, revision);
 });
 

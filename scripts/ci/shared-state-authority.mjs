@@ -180,6 +180,7 @@ export const PROOF_IDS = Object.freeze([
   "m10a-t09",
   "m10a-t12",
   "m10a-t13",
+  "m10a-t14",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -198,6 +199,7 @@ export const READ_ONLY_ROOT_PROOF_IDS = Object.freeze([
   "m10a-t05",
   "m10a-t06",
   "m10a-t13",
+  "m10a-t14",
 ]);
 
 /** The sole proof id whose root test currently requires workspace-scoped temporary writes. */
@@ -710,8 +712,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 256) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 256 steps.", {
+if (METADATA_BY_STEP_ID.size !== 258) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 258 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

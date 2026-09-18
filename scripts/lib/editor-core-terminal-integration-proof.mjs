@@ -10,6 +10,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import { projectM10AT14HistoricalCompatibility } from "./editor-core-content-edits-proof.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
@@ -104,6 +105,18 @@ const EDITOR_SOURCE_DIRECTORY = "packages/editor-core/src";
 const EDITOR_DIST_DIRECTORY = "packages/editor-core/dist";
 const EXPECTED_EDITOR_SOURCE_INVENTORY = Object.freeze([...EDITOR_SOURCE_PATHS].sort(compareText));
 const EXPECTED_EDITOR_DIST_INVENTORY = Object.freeze([...DIST_PATHS].sort(compareText));
+const M10A_T14_CURRENT_EDITOR_SOURCE_INVENTORY = Object.freeze(
+  [...EXPECTED_EDITOR_SOURCE_INVENTORY, "packages/editor-core/src/history.ts"].sort(compareText),
+);
+const M10A_T14_CURRENT_EDITOR_DIST_INVENTORY = Object.freeze(
+  [
+    ...EXPECTED_EDITOR_DIST_INVENTORY,
+    "packages/editor-core/dist/history.d.ts",
+    "packages/editor-core/dist/history.d.ts.map",
+    "packages/editor-core/dist/history.js",
+    "packages/editor-core/dist/history.js.map",
+  ].sort(compareText),
+);
 
 const HISTORICAL_PACKAGE_TEST_PATHS = Object.freeze(
   [
@@ -432,6 +445,22 @@ function exactArray(actual, expected, code, label) {
   }
 }
 
+function projectM10AT14HistoricalFileInventory(fileInventory) {
+  const sourcePaths = fileInventory.sourcePaths.filter(
+    (relativePath) => relativePath !== "packages/editor-core/src/history.ts",
+  );
+  const distPaths = fileInventory.distPaths.filter(
+    (relativePath) => !relativePath.includes("/history."),
+  );
+  return Object.freeze({
+    ...fileInventory,
+    sourceFiles: sourcePaths.length,
+    sourcePaths: Object.freeze(sourcePaths),
+    distFiles: distPaths.length,
+    distPaths: Object.freeze(distPaths),
+  });
+}
+
 function captureExactObject(raw, allowedKeys, label) {
   if (raw === undefined) return Object.freeze(Object.create(null));
   if (
@@ -601,13 +630,13 @@ async function verifyWorkspaceFileInventory(inventoryExtraPaths = Object.freeze(
   const checkedDistInventory = [...distInventory, ...simulatedDistExtras].sort(compareText);
   exactArray(
     checkedSourceInventory,
-    EXPECTED_EDITOR_SOURCE_INVENTORY,
+    M10A_T14_CURRENT_EDITOR_SOURCE_INVENTORY,
     "INVENTORY_DRIFT",
     "Editor source file inventory",
   );
   exactArray(
     checkedDistInventory,
-    EXPECTED_EDITOR_DIST_INVENTORY,
+    M10A_T14_CURRENT_EDITOR_DIST_INVENTORY,
     "INVENTORY_DRIFT",
     "Editor distribution file inventory",
   );
@@ -2199,13 +2228,15 @@ export async function buildEditorCoreTerminalIntegrationEvidence(rawOptions = un
   }
   const frozen = await authenticateFrozenArtifact();
   const fileInventory = await verifyWorkspaceFileInventory(options.inventoryExtraPaths);
+  const historicalFileInventory = projectM10AT14HistoricalFileInventory(fileInventory);
   const prerequisites = await authenticatePrerequisites(options);
   const files = new Map();
   for (const relativePath of TRACKED_PATHS) {
     files.set(relativePath, await trackedBytes(relativePath, options));
   }
+  projectM10AT14HistoricalCompatibility(files);
   const t09Artifact = prerequisites.artifacts["M08-T09"];
-  const boundary = verifyBoundary(files, t09Artifact, fileInventory);
+  const boundary = verifyBoundary(files, t09Artifact, historicalFileInventory);
   const executionAuthority = authenticateRuntimeClosure(t09Artifact, files);
   const validSource = parseJson(files.get(SOURCE_FIXTURE_PATH), SOURCE_FIXTURE_PATH);
   const validCatalog = parseJson(files.get(CATALOG_FIXTURE_PATH), CATALOG_FIXTURE_PATH);

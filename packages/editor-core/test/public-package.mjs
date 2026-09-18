@@ -408,6 +408,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
       "event-action-edits.js",
       "persistence.js",
       "continuous-validation.js",
+      "history.js",
     ].map(async (file) => ({
       file,
       source: await readFile(new URL(`../dist/${file}`, import.meta.url), "utf8"),
@@ -431,6 +432,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
           "./event-action-edits.js",
           "./persistence.js",
           "./continuous-validation.js",
+          "./history.js",
         ],
       },
       { file: "source-document.js", specifiers: ["@desen/validator"] },
@@ -461,6 +463,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
       {
         file: "continuous-validation.js",
         specifiers: ["@desen/protocol", "@desen/validator", "./source-document.js"],
+      },
+      {
+        file: "history.js",
+        specifiers: ["@desen/protocol", "./source-document.js", "./stable-id-insert.js"],
       },
     ],
   );
@@ -496,6 +502,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
     emittedModules[0].source,
     /export\s*\{\s*createDesenEditorContinuousValidator\s*\}\s*from\s*["']\.\/continuous-validation\.js["']/,
   );
+  assert.match(
+    emittedModules[0].source,
+    /export\s*\{\s*captureDesenEditorClipboard,\s*createDesenEditorHistory,\s*pasteDesenEditorClipboard,\s*readDesenEditorNodePlacement,\s*recordDesenEditorHistory,\s*redoDesenEditorHistory,\s*undoDesenEditorHistory\s*,?\s*\}\s*from\s*["']\.\/history\.js["']/,
+  );
 
   const emittedGraph = emittedModules.map(({ source }) => source).join("\n");
   for (const forbidden of [
@@ -515,9 +525,11 @@ test("the built public package resolves through its export map and exposes the r
     new URL("../dist/index.js", import.meta.url).href,
   );
   assert.deepEqual(Object.keys(editorCore), [
+    "captureDesenEditorClipboard",
     "clearDesenEditorNodeCondition",
     "createDesenEditorContinuousValidator",
     "createDesenEditorDocument",
+    "createDesenEditorHistory",
     "createDesenEditorPersistencePort",
     "deleteDesenEditorAction",
     "deleteDesenEditorEventHandler",
@@ -536,6 +548,10 @@ test("the built public package resolves through its export map and exposes the r
     "insertDesenEditorSubtree",
     "insertDesenEditorVariant",
     "moveDesenEditorNode",
+    "pasteDesenEditorClipboard",
+    "readDesenEditorNodePlacement",
+    "recordDesenEditorHistory",
+    "redoDesenEditorHistory",
     "reorderDesenEditorAction",
     "reorderDesenEditorNode",
     "reorderDesenEditorVariant",
@@ -551,6 +567,7 @@ test("the built public package resolves through its export map and exposes the r
     "setDesenEditorVariantCondition",
     "setDesenEditorVariantProp",
     "setDesenEditorVariantStyleProperty",
+    "undoDesenEditorHistory",
   ]);
 });
 

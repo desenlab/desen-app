@@ -47,6 +47,15 @@ export {
 } from "./event-action-edits.js";
 export { createDesenEditorPersistencePort } from "./persistence.js";
 export { createDesenEditorContinuousValidator } from "./continuous-validation.js";
+export {
+  captureDesenEditorClipboard,
+  createDesenEditorHistory,
+  pasteDesenEditorClipboard,
+  readDesenEditorNodePlacement,
+  recordDesenEditorHistory,
+  redoDesenEditorHistory,
+  undoDesenEditorHistory,
+} from "./history.js";
 
 export type {
   DesenEditorDocument,
@@ -163,3 +172,17 @@ export type {
   DesenEditorContinuousValidatorCreationSuccess,
   DesenEditorInvalidSubjectMapping,
 } from "./continuous-validation.js";
+
+export type {
+  DesenEditorClipboardPayload,
+  DesenEditorClipboardResult,
+  DesenEditorHistory,
+  DesenEditorHistoryDiagnostic,
+  DesenEditorHistoryDiagnosticCode,
+  DesenEditorHistoryEntry,
+  DesenEditorHistoryResult,
+  DesenEditorNodePlacement,
+  DesenEditorPasteCommand,
+  DesenEditorPasteResult,
+  DesenEditorPasteSuccess,
+} from "./history.js";

@@ -114,19 +114,19 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 256 steps across the eight reviewed execution classes", () => {
+test("owns exactly 258 steps across the eight reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 256);
-  assert.equal(new Set(ALL_STEP_IDS).size, 256);
+  assert.equal(ALL_STEP_IDS.length, 258);
+  assert.equal(new Set(ALL_STEP_IDS).size, 258);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 7,
     PACKAGE_TEST_EXCLUSIVE: 1,
-    PROOF_READ_ONLY: 102,
+    PROOF_READ_ONLY: 104,
     PROOF_OS_TEMP_ISOLATED: 124,
     PROOF_BROWSER_EXCLUSIVE: 5,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
@@ -208,10 +208,10 @@ test("owns exactly 256 steps across the eight reviewed execution classes", () =>
 });
 
 test("pins the exact fourteen read-only, five browser, and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 121);
-  assert.equal(new Set(PROOF_IDS).size, 121);
+  assert.equal(PROOF_IDS.length, 122);
+  assert.equal(new Set(PROOF_IDS).size, 122);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
-  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 105);
+  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 106);
   assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 16);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
@@ -228,6 +228,7 @@ test("pins the exact fourteen read-only, five browser, and sole workspace-temp p
     "m10a-t05",
     "m10a-t06",
     "m10a-t13",
+    "m10a-t14",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
   assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 106);
@@ -1380,7 +1381,7 @@ test("pins the exact fourteen read-only, five browser, and sole workspace-temp p
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    121,
+    122,
   );
 });
 
@@ -2540,7 +2541,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 238,
+    NONE: 240,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,
