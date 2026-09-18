@@ -991,6 +991,12 @@ const M10A_T12_RICH_STYLE_SOURCE_PATHS = Object.freeze([
   "apps/desen-app/src/starter-workspace-product.tsx",
   "apps/desen-app/src/style-panel.tsx",
 ]);
+// T13 adds the local design-system asset adapter as an additive storage boundary. It is
+// intentionally admitted to the complete source inventory only; the frozen historical graph
+// and its runtime module projection remain owned by the T12 successor receipts.
+const M10A_T13_ADDED_APP_SOURCE_PATHS = Object.freeze([
+  "apps/desen-app/src/design-system-asset-storage.ts",
+]);
 // T11 joins the live runtime graph rather than extending T10's inventory-only exception. Existing
 // frozen M09 successor readers admit its exact replacement receipts only when the live bytes
 // match this reviewed set.
@@ -1052,6 +1058,7 @@ const CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
     ...M10A_T10_ISOLATED_APP_SOURCE_PATHS,
     ...M10A_T11_REACHABLE_APP_SOURCE_PATHS,
     ...M10A_T12_RICH_STYLE_SOURCE_PATHS,
+    ...M10A_T13_ADDED_APP_SOURCE_PATHS,
   ].sort(),
 );
 // The live T12 product has a broader composition than the historical M09 reader. Keep the
