@@ -3922,6 +3922,44 @@ const M10A_T12_CATALOG = Object.freeze({
 });
 const M10A_T12_STYLE_SOURCE_PATHS = M10A_T12_RICH_STYLE_SOURCE_PATHS;
 
+// T14 adds the editor-core history surface to the live Vite graph. Authenticate that exact
+// additive graph first, then keep the T12 reader's frozen graph projection byte-stable.
+const M10A_T12_FROZEN_RUNTIME_RESOLUTION = Object.freeze({
+  profile: "m10a-t12-central-current-product",
+  moduleCount: 689,
+  staticEdges: 2_970,
+  dynamicEdges: 0,
+  unresolvedEdges: 0,
+  graphSha256: "sha256:4d2a4a74154d5041380a79a726ea698d9197dace3f25391ca6614492108df823",
+});
+const M10A_T14_CURRENT_RUNTIME_RESOLUTION = Object.freeze({
+  profile: "m10a-t12-central-current-product",
+  moduleCount: 690,
+  staticEdges: 2_974,
+  dynamicEdges: 0,
+  unresolvedEdges: 0,
+  graphSha256: "sha256:ac5f9c5196356f51008d5644e0c802fad7399c38ba35e210b0f6073ce89eb86c",
+});
+
+function projectM10AT14RuntimeToM10AT12(runtime) {
+  const observed = {
+    profile: M10A_T14_CURRENT_RUNTIME_RESOLUTION.profile,
+    moduleCount: runtime?.moduleCount,
+    staticEdges: runtime?.staticEdges,
+    dynamicEdges: runtime?.dynamicEdges,
+    unresolvedEdges: runtime?.unresolvedEdges,
+    graphSha256: runtime?.graphSha256,
+  };
+  if (!isDeepStrictEqual(observed, M10A_T14_CURRENT_RUNTIME_RESOLUTION)) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The live T14 graph is not the exact reviewed additive successor of T12.",
+      { observed },
+    );
+  }
+  return M10A_T12_FROZEN_RUNTIME_RESOLUTION;
+}
+
 async function authenticateM10AT12CanvasSuccessor(workspaceRoot) {
   const pin = M10A_T12_SUCCESSOR_ARTIFACT_PIN;
   const checkpointed = await readCheckpointedFrozenArtifact(pin.task, { workspaceRoot });
@@ -4077,14 +4115,7 @@ export async function buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence(
       receiptCount: successor.styleReceipts.length,
       catalogBound: true,
     },
-    runtimeResolution: {
-      profile: "m10a-t12-central-current-product",
-      moduleCount: runtime.moduleCount,
-      staticEdges: runtime.staticEdges,
-      dynamicEdges: runtime.dynamicEdges,
-      unresolvedEdges: runtime.unresolvedEdges,
-      graphSha256: runtime.graphSha256,
-    },
+    runtimeResolution: projectM10AT14RuntimeToM10AT12(runtime),
   });
 }
 
