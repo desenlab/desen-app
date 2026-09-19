@@ -225,6 +225,7 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
   "m10-gate",
+  "m10a-t14",
 ]);
 
 /** Exact verifiers allowed to execute their task-owned fixed-port browser toolchains. */
@@ -300,6 +301,7 @@ export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
   "desen-app-last-known-good-recovery",
   "desen-app-repeatable-demo",
   "m10-gate",
+  "m10a-t14",
 ]);
 
 /** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
@@ -477,6 +479,7 @@ const NATIVE_ADDON_POLICIES = Object.freeze({
   DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE: "DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE",
   DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE: "DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE",
   DESEN_APP_M10_GATE_VITE: "DESEN_APP_M10_GATE_VITE",
+  DESEN_APP_M10A_T14_VITEST: "DESEN_APP_M10A_T14_VITEST",
   NONE: "NONE",
   PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -501,6 +504,7 @@ const NATIVE_ADDON_POLICY_BY_PROOF_ID = Object.freeze({
     NATIVE_ADDON_POLICIES.DESEN_APP_LAST_KNOWN_GOOD_RECOVERY_VITE_SQLITE,
   "desen-app-repeatable-demo": NATIVE_ADDON_POLICIES.DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE,
   "m10-gate": NATIVE_ADDON_POLICIES.DESEN_APP_M10_GATE_VITE,
+  "m10a-t14": NATIVE_ADDON_POLICIES.DESEN_APP_M10A_T14_VITEST,
 });
 
 const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({

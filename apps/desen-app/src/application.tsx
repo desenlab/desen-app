@@ -2518,6 +2518,7 @@ function AuthoringPanel({
 }
 
 function SurfaceEditor({
+  authoringClipboard,
   authoringProjectRecord,
   initialDocument,
   integrationBinding,
@@ -2529,6 +2530,8 @@ function SurfaceEditor({
   workspaceProfile,
   workspaceSnapshot,
 }: Readonly<{
+  /** Project-scoped clipboard authority retained while admitted surfaces remount. */
+  readonly authoringClipboard: { current: DesenEditorClipboardPayload | null };
   /** The current aggregate T02 record when this normal workspace persists one. */
   readonly authoringProjectRecord: EditableProjectRecord | null;
   readonly initialDocument: DesenEditorDocument;
@@ -2608,7 +2611,6 @@ function SurfaceEditor({
       throw new TypeError("The bounded authoring history could not be created.");
     authoringHistory.current = createdHistory;
   }
-  const authoringClipboard = useRef<DesenEditorClipboardPayload | null>(null);
   const [historyNotice, setHistoryNotice] = useState("");
   const [scenarioChoice, setScenarioChoice] = useState<
     Readonly<{ readonly ownerKey: string | null; readonly value: AuthoringScenarioValue }>
@@ -3386,18 +3388,23 @@ function SurfaceEditor({
     establishesBaseline = false,
     resetsHistory = false,
   ): void {
+    let nextHistory: DesenEditorHistory;
+    const currentHistory = authoringHistory.current;
+    if (resetsHistory || currentHistory === null) {
+      const resetHistory = createDesenEditorHistory(nextSession.document);
+      if (resetHistory === undefined)
+        throw new TypeError("The bounded authoring history could not be reset.");
+      nextHistory = resetHistory;
+    } else {
+      const recorded = recordDesenEditorHistory(currentHistory, nextSession.document);
+      if (!recorded.ok)
+        throw new TypeError("The bounded authoring history rejected an admitted document.");
+      nextHistory = recorded.history;
+    }
     const canonicalDocument = canonicalizeJson(nextSession.document);
     inMemoryCurrentCanonical.current = canonicalDocument;
     if (establishesBaseline) inMemoryBaselineCanonical.current = canonicalDocument;
-    const currentHistory = authoringHistory.current;
-    if (resetsHistory || currentHistory === null) {
-      const nextHistory = createDesenEditorHistory(nextSession.document);
-      if (nextHistory === undefined)
-        throw new TypeError("The bounded authoring history could not be reset.");
-      authoringHistory.current = nextHistory;
-    } else {
-      authoringHistory.current = recordDesenEditorHistory(currentHistory, nextSession.document);
-    }
+    authoringHistory.current = nextHistory;
     updateInMemoryDirtyProjection();
     clearTransientDiagnostics();
     setHistoryNotice("");
@@ -3788,8 +3795,8 @@ function SurfaceEditor({
 
   function selectedReuseNodeIds(): readonly string[] {
     const ids =
-      directSelections.length > 0
-        ? directSelections.map(({ sourceNodeId }) => sourceNodeId)
+      selectedSourceNodeIds.length > 0
+        ? selectedSourceNodeIds
         : selection === null
           ? []
           : [selection.sourceNodeId];
@@ -3815,22 +3822,23 @@ function SurfaceEditor({
       : Object.freeze({ ok: false as const });
   }
 
-  function copySelectedLayers(): void {
-    if (!isDesignMode()) return;
+  function copySelectedLayers(): DesenEditorClipboardPayload | null {
+    if (!isDesignMode()) return null;
     const nodeIds = selectedReuseNodeIds();
     if (nodeIds.length === 0) {
       setHistoryNotice("Select at least one layer before copying.");
-      return;
+      return null;
     }
     const result = captureDesenEditorClipboard(document, selectedSurface.sourceId, nodeIds);
     if (!result.ok) {
       setHistoryNotice("Copy was rejected safely: the selection is no longer current.");
-      return;
+      return null;
     }
     authoringClipboard.current = result.payload;
     setHistoryNotice(
       `Copied ${result.payload.nodes.length} layer${result.payload.nodes.length === 1 ? "" : "s"}.`,
     );
+    return result.payload;
   }
 
   function reuseTarget(): Readonly<{
@@ -3852,9 +3860,8 @@ function SurfaceEditor({
     return Object.freeze({ parentId: anchor.parentId, slot: anchor.slot, index: anchor.index + 1 });
   }
 
-  function pasteSelectedLayers(): void {
+  function pasteClipboardPayload(payload: DesenEditorClipboardPayload | null): void {
     if (!isDesignMode()) return;
-    const payload = authoringClipboard.current;
     const target = reuseTarget();
     if (payload === null || target === null) {
       setHistoryNotice("Choose a current layer and an App-captured clipboard selection first.");
@@ -3884,10 +3891,14 @@ function SurfaceEditor({
     );
   }
 
+  function pasteSelectedLayers(): void {
+    pasteClipboardPayload(authoringClipboard.current);
+  }
+
   function duplicateSelectedLayers(): void {
-    copySelectedLayers();
-    if (authoringClipboard.current === null) return;
-    pasteSelectedLayers();
+    const payload = copySelectedLayers();
+    if (payload === null) return;
+    pasteClipboardPayload(payload);
   }
 
   function transitionHistory(direction: "undo" | "redo"): void {
@@ -4442,6 +4453,15 @@ function ProjectShell({
   readonly workspaceProfile: ProjectWorkspaceProfileHandle;
   readonly workspaceSnapshot: ProjectWorkspaceProfileSnapshot;
 }>) {
+  const clipboardAuthorityId = `${workspaceProfileMountIdentity(workspaceProfile)}:${project.id}`;
+  const clipboardScope = useRef<{
+    authorityId: string;
+    store: { current: DesenEditorClipboardPayload | null };
+  }>({ authorityId: clipboardAuthorityId, store: { current: null } });
+  if (clipboardScope.current.authorityId !== clipboardAuthorityId) {
+    clipboardScope.current = { authorityId: clipboardAuthorityId, store: { current: null } };
+  }
+
   if (selectedSurface === undefined) {
     return (
       <section className={styles.surfaceGallery} aria-labelledby="surfaces-title">
@@ -4505,6 +4525,7 @@ function ProjectShell({
 
   return (
     <SurfaceEditor
+      authoringClipboard={clipboardScope.current.store}
       authoringProjectRecord={authoringProjectRecord}
       key={`${workspaceProfileMountIdentity(workspaceProfile)}:${project.id}:${selectedSurface.id}`}
       initialDocument={initialDocument}

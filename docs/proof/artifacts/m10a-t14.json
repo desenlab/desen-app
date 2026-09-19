@@ -7,18 +7,18 @@
   "source": [
     {
       "path": "apps/desen-app/src/application.tsx",
-      "bytes": 183780,
-      "sha256": "341e9075946cbedcd233579b87db71ccab700675ce89170fb16be6767120b818"
+      "bytes": 184768,
+      "sha256": "4fcc90c0c7af787cefd2a02af795789d9eb89aee139366ba9e4b328e153f7e58"
     },
     {
       "path": "apps/desen-app/test/application.test.tsx",
-      "bytes": 126408,
-      "sha256": "91098c8240bf156c88e13c6448bd858a12155f015b45b98c1e3eb5866df76b85"
+      "bytes": 133879,
+      "sha256": "9b8b412488b2eb5b0c1dd385e21ffa5c1857be5d32bfd94b3d9da1971d22392a"
     },
     {
       "path": "packages/editor-core/src/history.ts",
-      "bytes": 17999,
-      "sha256": "ec17ba9a405a0279ccc009541c2ef216a1eeba11323a8c121f9e292cb29e0d42"
+      "bytes": 50994,
+      "sha256": "d4ff1b465765d25c9b3765b482af0baefea7bc5690d9b61bf3941befc747eedf"
     },
     {
       "path": "packages/editor-core/src/index.ts",
@@ -27,8 +27,8 @@
     },
     {
       "path": "packages/editor-core/test/history.test.ts",
-      "bytes": 3428,
-      "sha256": "5cb7f6f347a0603bbce08ff40d823d9a5d379327d84304e0ac014a37a783def5"
+      "bytes": 41060,
+      "sha256": "375c35683c5e63c8b8378559b48471927abefb2f7cd2a4a535870d3c22383395"
     },
     {
       "path": "pnpm-lock.yaml",
@@ -37,27 +37,44 @@
     }
   ],
   "limits": {
-    "maxHistoryEntries": 100,
-    "maxClipboardNodes": 256,
+    "defaultHistoryEntries": 100,
+    "maxHistoryEntries": 512,
+    "maxClipboardSelectionRoots": 256,
     "maxClipboardBytes": 8388608,
     "maxSourceTreeDepth": 64
   },
   "claims": {
     "boundedImmutableUndoRedo": true,
+    "fullyImmutableHistoryEntries": true,
+    "independentlyAdmittedHistorySnapshots": true,
+    "forgedHistoryAuthorityRejected": true,
+    "immutableDiagnostics": true,
     "redoClearedOnNewEdit": true,
     "appOwnedClipboardProvenance": true,
+    "projectScopedCrossSurfaceClipboard": true,
+    "opaqueWorkspaceClipboardIsolation": true,
+    "sourceOrderedMultiSelectionReuse": true,
     "freshIdentityRemapping": true,
     "nestedBindingReferenceRemapping": true,
+    "transitiveStateResourceDependencyRemapping": true,
+    "freshOperationAliasRemapping": true,
+    "schemaOwnedBindingRewriteOnly": true,
+    "externalComponentTargetRejectionAtomic": true,
+    "unresolvedBindingRejectionAtomic": true,
+    "multiRootReferenceRemapping": true,
+    "maxLengthIdentityAllocation": true,
+    "opaqueExtensionPreservation": true,
     "hostileClipboardRejectedAtomically": true,
+    "hostileClipboardWrappersRejected": true,
+    "ambiguousSourceIdentitiesRejected": true,
+    "rejectedDuplicateCannotReuseClipboard": true,
     "catalogValidationBeforeCommit": true,
     "crashSafeSaveBoundaryPreserved": true,
     "runtimePublisherProtocolUnchanged": true
   },
   "focusedCommands": [
-    "pnpm --filter @desen/editor-core build",
-    "pnpm --filter @desen/editor-core exec vitest run test/history.test.ts",
-    "pnpm --filter @desen/app-web typecheck",
-    "pnpm --filter @desen/app-web exec vitest run test/application.test.tsx"
+    "node node_modules/vitest/vitest.mjs run --root packages/editor-core --config package.json --configLoader runner test/history.test.ts",
+    "node node_modules/vitest/vitest.mjs run --root apps/desen-app --config package.json --configLoader runner test/application.test.tsx -t keeps duplicate and undo/redo operations atomic|does not reuse an older clipboard|retains the project clipboard across admitted surface remounts|clears the project clipboard when opaque workspace authority changes|keeps Source unchanged when a pasted candidate fails the current admission preflight|rejects a structurally admitted foreign capability through the real Catalog preflight|duplicates a reverse-clicked multi-selection in Source order"
   ],
   "nonClaims": [
     "Clipboard transfer is intentionally App-owned and in-memory; foreign OS clipboard payloads are not admitted.",

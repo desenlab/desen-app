@@ -109,14 +109,14 @@ const M10A_T01_PUBLIC_MATRIX_SNAPSHOT = Object.freeze({
 // additive public surface explicit: authenticate the complete fresh receipt, project the new
 // module away, and restore the exact pre-T14 entrypoint before the older T01 bridge runs.
 const M10A_T14_PUBLIC_MATRIX_SNAPSHOT = Object.freeze({
-  current: "sha256:cb277bac1e39a1e7ab4e4a1b40b909d9536f1367131f797acd27bf723f3594ff",
+  current: "sha256:877c8b8c316abb2d9b493330bdbf8b9503a457721d9c634566aba9f47f18dc7f",
   predecessor: M10A_T01_PUBLIC_MATRIX_SNAPSHOT.current,
 });
 const M10A_T14_EDITOR_CORE_PUBLIC_SUCCESSORS = Object.freeze([
   Object.freeze({
     path: "packages/editor-core/dist/history.js",
-    currentBytes: 13_735,
-    currentSha256: "b528b204ef9fe172aca09f03cefd1a92c736cd62652e2cd95089d6aca7ec3074",
+    currentBytes: 45_873,
+    currentSha256: "bc062e600061d0673ec14e202b0bdd20ce0db730b66ac309acea5f76a763f2a7",
   }),
   Object.freeze({
     path: "packages/editor-core/dist/index.js",
