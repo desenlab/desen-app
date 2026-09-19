@@ -1059,6 +1059,10 @@ const M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "scripts/verify-m10a-t14.mjs",
   "tests/m10a-t14.test.mjs",
 ]);
+const LOCAL_PREFLIGHT_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "scripts/ci/local-preflight.mjs",
+  "scripts/ci/test/local-preflight.test.mjs",
+]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
   ownershipSha256: "8a9904c93964f6b5e979bb1369e58bb84abaa110137e47b9b839222d8e82d7d8",
@@ -1321,6 +1325,22 @@ const M10A_T14_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: "7a89ddd897643ea7b20d8c684e46c0153b00422d8cc377c9145119dd471d4585",
+});
+const LOCAL_PREFLIGHT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
+  trackedPathCount: 1867,
+  trackedPathSetSha256: "96e708713b3e175b162a651f3b78223f50ada76426c7718834211b9014ce73bc",
+  proofOwnedPathCount: 244,
+  categoryCounts: Object.freeze({
+    PROOF_UNIT: 244,
+    CI_POLICY: 50,
+    DEPENDENCY_POLICY: 39,
+    FROZEN_INPUT: 171,
+    PACKAGE_OR_APPLICATION: 765,
+    SHARED_PROOF_INFRASTRUCTURE: 413,
+    PROJECT_DOCUMENTATION: 174,
+    REPOSITORY_POLICY: 11,
+  }),
+  ownershipSha256: "229cf86ef50580fb35b87ed07e540bec3a9727a55cee768c29d6285ec6ec8c31",
 });
 const VERIFIED_PROMOTION_RECEIPTS = new WeakMap();
 const VERIFIED_PROMOTION_BOUNDARIES = new WeakMap();
@@ -2126,13 +2146,41 @@ function createBoundaryOwnershipDelta(rawBoundary) {
   }
   const successorAuthority = createAffectedWorkloadOwnership(boundary.trackedPaths);
   const successorReview = ownershipReviewProjection(successorAuthority);
-  if (!isDeepStrictEqual(successorReview, M10A_T14_SUCCESSOR_OWNERSHIP_REVIEW)) {
+  if (!isDeepStrictEqual(successorReview, LOCAL_PREFLIGHT_SUCCESSOR_OWNERSHIP_REVIEW)) {
     fail(
       "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
       "The authenticated boundary does not reproduce the reviewed current ownership successor.",
     );
   }
   const successorPaths = successorAuthority.entries.map(({ path: trackedPath }) => trackedPath);
+  if (
+    LOCAL_PREFLIGHT_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 2 ||
+    new Set(LOCAL_PREFLIGHT_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 2
+  ) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "The reviewed local-preflight successor path append is not exactly two unique paths.",
+    );
+  }
+  for (const trackedPath of LOCAL_PREFLIGHT_SUCCESSOR_ADDED_TRACKED_PATHS) {
+    if (!successorPaths.includes(trackedPath)) {
+      fail(
+        "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+        "The authenticated boundary omitted one exact local-preflight successor path.",
+        { path: trackedPath },
+      );
+    }
+  }
+  const m10aT14SuccessorPaths = successorPaths.filter(
+    (trackedPath) => !LOCAL_PREFLIGHT_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
+  );
+  const m10aT14SuccessorReview = calculateAffectedWorkloadOwnershipReview(m10aT14SuccessorPaths);
+  if (!isDeepStrictEqual(m10aT14SuccessorReview, M10A_T14_SUCCESSOR_OWNERSHIP_REVIEW)) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "Removing the exact local-preflight append does not reproduce the reviewed M10A-T14 successor.",
+    );
+  }
   if (
     M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 8 ||
     new Set(M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 8
@@ -2143,7 +2191,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
     );
   }
   for (const trackedPath of M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS) {
-    if (!successorPaths.includes(trackedPath)) {
+    if (!m10aT14SuccessorPaths.includes(trackedPath)) {
       fail(
         "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
         "The authenticated boundary omitted one exact M10A-T14 successor path.",
@@ -2151,7 +2199,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
       );
     }
   }
-  const m10aT13SuccessorPaths = successorPaths.filter(
+  const m10aT13SuccessorPaths = m10aT14SuccessorPaths.filter(
     (trackedPath) => !M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
   );
   const m10aT13SuccessorReview = calculateAffectedWorkloadOwnershipReview(m10aT13SuccessorPaths);
