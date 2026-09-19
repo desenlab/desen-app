@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "d5045b0e2664bdfabf8302f534b789a5d5eb38837c11a34ec681ef54401b457a",
+  "headSha256": "3b225451d576eb7de2dbbae5abfea8abb75fcba9ff8f28961384b707de5a3a14",
   "checkpoints": [
     {
       "sequence": 1,
@@ -142144,7 +142144,7 @@
           "role": "proof-library",
           "path": "scripts/lib/desen-app-real-adapter-canvas-proof.mjs",
           "bytes": 224752,
-          "sha256": "fe6aab10dcef0f3fd5ab155b214e5b85b181efcdf409611944c903419805d3b2"
+          "sha256": "4af829f2550a08fc7d549a3079c8d7277c3072400bfced4ed4fc01e3e1298901"
         },
         {
           "task": "M09-T03",

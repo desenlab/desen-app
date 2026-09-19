@@ -193,9 +193,9 @@ const M10A_T14_T13_PACKAGE_SUCCESSOR_RESEALED_READER_INDEXES = Object.freeze([14
 // reissues only the published-host compatibility pair whose exact source projection changed.
 const M10A_T14_CORRECTIVE_RESEALED_READER_INDEXES = Object.freeze([116, 117, 150, 151]);
 // Sequence 138 advances the historical readers and final T14 proof pair that authenticate its
-// compiled package, public matrix, and hosted permission-isolated focused execution.
+// compiled package, live App graph, public matrix, and hosted permission-isolated execution.
 const M10A_T14_PUBLIC_MATRIX_CORRECTIVE_RESEALED_READER_INDEXES = Object.freeze([
-  56, 118, 150, 151,
+  56, 74, 118, 150, 151,
 ]);
 // Sequence 129 reissues only the published-host proof library after the T14 graph successor
 // authority was resealed to the current Vite graph and backing snapshot.
@@ -10107,6 +10107,13 @@ test("sequence one hundred thirty-eight seals T14 hosted-isolation compatibility
     bytes: 111379,
     sha256: "814b103c496a196a87613258d11f709c8c2c8bf7018d9484e9056230d5581d61",
   });
+  assert.deepEqual(current.readers[74], {
+    task: "M09-T03",
+    role: "proof-library",
+    path: "scripts/lib/desen-app-real-adapter-canvas-proof.mjs",
+    bytes: 224752,
+    sha256: "4af829f2550a08fc7d549a3079c8d7277c3072400bfced4ed4fc01e3e1298901",
+  });
   assert.deepEqual(current.readers[118], {
     task: "M10-T06",
     role: "proof-library",
@@ -10134,7 +10141,7 @@ test("sequence one hundred thirty-eight seals T14 hosted-isolation compatibility
   );
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "d5045b0e2664bdfabf8302f534b789a5d5eb38837c11a34ec681ef54401b457a",
+    "3b225451d576eb7de2dbbae5abfea8abb75fcba9ff8f28961384b707de5a3a14",
   );
   for (const [index, reader] of current.readers.entries())
     await assertHistoricalReaderMatchesCurrentWorkspace(reader, index);
