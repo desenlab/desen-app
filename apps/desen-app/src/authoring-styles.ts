@@ -1,4 +1,5 @@
 import {
+  createDesenEditorDocument,
   createDesenEditorContinuousValidator,
   deleteDesenEditorOwnerStyleProperty,
   deleteDesenEditorVariant,
@@ -35,6 +36,8 @@ type EditorVariant = NonNullable<EditorNode["variants"]>[number];
 const BASE_STYLE_STATE = "base";
 const RESPONSIVE_VARIANT_EXTENSION = "run.desen.app/t12-responsive";
 const RESPONSIVE_VARIANT_VERSION = 1;
+const NAMED_VARIANT_EXTENSION = "run.desen.app/t16-variant";
+const NAMED_VARIANT_VERSION = 1;
 const MAX_TOKEN_OPTIONS = 1_024;
 
 /** Exact App route that may authorize a style projection or mutation. */
@@ -69,6 +72,8 @@ export const AUTHORING_RESPONSIVE_BREAKPOINTS: readonly AuthoringResponsiveBreak
 /** The exact selectable style layer. A raw `when` predicate is deliberately not part of this API. */
 export type AuthoringStyleTarget =
   | Readonly<{ readonly kind: "base" }>
+  | Readonly<{ readonly kind: "visual-state"; readonly state: string }>
+  | Readonly<{ readonly kind: "variant"; readonly index: number }>
   | Readonly<{
       readonly kind: "breakpoint";
       readonly breakpoint: AuthoringResponsiveBreakpointId;
@@ -123,6 +128,17 @@ export interface AuthoringStyleControl {
   /** Exact detached JSON Schema for this declared property, never a generic CSS descriptor. */
   readonly propertiesSchema: JsonObject;
   readonly base: AuthoringStyleValueState;
+  /** Declared non-base visual states. Unknown state names never enter this projection. */
+  readonly visualStates?: readonly Readonly<{
+    readonly state: string;
+    readonly value: AuthoringStyleValueState;
+  }>[];
+  /** T16 named variants that may receive closed style overrides for this exact leaf. */
+  readonly variants?: readonly Readonly<{
+    readonly index: number;
+    readonly name: string;
+    readonly value: AuthoringStyleValueState;
+  }>[];
   readonly responsive: readonly AuthoringResponsiveStyleValue[];
 }
 
@@ -219,6 +235,8 @@ export type AuthoringStyleEditResult = AuthoringStyleEditSuccess | AuthoringStyl
 
 type CapturedStyleTarget =
   | Readonly<{ readonly kind: "base" }>
+  | Readonly<{ readonly kind: "visual-state"; readonly state: string }>
+  | Readonly<{ readonly kind: "variant"; readonly index: number }>
   | Readonly<{
       readonly kind: "breakpoint";
       readonly breakpoint: AuthoringResponsiveBreakpointId;
@@ -503,6 +521,21 @@ function captureStyleTarget(value: unknown): CapturedStyleTarget | undefined {
   const kind = captureExactOwnData(value, ["kind"]);
   if (kind !== undefined && kind.kind === "base") return Object.freeze({ kind: "base" });
 
+  const visualState = captureExactOwnData(value, ["kind", "state"]);
+  if (visualState?.kind === "visual-state" && isNonEmptyString(visualState.state)) {
+    return Object.freeze({ kind: "visual-state", state: visualState.state });
+  }
+
+  const variant = captureExactOwnData(value, ["kind", "index"]);
+  if (
+    variant?.kind === "variant" &&
+    typeof variant.index === "number" &&
+    Number.isInteger(variant.index) &&
+    variant.index >= 0
+  ) {
+    return Object.freeze({ kind: "variant", index: variant.index });
+  }
+
   const breakpoint = captureExactOwnData(value, ["kind", "breakpoint"]);
   if (breakpoint?.kind !== "breakpoint") return undefined;
   const selected = breakpointFor(breakpoint.breakpoint);
@@ -692,12 +725,13 @@ function styleLeafValue(
   part: string,
   property: string,
   tokens: readonly AuthoringResolvedStyleToken[],
+  state = BASE_STYLE_STATE,
 ): AuthoringStyleValueState {
   const owner = ownDataObject(nodeOrVariant);
   const style = owner === undefined ? undefined : ownDataObject(ownDataValue(owner, "style"));
-  const state =
-    style === undefined ? undefined : ownDataObject(ownDataValue(style, BASE_STYLE_STATE));
-  const stylePart = state === undefined ? undefined : ownDataObject(ownDataValue(state, part));
+  const stateValue = style === undefined ? undefined : ownDataObject(ownDataValue(style, state));
+  const stylePart =
+    stateValue === undefined ? undefined : ownDataObject(ownDataValue(stateValue, part));
   if (stylePart === undefined || !hasOwnDataValue(stylePart, property)) return NO_STYLE_VALUE;
   const value = captureJsonValue(ownDataValue(stylePart, property));
   if (value === undefined) return Object.freeze({ kind: "dynamic", value: null });
@@ -749,6 +783,25 @@ function responsiveMarker(variant: EditorVariant): JsonObject | undefined {
   return extensions === undefined
     ? undefined
     : ownDataObject(ownDataValue(extensions, RESPONSIVE_VARIANT_EXTENSION));
+}
+
+function namedVariantDescriptor(
+  index: number,
+  variant: EditorVariant,
+): Readonly<{ readonly index: number; readonly name: string }> | undefined {
+  const record = ownDataObject(variant);
+  const extensions =
+    record === undefined ? undefined : ownDataObject(ownDataValue(record, "extensions"));
+  const marker =
+    extensions === undefined
+      ? undefined
+      : ownDataObject(ownDataValue(extensions, NAMED_VARIANT_EXTENSION));
+  const name = marker === undefined ? undefined : ownDataValue(marker, "name");
+  return marker !== undefined &&
+    ownDataValue(marker, "version") === NAMED_VARIANT_VERSION &&
+    isNonEmptyString(name)
+    ? Object.freeze({ index, name })
+    : undefined;
 }
 
 /** Extracts a known marker target even when the marker itself is malformed, for fail-closed edits. */
@@ -872,6 +925,36 @@ function prepareStyleParts(
           tokenTypes: expectedTokenTypes(property) ?? NO_TOKEN_TYPES,
           propertiesSchema: schema,
           base: styleLeafValue(node, part.name, property, tokens),
+          visualStates: Object.freeze(
+            component.visualStates.map((state) =>
+              Object.freeze({
+                state,
+                value: styleLeafValue(node, part.name, property, tokens, state),
+              }),
+            ),
+          ),
+          variants: Object.freeze(
+            (node.variants ?? [])
+              .map((variant, index) => {
+                const descriptor = namedVariantDescriptor(index, variant);
+                return descriptor === undefined
+                  ? undefined
+                  : Object.freeze({
+                      index,
+                      name: descriptor.name,
+                      value: styleLeafValue(variant, part.name, property, tokens),
+                    });
+              })
+              .filter(
+                (
+                  value,
+                ): value is Readonly<{
+                  readonly index: number;
+                  readonly name: string;
+                  readonly value: AuthoringStyleValueState;
+                }> => value !== undefined,
+              ),
+          ),
           responsive: Object.freeze(
             AUTHORING_RESPONSIVE_BREAKPOINTS.map((breakpoint) => {
               const match = inventory.exactByBreakpoint.get(breakpoint.id);
@@ -950,6 +1033,83 @@ export function prepareAuthoringStyleModel(
     : prepareAuthoringStyleModelCaptured(model, capturedRoute, capturedSelection, capturedTokens);
 }
 
+/**
+ * Creates a transient, non-authored preview that promotes one declared state or named variant
+ * to the base style layer. The authored Source and its variant predicates are never changed.
+ */
+export function prepareAuthoringStylePreviewDocument(
+  document: DesenEditorDocument,
+  route: AuthoringStyleRoute,
+  selection: AuthoringComponentSelection | null,
+  target: AuthoringStyleTarget,
+): DesenEditorDocument {
+  if (selection === null || target.kind === "base" || target.kind === "breakpoint") return document;
+  const capturedSelection = selection;
+  try {
+    const candidate = JSON.parse(canonicalizeJson(document)) as Record<string, unknown>;
+    const surface =
+      candidate.surfaces && typeof candidate.surfaces === "object"
+        ? (candidate.surfaces as Record<string, unknown>)[route.surfaceId]
+        : undefined;
+    const root =
+      surface && typeof surface === "object"
+        ? (surface as Record<string, unknown>).root
+        : undefined;
+    let selected: Record<string, unknown> | undefined;
+    function visit(value: unknown): void {
+      if (
+        selected !== undefined ||
+        value === null ||
+        typeof value !== "object" ||
+        Array.isArray(value)
+      )
+        return;
+      const record = value as Record<string, unknown>;
+      if (record.id === capturedSelection.sourceNodeId) {
+        selected = record;
+        return;
+      }
+      const slots = record.slots;
+      if (slots !== null && typeof slots === "object") {
+        for (const children of Object.values(slots as Record<string, unknown>)) {
+          if (Array.isArray(children)) for (const child of children) visit(child);
+        }
+      }
+    }
+    visit(root);
+    if (selected === undefined) return document;
+    const style =
+      selected.style && typeof selected.style === "object"
+        ? (selected.style as Record<string, unknown>)
+        : {};
+    const nextBase =
+      style.base && typeof style.base === "object"
+        ? (JSON.parse(canonicalizeJson(style.base)) as Record<string, unknown>)
+        : {};
+    const overlay =
+      target.kind === "visual-state"
+        ? style[target.state]
+        : Array.isArray(selected.variants)
+          ? (selected.variants[target.index] as Record<string, unknown> | undefined)?.style
+          : undefined;
+    if (overlay && typeof overlay === "object" && !Array.isArray(overlay)) {
+      for (const [part, properties] of Object.entries(overlay as Record<string, unknown>)) {
+        if (properties === null || typeof properties !== "object" || Array.isArray(properties))
+          continue;
+        nextBase[part] = {
+          ...(nextBase[part] as Record<string, unknown> | undefined),
+          ...(properties as Record<string, unknown>),
+        };
+      }
+    }
+    selected.style = { ...style, base: nextBase };
+    const admitted = createDesenEditorDocument(candidate);
+    return admitted.ok ? admitted.document : document;
+  } catch {
+    return document;
+  }
+}
+
 function findControl(
   styleModel: AuthoringStyleReadyModel,
   part: string,
@@ -965,9 +1125,14 @@ function targetStyleValue(
   control: AuthoringStyleControl,
   target: CapturedStyleTarget,
 ): AuthoringStyleValueState | undefined {
-  return target.kind === "base"
-    ? control.base
-    : control.responsive.find(({ breakpoint }) => breakpoint.id === target.breakpoint)?.value;
+  if (target.kind === "base") return control.base;
+  if (target.kind === "visual-state") {
+    return control.visualStates?.find(({ state }) => state === target.state)?.value;
+  }
+  if (target.kind === "variant") {
+    return control.variants?.find(({ index }) => index === target.index)?.value;
+  }
+  return control.responsive.find(({ breakpoint }) => breakpoint.id === target.breakpoint)?.value;
 }
 
 function contentFailure(): AuthoringStyleEditFailure {
@@ -1001,6 +1166,45 @@ function setBaseStyle(
     setDesenEditorOwnerStyleProperty(document, {
       surfaceId: route.surfaceId,
       ownerId: selection.sourceNodeId,
+      state: BASE_STYLE_STATE,
+      part: edit.part,
+      property: edit.property,
+      value: edit.value as DesenEditorContentValue,
+    }),
+  );
+}
+
+function setVisualStateStyle(
+  document: DesenEditorDocument,
+  route: AuthoringStyleRoute,
+  selection: AuthoringComponentSelection,
+  state: string,
+  edit: Readonly<{ readonly part: string; readonly property: string; readonly value: JsonValue }>,
+): DesenEditorDocument | undefined {
+  return editSucceeded(
+    setDesenEditorOwnerStyleProperty(document, {
+      surfaceId: route.surfaceId,
+      ownerId: selection.sourceNodeId,
+      state,
+      part: edit.part,
+      property: edit.property,
+      value: edit.value as DesenEditorContentValue,
+    }),
+  );
+}
+
+function setVariantStyle(
+  document: DesenEditorDocument,
+  route: AuthoringStyleRoute,
+  selection: AuthoringComponentSelection,
+  target: Readonly<{ readonly index: number }>,
+  edit: Readonly<{ readonly part: string; readonly property: string; readonly value: JsonValue }>,
+): DesenEditorDocument | undefined {
+  return editSucceeded(
+    setDesenEditorVariantStyleProperty(document, {
+      surfaceId: route.surfaceId,
+      nodeId: selection.sourceNodeId,
+      index: target.index,
       state: BASE_STYLE_STATE,
       part: edit.part,
       property: edit.property,
@@ -1146,6 +1350,17 @@ function styleMutation(
   edit: Readonly<{ readonly part: string; readonly property: string; readonly value: JsonValue }>,
 ): DesenEditorDocument | undefined {
   if (target.kind === "base") return setBaseStyle(document, route, selection, edit);
+  if (target.kind === "visual-state") {
+    if (!node.use || !selection.capabilityId) return undefined;
+    return setVisualStateStyle(document, route, selection, target.state, edit);
+  }
+  if (target.kind === "variant") {
+    const descriptor = node.variants?.[target.index];
+    return descriptor !== undefined &&
+      namedVariantDescriptor(target.index, descriptor) !== undefined
+      ? setVariantStyle(document, route, selection, target, edit)
+      : undefined;
+  }
   const breakpoint = breakpointFor(target.breakpoint);
   if (
     breakpoint === undefined ||
@@ -1221,6 +1436,12 @@ export function applyAuthoringStyleEdit(
   ) {
     return Object.freeze({ ok: false, reason: "control-unavailable" });
   }
+  if (
+    capturedEdit.target.kind === "visual-state" &&
+    !styleModel.component.visualStates.includes(capturedEdit.target.state)
+  ) {
+    return Object.freeze({ ok: false, reason: "control-unavailable" });
+  }
   // Dynamic Source leaves are display-only. This guard deliberately precedes every mutation path
   // so programmatic callers cannot bypass the read-only control rendered by the App.
   if (targetStyleValue(control, capturedEdit.target)?.kind === "dynamic") {
@@ -1261,6 +1482,53 @@ export function applyAuthoringStyleEdit(
         deleteDesenEditorOwnerStyleProperty(prepared.model.validationDocument, {
           surfaceId: capturedRoute.surfaceId,
           ownerId: capturedSelection.sourceNodeId,
+          state: BASE_STYLE_STATE,
+          part: capturedEdit.part,
+          property: capturedEdit.property,
+        }),
+      );
+      return changed === undefined
+        ? contentFailure()
+        : validateCandidate(changed, prepared.model.validationCatalogs, "source-invalid");
+    }
+    if (capturedEdit.target.kind === "visual-state") {
+      if (!styleModel.component.visualStates.includes(capturedEdit.target.state)) {
+        return Object.freeze({ ok: false, reason: "control-unavailable" });
+      }
+      const current = targetStyleValue(control, capturedEdit.target);
+      if (current === undefined || current.kind === "absent" || current.kind === "dynamic") {
+        return Object.freeze({ ok: false, reason: "control-unavailable" });
+      }
+      const changed = editSucceeded(
+        deleteDesenEditorOwnerStyleProperty(prepared.model.validationDocument, {
+          surfaceId: capturedRoute.surfaceId,
+          ownerId: capturedSelection.sourceNodeId,
+          state: capturedEdit.target.state,
+          part: capturedEdit.part,
+          property: capturedEdit.property,
+        }),
+      );
+      return changed === undefined
+        ? contentFailure()
+        : validateCandidate(changed, prepared.model.validationCatalogs, "source-invalid");
+    }
+    if (capturedEdit.target.kind === "variant") {
+      const variant = node.variants?.[capturedEdit.target.index];
+      if (
+        variant === undefined ||
+        namedVariantDescriptor(capturedEdit.target.index, variant) === undefined
+      ) {
+        return Object.freeze({ ok: false, reason: "control-unavailable" });
+      }
+      const current = targetStyleValue(control, capturedEdit.target);
+      if (current === undefined || current.kind === "absent" || current.kind === "dynamic") {
+        return Object.freeze({ ok: false, reason: "control-unavailable" });
+      }
+      const changed = editSucceeded(
+        deleteDesenEditorVariantStyleProperty(prepared.model.validationDocument, {
+          surfaceId: capturedRoute.surfaceId,
+          nodeId: capturedSelection.sourceNodeId,
+          index: capturedEdit.target.index,
           state: BASE_STYLE_STATE,
           part: capturedEdit.part,
           property: capturedEdit.property,

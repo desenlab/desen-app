@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 
 import styles from "./application.module.css";
 import { StylePanel } from "./style-panel.js";
+import { VariantsPanel } from "./variants-panel.js";
 import { formatStructuredJson, parseStructuredJsonText } from "./structured-json.js";
 import { isAuthoringInspectorStateCompatible } from "./authoring-inspector.js";
 
@@ -22,6 +23,11 @@ import type {
   AuthoringStyleModelResult,
   AuthoringStyleTarget,
 } from "./authoring-styles.js";
+import type {
+  AuthoringVariantEdit,
+  AuthoringVariantEditResult,
+  AuthoringVariantModelResult,
+} from "./authoring-variants.js";
 import type { StructuredJsonParseFailureReason } from "./structured-json.js";
 
 interface InspectorPanelProps {
@@ -50,9 +56,13 @@ interface InspectorPanelProps {
   readonly onStyleTargetChange?: ((target: AuthoringStyleTarget) => void) | undefined;
   /** App-owned local-state controls retained in the right-sidebar State view. */
   readonly stateControls?: ReactNode;
+  /** Closed named-variant model for the selected Source component. */
+  readonly variantModel?: AuthoringVariantModelResult | undefined;
+  /** Applies one bounded named-variant mutation. */
+  readonly onVariantEdit?: ((edit: AuthoringVariantEdit) => AuthoringVariantEditResult) | undefined;
 }
 
-type InspectorTab = "inspector" | "style" | "state" | "actions";
+type InspectorTab = "inspector" | "style" | "variants" | "state" | "actions";
 
 const IDLE_STYLE_MODEL: AuthoringStyleModelResult = Object.freeze({ status: "idle" });
 
@@ -792,6 +802,8 @@ export function InspectorPanel({
   onStyleTargetChange,
   previewControls,
   stateControls,
+  variantModel = Object.freeze({ status: "idle" as const }),
+  onVariantEdit,
   styleModel = IDLE_STYLE_MODEL,
   styleTarget,
   styleTokenOptions,
@@ -802,6 +814,7 @@ export function InspectorPanel({
   const inspectorTab = useRef<HTMLButtonElement>(null);
   const styleTab = useRef<HTMLButtonElement>(null);
   const stateTab = useRef<HTMLButtonElement>(null);
+  const variantsTab = useRef<HTMLButtonElement>(null);
   const actionsTab = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (diagnosticsRevealKey !== undefined) setActiveTab("inspector");
@@ -822,14 +835,16 @@ export function InspectorPanel({
         ? styleTab
         : nextTab === "state"
           ? stateTab
-          : actionsTab
+          : nextTab === "variants"
+            ? variantsTab
+            : actionsTab
     ).current?.focus();
   }
 
   function selectAdjacentTab(event: KeyboardEvent<HTMLButtonElement>): void {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const tabs: readonly InspectorTab[] = ["inspector", "style", "state", "actions"];
+    const tabs: readonly InspectorTab[] = ["inspector", "style", "variants", "state", "actions"];
     const currentIndex = tabs.indexOf(activeTab);
     const nextTab =
       event.key === "Home"
@@ -885,6 +900,19 @@ export function InspectorPanel({
           Style
         </button>
         <button
+          aria-controls={`${panelId}-variants-panel`}
+          aria-selected={activeTab === "variants"}
+          id={`${panelId}-variants-tab`}
+          onClick={() => selectTab("variants")}
+          onKeyDown={selectAdjacentTab}
+          ref={variantsTab}
+          role="tab"
+          tabIndex={activeTab === "variants" ? 0 : -1}
+          type="button"
+        >
+          Variants
+        </button>
+        <button
           aria-controls={`${panelId}-state-panel`}
           aria-selected={activeTab === "state"}
           id={`${panelId}-state-tab`}
@@ -912,6 +940,16 @@ export function InspectorPanel({
         </button>
       </div>
 
+      <div
+        aria-labelledby={`${panelId}-variants-tab`}
+        className={styles.inspectorTabPanel}
+        hidden={activeTab !== "variants"}
+        id={`${panelId}-variants-panel`}
+        role="tabpanel"
+        tabIndex={activeTab === "variants" ? 0 : -1}
+      >
+        <VariantsPanel model={variantModel} onEdit={onVariantEdit} />
+      </div>
       <div
         aria-labelledby={`${panelId}-inspector-tab`}
         className={styles.inspectorTabPanel}

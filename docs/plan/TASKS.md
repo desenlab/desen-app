@@ -278,7 +278,7 @@ and fresh-`main` closures as immutable historical receipts while T12 owns the cu
 | M10A-T13 | DONE        | M10A-T04, M10A-T12                               | [Hosted safe image/icon/font asset closure](../proof/M10A-T13.md)                                       |
 | M10A-T14 | DONE        | M10A-T10, M10A-T11                               | [Hosted history and identity-safe reuse closure](../proof/M10A-T14.md)                                  |
 | M10A-T15 | DONE        | M10A-T09, M10A-T13, M10A-T14                     | [Hosted masters/instances, overrides, detach and isolated master editing closure](../proof/M10A-T15.md) |
-| M10A-T16 | NOT_STARTED | M10A-T12, M10A-T15                               | Component variants and visual-state authoring                                                           |
+| M10A-T16 | IN_PROGRESS | M10A-T12, M10A-T15                               | [Variants and visual-state authoring](../proof/M10A-T16.md)                                             |
 | M10A-T17 | NOT_STARTED | M10A-T03, M10A-T16                               | Built-in design-system explorer, documentation and controls                                             |
 | M10A-T18 | NOT_STARTED | M10A-T04, M10A-T17                               | Library versions, usage, deprecation and impact review                                                  |
 | M10A-T19 | NOT_STARTED | M10A-T10, M10A-T14                               | Separate Connections workspace and durable inert drafts                                                 |

@@ -1,6 +1,6 @@
 # Desen App
 
-## M10A-T15 aggregate integration in progress
+## M10A-T15 aggregate integration
 
 Normal DESEN Neutral now retains a complete project, matching Publisher preview and bounded
 whole-project history above route-keyed surface editors. Its existing Inspector/Style/structural/
@@ -26,8 +26,18 @@ save/reopen, rejected managed/foreign Source drafts, navigation guards and cross
 The normal-product Chromium journey also observes three visibly authored instances, override/reset,
 detach, isolated master text/color edits, two linked updates, a single live undo step, and exact
 complete-project save/reload equality. It uses the ordinary local control plane without injected
-Source or a hidden mutation API. These are local checks, not T15 completion: task-owned evidence,
-hosted CI and merge closure remain in progress.
+Source or a hidden mutation API. The hosted T15 closure is recorded in
+[the task proof](../../docs/proof/M10A-T15.md).
+
+## M10A-T16: variants and visual states (in progress)
+
+The Inspector now has a dedicated **Variants** tab for creating, renaming and deleting app-owned
+named variants from the declared state axes of the selected surface. The Style panel can target
+declared visual states and named variants, while the canvas previews the selected style layer
+without mutating the authored Source. Unmanaged protocol variants remain untouched, and invalid
+or undeclared state/variant targets fail closed. Local implementation evidence is recorded in
+[the T16 working proof](../../docs/proof/M10A-T16.md); hosted exact-head and fresh-`main` closure
+are still pending.
 
 The normal DESEN Neutral lifecycle now checks the complete migrated record, unused recipe masters,
 exact installed profile and Publisher before replacing an opened workspace. Invalid members,

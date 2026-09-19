@@ -60,6 +60,19 @@ function isJsonPrimitive(value: unknown): value is JsonPrimitive {
 function isStyleTarget(value: unknown): value is AuthoringStyleTarget {
   if (!isRecord(value)) return false;
   if (value.kind === "base") return Object.keys(value).length === 1;
+  if (value.kind === "visual-state") {
+    return (
+      Object.keys(value).length === 2 && typeof value.state === "string" && value.state.length > 0
+    );
+  }
+  if (value.kind === "variant") {
+    return (
+      Object.keys(value).length === 2 &&
+      typeof value.index === "number" &&
+      Number.isInteger(value.index) &&
+      value.index >= 0
+    );
+  }
   return (
     value.kind === "breakpoint" &&
     (value.breakpoint === "tablet" || value.breakpoint === "mobile") &&
@@ -73,6 +86,8 @@ function targetForBreakpoint(breakpoint: AuthoringResponsiveBreakpoint): Authori
 
 function targetLabel(target: AuthoringStyleTarget): string {
   if (target.kind === "base") return "Desktop";
+  if (target.kind === "visual-state") return `State · ${target.state}`;
+  if (target.kind === "variant") return `Variant · ${target.index + 1}`;
   return target.breakpoint === "tablet" ? "Tablet" : "Mobile";
 }
 
@@ -81,6 +96,14 @@ function selectedValue(
   target: AuthoringStyleTarget,
 ): AuthoringStyleValueState {
   if (target.kind === "base") return control.base;
+  if (target.kind === "visual-state") {
+    return (
+      control.visualStates?.find(({ state }) => state === target.state)?.value ?? NO_STYLE_VALUE
+    );
+  }
+  if (target.kind === "variant") {
+    return control.variants?.find(({ index }) => index === target.index)?.value ?? NO_STYLE_VALUE;
+  }
   return (
     control.responsive.find(({ breakpoint }) => breakpoint.id === target.breakpoint)?.value ??
     NO_STYLE_VALUE
@@ -214,6 +237,20 @@ function ControlProvenance({
 }>) {
   const layers = [
     Object.freeze({ label: "Desktop", target: BASE_STYLE_TARGET, value: control.base }),
+    ...(control.visualStates ?? []).map(({ state, value }) =>
+      Object.freeze({
+        label: `State · ${state}`,
+        target: Object.freeze({ kind: "visual-state" as const, state }),
+        value,
+      }),
+    ),
+    ...(control.variants ?? []).map(({ index, name, value }) =>
+      Object.freeze({
+        label: `Variant · ${name}`,
+        target: Object.freeze({ kind: "variant" as const, index }),
+        value,
+      }),
+    ),
     ...control.responsive.map(({ breakpoint, value }) =>
       Object.freeze({ label: breakpoint.label, target: targetForBreakpoint(breakpoint), value }),
     ),
@@ -225,7 +262,15 @@ function ControlProvenance({
           className={
             layer.target.kind === target.kind &&
             (layer.target.kind === "base" ||
-              (target.kind === "breakpoint" && layer.target.breakpoint === target.breakpoint))
+              (layer.target.kind === "breakpoint" &&
+                target.kind === "breakpoint" &&
+                layer.target.breakpoint === target.breakpoint) ||
+              (target.kind === "visual-state" &&
+                layer.target.kind === "visual-state" &&
+                layer.target.state === target.state) ||
+              (target.kind === "variant" &&
+                layer.target.kind === "variant" &&
+                layer.target.index === target.index))
               ? styles.styleProvenanceActive
               : undefined
           }
@@ -1790,17 +1835,33 @@ function StyleControlField(props: Readonly<StyleControlFieldProps>) {
 function StyleLayerSelector({
   target,
   breakpoints,
+  variants,
+  visualStates,
   disabled,
   onTargetChange,
 }: Readonly<{
   readonly target: AuthoringStyleTarget;
   readonly breakpoints: readonly AuthoringResponsiveBreakpoint[];
+  readonly variants: readonly Readonly<{ readonly index: number; readonly name: string }>[];
+  readonly visualStates: readonly string[];
   readonly disabled: boolean;
   readonly onTargetChange: (target: AuthoringStyleTarget) => void;
 }>) {
   const groupId = useId();
   const layers = [
     Object.freeze({ label: "Desktop", target: BASE_STYLE_TARGET }),
+    ...visualStates.map((state) =>
+      Object.freeze({
+        label: `State · ${state}`,
+        target: Object.freeze({ kind: "visual-state" as const, state }),
+      }),
+    ),
+    ...variants.map(({ index, name }) =>
+      Object.freeze({
+        label: `Variant · ${name}`,
+        target: Object.freeze({ kind: "variant" as const, index }),
+      }),
+    ),
     ...breakpoints.map((breakpoint) =>
       Object.freeze({ label: breakpoint.label, target: targetForBreakpoint(breakpoint) }),
     ),
@@ -1813,7 +1874,15 @@ function StyleLayerSelector({
           const checked =
             layer.target.kind === target.kind &&
             (layer.target.kind === "base" ||
-              (target.kind === "breakpoint" && layer.target.breakpoint === target.breakpoint));
+              (layer.target.kind === "breakpoint" &&
+                target.kind === "breakpoint" &&
+                layer.target.breakpoint === target.breakpoint) ||
+              (target.kind === "visual-state" &&
+                layer.target.kind === "visual-state" &&
+                layer.target.state === target.state) ||
+              (target.kind === "variant" &&
+                layer.target.kind === "variant" &&
+                layer.target.index === target.index));
           return (
             <label data-selected={checked ? "true" : "false"} key={layer.label}>
               <input
@@ -1870,6 +1939,7 @@ export function StylePanel({
     model.status,
     ready ? model.selection.sourceNodeId : null,
     safeTarget?.kind,
+    safeTarget?.kind === "variant" ? safeTarget.index : null,
     safeTarget?.kind === "breakpoint" ? safeTarget.breakpoint : null,
   ]);
 
@@ -1918,6 +1988,10 @@ export function StylePanel({
         disabled={onTargetChange === undefined}
         onTargetChange={onTargetChange ?? (() => undefined)}
         target={safeTarget}
+        variants={
+          model.parts[0]?.controls[0]?.variants?.map(({ index, name }) => ({ index, name })) ?? []
+        }
+        visualStates={model.component.visualStates}
       />
       <div className={styles.stylePanelBody}>
         {model.parts.map((part) => (

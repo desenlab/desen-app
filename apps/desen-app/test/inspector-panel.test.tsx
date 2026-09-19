@@ -145,7 +145,7 @@ describe("Desen App nested and structured Inspector panel", () => {
     document.body.replaceChildren();
   });
 
-  it("keeps right-sidebar tab panels mounted while providing keyboard-accessible Inspector, Style, State, and Actions views", () => {
+  it("keeps right-sidebar tab panels mounted while providing keyboard-accessible Inspector, Style, Variants, State, and Actions views", () => {
     render(
       <InspectorPanel
         eventActionControls={<DraftProbe label="Action draft" />}
@@ -158,10 +158,17 @@ describe("Desen App nested and structured Inspector panel", () => {
     const inspector = screen.getByRole("complementary", { name: "Inspector" });
     const tabs = within(inspector).getAllByRole("tab");
     expect(within(inspector).getByRole("tablist", { name: "Inspector views" })).toBeTruthy();
-    expect(tabs.map((tab) => tab.textContent)).toEqual(["Inspector", "Style", "State", "Actions"]);
+    expect(tabs.map((tab) => tab.textContent)).toEqual([
+      "Inspector",
+      "Style",
+      "Variants",
+      "State",
+      "Actions",
+    ]);
 
     const inspectorTab = within(inspector).getByRole("tab", { name: "Inspector" });
     const styleTab = within(inspector).getByRole("tab", { name: "Style" });
+    const variantsTab = within(inspector).getByRole("tab", { name: "Variants" });
     const stateTab = within(inspector).getByRole("tab", { name: "State" });
     const actionsTab = within(inspector).getByRole("tab", { name: "Actions" });
     const inspectorPanel = document.getElementById(
@@ -173,6 +180,9 @@ describe("Desen App nested and structured Inspector panel", () => {
     const stylePanel = document.getElementById(
       styleTab.getAttribute("aria-controls") ?? "",
     ) as HTMLElement;
+    const variantsPanel = document.getElementById(
+      variantsTab.getAttribute("aria-controls") ?? "",
+    ) as HTMLElement;
     const actionsPanel = document.getElementById(
       actionsTab.getAttribute("aria-controls") ?? "",
     ) as HTMLElement;
@@ -180,6 +190,7 @@ describe("Desen App nested and structured Inspector panel", () => {
     for (const [tab, panel] of [
       [inspectorTab, inspectorPanel],
       [styleTab, stylePanel],
+      [variantsTab, variantsPanel],
       [stateTab, statePanel],
       [actionsTab, actionsPanel],
     ] as const) {
@@ -189,6 +200,7 @@ describe("Desen App nested and structured Inspector panel", () => {
     }
     expect(inspectorTab.getAttribute("aria-selected")).toBe("true");
     expect(stylePanel.hidden).toBe(true);
+    expect(variantsPanel.hidden).toBe(true);
     expect(statePanel.hidden).toBe(true);
     expect(actionsPanel.hidden).toBe(true);
 
@@ -199,6 +211,10 @@ describe("Desen App nested and structured Inspector panel", () => {
     expect(within(stylePanel).getByText("Select a layer for styles")).toBeTruthy();
 
     fireEvent.keyDown(styleTab, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(variantsTab);
+    expect(variantsTab.getAttribute("aria-selected")).toBe("true");
+    expect(variantsPanel.hidden).toBe(false);
+    fireEvent.keyDown(variantsTab, { key: "ArrowRight" });
     expect(document.activeElement).toBe(stateTab);
     expect(stateTab.getAttribute("aria-selected")).toBe("true");
     expect(statePanel.hidden).toBe(false);

@@ -53,7 +53,12 @@ import {
   AUTHORING_STYLE_PREVIEW_VIEWPORTS,
   createAuthoringStylePreviewHostPorts,
 } from "./authoring-style-preview-runtime.js";
-import { applyAuthoringStyleEdit, prepareAuthoringStyleModel } from "./authoring-styles.js";
+import {
+  applyAuthoringStyleEdit,
+  prepareAuthoringStyleModel,
+  prepareAuthoringStylePreviewDocument,
+} from "./authoring-styles.js";
+import { applyAuthoringVariantEdit, prepareAuthoringVariantModel } from "./authoring-variants.js";
 import {
   authenticateAuthoringPersistenceControllerProfile,
   createAuthoringPersistenceController,
@@ -168,6 +173,11 @@ import type { RuntimeHostPorts, RuntimeOperationPort, RuntimeTokenPort } from "@
 import type { AuthoringIntegrationBindingHandle } from "./authoring-integration.js";
 import type { AuthoringRunDestination } from "./authoring-run-navigation.js";
 import type { AuthoringStyleEdit, AuthoringStyleTarget } from "./authoring-styles.js";
+import type {
+  AuthoringVariantEdit,
+  AuthoringVariantEditResult,
+  AuthoringVariantModelResult,
+} from "./authoring-variants.js";
 import type { AuthoringStylePreviewViewportId } from "./authoring-style-preview-runtime.js";
 import type {
   AuthoringBehaviorLayer,
@@ -2592,7 +2602,11 @@ function SurfaceEditor({
   const [selection, setSelection] = useState<AuthoringComponentSelection | null>(null);
   const [styleTarget, setStyleTarget] = useState<AuthoringStyleTarget>(AUTHORING_STYLE_BASE_TARGET);
   const stylePreviewViewportId: AuthoringStylePreviewViewportId =
-    styleTarget.kind === "base" ? "desktop" : styleTarget.breakpoint;
+    styleTarget.kind === "base" ||
+    styleTarget.kind === "visual-state" ||
+    styleTarget.kind === "variant"
+      ? "desktop"
+      : styleTarget.breakpoint;
   const stylePreviewViewport = AUTHORING_STYLE_PREVIEW_VIEWPORTS[stylePreviewViewportId];
   const [directSelections, setDirectSelections] = useState<readonly AuthoringComponentSelection[]>(
     Object.freeze([]),
@@ -2820,6 +2834,13 @@ function SurfaceEditor({
         : Object.freeze({ status: "rejected" as const }),
     [preparedModel, route, selection, styleTokenOptions],
   );
+  const variantModel = useMemo<AuthoringVariantModelResult>(
+    () =>
+      preparedModel.ok
+        ? prepareAuthoringVariantModel(preparedModel.model, route, selection)
+        : Object.freeze({ status: "rejected" as const }),
+    [preparedModel, route, selection],
+  );
   const canvasFrame = useMemo(
     () => projectAuthoringCanvasFrame(document, previewSurfaceId, workspaceSnapshot.catalogs),
     [document, previewSurfaceId, workspaceSnapshot.catalogs],
@@ -2835,7 +2856,9 @@ function SurfaceEditor({
   const effectiveCanvasFrame =
     canvasFrame.status !== "ready"
       ? null
-      : styleTarget.kind === "base"
+      : styleTarget.kind === "base" ||
+          styleTarget.kind === "visual-state" ||
+          styleTarget.kind === "variant"
         ? (canvasPreviewFrame ?? canvasFrame.frame)
         : Object.freeze({
             height: stylePreviewViewport.height as number,
@@ -2843,7 +2866,7 @@ function SurfaceEditor({
           });
   const previewFrameIsResized =
     canvasFrame.status === "ready" &&
-    (styleTarget.kind !== "base" ||
+    (styleTarget.kind === "breakpoint" ||
       (canvasPreviewFrame !== null &&
         (canvasPreviewFrame.width !== canvasFrame.frame.width ||
           canvasPreviewFrame.height !== canvasFrame.frame.height)));
@@ -2964,18 +2987,36 @@ function SurfaceEditor({
       workspaceSnapshot.catalogPackages,
     ],
   );
-  const effectivePreview =
+  const baseEffectivePreview =
     activeScenarioValue === AUTHORING_SOURCE_SCENARIO_VALUE
       ? preview
       : scenarioPreview?.ok === true
         ? scenarioPreview.preview
         : null;
-  const effectivePreviewDocument =
+  const baseEffectivePreviewDocument =
     activeScenarioValue === AUTHORING_SOURCE_SCENARIO_VALUE
       ? document
       : scenarioPreview?.ok === true
         ? scenarioPreview.scenarioDocument
         : null;
+  const effectivePreviewDocument =
+    baseEffectivePreviewDocument === null
+      ? null
+      : prepareAuthoringStylePreviewDocument(
+          baseEffectivePreviewDocument,
+          route,
+          selection,
+          styleTarget,
+        );
+  const effectivePreview =
+    effectivePreviewDocument === null
+      ? null
+      : effectivePreviewDocument === baseEffectivePreviewDocument
+        ? baseEffectivePreview
+        : prepareAuthoringPreviewBundle(
+            effectivePreviewDocument,
+            workspaceSnapshot.catalogPackages,
+          );
   const surfacePreview = useMemo(
     () =>
       effectivePreviewDocument === null
@@ -3078,7 +3119,7 @@ function SurfaceEditor({
             runDestination?.params,
             resolveStyleToken,
             stylePreviewViewportId,
-            styleTarget.kind === "base" ? (effectiveCanvasFrame ?? undefined) : undefined,
+            styleTarget.kind === "breakpoint" ? undefined : (effectiveCanvasFrame ?? undefined),
           ),
     [
       authoringProjectRecord,
@@ -3751,6 +3792,32 @@ function SurfaceEditor({
     }
     if (!commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview })))
       return Object.freeze({ ok: false as const, reason: "edit-rejected" as const });
+    return result;
+  }
+
+  function editSelectedVariant(edit: AuthoringVariantEdit): AuthoringVariantEditResult {
+    if (!isDesignMode()) return Object.freeze({ ok: false, reason: "edit-rejected" as const });
+    if (selection === null)
+      return Object.freeze({ ok: false, reason: "selection-invalid" as const });
+    const result = applyAuthoringVariantEdit(
+      document,
+      workspaceSnapshot.catalogs,
+      route,
+      selection,
+      edit,
+    );
+    captureEditDiagnostics(result);
+    if (!result.ok) return result;
+    const nextPreview = prepareAuthoringPreviewBundle(
+      result.document,
+      workspaceSnapshot.catalogPackages,
+    );
+    if (!nextPreview.ok) return Object.freeze({ ok: false, reason: "source-invalid" as const });
+    if (
+      !commitAuthoringSession(Object.freeze({ document: result.document, preview: nextPreview }))
+    ) {
+      return Object.freeze({ ok: false, reason: "edit-rejected" as const });
+    }
     return result;
   }
 
@@ -4548,7 +4615,11 @@ function SurfaceEditor({
               updateCanvasPresentation(() => createCanvasSurfacePresentation());
             }}
             onResize={(delta) => {
-              if (!isDesignMode() || canvasFrame.status !== "ready" || styleTarget.kind !== "base")
+              if (
+                !isDesignMode() ||
+                canvasFrame.status !== "ready" ||
+                styleTarget.kind === "breakpoint"
+              )
                 return;
               updateCanvasPresentation((current) =>
                 Object.freeze({
@@ -4676,6 +4747,7 @@ function SurfaceEditor({
         onEdit={editSelectedProperty}
         onStyleEdit={editSelectedStyle}
         onStyleTargetChange={setStyleTarget}
+        onVariantEdit={editSelectedVariant}
         previewControls={
           <>
             <ScenarioPreviewControl
@@ -4696,6 +4768,7 @@ function SurfaceEditor({
         styleModel={styleModel}
         styleTarget={styleTarget}
         styleTokenOptions={styleTokenOptions}
+        variantModel={variantModel}
       />
 
       {mode === "run" ? (

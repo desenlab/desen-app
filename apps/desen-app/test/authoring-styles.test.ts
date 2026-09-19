@@ -4,7 +4,11 @@ import { canonicalizeJson } from "@desen/protocol";
 import { describe, expect, it } from "vitest";
 
 import { prepareCatalogAuthoringModel } from "../src/authoring-data.js";
-import { applyAuthoringStyleEdit, prepareAuthoringStyleModel } from "../src/authoring-styles.js";
+import {
+  applyAuthoringStyleEdit,
+  prepareAuthoringStyleModel,
+  prepareAuthoringStylePreviewDocument,
+} from "../src/authoring-styles.js";
 import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
 
 import type { DesenEditorDocument } from "@desen/editor-core";
@@ -351,6 +355,86 @@ describe("Desen App Catalog-authorized style authoring", () => {
       }),
     );
     expect(findNode(reset).style?.base?.root?.color).toBeUndefined();
+  });
+
+  it("authors only declared visual-state leaves and rejects unknown states", () => {
+    const fixture = createFixture([], { hover: { root: { color: "#111111" } } });
+    const model = requireStyleModel(
+      prepareAuthoringStyleModel(fixture.model, ROUTE, fixture.selection, RESOLVED_TOKENS),
+    );
+    const color = model.parts
+      .find(({ name }) => name === "root")
+      ?.controls.find(({ property }) => property === "color");
+    expect(color?.visualStates?.map(({ state }) => state)).toEqual(["hover", "focus"]);
+    expect(color?.visualStates?.[0]?.value).toMatchObject({ kind: "literal", value: "#111111" });
+
+    const changed = requireEdit(
+      apply(fixture, fixture.document, {
+        kind: "set-literal",
+        target: { kind: "visual-state", state: "hover" },
+        part: "root",
+        property: "color",
+        value: "#abcdef",
+      }),
+    );
+    expect(findNode(changed).style?.hover?.root?.color).toBe("#abcdef");
+    expect(
+      apply(fixture, fixture.document, {
+        kind: "set-literal",
+        target: { kind: "visual-state", state: "not-declared" },
+        part: "root",
+        property: "color",
+        value: "#abcdef",
+      }),
+    ).toMatchObject({ ok: false, reason: "control-unavailable" });
+    const preview = prepareAuthoringStylePreviewDocument(
+      fixture.document,
+      ROUTE,
+      fixture.selection,
+      { kind: "visual-state", state: "hover" },
+    );
+    expect(preview).not.toBe(fixture.document);
+    expect(findNode(preview).style?.base?.root?.color).toBe("#111111");
+    expect(findNode(fixture.document).style?.base).toBeUndefined();
+  });
+
+  it("edits a named variant style without permitting an unmarked protocol variant", () => {
+    const fixture = createFixture([
+      {
+        when: { op: "lte", args: [{ $ref: "env.viewport.width" }, 1024] },
+        style: { base: { root: { color: "#111111" } } },
+        extensions: {
+          "run.desen.app/t16-variant": {
+            version: 1,
+            name: "Compact",
+            axis: { name: "mode", value: "compact", reference: "env.viewport.width" },
+          },
+        },
+      },
+      {
+        when: { op: "eq", args: [true, true] },
+        style: { base: { root: { color: "#222222" } } },
+      },
+    ]);
+    const changed = requireEdit(
+      apply(fixture, fixture.document, {
+        kind: "set-literal",
+        target: { kind: "variant", index: 0 },
+        part: "root",
+        property: "color",
+        value: "#abcdef",
+      }),
+    );
+    expect(findNode(changed).variants?.[0]?.style?.base?.root?.color).toBe("#abcdef");
+    expect(
+      apply(fixture, fixture.document, {
+        kind: "set-literal",
+        target: { kind: "variant", index: 1 },
+        part: "root",
+        property: "color",
+        value: "#abcdef",
+      }),
+    ).toMatchObject({ ok: false, reason: "edit-rejected" });
   });
 
   it("accepts only explicit compatible resolved tokens and stores only their token reference", () => {
