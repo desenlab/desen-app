@@ -2256,6 +2256,17 @@ function createBoundaryOwnershipDelta(rawBoundary) {
     (trackedPath) => !M10A_T16_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
   );
   if (
+    !isDeepStrictEqual(
+      calculateAffectedWorkloadOwnershipReview(successorPaths),
+      M10A_T15_SUCCESSOR_OWNERSHIP_REVIEW,
+    )
+  ) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "Removing the exact M10A-T16 append must reproduce the reviewed T15 successor.",
+    );
+  }
+  if (
     M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 45 ||
     new Set(M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 45 ||
     M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS.some(
