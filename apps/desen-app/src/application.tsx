@@ -54,11 +54,12 @@ import {
   createAuthoringStylePreviewHostPorts,
 } from "./authoring-style-preview-runtime.js";
 import {
+  applyAuthoringVariantEdit,
   applyAuthoringStyleEdit,
   prepareAuthoringStyleModel,
   prepareAuthoringStylePreviewDocument,
+  prepareAuthoringVariantModel,
 } from "./authoring-styles.js";
-import { applyAuthoringVariantEdit, prepareAuthoringVariantModel } from "./authoring-variants.js";
 import {
   authenticateAuthoringPersistenceControllerProfile,
   createAuthoringPersistenceController,
@@ -172,12 +173,13 @@ import type {
 import type { RuntimeHostPorts, RuntimeOperationPort, RuntimeTokenPort } from "@desen/runtime-core";
 import type { AuthoringIntegrationBindingHandle } from "./authoring-integration.js";
 import type { AuthoringRunDestination } from "./authoring-run-navigation.js";
-import type { AuthoringStyleEdit, AuthoringStyleTarget } from "./authoring-styles.js";
 import type {
+  AuthoringStyleEdit,
+  AuthoringStyleTarget,
   AuthoringVariantEdit,
   AuthoringVariantEditResult,
   AuthoringVariantModelResult,
-} from "./authoring-variants.js";
+} from "./authoring-styles.js";
 import type { AuthoringStylePreviewViewportId } from "./authoring-style-preview-runtime.js";
 import type {
   AuthoringBehaviorLayer,

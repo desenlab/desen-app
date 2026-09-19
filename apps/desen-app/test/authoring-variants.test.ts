@@ -6,7 +6,7 @@ import { prepareCatalogAuthoringModel } from "../src/authoring-data.js";
 import {
   applyAuthoringVariantEdit,
   prepareAuthoringVariantModel,
-} from "../src/authoring-variants.js";
+} from "../src/authoring-styles.js";
 import { createAuthoringComponentSelection } from "../src/authoring-selection.js";
 
 const CATALOG_ID = "run.desen.test.authoring-variants";
