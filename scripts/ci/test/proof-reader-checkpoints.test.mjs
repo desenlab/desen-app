@@ -192,9 +192,9 @@ const M10A_T14_T13_PACKAGE_SUCCESSOR_RESEALED_READER_INDEXES = Object.freeze([14
 // Sequence 137 replaces T14's declarative proof with an executed fail-closed verifier and
 // reissues only the published-host compatibility pair whose exact source projection changed.
 const M10A_T14_CORRECTIVE_RESEALED_READER_INDEXES = Object.freeze([116, 117, 150, 151]);
-// Sequence 138 advances only the M10-T06 public-matrix reader after its final T14 compiled
-// successor receipts were authenticated by the hosted Browser E2E verifier.
-const M10A_T14_PUBLIC_MATRIX_CORRECTIVE_RESEALED_READER_INDEXES = Object.freeze([118]);
+// Sequence 138 advances the two historical readers that authenticate the final T14 compiled
+// package and public-matrix successor receipts.
+const M10A_T14_PUBLIC_MATRIX_CORRECTIVE_RESEALED_READER_INDEXES = Object.freeze([56, 118]);
 // Sequence 129 reissues only the published-host proof library after the T14 graph successor
 // authority was resealed to the current Vite graph and backing snapshot.
 const M10A_T14_PUBLISHED_HOST_GRAPH_RESEALED_READER_INDEXES = Object.freeze([116]);
@@ -10077,7 +10077,7 @@ test("sequence one hundred thirty-seven corrects only the T14 artifact and exact
   assert.equal(frozen.checkpointHeadSha256, baselineManifest.headSha256);
 });
 
-test("sequence one hundred thirty-eight reseals only the final T14 public matrix reader", async () => {
+test("sequence one hundred thirty-eight reseals the final T14 compiled readers", async () => {
   const previous = baselineManifest.checkpoints[136];
   const current = baselineManifest.checkpoints[137];
   const identity = ({ task, role, path: readerPath }) => ({ task, role, path: readerPath });
@@ -10095,6 +10095,13 @@ test("sequence one hundred thirty-eight reseals only the final T14 public matrix
     ),
     M10A_T14_PUBLIC_MATRIX_CORRECTIVE_RESEALED_READER_INDEXES,
   );
+  assert.deepEqual(current.readers[56], {
+    task: "M08-T04",
+    role: "proof-library",
+    path: "scripts/lib/editor-core-content-edits-proof.mjs",
+    bytes: 111379,
+    sha256: "814b103c496a196a87613258d11f709c8c2c8bf7018d9484e9056230d5581d61",
+  });
   assert.deepEqual(current.readers[118], {
     task: "M10-T06",
     role: "proof-library",
@@ -10108,7 +10115,7 @@ test("sequence one hundred thirty-eight reseals only the final T14 public matrix
   );
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "180b5089b6b69636d7a7f2721b5f9ba7201c282ba7c4331fcfa1114201cf0b9c",
+    "7617c02811481173871b480a74fb20c05898d3d058a555bb746d9be2cf3f87d3",
   );
   for (const [index, reader] of current.readers.entries())
     await assertHistoricalReaderMatchesCurrentWorkspace(reader, index);

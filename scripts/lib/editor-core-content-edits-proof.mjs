@@ -140,20 +140,20 @@ const M10A_T14_HISTORICAL_COMPATIBILITY = Object.freeze({
 });
 const M10A_T14_HISTORY_DIST_RECEIPTS = Object.freeze({
   "packages/editor-core/dist/history.d.ts": Object.freeze({
-    bytes: 4_632,
-    sha256: "ec34216c26d47e7ac855da13a2e02da2b3102b7bd37077c7412086c4bc03146c",
+    bytes: 4_982,
+    sha256: "3ed79f9da411f075acdfa1b62d5b8b80da117f2ed653099f9dd5f0cb5336fc6b",
   }),
   "packages/editor-core/dist/history.d.ts.map": Object.freeze({
-    bytes: 2_990,
-    sha256: "2911cd927a5f8b739451cb3c82298dfdc45eb8ffa3ff20ae744403afa053847e",
+    bytes: 3_344,
+    sha256: "0d991af0606f06cf9e0fd0877d5af1707198e7dee83cab7c3343bf4e48034515",
   }),
   "packages/editor-core/dist/history.js": Object.freeze({
-    bytes: 13_735,
-    sha256: "b528b204ef9fe172aca09f03cefd1a92c736cd62652e2cd95089d6aca7ec3074",
+    bytes: 45_873,
+    sha256: "bc062e600061d0673ec14e202b0bdd20ce0db730b66ac309acea5f76a763f2a7",
   }),
   "packages/editor-core/dist/history.js.map": Object.freeze({
-    bytes: 12_762,
-    sha256: "1db4886bddbe130f3c3990604d6527f3c6ece7b95aeb82edf37990d0726fbd4b",
+    bytes: 42_624,
+    sha256: "e8200869135959493e5760478a4aa5ae98b5e06587fb8b1fc0788fcb1941461f",
   }),
 });
 
