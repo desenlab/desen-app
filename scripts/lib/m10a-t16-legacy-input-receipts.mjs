@@ -2,6 +2,47 @@
 // They are historical data only; every application is fenced by both current and predecessor receipts.
 export const M10A_T16_LEGACY_INPUT_SUCCESSORS = Object.freeze([
   {
+    path: "apps/desen-app/test/authoring-styles.test.ts",
+    current: {
+      bytes: 25117,
+      sha256: "f842d5d8c1fc02a46a636ce46fa492174ddf0b9e1bd8f2e2226732f6ccac98f9",
+    },
+    predecessor: {
+      bytes: 22206,
+      sha256: "0aea845ed9ecf4aa3cb58187e5bca74ab74c6600292c1868af16f83aa388b3c3",
+    },
+    inverseHunks: [
+      {
+        start: 7,
+        remove: 5,
+        restore: [
+          'import { applyAuthoringStyleEdit, prepareAuthoringStyleModel } from "../src/authoring-styles.js";',
+        ],
+      },
+      { start: 360, remove: 80, restore: [] },
+    ],
+  },
+  {
+    path: "scripts/lib/m10a-t15-proof.mjs",
+    current: {
+      bytes: 13668,
+      sha256: "720c5f7d6ca95fd34f485d79d6b9295c177e3650d2fb9ad583c3c3429187c623",
+    },
+    predecessor: {
+      bytes: 12250,
+      sha256: "cc323d418ddd435a5a3eb2b6b015ac7838ea5fbc825e5c323b468c4d2a743a56",
+    },
+    inverseHunks: [
+      { start: 14, remove: 1, restore: [] },
+      { start: 116, remove: 30, restore: [] },
+      {
+        start: 216,
+        remove: 1,
+        restore: ["    const bytes = await regular(relative);"],
+      },
+    ],
+  },
+  {
     path: "apps/desen-app/src/application.tsx",
     current: {
       bytes: 199207,
