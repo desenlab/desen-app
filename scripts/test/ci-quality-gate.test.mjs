@@ -1440,13 +1440,10 @@ test("inventory validation pins promoted CI entry points and their focused contr
   }
 });
 
-test("non-authoritative local preflight package wiring remains exact", async () => {
+test("non-authoritative local preflight preserves the frozen package-script authority", async () => {
   const packageJson = JSON.parse(await readFile(resolve(WORKSPACE_ROOT, "package.json"), "utf8"));
-  assert.equal(packageJson.scripts.preflight, "node scripts/ci/local-preflight.mjs");
-  assert.equal(
-    packageJson.scripts["test:local-preflight"],
-    "node --test scripts/ci/test/local-preflight.test.mjs",
-  );
+  assert.equal(packageJson.scripts.preflight, undefined);
+  assert.equal(packageJson.scripts["test:local-preflight"], undefined);
   assert.equal(
     packageJson.scripts["ci:required"],
     "node scripts/ci/run-required-affected-quality-gate.mjs",

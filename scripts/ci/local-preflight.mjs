@@ -1435,7 +1435,7 @@ async function main() {
     const options = parseLocalPreflightArguments(process.argv.slice(2));
     if (options.help) {
       process.stdout.write(
-        "Usage: pnpm preflight [--base <revision>] [--dry-run]\n" +
+        "Usage: node scripts/ci/local-preflight.mjs [--base <revision>] [--dry-run]\n" +
           "Prints a non-authoritative plan and runs focused checks only for reviewed tracked source edits.\n",
       );
       return;

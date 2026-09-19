@@ -40,8 +40,8 @@ Run the fail-closed local planner for quick, non-authoritative feedback between 
 states `authority: "NONE"` and never replaces hosted evidence:
 
 ```bash
-pnpm preflight
-pnpm preflight --dry-run
+node scripts/ci/local-preflight.mjs
+node scripts/ci/local-preflight.mjs --dry-run
 ```
 
 Only same-mode tracked source edits under `apps/*/{src,test,test-d,dev}` or
