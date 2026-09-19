@@ -83,9 +83,9 @@ dependency boundary audit reports no violation across 879 modules and 3,787 depe
 
 ## Next authority
 
-**M10A-T16 — variants and visual states — is the selected task and `IN_PROGRESS`; M10A-T19 is
+**M10A-T16 — variants and visual states — is the selected next task and `NOT_STARTED`; M10A-T19 is
 also dependency-ready but unselected and `NOT_STARTED`.** The [product plan](docs/plan/M10A-IMPLEMENTATION-PLAN.md), [task contract](docs/plan/M10A-TASK-CONTRACTS.md#m10a-t16--variants-and-visual-states), and
-completed [T15 report](docs/proof/M10A-T15.md) define this bounded boundary; the [T16 working proof](docs/proof/M10A-T16.md) records local implementation evidence. Hosted exact-head and fresh-`main` closure remain pending. T15 does not authorize
+completed [T15 report](docs/proof/M10A-T15.md) define the next bounded boundary. T15 does not authorize
 Runtime activation, Publisher authority, Core/protocol changes, G10A, or M11.
 
 G10A must pass before the M11 Map/Sortable branches. M10A and M11 preserve the complete frozen
