@@ -3799,5 +3799,18 @@ keeps ordinary local authoring independent of a network request. The artifact is
 `artifacts/m10a-t13.json`; its boundary does not change the frozen protocol, Runtime Core, Publisher,
 release activation, G10A or M11 authorities.
 
-PR #122's exact-head hosted and fresh-`main` closure are recorded in the task report. M10A-T14 is
-the next dependency-ready task.
+PR #122's exact-head hosted and fresh-`main` closure are recorded in the task report.
+
+## M10A-T14 history and identity-safe reuse operations (`DONE`)
+
+The [M10A-T14 report](M10A-T14.md) records bounded immutable undo/redo history, same-project
+clipboard continuity, Source-order multi-selection, and atomic duplicate/copy/paste through current
+Catalog admission and generation-fenced persistence. Its two-pass remapper assigns fresh node,
+behavior, state, resource, operation-alias and selected command-target identities before rewriting
+closed-schema references; incomplete or hostile transfers reject without a partial document. The
+3,670-byte `artifacts/m10a-t14.json` artifact is
+`sha256:fe7721562647b4ba4b9ab1275eec3fa554f9fa664d614745e6b5b3d70c75ef54`.
+
+PR #127's exact-head hosted and fresh-`main` closure are recorded in the task report. No P-claim or
+proof-gate status changes. T15 is selected next; T19 is also dependency-ready but unselected. T14
+adds no OS clipboard, masters/instances, Runtime, Publisher, Core/protocol, G10A, or M11 authority.

@@ -1,8 +1,8 @@
 # M10A — Design-first product foundation
 
-Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T13 are `DONE`, including
-T13's [exact-head hosted and fresh-`main` closure](../proof/M10A-T13.md). M10A-T14 is dependency-ready
-and `NOT_STARTED`; canonical statuses and dependencies are in [TASKS.md](TASKS.md).
+Decision date: 2026-09-10. Planning is complete; M10A-T01 through M10A-T14 are `DONE`, including
+T14's [exact-head hosted and fresh-`main` closure](../proof/M10A-T14.md). T15 is selected next and
+`NOT_STARTED`; T19 is also dependency-ready but unselected. Canonical statuses are in [TASKS.md](TASKS.md).
 
 ## Product promise
 
@@ -19,9 +19,9 @@ This is an investment decision, not a claim of validated demand, conversion, or 
 ## Delivery sequence and accounting
 
 The sequence is G10 → M10A → G10A → M11 → G11 → M12 → G12. M10A adds 28 implementation tasks
-and one gate; the total becomes 176 tasks and 14 gates. The 134 completed tasks and 11 completed
-gates remain completed. T01 through T13 are the thirteen completed M10A tasks; T14 is the next
-dependency-ready task and the other 16 remain `NOT_STARTED`. Nothing is renumbered, erased, or counted as implemented by this plan.
+and one gate; the total becomes 176 tasks and 14 gates. The 135 completed tasks and 11 completed
+gates remain completed. T01 through T14 are the fourteen completed M10A tasks; all 14 remaining
+tasks are `NOT_STARTED`. T15 is selected next while T19 is also dependency-ready but unselected. Nothing is renumbered, erased, or counted as implemented by this plan.
 At most one implementation task may be active at a time; task dependencies do not grant parallel
 implementation authority. M11 retains its two explicitly permitted capability branches after G10A.
 Dependencies, not numeric order, select the next eligible task: T26 acceptance precedes T25's
@@ -245,6 +245,13 @@ G10A, or M11; T13 is closed as a separate safe-local-asset boundary.
 bounded raster/icon/font admission contract, content-addressed local storage, bundled DESEN Neutral
 font, inert project metadata, and explicit missing/corrupt diagnostics. Exact-head hosted and
 fresh-`main` closure passed; T13 does not authorize Runtime, Publisher, Core/protocol, G10A, or M11.
+
+**M10A-T14 — History and identity-safe reuse operations** is `DONE`. Its
+[task report](../proof/M10A-T14.md) records bounded immutable undo/redo history, Source-order
+multi-selection, same-project clipboard continuity, atomic duplicate/copy/paste, and two-pass
+identity/reference/dependency remapping behind current admission and generation-fenced persistence.
+Exact-head hosted and fresh-`main` closure passed; T14 adds no Runtime, Publisher, Core/protocol,
+G10A, or M11 authority and grants no masters/instances or OS-clipboard authority.
 
 Every task uses the [task contracts](M10A-TASK-CONTRACTS.md), the CI-02 baseline, focused positive
 and negative tests, a fresh exact-head hosted Quality gate, and task-owned evidence before DONE.
