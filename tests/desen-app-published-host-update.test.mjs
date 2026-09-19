@@ -959,7 +959,7 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], async () => {
   assert.equal(current.runtimeResolution.app.moduleCount, 690);
   assert.equal(current.runtimeResolution.app.staticEdges, 2_974);
   assert.equal(current.runtimeResolution.app.dynamicEdges, 0);
-  assert.equal(current.runtimeResolution.appOutput.outputs[0].bytes, 3_580_707);
+  assert.equal(current.runtimeResolution.appOutput.outputs[0].bytes, 3_593_346);
   const t08Artifact = JSON.parse(
     await readFile(path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json")),
   );

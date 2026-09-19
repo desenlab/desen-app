@@ -193,6 +193,41 @@ and adapter-defined durability. M08-T09 supplies continuous semantic diagnostics
 authenticates the complete command, persistence, validation, and platform-neutrality boundary with
 independent determinism evidence.
 
+## History and identity-safe reuse
+
+`createDesenEditorHistory(document, limit)` and `recordDesenEditorHistory(history, document)`
+independently re-admit their document inputs instead of retaining caller-owned objects. History is
+bounded to 1–512 entries, defaults to 100, stores recursively immutable snapshots, clears redo after
+a new edit, and reports an invalid record without changing the previous authority. Every transition
+accepts only a history authority created by this module; forged mutable snapshots and out-of-range
+limits fail closed. Undo and redo move exact authored Source snapshots; they do not execute,
+normalize, publish, or activate them.
+
+`captureDesenEditorClipboard` creates an App-owned in-memory payload for at most 256 selected roots
+and 8 MiB of canonical data. It requires one unambiguous selected-surface identity namespace and
+rejects roots, duplicate selections, ancestor-plus-descendant selections, accessors, throwing
+reflection traps, and foreign payload copies. `pasteDesenEditorClipboard` accepts only the exact
+provenance-bearing payload plus an inert own-data command. Capture, placement lookup and paste each
+re-admit their Source input so hostile runtime-cast document wrappers cannot escape as exceptions.
+
+Paste allocates every copied node and behavior identity before rewriting references, including
+separately selected roots. Referenced surface state and resource definitions are copied transitively
+under normally suffixed `-copy` identities; a deterministic compact, reference-safe identity is
+used only when an admitted boundary-length action path leaves no suffix budget. Selected
+`operation.invoke` aliases receive fresh lifecycle identities. The rewriter changes only
+schema-owned ValueSpec references, state/resource actions, operation aliases, nested settlement
+actions and `component.command.target` fields.
+Opaque state schemas/initial values and every `extensions` payload remain exact. A missing
+dependency, component command target outside the captured identity closure, operation reference
+whose declaration is outside the selection, or conflicting alias ownership rejects the whole
+transfer. IDs stay within the protocol's 128-character local-ID
+ceiling; remapped state roots also honor the remaining budget of boundary-length action paths.
+Every allocation/insertion failure returns no partial document. The App performs
+current Catalog validation and preview preparation before committing a pasted Source, so a
+structurally admissible but foreign capability cannot bypass the existing save or publication
+boundaries. OS clipboard interchange, masters/instances, Runtime behavior, and Publisher authority
+are outside this API.
+
 ## Persistence port
 
 `createDesenEditorPersistencePort(adapter)` captures exactly two receiver-independent callbacks:

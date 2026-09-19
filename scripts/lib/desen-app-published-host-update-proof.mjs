@@ -1040,13 +1040,67 @@ const M10A_T12_APP_SOURCE_SUCCESSORS = Object.freeze([
 // history/reuse implementation back to the frozen T12 source.
 const M10A_T14_APP_SOURCE_SUCCESSOR = Object.freeze({
   path: "apps/desen-app/src/application.tsx",
-  bytes: 183_780,
-  sha256: "sha256:341e9075946cbedcd233579b87db71ccab700675ce89170fb16be6767120b818",
+  bytes: 184_768,
+  sha256: "sha256:4fcc90c0c7af787cefd2a02af795789d9eb89aee139366ba9e4b328e153f7e58",
   predecessor: Object.freeze({
     bytes: 174_486,
     sha256: "sha256:5074eea22b007f680d2f6b14e3e66ab2fb4ebc146d33077e5bc623c77ffda151",
   }),
   inverseChanges: Object.freeze([
+    Object.freeze([
+      "function SurfaceEditor({\n  authoringClipboard,\n  authoringProjectRecord,\n",
+      "function SurfaceEditor({\n  authoringProjectRecord,\n",
+    ]),
+    Object.freeze([
+      "  /** Project-scoped clipboard authority retained while admitted surfaces remount. */\n  readonly authoringClipboard: { current: DesenEditorClipboardPayload | null };\n",
+      "",
+    ]),
+    Object.freeze([
+      '  const [historyNotice, setHistoryNotice] = useState("");\n',
+      '  const authoringClipboard = useRef<DesenEditorClipboardPayload | null>(null);\n  const [historyNotice, setHistoryNotice] = useState("");\n',
+    ]),
+    Object.freeze([
+      "      selectedSourceNodeIds.length > 0\n        ? selectedSourceNodeIds\n",
+      "      directSelections.length > 0\n        ? directSelections.map(({ sourceNodeId }) => sourceNodeId)\n",
+    ]),
+    Object.freeze([
+      "  const clipboardAuthorityId = `${workspaceProfileMountIdentity(workspaceProfile)}:${project.id}`;\n  const clipboardScope = useRef<{\n    authorityId: string;\n    store: { current: DesenEditorClipboardPayload | null };\n  }>({ authorityId: clipboardAuthorityId, store: { current: null } });\n  if (clipboardScope.current.authorityId !== clipboardAuthorityId) {\n    clipboardScope.current = { authorityId: clipboardAuthorityId, store: { current: null } };\n  }\n\n",
+      "",
+    ]),
+    Object.freeze(["      authoringClipboard={clipboardScope.current.store}\n", ""]),
+    Object.freeze([
+      '    let nextHistory: DesenEditorHistory;\n    const currentHistory = authoringHistory.current;\n    if (resetsHistory || currentHistory === null) {\n      const resetHistory = createDesenEditorHistory(nextSession.document);\n      if (resetHistory === undefined)\n        throw new TypeError("The bounded authoring history could not be reset.");\n      nextHistory = resetHistory;\n    } else {\n      const recorded = recordDesenEditorHistory(currentHistory, nextSession.document);\n      if (!recorded.ok)\n        throw new TypeError("The bounded authoring history rejected an admitted document.");\n      nextHistory = recorded.history;\n    }\n    const canonicalDocument = canonicalizeJson(nextSession.document);\n    inMemoryCurrentCanonical.current = canonicalDocument;\n    if (establishesBaseline) inMemoryBaselineCanonical.current = canonicalDocument;\n    authoringHistory.current = nextHistory;\n',
+      '    const canonicalDocument = canonicalizeJson(nextSession.document);\n    inMemoryCurrentCanonical.current = canonicalDocument;\n    if (establishesBaseline) inMemoryBaselineCanonical.current = canonicalDocument;\n    const currentHistory = authoringHistory.current;\n    if (resetsHistory || currentHistory === null) {\n      const nextHistory = createDesenEditorHistory(nextSession.document);\n      if (nextHistory === undefined)\n        throw new TypeError("The bounded authoring history could not be reset.");\n      authoringHistory.current = nextHistory;\n    } else {\n      authoringHistory.current = recordDesenEditorHistory(currentHistory, nextSession.document);\n    }\n',
+    ]),
+    Object.freeze([
+      "  function copySelectedLayers(): DesenEditorClipboardPayload | null {\n",
+      "  function copySelectedLayers(): void {\n",
+    ]),
+    Object.freeze([
+      "    if (!isDesignMode()) return null;\n    const nodeIds = selectedReuseNodeIds();\n",
+      "    if (!isDesignMode()) return;\n    const nodeIds = selectedReuseNodeIds();\n",
+    ]),
+    Object.freeze([
+      '      setHistoryNotice("Select at least one layer before copying.");\n      return null;\n',
+      '      setHistoryNotice("Select at least one layer before copying.");\n      return;\n',
+    ]),
+    Object.freeze([
+      '      setHistoryNotice("Copy was rejected safely: the selection is no longer current.");\n      return null;\n',
+      '      setHistoryNotice("Copy was rejected safely: the selection is no longer current.");\n      return;\n',
+    ]),
+    Object.freeze(["    return result.payload;\n", ""]),
+    Object.freeze([
+      "  function pasteClipboardPayload(payload: DesenEditorClipboardPayload | null): void {\n    if (!isDesignMode()) return;\n    const target = reuseTarget();\n",
+      "  function pasteSelectedLayers(): void {\n    if (!isDesignMode()) return;\n    const payload = authoringClipboard.current;\n    const target = reuseTarget();\n",
+    ]),
+    Object.freeze([
+      "  function pasteSelectedLayers(): void {\n    pasteClipboardPayload(authoringClipboard.current);\n  }\n\n",
+      "",
+    ]),
+    Object.freeze([
+      "  function duplicateSelectedLayers(): void {\n    const payload = copySelectedLayers();\n    if (payload === null) return;\n    pasteClipboardPayload(payload);\n  }\n",
+      "  function duplicateSelectedLayers(): void {\n    copySelectedLayers();\n    if (authoringClipboard.current === null) return;\n    pasteSelectedLayers();\n  }\n",
+    ]),
     Object.freeze([
       'import {\n  captureDesenEditorClipboard,\n  createDesenEditorContinuousValidator,\n  createDesenEditorHistory,\n  pasteDesenEditorClipboard,\n  readDesenEditorNodePlacement,\n  recordDesenEditorHistory,\n  redoDesenEditorHistory,\n  undoDesenEditorHistory,\n} from "@desen/editor-core";\n',
       'import { createDesenEditorContinuousValidator } from "@desen/editor-core";\n',
@@ -1268,17 +1322,17 @@ const M10A_T14_APP_GRAPH_SUCCESSOR = Object.freeze({
     dynamicEdges: 0,
     unresolvedEdges: 0,
     reachableProductionSourceFiles: 64,
-    graphSha256: "sha256:ac5f9c5196356f51008d5644e0c802fad7399c38ba35e210b0f6073ce89eb86c",
+    graphSha256: "sha256:81caef9057f448051a88849097312a97840c3356c3926441729f18c575f27db0",
   }),
   appOutput: Object.freeze({
     files: 3,
     outputs: Object.freeze([
       Object.freeze({
-        fileName: "assets/index-DmzIefux.js",
+        fileName: "assets/index-9rpgAhBO.js",
         type: "chunk",
         isEntry: true,
-        bytes: 3_580_707,
-        sha256: "sha256:eeab8ab1d13b159b0069d2087aaad92e42a1a01fe4a0abcab8ff4b944c1058f3",
+        bytes: 3_593_346,
+        sha256: "sha256:89ed3ee0c1cab002b95aee7c827303d6d613848579b32411395098811e422b9a",
       }),
       Object.freeze({
         fileName: "assets/index-YPwZ0Ugb.css",
@@ -1292,13 +1346,13 @@ const M10A_T14_APP_GRAPH_SUCCESSOR = Object.freeze({
         type: "asset",
         isEntry: null,
         bytes: 511,
-        sha256: "sha256:f59963659a5273e0cb1c1245f2ef2f9adb7ac03239450488fc3f2201e341f6eb",
+        sha256: "sha256:569179098917de7bca00adfd0adbda86200c87d66843896437f1e4de8278f159",
       }),
     ]),
-    identitySha256: "sha256:edba2ec1e444adc51585fff3880cc71d79880e9d93e29870e1348263c2090f6f",
+    identitySha256: "sha256:f24bed7af89935c994a0296791704a905c4f4bb3c05ec752b0d152bafccaac9d",
   }),
   backingFiles: 707,
-  backingSnapshotSha256: "sha256:55c149a0de11b511c61e0dd378abb8a76e32b9700af7b74a4ee53990dff4467a",
+  backingSnapshotSha256: "sha256:c74566cb50c4b5675c98a2dcd7851b7b8948ba9088597aaae324c70ea72224f6",
 });
 
 const FOCUSED_TEST_COMMANDS = Object.freeze([

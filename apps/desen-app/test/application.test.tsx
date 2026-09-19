@@ -3,7 +3,7 @@ import { StrictMode, act } from "react";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { setDesenEditorOwnerProp } from "@desen/editor-core";
+import { createDesenEditorDocument, setDesenEditorOwnerProp } from "@desen/editor-core";
 
 import * as authoringFixtures from "../src/authoring-fixtures.js";
 import * as authoringPreview from "../src/authoring-preview.js";
@@ -408,6 +408,175 @@ describe("Desen App application shell", () => {
     expect((redo as HTMLButtonElement).disabled).toBe(false);
     fireEvent.click(redo);
     expect(within(hierarchy).getByText("sign-in.title.copy")).toBeTruthy();
+  });
+
+  it("does not reuse an older clipboard when the current duplicate selection is rejected", () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    fireEvent.click(
+      within(hierarchy).getByRole("button", { name: "Select Text layer · sign-in.title" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Copy selected layers" }));
+
+    fireEvent.click(
+      within(hierarchy).getByRole("button", { name: "Select Stack layer · sign-in.layout" }),
+    );
+    fireEvent.click(
+      within(hierarchy).getByRole("button", {
+        name: "Select Text field layer · sign-in.email",
+      }),
+      { shiftKey: true },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Duplicate selected layers" }));
+
+    expect(within(hierarchy).queryByText("sign-in.title.copy")).toBeNull();
+    expect(document.querySelector("[data-history-notice]")?.textContent).toBe(
+      "Copy was rejected safely: the selection is no longer current.",
+    );
+  });
+
+  it("retains the project clipboard across admitted surface remounts", () => {
+    const previewPreflight = vi.spyOn(authoringPreview, "prepareAuthoringPreviewBundle");
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    const signInHierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    fireEvent.click(
+      within(signInHierarchy).getByRole("button", {
+        name: "Select Text field layer · sign-in.email",
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Copy selected layers" }));
+
+    fireEvent.click(screen.getByRole("link", { name: "Account app" }));
+    const surfaceNavigation = screen.getByRole("navigation", { name: "Account app surfaces" });
+    fireEvent.click(within(surfaceNavigation).getByRole("link", { name: /Home/u }));
+
+    const homeHierarchy = screen.getByRole("region", { name: "Home layer hierarchy" });
+    fireEvent.click(
+      within(homeHierarchy).getByRole("button", { name: "Select Text layer · home.title" }),
+    );
+    const paste = screen.getByRole("button", { name: "Paste copied layers" });
+    expect((paste as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(paste);
+
+    expect(within(homeHierarchy).getByText("sign-in.email.copy")).toBeTruthy();
+    const pastedDocument = previewPreflight.mock.calls.at(-1)?.[0];
+    expect(pastedDocument?.surfaces.home?.state["email-copy"]).toEqual(
+      REFERENCE_EDITOR_DOCUMENT.surfaces["sign-in"]?.state.email,
+    );
+    expect(
+      pastedDocument?.surfaces.home?.root.slots?.default?.find(
+        ({ id }) => id === "sign-in.email.copy",
+      )?.props?.value,
+    ).toEqual({ $ref: "state.email-copy" });
+    expect(document.querySelector("[data-history-notice]")?.textContent).toBe(
+      "Pasted 1 fresh layer.",
+    );
+  });
+
+  it("clears the project clipboard when opaque workspace authority changes", () => {
+    window.history.replaceState(null, "", "/projects/account-app/surfaces/sign-in");
+    const siblingProfile = siblingOfficialWorkspaceProfile("Sibling clipboard boundary");
+    const view = render(
+      <DesenAppApplication
+        initialDocument={REFERENCE_EDITOR_DOCUMENT}
+        workspaceProfile={REFERENCE_AUTHORING_WORKSPACE_PROFILE}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Select Text layer · sign-in.title" }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy selected layers" }));
+
+    const siblingRead = readProjectWorkspaceProfileAuthority(siblingProfile);
+    if (siblingRead.status !== "read") throw new TypeError("Expected the sibling profile read.");
+    view.rerender(
+      <DesenAppApplication
+        initialDocument={siblingRead.profile.initialDocument}
+        workspaceProfile={siblingProfile}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Text field layer · sign-in.email" }),
+    );
+
+    expect(
+      (screen.getByRole("button", { name: "Paste copied layers" }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+  });
+
+  it("keeps Source unchanged when a pasted candidate fails the current admission preflight", () => {
+    const preparePreview = authoringPreview.prepareAuthoringPreviewBundle;
+    const previewPreflight = vi
+      .spyOn(authoringPreview, "prepareAuthoringPreviewBundle")
+      .mockImplementationOnce(preparePreview)
+      .mockReturnValueOnce(Object.freeze({ ok: false, reason: "publication-rejected" }));
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    fireEvent.click(
+      within(hierarchy).getByRole("button", { name: "Select Text layer · sign-in.title" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Copy selected layers" }));
+    fireEvent.click(
+      within(hierarchy).getByRole("button", {
+        name: "Select Text field layer · sign-in.email",
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Paste copied layers" }));
+
+    expect(previewPreflight).toHaveBeenCalledTimes(2);
+    expect(within(hierarchy).queryByText("sign-in.title.copy")).toBeNull();
+    expect(document.querySelector("[data-history-notice]")?.textContent).toBe(
+      "Paste was rejected by the current Catalog contract; the Source is unchanged.",
+    );
+  });
+
+  it("rejects a structurally admitted foreign capability through the real Catalog preflight", () => {
+    const raw = JSON.parse(JSON.stringify(REFERENCE_EDITOR_DOCUMENT)) as unknown as {
+      surfaces: Record<string, { root: { slots?: Record<string, { id: string; use: string }[]> } }>;
+    };
+    const title = raw.surfaces["sign-in"]?.root.slots?.default?.[0];
+    if (title === undefined) throw new TypeError("Expected the title node.");
+    title.use = "com.example.foreign/Unknown";
+    const admitted = createDesenEditorDocument(raw);
+    expect(admitted.ok).toBe(true);
+    if (!admitted.ok) return;
+    const authority = readProjectWorkspaceProfileAuthority(REFERENCE_AUTHORING_WORKSPACE_PROFILE);
+    if (authority.status !== "read") throw new TypeError("Expected workspace authority.");
+
+    expect(
+      authoringPreview.prepareAuthoringPreviewBundle(
+        admitted.document,
+        authority.profile.catalogPackages,
+      ),
+    ).toEqual({ ok: false, reason: "publication-rejected" });
+  });
+
+  it("duplicates a reverse-clicked multi-selection in Source order as one contiguous group", () => {
+    renderApplication("/projects/account-app/surfaces/sign-in");
+    const hierarchy = screen.getByRole("region", { name: "Sign-in layer hierarchy" });
+    fireEvent.click(
+      within(hierarchy).getByRole("button", {
+        name: "Select Text field layer · sign-in.email",
+      }),
+    );
+    fireEvent.click(
+      within(hierarchy).getByRole("button", { name: "Select Text layer · sign-in.title" }),
+      { shiftKey: true },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Duplicate selected layers" }));
+
+    expect(
+      Array.from(hierarchy.querySelectorAll<HTMLElement>("[data-layer-source-node-id]")).map(
+        ({ dataset }) => dataset.layerSourceNodeId,
+      ),
+    ).toEqual([
+      "sign-in.layout",
+      "sign-in.title",
+      "sign-in.email",
+      "sign-in.title.copy",
+      "sign-in.email.copy",
+      "sign-in.password",
+      "sign-in.error",
+      "sign-in.submit",
+    ]);
   });
 
   it("admits an explicit empty-project bootstrap without substituting completed sign-in content", () => {

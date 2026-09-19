@@ -1050,6 +1050,7 @@ const M10A_T13_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "tests/m10a-t13.test.mjs",
 ]);
 const M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "docs/proof/M10A-T14.md",
   "docs/proof/artifacts/m10a-t14.json",
   "packages/editor-core/src/history.ts",
   "packages/editor-core/test/history.test.ts",
@@ -1306,8 +1307,8 @@ const M10A_T13_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   ownershipSha256: "463e3f2217766da38dac2a908c78508d7a6a7d7c84886378769904c91032157c",
 });
 const M10A_T14_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
-  trackedPathCount: 1864,
-  trackedPathSetSha256: "c3b7f0e60aaa00ba58c0f6c6874dc1b60fc26c4a6e0a53514c7fa0ff62306136",
+  trackedPathCount: 1865,
+  trackedPathSetSha256: "eb150d25cfc68bb0ce5ce406f1b880a9286c3ed8e96e263d2cffdd6c5f4de085",
   proofOwnedPathCount: 244,
   categoryCounts: Object.freeze({
     PROOF_UNIT: 244,
@@ -1316,10 +1317,10 @@ const M10A_T14_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     FROZEN_INPUT: 171,
     PACKAGE_OR_APPLICATION: 765,
     SHARED_PROOF_INFRASTRUCTURE: 413,
-    PROJECT_DOCUMENTATION: 173,
+    PROJECT_DOCUMENTATION: 174,
     REPOSITORY_POLICY: 11,
   }),
-  ownershipSha256: "80efc887f7fc9cfdc1599db7246ef096090a79c9a0e10b7bae72b1b90f89cbae",
+  ownershipSha256: "7a89ddd897643ea7b20d8c684e46c0153b00422d8cc377c9145119dd471d4585",
 });
 const VERIFIED_PROMOTION_RECEIPTS = new WeakMap();
 const VERIFIED_PROMOTION_BOUNDARIES = new WeakMap();
@@ -1723,8 +1724,8 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 136,
-  headSha256: "e47f8c60665175452faf87705ad2e87eb7cbf52521636073f04cceb452db0535",
+  sequence: 137,
+  headSha256: "422d35c46c8ceb62967f070de99f5b647af26b27f50239836206d83031324b9e",
   frozenArtifactCount: 76,
   currentReaderCount: 152,
   liveVerification: "PASS",
@@ -2133,12 +2134,12 @@ function createBoundaryOwnershipDelta(rawBoundary) {
   }
   const successorPaths = successorAuthority.entries.map(({ path: trackedPath }) => trackedPath);
   if (
-    M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 7 ||
-    new Set(M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 7
+    M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 8 ||
+    new Set(M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 8
   ) {
     fail(
       "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
-      "The reviewed M10A-T14 successor path append is not exactly seven unique paths.",
+      "The reviewed M10A-T14 successor path append is not exactly eight unique paths.",
     );
   }
   for (const trackedPath of M10A_T14_SUCCESSOR_ADDED_TRACKED_PATHS) {
