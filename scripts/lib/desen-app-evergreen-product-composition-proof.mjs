@@ -73,6 +73,13 @@ const T05_T06_HISTORICAL_GAP_RECEIPTS = Object.freeze([
     sha256: "ad2543377377e8d5ae99fbd110a0cf1c63710620e972db388feca95ef7ae7d26",
   }),
 ]);
+// Persistence controls had no earlier archive entry: their first edit after M09-T12 is T15.
+// Keep the original M09-T12 receipt distinct from the authenticated current T15 input.
+const T15_PERSISTENCE_CONTROLS_PREDECESSOR = Object.freeze({
+  path: "apps/desen-app/src/persistence-controls.tsx",
+  bytes: 9_272,
+  sha256: "478578110307b00e0caeb7bef395a32e59bda4b0624f1b1ce2af430436a13d1e",
+});
 const T01C_SUCCESSOR_ADDED_PATHS = Object.freeze([
   "apps/desen-app-browser-e2e/input-pending-fixture.pw.ts",
   "apps/desen-app-browser-e2e/input-pending-playwright.config.ts",
@@ -383,11 +390,13 @@ async function authenticatePublishedHostHistoricalAuthority(workspaceRoot) {
     const readTaskTimeFile = successorModule.readDesenAppT04HistoricalReaderTaskTimeFile;
     const readT01aAncestorFile = successorModule.readDesenAppT01aHistoricalReaderGapFile;
     const projectPathInventory = successorModule.projectDesenAppT04HistoricalReaderPathInventory;
+    const projectT15Input = successorModule.projectM10AT15HistoricalInput;
     if (
       typeof authenticate !== "function" ||
       typeof readTaskTimeFile !== "function" ||
       typeof readT01aAncestorFile !== "function" ||
-      typeof projectPathInventory !== "function"
+      typeof projectPathInventory !== "function" ||
+      typeof projectT15Input !== "function"
     ) {
       fail("SUCCESSOR_POLICY_VIOLATION", "The M10-T05 historical gap contract is unavailable.");
     }
@@ -403,6 +412,21 @@ async function authenticatePublishedHostHistoricalAuthority(workspaceRoot) {
       }
       files.set(receipt.path, bytes);
     }
+    const persistenceReceipt = T15_PERSISTENCE_CONTROLS_PREDECESSOR;
+    const historicalPersistenceControls = projectT15Input(
+      persistenceReceipt.path,
+      await readRegularAuthority(
+        path.join(workspaceRoot, persistenceReceipt.path),
+        persistenceReceipt.path,
+      ),
+    );
+    if (
+      historicalPersistenceControls.byteLength !== persistenceReceipt.bytes ||
+      sha256(historicalPersistenceControls) !== persistenceReceipt.sha256
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The exact M09-T12 persistence-controls gap drifted.");
+    }
+    files.set(persistenceReceipt.path, historicalPersistenceControls);
     const t01aAncestorAppPackage = readT01aAncestorFile(
       successor,
       T01A_ANCESTOR_APP_PACKAGE_RECEIPT.path,
