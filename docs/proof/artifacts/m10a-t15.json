@@ -253,13 +253,13 @@
       },
       {
         "path": "apps/desen-app/test/project-authoring-application.test.tsx",
-        "bytes": 13923,
-        "sha256": "ce3e5c94514f67e684ea389c73c23b21bdab1fb6493df5d40e3cbb3276e9fed4"
+        "bytes": 14116,
+        "sha256": "9208ce6d16a2e9e07c6d5ef29f9710b44d42329ff600e59ae4a6a0532dd29e70"
       },
       {
         "path": "apps/desen-app/test/project-authoring-controller.test.ts",
-        "bytes": 27118,
-        "sha256": "d6a8d76f138420302e013005f41d40b8992933e29bd8840f305d25fcd97b060d"
+        "bytes": 27327,
+        "sha256": "63e63d55b8e4a6dae66522c5b0c31eaca2c0c71b7d62b53ed40896a13fafbfc3"
       },
       {
         "path": "apps/desen-app/test/project-authoring-fixture.ts",
@@ -877,9 +877,14 @@
         "sha256": "eb95a79f59bfb97b5cc1def4f3a275f55771afaf3b0a90dc364ab880f9bc7c49"
       },
       {
+        "path": "scripts/lib/m10a-t15-legacy-input-receipts.mjs",
+        "bytes": 35381,
+        "sha256": "ee2e9fc4610ab5f7d3ce75de377b0eeccc4da767ea8429bc85544eedcc6515c7"
+      },
+      {
         "path": "scripts/lib/m10a-t15-proof.mjs",
-        "bytes": 12198,
-        "sha256": "4291dc3c0bed1d2a82196adc6756ee33dfec17bbcdc64224f1bc96d5849ca4f8"
+        "bytes": 12250,
+        "sha256": "cc323d418ddd435a5a3eb2b6b015ac7838ea5fbc825e5c323b468c4d2a743a56"
       },
       {
         "path": "scripts/lib/m10a-t15-workloads.mjs",
@@ -923,8 +928,8 @@
       },
       {
         "path": "tests/m10a-t15.test.mjs",
-        "bytes": 15762,
-        "sha256": "a09a622e19cebc1a8313c318464ee9582755ecc878fcb2799844838062ff18df"
+        "bytes": 15816,
+        "sha256": "3b33fedc39b837cb3ce2607ecf71652b8d1c816cd46b5e2480218be108f09ea4"
       }
     ],
     "catalog": {

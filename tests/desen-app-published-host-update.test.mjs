@@ -44,6 +44,7 @@ import {
   projectM10AT11HistoricalInput,
   projectM10AT12CurrentGraphAudit,
   projectM10AT12HistoricalInput,
+  projectM10AT15HistoricalInput,
   readDesenAppT01aHistoricalReaderGapFile,
   readDesenAppT04HistoricalReaderTaskTimeFile,
   verifyDesenAppPublishedHostUpdateBrowserPolicy,
@@ -52,6 +53,152 @@ import {
   verifyDesenAppPublishedHostUpdateSourcePolicy,
   writeDesenAppPublishedHostUpdateEvidence,
 } from "../scripts/lib/desen-app-published-host-update-proof.mjs";
+
+const M10A_T15_INPUT_RECEIPTS = Object.freeze([
+  {
+    path: "apps/desen-app/README.md",
+    current: {
+      bytes: 60089,
+      sha256: "85fdd108b8ef14268f4e18d7e1074d064a266baa109fed63f88f403a2f71fd19",
+    },
+    predecessor: {
+      bytes: 57363,
+      sha256: "cdd84d677bbfa3f1c4f8f183eed2af78beff8498b1099e65082339a5ffa52608",
+    },
+  },
+  {
+    path: "apps/desen-app-browser-e2e/README.md",
+    current: {
+      bytes: 12913,
+      sha256: "0a6c6348440706305a0ddaafc11087370663e4a6e423487f2ad50c85ba514d9a",
+    },
+    predecessor: {
+      bytes: 11437,
+      sha256: "590ad3afffb1fee95c80e104b710a027be0754e5b01aa9c26f84e39fbdb21cac",
+    },
+  },
+  {
+    path: "apps/desen-app-browser-e2e/package.json",
+    current: {
+      bytes: 2075,
+      sha256: "b4ea1a4b7bd0c160108df7d779587d13a599247cb47f751bf8516386d52ea548",
+    },
+    predecessor: {
+      bytes: 1819,
+      sha256: "a811cf3d7ec960796ab47baee69524888a59efc0ab26e81a7eeeaf1968547c66",
+    },
+  },
+  {
+    path: "apps/desen-app/src/application.module.css",
+    current: {
+      bytes: 133589,
+      sha256: "00d8dd17c6737795a968d89f092589af637ce597850c43fe9228a65f9607098c",
+    },
+    predecessor: {
+      bytes: 133516,
+      sha256: "12d0647cb988870dfe77f4e348e0cf57eb201df0eb8fe8e5845ae37e018504bc",
+    },
+  },
+  {
+    path: "apps/desen-app/src/application.tsx",
+    current: {
+      bytes: 196864,
+      sha256: "f27bc881bde7e8fb2e5d841355f8b4b5299552ae44d0385df3d364d488161ef4",
+    },
+    predecessor: {
+      bytes: 184768,
+      sha256: "4fcc90c0c7af787cefd2a02af795789d9eb89aee139366ba9e4b328e153f7e58",
+    },
+  },
+  {
+    path: "apps/desen-app/src/authoring-persistence.ts",
+    current: {
+      bytes: 32034,
+      sha256: "716c9b95fcdfa4dbb1696f803ceabfe9c4f946ecefddd6424fd278f82c8ff517",
+    },
+    predecessor: {
+      bytes: 34441,
+      sha256: "fcf3d6731cdcaf4bc8ab180a50042d060437c7a08004b47346dd5061fbe1043c",
+    },
+  },
+  {
+    path: "apps/desen-app/src/main.tsx",
+    current: {
+      bytes: 7728,
+      sha256: "2a714ea98366f4f210b9972214c828275ff6a2bce993d57ff9754181a0c5028b",
+    },
+    predecessor: {
+      bytes: 6793,
+      sha256: "03f4c3040c67c4d3644c71835b347ea96fc861a155b217ab87b8ff8277973393",
+    },
+  },
+  {
+    path: "apps/desen-app/src/persistence-controls.tsx",
+    current: {
+      bytes: 9958,
+      sha256: "38e14c0c2ca259951aa3795d361a3f23f369fb52299702cea467b26c0b9c1397",
+    },
+    predecessor: {
+      bytes: 9272,
+      sha256: "478578110307b00e0caeb7bef395a32e59bda4b0624f1b1ce2af430436a13d1e",
+    },
+  },
+  {
+    path: "apps/desen-app/src/product-bootstrap.tsx",
+    current: {
+      bytes: 16434,
+      sha256: "94842fcf3837bd110013856850ab072bf45b33c734a10ab2a014f35a85ab51c6",
+    },
+    predecessor: {
+      bytes: 16148,
+      sha256: "ec5519ca8ca6053f8bce80665b1636d4ce962acd1b3c6208178fca7c19c3aab8",
+    },
+  },
+  {
+    path: "apps/desen-app/src/project-lifecycle.ts",
+    current: {
+      bytes: 43184,
+      sha256: "9b35cae46001f0fe7bb4c688983640c76317d91416315e6e9fa4e9d69e2cebfb",
+    },
+    predecessor: {
+      bytes: 40345,
+      sha256: "d797e98dd28edae64277ffb13fc1a6e4830063b4d5edd6b529f70aacee482fbd",
+    },
+  },
+  {
+    path: "apps/desen-app/src/project-workspace-authoring-persistence.ts",
+    current: {
+      bytes: 12890,
+      sha256: "988efd9ecc26bc1769398639c28c5427e107b88fdcd9691499a6b435546e0f68",
+    },
+    predecessor: {
+      bytes: 10796,
+      sha256: "895ee4af157f7f8191a95376e98d8cb7756816c348649cf410071b44673df830",
+    },
+  },
+  {
+    path: "apps/desen-app/src/starter-project.ts",
+    current: {
+      bytes: 4160,
+      sha256: "f5d79aeaee47ac25f675b7113fd270bb36426c1d9f00e2fc41a8d79e358f14d7",
+    },
+    predecessor: {
+      bytes: 4000,
+      sha256: "00c43f860cc94e5f8dd97b4de5b9a65e55ce6116bf881d31b670713b7a54afa5",
+    },
+  },
+  {
+    path: "apps/desen-app/src/starter-workspace-product.tsx",
+    current: {
+      bytes: 2527,
+      sha256: "7e8da51344b4558b6fdcb0c3e52c776359ad651429b422c0f0fe833bbabdfa0f",
+    },
+    predecessor: {
+      bytes: 1774,
+      sha256: "7cab34f631ba051ff04e5797a9c27367c5fb88b9a29be942852c59f908b1a587",
+    },
+  },
+]);
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT_PATH = "docs/proof/artifacts/desen-app-0.1.0-published-host-update.json";
@@ -954,18 +1101,54 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], async () => {
     assert.ok(current.runtimeResolution.appModules.some(({ id }) => id === addedPath));
     assert.ok(!built.artifact.authority.appSourceAudit.inventory.includes(addedPath));
   }
-  assert.equal(current.appSourceAudit.completeSourceFiles, 67);
-  assert.equal(current.appSourceAudit.productionGraphSourceFiles, 64);
-  assert.equal(current.runtimeResolution.app.moduleCount, 690);
-  assert.equal(current.runtimeResolution.app.staticEdges, 2_974);
+  assert.equal(current.appSourceAudit.completeSourceFiles, 78);
+  assert.equal(current.appSourceAudit.productionGraphSourceFiles, 73);
+  assert.equal(current.runtimeResolution.app.moduleCount, 708);
+  assert.equal(current.runtimeResolution.app.staticEdges, 3_045);
   assert.equal(current.runtimeResolution.app.dynamicEdges, 0);
-  assert.equal(current.runtimeResolution.appOutput.outputs[0].bytes, 3_593_346);
+  assert.equal(current.runtimeResolution.appOutput.outputs[0].bytes, 3_662_047);
   const t08Artifact = JSON.parse(
     await readFile(path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json")),
   );
   const t11GraphAudit = projectM10AT12CurrentGraphAudit(
     current,
     t08Artifact.authority.currentGraphAudit,
+  );
+  const t15RuntimePaths = [
+    "apps/desen-app/src/master-draft-banner.module.css",
+    "apps/desen-app/src/master-draft-banner.tsx",
+    "apps/desen-app/src/master-instance-panel.module.css",
+    "apps/desen-app/src/master-instance-panel.tsx",
+    "apps/desen-app/src/project-authoring-context.tsx",
+    "apps/desen-app/src/project-authoring-controller.ts",
+    "apps/desen-app/src/project-authoring-session.ts",
+    "apps/desen-app/src/project-authoring-source-controller.ts",
+    "apps/desen-app/src/project-master-draft-controller.ts",
+  ];
+  const typeOnlyPath = "apps/desen-app/src/authoring-persistence-types.ts";
+  assert.ok(!current.runtimeResolution.appModules.some(({ id }) => id === typeOnlyPath));
+  for (const addedPath of [...t15RuntimePaths, typeOnlyPath]) {
+    assert.ok(current.appSourceAudit.inventory.includes(addedPath));
+    if (addedPath !== typeOnlyPath)
+      assert.ok(current.runtimeResolution.appModules.some(({ id }) => id === addedPath));
+    const mutation = structuredClone(current);
+    const receipt = mutation.appSourceAudit.sourceReceipts.find(({ path }) => path === addedPath);
+    assert.ok(receipt);
+    receipt.sha256 = `sha256:${"0".repeat(64)}`;
+    assert.throws(
+      () => projectM10AT12CurrentGraphAudit(mutation, t08Artifact.authority.currentGraphAudit),
+      expectedError("SUCCESSOR_POLICY_VIOLATION"),
+    );
+  }
+  const missingT15Module = structuredClone(current);
+  missingT15Module.runtimeResolution.appModules =
+    missingT15Module.runtimeResolution.appModules.filter(
+      ({ id }) => id !== "apps/desen-app/src/project-authoring-controller.ts",
+    );
+  assert.throws(
+    () =>
+      projectM10AT12CurrentGraphAudit(missingT15Module, t08Artifact.authority.currentGraphAudit),
+    expectedError("VITE_GRAPH_DRIFT"),
   );
   assert.deepEqual(
     projectM10AT11CurrentGraphAudit(t11GraphAudit, t08Artifact.authority.currentGraphAudit)
@@ -1330,8 +1513,9 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
   const finalCommand = "playwright test --config repeatable-demo-playwright.config.ts";
   const recoveryCommand = "playwright test --config restart-recovery-playwright.config.ts";
   const t12Command = "playwright test --config t12-playwright.config.ts";
+  const t15Command = "playwright test --config t15-playwright.config.ts";
   const suite = parsedBrowserPackage.scripts["test:e2e"];
-  assert.equal(suite.endsWith(` && ${t12Command}`), true);
+  assert.equal(suite.endsWith(` && ${t12Command} && ${t15Command}`), true);
   const invalidPackages = [
     { command: suite.replace(` && ${finalCommand}`, ""), code: "SUCCESSOR_POLICY_VIOLATION" },
     {
@@ -1351,6 +1535,12 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[6], async () => {
       code: "SUCCESSOR_POLICY_VIOLATION",
     },
     { command: `${suite} && ${t12Command}`, code: "SUCCESSOR_POLICY_VIOLATION" },
+    { command: suite.replace(` && ${t15Command}`, ""), code: "SUCCESSOR_POLICY_VIOLATION" },
+    {
+      command: `${t15Command} && ${suite.replace(` && ${t15Command}`, "")}`,
+      code: "SUCCESSOR_POLICY_VIOLATION",
+    },
+    { command: `${suite} && ${t15Command}`, code: "SUCCESSOR_POLICY_VIOLATION" },
   ];
   for (const { command, code } of invalidPackages) {
     const changed = structuredClone(parsedBrowserPackage);
@@ -1577,6 +1767,31 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
 });
 
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
+  for (const receipt of M10A_T15_INPUT_RECEIPTS) {
+    const current = await readFile(path.join(ROOT, receipt.path));
+    assert.equal(current.byteLength, receipt.current.bytes, receipt.path);
+    assert.equal(
+      createHash("sha256").update(current).digest("hex"),
+      receipt.current.sha256,
+      receipt.path,
+    );
+    const predecessor = projectM10AT15HistoricalInput(receipt.path, current);
+    assert.equal(predecessor.byteLength, receipt.predecessor.bytes, receipt.path);
+    assert.equal(
+      createHash("sha256").update(predecessor).digest("hex"),
+      receipt.predecessor.sha256,
+      receipt.path,
+    );
+    const mutated = Buffer.from(current);
+    mutated[Math.floor(mutated.length / 2)] ^= 1;
+    for (const invalid of [mutated, current.subarray(1), predecessor]) {
+      assert.throws(
+        () => projectM10AT15HistoricalInput(receipt.path, invalid),
+        expectedError("SUCCESSOR_POLICY_VIOLATION"),
+        receipt.path,
+      );
+    }
+  }
   const livePackage = await readFile(path.join(ROOT, "apps/desen-app/package.json"));
   assert.equal(livePackage.byteLength, M10A_T12_APP_PACKAGE_RECEIPT.bytes);
   assert.equal(
@@ -1606,9 +1821,13 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   const liveBrowserPackage = await readFile(
     path.join(ROOT, "apps/desen-app-browser-e2e/package.json"),
   );
-  assert.equal(liveBrowserPackage.byteLength, M10A_T12_BROWSER_PACKAGE_RECEIPT.bytes);
+  const t14BrowserPackage = projectM10AT15HistoricalInput(
+    "apps/desen-app-browser-e2e/package.json",
+    liveBrowserPackage,
+  );
+  assert.equal(t14BrowserPackage.byteLength, M10A_T12_BROWSER_PACKAGE_RECEIPT.bytes);
   assert.equal(
-    createHash("sha256").update(liveBrowserPackage).digest("hex"),
+    createHash("sha256").update(t14BrowserPackage).digest("hex"),
     M10A_T12_BROWSER_PACKAGE_RECEIPT.sha256,
   );
   const t11BrowserPackage = projectM10AT12HistoricalInput(
@@ -1676,9 +1895,10 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     },
   ]) {
     const currentBytes = await readFile(path.join(ROOT, relativePath));
-    assert.equal(currentBytes.byteLength, currentReceipt.bytes, relativePath);
+    const t14Bytes = projectM10AT15HistoricalInput(relativePath, currentBytes);
+    assert.equal(t14Bytes.byteLength, currentReceipt.bytes, relativePath);
     assert.equal(
-      createHash("sha256").update(currentBytes).digest("hex"),
+      createHash("sha256").update(t14Bytes).digest("hex"),
       currentReceipt.sha256,
       relativePath,
     );

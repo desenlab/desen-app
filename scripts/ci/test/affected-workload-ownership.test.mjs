@@ -40,7 +40,7 @@ const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   DEPENDENCY_POLICY: 39,
   FROZEN_INPUT: 172,
   PACKAGE_OR_APPLICATION: 801,
-  SHARED_PROOF_INFRASTRUCTURE: 417,
+  SHARED_PROOF_INFRASTRUCTURE: 418,
   PROJECT_DOCUMENTATION: 175,
 });
 const SEC_01_SUCCESSOR_PATHS = Object.freeze([
@@ -556,6 +556,7 @@ const M10A_T15_SUCCESSOR_PATHS = Object.freeze([
   "packages/design-system-core/test/recipe-transactions.test.ts",
   "scripts/generate-m10a-t15-proof.mjs",
   "scripts/lib/m10a-t15-execution.mjs",
+  "scripts/lib/m10a-t15-legacy-input-receipts.mjs",
   "scripts/lib/m10a-t15-proof.mjs",
   "scripts/lib/m10a-t15-workloads.mjs",
   "scripts/verify-m10a-t15.mjs",
@@ -631,7 +632,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1911 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1912 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -664,11 +665,11 @@ test("freezes exact-one ownership for all 1911 reviewed tracked paths", async ()
   assertDeepFrozen(authority);
 });
 
-test("T15 adds only its 44 reviewed paths and reconstructs the exact pre-T15 ownership", async () => {
+test("T15 adds only its 45 reviewed paths and reconstructs the exact pre-T15 ownership", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
-  assert.equal(M10A_T15_SUCCESSOR_PATHS.length, 44);
-  assert.equal(new Set(M10A_T15_SUCCESSOR_PATHS).size, 44);
+  assert.equal(M10A_T15_SUCCESSOR_PATHS.length, 45);
+  assert.equal(new Set(M10A_T15_SUCCESSOR_PATHS).size, 45);
   for (const relativePath of M10A_T15_SUCCESSOR_PATHS) {
     const owner = resolveAffectedWorkloadOwner(authority, relativePath);
     const proofInput =

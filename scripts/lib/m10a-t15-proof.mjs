@@ -65,6 +65,7 @@ const EXTRA_FILES = Object.freeze([
   "packages/editor-core/test/history.test.ts",
   "scripts/lib/atomic-proof-artifact.mjs",
   "scripts/lib/m10a-t15-proof.mjs",
+  "scripts/lib/m10a-t15-legacy-input-receipts.mjs",
   "scripts/lib/m10a-t15-execution.mjs",
   "scripts/lib/m10a-t15-workloads.mjs",
   "scripts/verify-m10a-t15.mjs",

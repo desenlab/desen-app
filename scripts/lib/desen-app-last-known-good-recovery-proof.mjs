@@ -35,6 +35,7 @@ import {
   projectM10AT04T03Input,
   projectM10AT12CurrentGraphAudit,
   projectM10AT12HistoricalInput,
+  projectM10AT15HistoricalInput,
   projectM10AT11CurrentGraphAudit,
   projectM10AT10T04Input,
 } from "./desen-app-published-host-update-proof.mjs";
@@ -1534,21 +1535,26 @@ function verifyPackageWiring(files) {
   };
 }
 
-/** Authenticates the current T12 browser command before projecting its historical nine-journey form. */
+/** Checks all eleven live journeys, then authenticates the exact T15-to-T12 byte transition. */
 function verifyM10AT12PackageWiring(files) {
   const browser = parseJson(files.get(BROWSER_PACKAGE_PATH), BROWSER_PACKAGE_PATH);
   if (
     browser.name !== "@desen/app-browser-e2e" ||
     browser.scripts?.["test:e2e"] !==
-      `${BROWSER_SUITE_COMMAND} && playwright test --config repeatable-demo-playwright.config.ts && playwright test --config t12-playwright.config.ts` ||
+      `${BROWSER_SUITE_COMMAND} && playwright test --config repeatable-demo-playwright.config.ts && playwright test --config t12-playwright.config.ts && playwright test --config t15-playwright.config.ts` ||
     browser.scripts?.["test:m10a-t12"] !==
       "pnpm --filter @desen/app-web... build && pnpm --filter @desen/control-plane-api build && pnpm run typecheck && pnpm run build && playwright test --config t12-playwright.config.ts" ||
     browser.devDependencies?.["@desen/protocol"] !== "workspace:*"
   )
     fail(
       "TEST_AUTHORITY_DRIFT",
-      "The exact current T12 browser command or public Protocol dependency changed.",
+      "The exact current T15 browser command or retained public Protocol dependency changed.",
     );
+  try {
+    projectM10AT15HistoricalInput(BROWSER_PACKAGE_PATH, files.get(BROWSER_PACKAGE_PATH));
+  } catch {
+    fail("SUCCESSOR_DRIFT", "The current browser package is outside the exact T15 successor.");
+  }
 }
 
 async function readT08Successor(workspaceRoot) {

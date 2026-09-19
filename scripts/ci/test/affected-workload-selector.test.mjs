@@ -467,7 +467,7 @@ test("Design/Run modes select their exact canvas, state, and action closure", as
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, DESEN_APP_CONNECTED_PROOF_UNIT_COUNT);
   assert.equal(plan.workloadCount, DESEN_APP_CONNECTED_WORKLOAD_COUNT);
-  assert.equal(plan.planSha256, "3987cbe6925d2f8bf8901344d4c87c3e1500e51415cc4994788b6e601df2c615");
+  assert.equal(plan.planSha256, "fcf2a22fbbf89ba38eb7d40734445e2d4979a5b9a1098361a18295f3513be82e");
   assert.equal(plan.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-state-binding-editor"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-event-action-editor"), true);
@@ -629,7 +629,7 @@ test("evergreen product composition selects its exact M10-T01C successor closure
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, DESEN_APP_CONNECTED_PROOF_UNIT_COUNT);
   assert.equal(plan.workloadCount, DESEN_APP_CONNECTED_WORKLOAD_COUNT);
-  assert.equal(plan.planSha256, "c12e494ae887aea2d6fd5833b730fe56637fa2fbf82b4bc0cbcaeeeb81ed9d04");
+  assert.equal(plan.planSha256, "34d1e81e0925dbd313b56585b5859ab6cd218c719ecfaf2bdbcc7ce31d5c583a");
   assert.equal(plan.nodeIds.includes("verify-desen-app-visual-behavior-authoring"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-evergreen-product-composition"), true);
   assert.equal(plan.nodeIds.includes("test-desen-app-evergreen-product-composition"), true);
@@ -1118,6 +1118,7 @@ test("M10A product, Catalog, documentation, proof artifact, and shared reader in
     "scripts/generate-m10a-t15-proof.mjs",
     "scripts/lib/m10a-t15-proof.mjs",
     "scripts/lib/m10a-t15-execution.mjs",
+    "scripts/lib/m10a-t15-legacy-input-receipts.mjs",
     "scripts/lib/m10a-t15-workloads.mjs",
     "apps/desen-app/src/project-authoring-controller.ts",
     "apps/desen-app/src/project-master-draft-controller.ts",

@@ -12,6 +12,10 @@ import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 import { matchesAmendedHistoricalReceipt } from "./historical-archive-redaction.mjs";
+import {
+  M10A_T15_ADDED_APP_SOURCE_RECEIPTS,
+  M10A_T15_LEGACY_INPUT_SUCCESSORS,
+} from "./m10a-t15-legacy-input-receipts.mjs";
 import { buildCurrentReferenceHostWebSourceAuditEvidence } from "./reference-host-web-source-audit-proof.mjs";
 
 const MODULE_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
@@ -252,6 +256,23 @@ const M10A_T12_APP_GRAPH_SOURCE_PATHS = Object.freeze(
     ...M10A_T11_REACHABLE_APP_SOURCE_PATHS,
     ...M10A_T12_REACHABLE_T10_APP_SOURCE_PATHS,
     ...M10A_T12_ADDED_APP_SOURCE_PATHS,
+  ].sort((left, right) => left.localeCompare(right, "en-US")),
+);
+
+// Current inventory and executable reachability are deliberately separate. T15's persistence
+// interfaces have no runtime code; T13's storage adapter and T10's navigation factory stay dormant.
+const M10A_T15_APP_SOURCE_RECEIPT_PATHS = Object.freeze(
+  [
+    ...M10A_T12_LIVE_APP_SOURCE_INVENTORY_PATHS,
+    ...M10A_T15_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
+  ].sort((left, right) => left.localeCompare(right, "en-US")),
+);
+const M10A_T15_APP_GRAPH_SOURCE_PATHS = Object.freeze(
+  [
+    ...M10A_T12_APP_GRAPH_SOURCE_PATHS,
+    ...M10A_T15_ADDED_APP_SOURCE_RECEIPTS.filter(
+      ({ path: sourcePath }) => sourcePath !== "apps/desen-app/src/authoring-persistence-types.ts",
+    ).map(({ path: sourcePath }) => sourcePath),
   ].sort((left, right) => left.localeCompare(right, "en-US")),
 );
 
@@ -1355,6 +1376,47 @@ const M10A_T14_APP_GRAPH_SUCCESSOR = Object.freeze({
   backingSnapshotSha256: "sha256:c74566cb50c4b5675c98a2dcd7851b7b8948ba9088597aaae324c70ea72224f6",
 });
 
+// Observed by two independent write:false builds per App/host. This binds transformed code,
+// imports, outputs and backing bytes; source inventory admission alone cannot authorize T15.
+const M10A_T15_APP_GRAPH_SUCCESSOR = Object.freeze({
+  app: Object.freeze({
+    ...M10A_T14_APP_GRAPH_SUCCESSOR.app,
+    moduleCount: 708,
+    staticEdges: 3_045,
+    reachableProductionSourceFiles: 73,
+    graphSha256: "sha256:76ad600603ac9a6b38f0a555242676696cfa62ff4f29bf17a06011cda3809d1a",
+  }),
+  appOutput: Object.freeze({
+    files: 3,
+    outputs: Object.freeze([
+      Object.freeze({
+        fileName: "assets/index-5AOP1qI_.js",
+        type: "chunk",
+        isEntry: true,
+        bytes: 3_662_047,
+        sha256: "sha256:96f718744ce52ec0b0d82d5ea478e329b141d562a568ceb4d520d59ad8f74553",
+      }),
+      Object.freeze({
+        fileName: "assets/index-D9pZbY1p.css",
+        type: "asset",
+        isEntry: null,
+        bytes: 144_370,
+        sha256: "sha256:8cc45b5a962582cfccd426532e8fd6ae5b98f6bdd6008f46e4d65a8199fe9e3d",
+      }),
+      Object.freeze({
+        fileName: "index.html",
+        type: "asset",
+        isEntry: null,
+        bytes: 511,
+        sha256: "sha256:665a75c777d300705dd78a5d6f60f08a8b5c747aeaf0ec20eb5628594756b806",
+      }),
+    ]),
+    identitySha256: "sha256:6cfd15f6b18669c6f38b584cf6793b457f5ca71769d59e953990eaa40a05f960",
+  }),
+  backingFiles: 725,
+  backingSnapshotSha256: "sha256:c8d6ee40fec404b4d638d98c06a4d0d03de5c752b1d066fc485ad9683857f147",
+});
+
 const FOCUSED_TEST_COMMANDS = Object.freeze([
   "pnpm --filter @desen/app-web exec vitest run test/local-runtime-publication.test.ts test/product-bootstrap.test.tsx test/main-lifecycle.test.tsx dev/local-publication-host.test.mjs dev/local-dev-host.test.mjs",
   "pnpm --filter @desen/reference-host-web-server exec vitest run test/server.test.ts",
@@ -1859,7 +1921,7 @@ async function acquireFiles(options) {
     inventoryDirectory(canonicalRoot, "apps/reference-host-web-server/src"),
   ]);
   if (
-    !isDeepStrictEqual(appInventory, M10A_T12_LIVE_APP_SOURCE_INVENTORY_PATHS) ||
+    !isDeepStrictEqual(appInventory, M10A_T15_APP_SOURCE_RECEIPT_PATHS) ||
     !isDeepStrictEqual(hostInventory, HOST_SOURCE_PATHS) ||
     !isDeepStrictEqual(hostServerInventory, HOST_SERVER_SOURCE_PATHS)
   ) {
@@ -1883,6 +1945,8 @@ async function acquireFiles(options) {
     ...M10A_T10_ISOLATED_APP_SOURCE_PATHS,
     ...M10A_T11_REACHABLE_APP_SOURCE_PATHS,
     ...M10A_T12_ADDED_APP_SOURCE_PATHS,
+    ...M10A_T13_ADDED_APP_SOURCE_PATHS,
+    ...M10A_T15_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
   ]) {
     files.set(
       relativePath,
@@ -2320,10 +2384,55 @@ const M10A_T12_BROWSER_PACKAGE_SUCCESSOR = Object.freeze({
 });
 
 /**
+ * Authenticates one exact current T15 input before reconstructing its pre-T15 bytes.
+ *
+ * @remarks This is historical identity projection, never execution or current behavior evidence.
+ * Unrelated paths pass through unchanged; a stale or mutated successor cannot use the inverse.
+ */
+export function projectM10AT15HistoricalInput(relativePath, bytes) {
+  const successor = M10A_T15_LEGACY_INPUT_SUCCESSORS.find(
+    ({ path: owned }) => owned === relativePath,
+  );
+  if (successor === undefined) return bytes;
+  if (
+    !Buffer.isBuffer(bytes) ||
+    bytes.byteLength !== successor.current.bytes ||
+    sha256(bytes) !== successor.current.sha256
+  ) {
+    fail("SUCCESSOR_POLICY_VIOLATION", "The T15 input differs from its reviewed successor.", {
+      path: relativePath,
+    });
+  }
+  const lines = decodeUtf8(bytes, relativePath, "SUCCESSOR_POLICY_VIOLATION").split("\n");
+  for (const hunk of successor.inverseHunks.toReversed()) {
+    const start = hunk.remove === 0 ? hunk.start : hunk.start - 1;
+    if (start < 0 || start + hunk.remove > lines.length) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The reviewed T15 inverse is out of bounds.", {
+        path: relativePath,
+      });
+    }
+    lines.splice(start, hunk.remove, ...hunk.restore);
+  }
+  const predecessor = Buffer.from(lines.join("\n"));
+  if (
+    predecessor.byteLength !== successor.predecessor.bytes ||
+    sha256(predecessor) !== successor.predecessor.sha256
+  ) {
+    fail(
+      "SUCCESSOR_POLICY_VIOLATION",
+      "The T15 inverse does not reconstruct its exact predecessor.",
+      { path: relativePath },
+    );
+  }
+  return predecessor;
+}
+
+/**
  * Projects exact T12-owned manifests, lockfile, and the Inspector Style-view source to their
  * reviewed predecessors. All other inputs pass through unchanged for narrower successor chains.
  */
 export function projectM10AT12HistoricalInput(relativePath, bytes) {
+  bytes = projectM10AT15HistoricalInput(relativePath, bytes);
   if (relativePath === M10A_T14_APP_SOURCE_SUCCESSOR.path) {
     if (
       bytes.byteLength !== M10A_T14_APP_SOURCE_SUCCESSOR.bytes ||
@@ -3057,12 +3166,51 @@ export function projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit
     }
     return historical;
   });
+  const t15SourceReceipts = new Map(
+    expectedSourceReceipts.map((receipt) => [receipt.path, receipt]),
+  );
+  for (const successor of M10A_T15_LEGACY_INPUT_SUCCESSORS) {
+    if (!successor.path.startsWith("apps/desen-app/src/")) continue;
+    const prior = t15SourceReceipts.get(successor.path);
+    if (
+      prior?.bytes !== successor.predecessor.bytes ||
+      prior.sha256 !== `sha256:${successor.predecessor.sha256}`
+    ) {
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "T15 must retain the exact reviewed predecessor source receipt.",
+        { path: successor.path },
+      );
+    }
+    t15SourceReceipts.set(successor.path, {
+      path: successor.path,
+      bytes: successor.current.bytes,
+      sha256: `sha256:${successor.current.sha256}`,
+    });
+  }
+  for (const added of M10A_T15_ADDED_APP_SOURCE_RECEIPTS) {
+    if (t15SourceReceipts.has(added.path))
+      fail(
+        "SUCCESSOR_POLICY_VIOLATION",
+        "T15 cannot replace a predecessor through its additive inventory.",
+      );
+    t15SourceReceipts.set(added.path, { ...added, sha256: `sha256:${added.sha256}` });
+  }
+  // The previously dormant T13 adapter now also receives exact bytes in the complete inventory;
+  // it remains absent from the executable graph, so this grants no new runtime authority.
+  t15SourceReceipts.set("apps/desen-app/src/design-system-asset-storage.ts", {
+    path: "apps/desen-app/src/design-system-asset-storage.ts",
+    bytes: 6_129,
+    sha256: "sha256:3d7a7e405d6a9aa45d03e530d6269d22b3d30fdecb25099a6094622a8838066a",
+  });
   const expectedSourceAudit = {
     ...t11SourceAudit,
-    inventory: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS,
-    completeSourceFiles: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS.length,
-    productionGraphSourceFiles: M10A_T12_APP_GRAPH_SOURCE_PATHS.length,
-    sourceReceipts: expectedSourceReceipts,
+    inventory: M10A_T15_APP_SOURCE_RECEIPT_PATHS,
+    completeSourceFiles: M10A_T15_APP_SOURCE_RECEIPT_PATHS.length,
+    productionGraphSourceFiles: M10A_T15_APP_GRAPH_SOURCE_PATHS.length,
+    sourceReceipts: M10A_T15_APP_SOURCE_RECEIPT_PATHS.map((sourcePath) =>
+      t15SourceReceipts.get(sourcePath),
+    ),
   };
 
   const runtime = currentGraphAudit.runtimeResolution;
@@ -3071,12 +3219,12 @@ export function projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit
   }
   const graphPolicy = verifyDesenAppPublishedHostUpdateGraphPolicy({
     appGraph: runtime.appModules,
-    appSourcePaths: M10A_T12_APP_GRAPH_SOURCE_PATHS,
+    appSourcePaths: M10A_T15_APP_GRAPH_SOURCE_PATHS,
     hostGraph: runtime.hostModules,
     hostSourcePaths: HOST_SOURCE_PATHS,
   });
   if (
-    !isDeepStrictEqual(graphPolicy.app, M10A_T14_APP_GRAPH_SUCCESSOR.app) ||
+    !isDeepStrictEqual(graphPolicy.app, M10A_T15_APP_GRAPH_SUCCESSOR.app) ||
     !isDeepStrictEqual(graphPolicy.host, t11Runtime.host) ||
     !isDeepStrictEqual(graphPolicy.hostModules, t11Runtime.hostModules) ||
     !isDeepStrictEqual(graphPolicy.sharedManagedIdentity, t11Runtime.sharedManagedIdentity) ||
@@ -3091,11 +3239,11 @@ export function projectM10AT12CurrentGraphAudit(currentGraphAudit, t08GraphAudit
     ...graphPolicy,
     independentBuildsPerApplication: 2,
     deterministic: true,
-    appOutput: M10A_T14_APP_GRAPH_SUCCESSOR.appOutput,
+    appOutput: M10A_T15_APP_GRAPH_SUCCESSOR.appOutput,
     hostOutput: t11Runtime.hostOutput,
     hostOutputIdentityAEqualsB: true,
-    backingFiles: M10A_T14_APP_GRAPH_SUCCESSOR.backingFiles,
-    backingSnapshotSha256: M10A_T14_APP_GRAPH_SUCCESSOR.backingSnapshotSha256,
+    backingFiles: M10A_T15_APP_GRAPH_SUCCESSOR.backingFiles,
+    backingSnapshotSha256: M10A_T15_APP_GRAPH_SUCCESSOR.backingSnapshotSha256,
     backingModulesStableAcrossObservations: true,
   };
   const expectedCurrentGraphAudit = {
@@ -4766,7 +4914,7 @@ export function verifyDesenAppPublishedHostUpdateGraphPolicy(rawInput) {
   const appSourcePaths = captureDenseStringArray(input.appSourcePaths, "appSourcePaths", 256);
   const hostSourcePaths = captureDenseStringArray(input.hostSourcePaths, "hostSourcePaths", 256);
   if (
-    !isDeepStrictEqual(appSourcePaths, M10A_T12_APP_GRAPH_SOURCE_PATHS) ||
+    !isDeepStrictEqual(appSourcePaths, M10A_T15_APP_GRAPH_SOURCE_PATHS) ||
     !isDeepStrictEqual(hostSourcePaths, HOST_SOURCE_PATHS)
   ) {
     fail("VITE_GRAPH_DRIFT", "The current production source classification drifted.");
@@ -4869,7 +5017,7 @@ export function verifyDesenAppPublishedHostUpdateGraphPolicy(rawInput) {
     host,
     appModules: appGraph,
     hostModules: hostGraph,
-    completeAppSourceFiles: M10A_T12_APP_SOURCE_RECEIPT_PATHS.length,
+    completeAppSourceFiles: M10A_T15_APP_SOURCE_RECEIPT_PATHS.length,
     appFixtureOnlySourceFiles: APP_FIXTURE_ONLY_SOURCE_PATHS,
     completeHostSourceFiles: HOST_SOURCE_PATHS.length,
     sharedManagedModuleCount: sharedIdentity.length,
@@ -4950,7 +5098,7 @@ async function buildDualViteAudit(workspaceRoot) {
   }
   const graph = verifyDesenAppPublishedHostUpdateGraphPolicy({
     appGraph: appFirst.graph,
-    appSourcePaths: M10A_T12_APP_GRAPH_SOURCE_PATHS,
+    appSourcePaths: M10A_T15_APP_GRAPH_SOURCE_PATHS,
     hostGraph: hostFirst.graph,
     hostSourcePaths: HOST_SOURCE_PATHS,
   });
@@ -5063,7 +5211,10 @@ async function buildFreshHostAudit(workspaceRoot, files) {
 function verifyPackageAuthority(files) {
   const app = parseJson(files.get("apps/desen-app/package.json"), "apps/desen-app/package.json");
   const browser = parseJson(
-    files.get("apps/desen-app-browser-e2e/package.json"),
+    projectM10AT15HistoricalInput(
+      "apps/desen-app-browser-e2e/package.json",
+      files.get("apps/desen-app-browser-e2e/package.json"),
+    ),
     "apps/desen-app-browser-e2e/package.json",
   );
   const host = parseJson(
@@ -5122,13 +5273,13 @@ export async function buildCurrentDesenAppPublishedHostUpdateGraphAudit(rawOptio
     "workspaceRoot",
   );
   const acquired = await acquireFiles({ workspaceRoot, fileOverrides: new Map() });
-  const appSourceReceipts = sourceReceipts(acquired.files, M10A_T12_APP_SOURCE_RECEIPT_PATHS);
+  const appSourceReceipts = sourceReceipts(acquired.files, M10A_T15_APP_SOURCE_RECEIPT_PATHS);
   const hostSourceReceipts = sourceReceipts(acquired.files, HOST_SOURCE_PATHS);
   const referenceHostSourceAudit = await buildFreshHostAudit(workspaceRoot, acquired.files);
   const runtimeResolution = await buildDualViteAudit(workspaceRoot);
   const [appAfter, hostAfter, appInventoryAfter, hostInventoryAfter, serverInventoryAfter] =
     await Promise.all([
-      snapshotBackingFiles(workspaceRoot, M10A_T12_APP_SOURCE_RECEIPT_PATHS),
+      snapshotBackingFiles(workspaceRoot, M10A_T15_APP_SOURCE_RECEIPT_PATHS),
       snapshotBackingFiles(workspaceRoot, HOST_SOURCE_PATHS),
       inventoryDirectory(workspaceRoot, "apps/desen-app/src"),
       inventoryDirectory(workspaceRoot, "apps/reference-host-web/src"),
@@ -5148,9 +5299,9 @@ export async function buildCurrentDesenAppPublishedHostUpdateGraphAudit(rawOptio
   }
   return deepFreeze({
     appSourceAudit: {
-      inventory: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS,
-      completeSourceFiles: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS.length,
-      productionGraphSourceFiles: M10A_T12_APP_GRAPH_SOURCE_PATHS.length,
+      inventory: M10A_T15_APP_SOURCE_RECEIPT_PATHS,
+      completeSourceFiles: M10A_T15_APP_SOURCE_RECEIPT_PATHS.length,
+      productionGraphSourceFiles: M10A_T15_APP_GRAPH_SOURCE_PATHS.length,
       fixtureOnlySourceFiles: APP_FIXTURE_ONLY_SOURCE_PATHS,
       sourceReceipts: appSourceReceipts,
       everyProductionSourceFileReachable: true,
@@ -5294,13 +5445,13 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
         files.get(relativePath),
     );
   }
-  const acquiredAppSourceReceipts = sourceReceipts(files, M10A_T12_APP_SOURCE_RECEIPT_PATHS);
+  const acquiredAppSourceReceipts = sourceReceipts(files, M10A_T15_APP_SOURCE_RECEIPT_PATHS);
   const acquiredHostSourceReceipts = sourceReceipts(files, HOST_SOURCE_PATHS);
   const freshHostAudit = await buildFreshHostAudit(options.workspaceRoot, files);
   const viteAudit = await buildDualViteAudit(options.workspaceRoot);
   const finalAppSourceReceipts = await snapshotBackingFiles(
     options.workspaceRoot,
-    M10A_T12_APP_SOURCE_RECEIPT_PATHS,
+    M10A_T15_APP_SOURCE_RECEIPT_PATHS,
   );
   const finalHostSourceReceipts = await snapshotBackingFiles(
     options.workspaceRoot,
@@ -5327,7 +5478,7 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
         t08ProjectedInputs.get(relativePath) ??
         t11ProjectedInputs.get(relativePath) ??
         t12ProjectedInputs.get(relativePath) ??
-        files.get(relativePath);
+        projectM10AT15HistoricalInput(relativePath, files.get(relativePath));
       return Object.freeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) });
     }),
   );
@@ -5379,9 +5530,9 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       focusedTests,
       browser,
       appSourceAudit: {
-        inventory: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS,
-        completeSourceFiles: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS.length,
-        productionGraphSourceFiles: M10A_T12_APP_GRAPH_SOURCE_PATHS.length,
+        inventory: M10A_T15_APP_SOURCE_RECEIPT_PATHS,
+        completeSourceFiles: M10A_T15_APP_SOURCE_RECEIPT_PATHS.length,
+        productionGraphSourceFiles: M10A_T15_APP_GRAPH_SOURCE_PATHS.length,
         fixtureOnlySourceFiles: APP_FIXTURE_ONLY_SOURCE_PATHS,
         sourceReceipts: acquiredAppSourceReceipts,
         everyProductionSourceFileReachable: true,
@@ -5418,7 +5569,7 @@ export async function buildDesenAppPublishedHostUpdateEvidence(rawOptions = unde
       parentArtifacts: 4,
       historicalReaderBridgeArtifacts: 1,
       immutableInputs: true,
-      completeAppSourceFiles: M10A_T12_CURRENT_APP_SOURCE_INVENTORY_PATHS.length,
+      completeAppSourceFiles: M10A_T15_APP_SOURCE_RECEIPT_PATHS.length,
       completeReferenceHostSourceFiles: HOST_SOURCE_PATHS.length,
       completeReferenceHostServerSourceFiles: HOST_SERVER_SOURCE_PATHS.length,
       sourceSymlinksRejected: true,
@@ -5641,6 +5792,7 @@ function assertT08Receipt(successor, relativePath, bytes, code = "SUCCESSOR_POLI
  * retain the frozen T08 receipt rather than relabeling a current input as historical evidence.
  */
 function assertM10AT12SourceSuccessorReceipt(relativePath, bytes) {
+  bytes = projectM10AT15HistoricalInput(relativePath, bytes);
   const receipt = [
     M10A_T14_APP_SOURCE_SUCCESSOR,
     ...M10A_T12_APP_SOURCE_SUCCESSORS,

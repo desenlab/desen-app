@@ -99,6 +99,8 @@ it("preserves rejected managed Source drafts and carries project history across 
   });
 }, 15_000);
 
+// This full real-Catalog UI journey includes draft/history and repeated persistence admission.
+// Hosted execution reached 225.9s; retain all steps and bound this integration at five minutes.
 it("authors linked components in normal DESEN Neutral, retaining aggregate history and metadata-only saves", async () => {
   window.history.replaceState(null, "", "/projects/desen-neutral/surfaces/home");
   const starter = createStarterProject("desen-neutral");
@@ -282,4 +284,4 @@ it("authors linked components in normal DESEN Neutral, retaining aggregate histo
     project.dispose();
     lifecycle.dispose();
   });
-}, 180_000);
+}, 300_000);

@@ -408,6 +408,7 @@ test("M10A-T15 source capture binds the current implementation, exact Catalog an
     "scripts/lib/m10a-t15-workloads.mjs",
     "scripts/lib/m10a-t15-execution.mjs",
     "scripts/lib/atomic-proof-artifact.mjs",
+    "scripts/lib/m10a-t15-legacy-input-receipts.mjs",
     "prettier.config.mjs",
   ])
     assert.ok(

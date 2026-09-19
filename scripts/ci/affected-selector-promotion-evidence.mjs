@@ -1104,6 +1104,7 @@ const M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "packages/design-system-core/test/recipe-transactions.test.ts",
   "scripts/generate-m10a-t15-proof.mjs",
   "scripts/lib/m10a-t15-execution.mjs",
+  "scripts/lib/m10a-t15-legacy-input-receipts.mjs",
   "scripts/lib/m10a-t15-proof.mjs",
   "scripts/lib/m10a-t15-workloads.mjs",
   "scripts/verify-m10a-t15.mjs",
@@ -1389,8 +1390,8 @@ const LOCAL_PREFLIGHT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   ownershipSha256: "229cf86ef50580fb35b87ed07e540bec3a9727a55cee768c29d6285ec6ec8c31",
 });
 const M10A_T15_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
-  trackedPathCount: 1911,
-  trackedPathSetSha256: "877b04241a1c55100f8db1e24c4426724b5294fb942feca4cb39f8548bc0b799",
+  trackedPathCount: 1912,
+  trackedPathSetSha256: "4d298307879bb63be0afbc3a2e63e4ec3a72a867bdf24059ce5f6be76ec086e3",
   proofOwnedPathCount: 246,
   categoryCounts: Object.freeze({
     PROOF_UNIT: 246,
@@ -1398,11 +1399,11 @@ const M10A_T15_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
     DEPENDENCY_POLICY: 39,
     FROZEN_INPUT: 172,
     PACKAGE_OR_APPLICATION: 801,
-    SHARED_PROOF_INFRASTRUCTURE: 417,
+    SHARED_PROOF_INFRASTRUCTURE: 418,
     PROJECT_DOCUMENTATION: 175,
     REPOSITORY_POLICY: 11,
   }),
-  ownershipSha256: "28278c55f781c0e5cc6c87320f995856fd61a94afde4cd0e450a85fb7dcf3a65",
+  ownershipSha256: "553b7498aa5862b92b7e7c7831261f64fb650d4bb0fd5b00cf24360e2fcca75f",
 });
 const VERIFIED_PROMOTION_RECEIPTS = new WeakMap();
 const VERIFIED_PROMOTION_BOUNDARIES = new WeakMap();
@@ -1806,8 +1807,8 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
 });
 const CURRENT_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 140,
-  headSha256: "a1be3e89d95566d360b8795076b6eeca0f7df590e898258c0f570f7e5c9b1056",
+  sequence: 141,
+  headSha256: "9f41ddc718c989a06811b4ed016f1d4c28c3d6288f8722192a3e22b93767b8d9",
   frozenArtifactCount: 77,
   currentReaderCount: 154,
   liveVerification: "PASS",
@@ -2216,15 +2217,15 @@ function createBoundaryOwnershipDelta(rawBoundary) {
   }
   const successorPaths = successorAuthority.entries.map(({ path: trackedPath }) => trackedPath);
   if (
-    M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 44 ||
-    new Set(M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 44 ||
+    M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS.length !== 45 ||
+    new Set(M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS).size !== 45 ||
     M10A_T15_SUCCESSOR_ADDED_TRACKED_PATHS.some(
       (trackedPath) => !successorPaths.includes(trackedPath),
     )
   ) {
     fail(
       "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
-      "The authenticated T15 successor must include exactly the reviewed 44 added paths.",
+      "The authenticated T15 successor must include exactly the reviewed 45 added paths.",
     );
   }
   const localPreflightSuccessorPaths = successorPaths.filter(

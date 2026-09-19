@@ -181,6 +181,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "3b225451d576eb7de2dbbae5abfea8abb75fcba9ff8f28961384b707de5a3a14",
   "2c78400cce912bf5d7baa448e82ddfef8d365e666f3bb71ff83bf52ca44f65c8",
   "a1be3e89d95566d360b8795076b6eeca0f7df590e898258c0f570f7e5c9b1056",
+  "9f41ddc718c989a06811b4ed016f1d4c28c3d6288f8722192a3e22b93767b8d9",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
@@ -188,7 +189,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57, 58, 59, 59,
   59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70, 71, 71, 72, 72,
   72, 72, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 75,
-  75, 75, 75, 75, 75, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 77,
+  75, 75, 75, 75, 75, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 77, 77,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_COUNT = 1_024;
@@ -1075,6 +1076,17 @@ const PROOF_READER_CHECKPOINT_ARTIFACT_RECEIPT_TRANSITIONS = SAFE_OBJECT_FREEZE(
       path: "docs/proof/artifacts/m10a-t14.json",
       bytes: 3_670,
       sha256: "fe7721562647b4ba4b9ab1275eec3fa554f9fa664d614745e6b5b3d70c75ef54",
+    }),
+  }),
+  // Sequence 141 preserves the first T15 candidate while authenticating the fresh capture after
+  // exact legacy-reader handover and measured integration-test timeout corrections.
+  SAFE_OBJECT_FREEZE({
+    firstSequence: 141,
+    task: "M10A-T15",
+    artifact: SAFE_OBJECT_FREEZE({
+      path: "docs/proof/artifacts/m10a-t15.json",
+      bytes: 128_235,
+      sha256: "7ef3ff271f466b34de9ce0b3f406367b41e52a2aec3880db34663a0baae5d0ae",
     }),
   }),
 ]);

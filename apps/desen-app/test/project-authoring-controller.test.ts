@@ -155,6 +155,8 @@ function insert(controller: ProjectAuthoringController, instanceId: string) {
 
 // These are multi-operation integrations with the real installed Catalog and Publisher, not
 // mocked unit transitions. Bound each complete journey while retaining every actual preflight.
+// The three save/reopen/history journeys below exceeded 30s on hosted runners (the longest
+// observed 50.7s); give only those integrations a 60s budget, not every test in this suite.
 describe("aggregate project authoring authority", { timeout: 30_000 }, () => {
   it("keeps a cross-surface master update in one aggregate history step", () => {
     const authority = readProjectWorkspaceProfileAuthority(REFERENCE_FLOW_WORKSPACE_PROFILE);
@@ -289,7 +291,7 @@ describe("aggregate project authoring authority", { timeout: 30_000 }, () => {
     expect(controller.read().session.record).toEqual(after.session.record);
     expect(controller.read().history.past).toHaveLength(0);
     expect(controller.read().session.preview.revision).toBe(after.session.preview.revision);
-  });
+  }, 60_000);
 
   it("treats metadata-only detach as dirty, retains its exact Source and clears dirty by undo or discard", async () => {
     const { controller, lifecycle } = setup();
@@ -309,7 +311,7 @@ describe("aggregate project authoring authority", { timeout: 30_000 }, () => {
     expect(controller.read().history.past).toHaveLength(0);
     expect(controller.read().history.future).toHaveLength(0);
     expect(controller.read().dirty).toBe(false);
-  });
+  }, 60_000);
 
   it("rejects stale and managed structural Source edits without changing any authoring state", () => {
     const { controller } = setup();
@@ -404,7 +406,7 @@ describe("aggregate project authoring authority", { timeout: 30_000 }, () => {
     expect((await lifecycle.open()).status).toBe("opened");
     expect(controller.read().session.record).toEqual(after.session.record);
     expect(controller.read().session.preview.revision).toBe(after.session.preview.revision);
-  });
+  }, 60_000);
 
   it("accepts unmanaged Source edits, preserving all metadata and canonical no-op redo", () => {
     const { controller, record } = setup();

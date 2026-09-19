@@ -11,6 +11,10 @@ import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.m
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 import { buildCurrentDesenAppPublishedHostUpdateGraphAudit } from "./desen-app-published-host-update-proof.mjs";
 import {
+  M10A_T15_ADDED_APP_SOURCE_RECEIPTS,
+  M10A_T15_LEGACY_INPUT_SUCCESSORS,
+} from "./m10a-t15-legacy-input-receipts.mjs";
+import {
   authenticateDesenAppEvergreenProductCompositionSuccessor,
   materializeDesenAppHistoricalReaderFileOverrides,
   projectDesenAppHistoricalReaderPathInventory,
@@ -1059,6 +1063,7 @@ const CURRENT_APP_SOURCE_INVENTORY_PATHS = Object.freeze(
     ...M10A_T11_REACHABLE_APP_SOURCE_PATHS,
     ...M10A_T12_RICH_STYLE_SOURCE_PATHS,
     ...M10A_T13_ADDED_APP_SOURCE_PATHS,
+    ...M10A_T15_ADDED_APP_SOURCE_RECEIPTS.map(({ path: sourcePath }) => sourcePath),
   ].sort(),
 );
 // The live T12 product has a broader composition than the historical M09 reader. Keep the
@@ -3922,8 +3927,8 @@ const M10A_T12_CATALOG = Object.freeze({
 });
 const M10A_T12_STYLE_SOURCE_PATHS = M10A_T12_RICH_STYLE_SOURCE_PATHS;
 
-// T14 adds the editor-core history surface to the live Vite graph. Authenticate that exact
-// additive graph first, then keep the T12 reader's frozen graph projection byte-stable.
+// Authenticate the exact current graph before preserving the T12 reader's historical projection.
+// T15's master/instance graph succeeds T14 history; neither is an observation of the old graph.
 const M10A_T12_FROZEN_RUNTIME_RESOLUTION = Object.freeze({
   profile: "m10a-t12-central-current-product",
   moduleCount: 689,
@@ -3941,19 +3946,26 @@ const M10A_T14_CURRENT_RUNTIME_RESOLUTION = Object.freeze({
   graphSha256: "sha256:81caef9057f448051a88849097312a97840c3356c3926441729f18c575f27db0",
 });
 
-function projectM10AT14RuntimeToM10AT12(runtime) {
+const M10A_T15_CURRENT_RUNTIME_RESOLUTION = Object.freeze({
+  ...M10A_T14_CURRENT_RUNTIME_RESOLUTION,
+  moduleCount: 708,
+  staticEdges: 3_045,
+  graphSha256: "sha256:76ad600603ac9a6b38f0a555242676696cfa62ff4f29bf17a06011cda3809d1a",
+});
+
+function projectM10AT15RuntimeToM10AT12(runtime) {
   const observed = {
-    profile: M10A_T14_CURRENT_RUNTIME_RESOLUTION.profile,
+    profile: M10A_T15_CURRENT_RUNTIME_RESOLUTION.profile,
     moduleCount: runtime?.moduleCount,
     staticEdges: runtime?.staticEdges,
     dynamicEdges: runtime?.dynamicEdges,
     unresolvedEdges: runtime?.unresolvedEdges,
     graphSha256: runtime?.graphSha256,
   };
-  if (!isDeepStrictEqual(observed, M10A_T14_CURRENT_RUNTIME_RESOLUTION)) {
+  if (!isDeepStrictEqual(observed, M10A_T15_CURRENT_RUNTIME_RESOLUTION)) {
     fail(
       "SUCCESSOR_POLICY_VIOLATION",
-      "The live T14 graph is not the exact reviewed additive successor of T12.",
+      "The live T15 graph is not the exact reviewed successor of T12/T14.",
       { observed },
     );
   }
@@ -4059,14 +4071,29 @@ export async function buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence(
     sourceAudit.sourceReceipts.map((receipt) => [receipt.path, receipt]),
   );
   for (const receipt of successor.styleReceipts) {
+    const changedInput = M10A_T15_LEGACY_INPUT_SUCCESSORS.find(
+      ({ path: sourcePath }) => sourcePath === receipt.path,
+    );
+    // Match both ends of the reviewed transition. An unrelated predecessor or a stale current
+    // source must not gain authority merely because its path appears in the T15 change list.
+    if (
+      changedInput !== undefined &&
+      (changedInput.predecessor.bytes !== receipt.bytes ||
+        changedInput.predecessor.sha256 !== receipt.sha256)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The T15 style predecessor differs from frozen T12.", {
+        path: receipt.path,
+      });
+    }
+    const expected = changedInput?.current ?? receipt;
     if (
       !sourceAudit.inventory.includes(receipt.path) ||
-      graphReceipts.get(receipt.path)?.bytes !== receipt.bytes ||
-      graphReceipts.get(receipt.path)?.sha256 !== `sha256:${receipt.sha256}`
+      graphReceipts.get(receipt.path)?.bytes !== expected.bytes ||
+      graphReceipts.get(receipt.path)?.sha256 !== `sha256:${expected.sha256}`
     ) {
       fail(
         "SUCCESSOR_POLICY_VIOLATION",
-        "The current App graph differs from the checkpointed T12 style source receipt.",
+        "The current App graph differs from the reviewed T12/T15 style source receipt.",
         { path: receipt.path },
       );
     }
@@ -4115,7 +4142,7 @@ export async function buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence(
       receiptCount: successor.styleReceipts.length,
       catalogBound: true,
     },
-    runtimeResolution: projectM10AT14RuntimeToM10AT12(runtime),
+    runtimeResolution: projectM10AT15RuntimeToM10AT12(runtime),
   });
 }
 
