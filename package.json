@@ -21,6 +21,8 @@
     "test:coverage": "turbo run test:coverage",
     "test:e2e": "pnpm --filter @desen/app-browser-e2e test:e2e",
     "proof": "pnpm check",
+    "preflight": "node scripts/ci/local-preflight.mjs",
+    "test:local-preflight": "node --test scripts/ci/test/local-preflight.test.mjs",
     "ci:required": "node scripts/ci/run-required-affected-quality-gate.mjs",
     "test:ci-quality-gate": "node --test scripts/test/ci-quality-gate.test.mjs",
     "verify:affected-selector-promotion-evidence": "node scripts/ci/verify-affected-selector-promotion-evidence.mjs",

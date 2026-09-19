@@ -35,22 +35,22 @@ local verification commands.
 
 ### Local developer feedback
 
-For a quick, non-authoritative signal between commits, use the existing package tooling only when
-the diff is limited to modified tracked source under `apps/*/{src,test,test-d,dev}` or
-`packages/*/{src,test,test-d,dev}`:
+Run the fail-closed local planner for quick, non-authoritative feedback between commits. Add
+`--dry-run` to inspect its deterministic plan without executing it; the printed receipt always
+states `authority: "NONE"` and never replaces hosted evidence:
 
 ```bash
-pnpm format:check
-TURBO_FORCE=true pnpm exec turbo run lint typecheck build test \
-  '--filter=...[origin/main]' --force
-pnpm boundaries
+pnpm preflight
+pnpm preflight --dry-run
 ```
 
-Metadata, policy/CI, dependency, deleted/renamed, untracked, or otherwise uncertain changes must
-use the complete `pnpm check` compatibility audit. This is developer feedback, not passing
-authority: it never changes the hosted dispatcher, the affected selector, the exhaustive
-inventory, deadlines, or any required proof workload. Hosted CI still performs its exact fresh
-required route and remains the only merge authority.
+Only same-mode tracked source edits under `apps/*/{src,test,test-d,dev}` or
+`packages/*/{src,test,test-d,dev}` enter the focused route, using immutable package-name filters.
+Metadata, policy/CI, dependency, added/deleted/renamed, mode, symlink, untracked, malformed, stale
+base, unknown-workspace, or moving-input uncertainty falls back to the complete `pnpm check`
+compatibility audit. Repo-ignored `.desen/` profiles and exact workspace-root generated-output families
+are excluded as local/generated state. Focused format/build/type/lint/test/boundary/checkpoint checks
+stay ordered and non-authoritative; exact-head hosted CI remains the sole merge authority.
 
 ### Pull requests
 

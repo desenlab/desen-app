@@ -36,6 +36,7 @@ const CI_04_CATEGORY_COUNTS = Object.freeze({
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   ...CI_04_CATEGORY_COUNTS,
   PROOF_UNIT: 244,
+  CI_POLICY: 50,
   DEPENDENCY_POLICY: 39,
   FROZEN_INPUT: 171,
   PACKAGE_OR_APPLICATION: 765,
@@ -510,6 +511,10 @@ const M10A_T14_SUCCESSOR_PATHS = Object.freeze([
   "scripts/verify-m10a-t14.mjs",
   "tests/m10a-t14.test.mjs",
 ]);
+const LOCAL_PREFLIGHT_SUCCESSOR_PATHS = Object.freeze([
+  "scripts/ci/local-preflight.mjs",
+  "scripts/ci/test/local-preflight.test.mjs",
+]);
 
 async function currentTrackedPaths() {
   const { stdout } = await EXEC_FILE(
@@ -533,11 +538,15 @@ function calculateAffectedWorkloadOwnershipReview(rawPaths) {
   const paths =
     rawPaths.length === EXPECTED_AFFECTED_TRACKED_PATH_COUNT
       ? rawPaths
-      : rawPaths.filter(
-          (candidate) =>
-            !M10A_T14_SUCCESSOR_PATHS.includes(candidate) &&
-            !M10A_T13_SUCCESSOR_PATHS.includes(candidate),
-        );
+      : rawPaths.length ===
+          EXPECTED_AFFECTED_TRACKED_PATH_COUNT - LOCAL_PREFLIGHT_SUCCESSOR_PATHS.length
+        ? rawPaths
+        : rawPaths.filter(
+            (candidate) =>
+              !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate) &&
+              !M10A_T14_SUCCESSOR_PATHS.includes(candidate) &&
+              !M10A_T13_SUCCESSOR_PATHS.includes(candidate),
+          );
   return calculateAffectedWorkloadOwnershipReviewBase(paths);
 }
 
@@ -576,7 +585,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1865 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1867 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -607,6 +616,49 @@ test("freezes exact-one ownership for all 1865 reviewed tracked paths", async ()
     paths,
   );
   assertDeepFrozen(authority);
+});
+
+test("the local-preflight successor preserves T14 and adds exactly two exhaustive CI-policy paths", async () => {
+  const paths = await currentTrackedPaths();
+  const authority = createAffectedWorkloadOwnership(paths);
+  assert.equal(LOCAL_PREFLIGHT_SUCCESSOR_PATHS.length, 2);
+  assert.equal(new Set(LOCAL_PREFLIGHT_SUCCESSOR_PATHS).size, 2);
+  for (const relativePath of LOCAL_PREFLIGHT_SUCCESSOR_PATHS) {
+    assert.deepEqual(resolveAffectedWorkloadOwner(authority, relativePath), {
+      path: relativePath,
+      category: AFFECTED_OWNERSHIP_CATEGORIES.CI_POLICY,
+      disposition: AFFECTED_OWNERSHIP_DISPOSITIONS.FORCE_EXHAUSTIVE,
+      proofUnitId: null,
+      verifierNodeId: null,
+      rootTestNodeId: null,
+    });
+    assert.throws(
+      () =>
+        createAffectedWorkloadOwnership(paths.filter((candidate) => candidate !== relativePath)),
+      expectCode("AFFECTED_OWNERSHIP_TRACKED_PATH_SET_DRIFT"),
+    );
+  }
+  assert.deepEqual(
+    calculateAffectedWorkloadOwnershipReviewBase(
+      paths.filter((candidate) => !LOCAL_PREFLIGHT_SUCCESSOR_PATHS.includes(candidate)),
+    ),
+    {
+      trackedPathCount: 1865,
+      trackedPathSetSha256: "eb150d25cfc68bb0ce5ce406f1b880a9286c3ed8e96e263d2cffdd6c5f4de085",
+      proofOwnedPathCount: 244,
+      categoryCounts: {
+        PROOF_UNIT: 244,
+        CI_POLICY: 48,
+        DEPENDENCY_POLICY: 39,
+        FROZEN_INPUT: 171,
+        PACKAGE_OR_APPLICATION: 765,
+        SHARED_PROOF_INFRASTRUCTURE: 413,
+        PROJECT_DOCUMENTATION: 174,
+        REPOSITORY_POLICY: 11,
+      },
+      ownershipSha256: "7a89ddd897643ea7b20d8c684e46c0153b00422d8cc377c9145119dd471d4585",
+    },
+  );
 });
 
 test("the M10A-T12 successor preserves M10A-T11 ownership and adds its exact rich-styling closure", async () => {
