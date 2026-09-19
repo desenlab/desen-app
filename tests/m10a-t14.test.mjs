@@ -93,3 +93,22 @@ test("M10A-T14 verifier fails closed when a focused behavior suite fails", async
   );
   assert.deepEqual(observed, [M10A_T14_FOCUSED_COMMANDS[0]]);
 });
+
+test("M10A-T14 reports a focused child start failure without hiding its cause", async () => {
+  await assert.rejects(
+    verifyM10AT14Evidence({
+      runChild: async () => ({
+        code: null,
+        signal: null,
+        error: new Error("child process denied"),
+        output: Buffer.alloc(0),
+      }),
+    }),
+    (error) => {
+      assert.ok(error instanceof M10AT14ProofError);
+      assert.equal(error.code, "M10A_T14_FOCUSED_EXECUTION_FAILED");
+      assert.match(error.message, /child process denied/u);
+      return true;
+    },
+  );
+});

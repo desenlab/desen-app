@@ -178,7 +178,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "7773fa9e25681f54ee2789a29f618f21989dc043e8acceac75ed125f377244dd",
   "e47f8c60665175452faf87705ad2e87eb7cbf52521636073f04cceb452db0535",
   "422d35c46c8ceb62967f070de99f5b647af26b27f50239836206d83031324b9e",
-  "7617c02811481173871b480a74fb20c05898d3d058a555bb746d9be2cf3f87d3",
+  "d5045b0e2664bdfabf8302f534b789a5d5eb38837c11a34ec681ef54401b457a",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
@@ -1052,6 +1052,17 @@ const PROOF_READER_CHECKPOINT_ARTIFACT_RECEIPT_TRANSITIONS = SAFE_OBJECT_FREEZE(
       path: "docs/proof/artifacts/m10a-t14.json",
       bytes: 3_546,
       sha256: "f074c7be6c87a202350619a44bd2eaf90c7bf114d1d1b6f0bc729bab11468280",
+    }),
+  }),
+  // Sequence 138 retains the executed T14 evidence while replacing package-manager indirection
+  // with the exact permission-compatible Vitest entry points exercised by hosted isolation.
+  SAFE_OBJECT_FREEZE({
+    firstSequence: 138,
+    task: "M10A-T14",
+    artifact: SAFE_OBJECT_FREEZE({
+      path: "docs/proof/artifacts/m10a-t14.json",
+      bytes: 3_670,
+      sha256: "fe7721562647b4ba4b9ab1275eec3fa554f9fa664d614745e6b5b3d70c75ef54",
     }),
   }),
 ]);

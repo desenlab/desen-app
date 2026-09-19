@@ -22,24 +22,30 @@ const SOURCES = Object.freeze([
 /** Exact focused behavior suites that the production verifier executes. */
 export const M10A_T14_FOCUSED_COMMANDS = Object.freeze([
   Object.freeze({
-    command: "pnpm",
+    command: "node",
     args: Object.freeze([
-      "--filter",
-      "@desen/editor-core",
-      "exec",
-      "vitest",
+      "node_modules/vitest/vitest.mjs",
       "run",
+      "--root",
+      "packages/editor-core",
+      "--config",
+      "package.json",
+      "--configLoader",
+      "runner",
       "test/history.test.ts",
     ]),
   }),
   Object.freeze({
-    command: "pnpm",
+    command: "node",
     args: Object.freeze([
-      "--filter",
-      "@desen/app-web",
-      "exec",
-      "vitest",
+      "node_modules/vitest/vitest.mjs",
       "run",
+      "--root",
+      "apps/desen-app",
+      "--config",
+      "package.json",
+      "--configLoader",
+      "runner",
       "test/application.test.tsx",
       "-t",
       "keeps duplicate and undo/redo operations atomic|does not reuse an older clipboard|retains the project clipboard across admitted surface remounts|clears the project clipboard when opaque workspace authority changes|keeps Source unchanged when a pasted candidate fails the current admission preflight|rejects a structurally admitted foreign capability through the real Catalog preflight|duplicates a reverse-clicked multi-selection in Source order",
@@ -140,6 +146,13 @@ async function runFocusedBehaviorProof(runner) {
       throw new M10AT14ProofError(
         "M10A_T14_FOCUSED_EXECUTION_FAILED",
         `T14 focused behavior proof could not execute: ${detail}`,
+      );
+    }
+    if (result?.error !== undefined) {
+      const detail = result.error instanceof Error ? result.error.message : String(result.error);
+      throw new M10AT14ProofError(
+        "M10A_T14_FOCUSED_EXECUTION_FAILED",
+        `T14 focused behavior proof could not start: ${detail}`,
       );
     }
     if (result?.code !== 0 || result.signal !== null) {

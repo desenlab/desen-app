@@ -192,9 +192,11 @@ const M10A_T14_T13_PACKAGE_SUCCESSOR_RESEALED_READER_INDEXES = Object.freeze([14
 // Sequence 137 replaces T14's declarative proof with an executed fail-closed verifier and
 // reissues only the published-host compatibility pair whose exact source projection changed.
 const M10A_T14_CORRECTIVE_RESEALED_READER_INDEXES = Object.freeze([116, 117, 150, 151]);
-// Sequence 138 advances the two historical readers that authenticate the final T14 compiled
-// package and public-matrix successor receipts.
-const M10A_T14_PUBLIC_MATRIX_CORRECTIVE_RESEALED_READER_INDEXES = Object.freeze([56, 118]);
+// Sequence 138 advances the historical readers and final T14 proof pair that authenticate its
+// compiled package, public matrix, and hosted permission-isolated focused execution.
+const M10A_T14_PUBLIC_MATRIX_CORRECTIVE_RESEALED_READER_INDEXES = Object.freeze([
+  56, 118, 150, 151,
+]);
 // Sequence 129 reissues only the published-host proof library after the T14 graph successor
 // authority was resealed to the current Vite graph and backing snapshot.
 const M10A_T14_PUBLISHED_HOST_GRAPH_RESEALED_READER_INDEXES = Object.freeze([116]);
@@ -10072,12 +10074,9 @@ test("sequence one hundred thirty-seven corrects only the T14 artifact and exact
   );
   for (const [index, reader] of current.readers.entries())
     await assertHistoricalReaderMatchesCurrentWorkspace(reader, index);
-  const frozen = await readCheckpointedFrozenArtifact("M10A-T14");
-  assert.equal(frozen.sha256, current.artifacts.at(-1).sha256);
-  assert.equal(frozen.checkpointHeadSha256, baselineManifest.headSha256);
 });
 
-test("sequence one hundred thirty-eight reseals the final T14 compiled readers", async () => {
+test("sequence one hundred thirty-eight seals T14 hosted-isolation compatibility", async () => {
   const previous = baselineManifest.checkpoints[136];
   const current = baselineManifest.checkpoints[137];
   const identity = ({ task, role, path: readerPath }) => ({ task, role, path: readerPath });
@@ -10087,7 +10086,13 @@ test("sequence one hundred thirty-eight reseals the final T14 compiled readers",
     current.predecessorSha256,
     "422d35c46c8ceb62967f070de99f5b647af26b27f50239836206d83031324b9e",
   );
-  assert.deepEqual(current.artifacts, previous.artifacts);
+  assert.deepEqual(current.artifacts.slice(0, 75), previous.artifacts.slice(0, 75));
+  assert.deepEqual(current.artifacts[75], {
+    task: "M10A-T14",
+    path: "docs/proof/artifacts/m10a-t14.json",
+    bytes: 3670,
+    sha256: "fe7721562647b4ba4b9ab1275eec3fa554f9fa664d614745e6b5b3d70c75ef54",
+  });
   assert.deepEqual(current.readers.map(identity), previous.readers.map(identity));
   assert.deepEqual(
     current.readers.flatMap((reader, index) =>
@@ -10109,16 +10114,33 @@ test("sequence one hundred thirty-eight reseals the final T14 compiled readers",
     bytes: 109697,
     sha256: "a5f4c3b14f2021ad6f8933872bddf4aab4517722991bd66ee625f4f455201251",
   });
+  assert.deepEqual(current.readers[150], {
+    task: "M10A-T14",
+    role: "proof-library",
+    path: "scripts/lib/m10a-t14-proof.mjs",
+    bytes: 10324,
+    sha256: "ca28497e94fa062966a635d8de2ded9db816aee927bc66cf783762e3f492086b",
+  });
+  assert.deepEqual(current.readers[151], {
+    task: "M10A-T14",
+    role: "root-test",
+    path: "tests/m10a-t14.test.mjs",
+    bytes: 4531,
+    sha256: "f1254f8e38468952f2d8f9e84f3d8abcafc86dad7144836e7ff4f76cd272c072",
+  });
   assert.deepEqual(
     baselineManifest.checkpoints.slice(0, 137).map(calculateProofReaderCheckpointSha256),
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 137),
   );
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "7617c02811481173871b480a74fb20c05898d3d058a555bb746d9be2cf3f87d3",
+    "d5045b0e2664bdfabf8302f534b789a5d5eb38837c11a34ec681ef54401b457a",
   );
   for (const [index, reader] of current.readers.entries())
     await assertHistoricalReaderMatchesCurrentWorkspace(reader, index);
+  const frozen = await readCheckpointedFrozenArtifact("M10A-T14");
+  assert.equal(frozen.sha256, current.artifacts.at(-1).sha256);
+  assert.equal(frozen.checkpointHeadSha256, baselineManifest.headSha256);
 });
 
 test("reviewed task generations stay pinned while a candidate inherits current authority", () => {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "7617c02811481173871b480a74fb20c05898d3d058a555bb746d9be2cf3f87d3",
+  "headSha256": "d5045b0e2664bdfabf8302f534b789a5d5eb38837c11a34ec681ef54401b457a",
   "checkpoints": [
     {
       "sequence": 1,
@@ -141616,8 +141616,8 @@
         {
           "task": "M10A-T14",
           "path": "docs/proof/artifacts/m10a-t14.json",
-          "bytes": 3546,
-          "sha256": "f074c7be6c87a202350619a44bd2eaf90c7bf114d1d1b6f0bc729bab11468280"
+          "bytes": 3670,
+          "sha256": "fe7721562647b4ba4b9ab1275eec3fa554f9fa664d614745e6b5b3d70c75ef54"
         }
       ],
       "readers": [
@@ -142675,15 +142675,15 @@
           "task": "M10A-T14",
           "role": "proof-library",
           "path": "scripts/lib/m10a-t14-proof.mjs",
-          "bytes": 9849,
-          "sha256": "e2edb49071f2e39dfd90a3ad645c881d6e0316be6fef6efa9c7eccc9ddf0dbf7"
+          "bytes": 10324,
+          "sha256": "ca28497e94fa062966a635d8de2ded9db816aee927bc66cf783762e3f492086b"
         },
         {
           "task": "M10A-T14",
           "role": "root-test",
           "path": "tests/m10a-t14.test.mjs",
-          "bytes": 3976,
-          "sha256": "2eb1278947ae94ff566ce049af87d2b8872c420234d097284a9942f03d55e0ab"
+          "bytes": 4531,
+          "sha256": "f1254f8e38468952f2d8f9e84f3d8abcafc86dad7144836e7ff4f76cd272c072"
         }
       ]
     }

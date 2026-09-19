@@ -126,8 +126,8 @@ test("owns exactly 258 steps across the eight reviewed execution classes", () =>
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 7,
     PACKAGE_TEST_EXCLUSIVE: 1,
-    PROOF_READ_ONLY: 104,
-    PROOF_OS_TEMP_ISOLATED: 124,
+    PROOF_READ_ONLY: 103,
+    PROOF_OS_TEMP_ISOLATED: 125,
     PROOF_BROWSER_EXCLUSIVE: 5,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
@@ -207,7 +207,7 @@ test("owns exactly 258 steps across the eight reviewed execution classes", () =>
   });
 });
 
-test("pins the exact fourteen read-only, five browser, and sole workspace-temp proof ids", () => {
+test("pins the exact fifteen read-only, five browser, and sole workspace-temp proof ids", () => {
   assert.equal(PROOF_IDS.length, 122);
   assert.equal(new Set(PROOF_IDS).size, 122);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
@@ -539,8 +539,9 @@ test("pins the exact fourteen read-only, five browser, and sole workspace-temp p
     "desen-app-last-known-good-recovery",
     "desen-app-repeatable-demo",
     "m10-gate",
+    "m10a-t14",
   ]);
-  assert.equal(CHILD_PROCESS_VERIFIER_PROOF_IDS.length, 18);
+  assert.equal(CHILD_PROCESS_VERIFIER_PROOF_IDS.length, 19);
   for (const proofId of CHILD_PROCESS_VERIFIER_PROOF_IDS) {
     assert.deepEqual(classifyWorkloadStateMetadata(`verify-${proofId}`), {
       schemaVersion: 2,
@@ -577,7 +578,9 @@ test("pins the exact fourteen read-only, five browser, and sole workspace-temp p
                               ? "DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE"
                               : proofId === "m10-gate"
                                 ? "DESEN_APP_M10_GATE_VITE"
-                                : "NONE",
+                                : proofId === "m10a-t14"
+                                  ? "DESEN_APP_M10A_T14_VITEST"
+                                  : "NONE",
       filesystemCompatibilityPolicy: "NONE",
       barrier: false,
     });
@@ -1263,8 +1266,9 @@ test("pins the exact fourteen read-only, five browser, and sole workspace-temp p
     "desen-app-last-known-good-recovery",
     "desen-app-repeatable-demo",
     "m10-gate",
+    "m10a-t14",
   ]);
-  assert.equal(NATIVE_ADDON_PROOF_IDS.length, 14);
+  assert.equal(NATIVE_ADDON_PROOF_IDS.length, 15);
   assert.deepEqual(NATIVE_ADDON_ROOT_STEP_IDS, [
     "test-publisher-invalid-source-matrix",
     "test-control-plane-local-api",
@@ -1287,7 +1291,7 @@ test("pins the exact fourteen read-only, five browser, and sole workspace-temp p
       ]),
       ...NATIVE_ADDON_ROOT_STEP_IDS,
     ]).size,
-    27,
+    28,
   );
   assert.equal(
     classifyWorkloadStateMetadata("verify-reference-host-web-source-audit").nativeAddonPolicy,
@@ -1362,6 +1366,10 @@ test("pins the exact fourteen read-only, five browser, and sole workspace-temp p
   assert.equal(
     classifyWorkloadStateMetadata("verify-desen-app-real-adapter-canvas").nativeAddonPolicy,
     "DESEN_APP_REAL_ADAPTER_CANVAS_VITE",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("verify-m10a-t14").nativeAddonPolicy,
+    "DESEN_APP_M10A_T14_VITEST",
   );
   assert.equal(
     classifyWorkloadStateMetadata("test-desen-app-real-adapter-canvas").nativeAddonPolicy,
@@ -2322,7 +2330,7 @@ test(
   },
 );
 
-test("only the twenty-seven exact reviewed steps receive native-addon authority", async (context) => {
+test("only the twenty-eight exact reviewed steps receive native-addon authority", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-native-addon-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const verifier = await createProofStepIsolationContext({

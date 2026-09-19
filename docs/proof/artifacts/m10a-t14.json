@@ -73,8 +73,8 @@
     "runtimePublisherProtocolUnchanged": true
   },
   "focusedCommands": [
-    "pnpm --filter @desen/editor-core exec vitest run test/history.test.ts",
-    "pnpm --filter @desen/app-web exec vitest run test/application.test.tsx -t keeps duplicate and undo/redo operations atomic|does not reuse an older clipboard|retains the project clipboard across admitted surface remounts|clears the project clipboard when opaque workspace authority changes|keeps Source unchanged when a pasted candidate fails the current admission preflight|rejects a structurally admitted foreign capability through the real Catalog preflight|duplicates a reverse-clicked multi-selection in Source order"
+    "node node_modules/vitest/vitest.mjs run --root packages/editor-core --config package.json --configLoader runner test/history.test.ts",
+    "node node_modules/vitest/vitest.mjs run --root apps/desen-app --config package.json --configLoader runner test/application.test.tsx -t keeps duplicate and undo/redo operations atomic|does not reuse an older clipboard|retains the project clipboard across admitted surface remounts|clears the project clipboard when opaque workspace authority changes|keeps Source unchanged when a pasted candidate fails the current admission preflight|rejects a structurally admitted foreign capability through the real Catalog preflight|duplicates a reverse-clicked multi-selection in Source order"
   ],
   "nonClaims": [
     "Clipboard transfer is intentionally App-owned and in-memory; foreign OS clipboard payloads are not admitted.",
