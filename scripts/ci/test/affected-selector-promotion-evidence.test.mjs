@@ -340,7 +340,7 @@ test("authenticates the exact 20/20 hosted campaign and live local-preflight suc
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "27eb4790cdddf0e762f09b102d5a5de41ff55e3913270405bfded3e3fe65b761",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "d849ae585944dd4b0ab0fbf7a903860991121a457b0d03bf212d1b2fce1b5246",
+    runnerAuthoritySha256: "ca715bf8de4b229b97d250e19205d84f0826d4197ac70871a3b8addd5a3c93b1",
   });
 });
 

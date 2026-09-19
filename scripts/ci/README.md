@@ -77,7 +77,7 @@ cancellation, hosted, and zero-reference checks pass.
 ## Current authority
 
 - The T15 candidate has 260 logical workloads and 123 proof pairs: 108 ordinary and 15 barriers.
-- The fixed 53/32/38 partition executes 285 physical workloads, including replicated preparation
+- The fixed 81/30/12 partition executes 285 physical workloads, including replicated preparation
   and the join's fresh build. No prior command is removed or reordered.
 - The live checkpoint authority is code-owned by `proof-reader-checkpoints.mjs` and authenticated
   by `verify-proof-reader-checkpoints.mjs`; it must pass before any candidate is merged.
@@ -87,7 +87,7 @@ cancellation, hosted, and zero-reference checks pass.
   T15 executes their inherited current behavior freshly, including every original workbench/style
   assertion and all seven T14 App reuse cases.
 
-These are candidate execution contracts, not a claim that T15 has passed hosted closure.
+These [candidate execution contracts](../../docs/proof/M10A-T15.md#shard-deadline-correction) do not claim T15 hosted closure.
 
 Exact counts are reviewed invariants, not targets to reduce. A performance change may redistribute
 fresh work but cannot omit a workload, cache proof success, increase the deadline silently, or
