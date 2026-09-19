@@ -197,6 +197,9 @@ const M10A_T14_CORRECTIVE_RESEALED_READER_INDEXES = Object.freeze([116, 117, 150
 const M10A_T14_PUBLIC_MATRIX_CORRECTIVE_RESEALED_READER_INDEXES = Object.freeze([
   56, 74, 118, 150, 151,
 ]);
+// Sequence 139 registers the missing T13 asset package test without rewriting its frozen
+// artifact. Only the T13 proof library advances to own the exact inverse manifest projection.
+const M10A_T13_ASSET_TEST_RESEALED_READER_INDEXES = Object.freeze([148]);
 // Sequence 129 reissues only the published-host proof library after the T14 graph successor
 // authority was resealed to the current Vite graph and backing snapshot.
 const M10A_T14_PUBLISHED_HOST_GRAPH_RESEALED_READER_INDEXES = Object.freeze([116]);
@@ -255,7 +258,7 @@ async function assertHistoricalReaderMatchesCurrentWorkspace(reader, index) {
                                           )
                                         ? baselineManifest.checkpoints[69].readers[index]
                                         : reader;
-  const expectedCurrent = M10A_T14_PUBLIC_MATRIX_CORRECTIVE_RESEALED_READER_INDEXES.includes(index)
+  let expectedCurrent = M10A_T14_PUBLIC_MATRIX_CORRECTIVE_RESEALED_READER_INDEXES.includes(index)
     ? baselineManifest.checkpoints[137].readers[index]
     : M10A_T14_CORRECTIVE_RESEALED_READER_INDEXES.includes(index)
       ? baselineManifest.checkpoints[136].readers[index]
@@ -401,6 +404,9 @@ async function assertHistoricalReaderMatchesCurrentWorkspace(reader, index) {
                                                                                   .checkpoints[95]
                                                                                   .readers[index]
                                                                               : current;
+  if (M10A_T13_ASSET_TEST_RESEALED_READER_INDEXES.includes(index)) {
+    expectedCurrent = baselineManifest.checkpoints[138].readers[index];
+  }
   if (
     M10A_T10_RECOVERY_RESEALED_READER_INDEXES.includes(index) &&
     JSON.stringify(reader) === JSON.stringify(baselineManifest.checkpoints[103].readers[index])
@@ -488,7 +494,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   const result = await verifyProofReaderCheckpoints();
 
   assert.equal(manifest.schemaVersion, 1);
-  assert.equal(manifest.checkpoints.length, 138);
+  assert.equal(manifest.checkpoints.length, 139);
   assert.equal(manifest.checkpoints[0].sequence, 1);
   assert.equal(manifest.checkpoints[0].predecessorSha256, GENESIS_PREDECESSOR_SHA256);
   assert.equal(manifest.checkpoints[1].sequence, 2);
@@ -1072,8 +1078,8 @@ test("the reviewed chain authenticates its immutable genesis and current readers
     calculateProofReaderCheckpointSha256(manifest.checkpoints.at(-1)),
     manifest.headSha256,
   );
-  assert.equal(manifest.headSha256, PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[137]);
-  assert.equal(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length, 138);
+  assert.equal(manifest.headSha256, PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[138]);
+  assert.equal(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length, 139);
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[7],
     "f707fb4c3338aeda79eb6242b645b5e864ce54b1e3955373e8edebcd7e026b8a",
@@ -1396,7 +1402,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
       44, 45, 46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57,
       58, 59, 59, 59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70,
       71, 71, 72, 72, 72, 72, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 74, 74, 74, 74, 74, 74,
-      74, 74, 74, 74, 75, 75, 75, 75, 75, 75, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76,
+      74, 74, 74, 74, 75, 75, 75, 75, 75, 75, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76,
     ],
   );
   assert.equal(Object.isFrozen(PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS), true);
@@ -1408,7 +1414,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
     headSha256: manifest.headSha256,
-    checkpoints: 138,
+    checkpoints: 139,
     frozenArtifacts: 76,
     currentReaders: 152,
   });
@@ -10072,8 +10078,10 @@ test("sequence one hundred thirty-seven corrects only the T14 artifact and exact
     calculateProofReaderCheckpointSha256(current),
     "422d35c46c8ceb62967f070de99f5b647af26b27f50239836206d83031324b9e",
   );
-  for (const [index, reader] of current.readers.entries())
+  for (const [index, reader] of current.readers.entries()) {
+    if (M10A_T13_ASSET_TEST_RESEALED_READER_INDEXES.includes(index)) continue;
     await assertHistoricalReaderMatchesCurrentWorkspace(reader, index);
+  }
 });
 
 test("sequence one hundred thirty-eight seals T14 hosted-isolation compatibility", async () => {
@@ -10143,10 +10151,52 @@ test("sequence one hundred thirty-eight seals T14 hosted-isolation compatibility
     calculateProofReaderCheckpointSha256(current),
     "3b225451d576eb7de2dbbae5abfea8abb75fcba9ff8f28961384b707de5a3a14",
   );
-  for (const [index, reader] of current.readers.entries())
+  for (const [index, reader] of current.readers.entries()) {
+    if (M10A_T13_ASSET_TEST_RESEALED_READER_INDEXES.includes(index)) continue;
     await assertHistoricalReaderMatchesCurrentWorkspace(reader, index);
+  }
   const frozen = await readCheckpointedFrozenArtifact("M10A-T14");
   assert.equal(frozen.sha256, current.artifacts.at(-1).sha256);
+  assert.equal(frozen.checkpointHeadSha256, baselineManifest.headSha256);
+});
+
+test("sequence one hundred thirty-nine registers the T13 asset package test", async () => {
+  const previous = baselineManifest.checkpoints[137];
+  const current = baselineManifest.checkpoints[138];
+  const identity = ({ task, role, path: readerPath }) => ({ task, role, path: readerPath });
+
+  assert.equal(current.sequence, 139);
+  assert.equal(
+    current.predecessorSha256,
+    "3b225451d576eb7de2dbbae5abfea8abb75fcba9ff8f28961384b707de5a3a14",
+  );
+  assert.deepEqual(current.artifacts, previous.artifacts);
+  assert.deepEqual(current.readers.map(identity), previous.readers.map(identity));
+  assert.deepEqual(
+    current.readers.flatMap((reader, index) =>
+      JSON.stringify(reader) === JSON.stringify(previous.readers[index]) ? [] : [index],
+    ),
+    M10A_T13_ASSET_TEST_RESEALED_READER_INDEXES,
+  );
+  assert.deepEqual(current.readers[148], {
+    task: "M10A-T13",
+    role: "proof-library",
+    path: "scripts/lib/m10a-t13-proof.mjs",
+    bytes: 8666,
+    sha256: "6839c9969639f111b60f6fdf06f7b3bc348880a2ccf27d643710d6980fa81850",
+  });
+  assert.deepEqual(
+    baselineManifest.checkpoints.slice(0, 138).map(calculateProofReaderCheckpointSha256),
+    PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 138),
+  );
+  assert.equal(
+    calculateProofReaderCheckpointSha256(current),
+    "2c78400cce912bf5d7baa448e82ddfef8d365e666f3bb71ff83bf52ca44f65c8",
+  );
+  for (const [index, reader] of current.readers.entries())
+    await assertHistoricalReaderMatchesCurrentWorkspace(reader, index);
+  const frozen = await readCheckpointedFrozenArtifact("M10A-T13");
+  assert.equal(frozen.sha256, current.artifacts[74].sha256);
   assert.equal(frozen.checkpointHeadSha256, baselineManifest.headSha256);
 });
 
@@ -10806,12 +10856,12 @@ test("one changed reader is a valid review candidate while one hundred fifty-one
   assert.deepEqual(candidate, {
     status: "REVIEW_REQUIRED",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    anchoredCheckpoints: 138,
-    candidateSequence: 139,
+    anchoredCheckpoints: 139,
+    candidateSequence: 140,
     predecessorSha256: baselineManifest.headSha256,
     candidateSha256: manifest.headSha256,
   });
-  assert.equal(successor.sequence, 139);
+  assert.equal(successor.sequence, 140);
   assert.equal(successor.predecessorSha256, baselineManifest.headSha256);
   assert.notDeepEqual(successor.readers[0], reviewedReaders[0]);
   assert.deepEqual(successor.readers.slice(1), reviewedReaders.slice(1));
