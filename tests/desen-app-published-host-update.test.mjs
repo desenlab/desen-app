@@ -53,6 +53,7 @@ import {
   verifyDesenAppPublishedHostUpdateSourcePolicy,
   writeDesenAppPublishedHostUpdateEvidence,
 } from "../scripts/lib/desen-app-published-host-update-proof.mjs";
+import { M10A_T16_LEGACY_INPUT_SUCCESSORS } from "../scripts/lib/m10a-t16-legacy-input-receipts.mjs";
 
 const M10A_T15_INPUT_RECEIPTS = Object.freeze([
   {
@@ -1106,7 +1107,11 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[4], async () => {
   assert.equal(current.runtimeResolution.app.moduleCount, 708);
   assert.equal(current.runtimeResolution.app.staticEdges, 3_045);
   assert.equal(current.runtimeResolution.app.dynamicEdges, 0);
-  assert.equal(current.runtimeResolution.appOutput.outputs[0].bytes, 3_662_047);
+  const appEntryOutput = current.runtimeResolution.appOutput.outputs.find(
+    ({ fileName, type, isEntry }) =>
+      type === "chunk" && isEntry === true && fileName.endsWith(".js"),
+  );
+  assert.equal(appEntryOutput?.bytes, 3_677_797);
   const t08Artifact = JSON.parse(
     await readFile(path.join(ROOT, "docs/proof/artifacts/desen-app-0.1.0-repeatable-demo.json")),
   );
@@ -1769,10 +1774,14 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[8], async () => {
 test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
   for (const receipt of M10A_T15_INPUT_RECEIPTS) {
     const current = await readFile(path.join(ROOT, receipt.path));
-    assert.equal(current.byteLength, receipt.current.bytes, receipt.path);
+    const t16Successor = M10A_T16_LEGACY_INPUT_SUCCESSORS.find(
+      ({ path: sourcePath }) => sourcePath === receipt.path,
+    );
+    const expectedCurrent = t16Successor?.current ?? receipt.current;
+    assert.equal(current.byteLength, expectedCurrent.bytes, receipt.path);
     assert.equal(
       createHash("sha256").update(current).digest("hex"),
-      receipt.current.sha256,
+      expectedCurrent.sha256,
       receipt.path,
     );
     const predecessor = projectM10AT15HistoricalInput(receipt.path, current);
@@ -1864,11 +1873,12 @@ test(DESEN_APP_PUBLISHED_HOST_UPDATE_ROOT_TEST_NAMES[9], async () => {
     expectedError("SUCCESSOR_POLICY_VIOLATION"),
   );
   const liveInspector = await readFile(path.join(ROOT, "apps/desen-app/src/inspector-panel.tsx"));
-  assert.equal(liveInspector.byteLength, M10A_T12_INSPECTOR_RECEIPT.bytes);
-  assert.equal(
-    createHash("sha256").update(liveInspector).digest("hex"),
-    M10A_T12_INSPECTOR_RECEIPT.sha256,
+  const t16Inspector = M10A_T16_LEGACY_INPUT_SUCCESSORS.find(
+    ({ path: sourcePath }) => sourcePath === "apps/desen-app/src/inspector-panel.tsx",
   );
+  const expectedInspector = t16Inspector?.current ?? M10A_T12_INSPECTOR_RECEIPT;
+  assert.equal(liveInspector.byteLength, expectedInspector.bytes);
+  assert.equal(createHash("sha256").update(liveInspector).digest("hex"), expectedInspector.sha256);
   const t06Inspector = projectM10AT12HistoricalInput(
     "apps/desen-app/src/inspector-panel.tsx",
     liveInspector,
