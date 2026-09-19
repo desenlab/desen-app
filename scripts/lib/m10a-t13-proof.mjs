@@ -1,233 +1,101 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import prettier from "prettier";
+import { types } from "node:util";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 
-const MODULE_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
-const WORKSPACE_ROOT = path.resolve(MODULE_DIRECTORY, "../..");
-const ARTIFACT_PATH = path.join(WORKSPACE_ROOT, "docs/proof/artifacts/m10a-t13.json");
+const TASK = "M10A-T13";
+const ARTIFACT_PATH = "docs/proof/artifacts/m10a-t13.json";
+const ARTIFACT_BYTES = 3992;
+const ARTIFACT_SHA256 = "e76f00a135a6625f2c65175d07aafd83e467c4bf193de070444ece99fd0df6f3";
 const PROFILE = "desen.m10a-t13.safe-local-assets.v1";
-const SOURCE_FILES = Object.freeze([
-  "apps/desen-app/package.json",
-  "apps/desen-app/src/design-system-asset-storage.ts",
-  "apps/desen-app/src/main.tsx",
-  "package.json",
-  "packages/design-system-assets/README.md",
-  "packages/design-system-assets/package.json",
-  "packages/design-system-assets/src/asset-admission.ts",
-  "packages/design-system-assets/src/asset-store.ts",
-  "packages/design-system-assets/src/image-presentation.ts",
-  "packages/design-system-assets/src/index.ts",
-  "packages/design-system-assets/test/asset-admission.test.ts",
-  "pnpm-lock.yaml",
-]);
-const FONT = Object.freeze({
-  package: "@fontsource-variable/inter",
-  version: "5.3.0",
-  license: "OFL-1.1",
-  integrity:
-    "sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA==",
-});
-const M10A_T14_PACKAGE_SCRIPT_ADDITIONS = Object.freeze({
-  "verify:m10a-t14": "node scripts/verify-m10a-t14.mjs",
-  "test:m10a-t14": "node --test tests/m10a-t14.test.mjs",
-});
-const M10A_T13_ASSET_PACKAGE_SCRIPT_ADDITION = '    "test": "vitest run",\n';
 
+/** Failure to authenticate the immutable historical T13 receipt. */
 export class M10AT13ProofError extends Error {
   constructor(code, message) {
     super(message);
     this.name = "M10AT13ProofError";
-    this.code = code;
+    this.code = `M10A_T13_${code}`;
   }
 }
 
-function sha256(bytes) {
-  return createHash("sha256").update(bytes).digest("hex");
+function fail(code, message) {
+  throw new M10AT13ProofError(code, message);
 }
 
-async function sourceReceipt(relativePath) {
-  const bytes = await readFile(path.join(WORKSPACE_ROOT, relativePath));
-  return { path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) };
+function freeze(value) {
+  if (value !== null && typeof value === "object") {
+    for (const child of Object.values(value)) freeze(child);
+    Object.freeze(value);
+  }
+  return value;
 }
 
-async function currentSource() {
-  return Promise.all(SOURCE_FILES.map((relativePath) => sourceReceipt(relativePath)));
+/** Authenticates exact task-time bytes, never current implementation or fresh test success. */
+export function authenticateM10AT13Artifact(bytes) {
+  if (
+    types.isProxy(bytes) ||
+    !Buffer.isBuffer(bytes) ||
+    Reflect.ownKeys(bytes).some(
+      (key) => typeof key !== "string" || !/^(?:0|[1-9][0-9]*)$/u.test(key),
+    ) ||
+    bytes.byteLength !== ARTIFACT_BYTES ||
+    createHash("sha256").update(bytes).digest("hex") !== ARTIFACT_SHA256
+  )
+    fail("ARTIFACT_DRIFT", "The immutable task-time artifact bytes drifted.");
+  const artifact = JSON.parse(bytes.toString("utf8"));
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== TASK ||
+    artifact.proofId !== "m10a-t13" ||
+    artifact.profile !== PROFILE ||
+    artifact.result !== "PASS"
+  )
+    fail("ARTIFACT_DRIFT", "The immutable task-time artifact identity drifted.");
+  return freeze(artifact);
 }
 
-/**
- * T13 predates the reviewed T14 package-script registration. Keep T13's immutable package
- * receipt authoritative by projecting only those exact, additive T14 entries out of the current
- * package before comparing the historical reader. Any other package change remains drift.
- */
-async function historicalSource() {
-  const receipts = await Promise.all(
-    SOURCE_FILES.map(async (relativePath) => {
-      if (relativePath === "packages/design-system-assets/package.json") {
-        const packageText = await readFile(path.join(WORKSPACE_ROOT, relativePath), "utf8");
-        const packageJson = JSON.parse(packageText);
-        if (packageJson.scripts?.test === undefined) return sourceReceipt(relativePath);
-        const additions = packageText.split(M10A_T13_ASSET_PACKAGE_SCRIPT_ADDITION).length - 1;
-        if (packageJson.scripts.test !== "vitest run" || additions !== 1) {
-          return sourceReceipt(relativePath);
-        }
-
-        const projectedText = packageText.replace(M10A_T13_ASSET_PACKAGE_SCRIPT_ADDITION, "");
-        const bytes = Buffer.from(projectedText, "utf8");
-        return { path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) };
-      }
-
-      if (relativePath !== "package.json") return sourceReceipt(relativePath);
-
-      const packageText = await readFile(path.join(WORKSPACE_ROOT, relativePath), "utf8");
-      const packageJson = JSON.parse(packageText);
-      const scripts = packageJson.scripts;
-      const hasT14Scripts =
-        scripts?.["verify:m10a-t14"] !== undefined || scripts?.["test:m10a-t14"] !== undefined;
-      if (!hasT14Scripts) return sourceReceipt(relativePath);
-      if (
-        scripts?.["verify:m10a-t14"] !== M10A_T14_PACKAGE_SCRIPT_ADDITIONS["verify:m10a-t14"] ||
-        scripts?.["test:m10a-t14"] !== M10A_T14_PACKAGE_SCRIPT_ADDITIONS["test:m10a-t14"]
-      ) {
-        return sourceReceipt(relativePath);
-      }
-
-      const projected = structuredClone(packageJson);
-      delete projected.scripts["verify:m10a-t14"];
-      delete projected.scripts["test:m10a-t14"];
-      for (const [scriptName, command] of [
-        ["test", "pnpm test:m10a-t14"],
-        ["check", "pnpm verify:m10a-t14"],
-      ]) {
-        const currentCommand = projected.scripts[scriptName];
-        const occurrences = currentCommand?.split(command).length - 1;
-        if (occurrences !== 1 || !currentCommand.includes(` && ${command}`)) {
-          return sourceReceipt(relativePath);
-        }
-        projected.scripts[scriptName] = currentCommand.replace(` && ${command}`, "");
-      }
-      const projectedText = await canonical(projected);
-      const bytes = Buffer.from(projectedText, "utf8");
-      return { path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) };
-    }),
-  );
-  return receipts;
-}
-
-async function canonical(value) {
-  return prettier.format(JSON.stringify(value, null, 2), { parser: "json" });
-}
-
-function expectedClaims() {
-  return {
-    boundedRasterImages: true,
-    restrictedSvgIcons: true,
-    woff2Fonts: true,
-    contentAddressedOpaqueHandles: true,
-    inertProjectMetadataOnly: true,
-    localIndexedDbCas: true,
-    missingAssetDiagnostic: true,
-    boundedImageFitAndCrop: true,
-    noRemoteAssetRequest: true,
-    fontReadinessRequiredByCapture: false,
-    runtimeCoreChanged: false,
-    protocolChanged: false,
-    publisherChanged: false,
-  };
-}
-
+/** Retired capture: T15 owns current authoring; historical bytes cannot be regenerated. */
 export async function captureM10AT13Evidence() {
-  const source = await currentSource();
-  return {
-    schemaVersion: 1,
-    task: "M10A-T13",
-    proofId: "m10a-t13",
-    profile: PROFILE,
-    result: "PASS",
-    source,
-    limits: {
-      maxImageEncodedBytes: 8 * 1024 * 1024,
-      maxFontEncodedBytes: 4 * 1024 * 1024,
-      maxImageDimension: 8192,
-      maxImageDecodedPixels: 16_777_216,
-      allowedImageMediaTypes: ["image/jpeg", "image/png", "image/webp"],
-      allowedIconMediaTypes: ["image/svg+xml"],
-      allowedFontMediaTypes: ["font/woff2"],
-    },
-    bundledDefaultFont: FONT,
-    focusedCommands: [
-      "pnpm --filter @desen/design-system-assets build",
-      "pnpm --filter @desen/design-system-assets lint",
-      "pnpm --filter @desen/design-system-assets exec vitest run",
-      "pnpm --filter @desen/app-web typecheck",
-      "pnpm --filter @desen/app-web build",
-    ],
-    claims: expectedClaims(),
-    nonClaims: [
-      "This slice does not grant Runtime activation, Publisher authority, protocol/Core changes, or release activation.",
-      "The App IndexedDB adapter is a local CAS port; it does not migrate the existing project aggregate or silently replace missing assets.",
-      "Font readiness remains a prerequisite for future visual capture work; T24 owns the capture engine and T26 owns acceptance budgets.",
-    ],
-  };
+  fail(
+    "HISTORICAL_CAPTURE_RETIRED",
+    "T13 is historical. T15 owns fresh successor coverage; do not regenerate this artifact.",
+  );
 }
 
+/** Retired capture: T15 owns current authoring; historical bytes cannot be regenerated. */
 export async function writeM10AT13Evidence() {
-  const evidence = await captureM10AT13Evidence();
-  await mkdir(path.dirname(ARTIFACT_PATH), { recursive: true });
-  await writeFile(ARTIFACT_PATH, await canonical(evidence));
-  return evidence;
+  fail(
+    "HISTORICAL_CAPTURE_RETIRED",
+    "T13 is historical. T15 owns fresh successor coverage; do not regenerate this artifact.",
+  );
 }
 
-export async function verifyM10AT13Evidence() {
-  const bytes = await readFile(ARTIFACT_PATH);
-  let evidence;
-  try {
-    evidence = JSON.parse(bytes.toString("utf8"));
-  } catch {
-    throw new M10AT13ProofError(
-      "M10A_T13_ARTIFACT_JSON_INVALID",
-      "T13 evidence is not valid JSON.",
-    );
-  }
-  if (bytes.toString("utf8") !== (await canonical(evidence))) {
-    throw new M10AT13ProofError(
-      "M10A_T13_ARTIFACT_FORMAT_INVALID",
-      "T13 evidence is not canonical JSON.",
-    );
-  }
+/** Authenticates the checkpoint-owned receipt without claiming current T13 behavior. */
+export async function verifyM10AT13Evidence(options = undefined) {
   if (
-    evidence.schemaVersion !== 1 ||
-    evidence.task !== "M10A-T13" ||
-    evidence.proofId !== "m10a-t13" ||
-    evidence.profile !== PROFILE ||
-    evidence.result !== "PASS"
-  ) {
-    throw new M10AT13ProofError(
-      "M10A_T13_ARTIFACT_IDENTITY_INVALID",
-      "T13 evidence identity or result drifted.",
-    );
-  }
-  const actualSource = await historicalSource();
-  if (JSON.stringify(evidence.source) !== JSON.stringify(actualSource)) {
-    throw new M10AT13ProofError(
-      "M10A_T13_ARTIFACT_SOURCE_DRIFT",
-      "T13 source receipts no longer match the checked-out implementation.",
-    );
-  }
+    options !== undefined &&
+    (options === null ||
+      typeof options !== "object" ||
+      types.isProxy(options) ||
+      Object.getPrototypeOf(options) !== Object.prototype ||
+      Reflect.ownKeys(options).length !== 0)
+  )
+    fail("OPTIONS_INVALID", "Historical verification accepts no authority overrides.");
+  const frozen = await readCheckpointedFrozenArtifact(TASK);
   if (
-    JSON.stringify(evidence.bundledDefaultFont) !== JSON.stringify(FONT) ||
-    JSON.stringify(evidence.claims) !== JSON.stringify(expectedClaims())
-  ) {
-    throw new M10AT13ProofError(
-      "M10A_T13_ARTIFACT_CLAIM_DRIFT",
-      "T13 safety or bundled-font claims drifted.",
-    );
-  }
-  return {
+    frozen.path !== ARTIFACT_PATH ||
+    frozen.byteLength !== ARTIFACT_BYTES ||
+    frozen.sha256 !== ARTIFACT_SHA256
+  )
+    fail("ARTIFACT_DRIFT", "The checkpoint-owned historical receipt drifted.");
+  authenticateM10AT13Artifact(Buffer.from(frozen.bytes));
+  return freeze({
     status: "PASS",
-    task: evidence.task,
-    profile: evidence.profile,
-    sourceFiles: actualSource.length,
-  };
+    task: TASK,
+    profile: PROFILE,
+    evidenceScope: "historical-artifact-authentication",
+    artifactBytes: ARTIFACT_BYTES,
+    artifactSha256: ARTIFACT_SHA256,
+    checkpointHeadSha256: frozen.checkpointHeadSha256,
+    externalExecution: false,
+  });
 }

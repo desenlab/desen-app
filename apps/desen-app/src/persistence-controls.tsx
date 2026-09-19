@@ -38,6 +38,8 @@ export interface PersistenceControlProjection {
 
 /** Projection and admission callbacks consumed by the pure Source persistence control surface. */
 export interface PersistenceControlsProps {
+  /** Whole-project persistence includes masters and instances, not just ordinary Source. */
+  readonly aggregate?: boolean;
   /** Whether any App-owned operation currently blocks another persistence request. */
   readonly busy: boolean;
   /** Opaque identity of the exact persistence authority that a dirty-open confirmation may use. */
@@ -109,6 +111,7 @@ function requiresReopen(projection: PersistenceControlProjection): boolean {
 
 /** Compact, accessible Open/Save controls with no storage or editor authority of their own. */
 export function PersistenceControls({
+  aggregate = false,
   busy,
   confirmationScope,
   designMode,
@@ -132,7 +135,9 @@ export function PersistenceControls({
   const interactionBlocked = busy || lifecycleBusy || unavailable || !designMode;
   const openDisabled = interactionBlocked;
   const saveDisabled = interactionBlocked || !projection.dirty || reopen || exhausted;
-  const status = statusText(projection);
+  const status = aggregate
+    ? statusText(projection).replaceAll("Source", "Project").replaceAll("source", "project")
+    : statusText(projection);
   const statusKey =
     projection.status.state === "success" || projection.status.state === "failed"
       ? `${projection.status.state}:${projection.status.operation}`
@@ -175,9 +180,10 @@ export function PersistenceControls({
   return (
     <section
       aria-busy={busy || lifecycleBusy}
-      aria-label="Source persistence"
+      aria-label={aggregate ? "Project persistence" : "Source persistence"}
       className={styles.persistenceControls}
       data-persistence-state={projection.status.state}
+      data-persistence-scope={aggregate ? "project" : "source"}
     >
       <div
         aria-label="Source persistence actions"
@@ -193,7 +199,7 @@ export function PersistenceControls({
           ref={openButton}
           type="button"
         >
-          Open source
+          {aggregate ? "Open project" : "Open source"}
         </button>
         <button
           aria-describedby={`${statusId} ${admissionId}`}
@@ -201,7 +207,7 @@ export function PersistenceControls({
           onClick={onSave}
           type="button"
         >
-          Save source
+          {aggregate ? "Save project" : "Save source"}
         </button>
       </div>
 
@@ -226,7 +232,9 @@ export function PersistenceControls({
         {designMode
           ? unavailable
             ? "Storage is not configured for this environment."
-            : "Open and save affect only the authored Source."
+            : aggregate
+              ? "Open and save include all surfaces, masters, instances and overrides."
+              : "Open and save affect only the authored Source."
           : "Open and save are available in Design mode."}
       </p>
 
@@ -239,7 +247,9 @@ export function PersistenceControls({
         <span>
           <strong>Discard unsaved changes?</strong>
           <small>
-            Opening the stored Source will replace the current authored Source in this session.
+            {aggregate
+              ? "Opening the stored project will replace all current surface edits, masters, instances and overrides."
+              : "Opening the stored Source will replace the current authored Source in this session."}
           </small>
         </span>
         <div aria-label="Confirm open source" role="group">

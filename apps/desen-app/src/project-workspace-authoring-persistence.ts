@@ -1,4 +1,5 @@
 import { createDesenEditorPersistencePort } from "@desen/editor-core";
+import { authenticateProjectAuthoringControllerLifecycle } from "./project-authoring-controller.js";
 
 import type {
   DesenEditorPersistenceAdapter,
@@ -8,6 +9,7 @@ import type {
   DesenEditorPersistencePort,
 } from "@desen/editor-core";
 import type { EditableProjectRecord } from "@desen/design-system-core";
+import type { ProjectAuthoringController } from "./project-authoring-controller.js";
 import type {
   ProjectLifecycleController,
   ProjectWorkspaceSurfaceName,
@@ -15,6 +17,19 @@ import type {
 
 const SOURCE_KEY = /^[a-z][a-z0-9-]{0,63}$/u;
 const MAX_GENERATION = Number.MAX_SAFE_INTEGER;
+const AGGREGATE_PORT_OWNERS = new WeakMap<DesenEditorPersistencePort, ProjectAuthoringController>();
+
+/** Checks that a port was created for this exact aggregate, not a separate Source store. */
+export function authenticateProjectAuthoringPersistencePort(
+  port: unknown,
+  controller: ProjectAuthoringController,
+): port is DesenEditorPersistencePort {
+  return (
+    typeof port === "object" &&
+    port !== null &&
+    AGGREGATE_PORT_OWNERS.get(port as DesenEditorPersistencePort) === controller
+  );
+}
 
 /** Maps the first logical Source generation onto its later aggregate workspace generation. */
 interface SourceGenerationAlias {
@@ -34,6 +49,8 @@ export interface ProjectWorkspaceAuthoringPersistenceOptions {
   readonly surfaceNames: readonly ProjectWorkspaceSurfaceName[];
   /** The profile's exact host storage route identity. */
   readonly sourceKey: string;
+  /** Optional T15 aggregate draft authority; its complete snapshot replaces Source-only assembly. */
+  readonly authoringController?: ProjectAuthoringController;
 }
 
 /** Controlled failure to create an aggregate-workspace-backed editor persistence port. */
@@ -112,16 +129,23 @@ function writeSettlement(
  * Bridges the public Editor Core persistence port onto the same complete T02 workspace record
  * used by `ProjectLifecycleController`.
  *
- * @remarks The bridge never writes a Source key independently. Each editor compare-and-set first
- * replaces the selected `record.source` inside the admitted aggregate workspace, then commits the
- * complete workspace at the generation observed by the lifecycle controller. Thus a stored Source
- * and its design-system token sources cannot diverge into two local truth stores.
+ * @remarks The bridge never writes a Source key independently. With aggregate authoring it admits
+ * only the current draft's exact Source and persists that complete project, including Source-equal
+ * metadata changes. The legacy Source-only embedding may replace Source only when full project
+ * admission preserves graph coherence. Both paths use the lifecycle's single observed generation.
  */
 export function createProjectWorkspaceAuthoringPersistencePort(
   options: ProjectWorkspaceAuthoringPersistenceOptions,
 ): ProjectWorkspaceAuthoringPersistenceCreationResult {
   if (!sourceKeyAccepted(options)) return Object.freeze({ ok: false });
-  const { initialProject, lifecycle, projectName, sourceKey, surfaceNames } = options;
+  const { initialProject, lifecycle, projectName, sourceKey, surfaceNames, authoringController } =
+    options;
+  if (
+    authoringController !== undefined &&
+    (!authenticateProjectAuthoringControllerLifecycle(authoringController, lifecycle) ||
+      authoringController.read().session.record.id !== initialProject.id)
+  )
+    return Object.freeze({ ok: false });
   const projectId = initialProject.id;
   // A Source first inserted into an already-persisted aggregate is still Source generation one,
   // even though the aggregate advances from its own observed generation. Retain that mapping until
@@ -197,64 +221,78 @@ export function createProjectWorkspaceAuthoringPersistencePort(
       }
       const source = decodeSource(request.bytes);
       if (source === undefined) return failure("source-invalid");
-      if (current === undefined) {
-        if (request.expectedGeneration !== null) {
-          return Object.freeze({
-            status: "conflict" as const,
-            currentGeneration: snapshot.generation,
-          });
-        }
-        const created = lifecycle.createProject(
-          Object.freeze({ ...initialProject, source }),
-          projectName,
-          surfaceNames,
-        );
-        if (created !== null) return failure("source-invalid");
-      } else {
-        const replaced = lifecycle.replaceProjectRecord(
-          projectId,
-          Object.freeze({ ...current, source }),
-        );
-        if (replaced !== null) return failure("source-invalid");
-      }
-      const settlement = await lifecycle.save();
-      if (createsSourceInExistingAggregate && settlement.status === "updated") {
-        if (settlement.generation !== snapshot.generation + 1)
-          return failure("storage-unavailable");
-        sourceGenerationAlias = Object.freeze({
-          sourceGeneration: 1,
-          aggregateGeneration: settlement.generation,
-        });
-        return Object.freeze({ status: "created" as const, generation: 1 });
-      }
-      if (matchingAlias !== undefined && request.expectedGeneration !== null) {
-        if (settlement.status === "updated") {
-          if (settlement.generation !== matchingAlias.aggregateGeneration + 1) {
-            return failure("storage-unavailable");
+      const persist = async (
+        aggregate?: EditableProjectRecord,
+      ): Promise<DesenEditorPersistenceAdapterWriteResult> => {
+        if (aggregate !== undefined && aggregate.id !== projectId) return failure("source-invalid");
+        // Snapshot-capture notifications may be reentrant. Recheck the same aggregate generation
+        // and workspace identity before any local replacement or storage write.
+        if (lifecycle.read() !== snapshot) return failure("storage-busy");
+        if (current === undefined) {
+          if (request.expectedGeneration !== null) {
+            return Object.freeze({
+              status: "conflict" as const,
+              currentGeneration: snapshot.generation,
+            });
           }
-          const nextSourceGeneration = request.expectedGeneration + 1;
+          const created = lifecycle.createProject(
+            aggregate ?? Object.freeze({ ...initialProject, source }),
+            projectName,
+            surfaceNames,
+          );
+          if (created !== null) return failure("source-invalid");
+        } else {
+          const replaced = lifecycle.replaceProjectRecord(
+            projectId,
+            aggregate ?? Object.freeze({ ...current, source }),
+          );
+          if (replaced !== null) return failure("source-invalid");
+        }
+        const settlement = await lifecycle.save();
+        if (createsSourceInExistingAggregate && settlement.status === "updated") {
+          if (settlement.generation !== snapshot.generation + 1)
+            return failure("storage-unavailable");
           sourceGenerationAlias = Object.freeze({
-            sourceGeneration: nextSourceGeneration,
+            sourceGeneration: 1,
             aggregateGeneration: settlement.generation,
           });
-          return Object.freeze({ status: "updated" as const, generation: nextSourceGeneration });
+          return Object.freeze({ status: "created" as const, generation: 1 });
         }
-        if (settlement.status === "unchanged") {
-          if (settlement.generation !== matchingAlias.aggregateGeneration) {
-            return failure("storage-unavailable");
+        if (matchingAlias !== undefined && request.expectedGeneration !== null) {
+          if (settlement.status === "updated") {
+            if (settlement.generation !== matchingAlias.aggregateGeneration + 1) {
+              return failure("storage-unavailable");
+            }
+            const nextSourceGeneration = request.expectedGeneration + 1;
+            sourceGenerationAlias = Object.freeze({
+              sourceGeneration: nextSourceGeneration,
+              aggregateGeneration: settlement.generation,
+            });
+            return Object.freeze({ status: "updated" as const, generation: nextSourceGeneration });
           }
-          return Object.freeze({
-            status: "unchanged" as const,
-            generation: request.expectedGeneration,
-          });
+          if (settlement.status === "unchanged") {
+            if (settlement.generation !== matchingAlias.aggregateGeneration) {
+              return failure("storage-unavailable");
+            }
+            return Object.freeze({
+              status: "unchanged" as const,
+              generation: request.expectedGeneration,
+            });
+          }
         }
-      }
-      return writeSettlement(settlement);
+        return writeSettlement(settlement);
+      };
+      return authoringController === undefined
+        ? persist()
+        : ((await authoringController.saveSnapshot(source, persist)) ?? failure("source-invalid"));
     },
   });
 
   try {
-    return Object.freeze({ ok: true, persistencePort: createDesenEditorPersistencePort(adapter) });
+    const persistencePort = createDesenEditorPersistencePort(adapter);
+    if (authoringController !== undefined)
+      AGGREGATE_PORT_OWNERS.set(persistencePort, authoringController);
+    return Object.freeze({ ok: true, persistencePort });
   } catch {
     return Object.freeze({ ok: false });
   }

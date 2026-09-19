@@ -115,12 +115,12 @@ async function selectStyleLayer(page: Page, name: "Desktop" | "Tablet" | "Mobile
 
 async function saveCurrentSource(page: Page): Promise<void> {
   await page.getByText("Source & release", { exact: true }).click();
-  const persistence = page.getByRole("region", { name: "Source persistence" });
+  const persistence = page.getByRole("region", { name: "Project persistence" });
   await expect(persistence).toBeVisible();
-  const save = persistence.getByRole("button", { name: "Save source", exact: true });
+  const save = persistence.getByRole("button", { name: "Save project", exact: true });
   await expect(save).toBeEnabled();
   await save.click();
-  await expect(persistence.getByRole("status")).toContainText("Source saved successfully.");
+  await expect(persistence.getByRole("status")).toContainText("Project saved successfully.");
   await expect(save).toBeDisabled();
   await page.getByText("Source & release", { exact: true }).click();
 }

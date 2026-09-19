@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-invalid-void-type -- The port contract deliberately proves
  * receiver-independent callbacks at its capability boundary. */
 import { describe, expect, it } from "vitest";
+import { canonicalizeJson } from "@desen/protocol";
 
 import {
   createEmptyProjectWorkspace,
@@ -45,6 +46,22 @@ function names(): readonly { readonly id: string; readonly name: string }[] {
   ];
 }
 
+function legacyWorkspace() {
+  const entry = (id: string) => ({
+    id,
+    name: id,
+    record: project(id),
+    surfaceOrder: ["result", "start"],
+    surfaceNames: names(),
+  });
+  return {
+    kind: PROJECT_WORKSPACE_KIND,
+    schemaVersion: PROJECT_WORKSPACE_SCHEMA_VERSION,
+    projects: [entry("legacy-visible")],
+    deletedProjects: [entry("legacy-deleted")],
+  };
+}
+
 function requireController(
   storagePort: ProjectWorkspaceStoragePort = memoryPort(),
 ): NonNullable<ReturnType<typeof createProjectLifecycleController>> {
@@ -80,6 +97,96 @@ function memoryPort(): ProjectWorkspaceStoragePort {
 }
 
 describe("ordinary project and surface lifecycle", () => {
+  it("opens visible and deleted v1 projects without writing and saves v2 at the observed generation", async () => {
+    const legacy = legacyWorkspace();
+    const legacyBytes = canonicalizeJson(legacy);
+    let stored: unknown = legacy;
+    let storedGeneration = 17;
+    const saves: ProjectWorkspaceSaveRequest[] = [];
+    const storagePort: ProjectWorkspaceStoragePort = {
+      openWorkspace: async () => ({
+        status: "opened",
+        generation: storedGeneration,
+        workspace: stored,
+      }),
+      saveWorkspace: async (request) => {
+        saves.push(request);
+        if (request.expectedGeneration !== storedGeneration) {
+          return { status: "conflict", currentGeneration: storedGeneration };
+        }
+        stored = request.workspace;
+        storedGeneration += 1;
+        return { status: "updated", generation: storedGeneration };
+      },
+    };
+    const controller = requireController(storagePort);
+
+    expect(await controller.open()).toEqual({ status: "opened", generation: 17 });
+    expect(saves).toEqual([]);
+    expect(stored).toBe(legacy);
+    expect(canonicalizeJson(legacy)).toBe(legacyBytes);
+    expect(controller.read().dirty).toBe(false);
+    expect(controller.read().generation).toBe(17);
+    expect(controller.read().workspace.schemaVersion).toBe(1);
+    expect(controller.read().savedWorkspace).toBe(controller.read().workspace);
+    for (const key of ["projects", "deletedProjects"] as const) {
+      const migrated = controller.read().workspace[key][0];
+      expect(migrated?.record.schemaVersion).toBe(2);
+      expect(migrated?.record.designSystem.recipeGraph).toEqual({ definitions: [], instances: [] });
+      expect(migrated?.record.source).toEqual(
+        (legacy[key][0]?.record as Record<string, unknown>).source,
+      );
+      expect(migrated?.surfaceOrder).toEqual(legacy[key][0]?.surfaceOrder);
+      expect(migrated?.surfaceNames).toEqual(legacy[key][0]?.surfaceNames);
+    }
+
+    const normalizedWorkspace = controller.read().workspace;
+    expect(await controller.save()).toEqual({ status: "updated", generation: 18 });
+    expect(saves).toHaveLength(1);
+    expect(saves[0]?.expectedGeneration).toBe(17);
+    expect(saves[0]?.workspace).toBe(normalizedWorkspace);
+    expect(canonicalizeJson(stored)).toBe(canonicalizeJson(normalizedWorkspace));
+    expect(canonicalizeJson(legacy)).toBe(legacyBytes);
+    expect(controller.read().dirty).toBe(false);
+
+    expect(await controller.open()).toEqual({ status: "opened", generation: 18 });
+    expect(controller.read().workspace).toEqual(normalizedWorkspace);
+    expect(saves).toHaveLength(1);
+  });
+
+  it.each(["projects", "deletedProjects"] as const)(
+    "rejects a malformed v1 member in %s without replacing the prior workspace or generation",
+    async (collection) => {
+      let stored = legacyWorkspace();
+      let generation = 9;
+      let writes = 0;
+      const controller = requireController({
+        openWorkspace: async () => ({ status: "opened", generation, workspace: stored }),
+        saveWorkspace: async () => {
+          writes += 1;
+          return { status: "failed" };
+        },
+      });
+      expect(await controller.open()).toEqual({ status: "opened", generation: 9 });
+      expect(controller.renameProject("legacy-visible", "Unsaved local name")).toBeNull();
+      const previous = controller.read();
+      expect(previous.dirty).toBe(true);
+
+      stored = legacyWorkspace();
+      generation = 10;
+      const record = stored[collection][0]?.record as {
+        designSystem: Record<string, unknown>;
+      };
+      record.designSystem.recipeGraph = { definitions: [], instances: [] };
+      expect(await controller.open()).toEqual({ status: "failed", reason: "invalid-project" });
+      expect(controller.read().workspace).toBe(previous.workspace);
+      expect(controller.read().savedWorkspace).toBe(previous.savedWorkspace);
+      expect(controller.read().generation).toBe(9);
+      expect(controller.read().dirty).toBe(true);
+      expect(writes).toBe(0);
+    },
+  );
+
   it("captures options and host settlements without invoking accessors or binding a receiver", async () => {
     let accessorCalls = 0;
     const hostileOptions = Object.defineProperty({}, "initialWorkspace", {

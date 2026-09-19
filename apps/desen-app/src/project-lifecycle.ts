@@ -50,7 +50,7 @@ export interface ProjectWorkspaceProject {
   readonly id: string;
   /** Human-facing project name. */
   readonly name: string;
-  /** Exact T02 editable-project envelope; this layer never rewrites it. */
+  /** Exact current editable-project envelope; this layer never rewrites admitted Source. */
   readonly record: EditableProjectRecord;
   /** Complete order of the Source surface identities. */
   readonly surfaceOrder: readonly string[];
@@ -266,6 +266,12 @@ export interface ProjectLifecycleControllerOptions {
   readonly initialWorkspace: unknown;
   /** Explicit host storage authority; this module has no browser or filesystem authority. */
   readonly storagePort: ProjectWorkspaceStoragePort;
+  /**
+   * Optional trusted application preflight over the complete migrated workspace. Only literal
+   * `true` admits it; exceptions or other results preserve the preceding workspace. Captured once
+   * at construction, this callback cannot come from project data or choose storage authority.
+   */
+  readonly admitWorkspace?: (this: void, workspace: ProjectWorkspaceRecord) => boolean;
 }
 
 function ownRecord(
@@ -532,7 +538,7 @@ function captureSaveResult(value: unknown): ProjectWorkspaceSaveResult {
         status: "conflict",
         currentGeneration: conflict.currentGeneration as number | null,
       })
-    : Object.freeze({ status: "failed" });
+    : Object.freeze({ status: "indeterminate" });
 }
 
 function captureInitial(value: unknown): ProjectWorkspaceRecord | undefined {
@@ -560,10 +566,27 @@ function sourceSetsEqual(first: EditableProjectRecord, second: EditableProjectRe
 export function createProjectLifecycleController(
   options: ProjectLifecycleControllerOptions,
 ): ProjectLifecycleController | null {
-  const capturedOptions = ownRecord(options, ["initialWorkspace", "storagePort"]);
+  const capturedOptions =
+    ownRecord(options, ["initialWorkspace", "storagePort"]) ??
+    ownRecord(options, ["initialWorkspace", "storagePort", "admitWorkspace"]);
   const initialWorkspace = captureInitial(capturedOptions?.initialWorkspace);
   const storagePort = capturePort(capturedOptions?.storagePort);
   if (initialWorkspace === undefined || storagePort === undefined) return null;
+  const admission = capturedOptions?.admitWorkspace;
+  if (admission !== undefined && typeof admission !== "function") return null;
+  let checkingWorkspace = false;
+  const acceptsWorkspace = (workspace: ProjectWorkspaceRecord): boolean => {
+    if (checkingWorkspace) return false;
+    checkingWorkspace = true;
+    try {
+      return admission === undefined || admission(workspace) === true;
+    } catch {
+      return false;
+    } finally {
+      checkingWorkspace = false;
+    }
+  };
+  if (!acceptsWorkspace(initialWorkspace)) return null;
   const openWorkspace = storagePort.openWorkspace;
   const saveWorkspace = storagePort.saveWorkspace;
   const listeners = new Set<() => void>();
@@ -587,7 +610,12 @@ export function createProjectLifecycleController(
   };
   const mutate = (workspace: ProjectWorkspaceRecord): ProjectLifecycleResult | null => {
     if (state.disposed) return resultFailure("disposed");
-    if (state.pending !== null) return resultFailure("operation-in-progress");
+    if (state.pending !== null || checkingWorkspace) return resultFailure("operation-in-progress");
+    const observed = state;
+    const accepted = acceptsWorkspace(workspace);
+    if (state.disposed) return resultFailure("disposed");
+    if (state !== observed) return resultFailure("operation-in-progress");
+    if (!accepted) return resultFailure("invalid-workspace");
     replace({
       ...state,
       workspace,
@@ -607,14 +635,17 @@ export function createProjectLifecycleController(
     },
     open: async () => {
       if (state.disposed) return resultFailure("disposed");
-      if (state.pending !== null) return resultFailure("operation-in-progress");
+      if (state.pending !== null || checkingWorkspace)
+        return resultFailure("operation-in-progress");
       replace({ ...state, pending: "opening", result: null });
+      if (state.disposed) return resultFailure("disposed");
       let outcome: ProjectWorkspaceOpenResult;
       try {
         outcome = captureOpenResult(await openWorkspace());
       } catch {
         outcome = { status: "failed" };
       }
+      if (state.disposed) return resultFailure("disposed");
       if (outcome.status === "missing") {
         const result = Object.freeze({ status: "missing" } as const);
         replace({ ...state, pending: null, result });
@@ -626,8 +657,16 @@ export function createProjectLifecycleController(
         return result;
       }
       const admitted = admitProjectWorkspaceRecord(outcome.workspace);
+      if (state.disposed) return resultFailure("disposed");
       if (!admitted.ok) {
         const result = resultFailure(admitted.reason);
+        replace({ ...state, pending: null, result });
+        return result;
+      }
+      const accepted = acceptsWorkspace(admitted.workspace);
+      if (state.disposed) return resultFailure("disposed");
+      if (!accepted) {
+        const result = resultFailure("invalid-workspace");
         replace({ ...state, pending: null, result });
         return result;
       }
@@ -646,26 +685,40 @@ export function createProjectLifecycleController(
     },
     save: async () => {
       if (state.disposed) return resultFailure("disposed");
-      if (state.pending !== null) return resultFailure("operation-in-progress");
+      if (state.pending !== null || checkingWorkspace)
+        return resultFailure("operation-in-progress");
       if (state.reopenRequired) return resultFailure("reopen-required");
       const lastSaveMode = requestedSaveMode ?? "explicit";
       requestedSaveMode = null;
+      const request = Object.freeze({
+        expectedGeneration: state.generation,
+        workspace: state.workspace,
+      });
       replace({ ...state, pending: "saving", result: null, lastSaveMode });
+      if (state.disposed) return resultFailure("disposed");
       let outcome: ProjectWorkspaceSaveResult;
       try {
-        outcome = captureSaveResult(
-          await saveWorkspace(
-            Object.freeze({ expectedGeneration: state.generation, workspace: state.workspace }),
-          ),
-        );
+        outcome = captureSaveResult(await saveWorkspace(request));
       } catch {
-        outcome = { status: "failed" };
+        // A rejected promise cannot prove that the already dispatched write did not commit.
+        outcome = { status: "indeterminate" };
       }
+      if (state.disposed) return resultFailure("disposed");
       if (
         (outcome.status === "created" ||
           outcome.status === "updated" ||
           outcome.status === "unchanged") &&
-        generation(outcome.generation) !== undefined
+        generation(outcome.generation) !== undefined &&
+        (outcome.status === "created"
+          ? request.expectedGeneration === null && outcome.generation === 1
+          : outcome.status === "updated"
+            ? request.expectedGeneration !== null &&
+              request.expectedGeneration < MAX_GENERATION &&
+              outcome.generation === request.expectedGeneration + 1
+            : request.expectedGeneration !== null &&
+              outcome.generation === request.expectedGeneration &&
+              state.savedWorkspace !== null &&
+              canonicalizeJson(request.workspace) === canonicalizeJson(state.savedWorkspace))
       ) {
         const result = Object.freeze({
           status: outcome.status,
@@ -673,7 +726,7 @@ export function createProjectLifecycleController(
         } as const);
         replace({
           ...state,
-          savedWorkspace: state.workspace,
+          savedWorkspace: request.workspace,
           generation: outcome.generation,
           dirty: false,
           pending: null,
@@ -689,10 +742,10 @@ export function createProjectLifecycleController(
           status: "conflict",
           currentGeneration: outcome.currentGeneration,
         } as const);
-        replace({ ...state, pending: null, result });
+        replace({ ...state, pending: null, reopenRequired: true, result });
         return result;
       }
-      if (outcome.status === "indeterminate") {
+      if (outcome.status !== "failed") {
         const result = Object.freeze({ status: "indeterminate" } as const);
         replace({ ...state, pending: null, reopenRequired: true, result });
         return result;
@@ -703,7 +756,8 @@ export function createProjectLifecycleController(
     },
     autosave: async () => {
       if (state.disposed) return resultFailure("disposed");
-      if (state.pending !== null) return resultFailure("operation-in-progress");
+      if (state.pending !== null || checkingWorkspace)
+        return resultFailure("operation-in-progress");
       if (state.reopenRequired) return resultFailure("reopen-required");
       requestedSaveMode = "autosave";
       return controller.save();
@@ -1004,7 +1058,9 @@ export function createProjectLifecycleController(
     },
     discardChanges: () => {
       if (state.disposed) return resultFailure("disposed");
-      if (state.pending !== null) return resultFailure("operation-in-progress");
+      if (state.pending !== null || checkingWorkspace)
+        return resultFailure("operation-in-progress");
+      if (state.reopenRequired) return resultFailure("reopen-required");
       const workspace = state.savedWorkspace ?? initialWorkspace;
       replace({
         ...state,

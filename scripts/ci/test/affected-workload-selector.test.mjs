@@ -140,10 +140,13 @@ const DESEN_APP_CONNECTED_PROOF_UNITS = Object.freeze([
   "m10a-t08",
   "m10a-t09",
   "m10a-t12",
+  "m10a-t13",
+  "m10a-t14",
+  "m10a-t15",
 ]);
 const DESEN_APP_CONNECTED_PROOF_UNIT_COUNT = DESEN_APP_CONNECTED_PROOF_UNITS.length;
-const DESEN_APP_CONNECTED_WORKLOAD_COUNT = 190;
-const EXHAUSTIVE_WORKLOAD_COUNT = 258;
+const DESEN_APP_CONNECTED_WORKLOAD_COUNT = 196;
+const EXHAUSTIVE_WORKLOAD_COUNT = 260;
 
 function sha256(value) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -464,7 +467,7 @@ test("Design/Run modes select their exact canvas, state, and action closure", as
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, DESEN_APP_CONNECTED_PROOF_UNIT_COUNT);
   assert.equal(plan.workloadCount, DESEN_APP_CONNECTED_WORKLOAD_COUNT);
-  assert.equal(plan.planSha256, "4bda0866653799f0c55a5c4824c03070329608adb95942eda09e9504e73b9445");
+  assert.equal(plan.planSha256, "3987cbe6925d2f8bf8901344d4c87c3e1500e51415cc4994788b6e601df2c615");
   assert.equal(plan.nodeIds.includes("verify-desen-app-real-adapter-canvas"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-state-binding-editor"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-event-action-editor"), true);
@@ -626,7 +629,7 @@ test("evergreen product composition selects its exact M10-T01C successor closure
   assert.deepEqual(plan.affectedProofUnitIds, DESEN_APP_CONNECTED_PROOF_UNITS);
   assert.equal(plan.proofUnitCount, DESEN_APP_CONNECTED_PROOF_UNIT_COUNT);
   assert.equal(plan.workloadCount, DESEN_APP_CONNECTED_WORKLOAD_COUNT);
-  assert.equal(plan.planSha256, "e043dc175577eb73d89da26d8c8160ff1d791e48fc4238b90aecc060d78db90f");
+  assert.equal(plan.planSha256, "c12e494ae887aea2d6fd5833b730fe56637fa2fbf82b4bc0cbcaeeeb81ed9d04");
   assert.equal(plan.nodeIds.includes("verify-desen-app-visual-behavior-authoring"), true);
   assert.equal(plan.nodeIds.includes("verify-desen-app-evergreen-product-composition"), true);
   assert.equal(plan.nodeIds.includes("test-desen-app-evergreen-product-composition"), true);
@@ -884,6 +887,12 @@ test("M10 and M10A proof inputs select the complete successor closure", async ()
     ["tests/m10a-t09.test.mjs", "m10a-t09"],
     ["scripts/verify-m10a-t12.mjs", "m10a-t12"],
     ["tests/m10a-t12.test.mjs", "m10a-t12"],
+    ["scripts/verify-m10a-t13.mjs", "m10a-t13"],
+    ["tests/m10a-t13.test.mjs", "m10a-t13"],
+    ["scripts/verify-m10a-t14.mjs", "m10a-t14"],
+    ["tests/m10a-t14.test.mjs", "m10a-t14"],
+    ["scripts/verify-m10a-t15.mjs", "m10a-t15"],
+    ["tests/m10a-t15.test.mjs", "m10a-t15"],
   ]) {
     const plan = createShadowAffectedSelection(
       await affectedBoundary(currentPaths(), [changedPath]),
@@ -910,6 +919,9 @@ test("M10 and M10A proof inputs select the complete successor closure", async ()
       "m10a-t08",
       "m10a-t09",
       "m10a-t12",
+      "m10a-t13",
+      "m10a-t14",
+      "m10a-t15",
     ]) {
       assert.equal(plan.nodeIds.includes(`verify-${id}`), true);
       assert.equal(plan.nodeIds.includes(`test-${id}`), true);
@@ -1101,6 +1113,17 @@ test("M10A product, Catalog, documentation, proof artifact, and shared reader in
     "packages/starter-catalog-web/src/visual-style-profile.ts",
     "scripts/generate-m10a-t12-proof.mjs",
     "scripts/lib/m10a-t12-proof.mjs",
+    "docs/proof/M10A-T15.md",
+    "docs/proof/artifacts/m10a-t15.json",
+    "scripts/generate-m10a-t15-proof.mjs",
+    "scripts/lib/m10a-t15-proof.mjs",
+    "scripts/lib/m10a-t15-execution.mjs",
+    "scripts/lib/m10a-t15-workloads.mjs",
+    "apps/desen-app/src/project-authoring-controller.ts",
+    "apps/desen-app/src/project-master-draft-controller.ts",
+    "apps/desen-app-browser-e2e/t15-masters-instances.pw.ts",
+    "apps/desen-app-browser-e2e/t15-playwright.config.ts",
+    "packages/design-system-core/src/recipe-transactions.ts",
   ]) {
     const plan = createShadowAffectedSelection(
       await affectedBoundary(currentPaths(), [changedPath]),

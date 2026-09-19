@@ -1,25 +1,41 @@
 import { canonicalizeJson, digestCanonicalJson } from "@desen/protocol";
 
-import { admitEditableProjectRecord, EDITABLE_PROJECT_SCHEMA_VERSION } from "./project-record.js";
+import {
+  admitEditableProjectRecord,
+  admitEditableProjectRecordForMigration,
+  EDITABLE_PROJECT_SCHEMA_VERSION,
+} from "./project-record.js";
 
 import type { EditableProjectDiagnostic } from "./diagnostics.js";
 import type { EditableProjectRecord } from "./project-record.js";
 
 /** Exact closed set of editable-project versions understood by this package. */
-export const SUPPORTED_EDITABLE_PROJECT_SCHEMA_VERSIONS = Object.freeze([1] as const);
+export const SUPPORTED_EDITABLE_PROJECT_SCHEMA_VERSIONS = Object.freeze([1, 2] as const);
 
-/** Successful finite migration dispatch and canonical loss report. */
-export interface EditableProjectMigrationSuccess {
+/** One exact additive transformation applied by the version-1 migration. */
+export type EditableProjectMigrationChange =
+  | {
+      /** Identifies the envelope discriminator update. */
+      readonly code: "SCHEMA_VERSION_UPDATED";
+      /** Exact field changed by this transformation. */
+      readonly pointer: "/schemaVersion";
+      /** The admitted historical version. */
+      readonly from: 1;
+      /** The current returned version. */
+      readonly to: 2;
+    }
+  | {
+      /** Identifies the additive empty authoring graph. */
+      readonly code: "RECIPE_GRAPH_ADDED";
+      /** Exact field introduced without reinterpreting legacy metadata. */
+      readonly pointer: "/designSystem/recipeGraph";
+    };
+
+interface EditableProjectMigrationOutput {
   /** Confirms that a complete current record is available. */
   readonly ok: true;
-  /** Schema version observed before dispatch. */
-  readonly fromSchemaVersion: typeof EDITABLE_PROJECT_SCHEMA_VERSION;
   /** Current schema version returned by dispatch. */
   readonly toSchemaVersion: typeof EDITABLE_PROJECT_SCHEMA_VERSION;
-  /** False for the v1 identity path; no fictional predecessor is claimed. */
-  readonly migrated: false;
-  /** Explicitly empty because the current identity path rewrites no field. */
-  readonly changes: readonly [];
   /** Explicitly empty because every admitted byte of semantic JSON is retained. */
   readonly losses: readonly [];
   /** Detached recursively immutable current record. */
@@ -31,6 +47,30 @@ export interface EditableProjectMigrationSuccess {
   /** Always empty on success. */
   readonly diagnostics: readonly [];
 }
+
+/** Successful finite migration dispatch with a truthful version-specific change report. */
+export type EditableProjectMigrationSuccess = EditableProjectMigrationOutput &
+  (
+    | {
+        /** Exact admitted predecessor version. */
+        readonly fromSchemaVersion: 1;
+        /** Confirms the explicit version-1 to version-2 conversion. */
+        readonly migrated: true;
+        /** Ordered discriminator update and additive empty-graph changes. */
+        readonly changes: readonly [
+          Extract<EditableProjectMigrationChange, { readonly code: "SCHEMA_VERSION_UPDATED" }>,
+          Extract<EditableProjectMigrationChange, { readonly code: "RECIPE_GRAPH_ADDED" }>,
+        ];
+      }
+    | {
+        /** Current version admitted without conversion. */
+        readonly fromSchemaVersion: 2;
+        /** Confirms the version-2 identity path. */
+        readonly migrated: false;
+        /** Identity dispatch rewrites no field. */
+        readonly changes: readonly [];
+      }
+  );
 
 /** Failed migration dispatch with no partial project or export bytes. */
 export interface EditableProjectMigrationFailure {
@@ -47,23 +87,57 @@ export type EditableProjectMigrationResult =
 /**
  * Dispatches an unknown project through the closed schema-version registry.
  *
- * @remarks Version 1 is currently the only real format, so its path is a lossless identity
- * migration. Unknown, legacy and future versions fail explicitly without speculative conversion.
+ * @remarks Exact version 1 converts losslessly by adding an empty recipe graph and changing only
+ * the envelope version. Version 2 has an identity path. Safe inert capture precedes version
+ * dispatch; unknown versions and malformed known formats produce no partial result.
  */
 export function migrateEditableProjectRecord(input: unknown): EditableProjectMigrationResult {
-  const admission = admitEditableProjectRecord(input);
+  const admission = admitEditableProjectRecordForMigration(input);
   if (!admission.ok) return admission;
-  const canonicalJson = canonicalizeJson(admission.record);
-  return Object.freeze({
+
+  const original = admission.record;
+  const current =
+    original.schemaVersion === EDITABLE_PROJECT_SCHEMA_VERSION
+      ? { ok: true as const, record: original }
+      : admitEditableProjectRecord({
+          ...original,
+          schemaVersion: EDITABLE_PROJECT_SCHEMA_VERSION,
+          designSystem: {
+            ...original.designSystem,
+            recipeGraph: { definitions: [], instances: [] },
+          },
+        });
+  if (!current.ok) return current;
+  const output = {
     ok: true,
-    fromSchemaVersion: EDITABLE_PROJECT_SCHEMA_VERSION,
     toSchemaVersion: EDITABLE_PROJECT_SCHEMA_VERSION,
+    losses: Object.freeze([]) as readonly [],
+    record: current.record,
+    canonicalJson: canonicalizeJson(current.record),
+    digest: digestCanonicalJson(current.record),
+    diagnostics: Object.freeze([]) as readonly [],
+  } as const;
+
+  if (original.schemaVersion === 1) {
+    return Object.freeze({
+      ...output,
+      fromSchemaVersion: 1,
+      migrated: true,
+      changes: Object.freeze([
+        Object.freeze({
+          code: "SCHEMA_VERSION_UPDATED",
+          pointer: "/schemaVersion",
+          from: 1,
+          to: 2,
+        }),
+        Object.freeze({ code: "RECIPE_GRAPH_ADDED", pointer: "/designSystem/recipeGraph" }),
+      ] as const),
+    });
+  }
+  return Object.freeze({
+    ...output,
+    fromSchemaVersion: 2,
     migrated: false,
     changes: Object.freeze([]) as readonly [],
-    losses: Object.freeze([]) as readonly [],
-    record: admission.record,
-    canonicalJson,
-    digest: digestCanonicalJson(admission.record),
-    diagnostics: Object.freeze([]) as readonly [],
   });
 }

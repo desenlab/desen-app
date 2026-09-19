@@ -1,303 +1,101 @@
-import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { types as utilTypes } from "node:util";
-import prettier from "prettier";
+import { types } from "node:util";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const ARTIFACT = path.join(ROOT, "docs/proof/artifacts/m10a-t14.json");
+const TASK = "M10A-T14";
+const ARTIFACT_PATH = "docs/proof/artifacts/m10a-t14.json";
+const ARTIFACT_BYTES = 3670;
+const ARTIFACT_SHA256 = "fe7721562647b4ba4b9ab1275eec3fa554f9fa664d614745e6b5b3d70c75ef54";
 const PROFILE = "desen.m10a-t14.history-identity-safe-reuse.v1";
-const REPORT_LIMIT = 64 * 1024;
-const SOURCES = Object.freeze([
-  "apps/desen-app/src/application.tsx",
-  "apps/desen-app/test/application.test.tsx",
-  "packages/editor-core/src/history.ts",
-  "packages/editor-core/src/index.ts",
-  "packages/editor-core/test/history.test.ts",
-  "pnpm-lock.yaml",
-]);
 
-/** Exact focused behavior suites that the production verifier executes. */
-export const M10A_T14_FOCUSED_COMMANDS = Object.freeze([
-  Object.freeze({
-    command: "node",
-    args: Object.freeze([
-      "node_modules/vitest/vitest.mjs",
-      "run",
-      "--root",
-      "packages/editor-core",
-      "--config",
-      "package.json",
-      "--configLoader",
-      "runner",
-      "test/history.test.ts",
-    ]),
-  }),
-  Object.freeze({
-    command: "node",
-    args: Object.freeze([
-      "node_modules/vitest/vitest.mjs",
-      "run",
-      "--root",
-      "apps/desen-app",
-      "--config",
-      "package.json",
-      "--configLoader",
-      "runner",
-      "test/application.test.tsx",
-      "-t",
-      "keeps duplicate and undo/redo operations atomic|does not reuse an older clipboard|retains the project clipboard across admitted surface remounts|clears the project clipboard when opaque workspace authority changes|keeps Source unchanged when a pasted candidate fails the current admission preflight|rejects a structurally admitted foreign capability through the real Catalog preflight|duplicates a reverse-clicked multi-selection in Source order",
-    ]),
-  }),
-]);
-
+/** Failure to authenticate the immutable historical T14 receipt. */
 export class M10AT14ProofError extends Error {
   constructor(code, message) {
     super(message);
     this.name = "M10AT14ProofError";
-    this.code = code;
+    this.code = `M10A_T14_${code}`;
   }
 }
 
-function sha256(bytes) {
-  return createHash("sha256").update(bytes).digest("hex");
+function fail(code, message) {
+  throw new M10AT14ProofError(code, message);
 }
 
-function captureVerifierOptions(input) {
-  if (input === undefined) return Object.freeze({});
+function freeze(value) {
+  if (value !== null && typeof value === "object") {
+    for (const child of Object.values(value)) freeze(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+/** Authenticates exact task-time bytes, never current implementation or fresh test success. */
+export function authenticateM10AT14Artifact(bytes) {
   if (
-    typeof input !== "object" ||
-    input === null ||
-    utilTypes.isProxy(input) ||
-    Object.getPrototypeOf(input) !== Object.prototype
-  ) {
-    throw new M10AT14ProofError(
-      "M10A_T14_OPTIONS_INVALID",
-      "T14 verifier options must be one inert plain object.",
-    );
-  }
-  const keys = Reflect.ownKeys(input);
-  if (keys.some((key) => key !== "runChild")) {
-    throw new M10AT14ProofError(
-      "M10A_T14_OPTIONS_INVALID",
-      "T14 verifier options contain an unsupported field.",
-    );
-  }
-  const descriptor = Object.getOwnPropertyDescriptor(input, "runChild");
-  if (descriptor === undefined) return Object.freeze({});
-  if (!("value" in descriptor) || typeof descriptor.value !== "function") {
-    throw new M10AT14ProofError(
-      "M10A_T14_OPTIONS_INVALID",
-      "T14 runChild must be one inert function value.",
-    );
-  }
-  if (utilTypes.isProxy(descriptor.value)) {
-    throw new M10AT14ProofError("M10A_T14_OPTIONS_INVALID", "T14 runChild must not be a Proxy.");
-  }
-  return Object.freeze({ runChild: descriptor.value });
+    types.isProxy(bytes) ||
+    !Buffer.isBuffer(bytes) ||
+    Reflect.ownKeys(bytes).some(
+      (key) => typeof key !== "string" || !/^(?:0|[1-9][0-9]*)$/u.test(key),
+    ) ||
+    bytes.byteLength !== ARTIFACT_BYTES ||
+    createHash("sha256").update(bytes).digest("hex") !== ARTIFACT_SHA256
+  )
+    fail("ARTIFACT_DRIFT", "The immutable task-time artifact bytes drifted.");
+  const artifact = JSON.parse(bytes.toString("utf8"));
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== TASK ||
+    artifact.proofId !== "m10a-t14" ||
+    artifact.profile !== PROFILE ||
+    artifact.result !== "PASS"
+  )
+    fail("ARTIFACT_DRIFT", "The immutable task-time artifact identity drifted.");
+  return freeze(artifact);
 }
 
-function runChild(command, args, options) {
-  return new Promise((resolvePromise) => {
-    const output = [];
-    let outputBytes = 0;
-    let settled = false;
-    const settle = (result) => {
-      if (settled) return;
-      settled = true;
-      resolvePromise(Object.freeze({ ...result, output: Buffer.concat(output) }));
-    };
-    let child;
-    try {
-      child = spawn(command, args, options);
-    } catch (error) {
-      settle({ code: null, signal: null, error });
-      return;
-    }
-    const capture = (chunk) => {
-      const bytes = Buffer.from(chunk);
-      if (outputBytes < REPORT_LIMIT) {
-        const retained = bytes.subarray(0, REPORT_LIMIT - outputBytes);
-        output.push(retained);
-        outputBytes += retained.byteLength;
-      }
-    };
-    child.stdout.on("data", capture);
-    child.stderr.on("data", capture);
-    child.on("error", (error) => settle({ code: null, signal: null, error }));
-    child.on("close", (code, signal) => settle({ code, signal }));
-  });
-}
-
-async function runFocusedBehaviorProof(runner) {
-  for (const reviewed of M10A_T14_FOCUSED_COMMANDS) {
-    let result;
-    try {
-      result = await runner(reviewed.command, reviewed.args, {
-        cwd: ROOT,
-        env: process.env,
-        stdio: ["ignore", "pipe", "pipe"],
-        timeout: 120_000,
-      });
-    } catch (error) {
-      const detail = error instanceof Error ? error.message : String(error);
-      throw new M10AT14ProofError(
-        "M10A_T14_FOCUSED_EXECUTION_FAILED",
-        `T14 focused behavior proof could not execute: ${detail}`,
-      );
-    }
-    if (result?.error !== undefined) {
-      const detail = result.error instanceof Error ? result.error.message : String(result.error);
-      throw new M10AT14ProofError(
-        "M10A_T14_FOCUSED_EXECUTION_FAILED",
-        `T14 focused behavior proof could not start: ${detail}`,
-      );
-    }
-    if (result?.code !== 0 || result.signal !== null) {
-      const detail = Buffer.isBuffer(result?.output)
-        ? result.output.toString("utf8").slice(-REPORT_LIMIT)
-        : "No bounded command output was returned.";
-      throw new M10AT14ProofError(
-        "M10A_T14_FOCUSED_EXECUTION_FAILED",
-        `T14 focused behavior proof failed: ${detail}`,
-      );
-    }
-  }
-}
-
-async function sourceReceipts() {
-  return Promise.all(
-    SOURCES.map(async (relativePath) => {
-      const bytes = await readFile(path.join(ROOT, relativePath));
-      return { path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) };
-    }),
+/** Retired capture: T15 owns current authoring; historical bytes cannot be regenerated. */
+export async function captureM10AT14Evidence() {
+  fail(
+    "HISTORICAL_CAPTURE_RETIRED",
+    "T14 is historical. T15 owns fresh successor coverage; do not regenerate this artifact.",
   );
 }
 
-async function canonical(value) {
-  return prettier.format(JSON.stringify(value, null, 2), { parser: "json" });
-}
-
-export async function captureM10AT14Evidence() {
-  return {
-    schemaVersion: 1,
-    task: "M10A-T14",
-    proofId: "m10a-t14",
-    profile: PROFILE,
-    result: "PASS",
-    source: await sourceReceipts(),
-    limits: {
-      defaultHistoryEntries: 100,
-      maxHistoryEntries: 512,
-      maxClipboardSelectionRoots: 256,
-      maxClipboardBytes: 8 * 1024 * 1024,
-      maxSourceTreeDepth: 64,
-    },
-    claims: {
-      boundedImmutableUndoRedo: true,
-      fullyImmutableHistoryEntries: true,
-      independentlyAdmittedHistorySnapshots: true,
-      forgedHistoryAuthorityRejected: true,
-      immutableDiagnostics: true,
-      redoClearedOnNewEdit: true,
-      appOwnedClipboardProvenance: true,
-      projectScopedCrossSurfaceClipboard: true,
-      opaqueWorkspaceClipboardIsolation: true,
-      sourceOrderedMultiSelectionReuse: true,
-      freshIdentityRemapping: true,
-      nestedBindingReferenceRemapping: true,
-      transitiveStateResourceDependencyRemapping: true,
-      freshOperationAliasRemapping: true,
-      schemaOwnedBindingRewriteOnly: true,
-      externalComponentTargetRejectionAtomic: true,
-      unresolvedBindingRejectionAtomic: true,
-      multiRootReferenceRemapping: true,
-      maxLengthIdentityAllocation: true,
-      opaqueExtensionPreservation: true,
-      hostileClipboardRejectedAtomically: true,
-      hostileClipboardWrappersRejected: true,
-      ambiguousSourceIdentitiesRejected: true,
-      rejectedDuplicateCannotReuseClipboard: true,
-      catalogValidationBeforeCommit: true,
-      crashSafeSaveBoundaryPreserved: true,
-      runtimePublisherProtocolUnchanged: true,
-    },
-    focusedCommands: M10A_T14_FOCUSED_COMMANDS.map(
-      ({ command, args }) => `${command} ${args.join(" ")}`,
-    ),
-    nonClaims: [
-      "Clipboard transfer is intentionally App-owned and in-memory; foreign OS clipboard payloads are not admitted.",
-      "History changes authored Source only and does not grant Runtime, Publisher, protocol, or host authority.",
-      "Masters, instances, variants, visual capture, and G10A remain later tasks.",
-    ],
-  };
-}
-
+/** Retired capture: T15 owns current authoring; historical bytes cannot be regenerated. */
 export async function writeM10AT14Evidence() {
-  const evidence = await captureM10AT14Evidence();
-  await mkdir(path.dirname(ARTIFACT), { recursive: true });
-  await writeFile(ARTIFACT, await canonical(evidence));
-  return evidence;
+  fail(
+    "HISTORICAL_CAPTURE_RETIRED",
+    "T14 is historical. T15 owns fresh successor coverage; do not regenerate this artifact.",
+  );
 }
 
-/** Rejects any evidence field that is not derived from the current code-owned capture contract. */
-export async function validateM10AT14EvidenceValue(evidence) {
-  const expected = await captureM10AT14Evidence();
-  if ((await canonical(evidence)) !== (await canonical(expected))) {
-    throw new M10AT14ProofError(
-      "M10A_T14_ARTIFACT_CONTENT_INVALID",
-      "T14 evidence claims, limits, commands, non-claims, or source receipts drifted.",
-    );
-  }
-  return expected;
-}
-
-export async function verifyM10AT14Evidence(rawOptions = undefined) {
-  const options = captureVerifierOptions(rawOptions);
-  let evidence;
-  try {
-    evidence = JSON.parse(await readFile(ARTIFACT, "utf8"));
-  } catch {
-    throw new M10AT14ProofError(
-      "M10A_T14_ARTIFACT_JSON_INVALID",
-      "T14 evidence is not valid JSON.",
-    );
-  }
-  if ((await canonical(evidence)) !== (await readFile(ARTIFACT, "utf8"))) {
-    throw new M10AT14ProofError(
-      "M10A_T14_ARTIFACT_FORMAT_INVALID",
-      "T14 evidence is not canonical JSON.",
-    );
-  }
+/** Authenticates the checkpoint-owned receipt without claiming current T14 behavior. */
+export async function verifyM10AT14Evidence(options = undefined) {
   if (
-    evidence.schemaVersion !== 1 ||
-    evidence.task !== "M10A-T14" ||
-    evidence.proofId !== "m10a-t14" ||
-    evidence.profile !== PROFILE ||
-    evidence.result !== "PASS"
-  ) {
-    throw new M10AT14ProofError(
-      "M10A_T14_ARTIFACT_IDENTITY_INVALID",
-      "T14 evidence identity or result drifted.",
-    );
-  }
-  const source = await sourceReceipts();
-  if (JSON.stringify(source) !== JSON.stringify(evidence.source)) {
-    throw new M10AT14ProofError(
-      "M10A_T14_ARTIFACT_SOURCE_DRIFT",
-      "T14 source receipts no longer match the implementation.",
-    );
-  }
-  await validateM10AT14EvidenceValue(evidence);
-  await runFocusedBehaviorProof(options.runChild ?? runChild);
-  return {
+    options !== undefined &&
+    (options === null ||
+      typeof options !== "object" ||
+      types.isProxy(options) ||
+      Object.getPrototypeOf(options) !== Object.prototype ||
+      Reflect.ownKeys(options).length !== 0)
+  )
+    fail("OPTIONS_INVALID", "Historical verification accepts no authority overrides.");
+  const frozen = await readCheckpointedFrozenArtifact(TASK);
+  if (
+    frozen.path !== ARTIFACT_PATH ||
+    frozen.byteLength !== ARTIFACT_BYTES ||
+    frozen.sha256 !== ARTIFACT_SHA256
+  )
+    fail("ARTIFACT_DRIFT", "The checkpoint-owned historical receipt drifted.");
+  authenticateM10AT14Artifact(Buffer.from(frozen.bytes));
+  return freeze({
     status: "PASS",
-    task: evidence.task,
-    profile: evidence.profile,
-    sourceFiles: source.length,
-    focusedCommands: M10A_T14_FOCUSED_COMMANDS.length,
-    focusedExecutedByVerifier: true,
-  };
+    task: TASK,
+    profile: PROFILE,
+    evidenceScope: "historical-artifact-authentication",
+    artifactBytes: ARTIFACT_BYTES,
+    artifactSha256: ARTIFACT_SHA256,
+    checkpointHeadSha256: frozen.checkpointHeadSha256,
+    externalExecution: false,
+  });
 }

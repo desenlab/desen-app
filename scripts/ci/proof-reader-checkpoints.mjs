@@ -180,6 +180,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "422d35c46c8ceb62967f070de99f5b647af26b27f50239836206d83031324b9e",
   "3b225451d576eb7de2dbbae5abfea8abb75fcba9ff8f28961384b707de5a3a14",
   "2c78400cce912bf5d7baa448e82ddfef8d365e666f3bb71ff83bf52ca44f65c8",
+  "a1be3e89d95566d360b8795076b6eeca0f7df590e898258c0f570f7e5c9b1056",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
@@ -187,7 +188,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   46, 47, 48, 49, 49, 49, 49, 50, 51, 51, 52, 52, 52, 52, 53, 53, 54, 55, 56, 57, 57, 58, 59, 59,
   59, 59, 60, 61, 62, 63, 64, 65, 65, 65, 66, 66, 67, 68, 68, 68, 68, 68, 69, 70, 71, 71, 72, 72,
   72, 72, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 73, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 75,
-  75, 75, 75, 75, 75, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76,
+  75, 75, 75, 75, 75, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 76, 77,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_COUNT = 1_024;
@@ -987,6 +988,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/m10a-t14-proof.mjs",
     "tests/m10a-t14.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M10A-T15",
+    {
+      path: "docs/proof/artifacts/m10a-t15.json",
+      bytes: 128_043,
+      sha256: "28ffdd34a9c91ebc907b1acdd29afcb8984acc4463bba0106f9703a6b888dcc7",
+    },
+    "scripts/lib/m10a-t15-proof.mjs",
+    "tests/m10a-t15.test.mjs",
   ),
 ]);
 

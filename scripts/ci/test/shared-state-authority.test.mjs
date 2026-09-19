@@ -114,21 +114,21 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 258 steps across the eight reviewed execution classes", () => {
+test("owns exactly 260 steps across the eight reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 258);
-  assert.equal(new Set(ALL_STEP_IDS).size, 258);
+  assert.equal(ALL_STEP_IDS.length, 260);
+  assert.equal(new Set(ALL_STEP_IDS).size, 260);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 7,
     PACKAGE_TEST_EXCLUSIVE: 1,
-    PROOF_READ_ONLY: 103,
-    PROOF_OS_TEMP_ISOLATED: 125,
-    PROOF_BROWSER_EXCLUSIVE: 5,
+    PROOF_READ_ONLY: 109,
+    PROOF_OS_TEMP_ISOLATED: 122,
+    PROOF_BROWSER_EXCLUSIVE: 4,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
@@ -207,12 +207,12 @@ test("owns exactly 258 steps across the eight reviewed execution classes", () =>
   });
 });
 
-test("pins the exact fifteen read-only, five browser, and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 122);
-  assert.equal(new Set(PROOF_IDS).size, 122);
+test("pins the exact eighteen read-only, four browser, and sole workspace-temp proof ids", () => {
+  assert.equal(PROOF_IDS.length, 123);
+  assert.equal(new Set(PROOF_IDS).size, 123);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
-  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 106);
-  assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 16);
+  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 108);
+  assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 15);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
     "protocol-traceability",
@@ -225,13 +225,16 @@ test("pins the exact fifteen read-only, five browser, and sole workspace-temp pr
     "runtime-core-resource-lifecycle",
     "runtime-core-state-navigation-actions",
     "desen-app-published-host-update",
+    "m10a-t02",
+    "m10a-t03",
     "m10a-t05",
     "m10a-t06",
+    "m10a-t12",
     "m10a-t13",
     "m10a-t14",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 106);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 104);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -539,9 +542,8 @@ test("pins the exact fifteen read-only, five browser, and sole workspace-temp pr
     "desen-app-last-known-good-recovery",
     "desen-app-repeatable-demo",
     "m10-gate",
-    "m10a-t14",
   ]);
-  assert.equal(CHILD_PROCESS_VERIFIER_PROOF_IDS.length, 19);
+  assert.equal(CHILD_PROCESS_VERIFIER_PROOF_IDS.length, 18);
   for (const proofId of CHILD_PROCESS_VERIFIER_PROOF_IDS) {
     assert.deepEqual(classifyWorkloadStateMetadata(`verify-${proofId}`), {
       schemaVersion: 2,
@@ -578,9 +580,7 @@ test("pins the exact fifteen read-only, five browser, and sole workspace-temp pr
                               ? "DESEN_APP_REPEATABLE_DEMO_VITE_SQLITE"
                               : proofId === "m10-gate"
                                 ? "DESEN_APP_M10_GATE_VITE"
-                                : proofId === "m10a-t14"
-                                  ? "DESEN_APP_M10A_T14_VITEST"
-                                  : "NONE",
+                                : "NONE",
       filesystemCompatibilityPolicy: "NONE",
       barrier: false,
     });
@@ -1266,9 +1266,8 @@ test("pins the exact fifteen read-only, five browser, and sole workspace-temp pr
     "desen-app-last-known-good-recovery",
     "desen-app-repeatable-demo",
     "m10-gate",
-    "m10a-t14",
   ]);
-  assert.equal(NATIVE_ADDON_PROOF_IDS.length, 15);
+  assert.equal(NATIVE_ADDON_PROOF_IDS.length, 14);
   assert.deepEqual(NATIVE_ADDON_ROOT_STEP_IDS, [
     "test-publisher-invalid-source-matrix",
     "test-control-plane-local-api",
@@ -1291,7 +1290,7 @@ test("pins the exact fifteen read-only, five browser, and sole workspace-temp pr
       ]),
       ...NATIVE_ADDON_ROOT_STEP_IDS,
     ]).size,
-    28,
+    27,
   );
   assert.equal(
     classifyWorkloadStateMetadata("verify-reference-host-web-source-audit").nativeAddonPolicy,
@@ -1367,10 +1366,7 @@ test("pins the exact fifteen read-only, five browser, and sole workspace-temp pr
     classifyWorkloadStateMetadata("verify-desen-app-real-adapter-canvas").nativeAddonPolicy,
     "DESEN_APP_REAL_ADAPTER_CANVAS_VITE",
   );
-  assert.equal(
-    classifyWorkloadStateMetadata("verify-m10a-t14").nativeAddonPolicy,
-    "DESEN_APP_M10A_T14_VITEST",
-  );
+  assert.equal(classifyWorkloadStateMetadata("verify-m10a-t14").nativeAddonPolicy, "NONE");
   assert.equal(
     classifyWorkloadStateMetadata("test-desen-app-real-adapter-canvas").nativeAddonPolicy,
     "DESEN_APP_REAL_ADAPTER_CANVAS_VITE",
@@ -1389,7 +1385,7 @@ test("pins the exact fifteen read-only, five browser, and sole workspace-temp pr
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    122,
+    123,
   );
 });
 
@@ -1415,8 +1411,7 @@ test("M10A browser proofs own distinct fixed-port exclusive verifier authorities
     "verify-m10a-t07",
     "verify-m10a-t08",
     "verify-m10a-t09",
-    "verify-m10a-t03",
-    "verify-m10a-t12",
+    "verify-m10a-t15",
   ]);
   const cases = [
     {
@@ -1438,16 +1433,10 @@ test("M10A browser proofs own distinct fixed-port exclusive verifier authorities
       envKey: "DESEN_M10A_T09_PROOF_TEMP",
     },
     {
-      proofId: "m10a-t03",
-      stepId: "verify-m10a-t03",
-      port: 4_188,
-      envKey: "DESEN_M10A_T03_PROOF_TEMP",
-    },
-    {
-      proofId: "m10a-t12",
-      stepId: "verify-m10a-t12",
-      port: 4_175,
-      envKey: "DESEN_M10A_T12_PROOF_TEMP",
+      proofId: "m10a-t15",
+      stepId: "verify-m10a-t15",
+      ports: [4_175, 4_188],
+      envKey: "DESEN_M10A_T15_PROOF_TEMP",
     },
   ];
   for (const browserCase of cases) {
@@ -1461,7 +1450,7 @@ test("M10A browser proofs own distinct fixed-port exclusive verifier authorities
       workspaceWrites: [],
       tempPolicy: "RUNNER_SCOPED_OS",
       tempKey: browserCase.stepId,
-      ports: [browserCase.port],
+      ports: browserCase.ports ?? [browserCase.port],
       childProcessPolicy: "TOOLCHAIN_EXCLUSIVE",
       nativeAddonPolicy: "NONE",
       filesystemCompatibilityPolicy: "NONE",
@@ -1471,13 +1460,23 @@ test("M10A browser proofs own distinct fixed-port exclusive verifier authorities
     assert.equal(pair.rootTest.barrier, false);
   }
 
-  for (const historicalProofId of ["m10a-t05", "m10a-t06"]) {
+  for (const historicalProofId of [
+    "m10a-t02",
+    "m10a-t03",
+    "m10a-t05",
+    "m10a-t06",
+    "m10a-t12",
+    "m10a-t13",
+    "m10a-t14",
+  ]) {
     const historicalProof = classifyProofPairState(historicalProofId);
     assert.equal(historicalProof.barrier, false);
     assert.equal(historicalProof.verifier.executionClass, "PROOF_READ_ONLY");
     assert.deepEqual(historicalProof.verifier.ports, []);
     assert.equal(historicalProof.rootTest.executionClass, "PROOF_READ_ONLY");
     assert.equal(historicalProof.rootTest.tempPolicy, "NONE");
+    assert.equal(historicalProof.verifier.childProcessPolicy, "NONE");
+    assert.equal(historicalProof.verifier.nativeAddonPolicy, "NONE");
   }
 
   assert.throws(
@@ -1527,7 +1526,7 @@ test("M10A browser proofs own distinct fixed-port exclusive verifier authorities
     },
   });
   context.after(() => t03Isolation.dispose());
-  assert.equal(t03Isolation.env.DESEN_M10A_T03_PROOF_TEMP, t03Isolation.tempRoot);
+  assert.equal("DESEN_M10A_T03_PROOF_TEMP" in t03Isolation.env, false);
   assert.equal("DESEN_M10A_T05_PROOF_TEMP" in t03Isolation.env, false);
   assert.equal("DESEN_M10A_T06_PROOF_TEMP" in t03Isolation.env, false);
   assert.equal("DESEN_M10A_T07_PROOF_TEMP" in t03Isolation.env, false);
@@ -1543,9 +1542,37 @@ test("M10A browser proofs own distinct fixed-port exclusive verifier authorities
     },
   });
   context.after(() => t12Isolation.dispose());
-  assert.equal(t12Isolation.env.DESEN_M10A_T12_PROOF_TEMP, t12Isolation.tempRoot);
+  assert.equal("DESEN_M10A_T12_PROOF_TEMP" in t12Isolation.env, false);
   assert.equal("DESEN_M10A_T09_PROOF_TEMP" in t12Isolation.env, false);
   assert.equal(t12Isolation.env.DESEN_CI_STEP_ID, "verify-m10a-t12");
+
+  const t15Isolation = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "verify-m10a-t15",
+    baseEnvironment: {
+      PATH: process.env.PATH,
+      DESEN_M10A_T03_PROOF_TEMP: "/tmp/forged-t03",
+      DESEN_M10A_T12_PROOF_TEMP: "/tmp/forged-t12",
+      DESEN_M10A_T15_PROOF_TEMP: "/tmp/forged-t15",
+    },
+  });
+  context.after(() => t15Isolation.dispose());
+  assert.equal(t15Isolation.env.DESEN_M10A_T15_PROOF_TEMP, t15Isolation.tempRoot);
+  assert.equal("DESEN_M10A_T03_PROOF_TEMP" in t15Isolation.env, false);
+  assert.equal("DESEN_M10A_T12_PROOF_TEMP" in t15Isolation.env, false);
+  assert.equal("NODE_OPTIONS" in t15Isolation.env, false);
+  for (const ports of [[], [4_175], [4_188], [4_175, 4_188, 4_190]]) {
+    const forged = mutableMetadata("verify-m10a-t15");
+    forged.ports = ports;
+    assert.throws(
+      () => validateWorkloadStateMetadata("verify-m10a-t15", forged),
+      (error) => error.code === "SHARED_STATE_METADATA_DRIFT",
+    );
+  }
+  assert.throws(
+    () => assertProofPairsCanRunConcurrently("m10a-t15", "m10a-t07"),
+    SharedStateAuthorityError,
+  );
 
   await assert.rejects(
     createProofStepIsolationContext({
@@ -2330,7 +2357,7 @@ test(
   },
 );
 
-test("only the twenty-eight exact reviewed steps receive native-addon authority", async (context) => {
+test("only the twenty-seven exact reviewed steps receive native-addon authority", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-native-addon-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const verifier = await createProofStepIsolationContext({
@@ -2549,7 +2576,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 240,
+    NONE: 242,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,

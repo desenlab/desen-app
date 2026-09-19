@@ -4644,6 +4644,10 @@
   align-items: center;
 }
 
+.workspaceCommandBar[data-master-editing="true"] {
+  flex-wrap: wrap;
+}
+
 .workspaceIdentity {
   flex: 1 1 auto;
 }

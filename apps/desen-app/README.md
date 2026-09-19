@@ -1,5 +1,40 @@
 # Desen App
 
+## M10A-T15 aggregate integration in progress
+
+Normal DESEN Neutral now retains a complete project, matching Publisher preview and bounded
+whole-project history above route-keyed surface editors. Its existing Inspector/Style/structural/
+advanced-Source entry points commit through this aggregate. Prop/style edits become explicit scoped
+instance overrides; incompatible managed structure rejects without clearing the current draft.
+Same-project surface navigation retains whole-project history. Metadata-only detach is dirty even
+when Source is unchanged. Open project / Save project use the existing workspace CAS and exact
+aggregate snapshot; there is no second Source store or post-render Source repair.
+
+The existing Components pane now includes **My components**: name/capture a selected composition,
+insert linked instances into an unmanaged named slot, rename/delete unused masters, inspect/reset
+local overrides and detach explicitly. Ordinary duplicate/paste produces clearly disclosed detached
+copies. **Edit master** opens an isolated definition-default projection in the same SurfaceEditor,
+Inspector, Style and composition tools, with its own bounded undo/redo. Nested instances remain
+linked; Apply commits one complete live-project update and Discard leaves live edits/history
+unchanged. The draft has no persistence port. Save/Open, Run/Publish and navigation are guarded,
+and publication observes only the live aggregate. Stale authority and conflicting edits preserve
+the draft and live project.
+
+Normal-UI tests cover capture/insert/override/reset/detach, visual master updates to two linked
+instances while retaining a local override and detached third, isolated and live undo/redo,
+save/reopen, rejected managed/foreign Source drafts, navigation guards and cross-surface history.
+The normal-product Chromium journey also observes three visibly authored instances, override/reset,
+detach, isolated master text/color edits, two linked updates, a single live undo step, and exact
+complete-project save/reload equality. It uses the ordinary local control plane without injected
+Source or a hidden mutation API. These are local checks, not T15 completion: task-owned evidence,
+hosted CI and merge closure remain in progress.
+
+The normal DESEN Neutral lifecycle now checks the complete migrated record, unused recipe masters,
+exact installed profile and Publisher before replacing an opened workspace. Invalid members,
+reentrant validation, disposed lifetimes and incoherent save-generation receipts preserve the last
+admitted project. Conflicting or uncertain writes require reopening; discard cannot clear that
+storage uncertainty. Other installed workspace profiles and the frozen runtime remain unchanged.
+
 ## M10-T08: repeatable visual demo
 
 From the repository root, `pnpm demo:reset` starts the normal editor on **127.0.0.1:5173** with

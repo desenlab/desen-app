@@ -7,6 +7,7 @@ describe("DESEN Neutral blank starter project", () => {
     const starter = createStarterProject("new-product");
 
     expect(starter.record.id).toBe("new-product");
+    expect(starter.record.schemaVersion).toBe(2);
     expect(starter.record.source.catalogs).toEqual([
       { id: "run.desen.starter.web", version: "0.7.0", target: "web-react" },
     ]);
@@ -20,6 +21,11 @@ describe("DESEN Neutral blank starter project", () => {
       "neutral.light",
     ]);
     expect(starter.record.connectionIntents).toEqual([]);
+    expect(starter.record.designSystem.recipeGraph).toEqual({ definitions: [], instances: [] });
+    expect(Object.isFrozen(starter.record.designSystem.recipeGraph)).toBe(true);
+    expect(Object.isFrozen(starter.record.designSystem.recipeGraph.definitions)).toBe(true);
+    expect(Object.isFrozen(starter.record.designSystem.recipeGraph.instances)).toBe(true);
+    expect(starter.record.source).not.toHaveProperty("recipeGraph");
     expect(starter.surfaceNames).toEqual([{ id: "home", name: "Home" }]);
   });
 

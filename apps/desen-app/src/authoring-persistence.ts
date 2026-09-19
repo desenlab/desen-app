@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-invalid-void-type -- The controller is an external-store
- * boundary whose callbacks are deliberately receiver-independent. */
 import { prepareCatalogAuthoringModel } from "./authoring-data.js";
 import { prepareAuthoringPreviewBundle } from "./authoring-preview.js";
 import {
@@ -7,6 +5,10 @@ import {
   readProjectWorkspaceProfileAuthority,
 } from "./project-workspace-profile.js";
 import { canonicalizeJson, isJsonPointer } from "@desen/protocol";
+import { authenticateProjectAuthoringControllerProfile } from "./project-authoring-controller.js";
+import { authenticateProjectAuthoringPersistencePort } from "./project-workspace-authoring-persistence.js";
+import { createProjectAuthoringSourceController } from "./project-authoring-source-controller.js";
+import type { ProjectAuthoringController } from "./project-authoring-controller.js";
 
 import type {
   DesenEditorDocument,
@@ -16,7 +18,6 @@ import type {
 } from "@desen/editor-core";
 import type { DesenDiagnosticContext, DesenDiagnosticSubject } from "@desen/protocol";
 import type { CatalogAuthoringModel } from "./authoring-data.js";
-import type { AuthoringPreviewBundleSuccess } from "./authoring-preview.js";
 import type { ProjectWorkspaceProfileHandle } from "./project-workspace-profile.js";
 import type { PublishCatalogPackageCandidate } from "@desen/publisher";
 import type { DesenValidatedInteractionCatalogSet } from "@desen/validator";
@@ -40,120 +41,32 @@ const PERSISTENCE_DIAGNOSTIC_CODES = Object.freeze([
   "run.desen.editor/PERSISTENCE_UNSAFE_STORAGE",
 ] satisfies readonly DesenEditorPersistenceDiagnosticCode[]);
 
-type PersistencePendingOperation = "opening" | "saving";
 type OperationToken = Readonly<Record<never, never>>;
 
-/** Exact App route that selects one project-owned persistence identity and surface admission. */
-export interface AuthoringPersistenceRoute {
-  readonly projectId: string;
-  readonly surfaceId: string;
-}
-
-/** Atomically admitted authored Source and its matching publishable preview. */
-export interface AuthoringPersistenceSession {
-  readonly document: DesenEditorDocument;
-  readonly preview: AuthoringPreviewBundleSuccess;
-}
-
-/** Stable local reason why an authored Source could not cross the App persistence boundary. */
-export type AuthoringPersistenceFailureReason =
-  | "catalog-invalid"
-  | "disposed"
-  | "document-invalid"
-  | "document-mismatch"
-  | "operation-in-progress"
-  | "persistence-failed"
-  | "port-invalid"
-  | "preview-unavailable"
-  | "profile-invalid"
-  | "projection-limit"
-  | "reopen-required"
-  | "route-invalid"
-  | "stale-operation";
-
-/** Controlled open failure with an optional redacted Editor Core persistence diagnostic. */
-export interface AuthoringPersistenceOpenFailure {
-  readonly status: "failed";
-  readonly reason: AuthoringPersistenceFailureReason;
-  readonly diagnostic: DesenEditorPersistenceDiagnostic | null;
-}
-
-/** Exact successful open after route, document, Catalog, and preview admission. */
-export interface AuthoringPersistenceOpenSuccess {
-  readonly status: "opened";
-  readonly generation: number;
-  readonly session: AuthoringPersistenceSession;
-}
-
-/** Open outcome kept distinct from every save settlement. */
-export type AuthoringPersistenceOpenResult =
-  | AuthoringPersistenceOpenSuccess
-  | Readonly<{ readonly status: "missing" }>
-  | AuthoringPersistenceOpenFailure;
-
-/** Controlled save failure with an optional redacted Editor Core persistence diagnostic. */
-export interface AuthoringPersistenceSaveFailure {
-  readonly status: "failed";
-  readonly reason: AuthoringPersistenceFailureReason;
-  readonly diagnostic: DesenEditorPersistenceDiagnostic | null;
-}
-
-/** App-owned save settlement retaining every distinct Editor Core persistence outcome. */
-export type AuthoringPersistenceSaveResult =
-  | Readonly<{ readonly status: "created"; readonly generation: 1 }>
-  | Readonly<{ readonly status: "updated"; readonly generation: number }>
-  | Readonly<{ readonly status: "unchanged"; readonly generation: number }>
-  | Readonly<{ readonly status: "conflict"; readonly currentGeneration: number | null }>
-  | Readonly<{ readonly status: "generation-exhausted"; readonly generation: number }>
-  | Readonly<{
-      readonly status: "indeterminate";
-      readonly diagnostic: DesenEditorPersistenceDiagnostic;
-    }>
-  | AuthoringPersistenceSaveFailure;
-
-/** Immutable external-store snapshot for authored Source persistence UI. */
-export interface AuthoringPersistenceState {
-  readonly route: AuthoringPersistenceRoute;
-  readonly sourceKey: string;
-  readonly session: AuthoringPersistenceSession;
-  readonly generation: number | null;
-  readonly savedDocument: DesenEditorDocument | null;
-  readonly dirty: boolean;
-  readonly reopenRequired: boolean;
-  readonly pending: PersistencePendingOperation | null;
-  readonly openResult: AuthoringPersistenceOpenResult | null;
-  readonly saveResult: AuthoringPersistenceSaveResult | null;
-  readonly disposed: boolean;
-}
-
-/** Result of replacing only the controller's authored Source session. */
-export type AuthoringPersistenceDocumentReplacementResult =
-  | Readonly<{ readonly ok: true; readonly session: AuthoringPersistenceSession }>
-  | Readonly<{
-      readonly ok: false;
-      readonly reason: Extract<
-        AuthoringPersistenceFailureReason,
-        | "catalog-invalid"
-        | "disposed"
-        | "document-invalid"
-        | "document-mismatch"
-        | "preview-unavailable"
-        | "projection-limit"
-      >;
-    }>;
-
-/** Receiver-independent, React-free controller suitable for `useSyncExternalStore`. */
-export interface AuthoringPersistenceController {
-  readonly read: (this: void) => AuthoringPersistenceState;
-  readonly subscribe: (this: void, listener: () => void) => () => void;
-  readonly replaceAuthoredDocument: (
-    this: void,
-    document: DesenEditorDocument,
-  ) => AuthoringPersistenceDocumentReplacementResult;
-  readonly open: (this: void) => Promise<AuthoringPersistenceOpenResult>;
-  readonly save: (this: void) => Promise<AuthoringPersistenceSaveResult>;
-  readonly dispose: (this: void) => void;
-}
+export type {
+  AuthoringPersistenceRoute,
+  AuthoringPersistenceSession,
+  AuthoringPersistenceFailureReason,
+  AuthoringPersistenceOpenFailure,
+  AuthoringPersistenceOpenSuccess,
+  AuthoringPersistenceOpenResult,
+  AuthoringPersistenceSaveFailure,
+  AuthoringPersistenceSaveResult,
+  AuthoringPersistenceState,
+  AuthoringPersistenceDocumentReplacementResult,
+  AuthoringPersistenceController,
+} from "./authoring-persistence-types.js";
+import type {
+  AuthoringPersistenceRoute,
+  AuthoringPersistenceSession,
+  AuthoringPersistenceFailureReason,
+  AuthoringPersistenceOpenFailure,
+  AuthoringPersistenceOpenResult,
+  AuthoringPersistenceSaveFailure,
+  AuthoringPersistenceSaveResult,
+  AuthoringPersistenceState,
+  AuthoringPersistenceController,
+} from "./authoring-persistence-types.js";
 
 const PERSISTENCE_CONTROLLER_PROFILES = new WeakMap<
   AuthoringPersistenceController,
@@ -188,6 +101,8 @@ export function authenticateAuthoringPersistenceControllerProfile(
 
 /** Exact trusted inputs captured by the App-owned persistence controller. */
 export interface AuthoringPersistenceControllerOptions {
+  /** Optional authenticated aggregate authority; requires its matching workspace bridge. */
+  readonly projectAuthoringController?: ProjectAuthoringController;
   readonly route: AuthoringPersistenceRoute;
   readonly document: DesenEditorDocument;
   readonly profile: ProjectWorkspaceProfileHandle;
@@ -624,8 +539,9 @@ export function deriveAuthoringPersistenceSourceKey(
 export function createAuthoringPersistenceController(
   options: AuthoringPersistenceControllerOptions,
 ): AuthoringPersistenceControllerCreationResult {
-  const values = exactOwnData(options, CONFIGURATION_KEYS);
-  if (values === undefined) return Object.freeze({ ok: false, reason: "route-invalid" });
+  const values = allowedOwnData(options, [...CONFIGURATION_KEYS, "projectAuthoringController"]);
+  if (values === undefined || CONFIGURATION_KEYS.some((key) => !Object.hasOwn(values, key)))
+    return Object.freeze({ ok: false, reason: "route-invalid" });
   const authority = readProjectWorkspaceProfileAuthority(
     values.profile as ProjectWorkspaceProfileHandle,
   );
@@ -639,6 +555,24 @@ export function createAuthoringPersistenceController(
   if (route === undefined) return Object.freeze({ ok: false, reason: "route-invalid" });
   const persistencePort = capturePersistencePort(values.persistencePort);
   if (persistencePort === undefined) return Object.freeze({ ok: false, reason: "port-invalid" });
+
+  if (Object.hasOwn(values, "projectAuthoringController")) {
+    const project = values.projectAuthoringController;
+    if (!authenticateProjectAuthoringControllerProfile(project, profileHandle))
+      return Object.freeze({ ok: false, reason: "profile-invalid" });
+    if (!authenticateProjectAuthoringPersistencePort(values.persistencePort, project))
+      return Object.freeze({ ok: false, reason: "port-invalid" });
+    const controller = createProjectAuthoringSourceController({
+      project,
+      port: values.persistencePort,
+      sourceKey: profile.sourceKey,
+      route,
+      captureOpen: captureOpenSettlement,
+      captureSave: captureSaveSettlement,
+    });
+    PERSISTENCE_CONTROLLER_PROFILES.set(controller, profileHandle);
+    return Object.freeze({ ok: true, controller });
+  }
 
   const initialAdmission = admitSession(
     profileHandle,
