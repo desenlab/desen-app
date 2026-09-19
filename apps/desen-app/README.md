@@ -1,6 +1,6 @@
 # Desen App
 
-## M10A-T15 aggregate integration in progress
+## M10A-T15 aggregate integration — DONE
 
 Normal DESEN Neutral now retains a complete project, matching Publisher preview and bounded
 whole-project history above route-keyed surface editors. Its existing Inspector/Style/structural/
@@ -26,8 +26,9 @@ save/reopen, rejected managed/foreign Source drafts, navigation guards and cross
 The normal-product Chromium journey also observes three visibly authored instances, override/reset,
 detach, isolated master text/color edits, two linked updates, a single live undo step, and exact
 complete-project save/reload equality. It uses the ordinary local control plane without injected
-Source or a hidden mutation API. These are local checks, not T15 completion: task-owned evidence,
-hosted CI and merge closure remain in progress.
+Source or a hidden mutation API. The exact-head hosted and fresh-`main` closure is recorded in the
+[T15 proof](../../docs/proof/M10A-T15.md); this README describes the bounded authoring surface and
+does not claim variants, library release/adoption, Connections, Runtime or deployment authority.
 
 The normal DESEN Neutral lifecycle now checks the complete migrated record, unused recipe masters,
 exact installed profile and Publisher before replacing an opened workspace. Invalid members,

@@ -251,8 +251,8 @@ authority is recorded in [RUNTIME-CORE-BASELINE.md](../proof/RUNTIME-CORE-BASELI
 ## M10A — Design-first product foundation
 
 SC-02 concluded `adapt`; no further external research is required for this product investment.
-M10A-T01 through M10A-T14 are `DONE`; T12's 0.7.0 Catalog, T13's safe local assets, and T14's bounded history/reuse
-have hosted exact-head and fresh-`main` closure. Overall progress is 135/176 (77%), M10A is 14/28 (50%), and 11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
+M10A-T01 through M10A-T15 are `DONE`; T12's 0.7.0 Catalog, T13's safe local assets, T14's bounded history/reuse
+and T15's masters/instances boundary have hosted exact-head and fresh-`main` closure. Overall progress is 136/176 (77%), M10A is 15/28 (54%), and 11/14 proof gates are closed. Frozen SC-01 covers 16 valid fixtures: three T02-supported normal
 edit/preview paths and 13 losslessly preserved/disclosed unsupported paths with affected-overlay
 partial preview blocked; seven invalid fixtures reject atomically. A separate closed T02-recognized
 unsupported matrix preserves/discloses six valid fixtures and atomically rejects ten malformed
@@ -261,37 +261,37 @@ its exact-head hosted and fresh-`main` closure; T07, T08, and T09 retain their o
 and fresh-`main` closures as immutable historical receipts while T12 owns the current 0.7.0 capture. The [plan](M10A-IMPLEMENTATION-PLAN.md) and
 [task contracts](M10A-TASK-CONTRACTS.md) own scope, negative tests and evidence paths.
 
-| ID       | Status      | Depends on                                       | Deliverable / evidence                                                                 |
-| -------- | ----------- | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| M10A-T01 | DONE        | G10                                              | [Base UI adapter boundary proof](../proof/M10A-T01.md)                                 |
-| M10A-T02 | DONE        | M10A-T01                                         | [Versioned project design-system model and typed token resolver](../proof/M10A-T02.md) |
-| M10A-T03 | DONE        | M10A-T02                                         | Theme/token editor, modes, aliases and loss-aware import/export                        |
-| M10A-T04 | DONE        | M10A-T02                                         | Immutable design-system releases and host snapshot identity                            |
-| M10A-T05 | DONE        | M10A-T01, M10A-T02                               | Layout, typography and content starter capabilities                                    |
-| M10A-T06 | DONE        | M10A-T05                                         | [Hosted form-control closure](../proof/M10A-T06.md)                                    |
-| M10A-T07 | DONE        | M10A-T06                                         | [Hosted selection/numeric closure](../proof/M10A-T07.md)                               |
-| M10A-T08 | DONE        | M10A-T07                                         | [Hosted overlay, menu and disclosure closure](../proof/M10A-T08.md)                    |
-| M10A-T09 | DONE        | M10A-T05, M10A-T08                               | [Hosted data-display and feedback closure](../proof/M10A-T09.md)                       |
-| M10A-T10 | DONE        | M10A-T02, M10A-T04, M10A-T09                     | [Hosted project/surface lifecycle closure](../proof/M10A-T10.md)                       |
-| M10A-T11 | DONE        | M10A-T10                                         | [Hosted direct-manipulation closure](../proof/M10A-T11.md)                             |
-| M10A-T12 | DONE        | M10A-T03, M10A-T11                               | [Hosted rich styling/responsive closure](../proof/M10A-T12.md)                         |
-| M10A-T13 | DONE        | M10A-T04, M10A-T12                               | [Hosted safe image/icon/font asset closure](../proof/M10A-T13.md)                      |
-| M10A-T14 | DONE        | M10A-T10, M10A-T11                               | [Hosted history and identity-safe reuse closure](../proof/M10A-T14.md)                 |
-| M10A-T15 | NOT_STARTED | M10A-T09, M10A-T13, M10A-T14                     | Reusable masters, instances, overrides and detach                                      |
-| M10A-T16 | NOT_STARTED | M10A-T12, M10A-T15                               | Component variants and visual-state authoring                                          |
-| M10A-T17 | NOT_STARTED | M10A-T03, M10A-T16                               | Built-in design-system explorer, documentation and controls                            |
-| M10A-T18 | NOT_STARTED | M10A-T04, M10A-T17                               | Library versions, usage, deprecation and impact review                                 |
-| M10A-T19 | NOT_STARTED | M10A-T10, M10A-T14                               | Separate Connections workspace and durable inert drafts                                |
-| M10A-T20 | NOT_STARTED | M10A-T16, M10A-T19                               | Visual typed state, event, action and navigation wiring                                |
-| M10A-T21 | NOT_STARTED | M10A-T20                                         | Resource/operation connections and explicit host readiness                             |
-| M10A-T22 | NOT_STARTED | M10A-T04, M10A-T18, M10A-T21                     | Unified Run/release lifecycle with pinned design-system state                          |
-| M10A-T23 | NOT_STARTED | M10A-T08, M10A-T16, M10A-T17, M10A-T22           | Deterministic component/theme/state/viewport scenario matrix                           |
-| M10A-T24 | NOT_STARTED | M10A-T13, M10A-T23                               | Hermetic visual capture and reproducible difference engine                             |
-| M10A-T25 | NOT_STARTED | M10A-T18, M10A-T24, M10A-T26                     | Exact-candidate baseline review and fail-closed release checks                         |
-| M10A-T26 | NOT_STARTED | M10A-T12, M10A-T22, M10A-T23                     | Accessibility, responsive and bounded-performance acceptance                           |
-| M10A-T27 | NOT_STARTED | M10A-T14, M10A-T16, M10A-T22, M10A-T25, M10A-T26 | Three design-first product journeys and later functionalization                        |
-| M10A-T28 | NOT_STARTED | M10A-T01–M10A-T27                                | Regression closure, evidence inventory and repeatable handoff                          |
-| G10A     | NOT_STARTED | M10A-T01–M10A-T28                                | Complete design-first/workbench proof with unchanged Runtime Core                      |
+| ID       | Status      | Depends on                                       | Deliverable / evidence                                                                                  |
+| -------- | ----------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| M10A-T01 | DONE        | G10                                              | [Base UI adapter boundary proof](../proof/M10A-T01.md)                                                  |
+| M10A-T02 | DONE        | M10A-T01                                         | [Versioned project design-system model and typed token resolver](../proof/M10A-T02.md)                  |
+| M10A-T03 | DONE        | M10A-T02                                         | Theme/token editor, modes, aliases and loss-aware import/export                                         |
+| M10A-T04 | DONE        | M10A-T02                                         | Immutable design-system releases and host snapshot identity                                             |
+| M10A-T05 | DONE        | M10A-T01, M10A-T02                               | Layout, typography and content starter capabilities                                                     |
+| M10A-T06 | DONE        | M10A-T05                                         | [Hosted form-control closure](../proof/M10A-T06.md)                                                     |
+| M10A-T07 | DONE        | M10A-T06                                         | [Hosted selection/numeric closure](../proof/M10A-T07.md)                                                |
+| M10A-T08 | DONE        | M10A-T07                                         | [Hosted overlay, menu and disclosure closure](../proof/M10A-T08.md)                                     |
+| M10A-T09 | DONE        | M10A-T05, M10A-T08                               | [Hosted data-display and feedback closure](../proof/M10A-T09.md)                                        |
+| M10A-T10 | DONE        | M10A-T02, M10A-T04, M10A-T09                     | [Hosted project/surface lifecycle closure](../proof/M10A-T10.md)                                        |
+| M10A-T11 | DONE        | M10A-T10                                         | [Hosted direct-manipulation closure](../proof/M10A-T11.md)                                              |
+| M10A-T12 | DONE        | M10A-T03, M10A-T11                               | [Hosted rich styling/responsive closure](../proof/M10A-T12.md)                                          |
+| M10A-T13 | DONE        | M10A-T04, M10A-T12                               | [Hosted safe image/icon/font asset closure](../proof/M10A-T13.md)                                       |
+| M10A-T14 | DONE        | M10A-T10, M10A-T11                               | [Hosted history and identity-safe reuse closure](../proof/M10A-T14.md)                                  |
+| M10A-T15 | DONE        | M10A-T09, M10A-T13, M10A-T14                     | [Hosted masters/instances, overrides, detach and isolated master editing closure](../proof/M10A-T15.md) |
+| M10A-T16 | NOT_STARTED | M10A-T12, M10A-T15                               | Component variants and visual-state authoring                                                           |
+| M10A-T17 | NOT_STARTED | M10A-T03, M10A-T16                               | Built-in design-system explorer, documentation and controls                                             |
+| M10A-T18 | NOT_STARTED | M10A-T04, M10A-T17                               | Library versions, usage, deprecation and impact review                                                  |
+| M10A-T19 | NOT_STARTED | M10A-T10, M10A-T14                               | Separate Connections workspace and durable inert drafts                                                 |
+| M10A-T20 | NOT_STARTED | M10A-T16, M10A-T19                               | Visual typed state, event, action and navigation wiring                                                 |
+| M10A-T21 | NOT_STARTED | M10A-T20                                         | Resource/operation connections and explicit host readiness                                              |
+| M10A-T22 | NOT_STARTED | M10A-T04, M10A-T18, M10A-T21                     | Unified Run/release lifecycle with pinned design-system state                                           |
+| M10A-T23 | NOT_STARTED | M10A-T08, M10A-T16, M10A-T17, M10A-T22           | Deterministic component/theme/state/viewport scenario matrix                                            |
+| M10A-T24 | NOT_STARTED | M10A-T13, M10A-T23                               | Hermetic visual capture and reproducible difference engine                                              |
+| M10A-T25 | NOT_STARTED | M10A-T18, M10A-T24, M10A-T26                     | Exact-candidate baseline review and fail-closed release checks                                          |
+| M10A-T26 | NOT_STARTED | M10A-T12, M10A-T22, M10A-T23                     | Accessibility, responsive and bounded-performance acceptance                                            |
+| M10A-T27 | NOT_STARTED | M10A-T14, M10A-T16, M10A-T22, M10A-T25, M10A-T26 | Three design-first product journeys and later functionalization                                         |
+| M10A-T28 | NOT_STARTED | M10A-T01–M10A-T27                                | Regression closure, evidence inventory and repeatable handoff                                           |
+| G10A     | NOT_STARTED | M10A-T01–M10A-T28                                | Complete design-first/workbench proof with unchanged Runtime Core                                       |
 
 ## M11 — Capability extensibility proof
 
