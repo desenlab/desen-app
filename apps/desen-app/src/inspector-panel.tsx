@@ -21,6 +21,9 @@ import type {
   AuthoringStyleEditResult,
   AuthoringStyleModelResult,
   AuthoringStyleTarget,
+  AuthoringVariantEdit,
+  AuthoringVariantEditResult,
+  AuthoringVariantModelResult,
 } from "./authoring-styles.js";
 import type { StructuredJsonParseFailureReason } from "./structured-json.js";
 
@@ -50,9 +53,13 @@ interface InspectorPanelProps {
   readonly onStyleTargetChange?: ((target: AuthoringStyleTarget) => void) | undefined;
   /** App-owned local-state controls retained in the right-sidebar State view. */
   readonly stateControls?: ReactNode;
+  /** Closed named-variant model for the selected Source component. */
+  readonly variantModel?: AuthoringVariantModelResult | undefined;
+  /** Applies one bounded named-variant mutation. */
+  readonly onVariantEdit?: ((edit: AuthoringVariantEdit) => AuthoringVariantEditResult) | undefined;
 }
 
-type InspectorTab = "inspector" | "style" | "state" | "actions";
+type InspectorTab = "inspector" | "style" | "variants" | "state" | "actions";
 
 const IDLE_STYLE_MODEL: AuthoringStyleModelResult = Object.freeze({ status: "idle" });
 
@@ -76,6 +83,210 @@ function failureMessage(result: AuthoringInspectorEditResult): string {
   if (result.reason === "selection-invalid")
     return "The selected Source layer is no longer current.";
   return "This property could not be updated safely.";
+}
+
+function variantFailureMessage(result: AuthoringVariantEditResult): string {
+  if (result.ok) return "";
+  if (result.reason === "name-invalid") return "Use a unique name beginning with a letter.";
+  if (result.reason === "state-invalid") {
+    return "Choose a declared primitive state axis and a matching value.";
+  }
+  if (result.reason === "variant-unavailable") return "That variant is no longer current.";
+  if (result.reason === "source-invalid") {
+    return "The Source rejected this variant; no change was saved.";
+  }
+  return "This variant change could not be applied safely.";
+}
+
+function parseVariantValue(raw: string, sample: JsonPrimitive): JsonPrimitive | undefined {
+  if (typeof sample === "string") return raw;
+  if (typeof sample === "boolean") {
+    return raw === "true" ? true : raw === "false" ? false : undefined;
+  }
+  if (typeof sample === "number") {
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : undefined;
+  }
+  return undefined;
+}
+
+/** Renders named component presets without exposing arbitrary predicates or child mutations. */
+function VariantsPanel({
+  model,
+  onEdit,
+}: Readonly<{
+  readonly model: AuthoringVariantModelResult;
+  readonly onEdit?: ((edit: AuthoringVariantEdit) => AuthoringVariantEditResult) | undefined;
+}>) {
+  const formId = useId();
+  const [name, setName] = useState("");
+  const [axisName, setAxisName] = useState("");
+  const [axisValue, setAxisValue] = useState("");
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    if (model.status === "ready") {
+      const first = model.localStateOptions[0];
+      setAxisName((current) =>
+        model.localStateOptions.some(({ name: candidate }) => candidate === current)
+          ? current
+          : (first?.name ?? ""),
+      );
+      setAxisValue((current) =>
+        current.length > 0 ? current : first === undefined ? "" : String(first.value),
+      );
+    }
+    setNotice("");
+  }, [model]);
+
+  if (model.status !== "ready") {
+    return (
+      <div className={styles.inspectorTabUnavailable}>
+        <strong>{model.status === "idle" ? "Select a component" : "Variants unavailable"}</strong>
+        <p>Named variants are available only for the current Catalog-backed Source selection.</p>
+      </div>
+    );
+  }
+
+  const selectedAxis = model.localStateOptions.find(({ name }) => name === axisName);
+  const editingEnabled = onEdit !== undefined && selectedAxis !== undefined;
+
+  function dispatch(edit: AuthoringVariantEdit): boolean {
+    if (onEdit === undefined) {
+      setNotice("Variant editing is unavailable for this workspace.");
+      return false;
+    }
+    const result = onEdit(edit);
+    if (!result.ok) {
+      setNotice(variantFailureMessage(result));
+      return false;
+    }
+    setNotice(
+      edit.kind === "delete"
+        ? "Variant deleted."
+        : edit.kind === "rename"
+          ? "Variant renamed."
+          : "Variant created.",
+    );
+    return true;
+  }
+
+  function create(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    if (selectedAxis === undefined) return;
+    const value = parseVariantValue(axisValue, selectedAxis.value);
+    if (value === undefined) {
+      setNotice("Enter a value matching the selected state axis.");
+      return;
+    }
+    if (dispatch({ kind: "create", name, axisName, axisValue: value })) setName("");
+  }
+
+  return (
+    <div className={styles.stylePanel} data-authoring-variants="true">
+      <div className={styles.stylePanelIntro}>
+        <span>
+          <strong>{model.component.displayName}</strong>
+          <small>Named component presets</small>
+        </span>
+        <span className={styles.styleLayerSummary}>{model.variants.length} variants</span>
+      </div>
+      <p className={styles.styleControlHelp}>
+        Variants are persisted as conditional Source overlays. Children never change through a
+        variant; visual states remain available from the Style tab.
+      </p>
+      <form className={styles.styleControl} id={formId} noValidate onSubmit={create}>
+        <label className={styles.stateField} htmlFor={`${formId}-name`}>
+          <span>Variant name</span>
+          <input
+            id={`${formId}-name`}
+            maxLength={64}
+            onChange={(event) => setName(event.currentTarget.value)}
+            value={name}
+          />
+        </label>
+        <label className={styles.stateField} htmlFor={`${formId}-axis`}>
+          <span>State axis</span>
+          <select
+            id={`${formId}-axis`}
+            disabled={model.localStateOptions.length === 0}
+            onChange={(event) => {
+              const next = model.localStateOptions.find(
+                ({ name: candidate }) => candidate === event.currentTarget.value,
+              );
+              setAxisName(event.currentTarget.value);
+              setAxisValue(next === undefined ? "" : String(next.value));
+            }}
+            value={axisName}
+          >
+            {model.localStateOptions.length === 0 ? (
+              <option value="">No primitive state axes</option>
+            ) : (
+              model.localStateOptions.map(({ name: candidate }) => (
+                <option key={candidate} value={candidate}>
+                  {candidate}
+                </option>
+              ))
+            )}
+          </select>
+        </label>
+        <label className={styles.stateField} htmlFor={`${formId}-value`}>
+          <span>Axis value</span>
+          <input
+            id={`${formId}-value`}
+            onChange={(event) => setAxisValue(event.currentTarget.value)}
+            value={axisValue}
+          />
+        </label>
+        <button disabled={!editingEnabled || name.trim().length === 0} type="submit">
+          Create variant
+        </button>
+      </form>
+      {model.variants.length === 0 ? (
+        <p className={styles.styleControlHelp}>No named variants yet.</p>
+      ) : (
+        <div className={styles.styleControls}>
+          {model.variants.map((variant) => (
+            <section className={styles.styleControl} key={`${variant.index}:${variant.name}`}>
+              <div className={styles.styleControlHeading}>
+                <span>
+                  <strong>{variant.name}</strong>
+                  <small>
+                    {variant.axis.reference} = {String(variant.axis.value)}
+                  </small>
+                </span>
+                <span className={styles.styleValueBadge}>Preset</span>
+              </div>
+              <button
+                disabled={onEdit === undefined}
+                onClick={() => dispatch({ kind: "delete", index: variant.index })}
+                type="button"
+              >
+                Delete variant
+              </button>
+            </section>
+          ))}
+        </div>
+      )}
+      {model.unmanagedVariantCount > 0 ? (
+        <p className={styles.styleUnmanagedNotice}>
+          {model.unmanagedVariantCount} protocol variant(s) are preserved as unmanaged.
+        </p>
+      ) : null}
+      {model.visualStates.length === 0 ? (
+        <p className={styles.styleControlHelp}>
+          This component declares no additional visual states.
+        </p>
+      ) : (
+        <p className={styles.styleControlHelp}>
+          Declared visual states: {model.visualStates.join(", ")}.
+        </p>
+      )}
+      <p aria-live="polite" className={styles.styleNotice} role="status">
+        {notice || "Variant edits remain local until Save source succeeds."}
+      </p>
+    </div>
+  );
 }
 
 function FieldHeader({ field }: Readonly<{ readonly field: AuthoringInspectorField }>) {
@@ -792,6 +1003,8 @@ export function InspectorPanel({
   onStyleTargetChange,
   previewControls,
   stateControls,
+  variantModel = Object.freeze({ status: "idle" as const }),
+  onVariantEdit,
   styleModel = IDLE_STYLE_MODEL,
   styleTarget,
   styleTokenOptions,
@@ -802,6 +1015,7 @@ export function InspectorPanel({
   const inspectorTab = useRef<HTMLButtonElement>(null);
   const styleTab = useRef<HTMLButtonElement>(null);
   const stateTab = useRef<HTMLButtonElement>(null);
+  const variantsTab = useRef<HTMLButtonElement>(null);
   const actionsTab = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (diagnosticsRevealKey !== undefined) setActiveTab("inspector");
@@ -822,14 +1036,16 @@ export function InspectorPanel({
         ? styleTab
         : nextTab === "state"
           ? stateTab
-          : actionsTab
+          : nextTab === "variants"
+            ? variantsTab
+            : actionsTab
     ).current?.focus();
   }
 
   function selectAdjacentTab(event: KeyboardEvent<HTMLButtonElement>): void {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const tabs: readonly InspectorTab[] = ["inspector", "style", "state", "actions"];
+    const tabs: readonly InspectorTab[] = ["inspector", "style", "variants", "state", "actions"];
     const currentIndex = tabs.indexOf(activeTab);
     const nextTab =
       event.key === "Home"
@@ -885,6 +1101,19 @@ export function InspectorPanel({
           Style
         </button>
         <button
+          aria-controls={`${panelId}-variants-panel`}
+          aria-selected={activeTab === "variants"}
+          id={`${panelId}-variants-tab`}
+          onClick={() => selectTab("variants")}
+          onKeyDown={selectAdjacentTab}
+          ref={variantsTab}
+          role="tab"
+          tabIndex={activeTab === "variants" ? 0 : -1}
+          type="button"
+        >
+          Variants
+        </button>
+        <button
           aria-controls={`${panelId}-state-panel`}
           aria-selected={activeTab === "state"}
           id={`${panelId}-state-tab`}
@@ -912,6 +1141,16 @@ export function InspectorPanel({
         </button>
       </div>
 
+      <div
+        aria-labelledby={`${panelId}-variants-tab`}
+        className={styles.inspectorTabPanel}
+        hidden={activeTab !== "variants"}
+        id={`${panelId}-variants-panel`}
+        role="tabpanel"
+        tabIndex={activeTab === "variants" ? 0 : -1}
+      >
+        <VariantsPanel model={variantModel} onEdit={onVariantEdit} />
+      </div>
       <div
         aria-labelledby={`${panelId}-inspector-tab`}
         className={styles.inspectorTabPanel}

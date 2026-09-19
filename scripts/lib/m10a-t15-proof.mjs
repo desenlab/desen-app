@@ -11,6 +11,7 @@ import { authenticateM10AT12Artifact } from "./m10a-t12-proof.mjs";
 import { authenticateM10AT13Artifact } from "./m10a-t13-proof.mjs";
 import { authenticateM10AT14Artifact } from "./m10a-t14-proof.mjs";
 import { executeM10AT15Workloads } from "./m10a-t15-execution.mjs";
+import { M10A_T16_LEGACY_INPUT_SUCCESSORS } from "./m10a-t16-legacy-input-receipts.mjs";
 import { M10A_T15_APP_TEST_FILES, M10A_T15_WORKLOADS } from "./m10a-t15-workloads.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
@@ -112,6 +113,36 @@ function noOverrides(value) {
       "Production proof accepts no workspace, runner or observation overrides.",
     );
 }
+
+/**
+ * Projects only the reviewed T16 successors back to the immutable T15 source identity.
+ * This is a historical byte projection; workload execution still runs against the live tree.
+ */
+function projectM10AT15CurrentBytes(relative, bytes) {
+  const successor = M10A_T16_LEGACY_INPUT_SUCCESSORS.find(({ path: owned }) => owned === relative);
+  if (successor === undefined) return bytes;
+  if (
+    !Buffer.isBuffer(bytes) ||
+    bytes.byteLength !== successor.current.bytes ||
+    sha256(bytes) !== successor.current.sha256
+  )
+    fail("SOURCE_DRIFT", "The T16 successor differs from its reviewed current receipt.");
+  const lines = bytes.toString("utf8").split("\n");
+  for (const hunk of [...successor.inverseHunks].reverse()) {
+    const start = hunk.remove === 0 ? hunk.start : hunk.start - 1;
+    if (start < 0 || start + hunk.remove > lines.length)
+      fail("SOURCE_DRIFT", "The reviewed T16 inverse is out of bounds.");
+    lines.splice(start, hunk.remove, ...hunk.restore);
+  }
+  const predecessor = Buffer.from(lines.join("\n"));
+  if (
+    predecessor.byteLength !== successor.predecessor.bytes ||
+    sha256(predecessor) !== successor.predecessor.sha256
+  )
+    fail("SOURCE_DRIFT", "The reviewed T16 inverse does not reproduce its predecessor.");
+  return predecessor;
+}
+
 async function canonical(value) {
   return Buffer.from(
     await prettier.format(JSON.stringify(value, null, 2), { ...prettierConfig, parser: "json" }),
@@ -182,7 +213,7 @@ export async function captureM10AT15SourceAuthority(options = undefined) {
   if (paths.size > 512) fail("SOURCE_INVALID", "T15 source inventory exceeds its task boundary.");
   const files = [];
   for (const relative of [...paths].sort()) {
-    const bytes = await regular(relative);
+    const bytes = projectM10AT15CurrentBytes(relative, await regular(relative));
     files.push({ path: relative, bytes: bytes.byteLength, sha256: sha256(bytes) });
   }
   const catalog = JSON.parse(await regular("packages/starter-catalog-web/catalog.json"));

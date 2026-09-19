@@ -1,10 +1,12 @@
 import {
+  createDesenEditorDocument,
   createDesenEditorContinuousValidator,
   deleteDesenEditorOwnerStyleProperty,
   deleteDesenEditorVariant,
   deleteDesenEditorVariantStyleProperty,
   insertDesenEditorVariant,
   setDesenEditorOwnerStyleProperty,
+  setDesenEditorVariantCondition,
   setDesenEditorVariantStyleProperty,
 } from "@desen/editor-core";
 import { canonicalizeJson } from "@desen/protocol";
@@ -16,6 +18,7 @@ import { projectAuthoringSelection } from "./authoring-selection.js";
 import type { JsonPrimitive, JsonValue } from "@desen/catalog-sdk";
 import type {
   DesenEditorContentEditResult,
+  DesenEditorContentPredicate,
   DesenEditorContentValue,
   DesenEditorContentVariant,
   DesenEditorContinuousValidationReport,
@@ -35,6 +38,8 @@ type EditorVariant = NonNullable<EditorNode["variants"]>[number];
 const BASE_STYLE_STATE = "base";
 const RESPONSIVE_VARIANT_EXTENSION = "run.desen.app/t12-responsive";
 const RESPONSIVE_VARIANT_VERSION = 1;
+const NAMED_VARIANT_EXTENSION = "run.desen.app/t16-variant";
+const NAMED_VARIANT_VERSION = 1;
 const MAX_TOKEN_OPTIONS = 1_024;
 
 /** Exact App route that may authorize a style projection or mutation. */
@@ -69,6 +74,8 @@ export const AUTHORING_RESPONSIVE_BREAKPOINTS: readonly AuthoringResponsiveBreak
 /** The exact selectable style layer. A raw `when` predicate is deliberately not part of this API. */
 export type AuthoringStyleTarget =
   | Readonly<{ readonly kind: "base" }>
+  | Readonly<{ readonly kind: "visual-state"; readonly state: string }>
+  | Readonly<{ readonly kind: "variant"; readonly index: number }>
   | Readonly<{
       readonly kind: "breakpoint";
       readonly breakpoint: AuthoringResponsiveBreakpointId;
@@ -123,6 +130,17 @@ export interface AuthoringStyleControl {
   /** Exact detached JSON Schema for this declared property, never a generic CSS descriptor. */
   readonly propertiesSchema: JsonObject;
   readonly base: AuthoringStyleValueState;
+  /** Declared non-base visual states. Unknown state names never enter this projection. */
+  readonly visualStates?: readonly Readonly<{
+    readonly state: string;
+    readonly value: AuthoringStyleValueState;
+  }>[];
+  /** T16 named variants that may receive closed style overrides for this exact leaf. */
+  readonly variants?: readonly Readonly<{
+    readonly index: number;
+    readonly name: string;
+    readonly value: AuthoringStyleValueState;
+  }>[];
   readonly responsive: readonly AuthoringResponsiveStyleValue[];
 }
 
@@ -219,6 +237,8 @@ export type AuthoringStyleEditResult = AuthoringStyleEditSuccess | AuthoringStyl
 
 type CapturedStyleTarget =
   | Readonly<{ readonly kind: "base" }>
+  | Readonly<{ readonly kind: "visual-state"; readonly state: string }>
+  | Readonly<{ readonly kind: "variant"; readonly index: number }>
   | Readonly<{
       readonly kind: "breakpoint";
       readonly breakpoint: AuthoringResponsiveBreakpointId;
@@ -503,6 +523,21 @@ function captureStyleTarget(value: unknown): CapturedStyleTarget | undefined {
   const kind = captureExactOwnData(value, ["kind"]);
   if (kind !== undefined && kind.kind === "base") return Object.freeze({ kind: "base" });
 
+  const visualState = captureExactOwnData(value, ["kind", "state"]);
+  if (visualState?.kind === "visual-state" && isNonEmptyString(visualState.state)) {
+    return Object.freeze({ kind: "visual-state", state: visualState.state });
+  }
+
+  const variant = captureExactOwnData(value, ["kind", "index"]);
+  if (
+    variant?.kind === "variant" &&
+    typeof variant.index === "number" &&
+    Number.isInteger(variant.index) &&
+    variant.index >= 0
+  ) {
+    return Object.freeze({ kind: "variant", index: variant.index });
+  }
+
   const breakpoint = captureExactOwnData(value, ["kind", "breakpoint"]);
   if (breakpoint?.kind !== "breakpoint") return undefined;
   const selected = breakpointFor(breakpoint.breakpoint);
@@ -692,12 +727,13 @@ function styleLeafValue(
   part: string,
   property: string,
   tokens: readonly AuthoringResolvedStyleToken[],
+  state = BASE_STYLE_STATE,
 ): AuthoringStyleValueState {
   const owner = ownDataObject(nodeOrVariant);
   const style = owner === undefined ? undefined : ownDataObject(ownDataValue(owner, "style"));
-  const state =
-    style === undefined ? undefined : ownDataObject(ownDataValue(style, BASE_STYLE_STATE));
-  const stylePart = state === undefined ? undefined : ownDataObject(ownDataValue(state, part));
+  const stateValue = style === undefined ? undefined : ownDataObject(ownDataValue(style, state));
+  const stylePart =
+    stateValue === undefined ? undefined : ownDataObject(ownDataValue(stateValue, part));
   if (stylePart === undefined || !hasOwnDataValue(stylePart, property)) return NO_STYLE_VALUE;
   const value = captureJsonValue(ownDataValue(stylePart, property));
   if (value === undefined) return Object.freeze({ kind: "dynamic", value: null });
@@ -749,6 +785,25 @@ function responsiveMarker(variant: EditorVariant): JsonObject | undefined {
   return extensions === undefined
     ? undefined
     : ownDataObject(ownDataValue(extensions, RESPONSIVE_VARIANT_EXTENSION));
+}
+
+function namedVariantDescriptor(
+  index: number,
+  variant: EditorVariant,
+): Readonly<{ readonly index: number; readonly name: string }> | undefined {
+  const record = ownDataObject(variant);
+  const extensions =
+    record === undefined ? undefined : ownDataObject(ownDataValue(record, "extensions"));
+  const marker =
+    extensions === undefined
+      ? undefined
+      : ownDataObject(ownDataValue(extensions, NAMED_VARIANT_EXTENSION));
+  const name = marker === undefined ? undefined : ownDataValue(marker, "name");
+  return marker !== undefined &&
+    ownDataValue(marker, "version") === NAMED_VARIANT_VERSION &&
+    isNonEmptyString(name)
+    ? Object.freeze({ index, name })
+    : undefined;
 }
 
 /** Extracts a known marker target even when the marker itself is malformed, for fail-closed edits. */
@@ -872,6 +927,36 @@ function prepareStyleParts(
           tokenTypes: expectedTokenTypes(property) ?? NO_TOKEN_TYPES,
           propertiesSchema: schema,
           base: styleLeafValue(node, part.name, property, tokens),
+          visualStates: Object.freeze(
+            component.visualStates.map((state) =>
+              Object.freeze({
+                state,
+                value: styleLeafValue(node, part.name, property, tokens, state),
+              }),
+            ),
+          ),
+          variants: Object.freeze(
+            (node.variants ?? [])
+              .map((variant, index) => {
+                const descriptor = namedVariantDescriptor(index, variant);
+                return descriptor === undefined
+                  ? undefined
+                  : Object.freeze({
+                      index,
+                      name: descriptor.name,
+                      value: styleLeafValue(variant, part.name, property, tokens),
+                    });
+              })
+              .filter(
+                (
+                  value,
+                ): value is Readonly<{
+                  readonly index: number;
+                  readonly name: string;
+                  readonly value: AuthoringStyleValueState;
+                }> => value !== undefined,
+              ),
+          ),
           responsive: Object.freeze(
             AUTHORING_RESPONSIVE_BREAKPOINTS.map((breakpoint) => {
               const match = inventory.exactByBreakpoint.get(breakpoint.id);
@@ -950,6 +1035,83 @@ export function prepareAuthoringStyleModel(
     : prepareAuthoringStyleModelCaptured(model, capturedRoute, capturedSelection, capturedTokens);
 }
 
+/**
+ * Creates a transient, non-authored preview that promotes one declared state or named variant
+ * to the base style layer. The authored Source and its variant predicates are never changed.
+ */
+export function prepareAuthoringStylePreviewDocument(
+  document: DesenEditorDocument,
+  route: AuthoringStyleRoute,
+  selection: AuthoringComponentSelection | null,
+  target: AuthoringStyleTarget,
+): DesenEditorDocument {
+  if (selection === null || target.kind === "base" || target.kind === "breakpoint") return document;
+  const capturedSelection = selection;
+  try {
+    const candidate = JSON.parse(canonicalizeJson(document)) as Record<string, unknown>;
+    const surface =
+      candidate.surfaces && typeof candidate.surfaces === "object"
+        ? (candidate.surfaces as Record<string, unknown>)[route.surfaceId]
+        : undefined;
+    const root =
+      surface && typeof surface === "object"
+        ? (surface as Record<string, unknown>).root
+        : undefined;
+    let selected: Record<string, unknown> | undefined;
+    function visit(value: unknown): void {
+      if (
+        selected !== undefined ||
+        value === null ||
+        typeof value !== "object" ||
+        Array.isArray(value)
+      )
+        return;
+      const record = value as Record<string, unknown>;
+      if (record.id === capturedSelection.sourceNodeId) {
+        selected = record;
+        return;
+      }
+      const slots = record.slots;
+      if (slots !== null && typeof slots === "object") {
+        for (const children of Object.values(slots as Record<string, unknown>)) {
+          if (Array.isArray(children)) for (const child of children) visit(child);
+        }
+      }
+    }
+    visit(root);
+    if (selected === undefined) return document;
+    const style =
+      selected.style && typeof selected.style === "object"
+        ? (selected.style as Record<string, unknown>)
+        : {};
+    const nextBase =
+      style.base && typeof style.base === "object"
+        ? (JSON.parse(canonicalizeJson(style.base)) as Record<string, unknown>)
+        : {};
+    const overlay =
+      target.kind === "visual-state"
+        ? style[target.state]
+        : Array.isArray(selected.variants)
+          ? (selected.variants[target.index] as Record<string, unknown> | undefined)?.style
+          : undefined;
+    if (overlay && typeof overlay === "object" && !Array.isArray(overlay)) {
+      for (const [part, properties] of Object.entries(overlay as Record<string, unknown>)) {
+        if (properties === null || typeof properties !== "object" || Array.isArray(properties))
+          continue;
+        nextBase[part] = {
+          ...(nextBase[part] as Record<string, unknown> | undefined),
+          ...(properties as Record<string, unknown>),
+        };
+      }
+    }
+    selected.style = { ...style, base: nextBase };
+    const admitted = createDesenEditorDocument(candidate);
+    return admitted.ok ? admitted.document : document;
+  } catch {
+    return document;
+  }
+}
+
 function findControl(
   styleModel: AuthoringStyleReadyModel,
   part: string,
@@ -965,9 +1127,14 @@ function targetStyleValue(
   control: AuthoringStyleControl,
   target: CapturedStyleTarget,
 ): AuthoringStyleValueState | undefined {
-  return target.kind === "base"
-    ? control.base
-    : control.responsive.find(({ breakpoint }) => breakpoint.id === target.breakpoint)?.value;
+  if (target.kind === "base") return control.base;
+  if (target.kind === "visual-state") {
+    return control.visualStates?.find(({ state }) => state === target.state)?.value;
+  }
+  if (target.kind === "variant") {
+    return control.variants?.find(({ index }) => index === target.index)?.value;
+  }
+  return control.responsive.find(({ breakpoint }) => breakpoint.id === target.breakpoint)?.value;
 }
 
 function contentFailure(): AuthoringStyleEditFailure {
@@ -1001,6 +1168,45 @@ function setBaseStyle(
     setDesenEditorOwnerStyleProperty(document, {
       surfaceId: route.surfaceId,
       ownerId: selection.sourceNodeId,
+      state: BASE_STYLE_STATE,
+      part: edit.part,
+      property: edit.property,
+      value: edit.value as DesenEditorContentValue,
+    }),
+  );
+}
+
+function setVisualStateStyle(
+  document: DesenEditorDocument,
+  route: AuthoringStyleRoute,
+  selection: AuthoringComponentSelection,
+  state: string,
+  edit: Readonly<{ readonly part: string; readonly property: string; readonly value: JsonValue }>,
+): DesenEditorDocument | undefined {
+  return editSucceeded(
+    setDesenEditorOwnerStyleProperty(document, {
+      surfaceId: route.surfaceId,
+      ownerId: selection.sourceNodeId,
+      state,
+      part: edit.part,
+      property: edit.property,
+      value: edit.value as DesenEditorContentValue,
+    }),
+  );
+}
+
+function setVariantStyle(
+  document: DesenEditorDocument,
+  route: AuthoringStyleRoute,
+  selection: AuthoringComponentSelection,
+  target: Readonly<{ readonly index: number }>,
+  edit: Readonly<{ readonly part: string; readonly property: string; readonly value: JsonValue }>,
+): DesenEditorDocument | undefined {
+  return editSucceeded(
+    setDesenEditorVariantStyleProperty(document, {
+      surfaceId: route.surfaceId,
+      nodeId: selection.sourceNodeId,
+      index: target.index,
       state: BASE_STYLE_STATE,
       part: edit.part,
       property: edit.property,
@@ -1146,6 +1352,17 @@ function styleMutation(
   edit: Readonly<{ readonly part: string; readonly property: string; readonly value: JsonValue }>,
 ): DesenEditorDocument | undefined {
   if (target.kind === "base") return setBaseStyle(document, route, selection, edit);
+  if (target.kind === "visual-state") {
+    if (!node.use || !selection.capabilityId) return undefined;
+    return setVisualStateStyle(document, route, selection, target.state, edit);
+  }
+  if (target.kind === "variant") {
+    const descriptor = node.variants?.[target.index];
+    return descriptor !== undefined &&
+      namedVariantDescriptor(target.index, descriptor) !== undefined
+      ? setVariantStyle(document, route, selection, target, edit)
+      : undefined;
+  }
   const breakpoint = breakpointFor(target.breakpoint);
   if (
     breakpoint === undefined ||
@@ -1221,6 +1438,12 @@ export function applyAuthoringStyleEdit(
   ) {
     return Object.freeze({ ok: false, reason: "control-unavailable" });
   }
+  if (
+    capturedEdit.target.kind === "visual-state" &&
+    !styleModel.component.visualStates.includes(capturedEdit.target.state)
+  ) {
+    return Object.freeze({ ok: false, reason: "control-unavailable" });
+  }
   // Dynamic Source leaves are display-only. This guard deliberately precedes every mutation path
   // so programmatic callers cannot bypass the read-only control rendered by the App.
   if (targetStyleValue(control, capturedEdit.target)?.kind === "dynamic") {
@@ -1261,6 +1484,53 @@ export function applyAuthoringStyleEdit(
         deleteDesenEditorOwnerStyleProperty(prepared.model.validationDocument, {
           surfaceId: capturedRoute.surfaceId,
           ownerId: capturedSelection.sourceNodeId,
+          state: BASE_STYLE_STATE,
+          part: capturedEdit.part,
+          property: capturedEdit.property,
+        }),
+      );
+      return changed === undefined
+        ? contentFailure()
+        : validateCandidate(changed, prepared.model.validationCatalogs, "source-invalid");
+    }
+    if (capturedEdit.target.kind === "visual-state") {
+      if (!styleModel.component.visualStates.includes(capturedEdit.target.state)) {
+        return Object.freeze({ ok: false, reason: "control-unavailable" });
+      }
+      const current = targetStyleValue(control, capturedEdit.target);
+      if (current === undefined || current.kind === "absent" || current.kind === "dynamic") {
+        return Object.freeze({ ok: false, reason: "control-unavailable" });
+      }
+      const changed = editSucceeded(
+        deleteDesenEditorOwnerStyleProperty(prepared.model.validationDocument, {
+          surfaceId: capturedRoute.surfaceId,
+          ownerId: capturedSelection.sourceNodeId,
+          state: capturedEdit.target.state,
+          part: capturedEdit.part,
+          property: capturedEdit.property,
+        }),
+      );
+      return changed === undefined
+        ? contentFailure()
+        : validateCandidate(changed, prepared.model.validationCatalogs, "source-invalid");
+    }
+    if (capturedEdit.target.kind === "variant") {
+      const variant = node.variants?.[capturedEdit.target.index];
+      if (
+        variant === undefined ||
+        namedVariantDescriptor(capturedEdit.target.index, variant) === undefined
+      ) {
+        return Object.freeze({ ok: false, reason: "control-unavailable" });
+      }
+      const current = targetStyleValue(control, capturedEdit.target);
+      if (current === undefined || current.kind === "absent" || current.kind === "dynamic") {
+        return Object.freeze({ ok: false, reason: "control-unavailable" });
+      }
+      const changed = editSucceeded(
+        deleteDesenEditorVariantStyleProperty(prepared.model.validationDocument, {
+          surfaceId: capturedRoute.surfaceId,
+          nodeId: capturedSelection.sourceNodeId,
+          index: capturedEdit.target.index,
           state: BASE_STYLE_STATE,
           part: capturedEdit.part,
           property: capturedEdit.property,
@@ -1349,4 +1619,292 @@ export function applyAuthoringStyleEdit(
     prepared.model.validationCatalogs,
     capturedEdit.kind === "set-token" ? "source-invalid" : "value-invalid",
   );
+}
+
+const VARIANT_EXTENSION = "run.desen.app/t16-variant";
+const VARIANT_VERSION = 1;
+const VARIANT_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9 _-]{0,63}$/u;
+
+/** Exact App route authorized to inspect or mutate one Source surface's named variants. */
+export interface AuthoringVariantRoute {
+  readonly projectId: string;
+  readonly surfaceId: string;
+}
+
+/** A primitive surface state that can safely drive one named visual preset. */
+export interface AuthoringVariantAxis {
+  readonly name: string;
+  readonly value: JsonPrimitive;
+  readonly reference: string;
+}
+
+/** One named T16 preset projected from an immutable Source variant. */
+export interface AuthoringVariantDescriptor {
+  readonly index: number;
+  readonly name: string;
+  readonly axis: AuthoringVariantAxis;
+}
+
+/** Ready model for the selected component's named variants and declared visual states. */
+export interface AuthoringVariantReadyModel {
+  readonly status: "ready";
+  readonly component: CatalogComponentSummary;
+  readonly selection: AuthoringComponentSelection;
+  readonly variants: readonly AuthoringVariantDescriptor[];
+  readonly visualStates: readonly string[];
+  readonly localStateOptions: readonly AuthoringVariantAxis[];
+  readonly unmanagedVariantCount: number;
+}
+
+/** Fail-closed result of joining a Source selection, Catalog and variant metadata. */
+export type AuthoringVariantModelResult =
+  | Readonly<{ readonly status: "idle" }>
+  | Readonly<{ readonly status: "rejected" }>
+  | AuthoringVariantReadyModel;
+
+/** A bounded mutation for one named variant. No arbitrary predicate or child tree is accepted. */
+export type AuthoringVariantEdit =
+  | Readonly<{
+      readonly kind: "create";
+      readonly axisName: string;
+      readonly axisValue: JsonPrimitive;
+      readonly name: string;
+    }>
+  | Readonly<{ readonly kind: "rename"; readonly index: number; readonly name: string }>
+  | Readonly<{ readonly kind: "delete"; readonly index: number }>;
+
+/** Atomic result of one named-variant mutation. */
+export type AuthoringVariantEditResult =
+  | Readonly<{ readonly ok: true; readonly document: DesenEditorDocument }>
+  | Readonly<{
+      readonly ok: false;
+      readonly reason:
+        | "catalog-invalid"
+        | "edit-rejected"
+        | "name-invalid"
+        | "selection-invalid"
+        | "source-invalid"
+        | "state-invalid"
+        | "variant-unavailable";
+      readonly validationReport?: DesenEditorContinuousValidationReport;
+    }>;
+
+function variantOwnRecord(value: unknown): JsonObject | undefined {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as JsonObject)
+    : undefined;
+}
+
+function variantOwn(value: JsonObject, key: string): unknown {
+  return Object.prototype.hasOwnProperty.call(value, key) ? value[key] : undefined;
+}
+
+function variantPrimitive(value: unknown): JsonPrimitive | undefined {
+  return isJsonPrimitive(value) ? value : undefined;
+}
+
+function variantName(value: unknown): string | undefined {
+  return typeof value === "string" && VARIANT_NAME_PATTERN.test(value.trim())
+    ? value.trim()
+    : undefined;
+}
+
+function variantMarker(variant: EditorVariant): JsonObject | undefined {
+  const extensions = variantOwnRecord(variantOwn(variantOwnRecord(variant) ?? {}, "extensions"));
+  return variantOwnRecord(
+    extensions === undefined ? undefined : variantOwn(extensions, VARIANT_EXTENSION),
+  );
+}
+
+function readVariantDescriptor(
+  index: number,
+  variant: EditorVariant,
+): AuthoringVariantDescriptor | undefined {
+  const metadata = variantMarker(variant);
+  if (metadata === undefined || variantOwn(metadata, "version") !== VARIANT_VERSION)
+    return undefined;
+  const name = variantName(variantOwn(metadata, "name"));
+  const axis = variantOwnRecord(variantOwn(metadata, "axis"));
+  const axisName = typeof axis?.name === "string" ? axis.name : undefined;
+  const value = variantPrimitive(axis === undefined ? undefined : variantOwn(axis, "value"));
+  const reference = typeof axis?.reference === "string" ? axis.reference : undefined;
+  if (
+    name === undefined ||
+    axisName === undefined ||
+    value === undefined ||
+    reference === undefined
+  ) {
+    return undefined;
+  }
+  return Object.freeze({
+    index,
+    name,
+    axis: Object.freeze({ name: axisName, value, reference }),
+  });
+}
+
+function variantStateAxes(
+  document: DesenEditorDocument,
+  surfaceId: string,
+): readonly AuthoringVariantAxis[] {
+  const surface = document.surfaces[surfaceId];
+  if (surface === undefined) return Object.freeze([]);
+  return Object.freeze(
+    Object.entries(surface.state)
+      .flatMap(([name, declaration]) => {
+        const initial = variantPrimitive(declaration.initial);
+        return initial === undefined
+          ? []
+          : [Object.freeze({ name, value: initial, reference: `state.${name}` })];
+      })
+      .sort((left, right) => left.name.localeCompare(right.name)),
+  );
+}
+
+function variantPredicate(axis: AuthoringVariantAxis): DesenEditorContentPredicate {
+  return { op: "eq", args: [{ $ref: axis.reference }, axis.value] } as DesenEditorContentPredicate;
+}
+
+function validateVariantCandidate(
+  document: DesenEditorDocument,
+  catalogs: readonly unknown[],
+): AuthoringVariantEditResult {
+  const validator = createDesenEditorContinuousValidator(catalogs);
+  if (!validator.ok) return Object.freeze({ ok: false, reason: "catalog-invalid" });
+  const report = validator.validator.validate(document);
+  return report.valid
+    ? Object.freeze({ ok: true, document })
+    : Object.freeze({ ok: false, reason: "source-invalid", validationReport: report });
+}
+
+/** Projects only T16-marked named variants; unrelated protocol variants stay visible as unmanaged. */
+export function prepareAuthoringVariantModel(
+  model: CatalogAuthoringModel,
+  route: AuthoringVariantRoute,
+  selection: AuthoringComponentSelection | null,
+): AuthoringVariantModelResult {
+  if (selection === null) return Object.freeze({ status: "idle" });
+  if (selection.kind !== "component" || selection.sourceNodeId.length === 0) {
+    return Object.freeze({ status: "rejected" });
+  }
+  const projection = projectAuthoringSelection(selection, route, model, undefined);
+  if (projection.status !== "unavailable") return Object.freeze({ status: "rejected" });
+  const node = findSelectedEditorNode(
+    model.validationDocument,
+    route.surfaceId,
+    selection.sourceNodeId,
+  );
+  const component = model.components.find(({ id }) => id === selection.capabilityId);
+  if (node === undefined || node.use !== selection.capabilityId || component === undefined) {
+    return Object.freeze({ status: "rejected" });
+  }
+  const projected: AuthoringVariantDescriptor[] = [];
+  (node.variants ?? []).forEach((variant, index) => {
+    const descriptor = readVariantDescriptor(index, variant);
+    if (descriptor !== undefined) projected.push(descriptor);
+  });
+  return Object.freeze({
+    status: "ready",
+    component,
+    selection,
+    variants: Object.freeze(projected),
+    visualStates: component.visualStates,
+    localStateOptions: variantStateAxes(model.validationDocument, route.surfaceId),
+    unmanagedVariantCount: (node.variants ?? []).length - projected.length,
+  });
+}
+
+/** Applies a named preset while preserving all children and rejecting undeclared state axes. */
+export function applyAuthoringVariantEdit(
+  document: DesenEditorDocument,
+  catalogValue: unknown,
+  route: AuthoringVariantRoute,
+  selection: AuthoringComponentSelection,
+  edit: AuthoringVariantEdit,
+): AuthoringVariantEditResult {
+  const prepared = prepareCatalogAuthoringModel(catalogValue, document);
+  if (!prepared.ok) {
+    return Object.freeze({
+      ok: false,
+      reason: prepared.reason === "catalog-invalid" ? "catalog-invalid" : "source-invalid",
+    });
+  }
+  const model = prepareAuthoringVariantModel(prepared.model, route, selection);
+  if (model.status !== "ready") return Object.freeze({ ok: false, reason: "selection-invalid" });
+  const node = findSelectedEditorNode(
+    prepared.model.validationDocument,
+    route.surfaceId,
+    model.selection.sourceNodeId,
+  );
+  if (node === undefined) return Object.freeze({ ok: false, reason: "selection-invalid" });
+  if (edit.kind === "create") {
+    const name = variantName(edit.name);
+    const axisName = variantName(edit.axisName);
+    const axis = model.localStateOptions.find(({ name: candidate }) => candidate === edit.axisName);
+    const value = variantPrimitive(edit.axisValue);
+    if (name === undefined || axisName === undefined)
+      return Object.freeze({ ok: false, reason: "name-invalid" });
+    if (axis === undefined || value === undefined || typeof value !== typeof axis.value) {
+      return Object.freeze({ ok: false, reason: "state-invalid" });
+    }
+    if (model.variants.some((variant) => variant.name === name)) {
+      return Object.freeze({ ok: false, reason: "name-invalid" });
+    }
+    const variant: DesenEditorContentVariant = {
+      when: variantPredicate(Object.freeze({ name: axis.name, value, reference: axis.reference })),
+      style: { base: {} },
+      extensions: {
+        [VARIANT_EXTENSION]: {
+          version: VARIANT_VERSION,
+          name,
+          axis: { name: axis.name, value, reference: axis.reference },
+        },
+      },
+    } as DesenEditorContentVariant;
+    const changed = insertDesenEditorVariant(prepared.model.validationDocument, {
+      surfaceId: route.surfaceId,
+      nodeId: model.selection.sourceNodeId,
+      index: (node.variants ?? []).length,
+      variant,
+    });
+    return changed.ok
+      ? validateVariantCandidate(changed.document, prepared.model.validationCatalogs)
+      : Object.freeze({ ok: false, reason: "edit-rejected" });
+  }
+  const descriptor = model.variants.find(({ index }) => index === edit.index);
+  if (descriptor === undefined) return Object.freeze({ ok: false, reason: "variant-unavailable" });
+  if (edit.kind === "delete") {
+    const changed = deleteDesenEditorVariant(prepared.model.validationDocument, {
+      surfaceId: route.surfaceId,
+      nodeId: model.selection.sourceNodeId,
+      index: edit.index,
+    });
+    return changed.ok
+      ? validateVariantCandidate(changed.document, prepared.model.validationCatalogs)
+      : Object.freeze({ ok: false, reason: "edit-rejected" });
+  }
+  const name = variantName(edit.name);
+  if (
+    name === undefined ||
+    model.variants.some((variant) => variant.name === name && variant.index !== edit.index)
+  ) {
+    return Object.freeze({ ok: false, reason: "name-invalid" });
+  }
+  const changed = setDesenEditorVariantCondition(prepared.model.validationDocument, {
+    surfaceId: route.surfaceId,
+    nodeId: model.selection.sourceNodeId,
+    index: edit.index,
+    when: variantPredicate(descriptor.axis),
+  });
+  if (!changed.ok) return Object.freeze({ ok: false, reason: "edit-rejected" });
+  const next = JSON.parse(canonicalizeJson(changed.document)) as DesenEditorDocument;
+  const nextNode = findSelectedEditorNode(next, route.surfaceId, model.selection.sourceNodeId);
+  const nextVariant = nextNode?.variants?.[edit.index] as Record<string, unknown> | undefined;
+  if (nextVariant === undefined) return Object.freeze({ ok: false, reason: "edit-rejected" });
+  const extensions = (nextVariant.extensions ?? {}) as Record<string, unknown>;
+  const metadata = (extensions[VARIANT_EXTENSION] ?? {}) as Record<string, unknown>;
+  metadata.name = name;
+  extensions[VARIANT_EXTENSION] = metadata;
+  nextVariant.extensions = extensions;
+  return validateVariantCandidate(next, prepared.model.validationCatalogs);
 }

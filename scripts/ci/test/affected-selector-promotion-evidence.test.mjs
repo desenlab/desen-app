@@ -334,13 +334,13 @@ test("authenticates the exact 20/20 hosted campaign and live local-preflight suc
     },
   );
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "a1d94c293b2b955f89eb1a33284bc2ca6f78579b4b2984dfc039c04030ce6f11",
-    ownershipSha256: "553b7498aa5862b92b7e7c7831261f64fb650d4bb0fd5b00cf24360e2fcca75f",
+    selectorSha256: "fe3bbb4bd306f0e9514d49908e3cb898bfcb7b1e3794792485064b5cd0ef8d59",
+    ownershipSha256: "2d96aa919439750d4da20b037e7e539536782fb86e29640bbd14eff64889440f",
     impactGraphSha256: "a1c70aa4d72cfb34de7c29c034964bb7a5f0a3268388604c85446c52d475e034",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "27eb4790cdddf0e762f09b102d5a5de41ff55e3913270405bfded3e3fe65b761",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "ca715bf8de4b229b97d250e19205d84f0826d4197ac70871a3b8addd5a3c93b1",
+    runnerAuthoritySha256: "bad781b26d54d38e88b736621544a775b8a137954c0b0322fd75a6d7962b661e",
   });
 });
 
@@ -405,8 +405,8 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "58f6aab69cf3be5256dd4a81ffbf3b0d3f2c4f15417c7adef4a2d2bd39d222ac",
-    checkpoints: 142,
+    headSha256: "d98027ed7dca3abff9eb7c37172a8a915e5eed5cd8334af26f914c10fc8dda97",
+    checkpoints: 145,
     frozenArtifacts: 77,
     currentReaders: 154,
   };

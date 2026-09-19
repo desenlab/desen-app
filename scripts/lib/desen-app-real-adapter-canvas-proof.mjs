@@ -14,6 +14,7 @@ import {
   M10A_T15_ADDED_APP_SOURCE_RECEIPTS,
   M10A_T15_LEGACY_INPUT_SUCCESSORS,
 } from "./m10a-t15-legacy-input-receipts.mjs";
+import { M10A_T16_LEGACY_INPUT_SUCCESSORS } from "./m10a-t16-legacy-input-receipts.mjs";
 import {
   authenticateDesenAppEvergreenProductCompositionSuccessor,
   materializeDesenAppHistoricalReaderFileOverrides,
@@ -3950,7 +3951,7 @@ const M10A_T15_CURRENT_RUNTIME_RESOLUTION = Object.freeze({
   ...M10A_T14_CURRENT_RUNTIME_RESOLUTION,
   moduleCount: 708,
   staticEdges: 3_045,
-  graphSha256: "sha256:76ad600603ac9a6b38f0a555242676696cfa62ff4f29bf17a06011cda3809d1a",
+  graphSha256: "sha256:c18ee1a2eba9ee75e4cf6e8296f93c9d7d3fe5ef4f759868896136d627dfe93f",
 });
 
 function projectM10AT15RuntimeToM10AT12(runtime) {
@@ -4074,6 +4075,9 @@ export async function buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence(
     const changedInput = M10A_T15_LEGACY_INPUT_SUCCESSORS.find(
       ({ path: sourcePath }) => sourcePath === receipt.path,
     );
+    const currentInput = M10A_T16_LEGACY_INPUT_SUCCESSORS.find(
+      ({ path: sourcePath }) => sourcePath === receipt.path,
+    );
     // Match both ends of the reviewed transition. An unrelated predecessor or a stale current
     // source must not gain authority merely because its path appears in the T15 change list.
     if (
@@ -4085,7 +4089,16 @@ export async function buildDesenAppRealAdapterCanvasM10AT12SuccessorEvidence(
         path: receipt.path,
       });
     }
-    const expected = changedInput?.current ?? receipt;
+    if (
+      currentInput !== undefined &&
+      (currentInput.predecessor.bytes !== receipt.bytes ||
+        currentInput.predecessor.sha256 !== receipt.sha256)
+    ) {
+      fail("SUCCESSOR_POLICY_VIOLATION", "The T16 style predecessor differs from frozen T12.", {
+        path: receipt.path,
+      });
+    }
+    const expected = currentInput?.current ?? changedInput?.current ?? receipt;
     if (
       !sourceAudit.inventory.includes(receipt.path) ||
       graphReceipts.get(receipt.path)?.bytes !== expected.bytes ||
