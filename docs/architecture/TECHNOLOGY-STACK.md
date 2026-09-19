@@ -88,11 +88,11 @@ and generation-fenced storage only; M10A-T11 is `DONE` with exact-head hosted an
 direct-manipulation closure. M10A-T12 is `DONE`: it owns the current 0.7.0 Catalog capture,
 lazy Catalog Inspector, typed visual controls, bounded responsive previews, and project-workspace
 aggregate persistence. It does not add named-theme management, Runtime, Publisher, Core/protocol,
-G10A, or M11 authority; its exact-head hosted and fresh-`main` closure is recorded. M10A-T13 is
-`DONE`: it owns safe local image/icon/font admission, content-addressed local storage, bundled
-font readiness, and explicit missing/corrupt diagnostics; its exact-head hosted and fresh-`main`
-closure is recorded. T13 adds no Runtime, Publisher, Core/protocol, G10A, or M11 authority. M10A-T14
-is next; M11 has not started.
+G10A, or M11 authority; its exact-head hosted and fresh-`main` closure is recorded. M10A-T13 and
+M10A-T14 are `DONE`: T13 owns safe local image/icon/font admission and content-addressed storage;
+T14 owns bounded immutable history plus atomic identity-safe duplicate/copy/paste across admitted
+surfaces. Their exact-head hosted/fresh-`main` closures add no Runtime, Publisher, Core/protocol,
+G10A, or M11 authority. T15 is selected next; T19 is also dependency-ready; M11 has not started.
 The integrated design-system explorer uses Catalog/Source, not executable story files. Visual
 capture uses the existing Playwright foundation; M10A-T24 owns exact pixel-diff dependency pins
 and hermetic capture configuration. No Storybook, Chromatic, Tailwind or second primitive library
